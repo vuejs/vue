@@ -73,7 +73,7 @@ var builds = [
     entry: 'src/entries/web-server-renderer.js',
     format: 'cjs',
     external: ['stream', 'entities'],
-    out: 'packages/vue-server-renderer/index.js'
+    out: 'packages/vue-server-renderer/create-renderer.js'
   }
 ]
 

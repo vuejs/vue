@@ -1,6 +1,6 @@
 import Vue from '../../dist/vue.common.js'
 import { compileToFunctions } from '../../packages/vue-template-compiler'
-import createRenderer from '../../packages/vue-server-renderer'
+import { createRenderer } from '../../packages/vue-server-renderer'
 const { renderToString } = createRenderer()
 
 describe('SSR: renderToString', () => {
