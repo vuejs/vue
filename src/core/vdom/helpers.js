@@ -11,25 +11,38 @@ export function normalizeChildren (children: any): Array<VNode> {
     children = children()
   }
   if (isPrimitive(children)) {
-    return [new VNode(undefined, undefined, undefined, String(children))]
+    return [createTextVNode(children)]
   }
   if (Array.isArray(children)) {
     const res = []
     for (let i = 0, l = children.length; i < l; i++) {
       const c = children[i]
+      const last = res[res.length - 1]
       //  nested
       if (Array.isArray(c)) {
         res.push.apply(res, normalizeChildren(c))
       } else if (isPrimitive(c)) {
-        // convert primitive to vnode
-        res.push(new VNode(undefined, undefined, undefined, String(c)))
+        if (last && last.text) {
+          last.text += String(c)
+        } else {
+          // convert primitive to vnode
+          res.push(createTextVNode(c))
+        }
       } else if (c instanceof VNode) {
-        res.push(c)
+        if (c.text && last && last.text) {
+          last.text += c.text
+        } else {
+          res.push(c)
+        }
       }
     }
     return res
   }
   return []
+}
+
+function createTextVNode (val) {
+  return new VNode(undefined, undefined, undefined, String(val))
 }
 
 export function updateListeners (
