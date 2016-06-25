@@ -10,8 +10,8 @@ export function normalizeChildren (children: any): Array<VNode> {
   if (typeof children === 'function') {
     children = children()
   }
-  if (typeof children === 'string') {
-    return [new VNode(undefined, undefined, undefined, children)]
+  if (isPrimitive(children)) {
+    return [new VNode(undefined, undefined, undefined, String(children))]
   }
   if (Array.isArray(children)) {
     const res = []
@@ -22,7 +22,7 @@ export function normalizeChildren (children: any): Array<VNode> {
         res.push.apply(res, normalizeChildren(c))
       } else if (isPrimitive(c)) {
         // convert primitive to vnode
-        res.push(new VNode(undefined, undefined, undefined, c))
+        res.push(new VNode(undefined, undefined, undefined, String(c)))
       } else if (c instanceof VNode) {
         res.push(c)
       }
