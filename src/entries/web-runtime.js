@@ -26,7 +26,8 @@ Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
-  return this._mount(el && query(el), hydrating)
+  el = el && inBrowser ? query(el) : undefined
+  return this._mount(el, hydrating)
 }
 
 // devtools global hook
