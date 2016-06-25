@@ -1,10 +1,9 @@
-const { readFileSync } = require('fs')
-const createRenderer = require('./create-renderer')
-const Module = require('./module')
+var createRenderer = require('./create-renderer')
+var Module = require('./module')
 
 function runAsNewModule (code) {
-  const path = '__app__'
-  const m = new Module(path, null, true /* isBundle */)
+  var path = '__app__'
+  var m = new Module(path, null, true /* isBundle */)
   m.load(path)
   m._compile(code, path)
   return Object.prototype.hasOwnProperty.call(m.exports, 'default')
@@ -15,14 +14,14 @@ function runAsNewModule (code) {
 exports.createRenderer = createRenderer
 
 exports.createBundleRenderer = function (code, options) {
-  const renderer = createRenderer(options)
+  var renderer = createRenderer(options)
   return {
-    renderToString (cb) {
-      const app = runAsNewModule(code)
+    renderToString: function (cb) {
+      var app = runAsNewModule(code)
       renderer.renderToString(app, cb)
     },
-    renderToStream () {
-      const app = runAsNewModule(code)
+    renderToStream: function () {
+      var app = runAsNewModule(code)
       return renderer.renderToStream(app)
     }
   }
