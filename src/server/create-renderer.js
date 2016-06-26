@@ -36,8 +36,12 @@ export function createRenderer ({
     ): void {
       let result = ''
       let stackDepth = 0
-      const write = (str: string, next: Function) => {
-        result += str
+
+      const write = (text: string, next: Function) => {
+        if (write.caching && text) {
+          write.buffer += text
+        }
+        result += text
         if (stackDepth >= MAX_STACK_DEPTH) {
           process.nextTick(() => {
             try { next() } catch (e) {
@@ -50,6 +54,9 @@ export function createRenderer ({
           stackDepth--
         }
       }
+      write.caching = false
+      write.buffer = ''
+
       try {
         render(component, write, () => {
           done(null, result)

@@ -25,7 +25,10 @@ export default class RenderStream extends stream.Readable {
     this.expectedSize = 0
     this.stackDepth = 0
 
-    this.write = (text: string, next: Function) => {
+    const write = this.write = (text: string, next: Function) => {
+      if (write.caching && text) {
+        write.buffer += text
+      }
       const n = this.expectedSize
       this.buffer += text
       if (this.buffer.length >= n) {
@@ -47,6 +50,8 @@ export default class RenderStream extends stream.Readable {
         }
       }
     }
+    write.caching = false
+    write.buffer = ''
 
     this.end = () => {
       // the rendering is finished; we should push out the last of the buffer.

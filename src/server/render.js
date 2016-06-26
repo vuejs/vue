@@ -25,9 +25,28 @@ export function createRenderFunction (
     isRoot: boolean
   ) {
     if (node.componentOptions) {
-      const child =
-        getCachedComponent(node) ||
-        createComponentInstanceForVnode(node)._render()
+      // check cache hit
+      const Ctor = node.componentOptions.Ctor
+      const getKey = Ctor.options.server && Ctor.options.server.getCacheKey
+      if (getKey) {
+        const key = Ctor.cid + '::' + getKey(node.componentOptions.propsData)
+        if (cache.has(key)) {
+          return write(cache.get(key), next)
+        } else {
+          if (!write.caching) {
+            // initialize if not already caching
+            write.caching = true
+            const _next = next
+            next = () => {
+              cache.set(key, write.buffer)
+              write.caching = false
+              write.buffer = ''
+              _next()
+            }
+          }
+        }
+      }
+      const child = createComponentInstanceForVnode(node)._render()
       child.parent = node
       renderNode(child, write, next, isRoot)
     } else {
@@ -35,21 +54,6 @@ export function createRenderFunction (
         renderElement(node, write, next, isRoot)
       } else {
         write(node.raw ? node.text : encodeHTMLCached(node.text), next)
-      }
-    }
-  }
-
-  function getCachedComponent (node) {
-    const Ctor = node.componentOptions.Ctor
-    const getKey = Ctor.options.server && Ctor.options.server.getCacheKey
-    if (getKey) {
-      const key = Ctor.cid + '::' + getKey(node.componentOptions.propsData)
-      if (cache.has(key)) {
-        return cache.get(key)
-      } else {
-        const res = createComponentInstanceForVnode(node)._render()
-        cache.set(key, res)
-        return res
       }
     }
   }
@@ -94,9 +98,6 @@ export function createRenderFunction (
   }
 
   function renderStartingTag (node: VNode) {
-    if (node._rendered) {
-      return node._rendered
-    }
     let markup = `<${node.tag}`
     if (node.data) {
       // check directives
@@ -124,14 +125,13 @@ export function createRenderFunction (
     if (node.host && (scopeId = node.host.$options._scopeId)) {
       markup += ` ${scopeId}`
     }
-    let _node = node
-    while (_node) {
-      if ((scopeId = _node.context.$options._scopeId)) {
+    while (node) {
+      if ((scopeId = node.context.$options._scopeId)) {
         markup += ` ${scopeId}`
       }
-      _node = _node.parent
+      node = node.parent
     }
-    return (node._rendered = markup + '>')
+    return markup + '>'
   }
 
   return function render (
