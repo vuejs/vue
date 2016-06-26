@@ -30,8 +30,6 @@ export default function runInVm (code, _context) {
   const res = Object.prototype.hasOwnProperty.call(m.exports, 'default')
     ? m.exports.default
     : m
-  if (typeof res.then !== 'function') {
-    throw new Error('SSR bundle should export a Promise.')
-  }
-  return res
+  // ensure returning a Promise
+  return Promise.resolve(res)
 }
