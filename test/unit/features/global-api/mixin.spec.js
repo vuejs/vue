@@ -21,6 +21,7 @@ describe('Global API: mixin', () => {
   it('should work for constructors created before mixin is applied', () => {
     const calls = []
     const Test = Vue.extend({
+      name: 'test',
       init () {
         calls.push(this.$options.myOption + ' local')
       }
@@ -30,6 +31,7 @@ describe('Global API: mixin', () => {
         calls.push(this.$options.myOption + ' global')
       }
     })
+    expect(Test.options.name).toBe('test')
     new Test({
       myOption: 'hello'
     })
