@@ -13,7 +13,8 @@ module.exports = {
     alias: alias
   },
   externals: {
-    'entities': true
+    'entities': true,
+    'lru-cache': true
   },
   module: {
     loaders: [

@@ -10,3 +10,9 @@ declare module 'source-map' {
     toString(): string;
   }
 }
+
+declare module 'lru-cache' {
+  declare var exports: {
+    (): any
+  }
+}

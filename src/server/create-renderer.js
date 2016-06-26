@@ -9,11 +9,13 @@ export const MAX_STACK_DEPTH = 1000
 export function createRenderer ({
   modules = [],
   directives = {},
-  isUnaryTag = (() => false)
+  isUnaryTag = (() => false),
+  cache = {}
 }: {
   modules: Array<Function>,
   directives: Object,
-  isUnaryTag: Function
+  isUnaryTag: Function,
+  cache: Object
 } = {}): {
   renderToString: Function,
   renderToStream: Function
@@ -25,7 +27,7 @@ export function createRenderer ({
       'by turning data observation off.'
     )
   }
-  const render = createRenderFunction(modules, directives, isUnaryTag)
+  const render = createRenderFunction(modules, directives, isUnaryTag, cache)
 
   return {
     renderToString (

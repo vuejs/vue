@@ -15,6 +15,7 @@ export default function publicCreateRenderer (options?: Object = {}): {
   return createRenderer({
     isUnaryTag,
     modules,
-    directives
+    directives,
+    cache: options.cache || {}
   })
 }

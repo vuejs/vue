@@ -2,15 +2,22 @@
 
 import { cached } from 'shared/util'
 import { encodeHTML } from 'entities'
+import LRU from 'lru-cache'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
 const encodeHTMLCached = cached(encodeHTML)
+const defaultOptions = {
+  max: 5000
+}
 
 export function createRenderFunction (
   modules: Array<Function>,
   directives: Object,
-  isUnaryTag: Function
+  isUnaryTag: Function,
+  cacheOptions: Object
 ) {
+  const cache = LRU(Object.assign({}, defaultOptions, cacheOptions))
+
   function renderNode (
     node: VNode,
     write: Function,
@@ -18,7 +25,9 @@ export function createRenderFunction (
     isRoot: boolean
   ) {
     if (node.componentOptions) {
-      const child = createComponentInstanceForVnode(node)._render()
+      const child =
+        getCachedComponent(node) ||
+        createComponentInstanceForVnode(node)._render()
       child.parent = node
       renderNode(child, write, next, isRoot)
     } else {
@@ -26,6 +35,21 @@ export function createRenderFunction (
         renderElement(node, write, next, isRoot)
       } else {
         write(node.raw ? node.text : encodeHTMLCached(node.text), next)
+      }
+    }
+  }
+
+  function getCachedComponent (node) {
+    const Ctor = node.componentOptions.Ctor
+    const getKey = Ctor.options.server && Ctor.options.server.getCacheKey
+    if (getKey) {
+      const key = Ctor.cid + '::' + getKey(node.componentOptions.propsData)
+      if (cache.has(key)) {
+        return cache.get(key)
+      } else {
+        const res = createComponentInstanceForVnode(node)._render()
+        cache.set(key, res)
+        return res
       }
     }
   }
@@ -70,6 +94,9 @@ export function createRenderFunction (
   }
 
   function renderStartingTag (node: VNode) {
+    if (node._rendered) {
+      return node._rendered
+    }
     let markup = `<${node.tag}`
     if (node.data) {
       // check directives
@@ -97,13 +124,14 @@ export function createRenderFunction (
     if (node.host && (scopeId = node.host.$options._scopeId)) {
       markup += ` ${scopeId}`
     }
-    while (node) {
-      if ((scopeId = node.context.$options._scopeId)) {
+    let _node = node
+    while (_node) {
+      if ((scopeId = _node.context.$options._scopeId)) {
         markup += ` ${scopeId}`
       }
-      node = node.parent
+      _node = _node.parent
     }
-    return markup + '>'
+    return (node._rendered = markup + '>')
   }
 
   return function render (

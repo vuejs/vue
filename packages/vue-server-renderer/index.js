@@ -1,28 +1,39 @@
-var createRenderer = require('./create-renderer')
-var Module = require('./module')
+'use strict'
 
-function runAsNewModule (code) {
-  var path = '__app__'
-  var m = new Module(path, null, true /* isBundle */)
+const createRenderer = require('./create-renderer')
+const Module = require('./module')
+const stream = require('stream')
+
+function runAsNewModule (code, context) {
+  const path = '__app__'
+  const m = new Module(path, null, context)
   m.load(path)
   m._compile(code, path)
-  return Object.prototype.hasOwnProperty.call(m.exports, 'default')
+  const res = Object.prototype.hasOwnProperty.call(m.exports, 'default')
     ? m.exports.default
     : m.exports
+  if (typeof res.then !== 'function') {
+    throw new Error('SSR bundle should export a Promise.')
+  }
+  return res
 }
 
 exports.createRenderer = createRenderer
 
-exports.createBundleRenderer = function (code, options) {
-  var renderer = createRenderer(options)
+exports.createBundleRenderer = function (code, rendererOptions) {
+  const renderer = createRenderer(rendererOptions)
   return {
-    renderToString: function (cb) {
-      var app = runAsNewModule(code)
-      renderer.renderToString(app, cb)
+    renderToString: (context, cb) => {
+      runAsNewModule(code, context).then(app => {
+        renderer.renderToString(app, cb)
+      })
     },
-    renderToStream: function () {
-      var app = runAsNewModule(code)
-      return renderer.renderToStream(app)
+    renderToStream: (context) => {
+      const res = new stream.PassThrough()
+      runAsNewModule(code, context).then(app => {
+        renderer.renderToStream(app).pipe(res)
+      })
+      return res
     }
   }
 }

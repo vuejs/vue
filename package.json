@@ -73,6 +73,7 @@
     "karma-sourcemap-loader": "^0.3.0",
     "karma-webpack": "^1.7.0",
     "lodash": "^4.13.1",
+    "lru-cache": "^4.0.1",
     "nightwatch": "^0.9.0",
     "phantomjs-prebuilt": "^2.1.1",
     "rollup": "^0.26.3",
