@@ -3,10 +3,10 @@ var alias = require('./alias')
 
 module.exports = {
   target: 'node',
-  entry: path.resolve(__dirname, 'webpack.ssr.dev.entry.js'),
+  entry: path.resolve(__dirname, '../src/entries/web-server-renderer'),
   output: {
     path: path.resolve(__dirname, '../packages/vue-server-renderer'),
-    filename: 'create-renderer.js',
+    filename: 'index.js',
     libraryTarget: 'commonjs2'
   },
   resolve: {
@@ -17,6 +17,7 @@ module.exports = {
     'lru-cache': true
   },
   module: {
+    noParse: /run-in-vm/,
     loaders: [
       {
         test: /\.js/,
