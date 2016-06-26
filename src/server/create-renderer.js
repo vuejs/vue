@@ -3,8 +3,7 @@
 import RenderStream from './render-stream'
 import { createRenderFunction } from './render'
 import { warn } from 'core/util/debug'
-
-export const MAX_STACK_DEPTH = 1000
+import { createWriteFunction } from './write'
 
 export function createRenderer ({
   modules = [],
@@ -35,28 +34,9 @@ export function createRenderer ({
       done: (err: ?Error, res: ?string) => any
     ): void {
       let result = ''
-      let stackDepth = 0
-
-      const write = (text: string, next: Function) => {
-        if (write.caching && text) {
-          write.buffer += text
-        }
+      const write = createWriteFunction(text => {
         result += text
-        if (stackDepth >= MAX_STACK_DEPTH) {
-          process.nextTick(() => {
-            try { next() } catch (e) {
-              done(e)
-            }
-          })
-        } else {
-          stackDepth++
-          next()
-          stackDepth--
-        }
-      }
-      write.caching = false
-      write.buffer = ''
-
+      }, done)
       try {
         render(component, write, () => {
           done(null, result)

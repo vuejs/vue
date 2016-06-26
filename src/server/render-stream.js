@@ -1,7 +1,7 @@
 /* @flow */
 
 import stream from 'stream'
-import { MAX_STACK_DEPTH } from './create-renderer'
+import { createWriteFunction } from './write'
 
 /**
  * Original RenderStream implmentation by Sasha Aickin (@aickin)
@@ -25,33 +25,17 @@ export default class RenderStream extends stream.Readable {
     this.expectedSize = 0
     this.stackDepth = 0
 
-    const write = this.write = (text: string, next: Function) => {
-      if (write.caching && text) {
-        write.buffer += text
-      }
+    this.write = createWriteFunction((text, next) => {
       const n = this.expectedSize
       this.buffer += text
       if (this.buffer.length >= n) {
         this.next = next
         this.pushBySize(n)
-      } else {
-        // continue rendering until we have enough text to call this.push().
-        // sometimes do this as process.nextTick to get out of stack overflows.
-        if (this.stackDepth >= MAX_STACK_DEPTH) {
-          process.nextTick(() => {
-            try { next() } catch (e) {
-              this.emit('error', e)
-            }
-          })
-        } else {
-          this.stackDepth++
-          next()
-          this.stackDepth--
-        }
+        return true // we will decide when to call next
       }
-    }
-    write.caching = false
-    write.buffer = ''
+    }, err => {
+      this.emit('error', err)
+    })
 
     this.end = () => {
       // the rendering is finished; we should push out the last of the buffer.
