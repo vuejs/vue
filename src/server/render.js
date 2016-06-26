@@ -33,16 +33,24 @@ export function createRenderFunction (
         if (cache.has(key)) {
           return write(cache.get(key), next)
         } else {
-          if (!write.caching) {
-            // initialize if not already caching
-            write.caching = true
-            const _next = next
-            next = () => {
-              cache.set(key, write.buffer)
+          write.caching = true
+          const buffer = write.cacheBuffer
+          const bufferIndex = buffer.push('') - 1
+          const _next = next
+          next = () => {
+            const result = buffer[bufferIndex]
+            cache.set(key, result)
+            if (bufferIndex === 0) {
+              // this is a top-level cached component,
+              // exit caching mode.
               write.caching = false
-              write.buffer = ''
-              _next()
+            } else {
+              // parent component is also being cached,
+              // merge self into parent's result
+              buffer[bufferIndex - 1] += result
             }
+            buffer.length = bufferIndex
+            _next()
           }
         }
       }

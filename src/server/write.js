@@ -9,7 +9,7 @@ export function createWriteFunction (
   let stackDepth = 0
   const cachedWrite = (text, next) => {
     if (text && cachedWrite.caching) {
-      cachedWrite.buffer += text
+      cachedWrite.cacheBuffer[cachedWrite.cacheBuffer.length - 1] += text
     }
     const waitForNext = write(text, next)
     if (!waitForNext) {
@@ -27,6 +27,6 @@ export function createWriteFunction (
     }
   }
   cachedWrite.caching = false
-  cachedWrite.buffer = ''
+  cachedWrite.cacheBuffer = []
   return cachedWrite
 }
