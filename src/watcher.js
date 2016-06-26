@@ -343,7 +343,7 @@ function traverse (val, seen) {
   }
   const isA = isArray(val)
   const isO = isObject(val)
-  if (isA || isO) {
+  if ((isA || isO) && Object.isExtensible(val)) {
     if (val.__ob__) {
       var depId = val.__ob__.dep.id
       if (seen.has(depId)) {
