@@ -8,7 +8,7 @@
  */
 
 import VNode from './vnode'
-import { isPrimitive, renderString, warn } from '../util/index'
+import { isPrimitive, _toString, warn } from '../util/index'
 
 const emptyNode = new VNode('', {}, [])
 const hooks = ['create', 'update', 'postpatch', 'remove', 'destroy']
@@ -349,7 +349,7 @@ export function createPatchFunction (backend) {
         )
       }
     } else {
-      return renderString(vnode.text) === node.data
+      return _toString(vnode.text) === node.data
     }
   }
 

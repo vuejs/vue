@@ -57,14 +57,14 @@ describe('codegen', () => {
   it('generate v-if directive', () => {
     assertCodegen(
       '<p v-if="show">hello</p>',
-      `with(this){return (show)?_h(_e('p'),[_t("hello")]):void 0}`
+      `with(this){return (show)?_h(_e('p'),["hello"]):void 0}`
     )
   })
 
   it('generate v-else directive', () => {
     assertCodegen(
       '<div><p v-if="show">hello</p><p v-else>world</p></div>',
-      `with(this){return _h(_e('div'),[(show)?_h(_e('p'),[_t("hello")]):_h(_e('p'),[_t("world")])])}`
+      `with(this){return _h(_e('div'),[(show)?_h(_e('p'),["hello"]):_h(_e('p'),["world"])])}`
     )
   })
 
@@ -91,15 +91,15 @@ describe('codegen', () => {
 
   it('generate template tag', () => {
     assertCodegen(
-      '<template><p>hello world</p></template>',
-      `with(this){return [_h(_e('p'),[_t("hello world")])]}`
+      '<template><p>{{hello}}</p></template>',
+      `with(this){return [_h(_e('p'),[_s(hello)])]}`
     )
   })
 
   it('generate svg tag', () => {
     assertCodegen(
       '<svg><text>hello world</text></svg>',
-      `with(this){return _h(_e('svg',void 0,'svg'),[_h(_e('text',void 0,'svg'),[_t("hello world")])])}`
+      `with(this){return _h(_e('svg',void 0,'svg'),[_h(_e('text',void 0,'svg'),["hello world"])])}`
     )
   })
 
@@ -131,14 +131,14 @@ describe('codegen', () => {
     assertCodegen(
       '<slot><div>hi</div></slot>',
       `with(this){return ($slots["default"]||[_m(0)])}`,
-      [`with(this){return _h(_e('div'),[_t("hi")])}`]
+      [`with(this){return _h(_e('div'),["hi"])}`]
     )
   })
 
   it('generate slot target', () => {
     assertCodegen(
       '<p slot="one">hello world</p>',
-      `with(this){return _h(_e('p',{slot:"one"}),[_t("hello world")])}`
+      `with(this){return _h(_e('p',{slot:"one"}),["hello world"])}`
     )
   })
 
@@ -147,40 +147,40 @@ describe('codegen', () => {
     assertCodegen(
       '<p class="class1">hello world</p>',
       'with(this){return _m(0)}',
-      [`with(this){return _h(_e('p',{staticClass:"class1"}),[_t("hello world")])}`]
+      [`with(this){return _h(_e('p',{staticClass:"class1"}),["hello world"])}`]
     )
     // dynamic
     assertCodegen(
       '<p :class="class1">hello world</p>',
-      `with(this){return _h(_e('p',{class:class1}),[_t("hello world")])}`
+      `with(this){return _h(_e('p',{class:class1}),["hello world"])}`
     )
   })
 
   it('generate style binding', () => {
     assertCodegen(
       '<p :style="error">hello world</p>',
-      `with(this){return _h(_e('p',{style:(error)}),[_t("hello world")])}`
+      `with(this){return _h(_e('p',{style:(error)}),["hello world"])}`
     )
   })
 
   it('generate transition', () => {
     assertCodegen(
       '<p transition="expand">hello world</p>',
-      `with(this){return _h(_e('p',{transition:"expand"}),[_t("hello world")])}`
+      `with(this){return _h(_e('p',{transition:"expand"}),["hello world"])}`
     )
   })
 
   it('generate dynamic transition with transition on appear', () => {
     assertCodegen(
       `<p :transition="{name:'expand',appear:true}">hello world</p>`,
-      `with(this){return _h(_e('p',{transition:{name:'expand',appear:true}}),[_t("hello world")])}`
+      `with(this){return _h(_e('p',{transition:{name:'expand',appear:true}}),["hello world"])}`
     )
   })
 
   it('generate v-show directive', () => {
     assertCodegen(
       '<p v-show="shown">hello world</p>',
-      `with(this){return _h(_e('p',{directives:[{name:"show",value:(shown),expression:"shown"}],show:true}),[_t("hello world")])}`
+      `with(this){return _h(_e('p',{directives:[{name:"show",value:(shown),expression:"shown"}],show:true}),["hello world"])}`
     )
   })
 
@@ -292,7 +292,7 @@ describe('codegen', () => {
     assertCodegen(
       '<my-component name="mycomponent1" :msg="msg" @notify="onNotify"><div>hi</div></my-component>',
       `with(this){return _h(_e('my-component',{attrs:{"msg":msg},staticAttrs:{"name":"mycomponent1"},on:{"notify":onNotify}}),function(){return [_m(0)]})}`,
-      [`with(this){return _h(_e('div'),[_t("hi")])}`]
+      [`with(this){return _h(_e('div'),["hi"])}`]
     )
   })
 
@@ -311,7 +311,7 @@ describe('codegen', () => {
     // have "inline-template'"
     assertCodegen(
       '<my-component inline-template><p>hello world</p></my-component>',
-      `with(this){return _h(_e('my-component',{inlineTemplate:{render:function(){with(this){return _m(0)}},staticRenderFns:[function(){with(this){return _h(_e('p'),[_t("hello world")])}}]}}))}`
+      `with(this){return _h(_e('my-component',{inlineTemplate:{render:function(){with(this){return _m(0)}},staticRenderFns:[function(){with(this){return _h(_e('p'),["hello world"])}}]}}))}`
     )
     // "have inline-template attrs, but not having extactly one child element
     assertCodegen(
@@ -330,7 +330,7 @@ describe('codegen', () => {
   it('not specified directives option', () => {
     assertCodegen(
       '<p v-if="show">hello world</p>',
-      `with(this){return (show)?_h(_e('p'),[_t("hello world")]):void 0}`,
+      `with(this){return (show)?_h(_e('p'),["hello world"]):void 0}`,
       { isReservedTag }
     )
   })
@@ -341,7 +341,7 @@ describe('codegen', () => {
     assertCodegen(
       '<div><p>hello world</p></div>',
       `with(this){return _m(0)}`,
-      [`with(this){return _h(_e('div'),function(){return [_h(_e('p'),function(){return [_t("hello world")]})]})}`],
+      [`with(this){return _h(_e('div'),function(){return [_h(_e('p'),function(){return ["hello world"]})]})}`],
       { directives }
     )
   })

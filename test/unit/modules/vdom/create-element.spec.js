@@ -3,7 +3,6 @@ import { renderState } from 'core/instance/render'
 import {
   renderElement,
   renderElementWithChildren,
-  renderText,
   renderStatic
 } from 'core/vdom/create-element'
 import { emptyVNode } from 'core/vdom/vnode'
@@ -107,11 +106,6 @@ describe('create-element', () => {
     expect('createElement cannot be called outside of component').toHaveBeenWarned()
   })
 
-  it('renderText', () => {
-    expect(renderText('hello')).toBe('hello')
-    expect(renderText()).toBe('')
-  })
-
   it('renderStatic', done => {
     const vm = new Vue({
       template: '<p>hello world</p>'
@@ -130,12 +124,11 @@ describe('create-element', () => {
 
   it('render vnode with renderElementWithChildren', () => {
     const vm = new Vue({})
-    const _t = renderText
     const _e = bind(renderElement, vm)
     const _h = bind(renderElementWithChildren, vm)
     renderState.activeInstance = vm
     const parent = _e('p', {})
-    const children = [_e('br'), _t('hello world'), _e('br')]
+    const children = [_e('br'), 'hello world', _e('br')]
     const vnode = _h(parent, children)
     expect(vnode.children[0].tag).toBe('br')
     expect(vnode.children[1].text).toBe('hello world')
@@ -151,12 +144,11 @@ describe('create-element', () => {
         }
       }
     })
-    const _t = renderText
     const _e = bind(renderElement, vm)
     const _h = bind(renderElementWithChildren, vm)
     renderState.activeInstance = vm
     const parent = _e('my-component', { props: { msg: vm.message }})
-    const children = [_e('br'), _t('hello world'), _e('br')]
+    const children = [_e('br'), 'hello world', _e('br')]
     const vnode = _h(parent, children)
     expect(vnode.componentOptions.children[0].tag).toBe('br')
     expect(vnode.componentOptions.children[1]).toBe('hello world')

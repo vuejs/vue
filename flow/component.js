@@ -87,10 +87,6 @@ declare interface Component {
     data?: Object,
     namespace?: string
   ) => VNode | void;
-  // renderText
-  _t: (
-    str?: string
-  ) => string;
   // renderStaticTree
   _m: (
     index?: number

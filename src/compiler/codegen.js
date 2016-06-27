@@ -39,7 +39,12 @@ export function generate (
 }
 
 function genElement (el: ASTElement): string {
-  if (el.for && !el.forProcessed) {
+  if (el.staticRoot && !el.staticProcessed) {
+    // hoist static sub-trees out
+    el.staticProcessed = true
+    staticRenderFns.push(`with(this){return ${genElement(el)}}`)
+    return `_m(${staticRenderFns.length - 1})`
+  } else if (el.for && !el.forProcessed) {
     return genFor(el)
   } else if (el.if && !el.ifProcessed) {
     return genIf(el)
@@ -66,11 +71,6 @@ function genElement (el: ASTElement): string {
       })${
         children ? `,${children}` : '' // children
       })`
-      if (el.staticRoot) {
-        // hoist static sub-trees out
-        staticRenderFns.push(`with(this){return ${code}}`)
-        code = `_m(${staticRenderFns.length - 1})`
-      }
     }
     // module transforms
     for (let i = 0; i < transforms.length; i++) {
@@ -239,8 +239,8 @@ function genNode (node: ASTNode) {
 
 function genText (text: ASTText | ASTExpression): string {
   return text.type === 2
-    ? `(${text.expression})`
-    : '_t(' + JSON.stringify(text.text) + ')'
+    ? text.expression // no need for () because already wrapped in _s()
+    : JSON.stringify(text.text)
 }
 
 function genSlot (el: ASTElement): string {

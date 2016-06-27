@@ -5,13 +5,12 @@ import VNode, { emptyVNode } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
 import {
   warn, bind, isObject, toObject,
-  nextTick, resolveAsset, renderString, toNumber
+  nextTick, resolveAsset, _toString, toNumber
 } from '../util/index'
 
 import {
   renderElement,
   renderElementWithChildren,
-  renderText,
   renderStatic
 } from '../vdom/create-element'
 
@@ -91,11 +90,9 @@ export function renderMixin (Vue: Class<Component>) {
   // shorthands used in render functions
   Vue.prototype._h = renderElementWithChildren
   Vue.prototype._e = renderElement
-  Vue.prototype._t = renderText
   Vue.prototype._m = renderStatic
-
   // toString for mustaches
-  Vue.prototype._s = renderString
+  Vue.prototype._s = _toString
   // number conversion
   Vue.prototype._n = toNumber
 

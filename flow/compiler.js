@@ -65,6 +65,7 @@ declare type ASTElement = {
 
   static?: boolean,
   staticRoot?: boolean,
+  staticProcessed?: boolean,
 
   text?: string,
   attrs?: Array<{ name: string, value: string }>,

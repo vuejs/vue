@@ -91,4 +91,18 @@ describe('Directive v-once', () => {
         .toBe('<span>hello</span> <div>world</div> <span>!</span>')
     }).then(done)
   })
+
+  it('should work with v-for', done => {
+    const vm = new Vue({
+      data: {
+        list: [1, 2, 3]
+      },
+      template: `<div><div v-for="i in list" v-once>{{i}}</div></div>`
+    }).$mount()
+    expect(vm.$el.textContent).toBe('123')
+    vm.list.reverse()
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('123')
+    }).then(done)
+  })
 })

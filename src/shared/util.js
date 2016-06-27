@@ -3,7 +3,7 @@
 /**
  * Convert a value to a string that is actually rendered.
  */
-export function renderString (val: any): string {
+export function _toString (val: any): string {
   return val == null
     ? ''
     : typeof val === 'object'

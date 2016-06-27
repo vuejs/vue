@@ -98,10 +98,6 @@ export function renderElement (
   }
 }
 
-export function renderText (str?: string): string {
-  return str || ''
-}
-
 export function renderStatic (index?: number): Object | void {
   return this._staticTrees[index] || (
     this._staticTrees[index] = this.$options.staticRenderFns[index].call(
