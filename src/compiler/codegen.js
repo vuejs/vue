@@ -65,7 +65,7 @@ function genElement (el: ASTElement): string {
         ? genChildren(el, !el.ns && !isPlatformReservedTag(el.tag) /* asThunk */)
         : null
       code = `_h('${el.tag}'${
-        data ? `,${data}` : children ? ',void 0' : '' // data
+        data ? `,${data}` : '' // data
       }${
         children ? `,${children}` : '' // children
       })`

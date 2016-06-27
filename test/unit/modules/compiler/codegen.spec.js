@@ -57,14 +57,14 @@ describe('codegen', () => {
   it('generate v-if directive', () => {
     assertCodegen(
       '<p v-if="show">hello</p>',
-      `with(this){return (show)?_h('p',void 0,["hello"]):void 0}`
+      `with(this){return (show)?_h('p',["hello"]):void 0}`
     )
   })
 
   it('generate v-else directive', () => {
     assertCodegen(
       '<div><p v-if="show">hello</p><p v-else>world</p></div>',
-      `with(this){return _h('div',void 0,[(show)?_h('p',void 0,["hello"]):_h('p',void 0,["world"])])}`
+      `with(this){return _h('div',[(show)?_h('p',["hello"]):_h('p',["world"])])}`
     )
   })
 
@@ -78,7 +78,7 @@ describe('codegen', () => {
   it('generate ref on v-for', () => {
     assertCodegen(
       '<ul><li v-for="item in items" ref="component1"></li></ul>',
-      `with(this){return _h('ul',void 0,[(items)&&_l((items),function(item){return _h('li',{ref:"component1",refInFor:true})})])}`
+      `with(this){return _h('ul',[(items)&&_l((items),function(item){return _h('li',{ref:"component1",refInFor:true})})])}`
     )
   })
 
@@ -92,7 +92,7 @@ describe('codegen', () => {
   it('generate template tag', () => {
     assertCodegen(
       '<template><p>{{hello}}</p></template>',
-      `with(this){return [_h('p',void 0,[_s(hello)])]}`
+      `with(this){return [_h('p',[_s(hello)])]}`
     )
   })
 
@@ -114,7 +114,7 @@ describe('codegen', () => {
     assertCodegen(
       '<slot><div>hi</div></slot>',
       `with(this){return ($slots["default"]||[_m(0)])}`,
-      [`with(this){return _h('div',void 0,["hi"])}`]
+      [`with(this){return _h('div',["hi"])}`]
     )
   })
 
@@ -275,7 +275,7 @@ describe('codegen', () => {
     assertCodegen(
       '<my-component name="mycomponent1" :msg="msg" @notify="onNotify"><div>hi</div></my-component>',
       `with(this){return _h('my-component',{attrs:{"msg":msg},staticAttrs:{"name":"mycomponent1"},on:{"notify":onNotify}},function(){return [_m(0)]})}`,
-      [`with(this){return _h('div',void 0,["hi"])}`]
+      [`with(this){return _h('div',["hi"])}`]
     )
   })
 
@@ -294,7 +294,7 @@ describe('codegen', () => {
     // have "inline-template'"
     assertCodegen(
       '<my-component inline-template><p>hello world</p></my-component>',
-      `with(this){return _h('my-component',{inlineTemplate:{render:function(){with(this){return _m(0)}},staticRenderFns:[function(){with(this){return _h('p',void 0,["hello world"])}}]}})}`
+      `with(this){return _h('my-component',{inlineTemplate:{render:function(){with(this){return _m(0)}},staticRenderFns:[function(){with(this){return _h('p',["hello world"])}}]}})}`
     )
     // "have inline-template attrs, but not having extactly one child element
     assertCodegen(
@@ -313,7 +313,7 @@ describe('codegen', () => {
   it('not specified directives option', () => {
     assertCodegen(
       '<p v-if="show">hello world</p>',
-      `with(this){return (show)?_h('p',void 0,["hello world"]):void 0}`,
+      `with(this){return (show)?_h('p',["hello world"]):void 0}`,
       { isReservedTag }
     )
   })
@@ -324,7 +324,7 @@ describe('codegen', () => {
     assertCodegen(
       '<div><p>hello world</p></div>',
       `with(this){return _m(0)}`,
-      [`with(this){return _h('div',void 0,function(){return [_h('p',void 0,function(){return ["hello world"]})]})}`],
+      [`with(this){return _h('div',function(){return [_h('p',function(){return ["hello world"]})]})}`],
       { directives }
     )
   })

@@ -13,9 +13,9 @@ describe('create-element', () => {
     const vm = new Vue({
       data: { msg: 'hello world' }
     })
-    const _h = bind(createElement, vm)
+    const h = bind(createElement, vm)
     renderState.activeInstance = vm
-    const vnode = _h('p', {})
+    const vnode = h('p', {})
     expect(vnode.tag).toBe('p')
     expect(vnode.data).toEqual({})
     expect(vnode.children).toBeUndefined()
@@ -34,9 +34,9 @@ describe('create-element', () => {
         }
       }
     })
-    const _h = bind(createElement, vm)
+    const h = bind(createElement, vm)
     renderState.activeInstance = vm
-    const vnode = _h('my-component', { props: { msg: vm.message }})
+    const vnode = h('my-component', { props: { msg: vm.message }})
     expect(vnode.tag).toMatch(/vue-component-[0-9]+/)
     expect(vnode.componentOptions.propsData).toEqual({ msg: vm.message })
     expect(vnode.children).toBeUndefined()
@@ -50,10 +50,10 @@ describe('create-element', () => {
     const vm = new Vue({
       data: { msg: 'hello world' }
     })
-    const _h = bind(createElement, vm)
+    const h = bind(createElement, vm)
     const tag = 'custom-tag'
     renderState.activeInstance = vm
-    const vnode = _h(tag, {})
+    const vnode = h(tag, {})
     expect(vnode.tag).toBe('custom-tag')
     expect(vnode.data).toEqual({})
     expect(vnode.children).toBeUndefined()
@@ -69,9 +69,9 @@ describe('create-element', () => {
     const vm = new Vue({
       data: { msg: 'hello world' }
     })
-    const _h = bind(createElement, vm)
+    const h = bind(createElement, vm)
     renderState.activeInstance = vm
-    const vnode = _h(null, {})
+    const vnode = h(null, {})
     expect(vnode).toEqual(emptyVNode())
   })
 
@@ -79,9 +79,9 @@ describe('create-element', () => {
     const vm = new Vue({
       data: { msg: 'hello world' }
     })
-    const _h = bind(createElement, vm)
+    const h = bind(createElement, vm)
     renderState.activeInstance = vm
-    const vnode = _h(Vue.extend({ // Component class
+    const vnode = h(Vue.extend({ // Component class
       props: ['msg']
     }), { props: { msg: vm.message }})
     expect(vnode.tag).toMatch(/vue-component-[0-9]+/)
@@ -97,22 +97,32 @@ describe('create-element', () => {
     const vm = new Vue({
       data: { msg: 'hello world' }
     })
-    const _h = bind(createElement, vm)
-    _h('p', {})
+    const h = bind(createElement, vm)
+    h('p', {})
     expect('createElement cannot be called outside of component').toHaveBeenWarned()
   })
 
   it('render vnode with createElement with children', () => {
     const vm = new Vue({})
-    const _h = bind(createElement, vm)
+    const h = bind(createElement, vm)
     renderState.activeInstance = vm
-    const vnode = _h('p', void 0, [_h('br'), 'hello world', _h('br')])
+    const vnode = h('p', void 0, [h('br'), 'hello world', h('br')])
     expect(vnode.children[0].tag).toBe('br')
     expect(vnode.children[1].text).toBe('hello world')
     expect(vnode.children[2].tag).toBe('br')
   })
 
-  it('warn message when use createElementWithChildren for component', () => {
+  it('render vnode with children, omitting data', () => {
+    const vm = new Vue({})
+    const h = bind(createElement, vm)
+    renderState.activeInstance = vm
+    const vnode = h('p', [h('br'), 'hello world', h('br')])
+    expect(vnode.children[0].tag).toBe('br')
+    expect(vnode.children[1].text).toBe('hello world')
+    expect(vnode.children[2].tag).toBe('br')
+  })
+
+  it('warn message when using non-thunk children for component', () => {
     const vm = new Vue({
       data: { message: 'hello world' },
       components: {
@@ -121,12 +131,35 @@ describe('create-element', () => {
         }
       }
     })
-    const _h = bind(createElement, vm)
+    const h = bind(createElement, vm)
     renderState.activeInstance = vm
-    const vnode = _h('my-component', { props: { msg: vm.message }}, [_h('br'), 'hello world', _h('br')])
+    const vnode = h('my-component', { props: { msg: vm.message }}, [h('br'), 'hello world', h('br')])
     expect(vnode.componentOptions.children[0].tag).toBe('br')
     expect(vnode.componentOptions.children[1]).toBe('hello world')
     expect(vnode.componentOptions.children[2].tag).toBe('br')
     expect('A component\'s children should be a function').toHaveBeenWarned()
+  })
+
+  it('render svg elements with correct namespace', () => {
+    const vm = new Vue({})
+    const h = bind(createElement, vm)
+    renderState.activeInstance = vm
+    const vnode = h('svg', [h('a')])
+    expect(vnode.ns).toBe('svg')
+    // should apply ns to children
+    expect(vnode.children[0].ns).toBe('svg')
+  })
+
+  it('render MathML elements with correct namespace', () => {
+    const vm = new Vue({})
+    const h = bind(createElement, vm)
+    renderState.activeInstance = vm
+    const vnode = h('math', [h('matrix')])
+    expect(vnode.ns).toBe('math')
+    // should apply ns to children
+    expect(vnode.children[0].ns).toBe('math')
+    // although not explicitly listed, elements nested under <math>
+    // should not be treated as component
+    expect(vnode.children[0].componentOptions).toBeUndefined()
   })
 })

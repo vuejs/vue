@@ -7,7 +7,21 @@ import { normalizeChildren } from './helpers'
 import { renderState } from '../instance/render'
 import { warn, resolveAsset } from '../util/index'
 
+// wrapper function for providing a more flexible interface
+// without getting yelled at by flow
 export function createElement (
+  tag: any,
+  data: any,
+  children: any
+): VNode | Array<VNode> | void {
+  if (data && (Array.isArray(data) || typeof data !== 'object')) {
+    children = data
+    data = undefined
+  }
+  return _createElement.call(this, tag, data, children)
+}
+
+function _createElement (
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
   children?: VNodeChildren | void
