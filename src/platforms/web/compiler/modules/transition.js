@@ -26,9 +26,9 @@ function genData (el: ASTElement): string {
 
 function transformCode (el: ASTElement, code: string): string {
   return el.transitionMode
-    ? `_h(_e('TransitionControl',{props:{mode:${
+    ? `_h('TransitionControl',{props:{mode:${
         el.transitionMode
-      },child:${code}}}))`
+      },child:${code}}})`
     : code
 }
 

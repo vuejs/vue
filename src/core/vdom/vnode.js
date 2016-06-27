@@ -18,7 +18,7 @@ export default class VNode {
   constructor (
     tag?: string,
     data?: VNodeData,
-    children?: Array<VNode>,
+    children?: Array<VNode> | void,
     text?: string,
     elm?: Node,
     ns?: string,
@@ -46,10 +46,6 @@ export default class VNode {
     if (constructHook) {
       constructHook(this)
     }
-  }
-
-  setChildren (children?: Array<VNode>) {
-    this.children = children
   }
 }
 

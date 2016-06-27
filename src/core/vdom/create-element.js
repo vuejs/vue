@@ -7,47 +7,12 @@ import { normalizeChildren } from './helpers'
 import { renderState } from '../instance/render'
 import { warn, resolveAsset } from '../util/index'
 
-export function renderElementWithChildren (
-  vnode: VNode | void,
-  children: VNodeChildren | void
-): VNode | Array<VNode> | void {
-  if (vnode) {
-    const componentOptions = vnode.componentOptions
-    if (componentOptions) {
-      if (process.env.NODE_ENV !== 'production' &&
-        children && typeof children !== 'function') {
-        warn(
-          'A component\'s children should be a function that returns the ' +
-          'children array. This allows the component to track the children ' +
-          'dependencies and optimizes re-rendering.'
-        )
-      }
-      const CtorOptions = componentOptions.Ctor.options
-      // functional component
-      if (CtorOptions.functional) {
-        return CtorOptions.render.call(
-          null,
-          componentOptions.parent.$createElement, // h
-          componentOptions.propsData || {},       // props
-          normalizeChildren(children)             // children
-        )
-      } else {
-        // normal component
-        componentOptions.children = children
-      }
-    } else {
-      // normal element
-      vnode.setChildren(normalizeChildren(children))
-    }
-  }
-  return vnode
-}
-
-export function renderElement (
+export function createElement (
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
+  children?: VNodeChildren | void,
   namespace?: string
-): VNode | void {
+): VNode | Array<VNode> | void {
   // make sure to expose real self instead of proxy
   const context: Component = this._self
   const parent: ?Component = renderState.activeInstance
@@ -67,12 +32,12 @@ export function renderElement (
     let Ctor
     if (config.isReservedTag(tag)) {
       return new VNode(
-        tag, data,
-        undefined, undefined, undefined,
+        tag, data, normalizeChildren(children),
+        undefined, undefined,
         namespace, context, host
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return createComponent(Ctor, data, parent, context, host, tag)
+      return createComponent(Ctor, data, parent, context, host, children, tag)
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (
@@ -88,20 +53,12 @@ export function renderElement (
         }
       }
       return new VNode(
-        tag, data,
-        undefined, undefined, undefined,
+        tag, data, normalizeChildren(children),
+        undefined, undefined,
         namespace, context, host
       )
     }
   } else {
-    return createComponent(tag, data, parent, context, host)
+    return createComponent(tag, data, parent, context, host, children)
   }
-}
-
-export function renderStatic (index?: number): Object | void {
-  return this._staticTrees[index] || (
-    this._staticTrees[index] = this.$options.staticRenderFns[index].call(
-      this._renderProxy
-    )
-  )
 }

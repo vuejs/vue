@@ -30,7 +30,7 @@ export function generate (
   dataGenFns = pluckModuleFunction(options.modules, 'genData')
   platformDirectives = options.directives || {}
   isPlatformReservedTag = options.isReservedTag || no
-  const code = ast ? genElement(ast) : '_h(_e("div"))'
+  const code = ast ? genElement(ast) : '_h("div")'
   staticRenderFns = prevStaticRenderFns
   return {
     render: `with(this){return ${code}}`,
@@ -64,12 +64,12 @@ function genElement (el: ASTElement): string {
       const children = !el.inlineTemplate
         ? genChildren(el, !el.ns && !isPlatformReservedTag(el.tag) /* asThunk */)
         : null
-      code = `_h(_e('${el.tag}'${
-        data ? `,${data}` : el.ns ? ',void 0' : '' // data
+      code = `_h('${el.tag}'${
+        data ? `,${data}` : (children || el.ns) ? ',void 0' : '' // data
+      }${
+        children ? `,${children}` : '' // children
       }${
         el.ns ? `,'${el.ns}'` : '' // namespace
-      })${
-        children ? `,${children}` : '' // children
       })`
     }
     // module transforms
@@ -78,7 +78,7 @@ function genElement (el: ASTElement): string {
     }
     // check keep-alive
     if (el.component && el.keepAlive) {
-      code = `_h(_e("KeepAlive",{props:{child:${code}}}))`
+      code = `_h("KeepAlive",{props:{child:${code}}})`
     }
     return code
   }
@@ -253,7 +253,7 @@ function genSlot (el: ASTElement): string {
 
 function genComponent (el: ASTElement): string {
   const children = genChildren(el, true)
-  return `_h(_e(${el.component},${genData(el)})${
+  return `_h(${el.component},${genData(el)}${
     children ? `,${children}` : ''
   })`
 }

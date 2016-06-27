@@ -2,6 +2,7 @@
 
 import Vue from '../instance/index'
 import VNode from './vnode'
+import { normalizeChildren } from './helpers'
 import { callHook } from '../instance/lifecycle'
 import { warn, isObject, hasOwn, hyphenate } from '../util/index'
 
@@ -14,14 +15,27 @@ export function createComponent (
   parent: Component,
   context: Component,
   host: ?Component,
+  children?: VNodeChildren,
   tag?: string
 ): VNode | void {
+  // ensure children is a thunk
+  if (process.env.NODE_ENV !== 'production' &&
+    children && typeof children !== 'function') {
+    warn(
+      'A component\'s children should be a function that returns the ' +
+      'children array. This allows the component to track the children ' +
+      'dependencies and optimizes re-rendering.'
+    )
+  }
+
   if (!Ctor) {
     return
   }
+
   if (isObject(Ctor)) {
     Ctor = Vue.extend(Ctor)
   }
+
   if (typeof Ctor !== 'function') {
     if (process.env.NODE_ENV !== 'production') {
       warn(`Invalid Component definition: ${Ctor}`, parent)
@@ -50,14 +64,21 @@ export function createComponent (
 
   data = data || {}
 
-  // merge component management hooks onto the placeholder node
-  // only need to do this if this is not a functional component
-  if (!Ctor.options.functional) {
-    mergeHooks(data)
-  }
-
   // extract props
   const propsData = extractProps(data, Ctor)
+
+  // functional component
+  if (Ctor.options.functional) {
+    return Ctor.options.render.call(
+      null,
+      parent.$createElement,      // h
+      propsData || {},            // props
+      normalizeChildren(children) // children
+    )
+  }
+
+  // merge component management hooks onto the placeholder node
+  mergeHooks(data)
 
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
@@ -71,9 +92,7 @@ export function createComponent (
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, undefined, context, host,
-    { Ctor, propsData, listeners, parent, tag, children: undefined }
-    // children to be set later by renderElementWithChildren,
-    // but before the init hook
+    { Ctor, propsData, listeners, parent, tag, children }
   )
   return vnode
 }

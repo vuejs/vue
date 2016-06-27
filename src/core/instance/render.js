@@ -8,11 +8,7 @@ import {
   nextTick, resolveAsset, _toString, toNumber
 } from '../util/index'
 
-import {
-  renderElement,
-  renderElementWithChildren,
-  renderStatic
-} from '../vdom/create-element'
+import { createElement } from '../vdom/create-element'
 
 export const renderState: {
   activeInstance: ?Component
@@ -26,14 +22,7 @@ export function initRender (vm: Component) {
   vm.$slots = {}
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
-  vm.$createElement = bind(function (
-    tag?: string | Class<Component> | Function | Object,
-    data?: VNodeData,
-    children?: VNodeChildren,
-    namespace?: string
-  ) {
-    return this._h(this._e(tag, data, namespace), children)
-  }, vm)
+  vm.$createElement = bind(createElement, vm)
   if (vm.$options.el) {
     vm.$mount(vm.$options.el)
   }
@@ -88,22 +77,29 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
   // shorthands used in render functions
-  Vue.prototype._h = renderElementWithChildren
-  Vue.prototype._e = renderElement
-  Vue.prototype._m = renderStatic
+  Vue.prototype._h = createElement
   // toString for mustaches
   Vue.prototype._s = _toString
   // number conversion
   Vue.prototype._n = toNumber
 
+  //
+  Vue.prototype._m = function renderStatic (index?: number): Object | void {
+    return this._staticTrees[index] || (
+      this._staticTrees[index] = this.$options.staticRenderFns[index].call(
+        this._renderProxy
+      )
+    )
+  }
+
   // filter resolution helper
   const identity = _ => _
-  Vue.prototype._f = function (id) {
+  Vue.prototype._f = function resolveFilter (id) {
     return resolveAsset(this.$options, 'filters', id, true) || identity
   }
 
   // render v-for
-  Vue.prototype._l = function (
+  Vue.prototype._l = function renderList (
     val: any,
     render: () => VNode
   ): ?Array<VNode> {
@@ -130,7 +126,7 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
   // apply v-bind object
-  Vue.prototype._b = function (vnode: VNodeWithData, value: any) {
+  Vue.prototype._b = function bindProps (vnode: VNodeWithData, value: any) {
     if (value) {
       if (!isObject(value)) {
         process.env.NODE_ENV !== 'production' && warn(
@@ -153,7 +149,9 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
   // expose v-on keyCodes
-  Vue.prototype._k = key => config.keyCodes[key]
+  Vue.prototype._k = function getKeyCodes (key: string): any {
+    return config.keyCodes[key]
+  }
 }
 
 function resolveSlots (
@@ -161,7 +159,7 @@ function resolveSlots (
   renderChildren: Array<any> | () => Array<any> | string
 ) {
   if (renderChildren) {
-    const children = normalizeChildren(renderChildren)
+    const children = normalizeChildren(renderChildren) || []
     const slots = {}
     const defaultSlot = []
     let name, child
