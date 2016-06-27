@@ -426,7 +426,7 @@ if (!isIE9) {
       }).then(done)
     })
 
-    it('transition on appear', done => {
+    it('transition on appear (inline)', done => {
       const vm = new Vue({
         template: `
           <div>
@@ -441,6 +441,34 @@ if (!isIE9) {
           </div>
         `,
         data: { ok: true }
+      }).$mount(el)
+
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].className).toBe('test test-appear test-appear-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-appear-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.children[0].className).toBe('test')
+      }).then(done)
+    })
+
+    it('transition on appear (resolved)', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <div v-if="ok"
+              class="test"
+              transition="test">foo</div>
+          </div>
+        `,
+        data: { ok: true },
+        transitions: {
+          test: {
+            appear: true,
+            appearClass: 'test-appear',
+            appearActiveClass: 'test-appear-active'
+          }
+        }
       }).$mount(el)
 
       waitForUpdate(() => {

@@ -42,17 +42,15 @@ export function enter (vnode: VNodeWithData) {
     el._leaveCb.cancelled = true
     el._leaveCb()
   }
+
   const data = vnode.data.transition
   if (!data) {
-    return
-  }
-  const isAppear = !vnode.context.$root._isMounted
-  if (isAppear && !data.appear && data.appear !== '') {
     return
   }
 
   const {
     css,
+    appear,
     enterClass,
     enterActiveClass,
     appearClass,
@@ -66,6 +64,11 @@ export function enter (vnode: VNodeWithData) {
     afterAppear,
     appearCancelled
   } = resolveTransition(data, vnode.context)
+
+  const isAppear = !vnode.context.$root._isMounted
+  if (isAppear && !appear && appear !== '') {
+    return
+  }
 
   const startClass = isAppear ? appearClass : enterClass
   const activeClass = isAppear ? appearActiveClass : enterActiveClass
