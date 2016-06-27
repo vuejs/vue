@@ -167,56 +167,62 @@ if (!isIE9) {
     })
 
     it('transition with JavaScript hooks', done => {
+      const onLeaveSpy = jasmine.createSpy('onLeave')
+      const onEnterSpy = jasmine.createSpy('onEnter')
       const beforeLeaveSpy = jasmine.createSpy('beforeLeave')
       const beforeEnterSpy = jasmine.createSpy('beforeEnter')
-      const hooks = {
-        beforeLeave: el => {
-          expect(el).toBe(vm.$el.children[0])
-          expect(el.className).toBe('test')
-          beforeLeaveSpy()
-        },
-        onLeave: jasmine.createSpy('leave'),
-        afterLeave: jasmine.createSpy('afterLeave'),
-        beforeEnter: el => {
-          expect(vm.$el.contains(el)).toBe(false)
-          expect(el.className).toBe('test')
-          beforeEnterSpy()
-        },
-        onEnter: jasmine.createSpy('enter'),
-        afterEnter: jasmine.createSpy('afterEnter')
-      }
+      const afterLeaveSpy = jasmine.createSpy('afterLeave')
+      const afterEnterSpy = jasmine.createSpy('afterEnter')
 
       const vm = new Vue({
         template: '<div><div v-if="ok" class="test" transition="test">foo</div></div>',
         data: { ok: true },
         transitions: {
-          test: hooks
+          test: {
+            beforeLeave: (el, vm) => {
+              expect(el).toBe(vm.$el.children[0])
+              expect(el.className).toBe('test')
+              beforeLeaveSpy(el, vm)
+            },
+            onLeave: (el, vm) => onLeaveSpy(el, vm),
+            afterLeave: (el, vm) => afterLeaveSpy(el, vm),
+            beforeEnter: (el, vm) => {
+              expect(vm.$el.contains(el)).toBe(false)
+              expect(el.className).toBe('test')
+              beforeEnterSpy(el, vm)
+            },
+            onEnter: (el, vm) => onEnterSpy(el, vm),
+            afterEnter: (el, vm) => afterEnterSpy(el, vm)
+          }
         }
       }).$mount(el)
 
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
+
+      let _el = vm.$el.children[0]
       vm.ok = false
       waitForUpdate(() => {
-        expect(beforeLeaveSpy).toHaveBeenCalled()
-        expect(hooks.onLeave).toHaveBeenCalled()
+        expect(beforeLeaveSpy).toHaveBeenCalledWith(_el, vm)
+        expect(onLeaveSpy).toHaveBeenCalledWith(_el, vm)
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(hooks.afterLeave).not.toHaveBeenCalled()
+        expect(afterLeaveSpy).not.toHaveBeenCalled()
         expect(vm.$el.children[0].className).toBe('test test-leave-active')
       }).thenWaitFor(duration + 10).then(() => {
-        expect(hooks.afterLeave).toHaveBeenCalled()
+        expect(afterLeaveSpy).toHaveBeenCalledWith(_el, vm)
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
       }).then(() => {
-        expect(beforeEnterSpy).toHaveBeenCalled()
-        expect(hooks.onEnter).toHaveBeenCalled()
+        _el = vm.$el.children[0]
+        expect(beforeEnterSpy).toHaveBeenCalledWith(_el, vm)
+        expect(onEnterSpy).toHaveBeenCalledWith(_el, vm)
         expect(vm.$el.children[0].className).toBe('test test-enter test-enter-active')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(hooks.afterEnter).not.toHaveBeenCalled()
+        expect(afterEnterSpy).not.toHaveBeenCalled()
         expect(vm.$el.children[0].className).toBe('test test-enter-active')
       }).thenWaitFor(duration + 10).then(() => {
-        expect(hooks.afterEnter).toHaveBeenCalled()
+        expect(afterEnterSpy).toHaveBeenCalledWith(_el, vm)
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
@@ -228,10 +234,10 @@ if (!isIE9) {
         data: { ok: true },
         transitions: {
           test: {
-            onEnter: (el, cb) => {
+            onEnter: (el, vm, cb) => {
               next = cb
             },
-            onLeave: (el, cb) => {
+            onLeave: (el, vm, cb) => {
               next = cb
             }
           }
