@@ -36,6 +36,7 @@ describe('SSR: bundle renderer', () => {
     createRenderer('app.js', renderer => {
       const context = { url: '/test' }
       renderer.renderToString(context, (err, res) => {
+        expect(err).toBeNull()
         expect(res).toBe('<div server-rendered="true">&sol;test</div>')
         expect(context.msg).toBe('hello')
         done()
