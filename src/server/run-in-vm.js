@@ -12,24 +12,25 @@ function createContext (context) {
     setTimeout,
     console,
     process,
-    __VUE_SSR_CONTEXT__: context || {}
+    __VUE_SSR_CONTEXT__: context
   }
   sandbox.global = sandbox
   return sandbox
 }
 
-export default function runInVm (code, _context) {
-  const wrapper = NativeModule.wrap(code)
-  const context = createContext(_context)
-  const compiledWrapper = vm.runInNewContext(wrapper, context, {
-    filename: '__vue_ssr_bundle__',
-    displayErrors: true
+export default function runInVm (code, _context = {}) {
+  return new Promise((resolve, reject) => {
+    const wrapper = NativeModule.wrap(code)
+    const context = createContext(_context)
+    const compiledWrapper = vm.runInNewContext(wrapper, context, {
+      filename: '__vue_ssr_bundle__',
+      displayErrors: true
+    })
+    const m = { exports: {}}
+    compiledWrapper.call(m.exports, m.exports, require, m)
+    const res = Object.prototype.hasOwnProperty.call(m.exports, 'default')
+      ? m.exports.default
+      : m
+    resolve(typeof res === 'function' ? res(_context) : res)
   })
-  const m = { exports: {}}
-  compiledWrapper.call(m.exports, m.exports, require, m)
-  const res = Object.prototype.hasOwnProperty.call(m.exports, 'default')
-    ? m.exports.default
-    : m
-  // ensure returning a Promise
-  return Promise.resolve(res)
 }

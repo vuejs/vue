@@ -6,6 +6,10 @@ export function createBundleRendererCreator (createRenderer) {
     const renderer = createRenderer(rendererOptions)
     return {
       renderToString: (context, cb) => {
+        if (typeof context === 'function') {
+          cb = context
+          context = {}
+        }
         runInVm(code, context).then(app => {
           renderer.renderToString(app, cb)
         }).catch(cb)
