@@ -141,7 +141,7 @@ describe('SSR: renderToString', () => {
       data: {
         val: 'hi'
       },
-      init () {
+      beforeCreate () {
         expect(lifecycleCount++).toBe(1)
       },
       created () {
@@ -151,7 +151,7 @@ describe('SSR: renderToString', () => {
       },
       components: {
         test: {
-          init () {
+          beforeCreate () {
             expect(lifecycleCount++).toBe(3)
           },
           created () {
