@@ -22,12 +22,12 @@ describe('Global API: mixin', () => {
     const calls = []
     const Test = Vue.extend({
       name: 'test',
-      init () {
+      beforeCreate () {
         calls.push(this.$options.myOption + ' local')
       }
     })
     Vue.mixin({
-      init () {
+      beforeCreate () {
         calls.push(this.$options.myOption + ' global')
       }
     })

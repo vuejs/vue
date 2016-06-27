@@ -6,13 +6,13 @@ describe('Options lifecyce hooks', () => {
     spy = jasmine.createSpy('hook')
   })
 
-  describe('init', () => {
+  describe('beforeCreate', () => {
     it('should allow modifying options', () => {
       const vm = new Vue({
         data: {
           a: 1
         },
-        init () {
+        beforeCreate () {
           spy()
           expect(this.a).toBeUndefined()
           this.$options.computed = {

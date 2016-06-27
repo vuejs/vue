@@ -84,7 +84,7 @@ const config: Config = {
    * List of lifecycle hooks.
    */
   _lifecycleHooks: [
-    'init',
+    'beforeCreate',
     'created',
     'beforeMount',
     'mounted',
