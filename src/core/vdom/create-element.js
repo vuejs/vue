@@ -10,8 +10,7 @@ import { warn, resolveAsset } from '../util/index'
 export function createElement (
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
-  children?: VNodeChildren | void,
-  namespace?: string
+  children?: VNodeChildren | void
 ): VNode | Array<VNode> | void {
   // make sure to expose real self instead of proxy
   const context: Component = this._self
@@ -29,10 +28,11 @@ export function createElement (
     return emptyVNode()
   }
   if (typeof tag === 'string') {
+    const namespace = config.getTagNamespace(tag)
     let Ctor
     if (config.isReservedTag(tag)) {
       return new VNode(
-        tag, data, normalizeChildren(children),
+        tag, data, normalizeChildren(children, namespace),
         undefined, undefined,
         namespace, context, host
       )
@@ -53,7 +53,7 @@ export function createElement (
         }
       }
       return new VNode(
-        tag, data, normalizeChildren(children),
+        tag, data, normalizeChildren(children, namespace),
         undefined, undefined,
         namespace, context, host
       )

@@ -1,6 +1,6 @@
 /* @flow */
 
-import { no } from 'shared/util'
+import { no, noop } from 'shared/util'
 
 export type Config = {
   // user
@@ -13,6 +13,7 @@ export type Config = {
   // platform
   isReservedTag: (x?: string) => boolean,
   isUnknownElement: (x?: string) => boolean,
+  getTagNamespace: (x?: string) => string | void,
   mustUseProp: (x?: string) => boolean,
   // internal
   _assetTypes: Array<string>,
@@ -63,6 +64,11 @@ const config: Config = {
    * Platform-dependent.
    */
   isUnknownElement: no,
+
+  /**
+   * Get the namespace of an element
+   */
+  getTagNamespace: noop,
 
   /**
    * Check if an attribute must be bound using property, e.g. value

@@ -3,7 +3,10 @@
 import { isPrimitive } from '../util/index'
 import VNode from './vnode'
 
-export function normalizeChildren (children: any): Array<VNode> | void {
+export function normalizeChildren (
+  children: any,
+  ns: string | void
+): Array<VNode> | void {
   // invoke children thunks.
   // components always receive their children as thunks so that they
   // can perform the actual render inside their own dependency collection cycle.
@@ -32,6 +35,8 @@ export function normalizeChildren (children: any): Array<VNode> | void {
         if (c.text && last && last.text) {
           last.text += c.text
         } else {
+          // inherit parent namespace
+          if (ns && c.tag) c.ns = ns
           res.push(c)
         }
       }

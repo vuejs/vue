@@ -21,7 +21,7 @@ export default class VNode {
     children?: Array<VNode> | void,
     text?: string,
     elm?: Node,
-    ns?: string,
+    ns?: string | void,
     context?: Component,
     host?: ?Component,
     componentOptions?: VNodeComponentOptions

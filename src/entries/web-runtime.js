@@ -7,11 +7,18 @@ import { devtools, inBrowser } from 'core/util/index'
 import { patch } from 'web/runtime/patch'
 import platformDirectives from 'web/runtime/directives/index'
 import platformComponents from 'web/runtime/components/index'
-import { query, isUnknownElement, isReservedTag, mustUseProp } from 'web/util/index'
+import {
+  query,
+  isUnknownElement,
+  isReservedTag,
+  getTagNamespace,
+  mustUseProp
+} from 'web/util/index'
 
 // install platform specific utils
 Vue.config.isUnknownElement = isUnknownElement
 Vue.config.isReservedTag = isReservedTag
+Vue.config.getTagNamespace = getTagNamespace
 Vue.config.mustUseProp = mustUseProp
 
 // install platform runtime directives & components

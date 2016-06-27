@@ -96,23 +96,6 @@ describe('codegen', () => {
     )
   })
 
-  it('generate svg tag', () => {
-    assertCodegen(
-      '<svg><text>hello world</text></svg>',
-      `with(this){return _h('svg',void 0,[_h('text',void 0,["hello world"],'svg')],'svg')}`
-    )
-  })
-
-  it('generate MathML tag', () => {
-    assertCodegen(
-      `<math>
-        <matrix>
-        </matrix>
-      </math>`,
-      `with(this){return _h('math',void 0,[_h('matrix',void 0,'math')],'math')}`
-    )
-  })
-
   it('generate single slot', () => {
     assertCodegen(
       '<slot></slot>',

@@ -65,11 +65,9 @@ function genElement (el: ASTElement): string {
         ? genChildren(el, !el.ns && !isPlatformReservedTag(el.tag) /* asThunk */)
         : null
       code = `_h('${el.tag}'${
-        data ? `,${data}` : (children || el.ns) ? ',void 0' : '' // data
+        data ? `,${data}` : children ? ',void 0' : '' // data
       }${
         children ? `,${children}` : '' // children
-      }${
-        el.ns ? `,'${el.ns}'` : '' // namespace
       })`
     }
     // module transforms
