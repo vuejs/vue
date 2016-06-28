@@ -10,7 +10,8 @@
 import VNode from './vnode'
 import { isPrimitive, _toString, warn } from '../util/index'
 
-const emptyNode = new VNode('', {}, [])
+const emptyData = {}
+const emptyNode = new VNode('', emptyData, [])
 const hooks = ['create', 'update', 'postpatch', 'remove', 'destroy']
 
 function isUndef (s) {
@@ -267,13 +268,18 @@ export function createPatchFunction (backend) {
   function patchVnode (oldVnode, vnode, insertedVnodeQueue) {
     if (oldVnode === vnode) return
     let i, hook
-    if (isDef(i = vnode.data) && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
-      i(oldVnode, vnode)
+    const hasData = isDef(i = vnode.data)
+    if (hasData) {
+      // ensure the oldVnode also has data during patch
+      oldVnode.data = oldVnode.data || emptyData
+      if (isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
+        i(oldVnode, vnode)
+      }
     }
     const elm = vnode.elm = oldVnode.elm
     const oldCh = oldVnode.children
     const ch = vnode.children
-    if (isDef(vnode.data)) {
+    if (hasData) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef(hook) && isDef(i = hook.update)) i(oldVnode, vnode)
     }
@@ -291,7 +297,7 @@ export function createPatchFunction (backend) {
     } else if (oldVnode.text !== vnode.text) {
       nodeOps.setTextContent(elm, vnode.text)
     }
-    if (isDef(vnode.data)) {
+    if (hasData) {
       for (i = 0; i < cbs.postpatch.length; ++i) cbs.postpatch[i](oldVnode, vnode)
       if (isDef(hook) && isDef(i = hook.postpatch)) i(oldVnode, vnode)
     }
