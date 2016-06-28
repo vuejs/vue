@@ -11,7 +11,7 @@ npm install vue-template-compiler
 ```
 
 ``` js
-var compiler = require('vue-template-compiler')
+const compiler = require('vue-template-compiler')
 ```
 
 ## API
@@ -30,7 +30,9 @@ Compiles a template string and returns compiled JavaScript code. The returned re
 
 Note the returned function code uses `with` and thus cannot be used in strict mode code.
 
-**Options**
+#### Options
+
+It's possible to hook into the compilation process to support custom template features. **However, beware that by injecting custom compile-time modules, your templates will not work with other build tools built on standard built-in modules, e.g `vue-laoder` and `vueify`.**
 
 The optional `options` object can contain the following:
 
@@ -76,6 +78,6 @@ This is only useful at runtime with pre-configured builds, so it doesn't accept 
 
 Parse a SFC (single-file component, or `*.vue` file) into a [descriptor](https://github.com/vuejs/vue/blob/next/flow/compiler.js#L131). This is used in SFC build tools like `vue-loader` and `vueify`.
 
-**Options**
+#### Options
 
 - `pad`: with `{ pad: true }`, the extracted content for each block will be padded with newlines to ensure that the line numbers align with the original file. This is useful when you are piping the extracted content into other pre-processors, as you will get correct line numbers if there are any syntax errors.

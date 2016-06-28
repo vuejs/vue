@@ -7,7 +7,7 @@ export { compileToFunctions } from 'web/compiler/index'
 
 export function compile (
   template: string,
-  options?: Object
+  options?: CompilerOptions
 ): CompiledResult {
   options = options || {}
   const errors = []
