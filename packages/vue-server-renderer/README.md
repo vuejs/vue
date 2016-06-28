@@ -187,6 +187,14 @@ server: {
 }
 ```
 
+## Externals
+
+By default, we will bundle every dependency of our app into the server bundle as well. V8 is very good at optimizing running the same code over and over again, so in most cases the cost of re-running it on every request is a worthwhile tradeoff in return for more freedom in application structure.
+
+You can also further optimize the re-run cost by externalizing dependencies from your bundle. When running the bundle, any raw `require()` calls found in the bundle will return the actual module from your rendering process. With Webpack, you can simply list the modules you want to externalize using the `externals` config option. This avoids having to re-initialize the same module on each request and can also be beneficial for memory usage.
+
+However, since the same module instance will be shared across every request, you need to make sure that the dependency is **idempotent**. That is, using it across different requests should always yield the same result - it cannot have global state that may be changed by your application. Because of this, you should avoid externalizing Vue itself and its plugins.
+
 ## Client Side Hydration
 
 In server-rendered output, the root element will have the `server-rendered="true"` attribute. On the client, when you mount a Vue instance to an element with this attribute, it will attempt to "hydrate" the existing DOM instead of creating new DOM nodes.
