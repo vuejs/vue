@@ -2,7 +2,10 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
 var entities = require('entities');
+var deindent = _interopDefault(require('de-indent'));
 
 /**
  * Convert a value to a string that is actually rendered.
@@ -1415,6 +1418,7 @@ function initLifecycle(vm) {
   vm.$refs = {};
 
   vm._watcher = null;
+  vm._inactive = false;
   vm._isMounted = false;
   vm._isDestroyed = false;
   vm._isBeingDestroyed = false;
@@ -1689,6 +1693,7 @@ function insert(vnode) {
     callHook(vnode.child, 'mounted');
   }
   if (vnode.data.keepAlive) {
+    vnode.child._inactive = false;
     callHook(vnode.child, 'activated');
   }
 }
@@ -1698,6 +1703,7 @@ function destroy(vnode) {
     if (!vnode.data.keepAlive) {
       vnode.child.$destroy();
     } else {
+      vnode.child._inactive = true;
       callHook(vnode.child, 'deactivated');
     }
   }
@@ -4183,54 +4189,6 @@ function makeFunction(code) {
   } catch (e) {
     return noop;
   }
-}
-
-var splitRE$1 = /\r?\n/g;
-var emptyRE = /^\s*$/;
-var needFixRE = /^(\r?\n)*[\t\s]/;
-
-function deindent(str) {
-  if (!needFixRE.test(str)) {
-    return str;
-  }
-  var lines = str.split(splitRE$1);
-  var min = Infinity;
-  var type = void 0,
-      cur = void 0,
-      c = void 0;
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i];
-    if (!emptyRE.test(line)) {
-      if (!type) {
-        c = line.charAt(0);
-        if (c === ' ' || c === '\t') {
-          type = c;
-          cur = count(line, type);
-          if (cur < min) {
-            min = cur;
-          }
-        } else {
-          return str;
-        }
-      } else {
-        cur = count(line, type);
-        if (cur < min) {
-          min = cur;
-        }
-      }
-    }
-  }
-  return lines.map(function (line) {
-    return line.slice(min);
-  }).join('\n');
-}
-
-function count(line, type) {
-  var i = 0;
-  while (line.charAt(i) === type) {
-    i++;
-  }
-  return i;
 }
 
 var splitRE = /\r?\n/g;

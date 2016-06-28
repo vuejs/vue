@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-alpha.7
+ * Vue.js v2.0.0-alpha.8
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -1414,6 +1414,7 @@
     vm.$refs = {};
 
     vm._watcher = null;
+    vm._inactive = false;
     vm._isMounted = false;
     vm._isDestroyed = false;
     vm._isBeingDestroyed = false;
@@ -1688,6 +1689,7 @@
       callHook(vnode.child, 'mounted');
     }
     if (vnode.data.keepAlive) {
+      vnode.child._inactive = false;
       callHook(vnode.child, 'activated');
     }
   }
@@ -1697,6 +1699,7 @@
       if (!vnode.data.keepAlive) {
         vnode.child.$destroy();
       } else {
+        vnode.child._inactive = true;
         callHook(vnode.child, 'deactivated');
       }
     }
@@ -2805,7 +2808,7 @@
     }
   });
 
-  Vue.version = '2.0.0-alpha.7';
+  Vue.version = '2.0.0-alpha.8';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
@@ -3028,7 +3031,8 @@ var nodeOps = Object.freeze({
     setAttribute: setAttribute
   });
 
-  var emptyNode = new VNode('', {}, []);
+  var emptyData = {};
+  var emptyNode = new VNode('', emptyData, []);
   var hooks$1 = ['create', 'update', 'postpatch', 'remove', 'destroy'];
 
   function isUndef(s) {
@@ -3166,7 +3170,7 @@ var nodeOps = Object.freeze({
           cbs.destroy[i](vnode);
         }
       }
-      if (isDef(i = vnode.child)) {
+      if (isDef(i = vnode.child) && !data.keepAlive) {
         invokeDestroyHook(i._vnode);
       }
       if (isDef(i = vnode.children)) {
@@ -3296,13 +3300,18 @@ var nodeOps = Object.freeze({
       if (oldVnode === vnode) return;
       var i = void 0,
           hook = void 0;
-      if (isDef(i = vnode.data) && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
-        i(oldVnode, vnode);
+      var hasData = isDef(i = vnode.data);
+      if (hasData) {
+        // ensure the oldVnode also has data during patch
+        oldVnode.data = oldVnode.data || emptyData;
+        if (isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
+          i(oldVnode, vnode);
+        }
       }
       var elm = vnode.elm = oldVnode.elm;
       var oldCh = oldVnode.children;
       var ch = vnode.children;
-      if (isDef(vnode.data)) {
+      if (hasData) {
         for (i = 0; i < cbs.update.length; ++i) {
           cbs.update[i](oldVnode, vnode);
         }if (isDef(hook) && isDef(i = hook.update)) i(oldVnode, vnode);
@@ -3321,7 +3330,7 @@ var nodeOps = Object.freeze({
       } else if (oldVnode.text !== vnode.text) {
         nodeOps.setTextContent(elm, vnode.text);
       }
-      if (isDef(vnode.data)) {
+      if (hasData) {
         for (i = 0; i < cbs.postpatch.length; ++i) {
           cbs.postpatch[i](oldVnode, vnode);
         }if (isDef(hook) && isDef(i = hook.postpatch)) i(oldVnode, vnode);

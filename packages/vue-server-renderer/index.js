@@ -2224,6 +2224,7 @@ function initLifecycle(vm) {
   vm.$refs = {};
 
   vm._watcher = null;
+  vm._inactive = false;
   vm._isMounted = false;
   vm._isDestroyed = false;
   vm._isBeingDestroyed = false;
@@ -2576,6 +2577,7 @@ function insert(vnode) {
     callHook(vnode.child, 'mounted');
   }
   if (vnode.data.keepAlive) {
+    vnode.child._inactive = false;
     callHook(vnode.child, 'activated');
   }
 }
@@ -2585,6 +2587,7 @@ function destroy(vnode) {
     if (!vnode.data.keepAlive) {
       vnode.child.$destroy();
     } else {
+      vnode.child._inactive = true;
       callHook(vnode.child, 'deactivated');
     }
   }
