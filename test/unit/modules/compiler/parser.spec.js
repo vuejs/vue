@@ -48,7 +48,6 @@ describe('parser', () => {
     const ast = parse('<MyComponent><p>hello world</p></MyComponent>', baseOptions)
     expect(ast.tag).toBe('my-component')
     expect(ast.plain).toBe(true)
-    expect('Found camelCase tag in template').toHaveBeenWarned()
     expect(ast.children[0].tag).toBe('p')
     expect(ast.children[0].plain).toBe(true)
     expect(ast.children[0].children[0].text).toBe('hello world')

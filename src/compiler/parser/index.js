@@ -23,7 +23,6 @@ const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
 const argRE = /:(.*)$/
 const modifierRE = /\.[^\.]+/g
-const camelRE = /[a-z\d][A-Z]/
 
 const decodeHTMLCached = cached(decodeHTML)
 
@@ -60,16 +59,8 @@ export function parse (
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
     start (tag, attrs, unary) {
-      // check camelCase tag
-      if (camelRE.test(tag)) {
-        process.env.NODE_ENV !== 'production' && warn(
-          `Found camelCase tag in template: <${tag}>. ` +
-          `I've converted it to <${hyphenate(tag)}> for you.`
-        )
-        tag = hyphenate(tag)
-      }
-
-      tag = tag.toLowerCase()
+      // normalize tag name
+      tag = hyphenate(tag)
 
       // check namespace.
       // inherit parent ns if there is one
