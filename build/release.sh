@@ -7,7 +7,7 @@ echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
   echo "Releasing $VERSION ..."
-  export SAUCE_BUILD_ID=$VERSION
+  export SAUCE_BUILD_ID=$VERSION:`date +"%s"`
 
   npm run lint
   npm run flow
