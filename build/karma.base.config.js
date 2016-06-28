@@ -19,7 +19,8 @@ var webpackConfig = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {
-        NODE_ENV: '"development"'
+        NODE_ENV: '"development"',
+        TRANSITION_DURATION: process.env.SAUCE ? 200 : 50
       }
     })
   ],

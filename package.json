@@ -24,7 +24,7 @@
     "test:sauce": "npm run sauce -- 0 && npm run sauce -- 1 && npm run sauce -- 2",
     "lint": "eslint src build test",
     "flow": "flow check",
-    "sauce": "NODE_ENV=development karma start build/karma.sauce.config.js",
+    "sauce": "NODE_ENV=development SAUCE=true karma start build/karma.sauce.config.js",
     "bench:ssr": "npm run build:ssr && NODE_ENV=production VUE_ENV=server node benchmarks/ssr/renderToString.js && NODE_ENV=production VUE_ENV=server node benchmarks/ssr/renderToStream.js",
     "release": "bash build/release.sh"
   },
