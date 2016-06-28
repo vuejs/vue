@@ -10,18 +10,14 @@ This package offers Node.js server-side rendering for Vue 2.0.
 npm install vue-server-renderer
 ```
 
-``` js
-const ssr = require('vue-server-renderer')
-```
-
 ## API
 
-### ssr.createRenderer([[rendererOptions](#renderer-options)])
+### createRenderer([[rendererOptions](#renderer-options)])
 
 Create a `renderer` instance.
 
 ``` js
-const renderer = ssr.createRenderer()
+const renderer = require('vue-server-renderer').createRenderer()
 ```
 
 ---
@@ -32,9 +28,9 @@ Render a Vue instance to string. The callback is a standard Node.js callback tha
 
 ``` js
 const Vue = require('vue')
-const ssr = require('vue-server-renderer')
 
-const renderer = ssr.createRenderer()
+const renderer = require('vue-server-renderer').createRenderer()
+
 const vm = new Vue({
   render (h) {
     return h('div', 'hello')
@@ -72,12 +68,12 @@ app.get('/', (req, res) => {
 
 ---
 
-### ssr.createBundleRenderer(code, [[rendererOptions](#renderer-options)])
+### createBundleRenderer(code, [[rendererOptions](#renderer-options)])
 
 Creates a `bundleRenderer` instance using pre-bundled application code (see [Creating the Server Bundle](#creating-the-server-bundle)). For each render call, the code will be re-run in a new context using Node.js' `vm` module. This ensures your application state is discrete between requests, and you don't need to worry about structuring your application in a limiting pattern just for the sake of SSR.
 
 ``` js
-const bundleRenderer = ssr.createBundleRenderer(code)
+const bundleRenderer = require('vue-server-renderer').createBundleRenderer(code)
 ```
 
 ---
