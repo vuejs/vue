@@ -1,12 +1,23 @@
 'use strict';
 
+Object.defineProperty(exports, '__esModule', { value: true });
+
 var entities = require('entities');
 
 /**
  * Convert a value to a string that is actually rendered.
  */
-function renderString(val) {
+function _toString(val) {
   return val == null ? '' : typeof val === 'object' ? JSON.stringify(val, null, 2) : String(val);
+}
+
+/**
+ * Convert a input value to a number for persistence.
+ * If the conversion fails, return original string.
+ */
+function toNumber(val) {
+  var n = parseFloat(val, 10);
+  return n || n === 0 ? n : val;
 }
 
 /**
@@ -224,6 +235,11 @@ var config = {
   isUnknownElement: no,
 
   /**
+   * Get the namespace of an element
+   */
+  getTagNamespace: noop,
+
+  /**
    * Check if an attribute must be bound using property, e.g. value
    * Platform-dependent.
    */
@@ -237,7 +253,7 @@ var config = {
   /**
    * List of lifecycle hooks.
    */
-  _lifecycleHooks: ['init', 'created', 'beforeMount', 'mounted', 'beforeUpdate', 'updated', 'beforeDestroy', 'destroyed', 'activated', 'deactivated'],
+  _lifecycleHooks: ['beforeCreate', 'created', 'beforeMount', 'mounted', 'beforeUpdate', 'updated', 'beforeDestroy', 'destroyed', 'activated', 'deactivated'],
 
   /**
    * Max circular updates allowed in a scheduler flush cycle.
@@ -247,14 +263,7 @@ var config = {
   /**
    * Server rendering?
    */
-  _isServer: process.env.VUE_ENV === 'server',
-
-  /**
-   * Keeping track of all extended Component constructors
-   * so that we can update them in the case of global mixins being applied
-   * after their creation.
-   */
-  _ctors: []
+  _isServer: process.env.VUE_ENV === 'server'
 };
 
 var warn = void 0;
@@ -400,14 +409,14 @@ var nextTick = function () {
   };
 }();
 
-var Set$1 = void 0;
+var _Set = void 0;
 /* istanbul ignore if */
 if (typeof Set !== 'undefined' && /native code/.test(Set.toString())) {
   // use native Set when available.
-  Set$1 = Set;
+  _Set = Set;
 } else {
   // a non-standard Set polyfill that only works with primitive keys.
-  Set$1 = function () {
+  _Set = function () {
     function Set() {
       this.set = Object.create(null);
     }
@@ -632,8 +641,8 @@ var Watcher = function () {
     this.dirty = this.lazy; // for lazy watchers
     this.deps = [];
     this.newDeps = [];
-    this.depIds = new Set$1();
-    this.newDepIds = new Set$1();
+    this.depIds = new _Set();
+    this.newDepIds = new _Set();
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn;
@@ -758,7 +767,21 @@ var Watcher = function () {
         // set new value
         var oldValue = this.value;
         this.value = value;
-        this.cb.call(this.vm, value, oldValue);
+        if (this.user) {
+          try {
+            this.cb.call(this.vm, value, oldValue);
+          } catch (e) {
+            process.env.NODE_ENV !== 'production' && warn('Error in watcher "' + this.expression + '"', this.vm);
+            /* istanbul ignore else */
+            if (config.errorHandler) {
+              config.errorHandler.call(null, e, this.vm);
+            } else {
+              throw e;
+            }
+          }
+        } else {
+          this.cb.call(this.vm, value, oldValue);
+        }
       }
     }
   };
@@ -811,7 +834,7 @@ var Watcher = function () {
   return Watcher;
 }();
 
-var seenObjects = new Set$1();
+var seenObjects = new _Set();
 function traverse(val, seen) {
   var i = void 0,
       keys = void 0;
@@ -821,7 +844,7 @@ function traverse(val, seen) {
   }
   var isA = Array.isArray(val);
   var isO = isObject(val);
-  if (isA || isO) {
+  if ((isA || isO) && Object.isExtensible(val)) {
     if (val.__ob__) {
       var depId = val.__ob__.dep.id;
       if (seen.has(depId)) {
@@ -1254,68 +1277,74 @@ function proxy(vm, key) {
   }
 }
 
-var VNode = function () {
-  function VNode(tag, data, children, text, elm, ns, context, host, componentOptions) {
-    this.tag = tag;
-    this.data = data;
-    this.children = children;
-    this.text = text;
-    this.elm = elm;
-    this.ns = ns;
-    this.context = context;
-    this.host = host;
-    this.key = data && data.key;
-    this.componentOptions = componentOptions;
-    this.child = undefined;
-    this.parent = undefined;
-    this.raw = false;
-    // apply construct hook.
-    // this is applied during render, before patch happens.
-    // unlike other hooks, this is applied on both client and server.
-    var constructHook = data && data.hook && data.hook.construct;
-    if (constructHook) {
-      constructHook(this);
-    }
+var VNode = function VNode(tag, data, children, text, elm, ns, context, host, componentOptions) {
+  this.tag = tag;
+  this.data = data;
+  this.children = children;
+  this.text = text;
+  this.elm = elm;
+  this.ns = ns;
+  this.context = context;
+  this.host = host;
+  this.key = data && data.key;
+  this.componentOptions = componentOptions;
+  this.child = undefined;
+  this.parent = undefined;
+  this.raw = false;
+  // apply construct hook.
+  // this is applied during render, before patch happens.
+  // unlike other hooks, this is applied on both client and server.
+  var constructHook = data && data.hook && data.hook.construct;
+  if (constructHook) {
+    constructHook(this);
   }
-
-  VNode.prototype.setChildren = function setChildren(children) {
-    this.children = children;
-  };
-
-  return VNode;
-}();
+};
 
 var emptyVNode = function emptyVNode() {
   return new VNode(undefined, undefined, undefined, '');
 };
 
-function normalizeChildren(children) {
+function normalizeChildren(children, ns) {
   // invoke children thunks.
   // components always receive their children as thunks so that they
   // can perform the actual render inside their own dependency collection cycle.
   if (typeof children === 'function') {
     children = children();
   }
-  if (typeof children === 'string') {
-    return [new VNode(undefined, undefined, undefined, children)];
+  if (isPrimitive(children)) {
+    return [createTextVNode(children)];
   }
   if (Array.isArray(children)) {
     var res = [];
     for (var i = 0, l = children.length; i < l; i++) {
       var c = children[i];
+      var last = res[res.length - 1];
       //  nested
       if (Array.isArray(c)) {
         res.push.apply(res, normalizeChildren(c));
       } else if (isPrimitive(c)) {
-        // convert primitive to vnode
-        res.push(new VNode(undefined, undefined, undefined, c));
+        if (last && last.text) {
+          last.text += String(c);
+        } else {
+          // convert primitive to vnode
+          res.push(createTextVNode(c));
+        }
       } else if (c instanceof VNode) {
-        res.push(c);
+        if (c.text && last && last.text) {
+          last.text += c.text;
+        } else {
+          // inherit parent namespace
+          if (ns && c.tag) c.ns = ns;
+          res.push(c);
+        }
       }
     }
     return res;
   }
-  return [];
+}
+
+function createTextVNode(val) {
+  return new VNode(undefined, undefined, undefined, String(val));
 }
 
 function updateListeners(on, oldOn, add, remove) {
@@ -1547,13 +1576,20 @@ function callHook(vm, hook) {
 var hooks = { init: init, prepatch: prepatch, insert: insert, destroy: destroy };
 var hooksToMerge = Object.keys(hooks);
 
-function createComponent(Ctor, data, parent, context, host, tag) {
+function createComponent(Ctor, data, parent, context, host, children, tag) {
+  // ensure children is a thunk
+  if (process.env.NODE_ENV !== 'production' && children && typeof children !== 'function') {
+    warn('A component\'s children should be a function that returns the ' + 'children array. This allows the component to track the children ' + 'dependencies and optimizes re-rendering.');
+  }
+
   if (!Ctor) {
     return;
   }
+
   if (isObject(Ctor)) {
     Ctor = Vue.extend(Ctor);
   }
+
   if (typeof Ctor !== 'function') {
     if (process.env.NODE_ENV !== 'production') {
       warn('Invalid Component definition: ' + Ctor, parent);
@@ -1582,14 +1618,19 @@ function createComponent(Ctor, data, parent, context, host, tag) {
 
   data = data || {};
 
-  // merge component management hooks onto the placeholder node
-  // only need to do this if this is not a functional component
-  if (!Ctor.options.functional) {
-    mergeHooks(data);
-  }
-
   // extract props
   var propsData = extractProps(data, Ctor);
+
+  // functional component
+  if (Ctor.options.functional) {
+    return Ctor.options.render.call(null, parent.$createElement, // h
+    propsData || {}, // props
+    normalizeChildren(children) // children
+    );
+  }
+
+  // merge component management hooks onto the placeholder node
+  mergeHooks(data);
 
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
@@ -1600,10 +1641,7 @@ function createComponent(Ctor, data, parent, context, host, tag) {
 
   // return a placeholder vnode
   var name = Ctor.options.name || tag;
-  var vnode = new VNode('vue-component-' + Ctor.cid + (name ? '-' + name : ''), data, undefined, undefined, undefined, undefined, context, host, { Ctor: Ctor, propsData: propsData, listeners: listeners, parent: parent, tag: tag, children: undefined }
-  // children to be set later by renderElementWithChildren,
-  // but before the init hook
-  );
+  var vnode = new VNode('vue-component-' + Ctor.cid + (name ? '-' + name : ''), data, undefined, undefined, undefined, undefined, context, host, { Ctor: Ctor, propsData: propsData, listeners: listeners, parent: parent, tag: tag, children: children });
   return vnode;
 }
 
@@ -1764,33 +1802,17 @@ function mergeHook$1(a, b) {
   };
 }
 
-function renderElementWithChildren(vnode, children) {
-  if (vnode) {
-    var componentOptions = vnode.componentOptions;
-    if (componentOptions) {
-      if (process.env.NODE_ENV !== 'production' && children && typeof children !== 'function') {
-        warn('A component\'s children should be a function that returns the ' + 'children array. This allows the component to track the children ' + 'dependencies and optimizes re-rendering.');
-      }
-      var CtorOptions = componentOptions.Ctor.options;
-      // functional component
-      if (CtorOptions.functional) {
-        return CtorOptions.render.call(null, componentOptions.parent.$createElement, // h
-        componentOptions.propsData || {}, // props
-        normalizeChildren(children) // children
-        );
-      } else {
-          // normal component
-          componentOptions.children = children;
-        }
-    } else {
-      // normal element
-      vnode.setChildren(normalizeChildren(children));
-    }
+// wrapper function for providing a more flexible interface
+// without getting yelled at by flow
+function createElement(tag, data, children) {
+  if (data && (Array.isArray(data) || typeof data !== 'object')) {
+    children = data;
+    data = undefined;
   }
-  return vnode;
+  return _createElement.call(this, tag, data, children);
 }
 
-function renderElement(tag, data, namespace) {
+function _createElement(tag, data, children) {
   // make sure to expose real self instead of proxy
   var context = this._self;
   var parent = renderState.activeInstance;
@@ -1804,30 +1826,23 @@ function renderElement(tag, data, namespace) {
     return emptyVNode();
   }
   if (typeof tag === 'string') {
+    var namespace = config.getTagNamespace(tag);
     var Ctor = void 0;
     if (config.isReservedTag(tag)) {
-      return new VNode(tag, data, undefined, undefined, undefined, namespace, context, host);
+      return new VNode(tag, data, normalizeChildren(children, namespace), undefined, undefined, namespace, context, host);
     } else if (Ctor = resolveAsset(context.$options, 'components', tag)) {
-      return createComponent(Ctor, data, parent, context, host, tag);
+      return createComponent(Ctor, data, parent, context, host, children, tag);
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && !(config.ignoredElements && config.ignoredElements.indexOf(tag) > -1) && config.isUnknownElement(tag)) {
           warn('Unknown custom element: <' + tag + '> - did you ' + 'register the component correctly? For recursive components, ' + 'make sure to provide the "name" option.');
         }
       }
-      return new VNode(tag, data, undefined, undefined, undefined, namespace, context, host);
+      return new VNode(tag, data, normalizeChildren(children, namespace), undefined, undefined, namespace, context, host);
     }
   } else {
-    return createComponent(tag, data, parent, context, host);
+    return createComponent(tag, data, parent, context, host, children);
   }
-}
-
-function renderText(str) {
-  return str || '';
-}
-
-function renderStatic(index) {
-  return this._staticTrees[index] || (this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy));
 }
 
 var renderState = {
@@ -1840,9 +1855,7 @@ function initRender(vm) {
   vm.$slots = {};
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
-  vm.$createElement = bind(function (tag, data, children, namespace) {
-    return this._h(this._e(tag, data, namespace), children);
-  }, vm);
+  vm.$createElement = bind(createElement, vm);
   if (vm.$options.el) {
     vm.$mount(vm.$options.el);
   }
@@ -1893,24 +1906,27 @@ function renderMixin(Vue) {
   };
 
   // shorthands used in render functions
-  Vue.prototype._h = renderElementWithChildren;
-  Vue.prototype._e = renderElement;
-  Vue.prototype._t = renderText;
-  Vue.prototype._m = renderStatic;
-
+  Vue.prototype._h = createElement;
   // toString for mustaches
-  Vue.prototype._s = renderString;
+  Vue.prototype._s = _toString;
+  // number conversion
+  Vue.prototype._n = toNumber;
+
+  //
+  Vue.prototype._m = function renderStatic(index) {
+    return this._staticTrees[index] || (this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy));
+  };
 
   // filter resolution helper
   var identity = function identity(_) {
     return _;
   };
-  Vue.prototype._f = function (id) {
+  Vue.prototype._f = function resolveFilter(id) {
     return resolveAsset(this.$options, 'filters', id, true) || identity;
   };
 
   // render v-for
-  Vue.prototype._l = function (val, render) {
+  Vue.prototype._l = function renderList(val, render) {
     var ret = void 0,
         i = void 0,
         l = void 0,
@@ -1938,7 +1954,7 @@ function renderMixin(Vue) {
   };
 
   // apply v-bind object
-  Vue.prototype._b = function (vnode, value) {
+  Vue.prototype._b = function bindProps(vnode, value) {
     if (value) {
       if (!isObject(value)) {
         process.env.NODE_ENV !== 'production' && warn('v-bind without argument expects an Object or Array value', this);
@@ -1956,14 +1972,14 @@ function renderMixin(Vue) {
   };
 
   // expose v-on keyCodes
-  Vue.prototype._k = function (key) {
+  Vue.prototype._k = function getKeyCodes(key) {
     return config.keyCodes[key];
   };
 }
 
 function resolveSlots(vm, renderChildren) {
   if (renderChildren) {
-    var children = normalizeChildren(renderChildren);
+    var children = normalizeChildren(renderChildren) || [];
     var slots = {};
     var defaultSlot = [];
     var name = void 0,
@@ -2078,7 +2094,7 @@ function initMixin(Vue) {
       // internal component options needs special treatment.
       initInternalComponent(vm, options);
     } else {
-      vm.$options = mergeOptions(vm.constructor.options, options || {}, vm);
+      vm.$options = mergeOptions(resolveConstructorOptions(vm), options || {}, vm);
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
@@ -2090,25 +2106,43 @@ function initMixin(Vue) {
     vm._self = vm;
     initLifecycle(vm);
     initEvents(vm);
-    callHook(vm, 'init');
+    callHook(vm, 'beforeCreate');
     initState(vm);
     callHook(vm, 'created');
     initRender(vm);
   };
-}
 
-function initInternalComponent(vm, options) {
-  var opts = vm.$options = Object.create(vm.constructor.options);
-  // doing this because it's faster than dynamic enumeration.
-  opts.parent = options.parent;
-  opts.propsData = options.propsData;
-  opts._parentVnode = options._parentVnode;
-  opts._parentListeners = options._parentListeners;
-  opts._renderChildren = options._renderChildren;
-  opts._componentTag = options._componentTag;
-  if (options.render) {
-    opts.render = options.render;
-    opts.staticRenderFns = options.staticRenderFns;
+  function initInternalComponent(vm, options) {
+    var opts = vm.$options = Object.create(resolveConstructorOptions(vm));
+    // doing this because it's faster than dynamic enumeration.
+    opts.parent = options.parent;
+    opts.propsData = options.propsData;
+    opts._parentVnode = options._parentVnode;
+    opts._parentListeners = options._parentListeners;
+    opts._renderChildren = options._renderChildren;
+    opts._componentTag = options._componentTag;
+    if (options.render) {
+      opts.render = options.render;
+      opts.staticRenderFns = options.staticRenderFns;
+    }
+  }
+
+  function resolveConstructorOptions(vm) {
+    var Ctor = vm.constructor;
+    var options = Ctor.options;
+    if (Ctor.super) {
+      var superOptions = Ctor.super.options;
+      var cachedSuperOptions = Ctor.superOptions;
+      if (superOptions !== cachedSuperOptions) {
+        // super option changed
+        Ctor.superOptions = superOptions;
+        options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions);
+        if (options.name) {
+          options.components[options.name] = Ctor;
+        }
+      }
+    }
+    return options;
   }
 }
 
@@ -3598,7 +3632,7 @@ function generate(ast, options) {
   dataGenFns = pluckModuleFunction(options.modules, 'genData');
   platformDirectives = options.directives || {};
   isPlatformReservedTag$1 = options.isReservedTag || no;
-  var code = ast ? genElement(ast) : '_h(_e("div"))';
+  var code = ast ? genElement(ast) : '_h("div")';
   staticRenderFns = prevStaticRenderFns;
   return {
     render: 'with(this){return ' + code + '}',
@@ -3607,7 +3641,12 @@ function generate(ast, options) {
 }
 
 function genElement(el) {
-  if (el.for && !el.forProcessed) {
+  if (el.staticRoot && !el.staticProcessed) {
+    // hoist static sub-trees out
+    el.staticProcessed = true;
+    staticRenderFns.push('with(this){return ' + genElement(el) + '}');
+    return '_m(' + (staticRenderFns.length - 1) + ')';
+  } else if (el.for && !el.forProcessed) {
     return genFor(el);
   } else if (el.if && !el.ifProcessed) {
     return genIf(el);
@@ -3625,15 +3664,9 @@ function genElement(el) {
       // if the element is potentially a component,
       // wrap its children as a thunk.
       var children = !el.inlineTemplate ? genChildren(el, !el.ns && !isPlatformReservedTag$1(el.tag) /* asThunk */) : null;
-      code = '_h(_e(\'' + el.tag + '\'' + (data ? ',' + data : el.ns ? ',void 0' : '' // data
-      ) + (el.ns ? ',\'' + el.ns + '\'' : '' // namespace
-      ) + ')' + (children ? ',' + children : '' // children
+      code = '_h(\'' + el.tag + '\'' + (data ? ',' + data : '' // data
+      ) + (children ? ',' + children : '' // children
       ) + ')';
-      if (el.staticRoot) {
-        // hoist static sub-trees out
-        staticRenderFns.push('with(this){return ' + code + '}');
-        code = '_m(' + (staticRenderFns.length - 1) + ')';
-      }
     }
     // module transforms
     for (var i = 0; i < transforms$1.length; i++) {
@@ -3641,7 +3674,7 @@ function genElement(el) {
     }
     // check keep-alive
     if (el.component && el.keepAlive) {
-      code = '_h(_e("KeepAlive",{props:{child:' + code + '}}))';
+      code = '_h("KeepAlive",{props:{child:' + code + '}})';
     }
     return code;
   }
@@ -3787,7 +3820,8 @@ function genNode(node) {
 }
 
 function genText(text) {
-  return text.type === 2 ? '(' + text.expression + ')' : '_t(' + JSON.stringify(text.text) + ')';
+  return text.type === 2 ? text.expression // no need for () because already wrapped in _s()
+  : JSON.stringify(text.text);
 }
 
 function genSlot(el) {
@@ -3798,7 +3832,7 @@ function genSlot(el) {
 
 function genComponent(el) {
   var children = genChildren(el, true);
-  return '_h(_e(' + el.component + ',' + genData(el) + ')' + (children ? ',' + children : '') + ')';
+  return '_h(' + el.component + ',' + genData(el) + (children ? ',' + children : '') + ')';
 }
 
 function genProps(props) {
@@ -3966,7 +4000,7 @@ function genData$3(el) {
 }
 
 function transformCode(el, code) {
-  return el.transitionMode ? '_h(_e(\'TransitionControl\',{props:{mode:' + el.transitionMode + ',child:' + code + '}}))' : code;
+  return el.transitionMode ? '_h(\'TransitionControl\',{props:{mode:' + el.transitionMode + ',child:' + code + '}})' : code;
 }
 
 var transition = {
@@ -4041,7 +4075,7 @@ function genDefaultModel(el, value, modifiers) {
   var needCompositionGuard = !lazy && type !== 'range';
 
   var valueExpression = '$event.target.value' + (trim ? '.trim()' : '');
-  var code = number || type === 'number' ? value + '=Number(' + valueExpression + ')' : value + '=' + valueExpression;
+  var code = number || type === 'number' ? value + '=_n(' + valueExpression + ')' : value + '=' + valueExpression;
   if (needCompositionGuard) {
     code = 'if($event.target.composing)return;' + code;
   }
