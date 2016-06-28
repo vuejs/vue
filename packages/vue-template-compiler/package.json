@@ -19,7 +19,6 @@
   "homepage": "https://github.com/vuejs/vue#readme",
   "dependencies": {
     "de-indent": "^1.0.2",
-    "entities": "^1.1.1",
-    "source-map": "^0.5.6"
+    "entities": "^1.1.1"
   }
 }

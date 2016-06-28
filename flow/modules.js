@@ -16,3 +16,9 @@ declare module 'lru-cache' {
     (): any
   }
 }
+
+declare module 'de-indent' {
+  declare var exports: {
+    (input: string): string
+  }
+}
