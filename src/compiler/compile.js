@@ -121,7 +121,8 @@ function sortDirectives (dirs) {
   if (dirs.length === 0) return
 
   var groupedMap = {}
-  for (var i = 0, j = dirs.length; i < j; i++) {
+  var i, j, k, l
+  for (i = 0, j = dirs.length; i < j; i++) {
     var dir = dirs[i]
     var priority = dir.descriptor.def.priority || DEFAULT_PRIORITY
     var array = groupedMap[priority]
@@ -132,13 +133,15 @@ function sortDirectives (dirs) {
   }
 
   var index = 0
-  Object.keys(groupedMap).sort(function (a, b) {
+  var priorities = Object.keys(groupedMap).sort(function (a, b) {
     return a > b ? -1 : a === b ? 0 : 1
-  }).forEach(function (priority) {
-    groupedMap[priority].forEach(function (item) {
-      dirs[index++] = item
-    })
   })
+  for (i = 0, j = priorities.length; i < j; i++) {
+    var group = groupedMap[priorities[i]]
+    for (k = 0, l = group.length; k < l; k++) {
+      dirs[index++] = group[k]
+    }
+  }
 }
 
 /**
