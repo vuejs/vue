@@ -146,6 +146,7 @@ function insert (vnode: MountedComponentVNode) {
     callHook(vnode.child, 'mounted')
   }
   if (vnode.data.keepAlive) {
+    vnode.child._inactive = false
     callHook(vnode.child, 'activated')
   }
 }
@@ -155,6 +156,7 @@ function destroy (vnode: MountedComponentVNode) {
     if (!vnode.data.keepAlive) {
       vnode.child.$destroy()
     } else {
+      vnode.child._inactive = true
       callHook(vnode.child, 'deactivated')
     }
   }

@@ -55,6 +55,7 @@ declare interface Component {
   _watchers: Array<Watcher>;
   _data: Object;
   _events: Object;
+  _inactive: boolean;
   _isMounted: boolean;
   _isDestroyed: boolean;
   _isBeingDestroyed: boolean;

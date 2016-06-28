@@ -18,6 +18,7 @@ export function initLifecycle (vm: Component) {
   vm.$refs = {}
 
   vm._watcher = null
+  vm._inactive = false
   vm._isMounted = false
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
