@@ -71,9 +71,10 @@ export function createComponent (
   if (Ctor.options.functional) {
     return Ctor.options.render.call(
       null,
-      parent.$createElement,      // h
-      propsData || {},            // props
-      normalizeChildren(children) // children
+      parent.$createElement,       // h
+      propsData || {},             // props
+      normalizeChildren(children), // children
+      data                         // data
     )
   }
 
