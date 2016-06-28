@@ -52,17 +52,25 @@ var batches = [
   },
   // mobile
   {
-    sl_ios_safari: {
+    sl_ios_safari_7: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      platform: 'OS X 10.9',
-      version: '7.1'
+      version: '7.0'
     },
-    sl_android: {
+    sl_ios_safari_9: {
+      base: 'SauceLabs',
+      browserName: 'iphone',
+      version: '9.2'
+    },
+    sl_android_4_2: {
       base: 'SauceLabs',
       browserName: 'android',
-      platform: 'Linux',
       version: '4.2'
+    },
+    sl_android_5_1: {
+      base: 'SauceLabs',
+      browserName: 'android',
+      version: '5.1'
     }
   }
 ]
