@@ -98,15 +98,18 @@ function genDefaultModel (
   const { lazy, number, trim } = modifiers || {}
   const event = lazy ? 'change' : 'input'
   const needCompositionGuard = !lazy && type !== 'range'
+  const isNative = el.tag === 'input' || el.tag === 'textarea'
 
-  const valueExpression = `$event.target.value${trim ? '.trim()' : ''}`
+  const valueExpression = isNative
+    ? `$event.target.value${trim ? '.trim()' : ''}`
+    : `$event`
   let code = number || type === 'number'
     ? `${value}=_n(${valueExpression})`
     : `${value}=${valueExpression}`
-  if (needCompositionGuard) {
+  if (isNative && needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
   }
-  addProp(el, 'value', `_s(${value})`)
+  addProp(el, 'value', isNative ? `_s(${value})` : `(${value})`)
   addHandler(el, event, code)
   if (needCompositionGuard) {
     // need runtime directive code to help with composition events

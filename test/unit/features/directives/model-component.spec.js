@@ -21,7 +21,7 @@ describe('Directive v-model component', () => {
           methods: {
             onInput (e) {
               // something validate ...
-              this.$emit('input', e)
+              this.$emit('input', e.target.value)
             }
           },
           mounted () {

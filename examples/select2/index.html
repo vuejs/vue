@@ -48,7 +48,7 @@
           .select2({ data: this.options })
           // emit event on change.
           .on('change', function () {
-            vm.$emit('input', mockEvent(this.value))
+            vm.$emit('input', this.value)
           })
       },
       watch: {
@@ -65,16 +65,6 @@
         $(this.$el).off().select2('destroy')
       }
     })
-
-    // mock an event because the v-model binding expects
-    // event.target.value
-    function mockEvent (value) {
-      return {
-        target: {
-          value: value
-        }
-      }
-    }
 
     var vm = new Vue({
       el: '#el',
