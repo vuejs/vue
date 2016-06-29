@@ -50,6 +50,10 @@ It could be you!
   <img width="240px" src="http://i.imgur.com/MRIkKgp.png">
 </a>
 
+<a href="http://nodividestudio.com/"></a>
+  <img width="100px" src="https://cloud.githubusercontent.com/assets/499550/16464256/552c2306-3e07-11e6-867f-e4f5ac64bace.png"> No Divide Studio
+</a>
+
 ---
 
 ### $50+
@@ -121,3 +125,9 @@ It could be you!
 - Spenser
 - Takuya Nishio
 - Daniel Diekmeier
+- Peter Thaleikis
+- Karol Fabjanczuk
+- Eduardo
+- Lê Chương
+- Webber Wang
+- Daniel Schmitz
