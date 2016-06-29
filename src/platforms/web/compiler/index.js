@@ -26,10 +26,18 @@ export function compile (
   template: string,
   options?: CompilerOptions
 ): CompiledResult {
-  options = options
+  options = options || {}
+  const newOptions = options
     ? extend(extend({}, baseOptions), options)
-    : baseOptions
-  return baseCompile(template, options)
+    : extend({}, baseOptions)
+  // allow injecting modules/directives
+  newOptions.modules = options.modules
+    ? baseOptions.modules.concat(options.modules)
+    : baseOptions.modules
+  newOptions.directives = options.directives
+    ? extend(extend({}, baseOptions.directives), options.directives)
+    : baseOptions.directives
+  return baseCompile(template, newOptions)
 }
 
 export function compileToFunctions (
