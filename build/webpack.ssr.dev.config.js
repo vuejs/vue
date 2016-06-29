@@ -13,8 +13,7 @@ module.exports = {
     alias: alias
   },
   externals: {
-    'entities': true,
-    'lru-cache': true
+    'entities': true
   },
   module: {
     noParse: /run-in-vm/,

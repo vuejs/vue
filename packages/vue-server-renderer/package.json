@@ -18,8 +18,7 @@
     "url": "https://github.com/vuejs/vue/issues"
   },
   "dependencies": {
-    "entities": "^1.1.1",
-    "lru-cache": "^4.0.1"
+    "entities": "^1.1.1"
   },
   "homepage": "https://github.com/vuejs/vue#readme"
 }

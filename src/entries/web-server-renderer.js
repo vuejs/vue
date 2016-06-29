@@ -17,7 +17,7 @@ export function createRenderer (options?: Object = {}): {
     isUnaryTag,
     modules,
     directives,
-    cache: options.cache || {}
+    cache: options.cache
   })
 }
 

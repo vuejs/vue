@@ -2,21 +2,33 @@
 
 import { cached } from 'shared/util'
 import { encodeHTML } from 'entities'
-import LRU from 'lru-cache'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
 const encodeHTMLCached = cached(encodeHTML)
-const defaultOptions = {
-  max: 5000
+
+const normalizeAsync = (cache, method) => {
+  const fn = cache[method]
+  if (!fn) {
+    return
+  } else if (fn.length > 1) {
+    return (key, cb) => fn.call(cache, key, cb)
+  } else {
+    return (key, cb) => cb(fn.call(cache, key))
+  }
 }
 
 export function createRenderFunction (
   modules: Array<Function>,
   directives: Object,
   isUnaryTag: Function,
-  cacheOptions: Object
+  cache: any
 ) {
-  const cache = LRU(Object.assign({}, defaultOptions, cacheOptions))
+  if (cache && (!cache.get || !cache.set)) {
+    throw new Error('renderer cache must implement at least get & set.')
+  }
+
+  const get = cache && normalizeAsync(cache, 'get')
+  const has = cache && normalizeAsync(cache, 'has')
 
   function renderNode (
     node: VNode,
@@ -28,35 +40,34 @@ export function createRenderFunction (
       // check cache hit
       const Ctor = node.componentOptions.Ctor
       const getKey = Ctor.options.server && Ctor.options.server.getCacheKey
-      if (getKey) {
+      if (getKey && cache) {
         const key = Ctor.cid + '::' + getKey(node.componentOptions.propsData)
-        if (cache.has(key)) {
-          return write(cache.get(key), next)
-        } else {
-          write.caching = true
-          const buffer = write.cacheBuffer
-          const bufferIndex = buffer.push('') - 1
-          const _next = next
-          next = () => {
-            const result = buffer[bufferIndex]
-            cache.set(key, result)
-            if (bufferIndex === 0) {
-              // this is a top-level cached component,
-              // exit caching mode.
-              write.caching = false
+        if (has) {
+          has(key, hit => {
+            if (hit) {
+              get(key, res => write(res, next))
             } else {
-              // parent component is also being cached,
-              // merge self into parent's result
-              buffer[bufferIndex - 1] += result
+              renderComponentWithCache(node, write, next, isRoot, cache, key)
             }
-            buffer.length = bufferIndex
-            _next()
-          }
+          })
+        } else {
+          get(key, res => {
+            if (res) {
+              write(res, next)
+            } else {
+              renderComponentWithCache(node, write, next, isRoot, cache, key)
+            }
+          })
         }
+      } else {
+        if (getKey) {
+          console.error(
+            'Component implemented server.getCacheKey, ' +
+            'but no cache was provided to the renderer.'
+          )
+        }
+        renderComponent(node, write, next, isRoot)
       }
-      const child = createComponentInstanceForVnode(node)._render()
-      child.parent = node
-      renderNode(child, write, next, isRoot)
     } else {
       if (node.tag) {
         renderElement(node, write, next, isRoot)
@@ -66,12 +77,34 @@ export function createRenderFunction (
     }
   }
 
-  function renderElement (
-    el: VNode,
-    write: Function,
-    next: Function,
-    isRoot: boolean
-  ) {
+  function renderComponent (node, write, next, isRoot) {
+    const child = createComponentInstanceForVnode(node)._render()
+    child.parent = node
+    renderNode(child, write, next, isRoot)
+  }
+
+  function renderComponentWithCache (node, write, next, isRoot, cache, key) {
+    write.caching = true
+    const buffer = write.cacheBuffer
+    const bufferIndex = buffer.push('') - 1
+    renderComponent(node, write, () => {
+      const result = buffer[bufferIndex]
+      cache.set(key, result)
+      if (bufferIndex === 0) {
+        // this is a top-level cached component,
+        // exit caching mode.
+        write.caching = false
+      } else {
+        // parent component is also being cached,
+        // merge self into parent's result
+        buffer[bufferIndex - 1] += result
+      }
+      buffer.length = bufferIndex
+      next()
+    }, isRoot)
+  }
+
+  function renderElement (el, write, next, isRoot) {
     if (isRoot) {
       if (!el.data) el.data = {}
       if (!el.data.attrs) el.data.attrs = {}

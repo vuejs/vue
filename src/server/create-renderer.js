@@ -9,12 +9,12 @@ export function createRenderer ({
   modules = [],
   directives = {},
   isUnaryTag = (() => false),
-  cache = {}
+  cache
 }: {
   modules: Array<Function>,
   directives: Object,
   isUnaryTag: Function,
-  cache: Object
+  cache: ?Object
 } = {}): {
   renderToString: Function,
   renderToStream: Function
