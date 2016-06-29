@@ -147,7 +147,7 @@ As an example, check out [`v-show`'s server-side implementation](https://github.
 
 ### cache
 
-> Note: this option has changed and is different from versions < 2.0.0-alpha.8.
+> Note: this option has changed and is different from versions <= 2.0.0-alpha.8.
 
 Provide a cache implementation. The cache object must be of the following shape:
 
