@@ -242,7 +242,7 @@ describe('hooks', () => {
         new VNode('span', {}, undefined, 'child 2')
       ])
     ])
-    const vnode2 = new VNode('div')
+    const vnode2 = new VNode('div', {})
     patch1(vnode0, vnode1)
     expect(destroyed).toBe(1) // should invoke for replaced root nodes too
     patch1(vnode1, vnode2)
@@ -265,7 +265,7 @@ describe('hooks', () => {
       createTextVNode(''),
       new VNode('span', {}, undefined, 'third child')
     ])
-    const vnode2 = new VNode('div')
+    const vnode2 = new VNode('div', {})
     patch1(vnode0, vnode1)
     patch1(vnode1, vnode2)
     expect(created).toBe(3)
@@ -292,7 +292,7 @@ describe('hooks', () => {
         ])
       ])
     ])
-    const vnode2 = new VNode('div')
+    const vnode2 = new VNode('div', {})
     patch1(vnode0, vnode1)
     expect(destroyed).toBe(1) // should invoke for replaced root nodes too
     patch1(vnode1, vnode2)

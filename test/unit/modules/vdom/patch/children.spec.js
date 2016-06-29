@@ -450,4 +450,20 @@ describe('children', () => {
     expect(map(tag, elm.children)).toEqual(['DIV', 'SPAN', 'SPAN', 'DIV'])
     expect(map(inner, elm.children)).toEqual(['four', 'three', 'two', 'one'])
   })
+
+  it('should handle children with the same tag, same key, but one with data and one without data', () => {
+    const vnode1 = new VNode('div', {}, [
+      new VNode('div', { class: 'hi' }, undefined, 'one')
+    ])
+    const vnode2 = new VNode('div', {}, [
+      new VNode('div', undefined, undefined, 'four')
+    ])
+    let elm = patch(vnode0, vnode1)
+    const child1 = elm.children[0]
+    expect(child1.className).toBe('hi')
+    elm = patch(vnode1, vnode2)
+    const child2 = elm.children[0]
+    expect(child1).not.toBe(child2)
+    expect(child2.className).toBe('')
+  })
 })

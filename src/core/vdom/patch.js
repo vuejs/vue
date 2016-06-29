@@ -23,7 +23,11 @@ function isDef (s) {
 }
 
 function sameVnode (vnode1, vnode2) {
-  return vnode1.key === vnode2.key && vnode1.tag === vnode2.tag
+  return (
+    vnode1.key === vnode2.key &&
+    vnode1.tag === vnode2.tag &&
+    !vnode1.data === !vnode2.data
+  )
 }
 
 function createKeyToOldIdx (children, beginIdx, endIdx) {
@@ -269,12 +273,8 @@ export function createPatchFunction (backend) {
     if (oldVnode === vnode) return
     let i, hook
     const hasData = isDef(i = vnode.data)
-    if (hasData) {
-      // ensure the oldVnode also has data during patch
-      oldVnode.data = oldVnode.data || emptyData
-      if (isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
-        i(oldVnode, vnode)
-      }
+    if (hasData && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
+      i(oldVnode, vnode)
     }
     const elm = vnode.elm = oldVnode.elm
     const oldCh = oldVnode.children
