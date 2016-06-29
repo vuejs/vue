@@ -147,13 +147,27 @@ As an example, check out [`v-show`'s server-side implementation](https://github.
 
 ### cache
 
-Specify cache options. Passed directly to [lru-cache](https://github.com/isaacs/node-lru-cache). The default is `{ max: 5000 }`.
+> Note: this option has changed and is different from versions < 2.0.0-alpha.8.
+
+Provide a cache implementation. The cache object must be of the following shape:
 
 ``` js
+{
+  get: (key: string) => string,
+  set: (key: string, val: string) => void,
+  has?: (key: string) => boolean // optional
+}
+```
+
+A typical usage is passing in an [lru-cache](https://github.com/isaacs/node-lru-cache):
+
+``` js
+const LRU = require('lru-cache')
+
 const renderer = createRenderer({
-  cache: {
+  cache: LRU({
     max: 10000
-  }
+  })
 })
 ```
 
