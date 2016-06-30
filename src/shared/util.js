@@ -99,9 +99,10 @@ export const capitalize = cached((str: string): string => {
 /**
  * Hyphenate a camelCase string.
  */
-const hyphenateRE = /([a-z\d])([A-Z])/g
+const hyphenateRE = /([^-])([A-Z])/g
 export const hyphenate = cached((str: string): string => {
   return str
+    .replace(hyphenateRE, '$1-$2')
     .replace(hyphenateRE, '$1-$2')
     .toLowerCase()
 })
