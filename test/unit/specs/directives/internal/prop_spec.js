@@ -621,6 +621,36 @@ describe('prop', function () {
     expect(vm.a).toBe(123)
   })
 
+  // # GitHub issues #3183
+  it('pass propsData to create component that props is defined', function () {
+    var Comp = Vue.extend({
+      template: '<div>{{propA.a}}:{{propB.b}}</div>',
+      props: {
+        propA: {
+          type: Object,
+          required: true
+        },
+        'prop-b': {
+          type: Object,
+          required: true
+        }
+      }
+    })
+    var vm = new Comp({
+      el: el,
+      propsData: {
+        propA: { a: 123 },
+        propB: { b: '456' }
+      }
+    })
+    expect(vm.propA.a).toBe(123)
+    expect(vm.propB.b).toBe('456')
+    expect('Missing required prop: propA').not.toHaveBeenWarned()
+    expect('Invalid prop: type check failed for prop "propA". Expected Object, got Undefined').not.toHaveBeenWarned()
+    expect('Missing required prop: prop-b').not.toHaveBeenWarned()
+    expect('Invalid prop: type check failed for prop "prop-b". Expected Object, got Undefined').not.toHaveBeenWarned()
+  })
+
   it('should warn using propsData during extension', function () {
     Vue.extend({
       propsData: {
