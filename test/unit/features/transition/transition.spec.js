@@ -126,8 +126,8 @@ if (!isIE9) {
     })
 
     it('inline transition object', done => {
-      const onEnter = jasmine.createSpy('enter')
-      const onLeave = jasmine.createSpy('leave')
+      const enter = jasmine.createSpy('enter')
+      const leave = jasmine.createSpy('leave')
       const vm = new Vue({
         template: `<div><div v-if="ok" class="test" :transition="{
           name: 'inline',
@@ -139,8 +139,8 @@ if (!isIE9) {
         data: { ok: true },
         transitions: {
           inline: {
-            onEnter,
-            onLeave
+            enter,
+            leave
           }
         }
       }).$mount(el)
@@ -150,7 +150,7 @@ if (!isIE9) {
       vm.ok = false
       waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test bye byebye active')
-        expect(onLeave).toHaveBeenCalled()
+        expect(leave).toHaveBeenCalled()
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test byebye active')
       }).thenWaitFor(duration + 10).then(() => {
@@ -158,7 +158,7 @@ if (!isIE9) {
         vm.ok = true
       }).then(() => {
         expect(vm.$el.children[0].className).toBe('test hello hello-active')
-        expect(onEnter).toHaveBeenCalled()
+        expect(enter).toHaveBeenCalled()
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test hello-active')
       }).thenWaitFor(duration + 10).then(() => {
@@ -167,8 +167,8 @@ if (!isIE9) {
     })
 
     it('transition with JavaScript hooks', done => {
-      const onLeaveSpy = jasmine.createSpy('onLeave')
-      const onEnterSpy = jasmine.createSpy('onEnter')
+      const onLeaveSpy = jasmine.createSpy('leave')
+      const onEnterSpy = jasmine.createSpy('enter')
       const beforeLeaveSpy = jasmine.createSpy('beforeLeave')
       const beforeEnterSpy = jasmine.createSpy('beforeEnter')
       const afterLeaveSpy = jasmine.createSpy('afterLeave')
@@ -184,14 +184,14 @@ if (!isIE9) {
               expect(el.className).toBe('test')
               beforeLeaveSpy(el, vm)
             },
-            onLeave: (el, vm) => onLeaveSpy(el, vm),
+            leave: (el, vm) => onLeaveSpy(el, vm),
             afterLeave: (el, vm) => afterLeaveSpy(el, vm),
             beforeEnter: (el, vm) => {
               expect(vm.$el.contains(el)).toBe(false)
               expect(el.className).toBe('test')
               beforeEnterSpy(el, vm)
             },
-            onEnter: (el, vm) => onEnterSpy(el, vm),
+            enter: (el, vm) => onEnterSpy(el, vm),
             afterEnter: (el, vm) => afterEnterSpy(el, vm)
           }
         }
@@ -234,10 +234,10 @@ if (!isIE9) {
         data: { ok: true },
         transitions: {
           test: {
-            onEnter: (el, vm, cb) => {
+            enter: (el, vm, cb) => {
               next = cb
             },
-            onLeave: (el, vm, cb) => {
+            leave: (el, vm, cb) => {
               next = cb
             }
           }
@@ -276,8 +276,8 @@ if (!isIE9) {
         transitions: {
           test: {
             css: false,
-            onEnter: enterSpy,
-            onLeave: leaveSpy
+            enter: enterSpy,
+            leave: leaveSpy
           }
         }
       }).$mount(el)
@@ -301,8 +301,8 @@ if (!isIE9) {
         data: { ok: true },
         transitions: {
           nope: {
-            onEnter: enterSpy,
-            onLeave: leaveSpy
+            enter: enterSpy,
+            leave: leaveSpy
           }
         }
       }).$mount(el)

@@ -51,17 +51,16 @@ export function enter (vnode: VNodeWithData) {
 
   const {
     css,
-    appear,
     enterClass,
     enterActiveClass,
     appearClass,
     appearActiveClass,
     beforeEnter,
-    onEnter,
+    enter,
     afterEnter,
     enterCancelled,
     beforeAppear,
-    onAppear,
+    appear,
     afterAppear,
     appearCancelled
   } = resolveTransition(data, vnode.context)
@@ -74,7 +73,7 @@ export function enter (vnode: VNodeWithData) {
   const startClass = isAppear ? appearClass : enterClass
   const activeClass = isAppear ? appearActiveClass : enterActiveClass
   const beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter
-  const enterHook = isAppear ? (onAppear || onEnter) : onEnter
+  const enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter
   const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
   const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
 
@@ -130,14 +129,14 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     leaveClass,
     leaveActiveClass,
     beforeLeave,
-    onLeave,
+    leave,
     afterLeave,
     leaveCancelled,
     delayLeave
   } = resolveTransition(data, vnode.context)
 
   const expectsCSS = css !== false
-  const userWantsControl = onLeave && onLeave.length > 2
+  const userWantsControl = leave && leave.length > 2
   const cb = el._leaveCb = once(() => {
     if (expectsCSS) {
       removeTransitionClass(el, leaveActiveClass)
@@ -172,7 +171,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
         }
       })
     }
-    onLeave && onLeave(el, vm, cb)
+    leave && leave(el, vm, cb)
     if (!expectsCSS && !userWantsControl) {
       cb()
     }
