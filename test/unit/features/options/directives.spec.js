@@ -4,7 +4,7 @@ describe('Options directives', () => {
   it('basic usage', done => {
     const bindSpy = jasmine.createSpy('bind')
     const updateSpy = jasmine.createSpy('update')
-    const postupdateSpy = jasmine.createSpy('postupdate')
+    const componentUpdatedSpy = jasmine.createSpy('componentUpdated')
     const unbindSpy = jasmine.createSpy('unbind')
 
     const assertContext = (el, binding, vnode) => {
@@ -39,8 +39,8 @@ describe('Options directives', () => {
             expect(binding.oldValue).toBe('foo')
             expect(binding.expression).toBe('a')
           },
-          postupdate (el, binding, vnode) {
-            postupdateSpy()
+          componentUpdated (el, binding, vnode) {
+            componentUpdatedSpy()
             assertContext(el, binding, vnode)
           },
           unbind (el, binding, vnode) {
@@ -54,16 +54,16 @@ describe('Options directives', () => {
     vm.$mount()
     expect(bindSpy).toHaveBeenCalled()
     expect(updateSpy).not.toHaveBeenCalled()
-    expect(postupdateSpy).not.toHaveBeenCalled()
+    expect(componentUpdatedSpy).not.toHaveBeenCalled()
     expect(unbindSpy).not.toHaveBeenCalled()
     vm.a = 'bar'
     waitForUpdate(() => {
       expect(updateSpy).toHaveBeenCalled()
-      expect(postupdateSpy).toHaveBeenCalled()
+      expect(componentUpdatedSpy).toHaveBeenCalled()
       expect(unbindSpy).not.toHaveBeenCalled()
       vm.msg = 'bye'
     }).then(() => {
-      expect(postupdateSpy.calls.count()).toBe(2)
+      expect(componentUpdatedSpy.calls.count()).toBe(2)
       vm.ok = false
     }).then(() => {
       expect(unbindSpy).toHaveBeenCalled()

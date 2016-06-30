@@ -44,7 +44,7 @@ export default {
       }
     }
   },
-  postupdate (el, binding, vnode) {
+  componentUpdated (el, binding, vnode) {
     const val = binding.value
     if (vnode.tag === 'select') {
       setSelected(el, val)

@@ -10,7 +10,7 @@ export default {
     applyDirectives(oldVnode, vnode, 'update')
   },
   postpatch: function postupdateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-    applyDirectives(oldVnode, vnode, 'postupdate')
+    applyDirectives(oldVnode, vnode, 'componentUpdated')
   },
   destroy: function unbindDirectives (vnode: VNodeWithData) {
     applyDirectives(vnode, vnode, 'unbind')
