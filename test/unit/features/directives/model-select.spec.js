@@ -205,7 +205,7 @@ describe('Directive v-model select', () => {
   })
 
   it('should warn multiple with non-Array value', () => {
-    const vm = new Vue({
+    new Vue({
       data: {
         test: 'meh'
       },
