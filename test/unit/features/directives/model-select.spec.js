@@ -203,4 +203,16 @@ describe('Directive v-model select', () => {
     expect('inline selected attributes on <option> will be ignored when using v-model')
       .toHaveBeenWarned()
   })
+
+  it('should warn multiple with non-Array value', () => {
+    const vm = new Vue({
+      data: {
+        test: 'meh'
+      },
+      template:
+        '<select v-model="test" multiple></select>'
+    }).$mount()
+    expect('<select multiple v-model="test"> expects an Array value for its binding, but got String')
+      .toHaveBeenWarned()
+  })
 })

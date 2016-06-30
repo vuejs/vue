@@ -32,7 +32,7 @@ export default {
       }
     }
     if (vnode.tag === 'select') {
-      setSelected(el, binding.value)
+      setSelected(el, binding, vnode.context)
     } else {
       if (!isAndroid) {
         el.addEventListener('compositionstart', onCompositionStart)
@@ -45,16 +45,15 @@ export default {
     }
   },
   componentUpdated (el, binding, vnode) {
-    const val = binding.value
     if (vnode.tag === 'select') {
-      setSelected(el, val)
+      setSelected(el, binding, vnode.context)
       // in case the options rendered by v-for have changed,
       // it's possible that the value is out-of-sync with the rendered options.
       // detect such cases and filter out values that no longer has a matchig
       // option in the DOM.
       const needReset = el.multiple
-        ? val.some(v => hasNoMatchingOption(v, el.options))
-        : hasNoMatchingOption(val, el.options)
+        ? binding.value.some(v => hasNoMatchingOption(v, el.options))
+        : hasNoMatchingOption(binding.value, el.options)
       if (needReset) {
         trigger(el, 'change')
       }
@@ -62,10 +61,20 @@ export default {
   }
 }
 
-function setSelected (el, value) {
+function setSelected (el, binding, vm) {
+  const value = binding.value
   const isMultiple = el.multiple
   if (!isMultiple) {
     el.selectedIndex = -1
+  } else if (!Array.isArray(value)) {
+    process.env.NODE_ENV !== 'production' && warn(
+      `<select multiple v-model="${binding.expression}"> ` +
+      `expects an Array value for its binding, but got ${
+        Object.prototype.toString.call(value).slice(8, -1)
+      }`,
+      vm
+    )
+    return
   }
   for (let i = 0, l = el.options.length; i < l; i++) {
     const option = el.options[i]
