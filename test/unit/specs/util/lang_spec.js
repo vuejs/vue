@@ -51,6 +51,7 @@ describe('Util - Language Enhancement', function () {
     expect(_.hyphenate('fooBar')).toBe('foo-bar')
     expect(_.hyphenate('a1BfC')).toBe('a1-bf-c')
     expect(_.hyphenate('already-With-Hyphen')).toBe('already-with-hyphen')
+    expect(_.hyphenate('ABigApple')).toBe('a-big-apple')
   })
 
   it('classify', function () {
