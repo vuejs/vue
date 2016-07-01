@@ -326,6 +326,10 @@ function compileElement (el, options) {
   // textarea treats its text content as the initial value.
   // just bind it as an attr directive for value.
   if (el.tagName === 'TEXTAREA') {
+    // a textarea which has v-pre attr should skip complie.
+    if (getAttr(el, 'v-pre') !== null) {
+      return skip
+    }
     var tokens = parseText(el.value)
     if (tokens) {
       el.setAttribute(':value', tokensToExp(tokens))
