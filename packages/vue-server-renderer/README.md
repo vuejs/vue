@@ -173,14 +173,12 @@ const renderer = createRenderer({
 
 ## Component-Level Caching
 
-You can easily cache components during SSR by implementing the `server.getCacheKey` function:
+You can easily cache components during SSR by implementing the `serverCacheKey` function:
 
 ``` js
 export default {
   props: ['item'],
-  server: {
-    getCacheKey: props => props.item.id
-  },
+  serverCacheKey: props => props.item.id,
   render (h) {
     return h('div', this.item.id)
   }
@@ -196,9 +194,7 @@ If the renderer hits a cache for a component during render, it will directly reu
 In most cases, you shouldn't and don't need to cache single-instance components. The most common type of components that need caching are ones in big lists. Since these components are usually driven by objects in database collections, they can make use of a simple caching strategy: generate their cache keys using their unique id plus the last updated timestamp:
 
 ``` js
-server: {
-  getCacheKey: props => props.item.id + '::' + props.item.last_updated
-}
+serverCacheKey: props => props.item.id + '::' + props.item.last_updated
 ```
 
 ## Externals

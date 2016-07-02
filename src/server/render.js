@@ -39,7 +39,7 @@ export function createRenderFunction (
     if (node.componentOptions) {
       // check cache hit
       const Ctor = node.componentOptions.Ctor
-      const getKey = Ctor.options.server && Ctor.options.server.getCacheKey
+      const getKey = Ctor.options.serverCacheKey
       if (getKey && cache) {
         const key = Ctor.cid + '::' + getKey(node.componentOptions.propsData)
         if (has) {
@@ -62,7 +62,9 @@ export function createRenderFunction (
       } else {
         if (getKey) {
           console.error(
-            'Component implemented server.getCacheKey, ' +
+            `[vue-server-renderer] Component ${
+              Ctor.options.name || '(anonymous)'
+            } implemented serverCacheKey, ` +
             'but no cache was provided to the renderer.'
           )
         }
