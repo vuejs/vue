@@ -1,10 +1,7 @@
 /* @flow */
 
-import { cached } from 'shared/util'
 import { encodeHTML } from 'entities'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
-
-const encodeHTMLCached = cached(encodeHTML)
 
 const normalizeAsync = (cache, method) => {
   const fn = cache[method]
@@ -74,7 +71,7 @@ export function createRenderFunction (
       if (node.tag) {
         renderElement(node, write, next, isRoot)
       } else {
-        write(node.raw ? node.text : encodeHTMLCached(node.text), next)
+        write(node.raw ? node.text : encodeHTML(node.text), next)
       }
     }
   }
