@@ -114,4 +114,15 @@ describe('compile options', () => {
     expect(vm.$el.innerHTML).toBe('<input type="text">')
     expect(vm.$children[0].valid).toBe(true)
   })
+
+  it('should collect errors', () => {
+    let compiled = compile('hello')
+    expect(compiled.errors.length).toBe(1)
+    expect(compiled.errors[0]).toContain('should contain exactly one root element')
+
+    compiled = compile('<div v-if="a----">{{ b++++ }}</div>')
+    expect(compiled.errors.length).toBe(2)
+    expect(compiled.errors[0]).toContain('invalid expression: v-if="a----"')
+    expect(compiled.errors[1]).toContain('invalid expression: {{ b++++ }}')
+  })
 })

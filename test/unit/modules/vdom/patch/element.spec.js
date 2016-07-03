@@ -22,6 +22,12 @@ describe('element', () => {
     expect(`Unknown custom element: <unknown>`).toHaveBeenWarned()
   })
 
+  it('should warn unknown element with hyphen', () => {
+    const vnode = new VNode('unknown-foo')
+    patch(null, vnode)
+    expect(`Unknown custom element: <unknown-foo>`).toHaveBeenWarned()
+  })
+
   it('should create an elements which having text content', () => {
     const vnode = new VNode('div', {}, [createTextVNode('hello world')])
     const elm = patch(null, vnode)
