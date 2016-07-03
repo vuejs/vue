@@ -36,7 +36,9 @@ export function normalizeChildren (
           last.text += c.text
         } else {
           // inherit parent namespace
-          if (ns && c.tag) c.ns = ns
+          if (ns) {
+            applyNS(c, ns)
+          }
           res.push(c)
         }
       }
@@ -47,6 +49,17 @@ export function normalizeChildren (
 
 function createTextVNode (val) {
   return new VNode(undefined, undefined, undefined, String(val))
+}
+
+function applyNS (vnode, ns) {
+  if (vnode.tag && !vnode.ns) {
+    vnode.ns = ns
+    if (vnode.children) {
+      for (let i = 0, l = vnode.children.length; i < l; i++) {
+        applyNS(vnode.children[i], ns)
+      }
+    }
+  }
 }
 
 export function updateListeners (

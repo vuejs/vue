@@ -41,38 +41,16 @@ function _createElement (
     // in case of component :is set to falsy value
     return emptyVNode()
   }
-  if (typeof tag === 'string') {
-    const namespace = config.getTagNamespace(tag)
-    let Ctor
-    if (config.isReservedTag(tag)) {
-      return new VNode(
-        tag, data, normalizeChildren(children, namespace),
-        undefined, undefined,
-        namespace, context, host
-      )
-    } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return createComponent(Ctor, data, parent, context, host, children, tag)
-    } else {
-      if (process.env.NODE_ENV !== 'production') {
-        if (
-          !namespace &&
-          !(config.ignoredElements && config.ignoredElements.indexOf(tag) > -1) &&
-          config.isUnknownElement(tag)
-        ) {
-          warn(
-            'Unknown custom element: <' + tag + '> - did you ' +
-            'register the component correctly? For recursive components, ' +
-            'make sure to provide the "name" option.'
-          )
-        }
-      }
-      return new VNode(
-        tag, data, normalizeChildren(children, namespace),
-        undefined, undefined,
-        namespace, context, host
-      )
-    }
-  } else {
-    return createComponent(tag, data, parent, context, host, children)
+  const Ctor = typeof tag === 'string'
+    ? resolveAsset(context.$options, 'components', tag)
+    : tag
+  if (Ctor) {
+    return createComponent(Ctor, data, parent, context, host, children)
+  } else if (typeof tag === 'string') {
+    const ns = config.getTagNamespace(tag)
+    return new VNode(
+      tag, data, normalizeChildren(children, ns),
+      undefined, undefined, ns, context, host
+    )
   }
 }

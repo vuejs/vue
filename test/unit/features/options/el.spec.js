@@ -42,7 +42,11 @@ describe('Options el', () => {
 
   it('svg element', () => {
     const parent = document.createElement('div')
-    parent.innerHTML = '<svg><text :x="x" :y="y" :fill="color">{{ text }}</text></svg>'
+    parent.innerHTML =
+      '<svg>' +
+        '<text :x="x" :y="y" :fill="color">{{ text }}</text>' +
+        '<g><clipPath><foo></foo></clipPath></g>' +
+      '</svg>'
     const vm = new Vue({
       el: parent.childNodes[0],
       data: {
@@ -57,6 +61,9 @@ describe('Options el', () => {
     expect(vm.$el.childNodes[0].getAttribute('y')).toBe(vm.y.toString())
     expect(vm.$el.childNodes[0].getAttribute('fill')).toBe(vm.color)
     expect(vm.$el.childNodes[0].textContent).toBe(vm.text)
+    // nested, non-explicitly listed SVG elements
+    expect(vm.$el.childNodes[1].childNodes[0].namespaceURI).toContain('svg')
+    expect(vm.$el.childNodes[1].childNodes[0].childNodes[0].namespaceURI).toContain('svg')
   })
 
   it('warn cannot find element', () => {

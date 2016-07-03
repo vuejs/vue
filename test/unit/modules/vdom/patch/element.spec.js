@@ -16,6 +16,12 @@ describe('element', () => {
     expect(elm.namespaceURI).toBe('http://www.w3.org/2000/svg')
   })
 
+  it('should warn unknown element', () => {
+    const vnode = new VNode('unknown')
+    patch(null, vnode)
+    expect(`Unknown custom element: <unknown>`).toHaveBeenWarned()
+  })
+
   it('should create an elements which having text content', () => {
     const vnode = new VNode('div', {}, [createTextVNode('hello world')])
     const elm = patch(null, vnode)

@@ -3,7 +3,7 @@
 import { decodeHTML } from 'entities'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
-import { hyphenate, cached, no } from 'shared/util'
+import { cached, no } from 'shared/util'
 import {
   pluckModuleFunction,
   getAndRemoveAttr,
@@ -59,9 +59,6 @@ export function parse (
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
     start (tag, attrs, unary) {
-      // normalize tag name
-      tag = hyphenate(tag)
-
       // check namespace.
       // inherit parent ns if there is one
       const ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag)

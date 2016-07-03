@@ -62,7 +62,6 @@ describe('create-element', () => {
     expect(vnode.ns).toBeUndefined()
     expect(vnode.context).toEqual(vm)
     expect(vnode.componentOptions).toBeUndefined()
-    expect(`Unknown custom element: <${tag}> - did you`).toHaveBeenWarned()
   })
 
   it('render empty vnode with falsy tag using createElement', () => {

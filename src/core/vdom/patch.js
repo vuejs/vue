@@ -7,6 +7,7 @@
  * of making flow understand it is not worth it.
  */
 
+import config from '../config'
 import VNode from './vnode'
 import { isPrimitive, _toString, warn } from '../util/index'
 
@@ -90,6 +91,20 @@ export function createPatchFunction (backend) {
     const children = vnode.children
     const tag = vnode.tag
     if (isDef(tag)) {
+      if (process.env.NODE_ENV !== 'production') {
+        if (
+          !vnode.ns &&
+          !(config.ignoredElements && config.ignoredElements.indexOf(tag) > -1) &&
+          config.isUnknownElement(tag)
+        ) {
+          warn(
+            'Unknown custom element: <' + tag + '> - did you ' +
+            'register the component correctly? For recursive components, ' +
+            'make sure to provide the "name" option.',
+            vnode.context
+          )
+        }
+      }
       elm = vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag)
