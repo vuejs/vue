@@ -28,6 +28,10 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/chaitin.png">
 </a>
 
+<a href="https://htmlburger.com/">
+  <img width="360px" src="http://scared-aftermath.surge.sh/htmlBurger_Vue_Logo.png">
+</a>
+
 ---
 
 ### $250
@@ -64,6 +68,7 @@ It could be you!
 - Adam Dorsey
 - Greg McCarvell
 - Yoshiya Hinosawa
+- Wasim Khamlichi
 
 ---
 
