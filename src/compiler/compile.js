@@ -665,8 +665,8 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def, rawName, arg,
     modifiers: modifiers,
     def: def
   }
-  // check ref for v-for and router-view
-  if (dirName === 'for' || dirName === 'router-view') {
+  // check ref for v-for, v-if and router-view
+  if (dirName === 'for' || dirName === 'if' || dirName === 'router-view') {
     descriptor.ref = findRef(el)
   }
   var fn = function terminalNodeLinkFn (vm, el, host, scope, frag) {
