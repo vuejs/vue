@@ -77,6 +77,20 @@ describe('Directive Parser', function () {
     expect(res.filters[0].args).toBeUndefined()
   })
 
+  it('object literal with mixed spaces', function () {
+    var res1 = parse('t | f {u: true}')
+    var res2 = parse('t | f {u : true}')
+    var res3 = parse('t | f { u: true }')
+    var res4 = parse('t | f {u: true }')
+    var res5 = parse('t | f { u:true}')
+
+    expect(res1.filters[0].args[0].value).toBe('{u: true}')
+    expect(res2.filters[0].args[0].value).toBe('{u : true}')
+    expect(res3.filters[0].args[0].value).toBe('{ u: true }')
+    expect(res4.filters[0].args[0].value).toBe('{u: true }')
+    expect(res5.filters[0].args[0].value).toBe('{ u:true}')
+  })
+
   it('escape string', function () {
     var res = parse("'a\\'b' | test")
     expect(res.expression).toBe("'a\\'b'")

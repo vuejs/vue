@@ -2,7 +2,7 @@ import { toNumber, stripQuotes } from '../util/index'
 import Cache from '../cache'
 
 const cache = new Cache(1000)
-const filterTokenRE = /[^\s'"]+|'[^']*'|"[^"]*"/g
+const filterTokenRE = /(({.*})|([^\s'"]+|'[^']*'|"[^"]*"))/g
 const reservedArgRE = /^in$|^-?\d+/
 
 /**
