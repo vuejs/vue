@@ -29,7 +29,7 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 </a>
 
 <a href="https://htmlburger.com/">
-  <img width="360px" src="http://scared-aftermath.surge.sh/htmlBurger_Vue_Logo.png">
+  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
 </a>
 
 ---
