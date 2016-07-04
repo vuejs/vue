@@ -19,6 +19,13 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
   <img width="300px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/strikingly.png">
 </a>
 
+## !!Caution!!
+
+Modification by plaid broke the default build system of native repo. You should modify manually after `npm run build`.
+Check this commit out https://github.com/plaidev/vue/commit/8138d989b9e983b80f01e964fec2561e0914b027.
+This modification is related to rollup.js and IE8.
+To follow up this issue, check the thread https://github.com/plaidev/karte-io/issues/7530
+
 ## Intro
 
 Vue.js is a library for building interactive web interfaces. It provides data-reactive components with a simple and flexible API. Core features include:
