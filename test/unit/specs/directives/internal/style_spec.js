@@ -1,6 +1,6 @@
-var _ = require('../../../../../src/util')
-var def = require('../../../../../src/directives/internal/style')
-var Vue = require('../../../../../src/index')
+var _ = require('src/util')
+var def = require('src/directives/internal/style')
+var Vue = require('src')
 
 function checkPrefixedProp (prop) {
   var el = document.createElement('div')
@@ -18,7 +18,6 @@ function checkPrefixedProp (prop) {
 }
 
 describe(':style', function () {
-
   var el, dir
   beforeEach(function () {
     el = document.createElement('div')
@@ -113,7 +112,7 @@ describe(':style', function () {
     el.setAttribute(':style', 'divStyling')
     var vm = new Vue({
       el: el,
-      data: {divStyling: { display: 'none'}}
+      data: {divStyling: { display: 'none' }}
     })
     expect(el.style.display).toBe('none')
     vm.divStyling.display = 'block'

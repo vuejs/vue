@@ -1,5 +1,7 @@
 import config from '../config'
 import { parseDirective } from '../parsers/directive'
+import { isSimplePath } from '../parsers/expression'
+import { defineReactive, withoutConversion } from '../observer/index'
 import propDef from '../directives/internal/prop'
 import {
   warn,
@@ -8,12 +10,13 @@ import {
   getAttr,
   getBindAttr,
   isLiteral,
-  initProp,
-  hasOwn,
   toBoolean,
   toNumber,
   stripQuotes,
-  isObject
+  isArray,
+  isPlainObject,
+  isObject,
+  hasOwn
 } from '../util/index'
 
 const propBindingModes = config._propBindingModes
@@ -29,10 +32,11 @@ const settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
  *
  * @param {Element|DocumentFragment} el
  * @param {Array} propOptions
+ * @param {Vue} vm
  * @return {Function} propsLinkFn
  */
 
-export function compileProps (el, propOptions) {
+export function compileProps (el, propOptions, vm) {
   var props = []
   var names = Object.keys(propOptions)
   var i = names.length
@@ -42,7 +46,7 @@ export function compileProps (el, propOptions) {
     options = propOptions[name] || empty
 
     if (process.env.NODE_ENV !== 'production' && name === '$data') {
-      warn('Do not use $data as prop.')
+      warn('Do not use $data as prop.', vm)
       continue
     }
 
@@ -53,7 +57,8 @@ export function compileProps (el, propOptions) {
     if (!identRE.test(path)) {
       process.env.NODE_ENV !== 'production' && warn(
         'Invalid prop key: "' + name + '". Prop keys ' +
-        'must be valid identifiers.'
+        'must be valid identifiers.',
+        vm
       )
       continue
     }
@@ -82,7 +87,7 @@ export function compileProps (el, propOptions) {
       value = parsed.expression
       prop.filters = parsed.filters
       // check binding type
-      if (isLiteral(value)) {
+      if (isLiteral(value) && !parsed.filters) {
         // for expressions containing literal numbers and
         // booleans, there's no need to setup a prop binding,
         // so we can optimize them as a one-time set.
@@ -96,7 +101,8 @@ export function compileProps (el, propOptions) {
           prop.mode = propBindingModes.ONE_WAY
           warn(
             'Cannot bind two-way prop with non-settable ' +
-            'parent path: ' + value
+            'parent path: ' + value,
+            vm
           )
         }
       }
@@ -109,17 +115,36 @@ export function compileProps (el, propOptions) {
         prop.mode !== propBindingModes.TWO_WAY
       ) {
         warn(
-          'Prop "' + name + '" expects a two-way binding type.'
+          'Prop "' + name + '" expects a two-way binding type.',
+          vm
         )
       }
     } else if ((value = getAttr(el, attr)) !== null) {
       // has literal binding!
       prop.raw = value
-    } else if (options.required) {
-      // warn missing required
-      process.env.NODE_ENV !== 'production' && warn(
-        'Missing required prop: ' + name
+    } else if (process.env.NODE_ENV !== 'production') {
+      // check possible camelCase prop usage
+      var lowerCaseName = path.toLowerCase()
+      value = /[A-Z\-]/.test(name) && (
+        el.getAttribute(lowerCaseName) ||
+        el.getAttribute(':' + lowerCaseName) ||
+        el.getAttribute('v-bind:' + lowerCaseName) ||
+        el.getAttribute(':' + lowerCaseName + '.once') ||
+        el.getAttribute('v-bind:' + lowerCaseName + '.once') ||
+        el.getAttribute(':' + lowerCaseName + '.sync') ||
+        el.getAttribute('v-bind:' + lowerCaseName + '.sync')
       )
+      if (value) {
+        warn(
+          'Possible usage error for prop `' + lowerCaseName + '` - ' +
+          'did you mean `' + attr + '`? HTML is case-insensitive, remember to use ' +
+          'kebab-case for props in templates.',
+          vm
+        )
+      } else if (options.required) {
+        // warn missing required
+        warn('Missing required prop: ' + name, vm)
+      }
     }
     // push prop
     props.push(prop)
@@ -148,28 +173,25 @@ function makePropsLinkFn (props) {
       vm._props[path] = prop
       if (raw === null) {
         // initialize absent prop
-        initProp(vm, prop, getDefault(vm, options))
+        initProp(vm, prop, undefined)
       } else if (prop.dynamic) {
         // dynamic prop
-        if (vm._context) {
-          if (prop.mode === propBindingModes.ONE_TIME) {
-            // one time binding
-            value = (scope || vm._context).$get(prop.parentPath)
-            initProp(vm, prop, value)
-          } else {
+        if (prop.mode === propBindingModes.ONE_TIME) {
+          // one time binding
+          value = (scope || vm._context || vm).$get(prop.parentPath)
+          initProp(vm, prop, value)
+        } else {
+          if (vm._context) {
             // dynamic binding
             vm._bindDir({
               name: 'prop',
               def: propDef,
               prop: prop
             }, null, null, scope) // el, host, scope
+          } else {
+            // root instance
+            initProp(vm, prop, vm.$get(prop.parentPath))
           }
-        } else {
-          process.env.NODE_ENV !== 'production' && warn(
-            'Cannot bind dynamic prop on a root instance' +
-            ' with no parent: ' + prop.name + '="' +
-            raw + '"'
-          )
         }
       } else if (prop.optimizedLiteral) {
         // optimized literal, cast it and just set once
@@ -180,9 +202,13 @@ function makePropsLinkFn (props) {
         initProp(vm, prop, value)
       } else {
         // string literal, but we need to cater for
-        // Boolean props with no value
-        value = options.type === Boolean && raw === ''
-          ? true
+        // Boolean props with no value, or with same
+        // literal value (e.g. disabled="disabled")
+        // see https://github.com/vuejs/vue-loader/issues/182
+        value = (
+          options.type === Boolean &&
+          (raw === '' || raw === hyphenate(prop.name))
+        ) ? true
           : raw
         initProp(vm, prop, value)
       }
@@ -191,15 +217,75 @@ function makePropsLinkFn (props) {
 }
 
 /**
+ * Process a prop with a rawValue, applying necessary coersions,
+ * default values & assertions and call the given callback with
+ * processed value.
+ *
+ * @param {Vue} vm
+ * @param {Object} prop
+ * @param {*} rawValue
+ * @param {Function} fn
+ */
+
+function processPropValue (vm, prop, rawValue, fn) {
+  const isSimple = prop.dynamic && isSimplePath(prop.parentPath)
+  let value = rawValue
+  if (value === undefined) {
+    value = getPropDefaultValue(vm, prop)
+  }
+  value = coerceProp(prop, value)
+  const coerced = value !== rawValue
+  if (!assertProp(prop, value, vm)) {
+    value = undefined
+  }
+  if (isSimple && !coerced) {
+    withoutConversion(() => {
+      fn(value)
+    })
+  } else {
+    fn(value)
+  }
+}
+
+/**
+ * Set a prop's initial value on a vm and its data object.
+ *
+ * @param {Vue} vm
+ * @param {Object} prop
+ * @param {*} value
+ */
+
+export function initProp (vm, prop, value) {
+  processPropValue(vm, prop, value, value => {
+    defineReactive(vm, prop.path, value)
+  })
+}
+
+/**
+ * Update a prop's value on a vm.
+ *
+ * @param {Vue} vm
+ * @param {Object} prop
+ * @param {*} value
+ */
+
+export function updateProp (vm, prop, value) {
+  processPropValue(vm, prop, value, value => {
+    vm[prop.path] = value
+  })
+}
+
+/**
  * Get the default value of a prop.
  *
  * @param {Vue} vm
- * @param {Object} options
+ * @param {Object} prop
  * @return {*}
  */
 
-function getDefault (vm, options) {
+function getPropDefaultValue (vm, prop) {
   // no default, return undefined
+  const options = prop.options
   if (!hasOwn(options, 'default')) {
     // absent boolean value defaults to false
     return options.type === Boolean
@@ -210,13 +296,148 @@ function getDefault (vm, options) {
   // warn against non-factory defaults for Object & Array
   if (isObject(def)) {
     process.env.NODE_ENV !== 'production' && warn(
-      'Object/Array as default prop values will be shared ' +
-      'across multiple instances. Use a factory function ' +
-      'to return the default value instead.'
+      'Invalid default value for prop "' + prop.name + '": ' +
+      'Props with type Object/Array must use a factory function ' +
+      'to return the default value.',
+      vm
     )
   }
   // call factory function for non-Function types
   return typeof def === 'function' && options.type !== Function
     ? def.call(vm)
     : def
+}
+
+/**
+ * Assert whether a prop is valid.
+ *
+ * @param {Object} prop
+ * @param {*} value
+ * @param {Vue} vm
+ */
+
+function assertProp (prop, value, vm) {
+  if (
+    !prop.options.required && ( // non-required
+      prop.raw === null ||      // abscent
+      value == null             // null or undefined
+    )
+  ) {
+    return true
+  }
+  var options = prop.options
+  var type = options.type
+  var valid = !type
+  var expectedTypes = []
+  if (type) {
+    if (!isArray(type)) {
+      type = [ type ]
+    }
+    for (var i = 0; i < type.length && !valid; i++) {
+      var assertedType = assertType(value, type[i])
+      expectedTypes.push(assertedType.expectedType)
+      valid = assertedType.valid
+    }
+  }
+  if (!valid) {
+    if (process.env.NODE_ENV !== 'production') {
+      warn(
+        'Invalid prop: type check failed for prop "' + prop.name + '".' +
+        ' Expected ' + expectedTypes.map(formatType).join(', ') +
+        ', got ' + formatValue(value) + '.',
+        vm
+      )
+    }
+    return false
+  }
+  var validator = options.validator
+  if (validator) {
+    if (!validator(value)) {
+      process.env.NODE_ENV !== 'production' && warn(
+        'Invalid prop: custom validator check failed for prop "' + prop.name + '".',
+        vm
+      )
+      return false
+    }
+  }
+  return true
+}
+
+/**
+ * Force parsing value with coerce option.
+ *
+ * @param {*} value
+ * @param {Object} options
+ * @return {*}
+ */
+
+function coerceProp (prop, value) {
+  var coerce = prop.options.coerce
+  if (!coerce) {
+    return value
+  }
+  // coerce is a function
+  return coerce(value)
+}
+
+/**
+ * Assert the type of a value
+ *
+ * @param {*} value
+ * @param {Function} type
+ * @return {Object}
+ */
+
+function assertType (value, type) {
+  var valid
+  var expectedType
+  if (type === String) {
+    expectedType = 'string'
+    valid = typeof value === expectedType
+  } else if (type === Number) {
+    expectedType = 'number'
+    valid = typeof value === expectedType
+  } else if (type === Boolean) {
+    expectedType = 'boolean'
+    valid = typeof value === expectedType
+  } else if (type === Function) {
+    expectedType = 'function'
+    valid = typeof value === expectedType
+  } else if (type === Object) {
+    expectedType = 'object'
+    valid = isPlainObject(value)
+  } else if (type === Array) {
+    expectedType = 'array'
+    valid = isArray(value)
+  } else {
+    valid = value instanceof type
+  }
+  return {
+    valid,
+    expectedType
+  }
+}
+
+/**
+ * Format type for output
+ *
+ * @param {String} type
+ * @return {String}
+ */
+
+function formatType (type) {
+  return type
+    ? type.charAt(0).toUpperCase() + type.slice(1)
+    : 'custom type'
+}
+
+/**
+ * Format value
+ *
+ * @param {*} value
+ * @return {String}
+ */
+
+function formatValue (val) {
+  return Object.prototype.toString.call(val).slice(8, -1)
 }

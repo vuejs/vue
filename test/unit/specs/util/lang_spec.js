@@ -1,7 +1,6 @@
-var _ = require('../../../../src/util')
+var _ = require('src/util')
 
 describe('Util - Language Enhancement', function () {
-
   it('hasOwn', function () {
     var obj1 = { a: 1 }
     expect(_.hasOwn(obj1, 'a')).toBe(true)
@@ -15,14 +14,14 @@ describe('Util - Language Enhancement', function () {
     expect(_.isLiteral('12.3')).toBe(true)
     expect(_.isLiteral('true')).toBe(true)
     expect(_.isLiteral(' false ')).toBe(true)
-    expect(_.isLiteral('"hi"')).toBe(true)
-    expect(_.isLiteral(" 'whatt' ")).toBe(true)
+    expect(_.isLiteral('"foo"')).toBe(true)
+    expect(_.isLiteral(" 'foo' ")).toBe(true)
     expect(_.isLiteral('a.b.c')).toBe(false)
     expect(_.isLiteral('1 + 1')).toBe(false)
   })
 
   it('toString', function () {
-    expect(_._toString('hi')).toBe('hi')
+    expect(_._toString('foo')).toBe('foo')
     expect(_._toString(1.234)).toBe('1.234')
     expect(_._toString(null)).toBe('')
     expect(_._toString(undefined)).toBe('')
@@ -49,16 +48,16 @@ describe('Util - Language Enhancement', function () {
   })
 
   it('hyphenate', function () {
-    expect(_.hyphenate('whatsUp')).toBe('whats-up')
+    expect(_.hyphenate('fooBar')).toBe('foo-bar')
     expect(_.hyphenate('a1BfC')).toBe('a1-bf-c')
     expect(_.hyphenate('already-With-Hyphen')).toBe('already-with-hyphen')
   })
 
   it('classify', function () {
     expect(_.classify('abc')).toBe('Abc')
-    expect(_.classify('some-long-name')).toBe('SomeLongName')
-    expect(_.classify('what_about_this')).toBe('WhatAboutThis')
-    expect(_.classify('how/about/that')).toBe('HowAboutThat')
+    expect(_.classify('foo-bar')).toBe('FooBar')
+    expect(_.classify('foo_bar')).toBe('FooBar')
+    expect(_.classify('foo/bar')).toBe('FooBar')
   })
 
   it('bind', function () {
@@ -102,7 +101,7 @@ describe('Util - Language Enhancement', function () {
     expect(_.isObject(null)).toBeFalsy()
     expect(_.isObject(123)).toBeFalsy()
     expect(_.isObject(true)).toBeFalsy()
-    expect(_.isObject('hi')).toBeFalsy()
+    expect(_.isObject('foo')).toBeFalsy()
     expect(_.isObject(undefined)).toBeFalsy()
     expect(_.isObject(function () {})).toBeFalsy()
   })
@@ -114,7 +113,7 @@ describe('Util - Language Enhancement', function () {
     expect(_.isPlainObject(null)).toBeFalsy()
     expect(_.isPlainObject(123)).toBeFalsy()
     expect(_.isPlainObject(true)).toBeFalsy()
-    expect(_.isPlainObject('hi')).toBeFalsy()
+    expect(_.isPlainObject('foo')).toBeFalsy()
     expect(_.isPlainObject(undefined)).toBeFalsy()
     expect(_.isPlainObject(function () {})).toBe(false)
     expect(_.isPlainObject(window)).toBe(false)

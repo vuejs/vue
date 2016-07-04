@@ -1,8 +1,7 @@
-var Vue = require('../../../../src/index')
+var Vue = require('src')
 var init = Vue.prototype._init
 
 describe('Instance Init', function () {
-
   var stub = {
     constructor: {
       options: { a: 1, b: 2 }

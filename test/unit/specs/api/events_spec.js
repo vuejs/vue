@@ -1,7 +1,6 @@
-var Vue = require('../../../../src/index')
+var Vue = require('src')
 
 describe('Events API', function () {
-
   var vm, spy
   beforeEach(function () {
     vm = new Vue()
@@ -154,15 +153,82 @@ describe('Events API', function () {
     expect(spy.calls.count()).toBe(2)
   })
 
-  it('$dispatch cancel', function () {
-    var child = new Vue({ parent: vm })
-    var child2 = new Vue({ parent: child })
-    child.$on('test', function () {
-      return false
+  it('handle $dispatch by v-on inline-statement', function () {
+    var parent = new Vue({
+      el: document.createElement('div'),
+      template: '<child1 @test="onTest()" v-ref:child></child1>',
+      methods: {
+        onTest: function () {
+          spy()
+        }
+      },
+      components: {
+        child1: {
+          template: '<child2 @test="onTest" v-ref:child></child2>',
+          methods: {
+            onTest: function () {
+              spy()
+            }
+          },
+          components: {
+            child2: {
+              template: '<child3 @test="onTest()" v-ref:child></child3>',
+              methods: {
+                onTest: function () {
+                  spy()
+                  return true
+                }
+              },
+              components: {
+                child3: {
+                  template: '<child4 @test="onTest" v-ref:child></child4>',
+                  methods: {
+                    onTest: function () {
+                      spy()
+                      return true
+                    }
+                  },
+                  components: {
+                    child4: {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     })
-    vm.$on('test', spy)
-    child2.$dispatch('test')
-    expect(spy).not.toHaveBeenCalled()
+    parent
+      .$refs.child // child1
+      .$refs.child // child2
+      .$refs.child // child3
+      .$refs.child // child4
+      .$dispatch('test')
+    expect(spy.calls.count()).toBe(3)
   })
 
+  it('$dispatch forward on immediate inline component handler', function () {
+    var shouldPropagate = true
+    var parent = new Vue({
+      el: document.createElement('div'),
+      template: '<child @test="onTest" v-ref:child></child>',
+      events: {
+        test: spy
+      },
+      methods: {
+        onTest: function () {
+          spy()
+          return shouldPropagate
+        }
+      },
+      components: {
+        child: {}
+      }
+    })
+    parent.$refs.child.$dispatch('test')
+    expect(spy.calls.count()).toBe(2)
+    shouldPropagate = false
+    parent.$refs.child.$dispatch('test')
+    expect(spy.calls.count()).toBe(3)
+  })
 })

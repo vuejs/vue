@@ -1,9 +1,8 @@
-var Vue = require('../../../../../src/index')
-var transition = require('../../../../../src/transition')
-var def = require('../../../../../src/directives/public/show')
+var Vue = require('src')
+var transition = require('src/transition')
+var def = require('src/directives/public/show')
 
 describe('v-show', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')

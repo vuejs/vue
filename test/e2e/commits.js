@@ -3,7 +3,6 @@ casper.on('remote.message', function (e) {
 })
 
 casper.test.begin('commits', 18, function (test) {
-
   casper
   .start('examples/commits/index.html')
   .then(function () {
@@ -34,5 +33,4 @@ casper.test.begin('commits', 18, function (test) {
   .run(function () {
     test.done()
   })
-
 })

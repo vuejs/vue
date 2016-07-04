@@ -3,7 +3,6 @@ import { mergeOptions } from '../../util/index'
 let uid = 0
 
 export default function (Vue) {
-
   /**
    * The main init sequence. This is called for every
    * instance, including ones that are created from extended
@@ -16,7 +15,6 @@ export default function (Vue) {
    */
 
   Vue.prototype._init = function (options) {
-
     options = options || {}
 
     this.$el = null
@@ -51,7 +49,8 @@ export default function (Vue) {
     this._isDestroyed =
     this._isReady =
     this._isAttached =
-    this._isBeingDestroyed = false
+    this._isBeingDestroyed =
+    this._vForRemoving = false
     this._unlinkFn = null
 
     // context:
@@ -94,6 +93,11 @@ export default function (Vue) {
     // initialize data as empty object.
     // it will be filled up in _initScope().
     this._data = {}
+
+    // save raw constructor data before merge
+    // so that we know which properties are provided at
+    // instantiation.
+    this._runtimeData = options.data
 
     // call init hook
     this._callHook('init')

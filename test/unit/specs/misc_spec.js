@@ -1,30 +1,25 @@
 // test cases for edge cases & bug fixes
-var Vue = require('../../../src/index')
+var Vue = require('src')
 var _ = Vue.util
 
 describe('Misc', function () {
-
-  beforeEach(function () {
-    spyWarns()
-  })
-
   it('should handle directive.bind() altering its childNode structure', function () {
     var vm = new Vue({
       el: document.createElement('div'),
       template: '<div v-test>{{test}}</div>',
       data: {
-        test: 'hi'
+        test: 'foo'
       },
       directives: {
         test: {
           bind: function () {
-            this.el.insertBefore(document.createTextNode('yo '),
+            this.el.insertBefore(document.createTextNode('bar '),
               this.el.firstChild)
           }
         }
       }
     })
-    expect(vm.$el.textContent).toBe('yo hi')
+    expect(vm.$el.textContent).toBe('bar foo')
   })
 
   it('attached/detached hooks for transcluded components', function () {
@@ -41,7 +36,7 @@ describe('Misc', function () {
           template: '<slot></slot>'
         },
         inner: {
-          template: 'hi',
+          template: 'foo',
           attached: spy1,
           detached: spy2
         }
@@ -199,13 +194,13 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '{{msg}}',
       data: Object.freeze({
-        msg: 'hi!'
+        msg: 'foo'
       })
     })
-    expect(vm.$el.textContent).toBe('hi!')
-    try { vm.msg = 'ho!' } catch (e) {}
+    expect(vm.$el.textContent).toBe('foo')
+    try { vm.msg = 'bar' } catch (e) {}
     Vue.nextTick(function () {
-      expect(vm.$el.textContent).toBe('hi!')
+      expect(vm.$el.textContent).toBe('foo')
       done()
     })
   })
@@ -215,17 +210,23 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '{{msg}} {{frozen.msg}}',
       data: {
-        msg: 'hi',
+        msg: 'foo',
         frozen: Object.freeze({
           msg: 'frozen'
         })
       }
     })
-    expect(vm.$el.textContent).toBe('hi frozen')
-    vm.msg = 'ho'
-    vm.frozen.msg = 'changed'
+    expect(vm.$el.textContent).toBe('foo frozen')
+    vm.msg = 'bar'
+    try {
+      vm.frozen.msg = 'changed'
+    } catch (error) {
+      if (!(error instanceof TypeError)) {
+        throw error
+      }
+    }
     Vue.nextTick(function () {
-      expect(vm.$el.textContent).toBe('ho frozen')
+      expect(vm.$el.textContent).toBe('bar frozen')
       done()
     })
   })
@@ -313,7 +314,7 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '<custom-stuff></custom-stuff>'
     })
-    expect(hasWarned('Unknown custom element')).toBe(true)
+    expect('Unknown custom element').toHaveBeenWarned()
   })
 
   it('prefer bound attributes over static attributes', function (done) {
@@ -337,13 +338,13 @@ describe('Misc', function () {
     new Vue({
       el: el,
       template:
-        '<div>\
-          <comp v-bind:title="title"></comp>\
-          <comp title="static" v-bind:title="title"></comp>\
-          <comp title="static"></comp>\
-          <comp :title="title"></comp>\
-          <comp title="static" :title="title"></comp>\
-        </div>',
+        '<div>' +
+          '<comp v-bind:title="title"></comp>' +
+          '<comp title="static" v-bind:title="title"></comp>' +
+          '<comp title="static"></comp>' +
+          '<comp :title="title"></comp>' +
+          '<comp title="static" :title="title"></comp>' +
+        '</div>',
       data: {
         title: 'bound'
       },
@@ -395,11 +396,11 @@ describe('Misc', function () {
       components: {
         test: {
           replace: true,
-          template: '<div :class="{\'inner\': true}"></div>'
+          template: '<div class="static-inner" :class="{\'inner\': true}"></div>'
         }
       }
     })
-    expect(vm.$el.firstChild.className).toBe('outer inner')
+    expect(vm.$el.firstChild.className).toBe('static-inner outer inner')
   })
 
   it('SVG class interpolation', function () {
@@ -423,9 +424,117 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '<div class="{{test}}" transition="test"></div>',
       data: {
-        test: 'hi'
+        test: 'foo'
       }
     })
-    expect(vm.$el.firstChild.className).toBe('hi test-transition')
+    expect(vm.$el.firstChild.className).toBe('foo test-transition')
+  })
+
+  it('transclude class merging should skip interpolated class', function () {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<test class="outer-{{test}}"></test>',
+      data: {
+        test: 'foo'
+      },
+      components: {
+        test: {
+          template: '<div class="inner"></div>',
+          replace: true
+        }
+      }
+    })
+    expect(vm.$el.firstChild.className).toBe('outer-foo')
+  })
+
+  // #2163
+  it('slot compilation order with v-if', function () {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template:
+        '<test>' +
+          '<div slot="one">slot1</div>' +
+          'default content' +
+        '</test>',
+      components: {
+        test: {
+          template:
+            '<div>' +
+              '<slot v-if="true"></slot> ' +
+              '<slot name="one"></slot>' +
+            '</div>',
+          replace: true
+        }
+      }
+    })
+    expect(vm.$el.textContent).toBe('default content slot1')
+  })
+
+  // #2426
+  it('class merge untrimmed', function () {
+    expect(function () {
+      new Vue({
+        el: document.createElement('div'),
+        template: '<test class="p1 p2 "></test>',
+        components: {
+          test: {
+            template: '<div class="hi"></div>',
+            replace: true
+          }
+        }
+      })
+    }).not.toThrow()
+  })
+
+  // #2445
+  it('fragment attach hook should check if child is inDoc', function (done) {
+    var el = document.createElement('div')
+    document.body.appendChild(el)
+    var spyParent = jasmine.createSpy('attached parent')
+    var spyChild = jasmine.createSpy('attached child')
+
+    new Vue({
+      el: el,
+      template: '<comp v-for="n in 1"></comp>',
+      components: {
+        comp: {
+          template: '<div><child></child></div>',
+          attached: function () {
+            expect(_.inDoc(this.$el)).toBe(true)
+            spyParent()
+          },
+          activate: function (next) {
+            setTimeout(function () {
+              next()
+              check()
+            }, 100)
+          },
+          components: {
+            child: {
+              template: 'foo',
+              attached: spyChild
+            }
+          }
+        }
+      }
+    })
+
+    function check () {
+      expect(spyParent).toHaveBeenCalled()
+      expect(spyChild).toHaveBeenCalled()
+      done()
+    }
+  })
+
+  // #2500
+  it('template parser tag match should include hyphen', function () {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<div>{{{ test }}}</div>',
+      data: {
+        test: '<image-field></image-field>'
+      }
+    })
+    expect(vm.$el.querySelector('image-field').namespaceURI).not.toMatch(/svg/)
   })
 })

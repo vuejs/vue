@@ -1,10 +1,9 @@
-var _ = require('../../../../../src/util')
-var Vue = require('../../../../../src/index')
-var Directive = require('../../../../../src/directive')
-var def = require('../../../../../src/directives/internal/transition')
+var _ = require('src/util')
+var Vue = require('src')
+var Directive = require('src/directive')
+var def = require('src/directives/internal/transition')
 
 describe('transition', function () {
-
   it('should instantiate a transition object with correct args', function () {
     var fns = {}
     var el = document.createElement('div')
@@ -34,23 +33,6 @@ describe('transition', function () {
     expect(transition.leaveClass).toBe('lol-leave')
     expect(transition.fns).toBeUndefined()
     expect(dir.el.className === 'lol-transition')
-  })
-
-  it('should bind the transition to closest vm', function () {
-    var vm1 = new Vue()
-    var vm2 = new Vue()
-    var el = document.createElement('div')
-    var dir = new Directive({
-      name: 'transition',
-      raw: 'test',
-      def: def,
-      modifiers: {
-        literal: true
-      }
-    }, vm1, el)
-    dir.el.__vue__ = vm2
-    dir._bind()
-    expect(dir.el.__v_trans.vm).toBe(vm2)
   })
 
   it('dynamic transitions', function (done) {

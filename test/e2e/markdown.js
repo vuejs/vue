@@ -1,5 +1,4 @@
 casper.test.begin('markdown', 5, function (test) {
-
   casper
   .start('examples/markdown/index.html')
   .then(function () {
@@ -14,9 +13,9 @@ casper.test.begin('markdown', 5, function (test) {
   .then(function () {
     this.sendKeys(
       'textarea',
-      '## yo\n\n' +
-      '- test\n' +
-      '- hi\n\n',
+      '## foo\n\n' +
+      '- bar\n' +
+      '- baz\n\n',
       { keepFocus: true }
     )
     // keyUp(13)
@@ -33,13 +32,13 @@ casper.test.begin('markdown', 5, function (test) {
   .then(function () {
     test.assertEval(function () {
       return document.querySelector('textarea').value ===
-        '## yo\n\n- test\n- hi\n\n# hello'
+        '## foo\n\n- bar\n- baz\n\n# hello'
     })
     test.assertEval(function () {
       return document.querySelector('#editor div')
         .innerHTML ===
-          '<h2 id="yo">yo</h2>\n' +
-          '<ul>\n<li>test</li>\n<li>hi</li>\n</ul>\n' +
+          '<h2 id="foo">foo</h2>\n' +
+          '<ul>\n<li>bar</li>\n<li>baz</li>\n</ul>\n' +
           '<h1 id="hello">hello</h1>\n'
     })
   })
@@ -47,5 +46,4 @@ casper.test.begin('markdown', 5, function (test) {
   .run(function () {
     test.done()
   })
-
 })

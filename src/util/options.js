@@ -7,7 +7,8 @@ import {
   isArray,
   isPlainObject,
   hasOwn,
-  camelize
+  camelize,
+  hyphenate
 } from './lang'
 import { warn } from './debug'
 import { commonTagRE, reservedTagRE } from './component'
@@ -58,7 +59,8 @@ strats.data = function (parentVal, childVal, vm) {
       process.env.NODE_ENV !== 'production' && warn(
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
-        'definitions.'
+        'definitions.',
+        vm
       )
       return parentVal
     }
@@ -103,7 +105,8 @@ strats.el = function (parentVal, childVal, vm) {
     process.env.NODE_ENV !== 'production' && warn(
       'The "el" option should be a function ' +
       'that returns a per-instance value in component ' +
-      'definitions.'
+      'definitions.',
+      vm
     )
     return
   }
@@ -126,7 +129,8 @@ strats.detached =
 strats.beforeCompile =
 strats.compiled =
 strats.beforeDestroy =
-strats.destroyed = function (parentVal, childVal) {
+strats.destroyed =
+strats.activate = function (parentVal, childVal) {
   return childVal
     ? parentVal
       ? parentVal.concat(childVal)
@@ -134,18 +138,6 @@ strats.destroyed = function (parentVal, childVal) {
         ? childVal
         : [childVal]
     : parentVal
-}
-
-/**
- * 0.11 deprecation warning
- */
-
-strats.paramAttributes = function () {
-  /* istanbul ignore next */
-  process.env.NODE_ENV !== 'production' && warn(
-    '"paramAttributes" option has been deprecated in 0.12. ' +
-    'Use "props" instead.'
-  )
 }
 
 /**
@@ -229,8 +221,11 @@ function guardComponents (options) {
   if (options.components) {
     var components = options.components =
       guardArrayAssets(options.components)
-    var def
     var ids = Object.keys(components)
+    var def
+    if (process.env.NODE_ENV !== 'production') {
+      var map = options._componentNameMap = {}
+    }
     for (var i = 0, l = ids.length; i < l; i++) {
       var key = ids[i]
       if (commonTagRE.test(key) || reservedTagRE.test(key)) {
@@ -239,6 +234,11 @@ function guardComponents (options) {
           'id: ' + key
         )
         continue
+      }
+      // record a all lowercase <-> kebab-case mapping for
+      // possible custom element case error warning
+      if (process.env.NODE_ENV !== 'production') {
+        map[key.replace(/-/g, '').toLowerCase()] = hyphenate(key)
       }
       def = components[key]
       if (isPlainObject(def)) {
@@ -355,27 +355,27 @@ export function mergeOptions (parent, child, vm) {
  * @param {Object} options
  * @param {String} type
  * @param {String} id
+ * @param {Boolean} warnMissing
  * @return {Object|Function}
  */
 
-export function resolveAsset (options, type, id) {
+export function resolveAsset (options, type, id, warnMissing) {
+  /* istanbul ignore if */
+  if (typeof id !== 'string') {
+    return
+  }
   var assets = options[type]
   var camelizedId
-  return assets[id] ||
+  var res = assets[id] ||
     // camelCase ID
     assets[camelizedId = camelize(id)] ||
     // Pascal Case ID
     assets[camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)]
-}
-
-/**
- * Assert asset exists
- */
-
-export function assertAsset (val, type, id) {
-  if (!val) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Failed to resolve ' + type + ': ' + id
+  if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
+    warn(
+      'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
+      options
     )
   }
+  return res
 }

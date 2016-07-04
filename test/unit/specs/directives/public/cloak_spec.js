@@ -1,8 +1,7 @@
-var compile = require('../../../../../src/compiler').compile
-var Vue = require('../../../../../src/index')
+var compile = require('src/compiler').compile
+var Vue = require('src')
 
 describe('v-cloak', function () {
-
   it('should not remove during compile', function () {
     var el = document.createElement('div')
     el.setAttribute('v-cloak', '')

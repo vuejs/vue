@@ -1,10 +1,15 @@
-var Vue = require('../../../../src/index')
-var _ = require('../../../../src/util')
+var Vue = require('src')
+var _ = require('src/util')
 
 describe('Instance state initialization', function () {
+  it('should warn data functions that do not return an object', function () {
+    new Vue({
+      data: function () {}
+    })
+    expect('should return an object').toHaveBeenWarned()
+  })
 
   describe('data proxy', function () {
-
     var data = {
       a: 0,
       b: 0
@@ -29,11 +34,9 @@ describe('Instance state initialization', function () {
       expect(vm.b).toBe(2)
       expect(vm.b).toBe(data.b)
     })
-
   })
 
   describe('$data', function () {
-
     it('should initialize props', function () {
       var vm = new Vue({
         el: document.createElement('div'),
@@ -76,14 +79,12 @@ describe('Instance state initialization', function () {
         props: ['c'],
         data: function () {
           expect(this.c).toBe(2)
-          expect(this._data.c).toBe(2)
           return {
             d: this.c + 1
           }
         },
         created: function () {
           expect(this.c).toBe(2)
-          expect(this._data.c).toBe(2)
         }
       })
       expect(vm.d).toBe(3)
@@ -104,7 +105,6 @@ describe('Instance state initialization', function () {
   })
 
   describe('computed', function () {
-
     var spyE = jasmine.createSpy('computed e')
     var spyF = jasmine.createSpy('cached computed f')
     var spyCachedWatcher = jasmine.createSpy('cached computed watcher')
@@ -237,7 +237,6 @@ describe('Instance state initialization', function () {
   })
 
   describe('methods', function () {
-
     it('should work and have correct context', function () {
       var vm = new Vue({
         data: {
@@ -252,11 +251,9 @@ describe('Instance state initialization', function () {
       })
       expect(vm.test()).toBe(1)
     })
-
   })
 
   describe('meta', function () {
-
     var vm = new Vue({
       _meta: {
         $index: 0,
@@ -270,7 +267,5 @@ describe('Instance state initialization', function () {
       expect('$index' in vm.$data).toBe(false)
       expect('$value' in vm.$data).toBe(false)
     })
-
   })
-
 })

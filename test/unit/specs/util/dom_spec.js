@@ -1,7 +1,6 @@
-var _ = require('../../../../src/util')
+var _ = require('src/util')
 
 describe('Util - DOM', function () {
-
   var parent, child, target
 
   function div () {
@@ -115,5 +114,13 @@ describe('Util - DOM', function () {
     expect(el.getAttribute('class')).toBe('cc bb')
     _.addClass(el, 'bb')
     expect(el.getAttribute('class')).toBe('cc bb')
+  })
+
+  it('getOuterHTML for SVG', function () {
+    var el = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+    el.setAttribute('class', 'aa bb cc')
+    var html = _.getOuterHTML(el)
+    var re = /<circle (xmlns="http:\/\/www\.w3\.org\/2000\/svg"\s)?class="aa bb cc"(\s?\/>|><\/circle>)/
+    expect(re.test(html)).toBe(true)
   })
 })

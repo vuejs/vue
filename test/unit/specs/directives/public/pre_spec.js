@@ -1,11 +1,6 @@
-var Vue = require('../../../../../src/index')
+var Vue = require('src')
 
 describe('v-pre', function () {
-
-  beforeEach(function () {
-    spyWarns()
-  })
-
   it('should work', function () {
     var vm = new Vue({
       el: document.createElement('div'),

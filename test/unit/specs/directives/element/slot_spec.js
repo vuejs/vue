@@ -1,8 +1,7 @@
-var Vue = require('../../../../../src/index')
-var _ = require('../../../../../src/util')
+var Vue = require('src')
+var nextTick = Vue.nextTick
 
 describe('Slot Distribution', function () {
-
   var el, vm, options
   beforeEach(function () {
     el = document.createElement('div')
@@ -25,20 +24,20 @@ describe('Slot Distribution', function () {
   })
 
   it('default content', function () {
-    el.innerHTML = '<p>hi</p>'
+    el.innerHTML = '<p>foo</p>'
     options.template = '<div><slot></slot></div>'
     mount()
     expect(el.firstChild.tagName).toBe('DIV')
     expect(el.firstChild.firstChild.tagName).toBe('P')
-    expect(el.firstChild.firstChild.textContent).toBe('hi')
+    expect(el.firstChild.firstChild.textContent).toBe('foo')
   })
 
   it('no template auto content', function () {
-    el.innerHTML = '<p>hi</p>'
+    el.innerHTML = '<p>foo</p>'
     options._asComponent = true
     mount()
     expect(el.firstChild.tagName).toBe('P')
-    expect(el.firstChild.textContent).toBe('hi')
+    expect(el.firstChild.textContent).toBe('foo')
   })
 
   it('fallback content', function () {
@@ -78,17 +77,17 @@ describe('Slot Distribution', function () {
   })
 
   it('default content should only render parts not selected', function () {
-    el.innerHTML = '<div>hi</div><p slot="a">1</p><p slot="b">2</p>'
+    el.innerHTML = '<div>foo</div><p slot="a">1</p><p slot="b">2</p>'
     options.template =
       '<slot name="a"></slot>' +
       '<slot></slot>' +
       '<slot name="b"></slot>'
     mount()
-    expect(el.innerHTML).toBe('<p slot="a">1</p><div>hi</div><p slot="b">2</p>')
+    expect(el.innerHTML).toBe('<p slot="a">1</p><div>foo</div><p slot="b">2</p>')
   })
 
   it('content transclusion with replace', function () {
-    el.innerHTML = '<p>hi</p>'
+    el.innerHTML = '<p>foo</p>'
     options.template = '<div><div><slot></slot></div></div>'
     options.replace = true
     mount()
@@ -96,11 +95,11 @@ describe('Slot Distribution', function () {
     expect(res).not.toBe(el)
     expect(res.firstChild.tagName).toBe('DIV')
     expect(res.firstChild.firstChild.tagName).toBe('P')
-    expect(res.firstChild.firstChild.textContent).toBe('hi')
+    expect(res.firstChild.firstChild.textContent).toBe('foo')
   })
 
   it('block instance content transclusion', function () {
-    el.innerHTML = '<p slot="p">hi</p><span slot="span">ho</span>'
+    el.innerHTML = '<p slot="p">foo</p><span slot="span">ho</span>'
     options.template = '<div></div><slot name="p"></slot><slot name="span"></slot>'
     options.replace = true
     mount()
@@ -147,7 +146,7 @@ describe('Slot Distribution', function () {
     var vm = new Vue({
       el: el,
       data: {
-        msg: 'hello'
+        msg: 'foo'
       },
       template: '<test>{{msg}}</test>',
       components: {
@@ -156,10 +155,10 @@ describe('Slot Distribution', function () {
         }
       }
     })
-    expect(el.innerHTML).toBe('<test>hello</test>')
-    vm.msg = 'what'
-    _.nextTick(function () {
-      expect(el.innerHTML).toBe('<test>what</test>')
+    expect(el.innerHTML).toBe('<test>foo</test>')
+    vm.msg = 'bar'
+    nextTick(function () {
+      expect(el.innerHTML).toBe('<test>bar</test>')
       done()
     })
   })
@@ -182,14 +181,14 @@ describe('Slot Distribution', function () {
     })
     expect(el.textContent).toBe('12')
     vm.a = 2
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.textContent).toBe('22')
       vm.show = false
-      _.nextTick(function () {
+      nextTick(function () {
         expect(el.textContent).toBe('')
         vm.show = true
         vm.a = 3
-        _.nextTick(function () {
+        nextTick(function () {
           expect(el.textContent).toBe('32')
           done()
         })
@@ -218,7 +217,7 @@ describe('Slot Distribution', function () {
       template: '<test v-for="n in list" :class="cls" :a="n.a">{{msg}}</test>',
       data: {
         cls: 'parent',
-        msg: 'hi',
+        msg: 'foo',
         list: [{a: 1}, {a: 2}, {a: 3}]
       },
       components: {
@@ -230,14 +229,14 @@ describe('Slot Distribution', function () {
       }
     })
     var markup = vm.list.map(function (item) {
-      return '<div class="child parent">' + item.a + ' hi</div>'
+      return '<div class="child parent">' + item.a + ' foo</div>'
     }).join('')
     expect(el.innerHTML).toBe(markup)
-    vm.msg = 'ho'
+    vm.msg = 'bar'
     markup = vm.list.map(function (item) {
-      return '<div class="child parent">' + item.a + ' ho</div>'
+      return '<div class="child parent">' + item.a + ' bar</div>'
     }).join('')
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe(markup)
       done()
     })
@@ -266,7 +265,7 @@ describe('Slot Distribution', function () {
       '</testb></testa>'
     )
     vm.list.push(3)
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe(
         '<testa><testb>' +
           '<div>1</div><div>2</div><div>3</div>' +
@@ -297,7 +296,7 @@ describe('Slot Distribution', function () {
     })
     expect(el.innerHTML).toBe('<testa></testa>')
     vm.ok = true
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe('<testa><testb>hello</testb></testa>')
       done()
     })
@@ -385,16 +384,77 @@ describe('Slot Distribution', function () {
       template: '<div v-for="n in 3"><comp></comp></div>',
       components: {
         comp: {
-          template: '<div><slot>{{something}}</slot></div>',
+          template: '<div><slot>{{foo}}</slot></div>',
           data: function () {
             return {
-              something: 'hi'
+              foo: 'bar'
             }
           }
         }
       }
     })
-    expect(el.textContent).toBe('hihihi')
+    expect(el.textContent).toBe('barbarbar')
   })
 
+  it('fallback for slot with v-if', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: {
+        ok: false,
+        msg: 'inserted'
+      },
+      template: '<div><comp><div v-if="ok">{{ msg }}</div></comp></div>',
+      components: {
+        comp: {
+          data: function () {
+            return { msg: 'fallback' }
+          },
+          template: '<div><slot>{{ msg }}</slot></div>'
+        }
+      }
+    })
+    expect(el.textContent).toBe('fallback')
+    vm.ok = true
+    nextTick(function () {
+      expect(el.textContent).toBe('inserted')
+      done()
+    })
+  })
+
+  // #2435
+  it('slot inside template', function () {
+    var vm = new Vue({
+      el: el,
+      template: '<test>foo</test>',
+      components: {
+        test: {
+          data: function () {
+            return { ok: true }
+          },
+          template:
+            '<div>' +
+              '<template v-if="ok">' +
+                '<template v-if="ok">' +
+                  '<slot>{{ msg }}</slot>' +
+                '</template>' +
+              '</template>' +
+            '</div>'
+        }
+      }
+    })
+    expect(vm.$el.textContent).toBe('foo')
+  })
+
+  it('warn dynamic slot attribute', function () {
+    new Vue({
+      el: el,
+      template: '<test><div :slot="1"></div></test>',
+      components: {
+        test: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    })
+    expect('"slot" attribute must be static').toHaveBeenWarned()
+  })
 })

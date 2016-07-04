@@ -1,5 +1,4 @@
 casper.test.begin('modal', 8, function (test) {
-
   casper
   .start('examples/modal/index.html')
   .then(function () {
@@ -20,5 +19,4 @@ casper.test.begin('modal', 8, function (test) {
   .run(function () {
     test.done()
   })
-
 })

@@ -1,7 +1,6 @@
 import { toArray } from '../../util/index'
 
 export default function (Vue) {
-
   /**
    * Listen on the given `event` with `fn`.
    *
@@ -85,21 +84,36 @@ export default function (Vue) {
   /**
    * Trigger an event on self.
    *
-   * @param {String} event
+   * @param {String|Object} event
    * @return {Boolean} shouldPropagate
    */
 
   Vue.prototype.$emit = function (event) {
+    var isSource = typeof event === 'string'
+    event = isSource
+      ? event
+      : event.name
     var cbs = this._events[event]
-    var shouldPropagate = !cbs
+    var shouldPropagate = isSource || !cbs
     if (cbs) {
       cbs = cbs.length > 1
         ? toArray(cbs)
         : cbs
+      // this is a somewhat hacky solution to the question raised
+      // in #2102: for an inline component listener like <comp @test="doThis">,
+      // the propagation handling is somewhat broken. Therefore we
+      // need to treat these inline callbacks differently.
+      var hasParentCbs = isSource && cbs.some(function (cb) {
+        return cb._fromParent
+      })
+      if (hasParentCbs) {
+        shouldPropagate = false
+      }
       var args = toArray(arguments, 1)
       for (var i = 0, l = cbs.length; i < l; i++) {
-        var res = cbs[i].apply(this, args)
-        if (res === true) {
+        var cb = cbs[i]
+        var res = cb.apply(this, args)
+        if (res === true && (!hasParentCbs || cb._fromParent)) {
           shouldPropagate = true
         }
       }
@@ -110,20 +124,30 @@ export default function (Vue) {
   /**
    * Recursively broadcast an event to all children instances.
    *
-   * @param {String} event
+   * @param {String|Object} event
    * @param {...*} additional arguments
    */
 
   Vue.prototype.$broadcast = function (event) {
+    var isSource = typeof event === 'string'
+    event = isSource
+      ? event
+      : event.name
     // if no child has registered for this event,
     // then there's no need to broadcast.
     if (!this._eventsCount[event]) return
     var children = this.$children
+    var args = toArray(arguments)
+    if (isSource) {
+      // use object event to indicate non-source emit
+      // on children
+      args[0] = { name: event, source: this }
+    }
     for (var i = 0, l = children.length; i < l; i++) {
       var child = children[i]
-      var shouldPropagate = child.$emit.apply(child, arguments)
+      var shouldPropagate = child.$emit.apply(child, args)
       if (shouldPropagate) {
-        child.$broadcast.apply(child, arguments)
+        child.$broadcast.apply(child, args)
       }
     }
     return this
@@ -136,11 +160,16 @@ export default function (Vue) {
    * @param {...*} additional arguments
    */
 
-  Vue.prototype.$dispatch = function () {
-    this.$emit.apply(this, arguments)
+  Vue.prototype.$dispatch = function (event) {
+    var shouldPropagate = this.$emit.apply(this, arguments)
+    if (!shouldPropagate) return
     var parent = this.$parent
+    var args = toArray(arguments)
+    // use object event to indicate non-source emit
+    // on parents
+    args[0] = { name: event, source: this }
     while (parent) {
-      var shouldPropagate = parent.$emit.apply(parent, arguments)
+      shouldPropagate = parent.$emit.apply(parent, args)
       parent = shouldPropagate
         ? parent.$parent
         : null

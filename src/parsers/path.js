@@ -287,12 +287,13 @@ export function getPath (obj, path) {
 
 var warnNonExistent
 if (process.env.NODE_ENV !== 'production') {
-  warnNonExistent = function (path) {
+  warnNonExistent = function (path, vm) {
     warn(
       'You are setting a non-existent path "' + path.raw + '" ' +
       'on a vm instance. Consider pre-initializing the property ' +
       'with the "data" option for more reliable reactivity ' +
-      'and better performance.'
+      'and better performance.',
+      vm
     )
   }
 }
@@ -325,7 +326,7 @@ export function setPath (obj, path, val) {
       if (!isObject(obj)) {
         obj = {}
         if (process.env.NODE_ENV !== 'production' && last._isVue) {
-          warnNonExistent(path)
+          warnNonExistent(path, last)
         }
         set(last, key, obj)
       }
@@ -336,7 +337,7 @@ export function setPath (obj, path, val) {
         obj[key] = val
       } else {
         if (process.env.NODE_ENV !== 'production' && obj._isVue) {
-          warnNonExistent(path)
+          warnNonExistent(path, obj)
         }
         set(obj, key, val)
       }

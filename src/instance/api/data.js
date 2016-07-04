@@ -8,7 +8,6 @@ import { isSimplePath, parseExpression } from '../../parsers/expression'
 const filterRE = /[^|]\|[^|]/
 
 export default function (Vue) {
-
   /**
    * Get the value from an expression on this vm.
    *
@@ -24,8 +23,9 @@ export default function (Vue) {
         var self = this
         return function statementHandler () {
           self.$arguments = toArray(arguments)
-          res.get.call(self, self)
+          var result = res.get.call(self, self)
           self.$arguments = null
+          return result
         }
       } else {
         try {
@@ -161,8 +161,14 @@ export default function (Vue) {
     }
     // include computed fields
     if (!path) {
-      for (var key in this.$options.computed) {
+      var key
+      for (key in this.$options.computed) {
         data[key] = clean(this[key])
+      }
+      if (this._props) {
+        for (key in this._props) {
+          data[key] = clean(this[key])
+        }
       }
     }
     console.log(data)

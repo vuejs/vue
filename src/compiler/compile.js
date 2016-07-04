@@ -14,26 +14,19 @@ import {
   checkComponentAttr,
   findRef,
   defineReactive,
-  assertAsset,
-  getAttr,
-  hasBindAttr
+  getAttr
 } from '../util/index'
 
 // special binding prefixes
 const bindRE = /^v-bind:|^:/
 const onRE = /^v-on:|^@/
-const argRE = /:(.*)$/
+const dirAttrRE = /^v-([^:]+)(?:$|:(.*)$)/
 const modifierRE = /\.[^\.]+/g
 const transitionRE = /^(v-bind:|:)?transition$/
 
-// terminal directives
-const terminalDirectives = [
-  'for',
-  'if'
-]
-
 // default directive priority
 const DEFAULT_PRIORITY = 1000
+const DEFAULT_TERMINAL_PRIORITY = 2000
 
 /**
  * Compile a template and return a reusable composite link
@@ -100,6 +93,15 @@ export function compile (el, options, partial) {
  */
 
 function linkAndCapture (linker, vm) {
+  /* istanbul ignore if */
+  if (process.env.NODE_ENV === 'production') {
+    // reset directives before every capture in production
+    // mode, so that when unlinking we don't need to splice
+    // them out (which turns out to be a perf hit).
+    // they are kept in development mode because they are
+    // useful for Vue's own tests.
+    vm._directives = []
+  }
   var originalDirCount = vm._directives.length
   linker()
   var dirs = vm._directives.slice(originalDirCount)
@@ -139,12 +141,15 @@ function directiveComparator (a, b) {
  */
 
 function makeUnlinkFn (vm, dirs, context, contextDirs) {
-  return function unlink (destroying) {
+  function unlink (destroying) {
     teardownDirs(vm, dirs, destroying)
     if (context && contextDirs) {
       teardownDirs(context, contextDirs)
     }
   }
+  // expose linked directives
+  unlink.dirs = dirs
+  return unlink
 }
 
 /**
@@ -159,7 +164,7 @@ function teardownDirs (vm, dirs, destroying) {
   var i = dirs.length
   while (i--) {
     dirs[i]._teardown()
-    if (!destroying) {
+    if (process.env.NODE_ENV !== 'production' && !destroying) {
       vm._directives.$remove(dirs[i])
     }
   }
@@ -176,7 +181,7 @@ function teardownDirs (vm, dirs, destroying) {
  */
 
 export function compileAndLinkProps (vm, el, props, scope) {
-  var propsLinkFn = compileProps(el, props)
+  var propsLinkFn = compileProps(el, props, vm)
   var propDirs = linkAndCapture(function () {
     propsLinkFn(vm, scope)
   }, vm)
@@ -192,7 +197,6 @@ export function compileAndLinkProps (vm, el, props, scope) {
  *
  * If this is a fragment instance, we only need to compile 1.
  *
- * @param {Vue} vm
  * @param {Element} el
  * @param {Object} options
  * @param {Object} contextOptions
@@ -248,6 +252,7 @@ export function compileRoot (el, options, contextOptions) {
     }
   }
 
+  options._containerAttrs = options._replacerAttrs = null
   return function rootLinkFn (vm, el, scope) {
     // link context scope dirs
     var context = vm._context
@@ -312,9 +317,10 @@ function compileElement (el, options) {
   }
   var linkFn
   var hasAttrs = el.hasAttributes()
+  var attrs = hasAttrs && toArray(el.attributes)
   // check terminal directives (for & if)
   if (hasAttrs) {
-    linkFn = checkTerminalDirectives(el, options)
+    linkFn = checkTerminalDirectives(el, attrs, options)
   }
   // check element directives
   if (!linkFn) {
@@ -326,7 +332,7 @@ function compileElement (el, options) {
   }
   // normal directives
   if (!linkFn && hasAttrs) {
-    linkFn = compileDirectives(el.attributes, options)
+    linkFn = compileDirectives(attrs, options)
   }
   return linkFn
 }
@@ -518,11 +524,8 @@ function makeChildLinkFn (linkFns) {
 
 function checkElementDirectives (el, options) {
   var tag = el.tagName.toLowerCase()
-  if (commonTagRE.test(tag)) return
-  // special case: give named slot a higher priority
-  // than unnamed slots
-  if (tag === 'slot' && hasBindAttr(el, 'name')) {
-    tag = '_namedSlot'
+  if (commonTagRE.test(tag)) {
+    return
   }
   var def = resolveAsset(options, 'elementDirectives', tag)
   if (def) {
@@ -568,11 +571,12 @@ function checkComponent (el, options) {
  * If it finds one, return a terminal link function.
  *
  * @param {Element} el
+ * @param {Array} attrs
  * @param {Object} options
  * @return {Function} terminalLinkFn
  */
 
-function checkTerminalDirectives (el, options) {
+function checkTerminalDirectives (el, attrs, options) {
   // skip v-pre
   if (getAttr(el, 'v-pre') !== null) {
     return skip
@@ -584,14 +588,28 @@ function checkTerminalDirectives (el, options) {
       return skip
     }
   }
-  var value, dirName
-  for (var i = 0, l = terminalDirectives.length; i < l; i++) {
-    dirName = terminalDirectives[i]
-    /* eslint-disable no-cond-assign */
-    if (value = el.getAttribute('v-' + dirName)) {
-      return makeTerminalNodeLinkFn(el, dirName, value, options)
+
+  var attr, name, value, modifiers, matched, dirName, rawName, arg, def, termDef
+  for (var i = 0, j = attrs.length; i < j; i++) {
+    attr = attrs[i]
+    modifiers = parseModifiers(attr.name)
+    name = attr.name.replace(modifierRE, '')
+    if ((matched = name.match(dirAttrRE))) {
+      def = resolveAsset(options, 'directives', matched[1])
+      if (def && def.terminal) {
+        if (!termDef || ((def.priority || DEFAULT_TERMINAL_PRIORITY) > termDef.priority)) {
+          termDef = def
+          rawName = attr.name
+          value = attr.value
+          dirName = matched[1]
+          arg = matched[2]
+        }
+      }
     }
-    /* eslint-enable no-cond-assign */
+  }
+
+  if (termDef) {
+    return makeTerminalNodeLinkFn(el, dirName, value, options, termDef, rawName, arg, modifiers)
   }
 }
 
@@ -608,19 +626,24 @@ skip.terminal = true
  * @param {String} dirName
  * @param {String} value
  * @param {Object} options
- * @param {Object} [def]
+ * @param {Object} def
+ * @param {String} [rawName]
+ * @param {String} [arg]
+ * @param {Object} [modifiers]
  * @return {Function} terminalLinkFn
  */
 
-function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
+function makeTerminalNodeLinkFn (el, dirName, value, options, def, rawName, arg, modifiers) {
   var parsed = parseDirective(value)
   var descriptor = {
     name: dirName,
+    arg: arg,
     expression: parsed.expression,
     filters: parsed.filters,
     raw: value,
-    // either an element directive, or if/for
-    def: def || publicDirectives[dirName]
+    attr: rawName,
+    modifiers: modifiers,
+    def: def
   }
   // check ref for v-for and router-view
   if (dirName === 'for' || dirName === 'router-view') {
@@ -647,7 +670,7 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, value, rawName, rawValue, dirName, arg, modifiers, dirDef, tokens
+  var attr, name, value, rawName, rawValue, dirName, arg, modifiers, dirDef, tokens, matched
   while (i--) {
     attr = attrs[i]
     name = rawName = attr.name
@@ -663,7 +686,7 @@ function compileDirectives (attrs, options) {
     if (tokens) {
       value = tokensToExp(tokens)
       arg = name
-      pushDir('bind', publicDirectives.bind, true)
+      pushDir('bind', publicDirectives.bind, tokens)
       // warn against mixing mustaches with v-bind
       if (process.env.NODE_ENV !== 'production') {
         if (name === 'class' && Array.prototype.some.call(attrs, function (attr) {
@@ -671,7 +694,8 @@ function compileDirectives (attrs, options) {
         })) {
           warn(
             'class="' + rawValue + '": Do not mix mustache interpolation ' +
-            'and v-bind for "class" on the same element. Use one or the other.'
+            'and v-bind for "class" on the same element. Use one or the other.',
+            options
           )
         }
       }
@@ -701,26 +725,16 @@ function compileDirectives (attrs, options) {
     } else
 
     // normal directives
-    if (name.indexOf('v-') === 0) {
-      // check arg
-      arg = (arg = name.match(argRE)) && arg[1]
-      if (arg) {
-        name = name.replace(argRE, '')
-      }
-      // extract directive name
-      dirName = name.slice(2)
+    if ((matched = name.match(dirAttrRE))) {
+      dirName = matched[1]
+      arg = matched[2]
 
       // skip v-else (when used with v-show)
       if (dirName === 'else') {
         continue
       }
 
-      dirDef = resolveAsset(options, 'directives', dirName)
-
-      if (process.env.NODE_ENV !== 'production') {
-        assertAsset(dirDef, 'directive', dirName)
-      }
-
+      dirDef = resolveAsset(options, 'directives', dirName, true)
       if (dirDef) {
         pushDir(dirName, dirDef)
       }
@@ -732,11 +746,12 @@ function compileDirectives (attrs, options) {
    *
    * @param {String} dirName
    * @param {Object|Function} def
-   * @param {Boolean} [interp]
+   * @param {Array} [interpTokens]
    */
 
-  function pushDir (dirName, def, interp) {
-    var parsed = parseDirective(value)
+  function pushDir (dirName, def, interpTokens) {
+    var hasOneTimeToken = interpTokens && hasOneTime(interpTokens)
+    var parsed = !hasOneTimeToken && parseDirective(value)
     dirs.push({
       name: dirName,
       attr: rawName,
@@ -744,9 +759,13 @@ function compileDirectives (attrs, options) {
       def: def,
       arg: arg,
       modifiers: modifiers,
-      expression: parsed.expression,
-      filters: parsed.filters,
-      interp: interp
+      // conversion from interpolation strings with one-time token
+      // to expression is differed until directive bind time so that we
+      // have access to the actual vm context for one-time bindings.
+      expression: parsed && parsed.expression,
+      filters: parsed && parsed.filters,
+      interp: interpTokens,
+      hasOneTime: hasOneTimeToken
     })
   }
 
@@ -788,5 +807,19 @@ function makeNodeLinkFn (directives) {
     while (i--) {
       vm._bindDir(directives[i], el, host, scope, frag)
     }
+  }
+}
+
+/**
+ * Check if an interpolation string contains one-time tokens.
+ *
+ * @param {Array} tokens
+ * @return {Boolean}
+ */
+
+function hasOneTime (tokens) {
+  var i = tokens.length
+  while (i--) {
+    if (tokens[i].oneTime) return true
   }
 }

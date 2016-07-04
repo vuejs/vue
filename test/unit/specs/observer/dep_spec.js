@@ -1,7 +1,6 @@
-var Dep = require('../../../../src/observer/dep')
+var Dep = require('src/observer/dep')
 
 describe('Dep', function () {
-
   var d
   beforeEach(function () {
     d = new Dep()

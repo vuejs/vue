@@ -1,9 +1,8 @@
-var templateParser = require('../../../../src/parsers/template')
+var templateParser = require('src/parsers/template')
 var parse = templateParser.parseTemplate
 var testString = '<div>hello</div><p class="test">world</p>'
 
 describe('Template Parser', function () {
-
   it('should return same if argument is already a fragment', function () {
     var frag = document.createDocumentFragment()
     var res = parse(frag)
@@ -22,31 +21,31 @@ describe('Template Parser', function () {
 
   it('should parse if argument is a template string', function () {
     var res = parse(testString)
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(2)
     expect(res.querySelector('.test').textContent).toBe('world')
   })
 
   it('should work if the template string doesn\'t contain tags', function () {
     var res = parse('hello!')
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(1)
     expect(res.firstChild.nodeType).toBe(3) // Text node
   })
 
   it('should handle string that contains html entities', function () {
-    var res = parse('hi&lt;hi')
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    var res = parse('foo&lt;bar')
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(1)
-    expect(res.firstChild.nodeValue).toBe('hi<hi')
+    expect(res.firstChild.nodeValue).toBe('foo<bar')
     // #1330
     res = parse('hello &#x2F; hello')
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(1)
     expect(res.firstChild.nodeValue).toBe('hello / hello')
     // #2021
     res = parse('&#xe604;')
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(1)
     expect(res.firstChild.nodeValue).toBe('')
   })
@@ -55,7 +54,7 @@ describe('Template Parser', function () {
     var node = document.createElement('script')
     node.textContent = testString
     var res = parse(node)
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(2)
     expect(res.querySelector('.test').textContent).toBe('world')
   })
@@ -64,7 +63,7 @@ describe('Template Parser', function () {
     var node = document.createElement('div')
     node.innerHTML = testString
     var res = parse(node)
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(2)
     expect(res.querySelector('.test').textContent).toBe('world')
   })
@@ -76,7 +75,7 @@ describe('Template Parser', function () {
     node.textContent = testString
     document.head.appendChild(node)
     var res = parse('#template-test')
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(2)
     expect(res.querySelector('.test').textContent).toBe('world')
     document.head.removeChild(node)
@@ -84,7 +83,7 @@ describe('Template Parser', function () {
 
   it('should work for table elements', function () {
     var res = parse('<td>hello</td>')
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(1)
     expect(res.firstChild.tagName).toBe('TD')
     expect(res.firstChild.textContent).toBe('hello')
@@ -92,7 +91,7 @@ describe('Template Parser', function () {
 
   it('should work for option elements', function () {
     var res = parse('<option>hello</option>')
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(1)
     expect(res.firstChild.tagName).toBe('OPTION')
     expect(res.firstChild.textContent).toBe('hello')
@@ -100,7 +99,7 @@ describe('Template Parser', function () {
 
   it('should work for svg elements', function () {
     var res = parse('<circle></circle>')
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(1)
     // SVG tagNames should be lowercase because they are XML nodes not HTML
     expect(res.firstChild.tagName).toBe('circle')
@@ -133,7 +132,7 @@ describe('Template Parser', function () {
 
   it('should be able to not use id selectors', function () {
     var res = parse('#hi', false, true)
-    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.nodeType).toBe(11)
     expect(res.firstChild.nodeValue).toBe('#hi')
   })
 
@@ -158,7 +157,7 @@ describe('Template Parser', function () {
     expect(c.value).toBe('')
   })
 
-  it('should trim empty text nodes', function () {
+  it('should trim empty text nodes and comments', function () {
     // string
     var res = parse('    <p>test</p>    ')
     expect(res.childNodes.length).toBe(1)
@@ -169,5 +168,18 @@ describe('Template Parser', function () {
     res = parse(el.children[0])
     expect(res.childNodes.length).toBe(1)
     expect(res.firstChild.tagName).toBe('P')
+    // comments
+    res = parse('  <!-- yo -->  <p>test</p>  <!-- yo -->  ')
+    expect(res.childNodes.length).toBe(1)
+    expect(res.firstChild.tagName).toBe('P')
+  })
+
+  it('should reuse fragment from cache for the same string template', function () {
+    var stringTemplate = '    <p>test</p>    '
+    // When parsing a template, adds the created fragment to a cache
+    var res = parse(stringTemplate)
+
+    var newRes = parse(stringTemplate)
+    expect(newRes).toBe(res)
   })
 })

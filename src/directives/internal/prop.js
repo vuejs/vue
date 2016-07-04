@@ -5,30 +5,26 @@
 
 import Watcher from '../../watcher'
 import config from '../../config'
-import { assertProp, initProp, coerceProp } from '../../util/index'
+import { initProp, updateProp } from '../../compiler/compile-props'
 
 const bindingModes = config._propBindingModes
 
 export default {
 
   bind () {
-
-    var child = this.vm
-    var parent = child._context
+    const child = this.vm
+    const parent = child._context
     // passed in from compiler directly
-    var prop = this.descriptor.prop
-    var childKey = prop.path
-    var parentKey = prop.parentPath
-    var twoWay = prop.mode === bindingModes.TWO_WAY
+    const prop = this.descriptor.prop
+    const childKey = prop.path
+    const parentKey = prop.parentPath
+    const twoWay = prop.mode === bindingModes.TWO_WAY
 
-    var parentWatcher = this.parentWatcher = new Watcher(
+    const parentWatcher = this.parentWatcher = new Watcher(
       parent,
       parentKey,
       function (val) {
-        val = coerceProp(prop, val)
-        if (assertProp(prop, val)) {
-          child[childKey] = val
-        }
+        updateProp(child, prop, val)
       }, {
         twoWay: twoWay,
         filters: prop.filters,

@@ -1,12 +1,10 @@
-var _ = require('../../../../../src/util')
-var Vue = require('../../../../../src/index')
+var _ = require('src/util')
+var Vue = require('src')
 
 describe('ref', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')
-    spyWarns()
   })
 
   var components = {
@@ -123,16 +121,16 @@ describe('ref', function () {
         comp: {
           template: '<slot></slot>',
           data: function () {
-            return { msg: 'hi' }
+            return { msg: 'foo' }
           }
         }
       }
     })
     expect(getWarnCount()).toBe(0)
-    expect(vm.$el.textContent).toBe('hi')
-    vm.$children[0].msg = 'ho'
+    expect(vm.$el.textContent).toBe('foo')
+    vm.$children[0].msg = 'bar'
     _.nextTick(function () {
-      expect(vm.$el.textContent).toBe('ho')
+      expect(vm.$el.textContent).toBe('bar')
       done()
     })
   })
@@ -142,6 +140,6 @@ describe('ref', function () {
       el: el,
       template: '<div v-ref:test></div>'
     })
-    expect(hasWarned('must be used on a child component')).toBe(true)
+    expect('must be used on a child component').toHaveBeenWarned()
   })
 })

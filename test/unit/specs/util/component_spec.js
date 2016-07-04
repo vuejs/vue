@@ -1,7 +1,6 @@
-var _ = require('../../../../src/util')
+var _ = require('src/util')
 
 describe('Util - component', function () {
-
   it('checkComponentAttr', function () {
     var el = document.createElement('component')
 
@@ -10,15 +9,15 @@ describe('Util - component', function () {
     expect(res).toBeUndefined()
 
     // static <component is="...">
-    el.setAttribute('is', 'what')
+    el.setAttribute('is', 'foo')
     res = _.checkComponentAttr(el)
-    expect(res.id).toBe('what')
+    expect(res.id).toBe('foo')
     expect(res.dynamic).toBeFalsy()
 
     // <component :is="...">
-    el.setAttribute(':is', 'what')
+    el.setAttribute(':is', 'foo')
     res = _.checkComponentAttr(el)
-    expect(res.id).toBe('what')
+    expect(res.id).toBe('foo')
     expect(res.dynamic).toBe(true)
 
     // custom element, not defined
@@ -36,10 +35,10 @@ describe('Util - component', function () {
 
     // is on undefined custom element
     el = document.createElement('test2')
-    el.setAttribute('is', 'what')
+    el.setAttribute('is', 'foo')
     res = _.checkComponentAttr(el, {
       components: {}
     })
-    expect(res.id).toBe('what')
+    expect(res.id).toBe('foo')
   })
 })

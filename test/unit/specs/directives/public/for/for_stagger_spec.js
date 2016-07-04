@@ -1,8 +1,7 @@
-var Vue = require('../../../../../../src/index')
+var Vue = require('src')
 var _ = Vue.util
 
 describe('v-for staggering transitions', function () {
-
   var el
   var delayAmount = 50
   var multiplier = 2.5 // the bigger the slower, but safer

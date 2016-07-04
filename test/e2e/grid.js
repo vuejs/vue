@@ -1,5 +1,4 @@
 casper.test.begin('grid', 73, function (test) {
-
   casper
   .start('examples/grid/index.html')
   .then(function () {
@@ -110,5 +109,4 @@ casper.test.begin('grid', 73, function (test) {
       }
     }
   }
-
 })

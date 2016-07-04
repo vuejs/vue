@@ -3,11 +3,10 @@
 * those are tested in transition_spec.js.
 */
 
-var Vue = require('../../../../src/index')
-var _ = require('../../../../src/util')
+var Vue = require('src')
+var _ = require('src/util')
 
 describe('DOM API', function () {
-
   var vm, vm2, parent, target, sibling, empty, spy
   beforeEach(function () {
     spy = jasmine.createSpy('dom')
@@ -29,7 +28,6 @@ describe('DOM API', function () {
   })
 
   describe('$appendTo', function () {
-
     it('normal instance', function () {
       vm.$appendTo(parent, spy)
       expect(parent.childNodes.length).toBe(3)
@@ -47,11 +45,9 @@ describe('DOM API', function () {
       expect(parent.childNodes[5]).toBe(vm2._fragmentEnd)
       expect(spy.calls.count()).toBe(1)
     })
-
   })
 
   describe('$prependTo', function () {
-
     it('normal instance', function () {
       vm.$prependTo(parent, spy)
       expect(parent.childNodes.length).toBe(3)
@@ -82,11 +78,9 @@ describe('DOM API', function () {
       expect(empty.childNodes[3]).toBe(vm2._fragmentEnd)
       expect(spy.calls.count()).toBe(2)
     })
-
   })
 
   describe('$before', function () {
-
     it('normal instance', function () {
       vm.$before(sibling, spy)
       expect(parent.childNodes.length).toBe(3)
@@ -104,11 +98,9 @@ describe('DOM API', function () {
       expect(parent.childNodes[4]).toBe(vm2._fragmentEnd)
       expect(spy.calls.count()).toBe(1)
     })
-
   })
 
   describe('$after', function () {
-
     it('normal instance', function () {
       vm.$after(target, spy)
       expect(parent.childNodes.length).toBe(3)
@@ -144,11 +136,9 @@ describe('DOM API', function () {
       expect(parent.childNodes[5]).toBe(vm2._fragmentEnd)
       expect(spy.calls.count()).toBe(1)
     })
-
   })
 
   describe('$remove', function () {
-
     it('normal instance', function () {
       vm.$before(sibling)
       expect(parent.childNodes.length).toBe(3)
@@ -179,11 +169,9 @@ describe('DOM API', function () {
       vm.$remove(spy)
       expect(spy.calls.count()).toBe(1)
     })
-
   })
 
   describe('$nextTick', function () {
-
     it('should work', function (done) {
       var context
       var called = false

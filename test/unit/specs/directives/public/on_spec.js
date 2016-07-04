@@ -1,5 +1,5 @@
-var _ = require('../../../../../src/util')
-var Vue = require('../../../../../src/index')
+var _ = require('src/util')
+var Vue = require('src')
 
 function trigger (target, event, process) {
   var e = document.createEvent('HTMLEvents')
@@ -10,11 +10,9 @@ function trigger (target, event, process) {
 }
 
 describe('v-on', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')
-    spyWarns()
   })
 
   it('methods', function () {
@@ -81,6 +79,48 @@ describe('v-on', function () {
     var a = el.firstChild
     trigger(a, 'keyup', function (e) {
       e.keyCode = 13
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
+  it('with delete modifier capturing DEL', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.delete="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 46
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
+  it('with delete modifier capturing backspace', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.delete="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 8
     })
     _.nextTick(function () {
       expect(a.textContent).toBe('2')
@@ -174,6 +214,39 @@ describe('v-on', function () {
     expect(window.location.hash).toBe(hash)
   })
 
+  it('capture modifier', function () {
+    document.body.appendChild(el)
+    var outer = jasmine.createSpy('outer')
+    var inner = jasmine.createSpy('inner')
+    new Vue({
+      el: el,
+      template: '<div @click.capture.stop="outer"><div class="inner" @click="inner"></div></div>',
+      methods: {
+        outer: outer,
+        inner: inner
+      }
+    })
+    trigger(el.querySelector('.inner'), 'click')
+    expect(outer).toHaveBeenCalled()
+    expect(inner).not.toHaveBeenCalled()
+    document.body.removeChild(el)
+  })
+
+  it('self modifier', function () {
+    var outer = jasmine.createSpy('outer')
+    new Vue({
+      el: el,
+      template: '<div class="outer" @click.self="outer"><div class="inner"></div></div>',
+      methods: {
+        outer: outer
+      }
+    })
+    trigger(el.querySelector('.inner'), 'click')
+    expect(outer).not.toHaveBeenCalled()
+    trigger(el.querySelector('.outer'), 'click')
+    expect(outer).toHaveBeenCalled()
+  })
+
   it('multiple modifiers working together', function () {
     var outer = jasmine.createSpy('outer')
     var prevented
@@ -200,7 +273,7 @@ describe('v-on', function () {
       data: { test: 123 },
       template: '<a v-on:keyup="test"></a>'
     })
-    expect(hasWarned('expects a function value')).toBe(true)
+    expect('expects a function value').toHaveBeenWarned()
   })
 
   it('iframe', function () {

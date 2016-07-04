@@ -76,7 +76,10 @@ rollup.rollup({
       moduleName: 'Vue'
     }).code
     var minified = banner + '\n' + uglify.minify(code, {
-      fromString: true
+      fromString: true,
+      output: {
+        ascii_only: true
+      }
     }).code
     return write('dist/vue.min.js', minified)
   })

@@ -71,12 +71,11 @@ function processFilterArg (arg) {
  *   ]
  * }
  *
- * @param {String} str
+ * @param {String} s
  * @return {Object}
  */
 
 export function parseDirective (s) {
-
   var hit = cache.get(s)
   if (hit) {
     return hit

@@ -10,13 +10,12 @@ import {
   warn,
   query,
   hasOwn,
-  set,
   isReserved,
+  isPlainObject,
   bind
 } from '../../util/index'
 
 export default function (Vue) {
-
   /**
    * Accessor for `$data` property, since setting $data
    * requires observing the new object and updating
@@ -61,7 +60,8 @@ export default function (Vue) {
     if (props && !el) {
       process.env.NODE_ENV !== 'production' && warn(
         'Props will not be compiled if no `el` option is ' +
-        'provided at instantiation.'
+        'provided at instantiation.',
+        this
       )
     }
     // make sure to convert string selectors into element now
@@ -77,33 +77,43 @@ export default function (Vue) {
    */
 
   Vue.prototype._initData = function () {
-    var propsData = this._data
-    var optionsDataFn = this.$options.data
-    var optionsData = optionsDataFn && optionsDataFn()
-    if (optionsData) {
-      this._data = optionsData
-      for (var prop in propsData) {
-        if (process.env.NODE_ENV !== 'production' &&
-            hasOwn(optionsData, prop)) {
-          warn(
-            'Data field "' + prop + '" is already defined ' +
-            'as a prop. Use prop default value instead.'
-          )
-        }
-        if (this._props[prop].raw !== null ||
-            !hasOwn(optionsData, prop)) {
-          set(optionsData, prop, propsData[prop])
-        }
-      }
+    var dataFn = this.$options.data
+    var data = this._data = dataFn ? dataFn() : {}
+    if (!isPlainObject(data)) {
+      data = {}
+      process.env.NODE_ENV !== 'production' && warn(
+        'data functions should return an object.',
+        this
+      )
     }
-    var data = this._data
+    var props = this._props
+    var runtimeData = this._runtimeData
+      ? typeof this._runtimeData === 'function'
+        ? this._runtimeData()
+        : this._runtimeData
+      : null
     // proxy data on instance
     var keys = Object.keys(data)
     var i, key
     i = keys.length
     while (i--) {
       key = keys[i]
-      this._proxy(key)
+      // there are two scenarios where we can proxy a data key:
+      // 1. it's not already defined as a prop
+      // 2. it's provided via a instantiation option AND there are no
+      //    template prop present
+      if (
+        !props || !hasOwn(props, key) ||
+        (runtimeData && hasOwn(runtimeData, key) && props[key].raw === null)
+      ) {
+        this._proxy(key)
+      } else if (process.env.NODE_ENV !== 'production') {
+        warn(
+          'Data field "' + key + '" is already defined ' +
+          'as a prop. Use prop default value instead.',
+          this
+        )
+      }
     }
     // observe data
     observe(data, this)

@@ -1,3 +1,7 @@
+var webpackConfig = require('./webpack.test.config')
+delete webpackConfig.entry
+webpackConfig.devtool = 'inline-source-map'
+
 // shared config for all unit tests
 module.exports = {
   frameworks: ['jasmine'],
@@ -6,19 +10,9 @@ module.exports = {
     '../test/unit/specs/index.js'
   ],
   preprocessors: {
-    '../test/unit/specs/index.js': ['webpack']
+    '../test/unit/specs/index.js': ['webpack', 'sourcemap']
   },
-  webpack: {
-    module: {
-      loaders: [
-        {
-          test: /\.js$/,
-          exclude: /test|node_modules/,
-          loader: 'babel?optional[]=runtime&loose=all'
-        }
-      ]
-    }
-  },
+  webpack: webpackConfig,
   webpackMiddleware: {
     noInfo: true
   },

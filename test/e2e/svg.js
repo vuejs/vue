@@ -1,7 +1,6 @@
 /* global stats, valueToPoint */
 
 casper.test.begin('svg', 18, function (test) {
-
   casper
   .start('examples/svg/index.html')
   .then(function () {
@@ -35,7 +34,7 @@ casper.test.begin('svg', 18, function (test) {
   })
   .then(function () {
     this.fill('#add', {
-      newlabel: 'hi'
+      newlabel: 'foo'
     })
   })
   .thenClick('#add > button', function () {
@@ -55,5 +54,4 @@ casper.test.begin('svg', 18, function (test) {
   .run(function () {
     test.done()
   })
-
 })

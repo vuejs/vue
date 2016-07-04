@@ -6,6 +6,7 @@ import {
   getAttr,
   getBindAttr,
   camelize,
+  hyphenate,
   nextTick,
   warn
 } from './util/index'
@@ -20,18 +21,21 @@ function noop () {}
  * It registers a watcher with the expression and calls
  * the DOM update function when a change is triggered.
  *
- * @param {String} name
- * @param {Node} el
- * @param {Vue} vm
  * @param {Object} descriptor
  *                 - {String} name
  *                 - {Object} def
  *                 - {String} expression
  *                 - {Array<Object>} [filters]
+ *                 - {Object} [modifiers]
  *                 - {Boolean} literal
  *                 - {String} attr
+ *                 - {String} arg
  *                 - {String} raw
- * @param {Object} def - directive definition object
+ *                 - {String} [ref]
+ *                 - {Array<Object>} [interp]
+ *                 - {Boolean} [hasOneTime]
+ * @param {Vue} vm
+ * @param {Node} el
  * @param {Vue} [host] - transclusion host component
  * @param {Object} [scope] - v-for scope
  * @param {Fragment} [frag] - owner fragment
@@ -68,8 +72,6 @@ export default function Directive (descriptor, vm, el, host, scope, frag) {
  * Initialize the directive, mixin definition properties,
  * setup the watcher, call definition bind() and update()
  * if present.
- *
- * @param {Object} def
  */
 
 Directive.prototype._bind = function () {
@@ -165,7 +167,7 @@ Directive.prototype._setupParams = function () {
   var i = params.length
   var key, val, mappedKey
   while (i--) {
-    key = params[i]
+    key = hyphenate(params[i])
     mappedKey = camelize(key)
     val = getBindAttr(this.el, key)
     if (val != null) {
@@ -288,10 +290,11 @@ Directive.prototype._withLock = function (fn) {
  *
  * @param {String} event
  * @param {Function} handler
+ * @param {Boolean} [useCapture]
  */
 
-Directive.prototype.on = function (event, handler) {
-  on(this.el, event, handler)
+Directive.prototype.on = function (event, handler, useCapture) {
+  on(this.el, event, handler, useCapture)
   ;(this._listeners || (this._listeners = []))
     .push([event, handler])
 }

@@ -36,12 +36,11 @@ const config = {
   warnExpressionErrors: true,
 
   /**
-   * Whether or not to handle fully object properties which
-   * are already backed by getters and seters. Depending on
-   * use case and environment, this might introduce non-neglible
-   * performance penalties.
+   * Whether to allow devtools inspection.
+   * Disabled by default in production builds.
    */
-  convertAllProperties: false,
+
+  devtools: process.env.NODE_ENV !== 'production',
 
   /**
    * Internal flag to indicate the delimiters have been

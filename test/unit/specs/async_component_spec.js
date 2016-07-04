@@ -1,13 +1,11 @@
-var Vue = require('../../../src/index')
+var Vue = require('src')
 var _ = Vue.util
 
 describe('Async components', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')
     document.body.appendChild(el)
-    spyWarns()
   })
 
   afterEach(function () {
@@ -15,14 +13,22 @@ describe('Async components', function () {
   })
 
   it('normal', function (done) {
+    var go = jasmine.createSpy()
     new Vue({
       el: el,
-      template: '<test></test>',
+      template: '<test foo="bar" @ready="go"></test>',
+      methods: {
+        go: go
+      },
       components: {
         test: function (resolve) {
           setTimeout(function () {
             resolve({
-              template: 'ok'
+              props: ['foo'],
+              template: '{{ foo }}',
+              ready: function () {
+                this.$emit('ready')
+              }
             })
             next()
           }, 0)
@@ -30,7 +36,8 @@ describe('Async components', function () {
       }
     })
     function next () {
-      expect(el.textContent).toBe('ok')
+      expect(el.textContent).toBe('bar')
+      expect(go).toHaveBeenCalled()
       done()
     }
   })
@@ -191,7 +198,7 @@ describe('Async components', function () {
         }
       }
     })
-    expect(hasWarned('Reason: nooooo')).toBe(true)
+    expect('Reason: nooooo').toHaveBeenWarned()
   })
 
   it('v-for', function (done) {

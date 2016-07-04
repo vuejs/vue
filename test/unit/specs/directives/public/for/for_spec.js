@@ -1,29 +1,13 @@
-var _ = require('../../../../../../src/util')
-var Vue = require('../../../../../../src/index')
-var config = require('../../../../../../src/config')
+var _ = require('src/util')
+var Vue = require('src')
 
 describe('v-for', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')
-    spyWarns()
-    config.convertAllProperties = false
   })
 
   it('objects', function (done) {
-    var vm = new Vue({
-      el: el,
-      data: {
-        items: [{a: 1}, {a: 2}]
-      },
-      template: '<div v-for="item in items">{{$index}} {{item.a}}</div>'
-    })
-    assertMutations(vm, el, done)
-  })
-
-  it('objects with convertAllProperties on', function (done) {
-    config.convertAllProperties = true
     var vm = new Vue({
       el: el,
       data: {
@@ -121,6 +105,28 @@ describe('v-for', function () {
       }
     })
     expect(el.innerHTML).toBe('<div>aaa a</div><div>bbb b</div>')
+  })
+
+  it('check priorities: v-if before v-for', function () {
+    new Vue({
+      el: el,
+      data: {
+        items: [1, 2, 3]
+      },
+      template: '<div v-if="item < 3" v-for="item in items">{{item}}</div>'
+    })
+    expect(el.textContent).toBe('12')
+  })
+
+  it('check priorities: v-if after v-for', function () {
+    new Vue({
+      el: el,
+      data: {
+        items: [1, 2, 3]
+      },
+      template: '<div v-for="item in items" v-if="item < 3">{{item}}</div>'
+    })
+    expect(el.textContent).toBe('12')
   })
 
   it('component', function (done) {
@@ -272,17 +278,17 @@ describe('v-for', function () {
       },
       components: {
         'view-a': {
-          template: 'AAA'
+          template: 'foo'
         },
         'view-b': {
-          template: 'BBB'
+          template: 'bar'
         },
         'view-c': {
-          template: 'CCC'
+          template: 'baz'
         }
       }
     })
-    expect(el.innerHTML).toBe('<component>AAA</component><component>BBB</component><component>CCC</component>')
+    expect(el.innerHTML).toBe('<component>foo</component><component>bar</component><component>baz</component>')
     // primitive
     el = document.createElement('div')
     new Vue({
@@ -293,17 +299,17 @@ describe('v-for', function () {
       },
       components: {
         'view-a': {
-          template: 'AAA'
+          template: 'foo'
         },
         'view-b': {
-          template: 'BBB'
+          template: 'bar'
         },
         'view-c': {
-          template: 'CCC'
+          template: 'baz'
         }
       }
     })
-    expect(el.innerHTML).toBe('<component>AAA</component><component>BBB</component><component>CCC</component>')
+    expect(el.innerHTML).toBe('<component>foo</component><component>bar</component><component>baz</component>')
   })
 
   it('fragment loop', function (done) {
@@ -387,13 +393,13 @@ describe('v-for', function () {
       el: el,
       template: '<div v-for="item in list | filterBy filterKey | orderBy sortKey -1 | limitBy 2">{{item.id}}</div>',
       data: {
-        filterKey: 'hi!',
+        filterKey: 'foo',
         sortKey: 'id',
         list: [
-          { id: 1, id2: 4, msg: 'hi!' },
-          { id: 2, id2: 3, msg: 'na' },
-          { id: 3, id2: 2, msg: 'hi!' },
-          { id: 4, id2: 1, msg: 'na' }
+          { id: 1, id2: 4, msg: 'foo' },
+          { id: 2, id2: 3, msg: 'bar' },
+          { id: 3, id2: 2, msg: 'foo' },
+          { id: 4, id2: 1, msg: 'bar' }
         ]
       }
     })
@@ -401,7 +407,7 @@ describe('v-for', function () {
 
     go(
       function () {
-        vm.filterKey = 'na'
+        vm.filterKey = 'bar'
       }, assertMarkup
     )
     .then(
@@ -416,14 +422,14 @@ describe('v-for', function () {
     )
     .then(
       function () {
-        vm.list.push({ id: 0, id2: 4, msg: 'na' })
+        vm.list.push({ id: 0, id2: 4, msg: 'bar' })
       }, assertMarkup
     )
     .then(
       function () {
         vm.list = [
-          { id: 33, id2: 4, msg: 'hi!' },
-          { id: 44, id2: 3, msg: 'na' }
+          { id: 33, id2: 4, msg: 'foo' },
+          { id: 44, id2: 3, msg: 'bar' }
         ]
       }, assertMarkup
     )
@@ -479,15 +485,14 @@ describe('v-for', function () {
   })
 
   it('track by id', function (done) {
-
     var vm = new Vue({
       el: el,
       template: '<test v-for="item in list" :item="item" track-by="id"></test>',
       data: {
         list: [
-          { id: 1, msg: 'hi' },
-          { id: 2, msg: 'ha' },
-          { id: 3, msg: 'ho' }
+          { id: 1, msg: 'foo' },
+          { id: 2, msg: 'bar' },
+          { id: 3, msg: 'baz' }
         ]
       },
       components: {
@@ -502,8 +507,52 @@ describe('v-for', function () {
     // swap the data with different objects, but with
     // the same ID!
     vm.list = [
-      { id: 1, msg: 'wa' },
-      { id: 2, msg: 'wo' }
+      { id: 1, msg: 'qux' },
+      { id: 2, msg: 'quux' }
+    ]
+    _.nextTick(function () {
+      assertMarkup()
+      // should reuse old vms!
+      var i = 2
+      while (i--) {
+        expect(vm.$children[i]).toBe(oldVms[i])
+      }
+      done()
+    })
+
+    function assertMarkup () {
+      var markup = vm.list.map(function (item) {
+        return '<test>' + item.msg + '</test>'
+      }).join('')
+      expect(el.innerHTML).toBe(markup)
+    }
+  })
+
+  it('track by nested id path', function (done) {
+    var vm = new Vue({
+      el: el,
+      template: '<test v-for="item in list" :item="item" track-by="nested.id"></test>',
+      data: {
+        list: [
+          { nested: { id: 1 }, msg: 'foo' },
+          { nested: { id: 2 }, msg: 'bar' },
+          { nested: { id: 3 }, msg: 'baz' }
+        ]
+      },
+      components: {
+        test: {
+          props: ['item'],
+          template: '{{item.msg}}'
+        }
+      }
+    })
+    assertMarkup()
+    var oldVms = vm.$children.slice()
+    // swap the data with different objects, but with
+    // the same ID!
+    vm.list = [
+      { nested: { id: 1 }, msg: 'qux' },
+      { nested: { id: 2 }, msg: 'quux' }
     ]
     _.nextTick(function () {
       assertMarkup()
@@ -567,7 +616,7 @@ describe('v-for', function () {
       el: el,
       template: '<div v-for="items"></div>'
     })
-    expect(hasWarned('Alias is required in v-for')).toBe(true)
+    expect('alias is required').toHaveBeenWarned()
   })
 
   it('warn duplicate objects', function () {
@@ -579,7 +628,7 @@ describe('v-for', function () {
         items: [obj, obj]
       }
     })
-    expect(hasWarned('Duplicate value')).toBe(true)
+    expect('Duplicate value').toHaveBeenWarned()
   })
 
   it('warn duplicate objects on diff', function (done) {
@@ -594,7 +643,7 @@ describe('v-for', function () {
     expect(getWarnCount()).toBe(0)
     vm.items.push(obj)
     _.nextTick(function () {
-      expect(hasWarned('Duplicate value')).toBe(true)
+      expect('Duplicate value').toHaveBeenWarned()
       done()
     })
   })
@@ -607,7 +656,7 @@ describe('v-for', function () {
         items: [{id: 1}, {id: 1}]
       }
     })
-    expect(hasWarned('Duplicate value')).toBe(true)
+    expect('Duplicate value').toHaveBeenWarned()
   })
 
   it('key val syntax with object', function (done) {
@@ -741,7 +790,7 @@ describe('v-for', function () {
       }
     })
     trigger(vm.$el.querySelector('input'), 'input')
-    expect(hasWarned('It seems you are using two-way binding')).toBe(true)
+    expect('It seems you are using two-way binding').toHaveBeenWarned()
   })
 
   it('nested track by', function (done) {
@@ -759,8 +808,8 @@ describe('v-for', function () {
           { id: 1, msg: 'hi', list: [
             { id: 1, msg: 'hi foo' }
           ] },
-          { id: 2, msg: 'ha', list: [] },
-          { id: 3, msg: 'ho', list: [] }
+          { id: 2, msg: 'bar', list: [] },
+          { id: 3, msg: 'baz', list: [] }
         ]
       }
     })
@@ -770,11 +819,11 @@ describe('v-for', function () {
     var oldInnerNodes = el.children[0].children
 
     vm.list = [
-      { id: 1, msg: 'wa', list: [
+      { id: 1, msg: 'baz', list: [
         { id: 1, msg: 'hi foo' },
         { id: 2, msg: 'hi bar' }
       ] },
-      { id: 2, msg: 'wo', list: [] }
+      { id: 2, msg: 'qux', list: [] }
     ]
 
     _.nextTick(function () {
@@ -801,8 +850,8 @@ describe('v-for', function () {
 
   it('switch between object-converted & array mode', function (done) {
     var obj = {
-      a: { msg: 'AA' },
-      b: { msg: 'BB' }
+      a: { msg: 'foo' },
+      b: { msg: 'bar' }
     }
     var arr = [obj.b, obj.a]
     var vm = new Vue({
@@ -817,7 +866,7 @@ describe('v-for', function () {
     }).join(''))
     vm.obj = arr
     _.nextTick(function () {
-      expect(el.innerHTML).toBe('<div>BB</div><div>AA</div>')
+      expect(el.innerHTML).toBe('<div>bar</div><div>foo</div>')
       // make sure it cleared the cache
       expect(vm._directives[0].cache.a).toBeNull()
       expect(vm._directives[0].cache.b).toBeNull()
@@ -889,7 +938,7 @@ describe('v-for', function () {
         ready: false
       }
     })
-    expect(vm.$els.a instanceof Element).toBe(true)
+    expect(vm.$els.a.nodeType).toBe(1)
     expect(vm.$els.a.innerHTML).toContain('<div>0</div><div>0</div>')
     vm.ready = true
     vm.$nextTick(function () {

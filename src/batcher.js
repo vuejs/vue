@@ -1,5 +1,9 @@
-import { inBrowser, warn, nextTick } from './util/index'
 import config from './config'
+import {
+  warn,
+  nextTick,
+  devtools
+} from './util/index'
 
 // we have two separate queues: one for directive updates
 // and one for user watcher registered via $watch().
@@ -7,6 +11,8 @@ import config from './config'
 // before user watchers so that when user watchers are
 // triggered, the DOM would have already been in updated
 // state.
+
+var queueIndex
 var queue = []
 var userQueue = []
 var has = {}
@@ -36,10 +42,8 @@ function flushBatcherQueue () {
   runBatcherQueue(userQueue)
   // dev tool hook
   /* istanbul ignore if */
-  if (process.env.NODE_ENV !== 'production') {
-    if (inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
-      window.__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('flush')
-    }
+  if (devtools && config.devtools) {
+    devtools.emit('flush')
   }
   resetBatcherState()
 }
@@ -53,8 +57,8 @@ function flushBatcherQueue () {
 function runBatcherQueue (queue) {
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
-  for (var i = 0; i < queue.length; i++) {
-    var watcher = queue[i]
+  for (queueIndex = 0; queueIndex < queue.length; queueIndex++) {
+    var watcher = queue[queueIndex]
     var id = watcher.id
     has[id] = null
     watcher.run()
@@ -62,11 +66,12 @@ function runBatcherQueue (queue) {
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > config._maxUpdateCount) {
-        queue.splice(has[id], 1)
         warn(
           'You may have an infinite update loop for watcher ' +
-          'with expression: ' + watcher.expression
+          'with expression "' + watcher.expression + '"',
+          watcher.vm
         )
+        break
       }
     }
   }
@@ -86,20 +91,22 @@ function runBatcherQueue (queue) {
 export function pushWatcher (watcher) {
   var id = watcher.id
   if (has[id] == null) {
-    // if an internal watcher is pushed, but the internal
-    // queue is already depleted, we run it immediately.
     if (internalQueueDepleted && !watcher.user) {
-      watcher.run()
-      return
-    }
-    // push watcher into appropriate queue
-    var q = watcher.user ? userQueue : queue
-    has[id] = q.length
-    q.push(watcher)
-    // queue the flush
-    if (!waiting) {
-      waiting = true
-      nextTick(flushBatcherQueue)
+      // an internal watcher triggered by a user watcher...
+      // let's run it immediately after current user watcher is done.
+      userQueue.splice(queueIndex + 1, 0, watcher)
+    } else {
+      // push watcher into appropriate queue
+      var q = watcher.user
+        ? userQueue
+        : queue
+      has[id] = q.length
+      q.push(watcher)
+      // queue the flush
+      if (!waiting) {
+        waiting = true
+        nextTick(flushBatcherQueue)
+      }
     }
   }
 }

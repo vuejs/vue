@@ -17,13 +17,13 @@ const improperKeywords =
   'delete,do,else,export,extends,finally,for,function,if,' +
   'import,in,instanceof,let,return,super,switch,throw,try,' +
   'var,while,with,yield,enum,await,implements,package,' +
-  'proctected,static,interface,private,public'
+  'protected,static,interface,private,public'
 const improperKeywordsRE =
   new RegExp('^(' + improperKeywords.replace(/,/g, '\\b|') + '\\b)')
 
 const wsRE = /\s/g
 const newlineRE = /\n/g
-const saveRE = /[\{,]\s*[\w\$_]+\s*:|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|new |typeof |void /g
+const saveRE = /[\{,]\s*[\w\$_]+\s*:|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`)|new |typeof |void /g
 const restoreRE = /"(\d+)"/g
 const pathTestRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
 const identRE = /[^\w$\.](?:[A-Za-z_$][\w$]*)/g
@@ -136,7 +136,9 @@ function compileGetter (exp) {
 
 function makeGetterFn (body) {
   try {
+    /* eslint-disable no-new-func */
     return new Function('scope', 'return ' + body + ';')
+    /* eslint-enable no-new-func */
   } catch (e) {
     process.env.NODE_ENV !== 'production' && warn(
       'Invalid expression. ' +

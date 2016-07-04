@@ -64,7 +64,6 @@ var batches = [
 ]
 
 module.exports = function (config) {
-
   var batch = batches[process.argv[4] || 0]
 
   config.set(assign(base, {

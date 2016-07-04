@@ -1,9 +1,7 @@
-var _ = require('../../../../src/util')
+var _ = require('src/util')
 
 describe('Util - Environment', function () {
-
   describe('nextTick', function () {
-
     it('should accept context', function (done) {
       var ctx = {}
       _.nextTick(function () {

@@ -1,9 +1,19 @@
-import { replace, getAttr } from '../../util/index'
 import Directive from '../../directive'
-import { compile, compileRoot, transclude } from '../../compiler/index'
+
+import {
+  replace,
+  getAttr,
+  isFragment
+} from '../../util/index'
+
+import {
+  compile,
+  compileRoot,
+  transclude,
+  resolveSlots
+} from '../../compiler/index'
 
 export default function (Vue) {
-
   /**
    * Update v-ref for component.
    *
@@ -34,7 +44,6 @@ export default function (Vue) {
    * Otherwise we need to call transclude/compile/link here.
    *
    * @param {Element} el
-   * @return {Element}
    */
 
   Vue.prototype._compile = function (el) {
@@ -58,6 +67,9 @@ export default function (Vue) {
     // container attrs and props can be different every time.
     var contextOptions = this._context && this._context.$options
     var rootLinker = compileRoot(el, options, contextOptions)
+
+    // resolve slot distribution
+    resolveSlots(this, options._content)
 
     // compile and link the rest
     var contentLinkFn
@@ -94,7 +106,6 @@ export default function (Vue) {
 
     this._isCompiled = true
     this._callHook('compiled')
-    return el
   }
 
   /**
@@ -105,7 +116,7 @@ export default function (Vue) {
    */
 
   Vue.prototype._initElement = function (el) {
-    if (el instanceof DocumentFragment) {
+    if (isFragment(el)) {
       this._isFragment = true
       this.$el = this._fragmentStart = el.firstChild
       this._fragmentEnd = el.lastChild
@@ -124,10 +135,8 @@ export default function (Vue) {
   /**
    * Create and bind a directive to an element.
    *
-   * @param {String} name - directive name
+   * @param {Object} descriptor - parsed directive descriptor
    * @param {Node} node   - target node
-   * @param {Object} desc - parsed directive descriptor
-   * @param {Object} def  - directive definition object
    * @param {Vue} [host] - transclusion host component
    * @param {Object} [scope] - v-for scope
    * @param {Fragment} [frag] - owner fragment

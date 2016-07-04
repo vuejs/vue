@@ -1,4 +1,3 @@
-import config from '../config'
 import Dep from './dep'
 import { arrayMethods } from './array'
 import {
@@ -10,6 +9,23 @@ import {
 } from '../util/index'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
+
+/**
+ * By default, when a reactive property is set, the new value is
+ * also converted to become reactive. However in certain cases, e.g.
+ * v-for scope alias and props, we don't want to force conversion
+ * because the value may be a nested value under a frozen data structure.
+ *
+ * So whenever we want to set a reactive property without forcing
+ * conversion on the new value, we wrap that call inside this function.
+ */
+
+let shouldConvert = true
+export function withoutConversion (fn) {
+  shouldConvert = false
+  fn()
+  shouldConvert = true
+}
 
 /**
  * Observer class that are attached to each observed
@@ -108,11 +124,13 @@ Observer.prototype.removeVm = function (vm) {
  * the prototype chain using __proto__
  *
  * @param {Object|Array} target
- * @param {Object} proto
+ * @param {Object} src
  */
 
 function protoAugment (target, src) {
+  /* eslint-disable no-proto */
   target.__proto__ = src
+  /* eslint-enable no-proto */
 }
 
 /**
@@ -152,6 +170,7 @@ export function observe (value, vm) {
   ) {
     ob = value.__ob__
   } else if (
+    shouldConvert &&
     (isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
     !value._isVue
@@ -175,16 +194,14 @@ export function observe (value, vm) {
 export function defineReactive (obj, key, val) {
   var dep = new Dep()
 
-  // cater for pre-defined getter/setters
-  var getter, setter
-  if (config.convertAllProperties) {
-    var property = Object.getOwnPropertyDescriptor(obj, key)
-    if (property && property.configurable === false) {
-      return
-    }
-    getter = property && property.get
-    setter = property && property.set
+  var property = Object.getOwnPropertyDescriptor(obj, key)
+  if (property && property.configurable === false) {
+    return
   }
+
+  // cater for pre-defined getter/setters
+  var getter = property && property.get
+  var setter = property && property.set
 
   var childOb = observe(val)
   Object.defineProperty(obj, key, {

@@ -1,13 +1,11 @@
-var Vue = require('../../../src/index')
+var Vue = require('src')
 var nextTick = Vue.nextTick
-var Watcher = require('../../../src/watcher')
+var Watcher = require('src/watcher')
 var _ = Vue.util
 var config = Vue.config
 
 describe('Watcher', function () {
-
   var vm, spy
-
   beforeEach(function () {
     vm = new Vue({
       filters: {},
@@ -22,7 +20,6 @@ describe('Watcher', function () {
       }
     })
     spy = jasmine.createSpy('watcher')
-    spyWarns()
   })
 
   it('simple path', function (done) {
@@ -164,7 +161,7 @@ describe('Watcher', function () {
     var watcher2 = new Watcher(vm, 'e', spy2)
     expect(watcher.value).toBe(2)
     expect(watcher2.value).toBeUndefined()
-    vm.$data = { b: { c: 3}, e: 4 }
+    vm.$data = { b: { c: 3 }, e: 4 }
     nextTick(function () {
       expect(watcher.value).toBe(3)
       expect(watcher2.value).toBe(4)
@@ -181,7 +178,7 @@ describe('Watcher', function () {
     nextTick(function () {
       expect(watcher.value).toBe(3)
       expect(spy).toHaveBeenCalledWith(3, 2)
-      vm.$data = { b: {c: 4}}
+      vm.$data = { b: { c: 4 }}
       nextTick(function () {
         expect(watcher.value).toBe(4)
         expect(spy).toHaveBeenCalledWith(4, 3)
@@ -212,8 +209,8 @@ describe('Watcher', function () {
     }
     var watcher = new Watcher(vm, 'b.c', spy, {
       filters: [
-        { name: 'test', args: [{value: 3, dynamic: false}]},
-        { name: 'test2', args: [{value: 'msg', dynamic: true}]}
+        { name: 'test', args: [{ value: 3, dynamic: false }] },
+        { name: 'test2', args: [{ value: 'msg', dynamic: true }] }
       ]
     })
     expect(watcher.value).toBe('6yo')
@@ -275,7 +272,7 @@ describe('Watcher', function () {
     nextTick(function () {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
       var oldB = vm.b
-      vm.b = { c: [{a: 1}]}
+      vm.b = { c: [{ a: 1 }]}
       nextTick(function () {
         expect(spy).toHaveBeenCalledWith(vm.b, oldB)
         expect(spy.calls.count()).toBe(2)
@@ -366,13 +363,12 @@ describe('Watcher', function () {
 
   it('warn getter errors', function () {
     new Watcher(vm, 'd.e + c', spy)
-    expect(hasWarned('Error when evaluating expression')).toBe(true)
+    expect('Error when evaluating expression').toHaveBeenWarned()
   })
 
   it('warn setter errors', function () {
     var watcher = new Watcher(vm, 'a + b', spy)
     watcher.set(123)
-    expect(hasWarned('Error when evaluating setter')).toBe(true)
+    expect('Error when evaluating setter').toHaveBeenWarned()
   })
-
 })

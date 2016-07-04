@@ -8,21 +8,44 @@ import {
   commonTagRE,
   reservedTagRE,
   warn,
-  isPlainObject
-} from '../../util/index'
+  isPlainObject,
+  extend
+} from './util/index'
 
-import config from '../../config'
-import * as util from '../../util/index'
-import * as compiler from '../../compiler/index'
-import * as path from '../../parsers/path'
-import * as text from '../../parsers/text'
-import * as template from '../../parsers/template'
-import * as directive from '../../parsers/directive'
-import * as expression from '../../parsers/expression'
-import FragmentFactory from '../../fragment/factory'
-import internalDirectives from '../../directives/internal/index'
+import config from './config'
+import directives from './directives/public/index'
+import elementDirectives from './directives/element/index'
+import filters from './filters/index'
+import * as util from './util/index'
+import * as compiler from './compiler/index'
+import * as path from './parsers/path'
+import * as text from './parsers/text'
+import * as template from './parsers/template'
+import * as directive from './parsers/directive'
+import * as expression from './parsers/expression'
+import * as transition from './transition/index'
+import FragmentFactory from './fragment/factory'
+import internalDirectives from './directives/internal/index'
 
 export default function (Vue) {
+  /**
+   * Vue and every constructor that extends Vue has an
+   * associated options object, which can be accessed during
+   * compilation steps as `this.constructor.options`.
+   *
+   * These can be seen as the default options of every
+   * Vue instance.
+   */
+
+  Vue.options = {
+    directives,
+    elementDirectives,
+    filters,
+    transitions: {},
+    components: {},
+    partials: {},
+    replace: true
+  }
 
   /**
    * Expose useful internals
@@ -73,8 +96,11 @@ export default function (Vue) {
     }
     var name = extendOptions.name || Super.options.name
     if (process.env.NODE_ENV !== 'production') {
-      if (!/^[a-zA-Z][\w-]+$/.test(name)) {
-        warn('Invalid component name: ' + name)
+      if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+        warn(
+          'Invalid component name: "' + name + '". Component names ' +
+          'can only contain alphanumeric characaters and the hyphen.'
+        )
         name = null
       }
     }
@@ -115,10 +141,12 @@ export default function (Vue) {
    */
 
   function createClass (name) {
+    /* eslint-disable no-new-func */
     return new Function(
       'return function ' + classify(name) +
       ' (options) { this._init(options) }'
     )()
+    /* eslint-enable no-new-func */
   }
 
   /**
@@ -190,4 +218,7 @@ export default function (Vue) {
       }
     }
   })
+
+  // expose internal transition API
+  extend(Vue.transition, transition)
 }

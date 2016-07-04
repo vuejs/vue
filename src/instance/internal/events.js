@@ -7,7 +7,6 @@ import {
 const eventRE = /^v-on:|^@/
 
 export default function (Vue) {
-
   /**
    * Setup the instance's option events & watchers.
    * If the value is a string, we pull it from the
@@ -38,7 +37,16 @@ export default function (Vue) {
       if (eventRE.test(name)) {
         name = name.replace(eventRE, '')
         handler = (vm._scope || vm._context).$eval(attrs[i].value, true)
-        vm.$on(name.replace(eventRE), handler)
+        if (typeof handler === 'function') {
+          handler._fromParent = true
+          vm.$on(name.replace(eventRE), handler)
+        } else if (process.env.NODE_ENV !== 'production') {
+          warn(
+            'v-on:' + name + '="' + attrs[i].value + '" ' +
+            'expects a function value, got ' + handler,
+            vm
+          )
+        }
       }
     }
   }
@@ -89,7 +97,8 @@ export default function (Vue) {
         process.env.NODE_ENV !== 'production' && warn(
           'Unknown method: "' + handler + '" when ' +
           'registering callback for ' + action +
-          ': "' + key + '".'
+          ': "' + key + '".',
+          vm
         )
       }
     } else if (handler && type === 'object') {

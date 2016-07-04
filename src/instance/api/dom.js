@@ -14,7 +14,6 @@ import {
 } from '../../transition/index'
 
 export default function (Vue) {
-
   /**
    * Convenience on-instance nextTick. The callback is
    * auto-bound to the instance, and this avoids component

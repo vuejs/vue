@@ -1,16 +1,13 @@
 /* global __utils__ */
 
 casper.test.begin('todomvc', 63, function (test) {
-
   casper
   .start('examples/todomvc/index.html')
   .then(function () {
-
     test.assertNotVisible('.main', '.main should be hidden')
     test.assertNotVisible('.footer', '.footer should be hidden')
     test.assertElementCount('.filters .selected', 1, 'should have one filter selected')
     test.assertSelectorHasText('.filters .selected', 'All', 'default filter should be "All"')
-
   })
 
   // let's add a new item -----------------------------------------------
@@ -24,7 +21,6 @@ casper.test.begin('todomvc', 63, function (test) {
     createNewItem()
   })
   .then(function () {
-
     test.assertElementCount('.todo', 1, 'new item should be created')
     test.assertNotVisible('.todo .edit', 'new item edit box should be hidden')
     test.assertSelectorHasText('.todo label', 'test', 'new item should have correct label text')
@@ -32,12 +28,10 @@ casper.test.begin('todomvc', 63, function (test) {
     test.assertEvalEquals(function () {
       return __utils__.findOne('.todo .toggle').checked
     }, false, 'new item toggle should not be checked')
-
     test.assertVisible('.main', '.main should now be visible')
     test.assertVisible('.footer', '.footer should now be visible')
     test.assertNotVisible('.clear-completed', '.clear-completed should be hidden')
     test.assertField({type: 'css', path: '.new-todo'}, '', 'new todo input should be reset')
-
   })
 
   // add another item ---------------------------------------------------
@@ -58,7 +52,6 @@ casper.test.begin('todomvc', 63, function (test) {
     test.assertEval(function () {
       return __utils__.findOne('.todo').classList.contains('completed')
     }, 'it should be the first one')
-
     test.assertSelectorHasText('.todo-count strong', '1', 'remaining count should be 1')
     test.assertVisible('.clear-completed', '.clear-completed should now be visible')
   })
@@ -292,5 +285,4 @@ casper.test.begin('todomvc', 63, function (test) {
       document.querySelector('.todo:nth-child(1) .edit').value = ''
     })
   }
-
 })

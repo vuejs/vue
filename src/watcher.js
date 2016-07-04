@@ -1,8 +1,14 @@
-import { extend, warn, isArray, isObject, nextTick } from './util/index'
 import config from './config'
 import Dep from './observer/dep'
 import { parseExpression } from './parsers/expression'
 import { pushWatcher } from './batcher'
+import {
+  extend,
+  warn,
+  isArray,
+  isObject,
+  nextTick
+} from './util/index'
 
 let uid = 0
 
@@ -12,7 +18,7 @@ let uid = 0
  * This is used for both the $watch() api and directives.
  *
  * @param {Vue} vm
- * @param {String} expression
+ * @param {String|Function} expOrFn
  * @param {Function} cb
  * @param {Object} options
  *                 - {Array} filters
@@ -34,13 +40,15 @@ export default function Watcher (vm, expOrFn, cb, options) {
   var isFn = typeof expOrFn === 'function'
   this.vm = vm
   vm._watchers.push(this)
-  this.expression = isFn ? expOrFn.toString() : expOrFn
+  this.expression = expOrFn
   this.cb = cb
   this.id = ++uid // uid for batching
   this.active = true
   this.dirty = this.lazy // for lazy watchers
-  this.deps = Object.create(null)
-  this.newDeps = null
+  this.deps = []
+  this.newDeps = []
+  this.depIds = Object.create(null)
+  this.newDepIds = null
   this.prevError = null // for async error stacks
   // parse expression for getter/setter
   if (isFn) {
@@ -60,23 +68,6 @@ export default function Watcher (vm, expOrFn, cb, options) {
 }
 
 /**
- * Add a dependency to this directive.
- *
- * @param {Dep} dep
- */
-
-Watcher.prototype.addDep = function (dep) {
-  var id = dep.id
-  if (!this.newDeps[id]) {
-    this.newDeps[id] = dep
-    if (!this.deps[id]) {
-      this.deps[id] = dep
-      dep.addSub(this)
-    }
-  }
-}
-
-/**
  * Evaluate the getter, and re-collect dependencies.
  */
 
@@ -92,12 +83,9 @@ Watcher.prototype.get = function () {
       config.warnExpressionErrors
     ) {
       warn(
-        'Error when evaluating expression "' +
-        this.expression + '". ' +
-        (config.debug
-          ? ''
-          : 'Turn on debug mode to see stack trace.'
-        ), e
+        'Error when evaluating expression ' +
+        '"' + this.expression + '": ' + e.toString(),
+        this.vm
       )
     }
   }
@@ -139,8 +127,9 @@ Watcher.prototype.set = function (value) {
       config.warnExpressionErrors
     ) {
       warn(
-        'Error when evaluating setter "' +
-        this.expression + '"', e
+        'Error when evaluating setter ' +
+        '"' + this.expression + '": ' + e.toString(),
+        this.vm
       )
     }
   }
@@ -153,7 +142,8 @@ Watcher.prototype.set = function (value) {
         'a v-for alias (' + this.expression + '), and the ' +
         'v-for has filters. This will not work properly. ' +
         'Either remove the filters or use an array of ' +
-        'objects and bind to object properties instead.'
+        'objects and bind to object properties instead.',
+        this.vm
       )
       return
     }
@@ -173,7 +163,25 @@ Watcher.prototype.set = function (value) {
 
 Watcher.prototype.beforeGet = function () {
   Dep.target = this
-  this.newDeps = Object.create(null)
+  this.newDepIds = Object.create(null)
+  this.newDeps.length = 0
+}
+
+/**
+ * Add a dependency to this directive.
+ *
+ * @param {Dep} dep
+ */
+
+Watcher.prototype.addDep = function (dep) {
+  var id = dep.id
+  if (!this.newDepIds[id]) {
+    this.newDepIds[id] = true
+    this.newDeps.push(dep)
+    if (!this.depIds[id]) {
+      dep.addSub(this)
+    }
+  }
 }
 
 /**
@@ -182,15 +190,17 @@ Watcher.prototype.beforeGet = function () {
 
 Watcher.prototype.afterGet = function () {
   Dep.target = null
-  var ids = Object.keys(this.deps)
-  var i = ids.length
+  var i = this.deps.length
   while (i--) {
-    var id = ids[i]
-    if (!this.newDeps[id]) {
-      this.deps[id].removeSub(this)
+    var dep = this.deps[i]
+    if (!this.newDepIds[dep.id]) {
+      dep.removeSub(this)
     }
   }
+  this.depIds = this.newDepIds
+  var tmp = this.deps
   this.deps = this.newDeps
+  this.newDeps = tmp
 }
 
 /**
@@ -285,10 +295,9 @@ Watcher.prototype.evaluate = function () {
  */
 
 Watcher.prototype.depend = function () {
-  var depIds = Object.keys(this.deps)
-  var i = depIds.length
+  var i = this.deps.length
   while (i--) {
-    this.deps[depIds[i]].depend()
+    this.deps[i].depend()
   }
 }
 
@@ -299,15 +308,15 @@ Watcher.prototype.depend = function () {
 Watcher.prototype.teardown = function () {
   if (this.active) {
     // remove self from vm's watcher list
-    // we can skip this if the vm if being destroyed
-    // which can improve teardown performance.
-    if (!this.vm._isBeingDestroyed) {
+    // this is a somewhat expensive operation so we skip it
+    // if the vm is being destroyed or is performing a v-for
+    // re-render (the watcher list is then filtered by v-for).
+    if (!this.vm._isBeingDestroyed && !this.vm._vForRemoving) {
       this.vm._watchers.$remove(this)
     }
-    var depIds = Object.keys(this.deps)
-    var i = depIds.length
+    var i = this.deps.length
     while (i--) {
-      this.deps[depIds[i]].removeSub(this)
+      this.deps[i].removeSub(this)
     }
     this.active = false
     this.vm = this.cb = this.value = null

@@ -160,10 +160,11 @@ export function replace (target, el) {
  * @param {Element} el
  * @param {String} event
  * @param {Function} cb
+ * @param {Boolean} [useCapture]
  */
 
-export function on (el, event, cb) {
-  el.addEventListener(event, cb)
+export function on (el, event, cb, useCapture) {
+  el.addEventListener(event, cb, useCapture)
 }
 
 /**
@@ -179,6 +180,22 @@ export function off (el, event, cb) {
 }
 
 /**
+ * For IE9 compat: when both class and :class are present
+ * getAttribute('class') returns wrong value...
+ *
+ * @param {Element} el
+ * @return {String}
+ */
+
+function getClass (el) {
+  var classname = el.className
+  if (typeof classname === 'object') {
+    classname = classname.baseVal || ''
+  }
+  return classname
+}
+
+/**
  * In IE9, setAttribute('class') will result in empty class
  * if the element also has the :class attribute; However in
  * PhantomJS, setting `className` does not work on SVG elements...
@@ -190,7 +207,7 @@ export function off (el, event, cb) {
 
 export function setClass (el, cls) {
   /* istanbul ignore if */
-  if (isIE9 && !(el instanceof SVGElement)) {
+  if (isIE9 && !/svg$/.test(el.namespaceURI)) {
     el.className = cls
   } else {
     el.setAttribute('class', cls)
@@ -208,7 +225,7 @@ export function addClass (el, cls) {
   if (el.classList) {
     el.classList.add(cls)
   } else {
-    var cur = ' ' + (el.getAttribute('class') || '') + ' '
+    var cur = ' ' + getClass(el) + ' '
     if (cur.indexOf(' ' + cls + ' ') < 0) {
       setClass(el, (cur + cls).trim())
     }
@@ -226,7 +243,7 @@ export function removeClass (el, cls) {
   if (el.classList) {
     el.classList.remove(cls)
   } else {
-    var cur = ' ' + (el.getAttribute('class') || '') + ' '
+    var cur = ' ' + getClass(el) + ' '
     var tar = ' ' + cls + ' '
     while (cur.indexOf(tar) >= 0) {
       cur = cur.replace(tar, ' ')
@@ -244,17 +261,14 @@ export function removeClass (el, cls) {
  *
  * @param {Element} el
  * @param {Boolean} asFragment
- * @return {Element}
+ * @return {Element|DocumentFragment}
  */
 
 export function extractContent (el, asFragment) {
   var child
   var rawContent
   /* istanbul ignore if */
-  if (
-    isTemplate(el) &&
-    el.content instanceof DocumentFragment
-  ) {
+  if (isTemplate(el) && isFragment(el.content)) {
     el = el.content
   }
   if (el.hasChildNodes()) {
@@ -272,20 +286,29 @@ export function extractContent (el, asFragment) {
 }
 
 /**
- * Trim possible empty head/tail textNodes inside a parent.
+ * Trim possible empty head/tail text and comment
+ * nodes inside a parent.
  *
  * @param {Node} node
  */
 
 export function trimNode (node) {
-  trim(node, node.firstChild)
-  trim(node, node.lastChild)
+  var child
+  /* eslint-disable no-sequences */
+  while (child = node.firstChild, isTrimmable(child)) {
+    node.removeChild(child)
+  }
+  while (child = node.lastChild, isTrimmable(child)) {
+    node.removeChild(child)
+  }
+  /* eslint-enable no-sequences */
 }
 
-function trim (parent, node) {
-  if (node && node.nodeType === 3 && !node.data.trim()) {
-    parent.removeChild(node)
-  }
+function isTrimmable (node) {
+  return node && (
+    (node.nodeType === 3 && !node.data.trim()) ||
+    node.nodeType === 8
+  )
 }
 
 /**
@@ -323,7 +346,7 @@ export function createAnchor (content, persist) {
   var anchor = config.debug
     ? document.createComment(content)
     : document.createTextNode(persist ? ' ' : '')
-  anchor.__vue_anchor = true
+  anchor.__v_anchor = true
   return anchor
 }
 
@@ -394,5 +417,34 @@ export function removeNodeRange (start, end, vm, frag, cb) {
       }
       cb && cb()
     }
+  }
+}
+
+/**
+ * Check if a node is a DocumentFragment.
+ *
+ * @param {Node} node
+ * @return {Boolean}
+ */
+
+export function isFragment (node) {
+  return node && node.nodeType === 11
+}
+
+/**
+ * Get outerHTML of elements, taking care
+ * of SVG elements in IE as well.
+ *
+ * @param {Element} el
+ * @return {String}
+ */
+
+export function getOuterHTML (el) {
+  if (el.outerHTML) {
+    return el.outerHTML
+  } else {
+    var container = document.createElement('div')
+    container.appendChild(el.cloneNode(true))
+    return container.innerHTML
   }
 }

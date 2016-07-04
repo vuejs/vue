@@ -1,9 +1,8 @@
-var Vue = require('../../../../../src/index')
-var _ = require('../../../../../src/util')
-var compiler = require('../../../../../src/compiler')
+var Vue = require('src')
+var _ = require('src/util')
+var compiler = require('src/compiler')
 
 describe('Partial', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')
@@ -12,18 +11,18 @@ describe('Partial', function () {
   it('static', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<partial name="yo"></partial>',
+      template: '<partial name="p"></partial>',
       data: {
-        msg: 'hello'
+        msg: 'foo'
       },
       partials: {
-        yo: '{{msg}}'
+        p: '{{msg}}'
       }
     })
-    expect(el.textContent).toBe('hello')
-    vm.msg = 'what'
+    expect(el.textContent).toBe('foo')
+    vm.msg = 'bar'
     _.nextTick(function () {
-      expect(el.textContent).toBe('what')
+      expect(el.textContent).toBe('bar')
       done()
     })
   })
@@ -53,14 +52,14 @@ describe('Partial', function () {
       el: el,
       template: '<div v-for="id in list"><partial v-bind:name="\'test-\' + id"></partial></div>',
       data: {
-        list: ['a', 'b']
+        list: ['foo', 'bar']
       },
       partials: {
-        'test-a': 'a {{id}}',
-        'test-b': 'b {{id}}'
+        'test-foo': 'foo {{id}}',
+        'test-bar': 'bar {{id}}'
       }
     })
-    expect(el.textContent).toBe('a ab b')
+    expect(el.textContent).toBe('foo foobar bar')
   })
 
   it('caching', function () {
@@ -76,16 +75,16 @@ describe('Partial', function () {
         '<partial name="cache-test"></partial> ' +
         '<partial name="cache-test"></partial>',
       partials: {
-        'cache-test': 'cache-test {{msg}}'
+        'cache-test': 'foo {{msg}}'
       }
     })
     new Comp({
       el: el,
       data: {
-        msg: 'hi'
+        msg: 'bar'
       }
     })
-    expect(el.textContent).toBe('cache-test hi cache-test hi')
+    expect(el.textContent).toBe('foo bar foo bar')
     // one call for instance, and one for partial
     expect(calls).toBe(2)
     // cleanup
@@ -118,5 +117,4 @@ describe('Partial', function () {
     expect(vm._directives[0].name).toBe('partial')
     expect(vm._watchers.length).toBe(0)
   })
-
 })

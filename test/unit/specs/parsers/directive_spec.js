@@ -1,7 +1,6 @@
-var parse = require('../../../../src/parsers/directive').parseDirective
+var parse = require('src/parsers/directive').parseDirective
 
 describe('Directive Parser', function () {
-
   it('simple', function () {
     var res = parse('exp')
     expect(res.expression).toBe('exp')

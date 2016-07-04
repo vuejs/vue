@@ -1,12 +1,12 @@
-var Vue = require('../../../../src/index')
-var _ = require('../../../../src/util')
-var compiler = require('../../../../src/compiler')
+var Vue = require('src')
+var _ = require('src/util')
+var FragmentFactory = require('src/fragment/factory')
+var compiler = require('src/compiler')
 var compile = compiler.compile
-var publicDirectives = require('../../../../src/directives/public')
-var internalDirectives = require('../../../../src/directives/internal')
+var publicDirectives = require('src/directives/public')
+var internalDirectives = require('src/directives/internal')
 
 describe('Compile', function () {
-
   var vm, el, data, directiveBind, directiveTeardown
   beforeEach(function () {
     // We mock vms here so we can assert what the generated
@@ -28,6 +28,9 @@ describe('Compile', function () {
           _teardown: directiveTeardown
         })
       },
+      $get: function (exp) {
+        return (new Vue()).$get(exp)
+      },
       $eval: function (value) {
         return data[value]
       },
@@ -44,12 +47,11 @@ describe('Compile', function () {
     spyOn(vm, '_bindDir').and.callThrough()
     spyOn(vm, '$eval').and.callThrough()
     spyOn(vm, '$interpolate').and.callThrough()
-    spyWarns()
   })
 
   it('normal directives', function () {
     el.setAttribute('v-a', 'b')
-    el.innerHTML = '<p v-a:hello.a.b="a" v-b="1">hello</p><div v-b.literal="hi"></div>'
+    el.innerHTML = '<p v-a:hello.a.b="a" v-b="1">hello</p><div v-b.literal="foo"></div>'
     var defA = { priority: 1 }
     var defB = { priority: 2 }
     var options = _.mergeOptions(Vue.options, {
@@ -93,7 +95,7 @@ describe('Compile', function () {
     // 4 (explicit literal)
     args = vm._bindDir.calls.argsFor(3)
     expect(args[0].name).toBe('b')
-    expect(args[0].expression).toBe('hi')
+    expect(args[0].expression).toBe('foo')
     expect(args[0].def).toBe(defB)
     expect(args[0].modifiers.literal).toBe(true)
     expect(args[1]).toBe(el.lastChild)
@@ -217,7 +219,7 @@ describe('Compile', function () {
   })
 
   it('inline html', function () {
-    data.html = '<div>yoyoyo</div>'
+    data.html = '<div>foo</div>'
     el.innerHTML = '{{{html}}} {{{*html}}}'
     var htmlDef = Vue.options.directives.html
     var linker = compile(el, Vue.options)
@@ -228,7 +230,7 @@ describe('Compile', function () {
     expect(htmlArgs[0].expression).toBe('html')
     expect(htmlArgs[0].def).toBe(htmlDef)
     // with placeholder comments & interpolated one-time html
-    expect(el.innerHTML).toBe('<!--v-html--> <div>yoyoyo</div>')
+    expect(el.innerHTML).toBe('<!--v-html--> <div>foo</div>')
   })
 
   it('terminal directives', function () {
@@ -246,6 +248,48 @@ describe('Compile', function () {
     expect(args[0].expression).toBe('item in items')
     expect(args[0].def).toBe(def)
     expect(args[1]).toBe(el.firstChild)
+  })
+
+  it('custom terminal directives', function () {
+    var defTerminal = {
+      terminal: true,
+      priority: Vue.options.directives.if.priority + 1
+    }
+    var options = _.mergeOptions(Vue.options, {
+      directives: { term: defTerminal }
+    })
+    el.innerHTML = '<div v-term:arg1.modifier1.modifier2="foo"></div>'
+    var linker = compile(el, options)
+    linker(vm, el)
+    expect(vm._bindDir.calls.count()).toBe(1)
+    var args = vm._bindDir.calls.argsFor(0)
+    expect(args[0].name).toBe('term')
+    expect(args[0].expression).toBe('foo')
+    expect(args[0].attr).toBe('v-term:arg1.modifier1.modifier2')
+    expect(args[0].arg).toBe('arg1')
+    expect(args[0].modifiers.modifier1).toBe(true)
+    expect(args[0].modifiers.modifier2).toBe(true)
+    expect(args[0].def).toBe(defTerminal)
+  })
+
+  it('custom terminal directives priority', function () {
+    var defTerminal = {
+      terminal: true,
+      priority: Vue.options.directives.if.priority + 1
+    }
+    var options = _.mergeOptions(Vue.options, {
+      directives: { term: defTerminal }
+    })
+    el.innerHTML = '<div v-term:arg1 v-if="ok"></div>'
+    var linker = compile(el, options)
+    linker(vm, el)
+    expect(vm._bindDir.calls.count()).toBe(1)
+    var args = vm._bindDir.calls.argsFor(0)
+    expect(args[0].name).toBe('term')
+    expect(args[0].expression).toBe('')
+    expect(args[0].attr).toBe('v-term:arg1')
+    expect(args[0].arg).toBe('arg1')
+    expect(args[0].def).toBe(defTerminal)
   })
 
   it('custom element components', function () {
@@ -276,7 +320,9 @@ describe('Compile', function () {
       twoWayWarn: null,
       testOneTime: null,
       optimizeLiteral: null,
-      optimizeLiteralStr: null
+      optimizeLiteralStr: null,
+      optimizeLiteralNegativeNumber: null,
+      literalWithFilter: null
     }
     el.innerHTML = '<div ' +
       'v-bind:test-normal="a" ' +
@@ -284,23 +330,24 @@ describe('Compile', function () {
       'test-boolean ' +
       ':optimize-literal="1" ' +
       ':optimize-literal-str="\'true\'"' +
+      ':optimize-literal-negative-number="-1"' +
       ':test-two-way.sync="a" ' +
       ':two-way-warn.sync="a + 1" ' +
-      ':test-one-time.once="a"></div>'
+      ':test-one-time.once="a" ' +
+      ':literal-with-filter="\'FOO\' | lowercase"' +
+      '></div>'
     compiler.compileAndLinkProps(vm, el.firstChild, props)
-    expect(vm._bindDir.calls.count()).toBe(3) // skip literal and one time
+    // check bindDir calls:
+    // skip literal and one time, but not literal with filter
+    expect(vm._bindDir.calls.count()).toBe(4)
     // literal
     expect(vm.testLiteral).toBe('1')
-    expect(vm._data.testLiteral).toBe('1')
     expect(vm.testBoolean).toBe(true)
-    expect(vm._data.testBoolean).toBe(true)
     expect(vm.optimizeLiteral).toBe(1)
-    expect(vm._data.optimizeLiteral).toBe(1)
     expect(vm.optimizeLiteralStr).toBe('true')
-    expect(vm._data.optimizeLiteralStr).toBe('true')
+    expect(vm.optimizeLiteralNegativeNumber).toBe(-1)
     // one time
     expect(vm.testOneTime).toBe('from parent: a')
-    expect(vm._data.testOneTime).toBe('from parent: a')
     // normal
     var args = vm._bindDir.calls.argsFor(0)
     var prop = args[0].prop
@@ -316,19 +363,27 @@ describe('Compile', function () {
     expect(prop.parentPath).toBe('a')
     expect(prop.mode).toBe(bindingModes.TWO_WAY)
     // two way warn
-    expect(hasWarned('non-settable parent path')).toBe(true)
+    expect('non-settable parent path').toHaveBeenWarned()
+    // literal with filter
+    args = vm._bindDir.calls.argsFor(3)
+    prop = args[0].prop
+    expect(args[0].name).toBe('prop')
+    expect(prop.path).toBe('literalWithFilter')
+    expect(prop.parentPath).toBe("'FOO'")
+    expect(prop.filters.length).toBe(1)
+    expect(prop.mode).toBe(bindingModes.ONE_WAY)
   })
 
   it('props on root instance', function () {
     // temporarily remove vm.$parent
     var context = vm._context
     vm._context = null
-    el.setAttribute('v-bind:a', '"hi"')
-    el.setAttribute(':b', 'hi')
+    el.setAttribute('v-bind:a', '"foo"')
+    el.setAttribute(':b', '[1,2,3]')
     compiler.compileAndLinkProps(vm, el, { a: null, b: null })
     expect(vm._bindDir.calls.count()).toBe(0)
-    expect(vm._data.a).toBe('hi')
-    expect(hasWarned('Cannot bind dynamic prop on a root')).toBe(true)
+    expect(vm.a).toBe('foo')
+    expect(vm.b.join(',')).toBe('1,2,3')
     // restore parent mock
     vm._context = context
   })
@@ -398,7 +453,7 @@ describe('Compile', function () {
       el: el,
       template: '<test :msg="msg"></test>',
       data: {
-        msg: 'hi'
+        msg: 'foo'
       },
       components: {
         test: {
@@ -427,7 +482,7 @@ describe('Compile', function () {
       },
       components: {
         test: {
-          template: 'hi'
+          template: 'foo'
         }
       }
     })
@@ -526,6 +581,24 @@ describe('Compile', function () {
     })
   })
 
+  it('attribute interpolation: one-time', function (done) {
+    var vm = new Vue({
+      el: el,
+      template: '<div id="{{a}} b {{*c}}"></div>',
+      data: {
+        a: 'aaa',
+        c: 'ccc'
+      }
+    })
+    expect(el.firstChild.id).toBe('aaa b ccc')
+    vm.a = 'aa'
+    vm.c = 'cc'
+    _.nextTick(function () {
+      expect(el.firstChild.id).toBe('aa b ccc')
+      done()
+    })
+  })
+
   it('attribute interpolation: special cases', function () {
     new Vue({
       el: el,
@@ -548,7 +621,7 @@ describe('Compile', function () {
       }
     })
     expect(el.innerHTML).toBe('<div></div>')
-    expect(hasWarned('attribute interpolation is not allowed in Vue.js directives')).toBe(true)
+    expect('attribute interpolation is not allowed in Vue.js directives').toHaveBeenWarned()
   })
 
   it('attribute interpolation: warn mixed usage with v-bind', function () {
@@ -556,16 +629,16 @@ describe('Compile', function () {
       el: el,
       template: '<div class="{{a}}" :class="bcd"></div>',
       data: {
-        a: 'hi'
+        a: 'foo'
       }
     })
-    expect(hasWarned('Do not mix mustache interpolation and v-bind')).toBe(true)
+    expect('Do not mix mustache interpolation and v-bind').toHaveBeenWarned()
   })
 
   it('warn directives on fragment instances', function () {
     new Vue({
       el: el,
-      template: '<test id="hi" class="ok" :prop="123"></test>',
+      template: '<test id="foo" class="ok" :prop="123"></test>',
       components: {
         test: {
           replace: true,
@@ -575,10 +648,10 @@ describe('Compile', function () {
       }
     })
     expect(getWarnCount()).toBe(1)
-    expect(
-      hasWarned('Attributes "id", "class" are ignored on component <test>', true) ||
-      hasWarned('Attributes "class", "id" are ignored on component <test>')
-    ).toBe(true)
+    expect([
+      'Attributes "id", "class" are ignored on component <test>',
+      'Attributes "class", "id" are ignored on component <test>'
+    ]).toHaveBeenWarned()
   })
 
   it('should compile component container directives using correct context', function () {
@@ -592,9 +665,53 @@ describe('Compile', function () {
         }
       },
       template: '<comp v-test></comp>',
-      components: { comp: { template: '<div></div>'}}
+      components: { comp: { template: '<div></div>' }}
     })
     expect(el.textContent).toBe('worked!')
     expect(getWarnCount()).toBe(0)
+  })
+
+  // #xxx
+  it('should compile build-in terminal directive wihtout loop', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: { show: false },
+      template: '<p v-if:arg1.modifier1="show">hello world</p>'
+    })
+    vm.show = true
+    _.nextTick(function () {
+      expect(el.textContent).toBe('hello world')
+      done()
+    })
+  })
+
+  it('should compile custom terminal directive wihtout loop', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: { show: false },
+      template: '<p v-if="show" v-inject:modal.modifier1="foo">hello world</p>',
+      directives: {
+        inject: {
+          terminal: true,
+          priority: Vue.options.directives.if.priority + 1,
+          bind: function () {
+            this.anchor = _.createAnchor('v-inject')
+            _.replace(this.el, this.anchor)
+            var factory = new FragmentFactory(this.vm, this.el)
+            this.frag = factory.create(this._host, this._scope, this._frag)
+            this.frag.before(this.anchor)
+          },
+          unbind: function () {
+            this.frag.remove()
+            _.replace(this.anchor, this.el)
+          }
+        }
+      }
+    })
+    vm.show = true
+    _.nextTick(function () {
+      expect(el.textContent).toBe('hello world')
+      done()
+    })
   })
 })

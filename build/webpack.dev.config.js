@@ -1,9 +1,10 @@
+var path = require('path')
 var webpack = require('webpack')
 
 module.exports = {
   entry: './src/index',
   output: {
-    path: './dist',
+    path: path.resolve(__dirname, '../dist'),
     filename: 'vue.js',
     library: 'Vue',
     libraryTarget: 'umd'
@@ -23,5 +24,5 @@ module.exports = {
       }
     })
   ],
-  devtool: '#source-map'
+  devtool: 'source-map'
 }

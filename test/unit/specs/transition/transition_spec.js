@@ -1,11 +1,10 @@
-var Vue = require('../../../../src/index')
-var _ = require('../../../../src/util')
-var transition = require('../../../../src/transition')
-var Transition = require('../../../../src/transition/transition')
+var Vue = require('src')
+var _ = require('src/util')
+var transition = require('src/transition')
+var Transition = require('src/transition/transition')
 
 if (!_.isIE9) {
   describe('Transition', function () {
-
     // insert a test css
     function insertCSS (text) {
       var cssEl = document.createElement('style')
@@ -13,20 +12,20 @@ if (!_.isIE9) {
       document.head.appendChild(cssEl)
     }
 
-    var duration = '50ms'
+    var duration = 100
     insertCSS(
       '.test {\
-        transition: opacity ' + duration + ' ease;\
-        -webkit-transition: opacity ' + duration + ' ease;}'
+        transition: opacity ' + duration + 'ms ease;\
+        -webkit-transition: opacity ' + duration + 'ms ease;}'
     )
     insertCSS('.test-enter, .test-leave { opacity: 0; }')
     insertCSS(
       '.test-anim-enter {\
-        animation: test-enter ' + duration + ';\
-        -webkit-animation: test-enter ' + duration + ';}\
+        animation: test-enter ' + duration + 'ms;\
+        -webkit-animation: test-enter ' + duration + 'ms;}\
       .test-anim-leave {\
-        animation: test-leave ' + duration + ';\
-        -webkit-animation: test-leave ' + duration + ';}\
+        animation: test-leave ' + duration + 'ms;\
+        -webkit-animation: test-leave ' + duration + 'ms;}\
       @keyframes test-enter {\
         from { opacity: 0 }\
         to { opacity: 1 }}\
@@ -42,7 +41,6 @@ if (!_.isIE9) {
     )
 
     describe('Wrapper methods', function () {
-
       var spy, el, target, parent, vm
       beforeEach(function () {
         el = document.createElement('div')
@@ -72,11 +70,9 @@ if (!_.isIE9) {
         expect(parent.childNodes.length).toBe(0)
         expect(spy).toHaveBeenCalled()
       })
-
     })
 
     describe('Skipping', function () {
-
       var el, vm, op, cb
       beforeEach(function () {
         el = document.createElement('div')
@@ -121,13 +117,11 @@ if (!_.isIE9) {
         expect(cb).toHaveBeenCalled()
         _.transitionEndEvent = e
       })
-
     })
 
     describe('CSS transitions', function () {
-
       var vm, el, op, cb, hooks
-      beforeEach(function (done) {
+      beforeEach(function () {
         el = document.createElement('div')
         el.textContent = 'hello'
         vm = new Vue({ el: el })
@@ -144,7 +138,9 @@ if (!_.isIE9) {
         }
         // !IMPORTANT!
         // this ensures we force a layout for every test.
-        _.nextTick(done)
+        /* eslint-disable no-unused-vars */
+        var f = document.body.offsetHeight
+        /* eslint-enable no-unused-vars */
       })
 
       afterEach(function () {
@@ -198,7 +194,7 @@ if (!_.isIE9) {
               expect(el.classList.contains('test-no-trans-leave')).toBe(false)
               done()
             })
-          }, 17)
+          }, 50)
         })
       })
 
@@ -207,7 +203,7 @@ if (!_.isIE9) {
         el.__v_trans = new Transition(el, 'test', hooks, vm)
         // inline style
         el.style.transition =
-        el.style.WebkitTransition = 'opacity ' + duration + ' ease'
+        el.style.WebkitTransition = 'opacity ' + duration + 'ms ease'
         transition.applyTransition(el, 1, function () {
           document.body.appendChild(el)
           op()
@@ -227,12 +223,42 @@ if (!_.isIE9) {
         })
       })
 
+      it('transition enter for svg', function (done) {
+        el.innerHTML = '<svg><circle cx="0" cy="0" r="10"></circle></svg>'
+        var svg = el.querySelector('svg')
+        var circle = el.querySelector('circle')
+        svg.removeChild(circle)
+        circle.__v_trans = new Transition(circle, 'test', hooks, vm)
+        // inline style
+        circle.style.transition =
+        circle.style.WebkitTransition = 'opacity ' + duration + 'ms ease'
+        transition.applyTransition(circle, 1, function () {
+          svg.appendChild(circle)
+          op()
+        }, vm, cb)
+        expect(hooks.beforeEnter).toHaveBeenCalled()
+        expect(hooks.enter).toHaveBeenCalled()
+        expect(op).toHaveBeenCalled()
+        expect(cb).not.toHaveBeenCalled()
+        _.nextTick(function () {
+          expect(circle.getAttribute('class').indexOf('test-enter') > -1).toBe(false)
+          expect(hooks.afterEnter).not.toHaveBeenCalled()
+          _.on(circle, _.transitionEndEvent, function () {
+            expect(cb).toHaveBeenCalled()
+            expect(hooks.afterEnter).toHaveBeenCalled()
+            done()
+          })
+        })
+      })
+
       it('transition leave', function (done) {
         el.__v_trans = new Transition(el, 'test', hooks, vm)
         // cascaded class style
         el.classList.add('test')
         // force a layout here so the transition can be triggered
+        /* eslint-disable no-unused-vars */
         var f = el.offsetHeight
+        /* eslint-enable no-unused-vars */
         transition.applyTransition(el, -1, op, vm, cb)
         expect(hooks.beforeLeave).toHaveBeenCalled()
         expect(hooks.leave).toHaveBeenCalled()
@@ -249,7 +275,32 @@ if (!_.isIE9) {
             done()
           })
         })
-        return f
+      })
+
+      it('transition leave for svg', function (done) {
+        el.innerHTML = '<svg><circle cx="0" cy="0" r="10" class="test"></circle></svg>'
+        var circle = el.querySelector('circle')
+        circle.__v_trans = new Transition(circle, 'test', hooks, vm)
+        // force a layout here so the transition can be triggered
+        /* eslint-disable no-unused-vars */
+        var f = el.offsetHeight
+        /* eslint-enable no-unused-vars */
+        transition.applyTransition(circle, -1, op, vm, cb)
+        expect(hooks.beforeLeave).toHaveBeenCalled()
+        expect(hooks.leave).toHaveBeenCalled()
+        _.nextTick(function () {
+          expect(op).not.toHaveBeenCalled()
+          expect(cb).not.toHaveBeenCalled()
+          expect(hooks.afterLeave).not.toHaveBeenCalled()
+          expect(circle.getAttribute('class').indexOf('test-leave') > -1).toBe(true)
+          _.on(circle, _.transitionEndEvent, function () {
+            expect(op).toHaveBeenCalled()
+            expect(cb).toHaveBeenCalled()
+            expect(circle.getAttribute('class').indexOf('test-leave') > -1).toBe(false)
+            expect(hooks.afterLeave).toHaveBeenCalled()
+            done()
+          })
+        })
       })
 
       it('animation enter', function (done) {
@@ -308,7 +359,7 @@ if (!_.isIE9) {
           setTimeout(function () {
             enterDone()
             testDone()
-          }, 100)
+          }, duration * 1.5)
         }
 
         el.__v_trans = new Transition(el, 'test', hooks, vm)
@@ -351,7 +402,7 @@ if (!_.isIE9) {
           setTimeout(function () {
             enterDone()
             testDone()
-          }, 20)
+          }, duration / 2)
         }
 
         el.__v_trans = new Transition(el, 'test', hooks, vm)
@@ -427,11 +478,9 @@ if (!_.isIE9) {
           })
         })
       })
-
     })
 
     describe('JavaScript only transitions', function () {
-
       var el, vm, op, cb, hooks
       beforeEach(function () {
         hooks = {}
@@ -505,7 +554,7 @@ if (!_.isIE9) {
         var leaveSpy = jasmine.createSpy('js leave')
         var timeout
         hooks.enter = function (el, done) {
-          timeout = setTimeout(done, 30)
+          timeout = setTimeout(done, duration / 2)
         }
         hooks.enterCancelled = function () {
           clearTimeout(timeout)
@@ -524,8 +573,8 @@ if (!_.isIE9) {
           setTimeout(function () {
             expect(cb).not.toHaveBeenCalled()
             done()
-          }, 30)
-        }, 15)
+          }, duration / 2)
+        }, duration / 4)
       })
     })
   })

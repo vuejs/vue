@@ -1,6 +1,6 @@
 machine:
   node:
-    version: 4
+    version: 5
 
 general:
   branches:

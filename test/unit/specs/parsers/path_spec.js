@@ -1,5 +1,5 @@
-var Path = require('../../../../src/parsers/path')
-var _ = require('../../../../src/util')
+var Path = require('src/parsers/path')
+var _ = require('src/util')
 
 function assertPath (str, expected) {
   var path = Path.parsePath(str)
@@ -28,7 +28,6 @@ function pathMatch (a, b) {
 }
 
 describe('Path Parser', function () {
-
   it('parse simple paths', function () {
     assertPath('', [])
     assertPath(' ', [])
@@ -163,5 +162,4 @@ describe('Path Parser', function () {
     var res = Path.setPath({}, 'ab[c]d', 123)
     expect(res).toBe(false)
   })
-
 })
