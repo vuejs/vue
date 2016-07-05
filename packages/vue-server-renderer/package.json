@@ -18,7 +18,8 @@
     "url": "https://github.com/vuejs/vue/issues"
   },
   "dependencies": {
-    "entities": "^1.1.1"
+    "entities": "^1.1.1",
+    "de-indent": "^1.0.2"
   },
   "homepage": "https://github.com/vuejs/vue#readme"
 }

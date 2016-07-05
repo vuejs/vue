@@ -1,11 +1,10 @@
 import Vue from '../../dist/vue.common.js'
-import { compileToFunctions } from '../../packages/vue-template-compiler'
 import { createRenderer } from '../../packages/vue-server-renderer'
 const { renderToStream } = createRenderer()
 
 describe('SSR: renderToStream', () => {
   it('should render to a stream', done => {
-    const stream = renderVmWithOptions({
+    const stream = renderToStream(new Vue({
       template: `
         <div>
           <p class="hi">yoyo</p>
@@ -45,7 +44,7 @@ describe('SSR: renderToStream', () => {
           }
         }
       }
-    })
+    }))
     let res = ''
     stream.on('data', chunk => {
       res += chunk
@@ -78,10 +77,3 @@ describe('SSR: renderToStream', () => {
     stream.on('data', _ => _)
   })
 })
-
-function renderVmWithOptions (options) {
-  const res = compileToFunctions(options.template)
-  Object.assign(options, res)
-  delete options.template
-  return renderToStream(new Vue(options))
-}

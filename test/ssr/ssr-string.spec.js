@@ -1,5 +1,4 @@
 import Vue from '../../dist/vue.common.js'
-import { compileToFunctions } from '../../packages/vue-template-compiler'
 import { createRenderer } from '../../packages/vue-server-renderer'
 const { renderToString } = createRenderer()
 
@@ -223,11 +222,13 @@ describe('SSR: renderToString', () => {
       `,
       components: {
         testAsync (resolve) {
-          const options = compileToFunctions(`
-            <span class="b">
-              <test-sub-async></test-sub-async>
-            </span>
-          `, { preserveWhitespace: false })
+          const options = {
+            template: `
+              <span class="b">
+                <test-sub-async></test-sub-async>
+              </span>
+            `
+          }
 
           options.components = {
             testSubAsync (resolve) {
@@ -475,9 +476,6 @@ describe('SSR: renderToString', () => {
 })
 
 function renderVmWithOptions (options, cb) {
-  const res = compileToFunctions(options.template)
-  Object.assign(options, res)
-  delete options.template
   renderToString(new Vue(options), (err, res) => {
     expect(err).toBeNull()
     cb(res)

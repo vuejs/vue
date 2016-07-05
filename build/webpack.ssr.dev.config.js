@@ -13,7 +13,8 @@ module.exports = {
     alias: alias
   },
   externals: {
-    'entities': true
+    'entities': true,
+    'de-indent': true
   },
   module: {
     noParse: /run-in-vm/,

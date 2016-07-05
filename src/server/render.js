@@ -1,6 +1,7 @@
 /* @flow */
 
 import { encodeHTML } from 'entities'
+import { compileToFunctions } from 'web/compiler/index'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
 const normalizeAsync = (cache, method) => {
@@ -11,6 +12,18 @@ const normalizeAsync = (cache, method) => {
     return (key, cb) => fn.call(cache, key, cb)
   } else {
     return (key, cb) => cb(fn.call(cache, key))
+  }
+}
+
+const compilationCache = Object.create(null)
+const normalizeRender = vm => {
+  const { render, template } = vm.$options
+  if (!render && template) {
+    const renderFns = (
+      compilationCache[template] ||
+      (compilationCache[template] = compileToFunctions(template))
+    )
+    Object.assign(vm.$options, renderFns)
   }
 }
 
@@ -77,9 +90,11 @@ export function createRenderFunction (
   }
 
   function renderComponent (node, write, next, isRoot) {
-    const child = createComponentInstanceForVnode(node)._render()
-    child.parent = node
-    renderNode(child, write, next, isRoot)
+    const child = createComponentInstanceForVnode(node)
+    normalizeRender(child)
+    const childNode = child._render()
+    childNode.parent = node
+    renderNode(childNode, write, next, isRoot)
   }
 
   function renderComponentWithCache (node, write, next, isRoot, cache, key) {
@@ -179,6 +194,7 @@ export function createRenderFunction (
     write: (text: string, next: Function) => void,
     done: Function
   ) {
+    normalizeRender(component)
     renderNode(component._render(), write, done, true)
   }
 }

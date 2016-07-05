@@ -1,6 +1,5 @@
 'use strict'
 
-const compiler = require('../../packages/vue-template-compiler')
 const self = (global || root)
 
 self.performance = {
@@ -26,7 +25,7 @@ function generateGrid (rowCount, columnCount) {
 
 const gridData = generateGrid(1000, 10)
 
-var gridComponent = {
+module.exports = {
   template: '<div><h1>{{ Math.random() }}</h1><my-table></my-table></div>',
   components: {
     myTable: {
@@ -58,23 +57,3 @@ var gridComponent = {
     }
   }
 }
-
-function createCompiledOptions (options) {
-  const res = compiler.compileToFunctions(options.template, {
-    preserveWhitespace: false
-  })
-  Object.assign(options, res)
-  delete options.template
-  if (options.components) {
-    const keys = Object.keys(options.components)
-    let total = keys.length
-    while (total) {
-      const name = keys[total - 1]
-      options.components[name] = createCompiledOptions(options.components[name])
-      total--
-    }
-  }
-  return options
-}
-
-module.exports = createCompiledOptions(gridComponent)
