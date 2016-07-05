@@ -124,6 +124,7 @@ strats.el = function (parentVal, childVal, vm) {
 strats.init =
 strats.created =
 strats.ready =
+strats.hotreload =
 strats.attached =
 strats.detached =
 strats.beforeCompile =
