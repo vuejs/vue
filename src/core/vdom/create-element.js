@@ -41,16 +41,27 @@ function _createElement (
     // in case of component :is set to falsy value
     return emptyVNode()
   }
-  const Ctor = typeof tag === 'string'
-    ? resolveAsset(context.$options, 'components', tag)
-    : tag
-  if (Ctor) {
-    return createComponent(Ctor, data, parent, context, host, children)
-  } else if (typeof tag === 'string') {
-    const ns = config.getTagNamespace(tag)
-    return new VNode(
-      tag, data, normalizeChildren(children, ns),
-      undefined, undefined, ns, context, host
-    )
+  if (typeof tag === 'string') {
+    let Ctor, ns
+    if (config.isReservedTag(tag) || (ns = config.getTagNamespace(tag))) {
+      // platform built-in elements
+      return new VNode(
+        tag, data, normalizeChildren(children, ns),
+        undefined, undefined, ns, context, host
+      )
+    } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
+      // component
+      return createComponent(Ctor, data, parent, context, host, children)
+    } else {
+      // unknown element, but check at runtime because it may get assigned
+      // a namespace when its parent normalizes children
+      return new VNode(
+        tag, data, normalizeChildren(children),
+        undefined, undefined, ns, context, host
+      )
+    }
+  } else {
+    // direct component options / constructor
+    return createComponent(tag, data, parent, context, host, children)
   }
 }
