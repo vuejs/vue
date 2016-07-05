@@ -35,7 +35,7 @@ export function compile (
 export function compileToFunctions (
   template: string,
   options?: CompilerOptions,
-  vm: Component
+  vm?: Component
 ): CompiledFunctionResult {
   const _warn = (options && options.warn) || warn
   // detect possible CSP restriction
