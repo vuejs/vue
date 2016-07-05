@@ -50,11 +50,11 @@ It could be you!
   <img width="200px" src="http://assets.invoicemachine.com/images/flat_logo.png">
 </a>
 
-<a href="https://statamic.com/"></a>
+<a href="https://statamic.com/">
   <img width="240px" src="http://i.imgur.com/MRIkKgp.png">
 </a>
 
-<a href="http://nodividestudio.com/"></a>
+<a href="http://nodividestudio.com/">
   <img width="100px" src="https://cloud.githubusercontent.com/assets/499550/16464256/552c2306-3e07-11e6-867f-e4f5ac64bace.png"> No Divide Studio
 </a>
 
