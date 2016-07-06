@@ -62,6 +62,17 @@ function applyNS (vnode, ns) {
   }
 }
 
+// in case the child is also an abstract component, e.g. <transition-control>
+// we want to recrusively retrieve the real component to be rendered
+export function getRealChild (vnode) {
+  const compOptions = vnode && vnode.componentOptions
+  if (compOptions && compOptions.Ctor.options._abstract) {
+    return getRealChild(compOptions.propsData.child)
+  } else {
+    return vnode
+  }
+}
+
 export function updateListeners (
   on: Object,
   oldOn: Object,

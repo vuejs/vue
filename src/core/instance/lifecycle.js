@@ -86,7 +86,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       vm.$el.__vue__ = vm
     }
     // update parent vnode element after patch
-    const parentNode = vm.$options._parentVnode
+    const parentNode = vm.$vnode
     if (parentNode) {
       parentNode.elm = vm.$el
       // update parent $el if the parent is HOC

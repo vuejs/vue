@@ -1,4 +1,5 @@
 import { callHook } from 'core/instance/lifecycle'
+import { getRealChild } from 'core/vdom/helpers'
 
 export default {
   name: 'keep-alive',
@@ -28,16 +29,5 @@ export default {
       callHook(vnode.child, 'deactivated')
       vnode.child.$destroy()
     }
-  }
-}
-
-// in case the child is also an abstract component, e.g. <transition-control>
-// we want to recrusively retrieve the real component to be rendered
-function getRealChild (vnode) {
-  const compOptions = vnode && vnode.componentOptions
-  if (compOptions && compOptions.Ctor.options._abstract) {
-    return getRealChild(compOptions.propsData.child)
-  } else {
-    return vnode
   }
 }

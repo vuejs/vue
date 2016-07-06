@@ -1,6 +1,7 @@
 /* flow */
 
 import { warn } from 'core/util/index'
+import { getRealChild } from 'core/vdom/helpers'
 
 export default {
   name: 'transition-control',
@@ -20,7 +21,7 @@ export default {
   },
   render () {
     const oldChild = this._vnode
-    const newChild = this.child
+    const newChild = getRealChild(this.child)
     if (oldChild && oldChild.data && (
       oldChild.tag !== newChild.tag ||
       oldChild.key !== newChild.key

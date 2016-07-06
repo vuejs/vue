@@ -44,10 +44,7 @@ declare interface VNodeData {
   staticAttrs?: { [key: string]: string };
   hook?: { [key: string]: Function };
   on?: { [key: string]: Function | Array<Function> };
-  transition?: {
-    definition: String | Object,
-    appear: boolean
-  };
+  transition?: string | Object;
   inlineTemplate?: {
     render: Function,
     staticRenderFns: Array<Function>
