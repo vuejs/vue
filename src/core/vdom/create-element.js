@@ -51,7 +51,7 @@ function _createElement (
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
-      return createComponent(Ctor, data, parent, context, host, children)
+      return createComponent(Ctor, data, parent, context, host, children, tag)
     } else {
       // unknown element, but check at runtime because it may get assigned
       // a namespace when its parent normalizes children
