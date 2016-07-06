@@ -11,10 +11,15 @@ type PropOptions = {
   validator: ?Function
 }
 
-export function validateProp (vm: Component, key: string, propsData: ?Object): any {
+export function validateProp (
+  key: string,
+  propOptions: Object,
+  propsData: ?Object,
+  vm?: Component
+): any {
   /* istanbul ignore if */
-  if (!vm.$options.props || !propsData) return
-  const prop = vm.$options.props[key]
+  if (!propsData) return
+  const prop = propOptions[key]
   const absent = !hasOwn(propsData, key)
   let value = propsData[key]
   // handle boolean props
@@ -43,7 +48,7 @@ export function validateProp (vm: Component, key: string, propsData: ?Object): a
 /**
  * Get the default value of a prop.
  */
-function getPropDefaultValue (vm: Component, prop: PropOptions, name: string): any {
+function getPropDefaultValue (vm: ?Component, prop: PropOptions, name: string): any {
   // no default, return undefined
   if (!hasOwn(prop, 'default')) {
     return undefined
@@ -71,7 +76,7 @@ function assertProp (
   prop: PropOptions,
   name: string,
   value: any,
-  vm: Component,
+  vm: ?Component,
   absent: boolean
 ) {
   if (prop.required && absent) {

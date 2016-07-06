@@ -4,7 +4,7 @@ import Vue from '../instance/index'
 import VNode from './vnode'
 import { normalizeChildren } from './helpers'
 import { callHook } from '../instance/lifecycle'
-import { warn, isObject, hasOwn, hyphenate } from '../util/index'
+import { warn, isObject, hasOwn, hyphenate, validateProp } from '../util/index'
 
 const hooks = { init, prepatch, insert, destroy }
 const hooksToMerge = Object.keys(hooks)
@@ -69,12 +69,17 @@ export function createComponent (
 
   // functional component
   if (Ctor.options.functional) {
+    const props = {}
+    const propOptions = Ctor.options.props
+    if (propOptions) {
+      Object.keys(propOptions).forEach(key => {
+        props[key] = validateProp(key, propOptions, propsData)
+      })
+    }
     return Ctor.options.render.call(
       null,
-      parent.$createElement,       // h
-      propsData || {},             // props
-      normalizeChildren(children), // children
-      data                         // data
+      parent.$createElement,
+      { props, parent, data, children: normalizeChildren(children) }
     )
   }
 

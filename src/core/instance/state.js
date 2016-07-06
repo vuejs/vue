@@ -40,7 +40,7 @@ function initProps (vm: Component) {
       const key = keys[i]
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
-        defineReactive(vm, key, validateProp(vm, key, propsData), () => {
+        defineReactive(vm, key, validateProp(key, props, propsData, vm), () => {
           if (vm.$parent && !observerState.isSettingProps) {
             warn(
               `Avoid mutating a prop directly since the value will be ` +
@@ -52,7 +52,7 @@ function initProps (vm: Component) {
           }
         })
       } else {
-        defineReactive(vm, key, validateProp(vm, key, propsData))
+        defineReactive(vm, key, validateProp(key, props, propsData, vm))
       }
     }
     observerState.shouldConvert = true
