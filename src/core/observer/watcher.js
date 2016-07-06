@@ -99,12 +99,12 @@ export default class Watcher {
             this.vm
           )
         }
-        /* istanbul ignore else */
-        if (config.errorHandler) {
-          config.errorHandler.call(null, e, this.vm)
-        } else {
-          throw e
-        }
+      }
+      /* istanbul ignore else */
+      if (config.errorHandler) {
+        config.errorHandler.call(null, e, this.vm)
+      } else {
+        throw e
       }
       // return old value when evaluation fails so the current UI is preserved
       // if the error was somehow handled by user
