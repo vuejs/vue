@@ -64,10 +64,10 @@ function applyNS (vnode, ns) {
 
 // in case the child is also an abstract component, e.g. <transition-control>
 // we want to recrusively retrieve the real component to be rendered
-export function getRealChild (vnode) {
+export function getRealChild (vnode: ?VNode): ?VNode {
   const compOptions = vnode && vnode.componentOptions
   if (compOptions && compOptions.Ctor.options._abstract) {
-    return getRealChild(compOptions.propsData.child)
+    return getRealChild(compOptions.propsData && compOptions.propsData.child)
   } else {
     return vnode
   }
