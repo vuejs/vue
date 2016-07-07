@@ -10,7 +10,7 @@ describe('Options functional', () => {
           functional: true,
           props: ['msg'],
           render (h, { props, children }) {
-            return h('div', null, [props.msg, ' '].concat(children))
+            return h('div', null, [props.msg, ' '].concat(children()))
           }
         }
       }
@@ -36,7 +36,7 @@ describe('Options functional', () => {
           functional: true,
           props: ['field'],
           render (h, { props, children, data: { on } }) {
-            props.child = children[0]
+            props.child = children()[0]
             return h('validate-control', { props, on })
           }
         },
