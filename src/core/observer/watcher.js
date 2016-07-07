@@ -66,7 +66,7 @@ export default class Watcher {
       if (!this.getter) {
         this.getter = function () {}
         process.env.NODE_ENV !== 'production' && warn(
-          'Failed watching path: ' + expOrFn +
+          `Failed watching path: "${expOrFn}" ` +
           'Watcher only accepts simple dot-delimited paths. ' +
           'For full control, use a function instead.',
           vm
