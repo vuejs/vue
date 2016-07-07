@@ -17,6 +17,8 @@ export default {
   }
 }
 
+const emptyModifiers = Object.create(null)
+
 function applyDirectives (
   oldVnode: VNodeWithData,
   vnode: VNodeWithData,
@@ -31,12 +33,11 @@ function applyDirectives (
       const def = resolveAsset(vnode.context.$options, 'directives', dir.name, true)
       const fn = def && def[hook]
       if (fn) {
-        // only call update if value has changed
         if (isUpdate && oldDirs) {
-          const oldValue = dir.oldValue = oldDirs[i].value
-          if (oldValue === dir.value) {
-            continue
-          }
+          dir.oldValue = oldDirs[i].value
+        }
+        if (!dir.modifiers) {
+          dir.modifiers = emptyModifiers
         }
         fn(vnode.elm, dir, vnode, oldVnode)
       }

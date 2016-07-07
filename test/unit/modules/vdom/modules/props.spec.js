@@ -1,7 +1,7 @@
 import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 
-describe('props module', () => {
+describe('vdom props module', () => {
   it('should create an element with props', () => {
     const vnode = new VNode('a', { props: { src: 'http://localhost/' }})
     const elm = patch(null, vnode)

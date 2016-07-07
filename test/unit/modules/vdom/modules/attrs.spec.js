@@ -2,7 +2,7 @@ import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 import { xlinkNS } from 'web/util/index'
 
-describe('attrs module', () => {
+describe('vdom attrs module', () => {
   it('should create an element with staticAttrs', () => {
     const vnode = new VNode('p', { staticAttrs: { id: 1, class: 'class1' }})
     const elm = patch(null, vnode)

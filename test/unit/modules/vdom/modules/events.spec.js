@@ -1,7 +1,7 @@
 import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 
-describe('events module', () => {
+describe('vdom events module', () => {
   it('should attach event handler to element', () => {
     const click = jasmine.createSpy()
     const vnode = new VNode('a', { on: { click }})

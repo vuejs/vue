@@ -35,9 +35,11 @@ describe('Options directives', () => {
             expect(el).toBe(vm.$el)
             expect(oldVnode).toBe(vm._vnode)
             expect(oldVnode).not.toBe(vnode)
-            expect(binding.value).toBe('bar')
-            expect(binding.oldValue).toBe('foo')
             expect(binding.expression).toBe('a')
+            if (binding.value !== binding.oldValue) {
+              expect(binding.value).toBe('bar')
+              expect(binding.oldValue).toBe('foo')
+            }
           },
           componentUpdated (el, binding, vnode) {
             componentUpdatedSpy()
