@@ -28,6 +28,9 @@ export function initAssetRegisters (Vue: GlobalAPI) {
           definition.name = definition.name || id
           definition = Vue.extend(definition)
         }
+        if (type === 'directive' && typeof definition === 'function') {
+          definition = { bind: definition, update: definition }
+        }
         this.options[type + 's'][id] = definition
         return definition
       }

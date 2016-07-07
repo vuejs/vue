@@ -92,6 +92,27 @@ describe('Options directives', () => {
     }).then(done)
   })
 
+  it('function shorthand (global)', done => {
+    const spy = jasmine.createSpy('directive')
+    Vue.directive('test', function (el, binding, vnode) {
+      expect(vnode.context).toBe(vm)
+      expect(binding.arg).toBe('arg')
+      expect(binding.modifiers).toEqual({ hello: true })
+      spy(binding.value, binding.oldValue)
+    })
+    const vm = new Vue({
+      template: '<div v-test:arg.hello="a"></div>',
+      data: { a: 'foo' }
+    })
+    vm.$mount()
+    expect(spy).toHaveBeenCalledWith('foo', undefined)
+    vm.a = 'bar'
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalledWith('bar', 'foo')
+      delete Vue.options.directives.test
+    }).then(done)
+  })
+
   it('warn non-existent', () => {
     new Vue({
       template: '<div v-test></div>'
