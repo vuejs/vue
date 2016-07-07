@@ -83,6 +83,7 @@ export function createPatchFunction (backend) {
       // component also has set the placeholder vnode's elm.
       // in that case we can just return the element and be done.
       if (isDef(i = vnode.child)) {
+        vnode.elm = vnode.child.$el
         invokeCreateHooks(vnode, insertedVnodeQueue)
         setScope(vnode)
         return vnode.elm
@@ -414,6 +415,15 @@ export function createPatchFunction (backend) {
         parent = nodeOps.parentNode(elm)
 
         createElm(vnode, insertedVnodeQueue)
+
+        // component root element replaced.
+        // update parent placeholder node element.
+        if (vnode.parent) {
+          vnode.parent.elm = vnode.elm
+          for (let i = 0; i < cbs.create.length; ++i) {
+            cbs.create[i](emptyNode, vnode.parent)
+          }
+        }
 
         if (parent !== null) {
           nodeOps.insertBefore(parent, vnode.elm, nodeOps.nextSibling(elm))

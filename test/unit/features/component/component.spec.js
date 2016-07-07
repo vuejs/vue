@@ -236,4 +236,44 @@ describe('Component', () => {
       })
     }).not.toThrow()
   })
+
+  it('properly update replaced higher-order component root node', done => {
+    const vm = new Vue({
+      data: {
+        color: 'red'
+      },
+      template: '<test id="foo" :class="color"></test>',
+      components: {
+        test: {
+          data () {
+            return { tag: 'div' }
+          },
+          render (h) {
+            return h(this.tag, { class: 'test' }, 'hi')
+          }
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.tagName).toBe('DIV')
+    expect(vm.$el.id).toBe('foo')
+    expect(vm.$el.className).toBe('test red')
+
+    vm.color = 'green'
+    waitForUpdate(() => {
+      expect(vm.$el.tagName).toBe('DIV')
+      expect(vm.$el.id).toBe('foo')
+      expect(vm.$el.className).toBe('test green')
+      vm.$children[0].tag = 'p'
+    }).then(() => {
+      expect(vm.$el.tagName).toBe('P')
+      expect(vm.$el.id).toBe('foo')
+      expect(vm.$el.className).toBe('test green')
+      vm.color = 'red'
+    }).then(() => {
+      expect(vm.$el.tagName).toBe('P')
+      expect(vm.$el.id).toBe('foo')
+      expect(vm.$el.className).toBe('test red')
+    }).then(done)
+  })
 })

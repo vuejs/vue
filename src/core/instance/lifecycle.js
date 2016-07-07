@@ -85,15 +85,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm.$el) {
       vm.$el.__vue__ = vm
     }
-    // update parent vnode element after patch
-    const parentNode = vm.$vnode
-    if (parentNode) {
-      parentNode.elm = vm.$el
-      // update parent $el if the parent is HOC
-      // this is necessary because child is updated after parent
-      if (vm.$parent && parentNode === vm.$parent._vnode) {
-        vm.$parent.$el = vm.$el
-      }
+    // if parent is an HOC, update its $el as well
+    if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
+      vm.$parent.$el = vm.$el
     }
     if (vm._isMounted) {
       callHook(vm, 'updated')
