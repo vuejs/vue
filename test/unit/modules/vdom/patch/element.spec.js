@@ -16,11 +16,17 @@ describe('element', () => {
     expect(elm.namespaceURI).toBe('http://www.w3.org/2000/svg')
   })
 
-  it('should warn unknown element', () => {
-    const vnode = new VNode('unknown')
-    patch(null, vnode)
-    expect(`Unknown custom element: <unknown>`).toHaveBeenWarned()
-  })
+  const el = document.createElement('unknown')
+  // Android Browser <= 4.2 doesn't use correct class name,
+  // but it doesn't matter because no one's gonna use it as their primary
+  // development browser.
+  if (/HTMLUnknownElement/.test(el.toString())) {
+    it('should warn unknown element', () => {
+      const vnode = new VNode('unknown')
+      patch(null, vnode)
+      expect(`Unknown custom element: <unknown>`).toHaveBeenWarned()
+    })
+  }
 
   it('should warn unknown element with hyphen', () => {
     const vnode = new VNode('unknown-foo')
