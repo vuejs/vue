@@ -42,21 +42,23 @@ function _createElement (
     return emptyVNode()
   }
   if (typeof tag === 'string') {
-    let Ctor, ns
-    if (config.isReservedTag(tag) || (ns = config.getTagNamespace(tag))) {
+    let Ctor
+    if (config.isReservedTag(tag)) {
       // platform built-in elements
       return new VNode(
-        tag, data, normalizeChildren(children, ns),
-        undefined, undefined, ns, context, host
+        tag, data, normalizeChildren(children),
+        undefined, undefined, undefined, context, host
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
       return createComponent(Ctor, data, parent, context, host, children, tag)
     } else {
-      // unknown element, but check at runtime because it may get assigned
-      // a namespace when its parent normalizes children
+      // unknown or namespaced elements
+      // check at runtime because it may get assigned a namespace when its
+      // parent normalizes children
+      const ns = config.getTagNamespace(tag)
       return new VNode(
-        tag, data, normalizeChildren(children),
+        tag, data, normalizeChildren(children, ns),
         undefined, undefined, ns, context, host
       )
     }
