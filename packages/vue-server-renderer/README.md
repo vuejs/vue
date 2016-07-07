@@ -149,13 +149,13 @@ As an example, check out [`v-show`'s server-side implementation](https://github.
 
 > Note: this option has changed and is different from versions <= 2.0.0-alpha.8.
 
-Provide a cache implementation. The cache object must be of the following shape:
+Provide a cache implementation. The cache object must implement the following interface:
 
 ``` js
 {
-  get: (key: string) => string,
+  get: (key: string, [cb: Function]) => string | void,
   set: (key: string, val: string) => void,
-  has?: (key: string) => boolean // optional
+  has?: (key: string, [cb: Function]) => boolean | void // optional
 }
 ```
 
@@ -168,6 +168,24 @@ const renderer = createRenderer({
   cache: LRU({
     max: 10000
   })
+})
+```
+
+Note that the cache object should at least implement `get` and `set`. In addition, `get` and `has` can be optionally async if they accept a second argument as callback. This allows the cache to make use of async APIs, e.g. a redis client:
+
+``` js
+const renderer = createRenderer({
+  cache: {
+    get: (key, cb) => {
+      redisClient.get(key, (err, res) => {
+        // handle error if any
+        cb(res)
+      })
+    },
+    set: (key, val) => {
+      redisClient.set(key, val)
+    }
+  }
 })
 ```
 
