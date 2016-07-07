@@ -61,27 +61,15 @@ describe('Watcher', () => {
 
   it('path containing $data', done => {
     const watcher = new Watcher(vm, '$data.b.c', spy)
-    expect(watcher.value).toBeUndefined()
+    expect(watcher.value).toBe(2)
     vm.b = { c: 3 }
     waitForUpdate(() => {
-      expect(watcher.value).toBeUndefined()
-      expect(spy).not.toHaveBeenCalledWith(3, 2)
-      vm.$data = { b: { c: 4 }}
+      expect(watcher.value).toBe(3)
+      expect(spy).toHaveBeenCalledWith(3, 2)
+      vm.$data.b.c = 4
     }).then(() => {
-      expect(watcher.value).toBeUndefined()
-      expect(spy).not.toHaveBeenCalledWith(4, 3)
-    }).then(done)
-  })
-
-  it('not watching $data', done => {
-    const oldData = vm.$data
-    const watcher = new Watcher(vm, '$data', spy)
-    expect(watcher.value).toBeUndefined()
-    const newData = {}
-    vm.$data = newData
-    waitForUpdate(() => {
-      expect(spy).not.toHaveBeenCalledWith(newData, oldData)
-      expect(watcher.value).toBeUndefined()
+      expect(watcher.value).toBe(4)
+      expect(spy).toHaveBeenCalledWith(4, 3)
     }).then(done)
   })
 
@@ -102,6 +90,16 @@ describe('Watcher', () => {
     }).then(() => {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
       expect(spy.calls.count()).toBe(3)
+    }).then(done)
+  })
+
+  it('deep watch $data', done => {
+    new Watcher(vm, '$data', spy, {
+      deep: true
+    })
+    vm.b.c = 3
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalledWith(vm.$data, vm.$data)
     }).then(done)
   })
 
