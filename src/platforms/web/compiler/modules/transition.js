@@ -18,9 +18,14 @@ function transformNode (el: ASTElement) {
   }
 }
 
+let transitionKey = 0
 function genData (el: ASTElement): string {
   return el.transition
-    ? `transition:${el.transition},`
+    ? `transition:${el.transition},${
+        // ensure a unique key for elements with transition,
+        // if it doesn't already have one.
+        el.key ? '' : `key:"__t${transitionKey++}__",`
+      }`
     : ''
 }
 
