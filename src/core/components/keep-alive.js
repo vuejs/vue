@@ -13,14 +13,16 @@ export default {
   render () {
     const rawChild = this.child
     const realChild = getRealChild(this.child)
-    const cid = realChild.componentOptions.Ctor.cid
-    if (this.cache[cid]) {
-      const child = realChild.child = this.cache[cid].child
-      realChild.elm = this.$el = child.$el
-    } else {
-      this.cache[cid] = realChild
+    if (realChild.componentOptions) {
+      const cid = realChild.componentOptions.Ctor.cid
+      if (this.cache[cid]) {
+        const child = realChild.child = this.cache[cid].child
+        realChild.elm = this.$el = child.$el
+      } else {
+        this.cache[cid] = realChild
+      }
+      realChild.data.keepAlive = true
     }
-    realChild.data.keepAlive = true
     return rawChild
   },
   destroyed () {
