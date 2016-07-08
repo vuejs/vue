@@ -30,7 +30,7 @@ describe('Scheduler', () => {
     }).then(done)
   })
 
-  it('allow diplicate when flushing', done => {
+  it('allow duplicate when flushing', done => {
     const job = {
       id: 1,
       run: spy

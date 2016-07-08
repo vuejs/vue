@@ -18,6 +18,8 @@ const userQueue: Array<Watcher> = []
 let has: { [key: number]: ?true } = {}
 let circular: { [key: number]: number } = {}
 let waiting = false
+let flushing = false
+let index = 0
 
 /**
  * Reset the scheduler's state.
@@ -29,13 +31,14 @@ function resetSchedulerState () {
   if (process.env.NODE_ENV !== 'production') {
     circular = {}
   }
-  waiting = false
+  waiting = flushing = false
 }
 
 /**
  * Flush both queues and run the watchers.
  */
 function flushSchedulerQueue () {
+  flushing = true
   runSchedulerQueue(queue.sort(queueSorter))
   runSchedulerQueue(userQueue)
   // user watchers triggered more watchers,
@@ -68,8 +71,8 @@ function queueSorter (a: Watcher, b: Watcher) {
 function runSchedulerQueue (queue: Array<Watcher>) {
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
-  for (let i = 0; i < queue.length; i++) {
-    const watcher = queue[i]
+  for (index = 0; index < queue.length; index++) {
+    const watcher = queue[index]
     const id = watcher.id
     has[id] = null
     watcher.run()
@@ -102,7 +105,15 @@ export function queueWatcher (watcher: Watcher) {
       ? userQueue
       : queue
     has[id] = true
-    q.push(watcher)
+    if (!flushing) {
+      q.push(watcher)
+    } else {
+      let i = q.length - 1
+      while (i >= 0 && q[i].id > watcher.id) {
+        i--
+      }
+      q.splice(Math.max(i, index) + 1, 0, watcher)
+    }
     // queue the flush
     if (!waiting) {
       waiting = true
