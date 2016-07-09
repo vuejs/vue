@@ -18,16 +18,16 @@ export function createElement (
     children = data
     data = undefined
   }
-  return _createElement.call(this, tag, data, children)
+  // make sure to use real instance instead of proxy as context
+  return _createElement(this._self, tag, data, children)
 }
 
 function _createElement (
+  context: Component,
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
   children?: VNodeChildren | void
 ): VNode | Array<VNode> | void {
-  // make sure to expose real self instead of proxy
-  const context: Component = this._self
   const parent: ?Component = renderState.activeInstance
   const host = context !== parent ? parent : undefined
   if (!parent) {
