@@ -258,13 +258,23 @@ export function toArray (list, start) {
  * @param {Object} from
  */
 
-export function extend (to, from) {
-  var keys = Object.keys(from)
-  var i = keys.length
-  while (i--) {
-    to[keys[i]] = from[keys[i]]
+export function extend () {
+  var target = arguments[0]
+  if (typeof target === 'undefined') {
+    throw new TypeError('Cannot convert undefined or null to object')
   }
-  return to
+  target = Object(target)
+  for (var index = 1; index < arguments.length; index++) {
+    var source = arguments[index]
+    if (typeof source !== 'undefined') {
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key]
+        }
+      }
+    }
+  }
+  return target
 }
 
 /**
