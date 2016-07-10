@@ -95,7 +95,12 @@ export function enter (vnode: VNodeWithData) {
   })
 
   // remove pending leave element on enter by injecting an insert hook
-  mergeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
+  // make sure it's on parent node if this is a component root node
+  let parentVnode = vnode
+  while (parentVnode.parent) {
+    parentVnode = parentVnode.parent
+  }
+  mergeHook(parentVnode.data.hook || (parentVnode.data.hook = {}), 'insert', () => {
     const parent = el.parentNode
     const pendingNode = parent._pending && parent._pending[vnode.key]
     if (pendingNode && pendingNode.tag === vnode.tag) {
