@@ -99,6 +99,13 @@ export function enter (vnode: VNodeWithData) {
     addTransitionClass(el, startClass)
     addTransitionClass(el, activeClass)
     nextFrame(() => {
+      // remove pending leave element
+      const pendingNode =
+        el.parentNode._pending &&
+        el.parentNode._pending[vnode.key]
+      if (pendingNode && pendingNode.tag === vnode.tag) {
+        pendingNode.elm._leaveCb()
+      }
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
         whenTransitionEnds(el, cb)
@@ -138,6 +145,9 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   const expectsCSS = css !== false
   const userWantsControl = leave && leave.length > 2
   const cb = el._leaveCb = once(() => {
+    if (el.parentNode._pending) {
+      el.parentNode._pending[vnode.key] = null
+    }
     if (expectsCSS) {
       removeTransitionClass(el, leaveActiveClass)
     }
@@ -165,6 +175,10 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       addTransitionClass(el, leaveClass)
       addTransitionClass(el, leaveActiveClass)
       nextFrame(() => {
+        // record leaving element
+        if (!vnode.data.show) {
+          (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode
+        }
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
           whenTransitionEnds(el, cb)
