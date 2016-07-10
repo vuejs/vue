@@ -104,7 +104,7 @@ export default class Watcher {
       if (config.errorHandler) {
         config.errorHandler.call(null, e, this.vm)
       } else {
-        throw e
+        console.error(e)
       }
       // return old value when evaluation fails so the current UI is preserved
       // if the error was somehow handled by user
