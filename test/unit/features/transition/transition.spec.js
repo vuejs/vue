@@ -191,7 +191,10 @@ if (!isIE9) {
               expect(el.className).toBe('test')
               beforeEnterSpy(el, vm)
             },
-            enter: (el, vm) => onEnterSpy(el, vm),
+            enter: (el, vm) => {
+              expect(vm.$el.contains(el)).toBe(true)
+              onEnterSpy(el, vm)
+            },
             afterEnter: (el, vm) => afterEnterSpy(el, vm)
           }
         }
