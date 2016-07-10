@@ -254,15 +254,14 @@ function checkProp (
 }
 
 function mergeHooks (data: VNodeData) {
-  if (data.hook) {
-    for (let i = 0; i < hooksToMerge.length; i++) {
-      const key = hooksToMerge[i]
-      const fromParent = data.hook[key]
-      const ours = hooks[key]
-      data.hook[key] = fromParent ? mergeHook(ours, fromParent) : ours
-    }
-  } else {
-    data.hook = hooks
+  if (!data.hook) {
+    data.hook = {}
+  }
+  for (let i = 0; i < hooksToMerge.length; i++) {
+    const key = hooksToMerge[i]
+    const fromParent = data.hook[key]
+    const ours = hooks[key]
+    data.hook[key] = fromParent ? mergeHook(ours, fromParent) : ours
   }
 }
 

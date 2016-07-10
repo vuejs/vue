@@ -94,25 +94,29 @@ export function enter (vnode: VNodeWithData) {
     el._enterCb = null
   })
 
+  // remove pending leave element on enter by injecting an insert hook
+  mergeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
+    const parent = el.parentNode
+    const pendingNode = parent._pending && parent._pending[vnode.key]
+    if (pendingNode && pendingNode.tag === vnode.tag) {
+      pendingNode.elm._leaveCb()
+    }
+    enterHook && enterHook(el, vm, cb)
+  })
+
+  // start enter transition
   beforeEnterHook && beforeEnterHook(el, vm)
   if (expectsCSS) {
     addTransitionClass(el, startClass)
     addTransitionClass(el, activeClass)
     nextFrame(() => {
-      // remove pending leave element
-      const pendingNode =
-        el.parentNode._pending &&
-        el.parentNode._pending[vnode.key]
-      if (pendingNode && pendingNode.tag === vnode.tag) {
-        pendingNode.elm._leaveCb()
-      }
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
         whenTransitionEnds(el, cb)
       }
     })
   }
-  enterHook && enterHook(el, vm, cb)
+
   if (!expectsCSS && !userWantsControl) {
     cb()
   }
@@ -170,15 +174,15 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   }
 
   function performLeave () {
+    // record leaving element
+    if (!vnode.data.show) {
+      (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode
+    }
     beforeLeave && beforeLeave(el, vm)
     if (expectsCSS) {
       addTransitionClass(el, leaveClass)
       addTransitionClass(el, leaveActiveClass)
       nextFrame(() => {
-        // record leaving element
-        if (!vnode.data.show) {
-          (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode
-        }
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
           whenTransitionEnds(el, cb)
@@ -347,12 +351,12 @@ function shouldSkipTransition (vnode: VNodeWithData): boolean {
 }
 
 export default hasTransition ? {
-  create: function (_: any, vnode: VNodeWithData) {
+  create (_: any, vnode: VNodeWithData) {
     if (!shouldSkipTransition(vnode)) {
       enter(vnode)
     }
   },
-  remove: function (vnode: VNode, rm: Function) {
+  remove (vnode: VNode, rm: Function) {
     if (!shouldSkipTransition(vnode)) {
       leave(vnode, rm)
     } else {
