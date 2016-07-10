@@ -23,7 +23,7 @@ export function normalizeChildren (
       const last = res[res.length - 1]
       //  nested
       if (Array.isArray(c)) {
-        res.push.apply(res, normalizeChildren(c))
+        res.push.apply(res, normalizeChildren(c, ns))
       } else if (isPrimitive(c)) {
         if (last && last.text) {
           last.text += String(c)
