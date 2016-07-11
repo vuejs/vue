@@ -95,6 +95,10 @@ describe('Directive Parser', function () {
     expect(res6.filters[0].args[1].value).toBe('{a:1}')
     expect(res6.filters[0].args[2].value).toBe('{u:true,b:[1,2]}')
     expect(res6.filters[1].args[0].value).toBe('abc')
+
+    // Try out broken filter
+    parse('t | f1 [[1, 2, 3],')
+    expect('Invalid filter argument: [[1, 2, 3]').toHaveBeenWarned()
   })
 
   it('escape string', function () {
