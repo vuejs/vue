@@ -2,7 +2,7 @@ import { toNumber, stripQuotes } from '../util/index'
 import Cache from '../cache'
 
 const cache = new Cache(1000)
-const filterTokenRE = /(({.*})|([^\s'"]+|'[^']*'|"[^"]*"))/g
+const filterTokenRE = /(\[.*\])|[^\s'"]+|'[^']*'|"[^"]*"/g
 const reservedArgRE = /^in$|^-?\d+/
 
 /**
@@ -25,7 +25,21 @@ function pushFilter () {
     var tokens = exp.match(filterTokenRE)
     filter.name = tokens[0]
     if (tokens.length > 1) {
-      filter.args = tokens.slice(1).map(processFilterArg)
+      tokens.slice(1).map(function (token) {
+        if (filter.args === undefined) {
+          filter.args = []
+        }
+
+        if (token[0] === '[') {
+          /* eslint-disable no-eval */
+          window.eval(token).map(function (arg) {
+          /* eslint-disable no-eval */
+            filter.args.push(processFilterArg(JSON.stringify(arg).replace(/"/g, '')))
+          })
+        } else {
+          filter.args.push(processFilterArg(token))
+        }
+      })
     }
   }
   if (filter) {

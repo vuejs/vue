@@ -78,17 +78,23 @@ describe('Directive Parser', function () {
   })
 
   it('object literal with mixed spaces', function () {
-    var res1 = parse('t | f {u: true}')
-    var res2 = parse('t | f {u : true}')
-    var res3 = parse('t | f { u: true }')
-    var res4 = parse('t | f {u: true }')
-    var res5 = parse('t | f { u:true}')
+    var res1 = parse('t | f [{u: true}]')
+    var res2 = parse('t | f [{u : true}]')
+    var res3 = parse('t | f [{ u: true }]')
+    var res4 = parse('t | f [{u: true }]')
+    var res5 = parse('t | f [{ u:true}]')
 
-    expect(res1.filters[0].args[0].value).toBe('{u: true}')
-    expect(res2.filters[0].args[0].value).toBe('{u : true}')
-    expect(res3.filters[0].args[0].value).toBe('{ u: true }')
-    expect(res4.filters[0].args[0].value).toBe('{u: true }')
-    expect(res5.filters[0].args[0].value).toBe('{ u:true}')
+    expect(res1.filters[0].args[0].value).toBe('{u:true}')
+    expect(res2.filters[0].args[0].value).toBe('{u:true}')
+    expect(res3.filters[0].args[0].value).toBe('{u:true}')
+    expect(res4.filters[0].args[0].value).toBe('{u:true}')
+    expect(res5.filters[0].args[0].value).toBe('{u:true}')
+
+    var res6 = parse('t | f1 [[1, 2, 3], { a: 1 }, { u : true, b: [1, 2] }] | f2 \'abc\'')
+    expect(res6.filters[0].args[0].value).toBe('[1,2,3]')
+    expect(res6.filters[0].args[1].value).toBe('{a:1}')
+    expect(res6.filters[0].args[2].value).toBe('{u:true,b:[1,2]}')
+    expect(res6.filters[1].args[0].value).toBe('abc')
   })
 
   it('escape string', function () {
