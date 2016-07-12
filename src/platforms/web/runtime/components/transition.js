@@ -1,11 +1,13 @@
 import { warn, extend } from 'core/util/index'
+import { getRealChild } from 'core/vdom/helpers'
+import { leave } from 'web/runtime/modules/transition'
 
 export default {
   name: 'transition',
   props: ['name', 'appear', 'tag', 'mode'],
   _abstract: true,
   render (h) {
-    const children = this.$slots.default
+    const children = this.$slots.default && this.$slots.default.filter(c => c.tag)
     if (!children || !children.length) {
       return
     }
@@ -15,24 +17,23 @@ export default {
         '<transition-group> for lists.'
       )
     }
-    const child = children[0]
+    const rawChild = children[0]
+    const child = getRealChild(rawChild)
     ;(child.data || (child.data = {})).transition = extend({}, this.$options.propsData)
     child.key = child.key || `__v${child.tag + this._uid}__`
 
     const mode = this.mode
-    const oldChild = this._vnode
-    if (mode && oldChild && oldChild.data && (
-      oldChild.tag !== child.tag ||
-      oldChild.key !== child.key
-    )) {
+    const oldRawChild = this._vnode
+    const oldChild = getRealChild(oldRawChild)
+    if (mode && oldChild && oldChild.data && oldChild.key !== child.key) {
       if (mode === 'out-in') {
         // return empty node
         // and queue an update when the leave finishes
-        return addHook(oldChild, {
-          afterLeave: () => {
-            this.$forceUpdate()
-          }
+        leave(oldChild, () => {
+          oldRawChild.data.left = true
+          this.$forceUpdate()
         })
+        return oldRawChild.data.left ? rawChild : oldRawChild
       } else if (mode === 'in-out') {
         let delayedLeave
         const performLeave = () => { delayedLeave() }
@@ -50,7 +51,7 @@ export default {
       }
     }
 
-    return child
+    return rawChild
   }
 }
 
