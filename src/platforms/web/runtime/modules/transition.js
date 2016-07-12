@@ -309,25 +309,14 @@ function once (fn: Function): Function {
   }
 }
 
-function shouldSkipTransition (vnode: VNodeWithData): boolean {
-  return !!(
-    // if this is a component root node and the compoennt's
-    // parent container node also has transition, skip.
-    (vnode.parent && vnode.parent.data.transition) ||
-    // if the element has v-show, let the runtime directive
-    // call the hooks instead
-    vnode.data.show
-  )
-}
-
-export default hasTransition ? {
+export default inBrowser ? {
   create (_: any, vnode: VNodeWithData) {
-    if (!shouldSkipTransition(vnode)) {
+    if (!vnode.data.show) {
       enter(vnode)
     }
   },
   remove (vnode: VNode, rm: Function) {
-    if (!shouldSkipTransition(vnode)) {
+    if (!vnode.data.show) {
       leave(vnode, rm)
     } else {
       rm()

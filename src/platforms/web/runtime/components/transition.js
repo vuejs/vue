@@ -5,7 +5,17 @@ import { getRealChild } from 'core/vdom/helpers'
 
 export default {
   name: 'transition',
-  props: ['name', 'appear', 'tag', 'mode'],
+  props: {
+    name: String,
+    appear: Boolean,
+    mode: String,
+    enterClass: String,
+    leaveClass: String,
+    enterActiveClass: String,
+    leaveActiveClass: String,
+    appearClass: String,
+    appearActiveClass: String
+  },
   _abstract: true,
   render (h) {
     const children = this.$slots.default && this.$slots.default.filter(c => c.tag)
@@ -18,13 +28,21 @@ export default {
         '<transition-group> for lists.'
       )
     }
+
     const rawChild = children[0]
+
+    // if this is a component root node and the compoennt's
+    // parent container node also has transition, skip.
+    if (this.$vnode.parent && this.$vnode.parent.data.transition) {
+      return rawChild
+    }
+
     const child = getRealChild(rawChild)
     child.key = child.key || `__v${child.tag + this._uid}__`
-    ;(child.data || (child.data = {})).transition = extend(
-      { context: this },
-      this.$options.propsData
-    )
+    const data = (child.data || (child.data = {})).transition = { context: this }
+    for (const key in this.$options.propsData) {
+      data[key] = this[key]
+    }
 
     const mode = this.mode
     const oldRawChild = this._vnode
