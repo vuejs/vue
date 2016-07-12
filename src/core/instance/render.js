@@ -161,9 +161,9 @@ function resolveSlots (
   vm: Component,
   renderChildren: Array<any> | () => Array<any> | string
 ) {
+  const slots = vm.$slots = {}
   if (renderChildren) {
     const children = normalizeChildren(renderChildren) || []
-    const slots = {}
     const defaultSlot = []
     let name, child
     for (let i = 0, l = children.length; i < l; i++) {
@@ -179,12 +179,12 @@ function resolveSlots (
         defaultSlot.push(child)
       }
     }
+    // ignore single whitespace
     if (defaultSlot.length && !(
       defaultSlot.length === 1 &&
       defaultSlot[0].text === ' '
     )) {
-      slots['default'] = defaultSlot
+      slots.default = defaultSlot
     }
-    vm.$slots = slots
   }
 }
