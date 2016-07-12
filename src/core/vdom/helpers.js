@@ -73,6 +73,18 @@ export function getRealChild (vnode: ?VNode): ?VNode {
   }
 }
 
+export function mergeVNodeHook (def: Object, key: string, hook: Function) {
+  const oldHook = def[key]
+  if (oldHook) {
+    def[key] = function () {
+      oldHook.apply(this, arguments)
+      hook.apply(this, arguments)
+    }
+  } else {
+    def[key] = hook
+  }
+}
+
 export function updateListeners (
   on: Object,
   oldOn: Object,

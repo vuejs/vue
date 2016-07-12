@@ -3,6 +3,7 @@
 import { addClass, removeClass } from '../class-util'
 import { inBrowser, resolveAsset } from 'core/util/index'
 import { cached, remove, extend } from 'shared/util'
+import { mergeVNodeHook } from 'core/vdom/helpers'
 import { isIE9 } from 'web/util/index'
 
 const hasTransition = inBrowser && !isIE9
@@ -38,6 +39,7 @@ export function nextFrame (fn: Function) {
 export function enter (vnode: VNodeWithData) {
   const el: any = vnode.elm
   const vm = vnode.context
+
   // call leave callback now
   if (el._leaveCb) {
     el._leaveCb.cancelled = true
@@ -95,10 +97,10 @@ export function enter (vnode: VNodeWithData) {
   })
 
   // remove pending leave element on enter by injecting an insert hook
-  mergeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
+  mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
     const parent = el.parentNode
     const pendingNode = parent._pending && parent._pending[vnode.key]
-    if (pendingNode && pendingNode.tag === vnode.tag) {
+    if (pendingNode && pendingNode.tag === vnode.tag && pendingNode.elm._leaveCb) {
       pendingNode.elm._leaveCb()
     }
     enterHook && enterHook(el, vm, cb)
@@ -125,11 +127,13 @@ export function enter (vnode: VNodeWithData) {
 export function leave (vnode: VNodeWithData, rm: Function) {
   const el: any = vnode.elm
   const vm = vnode.context
+
   // call enter callback now
   if (el._enterCb) {
     el._enterCb.cancelled = true
     el._enterCb()
   }
+
   const data = vnode.data.transition
   if (!data) {
     return rm()
@@ -149,7 +153,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   const expectsCSS = css !== false
   const userWantsControl = leave && leave.length > 2
   const cb = el._leaveCb = once(() => {
-    if (el.parentNode._pending) {
+    if (el.parentNode && el.parentNode._pending) {
       el.parentNode._pending[vnode.key] = null
     }
     if (expectsCSS) {
@@ -214,7 +218,7 @@ function resolveTransition (id: string | Object, context: Component): Object {
     // added by <transition-control>
     if (id.hooks) {
       for (const key in id.hooks) {
-        mergeHook(def, key, id.hooks[key])
+        mergeVNodeHook(def, key, id.hooks[key])
       }
     }
     return def
@@ -244,25 +248,15 @@ const autoCssTransition: (name: string) => Object = cached(name => {
   }
 })
 
-function mergeHook (def: Object, key: string, hook: Function) {
-  const oldHook = def[key]
-  if (oldHook) {
-    def[key] = function () {
-      oldHook.apply(this, arguments)
-      hook()
-    }
-  } else {
-    def[key] = hook
-  }
-}
-
 function addTransitionClass (el: any, cls: string) {
   (el._transitionClasses || (el._transitionClasses = [])).push(cls)
   addClass(el, cls)
 }
 
 function removeTransitionClass (el: any, cls: string) {
-  remove(el._transitionClasses, cls)
+  if (el._transitionClasses) {
+    remove(el._transitionClasses, cls)
+  }
   removeClass(el, cls)
 }
 

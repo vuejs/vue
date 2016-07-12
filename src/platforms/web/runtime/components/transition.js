@@ -1,6 +1,7 @@
+import { noop } from 'shared/util'
 import { warn, extend } from 'core/util/index'
-import { getRealChild } from 'core/vdom/helpers'
 import { leave } from 'web/runtime/modules/transition'
+import { getRealChild, mergeVNodeHook } from 'core/vdom/helpers'
 
 export default {
   name: 'transition',
@@ -29,10 +30,12 @@ export default {
       if (mode === 'out-in') {
         // return empty node
         // and queue an update when the leave finishes
-        leave(oldChild, () => {
-          oldRawChild.data.left = true
-          this.$forceUpdate()
-        })
+        if (!oldChild.elm._leaveCb) {
+          leave(oldChild, () => {
+            oldRawChild.data.left = true
+            this.$forceUpdate()
+          })
+        }
         return oldRawChild.data.left ? rawChild : oldRawChild
       } else if (mode === 'in-out') {
         let delayedLeave
@@ -44,6 +47,9 @@ export default {
         addHook(oldChild, {
           delayLeave: leave => {
             delayedLeave = leave
+          },
+          leaveCancelled: () => {
+            delayedLeave = noop
           }
         })
       } else if (process.env.NODE_ENV !== 'production') {
