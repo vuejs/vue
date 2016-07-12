@@ -215,14 +215,6 @@ export function createPatchFunction (backend) {
     }
   }
 
-  function findOldIdx (vnode, oldCh, i, l) {
-    while (i++ < l) {
-      if (isDef(oldCh[i]) && sameVnode(vnode, oldCh[i])) {
-        return i
-      }
-    }
-  }
-
   function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue) {
     let oldStartIdx = 0
     let newStartIdx = 0
@@ -259,9 +251,7 @@ export function createPatchFunction (backend) {
         newStartVnode = newCh[++newStartIdx]
       } else {
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
-        idxInOld = isDef(newStartVnode.key)
-          ? oldKeyToIdx[newStartVnode.key]
-          : findOldIdx(newStartVnode, oldCh, oldStartIdx, oldEndIdx)
+        idxInOld = oldKeyToIdx[newStartVnode.key]
         if (isUndef(idxInOld)) { // New element
           nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm)
           newStartVnode = newCh[++newStartIdx]
