@@ -1,7 +1,7 @@
 import Transition from './transition'
-import TransitionControl from './transition-control'
+import TransitionGroup from './transition-group'
 
 export default {
   Transition,
-  TransitionControl
+  TransitionGroup
 }
