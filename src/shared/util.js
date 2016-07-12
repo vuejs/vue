@@ -41,7 +41,7 @@ export function makeMap (
 /**
  * Check if a tag is a built-in tag.
  */
-export const isBuiltInTag = makeMap('slot,component,render,transition', true)
+export const isBuiltInTag = makeMap('slot,component', true)
 
 /**
  * Remove an item from an array
