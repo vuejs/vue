@@ -8,11 +8,17 @@ import { warn, validateProp, remove, noop } from '../util/index'
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
-  vm.$parent = options.parent
-  vm.$root = vm.$parent ? vm.$parent.$root : vm
-  if (vm.$parent && !options._abstract) {
-    vm.$parent.$children.push(vm)
+  // locate first non-abstract parent
+  let parent = options.parent
+  if (parent && !options._abstract) {
+    while (parent.$options._abstract && parent.$parent) {
+      parent = parent.$parent
+    }
+    parent.$children.push(vm)
   }
+
+  vm.$parent = parent
+  vm.$root = parent ? parent.$root : vm
 
   vm.$children = []
   vm.$refs = {}
