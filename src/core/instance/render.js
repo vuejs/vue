@@ -167,7 +167,8 @@ function resolveSlots (
   let name, child
   for (let i = 0, l = children.length; i < l; i++) {
     child = children[i]
-    if ((name = child.data && child.data.slot)) {
+    if (child.data && (name = child.data.slot)) {
+      delete child.data.slot
       const slot = (slots[name] || (slots[name] = []))
       if (child.tag === 'template') {
         slot.push.apply(slot, child.children)

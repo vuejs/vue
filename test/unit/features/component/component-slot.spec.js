@@ -312,4 +312,22 @@ describe('Component slot', () => {
     }).$mount()
     expect('Render function should return a single root node').toHaveBeenWarned()
   })
+
+  it('should not keep slot name when passed further down', () => {
+    const vm = new Vue({
+      template: '<test><span slot="foo">foo<span></test>',
+      components: {
+        test: {
+          template: '<child><slot name="foo"></slot></child>',
+          components: {
+            child: {
+              template: '<div><div class="default"><slot></slot></div><div class="named"><slot name="foo"></slot></div></div>'
+            }
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.querySelector('.default').textContent).toBe('foo')
+    expect(vm.$el.querySelector('.named').textContent).toBe('')
+  })
 })
