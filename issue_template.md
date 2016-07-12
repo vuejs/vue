@@ -37,7 +37,7 @@ Remove the template from below and provide thoughtful commentary *and code sampl
 1.0.23
 
 ### Reproduction Link
-<!-- A minimal JSBin, JSFiddle, Codepen, or a GitHub reprository that can reproduce the bug. -->
+<!-- A minimal JSBin, JSFiddle, Codepen, or a GitHub repository that can reproduce the bug. -->
 
 ### Steps to reproduce
 
