@@ -111,7 +111,7 @@ export const hyphenate = cached((str: string): string => {
  * Simple bind, faster than native
  */
 export function bind (fn: Function, ctx: Object): Function {
-  return function (a) {
+  function boundFn (a) {
     const l: number = arguments.length
     return l
       ? l > 1
@@ -119,6 +119,9 @@ export function bind (fn: Function, ctx: Object): Function {
         : fn.call(ctx, a)
       : fn.call(ctx)
   }
+  // record original fn length
+  boundFn._length = fn.length
+  return boundFn
 }
 
 /**

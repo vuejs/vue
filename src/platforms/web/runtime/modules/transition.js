@@ -52,7 +52,6 @@ export function enter (vnode: VNodeWithData) {
   }
 
   const {
-    wrapper,
     css,
     enterClass,
     enterActiveClass,
@@ -81,7 +80,12 @@ export function enter (vnode: VNodeWithData) {
   const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
 
   const expectsCSS = css !== false
-  const userWantsControl = enterHook && enterHook.length > 2
+  const userWantsControl =
+    enterHook &&
+    // enterHook may be a bound method which exposes
+    // the length of original fn as _length
+    (enterHook._length || enterHook.length) > 2
+
   const cb = el._enterCb = once(() => {
     if (expectsCSS) {
       removeTransitionClass(el, activeClass)
@@ -91,16 +95,8 @@ export function enter (vnode: VNodeWithData) {
         removeTransitionClass(el, startClass)
       }
       enterCancelledHook && enterCancelledHook(el, vm)
-      wrapper.$emit('enter-cancelled', el, vm)
-      if (isAppear) {
-        wrapper.$emit('appear-cancelled', el, vm)
-      }
     } else {
       afterEnterHook && afterEnterHook(el, vm)
-      wrapper.$emit('after-enter', el, vm)
-      if (isAppear) {
-        wrapper.$emit('after-appear', el, vm)
-      }
     }
     el._enterCb = null
   })
@@ -113,18 +109,10 @@ export function enter (vnode: VNodeWithData) {
       pendingNode.elm._leaveCb()
     }
     enterHook && enterHook(el, vm, cb)
-    wrapper.$emit('enter', el, vm)
-    if (isAppear) {
-      wrapper.$emit('appear', el, vm)
-    }
   })
 
   // start enter transition
   beforeEnterHook && beforeEnterHook(el, vm)
-  wrapper.$emit('before-enter', el, vm)
-  if (isAppear) {
-    wrapper.$emit('before-appear', el, vm)
-  }
   if (expectsCSS) {
     addTransitionClass(el, startClass)
     addTransitionClass(el, activeClass)
@@ -157,7 +145,6 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   }
 
   const {
-    wrapper,
     css,
     leaveClass,
     leaveActiveClass,
@@ -169,7 +156,12 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   } = data
 
   const expectsCSS = css !== false
-  const userWantsControl = leave && leave.length > 2
+  const userWantsControl =
+    leave &&
+    // leave hook may be a bound method which exposes
+    // the length of original fn as _length
+    (leave._length || leave.length) > 2
+
   const cb = el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
       el.parentNode._pending[vnode.key] = null
@@ -182,11 +174,9 @@ export function leave (vnode: VNodeWithData, rm: Function) {
         removeTransitionClass(el, leaveClass)
       }
       leaveCancelled && leaveCancelled(el, vm)
-      wrapper.$emit('leave-cancelled', el, vm)
     } else {
       rm()
       afterLeave && afterLeave(el, vm)
-      wrapper.$emit('after-leave', el, vm)
     }
     el._leaveCb = null
   })
@@ -203,7 +193,6 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode
     }
     beforeLeave && beforeLeave(el, vm)
-    wrapper.$emit('before-leave', el, vm)
     if (expectsCSS) {
       addTransitionClass(el, leaveClass)
       addTransitionClass(el, leaveActiveClass)
@@ -215,7 +204,6 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       })
     }
     leave && leave(el, vm, cb)
-    wrapper.$emit('leave', el, vm)
     if (!expectsCSS && !userWantsControl) {
       cb()
     }

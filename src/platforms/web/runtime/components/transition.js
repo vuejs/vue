@@ -1,7 +1,7 @@
-import { noop } from 'shared/util'
-import { warn, extend } from 'core/util/index'
+import { warn } from 'core/util/index'
+import { noop, camelize } from 'shared/util'
 import { leave } from 'web/runtime/modules/transition'
-import { getRealChild } from 'core/vdom/helpers'
+import { getRealChild, mergeVNodeHook } from 'core/vdom/helpers'
 
 export default {
   name: 'transition',
@@ -42,9 +42,16 @@ export default {
     // use getRealChild() to ignore abstract components e.g. keep-alive
     const child = getRealChild(rawChild)
     child.key = child.key || `__v${child.tag + this._uid}__`
-    const data = (child.data || (child.data = {})).transition = { wrapper: this }
+    const data = (child.data || (child.data = {})).transition = {}
+    // props
     for (const key in this.$options.propsData) {
       data[key] = this[key]
+    }
+    // events.
+    // extract listeners and pass them directly to the transition methods
+    const listeners = this.$options._parentListeners
+    for (const key in listeners) {
+      data[camelize(key)] = listeners[key].fn
     }
 
     // handle transition mode
@@ -65,17 +72,16 @@ export default {
       } else if (mode === 'in-out') {
         let delayedLeave
         const performLeave = () => { delayedLeave() }
-        extend(child.data.transition, {
-          afterEnter: performLeave,
-          enterCancelled: performLeave
+
+        mergeVNodeHook(data, 'afterEnter', performLeave)
+        mergeVNodeHook(data, 'enterCancelled', performLeave)
+
+        const oldData = oldChild.data.transition
+        mergeVNodeHook(oldData, 'delayLeave', leave => {
+          delayedLeave = leave
         })
-        extend(oldChild.data.transition, {
-          delayLeave: leave => {
-            delayedLeave = leave
-          },
-          leaveCancelled: () => {
-            delayedLeave = noop
-          }
+        mergeVNodeHook(oldData, 'leaveCancelled', () => {
+          delayedLeave = noop
         })
       } else if (process.env.NODE_ENV !== 'production') {
         warn('invalid <transition> mode: ' + mode)
