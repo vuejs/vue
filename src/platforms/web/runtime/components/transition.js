@@ -1,7 +1,7 @@
 import { noop } from 'shared/util'
 import { warn, extend } from 'core/util/index'
 import { leave } from 'web/runtime/modules/transition'
-import { getRealChild, mergeVNodeHook } from 'core/vdom/helpers'
+import { getRealChild } from 'core/vdom/helpers'
 
 export default {
   name: 'transition',
@@ -20,15 +20,18 @@ export default {
     }
     const rawChild = children[0]
     const child = getRealChild(rawChild)
-    ;(child.data || (child.data = {})).transition = extend({}, this.$options.propsData)
     child.key = child.key || `__v${child.tag + this._uid}__`
+    ;(child.data || (child.data = {})).transition = extend(
+      { context: this },
+      this.$options.propsData
+    )
 
     const mode = this.mode
     const oldRawChild = this._vnode
     const oldChild = getRealChild(oldRawChild)
     if (mode && oldChild && oldChild.data && oldChild.key !== child.key) {
       if (mode === 'out-in') {
-        // return empty node
+        // return old node
         // and queue an update when the leave finishes
         if (!oldChild.elm._leaveCb) {
           leave(oldChild, () => {
@@ -40,11 +43,11 @@ export default {
       } else if (mode === 'in-out') {
         let delayedLeave
         const performLeave = () => { delayedLeave() }
-        addHook(child, {
+        extend(child.data.transition, {
           afterEnter: performLeave,
           enterCancelled: performLeave
         })
-        addHook(oldChild, {
+        extend(oldChild.data.transition, {
           delayLeave: leave => {
             delayedLeave = leave
           },
@@ -59,19 +62,4 @@ export default {
 
     return rawChild
   }
-}
-
-function addHook (vnode: VNode, hooks: Object) {
-  /* istanbul ignore if */
-  if (!vnode.data || !vnode.data.transition) {
-    return
-  }
-  let trans = vnode.data.transition
-  /* istanbul ignore else */
-  if (typeof trans === 'string') {
-    trans = vnode.data.transition = { name: trans }
-  } else if (typeof trans !== 'object') {
-    trans = vnode.data.transition = { name: 'v' }
-  }
-  trans.hooks = hooks
 }

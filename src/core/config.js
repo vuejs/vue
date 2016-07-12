@@ -82,7 +82,6 @@ const config: Config = {
   _assetTypes: [
     'component',
     'directive',
-    'transition',
     'filter'
   ],
 

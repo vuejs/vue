@@ -1,10 +1,10 @@
 /* @flow */
 
+import { inBrowser } from 'core/util/index'
+import { isIE9 } from 'web/util/index'
 import { addClass, removeClass } from '../class-util'
-import { inBrowser, resolveAsset } from 'core/util/index'
 import { cached, remove, extend } from 'shared/util'
 import { mergeVNodeHook } from 'core/vdom/helpers'
-import { isIE9 } from 'web/util/index'
 
 const hasTransition = inBrowser && !isIE9
 const TRANSITION = 'transition'
@@ -65,7 +65,7 @@ export function enter (vnode: VNodeWithData) {
     appear,
     afterAppear,
     appearCancelled
-  } = resolveTransition(data, vnode.context)
+  } = resolveTransition(data)
 
   const isAppear = !vnode.context.$root._isMounted
   if (isAppear && !appear && appear !== '') {
@@ -148,7 +148,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     afterLeave,
     leaveCancelled,
     delayLeave
-  } = resolveTransition(data, vnode.context)
+  } = resolveTransition(data)
 
   const expectsCSS = css !== false
   const userWantsControl = leave && leave.length > 2
@@ -200,41 +200,17 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   }
 }
 
-function resolveTransition (id: string | Object, context: Component): Object {
-  let def
-  if (id && typeof id === 'string') {
-    def = resolveAsset(context.$options, 'transitions', id)
-    return def
-      ? ensureTransitionClasses(def.name || id, def)
-      : autoCssTransition(id)
-  } else if (typeof id === 'object') { // inline transition object
-    if (id.name) {
-      def = resolveAsset(context.$options, 'transitions', id.name)
+function resolveTransition (def: string | Object): Object {
+  if (def && typeof def === 'object') {
+    const res = {}
+    if (def.css !== false) {
+      extend(res, autoCssTransition(def.name || 'v'))
     }
-    def = def
-      ? extend(ensureTransitionClasses(id.name, def), id)
-      : ensureTransitionClasses(id.name, id)
-    // extra hooks to be merged
-    // added by <transition-control>
-    if (id.hooks) {
-      for (const key in id.hooks) {
-        mergeVNodeHook(def, key, id.hooks[key])
-      }
-    }
-    return def
+    extend(res, def)
+    return res
   } else {
-    return autoCssTransition('v')
+    return autoCssTransition(typeof def === 'string' ? def : 'v')
   }
-}
-
-function ensureTransitionClasses (name: ?string, def: Object): Object {
-  name = name || 'v'
-  const res = {}
-  if (def.css !== false) {
-    extend(res, autoCssTransition(name))
-  }
-  extend(res, def)
-  return res
 }
 
 const autoCssTransition: (name: string) => Object = cached(name => {
