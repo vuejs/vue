@@ -83,6 +83,9 @@ export function createPatchFunction (backend) {
       // component also has set the placeholder vnode's elm.
       // in that case we can just return the element and be done.
       if (isDef(i = vnode.child)) {
+        if (vnode.data.pendingInsert) {
+          insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
+        }
         vnode.elm = vnode.child.$el
         invokeCreateHooks(vnode, insertedVnodeQueue)
         setScope(vnode)
@@ -319,9 +322,15 @@ export function createPatchFunction (backend) {
     }
   }
 
-  function invokeInsertHook (queue) {
-    for (let i = 0; i < queue.length; ++i) {
-      queue[i].data.hook.insert(queue[i])
+  function invokeInsertHook (vnode, queue, initial) {
+    // delay insert hooks for component root nodes, invoke them after the
+    // element is really inserted
+    if (initial && vnode.parent) {
+      vnode.parent.data.pendingInsert = queue
+    } else {
+      for (let i = 0; i < queue.length; ++i) {
+        queue[i].data.hook.insert(queue[i])
+      }
     }
   }
 
@@ -377,10 +386,12 @@ export function createPatchFunction (backend) {
 
   return function patch (oldVnode, vnode, hydrating) {
     let elm, parent
+    let isInitialPatch = false
     const insertedVnodeQueue = []
 
     if (!oldVnode) {
       // empty mount, create new root element
+      isInitialPatch = true
       createElm(vnode, insertedVnodeQueue)
     } else {
       const isRealElement = isDef(oldVnode.nodeType)
@@ -397,7 +408,7 @@ export function createPatchFunction (backend) {
           }
           if (hydrating) {
             if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
-              invokeInsertHook(insertedVnodeQueue)
+              invokeInsertHook(vnode, insertedVnodeQueue, true)
               return oldVnode
             } else if (process.env.NODE_ENV !== 'production') {
               warn(
@@ -434,7 +445,7 @@ export function createPatchFunction (backend) {
       }
     }
 
-    invokeInsertHook(insertedVnodeQueue)
+    invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
     return vnode.elm
   }
 }
