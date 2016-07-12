@@ -162,29 +162,27 @@ function resolveSlots (
   renderChildren: Array<any> | () => Array<any> | string
 ) {
   const slots = vm.$slots = {}
-  if (renderChildren) {
-    const children = normalizeChildren(renderChildren) || []
-    const defaultSlot = []
-    let name, child
-    for (let i = 0, l = children.length; i < l; i++) {
-      child = children[i]
-      if ((name = child.data && child.data.slot)) {
-        const slot = (slots[name] || (slots[name] = []))
-        if (child.tag === 'template') {
-          slot.push.apply(slot, child.children)
-        } else {
-          slot.push(child)
-        }
+  const children = normalizeChildren(renderChildren) || []
+  const defaultSlot = []
+  let name, child
+  for (let i = 0, l = children.length; i < l; i++) {
+    child = children[i]
+    if ((name = child.data && child.data.slot)) {
+      const slot = (slots[name] || (slots[name] = []))
+      if (child.tag === 'template') {
+        slot.push.apply(slot, child.children)
       } else {
-        defaultSlot.push(child)
+        slot.push(child)
       }
+    } else {
+      defaultSlot.push(child)
     }
-    // ignore single whitespace
-    if (defaultSlot.length && !(
-      defaultSlot.length === 1 &&
-      defaultSlot[0].text === ' '
-    )) {
-      slots.default = defaultSlot
-    }
+  }
+  // ignore single whitespace
+  if (defaultSlot.length && !(
+    defaultSlot.length === 1 &&
+    defaultSlot[0].text === ' '
+  )) {
+    slots.default = defaultSlot
   }
 }
