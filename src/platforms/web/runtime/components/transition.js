@@ -8,6 +8,7 @@ export default {
   props: {
     name: String,
     appear: Boolean,
+    css: Boolean,
     mode: String,
     enterClass: String,
     leaveClass: String,
@@ -37,13 +38,16 @@ export default {
       return rawChild
     }
 
+    // apply transition data to child
+    // use getRealChild() to ignore abstract components e.g. keep-alive
     const child = getRealChild(rawChild)
     child.key = child.key || `__v${child.tag + this._uid}__`
-    const data = (child.data || (child.data = {})).transition = { context: this }
+    const data = (child.data || (child.data = {})).transition = { wrapper: this }
     for (const key in this.$options.propsData) {
       data[key] = this[key]
     }
 
+    // handle transition mode
     const mode = this.mode
     const oldRawChild = this._vnode
     const oldChild = getRealChild(oldRawChild)

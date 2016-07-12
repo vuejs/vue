@@ -46,12 +46,13 @@ export function enter (vnode: VNodeWithData) {
     el._leaveCb()
   }
 
-  const data = vnode.data.transition
+  const data = resolveTransition(vnode.data.transition)
   if (!data) {
     return
   }
 
   const {
+    wrapper,
     css,
     enterClass,
     enterActiveClass,
@@ -65,7 +66,7 @@ export function enter (vnode: VNodeWithData) {
     appear,
     afterAppear,
     appearCancelled
-  } = resolveTransition(data)
+  } = data
 
   const isAppear = !vnode.context.$root._isMounted
   if (isAppear && !appear && appear !== '') {
@@ -90,8 +91,16 @@ export function enter (vnode: VNodeWithData) {
         removeTransitionClass(el, startClass)
       }
       enterCancelledHook && enterCancelledHook(el, vm)
+      wrapper.$emit('enter-cancelled', el, vm)
+      if (isAppear) {
+        wrapper.$emit('appear-cancelled', el, vm)
+      }
     } else {
       afterEnterHook && afterEnterHook(el, vm)
+      wrapper.$emit('after-enter', el, vm)
+      if (isAppear) {
+        wrapper.$emit('after-appear', el, vm)
+      }
     }
     el._enterCb = null
   })
@@ -104,10 +113,18 @@ export function enter (vnode: VNodeWithData) {
       pendingNode.elm._leaveCb()
     }
     enterHook && enterHook(el, vm, cb)
+    wrapper.$emit('enter', el, vm)
+    if (isAppear) {
+      wrapper.$emit('appear', el, vm)
+    }
   })
 
   // start enter transition
   beforeEnterHook && beforeEnterHook(el, vm)
+  wrapper.$emit('before-enter', el, vm)
+  if (isAppear) {
+    wrapper.$emit('before-appear', el, vm)
+  }
   if (expectsCSS) {
     addTransitionClass(el, startClass)
     addTransitionClass(el, activeClass)
@@ -134,12 +151,13 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     el._enterCb()
   }
 
-  const data = vnode.data.transition
+  const data = resolveTransition(vnode.data.transition)
   if (!data) {
     return rm()
   }
 
   const {
+    wrapper,
     css,
     leaveClass,
     leaveActiveClass,
@@ -148,7 +166,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     afterLeave,
     leaveCancelled,
     delayLeave
-  } = resolveTransition(data)
+  } = data
 
   const expectsCSS = css !== false
   const userWantsControl = leave && leave.length > 2
@@ -164,9 +182,11 @@ export function leave (vnode: VNodeWithData, rm: Function) {
         removeTransitionClass(el, leaveClass)
       }
       leaveCancelled && leaveCancelled(el, vm)
+      wrapper.$emit('leave-cancelled', el, vm)
     } else {
       rm()
       afterLeave && afterLeave(el, vm)
+      wrapper.$emit('after-leave', el, vm)
     }
     el._leaveCb = null
   })
@@ -183,6 +203,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode
     }
     beforeLeave && beforeLeave(el, vm)
+    wrapper.$emit('before-leave', el, vm)
     if (expectsCSS) {
       addTransitionClass(el, leaveClass)
       addTransitionClass(el, leaveActiveClass)
@@ -194,14 +215,17 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       })
     }
     leave && leave(el, vm, cb)
+    wrapper.$emit('leave', el, vm)
     if (!expectsCSS && !userWantsControl) {
       cb()
     }
   }
 }
 
-function resolveTransition (def: string | Object): Object {
-  if (def && typeof def === 'object') {
+function resolveTransition (def?: string | Object): ?Object {
+  if (!def) {
+    return
+  } else if (typeof def === 'object') {
     const res = {}
     if (def.css !== false) {
       extend(res, autoCssTransition(def.name || 'v'))
