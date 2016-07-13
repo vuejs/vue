@@ -13,13 +13,11 @@
   </head>
   <body>
     <div id="app">
-      <ul>
-        <transition v-for="user in users" :key="user['.key']">
-          <li class="user">
-            <span>{{user.name}} - {{user.email}}</span>
-            <button v-on:click="removeUser(user)">X</button>
-          </li>
-        </transition>
+      <ul is="transition-group">
+        <li v-for="user in users" class="user" :key="user['.key']">
+          <span>{{user.name}} - {{user.email}}</span>
+          <button v-on:click="removeUser(user)">X</button>
+        </li>
       </ul>
       <form id="form" v-on:submit.prevent="addUser">
         <input v-model="newUser.name">
