@@ -20,11 +20,10 @@ if (!isIE9) {
     it('dynamic components, simultaneous', done => {
       const vm = new Vue({
         template: `<div>
-          <component
-            :is="view"
-            class="test"
-            transition>
-          </component>
+          <transition>
+            <component :is="view" class="test">
+            </component>
+          </transition>
         </div>`,
         data: { view: 'one' },
         components
@@ -33,13 +32,13 @@ if (!isIE9) {
       vm.view = 'two'
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test v-enter v-enter-active">two</div>' +
-          '<div class="test v-leave v-leave-active">one</div>'
+          '<div class="test v-leave v-leave-active">one</div>' +
+          '<div class="test v-enter v-enter-active">two</div>'
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test v-enter-active">two</div>' +
-          '<div class="test v-leave-active">one</div>'
+          '<div class="test v-leave-active">one</div>' +
+          '<div class="test v-enter-active">two</div>'
         )
       }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -52,20 +51,16 @@ if (!isIE9) {
       let next
       const vm = new Vue({
         template: `<div>
-          <component
-            :is="view"
-            class="test"
-            transition="test"
-            transition-mode="out-in">
-          </component>
+          <transition name="test" mode="out-in" @after-leave="afterLeave">
+            <component :is="view" class="test">
+            </component>
+          </transition>
         </div>`,
         data: { view: 'one' },
         components,
-        transitions: {
-          test: {
-            afterLeave () {
-              next()
-            }
+        methods: {
+          afterLeave () {
+            next()
           }
         }
       }).$mount(el)
@@ -100,20 +95,16 @@ if (!isIE9) {
       let next
       const vm = new Vue({
         template: `<div>
-          <component
-            :is="view"
-            class="test"
-            transition="test"
-            transition-mode="in-out">
-          </component>
+          <transition name="test" mode="in-out" @after-enter="afterEnter">
+            <component :is="view" class="test">
+            </component>
+          </transition>
         </div>`,
         data: { view: 'one' },
         components,
-        transitions: {
-          test: {
-            afterEnter () {
-              next()
-            }
+        methods: {
+          afterEnter () {
+            next()
           }
         }
       }).$mount(el)
@@ -154,10 +145,9 @@ if (!isIE9) {
     it('normal elements with different keys, simultaneous', done => {
       const vm = new Vue({
         template: `<div>
-          <div
-            :key="view"
-            class="test"
-            transition>{{view}}</div>
+          <transition>
+            <div :key="view" class="test">{{view}}</div>
+          </transition>
         </div>`,
         data: { view: 'one' },
         components
@@ -166,13 +156,13 @@ if (!isIE9) {
       vm.view = 'two'
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test v-enter v-enter-active">two</div>' +
-          '<div class="test v-leave v-leave-active">one</div>'
+          '<div class="test v-leave v-leave-active">one</div>' +
+          '<div class="test v-enter v-enter-active">two</div>'
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test v-enter-active">two</div>' +
-          '<div class="test v-leave-active">one</div>'
+          '<div class="test v-leave-active">one</div>' +
+          '<div class="test v-enter-active">two</div>'
         )
       }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -185,19 +175,15 @@ if (!isIE9) {
       let next
       const vm = new Vue({
         template: `<div>
-          <div
-            :key="view"
-            class="test"
-            transition="test"
-            transition-mode="out-in">{{view}}</div>
+          <transition name="test" mode="out-in" @after-leave="afterLeave">
+            <div :key="view" class="test">{{view}}</div>
+          </transition>
         </div>`,
         data: { view: 'one' },
         components,
-        transitions: {
-          test: {
-            afterLeave () {
-              next()
-            }
+        methods: {
+          afterLeave () {
+            next()
           }
         }
       }).$mount(el)
@@ -232,19 +218,15 @@ if (!isIE9) {
       let next
       const vm = new Vue({
         template: `<div>
-          <div
-            :key="view"
-            class="test"
-            transition="test"
-            transition-mode="in-out">{{view}}</div>
+          <transition name="test" mode="in-out" @after-enter="afterEnter">
+            <div :key="view" class="test">{{view}}</div>
+          </transition>
         </div>`,
         data: { view: 'one' },
         components,
-        transitions: {
-          test: {
-            afterEnter () {
-              next()
-            }
+        methods: {
+          afterEnter () {
+            next()
           }
         }
       }).$mount(el)
