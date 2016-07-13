@@ -31,7 +31,7 @@ export default {
 
     const rawChild = children[0]
 
-    // if this is a component root node and the compoennt's
+    // if this is a component root node and the component's
     // parent container node also has transition, skip.
     if (this.$vnode.parent && this.$vnode.parent.data.transition) {
       return rawChild
