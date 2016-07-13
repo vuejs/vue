@@ -6,7 +6,6 @@ import { enter, leave } from '../modules/transition'
 export default {
   bind (el: HTMLElement, { value }: VNodeDirective, vnode: VNodeWithData) {
     const transition = vnode.data.transition
-    console.log(transition)
     if (value && transition && transition.appear && !isIE9) {
       enter(vnode)
     }
