@@ -15,7 +15,7 @@ if (!isIE9) {
 
     it('basic transition', done => {
       const vm = new Vue({
-        template: '<div><div v-if="ok" class="test" transition>foo</div></div>',
+        template: '<div><transition><div v-if="ok" class="test">foo</div></transition></div>',
         data: { ok: true }
       }).$mount(el)
 
@@ -40,7 +40,7 @@ if (!isIE9) {
 
     it('named transition', done => {
       const vm = new Vue({
-        template: '<div><div v-if="ok" class="test" transition="test">foo</div></div>',
+        template: '<div><transition name="test"><div v-if="ok" class="test">foo</div></transition></div>',
         data: { ok: true }
       }).$mount(el)
 
@@ -65,16 +65,18 @@ if (!isIE9) {
 
     it('custom transition classes', done => {
       const vm = new Vue({
-        template: '<div><div v-if="ok" class="test" transition="test">foo</div></div>',
-        data: { ok: true },
-        transitions: {
-          test: {
-            enterClass: 'hello',
-            enterActiveClass: 'hello-active',
-            leaveClass: 'bye',
-            leaveActiveClass: 'byebye active' // testing multi classes
-          }
-        }
+        template: `
+          <div>
+            <transition
+              enter-class="hello"
+              enter-active-class="hello-active"
+              leave-class="bye"
+              leave-active-class="byebye active">
+              <div v-if="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
+        data: { ok: true }
       }).$mount(el)
 
       // should not apply transition on initial render by default
@@ -98,7 +100,13 @@ if (!isIE9) {
 
     it('dynamic transition', done => {
       const vm = new Vue({
-        template: '<div><div v-if="ok" class="test" :transition="trans">foo</div></div>',
+        template: `
+          <div>
+            <transition :name="trans">
+              <div v-if="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
         data: {
           ok: true,
           trans: 'test'
@@ -129,20 +137,24 @@ if (!isIE9) {
       const enter = jasmine.createSpy('enter')
       const leave = jasmine.createSpy('leave')
       const vm = new Vue({
-        template: `<div><div v-if="ok" class="test" :transition="{
-          name: 'inline',
-          enterClass: 'hello',
-          enterActiveClass: 'hello-active',
-          leaveClass: 'bye',
-          leaveActiveClass: 'byebye active'
-        }">foo</div></div>`,
-        data: { ok: true },
-        transitions: {
-          inline: {
-            enter,
-            leave
-          }
-        }
+        render (h) {
+          return h('div', null, [
+            h('transition', {
+              props: {
+                name: 'inline',
+                enterClass: 'hello',
+                enterActiveClass: 'hello-active',
+                leaveClass: 'bye',
+                leaveActiveClass: 'byebye active'
+              },
+              on: {
+                enter,
+                leave
+              }
+            }, () => [this.ok ? h('div', { class: 'test' }, 'foo') : undefined])
+          ])
+        },
+        data: { ok: true }
       }).$mount(el)
 
       // should not apply transition on initial render by default
@@ -166,7 +178,7 @@ if (!isIE9) {
       }).then(done)
     })
 
-    it('transition with JavaScript hooks', done => {
+    it('transition events', done => {
       const onLeaveSpy = jasmine.createSpy('leave')
       const onEnterSpy = jasmine.createSpy('enter')
       const beforeLeaveSpy = jasmine.createSpy('beforeLeave')
@@ -175,28 +187,39 @@ if (!isIE9) {
       const afterEnterSpy = jasmine.createSpy('afterEnter')
 
       const vm = new Vue({
-        template: '<div><div v-if="ok" class="test" transition="test">foo</div></div>',
+        template: `
+          <div>
+            <transition
+              name="test"
+              @before-enter="beforeEnter"
+              @enter="enter"
+              @after-enter="afterEnter"
+              @before-leave="beforeLeave"
+              @leave="leave"
+              @after-leave="afterLeave">
+              <div v-if="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
         data: { ok: true },
-        transitions: {
-          test: {
-            beforeLeave: (el, vm) => {
-              expect(el).toBe(vm.$el.children[0])
-              expect(el.className).toBe('test')
-              beforeLeaveSpy(el, vm)
-            },
-            leave: (el, vm) => onLeaveSpy(el, vm),
-            afterLeave: (el, vm) => afterLeaveSpy(el, vm),
-            beforeEnter: (el, vm) => {
-              expect(vm.$el.contains(el)).toBe(false)
-              expect(el.className).toBe('test')
-              beforeEnterSpy(el, vm)
-            },
-            enter: (el, vm) => {
-              expect(vm.$el.contains(el)).toBe(true)
-              onEnterSpy(el, vm)
-            },
-            afterEnter: (el, vm) => afterEnterSpy(el, vm)
-          }
+        methods: {
+          beforeLeave: (el, vm) => {
+            expect(el).toBe(vm.$el.children[0])
+            expect(el.className).toBe('test')
+            beforeLeaveSpy(el, vm)
+          },
+          leave: (el, vm) => onLeaveSpy(el, vm),
+          afterLeave: (el, vm) => afterLeaveSpy(el, vm),
+          beforeEnter: (el, vm) => {
+            expect(vm.$el.contains(el)).toBe(false)
+            expect(el.className).toBe('test')
+            beforeEnterSpy(el, vm)
+          },
+          enter: (el, vm) => {
+            expect(vm.$el.contains(el)).toBe(true)
+            onEnterSpy(el, vm)
+          },
+          afterEnter: (el, vm) => afterEnterSpy(el, vm)
         }
       }).$mount(el)
 
@@ -233,16 +256,18 @@ if (!isIE9) {
     it('explicit user callback in JavaScript hooks', done => {
       let next
       const vm = new Vue({
-        template: '<div><div v-if="ok" class="test" transition="test">foo</div></div>',
+        template: `<div>
+          <transition name="test" @enter="enter" @leave="leave">
+            <div v-if="ok" class="test">foo</div>
+          </transition>
+        </div>`,
         data: { ok: true },
-        transitions: {
-          test: {
-            enter: (el, vm, cb) => {
-              next = cb
-            },
-            leave: (el, vm, cb) => {
-              next = cb
-            }
+        methods: {
+          enter: (el, vm, cb) => {
+            next = cb
+          },
+          leave: (el, vm, cb) => {
+            next = cb
           }
         }
       }).$mount(el)
@@ -274,14 +299,17 @@ if (!isIE9) {
       const enterSpy = jasmine.createSpy('enter')
       const leaveSpy = jasmine.createSpy('leave')
       const vm = new Vue({
-        template: '<div><div v-if="ok" class="test" transition="test">foo</div></div>',
+        template: `
+          <div>
+            <transition :css="false" name="test" @enter="enter" @leave="leave">
+              <div v-if="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
         data: { ok: true },
-        transitions: {
-          test: {
-            css: false,
-            enter: enterSpy,
-            leave: leaveSpy
-          }
+        methods: {
+          enter: enterSpy,
+          leave: leaveSpy
         }
       }).$mount(el)
 
@@ -300,13 +328,11 @@ if (!isIE9) {
       const enterSpy = jasmine.createSpy('enter')
       const leaveSpy = jasmine.createSpy('leave')
       const vm = new Vue({
-        template: '<div><div v-if="ok" transition="nope">foo</div></div>',
+        template: '<div><transition name="nope" @enter="enter" @leave="leave"><div v-if="ok">foo</div></transition></div>',
         data: { ok: true },
-        transitions: {
-          nope: {
-            enter: enterSpy,
-            leave: leaveSpy
-          }
+        methods: {
+          enter: enterSpy,
+          leave: leaveSpy
         }
       }).$mount(el)
 
@@ -328,12 +354,16 @@ if (!isIE9) {
     it('enterCancelled', done => {
       const spy = jasmine.createSpy('enterCancelled')
       const vm = new Vue({
-        template: '<div><div v-if="ok" class="test" transition="test">foo</div></div>',
+        template: `
+          <div>
+            <transition name="test" @enter-cancelled="enterCancelled">
+              <div v-if="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
         data: { ok: false },
-        transitions: {
-          test: {
-            enterCancelled: spy
-          }
+        methods: {
+          enterCancelled: spy
         }
       }).$mount(el)
 
@@ -355,7 +385,13 @@ if (!isIE9) {
 
     it('transition with v-show', done => {
       const vm = new Vue({
-        template: '<div><div v-show="ok" class="test" transition="test">foo</div></div>',
+        template: `
+          <div>
+            <transition name="test">
+              <div v-show="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
         data: { ok: true }
       }).$mount(el)
 
@@ -383,12 +419,16 @@ if (!isIE9) {
     it('leaveCancelled (v-show only)', done => {
       const spy = jasmine.createSpy('leaveCancelled')
       const vm = new Vue({
-        template: '<div><div v-show="ok" class="test" transition="test">foo</div></div>',
+        template: `
+          <div>
+            <transition name="test" @leave-cancelled="leaveCancelled">
+              <div v-show="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
         data: { ok: true },
-        transitions: {
-          test: {
-            leaveCancelled: spy
-          }
+        methods: {
+          leaveCancelled: spy
         }
       }).$mount(el)
 
@@ -412,7 +452,13 @@ if (!isIE9) {
 
     it('animations', done => {
       const vm = new Vue({
-        template: '<div><div v-if="ok" class="test" transition="test-anim">foo</div></div>',
+        template: `
+          <div>
+            <transition name="test-anim">
+              <div v-if="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
         data: { ok: true }
       }).$mount(el)
 
@@ -435,49 +481,19 @@ if (!isIE9) {
       }).then(done)
     })
 
-    it('transition on appear (inline)', done => {
+    it('transition on appear', done => {
       const vm = new Vue({
         template: `
           <div>
-            <div v-if="ok"
-              class="test"
-              :transition="{
-                name:'test',
-                appear:true,
-                appearClass: 'test-appear',
-                appearActiveClass: 'test-appear-active'
-              }">foo</div>
+            <transition name="test"
+              appear
+              appear-class="test-appear"
+              appear-active-class="test-appear-active">
+              <div v-if="ok" class="test">foo</div>
+            </transition>
           </div>
         `,
         data: { ok: true }
-      }).$mount(el)
-
-      waitForUpdate(() => {
-        expect(vm.$el.children[0].className).toBe('test test-appear test-appear-active')
-      }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].className).toBe('test test-appear-active')
-      }).thenWaitFor(duration + 10).then(() => {
-        expect(vm.$el.children[0].className).toBe('test')
-      }).then(done)
-    })
-
-    it('transition on appear (resolved)', done => {
-      const vm = new Vue({
-        template: `
-          <div>
-            <div v-if="ok"
-              class="test"
-              transition="test">foo</div>
-          </div>
-        `,
-        data: { ok: true },
-        transitions: {
-          test: {
-            appear: true,
-            appearClass: 'test-appear',
-            appearActiveClass: 'test-appear-active'
-          }
-        }
       }).$mount(el)
 
       waitForUpdate(() => {
@@ -493,9 +509,9 @@ if (!isIE9) {
       const vm = new Vue({
         template: `
           <div>
-            <div v-show="ok"
-              class="test"
-              :transition="{name:'test',appear:true}">foo</div>
+            <transition name="test" appear>
+              <div v-show="ok" class="test">foo</div>
+            </transition>
           </div>
         `,
         data: { ok: true }
@@ -512,36 +528,52 @@ if (!isIE9) {
 
     it('transition on SVG elements', done => {
       const vm = new Vue({
-        template: '<svg><circle cx="0" cy="0" r="10" v-if="ok" class="test" transition></circle></svg>',
+        template: `
+          <svg>
+            <transition>
+              <circle cx="0" cy="0" r="10" v-if="ok" class="test"></circle>
+            </transition>
+          </svg>
+        `,
         data: { ok: true }
       }).$mount(el)
 
       // should not apply transition on initial render by default
-      expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test')
+      expect(vm.$el.children[0].getAttribute('class')).toBe('test')
       vm.ok = false
       waitForUpdate(() => {
-        expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-leave v-leave-active')
+        expect(vm.$el.children[0].getAttribute('class')).toBe('test v-leave v-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-leave-active')
+        expect(vm.$el.children[0].getAttribute('class')).toBe('test v-leave-active')
       }).thenWaitFor(duration + 10).then(() => {
-        expect(vm.$el.childNodes.length).toBe(0)
+        expect(vm.$el.children.length).toBe(0)
         vm.ok = true
       }).then(() => {
-        expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-enter v-enter-active')
+        expect(vm.$el.children[0].getAttribute('class')).toBe('test v-enter v-enter-active')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-enter-active')
+        expect(vm.$el.children[0].getAttribute('class')).toBe('test v-enter-active')
       }).thenWaitFor(duration + 10).then(() => {
-        expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test')
+        expect(vm.$el.children[0].getAttribute('class')).toBe('test')
       }).then(done)
     })
 
     it('transition on child components', done => {
       const vm = new Vue({
-        template: '<div><test v-if="ok" class="test" transition></test></div>',
+        template:`
+          <div>
+            <transition>
+              <test v-if="ok" class="test"></test>
+            </transition>
+          </div>
+        `,
         data: { ok: true },
         components: {
           test: {
-            template: '<div transition="test">foo</div>' // test transition override from parent
+            template: `
+              <transition name="test">
+                <div>foo</div>
+              </transition>
+            ` // test transition override from parent
           }
         }
       }).$mount(el)
