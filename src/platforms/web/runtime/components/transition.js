@@ -62,13 +62,15 @@ export default {
       if (mode === 'out-in') {
         // return old node
         // and queue an update when the leave finishes
-        if (!oldChild.elm._leaveCb) {
+        if (!oldChild.elm._leaveCb && oldRawChild.data.transition) {
           leave(oldChild, () => {
-            oldRawChild.data.left = true
+            oldRawChild.data.transition = null
             this.$forceUpdate()
           })
         }
-        return oldRawChild.data.left ? rawChild : oldRawChild
+        if (oldRawChild.data.transition) {
+          return oldRawChild
+        }
       } else if (mode === 'in-out') {
         let delayedLeave
         const performLeave = () => { delayedLeave() }
