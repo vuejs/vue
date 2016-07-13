@@ -285,6 +285,13 @@ describe('codegen', () => {
     )
   })
 
+  it('generate svg component with children', () => {
+    assertCodegen(
+      '<svg><my-comp><circle :r="10"></circle></my-comp></svg>',
+      `with(this){return _h('svg',[_h('my-comp',function(){return [_h('circle',{attrs:{"r":10}})]})])}`
+    )
+  })
+
   it('generate is attribute', () => {
     assertCodegen(
       '<div is="component1"></div>',

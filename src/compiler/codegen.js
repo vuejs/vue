@@ -62,7 +62,7 @@ function genElement (el: ASTElement): string {
       // if the element is potentially a component,
       // wrap its children as a thunk.
       const children = !el.inlineTemplate
-        ? genChildren(el, !el.ns && !isPlatformReservedTag(el.tag) /* asThunk */)
+        ? genChildren(el, !isPlatformReservedTag(el.tag) /* asThunk */)
         : null
       code = `_h('${el.tag}'${
         data ? `,${data}` : '' // data

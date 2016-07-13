@@ -43,20 +43,20 @@ function _createElement (
   }
   if (typeof tag === 'string') {
     let Ctor
+    const ns = config.getTagNamespace(tag)
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       return new VNode(
-        tag, data, normalizeChildren(children),
-        undefined, undefined, undefined, context, host
+        tag, data, normalizeChildren(children, ns),
+        undefined, undefined, ns, context, host
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
       return createComponent(Ctor, data, parent, context, host, children, tag)
     } else {
-      // unknown or namespaced elements
+      // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
-      const ns = config.getTagNamespace(tag)
       return new VNode(
         tag, data, normalizeChildren(children, ns),
         undefined, undefined, ns, context, host
