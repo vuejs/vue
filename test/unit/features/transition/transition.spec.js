@@ -4,7 +4,7 @@ import { isIE9 } from 'web/util/index'
 import { nextFrame } from 'web/runtime/modules/transition'
 
 if (!isIE9) {
-  fdescribe('Transition system', () => {
+  describe('Transition system', () => {
     const duration = injectStyles()
 
     let el
@@ -539,27 +539,29 @@ if (!isIE9) {
       }).$mount(el)
 
       // should not apply transition on initial render by default
-      expect(vm.$el.children[0].getAttribute('class')).toBe('test')
+      expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test')
       vm.ok = false
       waitForUpdate(() => {
-        expect(vm.$el.children[0].getAttribute('class')).toBe('test v-leave v-leave-active')
+        expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-leave v-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].getAttribute('class')).toBe('test v-leave-active')
+        expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-leave-active')
       }).thenWaitFor(duration + 10).then(() => {
-        expect(vm.$el.children.length).toBe(0)
+        expect(vm.$el.childNodes.length).toBe(1)
+        expect(vm.$el.childNodes[0].nodeType).toBe(3) // should be an empty text node
+        expect(vm.$el.childNodes[0].textContent).toBe('')
         vm.ok = true
       }).then(() => {
-        expect(vm.$el.children[0].getAttribute('class')).toBe('test v-enter v-enter-active')
+        expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-enter v-enter-active')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].getAttribute('class')).toBe('test v-enter-active')
+        expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-enter-active')
       }).thenWaitFor(duration + 10).then(() => {
-        expect(vm.$el.children[0].getAttribute('class')).toBe('test')
+        expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test')
       }).then(done)
     })
 
     it('transition on child components', done => {
       const vm = new Vue({
-        template:`
+        template: `
           <div>
             <transition>
               <test v-if="ok" class="test"></test>
