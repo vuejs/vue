@@ -13,7 +13,7 @@ export default {
   render () {
     const rawChild = this.child
     const realChild = getRealChild(this.child)
-    if (realChild.componentOptions) {
+    if (realChild && realChild.componentOptions) {
       const cid = realChild.componentOptions.Ctor.cid
       if (this.cache[cid]) {
         const child = realChild.child = this.cache[cid].child

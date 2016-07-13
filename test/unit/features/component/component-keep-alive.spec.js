@@ -81,23 +81,21 @@ describe('Component keep-alive', () => {
       let next
       const vm = new Vue({
         template: `<div>
-          <component
-            :is="view"
-            class="test"
-            keep-alive
-            transition="test"
-            transition-mode="out-in">
-          </component>
+          <transition name="test" mode="out-in" @after-leave="afterLeave">
+            <component
+              :is="view"
+              class="test"
+              keep-alive>
+            </component>
+          <transition>
         </div>`,
         data: {
           view: 'one'
         },
         components,
-        transitions: {
-          test: {
-            afterLeave () {
-              next()
-            }
+        methods: {
+          afterLeave () {
+            next()
           }
         }
       }).$mount(el)
@@ -170,23 +168,21 @@ describe('Component keep-alive', () => {
       let next
       const vm = new Vue({
         template: `<div>
-          <component
-            :is="view"
-            class="test"
-            keep-alive
-            transition="test"
-            transition-mode="in-out">
-          </component>
+          <transition name="test" mode="in-out" @after-enter="afterEnter">
+            <component
+              :is="view"
+              class="test"
+              keep-alive>
+            </component>
+          </transition>
         </div>`,
         data: {
           view: 'one'
         },
         components,
-        transitions: {
-          test: {
-            afterEnter () {
-              next()
-            }
+        methods: {
+          afterEnter () {
+            next()
           }
         }
       }).$mount(el)

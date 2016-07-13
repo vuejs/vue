@@ -1,6 +1,5 @@
 import { warn } from 'core/util/index'
 import { noop, camelize } from 'shared/util'
-import { leave } from 'web/runtime/modules/transition'
 import { getRealChild, mergeVNodeHook } from 'core/vdom/helpers'
 
 export default {
@@ -60,20 +59,13 @@ export default {
     const oldChild = getRealChild(oldRawChild)
     if (mode && oldChild && oldChild.data && oldChild.key !== child.key) {
       if (mode === 'out-in') {
-        if (
-          !oldChild.elm._leaveCb && // not already leaving
-          oldChild.data.transition // not already left
-        ) {
-          leave(oldChild, () => {
-            // mark left & avoid triggering leave transition again
-            oldChild.data.transition = null
-            this.$forceUpdate()
-          })
-        }
-        // return old node if not left yet
-        if (oldChild.data.transition) {
-          return oldRawChild
-        }
+        // return empty node and queue update when leave finishes
+        mergeVNodeHook(oldChild.data.transition, 'afterLeave', () => {
+          this.$forceUpdate()
+        })
+        return /\d-keep-alive$/.test(rawChild.tag)
+          ? h('keep-alive')
+          : null
       } else if (mode === 'in-out') {
         let delayedLeave
         const performLeave = () => { delayedLeave() }
