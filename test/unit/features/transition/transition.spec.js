@@ -4,7 +4,7 @@ import { isIE9 } from 'web/util/index'
 import { nextFrame } from 'web/runtime/modules/transition'
 
 if (!isIE9) {
-  describe('Transition system', () => {
+  fdescribe('Transition system', () => {
     const duration = injectStyles()
 
     let el
@@ -203,23 +203,23 @@ if (!isIE9) {
         `,
         data: { ok: true },
         methods: {
-          beforeLeave: (el, vm) => {
+          beforeLeave: (el) => {
             expect(el).toBe(vm.$el.children[0])
             expect(el.className).toBe('test')
-            beforeLeaveSpy(el, vm)
+            beforeLeaveSpy(el)
           },
-          leave: (el, vm) => onLeaveSpy(el, vm),
-          afterLeave: (el, vm) => afterLeaveSpy(el, vm),
-          beforeEnter: (el, vm) => {
+          leave: (el) => onLeaveSpy(el),
+          afterLeave: (el) => afterLeaveSpy(el),
+          beforeEnter: (el) => {
             expect(vm.$el.contains(el)).toBe(false)
             expect(el.className).toBe('test')
-            beforeEnterSpy(el, vm)
+            beforeEnterSpy(el)
           },
-          enter: (el, vm) => {
+          enter: (el) => {
             expect(vm.$el.contains(el)).toBe(true)
-            onEnterSpy(el, vm)
+            onEnterSpy(el)
           },
-          afterEnter: (el, vm) => afterEnterSpy(el, vm)
+          afterEnter: (el) => afterEnterSpy(el)
         }
       }).$mount(el)
 
@@ -229,26 +229,26 @@ if (!isIE9) {
       let _el = vm.$el.children[0]
       vm.ok = false
       waitForUpdate(() => {
-        expect(beforeLeaveSpy).toHaveBeenCalledWith(_el, vm)
-        expect(onLeaveSpy).toHaveBeenCalledWith(_el, vm)
+        expect(beforeLeaveSpy).toHaveBeenCalledWith(_el)
+        expect(onLeaveSpy).toHaveBeenCalledWith(_el)
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(afterLeaveSpy).not.toHaveBeenCalled()
         expect(vm.$el.children[0].className).toBe('test test-leave-active')
       }).thenWaitFor(duration + 10).then(() => {
-        expect(afterLeaveSpy).toHaveBeenCalledWith(_el, vm)
+        expect(afterLeaveSpy).toHaveBeenCalledWith(_el)
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
       }).then(() => {
         _el = vm.$el.children[0]
-        expect(beforeEnterSpy).toHaveBeenCalledWith(_el, vm)
-        expect(onEnterSpy).toHaveBeenCalledWith(_el, vm)
+        expect(beforeEnterSpy).toHaveBeenCalledWith(_el)
+        expect(onEnterSpy).toHaveBeenCalledWith(_el)
         expect(vm.$el.children[0].className).toBe('test test-enter test-enter-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(afterEnterSpy).not.toHaveBeenCalled()
         expect(vm.$el.children[0].className).toBe('test test-enter-active')
       }).thenWaitFor(duration + 10).then(() => {
-        expect(afterEnterSpy).toHaveBeenCalledWith(_el, vm)
+        expect(afterEnterSpy).toHaveBeenCalledWith(_el)
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
@@ -263,10 +263,10 @@ if (!isIE9) {
         </div>`,
         data: { ok: true },
         methods: {
-          enter: (el, vm, cb) => {
+          enter: (el, cb) => {
             next = cb
           },
-          leave: (el, vm, cb) => {
+          leave: (el, cb) => {
             next = cb
           }
         }

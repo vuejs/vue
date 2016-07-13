@@ -38,7 +38,6 @@ export function nextFrame (fn: Function) {
 
 export function enter (vnode: VNodeWithData) {
   const el: any = vnode.elm
-  const vm = vnode.context
 
   // call leave callback now
   if (el._leaveCb) {
@@ -84,7 +83,7 @@ export function enter (vnode: VNodeWithData) {
     enterHook &&
     // enterHook may be a bound method which exposes
     // the length of original fn as _length
-    (enterHook._length || enterHook.length) > 2
+    (enterHook._length || enterHook.length) > 1
 
   const cb = el._enterCb = once(() => {
     if (expectsCSS) {
@@ -94,9 +93,9 @@ export function enter (vnode: VNodeWithData) {
       if (expectsCSS) {
         removeTransitionClass(el, startClass)
       }
-      enterCancelledHook && enterCancelledHook(el, vm)
+      enterCancelledHook && enterCancelledHook(el)
     } else {
-      afterEnterHook && afterEnterHook(el, vm)
+      afterEnterHook && afterEnterHook(el)
     }
     el._enterCb = null
   })
@@ -108,11 +107,11 @@ export function enter (vnode: VNodeWithData) {
     if (pendingNode && pendingNode.tag === vnode.tag && pendingNode.elm._leaveCb) {
       pendingNode.elm._leaveCb()
     }
-    enterHook && enterHook(el, vm, cb)
+    enterHook && enterHook(el, cb)
   })
 
   // start enter transition
-  beforeEnterHook && beforeEnterHook(el, vm)
+  beforeEnterHook && beforeEnterHook(el)
   if (expectsCSS) {
     addTransitionClass(el, startClass)
     addTransitionClass(el, activeClass)
@@ -131,7 +130,6 @@ export function enter (vnode: VNodeWithData) {
 
 export function leave (vnode: VNodeWithData, rm: Function) {
   const el: any = vnode.elm
-  const vm = vnode.context
 
   // call enter callback now
   if (el._enterCb) {
@@ -160,7 +158,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     leave &&
     // leave hook may be a bound method which exposes
     // the length of original fn as _length
-    (leave._length || leave.length) > 2
+    (leave._length || leave.length) > 1
 
   const cb = el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
@@ -173,10 +171,10 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       if (expectsCSS) {
         removeTransitionClass(el, leaveClass)
       }
-      leaveCancelled && leaveCancelled(el, vm)
+      leaveCancelled && leaveCancelled(el)
     } else {
       rm()
-      afterLeave && afterLeave(el, vm)
+      afterLeave && afterLeave(el)
     }
     el._leaveCb = null
   })
@@ -192,7 +190,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     if (!vnode.data.show) {
       (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode
     }
-    beforeLeave && beforeLeave(el, vm)
+    beforeLeave && beforeLeave(el)
     if (expectsCSS) {
       addTransitionClass(el, leaveClass)
       addTransitionClass(el, leaveActiveClass)
@@ -203,7 +201,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
         }
       })
     }
-    leave && leave(el, vm, cb)
+    leave && leave(el, cb)
     if (!expectsCSS && !userWantsControl) {
       cb()
     }
