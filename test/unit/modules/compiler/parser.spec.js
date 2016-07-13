@@ -211,16 +211,6 @@ describe('parser', () => {
     expect(ast.styleBinding).toBe('error')
   })
 
-  it('transition', () => {
-    const ast = parse('<p v-if="show" transition="expand">hello world</p>', baseOptions)
-    expect(ast.transition).toBe('"expand"')
-  })
-
-  it('transition with empty', () => {
-    const ast = parse('<p v-if="show" transition="">hello world</p>', baseOptions)
-    expect(ast.transition).toBe(true)
-  })
-
   it('attribute with v-bind', () => {
     const ast = parse('<input type="text" name="field1" :value="msg">', baseOptions)
     expect(ast.attrsList[0].name).toBe('type')

@@ -146,26 +146,6 @@ describe('codegen', () => {
     )
   })
 
-  it('generate transition', () => {
-    // without key, should auto-set unique key
-    assertCodegen(
-      '<p transition="expand">hello world</p>',
-      `with(this){return _h('p',{transition:"expand",key:"__t18__"},["hello world"])}`
-    )
-    // with key
-    assertCodegen(
-      '<p transition="expand" key="1">hello world</p>',
-      `with(this){return _h('p',{key:"1",transition:"expand"},["hello world"])}`
-    )
-  })
-
-  it('generate dynamic transition with transition on appear', () => {
-    assertCodegen(
-      `<p :transition="{name:'expand',appear:true}" :key="test">hello world</p>`,
-      `with(this){return _h('p',{key:test,transition:{name:'expand',appear:true}},["hello world"])}`
-    )
-  })
-
   it('generate v-show directive', () => {
     assertCodegen(
       '<p v-show="shown">hello world</p>',
