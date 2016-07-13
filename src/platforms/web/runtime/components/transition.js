@@ -60,15 +60,18 @@ export default {
     const oldChild = getRealChild(oldRawChild)
     if (mode && oldChild && oldChild.data && oldChild.key !== child.key) {
       if (mode === 'out-in') {
-        // return old node
-        // and queue an update when the leave finishes
-        if (!oldChild.elm._leaveCb && oldRawChild.data.transition) {
+        if (
+          !oldChild.elm._leaveCb && // not already leaving
+          oldChild.data.transition // not already left
+        ) {
           leave(oldChild, () => {
-            oldRawChild.data.transition = null
+            // mark left & avoid triggering leave transition again
+            oldChild.data.transition = null
             this.$forceUpdate()
           })
         }
-        if (oldRawChild.data.transition) {
+        // return old node if not left yet
+        if (oldChild.data.transition) {
           return oldRawChild
         }
       } else if (mode === 'in-out') {
