@@ -16,7 +16,7 @@
 		  height: 60px;
 		}
 		.todo-move, .todo-enter-active, .todo-leave-active {
-		  transition: all .25s cubic-bezier(.55,0,.1,1);
+		  transition: all .25s cubic-bezier(.5,0,.1,1);
 		}
 		.todo-enter, .todo-leave-active {
 		  opacity: 0;
@@ -94,6 +94,9 @@
 		<script>metrics.beforeRender = now()</script>
 		<script src="js/app.js"></script>
 		<script src="js/routes.js"></script>
+		<script>
+		  app.$mount('.todoapp')
+		</script>
 		<script>metrics.afterRender = now()</script>
 		<script src="perf.js"></script>
 	</body>
