@@ -14,12 +14,15 @@ export default {
     const rawChild = this.child
     const realChild = getRealChild(this.child)
     if (realChild && realChild.componentOptions) {
-      const cid = realChild.componentOptions.Ctor.cid
-      if (this.cache[cid]) {
-        const child = realChild.child = this.cache[cid].child
+      const opts = realChild.componentOptions
+      // same constructor may get registered as different local components
+      // so cid alone is not enough (#3269)
+      const key = opts.Ctor.cid + '::' + opts.tag
+      if (this.cache[key]) {
+        const child = realChild.child = this.cache[key].child
         realChild.elm = this.$el = child.$el
       } else {
-        this.cache[cid] = realChild
+        this.cache[key] = realChild
       }
       realChild.data.keepAlive = true
     }
