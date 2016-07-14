@@ -17,9 +17,10 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const elm = vnode.elm
   const oldAttrs = oldVnode.data.attrs || {}
   const attrs = vnode.data.attrs || {}
+  const clonedAttrs = vnode.data.attrs = {}
 
   for (key in attrs) {
-    cur = attrs[key]
+    cur = clonedAttrs[key] = attrs[key]
     old = oldAttrs[key]
     if (old !== cur) {
       setAttr(elm, key, cur)

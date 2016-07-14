@@ -8,6 +8,7 @@ function updateProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const elm: any = vnode.elm
   const oldProps = oldVnode.data.props || {}
   const props = vnode.data.props || {}
+  const clonedProps = vnode.data.props = {}
 
   for (key in oldProps) {
     if (props[key] == null) {
@@ -15,7 +16,7 @@ function updateProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     }
   }
   for (key in props) {
-    cur = props[key]
+    cur = clonedProps[key] = props[key]
     if (key === 'value') {
       // store value as _value as well since
       // non-string values will be stringified

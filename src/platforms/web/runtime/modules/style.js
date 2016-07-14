@@ -1,6 +1,6 @@
 /* @flow */
 
-import { cached, camelize, toObject, extend } from 'shared/util'
+import { cached, camelize, toObject } from 'shared/util'
 
 const prefixes = ['Webkit', 'Moz', 'ms']
 
@@ -31,8 +31,12 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
   // handle array syntax
   if (Array.isArray(style)) {
-    style = vnode.data.style = toObject(style)
+    style = toObject(style)
   }
+
+  // clone the style for future updates,
+  // in case the user mutates the style object in-place.
+  const clonedStyle = vnode.data.style = {}
 
   for (name in oldStyle) {
     if (!style[name]) {
@@ -40,15 +44,12 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     }
   }
   for (name in style) {
-    cur = style[name]
+    cur = clonedStyle[name] = style[name]
     if (cur !== oldStyle[name]) {
       // ie9 setting to null has no effect, must use empty string
       elm.style[normalize(name)] = cur || ''
     }
   }
-  // clone the style for future updates,
-  // in case the user mutates the style object in-place.
-  vnode.data.style = extend({}, style)
 }
 
 export default {

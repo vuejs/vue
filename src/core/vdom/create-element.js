@@ -37,6 +37,14 @@ function _createElement (
     )
     return
   }
+  if (data && data.__ob__) {
+    process.env.NODE_ENV !== 'production' && warn(
+      `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
+      'Always create fresh vnode data objects in each render!',
+      context
+    )
+    return
+  }
   if (!tag) {
     // in case of component :is set to falsy value
     return emptyVNode()
