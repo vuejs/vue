@@ -260,5 +260,71 @@ describe('Component keep-alive', () => {
         assertHookCalls(two, [1, 1, 1, 1, 0])
       }).then(done)
     })
+
+    it('dynamic components, in-out with early cancel', done => {
+      let next
+      const vm = new Vue({
+        template: `<div>
+          <transition name="test" mode="in-out" @after-enter="afterEnter">
+            <component :is="view" class="test" keep-alive></component>
+          </transition>
+        </div>`,
+        data: { view: 'one' },
+        components,
+        methods: {
+          afterEnter () {
+            next()
+          }
+        }
+      }).$mount(el)
+      expect(vm.$el.textContent).toBe('one')
+      vm.view = 'two'
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">one</div>' +
+          '<div class="test test-enter test-enter-active">two</div>'
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">one</div>' +
+          '<div class="test test-enter-active">two</div>'
+        )
+        // switch again before enter finishes,
+        // this cancels both enter and leave.
+        vm.view = 'one'
+      }).then(() => {
+        // 1. the pending leaving "one" should be removed instantly.
+        // 2. the entering "two" should be placed into its final state instantly.
+        // 3. a new "one" is created and entering
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">two</div>' +
+          '<div class="test test-enter test-enter-active">one</div>'
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">two</div>' +
+          '<div class="test test-enter-active">one</div>'
+        )
+      }).thenWaitFor(_next => { next = _next }).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">two</div>' +
+          '<div class="test">one</div>'
+        )
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave test-leave-active">two</div>' +
+          '<div class="test">one</div>'
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave-active">two</div>' +
+          '<div class="test">one</div>'
+        )
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">one</div>'
+        )
+      }).then(done).then(done)
+    })
   }
 })

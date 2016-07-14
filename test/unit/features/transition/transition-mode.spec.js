@@ -142,7 +142,7 @@ if (!isIE9) {
       }).then(done)
     })
 
-    it('dynamic components, in-out with leaveCancell', done => {
+    it('dynamic components, in-out with early cancel', done => {
       let next
       const vm = new Vue({
         template: `<div>

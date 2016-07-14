@@ -160,6 +160,10 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   }
 
   function performLeave () {
+    // the delayed leave may have already been cancelled
+    if (cb.cancelled) {
+      return
+    }
     // record leaving element
     if (!vnode.data.show) {
       (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode

@@ -2,7 +2,7 @@
 // supports transition mode (out-in / in-out)
 
 import { warn } from 'core/util/index'
-import { noop, camelize } from 'shared/util'
+import { camelize } from 'shared/util'
 import { getRealChild, mergeVNodeHook } from 'core/vdom/helpers'
 
 export const transitionProps = {
@@ -110,15 +110,10 @@ export default {
       } else if (mode === 'in-out') {
         let delayedLeave
         const performLeave = () => { delayedLeave() }
-
         mergeVNodeHook(data, 'afterEnter', performLeave)
         mergeVNodeHook(data, 'enterCancelled', performLeave)
-
         mergeVNodeHook(oldData, 'delayLeave', leave => {
           delayedLeave = leave
-        })
-        mergeVNodeHook(oldData, 'leaveCancelled', () => {
-          delayedLeave = noop
         })
       }
     }
