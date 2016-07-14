@@ -598,5 +598,39 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
+
+    it('custom transition higher-order component', done => {
+      const vm = new Vue({
+        template: '<div><my-transition><div v-if="ok" class="test">foo</div></my-transition></div>',
+        data: { ok: true },
+        components: {
+          'my-transition': {
+            functional: true,
+            render (h, { data, children }) {
+              (data.props || (data.props = {})).name = 'test'
+              return h('transition', data, children)
+            }
+          }
+        }
+      }).$mount(el)
+
+      // should not apply transition on initial render by default
+      expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
+      vm.ok = false
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-leave-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.children.length).toBe(0)
+        vm.ok = true
+      }).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-enter test-enter-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-enter-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.children[0].className).toBe('test')
+      }).then(done)
+    })
   })
 }
