@@ -39,14 +39,44 @@ export default {
   props: transitionProps,
   _abstract: true,
   render (h) {
-    const children = this.$slots.default && this.$slots.default.filter(c => c.tag)
-    if (!children || !children.length) {
+    let children = this.$slots.default
+    if (!children) {
       return
     }
+
+    // warn text nodes
+    if (process.env.NODE_ENV !== 'production' &&
+        children.length === 1 && !children[0].tag) {
+      warn(
+        '<transition> can only be used on elements or components, not text nodes.',
+        this.$parent
+      )
+    }
+
+    // filter out text nodes (possible whitespaces)
+    children = children.filter(c => c.tag)
+
+    if (!children.length) {
+      return
+    }
+
+    // warn multiple elements
     if (process.env.NODE_ENV !== 'production' && children.length > 1) {
       warn(
         '<transition> can only be used on a single element. Use ' +
-        '<transition-group> for lists.'
+        '<transition-group> for lists.',
+        this.$parent
+      )
+    }
+
+    const mode = this.mode
+
+    // warn invalid mode
+    if (process.env.NODE_ENV !== 'production' &&
+        mode && mode !== 'in-out' && mode !== 'out-in') {
+      warn(
+        'invalid <transition> mode: ' + mode,
+        this.$parent
       )
     }
 
@@ -63,11 +93,10 @@ export default {
     const child = getRealChild(rawChild)
     child.key = child.key || `__v${child.tag + this._uid}__`
     const data = (child.data || (child.data = {})).transition = extractTransitionData(this)
-
-    // handle transition mode
-    const mode = this.mode
     const oldRawChild = this._vnode
     const oldChild = getRealChild(oldRawChild)
+
+    // handle transition mode
     if (mode && oldChild && oldChild.data && oldChild.key !== child.key) {
       const oldData = oldChild.data.transition
       if (mode === 'out-in') {
@@ -91,8 +120,6 @@ export default {
         mergeVNodeHook(oldData, 'leaveCancelled', () => {
           delayedLeave = noop
         })
-      } else if (process.env.NODE_ENV !== 'production') {
-        warn('invalid <transition> mode: ' + mode)
       }
     }
 

@@ -142,6 +142,72 @@ if (!isIE9) {
       }).then(done)
     })
 
+    it('dynamic components, in-out with leaveCancell', done => {
+      let next
+      const vm = new Vue({
+        template: `<div>
+          <transition name="test" mode="in-out" @after-enter="afterEnter">
+            <component :is="view" class="test"></component>
+          </transition>
+        </div>`,
+        data: { view: 'one' },
+        components,
+        methods: {
+          afterEnter () {
+            next()
+          }
+        }
+      }).$mount(el)
+      expect(vm.$el.textContent).toBe('one')
+      vm.view = 'two'
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">one</div>' +
+          '<div class="test test-enter test-enter-active">two</div>'
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">one</div>' +
+          '<div class="test test-enter-active">two</div>'
+        )
+        // switch again before enter finishes,
+        // this cancels both enter and leave.
+        vm.view = 'one'
+      }).then(() => {
+        // 1. the pending leaving "one" should be removed instantly.
+        // 2. the entering "two" should be placed into its final state instantly.
+        // 3. a new "one" is created and entering
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">two</div>' +
+          '<div class="test test-enter test-enter-active">one</div>'
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">two</div>' +
+          '<div class="test test-enter-active">one</div>'
+        )
+      }).thenWaitFor(_next => { next = _next }).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">two</div>' +
+          '<div class="test">one</div>'
+        )
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave test-leave-active">two</div>' +
+          '<div class="test">one</div>'
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave-active">two</div>' +
+          '<div class="test">one</div>'
+        )
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">one</div>'
+        )
+      }).then(done).then(done)
+    })
+
     it('normal elements with different keys, simultaneous', done => {
       const vm = new Vue({
         template: `<div>
@@ -262,6 +328,20 @@ if (!isIE9) {
           '<div class="test">two</div>'
         )
       }).then(done)
+    })
+
+    it('warn invaid mode', () => {
+      new Vue({
+        template: '<transition mode="foo"><div>123</div></transition>'
+      }).$mount()
+      expect('invalid <transition> mode: foo').toHaveBeenWarned()
+    })
+
+    it('warn usage on non element/component', () => {
+      new Vue({
+        template: '<transition mode="foo">foo</transition>'
+      }).$mount()
+      expect('<transition> can only be used on elements or components, not text nodes.').toHaveBeenWarned()
     })
   })
 }

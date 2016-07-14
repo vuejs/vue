@@ -185,15 +185,17 @@ export function leave (vnode: VNodeWithData, rm: Function) {
 function resolveTransition (def?: string | Object): ?Object {
   if (!def) {
     return
-  } else if (typeof def === 'object') {
+  }
+  /* istanbul ignore else */
+  if (typeof def === 'object') {
     const res = {}
     if (def.css !== false) {
       extend(res, autoCssTransition(def.name || 'v'))
     }
     extend(res, def)
     return res
-  } else {
-    return autoCssTransition(typeof def === 'string' ? def : 'v')
+  } else if (typeof def === 'string') {
+    return autoCssTransition(def)
   }
 }
 
@@ -225,6 +227,7 @@ export default inBrowser ? {
     }
   },
   remove (vnode: VNode, rm: Function) {
+    /* istanbul ignore else */
     if (!vnode.data.show) {
       leave(vnode, rm)
     } else {
