@@ -143,10 +143,12 @@ describe('create-element', () => {
     const vm = new Vue({})
     const h = bind(createElement, vm)
     renderState.activeInstance = vm
-    const vnode = h('svg', [h('a')])
+    const vnode = h('svg', [h('a', [h('foo', [h('bar')])])])
     expect(vnode.ns).toBe('svg')
-    // should apply ns to children
+    // should apply ns to children recursively
     expect(vnode.children[0].ns).toBe('svg')
+    expect(vnode.children[0].children[0].ns).toBe('svg')
+    expect(vnode.children[0].children[0].children[0].ns).toBe('svg')
   })
 
   it('render MathML elements with correct namespace', () => {
