@@ -20,12 +20,13 @@ export function enter (vnode: VNodeWithData) {
     el._leaveCb()
   }
 
-  if (el._enterCb) {
+  const data = resolveTransition(vnode.data.transition)
+  if (!data) {
     return
   }
 
-  const data = resolveTransition(vnode.data.transition)
-  if (!data) {
+  /* istanbul ignore if */
+  if (el._enterCb) {
     return
   }
 
@@ -116,13 +117,14 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     el._enterCb()
   }
 
-  if (el._leaveCb) {
-    return
-  }
-
   const data = resolveTransition(vnode.data.transition)
   if (!data) {
     return rm()
+  }
+
+  /* istanbul ignore if */
+  if (el._leaveCb) {
+    return
   }
 
   const {
