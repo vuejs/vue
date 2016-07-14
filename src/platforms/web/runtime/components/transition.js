@@ -1,3 +1,6 @@
+// Provides transition support for a single element/component.
+// supports transition mode (out-in / in-out)
+
 import { warn } from 'core/util/index'
 import { noop, camelize } from 'shared/util'
 import { getRealChild, mergeVNodeHook } from 'core/vdom/helpers'

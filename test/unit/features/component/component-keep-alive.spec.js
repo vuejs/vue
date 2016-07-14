@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import injectStyles from '../transition/inject-styles'
 import { isIE9 } from 'web/util/index'
-import { nextFrame } from 'web/runtime/modules/transition'
+import { nextFrame } from 'web/runtime/transition-util'
 
 describe('Component keep-alive', () => {
   const duration = injectStyles()
