@@ -78,7 +78,11 @@
 				if (!value) {
 					return;
 				}
-				this.todos.push({ title: value, completed: false });
+				this.todos.push({
+					id: todoStorage.uid++,
+					title: value,
+					completed: false
+				});
 				this.newTodo = '';
 			},
 

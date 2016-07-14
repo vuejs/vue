@@ -4,7 +4,25 @@
 		<meta charset="utf-8">
 		<title>Vue.js • TodoMVC</title>
 		<link rel="stylesheet" href="node_modules/todomvc-app-css/index.css">
-		<style> [v-cloak] { display: none; } </style>
+		<style>
+		[v-cloak] {
+			display: none;
+		}
+		.todo-list {
+		  position: relative;
+		  overflow: hidden;
+		}
+		.todo {
+		  height: 60px;
+		}
+		.todo-move, .todo-enter-active, .todo-leave-active {
+		  transition: all .25s cubic-bezier(.55,0,.1,1);
+		}
+		.todo-enter, .todo-leave-active {
+		  opacity: 0;
+		  height: 0;
+		}
+		</style>
 	</head>
 	<body>
 		<section class="todoapp">
@@ -18,13 +36,14 @@
 			</header>
 			<section class="main" v-show="todos.length" v-cloak>
 				<input class="toggle-all" type="checkbox" v-model="allDone">
-				<ul class="todo-list">
-					<li class="todo"
-						v-for="todo in filteredTodos"
-						:class="{completed: todo.completed, editing: todo == editedTodo}">
+				<ul class="todo-list" is="transition-group" name="todo">
+					<li v-for="todo in filteredTodos"
+						class="todo"
+						:key="todo.id"
+						:class="{ completed: todo.completed, editing: todo == editedTodo }">
 						<div class="view">
 							<input class="toggle" type="checkbox" v-model="todo.completed">
-							<label @dblclick="editTodo(todo)">{{todo.title}}</label>
+							<label @dblclick="editTodo(todo)">{{ todo.title }}</label>
 							<button class="destroy" @click="removeTodo(todo)"></button>
 						</div>
 						<input class="edit" type="text"
@@ -41,9 +60,9 @@
 					<strong>{{ remaining }}</strong> {{ remaining | pluralize }} left
 				</span>
 				<ul class="filters">
-					<li><a href="#/all" :class="{selected: visibility == 'all'}">All</a></li>
-					<li><a href="#/active" :class="{selected: visibility == 'active'}">Active</a></li>
-					<li><a href="#/completed" :class="{selected: visibility == 'completed'}">Completed</a></li>
+					<li><a href="#/all" :class="{ selected: visibility == 'all' }">All</a></li>
+					<li><a href="#/active" :class="{ selected: visibility == 'active' }">Active</a></li>
+					<li><a href="#/completed" :class="{ selected: visibility == 'completed' }">Completed</a></li>
 				</ul>
 				<button class="clear-completed" @click="removeCompleted" v-show="todos.length > remaining">
 					Clear completed
