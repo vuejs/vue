@@ -383,6 +383,39 @@ if (!isIE9) {
       }).then(done)
     })
 
+    it('should remove stale leaving elements', done => {
+      const spy = jasmine.createSpy('afterLeave')
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition name="test" @after-leave="afterLeave">
+              <div v-if="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
+        data: { ok: true },
+        methods: {
+          afterLeave: spy
+        }
+      }).$mount(el)
+
+      expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
+      vm.ok = false
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
+      }).thenWaitFor(duration / 2).then(() => {
+        vm.ok = true
+      }).then(() => {
+        expect(spy).toHaveBeenCalled()
+        expect(vm.$el.children.length).toBe(1) // should have removed leaving element
+        expect(vm.$el.children[0].className).toBe('test test-enter test-enter-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-enter-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
+      }).then(done)
+    })
+
     it('transition with v-show', done => {
       const vm = new Vue({
         template: `
