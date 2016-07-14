@@ -163,4 +163,16 @@ describe('create-element', () => {
     // should not be treated as component
     expect(vnode.children[0].componentOptions).toBeUndefined()
   })
+
+  it('warn observed data objects', () => {
+    new Vue({
+      data: {
+        data: {}
+      },
+      render (h) {
+        return h('div', this.data)
+      }
+    }).$mount()
+    expect('Avoid using observed data object as vnode data').toHaveBeenWarned()
+  })
 })
