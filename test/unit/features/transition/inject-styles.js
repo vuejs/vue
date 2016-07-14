@@ -15,6 +15,10 @@ export default function injectStyles () {
       -webkit-transition: opacity ${duration}ms ease;
       transition: opacity ${duration}ms ease;
     }
+    .group-move {
+      -webkit-transition: -webkit-transform ${duration}ms ease;
+      transition: transform ${duration}ms ease;
+    }
     .v-appear, .v-enter, .v-leave-active,
     .test-appear, .test-enter, .test-leave-active,
     .hello, .bye.active,

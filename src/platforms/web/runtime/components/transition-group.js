@@ -30,11 +30,11 @@ export default {
   props,
 
   render (h) {
-    const prevMap = this.map
-    const map = this.map = {}
+    const tag = this.tag || this.$vnode.data.tag || 'span'
+    const map = Object.create(null)
+    const prevChildren = this.prevChildren = this.children
     const rawChildren = this.$slots.default || []
-    const children = []
-    const kept = []
+    const children = this.children = []
     const transitionData = extractTransitionData(this)
 
     for (let i = 0; i < rawChildren.length; i++) {
@@ -44,12 +44,6 @@ export default {
           children.push(c)
           map[c.key] = c
           ;(c.data || (c.data = {})).transition = transitionData
-          const prev = prevMap && prevMap[c.key]
-          if (prev) {
-            prev.data.kept = true
-            c.data.pos = prev.elm.getBoundingClientRect()
-            kept.push(c)
-          }
         } else if (process.env.NODE_ENV !== 'production') {
           const opts = c.componentOptions
           const name = opts
@@ -60,17 +54,20 @@ export default {
       }
     }
 
-    const tag = this.tag || this.$vnode.data.tag || 'span'
-    if (prevMap) {
-      this.kept = h(tag, null, kept)
-      this.removed = []
-      for (const key in prevMap) {
-        const c = prevMap[key]
-        if (!c.data.kept) {
-          c.data.pos = c.elm.getBoundingClientRect()
-          this.removed.push(c)
+    if (prevChildren) {
+      const kept = []
+      const removed = []
+      for (let i = 0; i < prevChildren.length; i++) {
+        const c = prevChildren[i]
+        c.data.pos = c.elm.getBoundingClientRect()
+        if (map[c.key]) {
+          kept.push(c)
+        } else {
+          removed.push(c)
         }
       }
+      this.kept = h(tag, null, kept)
+      this.removed = removed
     }
 
     return h(tag, null, children)
@@ -78,12 +75,17 @@ export default {
 
   beforeUpdate () {
     // force removing pass
-    this.__patch__(this._vnode, this.kept)
+    this.__patch__(
+      this._vnode,
+      this.kept,
+      false, // hydrating
+      true // removeOnly (!important, avoids unnecessary moves)
+    )
     this._vnode = this.kept
   },
 
   updated () {
-    const children = this.kept.children.concat(this.removed)
+    const children = this.prevChildren
     const moveClass = this.moveClass || (this.name + '-move')
     if (!children.length || !this.hasMove(children[0].elm, moveClass)) {
       return
@@ -108,12 +110,13 @@ export default {
     children.forEach(c => {
       if (c.data.moved) {
         const el = c.elm
+        /* istanbul ignore if */
+        if (el._pendingMoveCb) {
+          el._pendingMoveCb()
+        }
         const s = el.style
         addTransitionClass(el, moveClass)
         s.transform = s.WebkitTransform = s.transitionDuration = ''
-        if (el._pendingMoveCb) {
-          el.removeEventListener(transitionEndEvent, el._pendingMoveCb)
-        }
         el.addEventListener(transitionEndEvent, el._pendingMoveCb = function cb () {
           el.removeEventListener(transitionEndEvent, cb)
           el._pendingMoveCb = null
@@ -125,6 +128,7 @@ export default {
 
   methods: {
     hasMove (el, moveClass) {
+      /* istanbul ignore if */
       if (!hasTransition) {
         return false
       }

@@ -1,6 +1,7 @@
 /* @flow */
 
 import { inBrowser } from 'core/util/index'
+import { isIE9 } from 'web/util/index'
 import { cached, extend } from 'shared/util'
 import { mergeVNodeHook } from 'core/vdom/helpers'
 import {
@@ -52,7 +53,7 @@ export function enter (vnode: VNodeWithData) {
   const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
   const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
 
-  const expectsCSS = css !== false
+  const expectsCSS = css !== false && !isIE9
   const userWantsControl =
     enterHook &&
     // enterHook may be a bound method which exposes
@@ -127,7 +128,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     delayLeave
   } = data
 
-  const expectsCSS = css !== false
+  const expectsCSS = css !== false && !isIE9
   const userWantsControl =
     leave &&
     // leave hook may be a bound method which exposes
