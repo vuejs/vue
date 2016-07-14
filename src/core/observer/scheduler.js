@@ -81,8 +81,11 @@ function runSchedulerQueue (queue: Array<Watcher>) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > config._maxUpdateCount) {
         warn(
-          'You may have an infinite update loop for watcher ' +
-          'with expression "' + watcher.expression + '"',
+          'You may have an infinite update loop ' + (
+            watcher === watcher.vm._watcher
+              ? `in a component render function.`
+              : `in watcher with expression "${watcher.expression}"`
+          ),
           watcher.vm
         )
         break
