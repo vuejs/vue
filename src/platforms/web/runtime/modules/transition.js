@@ -20,6 +20,10 @@ export function enter (vnode: VNodeWithData) {
     el._leaveCb()
   }
 
+  if (el._enterCb) {
+    return
+  }
+
   const data = resolveTransition(vnode.data.transition)
   if (!data) {
     return
@@ -110,6 +114,10 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   if (el._enterCb) {
     el._enterCb.cancelled = true
     el._enterCb()
+  }
+
+  if (el._leaveCb) {
+    return
   }
 
   const data = resolveTransition(vnode.data.transition)
