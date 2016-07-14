@@ -4,25 +4,7 @@
 		<meta charset="utf-8">
 		<title>Vue.js • TodoMVC</title>
 		<link rel="stylesheet" href="node_modules/todomvc-app-css/index.css">
-		<style>
-		[v-cloak] {
-			display: none;
-		}
-		.todo-list {
-		  position: relative;
-		  overflow: hidden;
-		}
-		.todo {
-		  height: 60px;
-		}
-		.todo-move, .todo-enter-active, .todo-leave-active {
-		  transition: all .25s cubic-bezier(.5,0,.1,1);
-		}
-		.todo-enter, .todo-leave-active {
-		  opacity: 0;
-		  height: 0;
-		}
-		</style>
+		<style>[v-cloak] { display: none; }</style>
 	</head>
 	<body>
 		<section class="todoapp">
@@ -36,7 +18,7 @@
 			</header>
 			<section class="main" v-show="todos.length" v-cloak>
 				<input class="toggle-all" type="checkbox" v-model="allDone">
-				<ul class="todo-list" is="transition-group" name="todo">
+				<ul class="todo-list">
 					<li v-for="todo in filteredTodos"
 						class="todo"
 						:key="todo.id"
