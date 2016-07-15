@@ -32,6 +32,10 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
 </a>
 
+<a href="https://starter.someline.com/">
+  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
+</a>
+
 ---
 
 ### $250
@@ -69,6 +73,7 @@ It could be you!
 - Greg McCarvell
 - Yoshiya Hinosawa
 - Wasim Khamlichi
+- Jivan Roquet
 
 ---
 
@@ -136,3 +141,6 @@ It could be you!
 - Lê Chương
 - Webber Wang
 - Daniel Schmitz
+- Bruce Li
+- Mohammed
+- Sam Wainwright
