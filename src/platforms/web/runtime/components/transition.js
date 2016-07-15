@@ -1,3 +1,5 @@
+/* @flow */
+
 // Provides transition support for a single element/component.
 // supports transition mode (out-in / in-out)
 
@@ -18,7 +20,7 @@ export const transitionProps = {
   appearActiveClass: String
 }
 
-export function extractTransitionData (comp) {
+export function extractTransitionData (comp: Component): Object {
   const data = {}
   const options = comp.$options
   // props
@@ -38,7 +40,7 @@ export default {
   name: 'transition',
   props: transitionProps,
   _abstract: true,
-  render (h) {
+  render (h: Function) {
     let children = this.$slots.default
     if (!children) {
       return
@@ -91,10 +93,11 @@ export default {
     // apply transition data to child
     // use getRealChild() to ignore abstract components e.g. keep-alive
     const child = getRealChild(rawChild)
+    if (!child) return
     child.key = child.key || `__v${child.tag + this._uid}__`
     const data = (child.data || (child.data = {})).transition = extractTransitionData(this)
     const oldRawChild = this._vnode
-    const oldChild = getRealChild(oldRawChild)
+    const oldChild: any = getRealChild(oldRawChild)
 
     // handle transition mode
     if (mode && oldChild && oldChild.data && oldChild.key !== child.key) {

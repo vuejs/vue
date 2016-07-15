@@ -14,7 +14,6 @@ declare interface Component {
   // assets
   static directive: (id: string, def?: Function | Object) => Function | Object | void;
   static component: (id: string, def?: Class<Component> | Object) => Class<Component>;
-  static transition: (id: string, def?: Object) => Object | void;
   static filter: (id: string, def?: Function) => Function | void;
 
   // public properties

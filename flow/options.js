@@ -56,7 +56,7 @@ declare type ComponentOptions = {
   _isComponent?: true,
   _propKeys?: Array<string>,
   _parentVnode?: VNode,
-  _parentListeners?: ?{ [key: string]: Function | Array<Function> },
+  _parentListeners?: ?Object,
   _renderChildren?: ?VNodeChildren
 }
 

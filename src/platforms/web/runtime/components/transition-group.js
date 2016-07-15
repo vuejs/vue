@@ -1,3 +1,5 @@
+/* @flow */
+
 // Provides transition support for list items.
 // supports move transitions using the FLIP technique.
 
@@ -29,7 +31,7 @@ delete props.mode
 export default {
   props,
 
-  render (h) {
+  render (h: Function) {
     const tag = this.tag || this.$vnode.data.tag || 'span'
     const map = Object.create(null)
     const prevChildren = this.prevChildren = this.children
@@ -127,7 +129,7 @@ export default {
   },
 
   methods: {
-    hasMove (el, moveClass) {
+    hasMove (el: Element, moveClass: string): boolean {
       /* istanbul ignore if */
       if (!hasTransition) {
         return false

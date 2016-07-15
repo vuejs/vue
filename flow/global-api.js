@@ -14,7 +14,6 @@ declare interface GlobalAPI {
 
   directive: (id: string, def?: Function | Object) => Function | Object | void;
   component: (id: string, def?: Class<Component> | Object) => Class<Component>;
-  transition: (id: string, def?: Object) => Object | void;
   filter: (id: string, def?: Function) => Function | void;
 
   // allow dynamic method registration
