@@ -173,6 +173,29 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('computed properties', done => {
+    renderVmWithOptions({
+      template: '<div>{{ b }}</div>',
+      data: {
+        a: {
+          b: 1
+        }
+      },
+      computed: {
+        b () {
+          return this.a.b + 1
+        }
+      },
+      created () {
+        this.a.b = 2
+        expect(this.b).toBe(3)
+      }
+    }, result => {
+      expect(result).toContain('<div server-rendered="true">3</div>')
+      done()
+    })
+  })
+
   it('renders asynchronous component', done => {
     renderVmWithOptions({
       template: `
