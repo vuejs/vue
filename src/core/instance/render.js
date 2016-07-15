@@ -4,7 +4,7 @@ import config from '../config'
 import VNode, { emptyVNode } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
 import {
-  warn, bind, isObject, toObject,
+  warn, formatComponentName, bind, isObject, toObject,
   nextTick, resolveAsset, _toString, toNumber
 } from '../util/index'
 
@@ -48,19 +48,38 @@ export function renderMixin (Vue: Class<Component>) {
       _parentVnode
     } = vm.$options
 
-    if (staticRenderFns && !this._staticTrees) {
-      this._staticTrees = []
+    if (staticRenderFns && !vm._staticTrees) {
+      vm._staticTrees = []
     }
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
-    this.$vnode = _parentVnode
+    vm.$vnode = _parentVnode
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
     if (_renderChildren) {
       resolveSlots(vm, _renderChildren)
     }
     // render self
-    let vnode = render.call(vm._renderProxy, vm.$createElement)
+    let vnode
+    try {
+      vnode = render.call(vm._renderProxy, vm.$createElement)
+    } catch (e) {
+      if (process.env.NODE_ENV !== 'production') {
+        warn(`Error when rendering ${formatComponentName(vm)}:`)
+      }
+      /* istanbul ignore else */
+      if (config.errorHandler) {
+        config.errorHandler.call(null, e, vm)
+      } else {
+        if (config._isServer) {
+          throw e
+        } else {
+          setTimeout(() => { throw e }, 0)
+        }
+      }
+      // return previous vnode to prevent render error causing blank component
+      vnode = vm._vnode
+    }
     // return empty vnode in case the render function errored out
     if (!(vnode instanceof VNode)) {
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {

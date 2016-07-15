@@ -276,4 +276,31 @@ describe('Component', () => {
       expect(vm.$el.className).toBe('test red')
     }).then(done)
   })
+
+  it('catch component render error and preserve previous vnode', done => {
+    const spy = jasmine.createSpy()
+    Vue.config.errorHandler = spy
+    const vm = new Vue({
+      data: {
+        a: {
+          b: 123
+        }
+      },
+      render (h) {
+        return h('div', [this.a.b])
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('123')
+    expect(spy).not.toHaveBeenCalled()
+    vm.a = null
+    waitForUpdate(() => {
+      expect('Error when rendering root instance').toHaveBeenWarned()
+      expect(spy).toHaveBeenCalled()
+      expect(vm.$el.textContent).toBe('123') // should preserve rendered DOM
+      vm.a = { b: 234 }
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('234') // should be able to recover
+      Vue.config.errorHandler = null
+    }).then(done)
+  })
 })

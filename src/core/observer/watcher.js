@@ -83,33 +83,7 @@ export default class Watcher {
    */
   get () {
     pushTarget(this)
-    let value: any
-    try {
-      value = this.getter.call(this.vm, this.vm)
-    } catch (e) {
-      if (process.env.NODE_ENV !== 'production') {
-        if (this.user) {
-          warn(
-            'Error when evaluating watcher with getter: ' + this.expression,
-            this.vm
-          )
-        } else {
-          warn(
-            'Error during component render',
-            this.vm
-          )
-        }
-      }
-      /* istanbul ignore else */
-      if (config.errorHandler) {
-        config.errorHandler.call(null, e, this.vm)
-      } else {
-        console.error(e)
-      }
-      // return old value when evaluation fails so the current UI is preserved
-      // if the error was somehow handled by user
-      value = this.value
-    }
+    const value = this.getter.call(this.vm, this.vm)
     // "touch" every property so they are all tracked as
     // dependencies for deep watching
     if (this.deep) {
