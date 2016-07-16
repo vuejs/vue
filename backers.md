@@ -5,7 +5,7 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 ### $2000
 
 <a href="https://strikingly.com/s/careers?utm_source=v">
-  <img width="500px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/strikingly.png">
+  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/strikingly.png">
 </a>
 
 ---
@@ -13,27 +13,31 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 ### $500
 
 <a href="http://www.itunescn.com/">
-  <img width="360px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
+  <img width="240px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
 </a>
 
 <a href="https://jsfiddle.net/">
-  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
 </a>
 
 <a href="https://laravel.com">
-  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
 </a>
 
 <a href="https://chaitin.cn">
-  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/chaitin.png">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/chaitin.png">
 </a>
 
 <a href="https://htmlburger.com/">
-  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
 </a>
 
 <a href="https://starter.someline.com/">
-  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
+</a>
+
+<a href="http://gold.xitu.io/?utm_source=vuejs&utm_medium=image&utm_content=juejin&utm_campaign=q3_website">
+  <img width="180px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/juejin.png">
 </a>
 
 ---
