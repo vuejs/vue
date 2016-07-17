@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-beta.1
+ * Vue.js v2.0.0-beta.2
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -45,7 +45,7 @@
   /**
    * Check if a tag is a built-in tag.
    */
-  var isBuiltInTag = makeMap('slot,component,render,transition', true);
+  var isBuiltInTag = makeMap('slot,component', true);
 
   /**
    * Remove an item from an array
@@ -114,10 +114,13 @@
    * Simple bind, faster than native
    */
   function bind(fn, ctx) {
-    return function (a) {
+    function boundFn(a) {
       var l = arguments.length;
       return l ? l > 1 ? fn.apply(ctx, arguments) : fn.call(ctx, a) : fn.call(ctx);
-    };
+    }
+    // record original fn length
+    boundFn._length = fn.length;
+    return boundFn;
   }
 
   /**
@@ -253,7 +256,7 @@
     /**
      * List of asset types that a component can own.
      */
-    _assetTypes: ['component', 'directive', 'transition', 'filter'],
+    _assetTypes: ['component', 'directive', 'filter'],
 
     /**
      * List of lifecycle hooks.
@@ -510,6 +513,8 @@
   var has = {};
   var circular = {};
   var waiting = false;
+  var flushing = false;
+  var index = 0;
 
   /**
    * Reset the scheduler's state.
@@ -521,13 +526,14 @@
     if ("development" !== 'production') {
       circular = {};
     }
-    waiting = false;
+    waiting = flushing = false;
   }
 
   /**
    * Flush both queues and run the watchers.
    */
   function flushSchedulerQueue() {
+    flushing = true;
     runSchedulerQueue(queue.sort(queueSorter));
     runSchedulerQueue(userQueue);
     // user watchers triggered more watchers,
@@ -560,8 +566,8 @@
   function runSchedulerQueue(queue) {
     // do not cache length because more watchers might be pushed
     // as we run existing watchers
-    for (var i = 0; i < queue.length; i++) {
-      var watcher = queue[i];
+    for (index = 0; index < queue.length; index++) {
+      var watcher = queue[index];
       var id = watcher.id;
       has[id] = null;
       watcher.run();
@@ -569,7 +575,7 @@
       if ("development" !== 'production' && has[id] != null) {
         circular[id] = (circular[id] || 0) + 1;
         if (circular[id] > config._maxUpdateCount) {
-          warn('You may have an infinite update loop for watcher ' + 'with expression "' + watcher.expression + '"', watcher.vm);
+          warn('You may have an infinite update loop ' + (watcher.user ? 'in watcher with expression "' + watcher.expression + '"' : 'in a component render function.'), watcher.vm);
           break;
         }
       }
@@ -588,7 +594,15 @@
       // push watcher into appropriate queue
       var q = watcher.user ? userQueue : queue;
       has[id] = true;
-      q.push(watcher);
+      if (!flushing) {
+        q.push(watcher);
+      } else {
+        var i = q.length - 1;
+        while (i >= 0 && q[i].id > watcher.id) {
+          i--;
+        }
+        q.splice(Math.max(i, index) + 1, 0, watcher);
+      }
       // queue the flush
       if (!waiting) {
         waiting = true;
@@ -645,27 +659,7 @@
 
     Watcher.prototype.get = function get() {
       pushTarget(this);
-      var value = void 0;
-      try {
-        value = this.getter.call(this.vm, this.vm);
-      } catch (e) {
-        if ("development" !== 'production') {
-          if (this.user) {
-            warn('Error when evaluating watcher with getter: ' + this.expression, this.vm);
-          } else {
-            warn('Error during component render', this.vm);
-          }
-        }
-        /* istanbul ignore else */
-        if (config.errorHandler) {
-          config.errorHandler.call(null, e, this.vm);
-        } else {
-          throw e;
-        }
-        // return old value when evaluation fails so the current UI is preserved
-        // if the error was somehow handled by user
-        value = this.value;
-      }
+      var value = this.getter.call(this.vm, this.vm);
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
       if (this.deep) {
@@ -1320,7 +1314,7 @@
         var last = res[res.length - 1];
         //  nested
         if (Array.isArray(c)) {
-          res.push.apply(res, normalizeChildren(c));
+          res.push.apply(res, normalizeChildren(c, ns));
         } else if (isPrimitive(c)) {
           if (last && last.text) {
             last.text += String(c);
@@ -1367,6 +1361,18 @@
       return getRealChild(compOptions.propsData && compOptions.propsData.child);
     } else {
       return vnode;
+    }
+  }
+
+  function mergeVNodeHook(def, key, hook) {
+    var oldHook = def[key];
+    if (oldHook) {
+      def[key] = function () {
+        oldHook.apply(this, arguments);
+        hook.apply(this, arguments);
+      };
+    } else {
+      def[key] = hook;
     }
   }
 
@@ -1428,11 +1434,17 @@
   function initLifecycle(vm) {
     var options = vm.$options;
 
-    vm.$parent = options.parent;
-    vm.$root = vm.$parent ? vm.$parent.$root : vm;
-    if (vm.$parent && !options._abstract) {
-      vm.$parent.$children.push(vm);
+    // locate first non-abstract parent
+    var parent = options.parent;
+    if (parent && !options._abstract) {
+      while (parent.$options._abstract && parent.$parent) {
+        parent = parent.$parent;
+      }
+      parent.$children.push(vm);
     }
+
+    vm.$parent = parent;
+    vm.$root = parent ? parent.$root : vm;
 
     vm.$children = [];
     vm.$refs = {};
@@ -1813,15 +1825,14 @@
   }
 
   function mergeHooks(data) {
-    if (data.hook) {
-      for (var i = 0; i < hooksToMerge.length; i++) {
-        var key = hooksToMerge[i];
-        var fromParent = data.hook[key];
-        var ours = hooks[key];
-        data.hook[key] = fromParent ? mergeHook$1(ours, fromParent) : ours;
-      }
-    } else {
-      data.hook = hooks;
+    if (!data.hook) {
+      data.hook = {};
+    }
+    for (var i = 0; i < hooksToMerge.length; i++) {
+      var key = hooksToMerge[i];
+      var fromParent = data.hook[key];
+      var ours = hooks[key];
+      data.hook[key] = fromParent ? mergeHook$1(ours, fromParent) : ours;
     }
   }
 
@@ -1841,16 +1852,19 @@
       children = data;
       data = undefined;
     }
-    return _createElement.call(this, tag, data, children);
+    // make sure to use real instance instead of proxy as context
+    return _createElement(this._self, tag, data, children);
   }
 
-  function _createElement(tag, data, children) {
-    // make sure to expose real self instead of proxy
-    var context = this._self;
+  function _createElement(context, tag, data, children) {
     var parent = renderState.activeInstance;
     var host = context !== parent ? parent : undefined;
     if (!parent) {
       "development" !== 'production' && warn('createElement cannot be called outside of component ' + 'render functions.');
+      return;
+    }
+    if (data && data.__ob__) {
+      "development" !== 'production' && warn('Avoid using observed data object as vnode data: ' + JSON.stringify(data) + '\n' + 'Always create fresh vnode data objects in each render!', context);
       return;
     }
     if (!tag) {
@@ -1859,17 +1873,17 @@
     }
     if (typeof tag === 'string') {
       var Ctor = void 0;
+      var ns = config.getTagNamespace(tag);
       if (config.isReservedTag(tag)) {
         // platform built-in elements
-        return new VNode(tag, data, normalizeChildren(children), undefined, undefined, undefined, context, host);
+        return new VNode(tag, data, normalizeChildren(children, ns), undefined, undefined, ns, context, host);
       } else if (Ctor = resolveAsset(context.$options, 'components', tag)) {
         // component
         return createComponent(Ctor, data, parent, context, host, children, tag);
       } else {
-        // unknown or namespaced elements
+        // unknown or unlisted namespaced elements
         // check at runtime because it may get assigned a namespace when its
         // parent normalizes children
-        var ns = config.getTagNamespace(tag);
         return new VNode(tag, data, normalizeChildren(children, ns), undefined, undefined, ns, context, host);
       }
     } else {
@@ -1914,19 +1928,40 @@
       var _parentVnode = _vm$$options._parentVnode;
 
 
-      if (staticRenderFns && !this._staticTrees) {
-        this._staticTrees = [];
+      if (staticRenderFns && !vm._staticTrees) {
+        vm._staticTrees = [];
       }
       // set parent vnode. this allows render functions to have access
       // to the data on the placeholder node.
-      this.$vnode = _parentVnode;
+      vm.$vnode = _parentVnode;
       // resolve slots. becaues slots are rendered in parent scope,
       // we set the activeInstance to parent.
       if (_renderChildren) {
         resolveSlots(vm, _renderChildren);
       }
       // render self
-      var vnode = render.call(vm._renderProxy, vm.$createElement);
+      var vnode = void 0;
+      try {
+        vnode = render.call(vm._renderProxy, vm.$createElement);
+      } catch (e) {
+        if ("development" !== 'production') {
+          warn('Error when rendering ' + formatComponentName(vm) + ':');
+        }
+        /* istanbul ignore else */
+        if (config.errorHandler) {
+          config.errorHandler.call(null, e, vm);
+        } else {
+          if (config._isServer) {
+            throw e;
+          } else {
+            setTimeout(function () {
+              throw e;
+            }, 0);
+          }
+        }
+        // return previous vnode to prevent render error causing blank component
+        vnode = vm._vnode;
+      }
       // return empty vnode in case the render function errored out
       if (!(vnode instanceof VNode)) {
         if ("development" !== 'production' && Array.isArray(vnode)) {
@@ -2014,29 +2049,28 @@
   }
 
   function resolveSlots(vm, renderChildren) {
-    if (renderChildren) {
-      var children = normalizeChildren(renderChildren) || [];
-      var slots = {};
-      var defaultSlot = [];
-      var name = void 0,
-          child = void 0;
-      for (var i = 0, l = children.length; i < l; i++) {
-        child = children[i];
-        if (name = child.data && child.data.slot) {
-          var slot = slots[name] || (slots[name] = []);
-          if (child.tag === 'template') {
-            slot.push.apply(slot, child.children);
-          } else {
-            slot.push(child);
-          }
+    var slots = vm.$slots = {};
+    var children = normalizeChildren(renderChildren) || [];
+    var defaultSlot = [];
+    var name = void 0,
+        child = void 0;
+    for (var i = 0, l = children.length; i < l; i++) {
+      child = children[i];
+      if (child.data && (name = child.data.slot)) {
+        delete child.data.slot;
+        var slot = slots[name] || (slots[name] = []);
+        if (child.tag === 'template') {
+          slot.push.apply(slot, child.children);
         } else {
-          defaultSlot.push(child);
+          slot.push(child);
         }
+      } else {
+        defaultSlot.push(child);
       }
-      if (defaultSlot.length && !(defaultSlot.length === 1 && defaultSlot[0].text === ' ')) {
-        slots['default'] = defaultSlot;
-      }
-      vm.$slots = slots;
+    }
+    // ignore single whitespace
+    if (defaultSlot.length && !(defaultSlot.length === 1 && defaultSlot[0].text === ' ')) {
+      slots.default = defaultSlot;
     }
   }
 
@@ -2199,16 +2233,23 @@
 
       warn = function warn(msg, vm) {
         if (hasConsole && !config.silent) {
-          console.error('[Vue warn]: ' + msg + (vm ? formatComponentName(vm) : ''));
+          console.error('[Vue warn]: ' + msg + ' ' + (vm ? formatLocation(formatComponentName(vm)) : ''));
         }
       };
 
       formatComponentName = function formatComponentName(vm) {
         if (vm.$root === vm) {
-          return ' (found in root instance)';
+          return 'root instance';
         }
         var name = vm._isVue ? vm.$options.name || vm.$options._componentTag : vm.name;
-        return name ? ' (found in component: <' + hyphenate(name) + '>)' : ' (found in anonymous component. Use the "name" option for better debugging messages)';
+        return name ? 'component <' + name + '>' : 'anonymous component';
+      };
+
+      var formatLocation = function formatLocation(str) {
+        if (str === 'anonymous component') {
+          str += ' - use the "name" option for better debugging messages.)';
+        }
+        return '(found in ' + str + ')';
       };
     })();
   }
@@ -2646,6 +2687,7 @@
   	mergeOptions: mergeOptions,
   	resolveAsset: resolveAsset,
   	get warn () { return warn; },
+  	get formatComponentName () { return formatComponentName; },
   	validateProp: validateProp
   });
 
@@ -2773,14 +2815,19 @@
     render: function render() {
       var rawChild = this.child;
       var realChild = getRealChild(this.child);
-      var cid = realChild.componentOptions.Ctor.cid;
-      if (this.cache[cid]) {
-        var child = realChild.child = this.cache[cid].child;
-        realChild.elm = this.$el = child.$el;
-      } else {
-        this.cache[cid] = realChild;
+      if (realChild && realChild.componentOptions) {
+        var opts = realChild.componentOptions;
+        // same constructor may get registered as different local components
+        // so cid alone is not enough (#3269)
+        var key = opts.Ctor.cid + '::' + opts.tag;
+        if (this.cache[key]) {
+          var child = realChild.child = this.cache[key].child;
+          realChild.elm = this.$el = child.$el;
+        } else {
+          this.cache[key] = realChild;
+        }
+        realChild.data.keepAlive = true;
       }
-      realChild.data.keepAlive = true;
       return rawChild;
     },
     destroyed: function destroyed() {
@@ -2834,7 +2881,7 @@
     }
   });
 
-  Vue.version = '2.0.0-beta.1';
+  Vue.version = '2.0.0-beta.2';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
@@ -2928,7 +2975,7 @@
     math: 'http://www.w3.org/1998/Math/MathML'
   };
 
-  var isReservedTag = makeMap('html,base,head,link,meta,style,title,' + 'address,article,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' + 'div,dd,dl,dt,figcaption,figure,hr,img,li,main,ol,p,pre,ul,' + 'a,b,abbr,bdi,bdo,br,cite,code,data,dfn,em,i,kbd,mark,q,rp,rt,rtc,ruby,' + 's,samp,small,span,strong,sub,sup,time,u,var,wbr,area,audio,map,track,video,' + 'embed,object,param,source,canvas,script,noscript,del,ins,' + 'caption,col,colgroup,table,thead,tbody,td,th,tr,' + 'button,datalist,fieldset,form,input,label,legend,meter,optgroup,option,' + 'output,progress,select,textarea,' + 'details,dialog,menu,menuitem,summary,' + 'content,element,shadow,template');
+  var isHTMLTag = makeMap('html,body,base,head,link,meta,style,title,' + 'address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' + 'div,dd,dl,dt,figcaption,figure,hr,img,li,main,ol,p,pre,ul,' + 'a,b,abbr,bdi,bdo,br,cite,code,data,dfn,em,i,kbd,mark,q,rp,rt,rtc,ruby,' + 's,samp,small,span,strong,sub,sup,time,u,var,wbr,area,audio,map,track,video,' + 'embed,object,param,source,canvas,script,noscript,del,ins,' + 'caption,col,colgroup,table,thead,tbody,td,th,tr,' + 'button,datalist,fieldset,form,input,label,legend,meter,optgroup,option,' + 'output,progress,select,textarea,' + 'details,dialog,menu,menuitem,summary,' + 'content,element,shadow,template');
 
   var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' + 'link,meta,param,source,track,wbr', true);
 
@@ -2940,8 +2987,13 @@
   // Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
   var isNonPhrasingTag = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' + 'details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,' + 'h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,' + 'optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,' + 'title,tr,track', true);
 
-  // this map covers namespace elements that can appear as template root nodes
-  var isSVG = makeMap('svg,g,defs,symbol,use,image,text,circle,ellipse,' + 'line,path,polygon,polyline,rect', true);
+  // this map is intentionally selective, only covering SVG elements that may
+  // contain child elements.
+  var isSVG = makeMap('svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,font,' + 'font-face,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' + 'polygon,polyline,rect,switch,symbol,text,textpath,tspan,use,view', true);
+
+  var isReservedTag = function isReservedTag(tag) {
+    return isHTMLTag(tag) || isSVG(tag);
+  };
 
   function getTagNamespace(tag) {
     if (isSVG(tag)) {
@@ -3130,6 +3182,9 @@ var nodeOps = Object.freeze({
         // component also has set the placeholder vnode's elm.
         // in that case we can just return the element and be done.
         if (isDef(i = vnode.child)) {
+          if (vnode.data.pendingInsert) {
+            insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert);
+          }
           vnode.elm = vnode.child.$el;
           invokeCreateHooks(vnode, insertedVnodeQueue);
           setScope(vnode);
@@ -3255,7 +3310,7 @@ var nodeOps = Object.freeze({
       }
     }
 
-    function updateChildren(parentElm, oldCh, newCh, insertedVnodeQueue) {
+    function updateChildren(parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
       var oldStartIdx = 0;
       var newStartIdx = 0;
       var oldEndIdx = oldCh.length - 1;
@@ -3268,6 +3323,11 @@ var nodeOps = Object.freeze({
           idxInOld = void 0,
           elmToMove = void 0,
           before = void 0;
+
+      // removeOnly is a special flag used only by <transition-group>
+      // to ensure removed elements stay in correct relative positions
+      // during leaving transitions
+      var canMove = !removeOnly;
 
       while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
         if (isUndef(oldStartVnode)) {
@@ -3285,13 +3345,13 @@ var nodeOps = Object.freeze({
         } else if (sameVnode(oldStartVnode, newEndVnode)) {
           // Vnode moved right
           patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue);
-          nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm));
+          canMove && nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm));
           oldStartVnode = oldCh[++oldStartIdx];
           newEndVnode = newCh[--newEndIdx];
         } else if (sameVnode(oldEndVnode, newStartVnode)) {
           // Vnode moved left
           patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue);
-          nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm);
+          canMove && nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm);
           oldEndVnode = oldCh[--oldEndIdx];
           newStartVnode = newCh[++newStartIdx];
         } else {
@@ -3314,7 +3374,7 @@ var nodeOps = Object.freeze({
             } else {
               patchVnode(elmToMove, newStartVnode, insertedVnodeQueue);
               oldCh[idxInOld] = undefined;
-              nodeOps.insertBefore(parentElm, newStartVnode.elm, oldStartVnode.elm);
+              canMove && nodeOps.insertBefore(parentElm, newStartVnode.elm, oldStartVnode.elm);
               newStartVnode = newCh[++newStartIdx];
             }
           }
@@ -3328,7 +3388,7 @@ var nodeOps = Object.freeze({
       }
     }
 
-    function patchVnode(oldVnode, vnode, insertedVnodeQueue) {
+    function patchVnode(oldVnode, vnode, insertedVnodeQueue, removeOnly) {
       if (oldVnode === vnode) return;
       var i = void 0,
           hook = void 0;
@@ -3346,7 +3406,7 @@ var nodeOps = Object.freeze({
       }
       if (isUndef(vnode.text)) {
         if (isDef(oldCh) && isDef(ch)) {
-          if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue);
+          if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly);
         } else if (isDef(ch)) {
           if (isDef(oldVnode.text)) nodeOps.setTextContent(elm, '');
           addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue);
@@ -3365,9 +3425,15 @@ var nodeOps = Object.freeze({
       }
     }
 
-    function invokeInsertHook(queue) {
-      for (var _i2 = 0; _i2 < queue.length; ++_i2) {
-        queue[_i2].data.hook.insert(queue[_i2]);
+    function invokeInsertHook(vnode, queue, initial) {
+      // delay insert hooks for component root nodes, invoke them after the
+      // element is really inserted
+      if (initial && vnode.parent) {
+        vnode.parent.data.pendingInsert = queue;
+      } else {
+        for (var _i2 = 0; _i2 < queue.length; ++_i2) {
+          queue[_i2].data.hook.insert(queue[_i2]);
+        }
       }
     }
 
@@ -3420,18 +3486,20 @@ var nodeOps = Object.freeze({
       }
     }
 
-    return function patch(oldVnode, vnode, hydrating) {
+    return function patch(oldVnode, vnode, hydrating, removeOnly) {
       var elm = void 0,
           parent = void 0;
+      var isInitialPatch = false;
       var insertedVnodeQueue = [];
 
       if (!oldVnode) {
         // empty mount, create new root element
+        isInitialPatch = true;
         createElm(vnode, insertedVnodeQueue);
       } else {
         var isRealElement = isDef(oldVnode.nodeType);
         if (!isRealElement && sameVnode(oldVnode, vnode)) {
-          patchVnode(oldVnode, vnode, insertedVnodeQueue);
+          patchVnode(oldVnode, vnode, insertedVnodeQueue, removeOnly);
         } else {
           if (isRealElement) {
             // mounting to a real element
@@ -3443,7 +3511,7 @@ var nodeOps = Object.freeze({
             }
             if (hydrating) {
               if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
-                invokeInsertHook(insertedVnodeQueue);
+                invokeInsertHook(vnode, insertedVnodeQueue, true);
                 return oldVnode;
               } else if ("development" !== 'production') {
                 warn('The client-side rendered virtual DOM tree is not matching ' + 'server-rendered content. Bailing hydration and performing ' + 'full client-side render.');
@@ -3476,7 +3544,7 @@ var nodeOps = Object.freeze({
         }
       }
 
-      invokeInsertHook(insertedVnodeQueue);
+      invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch);
       return vnode.elm;
     };
   }
@@ -3573,9 +3641,10 @@ var nodeOps = Object.freeze({
     var elm = vnode.elm;
     var oldAttrs = oldVnode.data.attrs || {};
     var attrs = vnode.data.attrs || {};
+    var clonedAttrs = vnode.data.attrs = {};
 
     for (key in attrs) {
-      cur = attrs[key];
+      cur = clonedAttrs[key] = attrs[key];
       old = oldAttrs[key];
       if (old !== cur) {
         setAttr(elm, key, cur);
@@ -3687,6 +3756,7 @@ var nodeOps = Object.freeze({
     var elm = vnode.elm;
     var oldProps = oldVnode.data.props || {};
     var props = vnode.data.props || {};
+    var clonedProps = vnode.data.props = {};
 
     for (key in oldProps) {
       if (props[key] == null) {
@@ -3694,7 +3764,7 @@ var nodeOps = Object.freeze({
       }
     }
     for (key in props) {
-      cur = props[key];
+      cur = clonedProps[key] = props[key];
       if (key === 'value') {
         // store value as _value as well since
         // non-string values will be stringified
@@ -3745,8 +3815,12 @@ var nodeOps = Object.freeze({
 
     // handle array syntax
     if (Array.isArray(style)) {
-      style = vnode.data.style = toObject(style);
+      style = toObject(style);
     }
+
+    // clone the style for future updates,
+    // in case the user mutates the style object in-place.
+    var clonedStyle = vnode.data.style = {};
 
     for (name in oldStyle) {
       if (!style[name]) {
@@ -3754,15 +3828,12 @@ var nodeOps = Object.freeze({
       }
     }
     for (name in style) {
-      cur = style[name];
+      cur = clonedStyle[name] = style[name];
       if (cur !== oldStyle[name]) {
         // ie9 setting to null has no effect, must use empty string
         elm.style[normalize(name)] = cur || '';
       }
     }
-    // clone the style for future updates,
-    // in case the user mutates the style object in-place.
-    vnode.data.style = extend({}, style);
   }
 
   var style = {
@@ -3844,215 +3915,15 @@ var nodeOps = Object.freeze({
     });
   }
 
-  function enter(vnode) {
-    var el = vnode.elm;
-    var vm = vnode.context;
-    // call leave callback now
-    if (el._leaveCb) {
-      el._leaveCb.cancelled = true;
-      el._leaveCb();
-    }
-
-    var data = vnode.data.transition;
-    if (!data) {
-      return;
-    }
-
-    var _resolveTransition = resolveTransition(data, vnode.context);
-
-    var css = _resolveTransition.css;
-    var enterClass = _resolveTransition.enterClass;
-    var enterActiveClass = _resolveTransition.enterActiveClass;
-    var appearClass = _resolveTransition.appearClass;
-    var appearActiveClass = _resolveTransition.appearActiveClass;
-    var beforeEnter = _resolveTransition.beforeEnter;
-    var enter = _resolveTransition.enter;
-    var afterEnter = _resolveTransition.afterEnter;
-    var enterCancelled = _resolveTransition.enterCancelled;
-    var beforeAppear = _resolveTransition.beforeAppear;
-    var appear = _resolveTransition.appear;
-    var afterAppear = _resolveTransition.afterAppear;
-    var appearCancelled = _resolveTransition.appearCancelled;
-
-
-    var isAppear = !vnode.context.$root._isMounted;
-    if (isAppear && !appear && appear !== '') {
-      return;
-    }
-
-    var startClass = isAppear ? appearClass : enterClass;
-    var activeClass = isAppear ? appearActiveClass : enterActiveClass;
-    var beforeEnterHook = isAppear ? beforeAppear || beforeEnter : beforeEnter;
-    var enterHook = isAppear ? typeof appear === 'function' ? appear : enter : enter;
-    var afterEnterHook = isAppear ? afterAppear || afterEnter : afterEnter;
-    var enterCancelledHook = isAppear ? appearCancelled || enterCancelled : enterCancelled;
-
-    var expectsCSS = css !== false;
-    var userWantsControl = enterHook && enterHook.length > 2;
-    var cb = el._enterCb = once(function () {
-      if (expectsCSS) {
-        removeTransitionClass(el, activeClass);
-      }
-      if (cb.cancelled) {
-        if (expectsCSS) {
-          removeTransitionClass(el, startClass);
-        }
-        enterCancelledHook && enterCancelledHook(el, vm);
-      } else {
-        afterEnterHook && afterEnterHook(el, vm);
-      }
-      el._enterCb = null;
-    });
-
-    beforeEnterHook && beforeEnterHook(el, vm);
-    if (expectsCSS) {
-      addTransitionClass(el, startClass);
-      addTransitionClass(el, activeClass);
-      nextFrame(function () {
-        removeTransitionClass(el, startClass);
-        if (!cb.cancelled && !userWantsControl) {
-          whenTransitionEnds(el, cb);
-        }
-      });
-    }
-    enterHook && enterHook(el, vm, cb);
-    if (!expectsCSS && !userWantsControl) {
-      cb();
-    }
-  }
-
-  function leave(vnode, rm) {
-    var el = vnode.elm;
-    var vm = vnode.context;
-    // call enter callback now
-    if (el._enterCb) {
-      el._enterCb.cancelled = true;
-      el._enterCb();
-    }
-    var data = vnode.data.transition;
-    if (!data) {
-      return rm();
-    }
-
-    var _resolveTransition2 = resolveTransition(data, vnode.context);
-
-    var css = _resolveTransition2.css;
-    var leaveClass = _resolveTransition2.leaveClass;
-    var leaveActiveClass = _resolveTransition2.leaveActiveClass;
-    var beforeLeave = _resolveTransition2.beforeLeave;
-    var leave = _resolveTransition2.leave;
-    var afterLeave = _resolveTransition2.afterLeave;
-    var leaveCancelled = _resolveTransition2.leaveCancelled;
-    var delayLeave = _resolveTransition2.delayLeave;
-
-
-    var expectsCSS = css !== false;
-    var userWantsControl = leave && leave.length > 2;
-    var cb = el._leaveCb = once(function () {
-      if (expectsCSS) {
-        removeTransitionClass(el, leaveActiveClass);
-      }
-      if (cb.cancelled) {
-        if (expectsCSS) {
-          removeTransitionClass(el, leaveClass);
-        }
-        leaveCancelled && leaveCancelled(el, vm);
-      } else {
-        rm();
-        afterLeave && afterLeave(el, vm);
-      }
-      el._leaveCb = null;
-    });
-
-    if (delayLeave) {
-      delayLeave(performLeave);
-    } else {
-      performLeave();
-    }
-
-    function performLeave() {
-      beforeLeave && beforeLeave(el, vm);
-      if (expectsCSS) {
-        addTransitionClass(el, leaveClass);
-        addTransitionClass(el, leaveActiveClass);
-        nextFrame(function () {
-          removeTransitionClass(el, leaveClass);
-          if (!cb.cancelled && !userWantsControl) {
-            whenTransitionEnds(el, cb);
-          }
-        });
-      }
-      leave && leave(el, vm, cb);
-      if (!expectsCSS && !userWantsControl) {
-        cb();
-      }
-    }
-  }
-
-  function resolveTransition(id, context) {
-    var def = void 0;
-    if (id && typeof id === 'string') {
-      def = resolveAsset(context.$options, 'transitions', id);
-      return def ? ensureTransitionClasses(def.name || id, def) : autoCssTransition(id);
-    } else if (typeof id === 'object') {
-      // inline transition object
-      if (id.name) {
-        def = resolveAsset(context.$options, 'transitions', id.name);
-      }
-      def = def ? extend(ensureTransitionClasses(id.name, def), id) : ensureTransitionClasses(id.name, id);
-      // extra hooks to be merged
-      // added by <transition-control>
-      if (id.hooks) {
-        for (var key in id.hooks) {
-          mergeHook$2(def, key, id.hooks[key]);
-        }
-      }
-      return def;
-    } else {
-      return autoCssTransition('v');
-    }
-  }
-
-  function ensureTransitionClasses(name, def) {
-    name = name || 'v';
-    var res = {};
-    if (def.css !== false) {
-      extend(res, autoCssTransition(name));
-    }
-    extend(res, def);
-    return res;
-  }
-
-  var autoCssTransition = cached(function (name) {
-    return {
-      enterClass: name + '-enter',
-      leaveClass: name + '-leave',
-      appearClass: name + '-enter',
-      enterActiveClass: name + '-enter-active',
-      leaveActiveClass: name + '-leave-active',
-      appearActiveClass: name + '-enter-active'
-    };
-  });
-
-  function mergeHook$2(def, key, hook) {
-    var oldHook = def[key];
-    if (oldHook) {
-      def[key] = function () {
-        oldHook.apply(this, arguments);
-        hook();
-      };
-    } else {
-      def[key] = hook;
-    }
-  }
-
   function addTransitionClass(el, cls) {
     (el._transitionClasses || (el._transitionClasses = [])).push(cls);
     addClass(el, cls);
   }
 
   function removeTransitionClass(el, cls) {
-    remove(el._transitionClasses, cls);
+    if (el._transitionClasses) {
+      remove(el._transitionClasses, cls);
+    }
     removeClass(el, cls);
   }
 
@@ -4083,9 +3954,11 @@ var nodeOps = Object.freeze({
     el.addEventListener(event, onEnd);
   }
 
+  var transformRE = /\b(transform|all)(,|$)/;
+
   function getTransitionInfo(el) {
     var styles = window.getComputedStyle(el);
-    // 1. determine the maximum duration (timeout)
+    var transitionProps = styles[transitionProp + 'Property'];
     var transitioneDelays = styles[transitionProp + 'Delay'].split(', ');
     var transitionDurations = styles[transitionProp + 'Duration'].split(', ');
     var animationDelays = styles[animationProp + 'Delay'].split(', ');
@@ -4094,11 +3967,11 @@ var nodeOps = Object.freeze({
     var animationTimeout = getTimeout(animationDelays, animationDurations);
     var timeout = Math.max(transitionTimeout, animationTimeout);
     var type = timeout > 0 ? transitionTimeout > animationTimeout ? TRANSITION : ANIMATION : null;
-    var propCount = type ? type === TRANSITION ? transitionDurations.length : animationDurations.length : 0;
     return {
       type: type,
       timeout: timeout,
-      propCount: propCount
+      propCount: type ? type === TRANSITION ? transitionDurations.length : animationDurations.length : 0,
+      hasTransform: type === TRANSITION && transformRE.test(transitionProps)
     };
   }
 
@@ -4112,6 +3985,216 @@ var nodeOps = Object.freeze({
     return Number(s.slice(0, -1)) * 1000;
   }
 
+  function enter(vnode) {
+    var el = vnode.elm;
+
+    // call leave callback now
+    if (el._leaveCb) {
+      el._leaveCb.cancelled = true;
+      el._leaveCb();
+    }
+
+    var data = resolveTransition(vnode.data.transition);
+    if (!data) {
+      return;
+    }
+
+    /* istanbul ignore if */
+    if (el._enterCb) {
+      return;
+    }
+
+    var css = data.css;
+    var enterClass = data.enterClass;
+    var enterActiveClass = data.enterActiveClass;
+    var appearClass = data.appearClass;
+    var appearActiveClass = data.appearActiveClass;
+    var beforeEnter = data.beforeEnter;
+    var enter = data.enter;
+    var afterEnter = data.afterEnter;
+    var enterCancelled = data.enterCancelled;
+    var beforeAppear = data.beforeAppear;
+    var appear = data.appear;
+    var afterAppear = data.afterAppear;
+    var appearCancelled = data.appearCancelled;
+
+
+    var isAppear = !vnode.context.$root._isMounted;
+    if (isAppear && !appear && appear !== '') {
+      return;
+    }
+
+    var startClass = isAppear ? appearClass : enterClass;
+    var activeClass = isAppear ? appearActiveClass : enterActiveClass;
+    var beforeEnterHook = isAppear ? beforeAppear || beforeEnter : beforeEnter;
+    var enterHook = isAppear ? typeof appear === 'function' ? appear : enter : enter;
+    var afterEnterHook = isAppear ? afterAppear || afterEnter : afterEnter;
+    var enterCancelledHook = isAppear ? appearCancelled || enterCancelled : enterCancelled;
+
+    var expectsCSS = css !== false && !isIE9;
+    var userWantsControl = enterHook &&
+    // enterHook may be a bound method which exposes
+    // the length of original fn as _length
+    (enterHook._length || enterHook.length) > 1;
+
+    var cb = el._enterCb = once(function () {
+      if (expectsCSS) {
+        removeTransitionClass(el, activeClass);
+      }
+      if (cb.cancelled) {
+        if (expectsCSS) {
+          removeTransitionClass(el, startClass);
+        }
+        enterCancelledHook && enterCancelledHook(el);
+      } else {
+        afterEnterHook && afterEnterHook(el);
+      }
+      el._enterCb = null;
+    });
+
+    // remove pending leave element on enter by injecting an insert hook
+    mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', function () {
+      var parent = el.parentNode;
+      var pendingNode = parent._pending && parent._pending[vnode.key];
+      if (pendingNode && pendingNode.tag === vnode.tag && pendingNode.elm._leaveCb) {
+        pendingNode.elm._leaveCb();
+      }
+      enterHook && enterHook(el, cb);
+    });
+
+    // start enter transition
+    beforeEnterHook && beforeEnterHook(el);
+    if (expectsCSS) {
+      addTransitionClass(el, startClass);
+      addTransitionClass(el, activeClass);
+      nextFrame(function () {
+        removeTransitionClass(el, startClass);
+        if (!cb.cancelled && !userWantsControl) {
+          whenTransitionEnds(el, cb);
+        }
+      });
+    }
+
+    if (!expectsCSS && !userWantsControl) {
+      cb();
+    }
+  }
+
+  function leave(vnode, rm) {
+    var el = vnode.elm;
+
+    // call enter callback now
+    if (el._enterCb) {
+      el._enterCb.cancelled = true;
+      el._enterCb();
+    }
+
+    var data = resolveTransition(vnode.data.transition);
+    if (!data) {
+      return rm();
+    }
+
+    /* istanbul ignore if */
+    if (el._leaveCb) {
+      return;
+    }
+
+    var css = data.css;
+    var leaveClass = data.leaveClass;
+    var leaveActiveClass = data.leaveActiveClass;
+    var beforeLeave = data.beforeLeave;
+    var leave = data.leave;
+    var afterLeave = data.afterLeave;
+    var leaveCancelled = data.leaveCancelled;
+    var delayLeave = data.delayLeave;
+
+
+    var expectsCSS = css !== false && !isIE9;
+    var userWantsControl = leave &&
+    // leave hook may be a bound method which exposes
+    // the length of original fn as _length
+    (leave._length || leave.length) > 1;
+
+    var cb = el._leaveCb = once(function () {
+      if (el.parentNode && el.parentNode._pending) {
+        el.parentNode._pending[vnode.key] = null;
+      }
+      if (expectsCSS) {
+        removeTransitionClass(el, leaveActiveClass);
+      }
+      if (cb.cancelled) {
+        if (expectsCSS) {
+          removeTransitionClass(el, leaveClass);
+        }
+        leaveCancelled && leaveCancelled(el);
+      } else {
+        rm();
+        afterLeave && afterLeave(el);
+      }
+      el._leaveCb = null;
+    });
+
+    if (delayLeave) {
+      delayLeave(performLeave);
+    } else {
+      performLeave();
+    }
+
+    function performLeave() {
+      // the delayed leave may have already been cancelled
+      if (cb.cancelled) {
+        return;
+      }
+      // record leaving element
+      if (!vnode.data.show) {
+        (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode;
+      }
+      beforeLeave && beforeLeave(el);
+      if (expectsCSS) {
+        addTransitionClass(el, leaveClass);
+        addTransitionClass(el, leaveActiveClass);
+        nextFrame(function () {
+          removeTransitionClass(el, leaveClass);
+          if (!cb.cancelled && !userWantsControl) {
+            whenTransitionEnds(el, cb);
+          }
+        });
+      }
+      leave && leave(el, cb);
+      if (!expectsCSS && !userWantsControl) {
+        cb();
+      }
+    }
+  }
+
+  function resolveTransition(def) {
+    if (!def) {
+      return;
+    }
+    /* istanbul ignore else */
+    if (typeof def === 'object') {
+      var res = {};
+      if (def.css !== false) {
+        extend(res, autoCssTransition(def.name || 'v'));
+      }
+      extend(res, def);
+      return res;
+    } else if (typeof def === 'string') {
+      return autoCssTransition(def);
+    }
+  }
+
+  var autoCssTransition = cached(function (name) {
+    return {
+      enterClass: name + '-enter',
+      leaveClass: name + '-leave',
+      appearClass: name + '-enter',
+      enterActiveClass: name + '-enter-active',
+      leaveActiveClass: name + '-leave-active',
+      appearActiveClass: name + '-enter-active'
+    };
+  });
+
   function once(fn) {
     var called = false;
     return function () {
@@ -4122,24 +4205,15 @@ var nodeOps = Object.freeze({
     };
   }
 
-  function shouldSkipTransition(vnode) {
-    return !!(
-    // if this is a component root node and the compoennt's
-    // parent container node also has transition, skip.
-    vnode.parent && vnode.parent.data.transition ||
-    // if the element has v-show, let the runtime directive
-    // call the hooks instead
-    vnode.data.show);
-  }
-
-  var transition = hasTransition ? {
+  var transition = inBrowser ? {
     create: function create(_, vnode) {
-      if (!shouldSkipTransition(vnode)) {
+      if (!vnode.data.show) {
         enter(vnode);
       }
     },
     remove: function remove(vnode, rm) {
-      if (!shouldSkipTransition(vnode)) {
+      /* istanbul ignore else */
+      if (!vnode.data.show) {
         leave(vnode, rm);
       } else {
         rm();
@@ -4259,7 +4333,7 @@ var nodeOps = Object.freeze({
     bind: function bind(el, _ref, vnode) {
       var value = _ref.value;
 
-      var transition = getTransition(vnode);
+      var transition = vnode.data.transition;
       if (value && transition && transition.appear && !isIE9) {
         enter(vnode);
       }
@@ -4268,7 +4342,7 @@ var nodeOps = Object.freeze({
     update: function update(el, _ref2, vnode) {
       var value = _ref2.value;
 
-      var transition = getTransition(vnode);
+      var transition = vnode.data.transition;
       if (transition && !isIE9) {
         if (value) {
           enter(vnode);
@@ -4284,85 +4358,247 @@ var nodeOps = Object.freeze({
     }
   };
 
-  function getTransition(vnode) {
-    var parent = vnode.parent;
-    return parent && parent.data.transition != null ? parent.data.transition : vnode.data.transition;
-  }
-
   var platformDirectives = {
     model: model,
     show: show
   };
 
-  var TransitionControl = {
-    name: 'transition-control',
+  var transitionProps = {
+    name: String,
+    appear: Boolean,
+    css: Boolean,
+    mode: String,
+    enterClass: String,
+    leaveClass: String,
+    enterActiveClass: String,
+    leaveActiveClass: String,
+    appearClass: String,
+    appearActiveClass: String
+  };
+
+  function extractTransitionData(comp) {
+    var data = {};
+    var options = comp.$options;
+    // props
+    for (var key in options.propsData) {
+      data[key] = comp[key];
+    }
+    // events.
+    // extract listeners and pass them directly to the transition methods
+    var listeners = options._parentListeners;
+    for (var _key in listeners) {
+      data[camelize(_key)] = listeners[_key].fn;
+    }
+    return data;
+  }
+
+  var Transition = {
+    name: 'transition',
+    props: transitionProps,
     _abstract: true,
-    props: {
-      child: Object,
-      mode: {
-        validator: function validator(val) {
-          /* istanbul ignore if */
-          if (val && val !== 'out-in' && val !== 'in-out') {
-            warn('transition-mode must be either "out-in" or "in-out".');
-            return false;
-          }
-          return true;
-        }
-      }
-    },
-    render: function render() {
+    render: function render(h) {
       var _this = this;
 
-      var oldChild = this._vnode;
-      var newChild = getRealChild(this.child);
-      if (oldChild && oldChild.data && (oldChild.tag !== newChild.tag || oldChild.key !== newChild.key)) {
-        if (this.mode === 'out-in') {
-          // return empty node
-          // and queue an update when the leave finishes
-          return addHook(oldChild, {
-            afterLeave: function afterLeave() {
-              _this.$forceUpdate();
-            }
+      var children = this.$slots.default;
+      if (!children) {
+        return;
+      }
+
+      // warn text nodes
+      if ("development" !== 'production' && children.length === 1 && !children[0].tag) {
+        warn('<transition> can only be used on elements or components, not text nodes.', this.$parent);
+      }
+
+      // filter out text nodes (possible whitespaces)
+      children = children.filter(function (c) {
+        return c.tag;
+      });
+
+      if (!children.length) {
+        return;
+      }
+
+      // warn multiple elements
+      if ("development" !== 'production' && children.length > 1) {
+        warn('<transition> can only be used on a single element. Use ' + '<transition-group> for lists.', this.$parent);
+      }
+
+      var mode = this.mode;
+
+      // warn invalid mode
+      if ("development" !== 'production' && mode && mode !== 'in-out' && mode !== 'out-in') {
+        warn('invalid <transition> mode: ' + mode, this.$parent);
+      }
+
+      var rawChild = children[0];
+
+      // if this is a component root node and the component's
+      // parent container node also has transition, skip.
+      if (this.$vnode.parent && this.$vnode.parent.data.transition) {
+        return rawChild;
+      }
+
+      // apply transition data to child
+      // use getRealChild() to ignore abstract components e.g. keep-alive
+      var child = getRealChild(rawChild);
+      /* istanbul ignore if */
+      if (!child) return;
+      child.key = child.key || '__v' + (child.tag + this._uid) + '__';
+      var data = (child.data || (child.data = {})).transition = extractTransitionData(this);
+      var oldRawChild = this._vnode;
+      var oldChild = getRealChild(oldRawChild);
+
+      // handle transition mode
+      if (mode && oldChild && oldChild.data && oldChild.key !== child.key) {
+        var oldData = oldChild.data.transition;
+        if (mode === 'out-in') {
+          // return empty node and queue update when leave finishes
+          mergeVNodeHook(oldData, 'afterLeave', function () {
+            _this.$forceUpdate();
           });
-        } else if (this.mode === 'in-out') {
+          return (/\d-keep-alive$/.test(rawChild.tag) ? h('keep-alive') : null
+          );
+        } else if (mode === 'in-out') {
           (function () {
             var delayedLeave = void 0;
             var performLeave = function performLeave() {
               delayedLeave();
             };
-            addHook(newChild, {
-              afterEnter: performLeave,
-              enterCancelled: performLeave
-            });
-            addHook(oldChild, {
-              delayLeave: function delayLeave(leave) {
-                delayedLeave = leave;
-              }
+            mergeVNodeHook(data, 'afterEnter', performLeave);
+            mergeVNodeHook(data, 'enterCancelled', performLeave);
+            mergeVNodeHook(oldData, 'delayLeave', function (leave) {
+              delayedLeave = leave;
             });
           })();
         }
       }
-      return newChild;
+
+      return rawChild;
     }
   };
 
-  function addHook(vnode, hooks) {
-    /* istanbul ignore if */
-    if (!vnode.data || !vnode.data.transition) {
-      return;
+  var props$1 = extend({
+    tag: String,
+    moveClass: String
+  }, transitionProps);
+
+  delete props$1.mode;
+
+  var TransitionGroup = {
+    props: props$1,
+
+    render: function render(h) {
+      var tag = this.tag || this.$vnode.data.tag || 'span';
+      var map = Object.create(null);
+      var prevChildren = this.prevChildren = this.children;
+      var rawChildren = this.$slots.default || [];
+      var children = this.children = [];
+      var transitionData = extractTransitionData(this);
+
+      for (var i = 0; i < rawChildren.length; i++) {
+        var c = rawChildren[i];
+        if (c.tag) {
+          if (c.key != null) {
+            children.push(c);
+            map[c.key] = c;(c.data || (c.data = {})).transition = transitionData;
+          } else if ("development" !== 'production') {
+            var opts = c.componentOptions;
+            var name = opts ? opts.Ctor.options.name || opts.tag : c.tag;
+            warn('<transition-group> children must be keyed: <' + name + '>');
+          }
+        }
+      }
+
+      if (prevChildren) {
+        var kept = [];
+        var removed = [];
+        for (var _i = 0; _i < prevChildren.length; _i++) {
+          var _c = prevChildren[_i];
+          _c.data.pos = _c.elm.getBoundingClientRect();
+          if (map[_c.key]) {
+            kept.push(_c);
+          } else {
+            removed.push(_c);
+          }
+        }
+        this.kept = h(tag, null, kept);
+        this.removed = removed;
+      }
+
+      return h(tag, null, children);
+    },
+    beforeUpdate: function beforeUpdate() {
+      // force removing pass
+      this.__patch__(this._vnode, this.kept, false, // hydrating
+      true // removeOnly (!important, avoids unnecessary moves)
+      );
+      this._vnode = this.kept;
+    },
+    updated: function updated() {
+      var children = this.prevChildren;
+      var moveClass = this.moveClass || this.name + '-move';
+      if (!children.length || !this.hasMove(children[0].elm, moveClass)) {
+        return;
+      }
+
+      children.forEach(function (c) {
+        var oldPos = c.data.pos;
+        var newPos = c.elm.getBoundingClientRect();
+        var dx = oldPos.left - newPos.left;
+        var dy = oldPos.top - newPos.top;
+        if (dx || dy) {
+          c.data.moved = true;
+          var s = c.elm.style;
+          s.transform = s.WebkitTransform = 'translate(' + dx + 'px,' + dy + 'px)';
+          s.transitionDuration = '0s';
+        }
+      });
+
+      // force reflow to put everything in position
+      var f = document.body.offsetHeight; // eslint-disable-line
+
+      children.forEach(function (c) {
+        if (c.data.moved) {
+          (function () {
+            var el = c.elm;
+            /* istanbul ignore if */
+            if (el._pendingMoveCb) {
+              el._pendingMoveCb();
+            }
+            var s = el.style;
+            addTransitionClass(el, moveClass);
+            s.transform = s.WebkitTransform = s.transitionDuration = '';
+            el.addEventListener(transitionEndEvent, el._pendingMoveCb = function cb() {
+              el.removeEventListener(transitionEndEvent, cb);
+              el._pendingMoveCb = null;
+              removeTransitionClass(el, moveClass);
+            });
+          })();
+        }
+      });
+    },
+
+
+    methods: {
+      hasMove: function hasMove(el, moveClass) {
+        /* istanbul ignore if */
+        if (!hasTransition) {
+          return false;
+        }
+        if (this._hasMove != null) {
+          return this._hasMove;
+        }
+        addTransitionClass(el, moveClass);
+        var info = getTransitionInfo(el);
+        removeTransitionClass(el, moveClass);
+        return this._hasMove = info.hasTransform;
+      }
     }
-    var trans = vnode.data.transition;
-    /* istanbul ignore else */
-    if (typeof trans === 'string') {
-      trans = vnode.data.transition = { name: trans };
-    } else if (typeof trans !== 'object') {
-      trans = vnode.data.transition = { name: 'v' };
-    }
-    trans.hooks = hooks;
-  }
+  };
 
   var platformComponents = {
-    TransitionControl: TransitionControl
+    Transition: Transition,
+    TransitionGroup: TransitionGroup
   };
 
   // install platform specific utils
@@ -4815,7 +5051,7 @@ var nodeOps = Object.freeze({
     (el.directives || (el.directives = [])).push({ name: name, value: value, arg: arg, modifiers: modifiers });
   }
 
-  function addHook$1(el, name, code) {
+  function addHook(el, name, code) {
     var hooks = el.hooks || (el.hooks = {});
     var hook = hooks[name];
     /* istanbul ignore if */
@@ -5406,7 +5642,7 @@ var nodeOps = Object.freeze({
   }
 
   function bind$1(el, dir) {
-    addHook$1(el, 'construct', '_b(n1,' + dir.value + ')');
+    addHook(el, 'construct', '_b(n1,' + dir.value + ')');
   }
 
   var baseDirectives = {
@@ -5464,7 +5700,7 @@ var nodeOps = Object.freeze({
         var data = genData(el);
         // if the element is potentially a component,
         // wrap its children as a thunk.
-        var children = !el.inlineTemplate ? genChildren(el, !el.ns && !isPlatformReservedTag$1(el.tag) /* asThunk */) : null;
+        var children = !el.inlineTemplate ? genChildren(el, !isPlatformReservedTag$1(el.tag) /* asThunk */) : null;
         code = '_h(\'' + el.tag + '\'' + (data ? ',' + data : '' // data
         ) + (children ? ',' + children : '' // children
         ) + ')';
@@ -5782,35 +6018,7 @@ var nodeOps = Object.freeze({
     genData: genData$2
   };
 
-  function transformNode$2(el) {
-    var transition = getBindingAttr(el, 'transition');
-    if (transition === '""') {
-      transition = true;
-    }
-    if (transition) {
-      el.transition = transition;
-    }
-    var mode = getBindingAttr(el, 'transition-mode');
-    if (mode) {
-      el.transitionMode = mode;
-    }
-  }
-
-  function genData$3(el) {
-    return el.transition ? 'transition:' + el.transition + ',' : '';
-  }
-
-  function transformCode(el, code) {
-    return el.transitionMode ? '_h(\'TransitionControl\',{props:{mode:' + el.transitionMode + ',child:' + code + '}})' : code;
-  }
-
-  var transition$1 = {
-    transformNode: transformNode$2,
-    genData: genData$3,
-    transformCode: transformCode
-  };
-
-  var modules$1 = [klass$1, style$1, transition$1];
+  var modules$1 = [klass$1, style$1];
 
   var warn$3 = void 0;
 

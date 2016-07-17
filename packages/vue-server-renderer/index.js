@@ -184,7 +184,7 @@ function makeMap(str, expectsLowerCase) {
 /**
  * Check if a tag is a built-in tag.
  */
-var isBuiltInTag = makeMap('slot,component,render,transition', true);
+var isBuiltInTag = makeMap('slot,component', true);
 
 /**
  * Remove an item from an array
@@ -253,10 +253,13 @@ var hyphenate = cached(function (str) {
  * Simple bind, faster than native
  */
 function bind(fn, ctx) {
-  return function (a) {
+  function boundFn(a) {
     var l = arguments.length;
     return l ? l > 1 ? fn.apply(ctx, arguments) : fn.call(ctx, a) : fn.call(ctx);
-  };
+  }
+  // record original fn length
+  boundFn._length = fn.length;
+  return boundFn;
 }
 
 /**
@@ -392,7 +395,7 @@ var config = {
   /**
    * List of asset types that a component can own.
    */
-  _assetTypes: ['component', 'directive', 'transition', 'filter'],
+  _assetTypes: ['component', 'directive', 'filter'],
 
   /**
    * List of lifecycle hooks.
@@ -419,16 +422,23 @@ if (process.env.NODE_ENV !== 'production') {
 
     warn = function warn(msg, vm) {
       if (hasConsole && !config.silent) {
-        console.error('[Vue warn]: ' + msg + (vm ? formatComponentName(vm) : ''));
+        console.error('[Vue warn]: ' + msg + ' ' + (vm ? formatLocation(formatComponentName(vm)) : ''));
       }
     };
 
     formatComponentName = function formatComponentName(vm) {
       if (vm.$root === vm) {
-        return ' (found in root instance)';
+        return 'root instance';
       }
       var name = vm._isVue ? vm.$options.name || vm.$options._componentTag : vm.name;
-      return name ? ' (found in component: <' + hyphenate(name) + '>)' : ' (found in anonymous component. Use the "name" option for better debugging messages)';
+      return name ? 'component <' + name + '>' : 'anonymous component';
+    };
+
+    var formatLocation = function formatLocation(str) {
+      if (str === 'anonymous component') {
+        str += ' - use the "name" option for better debugging messages.)';
+      }
+      return '(found in ' + str + ')';
     };
   })();
 }
@@ -672,6 +682,8 @@ var userQueue = [];
 var has = {};
 var circular = {};
 var waiting = false;
+var flushing = false;
+var index = 0;
 
 /**
  * Reset the scheduler's state.
@@ -683,13 +695,14 @@ function resetSchedulerState() {
   if (process.env.NODE_ENV !== 'production') {
     circular = {};
   }
-  waiting = false;
+  waiting = flushing = false;
 }
 
 /**
  * Flush both queues and run the watchers.
  */
 function flushSchedulerQueue() {
+  flushing = true;
   runSchedulerQueue(queue.sort(queueSorter));
   runSchedulerQueue(userQueue);
   // user watchers triggered more watchers,
@@ -722,8 +735,8 @@ function queueSorter(a, b) {
 function runSchedulerQueue(queue) {
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
-  for (var i = 0; i < queue.length; i++) {
-    var watcher = queue[i];
+  for (index = 0; index < queue.length; index++) {
+    var watcher = queue[index];
     var id = watcher.id;
     has[id] = null;
     watcher.run();
@@ -731,7 +744,7 @@ function runSchedulerQueue(queue) {
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1;
       if (circular[id] > config._maxUpdateCount) {
-        warn('You may have an infinite update loop for watcher ' + 'with expression "' + watcher.expression + '"', watcher.vm);
+        warn('You may have an infinite update loop ' + (watcher.user ? 'in watcher with expression "' + watcher.expression + '"' : 'in a component render function.'), watcher.vm);
         break;
       }
     }
@@ -750,7 +763,15 @@ function queueWatcher(watcher) {
     // push watcher into appropriate queue
     var q = watcher.user ? userQueue : queue;
     has[id] = true;
-    q.push(watcher);
+    if (!flushing) {
+      q.push(watcher);
+    } else {
+      var i = q.length - 1;
+      while (i >= 0 && q[i].id > watcher.id) {
+        i--;
+      }
+      q.splice(Math.max(i, index) + 1, 0, watcher);
+    }
     // queue the flush
     if (!waiting) {
       waiting = true;
@@ -807,27 +828,7 @@ var Watcher = function () {
 
   Watcher.prototype.get = function get() {
     pushTarget(this);
-    var value = void 0;
-    try {
-      value = this.getter.call(this.vm, this.vm);
-    } catch (e) {
-      if (process.env.NODE_ENV !== 'production') {
-        if (this.user) {
-          warn('Error when evaluating watcher with getter: ' + this.expression, this.vm);
-        } else {
-          warn('Error during component render', this.vm);
-        }
-      }
-      /* istanbul ignore else */
-      if (config.errorHandler) {
-        config.errorHandler.call(null, e, this.vm);
-      } else {
-        throw e;
-      }
-      // return old value when evaluation fails so the current UI is preserved
-      // if the error was somehow handled by user
-      value = this.value;
-    }
+    var value = this.getter.call(this.vm, this.vm);
     // "touch" every property so they are all tracked as
     // dependencies for deep watching
     if (this.deep) {
@@ -1465,7 +1466,7 @@ function normalizeChildren(children, ns) {
       var last = res[res.length - 1];
       //  nested
       if (Array.isArray(c)) {
-        res.push.apply(res, normalizeChildren(c));
+        res.push.apply(res, normalizeChildren(c, ns));
       } else if (isPrimitive(c)) {
         if (last && last.text) {
           last.text += String(c);
@@ -1562,11 +1563,17 @@ function fnInvoker(o) {
 function initLifecycle(vm) {
   var options = vm.$options;
 
-  vm.$parent = options.parent;
-  vm.$root = vm.$parent ? vm.$parent.$root : vm;
-  if (vm.$parent && !options._abstract) {
-    vm.$parent.$children.push(vm);
+  // locate first non-abstract parent
+  var parent = options.parent;
+  if (parent && !options._abstract) {
+    while (parent.$options._abstract && parent.$parent) {
+      parent = parent.$parent;
+    }
+    parent.$children.push(vm);
   }
+
+  vm.$parent = parent;
+  vm.$root = parent ? parent.$root : vm;
 
   vm.$children = [];
   vm.$refs = {};
@@ -1947,15 +1954,14 @@ function checkProp(res, hash, key, altKey) {
 }
 
 function mergeHooks(data) {
-  if (data.hook) {
-    for (var i = 0; i < hooksToMerge.length; i++) {
-      var key = hooksToMerge[i];
-      var fromParent = data.hook[key];
-      var ours = hooks[key];
-      data.hook[key] = fromParent ? mergeHook$1(ours, fromParent) : ours;
-    }
-  } else {
-    data.hook = hooks;
+  if (!data.hook) {
+    data.hook = {};
+  }
+  for (var i = 0; i < hooksToMerge.length; i++) {
+    var key = hooksToMerge[i];
+    var fromParent = data.hook[key];
+    var ours = hooks[key];
+    data.hook[key] = fromParent ? mergeHook$1(ours, fromParent) : ours;
   }
 }
 
@@ -1975,16 +1981,19 @@ function createElement(tag, data, children) {
     children = data;
     data = undefined;
   }
-  return _createElement.call(this, tag, data, children);
+  // make sure to use real instance instead of proxy as context
+  return _createElement(this._self, tag, data, children);
 }
 
-function _createElement(tag, data, children) {
-  // make sure to expose real self instead of proxy
-  var context = this._self;
+function _createElement(context, tag, data, children) {
   var parent = renderState.activeInstance;
   var host = context !== parent ? parent : undefined;
   if (!parent) {
     process.env.NODE_ENV !== 'production' && warn('createElement cannot be called outside of component ' + 'render functions.');
+    return;
+  }
+  if (data && data.__ob__) {
+    process.env.NODE_ENV !== 'production' && warn('Avoid using observed data object as vnode data: ' + JSON.stringify(data) + '\n' + 'Always create fresh vnode data objects in each render!', context);
     return;
   }
   if (!tag) {
@@ -1993,17 +2002,17 @@ function _createElement(tag, data, children) {
   }
   if (typeof tag === 'string') {
     var Ctor = void 0;
+    var ns = config.getTagNamespace(tag);
     if (config.isReservedTag(tag)) {
       // platform built-in elements
-      return new VNode(tag, data, normalizeChildren(children), undefined, undefined, undefined, context, host);
+      return new VNode(tag, data, normalizeChildren(children, ns), undefined, undefined, ns, context, host);
     } else if (Ctor = resolveAsset(context.$options, 'components', tag)) {
       // component
       return createComponent(Ctor, data, parent, context, host, children, tag);
     } else {
-      // unknown or namespaced elements
+      // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
-      var ns = config.getTagNamespace(tag);
       return new VNode(tag, data, normalizeChildren(children, ns), undefined, undefined, ns, context, host);
     }
   } else {
@@ -2048,19 +2057,40 @@ function renderMixin(Vue) {
     var _parentVnode = _vm$$options._parentVnode;
 
 
-    if (staticRenderFns && !this._staticTrees) {
-      this._staticTrees = [];
+    if (staticRenderFns && !vm._staticTrees) {
+      vm._staticTrees = [];
     }
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
-    this.$vnode = _parentVnode;
+    vm.$vnode = _parentVnode;
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
     if (_renderChildren) {
       resolveSlots(vm, _renderChildren);
     }
     // render self
-    var vnode = render.call(vm._renderProxy, vm.$createElement);
+    var vnode = void 0;
+    try {
+      vnode = render.call(vm._renderProxy, vm.$createElement);
+    } catch (e) {
+      if (process.env.NODE_ENV !== 'production') {
+        warn('Error when rendering ' + formatComponentName(vm) + ':');
+      }
+      /* istanbul ignore else */
+      if (config.errorHandler) {
+        config.errorHandler.call(null, e, vm);
+      } else {
+        if (config._isServer) {
+          throw e;
+        } else {
+          setTimeout(function () {
+            throw e;
+          }, 0);
+        }
+      }
+      // return previous vnode to prevent render error causing blank component
+      vnode = vm._vnode;
+    }
     // return empty vnode in case the render function errored out
     if (!(vnode instanceof VNode)) {
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
@@ -2148,29 +2178,28 @@ function renderMixin(Vue) {
 }
 
 function resolveSlots(vm, renderChildren) {
-  if (renderChildren) {
-    var children = normalizeChildren(renderChildren) || [];
-    var slots = {};
-    var defaultSlot = [];
-    var name = void 0,
-        child = void 0;
-    for (var i = 0, l = children.length; i < l; i++) {
-      child = children[i];
-      if (name = child.data && child.data.slot) {
-        var slot = slots[name] || (slots[name] = []);
-        if (child.tag === 'template') {
-          slot.push.apply(slot, child.children);
-        } else {
-          slot.push(child);
-        }
+  var slots = vm.$slots = {};
+  var children = normalizeChildren(renderChildren) || [];
+  var defaultSlot = [];
+  var name = void 0,
+      child = void 0;
+  for (var i = 0, l = children.length; i < l; i++) {
+    child = children[i];
+    if (child.data && (name = child.data.slot)) {
+      delete child.data.slot;
+      var slot = slots[name] || (slots[name] = []);
+      if (child.tag === 'template') {
+        slot.push.apply(slot, child.children);
       } else {
-        defaultSlot.push(child);
+        slot.push(child);
       }
+    } else {
+      defaultSlot.push(child);
     }
-    if (defaultSlot.length && !(defaultSlot.length === 1 && defaultSlot[0].text === ' ')) {
-      slots['default'] = defaultSlot;
-    }
-    vm.$slots = slots;
+  }
+  // ignore single whitespace
+  if (defaultSlot.length && !(defaultSlot.length === 1 && defaultSlot[0].text === ' ')) {
+    slots.default = defaultSlot;
   }
 }
 
@@ -2811,7 +2840,7 @@ function stringifyClass(value) {
   return res;
 }
 
-var isReservedTag = makeMap('html,base,head,link,meta,style,title,' + 'address,article,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' + 'div,dd,dl,dt,figcaption,figure,hr,img,li,main,ol,p,pre,ul,' + 'a,b,abbr,bdi,bdo,br,cite,code,data,dfn,em,i,kbd,mark,q,rp,rt,rtc,ruby,' + 's,samp,small,span,strong,sub,sup,time,u,var,wbr,area,audio,map,track,video,' + 'embed,object,param,source,canvas,script,noscript,del,ins,' + 'caption,col,colgroup,table,thead,tbody,td,th,tr,' + 'button,datalist,fieldset,form,input,label,legend,meter,optgroup,option,' + 'output,progress,select,textarea,' + 'details,dialog,menu,menuitem,summary,' + 'content,element,shadow,template');
+var isHTMLTag = makeMap('html,body,base,head,link,meta,style,title,' + 'address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' + 'div,dd,dl,dt,figcaption,figure,hr,img,li,main,ol,p,pre,ul,' + 'a,b,abbr,bdi,bdo,br,cite,code,data,dfn,em,i,kbd,mark,q,rp,rt,rtc,ruby,' + 's,samp,small,span,strong,sub,sup,time,u,var,wbr,area,audio,map,track,video,' + 'embed,object,param,source,canvas,script,noscript,del,ins,' + 'caption,col,colgroup,table,thead,tbody,td,th,tr,' + 'button,datalist,fieldset,form,input,label,legend,meter,optgroup,option,' + 'output,progress,select,textarea,' + 'details,dialog,menu,menuitem,summary,' + 'content,element,shadow,template');
 
 var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' + 'link,meta,param,source,track,wbr', true);
 
@@ -2823,8 +2852,13 @@ var canBeLeftOpenTag = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr
 // Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
 var isNonPhrasingTag = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' + 'details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,' + 'h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,' + 'optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,' + 'title,tr,track', true);
 
-// this map covers namespace elements that can appear as template root nodes
-var isSVG = makeMap('svg,g,defs,symbol,use,image,text,circle,ellipse,' + 'line,path,polygon,polyline,rect', true);
+// this map is intentionally selective, only covering SVG elements that may
+// contain child elements.
+var isSVG = makeMap('svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,font,' + 'font-face,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' + 'polygon,polyline,rect,switch,symbol,text,textpath,tspan,use,view', true);
+
+var isReservedTag = function isReservedTag(tag) {
+  return isHTMLTag(tag) || isSVG(tag);
+};
 
 function getTagNamespace(tag) {
   if (isSVG(tag)) {
@@ -3903,7 +3937,7 @@ function genElement(el) {
       var data = genData(el);
       // if the element is potentially a component,
       // wrap its children as a thunk.
-      var children = !el.inlineTemplate ? genChildren(el, !el.ns && !isPlatformReservedTag$1(el.tag) /* asThunk */) : null;
+      var children = !el.inlineTemplate ? genChildren(el, !isPlatformReservedTag$1(el.tag) /* asThunk */) : null;
       code = '_h(\'' + el.tag + '\'' + (data ? ',' + data : '' // data
       ) + (children ? ',' + children : '' // children
       ) + ')';
@@ -4221,35 +4255,7 @@ var style = {
   genData: genData$2
 };
 
-function transformNode$2(el) {
-  var transition = getBindingAttr(el, 'transition');
-  if (transition === '""') {
-    transition = true;
-  }
-  if (transition) {
-    el.transition = transition;
-  }
-  var mode = getBindingAttr(el, 'transition-mode');
-  if (mode) {
-    el.transitionMode = mode;
-  }
-}
-
-function genData$3(el) {
-  return el.transition ? 'transition:' + el.transition + ',' : '';
-}
-
-function transformCode(el, code) {
-  return el.transitionMode ? '_h(\'TransitionControl\',{props:{mode:' + el.transitionMode + ',child:' + code + '}})' : code;
-}
-
-var transition = {
-  transformNode: transformNode$2,
-  genData: genData$3,
-  transformCode: transformCode
-};
-
-var modules = [klass, style, transition];
+var modules = [klass, style];
 
 var warn$3 = void 0;
 
