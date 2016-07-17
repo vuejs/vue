@@ -259,7 +259,7 @@ if (!isIE9) {
 
       vm.items = ['d', 'b', 'a']
       waitForUpdate(() => {
-        expect(vm.$el.innerHTML.replace(/\s?style=""\s?/g, '')).toBe(
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
           `<span>` +
             `<div class="test group-enter group-enter-active">d</div>` +
             `<div class="test">b</div>` +
@@ -268,7 +268,7 @@ if (!isIE9) {
           `</span>`
         )
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.innerHTML.replace(/\s?style=""\s?/g, '')).toBe(
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
           `<span>` +
             `<div class="test group-enter-active">d</div>` +
             `<div class="test">b</div>` +
@@ -276,8 +276,8 @@ if (!isIE9) {
             `<div class="test group-leave-active group-move">c</div>` +
           `</span>`
         )
-      }).thenWaitFor(duration + 10).then(() => {
-        expect(vm.$el.innerHTML.replace(/\s?style=""\s?/g, '')).toBe(
+      }).thenWaitFor(duration * 2).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
           `<span>` +
             `<div class="test">d</div>` +
             `<div class="test">b</div>` +

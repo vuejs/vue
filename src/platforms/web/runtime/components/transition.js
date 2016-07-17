@@ -93,6 +93,7 @@ export default {
     // apply transition data to child
     // use getRealChild() to ignore abstract components e.g. keep-alive
     const child = getRealChild(rawChild)
+    /* istanbul ignore if */
     if (!child) return
     child.key = child.key || `__v${child.tag + this._uid}__`
     const data = (child.data || (child.data = {})).transition = extractTransitionData(this)
