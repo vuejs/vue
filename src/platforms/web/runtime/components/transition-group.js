@@ -94,8 +94,11 @@ export default {
     }
 
     children.forEach(c => {
+      if (c.elm._moveCb) {
+        c.elm._moveCb()
+      }
       const oldPos = c.data.pos
-      const newPos = c.elm.getBoundingClientRect()
+      const newPos = c.data.pos = c.elm.getBoundingClientRect()
       const dx = oldPos.left - newPos.left
       const dy = oldPos.top - newPos.top
       if (dx || dy) {
@@ -112,16 +115,13 @@ export default {
     children.forEach(c => {
       if (c.data.moved) {
         const el = c.elm
-        /* istanbul ignore if */
-        if (el._pendingMoveCb) {
-          el._pendingMoveCb()
-        }
         const s = el.style
         addTransitionClass(el, moveClass)
         s.transform = s.WebkitTransform = s.transitionDuration = ''
-        el.addEventListener(transitionEndEvent, el._pendingMoveCb = function cb () {
+        el._moveDest = c.data.pos
+        el.addEventListener(transitionEndEvent, el._moveCb = function cb () {
           el.removeEventListener(transitionEndEvent, cb)
-          el._pendingMoveCb = null
+          el._moveCb = null
           removeTransitionClass(el, moveClass)
         })
       }
