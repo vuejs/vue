@@ -94,6 +94,7 @@ export default {
     }
 
     children.forEach(c => {
+      /* istanbul ignore if */
       if (c.elm._moveCb) {
         c.elm._moveCb()
       }
@@ -119,10 +120,12 @@ export default {
         addTransitionClass(el, moveClass)
         s.transform = s.WebkitTransform = s.transitionDuration = ''
         el._moveDest = c.data.pos
-        el.addEventListener(transitionEndEvent, el._moveCb = function cb () {
-          el.removeEventListener(transitionEndEvent, cb)
-          el._moveCb = null
-          removeTransitionClass(el, moveClass)
+        el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
+          if (!e || /transform$/.test(e.propertyName)) {
+            el.removeEventListener(transitionEndEvent, cb)
+            el._moveCb = null
+            removeTransitionClass(el, moveClass)
+          }
         })
       }
     })
