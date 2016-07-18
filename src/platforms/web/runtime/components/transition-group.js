@@ -98,6 +98,10 @@ export default {
       if (c.elm._moveCb) {
         c.elm._moveCb()
       }
+      /* istanbul ignore if */
+      if (c.elm._enterCb) {
+        c.elm._enterCb()
+      }
       const oldPos = c.data.pos
       const newPos = c.data.pos = c.elm.getBoundingClientRect()
       const dx = oldPos.left - newPos.left
