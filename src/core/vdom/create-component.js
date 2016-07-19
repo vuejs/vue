@@ -223,15 +223,14 @@ function extractProps (data: VNodeData, Ctor: Class<Component>): ?Object {
   }
   const res = {}
   const { attrs, props, domProps, staticAttrs } = data
-  if (!attrs && !props && !domProps && !staticAttrs) {
-    return res
-  }
-  for (const key in propOptions) {
-    const altKey = hyphenate(key)
-    checkProp(res, attrs, key, altKey) ||
-    checkProp(res, props, key, altKey) ||
-    checkProp(res, domProps, key, altKey) ||
-    checkProp(res, staticAttrs, key, altKey)
+  if (attrs || props || domProps || staticAttrs) {
+    for (const key in propOptions) {
+      const altKey = hyphenate(key)
+      checkProp(res, props, key, altKey, true) ||
+      checkProp(res, attrs, key, altKey) ||
+      checkProp(res, domProps, key, altKey) ||
+      checkProp(res, staticAttrs, key, altKey)
+    }
   }
   return res
 }
@@ -240,16 +239,21 @@ function checkProp (
   res: Object,
   hash: ?Object,
   key: string,
-  altKey: string
+  altKey: string,
+  preserve?: boolean
 ): boolean {
   if (hash) {
     if (hasOwn(hash, key)) {
       res[key] = hash[key]
-      delete hash[key]
+      if (!preserve) {
+        delete hash[key]
+      }
       return true
     } else if (hasOwn(hash, altKey)) {
       res[key] = hash[altKey]
-      delete hash[altKey]
+      if (!preserve) {
+        delete hash[altKey]
+      }
       return true
     }
   }
