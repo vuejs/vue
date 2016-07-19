@@ -102,6 +102,7 @@ declare type ASTElement = {
   styleBinding?: string,
   hooks?: ASTElementHooks,
   events?: ASTElementHandlers,
+  nativeEvents?: ASTElementHandlers,
 
   transition?: string | true,
   transitionOnAppear?: boolean,

@@ -166,6 +166,9 @@ function genData (el: ASTElement): string | void {
   if (el.events) {
     data += `${genHandlers(el.events)},`
   }
+  if (el.nativeEvents) {
+    data += `${genHandlers(el.nativeEvents, true)}`
+  }
   // inline-template
   if (el.inlineTemplate) {
     const ast = el.children[0]

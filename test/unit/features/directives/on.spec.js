@@ -152,6 +152,21 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalledWith('foo', 'bar')
   })
 
+  it('should be able to bind native events for a child component', () => {
+    Vue.component('bar', {
+      template: '<span>Hello</span>'
+    })
+    vm = new Vue({
+      el,
+      template: '<bar @click.native="foo"></bar>',
+      methods: { foo: spy }
+    })
+    vm.$children[0].$emit('click')
+    expect(spy).not.toHaveBeenCalled()
+    triggerEvent(vm.$children[0].$el, 'click')
+    expect(spy).toHaveBeenCalled()
+  })
+
   it('remove listener', done => {
     const spy2 = jasmine.createSpy('remove listener')
     vm = new Vue({

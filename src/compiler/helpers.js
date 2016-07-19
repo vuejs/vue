@@ -52,11 +52,17 @@ export function addHandler (
   value: string,
   modifiers: ?{ [key: string]: true }
 ) {
-  const events = el.events || (el.events = {})
   // check capture modifier
   if (modifiers && modifiers.capture) {
     delete modifiers.capture
     name = '!' + name // mark the event as captured
+  }
+  let events
+  if (modifiers && modifiers.native) {
+    delete modifiers.native
+    events = el.nativeEvents || (el.nativeEvents = {})
+  } else {
+    events = el.events || (el.events = {})
   }
   const newHandler = { value, modifiers }
   const handlers = events[name]

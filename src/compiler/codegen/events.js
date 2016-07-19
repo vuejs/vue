@@ -21,8 +21,8 @@ const modifierCode = {
   self: 'if($event.target !== $event.currentTarget)return;'
 }
 
-export function genHandlers (events: ASTElementHandlers): string {
-  let res = 'on:{'
+export function genHandlers (events: ASTElementHandlers, native?: boolean): string {
+  let res = native ? 'nativeOn:{' : 'on:{'
   for (const name in events) {
     res += `"${name}":${genHandler(events[name])},`
   }

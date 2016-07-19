@@ -44,7 +44,8 @@ declare interface VNodeData {
   domProps?: { [key: string]: any };
   staticAttrs?: { [key: string]: string };
   hook?: { [key: string]: Function };
-  on?: { [key: string]: Function | Array<Function> };
+  on?: ?{ [key: string]: Function | Array<Function> };
+  nativeOn?: { [key: string]: Function | Array<Function> };
   transition?: Object;
   inlineTemplate?: {
     render: Function,

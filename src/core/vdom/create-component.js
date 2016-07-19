@@ -89,9 +89,8 @@ export function createComponent (
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
   const listeners = data.on
-  if (listeners) {
-    delete data.on
-  }
+  // replace with listeners with .native modifier
+  data.on = data.nativeOn
 
   // return a placeholder vnode
   const name = Ctor.options.name || tag
