@@ -222,16 +222,15 @@ function extractProps (data: VNodeData, Ctor: Class<Component>): ?Object {
     return
   }
   const res = {}
-  const attrs = data.attrs
-  const props = data.props
-  const staticAttrs = data.staticAttrs
-  if (!attrs && !props && !staticAttrs) {
+  const { attrs, props, domProps, staticAttrs } = data
+  if (!attrs && !props && !domProps && !staticAttrs) {
     return res
   }
   for (const key in propOptions) {
     const altKey = hyphenate(key)
     checkProp(res, attrs, key, altKey) ||
     checkProp(res, props, key, altKey) ||
+    checkProp(res, domProps, key, altKey) ||
     checkProp(res, staticAttrs, key, altKey)
   }
   return res

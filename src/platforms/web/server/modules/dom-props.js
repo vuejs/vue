@@ -5,7 +5,7 @@ import { renderAttr } from './attrs'
 import { propsToAttrMap, isRenderableAttr } from 'web/util/attrs'
 
 export default function (node: VNodeWithData): string {
-  const props = node.data.props
+  const props = node.data.domProps
   let res = ''
   if (props) {
     for (const key in props) {

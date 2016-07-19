@@ -153,10 +153,10 @@ describe('codegen', () => {
     )
   })
 
-  it('generate props with v-bind directive', () => {
+  it('generate DOM props with v-bind directive', () => {
     assertCodegen(
       '<p :value="msg">',
-      `with(this){return _h('p',{props:{"value":msg}})}`
+      `with(this){return _h('p',{domProps:{"value":msg}})}`
     )
   })
 

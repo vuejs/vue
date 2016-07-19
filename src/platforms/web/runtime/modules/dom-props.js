@@ -1,14 +1,14 @@
 /* @flow */
 
-function updateProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  if (!oldVnode.data.props && !vnode.data.props) {
+function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+  if (!oldVnode.data.domProps && !vnode.data.domProps) {
     return
   }
   let key, cur
   const elm: any = vnode.elm
-  const oldProps = oldVnode.data.props || {}
-  const props = vnode.data.props || {}
-  const clonedProps = vnode.data.props = {}
+  const oldProps = oldVnode.data.domProps || {}
+  const props = vnode.data.domProps || {}
+  const clonedProps = vnode.data.domProps = {}
 
   for (key in oldProps) {
     if (props[key] == null) {
@@ -32,6 +32,6 @@ function updateProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 }
 
 export default {
-  create: updateProps,
-  update: updateProps
+  create: updateDOMProps,
+  update: updateDOMProps
 }

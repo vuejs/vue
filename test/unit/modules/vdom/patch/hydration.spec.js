@@ -50,8 +50,8 @@ describe('hydration', () => {
     traverseAndAssert(vnode1, node0)
 
     // check update
-    const vnode2 = new VNode('div', { props: { id: 'foo' }}, [
-      new VNode('span', { props: { id: 'bar' }}),
+    const vnode2 = new VNode('div', { attrs: { id: 'foo' }}, [
+      new VNode('span', { attrs: { id: 'bar' }}),
       new VNode('div', { hook: { init }}, [
         new VNode('span', {}),
         new VNode('span', {})

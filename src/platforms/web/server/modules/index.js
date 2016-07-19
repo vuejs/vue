@@ -1,11 +1,11 @@
 import attrs from './attrs'
-import props from './props'
+import domProps from './dom-props'
 import klass from './class'
 import style from './style'
 
 export default [
   attrs,
-  props,
+  domProps,
   klass,
   style
 ]

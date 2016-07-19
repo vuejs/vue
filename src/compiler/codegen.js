@@ -146,10 +146,6 @@ function genData (el: ASTElement): string | void {
   if (el.attrsMap['v-show']) {
     data += 'show:true,'
   }
-  // props
-  if (el.props) {
-    data += `props:{${genProps(el.props)}},`
-  }
   // attributes
   if (el.attrs) {
     data += `attrs:{${genProps(el.attrs)}},`
@@ -157,6 +153,10 @@ function genData (el: ASTElement): string | void {
   // static attributes
   if (el.staticAttrs) {
     data += `staticAttrs:{${genProps(el.staticAttrs)}},`
+  }
+  // DOM props
+  if (el.props) {
+    data += `domProps:{${genProps(el.props)}},`
   }
   // hooks
   if (el.hooks) {

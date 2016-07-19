@@ -41,6 +41,7 @@ declare interface VNodeData {
   show?: true;
   props?: { [key: string]: any };
   attrs?: { [key: string]: string };
+  domProps?: { [key: string]: any };
   staticAttrs?: { [key: string]: string };
   hook?: { [key: string]: Function };
   on?: { [key: string]: Function | Array<Function> };

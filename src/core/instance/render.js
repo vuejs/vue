@@ -162,7 +162,7 @@ export function renderMixin (Vue: Class<Component>) {
         const data = vnode.data
         for (const key in value) {
           const hash = config.mustUseProp(key)
-            ? data.props || (data.props = {})
+            ? data.domProps || (data.domProps = {})
             : data.attrs || (data.attrs = {})
           hash[key] = value[key]
         }
