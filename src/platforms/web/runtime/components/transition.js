@@ -39,7 +39,7 @@ export function extractTransitionData (comp: Component): Object {
 export default {
   name: 'transition',
   props: transitionProps,
-  _abstract: true,
+  abstract: true,
   render (h: Function) {
     let children = this.$slots.default
     if (!children) {

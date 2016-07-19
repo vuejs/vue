@@ -137,13 +137,17 @@ function prepatch (
   vnode: MountedComponentVNode
 ) {
   const options = vnode.componentOptions
-  vnode.child = oldVnode.child
-  vnode.child._updateFromParent(
+  const child = vnode.child = oldVnode.child
+  child._updateFromParent(
     options.propsData, // updated props
     options.listeners, // updated listeners
     vnode, // new parent vnode
     options.children // new children
   )
+  // always update abstract components.
+  if (child.$options.abstract) {
+    child.$forceUpdate()
+  }
 }
 
 function insert (vnode: MountedComponentVNode) {

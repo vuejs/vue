@@ -66,7 +66,7 @@ function applyNS (vnode, ns) {
 // we want to recrusively retrieve the real component to be rendered
 export function getRealChild (vnode: ?VNode): ?VNode {
   const compOptions = vnode && vnode.componentOptions
-  if (compOptions && compOptions.Ctor.options._abstract) {
+  if (compOptions && compOptions.Ctor.options.abstract) {
     return getRealChild(compOptions.propsData && compOptions.propsData.child)
   } else {
     return vnode

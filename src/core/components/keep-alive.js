@@ -3,7 +3,7 @@ import { getRealChild } from 'core/vdom/helpers'
 
 export default {
   name: 'keep-alive',
-  _abstract: true,
+  abstract: true,
   props: {
     child: Object
   },
