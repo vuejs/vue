@@ -30,9 +30,7 @@ const decodeHTMLCached = cached(decodeHTML)
 let warn
 let platformGetTagNamespace
 let platformMustUseProp
-let preTransforms
 let transforms
-let postTransforms
 let delimiters
 
 /**
@@ -45,9 +43,7 @@ export function parse (
   warn = options.warn || baseWarn
   platformGetTagNamespace = options.getTagNamespace || no
   platformMustUseProp = options.mustUseProp || no
-  preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   transforms = pluckModuleFunction(options.modules, 'transformNode')
-  postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
   delimiters = options.delimiters
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
@@ -88,11 +84,6 @@ export function parse (
           'UI. Avoid placing tags with side-effects in your templates, such as ' +
           `<${tag}>.`
         )
-      }
-
-      // apply pre-transforms
-      for (let i = 0; i < preTransforms.length; i++) {
-        preTransforms[i](element, options)
       }
 
       if (!inPre) {
@@ -157,10 +148,6 @@ export function parse (
       if (!unary) {
         currentParent = element
         stack.push(element)
-      }
-      // apply post-transforms
-      for (let i = 0; i < postTransforms.length; i++) {
-        postTransforms[i](element, options)
       }
     },
 
