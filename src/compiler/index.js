@@ -2,7 +2,7 @@
 
 import { parse } from './parser/index'
 import { optimize } from './optimizer'
-import { generate } from './codegen'
+import { generate } from './codegen/index'
 
 /**
  * Compile a template.
