@@ -68,6 +68,18 @@ var testCases = [
     expected: { a: '35', b: 32 }
   },
   {
+    // Object with string values with back-quotes
+    exp: '[{"a":"he`llo"},{"b":"world"},{"c":55}]',
+    scope: {},
+    expected: [{ 'a': 'he`llo'}, { 'b': 'world'}, { 'c': 55}]
+  },
+  {
+    // Object with string values and back quotes (single quoted string)
+    exp: '[{\'a\':\'he`llo\'},{\'b\':\'world\'},{\'c\':55}]',
+    scope: {},
+    expected: [{ 'a': 'he`llo'}, { 'b': 'world'}, { 'c': 55}]
+  },
+  {
     // dollar signs and underscore
     exp: "_a + ' ' + $b",
     scope: {
