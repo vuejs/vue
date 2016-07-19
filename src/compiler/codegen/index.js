@@ -1,8 +1,8 @@
 /* @flow */
 
 import { genHandlers } from './events'
-import { baseWarn, pluckModuleFunction } from './helpers'
-import baseDirectives from './directives/index'
+import { baseWarn, pluckModuleFunction } from '../helpers'
+import baseDirectives from '../directives/index'
 import { no } from 'shared/util'
 
 // configurable state
