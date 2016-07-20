@@ -39,13 +39,8 @@ function resetSchedulerState () {
  */
 function flushSchedulerQueue () {
   flushing = true
-  runSchedulerQueue(queue.sort(queueSorter))
   runSchedulerQueue(userQueue)
-  // user watchers triggered more watchers,
-  // keep flushing until it depletes
-  if (queue.length) {
-    return flushSchedulerQueue()
-  }
+  runSchedulerQueue(queue.sort(queueSorter))
   // devtool hook
   /* istanbul ignore if */
   if (devtools && config.devtools) {
@@ -103,11 +98,16 @@ function runSchedulerQueue (queue: Array<Watcher>) {
 export function queueWatcher (watcher: Watcher) {
   const id = watcher.id
   if (has[id] == null) {
+    // if already flushing, and all user watchers have already been run,
+    // run the new user watcher immediately.
+    if (flushing && watcher.user && !userQueue.length) {
+      return watcher.run()
+    }
     // push watcher into appropriate queue
+    has[id] = true
     const q = watcher.user
       ? userQueue
       : queue
-    has[id] = true
     if (!flushing) {
       q.push(watcher)
     } else {

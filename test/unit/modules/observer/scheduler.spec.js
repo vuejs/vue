@@ -45,7 +45,7 @@ describe('Scheduler', () => {
     }).then(done)
   })
 
-  it('calls user watchers after directive updates', done => {
+  it('call user watchers before component re-render', done => {
     const vals = []
     function run () {
       vals.push(this.id)
@@ -67,9 +67,34 @@ describe('Scheduler', () => {
       run: run
     })
     waitForUpdate(() => {
-      expect(vals[0]).toBe(1)
-      expect(vals[1]).toBe(2)
-      expect(vals[2]).toBe(3)
+      expect(vals).toEqual([2, 1, 3])
+    }).then(done)
+  })
+
+  it('call user watcher triggered by component re-render immediately', done => {
+    // this happens when a component re-render updates the props of a child
+    const vals = []
+    queueWatcher({
+      id: 1,
+      run () {
+        vals.push(1)
+        queueWatcher({
+          id: 3,
+          user: true,
+          run () {
+            vals.push(3)
+          }
+        })
+      }
+    })
+    queueWatcher({
+      id: 2,
+      run () {
+        vals.push(2)
+      }
+    })
+    waitForUpdate(() => {
+      expect(vals).toEqual([1, 3, 2])
     }).then(done)
   })
 
@@ -106,7 +131,7 @@ describe('Scheduler', () => {
       }
     })
     waitForUpdate(() => {
-      expect(callOrder.join()).toBe('1,2,3')
+      expect(callOrder).toEqual([1, 2, 3])
     }).then(done)
   })
 })
