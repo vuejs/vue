@@ -61,6 +61,7 @@ export default {
       const removed = []
       for (let i = 0; i < prevChildren.length; i++) {
         const c = prevChildren[i]
+        c.data.transition = transitionData
         c.data.pos = c.elm.getBoundingClientRect()
         if (map[c.key]) {
           kept.push(c)
