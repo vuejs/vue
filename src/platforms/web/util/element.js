@@ -76,6 +76,9 @@ export function isUnknownElement (tag: string): boolean {
   if (!inBrowser) {
     return true
   }
+  if (isReservedTag(tag)) {
+    return false
+  }
   tag = tag.toLowerCase()
   /* istanbul ignore if */
   if (unknownElementCache[tag] != null) {
