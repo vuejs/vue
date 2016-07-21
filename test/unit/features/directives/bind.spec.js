@@ -109,6 +109,18 @@ describe('Directive v-bind', () => {
     }).then(done)
   })
 
+  it('bind as prop', () => {
+    const vm = new Vue({
+      template: '<div><span v-bind:text-content.prop="foo"></span><span ::inner-html="bar"></span></div>',
+      data: {
+        foo: 'hello',
+        bar: '<span>qux</span>'
+      }
+    }).$mount()
+    expect(vm.$el.children[0].textContent).toBe('hello')
+    expect(vm.$el.children[1].innerHTML).toBe('<span>qux</span>')
+  })
+
   it('bind object', done => {
     const vm = new Vue({
       template: '<input v-bind="test">',
@@ -128,6 +140,30 @@ describe('Directive v-bind', () => {
     waitForUpdate(() => {
       expect(vm.$el.getAttribute('id')).toBe('hi')
       expect(vm.$el.getAttribute('class')).toBe('ok')
+      expect(vm.$el.value).toBe('bye')
+    }).then(done)
+  })
+
+  it('bind object as prop', done => {
+    const vm = new Vue({
+      template: '<input v-bind.prop="test">',
+      data: {
+        test: {
+          id: 'test',
+          className: 'ok',
+          value: 'hello'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.id).toBe('test')
+    expect(vm.$el.className).toBe('ok')
+    expect(vm.$el.value).toBe('hello')
+    vm.test.id = 'hi'
+    vm.test.className = 'okay'
+    vm.test.value = 'bye'
+    waitForUpdate(() => {
+      expect(vm.$el.id).toBe('hi')
+      expect(vm.$el.className).toBe('okay')
       expect(vm.$el.value).toBe('bye')
     }).then(done)
   })

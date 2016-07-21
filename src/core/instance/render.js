@@ -148,7 +148,10 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
   // apply v-bind object
-  Vue.prototype._b = function bindProps (vnode: VNodeWithData, value: any) {
+  Vue.prototype._b = function bindProps (
+    vnode: VNodeWithData,
+    value: any,
+    asProp?: boolean) {
     if (value) {
       if (!isObject(value)) {
         process.env.NODE_ENV !== 'production' && warn(
@@ -161,7 +164,7 @@ export function renderMixin (Vue: Class<Component>) {
         }
         const data = vnode.data
         for (const key in value) {
-          const hash = config.mustUseProp(key)
+          const hash = asProp || config.mustUseProp(key)
             ? data.domProps || (data.domProps = {})
             : data.attrs || (data.attrs = {})
           hash[key] = value[key]

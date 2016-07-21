@@ -3,7 +3,7 @@
 import { decodeHTML } from 'entities'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
-import { cached, no } from 'shared/util'
+import { cached, no, camelize } from 'shared/util'
 import {
   pluckModuleFunction,
   getAndRemoveAttr,
@@ -324,7 +324,7 @@ function processComponent (el) {
 
 function processAttrs (el) {
   const list = el.attrsList
-  let i, l, name, value, arg, modifiers
+  let i, l, name, value, arg, modifiers, isProp
   for (i = 0, l = list.length; i < l; i++) {
     name = list[i].name
     value = list[i].value
@@ -336,7 +336,12 @@ function processAttrs (el) {
       }
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
-        if (platformMustUseProp(name)) {
+        if (name.charAt(0) === ':' || (modifiers && modifiers.prop)) {
+          isProp = true
+          name = camelize(name.replace(bindRE, ''))
+          if (name === 'innerHtml') name = 'innerHTML'
+        }
+        if (isProp || platformMustUseProp(name)) {
           addProp(el, name, value)
         } else {
           addAttr(el, name, value)
