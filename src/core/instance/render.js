@@ -177,9 +177,7 @@ export function renderMixin (Vue: Class<Component>) {
   }
 }
 
-export function resolveSlots (
-  renderChildren?: Array<any> | () => Array<any> | string
-): Object {
+export function resolveSlots (renderChildren: any): Object {
   const slots = {}
   if (!renderChildren) {
     return slots
