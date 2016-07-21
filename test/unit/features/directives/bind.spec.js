@@ -111,7 +111,7 @@ describe('Directive v-bind', () => {
 
   it('bind as prop', () => {
     const vm = new Vue({
-      template: '<div><span v-bind:text-content.prop="foo"></span><span ::inner-html="bar"></span></div>',
+      template: '<div><span v-bind:text-content.prop="foo"></span><span :inner-html.prop="bar"></span></div>',
       data: {
         foo: 'hello',
         bar: '<span>qux</span>'

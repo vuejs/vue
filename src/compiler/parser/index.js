@@ -336,9 +336,9 @@ function processAttrs (el) {
       }
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
-        if (name.charAt(0) === ':' || (modifiers && modifiers.prop)) {
+        if (modifiers && modifiers.prop) {
           isProp = true
-          name = camelize(name.replace(bindRE, ''))
+          name = camelize(name)
           if (name === 'innerHtml') name = 'innerHTML'
         }
         if (isProp || platformMustUseProp(name)) {
