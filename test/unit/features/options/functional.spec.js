@@ -22,6 +22,24 @@ describe('Options functional', () => {
     }).then(done)
   })
 
+  it('should support slots', () => {
+    const vm = new Vue({
+      data: { test: 'foo' },
+      template: '<div><wrap><div slot="a">foo</div><div slot="b">bar</div></wrap></div>',
+      components: {
+        wrap: {
+          functional: true,
+          props: ['msg'],
+          render (h, { slots }) {
+            slots = slots()
+            return h('div', null, [slots.b, slots.a])
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<div><div>bar</div><div>foo</div></div>')
+  })
+
   it('should let vnode raw data pass through', done => {
     const onValid = jasmine.createSpy('valid')
     const vm = new Vue({

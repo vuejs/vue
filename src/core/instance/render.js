@@ -56,9 +56,7 @@ export function renderMixin (Vue: Class<Component>) {
     vm.$vnode = _parentVnode
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
-    if (_renderChildren) {
-      resolveSlots(vm, _renderChildren)
-    }
+    vm.$slots = resolveSlots(_renderChildren)
     // render self
     let vnode
     try {
@@ -179,11 +177,13 @@ export function renderMixin (Vue: Class<Component>) {
   }
 }
 
-function resolveSlots (
-  vm: Component,
-  renderChildren: Array<any> | () => Array<any> | string
-) {
-  const slots = vm.$slots = {}
+export function resolveSlots (
+  renderChildren?: Array<any> | () => Array<any> | string
+): Object {
+  const slots = {}
+  if (!renderChildren) {
+    return slots
+  }
   const children = normalizeChildren(renderChildren) || []
   const defaultSlot = []
   let name, child
@@ -208,4 +208,5 @@ function resolveSlots (
   )) {
     slots.default = defaultSlot
   }
+  return slots
 }

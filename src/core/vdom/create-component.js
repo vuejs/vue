@@ -4,6 +4,7 @@ import Vue from '../instance/index'
 import VNode from './vnode'
 import { normalizeChildren } from './helpers'
 import { callHook } from '../instance/lifecycle'
+import { resolveSlots } from '../instance/render'
 import { warn, isObject, hasOwn, hyphenate, validateProp } from '../util/index'
 
 const hooks = { init, prepatch, insert, destroy }
@@ -79,7 +80,13 @@ export function createComponent (
     return Ctor.options.render.call(
       null,
       parent.$createElement,
-      { props, parent, data, children: () => normalizeChildren(children) }
+      {
+        props,
+        parent,
+        data,
+        children: () => normalizeChildren(children),
+        slots: () => resolveSlots(children)
+      }
     )
   }
 
