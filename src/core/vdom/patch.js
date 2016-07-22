@@ -373,20 +373,24 @@ export function createPatchFunction (backend) {
   }
 
   function assertNodeMatch (node, vnode) {
-    if (vnode.tag) {
-      if (vnode.tag.indexOf('vue-component') === 0) {
-        return true
-      } else {
-        const childNodes = nodeOps.childNodes(node)
-        return vnode.tag === nodeOps.tagName(node).toLowerCase() && (
-          vnode.children
-            ? vnode.children.length === childNodes.length
-            : childNodes.length === 0
-        )
-      }
+    let match = true
+    if (!node) {
+      match = false
+    } else if (vnode.tag) {
+      match =
+        vnode.tag.indexOf('vue-component') === 0 ||
+        vnode.tag === nodeOps.tagName(node).toLowerCase()
     } else {
-      return _toString(vnode.text) === node.data
+      match = _toString(vnode.text) === node.data
     }
+    if (process.env.NODE_ENV !== 'production' && !match) {
+      warn(
+        'The client-side rendered virtual DOM tree is not matching ' +
+        'server-rendered content. Bailing hydration and performing ' +
+        'full client-side render.'
+      )
+    }
+    return match
   }
 
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
@@ -415,12 +419,6 @@ export function createPatchFunction (backend) {
             if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
               invokeInsertHook(vnode, insertedVnodeQueue, true)
               return oldVnode
-            } else if (process.env.NODE_ENV !== 'production') {
-              warn(
-                'The client-side rendered virtual DOM tree is not matching ' +
-                'server-rendered content. Bailing hydration and performing ' +
-                'full client-side render.'
-              )
             }
           }
           // either not server-rendered, or hydration failed.
