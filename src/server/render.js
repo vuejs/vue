@@ -84,7 +84,7 @@ export function createRenderFunction (
       if (node.tag) {
         renderElement(node, write, next, isRoot)
       } else {
-        write(node.raw ? node.text : encodeHTML(node.text), next)
+        write(node.raw ? node.text : encodeHTML(String(node.text)), next)
       }
     }
   }
