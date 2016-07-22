@@ -52,8 +52,8 @@ function genCheckboxModel (el: ASTElement, value: ?string) {
     'if(Array.isArray($$a)){' +
       `var $$v=${valueBinding},` +
           '$$i=$$a.indexOf($$v);' +
-      'if($$c){$$i<0&&$$a.push($$v)}' +
-      'else{$$i>-1&&$$a.splice($$i,1)}' +
+      `if($$c){$$i<0&&(${value}=$$a.concat($$v))}` +
+      `else{$$i>-1&&(${value}=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}` +
     `}else{${value}=$$c}`
   )
 }
