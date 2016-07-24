@@ -525,13 +525,8 @@ function resetSchedulerState() {
  */
 function flushSchedulerQueue() {
   flushing = true;
-  runSchedulerQueue(queue.sort(queueSorter));
   runSchedulerQueue(userQueue);
-  // user watchers triggered more watchers,
-  // keep flushing until it depletes
-  if (queue.length) {
-    return flushSchedulerQueue();
-  }
+  runSchedulerQueue(queue.sort(queueSorter));
   // devtool hook
   /* istanbul ignore if */
   if (devtools && config.devtools) {
@@ -582,9 +577,14 @@ function runSchedulerQueue(queue) {
 function queueWatcher(watcher) {
   var id = watcher.id;
   if (has[id] == null) {
+    // if already flushing, and all user watchers have already been run,
+    // run the new user watcher immediately.
+    if (flushing && watcher.user && !userQueue.length) {
+      return watcher.run();
+    }
     // push watcher into appropriate queue
-    var q = watcher.user ? userQueue : queue;
     has[id] = true;
+    var q = watcher.user ? userQueue : queue;
     if (!flushing) {
       q.push(watcher);
     } else {
@@ -1350,7 +1350,7 @@ function applyNS(vnode, ns) {
 // we want to recrusively retrieve the real component to be rendered
 function getRealChild(vnode) {
   var compOptions = vnode && vnode.componentOptions;
-  if (compOptions && compOptions.Ctor.options._abstract) {
+  if (compOptions && compOptions.Ctor.options.abstract) {
     return getRealChild(compOptions.propsData && compOptions.propsData.child);
   } else {
     return vnode;
@@ -1429,8 +1429,8 @@ function initLifecycle(vm) {
 
   // locate first non-abstract parent
   var parent = options.parent;
-  if (parent && !options._abstract) {
-    while (parent.$options._abstract && parent.$parent) {
+  if (parent && !options.abstract) {
+    while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent;
     }
     parent.$children.push(vm);
@@ -1557,7 +1557,7 @@ function lifecycleMixin(Vue) {
     vm._isBeingDestroyed = true;
     // remove self from parent
     var parent = vm.$parent;
-    if (parent && !parent._isBeingDestroyed && !vm.$options._abstract) {
+    if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm);
     }
     // teardown watchers
@@ -1655,9 +1655,17 @@ function createComponent(Ctor, data, parent, context, host, _children, tag) {
         });
       }
       return {
-        v: Ctor.options.render.call(null, parent.$createElement, { props: props, parent: parent, data: data, children: function children() {
+        v: Ctor.options.render.call(null, parent.$createElement, {
+          props: props,
+          parent: parent,
+          data: data,
+          children: function children() {
             return normalizeChildren(_children);
-          } })
+          },
+          slots: function slots() {
+            return resolveSlots(_children);
+          }
+        })
       };
     }();
 
@@ -1670,9 +1678,8 @@ function createComponent(Ctor, data, parent, context, host, _children, tag) {
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
   var listeners = data.on;
-  if (listeners) {
-    delete data.on;
-  }
+  // replace with listeners with .native modifier
+  data.on = data.nativeOn;
 
   // return a placeholder vnode
   var name = Ctor.options.name || tag;
@@ -1710,12 +1717,16 @@ function init(vnode, hydrating) {
 
 function prepatch(oldVnode, vnode) {
   var options = vnode.componentOptions;
-  vnode.child = oldVnode.child;
-  vnode.child._updateFromParent(options.propsData, // updated props
+  var child = vnode.child = oldVnode.child;
+  child._updateFromParent(options.propsData, // updated props
   options.listeners, // updated listeners
   vnode, // new parent vnode
   options.children // new children
   );
+  // always update abstract components.
+  if (child.$options.abstract) {
+    child.$forceUpdate();
+  }
 }
 
 function insert(vnode) {
@@ -1791,26 +1802,31 @@ function extractProps(data, Ctor) {
   var res = {};
   var attrs = data.attrs;
   var props = data.props;
+  var domProps = data.domProps;
   var staticAttrs = data.staticAttrs;
-  if (!attrs && !props && !staticAttrs) {
-    return res;
-  }
-  for (var key in propOptions) {
-    var altKey = hyphenate(key);
-    checkProp(res, attrs, key, altKey) || checkProp(res, props, key, altKey) || checkProp(res, staticAttrs, key, altKey);
+
+  if (attrs || props || domProps || staticAttrs) {
+    for (var key in propOptions) {
+      var altKey = hyphenate(key);
+      checkProp(res, props, key, altKey, true) || checkProp(res, attrs, key, altKey) || checkProp(res, domProps, key, altKey) || checkProp(res, staticAttrs, key, altKey);
+    }
   }
   return res;
 }
 
-function checkProp(res, hash, key, altKey) {
+function checkProp(res, hash, key, altKey, preserve) {
   if (hash) {
     if (hasOwn(hash, key)) {
       res[key] = hash[key];
-      delete hash[key];
+      if (!preserve) {
+        delete hash[key];
+      }
       return true;
     } else if (hasOwn(hash, altKey)) {
       res[key] = hash[altKey];
-      delete hash[altKey];
+      if (!preserve) {
+        delete hash[altKey];
+      }
       return true;
     }
   }
@@ -1929,9 +1945,7 @@ function renderMixin(Vue) {
     vm.$vnode = _parentVnode;
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
-    if (_renderChildren) {
-      resolveSlots(vm, _renderChildren);
-    }
+    vm.$slots = resolveSlots(_renderChildren);
     // render self
     var vnode = void 0;
     try {
@@ -2018,7 +2032,7 @@ function renderMixin(Vue) {
   };
 
   // apply v-bind object
-  Vue.prototype._b = function bindProps(vnode, value) {
+  Vue.prototype._b = function bindProps(vnode, value, asProp) {
     if (value) {
       if (!isObject(value)) {
         process.env.NODE_ENV !== 'production' && warn('v-bind without argument expects an Object or Array value', this);
@@ -2028,7 +2042,7 @@ function renderMixin(Vue) {
         }
         var data = vnode.data;
         for (var key in value) {
-          var hash = config.mustUseProp(key) ? data.props || (data.props = {}) : data.attrs || (data.attrs = {});
+          var hash = asProp || config.mustUseProp(key) ? data.domProps || (data.domProps = {}) : data.attrs || (data.attrs = {});
           hash[key] = value[key];
         }
       }
@@ -2041,8 +2055,11 @@ function renderMixin(Vue) {
   };
 }
 
-function resolveSlots(vm, renderChildren) {
-  var slots = vm.$slots = {};
+function resolveSlots(renderChildren) {
+  var slots = {};
+  if (!renderChildren) {
+    return slots;
+  }
   var children = normalizeChildren(renderChildren) || [];
   var defaultSlot = [];
   var name = void 0,
@@ -2065,6 +2082,7 @@ function resolveSlots(vm, renderChildren) {
   if (defaultSlot.length && !(defaultSlot.length === 1 && defaultSlot[0].text === ' ')) {
     slots.default = defaultSlot;
   }
+  return slots;
 }
 
 function initEvents(vm) {
@@ -2800,7 +2818,7 @@ function initAssetRegisters(Vue) {
 
 var KeepAlive = {
   name: 'keep-alive',
-  _abstract: true,
+  abstract: true,
   props: {
     child: Object
   },
@@ -2876,7 +2894,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   }
 });
 
-Vue.version = '2.0.0-beta.2';
+Vue.version = '2.0.0-beta.3';
 
 // attributes that should be using props for binding
 var mustUseProp = makeMap('value,selected,checked,muted');
@@ -3006,6 +3024,9 @@ function isUnknownElement(tag) {
   /* istanbul ignore if */
   if (!inBrowser) {
     return true;
+  }
+  if (isReservedTag(tag)) {
+    return false;
   }
   tag = tag.toLowerCase();
   /* istanbul ignore if */
@@ -3469,16 +3490,18 @@ function createPatchFunction(backend) {
   }
 
   function assertNodeMatch(node, vnode) {
-    if (vnode.tag) {
-      if (vnode.tag.indexOf('vue-component') === 0) {
-        return true;
-      } else {
-        var childNodes = nodeOps.childNodes(node);
-        return vnode.tag === nodeOps.tagName(node).toLowerCase() && (vnode.children ? vnode.children.length === childNodes.length : childNodes.length === 0);
-      }
+    var match = true;
+    if (!node) {
+      match = false;
+    } else if (vnode.tag) {
+      match = vnode.tag.indexOf('vue-component') === 0 || vnode.tag === nodeOps.tagName(node).toLowerCase();
     } else {
-      return _toString(vnode.text) === node.data;
+      match = _toString(vnode.text) === node.data;
     }
+    if (process.env.NODE_ENV !== 'production' && !match) {
+      warn('The client-side rendered virtual DOM tree is not matching ' + 'server-rendered content. Bailing hydration and performing ' + 'full client-side render.');
+    }
+    return match;
   }
 
   return function patch(oldVnode, vnode, hydrating, removeOnly) {
@@ -3508,8 +3531,6 @@ function createPatchFunction(backend) {
             if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
               invokeInsertHook(vnode, insertedVnodeQueue, true);
               return oldVnode;
-            } else if (process.env.NODE_ENV !== 'production') {
-              warn('The client-side rendered virtual DOM tree is not matching ' + 'server-rendered content. Bailing hydration and performing ' + 'full client-side render.');
             }
           }
           // either not server-rendered, or hydration failed.
@@ -3742,16 +3763,16 @@ var events = {
   update: updateDOMListeners
 };
 
-function updateProps(oldVnode, vnode) {
-  if (!oldVnode.data.props && !vnode.data.props) {
+function updateDOMProps(oldVnode, vnode) {
+  if (!oldVnode.data.domProps && !vnode.data.domProps) {
     return;
   }
   var key = void 0,
       cur = void 0;
   var elm = vnode.elm;
-  var oldProps = oldVnode.data.props || {};
-  var props = vnode.data.props || {};
-  var clonedProps = vnode.data.props = {};
+  var oldProps = oldVnode.data.domProps || {};
+  var props = vnode.data.domProps || {};
+  var clonedProps = vnode.data.domProps = {};
 
   for (key in oldProps) {
     if (props[key] == null) {
@@ -3775,9 +3796,9 @@ function updateProps(oldVnode, vnode) {
   }
 }
 
-var props = {
-  create: updateProps,
-  update: updateProps
+var domProps = {
+  create: updateDOMProps,
+  update: updateDOMProps
 };
 
 var prefixes = ['Webkit', 'Moz', 'ms'];
@@ -4216,7 +4237,7 @@ var transition = inBrowser ? {
   }
 } : {};
 
-var platformModules = [attrs, klass, events, props, style, transition];
+var platformModules = [attrs, klass, events, domProps, style, transition];
 
 // the directive module should be applied last, after all
 // built-in modules have been applied.
@@ -4390,7 +4411,7 @@ function extractTransitionData(comp) {
 var Transition = {
   name: 'transition',
   props: transitionProps,
-  _abstract: true,
+  abstract: true,
   render: function render(h) {
     var _this = this;
 
@@ -4443,9 +4464,12 @@ var Transition = {
     var oldRawChild = this._vnode;
     var oldChild = getRealChild(oldRawChild);
 
-    // handle transition mode
-    if (mode && oldChild && oldChild.data && oldChild.key !== child.key) {
-      var oldData = oldChild.data.transition;
+    if (oldChild && oldChild.data && oldChild.key !== child.key) {
+      // replace old child transition data with fresh one
+      // important for dynamic transitions!
+      var oldData = oldChild.data.transition = extend({}, data);
+
+      // handle transition mode
       if (mode === 'out-in') {
         // return empty node and queue update when leave finishes
         mergeVNodeHook(oldData, 'afterLeave', function () {
@@ -4472,15 +4496,15 @@ var Transition = {
   }
 };
 
-var props$1 = extend({
+var props = extend({
   tag: String,
   moveClass: String
 }, transitionProps);
 
-delete props$1.mode;
+delete props.mode;
 
 var TransitionGroup = {
-  props: props$1,
+  props: props,
 
   render: function render(h) {
     var tag = this.tag || this.$vnode.data.tag || 'span';
@@ -4509,6 +4533,7 @@ var TransitionGroup = {
       var removed = [];
       for (var _i = 0; _i < prevChildren.length; _i++) {
         var _c = prevChildren[_i];
+        _c.data.transition = transitionData;
         _c.data.pos = _c.elm.getBoundingClientRect();
         if (map[_c.key]) {
           kept.push(_c);
@@ -4537,8 +4562,16 @@ var TransitionGroup = {
     }
 
     children.forEach(function (c) {
+      /* istanbul ignore if */
+      if (c.elm._moveCb) {
+        c.elm._moveCb();
+      }
+      /* istanbul ignore if */
+      if (c.elm._enterCb) {
+        c.elm._enterCb();
+      }
       var oldPos = c.data.pos;
-      var newPos = c.elm.getBoundingClientRect();
+      var newPos = c.data.pos = c.elm.getBoundingClientRect();
       var dx = oldPos.left - newPos.left;
       var dy = oldPos.top - newPos.top;
       if (dx || dy) {
@@ -4556,17 +4589,16 @@ var TransitionGroup = {
       if (c.data.moved) {
         (function () {
           var el = c.elm;
-          /* istanbul ignore if */
-          if (el._pendingMoveCb) {
-            el._pendingMoveCb();
-          }
           var s = el.style;
           addTransitionClass(el, moveClass);
           s.transform = s.WebkitTransform = s.transitionDuration = '';
-          el.addEventListener(transitionEndEvent, el._pendingMoveCb = function cb() {
-            el.removeEventListener(transitionEndEvent, cb);
-            el._pendingMoveCb = null;
-            removeTransitionClass(el, moveClass);
+          el._moveDest = c.data.pos;
+          el.addEventListener(transitionEndEvent, el._moveCb = function cb(e) {
+            if (!e || /transform$/.test(e.propertyName)) {
+              el.removeEventListener(transitionEndEvent, cb);
+              el._moveCb = null;
+              removeTransitionClass(el, moveClass);
+            }
           });
         })();
       }

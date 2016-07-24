@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-beta.2
+ * Vue.js v2.0.0-beta.3
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -534,13 +534,8 @@
    */
   function flushSchedulerQueue() {
     flushing = true;
-    runSchedulerQueue(queue.sort(queueSorter));
     runSchedulerQueue(userQueue);
-    // user watchers triggered more watchers,
-    // keep flushing until it depletes
-    if (queue.length) {
-      return flushSchedulerQueue();
-    }
+    runSchedulerQueue(queue.sort(queueSorter));
     // devtool hook
     /* istanbul ignore if */
     if (devtools && config.devtools) {
@@ -591,9 +586,14 @@
   function queueWatcher(watcher) {
     var id = watcher.id;
     if (has[id] == null) {
+      // if already flushing, and all user watchers have already been run,
+      // run the new user watcher immediately.
+      if (flushing && watcher.user && !userQueue.length) {
+        return watcher.run();
+      }
       // push watcher into appropriate queue
-      var q = watcher.user ? userQueue : queue;
       has[id] = true;
+      var q = watcher.user ? userQueue : queue;
       if (!flushing) {
         q.push(watcher);
       } else {
@@ -1357,7 +1357,7 @@
   // we want to recrusively retrieve the real component to be rendered
   function getRealChild(vnode) {
     var compOptions = vnode && vnode.componentOptions;
-    if (compOptions && compOptions.Ctor.options._abstract) {
+    if (compOptions && compOptions.Ctor.options.abstract) {
       return getRealChild(compOptions.propsData && compOptions.propsData.child);
     } else {
       return vnode;
@@ -1436,8 +1436,8 @@
 
     // locate first non-abstract parent
     var parent = options.parent;
-    if (parent && !options._abstract) {
-      while (parent.$options._abstract && parent.$parent) {
+    if (parent && !options.abstract) {
+      while (parent.$options.abstract && parent.$parent) {
         parent = parent.$parent;
       }
       parent.$children.push(vm);
@@ -1564,7 +1564,7 @@
       vm._isBeingDestroyed = true;
       // remove self from parent
       var parent = vm.$parent;
-      if (parent && !parent._isBeingDestroyed && !vm.$options._abstract) {
+      if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
         remove(parent.$children, vm);
       }
       // teardown watchers
@@ -1662,9 +1662,17 @@
           });
         }
         return {
-          v: Ctor.options.render.call(null, parent.$createElement, { props: props, parent: parent, data: data, children: function children() {
+          v: Ctor.options.render.call(null, parent.$createElement, {
+            props: props,
+            parent: parent,
+            data: data,
+            children: function children() {
               return normalizeChildren(_children);
-            } })
+            },
+            slots: function slots() {
+              return resolveSlots(_children);
+            }
+          })
         };
       }();
 
@@ -1677,9 +1685,8 @@
     // extract listeners, since these needs to be treated as
     // child component listeners instead of DOM listeners
     var listeners = data.on;
-    if (listeners) {
-      delete data.on;
-    }
+    // replace with listeners with .native modifier
+    data.on = data.nativeOn;
 
     // return a placeholder vnode
     var name = Ctor.options.name || tag;
@@ -1717,12 +1724,16 @@
 
   function prepatch(oldVnode, vnode) {
     var options = vnode.componentOptions;
-    vnode.child = oldVnode.child;
-    vnode.child._updateFromParent(options.propsData, // updated props
+    var child = vnode.child = oldVnode.child;
+    child._updateFromParent(options.propsData, // updated props
     options.listeners, // updated listeners
     vnode, // new parent vnode
     options.children // new children
     );
+    // always update abstract components.
+    if (child.$options.abstract) {
+      child.$forceUpdate();
+    }
   }
 
   function insert(vnode) {
@@ -1798,26 +1809,31 @@
     var res = {};
     var attrs = data.attrs;
     var props = data.props;
+    var domProps = data.domProps;
     var staticAttrs = data.staticAttrs;
-    if (!attrs && !props && !staticAttrs) {
-      return res;
-    }
-    for (var key in propOptions) {
-      var altKey = hyphenate(key);
-      checkProp(res, attrs, key, altKey) || checkProp(res, props, key, altKey) || checkProp(res, staticAttrs, key, altKey);
+
+    if (attrs || props || domProps || staticAttrs) {
+      for (var key in propOptions) {
+        var altKey = hyphenate(key);
+        checkProp(res, props, key, altKey, true) || checkProp(res, attrs, key, altKey) || checkProp(res, domProps, key, altKey) || checkProp(res, staticAttrs, key, altKey);
+      }
     }
     return res;
   }
 
-  function checkProp(res, hash, key, altKey) {
+  function checkProp(res, hash, key, altKey, preserve) {
     if (hash) {
       if (hasOwn(hash, key)) {
         res[key] = hash[key];
-        delete hash[key];
+        if (!preserve) {
+          delete hash[key];
+        }
         return true;
       } else if (hasOwn(hash, altKey)) {
         res[key] = hash[altKey];
-        delete hash[altKey];
+        if (!preserve) {
+          delete hash[altKey];
+        }
         return true;
       }
     }
@@ -1936,9 +1952,7 @@
       vm.$vnode = _parentVnode;
       // resolve slots. becaues slots are rendered in parent scope,
       // we set the activeInstance to parent.
-      if (_renderChildren) {
-        resolveSlots(vm, _renderChildren);
-      }
+      vm.$slots = resolveSlots(_renderChildren);
       // render self
       var vnode = void 0;
       try {
@@ -2025,7 +2039,7 @@
     };
 
     // apply v-bind object
-    Vue.prototype._b = function bindProps(vnode, value) {
+    Vue.prototype._b = function bindProps(vnode, value, asProp) {
       if (value) {
         if (!isObject(value)) {
           "development" !== 'production' && warn('v-bind without argument expects an Object or Array value', this);
@@ -2035,7 +2049,7 @@
           }
           var data = vnode.data;
           for (var key in value) {
-            var hash = config.mustUseProp(key) ? data.props || (data.props = {}) : data.attrs || (data.attrs = {});
+            var hash = asProp || config.mustUseProp(key) ? data.domProps || (data.domProps = {}) : data.attrs || (data.attrs = {});
             hash[key] = value[key];
           }
         }
@@ -2048,8 +2062,11 @@
     };
   }
 
-  function resolveSlots(vm, renderChildren) {
-    var slots = vm.$slots = {};
+  function resolveSlots(renderChildren) {
+    var slots = {};
+    if (!renderChildren) {
+      return slots;
+    }
     var children = normalizeChildren(renderChildren) || [];
     var defaultSlot = [];
     var name = void 0,
@@ -2072,6 +2089,7 @@
     if (defaultSlot.length && !(defaultSlot.length === 1 && defaultSlot[0].text === ' ')) {
       slots.default = defaultSlot;
     }
+    return slots;
   }
 
   function initEvents(vm) {
@@ -2805,7 +2823,7 @@
 
   var KeepAlive = {
     name: 'keep-alive',
-    _abstract: true,
+    abstract: true,
     props: {
       child: Object
     },
@@ -2881,7 +2899,7 @@
     }
   });
 
-  Vue.version = '2.0.0-beta.2';
+  Vue.version = '2.0.0-beta.3';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
@@ -3011,6 +3029,9 @@
     /* istanbul ignore if */
     if (!inBrowser) {
       return true;
+    }
+    if (isReservedTag(tag)) {
+      return false;
     }
     tag = tag.toLowerCase();
     /* istanbul ignore if */
@@ -3474,16 +3495,18 @@ var nodeOps = Object.freeze({
     }
 
     function assertNodeMatch(node, vnode) {
-      if (vnode.tag) {
-        if (vnode.tag.indexOf('vue-component') === 0) {
-          return true;
-        } else {
-          var childNodes = nodeOps.childNodes(node);
-          return vnode.tag === nodeOps.tagName(node).toLowerCase() && (vnode.children ? vnode.children.length === childNodes.length : childNodes.length === 0);
-        }
+      var match = true;
+      if (!node) {
+        match = false;
+      } else if (vnode.tag) {
+        match = vnode.tag.indexOf('vue-component') === 0 || vnode.tag === nodeOps.tagName(node).toLowerCase();
       } else {
-        return _toString(vnode.text) === node.data;
+        match = _toString(vnode.text) === node.data;
       }
+      if ("development" !== 'production' && !match) {
+        warn('The client-side rendered virtual DOM tree is not matching ' + 'server-rendered content. Bailing hydration and performing ' + 'full client-side render.');
+      }
+      return match;
     }
 
     return function patch(oldVnode, vnode, hydrating, removeOnly) {
@@ -3513,8 +3536,6 @@ var nodeOps = Object.freeze({
               if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
                 invokeInsertHook(vnode, insertedVnodeQueue, true);
                 return oldVnode;
-              } else if ("development" !== 'production') {
-                warn('The client-side rendered virtual DOM tree is not matching ' + 'server-rendered content. Bailing hydration and performing ' + 'full client-side render.');
               }
             }
             // either not server-rendered, or hydration failed.
@@ -3747,16 +3768,16 @@ var nodeOps = Object.freeze({
     update: updateDOMListeners
   };
 
-  function updateProps(oldVnode, vnode) {
-    if (!oldVnode.data.props && !vnode.data.props) {
+  function updateDOMProps(oldVnode, vnode) {
+    if (!oldVnode.data.domProps && !vnode.data.domProps) {
       return;
     }
     var key = void 0,
         cur = void 0;
     var elm = vnode.elm;
-    var oldProps = oldVnode.data.props || {};
-    var props = vnode.data.props || {};
-    var clonedProps = vnode.data.props = {};
+    var oldProps = oldVnode.data.domProps || {};
+    var props = vnode.data.domProps || {};
+    var clonedProps = vnode.data.domProps = {};
 
     for (key in oldProps) {
       if (props[key] == null) {
@@ -3780,9 +3801,9 @@ var nodeOps = Object.freeze({
     }
   }
 
-  var props = {
-    create: updateProps,
-    update: updateProps
+  var domProps = {
+    create: updateDOMProps,
+    update: updateDOMProps
   };
 
   var prefixes = ['Webkit', 'Moz', 'ms'];
@@ -4221,7 +4242,7 @@ var nodeOps = Object.freeze({
     }
   } : {};
 
-  var platformModules = [attrs, klass, events, props, style, transition];
+  var platformModules = [attrs, klass, events, domProps, style, transition];
 
   // the directive module should be applied last, after all
   // built-in modules have been applied.
@@ -4395,7 +4416,7 @@ var nodeOps = Object.freeze({
   var Transition = {
     name: 'transition',
     props: transitionProps,
-    _abstract: true,
+    abstract: true,
     render: function render(h) {
       var _this = this;
 
@@ -4448,9 +4469,12 @@ var nodeOps = Object.freeze({
       var oldRawChild = this._vnode;
       var oldChild = getRealChild(oldRawChild);
 
-      // handle transition mode
-      if (mode && oldChild && oldChild.data && oldChild.key !== child.key) {
-        var oldData = oldChild.data.transition;
+      if (oldChild && oldChild.data && oldChild.key !== child.key) {
+        // replace old child transition data with fresh one
+        // important for dynamic transitions!
+        var oldData = oldChild.data.transition = extend({}, data);
+
+        // handle transition mode
         if (mode === 'out-in') {
           // return empty node and queue update when leave finishes
           mergeVNodeHook(oldData, 'afterLeave', function () {
@@ -4477,15 +4501,15 @@ var nodeOps = Object.freeze({
     }
   };
 
-  var props$1 = extend({
+  var props = extend({
     tag: String,
     moveClass: String
   }, transitionProps);
 
-  delete props$1.mode;
+  delete props.mode;
 
   var TransitionGroup = {
-    props: props$1,
+    props: props,
 
     render: function render(h) {
       var tag = this.tag || this.$vnode.data.tag || 'span';
@@ -4514,6 +4538,7 @@ var nodeOps = Object.freeze({
         var removed = [];
         for (var _i = 0; _i < prevChildren.length; _i++) {
           var _c = prevChildren[_i];
+          _c.data.transition = transitionData;
           _c.data.pos = _c.elm.getBoundingClientRect();
           if (map[_c.key]) {
             kept.push(_c);
@@ -4542,8 +4567,16 @@ var nodeOps = Object.freeze({
       }
 
       children.forEach(function (c) {
+        /* istanbul ignore if */
+        if (c.elm._moveCb) {
+          c.elm._moveCb();
+        }
+        /* istanbul ignore if */
+        if (c.elm._enterCb) {
+          c.elm._enterCb();
+        }
         var oldPos = c.data.pos;
-        var newPos = c.elm.getBoundingClientRect();
+        var newPos = c.data.pos = c.elm.getBoundingClientRect();
         var dx = oldPos.left - newPos.left;
         var dy = oldPos.top - newPos.top;
         if (dx || dy) {
@@ -4561,17 +4594,16 @@ var nodeOps = Object.freeze({
         if (c.data.moved) {
           (function () {
             var el = c.elm;
-            /* istanbul ignore if */
-            if (el._pendingMoveCb) {
-              el._pendingMoveCb();
-            }
             var s = el.style;
             addTransitionClass(el, moveClass);
             s.transform = s.WebkitTransform = s.transitionDuration = '';
-            el.addEventListener(transitionEndEvent, el._pendingMoveCb = function cb() {
-              el.removeEventListener(transitionEndEvent, cb);
-              el._pendingMoveCb = null;
-              removeTransitionClass(el, moveClass);
+            el._moveDest = c.data.pos;
+            el.addEventListener(transitionEndEvent, el._moveCb = function cb(e) {
+              if (!e || /transform$/.test(e.propertyName)) {
+                el.removeEventListener(transitionEndEvent, cb);
+                el._moveCb = null;
+                removeTransitionClass(el, moveClass);
+              }
             });
           })();
         }
@@ -5063,11 +5095,17 @@ var nodeOps = Object.freeze({
   }
 
   function addHandler(el, name, value, modifiers) {
-    var events = el.events || (el.events = {});
     // check capture modifier
     if (modifiers && modifiers.capture) {
       delete modifiers.capture;
       name = '!' + name; // mark the event as captured
+    }
+    var events = void 0;
+    if (modifiers && modifiers.native) {
+      delete modifiers.native;
+      events = el.nativeEvents || (el.nativeEvents = {});
+    } else {
+      events = el.events || (el.events = {});
     }
     var newHandler = { value: value, modifiers: modifiers };
     var handlers = events[name];
@@ -5121,9 +5159,7 @@ var nodeOps = Object.freeze({
   var warn$1 = void 0;
   var platformGetTagNamespace = void 0;
   var platformMustUseProp = void 0;
-  var preTransforms = void 0;
   var transforms = void 0;
-  var postTransforms = void 0;
   var delimiters = void 0;
 
   /**
@@ -5133,9 +5169,7 @@ var nodeOps = Object.freeze({
     warn$1 = options.warn || baseWarn;
     platformGetTagNamespace = options.getTagNamespace || no;
     platformMustUseProp = options.mustUseProp || no;
-    preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
     transforms = pluckModuleFunction(options.modules, 'transformNode');
-    postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
     delimiters = options.delimiters;
     var stack = [];
     var preserveWhitespace = options.preserveWhitespace !== false;
@@ -5174,11 +5208,6 @@ var nodeOps = Object.freeze({
           "development" !== 'production' && warn$1('Templates should only be responsbile for mapping the state to the ' + 'UI. Avoid placing tags with side-effects in your templates, such as ' + ('<' + tag + '>.'));
         }
 
-        // apply pre-transforms
-        for (var i = 0; i < preTransforms.length; i++) {
-          preTransforms[i](element, options);
-        }
-
         if (!inPre) {
           processPre(element);
           if (element.pre) {
@@ -5200,8 +5229,8 @@ var nodeOps = Object.freeze({
           processRef(element);
           processSlot(element);
           processComponent(element);
-          for (var _i = 0; _i < transforms.length; _i++) {
-            transforms[_i](element, options);
+          for (var i = 0; i < transforms.length; i++) {
+            transforms[i](element, options);
           }
           processAttrs(element);
         }
@@ -5233,10 +5262,6 @@ var nodeOps = Object.freeze({
         if (!unary) {
           currentParent = element;
           stack.push(element);
-        }
-        // apply post-transforms
-        for (var _i2 = 0; _i2 < postTransforms.length; _i2++) {
-          postTransforms[_i2](element, options);
         }
       },
       end: function end() {
@@ -5409,7 +5434,8 @@ var nodeOps = Object.freeze({
         name = void 0,
         value = void 0,
         arg = void 0,
-        modifiers = void 0;
+        modifiers = void 0,
+        isProp = void 0;
     for (i = 0, l = list.length; i < l; i++) {
       name = list[i].name;
       value = list[i].value;
@@ -5422,7 +5448,12 @@ var nodeOps = Object.freeze({
         if (bindRE.test(name)) {
           // v-bind
           name = name.replace(bindRE, '');
-          if (platformMustUseProp(name)) {
+          if (modifiers && modifiers.prop) {
+            isProp = true;
+            name = camelize(name);
+            if (name === 'innerHtml') name = 'innerHTML';
+          }
+          if (isProp || platformMustUseProp(name)) {
             addProp(el, name, value);
           } else {
             addAttr(el, name, value);
@@ -5603,8 +5634,8 @@ var nodeOps = Object.freeze({
     self: 'if($event.target !== $event.currentTarget)return;'
   };
 
-  function genHandlers(events) {
-    var res = 'on:{';
+  function genHandlers(events, native) {
+    var res = native ? 'nativeOn:{' : 'on:{';
     for (var name in events) {
       res += '"' + name + '":' + genHandler(events[name]) + ',';
     }
@@ -5642,7 +5673,7 @@ var nodeOps = Object.freeze({
   }
 
   function bind$1(el, dir) {
-    addHook(el, 'construct', '_b(n1,' + dir.value + ')');
+    addHook(el, 'construct', '_b(n1,' + dir.value + (dir.modifiers && dir.modifiers.prop ? ',true' : '') + ')');
   }
 
   var baseDirectives = {
@@ -5776,10 +5807,6 @@ var nodeOps = Object.freeze({
     if (el.attrsMap['v-show']) {
       data += 'show:true,';
     }
-    // props
-    if (el.props) {
-      data += 'props:{' + genProps(el.props) + '},';
-    }
     // attributes
     if (el.attrs) {
       data += 'attrs:{' + genProps(el.attrs) + '},';
@@ -5788,6 +5815,10 @@ var nodeOps = Object.freeze({
     if (el.staticAttrs) {
       data += 'staticAttrs:{' + genProps(el.staticAttrs) + '},';
     }
+    // DOM props
+    if (el.props) {
+      data += 'domProps:{' + genProps(el.props) + '},';
+    }
     // hooks
     if (el.hooks) {
       data += 'hook:{' + genHooks(el.hooks) + '},';
@@ -5795,6 +5826,9 @@ var nodeOps = Object.freeze({
     // event handlers
     if (el.events) {
       data += genHandlers(el.events) + ',';
+    }
+    if (el.nativeEvents) {
+      data += '' + genHandlers(el.nativeEvents, true);
     }
     // inline-template
     if (el.inlineTemplate) {
@@ -6050,7 +6084,7 @@ var nodeOps = Object.freeze({
     var trueValueBinding = getBindingAttr(el, 'true-value') || 'true';
     var falseValueBinding = getBindingAttr(el, 'false-value') || 'false';
     addProp(el, 'checked', 'Array.isArray(' + value + ')' + ('?(' + value + ').indexOf(' + valueBinding + ')>-1') + (':(' + value + ')===(' + trueValueBinding + ')'));
-    addHandler(el, 'change', 'var $$a=' + value + ',' + '$$el=$event.target,' + ('$$c=$$el.checked?(' + trueValueBinding + '):(' + falseValueBinding + ');') + 'if(Array.isArray($$a)){' + ('var $$v=' + valueBinding + ',') + '$$i=$$a.indexOf($$v);' + 'if($$c){$$i<0&&$$a.push($$v)}' + 'else{$$i>-1&&$$a.splice($$i,1)}' + ('}else{' + value + '=$$c}'));
+    addHandler(el, 'change', 'var $$a=' + value + ',' + '$$el=$event.target,' + ('$$c=$$el.checked?(' + trueValueBinding + '):(' + falseValueBinding + ');') + 'if(Array.isArray($$a)){' + ('var $$v=' + valueBinding + ',') + '$$i=$$a.indexOf($$v);' + ('if($$c){$$i<0&&(' + value + '=$$a.concat($$v))}') + ('else{$$i>-1&&(' + value + '=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}') + ('}else{' + value + '=$$c}'));
   }
 
   function genRadioModel(el, value) {

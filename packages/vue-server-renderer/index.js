@@ -703,13 +703,8 @@ function resetSchedulerState() {
  */
 function flushSchedulerQueue() {
   flushing = true;
-  runSchedulerQueue(queue.sort(queueSorter));
   runSchedulerQueue(userQueue);
-  // user watchers triggered more watchers,
-  // keep flushing until it depletes
-  if (queue.length) {
-    return flushSchedulerQueue();
-  }
+  runSchedulerQueue(queue.sort(queueSorter));
   // devtool hook
   /* istanbul ignore if */
   if (devtools && config.devtools) {
@@ -760,9 +755,14 @@ function runSchedulerQueue(queue) {
 function queueWatcher(watcher) {
   var id = watcher.id;
   if (has[id] == null) {
+    // if already flushing, and all user watchers have already been run,
+    // run the new user watcher immediately.
+    if (flushing && watcher.user && !userQueue.length) {
+      return watcher.run();
+    }
     // push watcher into appropriate queue
-    var q = watcher.user ? userQueue : queue;
     has[id] = true;
+    var q = watcher.user ? userQueue : queue;
     if (!flushing) {
       q.push(watcher);
     } else {
@@ -1565,8 +1565,8 @@ function initLifecycle(vm) {
 
   // locate first non-abstract parent
   var parent = options.parent;
-  if (parent && !options._abstract) {
-    while (parent.$options._abstract && parent.$parent) {
+  if (parent && !options.abstract) {
+    while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent;
     }
     parent.$children.push(vm);
@@ -1693,7 +1693,7 @@ function lifecycleMixin(Vue) {
     vm._isBeingDestroyed = true;
     // remove self from parent
     var parent = vm.$parent;
-    if (parent && !parent._isBeingDestroyed && !vm.$options._abstract) {
+    if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm);
     }
     // teardown watchers
@@ -1791,9 +1791,17 @@ function createComponent(Ctor, data, parent, context, host, _children, tag) {
         });
       }
       return {
-        v: Ctor.options.render.call(null, parent.$createElement, { props: props, parent: parent, data: data, children: function children() {
+        v: Ctor.options.render.call(null, parent.$createElement, {
+          props: props,
+          parent: parent,
+          data: data,
+          children: function children() {
             return normalizeChildren(_children);
-          } })
+          },
+          slots: function slots() {
+            return resolveSlots(_children);
+          }
+        })
       };
     }();
 
@@ -1806,9 +1814,8 @@ function createComponent(Ctor, data, parent, context, host, _children, tag) {
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
   var listeners = data.on;
-  if (listeners) {
-    delete data.on;
-  }
+  // replace with listeners with .native modifier
+  data.on = data.nativeOn;
 
   // return a placeholder vnode
   var name = Ctor.options.name || tag;
@@ -1846,12 +1853,16 @@ function init(vnode, hydrating) {
 
 function prepatch(oldVnode, vnode) {
   var options = vnode.componentOptions;
-  vnode.child = oldVnode.child;
-  vnode.child._updateFromParent(options.propsData, // updated props
+  var child = vnode.child = oldVnode.child;
+  child._updateFromParent(options.propsData, // updated props
   options.listeners, // updated listeners
   vnode, // new parent vnode
   options.children // new children
   );
+  // always update abstract components.
+  if (child.$options.abstract) {
+    child.$forceUpdate();
+  }
 }
 
 function insert(vnode) {
@@ -1927,26 +1938,31 @@ function extractProps(data, Ctor) {
   var res = {};
   var attrs = data.attrs;
   var props = data.props;
+  var domProps = data.domProps;
   var staticAttrs = data.staticAttrs;
-  if (!attrs && !props && !staticAttrs) {
-    return res;
-  }
-  for (var key in propOptions) {
-    var altKey = hyphenate(key);
-    checkProp(res, attrs, key, altKey) || checkProp(res, props, key, altKey) || checkProp(res, staticAttrs, key, altKey);
+
+  if (attrs || props || domProps || staticAttrs) {
+    for (var key in propOptions) {
+      var altKey = hyphenate(key);
+      checkProp(res, props, key, altKey, true) || checkProp(res, attrs, key, altKey) || checkProp(res, domProps, key, altKey) || checkProp(res, staticAttrs, key, altKey);
+    }
   }
   return res;
 }
 
-function checkProp(res, hash, key, altKey) {
+function checkProp(res, hash, key, altKey, preserve) {
   if (hash) {
     if (hasOwn(hash, key)) {
       res[key] = hash[key];
-      delete hash[key];
+      if (!preserve) {
+        delete hash[key];
+      }
       return true;
     } else if (hasOwn(hash, altKey)) {
       res[key] = hash[altKey];
-      delete hash[altKey];
+      if (!preserve) {
+        delete hash[altKey];
+      }
       return true;
     }
   }
@@ -2065,9 +2081,7 @@ function renderMixin(Vue) {
     vm.$vnode = _parentVnode;
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
-    if (_renderChildren) {
-      resolveSlots(vm, _renderChildren);
-    }
+    vm.$slots = resolveSlots(_renderChildren);
     // render self
     var vnode = void 0;
     try {
@@ -2154,7 +2168,7 @@ function renderMixin(Vue) {
   };
 
   // apply v-bind object
-  Vue.prototype._b = function bindProps(vnode, value) {
+  Vue.prototype._b = function bindProps(vnode, value, asProp) {
     if (value) {
       if (!isObject(value)) {
         process.env.NODE_ENV !== 'production' && warn('v-bind without argument expects an Object or Array value', this);
@@ -2164,7 +2178,7 @@ function renderMixin(Vue) {
         }
         var data = vnode.data;
         for (var key in value) {
-          var hash = config.mustUseProp(key) ? data.props || (data.props = {}) : data.attrs || (data.attrs = {});
+          var hash = asProp || config.mustUseProp(key) ? data.domProps || (data.domProps = {}) : data.attrs || (data.attrs = {});
           hash[key] = value[key];
         }
       }
@@ -2177,8 +2191,11 @@ function renderMixin(Vue) {
   };
 }
 
-function resolveSlots(vm, renderChildren) {
-  var slots = vm.$slots = {};
+function resolveSlots(renderChildren) {
+  var slots = {};
+  if (!renderChildren) {
+    return slots;
+  }
   var children = normalizeChildren(renderChildren) || [];
   var defaultSlot = [];
   var name = void 0,
@@ -2201,6 +2218,7 @@ function resolveSlots(vm, renderChildren) {
   if (defaultSlot.length && !(defaultSlot.length === 1 && defaultSlot[0].text === ' ')) {
     slots.default = defaultSlot;
   }
+  return slots;
 }
 
 function initEvents(vm) {
@@ -3300,11 +3318,17 @@ function addHook(el, name, code) {
 }
 
 function addHandler(el, name, value, modifiers) {
-  var events = el.events || (el.events = {});
   // check capture modifier
   if (modifiers && modifiers.capture) {
     delete modifiers.capture;
     name = '!' + name; // mark the event as captured
+  }
+  var events = void 0;
+  if (modifiers && modifiers.native) {
+    delete modifiers.native;
+    events = el.nativeEvents || (el.nativeEvents = {});
+  } else {
+    events = el.events || (el.events = {});
   }
   var newHandler = { value: value, modifiers: modifiers };
   var handlers = events[name];
@@ -3358,9 +3382,7 @@ var decodeHTMLCached = cached(entities.decodeHTML);
 var warn$1 = void 0;
 var platformGetTagNamespace = void 0;
 var platformMustUseProp = void 0;
-var preTransforms = void 0;
 var transforms = void 0;
-var postTransforms = void 0;
 var delimiters = void 0;
 
 /**
@@ -3370,9 +3392,7 @@ function parse(template, options) {
   warn$1 = options.warn || baseWarn;
   platformGetTagNamespace = options.getTagNamespace || no;
   platformMustUseProp = options.mustUseProp || no;
-  preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
   transforms = pluckModuleFunction(options.modules, 'transformNode');
-  postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
   delimiters = options.delimiters;
   var stack = [];
   var preserveWhitespace = options.preserveWhitespace !== false;
@@ -3411,11 +3431,6 @@ function parse(template, options) {
         process.env.NODE_ENV !== 'production' && warn$1('Templates should only be responsbile for mapping the state to the ' + 'UI. Avoid placing tags with side-effects in your templates, such as ' + ('<' + tag + '>.'));
       }
 
-      // apply pre-transforms
-      for (var i = 0; i < preTransforms.length; i++) {
-        preTransforms[i](element, options);
-      }
-
       if (!inPre) {
         processPre(element);
         if (element.pre) {
@@ -3437,8 +3452,8 @@ function parse(template, options) {
         processRef(element);
         processSlot(element);
         processComponent(element);
-        for (var _i = 0; _i < transforms.length; _i++) {
-          transforms[_i](element, options);
+        for (var i = 0; i < transforms.length; i++) {
+          transforms[i](element, options);
         }
         processAttrs(element);
       }
@@ -3470,10 +3485,6 @@ function parse(template, options) {
       if (!unary) {
         currentParent = element;
         stack.push(element);
-      }
-      // apply post-transforms
-      for (var _i2 = 0; _i2 < postTransforms.length; _i2++) {
-        postTransforms[_i2](element, options);
       }
     },
     end: function end() {
@@ -3646,7 +3657,8 @@ function processAttrs(el) {
       name = void 0,
       value = void 0,
       arg = void 0,
-      modifiers = void 0;
+      modifiers = void 0,
+      isProp = void 0;
   for (i = 0, l = list.length; i < l; i++) {
     name = list[i].name;
     value = list[i].value;
@@ -3659,7 +3671,12 @@ function processAttrs(el) {
       if (bindRE.test(name)) {
         // v-bind
         name = name.replace(bindRE, '');
-        if (platformMustUseProp(name)) {
+        if (modifiers && modifiers.prop) {
+          isProp = true;
+          name = camelize(name);
+          if (name === 'innerHtml') name = 'innerHTML';
+        }
+        if (isProp || platformMustUseProp(name)) {
           addProp(el, name, value);
         } else {
           addAttr(el, name, value);
@@ -3840,8 +3857,8 @@ var modifierCode = {
   self: 'if($event.target !== $event.currentTarget)return;'
 };
 
-function genHandlers(events) {
-  var res = 'on:{';
+function genHandlers(events, native) {
+  var res = native ? 'nativeOn:{' : 'on:{';
   for (var name in events) {
     res += '"' + name + '":' + genHandler(events[name]) + ',';
   }
@@ -3879,7 +3896,7 @@ function genKeyFilter(key) {
 }
 
 function bind$1(el, dir) {
-  addHook(el, 'construct', '_b(n1,' + dir.value + ')');
+  addHook(el, 'construct', '_b(n1,' + dir.value + (dir.modifiers && dir.modifiers.prop ? ',true' : '') + ')');
 }
 
 var baseDirectives = {
@@ -4013,10 +4030,6 @@ function genData(el) {
   if (el.attrsMap['v-show']) {
     data += 'show:true,';
   }
-  // props
-  if (el.props) {
-    data += 'props:{' + genProps(el.props) + '},';
-  }
   // attributes
   if (el.attrs) {
     data += 'attrs:{' + genProps(el.attrs) + '},';
@@ -4025,6 +4038,10 @@ function genData(el) {
   if (el.staticAttrs) {
     data += 'staticAttrs:{' + genProps(el.staticAttrs) + '},';
   }
+  // DOM props
+  if (el.props) {
+    data += 'domProps:{' + genProps(el.props) + '},';
+  }
   // hooks
   if (el.hooks) {
     data += 'hook:{' + genHooks(el.hooks) + '},';
@@ -4032,6 +4049,9 @@ function genData(el) {
   // event handlers
   if (el.events) {
     data += genHandlers(el.events) + ',';
+  }
+  if (el.nativeEvents) {
+    data += '' + genHandlers(el.nativeEvents, true);
   }
   // inline-template
   if (el.inlineTemplate) {
@@ -4287,7 +4307,7 @@ function genCheckboxModel(el, value) {
   var trueValueBinding = getBindingAttr(el, 'true-value') || 'true';
   var falseValueBinding = getBindingAttr(el, 'false-value') || 'false';
   addProp(el, 'checked', 'Array.isArray(' + value + ')' + ('?(' + value + ').indexOf(' + valueBinding + ')>-1') + (':(' + value + ')===(' + trueValueBinding + ')'));
-  addHandler(el, 'change', 'var $$a=' + value + ',' + '$$el=$event.target,' + ('$$c=$$el.checked?(' + trueValueBinding + '):(' + falseValueBinding + ');') + 'if(Array.isArray($$a)){' + ('var $$v=' + valueBinding + ',') + '$$i=$$a.indexOf($$v);' + 'if($$c){$$i<0&&$$a.push($$v)}' + 'else{$$i>-1&&$$a.splice($$i,1)}' + ('}else{' + value + '=$$c}'));
+  addHandler(el, 'change', 'var $$a=' + value + ',' + '$$el=$event.target,' + ('$$c=$$el.checked?(' + trueValueBinding + '):(' + falseValueBinding + ');') + 'if(Array.isArray($$a)){' + ('var $$v=' + valueBinding + ',') + '$$i=$$a.indexOf($$v);' + ('if($$c){$$i<0&&(' + value + '=$$a.concat($$v))}') + ('else{$$i>-1&&(' + value + '=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}') + ('}else{' + value + '=$$c}'));
 }
 
 function genRadioModel(el, value) {
@@ -4505,7 +4525,7 @@ function createRenderFunction(modules, directives, isUnaryTag, cache) {
       if (node.tag) {
         renderElement(node, write, next, isRoot);
       } else {
-        write(node.raw ? node.text : entities.encodeHTML(node.text), next);
+        write(node.raw ? node.text : entities.encodeHTML(String(node.text)), next);
       }
     }
   }
@@ -4756,8 +4776,8 @@ function renderAttr(key, value) {
   return '';
 }
 
-function props (node) {
-  var props = node.data.props;
+function domProps (node) {
+  var props = node.data.domProps;
   var res = '';
   if (props) {
     for (var key in props) {
@@ -4805,7 +4825,7 @@ function renderStyle(node) {
   }
 }
 
-var modules$1 = [renderAttrs, props, renderClass, renderStyle];
+var modules$1 = [renderAttrs, domProps, renderClass, renderStyle];
 
 function show(node, dir) {
   if (!dir.value) {
