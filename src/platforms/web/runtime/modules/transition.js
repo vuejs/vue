@@ -46,7 +46,7 @@ export function enter (vnode: VNodeWithData) {
     appearCancelled
   } = data
 
-  const isAppear = !vnode.context.$root._isMounted
+  const isAppear = !vnode.context._isMounted
   if (isAppear && !appear && appear !== '') {
     return
   }
