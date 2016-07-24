@@ -35,9 +35,10 @@ export function validateProp (
     value = getPropDefaultValue(vm, prop, key)
     // since the default value is a fresh copy,
     // make sure to observe it.
+    const prevShouldConvert = observerState.shouldConvert
     observerState.shouldConvert = true
     observe(value)
-    observerState.shouldConvert = false
+    observerState.shouldConvert = prevShouldConvert
   }
   if (process.env.NODE_ENV !== 'production') {
     assertProp(prop, key, value, vm, absent)
