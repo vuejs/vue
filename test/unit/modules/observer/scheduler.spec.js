@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import config from 'core/config'
 import { queueWatcher } from 'core/observer/scheduler'
 
@@ -46,55 +47,59 @@ describe('Scheduler', () => {
   })
 
   it('call user watchers before component re-render', done => {
-    const vals = []
-    function run () {
-      vals.push(this.id)
-    }
-    queueWatcher({
-      id: 2,
-      user: true,
-      run () {
-        run.call(this)
-        // user watcher triggering another directive update!
-        queueWatcher({
-          id: 3,
-          run: run
-        })
+    const calls = []
+    const vm = new Vue({
+      data: {
+        a: 1
+      },
+      template: '<div>{{ a }}</div>',
+      watch: {
+        a () { calls.push(1) }
+      },
+      beforeUpdate () {
+        calls.push(2)
       }
-    })
-    queueWatcher({
-      id: 1,
-      run: run
-    })
+    }).$mount()
+    vm.a = 2
     waitForUpdate(() => {
-      expect(vals).toEqual([2, 1, 3])
+      expect(calls).toEqual([1, 2])
     }).then(done)
   })
 
   it('call user watcher triggered by component re-render immediately', done => {
     // this happens when a component re-render updates the props of a child
-    const vals = []
-    queueWatcher({
-      id: 1,
-      run () {
-        vals.push(1)
-        queueWatcher({
-          id: 3,
-          user: true,
-          run () {
-            vals.push(3)
+    const calls = []
+    const vm = new Vue({
+      data: {
+        a: 1
+      },
+      watch: {
+        a () {
+          calls.push(1)
+        }
+      },
+      beforeUpdate () {
+        calls.push(2)
+      },
+      template: '<div><test :a="a"></test></div>',
+      components: {
+        test: {
+          props: ['a'],
+          template: '<div>{{ a }}</div>',
+          watch: {
+            a () {
+              calls.push(3)
+            }
+          },
+          beforeUpdate () {
+            calls.push(4)
           }
-        })
+        }
       }
-    })
-    queueWatcher({
-      id: 2,
-      run () {
-        vals.push(2)
-      }
-    })
+    }).$mount()
+    vm.a = 2
     waitForUpdate(() => {
-      expect(vals).toEqual([1, 3, 2])
+      expect(calls).toEqual([1, 2, 3, 4])
     }).then(done)
   })
 
