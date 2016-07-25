@@ -2,8 +2,8 @@
 module.exports = {
   'src_folders': ['test/e2e/specs'],
   'output_folder': 'test/e2e/reports',
-  'custom_commands_path': ['test/e2e/custom-commands'],
-  'custom_assertions_path': ['test/e2e/custom-assertions'],
+  'custom_commands_path': ['node_modules/nightwatch-helpers/commands'],
+  'custom_assertions_path': ['node_modules/nightwatch-helpers/assertions'],
 
   'selenium': {
     'start_process': true,
