@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-beta.3
+ * Vue.js v2.0.0-beta.4
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -503,13 +503,7 @@
     Dep.target = targetStack.pop();
   }
 
-  // We have two separate queues: one for internal component re-render updates
-  // and one for user watcher registered via $watch(). We want to guarantee
-  // re-render updates to be called before user watchers so that when user
-  // watchers are triggered, the DOM would already be in updated state.
-
   var queue = [];
-  var userQueue = [];
   var has = {};
   var circular = {};
   var waiting = false;
@@ -521,7 +515,6 @@
    */
   function resetSchedulerState() {
     queue.length = 0;
-    userQueue.length = 0;
     has = {};
     if ("development" !== 'production') {
       circular = {};
@@ -534,31 +527,19 @@
    */
   function flushSchedulerQueue() {
     flushing = true;
-    runSchedulerQueue(userQueue);
-    runSchedulerQueue(queue.sort(queueSorter));
-    // devtool hook
-    /* istanbul ignore if */
-    if (devtools && config.devtools) {
-      devtools.emit('flush');
-    }
-    resetSchedulerState();
-  }
 
-  /**
-   * Sort queue before flush.
-   * This ensures components are updated from parent to child
-   * so there will be no duplicate updates, e.g. a child was
-   * pushed into the queue first and then its parent's props
-   * changed.
-   */
-  function queueSorter(a, b) {
-    return a.id - b.id;
-  }
+    // Sort queue before flush.
+    // This ensures that:
+    // 1. Components are updated from parent to child. (because parent is always
+    //    created before the child)
+    // 2. A component's user watchers are run before its render watcher (because
+    //    user watchers are created before the render watcher)
+    // 3. If a component is destroyed during a parent component's watcher run,
+    //    its watchers can be skipped.
+    queue.sort(function (a, b) {
+      return a.id - b.id;
+    });
 
-  /**
-   * Run the watchers in a single queue.
-   */
-  function runSchedulerQueue(queue) {
     // do not cache length because more watchers might be pushed
     // as we run existing watchers
     for (index = 0; index < queue.length; index++) {
@@ -575,7 +556,14 @@
         }
       }
     }
-    queue.length = 0;
+
+    // devtool hook
+    /* istanbul ignore if */
+    if (devtools && config.devtools) {
+      devtools.emit('flush');
+    }
+
+    resetSchedulerState();
   }
 
   /**
@@ -586,22 +574,17 @@
   function queueWatcher(watcher) {
     var id = watcher.id;
     if (has[id] == null) {
-      // if already flushing, and all user watchers have already been run,
-      // run the new user watcher immediately.
-      if (flushing && watcher.user && !userQueue.length) {
-        return watcher.run();
-      }
-      // push watcher into appropriate queue
       has[id] = true;
-      var q = watcher.user ? userQueue : queue;
       if (!flushing) {
-        q.push(watcher);
+        queue.push(watcher);
       } else {
-        var i = q.length - 1;
-        while (i >= 0 && q[i].id > watcher.id) {
+        // if already flushing, splice the watcher based on its id
+        // if already past its id, it will be run next immediately.
+        var i = queue.length - 1;
+        while (i >= 0 && queue[i].id > watcher.id) {
           i--;
         }
-        q.splice(Math.max(i, index) + 1, 0, watcher);
+        queue.splice(Math.max(i, index) + 1, 0, watcher);
       }
       // queue the flush
       if (!waiting) {
@@ -2572,9 +2555,10 @@
       value = getPropDefaultValue(vm, prop, key);
       // since the default value is a fresh copy,
       // make sure to observe it.
+      var prevShouldConvert = observerState.shouldConvert;
       observerState.shouldConvert = true;
       observe(value);
-      observerState.shouldConvert = false;
+      observerState.shouldConvert = prevShouldConvert;
     }
     if ("development" !== 'production') {
       assertProp(prop, key, value, vm, absent);
@@ -2899,7 +2883,7 @@
     }
   });
 
-  Vue.version = '2.0.0-beta.3';
+  Vue.version = '2.0.0-beta.4';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
@@ -3051,6 +3035,14 @@
   var isIE = UA$1 && /msie|trident/.test(UA$1);
   var isIE9 = UA$1 && UA$1.indexOf('msie 9.0') > 0;
   var isAndroid = UA$1 && UA$1.indexOf('android') > 0;
+
+  // some browsers, e.g. PhantomJS, encodes attribute values for innerHTML
+  // this causes problems with the in-browser parser.
+  var shouldDecodeAttr = inBrowser ? function () {
+    var div = document.createElement('div');
+    div.innerHTML = '<div a=">">';
+    return div.innerHTML.indexOf('&gt;') > 0;
+  }() : false;
 
   /**
    * Query an element selector if it's not an element already.
@@ -4040,7 +4032,8 @@ var nodeOps = Object.freeze({
     var appearCancelled = data.appearCancelled;
 
 
-    var isAppear = !vnode.context.$root._isMounted;
+    var context = vnode.context.$parent || vnode.context;
+    var isAppear = !context._isMounted;
     if (isAppear && !appear && appear !== '') {
       return;
     }
@@ -4666,15 +4659,17 @@ var nodeOps = Object.freeze({
 
   var decoder = document.createElement('div');
 
-  function decodeHTML(html) {
+  function decodeHTML(html, asAttribute) {
+    if (asAttribute) {
+      html = html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
     decoder.innerHTML = html;
     return decoder.textContent;
   }
 
   // Regular Expressions for parsing tags and attributes
   var singleAttrIdentifier = /([^\s"'<>\/=]+)/;
-  var singleAttrAssign = /=/;
-  var singleAttrAssigns = [singleAttrAssign];
+  var singleAttrAssign = /(?:=)/;
   var singleAttrValues = [
   // attr value double quotes
   /"([^"]*)"+/.source,
@@ -4682,6 +4677,8 @@ var nodeOps = Object.freeze({
   /'([^']*)'+/.source,
   // attr value, no quotes
   /([^\s"'=<>`]+)/.source];
+  var attribute = new RegExp('^\\s*' + singleAttrIdentifier.source + '(?:\\s*(' + singleAttrAssign.source + ')' + '\\s*(?:' + singleAttrValues.join('|') + '))?');
+
   // could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
   // but for Vue templates we can enforce a simple charset
   var ncname = '[a-zA-Z_][\\w\\-\\.]*';
@@ -4701,22 +4698,11 @@ var nodeOps = Object.freeze({
 
   var reCache = {};
 
-  function attrForHandler(handler) {
-    var pattern = singleAttrIdentifier.source + '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')' + '\\s*(?:' + singleAttrValues.join('|') + '))?';
-    return new RegExp('^\\s*' + pattern);
-  }
-
-  function joinSingleAttrAssigns(handler) {
-    return singleAttrAssigns.map(function (assign) {
-      return '(?:' + assign.source + ')';
-    }).join('|');
-  }
-
-  function parseHTML(html, handler) {
+  function parseHTML(html, options) {
     var stack = [];
-    var attribute = attrForHandler(handler);
-    var expectHTML = handler.expectHTML;
-    var isUnaryTag = handler.isUnaryTag || no;
+    var expectHTML = options.expectHTML;
+    var isUnaryTag = options.isUnaryTag || no;
+    var shouldDecodeAttr = options.shouldDecodeAttr;
     var index = 0;
     var last = void 0,
         lastTag = void 0;
@@ -4749,9 +4735,6 @@ var nodeOps = Object.freeze({
           // Doctype:
           var doctypeMatch = html.match(doctype);
           if (doctypeMatch) {
-            if (handler.doctype) {
-              handler.doctype(doctypeMatch[0]);
-            }
             advance(doctypeMatch[0].length);
             continue;
           }
@@ -4782,8 +4765,8 @@ var nodeOps = Object.freeze({
           html = '';
         }
 
-        if (handler.chars) {
-          handler.chars(text);
+        if (options.chars) {
+          options.chars(text);
         }
       } else {
         (function () {
@@ -4795,8 +4778,8 @@ var nodeOps = Object.freeze({
             if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
               text = text.replace(/<!--([\s\S]*?)-->/g, '$1').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
             }
-            if (handler.chars) {
-              handler.chars(text);
+            if (options.chars) {
+              options.chars(text);
             }
             return '';
           });
@@ -4874,9 +4857,10 @@ var nodeOps = Object.freeze({
             delete args[5];
           }
         }
+        var value = args[3] || args[4] || args[5] || '';
         attrs[i] = {
           name: args[1],
-          value: decodeHTML(args[3] || args[4] || args[5] || '')
+          value: shouldDecodeAttr ? decodeHTML(value, true) : value
         };
       }
 
@@ -4886,8 +4870,8 @@ var nodeOps = Object.freeze({
         unarySlash = '';
       }
 
-      if (handler.start) {
-        handler.start(tagName, attrs, unary, match.start, match.end);
+      if (options.start) {
+        options.start(tagName, attrs, unary, match.start, match.end);
       }
     }
 
@@ -4912,8 +4896,8 @@ var nodeOps = Object.freeze({
       if (pos >= 0) {
         // Close all the open elements, up the stack
         for (var i = stack.length - 1; i >= pos; i--) {
-          if (handler.end) {
-            handler.end(stack[i].tag, start, end);
+          if (options.end) {
+            options.end(stack[i].tag, start, end);
           }
         }
 
@@ -4921,15 +4905,15 @@ var nodeOps = Object.freeze({
         stack.length = pos;
         lastTag = pos && stack[pos - 1].tag;
       } else if (tagName.toLowerCase() === 'br') {
-        if (handler.start) {
-          handler.start(tagName, [], true, start, end);
+        if (options.start) {
+          options.start(tagName, [], true, start, end);
         }
       } else if (tagName.toLowerCase() === 'p') {
-        if (handler.start) {
-          handler.start(tagName, [], false, start, end);
+        if (options.start) {
+          options.start(tagName, [], false, start, end);
         }
-        if (handler.end) {
-          handler.end(tagName, start, end);
+        if (options.end) {
+          options.end(tagName, start, end);
         }
       }
     }
@@ -5180,6 +5164,7 @@ var nodeOps = Object.freeze({
     parseHTML(template, {
       expectHTML: options.expectHTML,
       isUnaryTag: options.isUnaryTag,
+      shouldDecodeAttr: options.shouldDecodeAttr,
       start: function start(tag, attrs, unary) {
         // check namespace.
         // inherit parent ns if there is one
@@ -6241,12 +6226,15 @@ var nodeOps = Object.freeze({
     // resolve template/el and convert to render function
     if (!options.render) {
       var template = options.template;
+      var isFromDOM = false;
       if (template) {
         if (typeof template === 'string') {
           if (template.charAt(0) === '#') {
+            isFromDOM = true;
             template = idToTemplate(template);
           }
         } else if (template.nodeType) {
+          isFromDOM = true;
           template = template.innerHTML;
         } else {
           if ("development" !== 'production') {
@@ -6255,10 +6243,12 @@ var nodeOps = Object.freeze({
           return this;
         }
       } else if (el) {
+        isFromDOM = true;
         template = getOuterHTML(el);
       }
       if (template) {
         var _compileToFunctions = compileToFunctions(template, {
+          shouldDecodeAttr: isFromDOM && shouldDecodeAttr,
           delimiters: options.delimiters,
           warn: warn
         }, this);

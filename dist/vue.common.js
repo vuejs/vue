@@ -494,13 +494,7 @@ function popTarget() {
   Dep.target = targetStack.pop();
 }
 
-// We have two separate queues: one for internal component re-render updates
-// and one for user watcher registered via $watch(). We want to guarantee
-// re-render updates to be called before user watchers so that when user
-// watchers are triggered, the DOM would already be in updated state.
-
 var queue = [];
-var userQueue = [];
 var has = {};
 var circular = {};
 var waiting = false;
@@ -512,7 +506,6 @@ var index = 0;
  */
 function resetSchedulerState() {
   queue.length = 0;
-  userQueue.length = 0;
   has = {};
   if (process.env.NODE_ENV !== 'production') {
     circular = {};
@@ -525,31 +518,19 @@ function resetSchedulerState() {
  */
 function flushSchedulerQueue() {
   flushing = true;
-  runSchedulerQueue(userQueue);
-  runSchedulerQueue(queue.sort(queueSorter));
-  // devtool hook
-  /* istanbul ignore if */
-  if (devtools && config.devtools) {
-    devtools.emit('flush');
-  }
-  resetSchedulerState();
-}
 
-/**
- * Sort queue before flush.
- * This ensures components are updated from parent to child
- * so there will be no duplicate updates, e.g. a child was
- * pushed into the queue first and then its parent's props
- * changed.
- */
-function queueSorter(a, b) {
-  return a.id - b.id;
-}
+  // Sort queue before flush.
+  // This ensures that:
+  // 1. Components are updated from parent to child. (because parent is always
+  //    created before the child)
+  // 2. A component's user watchers are run before its render watcher (because
+  //    user watchers are created before the render watcher)
+  // 3. If a component is destroyed during a parent component's watcher run,
+  //    its watchers can be skipped.
+  queue.sort(function (a, b) {
+    return a.id - b.id;
+  });
 
-/**
- * Run the watchers in a single queue.
- */
-function runSchedulerQueue(queue) {
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
   for (index = 0; index < queue.length; index++) {
@@ -566,7 +547,14 @@ function runSchedulerQueue(queue) {
       }
     }
   }
-  queue.length = 0;
+
+  // devtool hook
+  /* istanbul ignore if */
+  if (devtools && config.devtools) {
+    devtools.emit('flush');
+  }
+
+  resetSchedulerState();
 }
 
 /**
@@ -577,22 +565,17 @@ function runSchedulerQueue(queue) {
 function queueWatcher(watcher) {
   var id = watcher.id;
   if (has[id] == null) {
-    // if already flushing, and all user watchers have already been run,
-    // run the new user watcher immediately.
-    if (flushing && watcher.user && !userQueue.length) {
-      return watcher.run();
-    }
-    // push watcher into appropriate queue
     has[id] = true;
-    var q = watcher.user ? userQueue : queue;
     if (!flushing) {
-      q.push(watcher);
+      queue.push(watcher);
     } else {
-      var i = q.length - 1;
-      while (i >= 0 && q[i].id > watcher.id) {
+      // if already flushing, splice the watcher based on its id
+      // if already past its id, it will be run next immediately.
+      var i = queue.length - 1;
+      while (i >= 0 && queue[i].id > watcher.id) {
         i--;
       }
-      q.splice(Math.max(i, index) + 1, 0, watcher);
+      queue.splice(Math.max(i, index) + 1, 0, watcher);
     }
     // queue the flush
     if (!waiting) {
@@ -2567,9 +2550,10 @@ function validateProp(key, propOptions, propsData, vm) {
     value = getPropDefaultValue(vm, prop, key);
     // since the default value is a fresh copy,
     // make sure to observe it.
+    var prevShouldConvert = observerState.shouldConvert;
     observerState.shouldConvert = true;
     observe(value);
-    observerState.shouldConvert = false;
+    observerState.shouldConvert = prevShouldConvert;
   }
   if (process.env.NODE_ENV !== 'production') {
     assertProp(prop, key, value, vm, absent);
@@ -2894,7 +2878,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   }
 });
 
-Vue.version = '2.0.0-beta.3';
+Vue.version = '2.0.0-beta.4';
 
 // attributes that should be using props for binding
 var mustUseProp = makeMap('value,selected,checked,muted');
@@ -3046,6 +3030,14 @@ var UA$1 = inBrowser && window.navigator.userAgent.toLowerCase();
 var isIE = UA$1 && /msie|trident/.test(UA$1);
 var isIE9 = UA$1 && UA$1.indexOf('msie 9.0') > 0;
 var isAndroid = UA$1 && UA$1.indexOf('android') > 0;
+
+// some browsers, e.g. PhantomJS, encodes attribute values for innerHTML
+// this causes problems with the in-browser parser.
+var shouldDecodeAttr = inBrowser ? function () {
+  var div = document.createElement('div');
+  div.innerHTML = '<div a=">">';
+  return div.innerHTML.indexOf('&gt;') > 0;
+}() : false;
 
 /**
  * Query an element selector if it's not an element already.
@@ -4035,7 +4027,8 @@ function enter(vnode) {
   var appearCancelled = data.appearCancelled;
 
 
-  var isAppear = !vnode.context.$root._isMounted;
+  var context = vnode.context.$parent || vnode.context;
+  var isAppear = !context._isMounted;
   if (isAppear && !appear && appear !== '') {
     return;
   }
