@@ -66,14 +66,14 @@ var builds = [
     entry: 'src/entries/web-compiler.js',
     format: 'cjs',
     external: ['entities', 'de-indent'],
-    out: 'packages/vue-template-compiler/index.js'
+    out: 'packages/vue-template-compiler/build.js'
   },
   // Web server renderer (CommonJS).
   {
     entry: 'src/entries/web-server-renderer.js',
     format: 'cjs',
     external: ['stream', 'module', 'vm', 'entities', 'de-indent'],
-    out: 'packages/vue-server-renderer/index.js'
+    out: 'packages/vue-server-renderer/build.js'
   }
 ]
 
