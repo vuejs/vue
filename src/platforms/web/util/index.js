@@ -13,9 +13,11 @@ export const isAndroid = UA && UA.indexOf('android') > 0
 
 // some browsers, e.g. PhantomJS, encodes attribute values for innerHTML
 // this causes problems with the in-browser parser.
-const div = document.createElement('div')
-div.innerHTML = '<div a=">">'
-export const shouldDecodeAttr = div.innerHTML.indexOf('&gt;') > 0
+export const shouldDecodeAttr = inBrowser ? (function () {
+  const div = document.createElement('div')
+  div.innerHTML = '<div a=">">'
+  return div.innerHTML.indexOf('&gt;') > 0
+})() : false
 
 /**
  * Query an element selector if it's not an element already.
