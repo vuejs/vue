@@ -2,7 +2,7 @@
 
 import Vue from './web-runtime'
 import { warn, cached } from 'core/util/index'
-import { query, shouldDecodeAttr } from 'web/util/index'
+import { query, shouldDecodeTags } from 'web/util/index'
 import { compileToFunctions } from 'web/compiler/index'
 
 const idToTemplate = cached(id => {
@@ -42,9 +42,10 @@ Vue.prototype.$mount = function (
     }
     if (template) {
       const { render, staticRenderFns } = compileToFunctions(template, {
-        shouldDecodeAttr: isFromDOM && shouldDecodeAttr,
-        delimiters: options.delimiters,
-        warn
+        warn,
+        isFromDOM,
+        shouldDecodeTags,
+        delimiters: options.delimiters
       }, this)
       options.render = render
       options.staticRenderFns = staticRenderFns

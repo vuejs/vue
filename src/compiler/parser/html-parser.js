@@ -9,7 +9,6 @@
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
-import { decodeHTML } from 'entities'
 import { makeMap, no } from 'shared/util'
 import { isNonPhrasingTag, canBeLeftOpenTag } from 'web/util/index'
 
@@ -49,11 +48,23 @@ const isSpecialTag = makeMap('script,style', true)
 
 const reCache = {}
 
+const ampRE = /&amp;/g
+const ltRE = /&lt;/g
+const gtRE = /&gt;/g
+
+function decodeAttr (value, shouldDecodeTags) {
+  if (shouldDecodeTags) {
+    value = value.replace(ltRE, '<').replace(gtRE, '>')
+  }
+  return value.replace(ampRE, '&')
+}
+
 export function parseHTML (html, options) {
   const stack = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
-  const shouldDecodeAttr = options.shouldDecodeAttr
+  const isFromDOM = options.isFromDOM
+  const shouldDecodeTags = options.shouldDecodeTags
   let index = 0
   let last, lastTag
   while (html) {
@@ -203,7 +214,7 @@ export function parseHTML (html, options) {
       const value = args[3] || args[4] || args[5] || ''
       attrs[i] = {
         name: args[1],
-        value: shouldDecodeAttr ? decodeHTML(value, true) : value
+        value: isFromDOM ? decodeAttr(value, shouldDecodeTags) : value
       }
     }
 

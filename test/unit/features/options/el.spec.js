@@ -66,6 +66,14 @@ describe('Options el', () => {
     expect(vm.$el.childNodes[1].childNodes[0].childNodes[0].namespaceURI).toContain('svg')
   })
 
+  it('properly encode attribute values', function () {
+    const el = document.createElement('div')
+    el.innerHTML = '<a href="/a?foo=bar&baz=qux" name="<abc>"></a>'
+    const vm = new Vue({ el })
+    expect(vm.$el.children[0].getAttribute('href')).toBe('/a?foo=bar&baz=qux')
+    expect(vm.$el.children[0].getAttribute('name')).toBe('<abc>')
+  })
+
   it('warn cannot find element', () => {
     new Vue({ el: '#non-existent' })
     expect('Cannot find element: #non-existent').toHaveBeenWarned()

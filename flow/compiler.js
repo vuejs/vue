@@ -11,7 +11,8 @@ declare type CompilerOptions = {
   getTagNamespace?: (tag: string) => ?string; // check the namespace for a tag
   transforms?: Array<Function>; // a list of transforms on parsed AST before codegen
   preserveWhitespace?: boolean;
-  shouldDecodeAttr?: boolean;
+  isFromDOM?: boolean;
+  shouldDecodeTags?: boolean;
 
   // runtime user-configurable
   delimiters?: [string, string]; // template delimiters

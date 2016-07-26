@@ -11,9 +11,10 @@ export const isIE = UA && /msie|trident/.test(UA)
 export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
 export const isAndroid = UA && UA.indexOf('android') > 0
 
-// some browsers, e.g. PhantomJS, encodes attribute values for innerHTML
+// some browsers, e.g. PhantomJS, encodes angular brackets
+// inside attribute values when retrieving innerHTML.
 // this causes problems with the in-browser parser.
-export const shouldDecodeAttr = inBrowser ? (function () {
+export const shouldDecodeTags = inBrowser ? (function () {
   const div = document.createElement('div')
   div.innerHTML = '<div a=">">'
   return div.innerHTML.indexOf('&gt;') > 0
