@@ -54,6 +54,7 @@ export function parse (
   parseHTML(template, {
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
+    shouldDecodeAttr: options.shouldDecodeAttr,
     start (tag, attrs, unary) {
       // check namespace.
       // inherit parent ns if there is one

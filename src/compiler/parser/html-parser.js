@@ -15,8 +15,7 @@ import { isNonPhrasingTag, canBeLeftOpenTag } from 'web/util/index'
 
 // Regular Expressions for parsing tags and attributes
 const singleAttrIdentifier = /([^\s"'<>\/=]+)/
-const singleAttrAssign = /=/
-const singleAttrAssigns = [singleAttrAssign]
+const singleAttrAssign = /(?:=)/
 const singleAttrValues = [
   // attr value double quotes
   /"([^"]*)"+/.source,
@@ -25,6 +24,12 @@ const singleAttrValues = [
   // attr value, no quotes
   /([^\s"'=<>`]+)/.source
 ]
+const attribute = new RegExp(
+  '^\\s*' + singleAttrIdentifier.source +
+  '(?:\\s*(' + singleAttrAssign.source + ')' +
+  '\\s*(?:' + singleAttrValues.join('|') + '))?'
+)
+
 // could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
 // but for Vue templates we can enforce a simple charset
 const ncname = '[a-zA-Z_][\\w\\-\\.]*'
@@ -44,24 +49,11 @@ const isSpecialTag = makeMap('script,style', true)
 
 const reCache = {}
 
-function attrForHandler (handler) {
-  const pattern = singleAttrIdentifier.source +
-    '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')' +
-    '\\s*(?:' + singleAttrValues.join('|') + '))?'
-  return new RegExp('^\\s*' + pattern)
-}
-
-function joinSingleAttrAssigns (handler) {
-  return singleAttrAssigns.map(function (assign) {
-    return '(?:' + assign.source + ')'
-  }).join('|')
-}
-
-export function parseHTML (html, handler) {
+export function parseHTML (html, options) {
   const stack = []
-  const attribute = attrForHandler(handler)
-  const expectHTML = handler.expectHTML
-  const isUnaryTag = handler.isUnaryTag || no
+  const expectHTML = options.expectHTML
+  const isUnaryTag = options.isUnaryTag || no
+  const shouldDecodeAttr = options.shouldDecodeAttr
   let index = 0
   let last, lastTag
   while (html) {
@@ -93,9 +85,6 @@ export function parseHTML (html, handler) {
         // Doctype:
         const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
-          if (handler.doctype) {
-            handler.doctype(doctypeMatch[0])
-          }
           advance(doctypeMatch[0].length)
           continue
         }
@@ -126,8 +115,8 @@ export function parseHTML (html, handler) {
         html = ''
       }
 
-      if (handler.chars) {
-        handler.chars(text)
+      if (options.chars) {
+        options.chars(text)
       }
     } else {
       const stackedTag = lastTag.toLowerCase()
@@ -140,8 +129,8 @@ export function parseHTML (html, handler) {
             .replace(/<!--([\s\S]*?)-->/g, '$1')
             .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
         }
-        if (handler.chars) {
-          handler.chars(text)
+        if (options.chars) {
+          options.chars(text)
         }
         return ''
       })
@@ -211,9 +200,10 @@ export function parseHTML (html, handler) {
         if (args[4] === '') { delete args[4] }
         if (args[5] === '') { delete args[5] }
       }
+      const value = args[3] || args[4] || args[5] || ''
       attrs[i] = {
         name: args[1],
-        value: decodeHTML(args[3] || args[4] || args[5] || '')
+        value: shouldDecodeAttr ? decodeHTML(value, true) : value
       }
     }
 
@@ -223,8 +213,8 @@ export function parseHTML (html, handler) {
       unarySlash = ''
     }
 
-    if (handler.start) {
-      handler.start(tagName, attrs, unary, match.start, match.end)
+    if (options.start) {
+      options.start(tagName, attrs, unary, match.start, match.end)
     }
   }
 
@@ -249,8 +239,8 @@ export function parseHTML (html, handler) {
     if (pos >= 0) {
       // Close all the open elements, up the stack
       for (let i = stack.length - 1; i >= pos; i--) {
-        if (handler.end) {
-          handler.end(stack[i].tag, start, end)
+        if (options.end) {
+          options.end(stack[i].tag, start, end)
         }
       }
 
@@ -258,15 +248,15 @@ export function parseHTML (html, handler) {
       stack.length = pos
       lastTag = pos && stack[pos - 1].tag
     } else if (tagName.toLowerCase() === 'br') {
-      if (handler.start) {
-        handler.start(tagName, [], true, start, end)
+      if (options.start) {
+        options.start(tagName, [], true, start, end)
       }
     } else if (tagName.toLowerCase() === 'p') {
-      if (handler.start) {
-        handler.start(tagName, [], false, start, end)
+      if (options.start) {
+        options.start(tagName, [], false, start, end)
       }
-      if (handler.end) {
-        handler.end(tagName, start, end)
+      if (options.end) {
+        options.end(tagName, start, end)
       }
     }
   }
