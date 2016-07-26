@@ -466,4 +466,24 @@ describe('children', () => {
     expect(child1).not.toBe(child2)
     expect(child2.className).toBe('')
   })
+
+  it('should handle static vnodes properly', function () {
+    function makeNode (text) {
+      return new VNode('div', undefined, [
+        new VNode(undefined, undefined, undefined, text)
+      ])
+    }
+    const b = makeNode('B')
+    b.isStatic = true
+    const vnode1 = new VNode('div', {}, [makeNode('A'), b, makeNode('C')])
+    const vnode2 = new VNode('div', {}, [b])
+    const vnode3 = new VNode('div', {}, [makeNode('A'), b, makeNode('C')])
+
+    let elm = patch(vnode0, vnode1)
+    expect(elm.textContent).toBe('ABC')
+    elm = patch(vnode1, vnode2)
+    expect(elm.textContent).toBe('B')
+    elm = patch(vnode2, vnode3)
+    expect(elm.textContent).toBe('ABC')
+  })
 })

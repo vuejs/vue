@@ -24,6 +24,9 @@ function isDef (s) {
 }
 
 function sameVnode (vnode1, vnode2) {
+  if (vnode1.isStatic || vnode2.isStatic) {
+    return vnode1 === vnode2
+  }
   return (
     vnode1.key === vnode2.key &&
     vnode1.tag === vnode2.tag &&
@@ -259,8 +262,12 @@ export function createPatchFunction (backend) {
         newStartVnode = newCh[++newStartIdx]
       } else {
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
-        idxInOld = oldKeyToIdx[newStartVnode.key]
-        if (isUndef(idxInOld)) { // New element
+        idxInOld = isDef(newStartVnode.key)
+          ? oldKeyToIdx[newStartVnode.key]
+          : newStartVnode.isStatic
+            ? oldCh.indexOf(newStartVnode)
+            : null
+        if (isUndef(idxInOld) || idxInOld === -1) { // New element
           nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm)
           newStartVnode = newCh[++newStartIdx]
         } else {

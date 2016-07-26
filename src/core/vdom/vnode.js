@@ -14,6 +14,7 @@ export default class VNode {
   child: Component | void;
   parent: VNode | void;
   raw: ?boolean;
+  isStatic: ?boolean;
 
   constructor (
     tag?: string,
@@ -39,6 +40,7 @@ export default class VNode {
     this.child = undefined
     this.parent = undefined
     this.raw = false
+    this.isStatic = false
     // apply construct hook.
     // this is applied during render, before patch happens.
     // unlike other hooks, this is applied on both client and server.

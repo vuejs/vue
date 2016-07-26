@@ -103,13 +103,16 @@ export function renderMixin (Vue: Class<Component>) {
   // number conversion
   Vue.prototype._n = toNumber
 
-  //
+  // render static tree by index
   Vue.prototype._m = function renderStatic (index?: number): Object | void {
-    return this._staticTrees[index] || (
-      this._staticTrees[index] = this.$options.staticRenderFns[index].call(
+    let tree = this._staticTrees[index]
+    if (!tree) {
+      tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(
         this._renderProxy
       )
-    )
+      tree.isStatic = true
+    }
+    return tree
   }
 
   // filter resolution helper
