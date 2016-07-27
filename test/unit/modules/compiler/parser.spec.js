@@ -99,6 +99,12 @@ describe('parser', () => {
       .toHaveBeenWarned()
   })
 
+  it('warn 2 root elements with v-if and v-else with v-for on 2nd', () => {
+    parse('<div v-if="1"></div><div v-else v-for="i in [1]"></div>', baseOptions)
+    expect('Cannot use v-for on stateful component root element because it renders multiple elements:\n<div v-if="1"></div><div v-else v-for="i in [1]"></div>')
+      .toHaveBeenWarned()
+  })
+
   it('warn <template> as root element', () => {
     parse('<template></template>', baseOptions)
     expect('Cannot use <template> as component root element').toHaveBeenWarned()

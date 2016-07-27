@@ -124,33 +124,37 @@ export function parse (
         processAttrs(element)
       }
 
-      // tree management
-      if (!root) {
-        root = element
-        // check root element constraints
+      function checkRootConstraints (el) {
         if (process.env.NODE_ENV !== 'production') {
-          if (tag === 'slot' || tag === 'template') {
+          if (el.tag === 'slot' || el.tag === 'template') {
             warn(
-              `Cannot use <${tag}> as component root element because it may ` +
+              `Cannot use <${el.tag}> as component root element because it may ` +
               'contain multiple nodes:\n' + template
             )
           }
-          if (element.attrsMap.hasOwnProperty('v-for')) {
+          if (el.attrsMap.hasOwnProperty('v-for')) {
             warn(
               'Cannot use v-for on stateful component root element because ' +
               'it renders multiple elements:\n' + template
             )
           }
         }
-      } else if (
-        process.env.NODE_ENV !== 'production' && !stack.length && !warned &&
+      }
+
+      // tree management
+      if (!root) {
+        root = element
+        checkRootConstraints(root)
+      } else if (process.env.NODE_ENV !== 'production' && !stack.length && !warned) {
         // allow 2 root elements with v-if and v-else
-        !(root.attrsMap.hasOwnProperty('v-if') && element.attrsMap.hasOwnProperty('v-else'))
-      ) {
-        warned = true
-        warn(
-          `Component template should contain exactly one root element:\n\n${template}`
-        )
+        if ((root.attrsMap.hasOwnProperty('v-if') && element.attrsMap.hasOwnProperty('v-else'))) {
+          checkRootConstraints(element)
+        } else {
+          warned = true
+          warn(
+            `Component template should contain exactly one root element:\n\n${template}`
+          )
+        }
       }
       if (currentParent && !element.forbidden) {
         if (element.else) {
