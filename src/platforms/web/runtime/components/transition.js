@@ -12,6 +12,7 @@ export const transitionProps = {
   appear: Boolean,
   css: Boolean,
   mode: String,
+  type: String,
   enterClass: String,
   leaveClass: String,
   enterActiveClass: String,

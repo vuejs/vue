@@ -45,8 +45,12 @@ export function removeTransitionClass (el: any, cls: string) {
   removeClass(el, cls)
 }
 
-export function whenTransitionEnds (el: Element, cb: Function) {
-  const { type, timeout, propCount } = getTransitionInfo(el)
+export function whenTransitionEnds (
+  el: Element,
+  expectedType: ?stirng,
+  cb: Function
+) {
+  const { type, timeout, propCount } = getTransitionInfo(el, expectedType)
   if (!type) return cb()
   const event = type === TRANSITION ? transitionEndEvent : animationEndEvent
   let ended = 0
@@ -69,34 +73,56 @@ export function whenTransitionEnds (el: Element, cb: Function) {
 
 const transformRE = /\b(transform|all)(,|$)/
 
-export function getTransitionInfo (el: Element): {
-  type: ?string,
-  propCount: number,
-  timeout: number
+export function getTransitionInfo (el: Element, expectedType?: ?string): {
+  type: ?string;
+  propCount: number;
+  timeout: number;
 } {
   const styles = window.getComputedStyle(el)
-  const transitionProps = styles[transitionProp + 'Property']
   const transitioneDelays = styles[transitionProp + 'Delay'].split(', ')
   const transitionDurations = styles[transitionProp + 'Duration'].split(', ')
+  const transitionTimeout = getTimeout(transitioneDelays, transitionDurations)
   const animationDelays = styles[animationProp + 'Delay'].split(', ')
   const animationDurations = styles[animationProp + 'Duration'].split(', ')
-  const transitionTimeout = getTimeout(transitioneDelays, transitionDurations)
   const animationTimeout = getTimeout(animationDelays, animationDurations)
-  const timeout = Math.max(transitionTimeout, animationTimeout)
-  const type = timeout > 0
-    ? transitionTimeout > animationTimeout
-      ? TRANSITION
-      : ANIMATION
-    : null
-  return {
-    type,
-    timeout,
-    propCount: type
+
+  let type
+  let timeout = 0
+  let propCount = 0
+  /* istanbul ignore if */
+  if (expectedType === TRANSITION) {
+    if (transitionTimeout > 0) {
+      type = TRANSITION
+      timeout = transitionTimeout
+      propCount = transitionDurations.length
+    }
+  } else if (expectedType === ANIMATION) {
+    if (animationTimeout > 0) {
+      type = ANIMATION
+      timeout = animationTimeout
+      propCount = animationDurations.length
+    }
+  } else {
+    timeout = Math.max(transitionTimeout, animationTimeout)
+    type = timeout > 0
+      ? transitionTimeout > animationTimeout
+        ? TRANSITION
+        : ANIMATION
+      : null
+    propCount = type
       ? type === TRANSITION
         ? transitionDurations.length
         : animationDurations.length
-      : 0,
-    hasTransform: type === TRANSITION && transformRE.test(transitionProps)
+      : 0
+  }
+  const hasTransform =
+    type === TRANSITION &&
+    transformRE.test(styles[transitionProp + 'Property'])
+  return {
+    type,
+    timeout,
+    propCount,
+    hasTransform
   }
 }
 

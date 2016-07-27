@@ -32,6 +32,7 @@ export function enter (vnode: VNodeWithData) {
 
   const {
     css,
+    type,
     enterClass,
     enterActiveClass,
     appearClass,
@@ -99,7 +100,7 @@ export function enter (vnode: VNodeWithData) {
     nextFrame(() => {
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
-        whenTransitionEnds(el, cb)
+        whenTransitionEnds(el, type, cb)
       }
     })
   }
@@ -130,6 +131,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
 
   const {
     css,
+    type,
     leaveClass,
     leaveActiveClass,
     beforeLeave,
@@ -187,7 +189,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       nextFrame(() => {
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
-          whenTransitionEnds(el, cb)
+          whenTransitionEnds(el, type, cb)
         }
       })
     }

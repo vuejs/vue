@@ -33,6 +33,14 @@ export default function injectStyles () {
       animation: test-leave ${duration}ms;
       -webkit-animation: test-leave ${duration}ms;
     }
+    .test-anim-long-enter-active {
+      animation: test-enter ${duration * 2}ms;
+      -webkit-animation: test-enter ${duration * 2}ms;
+    }
+    .test-anim-long-leave-active {
+      animation: test-leave ${duration * 2}ms;
+      -webkit-animation: test-leave ${duration * 2}ms;
+    }
     @keyframes test-enter {
       from { opacity: 0 }
       to { opacity: 1 }

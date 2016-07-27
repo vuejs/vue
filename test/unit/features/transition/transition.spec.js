@@ -488,6 +488,37 @@ if (!isIE9) {
         template: `
           <div>
             <transition name="test-anim">
+              <div v-if="ok">foo</div>
+            </transition>
+          </div>
+        `,
+        data: { ok: true }
+      }).$mount(el)
+
+      // should not apply transition on initial render by default
+      expect(vm.$el.innerHTML).toBe('<div>foo</div>')
+      vm.ok = false
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].className).toBe('test-anim-leave test-anim-leave-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test-anim-leave-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.children.length).toBe(0)
+        vm.ok = true
+      }).then(() => {
+        expect(vm.$el.children[0].className).toBe('test-anim-enter test-anim-enter-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test-anim-enter-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.children[0].className).toBe('')
+      }).then(done)
+    })
+
+    it('explicit transition type', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition name="test-anim-long" type="animation">
               <div v-if="ok" class="test">foo</div>
             </transition>
           </div>
@@ -499,17 +530,22 @@ if (!isIE9) {
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
       waitForUpdate(() => {
-        expect(vm.$el.children[0].className).toBe('test test-anim-leave test-anim-leave-active')
+        expect(vm.$el.children[0].className).toBe('test test-anim-long-leave test-anim-long-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].className).toBe('test test-anim-leave-active')
-      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-anim-long-leave-active')
+      }).thenWaitFor(duration + 5).then(() => {
+        // should not end early due to transition presence
+        expect(vm.$el.children[0].className).toBe('test test-anim-long-leave-active')
+      }).thenWaitFor(duration + 5).then(() => {
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
       }).then(() => {
-        expect(vm.$el.children[0].className).toBe('test test-anim-enter test-anim-enter-active')
+        expect(vm.$el.children[0].className).toBe('test test-anim-long-enter test-anim-long-enter-active')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].className).toBe('test test-anim-enter-active')
-      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-anim-long-enter-active')
+      }).thenWaitFor(duration + 5).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-anim-long-enter-active')
+      }).thenWaitFor(duration + 5).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
