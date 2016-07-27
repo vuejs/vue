@@ -142,7 +142,11 @@ export function parse (
             )
           }
         }
-      } else if (process.env.NODE_ENV !== 'production' && !stack.length && !warned) {
+      } else if (
+        process.env.NODE_ENV !== 'production' && !stack.length && !warned &&
+        // allow 2 root elements with v-if and v-else
+        !(root.attrsMap.hasOwnProperty('v-if') && element.attrsMap.hasOwnProperty('v-else'))
+      ) {
         warned = true
         warn(
           `Component template should contain exactly one root element:\n\n${template}`
