@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-beta.4
+ * Vue.js v2.0.0-beta.5
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -1267,6 +1267,7 @@
     this.child = undefined;
     this.parent = undefined;
     this.raw = false;
+    this.isStatic = false;
     // apply construct hook.
     // this is applied during render, before patch happens.
     // unlike other hooks, this is applied on both client and server.
@@ -1662,14 +1663,20 @@
       if (typeof _ret === "object") return _ret.v;
     }
 
-    // merge component management hooks onto the placeholder node
-    mergeHooks(data);
-
     // extract listeners, since these needs to be treated as
     // child component listeners instead of DOM listeners
     var listeners = data.on;
     // replace with listeners with .native modifier
     data.on = data.nativeOn;
+
+    if (Ctor.options.abstract) {
+      // abstract components do not keep anything
+      // other than props & listeners
+      data = {};
+    }
+
+    // merge component management hooks onto the placeholder node
+    mergeHooks(data);
 
     // return a placeholder vnode
     var name = Ctor.options.name || tag;
@@ -1980,9 +1987,14 @@
     // number conversion
     Vue.prototype._n = toNumber;
 
-    //
+    // render static tree by index
     Vue.prototype._m = function renderStatic(index) {
-      return this._staticTrees[index] || (this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy));
+      var tree = this._staticTrees[index];
+      if (!tree) {
+        tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy);
+        tree.isStatic = true;
+      }
+      return tree;
     };
 
     // filter resolution helper
@@ -2883,7 +2895,7 @@
     }
   });
 
-  Vue.version = '2.0.0-beta.4';
+  Vue.version = '2.0.0-beta.5';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
@@ -3036,9 +3048,10 @@
   var isIE9 = UA$1 && UA$1.indexOf('msie 9.0') > 0;
   var isAndroid = UA$1 && UA$1.indexOf('android') > 0;
 
-  // some browsers, e.g. PhantomJS, encodes attribute values for innerHTML
+  // some browsers, e.g. PhantomJS, encodes angular brackets
+  // inside attribute values when retrieving innerHTML.
   // this causes problems with the in-browser parser.
-  var shouldDecodeAttr = inBrowser ? function () {
+  var shouldDecodeTags = inBrowser ? function () {
     var div = document.createElement('div');
     div.innerHTML = '<div a=">">';
     return div.innerHTML.indexOf('&gt;') > 0;
@@ -3135,6 +3148,9 @@ var nodeOps = Object.freeze({
   }
 
   function sameVnode(vnode1, vnode2) {
+    if (vnode1.isStatic || vnode2.isStatic) {
+      return vnode1 === vnode2;
+    }
     return vnode1.key === vnode2.key && vnode1.tag === vnode2.tag && !vnode1.data === !vnode2.data;
   }
 
@@ -3369,8 +3385,8 @@ var nodeOps = Object.freeze({
           newStartVnode = newCh[++newStartIdx];
         } else {
           if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx);
-          idxInOld = oldKeyToIdx[newStartVnode.key];
-          if (isUndef(idxInOld)) {
+          idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx[newStartVnode.key] : newStartVnode.isStatic ? oldCh.indexOf(newStartVnode) : null;
+          if (isUndef(idxInOld) || idxInOld === -1) {
             // New element
             nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm);
             newStartVnode = newCh[++newStartIdx];
@@ -3940,8 +3956,8 @@ var nodeOps = Object.freeze({
     removeClass(el, cls);
   }
 
-  function whenTransitionEnds(el, cb) {
-    var _getTransitionInfo = getTransitionInfo(el);
+  function whenTransitionEnds(el, expectedType, cb) {
+    var _getTransitionInfo = getTransitionInfo(el, expectedType);
 
     var type = _getTransitionInfo.type;
     var timeout = _getTransitionInfo.timeout;
@@ -3969,22 +3985,42 @@ var nodeOps = Object.freeze({
 
   var transformRE = /\b(transform|all)(,|$)/;
 
-  function getTransitionInfo(el) {
+  function getTransitionInfo(el, expectedType) {
     var styles = window.getComputedStyle(el);
-    var transitionProps = styles[transitionProp + 'Property'];
     var transitioneDelays = styles[transitionProp + 'Delay'].split(', ');
     var transitionDurations = styles[transitionProp + 'Duration'].split(', ');
+    var transitionTimeout = getTimeout(transitioneDelays, transitionDurations);
     var animationDelays = styles[animationProp + 'Delay'].split(', ');
     var animationDurations = styles[animationProp + 'Duration'].split(', ');
-    var transitionTimeout = getTimeout(transitioneDelays, transitionDurations);
     var animationTimeout = getTimeout(animationDelays, animationDurations);
-    var timeout = Math.max(transitionTimeout, animationTimeout);
-    var type = timeout > 0 ? transitionTimeout > animationTimeout ? TRANSITION : ANIMATION : null;
+
+    var type = void 0;
+    var timeout = 0;
+    var propCount = 0;
+    /* istanbul ignore if */
+    if (expectedType === TRANSITION) {
+      if (transitionTimeout > 0) {
+        type = TRANSITION;
+        timeout = transitionTimeout;
+        propCount = transitionDurations.length;
+      }
+    } else if (expectedType === ANIMATION) {
+      if (animationTimeout > 0) {
+        type = ANIMATION;
+        timeout = animationTimeout;
+        propCount = animationDurations.length;
+      }
+    } else {
+      timeout = Math.max(transitionTimeout, animationTimeout);
+      type = timeout > 0 ? transitionTimeout > animationTimeout ? TRANSITION : ANIMATION : null;
+      propCount = type ? type === TRANSITION ? transitionDurations.length : animationDurations.length : 0;
+    }
+    var hasTransform = type === TRANSITION && transformRE.test(styles[transitionProp + 'Property']);
     return {
       type: type,
       timeout: timeout,
-      propCount: type ? type === TRANSITION ? transitionDurations.length : animationDurations.length : 0,
-      hasTransform: type === TRANSITION && transformRE.test(transitionProps)
+      propCount: propCount,
+      hasTransform: hasTransform
     };
   }
 
@@ -4018,6 +4054,7 @@ var nodeOps = Object.freeze({
     }
 
     var css = data.css;
+    var type = data.type;
     var enterClass = data.enterClass;
     var enterActiveClass = data.enterActiveClass;
     var appearClass = data.appearClass;
@@ -4084,7 +4121,7 @@ var nodeOps = Object.freeze({
       nextFrame(function () {
         removeTransitionClass(el, startClass);
         if (!cb.cancelled && !userWantsControl) {
-          whenTransitionEnds(el, cb);
+          whenTransitionEnds(el, type, cb);
         }
       });
     }
@@ -4114,6 +4151,7 @@ var nodeOps = Object.freeze({
     }
 
     var css = data.css;
+    var type = data.type;
     var leaveClass = data.leaveClass;
     var leaveActiveClass = data.leaveActiveClass;
     var beforeLeave = data.beforeLeave;
@@ -4170,7 +4208,7 @@ var nodeOps = Object.freeze({
         nextFrame(function () {
           removeTransitionClass(el, leaveClass);
           if (!cb.cancelled && !userWantsControl) {
-            whenTransitionEnds(el, cb);
+            whenTransitionEnds(el, type, cb);
           }
         });
       }
@@ -4382,6 +4420,7 @@ var nodeOps = Object.freeze({
     appear: Boolean,
     css: Boolean,
     mode: String,
+    type: String,
     enterClass: String,
     leaveClass: String,
     enterActiveClass: String,
@@ -4659,10 +4698,7 @@ var nodeOps = Object.freeze({
 
   var decoder = document.createElement('div');
 
-  function decodeHTML(html, asAttribute) {
-    if (asAttribute) {
-      html = html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
+  function decodeHTML(html) {
     decoder.innerHTML = html;
     return decoder.textContent;
   }
@@ -4698,11 +4734,23 @@ var nodeOps = Object.freeze({
 
   var reCache = {};
 
+  var ampRE = /&amp;/g;
+  var ltRE = /&lt;/g;
+  var gtRE = /&gt;/g;
+
+  function decodeAttr(value, shouldDecodeTags) {
+    if (shouldDecodeTags) {
+      value = value.replace(ltRE, '<').replace(gtRE, '>');
+    }
+    return value.replace(ampRE, '&');
+  }
+
   function parseHTML(html, options) {
     var stack = [];
     var expectHTML = options.expectHTML;
     var isUnaryTag = options.isUnaryTag || no;
-    var shouldDecodeAttr = options.shouldDecodeAttr;
+    var isFromDOM = options.isFromDOM;
+    var shouldDecodeTags = options.shouldDecodeTags;
     var index = 0;
     var last = void 0,
         lastTag = void 0;
@@ -4860,7 +4908,7 @@ var nodeOps = Object.freeze({
         var value = args[3] || args[4] || args[5] || '';
         attrs[i] = {
           name: args[1],
-          value: shouldDecodeAttr ? decodeHTML(value, true) : value
+          value: isFromDOM ? decodeAttr(value, shouldDecodeTags) : value
         };
       }
 
@@ -5143,7 +5191,9 @@ var nodeOps = Object.freeze({
   var warn$1 = void 0;
   var platformGetTagNamespace = void 0;
   var platformMustUseProp = void 0;
+  var preTransforms = void 0;
   var transforms = void 0;
+  var postTransforms = void 0;
   var delimiters = void 0;
 
   /**
@@ -5153,7 +5203,9 @@ var nodeOps = Object.freeze({
     warn$1 = options.warn || baseWarn;
     platformGetTagNamespace = options.getTagNamespace || no;
     platformMustUseProp = options.mustUseProp || no;
+    preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
     transforms = pluckModuleFunction(options.modules, 'transformNode');
+    postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
     delimiters = options.delimiters;
     var stack = [];
     var preserveWhitespace = options.preserveWhitespace !== false;
@@ -5164,7 +5216,8 @@ var nodeOps = Object.freeze({
     parseHTML(template, {
       expectHTML: options.expectHTML,
       isUnaryTag: options.isUnaryTag,
-      shouldDecodeAttr: options.shouldDecodeAttr,
+      isFromDOM: options.isFromDOM,
+      shouldDecodeTags: options.shouldDecodeTags,
       start: function start(tag, attrs, unary) {
         // check namespace.
         // inherit parent ns if there is one
@@ -5193,6 +5246,11 @@ var nodeOps = Object.freeze({
           "development" !== 'production' && warn$1('Templates should only be responsbile for mapping the state to the ' + 'UI. Avoid placing tags with side-effects in your templates, such as ' + ('<' + tag + '>.'));
         }
 
+        // apply pre-transforms
+        for (var i = 0; i < preTransforms.length; i++) {
+          preTransforms[i](element, options);
+        }
+
         if (!inPre) {
           processPre(element);
           if (element.pre) {
@@ -5214,8 +5272,8 @@ var nodeOps = Object.freeze({
           processRef(element);
           processSlot(element);
           processComponent(element);
-          for (var i = 0; i < transforms.length; i++) {
-            transforms[i](element, options);
+          for (var _i = 0; _i < transforms.length; _i++) {
+            transforms[_i](element, options);
           }
           processAttrs(element);
         }
@@ -5247,6 +5305,10 @@ var nodeOps = Object.freeze({
         if (!unary) {
           currentParent = element;
           stack.push(element);
+        }
+        // apply post-transforms
+        for (var _i2 = 0; _i2 < postTransforms.length; _i2++) {
+          postTransforms[_i2](element, options);
         }
       },
       end: function end() {
@@ -6248,9 +6310,10 @@ var nodeOps = Object.freeze({
       }
       if (template) {
         var _compileToFunctions = compileToFunctions(template, {
-          shouldDecodeAttr: isFromDOM && shouldDecodeAttr,
-          delimiters: options.delimiters,
-          warn: warn
+          warn: warn,
+          isFromDOM: isFromDOM,
+          shouldDecodeTags: shouldDecodeTags,
+          delimiters: options.delimiters
         }, this);
 
         var render = _compileToFunctions.render;

@@ -1260,6 +1260,7 @@ var VNode = function VNode(tag, data, children, text, elm, ns, context, host, co
   this.child = undefined;
   this.parent = undefined;
   this.raw = false;
+  this.isStatic = false;
   // apply construct hook.
   // this is applied during render, before patch happens.
   // unlike other hooks, this is applied on both client and server.
@@ -1655,14 +1656,20 @@ function createComponent(Ctor, data, parent, context, host, _children, tag) {
     if (typeof _ret === "object") return _ret.v;
   }
 
-  // merge component management hooks onto the placeholder node
-  mergeHooks(data);
-
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
   var listeners = data.on;
   // replace with listeners with .native modifier
   data.on = data.nativeOn;
+
+  if (Ctor.options.abstract) {
+    // abstract components do not keep anything
+    // other than props & listeners
+    data = {};
+  }
+
+  // merge component management hooks onto the placeholder node
+  mergeHooks(data);
 
   // return a placeholder vnode
   var name = Ctor.options.name || tag;
@@ -1973,9 +1980,14 @@ function renderMixin(Vue) {
   // number conversion
   Vue.prototype._n = toNumber;
 
-  //
+  // render static tree by index
   Vue.prototype._m = function renderStatic(index) {
-    return this._staticTrees[index] || (this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy));
+    var tree = this._staticTrees[index];
+    if (!tree) {
+      tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy);
+      tree.isStatic = true;
+    }
+    return tree;
   };
 
   // filter resolution helper
@@ -2878,7 +2890,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   }
 });
 
-Vue.version = '2.0.0-beta.4';
+Vue.version = '2.0.0-beta.5';
 
 // attributes that should be using props for binding
 var mustUseProp = makeMap('value,selected,checked,muted');
@@ -3031,9 +3043,10 @@ var isIE = UA$1 && /msie|trident/.test(UA$1);
 var isIE9 = UA$1 && UA$1.indexOf('msie 9.0') > 0;
 var isAndroid = UA$1 && UA$1.indexOf('android') > 0;
 
-// some browsers, e.g. PhantomJS, encodes attribute values for innerHTML
+// some browsers, e.g. PhantomJS, encodes angular brackets
+// inside attribute values when retrieving innerHTML.
 // this causes problems with the in-browser parser.
-var shouldDecodeAttr = inBrowser ? function () {
+var shouldDecodeTags = inBrowser ? function () {
   var div = document.createElement('div');
   div.innerHTML = '<div a=">">';
   return div.innerHTML.indexOf('&gt;') > 0;
@@ -3130,6 +3143,9 @@ function isDef(s) {
 }
 
 function sameVnode(vnode1, vnode2) {
+  if (vnode1.isStatic || vnode2.isStatic) {
+    return vnode1 === vnode2;
+  }
   return vnode1.key === vnode2.key && vnode1.tag === vnode2.tag && !vnode1.data === !vnode2.data;
 }
 
@@ -3364,8 +3380,8 @@ function createPatchFunction(backend) {
         newStartVnode = newCh[++newStartIdx];
       } else {
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx);
-        idxInOld = oldKeyToIdx[newStartVnode.key];
-        if (isUndef(idxInOld)) {
+        idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx[newStartVnode.key] : newStartVnode.isStatic ? oldCh.indexOf(newStartVnode) : null;
+        if (isUndef(idxInOld) || idxInOld === -1) {
           // New element
           nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm);
           newStartVnode = newCh[++newStartIdx];
@@ -3935,8 +3951,8 @@ function removeTransitionClass(el, cls) {
   removeClass(el, cls);
 }
 
-function whenTransitionEnds(el, cb) {
-  var _getTransitionInfo = getTransitionInfo(el);
+function whenTransitionEnds(el, expectedType, cb) {
+  var _getTransitionInfo = getTransitionInfo(el, expectedType);
 
   var type = _getTransitionInfo.type;
   var timeout = _getTransitionInfo.timeout;
@@ -3964,22 +3980,42 @@ function whenTransitionEnds(el, cb) {
 
 var transformRE = /\b(transform|all)(,|$)/;
 
-function getTransitionInfo(el) {
+function getTransitionInfo(el, expectedType) {
   var styles = window.getComputedStyle(el);
-  var transitionProps = styles[transitionProp + 'Property'];
   var transitioneDelays = styles[transitionProp + 'Delay'].split(', ');
   var transitionDurations = styles[transitionProp + 'Duration'].split(', ');
+  var transitionTimeout = getTimeout(transitioneDelays, transitionDurations);
   var animationDelays = styles[animationProp + 'Delay'].split(', ');
   var animationDurations = styles[animationProp + 'Duration'].split(', ');
-  var transitionTimeout = getTimeout(transitioneDelays, transitionDurations);
   var animationTimeout = getTimeout(animationDelays, animationDurations);
-  var timeout = Math.max(transitionTimeout, animationTimeout);
-  var type = timeout > 0 ? transitionTimeout > animationTimeout ? TRANSITION : ANIMATION : null;
+
+  var type = void 0;
+  var timeout = 0;
+  var propCount = 0;
+  /* istanbul ignore if */
+  if (expectedType === TRANSITION) {
+    if (transitionTimeout > 0) {
+      type = TRANSITION;
+      timeout = transitionTimeout;
+      propCount = transitionDurations.length;
+    }
+  } else if (expectedType === ANIMATION) {
+    if (animationTimeout > 0) {
+      type = ANIMATION;
+      timeout = animationTimeout;
+      propCount = animationDurations.length;
+    }
+  } else {
+    timeout = Math.max(transitionTimeout, animationTimeout);
+    type = timeout > 0 ? transitionTimeout > animationTimeout ? TRANSITION : ANIMATION : null;
+    propCount = type ? type === TRANSITION ? transitionDurations.length : animationDurations.length : 0;
+  }
+  var hasTransform = type === TRANSITION && transformRE.test(styles[transitionProp + 'Property']);
   return {
     type: type,
     timeout: timeout,
-    propCount: type ? type === TRANSITION ? transitionDurations.length : animationDurations.length : 0,
-    hasTransform: type === TRANSITION && transformRE.test(transitionProps)
+    propCount: propCount,
+    hasTransform: hasTransform
   };
 }
 
@@ -4013,6 +4049,7 @@ function enter(vnode) {
   }
 
   var css = data.css;
+  var type = data.type;
   var enterClass = data.enterClass;
   var enterActiveClass = data.enterActiveClass;
   var appearClass = data.appearClass;
@@ -4079,7 +4116,7 @@ function enter(vnode) {
     nextFrame(function () {
       removeTransitionClass(el, startClass);
       if (!cb.cancelled && !userWantsControl) {
-        whenTransitionEnds(el, cb);
+        whenTransitionEnds(el, type, cb);
       }
     });
   }
@@ -4109,6 +4146,7 @@ function leave(vnode, rm) {
   }
 
   var css = data.css;
+  var type = data.type;
   var leaveClass = data.leaveClass;
   var leaveActiveClass = data.leaveActiveClass;
   var beforeLeave = data.beforeLeave;
@@ -4165,7 +4203,7 @@ function leave(vnode, rm) {
       nextFrame(function () {
         removeTransitionClass(el, leaveClass);
         if (!cb.cancelled && !userWantsControl) {
-          whenTransitionEnds(el, cb);
+          whenTransitionEnds(el, type, cb);
         }
       });
     }
@@ -4377,6 +4415,7 @@ var transitionProps = {
   appear: Boolean,
   css: Boolean,
   mode: String,
+  type: String,
   enterClass: String,
   leaveClass: String,
   enterActiveClass: String,

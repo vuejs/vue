@@ -1419,6 +1419,7 @@ var VNode = function VNode(tag, data, children, text, elm, ns, context, host, co
   this.child = undefined;
   this.parent = undefined;
   this.raw = false;
+  this.isStatic = false;
   // apply construct hook.
   // this is applied during render, before patch happens.
   // unlike other hooks, this is applied on both client and server.
@@ -1791,14 +1792,20 @@ function createComponent(Ctor, data, parent, context, host, _children, tag) {
     if (typeof _ret === "object") return _ret.v;
   }
 
-  // merge component management hooks onto the placeholder node
-  mergeHooks(data);
-
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
   var listeners = data.on;
   // replace with listeners with .native modifier
   data.on = data.nativeOn;
+
+  if (Ctor.options.abstract) {
+    // abstract components do not keep anything
+    // other than props & listeners
+    data = {};
+  }
+
+  // merge component management hooks onto the placeholder node
+  mergeHooks(data);
 
   // return a placeholder vnode
   var name = Ctor.options.name || tag;
@@ -2109,9 +2116,14 @@ function renderMixin(Vue) {
   // number conversion
   Vue.prototype._n = toNumber;
 
-  //
+  // render static tree by index
   Vue.prototype._m = function renderStatic(index) {
-    return this._staticTrees[index] || (this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy));
+    var tree = this._staticTrees[index];
+    if (!tree) {
+      tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy);
+      tree.isStatic = true;
+    }
+    return tree;
   };
 
   // filter resolution helper
@@ -2878,9 +2890,10 @@ var isIE = UA && /msie|trident/.test(UA);
 var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
 var isAndroid = UA && UA.indexOf('android') > 0;
 
-// some browsers, e.g. PhantomJS, encodes attribute values for innerHTML
+// some browsers, e.g. PhantomJS, encodes angular brackets
+// inside attribute values when retrieving innerHTML.
 // this causes problems with the in-browser parser.
-var shouldDecodeAttr = inBrowser ? function () {
+var shouldDecodeTags = inBrowser ? function () {
   var div = document.createElement('div');
   div.innerHTML = '<div a=">">';
   return div.innerHTML.indexOf('&gt;') > 0;
@@ -2917,11 +2930,23 @@ var isSpecialTag = makeMap('script,style', true);
 
 var reCache = {};
 
+var ampRE = /&amp;/g;
+var ltRE = /&lt;/g;
+var gtRE = /&gt;/g;
+
+function decodeAttr(value, shouldDecodeTags) {
+  if (shouldDecodeTags) {
+    value = value.replace(ltRE, '<').replace(gtRE, '>');
+  }
+  return value.replace(ampRE, '&');
+}
+
 function parseHTML(html, options) {
   var stack = [];
   var expectHTML = options.expectHTML;
   var isUnaryTag = options.isUnaryTag || no;
-  var shouldDecodeAttr = options.shouldDecodeAttr;
+  var isFromDOM = options.isFromDOM;
+  var shouldDecodeTags = options.shouldDecodeTags;
   var index = 0;
   var last = void 0,
       lastTag = void 0;
@@ -3079,7 +3104,7 @@ function parseHTML(html, options) {
       var value = args[3] || args[4] || args[5] || '';
       attrs[i] = {
         name: args[1],
-        value: shouldDecodeAttr ? entities.decodeHTML(value, true) : value
+        value: isFromDOM ? decodeAttr(value, shouldDecodeTags) : value
       };
     }
 
@@ -3362,7 +3387,9 @@ var decodeHTMLCached = cached(entities.decodeHTML);
 var warn$1 = void 0;
 var platformGetTagNamespace = void 0;
 var platformMustUseProp = void 0;
+var preTransforms = void 0;
 var transforms = void 0;
+var postTransforms = void 0;
 var delimiters = void 0;
 
 /**
@@ -3372,7 +3399,9 @@ function parse(template, options) {
   warn$1 = options.warn || baseWarn;
   platformGetTagNamespace = options.getTagNamespace || no;
   platformMustUseProp = options.mustUseProp || no;
+  preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
   transforms = pluckModuleFunction(options.modules, 'transformNode');
+  postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
   delimiters = options.delimiters;
   var stack = [];
   var preserveWhitespace = options.preserveWhitespace !== false;
@@ -3383,7 +3412,8 @@ function parse(template, options) {
   parseHTML(template, {
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
-    shouldDecodeAttr: options.shouldDecodeAttr,
+    isFromDOM: options.isFromDOM,
+    shouldDecodeTags: options.shouldDecodeTags,
     start: function start(tag, attrs, unary) {
       // check namespace.
       // inherit parent ns if there is one
@@ -3412,6 +3442,11 @@ function parse(template, options) {
         process.env.NODE_ENV !== 'production' && warn$1('Templates should only be responsbile for mapping the state to the ' + 'UI. Avoid placing tags with side-effects in your templates, such as ' + ('<' + tag + '>.'));
       }
 
+      // apply pre-transforms
+      for (var i = 0; i < preTransforms.length; i++) {
+        preTransforms[i](element, options);
+      }
+
       if (!inPre) {
         processPre(element);
         if (element.pre) {
@@ -3433,8 +3468,8 @@ function parse(template, options) {
         processRef(element);
         processSlot(element);
         processComponent(element);
-        for (var i = 0; i < transforms.length; i++) {
-          transforms[i](element, options);
+        for (var _i = 0; _i < transforms.length; _i++) {
+          transforms[_i](element, options);
         }
         processAttrs(element);
       }
@@ -3466,6 +3501,10 @@ function parse(template, options) {
       if (!unary) {
         currentParent = element;
         stack.push(element);
+      }
+      // apply post-transforms
+      for (var _i2 = 0; _i2 < postTransforms.length; _i2++) {
+        postTransforms[_i2](element, options);
       }
     },
     end: function end() {
