@@ -23,4 +23,10 @@ describe('vdom domProps module', () => {
     const elm = patch(vnode1, vnode2)
     expect(elm.src).toBeUndefined()
   })
+
+  it('should initialize the elements value to zero', () => {
+    const vnode = new VNode('input', { domProps: { value: 0 }})
+    const elm = patch(null, vnode)
+    expect(elm.value).toBe('0')
+  })
 })
