@@ -22,8 +22,9 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       // non-string values will be stringified
       elm._value = cur
       // avoid resetting cursor position when value is the same
-      if (elm.value != cur) { // eslint-disable-line
-        elm.value = cur
+      const strCur = cur == null ? '' : String(cur)
+      if (elm.value !== strCur) {
+        elm.value = strCur
       }
     } else {
       elm[key] = cur
