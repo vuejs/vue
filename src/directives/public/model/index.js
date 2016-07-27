@@ -17,7 +17,7 @@ export default {
   priority: MODEL,
   twoWay: true,
   handlers: handlers,
-  params: ['lazy', 'number', 'debounce'],
+  params: ['lazy', 'number', 'debounce', 'trim'],
 
   /**
    * Possible elements:

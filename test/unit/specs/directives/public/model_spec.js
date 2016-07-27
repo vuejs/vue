@@ -688,6 +688,31 @@ describe('v-model', function () {
     })
   })
 
+  it('support trim', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: {
+        test: 'b'
+      },
+      template: '<input v-model="test" trim>'
+    })
+    expect(el.firstChild.value).toBe('b')
+    vm.test = 'a'
+    _.nextTick(function () {
+      expect(el.firstChild.value).toBe('a')
+      el.firstChild.value = ' c'
+      trigger(el.firstChild, 'input')
+      expect(vm.test).toBe('c')
+      el.firstChild.value = ' c'
+      trigger(el.firstChild, 'input')
+      expect(vm.test).toBe('c')
+      el.firstChild.value = ' c '
+      trigger(el.firstChild, 'input')
+      expect(vm.test).toBe('c')
+      done()
+    })
+  })
+
   it('support debounce', function (done) {
     var spy = jasmine.createSpy()
     var vm = new Vue({

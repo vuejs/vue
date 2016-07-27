@@ -18,6 +18,7 @@ export default {
     var lazy = this.params.lazy
     var number = this.params.number
     var debounce = this.params.debounce
+    var trim = this.params.trim
 
     // handle composition events.
     //   http://blog.evanyou.me/2014/01/03/composition-event/
@@ -67,7 +68,9 @@ export default {
       }
       var val = number || isRange
         ? toNumber(el.value)
-        : el.value
+        : trim
+          ? el.value.trim()
+          : el.value
       self.set(val)
       // force update on next tick to avoid lock & same value
       // also only update when user is not typing
