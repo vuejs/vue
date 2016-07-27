@@ -31,7 +31,9 @@ declare type CompiledFunctionResult = {
 }
 
 declare type ModuleOptions = {
+  preTransformNode: (el: ASTElement) => void;
   transformNode: (el: ASTElement) => void; // transform an element's AST node
+  postTransformNode: (el: ASTElement) => void;
   genData: (el: ASTElement) => string; // generate extra data string for an element
   transformCode?: (el: ASTElement, code: string) => string; // further transform generated code for an element
   staticKeys?: Array<string>; // AST properties to be considered static
