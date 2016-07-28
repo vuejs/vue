@@ -30,6 +30,7 @@ const decodeHTMLCached = cached(decodeHTML)
 let warn
 let platformGetTagNamespace
 let platformMustUseProp
+let platformIsPreTag
 let preTransforms
 let transforms
 let postTransforms
@@ -45,6 +46,7 @@ export function parse (
   warn = options.warn || baseWarn
   platformGetTagNamespace = options.getTagNamespace || no
   platformMustUseProp = options.mustUseProp || no
+  platformIsPreTag = options.isPreTag || no
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
@@ -53,6 +55,7 @@ export function parse (
   const preserveWhitespace = options.preserveWhitespace !== false
   let root
   let currentParent
+  let inVPre = false
   let inPre = false
   let warned = false
   parseHTML(template, {
@@ -97,13 +100,16 @@ export function parse (
         preTransforms[i](element, options)
       }
 
-      if (!inPre) {
+      if (!inVPre) {
         processPre(element)
         if (element.pre) {
-          inPre = true
+          inVPre = true
         }
       }
-      if (inPre) {
+      if (platformIsPreTag(element.tag)) {
+        inPre = true
+      }
+      if (inVPre) {
         processRawAttrs(element)
       } else {
         processFor(element)
@@ -178,6 +184,9 @@ export function parse (
       currentParent = stack[stack.length - 1]
       // check pre state
       if (element.pre) {
+        inVPre = false
+      }
+      if (platformIsPreTag(element.tag)) {
         inPre = false
       }
     },
@@ -192,13 +201,13 @@ export function parse (
         }
         return
       }
-      text = currentParent.tag === 'pre' || text.trim()
+      text = inPre || text.trim()
         ? decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
         : preserveWhitespace && currentParent.children.length ? ' ' : ''
       if (text) {
         let expression
-        if (!inPre && text !== ' ' && (expression = parseText(text, delimiters))) {
+        if (!inVPre && text !== ' ' && (expression = parseText(text, delimiters))) {
           currentParent.children.push({
             type: 2,
             expression,

@@ -4,22 +4,22 @@ import { no, noop } from 'shared/util'
 
 export type Config = {
   // user
-  optionMergeStrategies: { [key: string]: Function },
-  silent: boolean,
-  devtools: boolean,
-  errorHandler: ?Function,
-  ignoredElements: ?Array<string>,
-  keyCodes: { [key: string]: number },
+  optionMergeStrategies: { [key: string]: Function };
+  silent: boolean;
+  devtools: boolean;
+  errorHandler: ?Function;
+  ignoredElements: ?Array<string>;
+  keyCodes: { [key: string]: number };
   // platform
-  isReservedTag: (x?: string) => boolean,
-  isUnknownElement: (x?: string) => boolean,
-  getTagNamespace: (x?: string) => string | void,
-  mustUseProp: (x?: string) => boolean,
+  isReservedTag: (x?: string) => boolean;
+  isUnknownElement: (x?: string) => boolean;
+  getTagNamespace: (x?: string) => string | void;
+  mustUseProp: (x?: string) => boolean;
   // internal
-  _assetTypes: Array<string>,
-  _lifecycleHooks: Array<string>,
-  _maxUpdateCount: number,
-  _isServer: boolean
+  _assetTypes: Array<string>;
+  _lifecycleHooks: Array<string>;
+  _maxUpdateCount: number;
+  _isServer: boolean;
 }
 
 const config: Config = {

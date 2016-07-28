@@ -310,4 +310,14 @@ describe('parser', () => {
     expect(spy1).toHaveBeenCalledWith('img')
     expect(spy2).toHaveBeenCalledWith('img')
   })
+
+  it('preserve whitespace in <pre> tag', function () {
+    const options = extend({}, baseOptions)
+    const ast = parse('<pre><code>  \n<span>hi</span>\n  </code></pre>', options)
+    const code = ast.children[0]
+    expect(code.children[0].type).toBe(3)
+    expect(code.children[0].text).toBe('  \n')
+    expect(code.children[2].type).toBe(3)
+    expect(code.children[2].text).toBe('\n  ')
+  })
 })

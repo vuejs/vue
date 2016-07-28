@@ -6,7 +6,10 @@ import { compile as baseCompile } from 'compiler/index'
 import { detectErrors } from 'compiler/error-detector'
 import modules from './modules/index'
 import directives from './directives/index'
-import { isIE, isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from '../util/index'
+import {
+  isIE, isReservedTag, isUnaryTag,
+  mustUseProp, getTagNamespace, isPreTag
+} from '../util/index'
 
 const cache: { [key: string]: CompiledFunctionResult } = Object.create(null)
 
@@ -19,7 +22,8 @@ export const baseOptions: CompilerOptions = {
   isReservedTag,
   isUnaryTag,
   mustUseProp,
-  getTagNamespace
+  getTagNamespace,
+  isPreTag
 }
 
 export function compile (
