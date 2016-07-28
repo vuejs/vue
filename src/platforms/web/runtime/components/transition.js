@@ -47,18 +47,8 @@ export default {
       return
     }
 
-    // warn text nodes
-    if (process.env.NODE_ENV !== 'production' &&
-        children.length === 1 && !children[0].tag) {
-      warn(
-        '<transition> can only be used on elements or components, not text nodes.',
-        this.$parent
-      )
-    }
-
     // filter out text nodes (possible whitespaces)
     children = children.filter(c => c.tag)
-
     if (!children.length) {
       return
     }
