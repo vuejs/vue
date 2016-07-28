@@ -336,12 +336,5 @@ if (!isIE9) {
       }).$mount()
       expect('invalid <transition> mode: foo').toHaveBeenWarned()
     })
-
-    it('warn usage on non element/component', () => {
-      new Vue({
-        template: '<transition mode="foo">foo</transition>'
-      }).$mount()
-      expect('<transition> can only be used on elements or components, not text nodes.').toHaveBeenWarned()
-    })
   })
 }
