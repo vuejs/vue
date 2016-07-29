@@ -126,7 +126,7 @@ module.exports = {
     // editing triggered by enter
     browser
       .dblClick('.todo label')
-      enter('.todo:nth-child(1) .edit', 'edited again!')
+      .enterValue('.todo:nth-child(1) .edit', 'edited again!')
       .assert.count('.todo.editing', 0)
       .assert.containsText('.todo:nth-child(1) label', 'edited again!')
 
@@ -135,14 +135,14 @@ module.exports = {
       .dblClick('.todo label')
       .clearValue('.todo:nth-child(1) .edit')
       .setValue('.todo:nth-child(1) .edit', 'edited!')
-      triggerKeyup('.todo:nth-child(1) .edit', 27)
+      .trigger('.todo:nth-child(1) .edit', 'keyup', 27)
       .assert.count('.todo.editing', 0)
       .assert.containsText('.todo:nth-child(1) label', 'edited again!')
 
     // empty value should remove
     browser
       .dblClick('.todo label')
-      enter('.todo:nth-child(1) .edit', ' ')
+      .enterValue('.todo:nth-child(1) .edit', ' ')
       .assert.count('.todo', 3)
 
     // toggle all
@@ -154,23 +154,7 @@ module.exports = {
       .end()
 
     function createNewItem (text) {
-      return enter('.new-todo', text)
-    }
-
-    function enter (selector, text) {
-      browser
-        .clearValue(selector)
-        .setValue(selector, text)
-      return triggerKeyup(selector, 13)
-    }
-
-    function triggerKeyup (selector, code) {
-      return browser.execute(function (selector, code) {
-        var e = document.createEvent('HTMLEvents')
-        e.initEvent('keyup', true, true)
-        e.keyCode = code
-        document.querySelector(selector).dispatchEvent(e)
-      }, [selector, code])
+      return browser.enterValue('.new-todo', text)
     }
 
     function removeItemAt (n) {
