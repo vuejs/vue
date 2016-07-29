@@ -167,11 +167,11 @@ describe('codegen', () => {
     )
   })
 
-  it('generate staticAttrs', () => {
+  it('generate static attrs', () => {
     assertCodegen(
       '<input name="field1">',
       `with(this){return _m(0)}`,
-      [`with(this){return _h('input',{staticAttrs:{"name":"field1"}})}`]
+      [`with(this){return _h('input',{attrs:{"name":"field1"}})}`]
     )
   })
 
@@ -260,7 +260,7 @@ describe('codegen', () => {
   it('generate component', () => {
     assertCodegen(
       '<my-component name="mycomponent1" :msg="msg" @notify="onNotify"><div>hi</div></my-component>',
-      `with(this){return _h('my-component',{attrs:{"msg":msg},staticAttrs:{"name":"mycomponent1"},on:{"notify":onNotify}},function(){return [_m(0)]})}`,
+      `with(this){return _h('my-component',{attrs:{"name":"mycomponent1","msg":msg},on:{"notify":onNotify}},function(){return [_m(0)]})}`,
       [`with(this){return _h('div',["hi"])}`]
     )
   })

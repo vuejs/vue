@@ -21,10 +21,6 @@ export function addAttr (el: ASTElement, name: string, value: string) {
   (el.attrs || (el.attrs = [])).push({ name, value })
 }
 
-export function addStaticAttr (el: ASTElement, name: string, value: string) {
-  (el.staticAttrs || (el.staticAttrs = [])).push({ name, value })
-}
-
 export function addDirective (
   el: ASTElement,
   name: string,

@@ -64,14 +64,6 @@ function setAttr (el: Element, key: string, value: any) {
 }
 
 export default {
-  create: function (_: any, vnode: VNodeWithData) {
-    const attrs = vnode.data.staticAttrs
-    if (attrs) {
-      for (const key in attrs) {
-        setAttr(vnode.elm, key, attrs[key])
-      }
-    }
-    updateAttrs(_, vnode)
-  },
+  create: updateAttrs,
   update: updateAttrs
 }

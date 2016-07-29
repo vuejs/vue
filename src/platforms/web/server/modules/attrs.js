@@ -8,9 +8,6 @@ import {
 
 export default function renderAttrs (node: VNodeWithData): string {
   let res = ''
-  if (node.data.staticAttrs) {
-    res += render(node.data.staticAttrs)
-  }
   if (node.data.attrs) {
     res += render(node.data.attrs)
   }

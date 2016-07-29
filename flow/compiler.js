@@ -71,11 +71,11 @@ declare type ASTElement = {
   static?: boolean;
   staticRoot?: boolean;
   staticProcessed?: boolean;
+  hasBindings?: boolean;
 
   text?: string;
   attrs?: Array<{ name: string; value: string }>;
   props?: Array<{ name: string; value: string }>;
-  staticAttrs?: Array<{ name: string; value: string }>;
   plain?: boolean;
   pre?: true;
   ns?: string;

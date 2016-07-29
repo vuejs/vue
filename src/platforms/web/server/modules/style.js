@@ -3,7 +3,7 @@
 import { hyphenate, toObject } from 'shared/util'
 
 export default function renderStyle (node: VNodeWithData): ?string {
-  const staticStyle = node.data.staticAttrs && node.data.staticAttrs.style
+  const staticStyle = node.data.attrs && node.data.attrs.style
   if (node.data.style || staticStyle) {
     let styles = node.data.style
     let res = ' style="'

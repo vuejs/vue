@@ -9,7 +9,6 @@ import {
   getAndRemoveAttr,
   addProp,
   addAttr,
-  addStaticAttr,
   addHandler,
   addDirective,
   getBindingAttr,
@@ -242,7 +241,7 @@ function processPre (el) {
 function processRawAttrs (el) {
   const l = el.attrsList.length
   if (l) {
-    const attrs = el.staticAttrs = new Array(l)
+    const attrs = el.attrs = new Array(l)
     for (let i = 0; i < l; i++) {
       attrs[i] = {
         name: el.attrsList[i].name,
@@ -361,6 +360,8 @@ function processAttrs (el) {
     name = list[i].name
     value = list[i].value
     if (dirRE.test(name)) {
+      // mark element as dynamic
+      el.hasBindings = true
       // modifiers
       modifiers = parseModifiers(name)
       if (modifiers) {
@@ -402,7 +403,7 @@ function processAttrs (el) {
           )
         }
       }
-      addStaticAttr(el, name, JSON.stringify(value))
+      addAttr(el, name, JSON.stringify(value))
     }
   }
 }

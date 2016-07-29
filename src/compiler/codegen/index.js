@@ -31,6 +31,7 @@ export function generate (
   platformDirectives = options.directives || {}
   isPlatformReservedTag = options.isReservedTag || no
   const code = ast ? genElement(ast) : '_h("div")'
+  // console.log(code)
   staticRenderFns = prevStaticRenderFns
   return {
     render: `with(this){return ${code}}`,
@@ -149,10 +150,6 @@ function genData (el: ASTElement): string | void {
   // attributes
   if (el.attrs) {
     data += `attrs:{${genProps(el.attrs)}},`
-  }
-  // static attributes
-  if (el.staticAttrs) {
-    data += `staticAttrs:{${genProps(el.staticAttrs)}},`
   }
   // DOM props
   if (el.props) {
