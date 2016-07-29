@@ -92,4 +92,16 @@ describe('vdom class module', () => {
     expect(elm).not.toHaveClass('class2')
     expect(elm).not.toHaveClass('class3')
   })
+
+  it('should remove class for new nodes without class data', () => {
+    const vnode1 = new VNode('p', {
+      class: { class1: true, class2: false, class3: true }
+    })
+    const vnode2 = new VNode('p', {})
+    let elm = patch(null, vnode1)
+    elm = patch(vnode1, vnode2)
+    expect(elm).not.toHaveClass('class1')
+    expect(elm).not.toHaveClass('class2')
+    expect(elm).not.toHaveClass('class3')
+  })
 })

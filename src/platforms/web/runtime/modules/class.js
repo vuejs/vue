@@ -5,7 +5,9 @@ import { genClassForVnode, concat, stringifyClass } from 'web/util/index'
 function updateClass (oldVnode: any, vnode: any) {
   const el = vnode.elm
   const data: VNodeData = vnode.data
-  if (!data.staticClass && !data.class) {
+  const oldData: VNodeData = oldVnode.data
+  if (!data.staticClass && !data.class &&
+      (!oldData || (!oldData.staticClass && !oldData.class))) {
     return
   }
 
