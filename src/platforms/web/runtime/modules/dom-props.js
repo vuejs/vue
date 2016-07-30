@@ -1,5 +1,7 @@
 /* @flow */
 
+import { extend } from 'shared/util'
+
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.domProps && !vnode.data.domProps) {
     return
@@ -7,8 +9,11 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   let key, cur
   const elm: any = vnode.elm
   const oldProps = oldVnode.data.domProps || {}
-  const props = vnode.data.domProps || {}
-  const clonedProps = vnode.data.domProps = {}
+  let props = vnode.data.domProps || {}
+  // clone observed objects, as the user probably wants to mutate it
+  if (props.__ob__) {
+    props = vnode.data.domProps = extend({}, props)
+  }
 
   for (key in oldProps) {
     if (props[key] == null) {
@@ -16,7 +21,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     }
   }
   for (key in props) {
-    cur = clonedProps[key] = props[key]
+    cur = props[key]
     if (key === 'value') {
       // store value as _value as well since
       // non-string values will be stringified
