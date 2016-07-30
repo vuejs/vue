@@ -115,9 +115,9 @@ The default test script will do the following: lint with ESLint -> type check wi
 
     - **`instance`**: contains Vue instance constructor and prototype methods.
 
-    - `**global-api`**: as the name suggests.
+    - **`global-api`**: as the name suggests.
 
-    - `**components`**: universal abstract components. Currently `keep-alive` is the only one.
+    - **`components`**: universal abstract components. Currently `keep-alive` is the only one.
 
   - **`server`**: contains code related to server-side rendering.
 
