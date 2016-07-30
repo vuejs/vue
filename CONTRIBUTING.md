@@ -2,6 +2,11 @@
 
 Hi! I’m really excited that you are interested in contributing to Vue.js. Before submitting your contribution though, please make sure to take a moment and read through the following guidelines.
 
+- [Issue Reporting Guidelines](#issue-reporting-guidelines)
+- [Pull Request Guidelines](#pull-request-guidelines)
+- [Development Setup](#development-setup)
+- [Project Structure](#project-structure)
+
 ## Issue Reporting Guidelines
 
 - The issue list of this repo is **exclusively** for bug reports and feature requests. Non-conforming issues will be closed immediately.
