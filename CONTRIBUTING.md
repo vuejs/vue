@@ -106,7 +106,13 @@ The default test script will do the following: lint with ESLint -> type check wi
 
     - **`observer`**: contains code related to the reactivity system.
 
-    - **`vdom`**: contains code related to vdom patching. Note that `patch.js` exports a `createPatchFunction` function, and the browser-specific modules / node operations are injected in `platforms/web/runtime/patch.js`.
+    - **`vdom`**: contains code related to vdom element creation and patching.
+
+    - **`instance`**: contains Vue instance constructor and prototype methods.
+
+    - `**global-api`**: as the name suggests.
+
+    - `**components`**: universal abstract components. Currently `keep-alive` is the only one.
 
   - **`server`**: contains code related to server-side rendering.
 
