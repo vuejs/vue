@@ -449,6 +449,42 @@ if (!isIE9) {
       }).then(done)
     })
 
+    it('transition with v-show, inside child component', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <test v-show="ok"></test>
+          </div>
+        `,
+        data: { ok: true },
+        components: {
+          test: {
+            template: `<transition name="test"><div class="test">foo</div></transition>`
+          }
+        }
+      }).$mount(el)
+
+      // should not apply transition on initial render by default
+      expect(vm.$el.textContent).toBe('foo')
+      expect(vm.$el.children[0].style.display).toBe('')
+      vm.ok = false
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-leave-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.children[0].style.display).toBe('none')
+        vm.ok = true
+      }).then(() => {
+        expect(vm.$el.children[0].style.display).toBe('')
+        expect(vm.$el.children[0].className).toBe('test test-enter test-enter-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-enter-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.children[0].className).toBe('test')
+      }).then(done)
+    })
+
     it('leaveCancelled (v-show only)', done => {
       const spy = jasmine.createSpy('leaveCancelled')
       const vm = new Vue({
@@ -645,6 +681,44 @@ if (!isIE9) {
                 <div>foo</div>
               </transition>
             ` // test transition override from parent
+          }
+        }
+      }).$mount(el)
+
+      // should not apply transition on initial render by default
+      expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
+      vm.ok = false
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test v-leave-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.children.length).toBe(0)
+        vm.ok = true
+      }).then(() => {
+        expect(vm.$el.children[0].className).toBe('test v-enter v-enter-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test v-enter-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.children[0].className).toBe('test')
+      }).then(done)
+    })
+
+    it('transition inside child component', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <test v-if="ok" class="test"></test>
+          </div>
+        `,
+        data: { ok: true },
+        components: {
+          test: {
+            template: `
+              <transition>
+                <div>foo</div>
+              </transition>
+            `
           }
         }
       }).$mount(el)
