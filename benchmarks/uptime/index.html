@@ -164,7 +164,7 @@
             if (this.playing) {
               update()
             } else {
-              cancelAnimationFrame(loop)
+              clearTimeout(timeoutId)
             }
           }
         }
@@ -183,7 +183,7 @@
         }
       }
 
-      var loop
+      var timeoutId
       var lastFrame = null
       function update () {
         var thisFrame = window.performance.now()
@@ -191,7 +191,7 @@
           app.fps = Math.round(fpsMeter.push(1000 / (thisFrame - lastFrame)))
         }
         app.servers = Object.freeze(generateServers())
-        loop = setTimeout(update, 0) // not using rAF because that limits us to 60fps!
+        timeoutId = setTimeout(update, 0) // not using rAF because that limits us to 60fps!
         lastFrame = thisFrame
       }
     </script>
