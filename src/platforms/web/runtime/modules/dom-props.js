@@ -21,6 +21,12 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     }
   }
   for (key in props) {
+    // ignore children if the node has textContent or innerHTML,
+    // as these will throw away existing DOM nodes and cause removal errors
+    // on subsequent patches (#3360)
+    if ((key === 'textContent' || key === 'innerHTML') && vnode.children) {
+      vnode.children.length = 0
+    }
     cur = props[key]
     if (key === 'value') {
       // store value as _value as well since
