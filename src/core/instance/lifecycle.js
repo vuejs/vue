@@ -183,7 +183,6 @@ export function lifecycleMixin (Vue: Class<Component>) {
 }
 
 export function callHook (vm: Component, hook: string) {
-  vm.$emit('pre-hook:' + hook)
   const handlers = vm.$options[hook]
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
