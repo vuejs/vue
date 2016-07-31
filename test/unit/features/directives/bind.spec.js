@@ -199,4 +199,27 @@ describe('Directive v-bind', () => {
     }).$mount()
     expect('v-bind without argument expects an Object or Array value').toHaveBeenWarned()
   })
+
+  // a vdom patch edge case where the user has several un-keyed elements of the
+  // same tag next to each other, and toggling them.
+  it('properly update for toggling un-keyed children', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <div v-if="ok" id="a" data-test="1"></div>
+          <div v-if="!ok" id="b"></div>
+        </div>
+      `,
+      data: {
+        ok: true
+      }
+    }).$mount()
+    expect(vm.$el.children[0].id).toBe('a')
+    expect(vm.$el.children[0].getAttribute('data-test')).toBe('1')
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].id).toBe('b')
+      expect(vm.$el.children[0].getAttribute('data-test')).toBe(null)
+    }).then(done)
+  })
 })

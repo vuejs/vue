@@ -106,4 +106,25 @@ describe('Directive v-bind:class', () => {
       expect(vm.$el.className).toBe('a b')
     }).then(done)
   })
+
+  // a vdom patch edge case where the user has several un-keyed elements of the
+  // same tag next to each other, and toggling them.
+  it('properly remove staticClass for toggling un-keyed children', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <div v-if="ok" class="a"></div>
+          <div v-if="!ok"></div>
+        </div>
+      `,
+      data: {
+        ok: true
+      }
+    }).$mount()
+    expect(vm.$el.children[0].className).toBe('a')
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].className).toBe('')
+    }).then(done)
+  })
 })
