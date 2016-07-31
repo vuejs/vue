@@ -49,6 +49,7 @@ export default {
 
     // filter out text nodes (possible whitespaces)
     children = children.filter(c => c.tag)
+    /* istanbul ignore if */
     if (!children.length) {
       return
     }

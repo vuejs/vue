@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 import { xlinkNS } from 'web/util/index'
@@ -73,5 +74,29 @@ describe('vdom attrs module', () => {
     const vnode = new VNode('option', { attrs: { 'xlink:disabled': true }})
     const elm = patch(null, vnode)
     expect(elm.getAttributeNS(xlinkNS, 'disabled')).toBe('true')
+  })
+
+  it('should handle mutating observed attrs object', done => {
+    const vm = new Vue({
+      data: {
+        attrs: {
+          id: 'foo'
+        }
+      },
+      render (h) {
+        return h('div', {
+          attrs: this.attrs
+        })
+      }
+    }).$mount()
+
+    expect(vm.$el.id).toBe('foo')
+    vm.attrs.id = 'bar'
+    waitForUpdate(() => {
+      expect(vm.$el.id).toBe('bar')
+      vm.attrs = { id: 'baz' }
+    }).then(() => {
+      expect(vm.$el.id).toBe('baz')
+    }).then(done)
   })
 })

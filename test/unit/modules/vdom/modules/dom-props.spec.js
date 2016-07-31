@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 
@@ -51,5 +52,29 @@ describe('vdom domProps module', () => {
     const elm2 = patch(null, vnode2)
     expect(elm2.textContent).toBe('hi')
     expect(vnode2.children.length).toBe(0)
+  })
+
+  it('should handle mutating observed props object', done => {
+    const vm = new Vue({
+      data: {
+        props: {
+          id: 'foo'
+        }
+      },
+      render (h) {
+        return h('div', {
+          domProps: this.props
+        })
+      }
+    }).$mount()
+
+    expect(vm.$el.id).toBe('foo')
+    vm.props.id = 'bar'
+    waitForUpdate(() => {
+      expect(vm.$el.id).toBe('bar')
+      vm.props = { id: 'baz' }
+    }).then(() => {
+      expect(vm.$el.id).toBe('baz')
+    }).then(done)
   })
 })
