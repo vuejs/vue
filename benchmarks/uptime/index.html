@@ -6,7 +6,7 @@
     <style type="text/css">
       html, body {
         margin: 0;
-        padding: 0;
+        padding: 0 10px;
         font-family: sans-serif;
       }
 
@@ -69,6 +69,7 @@
     </style>
   </head>
   <body>
+    <p>Reference: <a href="https://github.com/tildeio/glimmer/blob/master/packages/glimmer-demos/lib/uptime.ts">Ember Glimmer 2 demo</a></p>
     <div id="app">
       <p>FPS: {{ fps }}</p>
       <button @click="toggle">{{ playing ? 'pause' : 'play' }}</button>
