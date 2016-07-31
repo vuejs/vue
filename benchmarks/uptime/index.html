@@ -81,14 +81,18 @@
     </div>
     <script src="../../dist/vue.min.js"></script>
     <script>
+      // functional components are prefect for small, presentational components
+      // and they are much more efficient than stateful ones.
       Vue.component('uptime-day', {
         props: ['day'],
-        template: `
-          <div class="uptime-day">
-            <span class="uptime-day-status" :style="{ backgroundColor: day.up ? '#8cc665' : '#ccc' }"></span>
-            <span class="hover">{{day.number}}: {{day.up ? 'Servers operational!' : 'Red alert!'}}</span>
-          </div>
-        `
+        functional: true,
+        render (h, ctx) {
+          var day = ctx.props.day
+          return h('div', { staticClass: 'uptime-day'}, [
+            h('span', { staticClass: 'uptime-day-status', style: { backgroundColor: day.up ? '#8cc665' : '#ccc' } }),
+            h('span', { staticClass: 'hover' }, [day.number + ': ' + day.up ? 'Servers operational!' : 'Red alert!'])
+          ])
+        }
       })
 
       Vue.component('server-uptime', {
@@ -187,7 +191,7 @@
           app.fps = Math.round(fpsMeter.push(1000 / (thisFrame - lastFrame)))
         }
         app.servers = Object.freeze(generateServers())
-        loop = requestAnimationFrame(update)
+        loop = setTimeout(update, 0) // not using rAF because that limits us to 60fps!
         lastFrame = thisFrame
       }
     </script>
