@@ -93,6 +93,51 @@ describe('Directive v-bind:class', () => {
     }).then(done)
   })
 
+  it('class merge between multiple nested components sharing same element', done => {
+    const vm = new Vue({
+      template: `
+        <component1 :class="componentClass1">
+          <component2 :class="componentClass2">
+            <component3 :class="componentClass3">
+              some text
+            </component3>
+          </component2>
+        </component1>
+      `,
+      data: {
+        componentClass1: 'componentClass1',
+        componentClass2: 'componentClass2',
+        componentClass3: 'componentClass3'
+      },
+      components: {
+        component1: {
+          render () {
+            return this.$slots.default[0]
+          }
+        },
+        component2: {
+          render () {
+            return this.$slots.default[0]
+          }
+        },
+        component3: {
+          template: '<div class="staticClass"><slot></slot></div>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.className).toBe('staticClass componentClass3 componentClass2 componentClass1')
+    vm.componentClass1 = 'c1'
+    waitForUpdate(() => {
+      expect(vm.$el.className).toBe('staticClass componentClass3 componentClass2 c1')
+      vm.componentClass2 = 'c2'
+    }).then(() => {
+      expect(vm.$el.className).toBe('staticClass componentClass3 c2 c1')
+      vm.componentClass3 = 'c3'
+    }).then(() => {
+      expect(vm.$el.className).toBe('staticClass c3 c2 c1')
+    }).then(done)
+  })
+
   it('deep update', done => {
     const vm = new Vue({
       template: '<div :class="test"></div>',

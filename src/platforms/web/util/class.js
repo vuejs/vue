@@ -4,14 +4,18 @@ import { isObject } from 'shared/util'
 
 export function genClassForVnode (vnode: VNode): string {
   let data = vnode.data
-  // Important: check if this is a component container node
-  // or a child component root node
-  let i
-  if ((i = vnode.child) && (i = i._vnode.data)) {
-    data = mergeClassData(i, data)
+  let parentNode = vnode
+  let childNode = vnode
+  while (childNode.child) {
+    childNode = childNode.child._vnode
+    if (childNode.data) {
+      data = mergeClassData(childNode.data, data)
+    }
   }
-  if ((i = vnode.parent) && (i = i.data)) {
-    data = mergeClassData(data, i)
+  while ((parentNode = parentNode.parent)) {
+    if (parentNode.data) {
+      data = mergeClassData(data, parentNode.data)
+    }
   }
   return genClassFromData(data)
 }
