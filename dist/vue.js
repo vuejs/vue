@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-beta.5
+ * Vue.js v2.0.0-beta.6
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -1282,12 +1282,16 @@
   };
 
   function normalizeChildren(children, ns) {
-    // invoke children thunks.
-    // components always receive their children as thunks so that they
-    // can perform the actual render inside their own dependency collection cycle.
-    if (typeof children === 'function') {
+    // Invoke children thunks. Components always receive their children
+    // as thunks so that they can perform the actual render inside their
+    // own dependency collection cycle. Also, since JSX automatically
+    // wraps component children in a thunk, we handle nested thunks to
+    // prevent situations such as <MyComponent>{ children }</MyComponent>
+    // from failing when it produces a double thunk.
+    while (typeof children === 'function') {
       children = children();
     }
+
     if (isPrimitive(children)) {
       return [createTextVNode(children)];
     }
@@ -1577,7 +1581,6 @@
   }
 
   function callHook(vm, hook) {
-    vm.$emit('pre-hook:' + hook);
     var handlers = vm.$options[hook];
     if (handlers) {
       for (var i = 0, j = handlers.length; i < j; i++) {
@@ -1800,12 +1803,11 @@
     var attrs = data.attrs;
     var props = data.props;
     var domProps = data.domProps;
-    var staticAttrs = data.staticAttrs;
 
-    if (attrs || props || domProps || staticAttrs) {
+    if (attrs || props || domProps) {
       for (var key in propOptions) {
         var altKey = hyphenate(key);
-        checkProp(res, props, key, altKey, true) || checkProp(res, attrs, key, altKey) || checkProp(res, domProps, key, altKey) || checkProp(res, staticAttrs, key, altKey);
+        checkProp(res, props, key, altKey, true) || checkProp(res, attrs, key, altKey) || checkProp(res, domProps, key, altKey);
       }
     }
     return res;
@@ -2895,7 +2897,7 @@
     }
   });
 
-  Vue.version = '2.0.0-beta.5';
+  Vue.version = '2.0.0-beta.6';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
@@ -2922,14 +2924,18 @@
 
   function genClassForVnode(vnode) {
     var data = vnode.data;
-    // Important: check if this is a component container node
-    // or a child component root node
-    var i = void 0;
-    if ((i = vnode.child) && (i = i._vnode.data)) {
-      data = mergeClassData(i, data);
+    var parentNode = vnode;
+    var childNode = vnode;
+    while (childNode.child) {
+      childNode = childNode.child._vnode;
+      if (childNode.data) {
+        data = mergeClassData(childNode.data, data);
+      }
     }
-    if ((i = vnode.parent) && (i = i.data)) {
-      data = mergeClassData(data, i);
+    while (parentNode = parentNode.parent) {
+      if (parentNode.data) {
+        data = mergeClassData(data, parentNode.data);
+      }
     }
     return genClassFromData(data);
   }
@@ -3004,6 +3010,10 @@
   // this map is intentionally selective, only covering SVG elements that may
   // contain child elements.
   var isSVG = makeMap('svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,font,' + 'font-face,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' + 'polygon,polyline,rect,switch,symbol,text,textpath,tspan,use,view', true);
+
+  var isPreTag = function isPreTag(tag) {
+    return tag === 'pre';
+  };
 
   var isReservedTag = function isReservedTag(tag) {
     return isHTMLTag(tag) || isSVG(tag);
@@ -3670,10 +3680,13 @@ var nodeOps = Object.freeze({
     var elm = vnode.elm;
     var oldAttrs = oldVnode.data.attrs || {};
     var attrs = vnode.data.attrs || {};
-    var clonedAttrs = vnode.data.attrs = {};
+    // clone observed objects, as the user probably wants to mutate it
+    if (attrs.__ob__) {
+      attrs = vnode.data.attrs = extend({}, attrs);
+    }
 
     for (key in attrs) {
-      cur = clonedAttrs[key] = attrs[key];
+      cur = attrs[key];
       old = oldAttrs[key];
       if (old !== cur) {
         setAttr(elm, key, cur);
@@ -3717,22 +3730,15 @@ var nodeOps = Object.freeze({
   }
 
   var attrs = {
-    create: function create(_, vnode) {
-      var attrs = vnode.data.staticAttrs;
-      if (attrs) {
-        for (var key in attrs) {
-          setAttr(vnode.elm, key, attrs[key]);
-        }
-      }
-      updateAttrs(_, vnode);
-    },
+    create: updateAttrs,
     update: updateAttrs
   };
 
   function updateClass(oldVnode, vnode) {
     var el = vnode.elm;
     var data = vnode.data;
-    if (!data.staticClass && !data.class) {
+    var oldData = oldVnode.data;
+    if (!data.staticClass && !data.class && (!oldData || !oldData.staticClass && !oldData.class)) {
       return;
     }
 
@@ -3785,7 +3791,10 @@ var nodeOps = Object.freeze({
     var elm = vnode.elm;
     var oldProps = oldVnode.data.domProps || {};
     var props = vnode.data.domProps || {};
-    var clonedProps = vnode.data.domProps = {};
+    // clone observed objects, as the user probably wants to mutate it
+    if (props.__ob__) {
+      props = vnode.data.domProps = extend({}, props);
+    }
 
     for (key in oldProps) {
       if (props[key] == null) {
@@ -3793,15 +3802,21 @@ var nodeOps = Object.freeze({
       }
     }
     for (key in props) {
-      cur = clonedProps[key] = props[key];
+      // ignore children if the node has textContent or innerHTML,
+      // as these will throw away existing DOM nodes and cause removal errors
+      // on subsequent patches (#3360)
+      if ((key === 'textContent' || key === 'innerHTML') && vnode.children) {
+        vnode.children.length = 0;
+      }
+      cur = props[key];
       if (key === 'value') {
         // store value as _value as well since
         // non-string values will be stringified
         elm._value = cur;
         // avoid resetting cursor position when value is the same
-        if (elm.value != cur) {
-          // eslint-disable-line
-          elm.value = cur;
+        var strCur = cur == null ? '' : String(cur);
+        if (elm.value !== strCur) {
+          elm.value = strCur;
         }
       } else {
         elm[key] = cur;
@@ -3841,15 +3856,18 @@ var nodeOps = Object.freeze({
     var elm = vnode.elm;
     var oldStyle = oldVnode.data.style || {};
     var style = vnode.data.style || {};
+    var needClone = style.__ob__;
 
     // handle array syntax
     if (Array.isArray(style)) {
-      style = toObject(style);
+      style = vnode.data.style = toObject(style);
     }
 
     // clone the style for future updates,
     // in case the user mutates the style object in-place.
-    var clonedStyle = vnode.data.style = {};
+    if (needClone) {
+      style = vnode.data.style = extend({}, style);
+    }
 
     for (name in oldStyle) {
       if (!style[name]) {
@@ -3857,7 +3875,7 @@ var nodeOps = Object.freeze({
       }
     }
     for (name in style) {
-      cur = clonedStyle[name] = style[name];
+      cur = style[name];
       if (cur !== oldStyle[name]) {
         // ie9 setting to null has no effect, must use empty string
         elm.style[normalize(name)] = cur || '';
@@ -4381,11 +4399,17 @@ var nodeOps = Object.freeze({
     el.dispatchEvent(e);
   }
 
+  // recursively search for possible transition defined inside the component root
+  function locateNode(vnode) {
+    return vnode.child && (!vnode.data || !vnode.data.transition) ? locateNode(vnode.child._vnode) : vnode;
+  }
+
   var show = {
     bind: function bind(el, _ref, vnode) {
       var value = _ref.value;
 
-      var transition = vnode.data.transition;
+      vnode = locateNode(vnode);
+      var transition = vnode.data && vnode.data.transition;
       if (value && transition && transition.appear && !isIE9) {
         enter(vnode);
       }
@@ -4394,7 +4418,8 @@ var nodeOps = Object.freeze({
     update: function update(el, _ref2, vnode) {
       var value = _ref2.value;
 
-      var transition = vnode.data.transition;
+      vnode = locateNode(vnode);
+      var transition = vnode.data && vnode.data.transition;
       if (transition && !isIE9) {
         if (value) {
           enter(vnode);
@@ -4457,16 +4482,11 @@ var nodeOps = Object.freeze({
         return;
       }
 
-      // warn text nodes
-      if ("development" !== 'production' && children.length === 1 && !children[0].tag) {
-        warn('<transition> can only be used on elements or components, not text nodes.', this.$parent);
-      }
-
       // filter out text nodes (possible whitespaces)
       children = children.filter(function (c) {
         return c.tag;
       });
-
+      /* istanbul ignore if */
       if (!children.length) {
         return;
       }
@@ -5107,10 +5127,6 @@ var nodeOps = Object.freeze({
     (el.attrs || (el.attrs = [])).push({ name: name, value: value });
   }
 
-  function addStaticAttr(el, name, value) {
-    (el.staticAttrs || (el.staticAttrs = [])).push({ name: name, value: value });
-  }
-
   function addDirective(el, name, value, arg, modifiers) {
     (el.directives || (el.directives = [])).push({ name: name, value: value, arg: arg, modifiers: modifiers });
   }
@@ -5191,6 +5207,7 @@ var nodeOps = Object.freeze({
   var warn$1 = void 0;
   var platformGetTagNamespace = void 0;
   var platformMustUseProp = void 0;
+  var platformIsPreTag = void 0;
   var preTransforms = void 0;
   var transforms = void 0;
   var postTransforms = void 0;
@@ -5203,6 +5220,7 @@ var nodeOps = Object.freeze({
     warn$1 = options.warn || baseWarn;
     platformGetTagNamespace = options.getTagNamespace || no;
     platformMustUseProp = options.mustUseProp || no;
+    platformIsPreTag = options.isPreTag || no;
     preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
     transforms = pluckModuleFunction(options.modules, 'transformNode');
     postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
@@ -5211,6 +5229,7 @@ var nodeOps = Object.freeze({
     var preserveWhitespace = options.preserveWhitespace !== false;
     var root = void 0;
     var currentParent = void 0;
+    var inVPre = false;
     var inPre = false;
     var warned = false;
     parseHTML(template, {
@@ -5251,13 +5270,16 @@ var nodeOps = Object.freeze({
           preTransforms[i](element, options);
         }
 
-        if (!inPre) {
+        if (!inVPre) {
           processPre(element);
           if (element.pre) {
-            inPre = true;
+            inVPre = true;
           }
         }
-        if (inPre) {
+        if (platformIsPreTag(element.tag)) {
+          inPre = true;
+        }
+        if (inVPre) {
           processRawAttrs(element);
         } else {
           processFor(element);
@@ -5278,21 +5300,29 @@ var nodeOps = Object.freeze({
           processAttrs(element);
         }
 
-        // tree management
-        if (!root) {
-          root = element;
-          // check root element constraints
+        function checkRootConstraints(el) {
           if ("development" !== 'production') {
-            if (tag === 'slot' || tag === 'template') {
-              warn$1('Cannot use <' + tag + '> as component root element because it may ' + 'contain multiple nodes:\n' + template);
+            if (el.tag === 'slot' || el.tag === 'template') {
+              warn$1('Cannot use <' + el.tag + '> as component root element because it may ' + 'contain multiple nodes:\n' + template);
             }
-            if (element.attrsMap.hasOwnProperty('v-for')) {
+            if (el.attrsMap.hasOwnProperty('v-for')) {
               warn$1('Cannot use v-for on stateful component root element because ' + 'it renders multiple elements:\n' + template);
             }
           }
+        }
+
+        // tree management
+        if (!root) {
+          root = element;
+          checkRootConstraints(root);
         } else if ("development" !== 'production' && !stack.length && !warned) {
-          warned = true;
-          warn$1('Component template should contain exactly one root element:\n\n' + template);
+          // allow 2 root elements with v-if and v-else
+          if (root.attrsMap.hasOwnProperty('v-if') && element.attrsMap.hasOwnProperty('v-else')) {
+            checkRootConstraints(element);
+          } else {
+            warned = true;
+            warn$1('Component template should contain exactly one root element:\n\n' + template);
+          }
         }
         if (currentParent && !element.forbidden) {
           if (element.else) {
@@ -5323,6 +5353,9 @@ var nodeOps = Object.freeze({
         currentParent = stack[stack.length - 1];
         // check pre state
         if (element.pre) {
+          inVPre = false;
+        }
+        if (platformIsPreTag(element.tag)) {
           inPre = false;
         }
       },
@@ -5334,12 +5367,12 @@ var nodeOps = Object.freeze({
           }
           return;
         }
-        text = currentParent.tag === 'pre' || text.trim() ? decodeHTMLCached(text)
+        text = inPre || text.trim() ? decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
         : preserveWhitespace && currentParent.children.length ? ' ' : '';
         if (text) {
           var expression = void 0;
-          if (!inPre && text !== ' ' && (expression = parseText(text, delimiters))) {
+          if (!inVPre && text !== ' ' && (expression = parseText(text, delimiters))) {
             currentParent.children.push({
               type: 2,
               expression: expression,
@@ -5366,7 +5399,7 @@ var nodeOps = Object.freeze({
   function processRawAttrs(el) {
     var l = el.attrsList.length;
     if (l) {
-      var attrs = el.staticAttrs = new Array(l);
+      var attrs = el.attrs = new Array(l);
       for (var i = 0; i < l; i++) {
         attrs[i] = {
           name: el.attrsList[i].name,
@@ -5487,6 +5520,8 @@ var nodeOps = Object.freeze({
       name = list[i].name;
       value = list[i].value;
       if (dirRE.test(name)) {
+        // mark element as dynamic
+        el.hasBindings = true;
         // modifiers
         modifiers = parseModifiers(name);
         if (modifiers) {
@@ -5527,7 +5562,7 @@ var nodeOps = Object.freeze({
             warn$1(name + '="' + value + '": ' + 'Interpolation inside attributes has been deprecated. ' + 'Use v-bind or the colon shorthand instead.');
           }
         }
-        addStaticAttr(el, name, JSON.stringify(value));
+        addAttr(el, name, JSON.stringify(value));
       }
     }
   }
@@ -5616,7 +5651,7 @@ var nodeOps = Object.freeze({
   }
 
   function genStaticKeys$1(keys) {
-    return makeMap('type,tag,attrsList,attrsMap,plain,parent,children,staticAttrs' + (keys ? ',' + keys : ''));
+    return makeMap('type,tag,attrsList,attrsMap,plain,parent,children,attrs' + (keys ? ',' + keys : ''));
   }
 
   function markStatic(node) {
@@ -5653,11 +5688,11 @@ var nodeOps = Object.freeze({
       // text
       return true;
     }
-    return !!(node.pre || !node.if && !node.for && // not v-if or v-for or v-else
+    return !!(node.pre || !node.hasBindings && // no dynamic bindings
+    !node.if && !node.for && // not v-if or v-for or v-else
     !isBuiltInTag(node.tag) && // not a built-in
-    isPlatformReservedTag(node.tag) && ( // not a component
-    node.plain || Object.keys(node).every(isStaticKey)) // no dynamic bindings
-    );
+    isPlatformReservedTag(node.tag) && // not a component
+    Object.keys(node).every(isStaticKey));
   }
 
   var simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/;
@@ -5748,6 +5783,7 @@ var nodeOps = Object.freeze({
     platformDirectives$1 = options.directives || {};
     isPlatformReservedTag$1 = options.isReservedTag || no;
     var code = ast ? genElement(ast) : '_h("div")';
+    // console.log(code)
     staticRenderFns = prevStaticRenderFns;
     return {
       render: 'with(this){return ' + code + '}',
@@ -5857,10 +5893,6 @@ var nodeOps = Object.freeze({
     // attributes
     if (el.attrs) {
       data += 'attrs:{' + genProps(el.attrs) + '},';
-    }
-    // static attributes
-    if (el.staticAttrs) {
-      data += 'staticAttrs:{' + genProps(el.staticAttrs) + '},';
     }
     // DOM props
     if (el.props) {
@@ -6225,7 +6257,8 @@ var nodeOps = Object.freeze({
     isReservedTag: isReservedTag,
     isUnaryTag: isUnaryTag,
     mustUseProp: mustUseProp,
-    getTagNamespace: getTagNamespace
+    getTagNamespace: getTagNamespace,
+    isPreTag: isPreTag
   };
 
   function compile(template, options) {

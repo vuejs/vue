@@ -1275,12 +1275,16 @@ var emptyVNode = function emptyVNode() {
 };
 
 function normalizeChildren(children, ns) {
-  // invoke children thunks.
-  // components always receive their children as thunks so that they
-  // can perform the actual render inside their own dependency collection cycle.
-  if (typeof children === 'function') {
+  // Invoke children thunks. Components always receive their children
+  // as thunks so that they can perform the actual render inside their
+  // own dependency collection cycle. Also, since JSX automatically
+  // wraps component children in a thunk, we handle nested thunks to
+  // prevent situations such as <MyComponent>{ children }</MyComponent>
+  // from failing when it produces a double thunk.
+  while (typeof children === 'function') {
     children = children();
   }
+
   if (isPrimitive(children)) {
     return [createTextVNode(children)];
   }
@@ -1570,7 +1574,6 @@ function lifecycleMixin(Vue) {
 }
 
 function callHook(vm, hook) {
-  vm.$emit('pre-hook:' + hook);
   var handlers = vm.$options[hook];
   if (handlers) {
     for (var i = 0, j = handlers.length; i < j; i++) {
@@ -1793,12 +1796,11 @@ function extractProps(data, Ctor) {
   var attrs = data.attrs;
   var props = data.props;
   var domProps = data.domProps;
-  var staticAttrs = data.staticAttrs;
 
-  if (attrs || props || domProps || staticAttrs) {
+  if (attrs || props || domProps) {
     for (var key in propOptions) {
       var altKey = hyphenate(key);
-      checkProp(res, props, key, altKey, true) || checkProp(res, attrs, key, altKey) || checkProp(res, domProps, key, altKey) || checkProp(res, staticAttrs, key, altKey);
+      checkProp(res, props, key, altKey, true) || checkProp(res, attrs, key, altKey) || checkProp(res, domProps, key, altKey);
     }
   }
   return res;
@@ -2890,7 +2892,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   }
 });
 
-Vue.version = '2.0.0-beta.5';
+Vue.version = '2.0.0-beta.6';
 
 // attributes that should be using props for binding
 var mustUseProp = makeMap('value,selected,checked,muted');
@@ -2917,14 +2919,18 @@ var isFalsyAttrValue = function isFalsyAttrValue(val) {
 
 function genClassForVnode(vnode) {
   var data = vnode.data;
-  // Important: check if this is a component container node
-  // or a child component root node
-  var i = void 0;
-  if ((i = vnode.child) && (i = i._vnode.data)) {
-    data = mergeClassData(i, data);
+  var parentNode = vnode;
+  var childNode = vnode;
+  while (childNode.child) {
+    childNode = childNode.child._vnode;
+    if (childNode.data) {
+      data = mergeClassData(childNode.data, data);
+    }
   }
-  if ((i = vnode.parent) && (i = i.data)) {
-    data = mergeClassData(data, i);
+  while (parentNode = parentNode.parent) {
+    if (parentNode.data) {
+      data = mergeClassData(data, parentNode.data);
+    }
   }
   return genClassFromData(data);
 }
@@ -3665,10 +3671,13 @@ function updateAttrs(oldVnode, vnode) {
   var elm = vnode.elm;
   var oldAttrs = oldVnode.data.attrs || {};
   var attrs = vnode.data.attrs || {};
-  var clonedAttrs = vnode.data.attrs = {};
+  // clone observed objects, as the user probably wants to mutate it
+  if (attrs.__ob__) {
+    attrs = vnode.data.attrs = extend({}, attrs);
+  }
 
   for (key in attrs) {
-    cur = clonedAttrs[key] = attrs[key];
+    cur = attrs[key];
     old = oldAttrs[key];
     if (old !== cur) {
       setAttr(elm, key, cur);
@@ -3712,22 +3721,15 @@ function setAttr(el, key, value) {
 }
 
 var attrs = {
-  create: function create(_, vnode) {
-    var attrs = vnode.data.staticAttrs;
-    if (attrs) {
-      for (var key in attrs) {
-        setAttr(vnode.elm, key, attrs[key]);
-      }
-    }
-    updateAttrs(_, vnode);
-  },
+  create: updateAttrs,
   update: updateAttrs
 };
 
 function updateClass(oldVnode, vnode) {
   var el = vnode.elm;
   var data = vnode.data;
-  if (!data.staticClass && !data.class) {
+  var oldData = oldVnode.data;
+  if (!data.staticClass && !data.class && (!oldData || !oldData.staticClass && !oldData.class)) {
     return;
   }
 
@@ -3780,7 +3782,10 @@ function updateDOMProps(oldVnode, vnode) {
   var elm = vnode.elm;
   var oldProps = oldVnode.data.domProps || {};
   var props = vnode.data.domProps || {};
-  var clonedProps = vnode.data.domProps = {};
+  // clone observed objects, as the user probably wants to mutate it
+  if (props.__ob__) {
+    props = vnode.data.domProps = extend({}, props);
+  }
 
   for (key in oldProps) {
     if (props[key] == null) {
@@ -3788,15 +3793,21 @@ function updateDOMProps(oldVnode, vnode) {
     }
   }
   for (key in props) {
-    cur = clonedProps[key] = props[key];
+    // ignore children if the node has textContent or innerHTML,
+    // as these will throw away existing DOM nodes and cause removal errors
+    // on subsequent patches (#3360)
+    if ((key === 'textContent' || key === 'innerHTML') && vnode.children) {
+      vnode.children.length = 0;
+    }
+    cur = props[key];
     if (key === 'value') {
       // store value as _value as well since
       // non-string values will be stringified
       elm._value = cur;
       // avoid resetting cursor position when value is the same
-      if (elm.value != cur) {
-        // eslint-disable-line
-        elm.value = cur;
+      var strCur = cur == null ? '' : String(cur);
+      if (elm.value !== strCur) {
+        elm.value = strCur;
       }
     } else {
       elm[key] = cur;
@@ -3836,15 +3847,18 @@ function updateStyle(oldVnode, vnode) {
   var elm = vnode.elm;
   var oldStyle = oldVnode.data.style || {};
   var style = vnode.data.style || {};
+  var needClone = style.__ob__;
 
   // handle array syntax
   if (Array.isArray(style)) {
-    style = toObject(style);
+    style = vnode.data.style = toObject(style);
   }
 
   // clone the style for future updates,
   // in case the user mutates the style object in-place.
-  var clonedStyle = vnode.data.style = {};
+  if (needClone) {
+    style = vnode.data.style = extend({}, style);
+  }
 
   for (name in oldStyle) {
     if (!style[name]) {
@@ -3852,7 +3866,7 @@ function updateStyle(oldVnode, vnode) {
     }
   }
   for (name in style) {
-    cur = clonedStyle[name] = style[name];
+    cur = style[name];
     if (cur !== oldStyle[name]) {
       // ie9 setting to null has no effect, must use empty string
       elm.style[normalize(name)] = cur || '';
@@ -4376,11 +4390,17 @@ function trigger(el, type) {
   el.dispatchEvent(e);
 }
 
+// recursively search for possible transition defined inside the component root
+function locateNode(vnode) {
+  return vnode.child && (!vnode.data || !vnode.data.transition) ? locateNode(vnode.child._vnode) : vnode;
+}
+
 var show = {
   bind: function bind(el, _ref, vnode) {
     var value = _ref.value;
 
-    var transition = vnode.data.transition;
+    vnode = locateNode(vnode);
+    var transition = vnode.data && vnode.data.transition;
     if (value && transition && transition.appear && !isIE9) {
       enter(vnode);
     }
@@ -4389,7 +4409,8 @@ var show = {
   update: function update(el, _ref2, vnode) {
     var value = _ref2.value;
 
-    var transition = vnode.data.transition;
+    vnode = locateNode(vnode);
+    var transition = vnode.data && vnode.data.transition;
     if (transition && !isIE9) {
       if (value) {
         enter(vnode);
@@ -4452,16 +4473,11 @@ var Transition = {
       return;
     }
 
-    // warn text nodes
-    if (process.env.NODE_ENV !== 'production' && children.length === 1 && !children[0].tag) {
-      warn('<transition> can only be used on elements or components, not text nodes.', this.$parent);
-    }
-
     // filter out text nodes (possible whitespaces)
     children = children.filter(function (c) {
       return c.tag;
     });
-
+    /* istanbul ignore if */
     if (!children.length) {
       return;
     }
