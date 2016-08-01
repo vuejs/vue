@@ -36,4 +36,16 @@ describe('Options render', () => {
     new Vue().$mount()
     expect('Failed to mount component: template or render function not defined.').toHaveBeenWarned()
   })
+
+  // Since JSX automatically thunkifies children, this will
+  // prevent <MyComponent>{ children }</MyComponent> from
+  // failing when it produces a double thunk.
+  it('should support nested thunk children', () => {
+    const vm = new Vue({
+      render: h => h('div',
+        () => () => () => ['hello ', h('strong', 'world')]
+      )
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('hello <strong>world</strong>')
+  })
 })

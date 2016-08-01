@@ -7,12 +7,16 @@ export function normalizeChildren (
   children: any,
   ns: string | void
 ): Array<VNode> | void {
-  // invoke children thunks.
-  // components always receive their children as thunks so that they
-  // can perform the actual render inside their own dependency collection cycle.
-  if (typeof children === 'function') {
+  // Invoke children thunks. Components always receive their children
+  // as thunks so that they can perform the actual render inside their
+  // own dependency collection cycle. Also, since JSX automatically
+  // wraps component children in a thunk, we handle nested thunks to
+  // prevent situations such as <MyComponent>{ children }</MyComponent>
+  // from failing when it produces a double thunk.
+  while (typeof children === 'function') {
     children = children()
   }
+
   if (isPrimitive(children)) {
     return [createTextVNode(children)]
   }
