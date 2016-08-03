@@ -21,17 +21,17 @@ const normalize = cached(function (prop) {
 })
 
 function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  if (!oldVnode.data.style && !vnode.data.style) {
+  if ((!oldVnode.data || !oldVnode.data.style) && !vnode.data.style) {
     return
   }
   let cur, name
-  const elm: any = vnode.elm
+  const el: any = vnode.elm
   const oldStyle: any = oldVnode.data.style || {}
   let style: any = vnode.data.style || {}
 
   // handle string
   if (typeof style === 'string') {
-    elm.setAttribute('style', style)
+    el.style.cssText = style
     return
   }
 
@@ -50,14 +50,14 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
   for (name in oldStyle) {
     if (!style[name]) {
-      elm.style[normalize(name)] = ''
+      el.style[normalize(name)] = ''
     }
   }
   for (name in style) {
     cur = style[name]
     if (cur !== oldStyle[name]) {
       // ie9 setting to null has no effect, must use empty string
-      elm.style[normalize(name)] = cur || ''
+      el.style[normalize(name)] = cur || ''
     }
   }
 }

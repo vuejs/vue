@@ -72,6 +72,20 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('dynamic string style', done => {
+    renderVmWithOptions({
+      template: '<div :style="style"></div>',
+      data: {
+        style: 'color:red'
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true" style="color:red"></div>'
+      )
+      done()
+    })
+  })
+
   it('text interpolation', done => {
     renderVmWithOptions({
       template: '<div>{{ foo }} side {{ bar }}</div>',
