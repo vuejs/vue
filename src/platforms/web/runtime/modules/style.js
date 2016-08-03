@@ -28,6 +28,13 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const elm: any = vnode.elm
   const oldStyle: any = oldVnode.data.style || {}
   let style: any = vnode.data.style || {}
+
+  // handle string
+  if (typeof style === 'string') {
+    elm.setAttribute('style', style)
+    return
+  }
+
   const needClone = style.__ob__
 
   // handle array syntax
