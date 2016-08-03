@@ -17,7 +17,7 @@ export default function renderStyle (node: VNodeWithData): ?string {
         for (const key in styles) {
           res += `${hyphenate(key)}:${styles[key]};`
         }
-        res += staticStyle
+        res += staticStyle || ''
       }
     }
     return ` style=${JSON.stringify(res)}`
