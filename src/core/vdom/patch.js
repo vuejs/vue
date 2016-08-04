@@ -347,7 +347,6 @@ export function createPatchFunction (backend) {
   }
 
   let bailed = false
-
   function hydrate (elm, vnode, insertedVnodeQueue) {
     if (process.env.NODE_ENV !== 'production') {
       if (!assertNodeMatch(elm, vnode)) {
@@ -367,16 +366,26 @@ export function createPatchFunction (backend) {
     if (isDef(tag)) {
       if (isDef(children)) {
         const childNodes = nodeOps.childNodes(elm)
-        for (let i = 0; i < children.length; i++) {
-          const success = hydrate(childNodes[i], children[i], insertedVnodeQueue)
-          if (!success) {
-            if (process.env.NODE_ENV !== 'production' && typeof console !== 'undefined' && !bailed) {
-              bailed = true
-              console.warn('Parent: ', elm)
-              console.warn('Mismatching childNodes vs. VNodes: ', childNodes, children)
+        let childrenMatch = true
+        if (childNodes.length !== children.length) {
+          childrenMatch = false
+        } else {
+          for (let i = 0; i < children.length; i++) {
+            if (!hydrate(childNodes[i], children[i], insertedVnodeQueue)) {
+              childrenMatch = false
+              break
             }
-            return false
           }
+        }
+        if (!childrenMatch) {
+          if (process.env.NODE_ENV !== 'production' &&
+              typeof console !== 'undefined' &&
+              !bailed) {
+            bailed = true
+            console.warn('Parent: ', elm)
+            console.warn('Mismatching childNodes vs. VNodes: ', childNodes, children)
+          }
+          return false
         }
       }
       if (isDef(data)) {
@@ -396,14 +405,6 @@ export function createPatchFunction (backend) {
         vnode.tag === nodeOps.tagName(node).toLowerCase()
     } else {
       match = _toString(vnode.text) === node.data
-    }
-    if (process.env.NODE_ENV !== 'production' && !match) {
-      warn(
-        'The client-side rendered virtual DOM tree is not matching ' +
-        'server-rendered content. This is likely caused by incorrect HTML markup, ' +
-        'for example nesting block-level elements inside <p>, or missing <tbody>. ' +
-        'Bailing hydration and performing full client-side render.'
-      )
     }
     return match
   }
@@ -434,6 +435,14 @@ export function createPatchFunction (backend) {
             if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
               invokeInsertHook(vnode, insertedVnodeQueue, true)
               return oldVnode
+            } else if (process.env.NODE_ENV !== 'production') {
+              warn(
+                'The client-side rendered virtual DOM tree is not matching ' +
+                'server-rendered content. This is likely caused by incorrect ' +
+                'HTML markup, for example nesting block-level elements inside ' +
+                '<p>, or missing <tbody>. Bailing hydration and performing ' +
+                'full client-side render.'
+              )
             }
           }
           // either not server-rendered, or hydration failed.
