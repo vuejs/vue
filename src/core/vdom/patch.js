@@ -346,6 +346,8 @@ export function createPatchFunction (backend) {
     }
   }
 
+  let bailed = false
+
   function hydrate (elm, vnode, insertedVnodeQueue) {
     if (process.env.NODE_ENV !== 'production') {
       if (!assertNodeMatch(elm, vnode)) {
@@ -368,6 +370,11 @@ export function createPatchFunction (backend) {
         for (let i = 0; i < children.length; i++) {
           const success = hydrate(childNodes[i], children[i], insertedVnodeQueue)
           if (!success) {
+            if (process.env.NODE_ENV !== 'production' && typeof console !== 'undefined' && !bailed) {
+              bailed = true
+              console.warn('Parent: ', elm)
+              console.warn('Mismatching childNodes vs. VNodes: ', childNodes, children)
+            }
             return false
           }
         }
@@ -393,8 +400,9 @@ export function createPatchFunction (backend) {
     if (process.env.NODE_ENV !== 'production' && !match) {
       warn(
         'The client-side rendered virtual DOM tree is not matching ' +
-        'server-rendered content. Bailing hydration and performing ' +
-        'full client-side render.'
+        'server-rendered content. This is likely caused by incorrect HTML markup, ' +
+        'for example nesting block-level elements inside <p>, or missing <tbody>. ' +
+        'Bailing hydration and performing full client-side render.'
       )
     }
     return match

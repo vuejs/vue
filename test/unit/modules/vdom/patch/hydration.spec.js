@@ -5,6 +5,7 @@ import VNode from 'core/vdom/vnode'
 describe('hydration', () => {
   let vnode0
   beforeEach(() => {
+    spyOn(console, 'warn')
     vnode0 = new VNode('p', { attrs: { id: '1' }}, [createTextVNode('hello world')])
     patch(null, vnode0)
   })
