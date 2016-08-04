@@ -31,7 +31,7 @@ export function normalizeChildren (
       } else if (isPrimitive(c)) {
         if (last && last.text) {
           last.text += String(c)
-        } else {
+        } else if (c !== '') {
           // convert primitive to vnode
           res.push(createTextVNode(c))
         }
