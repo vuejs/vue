@@ -1264,7 +1264,10 @@ function proxy(vm, key) {
   }
 }
 
-var VNode = function VNode(tag, data, children, text, elm, ns, context, host, componentOptions) {
+var VNode = // hoisted static node
+// compoennt placeholder node
+// rendered in this component's scope
+function VNode(tag, data, children, text, elm, ns, context, componentOptions) {
   this.tag = tag;
   this.data = data;
   this.children = children;
@@ -1272,13 +1275,14 @@ var VNode = function VNode(tag, data, children, text, elm, ns, context, host, co
   this.elm = elm;
   this.ns = ns;
   this.context = context;
-  this.host = host;
   this.key = data && data.key;
   this.componentOptions = componentOptions;
   this.child = undefined;
   this.parent = undefined;
   this.raw = false;
   this.isStatic = false;
+  this.isRootInsert = true;
+  this.isComment = false;
   // apply construct hook.
   // this is applied during render, before patch happens.
   // unlike other hooks, this is applied on both client and server.
@@ -1286,23 +1290,19 @@ var VNode = function VNode(tag, data, children, text, elm, ns, context, host, co
   if (constructHook) {
     constructHook(this);
   }
-};
+} // necessary for enter transition check
+// contains raw HTML
+// component instance
+;
 
 var emptyVNode = function emptyVNode() {
-  return new VNode(undefined, undefined, undefined, '');
+  var node = new VNode();
+  node.text = '';
+  node.isComment = true;
+  return node;
 };
 
 function normalizeChildren(children, ns) {
-  // Invoke children thunks. Components always receive their children
-  // as thunks so that they can perform the actual render inside their
-  // own dependency collection cycle. Also, since JSX automatically
-  // wraps component children in a thunk, we handle nested thunks to
-  // prevent situations such as <MyComponent>{ children }</MyComponent>
-  // from failing when it produces a double thunk.
-  while (typeof children === 'function') {
-    children = children();
-  }
-
   if (isPrimitive(children)) {
     return [createTextVNode(children)];
   }
@@ -1317,7 +1317,7 @@ function normalizeChildren(children, ns) {
       } else if (isPrimitive(c)) {
         if (last && last.text) {
           last.text += String(c);
-        } else {
+        } else if (c !== '') {
           // convert primitive to vnode
           res.push(createTextVNode(c));
         }
@@ -1407,6 +1407,8 @@ function fnInvoker(o) {
   };
 }
 
+var activeInstance = null;
+
 function initLifecycle(vm) {
   var options = vm.$options;
 
@@ -1467,6 +1469,8 @@ function lifecycleMixin(Vue) {
       callHook(vm, 'beforeUpdate');
     }
     var prevEl = vm.$el;
+    var prevActiveInstance = activeInstance;
+    activeInstance = vm;
     if (!vm._vnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
@@ -1474,6 +1478,7 @@ function lifecycleMixin(Vue) {
     } else {
       vm.$el = vm.__patch__(vm._vnode, vnode);
     }
+    activeInstance = prevActiveInstance;
     vm._vnode = vnode;
     // update __vue__ reference
     if (prevEl) {
@@ -1493,6 +1498,7 @@ function lifecycleMixin(Vue) {
 
   Vue.prototype._updateFromParent = function (propsData, listeners, parentVnode, renderChildren) {
     var vm = this;
+    var hasChildren = !!(vm.$options._renderChildren || renderChildren);
     vm.$options._parentVnode = parentVnode;
     vm.$options._renderChildren = renderChildren;
     // update props
@@ -1516,6 +1522,10 @@ function lifecycleMixin(Vue) {
       var oldListeners = vm.$options._parentListeners;
       vm.$options._parentListeners = listeners;
       vm._updateListeners(listeners, oldListeners);
+    }
+    // force udpate if has children
+    if (hasChildren) {
+      vm.$forceUpdate();
     }
   };
 
@@ -1581,12 +1591,7 @@ function callHook(vm, hook) {
 var hooks = { init: init, prepatch: prepatch, insert: insert, destroy: destroy };
 var hooksToMerge = Object.keys(hooks);
 
-function createComponent(Ctor, data, parent, context, host, _children, tag) {
-  // ensure children is a thunk
-  if (process.env.NODE_ENV !== 'production' && _children && typeof _children !== 'function') {
-    warn('A component\'s children should be a function that returns the ' + 'children array. This allows the component to track the children ' + 'dependencies and optimizes re-rendering.');
-  }
-
+function createComponent(Ctor, data, context, children, tag) {
   if (!Ctor) {
     return;
   }
@@ -1597,7 +1602,7 @@ function createComponent(Ctor, data, parent, context, host, _children, tag) {
 
   if (typeof Ctor !== 'function') {
     if (process.env.NODE_ENV !== 'production') {
-      warn('Invalid Component definition: ' + Ctor, parent);
+      warn('Invalid Component definition: ' + Ctor, context);
     }
     return;
   }
@@ -1609,9 +1614,8 @@ function createComponent(Ctor, data, parent, context, host, _children, tag) {
     } else {
       Ctor = resolveAsyncComponent(Ctor, function () {
         // it's ok to queue this on every render because
-        // $forceUpdate is buffered. this is only called
-        // if the
-        parent.$forceUpdate();
+        // $forceUpdate is buffered by the scheduler.
+        context.$forceUpdate();
       });
       if (!Ctor) {
         // return nothing if this is indeed an async component
@@ -1637,15 +1641,13 @@ function createComponent(Ctor, data, parent, context, host, _children, tag) {
         });
       }
       return {
-        v: Ctor.options.render.call(null, parent.$createElement, {
+        v: Ctor.options.render.call(null, context.$createElement, {
           props: props,
-          parent: parent,
           data: data,
-          children: function children() {
-            return normalizeChildren(_children);
-          },
+          parent: context,
+          children: normalizeChildren(children),
           slots: function slots() {
-            return resolveSlots(_children);
+            return resolveSlots(children);
           }
         })
       };
@@ -1671,16 +1673,17 @@ function createComponent(Ctor, data, parent, context, host, _children, tag) {
 
   // return a placeholder vnode
   var name = Ctor.options.name || tag;
-  var vnode = new VNode('vue-component-' + Ctor.cid + (name ? '-' + name : ''), data, undefined, undefined, undefined, undefined, context, host, { Ctor: Ctor, propsData: propsData, listeners: listeners, parent: parent, tag: tag, children: _children });
+  var vnode = new VNode('vue-component-' + Ctor.cid + (name ? '-' + name : ''), data, undefined, undefined, undefined, undefined, context, { Ctor: Ctor, propsData: propsData, listeners: listeners, tag: tag, children: children });
   return vnode;
 }
 
-function createComponentInstanceForVnode(vnode // we know it's MountedComponentVNode but flow doesn't
+function createComponentInstanceForVnode(vnode, // we know it's MountedComponentVNode but flow doesn't
+parent // activeInstance in lifecycle state
 ) {
   var vnodeComponentOptions = vnode.componentOptions;
   var options = {
     _isComponent: true,
-    parent: vnodeComponentOptions.parent,
+    parent: parent,
     propsData: vnodeComponentOptions.propsData,
     _componentTag: vnodeComponentOptions.tag,
     _parentVnode: vnode,
@@ -1698,7 +1701,7 @@ function createComponentInstanceForVnode(vnode // we know it's MountedComponentV
 
 function init(vnode, hydrating) {
   if (!vnode.child) {
-    var child = vnode.child = createComponentInstanceForVnode(vnode);
+    var child = vnode.child = createComponentInstanceForVnode(vnode, activeInstance);
     child.$mount(hydrating ? vnode.elm : undefined, hydrating);
   }
 }
@@ -1711,10 +1714,6 @@ function prepatch(oldVnode, vnode) {
   vnode, // new parent vnode
   options.children // new children
   );
-  // always update abstract components.
-  if (child.$options.abstract) {
-    child.$forceUpdate();
-  }
 }
 
 function insert(vnode) {
@@ -1853,12 +1852,6 @@ function createElement(tag, data, children) {
 }
 
 function _createElement(context, tag, data, children) {
-  var parent = renderState.activeInstance;
-  var host = context !== parent ? parent : undefined;
-  if (!parent) {
-    process.env.NODE_ENV !== 'production' && warn('createElement cannot be called outside of component ' + 'render functions.');
-    return;
-  }
   if (data && data.__ob__) {
     process.env.NODE_ENV !== 'production' && warn('Avoid using observed data object as vnode data: ' + JSON.stringify(data) + '\n' + 'Always create fresh vnode data objects in each render!', context);
     return;
@@ -1872,25 +1865,21 @@ function _createElement(context, tag, data, children) {
     var ns = config.getTagNamespace(tag);
     if (config.isReservedTag(tag)) {
       // platform built-in elements
-      return new VNode(tag, data, normalizeChildren(children, ns), undefined, undefined, ns, context, host);
+      return new VNode(tag, data, normalizeChildren(children, ns), undefined, undefined, ns, context);
     } else if (Ctor = resolveAsset(context.$options, 'components', tag)) {
       // component
-      return createComponent(Ctor, data, parent, context, host, children, tag);
+      return createComponent(Ctor, data, context, children, tag);
     } else {
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
-      return new VNode(tag, data, normalizeChildren(children, ns), undefined, undefined, ns, context, host);
+      return new VNode(tag, data, normalizeChildren(children, ns), undefined, undefined, ns, context);
     }
   } else {
     // direct component options / constructor
-    return createComponent(tag, data, parent, context, host, children);
+    return createComponent(tag, data, context, children);
   }
 }
-
-var renderState = {
-  activeInstance: null
-};
 
 function initRender(vm) {
   vm.$vnode = null; // the placeholder node in parent tree
@@ -1912,11 +1901,6 @@ function renderMixin(Vue) {
 
   Vue.prototype._render = function () {
     var vm = this;
-
-    // set current active instance
-    var prev = renderState.activeInstance;
-    renderState.activeInstance = vm;
-
     var _vm$$options = vm.$options;
     var render = _vm$$options.render;
     var staticRenderFns = _vm$$options.staticRenderFns;
@@ -1965,8 +1949,6 @@ function renderMixin(Vue) {
     }
     // set parent
     vnode.parent = _parentVnode;
-    // restore render state
-    renderState.activeInstance = prev;
     return vnode;
   };
 
@@ -2034,8 +2016,12 @@ function renderMixin(Vue) {
         }
         var data = vnode.data;
         for (var key in value) {
-          var hash = asProp || config.mustUseProp(key) ? data.domProps || (data.domProps = {}) : data.attrs || (data.attrs = {});
-          hash[key] = value[key];
+          if (key === 'class' || key === 'style') {
+            data[key] = value[key];
+          } else {
+            var hash = asProp || config.mustUseProp(key) ? data.domProps || (data.domProps = {}) : data.attrs || (data.attrs = {});
+            hash[key] = value[key];
+          }
         }
       }
     }
@@ -3730,7 +3716,6 @@ var warn$2 = void 0;
 var transforms$1 = void 0;
 var dataGenFns = void 0;
 var platformDirectives = void 0;
-var isPlatformReservedTag$1 = void 0;
 var staticRenderFns = void 0;
 var currentOptions = void 0;
 
@@ -3743,7 +3728,6 @@ function generate(ast, options) {
   transforms$1 = pluckModuleFunction(options.modules, 'transformCode');
   dataGenFns = pluckModuleFunction(options.modules, 'genData');
   platformDirectives = options.directives || {};
-  isPlatformReservedTag$1 = options.isReservedTag || no;
   var code = ast ? genElement(ast) : '_h("div")';
   // console.log(code)
   staticRenderFns = prevStaticRenderFns;
@@ -3774,9 +3758,7 @@ function genElement(el) {
       code = genComponent(el);
     } else {
       var data = genData(el);
-      // if the element is potentially a component,
-      // wrap its children as a thunk.
-      var children = !el.inlineTemplate ? genChildren(el, !isPlatformReservedTag$1(el.tag) /* asThunk */) : null;
+      var children = el.inlineTemplate ? null : genChildren(el);
       code = '_h(\'' + el.tag + '\'' + (data ? ',' + data : '' // data
       ) + (children ? ',' + children : '' // children
       ) + ')';
@@ -3915,12 +3897,10 @@ function genDirectives(el) {
   }
 }
 
-function genChildren(el, asThunk) {
-  if (!el.children.length) {
-    return;
+function genChildren(el) {
+  if (el.children.length) {
+    return '[' + el.children.map(genNode).join(',') + ']';
   }
-  var code = '[' + el.children.map(genNode).join(',') + ']';
-  return asThunk ? 'function(){return ' + code + '}' : code;
 }
 
 function genNode(node) {
@@ -3943,7 +3923,7 @@ function genSlot(el) {
 }
 
 function genComponent(el) {
-  var children = genChildren(el, true);
+  var children = genChildren(el);
   return '_h(' + el.component + ',' + genData(el) + (children ? ',' + children : '') + ')';
 }
 
@@ -4053,7 +4033,9 @@ function transformNode(el, options) {
       warn('class="' + staticClass + '": ' + 'Interpolation inside attributes has been deprecated. ' + 'Use v-bind or the colon shorthand instead.');
     }
   }
-  el.staticClass = JSON.stringify(staticClass);
+  if (staticClass) {
+    el.staticClass = JSON.stringify(staticClass);
+  }
   var classBinding = getBindingAttr(el, 'class', false /* getStatic */);
   if (classBinding) {
     el.classBinding = classBinding;
