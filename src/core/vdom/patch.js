@@ -10,6 +10,7 @@
 import config from '../config'
 import VNode from './vnode'
 import { isPrimitive, _toString, warn } from '../util/index'
+import { activeInstance } from '../instance/lifecycle'
 
 const emptyData = {}
 const emptyNode = new VNode('', emptyData, [])
@@ -156,10 +157,10 @@ export function createPatchFunction (backend) {
   // of going through the normal attribute patching process.
   function setScope (vnode) {
     let i
-    if (isDef(i = vnode.host) && isDef(i = i.$options._scopeId)) {
+    if (isDef(i = vnode.context) && isDef(i = i.$options._scopeId)) {
       nodeOps.setAttribute(vnode.elm, i, '')
     }
-    if (isDef(i = vnode.context) && isDef(i = i.$options._scopeId)) {
+    if (activeInstance !== vnode.context && isDef(i = activeInstance.$options._scopeId)) {
       nodeOps.setAttribute(vnode.elm, i, '')
     }
   }

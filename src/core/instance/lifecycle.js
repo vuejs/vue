@@ -5,6 +5,8 @@ import { emptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { warn, validateProp, remove, noop } from '../util/index'
 
+export let activeInstance: any = null
+
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
@@ -76,6 +78,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
       callHook(vm, 'beforeUpdate')
     }
     const prevEl = vm.$el
+    const prevActiveInstance = activeInstance
+    activeInstance = vm
     if (!vm._vnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
@@ -83,6 +87,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     } else {
       vm.$el = vm.__patch__(vm._vnode, vnode)
     }
+    activeInstance = prevActiveInstance
     vm._vnode = vnode
     // update __vue__ reference
     if (prevEl) {
@@ -107,6 +112,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     renderChildren: ?VNodeChildren
   ) {
     const vm: Component = this
+    const hasChildren = !!(vm.$options._renderChildren || renderChildren)
     vm.$options._parentVnode = parentVnode
     vm.$options._renderChildren = renderChildren
     // update props
@@ -130,6 +136,10 @@ export function lifecycleMixin (Vue: Class<Component>) {
       const oldListeners = vm.$options._parentListeners
       vm.$options._parentListeners = listeners
       vm._updateListeners(listeners, oldListeners)
+    }
+    // force udpate if has children
+    if (hasChildren) {
+      vm.$forceUpdate()
     }
   }
 

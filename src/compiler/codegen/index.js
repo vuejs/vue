@@ -3,14 +3,12 @@
 import { genHandlers } from './events'
 import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
-import { no } from 'shared/util'
 
 // configurable state
 let warn
 let transforms
 let dataGenFns
 let platformDirectives
-let isPlatformReservedTag
 let staticRenderFns
 let currentOptions
 
@@ -29,7 +27,6 @@ export function generate (
   transforms = pluckModuleFunction(options.modules, 'transformCode')
   dataGenFns = pluckModuleFunction(options.modules, 'genData')
   platformDirectives = options.directives || {}
-  isPlatformReservedTag = options.isReservedTag || no
   const code = ast ? genElement(ast) : '_h("div")'
   // console.log(code)
   staticRenderFns = prevStaticRenderFns
@@ -60,11 +57,7 @@ function genElement (el: ASTElement): string {
       code = genComponent(el)
     } else {
       const data = genData(el)
-      // if the element is potentially a component,
-      // wrap its children as a thunk.
-      const children = !el.inlineTemplate
-        ? genChildren(el, !isPlatformReservedTag(el.tag) /* asThunk */)
-        : null
+      const children = el.inlineTemplate ? null : genChildren(el)
       code = `_h('${el.tag}'${
         data ? `,${data}` : '' // data
       }${

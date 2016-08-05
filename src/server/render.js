@@ -40,6 +40,9 @@ export function createRenderFunction (
   const get = cache && normalizeAsync(cache, 'get')
   const has = cache && normalizeAsync(cache, 'has')
 
+  // used to track and apply scope ids
+  let activeInstance: any
+
   function renderNode (
     node: VNode,
     write: Function,
@@ -96,7 +99,10 @@ export function createRenderFunction (
     normalizeRender(child)
     const childNode = child._render()
     childNode.parent = node
+    const prevActive = activeInstance
+    activeInstance = child
     renderNode(childNode, write, next, isRoot)
+    activeInstance = prevActive
   }
 
   function renderComponentWithCache (node, write, next, isRoot, cache, key) {
@@ -179,7 +185,9 @@ export function createRenderFunction (
     }
     // attach scoped CSS ID
     let scopeId
-    if (node.host && (scopeId = node.host.$options._scopeId)) {
+    if (activeInstance &&
+        activeInstance !== node.context &&
+        (scopeId = activeInstance.$options._scopeId)) {
       markup += ` ${scopeId}`
     }
     while (node) {
@@ -196,6 +204,7 @@ export function createRenderFunction (
     write: (text: string, next: Function) => void,
     done: Function
   ) {
+    activeInstance = component
     normalizeRender(component)
     renderNode(component._render(), write, done, true)
   }

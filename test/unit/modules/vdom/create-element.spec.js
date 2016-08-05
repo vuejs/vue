@@ -121,24 +121,6 @@ describe('create-element', () => {
     expect(vnode.children[2].tag).toBe('br')
   })
 
-  it('warn message when using non-thunk children for component', () => {
-    const vm = new Vue({
-      data: { message: 'hello world' },
-      components: {
-        'my-component': {
-          props: ['msg']
-        }
-      }
-    })
-    const h = bind(createElement, vm)
-    renderState.activeInstance = vm
-    const vnode = h('my-component', { props: { msg: vm.message }}, [h('br'), 'hello world', h('br')])
-    expect(vnode.componentOptions.children[0].tag).toBe('br')
-    expect(vnode.componentOptions.children[1]).toBe('hello world')
-    expect(vnode.componentOptions.children[2].tag).toBe('br')
-    expect('A component\'s children should be a function').toHaveBeenWarned()
-  })
-
   it('render svg elements with correct namespace', () => {
     const vm = new Vue({})
     const h = bind(createElement, vm)

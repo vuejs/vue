@@ -19,16 +19,6 @@ export function createComponent (
   children?: VNodeChildren,
   tag?: string
 ): VNode | void {
-  // ensure children is a thunk
-  if (process.env.NODE_ENV !== 'production' &&
-    children && typeof children !== 'function') {
-    warn(
-      'A component\'s children should be a function that returns the ' +
-      'children array. This allows the component to track the children ' +
-      'dependencies and optimizes re-rendering.'
-    )
-  }
-
   if (!Ctor) {
     return
   }
@@ -84,7 +74,7 @@ export function createComponent (
         props,
         parent,
         data,
-        children: () => normalizeChildren(children),
+        children: normalizeChildren(children),
         slots: () => resolveSlots(children)
       }
     )
@@ -156,10 +146,6 @@ function prepatch (
     vnode, // new parent vnode
     options.children // new children
   )
-  // always update abstract components.
-  if (child.$options.abstract) {
-    child.$forceUpdate()
-  }
 }
 
 function insert (vnode: MountedComponentVNode) {

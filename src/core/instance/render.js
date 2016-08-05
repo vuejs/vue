@@ -184,7 +184,7 @@ export function renderMixin (Vue: Class<Component>) {
   }
 }
 
-export function resolveSlots (renderChildren: any): Object {
+export function resolveSlots (renderChildren: ?VNodeChildren): Object {
   const slots = {}
   if (!renderChildren) {
     return slots
