@@ -165,10 +165,14 @@ export function renderMixin (Vue: Class<Component>) {
         }
         const data = vnode.data
         for (const key in value) {
-          const hash = asProp || config.mustUseProp(key)
-            ? data.domProps || (data.domProps = {})
-            : data.attrs || (data.attrs = {})
-          hash[key] = value[key]
+          if (key === 'class' || key === 'style') {
+            data[key] = value[key]
+          } else {
+            const hash = asProp || config.mustUseProp(key)
+              ? data.domProps || (data.domProps = {})
+              : data.attrs || (data.attrs = {})
+            hash[key] = value[key]
+          }
         }
       }
     }

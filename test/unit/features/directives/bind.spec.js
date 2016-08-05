@@ -144,6 +144,32 @@ describe('Directive v-bind', () => {
     }).then(done)
   })
 
+  it('bind object with class/style', done => {
+    const vm = new Vue({
+      template: '<input class="a" style="color:red" v-bind="test">',
+      data: {
+        test: {
+          id: 'test',
+          class: ['b', 'c'],
+          style: { fontSize: '12px' }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.id).toBe('test')
+    expect(vm.$el.className).toBe('a b c')
+    expect(vm.$el.style.color).toBe('red')
+    expect(vm.$el.style.fontSize).toBe('12px')
+    vm.test.id = 'hi'
+    vm.test.class = ['d']
+    vm.test.style = { fontSize: '14px' }
+    waitForUpdate(() => {
+      expect(vm.$el.id).toBe('hi')
+      expect(vm.$el.className).toBe('a d')
+      expect(vm.$el.style.color).toBe('red')
+      expect(vm.$el.style.fontSize).toBe('14px')
+    }).then(done)
+  })
+
   it('bind object as prop', done => {
     const vm = new Vue({
       template: '<input v-bind.prop="test">',
