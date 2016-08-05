@@ -397,17 +397,14 @@ export function createPatchFunction (backend) {
   }
 
   function assertNodeMatch (node, vnode) {
-    let match = true
-    if (!node) {
-      match = false
-    } else if (vnode.tag) {
-      match =
+    if (vnode.tag) {
+      return (
         vnode.tag.indexOf('vue-component') === 0 ||
         vnode.tag === nodeOps.tagName(node).toLowerCase()
+      )
     } else {
-      match = _toString(vnode.text) === node.data
+      return _toString(vnode.text) === node.data
     }
-    return match
   }
 
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
