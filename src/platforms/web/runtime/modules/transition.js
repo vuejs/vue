@@ -48,7 +48,7 @@ export function enter (vnode: VNodeWithData) {
   } = data
 
   const context = vnode.context.$parent || vnode.context
-  const isAppear = !context._isMounted
+  const isAppear = !context._isMounted || !vnode.isRootInsert
   if (isAppear && !appear && appear !== '') {
     return
   }

@@ -76,9 +76,10 @@ export function createPatchFunction (backend) {
     nodeOps.removeChild(parent, el)
   }
 
-  function createElm (vnode, insertedVnodeQueue) {
+  function createElm (vnode, insertedVnodeQueue, nested) {
     let i, elm
     const data = vnode.data
+    vnode.isRootInsert = !nested
     if (isDef(data)) {
       if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode)
       // after calling the init hook, if the vnode is a child component
@@ -118,7 +119,7 @@ export function createPatchFunction (backend) {
       setScope(vnode)
       if (Array.isArray(children)) {
         for (i = 0; i < children.length; ++i) {
-          nodeOps.appendChild(elm, createElm(children[i], insertedVnodeQueue))
+          nodeOps.appendChild(elm, createElm(children[i], insertedVnodeQueue, true))
         }
       } else if (isPrimitive(vnode.text)) {
         nodeOps.appendChild(elm, nodeOps.createTextNode(vnode.text))

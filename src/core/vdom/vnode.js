@@ -7,14 +7,15 @@ export default class VNode {
   text: string | void;
   elm: Node | void;
   ns: string | void;
-  context: Component | void;
-  host: ?Component;
+  context: Component | void; // rendered in this component's scope
+  host: ?Component; // inserted into this component as children
   key: string | number | void;
   componentOptions: VNodeComponentOptions | void;
-  child: Component | void;
-  parent: VNode | void;
-  raw: ?boolean;
-  isStatic: ?boolean;
+  child: Component | void; // component instance
+  parent: VNode | void; // compoennt placeholder node
+  raw: ?boolean; // contains raw HTML
+  isStatic: ?boolean; // hoisted static node
+  isRootInsert: boolean; // necessary for enter transition check
 
   constructor (
     tag?: string,
@@ -41,6 +42,7 @@ export default class VNode {
     this.parent = undefined
     this.raw = false
     this.isStatic = false
+    this.isRootInsert = true
     // apply construct hook.
     // this is applied during render, before patch happens.
     // unlike other hooks, this is applied on both client and server.

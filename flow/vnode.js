@@ -28,6 +28,7 @@ declare type VNodeWithData = {
   key: string | number | void;
   parent?: VNodeWithData;
   child?: Component;
+  isRootInsert: boolean;
 }
 
 declare interface VNodeData {
