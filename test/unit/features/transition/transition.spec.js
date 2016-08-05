@@ -316,7 +316,7 @@ if (!isIE9) {
       vm.ok = false
       waitForUpdate(() => {
         expect(leaveSpy).toHaveBeenCalled()
-        expect(vm.$el.innerHTML).toBe('')
+        expect(vm.$el.innerHTML).toBe('<!---->')
         vm.ok = true
       }).then(() => {
         expect(enterSpy).toHaveBeenCalled()
@@ -339,9 +339,9 @@ if (!isIE9) {
       vm.ok = false
       waitForUpdate(() => {
         expect(leaveSpy).toHaveBeenCalled()
-        expect(vm.$el.innerHTML).toBe('<div class="nope-leave nope-leave-active">foo</div>')
+        expect(vm.$el.innerHTML).toBe('<div class="nope-leave nope-leave-active">foo</div><!---->')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.innerHTML).toBe('')
+        expect(vm.$el.innerHTML).toBe('<!---->')
         vm.ok = true
       }).then(() => {
         expect(enterSpy).toHaveBeenCalled()
@@ -367,7 +367,7 @@ if (!isIE9) {
         }
       }).$mount(el)
 
-      expect(vm.$el.innerHTML).toBe('')
+      expect(vm.$el.innerHTML).toBe('<!---->')
       vm.ok = true
       waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter test-enter-active')
@@ -652,7 +652,7 @@ if (!isIE9) {
         expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-leave-active')
       }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.childNodes.length).toBe(1)
-        expect(vm.$el.childNodes[0].nodeType).toBe(3) // should be an empty text node
+        expect(vm.$el.childNodes[0].nodeType).toBe(8) // should be an empty comment node
         expect(vm.$el.childNodes[0].textContent).toBe('')
         vm.ok = true
       }).then(() => {

@@ -30,6 +30,7 @@ function sameVnode (vnode1, vnode2) {
   return (
     vnode1.key === vnode2.key &&
     vnode1.tag === vnode2.tag &&
+    vnode1.isComment === vnode2.isComment &&
     !vnode1.data === !vnode2.data
   )
 }
@@ -87,12 +88,7 @@ export function createPatchFunction (backend) {
       // component also has set the placeholder vnode's elm.
       // in that case we can just return the element and be done.
       if (isDef(i = vnode.child)) {
-        if (vnode.data.pendingInsert) {
-          insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
-        }
-        vnode.elm = vnode.child.$el
-        invokeCreateHooks(vnode, insertedVnodeQueue)
-        setScope(vnode)
+        initComponent(vnode, insertedVnodeQueue)
         return vnode.elm
       }
     }
@@ -127,6 +123,8 @@ export function createPatchFunction (backend) {
       if (isDef(data)) {
         invokeCreateHooks(vnode, insertedVnodeQueue)
       }
+    } else if (vnode.isComment) {
+      elm = vnode.elm = nodeOps.createComment(vnode.text)
     } else {
       elm = vnode.elm = nodeOps.createTextNode(vnode.text)
     }
@@ -142,6 +140,15 @@ export function createPatchFunction (backend) {
       if (i.create) i.create(emptyNode, vnode)
       if (i.insert) insertedVnodeQueue.push(vnode)
     }
+  }
+
+  function initComponent (vnode, insertedVnodeQueue) {
+    if (vnode.data.pendingInsert) {
+      insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
+    }
+    vnode.elm = vnode.child.$el
+    invokeCreateHooks(vnode, insertedVnodeQueue)
+    setScope(vnode)
   }
 
   // set scope id attribute for scoped CSS.
@@ -360,7 +367,7 @@ export function createPatchFunction (backend) {
       if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode, true /* hydrating */)
       if (isDef(i = vnode.child)) {
         // child component. it should have hydrated its own tree.
-        invokeCreateHooks(vnode, insertedVnodeQueue)
+        initComponent(vnode, insertedVnodeQueue)
         return true
       }
     }
@@ -425,7 +432,7 @@ export function createPatchFunction (backend) {
           // mounting to a real element
           // check if this is server-rendered content and if we can perform
           // a successful hydration.
-          if (oldVnode.hasAttribute('server-rendered')) {
+          if (oldVnode.nodeType === 1 && oldVnode.hasAttribute('server-rendered')) {
             oldVnode.removeAttribute('server-rendered')
             hydrating = true
           }

@@ -16,6 +16,7 @@ export default class VNode {
   raw: ?boolean; // contains raw HTML
   isStatic: ?boolean; // hoisted static node
   isRootInsert: boolean; // necessary for enter transition check
+  isComment: boolean;
 
   constructor (
     tag?: string,
@@ -43,6 +44,7 @@ export default class VNode {
     this.raw = false
     this.isStatic = false
     this.isRootInsert = true
+    this.isComment = false
     // apply construct hook.
     // this is applied during render, before patch happens.
     // unlike other hooks, this is applied on both client and server.
@@ -53,4 +55,9 @@ export default class VNode {
   }
 }
 
-export const emptyVNode = () => new VNode(undefined, undefined, undefined, '')
+export const emptyVNode = () => {
+  const node = new VNode()
+  node.text = ''
+  node.isComment = true
+  return node
+}

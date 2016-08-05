@@ -83,6 +83,8 @@ export function createRenderFunction (
     } else {
       if (node.tag) {
         renderElement(node, write, next, isRoot)
+      } else if (node.isComment) {
+        write(`<!--${node.text}-->`, next)
       } else {
         write(node.raw ? node.text : encodeHTML(String(node.text)), next)
       }

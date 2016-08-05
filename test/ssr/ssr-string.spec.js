@@ -500,6 +500,15 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('comment nodes', done => {
+    renderVmWithOptions({
+      template: '<div><transition><div v-if="false"></test></transition></div>'
+    }, result => {
+      expect(result).toContain(`<div server-rendered="true"><!----></div>`)
+      done()
+    })
+  })
+
   it('should catch error', done => {
     renderToString(new Vue({
       render () {

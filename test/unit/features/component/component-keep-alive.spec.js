@@ -105,16 +105,16 @@ describe('Component keep-alive', () => {
       vm.view = 'two'
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave test-leave-active">one</div>'
+          '<div class="test test-leave test-leave-active">one</div><!---->'
         )
         assertHookCalls(one, [1, 1, 1, 1, 0])
         assertHookCalls(two, [0, 0, 0, 0, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">one</div>'
+          '<div class="test test-leave-active">one</div><!---->'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
-        expect(vm.$el.innerHTML).toBe('')
+        expect(vm.$el.innerHTML).toBe('<!---->')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter test-enter-active">two</div>'
@@ -135,16 +135,16 @@ describe('Component keep-alive', () => {
         vm.view = 'one'
       }).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave test-leave-active">two</div>'
+          '<div class="test test-leave test-leave-active">two</div><!---->'
         )
         assertHookCalls(one, [1, 1, 1, 1, 0])
         assertHookCalls(two, [1, 1, 1, 1, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">two</div>'
+          '<div class="test test-leave-active">two</div><!---->'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
-        expect(vm.$el.innerHTML).toBe('')
+        expect(vm.$el.innerHTML).toBe('<!---->')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter test-enter-active">one</div>'

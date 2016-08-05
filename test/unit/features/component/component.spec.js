@@ -107,7 +107,7 @@ describe('Component', () => {
       vm.view = ''
     })
     .then(() => {
-      expect(vm.$el.nodeType).toBe(3)
+      expect(vm.$el.nodeType).toBe(8)
       expect(vm.$el.data).toBe('')
     }).then(done)
   })

@@ -14,6 +14,10 @@ export function createTextNode (text: string): Text {
   return document.createTextNode(text)
 }
 
+export function createComment (text: string): Comment {
+  return document.createComment(text)
+}
+
 export function insertBefore (parentNode: Node, newNode: Node, referenceNode: Node) {
   parentNode.insertBefore(newNode, referenceNode)
 }

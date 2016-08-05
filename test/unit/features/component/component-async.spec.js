@@ -40,7 +40,7 @@ describe('Component async', () => {
         }
       }
     }).$mount()
-    expect(vm.$el.nodeType).toBe(3)
+    expect(vm.$el.nodeType).toBe(8)
     expect(vm.$children.length).toBe(0)
     function next () {
       expect(vm.$el.nodeType).toBe(1)
