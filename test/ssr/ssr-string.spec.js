@@ -411,11 +411,11 @@ describe('SSR: renderToString', () => {
   it('v-bind object', done => {
     renderVmWithOptions({
       data: {
-        test: { id: 'a', class: 'b', value: 'c' }
+        test: { id: 'a', class: ['a', 'b'], value: 'c' }
       },
       template: '<input v-bind="test">'
     }, result => {
-      expect(result).toContain('<input id="a" class="b" server-rendered="true" value="c">')
+      expect(result).toContain('<input id="a" server-rendered="true" value="c" class="a b">')
       done()
     })
   })
