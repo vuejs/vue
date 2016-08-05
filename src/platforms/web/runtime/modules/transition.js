@@ -4,6 +4,7 @@ import { inBrowser } from 'core/util/index'
 import { isIE9 } from 'web/util/index'
 import { cached, extend } from 'shared/util'
 import { mergeVNodeHook } from 'core/vdom/helpers'
+import { activeInstance } from 'core/instance/lifecycle'
 import {
   nextFrame,
   addTransitionClass,
@@ -47,8 +48,17 @@ export function enter (vnode: VNodeWithData) {
     appearCancelled
   } = data
 
-  const context = vnode.context.$parent || vnode.context
+  // activeInstance will always be the <transition> component managing this
+  // transition. One edge case to check is when the <transition> is placed
+  // as the root node of a child component. In that case we need to check
+  // <transition>'s parent for appear check.
+  const transitionNode = activeInstance.$vnode
+  const context = transitionNode && transitionNode.parent
+    ? transitionNode.parent.context
+    : activeInstance
+
   const isAppear = !context._isMounted || !vnode.isRootInsert
+
   if (isAppear && !appear && appear !== '') {
     return
   }
