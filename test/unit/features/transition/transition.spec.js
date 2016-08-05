@@ -151,7 +151,7 @@ if (!isIE9) {
                 enter,
                 leave
               }
-            }, () => [this.ok ? h('div', { class: 'test' }, 'foo') : undefined])
+            }, this.ok ? [h('div', { class: 'test' }, 'foo')] : undefined)
           ])
         },
         data: { ok: true }

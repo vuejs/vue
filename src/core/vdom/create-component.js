@@ -69,8 +69,8 @@ export function createComponent (
       context.$createElement,
       {
         props,
-        parent: context,
         data,
+        parent: context,
         children: normalizeChildren(children),
         slots: () => resolveSlots(children)
       }

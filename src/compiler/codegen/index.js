@@ -210,14 +210,10 @@ function genDirectives (el: ASTElement): string | void {
   }
 }
 
-function genChildren (el: ASTElement, asThunk?: boolean): string | void {
-  if (!el.children.length) {
-    return
+function genChildren (el: ASTElement): string | void {
+  if (el.children.length) {
+    return '[' + el.children.map(genNode).join(',') + ']'
   }
-  const code = '[' + el.children.map(genNode).join(',') + ']'
-  return asThunk
-    ? `function(){return ${code}}`
-    : code
 }
 
 function genNode (node: ASTNode) {
@@ -243,7 +239,7 @@ function genSlot (el: ASTElement): string {
 }
 
 function genComponent (el: ASTElement): string {
-  const children = genChildren(el, true)
+  const children = genChildren(el)
   return `_h(${el.component},${genData(el)}${
     children ? `,${children}` : ''
   })`
