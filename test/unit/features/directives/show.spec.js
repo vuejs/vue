@@ -49,4 +49,12 @@ describe('Directive v-show', () => {
       expect(vm.$el.firstChild.style.display).toBe('')
     }).then(done)
   })
+
+  it('should respect display value in style attribute', () => {
+    const vm = new Vue({
+      template: '<div><span v-show="foo" style="display:block">hello</span></div>',
+      data: { foo: true }
+    }).$mount()
+    expect(vm.$el.firstChild.style.display).toBe('block')
+  })
 })
