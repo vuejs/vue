@@ -160,7 +160,9 @@ export function createPatchFunction (backend) {
     if (isDef(i = vnode.context) && isDef(i = i.$options._scopeId)) {
       nodeOps.setAttribute(vnode.elm, i, '')
     }
-    if (activeInstance !== vnode.context && isDef(i = activeInstance.$options._scopeId)) {
+    if (isDef(i = activeInstance) &&
+        i !== vnode.context &&
+        isDef(i = i.$options._scopeId)) {
       nodeOps.setAttribute(vnode.elm, i, '')
     }
   }

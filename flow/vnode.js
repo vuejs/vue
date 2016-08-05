@@ -4,7 +4,6 @@ declare type VNodeComponentOptions = {
   Ctor: Class<Component>;
   propsData: ?Object;
   listeners: ?Object;
-  parent: Component;
   children: ?VNodeChildren;
   tag?: string;
 }

@@ -23,15 +23,15 @@ describe('SSR: renderToStream', () => {
       components: {
         bComp (resolve) {
           return resolve({
-            render () {
-              return this.$createElement('test-async-2')
+            render (h) {
+              return h('test-async-2')
             },
             components: {
               testAsync2 (resolve) {
                 return resolve({
                   created () { this.$parent.$parent.testClass = 'b' },
-                  render () {
-                    return this.$createElement('div', { class: [this.$parent.$parent.testClass] }, 'test')
+                  render (h) {
+                    return h('div', { class: [this.$parent.$parent.testClass] }, 'test')
                   }
                 })
               }
@@ -39,8 +39,8 @@ describe('SSR: renderToStream', () => {
           })
         },
         cComp: {
-          render () {
-            return this.$createElement('div', { class: [this.$parent.testClass] }, 'test')
+          render (h) {
+            return h('div', { class: [this.$parent.testClass] }, 'test')
           }
         }
       }

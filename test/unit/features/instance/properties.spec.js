@@ -54,6 +54,32 @@ describe('Instance properties', () => {
     }).then(done)
   })
 
+  it('$parent', () => {
+    const calls = []
+    const makeOption = name => ({
+      name,
+      template: `<div><slot></slot></div>`,
+      created () {
+        calls.push(`${name}:${this.$parent.$options.name}`)
+      }
+    })
+    new Vue({
+      template: `
+        <div>
+          <outer><middle><inner></inner></middle></outer>
+          <next></next>
+        </div>
+      `,
+      components: {
+        outer: makeOption('outer'),
+        middle: makeOption('middle'),
+        inner: makeOption('inner'),
+        next: makeOption('next')
+      }
+    }).$mount()
+    expect(calls).toEqual(['outer:undefined', 'middle:outer', 'inner:middle', 'next:undefined'])
+  })
+
   it('$isServer', () => {
     const vm = new Vue()
     expect(vm.$isServer).toBe(false)

@@ -95,14 +95,15 @@ export function createRenderFunction (
   }
 
   function renderComponent (node, write, next, isRoot) {
-    const child = createComponentInstanceForVnode(node)
+    const prevActive = activeInstance
+    const child = activeInstance = createComponentInstanceForVnode(node, activeInstance)
     normalizeRender(child)
     const childNode = child._render()
     childNode.parent = node
-    const prevActive = activeInstance
-    activeInstance = child
-    renderNode(childNode, write, next, isRoot)
-    activeInstance = prevActive
+    renderNode(childNode, write, () => {
+      activeInstance = prevActive
+      next()
+    }, isRoot)
   }
 
   function renderComponentWithCache (node, write, next, isRoot, cache, key) {

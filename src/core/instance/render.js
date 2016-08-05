@@ -10,12 +10,6 @@ import {
 
 import { createElement } from '../vdom/create-element'
 
-export const renderState: {
-  activeInstance: ?Component
-} = {
-  activeInstance: null
-}
-
 export function initRender (vm: Component) {
   vm.$vnode = null // the placeholder node in parent tree
   vm._vnode = null // the root of the child tree
@@ -36,11 +30,6 @@ export function renderMixin (Vue: Class<Component>) {
 
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
-
-    // set current active instance
-    const prev = renderState.activeInstance
-    renderState.activeInstance = vm
-
     const {
       render,
       staticRenderFns,
@@ -91,8 +80,6 @@ export function renderMixin (Vue: Class<Component>) {
     }
     // set parent
     vnode.parent = _parentVnode
-    // restore render state
-    renderState.activeInstance = prev
     return vnode
   }
 

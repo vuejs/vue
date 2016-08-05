@@ -4,7 +4,6 @@ import VNode, { emptyVNode } from './vnode'
 import config from '../config'
 import { createComponent } from './create-component'
 import { normalizeChildren } from './helpers'
-import { renderState } from '../instance/render'
 import { warn, resolveAsset } from '../util/index'
 
 // wrapper function for providing a more flexible interface
@@ -28,15 +27,6 @@ function _createElement (
   data?: VNodeData,
   children?: VNodeChildren | void
 ): VNode | Array<VNode> | void {
-  const parent: ?Component = renderState.activeInstance
-  const host = context !== parent ? parent : undefined
-  if (!parent) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'createElement cannot be called outside of component ' +
-      'render functions.'
-    )
-    return
-  }
   if (data && data.__ob__) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -56,22 +46,22 @@ function _createElement (
       // platform built-in elements
       return new VNode(
         tag, data, normalizeChildren(children, ns),
-        undefined, undefined, ns, context, host
+        undefined, undefined, ns, context
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
-      return createComponent(Ctor, data, parent, context, host, children, tag)
+      return createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
       return new VNode(
         tag, data, normalizeChildren(children, ns),
-        undefined, undefined, ns, context, host
+        undefined, undefined, ns, context
       )
     }
   } else {
     // direct component options / constructor
-    return createComponent(tag, data, parent, context, host, children)
+    return createComponent(tag, data, context, children)
   }
 }
