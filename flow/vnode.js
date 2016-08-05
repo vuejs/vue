@@ -53,7 +53,6 @@ declare interface VNodeData {
   };
   directives?: Array<VNodeDirective>;
   keepAlive?: boolean;
-  [key: string]: any;
 }
 
 declare type VNodeDirective = {
