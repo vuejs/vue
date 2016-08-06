@@ -19,7 +19,8 @@ export default {
     }
     el.style.display = value ? '' : 'none'
   },
-  update (el: HTMLElement, { value }: VNodeDirective, vnode: VNodeWithData) {
+  update (el: HTMLElement, { value, oldValue }: VNodeDirective, vnode: VNodeWithData) {
+    if (value === oldValue) return
     vnode = locateNode(vnode)
     const transition = vnode.data && vnode.data.transition
     if (transition && !isIE9) {
