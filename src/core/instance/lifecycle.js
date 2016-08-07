@@ -4,6 +4,7 @@ import Watcher from '../observer/watcher'
 import { emptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { warn, validateProp, remove, noop } from '../util/index'
+import { resolveSlots } from './render'
 
 export let activeInstance: any = null
 
@@ -137,8 +138,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
       vm.$options._parentListeners = listeners
       vm._updateListeners(listeners, oldListeners)
     }
-    // force udpate if has children
+    // resolve slots + force update if has children
     if (hasChildren) {
+      vm.$slots = resolveSlots(renderChildren)
       vm.$forceUpdate()
     }
   }

@@ -313,6 +313,7 @@ describe('Component slot', () => {
     expect('Render function should return a single root node').toHaveBeenWarned()
   })
 
+  // #3254
   it('should not keep slot name when passed further down', () => {
     const vm = new Vue({
       template: '<test><span slot="foo">foo<span></test>',
@@ -321,7 +322,12 @@ describe('Component slot', () => {
           template: '<child><slot name="foo"></slot></child>',
           components: {
             child: {
-              template: '<div><div class="default"><slot></slot></div><div class="named"><slot name="foo"></slot></div></div>'
+              template: `
+                <div>
+                  <div class="default"><slot></slot></div>
+                  <div class="named"><slot name="foo"></slot></div>
+                </div>
+              `
             }
           }
         }
@@ -329,5 +335,81 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.querySelector('.default').textContent).toBe('foo')
     expect(vm.$el.querySelector('.named').textContent).toBe('')
+  })
+
+  it('should not keep slot name when passed further down (nested)', () => {
+    const vm = new Vue({
+      template: '<wrap><test><span slot="foo">foo<span></test></wrap>',
+      components: {
+        wrap: {
+          template: '<div><slot></slot></div>'
+        },
+        test: {
+          template: '<child><slot name="foo"></slot></child>',
+          components: {
+            child: {
+              template: `
+                <div>
+                  <div class="default"><slot></slot></div>
+                  <div class="named"><slot name="foo"></slot></div>
+                </div>
+              `
+            }
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.querySelector('.default').textContent).toBe('foo')
+    expect(vm.$el.querySelector('.named').textContent).toBe('')
+  })
+
+  it('should not keep slot name when passed further down (functional)', () => {
+    const child = {
+      template: `
+        <div>
+          <div class="default"><slot></slot></div>
+          <div class="named"><slot name="foo"></slot></div>
+        </div>
+      `
+    }
+    const vm = new Vue({
+      template: '<test><span slot="foo">foo<span></test>',
+      components: {
+        test: {
+          functional: true,
+          render (h, ctx) {
+            const slots = ctx.slots()
+            return h(child, slots.foo)
+          }
+        }
+      }
+    }).$mount()
+    console.log(vm.$el.innerHTML)
+    expect(vm.$el.querySelector('.default').textContent).toBe('foo')
+    expect(vm.$el.querySelector('.named').textContent).toBe('')
+  })
+
+  // #3400
+  it('named slots should be consistent across re-renders', done => {
+    const vm = new Vue({
+      template: `
+        <comp>
+          <div slot="foo">foo</div>
+        </comp>
+      `,
+      components: {
+        comp: {
+          data () {
+            return { a: 1 }
+          },
+          template: `<div><slot name="foo"></slot>{{ a }}</div>`
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('foo1')
+    vm.$children[0].a = 2
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('foo2')
+    }).then(done)
   })
 })

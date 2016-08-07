@@ -14,7 +14,7 @@ export function initRender (vm: Component) {
   vm.$vnode = null // the placeholder node in parent tree
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null
-  vm.$slots = {}
+  vm.$slots = resolveSlots(vm.$options._renderChildren)
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
   vm.$createElement = bind(createElement, vm)
@@ -33,7 +33,6 @@ export function renderMixin (Vue: Class<Component>) {
     const {
       render,
       staticRenderFns,
-      _renderChildren,
       _parentVnode
     } = vm.$options
 
@@ -43,9 +42,6 @@ export function renderMixin (Vue: Class<Component>) {
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
     vm.$vnode = _parentVnode
-    // resolve slots. becaues slots are rendered in parent scope,
-    // we set the activeInstance to parent.
-    vm.$slots = resolveSlots(_renderChildren)
     // render self
     let vnode
     try {
@@ -171,7 +167,9 @@ export function renderMixin (Vue: Class<Component>) {
   }
 }
 
-export function resolveSlots (renderChildren: ?VNodeChildren): Object {
+export function resolveSlots (
+  renderChildren: ?VNodeChildren
+): { [key: string]: Array<VNode> } {
   const slots = {}
   if (!renderChildren) {
     return slots
