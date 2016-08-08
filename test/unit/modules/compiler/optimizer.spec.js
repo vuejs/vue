@@ -203,4 +203,11 @@ describe('optimizer', () => {
     optimize(ast, {})
     expect(ast.static).toBe(false)
   })
+
+  it('mark static trees inside v-for', () => {
+    const ast = parse(`<div><div v-for="i in 10"><span>hi</span></div></div>`, baseOptions)
+    optimize(ast, baseOptions)
+    expect(ast.children[0].children[0].staticRoot).toBe(true)
+    expect(ast.children[0].children[0].staticInFor).toBe(true)
+  })
 })

@@ -25,7 +25,7 @@ export function optimize (root: ?ASTElement, options: CompilerOptions) {
   // first pass: mark all non-static nodes.
   markStatic(root)
   // second pass: mark static roots.
-  markStaticRoots(root)
+  markStaticRoots(root, false)
 }
 
 function genStaticKeys (keys: string): Function {
@@ -48,14 +48,17 @@ function markStatic (node: ASTNode) {
   }
 }
 
-function markStaticRoots (node: ASTNode) {
-  if (node.type === 1 && (node.once || node.static)) {
-    node.staticRoot = true
-    return
-  }
-  if (node.children) {
-    for (let i = 0, l = node.children.length; i < l; i++) {
-      markStaticRoots(node.children[i])
+function markStaticRoots (node: ASTNode, isInFor: boolean) {
+  if (node.type === 1) {
+    if (node.once || node.static) {
+      node.staticRoot = true
+      node.staticInFor = isInFor
+      return
+    }
+    if (node.children) {
+      for (let i = 0, l = node.children.length; i < l; i++) {
+        markStaticRoots(node.children[i], !!node.for)
+      }
     }
   }
 }

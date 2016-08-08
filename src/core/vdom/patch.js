@@ -25,9 +25,6 @@ function isDef (s) {
 }
 
 function sameVnode (vnode1, vnode2) {
-  if (vnode1.isStatic || vnode2.isStatic) {
-    return vnode1 === vnode2
-  }
   return (
     vnode1.key === vnode2.key &&
     vnode1.tag === vnode2.tag &&
@@ -273,12 +270,8 @@ export function createPatchFunction (backend) {
         newStartVnode = newCh[++newStartIdx]
       } else {
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
-        idxInOld = isDef(newStartVnode.key)
-          ? oldKeyToIdx[newStartVnode.key]
-          : newStartVnode.isStatic
-            ? oldCh.indexOf(newStartVnode)
-            : null
-        if (isUndef(idxInOld) || idxInOld === -1) { // New element
+        idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx[newStartVnode.key] : null
+        if (isUndef(idxInOld)) { // New element
           nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm)
           newStartVnode = newCh[++newStartIdx]
         } else {
@@ -312,7 +305,13 @@ export function createPatchFunction (backend) {
   }
 
   function patchVnode (oldVnode, vnode, insertedVnodeQueue, removeOnly) {
-    if (oldVnode === vnode) return
+    if (oldVnode === vnode) {
+      return
+    }
+    if (vnode.isStatic && oldVnode.isStatic && vnode.key === oldVnode.key) {
+      vnode.elm = oldVnode.elm
+      return
+    }
     let i, hook
     const hasData = isDef(i = vnode.data)
     if (hasData && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {

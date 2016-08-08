@@ -77,21 +77,10 @@ declare interface Component {
   // rendering
   _render: () => VNode;
   __patch__: (a: Element | VNode | void, b: VNode) => any;
-  // renderElementWithChildren
-  _h: (
-    vnode?: VNode,
-    children?: VNodeChildren
-  ) => VNode | void;
-  // renderElement
-  _e: (
-    tag?: string | Component | Object,
-    data?: Object,
-    namespace?: string
-  ) => VNode | void;
-  // renderStaticTree
-  _m: (
-    index?: number
-  ) => Object | void;
+  // createElement
+  _h: (vnode?: VNode, data?: VNodeData, children?: VNodeChildren) => VNode | void;
+  // renderStatic
+  _m: (index: number, isInFor?: boolean) => VNode | VNodeChildren;
   // toString
   _s: (value: any) => string;
   // toNumber
@@ -99,10 +88,7 @@ declare interface Component {
   // resolveFilter
   _f: (id: string) => Function;
   // renderList
-  _l: (
-    val: any,
-    render: Function
-  ) => ?Array<VNode>;
+  _l: (val: any, render: Function) => ?Array<VNode>;
   // apply v-bind object
   _b: (vnode: VNodeWithData, value: any) => void;
   // retrive custom keyCode

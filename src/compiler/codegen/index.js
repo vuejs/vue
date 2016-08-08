@@ -40,7 +40,7 @@ function genElement (el: ASTElement): string {
     // hoist static sub-trees out
     el.staticProcessed = true
     staticRenderFns.push(`with(this){return ${genElement(el)}}`)
-    return `_m(${staticRenderFns.length - 1})`
+    return `_m(${staticRenderFns.length - 1}${el.staticInFor ? ',true' : ''})`
   } else if (el.for && !el.forProcessed) {
     return genFor(el)
   } else if (el.if && !el.ifProcessed) {

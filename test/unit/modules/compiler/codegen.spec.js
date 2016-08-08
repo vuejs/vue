@@ -296,6 +296,14 @@ describe('codegen', () => {
     expect('Inline-template components must have exactly one child element.').toHaveBeenWarned()
   })
 
+  it('generate static trees inside v-for', () => {
+    assertCodegen(
+      `<div><div v-for="i in 10"><span></span></div></div>`,
+      `with(this){return _h('div',[(10)&&_l((10),function(i){return _h('div',[_m(0,true)])})])}`,
+      [`with(this){return _h('span')}`]
+    )
+  })
+
   it('not specified ast type', () => {
     const res = generate(null, baseOptions)
     expect(res.render).toBe(`with(this){return _h("div")}`)

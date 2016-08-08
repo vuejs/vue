@@ -87,13 +87,26 @@ export function renderMixin (Vue: Class<Component>) {
   Vue.prototype._n = toNumber
 
   // render static tree by index
-  Vue.prototype._m = function renderStatic (index?: number): Object | void {
+  Vue.prototype._m = function renderStatic (
+    index: number,
+    isInFor?: boolean
+  ): VNode | VNodeChildren {
     let tree = this._staticTrees[index]
-    if (!tree) {
-      tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(
-        this._renderProxy
-      )
+    // if has already-rendered static tree and not inside v-for,
+    // we can reuse the same tree by indentity.
+    if (tree && !isInFor) {
+      return tree
+    }
+    // otherwise, render a fresh tree.
+    tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy)
+    if (Array.isArray(tree)) {
+      for (let i = 0; i < tree.length; i++) {
+        tree[i].isStatic = true
+        tree[i].key = `__static__${index}_${i}`
+      }
+    } else {
       tree.isStatic = true
+      tree.key = `__static__${index}`
     }
     return tree
   }

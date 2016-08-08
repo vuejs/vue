@@ -70,6 +70,7 @@ declare type ASTElement = {
 
   static?: boolean;
   staticRoot?: boolean;
+  staticInFor?: boolean;
   staticProcessed?: boolean;
   hasBindings?: boolean;
 
