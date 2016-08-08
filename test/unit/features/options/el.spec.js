@@ -66,12 +66,14 @@ describe('Options el', () => {
     expect(vm.$el.childNodes[1].childNodes[0].childNodes[0].namespaceURI).toContain('svg')
   })
 
-  it('properly encode attribute values', function () {
+  // https://w3c.github.io/DOM-Parsing/#dfn-serializing-an-attribute-value
+  it('properly decode attribute values when parsing templates from DOM', function () {
     const el = document.createElement('div')
-    el.innerHTML = '<a href="/a?foo=bar&baz=qux" name="<abc>"></a>'
+    el.innerHTML = '<a href="/a?foo=bar&baz=qux" name="<abc>" single=\'"hi"\'></a>'
     const vm = new Vue({ el })
     expect(vm.$el.children[0].getAttribute('href')).toBe('/a?foo=bar&baz=qux')
     expect(vm.$el.children[0].getAttribute('name')).toBe('<abc>')
+    expect(vm.$el.children[0].getAttribute('single')).toBe('"hi"')
   })
 
   it('warn cannot find element', () => {

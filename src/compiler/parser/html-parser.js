@@ -51,12 +51,13 @@ const reCache = {}
 const ampRE = /&amp;/g
 const ltRE = /&lt;/g
 const gtRE = /&gt;/g
+const quoteRE = /&quot;/g
 
 function decodeAttr (value, shouldDecodeTags) {
   if (shouldDecodeTags) {
     value = value.replace(ltRE, '<').replace(gtRE, '>')
   }
-  return value.replace(ampRE, '&')
+  return value.replace(ampRE, '&').replace(quoteRE, '"')
 }
 
 export function parseHTML (html, options) {

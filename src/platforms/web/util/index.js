@@ -11,8 +11,10 @@ export const isIE = UA && /msie|trident/.test(UA)
 export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
 export const isAndroid = UA && UA.indexOf('android') > 0
 
-// some browsers, e.g. PhantomJS, encodes angular brackets
-// inside attribute values when retrieving innerHTML.
+// According to
+// https://w3c.github.io/DOM-Parsing/#dfn-serializing-an-attribute-value
+// when serializing innerHTML, <, >, ", & should be encoded as entities.
+// However, only some browsers, e.g. PhantomJS, encodes < and >.
 // this causes problems with the in-browser parser.
 export const shouldDecodeTags = inBrowser ? (function () {
   const div = document.createElement('div')

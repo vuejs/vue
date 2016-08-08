@@ -384,7 +384,6 @@ describe('Component slot', () => {
         }
       }
     }).$mount()
-    console.log(vm.$el.innerHTML)
     expect(vm.$el.querySelector('.default').textContent).toBe('foo')
     expect(vm.$el.querySelector('.named').textContent).toBe('')
   })

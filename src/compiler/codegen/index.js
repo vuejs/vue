@@ -28,7 +28,6 @@ export function generate (
   dataGenFns = pluckModuleFunction(options.modules, 'genData')
   platformDirectives = options.directives || {}
   const code = ast ? genElement(ast) : '_h("div")'
-  // console.log(code)
   staticRenderFns = prevStaticRenderFns
   return {
     render: `with(this){return ${code}}`,
