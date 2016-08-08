@@ -5,6 +5,7 @@ import {
   camelize,
   warn
 } from '../../util/index'
+import vClass from './class'
 
 const prefixes = ['-webkit-', '-moz-', '-ms-']
 const camelPrefixes = ['Webkit', 'Moz', 'ms']
@@ -39,10 +40,15 @@ export default {
       }
     }
     for (name in value) {
-      val = value[name]
-      if (val !== cache[name]) {
-        cache[name] = val
-        this.handleSingle(name, val)
+      if (name === 'class') {
+        var classDir = extend({ el: this.el }, vClass)
+        classDir.update(value[name])
+      } else {
+        val = value[name]
+        if (val !== cache[name]) {
+          cache[name] = val
+          this.handleSingle(name, val)
+        }
       }
     }
   },

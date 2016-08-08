@@ -359,6 +359,28 @@ describe('Misc', function () {
     })
   })
 
+  // #3382
+  it('merges v-bind class attributes', function () {
+    var templates = [
+      '<div class="static-class" :class="classes.class"></div>',
+      '<div class="static-class" v-bind="classes"></div>'
+    ]
+
+    templates.forEach(function (template) {
+      var el = document.createElement('div')
+      var vm = new Vue({
+        el: el,
+        template: template,
+        data: {
+          classes: { class: ['bound-class'] }
+        }
+      })
+
+      expect(vm.$el.firstChild.classList.contains('bound-class')).toBe(true)
+      expect(vm.$el.firstChild.classList.contains('static-class')).toBe(true)
+    })
+  })
+
   it('deep watch for class, style and bind', function (done) {
     var el = document.createElement('div')
     var vm = new Vue({
