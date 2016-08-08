@@ -19,7 +19,7 @@ export default {
     }
     const originalDisplay = el.style.display
     el.style.display = value ? originalDisplay : 'none'
-    el.dataset.__vOriginalDisplay = originalDisplay
+    el.__vOriginalDisplay = originalDisplay
   },
   update (el: HTMLElement, { value, oldValue }: VNodeDirective, vnode: VNodeWithData) {
     /* istanbul ignore if */
@@ -29,14 +29,14 @@ export default {
     if (transition && !isIE9) {
       if (value) {
         enter(vnode)
-        el.style.display = el.dataset.__vOriginalDisplay
+        el.style.display = el.__vOriginalDisplay
       } else {
         leave(vnode, () => {
           el.style.display = 'none'
         })
       }
     } else {
-      el.style.display = value ? el.dataset.__vOriginalDisplay : 'none'
+      el.style.display = value ? el.__vOriginalDisplay : 'none'
     }
   }
 }
