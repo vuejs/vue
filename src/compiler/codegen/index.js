@@ -67,10 +67,6 @@ function genElement (el: ASTElement): string {
     for (let i = 0; i < transforms.length; i++) {
       code = transforms[i](el, code)
     }
-    // check keep-alive
-    if (el.keepAlive) {
-      code = `_h("KeepAlive",{props:{child:${code}}})`
-    }
     return code
   }
 }

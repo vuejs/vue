@@ -82,7 +82,6 @@ declare type ASTElement = {
   ns?: string;
 
   component?: string;
-  keepAlive?: boolean;
   inlineTemplate?: true;
   transitionMode?: string | null;
   slotName?: ?string;

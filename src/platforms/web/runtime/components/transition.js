@@ -5,7 +5,7 @@
 
 import { warn } from 'core/util/index'
 import { camelize, extend } from 'shared/util'
-import { getRealChild, mergeVNodeHook } from 'core/vdom/helpers'
+import { mergeVNodeHook, getFirstComponentChild } from 'core/vdom/helpers'
 
 export const transitionProps = {
   name: String,
@@ -19,6 +19,17 @@ export const transitionProps = {
   leaveActiveClass: String,
   appearClass: String,
   appearActiveClass: String
+}
+
+// in case the child is also an abstract component, e.g. <keep-alive>
+// we want to recrusively retrieve the real component to be rendered
+function getRealChild (vnode: ?VNode): ?VNode {
+  const compOptions = vnode && vnode.componentOptions
+  if (compOptions && compOptions.Ctor.options.abstract) {
+    return getRealChild(getFirstComponentChild(compOptions.children))
+  } else {
+    return vnode
+  }
 }
 
 export function extractTransitionData (comp: Component): Object {
@@ -86,8 +97,13 @@ export default {
     // use getRealChild() to ignore abstract components e.g. keep-alive
     const child = getRealChild(rawChild)
     /* istanbul ignore if */
-    if (!child) return
-    child.key = child.key || `__v${child.tag + this._uid}__`
+    if (!child) {
+      return rawChild
+    }
+
+    child.key = child.key == null
+      ? `__v${child.tag + this._uid}__`
+      : child.key
     const data = (child.data || (child.data = {})).transition = extractTransitionData(this)
     const oldRawChild = this._vnode
     const oldChild: any = getRealChild(oldRawChild)

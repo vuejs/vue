@@ -1,32 +1,30 @@
 import { callHook } from 'core/instance/lifecycle'
-import { getRealChild } from 'core/vdom/helpers'
+import { getFirstComponentChild } from 'core/vdom/helpers'
 
 export default {
   name: 'keep-alive',
   abstract: true,
-  props: {
-    child: Object
-  },
   created () {
     this.cache = Object.create(null)
   },
   render () {
-    const rawChild = this.child
-    const realChild = getRealChild(this.child)
-    if (realChild && realChild.componentOptions) {
-      const opts = realChild.componentOptions
-      // same constructor may get registered as different local components
-      // so cid alone is not enough (#3269)
-      const key = opts.Ctor.cid + '::' + opts.tag
+    const vnode = getFirstComponentChild(this.$slots.default)
+    if (vnode && vnode.componentOptions) {
+      const opts = vnode.componentOptions
+      const key = vnode.key == null
+        // same constructor may get registered as different local components
+        // so cid alone is not enough (#3269)
+        ? opts.Ctor.cid + '::' + opts.tag
+        : vnode.key
       if (this.cache[key]) {
-        const child = realChild.child = this.cache[key].child
-        realChild.elm = this.$el = child.$el
+        const child = vnode.child = this.cache[key].child
+        vnode.elm = this.$el = child.$el
       } else {
-        this.cache[key] = realChild
+        this.cache[key] = vnode
       }
-      realChild.data.keepAlive = true
+      vnode.data.keepAlive = true
     }
-    return rawChild
+    return vnode
   },
   destroyed () {
     for (const key in this.cache) {

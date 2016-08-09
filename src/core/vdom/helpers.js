@@ -56,15 +56,8 @@ function applyNS (vnode, ns) {
   }
 }
 
-// in case the child is also an abstract component, e.g. <transition-control>
-// we want to recrusively retrieve the real component to be rendered
-export function getRealChild (vnode: ?VNode): ?VNode {
-  const compOptions = vnode && vnode.componentOptions
-  if (compOptions && compOptions.Ctor.options.abstract) {
-    return getRealChild(compOptions.propsData && compOptions.propsData.child)
-  } else {
-    return vnode
-  }
+export function getFirstComponentChild (children: ?Array<any>) {
+  return children && children.filter(c => c && c.componentOptions)[0]
 }
 
 export function mergeVNodeHook (def: Object, key: string, hook: Function) {

@@ -345,9 +345,6 @@ function processComponent (el) {
   if ((binding = getBindingAttr(el, 'is'))) {
     el.component = binding
   }
-  if (getAndRemoveAttr(el, 'keep-alive') != null) {
-    el.keepAlive = true
-  }
   if (getAndRemoveAttr(el, 'inline-template') != null) {
     el.inlineTemplate = true
   }
