@@ -18,12 +18,20 @@ const normalizeAsync = (cache, method) => {
 const compilationCache = Object.create(null)
 const normalizeRender = vm => {
   const { render, template } = vm.$options
-  if (!render && template) {
-    const renderFns = (
-      compilationCache[template] ||
-      (compilationCache[template] = compileToFunctions(template))
-    )
-    Object.assign(vm.$options, renderFns)
+  if (!render) {
+    if (template) {
+      const renderFns = (
+        compilationCache[template] ||
+        (compilationCache[template] = compileToFunctions(template))
+      )
+      Object.assign(vm.$options, renderFns)
+    } else {
+      throw new Error(
+        `render function or template not defined in component: ${
+          vm.$options.name || vm.$options._componentTag || 'anonymous'
+        }`
+      )
+    }
   }
 }
 
