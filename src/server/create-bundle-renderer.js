@@ -17,7 +17,11 @@ export function createBundleRendererCreator (createRenderer) {
       renderToStream: (context) => {
         const res = new PassThrough()
         runInVm(code, context).then(app => {
-          renderer.renderToStream(app).pipe(res)
+          const renderStream = renderer.renderToStream(app)
+          renderStream.on('error', err => {
+            res.emit('error', err)
+          })
+          renderStream.pipe(res)
         }).catch(err => {
           process.nextTick(() => {
             res.emit('error', err)
