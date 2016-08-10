@@ -1334,15 +1334,10 @@ function applyNS(vnode, ns) {
   }
 }
 
-// in case the child is also an abstract component, e.g. <transition-control>
-// we want to recrusively retrieve the real component to be rendered
-function getRealChild(vnode) {
-  var compOptions = vnode && vnode.componentOptions;
-  if (compOptions && compOptions.Ctor.options.abstract) {
-    return getRealChild(compOptions.propsData && compOptions.propsData.child);
-  } else {
-    return vnode;
-  }
+function getFirstComponentChild(children) {
+  return children && children.filter(function (c) {
+    return c && c.componentOptions;
+  })[0];
 }
 
 function mergeVNodeHook(def, key, hook) {
@@ -1528,8 +1523,9 @@ function lifecycleMixin(Vue) {
       vm.$options._parentListeners = listeners;
       vm._updateListeners(listeners, oldListeners);
     }
-    // force udpate if has children
+    // resolve slots + force update if has children
     if (hasChildren) {
+      vm.$slots = resolveSlots(renderChildren);
       vm.$forceUpdate();
     }
   };
@@ -1890,7 +1886,7 @@ function initRender(vm) {
   vm.$vnode = null; // the placeholder node in parent tree
   vm._vnode = null; // the root of the child tree
   vm._staticTrees = null;
-  vm.$slots = {};
+  vm.$slots = resolveSlots(vm.$options._renderChildren);
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
   vm.$createElement = bind(createElement, vm);
@@ -1909,7 +1905,6 @@ function renderMixin(Vue) {
     var _vm$$options = vm.$options;
     var render = _vm$$options.render;
     var staticRenderFns = _vm$$options.staticRenderFns;
-    var _renderChildren = _vm$$options._renderChildren;
     var _parentVnode = _vm$$options._parentVnode;
 
 
@@ -1919,9 +1914,6 @@ function renderMixin(Vue) {
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
     vm.$vnode = _parentVnode;
-    // resolve slots. becaues slots are rendered in parent scope,
-    // we set the activeInstance to parent.
-    vm.$slots = resolveSlots(_renderChildren);
     // render self
     var vnode = void 0;
     try {
@@ -1965,11 +1957,23 @@ function renderMixin(Vue) {
   Vue.prototype._n = toNumber;
 
   // render static tree by index
-  Vue.prototype._m = function renderStatic(index) {
+  Vue.prototype._m = function renderStatic(index, isInFor) {
     var tree = this._staticTrees[index];
-    if (!tree) {
-      tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy);
+    // if has already-rendered static tree and not inside v-for,
+    // we can reuse the same tree by indentity.
+    if (tree && !isInFor) {
+      return tree;
+    }
+    // otherwise, render a fresh tree.
+    tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy);
+    if (Array.isArray(tree)) {
+      for (var i = 0; i < tree.length; i++) {
+        tree[i].isStatic = true;
+        tree[i].key = '__static__' + index + '_' + i;
+      }
+    } else {
       tree.isStatic = true;
+      tree.key = '__static__' + index;
     }
     return tree;
   };
@@ -2020,12 +2024,12 @@ function renderMixin(Vue) {
           value = toObject(value);
         }
         var data = vnode.data;
-        for (var key in value) {
-          if (key === 'class' || key === 'style') {
-            data[key] = value[key];
+        for (var _key in value) {
+          if (_key === 'class' || _key === 'style') {
+            data[_key] = value[_key];
           } else {
-            var hash = asProp || config.mustUseProp(key) ? data.domProps || (data.domProps = {}) : data.attrs || (data.attrs = {});
-            hash[key] = value[key];
+            var hash = asProp || config.mustUseProp(_key) ? data.domProps || (data.domProps = {}) : data.attrs || (data.attrs = {});
+            hash[_key] = value[_key];
           }
         }
       }
@@ -2803,29 +2807,26 @@ function initAssetRegisters(Vue) {
 var KeepAlive = {
   name: 'keep-alive',
   abstract: true,
-  props: {
-    child: Object
-  },
   created: function created() {
     this.cache = Object.create(null);
   },
   render: function render() {
-    var rawChild = this.child;
-    var realChild = getRealChild(this.child);
-    if (realChild && realChild.componentOptions) {
-      var opts = realChild.componentOptions;
+    var vnode = getFirstComponentChild(this.$slots.default);
+    if (vnode && vnode.componentOptions) {
+      var opts = vnode.componentOptions;
+      var key = vnode.key == null
       // same constructor may get registered as different local components
       // so cid alone is not enough (#3269)
-      var key = opts.Ctor.cid + '::' + opts.tag;
+      ? opts.Ctor.cid + '::' + opts.tag : vnode.key;
       if (this.cache[key]) {
-        var child = realChild.child = this.cache[key].child;
-        realChild.elm = this.$el = child.$el;
+        var child = vnode.child = this.cache[key].child;
+        vnode.elm = this.$el = child.$el;
       } else {
-        this.cache[key] = realChild;
+        this.cache[key] = vnode;
       }
-      realChild.data.keepAlive = true;
+      vnode.data.keepAlive = true;
     }
-    return rawChild;
+    return vnode;
   },
   destroyed: function destroyed() {
     for (var key in this.cache) {
@@ -2878,7 +2879,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   }
 });
 
-Vue.version = '2.0.0-beta.7';
+Vue.version = '2.0.0-beta.8';
 
 // attributes that should be using props for binding
 var mustUseProp = makeMap('value,selected,checked,muted');
@@ -3035,8 +3036,10 @@ var isIE = UA$1 && /msie|trident/.test(UA$1);
 var isIE9 = UA$1 && UA$1.indexOf('msie 9.0') > 0;
 var isAndroid = UA$1 && UA$1.indexOf('android') > 0;
 
-// some browsers, e.g. PhantomJS, encodes angular brackets
-// inside attribute values when retrieving innerHTML.
+// According to
+// https://w3c.github.io/DOM-Parsing/#dfn-serializing-an-attribute-value
+// when serializing innerHTML, <, >, ", & should be encoded as entities.
+// However, only some browsers, e.g. PhantomJS, encodes < and >.
 // this causes problems with the in-browser parser.
 var shouldDecodeTags = inBrowser ? function () {
   var div = document.createElement('div');
@@ -3140,9 +3143,6 @@ function isDef(s) {
 }
 
 function sameVnode(vnode1, vnode2) {
-  if (vnode1.isStatic || vnode2.isStatic) {
-    return vnode1 === vnode2;
-  }
   return vnode1.key === vnode2.key && vnode1.tag === vnode2.tag && vnode1.isComment === vnode2.isComment && !vnode1.data === !vnode2.data;
 }
 
@@ -3384,8 +3384,8 @@ function createPatchFunction(backend) {
         newStartVnode = newCh[++newStartIdx];
       } else {
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx);
-        idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx[newStartVnode.key] : newStartVnode.isStatic ? oldCh.indexOf(newStartVnode) : null;
-        if (isUndef(idxInOld) || idxInOld === -1) {
+        idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx[newStartVnode.key] : null;
+        if (isUndef(idxInOld)) {
           // New element
           nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm);
           newStartVnode = newCh[++newStartIdx];
@@ -3417,7 +3417,13 @@ function createPatchFunction(backend) {
   }
 
   function patchVnode(oldVnode, vnode, insertedVnodeQueue, removeOnly) {
-    if (oldVnode === vnode) return;
+    if (oldVnode === vnode) {
+      return;
+    }
+    if (vnode.isStatic && oldVnode.isStatic && vnode.key === oldVnode.key) {
+      vnode.elm = oldVnode.elm;
+      return;
+    }
     var i = void 0,
         hook = void 0;
     var hasData = isDef(i = vnode.data);
@@ -4072,7 +4078,7 @@ function enter(vnode) {
   }
 
   /* istanbul ignore if */
-  if (el._enterCb) {
+  if (el._enterCb || el.nodeType !== 1) {
     return;
   }
 
@@ -4176,7 +4182,7 @@ function leave(vnode, rm) {
   }
 
   /* istanbul ignore if */
-  if (el._leaveCb) {
+  if (el._leaveCb || el.nodeType !== 1) {
     return;
   }
 
@@ -4429,7 +4435,10 @@ var show = {
   },
   update: function update(el, _ref2, vnode) {
     var value = _ref2.value;
+    var oldValue = _ref2.oldValue;
 
+    /* istanbul ignore if */
+    if (value === oldValue) return;
     vnode = locateNode(vnode);
     var transition = vnode.data && vnode.data.transition;
     if (transition && !isIE9) {
@@ -4465,6 +4474,17 @@ var transitionProps = {
   appearClass: String,
   appearActiveClass: String
 };
+
+// in case the child is also an abstract component, e.g. <keep-alive>
+// we want to recrusively retrieve the real component to be rendered
+function getRealChild(vnode) {
+  var compOptions = vnode && vnode.componentOptions;
+  if (compOptions && compOptions.Ctor.options.abstract) {
+    return getRealChild(getFirstComponentChild(compOptions.children));
+  } else {
+    return vnode;
+  }
+}
 
 function extractTransitionData(comp) {
   var data = {};
@@ -4527,8 +4547,11 @@ var Transition = {
     // use getRealChild() to ignore abstract components e.g. keep-alive
     var child = getRealChild(rawChild);
     /* istanbul ignore if */
-    if (!child) return;
-    child.key = child.key || '__v' + (child.tag + this._uid) + '__';
+    if (!child) {
+      return rawChild;
+    }
+
+    child.key = child.key == null ? '__v' + (child.tag + this._uid) + '__' : child.key;
     var data = (child.data || (child.data = {})).transition = extractTransitionData(this);
     var oldRawChild = this._vnode;
     var oldChild = getRealChild(oldRawChild);

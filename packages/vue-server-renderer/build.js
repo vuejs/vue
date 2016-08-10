@@ -1664,8 +1664,9 @@ function lifecycleMixin(Vue) {
       vm.$options._parentListeners = listeners;
       vm._updateListeners(listeners, oldListeners);
     }
-    // force udpate if has children
+    // resolve slots + force update if has children
     if (hasChildren) {
+      vm.$slots = resolveSlots(renderChildren);
       vm.$forceUpdate();
     }
   };
@@ -2026,7 +2027,7 @@ function initRender(vm) {
   vm.$vnode = null; // the placeholder node in parent tree
   vm._vnode = null; // the root of the child tree
   vm._staticTrees = null;
-  vm.$slots = {};
+  vm.$slots = resolveSlots(vm.$options._renderChildren);
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
   vm.$createElement = bind(createElement, vm);
@@ -2045,7 +2046,6 @@ function renderMixin(Vue) {
     var _vm$$options = vm.$options;
     var render = _vm$$options.render;
     var staticRenderFns = _vm$$options.staticRenderFns;
-    var _renderChildren = _vm$$options._renderChildren;
     var _parentVnode = _vm$$options._parentVnode;
 
 
@@ -2055,9 +2055,6 @@ function renderMixin(Vue) {
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
     vm.$vnode = _parentVnode;
-    // resolve slots. becaues slots are rendered in parent scope,
-    // we set the activeInstance to parent.
-    vm.$slots = resolveSlots(_renderChildren);
     // render self
     var vnode = void 0;
     try {
@@ -2101,11 +2098,23 @@ function renderMixin(Vue) {
   Vue.prototype._n = toNumber;
 
   // render static tree by index
-  Vue.prototype._m = function renderStatic(index) {
+  Vue.prototype._m = function renderStatic(index, isInFor) {
     var tree = this._staticTrees[index];
-    if (!tree) {
-      tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy);
+    // if has already-rendered static tree and not inside v-for,
+    // we can reuse the same tree by indentity.
+    if (tree && !isInFor) {
+      return tree;
+    }
+    // otherwise, render a fresh tree.
+    tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy);
+    if (Array.isArray(tree)) {
+      for (var i = 0; i < tree.length; i++) {
+        tree[i].isStatic = true;
+        tree[i].key = '__static__' + index + '_' + i;
+      }
+    } else {
       tree.isStatic = true;
+      tree.key = '__static__' + index;
     }
     return tree;
   };
@@ -2156,12 +2165,12 @@ function renderMixin(Vue) {
           value = toObject(value);
         }
         var data = vnode.data;
-        for (var key in value) {
-          if (key === 'class' || key === 'style') {
-            data[key] = value[key];
+        for (var _key in value) {
+          if (_key === 'class' || _key === 'style') {
+            data[_key] = value[_key];
           } else {
-            var hash = asProp || config.mustUseProp(key) ? data.domProps || (data.domProps = {}) : data.attrs || (data.attrs = {});
-            hash[key] = value[key];
+            var hash = asProp || config.mustUseProp(_key) ? data.domProps || (data.domProps = {}) : data.attrs || (data.attrs = {});
+            hash[_key] = value[_key];
           }
         }
       }
@@ -2886,8 +2895,10 @@ var isIE = UA && /msie|trident/.test(UA);
 var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
 var isAndroid = UA && UA.indexOf('android') > 0;
 
-// some browsers, e.g. PhantomJS, encodes angular brackets
-// inside attribute values when retrieving innerHTML.
+// According to
+// https://w3c.github.io/DOM-Parsing/#dfn-serializing-an-attribute-value
+// when serializing innerHTML, <, >, ", & should be encoded as entities.
+// However, only some browsers, e.g. PhantomJS, encodes < and >.
 // this causes problems with the in-browser parser.
 var shouldDecodeTags = inBrowser ? function () {
   var div = document.createElement('div');
@@ -2929,12 +2940,13 @@ var reCache = {};
 var ampRE = /&amp;/g;
 var ltRE = /&lt;/g;
 var gtRE = /&gt;/g;
+var quoteRE = /&quot;/g;
 
 function decodeAttr(value, shouldDecodeTags) {
   if (shouldDecodeTags) {
     value = value.replace(ltRE, '<').replace(gtRE, '>');
   }
-  return value.replace(ampRE, '&');
+  return value.replace(ampRE, '&').replace(quoteRE, '"');
 }
 
 function parseHTML(html, options) {
@@ -3671,9 +3683,6 @@ function processComponent(el) {
   if (binding = getBindingAttr(el, 'is')) {
     el.component = binding;
   }
-  if (getAndRemoveAttr(el, 'keep-alive') != null) {
-    el.keepAlive = true;
-  }
   if (getAndRemoveAttr(el, 'inline-template') != null) {
     el.inlineTemplate = true;
   }
@@ -3819,7 +3828,7 @@ function optimize(root, options) {
   // first pass: mark all non-static nodes.
   markStatic(root);
   // second pass: mark static roots.
-  markStaticRoots(root);
+  markStaticRoots(root, false);
 }
 
 function genStaticKeys$1(keys) {
@@ -3839,14 +3848,17 @@ function markStatic(node) {
   }
 }
 
-function markStaticRoots(node) {
-  if (node.type === 1 && (node.once || node.static)) {
-    node.staticRoot = true;
-    return;
-  }
-  if (node.children) {
-    for (var i = 0, l = node.children.length; i < l; i++) {
-      markStaticRoots(node.children[i]);
+function markStaticRoots(node, isInFor) {
+  if (node.type === 1) {
+    if (node.once || node.static) {
+      node.staticRoot = true;
+      node.staticInFor = isInFor;
+      return;
+    }
+    if (node.children) {
+      for (var i = 0, l = node.children.length; i < l; i++) {
+        markStaticRoots(node.children[i], !!node.for);
+      }
     }
   }
 }
@@ -3953,7 +3965,6 @@ function generate(ast, options) {
   dataGenFns = pluckModuleFunction(options.modules, 'genData');
   platformDirectives = options.directives || {};
   var code = ast ? genElement(ast) : '_h("div")';
-  // console.log(code)
   staticRenderFns = prevStaticRenderFns;
   return {
     render: 'with(this){return ' + code + '}',
@@ -3966,7 +3977,7 @@ function genElement(el) {
     // hoist static sub-trees out
     el.staticProcessed = true;
     staticRenderFns.push('with(this){return ' + genElement(el) + '}');
-    return '_m(' + (staticRenderFns.length - 1) + ')';
+    return '_m(' + (staticRenderFns.length - 1) + (el.staticInFor ? ',true' : '') + ')';
   } else if (el.for && !el.forProcessed) {
     return genFor(el);
   } else if (el.if && !el.ifProcessed) {
@@ -3990,10 +4001,6 @@ function genElement(el) {
     // module transforms
     for (var i = 0; i < transforms$1.length; i++) {
       code = transforms$1[i](el, code);
-    }
-    // check keep-alive
-    if (el.keepAlive) {
-      code = '_h("KeepAlive",{props:{child:' + code + '}})';
     }
     return code;
   }
@@ -4498,9 +4505,13 @@ var normalizeRender = function normalizeRender(vm) {
   var render = _vm$$options.render;
   var template = _vm$$options.template;
 
-  if (!render && template) {
-    var renderFns = compilationCache[template] || (compilationCache[template] = compileToFunctions(template));
-    Object.assign(vm.$options, renderFns);
+  if (!render) {
+    if (template) {
+      var renderFns = compilationCache[template] || (compilationCache[template] = compileToFunctions(template));
+      Object.assign(vm.$options, renderFns);
+    } else {
+      throw new Error('render function or template not defined in component: ' + (vm.$options.name || vm.$options._componentTag || 'anonymous'));
+    }
   }
 };
 
@@ -4763,7 +4774,11 @@ function createBundleRendererCreator(createRenderer) {
       renderToStream: function renderToStream(context) {
         var res = new stream.PassThrough();
         runInVm(code, context).then(function (app) {
-          renderer.renderToStream(app).pipe(res);
+          var renderStream = renderer.renderToStream(app);
+          renderStream.on('error', function (err) {
+            res.emit('error', err);
+          });
+          renderStream.pipe(res);
         }).catch(function (err) {
           process.nextTick(function () {
             res.emit('error', err);
