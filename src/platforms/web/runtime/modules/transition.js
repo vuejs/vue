@@ -27,7 +27,7 @@ export function enter (vnode: VNodeWithData) {
   }
 
   /* istanbul ignore if */
-  if (el._enterCb) {
+  if (el._enterCb || el.nodeType !== 1) {
     return
   }
 
@@ -135,7 +135,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   }
 
   /* istanbul ignore if */
-  if (el._leaveCb) {
+  if (el._leaveCb || el.nodeType !== 1) {
     return
   }
 
