@@ -246,7 +246,7 @@ p.leaveNextTick = function () {
 p.leaveDone = function () {
   this.left = true
   this.cancel = this.pendingJsCb = null
-  this.op()
+  if(this.op) this.op()
   removeClass(this.el, this.leaveClass)
   this.callHook('afterLeave')
   if (this.cb) this.cb()
