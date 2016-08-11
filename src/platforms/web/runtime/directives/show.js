@@ -11,15 +11,17 @@ function locateNode (vnode: VNode): VNodeWithData {
 }
 
 export default {
-  bind (el: HTMLElement, { value }: VNodeDirective, vnode: VNodeWithData) {
+  bind (el: any, { value }: VNodeDirective, vnode: VNodeWithData) {
     vnode = locateNode(vnode)
     const transition = vnode.data && vnode.data.transition
     if (value && transition && transition.appear && !isIE9) {
       enter(vnode)
     }
-    el.style.display = value ? '' : 'none'
+    const originalDisplay = el.style.display
+    el.style.display = value ? originalDisplay : 'none'
+    el.__vOriginalDisplay = originalDisplay
   },
-  update (el: HTMLElement, { value, oldValue }: VNodeDirective, vnode: VNodeWithData) {
+  update (el: any, { value, oldValue }: VNodeDirective, vnode: VNodeWithData) {
     /* istanbul ignore if */
     if (value === oldValue) return
     vnode = locateNode(vnode)
@@ -27,14 +29,14 @@ export default {
     if (transition && !isIE9) {
       if (value) {
         enter(vnode)
-        el.style.display = ''
+        el.style.display = el.__vOriginalDisplay
       } else {
         leave(vnode, () => {
           el.style.display = 'none'
         })
       }
     } else {
-      el.style.display = value ? '' : 'none'
+      el.style.display = value ? el.__vOriginalDisplay : 'none'
     }
   }
 }
