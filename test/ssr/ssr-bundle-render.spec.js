@@ -100,7 +100,7 @@ describe('SSR: bundle renderer', () => {
     }
     createRenderer('cache.js', renderer => {
       const expected = '<div server-rendered="true">&sol;test</div>'
-      const key = '1::1'
+      const key = 'app::1'
       renderer.renderToString((err, res) => {
         expect(err).toBeNull()
         expect(res).toBe(expected)
@@ -143,7 +143,7 @@ describe('SSR: bundle renderer', () => {
     }
     createRenderer('cache.js', renderer => {
       const expected = '<div server-rendered="true">&sol;test</div>'
-      const key = '1::1'
+      const key = 'app::1'
       renderer.renderToString((err, res) => {
         expect(err).toBeNull()
         expect(res).toBe(expected)

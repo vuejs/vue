@@ -1,6 +1,7 @@
 import Vue from '../../../dist/vue.common.js'
 
 const app = {
+  name: 'app',
   props: ['id'],
   serverCacheKey: props => props.id,
   render (h) {
