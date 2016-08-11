@@ -4,12 +4,12 @@ import { hasOwn, isObject, isPlainObject, capitalize, hyphenate } from 'shared/u
 import { observe, observerState } from '../observer/index'
 import { warn } from './debug'
 
-type PropOptions = {
-  type: Function | Array<Function> | null,
-  default: any,
-  required: ?boolean,
-  validator: ?Function
-}
+// type PropOptions = {
+//   type: Function | Array<Function> | null,
+//   default: any,
+//   required: ?boolean,
+//   validator: ?Function
+// }
 
 export function validateProp (
   key: string,
@@ -23,7 +23,7 @@ export function validateProp (
   const absent = !hasOwn(propsData, key)
   let value = propsData[key]
   // handle boolean props
-  if (prop.type === Boolean) {
+  if (getType(prop.type) === 'Boolean') {
     if (absent && !hasOwn(prop, 'default')) {
       value = false
     } else if (value === '' || value === hyphenate(key)) {
@@ -131,31 +131,34 @@ function assertType (value: any, type: Function): {
   expectedType: string
 } {
   let valid
-  let expectedType
-  if (type === String) {
-    expectedType = 'string'
-    valid = typeof value === expectedType
-  } else if (type === Number) {
-    expectedType = 'number'
-    valid = typeof value === expectedType
-  } else if (type === Boolean) {
-    expectedType = 'boolean'
-    valid = typeof value === expectedType
-  } else if (type === Function) {
-    expectedType = 'function'
-    valid = typeof value === expectedType
-  } else if (type === Object) {
-    expectedType = 'Object'
+  let expectedType = getType(type)
+  if (expectedType === 'String') {
+    valid = typeof value === (expectedType = 'string')
+  } else if (expectedType === 'Number') {
+    valid = typeof value === (expectedType = 'number')
+  } else if (expectedType === 'Boolean') {
+    valid = typeof value === (expectedType = 'boolean')
+  } else if (expectedType === 'Function') {
+    valid = typeof value === (expectedType = 'function')
+  } else if (expectedType === 'Object') {
     valid = isPlainObject(value)
-  } else if (type === Array) {
-    expectedType = 'Array'
+  } else if (expectedType === 'Array') {
     valid = Array.isArray(value)
   } else {
-    expectedType = type.name || type.toString()
     valid = value instanceof type
   }
   return {
     valid,
     expectedType
   }
+}
+
+/**
+ * Use function string name to check built-in types,
+ * because a simple equality check will fail when running
+ * across different vms / iframes.
+ */
+function getType (fn) {
+  const match = fn && fn.toString().match(/^function (\w+)/)
+  return match && match[1]
 }
