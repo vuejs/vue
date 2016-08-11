@@ -1,12 +1,11 @@
 .DS_Store
 node_modules
-npm-debug.log
+*.log
 explorations
 TODOs.md
 dist/*.gz
 dist/*.map
 dist/vue.common.min.js
-selenium-debug.log
 test/e2e/reports
 test/e2e/screenshots
 coverage
