@@ -2653,7 +2653,7 @@ function validateProp(key, propOptions, propsData, vm) {
   var absent = !hasOwn(propsData, key);
   var value = propsData[key];
   // handle boolean props
-  if (prop.type === Boolean) {
+  if (getType(prop.type) === 'Boolean') {
     if (absent && !hasOwn(prop, 'default')) {
       value = false;
     } else if (value === '' || value === hyphenate(key)) {
@@ -2734,33 +2734,36 @@ function assertProp(prop, name, value, vm, absent) {
  */
 function assertType(value, type) {
   var valid = void 0;
-  var expectedType = void 0;
-  if (type === String) {
-    expectedType = 'string';
-    valid = typeof value === expectedType;
-  } else if (type === Number) {
-    expectedType = 'number';
-    valid = typeof value === expectedType;
-  } else if (type === Boolean) {
-    expectedType = 'boolean';
-    valid = typeof value === expectedType;
-  } else if (type === Function) {
-    expectedType = 'function';
-    valid = typeof value === expectedType;
-  } else if (type === Object) {
-    expectedType = 'Object';
+  var expectedType = getType(type);
+  if (expectedType === 'String') {
+    valid = typeof value === (expectedType = 'string');
+  } else if (expectedType === 'Number') {
+    valid = typeof value === (expectedType = 'number');
+  } else if (expectedType === 'Boolean') {
+    valid = typeof value === (expectedType = 'boolean');
+  } else if (expectedType === 'Function') {
+    valid = typeof value === (expectedType = 'function');
+  } else if (expectedType === 'Object') {
     valid = isPlainObject(value);
-  } else if (type === Array) {
-    expectedType = 'Array';
+  } else if (expectedType === 'Array') {
     valid = Array.isArray(value);
   } else {
-    expectedType = type.name || type.toString();
     valid = value instanceof type;
   }
   return {
     valid: valid,
     expectedType: expectedType
   };
+}
+
+/**
+ * Use function string name to check built-in types,
+ * because a simple equality check will fail when running
+ * across different vms / iframes.
+ */
+function getType(fn) {
+  var match = fn && fn.toString().match(/^\s*function (\w+)/);
+  return match && match[1];
 }
 
 // attributes that should be using props for binding
@@ -4484,6 +4487,14 @@ function makeFunction(code) {
   }
 }
 
+var warned = Object.create(null);
+var warnOnce = function warnOnce(msg) {
+  if (!warned[msg]) {
+    warned[msg] = true;
+    console.warn('\n\u001b[31m' + msg + '\u001b[39m\n');
+  }
+};
+
 var normalizeAsync = function normalizeAsync(cache, method) {
   var fn = cache[method];
   if (!fn) {
@@ -4531,9 +4542,10 @@ function createRenderFunction(modules, directives, isUnaryTag, cache) {
       // check cache hit
       var Ctor = node.componentOptions.Ctor;
       var getKey = Ctor.options.serverCacheKey;
-      if (getKey && cache) {
+      var name = Ctor.options.name;
+      if (getKey && cache && name) {
         (function () {
-          var key = Ctor.cid + '::' + getKey(node.componentOptions.propsData);
+          var key = name + '::' + getKey(node.componentOptions.propsData);
           if (has) {
             has(key, function (hit) {
               if (hit) {
@@ -4555,8 +4567,11 @@ function createRenderFunction(modules, directives, isUnaryTag, cache) {
           }
         })();
       } else {
-        if (getKey) {
-          console.error('[vue-server-renderer] Component ' + (Ctor.options.name || '(anonymous)') + ' implemented serverCacheKey, ' + 'but no cache was provided to the renderer.');
+        if (getKey && !cache) {
+          warnOnce('[vue-server-renderer] Component ' + (Ctor.options.name || '(anonymous)') + ' implemented serverCacheKey, ' + 'but no cache was provided to the renderer.');
+        }
+        if (getKey && !name) {
+          warnOnce('[vue-server-renderer] Components that implement "serverCacheKey" ' + 'must also define a unique "name" option.');
         }
         renderComponent(node, write, next, isRoot);
       }
@@ -4678,6 +4693,7 @@ function createRenderFunction(modules, directives, isUnaryTag, cache) {
   }
 
   return function render(component, write, done) {
+    warned = Object.create(null);
     activeInstance = component;
     normalizeRender(component);
     renderNode(component._render(), write, done, true);

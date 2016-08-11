@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-beta.8
+ * Vue.js v2.0.0-rc.1
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -2547,7 +2547,7 @@
     var absent = !hasOwn(propsData, key);
     var value = propsData[key];
     // handle boolean props
-    if (prop.type === Boolean) {
+    if (getType(prop.type) === 'Boolean') {
       if (absent && !hasOwn(prop, 'default')) {
         value = false;
       } else if (value === '' || value === hyphenate(key)) {
@@ -2628,33 +2628,36 @@
    */
   function assertType(value, type) {
     var valid = void 0;
-    var expectedType = void 0;
-    if (type === String) {
-      expectedType = 'string';
-      valid = typeof value === expectedType;
-    } else if (type === Number) {
-      expectedType = 'number';
-      valid = typeof value === expectedType;
-    } else if (type === Boolean) {
-      expectedType = 'boolean';
-      valid = typeof value === expectedType;
-    } else if (type === Function) {
-      expectedType = 'function';
-      valid = typeof value === expectedType;
-    } else if (type === Object) {
-      expectedType = 'Object';
+    var expectedType = getType(type);
+    if (expectedType === 'String') {
+      valid = typeof value === (expectedType = 'string');
+    } else if (expectedType === 'Number') {
+      valid = typeof value === (expectedType = 'number');
+    } else if (expectedType === 'Boolean') {
+      valid = typeof value === (expectedType = 'boolean');
+    } else if (expectedType === 'Function') {
+      valid = typeof value === (expectedType = 'function');
+    } else if (expectedType === 'Object') {
       valid = isPlainObject(value);
-    } else if (type === Array) {
-      expectedType = 'Array';
+    } else if (expectedType === 'Array') {
       valid = Array.isArray(value);
     } else {
-      expectedType = type.name || type.toString();
       valid = value instanceof type;
     }
     return {
       valid: valid,
       expectedType: expectedType
     };
+  }
+
+  /**
+   * Use function string name to check built-in types,
+   * because a simple equality check will fail when running
+   * across different vms / iframes.
+   */
+  function getType(fn) {
+    var match = fn && fn.toString().match(/^\s*function (\w+)/);
+    return match && match[1];
   }
 
 
@@ -2884,7 +2887,7 @@
     }
   });
 
-  Vue.version = '2.0.0-beta.8';
+  Vue.version = '2.0.0-rc.1';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
