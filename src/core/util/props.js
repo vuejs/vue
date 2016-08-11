@@ -4,12 +4,12 @@ import { hasOwn, isObject, isPlainObject, capitalize, hyphenate } from 'shared/u
 import { observe, observerState } from '../observer/index'
 import { warn } from './debug'
 
-// type PropOptions = {
-//   type: Function | Array<Function> | null,
-//   default: any,
-//   required: ?boolean,
-//   validator: ?Function
-// }
+type PropOptions = {
+  type: Function | Array<Function> | null,
+  default: any,
+  required: ?boolean,
+  validator: ?Function
+}
 
 export function validateProp (
   key: string,
@@ -159,6 +159,6 @@ function assertType (value: any, type: Function): {
  * across different vms / iframes.
  */
 function getType (fn) {
-  const match = fn && fn.toString().match(/^function (\w+)/)
+  const match = fn && fn.toString().match(/^\s*function (\w+)/)
   return match && match[1]
 }
