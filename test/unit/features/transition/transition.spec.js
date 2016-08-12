@@ -253,6 +253,79 @@ if (!isIE9) {
       }).then(done)
     })
 
+    fit('transition events (v-show)', done => {
+      const onLeaveSpy = jasmine.createSpy('leave')
+      const onEnterSpy = jasmine.createSpy('enter')
+      const beforeLeaveSpy = jasmine.createSpy('beforeLeave')
+      const beforeEnterSpy = jasmine.createSpy('beforeEnter')
+      const afterLeaveSpy = jasmine.createSpy('afterLeave')
+      const afterEnterSpy = jasmine.createSpy('afterEnter')
+
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition
+              name="test"
+              @before-enter="beforeEnter"
+              @enter="enter"
+              @after-enter="afterEnter"
+              @before-leave="beforeLeave"
+              @leave="leave"
+              @after-leave="afterLeave">
+              <div v-show="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
+        data: { ok: true },
+        methods: {
+          beforeLeave: (el) => {
+            expect(el).toBe(vm.$el.children[0])
+            expect(el.className).toBe('test')
+            beforeLeaveSpy(el)
+          },
+          leave: (el) => onLeaveSpy(el),
+          afterLeave: (el) => afterLeaveSpy(el),
+          beforeEnter: (el) => {
+            expect(el.className).toBe('test')
+            beforeEnterSpy(el)
+          },
+          enter: (el) => {
+            onEnterSpy(el)
+          },
+          afterEnter: (el) => afterEnterSpy(el)
+        }
+      }).$mount(el)
+
+      // should not apply transition on initial render by default
+      expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
+
+      let _el = vm.$el.children[0]
+      vm.ok = false
+      waitForUpdate(() => {
+        expect(beforeLeaveSpy).toHaveBeenCalledWith(_el)
+        expect(onLeaveSpy).toHaveBeenCalledWith(_el)
+        expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(afterLeaveSpy).not.toHaveBeenCalled()
+        expect(vm.$el.children[0].className).toBe('test test-leave-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(afterLeaveSpy).toHaveBeenCalledWith(_el)
+        expect(vm.$el.children[0].style.display).toBe('none')
+        vm.ok = true
+      }).then(() => {
+        _el = vm.$el.children[0]
+        expect(beforeEnterSpy).toHaveBeenCalledWith(_el)
+        expect(onEnterSpy).toHaveBeenCalledWith(_el)
+        expect(vm.$el.children[0].className).toBe('test test-enter test-enter-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(afterEnterSpy).not.toHaveBeenCalled()
+        expect(vm.$el.children[0].className).toBe('test test-enter-active')
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(afterEnterSpy).toHaveBeenCalledWith(_el)
+        expect(vm.$el.children[0].className).toBe('test')
+      }).then(done)
+    })
+
     it('explicit user callback in JavaScript hooks', done => {
       let next
       const vm = new Vue({

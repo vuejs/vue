@@ -92,15 +92,17 @@ export function enter (vnode: VNodeWithData) {
     el._enterCb = null
   })
 
-  // remove pending leave element on enter by injecting an insert hook
-  mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
-    const parent = el.parentNode
-    const pendingNode = parent._pending && parent._pending[vnode.key]
-    if (pendingNode && pendingNode.tag === vnode.tag && pendingNode.elm._leaveCb) {
-      pendingNode.elm._leaveCb()
-    }
-    enterHook && enterHook(el, cb)
-  })
+  if (!vnode.data.show) {
+    // remove pending leave element on enter by injecting an insert hook
+    mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
+      const parent = el.parentNode
+      const pendingNode = parent._pending && parent._pending[vnode.key]
+      if (pendingNode && pendingNode.tag === vnode.tag && pendingNode.elm._leaveCb) {
+        pendingNode.elm._leaveCb()
+      }
+      enterHook && enterHook(el, cb)
+    })
+  }
 
   // start enter transition
   beforeEnterHook && beforeEnterHook(el)
@@ -113,6 +115,10 @@ export function enter (vnode: VNodeWithData) {
         whenTransitionEnds(el, type, cb)
       }
     })
+  }
+
+  if (vnode.data.show) {
+    enterHook && enterHook(el, cb)
   }
 
   if (!expectsCSS && !userWantsControl) {
