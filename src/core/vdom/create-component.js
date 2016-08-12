@@ -126,7 +126,7 @@ export function createComponentInstanceForVnode (
 }
 
 function init (vnode: VNodeWithData, hydrating: boolean) {
-  if (!vnode.child) {
+  if (!vnode.child || vnode.child._isDestroyed) {
     const child = vnode.child = createComponentInstanceForVnode(vnode, activeInstance)
     child.$mount(hydrating ? vnode.elm : undefined, hydrating)
   }
@@ -157,11 +157,10 @@ function insert (vnode: MountedComponentVNode) {
   }
 }
 
-function destroy (vnode: any) {
+function destroy (vnode: MountedComponentVNode) {
   if (!vnode.child._isDestroyed) {
     if (!vnode.data.keepAlive) {
       vnode.child.$destroy()
-      vnode.child = null
     } else {
       vnode.child._inactive = true
       callHook(vnode.child, 'deactivated')
