@@ -253,7 +253,7 @@ if (!isIE9) {
       }).then(done)
     })
 
-    fit('transition events (v-show)', done => {
+    it('transition events (v-show)', done => {
       const onLeaveSpy = jasmine.createSpy('leave')
       const onEnterSpy = jasmine.createSpy('enter')
       const beforeLeaveSpy = jasmine.createSpy('beforeLeave')
