@@ -411,4 +411,47 @@ describe('Component slot', () => {
       expect(vm.$el.textContent).toBe('foo2')
     }).then(done)
   })
+
+  // #3437
+  it('should correctly re-create components in slot', done => {
+    const calls = []
+    const vm = new Vue({
+      template: `
+        <comp ref="child">
+          <div slot="foo">
+            <child></child>
+          </div>
+        </comp>
+      `,
+      components: {
+        comp: {
+          data () {
+            return { ok: true }
+          },
+          template: `<div><slot name="foo" v-if="ok"></slot></div>`
+        },
+        child: {
+          template: '<div>child</div>',
+          created () {
+            calls.push(1)
+          },
+          destroyed () {
+            calls.push(2)
+          }
+        }
+      }
+    }).$mount()
+
+    expect(calls).toEqual([1])
+    vm.$refs.child.ok = false
+    waitForUpdate(() => {
+      expect(calls).toEqual([1, 2])
+      vm.$refs.child.ok = true
+    }).then(() => {
+      expect(calls).toEqual([1, 2, 1])
+      vm.$refs.child.ok = false
+    }).then(() => {
+      expect(calls).toEqual([1, 2, 1, 2])
+    }).then(done)
+  })
 })

@@ -161,6 +161,7 @@ function destroy (vnode: MountedComponentVNode) {
   if (!vnode.child._isDestroyed) {
     if (!vnode.data.keepAlive) {
       vnode.child.$destroy()
+      vnode.child = null
     } else {
       vnode.child._inactive = true
       callHook(vnode.child, 'deactivated')
