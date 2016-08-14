@@ -146,7 +146,9 @@ export function createPatchFunction (backend) {
     }
     vnode.elm = vnode.child.$el
     invokeCreateHooks(vnode, insertedVnodeQueue)
-    setScope(vnode)
+    if (vnode.child._vnode.tag) {
+      setScope(vnode)
+    }
   }
 
   // set scope id attribute for scoped CSS.
