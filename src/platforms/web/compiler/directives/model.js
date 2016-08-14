@@ -1,5 +1,6 @@
 /* @flow */
 
+import { isIE } from 'web/util/index'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 
 let warn
@@ -96,7 +97,7 @@ function genDefaultModel (
 
   const type = el.attrsMap.type
   const { lazy, number, trim } = modifiers || {}
-  const event = lazy ? 'change' : 'input'
+  const event = lazy || (isIE && type === 'range') ? 'change' : 'input'
   const needCompositionGuard = !lazy && type !== 'range'
   const isNative = el.tag === 'input' || el.tag === 'textarea'
 
