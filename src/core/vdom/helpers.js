@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isPrimitive } from '../util/index'
+import { isPrimitive, warn } from '../util/index'
 import VNode from './vnode'
 
 export function normalizeChildren (
@@ -82,7 +82,11 @@ export function updateListeners (
   for (name in on) {
     cur = on[name]
     old = oldOn[name]
-    if (!old) {
+    if (!cur) {
+      process.env.NODE_ENV !== 'production' && warn(
+        `Handler for event "${name}" is undefined.`
+      )
+    } else if (!old) {
       capture = name.charAt(0) === '!'
       event = capture ? name.slice(1) : name
       if (Array.isArray(cur)) {

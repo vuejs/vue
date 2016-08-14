@@ -22,8 +22,9 @@ if (process.env.NODE_ENV !== 'production') {
       const isAllowedGlobal = allowedGlobals(key)
       if (!has && !isAllowedGlobal) {
         warn(
-          `Trying to access non-existent property "${key}" while rendering. ` +
-          `Make sure to declare reactive data properties in the data option.`,
+          `Property or method "${key}" is not defined on the instance but ` +
+          `referenced during render. Make sure to declare reactive data ` +
+          `properties in the data option.`,
           target
         )
       }

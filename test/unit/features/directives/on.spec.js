@@ -223,4 +223,16 @@ describe('Directive v-on', () => {
       expect(spy2.calls.count()).toBe(1)
     }).then(done)
   })
+
+  it('warn missing handlers', () => {
+    vm = new Vue({
+      el,
+      data: { none: null },
+      template: `<div @click="none"></div>`
+    })
+    expect(`Handler for event "click" is undefined`).toHaveBeenWarned()
+    expect(() => {
+      triggerEvent(vm.$el, 'click')
+    }).not.toThrow()
+  })
 })
