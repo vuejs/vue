@@ -91,6 +91,54 @@ if (!isIE9) {
       }).then(done)
     })
 
+    // #3440
+    it('dynamic components, out-in (with extra re-render)', done => {
+      let next
+      const vm = new Vue({
+        template: `<div>
+          <transition name="test" mode="out-in" @after-leave="afterLeave">
+            <component :is="view" class="test">
+            </component>
+          </transition>
+        </div>`,
+        data: { view: 'one' },
+        components,
+        methods: {
+          afterLeave () {
+            next()
+          }
+        }
+      }).$mount(el)
+      expect(vm.$el.textContent).toBe('one')
+      vm.view = 'two'
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave test-leave-active">one</div><!---->'
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave-active">one</div><!---->'
+        )
+        // Force re-render before the element finishes leaving
+        // this should not cause the incoming element to enter early
+        vm.$forceUpdate()
+      }).thenWaitFor(_next => { next = _next }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<!---->')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-enter test-enter-active">two</div>'
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-enter-active">two</div>'
+        )
+      }).thenWaitFor(duration + 10).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">two</div>'
+        )
+      }).then(done)
+    })
+
     it('dynamic components, in-out', done => {
       let next
       const vm = new Vue({

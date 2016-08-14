@@ -48,6 +48,12 @@ export function extractTransitionData (comp: Component): Object {
   return data
 }
 
+function placeholder (h, rawChild) {
+  return /\d-keep-alive$/.test(rawChild.tag)
+    ? h('keep-alive')
+    : null
+}
+
 export default {
   name: 'transition',
   props: transitionProps,
@@ -101,6 +107,10 @@ export default {
       return rawChild
     }
 
+    if (this._leaving) {
+      return placeholder(h, rawChild)
+    }
+
     child.key = child.key == null
       ? `__v${child.tag + this._uid}__`
       : child.key
@@ -115,13 +125,13 @@ export default {
 
       // handle transition mode
       if (mode === 'out-in') {
-        // return empty node and queue update when leave finishes
+        // return placeholder node and queue update when leave finishes
+        this._leaving = true
         mergeVNodeHook(oldData, 'afterLeave', () => {
+          this._leaving = false
           this.$forceUpdate()
         })
-        return /\d-keep-alive$/.test(rawChild.tag)
-          ? h('keep-alive')
-          : null
+        return placeholder(h, rawChild)
       } else if (mode === 'in-out') {
         let delayedLeave
         const performLeave = () => { delayedLeave() }
