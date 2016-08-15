@@ -17,8 +17,7 @@ export default {
         ? opts.Ctor.cid + '::' + opts.tag
         : vnode.key
       if (this.cache[key]) {
-        const child = vnode.child = this.cache[key].child
-        vnode.elm = this.$el = child.$el
+        vnode.child = this.cache[key].child
       } else {
         this.cache[key] = vnode
       }
