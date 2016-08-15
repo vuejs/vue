@@ -152,7 +152,7 @@ function genData (el: ASTElement): string | void {
     data += `${genHandlers(el.events)},`
   }
   if (el.nativeEvents) {
-    data += `${genHandlers(el.nativeEvents, true)}`
+    data += `${genHandlers(el.nativeEvents, true)},`
   }
   // inline-template
   if (el.inlineTemplate) {
