@@ -34,6 +34,7 @@ let preTransforms
 let transforms
 let postTransforms
 let delimiters
+let seenSlots: any
 
 /**
  * Convert HTML string to AST.
@@ -50,6 +51,7 @@ export function parse (
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
   delimiters = options.delimiters
+  seenSlots = Object.create(null)
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
   let root
@@ -265,14 +267,7 @@ function processRef (el) {
   const ref = getBindingAttr(el, 'ref')
   if (ref) {
     el.ref = ref
-    let parent = el
-    while (parent) {
-      if (parent.for !== undefined) {
-        el.refInFor = true
-        break
-      }
-      parent = parent.parent
-    }
+    el.refInFor = checkInFor(el)
   }
 }
 
@@ -331,7 +326,25 @@ function processOnce (el) {
 
 function processSlot (el) {
   if (el.tag === 'slot') {
+    if (process.env.NODE_ENV !== 'production') {
+      if (!el.attrsMap[':name'] && !el.attrsMap['v-bind:name'] && checkInFor(el)) {
+        warn(
+          'Static <slot> found inside v-for: they will not render correctly. ' +
+          'Render the list in parent scope and use a single <slot> instead.'
+        )
+      }
+    }
     el.slotName = getBindingAttr(el, 'name')
+    if (process.env.NODE_ENV !== 'production') {
+      const name = el.slotName
+      if (seenSlots[name]) {
+        warn(
+          `Duplicate ${name ? `<slot> with name ${name}` : `default <slot>`} ` +
+          `found in the same template.`
+        )
+      }
+      seenSlots[name] = true
+    }
   } else {
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
@@ -403,6 +416,17 @@ function processAttrs (el) {
       addAttr(el, name, JSON.stringify(value))
     }
   }
+}
+
+function checkInFor (el: ASTElement): boolean {
+  let parent = el
+  while (parent) {
+    if (parent.for !== undefined) {
+      return true
+    }
+    parent = parent.parent
+  }
+  return false
 }
 
 function parseModifiers (name: string): Object | void {

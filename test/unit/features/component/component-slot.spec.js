@@ -454,4 +454,31 @@ describe('Component slot', () => {
       expect(calls).toEqual([1, 2, 1, 2])
     }).then(done)
   })
+
+  it('warn duplicate slots', () => {
+    new Vue({
+      template: `<div>
+        <slot></slot><slot></slot>
+        <slot name="a"></slot><slot name="a"></slot>
+      </div>`
+    }).$mount()
+    expect('Duplicate default <slot>').toHaveBeenWarned()
+    expect('Duplicate <slot> with name "a"').toHaveBeenWarned()
+  })
+
+  it('warn static slot inside v-for', () => {
+    new Vue({
+      template: `<div>
+        <div v-for="i in 1"><slot :name="'test' + i"></slot></div>
+      </div>`
+    }).$mount()
+    expect('Static <slot> found inside v-for').not.toHaveBeenWarned()
+
+    new Vue({
+      template: `<div>
+        <div v-for="i in 1"><slot></slot></div>
+      </div>`
+    }).$mount()
+    expect('Static <slot> found inside v-for').toHaveBeenWarned()
+  })
 })
