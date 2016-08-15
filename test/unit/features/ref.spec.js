@@ -3,10 +3,12 @@ import Vue from 'vue'
 describe('ref', () => {
   const components = {
     test: {
-      id: 'test'
+      id: 'test',
+      template: '<div>test</div>'
     },
     test2: {
-      id: 'test2'
+      id: 'test2',
+      template: '<div>test2</div>'
     }
   }
 
