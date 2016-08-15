@@ -54,6 +54,14 @@ function placeholder (h, rawChild) {
     : null
 }
 
+function hasParentTransition (vnode) {
+  while ((vnode = vnode.parent)) {
+    if (vnode.data.transition) {
+      return true
+    }
+  }
+}
+
 export default {
   name: 'transition',
   props: transitionProps,
@@ -95,7 +103,7 @@ export default {
 
     // if this is a component root node and the component's
     // parent container node also has transition, skip.
-    if (this.$vnode.parent && this.$vnode.parent.data.transition) {
+    if (hasParentTransition(this.$vnode)) {
       return rawChild
     }
 
