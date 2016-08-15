@@ -558,7 +558,7 @@ if (!isIE9) {
       }).then(done)
     })
 
-    fit('transition with v-show, with transition outside and v-show inside', done => {
+    it('transition with v-show, with transition outside and v-show inside', done => {
       const vm = new Vue({
         template: `
           <div>

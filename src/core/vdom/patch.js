@@ -129,6 +129,13 @@ export function createPatchFunction (backend) {
     return vnode.elm
   }
 
+  function isPatchable (vnode) {
+    while (vnode.child) {
+      vnode = vnode.child._vnode
+    }
+    return isDef(vnode.tag)
+  }
+
   function invokeCreateHooks (vnode, insertedVnodeQueue) {
     for (let i = 0; i < cbs.create.length; ++i) {
       cbs.create[i](emptyNode, vnode)
@@ -145,9 +152,11 @@ export function createPatchFunction (backend) {
       insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
     }
     vnode.elm = vnode.child.$el
-    invokeCreateHooks(vnode, insertedVnodeQueue)
-    if (vnode.child._vnode.tag) {
+    if (isPatchable(vnode)) {
+      invokeCreateHooks(vnode, insertedVnodeQueue)
       setScope(vnode)
+    } else {
+      insertedVnodeQueue.push(vnode)
     }
   }
 
@@ -322,7 +331,7 @@ export function createPatchFunction (backend) {
     const elm = vnode.elm = oldVnode.elm
     const oldCh = oldVnode.children
     const ch = vnode.children
-    if (hasData) {
+    if (hasData && isPatchable(vnode)) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef(hook) && isDef(i = hook.update)) i(oldVnode, vnode)
     }
@@ -467,8 +476,10 @@ export function createPatchFunction (backend) {
         // update parent placeholder node element.
         if (vnode.parent) {
           vnode.parent.elm = vnode.elm
-          for (let i = 0; i < cbs.create.length; ++i) {
-            cbs.create[i](emptyNode, vnode.parent)
+          if (isPatchable(vnode)) {
+            for (let i = 0; i < cbs.create.length; ++i) {
+              cbs.create[i](emptyNode, vnode.parent)
+            }
           }
         }
 

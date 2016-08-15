@@ -81,15 +81,16 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const prevEl = vm.$el
     const prevActiveInstance = activeInstance
     activeInstance = vm
-    if (!vm._vnode) {
+    const prevVnode = vm._vnode
+    vm._vnode = vnode
+    if (!prevVnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating)
     } else {
-      vm.$el = vm.__patch__(vm._vnode, vnode)
+      vm.$el = vm.__patch__(prevVnode, vnode)
     }
     activeInstance = prevActiveInstance
-    vm._vnode = vnode
     // update __vue__ reference
     if (prevEl) {
       prevEl.__vue__ = null

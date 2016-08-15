@@ -33,7 +33,6 @@ describe('Options directives', () => {
             updateSpy()
             assertContext(el, binding, vnode)
             expect(el).toBe(vm.$el)
-            expect(oldVnode).toBe(vm._vnode)
             expect(oldVnode).not.toBe(vnode)
             expect(binding.expression).toBe('a')
             if (binding.value !== binding.oldValue) {
