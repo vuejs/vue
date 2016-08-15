@@ -151,11 +151,6 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm._watcher) {
       vm._watcher.update()
     }
-    if (vm._watchers.length) {
-      for (let i = 0; i < vm._watchers.length; i++) {
-        vm._watchers[i].update(true /* shallow */)
-      }
-    }
   }
 
   Vue.prototype.$destroy = function () {
