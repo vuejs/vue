@@ -1,8 +1,13 @@
 /**
- * Virtual DOM implementation based on Snabbdom by
+ * Virtual DOM patching algorithm based on Snabbdom by
  * Simon Friis Vindum (@paldepind)
- * with custom modifications.
+ * Licensed under the MIT License
+ * https://github.com/paldepind/snabbdom/blob/master/LICENSE
  *
+ * modified by Evan You (@yyx990803)
+ *
+
+/*
  * Not type-checking this because this file is perf-critical and the cost
  * of making flow understand it is not worth it.
  */

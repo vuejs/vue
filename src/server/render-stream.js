@@ -1,13 +1,16 @@
 /* @flow */
 
-import stream from 'stream'
-import { createWriteFunction } from './write'
-
 /**
  * Original RenderStream implmentation by Sasha Aickin (@aickin)
  * Licensed under the Apache License, Version 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Modified by Evan You (@yyx990803)
  */
+
+import stream from 'stream'
+import { createWriteFunction } from './write'
+
 export default class RenderStream extends stream.Readable {
   buffer: string;
   render: Function;
