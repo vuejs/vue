@@ -145,4 +145,16 @@ describe('ref', () => {
       expect(vm.$refs.list.every((comp, i) => comp.$el.textContent === String(i + 1))).toBe(true)
     }
   })
+
+  it('should register on component with empty roots', () => {
+    const vm = new Vue({
+      template: '<child ref="test"></child>',
+      components: {
+        child: {
+          template: '<div v-if="false"></div>'
+        }
+      }
+    }).$mount()
+    expect(vm.$refs.test).toBe(vm.$children[0])
+  })
 })

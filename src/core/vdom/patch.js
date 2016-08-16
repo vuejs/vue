@@ -11,6 +11,7 @@ import config from '../config'
 import VNode from './vnode'
 import { isPrimitive, _toString, warn } from '../util/index'
 import { activeInstance } from '../instance/lifecycle'
+import { registerRef } from './modules/ref'
 
 const emptyData = {}
 const emptyNode = new VNode('', emptyData, [])
@@ -156,6 +157,10 @@ export function createPatchFunction (backend) {
       invokeCreateHooks(vnode, insertedVnodeQueue)
       setScope(vnode)
     } else {
+      // empty component root.
+      // skip all element-related modules except for ref (#3455)
+      registerRef(vnode)
+      // make sure to invoke the insert hook
       insertedVnodeQueue.push(vnode)
     }
   }
