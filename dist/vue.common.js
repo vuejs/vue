@@ -428,7 +428,7 @@ if (process.env.NODE_ENV !== 'production') {
         var has = key in target;
         var isAllowedGlobal = allowedGlobals(key);
         if (!has && !isAllowedGlobal) {
-          warn('Trying to access non-existent property "' + key + '" while rendering. ' + 'Make sure to declare reactive data properties in the data option.', target);
+          warn('Property or method "' + key + '" is not defined on the instance but ' + 'referenced during render. Make sure to declare reactive data ' + 'properties in the data option.', target);
         }
         return !isAllowedGlobal;
       }
@@ -1362,7 +1362,9 @@ function updateListeners(on, oldOn, add, remove) {
   for (name in on) {
     cur = on[name];
     old = oldOn[name];
-    if (!old) {
+    if (!cur) {
+      process.env.NODE_ENV !== 'production' && warn('Handler for event "' + name + '" is undefined.');
+    } else if (!old) {
       capture = name.charAt(0) === '!';
       event = capture ? name.slice(1) : name;
       if (Array.isArray(cur)) {
@@ -1471,15 +1473,16 @@ function lifecycleMixin(Vue) {
     var prevEl = vm.$el;
     var prevActiveInstance = activeInstance;
     activeInstance = vm;
-    if (!vm._vnode) {
+    var prevVnode = vm._vnode;
+    vm._vnode = vnode;
+    if (!prevVnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating);
     } else {
-      vm.$el = vm.__patch__(vm._vnode, vnode);
+      vm.$el = vm.__patch__(prevVnode, vnode);
     }
     activeInstance = prevActiveInstance;
-    vm._vnode = vnode;
     // update __vue__ reference
     if (prevEl) {
       prevEl.__vue__ = null;
@@ -1534,11 +1537,6 @@ function lifecycleMixin(Vue) {
     var vm = this;
     if (vm._watcher) {
       vm._watcher.update();
-    }
-    if (vm._watchers.length) {
-      for (var i = 0; i < vm._watchers.length; i++) {
-        vm._watchers[i].update(true /* shallow */);
-      }
     }
   };
 
@@ -1701,7 +1699,7 @@ parent // activeInstance in lifecycle state
 }
 
 function init(vnode, hydrating) {
-  if (!vnode.child) {
+  if (!vnode.child || vnode.child._isDestroyed) {
     var child = vnode.child = createComponentInstanceForVnode(vnode, activeInstance);
     child.$mount(hydrating ? vnode.elm : undefined, hydrating);
   }
@@ -2822,8 +2820,7 @@ var KeepAlive = {
       // so cid alone is not enough (#3269)
       ? opts.Ctor.cid + '::' + opts.tag : vnode.key;
       if (this.cache[key]) {
-        var child = vnode.child = this.cache[key].child;
-        vnode.elm = this.$el = child.$el;
+        vnode.child = this.cache[key].child;
       } else {
         this.cache[key] = vnode;
       }
@@ -2882,7 +2879,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   }
 });
 
-Vue.version = '2.0.0-rc.1';
+Vue.version = '2.0.0-rc.2';
 
 // attributes that should be using props for binding
 var mustUseProp = makeMap('value,selected,checked,muted');
@@ -3239,6 +3236,13 @@ function createPatchFunction(backend) {
     return vnode.elm;
   }
 
+  function isPatchable(vnode) {
+    while (vnode.child) {
+      vnode = vnode.child._vnode;
+    }
+    return isDef(vnode.tag);
+  }
+
   function invokeCreateHooks(vnode, insertedVnodeQueue) {
     for (var _i = 0; _i < cbs.create.length; ++_i) {
       cbs.create[_i](emptyNode, vnode);
@@ -3255,8 +3259,12 @@ function createPatchFunction(backend) {
       insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert);
     }
     vnode.elm = vnode.child.$el;
-    invokeCreateHooks(vnode, insertedVnodeQueue);
-    setScope(vnode);
+    if (isPatchable(vnode)) {
+      invokeCreateHooks(vnode, insertedVnodeQueue);
+      setScope(vnode);
+    } else {
+      insertedVnodeQueue.push(vnode);
+    }
   }
 
   // set scope id attribute for scoped CSS.
@@ -3436,7 +3444,7 @@ function createPatchFunction(backend) {
     var elm = vnode.elm = oldVnode.elm;
     var oldCh = oldVnode.children;
     var ch = vnode.children;
-    if (hasData) {
+    if (hasData && isPatchable(vnode)) {
       for (i = 0; i < cbs.update.length; ++i) {
         cbs.update[i](oldVnode, vnode);
       }if (isDef(hook) && isDef(i = hook.update)) i(oldVnode, vnode);
@@ -3576,8 +3584,10 @@ function createPatchFunction(backend) {
         // update parent placeholder node element.
         if (vnode.parent) {
           vnode.parent.elm = vnode.elm;
-          for (var _i4 = 0; _i4 < cbs.create.length; ++_i4) {
-            cbs.create[_i4](emptyNode, vnode.parent);
+          if (isPatchable(vnode)) {
+            for (var _i4 = 0; _i4 < cbs.create.length; ++_i4) {
+              cbs.create[_i4](emptyNode, vnode.parent);
+            }
           }
         }
 
@@ -4142,15 +4152,17 @@ function enter(vnode) {
     el._enterCb = null;
   });
 
-  // remove pending leave element on enter by injecting an insert hook
-  mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', function () {
-    var parent = el.parentNode;
-    var pendingNode = parent._pending && parent._pending[vnode.key];
-    if (pendingNode && pendingNode.tag === vnode.tag && pendingNode.elm._leaveCb) {
-      pendingNode.elm._leaveCb();
-    }
-    enterHook && enterHook(el, cb);
-  });
+  if (!vnode.data.show) {
+    // remove pending leave element on enter by injecting an insert hook
+    mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', function () {
+      var parent = el.parentNode;
+      var pendingNode = parent._pending && parent._pending[vnode.key];
+      if (pendingNode && pendingNode.tag === vnode.tag && pendingNode.elm._leaveCb) {
+        pendingNode.elm._leaveCb();
+      }
+      enterHook && enterHook(el, cb);
+    });
+  }
 
   // start enter transition
   beforeEnterHook && beforeEnterHook(el);
@@ -4163,6 +4175,10 @@ function enter(vnode) {
         whenTransitionEnds(el, type, cb);
       }
     });
+  }
+
+  if (vnode.data.show) {
+    enterHook && enterHook(el, cb);
   }
 
   if (!expectsCSS && !userWantsControl) {
@@ -4434,7 +4450,9 @@ var show = {
     if (value && transition && transition.appear && !isIE9) {
       enter(vnode);
     }
-    el.style.display = value ? '' : 'none';
+    var originalDisplay = el.style.display;
+    el.style.display = value ? originalDisplay : 'none';
+    el.__vOriginalDisplay = originalDisplay;
   },
   update: function update(el, _ref2, vnode) {
     var value = _ref2.value;
@@ -4447,14 +4465,14 @@ var show = {
     if (transition && !isIE9) {
       if (value) {
         enter(vnode);
-        el.style.display = '';
+        el.style.display = el.__vOriginalDisplay;
       } else {
         leave(vnode, function () {
           el.style.display = 'none';
         });
       }
     } else {
-      el.style.display = value ? '' : 'none';
+      el.style.display = value ? el.__vOriginalDisplay : 'none';
     }
   }
 };
@@ -4505,6 +4523,19 @@ function extractTransitionData(comp) {
   return data;
 }
 
+function placeholder(h, rawChild) {
+  return (/\d-keep-alive$/.test(rawChild.tag) ? h('keep-alive') : null
+  );
+}
+
+function hasParentTransition(vnode) {
+  while (vnode = vnode.parent) {
+    if (vnode.data.transition) {
+      return true;
+    }
+  }
+}
+
 var Transition = {
   name: 'transition',
   props: transitionProps,
@@ -4542,7 +4573,7 @@ var Transition = {
 
     // if this is a component root node and the component's
     // parent container node also has transition, skip.
-    if (this.$vnode.parent && this.$vnode.parent.data.transition) {
+    if (hasParentTransition(this.$vnode)) {
       return rawChild;
     }
 
@@ -4552,6 +4583,10 @@ var Transition = {
     /* istanbul ignore if */
     if (!child) {
       return rawChild;
+    }
+
+    if (this._leaving) {
+      return placeholder(h, rawChild);
     }
 
     child.key = child.key == null ? '__v' + (child.tag + this._uid) + '__' : child.key;
@@ -4566,12 +4601,13 @@ var Transition = {
 
       // handle transition mode
       if (mode === 'out-in') {
-        // return empty node and queue update when leave finishes
+        // return placeholder node and queue update when leave finishes
+        this._leaving = true;
         mergeVNodeHook(oldData, 'afterLeave', function () {
+          _this._leaving = false;
           _this.$forceUpdate();
         });
-        return (/\d-keep-alive$/.test(rawChild.tag) ? h('keep-alive') : null
-        );
+        return placeholder(h, rawChild);
       } else if (mode === 'in-out') {
         (function () {
           var delayedLeave = void 0;

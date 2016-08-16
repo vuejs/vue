@@ -465,7 +465,7 @@ if (process.env.NODE_ENV !== 'production') {
         var has = key in target;
         var isAllowedGlobal = allowedGlobals(key);
         if (!has && !isAllowedGlobal) {
-          warn('Trying to access non-existent property "' + key + '" while rendering. ' + 'Make sure to declare reactive data properties in the data option.', target);
+          warn('Property or method "' + key + '" is not defined on the instance but ' + 'referenced during render. Make sure to declare reactive data ' + 'properties in the data option.', target);
         }
         return !isAllowedGlobal;
       }
@@ -1362,7 +1362,9 @@ function updateListeners(on, oldOn, add, remove) {
   for (name in on) {
     cur = on[name];
     old = oldOn[name];
-    if (!old) {
+    if (!cur) {
+      process.env.NODE_ENV !== 'production' && warn('Handler for event "' + name + '" is undefined.');
+    } else if (!old) {
       capture = name.charAt(0) === '!';
       event = capture ? name.slice(1) : name;
       if (Array.isArray(cur)) {
@@ -1471,15 +1473,16 @@ function lifecycleMixin(Vue) {
     var prevEl = vm.$el;
     var prevActiveInstance = activeInstance;
     activeInstance = vm;
-    if (!vm._vnode) {
+    var prevVnode = vm._vnode;
+    vm._vnode = vnode;
+    if (!prevVnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating);
     } else {
-      vm.$el = vm.__patch__(vm._vnode, vnode);
+      vm.$el = vm.__patch__(prevVnode, vnode);
     }
     activeInstance = prevActiveInstance;
-    vm._vnode = vnode;
     // update __vue__ reference
     if (prevEl) {
       prevEl.__vue__ = null;
@@ -1534,11 +1537,6 @@ function lifecycleMixin(Vue) {
     var vm = this;
     if (vm._watcher) {
       vm._watcher.update();
-    }
-    if (vm._watchers.length) {
-      for (var i = 0; i < vm._watchers.length; i++) {
-        vm._watchers[i].update(true /* shallow */);
-      }
     }
   };
 
@@ -1701,7 +1699,7 @@ parent // activeInstance in lifecycle state
 }
 
 function init(vnode, hydrating) {
-  if (!vnode.child) {
+  if (!vnode.child || vnode.child._isDestroyed) {
     var child = vnode.child = createComponentInstanceForVnode(vnode, activeInstance);
     child.$mount(hydrating ? vnode.elm : undefined, hydrating);
   }
@@ -3175,6 +3173,7 @@ var preTransforms = void 0;
 var transforms = void 0;
 var postTransforms = void 0;
 var delimiters = void 0;
+var seenSlots = void 0;
 
 /**
  * Convert HTML string to AST.
@@ -3188,6 +3187,7 @@ function parse(template, options) {
   transforms = pluckModuleFunction(options.modules, 'transformNode');
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
   delimiters = options.delimiters;
+  seenSlots = Object.create(null);
   var stack = [];
   var preserveWhitespace = options.preserveWhitespace !== false;
   var root = void 0;
@@ -3223,7 +3223,7 @@ function parse(template, options) {
         element.ns = ns;
       }
 
-      if (isForbiddenTag(element)) {
+      if (process.env.VUE_ENV !== 'server' && isForbiddenTag(element)) {
         element.forbidden = true;
         process.env.NODE_ENV !== 'production' && warn$1('Templates should only be responsbile for mapping the state to the ' + 'UI. Avoid placing tags with side-effects in your templates, such as ' + ('<' + tag + '>.'));
       }
@@ -3386,14 +3386,7 @@ function processRef(el) {
   var ref = getBindingAttr(el, 'ref');
   if (ref) {
     el.ref = ref;
-    var parent = el;
-    while (parent) {
-      if (parent.for !== undefined) {
-        el.refInFor = true;
-        break;
-      }
-      parent = parent.parent;
-    }
+    el.refInFor = checkInFor(el);
   }
 }
 
@@ -3448,7 +3441,19 @@ function processOnce(el) {
 
 function processSlot(el) {
   if (el.tag === 'slot') {
+    if (process.env.NODE_ENV !== 'production') {
+      if (!el.attrsMap[':name'] && !el.attrsMap['v-bind:name'] && checkInFor(el)) {
+        warn$1('Static <slot> found inside v-for: they will not render correctly. ' + 'Render the list in parent scope and use a single <slot> instead.');
+      }
+    }
     el.slotName = getBindingAttr(el, 'name');
+    if (process.env.NODE_ENV !== 'production') {
+      var name = el.slotName;
+      if (seenSlots[name]) {
+        warn$1('Duplicate ' + (name ? '<slot> with name ' + name : 'default <slot>') + ' ' + 'found in the same template.');
+      }
+      seenSlots[name] = true;
+    }
   } else {
     var slotTarget = getBindingAttr(el, 'slot');
     if (slotTarget) {
@@ -3525,6 +3530,17 @@ function processAttrs(el) {
       addAttr(el, name, JSON.stringify(value));
     }
   }
+}
+
+function checkInFor(el) {
+  var parent = el;
+  while (parent) {
+    if (parent.for !== undefined) {
+      return true;
+    }
+    parent = parent.parent;
+  }
+  return false;
 }
 
 function parseModifiers(name) {
@@ -3861,7 +3877,7 @@ function genData(el) {
     data += genHandlers(el.events) + ',';
   }
   if (el.nativeEvents) {
-    data += '' + genHandlers(el.nativeEvents, true);
+    data += genHandlers(el.nativeEvents, true) + ',';
   }
   // inline-template
   if (el.inlineTemplate) {
@@ -4147,7 +4163,7 @@ function genDefaultModel(el, value, modifiers) {
   var number = _ref.number;
   var trim = _ref.trim;
 
-  var event = lazy ? 'change' : 'input';
+  var event = lazy || isIE && type === 'range' ? 'change' : 'input';
   var needCompositionGuard = !lazy && type !== 'range';
   var isNative = el.tag === 'input' || el.tag === 'textarea';
 
