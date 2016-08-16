@@ -161,14 +161,16 @@ describe('Directive v-if', () => {
         }
       }
     }).$mount()
-    expect(vm.$el.innerHTML).toBe('<div id="ok" class="inner test">test</div>')
+    expect(vm.$el.children[0].id).toBe('ok')
+    expect(vm.$el.children[0].className).toBe('inner test')
     vm.$children[0].ok = false
     waitForUpdate(() => {
       // attrs / class modules should not attempt to patch the comment node
       expect(vm.$el.innerHTML).toBe('<!---->')
       vm.$children[0].ok = true
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<div id="ok" class="inner test">test</div>')
+      expect(vm.$el.children[0].id).toBe('ok')
+      expect(vm.$el.children[0].className).toBe('inner test')
     }).then(done)
   })
 })
