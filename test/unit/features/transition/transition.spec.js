@@ -558,45 +558,6 @@ if (!isIE9) {
       }).then(done)
     })
 
-    it('transition with v-show, with transition outside and v-show inside', done => {
-      const vm = new Vue({
-        template: `
-          <div>
-            <transition name="test">
-              <test :ok="ok"></test>
-            </transition>
-          </div>
-        `,
-        data: { ok: true },
-        components: {
-          test: {
-            props: ['ok'],
-            template: `<div v-show="ok" class="test">foo</div>`
-          }
-        }
-      }).$mount(el)
-
-      // should not apply transition on initial render by default
-      expect(vm.$el.textContent).toBe('foo')
-      expect(vm.$el.children[0].style.display).toBe('')
-      vm.ok = false
-      waitForUpdate(() => {
-        expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
-      }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].className).toBe('test test-leave-active')
-      }).thenWaitFor(duration + 10).then(() => {
-        expect(vm.$el.children[0].style.display).toBe('none')
-        vm.ok = true
-      }).then(() => {
-        expect(vm.$el.children[0].style.display).toBe('')
-        expect(vm.$el.children[0].className).toBe('test test-enter test-enter-active')
-      }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].className).toBe('test test-enter-active')
-      }).thenWaitFor(duration + 10).then(() => {
-        expect(vm.$el.children[0].className).toBe('test')
-      }).then(done)
-    })
-
     it('leaveCancelled (v-show only)', done => {
       const spy = jasmine.createSpy('leaveCancelled')
       const vm = new Vue({
