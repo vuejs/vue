@@ -4,6 +4,8 @@ import Watcher from '../observer/watcher'
 import Dep from '../observer/dep'
 
 import {
+  set,
+  del,
   observe,
   defineReactive,
   observerState
@@ -191,6 +193,9 @@ export function stateMixin (Vue: Class<Component>) {
     }
   }
   Object.defineProperty(Vue.prototype, '$data', dataDef)
+
+  Vue.prototype.$set = set
+  Vue.prototype.$delete = del
 
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
