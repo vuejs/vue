@@ -46,7 +46,8 @@ export function addHandler (
   el: ASTElement,
   name: string,
   value: string,
-  modifiers: ?{ [key: string]: true }
+  modifiers: ?{ [key: string]: true },
+  important: ?boolean
 ) {
   // check capture modifier
   if (modifiers && modifiers.capture) {
@@ -64,9 +65,9 @@ export function addHandler (
   const handlers = events[name]
   /* istanbul ignore if */
   if (Array.isArray(handlers)) {
-    handlers.push(newHandler)
+    important ? handlers.unshift(newHandler) : handlers.push(newHandler)
   } else if (handlers) {
-    events[name] = [handlers, newHandler]
+    events[name] = important ? [newHandler, handlers] : [handlers, newHandler]
   } else {
     events[name] = newHandler
   }

@@ -141,4 +141,23 @@ describe('Directive v-model text', () => {
     }).$mount()
     expect('v-model is not supported on element type: <div>').toHaveBeenWarned()
   })
+
+  // #3468
+  it('should have higher priority than user v-on events', () => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        a: 'a'
+      },
+      template: '<input v-model="a" @input="onInput">',
+      methods: {
+        onInput (e) {
+          spy(e.target.value)
+        }
+      }
+    }).$mount()
+    vm.$el.value = 'b'
+    triggerEvent(vm.$el, 'input')
+    expect(spy).toHaveBeenCalledWith('b')
+  })
 })

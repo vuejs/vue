@@ -55,7 +55,8 @@ function genCheckboxModel (el: ASTElement, value: ?string) {
           '$$i=$$a.indexOf($$v);' +
       `if($$c){$$i<0&&(${value}=$$a.concat($$v))}` +
       `else{$$i>-1&&(${value}=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}` +
-    `}else{${value}=$$c}`
+    `}else{${value}=$$c}`,
+    null, true
   )
 }
 
@@ -70,7 +71,7 @@ function genRadioModel (el: ASTElement, value: ?string) {
   }
   const valueBinding = getBindingAttr(el, 'value')
   addProp(el, 'checked', `(${value})===(${valueBinding})`)
-  addHandler(el, 'change', `${value}=${valueBinding}`)
+  addHandler(el, 'change', `${value}=${valueBinding}`, null, true)
 }
 
 function genDefaultModel (
@@ -111,7 +112,7 @@ function genDefaultModel (
     code = `if($event.target.composing)return;${code}`
   }
   addProp(el, 'value', isNative ? `_s(${value})` : `(${value})`)
-  addHandler(el, event, code)
+  addHandler(el, event, code, null, true)
   if (needCompositionGuard) {
     // need runtime directive code to help with composition events
     return true
@@ -126,7 +127,7 @@ function genSelect (el: ASTElement, value: ?string) {
     `.call($event.target.options,function(o){return o.selected})` +
     `.map(function(o){return "_value" in o ? o._value : o.value})` +
     (el.attrsMap.multiple == null ? '[0]' : '')
-  addHandler(el, 'change', code)
+  addHandler(el, 'change', code, null, true)
   // need runtime to help with possible dynamically generated options
   return true
 }
