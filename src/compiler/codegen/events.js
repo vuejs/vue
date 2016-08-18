@@ -41,25 +41,40 @@ function genHandler (
       ? handler.value
       : `function($event){${handler.value}}`
   } else {
-    let code = 'function($event){'
+    let code = ''
+    const keys = []
     for (const key in handler.modifiers) {
-      code += modifierCode[key] || genKeyFilter(key)
+      if (modifierCode[key]) {
+        code += modifierCode[key]
+      } else {
+        keys.push(key)
+      }
+    }
+    if (keys.length) {
+      code = genKeyFilter(keys) + code
     }
     const handlerCode = simplePathRE.test(handler.value)
       ? handler.value + '($event)'
       : handler.value
-    return code + handlerCode + '}'
+    return 'function($event){' + code + handlerCode + '}'
   }
 }
 
-function genKeyFilter (key: string): string {
-  const code =
-    parseInt(key, 10) || // number keyCode
-    keyCodes[key] || // built-in alias
-    `_k(${JSON.stringify(key)})` // custom alias
+function genKeyFilter (keys: Array<string>): string {
+  const code = keys.length === 1
+    ? normalizeKeyCode(keys[0])
+    : Array.prototype.concat.apply([], keys.map(normalizeKeyCode))
   if (Array.isArray(code)) {
     return `if(${code.map(c => `$event.keyCode!==${c}`).join('&&')})return;`
   } else {
     return `if($event.keyCode!==${code})return;`
   }
+}
+
+function normalizeKeyCode (key) {
+  return (
+    parseInt(key, 10) || // number keyCode
+    keyCodes[key] || // built-in alias
+    `_k(${JSON.stringify(key)})` // custom alias
+  )
 }

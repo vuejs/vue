@@ -191,6 +191,11 @@ describe('codegen', () => {
       '<input @input.delete="onInput">',
       `with(this){return _h('input',{on:{"input":function($event){if($event.keyCode!==8&&$event.keyCode!==46)return;onInput($event)}}})}`
     )
+    // multiple keycodes (chained)
+    assertCodegen(
+      '<input @keydown.enter.delete="onInput">',
+      `with(this){return _h('input',{on:{"keydown":function($event){if($event.keyCode!==13&&$event.keyCode!==8&&$event.keyCode!==46)return;onInput($event)}}})}`
+    )
     // number keycode
     assertCodegen(
       '<input @input.13="onInput">',
