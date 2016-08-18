@@ -60,6 +60,10 @@ Vue.js is a library for building interactive web interfaces. It provides data-re
 
 Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported). To check out live examples and docs, visit [vuejs.org](http://vuejs.org).
 
+## What to Use Vue.js for and When to Use It
+
+Vue.js brings together **reactive data binding** and **composable view components** in one lightweight library. It is an ideal choice for heavy back-end applications that allow for flexible front-end solutions. Vue.js can be integrated with existing projects, as well as used to create large-scale Single Page Applications from scratch. Having a shorter learning curve than full-blown frameworks, Vue.js will get your team up and running in no time. 
+
 ## Questions
 
 For questions and support please use the [Gitter chat room](https://gitter.im/vuejs/vue) or [the official forum](http://forum.vuejs.org). The issue list of this repo is **exclusively** for bug reports and feature requests.
