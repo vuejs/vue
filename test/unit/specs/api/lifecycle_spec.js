@@ -112,7 +112,7 @@ describe('Lifecycle API', function () {
     })
 
     it('hooks', function () {
-      var hooks = ['created', 'beforeCompile', 'compiled', 'attached', 'ready']
+      var hooks = ['created', 'beforeCompile', 'compiled', 'beforeAttach', 'attached', 'ready']
       var options = {
         data: {
           test: 'foo'
@@ -127,9 +127,11 @@ describe('Lifecycle API', function () {
       vm.$mount(el)
       expect(options.beforeCompile).toHaveBeenCalled()
       expect(options.compiled).toHaveBeenCalled()
+      expect(options.beforeAttach).not.toHaveBeenCalled()
       expect(options.attached).not.toHaveBeenCalled()
       expect(options.ready).not.toHaveBeenCalled()
       vm.$appendTo(document.body)
+      expect(options.beforeAttach).toHaveBeenCalled()
       expect(options.attached).toHaveBeenCalled()
       expect(options.ready).toHaveBeenCalled()
       vm.$remove()
@@ -176,6 +178,7 @@ describe('Lifecycle API', function () {
       var opts = {
         beforeDestroy: jasmine.createSpy(),
         destroyed: jasmine.createSpy(),
+        beforeDetach: jasmine.createSpy(),
         detached: jasmine.createSpy()
       }
       var el = opts.el = document.createElement('div')
@@ -184,6 +187,7 @@ describe('Lifecycle API', function () {
       vm.$destroy(true)
       expect(opts.beforeDestroy).toHaveBeenCalled()
       expect(opts.destroyed).toHaveBeenCalled()
+      expect(opts.beforeDetach).toHaveBeenCalled()
       expect(opts.detached).toHaveBeenCalled()
     })
 
@@ -191,6 +195,7 @@ describe('Lifecycle API', function () {
     it('grandchild hooks', function () {
       var grandChildBeforeDestroy = jasmine.createSpy()
       var grandChildDestroyed = jasmine.createSpy()
+      var grandChildBeforeDetach = jasmine.createSpy()
       var grandChildDetached = jasmine.createSpy()
 
       var opts = {
@@ -202,6 +207,7 @@ describe('Lifecycle API', function () {
               'test-inner': {
                 beforeDestroy: grandChildBeforeDestroy,
                 destroyed: grandChildDestroyed,
+                beforeDetach: grandChildBeforeDetach,
                 detached: grandChildDetached
               }
             }
@@ -215,6 +221,7 @@ describe('Lifecycle API', function () {
 
       expect(grandChildBeforeDestroy).toHaveBeenCalled()
       expect(grandChildDestroyed).toHaveBeenCalled()
+      expect(grandChildBeforeDetach).toHaveBeenCalled()
       expect(grandChildDetached).toHaveBeenCalled()
     })
 

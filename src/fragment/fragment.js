@@ -81,6 +81,9 @@ Fragment.prototype.callHook = function (hook) {
  */
 
 function singleBefore (target, withTransition) {
+  if (inDoc(this.node)) {
+    this.callHook(beforeAttach)
+  }
   this.inserted = true
   var method = withTransition !== false
     ? beforeWithTransition
@@ -100,6 +103,7 @@ function singleRemove () {
   var shouldCallRemove = inDoc(this.node)
   var self = this
   this.beforeRemove()
+  self.callHook(beforeDetach)
   removeWithTransition(this.node, this.vm, function () {
     if (shouldCallRemove) {
       self.callHook(detach)
@@ -116,6 +120,9 @@ function singleRemove () {
  */
 
 function multiBefore (target, withTransition) {
+  if (inDoc(this.node)) {
+    this.callHook(beforeAttach)
+  }
   this.inserted = true
   var vm = this.vm
   var method = withTransition !== false
@@ -138,6 +145,7 @@ function multiRemove () {
   var self = this
   var shouldCallRemove = inDoc(this.node)
   this.beforeRemove()
+  self.callHook(beforeDetach)
   removeNodeRange(this.node, this.end, this.vm, this.frag, function () {
     if (shouldCallRemove) {
       self.callHook(detach)
@@ -187,6 +195,18 @@ Fragment.prototype.destroy = function () {
 }
 
 /**
+ * Call beforeAttach hook for a Vue instance.
+ *
+ * @param {Vue} child
+ */
+
+function beforeAttach (child) {
+  if (!child._isAttached && inDoc(child.$el)) {
+    child._callHook('beforeAttach')
+  }
+}
+
+/**
  * Call attach hook for a Vue instance.
  *
  * @param {Vue} child
@@ -195,6 +215,18 @@ Fragment.prototype.destroy = function () {
 function attach (child) {
   if (!child._isAttached && inDoc(child.$el)) {
     child._callHook('attached')
+  }
+}
+
+/**
+ * Call beforeDetach hook for a Vue instance.
+ *
+ * @param {Vue} child
+ */
+
+function beforeDetach (child) {
+  if (child._isAttached && !inDoc(child.$el)) {
+    child._callHook('beforeDetach')
   }
 }
 

@@ -108,6 +108,8 @@ export default function (Vue) {
     // for transitions
     if (!inDocument) withTransition = false
     var self = this
+    // if the Instance contains a beforeDetach event trigger it
+    self._callHook('beforeDetach')
     var realCb = function () {
       if (inDocument) self._callHook('detached')
       if (cb) cb()
@@ -149,6 +151,9 @@ export default function (Vue) {
       !targetIsDetached &&
       !vm._isAttached &&
       !inDoc(vm.$el)
+    if (shouldCallHook) {
+      vm._callHook('beforeAttach')
+    }
     if (vm._isFragment) {
       mapNodeRange(vm._fragmentStart, vm._fragmentEnd, function (node) {
         op(node, target, vm)
