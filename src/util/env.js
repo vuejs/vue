@@ -84,7 +84,7 @@ export const nextTick = (function () {
   if (typeof MutationObserver !== 'undefined' && !hasMutationObserverBug) {
     var counter = 1
     var observer = new MutationObserver(nextTickHandler)
-    var textNode = document.createTextNode(counter)
+    var textNode = document.createTextNode(counter.toString())
     observer.observe(textNode, {
       characterData: true
     })
