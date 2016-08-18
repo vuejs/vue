@@ -46,6 +46,7 @@ declare interface VNodeData {
   on?: ?{ [key: string]: Function | Array<Function> };
   nativeOn?: { [key: string]: Function | Array<Function> };
   transition?: Object;
+  transitionInjected?: boolean;
   inlineTemplate?: {
     render: Function;
     staticRenderFns: Array<Function>;
