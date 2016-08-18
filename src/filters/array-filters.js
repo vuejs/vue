@@ -127,7 +127,56 @@ export function orderBy (arr) {
   // sort on a copy to avoid mutating original array
   return arr.slice().sort(comparator)
 }
+/**
+ * Filter order by for arrays,like sql order: "a desc,b asc,c asc"
+ *
+ * @param {String} sortKeys
+ */
+function orderByKeys(arr, sortKeys) {
+	//console.log("sortKeys="+sortKeys);
+	arr = toArray(arr)
+	if (!sortKeys) {
+		return arr
+	}
+	sortKeys = sortKeys.trim().split(",");
+	//console.log("sortKeys.length="+sortKeys.length);
+	// sort on a copy to avoid mutating original array
+	return arr.slice().sort(function(a, b) {
+		//console.log("a="+JSON.stringify(a));
+		//console.log("b="+JSON.stringify(b));
+		if (a === b) return 0;
+		var result = 0;
+		for (var i in sortKeys) {
+			var sortKey = sortKeys[i].trim();
 
+			var order = 1;
+			if (sortKey.indexOf(" ") > 0) {
+				sortKey = sortKeys[i].split(" ")[0].trim();
+				order = sortKeys[i].split(" ")[1].trim().toLowerCase();
+				if (order === "desc" || (order && order < 0)) {
+					order = -1;
+				} else {
+					order = 1;
+				}
+			}
+			var va = a,
+				vb = b;
+			if (sortKey !== '$key') {
+				if (isObject(va) && '$value' in va) va = va.$value;
+				if (isObject(vb) && '$value' in vb) vb = vb.$value;
+			}
+			va = isObject(va) ? Path.get(va, sortKey) : va;
+			vb = isObject(vb) ? Path.get(vb, sortKey) : vb;
+			if (va === undefined || va === null) va = "";
+			if (vb === undefined || vb === null) vb = "";
+			result = (va === vb ? 0 : va > vb ? order : -order);
+			//console.log("a="+va+",b="+vb+",sortKey="+sortKey+",order="+order+",result="+result);
+			if (result !== 0) break;
+		}
+		//console.log("result="+result);
+		return result;
+	})
+}
 /**
  * String contain helper
  *
