@@ -214,6 +214,27 @@ describe('v-on', function () {
     expect(window.location.hash).toBe(hash)
   })
 
+  it('halt modifier', function () {
+    var prevented
+    var outer = jasmine.createSpy('outer')
+    new Vue({
+      el: el,
+      template: '<div @click="outer"><div class="inner" @click.halt="inner"></div></div>',
+      methods: {
+        outer: outer,
+        inner: function (e) {
+          // store the prevented state now:
+          // IE will reset the `defaultPrevented` flag
+          // once the event handler call stack is done!
+          prevented = e.defaultPrevented
+        }
+      }
+    })
+    trigger(el.querySelector('.inner'), 'click')
+    expect(prevented).toBe(true)
+    expect(outer).not.toHaveBeenCalled()
+  })
+
   it('capture modifier', function () {
     document.body.appendChild(el)
     var outer = jasmine.createSpy('outer')
