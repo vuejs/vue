@@ -113,6 +113,8 @@ describe('Util - DOM', function () {
     expect(el.className).toBe('cc bb')
     _.addClass(el, 'bb')
     expect(el.className).toBe('cc bb')
+    _.addClass(el, 'aa dd')
+    expect(el.className).toBe('cc bb aa dd')
   })
 
   it('addClass/removeClass for SVG/IE9', function () {
