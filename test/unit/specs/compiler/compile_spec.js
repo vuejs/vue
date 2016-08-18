@@ -112,6 +112,8 @@ describe('Compile', function () {
     el.setAttribute(':class', 'a')
     el.setAttribute(':style', 'b')
     el.setAttribute(':title', 'c')
+    el.setAttribute(':content', '')
+    el.setAttribute(':data-content', '')
 
     // The order of setAttribute is not guaranteed to be the same with
     // the order of attribute enumberation, therefore we need to save
@@ -135,6 +137,20 @@ describe('Compile', function () {
         expression: 'c',
         arg: 'title',
         def: publicDirectives.bind
+      },
+      ':content': {
+        name: 'bind',
+        attr: ':content',
+        expression: 'content',
+        arg: 'content',
+        def: publicDirectives.bind
+      },
+      ':data-content': {
+        name: 'bind',
+        attr: ':data-content',
+        expression: 'dataContent',
+        arg: 'data-content',
+        def: publicDirectives.bind
       }
     }
     var expects = [].map.call(el.attributes, function (attr) {
@@ -143,7 +159,7 @@ describe('Compile', function () {
 
     var linker = compile(el, Vue.options)
     linker(vm, el)
-    expect(vm._bindDir.calls.count()).toBe(3)
+    expect(vm._bindDir.calls.count()).toBe(5)
 
     expects.forEach(function (e, i) {
       var args = vm._bindDir.calls.argsFor(i)
