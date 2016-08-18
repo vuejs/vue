@@ -254,7 +254,9 @@ export function compileRoot (el, options, contextOptions) {
           // allow event listeners
           !onRE.test(attr.name) &&
           // allow slots
-          attr.name !== 'slot'
+          attr.name !== 'slot' &&
+          //allow container with :is
+          (attr.name !== 'is' && attr.name !== ':is' && el.tagName !== 'COMPONENT')
       })
       .map(function (attr) {
         return '"' + attr.name + '"'
