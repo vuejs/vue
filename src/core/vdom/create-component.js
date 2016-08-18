@@ -85,7 +85,13 @@ export function createComponent (
   return vnode
 }
 
-function createFunctionalComponent (Ctor, propsData, data, context, children) {
+function createFunctionalComponent (
+  Ctor: Class<Component>,
+  propsData: ?Object,
+  data: VNodeData,
+  context: Component,
+  children?: VNodeChildren
+): VNode | void {
   const props = {}
   const propOptions = Ctor.options.props
   if (propOptions) {
