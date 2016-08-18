@@ -135,7 +135,7 @@ Watcher.prototype.set = function (value) {
     }
   }
   // two-way sync for v-for alias
-  var forContext = scope.$forContext
+  var forContext = scope && scope.$forContext
   if (forContext && forContext.alias === this.expression) {
     if (forContext.filters) {
       process.env.NODE_ENV !== 'production' && warn(
