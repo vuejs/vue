@@ -1,0 +1,38 @@
+
+ul,li{
+  margin: 0px;
+  padding: 0px;
+}
+.paginator li{
+  list-style: none;
+  display: inline;
+}
+.paginator li:first-child>a {
+  margin-left: 0px;
+}
+.paginator a{
+  border: 1px solid #ddd;
+  text-decoration: none;
+  position: relative;
+  float: left;
+  padding: 6px 12px;
+  margin-left: -1px;
+  line-height: 1.42857143;
+  color: #337ab7;
+  cursor: pointer
+}
+.paginator a:hover{
+  background-color: #eee;
+}
+.paginator .active a{
+  color: #fff;
+  cursor: default;
+  background-color: #337ab7;
+  border-color: #337ab7;
+}
+.paginator i{
+  font-style:normal;
+  color: #d44950;
+  margin: 0px 4px;
+  font-size: 12px;
+}
