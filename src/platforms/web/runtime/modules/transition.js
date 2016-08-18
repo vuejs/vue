@@ -94,7 +94,7 @@ export function enter (vnode: VNodeWithData) {
 
   if (!vnode.data.show) {
     // remove pending leave element on enter by injecting an insert hook
-    const hooks = vnode.data.hook || (vnode.data.hook = {})
+    var hooks = vnode.data.hook || (vnode.data.hook = {})
     hooks._transitionInsert = () => {
       const parent = el.parentNode
       const pendingNode = parent && parent._pending && parent._pending[vnode.key]

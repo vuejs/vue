@@ -141,8 +141,8 @@ export default {
         })
         return placeholder(h, rawChild)
       } else if (mode === 'in-out') {
-        let delayedLeave
-        const performLeave = () => { delayedLeave() }
+        var delayedLeave
+        var performLeave = () => { delayedLeave() }
         mergeVNodeHook(data, 'afterEnter', performLeave)
         mergeVNodeHook(data, 'enterCancelled', performLeave)
         mergeVNodeHook(oldData, 'delayLeave', leave => {

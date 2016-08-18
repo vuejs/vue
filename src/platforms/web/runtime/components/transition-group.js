@@ -120,8 +120,8 @@ export default {
 
     children.forEach(c => {
       if (c.data.moved) {
-        const el = c.elm
-        const s = el.style
+        var el = c.elm
+        var s = el.style
         addTransitionClass(el, moveClass)
         s.transform = s.WebkitTransform = s.transitionDuration = ''
         el._moveDest = c.data.pos

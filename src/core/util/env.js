@@ -51,9 +51,9 @@ export const nextTick = (function () {
 
   /* istanbul ignore else */
   if (typeof MutationObserver !== 'undefined' && !hasMutationObserverBug) {
-    let counter = 1
-    const observer = new MutationObserver(nextTickHandler)
-    const textNode = document.createTextNode(String(counter))
+    var counter = 1
+    var observer = new MutationObserver(nextTickHandler)
+    var textNode = document.createTextNode(String(counter))
     observer.observe(textNode, {
       characterData: true
     })
@@ -65,7 +65,7 @@ export const nextTick = (function () {
     // webpack attempts to inject a shim for setImmediate
     // if it is used as a global, so we have to work around that to
     // avoid bundling unnecessary code.
-    const context = inBrowser
+    var context = inBrowser
       ? window
       : typeof global !== 'undefined' ? global : {}
     timerFunc = context.setImmediate || setTimeout
