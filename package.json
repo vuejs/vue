@@ -69,7 +69,7 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
     "object-assign": "^4.0.1",
-    "phantomjs": "^1.9.17",
+    "phantomjs-prebuilt": "^2.1.7",
     "rollup": "^0.25.1",
     "rollup-plugin-babel": "^1.0.0",
     "rollup-plugin-replace": "^1.1.0",
