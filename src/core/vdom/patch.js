@@ -213,8 +213,8 @@ export function createPatchFunction (backend) {
       const ch = vnodes[startIdx]
       if (isDef(ch)) {
         if (isDef(ch.tag)) {
-          invokeDestroyHook(ch)
           removeAndInvokeRemoveHook(ch)
+          invokeDestroyHook(ch)
         } else { // Text node
           nodeOps.removeChild(parentElm, ch.elm)
         }
