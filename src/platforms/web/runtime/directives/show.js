@@ -17,7 +17,7 @@ export default {
     if (value && transition && transition.appear && !isIE9) {
       enter(vnode)
     }
-    const originalDisplay = el.style.display
+    const originalDisplay = el.style.display === 'none' ? '' : el.style.display
     el.style.display = value ? originalDisplay : 'none'
     el.__vOriginalDisplay = originalDisplay
   },
