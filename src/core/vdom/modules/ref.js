@@ -1,18 +1,18 @@
-/* flow */
+/* @flow */
 
 import { remove } from 'shared/util'
 
 export default {
-  create (_, vnode) {
+  create (_: any, vnode: VNodeWithData) {
     registerRef(vnode)
   },
-  update (oldVnode, vnode) {
+  update (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     if (oldVnode.data.ref !== vnode.data.ref) {
       registerRef(oldVnode, true)
       registerRef(vnode)
     }
   },
-  destroy (vnode) {
+  destroy (vnode: VNodeWithData) {
     registerRef(vnode, true)
   }
 }

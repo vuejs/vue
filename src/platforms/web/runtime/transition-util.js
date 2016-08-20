@@ -1,3 +1,5 @@
+/* @flow */
+
 import { inBrowser } from 'core/util/index'
 import { isIE9 } from 'web/util/index'
 import { remove } from 'shared/util'
@@ -47,7 +49,7 @@ export function removeTransitionClass (el: any, cls: string) {
 
 export function whenTransitionEnds (
   el: Element,
-  expectedType: ?stirng,
+  expectedType: ?string,
   cb: Function
 ) {
   const { type, timeout, propCount } = getTransitionInfo(el, expectedType)
@@ -77,6 +79,7 @@ export function getTransitionInfo (el: Element, expectedType?: ?string): {
   type: ?string;
   propCount: number;
   timeout: number;
+  hasTransform: boolean;
 } {
   const styles = window.getComputedStyle(el)
   const transitioneDelays = styles[transitionProp + 'Delay'].split(', ')

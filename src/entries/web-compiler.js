@@ -1,3 +1,5 @@
+/* @flow */
+
 import { extend } from 'shared/util'
 import { compile as baseCompile, baseOptions } from 'web/compiler/index'
 import { detectErrors } from 'compiler/error-detector'
@@ -12,9 +14,10 @@ export function compile (
   options = options || {}
   const errors = []
   // allow injecting modules/directives
+  const baseModules = baseOptions.modules || []
   const modules = options.modules
-    ? baseOptions.modules.concat(options.modules)
-    : baseOptions.modules
+    ? baseModules.concat(options.modules)
+    : baseModules
   const directives = options.directives
     ? extend(extend({}, baseOptions.directives), options.directives)
     : baseOptions.directives

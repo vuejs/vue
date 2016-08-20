@@ -3,7 +3,7 @@
 
 import { updateListeners } from 'core/vdom/helpers'
 
-function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+function updateDOMListeners (oldVnode, vnode) {
   if (!oldVnode.data.on && !vnode.data.on) {
     return
   }
