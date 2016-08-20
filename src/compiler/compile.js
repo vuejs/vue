@@ -857,12 +857,10 @@ function flatifyNodeList (nodeList) {
   var openingDelimiterNode = false
   for (var i = 0, l = nodeList.length; i < l; i++) {
     var node = nodeList[i]
-    if (openingDelimiterNode) {
-      openingDelimiterNode.textContent = node.nodeType === 3 ? node.textContent : node.outerHTML
-      if (containsClosingDelimiter) {
-        openingDelimiterNode = false
-      }
-      node.parentNode.removeChild(node)
+    if (openingDelimiterNode && node.nodeType === 1) {
+      node.parentNode.replaceChild(document.createTextNode(node.outerHTML), node)
+    } else if (openingDelimiterNode && node.nodeType == 3 && containsClosingDelimiter(node)) {
+      openingDelimiterNode = false
     } else {
       node = nodeList[i]
       if (containsOpeningDelimiter(node)) {
