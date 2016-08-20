@@ -126,6 +126,12 @@ export default {
     const oldRawChild = this._vnode
     const oldChild: any = getRealChild(oldRawChild)
 
+    // mark v-show
+    // so that the transition module can hand over the control to the directive
+    if (child.data.directives && child.data.directives.some(d => d.name === 'show')) {
+      child.data.show = true
+    }
+
     if (oldChild && oldChild.data && oldChild.key !== child.key) {
       // replace old child transition data with fresh one
       // important for dynamic transitions!

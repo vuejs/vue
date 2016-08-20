@@ -38,7 +38,6 @@ declare interface VNodeData {
   staticClass?: string;
   class?: any;
   style?: Array<Object> | Object;
-  show?: true;
   props?: { [key: string]: any };
   attrs?: { [key: string]: string };
   domProps?: { [key: string]: any };
@@ -46,7 +45,8 @@ declare interface VNodeData {
   on?: ?{ [key: string]: Function | Array<Function> };
   nativeOn?: { [key: string]: Function | Array<Function> };
   transition?: Object;
-  transitionInjected?: boolean;
+  transitionInjected?: boolean; // marker for transition insert hook injection
+  show?: boolean; // marker for v-show
   inlineTemplate?: {
     render: Function;
     staticRenderFns: Array<Function>;

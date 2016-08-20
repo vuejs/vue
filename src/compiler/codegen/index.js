@@ -130,11 +130,6 @@ function genData (el: ASTElement): string | void {
   for (let i = 0; i < dataGenFns.length; i++) {
     data += dataGenFns[i](el)
   }
-  // v-show, used to avoid transition being applied
-  // since v-show takes it over
-  if (el.attrsMap['v-show']) {
-    data += 'show:true,'
-  }
   // attributes
   if (el.attrs) {
     data += `attrs:{${genProps(el.attrs)}},`

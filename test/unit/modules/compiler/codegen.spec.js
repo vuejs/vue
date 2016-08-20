@@ -148,7 +148,7 @@ describe('codegen', () => {
   it('generate v-show directive', () => {
     assertCodegen(
       '<p v-show="shown">hello world</p>',
-      `with(this){return _h('p',{directives:[{name:"show",value:(shown),expression:"shown"}],show:true},["hello world"])}`
+      `with(this){return _h('p',{directives:[{name:"show",value:(shown),expression:"shown"}]},["hello world"])}`
     )
   })
 
