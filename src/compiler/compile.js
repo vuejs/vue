@@ -859,7 +859,7 @@ function flatifyNodeList (nodeList) {
     var node = nodeList[i]
     if (openingDelimiterNode && node.nodeType === 1) {
       node.parentNode.replaceChild(document.createTextNode(node.outerHTML), node)
-    } else if (openingDelimiterNode && node.nodeType == 3 && containsClosingDelimiter(node)) {
+    } else if (openingDelimiterNode && node.nodeType === 3 && containsClosingDelimiter(node)) {
       openingDelimiterNode = false
     } else {
       node = nodeList[i]
