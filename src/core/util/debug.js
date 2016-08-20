@@ -26,7 +26,7 @@ if (process.env.NODE_ENV !== 'production') {
 
   const formatLocation = str => {
     if (str === 'anonymous component') {
-      str += ` - use the "name" option for better debugging messages.)`
+      str += ` - use the "name" option for better debugging messages.`
     }
     return `(found in ${str})`
   }
