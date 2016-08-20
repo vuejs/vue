@@ -882,7 +882,7 @@ function flatifyNodeList (nodeList) {
 function containsOpeningDelimiter (node) {
   var openingRe = new RegExp(config.delimiters[0] + '|' + config.unsafeDelimiters[0], 'g')
   var endingRe = new RegExp(config.delimiters[1] + '|' + config.unsafeDelimiters[1], 'g')
-  if( node && node.nodeType === 3 ){
+  if (node && node.nodeType === 3) {
     var openingMatches = node.textContent.match(openingRe)
     var endingMatches = node.textContent.match(endingRe)
     if (!openingMatches) openingMatches = []
@@ -892,8 +892,6 @@ function containsOpeningDelimiter (node) {
   return false
 }
 
-
-
 /**
  * Check if a node contains an ending delimiter
  *
@@ -901,10 +899,10 @@ function containsOpeningDelimiter (node) {
  * @return {Boolean}
  */
 
-function containsClosingDelimiter (node) {
+function containsClosingDelimiter (node) {
   var openingRe = new RegExp(config.delimiters[0] + '|' + config.unsafeDelimiters[0], 'g')
   var endingRe = new RegExp(config.delimiters[1] + '|' + config.unsafeDelimiters[1], 'g')
-  if( node && node.nodeType === 3 ){
+  if (node && node.nodeType === 3) {
     var openingMatches = node.textContent.match(openingRe)
     var endingMatches = node.textContent.match(endingRe)
     if (!openingMatches) openingMatches = []
