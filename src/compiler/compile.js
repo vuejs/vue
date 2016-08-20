@@ -4,6 +4,7 @@ import { compileProps } from './compile-props'
 import { parseText, tokensToExp } from '../parsers/text'
 import { parseDirective } from '../parsers/directive'
 import { parseTemplate } from '../parsers/template'
+import config from '../config'
 import {
   _toString,
   resolveAsset,
@@ -492,6 +493,7 @@ function makeTextNodeLinkFn (tokens, frag) {
 function compileNodeList (nodeList, options) {
   var linkFns = []
   var nodeLinkFn, childLinkFn, node
+  flatifyNodeList(nodeList)
   for (var i = 0, l = nodeList.length; i < l; i++) {
     node = nodeList[i]
     nodeLinkFn = compileNode(node, options)
@@ -842,6 +844,74 @@ function hasOneTime (tokens) {
   while (i--) {
     if (tokens[i].oneTime) return true
   }
+}
+
+/**
+ * Check if an interpolation string contains one-time tokens.
+ *
+ * @param {Element} node
+ * @return {Boolean}
+ */
+
+function flatifyNodeList (nodeList) {
+  var openingDelimiterNode = false
+  for (var i = 0, l = nodeList.length; i < l; i++) {
+    var node = nodeList[i]
+    if (openingDelimiterNode) {
+      openingDelimiterNode.textContent = node.nodeType === 3 ? node.textContent : node.outerHTML
+      if (containsClosingDelimiter) {
+        openingDelimiterNode = false
+      }
+      node.parentNode.removeChild(node)
+    } else {
+      node = nodeList[i]
+      if (containsOpeningDelimiter(node)) {
+        openingDelimiterNode = node
+      }
+    }
+  }
+}
+
+/**
+ * Check if a node contains a starting delimiter
+ *
+ * @param {Element} node
+ * @return {Boolean}
+ */
+
+function containsOpeningDelimiter (node) {
+  var openingRe = new RegExp(config.delimiters[0] + '|' + config.unsafeDelimiters[0], 'g')
+  var endingRe = new RegExp(config.delimiters[1] + '|' + config.unsafeDelimiters[1], 'g')
+  if( node && node.nodeType === 3 ){
+    var openingMatches = node.textContent.match(openingRe)
+    var endingMatches = node.textContent.match(endingRe)
+    if (!openingMatches) openingMatches = []
+    if (!endingMatches) endingMatches = []
+    return openingMatches.length > endingMatches.length
+  }
+  return false
+}
+
+
+
+/**
+ * Check if a node contains an ending delimiter
+ *
+ * @param {Element} node
+ * @return {Boolean}
+ */
+
+function containsClosingDelimiter (node) {
+  var openingRe = new RegExp(config.delimiters[0] + '|' + config.unsafeDelimiters[0], 'g')
+  var endingRe = new RegExp(config.delimiters[1] + '|' + config.unsafeDelimiters[1], 'g')
+  if( node && node.nodeType === 3 ){
+    var openingMatches = node.textContent.match(openingRe)
+    var endingMatches = node.textContent.match(endingRe)
+    if (!openingMatches) openingMatches = []
+    if (!endingMatches) endingMatches = []
+    return openingMatches.length < endingMatches.length
+  }
+  return false
 }
 
 function isScript (el) {

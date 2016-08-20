@@ -716,7 +716,7 @@ describe('Compile', function () {
     })
   })
 
-  fit('should interpolate string with html', function (done) {
+  it('should interpolate string with html', function (done) {
     var vm = new Vue({
       el: el,
       template: "<div>{{ '<strong>hello</strong> world' }}</div>"
