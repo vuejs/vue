@@ -715,4 +715,16 @@ describe('Compile', function () {
       done()
     })
   })
+
+  fit('should interpolate string with html', function (done) {
+    var vm = new Vue({
+      el: el,
+      template: "<div>{{ '<strong>hello</strong> world' }}</div>"
+    })
+    _.nextTick(function () {
+      expect(el.textContent).toBe('<strong>hello</strong> world')
+      done()
+    })
+  })
+
 })
