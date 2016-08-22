@@ -90,7 +90,7 @@ export function parse (
       if (process.env.VUE_ENV !== 'server' && isForbiddenTag(element)) {
         element.forbidden = true
         process.env.NODE_ENV !== 'production' && warn(
-          'Templates should only be responsbile for mapping the state to the ' +
+          'Templates should only be responsible for mapping the state to the ' +
           'UI. Avoid placing tags with side-effects in your templates, such as ' +
           `<${tag}>.`
         )
