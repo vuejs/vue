@@ -3241,7 +3241,7 @@ function parse(template, options) {
 
       if (process.env.VUE_ENV !== 'server' && isForbiddenTag(element)) {
         element.forbidden = true;
-        process.env.NODE_ENV !== 'production' && warn$1('Templates should only be responsbile for mapping the state to the ' + 'UI. Avoid placing tags with side-effects in your templates, such as ' + ('<' + tag + '>.'));
+        process.env.NODE_ENV !== 'production' && warn$1('Templates should only be responsible for mapping the state to the ' + 'UI. Avoid placing tags with side-effects in your templates, such as ' + ('<' + tag + '>.'));
       }
 
       // apply pre-transforms
