@@ -64,9 +64,7 @@ export default {
 function setSelected (el, binding, vm) {
   const value = binding.value
   const isMultiple = el.multiple
-  if (!isMultiple) {
-    el.selectedIndex = -1
-  } else if (!Array.isArray(value)) {
+  if (isMultiple && !Array.isArray(value)) {
     process.env.NODE_ENV !== 'production' && warn(
       `<select multiple v-model="${binding.expression}"> ` +
       `expects an Array value for its binding, but got ${
@@ -76,16 +74,25 @@ function setSelected (el, binding, vm) {
     )
     return
   }
+  let selected, option
   for (let i = 0, l = el.options.length; i < l; i++) {
-    const option = el.options[i]
+    option = el.options[i]
     if (isMultiple) {
-      option.selected = value.indexOf(getValue(option)) > -1
+      selected = value.indexOf(getValue(option)) > -1
+      if (option.selected !== selected) {
+        option.selected = selected
+      }
     } else {
       if (getValue(option) === value) {
-        el.selectedIndex = i
-        break
+        if (el.selectedIndex !== i) {
+          el.selectedIndex = i
+        }
+        return
       }
     }
+  }
+  if (!isMultiple) {
+    el.selectedIndex = -1
   }
 }
 
