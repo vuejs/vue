@@ -8,6 +8,11 @@ export default {
   },
   update: function updateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     applyDirectives(oldVnode, vnode, 'update')
+    // if old vnode has directives but new vnode doesn't
+    // we need to teardown the directives on the old one.
+    if (oldVnode.data.directives && !vnode.data.directives) {
+      applyDirectives(oldVnode, oldVnode, 'unbind')
+    }
   },
   postpatch: function postupdateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     applyDirectives(oldVnode, vnode, 'componentUpdated')
@@ -27,7 +32,7 @@ function applyDirectives (
   const dirs = vnode.data.directives
   if (dirs) {
     const oldDirs = oldVnode.data.directives
-    const isUpdate = hook === 'update'
+    const isUpdate = hook === 'update' || hook === 'componentUpdated'
     for (let i = 0; i < dirs.length; i++) {
       const dir = dirs[i]
       const def = resolveAsset(vnode.context.$options, 'directives', dir.name, true)

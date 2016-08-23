@@ -114,6 +114,32 @@ describe('Options directives', () => {
     }).then(done)
   })
 
+  it('should teardown directives on old vnodes when new vnodes have none', done => {
+    const vm = new Vue({
+      data: {
+        ok: true
+      },
+      template: `
+        <div>
+          <div v-if="ok" v-test>a</div>
+          <div v-else class="b">b</div>
+        </div>
+      `,
+      directives: {
+        test: {
+          bind: el => { el.id = 'a' },
+          unbind: el => { el.id = '' }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.children[0].id).toBe('a')
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].id).toBe('')
+      expect(vm.$el.children[0].className).toBe('b')
+    }).then(done)
+  })
+
   it('warn non-existent', () => {
     new Vue({
       template: '<div v-test></div>'
