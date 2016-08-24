@@ -51,7 +51,6 @@ declare class Vue {
   static filter(id: string, definition?: Function): Function;
   static component(id: string, definition?: typeof Vue | Vue.ComponentOption): typeof Vue;
   static use<T>(plugin: Vue.Plugin<T> | Vue.Installer<T>, options?: T): void;
-  // static use<T>(plugin: Vue.Installer<T>, options?: T): void;
   static mixin(mixin: typeof Vue | Vue.ComponentOption): void;
   static compile(template: string): {render: Function, staticRenderFns: Function};
 }
