@@ -17,7 +17,7 @@ export declare class Vue {
   readonly $options: ComponentOptions;
   readonly $parent: Vue;
   readonly $root: Vue;
-  readonly $chldren: Vue[];
+  readonly $children: Vue[];
   readonly $refs: { [key: string]: Vue };
   readonly $slots: { [key: string]: VNode[] };
   readonly $isServer: boolean;

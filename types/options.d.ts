@@ -8,15 +8,15 @@ type Constructor = {
 export interface ComponentOptions {
   data?: Object | ( (this: Vue) => Object );
   props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
-  propData?: Object;
+  propsData?: Object;
   computed?: { [key: string]: ((this: Vue) => any) | ComputedOptions };
   methods?: { [key: string]: Function };
-  watch?: { [key: string]: ({ handler: WatchHandler } & WatchOptions) | WatchHandler };
+  watch?: { [key: string]: ({ handler: WatchHandler } & WatchOptions) | WatchHandler | string };
 
   el?: Element | String;
   template?: string;
-  render?(): VNode;
-  staticRenderFns?(): (() => VNode)[];
+  render?(createElement: typeof Vue.prototype.$createElement): VNode;
+  staticRenderFns?: (() => VNode)[];
 
   init?(): void;
   created?(): void;
@@ -46,7 +46,7 @@ export interface PropOptions {
 
 export interface ComputedOptions {
   get(this: Vue): any;
-  set(this: Vue): void;
+  set(this: Vue, value: any): void;
 }
 
 export type WatchHandler = <T>(val: T, oldVal: T) => void;
