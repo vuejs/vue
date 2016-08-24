@@ -1,8 +1,3 @@
-interface Array<T> {
-  $remove(item: T): Array<T>;
-  $set(index: any, val: T): T;
-}
-
 type Constructor = {
   new (...args: any[]): any;
 }
