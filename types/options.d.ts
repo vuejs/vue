@@ -45,8 +45,9 @@ export interface PropOptions {
 }
 
 export interface ComputedOptions {
-  get(this: Vue): any;
-  set(this: Vue, value: any): void;
+  get?(this: Vue): any;
+  set?(this: Vue, value: any): void;
+  cache?: boolean;
 }
 
 export type WatchHandler = <T>(val: T, oldVal: T) => void;

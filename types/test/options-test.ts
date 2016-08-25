@@ -35,7 +35,8 @@ const Options: ComponentOptions = {
       },
       set(this: Component, v: number) {
         this.a = v - 1;
-      }
+      },
+      cache: false
     }
   },
   methods: {
