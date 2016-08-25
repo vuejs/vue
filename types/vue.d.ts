@@ -56,6 +56,7 @@ export declare class Vue {
   static extend(options: ComponentOptions): Vue;
   static nextTick(callback: () => void, context?: any[]): void;
   static set<T>(object: Object, key: string, value: T): T;
+  static set<T>(array: T[], key: number, value: T): T;
   static delete(object: Object, key: string): void;
 
   static directive(id: string, definition?: DirectiveOptions | DirectiveFunction): DirectiveOptions;

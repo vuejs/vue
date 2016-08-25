@@ -58,6 +58,7 @@ class Test extends Vue {
     });
     this.nextTick(() => {});
     this.set({}, "", "");
+    this.set([true, false, true], 1, true);
     this.delete({}, "");
     this.directive("", {bind() {}});
     this.filter("", (value: number) => value);
