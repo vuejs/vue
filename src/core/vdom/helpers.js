@@ -129,7 +129,6 @@ function arrInvoker (arr: Array<Function>): Function {
 function fnInvoker (o: { fn: Function }): Function {
   return function (ev) {
     const single = arguments.length === 1
-    if (typeof o.fn !== 'function') debugger
     single ? o.fn(ev) : o.fn.apply(null, arguments)
   }
 }
