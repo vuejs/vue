@@ -1,10 +1,13 @@
 /* @flow */
 
 import { resolveAsset } from 'core/util/options'
+import { mergeVNodeHook } from 'core/vdom/helpers'
 
 export default {
   create: function bindDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-    applyDirectives(oldVnode, vnode, 'bind')
+    mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
+      applyDirectives(oldVnode, vnode, 'bind')
+    })
   },
   update: function updateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     applyDirectives(oldVnode, vnode, 'update')
