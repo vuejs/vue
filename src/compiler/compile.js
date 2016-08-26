@@ -261,10 +261,16 @@ export function compileRoot (el, options, contextOptions) {
       })
     if (names.length) {
       var plural = names.length > 1
+
+      var componentName = options.el.tagName.toLowerCase()
+      if (componentName === 'component' && options.name) {
+        componentName += ':' + options.name
+      }
+
       warn(
         'Attribute' + (plural ? 's ' : ' ') + names.join(', ') +
         (plural ? ' are' : ' is') + ' ignored on component ' +
-        '<' + options.el.tagName.toLowerCase() + '> because ' +
+        '<' + componentName + '> because ' +
         'the component is a fragment instance: ' +
         'http://vuejs.org/guide/components.html#Fragment-Instance'
       )
