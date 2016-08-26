@@ -481,4 +481,32 @@ describe('Component slot', () => {
     }).$mount()
     expect('Static <slot> found inside v-for').toHaveBeenWarned()
   })
+
+  // #3518
+  fit('events should not break when slot is toggled by v-if', done => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      template: `<test><div class="click" @click="test">hi</div></test>`,
+      methods: {
+        test: spy
+      },
+      components: {
+        test: {
+          data: () => ({
+            toggle: true
+          }),
+          template: `<div v-if="toggle"><slot></slot></div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('hi')
+    vm.$children[0].toggle = false
+    waitForUpdate(() => {
+      vm.$children[0].toggle = true
+    }).then(() => {
+      triggerEvent(vm.$el.querySelector('.click'), 'click')
+      expect(spy).toHaveBeenCalled()
+    }).then(done)
+  })
 })

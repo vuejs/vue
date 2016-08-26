@@ -92,10 +92,13 @@ export function updateListeners (
       if (Array.isArray(cur)) {
         add(event, (cur.invoker = arrInvoker(cur)), capture)
       } else {
-        fn = cur
-        cur = on[name] = {}
-        cur.fn = fn
-        add(event, (cur.invoker = fnInvoker(cur)), capture)
+        if (!cur.invoker) {
+          fn = cur
+          cur = on[name] = {}
+          cur.fn = fn
+          cur.invoker = fnInvoker(cur)
+        }
+        add(event, cur.invoker, capture)
       }
     } else if (Array.isArray(old)) {
       old.length = cur.length
@@ -126,6 +129,7 @@ function arrInvoker (arr: Array<Function>): Function {
 function fnInvoker (o: { fn: Function }): Function {
   return function (ev) {
     const single = arguments.length === 1
+    if (typeof o.fn !== 'function') debugger
     single ? o.fn(ev) : o.fn.apply(null, arguments)
   }
 }
