@@ -483,7 +483,7 @@ describe('Component slot', () => {
   })
 
   // #3518
-  fit('events should not break when slot is toggled by v-if', done => {
+  it('events should not break when slot is toggled by v-if', done => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       template: `<test><div class="click" @click="test">hi</div></test>`,

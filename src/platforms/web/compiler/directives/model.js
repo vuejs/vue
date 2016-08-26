@@ -13,19 +13,16 @@ export default function model (
   warn = _warn
   const value = dir.value
   const modifiers = dir.modifiers
-  if (el.tag === 'select') {
+  const tag = el.tag
+  const type = el.attrsMap.type
+  if (tag === 'select') {
     return genSelect(el, value)
+  } else if (tag === 'input' && type === 'checkbox') {
+    genCheckboxModel(el, value)
+  } else if (tag === 'input' && type === 'radio') {
+    genRadioModel(el, value)
   } else {
-    switch (el.attrsMap.type) {
-      case 'checkbox':
-        genCheckboxModel(el, value)
-        break
-      case 'radio':
-        genRadioModel(el, value)
-        break
-      default:
-        return genDefaultModel(el, value, modifiers)
-    }
+    return genDefaultModel(el, value, modifiers)
   }
 }
 
