@@ -45,7 +45,6 @@ declare interface VNodeData {
   on?: ?{ [key: string]: Function | Array<Function> };
   nativeOn?: { [key: string]: Function | Array<Function> };
   transition?: Object;
-  transitionInjected?: boolean; // marker for transition insert hook injection
   show?: boolean; // marker for v-show
   inlineTemplate?: {
     render: Function;
