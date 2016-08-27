@@ -80,7 +80,7 @@ function genIf (el: ASTElement): string {
 function genElse (el: ASTElement): string {
   return el.elseBlock
     ? genElement(el.elseBlock)
-    : 'void 0'
+    : '_e()'
 }
 
 function genFor (el: ASTElement): string {

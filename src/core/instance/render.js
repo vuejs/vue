@@ -92,6 +92,8 @@ export function renderMixin (Vue: Class<Component>) {
   Vue.prototype._s = _toString
   // number conversion
   Vue.prototype._n = toNumber
+  // empty vnode
+  Vue.prototype._e = emptyVNode
 
   // render static tree by index
   Vue.prototype._m = function renderStatic (
@@ -216,7 +218,7 @@ export function resolveSlots (
   // ignore single whitespace
   if (defaultSlot.length && !(
     defaultSlot.length === 1 &&
-    defaultSlot[0].text === ' '
+    (defaultSlot[0].text === ' ' || defaultSlot[0].isComment)
   )) {
     slots.default = defaultSlot
   }

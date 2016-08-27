@@ -56,7 +56,7 @@ describe('codegen', () => {
   it('generate v-if directive', () => {
     assertCodegen(
       '<p v-if="show">hello</p>',
-      `with(this){return (show)?_h('p',["hello"]):void 0}`
+      `with(this){return (show)?_h('p',["hello"]):_e()}`
     )
   })
 
@@ -318,7 +318,7 @@ describe('codegen', () => {
   it('not specified directives option', () => {
     assertCodegen(
       '<p v-if="show">hello world</p>',
-      `with(this){return (show)?_h('p',["hello world"]):void 0}`,
+      `with(this){return (show)?_h('p',["hello world"]):_e()}`,
       { isReservedTag }
     )
   })

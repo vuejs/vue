@@ -14,7 +14,7 @@ describe('Directive v-if', () => {
       template: '<div><span v-if="foo">hello</span></div>',
       data: { foo: false }
     }).$mount()
-    expect(vm.$el.innerHTML).toBe('')
+    expect(vm.$el.innerHTML).toBe('<!---->')
   })
 
   it('should update if value changed', done => {
@@ -25,25 +25,25 @@ describe('Directive v-if', () => {
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
     vm.foo = false
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML).toBe('')
+      expect(vm.$el.innerHTML).toBe('<!---->')
       vm.foo = {}
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>hello</span>')
       vm.foo = 0
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('')
+      expect(vm.$el.innerHTML).toBe('<!---->')
       vm.foo = []
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>hello</span>')
       vm.foo = null
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('')
+      expect(vm.$el.innerHTML).toBe('<!---->')
       vm.foo = '0'
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>hello</span>')
       vm.foo = undefined
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('')
+      expect(vm.$el.innerHTML).toBe('<!---->')
       vm.foo = 1
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>hello</span>')
@@ -103,16 +103,16 @@ describe('Directive v-if', () => {
         ]
       }
     }).$mount()
-    expect(vm.$el.innerHTML).toBe('<span>0</span><span>2</span>')
+    expect(vm.$el.innerHTML).toBe('<span>0</span><!----><span>2</span>')
     vm.list[0].value = false
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML).toBe('<span>2</span>')
+      expect(vm.$el.innerHTML).toBe('<!----><!----><span>2</span>')
       vm.list.push({ value: true })
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>2</span><span>3</span>')
+      expect(vm.$el.innerHTML).toBe('<!----><!----><span>2</span><span>3</span>')
       vm.list.splice(1, 2)
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>1</span>')
+      expect(vm.$el.innerHTML).toBe('<!----><span>1</span>')
     }).then(done)
   })
 
@@ -171,6 +171,38 @@ describe('Directive v-if', () => {
     }).then(() => {
       expect(vm.$el.children[0].id).toBe('ok')
       expect(vm.$el.children[0].className).toBe('inner test')
+    }).then(done)
+  })
+
+  it('should maintain stable list to avoid unnecessary patches', done => {
+    const created = jasmine.createSpy()
+    const destroyed = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        ok: true
+      },
+      // when the first div is toggled, the second div should be reused
+      // instead of re-created/destroyed
+      template: `
+        <div>
+          <div v-if="ok"></div>
+          <div><test></test></div>
+        </div>
+      `,
+      components: {
+        test: {
+          template: '<div></div>',
+          created,
+          destroyed
+        }
+      }
+    }).$mount()
+
+    expect(created.calls.count()).toBe(1)
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(created.calls.count()).toBe(1)
+      expect(destroyed).not.toHaveBeenCalled()
     }).then(done)
   })
 })

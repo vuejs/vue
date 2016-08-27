@@ -87,6 +87,8 @@ declare interface Component {
   _s: (value: any) => string;
   // toNumber
   _n: (value: string) => number | string;
+  // empty vnode
+  _e: () => VNode;
   // resolveFilter
   _f: (id: string) => Function;
   // renderList
