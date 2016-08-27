@@ -7,7 +7,7 @@ import VNode from 'core/vdom/vnode'
 
 const modules = baseModules.concat(platformModules)
 
-describe('hooks', () => {
+describe('vdom patch: hooks', () => {
   let vnode0
   beforeEach(() => {
     vnode0 = new VNode('p', { attrs: { id: '1' }}, [createTextVNode('hello world')])

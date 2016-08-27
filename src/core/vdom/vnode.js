@@ -12,7 +12,7 @@ export default class VNode {
   componentOptions: VNodeComponentOptions | void;
   child: Component | void; // component instance
   parent: VNode | void; // compoennt placeholder node
-  raw: ?boolean; // contains raw HTML
+  raw: ?boolean; // contains raw HTML? (server only)
   isStatic: ?boolean; // hoisted static node
   isRootInsert: boolean; // necessary for enter transition check
   isComment: boolean;
@@ -57,4 +57,32 @@ export const emptyVNode = () => {
   node.text = ''
   node.isComment = true
   return node
+}
+
+// optimized shallow clone
+// used for static nodes and slot nodes because they may be reused across
+// multiple renders, cloning them avoids errors when DOM manipulations rely
+// on their elm reference.
+export function cloneVNode (vnode: VNode): VNode {
+  const cloned = new VNode(
+    vnode.tag,
+    vnode.data,
+    vnode.children,
+    vnode.text,
+    vnode.elm,
+    vnode.ns,
+    vnode.context,
+    vnode.componentOptions
+  )
+  cloned.isStatic = vnode.isStatic
+  cloned.key = vnode.key
+  return cloned
+}
+
+export function cloneVNodes (vnodes: Array<VNode>): Array<VNode> {
+  const res = new Array(vnodes.length)
+  for (let i = 0; i < vnodes.length; i++) {
+    res[i] = cloneVNode(vnodes[i])
+  }
+  return res
 }

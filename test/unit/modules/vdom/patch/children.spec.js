@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 
@@ -43,7 +42,7 @@ function shuffle (array) {
 const inner = prop('innerHTML')
 const tag = prop('tagName')
 
-describe('children', () => {
+describe('vdom patch: children', () => {
   let vnode0
   beforeEach(() => {
     vnode0 = new VNode('p', { attrs: { id: '1' }}, [createTextVNode('hello world')])
@@ -508,29 +507,5 @@ describe('children', () => {
     expect(elm.textContent).toBe('B')
     elm = patch(vnode2, vnode3)
     expect(elm.textContent).toBe('ABC')
-  })
-
-  // exposed by #3406
-  // When a static vnode is inside v-for, it's possible for the same vnode
-  // to be used in multiple places, and its element will be replaced. This
-  // causes patch errors when node ops depend on the vnode's element position.
-  it('should handle static vnodes by key', done => {
-    const vm = new Vue({
-      data: {
-        ok: true
-      },
-      template: `
-        <div>
-          <div v-for="i in 2">
-            <div v-if="ok">a</div><div>b</div><div v-if="!ok">c</div><div>d</div>
-          </div>
-        </div>
-      `
-    }).$mount()
-    expect(vm.$el.textContent).toBe('abdabd')
-    vm.ok = false
-    waitForUpdate(() => {
-      expect(vm.$el.textContent).toBe('bcdbcd')
-    }).then(done)
   })
 })

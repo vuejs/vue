@@ -2,7 +2,7 @@ import Vue from 'vue'
 import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 
-describe('hydration', () => {
+describe('vdom patch: hydration', () => {
   let vnode0
   beforeEach(() => {
     spyOn(console, 'warn')

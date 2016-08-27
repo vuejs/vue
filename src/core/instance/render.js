@@ -1,7 +1,7 @@
 /* @flow */
 
 import config from '../config'
-import VNode, { emptyVNode } from '../vdom/vnode'
+import VNode, { emptyVNode, cloneVNode, cloneVNodes } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
 import {
   warn, formatComponentName, bind, isObject, toObject,
@@ -35,6 +35,13 @@ export function renderMixin (Vue: Class<Component>) {
       staticRenderFns,
       _parentVnode
     } = vm.$options
+
+    if (vm._isMounted) {
+      // clone slot nodes on re-renders
+      for (const key in vm.$slots) {
+        vm.$slots[key] = cloneVNodes(vm.$slots[key])
+      }
+    }
 
     if (staticRenderFns && !vm._staticTrees) {
       vm._staticTrees = []
@@ -90,12 +97,14 @@ export function renderMixin (Vue: Class<Component>) {
   Vue.prototype._m = function renderStatic (
     index: number,
     isInFor?: boolean
-  ): VNode | VNodeChildren {
+  ): VNode | Array<VNode> {
     let tree = this._staticTrees[index]
     // if has already-rendered static tree and not inside v-for,
     // we can reuse the same tree by indentity.
     if (tree && !isInFor) {
-      return tree
+      return Array.isArray(tree)
+        ? cloneVNodes(tree)
+        : cloneVNode(tree)
     }
     // otherwise, render a fresh tree.
     tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy)
