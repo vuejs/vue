@@ -60,9 +60,11 @@ export function whenTransitionEnds (
     el.removeEventListener(event, onEnd)
     cb()
   }
-  const onEnd = () => {
-    if (++ended >= propCount) {
-      end()
+  const onEnd = e => {
+    if (e.target === el) {
+      if (++ended >= propCount) {
+        end()
+      }
     }
   }
   setTimeout(() => {
