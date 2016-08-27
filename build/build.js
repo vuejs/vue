@@ -1,131 +1,53 @@
-var fs = require('fs')
-var zlib = require('zlib')
-var rollup = require('rollup')
-var uglify = require('uglify-js')
-var babel = require('rollup-plugin-babel')
-var replace = require('rollup-plugin-replace')
-var aliasPlugin = require('rollup-plugin-alias')
-var baseAlias = require('./alias')
-var version = process.env.VERSION || require('../package.json').version
+const fs = require('fs')
+const path = require('path')
+const zlib = require('zlib')
+const rollup = require('rollup')
+const uglify = require('uglify-js')
 
 if (!fs.existsSync('dist')) {
   fs.mkdirSync('dist')
 }
 
-var banner =
-  '/*!\n' +
-  ' * Vue.js v' + version + '\n' +
-  ' * (c) 2014-' + new Date().getFullYear() + ' Evan You\n' +
-  ' * Released under the MIT License.\n' +
-  ' */'
-
 // Update main file
-var main = fs
+const version = process.env.VERSION || require('../package.json').version
+const main = fs
   .readFileSync('src/core/index.js', 'utf-8')
   .replace(/Vue\.version = '[^']+'/, "Vue.version = '" + version + "'")
 fs.writeFileSync('src/core/index.js', main)
 
-var builds = [
-  // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
-  {
-    entry: 'src/entries/web-runtime.js',
-    format: 'cjs',
-    out: 'dist/vue.common.js'
-  },
-  // Minified runtime, only for filze size monitoring
-  {
-    entry: 'src/entries/web-runtime.js',
-    format: 'umd',
-    env: 'production',
-    out: 'dist/vue.common.min.js'
-  },
-  // Runtime+compiler standalone developement build.
-  {
-    entry: 'src/entries/web-runtime-with-compiler.js',
-    format: 'umd',
-    env: 'development',
-    out: 'dist/vue.js',
-    banner: true,
-    alias: {
-      entities: './entity-decoder'
-    }
-  },
-  // Runtime+compiler standalone production build.
-  {
-    entry: 'src/entries/web-runtime-with-compiler.js',
-    format: 'umd',
-    env: 'production',
-    out: 'dist/vue.min.js',
-    banner: true,
-    alias: {
-      entities: './entity-decoder'
-    }
-  },
-  // Web compiler (CommonJS).
-  {
-    entry: 'src/entries/web-compiler.js',
-    format: 'cjs',
-    external: ['entities', 'de-indent'],
-    out: 'packages/vue-template-compiler/build.js'
-  },
-  // Web server renderer (CommonJS).
-  {
-    entry: 'src/entries/web-server-renderer.js',
-    format: 'cjs',
-    external: ['stream', 'module', 'vm', 'entities', 'de-indent'],
-    out: 'packages/vue-server-renderer/build.js'
-  }
-]
+let builds = require('./config').getAllBuilds()
 
 // filter builds via command line arg
 if (process.argv[2]) {
-  var filters = process.argv[2].split(',')
+  const filters = process.argv[2].split(',')
   builds = builds.filter(b => {
-    return filters.some(f => b.out.indexOf(f) > -1)
+    return filters.some(f => b.dest.indexOf(f) > -1)
   })
 }
 
 build(builds)
 
 function build (builds) {
-  var built = 0
-  var total = builds.length
-  next()
-  function next () {
-    buildEntry(builds[built]).then(function () {
+  let built = 0
+  const total = builds.length
+  const next = () => {
+    buildEntry(builds[built]).then(() => {
       built++
       if (built < total) {
         next()
       }
     }).catch(logError)
   }
+
+  next()
 }
 
-function buildEntry (opts) {
-  var plugins = [babel()]
-  if (opts.env) {
-    plugins.push(replace({
-      'process.env.NODE_ENV': JSON.stringify(opts.env),
-      'process.env.VUE_ENV': JSON.stringify('client')
-    }))
-  }
-  var alias = baseAlias
-  if (opts.alias) {
-    alias = Object.assign({}, baseAlias, opts.alias)
-  }
-  plugins.push(aliasPlugin(alias))
-  return rollup.rollup({
-    entry: opts.entry,
-    plugins: plugins,
-    external: opts.external
-  }).then(function (bundle) {
-    var code = bundle.generate({
-      format: opts.format,
-      moduleName: 'Vue',
-      banner: opts.banner ? banner : null
-    }).code
-    if (opts.env === 'production') {
-      var minified = (opts.banner ? banner + '\n' : '') + uglify.minify(code, {
+function buildEntry (config) {
+  const isProd = /min\.js$/.test(config.dest)
+  return rollup.rollup(config).then(bundle => {
+    const code = bundle.generate(config).code
+    if (isProd) {
+      var minified = (config.banner ? config.banner + '\n' : '') + uglify.minify(code, {
         fromString: true,
         output: {
           screw_ie8: true,
@@ -135,9 +57,9 @@ function buildEntry (opts) {
           pure_funcs: ['makeMap']
         }
       }).code
-      return write(opts.out, minified).then(zip(opts.out))
+      return write(config.dest, minified).then(zip(config.dest))
     } else {
-      return write(opts.out, code)
+      return write(config.dest, code)
     }
   })
 }
@@ -146,7 +68,7 @@ function write (dest, code) {
   return new Promise(function (resolve, reject) {
     fs.writeFile(dest, code, function (err) {
       if (err) return reject(err)
-      console.log(blue(dest) + ' ' + getSize(code))
+      console.log(blue(path.relative(process.cwd(), dest)) + ' ' + getSize(code))
       resolve()
     })
   })
