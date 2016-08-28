@@ -12,16 +12,7 @@ const banner =
   ' * Released under the MIT License.\n' +
   ' */'
 
-const baseAlias = {
-  vue: path.resolve(__dirname, '../src/entries/web-runtime-with-compiler'),
-  compiler: path.resolve(__dirname, '../src/compiler'),
-  core: path.resolve(__dirname, '../src/core'),
-  shared: path.resolve(__dirname, '../src/shared'),
-  web: path.resolve(__dirname, '../src/platforms/web'),
-  server: path.resolve(__dirname, '../src/server'),
-  entries: path.resolve(__dirname, '../src/entries'),
-  sfc: path.resolve(__dirname, '../src/sfc')
-}
+const baseAlias = require('./alias')
 
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
