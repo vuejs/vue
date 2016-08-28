@@ -50,7 +50,7 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
 
 ## Development Setup
 
-You will need [Node.js](http://nodejs.org) and [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/index.html) (needed for running Selenium server during e2e tests).
+You will need [Node.js](http://nodejs.org) **version 6+** and [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/index.html) (needed for running Selenium server during e2e tests).
 
 After cloning the repo, run:
 
