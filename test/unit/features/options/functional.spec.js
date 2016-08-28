@@ -53,7 +53,7 @@ describe('Options functional', () => {
         validate: {
           functional: true,
           props: ['field'],
-          render (h, { props, children, data: { on } }) {
+          render (h, { props, children, data: { on }}) {
             props.child = children[0]
             return h('validate-control', { props, on })
           }
