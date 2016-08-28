@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { Promise } from 'es6-promise'
 
 describe('Component async', () => {
   it('normal', done => {
@@ -127,6 +128,34 @@ describe('Component async', () => {
     }).$mount()
     function next () {
       expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
+      done()
+    }
+  })
+
+  it('returning Promise', done => {
+    const vm = new Vue({
+      template: '<div><test></test></div>',
+      components: {
+        test: () => {
+          return new Promise(resolve => {
+            setTimeout(() => {
+              resolve({
+                template: '<div>hi</div>'
+              })
+              // wait for promise resolve and then parent update
+              Promise.resolve().then(() => {
+                Vue.nextTick(next)
+              })
+            }, 0)
+          })
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('')
+    expect(vm.$children.length).toBe(0)
+    function next () {
+      expect(vm.$el.innerHTML).toBe('<div>hi</div>')
+      expect(vm.$children.length).toBe(1)
       done()
     }
   })
