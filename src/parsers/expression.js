@@ -23,11 +23,13 @@ const improperKeywordsRE =
 
 const wsRE = /\s/g
 const newlineRE = /\n/g
-const saveRE = /[\{,]\s*[\w\$_]+\s*:|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`)|new |typeof |void /g
+const saveRE = /[\{,]\s*[\w\$_]+\s*:|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\"']|\\.)*`|`(?:[^`\\]|\\.)*`)|new |typeof |void /g
 const restoreRE = /"(\d+)"/g
 const pathTestRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
 const identRE = /[^\w$\.](?:[A-Za-z_$][\w$]*)/g
-const booleanLiteralRE = /^(?:true|false)$/
+const literalValueRE = /^(?:true|false|null|undefined|Infinity|NaN)$/
+
+function noop () {}
 
 /**
  * Save / Rewrite / Restore
@@ -117,7 +119,7 @@ function compileGetter (exp) {
     .replace(saveRE, save)
     .replace(wsRE, '')
   // rewrite all paths
-  // pad 1 space here becaue the regex matches 1 extra char
+  // pad 1 space here because the regex matches 1 extra char
   body = (' ' + body)
     .replace(identRE, rewrite)
     .replace(restoreRE, restore)
@@ -140,10 +142,23 @@ function makeGetterFn (body) {
     return new Function('scope', 'return ' + body + ';')
     /* eslint-enable no-new-func */
   } catch (e) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Invalid expression. ' +
-      'Generated function body: ' + body
-    )
+    if (process.env.NODE_ENV !== 'production') {
+      /* istanbul ignore if */
+      if (e.toString().match(/unsafe-eval|CSP/)) {
+        warn(
+          'It seems you are using the default build of Vue.js in an environment ' +
+          'with Content Security Policy that prohibits unsafe-eval. ' +
+          'Use the CSP-compliant build instead: ' +
+          'http://vuejs.org/guide/installation.html#CSP-compliant-build'
+        )
+      } else {
+        warn(
+          'Invalid expression. ' +
+          'Generated function body: ' + body
+        )
+      }
+    }
+    return noop
   }
 }
 
@@ -207,8 +222,8 @@ export function parseExpression (exp, needSet) {
 
 export function isSimplePath (exp) {
   return pathTestRE.test(exp) &&
-    // don't treat true/false as paths
-    !booleanLiteralRE.test(exp) &&
+    // don't treat literal values as paths
+    !literalValueRE.test(exp) &&
     // Math constants e.g. Math.PI, Math.E etc.
     exp.slice(0, 5) !== 'Math.'
 }

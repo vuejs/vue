@@ -92,7 +92,7 @@ export function orderBy (arr) {
   }
 
   // determine sortKeys & comparator
-  let firstArg = args[0]
+  const firstArg = args[0]
   if (!firstArg) {
     return arr
   } else if (typeof firstArg === 'function') {

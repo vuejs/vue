@@ -185,11 +185,13 @@ describe('v-model', function () {
     el.firstChild.click()
     expect(vm.list.length).toBe(2)
     expect(vm.list[1]).toBe(1)
-    vm.list = [vm.a]
     _.nextTick(function () {
-      expect(el.firstChild.checked).toBe(false)
-      expect(el.lastChild.checked).toBe(true)
-      done()
+      vm.list = [vm.a]
+      _.nextTick(function () {
+        expect(el.firstChild.checked).toBe(false)
+        expect(el.lastChild.checked).toBe(true)
+        done()
+      })
     })
   })
 
@@ -235,7 +237,7 @@ describe('v-model', function () {
     })
   })
 
-  it('select persist non-selected on append', function () {
+  it('select persist non-selected on append', function (done) {
     var vm = new Vue({
       el: el,
       data: {
@@ -249,12 +251,17 @@ describe('v-model', function () {
           '<option>c</option>' +
         '</select>'
     })
-    expect(vm.$el.value).toBe('')
-    expect(vm.$el.selectedIndex).toBe(-1)
-    vm.$remove()
-    vm.$appendTo(document.body)
-    expect(vm.$el.value).toBe('')
-    expect(vm.$el.selectedIndex).toBe(-1)
+    _.nextTick(function () {
+      expect(vm.$el.value).toBe('')
+      expect(vm.$el.selectedIndex).toBe(-1)
+      vm.$remove()
+      vm.$appendTo(document.body)
+      _.nextTick(function () {
+        expect(vm.$el.value).toBe('')
+        expect(vm.$el.selectedIndex).toBe(-1)
+        done()
+      })
+    })
   })
 
   it('select template default value', function () {

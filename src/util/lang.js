@@ -189,9 +189,10 @@ function toUpper (_, c) {
  * @return {String}
  */
 
-var hyphenateRE = /([a-z\d])([A-Z])/g
+var hyphenateRE = /([^-])([A-Z])/g
 export function hyphenate (str) {
   return str
+    .replace(hyphenateRE, '$1-$2')
     .replace(hyphenateRE, '$1-$2')
     .toLowerCase()
 }

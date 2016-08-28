@@ -13,10 +13,15 @@ export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
 // UA sniffing for working around browser-specific quirks
 const UA = inBrowser && window.navigator.userAgent.toLowerCase()
+export const isIE = UA && UA.indexOf('trident') > 0
 export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
 export const isAndroid = UA && UA.indexOf('android') > 0
 export const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
-export const isWechat = UA && UA.indexOf('micromessenger') > 0
+export const iosVersionMatch = isIos && UA.match(/os ([\d_]+)/)
+export const iosVersion = iosVersionMatch && iosVersionMatch[1].split('_')
+
+// detecting iOS UIWebView by indexedDB
+export const hasMutationObserverBug = iosVersion && Number(iosVersion[0]) >= 9 && Number(iosVersion[1]) >= 3 && !window.indexedDB
 
 let transitionProp
 let transitionEndEvent
@@ -76,7 +81,7 @@ export const nextTick = (function () {
   }
 
   /* istanbul ignore if */
-  if (typeof MutationObserver !== 'undefined' && !(isWechat && isIos)) {
+  if (typeof MutationObserver !== 'undefined' && !hasMutationObserverBug) {
     var counter = 1
     var observer = new MutationObserver(nextTickHandler)
     var textNode = document.createTextNode(counter)

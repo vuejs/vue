@@ -36,11 +36,11 @@ function resetBatcherState () {
 
 function flushBatcherQueue () {
   runBatcherQueue(queue)
-  queue.length = 0
   runBatcherQueue(userQueue)
-  // user watchers triggered more internal watchers
+  // user watchers triggered more watchers,
+  // keep flushing until it depletes
   if (queue.length) {
-    runBatcherQueue(queue)
+    return flushBatcherQueue()
   }
   // dev tool hook
   /* istanbul ignore if */
@@ -77,6 +77,7 @@ function runBatcherQueue (queue) {
       }
     }
   }
+  queue.length = 0
 }
 
 /**

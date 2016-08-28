@@ -38,6 +38,7 @@ const settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
 
 export function compileProps (el, propOptions, vm) {
   var props = []
+  var propsData = vm.$options.propsData
   var names = Object.keys(propOptions)
   var i = names.length
   var options, name, attr, value, path, parsed, prop
@@ -121,6 +122,9 @@ export function compileProps (el, propOptions, vm) {
       }
     } else if ((value = getAttr(el, attr)) !== null) {
       // has literal binding!
+      prop.raw = value
+    } else if (propsData && ((value = propsData[name] || propsData[path]) !== null)) {
+      // has propsData
       prop.raw = value
     } else if (process.env.NODE_ENV !== 'production') {
       // check possible camelCase prop usage
@@ -236,7 +240,7 @@ function processPropValue (vm, prop, rawValue, fn) {
   if (value === undefined) {
     value = getPropDefaultValue(vm, prop)
   }
-  value = coerceProp(prop, value)
+  value = coerceProp(prop, value, vm)
   const coerced = value !== rawValue
   if (!assertProp(prop, value, vm)) {
     value = undefined
@@ -334,7 +338,7 @@ function assertProp (prop, value, vm) {
   var expectedTypes = []
   if (type) {
     if (!isArray(type)) {
-      type = [ type ]
+      type = [type]
     }
     for (var i = 0; i < type.length && !valid; i++) {
       var assertedType = assertType(value, type[i])
@@ -374,13 +378,20 @@ function assertProp (prop, value, vm) {
  * @return {*}
  */
 
-function coerceProp (prop, value) {
+function coerceProp (prop, value, vm) {
   var coerce = prop.options.coerce
   if (!coerce) {
     return value
   }
-  // coerce is a function
-  return coerce(value)
+  if (typeof coerce === 'function') {
+    return coerce(value)
+  } else {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Invalid coerce for prop "' + prop.name + '": expected function, got ' + typeof coerce + '.',
+      vm
+    )
+    return value
+  }
 }
 
 /**

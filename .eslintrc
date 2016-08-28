@@ -1,7 +1,6 @@
 {
-  "extends": "standard",
+  "extends": "vue",
   "rules": {
-    "arrow-parens": [2, "as-needed"],
     "no-duplicate-imports": 0
   }
 }

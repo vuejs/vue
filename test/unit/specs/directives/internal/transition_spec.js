@@ -14,7 +14,7 @@ describe('transition', function () {
     })
     var dir = new Directive({
       name: 'transition',
-      raw: 'test',
+      raw: '',
       def: def,
       modifiers: {
         literal: true
@@ -22,17 +22,22 @@ describe('transition', function () {
     }, vm, el)
     dir._bind()
     var transition = dir.el.__v_trans
+    expect(transition.enterClass).toBe('v-enter')
+    expect(transition.leaveClass).toBe('v-leave')
+    expect(dir.el.className).toBe('v-transition')
+    dir.update('test', '')
+    transition = dir.el.__v_trans
     expect(transition.el).toBe(dir.el)
     expect(transition.hooks).toBe(fns)
     expect(transition.enterClass).toBe('test-enter')
     expect(transition.leaveClass).toBe('test-leave')
-    expect(dir.el.className === 'test-transition')
+    expect(dir.el.className).toBe('test-transition')
     dir.update('lol', 'test')
     transition = dir.el.__v_trans
     expect(transition.enterClass).toBe('lol-enter')
     expect(transition.leaveClass).toBe('lol-leave')
     expect(transition.fns).toBeUndefined()
-    expect(dir.el.className === 'lol-transition')
+    expect(dir.el.className).toBe('lol-transition')
   })
 
   it('dynamic transitions', function (done) {

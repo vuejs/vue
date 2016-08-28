@@ -6,6 +6,7 @@ describe('Filters', function () {
     var obj = {a: {b: 2}}
     expect(filter(obj)).toBe(JSON.stringify(obj, null, 2))
     expect(filter(obj, 4)).toBe(JSON.stringify(obj, null, 4))
+    expect(filter(obj, 0)).toBe(JSON.stringify(obj, null, 0))
     // plain string
     expect(filter('1234')).toBe('1234')
   })
@@ -52,6 +53,8 @@ describe('Filters', function () {
     expect(filter(2, 'st', 'nd', 'rd', 'th')).toBe('nd')
     expect(filter(3, 'st', 'nd', 'rd', 'th')).toBe('rd')
     expect(filter(4, 'st', 'nd', 'rd', 'th')).toBe('th')
+    // multi args where selected argument is empty string
+    expect(filter(1, '', 'nd', 'rd', 'th')).toBe('')
   })
 
   it('currency', function () {

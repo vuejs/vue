@@ -22,6 +22,18 @@ describe('Util - DOM', function () {
     expect(_.inDoc(target)).toBe(false)
   })
 
+  it('inDoc (iframe)', function (done) {
+    var f = document.createElement('iframe')
+    f.onload = function () {
+      f.contentWindow.document.body.appendChild(target)
+      expect(_.inDoc(target)).toBe(true)
+      document.body.removeChild(f)
+      done()
+    }
+    document.body.appendChild(f)
+    f.src = 'about:blank'
+  })
+
   it('getAttr', function () {
     target.setAttribute('v-test', 'ok')
     var val = _.getAttr(target, 'v-test')

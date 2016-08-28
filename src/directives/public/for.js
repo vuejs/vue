@@ -16,7 +16,8 @@ import {
   def,
   cancellable,
   isArray,
-  isPlainObject
+  isPlainObject,
+  findVmFromFrag
 } from '../../util/index'
 
 let uid = 0
@@ -524,7 +525,7 @@ const vFor = {
    * the filters. This is passed to and called by the watcher.
    *
    * It is necessary for this to be called during the
-   * wathcer's dependency collection phase because we want
+   * watcher's dependency collection phase because we want
    * the v-for to update when the source Object is mutated.
    */
 
@@ -600,24 +601,6 @@ function findPrevFrag (frag, anchor, id) {
     frag = el.__v_frag
   }
   return frag
-}
-
-/**
- * Find a vm from a fragment.
- *
- * @param {Fragment} frag
- * @return {Vue|undefined}
- */
-
-function findVmFromFrag (frag) {
-  let node = frag.node
-  // handle multi-node frag
-  if (frag.end) {
-    while (!node.__vue__ && node !== frag.end && node.nextSibling) {
-      node = node.nextSibling
-    }
-  }
-  return node.__vue__
 }
 
 /**

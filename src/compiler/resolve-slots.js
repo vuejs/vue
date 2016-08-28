@@ -68,7 +68,7 @@ function extractFragment (nodes, parent) {
       !node.hasAttribute('v-for')
     ) {
       parent.removeChild(node)
-      node = parseTemplate(node)
+      node = parseTemplate(node, true)
     }
     frag.appendChild(node)
   }

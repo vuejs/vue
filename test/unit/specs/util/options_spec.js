@@ -282,9 +282,9 @@ describe('Util - Option merging', function () {
     var f1 = function () {}
     var f2 = function () {}
     var f3 = function () {}
-    var componentA = { template: 'foo', methods: { f1: f1, f2: function () {} } }
-    var componentB = { extends: componentA, methods: { f2: f2 } }
-    var componentC = { extends: componentB, template: 'bar', methods: { f3: f3 } }
+    var componentA = Vue.extend({ template: 'foo', methods: { f1: f1, f2: function () {} }})
+    var componentB = { extends: componentA, methods: { f2: f2 }}
+    var componentC = { extends: componentB, template: 'bar', methods: { f3: f3 }}
     var res = merge({}, componentC)
     expect(res.template).toBe('bar')
     expect(res.methods.f1).toBe(f1)
@@ -303,12 +303,14 @@ describe('Util - Option merging', function () {
     var f4 = function () {}
     var mixinA = { a: 1, directives: { a: a }, created: f2 }
     var mixinB = { b: 1, directives: { b: b }, created: f3 }
+    var mixinC = Vue.extend({ c: 1 })
     var res = merge(
       { a: 2, directives: { c: c }, created: [f1] },
-      { directives: { d: d }, mixins: [mixinA, mixinB], created: f4 }
+      { directives: { d: d }, mixins: [mixinA, mixinB, mixinC], created: f4 }
     )
     expect(res.a).toBe(1)
     expect(res.b).toBe(1)
+    expect(res.c).toBe(1)
     expect(res.directives.a).toBe(a)
     expect(res.directives.b).toBe(b)
     expect(res.directives.c).toBe(c)

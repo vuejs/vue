@@ -19,7 +19,7 @@ export default {
     read: function (value, indent) {
       return typeof value === 'string'
         ? value
-        : JSON.stringify(value, null, Number(indent) || 2)
+        : JSON.stringify(value, null, arguments.length > 1 ? indent : 2)
     },
     write: function (value) {
       try {
@@ -104,9 +104,13 @@ export default {
 
   pluralize (value) {
     var args = toArray(arguments, 1)
-    return args.length > 1
-      ? (args[value % 10 - 1] || args[args.length - 1])
-      : (args[0] + (value === 1 ? '' : 's'))
+    var length = args.length
+    if (length > 1) {
+      var index = value % 10 - 1
+      return index in args ? args[index] : args[length - 1]
+    } else {
+      return args[0] + (value === 1 ? '' : 's')
+    }
   },
 
   /**

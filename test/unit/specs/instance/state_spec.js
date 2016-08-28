@@ -11,7 +11,7 @@ describe('Instance state initialization', function () {
 
   it('should initialize data once per strat', function () {
     var spyOncePerStrat = jasmine.createSpy('called once per strat')
-    const VM = Vue.extend({
+    var Comp = Vue.extend({
       data: function () {
         spyOncePerStrat()
         return {
@@ -19,7 +19,7 @@ describe('Instance state initialization', function () {
         }
       }
     })
-    new VM({
+    new Comp({
       data: function () {
         spyOncePerStrat()
         return {

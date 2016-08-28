@@ -5,7 +5,7 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 ### $2000
 
 <a href="https://strikingly.com/s/careers?utm_source=v">
-  <img width="500px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/strikingly.png">
+  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/strikingly.png">
 </a>
 
 ---
@@ -13,16 +13,38 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 ### $500
 
 <a href="http://www.itunescn.com/">
-  <img width="360px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
+  <img width="240px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
+</a>
+
+<a href="https://jsfiddle.net/">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
+</a>
+
+<a href="https://laravel.com">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
+</a>
+
+<a href="https://chaitin.cn">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/chaitin.png">
+</a>
+
+<a href="https://htmlburger.com/">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
+</a>
+
+<a href="https://starter.someline.com/">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
+</a>
+
+<a href="http://gold.xitu.io/?utm_source=vuejs&utm_medium=image&utm_content=juejin&utm_campaign=q3_website">
+  <img width="180px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/juejin.png">
 </a>
 
 ---
 
 ### $250
 
-<a href="https://laravel.com">
-  <img width="300px" src="http://blog.legacyteam.info/wp-content/uploads/2014/10/laravel-logo-white.png">
-</a>
+It could be you!
 
 ---
 
@@ -36,8 +58,12 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="200px" src="http://assets.invoicemachine.com/images/flat_logo.png">
 </a>
 
-<a href="https://statamic.com/"></a>
+<a href="https://statamic.com/">
   <img width="240px" src="http://i.imgur.com/MRIkKgp.png">
+</a>
+
+<a href="http://nodividestudio.com/">
+  <img width="100px" src="https://cloud.githubusercontent.com/assets/499550/16464256/552c2306-3e07-11e6-867f-e4f5ac64bace.png"> No Divide Studio
 </a>
 
 ---
@@ -50,6 +76,8 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - Adam Dorsey
 - Greg McCarvell
 - Yoshiya Hinosawa
+- Wasim Khamlichi
+- Jivan Roquet
 
 ---
 
@@ -102,3 +130,21 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - louisbl
 - Yegor Sytnyk
 - Guido H.
+- Joan Cejudo
+- Ian Walter
+- Nikola Trifunovic
+- Nicolas Mutis Mesa
+- Fahed Toumi
+- James
+- Spenser
+- Takuya Nishio
+- Daniel Diekmeier
+- Peter Thaleikis
+- Karol Fabjanczuk
+- Eduardo
+- Lê Chương
+- Webber Wang
+- Daniel Schmitz
+- Bruce Li
+- Mohammed
+- Sam Wainwright

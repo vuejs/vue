@@ -37,8 +37,9 @@ export function query (el) {
  */
 
 export function inDoc (node) {
-  var doc = document.documentElement
-  var parent = node && node.parentNode
+  if (!node) return false
+  var doc = node.ownerDocument.documentElement
+  var parent = node.parentNode
   return doc === node ||
     doc === parent ||
     !!(parent && parent.nodeType === 1 && (doc.contains(parent)))
@@ -447,4 +448,22 @@ export function getOuterHTML (el) {
     container.appendChild(el.cloneNode(true))
     return container.innerHTML
   }
+}
+
+/**
+ * Find a vm from a fragment.
+ *
+ * @param {Fragment} frag
+ * @return {Vue|undefined}
+ */
+
+export function findVmFromFrag (frag) {
+  let node = frag.node
+  // handle multi-node frag
+  if (frag.end) {
+    while (!node.__vue__ && node !== frag.end && node.nextSibling) {
+      node = node.nextSibling
+    }
+  }
+  return node.__vue__
 }
