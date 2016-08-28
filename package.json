@@ -17,14 +17,14 @@
     "build": "node build/build.js",
     "build:ssr": "npm run build -- vue.common.js,vue-server-renderer",
     "test": "npm run lint && flow check && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr",
-    "test:unit": "NODE_ENV=development karma start build/karma.unit.config.js",
-    "test:cover": "NODE_ENV=development karma start build/karma.cover.config.js",
+    "test:unit": "karma start build/karma.unit.config.js",
+    "test:cover": "karma start build/karma.cover.config.js",
     "test:e2e": "npm run build -- vue.js && node test/e2e/runner.js",
-    "test:ssr": "npm run build:ssr && NODE_ENV=development VUE_ENV=server jasmine JASMINE_CONFIG_PATH=test/ssr/jasmine.json",
+    "test:ssr": "npm run build:ssr && VUE_ENV=server jasmine JASMINE_CONFIG_PATH=test/ssr/jasmine.json",
     "test:sauce": "npm run sauce -- 0 && npm run sauce -- 1 && npm run sauce -- 2",
     "lint": "eslint src build test",
     "flow": "flow check",
-    "sauce": "NODE_ENV=development SAUCE=true karma start build/karma.sauce.config.js",
+    "sauce": "SAUCE=true karma start build/karma.sauce.config.js",
     "bench:ssr": "npm run build:ssr && NODE_ENV=production VUE_ENV=server node benchmarks/ssr/renderToString.js && NODE_ENV=production VUE_ENV=server node benchmarks/ssr/renderToStream.js",
     "release": "bash build/release.sh"
   },
@@ -47,7 +47,6 @@
     "babel-loader": "^6.2.4",
     "babel-plugin-coverage": "^1.0.0",
     "babel-preset-es2015": "^6.9.0",
-    "babel-preset-es2015-rollup-vue": "^1.1.0",
     "babel-preset-flow-vue": "^1.0.0",
     "buble": "^0.13.1",
     "chromedriver": "^2.21.2",
@@ -87,6 +86,6 @@
     "rollup-watch": "^2.5.0",
     "selenium-server": "2.53.0",
     "uglify-js": "^2.6.2",
-    "webpack": "^1.13.1"
+    "webpack": "^1.13.2"
   }
 }
