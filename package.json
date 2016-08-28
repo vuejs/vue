@@ -10,10 +10,10 @@
     "src"
   ],
   "scripts": {
-    "dev": "TARGET=web-standalone-dev rollup --w --c build/config.js",
+    "dev": "TARGET=web-standalone-dev rollup -w -c build/config.js",
     "dev:test": "karma start build/karma.dev.config.js",
-    "dev:ssr": "TARGET=web-server-renderer rollup --w --c build/config.js",
-    "dev:compiler": "TARGET=web-compiler rollup --w --c build/config.js",
+    "dev:ssr": "TARGET=web-server-renderer rollup -w -c build/config.js",
+    "dev:compiler": "TARGET=web-compiler rollup -w -c build/config.js",
     "build": "node build/build.js",
     "build:ssr": "npm run build -- vue.common.js,vue-server-renderer",
     "test": "npm run lint && flow check && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr",
