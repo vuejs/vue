@@ -74,13 +74,13 @@ export function createRenderFunction (
         const key = name + '::' + getKey(node.componentOptions.propsData)
         if (has) {
           has(key, hit => {
-            if (hit) {
+            if (hit && get) {
               get(key, res => write(res, next))
             } else {
               renderComponentWithCache(node, write, next, isRoot, cache, key)
             }
           })
-        } else {
+        } else if (get) {
           get(key, res => {
             if (res) {
               write(res, next)

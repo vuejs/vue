@@ -71,7 +71,7 @@ function genElement (el: ASTElement): string {
   }
 }
 
-function genIf (el: ASTElement): string {
+function genIf (el: any): string {
   const exp = el.if
   el.ifProcessed = true // avoid recursion
   return `(${exp})?${genElement(el)}:${genElse(el)}`
@@ -83,7 +83,7 @@ function genElse (el: ASTElement): string {
     : '_e()'
 }
 
-function genFor (el: ASTElement): string {
+function genFor (el: any): string {
   const exp = el.for
   const alias = el.alias
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
@@ -228,7 +228,7 @@ function genSlot (el: ASTElement): string {
     : slot
 }
 
-function genComponent (el: ASTElement): string {
+function genComponent (el: any): string {
   const children = genChildren(el)
   return `_h(${el.component},${genData(el)}${
     children ? `,${children}` : ''

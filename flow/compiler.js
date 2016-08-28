@@ -53,7 +53,7 @@ declare type ASTElementHooks = { [key: string]: Array<string> }
 
 declare type ASTDirective = {
   name: string;
-  value: ?string;
+  value: string;
   arg: ?string;
   modifiers: ?{ [key: string]: true };
 }

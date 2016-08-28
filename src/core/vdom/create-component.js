@@ -27,7 +27,7 @@ export function createComponent (
 
   if (typeof Ctor !== 'function') {
     if (process.env.NODE_ENV !== 'production') {
-      warn(`Invalid Component definition: ${Ctor}`, context)
+      warn(`Invalid Component definition: ${String(Ctor)}`, context)
     }
     return
   }
@@ -208,7 +208,7 @@ function resolveAsyncComponent (
       // reject
       reason => {
         process.env.NODE_ENV !== 'production' && warn(
-          `Failed to resolve async component: ${factory}` +
+          `Failed to resolve async component: ${String(factory)}` +
           (reason ? `\nReason: ${reason}` : '')
         )
       }

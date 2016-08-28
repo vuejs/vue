@@ -46,7 +46,7 @@ export function setTextContent (node: Node, text: string) {
   node.textContent = text
 }
 
-export function childNodes (node: Node): NodeList {
+export function childNodes (node: Node): NodeList<Node> {
   return node.childNodes
 }
 
