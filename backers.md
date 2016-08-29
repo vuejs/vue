@@ -4,9 +4,7 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 ### $2000
 
-<a href="https://strikingly.com/s/careers?utm_source=v">
-  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/strikingly.png">
-</a>
+[Currently vacant. It could be you!](https://www.patreon.com/bePatron?u=2341390&patAmt=2000.0&exp=1&rid=473784)
 
 ---
 
@@ -38,6 +36,14 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 <a href="http://gold.xitu.io/?utm_source=vuejs&utm_medium=image&utm_content=juejin&utm_campaign=q3_website">
   <img width="180px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/juejin.png">
+</a>
+
+<a href="http://monterail.com/" target="_blank">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
+</a>
+
+<a href="https://www.trisoft.ro/" target="_blank">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/trisoft.png">
 </a>
 
 ---
@@ -148,3 +154,14 @@ It could be you!
 - Bruce Li
 - Mohammed
 - Sam Wainwright
+- TJ Hillard
+- Kyle Arrington
+- Jason Land
+- Miljan Aleksic
+- James Ye
+- Laurids Duellmann
+- Christo Crampton
+- Adon Metcalfe
+- Paul Straw
+- Jake Ingman
+- Eduardo Camillo
