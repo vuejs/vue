@@ -6,6 +6,8 @@
 import { warn } from 'core/util/index'
 import { isAndroid, isIE9 } from 'web/util/index'
 
+const modelableTagRE = /^input|select|textarea|vue-component-[0-9]+(-[0-9a-zA-Z_\-]*)?$/
+
 /* istanbul ignore if */
 if (isIE9) {
   // http://www.matts411.com/post/internet-explorer-9-oninput/
@@ -20,7 +22,7 @@ if (isIE9) {
 export default {
   bind (el, binding, vnode) {
     if (process.env.NODE_ENV !== 'production') {
-      if (!vnode.tag.match(/input|select|textarea/)) {
+      if (!modelableTagRE.test(vnode.tag)) {
         warn(
           `v-model is not supported on element type: <${vnode.tag}>. ` +
           'If you are working with contenteditable, it\'s recommended to ' +
@@ -30,7 +32,7 @@ export default {
       }
     }
     if (vnode.tag === 'select') {
-      setSelected(el, binding.value)
+      setSelected(el, binding, vnode.context)
     } else {
       if (!isAndroid) {
         el.addEventListener('compositionstart', onCompositionStart)
@@ -42,17 +44,16 @@ export default {
       }
     }
   },
-  postupdate (el, binding, vnode) {
-    const val = binding.value
+  componentUpdated (el, binding, vnode) {
     if (vnode.tag === 'select') {
-      setSelected(el, val)
+      setSelected(el, binding, vnode.context)
       // in case the options rendered by v-for have changed,
       // it's possible that the value is out-of-sync with the rendered options.
       // detect such cases and filter out values that no longer has a matchig
       // option in the DOM.
       const needReset = el.multiple
-        ? val.some(v => hasNoMatchingOption(v, el.options))
-        : hasNoMatchingOption(val, el.options)
+        ? binding.value.some(v => hasNoMatchingOption(v, el.options))
+        : hasNoMatchingOption(binding.value, el.options)
       if (needReset) {
         trigger(el, 'change')
       }
@@ -60,21 +61,38 @@ export default {
   }
 }
 
-function setSelected (el, value) {
+function setSelected (el, binding, vm) {
+  const value = binding.value
   const isMultiple = el.multiple
-  if (!isMultiple) {
-    el.selectedIndex = -1
+  if (isMultiple && !Array.isArray(value)) {
+    process.env.NODE_ENV !== 'production' && warn(
+      `<select multiple v-model="${binding.expression}"> ` +
+      `expects an Array value for its binding, but got ${
+        Object.prototype.toString.call(value).slice(8, -1)
+      }`,
+      vm
+    )
+    return
   }
+  let selected, option
   for (let i = 0, l = el.options.length; i < l; i++) {
-    const option = el.options[i]
+    option = el.options[i]
     if (isMultiple) {
-      option.selected = value.indexOf(getValue(option)) > -1
+      selected = value.indexOf(getValue(option)) > -1
+      if (option.selected !== selected) {
+        option.selected = selected
+      }
     } else {
       if (getValue(option) === value) {
-        el.selectedIndex = i
-        break
+        if (el.selectedIndex !== i) {
+          el.selectedIndex = i
+        }
+        return
       }
     }
+  }
+  if (!isMultiple) {
+    el.selectedIndex = -1
   }
 }
 

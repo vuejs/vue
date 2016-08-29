@@ -1,21 +1,31 @@
 /* @flow */
 
 import { resolveAsset } from 'core/util/options'
+import { mergeVNodeHook } from 'core/vdom/helpers'
 
 export default {
   create: function bindDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-    applyDirectives(oldVnode, vnode, 'bind')
+    mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
+      applyDirectives(oldVnode, vnode, 'bind')
+    })
   },
   update: function updateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     applyDirectives(oldVnode, vnode, 'update')
+    // if old vnode has directives but new vnode doesn't
+    // we need to teardown the directives on the old one.
+    if (oldVnode.data.directives && !vnode.data.directives) {
+      applyDirectives(oldVnode, oldVnode, 'unbind')
+    }
   },
   postpatch: function postupdateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-    applyDirectives(oldVnode, vnode, 'postupdate')
+    applyDirectives(oldVnode, vnode, 'componentUpdated')
   },
   destroy: function unbindDirectives (vnode: VNodeWithData) {
     applyDirectives(vnode, vnode, 'unbind')
   }
 }
+
+const emptyModifiers = Object.create(null)
 
 function applyDirectives (
   oldVnode: VNodeWithData,
@@ -25,18 +35,17 @@ function applyDirectives (
   const dirs = vnode.data.directives
   if (dirs) {
     const oldDirs = oldVnode.data.directives
-    const isUpdate = hook === 'update'
+    const isUpdate = hook === 'update' || hook === 'componentUpdated'
     for (let i = 0; i < dirs.length; i++) {
       const dir = dirs[i]
       const def = resolveAsset(vnode.context.$options, 'directives', dir.name, true)
       const fn = def && def[hook]
       if (fn) {
-        // only call update if value has changed
         if (isUpdate && oldDirs) {
-          const oldValue = dir.oldValue = oldDirs[i].value
-          if (oldValue === dir.value) {
-            continue
-          }
+          dir.oldValue = oldDirs[i].value
+        }
+        if (!dir.modifiers) {
+          dir.modifiers = emptyModifiers
         }
         fn(vnode.elm, dir, vnode, oldVnode)
       }

@@ -9,12 +9,12 @@
     <!-- Firebase -->
     <script src="https://cdn.firebase.com/js/client/2.4.2/firebase.js"></script>
     <!-- VueFire -->
-    <script src="https://cdn.jsdelivr.net/vuefire/1.0.1/vuefire.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/vuefire/1.2.0/vuefire.min.js"></script>
   </head>
   <body>
     <div id="app">
-      <ul>
-        <li class="user" v-for="user in users" transition>
+      <ul is="transition-group">
+        <li v-for="user in users" class="user" :key="user['.key']">
           <span>{{user.name}} - {{user.email}}</span>
           <button v-on:click="removeUser(user)">X</button>
         </li>

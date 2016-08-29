@@ -4,20 +4,30 @@ import Watcher from '../observer/watcher'
 import { emptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { warn, validateProp, remove, noop } from '../util/index'
+import { resolveSlots } from './render'
+
+export let activeInstance: any = null
 
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
-  vm.$parent = options.parent
-  vm.$root = vm.$parent ? vm.$parent.$root : vm
-  if (vm.$parent) {
-    vm.$parent.$children.push(vm)
+  // locate first non-abstract parent
+  let parent = options.parent
+  if (parent && !options.abstract) {
+    while (parent.$options.abstract && parent.$parent) {
+      parent = parent.$parent
+    }
+    parent.$children.push(vm)
   }
+
+  vm.$parent = parent
+  vm.$root = parent ? parent.$root : vm
 
   vm.$children = []
   vm.$refs = {}
 
   vm._watcher = null
+  vm._inactive = false
   vm._isMounted = false
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
@@ -31,7 +41,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const vm: Component = this
     vm.$el = el
     if (!vm.$options.render) {
-      vm.$options.render = () => emptyVNode
+      vm.$options.render = emptyVNode
       if (process.env.NODE_ENV !== 'production') {
         /* istanbul ignore if */
         if (vm.$options.template) {
@@ -54,10 +64,10 @@ export function lifecycleMixin (Vue: Class<Component>) {
       vm._update(vm._render(), hydrating)
     }, noop)
     hydrating = false
-    vm._isMounted = true
     // root instance, call mounted on self
     // mounted is called for child components in its inserted hook
     if (vm.$root === vm) {
+      vm._isMounted = true
       callHook(vm, 'mounted')
     }
     return vm
@@ -68,23 +78,29 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm._isMounted) {
       callHook(vm, 'beforeUpdate')
     }
-    if (!vm._vnode) {
+    const prevEl = vm.$el
+    const prevActiveInstance = activeInstance
+    activeInstance = vm
+    const prevVnode = vm._vnode
+    vm._vnode = vnode
+    if (!prevVnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating)
     } else {
-      vm.$el = vm.__patch__(vm._vnode, vnode)
+      vm.$el = vm.__patch__(prevVnode, vnode)
     }
-    vm._vnode = vnode
-    // update parent vnode element after patch
-    const parentNode = vm.$options._parentVnode
-    if (parentNode) {
-      parentNode.elm = vm.$el
-      // update parent $el if the parent is HOC
-      // this is necessary because child is updated after parent
-      if (vm.$parent && parentNode === vm.$parent._vnode) {
-        vm.$parent.$el = vm.$el
-      }
+    activeInstance = prevActiveInstance
+    // update __vue__ reference
+    if (prevEl) {
+      prevEl.__vue__ = null
+    }
+    if (vm.$el) {
+      vm.$el.__vue__ = vm
+    }
+    // if parent is an HOC, update its $el as well
+    if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
+      vm.$parent.$el = vm.$el
     }
     if (vm._isMounted) {
       callHook(vm, 'updated')
@@ -98,6 +114,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     renderChildren: ?VNodeChildren
   ) {
     const vm: Component = this
+    const hasChildren = !!(vm.$options._renderChildren || renderChildren)
     vm.$options._parentVnode = parentVnode
     vm.$options._renderChildren = renderChildren
     // update props
@@ -109,7 +126,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       const propKeys = vm.$options._propKeys || []
       for (let i = 0; i < propKeys.length; i++) {
         const key = propKeys[i]
-        vm[key] = validateProp(vm, key, propsData)
+        vm[key] = validateProp(key, vm.$options.props, propsData, vm)
       }
       observerState.shouldConvert = true
       if (process.env.NODE_ENV !== 'production') {
@@ -122,17 +139,17 @@ export function lifecycleMixin (Vue: Class<Component>) {
       vm.$options._parentListeners = listeners
       vm._updateListeners(listeners, oldListeners)
     }
+    // resolve slots + force update if has children
+    if (hasChildren) {
+      vm.$slots = resolveSlots(renderChildren)
+      vm.$forceUpdate()
+    }
   }
 
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
     if (vm._watcher) {
       vm._watcher.update()
-    }
-    if (vm._watchers.length) {
-      for (let i = 0; i < vm._watchers.length; i++) {
-        vm._watchers[i].update(true /* shallow */)
-      }
     }
   }
 
@@ -145,7 +162,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     vm._isBeingDestroyed = true
     // remove self from parent
     const parent = vm.$parent
-    if (parent && !parent._isBeingDestroyed) {
+    if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm)
     }
     // teardown watchers
@@ -166,11 +183,14 @@ export function lifecycleMixin (Vue: Class<Component>) {
     callHook(vm, 'destroyed')
     // turn off all instance listeners.
     vm.$off()
+    // remove __vue__ reference
+    if (vm.$el) {
+      vm.$el.__vue__ = null
+    }
   }
 }
 
 export function callHook (vm: Component, hook: string) {
-  vm.$emit('pre-hook:' + hook)
   const handlers = vm.$options[hook]
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {

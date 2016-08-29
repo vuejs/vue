@@ -93,6 +93,51 @@ describe('Directive v-bind:class', () => {
     }).then(done)
   })
 
+  it('class merge between multiple nested components sharing same element', done => {
+    const vm = new Vue({
+      template: `
+        <component1 :class="componentClass1">
+          <component2 :class="componentClass2">
+            <component3 :class="componentClass3">
+              some text
+            </component3>
+          </component2>
+        </component1>
+      `,
+      data: {
+        componentClass1: 'componentClass1',
+        componentClass2: 'componentClass2',
+        componentClass3: 'componentClass3'
+      },
+      components: {
+        component1: {
+          render () {
+            return this.$slots.default[0]
+          }
+        },
+        component2: {
+          render () {
+            return this.$slots.default[0]
+          }
+        },
+        component3: {
+          template: '<div class="staticClass"><slot></slot></div>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.className).toBe('staticClass componentClass3 componentClass2 componentClass1')
+    vm.componentClass1 = 'c1'
+    waitForUpdate(() => {
+      expect(vm.$el.className).toBe('staticClass componentClass3 componentClass2 c1')
+      vm.componentClass2 = 'c2'
+    }).then(() => {
+      expect(vm.$el.className).toBe('staticClass componentClass3 c2 c1')
+      vm.componentClass3 = 'c3'
+    }).then(() => {
+      expect(vm.$el.className).toBe('staticClass c3 c2 c1')
+    }).then(done)
+  })
+
   it('deep update', done => {
     const vm = new Vue({
       template: '<div :class="test"></div>',
@@ -104,6 +149,27 @@ describe('Directive v-bind:class', () => {
     vm.test.b = true
     waitForUpdate(() => {
       expect(vm.$el.className).toBe('a b')
+    }).then(done)
+  })
+
+  // a vdom patch edge case where the user has several un-keyed elements of the
+  // same tag next to each other, and toggling them.
+  it('properly remove staticClass for toggling un-keyed children', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <div v-if="ok" class="a"></div>
+          <div v-if="!ok"></div>
+        </div>
+      `,
+      data: {
+        ok: true
+      }
+    }).$mount()
+    expect(vm.$el.children[0].className).toBe('a')
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].className).toBe('')
     }).then(done)
   })
 })

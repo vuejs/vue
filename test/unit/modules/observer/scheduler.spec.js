@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import config from 'core/config'
 import { queueWatcher } from 'core/observer/scheduler'
 
@@ -30,7 +31,7 @@ describe('Scheduler', () => {
     }).then(done)
   })
 
-  it('allow diplicate when flushing', done => {
+  it('allow duplicate when flushing', done => {
     const job = {
       id: 1,
       run: spy
@@ -45,31 +46,60 @@ describe('Scheduler', () => {
     }).then(done)
   })
 
-  it('calls user watchers after directive updates', done => {
-    const vals = []
-    function run () {
-      vals.push(this.id)
-    }
-    queueWatcher({
-      id: 2,
-      user: true,
-      run () {
-        run.call(this)
-        // user watcher triggering another directive update!
-        queueWatcher({
-          id: 3,
-          run: run
-        })
+  it('call user watchers before component re-render', done => {
+    const calls = []
+    const vm = new Vue({
+      data: {
+        a: 1
+      },
+      template: '<div>{{ a }}</div>',
+      watch: {
+        a () { calls.push(1) }
+      },
+      beforeUpdate () {
+        calls.push(2)
       }
-    })
-    queueWatcher({
-      id: 1,
-      run: run
-    })
+    }).$mount()
+    vm.a = 2
     waitForUpdate(() => {
-      expect(vals[0]).toBe(1)
-      expect(vals[1]).toBe(2)
-      expect(vals[2]).toBe(3)
+      expect(calls).toEqual([1, 2])
+    }).then(done)
+  })
+
+  it('call user watcher triggered by component re-render immediately', done => {
+    // this happens when a component re-render updates the props of a child
+    const calls = []
+    const vm = new Vue({
+      data: {
+        a: 1
+      },
+      watch: {
+        a () {
+          calls.push(1)
+        }
+      },
+      beforeUpdate () {
+        calls.push(2)
+      },
+      template: '<div><test :a="a"></test></div>',
+      components: {
+        test: {
+          props: ['a'],
+          template: '<div>{{ a }}</div>',
+          watch: {
+            a () {
+              calls.push(3)
+            }
+          },
+          beforeUpdate () {
+            calls.push(4)
+          }
+        }
+      }
+    }).$mount()
+    vm.a = 2
+    waitForUpdate(() => {
+      expect(calls).toEqual([1, 2, 3, 4])
     }).then(done)
   })
 
@@ -106,7 +136,7 @@ describe('Scheduler', () => {
       }
     })
     waitForUpdate(() => {
-      expect(callOrder.join()).toBe('1,2,3')
+      expect(callOrder).toEqual([1, 2, 3])
     }).then(done)
   })
 })

@@ -1,0 +1,25 @@
+{
+  "name": "vue-server-renderer",
+  "version": "2.0.0-rc.3",
+  "description": "server renderer for Vue 2.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vuejs/vue.git"
+  },
+  "keywords": [
+    "vue",
+    "server",
+    "ssr"
+  ],
+  "author": "Evan You",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vuejs/vue/issues"
+  },
+  "dependencies": {
+    "entities": "^1.1.1",
+    "de-indent": "^1.0.2"
+  },
+  "homepage": "https://github.com/vuejs/vue#readme"
+}

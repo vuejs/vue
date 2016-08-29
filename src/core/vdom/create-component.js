@@ -2,8 +2,10 @@
 
 import Vue from '../instance/index'
 import VNode from './vnode'
-import { callHook } from '../instance/lifecycle'
-import { warn, isObject, hasOwn, hyphenate } from '../util/index'
+import { normalizeChildren } from './helpers'
+import { activeInstance, callHook } from '../instance/lifecycle'
+import { resolveSlots } from '../instance/render'
+import { warn, isObject, hasOwn, hyphenate, validateProp } from '../util/index'
 
 const hooks = { init, prepatch, insert, destroy }
 const hooksToMerge = Object.keys(hooks)
@@ -11,19 +13,21 @@ const hooksToMerge = Object.keys(hooks)
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data?: VNodeData,
-  parent: Component,
   context: Component,
+  children?: VNodeChildren,
   tag?: string
 ): VNode | void {
   if (!Ctor) {
     return
   }
+
   if (isObject(Ctor)) {
     Ctor = Vue.extend(Ctor)
   }
+
   if (typeof Ctor !== 'function') {
     if (process.env.NODE_ENV !== 'production') {
-      warn(`Invalid Component definition: ${Ctor}`, parent)
+      warn(`Invalid Component definition: ${String(Ctor)}`, context)
     }
     return
   }
@@ -35,9 +39,8 @@ export function createComponent (
     } else {
       Ctor = resolveAsyncComponent(Ctor, () => {
         // it's ok to queue this on every render because
-        // $forceUpdate is buffered. this is only called
-        // if the
-        parent.$forceUpdate()
+        // $forceUpdate is buffered by the scheduler.
+        context.$forceUpdate()
       })
       if (!Ctor) {
         // return nothing if this is indeed an async component
@@ -49,38 +52,74 @@ export function createComponent (
 
   data = data || {}
 
-  // merge component management hooks onto the placeholder node
-  mergeHooks(data)
-
   // extract props
   const propsData = extractProps(data, Ctor)
+
+  // functional component
+  if (Ctor.options.functional) {
+    return createFunctionalComponent(Ctor, propsData, data, context, children)
+  }
 
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
   const listeners = data.on
-  if (listeners) {
-    delete data.on
+  // replace with listeners with .native modifier
+  data.on = data.nativeOn
+
+  if (Ctor.options.abstract) {
+    // abstract components do not keep anything
+    // other than props & listeners
+    data = {}
   }
+
+  // merge component management hooks onto the placeholder node
+  mergeHooks(data)
 
   // return a placeholder vnode
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, undefined, context,
-    { Ctor, propsData, listeners, parent, tag, children: undefined }
-    // children to be set later by renderElementWithChildren,
-    // but before the init hook
+    { Ctor, propsData, listeners, tag, children }
   )
   return vnode
 }
 
+function createFunctionalComponent (
+  Ctor: Class<Component>,
+  propsData: ?Object,
+  data: VNodeData,
+  context: Component,
+  children?: VNodeChildren
+): VNode | void {
+  const props = {}
+  const propOptions = Ctor.options.props
+  if (propOptions) {
+    for (const key in propOptions) {
+      props[key] = validateProp(key, propOptions, propsData)
+    }
+  }
+  return Ctor.options.render.call(
+    null,
+    context.$createElement,
+    {
+      props,
+      data,
+      parent: context,
+      children: normalizeChildren(children),
+      slots: () => resolveSlots(children)
+    }
+  )
+}
+
 export function createComponentInstanceForVnode (
-  vnode: any // we know it's MountedComponentVNode but flow doesn't
+  vnode: any, // we know it's MountedComponentVNode but flow doesn't
+  parent: any // activeInstance in lifecycle state
 ): Component {
   const vnodeComponentOptions = vnode.componentOptions
   const options: InternalComponentOptions = {
     _isComponent: true,
-    parent: vnodeComponentOptions.parent,
+    parent,
     propsData: vnodeComponentOptions.propsData,
     _componentTag: vnodeComponentOptions.tag,
     _parentVnode: vnode,
@@ -97,8 +136,10 @@ export function createComponentInstanceForVnode (
 }
 
 function init (vnode: VNodeWithData, hydrating: boolean) {
-  const child = vnode.child = createComponentInstanceForVnode(vnode)
-  child.$mount(hydrating ? vnode.elm : undefined, hydrating)
+  if (!vnode.child || vnode.child._isDestroyed) {
+    const child = vnode.child = createComponentInstanceForVnode(vnode, activeInstance)
+    child.$mount(hydrating ? vnode.elm : undefined, hydrating)
+  }
 }
 
 function prepatch (
@@ -106,8 +147,8 @@ function prepatch (
   vnode: MountedComponentVNode
 ) {
   const options = vnode.componentOptions
-  vnode.child = oldVnode.child
-  vnode.child._updateFromParent(
+  const child = vnode.child = oldVnode.child
+  child._updateFromParent(
     options.propsData, // updated props
     options.listeners, // updated listeners
     vnode, // new parent vnode
@@ -116,11 +157,25 @@ function prepatch (
 }
 
 function insert (vnode: MountedComponentVNode) {
-  callHook(vnode.child, 'mounted')
+  if (!vnode.child._isMounted) {
+    vnode.child._isMounted = true
+    callHook(vnode.child, 'mounted')
+  }
+  if (vnode.data.keepAlive) {
+    vnode.child._inactive = false
+    callHook(vnode.child, 'activated')
+  }
 }
 
 function destroy (vnode: MountedComponentVNode) {
-  vnode.child.$destroy()
+  if (!vnode.child._isDestroyed) {
+    if (!vnode.data.keepAlive) {
+      vnode.child.$destroy()
+    } else {
+      vnode.child._inactive = true
+      callHook(vnode.child, 'deactivated')
+    }
+  }
 }
 
 function resolveAsyncComponent (
@@ -134,30 +189,36 @@ function resolveAsyncComponent (
     factory.requested = true
     const cbs = factory.pendingCallbacks = [cb]
     let sync = true
-    factory(
-      // resolve
-      (res: Object | Class<Component>) => {
-        if (isObject(res)) {
-          res = Vue.extend(res)
-        }
-        // cache resolved
-        factory.resolved = res
-        // invoke callbacks only if this is not a synchronous resolve
-        // (async resolves are shimmed as synchronous during SSR)
-        if (!sync) {
-          for (let i = 0, l = cbs.length; i < l; i++) {
-            cbs[i](res)
-          }
-        }
-      },
-      // reject
-      reason => {
-        process.env.NODE_ENV !== 'production' && warn(
-          `Failed to resolve async component: ${factory}` +
-          (reason ? `\nReason: ${reason}` : '')
-        )
+
+    const resolve = (res: Object | Class<Component>) => {
+      if (isObject(res)) {
+        res = Vue.extend(res)
       }
-    )
+      // cache resolved
+      factory.resolved = res
+      // invoke callbacks only if this is not a synchronous resolve
+      // (async resolves are shimmed as synchronous during SSR)
+      if (!sync) {
+        for (let i = 0, l = cbs.length; i < l; i++) {
+          cbs[i](res)
+        }
+      }
+    }
+
+    const reject = reason => {
+      process.env.NODE_ENV !== 'production' && warn(
+        `Failed to resolve async component: ${String(factory)}` +
+        (reason ? `\nReason: ${reason}` : '')
+      )
+    }
+
+    const res = factory(resolve, reject)
+
+    // handle promise
+    if (res && typeof res.then === 'function' && !factory.resolved) {
+      res.then(resolve, reject)
+    }
+
     sync = false
     // return in case resolved synchronously
     return factory.resolved
@@ -173,17 +234,14 @@ function extractProps (data: VNodeData, Ctor: Class<Component>): ?Object {
     return
   }
   const res = {}
-  const attrs = data.attrs
-  const props = data.props
-  const staticAttrs = data.staticAttrs
-  if (!attrs && !props && !staticAttrs) {
-    return res
-  }
-  for (const key in propOptions) {
-    const altKey = hyphenate(key)
-    checkProp(res, attrs, key, altKey) ||
-    checkProp(res, props, key, altKey) ||
-    checkProp(res, staticAttrs, key, altKey)
+  const { attrs, props, domProps } = data
+  if (attrs || props || domProps) {
+    for (const key in propOptions) {
+      const altKey = hyphenate(key)
+      checkProp(res, props, key, altKey, true) ||
+      checkProp(res, attrs, key, altKey) ||
+      checkProp(res, domProps, key, altKey)
+    }
   }
   return res
 }
@@ -192,16 +250,21 @@ function checkProp (
   res: Object,
   hash: ?Object,
   key: string,
-  altKey: string
+  altKey: string,
+  preserve?: boolean
 ): boolean {
   if (hash) {
     if (hasOwn(hash, key)) {
       res[key] = hash[key]
-      delete hash[key]
+      if (!preserve) {
+        delete hash[key]
+      }
       return true
     } else if (hasOwn(hash, altKey)) {
       res[key] = hash[altKey]
-      delete hash[altKey]
+      if (!preserve) {
+        delete hash[altKey]
+      }
       return true
     }
   }
@@ -209,15 +272,14 @@ function checkProp (
 }
 
 function mergeHooks (data: VNodeData) {
-  if (data.hook) {
-    for (let i = 0; i < hooksToMerge.length; i++) {
-      const key = hooksToMerge[i]
-      const fromParent = data.hook[key]
-      const ours = hooks[key]
-      data.hook[key] = fromParent ? mergeHook(ours, fromParent) : ours
-    }
-  } else {
-    data.hook = hooks
+  if (!data.hook) {
+    data.hook = {}
+  }
+  for (let i = 0; i < hooksToMerge.length; i++) {
+    const key = hooksToMerge[i]
+    const fromParent = data.hook[key]
+    const ours = hooks[key]
+    data.hook[key] = fromParent ? mergeHook(ours, fromParent) : ours
   }
 }
 

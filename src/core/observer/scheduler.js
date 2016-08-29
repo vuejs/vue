@@ -4,68 +4,49 @@ import type Watcher from './watcher'
 import config from '../config'
 import {
   warn,
-  nextTick
+  nextTick,
+  devtools
 } from '../util/index'
 
-// we have two separate queues: one for directive updates
-// and one for user watcher registered via $watch().
-// we want to guarantee directive updates to be called
-// before user watchers so that when user watchers are
-// triggered, the DOM would have already been in updated
-// state.
-
 const queue: Array<Watcher> = []
-const userQueue: Array<Watcher> = []
 let has: { [key: number]: ?true } = {}
 let circular: { [key: number]: number } = {}
 let waiting = false
+let flushing = false
+let index = 0
 
 /**
  * Reset the scheduler's state.
  */
 function resetSchedulerState () {
   queue.length = 0
-  userQueue.length = 0
   has = {}
   if (process.env.NODE_ENV !== 'production') {
     circular = {}
   }
-  waiting = false
+  waiting = flushing = false
 }
 
 /**
  * Flush both queues and run the watchers.
  */
 function flushSchedulerQueue () {
-  runSchedulerQueue(queue.sort(queueSorter))
-  runSchedulerQueue(userQueue)
-  // user watchers triggered more watchers,
-  // keep flushing until it depletes
-  if (queue.length) {
-    return flushSchedulerQueue()
-  }
-  resetSchedulerState()
-}
+  flushing = true
 
-/**
- * Sort queue before flush.
- * This ensures components are updated from parent to child
- * so there will be no duplicate updates, e.g. a child was
- * pushed into the queue first and then its parent's props
- * changed.
- */
-function queueSorter (a: Watcher, b: Watcher) {
-  return a.id - b.id
-}
+  // Sort queue before flush.
+  // This ensures that:
+  // 1. Components are updated from parent to child. (because parent is always
+  //    created before the child)
+  // 2. A component's user watchers are run before its render watcher (because
+  //    user watchers are created before the render watcher)
+  // 3. If a component is destroyed during a parent component's watcher run,
+  //    its watchers can be skipped.
+  queue.sort((a, b) => a.id - b.id)
 
-/**
- * Run the watchers in a single queue.
- */
-function runSchedulerQueue (queue: Array<Watcher>) {
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
-  for (let i = 0; i < queue.length; i++) {
-    const watcher = queue[i]
+  for (index = 0; index < queue.length; index++) {
+    const watcher = queue[index]
     const id = watcher.id
     has[id] = null
     watcher.run()
@@ -74,15 +55,25 @@ function runSchedulerQueue (queue: Array<Watcher>) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > config._maxUpdateCount) {
         warn(
-          'You may have an infinite update loop for watcher ' +
-          'with expression "' + watcher.expression + '"',
+          'You may have an infinite update loop ' + (
+            watcher.user
+              ? `in watcher with expression "${watcher.expression}"`
+              : `in a component render function.`
+          ),
           watcher.vm
         )
         break
       }
     }
   }
-  queue.length = 0
+
+  // devtool hook
+  /* istanbul ignore if */
+  if (devtools && config.devtools) {
+    devtools.emit('flush')
+  }
+
+  resetSchedulerState()
 }
 
 /**
@@ -93,12 +84,18 @@ function runSchedulerQueue (queue: Array<Watcher>) {
 export function queueWatcher (watcher: Watcher) {
   const id = watcher.id
   if (has[id] == null) {
-    // push watcher into appropriate queue
-    const q = watcher.user
-      ? userQueue
-      : queue
     has[id] = true
-    q.push(watcher)
+    if (!flushing) {
+      queue.push(watcher)
+    } else {
+      // if already flushing, splice the watcher based on its id
+      // if already past its id, it will be run next immediately.
+      let i = queue.length - 1
+      while (i >= 0 && queue[i].id > watcher.id) {
+        i--
+      }
+      queue.splice(Math.max(i, index) + 1, 0, watcher)
+    }
     // queue the flush
     if (!waiting) {
       waiting = true

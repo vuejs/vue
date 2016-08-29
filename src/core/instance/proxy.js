@@ -8,7 +8,8 @@ if (process.env.NODE_ENV !== 'production') {
   const allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
-    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl'
+    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
+    'require' // for Webpack/Browserify
   )
 
   hasProxy =
@@ -18,15 +19,16 @@ if (process.env.NODE_ENV !== 'production') {
   proxyHandlers = {
     has (target, key) {
       const has = key in target
-      const isAllowedGlobal = allowedGlobals(key)
-      if (!has && !isAllowedGlobal) {
+      const isAllowed = allowedGlobals(key) || key.charAt(0) === '_'
+      if (!has && !isAllowed) {
         warn(
-          `Trying to access non-existent property "${key}" while rendering. ` +
-          `Make sure to declare reactive data properties in the data option.`,
+          `Property or method "${key}" is not defined on the instance but ` +
+          `referenced during render. Make sure to declare reactive data ` +
+          `properties in the data option.`,
           target
         )
       }
-      return !isAllowedGlobal
+      return has || !isAllowed
     }
   }
 

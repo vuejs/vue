@@ -1,9 +1,6 @@
 import Vue from '../../dist/vue.common.js'
-import { compileToFunctions } from '../../dist/compiler.js'
-import createRenderer from '../../dist/server-renderer.js'
+import { createRenderer } from '../../packages/vue-server-renderer'
 const { renderToString } = createRenderer()
-
-// TODO: test custom server-side directives
 
 describe('SSR: renderToString', () => {
   it('static attributes', done => {
@@ -75,15 +72,53 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('dynamic string style', done => {
+    renderVmWithOptions({
+      template: '<div :style="style"></div>',
+      data: {
+        style: 'color:red'
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true" style="color:red"></div>'
+      )
+      done()
+    })
+  })
+
   it('text interpolation', done => {
     renderVmWithOptions({
       template: '<div>{{ foo }} side {{ bar }}</div>',
       data: {
         foo: 'server',
-        bar: 'rendering'
+        bar: '<span>rendering</span>'
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true">server side rendering</div>')
+      expect(result).toContain('<div server-rendered="true">server side &lt;span&gt;rendering&lt;&sol;span&gt;</div>')
+      done()
+    })
+  })
+
+  it('v-html', done => {
+    renderVmWithOptions({
+      template: '<div v-html="text"></div>',
+      data: {
+        text: '<span>foo</span>'
+      }
+    }, result => {
+      expect(result).toContain('<div server-rendered="true"><span>foo</span></div>')
+      done()
+    })
+  })
+
+  it('v-text', done => {
+    renderVmWithOptions({
+      template: '<div v-text="text"></div>',
+      data: {
+        text: '<span>foo</span>'
+      }
+    }, result => {
+      expect(result).toContain('<div server-rendered="true">&lt;span&gt;foo&lt;&sol;span&gt;</div>')
       done()
     })
   })
@@ -119,7 +154,7 @@ describe('SSR: renderToString', () => {
       data: {
         val: 'hi'
       },
-      init () {
+      beforeCreate () {
         expect(lifecycleCount++).toBe(1)
       },
       created () {
@@ -129,7 +164,7 @@ describe('SSR: renderToString', () => {
       },
       components: {
         test: {
-          init () {
+          beforeCreate () {
             expect(lifecycleCount++).toBe(3)
           },
           created () {
@@ -148,6 +183,29 @@ describe('SSR: renderToString', () => {
           '<span class="b">testAsync</span>' +
         '</div>'
       )
+      done()
+    })
+  })
+
+  it('computed properties', done => {
+    renderVmWithOptions({
+      template: '<div>{{ b }}</div>',
+      data: {
+        a: {
+          b: 1
+        }
+      },
+      computed: {
+        b () {
+          return this.a.b + 1
+        }
+      },
+      created () {
+        this.a.b = 2
+        expect(this.b).toBe(3)
+      }
+    }, result => {
+      expect(result).toContain('<div server-rendered="true">3</div>')
       done()
     })
   })
@@ -201,11 +259,13 @@ describe('SSR: renderToString', () => {
       `,
       components: {
         testAsync (resolve) {
-          const options = compileToFunctions(`
-            <span class="b">
-              <test-sub-async></test-sub-async>
-            </span>
-          `, { preserveWhitespace: false })
+          const options = {
+            template: `
+              <span class="b">
+                <test-sub-async></test-sub-async>
+              </span>
+            `
+          }
 
           options.components = {
             testSubAsync (resolve) {
@@ -260,12 +320,12 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<p class="hi">yoyo</p>' +
-          '<div id="ho" class="red"></div>' +
-          '<span>hi</span>' +
-          '<input value="hi">' +
-          '<img src="https://vuejs.org/images/logo.png">' +
-          '<div class="a">test</div>' +
+          '<p class="hi">yoyo</p> ' +
+          '<div id="ho" class="red"></div> ' +
+          '<span>hi</span> ' +
+          '<input value="hi"> ' +
+          '<img src="https://vuejs.org/images/logo.png"> ' +
+          '<div class="a">test</div> ' +
           '<span class="b">testAsync</span>' +
         '</div>'
       )
@@ -287,10 +347,10 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<span test="ok">hello</span>' +
-          '<span>hello</span>' +
-          '<span>hello</span>' +
-          '<span test="true">hello</span>' +
+          '<span test="ok">hello</span> ' +
+          '<span>hello</span> ' +
+          '<span>hello</span> ' +
+          '<span test="true">hello</span> ' +
           '<span test="0">hello</span>' +
         '</div>'
       )
@@ -313,11 +373,11 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<span draggable="true">hello</span>' +
-          '<span draggable="true">hello</span>' +
-          '<span draggable="false">hello</span>' +
-          '<span draggable="false">hello</span>' +
-          '<span draggable="true">hello</span>' +
+          '<span draggable="true">hello</span> ' +
+          '<span draggable="true">hello</span> ' +
+          '<span draggable="false">hello</span> ' +
+          '<span draggable="false">hello</span> ' +
+          '<span draggable="true">hello</span> ' +
           '<span draggable="false">hello</span>' +
         '</div>'
       )
@@ -338,9 +398,9 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<span disabled="disabled">hello</span>' +
-          '<span disabled="disabled">hello</span>' +
-          '<span>hello</span>' +
+          '<span disabled="disabled">hello</span> ' +
+          '<span disabled="disabled">hello</span> ' +
+          '<span>hello</span> ' +
           '<span disabled="disabled">hello</span>' +
         '</div>'
       )
@@ -351,11 +411,100 @@ describe('SSR: renderToString', () => {
   it('v-bind object', done => {
     renderVmWithOptions({
       data: {
-        test: { id: 'a', class: 'b', value: 'c' }
+        test: { id: 'a', class: ['a', 'b'], value: 'c' }
       },
       template: '<input v-bind="test">'
     }, result => {
-      expect(result).toContain('<input id="a" class="b" server-rendered="true" value="c">')
+      expect(result).toContain('<input id="a" server-rendered="true" value="c" class="a b">')
+      done()
+    })
+  })
+
+  it('custom directives', done => {
+    const renderer = createRenderer({
+      directives: {
+        'class-prefixer': (node, dir) => {
+          if (node.data.class) {
+            node.data.class = `${dir.value}-${node.data.class}`
+          }
+          if (node.data.staticClass) {
+            node.data.staticClass = `${dir.value}-${node.data.staticClass}`
+          }
+        }
+      }
+    })
+    renderer.renderToString(new Vue({
+      render () {
+        const h = this.$createElement
+        return h('p', {
+          class: 'class1',
+          staticClass: 'class2',
+          directives: [{
+            name: 'class-prefixer',
+            value: 'my'
+          }]
+        }, ['hello world'])
+      }
+    }), (err, result) => {
+      expect(err).toBeNull()
+      expect(result).toContain('<p server-rendered="true" class="my-class2 my-class1">hello world</p>')
+      done()
+    })
+  })
+
+  it('_scopeId', done => {
+    renderVmWithOptions({
+      _scopeId: '_v-parent',
+      template: '<div id="foo"><p><child></child></p></div>',
+      components: {
+        child: {
+          _scopeId: '_v-child',
+          render () {
+            const h = this.$createElement
+            return h('div', null, [h('span', null, ['foo'])])
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div id="foo" server-rendered="true" _v-parent>' +
+          '<p _v-parent>' +
+            '<div _v-child _v-parent><span _v-child>foo</span></div>' +
+          '</p>' +
+        '</div>'
+      )
+      done()
+    })
+  })
+
+  it('_scopeId on slot content', done => {
+    renderVmWithOptions({
+      _scopeId: '_v-parent',
+      template: '<div><child><p>foo</p></child></div>',
+      components: {
+        child: {
+          _scopeId: '_v-child',
+          render () {
+            const h = this.$createElement
+            return h('div', null, this.$slots.default)
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true" _v-parent>' +
+          '<div _v-child _v-parent><p _v-child _v-parent>foo</p></div>' +
+        '</div>'
+      )
+      done()
+    })
+  })
+
+  it('comment nodes', done => {
+    renderVmWithOptions({
+      template: '<div><transition><div v-if="false"></test></transition></div>'
+    }, result => {
+      expect(result).toContain(`<div server-rendered="true"><!----></div>`)
       done()
     })
   })
@@ -373,11 +522,6 @@ describe('SSR: renderToString', () => {
 })
 
 function renderVmWithOptions (options, cb) {
-  const res = compileToFunctions(options.template, {
-    preserveWhitespace: false
-  })
-  Object.assign(options, res)
-  delete options.template
   renderToString(new Vue(options), (err, res) => {
     expect(err).toBeNull()
     cb(res)

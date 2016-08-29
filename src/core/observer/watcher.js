@@ -1,7 +1,7 @@
 /* @flow */
 
 import config from '../config'
-import Dep from './dep'
+import Dep, { pushTarget, popTarget } from './dep'
 import { queueWatcher } from './scheduler'
 import {
   warn,
@@ -12,7 +12,6 @@ import {
 } from '../util/index'
 
 let uid = 0
-let prevTarget
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -27,6 +26,7 @@ export default class Watcher {
   deep: boolean;
   user: boolean;
   lazy: boolean;
+  sync: boolean;
   dirty: boolean;
   active: boolean;
   deps: Array<Dep>;
@@ -48,6 +48,7 @@ export default class Watcher {
     this.deep = !!options.deep
     this.user = !!options.user
     this.lazy = !!options.lazy
+    this.sync = !!options.sync
     this.expression = expOrFn.toString()
     this.cb = cb
     this.id = ++uid // uid for batching
@@ -65,7 +66,7 @@ export default class Watcher {
       if (!this.getter) {
         this.getter = function () {}
         process.env.NODE_ENV !== 'production' && warn(
-          'Failed watching path: ' + expOrFn +
+          `Failed watching path: "${expOrFn}" ` +
           'Watcher only accepts simple dot-delimited paths. ' +
           'For full control, use a function instead.',
           vm
@@ -81,48 +82,16 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
-    this.beforeGet()
-    let value: any
-    try {
-      value = this.getter.call(this.vm, this.vm)
-    } catch (e) {
-      if (process.env.NODE_ENV !== 'production') {
-        if (this.user) {
-          warn(
-            'Error when evaluating watcher with getter: ' + this.expression,
-            this.vm
-          )
-        } else {
-          warn(
-            'Error during component render',
-            this.vm
-          )
-        }
-        /* istanbul ignore else */
-        if (config.errorHandler) {
-          config.errorHandler.call(null, e, this.vm)
-        } else {
-          warn(e.stack)
-        }
-      }
-      // return old value when evaluation fails so the current UI is preserved
-      value = this.value
-    }
+    pushTarget(this)
+    const value = this.getter.call(this.vm, this.vm)
     // "touch" every property so they are all tracked as
     // dependencies for deep watching
     if (this.deep) {
       traverse(value)
     }
-    this.afterGet()
+    popTarget()
+    this.cleanupDeps()
     return value
-  }
-
-  /**
-   * Prepare for dependency collection.
-   */
-  beforeGet () {
-    prevTarget = Dep.target
-    Dep.target = this
   }
 
   /**
@@ -142,8 +111,7 @@ export default class Watcher {
   /**
    * Clean up for dependency collection.
    */
-  afterGet () {
-    Dep.target = prevTarget
+  cleanupDeps () {
     let i = this.deps.length
     while (i--) {
       const dep = this.deps[i]
@@ -166,8 +134,11 @@ export default class Watcher {
    * Will be called when a dependency changes.
    */
   update () {
+    /* istanbul ignore else */
     if (this.lazy) {
       this.dirty = true
+    } else if (this.sync) {
+      this.run()
     } else {
       queueWatcher(this)
     }
@@ -191,7 +162,24 @@ export default class Watcher {
         // set new value
         const oldValue = this.value
         this.value = value
-        this.cb.call(this.vm, value, oldValue)
+        if (this.user) {
+          try {
+            this.cb.call(this.vm, value, oldValue)
+          } catch (e) {
+            process.env.NODE_ENV !== 'production' && warn(
+              `Error in watcher "${this.expression}"`,
+              this.vm
+            )
+            /* istanbul ignore else */
+            if (config.errorHandler) {
+              config.errorHandler.call(null, e, this.vm)
+            } else {
+              throw e
+            }
+          }
+        } else {
+          this.cb.call(this.vm, value, oldValue)
+        }
       }
     }
   }
@@ -201,12 +189,8 @@ export default class Watcher {
    * This only gets called for lazy watchers.
    */
   evaluate () {
-    // avoid overwriting another watcher that is being
-    // collected.
-    const current = Dep.target
     this.value = this.get()
     this.dirty = false
-    Dep.target = current
   }
 
   /**
@@ -254,7 +238,7 @@ function traverse (val: any, seen?: Set) {
   }
   const isA = Array.isArray(val)
   const isO = isObject(val)
-  if (isA || isO) {
+  if ((isA || isO) && Object.isExtensible(val)) {
     if (val.__ob__) {
       const depId = val.__ob__.dep.id
       if (seen.has(depId)) {

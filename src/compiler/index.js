@@ -2,7 +2,7 @@
 
 import { parse } from './parser/index'
 import { optimize } from './optimizer'
-import { generate } from './codegen'
+import { generate } from './codegen/index'
 
 /**
  * Compile a template.
@@ -10,11 +10,13 @@ import { generate } from './codegen'
 export function compile (
   template: string,
   options: CompilerOptions
-): {
-  render: string,
-  staticRenderFns: Array<string>
-} {
+): CompiledResult {
   const ast = parse(template.trim(), options)
   optimize(ast, options)
-  return generate(ast, options)
+  const code = generate(ast, options)
+  return {
+    ast,
+    render: code.render,
+    staticRenderFns: code.staticRenderFns
+  }
 }

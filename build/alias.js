@@ -1,4 +1,4 @@
-var path = require('path')
+const path = require('path')
 
 module.exports = {
   vue: path.resolve(__dirname, '../src/entries/web-runtime-with-compiler'),
@@ -7,5 +7,6 @@ module.exports = {
   shared: path.resolve(__dirname, '../src/shared'),
   web: path.resolve(__dirname, '../src/platforms/web'),
   server: path.resolve(__dirname, '../src/server'),
-  entries: path.resolve(__dirname, '../src/entries')
+  entries: path.resolve(__dirname, '../src/entries'),
+  sfc: path.resolve(__dirname, '../src/sfc')
 }

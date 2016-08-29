@@ -3,12 +3,21 @@
 /**
  * Convert a value to a string that is actually rendered.
  */
-export function renderString (val: any): string {
+export function _toString (val: any): string {
   return val == null
     ? ''
     : typeof val === 'object'
       ? JSON.stringify(val, null, 2)
       : String(val)
+}
+
+/**
+ * Convert a input value to a number for persistence.
+ * If the conversion fails, return original string.
+ */
+export function toNumber (val: string): number | string {
+  const n = parseFloat(val, 10)
+  return (n || n === 0) ? n : val
 }
 
 /**
@@ -32,7 +41,7 @@ export function makeMap (
 /**
  * Check if a tag is a built-in tag.
  */
-export const isBuiltInTag = makeMap('slot,component,render,transition', true)
+export const isBuiltInTag = makeMap('slot,component', true)
 
 /**
  * Remove an item from an array
@@ -90,9 +99,10 @@ export const capitalize = cached((str: string): string => {
 /**
  * Hyphenate a camelCase string.
  */
-const hyphenateRE = /([a-z\d])([A-Z])/g
+const hyphenateRE = /([^-])([A-Z])/g
 export const hyphenate = cached((str: string): string => {
   return str
+    .replace(hyphenateRE, '$1-$2')
     .replace(hyphenateRE, '$1-$2')
     .toLowerCase()
 })
@@ -101,7 +111,7 @@ export const hyphenate = cached((str: string): string => {
  * Simple bind, faster than native
  */
 export function bind (fn: Function, ctx: Object): Function {
-  return function (a) {
+  function boundFn (a) {
     const l: number = arguments.length
     return l
       ? l > 1
@@ -109,6 +119,9 @@ export function bind (fn: Function, ctx: Object): Function {
         : fn.call(ctx, a)
       : fn.call(ctx)
   }
+  // record original fn length
+  boundFn._length = fn.length
+  return boundFn
 }
 
 /**

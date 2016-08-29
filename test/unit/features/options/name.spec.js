@@ -2,14 +2,14 @@ import Vue from 'vue'
 
 describe('Options name', () => {
   it('should warn when giving instance a name', () => {
+    const Comp = Vue.component('custom', { name: 'custom' })
+    new Comp()
+    expect(`options "name" can only be used as a component definition option`).not.toHaveBeenWarned()
+
     new Vue({
       name: 'SuperVue'
     }).$mount()
-
-    /* eslint-disable */
-    expect(`options "name" can only be used as a component definition option, not during instance creation.`)
-      .toHaveBeenWarned()
-    /* eslint-enable */
+    expect(`options "name" can only be used as a component definition option`).toHaveBeenWarned()
   })
 
   it('should contain itself in self components', () => {
@@ -39,13 +39,12 @@ describe('Options name', () => {
     expect(vm.options.components['Hyper*Vue']).toBeUndefined()
   })
 
-  it('id should override given name when using Vue.component', () => {
+  it('id should not override given name when using Vue.component', () => {
     const SuperComponent = Vue.component('super-component', {
       name: 'SuperVue'
     })
 
-    expect(SuperComponent.options.components['SuperVue']).toBeUndefined()
-    expect(SuperComponent.options.components['super-component']).toBeDefined()
+    expect(SuperComponent.options.components['SuperVue']).toEqual(SuperComponent)
     expect(SuperComponent.options.components['super-component']).toEqual(SuperComponent)
   })
 })

@@ -1,28 +1,28 @@
 /* @flow */
 
-import { no } from 'shared/util'
+import { no, noop } from 'shared/util'
 
 export type Config = {
-  preserveWhitespace: boolean,
-  optionMergeStrategies: { [key: string]: Function },
-  silent: boolean,
-  isReservedTag: (x?: string) => boolean,
-  isUnknownElement: (x?: string) => boolean,
-  mustUseProp: (x?: string) => boolean,
-  _assetTypes: Array<string>,
-  _lifecycleHooks: Array<string>,
-  _maxUpdateCount: number,
-  _isServer: boolean,
-  _ctors: Array<Function>
+  // user
+  optionMergeStrategies: { [key: string]: Function };
+  silent: boolean;
+  devtools: boolean;
+  errorHandler: ?Function;
+  ignoredElements: ?Array<string>;
+  keyCodes: { [key: string]: number };
+  // platform
+  isReservedTag: (x?: string) => boolean;
+  isUnknownElement: (x?: string) => boolean;
+  getTagNamespace: (x?: string) => string | void;
+  mustUseProp: (x?: string) => boolean;
+  // internal
+  _assetTypes: Array<string>;
+  _lifecycleHooks: Array<string>;
+  _maxUpdateCount: number;
+  _isServer: boolean;
 }
 
 const config: Config = {
-
-  /**
-   * Preserve whitespaces between elements.
-   */
-  preserveWhitespace: true,
-
   /**
    * Option merge strategies (used in core/util/options)
    */
@@ -34,9 +34,24 @@ const config: Config = {
   silent: false,
 
   /**
+   * Whether to enable devtools
+   */
+  devtools: process.env.NODE_ENV !== 'production',
+
+  /**
    * Error handler for watcher errors
    */
   errorHandler: null,
+
+  /**
+   * Ignore certain custom elements
+   */
+  ignoredElements: null,
+
+  /**
+   * Custom user key aliases for v-on
+   */
+  keyCodes: Object.create(null),
 
   /**
    * Check if a tag is reserved so that it cannot be registered as a
@@ -51,6 +66,11 @@ const config: Config = {
   isUnknownElement: no,
 
   /**
+   * Get the namespace of an element
+   */
+  getTagNamespace: noop,
+
+  /**
    * Check if an attribute must be bound using property, e.g. value
    * Platform-dependent.
    */
@@ -62,7 +82,6 @@ const config: Config = {
   _assetTypes: [
     'component',
     'directive',
-    'transition',
     'filter'
   ],
 
@@ -70,14 +89,16 @@ const config: Config = {
    * List of lifecycle hooks.
    */
   _lifecycleHooks: [
-    'init',
+    'beforeCreate',
     'created',
     'beforeMount',
     'mounted',
     'beforeUpdate',
     'updated',
     'beforeDestroy',
-    'destroyed'
+    'destroyed',
+    'activated',
+    'deactivated'
   ],
 
   /**
@@ -88,14 +109,7 @@ const config: Config = {
   /**
    * Server rendering?
    */
-  _isServer: process.env.VUE_ENV === 'server',
-
-  /**
-   * Keeping track of all extended Component constructors
-   * so that we can update them in the case of global mixins being applied
-   * after their creation.
-   */
-  _ctors: []
+  _isServer: process.env.VUE_ENV === 'server'
 }
 
 export default config

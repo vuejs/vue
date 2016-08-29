@@ -8,6 +8,7 @@ module.exports = {
       .assert.elementPresent('.modal-mask')
       .assert.elementPresent('.modal-wrapper')
       .assert.elementPresent('.modal-container')
+      .waitFor(50)
       .assert.cssClassPresent('.modal-mask', 'modal-enter-active')
       .waitFor(300)
       .assert.cssClassNotPresent('.modal-mask', 'modal-enter-active')

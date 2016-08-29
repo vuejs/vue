@@ -2,9 +2,10 @@ import Vue from 'vue'
 import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 
-describe('hydration', () => {
+describe('vdom patch: hydration', () => {
   let vnode0
   beforeEach(() => {
+    spyOn(console, 'warn')
     vnode0 = new VNode('p', { attrs: { id: '1' }}, [createTextVNode('hello world')])
     patch(null, vnode0)
   })
@@ -50,8 +51,8 @@ describe('hydration', () => {
     traverseAndAssert(vnode1, node0)
 
     // check update
-    const vnode2 = new VNode('div', { props: { id: 'foo' }}, [
-      new VNode('span', { props: { id: 'bar' }}),
+    const vnode2 = new VNode('div', { attrs: { id: 'foo' }}, [
+      new VNode('span', { attrs: { id: 'bar' }}),
       new VNode('div', { hook: { init }}, [
         new VNode('span', {}),
         new VNode('span', {})

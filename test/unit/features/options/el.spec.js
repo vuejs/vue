@@ -29,8 +29,7 @@ describe('Options el', () => {
     el.innerHTML = '<span>{{message}}</span>'
     const vm = new Vue({
       el,
-      render () {
-        const h = this.$createElement
+      render (h) {
         return h('p', { staticAttrs: { id: 'app' }}, [
           h('span', {}, [this.message])
         ])
@@ -43,7 +42,11 @@ describe('Options el', () => {
 
   it('svg element', () => {
     const parent = document.createElement('div')
-    parent.innerHTML = '<svg><text :x="x" :y="y" :fill="color">{{ text }}</text></svg>'
+    parent.innerHTML =
+      '<svg>' +
+        '<text :x="x" :y="y" :fill="color">{{ text }}</text>' +
+        '<g><clipPath><foo></foo></clipPath></g>' +
+      '</svg>'
     const vm = new Vue({
       el: parent.childNodes[0],
       data: {
@@ -58,6 +61,19 @@ describe('Options el', () => {
     expect(vm.$el.childNodes[0].getAttribute('y')).toBe(vm.y.toString())
     expect(vm.$el.childNodes[0].getAttribute('fill')).toBe(vm.color)
     expect(vm.$el.childNodes[0].textContent).toBe(vm.text)
+    // nested, non-explicitly listed SVG elements
+    expect(vm.$el.childNodes[1].childNodes[0].namespaceURI).toContain('svg')
+    expect(vm.$el.childNodes[1].childNodes[0].childNodes[0].namespaceURI).toContain('svg')
+  })
+
+  // https://w3c.github.io/DOM-Parsing/#dfn-serializing-an-attribute-value
+  it('properly decode attribute values when parsing templates from DOM', function () {
+    const el = document.createElement('div')
+    el.innerHTML = '<a href="/a?foo=bar&baz=qux" name="<abc>" single=\'"hi"\'></a>'
+    const vm = new Vue({ el })
+    expect(vm.$el.children[0].getAttribute('href')).toBe('/a?foo=bar&baz=qux')
+    expect(vm.$el.children[0].getAttribute('name')).toBe('<abc>')
+    expect(vm.$el.children[0].getAttribute('single')).toBe('"hi"')
   })
 
   it('warn cannot find element', () => {

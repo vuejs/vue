@@ -21,25 +21,20 @@ describe('Global API: mixin', () => {
   it('should work for constructors created before mixin is applied', () => {
     const calls = []
     const Test = Vue.extend({
-      init () {
+      name: 'test',
+      beforeCreate () {
         calls.push(this.$options.myOption + ' local')
       }
     })
     Vue.mixin({
-      init () {
+      beforeCreate () {
         calls.push(this.$options.myOption + ' global')
       }
     })
+    expect(Test.options.name).toBe('test')
     new Test({
       myOption: 'hello'
     })
     expect(calls).toEqual(['hello global', 'hello local'])
-  })
-
-  it('should allow releasing constructors', () => {
-    const Test = Vue.extend({})
-    expect(Vue.config._ctors.indexOf(Test) > -1).toBe(true)
-    Test.release()
-    expect(Vue.config._ctors.indexOf(Test) > -1).toBe(false)
   })
 })

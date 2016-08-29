@@ -1,7 +1,7 @@
 /* @flow */
 
 import config from '../config'
-import { warn, remove, mergeOptions } from '../util/index'
+import { warn, mergeOptions } from '../util/index'
 
 export function initExtend (Vue: GlobalAPI) {
   /**
@@ -54,12 +54,11 @@ export function initExtend (Vue: GlobalAPI) {
     if (name) {
       Sub.options.components[name] = Sub
     }
-    // book-keeping for global mixin edge cases. also expose a way to remove it
+    // keep a reference to the super options at extension time.
+    // later at instantiation we can check if Super's options have
+    // been updated.
+    Sub.superOptions = Super.options
     Sub.extendOptions = extendOptions
-    config._ctors.push(Sub)
-    Sub.release = () => {
-      remove(config._ctors, Sub)
-    }
     // cache constructor
     if (isFirstExtend) {
       extendOptions._Ctor = Sub

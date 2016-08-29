@@ -42,7 +42,7 @@ function shuffle (array) {
 const inner = prop('innerHTML')
 const tag = prop('tagName')
 
-describe('children', () => {
+describe('vdom patch: children', () => {
   let vnode0
   beforeEach(() => {
     vnode0 = new VNode('p', { attrs: { id: '1' }}, [createTextVNode('hello world')])
@@ -449,5 +449,63 @@ describe('children', () => {
     elm = patch(vnode1, vnode2)
     expect(map(tag, elm.children)).toEqual(['DIV', 'SPAN', 'SPAN', 'DIV'])
     expect(map(inner, elm.children)).toEqual(['four', 'three', 'two', 'one'])
+  })
+
+  it('should handle children with the same tag, same key, but one with data and one without data', () => {
+    const vnode1 = new VNode('div', {}, [
+      new VNode('div', { class: 'hi' }, undefined, 'one')
+    ])
+    const vnode2 = new VNode('div', {}, [
+      new VNode('div', undefined, undefined, 'four')
+    ])
+    let elm = patch(vnode0, vnode1)
+    const child1 = elm.children[0]
+    expect(child1.className).toBe('hi')
+    elm = patch(vnode1, vnode2)
+    const child2 = elm.children[0]
+    expect(child1).not.toBe(child2)
+    expect(child2.className).toBe('')
+  })
+
+  it('should handle static vnodes properly', function () {
+    function makeNode (text) {
+      return new VNode('div', undefined, [
+        new VNode(undefined, undefined, undefined, text)
+      ])
+    }
+    const b = makeNode('B')
+    b.isStatic = true
+    b.key = `__static__1`
+    const vnode1 = new VNode('div', {}, [makeNode('A'), b, makeNode('C')])
+    const vnode2 = new VNode('div', {}, [b])
+    const vnode3 = new VNode('div', {}, [makeNode('A'), b, makeNode('C')])
+
+    let elm = patch(vnode0, vnode1)
+    expect(elm.textContent).toBe('ABC')
+    elm = patch(vnode1, vnode2)
+    expect(elm.textContent).toBe('B')
+    elm = patch(vnode2, vnode3)
+    expect(elm.textContent).toBe('ABC')
+  })
+
+  it('should handle static vnodes inside ', function () {
+    function makeNode (text) {
+      return new VNode('div', undefined, [
+        new VNode(undefined, undefined, undefined, text)
+      ])
+    }
+    const b = makeNode('B')
+    b.isStatic = true
+    b.key = `__static__1`
+    const vnode1 = new VNode('div', {}, [makeNode('A'), b, makeNode('C')])
+    const vnode2 = new VNode('div', {}, [b])
+    const vnode3 = new VNode('div', {}, [makeNode('A'), b, makeNode('C')])
+
+    let elm = patch(vnode0, vnode1)
+    expect(elm.textContent).toBe('ABC')
+    elm = patch(vnode1, vnode2)
+    expect(elm.textContent).toBe('B')
+    elm = patch(vnode2, vnode3)
+    expect(elm.textContent).toBe('ABC')
   })
 })

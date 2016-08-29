@@ -6,13 +6,13 @@ describe('Options lifecyce hooks', () => {
     spy = jasmine.createSpy('hook')
   })
 
-  describe('init', () => {
+  describe('beforeCreate', () => {
     it('should allow modifying options', () => {
       const vm = new Vue({
         data: {
           a: 1
         },
-        init () {
+        beforeCreate () {
           spy()
           expect(this.a).toBeUndefined()
           this.$options.computed = {
@@ -78,20 +78,30 @@ describe('Options lifecyce hooks', () => {
     it('should mount child parent in correct order', () => {
       const calls = []
       new Vue({
-        template: '<test></test>',
+        template: '<div><test></test><div>',
         mounted () {
           calls.push('parent')
         },
         components: {
           test: {
-            template: '<div></div>',
+            template: '<nested></nested>',
             mounted () {
+              expect(this.$el.parentNode).toBeTruthy()
               calls.push('child')
+            },
+            components: {
+              nested: {
+                template: '<div></div>',
+                mounted () {
+                  expect(this.$el.parentNode).toBeTruthy()
+                  calls.push('nested')
+                }
+              }
             }
           }
         }
       }).$mount()
-      expect(calls).toEqual(['child', 'parent'])
+      expect(calls).toEqual(['nested', 'child', 'parent'])
     })
   })
 

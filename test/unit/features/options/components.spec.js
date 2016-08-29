@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { UA } from 'core/util/env'
 
 describe('Options components', () => {
   it('should accept plain object', () => {
@@ -74,10 +75,15 @@ describe('Options components', () => {
     expect('Do not use built-in or reserved HTML elements as component').toHaveBeenWarned()
   })
 
-  it('warn non-existent', () => {
-    new Vue({
-      template: '<test></test>'
-    }).$mount()
-    expect('Unknown custom element: <test>').toHaveBeenWarned()
-  })
+  // the HTMLUnknownElement check doesn't work in Android 4.2
+  // but since it doesn't support custom elements nor will any dev use it
+  // as their primary debugging browser, it doesn't really matter.
+  if (!(UA && /android 4\.2/.test(UA))) {
+    it('warn non-existent', () => {
+      new Vue({
+        template: '<test></test>'
+      }).$mount()
+      expect('Unknown custom element: <test>').toHaveBeenWarned()
+    })
+  }
 })
