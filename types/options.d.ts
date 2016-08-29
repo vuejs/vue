@@ -18,8 +18,10 @@ export interface ComponentOptions {
   render?(createElement: typeof Vue.prototype.$createElement): VNode;
   staticRenderFns?: (() => VNode)[];
 
-  init?(): void;
+  beforeCreate?(): void;
   created?(): void;
+  beforeDestroy?(): void;
+  destroyed?(): void;
   beforeMount?(): void;
   mounted?(): void;
   beforeUpdate?(): void;

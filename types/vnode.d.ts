@@ -46,7 +46,6 @@ export interface VNodeData {
   on?: { [key: string]: Function | Function[] };
   nativeOn?: { [key: string]: Function | Function[] };
   transition?: Object;
-  transitionInjected?: boolean;
   show?: boolean;
   inlineTemplate?: {
     render: Function;
@@ -57,10 +56,10 @@ export interface VNodeData {
 }
 
 export interface VNodeDirective {
-  name: string;
-  value: any;
-  oldValue: any;
-  expression: any;
-  arg: string;
-  modifiers: { [key: string]: boolean };
+  readonly name: string;
+  readonly value: any;
+  readonly oldValue: any;
+  readonly expression: any;
+  readonly arg: string;
+  readonly modifiers: { [key: string]: boolean };
 }

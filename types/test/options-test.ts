@@ -57,12 +57,44 @@ const Options: ComponentOptions = {
   el: "#app",
   template: "<div>{{ message }}</div>",
   render(createElement) {
-    return createElement("div", {}, this.message);
+    return createElement("div", {
+      attrs: {
+        id: "foo"
+      },
+      props: {
+        myProp: "bar"
+      },
+      domProps: {
+        innerHTML: "baz"
+      },
+      on: {
+        click: new Function
+      },
+      nativeOn: {
+        click: new Function
+      },
+      class: {
+        foo: true,
+        bar: false
+      },
+      style: {
+        color: 'red',
+        fontSize: '14px'
+      },
+      key: 'myKey',
+      ref: 'myRef'
+    }, [
+      createElement("div", {}, "message"),
+      "message",
+      [createElement("div", {}, "message")]
+    ]);
   },
   staticRenderFns: [],
 
-  init() {},
+  beforeCreate() {},
   created() {},
+  beforeDestroy() {},
+  destroyed() {},
   beforeMount() {},
   mounted() {},
   beforeUpdate() {},
@@ -77,6 +109,13 @@ const Options: ComponentOptions = {
     },
     b(el, binding, vnode, oldVnode) {
       el.textContent;
+
+      binding.name;
+      binding.value;
+      binding.oldValue;
+      binding.expression;
+      binding.arg;
+      binding.modifiers["modifier"];
     }
   },
   components: {
