@@ -12,10 +12,11 @@ export default class VNode {
   componentOptions: VNodeComponentOptions | void;
   child: Component | void; // component instance
   parent: VNode | void; // compoennt placeholder node
-  raw: ?boolean; // contains raw HTML? (server only)
-  isStatic: ?boolean; // hoisted static node
+  raw: boolean; // contains raw HTML? (server only)
+  isStatic: boolean; // hoisted static node
   isRootInsert: boolean; // necessary for enter transition check
-  isComment: boolean;
+  isComment: boolean; // empty comment placeholder?
+  isCloned: boolean; // is a cloned node?
 
   constructor (
     tag?: string,
@@ -42,6 +43,7 @@ export default class VNode {
     this.isStatic = false
     this.isRootInsert = true
     this.isComment = false
+    this.isCloned = false
     // apply construct hook.
     // this is applied during render, before patch happens.
     // unlike other hooks, this is applied on both client and server.
@@ -76,6 +78,7 @@ export function cloneVNode (vnode: VNode): VNode {
   )
   cloned.isStatic = vnode.isStatic
   cloned.key = vnode.key
+  cloned.isCloned = true
   return cloned
 }
 

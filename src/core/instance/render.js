@@ -102,7 +102,7 @@ export function renderMixin (Vue: Class<Component>) {
   ): VNode | Array<VNode> {
     let tree = this._staticTrees[index]
     // if has already-rendered static tree and not inside v-for,
-    // we can reuse the same tree by indentity.
+    // we can reuse the same tree by doing a shallow clone.
     if (tree && !isInFor) {
       return Array.isArray(tree)
         ? cloneVNodes(tree)
