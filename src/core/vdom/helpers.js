@@ -104,13 +104,15 @@ export function updateListeners (
         }
         add(event, cur.invoker, capture)
       }
-    } else if (Array.isArray(old)) {
-      old.length = cur.length
-      for (let i = 0; i < old.length; i++) old[i] = cur[i]
-      on[name] = old
-    } else {
-      old.fn = cur
-      on[name] = old
+    } else if (cur !== old) {
+      if (Array.isArray(old)) {
+        old.length = cur.length
+        for (let i = 0; i < old.length; i++) old[i] = cur[i]
+        on[name] = old
+      } else {
+        old.fn = cur
+        on[name] = old
+      }
     }
   }
   for (name in oldOn) {
