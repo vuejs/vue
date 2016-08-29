@@ -1040,7 +1040,7 @@
     }
     var ob = obj.__ob__;
     if (obj._isVue || ob && ob.vmCount) {
-      "development" !== 'production' && warn('Avoid adding reactive properties to a Vue instance or its root $data ' + 'at runtime - declare it upfront in the data option.');
+      "development" !== 'production' && warn('Avoid adding reactive properties to a Vue instance or its root $data ' + 'at runtime - delcare it upfront in the data option.');
       return;
     }
     if (!ob) {
