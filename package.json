@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "dev": "TARGET=web-standalone-dev rollup -w -c build/config.js",
+    "dev:runtime": "TARGET=web-runtime-dev rollup -w -c build/config.js",
     "dev:test": "karma start build/karma.dev.config.js",
     "dev:ssr": "TARGET=web-server-renderer rollup -w -c build/config.js",
     "dev:compiler": "TARGET=web-compiler rollup -w -c build/config.js",
