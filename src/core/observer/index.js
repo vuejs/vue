@@ -200,7 +200,7 @@ export function set (obj: Array<any> | Object, key: any, val: any) {
   if (obj._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
-      'at runtime - delcare it upfront in the data option.'
+      'at runtime - declare it upfront in the data option.'
     )
     return
   }
