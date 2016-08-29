@@ -14,39 +14,45 @@
 
 Vue.js is an MIT-licensed open source project. Its ongoing development is made possible thanks to the support by these awesome [backers](https://github.com/vuejs/vue/blob/dev/backers.md). If you'd like to join them, check out [Vue.js' Patreon campaign](https://www.patreon.com/evanyou).
 
-**Special thanks to the generous sponsorship by:**
-
-<a href="https://strikingly.com/s/careers?utm_source=v">
-  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/strikingly.png">
-</a>
-
-<a href="http://www.itunescn.com/">
-  <img width="160px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
-</a>
-
-<a href="https://jsfiddle.net/">
-  <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
-</a>
-
-<a href="https://laravel.com/">
-  <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
-</a>
-
-<a href="https://chaitin.cn/">
-  <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/chaitin.png">
-</a>
-
-<a href="https://htmlburger.com/">
-  <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
-</a>
-
-<a href="https://starter.someline.com/">
-  <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
-</a>
-
-<a href="http://gold.xitu.io/?utm_source=vuejs&utm_medium=image&utm_content=juejin&utm_campaign=q3_website">
-  <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/juejin.png">
-</a>
+<p align="center">
+  <b>Special thanks to the generous sponsorship by:</b>
+  <br><br>
+  <a href="http://www.itunescn.com/" style="">
+    <img width="120px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
+  </a>
+  <br><br>
+  <a href="https://jsfiddle.net/">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
+  </a>
+  <br><br>
+  <a href="https://laravel.com/">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
+  </a>
+  <br><br>
+  <a href="https://chaitin.cn/">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/chaitin.png">
+  </a>
+  <br><br>
+  <a href="https://htmlburger.com/">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
+  </a>
+  <br><br>
+  <a href="https://starter.someline.com/">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
+  </a>
+  <br><br>
+  <a href="http://gold.xitu.io/?utm_source=vuejs&utm_medium=image&utm_content=juejin&utm_campaign=q3_website">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/juejin.png">
+  </a>
+  <br><br>
+  <a href="http://monterail.com/" target="_blank">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
+  </a>
+  <br><br>
+  <a href="https://www.trisoft.ro/" target="_blank">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/trisoft.png">
+  </a>
+</p>
 
 ## Intro
 
