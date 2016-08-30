@@ -18,7 +18,7 @@ export default {
     var lazy = this.params.lazy
     var number = this.params.number
     var debounce = this.params.debounce
-    var emptyToNull = this.modifiers['empty-to-null']
+    var undef = this.modifiers.undef
 
     // handle composition events.
     //   http://blog.evanyou.me/2014/01/03/composition-event/
@@ -66,8 +66,8 @@ export default {
       if (composing || !self._bound) {
         return
       }
-      if (emptyToNull && el.value === '') {
-        self.set(null)
+      if (undef && el.value === '') {
+        self.set(undefined)
       } else {
         var val = number || isRange
           ? toNumber(el.value)

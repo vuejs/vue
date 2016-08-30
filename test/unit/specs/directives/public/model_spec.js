@@ -569,11 +569,11 @@ describe('v-model', function () {
       data: {
         test: 1
       },
-      template: '<input v-model.empty-to-null="test" value="2" number>'
+      template: '<input v-model.undef="test" value="2" number>'
     })
     el.firstChild.value = ''
     trigger(el.firstChild, 'input')
-    expect(vm.test).toBe(null)
+    expect(vm.test).toBe(undefined)
   })
 
   it('IE9 cut and delete', function (done) {
