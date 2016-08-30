@@ -14,7 +14,7 @@ export default {
   bind (el: any, { value }: VNodeDirective, vnode: VNodeWithData) {
     vnode = locateNode(vnode)
     const transition = vnode.data && vnode.data.transition
-    if (value && transition && transition.appear && !isIE9) {
+    if (value && transition && !isIE9) {
       enter(vnode)
     }
     const originalDisplay = el.style.display === 'none' ? '' : el.style.display

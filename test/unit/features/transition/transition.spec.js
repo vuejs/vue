@@ -504,6 +504,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.textContent).toBe('foo')
       expect(vm.$el.children[0].style.display).toBe('')
+      expect(vm.$el.children[0].className).toBe('test')
       vm.ok = false
       waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
