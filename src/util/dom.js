@@ -123,6 +123,7 @@ export function after (el, target) {
  */
 
 export function remove (el) {
+  if (!inDoc(el)) return false
   el.parentNode.removeChild(el)
 }
 
