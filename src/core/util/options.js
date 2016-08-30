@@ -127,9 +127,7 @@ function mergeHook (
   return childVal
     ? parentVal
       ? parentVal.concat(childVal)
-      : Array.isArray(childVal)
-        ? childVal
-        : [childVal]
+      : [childVal]
     : parentVal
 }
 
