@@ -3,6 +3,7 @@ import Vue from 'vue'
 describe('Options directives', () => {
   it('basic usage', done => {
     const bindSpy = jasmine.createSpy('bind')
+    const insertedSpy = jasmine.createSpy('inserted')
     const updateSpy = jasmine.createSpy('update')
     const componentUpdatedSpy = jasmine.createSpy('componentUpdated')
     const unbindSpy = jasmine.createSpy('unbind')
@@ -14,7 +15,7 @@ describe('Options directives', () => {
     }
 
     const vm = new Vue({
-      template: '<div v-if="ok" v-test:arg.hello="a">{{ msg }}</div>',
+      template: '<div class="hi"><div v-if="ok" v-test:arg.hello="a">{{ msg }}</div></div>',
       data: {
         msg: 'hi',
         a: 'foo',
@@ -28,11 +29,20 @@ describe('Options directives', () => {
             expect(binding.value).toBe('foo')
             expect(binding.expression).toBe('a')
             expect(binding.oldValue).toBeUndefined()
+            expect(el.parentNode).toBeNull()
+          },
+          inserted (el, binding, vnode) {
+            insertedSpy()
+            assertContext(el, binding, vnode)
+            expect(binding.value).toBe('foo')
+            expect(binding.expression).toBe('a')
+            expect(binding.oldValue).toBeUndefined()
+            expect(el.parentNode.className).toBe('hi')
           },
           update (el, binding, vnode, oldVnode) {
             updateSpy()
             assertContext(el, binding, vnode)
-            expect(el).toBe(vm.$el)
+            expect(el).toBe(vm.$el.children[0])
             expect(oldVnode).not.toBe(vnode)
             expect(binding.expression).toBe('a')
             if (binding.value !== binding.oldValue) {
@@ -54,6 +64,7 @@ describe('Options directives', () => {
 
     vm.$mount()
     expect(bindSpy).toHaveBeenCalled()
+    expect(insertedSpy).toHaveBeenCalled()
     expect(updateSpy).not.toHaveBeenCalled()
     expect(componentUpdatedSpy).not.toHaveBeenCalled()
     expect(unbindSpy).not.toHaveBeenCalled()
