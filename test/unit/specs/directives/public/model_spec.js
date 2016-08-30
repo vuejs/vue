@@ -558,6 +558,22 @@ describe('v-model', function () {
     el.firstChild.value = 3
     trigger(el.firstChild, 'input')
     expect(vm.test).toBe(3)
+    el.firstChild.value = ''
+    trigger(el.firstChild, 'input')
+    expect(vm.test).toBe(0)
+  })
+
+  it('empty-to-null', function () {
+    var vm = new Vue({
+      el: el,
+      data: {
+        test: 1
+      },
+      template: '<input v-model.empty-to-null="test" value="2" number>'
+    })
+    el.firstChild.value = ''
+    trigger(el.firstChild, 'input')
+    expect(vm.test).toBe(null)
   })
 
   it('IE9 cut and delete', function (done) {

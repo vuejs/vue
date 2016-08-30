@@ -18,6 +18,7 @@ export default {
     var lazy = this.params.lazy
     var number = this.params.number
     var debounce = this.params.debounce
+    var emptyToNull = this.modifiers['empty-to-null']
 
     // handle composition events.
     //   http://blog.evanyou.me/2014/01/03/composition-event/
@@ -65,10 +66,15 @@ export default {
       if (composing || !self._bound) {
         return
       }
-      var val = number || isRange
-        ? toNumber(el.value)
-        : el.value
-      self.set(val)
+      if (emptyToNull && el.value === '') {
+        self.set(null)
+      } else {
+        var val = number || isRange
+          ? toNumber(el.value)
+          : el.value
+        self.set(val)
+      }
+
       // force update on next tick to avoid lock & same value
       // also only update when user is not typing
       nextTick(function () {
