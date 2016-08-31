@@ -3,7 +3,8 @@
     "target": "es5",
     "module": "commonjs",
     "noImplicitAny": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "noEmit": true
   },
   "files": [
     "../index.d.ts",
