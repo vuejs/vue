@@ -12,7 +12,7 @@ export function createElement (
   tag: any,
   data: any,
   children: any
-): VNode | Array<VNode> | void {
+): VNode | void {
   if (data && (Array.isArray(data) || typeof data !== 'object')) {
     children = data
     data = undefined
@@ -26,7 +26,7 @@ function _createElement (
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
   children?: VNodeChildren | void
-): VNode | Array<VNode> | void {
+): VNode | void {
   if (data && data.__ob__) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
