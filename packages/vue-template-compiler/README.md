@@ -32,7 +32,7 @@ Note the returned function code uses `with` and thus cannot be used in strict mo
 
 #### Options
 
-It's possible to hook into the compilation process to support custom template features. **However, beware that by injecting custom compile-time modules, your templates will not work with other build tools built on standard built-in modules, e.g `vue-laoder` and `vueify`.**
+It's possible to hook into the compilation process to support custom template features. **However, beware that by injecting custom compile-time modules, your templates will not work with other build tools built on standard built-in modules, e.g `vue-loader` and `vueify`.**
 
 The optional `options` object can contain the following:
 
