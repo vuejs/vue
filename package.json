@@ -3,7 +3,7 @@
   "version": "2.0.0-rc.4",
   "description": "Reactive, component-oriented view layer for modern web interfaces.",
   "main": "dist/vue.common.js",
-  "typings": "index.d.ts",
+  "typings": "types/index.d.ts",
   "files": [
     "dist/vue.common.js",
     "dist/vue.js",

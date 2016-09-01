@@ -1,4 +1,4 @@
-import { Vue } from "../vue.d";
+import Vue = require("../index.d");
 import { ComponentOptions } from "../options.d";
 
 interface Component extends Vue {
