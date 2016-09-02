@@ -44,11 +44,11 @@ export interface ComponentOptions {
 export interface FunctionalComponentOptions {
   props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
   functional: boolean;
-  render(this: never, createElement: $createElement, context: ContextObject): VNode;
+  render(this: never, createElement: $createElement, context: RenderContext): VNode;
   name?: string;
 }
 
-export interface ContextObject {
+export interface RenderContext {
   props: any;
   children: VNode[];
   slots: any;
