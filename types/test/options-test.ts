@@ -1,11 +1,11 @@
 import { Vue } from "../vue.d";
-import { ComponentOptions } from "../options.d";
+import { ComponentOptions, FunctionalComponentOptions } from "../options.d";
 
 interface Component extends Vue {
   a: number;
 }
 
-const Options: ComponentOptions = {
+Vue.component('component', {
   data() {
     return {
       a: 1
@@ -133,4 +133,17 @@ const Options: ComponentOptions = {
   name: "Component",
   extends: {} as ComponentOptions,
   delimiters: ["${", "}"]
-}
+} as ComponentOptions);
+
+Vue.component('functional-component', {
+  props: ['prop'],
+  functional: true,
+  render(createElement, context) {
+    context.props;
+    context.children;
+    context.slots;
+    context.data;
+    context.parent;
+    return createElement("div", {}, context.children);
+  }
+} as FunctionalComponentOptions);
