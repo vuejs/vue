@@ -53,7 +53,7 @@ export declare class Vue {
     keyCodes: { [key: string]: number };
   }
 
-  static extend(options: ComponentOptions): Vue;
+  static extend(options: ComponentOptions): typeof Vue;
   static nextTick(callback: () => void, context?: any[]): void;
   static set<T>(object: Object, key: string, value: T): T;
   static set<T>(array: T[], key: number, value: T): T;

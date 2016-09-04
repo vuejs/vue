@@ -1,4 +1,4 @@
-import { Vue } from "../vue.d";
+import Vue = require("../index.d");
 import { PluginFunction, PluginObject } from "../plugin.d";
 
 class Option {
