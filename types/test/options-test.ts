@@ -1,5 +1,6 @@
 import { Vue } from "../vue.d";
-import { ComponentOptions, FunctionalComponentOptions } from "../options.d";
+import { ComponentOptions } from "../options.d";
+import { FunctionalComponentOptions } from "../options.d";
 
 interface Component extends Vue {
   a: number;
