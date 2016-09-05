@@ -1,9 +1,11 @@
 import { Vue } from "./vue.d";
-import { VNode, VNodeDirective } from "./vnode.d";
+import { VNode, VNodeData, VNodeDirective } from "./vnode.d";
 
 type Constructor = {
   new (...args: any[]): any;
 }
+
+type $createElement = typeof Vue.prototype.$createElement;
 
 export interface ComponentOptions {
   data?: Object | ( (this: Vue) => Object );
@@ -15,7 +17,7 @@ export interface ComponentOptions {
 
   el?: Element | String;
   template?: string;
-  render?(createElement: typeof Vue.prototype.$createElement): VNode;
+  render?(createElement: $createElement): VNode;
   staticRenderFns?: (() => VNode)[];
 
   beforeCreate?(): void;
@@ -28,7 +30,7 @@ export interface ComponentOptions {
   updated?(): void;
 
   directives?: { [key: string]: DirectiveOptions | DirectiveFunction };
-  components?: { [key: string]: ComponentOptions | typeof Vue };
+  components?: { [key: string]: ComponentOptions | FunctionalComponentOptions | typeof Vue };
   transitions?: { [key: string]: Object };
   filters?: { [key: string]: Function };
 
@@ -37,6 +39,21 @@ export interface ComponentOptions {
   name?: string;
   extends?: ComponentOptions | typeof Vue;
   delimiters?: [string, string];
+}
+
+export interface FunctionalComponentOptions {
+  props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
+  functional: boolean;
+  render(this: never, createElement: $createElement, context: RenderContext): VNode;
+  name?: string;
+}
+
+export interface RenderContext {
+  props: any;
+  children: VNode[];
+  slots: any;
+  data: VNodeData;
+  parent: Vue;
 }
 
 export interface PropOptions {
