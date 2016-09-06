@@ -4,7 +4,7 @@ import * as Plugin from "./plugin";
 import * as VNode from "./vnode";
 
 // `Vue` in `export = Vue` must be a namespace
-// All avairable types are exported via this namespace
+// All available types are exported via this namespace
 declare namespace Vue {
   export type ComponentOptions = Options.ComponentOptions;
   export type FunctionalComponentOptions = Options.FunctionalComponentOptions;
