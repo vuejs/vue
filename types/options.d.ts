@@ -1,5 +1,5 @@
-import { Vue } from "./vue.d";
-import { VNode, VNodeData, VNodeDirective } from "./vnode.d";
+import { Vue } from "./vue";
+import { VNode, VNodeData, VNodeDirective } from "./vnode";
 
 type Constructor = {
   new (...args: any[]): any;

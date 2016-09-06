@@ -1,5 +1,5 @@
-import Vue = require("../index.d");
-import { PluginFunction, PluginObject } from "../plugin.d";
+import Vue = require("../index");
+import { PluginFunction, PluginObject } from "../plugin";
 
 class Option {
   prefix: string;

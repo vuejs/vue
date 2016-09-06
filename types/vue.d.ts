@@ -6,8 +6,8 @@ import {
   DirectiveOptions,
   DirectiveFunction
 } from "./options.d";
-import { VNode, VNodeData, VNodeChildren } from "./vnode.d";
-import { PluginFunction, PluginObject } from "./plugin.d";
+import { VNode, VNodeData, VNodeChildren } from "./vnode";
+import { PluginFunction, PluginObject } from "./plugin";
 
 export declare class Vue {
 
