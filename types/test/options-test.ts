@@ -1,6 +1,5 @@
-import Vue = require("../index.d");
-import { ComponentOptions } from "../options.d";
-import { FunctionalComponentOptions } from "../options.d";
+import Vue = require("../index");
+import { ComponentOptions, FunctionalComponentOptions } from "../options";
 
 interface Component extends Vue {
   a: number;

@@ -1,4 +1,4 @@
-import { Vue } from "./vue.d";
+import { Vue } from "./vue";
 
 export type VNodeChildren = VNodeChildrenArrayContents | string;
 export interface VNodeChildrenArrayContents {

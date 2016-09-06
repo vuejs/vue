@@ -1,4 +1,4 @@
-import { Vue as _Vue } from "./vue.d";
+import { Vue as _Vue } from "./vue";
 
 export type PluginFunction<T> = (Vue: typeof _Vue, options?: T) => void;
 

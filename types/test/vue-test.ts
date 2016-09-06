@@ -1,4 +1,4 @@
-import Vue = require("../index.d");
+import Vue = require("../index");
 
 class Test extends Vue {
   testProperties() {
