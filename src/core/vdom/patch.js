@@ -332,7 +332,7 @@ export function createPatchFunction (backend) {
     // reuse element for static trees.
     // note we only do this if the vnode is cloned -
     // if the new node is not cloned it means the render functions have been
-    // reset by the hot-reload-api and we need to a proper re-render.
+    // reset by the hot-reload-api and we need to do a proper re-render.
     if (vnode.isStatic &&
         oldVnode.isStatic &&
         vnode.key === oldVnode.key &&
