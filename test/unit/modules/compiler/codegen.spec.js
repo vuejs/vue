@@ -98,21 +98,21 @@ describe('codegen', () => {
   it('generate single slot', () => {
     assertCodegen(
       '<slot></slot>',
-      `with(this){return $slots["default"]}`
+      `with(this){return _t("default")}`
     )
   })
 
   it('generate named slot', () => {
     assertCodegen(
       '<slot name="one"></slot>',
-      `with(this){return $slots["one"]}`
+      `with(this){return _t("one")}`
     )
   })
 
   it('generate slot fallback content', () => {
     assertCodegen(
       '<slot><div>hi</div></slot>',
-      `with(this){return ($slots["default"]||[_m(0)])}`,
+      `with(this){return _t("default",[_m(0)])}`,
       [`with(this){return _h('div',["hi"])}`]
     )
   })

@@ -458,28 +458,41 @@ describe('Component slot', () => {
   it('warn duplicate slots', () => {
     new Vue({
       template: `<div>
-        <slot></slot><slot></slot>
-        <slot name="a"></slot><slot name="a"></slot>
-      </div>`
+        <test>
+          <div>foo</div>
+          <div slot="a">bar</div>
+        </test>
+      </div>`,
+      components: {
+        test: {
+          template: `<div>
+            <slot></slot><slot></slot>
+            <div v-for="i in 3"><slot name="a"></slot></div>
+          </div>`
+        }
+      }
     }).$mount()
-    expect('Duplicate default <slot>').toHaveBeenWarned()
-    expect('Duplicate <slot> with name "a"').toHaveBeenWarned()
+    expect('Duplicate presense of slot "default"').toHaveBeenWarned()
+    expect('Duplicate presense of slot "a"').toHaveBeenWarned()
   })
 
-  it('warn static slot inside v-for', () => {
+  it('should not warn valid conditional slots', () => {
     new Vue({
       template: `<div>
-        <div v-for="i in 1"><slot :name="'test' + i"></slot></div>
-      </div>`
+        <test>
+          <div>foo</div>
+        </test>
+      </div>`,
+      components: {
+        test: {
+          template: `<div>
+            <slot v-if="true"></slot>
+            <slot v-else></slot>
+          </div>`
+        }
+      }
     }).$mount()
-    expect('Static <slot> found inside v-for').not.toHaveBeenWarned()
-
-    new Vue({
-      template: `<div>
-        <div v-for="i in 1"><slot></slot></div>
-      </div>`
-    }).$mount()
-    expect('Static <slot> found inside v-for').toHaveBeenWarned()
+    expect('Duplicate presense of slot "default"').not.toHaveBeenWarned()
   })
 
   // #3518

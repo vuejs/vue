@@ -93,6 +93,8 @@ declare interface Component {
   _f: (id: string) => Function;
   // renderList
   _l: (val: any, render: Function) => ?Array<VNode>;
+  // renderSlot
+  _t: (name: string, fallback: ?Array<VNode>) => ?Array<VNode>;
   // apply v-bind object
   _b: (vnode: VNodeWithData, value: any) => void;
   // retrive custom keyCode

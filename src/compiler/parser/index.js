@@ -34,7 +34,6 @@ let preTransforms
 let transforms
 let postTransforms
 let delimiters
-let seenSlots: any
 
 /**
  * Convert HTML string to AST.
@@ -51,7 +50,6 @@ export function parse (
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
   delimiters = options.delimiters
-  seenSlots = Object.create(null)
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
   let root
@@ -326,25 +324,7 @@ function processOnce (el) {
 
 function processSlot (el) {
   if (el.tag === 'slot') {
-    if (process.env.NODE_ENV !== 'production') {
-      if (!el.attrsMap[':name'] && !el.attrsMap['v-bind:name'] && checkInFor(el)) {
-        warn(
-          'Static <slot> found inside v-for: they will not render correctly. ' +
-          'Render the list in parent scope and use a single <slot> instead.'
-        )
-      }
-    }
     el.slotName = getBindingAttr(el, 'name')
-    if (process.env.NODE_ENV !== 'production') {
-      const name = el.slotName
-      if (seenSlots[name]) {
-        warn(
-          `Duplicate ${name ? `<slot> with name ${name}` : `default <slot>`} ` +
-          `found in the same template.`
-        )
-      }
-      seenSlots[name] = true
-    }
   } else {
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {

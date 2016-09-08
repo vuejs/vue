@@ -221,11 +221,11 @@ function genText (text: ASTText | ASTExpression): string {
 }
 
 function genSlot (el: ASTElement): string {
-  const slot = `$slots[${el.slotName || '"default"'}]`
+  const slotName = el.slotName || '"default"'
   const children = genChildren(el)
   return children
-    ? `(${slot}||${children})`
-    : slot
+    ? `_t(${slotName},${children})`
+    : `_t(${slotName})`
 }
 
 function genComponent (el: any): string {
