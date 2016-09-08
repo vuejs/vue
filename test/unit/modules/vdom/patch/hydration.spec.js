@@ -131,7 +131,7 @@ describe('vdom patch: hydration', () => {
     dom.setAttribute('server-rendered', 'true')
     dom.innerHTML = '<div><span>foo</span></div>'
 
-    const vm = new Vue({
+    new Vue({
       template: '<div><test></test></div>',
       components: {
         test: {

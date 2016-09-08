@@ -82,7 +82,7 @@ export function createPatchFunction (backend) {
   }
 
   function createElm (vnode, insertedVnodeQueue, nested) {
-    let i, elm
+    let i
     const data = vnode.data
     vnode.isRootInsert = !nested
     if (isDef(data)) {
@@ -113,7 +113,7 @@ export function createPatchFunction (backend) {
           )
         }
       }
-      elm = vnode.elm = vnode.ns
+      vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag)
       setScope(vnode)
@@ -122,9 +122,9 @@ export function createPatchFunction (backend) {
         invokeCreateHooks(vnode, insertedVnodeQueue)
       }
     } else if (vnode.isComment) {
-      elm = vnode.elm = nodeOps.createComment(vnode.text)
+      vnode.elm = nodeOps.createComment(vnode.text)
     } else {
-      elm = vnode.elm = nodeOps.createTextNode(vnode.text)
+      vnode.elm = nodeOps.createTextNode(vnode.text)
     }
     return vnode.elm
   }
