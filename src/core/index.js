@@ -8,6 +8,6 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   get: () => config._isServer
 })
 
-Vue.version = '2.0.0-rc.4'
+Vue.version = '2.0.0-rc.5'
 
 export default Vue
