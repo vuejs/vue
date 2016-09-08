@@ -42,7 +42,7 @@ export default {
     for (let i = 0; i < rawChildren.length; i++) {
       const c = rawChildren[i]
       if (c.tag) {
-        if (c.key != null) {
+        if (c.key != null && String(c.key).indexOf('__vlist') !== 0) {
           children.push(c)
           map[c.key] = c
           ;(c.data || (c.data = {})).transition = transitionData
