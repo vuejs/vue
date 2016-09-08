@@ -117,13 +117,7 @@ export function createPatchFunction (backend) {
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag)
       setScope(vnode)
-      if (Array.isArray(children)) {
-        for (i = 0; i < children.length; ++i) {
-          nodeOps.appendChild(elm, createElm(children[i], insertedVnodeQueue, true))
-        }
-      } else if (isPrimitive(vnode.text)) {
-        nodeOps.appendChild(elm, nodeOps.createTextNode(vnode.text))
-      }
+      createChildren(vnode, children, insertedVnodeQueue)
       if (isDef(data)) {
         invokeCreateHooks(vnode, insertedVnodeQueue)
       }
@@ -133,6 +127,16 @@ export function createPatchFunction (backend) {
       elm = vnode.elm = nodeOps.createTextNode(vnode.text)
     }
     return vnode.elm
+  }
+
+  function createChildren (vnode, children, insertedVnodeQueue) {
+    if (Array.isArray(children)) {
+      for (let i = 0; i < children.length; ++i) {
+        nodeOps.appendChild(vnode.elm, createElm(children[i], insertedVnodeQueue, true))
+      }
+    } else if (isPrimitive(vnode.text)) {
+      nodeOps.appendChild(vnode.elm, nodeOps.createTextNode(vnode.text))
+    }
   }
 
   function isPatchable (vnode) {
@@ -404,26 +408,31 @@ export function createPatchFunction (backend) {
     if (isDef(tag)) {
       if (isDef(children)) {
         const childNodes = nodeOps.childNodes(elm)
-        let childrenMatch = true
-        if (childNodes.length !== children.length) {
-          childrenMatch = false
+        // empty element, allow client to pick up and populate children
+        if (!childNodes.length) {
+          createChildren(vnode, children, insertedVnodeQueue)
         } else {
-          for (let i = 0; i < children.length; i++) {
-            if (!hydrate(childNodes[i], children[i], insertedVnodeQueue)) {
-              childrenMatch = false
-              break
+          let childrenMatch = true
+          if (childNodes.length !== children.length) {
+            childrenMatch = false
+          } else {
+            for (let i = 0; i < children.length; i++) {
+              if (!hydrate(childNodes[i], children[i], insertedVnodeQueue)) {
+                childrenMatch = false
+                break
+              }
             }
           }
-        }
-        if (!childrenMatch) {
-          if (process.env.NODE_ENV !== 'production' &&
-              typeof console !== 'undefined' &&
-              !bailed) {
-            bailed = true
-            console.warn('Parent: ', elm)
-            console.warn('Mismatching childNodes vs. VNodes: ', childNodes, children)
+          if (!childrenMatch) {
+            if (process.env.NODE_ENV !== 'production' &&
+                typeof console !== 'undefined' &&
+                !bailed) {
+              bailed = true
+              console.warn('Parent: ', elm)
+              console.warn('Mismatching childNodes vs. VNodes: ', childNodes, children)
+            }
+            return false
           }
-          return false
         }
       }
       if (isDef(data)) {

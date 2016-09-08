@@ -141,9 +141,36 @@ describe('vdom patch: hydration', () => {
           template: '<div><span>{{a}}</span></div>'
         }
       }
-    })
+    }).$mount(dom)
 
-    vm.$mount(dom)
     expect('not matching server-rendered content').toHaveBeenWarned()
+  })
+
+  it('should pick up elements with no children and populate without warning', done => {
+    const dom = document.createElement('div')
+    dom.setAttribute('server-rendered', 'true')
+    dom.innerHTML = '<div><span></span></div>'
+    const span = dom.querySelector('span')
+
+    const vm = new Vue({
+      template: '<div><test></test></div>',
+      components: {
+        test: {
+          data () {
+            return { a: 'qux' }
+          },
+          template: '<div><span>{{a}}</span></div>'
+        }
+      }
+    }).$mount(dom)
+
+    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect(span).toBe(vm.$el.querySelector('span'))
+    expect(vm.$el.innerHTML).toBe('<div><span>qux</span></div>')
+
+    vm.$children[0].a = 'foo'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div><span>foo</span></div>')
+    }).then(done)
   })
 })
