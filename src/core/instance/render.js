@@ -36,6 +36,13 @@ export function renderMixin (Vue: Class<Component>) {
       _parentVnode
     } = vm.$options
 
+    if (vm._isMounted) {    
+      // clone slot nodes on re-renders   
+      for (const key in vm.$slots) {    
+        vm.$slots[key] = cloneVNodes(vm.$slots[key])    
+      }   
+    }
+
     if (staticRenderFns && !vm._staticTrees) {
       vm._staticTrees = []
     }
@@ -154,20 +161,14 @@ export function renderMixin (Vue: Class<Component>) {
     fallback: ?Array<VNode>
   ): ?Array<VNode> {
     let slotNodes = this.$slots[name]
-    if (slotNodes) {
-      // warn duplicate slot usage
-      if (process.env.NODE_ENV !== 'production') {
-        slotNodes._rendered && warn(
-          `Duplicate presense of slot "${name}" found in the same render tree ` +
-          `- this will likely cause render errors.`,
-          this
-        )
-        slotNodes._rendered = true
-      }
-      // clone slot nodes on re-renders
-      if (this._isMounted) {
-        slotNodes = cloneVNodes(slotNodes)
-      }
+    // warn duplicate slot usage
+    if (slotNodes && process.env.NODE_ENV !== 'production') {
+      slotNodes._rendered && warn(
+        `Duplicate presense of slot "${name}" found in the same render tree ` +
+        `- this will likely cause render errors.`,
+        this
+      )
+      slotNodes._rendered = true
     }
     return slotNodes || fallback
   }
