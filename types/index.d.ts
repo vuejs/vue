@@ -6,12 +6,12 @@ import * as VNode from "./vnode";
 // `Vue` in `export = Vue` must be a namespace
 // All available types are exported via this namespace
 declare namespace Vue {
-  export type ComponentOptions = Options.ComponentOptions;
+  export type ComponentOptions<V extends Vue> = Options.ComponentOptions<V>;
   export type FunctionalComponentOptions = Options.FunctionalComponentOptions;
   export type RenderContext = Options.RenderContext;
   export type PropOptions = Options.PropOptions;
-  export type ComputedOptions = Options.ComputedOptions;
-  export type WatchHandler = Options.WatchHandler;
+  export type ComputedOptions<V extends Vue> = Options.ComputedOptions<V>;
+  export type WatchHandler<V extends Vue> = Options.WatchHandler<V>;
   export type WatchOptions = Options.WatchOptions;
   export type DirectiveFunction = Options.DirectiveFunction;
   export type DirectiveOptions = Options.DirectiveOptions;
