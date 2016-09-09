@@ -7,7 +7,7 @@ import {
   baseWarn
 } from 'compiler/helpers'
 
-function parse (el: ASTElement, options: CompilerOptions) {
+function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')
   if (process.env.NODE_ENV !== 'production' && staticClass) {
@@ -20,7 +20,9 @@ function parse (el: ASTElement, options: CompilerOptions) {
       )
     }
   }
-  el.staticClass = JSON.stringify(staticClass)
+  if (staticClass) {
+    el.staticClass = JSON.stringify(staticClass)
+  }
   const classBinding = getBindingAttr(el, 'class', false /* getStatic */)
   if (classBinding) {
     el.classBinding = classBinding
@@ -40,6 +42,6 @@ function genData (el: ASTElement): string {
 
 export default {
   staticKeys: ['staticClass'],
-  parse,
+  transformNode,
   genData
 }

@@ -2,9 +2,10 @@ import Vue from 'vue'
 import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 
-describe('hydration', () => {
+describe('vdom patch: hydration', () => {
   let vnode0
   beforeEach(() => {
+    spyOn(console, 'warn')
     vnode0 = new VNode('p', { attrs: { id: '1' }}, [createTextVNode('hello world')])
     patch(null, vnode0)
   })
@@ -50,8 +51,8 @@ describe('hydration', () => {
     traverseAndAssert(vnode1, node0)
 
     // check update
-    const vnode2 = new VNode('div', { props: { id: 'foo' }}, [
-      new VNode('span', { props: { id: 'bar' }}),
+    const vnode2 = new VNode('div', { attrs: { id: 'foo' }}, [
+      new VNode('span', { attrs: { id: 'bar' }}),
       new VNode('div', { hook: { init }}, [
         new VNode('span', {}),
         new VNode('span', {})
@@ -130,6 +131,27 @@ describe('hydration', () => {
     dom.setAttribute('server-rendered', 'true')
     dom.innerHTML = '<div><span>foo</span></div>'
 
+    new Vue({
+      template: '<div><test></test></div>',
+      components: {
+        test: {
+          data () {
+            return { a: 'qux' }
+          },
+          template: '<div><span>{{a}}</span></div>'
+        }
+      }
+    }).$mount(dom)
+
+    expect('not matching server-rendered content').toHaveBeenWarned()
+  })
+
+  it('should pick up elements with no children and populate without warning', done => {
+    const dom = document.createElement('div')
+    dom.setAttribute('server-rendered', 'true')
+    dom.innerHTML = '<div><span></span></div>'
+    const span = dom.querySelector('span')
+
     const vm = new Vue({
       template: '<div><test></test></div>',
       components: {
@@ -140,9 +162,15 @@ describe('hydration', () => {
           template: '<div><span>{{a}}</span></div>'
         }
       }
-    })
+    }).$mount(dom)
 
-    vm.$mount(dom)
-    expect('not matching server-rendered content').toHaveBeenWarned()
+    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect(span).toBe(vm.$el.querySelector('span'))
+    expect(vm.$el.innerHTML).toBe('<div><span>qux</span></div>')
+
+    vm.$children[0].a = 'foo'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div><span>foo</span></div>')
+    }).then(done)
   })
 })

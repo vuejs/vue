@@ -30,6 +30,13 @@ describe('Directive v-bind:style', () => {
     }).$mount()
   })
 
+  it('string', done => {
+    vm.styles = 'color:red;'
+    waitForUpdate(() => {
+      expect(vm.$el.style.cssText.replace(/\s/g, '')).toBe('color:red;')
+    }).then(done)
+  })
+
   it('plain object', done => {
     vm.styles = { color: 'red' }
     waitForUpdate(() => {

@@ -1,5 +1,6 @@
 if (typeof console === 'undefined') {
   window.console = {
+    warn: function () {},
     error: function () {}
   }
 }

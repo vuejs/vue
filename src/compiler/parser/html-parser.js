@@ -9,14 +9,12 @@
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
-import { decodeHTML } from 'entities'
-import { makeMap } from 'shared/util'
+import { makeMap, no } from 'shared/util'
 import { isNonPhrasingTag, canBeLeftOpenTag } from 'web/util/index'
 
 // Regular Expressions for parsing tags and attributes
 const singleAttrIdentifier = /([^\s"'<>\/=]+)/
-const singleAttrAssign = /=/
-const singleAttrAssigns = [singleAttrAssign]
+const singleAttrAssign = /(?:=)/
 const singleAttrValues = [
   // attr value double quotes
   /"([^"]*)"+/.source,
@@ -25,6 +23,12 @@ const singleAttrValues = [
   // attr value, no quotes
   /([^\s"'=<>`]+)/.source
 ]
+const attribute = new RegExp(
+  '^\\s*' + singleAttrIdentifier.source +
+  '(?:\\s*(' + singleAttrAssign.source + ')' +
+  '\\s*(?:' + singleAttrValues.join('|') + '))?'
+)
+
 // could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
 // but for Vue templates we can enforce a simple charset
 const ncname = '[a-zA-Z_][\\w\\-\\.]*'
@@ -40,33 +44,34 @@ let IS_REGEX_CAPTURING_BROKEN = false
 })
 
 // Special Elements (can contain anything)
-const special = makeMap('script,style', true)
+const isSpecialTag = makeMap('script,style', true)
 
 const reCache = {}
 
-function attrForHandler (handler) {
-  const pattern = singleAttrIdentifier.source +
-    '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')' +
-    '\\s*(?:' + singleAttrValues.join('|') + '))?'
-  return new RegExp('^\\s*' + pattern)
+const ampRE = /&amp;/g
+const ltRE = /&lt;/g
+const gtRE = /&gt;/g
+const quoteRE = /&quot;/g
+
+function decodeAttr (value, shouldDecodeTags) {
+  if (shouldDecodeTags) {
+    value = value.replace(ltRE, '<').replace(gtRE, '>')
+  }
+  return value.replace(ampRE, '&').replace(quoteRE, '"')
 }
 
-function joinSingleAttrAssigns (handler) {
-  return singleAttrAssigns.map(function (assign) {
-    return '(?:' + assign.source + ')'
-  }).join('|')
-}
-
-export function parseHTML (html, handler) {
+export function parseHTML (html, options) {
   const stack = []
-  const attribute = attrForHandler(handler)
-  const expectHTML = handler.expectHTML
-  const isUnaryTag = handler.isUnaryTag || (() => false)
-  let last, prevTag, nextTag, lastTag
+  const expectHTML = options.expectHTML
+  const isUnaryTag = options.isUnaryTag || no
+  const isFromDOM = options.isFromDOM
+  const shouldDecodeTags = options.shouldDecodeTags
+  let index = 0
+  let last, lastTag
   while (html) {
     last = html
     // Make sure we're not in a script or style element
-    if (!lastTag || !special(lastTag)) {
+    if (!lastTag || !isSpecialTag(lastTag)) {
       const textEnd = html.indexOf('<')
       if (textEnd === 0) {
         // Comment:
@@ -74,8 +79,7 @@ export function parseHTML (html, handler) {
           const commentEnd = html.indexOf('-->')
 
           if (commentEnd >= 0) {
-            html = html.substring(commentEnd + 3)
-            prevTag = ''
+            advance(commentEnd + 3)
             continue
           }
         }
@@ -85,8 +89,7 @@ export function parseHTML (html, handler) {
           const conditionalEnd = html.indexOf(']>')
 
           if (conditionalEnd >= 0) {
-            html = html.substring(conditionalEnd + 2)
-            prevTag = ''
+            advance(conditionalEnd + 2)
             continue
           }
         }
@@ -94,29 +97,23 @@ export function parseHTML (html, handler) {
         // Doctype:
         const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
-          if (handler.doctype) {
-            handler.doctype(doctypeMatch[0])
-          }
-          html = html.substring(doctypeMatch[0].length)
-          prevTag = ''
+          advance(doctypeMatch[0].length)
           continue
         }
 
         // End tag:
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
-          html = html.substring(endTagMatch[0].length)
-          endTagMatch[0].replace(endTag, parseEndTag)
-          prevTag = '/' + endTagMatch[1].toLowerCase()
+          const curIndex = index
+          advance(endTagMatch[0].length)
+          parseEndTag(endTagMatch[0], endTagMatch[1], curIndex, index)
           continue
         }
 
         // Start tag:
-        const startTagMatch = parseStartTag(html)
+        const startTagMatch = parseStartTag()
         if (startTagMatch) {
-          html = startTagMatch.rest
           handleStartTag(startTagMatch)
-          prevTag = startTagMatch.tagName.toLowerCase()
           continue
         }
       }
@@ -124,46 +121,34 @@ export function parseHTML (html, handler) {
       let text
       if (textEnd >= 0) {
         text = html.substring(0, textEnd)
-        html = html.substring(textEnd)
+        advance(textEnd)
       } else {
         text = html
         html = ''
       }
 
-      // next tag
-      let nextTagMatch = parseStartTag(html)
-      if (nextTagMatch) {
-        nextTag = nextTagMatch.tagName
-      } else {
-        nextTagMatch = html.match(endTag)
-        if (nextTagMatch) {
-          nextTag = '/' + nextTagMatch[1]
-        } else {
-          nextTag = ''
-        }
+      if (options.chars) {
+        options.chars(text)
       }
-
-      if (handler.chars) {
-        handler.chars(text, prevTag, nextTag)
-      }
-      prevTag = ''
     } else {
-      const stackedTag = lastTag.toLowerCase()
-      const reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)</' + stackedTag + '[^>]*>', 'i'))
-
-      html = html.replace(reStackedTag, function (all, text) {
+      var stackedTag = lastTag.toLowerCase()
+      var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'))
+      var endTagLength = 0
+      var rest = html.replace(reStackedTag, function (all, text, endTag) {
+        endTagLength = endTag.length
         if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
           text = text
             .replace(/<!--([\s\S]*?)-->/g, '$1')
             .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
         }
-        if (handler.chars) {
-          handler.chars(text)
+        if (options.chars) {
+          options.chars(text)
         }
         return ''
       })
-
-      parseEndTag('</' + stackedTag + '>', stackedTag)
+      index += html.length - rest.length
+      html = rest
+      parseEndTag('</' + stackedTag + '>', stackedTag, index - endTagLength, index)
     }
 
     if (html === last) {
@@ -171,27 +156,32 @@ export function parseHTML (html, handler) {
     }
   }
 
-  if (!handler.partialMarkup) {
-    // Clean up any remaining tags
-    parseEndTag()
+  // Clean up any remaining tags
+  parseEndTag()
+
+  function advance (n) {
+    index += n
+    html = html.substring(n)
   }
 
-  function parseStartTag (input) {
-    const start = input.match(startTagOpen)
+  function parseStartTag () {
+    const start = html.match(startTagOpen)
     if (start) {
       const match = {
         tagName: start[1],
-        attrs: []
+        attrs: [],
+        start: index
       }
-      input = input.slice(start[0].length)
+      advance(start[0].length)
       let end, attr
-      while (!(end = input.match(startTagClose)) && (attr = input.match(attribute))) {
-        input = input.slice(attr[0].length)
+      while (!(end = html.match(startTagClose)) && (attr = html.match(attribute))) {
+        advance(attr[0].length)
         match.attrs.push(attr)
       }
       if (end) {
         match.unarySlash = end[1]
-        match.rest = input.slice(end[0].length)
+        advance(end[0].length)
+        match.end = index
         return match
       }
     }
@@ -222,9 +212,10 @@ export function parseHTML (html, handler) {
         if (args[4] === '') { delete args[4] }
         if (args[5] === '') { delete args[5] }
       }
+      const value = args[3] || args[4] || args[5] || ''
       attrs[i] = {
         name: args[1],
-        value: decodeHTML(args[3] || args[4] || args[5] || '')
+        value: isFromDOM ? decodeAttr(value, shouldDecodeTags) : value
       }
     }
 
@@ -234,13 +225,15 @@ export function parseHTML (html, handler) {
       unarySlash = ''
     }
 
-    if (handler.start) {
-      handler.start(tagName, attrs, unary, unarySlash)
+    if (options.start) {
+      options.start(tagName, attrs, unary, match.start, match.end)
     }
   }
 
-  function parseEndTag (tag, tagName) {
+  function parseEndTag (tag, tagName, start, end) {
     let pos
+    if (start == null) start = index
+    if (end == null) end = index
 
     // Find the closest opened tag of the same type
     if (tagName) {
@@ -258,8 +251,8 @@ export function parseHTML (html, handler) {
     if (pos >= 0) {
       // Close all the open elements, up the stack
       for (let i = stack.length - 1; i >= pos; i--) {
-        if (handler.end) {
-          handler.end(stack[i].tag, stack[i].attrs, i > pos || !tag)
+        if (options.end) {
+          options.end(stack[i].tag, start, end)
         }
       }
 
@@ -267,15 +260,15 @@ export function parseHTML (html, handler) {
       stack.length = pos
       lastTag = pos && stack[pos - 1].tag
     } else if (tagName.toLowerCase() === 'br') {
-      if (handler.start) {
-        handler.start(tagName, [], true, '')
+      if (options.start) {
+        options.start(tagName, [], true, start, end)
       }
     } else if (tagName.toLowerCase() === 'p') {
-      if (handler.start) {
-        handler.start(tagName, [], false, '', true)
+      if (options.start) {
+        options.start(tagName, [], false, start, end)
       }
-      if (handler.end) {
-        handler.end(tagName, [])
+      if (options.end) {
+        options.end(tagName, start, end)
       }
     }
   }

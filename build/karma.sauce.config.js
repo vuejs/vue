@@ -43,21 +43,34 @@ var batches = [
       browserName: 'internet explorer',
       platform: 'Windows 8.1',
       version: '11'
+    },
+    sl_edge: {
+      base: 'SauceLabs',
+      browserName: 'MicrosoftEdge',
+      platform: 'Windows 10'
     }
   },
   // mobile
   {
-    sl_ios_safari: {
+    sl_ios_safari_7: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      platform: 'OS X 10.9',
-      version: '7.1'
+      version: '7.0'
     },
-    sl_android: {
+    sl_ios_safari_9: {
+      base: 'SauceLabs',
+      browserName: 'iphone',
+      version: '9.3'
+    },
+    sl_android_4_2: {
       base: 'SauceLabs',
       browserName: 'android',
-      platform: 'Linux',
       version: '4.2'
+    },
+    sl_android_5_1: {
+      base: 'SauceLabs',
+      browserName: 'android',
+      version: '5.1'
     }
   }
 ]
@@ -66,9 +79,12 @@ module.exports = function (config) {
   var batch = batches[process.argv[4] || 0]
 
   config.set(Object.assign(base, {
+    singleRun: true,
     browsers: Object.keys(batch),
     customLaunchers: batch,
-    reporters: ['progress', 'saucelabs'],
+    reporters: process.env.CI
+      ? ['dots', 'saucelabs'] // avoid spamming CI output
+      : ['progress', 'saucelabs'],
     sauceLabs: {
       testName: 'Vue.js unit tests',
       recordScreenshots: false,

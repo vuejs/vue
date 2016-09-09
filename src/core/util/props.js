@@ -11,14 +11,19 @@ type PropOptions = {
   validator: ?Function
 }
 
-export function validateProp (vm: Component, key: string, propsData: ?Object): any {
+export function validateProp (
+  key: string,
+  propOptions: Object,
+  propsData: ?Object,
+  vm?: Component
+): any {
   /* istanbul ignore if */
-  if (!vm.$options.props || !propsData) return
-  const prop = vm.$options.props[key]
+  if (!propsData) return
+  const prop = propOptions[key]
   const absent = !hasOwn(propsData, key)
   let value = propsData[key]
   // handle boolean props
-  if (prop.type === Boolean) {
+  if (getType(prop.type) === 'Boolean') {
     if (absent && !hasOwn(prop, 'default')) {
       value = false
     } else if (value === '' || value === hyphenate(key)) {
@@ -30,9 +35,10 @@ export function validateProp (vm: Component, key: string, propsData: ?Object): a
     value = getPropDefaultValue(vm, prop, key)
     // since the default value is a fresh copy,
     // make sure to observe it.
+    const prevShouldConvert = observerState.shouldConvert
     observerState.shouldConvert = true
     observe(value)
-    observerState.shouldConvert = false
+    observerState.shouldConvert = prevShouldConvert
   }
   if (process.env.NODE_ENV !== 'production') {
     assertProp(prop, key, value, vm, absent)
@@ -43,7 +49,7 @@ export function validateProp (vm: Component, key: string, propsData: ?Object): a
 /**
  * Get the default value of a prop.
  */
-function getPropDefaultValue (vm: Component, prop: PropOptions, name: string): any {
+function getPropDefaultValue (vm: ?Component, prop: PropOptions, name: string): any {
   // no default, return undefined
   if (!hasOwn(prop, 'default')) {
     return undefined
@@ -71,7 +77,7 @@ function assertProp (
   prop: PropOptions,
   name: string,
   value: any,
-  vm: Component,
+  vm: ?Component,
   absent: boolean
 ) {
   if (prop.required && absent) {
@@ -125,31 +131,34 @@ function assertType (value: any, type: Function): {
   expectedType: string
 } {
   let valid
-  let expectedType
-  if (type === String) {
-    expectedType = 'string'
-    valid = typeof value === expectedType
-  } else if (type === Number) {
-    expectedType = 'number'
-    valid = typeof value === expectedType
-  } else if (type === Boolean) {
-    expectedType = 'boolean'
-    valid = typeof value === expectedType
-  } else if (type === Function) {
-    expectedType = 'function'
-    valid = typeof value === expectedType
-  } else if (type === Object) {
-    expectedType = 'Object'
+  let expectedType = getType(type)
+  if (expectedType === 'String') {
+    valid = typeof value === (expectedType = 'string')
+  } else if (expectedType === 'Number') {
+    valid = typeof value === (expectedType = 'number')
+  } else if (expectedType === 'Boolean') {
+    valid = typeof value === (expectedType = 'boolean')
+  } else if (expectedType === 'Function') {
+    valid = typeof value === (expectedType = 'function')
+  } else if (expectedType === 'Object') {
     valid = isPlainObject(value)
-  } else if (type === Array) {
-    expectedType = 'Array'
+  } else if (expectedType === 'Array') {
     valid = Array.isArray(value)
   } else {
-    expectedType = type.name || type.toString()
     valid = value instanceof type
   }
   return {
     valid,
     expectedType
   }
+}
+
+/**
+ * Use function string name to check built-in types,
+ * because a simple equality check will fail when running
+ * across different vms / iframes.
+ */
+function getType (fn) {
+  const match = fn && fn.toString().match(/^\s*function (\w+)/)
+  return match && match[1]
 }

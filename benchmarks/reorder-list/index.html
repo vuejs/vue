@@ -20,7 +20,7 @@
         <button @click="shuffle">shuffle</button>
         <button @click="add">add</button>
         <table class="table table-hover table-striped test-data">
-          <row v-for="item in items" track-by="item.id"
+          <row v-for="item in items" :key="item.id"
             :class="{ danger: item.id === selected }"
             :item="item"
             @select="select(item)"

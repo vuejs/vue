@@ -2,9 +2,9 @@
   "root": true,
   "parser": "babel-eslint",
   "extends": "vue",
-  "plugins": ["flow-vars"],
+  "plugins": ["flowtype"],
   "rules": {
-    "flow-vars/define-flow-type": 1,
-    "flow-vars/use-flow-type": 1
+    "flowtype/define-flow-type": 1,
+    "flowtype/use-flow-type": 1
   }
 }

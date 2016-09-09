@@ -107,7 +107,7 @@ describe('Component', () => {
       vm.view = ''
     })
     .then(() => {
-      expect(vm.$el.nodeType).toBe(3)
+      expect(vm.$el.nodeType).toBe(8)
       expect(vm.$el.data).toBe('')
     }).then(done)
   })
@@ -235,5 +235,72 @@ describe('Component', () => {
         template: '<div is="non-existent"></div>'
       })
     }).not.toThrow()
+  })
+
+  it('properly update replaced higher-order component root node', done => {
+    const vm = new Vue({
+      data: {
+        color: 'red'
+      },
+      template: '<test id="foo" :class="color"></test>',
+      components: {
+        test: {
+          data () {
+            return { tag: 'div' }
+          },
+          render (h) {
+            return h(this.tag, { class: 'test' }, 'hi')
+          }
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.tagName).toBe('DIV')
+    expect(vm.$el.id).toBe('foo')
+    expect(vm.$el.className).toBe('test red')
+
+    vm.color = 'green'
+    waitForUpdate(() => {
+      expect(vm.$el.tagName).toBe('DIV')
+      expect(vm.$el.id).toBe('foo')
+      expect(vm.$el.className).toBe('test green')
+      vm.$children[0].tag = 'p'
+    }).then(() => {
+      expect(vm.$el.tagName).toBe('P')
+      expect(vm.$el.id).toBe('foo')
+      expect(vm.$el.className).toBe('test green')
+      vm.color = 'red'
+    }).then(() => {
+      expect(vm.$el.tagName).toBe('P')
+      expect(vm.$el.id).toBe('foo')
+      expect(vm.$el.className).toBe('test red')
+    }).then(done)
+  })
+
+  it('catch component render error and preserve previous vnode', done => {
+    const spy = jasmine.createSpy()
+    Vue.config.errorHandler = spy
+    const vm = new Vue({
+      data: {
+        a: {
+          b: 123
+        }
+      },
+      render (h) {
+        return h('div', [this.a.b])
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('123')
+    expect(spy).not.toHaveBeenCalled()
+    vm.a = null
+    waitForUpdate(() => {
+      expect('Error when rendering root instance').toHaveBeenWarned()
+      expect(spy).toHaveBeenCalled()
+      expect(vm.$el.textContent).toBe('123') // should preserve rendered DOM
+      vm.a = { b: 234 }
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('234') // should be able to recover
+      Vue.config.errorHandler = null
+    }).then(done)
   })
 })

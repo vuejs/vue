@@ -1,6 +1,6 @@
 /* @flow */
 
-import { cached, camelize, toObject, extend } from 'shared/util'
+import { cached, extend, camelize, toObject } from 'shared/util'
 
 const prefixes = ['Webkit', 'Moz', 'ms']
 
@@ -21,34 +21,45 @@ const normalize = cached(function (prop) {
 })
 
 function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  if (!oldVnode.data.style && !vnode.data.style) {
+  if ((!oldVnode.data || !oldVnode.data.style) && !vnode.data.style) {
     return
   }
   let cur, name
-  const elm: any = vnode.elm
+  const el: any = vnode.elm
   const oldStyle: any = oldVnode.data.style || {}
-  let style = vnode.data.style || {}
+  let style: any = vnode.data.style || {}
+
+  // handle string
+  if (typeof style === 'string') {
+    el.style.cssText = style
+    return
+  }
+
+  const needClone = style.__ob__
 
   // handle array syntax
   if (Array.isArray(style)) {
     style = vnode.data.style = toObject(style)
   }
 
+  // clone the style for future updates,
+  // in case the user mutates the style object in-place.
+  if (needClone) {
+    style = vnode.data.style = extend({}, style)
+  }
+
   for (name in oldStyle) {
     if (!style[name]) {
-      elm.style[normalize(name)] = ''
+      el.style[normalize(name)] = ''
     }
   }
   for (name in style) {
     cur = style[name]
     if (cur !== oldStyle[name]) {
       // ie9 setting to null has no effect, must use empty string
-      elm.style[normalize(name)] = cur || ''
+      el.style[normalize(name)] = cur || ''
     }
   }
-  // clone the style for future updates,
-  // in case the user mutates the style object in-place.
-  vnode.data.style = extend({}, style)
 }
 
 export default {

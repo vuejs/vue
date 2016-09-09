@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noEmit": true
+  },
+  "files": [
+    "../index.d.ts",
+    "../options.d.ts",
+    "../plugin.d.ts",
+    "../vnode.d.ts",
+    "../vue.d.ts",
+    "options-test.ts",
+    "plugin-test.ts",
+    "vue-test.ts"
+  ],
+  "compileOnSave": false
+}

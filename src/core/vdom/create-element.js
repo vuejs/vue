@@ -4,83 +4,64 @@ import VNode, { emptyVNode } from './vnode'
 import config from '../config'
 import { createComponent } from './create-component'
 import { normalizeChildren } from './helpers'
-import { renderState } from '../instance/render'
 import { warn, resolveAsset } from '../util/index'
 
-export function renderElementWithChildren (
-  vnode: VNode | void,
-  children: VNodeChildren | void
+// wrapper function for providing a more flexible interface
+// without getting yelled at by flow
+export function createElement (
+  tag: any,
+  data: any,
+  children: any
 ): VNode | void {
-  if (vnode) {
-    if (vnode.componentOptions) {
-      if (process.env.NODE_ENV !== 'production' &&
-        children && typeof children !== 'function') {
-        warn(
-          'A component\'s children should be a function that returns the ' +
-          'children array. This allows the component to track the children ' +
-          'dependencies and optimizes re-rendering.'
-        )
-      }
-      vnode.componentOptions.children = children
-    } else {
-      vnode.setChildren(normalizeChildren(children))
-    }
+  if (data && (Array.isArray(data) || typeof data !== 'object')) {
+    children = data
+    data = undefined
   }
-  return vnode
+  // make sure to use real instance instead of proxy as context
+  return _createElement(this._self, tag, data, children)
 }
 
-export function renderElement (
+function _createElement (
+  context: Component,
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
-  namespace?: string
+  children?: VNodeChildren | void
 ): VNode | void {
-  // make sure to expose real self instead of proxy
-  const context: Component = this._self
-  const parent: Component | null = renderState.activeInstance
-  if (!parent) {
+  if (data && data.__ob__) {
     process.env.NODE_ENV !== 'production' && warn(
-      'createElement cannot be called outside of component ' +
-      'render functions.'
+      `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
+      'Always create fresh vnode data objects in each render!',
+      context
     )
     return
   }
   if (!tag) {
     // in case of component :is set to falsy value
-    return emptyVNode
+    return emptyVNode()
   }
   if (typeof tag === 'string') {
     let Ctor
+    const ns = config.getTagNamespace(tag)
     if (config.isReservedTag(tag)) {
+      // platform built-in elements
       return new VNode(
-        tag, data, undefined,
-        undefined, undefined, namespace, context
+        tag, data, normalizeChildren(children, ns),
+        undefined, undefined, ns, context
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return createComponent(Ctor, data, parent, context, tag)
+      // component
+      return createComponent(Ctor, data, context, children, tag)
     } else {
-      if (process.env.NODE_ENV !== 'production') {
-        if (!namespace && config.isUnknownElement(tag)) {
-          warn(
-            'Unknown custom element: <' + tag + '> - did you ' +
-            'register the component correctly? For recursive components, ' +
-            'make sure to provide the "name" option.'
-          )
-        }
-      }
+      // unknown or unlisted namespaced elements
+      // check at runtime because it may get assigned a namespace when its
+      // parent normalizes children
       return new VNode(
-        tag, data, undefined,
-        undefined, undefined, namespace, context
+        tag, data, normalizeChildren(children, ns),
+        undefined, undefined, ns, context
       )
     }
   } else {
-    return createComponent(tag, data, parent, context)
+    // direct component options / constructor
+    return createComponent(tag, data, context, children)
   }
-}
-
-export function renderText (str?: string): string {
-  return str || ''
-}
-
-export function renderStatic (index?: number): Object | void {
-  return this._staticTrees[index]
 }

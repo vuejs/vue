@@ -2,16 +2,19 @@
 
 import Watcher from '../observer/watcher'
 import Dep from '../observer/dep'
+
 import {
+  set,
+  del,
   observe,
   defineReactive,
-  observerState,
-  proxy,
-  unproxy
+  observerState
 } from '../observer/index'
+
 import {
   warn,
   hasOwn,
+  isReserved,
   isPlainObject,
   bind,
   validateProp,
@@ -39,7 +42,7 @@ function initProps (vm: Component) {
       const key = keys[i]
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
-        defineReactive(vm, key, validateProp(vm, key, propsData), () => {
+        defineReactive(vm, key, validateProp(key, props, propsData, vm), () => {
           if (vm.$parent && !observerState.isSettingProps) {
             warn(
               `Avoid mutating a prop directly since the value will be ` +
@@ -51,7 +54,7 @@ function initProps (vm: Component) {
           }
         })
       } else {
-        defineReactive(vm, key, validateProp(vm, key, propsData))
+        defineReactive(vm, key, validateProp(key, props, propsData, vm))
       }
     }
     observerState.shouldConvert = true
@@ -180,12 +183,19 @@ export function stateMixin (Vue: Class<Component>) {
   dataDef.get = function () {
     return this._data
   }
-  dataDef.set = function (newData: Object) {
-    if (newData !== this._data) {
-      setData(this, newData)
+  if (process.env.NODE_ENV !== 'production') {
+    dataDef.set = function (newData: Object) {
+      warn(
+        'Avoid replacing instance root $data. ' +
+        'Use nested data properties instead.',
+        this
+      )
     }
   }
   Object.defineProperty(Vue.prototype, '$data', dataDef)
+
+  Vue.prototype.$set = set
+  Vue.prototype.$delete = del
 
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
@@ -205,33 +215,17 @@ export function stateMixin (Vue: Class<Component>) {
   }
 }
 
-function setData (vm: Component, newData: Object) {
-  newData = newData || {}
-  const oldData = vm._data
-  vm._data = newData
-  let keys, key, i
-  // unproxy keys not present in new data
-  keys = Object.keys(oldData)
-  i = keys.length
-  while (i--) {
-    key = keys[i]
-    if (!(key in newData)) {
-      unproxy(vm, key)
-    }
+function proxy (vm: Component, key: string) {
+  if (!isReserved(key)) {
+    Object.defineProperty(vm, key, {
+      configurable: true,
+      enumerable: true,
+      get: function proxyGetter () {
+        return vm._data[key]
+      },
+      set: function proxySetter (val) {
+        vm._data[key] = val
+      }
+    })
   }
-  // proxy keys not already proxied,
-  // and trigger change for changed values
-  keys = Object.keys(newData)
-  i = keys.length
-  while (i--) {
-    key = keys[i]
-    if (!hasOwn(vm, key)) {
-      // new property
-      proxy(vm, key)
-    }
-  }
-  oldData.__ob__ && oldData.__ob__.vmCount--
-  observe(newData)
-  newData.__ob__ && newData.__ob__.vmCount++
-  vm.$forceUpdate()
 }

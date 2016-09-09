@@ -21,10 +21,6 @@
 	};
 
 	exports.app = new Vue({
-
-		// the root element that will be compiled
-		el: '.todoapp',
-
 		// app initial state
 		data: {
 			todos: todoStorage.fetch(),
@@ -78,7 +74,11 @@
 				if (!value) {
 					return;
 				}
-				this.todos.push({ title: value, completed: false });
+				this.todos.push({
+					id: todoStorage.uid++,
+					title: value,
+					completed: false
+				});
 				this.newTodo = '';
 			},
 

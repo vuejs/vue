@@ -1,6 +1,6 @@
 import { parse } from 'compiler/parser/index'
 import { optimize } from 'compiler/optimizer'
-import { baseOptions } from 'entries/web-compiler'
+import { baseOptions } from 'web/compiler/index'
 
 describe('optimizer', () => {
   it('simple', () => {
@@ -152,6 +152,20 @@ describe('optimizer', () => {
     expect(ast.children[0].static).toBe(false)
   })
 
+  it('key', () => {
+    const ast = parse('<p key="foo">hello world</p>', baseOptions)
+    optimize(ast, baseOptions)
+    expect(ast.static).toBe(false)
+    expect(ast.children[0].static).toBe(true)
+  })
+
+  it('ref', () => {
+    const ast = parse('<p ref="foo">hello world</p>', baseOptions)
+    optimize(ast, baseOptions)
+    expect(ast.static).toBe(false)
+    expect(ast.children[0].static).toBe(true)
+  })
+
   it('transition', () => {
     const ast = parse('<p v-if="show" transition="expand">hello world</p>', baseOptions)
     optimize(ast, baseOptions)
@@ -163,13 +177,6 @@ describe('optimizer', () => {
     const ast = parse('<input type="text" name="field1" :value="msg">', baseOptions)
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
-  })
-
-  it('v-ref directive', () => {
-    const ast = parse('<p v-ref:foo>hello world</p>', baseOptions)
-    optimize(ast, baseOptions)
-    expect(ast.static).toBe(false)
-    expect(ast.children[0].static).toBe(true)
   })
 
   it('v-on directive', () => {
@@ -195,5 +202,12 @@ describe('optimizer', () => {
     const ast = parse('<h1 id="section1">hello world</h1>', baseOptions)
     optimize(ast, {})
     expect(ast.static).toBe(false)
+  })
+
+  it('mark static trees inside v-for', () => {
+    const ast = parse(`<div><div v-for="i in 10"><span>hi</span></div></div>`, baseOptions)
+    optimize(ast, baseOptions)
+    expect(ast.children[0].children[0].staticRoot).toBe(true)
+    expect(ast.children[0].children[0].staticInFor).toBe(true)
   })
 })

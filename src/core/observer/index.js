@@ -9,7 +9,6 @@ import {
   isPlainObject,
   hasProto,
   hasOwn,
-  isReserved,
   warn
 } from '../util/index'
 
@@ -59,9 +58,9 @@ export class Observer {
    * value type is Object.
    */
   walk (obj: Object) {
-    const val = this.value
-    for (const key in obj) {
-      defineReactive(val, key, obj[key])
+    const keys = Object.keys(obj)
+    for (let i = 0; i < keys.length; i++) {
+      defineReactive(obj, keys[i], obj[keys[i]])
     }
   }
 
@@ -201,7 +200,7 @@ export function set (obj: Array<any> | Object, key: any, val: any) {
   if (obj._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
-      'at runtime - delcare it upfront in the data option.'
+      'at runtime - declare it upfront in the data option.'
     )
     return
   }
@@ -234,26 +233,4 @@ export function del (obj: Object, key: string) {
     return
   }
   ob.dep.notify()
-}
-
-export function proxy (vm: Component, key: string) {
-  if (!isReserved(key)) {
-    Object.defineProperty(vm, key, {
-      configurable: true,
-      enumerable: true,
-      get: function proxyGetter () {
-        return vm._data[key]
-      },
-      set: function proxySetter (val) {
-        vm._data[key] = val
-      }
-    })
-  }
-}
-
-// using Object type to avoid flow complaining
-export function unproxy (vm: Component, key: string) {
-  if (!isReserved(key)) {
-    delete vm[key]
-  }
 }

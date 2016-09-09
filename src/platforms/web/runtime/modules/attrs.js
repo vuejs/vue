@@ -1,5 +1,6 @@
 /* @flow */
 
+import { extend } from 'shared/util'
 import {
   isBooleanAttr,
   isEnumeratedAttr,
@@ -16,7 +17,11 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   let key, cur, old
   const elm = vnode.elm
   const oldAttrs = oldVnode.data.attrs || {}
-  const attrs = vnode.data.attrs || {}
+  let attrs = vnode.data.attrs || {}
+  // clone observed objects, as the user probably wants to mutate it
+  if (attrs.__ob__) {
+    attrs = vnode.data.attrs = extend({}, attrs)
+  }
 
   for (key in attrs) {
     cur = attrs[key]
@@ -63,14 +68,6 @@ function setAttr (el: Element, key: string, value: any) {
 }
 
 export default {
-  create: function (_: any, vnode: VNodeWithData) {
-    const attrs = vnode.data.staticAttrs
-    if (attrs) {
-      for (const key in attrs) {
-        setAttr(vnode.elm, key, attrs[key])
-      }
-    }
-    updateAttrs(_, vnode)
-  },
+  create: updateAttrs,
   update: updateAttrs
 }

@@ -6,7 +6,7 @@ describe('Options props', () => {
       data: {
         b: 'bar'
       },
-      template: '<test v-bind:b="b" v-ref:child></test>',
+      template: '<test v-bind:b="b" ref="child"></test>',
       components: {
         test: {
           props: ['b'],
@@ -30,7 +30,7 @@ describe('Options props', () => {
       data: {
         b: 'bar'
       },
-      template: '<test v-bind:b="b" v-ref:child></test>',
+      template: '<test v-bind:b="b" ref="child"></test>',
       components: {
         test: {
           props: { b: String },
@@ -266,7 +266,7 @@ describe('Options props', () => {
 
   it('treat boolean props properly', () => {
     const vm = new Vue({
-      template: '<comp v-ref:child prop-a prop-b="prop-b"></comp>',
+      template: '<comp ref="child" prop-a prop-b="prop-b"></comp>',
       components: {
         comp: {
           template: '<div></div>',
@@ -348,5 +348,29 @@ describe('Options props', () => {
       }
     }).$mount()
     expect(console.error.calls.count()).toBe(0)
+  })
+
+  // #3453
+  it('should not fire watcher on object/array props when parent re-renders', done => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        arr: []
+      },
+      template: '<test :prop="arr">hi</test>',
+      components: {
+        test: {
+          props: ['prop'],
+          watch: {
+            prop: spy
+          },
+          template: '<div><slot></slot></div>'
+        }
+      }
+    }).$mount()
+    vm.$forceUpdate()
+    waitForUpdate(() => {
+      expect(spy).not.toHaveBeenCalled()
+    }).then(done)
   })
 })

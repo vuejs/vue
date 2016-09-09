@@ -3,8 +3,7 @@ import Vue from 'entries/web-runtime'
 describe('Options render', () => {
   it('basic usage', () => {
     const vm = new Vue({
-      render () {
-        const h = this.$createElement
+      render (h) {
         const children = []
         for (let i = 0; i < this.items.length; i++) {
           children.push(h('li', { staticClass: 'task' }, [this.items[i].name]))
@@ -25,8 +24,7 @@ describe('Options render', () => {
 
   it('allow null data', () => {
     const vm = new Vue({
-      render () {
-        const h = this.$createElement
+      render (h) {
         return h('div', null, 'hello' /* string as children*/)
       }
     }).$mount()

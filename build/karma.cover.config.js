@@ -3,7 +3,7 @@ var base = require('./karma.base.config.js')
 module.exports = function (config) {
   var options = Object.assign(base, {
     browsers: ['PhantomJS'],
-    reporters: ['progress', 'coverage'],
+    reporters: ['mocha', 'coverage'],
     coverageReporter: {
       reporters: [
         { type: 'lcov', dir: '../coverage', subdir: '.' },
@@ -19,7 +19,8 @@ module.exports = function (config) {
       ignore: [
         'test/',
         'src/compiler/parser/html-parser.js',
-        'src/core/instance/proxy.js'
+        'src/core/instance/proxy.js',
+        'src/sfc/deindent.js'
       ]
     }]]
   }

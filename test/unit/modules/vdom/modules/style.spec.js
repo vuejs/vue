@@ -1,7 +1,7 @@
 import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 
-describe('style module', () => {
+describe('vdom style module', () => {
   it('should create an element with style', () => {
     const vnode = new VNode('p', { style: { fontSize: '12px' }})
     const elm = patch(null, vnode)

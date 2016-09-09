@@ -1,0 +1,24 @@
+{
+  "name": "vue-template-compiler",
+  "version": "2.0.0-rc.5",
+  "description": "template compiler for Vue 2.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vuejs/vue.git"
+  },
+  "keywords": [
+    "vue",
+    "compiler"
+  ],
+  "author": "Evan You",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vuejs/vue/issues"
+  },
+  "homepage": "https://github.com/vuejs/vue#readme",
+  "dependencies": {
+    "de-indent": "^1.0.2",
+    "entities": "^1.1.1"
+  }
+}

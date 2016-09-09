@@ -10,7 +10,7 @@ beforeEach(() => {
           const pass = isEqual(a, b)
           return {
             pass,
-            message: `Expected ${a}${pass ? ' ' : ' not '}to equal ${b}`
+            message: `Expected ${a} to equal ${b}`
           }
         }
       }

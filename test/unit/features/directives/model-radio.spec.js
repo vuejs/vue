@@ -14,15 +14,15 @@ describe('Directive v-model radio', () => {
       `
     }).$mount()
     document.body.appendChild(vm.$el)
-    expect(vm.$el.childNodes[0].checked).toBe(true)
-    expect(vm.$el.childNodes[1].checked).toBe(false)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
     vm.test = '2'
     waitForUpdate(() => {
-      expect(vm.$el.childNodes[0].checked).toBe(false)
-      expect(vm.$el.childNodes[1].checked).toBe(true)
-      vm.$el.childNodes[0].click()
-      expect(vm.$el.childNodes[0].checked).toBe(true)
-      expect(vm.$el.childNodes[1].checked).toBe(false)
+      expect(vm.$el.children[0].checked).toBe(false)
+      expect(vm.$el.children[1].checked).toBe(true)
+      vm.$el.children[0].click()
+      expect(vm.$el.children[0].checked).toBe(true)
+      expect(vm.$el.children[1].checked).toBe(false)
       expect(vm.test).toBe('1')
     }).then(() => {
       document.body.removeChild(vm.$el)
@@ -42,15 +42,15 @@ describe('Directive v-model radio', () => {
       `
     }).$mount()
     document.body.appendChild(vm.$el)
-    expect(vm.$el.childNodes[0].checked).toBe(true)
-    expect(vm.$el.childNodes[1].checked).toBe(false)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
     vm.test = 2
     waitForUpdate(() => {
-      expect(vm.$el.childNodes[0].checked).toBe(false)
-      expect(vm.$el.childNodes[1].checked).toBe(true)
-      vm.$el.childNodes[0].click()
-      expect(vm.$el.childNodes[0].checked).toBe(true)
-      expect(vm.$el.childNodes[1].checked).toBe(false)
+      expect(vm.$el.children[0].checked).toBe(false)
+      expect(vm.$el.children[1].checked).toBe(true)
+      vm.$el.children[0].click()
+      expect(vm.$el.children[0].checked).toBe(true)
+      expect(vm.$el.children[1].checked).toBe(false)
       expect(vm.test).toBe(1)
     }).then(() => {
       document.body.removeChild(vm.$el)

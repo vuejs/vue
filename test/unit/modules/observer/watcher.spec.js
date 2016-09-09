@@ -59,46 +59,17 @@ describe('Watcher', () => {
     }).then(done)
   })
 
-  it('swapping $data', done => {
-    // existing path
-    const watcher1 = new Watcher(vm, 'b.c', spy)
-    // non-existing path
-    const spy2 = jasmine.createSpy()
-    const watcher2 = new Watcher(vm, 'e', spy2)
-    expect(watcher1.value).toBe(2)
-    expect(watcher2.value).toBeUndefined()
-    vm.$data = { b: { c: 3 }, e: 4 }
-    waitForUpdate(() => {
-      expect(watcher1.value).toBe(3)
-      expect(watcher2.value).toBe(4)
-      expect(spy).toHaveBeenCalledWith(3, 2)
-      expect(spy2).toHaveBeenCalledWith(4, undefined)
-    }).then(done)
-  })
-
   it('path containing $data', done => {
     const watcher = new Watcher(vm, '$data.b.c', spy)
-    expect(watcher.value).toBeUndefined()
+    expect(watcher.value).toBe(2)
     vm.b = { c: 3 }
     waitForUpdate(() => {
-      expect(watcher.value).toBeUndefined()
-      expect(spy).not.toHaveBeenCalledWith(3, 2)
-      vm.$data = { b: { c: 4 }}
+      expect(watcher.value).toBe(3)
+      expect(spy).toHaveBeenCalledWith(3, 2)
+      vm.$data.b.c = 4
     }).then(() => {
-      expect(watcher.value).toBeUndefined()
-      expect(spy).not.toHaveBeenCalledWith(4, 3)
-    }).then(done)
-  })
-
-  it('not watching $data', done => {
-    const oldData = vm.$data
-    const watcher = new Watcher(vm, '$data', spy)
-    expect(watcher.value).toBeUndefined()
-    const newData = {}
-    vm.$data = newData
-    waitForUpdate(() => {
-      expect(spy).not.toHaveBeenCalledWith(newData, oldData)
-      expect(watcher.value).toBeUndefined()
+      expect(watcher.value).toBe(4)
+      expect(spy).toHaveBeenCalledWith(4, 3)
     }).then(done)
   })
 
@@ -119,6 +90,16 @@ describe('Watcher', () => {
     }).then(() => {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
       expect(spy.calls.count()).toBe(3)
+    }).then(done)
+  })
+
+  it('deep watch $data', done => {
+    new Watcher(vm, '$data', spy, {
+      deep: true
+    })
+    vm.b.c = 3
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalledWith(vm.$data, vm.$data)
     }).then(done)
   })
 
@@ -196,28 +177,5 @@ describe('Watcher', () => {
   it('warn not support path', () => {
     new Watcher(vm, 'd.e + c', spy)
     expect('Failed watching path:').toHaveBeenWarned()
-  })
-
-  it('catch getter error', () => {
-    Vue.config.errorHandler = spy
-    const err = new Error()
-    const vm = new Vue({
-      render () { throw err }
-    }).$mount()
-    expect('Error during component render').toHaveBeenWarned()
-    expect(spy).toHaveBeenCalledWith(err, vm)
-    Vue.config.errorHandler = null
-  })
-
-  it('catch user watcher error', () => {
-    Vue.config.errorHandler = spy
-    new Watcher(vm, function () {
-      return this.a.b.c
-    }, () => {}, { user: true })
-    expect('Error when evaluating watcher').toHaveBeenWarned()
-    expect(spy).toHaveBeenCalled()
-    expect(spy.calls.argsFor(0)[0] instanceof TypeError).toBe(true)
-    expect(spy.calls.argsFor(0)[1]).toBe(vm)
-    Vue.config.errorHandler = null
   })
 })

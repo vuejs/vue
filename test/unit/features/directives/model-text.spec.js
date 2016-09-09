@@ -45,7 +45,10 @@ describe('Directive v-model text', () => {
     expect(vm.test).toBe(1)
     vm.$el.value = '2'
     triggerEvent(vm.$el, 'input')
-    expect(vm.test).toBe(2)
+    // should let strings pass through
+    vm.$el.value = 'f'
+    triggerEvent(vm.$el, 'input')
+    expect(vm.test).toBe('f')
   })
 
   it('.trim modifier', () => {
@@ -137,5 +140,24 @@ describe('Directive v-model text', () => {
       template: '<div v-model="test"></div>'
     }).$mount()
     expect('v-model is not supported on element type: <div>').toHaveBeenWarned()
+  })
+
+  // #3468
+  it('should have higher priority than user v-on events', () => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        a: 'a'
+      },
+      template: '<input v-model="a" @input="onInput">',
+      methods: {
+        onInput (e) {
+          spy(e.target.value)
+        }
+      }
+    }).$mount()
+    vm.$el.value = 'b'
+    triggerEvent(vm.$el, 'input')
+    expect(spy).toHaveBeenCalledWith('b')
   })
 })

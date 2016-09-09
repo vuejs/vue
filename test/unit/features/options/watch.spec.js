@@ -101,21 +101,4 @@ describe('Options watch', () => {
       expect(spy).toHaveBeenCalledWith(vm.a, oldA)
     }).then(done)
   })
-
-  it('replace $data', done => {
-    const vm = new Vue({
-      data: {
-        a: 1
-      },
-      watch: {
-        a: spy
-      }
-    })
-    expect(spy).not.toHaveBeenCalled()
-    vm.$data = { a: 2 }
-    expect(spy).not.toHaveBeenCalled()
-    waitForUpdate(() => {
-      expect(spy).toHaveBeenCalledWith(2, 1)
-    }).then(done)
-  })
 })
