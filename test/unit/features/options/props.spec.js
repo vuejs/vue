@@ -244,6 +244,19 @@ describe('Options props', () => {
       expect(console.error.calls.count()).toBe(2)
       expect('Expected Boolean').toHaveBeenWarned()
     })
+
+    it('optional prop of any type (type: true or prop: true)', () => {
+      makeInstance(1, true)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance('any', true)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance({}, true)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(undefined, true)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(null, true)
+      expect(console.error.calls.count()).toBe(0)
+    })
   })
 
   it('should warn data fields already defined as a prop', () => {
