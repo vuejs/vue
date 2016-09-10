@@ -472,8 +472,8 @@ describe('Component slot', () => {
         }
       }
     }).$mount()
-    expect('Duplicate presense of slot "default"').toHaveBeenWarned()
-    expect('Duplicate presense of slot "a"').toHaveBeenWarned()
+    expect('Duplicate presence of slot "default"').toHaveBeenWarned()
+    expect('Duplicate presence of slot "a"').toHaveBeenWarned()
   })
 
   it('should not warn valid conditional slots', () => {
@@ -492,7 +492,7 @@ describe('Component slot', () => {
         }
       }
     }).$mount()
-    expect('Duplicate presense of slot "default"').not.toHaveBeenWarned()
+    expect('Duplicate presence of slot "default"').not.toHaveBeenWarned()
   })
 
   // #3518

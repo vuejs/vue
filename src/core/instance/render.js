@@ -164,7 +164,7 @@ export function renderMixin (Vue: Class<Component>) {
     // warn duplicate slot usage
     if (slotNodes && process.env.NODE_ENV !== 'production') {
       slotNodes._rendered && warn(
-        `Duplicate presense of slot "${name}" found in the same render tree ` +
+        `Duplicate presence of slot "${name}" found in the same render tree ` +
         `- this will likely cause render errors.`,
         this
       )
