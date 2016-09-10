@@ -142,7 +142,9 @@ function initMethods (vm: Component) {
   const methods = vm.$options.methods
   if (methods) {
     for (const key in methods) {
-      vm[key] = bind(methods[key], vm)
+      if (methods[key] != null) {
+        vm[key] = bind(methods[key], vm)
+      }
     }
   }
 }
