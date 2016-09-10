@@ -144,6 +144,8 @@ function initMethods (vm: Component) {
     for (const key in methods) {
       if (methods[key] != null) {
         vm[key] = bind(methods[key], vm)
+      } else {
+        warn(`The method ${key} on vue instance is undefined.`, vm)
       }
     }
   }
