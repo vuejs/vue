@@ -170,8 +170,8 @@ export function isPlainObject (obj: any): boolean {
  * Merge an Array of Objects into a single Object.
  */
 export function toObject (arr: Array<any>): Object {
-  const res = arr[0] || {}
-  for (let i = 1; i < arr.length; i++) {
+  const res = {}
+  for (let i = 0; i < arr.length; i++) {
     if (arr[i]) {
       extend(res, arr[i])
     }
