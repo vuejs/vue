@@ -142,7 +142,11 @@ function initMethods (vm: Component) {
   const methods = vm.$options.methods
   if (methods) {
     for (const key in methods) {
-      vm[key] = bind(methods[key], vm)
+      if (methods[key] != null) {
+        vm[key] = bind(methods[key], vm)
+      } else if (process.env.NODE_ENV !== 'production') {
+        warn(`The method ${key} on vue instance is undefined.`, vm)
+      }
     }
   }
 }
