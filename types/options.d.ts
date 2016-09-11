@@ -8,7 +8,7 @@ type Constructor = {
 type $createElement = typeof Vue.prototype.$createElement;
 
 export interface ComponentOptions<V extends Vue> {
-  data?(this: V): Object;
+  data?: Object | ((this: V) => Object);
   props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
   propsData?: Object;
   computed?: { [key: string]: ((this: V) => any) | ComputedOptions<V> };
@@ -30,7 +30,7 @@ export interface ComponentOptions<V extends Vue> {
   updated?(this: V): void;
 
   directives?: { [key: string]: DirectiveOptions | DirectiveFunction };
-  components?: { [key: string]: ComponentOptions<V> | FunctionalComponentOptions | typeof Vue };
+  components?: { [key: string]: ComponentOptions<Vue> | FunctionalComponentOptions | typeof Vue };
   transitions?: { [key: string]: Object };
   filters?: { [key: string]: Function };
 
