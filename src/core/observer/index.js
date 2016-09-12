@@ -188,6 +188,13 @@ export function defineReactive (
  * already exist.
  */
 export function set (obj: Array<any> | Object, key: any, val: any) {
+  if (arguments.length < 3) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Set now requires you to specifiy the object you are modifying' +
+      'as the first argument. See: http://rc.vuejs.org/api/#Vue-set'
+    )
+    return
+  }
   if (Array.isArray(obj)) {
     obj.splice(key, 1, val)
     return val
