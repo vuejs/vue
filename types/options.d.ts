@@ -7,37 +7,37 @@ type Constructor = {
 
 type $createElement = typeof Vue.prototype.$createElement;
 
-export interface ComponentOptions {
-  data?: Object | ( (this: Vue) => Object );
+export interface ComponentOptions<V extends Vue> {
+  data?: Object | ((this: V) => Object);
   props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
   propsData?: Object;
-  computed?: { [key: string]: ((this: Vue) => any) | ComputedOptions };
+  computed?: { [key: string]: ((this: V) => any) | ComputedOptions<V> };
   methods?: { [key: string]: Function };
-  watch?: { [key: string]: ({ handler: WatchHandler } & WatchOptions) | WatchHandler | string };
+  watch?: { [key: string]: ({ handler: WatchHandler<V> } & WatchOptions) | WatchHandler<V> | string };
 
   el?: Element | String;
   template?: string;
-  render?(createElement: $createElement): VNode;
-  staticRenderFns?: (() => VNode)[];
+  render?(this: V, createElement: $createElement): VNode;
+  staticRenderFns?: ((createElement: $createElement) => VNode)[];
 
-  beforeCreate?(): void;
-  created?(): void;
-  beforeDestroy?(): void;
-  destroyed?(): void;
-  beforeMount?(): void;
-  mounted?(): void;
-  beforeUpdate?(): void;
-  updated?(): void;
+  beforeCreate?(this: V): void;
+  created?(this: V): void;
+  beforeDestroy?(this: V): void;
+  destroyed?(this: V): void;
+  beforeMount?(this: V): void;
+  mounted?(this: V): void;
+  beforeUpdate?(this: V): void;
+  updated?(this: V): void;
 
   directives?: { [key: string]: DirectiveOptions | DirectiveFunction };
-  components?: { [key: string]: ComponentOptions | FunctionalComponentOptions | typeof Vue };
+  components?: { [key: string]: ComponentOptions<Vue> | FunctionalComponentOptions | typeof Vue };
   transitions?: { [key: string]: Object };
   filters?: { [key: string]: Function };
 
   parent?: Vue;
-  mixins?: (ComponentOptions | typeof Vue)[];
+  mixins?: (ComponentOptions<Vue> | typeof Vue)[];
   name?: string;
-  extends?: ComponentOptions | typeof Vue;
+  extends?: ComponentOptions<Vue> | typeof Vue;
   delimiters?: [string, string];
 }
 
@@ -63,13 +63,13 @@ export interface PropOptions {
   validator?(value: any): boolean;
 }
 
-export interface ComputedOptions {
-  get?(this: Vue): any;
-  set?(this: Vue, value: any): void;
+export interface ComputedOptions<V> {
+  get?(this: V): any;
+  set?(this: V, value: any): void;
   cache?: boolean;
 }
 
-export type WatchHandler = <T>(val: T, oldVal: T) => void;
+export type WatchHandler<V> = (this: V, val: any, oldVal: any) => void;
 
 export interface WatchOptions {
   deep?: boolean;

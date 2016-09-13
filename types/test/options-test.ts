@@ -7,6 +7,8 @@ interface Component extends Vue {
 
 Vue.component('component', {
   data() {
+    this.$mount
+    this.a
     return {
       a: 1
     }
@@ -50,7 +52,9 @@ Vue.component('component', {
     },
     'b': 'someMethod',
     'c': {
-      handler(val: number, oldval: number) {},
+      handler(val, oldVal) {
+        this.a = val
+      },
       deep: true
     }
   },
@@ -91,7 +95,9 @@ Vue.component('component', {
   },
   staticRenderFns: [],
 
-  beforeCreate() {},
+  beforeCreate() {
+    this.a = 1;
+  },
   created() {},
   beforeDestroy() {},
   destroyed() {},
@@ -120,7 +126,7 @@ Vue.component('component', {
   },
   components: {
     a: Vue.component(""),
-    b: {} as ComponentOptions
+    b: {} as ComponentOptions<Vue>
   },
   transitions: {},
   filters: {
@@ -129,11 +135,11 @@ Vue.component('component', {
     }
   },
   parent: new Vue,
-  mixins: [Vue.component(""), ({} as ComponentOptions)],
+  mixins: [Vue.component(""), ({} as ComponentOptions<Vue>)],
   name: "Component",
-  extends: {} as ComponentOptions,
+  extends: {} as ComponentOptions<Vue>,
   delimiters: ["${", "}"]
-} as ComponentOptions);
+} as ComponentOptions<Component>);
 
 Vue.component('functional-component', {
   props: ['prop'],

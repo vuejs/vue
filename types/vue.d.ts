@@ -11,11 +11,11 @@ import { PluginFunction, PluginObject } from "./plugin";
 
 export declare class Vue {
 
-  constructor(options?: ComponentOptions);
+  constructor(options?: ComponentOptions<Vue>);
 
   $data: Object;
   readonly $el: HTMLElement;
-  readonly $options: ComponentOptions;
+  readonly $options: ComponentOptions<this>;
   readonly $parent: Vue;
   readonly $root: Vue;
   readonly $children: Vue[];
@@ -30,7 +30,7 @@ export declare class Vue {
   $delete: typeof Vue.delete;
   $watch(
     expOrFn: string | Function,
-    callback: WatchHandler,
+    callback: WatchHandler<this>,
     options?: WatchOptions
   ): (() => void);
   $on(event: string, callback: Function): this;
@@ -54,7 +54,7 @@ export declare class Vue {
     keyCodes: { [key: string]: number };
   }
 
-  static extend(options: ComponentOptions): typeof Vue;
+  static extend(options: ComponentOptions<Vue>): typeof Vue;
   static nextTick(callback: () => void, context?: any[]): void;
   static set<T>(object: Object, key: string, value: T): T;
   static set<T>(array: T[], key: number, value: T): T;
@@ -67,11 +67,11 @@ export declare class Vue {
   static filter(id: string, definition?: Function): Function;
   static component(
     id: string,
-    definition?: ComponentOptions | FunctionalComponentOptions | typeof Vue
+    definition?: ComponentOptions<Vue> | FunctionalComponentOptions | typeof Vue
   ): typeof Vue;
 
   static use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): void;
-  static mixin(mixin: typeof Vue | ComponentOptions): void;
+  static mixin(mixin: typeof Vue | ComponentOptions<Vue>): void;
   static compile(template: string): {
     render(createElement: typeof Vue.prototype.$createElement): VNode;
     staticRenderFns: (() => VNode)[];
