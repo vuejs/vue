@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-rc.5
+ * Vue.js v2.0.0-rc.6
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -181,8 +181,8 @@ function isPlainObject (obj) {
  * Merge an Array of Objects into a single Object.
  */
 function toObject (arr) {
-  var res = arr[0] || {}
-  for (var i = 1; i < arr.length; i++) {
+  var res = {}
+  for (var i = 0; i < arr.length; i++) {
     if (arr[i]) {
       extend(res, arr[i])
     }
@@ -977,9 +977,9 @@ var Observer = function Observer (value) {
  * value type is Object.
  */
 Observer.prototype.walk = function walk (obj) {
-  var val = this.value
-  for (var key in obj) {
-    defineReactive(val, key, obj[key])
+  var keys = Object.keys(obj)
+  for (var i = 0; i < keys.length; i++) {
+    defineReactive(obj, keys[i], obj[keys[i]])
   }
 };
 
@@ -1276,7 +1276,11 @@ function initMethods (vm) {
   var methods = vm.$options.methods
   if (methods) {
     for (var key in methods) {
-      vm[key] = bind(methods[key], vm)
+      if (methods[key] != null) {
+        vm[key] = bind(methods[key], vm)
+      } else if ("development" !== 'production') {
+        warn(("Method \"" + key + "\" is undefined in options."), vm)
+      }
     }
   }
 }
@@ -2156,6 +2160,13 @@ function renderMixin (Vue) {
     var staticRenderFns = ref.staticRenderFns;
     var _parentVnode = ref._parentVnode;
 
+    if (vm._isMounted) {
+      // clone slot nodes on re-renders
+      for (var key in vm.$slots) {
+        vm.$slots[key] = cloneVNodes(vm.$slots[key])
+      }
+    }
+
     if (staticRenderFns && !vm._staticTrees) {
       vm._staticTrees = []
     }
@@ -2274,20 +2285,14 @@ function renderMixin (Vue) {
     fallback
   ) {
     var slotNodes = this.$slots[name]
-    if (slotNodes) {
-      // warn duplicate slot usage
-      if ("development" !== 'production') {
-        slotNodes._rendered && warn(
-          "Duplicate presense of slot \"" + name + "\" found in the same render tree " +
-          "- this will likely cause render errors.",
-          this
-        )
-        slotNodes._rendered = true
-      }
-      // clone slot nodes on re-renders
-      if (this._isMounted) {
-        slotNodes = cloneVNodes(slotNodes)
-      }
+    // warn duplicate slot usage
+    if (slotNodes && "development" !== 'production') {
+      slotNodes._rendered && warn(
+        "Duplicate presence of slot \"" + name + "\" found in the same render tree " +
+        "- this will likely cause render errors.",
+        this
+      )
+      slotNodes._rendered = true
     }
     return slotNodes || fallback
   }
@@ -2972,7 +2977,7 @@ function assertProp (
     return
   }
   var type = prop.type
-  var valid = !type
+  var valid = !type || type === true
   var expectedTypes = []
   if (type) {
     if (!Array.isArray(type)) {
@@ -3290,7 +3295,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   get: function () { return config._isServer; }
 })
 
-Vue.version = '2.0.0-rc.5'
+Vue.version = '2.0.0-rc.6'
 
 /*  */
 
@@ -3513,17 +3518,6 @@ var UA$1 = inBrowser && window.navigator.userAgent.toLowerCase()
 var isIE = UA$1 && /msie|trident/.test(UA$1)
 var isIE9 = UA$1 && UA$1.indexOf('msie 9.0') > 0
 var isAndroid = UA$1 && UA$1.indexOf('android') > 0
-
-// According to
-// https://w3c.github.io/DOM-Parsing/#dfn-serializing-an-attribute-value
-// when serializing innerHTML, <, >, ", & should be encoded as entities.
-// However, only some browsers, e.g. PhantomJS, encodes < and >.
-// this causes problems with the in-browser parser.
-var shouldDecodeTags = inBrowser ? (function () {
-  var div = document.createElement('div')
-  div.innerHTML = '<div a=">">'
-  return div.innerHTML.indexOf('&gt;') > 0
-})() : false
 
 /**
  * Query an element selector if it's not an element already.
@@ -5473,6 +5467,26 @@ setTimeout(function () {
 
 /*  */
 
+// check whether current browser encodes a char inside attribute values
+function shouldDecode (content, encoded) {
+  var div = document.createElement('div')
+  div.innerHTML = "<div a=\"" + content + "\">"
+  return div.innerHTML.indexOf(encoded) > 0
+}
+
+// According to
+// https://w3c.github.io/DOM-Parsing/#dfn-serializing-an-attribute-value
+// when serializing innerHTML, <, >, ", & should be encoded as entities.
+// However, only some browsers, e.g. PhantomJS, encodes < and >.
+// this causes problems with the in-browser parser.
+var shouldDecodeTags = inBrowser ? shouldDecode('>', '&gt;') : false
+
+// #3663
+// IE encodes newlines inside attribute values while other browsers don't
+var shouldDecodeNewlines = inBrowser ? shouldDecode('\n', '&#10;') : false
+
+/*  */
+
 var decoder = document.createElement('div')
 
 function decodeHTML (html) {
@@ -5527,14 +5541,18 @@ var isSpecialTag = makeMap('script,style', true)
 
 var reCache = {}
 
-var ampRE = /&amp;/g
 var ltRE = /&lt;/g
 var gtRE = /&gt;/g
+var nlRE = /&#10;/g
+var ampRE = /&amp;/g
 var quoteRE = /&quot;/g
 
-function decodeAttr (value, shouldDecodeTags) {
+function decodeAttr (value, shouldDecodeTags, shouldDecodeNewlines) {
   if (shouldDecodeTags) {
     value = value.replace(ltRE, '<').replace(gtRE, '>')
+  }
+  if (shouldDecodeNewlines) {
+    value = value.replace(nlRE, '\n')
   }
   return value.replace(ampRE, '&').replace(quoteRE, '"')
 }
@@ -5544,7 +5562,6 @@ function parseHTML (html, options) {
   var expectHTML = options.expectHTML
   var isUnaryTag = options.isUnaryTag || no
   var isFromDOM = options.isFromDOM
-  var shouldDecodeTags = options.shouldDecodeTags
   var index = 0
   var last, lastTag
   while (html) {
@@ -5694,7 +5711,11 @@ function parseHTML (html, options) {
       var value = args[3] || args[4] || args[5] || ''
       attrs[i] = {
         name: args[1],
-        value: isFromDOM ? decodeAttr(value, shouldDecodeTags) : value
+        value: isFromDOM ? decodeAttr(
+          value,
+          options.shouldDecodeTags,
+          options.shouldDecodeNewlines
+        ) : value
       }
     }
 
@@ -6027,6 +6048,7 @@ function parse (
     isUnaryTag: options.isUnaryTag,
     isFromDOM: options.isFromDOM,
     shouldDecodeTags: options.shouldDecodeTags,
+    shouldDecodeNewlines: options.shouldDecodeNewlines,
     start: function start (tag, attrs, unary) {
       // check namespace.
       // inherit parent ns if there is one
@@ -7292,6 +7314,7 @@ Vue.prototype.$mount = function (
         warn: warn,
         isFromDOM: isFromDOM,
         shouldDecodeTags: shouldDecodeTags,
+        shouldDecodeNewlines: shouldDecodeNewlines,
         delimiters: options.delimiters
       }, this);
       var render = ref.render;

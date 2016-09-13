@@ -172,8 +172,8 @@ function isPlainObject (obj) {
  * Merge an Array of Objects into a single Object.
  */
 function toObject (arr) {
-  var res = arr[0] || {}
-  for (var i = 1; i < arr.length; i++) {
+  var res = {}
+  for (var i = 0; i < arr.length; i++) {
     if (arr[i]) {
       extend(res, arr[i])
     }
@@ -968,9 +968,9 @@ var Observer = function Observer (value) {
  * value type is Object.
  */
 Observer.prototype.walk = function walk (obj) {
-  var val = this.value
-  for (var key in obj) {
-    defineReactive(val, key, obj[key])
+  var keys = Object.keys(obj)
+  for (var i = 0; i < keys.length; i++) {
+    defineReactive(obj, keys[i], obj[keys[i]])
   }
 };
 
@@ -1269,7 +1269,11 @@ function initMethods (vm) {
   var methods = vm.$options.methods
   if (methods) {
     for (var key in methods) {
-      vm[key] = bind(methods[key], vm)
+      if (methods[key] != null) {
+        vm[key] = bind(methods[key], vm)
+      } else if (process.env.NODE_ENV !== 'production') {
+        warn(("Method \"" + key + "\" is undefined in options."), vm)
+      }
     }
   }
 }
@@ -2149,6 +2153,13 @@ function renderMixin (Vue) {
     var staticRenderFns = ref.staticRenderFns;
     var _parentVnode = ref._parentVnode;
 
+    if (vm._isMounted) {
+      // clone slot nodes on re-renders
+      for (var key in vm.$slots) {
+        vm.$slots[key] = cloneVNodes(vm.$slots[key])
+      }
+    }
+
     if (staticRenderFns && !vm._staticTrees) {
       vm._staticTrees = []
     }
@@ -2267,20 +2278,14 @@ function renderMixin (Vue) {
     fallback
   ) {
     var slotNodes = this.$slots[name]
-    if (slotNodes) {
-      // warn duplicate slot usage
-      if (process.env.NODE_ENV !== 'production') {
-        slotNodes._rendered && warn(
-          "Duplicate presense of slot \"" + name + "\" found in the same render tree " +
-          "- this will likely cause render errors.",
-          this
-        )
-        slotNodes._rendered = true
-      }
-      // clone slot nodes on re-renders
-      if (this._isMounted) {
-        slotNodes = cloneVNodes(slotNodes)
-      }
+    // warn duplicate slot usage
+    if (slotNodes && process.env.NODE_ENV !== 'production') {
+      slotNodes._rendered && warn(
+        "Duplicate presence of slot \"" + name + "\" found in the same render tree " +
+        "- this will likely cause render errors.",
+        this
+      )
+      slotNodes._rendered = true
     }
     return slotNodes || fallback
   }
@@ -2967,7 +2972,7 @@ function assertProp (
     return
   }
   var type = prop.type
-  var valid = !type
+  var valid = !type || type === true
   var expectedTypes = []
   if (type) {
     if (!Array.isArray(type)) {
@@ -3285,7 +3290,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   get: function () { return config._isServer; }
 })
 
-Vue.version = '2.0.0-rc.5'
+Vue.version = '2.0.0-rc.6'
 
 /*  */
 
@@ -3506,17 +3511,6 @@ var UA$1 = inBrowser && window.navigator.userAgent.toLowerCase()
 var isIE = UA$1 && /msie|trident/.test(UA$1)
 var isIE9 = UA$1 && UA$1.indexOf('msie 9.0') > 0
 var isAndroid = UA$1 && UA$1.indexOf('android') > 0
-
-// According to
-// https://w3c.github.io/DOM-Parsing/#dfn-serializing-an-attribute-value
-// when serializing innerHTML, <, >, ", & should be encoded as entities.
-// However, only some browsers, e.g. PhantomJS, encodes < and >.
-// this causes problems with the in-browser parser.
-var shouldDecodeTags = inBrowser ? (function () {
-  var div = document.createElement('div')
-  div.innerHTML = '<div a=">">'
-  return div.innerHTML.indexOf('&gt;') > 0
-})() : false
 
 /**
  * Query an element selector if it's not an element already.

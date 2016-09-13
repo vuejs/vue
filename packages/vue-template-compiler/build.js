@@ -179,8 +179,8 @@ function isPlainObject (obj) {
  * Merge an Array of Objects into a single Object.
  */
 function toObject (arr) {
-  var res = arr[0] || {}
-  for (var i = 1; i < arr.length; i++) {
+  var res = {}
+  for (var i = 0; i < arr.length; i++) {
     if (arr[i]) {
       extend(res, arr[i])
     }
@@ -1007,9 +1007,9 @@ var Observer = function Observer (value) {
  * value type is Object.
  */
 Observer.prototype.walk = function walk (obj) {
-  var val = this.value
-  for (var key in obj) {
-    defineReactive(val, key, obj[key])
+  var keys = Object.keys(obj)
+  for (var i = 0; i < keys.length; i++) {
+    defineReactive(obj, keys[i], obj[keys[i]])
   }
 };
 
@@ -1308,7 +1308,11 @@ function initMethods (vm) {
   var methods = vm.$options.methods
   if (methods) {
     for (var key in methods) {
-      vm[key] = bind(methods[key], vm)
+      if (methods[key] != null) {
+        vm[key] = bind(methods[key], vm)
+      } else if (process.env.NODE_ENV !== 'production') {
+        warn(("Method \"" + key + "\" is undefined in options."), vm)
+      }
     }
   }
 }
@@ -2168,6 +2172,13 @@ function renderMixin (Vue) {
     var staticRenderFns = ref.staticRenderFns;
     var _parentVnode = ref._parentVnode;
 
+    if (vm._isMounted) {
+      // clone slot nodes on re-renders
+      for (var key in vm.$slots) {
+        vm.$slots[key] = cloneVNodes(vm.$slots[key])
+      }
+    }
+
     if (staticRenderFns && !vm._staticTrees) {
       vm._staticTrees = []
     }
@@ -2286,20 +2297,14 @@ function renderMixin (Vue) {
     fallback
   ) {
     var slotNodes = this.$slots[name]
-    if (slotNodes) {
-      // warn duplicate slot usage
-      if (process.env.NODE_ENV !== 'production') {
-        slotNodes._rendered && warn(
-          "Duplicate presense of slot \"" + name + "\" found in the same render tree " +
-          "- this will likely cause render errors.",
-          this
-        )
-        slotNodes._rendered = true
-      }
-      // clone slot nodes on re-renders
-      if (this._isMounted) {
-        slotNodes = cloneVNodes(slotNodes)
-      }
+    // warn duplicate slot usage
+    if (slotNodes && process.env.NODE_ENV !== 'production') {
+      slotNodes._rendered && warn(
+        "Duplicate presence of slot \"" + name + "\" found in the same render tree " +
+        "- this will likely cause render errors.",
+        this
+      )
+      slotNodes._rendered = true
     }
     return slotNodes || fallback
   }
@@ -2954,7 +2959,7 @@ function assertProp (
     return
   }
   var type = prop.type
-  var valid = !type
+  var valid = !type || type === true
   var expectedTypes = []
   if (type) {
     if (!Array.isArray(type)) {
@@ -3130,17 +3135,6 @@ var isIE = UA && /msie|trident/.test(UA)
 var isIE9 = UA && UA.indexOf('msie 9.0') > 0
 var isAndroid = UA && UA.indexOf('android') > 0
 
-// According to
-// https://w3c.github.io/DOM-Parsing/#dfn-serializing-an-attribute-value
-// when serializing innerHTML, <, >, ", & should be encoded as entities.
-// However, only some browsers, e.g. PhantomJS, encodes < and >.
-// this causes problems with the in-browser parser.
-var shouldDecodeTags = inBrowser ? (function () {
-  var div = document.createElement('div')
-  div.innerHTML = '<div a=">">'
-  return div.innerHTML.indexOf('&gt;') > 0
-})() : false
-
 /**
  * Not type-checking this file because it's mostly vendor code.
  */
@@ -3188,14 +3182,18 @@ var isSpecialTag = makeMap('script,style', true)
 
 var reCache = {}
 
-var ampRE = /&amp;/g
 var ltRE = /&lt;/g
 var gtRE = /&gt;/g
+var nlRE = /&#10;/g
+var ampRE = /&amp;/g
 var quoteRE = /&quot;/g
 
-function decodeAttr (value, shouldDecodeTags) {
+function decodeAttr (value, shouldDecodeTags, shouldDecodeNewlines) {
   if (shouldDecodeTags) {
     value = value.replace(ltRE, '<').replace(gtRE, '>')
+  }
+  if (shouldDecodeNewlines) {
+    value = value.replace(nlRE, '\n')
   }
   return value.replace(ampRE, '&').replace(quoteRE, '"')
 }
@@ -3205,7 +3203,6 @@ function parseHTML (html, options) {
   var expectHTML = options.expectHTML
   var isUnaryTag = options.isUnaryTag || no
   var isFromDOM = options.isFromDOM
-  var shouldDecodeTags = options.shouldDecodeTags
   var index = 0
   var last, lastTag
   while (html) {
@@ -3355,7 +3352,11 @@ function parseHTML (html, options) {
       var value = args[3] || args[4] || args[5] || ''
       attrs[i] = {
         name: args[1],
-        value: isFromDOM ? decodeAttr(value, shouldDecodeTags) : value
+        value: isFromDOM ? decodeAttr(
+          value,
+          options.shouldDecodeTags,
+          options.shouldDecodeNewlines
+        ) : value
       }
     }
 
@@ -3688,6 +3689,7 @@ function parse (
     isUnaryTag: options.isUnaryTag,
     isFromDOM: options.isFromDOM,
     shouldDecodeTags: options.shouldDecodeTags,
+    shouldDecodeNewlines: options.shouldDecodeNewlines,
     start: function start (tag, attrs, unary) {
       // check namespace.
       // inherit parent ns if there is one
