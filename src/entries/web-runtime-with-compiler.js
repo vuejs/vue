@@ -2,7 +2,8 @@
 
 import Vue from './web-runtime'
 import { warn, cached } from 'core/util/index'
-import { query, shouldDecodeTags } from 'web/util/index'
+import { query } from 'web/util/index'
+import { shouldDecodeTags, shouldDecodeNewlines } from 'web/util/compat'
 import { compileToFunctions } from 'web/compiler/index'
 
 const idToTemplate = cached(id => {
@@ -54,6 +55,7 @@ Vue.prototype.$mount = function (
         warn,
         isFromDOM,
         shouldDecodeTags,
+        shouldDecodeNewlines,
         delimiters: options.delimiters
       }, this)
       options.render = render

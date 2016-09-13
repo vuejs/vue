@@ -62,6 +62,7 @@ export function parse (
     isUnaryTag: options.isUnaryTag,
     isFromDOM: options.isFromDOM,
     shouldDecodeTags: options.shouldDecodeTags,
+    shouldDecodeNewlines: options.shouldDecodeNewlines,
     start (tag, attrs, unary) {
       // check namespace.
       // inherit parent ns if there is one

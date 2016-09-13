@@ -48,14 +48,18 @@ const isSpecialTag = makeMap('script,style', true)
 
 const reCache = {}
 
-const ampRE = /&amp;/g
 const ltRE = /&lt;/g
 const gtRE = /&gt;/g
+const nlRE = /&#10;/g
+const ampRE = /&amp;/g
 const quoteRE = /&quot;/g
 
-function decodeAttr (value, shouldDecodeTags) {
+function decodeAttr (value, shouldDecodeTags, shouldDecodeNewlines) {
   if (shouldDecodeTags) {
     value = value.replace(ltRE, '<').replace(gtRE, '>')
+  }
+  if (shouldDecodeNewlines) {
+    value = value.replace(nlRE, '\n')
   }
   return value.replace(ampRE, '&').replace(quoteRE, '"')
 }
@@ -65,7 +69,6 @@ export function parseHTML (html, options) {
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
   const isFromDOM = options.isFromDOM
-  const shouldDecodeTags = options.shouldDecodeTags
   let index = 0
   let last, lastTag
   while (html) {
@@ -215,7 +218,11 @@ export function parseHTML (html, options) {
       const value = args[3] || args[4] || args[5] || ''
       attrs[i] = {
         name: args[1],
-        value: isFromDOM ? decodeAttr(value, shouldDecodeTags) : value
+        value: isFromDOM ? decodeAttr(
+          value,
+          options.shouldDecodeTags,
+          options.shouldDecodeNewlines
+        ) : value
       }
     }
 

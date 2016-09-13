@@ -14,6 +14,7 @@ declare type CompilerOptions = {
   preserveWhitespace?: boolean;
   isFromDOM?: boolean;
   shouldDecodeTags?: boolean;
+  shouldDecodeNewlines?: boolean;
 
   // runtime user-configurable
   delimiters?: [string, string]; // template delimiters

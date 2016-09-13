@@ -67,13 +67,20 @@ describe('Options el', () => {
   })
 
   // https://w3c.github.io/DOM-Parsing/#dfn-serializing-an-attribute-value
-  it('properly decode attribute values when parsing templates from DOM', function () {
+  it('properly decode attribute values when parsing templates from DOM', () => {
     const el = document.createElement('div')
     el.innerHTML = '<a href="/a?foo=bar&baz=qux" name="<abc>" single=\'"hi"\'></a>'
     const vm = new Vue({ el })
     expect(vm.$el.children[0].getAttribute('href')).toBe('/a?foo=bar&baz=qux')
     expect(vm.$el.children[0].getAttribute('name')).toBe('<abc>')
     expect(vm.$el.children[0].getAttribute('single')).toBe('"hi"')
+  })
+
+  it('decode attribute value newlines when parsing templates from DOM in IE', () => {
+    const el = document.createElement('div')
+    el.innerHTML = `<a :style="{\ncolor:'red'\n}"></a>`
+    const vm = new Vue({ el })
+    expect(vm.$el.children[0].style.color).toBe('red')
   })
 
   it('warn cannot find element', () => {
