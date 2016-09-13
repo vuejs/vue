@@ -145,7 +145,7 @@ function initMethods (vm: Component) {
       if (methods[key] != null) {
         vm[key] = bind(methods[key], vm)
       } else if (process.env.NODE_ENV !== 'production') {
-        warn(`The method ${key} on vue instance is undefined.`, vm)
+        warn(`Method "${key}" is undefined in options.`, vm)
       }
     }
   }
