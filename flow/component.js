@@ -89,6 +89,10 @@ declare interface Component {
   _n: (value: string) => number | string;
   // empty vnode
   _e: () => VNode;
+  // loose equal
+  _q: (a: mixed, b: mixed) => boolean;
+  // loose indexOf
+  _i: (arr: Array<mixed>, val: mixed) => number;
   // resolveFilter
   _f: (id: string) => Function;
   // renderList

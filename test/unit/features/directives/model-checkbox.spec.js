@@ -105,6 +105,34 @@ describe('Directive v-model checkbox', () => {
     }).then(done)
   })
 
+  it('bind to Array value with value bindings (object loose equal)', done => {
+    const vm = new Vue({
+      data: {
+        test: [{ a: 1 }]
+      },
+      template: `
+        <div>
+          <input type="checkbox" v-model="test" :value="{ a: 1 }">
+          <input type="checkbox" v-model="test" :value="{ a: 2 }">
+        </div>
+      `
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
+    vm.$el.children[0].click()
+    expect(vm.test.length).toBe(0)
+    vm.$el.children[1].click()
+    expect(vm.test).toEqual([{ a: 2 }])
+    vm.$el.children[0].click()
+    expect(vm.test).toEqual([{ a: 2 }, { a: 1 }])
+    vm.test = [{ a: 1 }]
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].checked).toBe(true)
+      expect(vm.$el.children[1].checked).toBe(false)
+    }).then(done)
+  })
+
   it('warn inline checked', () => {
     const vm = new Vue({
       template: `<input type="checkbox" v-model="test" checked>`,

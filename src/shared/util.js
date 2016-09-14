@@ -152,7 +152,7 @@ export function extend (to: Object, _from: ?Object): Object {
  * Objects from primitive values when we know the value
  * is a JSON-compliant type.
  */
-export function isObject (obj: any): boolean {
+export function isObject (obj: mixed): boolean {
   return obj !== null && typeof obj === 'object'
 }
 
@@ -196,4 +196,25 @@ export function genStaticKeys (modules: Array<ModuleOptions>): string {
   return modules.reduce((keys, m) => {
     return keys.concat(m.staticKeys || [])
   }, []).join(',')
+}
+
+/**
+ * Check if two values are loosely equal - that is,
+ * if they are plain objects, do they have the same shape?
+ */
+export function looseEqual (a: mixed, b: mixed): boolean {
+  /* eslint-disable eqeqeq */
+  return a == b || (
+    isObject(a) && isObject(b)
+      ? JSON.stringify(a) === JSON.stringify(b)
+      : false
+  )
+  /* eslint-enable eqeqeq */
+}
+
+export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
+  for (let i = 0; i < arr.length; i++) {
+    if (looseEqual(arr[i], val)) return i
+  }
+  return -1
 }

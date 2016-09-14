@@ -5,7 +5,7 @@ import VNode, { emptyVNode, cloneVNode, cloneVNodes } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
 import {
   warn, formatComponentName, bind, isObject, toObject,
-  nextTick, resolveAsset, _toString, toNumber
+  nextTick, resolveAsset, _toString, toNumber, looseEqual, looseIndexOf
 } from '../util/index'
 
 import { createElement } from '../vdom/create-element'
@@ -94,6 +94,10 @@ export function renderMixin (Vue: Class<Component>) {
   Vue.prototype._n = toNumber
   // empty vnode
   Vue.prototype._e = emptyVNode
+  // loose equal
+  Vue.prototype._q = looseEqual
+  // loose indexOf
+  Vue.prototype._i = looseIndexOf
 
   // render static tree by index
   Vue.prototype._m = function renderStatic (

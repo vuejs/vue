@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { looseEqual } from 'shared/util'
 
 /**
  * setting <select>'s value in IE9 doesn't work
@@ -8,13 +9,17 @@ function updateSelect (el, value) {
   var options = el.options
   var i = options.length
   while (i--) {
-    /* eslint-disable eqeqeq */
-    if (options[i].value == value) {
-    /* eslint-enable eqeqeq */
+    if (looseEqual(getValue(options[i]), value)) {
       options[i].selected = true
       break
     }
   }
+}
+
+function getValue (option) {
+  return '_value' in option
+    ? option._value
+    : option.value || option.text
 }
 
 describe('Directive v-model select', () => {
@@ -66,6 +71,34 @@ describe('Directive v-model select', () => {
       updateSelect(vm.$el, '1')
       triggerEvent(vm.$el, 'change')
       expect(vm.test).toBe('1')
+    }).then(done)
+  })
+
+  it('should work with value bindings (object loose equal)', done => {
+    const vm = new Vue({
+      data: {
+        test: { a: 2 }
+      },
+      template:
+        '<select v-model="test">' +
+          '<option value="1">a</option>' +
+          '<option :value="{ a: 2 }">b</option>' +
+          '<option :value="{ a: 3 }">c</option>' +
+        '</select>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = { a: 3 }
+    waitForUpdate(function () {
+      expect(vm.$el.childNodes[2].selected).toBe(true)
+
+      updateSelect(vm.$el, '1')
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toBe('1')
+
+      updateSelect(vm.$el, { a: 2 })
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toEqual({ a: 2 })
     }).then(done)
   })
 
