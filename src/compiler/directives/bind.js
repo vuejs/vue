@@ -1,9 +1,13 @@
 /* @flow */
 
-import { addHook } from '../helpers'
-
 export default function bind (el: ASTElement, dir: ASTDirective) {
-  addHook(el, 'construct', `_b(n1,${dir.value}${
-    dir.modifiers && dir.modifiers.prop ? ',true' : ''
-  })`)
+  el.wrapData = (code: string) => {
+    return `_b(${
+      code
+    },${
+      dir.value
+    }${
+      dir.modifiers && dir.modifiers.prop ? ',true' : ''
+    })`
+  }
 }

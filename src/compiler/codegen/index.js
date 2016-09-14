@@ -138,10 +138,6 @@ function genData (el: ASTElement): string | void {
   if (el.props) {
     data += `domProps:{${genProps(el.props)}},`
   }
-  // hooks
-  if (el.hooks) {
-    data += `hook:{${genHooks(el.hooks)}},`
-  }
   // event handlers
   if (el.events) {
     data += `${genHandlers(el.events)},`
@@ -166,7 +162,12 @@ function genData (el: ASTElement): string | void {
       }]}`
     }
   }
-  return data.replace(/,$/, '') + '}'
+  data = data.replace(/,$/, '') + '}'
+  // v-bind data wrap
+  if (el.wrapData) {
+    data = el.wrapData(data)
+  }
+  return data
 }
 
 function genDirectives (el: ASTElement): string | void {
@@ -240,14 +241,6 @@ function genProps (props: Array<{ name: string, value: string }>): string {
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
     res += `"${prop.name}":${prop.value},`
-  }
-  return res.slice(0, -1)
-}
-
-function genHooks (hooks: { [key: string]: Array<string> }): string {
-  let res = ''
-  for (const key in hooks) {
-    res += `"${key}":function(n1,n2){${hooks[key].join(';')}},`
   }
   return res.slice(0, -1)
 }

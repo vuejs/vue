@@ -259,6 +259,19 @@ describe('Options props', () => {
     })
   })
 
+  it('should work with v-bind', () => {
+    const vm = new Vue({
+      template: `<test v-bind="{ a: 1, b: 2 }"></test>`,
+      components: {
+        test: {
+          props: ['a', 'b'],
+          template: '<div>{{ a }} {{ b }}</div>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('1 2')
+  })
+
   it('should warn data fields already defined as a prop', () => {
     new Vue({
       template: '<test a="1"></test>',

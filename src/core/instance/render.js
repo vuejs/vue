@@ -175,9 +175,10 @@ export function renderMixin (Vue: Class<Component>) {
 
   // apply v-bind object
   Vue.prototype._b = function bindProps (
-    vnode: VNodeWithData,
+    data: any,
     value: any,
-    asProp?: boolean) {
+    asProp?: boolean
+  ): VNodeData {
     if (value) {
       if (!isObject(value)) {
         process.env.NODE_ENV !== 'production' && warn(
@@ -188,7 +189,6 @@ export function renderMixin (Vue: Class<Component>) {
         if (Array.isArray(value)) {
           value = toObject(value)
         }
-        const data: any = vnode.data
         for (const key in value) {
           if (key === 'class' || key === 'style') {
             data[key] = value[key]
@@ -201,6 +201,7 @@ export function renderMixin (Vue: Class<Component>) {
         }
       }
     }
+    return data
   }
 
   // expose v-on keyCodes

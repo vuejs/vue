@@ -44,13 +44,6 @@ export default class VNode {
     this.isRootInsert = true
     this.isComment = false
     this.isCloned = false
-    // apply construct hook.
-    // this is applied during render, before patch happens.
-    // unlike other hooks, this is applied on both client and server.
-    const constructHook = data && data.hook && data.hook.construct
-    if (constructHook) {
-      constructHook(this)
-    }
   }
 }
 

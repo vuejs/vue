@@ -50,8 +50,6 @@ declare type ASTElementHandlers = {
   [key: string]: ASTElementHandler | Array<ASTElementHandler>;
 }
 
-declare type ASTElementHooks = { [key: string]: Array<string> }
-
 declare type ASTDirective = {
   name: string;
   value: string;
@@ -106,7 +104,6 @@ declare type ASTElement = {
   staticClass?: string;
   classBinding?: string;
   styleBinding?: string;
-  hooks?: ASTElementHooks;
   events?: ASTElementHandlers;
   nativeEvents?: ASTElementHandlers;
 
@@ -117,6 +114,7 @@ declare type ASTElement = {
 
   forbidden?: true;
   once?: true;
+  wrapData?: (code: string) => string;
 }
 
 declare type ASTExpression = {

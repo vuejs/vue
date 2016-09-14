@@ -31,17 +31,6 @@ export function addDirective (
   (el.directives || (el.directives = [])).push({ name, value, arg, modifiers })
 }
 
-export function addHook (el: ASTElement, name: string, code: string) {
-  const hooks = el.hooks || (el.hooks = {})
-  const hook = hooks[name]
-  /* istanbul ignore if */
-  if (hook) {
-    hook.push(code)
-  } else {
-    hooks[name] = [code]
-  }
-}
-
 export function addHandler (
   el: ASTElement,
   name: string,

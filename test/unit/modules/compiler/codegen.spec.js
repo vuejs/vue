@@ -84,7 +84,7 @@ describe('codegen', () => {
   it('generate v-bind directive', () => {
     assertCodegen(
       '<p v-bind="test"></p>',
-      `with(this){return _h('p',{hook:{"construct":function(n1,n2){_b(n1,test)}}})}`
+      `with(this){return _h('p',_b({},test))}`
     )
   })
 

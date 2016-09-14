@@ -96,7 +96,7 @@ declare interface Component {
   // renderSlot
   _t: (name: string, fallback: ?Array<VNode>) => ?Array<VNode>;
   // apply v-bind object
-  _b: (vnode: VNodeWithData, value: any) => void;
+  _b: (data: any, value: any, asProp?: boolean) => VNodeData;
   // retrive custom keyCode
   _k: (key: string) => ?number;
 
