@@ -109,6 +109,7 @@ Vue.component('component', {
   directives: {
     a: {
       bind() {},
+      inserted() {},
       update() {},
       componentMounted() {},
       unbind() {}
