@@ -85,6 +85,7 @@ export type DirectiveFunction = (
 
 export interface DirectiveOptions {
   bind?: DirectiveFunction;
+  inserted?: DirectiveFunction;
   update?: DirectiveFunction;
   componentUpdated?: DirectiveFunction;
   unbind?: DirectiveFunction;
