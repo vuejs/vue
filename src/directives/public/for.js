@@ -152,7 +152,7 @@ const vFor = {
             frag.scope[alias] = value
           })
         }
-      } else { // new isntance
+      } else { // new instance
         frag = this.create(value, alias, i, key)
         frag.fresh = !init
       }
