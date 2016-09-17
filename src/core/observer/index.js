@@ -190,8 +190,8 @@ export function defineReactive (
 export function set (obj: Array<any> | Object, key: any, val: any) {
   if (arguments.length < 3) {
     process.env.NODE_ENV !== 'production' && warn(
-      'Set now requires you to specifiy the object you are modifying' +
-      'as the first argument. See: http://rc.vuejs.org/api/#Vue-set'
+      'Vue.set / this.$set now requires you to specify the object you are ' +
+      'modifying as the first argument. See: http://rc.vuejs.org/api/#Vue-set'
     )
     return
   }
