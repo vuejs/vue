@@ -14,6 +14,12 @@ const keyCodes = {
   down: 40
 }
 
+const eventKeys = ['stop', 'prevent', 'self', 'capture']
+const modifierKeys = ['ctrl', 'shift', 'alt']
+const namedKeys = eventKeys.concat(modifierKeys).sort()
+
+var modifierKeyHandlers = {}
+
 function keyFilter (handler, keys) {
   var codes = keys.map(function (key) {
     var charCode = key.charCodeAt(0)
@@ -57,6 +63,17 @@ function selfFilter (handler) {
     }
   }
 }
+
+modifierKeys.forEach((key) => {
+  var keyName = key + 'Key'
+  modifierKeyHandlers[key] = function (handler) {
+    return function (e) {
+      if (e[keyName]) {
+        return handler.call(this, e)
+      }
+    }
+  }
+})
 
 export default {
 
@@ -110,13 +127,15 @@ export default {
     if (this.modifiers.self) {
       handler = selfFilter(handler)
     }
+    modifierKeys.forEach((key) => {
+      if (this.modifiers[key]) {
+        handler = modifierKeyHandlers[key](handler)
+      }
+    })
     // key filter
     var keys = Object.keys(this.modifiers)
       .filter(function (key) {
-        return key !== 'stop' &&
-          key !== 'prevent' &&
-          key !== 'self' &&
-          key !== 'capture'
+        return namedKeys.indexOf(key) === -1
       })
     if (keys.length) {
       handler = keyFilter(handler, keys)
