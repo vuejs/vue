@@ -2,7 +2,7 @@ module.exports = {
   'commits': function (browser) {
     browser
     .url('http://localhost:8080/examples/commits/')
-      .waitForElementVisible('li', 1000)
+      .waitForElementVisible('li', 5000)
       .assert.count('input', 2)
       .assert.count('label', 2)
       .assert.containsText('label[for="master"]', 'master')
