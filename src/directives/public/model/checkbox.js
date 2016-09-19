@@ -31,15 +31,16 @@ export default {
     }
 
     this.listener = function () {
-      var model = self._watcher.value
+      var model = self._watcher.get()
       if (isArray(model)) {
         var val = self.getValue()
+        var i = indexOf(model, val)
         if (el.checked) {
-          if (indexOf(model, val) < 0) {
-            model.push(val)
+          if (i < 0) {
+            self.set(model.concat(val))
           }
-        } else {
-          model.$remove(val)
+        } else if (i > -1) {
+          self.set(model.slice(0, i).concat(model.slice(i + 1)))
         }
       } else {
         self.set(getBooleanValue())

@@ -38,6 +38,7 @@ const settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
 
 export function compileProps (el, propOptions, vm) {
   var props = []
+  var propsData = vm.$options.propsData
   var names = Object.keys(propOptions)
   var i = names.length
   var options, name, attr, value, path, parsed, prop
@@ -121,6 +122,9 @@ export function compileProps (el, propOptions, vm) {
       }
     } else if ((value = getAttr(el, attr)) !== null) {
       // has literal binding!
+      prop.raw = value
+    } else if (propsData && ((value = propsData[name] || propsData[path]) !== null)) {
+      // has propsData
       prop.raw = value
     } else if (process.env.NODE_ENV !== 'production') {
       // check possible camelCase prop usage

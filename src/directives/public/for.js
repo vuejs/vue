@@ -16,7 +16,8 @@ import {
   def,
   cancellable,
   isArray,
-  isPlainObject
+  isPlainObject,
+  findVmFromFrag
 } from '../../util/index'
 
 let uid = 0
@@ -151,7 +152,7 @@ const vFor = {
             frag.scope[alias] = value
           })
         }
-      } else { // new isntance
+      } else { // new instance
         frag = this.create(value, alias, i, key)
         frag.fresh = !init
       }
@@ -600,24 +601,6 @@ function findPrevFrag (frag, anchor, id) {
     frag = el.__v_frag
   }
   return frag
-}
-
-/**
- * Find a vm from a fragment.
- *
- * @param {Fragment} frag
- * @return {Vue|undefined}
- */
-
-function findVmFromFrag (frag) {
-  let node = frag.node
-  // handle multi-node frag
-  if (frag.end) {
-    while (!node.__vue__ && node !== frag.end && node.nextSibling) {
-      node = node.nextSibling
-    }
-  }
-  return node.__vue__
 }
 
 /**

@@ -4,28 +4,46 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 ### $2000
 
-<a href="https://strikingly.com/s/careers?utm_source=v">
-  <img width="500px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/strikingly.png">
-</a>
+[Currently vacant. It could be you!](https://www.patreon.com/bePatron?u=2341390&patAmt=2000.0&exp=1&rid=473784)
 
 ---
 
 ### $500
 
 <a href="http://www.itunescn.com/">
-  <img width="360px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
+  <img width="240px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
 </a>
 
 <a href="https://jsfiddle.net/">
-  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
 </a>
 
 <a href="https://laravel.com">
-  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
 </a>
 
 <a href="https://chaitin.cn">
-  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/chaitin.png">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/chaitin.png">
+</a>
+
+<a href="https://htmlburger.com/">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
+</a>
+
+<a href="https://starter.someline.com/">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
+</a>
+
+<a href="http://gold.xitu.io/?utm_source=vuejs&utm_medium=image&utm_content=juejin&utm_campaign=q3_website">
+  <img width="180px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/juejin.png">
+</a>
+
+<a href="http://monterail.com/" target="_blank">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
+</a>
+
+<a href="https://www.trisoft.ro/" target="_blank">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/trisoft.png">
 </a>
 
 ---
@@ -46,8 +64,12 @@ It could be you!
   <img width="200px" src="http://assets.invoicemachine.com/images/flat_logo.png">
 </a>
 
-<a href="https://statamic.com/"></a>
+<a href="https://statamic.com/">
   <img width="240px" src="http://i.imgur.com/MRIkKgp.png">
+</a>
+
+<a href="http://nodividestudio.com/">
+  <img width="100px" src="https://cloud.githubusercontent.com/assets/499550/16464256/552c2306-3e07-11e6-867f-e4f5ac64bace.png"> No Divide Studio
 </a>
 
 ---
@@ -60,6 +82,8 @@ It could be you!
 - Adam Dorsey
 - Greg McCarvell
 - Yoshiya Hinosawa
+- Wasim Khamlichi
+- Jivan Roquet
 
 ---
 
@@ -121,3 +145,23 @@ It could be you!
 - Spenser
 - Takuya Nishio
 - Daniel Diekmeier
+- Peter Thaleikis
+- Karol Fabjanczuk
+- Eduardo
+- Lê Chương
+- Webber Wang
+- Daniel Schmitz
+- Bruce Li
+- Mohammed
+- Sam Wainwright
+- TJ Hillard
+- Kyle Arrington
+- Jason Land
+- Miljan Aleksic
+- James Ye
+- Laurids Duellmann
+- Christo Crampton
+- Adon Metcalfe
+- Paul Straw
+- Jake Ingman
+- Eduardo Camillo

@@ -185,11 +185,13 @@ describe('v-model', function () {
     el.firstChild.click()
     expect(vm.list.length).toBe(2)
     expect(vm.list[1]).toBe(1)
-    vm.list = [vm.a]
     _.nextTick(function () {
-      expect(el.firstChild.checked).toBe(false)
-      expect(el.lastChild.checked).toBe(true)
-      done()
+      vm.list = [vm.a]
+      _.nextTick(function () {
+        expect(el.firstChild.checked).toBe(false)
+        expect(el.lastChild.checked).toBe(true)
+        done()
+      })
     })
   })
 
