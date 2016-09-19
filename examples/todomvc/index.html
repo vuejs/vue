@@ -3,7 +3,8 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Vue.js • TodoMVC</title>
-		<link rel="stylesheet" href="node_modules/todomvc-app-css/index.css">
+		<link rel="stylesheet" href="https://unpkg.com/todomvc-app-css/index.css">
+		<script src="https:unpkg.com/director/build/director.js"></script>
 		<style>[v-cloak] { display: none; }</style>
 	</head>
 	<body>
@@ -57,29 +58,12 @@
 			<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
 		</footer>
 
-		<!-- testing/benchmark only -->
-		<script>
-		if (window.location.hash === '#test') {
-			localStorage.clear()
-		}
-		var now = window.performance && window.performance.now
-			? function () { return window.performance.now() }
-			: Date.now
-		var metrics = { beforeLoad: now() }
-		</script>
-		<!-- end testing/bench -->
-
 		<script src="../../dist/vue.js"></script>
-		<script>metrics.afterLoad = now()</script>
-		<script src="node_modules/director/build/director.js"></script>
 		<script src="js/store.js"></script>
-		<script>metrics.beforeRender = now()</script>
 		<script src="js/app.js"></script>
 		<script src="js/routes.js"></script>
 		<script>
 		  app.$mount('.todoapp')
 		</script>
-		<script>metrics.afterRender = now()</script>
-		<script src="perf.js"></script>
 	</body>
 </html>
