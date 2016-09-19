@@ -55,7 +55,7 @@
       watch: {
         value: function (value) {
           // update value
-          $(this.$el).select2('val', value)
+          $(this.$el).val(value).trigger('change')
         },
         options: function (options) {
           // update options
