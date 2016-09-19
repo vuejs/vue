@@ -1,7 +1,14 @@
 var emailRE = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-// Firebase ref
-var usersRef = new Firebase('https://vue-demo.firebaseIO.com/users')
+// Setup Firebase
+var config = {
+  apiKey: "AIzaSyAi_yuJciPXLFr_PYPeU3eTvtXf8jbJ8zw",
+  authDomain: "vue-demo-537e6.firebaseapp.com",
+  databaseURL: "https://vue-demo-537e6.firebaseio.com"
+}
+firebase.initializeApp(config)
+
+var usersRef = firebase.database().ref('users')
 
 // create Vue app
 var app = new Vue({
