@@ -58,12 +58,11 @@
 			<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
 		</footer>
 
-		<script src="../../dist/vue.js"></script>
-		<script src="js/store.js"></script>
-		<script src="js/app.js"></script>
-		<script src="js/routes.js"></script>
 		<script>
-		  app.$mount('.todoapp')
+		// for testing
+		if (navigator.userAgent.indexOf('PhantomJS') > -1) localStorage.clear()
 		</script>
+		<script src="../../dist/vue.js"></script>
+		<script src="app.js"></script>
 	</body>
 </html>
