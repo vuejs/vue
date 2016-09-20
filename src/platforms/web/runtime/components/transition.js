@@ -119,7 +119,7 @@ export default {
       return placeholder(h, rawChild)
     }
 
-    child.key = child.key == null
+    child.key = child.key == null || child.isStatic
       ? `__v${child.tag + this._uid}__`
       : child.key
     const data = (child.data || (child.data = {})).transition = extractTransitionData(this)
