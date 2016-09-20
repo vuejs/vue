@@ -11,6 +11,11 @@ export function normalizeChildren (
   if (isPrimitive(children)) {
     return [createTextVNode(children)]
   }
+
+  if (typeof (children) === 'function') {
+    return children
+  }
+
   if (Array.isArray(children)) {
     const res = []
     for (let i = 0, l = children.length; i < l; i++) {
@@ -40,6 +45,8 @@ export function normalizeChildren (
           }
           res.push(c)
         }
+      } else if (typeof c === 'function') {
+        return c;
       }
     }
     return res

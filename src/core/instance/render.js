@@ -222,6 +222,12 @@ export function resolveSlots (
     return slots
   }
   const children = normalizeChildren(renderChildren) || []
+
+  if (typeof children === 'function') {
+    slots.default = children
+    return slots
+  }
+
   const defaultSlot = []
   let name, child
   for (let i = 0, l = children.length; i < l; i++) {

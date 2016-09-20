@@ -269,6 +269,45 @@ describe('Component slot', () => {
     Vue.config.preserveWhitespace = false
   })
 
+  it('slot can be a function', () => {
+    const test = {
+      render () {
+        expect(typeof (this.$slots.default) === 'function')
+        return this.$slots.default('Hello, World!')
+      }
+    }
+    const vm = new Vue({
+      render (h) {
+        return h(test, null, function (data) {
+          return h('div', null, data)
+        })
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('Hello, World!')
+  })
+
+  it('a function will override all other children', () => {
+    const test = {
+      render () {
+        expect(typeof (this.$slots.default) === 'function')
+        return this.$slots.default('Hello, World!')
+      }
+    }
+    const vm = new Vue({
+      render (h) {
+        return h(test, null, [
+          h('div', null, "this shouldn't appear"),
+          function (data) {
+            return h('div', null, data)
+          }
+        ])
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('Hello, World!')
+  })
+
   it('programmatic access to $slots', () => {
     const vm = new Vue({
       template: '<test><p slot="a">A</p><div>C</div><p slot="b">B</div></p></test>',
