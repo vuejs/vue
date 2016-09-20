@@ -43,6 +43,19 @@ describe('Options template', () => {
     expect(vm.$el.textContent).toBe(vm.message)
   })
 
+  it('Object', () => {
+    const obj = {
+      render: function (h) {
+        return h('p')
+      },
+      staticRenderFns: []
+    }
+    const vm = new Vue({
+      template: obj
+    }).$mount()
+    expect(vm.$el.tagName).toBe('P')
+  })
+
   it('invalid template', () => {
     new Vue({
       template: Vue,
