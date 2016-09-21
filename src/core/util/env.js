@@ -16,16 +16,19 @@ export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 export const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
 const iosVersionMatch = UA && isIos && UA.match(/os ([\d_]+)/)
-const iosVersion = iosVersionMatch && iosVersionMatch[1].split('_')
+const iosVersion = iosVersionMatch && iosVersionMatch[1].split('_').map(Number)
 
 // MutationObserver is unreliable in iOS 9.3 UIWebView
 // detecting it by checking presence of IndexedDB
 // ref #3027
 const hasMutationObserverBug =
   iosVersion &&
-  Number(iosVersion[0]) >= 9 &&
-  Number(iosVersion[1]) >= 3 &&
-  !window.indexedDB
+  !window.indexedDB && (
+    iosVersion[0] > 9 || (
+      iosVersion[0] === 9 &&
+      iosVersion[1] >= 3
+    )
+  )
 
 /**
  * Defer a task to execute it asynchronously. Ideally this
