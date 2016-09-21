@@ -1,4 +1,4 @@
-declare type VNodeChildren = Array<?VNode | string | VNodeChildren> | string
+declare type VNodeChildren = Array<?VNode | string | VNodeChildren> | string | ?() => ?VNode
 
 declare type VNodeComponentOptions = {
   Ctor: Class<Component>;

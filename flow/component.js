@@ -25,6 +25,7 @@ declare interface Component {
   $children: Array<Component>;
   $refs: { [key: string]: Component | Element | Array<Component | Element> | void };
   $slots: { [key: string]: Array<VNode> };
+  $slotFn: ?() => VNode;
   $vnode: VNode;
   $isServer: boolean;
 

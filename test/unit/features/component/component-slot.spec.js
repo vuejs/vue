@@ -269,11 +269,43 @@ describe('Component slot', () => {
     Vue.config.preserveWhitespace = false
   })
 
-  it('slot can be a function', () => {
+  it('slots will not contain any functions', () => {
+    const test1 = {
+      render () {
+        expect(this.$slots.default).toBe(undefined)
+        return null
+      }
+    }
+
+    const test2 = {
+      render () {
+        expect(this.$slots.default.length).toBe(1)
+        return null
+      }
+    }
+
+    new Vue({ // eslint-disable-line no-new
+      render (h) {
+        return h(test1, null, function (data) {
+          return h('div', null, data)
+        })
+      }
+    }).$mount()
+
+    new Vue({ // eslint-disable-line no-new
+      render (h) {
+        return h(test2, null, ['text', function (data) {
+          return h('div', null, data)
+        }])
+      }
+    }).$mount()
+  })
+
+  it('if children is a function,  make sure $slotFn is a function', () => {
     const test = {
       render () {
-        expect(typeof (this.$slots.default) === 'function')
-        return this.$slots.default('Hello, World!')
+        expect(typeof (this.$slotFn)).toBe('function')
+        return this.$slotFn('Hello, World!')
       }
     }
     const vm = new Vue({
@@ -287,21 +319,18 @@ describe('Component slot', () => {
     expect(vm.$el.textContent).toBe('Hello, World!')
   })
 
-  it('a function will override all other children', () => {
+  it('if children is an array and children[0] is a function, make sure $slotFn is a function', () => {
     const test = {
       render () {
-        expect(typeof (this.$slots.default) === 'function')
-        return this.$slots.default('Hello, World!')
+        expect(typeof (this.$slotFn)).toBe('function')
+        return this.$slotFn('Hello, World!')
       }
     }
     const vm = new Vue({
       render (h) {
-        return h(test, null, [
-          h('div', null, "this shouldn't appear"),
-          function (data) {
-            return h('div', null, data)
-          }
-        ])
+        return h(test, null, [function (data) {
+          return h('div', null, data)
+        }])
       }
     }).$mount()
 

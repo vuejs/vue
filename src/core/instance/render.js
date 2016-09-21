@@ -15,6 +15,7 @@ export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null
   vm.$slots = resolveSlots(vm.$options._renderChildren)
+  vm.$slotFn = resolveSlotFn(vm.$options._renderChildren)
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
   vm.$createElement = bind(createElement, vm)
@@ -214,6 +215,20 @@ export function renderMixin (Vue: Class<Component>) {
   }
 }
 
+export function resolveSlotFn (
+  children: ?VNodeChildren
+): ?() => ?VNode {
+  if (typeof (children) === 'function') {
+    return children
+  }
+
+  if (Array.isArray(children)) {
+    const child = children[0]
+
+    if (child && typeof (child) === 'function') return child
+  }
+}
+
 export function resolveSlots (
   renderChildren: ?VNodeChildren
 ): { [key: string]: Array<VNode> } {
@@ -224,7 +239,6 @@ export function resolveSlots (
   const children = normalizeChildren(renderChildren) || []
 
   if (typeof children === 'function') {
-    slots.default = children
     return slots
   }
 
