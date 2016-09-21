@@ -18,10 +18,19 @@ export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
 export const isAndroid = UA && UA.indexOf('android') > 0
 export const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
 export const iosVersionMatch = isIos && UA.match(/os ([\d_]+)/)
-export const iosVersion = iosVersionMatch && iosVersionMatch[1].split('_')
+export const iosVersion = iosVersionMatch && iosVersionMatch[1].split('_').map(Number)
 
-// detecting iOS UIWebView by indexedDB
-export const hasMutationObserverBug = iosVersion && Number(iosVersion[0]) >= 9 && Number(iosVersion[1]) >= 3 && !window.indexedDB
+// MutationObserver is unreliable in iOS 9.3 UIWebView
+// detecting it by checking presence of IndexedDB
+// ref #3027
+const hasMutationObserverBug =
+  iosVersion &&
+  !window.indexedDB && (
+    iosVersion[0] > 9 || (
+      iosVersion[0] === 9 &&
+      iosVersion[1] >= 3
+    )
+  )
 
 let transitionProp
 let transitionEndEvent
