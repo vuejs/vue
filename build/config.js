@@ -1,5 +1,5 @@
 const path = require('path')
-const flow = require('./rollup-plugin-flow')
+const flow = require('rollup-plugin-flow-no-whitespace')
 const buble = require('rollup-plugin-buble')
 const replace = require('rollup-plugin-replace')
 const alias = require('rollup-plugin-alias')
