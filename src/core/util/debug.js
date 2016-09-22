@@ -1,6 +1,7 @@
 import config from '../config'
+import { noop } from 'shared/util'
 
-let warn
+let warn = noop
 let formatComponentName
 
 if (process.env.NODE_ENV !== 'production') {
