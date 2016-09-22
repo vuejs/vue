@@ -5,7 +5,7 @@ import { parseHTML } from 'compiler/parser/html-parser'
 import { makeMap } from 'shared/util'
 
 const splitRE = /\r?\n/g
-const isSpecialTag = makeMap('script,style,template', true)
+const isSpecialTag = makeMap('script,style,template,graphql', true)
 
 type Attribute = {
   name: string,
@@ -22,7 +22,8 @@ export function parseComponent (
   const sfc: SFCDescriptor = {
     template: null,
     script: null,
-    styles: []
+    styles: [],
+    graphql: null
   }
   let depth = 0
   let currentBlock: ?SFCBlock = null
