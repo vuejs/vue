@@ -94,26 +94,11 @@ export default {
       return
     }
 
-    children.forEach(c => {
-      /* istanbul ignore if */
-      if (c.elm._moveCb) {
-        c.elm._moveCb()
-      }
-      /* istanbul ignore if */
-      if (c.elm._enterCb) {
-        c.elm._enterCb()
-      }
-      const oldPos = c.data.pos
-      const newPos = c.data.pos = c.elm.getBoundingClientRect()
-      const dx = oldPos.left - newPos.left
-      const dy = oldPos.top - newPos.top
-      if (dx || dy) {
-        c.data.moved = true
-        const s = c.elm.style
-        s.transform = s.WebkitTransform = `translate(${dx}px,${dy}px)`
-        s.transitionDuration = '0s'
-      }
-    })
+    // we divide the work into three loops to avoid mixing DOM reads and writes
+    // in each iteration - which helps prevent layout thrashing.
+    children.forEach(callPendingCbs)
+    children.forEach(recordPosition)
+    children.forEach(applyTranslation)
 
     // force reflow to put everything in position
     const f = document.body.offsetHeight // eslint-disable-line
@@ -124,7 +109,6 @@ export default {
         var s = el.style
         addTransitionClass(el, moveClass)
         s.transform = s.WebkitTransform = s.transitionDuration = ''
-        el._moveDest = c.data.pos
         el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
           if (!e || /transform$/.test(e.propertyName)) {
             el.removeEventListener(transitionEndEvent, cb)
@@ -150,5 +134,33 @@ export default {
       removeTransitionClass(el, moveClass)
       return (this._hasMove = info.hasTransform)
     }
+  }
+}
+
+function callPendingCbs (c) {
+  /* istanbul ignore if */
+  if (c.elm._moveCb) {
+    c.elm._moveCb()
+  }
+  /* istanbul ignore if */
+  if (c.elm._enterCb) {
+    c.elm._enterCb()
+  }
+}
+
+function recordPosition (c) {
+  c.data.newPos = c.elm.getBoundingClientRect()
+}
+
+function applyTranslation (c) {
+  const oldPos = c.data.pos
+  const newPos = c.data.newPos
+  const dx = oldPos.left - newPos.left
+  const dy = oldPos.top - newPos.top
+  if (dx || dy) {
+    c.data.moved = true
+    const s = c.elm.style
+    s.transform = s.WebkitTransform = `translate(${dx}px,${dy}px)`
+    s.transitionDuration = '0s'
   }
 }
