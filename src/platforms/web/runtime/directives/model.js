@@ -95,12 +95,11 @@ function setSelected (el, binding, vm) {
   if (!isMultiple) {
     el.selectedIndex = -1
   }
-  if ((isIE || isEdge) && el.selectedIndex === -1) {
-    vm.$on('hook:mounted', () => {
-      setTimeout(() => {
-        setSelected(el, binding, vm)
-      }, 0)
-    })
+  if ((isIE || isEdge) && el.selectedIndex === -1 && !el._v_ieselectdone) {
+    el._v_ieselectdone = true;
+    setTimeout(() => {
+      setSelected(el, binding, vm)
+    }, 0)
   }
 }
 
