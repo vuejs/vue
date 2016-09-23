@@ -121,9 +121,7 @@ describe('vdom patch: children', () => {
     expect(elm.children.length).toBe(5)
     elm = patch(vnode1, vnode2)
     expect(elm.children.length).toBe(3)
-    expect(elm.children[0].innerHTML).toBe('1')
-    expect(elm.children[1].innerHTML).toBe('2')
-    expect(elm.children[2].innerHTML).toBe('3')
+    expect(map(inner, elm.children)).toEqual(['1', '2', '3'])
   })
 
   it('should remove elements from the middle', () => {
@@ -133,10 +131,7 @@ describe('vdom patch: children', () => {
     expect(elm.children.length).toBe(5)
     elm = patch(vnode1, vnode2)
     expect(elm.children.length).toBe(4)
-    expect(elm.children[0].innerHTML).toBe('1')
-    expect(elm.children[1].innerHTML).toBe('2')
-    expect(elm.children[2].innerHTML).toBe('4')
-    expect(elm.children[3].innerHTML).toBe('5')
+    expect(map(inner, elm.children)).toEqual(['1', '2', '4', '5'])
   })
 
   it('should moves element forward', () => {
@@ -146,10 +141,7 @@ describe('vdom patch: children', () => {
     expect(elm.children.length).toBe(4)
     elm = patch(vnode1, vnode2)
     expect(elm.children.length).toBe(4)
-    expect(elm.children[0].innerHTML).toBe('2')
-    expect(elm.children[1].innerHTML).toBe('3')
-    expect(elm.children[2].innerHTML).toBe('1')
-    expect(elm.children[3].innerHTML).toBe('4')
+    expect(map(inner, elm.children)).toEqual(['2', '3', '1', '4'])
   })
 
   it('should move elements to end', () => {
@@ -159,9 +151,7 @@ describe('vdom patch: children', () => {
     expect(elm.children.length).toBe(3)
     elm = patch(vnode1, vnode2)
     expect(elm.children.length).toBe(3)
-    expect(elm.children[0].innerHTML).toBe('2')
-    expect(elm.children[1].innerHTML).toBe('3')
-    expect(elm.children[2].innerHTML).toBe('1')
+    expect(map(inner, elm.children)).toEqual(['2', '3', '1'])
   })
 
   it('should move element backwards', () => {
@@ -171,10 +161,7 @@ describe('vdom patch: children', () => {
     expect(elm.children.length).toBe(4)
     elm = patch(vnode1, vnode2)
     expect(elm.children.length).toBe(4)
-    expect(elm.children[0].innerHTML).toBe('1')
-    expect(elm.children[1].innerHTML).toBe('4')
-    expect(elm.children[2].innerHTML).toBe('2')
-    expect(elm.children[3].innerHTML).toBe('3')
+    expect(map(inner, elm.children)).toEqual(['1', '4', '2', '3'])
   })
 
   it('should swap first and last', () => {
@@ -184,10 +171,7 @@ describe('vdom patch: children', () => {
     expect(elm.children.length).toBe(4)
     elm = patch(vnode1, vnode2)
     expect(elm.children.length).toBe(4)
-    expect(elm.children[0].innerHTML).toBe('4')
-    expect(elm.children[1].innerHTML).toBe('2')
-    expect(elm.children[2].innerHTML).toBe('3')
-    expect(elm.children[3].innerHTML).toBe('1')
+    expect(map(inner, elm.children)).toEqual(['4', '2', '3', '1'])
   })
 
   it('should move to left and replace', () => {
@@ -197,11 +181,7 @@ describe('vdom patch: children', () => {
     expect(elm.children.length).toBe(5)
     elm = patch(vnode1, vnode2)
     expect(elm.children.length).toBe(5)
-    expect(elm.children[0].innerHTML).toBe('4')
-    expect(elm.children[1].innerHTML).toBe('1')
-    expect(elm.children[2].innerHTML).toBe('2')
-    expect(elm.children[3].innerHTML).toBe('3')
-    expect(elm.children[4].innerHTML).toBe('6')
+    expect(map(inner, elm.children)).toEqual(['4', '1', '2', '3', '6'])
   })
 
   it('should move to left and leaves hold', () => {
@@ -220,9 +200,7 @@ describe('vdom patch: children', () => {
     expect(elm.children.length).toBe(3)
     elm = patch(vnode1, vnode2)
     expect(elm.children.length).toBe(3)
-    expect(elm.children[0].innerHTML).toBe('4')
-    expect(elm.children[1].innerHTML).toBe('5')
-    expect(elm.children[2].innerHTML).toBe('3')
+    expect(map(inner, elm.children)).toEqual(['4', '5', '3'])
   })
 
   it('should move a key in non-keyed nodes with a size up', () => {
