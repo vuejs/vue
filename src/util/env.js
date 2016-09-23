@@ -1,5 +1,3 @@
-/* global MutationObserver */
-
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
 
@@ -16,21 +14,6 @@ const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 export const isIE = UA && UA.indexOf('trident') > 0
 export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
 export const isAndroid = UA && UA.indexOf('android') > 0
-export const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
-export const iosVersionMatch = isIos && UA.match(/os ([\d_]+)/)
-export const iosVersion = iosVersionMatch && iosVersionMatch[1].split('_').map(Number)
-
-// MutationObserver is unreliable in iOS 9.3 UIWebView
-// detecting it by checking presence of IndexedDB
-// ref #3027
-const hasMutationObserverBug =
-  iosVersion &&
-  !window.indexedDB && (
-    iosVersion[0] > 9 || (
-      iosVersion[0] === 9 &&
-      iosVersion[1] >= 3
-    )
-  )
 
 let transitionProp
 let transitionEndEvent
@@ -89,27 +72,24 @@ export const nextTick = (function () {
     }
   }
 
-  /* istanbul ignore if */
-  if (typeof MutationObserver !== 'undefined' && !hasMutationObserverBug) {
-    var counter = 1
-    var observer = new MutationObserver(nextTickHandler)
-    var textNode = document.createTextNode(counter)
-    observer.observe(textNode, {
-      characterData: true
+  /* istanbul ignore else */
+  if (inBrowser && window.postMessage &&
+    !window.importScripts && // not in WebWorker
+    !(isAndroid && !window.requestAnimationFrame) // not in Android <= 4.3
+  ) {
+    const NEXT_TICK_TOKEN = '__vue__nextTick__'
+    window.addEventListener('message', e => {
+      if (e.source === window && e.data === NEXT_TICK_TOKEN) {
+        nextTickHandler()
+      }
     })
-    timerFunc = function () {
-      counter = (counter + 1) % 2
-      textNode.data = counter
+    timerFunc = () => {
+      window.postMessage(NEXT_TICK_TOKEN, '*')
     }
   } else {
-    // webpack attempts to inject a shim for setImmediate
-    // if it is used as a global, so we have to work around that to
-    // avoid bundling unnecessary code.
-    const context = inBrowser
-      ? window
-      : typeof global !== 'undefined' ? global : {}
-    timerFunc = context.setImmediate || setTimeout
+    timerFunc = (typeof global !== 'undefined' && global.setImmediate) || setTimeout
   }
+
   return function (cb, ctx) {
     var func = ctx
       ? function () { cb.call(ctx) }
