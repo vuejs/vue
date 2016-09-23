@@ -145,7 +145,12 @@ export function compileProps (el, propOptions, vm) {
           'kebab-case for props in templates.',
           vm
         )
-      } else if (options.required) {
+      } else if (options.required && (
+        !propsData || (
+          !(name in propsData) &&
+          !(path in propsData)
+        )
+      )) {
         // warn missing required
         warn('Missing required prop: ' + name, vm)
       }
