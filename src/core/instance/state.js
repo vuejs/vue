@@ -32,8 +32,8 @@ export function initState (vm: Component) {
 
 function initProps (vm: Component) {
   const props = vm.$options.props
-  const propsData = vm.$options.propsData
   if (props) {
+    const propsData = vm.$options.propsData || {}
     const keys = vm.$options._propKeys = Object.keys(props)
     const isRoot = !vm.$parent
     // root instance props should be converted

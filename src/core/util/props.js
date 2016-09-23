@@ -14,11 +14,9 @@ type PropOptions = {
 export function validateProp (
   key: string,
   propOptions: Object,
-  propsData: ?Object,
+  propsData: Object,
   vm?: Component
 ): any {
-  /* istanbul ignore if */
-  if (!propsData) return
   const prop = propOptions[key]
   const absent = !hasOwn(propsData, key)
   let value = propsData[key]
