@@ -34,7 +34,7 @@ export default {
     }
     if (vnode.tag === 'select') {
       setSelected(el, binding, vnode.context)
-    } else {
+    } else if (vnode.tag === 'textarea' || el.type === 'text') {
       if (!isAndroid) {
         el.addEventListener('compositionstart', onCompositionStart)
         el.addEventListener('compositionend', onCompositionEnd)
