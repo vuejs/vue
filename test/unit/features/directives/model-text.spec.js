@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { isIE9, isAndroid } from 'web/util/index'
+import { isIE9, isAndroid } from 'core/util/env'
 
 describe('Directive v-model text', () => {
   it('should update value both ways', done => {

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import injectStyles from './inject-styles'
-import { isIE9 } from 'web/util/index'
+import { isIE9 } from 'core/util/env'
 import { nextFrame } from 'web/runtime/transition-util'
 
 if (!isIE9) {
