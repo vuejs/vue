@@ -109,7 +109,7 @@ function hasNoMatchingOption (value, options) {
 function getValue (option) {
   return '_value' in option
     ? option._value
-    : option.value || option.text
+    : option.value
 }
 
 function onCompositionStart (e) {
