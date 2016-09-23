@@ -5,7 +5,7 @@
 
 import { looseEqual, looseIndexOf } from 'shared/util'
 import { warn } from 'core/util/index'
-import { isAndroid, isIE9 } from 'web/util/index'
+import { isAndroid, isIE9, isEdge, isIE } from 'web/util/index'
 
 const modelableTagRE = /^input|select|textarea|vue-component-[0-9]+(-[0-9a-zA-Z_\-]*)?$/
 
@@ -94,6 +94,12 @@ function setSelected (el, binding, vm) {
   }
   if (!isMultiple) {
     el.selectedIndex = -1
+  }
+  if ((isIE || isEdge) && el.selectedIndex === -1 && !el._v_ieselectdone) {
+    el._v_ieselectdone = true;
+    setTimeout(() => {
+      setSelected(el, binding, vm)
+    }, 0)
   }
 }
 
