@@ -22,8 +22,9 @@ export default function (Vue) {
 
   Vue.prototype._updateRef = function (remove) {
     var ref = this.$options._ref
-    if (ref) {
-      var refs = (this._scope || this._context).$refs
+    var vm = this._scope || this._context
+    if (ref && vm) {
+      var refs = vm.$refs
       if (remove) {
         if (refs[ref] === this) {
           refs[ref] = null
