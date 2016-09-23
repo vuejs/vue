@@ -1,8 +1,9 @@
 import { toNumber, stripQuotes } from '../util/index'
 import Cache from '../cache'
+import { warn } from '../util/index'
 
 const cache = new Cache(1000)
-const filterTokenRE = /[^\s'"]+|'[^']*'|"[^"]*"/g
+const filterTokenRE = /(\[.*\])|[^\s'"]+|'[^']*'|"[^"]*"/g
 const reservedArgRE = /^in$|^-?\d+/
 
 /**
@@ -25,7 +26,39 @@ function pushFilter () {
     var tokens = exp.match(filterTokenRE)
     filter.name = tokens[0]
     if (tokens.length > 1) {
-      filter.args = tokens.slice(1).map(processFilterArg)
+      tokens.slice(1).map(function (token) {
+        if (filter.args === undefined) {
+          filter.args = []
+        }
+
+        if (token[0] === '[') {
+          try {
+            /* eslint-disable no-eval */
+            window.eval(token).map(function (arg) {
+              /* eslint-disable no-eval */
+              filter.args.push(processFilterArg(JSON.stringify(arg).replace(/"/g, '')))
+            })
+          } catch (e) {
+            if (process.env.NODE_ENV !== 'production') {
+              /* istanbul ignore if */
+              if (e.toString().match(/unsafe-eval|CSP/)) {
+                warn(
+                  'It seems you are using the default build of Vue.js in an environment ' +
+                  'with Content Security Policy that prohibits unsafe-eval. ' +
+                  'Use the CSP-compliant build instead: ' +
+                  'http://vuejs.org/guide/installation.html#CSP-compliant-build'
+                )
+              } else {
+                warn(
+                  'Invalid filter argument: ' + token
+                )
+              }
+            }
+          }
+        } else {
+          filter.args.push(processFilterArg(token))
+        }
+      })
     }
   }
   if (filter) {
