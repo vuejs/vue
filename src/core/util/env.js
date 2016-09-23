@@ -1,6 +1,5 @@
 /* @flow */
 
-/* global MutationObserver */
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
 
@@ -9,40 +8,24 @@ export const inBrowser =
   typeof window !== 'undefined' &&
   Object.prototype.toString.call(window) !== '[object Object]'
 
+export const UA = inBrowser && window.navigator.userAgent.toLowerCase()
+export const isIE = UA && /msie|trident/.test(UA)
+export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
+export const isAndroid = UA && UA.indexOf('android') > 0
+
 // detect devtools
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
-// UA sniffing for working around browser-specific quirks
-export const UA = inBrowser && window.navigator.userAgent.toLowerCase()
-const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
-const iosVersionMatch = UA && isIos && UA.match(/os ([\d_]+)/)
-const iosVersion = iosVersionMatch && iosVersionMatch[1].split('_').map(Number)
-
-// MutationObserver is unreliable in iOS 9.3 UIWebView
-// detecting it by checking presence of IndexedDB
-// ref #3027
-const hasMutationObserverBug =
-  iosVersion &&
-  !window.indexedDB && (
-    iosVersion[0] > 9 || (
-      iosVersion[0] === 9 &&
-      iosVersion[1] >= 3
-    )
-  )
-
 /**
  * Defer a task to execute it asynchronously. Ideally this
- * should be executed as a microtask, so we leverage
- * MutationObserver if it's available, and fallback to
- * setTimeout(0).
- *
- * @param {Function} cb
- * @param {Object} ctx
+ * should be executed as a microtask, but MutationObserver is unreliable
+ * in iOS UIWebView so we use a setImmediate shim and fallback to setTimeout.
  */
 export const nextTick = (function () {
   let callbacks = []
   let pending = false
   let timerFunc
+
   function nextTickHandler () {
     pending = false
     const copies = callbacks.slice(0)
@@ -53,27 +36,24 @@ export const nextTick = (function () {
   }
 
   /* istanbul ignore else */
-  if (typeof MutationObserver !== 'undefined' && !hasMutationObserverBug) {
-    var counter = 1
-    var observer = new MutationObserver(nextTickHandler)
-    var textNode = document.createTextNode(String(counter))
-    observer.observe(textNode, {
-      characterData: true
+  if (inBrowser && window.postMessage &&
+    !window.importScripts && // not in WebWorker
+    !(isAndroid && !window.requestAnimationFrame) // not in Android <= 4.3
+  ) {
+    const NEXT_TICK_TOKEN = '__vue__nextTick__'
+    window.addEventListener('message', e => {
+      if (e.source === window && e.data === NEXT_TICK_TOKEN) {
+        nextTickHandler()
+      }
     })
-    timerFunc = function () {
-      counter = (counter + 1) % 2
-      textNode.data = String(counter)
+    timerFunc = () => {
+      window.postMessage(NEXT_TICK_TOKEN, '*')
     }
   } else {
-    // webpack attempts to inject a shim for setImmediate
-    // if it is used as a global, so we have to work around that to
-    // avoid bundling unnecessary code.
-    var context = inBrowser
-      ? window
-      : typeof global !== 'undefined' ? global : {}
-    timerFunc = context.setImmediate || setTimeout
+    timerFunc = (typeof global !== 'undefined' && global.setImmediate) || setTimeout
   }
-  return function (cb: Function, ctx?: Object) {
+
+  return function queueNextTick (cb: Function, ctx?: Object) {
     const func = ctx
       ? function () { cb.call(ctx) }
       : cb
