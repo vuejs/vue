@@ -4,7 +4,7 @@
  */
 
 import { looseEqual, looseIndexOf } from 'shared/util'
-import { warn, isAndroid, isIE9 } from 'core/util/index'
+import { warn, nextTick, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
 
 const modelableTagRE = /^input|select|textarea|vue-component-[0-9]+(-[0-9a-zA-Z_\-]*)?$/
 
@@ -33,6 +33,12 @@ export default {
     }
     if (vnode.tag === 'select') {
       setSelected(el, binding, vnode.context)
+      /* istanbul ignore if */
+      if (isIE || isEdge) {
+        nextTick(() => {
+          setSelected(el, binding, vnode.context)
+        })
+      }
     } else if (vnode.tag === 'textarea' || el.type === 'text') {
       if (!isAndroid) {
         el.addEventListener('compositionstart', onCompositionStart)
