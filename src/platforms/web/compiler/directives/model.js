@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isIE } from 'web/util/index'
+import { isIE } from 'core/util/env'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 
 let warn

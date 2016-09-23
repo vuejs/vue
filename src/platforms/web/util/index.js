@@ -1,7 +1,6 @@
 /* @flow */
 
 import { warn } from 'core/util/index'
-export { inBrowser, isIE, isIE9, isAndroid } from 'core/util/env'
 
 export * from './attrs'
 export * from './class'

@@ -1,13 +1,14 @@
 /* @flow */
 
 import { extend, genStaticKeys, noop } from 'shared/util'
+import { isIE } from 'core/util/env'
 import { warn } from 'core/util/debug'
 import { compile as baseCompile } from 'compiler/index'
 import { detectErrors } from 'compiler/error-detector'
 import modules from './modules/index'
 import directives from './directives/index'
 import {
-  isIE, isReservedTag, isUnaryTag,
+  isReservedTag, isUnaryTag,
   mustUseProp, getTagNamespace, isPreTag
 } from '../util/index'
 

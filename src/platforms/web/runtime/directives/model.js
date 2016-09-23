@@ -4,8 +4,7 @@
  */
 
 import { looseEqual, looseIndexOf } from 'shared/util'
-import { warn } from 'core/util/index'
-import { isAndroid, isIE9 } from 'web/util/index'
+import { warn, isAndroid, isIE9 } from 'core/util/index'
 
 const modelableTagRE = /^input|select|textarea|vue-component-[0-9]+(-[0-9a-zA-Z_\-]*)?$/
 

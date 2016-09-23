@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isIE9 } from 'web/util/index'
+import { isIE9 } from 'core/util/env'
 import { enter, leave } from '../modules/transition'
 
 // recursively search for possible transition defined inside the component root

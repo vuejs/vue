@@ -1,7 +1,6 @@
 /* @flow */
 
-import { inBrowser } from 'core/util/index'
-import { isIE9 } from 'web/util/index'
+import { inBrowser, isIE9 } from 'core/util/index'
 import { cached, extend } from 'shared/util'
 import { mergeVNodeHook } from 'core/vdom/helpers'
 import { activeInstance } from 'core/instance/lifecycle'
