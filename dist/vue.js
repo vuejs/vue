@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-rc.6
+ * Vue.js v2.0.0-rc.7
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -209,6 +209,27 @@ function genStaticKeys (modules) {
   }, []).join(',')
 }
 
+/**
+ * Check if two values are loosely equal - that is,
+ * if they are plain objects, do they have the same shape?
+ */
+function looseEqual (a, b) {
+  /* eslint-disable eqeqeq */
+  return a == b || (
+    isObject(a) && isObject(b)
+      ? JSON.stringify(a) === JSON.stringify(b)
+      : false
+  )
+  /* eslint-enable eqeqeq */
+}
+
+function looseIndexOf (arr, val) {
+  for (var i = 0; i < arr.length; i++) {
+    if (looseEqual(arr[i], val)) { return i }
+  }
+  return -1
+}
+
 /*  */
 
 var config = {
@@ -334,7 +355,7 @@ function parsePath (path) {
     var segments = path.split('.')
     return function (obj) {
       for (var i = 0; i < segments.length; i++) {
-        if (!obj) return
+        if (!obj) { return }
         obj = obj[segments[i]]
       }
       return obj
@@ -344,7 +365,6 @@ function parsePath (path) {
 
 /*  */
 
-/* global MutationObserver */
 // can we use __proto__?
 var hasProto = '__proto__' in {}
 
@@ -353,37 +373,25 @@ var inBrowser =
   typeof window !== 'undefined' &&
   Object.prototype.toString.call(window) !== '[object Object]'
 
+var UA = inBrowser && window.navigator.userAgent.toLowerCase()
+var isIE = UA && /msie|trident/.test(UA)
+var isIE9 = UA && UA.indexOf('msie 9.0') > 0
+var isEdge = UA && UA.indexOf('edge/') > 0
+var isAndroid = UA && UA.indexOf('android') > 0
+
 // detect devtools
 var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
-// UA sniffing for working around browser-specific quirks
-var UA = inBrowser && window.navigator.userAgent.toLowerCase()
-var isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
-var iosVersionMatch = UA && isIos && UA.match(/os ([\d_]+)/)
-var iosVersion = iosVersionMatch && iosVersionMatch[1].split('_')
-
-// MutationObserver is unreliable in iOS 9.3 UIWebView
-// detecting it by checking presence of IndexedDB
-// ref #3027
-var hasMutationObserverBug =
-  iosVersion &&
-  Number(iosVersion[0]) >= 9 &&
-  Number(iosVersion[1]) >= 3 &&
-  !window.indexedDB
-
 /**
  * Defer a task to execute it asynchronously. Ideally this
- * should be executed as a microtask, so we leverage
- * MutationObserver if it's available, and fallback to
- * setTimeout(0).
- *
- * @param {Function} cb
- * @param {Object} ctx
+ * should be executed as a microtask, but MutationObserver is unreliable
+ * in iOS UIWebView so we use a setImmediate shim and fallback to setTimeout.
  */
 var nextTick = (function () {
   var callbacks = []
   var pending = false
   var timerFunc
+
   function nextTickHandler () {
     pending = false
     var copies = callbacks.slice(0)
@@ -394,32 +402,29 @@ var nextTick = (function () {
   }
 
   /* istanbul ignore else */
-  if (typeof MutationObserver !== 'undefined' && !hasMutationObserverBug) {
-    var counter = 1
-    var observer = new MutationObserver(nextTickHandler)
-    var textNode = document.createTextNode(String(counter))
-    observer.observe(textNode, {
-      characterData: true
+  if (inBrowser && window.postMessage &&
+    !window.importScripts && // not in WebWorker
+    !(isAndroid && !window.requestAnimationFrame) // not in Android <= 4.3
+  ) {
+    var NEXT_TICK_TOKEN = '__vue__nextTick__'
+    window.addEventListener('message', function (e) {
+      if (e.source === window && e.data === NEXT_TICK_TOKEN) {
+        nextTickHandler()
+      }
     })
     timerFunc = function () {
-      counter = (counter + 1) % 2
-      textNode.data = String(counter)
+      window.postMessage(NEXT_TICK_TOKEN, '*')
     }
   } else {
-    // webpack attempts to inject a shim for setImmediate
-    // if it is used as a global, so we have to work around that to
-    // avoid bundling unnecessary code.
-    var context = inBrowser
-      ? window
-      : typeof global !== 'undefined' ? global : {}
-    timerFunc = context.setImmediate || setTimeout
+    timerFunc = (typeof global !== 'undefined' && global.setImmediate) || setTimeout
   }
-  return function (cb, ctx) {
+
+  return function queueNextTick (cb, ctx) {
     var func = ctx
       ? function () { cb.call(ctx) }
       : cb
     callbacks.push(func)
-    if (pending) return
+    if (pending) { return }
     pending = true
     timerFunc(nextTickHandler, 0)
   }
@@ -535,7 +540,7 @@ Dep.target = null
 var targetStack = []
 
 function pushTarget (_target) {
-  if (Dep.target) targetStack.push(Dep.target)
+  if (Dep.target) { targetStack.push(Dep.target) }
   Dep.target = _target
 }
 
@@ -871,11 +876,11 @@ function traverse (val, seen) {
     }
     if (isA) {
       i = val.length
-      while (i--) traverse(val[i], seen)
+      while (i--) { traverse(val[i], seen) }
     } else if (isO) {
       keys = Object.keys(val)
       i = keys.length
-      while (i--) traverse(val[keys[i]], seen)
+      while (i--) { traverse(val[keys[i]], seen) }
     }
   }
 }
@@ -927,7 +932,7 @@ var arrayMethods = Object.create(arrayProto)
         inserted = args.slice(2)
         break
     }
-    if (inserted) ob.observeArray(inserted)
+    if (inserted) { ob.observeArray(inserted) }
     // notify change
     ob.dep.notify()
     return result
@@ -1073,7 +1078,7 @@ function defineReactive (
           childOb.dep.depend()
         }
         if (Array.isArray(value)) {
-          for (var e, i = 0, l = value.length; i < l; i++) {
+          for (var e = void 0, i = 0, l = value.length; i < l; i++) {
             e = value[i]
             e && e.__ob__ && e.__ob__.dep.depend()
           }
@@ -1166,8 +1171,8 @@ function initState (vm) {
 
 function initProps (vm) {
   var props = vm.$options.props
-  var propsData = vm.$options.propsData
   if (props) {
+    var propsData = vm.$options.propsData || {}
     var keys = vm.$options._propKeys = Object.keys(props)
     var isRoot = !vm.$parent
     // root instance props should be converted
@@ -1396,13 +1401,6 @@ var VNode = function VNode (
   this.isRootInsert = true
   this.isComment = false
   this.isCloned = false
-  // apply construct hook.
-  // this is applied during render, before patch happens.
-  // unlike other hooks, this is applied on both client and server.
-  var constructHook = data && data.hook && data.hook.construct
-  if (constructHook) {
-    constructHook(this)
-  }
 };
 
 var emptyVNode = function () {
@@ -1552,7 +1550,7 @@ function updateListeners (
     } else if (cur !== old) {
       if (Array.isArray(old)) {
         old.length = cur.length
-        for (var i = 0; i < old.length; i++) old[i] = cur[i]
+        for (var i = 0; i < old.length; i++) { old[i] = cur[i] }
         on[name] = old
       } else {
         old.fn = cur
@@ -2218,6 +2216,10 @@ function renderMixin (Vue) {
   Vue.prototype._n = toNumber
   // empty vnode
   Vue.prototype._e = emptyVNode
+  // loose equal
+  Vue.prototype._q = looseEqual
+  // loose indexOf
+  Vue.prototype._i = looseIndexOf
 
   // render static tree by index
   Vue.prototype._m = function renderStatic (
@@ -2299,9 +2301,10 @@ function renderMixin (Vue) {
 
   // apply v-bind object
   Vue.prototype._b = function bindProps (
-    vnode,
+    data,
     value,
-    asProp) {
+    asProp
+  ) {
     if (value) {
       if (!isObject(value)) {
         "development" !== 'production' && warn(
@@ -2312,7 +2315,6 @@ function renderMixin (Vue) {
         if (Array.isArray(value)) {
           value = toObject(value)
         }
-        var data = vnode.data
         for (var key in value) {
           if (key === 'class' || key === 'style') {
             data[key] = value[key]
@@ -2325,6 +2327,7 @@ function renderMixin (Vue) {
         }
       }
     }
+    return data
   }
 
   // expose v-on keyCodes
@@ -2526,7 +2529,7 @@ eventsMixin(Vue)
 lifecycleMixin(Vue)
 renderMixin(Vue)
 
-var warn
+var warn = noop
 var formatComponentName
 
 if ("development" !== 'production') {
@@ -2709,8 +2712,8 @@ config._assetTypes.forEach(function (type) {
  */
 strats.watch = function (parentVal, childVal) {
   /* istanbul ignore if */
-  if (!childVal) return parentVal
-  if (!parentVal) return childVal
+  if (!childVal) { return parentVal }
+  if (!parentVal) { return childVal }
   var ret = {}
   extend(ret, parentVal)
   for (var key in childVal) {
@@ -2732,8 +2735,8 @@ strats.watch = function (parentVal, childVal) {
 strats.props =
 strats.methods =
 strats.computed = function (parentVal, childVal) {
-  if (!childVal) return parentVal
-  if (!parentVal) return childVal
+  if (!childVal) { return parentVal }
+  if (!parentVal) { return childVal }
   var ret = Object.create(null)
   extend(ret, parentVal)
   extend(ret, childVal)
@@ -2780,7 +2783,7 @@ function normalizeComponents (options) {
  */
 function normalizeProps (options) {
   var props = options.props
-  if (!props) return
+  if (!props) { return }
   var res = {}
   var i, val, name
   if (Array.isArray(props)) {
@@ -2903,8 +2906,6 @@ function validateProp (
   propsData,
   vm
 ) {
-  /* istanbul ignore if */
-  if (!propsData) return
   var prop = propOptions[key]
   var absent = !hasOwn(propsData, key)
   var value = propsData[key]
@@ -3070,13 +3071,19 @@ var util = Object.freeze({
 	noop: noop,
 	no: no,
 	genStaticKeys: genStaticKeys,
+	looseEqual: looseEqual,
+	looseIndexOf: looseIndexOf,
 	isReserved: isReserved,
 	def: def,
 	parsePath: parsePath,
 	hasProto: hasProto,
 	inBrowser: inBrowser,
-	devtools: devtools,
 	UA: UA,
+	isIE: isIE,
+	isIE9: isIE9,
+	isEdge: isEdge,
+	isAndroid: isAndroid,
+	devtools: devtools,
 	nextTick: nextTick,
 	get _Set () { return _Set; },
 	mergeOptions: mergeOptions,
@@ -3295,7 +3302,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   get: function () { return config._isServer; }
 })
 
-Vue.version = '2.0.0-rc.6'
+Vue.version = '2.0.0-rc.7'
 
 /*  */
 
@@ -3407,7 +3414,7 @@ function stringifyClass (value) {
   }
   if (isObject(value)) {
     for (var key in value) {
-      if (value[key]) res += key + ' '
+      if (value[key]) { res += key + ' ' }
     }
     return res.slice(0, -1)
   }
@@ -3513,11 +3520,6 @@ function isUnknownElement (tag) {
 }
 
 /*  */
-
-var UA$1 = inBrowser && window.navigator.userAgent.toLowerCase()
-var isIE = UA$1 && /msie|trident/.test(UA$1)
-var isIE9 = UA$1 && UA$1.indexOf('msie 9.0') > 0
-var isAndroid = UA$1 && UA$1.indexOf('android') > 0
 
 /**
  * Query an element selector if it's not an element already.
@@ -3626,7 +3628,7 @@ var ref = {
 
 function registerRef (vnode, isRemoval) {
   var key = vnode.data.ref
-  if (!key) return
+  if (!key) { return }
 
   var vm = vnode.context
   var ref = vnode.child || vnode.elm
@@ -3690,7 +3692,7 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   var map = {}
   for (i = beginIdx; i <= endIdx; ++i) {
     key = children[i].key
-    if (isDef(key)) map[key] = i
+    if (isDef(key)) { map[key] = i }
   }
   return map
 }
@@ -3705,7 +3707,7 @@ function createPatchFunction (backend) {
   for (i = 0; i < hooks$1.length; ++i) {
     cbs[hooks$1[i]] = []
     for (j = 0; j < modules.length; ++j) {
-      if (modules[j][hooks$1[i]] !== undefined) cbs[hooks$1[i]].push(modules[j][hooks$1[i]])
+      if (modules[j][hooks$1[i]] !== undefined) { cbs[hooks$1[i]].push(modules[j][hooks$1[i]]) }
     }
   }
 
@@ -3733,7 +3735,7 @@ function createPatchFunction (backend) {
     var data = vnode.data
     vnode.isRootInsert = !nested
     if (isDef(data)) {
-      if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode)
+      if (isDef(i = data.hook) && isDef(i = i.init)) { i(vnode) }
       // after calling the init hook, if the vnode is a child component
       // it should've created a child instance and mounted it. the child
       // component also has set the placeholder vnode's elm.
@@ -3799,8 +3801,8 @@ function createPatchFunction (backend) {
     }
     i = vnode.data.hook // Reuse variable
     if (isDef(i)) {
-      if (i.create) i.create(emptyNode, vnode)
-      if (i.insert) insertedVnodeQueue.push(vnode)
+      if (i.create) { i.create(emptyNode, vnode) }
+      if (i.insert) { insertedVnodeQueue.push(vnode) }
     }
   }
 
@@ -3846,8 +3848,8 @@ function createPatchFunction (backend) {
     var i, j
     var data = vnode.data
     if (isDef(data)) {
-      if (isDef(i = data.hook) && isDef(i = i.destroy)) i(vnode)
-      for (i = 0; i < cbs.destroy.length; ++i) cbs.destroy[i](vnode)
+      if (isDef(i = data.hook) && isDef(i = i.destroy)) { i(vnode) }
+      for (i = 0; i < cbs.destroy.length; ++i) { cbs.destroy[i](vnode) }
     }
     if (isDef(i = vnode.child) && !data.keepAlive) {
       invokeDestroyHook(i._vnode)
@@ -3941,7 +3943,7 @@ function createPatchFunction (backend) {
         oldEndVnode = oldCh[--oldEndIdx]
         newStartVnode = newCh[++newStartIdx]
       } else {
-        if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
+        if (isUndef(oldKeyToIdx)) { oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx) }
         idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx[newStartVnode.key] : null
         if (isUndef(idxInOld)) { // New element
           nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm)
@@ -4000,14 +4002,14 @@ function createPatchFunction (backend) {
     var oldCh = oldVnode.children
     var ch = vnode.children
     if (hasData && isPatchable(vnode)) {
-      for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
-      if (isDef(hook) && isDef(i = hook.update)) i(oldVnode, vnode)
+      for (i = 0; i < cbs.update.length; ++i) { cbs.update[i](oldVnode, vnode) }
+      if (isDef(hook) && isDef(i = hook.update)) { i(oldVnode, vnode) }
     }
     if (isUndef(vnode.text)) {
       if (isDef(oldCh) && isDef(ch)) {
-        if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
+        if (oldCh !== ch) { updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly) }
       } else if (isDef(ch)) {
-        if (isDef(oldVnode.text)) nodeOps.setTextContent(elm, '')
+        if (isDef(oldVnode.text)) { nodeOps.setTextContent(elm, '') }
         addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue)
       } else if (isDef(oldCh)) {
         removeVnodes(elm, oldCh, 0, oldCh.length - 1)
@@ -4018,8 +4020,8 @@ function createPatchFunction (backend) {
       nodeOps.setTextContent(elm, vnode.text)
     }
     if (hasData) {
-      for (i = 0; i < cbs.postpatch.length; ++i) cbs.postpatch[i](oldVnode, vnode)
-      if (isDef(hook) && isDef(i = hook.postpatch)) i(oldVnode, vnode)
+      for (i = 0; i < cbs.postpatch.length; ++i) { cbs.postpatch[i](oldVnode, vnode) }
+      if (isDef(hook) && isDef(i = hook.postpatch)) { i(oldVnode, vnode) }
     }
   }
 
@@ -4047,7 +4049,7 @@ function createPatchFunction (backend) {
     var data = vnode.data;
     var children = vnode.children;
     if (isDef(data)) {
-      if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode, true /* hydrating */)
+      if (isDef(i = data.hook) && isDef(i = i.init)) { i(vnode, true /* hydrating */) }
       if (isDef(i = vnode.child)) {
         // child component. it should have hydrated its own tree.
         initComponent(vnode, insertedVnodeQueue)
@@ -4583,7 +4585,7 @@ function whenTransitionEnds (
   var type = ref.type;
   var timeout = ref.timeout;
   var propCount = ref.propCount;
-  if (!type) return cb()
+  if (!type) { return cb() }
   var event = type === TRANSITION ? transitionEndEvent : animationEndEvent
   var ended = 0
   var end = function () {
@@ -4971,7 +4973,13 @@ var model = {
     }
     if (vnode.tag === 'select') {
       setSelected(el, binding, vnode.context)
-    } else {
+      /* istanbul ignore if */
+      if (isIE || isEdge) {
+        nextTick(function () {
+          setSelected(el, binding, vnode.context)
+        })
+      }
+    } else if (vnode.tag === 'textarea' || el.type === 'text') {
       if (!isAndroid) {
         el.addEventListener('compositionstart', onCompositionStart)
         el.addEventListener('compositionend', onCompositionEnd)
@@ -5014,12 +5022,12 @@ function setSelected (el, binding, vm) {
   for (var i = 0, l = el.options.length; i < l; i++) {
     option = el.options[i]
     if (isMultiple) {
-      selected = value.indexOf(getValue(option)) > -1
+      selected = looseIndexOf(value, getValue(option)) > -1
       if (option.selected !== selected) {
         option.selected = selected
       }
     } else {
-      if (getValue(option) === value) {
+      if (looseEqual(getValue(option), value)) {
         if (el.selectedIndex !== i) {
           el.selectedIndex = i
         }
@@ -5034,7 +5042,7 @@ function setSelected (el, binding, vm) {
 
 function hasNoMatchingOption (value, options) {
   for (var i = 0, l = options.length; i < l; i++) {
-    if (getValue(options[i]) === value) {
+    if (looseEqual(getValue(options[i]), value)) {
       return false
     }
   }
@@ -5044,7 +5052,7 @@ function hasNoMatchingOption (value, options) {
 function getValue (option) {
   return '_value' in option
     ? option._value
-    : option.value || option.text
+    : option.value
 }
 
 function onCompositionStart (e) {
@@ -5089,7 +5097,7 @@ var show = {
     var oldValue = ref.oldValue;
 
     /* istanbul ignore if */
-    if (value === oldValue) return
+    if (value === oldValue) { return }
     vnode = locateNode(vnode)
     var transition = vnode.data && vnode.data.transition
     if (transition && !isIE9) {
@@ -5231,7 +5239,7 @@ var Transition = {
       return placeholder(h, rawChild)
     }
 
-    child.key = child.key == null
+    child.key = child.key == null || child.isStatic
       ? ("__v" + (child.tag + this._uid) + "__")
       : child.key
     var data = (child.data || (child.data = {})).transition = extractTransitionData(this)
@@ -5359,26 +5367,11 @@ var TransitionGroup = {
       return
     }
 
-    children.forEach(function (c) {
-      /* istanbul ignore if */
-      if (c.elm._moveCb) {
-        c.elm._moveCb()
-      }
-      /* istanbul ignore if */
-      if (c.elm._enterCb) {
-        c.elm._enterCb()
-      }
-      var oldPos = c.data.pos
-      var newPos = c.data.pos = c.elm.getBoundingClientRect()
-      var dx = oldPos.left - newPos.left
-      var dy = oldPos.top - newPos.top
-      if (dx || dy) {
-        c.data.moved = true
-        var s = c.elm.style
-        s.transform = s.WebkitTransform = "translate(" + dx + "px," + dy + "px)"
-        s.transitionDuration = '0s'
-      }
-    })
+    // we divide the work into three loops to avoid mixing DOM reads and writes
+    // in each iteration - which helps prevent layout thrashing.
+    children.forEach(callPendingCbs)
+    children.forEach(recordPosition)
+    children.forEach(applyTranslation)
 
     // force reflow to put everything in position
     var f = document.body.offsetHeight // eslint-disable-line
@@ -5389,7 +5382,6 @@ var TransitionGroup = {
         var s = el.style
         addTransitionClass(el, moveClass)
         s.transform = s.WebkitTransform = s.transitionDuration = ''
-        el._moveDest = c.data.pos
         el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
           if (!e || /transform$/.test(e.propertyName)) {
             el.removeEventListener(transitionEndEvent, cb)
@@ -5415,6 +5407,34 @@ var TransitionGroup = {
       removeTransitionClass(el, moveClass)
       return (this._hasMove = info.hasTransform)
     }
+  }
+}
+
+function callPendingCbs (c) {
+  /* istanbul ignore if */
+  if (c.elm._moveCb) {
+    c.elm._moveCb()
+  }
+  /* istanbul ignore if */
+  if (c.elm._enterCb) {
+    c.elm._enterCb()
+  }
+}
+
+function recordPosition (c) {
+  c.data.newPos = c.elm.getBoundingClientRect()
+}
+
+function applyTranslation (c) {
+  var oldPos = c.data.pos
+  var newPos = c.data.newPos
+  var dx = oldPos.left - newPos.left
+  var dy = oldPos.top - newPos.top
+  if (dx || dy) {
+    c.data.moved = true
+    var s = c.elm.style
+    s.transform = s.WebkitTransform = "translate(" + dx + "px," + dy + "px)"
+    s.transitionDuration = '0s'
   }
 }
 
@@ -5614,7 +5634,7 @@ function parseHTML (html, options) {
         }
       }
 
-      var text
+      var text = void 0
       if (textEnd >= 0) {
         text = html.substring(0, textEnd)
         advance(textEnd)
@@ -5732,8 +5752,8 @@ function parseHTML (html, options) {
 
   function parseEndTag (tag, tagName, start, end) {
     var pos
-    if (start == null) start = index
-    if (end == null) end = index
+    if (start == null) { start = index }
+    if (end == null) { end = index }
 
     // Find the closest opened tag of the same type
     if (tagName) {
@@ -5790,10 +5810,10 @@ function parseFilters (exp) {
     c = exp.charCodeAt(i)
     if (inSingle) {
       // check single quote
-      if (c === 0x27 && prev !== 0x5C) inSingle = !inSingle
+      if (c === 0x27 && prev !== 0x5C) { inSingle = !inSingle }
     } else if (inDouble) {
       // check double quote
-      if (c === 0x22 && prev !== 0x5C) inDouble = !inDouble
+      if (c === 0x22 && prev !== 0x5C) { inDouble = !inDouble }
     } else if (
       c === 0x7C && // pipe
       exp.charCodeAt(i + 1) !== 0x7C &&
@@ -5923,17 +5943,6 @@ function addDirective (
   modifiers
 ) {
   (el.directives || (el.directives = [])).push({ name: name, value: value, arg: arg, modifiers: modifiers })
-}
-
-function addHook (el, name, code) {
-  var hooks = el.hooks || (el.hooks = {})
-  var hook = hooks[name]
-  /* istanbul ignore if */
-  if (hook) {
-    hook.push(code)
-  } else {
-    hooks[name] = [code]
-  }
 }
 
 function addHandler (
@@ -6349,7 +6358,7 @@ function processAttrs (el) {
         if (modifiers && modifiers.prop) {
           isProp = true
           name = camelize(name)
-          if (name === 'innerHtml') name = 'innerHTML'
+          if (name === 'innerHtml') { name = 'innerHTML' }
         }
         if (isProp || platformMustUseProp(name)) {
           addProp(el, name, value)
@@ -6419,7 +6428,7 @@ function makeAttrsMap (attrs) {
 function findPrevElement (children) {
   var i = children.length
   while (i--) {
-    if (children[i].tag) return children[i]
+    if (children[i].tag) { return children[i] }
   }
 }
 
@@ -6468,7 +6477,7 @@ var genStaticKeysCached = cached(genStaticKeys$1)
  * 2. Completely skip them in the patching process.
  */
 function optimize (root, options) {
-  if (!root) return
+  if (!root) { return }
   isStaticKey = genStaticKeysCached(options.staticKeys || '')
   isPlatformReservedTag = options.isReservedTag || (function () { return false; })
   // first pass: mark all non-static nodes.
@@ -6612,7 +6621,9 @@ function normalizeKeyCode (key) {
 /*  */
 
 function bind$1 (el, dir) {
-  addHook(el, 'construct', ("_b(n1," + (dir.value) + (dir.modifiers && dir.modifiers.prop ? ',true' : '') + ")"))
+  el.wrapData = function (code) {
+    return ("_b(" + code + "," + (dir.value) + (dir.modifiers && dir.modifiers.prop ? ',true' : '') + ")")
+  }
 }
 
 var baseDirectives = {
@@ -6716,7 +6727,7 @@ function genData (el) {
   // directives first.
   // directives may mutate the el's other properties before they are generated.
   var dirs = genDirectives(el)
-  if (dirs) data += dirs + ','
+  if (dirs) { data += dirs + ',' }
 
   // key
   if (el.key) {
@@ -6749,10 +6760,6 @@ function genData (el) {
   if (el.props) {
     data += "domProps:{" + (genProps(el.props)) + "},"
   }
-  // hooks
-  if (el.hooks) {
-    data += "hook:{" + (genHooks(el.hooks)) + "},"
-  }
   // event handlers
   if (el.events) {
     data += (genHandlers(el.events)) + ","
@@ -6773,12 +6780,17 @@ function genData (el) {
       data += "inlineTemplate:{render:function(){" + (inlineRenderFns.render) + "},staticRenderFns:[" + (inlineRenderFns.staticRenderFns.map(function (code) { return ("function(){" + code + "}"); }).join(',')) + "]}"
     }
   }
-  return data.replace(/,$/, '') + '}'
+  data = data.replace(/,$/, '') + '}'
+  // v-bind data wrap
+  if (el.wrapData) {
+    data = el.wrapData(data)
+  }
+  return data
 }
 
 function genDirectives (el) {
   var dirs = el.directives
-  if (!dirs) return
+  if (!dirs) { return }
   var res = 'directives:['
   var hasRuntime = false
   var i, l, dir, needRuntime
@@ -6839,14 +6851,6 @@ function genProps (props) {
   for (var i = 0; i < props.length; i++) {
     var prop = props[i]
     res += "\"" + (prop.name) + "\":" + (prop.value) + ","
-  }
-  return res.slice(0, -1)
-}
-
-function genHooks (hooks) {
-  var res = ''
-  for (var key in hooks) {
-    res += "\"" + key + "\":function(n1,n2){" + (hooks[key].join(';')) + "},"
   }
   return res.slice(0, -1)
 }
@@ -7050,8 +7054,8 @@ function genCheckboxModel (el, value) {
   var falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
   addProp(el, 'checked',
     "Array.isArray(" + value + ")" +
-      "?(" + value + ").indexOf(" + valueBinding + ")>-1" +
-      ":(" + value + ")===(" + trueValueBinding + ")"
+      "?_i(" + value + "," + valueBinding + ")>-1" +
+      ":_q(" + value + "," + trueValueBinding + ")"
   )
   addHandler(el, 'change',
     "var $$a=" + value + "," +
@@ -7059,7 +7063,7 @@ function genCheckboxModel (el, value) {
         "$$c=$$el.checked?(" + trueValueBinding + "):(" + falseValueBinding + ");" +
     'if(Array.isArray($$a)){' +
       "var $$v=" + valueBinding + "," +
-          '$$i=$$a.indexOf($$v);' +
+          '$$i=_i($$a,$$v);' +
       "if($$c){$$i<0&&(" + value + "=$$a.concat($$v))}" +
       "else{$$i>-1&&(" + value + "=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}" +
     "}else{" + value + "=$$c}",
@@ -7077,7 +7081,7 @@ function genRadioModel (el, value) {
     )
   }
   var valueBinding = getBindingAttr(el, 'value') || 'null'
-  addProp(el, 'checked', ("(" + value + ")===(" + valueBinding + ")"))
+  addProp(el, 'checked', ("_q(" + value + "," + valueBinding + ")"))
   addHandler(el, 'change', (value + "=" + valueBinding), null, true)
 }
 

@@ -207,6 +207,119 @@ function genStaticKeys (modules) {
   }, []).join(',')
 }
 
+/**
+ * Check if two values are loosely equal - that is,
+ * if they are plain objects, do they have the same shape?
+ */
+function looseEqual (a, b) {
+  /* eslint-disable eqeqeq */
+  return a == b || (
+    isObject(a) && isObject(b)
+      ? JSON.stringify(a) === JSON.stringify(b)
+      : false
+  )
+  /* eslint-enable eqeqeq */
+}
+
+function looseIndexOf (arr, val) {
+  for (var i = 0; i < arr.length; i++) {
+    if (looseEqual(arr[i], val)) { return i }
+  }
+  return -1
+}
+
+/*  */
+
+// can we use __proto__?
+var hasProto = '__proto__' in {}
+
+// Browser environment sniffing
+var inBrowser =
+  typeof window !== 'undefined' &&
+  Object.prototype.toString.call(window) !== '[object Object]'
+
+var UA = inBrowser && window.navigator.userAgent.toLowerCase()
+var isIE = UA && /msie|trident/.test(UA)
+var isIE9 = UA && UA.indexOf('msie 9.0') > 0
+var isEdge = UA && UA.indexOf('edge/') > 0
+var isAndroid = UA && UA.indexOf('android') > 0
+
+// detect devtools
+var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
+
+/**
+ * Defer a task to execute it asynchronously. Ideally this
+ * should be executed as a microtask, but MutationObserver is unreliable
+ * in iOS UIWebView so we use a setImmediate shim and fallback to setTimeout.
+ */
+var nextTick = (function () {
+  var callbacks = []
+  var pending = false
+  var timerFunc
+
+  function nextTickHandler () {
+    pending = false
+    var copies = callbacks.slice(0)
+    callbacks = []
+    for (var i = 0; i < copies.length; i++) {
+      copies[i]()
+    }
+  }
+
+  /* istanbul ignore else */
+  if (inBrowser && window.postMessage &&
+    !window.importScripts && // not in WebWorker
+    !(isAndroid && !window.requestAnimationFrame) // not in Android <= 4.3
+  ) {
+    var NEXT_TICK_TOKEN = '__vue__nextTick__'
+    window.addEventListener('message', function (e) {
+      if (e.source === window && e.data === NEXT_TICK_TOKEN) {
+        nextTickHandler()
+      }
+    })
+    timerFunc = function () {
+      window.postMessage(NEXT_TICK_TOKEN, '*')
+    }
+  } else {
+    timerFunc = (typeof global !== 'undefined' && global.setImmediate) || setTimeout
+  }
+
+  return function queueNextTick (cb, ctx) {
+    var func = ctx
+      ? function () { cb.call(ctx) }
+      : cb
+    callbacks.push(func)
+    if (pending) { return }
+    pending = true
+    timerFunc(nextTickHandler, 0)
+  }
+})()
+
+var _Set
+/* istanbul ignore if */
+if (typeof Set !== 'undefined' && /native code/.test(Set.toString())) {
+  // use native Set when available.
+  _Set = Set
+} else {
+  // a non-standard Set polyfill that only works with primitive keys.
+  _Set = (function () {
+    function Set () {
+      this.set = Object.create(null)
+    }
+    Set.prototype.has = function has (key) {
+      return this.set[key] !== undefined
+    };
+    Set.prototype.add = function add (key) {
+      this.set[key] = 1
+    };
+    Set.prototype.clear = function clear () {
+      this.set = Object.create(null)
+    };
+
+    return Set;
+  }())
+}
+
 /*  */
 
 var config = {
@@ -299,7 +412,7 @@ var config = {
   _isServer: process.env.VUE_ENV === 'server'
 }
 
-var warn
+var warn = noop
 var formatComponentName
 
 if (process.env.NODE_ENV !== 'production') {
@@ -364,120 +477,12 @@ function parsePath (path) {
     var segments = path.split('.')
     return function (obj) {
       for (var i = 0; i < segments.length; i++) {
-        if (!obj) return
+        if (!obj) { return }
         obj = obj[segments[i]]
       }
       return obj
     }
   }
-}
-
-/*  */
-
-/* global MutationObserver */
-// can we use __proto__?
-var hasProto = '__proto__' in {}
-
-// Browser environment sniffing
-var inBrowser =
-  typeof window !== 'undefined' &&
-  Object.prototype.toString.call(window) !== '[object Object]'
-
-// detect devtools
-var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
-
-// UA sniffing for working around browser-specific quirks
-var UA$1 = inBrowser && window.navigator.userAgent.toLowerCase()
-var isIos = UA$1 && /(iphone|ipad|ipod|ios)/i.test(UA$1)
-var iosVersionMatch = UA$1 && isIos && UA$1.match(/os ([\d_]+)/)
-var iosVersion = iosVersionMatch && iosVersionMatch[1].split('_')
-
-// MutationObserver is unreliable in iOS 9.3 UIWebView
-// detecting it by checking presence of IndexedDB
-// ref #3027
-var hasMutationObserverBug =
-  iosVersion &&
-  Number(iosVersion[0]) >= 9 &&
-  Number(iosVersion[1]) >= 3 &&
-  !window.indexedDB
-
-/**
- * Defer a task to execute it asynchronously. Ideally this
- * should be executed as a microtask, so we leverage
- * MutationObserver if it's available, and fallback to
- * setTimeout(0).
- *
- * @param {Function} cb
- * @param {Object} ctx
- */
-var nextTick = (function () {
-  var callbacks = []
-  var pending = false
-  var timerFunc
-  function nextTickHandler () {
-    pending = false
-    var copies = callbacks.slice(0)
-    callbacks = []
-    for (var i = 0; i < copies.length; i++) {
-      copies[i]()
-    }
-  }
-
-  /* istanbul ignore else */
-  if (typeof MutationObserver !== 'undefined' && !hasMutationObserverBug) {
-    var counter = 1
-    var observer = new MutationObserver(nextTickHandler)
-    var textNode = document.createTextNode(String(counter))
-    observer.observe(textNode, {
-      characterData: true
-    })
-    timerFunc = function () {
-      counter = (counter + 1) % 2
-      textNode.data = String(counter)
-    }
-  } else {
-    // webpack attempts to inject a shim for setImmediate
-    // if it is used as a global, so we have to work around that to
-    // avoid bundling unnecessary code.
-    var context = inBrowser
-      ? window
-      : typeof global !== 'undefined' ? global : {}
-    timerFunc = context.setImmediate || setTimeout
-  }
-  return function (cb, ctx) {
-    var func = ctx
-      ? function () { cb.call(ctx) }
-      : cb
-    callbacks.push(func)
-    if (pending) return
-    pending = true
-    timerFunc(nextTickHandler, 0)
-  }
-})()
-
-var _Set
-/* istanbul ignore if */
-if (typeof Set !== 'undefined' && /native code/.test(Set.toString())) {
-  // use native Set when available.
-  _Set = Set
-} else {
-  // a non-standard Set polyfill that only works with primitive keys.
-  _Set = (function () {
-    function Set () {
-      this.set = Object.create(null)
-    }
-    Set.prototype.has = function has (key) {
-      return this.set[key] !== undefined
-    };
-    Set.prototype.add = function add (key) {
-      this.set[key] = 1
-    };
-    Set.prototype.clear = function clear () {
-      this.set = Object.create(null)
-    };
-
-    return Set;
-  }())
 }
 
 /* not type checking this file because flow doesn't play well with Proxy */
@@ -565,7 +570,7 @@ Dep.target = null
 var targetStack = []
 
 function pushTarget (_target) {
-  if (Dep.target) targetStack.push(Dep.target)
+  if (Dep.target) { targetStack.push(Dep.target) }
   Dep.target = _target
 }
 
@@ -901,11 +906,11 @@ function traverse (val, seen) {
     }
     if (isA) {
       i = val.length
-      while (i--) traverse(val[i], seen)
+      while (i--) { traverse(val[i], seen) }
     } else if (isO) {
       keys = Object.keys(val)
       i = keys.length
-      while (i--) traverse(val[keys[i]], seen)
+      while (i--) { traverse(val[keys[i]], seen) }
     }
   }
 }
@@ -957,7 +962,7 @@ var arrayMethods = Object.create(arrayProto)
         inserted = args.slice(2)
         break
     }
-    if (inserted) ob.observeArray(inserted)
+    if (inserted) { ob.observeArray(inserted) }
     // notify change
     ob.dep.notify()
     return result
@@ -1103,7 +1108,7 @@ function defineReactive (
           childOb.dep.depend()
         }
         if (Array.isArray(value)) {
-          for (var e, i = 0, l = value.length; i < l; i++) {
+          for (var e = void 0, i = 0, l = value.length; i < l; i++) {
             e = value[i]
             e && e.__ob__ && e.__ob__.dep.depend()
           }
@@ -1196,8 +1201,8 @@ function initState (vm) {
 
 function initProps (vm) {
   var props = vm.$options.props
-  var propsData = vm.$options.propsData
   if (props) {
+    var propsData = vm.$options.propsData || {}
     var keys = vm.$options._propKeys = Object.keys(props)
     var isRoot = !vm.$parent
     // root instance props should be converted
@@ -1428,13 +1433,6 @@ var VNode = function VNode (
   this.isRootInsert = true
   this.isComment = false
   this.isCloned = false
-  // apply construct hook.
-  // this is applied during render, before patch happens.
-  // unlike other hooks, this is applied on both client and server.
-  var constructHook = data && data.hook && data.hook.construct
-  if (constructHook) {
-    constructHook(this)
-  }
 };
 
 var emptyVNode = function () {
@@ -1564,7 +1562,7 @@ function updateListeners (
     } else if (cur !== old) {
       if (Array.isArray(old)) {
         old.length = cur.length
-        for (var i = 0; i < old.length; i++) old[i] = cur[i]
+        for (var i = 0; i < old.length; i++) { old[i] = cur[i] }
         on[name] = old
       } else {
         old.fn = cur
@@ -2230,6 +2228,10 @@ function renderMixin (Vue) {
   Vue.prototype._n = toNumber
   // empty vnode
   Vue.prototype._e = emptyVNode
+  // loose equal
+  Vue.prototype._q = looseEqual
+  // loose indexOf
+  Vue.prototype._i = looseIndexOf
 
   // render static tree by index
   Vue.prototype._m = function renderStatic (
@@ -2311,9 +2313,10 @@ function renderMixin (Vue) {
 
   // apply v-bind object
   Vue.prototype._b = function bindProps (
-    vnode,
+    data,
     value,
-    asProp) {
+    asProp
+  ) {
     if (value) {
       if (!isObject(value)) {
         process.env.NODE_ENV !== 'production' && warn(
@@ -2324,7 +2327,6 @@ function renderMixin (Vue) {
         if (Array.isArray(value)) {
           value = toObject(value)
         }
-        var data = vnode.data
         for (var key in value) {
           if (key === 'class' || key === 'style') {
             data[key] = value[key]
@@ -2337,6 +2339,7 @@ function renderMixin (Vue) {
         }
       }
     }
+    return data
   }
 
   // expose v-on keyCodes
@@ -2691,8 +2694,8 @@ config._assetTypes.forEach(function (type) {
  */
 strats.watch = function (parentVal, childVal) {
   /* istanbul ignore if */
-  if (!childVal) return parentVal
-  if (!parentVal) return childVal
+  if (!childVal) { return parentVal }
+  if (!parentVal) { return childVal }
   var ret = {}
   extend(ret, parentVal)
   for (var key in childVal) {
@@ -2714,8 +2717,8 @@ strats.watch = function (parentVal, childVal) {
 strats.props =
 strats.methods =
 strats.computed = function (parentVal, childVal) {
-  if (!childVal) return parentVal
-  if (!parentVal) return childVal
+  if (!childVal) { return parentVal }
+  if (!parentVal) { return childVal }
   var ret = Object.create(null)
   extend(ret, parentVal)
   extend(ret, childVal)
@@ -2762,7 +2765,7 @@ function normalizeComponents (options) {
  */
 function normalizeProps (options) {
   var props = options.props
-  if (!props) return
+  if (!props) { return }
   var res = {}
   var i, val, name
   if (Array.isArray(props)) {
@@ -2885,8 +2888,6 @@ function validateProp (
   propsData,
   vm
 ) {
-  /* istanbul ignore if */
-  if (!propsData) return
   var prop = propOptions[key]
   var absent = !hasOwn(propsData, key)
   var value = propsData[key]
@@ -3130,11 +3131,6 @@ function getTagNamespace (tag) {
 
 /*  */
 
-var UA = inBrowser && window.navigator.userAgent.toLowerCase()
-var isIE = UA && /msie|trident/.test(UA)
-var isIE9 = UA && UA.indexOf('msie 9.0') > 0
-var isAndroid = UA && UA.indexOf('android') > 0
-
 /**
  * Not type-checking this file because it's mostly vendor code.
  */
@@ -3255,7 +3251,7 @@ function parseHTML (html, options) {
         }
       }
 
-      var text
+      var text = void 0
       if (textEnd >= 0) {
         text = html.substring(0, textEnd)
         advance(textEnd)
@@ -3373,8 +3369,8 @@ function parseHTML (html, options) {
 
   function parseEndTag (tag, tagName, start, end) {
     var pos
-    if (start == null) start = index
-    if (end == null) end = index
+    if (start == null) { start = index }
+    if (end == null) { end = index }
 
     // Find the closest opened tag of the same type
     if (tagName) {
@@ -3431,10 +3427,10 @@ function parseFilters (exp) {
     c = exp.charCodeAt(i)
     if (inSingle) {
       // check single quote
-      if (c === 0x27 && prev !== 0x5C) inSingle = !inSingle
+      if (c === 0x27 && prev !== 0x5C) { inSingle = !inSingle }
     } else if (inDouble) {
       // check double quote
-      if (c === 0x22 && prev !== 0x5C) inDouble = !inDouble
+      if (c === 0x22 && prev !== 0x5C) { inDouble = !inDouble }
     } else if (
       c === 0x7C && // pipe
       exp.charCodeAt(i + 1) !== 0x7C &&
@@ -3564,17 +3560,6 @@ function addDirective (
   modifiers
 ) {
   (el.directives || (el.directives = [])).push({ name: name, value: value, arg: arg, modifiers: modifiers })
-}
-
-function addHook (el, name, code) {
-  var hooks = el.hooks || (el.hooks = {})
-  var hook = hooks[name]
-  /* istanbul ignore if */
-  if (hook) {
-    hook.push(code)
-  } else {
-    hooks[name] = [code]
-  }
 }
 
 function addHandler (
@@ -3990,7 +3975,7 @@ function processAttrs (el) {
         if (modifiers && modifiers.prop) {
           isProp = true
           name = camelize(name)
-          if (name === 'innerHtml') name = 'innerHTML'
+          if (name === 'innerHtml') { name = 'innerHTML' }
         }
         if (isProp || platformMustUseProp(name)) {
           addProp(el, name, value)
@@ -4060,7 +4045,7 @@ function makeAttrsMap (attrs) {
 function findPrevElement (children) {
   var i = children.length
   while (i--) {
-    if (children[i].tag) return children[i]
+    if (children[i].tag) { return children[i] }
   }
 }
 
@@ -4109,7 +4094,7 @@ var genStaticKeysCached = cached(genStaticKeys$1)
  * 2. Completely skip them in the patching process.
  */
 function optimize (root, options) {
-  if (!root) return
+  if (!root) { return }
   isStaticKey = genStaticKeysCached(options.staticKeys || '')
   isPlatformReservedTag = options.isReservedTag || (function () { return false; })
   // first pass: mark all non-static nodes.
@@ -4253,7 +4238,9 @@ function normalizeKeyCode (key) {
 /*  */
 
 function bind$1 (el, dir) {
-  addHook(el, 'construct', ("_b(n1," + (dir.value) + (dir.modifiers && dir.modifiers.prop ? ',true' : '') + ")"))
+  el.wrapData = function (code) {
+    return ("_b(" + code + "," + (dir.value) + (dir.modifiers && dir.modifiers.prop ? ',true' : '') + ")")
+  }
 }
 
 var baseDirectives = {
@@ -4357,7 +4344,7 @@ function genData (el) {
   // directives first.
   // directives may mutate the el's other properties before they are generated.
   var dirs = genDirectives(el)
-  if (dirs) data += dirs + ','
+  if (dirs) { data += dirs + ',' }
 
   // key
   if (el.key) {
@@ -4390,10 +4377,6 @@ function genData (el) {
   if (el.props) {
     data += "domProps:{" + (genProps(el.props)) + "},"
   }
-  // hooks
-  if (el.hooks) {
-    data += "hook:{" + (genHooks(el.hooks)) + "},"
-  }
   // event handlers
   if (el.events) {
     data += (genHandlers(el.events)) + ","
@@ -4414,12 +4397,17 @@ function genData (el) {
       data += "inlineTemplate:{render:function(){" + (inlineRenderFns.render) + "},staticRenderFns:[" + (inlineRenderFns.staticRenderFns.map(function (code) { return ("function(){" + code + "}"); }).join(',')) + "]}"
     }
   }
-  return data.replace(/,$/, '') + '}'
+  data = data.replace(/,$/, '') + '}'
+  // v-bind data wrap
+  if (el.wrapData) {
+    data = el.wrapData(data)
+  }
+  return data
 }
 
 function genDirectives (el) {
   var dirs = el.directives
-  if (!dirs) return
+  if (!dirs) { return }
   var res = 'directives:['
   var hasRuntime = false
   var i, l, dir, needRuntime
@@ -4480,14 +4468,6 @@ function genProps (props) {
   for (var i = 0; i < props.length; i++) {
     var prop = props[i]
     res += "\"" + (prop.name) + "\":" + (prop.value) + ","
-  }
-  return res.slice(0, -1)
-}
-
-function genHooks (hooks) {
-  var res = ''
-  for (var key in hooks) {
-    res += "\"" + key + "\":function(n1,n2){" + (hooks[key].join(';')) + "},"
   }
   return res.slice(0, -1)
 }
@@ -4691,8 +4671,8 @@ function genCheckboxModel (el, value) {
   var falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
   addProp(el, 'checked',
     "Array.isArray(" + value + ")" +
-      "?(" + value + ").indexOf(" + valueBinding + ")>-1" +
-      ":(" + value + ")===(" + trueValueBinding + ")"
+      "?_i(" + value + "," + valueBinding + ")>-1" +
+      ":_q(" + value + "," + trueValueBinding + ")"
   )
   addHandler(el, 'change',
     "var $$a=" + value + "," +
@@ -4700,7 +4680,7 @@ function genCheckboxModel (el, value) {
         "$$c=$$el.checked?(" + trueValueBinding + "):(" + falseValueBinding + ");" +
     'if(Array.isArray($$a)){' +
       "var $$v=" + valueBinding + "," +
-          '$$i=$$a.indexOf($$v);' +
+          '$$i=_i($$a,$$v);' +
       "if($$c){$$i<0&&(" + value + "=$$a.concat($$v))}" +
       "else{$$i>-1&&(" + value + "=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}" +
     "}else{" + value + "=$$c}",
@@ -4718,7 +4698,7 @@ function genRadioModel (el, value) {
     )
   }
   var valueBinding = getBindingAttr(el, 'value') || 'null'
-  addProp(el, 'checked', ("(" + value + ")===(" + valueBinding + ")"))
+  addProp(el, 'checked', ("_q(" + value + "," + valueBinding + ")"))
   addHandler(el, 'change', (value + "=" + valueBinding), null, true)
 }
 
