@@ -85,6 +85,32 @@ describe('Directive Parser', function () {
     expect(res.filters[0].args).toBeUndefined()
   })
 
+  it('white spaces inside object literal', function () {
+    var res = parse('abc | filter {a:1} {b: 2}')
+    expect(res.expression).toBe('abc')
+    expect(res.filters.length).toBe(1)
+    expect(res.filters[0].name).toBe('filter')
+    expect(res.filters[0].args.length).toBe(2)
+    expect(res.filters[0].args[0].value).toBe('{a:1}')
+    expect(res.filters[0].args[0].dynamic).toBe(true)
+    expect(res.filters[0].args[1].value).toBe('{b: 2}')
+    expect(res.filters[0].args[1].dynamic).toBe(true)
+  })
+
+  it('white spaces inside array literal', function () {
+    var res = parse('abc | filter0 abc||def | filter1 [ 1, { a: 2 }]')
+    expect(res.expression).toBe('abc')
+    expect(res.filters.length).toBe(2)
+    expect(res.filters[0].name).toBe('filter0')
+    expect(res.filters[0].args.length).toBe(1)
+    expect(res.filters[0].args[0].value).toBe('abc||def')
+    expect(res.filters[0].args[0].dynamic).toBe(true)
+    expect(res.filters[1].name).toBe('filter1')
+    expect(res.filters[1].args.length).toBe(1)
+    expect(res.filters[1].args[0].value).toBe('[ 1, { a: 2 }]')
+    expect(res.filters[1].args[0].dynamic).toBe(true)
+  })
+
   it('cache', function () {
     var res1 = parse('a || b | c')
     var res2 = parse('a || b | c')
