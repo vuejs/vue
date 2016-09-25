@@ -337,6 +337,22 @@ describe('Component slot', () => {
     expect(vm.$el.textContent).toBe('Hello, World!')
   })
 
+  it('if children is a function and nested in tags,  make sure $slotFn is a function', () => {
+    const test = {
+      render () {
+        expect(typeof (this.$slotFn)).toBe('function')
+        return this.$slotFn('Hello, World!')
+      }
+    }
+    const vm = new Vue({
+      render (h) {
+        return h(test, null, [h('div', null, [(data) => h('span', null, [data])])])
+      }
+    }).$mount()
+
+    expect(vm.$el.outerHTML).toBe('<span>Hello, World!</span>')
+  })
+
   it('programmatic access to $slots', () => {
     const vm = new Vue({
       template: '<test><p slot="a">A</p><div>C</div><p slot="b">B</div></p></test>',

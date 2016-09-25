@@ -223,9 +223,17 @@ export function resolveSlotFn (
   }
 
   if (Array.isArray(children)) {
-    const child = children[0]
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i]
 
-    if (child && typeof (child) === 'function') return child
+      if (typeof child === 'function') return child
+
+      if (child && Array.isArray(child.children)) {
+        const func = resolveSlotFn(child.children)
+
+        if (func) return func
+      }
+    }
   }
 }
 
@@ -247,7 +255,7 @@ export function resolveSlots (
   for (let i = 0, l = children.length; i < l; i++) {
     child = children[i]
 
-    if (typeof child === 'function') continue;
+    if (typeof child === 'function') continue
 
     if (child.data && (name = child.data.slot)) {
       delete child.data.slot
