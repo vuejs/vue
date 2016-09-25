@@ -246,6 +246,9 @@ export function resolveSlots (
   let name, child
   for (let i = 0, l = children.length; i < l; i++) {
     child = children[i]
+
+    if (typeof child === 'function') continue;
+
     if (child.data && (name = child.data.slot)) {
       delete child.data.slot
       const slot = (slots[name] || (slots[name] = []))

@@ -13,7 +13,7 @@ export function normalizeChildren (
   }
 
   if (typeof (children) === 'function') {
-    return
+    return children
   }
 
   if (Array.isArray(children)) {
@@ -46,7 +46,7 @@ export function normalizeChildren (
           res.push(c)
         }
       } else if (typeof c === 'function') {
-        continue
+        res.push(c)
       }
     }
     return res
