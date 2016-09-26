@@ -13,6 +13,13 @@ class Test extends Vue {
     this.$isServer;
   }
 
+  // test property reification
+  $refs: { vue: Vue, element: HTMLInputElement}
+  testReification() {
+    this.$refs.element.value;
+    this.$refs.vue.$data;
+  }
+
   testMethods() {
     this.$mount("#app", false);
     this.$forceUpdate();
