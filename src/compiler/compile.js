@@ -122,18 +122,20 @@ function sortDirectives (dirs) {
 
   var groupedMap = {}
   var i, j, k, l
+  var keys = []
   for (i = 0, j = dirs.length; i < j; i++) {
     var dir = dirs[i]
     var priority = dir.descriptor.def.priority || DEFAULT_PRIORITY
     var array = groupedMap[priority]
     if (!array) {
       array = groupedMap[priority] = []
+      keys.push(priority)
     }
     array.push(dir)
   }
 
   var index = 0
-  var priorities = Object.keys(groupedMap).sort(function (a, b) {
+  var priorities = keys.sort(function (a, b) {
     return a > b ? -1 : a === b ? 0 : 1
   })
   for (i = 0, j = priorities.length; i < j; i++) {
