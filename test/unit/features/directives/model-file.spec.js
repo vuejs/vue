@@ -8,6 +8,6 @@ describe('Directive v-model file', () => {
       },
       template: '<input v-model="file" type="file">'
     }).$mount()
-    expect('use @change instead').toHaveBeenWarned()
+    expect('Use a v-on:change listener instead').toHaveBeenWarned()
   })
 })

@@ -114,8 +114,7 @@ function genDefaultModel (
       type === 'file') {
     warn(
       `<${el.tag} v-model="${value}" type="file">:\n` +
-      'File inputs are read only. You should use @change instead:\n' +
-      `<${el.tag} @change="${value} = $event.target.files" type="file">`
+      `File inputs are read only. Use a v-on:change listener instead.`
     )
   }
   addProp(el, 'value', isNative ? `_s(${value})` : `(${value})`)
