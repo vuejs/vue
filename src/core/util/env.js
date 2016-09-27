@@ -21,6 +21,7 @@ export const isIOS = UA && /iphone|ipad|ipod|ios/.test(UA)
 // detect devtools
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
+/* istanbul ignore next */
 function isNative (Ctor: Function): boolean {
   return /native code/.test(Ctor.toString())
 }
@@ -50,6 +51,7 @@ export const nextTick = (function () {
   // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
   // completely stops working after triggering a few times... so, if native
   // Promise is available, we will use it:
+  /* istanbul ignore if */
   if (typeof Promise !== 'undefined' && isNative(Promise)) {
     var p = Promise.resolve()
     timerFunc = () => {
@@ -76,6 +78,7 @@ export const nextTick = (function () {
     }
   } else {
     // fallback to setTimeout
+    /* istanbul ignore next */
     timerFunc = setTimeout
   }
 
