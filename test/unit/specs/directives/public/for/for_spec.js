@@ -1001,6 +1001,17 @@ describe('v-for', function () {
     })
     expect('Frozen v-for objects cannot be automatically tracked').toHaveBeenWarned()
   })
+
+  it('warn v-if and v-for mixed usage', () => {
+    new Vue({
+      el: document.createElement('div'),
+      template: '<div v-for="item in items" v-if="ok"></div>',
+      data: {
+        items: []
+      }
+    })
+    expect('consider filtering the source Array instead').toHaveBeenWarned()
+  })
 })
 
 /**

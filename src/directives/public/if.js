@@ -41,10 +41,8 @@ export default {
     if (value) {
       if (!this.frag) {
         this.insert()
-        this.updateRef(value)
       }
     } else {
-      this.updateRef(value)
       this.remove()
     }
   },
@@ -76,29 +74,6 @@ export default {
       }
       this.elseFrag = this.elseFactory.create(this._host, this._scope, this._frag)
       this.elseFrag.before(this.anchor)
-    }
-  },
-
-  updateRef (value) {
-    var ref = this.descriptor.ref
-    if (!ref) return
-    var hash = (this.vm || this._scope).$refs
-    var refs = hash[ref]
-    var key = this._frag.scope.$key
-    if (!refs) return
-    if (value) {
-      if (Array.isArray(refs)) {
-        refs.push(findVmFromFrag(this._frag))
-      } else {
-        refs[key] = findVmFromFrag(this._frag)
-      }
-    } else {
-      if (Array.isArray(refs)) {
-        refs.$remove(findVmFromFrag(this._frag))
-      } else {
-        refs[key] = null
-        delete refs[key]
-      }
     }
   },
 
