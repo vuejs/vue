@@ -1,3 +1,5 @@
+/* globals MutationObserver */
+
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
 
@@ -14,6 +16,7 @@ const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 export const isIE = UA && UA.indexOf('trident') > 0
 export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
 export const isAndroid = UA && UA.indexOf('android') > 0
+export const isIOS = UA && /iphone|ipad|ipod|ios/.test(UA)
 
 let transitionProp
 let transitionEndEvent
@@ -49,6 +52,11 @@ export {
   animationEndEvent
 }
 
+/* istanbul ignore next */
+function isNative (Ctor) {
+  return /native code/.test(Ctor.toString())
+}
+
 /**
  * Defer a task to execute it asynchronously. Ideally this
  * should be executed as a microtask, so we leverage
@@ -60,34 +68,55 @@ export {
  */
 
 export const nextTick = (function () {
-  var callbacks = []
-  var pending = false
-  var timerFunc
+  const callbacks = []
+  let pending = false
+  let timerFunc
+
   function nextTickHandler () {
     pending = false
-    var copies = callbacks.slice(0)
-    callbacks = []
-    for (var i = 0; i < copies.length; i++) {
+    const copies = callbacks.slice(0)
+    callbacks.length = 0
+    for (let i = 0; i < copies.length; i++) {
       copies[i]()
     }
   }
 
-  /* istanbul ignore else */
-  if (inBrowser && window.postMessage &&
-    !window.importScripts && // not in WebWorker
-    !(isAndroid && !window.requestAnimationFrame) // not in Android <= 4.3
-  ) {
-    const NEXT_TICK_TOKEN = '__vue__nextTick__'
-    window.addEventListener('message', e => {
-      if (e.source === window && e.data === NEXT_TICK_TOKEN) {
-        nextTickHandler()
-      }
+  // the nextTick behavior leverages the microtask queue, which can be accessed
+  // via either native Promise.then or MutationObserver.
+  // MutationObserver has wider support, however it is seriously bugged in
+  // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
+  // completely stops working after triggering a few times... so, if native
+  // Promise is available, we will use it:
+  /* istanbul ignore if */
+  if (typeof Promise !== 'undefined' && isNative(Promise)) {
+    var p = Promise.resolve()
+    var noop = function () {}
+    timerFunc = () => {
+      p.then(nextTickHandler)
+      // in problematic UIWebViews, Promise.then doesn't completely break, but
+      // it can get stuck in a weird state where callbacks are pushed into the
+      // microtask queue but the queue isn't being flushed, until the browser
+      // needs to do some other work, e.g. handle a timer. Therefore we can
+      // "force" the microtask queue to be flushed by adding an empty timer.
+      if (isIOS) setTimeout(noop)
+    }
+  } else if (typeof MutationObserver !== 'undefined') {
+    // use MutationObserver where native Promise is not available,
+    // e.g. IE11, iOS7, Android 4.4
+    var counter = 1
+    var observer = new MutationObserver(nextTickHandler)
+    var textNode = document.createTextNode(String(counter))
+    observer.observe(textNode, {
+      characterData: true
     })
     timerFunc = () => {
-      window.postMessage(NEXT_TICK_TOKEN, '*')
+      counter = (counter + 1) % 2
+      textNode.data = String(counter)
     }
   } else {
-    timerFunc = (typeof global !== 'undefined' && global.setImmediate) || setTimeout
+    // fallback to setTimeout
+    /* istanbul ignore next */
+    timerFunc = setTimeout
   }
 
   return function (cb, ctx) {
@@ -103,7 +132,7 @@ export const nextTick = (function () {
 
 let _Set
 /* istanbul ignore if */
-if (typeof Set !== 'undefined' && Set.toString().match(/native code/)) {
+if (typeof Set !== 'undefined' && isNative(Set)) {
   // use native Set when available.
   _Set = Set
 } else {
