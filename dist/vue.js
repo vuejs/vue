@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-rc.7
+ * Vue.js v2.0.0-rc.8
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -364,6 +364,7 @@ function parsePath (path) {
 }
 
 /*  */
+/* globals MutationObserver */
 
 // can we use __proto__?
 var hasProto = '__proto__' in {}
@@ -378,9 +379,15 @@ var isIE = UA && /msie|trident/.test(UA)
 var isIE9 = UA && UA.indexOf('msie 9.0') > 0
 var isEdge = UA && UA.indexOf('edge/') > 0
 var isAndroid = UA && UA.indexOf('android') > 0
+var isIOS = UA && /iphone|ipad|ipod|ios/.test(UA)
 
 // detect devtools
 var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
+
+/* istanbul ignore next */
+function isNative (Ctor) {
+  return /native code/.test(Ctor.toString())
+}
 
 /**
  * Defer a task to execute it asynchronously. Ideally this
@@ -395,28 +402,47 @@ var nextTick = (function () {
   function nextTickHandler () {
     pending = false
     var copies = callbacks.slice(0)
-    callbacks = []
+    callbacks.length = 0
     for (var i = 0; i < copies.length; i++) {
       copies[i]()
     }
   }
 
-  /* istanbul ignore else */
-  if (inBrowser && window.postMessage &&
-    !window.importScripts && // not in WebWorker
-    !(isAndroid && !window.requestAnimationFrame) // not in Android <= 4.3
-  ) {
-    var NEXT_TICK_TOKEN = '__vue__nextTick__'
-    window.addEventListener('message', function (e) {
-      if (e.source === window && e.data === NEXT_TICK_TOKEN) {
-        nextTickHandler()
-      }
+  // the nextTick behavior leverages the microtask queue, which can be accessed
+  // via either native Promise.then or MutationObserver.
+  // MutationObserver has wider support, however it is seriously bugged in
+  // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
+  // completely stops working after triggering a few times... so, if native
+  // Promise is available, we will use it:
+  /* istanbul ignore if */
+  if (typeof Promise !== 'undefined' && isNative(Promise)) {
+    var p = Promise.resolve()
+    timerFunc = function () {
+      p.then(nextTickHandler)
+      // in problematic UIWebViews, Promise.then doesn't completely break, but
+      // it can get stuck in a weird state where callbacks are pushed into the
+      // microtask queue but the queue isn't being flushed, until the browser
+      // needs to do some other work, e.g. handle a timer. Therefore we can
+      // "force" the microtask queue to be flushed by adding an empty timer.
+      if (isIOS) { setTimeout(noop) }
+    }
+  } else if (typeof MutationObserver !== 'undefined') {
+    // use MutationObserver where native Promise is not available,
+    // e.g. IE11, iOS7, Android 4.4
+    var counter = 1
+    var observer = new MutationObserver(nextTickHandler)
+    var textNode = document.createTextNode(String(counter))
+    observer.observe(textNode, {
+      characterData: true
     })
     timerFunc = function () {
-      window.postMessage(NEXT_TICK_TOKEN, '*')
+      counter = (counter + 1) % 2
+      textNode.data = String(counter)
     }
   } else {
-    timerFunc = (typeof global !== 'undefined' && global.setImmediate) || setTimeout
+    // fallback to setTimeout
+    /* istanbul ignore next */
+    timerFunc = setTimeout
   }
 
   return function queueNextTick (cb, ctx) {
@@ -424,15 +450,16 @@ var nextTick = (function () {
       ? function () { cb.call(ctx) }
       : cb
     callbacks.push(func)
-    if (pending) { return }
-    pending = true
-    timerFunc(nextTickHandler, 0)
+    if (!pending) {
+      pending = true
+      timerFunc(nextTickHandler, 0)
+    }
   }
 })()
 
 var _Set
 /* istanbul ignore if */
-if (typeof Set !== 'undefined' && /native code/.test(Set.toString())) {
+if (typeof Set !== 'undefined' && isNative(Set)) {
   // use native Set when available.
   _Set = Set
 } else {
@@ -3083,6 +3110,7 @@ var util = Object.freeze({
 	isIE9: isIE9,
 	isEdge: isEdge,
 	isAndroid: isAndroid,
+	isIOS: isIOS,
 	devtools: devtools,
 	nextTick: nextTick,
 	get _Set () { return _Set; },
@@ -3302,7 +3330,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   get: function () { return config._isServer; }
 })
 
-Vue.version = '2.0.0-rc.7'
+Vue.version = '2.0.0-rc.8'
 
 /*  */
 
@@ -7124,6 +7152,15 @@ function genDefaultModel (
     : (value + "=" + valueExpression)
   if (isNative && needCompositionGuard) {
     code = "if($event.target.composing)return;" + code
+  }
+  // inputs with type="file" are read only and setting the input's
+  // value will throw an error.
+  if ("development" !== 'production' &&
+      type === 'file') {
+    warn$3(
+      "<" + (el.tag) + " v-model=\"" + value + "\" type=\"file\">:\n" +
+      "File inputs are read only. Use a v-on:change listener instead."
+    )
   }
   addProp(el, 'value', isNative ? ("_s(" + value + ")") : ("(" + value + ")"))
   addHandler(el, event, code, null, true)
