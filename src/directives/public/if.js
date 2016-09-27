@@ -5,8 +5,7 @@ import {
   remove,
   replace,
   createAnchor,
-  warn,
-  findVmFromFrag
+  warn
 } from '../../util/index'
 
 export default {

@@ -1002,7 +1002,7 @@ describe('v-for', function () {
     expect('Frozen v-for objects cannot be automatically tracked').toHaveBeenWarned()
   })
 
-  it('warn v-if and v-for mixed usage', () => {
+  it('warn v-if and v-for mixed usage', function () {
     new Vue({
       el: document.createElement('div'),
       template: '<div v-for="item in items" v-if="ok"></div>',

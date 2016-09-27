@@ -16,8 +16,7 @@ import {
   def,
   cancellable,
   isArray,
-  isPlainObject,
-  findVmFromFrag
+  isPlainObject
 } from '../../util/index'
 
 let uid = 0
@@ -656,6 +655,24 @@ if (process.env.NODE_ENV !== 'production') {
       this.vm
     )
   }
+}
+
+/**
+ * Find a vm from a fragment.
+ *
+ * @param {Fragment} frag
+ * @return {Vue|undefined}
+ */
+
+function findVmFromFrag (frag) {
+  let node = frag.node
+  // handle multi-node frag
+  if (frag.end) {
+    while (!node.__vue__ && node !== frag.end && node.nextSibling) {
+      node = node.nextSibling
+    }
+  }
+  return node.__vue__
 }
 
 export default vFor
