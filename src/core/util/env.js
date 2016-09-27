@@ -27,9 +27,7 @@ function isNative (Ctor: Function): boolean {
 }
 
 /**
- * Defer a task to execute it asynchronously. Ideally this
- * should be executed as a microtask, but MutationObserver is unreliable
- * in iOS UIWebView so we use a setImmediate shim and fallback to setTimeout.
+ * Defer a task to execute it asynchronously.
  */
 export const nextTick = (function () {
   const callbacks = []
