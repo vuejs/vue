@@ -108,6 +108,16 @@ function genDefaultModel (
   if (isNative && needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
   }
+  // inputs with type="file" are read only and setting the input's
+  // value will throw an error.
+  if (process.env.NODE_ENV !== 'production' &&
+      type === 'file') {
+    warn(
+      `<${el.tag} v-model="${value}" type="file">:\n` +
+      'File inputs are read only. You should use @change instead:\n' +
+      `<${el.tag} @change="${value} = $event.target.files" type="file">`
+    )
+  }
   addProp(el, 'value', isNative ? `_s(${value})` : `(${value})`)
   addHandler(el, event, code, null, true)
   if (needCompositionGuard) {
