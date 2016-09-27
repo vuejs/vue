@@ -34,7 +34,7 @@ declare type ComponentOptions = {
   render: () => VNode;
   staticRenderFns?: Array<() => VNode>;
   // lifecycle
-  init?: Function;
+  beforeCreate?: Function;
   created?: Function;
   beforeMount?: Function;
   mounted?: Function;
