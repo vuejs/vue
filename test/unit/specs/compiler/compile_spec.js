@@ -53,8 +53,8 @@ describe('Compile', function () {
   it('normal directives', function () {
     el.setAttribute('v-a', 'b')
     el.innerHTML = '<p v-a:hello.a.b="a" v-b="1">hello</p><div v-b.literal="foo"></div>'
-    var defA = { priority: 1 }
-    var defB = { priority: 2 }
+    var defA = { priority: 250 }
+    var defB = { priority: 1100 }
     var options = _.mergeOptions(Vue.options, {
       directives: {
         a: defA,
