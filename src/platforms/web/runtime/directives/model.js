@@ -35,7 +35,7 @@ export default {
       setSelected(el, binding, vnode.context)
       /* istanbul ignore if */
       if (isIE || isEdge) {
-        let cb = () => {
+        const cb = () => {
           setSelected(el, binding, vnode.context)
         }
         nextTick(cb)
