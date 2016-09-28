@@ -35,9 +35,11 @@ export default {
       setSelected(el, binding, vnode.context)
       /* istanbul ignore if */
       if (isIE || isEdge) {
-        nextTick(() => {
+        const cb = () => {
           setSelected(el, binding, vnode.context)
-        })
+        }
+        nextTick(cb)
+        setTimeout(cb, 0)
       }
     } else if (vnode.tag === 'textarea' || el.type === 'text') {
       if (!isAndroid) {
