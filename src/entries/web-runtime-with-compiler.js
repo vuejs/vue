@@ -40,6 +40,11 @@ Vue.prototype.$mount = function (
       } else if (template.nodeType) {
         isFromDOM = true
         template = template.innerHTML
+      } else if (template.render && template.staticRenderFns) {
+        options.render = template.render
+        options.staticRenderFns = template.staticRenderFns
+        options.template = null
+        template = null
       } else {
         if (process.env.NODE_ENV !== 'production') {
           warn('invalid template option:' + template, this)

@@ -40,6 +40,12 @@ export function lifecycleMixin (Vue: Class<Component>) {
   ): Component {
     const vm: Component = this
     vm.$el = el
+    const template = vm.$options.template
+    if (template && template.render && template.staticRenderFns) {
+      vm.$options.render = template.render
+      vm.$options.staticRenderFns = template.staticRenderFns
+      vm.$options.template = null
+    }
     if (!vm.$options.render) {
       vm.$options.render = emptyVNode
       if (process.env.NODE_ENV !== 'production') {

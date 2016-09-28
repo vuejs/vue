@@ -36,4 +36,17 @@ describe('Options render', () => {
     new Vue().$mount()
     expect('Failed to mount component: template or render function not defined.').toHaveBeenWarned()
   })
+
+  it('allow setting of render functions via template option', () => {
+    const obj = {
+      render: function (h) {
+        return h('p')
+      },
+      staticRenderFns: []
+    }
+    const vm = new Vue({
+      template: obj
+    }).$mount()
+    expect(vm.$el.tagName).toBe('P')
+  })
 })
