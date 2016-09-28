@@ -61,7 +61,7 @@ export const nextTick = (function () {
       // "force" the microtask queue to be flushed by adding an empty timer.
       if (isIOS) setTimeout(noop)
     }
-  } else if (typeof MutationObserver !== 'undefined') {
+  } else if (typeof MutationObserver !== 'undefined' && isNative(MutationObserver)) {
     // use MutationObserver where native Promise is not available,
     // e.g. IE11, iOS7, Android 4.4
     var counter = 1
