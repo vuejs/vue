@@ -52,10 +52,10 @@ var batches = [
   },
   // mobile
   {
-    sl_ios_safari_7: {
+    sl_ios_safari_8: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      version: '7.0'
+      version: '8.4'
     },
     sl_ios_safari_9: {
       base: 'SauceLabs',
