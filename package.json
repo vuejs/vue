@@ -87,7 +87,7 @@
     "nightwatch": "^0.9.0",
     "nightwatch-helpers": "^1.2.0",
     "phantomjs-prebuilt": "^2.1.1",
-    "rollup": "^0.34.13",
+    "rollup": "^0.36.1",
     "rollup-plugin-alias": "^1.2.0",
     "rollup-plugin-babel": "^2.4.0",
     "rollup-plugin-buble": "^0.14.0",
