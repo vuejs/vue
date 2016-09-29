@@ -57,7 +57,7 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     cur = style[name]
     if (cur !== oldStyle[name]) {
       // ie9 setting to null has no effect, must use empty string
-      el.style[normalize(name)] = cur || ''
+      el.style[normalize(name)] = cur == null ? '' : cur
     }
   }
 }

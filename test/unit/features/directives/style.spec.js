@@ -37,6 +37,13 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
+  it('falsy number', done => {
+    vm.styles = { opacity: 0 }
+    waitForUpdate(() => {
+      expect(vm.$el.style.opacity).toBe('0')
+    }).then(done)
+  })
+
   it('plain object', done => {
     vm.styles = { color: 'red' }
     waitForUpdate(() => {
