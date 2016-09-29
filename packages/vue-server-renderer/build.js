@@ -381,9 +381,7 @@ function isNative (Ctor) {
 }
 
 /**
- * Defer a task to execute it asynchronously. Ideally this
- * should be executed as a microtask, but MutationObserver is unreliable
- * in iOS UIWebView so we use a setImmediate shim and fallback to setTimeout.
+ * Defer a task to execute it asynchronously.
  */
 var nextTick = (function () {
   var callbacks = []
@@ -417,7 +415,7 @@ var nextTick = (function () {
       // "force" the microtask queue to be flushed by adding an empty timer.
       if (isIOS) { setTimeout(noop) }
     }
-  } else if (typeof MutationObserver !== 'undefined') {
+  } else if (typeof MutationObserver !== 'undefined' && isNative(MutationObserver)) {
     // use MutationObserver where native Promise is not available,
     // e.g. IE11, iOS7, Android 4.4
     var counter = 1
@@ -571,21 +569,21 @@ var formatComponentName
 if (process.env.NODE_ENV !== 'production') {
   var hasConsole = typeof console !== 'undefined'
 
-  warn = function (msg, vm) {
+  warn = function (msg, vm$$1) {
     if (hasConsole && (!config.silent)) {
       console.error("[Vue warn]: " + msg + " " + (
-        vm ? formatLocation(formatComponentName(vm)) : ''
+        vm$$1 ? formatLocation(formatComponentName(vm$$1)) : ''
       ))
     }
   }
 
-  formatComponentName = function (vm) {
-    if (vm.$root === vm) {
+  formatComponentName = function (vm$$1) {
+    if (vm$$1.$root === vm$$1) {
       return 'root instance'
     }
-    var name = vm._isVue
-      ? vm.$options.name || vm.$options._componentTag
-      : vm.name
+    var name = vm$$1._isVue
+      ? vm$$1.$options.name || vm$$1.$options._componentTag
+      : vm$$1.name
     return name ? ("component <" + name + ">") : "anonymous component"
   }
 
@@ -642,7 +640,8 @@ function parsePath (path) {
 
 var hasProxy;
 var proxyHandlers;
-var initProxy;
+var initProxy
+
 if (process.env.NODE_ENV !== 'production') {
   var allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
@@ -671,11 +670,11 @@ if (process.env.NODE_ENV !== 'production') {
     }
   }
 
-  initProxy = function initProxy (vm) {
+  initProxy = function initProxy (vm$$1) {
     if (hasProxy) {
-      vm._renderProxy = new Proxy(vm, proxyHandlers)
+      vm$$1._renderProxy = new Proxy(vm$$1, proxyHandlers)
     } else {
-      vm._renderProxy = vm
+      vm$$1._renderProxy = vm$$1
     }
   }
 }
@@ -735,7 +734,7 @@ function popTarget () {
 
 
 var queue = []
-var has = {}
+var has$1 = {}
 var circular = {}
 var waiting = false
 var flushing = false
@@ -746,7 +745,7 @@ var index = 0
  */
 function resetSchedulerState () {
   queue.length = 0
-  has = {}
+  has$1 = {}
   if (process.env.NODE_ENV !== 'production') {
     circular = {}
   }
@@ -774,10 +773,10 @@ function flushSchedulerQueue () {
   for (index = 0; index < queue.length; index++) {
     var watcher = queue[index]
     var id = watcher.id
-    has[id] = null
+    has$1[id] = null
     watcher.run()
     // in dev build, check and stop circular updates.
-    if (process.env.NODE_ENV !== 'production' && has[id] != null) {
+    if (process.env.NODE_ENV !== 'production' && has$1[id] != null) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > config._maxUpdateCount) {
         warn(
@@ -809,8 +808,8 @@ function flushSchedulerQueue () {
  */
 function queueWatcher (watcher) {
   var id = watcher.id
-  if (has[id] == null) {
-    has[id] = true
+  if (has$1[id] == null) {
+    has$1[id] = true
     if (!flushing) {
       queue.push(watcher)
     } else {
@@ -840,15 +839,15 @@ var uid$1 = 0
  * This is used for both the $watch() api and directives.
  */
 var Watcher = function Watcher (
-  vm,
+  vm$$1,
   expOrFn,
   cb,
   options
 ) {
   if ( options === void 0 ) options = {};
 
-  this.vm = vm
-  vm._watchers.push(this)
+  this.vm = vm$$1
+  vm$$1._watchers.push(this)
   // options
   this.deep = !!options.deep
   this.user = !!options.user
@@ -874,7 +873,7 @@ var Watcher = function Watcher (
         "Failed watching path: \"" + expOrFn + "\" " +
         'Watcher only accepts simple dot-delimited paths. ' +
         'For full control, use a function instead.',
-        vm
+        vm$$1
       )
     }
   }
@@ -1074,12 +1073,7 @@ function traverse (val, seen) {
  */
 
 var arrayProto = Array.prototype
-var arrayMethods = Object.create(arrayProto)
-
-/**
- * Intercept mutating methods and emit events
- */
-;[
+var arrayMethods = Object.create(arrayProto);[
   'push',
   'pop',
   'shift',
@@ -1167,7 +1161,7 @@ var Observer = function Observer (value) {
 Observer.prototype.walk = function walk (obj) {
   var keys = Object.keys(obj)
   for (var i = 0; i < keys.length; i++) {
-    defineReactive(obj, keys[i], obj[keys[i]])
+    defineReactive$$1(obj, keys[i], obj[keys[i]])
   }
 };
 
@@ -1232,7 +1226,7 @@ function observe (value) {
 /**
  * Define a reactive property on an Object.
  */
-function defineReactive (
+function defineReactive$$1 (
   obj,
   key,
   val,
@@ -1314,7 +1308,7 @@ function set (obj, key, val) {
     obj[key] = val
     return
   }
-  defineReactive(ob.value, key, val)
+  defineReactive$$1(ob.value, key, val)
   ob.dep.notify()
   return val
 }
@@ -1343,40 +1337,40 @@ function del (obj, key) {
 
 /*  */
 
-function initState (vm) {
-  vm._watchers = []
-  initProps(vm)
-  initData(vm)
-  initComputed(vm)
-  initMethods(vm)
-  initWatch(vm)
+function initState (vm$$1) {
+  vm$$1._watchers = []
+  initProps(vm$$1)
+  initData(vm$$1)
+  initComputed(vm$$1)
+  initMethods(vm$$1)
+  initWatch(vm$$1)
 }
 
-function initProps (vm) {
-  var props = vm.$options.props
+function initProps (vm$$1) {
+  var props = vm$$1.$options.props
   if (props) {
-    var propsData = vm.$options.propsData || {}
-    var keys = vm.$options._propKeys = Object.keys(props)
-    var isRoot = !vm.$parent
+    var propsData = vm$$1.$options.propsData || {}
+    var keys = vm$$1.$options._propKeys = Object.keys(props)
+    var isRoot = !vm$$1.$parent
     // root instance props should be converted
     observerState.shouldConvert = isRoot
     var loop = function ( i ) {
       var key = keys[i]
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
-        defineReactive(vm, key, validateProp(key, props, propsData, vm), function () {
-          if (vm.$parent && !observerState.isSettingProps) {
+        defineReactive$$1(vm$$1, key, validateProp(key, props, propsData, vm$$1), function () {
+          if (vm$$1.$parent && !observerState.isSettingProps) {
             warn(
               "Avoid mutating a prop directly since the value will be " +
               "overwritten whenever the parent component re-renders. " +
               "Instead, use a data or computed property based on the prop's " +
               "value. Prop being mutated: \"" + key + "\"",
-              vm
+              vm$$1
             )
           }
         })
       } else {
-        defineReactive(vm, key, validateProp(key, props, propsData, vm))
+        defineReactive$$1(vm$$1, key, validateProp(key, props, propsData, vm$$1))
       }
     };
 
@@ -1385,31 +1379,31 @@ function initProps (vm) {
   }
 }
 
-function initData (vm) {
-  var data = vm.$options.data
-  data = vm._data = typeof data === 'function'
-    ? data.call(vm)
+function initData (vm$$1) {
+  var data = vm$$1.$options.data
+  data = vm$$1._data = typeof data === 'function'
+    ? data.call(vm$$1)
     : data || {}
   if (!isPlainObject(data)) {
     data = {}
     process.env.NODE_ENV !== 'production' && warn(
       'data functions should return an object.',
-      vm
+      vm$$1
     )
   }
   // proxy data on instance
   var keys = Object.keys(data)
-  var props = vm.$options.props
+  var props = vm$$1.$options.props
   var i = keys.length
   while (i--) {
     if (props && hasOwn(props, keys[i])) {
       process.env.NODE_ENV !== 'production' && warn(
         "The data property \"" + (keys[i]) + "\" is already declared as a prop. " +
         "Use prop default value instead.",
-        vm
+        vm$$1
       )
     } else {
-      proxy(vm, keys[i])
+      proxy(vm$$1, keys[i])
     }
   }
   // observe data
@@ -1424,25 +1418,25 @@ var computedSharedDefinition = {
   set: noop
 }
 
-function initComputed (vm) {
-  var computed = vm.$options.computed
+function initComputed (vm$$1) {
+  var computed = vm$$1.$options.computed
   if (computed) {
     for (var key in computed) {
       var userDef = computed[key]
       if (typeof userDef === 'function') {
-        computedSharedDefinition.get = makeComputedGetter(userDef, vm)
+        computedSharedDefinition.get = makeComputedGetter(userDef, vm$$1)
         computedSharedDefinition.set = noop
       } else {
         computedSharedDefinition.get = userDef.get
           ? userDef.cache !== false
-            ? makeComputedGetter(userDef.get, vm)
-            : bind(userDef.get, vm)
+            ? makeComputedGetter(userDef.get, vm$$1)
+            : bind(userDef.get, vm$$1)
           : noop
         computedSharedDefinition.set = userDef.set
-          ? bind(userDef.set, vm)
+          ? bind(userDef.set, vm$$1)
           : noop
       }
-      Object.defineProperty(vm, key, computedSharedDefinition)
+      Object.defineProperty(vm$$1, key, computedSharedDefinition)
     }
   }
 }
@@ -1462,45 +1456,45 @@ function makeComputedGetter (getter, owner) {
   }
 }
 
-function initMethods (vm) {
-  var methods = vm.$options.methods
+function initMethods (vm$$1) {
+  var methods = vm$$1.$options.methods
   if (methods) {
     for (var key in methods) {
       if (methods[key] != null) {
-        vm[key] = bind(methods[key], vm)
+        vm$$1[key] = bind(methods[key], vm$$1)
       } else if (process.env.NODE_ENV !== 'production') {
-        warn(("Method \"" + key + "\" is undefined in options."), vm)
+        warn(("Method \"" + key + "\" is undefined in options."), vm$$1)
       }
     }
   }
 }
 
-function initWatch (vm) {
-  var watch = vm.$options.watch
+function initWatch (vm$$1) {
+  var watch = vm$$1.$options.watch
   if (watch) {
     for (var key in watch) {
       var handler = watch[key]
       if (Array.isArray(handler)) {
         for (var i = 0; i < handler.length; i++) {
-          createWatcher(vm, key, handler[i])
+          createWatcher(vm$$1, key, handler[i])
         }
       } else {
-        createWatcher(vm, key, handler)
+        createWatcher(vm$$1, key, handler)
       }
     }
   }
 }
 
-function createWatcher (vm, key, handler) {
+function createWatcher (vm$$1, key, handler) {
   var options
   if (isPlainObject(handler)) {
     options = handler
     handler = handler.handler
   }
   if (typeof handler === 'string') {
-    handler = vm[handler]
+    handler = vm$$1[handler]
   }
-  vm.$watch(key, handler, options)
+  vm$$1.$watch(key, handler, options)
 }
 
 function stateMixin (Vue) {
@@ -1530,12 +1524,12 @@ function stateMixin (Vue) {
     cb,
     options
   ) {
-    var vm = this
+    var vm$$1 = this
     options = options || {}
     options.user = true
-    var watcher = new Watcher(vm, expOrFn, cb, options)
+    var watcher = new Watcher(vm$$1, expOrFn, cb, options)
     if (options.immediate) {
-      cb.call(vm, watcher.value)
+      cb.call(vm$$1, watcher.value)
     }
     return function unwatchFn () {
       watcher.teardown()
@@ -1543,16 +1537,16 @@ function stateMixin (Vue) {
   }
 }
 
-function proxy (vm, key) {
+function proxy (vm$$1, key) {
   if (!isReserved(key)) {
-    Object.defineProperty(vm, key, {
+    Object.defineProperty(vm$$1, key, {
       configurable: true,
       enumerable: true,
       get: function proxyGetter () {
-        return vm._data[key]
+        return vm$$1._data[key]
       },
       set: function proxySetter (val) {
-        vm._data[key] = val
+        vm$$1._data[key] = val
       }
     })
   }
@@ -1684,11 +1678,15 @@ function applyNS (vnode, ns) {
   }
 }
 
+
+
+
+
 function updateListeners (
   on,
   oldOn,
   add,
-  remove
+  remove$$1
 ) {
   var name, cur, old, fn, event, capture
   for (name in on) {
@@ -1726,7 +1724,7 @@ function updateListeners (
   for (name in oldOn) {
     if (!on[name]) {
       event = name.charAt(0) === '!' ? name.slice(1) : name
-      remove(event, oldOn[name].invoker)
+      remove$$1(event, oldOn[name].invoker)
     }
   }
 }
@@ -1753,8 +1751,8 @@ function fnInvoker (o) {
 
 var activeInstance = null
 
-function initLifecycle (vm) {
-  var options = vm.$options
+function initLifecycle (vm$$1) {
+  var options = vm$$1.$options
 
   // locate first non-abstract parent
   var parent = options.parent
@@ -1762,20 +1760,20 @@ function initLifecycle (vm) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
-    parent.$children.push(vm)
+    parent.$children.push(vm$$1)
   }
 
-  vm.$parent = parent
-  vm.$root = parent ? parent.$root : vm
+  vm$$1.$parent = parent
+  vm$$1.$root = parent ? parent.$root : vm$$1
 
-  vm.$children = []
-  vm.$refs = {}
+  vm$$1.$children = []
+  vm$$1.$refs = {}
 
-  vm._watcher = null
-  vm._inactive = false
-  vm._isMounted = false
-  vm._isDestroyed = false
-  vm._isBeingDestroyed = false
+  vm$$1._watcher = null
+  vm$$1._inactive = false
+  vm$$1._isMounted = false
+  vm$$1._isDestroyed = false
+  vm$$1._isBeingDestroyed = false
 }
 
 function lifecycleMixin (Vue) {
@@ -1783,72 +1781,72 @@ function lifecycleMixin (Vue) {
     el,
     hydrating
   ) {
-    var vm = this
-    vm.$el = el
-    if (!vm.$options.render) {
-      vm.$options.render = emptyVNode
+    var vm$$1 = this
+    vm$$1.$el = el
+    if (!vm$$1.$options.render) {
+      vm$$1.$options.render = emptyVNode
       if (process.env.NODE_ENV !== 'production') {
         /* istanbul ignore if */
-        if (vm.$options.template) {
+        if (vm$$1.$options.template) {
           warn(
             'You are using the runtime-only build of Vue where the template ' +
             'option is not available. Either pre-compile the templates into ' +
             'render functions, or use the compiler-included build.',
-            vm
+            vm$$1
           )
         } else {
           warn(
             'Failed to mount component: template or render function not defined.',
-            vm
+            vm$$1
           )
         }
       }
     }
-    callHook(vm, 'beforeMount')
-    vm._watcher = new Watcher(vm, function () {
-      vm._update(vm._render(), hydrating)
+    callHook(vm$$1, 'beforeMount')
+    vm$$1._watcher = new Watcher(vm$$1, function () {
+      vm$$1._update(vm$$1._render(), hydrating)
     }, noop)
     hydrating = false
     // root instance, call mounted on self
     // mounted is called for child components in its inserted hook
-    if (vm.$root === vm) {
-      vm._isMounted = true
-      callHook(vm, 'mounted')
+    if (vm$$1.$root === vm$$1) {
+      vm$$1._isMounted = true
+      callHook(vm$$1, 'mounted')
     }
-    return vm
+    return vm$$1
   }
 
   Vue.prototype._update = function (vnode, hydrating) {
-    var vm = this
-    if (vm._isMounted) {
-      callHook(vm, 'beforeUpdate')
+    var vm$$1 = this
+    if (vm$$1._isMounted) {
+      callHook(vm$$1, 'beforeUpdate')
     }
-    var prevEl = vm.$el
+    var prevEl = vm$$1.$el
     var prevActiveInstance = activeInstance
-    activeInstance = vm
-    var prevVnode = vm._vnode
-    vm._vnode = vnode
+    activeInstance = vm$$1
+    var prevVnode = vm$$1._vnode
+    vm$$1._vnode = vnode
     if (!prevVnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
-      vm.$el = vm.__patch__(vm.$el, vnode, hydrating)
+      vm$$1.$el = vm$$1.__patch__(vm$$1.$el, vnode, hydrating)
     } else {
-      vm.$el = vm.__patch__(prevVnode, vnode)
+      vm$$1.$el = vm$$1.__patch__(prevVnode, vnode)
     }
     activeInstance = prevActiveInstance
     // update __vue__ reference
     if (prevEl) {
       prevEl.__vue__ = null
     }
-    if (vm.$el) {
-      vm.$el.__vue__ = vm
+    if (vm$$1.$el) {
+      vm$$1.$el.__vue__ = vm$$1
     }
     // if parent is an HOC, update its $el as well
-    if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
-      vm.$parent.$el = vm.$el
+    if (vm$$1.$vnode && vm$$1.$parent && vm$$1.$vnode === vm$$1.$parent._vnode) {
+      vm$$1.$parent.$el = vm$$1.$el
     }
-    if (vm._isMounted) {
-      callHook(vm, 'updated')
+    if (vm$$1._isMounted) {
+      callHook(vm$$1, 'updated')
     }
   }
 
@@ -1858,20 +1856,20 @@ function lifecycleMixin (Vue) {
     parentVnode,
     renderChildren
   ) {
-    var vm = this
-    var hasChildren = !!(vm.$options._renderChildren || renderChildren)
-    vm.$options._parentVnode = parentVnode
-    vm.$options._renderChildren = renderChildren
+    var vm$$1 = this
+    var hasChildren = !!(vm$$1.$options._renderChildren || renderChildren)
+    vm$$1.$options._parentVnode = parentVnode
+    vm$$1.$options._renderChildren = renderChildren
     // update props
-    if (propsData && vm.$options.props) {
+    if (propsData && vm$$1.$options.props) {
       observerState.shouldConvert = false
       if (process.env.NODE_ENV !== 'production') {
         observerState.isSettingProps = true
       }
-      var propKeys = vm.$options._propKeys || []
+      var propKeys = vm$$1.$options._propKeys || []
       for (var i = 0; i < propKeys.length; i++) {
         var key = propKeys[i]
-        vm[key] = validateProp(key, vm.$options.props, propsData, vm)
+        vm$$1[key] = validateProp(key, vm$$1.$options.props, propsData, vm$$1)
       }
       observerState.shouldConvert = true
       if (process.env.NODE_ENV !== 'production') {
@@ -1880,69 +1878,69 @@ function lifecycleMixin (Vue) {
     }
     // update listeners
     if (listeners) {
-      var oldListeners = vm.$options._parentListeners
-      vm.$options._parentListeners = listeners
-      vm._updateListeners(listeners, oldListeners)
+      var oldListeners = vm$$1.$options._parentListeners
+      vm$$1.$options._parentListeners = listeners
+      vm$$1._updateListeners(listeners, oldListeners)
     }
     // resolve slots + force update if has children
     if (hasChildren) {
-      vm.$slots = resolveSlots(renderChildren)
-      vm.$forceUpdate()
+      vm$$1.$slots = resolveSlots(renderChildren)
+      vm$$1.$forceUpdate()
     }
   }
 
   Vue.prototype.$forceUpdate = function () {
-    var vm = this
-    if (vm._watcher) {
-      vm._watcher.update()
+    var vm$$1 = this
+    if (vm$$1._watcher) {
+      vm$$1._watcher.update()
     }
   }
 
   Vue.prototype.$destroy = function () {
-    var vm = this
-    if (vm._isBeingDestroyed) {
+    var vm$$1 = this
+    if (vm$$1._isBeingDestroyed) {
       return
     }
-    callHook(vm, 'beforeDestroy')
-    vm._isBeingDestroyed = true
+    callHook(vm$$1, 'beforeDestroy')
+    vm$$1._isBeingDestroyed = true
     // remove self from parent
-    var parent = vm.$parent
-    if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
-      remove(parent.$children, vm)
+    var parent = vm$$1.$parent
+    if (parent && !parent._isBeingDestroyed && !vm$$1.$options.abstract) {
+      remove(parent.$children, vm$$1)
     }
     // teardown watchers
-    if (vm._watcher) {
-      vm._watcher.teardown()
+    if (vm$$1._watcher) {
+      vm$$1._watcher.teardown()
     }
-    var i = vm._watchers.length
+    var i = vm$$1._watchers.length
     while (i--) {
-      vm._watchers[i].teardown()
+      vm$$1._watchers[i].teardown()
     }
     // remove reference from data ob
     // frozen object may not have observer.
-    if (vm._data.__ob__) {
-      vm._data.__ob__.vmCount--
+    if (vm$$1._data.__ob__) {
+      vm$$1._data.__ob__.vmCount--
     }
     // call the last hook...
-    vm._isDestroyed = true
-    callHook(vm, 'destroyed')
+    vm$$1._isDestroyed = true
+    callHook(vm$$1, 'destroyed')
     // turn off all instance listeners.
-    vm.$off()
+    vm$$1.$off()
     // remove __vue__ reference
-    if (vm.$el) {
-      vm.$el.__vue__ = null
+    if (vm$$1.$el) {
+      vm$$1.$el.__vue__ = null
     }
   }
 }
 
-function callHook (vm, hook) {
-  var handlers = vm.$options[hook]
+function callHook (vm$$1, hook) {
+  var handlers = vm$$1.$options[hook]
   if (handlers) {
     for (var i = 0, j = handlers.length; i < j; i++) {
-      handlers[i].call(vm)
+      handlers[i].call(vm$$1)
     }
   }
-  vm.$emit('hook:' + hook)
+  vm$$1.$emit('hook:' + hook)
 }
 
 /*  */
@@ -2298,16 +2296,16 @@ function _createElement (
 
 /*  */
 
-function initRender (vm) {
-  vm.$vnode = null // the placeholder node in parent tree
-  vm._vnode = null // the root of the child tree
-  vm._staticTrees = null
-  vm.$slots = resolveSlots(vm.$options._renderChildren)
+function initRender (vm$$1) {
+  vm$$1.$vnode = null // the placeholder node in parent tree
+  vm$$1._vnode = null // the root of the child tree
+  vm$$1._staticTrees = null
+  vm$$1.$slots = resolveSlots(vm$$1.$options._renderChildren)
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
-  vm.$createElement = bind(createElement, vm)
-  if (vm.$options.el) {
-    vm.$mount(vm.$options.el)
+  vm$$1.$createElement = bind(createElement, vm$$1)
+  if (vm$$1.$options.el) {
+    vm$$1.$mount(vm$$1.$options.el)
   }
 }
 
@@ -2317,36 +2315,36 @@ function renderMixin (Vue) {
   }
 
   Vue.prototype._render = function () {
-    var vm = this
-    var ref = vm.$options;
+    var vm$$1 = this
+    var ref = vm$$1.$options;
     var render = ref.render;
     var staticRenderFns = ref.staticRenderFns;
     var _parentVnode = ref._parentVnode;
 
-    if (vm._isMounted) {
+    if (vm$$1._isMounted) {
       // clone slot nodes on re-renders
-      for (var key in vm.$slots) {
-        vm.$slots[key] = cloneVNodes(vm.$slots[key])
+      for (var key in vm$$1.$slots) {
+        vm$$1.$slots[key] = cloneVNodes(vm$$1.$slots[key])
       }
     }
 
-    if (staticRenderFns && !vm._staticTrees) {
-      vm._staticTrees = []
+    if (staticRenderFns && !vm$$1._staticTrees) {
+      vm$$1._staticTrees = []
     }
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
-    vm.$vnode = _parentVnode
+    vm$$1.$vnode = _parentVnode
     // render self
     var vnode
     try {
-      vnode = render.call(vm._renderProxy, vm.$createElement)
+      vnode = render.call(vm$$1._renderProxy, vm$$1.$createElement)
     } catch (e) {
       if (process.env.NODE_ENV !== 'production') {
-        warn(("Error when rendering " + (formatComponentName(vm)) + ":"))
+        warn(("Error when rendering " + (formatComponentName(vm$$1)) + ":"))
       }
       /* istanbul ignore else */
       if (config.errorHandler) {
-        config.errorHandler.call(null, e, vm)
+        config.errorHandler.call(null, e, vm$$1)
       } else {
         if (config._isServer) {
           throw e
@@ -2355,7 +2353,7 @@ function renderMixin (Vue) {
         }
       }
       // return previous vnode to prevent render error causing blank component
-      vnode = vm._vnode
+      vnode = vm$$1._vnode
     }
     // return empty vnode in case the render function errored out
     if (!(vnode instanceof VNode)) {
@@ -2363,7 +2361,7 @@ function renderMixin (Vue) {
         warn(
           'Multiple root nodes returned from render function. Render function ' +
           'should return a single root node.',
-          vm
+          vm$$1
         )
       }
       vnode = emptyVNode()
@@ -2537,53 +2535,52 @@ function resolveSlots (
 
 /*  */
 
-function initEvents (vm) {
-  vm._events = Object.create(null)
+function initEvents (vm$$1) {
+  vm$$1._events = Object.create(null)
   // init parent attached events
-  var listeners = vm.$options._parentListeners
-  var on = bind(vm.$on, vm)
-  var off = bind(vm.$off, vm)
-  vm._updateListeners = function (listeners, oldListeners) {
+  var listeners = vm$$1.$options._parentListeners
+  var on = bind(vm$$1.$on, vm$$1)
+  var off = bind(vm$$1.$off, vm$$1)
+  vm$$1._updateListeners = function (listeners, oldListeners) {
     updateListeners(listeners, oldListeners || {}, on, off)
   }
   if (listeners) {
-    vm._updateListeners(listeners)
+    vm$$1._updateListeners(listeners)
   }
 }
 
 function eventsMixin (Vue) {
   Vue.prototype.$on = function (event, fn) {
-    var vm = this
-    ;(vm._events[event] || (vm._events[event] = [])).push(fn)
-    return vm
+    var vm$$1 = this;(vm$$1._events[event] || (vm$$1._events[event] = [])).push(fn)
+    return vm$$1
   }
 
   Vue.prototype.$once = function (event, fn) {
-    var vm = this
+    var vm$$1 = this
     function on () {
-      vm.$off(event, on)
-      fn.apply(vm, arguments)
+      vm$$1.$off(event, on)
+      fn.apply(vm$$1, arguments)
     }
     on.fn = fn
-    vm.$on(event, on)
-    return vm
+    vm$$1.$on(event, on)
+    return vm$$1
   }
 
   Vue.prototype.$off = function (event, fn) {
-    var vm = this
+    var vm$$1 = this
     // all
     if (!arguments.length) {
-      vm._events = Object.create(null)
-      return vm
+      vm$$1._events = Object.create(null)
+      return vm$$1
     }
     // specific event
-    var cbs = vm._events[event]
+    var cbs = vm$$1._events[event]
     if (!cbs) {
-      return vm
+      return vm$$1
     }
     if (arguments.length === 1) {
-      vm._events[event] = null
-      return vm
+      vm$$1._events[event] = null
+      return vm$$1
     }
     // specific handler
     var cb
@@ -2595,20 +2592,20 @@ function eventsMixin (Vue) {
         break
       }
     }
-    return vm
+    return vm$$1
   }
 
   Vue.prototype.$emit = function (event) {
-    var vm = this
-    var cbs = vm._events[event]
+    var vm$$1 = this
+    var cbs = vm$$1._events[event]
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
       var args = toArray(arguments, 1)
       for (var i = 0, l = cbs.length; i < l; i++) {
-        cbs[i].apply(vm, args)
+        cbs[i].apply(vm$$1, args)
       }
     }
-    return vm
+    return vm$$1
   }
 }
 
@@ -2618,42 +2615,42 @@ var uid = 0
 
 function initMixin (Vue) {
   Vue.prototype._init = function (options) {
-    var vm = this
+    var vm$$1 = this
     // a uid
-    vm._uid = uid++
+    vm$$1._uid = uid++
     // a flag to avoid this being observed
-    vm._isVue = true
+    vm$$1._isVue = true
     // merge options
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
-      initInternalComponent(vm, options)
+      initInternalComponent(vm$$1, options)
     } else {
-      vm.$options = mergeOptions(
-        resolveConstructorOptions(vm),
+      vm$$1.$options = mergeOptions(
+        resolveConstructorOptions(vm$$1),
         options || {},
-        vm
+        vm$$1
       )
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
-      initProxy(vm)
+      initProxy(vm$$1)
     } else {
-      vm._renderProxy = vm
+      vm$$1._renderProxy = vm$$1
     }
     // expose real self
-    vm._self = vm
-    initLifecycle(vm)
-    initEvents(vm)
-    callHook(vm, 'beforeCreate')
-    initState(vm)
-    callHook(vm, 'created')
-    initRender(vm)
+    vm$$1._self = vm$$1
+    initLifecycle(vm$$1)
+    initEvents(vm$$1)
+    callHook(vm$$1, 'beforeCreate')
+    initState(vm$$1)
+    callHook(vm$$1, 'created')
+    initRender(vm$$1)
   }
 
-  function initInternalComponent (vm, options) {
-    var opts = vm.$options = Object.create(resolveConstructorOptions(vm))
+  function initInternalComponent (vm$$1, options) {
+    var opts = vm$$1.$options = Object.create(resolveConstructorOptions(vm$$1))
     // doing this because it's faster than dynamic enumeration.
     opts.parent = options.parent
     opts.propsData = options.propsData
@@ -2667,8 +2664,8 @@ function initMixin (Vue) {
     }
   }
 
-  function resolveConstructorOptions (vm) {
-    var Ctor = vm.constructor
+  function resolveConstructorOptions (vm$$1) {
+    var Ctor = vm$$1.constructor
     var options = Ctor.options
     if (Ctor.super) {
       var superOptions = Ctor.super.options
@@ -2687,6 +2684,10 @@ function initMixin (Vue) {
 }
 
 function Vue (options) {
+  if (process.env.NODE_ENV !== 'production' &&
+    !(this instanceof Vue)) {
+    warn('Vue is a constructor and should be called with the `new` keyword')
+  }
   this._init(options)
 }
 
@@ -2709,8 +2710,8 @@ var strats = config.optionMergeStrategies
  * Options with restrictions
  */
 if (process.env.NODE_ENV !== 'production') {
-  strats.el = strats.propsData = function (parent, child, vm, key) {
-    if (!vm) {
+  strats.el = strats.propsData = function (parent, child, vm$$1, key) {
+    if (!vm$$1) {
       warn(
         "option \"" + key + "\" can only be used during instance " +
         'creation with the `new` keyword.'
@@ -2719,8 +2720,8 @@ if (process.env.NODE_ENV !== 'production') {
     return defaultStrat(parent, child)
   }
 
-  strats.name = function (parent, child, vm) {
-    if (vm && child) {
+  strats.name = function (parent, child, vm$$1) {
+    if (vm$$1 && child) {
       warn(
         'options "name" can only be used as a component definition option, ' +
         'not during instance creation.'
@@ -2753,9 +2754,9 @@ function mergeData (to, from) {
 strats.data = function (
   parentVal,
   childVal,
-  vm
+  vm$$1
 ) {
-  if (!vm) {
+  if (!vm$$1) {
     // in a Vue.extend merge, both should be functions
     if (!childVal) {
       return parentVal
@@ -2765,7 +2766,7 @@ strats.data = function (
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
         'definitions.',
-        vm
+        vm$$1
       )
       return parentVal
     }
@@ -2787,10 +2788,10 @@ strats.data = function (
     return function mergedInstanceDataFn () {
       // instance merge
       var instanceData = typeof childVal === 'function'
-        ? childVal.call(vm)
+        ? childVal.call(vm$$1)
         : childVal
       var defaultData = typeof parentVal === 'function'
-        ? parentVal.call(vm)
+        ? parentVal.call(vm$$1)
         : undefined
       if (instanceData) {
         return mergeData(instanceData, defaultData)
@@ -2966,7 +2967,7 @@ function normalizeDirectives (options) {
 function mergeOptions (
   parent,
   child,
-  vm
+  vm$$1
 ) {
   normalizeComponents(child)
   normalizeProps(child)
@@ -2974,8 +2975,8 @@ function mergeOptions (
   var extendsFrom = child.extends
   if (extendsFrom) {
     parent = typeof extendsFrom === 'function'
-      ? mergeOptions(parent, extendsFrom.options, vm)
-      : mergeOptions(parent, extendsFrom, vm)
+      ? mergeOptions(parent, extendsFrom.options, vm$$1)
+      : mergeOptions(parent, extendsFrom, vm$$1)
   }
   if (child.mixins) {
     for (var i = 0, l = child.mixins.length; i < l; i++) {
@@ -2983,7 +2984,7 @@ function mergeOptions (
       if (mixin.prototype instanceof Vue) {
         mixin = mixin.options
       }
-      parent = mergeOptions(parent, mixin, vm)
+      parent = mergeOptions(parent, mixin, vm$$1)
     }
   }
   var options = {}
@@ -2998,7 +2999,7 @@ function mergeOptions (
   }
   function mergeField (key) {
     var strat = strats[key] || defaultStrat
-    options[key] = strat(parent[key], child[key], vm, key)
+    options[key] = strat(parent[key], child[key], vm$$1, key)
   }
   return options
 }
@@ -3039,7 +3040,7 @@ function validateProp (
   key,
   propOptions,
   propsData,
-  vm
+  vm$$1
 ) {
   var prop = propOptions[key]
   var absent = !hasOwn(propsData, key)
@@ -3054,7 +3055,7 @@ function validateProp (
   }
   // check default value
   if (value === undefined) {
-    value = getPropDefaultValue(vm, prop, key)
+    value = getPropDefaultValue(vm$$1, prop, key)
     // since the default value is a fresh copy,
     // make sure to observe it.
     var prevShouldConvert = observerState.shouldConvert
@@ -3063,7 +3064,7 @@ function validateProp (
     observerState.shouldConvert = prevShouldConvert
   }
   if (process.env.NODE_ENV !== 'production') {
-    assertProp(prop, key, value, vm, absent)
+    assertProp(prop, key, value, vm$$1, absent)
   }
   return value
 }
@@ -3071,7 +3072,7 @@ function validateProp (
 /**
  * Get the default value of a prop.
  */
-function getPropDefaultValue (vm, prop, name) {
+function getPropDefaultValue (vm$$1, prop, name) {
   // no default, return undefined
   if (!hasOwn(prop, 'default')) {
     return undefined
@@ -3083,12 +3084,12 @@ function getPropDefaultValue (vm, prop, name) {
       'Invalid default value for prop "' + name + '": ' +
       'Props with type Object/Array must use a factory function ' +
       'to return the default value.',
-      vm
+      vm$$1
     )
   }
   // call factory function for non-Function types
   return typeof def === 'function' && prop.type !== Function
-    ? def.call(vm)
+    ? def.call(vm$$1)
     : def
 }
 
@@ -3099,13 +3100,13 @@ function assertProp (
   prop,
   name,
   value,
-  vm,
+  vm$$1,
   absent
 ) {
   if (prop.required && absent) {
     warn(
       'Missing required prop: "' + name + '"',
-      vm
+      vm$$1
     )
     return
   }
@@ -3130,7 +3131,7 @@ function assertProp (
       'Invalid prop: type check failed for prop "' + name + '".' +
       ' Expected ' + expectedTypes.map(capitalize).join(', ') +
       ', got ' + Object.prototype.toString.call(value).slice(8, -1) + '.',
-      vm
+      vm$$1
     )
     return
   }
@@ -3139,7 +3140,7 @@ function assertProp (
     if (!validator(value)) {
       warn(
         'Invalid prop: custom validator check failed for prop "' + name + '".',
-        vm
+        vm$$1
       )
     }
   }
@@ -3229,6 +3230,14 @@ var propsToAttrMap = {
   httpEquiv: 'http-equiv'
 }
 
+
+
+var isXlink = function (name) {
+  return name.charAt(5) === ':' && name.slice(0, 5) === 'xlink'
+}
+
+
+
 var isFalsyAttrValue = function (val) {
   return val == null || val === false
 }
@@ -3307,6 +3316,8 @@ function stringifyClass (value) {
 
 /*  */
 
+
+
 var isHTMLTag = makeMap(
   'html,body,base,head,link,meta,style,title,' +
   'address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' +
@@ -3371,7 +3382,13 @@ function getTagNamespace (tag) {
   }
 }
 
+var unknownElementCache = Object.create(null)
+
 /*  */
+
+/**
+ * Query an element selector if it's not an element already.
+ */
 
 /**
  * Not type-checking this file because it's mostly vendor code.
@@ -3439,7 +3456,7 @@ function decodeAttr (value, shouldDecodeTags, shouldDecodeNewlines) {
 function parseHTML (html, options) {
   var stack = []
   var expectHTML = options.expectHTML
-  var isUnaryTag = options.isUnaryTag || no
+  var isUnaryTag$$1 = options.isUnaryTag || no
   var isFromDOM = options.isFromDOM
   var index = 0
   var last, lastTag
@@ -3575,7 +3592,7 @@ function parseHTML (html, options) {
       }
     }
 
-    var unary = isUnaryTag(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash
+    var unary = isUnaryTag$$1(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash
 
     var l = match.attrs.length
     var attrs = new Array(l)
@@ -5067,7 +5084,7 @@ var baseOptions = {
   isPreTag: isPreTag
 }
 
-function compile (
+function compile$$1 (
   template,
   options
 ) {
@@ -5080,7 +5097,7 @@ function compile (
 function compileToFunctions (
   template,
   options,
-  vm
+  vm$$1
 ) {
   var _warn = (options && options.warn) || warn
   // detect possible CSP restriction
@@ -5107,7 +5124,7 @@ function compileToFunctions (
     return cache[key]
   }
   var res = {}
-  var compiled = compile(template, options)
+  var compiled = compile$$1(template, options)
   res.render = makeFunction(compiled.render)
   var l = compiled.staticRenderFns.length
   res.staticRenderFns = new Array(l)
@@ -5120,7 +5137,7 @@ function compileToFunctions (
         "failed to compile template:\n\n" + template + "\n\n" +
         detectErrors(compiled.ast).join('\n') +
         '\n\n',
-        vm
+        vm$$1
       )
     }
   }
@@ -5157,8 +5174,8 @@ var normalizeAsync = function (cache, method) {
 }
 
 var compilationCache = Object.create(null)
-var normalizeRender = function (vm) {
-  var ref = vm.$options;
+var normalizeRender = function (vm$$1) {
+  var ref = vm$$1.$options;
   var render = ref.render;
   var template = ref.template;
   if (!render) {
@@ -5167,10 +5184,10 @@ var normalizeRender = function (vm) {
         compilationCache[template] ||
         (compilationCache[template] = compileToFunctions(template))
       )
-      Object.assign(vm.$options, renderFns)
+      Object.assign(vm$$1.$options, renderFns)
     } else {
       throw new Error(
-        ("render function or template not defined in component: " + (vm.$options.name || vm.$options._componentTag || 'anonymous'))
+        ("render function or template not defined in component: " + (vm$$1.$options.name || vm$$1.$options._componentTag || 'anonymous'))
       )
     }
   }
@@ -5483,12 +5500,12 @@ function createBundleRendererCreator (createRenderer) {
 function renderAttrs (node) {
   var res = ''
   if (node.data.attrs) {
-    res += render(node.data.attrs)
+    res += render$1(node.data.attrs)
   }
   return res
 }
 
-function render (attrs) {
+function render$1 (attrs) {
   var res = ''
   for (var key in attrs) {
     if (key === 'style') {
@@ -5515,7 +5532,7 @@ function renderAttr (key, value) {
 
 /*  */
 
-function domProps (node) {
+var domProps = function (node) {
   var props = node.data.domProps
   var res = ''
   if (props) {
@@ -5595,7 +5612,7 @@ var baseDirectives$1 = {
 
 /*  */
 
-function createRenderer (options) {
+function createRenderer$$1 (options) {
   if ( options === void 0 ) options = {};
 
   // user can provide server-side implementations for custom directives
@@ -5609,7 +5626,7 @@ function createRenderer (options) {
   })
 }
 
-var createBundleRenderer = createBundleRendererCreator(createRenderer)
+var createBundleRenderer = createBundleRendererCreator(createRenderer$$1)
 
-exports.createRenderer = createRenderer;
+exports.createRenderer = createRenderer$$1;
 exports.createBundleRenderer = createBundleRenderer;

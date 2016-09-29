@@ -1,6 +1,6 @@
 # vue-server-renderer
 
-> This package is auto-generated. For pull requests please see [src/entries/web-server-renderer.js](https://github.com/vuejs/vue/blob/next/src/entries/web-server-renderer.js).
+> This package is auto-generated. For pull requests please see [src/entries/web-server-renderer.js](https://github.com/vuejs/vue/blob/dev/src/entries/web-server-renderer.js).
 
 This package offers Node.js server-side rendering for Vue 2.0.
 
@@ -124,7 +124,7 @@ const renderer = createRenderer({
 })
 ```
 
-As an example, check out [`v-show`'s server-side implementation](https://github.com/vuejs/vue/blob/next/src/platforms/web/server/directives/show.js).
+As an example, check out [`v-show`'s server-side implementation](https://github.com/vuejs/vue/blob/dev/src/platforms/web/server/directives/show.js).
 
 ---
 

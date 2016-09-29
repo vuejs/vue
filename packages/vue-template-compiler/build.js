@@ -255,9 +255,7 @@ function isNative (Ctor) {
 }
 
 /**
- * Defer a task to execute it asynchronously. Ideally this
- * should be executed as a microtask, but MutationObserver is unreliable
- * in iOS UIWebView so we use a setImmediate shim and fallback to setTimeout.
+ * Defer a task to execute it asynchronously.
  */
 var nextTick = (function () {
   var callbacks = []
@@ -291,7 +289,7 @@ var nextTick = (function () {
       // "force" the microtask queue to be flushed by adding an empty timer.
       if (isIOS) { setTimeout(noop) }
     }
-  } else if (typeof MutationObserver !== 'undefined') {
+  } else if (typeof MutationObserver !== 'undefined' && isNative(MutationObserver)) {
     // use MutationObserver where native Promise is not available,
     // e.g. IE11, iOS7, Android 4.4
     var counter = 1
@@ -516,7 +514,8 @@ function parsePath (path) {
 
 var hasProxy;
 var proxyHandlers;
-var initProxy;
+var initProxy
+
 if (process.env.NODE_ENV !== 'production') {
   var allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
@@ -609,7 +608,7 @@ function popTarget () {
 
 
 var queue = []
-var has = {}
+var has$1 = {}
 var circular = {}
 var waiting = false
 var flushing = false
@@ -620,7 +619,7 @@ var index = 0
  */
 function resetSchedulerState () {
   queue.length = 0
-  has = {}
+  has$1 = {}
   if (process.env.NODE_ENV !== 'production') {
     circular = {}
   }
@@ -648,10 +647,10 @@ function flushSchedulerQueue () {
   for (index = 0; index < queue.length; index++) {
     var watcher = queue[index]
     var id = watcher.id
-    has[id] = null
+    has$1[id] = null
     watcher.run()
     // in dev build, check and stop circular updates.
-    if (process.env.NODE_ENV !== 'production' && has[id] != null) {
+    if (process.env.NODE_ENV !== 'production' && has$1[id] != null) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > config._maxUpdateCount) {
         warn(
@@ -683,8 +682,8 @@ function flushSchedulerQueue () {
  */
 function queueWatcher (watcher) {
   var id = watcher.id
-  if (has[id] == null) {
-    has[id] = true
+  if (has$1[id] == null) {
+    has$1[id] = true
     if (!flushing) {
       queue.push(watcher)
     } else {
@@ -948,12 +947,7 @@ function traverse (val, seen) {
  */
 
 var arrayProto = Array.prototype
-var arrayMethods = Object.create(arrayProto)
-
-/**
- * Intercept mutating methods and emit events
- */
-;[
+var arrayMethods = Object.create(arrayProto);[
   'push',
   'pop',
   'shift',
@@ -1041,7 +1035,7 @@ var Observer = function Observer (value) {
 Observer.prototype.walk = function walk (obj) {
   var keys = Object.keys(obj)
   for (var i = 0; i < keys.length; i++) {
-    defineReactive(obj, keys[i], obj[keys[i]])
+    defineReactive$$1(obj, keys[i], obj[keys[i]])
   }
 };
 
@@ -1106,7 +1100,7 @@ function observe (value) {
 /**
  * Define a reactive property on an Object.
  */
-function defineReactive (
+function defineReactive$$1 (
   obj,
   key,
   val,
@@ -1188,7 +1182,7 @@ function set (obj, key, val) {
     obj[key] = val
     return
   }
-  defineReactive(ob.value, key, val)
+  defineReactive$$1(ob.value, key, val)
   ob.dep.notify()
   return val
 }
@@ -1238,7 +1232,7 @@ function initProps (vm) {
       var key = keys[i]
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
-        defineReactive(vm, key, validateProp(key, props, propsData, vm), function () {
+        defineReactive$$1(vm, key, validateProp(key, props, propsData, vm), function () {
           if (vm.$parent && !observerState.isSettingProps) {
             warn(
               "Avoid mutating a prop directly since the value will be " +
@@ -1250,7 +1244,7 @@ function initProps (vm) {
           }
         })
       } else {
-        defineReactive(vm, key, validateProp(key, props, propsData, vm))
+        defineReactive$$1(vm, key, validateProp(key, props, propsData, vm))
       }
     };
 
@@ -1558,11 +1552,15 @@ function applyNS (vnode, ns) {
   }
 }
 
+
+
+
+
 function updateListeners (
   on,
   oldOn,
   add,
-  remove
+  remove$$1
 ) {
   var name, cur, old, fn, event, capture
   for (name in on) {
@@ -1600,7 +1598,7 @@ function updateListeners (
   for (name in oldOn) {
     if (!on[name]) {
       event = name.charAt(0) === '!' ? name.slice(1) : name
-      remove(event, oldOn[name].invoker)
+      remove$$1(event, oldOn[name].invoker)
     }
   }
 }
@@ -2427,8 +2425,7 @@ function initEvents (vm) {
 
 function eventsMixin (Vue) {
   Vue.prototype.$on = function (event, fn) {
-    var vm = this
-    ;(vm._events[event] || (vm._events[event] = [])).push(fn)
+    var vm = this;(vm._events[event] || (vm._events[event] = [])).push(fn)
     return vm
   }
 
@@ -2561,6 +2558,10 @@ function initMixin (Vue) {
 }
 
 function Vue (options) {
+  if (process.env.NODE_ENV !== 'production' &&
+    !(this instanceof Vue)) {
+    warn('Vue is a constructor and should be called with the `new` keyword')
+  }
   this._init(options)
 }
 
@@ -3088,9 +3089,73 @@ var isAttr = makeMap(
   'target,title,type,usemap,value,width,wrap'
 )
 
-/*  */
+
+
+
+
+var isXlink = function (name) {
+  return name.charAt(5) === ':' && name.slice(0, 5) === 'xlink'
+}
 
 /*  */
+
+
+
+function mergeClassData (child, parent) {
+  return {
+    staticClass: concat(child.staticClass, parent.staticClass),
+    class: child.class
+      ? [child.class, parent.class]
+      : parent.class
+  }
+}
+
+function genClassFromData (data) {
+  var dynamicClass = data.class
+  var staticClass = data.staticClass
+  if (staticClass || dynamicClass) {
+    return concat(staticClass, stringifyClass(dynamicClass))
+  }
+  /* istanbul ignore next */
+  return ''
+}
+
+function concat (a, b) {
+  return a ? b ? (a + ' ' + b) : a : (b || '')
+}
+
+function stringifyClass (value) {
+  var res = ''
+  if (!value) {
+    return res
+  }
+  if (typeof value === 'string') {
+    return value
+  }
+  if (Array.isArray(value)) {
+    var stringified
+    for (var i = 0, l = value.length; i < l; i++) {
+      if (value[i]) {
+        if ((stringified = stringifyClass(value[i]))) {
+          res += stringified + ' '
+        }
+      }
+    }
+    return res.slice(0, -1)
+  }
+  if (isObject(value)) {
+    for (var key in value) {
+      if (value[key]) { res += key + ' ' }
+    }
+    return res.slice(0, -1)
+  }
+  /* istanbul ignore next */
+  return res
+}
+
+/*  */
+
+
 
 var isHTMLTag = makeMap(
   'html,body,base,head,link,meta,style,title,' +
@@ -3156,7 +3221,13 @@ function getTagNamespace (tag) {
   }
 }
 
+var unknownElementCache = Object.create(null)
+
 /*  */
+
+/**
+ * Query an element selector if it's not an element already.
+ */
 
 /**
  * Not type-checking this file because it's mostly vendor code.
@@ -3224,7 +3295,7 @@ function decodeAttr (value, shouldDecodeTags, shouldDecodeNewlines) {
 function parseHTML (html, options) {
   var stack = []
   var expectHTML = options.expectHTML
-  var isUnaryTag = options.isUnaryTag || no
+  var isUnaryTag$$1 = options.isUnaryTag || no
   var isFromDOM = options.isFromDOM
   var index = 0
   var last, lastTag
@@ -3360,7 +3431,7 @@ function parseHTML (html, options) {
       }
     }
 
-    var unary = isUnaryTag(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash
+    var unary = isUnaryTag$$1(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash
 
     var l = match.attrs.length
     var attrs = new Array(l)
@@ -5017,7 +5088,7 @@ function parseComponent (
 
 /*  */
 
-function compile (
+function compile$$1 (
   template,
   options
 ) {
@@ -5042,6 +5113,6 @@ function compile (
   return compiled
 }
 
-exports.compile = compile;
+exports.compile = compile$$1;
 exports.parseComponent = parseComponent;
 exports.compileToFunctions = compileToFunctions;
