@@ -12,7 +12,7 @@
 
 ## Supporting Vue.js
 
-Vue.js is an MIT-licensed open source project. Its ongoing development is made possible thanks to the support by these awesome [backers](https://github.com/vuejs/vue/blob/dev/backers.md). If you'd like to join them, check out [Vue.js' Patreon campaign](https://www.patreon.com/evanyou).
+Vue.js is an MIT-licensed open source project. Its ongoing development is made possible thanks to the support by these awesome [backers](https://github.com/vuejs/vue/blob/dev/BACKERS.md). If you'd like to join them, check out [Vue.js' Patreon campaign](https://www.patreon.com/evanyou).
 
 <p align="center">
   <b>Special thanks to the generous sponsorship by:</b>
