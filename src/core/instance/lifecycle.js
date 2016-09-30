@@ -141,7 +141,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     // resolve slots + force update if has children
     if (hasChildren) {
-      vm.$slots = resolveSlots(renderChildren)
+      vm.$slots = resolveSlots(renderChildren, vm._renderContext)
       vm.$forceUpdate()
     }
   }

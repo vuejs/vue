@@ -14,7 +14,8 @@ export function initRender (vm: Component) {
   vm.$vnode = null // the placeholder node in parent tree
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null
-  vm.$slots = resolveSlots(vm.$options._renderChildren)
+  vm._renderContext = vm.$options._parentVnode && vm.$options._parentVnode.context
+  vm.$slots = resolveSlots(vm.$options._renderChildren, vm._renderContext)
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
   vm.$createElement = bind(createElement, vm)
@@ -215,7 +216,8 @@ export function renderMixin (Vue: Class<Component>) {
 }
 
 export function resolveSlots (
-  renderChildren: ?VNodeChildren
+  renderChildren: ?VNodeChildren,
+  context: ?Component
 ): { [key: string]: Array<VNode> } {
   const slots = {}
   if (!renderChildren) {
@@ -226,8 +228,10 @@ export function resolveSlots (
   let name, child
   for (let i = 0, l = children.length; i < l; i++) {
     child = children[i]
-    if (child.data && (name = child.data.slot)) {
-      delete child.data.slot
+    // named slots should only be respected if the vnode was rendered in the
+    // same context.
+    if (child.context === context &&
+        child.data && (name = child.data.slot)) {
       const slot = (slots[name] || (slots[name] = []))
       if (child.tag === 'template') {
         slot.push.apply(slot, child.children)

@@ -52,7 +52,7 @@ declare interface Component {
   _isVue: true;
   _self: Component;
   _renderProxy: Component;
-  _renderParent: ?Component;
+  _renderContext: ?Component;
   _watcher: Watcher;
   _watchers: Array<Watcher>;
   _data: Object;

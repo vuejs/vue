@@ -372,6 +372,7 @@ describe('Component slot', () => {
         </div>
       `
     }
+
     const vm = new Vue({
       template: '<test><span slot="foo">foo</span></test>',
       components: {
