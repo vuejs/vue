@@ -90,10 +90,23 @@ Vue.component('component', {
     }, [
       createElement("div", {}, "message"),
       createElement(Vue.component("component")),
-      createElement({ mounted() {} }),
+      createElement({} as ComponentOptions<Vue>),
       createElement({ functional: true }),
+
       createElement(() => Vue.component("component")),
+      createElement(() => ( {} as ComponentOptions<Vue> )),
+      createElement(() => {
+        return new Promise((resolve) => {
+          resolve({} as ComponentOptions<Vue>);
+        })
+      }),
+      createElement((resolve, reject) => {
+        resolve({} as ComponentOptions<Vue>);
+        reject();
+      }),
+
       "message",
+
       [createElement("div", {}, "message")]
     ]);
   },
@@ -158,3 +171,12 @@ Vue.component('functional-component', {
     return createElement("div", {}, context.children);
   }
 } as FunctionalComponentOptions);
+
+Vue.component("async-component", (resolve, reject) => {
+  setTimeout(() => {
+    resolve(Vue.component("component"));
+  }, 0);
+  return new Promise((resolve) => {
+    resolve({ functional: true } as FunctionalComponentOptions);
+  })
+});

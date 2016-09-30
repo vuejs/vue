@@ -1,6 +1,12 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "lib": [
+      "es5",
+      "dom",
+      "es2015.promise",
+      "es2015.core"
+    ],
     "module": "commonjs",
     "noImplicitAny": true,
     "strictNullChecks": true,

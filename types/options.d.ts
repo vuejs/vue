@@ -7,6 +7,12 @@ type Constructor = {
 
 type $createElement = typeof Vue.prototype.$createElement;
 
+export type Component = typeof Vue | ComponentOptions<Vue> | FunctionalComponentOptions;
+export type AsyncComponent = (
+  resolve: (component: Component) => void,
+  reject: (reason?: any) => void
+) => Promise<Component> | Component | void;
+
 export interface ComponentOptions<V extends Vue> {
   data?: Object | ((this: V) => Object);
   props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
@@ -30,7 +36,7 @@ export interface ComponentOptions<V extends Vue> {
   updated?(this: V): void;
 
   directives?: { [key: string]: DirectiveOptions | DirectiveFunction };
-  components?: { [key: string]: ComponentOptions<Vue> | FunctionalComponentOptions | typeof Vue };
+  components?: { [key: string]: Component | AsyncComponent };
   transitions?: { [key: string]: Object };
   filters?: { [key: string]: Function };
 
