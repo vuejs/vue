@@ -45,7 +45,7 @@ class Test extends Vue {
     this.$nextTick(function() {
       this.$nextTick;
     });
-    this.$createElement("div", {}, "message", "");
+    this.$createElement("div", {}, "message");
   }
 
   static testConfig() {
@@ -77,6 +77,7 @@ class Test extends Vue {
     this.directive("", {bind() {}});
     this.filter("", (value: number) => value);
     this.component("", { data: () => ({}) });
+    this.component("", { functional: true });
     this.use;
     this.mixin(Test);
     this.compile("<div>{{ message }}</div>");

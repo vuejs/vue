@@ -89,6 +89,10 @@ Vue.component('component', {
       ref: 'myRef'
     }, [
       createElement("div", {}, "message"),
+      createElement(Vue.component("component")),
+      createElement({ mounted() {} }),
+      createElement({ functional: true }),
+      createElement(() => Vue.component("component")),
       "message",
       [createElement("div", {}, "message")]
     ]);
