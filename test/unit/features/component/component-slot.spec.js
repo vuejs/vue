@@ -316,7 +316,7 @@ describe('Component slot', () => {
   // #3254
   it('should not keep slot name when passed further down', () => {
     const vm = new Vue({
-      template: '<test><span slot="foo">foo<span></test>',
+      template: '<test><span slot="foo">foo</span></test>',
       components: {
         test: {
           template: '<child><slot name="foo"></slot></child>',
@@ -339,7 +339,7 @@ describe('Component slot', () => {
 
   it('should not keep slot name when passed further down (nested)', () => {
     const vm = new Vue({
-      template: '<wrap><test><span slot="foo">foo<span></test></wrap>',
+      template: '<wrap><test><span slot="foo">foo</span></test></wrap>',
       components: {
         wrap: {
           template: '<div><slot></slot></div>'
@@ -373,7 +373,7 @@ describe('Component slot', () => {
       `
     }
     const vm = new Vue({
-      template: '<test><span slot="foo">foo<span></test>',
+      template: '<test><span slot="foo">foo</span></test>',
       components: {
         test: {
           functional: true,
