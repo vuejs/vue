@@ -1,4 +1,6 @@
 import {
+  Component,
+  AsyncComponent,
   ComponentOptions,
   FunctionalComponentOptions,
   WatchOptions,
@@ -39,10 +41,9 @@ export declare class Vue {
   $emit(event: string, ...args: any[]): this;
   $nextTick(callback?: (this: this) => void): void;
   $createElement(
-    tag?: string | Vue,
+    tag?: string | Component | AsyncComponent,
     data?: VNodeData,
-    children?: VNodeChildren,
-    namespace?: string
+    children?: VNodeChildren
   ): VNode;
 
 
@@ -54,7 +55,7 @@ export declare class Vue {
     keyCodes: { [key: string]: number };
   }
 
-  static extend(options: ComponentOptions<Vue>): typeof Vue;
+  static extend(options: ComponentOptions<Vue> | FunctionalComponentOptions): typeof Vue;
   static nextTick(callback: () => void, context?: any[]): void;
   static set<T>(object: Object, key: string, value: T): T;
   static set<T>(array: T[], key: number, value: T): T;
@@ -65,10 +66,7 @@ export declare class Vue {
     definition?: DirectiveOptions | DirectiveFunction
   ): DirectiveOptions;
   static filter(id: string, definition?: Function): Function;
-  static component(
-    id: string,
-    definition?: ComponentOptions<Vue> | FunctionalComponentOptions | typeof Vue
-  ): typeof Vue;
+  static component(id: string, definition?: Component | AsyncComponent): typeof Vue;
 
   static use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): void;
   static mixin(mixin: typeof Vue | ComponentOptions<Vue>): void;
