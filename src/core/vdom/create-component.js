@@ -102,6 +102,8 @@ function createFunctionalComponent (
   }
   return Ctor.options.render.call(
     null,
+    // ensure the createElement function in functional components
+    // gets a unique context - this is necessary for correct named slot check
     bind(createElement, { _self: Object.create(context) }),
     {
       props,
