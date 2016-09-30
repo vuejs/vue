@@ -120,6 +120,11 @@ describe('parser', () => {
     expect('Cannot use v-for on stateful component root element').toHaveBeenWarned()
   })
 
+  it('warn <template> key', () => {
+    parse('<div><template v-for="i in 10" :key="i"></template></div>', baseOptions)
+    expect('<template> cannot be keyed').toHaveBeenWarned()
+  })
+
   it('v-pre directive', () => {
     const ast = parse('<div v-pre id="message1"><p>{{msg}}</p></div>', baseOptions)
     expect(ast.pre).toBe(true)
