@@ -1,6 +1,6 @@
 {
   "name": "vue",
-  "version": "2.0.0-rc.8",
+  "version": "2.0.0",
   "description": "Reactive, component-oriented view layer for modern web interfaces.",
   "main": "dist/vue.js",
   "typings": "types/index.d.ts",
