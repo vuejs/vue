@@ -3332,7 +3332,7 @@ Object.defineProperty(Vue$2.prototype, '$isServer', {
   get: function () { return config._isServer; }
 })
 
-Vue$2.version = '2.0.0'
+Vue$2.version = '2.0.1'
 
 /*  */
 
