@@ -40,16 +40,16 @@ describe('codegen', () => {
   it('generate v-for directive', () => {
     assertCodegen(
       '<li v-for="item in items" :key="item.uid"></li>',
-      `with(this){return (items)&&_l((items),function(item){return _h('li',{key:item.uid})})}`
+      `with(this){return _l((items),function(item){return _h('li',{key:item.uid})})}`
     )
     // iterator syntax
     assertCodegen(
       '<li v-for="(item, i) in items"></li>',
-      `with(this){return (items)&&_l((items),function(item,i){return _h('li')})}`
+      `with(this){return _l((items),function(item,i){return _h('li')})}`
     )
     assertCodegen(
       '<li v-for="(item, key, index) in items"></li>',
-      `with(this){return (items)&&_l((items),function(item,key,index){return _h('li')})}`
+      `with(this){return _l((items),function(item,key,index){return _h('li')})}`
     )
   })
 
@@ -77,7 +77,7 @@ describe('codegen', () => {
   it('generate ref on v-for', () => {
     assertCodegen(
       '<ul><li v-for="item in items" ref="component1"></li></ul>',
-      `with(this){return _h('ul',[(items)&&_l((items),function(item){return _h('li',{ref:"component1",refInFor:true})})])}`
+      `with(this){return _h('ul',[_l((items),function(item){return _h('li',{ref:"component1",refInFor:true})})])}`
     )
   })
 
@@ -304,7 +304,7 @@ describe('codegen', () => {
   it('generate static trees inside v-for', () => {
     assertCodegen(
       `<div><div v-for="i in 10"><span></span></div></div>`,
-      `with(this){return _h('div',[(10)&&_l((10),function(i){return _h('div',[_m(0,true)])})])}`,
+      `with(this){return _h('div',[_l((10),function(i){return _h('div',[_m(0,true)])})])}`,
       [`with(this){return _h('span')}`]
     )
   })
