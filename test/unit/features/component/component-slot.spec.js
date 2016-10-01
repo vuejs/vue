@@ -523,4 +523,17 @@ describe('Component slot', () => {
       expect(spy).toHaveBeenCalled()
     }).then(done)
   })
+
+  it('renders static tree with text', () => {
+    const vm = new Vue({
+      template: `<div><test><template><div></div>Hello<div></div></template></test></div>`,
+      components: {
+        test: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    })
+    vm.$mount()
+    expect('Error when rendering root').not.toHaveBeenWarned()
+  })
 })

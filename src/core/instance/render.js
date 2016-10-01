@@ -117,8 +117,10 @@ export function renderMixin (Vue: Class<Component>) {
     tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy)
     if (Array.isArray(tree)) {
       for (let i = 0; i < tree.length; i++) {
-        tree[i].isStatic = true
-        tree[i].key = `__static__${index}_${i}`
+        if (typeof tree[i] !== 'string') {
+          tree[i].isStatic = true
+          tree[i].key = `__static__${index}_${i}`
+        }
       }
     } else {
       tree.isStatic = true
