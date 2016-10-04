@@ -134,7 +134,7 @@ describe('Options props', () => {
         },
         components: {
           test: {
-            template: '<div></div>',
+            template: '<div>{{ test }}</div>',
             props: {
               test: {
                 type,
@@ -205,10 +205,14 @@ describe('Options props', () => {
     })
 
     it('custom validator', () => {
-      makeInstance(123, null, v => v === 123)
+      const vm1 = makeInstance(123, null, v => v === 123)
       expect(console.error.calls.count()).toBe(0)
-      makeInstance(123, null, v => v === 234)
+      expect(vm1.$el.textContent).toBe('123')
+      expect(vm1.$children[0].test).toBe(123)
+      const vm2 = makeInstance(123, null, v => v === 234)
       expect('custom validator check failed').toHaveBeenWarned()
+      expect(vm2.$children[0].test).toBe(undefined)
+      expect(vm2.$el.textContent).toBe('')
     })
 
     it('type check + custom validator', () => {
