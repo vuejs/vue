@@ -19,14 +19,16 @@ const builds = {
   'web-runtime-dev': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
     dest: path.resolve(__dirname, '../dist/vue.common.js'),
-    format: 'cjs'
+    format: 'cjs',
+    banner
   },
   // Minified runtime, only for filze size monitoring
   'web-runtime-prod': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
     dest: path.resolve(__dirname, '../dist/vue.common.min.js'),
     format: 'umd',
-    env: 'production'
+    env: 'production',
+    banner
   },
   // Runtime+compiler standalone developement build.
   'web-standalone-dev': {
