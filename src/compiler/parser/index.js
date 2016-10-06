@@ -16,7 +16,7 @@ import {
 } from '../helpers'
 
 export const dirRE = /^v-|^@|^:/
-export const forAliasRE = /(.*)\s+(?:in|of)\s+(.*)/
+export const forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/
 export const forIteratorRE = /\(([^,]*),([^,]*)(?:,([^,]*))?\)/
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
