@@ -27,6 +27,6 @@ export function createWriteFunction (
     }
   }
   cachedWrite.caching = false
-  cachedWrite.cacheBuffer.length = 0
+  cachedWrite.cacheBuffer = []
   return cachedWrite
 }
