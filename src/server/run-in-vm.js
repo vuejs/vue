@@ -30,7 +30,7 @@ export default function runInVm (code, _context = {}) {
     compiledWrapper.call(m.exports, m.exports, require, m)
     const res = Object.prototype.hasOwnProperty.call(m.exports, 'default')
       ? m.exports.default
-      : m
+      : m.exports
     resolve(typeof res === 'function' ? res(_context) : res)
   })
 }
