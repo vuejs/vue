@@ -11,10 +11,10 @@ describe('vdom domProps module', () => {
 
   it('should change the elements domProps', () => {
     const vnode1 = new VNode('a', { domProps: { src: 'http://localhost/' }})
-    const vnode2 = new VNode('a', { domProps: { src: 'http://vuejs.org/' }})
+    const vnode2 = new VNode('a', { domProps: { src: 'https://vuejs.org/' }})
     patch(null, vnode1)
     const elm = patch(vnode1, vnode2)
-    expect(elm.src).toBe('http://vuejs.org/')
+    expect(elm.src).toBe('https://vuejs.org/')
   })
 
   it('should remove the elements domProps', () => {

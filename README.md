@@ -1,4 +1,4 @@
-<p align="center"><a href="http://vuejs.org" target="_blank"><img width="100"src="http://vuejs.org/images/logo.png"></a></p>
+<p align="center"><a href="https://vuejs.org" target="_blank"><img width="100"src="https://vuejs.org/images/logo.png"></a></p>
 
 <p align="center">
   <a href="https://circleci.com/gh/vuejs/vue/tree/dev"><img src="https://img.shields.io/circleci/project/vuejs/vue/dev.svg" alt="Build Status"></a>
@@ -58,13 +58,13 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
 
 Vue.js is a library for building interactive web interfaces. It provides data-reactive components with a simple and flexible API. Core features include:
 
-- [Declarative rendering with a plain JavaScript object based reactivity system.](http://vuejs.org/guide/index.html#Declarative-Rendering)
-- [Component-oriented development style with tooling support](http://vuejs.org/guide/index.html#Composing-with-Components)
+- [Declarative rendering with a plain JavaScript object based reactivity system.](https://vuejs.org/guide/index.html#Declarative-Rendering)
+- [Component-oriented development style with tooling support](https://vuejs.org/guide/index.html#Composing-with-Components)
 - Lean and extensible core
-- [Flexible transition effect system](http://vuejs.org/guide/transitions.html)
+- [Flexible transition effect system](https://vuejs.org/guide/transitions.html)
 - Fast without the need for complex optimization
 
-Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported). To check out live examples and docs, visit [vuejs.org](http://vuejs.org).
+Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported). To check out live examples and docs, visit [vuejs.org](https://vuejs.org).
 
 ## Questions
 
