@@ -1,7 +1,7 @@
 /* @flow */
 /* globals MutationObserver */
 
-import { noop } from 'shared/util'
+import { noop, bind } from 'shared/util'
 
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
@@ -86,7 +86,7 @@ export const nextTick = (function () {
 
   return function queueNextTick (cb: Function, ctx?: Object) {
     const func = ctx
-      ? function () { cb.call(ctx) }
+      ? bind(cb, ctx)
       : cb
     callbacks.push(func)
     if (!pending) {
