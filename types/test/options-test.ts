@@ -42,7 +42,7 @@ Vue.component('component', {
     }
   },
   methods: {
-    plus(this: Component) {
+    plus() {
       this.a++;
     }
   },

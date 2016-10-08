@@ -18,7 +18,7 @@ export interface ComponentOptions<V extends Vue> {
   props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
   propsData?: Object;
   computed?: { [key: string]: ((this: V) => any) | ComputedOptions<V> };
-  methods?: { [key: string]: Function };
+  methods?: { [key: string]: (this: V, ...args: any[]) => any };
   watch?: { [key: string]: ({ handler: WatchHandler<V> } & WatchOptions) | WatchHandler<V> | string };
 
   el?: Element | String;
