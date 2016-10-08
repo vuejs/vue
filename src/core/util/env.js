@@ -81,7 +81,9 @@ export const nextTick = (function () {
   } else {
     // fallback to setTimeout
     /* istanbul ignore next */
-    timerFunc = setTimeout
+    timerFunc = () => {
+      setTimeout(nextTickHandler, 0)
+    }
   }
 
   return function queueNextTick (cb: Function, ctx?: Object) {
@@ -91,7 +93,7 @@ export const nextTick = (function () {
     callbacks.push(func)
     if (!pending) {
       pending = true
-      timerFunc(nextTickHandler, 0)
+      timerFunc()
     }
   }
 })()
