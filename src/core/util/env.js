@@ -81,7 +81,7 @@ export const nextTick = (function () {
   } else {
     // fallback to setTimeout
     /* istanbul ignore next */
-    timerFunc = function () {
+    timerFunc = () => {
       setTimeout(nextTickHandler, 0)
     }
   }
