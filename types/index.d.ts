@@ -1,4 +1,4 @@
-import {Vue as _Vue} from "./vue";
+import * as V from "./vue";
 import * as Options from "./options";
 import * as Plugin from "./plugin";
 import * as VNode from "./vnode";
@@ -6,6 +6,8 @@ import * as VNode from "./vnode";
 // `Vue` in `export = Vue` must be a namespace
 // All available types are exported via this namespace
 declare namespace Vue {
+  export type CreateElement = V.CreateElement;
+
   export type Component = Options.Component;
   export type AsyncComponent = Options.AsyncComponent;
   export type ComponentOptions<V extends Vue> = Options.ComponentOptions<V>;
@@ -30,6 +32,6 @@ declare namespace Vue {
 }
 
 // TS cannot merge imported class with namespace, declare a subclass to bypass
-declare class Vue extends _Vue {}
+declare class Vue extends V.Vue {}
 
 export = Vue;
