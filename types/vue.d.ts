@@ -11,6 +11,23 @@ import {
 import { VNode, VNodeData, VNodeChildren } from "./vnode";
 import { PluginFunction, PluginObject } from "./plugin";
 
+export type CreateElement = {
+  // empty node
+  (): VNode;
+
+  // element or component name
+  (tag: string, children: VNodeChildren): VNode;
+  (tag: string, data?: VNodeData, children?: VNodeChildren): VNode;
+
+  // component constructor or options
+  (tag: Component, children: VNodeChildren): VNode;
+  (tag: Component, data?: VNodeData, children?: VNodeChildren): VNode;
+
+  // async component
+  (tag: AsyncComponent, children: VNodeChildren): VNode;
+  (tag: AsyncComponent, data?: VNodeData, children?: VNodeChildren): VNode;
+}
+
 export declare class Vue {
 
   constructor(options?: ComponentOptions<Vue>);
@@ -40,12 +57,7 @@ export declare class Vue {
   $off(event?: string, callback?: Function): this;
   $emit(event: string, ...args: any[]): this;
   $nextTick(callback?: (this: this) => void): void;
-  $createElement(
-    tag?: string | Component | AsyncComponent,
-    data?: VNodeData,
-    children?: VNodeChildren
-  ): VNode;
-
+  $createElement: CreateElement;
 
   static config: {
     silent: boolean;

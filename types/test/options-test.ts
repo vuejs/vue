@@ -42,7 +42,7 @@ Vue.component('component', {
     }
   },
   methods: {
-    plus(this: Component) {
+    plus() {
       this.a++;
     }
   },
@@ -88,7 +88,8 @@ Vue.component('component', {
       key: 'myKey',
       ref: 'myRef'
     }, [
-      createElement("div", {}, "message"),
+      createElement(),
+      createElement("div", "message"),
       createElement(Vue.component("component")),
       createElement({} as ComponentOptions<Vue>),
       createElement({ functional: true }),
@@ -107,7 +108,7 @@ Vue.component('component', {
 
       "message",
 
-      [createElement("div", {}, "message")]
+      [createElement("div", "message")]
     ]);
   },
   staticRenderFns: [],

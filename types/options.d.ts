@@ -1,11 +1,9 @@
-import { Vue } from "./vue";
+import { Vue, CreateElement } from "./vue";
 import { VNode, VNodeData, VNodeDirective } from "./vnode";
 
 type Constructor = {
   new (...args: any[]): any;
 }
-
-type $createElement = typeof Vue.prototype.$createElement;
 
 export type Component = typeof Vue | ComponentOptions<Vue> | FunctionalComponentOptions;
 export type AsyncComponent = (
@@ -18,13 +16,13 @@ export interface ComponentOptions<V extends Vue> {
   props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
   propsData?: Object;
   computed?: { [key: string]: ((this: V) => any) | ComputedOptions<V> };
-  methods?: { [key: string]: Function };
+  methods?: { [key: string]: (this: V, ...args: any[]) => any };
   watch?: { [key: string]: ({ handler: WatchHandler<V> } & WatchOptions) | WatchHandler<V> | string };
 
   el?: Element | String;
   template?: string;
-  render?(this: V, createElement: $createElement): VNode;
-  staticRenderFns?: ((createElement: $createElement) => VNode)[];
+  render?(this: V, createElement: CreateElement): VNode;
+  staticRenderFns?: ((createElement: CreateElement) => VNode)[];
 
   beforeCreate?(this: V): void;
   created?(this: V): void;
@@ -50,7 +48,7 @@ export interface ComponentOptions<V extends Vue> {
 export interface FunctionalComponentOptions {
   props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
   functional: boolean;
-  render(this: never, createElement: $createElement, context: RenderContext): VNode;
+  render(this: never, createElement: CreateElement, context: RenderContext): VNode;
   name?: string;
 }
 
