@@ -15,6 +15,15 @@ export default function model (
   const modifiers = dir.modifiers
   const tag = el.tag
   const type = el.attrsMap.type
+  if (process.env.NODE_ENV !== 'production') {
+    const dynamicType = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
+    if (tag === 'input' && dynamicType) {
+      warn(
+        `<input :type="${dynamicType}" v-model="${value}">:\n` +
+        `v-model does not support dynamic input types. Use v-if branches instead.`
+      )
+    }
+  }
   if (tag === 'select') {
     return genSelect(el, value)
   } else if (tag === 'input' && type === 'checkbox') {
