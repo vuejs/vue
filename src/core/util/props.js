@@ -165,7 +165,5 @@ function getTypeList (fn) {
   if (!Array.isArray(fn)) {
     fn = [fn]
   }
-  return fn.map(function (item) {
-    return getType(item)
-  })
+  return fn.map(item => getType(item))
 }
