@@ -73,7 +73,7 @@ describe('parser', () => {
 
   it('not contain root element', () => {
     parse('hello world', baseOptions)
-    expect('Component template should contain exactly one root element').toHaveBeenWarned()
+    expect('Component template requires a root element, rather than just text').toHaveBeenWarned()
   })
 
   it('warn multiple root elements', () => {
@@ -83,8 +83,26 @@ describe('parser', () => {
 
   it('not warn 2 root elements with v-if and v-else', () => {
     parse('<div v-if="1"></div><div v-else></div>', baseOptions)
-    expect('Component template should contain exactly one root element:\n\n<div v-if="1"></div><div v-else></div>')
+    expect('Component template should contain exactly one root element')
       .not.toHaveBeenWarned()
+  })
+
+  it('not warn 2 root elements with v-if and v-else on separate lines', () => {
+    parse(`
+      <div v-if="1"></div>
+      <div v-else></div>
+    `, baseOptions)
+    expect('Component template should contain exactly one root element')
+      .not.toHaveBeenWarned()
+  })
+
+  it('generate correct ast for 2 root elements with v-if and v-else on separate lines', () => {
+    const ast = parse(`
+      <div v-if="1"></div>
+      <p v-else></p>
+    `, baseOptions)
+    expect(ast.tag).toBe('div')
+    expect(ast.elseBlock.tag).toBe('p')
   })
 
   it('warn 2 root elements with v-if', () => {
