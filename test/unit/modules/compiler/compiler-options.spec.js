@@ -118,7 +118,7 @@ describe('compile options', () => {
   it('should collect errors', () => {
     let compiled = compile('hello')
     expect(compiled.errors.length).toBe(1)
-    expect(compiled.errors[0]).toContain('should contain exactly one root element')
+    expect(compiled.errors[0]).toContain('root element')
 
     compiled = compile('<div v-if="a----">{{ b++++ }}</div>')
     expect(compiled.errors.length).toBe(2)

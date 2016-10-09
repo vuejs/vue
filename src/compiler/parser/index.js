@@ -153,8 +153,9 @@ export function parse (
         checkRootConstraints(root)
       } else if (process.env.NODE_ENV !== 'production' && !stack.length && !warned) {
         // allow 2 root elements with v-if and v-else
-        if ((root.attrsMap.hasOwnProperty('v-if') && element.attrsMap.hasOwnProperty('v-else'))) {
+        if (root.if && element.else) {
           checkRootConstraints(element)
+          root.elseBlock = element
         } else {
           warned = true
           warn(
@@ -201,10 +202,10 @@ export function parse (
 
     chars (text: string) {
       if (!currentParent) {
-        if (process.env.NODE_ENV !== 'production' && !warned) {
+        if (process.env.NODE_ENV !== 'production' && !warned && text === template) {
           warned = true
           warn(
-            'Component template should contain exactly one root element:\n\n' + template
+            'Component template requires a root element, rather than just text:\n\n' + template
           )
         }
         return
