@@ -21,7 +21,7 @@ export function validateProp (
   const absent = !hasOwn(propsData, key)
   let value = propsData[key]
   // handle boolean props
-  if (getType(prop.type) === 'Boolean') {
+  if (getTypeList(prop.type).indexOf('Boolean') >= 0) {
     if (absent && !hasOwn(prop, 'default')) {
       value = false
     } else if (value === '' || value === hyphenate(key)) {
@@ -159,4 +159,13 @@ function assertType (value: any, type: Function): {
 function getType (fn) {
   const match = fn && fn.toString().match(/^\s*function (\w+)/)
   return match && match[1]
+}
+
+function getTypeList (fn) {
+  if (!Array.isArray(fn)) {
+    fn = [fn]
+  }
+  return fn.map(function (item) {
+    return getType(item)
+  })
 }
