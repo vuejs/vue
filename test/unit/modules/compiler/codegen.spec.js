@@ -244,6 +244,14 @@ describe('codegen', () => {
     )
   })
 
+  // #3893
+  it('should not treat handler with unexpected whitespace as inline statement', () => {
+    assertCodegen(
+      '<input @input=" onInput ">',
+      `with(this){return _h('input',{on:{"input": onInput }})}`
+    )
+  })
+
   it('generate unhandled events', () => {
     assertCodegen(
       '<input @input="curent++">',
