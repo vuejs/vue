@@ -168,7 +168,7 @@ function isBooleanType (fn) {
     return isBoolean(fn)
   }
   for (let i = 0, len = fn.length; i < len; i++) {
-    if (isBoolean(getType(fn[i]))) {
+    if (isBoolean(fn[i])) {
       return true
     }
   }
