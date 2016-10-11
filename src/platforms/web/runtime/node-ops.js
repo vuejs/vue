@@ -9,7 +9,6 @@ export function createElement (tagName: string, vnode: VNode): Element {
   }
   if (vnode.data && vnode.data.attrs && 'multiple' in vnode.data.attrs) {
     elm.setAttribute('multiple', 'multiple')
-    delete vnode.data.attrs.multiple
   }
   return elm
 }
