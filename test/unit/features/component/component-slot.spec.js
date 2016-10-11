@@ -565,7 +565,10 @@ describe('Component slot', () => {
           template: `<div><slot name="a"></slot><slot></slot></div>`
         },
         child: {
-          template: '<div><slot></slot></div>'
+          functional: true,
+          render (h, { slots }) {
+            return h('div', slots().default)
+          }
         }
       }
     }).$mount()

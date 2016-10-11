@@ -162,15 +162,14 @@ function getType (fn) {
 }
 
 function isBooleanType (fn) {
-  const isBoolean = (fnItem) => getType(fnItem) === 'Boolean'
-
   if (!Array.isArray(fn)) {
-    return isBoolean(fn)
+    return getType(fn) === 'Boolean'
   }
   for (let i = 0, len = fn.length; i < len; i++) {
-    if (isBoolean(fn[i])) {
+    if (getType(fn[i]) === 'Boolean') {
       return true
     }
   }
+  /* istanbul ignore next */
   return false
 }
