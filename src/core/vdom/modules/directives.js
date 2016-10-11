@@ -15,7 +15,7 @@ export default {
     if (hasInsert) {
       mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
         applyDirectives(oldVnode, vnode, 'inserted')
-      })
+      }, 'dir-insert')
     }
   },
   update: function updateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {

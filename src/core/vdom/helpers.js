@@ -65,19 +65,19 @@ export function getFirstComponentChild (children: ?Array<any>) {
   return children && children.filter(c => c && c.componentOptions)[0]
 }
 
-export function mergeVNodeHook (def: Object, key: string, hook: Function) {
-  const oldHook = def[key]
+export function mergeVNodeHook (def: Object, hookKey: string, hook: Function, key: string) {
+  key = key + hookKey
+  const injectedHash = def.__injected || (def.__injected = {})
+  if (injectedHash[key]) return
+  injectedHash[key] = true
+  const oldHook = def[hookKey]
   if (oldHook) {
-    const injectedHash = def.__injected || (def.__injected = {})
-    if (!injectedHash[key]) {
-      injectedHash[key] = true
-      def[key] = function () {
-        oldHook.apply(this, arguments)
-        hook.apply(this, arguments)
-      }
+    def[hookKey] = function () {
+      oldHook.apply(this, arguments)
+      hook.apply(this, arguments)
     }
   } else {
-    def[key] = hook
+    def[hookKey] = hook
   }
 }
 

@@ -100,7 +100,7 @@ export function enter (vnode: VNodeWithData) {
         pendingNode.elm._leaveCb()
       }
       enterHook && enterHook(el, cb)
-    })
+    }, 'transition-insert')
   }
 
   // start enter transition

@@ -119,7 +119,7 @@ export default {
       return placeholder(h, rawChild)
     }
 
-    child.key = child.key == null || child.isStatic
+    const key = child.key = child.key == null || child.isStatic
       ? `__v${child.tag + this._uid}__`
       : child.key
     const data = (child.data || (child.data = {})).transition = extractTransitionData(this)
@@ -132,7 +132,7 @@ export default {
       child.data.show = true
     }
 
-    if (oldChild && oldChild.data && oldChild.key !== child.key) {
+    if (oldChild && oldChild.data && oldChild.key !== key) {
       // replace old child transition data with fresh one
       // important for dynamic transitions!
       const oldData = oldChild.data.transition = extend({}, data)
@@ -144,16 +144,16 @@ export default {
         mergeVNodeHook(oldData, 'afterLeave', () => {
           this._leaving = false
           this.$forceUpdate()
-        })
+        }, key)
         return placeholder(h, rawChild)
       } else if (mode === 'in-out') {
         var delayedLeave
         var performLeave = () => { delayedLeave() }
-        mergeVNodeHook(data, 'afterEnter', performLeave)
-        mergeVNodeHook(data, 'enterCancelled', performLeave)
+        mergeVNodeHook(data, 'afterEnter', performLeave, key)
+        mergeVNodeHook(data, 'enterCancelled', performLeave, key)
         mergeVNodeHook(oldData, 'delayLeave', leave => {
           delayedLeave = leave
-        })
+        }, key)
       }
     }
 
