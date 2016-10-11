@@ -10,7 +10,7 @@ export function initEvents (vm: Component) {
   const on = bind(vm.$on, vm)
   const off = bind(vm.$off, vm)
   vm._updateListeners = (listeners, oldListeners) => {
-    updateListeners(listeners, oldListeners || {}, on, off)
+    updateListeners(listeners, oldListeners || {}, on, off, vm)
   }
   if (listeners) {
     vm._updateListeners(listeners)

@@ -15,7 +15,7 @@ function updateDOMListeners (oldVnode, vnode) {
   const remove = vnode.elm._v_remove || (vnode.elm._v_remove = (event, handler) => {
     vnode.elm.removeEventListener(event, handler)
   })
-  updateListeners(on, oldOn, add, remove)
+  updateListeners(on, oldOn, add, remove, vnode.context)
 }
 
 export default {

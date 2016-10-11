@@ -230,7 +230,7 @@ describe('Directive v-on', () => {
       data: { none: null },
       template: `<div @click="none"></div>`
     })
-    expect(`Handler for event "click" is undefined`).toHaveBeenWarned()
+    expect(`Invalid handler for event "click": got null`).toHaveBeenWarned()
     expect(() => {
       triggerEvent(vm.$el, 'click')
     }).not.toThrow()

@@ -22,6 +22,6 @@ describe('Options methods', () => {
         hello: undefined
       }
     })
-    expect(`Method "hello" is undefined in options`).toHaveBeenWarned()
+    expect(`method "hello" has an undefined value in the component definition`).toHaveBeenWarned()
   })
 })

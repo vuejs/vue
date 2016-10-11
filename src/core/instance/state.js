@@ -142,10 +142,13 @@ function initMethods (vm: Component) {
   const methods = vm.$options.methods
   if (methods) {
     for (const key in methods) {
-      if (methods[key] != null) {
-        vm[key] = bind(methods[key], vm)
-      } else if (process.env.NODE_ENV !== 'production') {
-        warn(`Method "${key}" is undefined in options.`, vm)
+      vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
+      if (process.env.NODE_ENV !== 'production' && methods[key] == null) {
+        warn(
+          `method "${key}" has an undefined value in the component definition. ` +
+          `Did you reference the function correctly?`,
+          vm
+        )
       }
     }
   }

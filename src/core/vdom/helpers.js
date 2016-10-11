@@ -85,7 +85,8 @@ export function updateListeners (
   on: Object,
   oldOn: Object,
   add: Function,
-  remove: Function
+  remove: Function,
+  vm: Component
 ) {
   let name, cur, old, fn, event, capture
   for (name in on) {
@@ -93,7 +94,8 @@ export function updateListeners (
     old = oldOn[name]
     if (!cur) {
       process.env.NODE_ENV !== 'production' && warn(
-        `Handler for event "${name}" is undefined.`
+        `Invalid handler for event "${name}": got ` + String(cur),
+        vm
       )
     } else if (!old) {
       capture = name.charAt(0) === '!'
