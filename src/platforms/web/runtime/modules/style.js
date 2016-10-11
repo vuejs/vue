@@ -49,7 +49,7 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 
   for (name in oldStyle) {
-    if (!style[name]) {
+    if (style[name] == null) {
       el.style[normalize(name)] = ''
     }
   }
