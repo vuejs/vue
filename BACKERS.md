@@ -4,7 +4,9 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 ### $2000
 
-[Currently vacant. It could be you!](https://www.patreon.com/bePatron?u=2341390&patAmt=2000.0&exp=1&rid=473784)
+<a href="http://www.thedifferenceengine.io/">
+  <img width="600px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tde.png">
+</a>
 
 ---
 
@@ -165,3 +167,12 @@ It could be you!
 - Paul Straw
 - Jake Ingman
 - Eduardo Camillo
+- Barbara Liau
+- Jens Lind
+- Yegor Sytnyk
+- Benson Wong
+- Anthony Tsui
+- Karol Fabjanczuk
+- Isaac Sant
+- Milos Stojanovic
+- Matsumoto Takamasa
