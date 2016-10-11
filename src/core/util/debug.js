@@ -22,14 +22,17 @@ if (process.env.NODE_ENV !== 'production') {
     const name = vm._isVue
       ? vm.$options.name || vm.$options._componentTag
       : vm.name
-    return name ? `component <${name}>` : `anonymous component`
+    return (
+      (name ? `component <${name}>` : `anonymous component`) +
+      (vm._isVue && vm.$options.__file ? ` at ${vm.$options.__file}` : '')
+    )
   }
 
   const formatLocation = str => {
     if (str === 'anonymous component') {
       str += ` - use the "name" option for better debugging messages.`
     }
-    return `(found in ${str})`
+    return `\n(found in ${str})`
   }
 }
 
