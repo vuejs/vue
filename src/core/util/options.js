@@ -34,16 +34,6 @@ if (process.env.NODE_ENV !== 'production') {
     }
     return defaultStrat(parent, child)
   }
-
-  strats.name = function (parent, child, vm) {
-    if (vm && child) {
-      warn(
-        'options "name" can only be used as a component definition option, ' +
-        'not during instance creation.'
-      )
-    }
-    return defaultStrat(parent, child)
-  }
 }
 
 /**

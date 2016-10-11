@@ -1,17 +1,6 @@
 import Vue from 'vue'
 
 describe('Options name', () => {
-  it('should warn when giving instance a name', () => {
-    const Comp = Vue.component('custom', { name: 'custom' })
-    new Comp()
-    expect(`options "name" can only be used as a component definition option`).not.toHaveBeenWarned()
-
-    new Vue({
-      name: 'SuperVue'
-    }).$mount()
-    expect(`options "name" can only be used as a component definition option`).toHaveBeenWarned()
-  })
-
   it('should contain itself in self components', () => {
     const vm = Vue.extend({
       name: 'SuperVue'
