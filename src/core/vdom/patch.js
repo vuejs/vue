@@ -115,7 +115,7 @@ export function createPatchFunction (backend) {
       }
       vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
-        : nodeOps.createElement(tag)
+        : nodeOps.createElement(tag, vnode)
       setScope(vnode)
       createChildren(vnode, children, insertedVnodeQueue)
       if (isDef(data)) {

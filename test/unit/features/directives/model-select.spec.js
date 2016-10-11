@@ -189,6 +189,21 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
+  it('multiple with static template', () => {
+    const vm = new Vue({
+      template:
+      '<select multiple>' +
+        '<option selected>a</option>' +
+        '<option selected>b</option>' +
+        '<option selected>c</option>' +
+      '</select>'
+    }).$mount()
+    var opts = vm.$el.options
+    expect(opts[0].selected).toBe(true)
+    expect(opts[1].selected).toBe(true)
+    expect(opts[2].selected).toBe(true)
+  })
+
   it('multiple + v-for', done => {
     const vm = new Vue({
       data: {
