@@ -160,4 +160,20 @@ describe('Directive v-model text', () => {
     triggerEvent(vm.$el, 'input')
     expect(spy).toHaveBeenCalledWith('b')
   })
+
+  it('warn binding to v-for alias', () => {
+    new Vue({
+      data: {
+        strings: ['hi']
+      },
+      template: `
+        <div>
+          <div v-for="str in strings">
+            <input v-model="str">
+          </div>
+        </div>
+      `
+    }).$mount()
+    expect('You are binding v-model directly to a v-for iteration alias').toHaveBeenWarned()
+  })
 })

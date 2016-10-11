@@ -388,6 +388,9 @@ function processAttrs (el) {
           name = name.slice(0, -(arg.length + 1))
         }
         addDirective(el, name, value, arg, modifiers)
+        if (process.env.NODE_ENV !== 'production' && name === 'model') {
+          checkForAliasModel(el, value)
+        }
       }
     } else {
       // literal attribute
@@ -468,4 +471,20 @@ function guardIESVGBug (attrs) {
     }
   }
   return res
+}
+
+function checkForAliasModel (el, value) {
+  let _el = el
+  while (_el) {
+    if (_el.for && _el.alias === value) {
+      warn(
+        `<${el.tag} v-model="${value}">: ` +
+        `You are binding v-model directly to a v-for iteration alias. ` +
+        `This will not be able to modify the v-for source array because ` +
+        `writing to the alias is like modifying a function local variable. ` +
+        `Consider using an array of objects and use v-model on an object property instead.`
+      )
+    }
+    _el = _el.parent
+  }
 }
