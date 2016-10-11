@@ -100,7 +100,7 @@ function createFunctionalComponent (
       props[key] = validateProp(key, propOptions, propsData)
     }
   }
-  return Ctor.options.render.call(
+  const vnode = Ctor.options.render.call(
     null,
     // ensure the createElement function in functional components
     // gets a unique context - this is necessary for correct named slot check
@@ -113,6 +113,11 @@ function createFunctionalComponent (
       slots: () => resolveSlots(children, context)
     }
   )
+  vnode.functionalContext = context
+  if (data.slot) {
+    (vnode.data || (vnode.data = {})).slot = data.slot
+  }
+  return vnode
 }
 
 export function createComponentInstanceForVnode (

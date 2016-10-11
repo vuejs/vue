@@ -232,7 +232,7 @@ export function resolveSlots (
     child = children[i]
     // named slots should only be respected if the vnode was rendered in the
     // same context.
-    if (child.context === context &&
+    if ((child.context === context || child.functionalContext === context) &&
         child.data && (name = child.data.slot)) {
       const slot = (slots[name] || (slots[name] = []))
       if (child.tag === 'template') {

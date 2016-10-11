@@ -29,10 +29,24 @@ describe('Component slot', () => {
     expect(child.$el.childNodes.length).toBe(0)
   })
 
-  it('default content', done => {
+  it('default slot', done => {
     mount({
       childTemplate: '<div><slot></slot></div>',
       parentContent: '<p>{{ msg }}</p>'
+    })
+    expect(child.$el.tagName).toBe('DIV')
+    expect(child.$el.children[0].tagName).toBe('P')
+    expect(child.$el.children[0].textContent).toBe('parent message')
+    vm.msg = 'changed'
+    waitForUpdate(() => {
+      expect(child.$el.children[0].textContent).toBe('changed')
+    }).then(done)
+  })
+
+  it('named slot', done => {
+    mount({
+      childTemplate: '<div><slot name="test"></slot></div>',
+      parentContent: '<p slot="test">{{ msg }}</p>'
     })
     expect(child.$el.tagName).toBe('DIV')
     expect(child.$el.children[0].tagName).toBe('P')
@@ -535,5 +549,26 @@ describe('Component slot', () => {
     })
     vm.$mount()
     expect('Error when rendering root').not.toHaveBeenWarned()
+  })
+
+  // #3872
+  it('functional component as slot', () => {
+    const vm = new Vue({
+      template: `
+        <parent>
+          <child>one</child>
+          <child slot="a">two</child>
+        </parent>
+      `,
+      components: {
+        parent: {
+          template: `<div><slot name="a"></slot><slot></slot></div>`
+        },
+        child: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML.trim()).toBe('<div>two</div><div>one</div>')
   })
 })

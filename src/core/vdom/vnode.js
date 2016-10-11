@@ -8,6 +8,7 @@ export default class VNode {
   elm: Node | void;
   ns: string | void;
   context: Component | void; // rendered in this component's scope
+  functionalContext: Component | void; // only for functional component root nodes
   key: string | number | void;
   componentOptions: VNodeComponentOptions | void;
   child: Component | void; // component instance
@@ -35,6 +36,7 @@ export default class VNode {
     this.elm = elm
     this.ns = ns
     this.context = context
+    this.functionalContext = undefined
     this.key = data && data.key
     this.componentOptions = componentOptions
     this.child = undefined
