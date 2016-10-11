@@ -155,10 +155,7 @@ export function defineReactive (
           childOb.dep.depend()
         }
         if (Array.isArray(value)) {
-          for (let e, i = 0, l = value.length; i < l; i++) {
-            e = value[i]
-            e && e.__ob__ && e.__ob__.dep.depend()
-          }
+          dependArray(value)
         }
       }
       return value
@@ -233,4 +230,18 @@ export function del (obj: Object, key: string) {
     return
   }
   ob.dep.notify()
+}
+
+/**
+ * Collect dependencies on array elements when the array is touched, since
+ * we cannot intercept array element access like property getters.
+ */
+function dependArray (value: Array<any>) {
+  for (let e, i = 0, l = value.length; i < l; i++) {
+    e = value[i]
+    e && e.__ob__ && e.__ob__.dep.depend()
+    if (Array.isArray(e)) {
+      dependArray(e)
+    }
+  }
 }
