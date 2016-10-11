@@ -20,7 +20,7 @@ if (isIE9) {
 }
 
 export default {
-  bind (el, binding, vnode) {
+  inserted (el, binding, vnode) {
     if (process.env.NODE_ENV !== 'production') {
       if (!modelableTagRE.test(vnode.tag)) {
         warn(
@@ -32,13 +32,12 @@ export default {
       }
     }
     if (vnode.tag === 'select') {
-      setSelected(el, binding, vnode.context)
+      const cb = () => {
+        setSelected(el, binding, vnode.context)
+      }
+      cb()
       /* istanbul ignore if */
       if (isIE || isEdge) {
-        const cb = () => {
-          setSelected(el, binding, vnode.context)
-        }
-        nextTick(cb)
         setTimeout(cb, 0)
       }
     } else if (vnode.tag === 'textarea' || el.type === 'text') {
