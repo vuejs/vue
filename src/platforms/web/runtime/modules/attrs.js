@@ -68,15 +68,6 @@ function setAttr (el: Element, key: string, value: any) {
 }
 
 export default {
-  create: function initAttrs (_: VNodeWithData, vnode: VNodeWithData) {
-    updateAttrs(_, vnode)
-    // #3852: if the "multiple" attribute is added to a <select> element
-    // when the children options have already been appended, Chrome/Firefox
-    // auto-selects the first option.
-    const el: any = vnode.elm
-    if (vnode.tag === 'select' && el.multiple) {
-      el.options[0] && (el.options[0].selected = false)
-    }
-  },
+  create: updateAttrs,
   update: updateAttrs
 }
