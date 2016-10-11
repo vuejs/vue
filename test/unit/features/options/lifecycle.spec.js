@@ -75,6 +75,20 @@ describe('Options lifecyce hooks', () => {
       expect(spy).toHaveBeenCalled()
     })
 
+    // #3898
+    it('should call for manually mounted instance with parent', () => {
+      const parent = new Vue()
+      expect(spy).not.toHaveBeenCalled()
+      new Vue({
+        parent,
+        template: '<div></div>',
+        mounted () {
+          spy()
+        }
+      }).$mount()
+      expect(spy).toHaveBeenCalled()
+    })
+
     it('should mount child parent in correct order', () => {
       const calls = []
       new Vue({
