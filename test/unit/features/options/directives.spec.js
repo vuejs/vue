@@ -151,6 +151,76 @@ describe('Options directives', () => {
     }).then(done)
   })
 
+  it('should properly handle same node with different directive sets', done => {
+    const spies = {}
+    const createSpy = name => (spies[name] = jasmine.createSpy(name))
+    const vm = new Vue({
+      data: {
+        ok: true,
+        val: 123
+      },
+      template: `
+        <div>
+          <div v-if="ok" v-test="val" v-test.hi="val"></div>
+          <div v-if="!ok" v-test.hi="val" v-test2="val"></div>
+        </div>
+      `,
+      directives: {
+        test: {
+          bind: createSpy('bind1'),
+          inserted: createSpy('inserted1'),
+          update: createSpy('update1'),
+          componentUpdated: createSpy('componentUpdated1'),
+          unbind: createSpy('unbind1')
+        },
+        test2: {
+          bind: createSpy('bind2'),
+          inserted: createSpy('inserted2'),
+          update: createSpy('update2'),
+          componentUpdated: createSpy('componentUpdated2'),
+          unbind: createSpy('unbind2')
+        }
+      }
+    }).$mount()
+
+    expect(spies.bind1.calls.count()).toBe(2)
+    expect(spies.inserted1.calls.count()).toBe(2)
+    expect(spies.bind2.calls.count()).toBe(0)
+    expect(spies.inserted2.calls.count()).toBe(0)
+
+    vm.ok = false
+    waitForUpdate(() => {
+      // v-test with modifier should be updated
+      expect(spies.update1.calls.count()).toBe(1)
+      expect(spies.componentUpdated1.calls.count()).toBe(1)
+
+      // v-test without modifier should be unbound
+      expect(spies.unbind1.calls.count()).toBe(1)
+
+      // v-test2 should be bound
+      expect(spies.bind2.calls.count()).toBe(1)
+      expect(spies.inserted2.calls.count()).toBe(1)
+
+      vm.ok = true
+    }).then(() => {
+      // v-test without modifier should be bound again
+      expect(spies.bind1.calls.count()).toBe(3)
+      expect(spies.inserted1.calls.count()).toBe(3)
+
+      // v-test2 should be unbound
+      expect(spies.unbind2.calls.count()).toBe(1)
+
+      // v-test with modifier should be updated again
+      expect(spies.update1.calls.count()).toBe(2)
+      expect(spies.componentUpdated1.calls.count()).toBe(2)
+
+      vm.val = 234
+    }).then(() => {
+      expect(spies.update1.calls.count()).toBe(4)
+      expect(spies.componentUpdated1.calls.count()).toBe(4)
+    }).then(done)
+  })
+
   it('warn non-existent', () => {
     new Vue({
       template: '<div v-test></div>'
