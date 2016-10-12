@@ -57,7 +57,7 @@ function markStaticRoots (node: ASTNode, isInFor: boolean) {
     }
     if (node.children) {
       for (let i = 0, l = node.children.length; i < l; i++) {
-        markStaticRoots(node.children[i], !!node.for)
+        markStaticRoots(node.children[i], isInFor || !!node.for)
       }
     }
   }
