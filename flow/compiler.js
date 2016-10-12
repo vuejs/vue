@@ -52,6 +52,7 @@ declare type ASTElementHandlers = {
 
 declare type ASTDirective = {
   name: string;
+  rawName: string;
   value: string;
   arg: ?string;
   modifiers: ?{ [key: string]: true };
