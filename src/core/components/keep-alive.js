@@ -1,5 +1,5 @@
 import { callHook } from 'core/instance/lifecycle'
-import { getFirstComponentChild } from 'core/vdom/helpers'
+import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
 export default {
   name: 'keep-alive',

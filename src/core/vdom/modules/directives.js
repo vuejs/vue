@@ -1,7 +1,7 @@
 /* @flow */
 
 import { resolveAsset } from 'core/util/options'
-import { mergeVNodeHook } from 'core/vdom/helpers'
+import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { emptyNode } from 'core/vdom/patch'
 
 export default {

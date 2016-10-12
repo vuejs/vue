@@ -3,7 +3,7 @@
 import VNode, { emptyVNode } from './vnode'
 import config from '../config'
 import { createComponent } from './create-component'
-import { normalizeChildren } from './helpers'
+import { normalizeChildren } from './helpers/index'
 import { warn, resolveAsset } from '../util/index'
 
 // wrapper function for providing a more flexible interface

@@ -2,7 +2,7 @@
 
 import Vue from '../instance/index'
 import VNode from './vnode'
-import { normalizeChildren } from './helpers'
+import { normalizeChildren } from './helpers/index'
 import { activeInstance, callHook } from '../instance/lifecycle'
 import { resolveSlots } from '../instance/render'
 import { createElement } from './create-element'

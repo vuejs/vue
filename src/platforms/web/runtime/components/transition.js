@@ -5,7 +5,7 @@
 
 import { warn } from 'core/util/index'
 import { camelize, extend } from 'shared/util'
-import { mergeVNodeHook, getFirstComponentChild } from 'core/vdom/helpers'
+import { mergeVNodeHook, getFirstComponentChild } from 'core/vdom/helpers/index'
 
 export const transitionProps = {
   name: String,

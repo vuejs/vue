@@ -2,7 +2,7 @@
 
 import config from '../config'
 import VNode, { emptyVNode, cloneVNode, cloneVNodes } from '../vdom/vnode'
-import { normalizeChildren } from '../vdom/helpers'
+import { normalizeChildren } from '../vdom/helpers/index'
 import {
   warn, formatComponentName, bind, isObject, toObject,
   nextTick, resolveAsset, _toString, toNumber, looseEqual, looseIndexOf
