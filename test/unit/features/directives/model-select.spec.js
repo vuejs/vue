@@ -166,16 +166,16 @@ describe('Directive v-model select', () => {
     const vm = new Vue({
       data: {
         id: 4,
-        list: [1,2,3],
+        list: [1, 2, 3],
         testChange: 5
       },
       template:
-      '<div>' +
-      '<select @change="test" v-model="id">' +
-      '<option v-for="item in list" :value="item">{{item}}</option>' +
-      '</select>' +
-      '{{testChange}}' +
-      '</div>',
+        '<div>' +
+          '<select @change="test" v-model="id">' +
+            '<option v-for="item in list" :value="item">{{item}}</option>' +
+          '</select>' +
+          '{{testChange}}' +
+        '</div>',
       methods: {
         test: spy
       }
