@@ -35,10 +35,11 @@ Remove the template from below and provide thoughtful commentary *and code sampl
 
 <!-- BUG REPORT TEMPLATE -->
 ### Vue.js version
-2.0.0-rc.1
+2.0.2
 
 ### Reproduction Link
 <!-- A minimal JSBin, JSFiddle, Codepen, or a GitHub repository that can reproduce the bug. -->
+<!-- You could start with this template: http://jsfiddle.net/df4Lnuw6/ -->
 
 ### Steps to reproduce
 
