@@ -82,6 +82,31 @@ describe('Component keep-alive', () => {
     }).then(done)
   })
 
+  // #3882
+  it('deeply nested keep-alive should be destroyed properly', done => {
+    one.template = `<div><keep-alive><two></two></keep-alive></div>`
+    one.components = { two }
+    const vm = new Vue({
+      template: `<div><parent v-if="ok"></parent></div>`,
+      data: { ok: true },
+      components: {
+        parent: {
+          template: `<div><keep-alive><one></one></keep-alive></div>`,
+          components: { one }
+        }
+      }
+    }).$mount()
+
+    assertHookCalls(one, [1, 1, 1, 0, 0])
+    assertHookCalls(two, [1, 1, 1, 0, 0])
+
+    vm.ok = false
+    waitForUpdate(() => {
+      assertHookCalls(one, [1, 1, 1, 1, 1])
+      assertHookCalls(two, [1, 1, 1, 1, 1])
+    }).then(done)
+  })
+
   if (!isIE9) {
     it('with transition-mode out-in', done => {
       let next
