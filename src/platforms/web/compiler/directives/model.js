@@ -25,14 +25,16 @@ export default function model (
     }
   }
   if (tag === 'select') {
-    return genSelect(el, value)
+    genSelect(el, value)
   } else if (tag === 'input' && type === 'checkbox') {
     genCheckboxModel(el, value)
   } else if (tag === 'input' && type === 'radio') {
     genRadioModel(el, value)
   } else {
-    return genDefaultModel(el, value, modifiers)
+    genDefaultModel(el, value, modifiers)
   }
+  // ensure runtime directive metadata
+  return true
 }
 
 function genCheckboxModel (el: ASTElement, value: string) {
@@ -128,10 +130,6 @@ function genDefaultModel (
   }
   addProp(el, 'value', isNative ? `_s(${value})` : `(${value})`)
   addHandler(el, event, code, null, true)
-  if (needCompositionGuard) {
-    // need runtime directive code to help with composition events
-    return true
-  }
 }
 
 function genSelect (el: ASTElement, value: string) {
@@ -143,8 +141,6 @@ function genSelect (el: ASTElement, value: string) {
     `.map(function(o){return "_value" in o ? o._value : o.value})` +
     (el.attrsMap.multiple == null ? '[0]' : '')
   addHandler(el, 'change', code, null, true)
-  // need runtime to help with possible dynamically generated options
-  return true
 }
 
 function checkOptionWarning (option: any): boolean {

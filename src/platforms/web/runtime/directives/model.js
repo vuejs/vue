@@ -40,7 +40,10 @@ export default {
       if (isIE || isEdge) {
         setTimeout(cb, 0)
       }
-    } else if (vnode.tag === 'textarea' || el.type === 'text') {
+    } else if (
+      (vnode.tag === 'textarea' || el.type === 'text') &&
+      !binding.modifiers.lazy
+    ) {
       if (!isAndroid) {
         el.addEventListener('compositionstart', onCompositionStart)
         el.addEventListener('compositionend', onCompositionEnd)
