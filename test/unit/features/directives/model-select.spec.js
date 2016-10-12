@@ -161,6 +161,32 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
+  it('should work with select which has no default selected options', (done) => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        id: 4,
+        list: [1, 2, 3],
+        testChange: 5
+      },
+      template:
+        '<div>' +
+          '<select @change="test" v-model="id">' +
+            '<option v-for="item in list" :value="item">{{item}}</option>' +
+          '</select>' +
+          '{{testChange}}' +
+        '</div>',
+      methods: {
+        test: spy
+      }
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.testChange = 10
+    waitForUpdate(() => {
+      expect(spy.calls.count()).toBe(0)
+    }).then(done)
+  })
+
   it('multiple', done => {
     const vm = new Vue({
       data: {
