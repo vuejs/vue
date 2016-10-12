@@ -113,9 +113,11 @@ function createFunctionalComponent (
       slots: () => resolveSlots(children, context)
     }
   )
-  vnode.functionalContext = context
-  if (data.slot) {
-    (vnode.data || (vnode.data = {})).slot = data.slot
+  if (vnode instanceof VNode) {
+    vnode.functionalContext = context
+    if (data.slot) {
+      (vnode.data || (vnode.data = {})).slot = data.slot
+    }
   }
   return vnode
 }
