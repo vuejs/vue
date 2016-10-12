@@ -353,9 +353,9 @@ function processComponent (el) {
 
 function processAttrs (el) {
   const list = el.attrsList
-  let i, l, name, value, arg, modifiers, isProp
+  let i, l, name, rawName, value, arg, modifiers, isProp
   for (i = 0, l = list.length; i < l; i++) {
-    name = list[i].name
+    name = rawName = list[i].name
     value = list[i].value
     if (dirRE.test(name)) {
       // mark element as dynamic
@@ -387,7 +387,7 @@ function processAttrs (el) {
         if (argMatch && (arg = argMatch[1])) {
           name = name.slice(0, -(arg.length + 1))
         }
-        addDirective(el, name, value, arg, modifiers)
+        addDirective(el, name, rawName, value, arg, modifiers)
         if (process.env.NODE_ENV !== 'production' && name === 'model') {
           checkForAliasModel(el, value)
         }

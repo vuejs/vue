@@ -18,9 +18,9 @@ import { isPrimitive, _toString, warn } from '../util/index'
 import { activeInstance } from '../instance/lifecycle'
 import { registerRef } from './modules/ref'
 
-const emptyData = {}
-const emptyNode = new VNode('', emptyData, [])
-const hooks = ['create', 'update', 'postpatch', 'remove', 'destroy']
+export const emptyNode = new VNode('', {}, [])
+
+const hooks = ['create', 'update', 'remove', 'destroy']
 
 function isUndef (s) {
   return s == null
@@ -344,9 +344,10 @@ export function createPatchFunction (backend) {
       vnode.elm = oldVnode.elm
       return
     }
-    let i, hook
-    const hasData = isDef(i = vnode.data)
-    if (hasData && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
+    let i
+    const data = vnode.data
+    const hasData = isDef(data)
+    if (hasData && isDef(i = data.hook) && isDef(i = i.prepatch)) {
       i(oldVnode, vnode)
     }
     const elm = vnode.elm = oldVnode.elm
@@ -354,7 +355,7 @@ export function createPatchFunction (backend) {
     const ch = vnode.children
     if (hasData && isPatchable(vnode)) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
-      if (isDef(hook) && isDef(i = hook.update)) i(oldVnode, vnode)
+      if (isDef(i = data.hook) && isDef(i = i.update)) i(oldVnode, vnode)
     }
     if (isUndef(vnode.text)) {
       if (isDef(oldCh) && isDef(ch)) {
@@ -371,8 +372,7 @@ export function createPatchFunction (backend) {
       nodeOps.setTextContent(elm, vnode.text)
     }
     if (hasData) {
-      for (i = 0; i < cbs.postpatch.length; ++i) cbs.postpatch[i](oldVnode, vnode)
-      if (isDef(hook) && isDef(i = hook.postpatch)) i(oldVnode, vnode)
+      if (isDef(i = data.hook) && isDef(i = i.postpatch)) i(oldVnode, vnode)
     }
   }
 

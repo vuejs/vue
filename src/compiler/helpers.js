@@ -24,11 +24,12 @@ export function addAttr (el: ASTElement, name: string, value: string) {
 export function addDirective (
   el: ASTElement,
   name: string,
+  rawName: string,
   value: string,
   arg: ?string,
   modifiers: ?{ [key: string]: true }
 ) {
-  (el.directives || (el.directives = [])).push({ name, value, arg, modifiers })
+  (el.directives || (el.directives = [])).push({ name, rawName, value, arg, modifiers })
 }
 
 export function addHandler (

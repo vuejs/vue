@@ -56,8 +56,10 @@ declare interface VNodeData {
 
 declare type VNodeDirective = {
   name: string;
+  rawName: string;
   value?: any;
   oldValue?: any;
   arg?: string;
   modifiers?: { [key: string]: boolean };
+  def?: Object;
 }

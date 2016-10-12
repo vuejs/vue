@@ -32,8 +32,8 @@ function assertCodegen (template, generatedCode, ...args) {
 describe('codegen', () => {
   it('generate directive', () => {
     assertCodegen(
-      '<p v-custom1:arg1.modifire="value1" v-custom2><p>',
-      `with(this){return _h('p',{directives:[{name:"custom1",value:(value1),expression:"value1",arg:"arg1",modifiers:{"modifire":true}},{name:"custom2",arg:"arg1"}]})}`
+      '<p v-custom1:arg1.modifier="value1" v-custom2><p>',
+      `with(this){return _h('p',{directives:[{name:"custom1",rawName:"v-custom1:arg1.modifier",value:(value1),expression:"value1",arg:"arg1",modifiers:{"modifier":true}},{name:"custom2",rawName:"v-custom2",arg:"arg1"}]})}`
     )
   })
 
@@ -148,7 +148,7 @@ describe('codegen', () => {
   it('generate v-show directive', () => {
     assertCodegen(
       '<p v-show="shown">hello world</p>',
-      `with(this){return _h('p',{directives:[{name:"show",value:(shown),expression:"shown"}]},["hello world"])}`
+      `with(this){return _h('p',{directives:[{name:"show",rawName:"v-show",value:(shown),expression:"shown"}]},["hello world"])}`
     )
   })
 
