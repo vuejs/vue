@@ -75,6 +75,20 @@ function isStatic (node: ASTNode): boolean {
     !node.if && !node.for && // not v-if or v-for or v-else
     !isBuiltInTag(node.tag) && // not a built-in
     isPlatformReservedTag(node.tag) && // not a component
+    !isDirectChildOfTemplateFor(node) &&
     Object.keys(node).every(isStaticKey)
   ))
+}
+
+function isDirectChildOfTemplateFor (node: ASTElement): boolean {
+  while (node.parent) {
+    node = node.parent
+    if (node.tag !== 'template') {
+      return false
+    }
+    if (node.for) {
+      return true
+    }
+  }
+  return false
 }
