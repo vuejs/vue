@@ -187,6 +187,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm.$el) {
       vm.$el.__vue__ = null
     }
+    // invoke destroy hooks on current rendered tree
+    vm.__patch__(vm._vnode, null)
   }
 }
 
