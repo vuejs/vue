@@ -60,7 +60,7 @@ export default {
       // option in the DOM.
       const needReset = el.multiple
         ? binding.value.some(v => hasNoMatchingOption(v, el.options))
-        : binding.value === binding.oldValue ? false : hasNoMatchingOption(binding.value, el.options)
+        : binding.value !== binding.oldValue && hasNoMatchingOption(binding.value, el.options)
       if (needReset) {
         trigger(el, 'change')
       }
