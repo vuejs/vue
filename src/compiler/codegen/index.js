@@ -230,7 +230,7 @@ function genSlot (el: ASTElement): string {
 }
 
 function genComponent (el: any): string {
-  const children = genChildren(el)
+  const children = el.inlineTemplate ? null : genChildren(el)
   return `_h(${el.component},${genData(el)}${
     children ? `,${children}` : ''
   })`
