@@ -90,23 +90,17 @@ function normalizeDirectives (
   let i, dir
   for (i = 0; i < dirs.length; i++) {
     dir = dirs[i]
-    res[getRawDirName(dir)] = dir
     if (!dir.modifiers) {
       dir.modifiers = emptyModifiers
     }
+    res[getRawDirName(dir)] = dir
     dir.def = resolveAsset(vm.$options, 'directives', dir.name, true)
   }
   return res
 }
 
 function getRawDirName (dir: VNodeDirective): string {
-  return dir.rawName || (
-    dir.name + (
-      dir.modifiers
-        ? '.' + Object.keys(dir.modifiers).join('.')
-        : ''
-    )
-  )
+  return dir.rawName || `${dir.name}.${Object.keys(dir.modifiers || {}).join('.')}`
 }
 
 function callHook (dir, hook, vnode, oldVnode) {
