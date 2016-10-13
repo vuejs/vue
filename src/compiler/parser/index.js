@@ -79,7 +79,7 @@ export function parse (
         type: 1,
         tag,
         attrsList: attrs,
-        attrsMap: makeAttrsMap(attrs),
+        attrsMap: makeAttrsMap(attrs, options.isIE),
         parent: currentParent,
         children: []
       }
@@ -429,10 +429,10 @@ function parseModifiers (name: string): Object | void {
   }
 }
 
-function makeAttrsMap (attrs: Array<Object>): Object {
+function makeAttrsMap (attrs: Array<Object>, isIE: ?boolean): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
-    if (process.env.NODE_ENV !== 'production' && map[attrs[i].name]) {
+    if (process.env.NODE_ENV !== 'production' && map[attrs[i].name] && !isIE) {
       warn('duplicate attribute: ' + attrs[i].name)
     }
     map[attrs[i].name] = attrs[i].value
