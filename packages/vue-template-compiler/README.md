@@ -57,6 +57,10 @@ The optional `options` object can contain the following:
 
   Refer to the implementation of some [built-in compile-time directives](https://github.com/vuejs/vue/tree/next/src/platforms/web/compiler/directives).
 
+- `preserveWhitespace`
+
+  Defaults to `true`. This means the compiled render function respects all the whitespaces between HTML tags. If set to `false`, all whitespaces between tags will be ignored. This can result in slightly better performance but may affect layout for inline elements.
+
 ---
 
 ### compiler.compileToFunctions(template)
