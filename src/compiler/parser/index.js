@@ -1,6 +1,6 @@
 /* @flow */
 
-import { decodeHTML } from 'entities'
+import { decode } from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { cached, no, camelize } from 'shared/util'
@@ -24,7 +24,7 @@ const argRE = /:(.*)$/
 const modifierRE = /\.[^\.]+/g
 const specialNewlineRE = /\u2028|\u2029/g
 
-const decodeHTMLCached = cached(decodeHTML)
+const decodeHTMLCached = cached(decode)
 
 // configurable state
 let warn
@@ -61,8 +61,6 @@ export function parse (
   parseHTML(template, {
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
-    isFromDOM: options.isFromDOM,
-    shouldDecodeTags: options.shouldDecodeTags,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
     start (tag, attrs, unary) {
       // check namespace.

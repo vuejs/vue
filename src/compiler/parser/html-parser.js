@@ -54,21 +54,21 @@ const nlRE = /&#10;/g
 const ampRE = /&amp;/g
 const quoteRE = /&quot;/g
 
-function decodeAttr (value, shouldDecodeTags, shouldDecodeNewlines) {
-  if (shouldDecodeTags) {
-    value = value.replace(ltRE, '<').replace(gtRE, '>')
-  }
+function decodeAttr (value, shouldDecodeNewlines) {
   if (shouldDecodeNewlines) {
     value = value.replace(nlRE, '\n')
   }
-  return value.replace(ampRE, '&').replace(quoteRE, '"')
+  return value
+    .replace(ltRE, '<')
+    .replace(gtRE, '>')
+    .replace(ampRE, '&')
+    .replace(quoteRE, '"')
 }
 
 export function parseHTML (html, options) {
   const stack = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
-  const isFromDOM = options.isFromDOM
   let index = 0
   let last, lastTag
   while (html) {
@@ -218,11 +218,10 @@ export function parseHTML (html, options) {
       const value = args[3] || args[4] || args[5] || ''
       attrs[i] = {
         name: args[1],
-        value: isFromDOM ? decodeAttr(
+        value: decodeAttr(
           value,
-          options.shouldDecodeTags,
           options.shouldDecodeNewlines
-        ) : value
+        )
       }
     }
 

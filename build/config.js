@@ -38,7 +38,7 @@ const builds = {
     env: 'development',
     banner,
     alias: {
-      entities: './entity-decoder'
+      he: './entity-decoder'
     }
   },
   // Runtime+compiler standalone production build.
@@ -49,7 +49,7 @@ const builds = {
     env: 'production',
     banner,
     alias: {
-      entities: './entity-decoder'
+      he: './entity-decoder'
     }
   },
   // Web compiler (CommonJS).
@@ -57,14 +57,14 @@ const builds = {
     entry: path.resolve(__dirname, '../src/entries/web-compiler.js'),
     dest: path.resolve(__dirname, '../packages/vue-template-compiler/build.js'),
     format: 'cjs',
-    external: ['entities', 'de-indent']
+    external: ['he', 'de-indent']
   },
   // Web server renderer (CommonJS).
   'web-server-renderer': {
     entry: path.resolve(__dirname, '../src/entries/web-server-renderer.js'),
     dest: path.resolve(__dirname, '../packages/vue-server-renderer/build.js'),
     format: 'cjs',
-    external: ['stream', 'module', 'vm', 'entities', 'de-indent']
+    external: ['stream', 'module', 'vm', 'he', 'de-indent']
   }
 }
 

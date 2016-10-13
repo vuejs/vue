@@ -1,6 +1,6 @@
 /* @flow */
 
-import { encodeHTML } from 'entities'
+import { escape } from 'he'
 import { compileToFunctions } from 'web/compiler/index'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
@@ -112,7 +112,7 @@ export function createRenderFunction (
       } else if (node.isComment) {
         write(`<!--${node.text}-->`, next)
       } else {
-        write(node.raw ? node.text : encodeHTML(String(node.text)), next)
+        write(node.raw ? node.text : escape(String(node.text)), next)
       }
     }
   }
