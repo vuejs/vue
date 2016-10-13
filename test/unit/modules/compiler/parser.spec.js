@@ -1,6 +1,7 @@
 import { parse } from 'compiler/parser/index'
 import { extend } from 'shared/util'
 import { baseOptions } from 'web/compiler/index'
+import { isIE } from 'core/util/env'
 
 describe('parser', () => {
   it('simple element', () => {
@@ -320,10 +321,12 @@ describe('parser', () => {
     expect('Interpolation inside attributes has been deprecated').toHaveBeenWarned()
   })
 
-  it('duplicate attribute', () => {
-    parse('<p class="class1" class="class1">hello world</p>', baseOptions)
-    expect('duplicate attribute').toHaveBeenWarned()
-  })
+  if (!isIE) {
+    it('duplicate attribute', () => {
+      parse('<p class="class1" class="class1">hello world</p>', baseOptions)
+      expect('duplicate attribute').toHaveBeenWarned()
+    })
+  }
 
   it('custom delimiter', () => {
     const ast = parse('<p>{msg}</p>', extend({ delimiters: ['{', '}'] }, baseOptions))
