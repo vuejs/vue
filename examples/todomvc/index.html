@@ -62,7 +62,8 @@
 		// for testing
 		if (navigator.userAgent.indexOf('PhantomJS') > -1) localStorage.clear()
 		</script>
-		<script src="../../dist/vue.min.js"></script>
+    <!-- Delete ".min" for console warnings in development -->
+    <script src="../../dist/vue.min.js"></script>
 		<script src="app.js"></script>
 	</body>
 </html>
