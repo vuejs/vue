@@ -130,14 +130,16 @@ export function parse (
       }
 
       function checkRootConstraints (el) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV !== 'production' && !warned) {
           if (el.tag === 'slot' || el.tag === 'template') {
+            warned = true
             warn(
               `Cannot use <${el.tag}> as component root element because it may ` +
               'contain multiple nodes:\n' + template
             )
           }
           if (el.attrsMap.hasOwnProperty('v-for')) {
+            warned = true
             warn(
               'Cannot use v-for on stateful component root element because ' +
               'it renders multiple elements:\n' + template
@@ -150,12 +152,12 @@ export function parse (
       if (!root) {
         root = element
         checkRootConstraints(root)
-      } else if (process.env.NODE_ENV !== 'production' && !stack.length && !warned) {
+      } else if (!stack.length) {
         // allow 2 root elements with v-if and v-else
         if (root.if && element.else) {
           checkRootConstraints(element)
           root.elseBlock = element
-        } else {
+        } else if (process.env.NODE_ENV !== 'production' && !warned) {
           warned = true
           warn(
             `Component template should contain exactly one root element:\n\n${template}`

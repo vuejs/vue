@@ -82,6 +82,12 @@ module.exports = {
         { name: 'Chuck Norris', power: Infinity }
       ])
 
+    browser
+      .clearValue('input[name="query"]')
+      .assert.count('p', 0)
+      .setValue('input[name="query"]', 'stringthatdoesnotexistanywhere')
+      .assert.count('p', 1)
+
     browser.end()
 
     function assertTable (data) {
