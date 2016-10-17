@@ -26,7 +26,7 @@ export function initRender (vm: Component) {
 
 export function renderMixin (Vue: Class<Component>) {
   Vue.prototype.$nextTick = function (fn: Function) {
-    nextTick(fn, this)
+    return nextTick(fn, this)
   }
 
   Vue.prototype._render = function (): VNode {
