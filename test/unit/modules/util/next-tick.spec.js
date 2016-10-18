@@ -9,13 +9,7 @@ describe('nextTick', () => {
     expect(typeof nextTick(() => {})).toBe('undefined')
   })
 
-  if (typeof Promise === 'undefined') {
-    it('raises an error when provided no callback with no Promise support', () => {
-      spyOn(console, 'error')
-      nextTick()
-      expect(console.error).toHaveBeenCalledWith('Vue.nextTick requires a callback as its first argument or an environment that supports Promises')
-    })
-  } else {
+  if (typeof Promise !== 'undefined') {
     it('returns a Promise when provided no callback', done => {
       nextTick().then(done)
     })
