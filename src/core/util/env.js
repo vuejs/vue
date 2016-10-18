@@ -86,7 +86,7 @@ export const nextTick = (function () {
     }
   }
 
-  return function queueNextTick (cb: Function, ctx?: Object) {
+  return function queueNextTick (cb?: ?Function, ctx?: Object) {
     if (cb) {
       var func = ctx
         ? function () { cb.call(ctx) }
