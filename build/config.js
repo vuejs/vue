@@ -30,7 +30,7 @@ const builds = {
     env: 'production',
     banner
   },
-  // Runtime+compiler standalone developement build.
+  // Runtime+compiler standalone development build.
   'web-standalone-dev': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime-with-compiler.js'),
     dest: path.resolve(__dirname, '../dist/vue.js'),
