@@ -204,7 +204,7 @@ export default class Watcher {
   }
 
   /**
-   * Remove self from all dependencies' subcriber list.
+   * Remove self from all dependencies' subscriber list.
    */
   teardown () {
     if (this.active) {

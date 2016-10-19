@@ -2,7 +2,7 @@ import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 
 describe('vdom class module', () => {
-  it('shuold create an element with staticClass', () => {
+  it('should create an element with staticClass', () => {
     const vnode = new VNode('p', { staticClass: 'class1' })
     const elm = patch(null, vnode)
     expect(elm).toHaveClass('class1')
