@@ -263,6 +263,44 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
+  it('multiple selects', (done) => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        selections: ['', ''],
+        selectBoxes: [
+          [
+            { value: 'foo', text: 'foo' },
+            { value: 'bar', text: 'bar' }
+          ],
+          [
+            { value: 'day', text: 'day' },
+            { value: 'night', text: 'night' }
+          ]
+        ]
+      },
+      watch: {
+        selections: spy
+      },
+      template:
+        '<div>' +
+          '<select v-for="(item, index) in selectBoxes" v-model="selections[index]">' +
+            '<option v-for="element in item" v-bind:value="element.value" v-text="element.text"></option>' +
+          '</select>' +
+          '<span ref="rs">{{selections}}</span>' +
+        '</div>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    var selects = vm.$el.getElementsByTagName('select')
+    var select0 = selects[0]
+    select0.options[0].selected = true
+    triggerEvent(select0, 'change')
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalled()
+      expect(vm.selections).toEqual(['foo', ''])
+    }).then(done)
+  })
+
   it('should warn inline selected', () => {
     const vm = new Vue({
       data: {
