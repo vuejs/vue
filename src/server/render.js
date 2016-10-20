@@ -3,6 +3,7 @@
 import { escape } from 'he'
 import { compileToFunctions } from 'web/compiler/index'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
+import { noop } from 'shared/util'
 
 let warned = Object.create(null)
 const warnOnce = msg => {
@@ -43,7 +44,7 @@ const normalizeRender = vm => {
   }
 }
 
-function renderNode (node: VNode, isRoot: boolean, context) {
+function renderNode (node, isRoot, context) {
   const { write, next } = context
   if (node.componentOptions) {
     // check cache hit
@@ -195,7 +196,7 @@ const nextFactory = context => function next () {
   if (!lastState) {
     context.done()
     // cleanup context, avoid leakage
-    context = null
+    context = (null: any)
     return
   }
   switch (lastState.type) {
@@ -254,8 +255,10 @@ export function createRenderFunction (
     const context = {
       activeInstance: component,
       renderStates: [],
-      write, done, isUnaryTag,
-      modules, directives, cache, get, has
+      next: noop, // for flow
+      write, done,
+      isUnaryTag, modules, directives,
+      cache, get, has
     }
     context.next = nextFactory(context)
     normalizeRender(component)
