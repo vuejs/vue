@@ -57,7 +57,8 @@ declare type ComponentOptions = {
   _propKeys?: Array<string>;
   _parentVnode?: VNode;
   _parentListeners?: ?Object;
-  _renderChildren?: ?VNodeChildren
+  _renderChildren?: ?VNodeChildren;
+  _componentTag: ?string;
 }
 
 declare type PropOptions = {
