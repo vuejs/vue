@@ -107,7 +107,7 @@ function renderComponent (node, isRoot, context) {
   childNode.parent = node
   context.renderStates.push({
     type: 'Component',
-    prevActive,
+    prevActive
   })
   renderNode(childNode, isRoot, context)
 }
@@ -151,7 +151,7 @@ function renderElement (el, isRoot, context) {
 
 function renderStartingTag (node: VNode, context) {
   let markup = `<${node.tag}`
-  const {directives, modules} = context
+  const { directives, modules } = context
   if (node.data) {
     // check directives
     const dirs = node.data.directives
@@ -190,7 +190,7 @@ function renderStartingTag (node: VNode, context) {
   return markup + '>'
 }
 
-const nextFactory = context =>  function next () {
+const nextFactory = context => function next () {
   const lastState = context.renderStates.pop()
   if (!lastState) {
     context.done()
@@ -238,7 +238,6 @@ export function createRenderFunction (
   isUnaryTag: Function,
   cache: any
 ) {
-
   if (cache && (!cache.get || !cache.set)) {
     throw new Error('renderer cache must implement at least get & set.')
   }
