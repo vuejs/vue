@@ -190,25 +190,54 @@ function renderStartingTag (node: VNode, context) {
   return markup + '>'
 }
 
+const nextFactory = context =>  function next () {
+  const lastState = context.renderStates.pop()
+  if (!lastState) {
+    context.done()
+    // cleanup context, avoid leakage
+    context = null
+    return
+  }
+  switch (lastState.type) {
+    case 'Component':
+      context.activeInstance = lastState.prevActive
+      next()
+      break
+    case 'Element':
+      const { children, total } = lastState
+      const rendered = lastState.rendered++
+      if (rendered < total) {
+        context.renderStates.push(lastState)
+        renderNode(children[rendered], false, context)
+      } else {
+        context.write(lastState.endTag, next)
+      }
+      break
+    case 'ComponentWithCache':
+      const { buffer, bufferIndex, key } = lastState
+      const result = buffer[bufferIndex]
+      context.cache.set(key, result)
+      if (bufferIndex === 0) {
+        // this is a top-level cached component,
+        // exit caching mode.
+        context.write.caching = false
+      } else {
+        // parent component is also being cached,
+        // merge self into parent's result
+        buffer[bufferIndex - 1] += result
+      }
+      buffer.length = bufferIndex
+      next()
+      break
+  }
+}
+
 export function createRenderFunction (
   modules: Array<Function>,
   directives: Object,
   isUnaryTag: Function,
   cache: any
 ) {
-
-  let context: {
-    renderStates: RenderState[],
-    activeInstance: Component,
-    write: Function,
-    next: Function,
-    done: Function,
-    isUnaryTag: (s: string) => boolean,
-    directives: Object,
-    modules: Array<Function>,
-    cache: any,
-    get: ?Function, has: ?Function,
-  }
 
   if (cache && (!cache.get || !cache.set)) {
     throw new Error('renderer cache must implement at least get & set.')
@@ -217,58 +246,19 @@ export function createRenderFunction (
   const get = cache && normalizeAsync(cache, 'get')
   const has = cache && normalizeAsync(cache, 'has')
 
-  function next () {
-    const lastState = context.renderStates.pop()
-    if (!lastState) {
-      context.done()
-      return
-    }
-    switch (lastState.type) {
-      case 'Component':
-        context.activeInstance = lastState.prevActive
-        next()
-        break
-      case 'Element':
-        const { children, total } = lastState
-        const rendered = lastState.rendered++
-        if (rendered < total) {
-          context.renderStates.push(lastState)
-          renderNode(children[rendered], false, context)
-        } else {
-          context.write(lastState.endTag, next)
-        }
-        break
-      case 'ComponentWithCache':
-        const { buffer, bufferIndex, key } = lastState
-        const result = buffer[bufferIndex]
-        cache.set(key, result)
-        if (bufferIndex === 0) {
-          // this is a top-level cached component,
-          // exit caching mode.
-          context.write.caching = false
-        } else {
-          // parent component is also being cached,
-          // merge self into parent's result
-          buffer[bufferIndex - 1] += result
-        }
-        buffer.length = bufferIndex
-        next()
-        break
-    }
-  }
-
   return function render (
     component: Component,
     write: (text: string, next: Function) => void,
     done: Function
   ) {
-    const renderStates = []
     warned = Object.create(null)
-    context = {
+    const context = {
       activeInstance: component,
-      write, done, renderStates, isUnaryTag,
-      next, modules, directives, cache, get, has
+      renderStates: [],
+      write, done, isUnaryTag,
+      modules, directives, cache, get, has
     }
+    context.next = nextFactory(context)
     normalizeRender(component)
     renderNode(component._render(), true, context)
   }
