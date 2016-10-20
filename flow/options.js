@@ -59,6 +59,7 @@ declare type ComponentOptions = {
   _parentListeners?: ?Object;
   _renderChildren?: ?VNodeChildren;
   _componentTag: ?string;
+  _scopeId: ?string;
 }
 
 declare type PropOptions = {
