@@ -2,6 +2,20 @@
 
 let len, str, chr, index, expressionPos, expressionEndPos
 
+/**
+ * parse directive model to do the array update transform. a[idx] = val => $$a.splice($$idx, 1, val)
+ *
+ * for loop possible cases:
+ *
+ * - test
+ * - test[idx]
+ * - test[test1[idx]]
+ * - test["a"][idx]
+ * - xxx.test[a[a].test1[idx]]
+ * - test.xxx.a["asa"][test1[idx]]
+ *
+ */
+
 export default function parseModel (val: string): Object {
   str = val
   len = str.length
