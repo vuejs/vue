@@ -80,7 +80,7 @@ function genRadioModel (el: ASTElement, value: string) {
   }
   const valueBinding = getBindingAttr(el, 'value') || 'null'
   addProp(el, 'checked', `_q(${value},${valueBinding})`)
-  addHandler(el, 'change', updateValue(value, valueBinding), null, true)
+  addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true)
 }
 
 function genDefaultModel (
@@ -115,8 +115,8 @@ function genDefaultModel (
     ? `$event.target.value${trim ? '.trim()' : ''}`
     : `$event`
   let code = number || type === 'number'
-    ? updateValue(value, `_n(${valueExpression})`)
-    : updateValue(value, valueExpression)
+    ? genAssignmentCode(value, `_n(${valueExpression})`)
+    : genAssignmentCode(value, valueExpression)
   if (isNative && needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
   }
@@ -143,7 +143,7 @@ function genSelect (el: ASTElement, value: string) {
     `.map(function(o){return "_value" in o ? o._value : o.value})` +
     (el.attrsMap.multiple == null ? '[0]' : '')
 
-  const code = updateValue(value, assignment)
+  const code = genAssignmentCode(value, assignment)
   addHandler(el, 'change', code, null, true)
 }
 
@@ -161,7 +161,7 @@ function checkOptionWarning (option: any): boolean {
   return false
 }
 
-function updateValue (value, assignment) {
+function genAssignmentCode (value: string, assignment: string): string {
   const modelRs = parseModel(value)
   if (modelRs.idx === null) {
     return `${value}=${assignment}`
