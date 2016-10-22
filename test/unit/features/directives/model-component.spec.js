@@ -2,14 +2,18 @@ import Vue from 'vue'
 
 describe('Directive v-model component', () => {
   it('should work', done => {
+    const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
-        msg: 'hello'
+        msg: ['hello']
+      },
+      watch: {
+        msg: spy
       },
       template: `
         <div>
           <p>{{ msg }}</p>
-          <validate v-model="msg">
+          <validate v-model="msg[0]">
             <input type="text">
           </validate>
         </div>
@@ -40,7 +44,8 @@ describe('Directive v-model component', () => {
       input.value = 'world'
       triggerEvent(input, 'input')
     }).then(() => {
-      expect(vm.msg).toBe('world')
+      expect(vm.msg).toEqual(['world'])
+      expect(spy).toHaveBeenCalled()
     }).then(() => {
       document.body.removeChild(vm.$el)
       vm.$destroy()
