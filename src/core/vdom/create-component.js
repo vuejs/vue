@@ -236,7 +236,7 @@ function resolveAsyncComponent (
 }
 
 function extractProps (data: VNodeData, Ctor: Class<Component>): ?Object {
-  // we are only extrating raw values here.
+  // we are only extracting raw values here.
   // validation and default values are handled in the child
   // component itself.
   const propOptions = Ctor.options.props

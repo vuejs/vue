@@ -59,7 +59,7 @@ export default {
       setSelected(el, binding, vnode.context)
       // in case the options rendered by v-for have changed,
       // it's possible that the value is out-of-sync with the rendered options.
-      // detect such cases and filter out values that no longer has a matchig
+      // detect such cases and filter out values that no longer has a matching
       // option in the DOM.
       const needReset = el.multiple
         ? binding.value.some(v => hasNoMatchingOption(v, el.options))
