@@ -92,7 +92,8 @@ export function parseComponent (
 
   parseHTML(content, {
     start,
-    end
+    end,
+    sfc: true
   })
 
   return sfc
