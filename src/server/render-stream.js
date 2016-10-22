@@ -1,7 +1,7 @@
 /* @flow */
 
 /**
- * Original RenderStream implmentation by Sasha Aickin (@aickin)
+ * Original RenderStream implementation by Sasha Aickin (@aickin)
  * Licensed under the Apache License, Version 2.0
  * http://www.apache.org/licenses/LICENSE-2.0
  *
