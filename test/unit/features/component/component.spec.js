@@ -108,7 +108,7 @@ describe('Component', () => {
     })
     .then(() => {
       expect(vm.$el.nodeType).toBe(8)
-      expect(vm.$el.outerHTML).toBeUndefined()
+      expect(vm.$el.data).toBe('')
     }).then(done)
   })
 
