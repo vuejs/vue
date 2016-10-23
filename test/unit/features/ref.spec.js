@@ -82,7 +82,7 @@ describe('ref', () => {
     vm.test = 'test2'
     waitForUpdate(() => {
       expect(vm.$refs.test.$options.id).toBe('test2')
-      vm.test = ''
+      vm.test = undefined
     }).then(() => {
       expect(vm.$refs.test).toBeUndefined()
     }).then(done)
