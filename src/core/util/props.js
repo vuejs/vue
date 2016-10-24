@@ -126,7 +126,7 @@ function assertProp (
  */
 function assertType (value: any, type: Function): {
   valid: boolean,
-  expectedType: string
+  expectedType: ?string
 } {
   let valid
   let expectedType = getType(type)
