@@ -301,6 +301,24 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
+  it('.number modifier', () => {
+    const vm = new Vue({
+      data: {
+        test: 2
+      },
+      template:
+        '<select v-model.number="test">' +
+          '<option value="1">a</option>' +
+          '<option :value="2">b</option>' +
+        ' <option :value="3">c</option>' +
+        '</select>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    updateSelect(vm.$el, '1')
+    triggerEvent(vm.$el, 'change')
+    expect(vm.test).toBe(1)
+  })
+
   it('should warn inline selected', () => {
     const vm = new Vue({
       data: {
