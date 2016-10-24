@@ -26,11 +26,11 @@ export default function model (
     }
   }
   if (tag === 'select') {
-    genSelect(el, value)
+    genSelect(el, value, modifiers)
   } else if (tag === 'input' && type === 'checkbox') {
-    genCheckboxModel(el, value)
+    genCheckboxModel(el, value, modifiers)
   } else if (tag === 'input' && type === 'radio') {
-    genRadioModel(el, value)
+    genRadioModel(el, value, modifiers)
   } else {
     genDefaultModel(el, value, modifiers)
   }
@@ -38,7 +38,11 @@ export default function model (
   return true
 }
 
-function genCheckboxModel (el: ASTElement, value: string) {
+function genCheckboxModel (
+  el: ASTElement,
+  value: string,
+  modifiers: ?Object
+) {
   if (process.env.NODE_ENV !== 'production' &&
     el.attrsMap.checked != null) {
     warn(
@@ -47,6 +51,7 @@ function genCheckboxModel (el: ASTElement, value: string) {
       'Declare initial values in the component\'s data option instead.'
     )
   }
+  const number = modifiers && modifiers.number
   const valueBinding = getBindingAttr(el, 'value') || 'null'
   const trueValueBinding = getBindingAttr(el, 'true-value') || 'true'
   const falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
@@ -60,7 +65,7 @@ function genCheckboxModel (el: ASTElement, value: string) {
         '$$el=$event.target,' +
         `$$c=$$el.checked?(${trueValueBinding}):(${falseValueBinding});` +
     'if(Array.isArray($$a)){' +
-      `var $$v=${valueBinding},` +
+      `var $$v=${number ? '_n(' + valueBinding + ')' : valueBinding},` +
           '$$i=_i($$a,$$v);' +
       `if($$c){$$i<0&&(${value}=$$a.concat($$v))}` +
       `else{$$i>-1&&(${value}=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}` +
@@ -69,7 +74,11 @@ function genCheckboxModel (el: ASTElement, value: string) {
   )
 }
 
-function genRadioModel (el: ASTElement, value: string) {
+function genRadioModel (
+    el: ASTElement,
+    value: string,
+    modifiers: ?Object
+) {
   if (process.env.NODE_ENV !== 'production' &&
     el.attrsMap.checked != null) {
     warn(
@@ -78,7 +87,11 @@ function genRadioModel (el: ASTElement, value: string) {
       'Declare initial values in the component\'s data option instead.'
     )
   }
-  const valueBinding = getBindingAttr(el, 'value') || 'null'
+  const number = modifiers && modifiers.number
+  let valueBinding = getBindingAttr(el, 'value') || 'null'
+  if (number) {
+    valueBinding = `_n(${valueBinding})`
+  }
   addProp(el, 'checked', `_q(${value},${valueBinding})`)
   addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true)
 }
@@ -133,14 +146,20 @@ function genDefaultModel (
   addHandler(el, event, code, null, true)
 }
 
-function genSelect (el: ASTElement, value: string) {
+function genSelect (
+    el: ASTElement,
+    value: string,
+    modifiers: ?Object
+) {
   if (process.env.NODE_ENV !== 'production') {
     el.children.some(checkOptionWarning)
   }
 
+  const number = modifiers && modifiers.number
   const assignment = `Array.prototype.filter` +
     `.call($event.target.options,function(o){return o.selected})` +
-    `.map(function(o){return "_value" in o ? o._value : o.value})` +
+    `.map(function(o){var val = "_value" in o ? o._value : o.value;` +
+    `return ${number ? '_n(val)' : 'val'}})` +
     (el.attrsMap.multiple == null ? '[0]' : '')
 
   const code = genAssignmentCode(value, assignment)
