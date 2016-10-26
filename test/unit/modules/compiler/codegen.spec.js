@@ -233,10 +233,10 @@ describe('codegen', () => {
       '<input @input.alt="onInput">',
       `with(this){return _h('input',{on:{"input":function($event){if(!$event.altKey)return;onInput($event)}}})}`
     )
-assertCodegen(
-    '<input @input.meta="onInput">',
-    `with(this){return _h('input',{on:{"input":function($event){if(!$event.metaKey)return;onInput($event)}}})}`
-)
+    assertCodegen(
+      '<input @input.meta="onInput">',
+      `with(this){return _h('input',{on:{"input":function($event){if(!$event.metaKey)return;onInput($event)}}})}`
+    )
   })
 
   it('generate events with multiple modifers', () => {
