@@ -21,7 +21,8 @@ const modifierCode = {
   self: 'if($event.target !== $event.currentTarget)return;',
   ctrl: 'if(!$event.ctrlKey)return;',
   shift: 'if(!$event.shiftKey)return;',
-  alt: 'if(!$event.altKey)return;'
+  alt: 'if(!$event.altKey)return;',
+  meta: 'if(!$event.metaKey)return;'
 }
 
 export function genHandlers (events: ASTElementHandlers, native?: boolean): string {
