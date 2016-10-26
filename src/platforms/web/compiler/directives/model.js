@@ -41,7 +41,7 @@ export default function model (
 function genCheckboxModel (
   el: ASTElement,
   value: string,
-  modifiers: ?ASTModifier
+  modifiers: ?ASTModifiers
 ) {
   if (process.env.NODE_ENV !== 'production' &&
     el.attrsMap.checked != null) {
@@ -77,7 +77,7 @@ function genCheckboxModel (
 function genRadioModel (
     el: ASTElement,
     value: string,
-    modifiers: ?ASTModifier
+    modifiers: ?ASTModifiers
 ) {
   if (process.env.NODE_ENV !== 'production' &&
     el.attrsMap.checked != null) {
@@ -99,7 +99,7 @@ function genRadioModel (
 function genDefaultModel (
   el: ASTElement,
   value: string,
-  modifiers: ?ASTModifier
+  modifiers: ?ASTModifiers
 ): ?boolean {
   if (process.env.NODE_ENV !== 'production') {
     if (el.tag === 'input' && el.attrsMap.value) {
@@ -149,7 +149,7 @@ function genDefaultModel (
 function genSelect (
     el: ASTElement,
     value: string,
-    modifiers: ?ASTModifier
+    modifiers: ?ASTModifiers
 ) {
   if (process.env.NODE_ENV !== 'production') {
     el.children.some(checkOptionWarning)
