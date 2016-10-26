@@ -41,9 +41,11 @@ declare type ModuleOptions = {
   staticKeys?: Array<string>; // AST properties to be considered static
 }
 
+declare type ASTModifier = { [key: string]: boolean }
+
 declare type ASTElementHandler = {
   value: string;
-  modifiers: ?{ [key: string]: true };
+  modifiers: ?ASTModifier;
 }
 
 declare type ASTElementHandlers = {
@@ -55,7 +57,7 @@ declare type ASTDirective = {
   rawName: string;
   value: string;
   arg: ?string;
-  modifiers: ?{ [key: string]: true };
+  modifiers: ?ASTModifier;
 }
 
 declare type ASTNode = ASTElement | ASTText | ASTExpression
