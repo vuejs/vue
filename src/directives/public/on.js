@@ -15,7 +15,7 @@ const keyCodes = {
 }
 
 const eventKeys = ['stop', 'prevent', 'self', 'capture']
-const modifierKeys = ['ctrl', 'shift', 'alt']
+const modifierKeys = ['ctrl', 'shift', 'alt', 'meta']
 const namedKeys = eventKeys.concat(modifierKeys).sort()
 
 var modifierKeyHandlers = {}

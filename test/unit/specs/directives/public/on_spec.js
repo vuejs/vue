@@ -245,6 +245,194 @@ describe('v-on', function () {
     })
   })
 
+  it('with meta modifier', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.a.meta="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 65
+      e.metaKey = true
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
+  it('with meta + shift modifier', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.a.meta.shift="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 65
+      e.metaKey = true
+      e.shiftKey = true
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
+  it('with meta + alt modifier', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.a.meta.alt="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 65
+      e.metaKey = true
+      e.altKey = true
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
+  it('with meta + ctrl modifier', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.a.meta.ctrl="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 65
+      e.metaKey = true
+      e.ctrlKey = true
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
+  it('with meta + shift + alt modifier', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.a.meta.shift.alt="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 65
+      e.metaKey = true
+      e.shiftKey = true
+      e.altKey = true
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
+  it('with meta + shift + ctrl modifier', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.a.meta.shift.ctrl="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 65
+      e.metaKey = true
+      e.shiftKey = true
+      e.ctrlKey = true
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
+  it('with meta + alt + ctrl modifier', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.a.meta.alt.ctrl="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 65
+      e.metaKey = true
+      e.altKey = true
+      e.ctrlKey = true
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
+  it('with meta + shift + alt + ctrl modifier', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.a.meta.shift.alt.ctrl="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 65
+      e.metaKey = true
+      e.shiftKey = true
+      e.altKey = true
+      e.ctrlKey = true
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
   it('with delete modifier capturing DEL', function (done) {
     new Vue({
       el: el,
