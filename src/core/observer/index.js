@@ -186,6 +186,7 @@ export function defineReactive (
  */
 export function set (obj: Array<any> | Object, key: any, val: any) {
   if (Array.isArray(obj)) {
+    obj.length = Math.max(obj.length, key)
     obj.splice(key, 1, val)
     return val
   }

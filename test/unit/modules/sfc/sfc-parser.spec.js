@@ -63,4 +63,14 @@ describe('Single File Component parser', () => {
     expect(res.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
     expect(res.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
   })
+
+  it('should handle template blocks with lang as special text', () => {
+    const res = parseComponent(`
+      <template lang="pug">
+        div
+          h1(v-if='1 < 2') hello
+      </template>
+    `)
+    expect(res.template.content.trim()).toBe(`div\n  h1(v-if='1 < 2') hello`)
+  })
 })

@@ -202,12 +202,6 @@ export function createPatchFunction (backend) {
       if (isDef(i = data.hook) && isDef(i = i.destroy)) i(vnode)
       for (i = 0; i < cbs.destroy.length; ++i) cbs.destroy[i](vnode)
     }
-    if (isDef(i = vnode.child) && (
-      !data.keepAlive ||
-      vnode.context._isBeingDestroyed
-    )) {
-      invokeDestroyHook(i._vnode)
-    }
     if (isDef(i = vnode.children)) {
       for (j = 0; j < vnode.children.length; ++j) {
         invokeDestroyHook(vnode.children[j])
@@ -457,6 +451,11 @@ export function createPatchFunction (backend) {
   }
 
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
+    if (!vnode) {
+      if (oldVnode) invokeDestroyHook(oldVnode)
+      return
+    }
+
     let elm, parent
     let isInitialPatch = false
     const insertedVnodeQueue = []

@@ -39,7 +39,7 @@ describe('SSR: VUE_ENV=server', () => {
   it('should warn when not set', () => {
     process.env.VUE_ENV = ''
     createRenderer()
-    expect('You are using createRenderer without setting VUE_ENV enviroment').toHaveBeenWarned()
+    expect('You are using createRenderer without setting VUE_ENV environment').toHaveBeenWarned()
     process.env.VUE_ENV = 'server'
   })
 })

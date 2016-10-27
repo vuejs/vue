@@ -21,7 +21,7 @@ export function createRenderer ({
 } {
   if (process.env.VUE_ENV !== 'server') {
     warn(
-      'You are using createRenderer without setting VUE_ENV enviroment variable to "server". ' +
+      'You are using createRenderer without setting VUE_ENV environment variable to "server". ' +
       'It is recommended to set VUE_ENV=server this will help rendering performance, ' +
       'by turning data observation off.'
     )

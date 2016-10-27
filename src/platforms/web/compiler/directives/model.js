@@ -2,6 +2,7 @@
 
 import { isIE } from 'core/util/env'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
+import parseModel from 'web/util/model'
 
 let warn
 
@@ -25,14 +26,16 @@ export default function model (
     }
   }
   if (tag === 'select') {
-    return genSelect(el, value)
+    genSelect(el, value)
   } else if (tag === 'input' && type === 'checkbox') {
     genCheckboxModel(el, value)
   } else if (tag === 'input' && type === 'radio') {
     genRadioModel(el, value)
   } else {
-    return genDefaultModel(el, value, modifiers)
+    genDefaultModel(el, value, modifiers)
   }
+  // ensure runtime directive metadata
+  return true
 }
 
 function genCheckboxModel (el: ASTElement, value: string) {
@@ -77,7 +80,7 @@ function genRadioModel (el: ASTElement, value: string) {
   }
   const valueBinding = getBindingAttr(el, 'value') || 'null'
   addProp(el, 'checked', `_q(${value},${valueBinding})`)
-  addHandler(el, 'change', `${value}=${valueBinding}`, null, true)
+  addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true)
 }
 
 function genDefaultModel (
@@ -112,8 +115,8 @@ function genDefaultModel (
     ? `$event.target.value${trim ? '.trim()' : ''}`
     : `$event`
   let code = number || type === 'number'
-    ? `${value}=_n(${valueExpression})`
-    : `${value}=${valueExpression}`
+    ? genAssignmentCode(value, `_n(${valueExpression})`)
+    : genAssignmentCode(value, valueExpression)
   if (isNative && needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
   }
@@ -128,23 +131,20 @@ function genDefaultModel (
   }
   addProp(el, 'value', isNative ? `_s(${value})` : `(${value})`)
   addHandler(el, event, code, null, true)
-  if (needCompositionGuard) {
-    // need runtime directive code to help with composition events
-    return true
-  }
 }
 
 function genSelect (el: ASTElement, value: string) {
   if (process.env.NODE_ENV !== 'production') {
     el.children.some(checkOptionWarning)
   }
-  const code = `${value}=Array.prototype.filter` +
+
+  const assignment = `Array.prototype.filter` +
     `.call($event.target.options,function(o){return o.selected})` +
     `.map(function(o){return "_value" in o ? o._value : o.value})` +
     (el.attrsMap.multiple == null ? '[0]' : '')
+
+  const code = genAssignmentCode(value, assignment)
   addHandler(el, 'change', code, null, true)
-  // need runtime to help with possible dynamically generated options
-  return true
 }
 
 function checkOptionWarning (option: any): boolean {
@@ -159,4 +159,16 @@ function checkOptionWarning (option: any): boolean {
     return true
   }
   return false
+}
+
+function genAssignmentCode (value: string, assignment: string): string {
+  const modelRs = parseModel(value)
+  if (modelRs.idx === null) {
+    return `${value}=${assignment}`
+  } else {
+    return `var $$exp = ${modelRs.exp}, $$idx = ${modelRs.idx};` +
+      `if (!Array.isArray($$exp)){` +
+        `${value}=${assignment}}` +
+      `else{$$exp.splice($$idx, 1, ${assignment})}`
+  }
 }

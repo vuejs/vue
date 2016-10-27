@@ -37,7 +37,7 @@ describe('SSR: bundle renderer', () => {
       const context = { url: '/test' }
       renderer.renderToString(context, (err, res) => {
         expect(err).toBeNull()
-        expect(res).toBe('<div server-rendered="true">&sol;test</div>')
+        expect(res).toBe('<div server-rendered="true">/test</div>')
         expect(context.msg).toBe('hello')
         done()
       })
@@ -53,7 +53,7 @@ describe('SSR: bundle renderer', () => {
         res += chunk.toString()
       })
       stream.on('end', () => {
-        expect(res).toBe('<div server-rendered="true">&sol;test</div>')
+        expect(res).toBe('<div server-rendered="true">/test</div>')
         expect(context.msg).toBe('hello')
         done()
       })
@@ -99,7 +99,7 @@ describe('SSR: bundle renderer', () => {
       }
     }
     createRenderer('cache.js', renderer => {
-      const expected = '<div server-rendered="true">&sol;test</div>'
+      const expected = '<div server-rendered="true">/test</div>'
       const key = 'app::1'
       renderer.renderToString((err, res) => {
         expect(err).toBeNull()
@@ -142,7 +142,7 @@ describe('SSR: bundle renderer', () => {
       }
     }
     createRenderer('cache.js', renderer => {
-      const expected = '<div server-rendered="true">&sol;test</div>'
+      const expected = '<div server-rendered="true">/test</div>'
       const key = 'app::1'
       renderer.renderToString((err, res) => {
         expect(err).toBeNull()

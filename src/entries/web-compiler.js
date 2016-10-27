@@ -24,6 +24,7 @@ export function compile (
   const compiled = baseCompile(template, {
     modules,
     directives,
+    preserveWhitespace: options.preserveWhitespace,
     warn: msg => {
       errors.push(msg)
     }

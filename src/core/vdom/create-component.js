@@ -2,7 +2,7 @@
 
 import Vue from '../instance/index'
 import VNode from './vnode'
-import { normalizeChildren } from './helpers'
+import { normalizeChildren } from './helpers/index'
 import { activeInstance, callHook } from '../instance/lifecycle'
 import { resolveSlots } from '../instance/render'
 import { createElement } from './create-element'
@@ -113,9 +113,11 @@ function createFunctionalComponent (
       slots: () => resolveSlots(children, context)
     }
   )
-  vnode.functionalContext = context
-  if (data.slot) {
-    (vnode.data || (vnode.data = {})).slot = data.slot
+  if (vnode instanceof VNode) {
+    vnode.functionalContext = context
+    if (data.slot) {
+      (vnode.data || (vnode.data = {})).slot = data.slot
+    }
   }
   return vnode
 }
@@ -234,7 +236,7 @@ function resolveAsyncComponent (
 }
 
 function extractProps (data: VNodeData, Ctor: Class<Component>): ?Object {
-  // we are only extrating raw values here.
+  // we are only extracting raw values here.
   // validation and default values are handled in the child
   // component itself.
   const propOptions = Ctor.options.props
