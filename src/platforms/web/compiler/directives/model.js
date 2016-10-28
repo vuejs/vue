@@ -89,9 +89,7 @@ function genRadioModel (
   }
   const number = modifiers && modifiers.number
   let valueBinding = getBindingAttr(el, 'value') || 'null'
-  if (number) {
-    valueBinding = `_n(${valueBinding})`
-  }
+  valueBinding = number ? `_n(${valueBinding})` : valueBinding
   addProp(el, 'checked', `_q(${value},${valueBinding})`)
   addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true)
 }
@@ -124,12 +122,13 @@ function genDefaultModel (
   const needCompositionGuard = !lazy && type !== 'range'
   const isNative = el.tag === 'input' || el.tag === 'textarea'
 
-  const valueExpression = isNative
+  let valueExpression = isNative
     ? `$event.target.value${trim ? '.trim()' : ''}`
     : `$event`
-  let code = number || type === 'number'
-    ? genAssignmentCode(value, `_n(${valueExpression})`)
-    : genAssignmentCode(value, valueExpression)
+  valueExpression = number || type === 'number'
+    ? `_n(${valueExpression})`
+    : valueExpression
+  let code = genAssignmentCode(value, valueExpression)
   if (isNative && needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
   }
