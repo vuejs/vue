@@ -1,10 +1,17 @@
 /* @flow */
 
+import { warn } from 'core/util/index'
+
 /**
  * Add class with compatibility for SVG since classList is not supported on
  * SVG elements in IE
  */
-export function addClass (el: Element, cls: string) {
+export function addClass (el: Element, cls: ?string) {
+  if (!cls || cls.trim() === '') {
+    process.env.NODE_ENV !== 'production' && warn('Ignoring empty class name.')
+    return
+  }
+
   /* istanbul ignore else */
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
@@ -24,7 +31,12 @@ export function addClass (el: Element, cls: string) {
  * Remove class with compatibility for SVG since classList is not supported on
  * SVG elements in IE
  */
-export function removeClass (el: Element, cls: string) {
+export function removeClass (el: Element, cls: ?string) {
+  if (!cls || cls.trim() === '') {
+    process.env.NODE_ENV !== 'production' && warn('Ignoring empty class name.')
+    return
+  }
+
   /* istanbul ignore else */
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
