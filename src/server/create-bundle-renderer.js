@@ -21,6 +21,7 @@ export function createBundleRendererCreator (createRenderer) {
           renderStream.on('error', err => {
             res.emit('error', err)
           })
+          res.emit('app', app)
           renderStream.pipe(res)
         }).catch(err => {
           process.nextTick(() => {
