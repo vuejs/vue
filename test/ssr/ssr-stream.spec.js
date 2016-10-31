@@ -76,4 +76,28 @@ describe('SSR: renderToStream', () => {
     })
     stream.on('data', _ => _)
   })
+
+  it('should not mingle two components', done => {
+    const padding = (new Array(20000)).join('x')
+    const component1 = new Vue({
+      template: `<div>${padding}<div></div></div>`,
+      _scopeId: '_component1'
+    })
+    const component2 = new Vue({
+      template: `<div></div>`,
+      _scopeId: '_component2'
+    })
+    var stream1 = renderToStream(component1)
+    var stream2 = renderToStream(component2)
+    var res = ''
+    stream1.on('data', (text) => {
+      res += text.toString('utf-8').replace(/x/g, '')
+    })
+    stream1.on('end', () => {
+      expect(res).not.toContain('_component2')
+      done()
+    })
+    stream1.read(1)
+    stream2.read(1)
+  })
 })

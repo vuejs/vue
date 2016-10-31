@@ -3,7 +3,7 @@
 const MAX_STACK_DEPTH = 1000
 
 export function createWriteFunction (
-  write: Function,
+  write: (text: string, next: Function) => ?boolean,
   onError: Function
 ): Function {
   let stackDepth = 0

@@ -3,6 +3,7 @@
 import { escape } from 'he'
 import { compileToFunctions } from 'web/compiler/index'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
+import { noop } from 'shared/util'
 
 let warned = Object.create(null)
 const warnOnce = msg => {
@@ -43,6 +44,195 @@ const normalizeRender = vm => {
   }
 }
 
+function renderNode (node, isRoot, context) {
+  const { write, next } = context
+  if (node.componentOptions) {
+    // check cache hit
+    const Ctor = node.componentOptions.Ctor
+    const getKey = Ctor.options.serverCacheKey
+    const name = Ctor.options.name
+    const cache = context.cache
+    if (getKey && cache && name) {
+      const key = name + '::' + getKey(node.componentOptions.propsData)
+      const { has, get } = context
+      if (has) {
+        has(key, hit => {
+          if (hit && get) {
+            get(key, res => write(res, next))
+          } else {
+            renderComponentWithCache(node, isRoot, key, context)
+          }
+        })
+      } else if (get) {
+        get(key, res => {
+          if (res) {
+            write(res, next)
+          } else {
+            renderComponentWithCache(node, isRoot, key, context)
+          }
+        })
+      }
+    } else {
+      if (getKey && !cache) {
+        warnOnce(
+          `[vue-server-renderer] Component ${
+            Ctor.options.name || '(anonymous)'
+          } implemented serverCacheKey, ` +
+          'but no cache was provided to the renderer.'
+        )
+      }
+      if (getKey && !name) {
+        warnOnce(
+          `[vue-server-renderer] Components that implement "serverCacheKey" ` +
+          `must also define a unique "name" option.`
+        )
+      }
+      renderComponent(node, isRoot, context)
+    }
+  } else {
+    if (node.tag) {
+      renderElement(node, isRoot, context)
+    } else if (node.isComment) {
+      write(`<!--${node.text}-->`, next)
+    } else {
+      write(node.raw ? node.text : escape(String(node.text)), next)
+    }
+  }
+}
+
+function renderComponent (node, isRoot, context) {
+  const prevActive = context.activeInstance
+  const child = context.activeInstance = createComponentInstanceForVnode(node, context.activeInstance)
+  normalizeRender(child)
+  const childNode = child._render()
+  childNode.parent = node
+  context.renderStates.push({
+    type: 'Component',
+    prevActive
+  })
+  renderNode(childNode, isRoot, context)
+}
+
+function renderComponentWithCache (node, isRoot, key, context) {
+  const write = context.write
+  write.caching = true
+  const buffer = write.cacheBuffer
+  const bufferIndex = buffer.push('') - 1
+  context.renderStates.push({
+    type: 'ComponentWithCache',
+    buffer, bufferIndex, key
+  })
+  renderComponent(node, isRoot, context)
+}
+
+function renderElement (el, isRoot, context) {
+  if (isRoot) {
+    if (!el.data) el.data = {}
+    if (!el.data.attrs) el.data.attrs = {}
+    el.data.attrs['server-rendered'] = 'true'
+  }
+  const startTag = renderStartingTag(el, context)
+  const endTag = `</${el.tag}>`
+  const { write, next } = context
+  if (context.isUnaryTag(el.tag)) {
+    write(startTag, next)
+  } else if (!el.children || !el.children.length) {
+    write(startTag + endTag, next)
+  } else {
+    const children: Array<VNode> = el.children
+    context.renderStates.push({
+      type: 'Element',
+      rendered: 0,
+      total: children.length,
+      endTag, children
+    })
+    write(startTag, next)
+  }
+}
+
+function renderStartingTag (node: VNode, context) {
+  let markup = `<${node.tag}`
+  const { directives, modules } = context
+  if (node.data) {
+    // check directives
+    const dirs = node.data.directives
+    if (dirs) {
+      for (let i = 0; i < dirs.length; i++) {
+        const dirRenderer = directives[dirs[i].name]
+        if (dirRenderer) {
+          // directives mutate the node's data
+          // which then gets rendered by modules
+          dirRenderer(node, dirs[i])
+        }
+      }
+    }
+    // apply other modules
+    for (let i = 0; i < modules.length; i++) {
+      const res = modules[i](node)
+      if (res) {
+        markup += res
+      }
+    }
+  }
+  // attach scoped CSS ID
+  let scopeId
+  const activeInstance = context.activeInstance
+  if (activeInstance &&
+      activeInstance !== node.context &&
+      (scopeId = activeInstance.$options._scopeId)) {
+    markup += ` ${scopeId}`
+  }
+  while (node) {
+    if ((scopeId = node.context.$options._scopeId)) {
+      markup += ` ${scopeId}`
+    }
+    node = node.parent
+  }
+  return markup + '>'
+}
+
+const nextFactory = context => function next () {
+  const lastState = context.renderStates.pop()
+  if (!lastState) {
+    context.done()
+    // cleanup context, avoid leakage
+    context = (null: any)
+    return
+  }
+  switch (lastState.type) {
+    case 'Component':
+      context.activeInstance = lastState.prevActive
+      next()
+      break
+    case 'Element':
+      const { children, total } = lastState
+      const rendered = lastState.rendered++
+      if (rendered < total) {
+        context.renderStates.push(lastState)
+        renderNode(children[rendered], false, context)
+      } else {
+        context.write(lastState.endTag, next)
+      }
+      break
+    case 'ComponentWithCache':
+      const { buffer, bufferIndex, key } = lastState
+      const result = buffer[bufferIndex]
+      context.cache.set(key, result)
+      if (bufferIndex === 0) {
+        // this is a top-level cached component,
+        // exit caching mode.
+        context.write.caching = false
+      } else {
+        // parent component is also being cached,
+        // merge self into parent's result
+        buffer[bufferIndex - 1] += result
+      }
+      buffer.length = bufferIndex
+      next()
+      break
+  }
+}
+
 export function createRenderFunction (
   modules: Array<Function>,
   directives: Object,
@@ -56,181 +246,22 @@ export function createRenderFunction (
   const get = cache && normalizeAsync(cache, 'get')
   const has = cache && normalizeAsync(cache, 'has')
 
-  // used to track and apply scope ids
-  let activeInstance: any
-
-  function renderNode (
-    node: VNode,
-    write: Function,
-    next: Function,
-    isRoot: boolean
-  ) {
-    if (node.componentOptions) {
-      // check cache hit
-      const Ctor = node.componentOptions.Ctor
-      const getKey = Ctor.options.serverCacheKey
-      const name = Ctor.options.name
-      if (getKey && cache && name) {
-        const key = name + '::' + getKey(node.componentOptions.propsData)
-        if (has) {
-          has(key, hit => {
-            if (hit && get) {
-              get(key, res => write(res, next))
-            } else {
-              renderComponentWithCache(node, write, next, isRoot, cache, key)
-            }
-          })
-        } else if (get) {
-          get(key, res => {
-            if (res) {
-              write(res, next)
-            } else {
-              renderComponentWithCache(node, write, next, isRoot, cache, key)
-            }
-          })
-        }
-      } else {
-        if (getKey && !cache) {
-          warnOnce(
-            `[vue-server-renderer] Component ${
-              Ctor.options.name || '(anonymous)'
-            } implemented serverCacheKey, ` +
-            'but no cache was provided to the renderer.'
-          )
-        }
-        if (getKey && !name) {
-          warnOnce(
-            `[vue-server-renderer] Components that implement "serverCacheKey" ` +
-            `must also define a unique "name" option.`
-          )
-        }
-        renderComponent(node, write, next, isRoot)
-      }
-    } else {
-      if (node.tag) {
-        renderElement(node, write, next, isRoot)
-      } else if (node.isComment) {
-        write(`<!--${node.text}-->`, next)
-      } else {
-        write(node.raw ? node.text : escape(String(node.text)), next)
-      }
-    }
-  }
-
-  function renderComponent (node, write, next, isRoot) {
-    const prevActive = activeInstance
-    const child = activeInstance = createComponentInstanceForVnode(node, activeInstance)
-    normalizeRender(child)
-    const childNode = child._render()
-    childNode.parent = node
-    renderNode(childNode, write, () => {
-      activeInstance = prevActive
-      next()
-    }, isRoot)
-  }
-
-  function renderComponentWithCache (node, write, next, isRoot, cache, key) {
-    write.caching = true
-    const buffer = write.cacheBuffer
-    const bufferIndex = buffer.push('') - 1
-    renderComponent(node, write, () => {
-      const result = buffer[bufferIndex]
-      cache.set(key, result)
-      if (bufferIndex === 0) {
-        // this is a top-level cached component,
-        // exit caching mode.
-        write.caching = false
-      } else {
-        // parent component is also being cached,
-        // merge self into parent's result
-        buffer[bufferIndex - 1] += result
-      }
-      buffer.length = bufferIndex
-      next()
-    }, isRoot)
-  }
-
-  function renderElement (el, write, next, isRoot) {
-    if (isRoot) {
-      if (!el.data) el.data = {}
-      if (!el.data.attrs) el.data.attrs = {}
-      el.data.attrs['server-rendered'] = 'true'
-    }
-    const startTag = renderStartingTag(el)
-    const endTag = `</${el.tag}>`
-    if (isUnaryTag(el.tag)) {
-      write(startTag, next)
-    } else if (!el.children || !el.children.length) {
-      write(startTag + endTag, next)
-    } else {
-      const children: Array<VNode> = el.children || []
-      write(startTag, () => {
-        const total = children.length
-        let rendered = 0
-
-        function renderChild (child: VNode) {
-          renderNode(child, write, () => {
-            rendered++
-            if (rendered < total) {
-              renderChild(children[rendered])
-            } else {
-              write(endTag, next)
-            }
-          }, false)
-        }
-
-        renderChild(children[0])
-      })
-    }
-  }
-
-  function renderStartingTag (node: VNode) {
-    let markup = `<${node.tag}`
-    if (node.data) {
-      // check directives
-      const dirs = node.data.directives
-      if (dirs) {
-        for (let i = 0; i < dirs.length; i++) {
-          const dirRenderer = directives[dirs[i].name]
-          if (dirRenderer) {
-            // directives mutate the node's data
-            // which then gets rendered by modules
-            dirRenderer(node, dirs[i])
-          }
-        }
-      }
-      // apply other modules
-      for (let i = 0; i < modules.length; i++) {
-        const res = modules[i](node)
-        if (res) {
-          markup += res
-        }
-      }
-    }
-    // attach scoped CSS ID
-    let scopeId
-    if (activeInstance &&
-        activeInstance !== node.context &&
-        (scopeId = activeInstance.$options._scopeId)) {
-      markup += ` ${scopeId}`
-    }
-    while (node) {
-      if ((scopeId = node.context.$options._scopeId)) {
-        markup += ` ${scopeId}`
-      }
-      node = node.parent
-    }
-    return markup + '>'
-  }
-
   return function render (
     component: Component,
     write: (text: string, next: Function) => void,
     done: Function
   ) {
     warned = Object.create(null)
-    activeInstance = component
+    const context = {
+      activeInstance: component,
+      renderStates: [],
+      next: noop, // for flow
+      write, done,
+      isUnaryTag, modules, directives,
+      cache, get, has
+    }
+    context.next = nextFactory(context)
     normalizeRender(component)
-    renderNode(component._render(), write, done, true)
+    renderNode(component._render(), true, context)
   }
 }

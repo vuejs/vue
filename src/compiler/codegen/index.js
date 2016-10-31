@@ -53,9 +53,10 @@ function genElement (el: ASTElement): string {
     // component or element
     let code
     if (el.component) {
-      code = genComponent(el)
+      code = genComponent(el.component, el)
     } else {
-      const data = genData(el)
+      const data = el.plain ? undefined : genData(el)
+
       const children = el.inlineTemplate ? null : genChildren(el)
       code = `_h('${el.tag}'${
         data ? `,${data}` : '' // data
@@ -95,11 +96,7 @@ function genFor (el: any): string {
     '})'
 }
 
-function genData (el: ASTElement): string | void {
-  if (el.plain) {
-    return
-  }
-
+function genData (el: ASTElement): string {
   let data = '{'
 
   // directives first.
@@ -229,9 +226,10 @@ function genSlot (el: ASTElement): string {
     : `_t(${slotName})`
 }
 
-function genComponent (el: any): string {
+// componentName is el.component, take it as argument to shun flow's pessimistic refinement
+function genComponent (componentName, el): string {
   const children = el.inlineTemplate ? null : genChildren(el)
-  return `_h(${el.component},${genData(el)}${
+  return `_h(${componentName},${genData(el)}${
     children ? `,${children}` : ''
   })`
 }
