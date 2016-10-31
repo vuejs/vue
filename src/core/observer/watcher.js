@@ -238,21 +238,22 @@ function traverse (val: any) {
 function _traverse (val: any, seen: Set) {
   let i, keys
   const isA = Array.isArray(val)
-  if ((isA || isObject(val)) && Object.isExtensible(val)) {
-    if (val.__ob__) {
-      const depId = val.__ob__.dep.id
-      if (seen.has(depId)) {
-        return
-      }
-      seen.add(depId)
+  if ((!isA && !isObject(val)) || !Object.isExtensible(val)) {
+    return
+  }
+  if (val.__ob__) {
+    const depId = val.__ob__.dep.id
+    if (seen.has(depId)) {
+      return
     }
-    if (isA) {
-      i = val.length
-      while (i--) _traverse(val[i], seen)
-    } else {
-      keys = Object.keys(val)
-      i = keys.length
-      while (i--) _traverse(val[keys[i]], seen)
-    }
+    seen.add(depId)
+  }
+  if (isA) {
+    i = val.length
+    while (i--) _traverse(val[i], seen)
+  } else {
+    keys = Object.keys(val)
+    i = keys.length
+    while (i--) _traverse(val[keys[i]], seen)
   }
 }
