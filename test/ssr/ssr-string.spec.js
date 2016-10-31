@@ -88,7 +88,7 @@ describe('SSR: renderToString', () => {
 
   it('custom component style', done => {
     renderVmWithOptions({
-      template: '<comp :style="style"></comp>',
+      template: '<section><comp :style="style"></comp></section>',
       data: {
         style: 'color:red'
       },
@@ -99,7 +99,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="color:red"></div>'
+        '<section server-rendered="true"><div style="color:red"></div></section>'
       )
       done()
     })

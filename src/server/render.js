@@ -184,8 +184,19 @@ export function createRenderFunction (
     }
   }
 
+  function hasAncestorData (node: VNode) {
+    const parentNode = node.parent
+    return parentNode && (parentNode.data || hasAncestorData(parentNode))
+  }
+
   function renderStartingTag (node: VNode) {
     let markup = `<${node.tag}`
+
+    // construct synthetic data for module processing
+    // because modules like style also produce code by parent VNode data
+    if (!node.data && hasAncestorData(node)) {
+      node.data = {}
+    }
     if (node.data) {
       // check directives
       const dirs = node.data.directives
