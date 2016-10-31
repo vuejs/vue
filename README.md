@@ -21,10 +21,6 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
     <img width="300px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tde.png">
   </a>
   <br><br>
-  <a href="http://www.itunescn.com/" style="">
-    <img width="120px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
-  </a>
-  <br><br>
   <a href="https://jsfiddle.net/">
     <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
   </a>
@@ -55,6 +51,14 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
   <br><br>
   <a href="https://www.trisoft.ro/" target="_blank">
     <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/trisoft.png">
+  </a>
+  <br><br>
+  <a href="https://www.2mhost.com/" target="_blank">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/2mhost.png">
+  </a>
+  <br><br>
+  <a href="https://vuejobs.com/?ref_source=vue" target="_blank">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
   </a>
 </p>
 
