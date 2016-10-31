@@ -4,7 +4,7 @@ import { cached } from 'shared/util'
 import { parseFilters } from './filter-parser'
 
 const defaultTagRE = /\{\{((?:.|\n)+?)\}\}/g
-const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
+const regexEscapeRE = /[-.*+?^${}()|[\]/\\]/g
 
 const buildRegex = cached(delimiters => {
   const open = delimiters[0].replace(regexEscapeRE, '\\$&')

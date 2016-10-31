@@ -13,7 +13,7 @@ import { makeMap, no } from 'shared/util'
 import { isNonPhrasingTag, canBeLeftOpenTag } from 'web/util/index'
 
 // Regular Expressions for parsing tags and attributes
-const singleAttrIdentifier = /([^\s"'<>\/=]+)/
+const singleAttrIdentifier = /([^\s"'<>/=]+)/
 const singleAttrAssign = /(?:=)/
 const singleAttrValues = [
   // attr value double quotes
@@ -158,7 +158,7 @@ export function parseHTML (html, options) {
         if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
           text = text
             .replace(/<!--([\s\S]*?)-->/g, '$1')
-            .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1')
         }
         if (options.chars) {
           options.chars(text)

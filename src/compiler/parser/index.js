@@ -21,7 +21,7 @@ export const forIteratorRE = /\(([^,]*),([^,]*)(?:,([^,]*))?\)/
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
 const argRE = /:(.*)$/
-const modifierRE = /\.[^\.]+/g
+const modifierRE = /\.[^.]+/g
 const specialNewlineRE = /\u2028|\u2029/g
 
 const decodeHTMLCached = cached(decode)
