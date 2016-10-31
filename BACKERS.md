@@ -48,7 +48,7 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/2mhost.png">
 </a>
 
-<a href="https://vuejobs.com/?ref_source=vue" target="_blank">
+<a href="https://vuejsjob.com/?ref=vuejs" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
 </a>
 
