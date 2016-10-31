@@ -224,9 +224,9 @@ function genText (text: ASTText | ASTExpression): string {
 function genSlot (el: ASTElement): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el)
-  return children
-    ? `_t(${slotName},${children})`
-    : `_t(${slotName})`
+  return `_t(${slotName}${
+    children ? `,${children}` : ''
+  })`
 }
 
 function genComponent (el: any): string {
