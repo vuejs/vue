@@ -1,14 +1,12 @@
 /* @flow */
 
-import { warn } from 'core/util/index'
-
 /**
  * Add class with compatibility for SVG since classList is not supported on
  * SVG elements in IE
  */
 export function addClass (el: Element, cls: ?string) {
-  if (!cls || cls.trim() === '') {
-    process.env.NODE_ENV !== 'production' && warn('Ignoring empty class name.')
+  /* istanbul ignore if */
+  if (!cls || !cls.trim()) {
     return
   }
 
@@ -32,8 +30,8 @@ export function addClass (el: Element, cls: ?string) {
  * SVG elements in IE
  */
 export function removeClass (el: Element, cls: ?string) {
-  if (!cls || cls.trim() === '') {
-    process.env.NODE_ENV !== 'production' && warn('Ignoring empty class name.')
+  /* istanbul ignore if */
+  if (!cls || !cls.trim()) {
     return
   }
 

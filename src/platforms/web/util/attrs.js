@@ -33,13 +33,14 @@ const isAttr = makeMap(
 )
 
 /* istanbul ignore next */
-export const isRenderableAttr = (name: string): boolean => {
+const isRenderableAttr = (name: string): boolean => {
   return (
     isAttr(name) ||
     name.indexOf('data-') === 0 ||
     name.indexOf('aria-') === 0
   )
 }
+export { isRenderableAttr }
 
 export const propsToAttrMap = {
   acceptCharset: 'accept-charset',

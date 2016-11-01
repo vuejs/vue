@@ -2,6 +2,16 @@
 
 import { cached, extend, camelize, toObject } from 'shared/util'
 
+const cssVarRE = /^--/
+const setProp = (el, name, val) => {
+  /* istanbul ignore if */
+  if (cssVarRE.test(name)) {
+    el.style.setProperty(name, val)
+  } else {
+    el.style[normalize(name)] = val
+  }
+}
+
 const prefixes = ['Webkit', 'Moz', 'ms']
 
 let testEl
@@ -50,14 +60,14 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
   for (name in oldStyle) {
     if (style[name] == null) {
-      el.style[normalize(name)] = ''
+      setProp(el, name, '')
     }
   }
   for (name in style) {
     cur = style[name]
     if (cur !== oldStyle[name]) {
       // ie9 setting to null has no effect, must use empty string
-      el.style[normalize(name)] = cur == null ? '' : cur
+      setProp(el, name, cur == null ? '' : cur)
     }
   }
 }

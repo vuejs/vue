@@ -30,6 +30,7 @@ export default function parseModel (val: string): Object {
 
   while (!eof()) {
     chr = next()
+    /* istanbul ignore if */
     if (isStringStart(chr)) {
       parseString(chr)
     } else if (chr === 0x5B) {
