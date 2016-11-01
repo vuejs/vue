@@ -22,10 +22,17 @@ const builds = {
     format: 'cjs',
     banner
   },
-  // Minified runtime, only for filze size monitoring
-  'web-runtime-prod': {
+  // runtime-only build for CDN
+  'web-runtime-cdn-dev': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
-    dest: path.resolve(__dirname, '../dist/vue.common.min.js'),
+    dest: path.resolve(__dirname, '../dist/vue.runtime.js'),
+    format: 'umd',
+    banner
+  },
+  // runtime-only production build for CDN
+  'web-runtime-cdn-prod': {
+    entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
+    dest: path.resolve(__dirname, '../dist/vue.runtime.min.js'),
     format: 'umd',
     env: 'production',
     banner

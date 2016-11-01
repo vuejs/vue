@@ -6,6 +6,8 @@
   "typings": "types/index.d.ts",
   "files": [
     "dist/vue.common.js",
+    "dist/vue.runtime.js",
+    "dist/vue.runtime.min.js",
     "dist/vue.js",
     "dist/vue.min.js",
     "src",
