@@ -125,6 +125,27 @@ describe('Directive v-model radio', () => {
     }).then(done)
   })
 
+  it('.number modifier', () => {
+    const vm = new Vue({
+      data: {
+        test: 1
+      },
+      template: `
+        <div>
+          <input type="radio" value="1" v-model="test" name="test">
+          <input type="radio" value="2" v-model.number="test" name="test">
+        </div>
+      `
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
+    vm.$el.children[1].click()
+    expect(vm.$el.children[0].checked).toBe(false)
+    expect(vm.$el.children[1].checked).toBe(true)
+    expect(vm.test).toBe(2)
+  })
+
   it('warn inline checked', () => {
     const vm = new Vue({
       template: `<input v-model="test" type="radio" value="1" checked>`,
