@@ -230,30 +230,30 @@ export default class Watcher {
  * is collected as a "deep" dependency.
  */
 const seenObjects = new Set()
-function traverse (val: any, seen?: Set) {
+function traverse (val: any) {
+  seenObjects.clear()
+  _traverse(val, seenObjects)
+}
+
+function _traverse (val: any, seen: Set) {
   let i, keys
-  if (!seen) {
-    seen = seenObjects
-    seen.clear()
-  }
   const isA = Array.isArray(val)
-  const isO = isObject(val)
-  if ((isA || isO) && Object.isExtensible(val)) {
-    if (val.__ob__) {
-      const depId = val.__ob__.dep.id
-      if (seen.has(depId)) {
-        return
-      } else {
-        seen.add(depId)
-      }
+  if ((!isA && !isObject(val)) || !Object.isExtensible(val)) {
+    return
+  }
+  if (val.__ob__) {
+    const depId = val.__ob__.dep.id
+    if (seen.has(depId)) {
+      return
     }
-    if (isA) {
-      i = val.length
-      while (i--) traverse(val[i], seen)
-    } else if (isO) {
-      keys = Object.keys(val)
-      i = keys.length
-      while (i--) traverse(val[keys[i]], seen)
-    }
+    seen.add(depId)
+  }
+  if (isA) {
+    i = val.length
+    while (i--) _traverse(val[i], seen)
+  } else {
+    keys = Object.keys(val)
+    i = keys.length
+    while (i--) _traverse(val[keys[i]], seen)
   }
 }
