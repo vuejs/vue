@@ -367,7 +367,7 @@ function processAttrs (el) {
       }
       if (bindRE.test(name)) { // v-bind
         if (process.env.NODE_ENV !== 'production') {
-          checkVBindingVal(name, value)
+          checkVBindingVal(rawName, value)
         }
         name = name.replace(bindRE, '')
         if (modifiers && modifiers.prop) {
