@@ -6,7 +6,7 @@
 import { looseEqual, looseIndexOf } from 'shared/util'
 import { warn, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
 
-const modelableTagRE = /^input|select|textarea|vue-component-[0-9]+(-[0-9a-zA-Z_\-]*)?$/
+const modelableTagRE = /^input|select|textarea|vue-component-[0-9]+(-[0-9a-zA-Z_-]*)?$/
 
 /* istanbul ignore if */
 if (isIE9) {

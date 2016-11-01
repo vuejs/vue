@@ -21,7 +21,7 @@ export const forIteratorRE = /\(([^,]*),([^,]*)(?:,([^,]*))?\)/
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
 const argRE = /:(.*)$/
-const modifierRE = /\.[^\.]+/g
+const modifierRE = /\.[^.]+/g
 const specialNewlineRE = /\u2028|\u2029/g
 
 const decodeHTMLCached = cached(decode)
@@ -399,7 +399,7 @@ function processAttrs (el) {
         if (expression) {
           warn(
             `${name}="${value}": ` +
-            'Interpolation inside attributes has been deprecated. ' +
+            'Interpolation inside attributes has been removed. ' +
             'Use v-bind or the colon shorthand instead. For example, ' +
             'instead of <div id="{{ val }}">, use <div :id="val">.'
           )
