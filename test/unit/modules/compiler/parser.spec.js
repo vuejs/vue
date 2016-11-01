@@ -280,6 +280,11 @@ describe('parser', () => {
     expect(ast.props[0].value).toBe('msg')
   })
 
+  it('warn v-bind with literal', () => {
+    parse('<my-component :value="{}"></my-component>', baseOptions)
+    expect('You are using v-bind with literal').toHaveBeenWarned()
+  })
+
   it('attribute with v-on', () => {
     const ast = parse('<input type="text" name="field1" :value="msg" @input="onInput">', baseOptions)
     expect(ast.events.input.value).toBe('onInput')
