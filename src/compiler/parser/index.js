@@ -416,7 +416,7 @@ function processAttrs (el) {
   }
 }
 
-function checkVBindingVal (name, value) {
+function checkVBindingVal (name: string, value: string): void {
   let func
 
   // there may be template error, leave it to the compiler detectErrors
