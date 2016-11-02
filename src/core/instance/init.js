@@ -66,10 +66,13 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
   if (Ctor.super) {
     const superOptions = Ctor.super.options
     const cachedSuperOptions = Ctor.superOptions
+    const extendOptions = Ctor.extendOptions
     if (superOptions !== cachedSuperOptions) {
       // super option changed
       Ctor.superOptions = superOptions
-      options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
+      extendOptions.render = options.render
+      extendOptions.staticRenderFns = options.staticRenderFns
+      options = Ctor.options = mergeOptions(superOptions, extendOptions)
       if (options.name) {
         options.components[options.name] = Ctor
       }

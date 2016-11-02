@@ -56,4 +56,18 @@ describe('Global API: mixin', () => {
 
     expect(vm.$el.textContent).toBe('hi')
   })
+
+  // vue-loader#433
+  it('should not drop late-set render functions', () => {
+    const Test = Vue.extend({})
+    Test.options.render = h => h('div', 'hello')
+
+    Vue.mixin({})
+
+    const vm = new Vue({
+      render: h => h(Test)
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('hello')
+  })
 })
