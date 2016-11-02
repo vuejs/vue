@@ -11,8 +11,8 @@ declare namespace Vue {
   export type Component = Options.Component;
   export type AsyncComponent = Options.AsyncComponent;
   export type ComponentOptions<V extends Vue> = Options.ComponentOptions<V>;
-  export type FunctionalComponentOptions = Options.FunctionalComponentOptions;
-  export type RenderContext = Options.RenderContext;
+  export type FunctionalComponentOptions<P, S> = Options.FunctionalComponentOptions<P, S>;
+  export type RenderContext<P, S> = Options.RenderContext<P, S>;
   export type PropOptions = Options.PropOptions;
   export type ComputedOptions<V extends Vue> = Options.ComputedOptions<V>;
   export type WatchHandler<V extends Vue> = Options.WatchHandler<V>;

@@ -171,13 +171,13 @@ Vue.component('functional-component', {
     context.parent;
     return createElement("div", {}, context.children);
   }
-} as FunctionalComponentOptions);
+} as FunctionalComponentOptions<{}, {}>);
 
 Vue.component("async-component", (resolve, reject) => {
   setTimeout(() => {
     resolve(Vue.component("component"));
   }, 0);
   return new Promise((resolve) => {
-    resolve({ functional: true } as FunctionalComponentOptions);
+    resolve({ functional: true } as FunctionalComponentOptions<{}, {}>);
   })
 });
