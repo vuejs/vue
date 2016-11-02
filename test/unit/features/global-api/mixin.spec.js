@@ -37,4 +37,23 @@ describe('Global API: mixin', () => {
     })
     expect(calls).toEqual(['hello global', 'hello local'])
   })
+
+  // #3957
+  it('should work for global props', () => {
+    const Test = Vue.extend({
+      template: `<div>{{ prop }}</div>`
+    })
+
+    Vue.mixin({
+      props: ['prop']
+    })
+
+    // test child component
+    const vm = new Vue({
+      template: '<test prop="hi"></test>',
+      components: { Test }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('hi')
+  })
 })

@@ -24,7 +24,7 @@ export function initMixin (Vue: Class<Component>) {
       initInternalComponent(vm, options)
     } else {
       vm.$options = mergeOptions(
-        resolveConstructorOptions(vm),
+        resolveConstructorOptions(vm.constructor),
         options || {},
         vm
       )
@@ -44,37 +44,36 @@ export function initMixin (Vue: Class<Component>) {
     callHook(vm, 'created')
     initRender(vm)
   }
+}
 
-  function initInternalComponent (vm: Component, options: InternalComponentOptions) {
-    const opts = vm.$options = Object.create(resolveConstructorOptions(vm))
-    // doing this because it's faster than dynamic enumeration.
-    opts.parent = options.parent
-    opts.propsData = options.propsData
-    opts._parentVnode = options._parentVnode
-    opts._parentListeners = options._parentListeners
-    opts._renderChildren = options._renderChildren
-    opts._componentTag = options._componentTag
-    if (options.render) {
-      opts.render = options.render
-      opts.staticRenderFns = options.staticRenderFns
-    }
+function initInternalComponent (vm: Component, options: InternalComponentOptions) {
+  const opts = vm.$options = Object.create(vm.constructor.options)
+  // doing this because it's faster than dynamic enumeration.
+  opts.parent = options.parent
+  opts.propsData = options.propsData
+  opts._parentVnode = options._parentVnode
+  opts._parentListeners = options._parentListeners
+  opts._renderChildren = options._renderChildren
+  opts._componentTag = options._componentTag
+  if (options.render) {
+    opts.render = options.render
+    opts.staticRenderFns = options.staticRenderFns
   }
+}
 
-  function resolveConstructorOptions (vm: Component) {
-    const Ctor = vm.constructor
-    let options = Ctor.options
-    if (Ctor.super) {
-      const superOptions = Ctor.super.options
-      const cachedSuperOptions = Ctor.superOptions
-      if (superOptions !== cachedSuperOptions) {
-        // super option changed
-        Ctor.superOptions = superOptions
-        options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
-        if (options.name) {
-          options.components[options.name] = Ctor
-        }
+export function resolveConstructorOptions (Ctor: Class<Component>) {
+  let options = Ctor.options
+  if (Ctor.super) {
+    const superOptions = Ctor.super.options
+    const cachedSuperOptions = Ctor.superOptions
+    if (superOptions !== cachedSuperOptions) {
+      // super option changed
+      Ctor.superOptions = superOptions
+      options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
+      if (options.name) {
+        options.components[options.name] = Ctor
       }
     }
-    return options
   }
+  return options
 }
