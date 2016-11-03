@@ -375,4 +375,13 @@ describe('parser', () => {
     expect(code.children[2].type).toBe(3)
     expect(code.children[2].text).toBe('\n  ')
   })
+
+  it('forgivingly handle < in plain text', () => {
+    const options = extend({}, baseOptions)
+    const ast = parse('<p>1 < 2 < 3</p>', options)
+    expect(ast.tag).toBe('p')
+    expect(ast.children.length).toBe(1)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('1 < 2 < 3')
+  })
 })

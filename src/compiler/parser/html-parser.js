@@ -91,7 +91,7 @@ export function parseHTML (html, options) {
     last = html
     // Make sure we're not in a script or style element
     if (!lastTag || !isSpecialTag(lastTag, options.sfc, stack)) {
-      const textEnd = html.indexOf('<')
+      let textEnd = html.indexOf('<')
       if (textEnd === 0) {
         // Comment:
         if (/^<!--/.test(html)) {
@@ -137,16 +137,24 @@ export function parseHTML (html, options) {
         }
       }
 
-      let text
-      if (textEnd >= 0) {
+      let text, rest
+      if (textEnd > 0) {
+        rest = html.slice(textEnd)
+        while (!startTagOpen.test(rest) && !endTag.test(rest)) {
+          // < in plain text, be forgiving and treat it as text
+          textEnd += rest.indexOf('<', 1)
+          rest = html.slice(textEnd)
+        }
         text = html.substring(0, textEnd)
         advance(textEnd)
-      } else {
+      }
+
+      if (textEnd < 0) {
         text = html
         html = ''
       }
 
-      if (options.chars) {
+      if (options.chars && text) {
         options.chars(text)
       }
     } else {
