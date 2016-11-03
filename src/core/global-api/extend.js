@@ -30,7 +30,7 @@ export function initExtend (Vue: GlobalAPI) {
           'can only contain alphanumeric characaters and the hyphen.'
         )
       }
-      name = null      
+      name = null
     }
     const Sub = function VueComponent (options) {
       this._init(options)
