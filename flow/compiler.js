@@ -151,4 +151,5 @@ declare type SFCBlock = {
   lang?: string;
   src?: string;
   scoped?: boolean;
+  module?: string | boolean;
 }
