@@ -2,7 +2,7 @@ import { warn } from './debug'
 import { resolveAsset } from './options'
 import { getBindAttr } from './dom'
 
-export const commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer)$/i
+export const commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer|main)$/i
 export const reservedTagRE = /^(slot|partial|component)$/i
 
 let isUnknownElement
