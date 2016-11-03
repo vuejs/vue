@@ -5140,9 +5140,6 @@ function parseComponent (
       if (attr.name === 'scoped') {
         block.scoped = true;
       }
-      if (attr.name === 'module') {
-        block.module = attr.value || true;
-      }
       if (attr.name === 'src') {
         block.src = attr.value;
       }
