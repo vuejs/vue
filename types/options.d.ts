@@ -5,7 +5,7 @@ type Constructor = {
   new (...args: any[]): any;
 }
 
-export type Component = typeof Vue | ComponentOptions<Vue> | FunctionalComponentOptions;
+export type Component = typeof Vue | ComponentOptions<Vue> | FunctionalComponentOptions<any, any>;
 export type AsyncComponent = (
   resolve: (component: Component) => void,
   reject: (reason?: any) => void
@@ -45,17 +45,17 @@ export interface ComponentOptions<V extends Vue> {
   delimiters?: [string, string];
 }
 
-export interface FunctionalComponentOptions {
+export interface FunctionalComponentOptions<P, S> {
   props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
   functional: boolean;
-  render(this: never, createElement: CreateElement, context: RenderContext): VNode;
+  render(this: never, createElement: CreateElement, context: RenderContext<P, S>): VNode;
   name?: string;
 }
 
-export interface RenderContext {
-  props: any;
+export interface RenderContext<P, S> {
+  props: P;
   children: VNode[];
-  slots: any;
+  slots(): S;
   data: VNodeData;
   parent: Vue;
 }
