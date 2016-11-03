@@ -200,6 +200,7 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
 function normalizeComponents (options: Object) {
   if (options.components) {
     const components = options.components
+    const normalized = options.components = {}
     let def
     for (const key in components) {
       const lower = key.toLowerCase()
@@ -211,9 +212,7 @@ function normalizeComponents (options: Object) {
         continue
       }
       def = components[key]
-      if (isPlainObject(def)) {
-        components[key] = Vue.extend(def)
-      }
+      normalized[key] = isPlainObject(def) ? Vue.extend(def) : def
     }
   }
 }
