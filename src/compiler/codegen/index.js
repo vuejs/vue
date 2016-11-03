@@ -10,6 +10,7 @@ let transforms
 let dataGenFns
 let platformDirectives
 let staticRenderFns
+let onceCount
 let currentOptions
 
 export function generate (
@@ -22,6 +23,8 @@ export function generate (
   // save previous staticRenderFns so generate calls can be nested
   const prevStaticRenderFns: Array<string> = staticRenderFns
   const currentStaticRenderFns: Array<string> = staticRenderFns = []
+  const prevOnceCount = onceCount
+  onceCount = 0
   currentOptions = options
   warn = options.warn || baseWarn
   transforms = pluckModuleFunction(options.modules, 'transformCode')
@@ -29,6 +32,7 @@ export function generate (
   platformDirectives = options.directives || {}
   const code = ast ? genElement(ast) : '_h("div")'
   staticRenderFns = prevStaticRenderFns
+  onceCount = prevOnceCount
   return {
     render: `with(this){return ${code}}`,
     staticRenderFns: currentStaticRenderFns
@@ -37,10 +41,9 @@ export function generate (
 
 function genElement (el: ASTElement): string {
   if (el.staticRoot && !el.staticProcessed) {
-    // hoist static sub-trees out
-    el.staticProcessed = true
-    staticRenderFns.push(`with(this){return ${genElement(el)}}`)
-    return `_m(${staticRenderFns.length - 1}${el.staticInFor ? ',true' : ''})`
+    return genStatic(el)
+  } else if (el.once && !el.onceProcessed) {
+    return genOnce(el)
   } else if (el.for && !el.forProcessed) {
     return genFor(el)
   } else if (el.if && !el.ifProcessed) {
@@ -69,6 +72,38 @@ function genElement (el: ASTElement): string {
       code = transforms[i](el, code)
     }
     return code
+  }
+}
+
+// hoist static sub-trees out
+function genStatic (el: ASTElement): string {
+  el.staticProcessed = true
+  staticRenderFns.push(`with(this){return ${genElement(el)}}`)
+  return `_m(${staticRenderFns.length - 1}${el.staticInFor ? ',true' : ''})`
+}
+
+// v-once
+function genOnce (el: ASTElement): string {
+  el.onceProcessed = true
+  if (el.staticInFor) {
+    let key = ''
+    let parent = el.parent
+    while (parent) {
+      if (parent.for) {
+        key = parent.key
+        break
+      }
+      parent = parent.parent
+    }
+    if (!key) {
+      process.env.NODE_ENV !== 'production' && warn(
+        `v-once can only be used inside v-for that is keyed. `
+      )
+      return genElement(el)
+    }
+    return `_o(${genElement(el)},${onceCount++}${key ? `,${key}` : ``})`
+  } else {
+    return genStatic(el)
   }
 }
 

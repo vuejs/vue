@@ -115,18 +115,36 @@ export function renderMixin (Vue: Class<Component>) {
     }
     // otherwise, render a fresh tree.
     tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy)
+    markStatic(tree, `__static__${index}`, false)
+    return tree
+  }
+
+  // mark node as static (v-once)
+  Vue.prototype._o = function markOnce (
+    tree: VNode | Array<VNode>,
+    index: number,
+    key: string
+  ) {
+    markStatic(tree, `__once__${index}${key ? `_${key}` : ``}`, true)
+    return tree
+  }
+
+  function markStatic (tree, key, isOnce) {
     if (Array.isArray(tree)) {
       for (let i = 0; i < tree.length; i++) {
-        if (typeof tree[i] !== 'string') {
-          tree[i].isStatic = true
-          tree[i].key = `__static__${index}_${i}`
+        if (tree[i] && typeof tree[i] !== 'string') {
+          markStaticNode(tree[i], `${key}_${i}`, isOnce)
         }
       }
     } else {
-      tree.isStatic = true
-      tree.key = `__static__${index}`
+      markStaticNode(tree, key, isOnce)
     }
-    return tree
+  }
+
+  function markStaticNode (node, key, isOnce) {
+    node.isStatic = true
+    node.key = key
+    node.isOnce = isOnce
   }
 
   // filter resolution helper

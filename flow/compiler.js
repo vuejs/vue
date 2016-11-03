@@ -117,6 +117,7 @@ declare type ASTElement = {
 
   forbidden?: true;
   once?: true;
+  onceProcessed?: boolean;
   wrapData?: (code: string) => string;
 }
 

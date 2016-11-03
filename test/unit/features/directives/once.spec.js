@@ -105,4 +105,60 @@ describe('Directive v-once', () => {
       expect(vm.$el.textContent).toBe('123')
     }).then(done)
   })
+
+  it('should work inside v-for', done => {
+    const vm = new Vue({
+      data: {
+        list: [
+          { id: 0, text: 'a' },
+          { id: 1, text: 'b' },
+          { id: 2, text: 'c' }
+        ]
+      },
+      template: `
+        <div>
+          <div v-for="i in list" :key="i.id">
+            <div>
+              <span v-once>{{ i.text }}</span><span>{{ i.text }}</span>
+            </div>
+          </div>
+        </div>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('aabbcc')
+
+    vm.list[0].text = 'd'
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('adbbcc')
+      vm.list[1].text = 'e'
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('adbecc')
+      vm.list.reverse()
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('ccbead')
+    }).then(done)
+  })
+
+  it('should warn inside non-keyed v-for', () => {
+    const vm = new Vue({
+      data: {
+        list: [
+          { id: 0, text: 'a' },
+          { id: 1, text: 'b' },
+          { id: 2, text: 'c' }
+        ]
+      },
+      template: `
+        <div>
+          <div v-for="i in list">
+            <span v-once>{{ i.text }}</span><span>{{ i.text }}</span>
+          </div>
+        </div>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('aabbcc')
+    expect(`v-once can only be used inside v-for that is keyed.`).toHaveBeenWarned()
+  })
 })

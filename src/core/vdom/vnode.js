@@ -18,6 +18,7 @@ export default class VNode {
   isRootInsert: boolean; // necessary for enter transition check
   isComment: boolean; // empty comment placeholder?
   isCloned: boolean; // is a cloned node?
+  isOnce: boolean; // is a v-once node?
 
   constructor (
     tag?: string,
@@ -46,6 +47,7 @@ export default class VNode {
     this.isRootInsert = true
     this.isComment = false
     this.isCloned = false
+    this.isOnce = false
   }
 }
 

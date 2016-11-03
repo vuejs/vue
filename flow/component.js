@@ -83,6 +83,8 @@ declare interface Component {
   _h: (vnode?: VNode, data?: VNodeData, children?: VNodeChildren) => VNode | void;
   // renderStatic
   _m: (index: number, isInFor?: boolean) => VNode | VNodeChildren;
+  // markOnce
+  _o: (vnode: VNode | Array<VNode>, index: number, key: string) => VNode | VNodeChildren;
   // toString
   _s: (value: any) => string;
   // toNumber
