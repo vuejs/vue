@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.3
+ * Vue.js v2.0.4
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -343,7 +343,7 @@ function def (obj, key, val, enumerable) {
 /**
  * Parse simple path.
  */
-var bailRE = /[^\w\.\$]/;
+var bailRE = /[^\w.$]/;
 function parsePath (path) {
   if (bailRE.test(path)) {
     return
@@ -858,7 +858,7 @@ Watcher.prototype.depend = function depend () {
 };
 
 /**
- * Remove self from all dependencies' subcriber list.
+ * Remove self from all dependencies' subscriber list.
  */
 Watcher.prototype.teardown = function teardown () {
     var this$1 = this;
@@ -885,31 +885,31 @@ Watcher.prototype.teardown = function teardown () {
  * is collected as a "deep" dependency.
  */
 var seenObjects = new _Set();
-function traverse (val, seen) {
+function traverse (val) {
+  seenObjects.clear();
+  _traverse(val, seenObjects);
+}
+
+function _traverse (val, seen) {
   var i, keys;
-  if (!seen) {
-    seen = seenObjects;
-    seen.clear();
-  }
   var isA = Array.isArray(val);
-  var isO = isObject(val);
-  if ((isA || isO) && Object.isExtensible(val)) {
-    if (val.__ob__) {
-      var depId = val.__ob__.dep.id;
-      if (seen.has(depId)) {
-        return
-      } else {
-        seen.add(depId);
-      }
+  if ((!isA && !isObject(val)) || !Object.isExtensible(val)) {
+    return
+  }
+  if (val.__ob__) {
+    var depId = val.__ob__.dep.id;
+    if (seen.has(depId)) {
+      return
     }
-    if (isA) {
-      i = val.length;
-      while (i--) { traverse(val[i], seen); }
-    } else if (isO) {
-      keys = Object.keys(val);
-      i = keys.length;
-      while (i--) { traverse(val[keys[i]], seen); }
-    }
+    seen.add(depId);
+  }
+  if (isA) {
+    i = val.length;
+    while (i--) { _traverse(val[i], seen); }
+  } else {
+    keys = Object.keys(val);
+    i = keys.length;
+    while (i--) { _traverse(val[keys[i]], seen); }
   }
 }
 
@@ -1132,6 +1132,7 @@ function defineReactive$$1 (
  */
 function set (obj, key, val) {
   if (Array.isArray(obj)) {
+    obj.length = Math.max(obj.length, key);
     obj.splice(key, 1, val);
     return val
   }
@@ -1183,7 +1184,7 @@ function del (obj, key) {
  * we cannot intercept array element access like property getters.
  */
 function dependArray (value) {
-  for (var e = void 0, i = 0, l = value.length; i < l; i++) {
+  for (var e = (void 0), i = 0, l = value.length; i < l; i++) {
     e = value[i];
     e && e.__ob__ && e.__ob__.dep.depend();
     if (Array.isArray(e)) {
@@ -2061,7 +2062,7 @@ function resolveAsyncComponent (
 }
 
 function extractProps (data, Ctor) {
-  // we are only extrating raw values here.
+  // we are only extracting raw values here.
   // validation and default values are handled in the child
   // component itself.
   var propOptions = Ctor.options.props;
@@ -3303,6 +3304,13 @@ function initAssetRegisters (Vue) {
   });
 }
 
+/*  */
+
+// Using the spread operator to avoid code duplication from the origin
+function initCreateElement (Vue) {
+  Vue.createElement = createElement;
+}
+
 var KeepAlive = {
   name: 'keep-alive',
   abstract: true,
@@ -3372,6 +3380,7 @@ function initGlobalAPI (Vue) {
   initMixin$1(Vue);
   initExtend(Vue);
   initAssetRegisters(Vue);
+  initCreateElement(Vue);
 }
 
 initGlobalAPI(Vue$2);
@@ -3380,7 +3389,7 @@ Object.defineProperty(Vue$2.prototype, '$isServer', {
   get: function () { return config._isServer; }
 });
 
-Vue$2.version = '2.0.3';
+Vue$2.version = '2.0.4';
 
 /*  */
 
@@ -4544,6 +4553,16 @@ var domProps = {
 
 /*  */
 
+var cssVarRE = /^--/;
+var setProp = function (el, name, val) {
+  /* istanbul ignore if */
+  if (cssVarRE.test(name)) {
+    el.style.setProperty(name, val);
+  } else {
+    el.style[normalize(name)] = val;
+  }
+};
+
 var prefixes = ['Webkit', 'Moz', 'ms'];
 
 var testEl;
@@ -4592,14 +4611,14 @@ function updateStyle (oldVnode, vnode) {
 
   for (name in oldStyle) {
     if (style[name] == null) {
-      el.style[normalize(name)] = '';
+      setProp(el, name, '');
     }
   }
   for (name in style) {
     cur = style[name];
     if (cur !== oldStyle[name]) {
       // ie9 setting to null has no effect, must use empty string
-      el.style[normalize(name)] = cur == null ? '' : cur;
+      setProp(el, name, cur == null ? '' : cur);
     }
   }
 }
@@ -4616,6 +4635,11 @@ var style = {
  * SVG elements in IE
  */
 function addClass (el, cls) {
+  /* istanbul ignore if */
+  if (!cls || !cls.trim()) {
+    return
+  }
+
   /* istanbul ignore else */
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
@@ -4636,6 +4660,11 @@ function addClass (el, cls) {
  * SVG elements in IE
  */
 function removeClass (el, cls) {
+  /* istanbul ignore if */
+  if (!cls || !cls.trim()) {
+    return
+  }
+
   /* istanbul ignore else */
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
@@ -4780,6 +4809,11 @@ function getTransitionInfo (el, expectedType) {
 }
 
 function getTimeout (delays, durations) {
+  /* istanbul ignore next */
+  while (delays.length < durations.length) {
+    delays = delays.concat(delays);
+  }
+
   return Math.max.apply(null, durations.map(function (d, i) {
     return toMs(d) + toMs(delays[i])
   }))
@@ -5067,7 +5101,7 @@ var patch$1 = createPatchFunction({ nodeOps: nodeOps, modules: modules });
  * properties to Elements.
  */
 
-var modelableTagRE = /^input|select|textarea|vue-component-[0-9]+(-[0-9a-zA-Z_\-]*)?$/;
+var modelableTagRE = /^input|select|textarea|vue-component-[0-9]+(-[0-9a-zA-Z_-]*)?$/;
 
 /* istanbul ignore if */
 if (isIE9) {
@@ -5120,7 +5154,7 @@ var model = {
       setSelected(el, binding, vnode.context);
       // in case the options rendered by v-for have changed,
       // it's possible that the value is out-of-sync with the rendered options.
-      // detect such cases and filter out values that no longer has a matchig
+      // detect such cases and filter out values that no longer has a matching
       // option in the DOM.
       var needReset = el.multiple
         ? binding.value.some(function (v) { return hasNoMatchingOption(v, el.options); })
@@ -5265,7 +5299,7 @@ var transitionProps = {
 };
 
 // in case the child is also an abstract component, e.g. <keep-alive>
-// we want to recrusively retrieve the real component to be rendered
+// we want to recursively retrieve the real component to be rendered
 function getRealChild (vnode) {
   var compOptions = vnode && vnode.componentOptions;
   if (compOptions && compOptions.Ctor.options.abstract) {

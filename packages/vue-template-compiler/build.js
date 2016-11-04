@@ -503,7 +503,7 @@ function def (obj, key, val, enumerable) {
 /**
  * Parse simple path.
  */
-var bailRE = /[^\w\.\$]/;
+var bailRE = /[^\w.$]/;
 function parsePath (path) {
   if (bailRE.test(path)) {
     return
@@ -895,7 +895,7 @@ Watcher.prototype.depend = function depend () {
 };
 
 /**
- * Remove self from all dependencies' subcriber list.
+ * Remove self from all dependencies' subscriber list.
  */
 Watcher.prototype.teardown = function teardown () {
     var this$1 = this;
@@ -922,31 +922,31 @@ Watcher.prototype.teardown = function teardown () {
  * is collected as a "deep" dependency.
  */
 var seenObjects = new _Set();
-function traverse (val, seen) {
+function traverse (val) {
+  seenObjects.clear();
+  _traverse(val, seenObjects);
+}
+
+function _traverse (val, seen) {
   var i, keys;
-  if (!seen) {
-    seen = seenObjects;
-    seen.clear();
-  }
   var isA = Array.isArray(val);
-  var isO = isObject(val);
-  if ((isA || isO) && Object.isExtensible(val)) {
-    if (val.__ob__) {
-      var depId = val.__ob__.dep.id;
-      if (seen.has(depId)) {
-        return
-      } else {
-        seen.add(depId);
-      }
+  if ((!isA && !isObject(val)) || !Object.isExtensible(val)) {
+    return
+  }
+  if (val.__ob__) {
+    var depId = val.__ob__.dep.id;
+    if (seen.has(depId)) {
+      return
     }
-    if (isA) {
-      i = val.length;
-      while (i--) { traverse(val[i], seen); }
-    } else if (isO) {
-      keys = Object.keys(val);
-      i = keys.length;
-      while (i--) { traverse(val[keys[i]], seen); }
-    }
+    seen.add(depId);
+  }
+  if (isA) {
+    i = val.length;
+    while (i--) { _traverse(val[i], seen); }
+  } else {
+    keys = Object.keys(val);
+    i = keys.length;
+    while (i--) { _traverse(val[keys[i]], seen); }
   }
 }
 
@@ -1169,6 +1169,7 @@ function defineReactive$$1 (
  */
 function set (obj, key, val) {
   if (Array.isArray(obj)) {
+    obj.length = Math.max(obj.length, key);
     obj.splice(key, 1, val);
     return val
   }
@@ -1220,7 +1221,7 @@ function del (obj, key) {
  * we cannot intercept array element access like property getters.
  */
 function dependArray (value) {
-  for (var e = void 0, i = 0, l = value.length; i < l; i++) {
+  for (var e = (void 0), i = 0, l = value.length; i < l; i++) {
     e = value[i];
     e && e.__ob__ && e.__ob__.dep.depend();
     if (Array.isArray(e)) {
@@ -2077,7 +2078,7 @@ function resolveAsyncComponent (
 }
 
 function extractProps (data, Ctor) {
-  // we are only extrating raw values here.
+  // we are only extracting raw values here.
   // validation and default values are handled in the child
   // component itself.
   var propOptions = Ctor.options.props;
@@ -3289,7 +3290,7 @@ var unknownElementCache = Object.create(null);
  */
 
 // Regular Expressions for parsing tags and attributes
-var singleAttrIdentifier = /([^\s"'<>\/=]+)/;
+var singleAttrIdentifier = /([^\s"'<>/=]+)/;
 var singleAttrAssign = /(?:=)/;
 var singleAttrValues = [
   // attr value double quotes
@@ -3320,7 +3321,23 @@ var IS_REGEX_CAPTURING_BROKEN = false;
 });
 
 // Special Elements (can contain anything)
-var isSpecialTag = makeMap('script,style', true);
+var isScriptOrStyle = makeMap('script,style', true);
+var hasLang = function (attr) { return attr.name === 'lang' && attr.value !== 'html'; };
+var isSpecialTag = function (tag, isSFC, stack) {
+  if (isScriptOrStyle(tag)) {
+    return true
+  }
+  // top-level template that has a pre-processor
+  if (
+    isSFC &&
+    tag === 'template' &&
+    stack.length === 1 &&
+    stack[0].attrs.some(hasLang)
+  ) {
+    return true
+  }
+  return false
+};
 
 var reCache = {};
 
@@ -3350,7 +3367,7 @@ function parseHTML (html, options) {
   while (html) {
     last = html;
     // Make sure we're not in a script or style element
-    if (!lastTag || !isSpecialTag(lastTag)) {
+    if (!lastTag || !isSpecialTag(lastTag, options.sfc, stack)) {
       var textEnd = html.indexOf('<');
       if (textEnd === 0) {
         // Comment:
@@ -3397,7 +3414,7 @@ function parseHTML (html, options) {
         }
       }
 
-      var text = void 0;
+      var text = (void 0);
       if (textEnd >= 0) {
         text = html.substring(0, textEnd);
         advance(textEnd);
@@ -3418,7 +3435,7 @@ function parseHTML (html, options) {
         if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
           text = text
             .replace(/<!--([\s\S]*?)-->/g, '$1')
-            .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
+            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1');
         }
         if (options.chars) {
           options.chars(text);
@@ -3638,7 +3655,7 @@ function wrapFilter (exp, filter) {
 /*  */
 
 var defaultTagRE = /\{\{((?:.|\n)+?)\}\}/g;
-var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
+var regexEscapeRE = /[-.*+?^${}()|[\]/\\]/g;
 
 var buildRegex = cached(function (delimiters) {
   var open = delimiters[0].replace(regexEscapeRE, '\\$&');
@@ -3779,7 +3796,7 @@ var forIteratorRE = /\(([^,]*),([^,]*)(?:,([^,]*))?\)/;
 var bindRE = /^:|^v-bind:/;
 var onRE = /^@|^v-on:/;
 var argRE = /:(.*)$/;
-var modifierRE = /\.[^\.]+/g;
+var modifierRE = /\.[^.]+/g;
 var specialNewlineRE = /\u2028|\u2029/g;
 
 var decodeHTMLCached = cached(he.decode);
@@ -3888,14 +3905,16 @@ function parse (
       }
 
       function checkRootConstraints (el) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV !== 'production' && !warned) {
           if (el.tag === 'slot' || el.tag === 'template') {
+            warned = true;
             warn$1(
               "Cannot use <" + (el.tag) + "> as component root element because it may " +
               'contain multiple nodes:\n' + template
             );
           }
           if (el.attrsMap.hasOwnProperty('v-for')) {
+            warned = true;
             warn$1(
               'Cannot use v-for on stateful component root element because ' +
               'it renders multiple elements:\n' + template
@@ -3908,12 +3927,12 @@ function parse (
       if (!root) {
         root = element;
         checkRootConstraints(root);
-      } else if (process.env.NODE_ENV !== 'production' && !stack.length && !warned) {
+      } else if (!stack.length) {
         // allow 2 root elements with v-if and v-else
         if (root.if && element.else) {
           checkRootConstraints(element);
           root.elseBlock = element;
-        } else {
+        } else if (process.env.NODE_ENV !== 'production' && !warned) {
           warned = true;
           warn$1(
             ("Component template should contain exactly one root element:\n\n" + template)
@@ -4155,8 +4174,9 @@ function processAttrs (el) {
         if (expression) {
           warn$1(
             name + "=\"" + value + "\": " +
-            'Interpolation inside attributes has been deprecated. ' +
-            'Use v-bind or the colon shorthand instead.'
+            'Interpolation inside attributes has been removed. ' +
+            'Use v-bind or the colon shorthand instead. For example, ' +
+            'instead of <div id="{{ val }}">, use <div :id="val">.'
           );
         }
       }
@@ -4253,7 +4273,7 @@ var isPlatformReservedTag;
 var genStaticKeysCached = cached(genStaticKeys$1);
 
 /**
- * Goal of the optimizier: walk the generated template AST tree
+ * Goal of the optimizer: walk the generated template AST tree
  * and detect sub-trees that are purely static, i.e. parts of
  * the DOM that never needs to change.
  *
@@ -4340,7 +4360,7 @@ function isDirectChildOfTemplateFor (node) {
 
 /*  */
 
-var simplePathRE = /^\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*\s*$/;
+var simplePathRE = /^\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?']|\[".*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*\s*$/;
 
 // keyCode aliases
 var keyCodes = {
@@ -4480,9 +4500,10 @@ function genElement (el) {
     // component or element
     var code;
     if (el.component) {
-      code = genComponent(el);
+      code = genComponent(el.component, el);
     } else {
-      var data = genData(el);
+      var data = el.plain ? undefined : genData(el);
+
       var children = el.inlineTemplate ? null : genChildren(el);
       code = "_h('" + (el.tag) + "'" + (data ? ("," + data) : '') + (children ? ("," + children) : '') + ")";
     }
@@ -4519,10 +4540,6 @@ function genFor (el) {
 }
 
 function genData (el) {
-  if (el.plain) {
-    return
-  }
-
   var data = '{';
 
   // directives first.
@@ -4637,14 +4654,13 @@ function genText (text) {
 function genSlot (el) {
   var slotName = el.slotName || '"default"';
   var children = genChildren(el);
-  return children
-    ? ("_t(" + slotName + "," + children + ")")
-    : ("_t(" + slotName + ")")
+  return ("_t(" + slotName + (children ? ("," + children) : '') + ")")
 }
 
-function genComponent (el) {
+// componentName is el.component, take it as argument to shun flow's pessimistic refinement
+function genComponent (componentName, el) {
   var children = el.inlineTemplate ? null : genChildren(el);
-  return ("_h(" + (el.component) + "," + (genData(el)) + (children ? ("," + children) : '') + ")")
+  return ("_h(" + componentName + "," + (genData(el)) + (children ? ("," + children) : '') + ")")
 }
 
 function genProps (props) {
@@ -4760,8 +4776,9 @@ function transformNode (el, options) {
     if (expression) {
       warn(
         "class=\"" + staticClass + "\": " +
-        'Interpolation inside attributes has been deprecated. ' +
-        'Use v-bind or the colon shorthand instead.'
+        'Interpolation inside attributes has been removed. ' +
+        'Use v-bind or the colon shorthand instead. For example, ' +
+        'instead of <div class="{{ val }}">, use <div :class="val">.'
       );
     }
   }
@@ -4818,6 +4835,97 @@ var modules = [
 
 /*  */
 
+var len;
+var str;
+var chr;
+var index$1;
+var expressionPos;
+var expressionEndPos;
+
+/**
+ * parse directive model to do the array update transform. a[idx] = val => $$a.splice($$idx, 1, val)
+ *
+ * for loop possible cases:
+ *
+ * - test
+ * - test[idx]
+ * - test[test1[idx]]
+ * - test["a"][idx]
+ * - xxx.test[a[a].test1[idx]]
+ * - test.xxx.a["asa"][test1[idx]]
+ *
+ */
+
+function parseModel (val) {
+  str = val;
+  len = str.length;
+  index$1 = expressionPos = expressionEndPos = 0;
+
+  if (val.indexOf('[') < 0) {
+    return {
+      exp: val,
+      idx: null
+    }
+  }
+
+  while (!eof()) {
+    chr = next();
+    /* istanbul ignore if */
+    if (isStringStart(chr)) {
+      parseString(chr);
+    } else if (chr === 0x5B) {
+      parseBracket(chr);
+    }
+  }
+
+  return {
+    exp: val.substring(0, expressionPos),
+    idx: val.substring(expressionPos + 1, expressionEndPos)
+  }
+}
+
+function next () {
+  return str.charCodeAt(++index$1)
+}
+
+function eof () {
+  return index$1 >= len
+}
+
+function isStringStart (chr) {
+  return chr === 0x22 || chr === 0x27
+}
+
+function parseBracket (chr) {
+  var inBracket = 1;
+  expressionPos = index$1;
+  while (!eof()) {
+    chr = next();
+    if (isStringStart(chr)) {
+      parseString(chr);
+      continue
+    }
+    if (chr === 0x5B) { inBracket++; }
+    if (chr === 0x5D) { inBracket--; }
+    if (inBracket === 0) {
+      expressionEndPos = index$1;
+      break
+    }
+  }
+}
+
+function parseString (chr) {
+  var stringQuote = chr;
+  while (!eof()) {
+    chr = next();
+    if (chr === stringQuote) {
+      break
+    }
+  }
+}
+
+/*  */
+
 var warn$3;
 
 function model (
@@ -4840,11 +4948,11 @@ function model (
     }
   }
   if (tag === 'select') {
-    genSelect(el, value);
+    genSelect(el, value, modifiers);
   } else if (tag === 'input' && type === 'checkbox') {
-    genCheckboxModel(el, value);
+    genCheckboxModel(el, value, modifiers);
   } else if (tag === 'input' && type === 'radio') {
-    genRadioModel(el, value);
+    genRadioModel(el, value, modifiers);
   } else {
     genDefaultModel(el, value, modifiers);
   }
@@ -4852,7 +4960,11 @@ function model (
   return true
 }
 
-function genCheckboxModel (el, value) {
+function genCheckboxModel (
+  el,
+  value,
+  modifiers
+) {
   if (process.env.NODE_ENV !== 'production' &&
     el.attrsMap.checked != null) {
     warn$3(
@@ -4861,6 +4973,7 @@ function genCheckboxModel (el, value) {
       'Declare initial values in the component\'s data option instead.'
     );
   }
+  var number = modifiers && modifiers.number;
   var valueBinding = getBindingAttr(el, 'value') || 'null';
   var trueValueBinding = getBindingAttr(el, 'true-value') || 'true';
   var falseValueBinding = getBindingAttr(el, 'false-value') || 'false';
@@ -4874,7 +4987,7 @@ function genCheckboxModel (el, value) {
         '$$el=$event.target,' +
         "$$c=$$el.checked?(" + trueValueBinding + "):(" + falseValueBinding + ");" +
     'if(Array.isArray($$a)){' +
-      "var $$v=" + valueBinding + "," +
+      "var $$v=" + (number ? '_n(' + valueBinding + ')' : valueBinding) + "," +
           '$$i=_i($$a,$$v);' +
       "if($$c){$$i<0&&(" + value + "=$$a.concat($$v))}" +
       "else{$$i>-1&&(" + value + "=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}" +
@@ -4883,7 +4996,11 @@ function genCheckboxModel (el, value) {
   );
 }
 
-function genRadioModel (el, value) {
+function genRadioModel (
+    el,
+    value,
+    modifiers
+) {
   if (process.env.NODE_ENV !== 'production' &&
     el.attrsMap.checked != null) {
     warn$3(
@@ -4892,9 +5009,11 @@ function genRadioModel (el, value) {
       'Declare initial values in the component\'s data option instead.'
     );
   }
+  var number = modifiers && modifiers.number;
   var valueBinding = getBindingAttr(el, 'value') || 'null';
+  valueBinding = number ? ("_n(" + valueBinding + ")") : valueBinding;
   addProp(el, 'checked', ("_q(" + value + "," + valueBinding + ")"));
-  addHandler(el, 'change', (value + "=" + valueBinding), null, true);
+  addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true);
 }
 
 function genDefaultModel (
@@ -4931,9 +5050,10 @@ function genDefaultModel (
   var valueExpression = isNative
     ? ("$event.target.value" + (trim ? '.trim()' : ''))
     : "$event";
-  var code = number || type === 'number'
-    ? (value + "=_n(" + valueExpression + ")")
-    : (value + "=" + valueExpression);
+  valueExpression = number || type === 'number'
+    ? ("_n(" + valueExpression + ")")
+    : valueExpression;
+  var code = genAssignmentCode(value, valueExpression);
   if (isNative && needCompositionGuard) {
     code = "if($event.target.composing)return;" + code;
   }
@@ -4950,14 +5070,23 @@ function genDefaultModel (
   addHandler(el, event, code, null, true);
 }
 
-function genSelect (el, value) {
+function genSelect (
+    el,
+    value,
+    modifiers
+) {
   if (process.env.NODE_ENV !== 'production') {
     el.children.some(checkOptionWarning);
   }
-  var code = value + "=Array.prototype.filter" +
+
+  var number = modifiers && modifiers.number;
+  var assignment = "Array.prototype.filter" +
     ".call($event.target.options,function(o){return o.selected})" +
-    ".map(function(o){return \"_value\" in o ? o._value : o.value})" +
+    ".map(function(o){var val = \"_value\" in o ? o._value : o.value;" +
+    "return " + (number ? '_n(val)' : 'val') + "})" +
     (el.attrsMap.multiple == null ? '[0]' : '');
+
+  var code = genAssignmentCode(value, assignment);
   addHandler(el, 'change', code, null, true);
 }
 
@@ -4973,6 +5102,18 @@ function checkOptionWarning (option) {
     return true
   }
   return false
+}
+
+function genAssignmentCode (value, assignment) {
+  var modelRs = parseModel(value);
+  if (modelRs.idx === null) {
+    return (value + "=" + assignment)
+  } else {
+    return "var $$exp = " + (modelRs.exp) + ", $$idx = " + (modelRs.idx) + ";" +
+      "if (!Array.isArray($$exp)){" +
+        value + "=" + assignment + "}" +
+      "else{$$exp.splice($$idx, 1, " + assignment + ")}"
+  }
 }
 
 /*  */
@@ -5171,7 +5312,8 @@ function parseComponent (
 
   parseHTML(content, {
     start: start,
-    end: end
+    end: end,
+    sfc: true
   });
 
   return sfc
