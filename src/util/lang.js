@@ -131,8 +131,8 @@ export function toNumber (value) {
   }
   var parsed = Number(value)
   return isNaN(parsed)
-      ? value
-      : parsed
+    ? value
+    : parsed
 }
 
 /**
