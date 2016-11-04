@@ -78,7 +78,10 @@ export function createPatchFunction (backend) {
 
   function removeElement (el) {
     const parent = nodeOps.parentNode(el)
-    nodeOps.removeChild(parent, el)
+    // element may have already been removed due to v-html
+    if (parent) {
+      nodeOps.removeChild(parent, el)
+    }
   }
 
   function createElm (vnode, insertedVnodeQueue, nested) {
