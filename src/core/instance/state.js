@@ -152,8 +152,7 @@ function initMethods (vm: Component) {
           vm
         )
         hasOwn(BuiltinVue.prototype, key) && warn(
-          `You're overriding Vue's internal method "${key}". ` +
-          `Beware of misbehaviors.`,
+          `Avoid overriding Vue's internal method "${key}".`,
           vm
         )
       }

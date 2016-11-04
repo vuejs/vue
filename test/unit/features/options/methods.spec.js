@@ -32,6 +32,6 @@ describe('Options methods', () => {
         }
       }
     })
-    expect(`You're overriding Vue's internal method "$emit". Beware of misbehaviors.`).toHaveBeenWarned()
+    expect(`Avoid overriding Vue's internal method "$emit".`).toHaveBeenWarned()
   })
 })
