@@ -37,6 +37,8 @@ const startTagOpen = new RegExp('^<' + qnameCapture)
 const startTagClose = /^\s*(\/?)>/
 const endTag = new RegExp('^<\\/' + qnameCapture + '[^>]*>')
 const doctype = /^<!DOCTYPE [^>]+>/i
+const comment = /^<!--/
+const conditionalComment = /^<!\[/
 
 let IS_REGEX_CAPTURING_BROKEN = false
 'x'.replace(/x(.)?/g, function (m, g) {
@@ -94,7 +96,7 @@ export function parseHTML (html, options) {
       let textEnd = html.indexOf('<')
       if (textEnd === 0) {
         // Comment:
-        if (/^<!--/.test(html)) {
+        if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
 
           if (commentEnd >= 0) {
@@ -104,7 +106,7 @@ export function parseHTML (html, options) {
         }
 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
-        if (/^<!\[/.test(html)) {
+        if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
 
           if (conditionalEnd >= 0) {
@@ -140,7 +142,12 @@ export function parseHTML (html, options) {
       let text, rest
       if (textEnd > 0) {
         rest = html.slice(textEnd)
-        while (!startTagOpen.test(rest) && !endTag.test(rest)) {
+        while (
+          !endTag.test(rest) &&
+          !startTagOpen.test(rest) &&
+          !comment.test(rest) &&
+          !conditionalComment.test(rest)
+        ) {
           // < in plain text, be forgiving and treat it as text
           textEnd += rest.indexOf('<', 1)
           rest = html.slice(textEnd)
