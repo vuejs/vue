@@ -7,14 +7,6 @@ import {
 } from 'web/util/attrs'
 
 export default function renderAttrs (node: VNodeWithData): string {
-  let res = ''
-  if (node.data.attrs || node.parent) {
-    res += render(node)
-  }
-  return res
-}
-
-function render (node): string {
   let attrs = node.data.attrs
   let res = ''
 
