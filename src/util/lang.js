@@ -126,7 +126,7 @@ export function _toString (value) {
  */
 
 export function toNumber (value) {
-  if (typeof value !== 'string' || value == '') {
+  if (typeof value !== 'string' || value.trim() == '') {
     return value
   }
   var parsed = Number(value)
