@@ -126,14 +126,13 @@ export function _toString (value) {
  */
 
 export function toNumber (value) {
-  if (typeof value !== 'string') {
+  if (typeof value !== 'string' || value.trim() === '') {
     return value
-  } else {
-    var parsed = Number(value)
-    return isNaN(parsed)
-      ? value
-      : parsed
   }
+  var parsed = Number(value)
+  return isNaN(parsed)
+    ? value
+    : parsed
 }
 
 /**
