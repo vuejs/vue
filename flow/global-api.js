@@ -11,6 +11,7 @@ declare interface GlobalAPI {
   use: (plugin: Function | Object) => void;
   mixin: (mixin: Object) => void;
   compile: (template: string) => { render: Function, staticRenderFns: Array<Function> };
+  createElement: (tag: string | Function, props: any, children: any) => VNode;
 
   directive: (id: string, def?: Function | Object) => Function | Object | void;
   component: (id: string, def?: Class<Component> | Object) => Class<Component>;

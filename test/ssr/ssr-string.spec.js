@@ -94,7 +94,7 @@ describe('SSR: renderToString', () => {
         bar: '<span>rendering</span>'
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true">server side &lt;span&gt;rendering&lt;&sol;span&gt;</div>')
+      expect(result).toContain('<div server-rendered="true">server side &lt;span&gt;rendering&lt;/span&gt;</div>')
       done()
     })
   })
@@ -118,7 +118,7 @@ describe('SSR: renderToString', () => {
         text: '<span>foo</span>'
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true">&lt;span&gt;foo&lt;&sol;span&gt;</div>')
+      expect(result).toContain('<div server-rendered="true">&lt;span&gt;foo&lt;/span&gt;</div>')
       done()
     })
   })

@@ -2,7 +2,7 @@
 
 import { inBrowser, isIE9 } from 'core/util/index'
 import { cached, extend } from 'shared/util'
-import { mergeVNodeHook } from 'core/vdom/helpers'
+import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
 import {
   nextFrame,

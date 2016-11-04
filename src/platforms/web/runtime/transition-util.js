@@ -131,6 +131,11 @@ export function getTransitionInfo (el: Element, expectedType?: ?string): {
 }
 
 function getTimeout (delays: Array<string>, durations: Array<string>): number {
+  /* istanbul ignore next */
+  while (delays.length < durations.length) {
+    delays = delays.concat(delays)
+  }
+
   return Math.max.apply(null, durations.map((d, i) => {
     return toMs(d) + toMs(delays[i])
   }))

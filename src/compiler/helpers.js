@@ -27,7 +27,7 @@ export function addDirective (
   rawName: string,
   value: string,
   arg: ?string,
-  modifiers: ?{ [key: string]: true }
+  modifiers: ?ASTModifiers
 ) {
   (el.directives || (el.directives = [])).push({ name, rawName, value, arg, modifiers })
 }
@@ -36,7 +36,7 @@ export function addHandler (
   el: ASTElement,
   name: string,
   value: string,
-  modifiers: ?{ [key: string]: true },
+  modifiers: ?ASTModifiers,
   important: ?boolean
 ) {
   // check capture modifier

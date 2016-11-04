@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <title>Vue.js grid component example</title>
     <link rel="stylesheet" href="style.css">
-    <script src="../../dist/vue.js"></script>
+    <!-- Delete ".min" for console warnings in development -->
+    <script src="../../dist/vue.min.js"></script>
     </head>
   <body>
 
     <!-- component template -->
     <script type="text/x-template" id="grid-template">
-      <table>
+      <table v-if="filteredData.length">
         <thead>
           <tr>
             <th v-for="key in columns"
@@ -30,6 +31,7 @@
           </tr>
         </tbody>
       </table>
+      <p v-else>No matches found.</p>
     </script>
 
     <!-- demo root element -->

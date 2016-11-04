@@ -22,15 +22,22 @@ const builds = {
     format: 'cjs',
     banner
   },
-  // Minified runtime, only for filze size monitoring
-  'web-runtime-prod': {
+  // runtime-only build for CDN
+  'web-runtime-cdn-dev': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
-    dest: path.resolve(__dirname, '../dist/vue.common.min.js'),
+    dest: path.resolve(__dirname, '../dist/vue.runtime.js'),
+    format: 'umd',
+    banner
+  },
+  // runtime-only production build for CDN
+  'web-runtime-cdn-prod': {
+    entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
+    dest: path.resolve(__dirname, '../dist/vue.runtime.min.js'),
     format: 'umd',
     env: 'production',
     banner
   },
-  // Runtime+compiler standalone developement build.
+  // Runtime+compiler standalone development build.
   'web-standalone-dev': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime-with-compiler.js'),
     dest: path.resolve(__dirname, '../dist/vue.js'),
@@ -38,7 +45,7 @@ const builds = {
     env: 'development',
     banner,
     alias: {
-      entities: './entity-decoder'
+      he: './entity-decoder'
     }
   },
   // Runtime+compiler standalone production build.
@@ -49,7 +56,7 @@ const builds = {
     env: 'production',
     banner,
     alias: {
-      entities: './entity-decoder'
+      he: './entity-decoder'
     }
   },
   // Web compiler (CommonJS).
@@ -57,14 +64,14 @@ const builds = {
     entry: path.resolve(__dirname, '../src/entries/web-compiler.js'),
     dest: path.resolve(__dirname, '../packages/vue-template-compiler/build.js'),
     format: 'cjs',
-    external: ['entities', 'de-indent']
+    external: ['he', 'de-indent']
   },
   // Web server renderer (CommonJS).
   'web-server-renderer': {
     entry: path.resolve(__dirname, '../src/entries/web-server-renderer.js'),
     dest: path.resolve(__dirname, '../packages/vue-server-renderer/build.js'),
     format: 'cjs',
-    external: ['stream', 'module', 'vm', 'entities', 'de-indent']
+    external: ['stream', 'module', 'vm', 'he', 'de-indent']
   }
 }
 

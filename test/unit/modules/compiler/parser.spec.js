@@ -1,6 +1,7 @@
 import { parse } from 'compiler/parser/index'
 import { extend } from 'shared/util'
 import { baseOptions } from 'web/compiler/index'
+import { isIE } from 'core/util/env'
 
 describe('parser', () => {
   it('simple element', () => {
@@ -255,7 +256,7 @@ describe('parser', () => {
     expect(ast2.classBinding).toBe('class1')
     // interpolation warning
     parse('<p class="{{error}}">hello world</p>', baseOptions)
-    expect('Interpolation inside attributes has been deprecated').toHaveBeenWarned()
+    expect('Interpolation inside attributes has been removed').toHaveBeenWarned()
   })
 
   it('style binding', () => {
@@ -317,13 +318,15 @@ describe('parser', () => {
     expect(ast1.attrs[2].value).toBe('"hello world"')
     // interpolation warning
     parse('<input type="text" name="field1" value="{{msg}}">', baseOptions)
-    expect('Interpolation inside attributes has been deprecated').toHaveBeenWarned()
+    expect('Interpolation inside attributes has been removed').toHaveBeenWarned()
   })
 
-  it('duplicate attribute', () => {
-    parse('<p class="class1" class="class1">hello world</p>', baseOptions)
-    expect('duplicate attribute').toHaveBeenWarned()
-  })
+  if (!isIE) {
+    it('duplicate attribute', () => {
+      parse('<p class="class1" class="class1">hello world</p>', baseOptions)
+      expect('duplicate attribute').toHaveBeenWarned()
+    })
+  }
 
   it('custom delimiter', () => {
     const ast = parse('<p>{msg}</p>', extend({ delimiters: ['{', '}'] }, baseOptions))

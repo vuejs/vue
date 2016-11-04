@@ -1,6 +1,6 @@
 /* @flow */
 
-import { decodeHTML } from 'entities'
+import { decode } from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { cached, no, camelize } from 'shared/util'
@@ -21,10 +21,10 @@ export const forIteratorRE = /\(([^,]*),([^,]*)(?:,([^,]*))?\)/
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
 const argRE = /:(.*)$/
-const modifierRE = /\.[^\.]+/g
+const modifierRE = /\.[^.]+/g
 const specialNewlineRE = /\u2028|\u2029/g
 
-const decodeHTMLCached = cached(decodeHTML)
+const decodeHTMLCached = cached(decode)
 
 // configurable state
 let warn
@@ -61,8 +61,6 @@ export function parse (
   parseHTML(template, {
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
-    isFromDOM: options.isFromDOM,
-    shouldDecodeTags: options.shouldDecodeTags,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
     start (tag, attrs, unary) {
       // check namespace.
@@ -79,7 +77,7 @@ export function parse (
         type: 1,
         tag,
         attrsList: attrs,
-        attrsMap: makeAttrsMap(attrs),
+        attrsMap: makeAttrsMap(attrs, options.isIE),
         parent: currentParent,
         children: []
       }
@@ -132,14 +130,16 @@ export function parse (
       }
 
       function checkRootConstraints (el) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV !== 'production' && !warned) {
           if (el.tag === 'slot' || el.tag === 'template') {
+            warned = true
             warn(
               `Cannot use <${el.tag}> as component root element because it may ` +
               'contain multiple nodes:\n' + template
             )
           }
           if (el.attrsMap.hasOwnProperty('v-for')) {
+            warned = true
             warn(
               'Cannot use v-for on stateful component root element because ' +
               'it renders multiple elements:\n' + template
@@ -152,12 +152,12 @@ export function parse (
       if (!root) {
         root = element
         checkRootConstraints(root)
-      } else if (process.env.NODE_ENV !== 'production' && !stack.length && !warned) {
+      } else if (!stack.length) {
         // allow 2 root elements with v-if and v-else
         if (root.if && element.else) {
           checkRootConstraints(element)
           root.elseBlock = element
-        } else {
+        } else if (process.env.NODE_ENV !== 'production' && !warned) {
           warned = true
           warn(
             `Component template should contain exactly one root element:\n\n${template}`
@@ -399,8 +399,9 @@ function processAttrs (el) {
         if (expression) {
           warn(
             `${name}="${value}": ` +
-            'Interpolation inside attributes has been deprecated. ' +
-            'Use v-bind or the colon shorthand instead.'
+            'Interpolation inside attributes has been removed. ' +
+            'Use v-bind or the colon shorthand instead. For example, ' +
+            'instead of <div id="{{ val }}">, use <div :id="val">.'
           )
         }
       }
@@ -429,10 +430,10 @@ function parseModifiers (name: string): Object | void {
   }
 }
 
-function makeAttrsMap (attrs: Array<Object>): Object {
+function makeAttrsMap (attrs: Array<Object>, isIE: ?boolean): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
-    if (process.env.NODE_ENV !== 'production' && map[attrs[i].name]) {
+    if (process.env.NODE_ENV !== 'production' && map[attrs[i].name] && !isIE) {
       warn('duplicate attribute: ' + attrs[i].name)
     }
     map[attrs[i].name] = attrs[i].value

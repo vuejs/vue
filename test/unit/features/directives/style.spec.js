@@ -151,4 +151,19 @@ describe('Directive v-bind:style', () => {
       expect(vm.$el.style.fontSize).toBe('16px')
     }).then(done)
   })
+
+  const supportCssVariable = () => {
+    const el = document.createElement('div')
+    el.style.setProperty('--color', 'red')
+    return el.style.getPropertyValue('--color') === 'red'
+  }
+
+  if (supportCssVariable()) {
+    it('CSS variables', done => {
+      vm.styles = { '--color': 'red' }
+      waitForUpdate(() => {
+        expect(vm.$el.style.getPropertyValue('--color')).toBe('red')
+      }).then(done)
+    })
+  }
 })

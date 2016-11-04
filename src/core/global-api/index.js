@@ -6,6 +6,7 @@ import { initUse } from './use'
 import { initMixin } from './mixin'
 import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
+import { initCreateElement } from './createElement'
 import { set, del } from '../observer/index'
 import builtInComponents from '../components/index'
 
@@ -37,4 +38,5 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   initMixin(Vue)
   initExtend(Vue)
   initAssetRegisters(Vue)
+  initCreateElement(Vue)
 }

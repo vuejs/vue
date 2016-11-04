@@ -2,7 +2,7 @@
 
 const decoder = document.createElement('div')
 
-export function decodeHTML (html: string): string {
+export function decode (html: string): string {
   decoder.innerHTML = html
   return decoder.textContent
 }

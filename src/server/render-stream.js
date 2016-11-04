@@ -1,7 +1,7 @@
 /* @flow */
 
 /**
- * Original RenderStream implmentation by Sasha Aickin (@aickin)
+ * Original RenderStream implementation by Sasha Aickin (@aickin)
  * Licensed under the Apache License, Version 2.0
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -13,9 +13,8 @@ import { createWriteFunction } from './write'
 
 export default class RenderStream extends stream.Readable {
   buffer: string;
-  render: Function;
+  render: (write: Function, done: Function) => void;
   expectedSize: number;
-  stackDepth: number;
   write: Function;
   next: Function;
   end: Function;
@@ -26,7 +25,6 @@ export default class RenderStream extends stream.Readable {
     this.buffer = ''
     this.render = render
     this.expectedSize = 0
-    this.stackDepth = 0
 
     this.write = createWriteFunction((text, next) => {
       const n = this.expectedSize

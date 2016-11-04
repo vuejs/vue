@@ -1,7 +1,7 @@
 // skip type checking this file because we need to attach private properties
 // to elements
 
-import { updateListeners } from 'core/vdom/helpers'
+import { updateListeners } from 'core/vdom/helpers/index'
 
 function updateDOMListeners (oldVnode, vnode) {
   if (!oldVnode.data.on && !vnode.data.on) {

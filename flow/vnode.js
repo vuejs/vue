@@ -60,6 +60,6 @@ declare type VNodeDirective = {
   value?: any;
   oldValue?: any;
   arg?: string;
-  modifiers?: { [key: string]: boolean };
+  modifiers?: ASTModifiers;
   def?: Object;
 }

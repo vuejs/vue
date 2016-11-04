@@ -8,7 +8,7 @@ let isPlatformReservedTag
 const genStaticKeysCached = cached(genStaticKeys)
 
 /**
- * Goal of the optimizier: walk the generated template AST tree
+ * Goal of the optimizer: walk the generated template AST tree
  * and detect sub-trees that are purely static, i.e. parts of
  * the DOM that never needs to change.
  *
@@ -57,7 +57,7 @@ function markStaticRoots (node: ASTNode, isInFor: boolean) {
     }
     if (node.children) {
       for (let i = 0, l = node.children.length; i < l; i++) {
-        markStaticRoots(node.children[i], !!node.for)
+        markStaticRoots(node.children[i], isInFor || !!node.for)
       }
     }
   }
@@ -75,6 +75,20 @@ function isStatic (node: ASTNode): boolean {
     !node.if && !node.for && // not v-if or v-for or v-else
     !isBuiltInTag(node.tag) && // not a built-in
     isPlatformReservedTag(node.tag) && // not a component
+    !isDirectChildOfTemplateFor(node) &&
     Object.keys(node).every(isStaticKey)
   ))
+}
+
+function isDirectChildOfTemplateFor (node: ASTElement): boolean {
+  while (node.parent) {
+    node = node.parent
+    if (node.tag !== 'template') {
+      return false
+    }
+    if (node.for) {
+      return true
+    }
+  }
+  return false
 }
