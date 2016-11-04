@@ -167,6 +167,42 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('attrs merging on components', done => {
+    const Test = {
+      render: h => h('div', {
+        attrs: { id: 'a' }
+      })
+    }
+    renderVmWithOptions({
+      render: h => h(Test, {
+        attrs: { id: 'b', name: 'c' }
+      })
+    }, res => {
+      expect(res).toContain(
+        '<div id="b" server-rendered="true" name="c"></div>'
+      )
+      done()
+    })
+  })
+
+  it('domProps merging on components', done => {
+    const Test = {
+      render: h => h('div', {
+        domProps: { innerHTML: 'a' }
+      })
+    }
+    renderVmWithOptions({
+      render: h => h(Test, {
+        domProps: { innerHTML: 'b', value: 'c' }
+      })
+    }, res => {
+      expect(res).toContain(
+        '<div server-rendered="true" value="c">b</div>'
+      )
+      done()
+    })
+  })
+
   it('text interpolation', done => {
     renderVmWithOptions({
       template: '<div>{{ foo }} side {{ bar }}</div>',
