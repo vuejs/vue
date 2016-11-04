@@ -20,14 +20,6 @@ describe('Options name', () => {
     /* eslint-enable */
   })
 
-  it('when incorrect name given it should not contain itself in self components', () => {
-    const vm = Vue.extend({
-      name: 'Hyper*Vue'
-    })
-
-    expect(vm.options.components['Hyper*Vue']).toBeUndefined()
-  })
-
   it('id should not override given name when using Vue.component', () => {
     const SuperComponent = Vue.component('super-component', {
       name: 'SuperVue'
