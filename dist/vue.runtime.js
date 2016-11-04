@@ -3,7 +3,11 @@
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
-'use strict';
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global.Vue = factory());
+}(this, (function () { 'use strict';
 
 /*  */
 
@@ -5666,4 +5670,6 @@ setTimeout(function () {
   }
 }, 0);
 
-module.exports = Vue$1;
+return Vue$1;
+
+})));
