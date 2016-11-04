@@ -23,14 +23,13 @@ export function initExtend (Vue: GlobalAPI) {
       return extendOptions._Ctor
     }
     let name = extendOptions.name || Super.options.name
-    if (!/^[a-zA-Z][\w-]*$/.test(name)) {
-      if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV !== 'production') {
+      if (!/^[a-zA-Z][\w-]*$/.test(name)) {      
         warn(
           'Invalid component name: "' + name + '". Component names ' +
           'can only contain alphanumeric characaters and the hyphen.'
         )
       }
-      name = null
     }
     const Sub = function VueComponent (options) {
       this._init(options)
