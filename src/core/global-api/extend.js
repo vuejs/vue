@@ -22,9 +22,9 @@ export function initExtend (Vue: GlobalAPI) {
     if (isFirstExtend && extendOptions._Ctor) {
       return extendOptions._Ctor
     }
-    let name = extendOptions.name || Super.options.name
+    const name = extendOptions.name || Super.options.name
     if (process.env.NODE_ENV !== 'production') {
-      if (!/^[a-zA-Z][\w-]*$/.test(name)) {      
+      if (!/^[a-zA-Z][\w-]*$/.test(name)) {
         warn(
           'Invalid component name: "' + name + '". Component names ' +
           'can only contain alphanumeric characaters and the hyphen.'
