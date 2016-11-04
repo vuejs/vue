@@ -86,6 +86,87 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('custom component style', done => {
+    renderVmWithOptions({
+      template: '<section><comp :style="style"></comp></section>',
+      data: {
+        style: 'color:red'
+      },
+      components: {
+        comp: {
+          template: '<div></div>'
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<section server-rendered="true"><div style="color:red"></div></section>'
+      )
+      done()
+    })
+  })
+
+  it('nested custom component style', done => {
+    renderVmWithOptions({
+      template: '<comp :style="style"></comp>',
+      data: {
+        style: 'color:red'
+      },
+      components: {
+        comp: {
+          template: '<nested style="font-size:520rem"></nested>',
+          components: {
+            nested: {
+              template: '<div></div>'
+            }
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true" style="color:red;font-size:520rem"></div>'
+      )
+      done()
+    })
+  })
+
+  it('component style not passed to child', done => {
+    renderVmWithOptions({
+      template: '<comp :style="style"></comp>',
+      data: {
+        style: 'color:red'
+      },
+      components: {
+        comp: {
+          template: '<div><div></div></div>'
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true" style="color:red"><div></div></div>'
+      )
+      done()
+    })
+  })
+
+  it('component style not passed to slot', done => {
+    renderVmWithOptions({
+      template: '<comp :style="style"><span style="color:black"></span></comp>',
+      data: {
+        style: 'color:red'
+      },
+      components: {
+        comp: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true" style="color:red"><span style="color:black"></span></div>'
+      )
+      done()
+    })
+  })
+
   it('text interpolation', done => {
     renderVmWithOptions({
       template: '<div>{{ foo }} side {{ bar }}</div>',
