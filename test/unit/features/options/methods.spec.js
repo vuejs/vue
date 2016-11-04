@@ -24,4 +24,14 @@ describe('Options methods', () => {
     })
     expect(`method "hello" has an undefined value in the component definition`).toHaveBeenWarned()
   })
+
+  it('should warn overriding builtin methods', () => {
+    new Vue({
+      methods: {
+        $emit () {
+        }
+      }
+    })
+    expect(`You're overriding Vue's internal method "$emit". Beware of misbehaviors.`).toHaveBeenWarned()
+  })
 })
