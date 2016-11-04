@@ -21,6 +21,8 @@ import {
   noop
 } from '../util/index'
 
+import BuiltinVue from '../index'
+
 export function initState (vm: Component) {
   vm._watchers = []
   initProps(vm)
@@ -143,10 +145,14 @@ function initMethods (vm: Component) {
   if (methods) {
     for (const key in methods) {
       vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
-      if (process.env.NODE_ENV !== 'production' && methods[key] == null) {
-        warn(
+      if (process.env.NODE_ENV !== 'production') {
+        methods[key] == null && warn(
           `method "${key}" has an undefined value in the component definition. ` +
           `Did you reference the function correctly?`,
+          vm
+        )
+        hasOwn(BuiltinVue.prototype, key) && warn(
+          `Avoid overriding Vue's internal method "${key}".`,
           vm
         )
       }
