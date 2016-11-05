@@ -65,7 +65,7 @@ export function renderMixin (Vue: Class<Component>) {
         if (config._isServer) {
           throw e
         } else {
-          setTimeout(() => { throw e }, 0)
+          console.error(e)
         }
       }
       // return previous vnode to prevent render error causing blank component
