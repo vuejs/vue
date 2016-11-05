@@ -1,7 +1,7 @@
 {
-  "name": "vue-template-compiler",
-  "version": "2.0.5",
-  "description": "template compiler for Vue 2.0",
+  "name": "weex-vue-framework",
+  "version": "2.0.5-weex.1",
+  "description": "Vue 2.0 Framework for Weex",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -16,9 +16,8 @@
   "bugs": {
     "url": "https://github.com/vuejs/vue/issues"
   },
-  "homepage": "https://github.com/vuejs/vue/tree/dev/packages/vue-template-compiler#readme",
+  "homepage": "https://github.com/vuejs/vue/tree/dev/packages/weex-vue-framework#readme",
   "dependencies": {
-    "he": "^1.1.0",
-    "de-indent": "^1.0.2"
+    "weex-styler": "0.0.17"
   }
 }

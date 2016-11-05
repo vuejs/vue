@@ -64,6 +64,19 @@ const builds = {
     dest: path.resolve(__dirname, '../packages/vue-server-renderer/build.js'),
     format: 'cjs',
     external: ['stream', 'module', 'vm', 'he', 'de-indent']
+  },
+  // Weex runtime framework (CommonJS).
+  'weex-framework': {
+    entry: path.resolve(__dirname, '../src/entries/weex-framework.js'),
+    dest: path.resolve(__dirname, '../packages/weex-vue-framework/index.js'),
+    format: 'cjs'
+  },
+  // Weex compiler (CommonJS). Used by Weex's Webpack loader.
+  'weex-compiler': {
+    entry: path.resolve(__dirname, '../src/entries/weex-compiler.js'),
+    dest: path.resolve(__dirname, '../packages/weex-template-compiler/build.js'),
+    format: 'cjs',
+    external: ['entities', 'de-indent']
   }
 }
 

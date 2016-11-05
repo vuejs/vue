@@ -21,5 +21,5 @@
     "he": "^1.1.0",
     "de-indent": "^1.0.2"
   },
-  "homepage": "https://github.com/vuejs/vue#readme"
+  "homepage": "https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#readme"
 }

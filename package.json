@@ -23,12 +23,16 @@
     "dev:test": "karma start build/karma.dev.config.js",
     "dev:ssr": "TARGET=web-server-renderer rollup -w -c build/config.js",
     "dev:compiler": "TARGET=web-compiler rollup -w -c build/config.js",
+    "dev:weex": "TARGET=weex-framework rollup -w -c build/config.js",
+    "dev:weex:compiler": "TARGET=weex-compiler rollup -w -c build/config.js",
     "build": "node build/build.js",
     "build:ssr": "npm run build -- vue.common.js,vue-server-renderer",
+    "build:weex": "npm run build -- weex-vue-framework,weex-template-compiler",
     "test": "npm run lint && flow check && npm run test:types && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr",
     "test:unit": "karma start build/karma.unit.config.js",
     "test:cover": "karma start build/karma.cover.config.js",
     "test:e2e": "npm run build -- vue.min.js && node test/e2e/runner.js",
+    "test:weex": "npm run build:weex && jasmine JASMINE_CONFIG_PATH=test/weex/jasmine.json",
     "test:ssr": "npm run build:ssr && VUE_ENV=server jasmine JASMINE_CONFIG_PATH=test/ssr/jasmine.json",
     "test:sauce": "npm run sauce -- 0 && npm run sauce -- 1 && npm run sauce -- 2",
     "test:types": "tsc -p ./types/test/tsconfig.json",
@@ -36,7 +40,8 @@
     "flow": "flow check",
     "sauce": "SAUCE=true karma start build/karma.sauce.config.js",
     "bench:ssr": "npm run build:ssr && NODE_ENV=production VUE_ENV=server node benchmarks/ssr/renderToString.js && NODE_ENV=production VUE_ENV=server node benchmarks/ssr/renderToStream.js",
-    "release": "bash build/release.sh"
+    "release": "bash build/release.sh",
+    "release:weex": "bash build/release-weex.sh"
   },
   "repository": {
     "type": "git",
@@ -99,6 +104,8 @@
     "selenium-server": "2.53.1",
     "typescript": "^2.0.2",
     "uglify-js": "^2.6.2",
-    "webpack": "^1.13.2"
+    "webpack": "^1.13.2",
+    "weex-js-runtime": "^0.17.0-alpha4",
+    "weex-vdom-tester": "^0.1.3"
   }
 }
