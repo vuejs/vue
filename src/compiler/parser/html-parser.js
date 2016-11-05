@@ -139,7 +139,7 @@ export function parseHTML (html, options) {
         }
       }
 
-      let text, rest
+      let text, rest, next
       if (textEnd > 0) {
         rest = html.slice(textEnd)
         while (
@@ -149,7 +149,9 @@ export function parseHTML (html, options) {
           !conditionalComment.test(rest)
         ) {
           // < in plain text, be forgiving and treat it as text
-          textEnd += rest.indexOf('<', 1)
+          next = rest.indexOf('<', 1)
+          if (next < 0) break
+          textEnd += next
           rest = html.slice(textEnd)
         }
         text = html.substring(0, textEnd)
@@ -185,8 +187,9 @@ export function parseHTML (html, options) {
       parseEndTag('</' + stackedTag + '>', stackedTag, index - endTagLength, index)
     }
 
-    if (html === last) {
-      throw new Error('Error parsing template:\n\n' + html)
+    if (html === last && options.chars) {
+      options.chars(html)
+      break
     }
   }
 
