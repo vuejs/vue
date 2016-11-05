@@ -55,8 +55,9 @@ function _createElement (
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
+      const childNs = tag === 'foreignObject' ? 'xhtml' : ns
       return new VNode(
-        tag, data, normalizeChildren(children, ns),
+        tag, data, normalizeChildren(children, childNs),
         undefined, undefined, ns, context
       )
     }
