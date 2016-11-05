@@ -145,7 +145,8 @@ It could be you!
 - Nikola Trifunovic
 - Nicolas Mutis Mesa
 - Fahed Toumi
-- James
+- James Brooks
+- Kirk Lewis
 - Spenser
 - Takuya Nishio
 - Daniel Diekmeier
