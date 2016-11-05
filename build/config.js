@@ -12,8 +12,6 @@ const banner =
   ' * Released under the MIT License.\n' +
   ' */'
 
-const baseAlias = require('./alias')
-
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
   'web-runtime-dev': {
@@ -43,10 +41,7 @@ const builds = {
     dest: path.resolve(__dirname, '../dist/vue.js'),
     format: 'umd',
     env: 'development',
-    banner,
-    alias: {
-      he: './entity-decoder'
-    }
+    banner
   },
   // Runtime+compiler standalone production build.
   'web-standalone-prod': {
@@ -54,10 +49,7 @@ const builds = {
     dest: path.resolve(__dirname, '../dist/vue.min.js'),
     format: 'umd',
     env: 'production',
-    banner,
-    alias: {
-      he: './entity-decoder'
-    }
+    banner
   },
   // Web compiler (CommonJS).
   'web-compiler': {
@@ -86,7 +78,7 @@ function genConfig (opts) {
     plugins: [
       flow(),
       buble(),
-      alias(Object.assign({}, baseAlias, opts.alias))
+      alias(require('./alias'))
     ]
   }
 
