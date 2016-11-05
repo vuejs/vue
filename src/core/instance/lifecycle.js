@@ -132,6 +132,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       if (process.env.NODE_ENV !== 'production') {
         observerState.isSettingProps = false
       }
+      vm.$options.propsData = propsData
     }
     // update listeners
     if (listeners) {
