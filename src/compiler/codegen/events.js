@@ -24,7 +24,7 @@ const modifierCode = {
 export function genHandlers (events: ASTElementHandlers, native?: boolean): string {
   let res = native ? 'nativeOn:{' : 'on:{'
   for (const name in events) {
-    res += `"${name}":${genHandler(events[name])},`
+    res += `"${name}":v.${genHandler(events[name])},`
   }
   return res.slice(0, -1) + '}'
 }
