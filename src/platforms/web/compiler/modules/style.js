@@ -23,7 +23,7 @@ function genData (el: ASTElement): string {
     data += `staticStyle:${el.staticStyle},`
   }
   if (el.styleBinding) {
-    data += `style:${el.styleBinding},`
+    data += `style:(${el.styleBinding}),`
   }
   return data
 }
