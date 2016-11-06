@@ -216,7 +216,7 @@ describe('Directive v-bind:style', () => {
       },
       components: {
         child: {
-          template: '<div><nested style="color: blue;text-align:left"></nested></div>',
+          template: '<div><nested ref="nested" style="color: blue;text-align:left"></nested></div>',
           components: {
             nested: {
               template: '<div></div>'
@@ -228,6 +228,7 @@ describe('Directive v-bind:style', () => {
     expect(vm.$el.style.color).toBe('red')
     expect(vm.$el.style.textAlign).toBe('')
     expect(vm.$el.style.fontSize).toBe('12px')
+    expect(vm.$children[0].$refs.nested.$el.style.color).toBe('blue')
   })
 
   it('should merge between nested components', (done) => {
@@ -257,7 +258,6 @@ describe('Directive v-bind:style', () => {
     waitForUpdate(() => {
       child.nestedStyle.marginLeft = '60px'
     }).then(() => {
-      console.log(vm.$el.style.cssText)
       expect(vm.$el.style.marginLeft).toBe('60px')
       child.nestedStyle = {
         fontSize: '14px',
