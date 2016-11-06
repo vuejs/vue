@@ -8,7 +8,7 @@ import {
 function transformNode (el: ASTElement) {
   const staticStyle = getAndRemoveAttr(el, 'style')
   if (staticStyle) {
-    el.staticStyle = staticStyle
+    el.staticStyle = JSON.stringify(staticStyle)
   }
 
   const styleBinding = getBindingAttr(el, 'style', false /* getStatic */)
@@ -20,10 +20,10 @@ function transformNode (el: ASTElement) {
 function genData (el: ASTElement): string {
   let data = ''
   if (el.staticStyle) {
-    data += 'staticStyle:"' + (el.staticStyle) + '",'
+    data += `staticStyle:${el.staticStyle},`
   }
   if (el.styleBinding) {
-    data += 'style:(' + (el.styleBinding) + '),'
+    data += `style:${el.styleBinding},`
   }
   return data
 }
