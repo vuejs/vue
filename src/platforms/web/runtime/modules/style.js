@@ -1,6 +1,7 @@
 /* @flow */
 
-import { cached, extend, camelize, toObject } from 'shared/util'
+import { cached, camelize, extend, looseEqual } from 'shared/util'
+import { normalizeBindingStyle, getStyle } from 'web/util/style'
 
 const cssVarRE = /^--/
 const setProp = (el, name, val) => {
@@ -31,45 +32,39 @@ const normalize = cached(function (prop) {
 })
 
 function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  if ((!oldVnode.data || !oldVnode.data.style) && !vnode.data.style) {
+  const data = vnode.data
+  const oldData = oldVnode.data
+
+  if (!data.staticStyle && !data.style &&
+      !oldData.staticStyle && !oldData.style) {
     return
   }
+
   let cur, name
   const el: any = vnode.elm
   const oldStyle: any = oldVnode.data.style || {}
-  let style: any = vnode.data.style || {}
+  const style: Object = normalizeBindingStyle(vnode.data.style || {})
+  vnode.data.style = extend({}, style)
 
-  // handle string
-  if (typeof style === 'string') {
-    el.style.cssText = style
+  const newStyle: Object = getStyle(vnode, true)
+
+  if (looseEqual(el._prevStyle, newStyle)) {
     return
   }
 
-  const needClone = style.__ob__
-
-  // handle array syntax
-  if (Array.isArray(style)) {
-    style = vnode.data.style = toObject(style)
-  }
-
-  // clone the style for future updates,
-  // in case the user mutates the style object in-place.
-  if (needClone) {
-    style = vnode.data.style = extend({}, style)
-  }
-
   for (name in oldStyle) {
-    if (style[name] == null) {
+    if (newStyle[name] == null) {
       setProp(el, name, '')
     }
   }
-  for (name in style) {
-    cur = style[name]
+  for (name in newStyle) {
+    cur = newStyle[name]
     if (cur !== oldStyle[name]) {
       // ie9 setting to null has no effect, must use empty string
       setProp(el, name, cur == null ? '' : cur)
     }
   }
+  el._prevStyle = newStyle
 }
 
 export default {

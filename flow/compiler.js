@@ -106,6 +106,7 @@ declare type ASTElement = {
 
   staticClass?: string;
   classBinding?: string;
+  staticStyle?: string;
   styleBinding?: string;
   events?: ASTElementHandlers;
   nativeEvents?: ASTElementHandlers;

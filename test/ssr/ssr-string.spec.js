@@ -66,7 +66,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="font-size:14px;color:red;background-color:black"></div>'
+        '<div server-rendered="true" style="background-color:black;font-size:14px;color:red"></div>'
       )
       done()
     })
@@ -107,13 +107,13 @@ describe('SSR: renderToString', () => {
 
   it('nested custom component style', done => {
     renderVmWithOptions({
-      template: '<comp :style="style"></comp>',
+      template: '<comp style="color: blue" :style="style"></comp>',
       data: {
         style: 'color:red'
       },
       components: {
         comp: {
-          template: '<nested style="font-size:520rem"></nested>',
+          template: '<nested style="text-align: left;" :style="{fontSize:\'520rem\'}"></nested>',
           components: {
             nested: {
               template: '<div></div>'
@@ -123,7 +123,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="color:red;font-size:520rem"></div>'
+        '<div server-rendered="true" style="text-align:left;font-size:520rem;color:red"></div>'
       )
       done()
     })
