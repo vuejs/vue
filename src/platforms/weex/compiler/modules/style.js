@@ -19,14 +19,12 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticStyle = getAndRemoveAttr(el, 'style')
   const { dynamic, styleResult } = parseStaticStyle(staticStyle, options)
-  if (dynamic) {
-    if (process.env.NODE_ENV !== 'production') {
-      warn(
-        `style="${staticStyle}": ` +
-        'Interpolation inside attributes has been deprecated. ' +
-        'Use v-bind or the colon shorthand instead.'
-      )
-    }
+  if (process.env.NODE_ENV !== 'production' && dynamic) {
+    warn(
+      `style="${String(staticStyle)}": ` +
+      'Interpolation inside attributes has been deprecated. ' +
+      'Use v-bind or the colon shorthand instead.'
+    )
   }
   if (!dynamic && styleResult) {
     el.staticStyle = styleResult
@@ -50,7 +48,7 @@ function genData (el: ASTElement): string {
   return data
 }
 
-function parseStaticStyle (staticStyle?: string, options: CompilerOptions): StaticStyleResult {
+function parseStaticStyle (staticStyle: ?string, options: CompilerOptions): StaticStyleResult {
   // "width: 200px; height: 200px;" -> {width: 200, height: 200}
   // "width: 200px; height: {{y}}" -> {width: 200, height: y}
   let dynamic = false

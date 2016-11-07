@@ -25,8 +25,8 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
   let cur, name
   const elm = vnode.elm
-  const oldStyle = oldVnode.data.style || {}
-  let style = vnode.data.style || {}
+  const oldStyle: any = oldVnode.data.style || {}
+  let style: any = vnode.data.style || {}
 
   const needClone = style.__ob__
 

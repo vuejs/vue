@@ -11,9 +11,10 @@ export function compile (
   options = options || {}
   const errors = []
   // allow injecting modules/directives
+  const baseModules = baseOptions.modules || []
   const modules = options.modules
-    ? baseOptions.modules.concat(options.modules)
-    : baseOptions.modules
+    ? baseModules.concat(options.modules)
+    : baseModules
   const directives = options.directives
     ? extend(extend({}, baseOptions.directives), options.directives)
     : baseOptions.directives

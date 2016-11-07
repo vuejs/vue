@@ -14,16 +14,20 @@ function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 
   const oldClassList = []
-  if (oldData.staticClass) {
-    oldClassList.push.apply(oldClassList, oldData.staticClass)
+  // unlike web, weex vnode staticClass is an Array
+  const oldStaticClass: any = oldData.staticClass
+  if (oldStaticClass) {
+    oldClassList.push.apply(oldClassList, oldStaticClass)
   }
   if (oldData.class) {
     oldClassList.push.apply(oldClassList, oldData.class)
   }
 
   const classList = []
-  if (data.staticClass) {
-    classList.push.apply(classList, data.staticClass)
+  // unlike web, weex vnode staticClass is an Array
+  const staticClass: any = data.staticClass
+  if (staticClass) {
+    classList.push.apply(classList, staticClass)
   }
   if (data.class) {
     classList.push.apply(classList, data.class)
@@ -36,7 +40,9 @@ function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 }
 
 function getStyle (oldClassList: Array<string>, classList: Array<string>, ctx: Component): Object {
-  const stylesheet = ctx.$options.style || {}
+  // style is a weex-only injected object
+  // compiled from <style> tags in weex files
+  const stylesheet: any = ctx.$options.style || {}
   const result = {}
   classList.forEach(name => {
     const style = stylesheet[name]
