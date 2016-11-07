@@ -169,14 +169,15 @@ describe('Directive v-bind:style', () => {
 
   it('should merge static style with binding style', () => {
     const vm = new Vue({
-      template: '<div style="text-align: left;color: blue" :style="test"></div>',
+      template: '<div style="background: url(https://vuejs.org/images/logo.png);color: blue" :style="test"></div>',
       data: {
         test: { color: 'red', fontSize: '12px' }
       }
     }).$mount()
-    expect(vm.$el.style.cssText.replace(/\s/g, '')).toBe('text-align:left;color:red;font-size:12px;')
-    expect(vm.$el.style.getPropertyValue('color')).toBe('red')
-    expect(vm.$el.style.getPropertyValue('font-size')).toBe('12px')
+    const style = vm.$el.style
+    expect(style.getPropertyValue('background-image')).toMatch('https://vuejs.org/images/logo.png')
+    expect(style.getPropertyValue('color')).toBe('red')
+    expect(style.getPropertyValue('font-size')).toBe('12px')
   })
 
   it('should merge between parent and child', done => {
@@ -192,19 +193,20 @@ describe('Directive v-bind:style', () => {
         }
       }
     }).$mount()
+    const style = vm.$el.style
     const child = vm.$children[0]
-    expect(vm.$el.style.cssText.replace(/\s/g, '')).toBe('margin-right:20px;margin-left:16px;text-align:left;color:red;font-size:12px;')
-    expect(vm.$el.style.color).toBe('red')
-    expect(vm.$el.style.marginRight).toBe('20px')
+    expect(style.cssText.replace(/\s/g, '')).toBe('margin-right:20px;margin-left:16px;text-align:left;color:red;font-size:12px;')
+    expect(style.color).toBe('red')
+    expect(style.marginRight).toBe('20px')
     vm.test.color = 'blue'
     waitForUpdate(() => {
-      expect(vm.$el.style.color).toBe('blue')
+      expect(style.color).toBe('blue')
       child.marginLeft = '30px'
     }).then(() => {
-      expect(vm.$el.style.marginLeft).toBe('30px')
+      expect(style.marginLeft).toBe('30px')
       child.fontSize = '30px'
     }).then(() => {
-      expect(vm.$el.style.fontSize).toBe('12px')
+      expect(style.fontSize).toBe('12px')
     }).then(done)
   })
 
@@ -225,9 +227,10 @@ describe('Directive v-bind:style', () => {
         }
       }
     }).$mount()
-    expect(vm.$el.style.color).toBe('red')
-    expect(vm.$el.style.textAlign).toBe('')
-    expect(vm.$el.style.fontSize).toBe('12px')
+    const style = vm.$el.style
+    expect(style.color).toBe('red')
+    expect(style.textAlign).toBe('')
+    expect(style.fontSize).toBe('12px')
     expect(vm.$children[0].$refs.nested.$el.style.color).toBe('blue')
   })
 
@@ -249,23 +252,24 @@ describe('Directive v-bind:style', () => {
         }
       }
     }).$mount()
+    const style = vm.$el.style
     const child = vm.$children[0].$children[0]
-    expect(vm.$el.style.color).toBe('red')
-    expect(vm.$el.style.marginLeft).toBe('30px')
-    expect(vm.$el.style.textAlign).toBe('left')
-    expect(vm.$el.style.fontSize).toBe('12px')
+    expect(style.color).toBe('red')
+    expect(style.marginLeft).toBe('30px')
+    expect(style.textAlign).toBe('left')
+    expect(style.fontSize).toBe('12px')
     vm.test.color = 'yellow'
     waitForUpdate(() => {
       child.nestedStyle.marginLeft = '60px'
     }).then(() => {
-      expect(vm.$el.style.marginLeft).toBe('60px')
+      expect(style.marginLeft).toBe('60px')
       child.nestedStyle = {
         fontSize: '14px',
         marginLeft: '40px'
       }
     }).then(() => {
-      expect(vm.$el.style.fontSize).toBe('12px')
-      expect(vm.$el.style.marginLeft).toBe('40px')
+      expect(style.fontSize).toBe('12px')
+      expect(style.marginLeft).toBe('40px')
     }).then(done)
   })
 })
