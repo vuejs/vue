@@ -166,4 +166,110 @@ describe('Directive v-bind:style', () => {
       }).then(done)
     })
   }
+
+  it('should merge static style with binding style', () => {
+    const vm = new Vue({
+      template: '<div style="background: url(https://vuejs.org/images/logo.png);color: blue" :style="test"></div>',
+      data: {
+        test: { color: 'red', fontSize: '12px' }
+      }
+    }).$mount()
+    const style = vm.$el.style
+    expect(style.getPropertyValue('background-image')).toMatch('https://vuejs.org/images/logo.png')
+    expect(style.getPropertyValue('color')).toBe('red')
+    expect(style.getPropertyValue('font-size')).toBe('12px')
+  })
+
+  it('should merge between parent and child', done => {
+    const vm = new Vue({
+      template: '<child style="text-align: left;margin-right:20px" :style="test"></child>',
+      data: {
+        test: { color: 'red', fontSize: '12px' }
+      },
+      components: {
+        child: {
+          template: '<div style="margin-right:10px;" :style="{marginLeft: marginLeft}"></div>',
+          data: () => ({ marginLeft: '16px' })
+        }
+      }
+    }).$mount()
+    const style = vm.$el.style
+    const child = vm.$children[0]
+    expect(style.cssText.replace(/\s/g, '')).toBe('margin-right:20px;margin-left:16px;text-align:left;color:red;font-size:12px;')
+    expect(style.color).toBe('red')
+    expect(style.marginRight).toBe('20px')
+    vm.test.color = 'blue'
+    waitForUpdate(() => {
+      expect(style.color).toBe('blue')
+      child.marginLeft = '30px'
+    }).then(() => {
+      expect(style.marginLeft).toBe('30px')
+      child.fontSize = '30px'
+    }).then(() => {
+      expect(style.fontSize).toBe('12px')
+    }).then(done)
+  })
+
+  it('should not pass to child root element', () => {
+    const vm = new Vue({
+      template: '<child :style="test"></child>',
+      data: {
+        test: { color: 'red', fontSize: '12px' }
+      },
+      components: {
+        child: {
+          template: '<div><nested ref="nested" style="color: blue;text-align:left"></nested></div>',
+          components: {
+            nested: {
+              template: '<div></div>'
+            }
+          }
+        }
+      }
+    }).$mount()
+    const style = vm.$el.style
+    expect(style.color).toBe('red')
+    expect(style.textAlign).toBe('')
+    expect(style.fontSize).toBe('12px')
+    expect(vm.$children[0].$refs.nested.$el.style.color).toBe('blue')
+  })
+
+  it('should merge between nested components', (done) => {
+    const vm = new Vue({
+      template: '<child :style="test"></child>',
+      data: {
+        test: { color: 'red', fontSize: '12px' }
+      },
+      components: {
+        child: {
+          template: '<nested style="color: blue;text-align:left"></nested>',
+          components: {
+            nested: {
+              template: '<div style="margin-left: 12px;" :style="nestedStyle"></div>',
+              data: () => ({ nestedStyle: { marginLeft: '30px' }})
+            }
+          }
+        }
+      }
+    }).$mount()
+    const style = vm.$el.style
+    const child = vm.$children[0].$children[0]
+    expect(style.color).toBe('red')
+    expect(style.marginLeft).toBe('30px')
+    expect(style.textAlign).toBe('left')
+    expect(style.fontSize).toBe('12px')
+    vm.test.color = 'yellow'
+    waitForUpdate(() => {
+      child.nestedStyle.marginLeft = '60px'
+    }).then(() => {
+      expect(style.marginLeft).toBe('60px')
+      child.nestedStyle = {
+        fontSize: '14px',
+        marginLeft: '40px'
+      }
+    }).then(() => {
+      expect(style.fontSize).toBe('12px')
+      expect(style.marginLeft).toBe('40px')
+    }).then(done)
+  })
 })

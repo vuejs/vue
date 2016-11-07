@@ -1,44 +1,19 @@
 /* @flow */
+import { hyphenate } from 'shared/util'
+import { getStyle } from 'web/util/style'
 
-import { hyphenate, toObject } from 'shared/util'
-
-function concatStyleString (former: string, latter: string) {
-  if (former === '' || latter === '' || former.charAt(former.length - 1) === ';') {
-    return former + latter
+function genStyleText (vnode: VNode): string {
+  let styleText = ''
+  const style = getStyle(vnode, false)
+  for (const key in style) {
+    styleText += `${hyphenate(key)}:${style[key]};`
   }
-  return former + ';' + latter
+  return styleText.slice(0, -1)
 }
 
-function generateStyleText (node) {
-  const staticStyle = node.data.attrs && node.data.attrs.style
-  let styles = node.data.style
-  const parentStyle = node.parent ? generateStyleText(node.parent) : ''
-
-  if (!styles && !staticStyle) {
-    return parentStyle
-  }
-
-  let dynamicStyle = ''
-  if (styles) {
-    if (typeof styles === 'string') {
-      dynamicStyle += styles
-    } else {
-      if (Array.isArray(styles)) {
-        styles = toObject(styles)
-      }
-      for (const key in styles) {
-        dynamicStyle += `${hyphenate(key)}:${styles[key]};`
-      }
-    }
-  }
-
-  dynamicStyle = concatStyleString(parentStyle, dynamicStyle)
-  return concatStyleString(dynamicStyle, staticStyle || '')
-}
-
-export default function renderStyle (node: VNodeWithData): ?string {
-  const res = generateStyleText(node)
-  if (res) {
-    return ` style=${JSON.stringify(res)}`
+export default function renderStyle (vnode: VNodeWithData): ?string {
+  const styleText = genStyleText(vnode)
+  if (styleText) {
+    return ` style=${JSON.stringify(styleText)}`
   }
 }
