@@ -62,11 +62,11 @@ describe('SSR: renderToString', () => {
       template: '<div><cmp class="cmp"></cmp></div>',
       components: {
         cmp: {
-          render: h => h('div', { staticClass: 'child' }, 'test')
+          render: h => h('div', 'test')
         }
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true"><div class="child cmp">test</div></div>')
+      expect(result).toContain('<div server-rendered="true"><div class="cmp">test</div></div>')
       done()
     })
   })
