@@ -1,7 +1,7 @@
 /* @flow */
 
-import { cached, camelize, extend, looseEqual } from 'shared/util'
-import { normalizeBindingStyle, getStyle } from 'web/util/style'
+import { cached, camelize, extend } from 'shared/util'
+import { normalizeStyleBinding, getStyle } from 'web/util/style'
 
 const cssVarRE = /^--/
 const setProp = (el, name, val) => {
@@ -43,14 +43,11 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   let cur, name
   const el: any = vnode.elm
   const oldStyle: any = oldVnode.data.style || {}
-  const style: Object = normalizeBindingStyle(vnode.data.style || {})
-  vnode.data.style = extend({}, style)
+  const style = normalizeStyleBinding(vnode.data.style) || {}
 
-  const newStyle: Object = getStyle(vnode, true)
+  vnode.data.style = style.__ob__ ? extend({}, style) : style
 
-  if (looseEqual(el._prevStyle, newStyle)) {
-    return
-  }
+  const newStyle = getStyle(vnode, true)
 
   for (name in oldStyle) {
     if (newStyle[name] == null) {
@@ -64,7 +61,6 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       setProp(el, name, cur == null ? '' : cur)
     }
   }
-  el._prevStyle = newStyle
 }
 
 export default {

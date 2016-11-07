@@ -1,6 +1,7 @@
 /* @flow */
 
 import { parseText } from 'compiler/parser/text-parser'
+import { parseStyleText } from 'web/util/style'
 import {
   getAndRemoveAttr,
   getBindingAttr,
@@ -22,7 +23,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
         )
       }
     }
-    el.staticStyle = JSON.stringify(staticStyle)
+    el.staticStyle = JSON.stringify(parseStyleText(staticStyle))
   }
 
   const styleBinding = getBindingAttr(el, 'style', false /* getStatic */)

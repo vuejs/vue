@@ -2,7 +2,7 @@
 
 import { cached, extend, toObject } from 'shared/util'
 
-const parseStyleText = cached(function (cssText) {
+export const parseStyleText = cached(function (cssText) {
   const rs = {}
   if (!cssText) {
     return rs
@@ -20,17 +20,21 @@ const parseStyleText = cached(function (cssText) {
   return rs
 })
 
-function normalizeStyleData (styleData: Object): Object {
-  const style = normalizeBindingStyle(styleData.style)
-  const staticStyle = parseStyleText(styleData.staticStyle)
-  return extend(extend({}, staticStyle), style)
+// merge static and dynamic style data on the same vnode
+function normalizeStyleData (data: VNodeData): ?Object {
+  const style = normalizeStyleBinding(data.style)
+  // static style is pre-processed into an object during compilation
+  // and is always a fresh object, so it's safe to merge into it
+  return data.staticStyle
+    ? extend(data.staticStyle, style)
+    : style
 }
 
-export function normalizeBindingStyle (bindingStyle: any): Object {
+// normalize possible array / string values into Object
+export function normalizeStyleBinding (bindingStyle: any): ?Object {
   if (Array.isArray(bindingStyle)) {
     return toObject(bindingStyle)
   }
-
   if (typeof bindingStyle === 'string') {
     return parseStyleText(bindingStyle)
   }
@@ -42,25 +46,29 @@ export function normalizeBindingStyle (bindingStyle: any): Object {
  * so that parent component's style could override it
  */
 export function getStyle (vnode: VNode, checkChild: boolean): Object {
-  let data = vnode.data
-  let parentNode = vnode
-  let childNode = vnode
-
-  data = normalizeStyleData(data)
+  const res = {}
+  let styleData
 
   if (checkChild) {
+    let childNode = vnode
     while (childNode.child) {
       childNode = childNode.child._vnode
-      if (childNode.data) {
-        data = extend(normalizeStyleData(childNode.data), data)
+      if (childNode.data && (styleData = normalizeStyleData(childNode.data))) {
+        extend(res, styleData)
       }
     }
   }
+
+  if ((styleData = normalizeStyleData(vnode.data))) {
+    extend(res, styleData)
+  }
+
+  let parentNode = vnode
   while ((parentNode = parentNode.parent)) {
-    if (parentNode.data) {
-      data = extend(data, normalizeStyleData(parentNode.data))
+    if (parentNode.data && (styleData = normalizeStyleData(parentNode.data))) {
+      extend(res, styleData)
     }
   }
-  return data
+  return res
 }
 
