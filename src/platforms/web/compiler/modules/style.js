@@ -12,6 +12,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticStyle = getAndRemoveAttr(el, 'style')
   if (staticStyle) {
+    /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production') {
       const expression = parseText(staticStyle, options.delimiters)
       if (expression) {

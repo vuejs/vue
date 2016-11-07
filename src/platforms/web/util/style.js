@@ -3,10 +3,7 @@
 import { cached, extend, toObject } from 'shared/util'
 
 export const parseStyleText = cached(function (cssText) {
-  const rs = {}
-  if (!cssText) {
-    return rs
-  }
+  const res = {}
   const hasBackground = cssText.indexOf('background') >= 0
   // maybe with background-image: url(http://xxx) or base64 img
   const listDelimiter = hasBackground ? /;(?![^(]*\))/g : ';'
@@ -14,10 +11,10 @@ export const parseStyleText = cached(function (cssText) {
   cssText.split(listDelimiter).forEach(function (item) {
     if (item) {
       var tmp = item.split(propertyDelimiter)
-      tmp.length > 1 && (rs[tmp[0].trim()] = tmp[1].trim())
+      tmp.length > 1 && (res[tmp[0].trim()] = tmp[1].trim())
     }
   })
-  return rs
+  return res
 })
 
 // merge static and dynamic style data on the same vnode
