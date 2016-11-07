@@ -3,14 +3,14 @@
 import { cached, extend, toObject } from 'shared/util'
 
 const parseStyleText = cached(function (cssText) {
-  var rs = {}
+  const rs = {}
   if (!cssText) {
     return rs
   }
-  var hasBackground = cssText.indexOf('background') >= 0
+  const hasBackground = cssText.indexOf('background') >= 0
   // maybe with background-image: url(http://xxx) or base64 img
-  var listDelimiter = hasBackground ? /;(?![^(]*\))/g : ';'
-  var propertyDelimiter = hasBackground ? /:(.+)/ : ':'
+  const listDelimiter = hasBackground ? /;(?![^(]*\))/g : ';'
+  const propertyDelimiter = hasBackground ? /:(.+)/ : ':'
   cssText.split(listDelimiter).forEach(function (item) {
     if (item) {
       var tmp = item.split(propertyDelimiter)
