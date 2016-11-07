@@ -57,6 +57,42 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('custome component class', done => {
+    renderVmWithOptions({
+      template: '<div><cmp class="cmp"></cmp></div>',
+      components: {
+        cmp: {
+          render: h => h('div', 'test')
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div server-rendered="true"><div class="cmp">test</div></div>')
+      done()
+    })
+  })
+
+  it('nested component class', done => {
+    renderVmWithOptions({
+      template: '<cmp class="outer" :class="cls"></cmp>',
+      data: { cls: { 'success': 1 }},
+      components: {
+        cmp: {
+          render: h => h('div', [h('nested', { staticClass: 'nested', 'class': { 'error': 1 }})]),
+          components: {
+            nested: {
+              render: h => h('div', { staticClass: 'inner' }, 'test')
+            }
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div server-rendered="true" class="outer success">' +
+          '<div class="inner nested error">test</div>' +
+        '</div>')
+      done()
+    })
+  })
+
   it('dynamic style', done => {
     renderVmWithOptions({
       template: '<div style="background-color:black" :style="{ fontSize: fontSize + \'px\', color: color }"></div>',
