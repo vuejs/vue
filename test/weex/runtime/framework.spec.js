@@ -3,7 +3,6 @@ import { DEFAULT_ENV, Runtime, Instance } from 'weex-vdom-tester'
 import { config } from 'weex-js-runtime'
 
 import {
-  createInstance,
   syncPromise,
   checkRefresh
 } from '../helpers/index'
@@ -231,7 +230,7 @@ describe('framework APIs', () => {
 
     const textRef = Vue.getRoot(instance.id).children[0].ref
     Vue.receiveTasks(instance.id, [
-      { method: 'fireEvent', args: [textRef, 'click']}
+      { method: 'fireEvent', args: [textRef, 'click'] }
     ])
 
     setTimeout(() => {
@@ -246,7 +245,7 @@ describe('framework APIs', () => {
 
       Vue.destroyInstance(instance.id)
       const result = Vue.receiveTasks(instance.id, [
-        { method: 'fireEvent', args: [textRef, 'click']}
+        { method: 'fireEvent', args: [textRef, 'click'] }
       ])
       expect(result instanceof Error).toBe(true)
       expect(result).toMatch(/receiveTasks/)
@@ -301,7 +300,7 @@ describe('framework APIs', () => {
       }
     })
     Vue.receiveTasks(instance.id, [
-      { method: 'callback', args: [callbackId, undefined, true]}
+      { method: 'callback', args: [callbackId, undefined, true] }
     ])
 
     setTimeout(() => {
@@ -314,7 +313,7 @@ describe('framework APIs', () => {
       })
 
       Vue.receiveTasks(instance.id, [
-        { method: 'callback', args: [callbackId, { value: 'Weex' }, true]}
+        { method: 'callback', args: [callbackId, { value: 'Weex' }, true] }
       ])
       setTimeout(() => {
         expect(instance.getRealRoot()).toEqual({
@@ -326,7 +325,7 @@ describe('framework APIs', () => {
         })
 
         Vue.receiveTasks(instance.id, [
-          { method: 'callback', args: [callbackId]}
+          { method: 'callback', args: [callbackId] }
         ])
         setTimeout(() => {
           expect(instance.getRealRoot()).toEqual({
@@ -339,7 +338,7 @@ describe('framework APIs', () => {
 
           Vue.destroyInstance(instance.id)
           const result = Vue.receiveTasks(instance.id, [
-            { method: 'callback', args: [callbackId]}
+            { method: 'callback', args: [callbackId] }
           ])
           expect(result instanceof Error).toBe(true)
           expect(result).toMatch(/receiveTasks/)
@@ -399,14 +398,14 @@ describe('framework APIs', () => {
       }]
     })
 
-    expect(instance.history.callNative.
-      filter(task => task.module === 'foo').
-      map(task => `${task.method}(${task.args})`)
+    expect(instance.history.callNative
+      .filter(task => task.module === 'foo')
+      .map(task => `${task.method}(${task.args})`)
     ).toEqual(['a(1,2,true)'])
 
-    expect(instance.history.callNative.
-      filter(task => task.module === 'bar').
-      map(task => `${task.method}(${task.args})`)
+    expect(instance.history.callNative
+      .filter(task => task.module === 'bar')
+      .map(task => `${task.method}(${task.args})`)
     ).toEqual(['b(1)'])
   })
 
