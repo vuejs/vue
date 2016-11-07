@@ -21,7 +21,7 @@ declare type VNodeWithData = {
   data: VNodeData;
   children: Array<VNode> | void;
   text: void;
-  elm: HTMLElement;
+  elm: any;
   ns: string | void;
   context: Component;
   key: string | number | void;

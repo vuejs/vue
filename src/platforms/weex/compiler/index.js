@@ -14,7 +14,6 @@ import {
 const cache: { [key: string]: CompiledFunctionResult } = Object.create(null)
 
 export const baseOptions: CompilerOptions = {
-
   preserveWhitespace: false,
   modules,
   staticKeys: genStaticKeys(modules),
@@ -23,7 +22,6 @@ export const baseOptions: CompilerOptions = {
   isUnaryTag,
   mustUseProp,
   getTagNamespace
-
 }
 
 export function compile (

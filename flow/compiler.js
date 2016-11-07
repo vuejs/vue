@@ -120,6 +120,9 @@ declare type ASTElement = {
   once?: true;
   onceProcessed?: boolean;
   wrapData?: (code: string) => string;
+
+  // weex specific
+  atom?: boolean;
 }
 
 declare type ASTExpression = {

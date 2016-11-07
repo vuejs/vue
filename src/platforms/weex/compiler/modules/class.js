@@ -16,14 +16,12 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')
   const { dynamic, classResult } = parseStaticClass(staticClass, options)
-  if (dynamic) {
-    if (process.env.NODE_ENV !== 'production') {
-      warn(
-        `class="${staticClass}": ` +
-        'Interpolation inside attributes has been deprecated. ' +
-        'Use v-bind or the colon shorthand instead.'
-      )
-    }
+  if (process.env.NODE_ENV !== 'production' && dynamic && staticClass) {
+    warn(
+      `class="${staticClass}": ` +
+      'Interpolation inside attributes has been deprecated. ' +
+      'Use v-bind or the colon shorthand instead.'
+    )
   }
   if (!dynamic && classResult) {
     el.staticClass = classResult
@@ -47,7 +45,7 @@ function genData (el: ASTElement): string {
   return data
 }
 
-function parseStaticClass (staticClass?: string, options: CompilerOptions): StaticClassResult {
+function parseStaticClass (staticClass: ?string, options: CompilerOptions): StaticClassResult {
   // "a b c" -> ["a", "b", "c"] => staticClass: ["a", "b", "c"]
   // "a {{x}} c" -> ["a", x, "c"] => classBinding: '["a", x, "c"]'
   let dynamic = false
