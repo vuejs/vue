@@ -5,6 +5,7 @@ npm run test:types
 npm run test:cover
 npm run test:e2e -- --env phantomjs
 npm run test:ssr
+npm run test:weex
 
 # report coverage stats for non-PRs
 if [[ -z $CI_PULL_REQUEST ]]; then
