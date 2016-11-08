@@ -77,4 +77,50 @@ describe('Single File Component parser', () => {
     `)
     expect(res.template.content.trim()).toBe(`div\n  h1(v-if='1 < 2') hello`)
   })
+
+  it('should handle custom blocks without without parsing them', () => {
+    const res = parseComponent(`
+      <template>
+        <div></div>
+      </template>
+      <example name="simple">
+        <my-button ref="button">Hello</my-button>
+      </example>
+      <example name="with props">
+        <my-button color="red">Hello</my-button>
+      </example>
+      <test name="simple" foo="bar">
+      export default function simple (vm) {
+        describe('Hello', () => {
+          it('should display Hello', () => {
+            this.vm.$refs.button.$el.innerText.should.equal('Hello')
+          }))
+        }))
+      }
+      </test>
+    `)
+    expect(res.customBlocks.length).toBe(3)
+
+    const simpleExample = res.customBlocks[0]
+    expect(simpleExample.type).toBe('example')
+    expect(simpleExample.content.trim()).toBe('<my-button ref="button">Hello</my-button>')
+    expect(simpleExample.attrs.name).toBe('simple')
+
+    const withProps = res.customBlocks[1]
+    expect(withProps.type).toBe('example')
+    expect(withProps.content.trim()).toBe('<my-button color="red">Hello</my-button>')
+    expect(withProps.attrs.name).toBe('with props')
+
+    const simpleTest = res.customBlocks[2]
+    expect(simpleTest.type).toBe('test')
+    expect(simpleTest.content.trim()).toBe(`export default function simple (vm) {
+  describe('Hello', () => {
+    it('should display Hello', () => {
+      this.vm.$refs.button.$el.innerText.should.equal('Hello')
+    }))
+  }))
+}`)
+    expect(simpleTest.attrs.name).toBe('simple')
+    expect(simpleTest.attrs.foo).toBe('bar')
+  })
 })
