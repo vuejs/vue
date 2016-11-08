@@ -5121,14 +5121,12 @@ function transformNode (el, options) {
   var ref = parseStaticClass(staticClass, options);
   var dynamic = ref.dynamic;
   var classResult = ref.classResult;
-  if (dynamic) {
-    if (process.env.NODE_ENV !== 'production') {
-      warn(
-        "class=\"" + staticClass + "\": " +
-        'Interpolation inside attributes has been deprecated. ' +
-        'Use v-bind or the colon shorthand instead.'
-      );
-    }
+  if (process.env.NODE_ENV !== 'production' && dynamic && staticClass) {
+    warn(
+      "class=\"" + staticClass + "\": " +
+      'Interpolation inside attributes has been deprecated. ' +
+      'Use v-bind or the colon shorthand instead.'
+    );
   }
   if (!dynamic && classResult) {
     el.staticClass = classResult;
@@ -5189,14 +5187,12 @@ function transformNode$1 (el, options) {
   var ref = parseStaticStyle(staticStyle, options);
   var dynamic = ref.dynamic;
   var styleResult = ref.styleResult;
-  if (dynamic) {
-    if (process.env.NODE_ENV !== 'production') {
-      warn(
-        "style=\"" + staticStyle + "\": " +
-        'Interpolation inside attributes has been deprecated. ' +
-        'Use v-bind or the colon shorthand instead.'
-      );
-    }
+  if (process.env.NODE_ENV !== 'production' && dynamic) {
+    warn(
+      "style=\"" + (String(staticStyle)) + "\": " +
+      'Interpolation inside attributes has been deprecated. ' +
+      'Use v-bind or the colon shorthand instead.'
+    );
   }
   if (!dynamic && styleResult) {
     el.staticStyle = styleResult;
@@ -5310,7 +5306,6 @@ function getTagNamespace$1 () { /* console.log('getTagNamespace') */ }
 var cache = Object.create(null);
 
 var baseOptions = {
-
   preserveWhitespace: false,
   modules: modules,
   staticKeys: genStaticKeys(modules),
@@ -5319,7 +5314,6 @@ var baseOptions = {
   isUnaryTag: isUnaryTag$1,
   mustUseProp: mustUseProp$1,
   getTagNamespace: getTagNamespace$1
-
 };
 
 function compile$1 (
@@ -5351,9 +5345,10 @@ function compile$$1 (
   options = options || {};
   var errors = [];
   // allow injecting modules/directives
+  var baseModules = baseOptions.modules || [];
   var modules = options.modules
-    ? baseOptions.modules.concat(options.modules)
-    : baseOptions.modules;
+    ? baseModules.concat(options.modules)
+    : baseModules;
   var directives = options.directives
     ? extend(extend({}, baseOptions.directives), options.directives)
     : baseOptions.directives;

@@ -4252,16 +4252,20 @@ function updateClass (oldVnode, vnode) {
   }
 
   var oldClassList = [];
-  if (oldData.staticClass) {
-    oldClassList.push.apply(oldClassList, oldData.staticClass);
+  // unlike web, weex vnode staticClass is an Array
+  var oldStaticClass = oldData.staticClass;
+  if (oldStaticClass) {
+    oldClassList.push.apply(oldClassList, oldStaticClass);
   }
   if (oldData.class) {
     oldClassList.push.apply(oldClassList, oldData.class);
   }
 
   var classList = [];
-  if (data.staticClass) {
-    classList.push.apply(classList, data.staticClass);
+  // unlike web, weex vnode staticClass is an Array
+  var staticClass = data.staticClass;
+  if (staticClass) {
+    classList.push.apply(classList, staticClass);
   }
   if (data.class) {
     classList.push.apply(classList, data.class);
@@ -4274,6 +4278,8 @@ function updateClass (oldVnode, vnode) {
 }
 
 function getStyle (oldClassList, classList, ctx) {
+  // style is a weex-only injected object
+  // compiled from <style> tags in weex files
   var stylesheet = ctx.$options.style || {};
   var result = {};
   classList.forEach(function (name) {
@@ -4439,6 +4445,8 @@ Vue$1.prototype.$mount = function (
 ) {
   return this._mount(el && query(el, this.$document), hydrating)
 };
+
+Vue$1.weexVersion = '2.0.5-weex.1';
 
 var instances = renderer.instances;
 var modules = renderer.modules;
