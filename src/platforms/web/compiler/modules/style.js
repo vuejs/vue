@@ -17,10 +17,10 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
       const expression = parseText(staticStyle, options.delimiters)
       if (expression) {
         warn(
-            `style="${staticStyle}": ` +
-            'Interpolation inside attributes has been removed. ' +
-            'Use v-bind or the colon shorthand instead. For example, ' +
-            'instead of <div style="{{ val }}">, use <div :style="val">.'
+          `style="${staticStyle}": ` +
+          'Interpolation inside attributes has been removed. ' +
+          'Use v-bind or the colon shorthand instead. For example, ' +
+          'instead of <div style="{{ val }}">, use <div :style="val">.'
         )
       }
     }
