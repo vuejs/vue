@@ -16,8 +16,5 @@
   "bugs": {
     "url": "https://github.com/vuejs/vue/issues"
   },
-  "homepage": "https://github.com/vuejs/vue/tree/dev/packages/weex-vue-framework#readme",
-  "dependencies": {
-    "weex-styler": "0.0.17"
-  }
+  "homepage": "https://github.com/vuejs/vue/tree/dev/packages/weex-vue-framework#readme"
 }
