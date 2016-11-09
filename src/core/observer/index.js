@@ -41,6 +41,9 @@ export class Observer {
     this.dep = new Dep()
     this.vmCount = 0
     def(value, '__ob__', this)
+    def(value, 'normalize', function(){
+      return JSON.parse(JSON.stringify(this))
+    })
     if (Array.isArray(value)) {
       const augment = hasProto
         ? protoAugment
