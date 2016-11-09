@@ -34,10 +34,6 @@ export function createComponent (
     return
   }
 
-  // resolve constructor options in case global mixins are applied after
-  // component constructor creation
-  resolveConstructorOptions(Ctor)
-
   // async component
   if (!Ctor.cid) {
     if (Ctor.resolved) {
@@ -55,6 +51,10 @@ export function createComponent (
       }
     }
   }
+
+  // resolve constructor options in case global mixins are applied after
+  // component constructor creation
+  resolveConstructorOptions(Ctor)
 
   data = data || {}
 
