@@ -1,6 +1,5 @@
 /* @flow */
 
-import Vue from '../instance/index'
 import VNode from './vnode'
 import { normalizeChildren } from './helpers/index'
 import { resolveConstructorOptions } from '../instance/init'
@@ -23,8 +22,9 @@ export function createComponent (
     return
   }
 
+  const baseCtor = context.$options._base
   if (isObject(Ctor)) {
-    Ctor = Vue.extend(Ctor)
+    Ctor = baseCtor.extend(Ctor)
   }
 
   if (typeof Ctor !== 'function') {
@@ -39,7 +39,7 @@ export function createComponent (
     if (Ctor.resolved) {
       Ctor = Ctor.resolved
     } else {
-      Ctor = resolveAsyncComponent(Ctor, () => {
+      Ctor = resolveAsyncComponent(Ctor, baseCtor, () => {
         // it's ok to queue this on every render because
         // $forceUpdate is buffered by the scheduler.
         context.$forceUpdate()
@@ -195,6 +195,7 @@ function destroy (vnode: MountedComponentVNode) {
 
 function resolveAsyncComponent (
   factory: Function,
+  baseCtor: Class<Component>,
   cb: Function
 ): Class<Component> | void {
   if (factory.requested) {
@@ -207,7 +208,7 @@ function resolveAsyncComponent (
 
     const resolve = (res: Object | Class<Component>) => {
       if (isObject(res)) {
-        res = Vue.extend(res)
+        res = baseCtor.extend(res)
       }
       // cache resolved
       factory.resolved = res

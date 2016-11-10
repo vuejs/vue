@@ -2,6 +2,7 @@ import Vue from 'weex/runtime/index'
 import renderer from 'weex/runtime/config'
 
 Vue.weexVersion = '2.0.5-weex.1'
+export { Vue }
 
 const {
   instances,
@@ -85,8 +86,11 @@ export function createInstance (
 
   // Each instance has a independent `Vue` object and it should have
   // all top-level public APIs.
-  const subVue = Vue.extend({});
-  ['util', 'set', 'delete', 'nextTick', 'use'].forEach(name => {
+  const subVue = Vue.extend({})
+  // ensure plain-object components are extended from the subVue
+  subVue.options._base = subVue
+  // expose global utility
+  ;['util', 'set', 'delete', 'nextTick'].forEach(name => {
     subVue[name] = Vue[name]
   })
 

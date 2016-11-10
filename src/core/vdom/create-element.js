@@ -21,7 +21,7 @@ export function createElement (
   return _createElement(this._self, tag, data, children)
 }
 
-function _createElement (
+export function _createElement (
   context: Component,
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,

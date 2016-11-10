@@ -18,9 +18,10 @@ export function initExtend (Vue: GlobalAPI) {
   Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
     const Super = this
-    const isFirstExtend = Super.cid === 0
-    if (isFirstExtend && extendOptions._Ctor) {
-      return extendOptions._Ctor
+    const SuperId = Super.cid
+    const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
+    if (cachedCtors[SuperId]) {
+      return cachedCtors[SuperId]
     }
     const name = extendOptions.name || Super.options.name
     if (process.env.NODE_ENV !== 'production') {
@@ -42,8 +43,10 @@ export function initExtend (Vue: GlobalAPI) {
       extendOptions
     )
     Sub['super'] = Super
-    // allow further extension
+    // allow further extension/mixin/plugin usage
     Sub.extend = Super.extend
+    Sub.mixin = Super.mixin
+    Sub.use = Super.use
     // create asset registers, so extended classes
     // can have their private assets too.
     config._assetTypes.forEach(function (type) {
@@ -59,9 +62,7 @@ export function initExtend (Vue: GlobalAPI) {
     Sub.superOptions = Super.options
     Sub.extendOptions = extendOptions
     // cache constructor
-    if (isFirstExtend) {
-      extendOptions._Ctor = Sub
-    }
+    cachedCtors[SuperId] = Sub
     return Sub
   }
 }

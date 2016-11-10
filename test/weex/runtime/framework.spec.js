@@ -1,4 +1,4 @@
-import * as Vue from '../../../packages/weex-vue-framework'
+import * as framework from '../../../packages/weex-vue-framework'
 import { DEFAULT_ENV, Runtime, Instance } from 'weex-vdom-tester'
 import { config } from 'weex-js-runtime'
 
@@ -18,8 +18,8 @@ describe('framework APIs', () => {
 
   beforeEach(() => {
     Document.handler = sendTasks
-    Vue.init({ Document, Element, Comment, sendTasks })
-    runtime = new Runtime(Vue)
+    framework.init({ Document, Element, Comment, sendTasks })
+    runtime = new Runtime(framework)
     sendTasksHandler = function () {
       runtime.target.callNative(...arguments)
     }
@@ -27,12 +27,12 @@ describe('framework APIs', () => {
 
   afterEach(() => {
     delete Document.handler
-    Vue.reset()
+    framework.reset()
   })
 
   it('createInstance', () => {
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       new Vue({
         render: function (createElement) {
           return createElement('div', {}, [
@@ -50,7 +50,7 @@ describe('framework APIs', () => {
 
   it('createInstance with config', () => {
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       new Vue({
         render: function (createElement) {
           return createElement('div', {}, [
@@ -68,7 +68,7 @@ describe('framework APIs', () => {
 
   it('createInstance with external data', () => {
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       new Vue({
         data: {
           a: 1,
@@ -90,7 +90,7 @@ describe('framework APIs', () => {
 
   it('destroyInstance', (done) => {
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       new Vue({
         data: {
           x: 'Hello'
@@ -114,7 +114,7 @@ describe('framework APIs', () => {
           type: 'div',
           children: [{ type: 'text', attr: { value: 'World' }}]
         })
-        Vue.destroyInstance(instance.id)
+        framework.destroyInstance(instance.id)
       }),
       checkRefresh(instance, { x: 'Weex' }, result => {
         expect(result).toEqual({
@@ -128,7 +128,7 @@ describe('framework APIs', () => {
 
   it('refreshInstance', (done) => {
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       new Vue({
         data: {
           x: 'Hello'
@@ -146,15 +146,15 @@ describe('framework APIs', () => {
       children: [{ type: 'text', attr: { value: 'Hello' }}]
     })
 
-    Vue.refreshInstance(instance.id, { x: 'World' })
+    framework.refreshInstance(instance.id, { x: 'World' })
     setTimeout(() => {
       expect(instance.getRealRoot()).toEqual({
         type: 'div',
         children: [{ type: 'text', attr: { value: 'World' }}]
       })
 
-      Vue.destroyInstance(instance.id)
-      const result = Vue.refreshInstance(instance.id, { x: 'Weex' })
+      framework.destroyInstance(instance.id)
+      const result = framework.refreshInstance(instance.id, { x: 'Weex' })
       expect(result instanceof Error).toBe(true)
       expect(result).toMatch(/refreshInstance/)
       expect(result).toMatch(/not found/)
@@ -171,7 +171,7 @@ describe('framework APIs', () => {
 
   it('getRoot', () => {
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       new Vue({
         data: {
           x: 'Hello'
@@ -185,15 +185,15 @@ describe('framework APIs', () => {
       })
     `)
 
-    let root = Vue.getRoot(instance.id)
+    let root = framework.getRoot(instance.id)
     expect(root.ref).toEqual('_root')
     expect(root.type).toEqual('div')
     expect(root.children.length).toEqual(1)
     expect(root.children[0].type).toEqual('text')
     expect(root.children[0].attr).toEqual({ value: 'Hello' })
-    Vue.destroyInstance(instance.id)
+    framework.destroyInstance(instance.id)
 
-    root = Vue.getRoot(instance.id)
+    root = framework.getRoot(instance.id)
     expect(root instanceof Error).toBe(true)
     expect(root).toMatch(/getRoot/)
     expect(root).toMatch(/not found/)
@@ -201,7 +201,7 @@ describe('framework APIs', () => {
 
   it('reveiveTasks: fireEvent', (done) => {
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       new Vue({
         data: {
           x: 'Hello'
@@ -228,8 +228,8 @@ describe('framework APIs', () => {
       }]
     })
 
-    const textRef = Vue.getRoot(instance.id).children[0].ref
-    Vue.receiveTasks(instance.id, [
+    const textRef = framework.getRoot(instance.id).children[0].ref
+    framework.receiveTasks(instance.id, [
       { method: 'fireEvent', args: [textRef, 'click'] }
     ])
 
@@ -243,8 +243,8 @@ describe('framework APIs', () => {
         }]
       })
 
-      Vue.destroyInstance(instance.id)
-      const result = Vue.receiveTasks(instance.id, [
+      framework.destroyInstance(instance.id)
+      const result = framework.receiveTasks(instance.id, [
         { method: 'fireEvent', args: [textRef, 'click'] }
       ])
       expect(result instanceof Error).toBe(true)
@@ -255,12 +255,12 @@ describe('framework APIs', () => {
   })
 
   it('reveiveTasks: callback', (done) => {
-    Vue.registerModules({
+    framework.registerModules({
       foo: ['a', 'b', 'c']
     })
 
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       const moduleFoo = __weex_require_module__('foo')
       new Vue({
         data: {
@@ -299,7 +299,7 @@ describe('framework APIs', () => {
         return true
       }
     })
-    Vue.receiveTasks(instance.id, [
+    framework.receiveTasks(instance.id, [
       { method: 'callback', args: [callbackId, undefined, true] }
     ])
 
@@ -312,7 +312,7 @@ describe('framework APIs', () => {
         }]
       })
 
-      Vue.receiveTasks(instance.id, [
+      framework.receiveTasks(instance.id, [
         { method: 'callback', args: [callbackId, { value: 'Weex' }, true] }
       ])
       setTimeout(() => {
@@ -324,7 +324,7 @@ describe('framework APIs', () => {
           }]
         })
 
-        Vue.receiveTasks(instance.id, [
+        framework.receiveTasks(instance.id, [
           { method: 'callback', args: [callbackId] }
         ])
         setTimeout(() => {
@@ -336,8 +336,8 @@ describe('framework APIs', () => {
             }]
           })
 
-          Vue.destroyInstance(instance.id)
-          const result = Vue.receiveTasks(instance.id, [
+          framework.destroyInstance(instance.id)
+          const result = framework.receiveTasks(instance.id, [
             { method: 'callback', args: [callbackId] }
           ])
           expect(result instanceof Error).toBe(true)
@@ -350,7 +350,7 @@ describe('framework APIs', () => {
   })
 
   it('registerModules', () => {
-    Vue.registerModules({
+    framework.registerModules({
       foo: ['a', 'b', 'c'],
       bar: [
         { name: 'a', args: ['string'] },
@@ -360,7 +360,7 @@ describe('framework APIs', () => {
     })
 
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       const moduleFoo = __weex_require_module__('foo')
       const moduleBar = __weex_require_module__('bar')
       const moduleBaz = __weex_require_module__('baz')
@@ -410,9 +410,9 @@ describe('framework APIs', () => {
   })
 
   it('registerComponents', () => {
-    Vue.registerComponents(['foo', { type: 'bar' }, 'text'])
+    framework.registerComponents(['foo', { type: 'bar' }, 'text'])
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       new Vue({
         render: function (createElement) {
           return createElement('div', {}, [
@@ -431,7 +431,7 @@ describe('framework APIs', () => {
     })
   })
 
-  it('Vue.$getConfig', () => {
+  it('vm.$getConfig', () => {
     const instance = new Instance(runtime)
     instance.$create(`
       new Vue({
@@ -517,7 +517,7 @@ describe('framework APIs', () => {
       expect(instance.getRealRoot().children[0].attr.value).toEqual('1-4')
     }, 3250)
     setTimeout(() => {
-      Vue.destroyInstance(instance.id)
+      framework.destroyInstance(instance.id)
     }, 3500)
     setTimeout(() => {
       expect(instance.getRealRoot().children[0].attr.value).toEqual('1-4')
@@ -526,12 +526,12 @@ describe('framework APIs', () => {
   })
 
   it('send function param', () => {
-    Vue.registerModules({
+    framework.registerModules({
       foo: ['a']
     })
 
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       const moduleFoo = __weex_require_module__('foo')
       new Vue({
         mounted: function () {
@@ -558,12 +558,12 @@ describe('framework APIs', () => {
   })
 
   it('send Element param', () => {
-    Vue.registerModules({
+    framework.registerModules({
       foo: ['a']
     })
 
     const instance = new Instance(runtime)
-    Vue.createInstance(instance.id, `
+    framework.createInstance(instance.id, `
       const moduleFoo = __weex_require_module__('foo')
       new Vue({
         mounted: function () {
@@ -587,5 +587,84 @@ describe('framework APIs', () => {
     })
 
     expect(typeof callbackId).toEqual('string')
+  })
+
+  it('registering global assets', () => {
+    const instance = new Instance(runtime)
+    framework.createInstance(instance.id, `
+      Vue.component('test', {
+        render (h) {
+          return h('div', 'Hello')
+        }
+      })
+      new Vue({
+        render (h) {
+          return h('test')
+        },
+        el: 'body'
+      })
+    `)
+    expect(instance.getRealRoot()).toEqual({
+      type: 'div',
+      children: [{ type: 'text', attr: { value: 'Hello' }}]
+    })
+    // ensure base Vue is unaffected
+    expect(framework.Vue.options.components.test).toBeUndefined()
+  })
+
+  it('adding prototype methods', () => {
+    const instance = new Instance(runtime)
+    framework.createInstance(instance.id, `
+      Vue.prototype.$test = () => 'Hello'
+      const Test = {
+        render (h) {
+          return h('div', this.$test())
+        }
+      }
+      new Vue({
+        render (h) {
+          return h(Test)
+        },
+        el: 'body'
+      })
+    `)
+    expect(instance.getRealRoot()).toEqual({
+      type: 'div',
+      children: [{ type: 'text', attr: { value: 'Hello' }}]
+    })
+    // ensure base Vue is unaffected
+    expect(framework.Vue.prototype.$test).toBeUndefined()
+  })
+
+  it('using global mixins', () => {
+    const instance = new Instance(runtime)
+    framework.createInstance(instance.id, `
+      Vue.mixin({
+        created () {
+          this.test = true
+        }
+      })
+      const Test = {
+        data: () => ({ test: false }),
+        render (h) {
+          return h('div', this.test ? 'Hello' : 'nope')
+        }
+      }
+      new Vue({
+        data: { test: false },
+        render (h) {
+          return this.test ? h(Test) : h('p')
+        },
+        el: 'body'
+      })
+    `)
+    expect(instance.getRealRoot()).toEqual({
+      type: 'div',
+      children: [{ type: 'text', attr: { value: 'Hello' }}]
+    })
+    const vm = new framework.Vue({
+      data: { test: false }
+    })
+    expect(vm.test).toBe(false)
   })
 })

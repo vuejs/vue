@@ -60,6 +60,7 @@ declare type ComponentOptions = {
   _renderChildren?: ?VNodeChildren;
   _componentTag: ?string;
   _scopeId: ?string;
+  _base: Class<Component>;
 }
 
 declare type PropOptions = {
