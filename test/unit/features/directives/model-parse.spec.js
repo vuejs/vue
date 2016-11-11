@@ -1,4 +1,4 @@
-import parseModel from 'web/util/model'
+import { parseModel } from 'compiler/helpers'
 
 describe('model expression parser', () => {
   it('parse string in brackets', () => {
