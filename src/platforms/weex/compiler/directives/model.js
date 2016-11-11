@@ -15,7 +15,6 @@ function genDefaultModel (
   value: string,
   modifiers: ?ASTModifiers
 ): ?boolean {
-  const type = el.attrsMap.type
   const { lazy, trim } = modifiers || {}
   const event = lazy ? 'change' : 'input'
   const isNative = el.tag === 'input' || el.tag === 'textarea'

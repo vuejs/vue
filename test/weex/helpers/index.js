@@ -5,7 +5,7 @@ import { config } from 'weex-js-runtime'
 
 // http://stackoverflow.com/a/35478115
 const matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g
-export function strToRegExp(str) {
+export function strToRegExp (str) {
   return new RegExp(str.replace(matchOperatorsRe, '\\$&'))
 }
 
