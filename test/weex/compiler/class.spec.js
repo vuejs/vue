@@ -1,4 +1,5 @@
 import { compile } from '../../../packages/weex-template-compiler'
+import { strToRegExp } from '../helpers/index'
 
 describe('compile class', () => {
   it('should be compiled', () => {
@@ -6,7 +7,7 @@ describe('compile class', () => {
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).not.toBeUndefined()
     expect(staticRenderFns.length).toEqual(1)
-    expect(staticRenderFns).toMatch(/staticClass\:\["a","b","c"\]/)
+    expect(staticRenderFns).toMatch(strToRegExp(`staticClass:["a","b","c"]`))
     expect(errors).toEqual([])
   })
 
@@ -14,18 +15,18 @@ describe('compile class', () => {
     const { render, staticRenderFns, errors } = compile(`<div class="a {{b}} c"></div>`)
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).toEqual([])
-    expect(render).toMatch(/class\:\["a",_s\(b\),"c"\]/)
+    expect(render).toMatch(strToRegExp(`class:["a",_s(b),"c"]`))
     expect(errors).not.toBeUndefined()
     expect(errors.length).toEqual(1)
-    expect(errors[0]).toMatch(/a \{\{b\}\} c/)
-    expect(errors[0]).toMatch(/v\-bind/)
+    expect(errors[0]).toMatch(strToRegExp(`a {{b}} c`))
+    expect(errors[0]).toMatch(strToRegExp(`v-bind`))
   })
 
   it('should compile class binding of array', () => {
     const { render, staticRenderFns, errors } = compile(`<div v-bind:class="['a', 'b', c]"></div>`)
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).toEqual([])
-    expect(render).toMatch(/class\:\['a', 'b', c\]/)
+    expect(render).toMatch(strToRegExp(`class:['a', 'b', c]`))
     expect(errors).toEqual([])
   })
 
@@ -33,7 +34,7 @@ describe('compile class', () => {
     const { render, staticRenderFns, errors } = compile(`<div v-bind:class="{ a: true, b: x }"></div>`)
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).toEqual([])
-    expect(render).toMatch(/class\:\{ a\: true, b\: x \}/)
+    expect(render).toMatch(strToRegExp(`class:{ a: true, b: x }`))
     expect(errors).toEqual([])
   })
 
@@ -41,7 +42,7 @@ describe('compile class', () => {
     const { render, staticRenderFns, errors } = compile(`<div v-bind:class="x"></div>`)
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).toEqual([])
-    expect(render).toMatch(/class\:x/)
+    expect(render).toMatch(strToRegExp(`class:x`))
     expect(errors).toEqual([])
   })
 
@@ -49,7 +50,7 @@ describe('compile class', () => {
     const { render, staticRenderFns, errors } = compile(`<div :class="['a', 'b', c]"></div>`)
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).toEqual([])
-    expect(render).toMatch(/class\:\['a', 'b', c\]/)
+    expect(render).toMatch(strToRegExp(`class:['a', 'b', c]`))
     expect(errors).toEqual([])
   })
 })
