@@ -1,17 +1,13 @@
 /* @flow */
 
-import { addHandler, addProp, parseModel } from 'compiler/helpers'
-
-let warn
+import { addHandler, addAttr, parseModel } from 'compiler/helpers'
 
 export default function model (
   el: ASTElement,
   dir: ASTDirective,
   _warn: Function
 ): ?boolean {
-  warn = _warn
   genDefaultModel(el, dir.value, dir.modifiers)
-  return true
 }
 
 function genDefaultModel (
@@ -20,10 +16,14 @@ function genDefaultModel (
   modifiers: ?ASTModifiers
 ): ?boolean {
   const type = el.attrsMap.type
-  const { lazy } = modifiers || {}
+  const { lazy, trim } = modifiers || {}
   const event = lazy ? 'change' : 'input'
-  const code = genAssignmentCode(value, `$event`)
-  addProp(el, 'value', `(${value})`)
+  const isNative = el.tag === 'input' || el.tag === 'textarea'
+  const valueExpression = isNative
+    ? `$event.target.attr.value${trim ? '.trim()' : ''}`
+    : `$event`
+  const code = genAssignmentCode(value, valueExpression)
+  addAttr(el, 'value', `(${value})`)
   addHandler(el, event, code, null, true)
 }
 
