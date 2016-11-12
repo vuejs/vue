@@ -1,8 +1,7 @@
 /* @flow */
 
 import { isIE } from 'core/util/env'
-import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
-import parseModel from 'web/util/model'
+import { addHandler, addProp, getBindingAttr, parseModel } from 'compiler/helpers'
 
 let warn
 
