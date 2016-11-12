@@ -7,9 +7,7 @@ import { noop } from 'shared/util'
 export const hasProto = '__proto__' in {}
 
 // Browser environment sniffing
-export const inBrowser =
-  typeof window !== 'undefined' &&
-  Object.prototype.toString.call(window) !== '[object Object]'
+export const inBrowser = typeof window !== 'undefined' && window === window.window
 
 export const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 export const isIE = UA && /msie|trident/.test(UA)
