@@ -3,9 +3,7 @@ var webpack = require('webpack')
 
 var webpackConfig = {
   resolve: {
-    alias: Object.assign({}, alias, {
-      entities: './entity-decoder'
-    })
+    alias: alias
   },
   module: {
     loaders: [
