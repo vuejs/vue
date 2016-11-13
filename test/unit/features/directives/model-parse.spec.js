@@ -1,6 +1,12 @@
 import { parseModel } from 'compiler/helpers'
 
 describe('model expression parser', () => {
+  it('parse object dot notation', () => {
+    const res = parseModel('a.b.c')
+    expect(res.exp).toBe('a.b.c')
+    expect(res.idx).toBe(null)
+  })
+
   it('parse string in brackets', () => {
     const res = parseModel('a["b"][c]')
     expect(res.exp).toBe('a["b"]')
