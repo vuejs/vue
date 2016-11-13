@@ -25,6 +25,7 @@ describe('compile class', () => {
   it('should compile data bindings with children', () => {
     const { render, staticRenderFns, errors } = compile(`<foo :a="b"><text>Hello</text></foo>`)
     expect(render).toEqual(`with(this){return _h('foo',{attrs:{"a":b}},[_h('text',["Hello"])])}`)
+    expect(staticRenderFns).toEqual([])
     expect(errors).toEqual([])
   })
 
@@ -38,6 +39,7 @@ describe('compile class', () => {
       </refresh>
     `)
     expect(render).toEqual(`with(this){return _h('refresh',{staticClass:["refresh"],staticStyle:{flexDirection:"row"},attrs:{"display":displayRefresh},on:{"refresh":handleRefresh}},[_h('loading-indicator'),_h('text',{staticStyle:{marginLeft:"36px",color:"#eee"}},["Load more..."])])}`)
+    expect(staticRenderFns).toEqual([])
     expect(errors).toEqual([])
   })
 })
