@@ -272,8 +272,7 @@ describe('codegen', () => {
   it('generate component', () => {
     assertCodegen(
       '<my-component name="mycomponent1" :msg="msg" @notify="onNotify"><div>hi</div></my-component>',
-      `with(this){return _h('my-component',{attrs:{"name":"mycomponent1","msg":msg},on:{"notify":onNotify}},[_m(0)])}`,
-      [`with(this){return _h('div',["hi"])}`]
+      `with(this){return _h('my-component',{attrs:{"name":"mycomponent1","msg":msg},on:{"notify":onNotify}},[_h('div',["hi"])])}`
     )
   })
 
