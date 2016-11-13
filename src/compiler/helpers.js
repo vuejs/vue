@@ -116,7 +116,7 @@ export function parseModel (val: string): Object {
   len = str.length
   index = expressionPos = expressionEndPos = 0
 
-  if (val.indexOf('[') < 0) {
+  if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
     return {
       exp: val,
       idx: null

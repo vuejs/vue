@@ -7,6 +7,12 @@ describe('model expression parser', () => {
     expect(res.idx).toBe('c')
   })
 
+  it('parse brackets with object dot notation', () => {
+    const res = parseModel('a["b"][c].xxx')
+    expect(res.exp).toBe('a["b"][c].xxx')
+    expect(res.idx).toBe(null)
+  })
+
   it('parse nested brackets', () => {
     const res = parseModel('a[i[c]]')
     expect(res.exp).toBe('a')
