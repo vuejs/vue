@@ -1,5 +1,7 @@
 /* @flow */
 
+import { parseFilters } from './parser/filter-parser'
+
 export function baseWarn (msg: string) {
   console.error(`[Vue parser]: ${msg}`)
 }
@@ -72,7 +74,7 @@ export function getBindingAttr (
     getAndRemoveAttr(el, ':' + name) ||
     getAndRemoveAttr(el, 'v-bind:' + name)
   if (dynamicValue != null) {
-    return dynamicValue
+    return parseFilters(dynamicValue)
   } else if (getStatic !== false) {
     const staticValue = getAndRemoveAttr(el, name)
     if (staticValue != null) {

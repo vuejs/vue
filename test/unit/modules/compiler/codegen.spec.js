@@ -37,6 +37,13 @@ describe('codegen', () => {
     )
   })
 
+  it('generate filters', () => {
+    assertCodegen(
+      '<div :id="a | b | c">{{ d | e | f }}</div>',
+      `with(this){return _h('div',{attrs:{"id":_f("c")(_f("b")(a))}},[_s(_f("f")(_f("e")(d)))])}`
+    )
+  })
+
   it('generate v-for directive', () => {
     assertCodegen(
       '<li v-for="item in items" :key="item.uid"></li>',

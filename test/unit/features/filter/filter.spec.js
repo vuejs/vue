@@ -29,6 +29,31 @@ describe('Filters', () => {
     expect(vm.$el.textContent).toBe('IH')
   })
 
+  it('in v-bind', () => {
+    const vm = new Vue({
+      template: `
+        <div
+          v-bind:id="id | upper | reverse"
+          :class="cls | reverse"
+          :ref="ref | lower">
+        </div>
+      `,
+      filters: {
+        upper: v => v.toUpperCase(),
+        reverse: v => v.split('').reverse().join(''),
+        lower: v => v.toLowerCase()
+      },
+      data: {
+        id: 'abc',
+        cls: 'foo',
+        ref: 'BAR'
+      }
+    }).$mount()
+    expect(vm.$el.id).toBe('CBA')
+    expect(vm.$el.className).toBe('oof')
+    expect(vm.$refs.bar).toBe(vm.$el)
+  })
+
   it('arguments', () => {
     const vm = new Vue({
       template: `<div>{{ msg | add(a, 3) }}</div>`,

@@ -3,6 +3,7 @@
 import { decode } from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
+import { parseFilters } from './filter-parser'
 import { cached, no, camelize } from 'shared/util'
 import { isIE, isServerRendering } from 'core/util/env'
 import {
@@ -375,6 +376,7 @@ function processAttrs (el) {
       }
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
+        value = parseFilters(value)
         if (modifiers && modifiers.prop) {
           isProp = true
           name = camelize(name)
