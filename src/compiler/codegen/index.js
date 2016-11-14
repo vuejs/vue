@@ -30,11 +30,11 @@ export function generate (
   transforms = pluckModuleFunction(options.modules, 'transformCode')
   dataGenFns = pluckModuleFunction(options.modules, 'genData')
   platformDirectives = options.directives || {}
-  const code = ast ? genElement(ast) : '_h("div")'
+  const code = ast ? genElement(ast) : 'v._h("div")'
   staticRenderFns = prevStaticRenderFns
   onceCount = prevOnceCount
   return {
-    render: `with(this){return ${code}}`,
+    render: `var v = this; return ${code}`,
     staticRenderFns: currentStaticRenderFns
   }
 }
@@ -61,7 +61,7 @@ function genElement (el: ASTElement): string {
       const data = el.plain ? undefined : genData(el)
 
       const children = el.inlineTemplate ? null : genChildren(el)
-      code = `_h('${el.tag}'${
+      code = `v._h('${el.tag}'${
         data ? `,${data}` : '' // data
       }${
         children ? `,${children}` : '' // children
@@ -78,7 +78,7 @@ function genElement (el: ASTElement): string {
 // hoist static sub-trees out
 function genStatic (el: ASTElement): string {
   el.staticProcessed = true
-  staticRenderFns.push(`with(this){return ${genElement(el)}}`)
+  staticRenderFns.push(`var v = this; return ${genElement(el)}`)
   return `_m(${staticRenderFns.length - 1}${el.staticInFor ? ',true' : ''})`
 }
 
@@ -168,7 +168,7 @@ function genData (el: ASTElement): string {
   }
   // DOM props
   if (el.props) {
-    data += `domProps:{${genProps(el.props)}},`
+    data += `domProps:{${genProps(el.props, true)}},`
   }
   // event handlers
   if (el.events) {
@@ -264,16 +264,20 @@ function genSlot (el: ASTElement): string {
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement
 function genComponent (componentName, el): string {
   const children = el.inlineTemplate ? null : genChildren(el)
-  return `_h(${componentName},${genData(el)}${
+  return `v._h(${componentName},${genData(el)}${
     children ? `,${children}` : ''
   })`
 }
 
-function genProps (props: Array<{ name: string, value: string }>): string {
+function genProps (props: Array<{ name: string, value: string }>, prefix): string {
   let res = ''
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
-    res += `"${prop.name}":${prop.value},`
+    if (prefix) {
+      res += `"${prop.name}":v.${prop.value},`
+    } else {
+      res += `"${prop.name}":${prop.value},`
+    }
   }
   return res.slice(0, -1)
 }

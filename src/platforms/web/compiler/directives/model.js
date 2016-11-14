@@ -140,7 +140,7 @@ function genDefaultModel (
       `File inputs are read only. Use a v-on:change listener instead.`
     )
   }
-  addProp(el, 'value', isNative ? `_s(${value})` : `(${value})`)
+  addProp(el, 'value', isNative ? `v._s(v.${value})` : `(v.${value})`)
   addHandler(el, event, code, null, true)
 }
 
