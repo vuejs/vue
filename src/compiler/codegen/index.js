@@ -85,7 +85,9 @@ function genStatic (el: ASTElement): string {
 // v-once
 function genOnce (el: ASTElement): string {
   el.onceProcessed = true
-  if (el.staticInFor) {
+  if (el.if && !el.ifProcessed) {
+    return genIf(el)
+  } else if (el.staticInFor) {
     let key = ''
     let parent = el.parent
     while (parent) {
@@ -107,10 +109,11 @@ function genOnce (el: ASTElement): string {
   }
 }
 
+// v-if with v-once shuold generate code like (a)?_m(0):_m(1)
 function genIf (el: any): string {
   const exp = el.if
   el.ifProcessed = true // avoid recursion
-  return `(${exp})?${genElement(el)}:${genElse(el)}`
+  return `(${exp})?${el.once ? genOnce(el) : genElement(el)}:${genElse(el)}`
 }
 
 function genElse (el: ASTElement): string {
