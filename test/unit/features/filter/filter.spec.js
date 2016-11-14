@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { parseFilters } from 'compiler/parser/filter-parser'
 
 describe('Filters', () => {
   it('basic usage', () => {
@@ -95,5 +96,9 @@ describe('Filters', () => {
       data: { msg: 'foo' }
     }).$mount()
     expect('Failed to resolve filter: upper').toHaveBeenWarned()
+  })
+
+  it('support template string', () => {
+    expect(parseFilters('`a | ${b}c` | d')).toBe('_f("d")(`a | ${b}c`)')
   })
 })

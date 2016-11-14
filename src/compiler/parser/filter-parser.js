@@ -3,6 +3,7 @@
 export function parseFilters (exp: string): string {
   let inSingle = false
   let inDouble = false
+  let inTemplateString = false
   let curly = 0
   let square = 0
   let paren = 0
@@ -18,6 +19,9 @@ export function parseFilters (exp: string): string {
     } else if (inDouble) {
       // check double quote
       if (c === 0x22 && prev !== 0x5C) inDouble = !inDouble
+    } else if (inTemplateString) {
+      // check template literal
+      if (c === 0x60 && prev !== 0x5C) inTemplateString = !inTemplateString
     } else if (
       c === 0x7C && // pipe
       exp.charCodeAt(i + 1) !== 0x7C &&
@@ -33,14 +37,15 @@ export function parseFilters (exp: string): string {
       }
     } else {
       switch (c) {
-        case 0x22: inDouble = true; break // "
-        case 0x27: inSingle = true; break // '
-        case 0x28: paren++; break         // (
-        case 0x29: paren--; break         // )
-        case 0x5B: square++; break        // [
-        case 0x5D: square--; break        // ]
-        case 0x7B: curly++; break         // {
-        case 0x7D: curly--; break         // }
+        case 0x22: inDouble = true; break         // "
+        case 0x27: inSingle = true; break         // '
+        case 0x60: inTemplateString = true; break // `
+        case 0x28: paren++; break                 // (
+        case 0x29: paren--; break                 // )
+        case 0x5B: square++; break                // [
+        case 0x5D: square--; break                // ]
+        case 0x7B: curly++; break                 // {
+        case 0x7D: curly--; break                 // }
       }
     }
   }
