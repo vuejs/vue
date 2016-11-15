@@ -211,6 +211,13 @@ export function parse (
         }
         return
       }
+      // IE textarea placeholder bug
+      /* istanbul ignore if */
+      if (options.isIE &&
+          currentParent.tag === 'textarea' &&
+          currentParent.attrsMap.placeholder === text) {
+        return
+      }
       text = inPre || text.trim()
         ? decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
