@@ -8,6 +8,7 @@ if (weexBaseVersion === coreVersion) {
   weexSubVersion++
 } else {
   // new core version, reset sub version
+  weexBaseVersion = coreVersion
   weexSubVersion = 1
 }
 

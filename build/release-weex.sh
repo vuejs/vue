@@ -1,4 +1,3 @@
-# TODO, only release weex package by bumping the weex postfix
 set -e
 CUR_VERSION=`node build/get-weex-version.js -c`
 NEXT_VERSION=`node build/get-weex-version.js`
