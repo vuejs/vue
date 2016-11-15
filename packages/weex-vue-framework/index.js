@@ -1316,14 +1316,10 @@ function initMethods (vm) {
   if (methods) {
     for (var key in methods) {
       vm[key] = methods[key] == null ? noop : bind(methods[key], vm);
-      if (process.env.NODE_ENV !== 'production') {
-        methods[key] == null && warn(
+      if (process.env.NODE_ENV !== 'production' && methods[key] == null) {
+        warn(
           "method \"" + key + "\" has an undefined value in the component definition. " +
           "Did you reference the function correctly?",
-          vm
-        );
-        hasOwn(Vue$1.prototype, key) && warn(
-          ("Avoid overriding Vue's internal method \"" + key + "\"."),
           vm
         );
       }
@@ -1676,7 +1672,7 @@ function lifecycleMixin (Vue) {
       vm.$options.render = emptyVNode;
       if (process.env.NODE_ENV !== 'production') {
         /* istanbul ignore if */
-        if (vm.$options.template) {
+        if (vm.$options.template && vm.$options.template.charAt(0) !== '#') {
           warn(
             'You are using the runtime-only build of Vue where the template ' +
             'option is not available. Either pre-compile the templates into ' +
@@ -1851,8 +1847,9 @@ function createComponent (
     return
   }
 
+  var baseCtor = context.$options._base;
   if (isObject(Ctor)) {
-    Ctor = Vue$1.extend(Ctor);
+    Ctor = baseCtor.extend(Ctor);
   }
 
   if (typeof Ctor !== 'function') {
@@ -1862,16 +1859,12 @@ function createComponent (
     return
   }
 
-  // resolve constructor options in case global mixins are applied after
-  // component constructor creation
-  resolveConstructorOptions(Ctor);
-
   // async component
   if (!Ctor.cid) {
     if (Ctor.resolved) {
       Ctor = Ctor.resolved;
     } else {
-      Ctor = resolveAsyncComponent(Ctor, function () {
+      Ctor = resolveAsyncComponent(Ctor, baseCtor, function () {
         // it's ok to queue this on every render because
         // $forceUpdate is buffered by the scheduler.
         context.$forceUpdate();
@@ -1883,6 +1876,10 @@ function createComponent (
       }
     }
   }
+
+  // resolve constructor options in case global mixins are applied after
+  // component constructor creation
+  resolveConstructorOptions(Ctor);
 
   data = data || {};
 
@@ -2023,6 +2020,7 @@ function destroy$1 (vnode) {
 
 function resolveAsyncComponent (
   factory,
+  baseCtor,
   cb
 ) {
   if (factory.requested) {
@@ -2035,7 +2033,7 @@ function resolveAsyncComponent (
 
     var resolve = function (res) {
       if (isObject(res)) {
-        res = Vue$1.extend(res);
+        res = baseCtor.extend(res);
       }
       // cache resolved
       factory.resolved = res;
@@ -2615,19 +2613,19 @@ function resolveConstructorOptions (Ctor) {
   return options
 }
 
-function Vue$1 (options) {
+function Vue$2 (options) {
   if (process.env.NODE_ENV !== 'production' &&
-    !(this instanceof Vue$1)) {
+    !(this instanceof Vue$2)) {
     warn('Vue is a constructor and should be called with the `new` keyword');
   }
   this._init(options);
 }
 
-initMixin(Vue$1);
-stateMixin(Vue$1);
-eventsMixin(Vue$1);
-lifecycleMixin(Vue$1);
-renderMixin(Vue$1);
+initMixin(Vue$2);
+stateMixin(Vue$2);
+eventsMixin(Vue$2);
+lifecycleMixin(Vue$2);
+renderMixin(Vue$2);
 
 var warn = noop;
 var formatComponentName;
@@ -2692,13 +2690,16 @@ if (process.env.NODE_ENV !== 'production') {
  * Helper that recursively merges two data objects together.
  */
 function mergeData (to, from) {
+  if (!from) { return to }
   var key, toVal, fromVal;
-  for (key in from) {
+  var keys = Object.keys(from);
+  for (var i = 0; i < keys.length; i++) {
+    key = keys[i];
     toVal = to[key];
     fromVal = from[key];
     if (!hasOwn(to, key)) {
       set(to, key, fromVal);
-    } else if (isObject(toVal) && isObject(fromVal)) {
+    } else if (isPlainObject(toVal) && isPlainObject(fromVal)) {
       mergeData(toVal, fromVal);
     }
   }
@@ -2930,7 +2931,7 @@ function mergeOptions (
   if (child.mixins) {
     for (var i = 0, l = child.mixins.length; i < l; i++) {
       var mixin = child.mixins[i];
-      if (mixin.prototype instanceof Vue$1) {
+      if (mixin.prototype instanceof Vue$2) {
         mixin = mixin.options;
       }
       parent = mergeOptions(parent, mixin, vm);
@@ -3224,7 +3225,7 @@ function initUse (Vue) {
 
 function initMixin$1 (Vue) {
   Vue.mixin = function (mixin) {
-    Vue.options = mergeOptions(Vue.options, mixin);
+    this.options = mergeOptions(this.options, mixin);
   };
 }
 
@@ -3245,9 +3246,10 @@ function initExtend (Vue) {
   Vue.extend = function (extendOptions) {
     extendOptions = extendOptions || {};
     var Super = this;
-    var isFirstExtend = Super.cid === 0;
-    if (isFirstExtend && extendOptions._Ctor) {
-      return extendOptions._Ctor
+    var SuperId = Super.cid;
+    var cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {});
+    if (cachedCtors[SuperId]) {
+      return cachedCtors[SuperId]
     }
     var name = extendOptions.name || Super.options.name;
     if (process.env.NODE_ENV !== 'production') {
@@ -3269,8 +3271,10 @@ function initExtend (Vue) {
       extendOptions
     );
     Sub['super'] = Super;
-    // allow further extension
+    // allow further extension/mixin/plugin usage
     Sub.extend = Super.extend;
+    Sub.mixin = Super.mixin;
+    Sub.use = Super.use;
     // create asset registers, so extended classes
     // can have their private assets too.
     config._assetTypes.forEach(function (type) {
@@ -3286,9 +3290,7 @@ function initExtend (Vue) {
     Sub.superOptions = Super.options;
     Sub.extendOptions = extendOptions;
     // cache constructor
-    if (isFirstExtend) {
-      extendOptions._Ctor = Sub;
-    }
+    cachedCtors[SuperId] = Sub;
     return Sub
   };
 }
@@ -3318,7 +3320,7 @@ function initAssetRegisters (Vue) {
         }
         if (type === 'component' && isPlainObject(definition)) {
           definition.name = definition.name || id;
-          definition = Vue.extend(definition);
+          definition = this.options._base.extend(definition);
         }
         if (type === 'directive' && typeof definition === 'function') {
           definition = { bind: definition, update: definition };
@@ -3393,6 +3395,10 @@ function initGlobalAPI (Vue) {
     Vue.options[type + 's'] = Object.create(null);
   });
 
+  // this is used to identify the "base" constructor to extend all plain-object
+  // components with in Weex's multi-instance scenarios.
+  Vue.options._base = Vue;
+
   extend(Vue.options.components, builtInComponents);
 
   initUse(Vue);
@@ -3401,13 +3407,13 @@ function initGlobalAPI (Vue) {
   initAssetRegisters(Vue);
 }
 
-initGlobalAPI(Vue$1);
+initGlobalAPI(Vue$2);
 
-Object.defineProperty(Vue$1.prototype, '$isServer', {
+Object.defineProperty(Vue$2.prototype, '$isServer', {
   get: function () { return config._isServer; }
 });
 
-Vue$1.version = '2.0.5';
+Vue$2.version = '2.0.6';
 
 var latestNodeId = 1;
 
@@ -4009,7 +4015,7 @@ function createPatchFunction (backend) {
     if (vnode.tag) {
       return (
         vnode.tag.indexOf('vue-component') === 0 ||
-        vnode.tag === nodeOps.tagName(node).toLowerCase()
+        vnode.tag.toLowerCase() === nodeOps.tagName(node).toLowerCase()
       )
     } else {
       return _toString(vnode.text) === node.data
@@ -4428,32 +4434,31 @@ function query (el, document) {
 /*  */
 
 // install platform specific utils
-Vue$1.config.isUnknownElement = isUnknownElement;
-Vue$1.config.isReservedTag = isReservedTag;
-Vue$1.config.mustUseProp = mustUseProp;
+Vue$2.config.isUnknownElement = isUnknownElement;
+Vue$2.config.isReservedTag = isReservedTag;
+Vue$2.config.mustUseProp = mustUseProp;
 
 // install platform runtime directives
-Vue$1.options.directives = platformDirectives;
+Vue$2.options.directives = platformDirectives;
 
 // install platform patch function
-Vue$1.prototype.__patch__ = config._isServer ? noop : patch$1;
+Vue$2.prototype.__patch__ = config._isServer ? noop : patch$1;
 
 // wrap mount
-Vue$1.prototype.$mount = function (
+Vue$2.prototype.$mount = function (
   el,
   hydrating
 ) {
   return this._mount(el && query(el, this.$document), hydrating)
 };
 
-Vue$1.weexVersion = '2.0.5-weex.1';
-
+Vue$2.weexVersion = '2.0.5-weex.1';
 var instances = renderer.instances;
 var modules = renderer.modules;
 var components = renderer.components;
 
 var activeId;
-var oriIsReservedTag = (Vue$1 && Vue$1.config && typeof Vue$1.config.isReservedTag === 'function') ? Vue$1.config.isReservedTag : function () {};
+var oriIsReservedTag = (Vue$2 && Vue$2.config && typeof Vue$2.config.isReservedTag === 'function') ? Vue$2.config.isReservedTag : function () {};
 
 /**
  * Prepare framework config, basically about the virtual-DOM and JS bridge.
@@ -4477,7 +4482,7 @@ function reset () {
   delete renderer.Element;
   delete renderer.Comment;
   delete renderer.sendTasks;
-  Vue$1.config.isReservedTag = oriIsReservedTag;
+  Vue$2.config.isReservedTag = oriIsReservedTag;
 }
 
 /**
@@ -4531,9 +4536,12 @@ function createInstance (
 
   // Each instance has a independent `Vue` object and it should have
   // all top-level public APIs.
-  var subVue = Vue$1.extend({});
-  ['util', 'set', 'delete', 'nextTick', 'use'].forEach(function (name) {
-    subVue[name] = Vue$1[name];
+  var subVue = Vue$2.extend({});
+  // ensure plain-object components are extended from the subVue
+  subVue.options._base = subVue
+  // expose global utility
+  ;['util', 'set', 'delete', 'nextTick'].forEach(function (name) {
+    subVue[name] = Vue$2[name];
   });
 
   // Prepare native module getter and HTML5 Timer APIs.
@@ -4557,7 +4565,7 @@ function createInstance (
  */
 function destroyInstance (instanceId) {
   var instance = instances[instanceId] || {};
-  if (instance.app instanceof Vue$1) {
+  if (instance.app instanceof Vue$2) {
     instance.app.$destroy();
   }
   delete instances[instanceId];
@@ -4572,11 +4580,11 @@ function destroyInstance (instanceId) {
  */
 function refreshInstance (instanceId, data) {
   var instance = instances[instanceId] || {};
-  if (!(instance.app instanceof Vue$1)) {
+  if (!(instance.app instanceof Vue$2)) {
     return new Error(("refreshInstance: instance " + instanceId + " not found!"))
   }
   for (var key in data) {
-    Vue$1.set(instance.app, key, data[key]);
+    Vue$2.set(instance.app, key, data[key]);
   }
   // Finally `refreshFinish` signal needed.
   renderer.sendTasks(instanceId + '', [{ module: 'dom', method: 'refreshFinish', args: [] }], -1);
@@ -4588,7 +4596,7 @@ function refreshInstance (instanceId, data) {
  */
 function getRoot (instanceId) {
   var instance = instances[instanceId] || {};
-  if (!(instance.app instanceof Vue$1)) {
+  if (!(instance.app instanceof Vue$2)) {
     return new Error(("getRoot: instance " + instanceId + " not found!"))
   }
   return instance.app.$el.toJSON()
@@ -4603,7 +4611,7 @@ function getRoot (instanceId) {
  */
 function receiveTasks (instanceId, tasks) {
   var instance = instances[instanceId] || {};
-  if (!(instance.app instanceof Vue$1)) {
+  if (!(instance.app instanceof Vue$2)) {
     return new Error(("receiveTasks: instance " + instanceId + " not found!"))
   }
   var callbacks = instance.callbacks;
@@ -4665,7 +4673,7 @@ function registerModules (newModules) {
  * @param {array} newComponents
  */
 function registerComponents (newComponents) {
-  var config = Vue$1.config;
+  var config = Vue$2.config;
   var newConfig = {};
   if (Array.isArray(newComponents)) {
     newComponents.forEach(function (component) {
@@ -4689,7 +4697,7 @@ function registerComponents (newComponents) {
 
 // Hack `Vue` behavior to handle instance information and data
 // before root component created.
-Vue$1.mixin({
+Vue$2.mixin({
   beforeCreate: function beforeCreate () {
     var options = this.$options;
     var parentOptions = (options.parent && options.parent.$options) || {};
@@ -4721,9 +4729,9 @@ Vue$1.mixin({
  * Get instance config.
  * @return {object}
  */
-Vue$1.prototype.$getConfig = function () {
+Vue$2.prototype.$getConfig = function () {
   var instance = instances[this.$instanceId] || {};
-  if (instance.app instanceof Vue$1) {
+  if (instance.app instanceof Vue$2) {
     return instance.config
   }
 };
@@ -4852,6 +4860,7 @@ function typof (v) {
   return s.substring(8, s.length - 1).toLowerCase()
 }
 
+exports.Vue = Vue$2;
 exports.init = init;
 exports.reset = reset;
 exports.createInstance = createInstance;
