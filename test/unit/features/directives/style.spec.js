@@ -195,7 +195,12 @@ describe('Directive v-bind:style', () => {
     }).$mount()
     const style = vm.$el.style
     const child = vm.$children[0]
-    expect(style.cssText.replace(/\s/g, '')).toBe('margin-right:20px;margin-left:16px;text-align:left;color:red;font-size:12px;')
+    const css = style.cssText.replace(/\s/g, '')
+    expect(css).toContain('margin-right:20px;')
+    expect(css).toContain('margin-left:16px;')
+    expect(css).toContain('text-align:left;')
+    expect(css).toContain('color:red;')
+    expect(css).toContain('font-size:12px;')
     expect(style.color).toBe('red')
     expect(style.marginRight).toBe('20px')
     vm.test.color = 'blue'
