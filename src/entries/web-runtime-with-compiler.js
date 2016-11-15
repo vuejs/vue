@@ -34,6 +34,13 @@ Vue.prototype.$mount = function (
       if (typeof template === 'string') {
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
+          /* istanbul ignore if */
+          if (process.env.NODE_ENV !== 'production' && !template) {
+            warn(
+              `Template element not found or is empty: ${options.template}`,
+              this
+            )
+          }
         }
       } else if (template.nodeType) {
         template = template.innerHTML
