@@ -123,7 +123,7 @@ function genDefaultModel (
 
   let valueExpression = isNative
     ? `$event.target.value${trim ? '.trim()' : ''}`
-    : `$event`
+    : trim ? `(typeof $event === 'string' ? $event.trim() : $event)` : `$event`
   valueExpression = number || type === 'number'
     ? `_n(${valueExpression})`
     : valueExpression

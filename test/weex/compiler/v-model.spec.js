@@ -11,9 +11,6 @@ describe('compile v-model', () => {
     expect(errors).toEqual([])
   })
 
-  it('should compile into render functions without runtime model directive', () => {
-  })
-
   it('should compile other component with whole $event as the value', () => {
     const { render, staticRenderFns, errors } = compile(`<div><foo v-model="x" /></div>`)
     expect(render).not.toBeUndefined()
