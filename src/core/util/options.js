@@ -40,13 +40,16 @@ if (process.env.NODE_ENV !== 'production') {
  * Helper that recursively merges two data objects together.
  */
 function mergeData (to: Object, from: ?Object): Object {
+  if (!from) return to
   let key, toVal, fromVal
-  for (key in from) {
+  const keys = Object.keys(from)
+  for (let i = 0; i < keys.length; i++) {
+    key = keys[i]
     toVal = to[key]
     fromVal = from[key]
     if (!hasOwn(to, key)) {
       set(to, key, fromVal)
-    } else if (isObject(toVal) && isObject(fromVal)) {
+    } else if (isPlainObject(toVal) && isPlainObject(fromVal)) {
       mergeData(toVal, fromVal)
     }
   }
