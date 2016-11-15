@@ -7,11 +7,12 @@ module.exports = {
 
   'selenium': {
     'start_process': true,
-    'server_path': 'node_modules/selenium-server/lib/runner/selenium-server-standalone-2.53.1.jar',
+    'server_path': 'node_modules/selenium-server/lib/runner/selenium-server-standalone-3.0.1.jar',
     'host': '127.0.0.1',
     'port': 4444,
     'cli_args': {
       'webdriver.chrome.driver': require('chromedriver').path
+      // , 'webdriver.gecko.driver': require('geckodriver').path
     }
   },
 
@@ -40,7 +41,8 @@ module.exports = {
       'desiredCapabilities': {
         'browserName': 'firefox',
         'javascriptEnabled': true,
-        'acceptSslCerts': true
+        'acceptSslCerts': true,
+        'marionette': true
       }
     },
 
