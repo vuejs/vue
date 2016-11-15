@@ -101,7 +101,7 @@
     "rollup-plugin-flow-no-whitespace": "^1.0.0",
     "rollup-plugin-replace": "^1.1.0",
     "rollup-watch": "^2.5.0",
-    "selenium-server": "3.0.1",
+    "selenium-server": "2.53.1",
     "typescript": "^2.0.9",
     "uglify-js": "^2.6.2",
     "webpack": "^1.13.2",
