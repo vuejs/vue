@@ -76,7 +76,7 @@ const builds = {
     entry: path.resolve(__dirname, '../src/entries/weex-compiler.js'),
     dest: path.resolve(__dirname, '../packages/weex-template-compiler/build.js'),
     format: 'cjs',
-    external: ['entities', 'de-indent']
+    external: ['he', 'de-indent']
   }
 }
 
