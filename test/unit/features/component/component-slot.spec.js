@@ -574,4 +574,27 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.innerHTML.trim()).toBe('<div>two</div><div>one</div>')
   })
+
+  // #4209
+  it('slot of multiple text nodes should not be infinitely merged', done => {
+    const wrap = {
+      template: `<inner ref="inner">foo<slot></slot></inner>`,
+      components: {
+        inner: {
+          data: () => ({ a: 1 }),
+          template: `<div>{{a}}<slot></slot></div>`
+        }
+      }
+    }
+    const vm = new Vue({
+      template: `<wrap ref="wrap">bar</wrap>`,
+      components: { wrap }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('1foobar')
+    vm.$refs.wrap.$refs.inner.a++
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('2foobar')
+    }).then(done)
+  })
 })

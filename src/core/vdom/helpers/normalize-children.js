@@ -28,7 +28,9 @@ export function normalizeChildren (
         }
       } else if (c instanceof VNode) {
         if (c.text && last && last.text) {
-          last.text += c.text
+          if (!last.isCloned) {
+            last.text += c.text
+          }
         } else {
           // inherit parent namespace
           if (ns) {
