@@ -79,12 +79,4 @@ describe('Instance properties', () => {
     }).$mount()
     expect(calls).toEqual(['outer:undefined', 'middle:outer', 'inner:middle', 'next:undefined'])
   })
-
-  it('$isServer', () => {
-    const vm = new Vue()
-    expect(vm.$isServer).toBe(false)
-    Vue.config._isServer = true
-    expect(vm.$isServer).toBe(true)
-    Vue.config._isServer = false
-  })
 })

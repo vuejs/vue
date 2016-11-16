@@ -1,6 +1,6 @@
 'use strict'
 
-const Vue = require('../../dist/vue.common.js')
+const Vue = require('../../dist/vue.runtime.common.js')
 const createRenderer = require('../../packages/vue-server-renderer').createRenderer
 const renderToStream = createRenderer().renderToStream
 const gridComponent = require('./common.js')

@@ -4,7 +4,7 @@ import config from '../config'
 import VNode, { emptyVNode, cloneVNode, cloneVNodes } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers/index'
 import {
-  warn, formatComponentName, bind, isObject, toObject,
+  warn, formatComponentName, bind, isObject, toObject, isServerRendering,
   nextTick, resolveAsset, _toString, toNumber, looseEqual, looseIndexOf
 } from '../util/index'
 
@@ -62,7 +62,7 @@ export function renderMixin (Vue: Class<Component>) {
       if (config.errorHandler) {
         config.errorHandler.call(null, e, vm)
       } else {
-        if (config._isServer) {
+        if (isServerRendering()) {
           throw e
         } else {
           console.error(e)

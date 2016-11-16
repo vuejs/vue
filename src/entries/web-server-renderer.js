@@ -1,5 +1,7 @@
 /* @flow */
 
+process.env.VUE_ENV = 'server'
+
 import { createRenderer as _createRenderer } from 'server/create-renderer'
 import { createBundleRendererCreator } from 'server/create-bundle-renderer'
 import { isUnaryTag } from 'web/util/index'

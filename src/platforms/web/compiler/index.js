@@ -1,7 +1,6 @@
 /* @flow */
 
 import { extend, genStaticKeys, noop } from 'shared/util'
-import { isIE } from 'core/util/env'
 import { warn } from 'core/util/debug'
 import { compile as baseCompile } from 'compiler/index'
 import { detectErrors } from 'compiler/error-detector'
@@ -15,7 +14,6 @@ import {
 const cache: { [key: string]: CompiledFunctionResult } = Object.create(null)
 
 export const baseOptions: CompilerOptions = {
-  isIE,
   expectHTML: true,
   modules,
   staticKeys: genStaticKeys(modules),

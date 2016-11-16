@@ -1,4 +1,4 @@
-import Vue from '../../dist/vue.common.js'
+import Vue from '../../dist/vue.runtime.common.js'
 import { createRenderer } from '../../packages/vue-server-renderer'
 const { renderToString } = createRenderer()
 
@@ -663,12 +663,14 @@ describe('SSR: renderToString', () => {
   })
 
   it('should catch error', done => {
+    Vue.config.silent = true
     renderToString(new Vue({
       render () {
         throw new Error('oops')
       }
     }), err => {
       expect(err instanceof Error).toBe(true)
+      Vue.config.silent = false
       done()
     })
   })

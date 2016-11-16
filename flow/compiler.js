@@ -1,6 +1,5 @@
 declare type CompilerOptions = {
   warn?: Function; // allow customizing warning in different environments; e.g. node
-  isIE?: boolean; // for detecting IE SVG innerHTML bug
   expectHTML?: boolean; // only false for non-web builds
   modules?: Array<ModuleOptions>; // platform specific modules; e.g. style; class
   staticKeys?: string; // a list of AST properties to be considered static; for optimization

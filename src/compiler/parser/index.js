@@ -4,6 +4,7 @@ import { decode } from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { cached, no, camelize } from 'shared/util'
+import { isIE, isServerRendering } from 'core/util/env'
 import {
   pluckModuleFunction,
   getAndRemoveAttr,
@@ -69,7 +70,7 @@ export function parse (
 
       // handle IE svg bug
       /* istanbul ignore if */
-      if (options.isIE && ns === 'svg') {
+      if (isIE && ns === 'svg') {
         attrs = guardIESVGBug(attrs)
       }
 
@@ -77,7 +78,7 @@ export function parse (
         type: 1,
         tag,
         attrsList: attrs,
-        attrsMap: makeAttrsMap(attrs, options.isIE),
+        attrsMap: makeAttrsMap(attrs),
         parent: currentParent,
         children: []
       }
@@ -85,7 +86,7 @@ export function parse (
         element.ns = ns
       }
 
-      if (process.env.VUE_ENV !== 'server' && isForbiddenTag(element)) {
+      if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
         process.env.NODE_ENV !== 'production' && warn(
           'Templates should only be responsible for mapping the state to the ' +
@@ -213,7 +214,7 @@ export function parse (
       }
       // IE textarea placeholder bug
       /* istanbul ignore if */
-      if (options.isIE &&
+      if (isIE &&
           currentParent.tag === 'textarea' &&
           currentParent.attrsMap.placeholder === text) {
         return
@@ -437,7 +438,7 @@ function parseModifiers (name: string): Object | void {
   }
 }
 
-function makeAttrsMap (attrs: Array<Object>, isIE: ?boolean): Object {
+function makeAttrsMap (attrs: Array<Object>): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
     if (process.env.NODE_ENV !== 'production' && map[attrs[i].name] && !isIE) {

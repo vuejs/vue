@@ -1,4 +1,4 @@
-import Vue from '../../dist/vue.common.js'
+import Vue from '../../dist/vue.runtime.common.js'
 import { createRenderer } from '../../packages/vue-server-renderer'
 const { renderToStream } = createRenderer()
 
@@ -65,6 +65,7 @@ describe('SSR: renderToStream', () => {
   })
 
   it('should catch error', done => {
+    Vue.config.silent = true
     const stream = renderToStream(new Vue({
       render () {
         throw new Error('oops')
@@ -72,6 +73,7 @@ describe('SSR: renderToStream', () => {
     }))
     stream.on('error', err => {
       expect(err.toString()).toMatch(/oops/)
+      Vue.config.silent = false
       done()
     })
     stream.on('data', _ => _)
