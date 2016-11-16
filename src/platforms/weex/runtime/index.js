@@ -16,7 +16,7 @@ Vue.config.mustUseProp = mustUseProp
 Vue.options.directives = platformDirectives
 
 // install platform patch function
-Vue.prototype.__patch__ = config._isServer ? noop : patch
+Vue.prototype.__patch__ = patch
 
 // wrap mount
 Vue.prototype.$mount = function (
