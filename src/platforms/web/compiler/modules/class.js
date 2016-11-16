@@ -15,8 +15,9 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
     if (expression) {
       warn(
         `class="${staticClass}": ` +
-        'Interpolation inside attributes has been deprecated. ' +
-        'Use v-bind or the colon shorthand instead.'
+        'Interpolation inside attributes has been removed. ' +
+        'Use v-bind or the colon shorthand instead. For example, ' +
+        'instead of <div class="{{ val }}">, use <div :class="val">.'
       )
     }
   }

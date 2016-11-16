@@ -12,10 +12,6 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 ### $500
 
-<a href="http://www.itunescn.com/">
-  <img width="240px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
-</a>
-
 <a href="https://jsfiddle.net/">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
 </a>
@@ -48,6 +44,14 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/trisoft.png">
 </a>
 
+<a href="https://www.2mhost.com/" target="_blank">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/2mhost.png">
+</a>
+
+<a href="https://vuejsjob.com/?ref=vuejs" target="_blank">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
+</a>
+
 ---
 
 ### $250
@@ -70,14 +74,11 @@ It could be you!
   <img width="240px" src="http://i.imgur.com/MRIkKgp.png">
 </a>
 
-<a href="http://nodividestudio.com/">
-  <img width="100px" src="https://cloud.githubusercontent.com/assets/499550/16464256/552c2306-3e07-11e6-867f-e4f5ac64bace.png"> No Divide Studio
-</a>
-
 ---
 
 ### $50+
 
+- No Divide Studio
 - James Kyle
 - Blake Newman
 - Lee Smith
@@ -86,6 +87,7 @@ It could be you!
 - Yoshiya Hinosawa
 - Wasim Khamlichi
 - Jivan Roquet
+- errorrik
 
 ---
 
@@ -143,7 +145,8 @@ It could be you!
 - Nikola Trifunovic
 - Nicolas Mutis Mesa
 - Fahed Toumi
-- James
+- James Brooks
+- Kirk Lewis
 - Spenser
 - Takuya Nishio
 - Daniel Diekmeier
@@ -176,3 +179,8 @@ It could be you!
 - Isaac Sant
 - Milos Stojanovic
 - Matsumoto Takamasa
+- Douglas Lowder
+- Bess Brooks
+- Christian Griffith
+- Matt Rockwell
+- Jarek Tkaczyk

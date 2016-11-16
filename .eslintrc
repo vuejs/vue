@@ -4,6 +4,7 @@
   "extends": "vue",
   "plugins": ["flowtype"],
   "rules": {
+    "no-useless-escape": 0,
     "flowtype/define-flow-type": 1,
     "flowtype/use-flow-type": 1
   }

@@ -12,8 +12,6 @@ const banner =
   ' * Released under the MIT License.\n' +
   ' */'
 
-const baseAlias = require('./alias')
-
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
   'web-runtime-dev': {
@@ -22,24 +20,28 @@ const builds = {
     format: 'cjs',
     banner
   },
-  // Minified runtime, only for filze size monitoring
-  'web-runtime-prod': {
+  // runtime-only build for CDN
+  'web-runtime-cdn-dev': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
-    dest: path.resolve(__dirname, '../dist/vue.common.min.js'),
+    dest: path.resolve(__dirname, '../dist/vue.runtime.js'),
+    format: 'umd',
+    banner
+  },
+  // runtime-only production build for CDN
+  'web-runtime-cdn-prod': {
+    entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
+    dest: path.resolve(__dirname, '../dist/vue.runtime.min.js'),
     format: 'umd',
     env: 'production',
     banner
   },
-  // Runtime+compiler standalone developement build.
+  // Runtime+compiler standalone development build.
   'web-standalone-dev': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime-with-compiler.js'),
     dest: path.resolve(__dirname, '../dist/vue.js'),
     format: 'umd',
     env: 'development',
-    banner,
-    alias: {
-      entities: './entity-decoder'
-    }
+    banner
   },
   // Runtime+compiler standalone production build.
   'web-standalone-prod': {
@@ -47,24 +49,34 @@ const builds = {
     dest: path.resolve(__dirname, '../dist/vue.min.js'),
     format: 'umd',
     env: 'production',
-    banner,
-    alias: {
-      entities: './entity-decoder'
-    }
+    banner
   },
   // Web compiler (CommonJS).
   'web-compiler': {
     entry: path.resolve(__dirname, '../src/entries/web-compiler.js'),
     dest: path.resolve(__dirname, '../packages/vue-template-compiler/build.js'),
     format: 'cjs',
-    external: ['entities', 'de-indent']
+    external: ['he', 'de-indent']
   },
   // Web server renderer (CommonJS).
   'web-server-renderer': {
     entry: path.resolve(__dirname, '../src/entries/web-server-renderer.js'),
     dest: path.resolve(__dirname, '../packages/vue-server-renderer/build.js'),
     format: 'cjs',
-    external: ['stream', 'module', 'vm', 'entities', 'de-indent']
+    external: ['stream', 'module', 'vm', 'he', 'de-indent']
+  },
+  // Weex runtime framework (CommonJS).
+  'weex-framework': {
+    entry: path.resolve(__dirname, '../src/entries/weex-framework.js'),
+    dest: path.resolve(__dirname, '../packages/weex-vue-framework/index.js'),
+    format: 'cjs'
+  },
+  // Weex compiler (CommonJS). Used by Weex's Webpack loader.
+  'weex-compiler': {
+    entry: path.resolve(__dirname, '../src/entries/weex-compiler.js'),
+    dest: path.resolve(__dirname, '../packages/weex-template-compiler/build.js'),
+    format: 'cjs',
+    external: ['entities', 'de-indent']
   }
 }
 
@@ -79,7 +91,7 @@ function genConfig (opts) {
     plugins: [
       flow(),
       buble(),
-      alias(Object.assign({}, baseAlias, opts.alias))
+      alias(require('./alias'))
     ]
   }
 

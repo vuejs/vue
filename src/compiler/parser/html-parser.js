@@ -13,7 +13,7 @@ import { makeMap, no } from 'shared/util'
 import { isNonPhrasingTag, canBeLeftOpenTag } from 'web/util/index'
 
 // Regular Expressions for parsing tags and attributes
-const singleAttrIdentifier = /([^\s"'<>\/=]+)/
+const singleAttrIdentifier = /([^\s"'<>/=]+)/
 const singleAttrAssign = /(?:=)/
 const singleAttrValues = [
   // attr value double quotes
@@ -37,6 +37,8 @@ const startTagOpen = new RegExp('^<' + qnameCapture)
 const startTagClose = /^\s*(\/?)>/
 const endTag = new RegExp('^<\\/' + qnameCapture + '[^>]*>')
 const doctype = /^<!DOCTYPE [^>]+>/i
+const comment = /^<!--/
+const conditionalComment = /^<!\[/
 
 let IS_REGEX_CAPTURING_BROKEN = false
 'x'.replace(/x(.)?/g, function (m, g) {
@@ -44,7 +46,23 @@ let IS_REGEX_CAPTURING_BROKEN = false
 })
 
 // Special Elements (can contain anything)
-const isSpecialTag = makeMap('script,style', true)
+const isScriptOrStyle = makeMap('script,style', true)
+const hasLang = attr => attr.name === 'lang' && attr.value !== 'html'
+const isSpecialTag = (tag, isSFC, stack) => {
+  if (isScriptOrStyle(tag)) {
+    return true
+  }
+  // top-level template that has a pre-processor
+  if (
+    isSFC &&
+    tag === 'template' &&
+    stack.length === 1 &&
+    stack[0].attrs.some(hasLang)
+  ) {
+    return true
+  }
+  return false
+}
 
 const reCache = {}
 
@@ -54,31 +72,31 @@ const nlRE = /&#10;/g
 const ampRE = /&amp;/g
 const quoteRE = /&quot;/g
 
-function decodeAttr (value, shouldDecodeTags, shouldDecodeNewlines) {
-  if (shouldDecodeTags) {
-    value = value.replace(ltRE, '<').replace(gtRE, '>')
-  }
+function decodeAttr (value, shouldDecodeNewlines) {
   if (shouldDecodeNewlines) {
     value = value.replace(nlRE, '\n')
   }
-  return value.replace(ampRE, '&').replace(quoteRE, '"')
+  return value
+    .replace(ltRE, '<')
+    .replace(gtRE, '>')
+    .replace(ampRE, '&')
+    .replace(quoteRE, '"')
 }
 
 export function parseHTML (html, options) {
   const stack = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
-  const isFromDOM = options.isFromDOM
   let index = 0
   let last, lastTag
   while (html) {
     last = html
     // Make sure we're not in a script or style element
-    if (!lastTag || !isSpecialTag(lastTag)) {
-      const textEnd = html.indexOf('<')
+    if (!lastTag || !isSpecialTag(lastTag, options.sfc, stack)) {
+      let textEnd = html.indexOf('<')
       if (textEnd === 0) {
         // Comment:
-        if (/^<!--/.test(html)) {
+        if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
 
           if (commentEnd >= 0) {
@@ -88,7 +106,7 @@ export function parseHTML (html, options) {
         }
 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
-        if (/^<!\[/.test(html)) {
+        if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
 
           if (conditionalEnd >= 0) {
@@ -121,16 +139,31 @@ export function parseHTML (html, options) {
         }
       }
 
-      let text
-      if (textEnd >= 0) {
+      let text, rest, next
+      if (textEnd > 0) {
+        rest = html.slice(textEnd)
+        while (
+          !endTag.test(rest) &&
+          !startTagOpen.test(rest) &&
+          !comment.test(rest) &&
+          !conditionalComment.test(rest)
+        ) {
+          // < in plain text, be forgiving and treat it as text
+          next = rest.indexOf('<', 1)
+          if (next < 0) break
+          textEnd += next
+          rest = html.slice(textEnd)
+        }
         text = html.substring(0, textEnd)
         advance(textEnd)
-      } else {
+      }
+
+      if (textEnd < 0) {
         text = html
         html = ''
       }
 
-      if (options.chars) {
+      if (options.chars && text) {
         options.chars(text)
       }
     } else {
@@ -142,7 +175,7 @@ export function parseHTML (html, options) {
         if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
           text = text
             .replace(/<!--([\s\S]*?)-->/g, '$1')
-            .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1')
         }
         if (options.chars) {
           options.chars(text)
@@ -154,8 +187,9 @@ export function parseHTML (html, options) {
       parseEndTag('</' + stackedTag + '>', stackedTag, index - endTagLength, index)
     }
 
-    if (html === last) {
-      throw new Error('Error parsing template:\n\n' + html)
+    if (html === last && options.chars) {
+      options.chars(html)
+      break
     }
   }
 
@@ -218,11 +252,10 @@ export function parseHTML (html, options) {
       const value = args[3] || args[4] || args[5] || ''
       attrs[i] = {
         name: args[1],
-        value: isFromDOM ? decodeAttr(
+        value: decodeAttr(
           value,
-          options.shouldDecodeTags,
           options.shouldDecodeNewlines
-        ) : value
+        )
       }
     }
 

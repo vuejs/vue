@@ -17,7 +17,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
   for (key in oldProps) {
     if (props[key] == null) {
-      elm[key] = undefined
+      elm[key] = ''
     }
   }
   for (key in props) {

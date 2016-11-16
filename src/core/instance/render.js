@@ -2,7 +2,7 @@
 
 import config from '../config'
 import VNode, { emptyVNode, cloneVNode, cloneVNodes } from '../vdom/vnode'
-import { normalizeChildren } from '../vdom/helpers'
+import { normalizeChildren } from '../vdom/helpers/index'
 import {
   warn, formatComponentName, bind, isObject, toObject,
   nextTick, resolveAsset, _toString, toNumber, looseEqual, looseIndexOf
@@ -65,7 +65,7 @@ export function renderMixin (Vue: Class<Component>) {
         if (config._isServer) {
           throw e
         } else {
-          setTimeout(() => { throw e }, 0)
+          console.error(e)
         }
       }
       // return previous vnode to prevent render error causing blank component
@@ -115,18 +115,36 @@ export function renderMixin (Vue: Class<Component>) {
     }
     // otherwise, render a fresh tree.
     tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy)
+    markStatic(tree, `__static__${index}`, false)
+    return tree
+  }
+
+  // mark node as static (v-once)
+  Vue.prototype._o = function markOnce (
+    tree: VNode | Array<VNode>,
+    index: number,
+    key: string
+  ) {
+    markStatic(tree, `__once__${index}${key ? `_${key}` : ``}`, true)
+    return tree
+  }
+
+  function markStatic (tree, key, isOnce) {
     if (Array.isArray(tree)) {
       for (let i = 0; i < tree.length; i++) {
-        if (typeof tree[i] !== 'string') {
-          tree[i].isStatic = true
-          tree[i].key = `__static__${index}_${i}`
+        if (tree[i] && typeof tree[i] !== 'string') {
+          markStaticNode(tree[i], `${key}_${i}`, isOnce)
         }
       }
     } else {
-      tree.isStatic = true
-      tree.key = `__static__${index}`
+      markStaticNode(tree, key, isOnce)
     }
-    return tree
+  }
+
+  function markStaticNode (node, key, isOnce) {
+    node.isStatic = true
+    node.key = key
+    node.isOnce = isOnce
   }
 
   // filter resolution helper

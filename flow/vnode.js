@@ -21,7 +21,7 @@ declare type VNodeWithData = {
   data: VNodeData;
   children: Array<VNode> | void;
   text: void;
-  elm: HTMLElement;
+  elm: any;
   ns: string | void;
   context: Component;
   key: string | number | void;
@@ -37,6 +37,7 @@ declare interface VNodeData {
   tag?: string;
   staticClass?: string;
   class?: any;
+  staticStyle?: { [key: string]: any };
   style?: Array<Object> | Object;
   props?: { [key: string]: any };
   attrs?: { [key: string]: string };
@@ -60,6 +61,6 @@ declare type VNodeDirective = {
   value?: any;
   oldValue?: any;
   arg?: string;
-  modifiers?: { [key: string]: boolean };
+  modifiers?: ASTModifiers;
   def?: Object;
 }

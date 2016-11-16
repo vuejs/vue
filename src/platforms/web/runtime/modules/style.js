@@ -1,6 +1,17 @@
 /* @flow */
 
-import { cached, extend, camelize, toObject } from 'shared/util'
+import { cached, camelize, extend } from 'shared/util'
+import { normalizeStyleBinding, getStyle } from 'web/util/style'
+
+const cssVarRE = /^--/
+const setProp = (el, name, val) => {
+  /* istanbul ignore if */
+  if (cssVarRE.test(name)) {
+    el.style.setProperty(name, val)
+  } else {
+    el.style[normalize(name)] = val
+  }
+}
 
 const prefixes = ['Webkit', 'Moz', 'ms']
 
@@ -21,43 +32,33 @@ const normalize = cached(function (prop) {
 })
 
 function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  if ((!oldVnode.data || !oldVnode.data.style) && !vnode.data.style) {
+  const data = vnode.data
+  const oldData = oldVnode.data
+
+  if (!data.staticStyle && !data.style &&
+      !oldData.staticStyle && !oldData.style) {
     return
   }
+
   let cur, name
   const el: any = vnode.elm
   const oldStyle: any = oldVnode.data.style || {}
-  let style: any = vnode.data.style || {}
+  const style = normalizeStyleBinding(vnode.data.style) || {}
 
-  // handle string
-  if (typeof style === 'string') {
-    el.style.cssText = style
-    return
-  }
+  vnode.data.style = style.__ob__ ? extend({}, style) : style
 
-  const needClone = style.__ob__
-
-  // handle array syntax
-  if (Array.isArray(style)) {
-    style = vnode.data.style = toObject(style)
-  }
-
-  // clone the style for future updates,
-  // in case the user mutates the style object in-place.
-  if (needClone) {
-    style = vnode.data.style = extend({}, style)
-  }
+  const newStyle = getStyle(vnode, true)
 
   for (name in oldStyle) {
-    if (style[name] == null) {
-      el.style[normalize(name)] = ''
+    if (newStyle[name] == null) {
+      setProp(el, name, '')
     }
   }
-  for (name in style) {
-    cur = style[name]
+  for (name in newStyle) {
+    cur = newStyle[name]
     if (cur !== oldStyle[name]) {
       // ie9 setting to null has no effect, must use empty string
-      el.style[normalize(name)] = cur == null ? '' : cur
+      setProp(el, name, cur == null ? '' : cur)
     }
   }
 }

@@ -57,6 +57,42 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('custome component class', done => {
+    renderVmWithOptions({
+      template: '<div><cmp class="cmp"></cmp></div>',
+      components: {
+        cmp: {
+          render: h => h('div', 'test')
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div server-rendered="true"><div class="cmp">test</div></div>')
+      done()
+    })
+  })
+
+  it('nested component class', done => {
+    renderVmWithOptions({
+      template: '<cmp class="outer" :class="cls"></cmp>',
+      data: { cls: { 'success': 1 }},
+      components: {
+        cmp: {
+          render: h => h('div', [h('nested', { staticClass: 'nested', 'class': { 'error': 1 }})]),
+          components: {
+            nested: {
+              render: h => h('div', { staticClass: 'inner' }, 'test')
+            }
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div server-rendered="true" class="outer success">' +
+          '<div class="inner nested error">test</div>' +
+        '</div>')
+      done()
+    })
+  })
+
   it('dynamic style', done => {
     renderVmWithOptions({
       template: '<div style="background-color:black" :style="{ fontSize: fontSize + \'px\', color: color }"></div>',
@@ -66,7 +102,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="font-size:14px;color:red;background-color:black"></div>'
+        '<div server-rendered="true" style="background-color:black;font-size:14px;color:red"></div>'
       )
       done()
     })
@@ -86,6 +122,123 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('custom component style', done => {
+    renderVmWithOptions({
+      template: '<section><comp :style="style"></comp></section>',
+      data: {
+        style: 'color:red'
+      },
+      components: {
+        comp: {
+          template: '<div></div>'
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<section server-rendered="true"><div style="color:red"></div></section>'
+      )
+      done()
+    })
+  })
+
+  it('nested custom component style', done => {
+    renderVmWithOptions({
+      template: '<comp style="color: blue" :style="style"></comp>',
+      data: {
+        style: 'color:red'
+      },
+      components: {
+        comp: {
+          template: '<nested style="text-align: left;" :style="{fontSize:\'520rem\'}"></nested>',
+          components: {
+            nested: {
+              template: '<div></div>'
+            }
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true" style="text-align:left;font-size:520rem;color:red"></div>'
+      )
+      done()
+    })
+  })
+
+  it('component style not passed to child', done => {
+    renderVmWithOptions({
+      template: '<comp :style="style"></comp>',
+      data: {
+        style: 'color:red'
+      },
+      components: {
+        comp: {
+          template: '<div><div></div></div>'
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true" style="color:red"><div></div></div>'
+      )
+      done()
+    })
+  })
+
+  it('component style not passed to slot', done => {
+    renderVmWithOptions({
+      template: '<comp :style="style"><span style="color:black"></span></comp>',
+      data: {
+        style: 'color:red'
+      },
+      components: {
+        comp: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true" style="color:red"><span style="color:black"></span></div>'
+      )
+      done()
+    })
+  })
+
+  it('attrs merging on components', done => {
+    const Test = {
+      render: h => h('div', {
+        attrs: { id: 'a' }
+      })
+    }
+    renderVmWithOptions({
+      render: h => h(Test, {
+        attrs: { id: 'b', name: 'c' }
+      })
+    }, res => {
+      expect(res).toContain(
+        '<div id="b" server-rendered="true" name="c"></div>'
+      )
+      done()
+    })
+  })
+
+  it('domProps merging on components', done => {
+    const Test = {
+      render: h => h('div', {
+        domProps: { innerHTML: 'a' }
+      })
+    }
+    renderVmWithOptions({
+      render: h => h(Test, {
+        domProps: { innerHTML: 'b', value: 'c' }
+      })
+    }, res => {
+      expect(res).toContain(
+        '<div server-rendered="true" value="c">b</div>'
+      )
+      done()
+    })
+  })
+
   it('text interpolation', done => {
     renderVmWithOptions({
       template: '<div>{{ foo }} side {{ bar }}</div>',
@@ -94,7 +247,7 @@ describe('SSR: renderToString', () => {
         bar: '<span>rendering</span>'
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true">server side &lt;span&gt;rendering&lt;&sol;span&gt;</div>')
+      expect(result).toContain('<div server-rendered="true">server side &lt;span&gt;rendering&lt;/span&gt;</div>')
       done()
     })
   })
@@ -118,7 +271,7 @@ describe('SSR: renderToString', () => {
         text: '<span>foo</span>'
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true">&lt;span&gt;foo&lt;&sol;span&gt;</div>')
+      expect(result).toContain('<div server-rendered="true">&lt;span&gt;foo&lt;/span&gt;</div>')
       done()
     })
   })

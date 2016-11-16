@@ -44,7 +44,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       vm.$options.render = emptyVNode
       if (process.env.NODE_ENV !== 'production') {
         /* istanbul ignore if */
-        if (vm.$options.template) {
+        if (vm.$options.template && vm.$options.template.charAt(0) !== '#') {
           warn(
             'You are using the runtime-only build of Vue where the template ' +
             'option is not available. Either pre-compile the templates into ' +
@@ -132,6 +132,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       if (process.env.NODE_ENV !== 'production') {
         observerState.isSettingProps = false
       }
+      vm.$options.propsData = propsData
     }
     // update listeners
     if (listeners) {
@@ -187,6 +188,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm.$el) {
       vm.$el.__vue__ = null
     }
+    // invoke destroy hooks on current rendered tree
+    vm.__patch__(vm._vnode, null)
   }
 }
 

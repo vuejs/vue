@@ -7,7 +7,7 @@ import {
   WatchHandler,
   DirectiveOptions,
   DirectiveFunction
-} from "./options.d";
+} from "./options";
 import { VNode, VNodeData, VNodeChildren } from "./vnode";
 import { PluginFunction, PluginObject } from "./plugin";
 

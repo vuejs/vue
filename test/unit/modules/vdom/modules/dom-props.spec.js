@@ -22,7 +22,7 @@ describe('vdom domProps module', () => {
     const vnode2 = new VNode('a', { domProps: {}})
     patch(null, vnode1)
     const elm = patch(vnode1, vnode2)
-    expect(elm.src).toBeUndefined()
+    expect(elm.src).toBe('')
   })
 
   it('should initialize the elements value to zero', () => {

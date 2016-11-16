@@ -10,6 +10,7 @@ let transforms
 let dataGenFns
 let platformDirectives
 let staticRenderFns
+let onceCount
 let currentOptions
 
 export function generate (
@@ -22,6 +23,8 @@ export function generate (
   // save previous staticRenderFns so generate calls can be nested
   const prevStaticRenderFns: Array<string> = staticRenderFns
   const currentStaticRenderFns: Array<string> = staticRenderFns = []
+  const prevOnceCount = onceCount
+  onceCount = 0
   currentOptions = options
   warn = options.warn || baseWarn
   transforms = pluckModuleFunction(options.modules, 'transformCode')
@@ -29,6 +32,7 @@ export function generate (
   platformDirectives = options.directives || {}
   const code = ast ? genElement(ast) : '_h("div")'
   staticRenderFns = prevStaticRenderFns
+  onceCount = prevOnceCount
   return {
     render: `with(this){return ${code}}`,
     staticRenderFns: currentStaticRenderFns
@@ -37,10 +41,9 @@ export function generate (
 
 function genElement (el: ASTElement): string {
   if (el.staticRoot && !el.staticProcessed) {
-    // hoist static sub-trees out
-    el.staticProcessed = true
-    staticRenderFns.push(`with(this){return ${genElement(el)}}`)
-    return `_m(${staticRenderFns.length - 1}${el.staticInFor ? ',true' : ''})`
+    return genStatic(el)
+  } else if (el.once && !el.onceProcessed) {
+    return genOnce(el)
   } else if (el.for && !el.forProcessed) {
     return genFor(el)
   } else if (el.if && !el.ifProcessed) {
@@ -53,9 +56,10 @@ function genElement (el: ASTElement): string {
     // component or element
     let code
     if (el.component) {
-      code = genComponent(el)
+      code = genComponent(el.component, el)
     } else {
-      const data = genData(el)
+      const data = el.plain ? undefined : genData(el)
+
       const children = el.inlineTemplate ? null : genChildren(el)
       code = `_h('${el.tag}'${
         data ? `,${data}` : '' // data
@@ -71,10 +75,45 @@ function genElement (el: ASTElement): string {
   }
 }
 
+// hoist static sub-trees out
+function genStatic (el: ASTElement): string {
+  el.staticProcessed = true
+  staticRenderFns.push(`with(this){return ${genElement(el)}}`)
+  return `_m(${staticRenderFns.length - 1}${el.staticInFor ? ',true' : ''})`
+}
+
+// v-once
+function genOnce (el: ASTElement): string {
+  el.onceProcessed = true
+  if (el.if && !el.ifProcessed) {
+    return genIf(el)
+  } else if (el.staticInFor) {
+    let key = ''
+    let parent = el.parent
+    while (parent) {
+      if (parent.for) {
+        key = parent.key
+        break
+      }
+      parent = parent.parent
+    }
+    if (!key) {
+      process.env.NODE_ENV !== 'production' && warn(
+        `v-once can only be used inside v-for that is keyed. `
+      )
+      return genElement(el)
+    }
+    return `_o(${genElement(el)},${onceCount++}${key ? `,${key}` : ``})`
+  } else {
+    return genStatic(el)
+  }
+}
+
+// v-if with v-once shuold generate code like (a)?_m(0):_m(1)
 function genIf (el: any): string {
   const exp = el.if
   el.ifProcessed = true // avoid recursion
-  return `(${exp})?${genElement(el)}:${genElse(el)}`
+  return `(${exp})?${el.once ? genOnce(el) : genElement(el)}:${genElse(el)}`
 }
 
 function genElse (el: ASTElement): string {
@@ -95,11 +134,7 @@ function genFor (el: any): string {
     '})'
 }
 
-function genData (el: ASTElement): string | void {
-  if (el.plain) {
-    return
-  }
-
+function genData (el: ASTElement): string {
   let data = '{'
 
   // directives first.
@@ -224,14 +259,15 @@ function genText (text: ASTText | ASTExpression): string {
 function genSlot (el: ASTElement): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el)
-  return children
-    ? `_t(${slotName},${children})`
-    : `_t(${slotName})`
+  return `_t(${slotName}${
+    children ? `,${children}` : ''
+  })`
 }
 
-function genComponent (el: any): string {
-  const children = genChildren(el)
-  return `_h(${el.component},${genData(el)}${
+// componentName is el.component, take it as argument to shun flow's pessimistic refinement
+function genComponent (componentName, el): string {
+  const children = el.inlineTemplate ? null : genChildren(el)
+  return `_h(${componentName},${genData(el)}${
     children ? `,${children}` : ''
   })`
 }

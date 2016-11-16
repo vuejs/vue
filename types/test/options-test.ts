@@ -166,7 +166,7 @@ Vue.component('functional-component', {
   render(createElement, context) {
     context.props;
     context.children;
-    context.slots;
+    context.slots();
     context.data;
     context.parent;
     return createElement("div", {}, context.children);

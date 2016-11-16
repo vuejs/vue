@@ -55,7 +55,7 @@ export interface FunctionalComponentOptions {
 export interface RenderContext {
   props: any;
   children: VNode[];
-  slots: any;
+  slots(): any;
   data: VNodeData;
   parent: Vue;
 }

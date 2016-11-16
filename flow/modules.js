@@ -1,6 +1,6 @@
-declare module 'entities' {
-  declare function encodeHTML(html: string): string;
-  declare function decodeHTML(html: string): string;
+declare module 'he' {
+  declare function escape(html: string): string;
+  declare function decode(html: string): string;
 }
 
 declare module 'source-map' {

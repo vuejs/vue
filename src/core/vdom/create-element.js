@@ -3,7 +3,7 @@
 import VNode, { emptyVNode } from './vnode'
 import config from '../config'
 import { createComponent } from './create-component'
-import { normalizeChildren } from './helpers'
+import { normalizeChildren } from './helpers/index'
 import { warn, resolveAsset } from '../util/index'
 
 // wrapper function for providing a more flexible interface
@@ -21,7 +21,7 @@ export function createElement (
   return _createElement(this._self, tag, data, children)
 }
 
-function _createElement (
+export function _createElement (
   context: Component,
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
@@ -55,8 +55,9 @@ function _createElement (
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
+      const childNs = tag === 'foreignObject' ? 'xhtml' : ns
       return new VNode(
-        tag, data, normalizeChildren(children, ns),
+        tag, data, normalizeChildren(children, childNs),
         undefined, undefined, ns, context
       )
     }

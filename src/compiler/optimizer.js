@@ -8,7 +8,7 @@ let isPlatformReservedTag
 const genStaticKeysCached = cached(genStaticKeys)
 
 /**
- * Goal of the optimizier: walk the generated template AST tree
+ * Goal of the optimizer: walk the generated template AST tree
  * and detect sub-trees that are purely static, i.e. parts of
  * the DOM that never needs to change.
  *
@@ -38,6 +38,16 @@ function genStaticKeys (keys: string): Function {
 function markStatic (node: ASTNode) {
   node.static = isStatic(node)
   if (node.type === 1) {
+    // do not make component slot content static. this avoids
+    // 1. components not able to mutate slot nodes
+    // 2. static slot content fails for hot-reloading
+    if (
+      !isPlatformReservedTag(node.tag) &&
+      node.tag !== 'slot' &&
+      node.attrsMap['inline-template'] == null
+    ) {
+      return
+    }
     for (let i = 0, l = node.children.length; i < l; i++) {
       const child = node.children[i]
       markStatic(child)
@@ -50,14 +60,21 @@ function markStatic (node: ASTNode) {
 
 function markStaticRoots (node: ASTNode, isInFor: boolean) {
   if (node.type === 1) {
-    if (node.once || node.static) {
-      node.staticRoot = true
+    if (node.static || node.once) {
       node.staticInFor = isInFor
+    }
+    if (node.static) {
+      node.staticRoot = true
       return
     }
     if (node.children) {
       for (let i = 0, l = node.children.length; i < l; i++) {
-        markStaticRoots(node.children[i], !!node.for)
+        const child = node.children[i]
+        isInFor = isInFor || !!node.for
+        markStaticRoots(child, isInFor)
+        if (child.type === 1 && child.elseBlock) {
+          markStaticRoots(child.elseBlock, isInFor)
+        }
       }
     }
   }
@@ -75,6 +92,20 @@ function isStatic (node: ASTNode): boolean {
     !node.if && !node.for && // not v-if or v-for or v-else
     !isBuiltInTag(node.tag) && // not a built-in
     isPlatformReservedTag(node.tag) && // not a component
+    !isDirectChildOfTemplateFor(node) &&
     Object.keys(node).every(isStaticKey)
   ))
+}
+
+function isDirectChildOfTemplateFor (node: ASTElement): boolean {
+  while (node.parent) {
+    node = node.parent
+    if (node.tag !== 'template') {
+      return false
+    }
+    if (node.for) {
+      return true
+    }
+  }
+  return false
 }

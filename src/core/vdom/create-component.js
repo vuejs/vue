@@ -1,8 +1,8 @@
 /* @flow */
 
-import Vue from '../instance/index'
 import VNode from './vnode'
-import { normalizeChildren } from './helpers'
+import { normalizeChildren } from './helpers/index'
+import { resolveConstructorOptions } from '../instance/init'
 import { activeInstance, callHook } from '../instance/lifecycle'
 import { resolveSlots } from '../instance/render'
 import { createElement } from './create-element'
@@ -22,8 +22,9 @@ export function createComponent (
     return
   }
 
+  const baseCtor = context.$options._base
   if (isObject(Ctor)) {
-    Ctor = Vue.extend(Ctor)
+    Ctor = baseCtor.extend(Ctor)
   }
 
   if (typeof Ctor !== 'function') {
@@ -38,7 +39,7 @@ export function createComponent (
     if (Ctor.resolved) {
       Ctor = Ctor.resolved
     } else {
-      Ctor = resolveAsyncComponent(Ctor, () => {
+      Ctor = resolveAsyncComponent(Ctor, baseCtor, () => {
         // it's ok to queue this on every render because
         // $forceUpdate is buffered by the scheduler.
         context.$forceUpdate()
@@ -50,6 +51,10 @@ export function createComponent (
       }
     }
   }
+
+  // resolve constructor options in case global mixins are applied after
+  // component constructor creation
+  resolveConstructorOptions(Ctor)
 
   data = data || {}
 
@@ -113,9 +118,11 @@ function createFunctionalComponent (
       slots: () => resolveSlots(children, context)
     }
   )
-  vnode.functionalContext = context
-  if (data.slot) {
-    (vnode.data || (vnode.data = {})).slot = data.slot
+  if (vnode instanceof VNode) {
+    vnode.functionalContext = context
+    if (data.slot) {
+      (vnode.data || (vnode.data = {})).slot = data.slot
+    }
   }
   return vnode
 }
@@ -188,6 +195,7 @@ function destroy (vnode: MountedComponentVNode) {
 
 function resolveAsyncComponent (
   factory: Function,
+  baseCtor: Class<Component>,
   cb: Function
 ): Class<Component> | void {
   if (factory.requested) {
@@ -200,7 +208,7 @@ function resolveAsyncComponent (
 
     const resolve = (res: Object | Class<Component>) => {
       if (isObject(res)) {
-        res = Vue.extend(res)
+        res = baseCtor.extend(res)
       }
       // cache resolved
       factory.resolved = res
@@ -234,7 +242,7 @@ function resolveAsyncComponent (
 }
 
 function extractProps (data: VNodeData, Ctor: Class<Component>): ?Object {
-  // we are only extrating raw values here.
+  // we are only extracting raw values here.
   // validation and default values are handled in the child
   // component itself.
   const propOptions = Ctor.options.props

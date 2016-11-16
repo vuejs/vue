@@ -133,6 +133,32 @@ describe('Directive v-model checkbox', () => {
     }).then(done)
   })
 
+  it('.number modifier', () => {
+    const vm = new Vue({
+      data: {
+        test: [],
+        check: true
+      },
+      template: `
+        <div>
+          <input type="checkbox" v-model.number="test" value="1">
+          <input type="checkbox" v-model="test" value="2">
+          <input type="checkbox" v-model.number="check">
+        </div>
+      `
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    var checkboxInputs = vm.$el.getElementsByTagName('input')
+    expect(checkboxInputs[0].checked).toBe(false)
+    expect(checkboxInputs[1].checked).toBe(false)
+    expect(checkboxInputs[2].checked).toBe(true)
+    checkboxInputs[0].click()
+    checkboxInputs[1].click()
+    checkboxInputs[2].click()
+    expect(vm.test).toEqual([1, '2'])
+    expect(vm.check).toEqual(false)
+  })
+
   it('warn inline checked', () => {
     const vm = new Vue({
       template: `<input type="checkbox" v-model="test" checked>`,

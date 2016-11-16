@@ -161,6 +161,32 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
+  it('should work with select which has no default selected options', (done) => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        id: 4,
+        list: [1, 2, 3],
+        testChange: 5
+      },
+      template:
+        '<div>' +
+          '<select @change="test" v-model="id">' +
+            '<option v-for="item in list" :value="item">{{item}}</option>' +
+          '</select>' +
+          '{{testChange}}' +
+        '</div>',
+      methods: {
+        test: spy
+      }
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.testChange = 10
+    waitForUpdate(() => {
+      expect(spy.calls.count()).toBe(0)
+    }).then(done)
+  })
+
   it('multiple', done => {
     const vm = new Vue({
       data: {
@@ -235,6 +261,62 @@ describe('Directive v-model select', () => {
       expect(opts[1].selected).toBe(false)
       expect(vm.test).toEqual(['c']) // should remove 'd' which no longer has a matching option
     }).then(done)
+  })
+
+  it('multiple selects', (done) => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        selections: ['', ''],
+        selectBoxes: [
+          [
+            { value: 'foo', text: 'foo' },
+            { value: 'bar', text: 'bar' }
+          ],
+          [
+            { value: 'day', text: 'day' },
+            { value: 'night', text: 'night' }
+          ]
+        ]
+      },
+      watch: {
+        selections: spy
+      },
+      template:
+        '<div>' +
+          '<select v-for="(item, index) in selectBoxes" v-model="selections[index]">' +
+            '<option v-for="element in item" v-bind:value="element.value" v-text="element.text"></option>' +
+          '</select>' +
+          '<span ref="rs">{{selections}}</span>' +
+        '</div>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    var selects = vm.$el.getElementsByTagName('select')
+    var select0 = selects[0]
+    select0.options[0].selected = true
+    triggerEvent(select0, 'change')
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalled()
+      expect(vm.selections).toEqual(['foo', ''])
+    }).then(done)
+  })
+
+  it('.number modifier', () => {
+    const vm = new Vue({
+      data: {
+        test: 2
+      },
+      template:
+        '<select v-model.number="test">' +
+          '<option value="1">a</option>' +
+          '<option :value="2">b</option>' +
+        ' <option :value="3">c</option>' +
+        '</select>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    updateSelect(vm.$el, '1')
+    triggerEvent(vm.$el, 'change')
+    expect(vm.test).toBe(1)
   })
 
   it('should warn inline selected', () => {

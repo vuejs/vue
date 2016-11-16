@@ -64,6 +64,47 @@ describe('Directive v-model text', () => {
     expect(vm.test).toBe('what')
   })
 
+  it('multiple inputs', (done) => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        selections: [[1, 2, 3], [4, 5]],
+        inputList: [
+          {
+            name: 'questionA',
+            data: ['a', 'b', 'c']
+          },
+          {
+            name: 'questionB',
+            data: ['1', '2']
+          }
+        ]
+      },
+      watch: {
+        selections: spy
+      },
+      template:
+        '<div>' +
+          '<div v-for="(inputGroup, idx) in inputList">' +
+            '<div>' +
+              '<span v-for="(item, index) in inputGroup.data">' +
+                '<input v-bind:name="item" type="text" v-model.number="selections[idx][index]" v-bind:id="idx+\'-\'+index"/>' +
+                '<label>{{item}}</label>' +
+              '</span>' +
+            '</div>' +
+          '</div>' +
+          '<span ref="rs">{{selections}}</span>' +
+        '</div>'
+    }).$mount()
+    var inputs = vm.$el.getElementsByTagName('input')
+    inputs[1].value = 'test'
+    triggerEvent(inputs[1], 'input')
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalled()
+      expect(vm.selections).toEqual([[1, 'test', 3], [4, 5]])
+    }).then(done)
+  })
+
   if (isIE9) {
     it('IE9 selectionchange', done => {
       const vm = new Vue({

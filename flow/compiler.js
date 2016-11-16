@@ -41,9 +41,11 @@ declare type ModuleOptions = {
   staticKeys?: Array<string>; // AST properties to be considered static
 }
 
+declare type ASTModifiers = { [key: string]: boolean }
+
 declare type ASTElementHandler = {
   value: string;
-  modifiers: ?{ [key: string]: true };
+  modifiers: ?ASTModifiers;
 }
 
 declare type ASTElementHandlers = {
@@ -55,7 +57,7 @@ declare type ASTDirective = {
   rawName: string;
   value: string;
   arg: ?string;
-  modifiers: ?{ [key: string]: true };
+  modifiers: ?ASTModifiers;
 }
 
 declare type ASTNode = ASTElement | ASTText | ASTExpression
@@ -104,6 +106,7 @@ declare type ASTElement = {
 
   staticClass?: string;
   classBinding?: string;
+  staticStyle?: string;
   styleBinding?: string;
   events?: ASTElementHandlers;
   nativeEvents?: ASTElementHandlers;
@@ -115,7 +118,11 @@ declare type ASTElement = {
 
   forbidden?: true;
   once?: true;
+  onceProcessed?: boolean;
   wrapData?: (code: string) => string;
+
+  // weex specific
+  atom?: boolean;
 }
 
 declare type ASTExpression = {
@@ -148,4 +155,5 @@ declare type SFCBlock = {
   lang?: string;
   src?: string;
   scoped?: boolean;
+  module?: string | boolean;
 }

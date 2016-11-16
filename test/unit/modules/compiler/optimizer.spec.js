@@ -90,14 +90,6 @@ describe('optimizer', () => {
     expect(ast.children[0].static).toBe(false) // text node
   })
 
-  it('render tag', () => {
-    const ast = parse('<render :method="onRender"><p>hello</p></render>', baseOptions)
-    optimize(ast, baseOptions)
-    expect(ast.static).toBe(false)
-    expect(ast.children[0].static).toBe(true)
-    expect(ast.children[0].children[0].static).toBe(true)
-  })
-
   it('single slot', () => {
     const ast = parse('<slot>hello</slot>', baseOptions)
     optimize(ast, baseOptions)
@@ -186,7 +178,7 @@ describe('optimizer', () => {
   })
 
   it('custom directive', () => {
-    const ast = parse('<fom><input type="text" name="field1" :value="msg" v-validate:field1="required"></form>', baseOptions)
+    const ast = parse('<form><input type="text" name="field1" :value="msg" v-validate:field1="required"></form>', baseOptions)
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(false)

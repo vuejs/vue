@@ -1,7 +1,7 @@
 /* @flow */
 
 import { bind, toArray } from '../util/index'
-import { updateListeners } from '../vdom/helpers'
+import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
   vm._events = Object.create(null)

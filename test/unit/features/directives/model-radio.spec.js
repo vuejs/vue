@@ -85,6 +85,67 @@ describe('Directive v-model radio', () => {
     }).then(done)
   })
 
+  it('multiple radios ', (done) => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        selections: ['a', '1'],
+        radioList: [
+          {
+            name: 'questionA',
+            data: ['a', 'b', 'c']
+          },
+          {
+            name: 'questionB',
+            data: ['1', '2']
+          }
+        ]
+      },
+      watch: {
+        selections: spy
+      },
+      template:
+        '<div>' +
+          '<div v-for="(radioGroup, idx) in radioList">' +
+            '<div>' +
+              '<span v-for="(item, index) in radioGroup.data">' +
+                '<input :name="radioGroup.name" type="radio" :value="item" v-model="selections[idx]" :id="idx"/>' +
+                '<label>{{item}}</label>' +
+              '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    var inputs = vm.$el.getElementsByTagName('input')
+    inputs[1].click()
+    waitForUpdate(() => {
+      expect(vm.selections).toEqual(['b', '1'])
+      expect(spy).toHaveBeenCalled()
+    }).then(done)
+  })
+
+  it('.number modifier', () => {
+    const vm = new Vue({
+      data: {
+        test: 1
+      },
+      template: `
+        <div>
+          <input type="radio" value="1" v-model="test" name="test">
+          <input type="radio" value="2" v-model.number="test" name="test">
+        </div>
+      `
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
+    vm.$el.children[1].click()
+    expect(vm.$el.children[0].checked).toBe(false)
+    expect(vm.$el.children[1].checked).toBe(true)
+    expect(vm.test).toBe(2)
+  })
+
   it('warn inline checked', () => {
     const vm = new Vue({
       template: `<input v-model="test" type="radio" value="1" checked>`,

@@ -7,15 +7,21 @@ import {
 } from 'web/util/attrs'
 
 export default function renderAttrs (node: VNodeWithData): string {
+  let attrs = node.data.attrs
   let res = ''
-  if (node.data.attrs) {
-    res += render(node.data.attrs)
-  }
-  return res
-}
 
-function render (attrs: { [key: string]: any }): string {
-  let res = ''
+  let parent = node.parent
+  while (parent) {
+    if (parent.data && parent.data.attrs) {
+      attrs = Object.assign({}, attrs, parent.data.attrs)
+    }
+    parent = parent.parent
+  }
+
+  if (!attrs) {
+    return res
+  }
+
   for (const key in attrs) {
     if (key === 'style') {
       // leave it to the style module

@@ -13,6 +13,9 @@ describe('Single File Component parser', () => {
         h2
           color green
       </style>
+      <style module>
+        h1 { font-weight: bold }
+      </style>
       <script>
         export default {}
       </script>
@@ -21,11 +24,12 @@ describe('Single File Component parser', () => {
       </div>
     `)
     expect(res.template.content.trim()).toBe('<div>hi</div>')
-    expect(res.styles.length).toBe(2)
+    expect(res.styles.length).toBe(3)
     expect(res.styles[0].src).toBe('./test.css')
     expect(res.styles[1].lang).toBe('stylus')
     expect(res.styles[1].scoped).toBe(true)
     expect(res.styles[1].content.trim()).toBe('h1\n  color red\nh2\n  color green')
+    expect(res.styles[2].module).toBe(true)
     expect(res.script.content.trim()).toBe('export default {}')
   })
 
@@ -62,5 +66,15 @@ describe('Single File Component parser', () => {
     `.trim(), { pad: true })
     expect(res.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
     expect(res.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
+  })
+
+  it('should handle template blocks with lang as special text', () => {
+    const res = parseComponent(`
+      <template lang="pug">
+        div
+          h1(v-if='1 < 2') hello
+      </template>
+    `)
+    expect(res.template.content.trim()).toBe(`div\n  h1(v-if='1 < 2') hello`)
   })
 })

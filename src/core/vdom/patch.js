@@ -78,7 +78,10 @@ export function createPatchFunction (backend) {
 
   function removeElement (el) {
     const parent = nodeOps.parentNode(el)
-    nodeOps.removeChild(parent, el)
+    // element may have already been removed due to v-html
+    if (parent) {
+      nodeOps.removeChild(parent, el)
+    }
   }
 
   function createElm (vnode, insertedVnodeQueue, nested) {
@@ -201,12 +204,6 @@ export function createPatchFunction (backend) {
     if (isDef(data)) {
       if (isDef(i = data.hook) && isDef(i = i.destroy)) i(vnode)
       for (i = 0; i < cbs.destroy.length; ++i) cbs.destroy[i](vnode)
-    }
-    if (isDef(i = vnode.child) && (
-      !data.keepAlive ||
-      vnode.context._isBeingDestroyed
-    )) {
-      invokeDestroyHook(i._vnode)
     }
     if (isDef(i = vnode.children)) {
       for (j = 0; j < vnode.children.length; ++j) {
@@ -343,7 +340,7 @@ export function createPatchFunction (backend) {
     if (vnode.isStatic &&
         oldVnode.isStatic &&
         vnode.key === oldVnode.key &&
-        vnode.isCloned) {
+        (vnode.isCloned || vnode.isOnce)) {
       vnode.elm = oldVnode.elm
       return
     }
@@ -449,7 +446,7 @@ export function createPatchFunction (backend) {
     if (vnode.tag) {
       return (
         vnode.tag.indexOf('vue-component') === 0 ||
-        vnode.tag === nodeOps.tagName(node).toLowerCase()
+        vnode.tag.toLowerCase() === nodeOps.tagName(node).toLowerCase()
       )
     } else {
       return _toString(vnode.text) === node.data
@@ -457,6 +454,11 @@ export function createPatchFunction (backend) {
   }
 
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
+    if (!vnode) {
+      if (oldVnode) invokeDestroyHook(oldVnode)
+      return
+    }
+
     let elm, parent
     let isInitialPatch = false
     const insertedVnodeQueue = []

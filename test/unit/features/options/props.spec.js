@@ -399,4 +399,46 @@ describe('Options props', () => {
       expect(spy).not.toHaveBeenCalled()
     }).then(done)
   })
+
+  // #4090
+  it('should not trigger wathcer on default value', done => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      template: `<test :value="a" :test="b"></test>`,
+      data: {
+        a: 1,
+        b: undefined
+      },
+      components: {
+        test: {
+          template: '<div>{{ value }}</div>',
+          props: {
+            value: { type: Number },
+            test: {
+              type: Object,
+              default: () => ({})
+            }
+          },
+          watch: {
+            test: spy
+          }
+        }
+      }
+    }).$mount()
+
+    vm.a++
+    waitForUpdate(() => {
+      expect(spy).not.toHaveBeenCalled()
+      vm.b = {}
+    }).then(() => {
+      expect(spy.calls.count()).toBe(1)
+    }).then(() => {
+      vm.b = undefined
+    }).then(() => {
+      expect(spy.calls.count()).toBe(2)
+      vm.a++
+    }).then(() => {
+      expect(spy.calls.count()).toBe(2)
+    }).then(done)
+  })
 })

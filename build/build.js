@@ -15,6 +15,13 @@ const main = fs
   .replace(/Vue\.version = '[^']+'/, "Vue.version = '" + version + "'")
 fs.writeFileSync('src/core/index.js', main)
 
+// update weex subversion
+const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
+const weexMain = fs
+  .readFileSync('src/entries/weex-framework.js', 'utf-8')
+  .replace(/Vue\.version = '[^']+'/, "Vue.version = '" + weexVersion + "'")
+fs.writeFileSync('src/entries/weex-framework.js', weexMain)
+
 let builds = require('./config').getAllBuilds()
 
 // filter builds via command line arg
@@ -22,6 +29,11 @@ if (process.argv[2]) {
   const filters = process.argv[2].split(',')
   builds = builds.filter(b => {
     return filters.some(f => b.dest.indexOf(f) > -1)
+  })
+} else {
+  // filter out weex builds by default
+  builds = builds.filter(b => {
+    return b.dest.indexOf('weex') === -1
   })
 }
 

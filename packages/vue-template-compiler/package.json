@@ -1,6 +1,6 @@
 {
   "name": "vue-template-compiler",
-  "version": "2.0.2",
+  "version": "2.0.6",
   "description": "template compiler for Vue 2.0",
   "main": "index.js",
   "repository": {
@@ -16,9 +16,9 @@
   "bugs": {
     "url": "https://github.com/vuejs/vue/issues"
   },
-  "homepage": "https://github.com/vuejs/vue#readme",
+  "homepage": "https://github.com/vuejs/vue/tree/dev/packages/vue-template-compiler#readme",
   "dependencies": {
-    "de-indent": "^1.0.2",
-    "entities": "^1.1.1"
+    "he": "^1.1.0",
+    "de-indent": "^1.0.2"
   }
 }

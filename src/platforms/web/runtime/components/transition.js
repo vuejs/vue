@@ -5,7 +5,7 @@
 
 import { warn } from 'core/util/index'
 import { camelize, extend } from 'shared/util'
-import { mergeVNodeHook, getFirstComponentChild } from 'core/vdom/helpers'
+import { mergeVNodeHook, getFirstComponentChild } from 'core/vdom/helpers/index'
 
 export const transitionProps = {
   name: String,
@@ -22,7 +22,7 @@ export const transitionProps = {
 }
 
 // in case the child is also an abstract component, e.g. <keep-alive>
-// we want to recrusively retrieve the real component to be rendered
+// we want to recursively retrieve the real component to be rendered
 function getRealChild (vnode: ?VNode): ?VNode {
   const compOptions = vnode && vnode.componentOptions
   if (compOptions && compOptions.Ctor.options.abstract) {
