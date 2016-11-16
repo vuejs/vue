@@ -605,21 +605,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 /*  */
 
-var decode;
-
-/* istanbul ignore else */
-if (inBrowser) {
-  var decoder = document.createElement('div');
-  decode = function (html) {
-    decoder.innerHTML = html;
-    return decoder.textContent
-  };
-} else {
-  decode = require('he').decode;
-}
-
-/*  */
-
 /**
  * Check if a string starts with $ or _
  */
@@ -1756,7 +1741,9 @@ function normalizeChildren (
         }
       } else if (c instanceof VNode) {
         if (c.text && last && last.text) {
-          last.text += c.text;
+          if (!last.isCloned) {
+            last.text += c.text;
+          }
         } else {
           // inherit parent namespace
           if (ns) {
@@ -4112,7 +4099,7 @@ var argRE = /:(.*)$/;
 var modifierRE = /\.[^.]+/g;
 var specialNewlineRE = /\u2028|\u2029/g;
 
-var decodeHTMLCached = cached(decode);
+var decodeHTMLCached = cached(he.decode);
 
 // configurable state
 var warn$1;

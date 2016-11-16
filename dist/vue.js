@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.6
+ * Vue.js v2.0.7
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -1598,7 +1598,9 @@ function normalizeChildren (
         }
       } else if (c instanceof VNode) {
         if (c.text && last && last.text) {
-          last.text += c.text;
+          if (!last.isCloned) {
+            last.text += c.text;
+          }
         } else {
           // inherit parent namespace
           if (ns) {
@@ -3416,7 +3418,7 @@ Object.defineProperty(Vue$3.prototype, '$isServer', {
   get: function () { return config._isServer; }
 });
 
-Vue$3.version = '2.0.6';
+Vue$3.version = '2.0.7';
 
 /*  */
 
@@ -5749,17 +5751,12 @@ var shouldDecodeNewlines = inBrowser ? shouldDecode('\n', '&#10;') : false;
 
 /*  */
 
-var decode;
+var decoder;
 
-/* istanbul ignore else */
-if (inBrowser) {
-  var decoder = document.createElement('div');
-  decode = function (html) {
-    decoder.innerHTML = html;
-    return decoder.textContent
-  };
-} else {
-  decode = require('he').decode;
+function decode (html) {
+  decoder = decoder || document.createElement('div');
+  decoder.innerHTML = html;
+  return decoder.textContent
 }
 
 /**
