@@ -1,8 +1,6 @@
 /* @flow */
 
 import Vue from 'core/index'
-import config from 'core/config'
-import { noop } from 'shared/util'
 import { patch } from 'weex/runtime/patch'
 import platformDirectives from 'weex/runtime/directives/index'
 import { query, isUnknownElement, isReservedTag, mustUseProp } from 'weex/util/index'
