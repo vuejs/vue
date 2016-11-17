@@ -277,4 +277,37 @@ describe('Directive v-bind:style', () => {
       expect(style.marginLeft).toBe('40px')
     }).then(done)
   })
+
+  it('should work for different element patching', (done) => {
+    const vm = new Vue({
+      template:
+        '<div>' +
+          '<div style="text-align:center" :style="style" v-if="a">true</div>' +
+          '{{ a }}' +
+          '<div style="margin-left:10px" v-else>false</div>' +
+        '</div>',
+      data: {
+        a: true,
+        style: {
+          color: 'red'
+        }
+      }
+    }).$mount()
+    const style = vm.$el.children[0].style
+    expect(style.textAlign).toBe('center')
+    expect(style.color).toBe('red')
+    waitForUpdate(() => {
+      vm.a = false
+    }).then(() => {
+      expect(style.textAlign).toBe('')
+      expect(style.color).toBe('')
+      expect(style.marginLeft).toBe('10px')
+      vm.a = true
+    }).then(() => {
+      expect(style.textAlign).toBe('center')
+      expect(style.color).toBe('red')
+      expect(style.marginLeft).toBe('')
+      vm.a = true
+    }).then(done)
+  })
 })
