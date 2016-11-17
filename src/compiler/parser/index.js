@@ -169,8 +169,9 @@ export function parse (
       if (currentParent && !element.forbidden) {
         if (element.else) { // else block
           processElse(element, currentParent)
-        } else if (element.slotTarget && element.attrsMap.scope) { // scoped slot
+        } else if (element.slotTarget && element.slotScope) { // scoped slot
           (currentParent.scopedSlots || (currentParent.scopedSlots = {}))[element.slotTarget] = element
+          currentParent.plain = false
         } else {
           currentParent.children.push(element)
           element.parent = currentParent
@@ -344,10 +345,18 @@ function processOnce (el) {
 function processSlot (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
+    if (process.env.NODE_ENV !== 'production' && el.key) {
+      warn(
+        `\`key\` does not work on <slot> because slots are abstract outlets ` +
+        `and can possibly expand into multiple elements. ` +
+        `Use the key on a wrapping element instead.`
+      )
+    }
   } else {
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
       el.slotTarget = slotTarget
+      el.slotScope = getAndRemoveAttr(el, 'scope')
     }
   }
 }

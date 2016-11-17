@@ -158,10 +158,6 @@ function genData (el: ASTElement): string {
   if (el.component) {
     data += `tag:"${el.tag}",`
   }
-  // slot target
-  if (el.slotTarget) {
-    data += `slot:${el.slotTarget},`
-  }
   // module data generation functions
   for (let i = 0; i < dataGenFns.length; i++) {
     data += dataGenFns[i](el)
@@ -181,13 +177,20 @@ function genData (el: ASTElement): string {
   if (el.nativeEvents) {
     data += `${genHandlers(el.nativeEvents, true)},`
   }
-  // inline-template
-  if (el.inlineTemplate) {
-    data += `${genInlineTemplate(el)},`
+  // slot target
+  if (el.slotTarget) {
+    data += `slot:${el.slotTarget},`
   }
   // scoped slots
   if (el.scopedSlots) {
     data += `${genScopedSlots(el.scopedSlots)},`
+  }
+  // inline-template
+  if (el.inlineTemplate) {
+    const inlineTemplate = genInlineTemplate(el)
+    if (inlineTemplate) {
+      data += `${inlineTemplate},`
+    }
   }
   data = data.replace(/,$/, '') + '}'
   // v-bind data wrap
@@ -228,7 +231,7 @@ function genDirectives (el: ASTElement): string | void {
   }
 }
 
-function genInlineTemplate (el) {
+function genInlineTemplate (el: ASTElement): ?string {
   const ast = el.children[0]
   if (process.env.NODE_ENV !== 'production' && (
     el.children.length > 1 || ast.type !== 1
@@ -242,8 +245,6 @@ function genInlineTemplate (el) {
     }},staticRenderFns:[${
       inlineRenderFns.staticRenderFns.map(code => `function(){${code}}`).join(',')
     }]}`
-  } else {
-    return ''
   }
 }
 
