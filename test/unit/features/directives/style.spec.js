@@ -280,19 +280,28 @@ describe('Directive v-bind:style', () => {
 
   it('should not merge for different adjacent elements', (done) => {
     const vm = new Vue({
-      template: '<div>' +
-                  '<section style="color: blue" v-if="!bool"></section>' +
-                  '<div></div>' +
-                  '<section style="margin: 0" v-if="bool"></section>' +
-                '</div>',
+      template:
+        '<div>' +
+          '<section style="color: blue" :style="style" v-if="!bool"></section>' +
+          '<div></div>' +
+          '<section style="margin-top: 12px" v-if="bool"></section>' +
+        '</div>',
       data: {
-        bool: false
+        bool: false,
+        style: {
+          fontSize: '12px'
+        }
       }
     }).$mount()
+    const style = vm.$el.children[0].style
+    expect(style.fontSize).toBe('12px')
+    expect(style.color).toBe('blue')
     waitForUpdate(() => {
       vm.bool = true
     }).then(() => {
-      expect(vm.$el.children[1].style.color).not.toBe('blue')
+      expect(style.color).toBe('')
+      expect(style.fontSize).toBe('')
+      expect(style.marginTop).toBe('12px')
     }).then(done)
   })
 })
