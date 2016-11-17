@@ -4,6 +4,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
+var he = require('he');
 var deindent = _interopDefault(require('de-indent'));
 
 /*  */
@@ -475,21 +476,6 @@ if (process.env.NODE_ENV !== 'production') {
     }
     return ("\n(found in " + str + ")")
   };
-}
-
-/*  */
-
-var decode;
-
-/* istanbul ignore else */
-if (inBrowser) {
-  var decoder = document.createElement('div');
-  decode = function (html) {
-    decoder.innerHTML = html;
-    return decoder.textContent
-  };
-} else {
-  decode = require('he').decode;
 }
 
 /*  */
@@ -1630,7 +1616,9 @@ function normalizeChildren (
         }
       } else if (c instanceof VNode) {
         if (c.text && last && last.text) {
-          last.text += c.text;
+          if (!last.isCloned) {
+            last.text += c.text;
+          }
         } else {
           // inherit parent namespace
           if (ns) {
@@ -3951,7 +3939,7 @@ var argRE = /:(.*)$/;
 var modifierRE = /\.[^.]+/g;
 var specialNewlineRE = /\u2028|\u2029/g;
 
-var decodeHTMLCached = cached(decode);
+var decodeHTMLCached = cached(he.decode);
 
 // configurable state
 var warn$1;

@@ -278,36 +278,21 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
-  it('should work for different element patching', (done) => {
+  it('should not merge for different adjacent elements', (done) => {
     const vm = new Vue({
-      template:
-        '<div>' +
-          '<div style="text-align:center" :style="style" v-if="a">true</div>' +
-          '{{ a }}' +
-          '<div style="margin-left:10px" v-else>false</div>' +
-        '</div>',
+      template: '<div>' +
+                  '<section style="color: blue" v-if="!bool"></section>' +
+                  '<div></div>' +
+                  '<section style="margin: 0" v-if="bool"></section>' +
+                '</div>',
       data: {
-        a: true,
-        style: {
-          color: 'red'
-        }
+        bool: false
       }
     }).$mount()
-    const style = vm.$el.children[0].style
-    expect(style.textAlign).toBe('center')
-    expect(style.color).toBe('red')
     waitForUpdate(() => {
-      vm.a = false
+      vm.bool = true
     }).then(() => {
-      expect(style.textAlign).toBe('')
-      expect(style.color).toBe('')
-      expect(style.marginLeft).toBe('10px')
-      vm.a = true
-    }).then(() => {
-      expect(style.textAlign).toBe('center')
-      expect(style.color).toBe('red')
-      expect(style.marginLeft).toBe('')
-      vm.a = true
+      expect(vm.$el.children[1].style.color).not.toBe('blue')
     }).then(done)
   })
 })
