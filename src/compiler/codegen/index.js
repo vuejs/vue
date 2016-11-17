@@ -287,7 +287,7 @@ function genSlot (el: ASTElement): string {
   return `_t(${slotName}${
     children ? `,${children}` : ''
   }${
-    el.attrs ? `${children ? '' : 'null'},{${
+    el.attrs ? `${children ? '' : ',null'},{${
       el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')
     }}` : ''
   })`
