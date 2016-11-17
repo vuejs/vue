@@ -25,6 +25,7 @@ const builds = {
     entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
     dest: path.resolve(__dirname, '../dist/vue.runtime.js'),
     format: 'umd',
+    env: 'development',
     banner
   },
   // runtime-only production build for CDN
@@ -41,6 +42,7 @@ const builds = {
     dest: path.resolve(__dirname, '../dist/vue.js'),
     format: 'umd',
     env: 'development',
+    alias: { he: './entity-decoder' },
     banner
   },
   // Runtime+compiler standalone production build.
@@ -49,6 +51,7 @@ const builds = {
     dest: path.resolve(__dirname, '../dist/vue.min.js'),
     format: 'umd',
     env: 'production',
+    alias: { he: './entity-decoder' },
     banner
   },
   // Web compiler (CommonJS).
@@ -91,7 +94,7 @@ function genConfig (opts) {
     plugins: [
       flow(),
       buble(),
-      alias(require('./alias'))
+      alias(Object.assign({}, require('./alias'), opts.alias))
     ]
   }
 

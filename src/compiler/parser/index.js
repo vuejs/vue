@@ -1,6 +1,6 @@
 /* @flow */
 
-import { decode } from './entity-decoder'
+import { decode } from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { cached, no, camelize } from 'shared/util'

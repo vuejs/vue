@@ -42,7 +42,12 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
   let cur, name
   const el: any = vnode.elm
-  const oldStyle: any = oldVnode.data.style || {}
+  const oldStaticStyle: any = oldVnode.data.staticStyle
+  const oldStyleBinding: any = oldVnode.data.style || {}
+
+  // if static style exists, stylebinding already merged into it when doing normalizeStyleData
+  const oldStyle = oldStaticStyle || oldStyleBinding
+
   const style = normalizeStyleBinding(vnode.data.style) || {}
 
   vnode.data.style = style.__ob__ ? extend({}, style) : style

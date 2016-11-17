@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.7
+ * Vue.js v2.0.6
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -228,98 +228,6 @@ function looseIndexOf (arr, val) {
 
 /*  */
 
-var config = {
-  /**
-   * Option merge strategies (used in core/util/options)
-   */
-  optionMergeStrategies: Object.create(null),
-
-  /**
-   * Whether to suppress warnings.
-   */
-  silent: false,
-
-  /**
-   * Whether to enable devtools
-   */
-  devtools: process.env.NODE_ENV !== 'production',
-
-  /**
-   * Error handler for watcher errors
-   */
-  errorHandler: null,
-
-  /**
-   * Ignore certain custom elements
-   */
-  ignoredElements: null,
-
-  /**
-   * Custom user key aliases for v-on
-   */
-  keyCodes: Object.create(null),
-
-  /**
-   * Check if a tag is reserved so that it cannot be registered as a
-   * component. This is platform-dependent and may be overwritten.
-   */
-  isReservedTag: no,
-
-  /**
-   * Check if a tag is an unknown element.
-   * Platform-dependent.
-   */
-  isUnknownElement: no,
-
-  /**
-   * Get the namespace of an element
-   */
-  getTagNamespace: noop,
-
-  /**
-   * Check if an attribute must be bound using property, e.g. value
-   * Platform-dependent.
-   */
-  mustUseProp: no,
-
-  /**
-   * List of asset types that a component can own.
-   */
-  _assetTypes: [
-    'component',
-    'directive',
-    'filter'
-  ],
-
-  /**
-   * List of lifecycle hooks.
-   */
-  _lifecycleHooks: [
-    'beforeCreate',
-    'created',
-    'beforeMount',
-    'mounted',
-    'beforeUpdate',
-    'updated',
-    'beforeDestroy',
-    'destroyed',
-    'activated',
-    'deactivated'
-  ],
-
-  /**
-   * Max circular updates allowed in a scheduler flush cycle.
-   */
-  _maxUpdateCount: 100,
-
-  /**
-   * Server rendering?
-   */
-  _isServer: process.env.VUE_ENV === 'server'
-};
-
-/*  */
-
 /**
  * Check if a string starts with $ or _
  */
@@ -376,6 +284,23 @@ var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
 var isEdge = UA && UA.indexOf('edge/') > 0;
 var isAndroid = UA && UA.indexOf('android') > 0;
 var isIOS = UA && /iphone|ipad|ipod|ios/.test(UA);
+
+// this needs to be lazy-evaled because vue may be required before
+// vue-server-renderer can set VUE_ENV
+var _isServer;
+var isServerRendering = function () {
+  if (_isServer === undefined) {
+    /* istanbul ignore if */
+    if (!inBrowser && typeof global !== 'undefined') {
+      // detect presence of vue-server-renderer and avoid
+      // Webpack shimming the process
+      _isServer = global['process'].env.VUE_ENV === 'server';
+    } else {
+      _isServer = false;
+    }
+  }
+  return _isServer
+};
 
 // detect devtools
 var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
@@ -482,6 +407,998 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
   }());
 }
 
+/*  */
+
+var config = {
+  /**
+   * Option merge strategies (used in core/util/options)
+   */
+  optionMergeStrategies: Object.create(null),
+
+  /**
+   * Whether to suppress warnings.
+   */
+  silent: false,
+
+  /**
+   * Whether to enable devtools
+   */
+  devtools: process.env.NODE_ENV !== 'production',
+
+  /**
+   * Error handler for watcher errors
+   */
+  errorHandler: null,
+
+  /**
+   * Ignore certain custom elements
+   */
+  ignoredElements: null,
+
+  /**
+   * Custom user key aliases for v-on
+   */
+  keyCodes: Object.create(null),
+
+  /**
+   * Check if a tag is reserved so that it cannot be registered as a
+   * component. This is platform-dependent and may be overwritten.
+   */
+  isReservedTag: no,
+
+  /**
+   * Check if a tag is an unknown element.
+   * Platform-dependent.
+   */
+  isUnknownElement: no,
+
+  /**
+   * Get the namespace of an element
+   */
+  getTagNamespace: noop,
+
+  /**
+   * Check if an attribute must be bound using property, e.g. value
+   * Platform-dependent.
+   */
+  mustUseProp: no,
+
+  /**
+   * List of asset types that a component can own.
+   */
+  _assetTypes: [
+    'component',
+    'directive',
+    'filter'
+  ],
+
+  /**
+   * List of lifecycle hooks.
+   */
+  _lifecycleHooks: [
+    'beforeCreate',
+    'created',
+    'beforeMount',
+    'mounted',
+    'beforeUpdate',
+    'updated',
+    'beforeDestroy',
+    'destroyed',
+    'activated',
+    'deactivated'
+  ],
+
+  /**
+   * Max circular updates allowed in a scheduler flush cycle.
+   */
+  _maxUpdateCount: 100
+};
+
+var warn = noop;
+var formatComponentName;
+
+if (process.env.NODE_ENV !== 'production') {
+  var hasConsole = typeof console !== 'undefined';
+
+  warn = function (msg, vm) {
+    if (hasConsole && (!config.silent)) {
+      console.error("[Vue warn]: " + msg + " " + (
+        vm ? formatLocation(formatComponentName(vm)) : ''
+      ));
+    }
+  };
+
+  formatComponentName = function (vm) {
+    if (vm.$root === vm) {
+      return 'root instance'
+    }
+    var name = vm._isVue
+      ? vm.$options.name || vm.$options._componentTag
+      : vm.name;
+    return (
+      (name ? ("component <" + name + ">") : "anonymous component") +
+      (vm._isVue && vm.$options.__file ? (" at " + (vm.$options.__file)) : '')
+    )
+  };
+
+  var formatLocation = function (str) {
+    if (str === 'anonymous component') {
+      str += " - use the \"name\" option for better debugging messages.";
+    }
+    return ("\n(found in " + str + ")")
+  };
+}
+
+/*  */
+
+
+var uid$1 = 0;
+
+/**
+ * A dep is an observable that can have multiple
+ * directives subscribing to it.
+ */
+var Dep = function Dep () {
+  this.id = uid$1++;
+  this.subs = [];
+};
+
+Dep.prototype.addSub = function addSub (sub) {
+  this.subs.push(sub);
+};
+
+Dep.prototype.removeSub = function removeSub (sub) {
+  remove$1(this.subs, sub);
+};
+
+Dep.prototype.depend = function depend () {
+  if (Dep.target) {
+    Dep.target.addDep(this);
+  }
+};
+
+Dep.prototype.notify = function notify () {
+  // stablize the subscriber list first
+  var subs = this.subs.slice();
+  for (var i = 0, l = subs.length; i < l; i++) {
+    subs[i].update();
+  }
+};
+
+// the current target watcher being evaluated.
+// this is globally unique because there could be only one
+// watcher being evaluated at any time.
+Dep.target = null;
+var targetStack = [];
+
+function pushTarget (_target) {
+  if (Dep.target) { targetStack.push(Dep.target); }
+  Dep.target = _target;
+}
+
+function popTarget () {
+  Dep.target = targetStack.pop();
+}
+
+/*
+ * not type checking this file because flow doesn't play well with
+ * dynamically accessing methods on Array prototype
+ */
+
+var arrayProto = Array.prototype;
+var arrayMethods = Object.create(arrayProto);[
+  'push',
+  'pop',
+  'shift',
+  'unshift',
+  'splice',
+  'sort',
+  'reverse'
+]
+.forEach(function (method) {
+  // cache original method
+  var original = arrayProto[method];
+  def(arrayMethods, method, function mutator () {
+    var arguments$1 = arguments;
+
+    // avoid leaking arguments:
+    // http://jsperf.com/closure-with-arguments
+    var i = arguments.length;
+    var args = new Array(i);
+    while (i--) {
+      args[i] = arguments$1[i];
+    }
+    var result = original.apply(this, args);
+    var ob = this.__ob__;
+    var inserted;
+    switch (method) {
+      case 'push':
+        inserted = args;
+        break
+      case 'unshift':
+        inserted = args;
+        break
+      case 'splice':
+        inserted = args.slice(2);
+        break
+    }
+    if (inserted) { ob.observeArray(inserted); }
+    // notify change
+    ob.dep.notify();
+    return result
+  });
+});
+
+/*  */
+
+var arrayKeys = Object.getOwnPropertyNames(arrayMethods);
+
+/**
+ * By default, when a reactive property is set, the new value is
+ * also converted to become reactive. However when passing down props,
+ * we don't want to force conversion because the value may be a nested value
+ * under a frozen data structure. Converting it would defeat the optimization.
+ */
+var observerState = {
+  shouldConvert: true,
+  isSettingProps: false
+};
+
+/**
+ * Observer class that are attached to each observed
+ * object. Once attached, the observer converts target
+ * object's property keys into getter/setters that
+ * collect dependencies and dispatches updates.
+ */
+var Observer = function Observer (value) {
+  this.value = value;
+  this.dep = new Dep();
+  this.vmCount = 0;
+  def(value, '__ob__', this);
+  if (Array.isArray(value)) {
+    var augment = hasProto
+      ? protoAugment
+      : copyAugment;
+    augment(value, arrayMethods, arrayKeys);
+    this.observeArray(value);
+  } else {
+    this.walk(value);
+  }
+};
+
+/**
+ * Walk through each property and convert them into
+ * getter/setters. This method should only be called when
+ * value type is Object.
+ */
+Observer.prototype.walk = function walk (obj) {
+  var keys = Object.keys(obj);
+  for (var i = 0; i < keys.length; i++) {
+    defineReactive$$1(obj, keys[i], obj[keys[i]]);
+  }
+};
+
+/**
+ * Observe a list of Array items.
+ */
+Observer.prototype.observeArray = function observeArray (items) {
+  for (var i = 0, l = items.length; i < l; i++) {
+    observe(items[i]);
+  }
+};
+
+// helpers
+
+/**
+ * Augment an target Object or Array by intercepting
+ * the prototype chain using __proto__
+ */
+function protoAugment (target, src) {
+  /* eslint-disable no-proto */
+  target.__proto__ = src;
+  /* eslint-enable no-proto */
+}
+
+/**
+ * Augment an target Object or Array by defining
+ * hidden properties.
+ *
+ * istanbul ignore next
+ */
+function copyAugment (target, src, keys) {
+  for (var i = 0, l = keys.length; i < l; i++) {
+    var key = keys[i];
+    def(target, key, src[key]);
+  }
+}
+
+/**
+ * Attempt to create an observer instance for a value,
+ * returns the new observer if successfully observed,
+ * or the existing observer if the value already has one.
+ */
+function observe (value) {
+  if (!isObject(value)) {
+    return
+  }
+  var ob;
+  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+    ob = value.__ob__;
+  } else if (
+    observerState.shouldConvert &&
+    !isServerRendering() &&
+    (Array.isArray(value) || isPlainObject(value)) &&
+    Object.isExtensible(value) &&
+    !value._isVue
+  ) {
+    ob = new Observer(value);
+  }
+  return ob
+}
+
+/**
+ * Define a reactive property on an Object.
+ */
+function defineReactive$$1 (
+  obj,
+  key,
+  val,
+  customSetter
+) {
+  var dep = new Dep();
+
+  var property = Object.getOwnPropertyDescriptor(obj, key);
+  if (property && property.configurable === false) {
+    return
+  }
+
+  // cater for pre-defined getter/setters
+  var getter = property && property.get;
+  var setter = property && property.set;
+
+  var childOb = observe(val);
+  Object.defineProperty(obj, key, {
+    enumerable: true,
+    configurable: true,
+    get: function reactiveGetter () {
+      var value = getter ? getter.call(obj) : val;
+      if (Dep.target) {
+        dep.depend();
+        if (childOb) {
+          childOb.dep.depend();
+        }
+        if (Array.isArray(value)) {
+          dependArray(value);
+        }
+      }
+      return value
+    },
+    set: function reactiveSetter (newVal) {
+      var value = getter ? getter.call(obj) : val;
+      if (newVal === value) {
+        return
+      }
+      if (process.env.NODE_ENV !== 'production' && customSetter) {
+        customSetter();
+      }
+      if (setter) {
+        setter.call(obj, newVal);
+      } else {
+        val = newVal;
+      }
+      childOb = observe(newVal);
+      dep.notify();
+    }
+  });
+}
+
+/**
+ * Set a property on an object. Adds the new property and
+ * triggers change notification if the property doesn't
+ * already exist.
+ */
+function set (obj, key, val) {
+  if (Array.isArray(obj)) {
+    obj.length = Math.max(obj.length, key);
+    obj.splice(key, 1, val);
+    return val
+  }
+  if (hasOwn(obj, key)) {
+    obj[key] = val;
+    return
+  }
+  var ob = obj.__ob__;
+  if (obj._isVue || (ob && ob.vmCount)) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Avoid adding reactive properties to a Vue instance or its root $data ' +
+      'at runtime - declare it upfront in the data option.'
+    );
+    return
+  }
+  if (!ob) {
+    obj[key] = val;
+    return
+  }
+  defineReactive$$1(ob.value, key, val);
+  ob.dep.notify();
+  return val
+}
+
+/**
+ * Delete a property and trigger change if necessary.
+ */
+function del (obj, key) {
+  var ob = obj.__ob__;
+  if (obj._isVue || (ob && ob.vmCount)) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Avoid deleting properties on a Vue instance or its root $data ' +
+      '- just set it to null.'
+    );
+    return
+  }
+  if (!hasOwn(obj, key)) {
+    return
+  }
+  delete obj[key];
+  if (!ob) {
+    return
+  }
+  ob.dep.notify();
+}
+
+/**
+ * Collect dependencies on array elements when the array is touched, since
+ * we cannot intercept array element access like property getters.
+ */
+function dependArray (value) {
+  for (var e = (void 0), i = 0, l = value.length; i < l; i++) {
+    e = value[i];
+    e && e.__ob__ && e.__ob__.dep.depend();
+    if (Array.isArray(e)) {
+      dependArray(e);
+    }
+  }
+}
+
+/*  */
+
+/**
+ * Option overwriting strategies are functions that handle
+ * how to merge a parent option value and a child option
+ * value into the final value.
+ */
+var strats = config.optionMergeStrategies;
+
+/**
+ * Options with restrictions
+ */
+if (process.env.NODE_ENV !== 'production') {
+  strats.el = strats.propsData = function (parent, child, vm, key) {
+    if (!vm) {
+      warn(
+        "option \"" + key + "\" can only be used during instance " +
+        'creation with the `new` keyword.'
+      );
+    }
+    return defaultStrat(parent, child)
+  };
+}
+
+/**
+ * Helper that recursively merges two data objects together.
+ */
+function mergeData (to, from) {
+  if (!from) { return to }
+  var key, toVal, fromVal;
+  var keys = Object.keys(from);
+  for (var i = 0; i < keys.length; i++) {
+    key = keys[i];
+    toVal = to[key];
+    fromVal = from[key];
+    if (!hasOwn(to, key)) {
+      set(to, key, fromVal);
+    } else if (isPlainObject(toVal) && isPlainObject(fromVal)) {
+      mergeData(toVal, fromVal);
+    }
+  }
+  return to
+}
+
+/**
+ * Data
+ */
+strats.data = function (
+  parentVal,
+  childVal,
+  vm
+) {
+  if (!vm) {
+    // in a Vue.extend merge, both should be functions
+    if (!childVal) {
+      return parentVal
+    }
+    if (typeof childVal !== 'function') {
+      process.env.NODE_ENV !== 'production' && warn(
+        'The "data" option should be a function ' +
+        'that returns a per-instance value in component ' +
+        'definitions.',
+        vm
+      );
+      return parentVal
+    }
+    if (!parentVal) {
+      return childVal
+    }
+    // when parentVal & childVal are both present,
+    // we need to return a function that returns the
+    // merged result of both functions... no need to
+    // check if parentVal is a function here because
+    // it has to be a function to pass previous merges.
+    return function mergedDataFn () {
+      return mergeData(
+        childVal.call(this),
+        parentVal.call(this)
+      )
+    }
+  } else if (parentVal || childVal) {
+    return function mergedInstanceDataFn () {
+      // instance merge
+      var instanceData = typeof childVal === 'function'
+        ? childVal.call(vm)
+        : childVal;
+      var defaultData = typeof parentVal === 'function'
+        ? parentVal.call(vm)
+        : undefined;
+      if (instanceData) {
+        return mergeData(instanceData, defaultData)
+      } else {
+        return defaultData
+      }
+    }
+  }
+};
+
+/**
+ * Hooks and param attributes are merged as arrays.
+ */
+function mergeHook (
+  parentVal,
+  childVal
+) {
+  return childVal
+    ? parentVal
+      ? parentVal.concat(childVal)
+      : Array.isArray(childVal)
+        ? childVal
+        : [childVal]
+    : parentVal
+}
+
+config._lifecycleHooks.forEach(function (hook) {
+  strats[hook] = mergeHook;
+});
+
+/**
+ * Assets
+ *
+ * When a vm is present (instance creation), we need to do
+ * a three-way merge between constructor options, instance
+ * options and parent options.
+ */
+function mergeAssets (parentVal, childVal) {
+  var res = Object.create(parentVal || null);
+  return childVal
+    ? extend(res, childVal)
+    : res
+}
+
+config._assetTypes.forEach(function (type) {
+  strats[type + 's'] = mergeAssets;
+});
+
+/**
+ * Watchers.
+ *
+ * Watchers hashes should not overwrite one
+ * another, so we merge them as arrays.
+ */
+strats.watch = function (parentVal, childVal) {
+  /* istanbul ignore if */
+  if (!childVal) { return parentVal }
+  if (!parentVal) { return childVal }
+  var ret = {};
+  extend(ret, parentVal);
+  for (var key in childVal) {
+    var parent = ret[key];
+    var child = childVal[key];
+    if (parent && !Array.isArray(parent)) {
+      parent = [parent];
+    }
+    ret[key] = parent
+      ? parent.concat(child)
+      : [child];
+  }
+  return ret
+};
+
+/**
+ * Other object hashes.
+ */
+strats.props =
+strats.methods =
+strats.computed = function (parentVal, childVal) {
+  if (!childVal) { return parentVal }
+  if (!parentVal) { return childVal }
+  var ret = Object.create(null);
+  extend(ret, parentVal);
+  extend(ret, childVal);
+  return ret
+};
+
+/**
+ * Default strategy.
+ */
+var defaultStrat = function (parentVal, childVal) {
+  return childVal === undefined
+    ? parentVal
+    : childVal
+};
+
+/**
+ * Validate component names
+ */
+function checkComponents (options) {
+  for (var key in options.components) {
+    var lower = key.toLowerCase();
+    if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
+      warn(
+        'Do not use built-in or reserved HTML elements as component ' +
+        'id: ' + key
+      );
+    }
+  }
+}
+
+/**
+ * Ensure all props option syntax are normalized into the
+ * Object-based format.
+ */
+function normalizeProps (options) {
+  var props = options.props;
+  if (!props) { return }
+  var res = {};
+  var i, val, name;
+  if (Array.isArray(props)) {
+    i = props.length;
+    while (i--) {
+      val = props[i];
+      if (typeof val === 'string') {
+        name = camelize(val);
+        res[name] = { type: null };
+      } else if (process.env.NODE_ENV !== 'production') {
+        warn('props must be strings when using array syntax.');
+      }
+    }
+  } else if (isPlainObject(props)) {
+    for (var key in props) {
+      val = props[key];
+      name = camelize(key);
+      res[name] = isPlainObject(val)
+        ? val
+        : { type: val };
+    }
+  }
+  options.props = res;
+}
+
+/**
+ * Normalize raw function directives into object format.
+ */
+function normalizeDirectives (options) {
+  var dirs = options.directives;
+  if (dirs) {
+    for (var key in dirs) {
+      var def = dirs[key];
+      if (typeof def === 'function') {
+        dirs[key] = { bind: def, update: def };
+      }
+    }
+  }
+}
+
+/**
+ * Merge two option objects into a new one.
+ * Core utility used in both instantiation and inheritance.
+ */
+function mergeOptions (
+  parent,
+  child,
+  vm
+) {
+  if (process.env.NODE_ENV !== 'production') {
+    checkComponents(child);
+  }
+  normalizeProps(child);
+  normalizeDirectives(child);
+  var extendsFrom = child.extends;
+  if (extendsFrom) {
+    parent = typeof extendsFrom === 'function'
+      ? mergeOptions(parent, extendsFrom.options, vm)
+      : mergeOptions(parent, extendsFrom, vm);
+  }
+  if (child.mixins) {
+    for (var i = 0, l = child.mixins.length; i < l; i++) {
+      var mixin = child.mixins[i];
+      if (mixin.prototype instanceof Vue$2) {
+        mixin = mixin.options;
+      }
+      parent = mergeOptions(parent, mixin, vm);
+    }
+  }
+  var options = {};
+  var key;
+  for (key in parent) {
+    mergeField(key);
+  }
+  for (key in child) {
+    if (!hasOwn(parent, key)) {
+      mergeField(key);
+    }
+  }
+  function mergeField (key) {
+    var strat = strats[key] || defaultStrat;
+    options[key] = strat(parent[key], child[key], vm, key);
+  }
+  return options
+}
+
+/**
+ * Resolve an asset.
+ * This function is used because child instances need access
+ * to assets defined in its ancestor chain.
+ */
+function resolveAsset (
+  options,
+  type,
+  id,
+  warnMissing
+) {
+  /* istanbul ignore if */
+  if (typeof id !== 'string') {
+    return
+  }
+  var assets = options[type];
+  var res = assets[id] ||
+    // camelCase ID
+    assets[camelize(id)] ||
+    // Pascal Case ID
+    assets[capitalize(camelize(id))];
+  if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
+    warn(
+      'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
+      options
+    );
+  }
+  return res
+}
+
+/*  */
+
+function validateProp (
+  key,
+  propOptions,
+  propsData,
+  vm
+) {
+  var prop = propOptions[key];
+  var absent = !hasOwn(propsData, key);
+  var value = propsData[key];
+  // handle boolean props
+  if (isBooleanType(prop.type)) {
+    if (absent && !hasOwn(prop, 'default')) {
+      value = false;
+    } else if (value === '' || value === hyphenate(key)) {
+      value = true;
+    }
+  }
+  // check default value
+  if (value === undefined) {
+    value = getPropDefaultValue(vm, prop, key);
+    // since the default value is a fresh copy,
+    // make sure to observe it.
+    var prevShouldConvert = observerState.shouldConvert;
+    observerState.shouldConvert = true;
+    observe(value);
+    observerState.shouldConvert = prevShouldConvert;
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    assertProp(prop, key, value, vm, absent);
+  }
+  return value
+}
+
+/**
+ * Get the default value of a prop.
+ */
+function getPropDefaultValue (vm, prop, key) {
+  // no default, return undefined
+  if (!hasOwn(prop, 'default')) {
+    return undefined
+  }
+  var def = prop.default;
+  // warn against non-factory defaults for Object & Array
+  if (isObject(def)) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Invalid default value for prop "' + key + '": ' +
+      'Props with type Object/Array must use a factory function ' +
+      'to return the default value.',
+      vm
+    );
+  }
+  // the raw prop value was also undefined from previous render,
+  // return previous default value to avoid unnecessary watcher trigger
+  if (vm && vm.$options.propsData &&
+    vm.$options.propsData[key] === undefined &&
+    vm[key] !== undefined) {
+    return vm[key]
+  }
+  // call factory function for non-Function types
+  return typeof def === 'function' && prop.type !== Function
+    ? def.call(vm)
+    : def
+}
+
+/**
+ * Assert whether a prop is valid.
+ */
+function assertProp (
+  prop,
+  name,
+  value,
+  vm,
+  absent
+) {
+  if (prop.required && absent) {
+    warn(
+      'Missing required prop: "' + name + '"',
+      vm
+    );
+    return
+  }
+  if (value == null && !prop.required) {
+    return
+  }
+  var type = prop.type;
+  var valid = !type || type === true;
+  var expectedTypes = [];
+  if (type) {
+    if (!Array.isArray(type)) {
+      type = [type];
+    }
+    for (var i = 0; i < type.length && !valid; i++) {
+      var assertedType = assertType(value, type[i]);
+      expectedTypes.push(assertedType.expectedType);
+      valid = assertedType.valid;
+    }
+  }
+  if (!valid) {
+    warn(
+      'Invalid prop: type check failed for prop "' + name + '".' +
+      ' Expected ' + expectedTypes.map(capitalize).join(', ') +
+      ', got ' + Object.prototype.toString.call(value).slice(8, -1) + '.',
+      vm
+    );
+    return
+  }
+  var validator = prop.validator;
+  if (validator) {
+    if (!validator(value)) {
+      warn(
+        'Invalid prop: custom validator check failed for prop "' + name + '".',
+        vm
+      );
+    }
+  }
+}
+
+/**
+ * Assert the type of a value
+ */
+function assertType (value, type) {
+  var valid;
+  var expectedType = getType(type);
+  if (expectedType === 'String') {
+    valid = typeof value === (expectedType = 'string');
+  } else if (expectedType === 'Number') {
+    valid = typeof value === (expectedType = 'number');
+  } else if (expectedType === 'Boolean') {
+    valid = typeof value === (expectedType = 'boolean');
+  } else if (expectedType === 'Function') {
+    valid = typeof value === (expectedType = 'function');
+  } else if (expectedType === 'Object') {
+    valid = isPlainObject(value);
+  } else if (expectedType === 'Array') {
+    valid = Array.isArray(value);
+  } else {
+    valid = value instanceof type;
+  }
+  return {
+    valid: valid,
+    expectedType: expectedType
+  }
+}
+
+/**
+ * Use function string name to check built-in types,
+ * because a simple equality check will fail when running
+ * across different vms / iframes.
+ */
+function getType (fn) {
+  var match = fn && fn.toString().match(/^\s*function (\w+)/);
+  return match && match[1]
+}
+
+function isBooleanType (fn) {
+  if (!Array.isArray(fn)) {
+    return getType(fn) === 'Boolean'
+  }
+  for (var i = 0, len = fn.length; i < len; i++) {
+    if (getType(fn[i]) === 'Boolean') {
+      return true
+    }
+  }
+  /* istanbul ignore next */
+  return false
+}
+
+
+
+var util = Object.freeze({
+	defineReactive: defineReactive$$1,
+	_toString: _toString,
+	toNumber: toNumber,
+	makeMap: makeMap,
+	isBuiltInTag: isBuiltInTag,
+	remove: remove$1,
+	hasOwn: hasOwn,
+	isPrimitive: isPrimitive,
+	cached: cached,
+	camelize: camelize,
+	capitalize: capitalize,
+	hyphenate: hyphenate,
+	bind: bind$1,
+	toArray: toArray,
+	extend: extend,
+	isObject: isObject,
+	isPlainObject: isPlainObject,
+	toObject: toObject,
+	noop: noop,
+	no: no,
+	genStaticKeys: genStaticKeys,
+	looseEqual: looseEqual,
+	looseIndexOf: looseIndexOf,
+	isReserved: isReserved,
+	def: def,
+	parsePath: parsePath,
+	hasProto: hasProto,
+	inBrowser: inBrowser,
+	UA: UA,
+	isIE: isIE,
+	isIE9: isIE9,
+	isEdge: isEdge,
+	isAndroid: isAndroid,
+	isIOS: isIOS,
+	isServerRendering: isServerRendering,
+	devtools: devtools,
+	nextTick: nextTick,
+	get _Set () { return _Set; },
+	mergeOptions: mergeOptions,
+	resolveAsset: resolveAsset,
+	get warn () { return warn; },
+	get formatComponentName () { return formatComponentName; },
+	validateProp: validateProp
+});
+
 /* not type checking this file because flow doesn't play well with Proxy */
 
 var hasProxy;
@@ -523,57 +1440,6 @@ if (process.env.NODE_ENV !== 'production') {
       vm._renderProxy = vm;
     }
   };
-}
-
-/*  */
-
-
-var uid$2 = 0;
-
-/**
- * A dep is an observable that can have multiple
- * directives subscribing to it.
- */
-var Dep = function Dep () {
-  this.id = uid$2++;
-  this.subs = [];
-};
-
-Dep.prototype.addSub = function addSub (sub) {
-  this.subs.push(sub);
-};
-
-Dep.prototype.removeSub = function removeSub (sub) {
-  remove$1(this.subs, sub);
-};
-
-Dep.prototype.depend = function depend () {
-  if (Dep.target) {
-    Dep.target.addDep(this);
-  }
-};
-
-Dep.prototype.notify = function notify () {
-  // stablize the subscriber list first
-  var subs = this.subs.slice();
-  for (var i = 0, l = subs.length; i < l; i++) {
-    subs[i].update();
-  }
-};
-
-// the current target watcher being evaluated.
-// this is globally unique because there could be only one
-// watcher being evaluated at any time.
-Dep.target = null;
-var targetStack = [];
-
-function pushTarget (_target) {
-  if (Dep.target) { targetStack.push(Dep.target); }
-  Dep.target = _target;
-}
-
-function popTarget () {
-  Dep.target = targetStack.pop();
 }
 
 /*  */
@@ -677,7 +1543,7 @@ function queueWatcher (watcher) {
 
 /*  */
 
-var uid$1 = 0;
+var uid$2 = 0;
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -701,7 +1567,7 @@ var Watcher = function Watcher (
   this.sync = !!options.sync;
   this.expression = expOrFn.toString();
   this.cb = cb;
-  this.id = ++uid$1; // uid for batching
+  this.id = ++uid$2; // uid for batching
   this.active = true;
   this.dirty = this.lazy; // for lazy watchers
   this.deps = [];
@@ -910,286 +1776,6 @@ function _traverse (val, seen) {
     keys = Object.keys(val);
     i = keys.length;
     while (i--) { _traverse(val[keys[i]], seen); }
-  }
-}
-
-/*
- * not type checking this file because flow doesn't play well with
- * dynamically accessing methods on Array prototype
- */
-
-var arrayProto = Array.prototype;
-var arrayMethods = Object.create(arrayProto);[
-  'push',
-  'pop',
-  'shift',
-  'unshift',
-  'splice',
-  'sort',
-  'reverse'
-]
-.forEach(function (method) {
-  // cache original method
-  var original = arrayProto[method];
-  def(arrayMethods, method, function mutator () {
-    var arguments$1 = arguments;
-
-    // avoid leaking arguments:
-    // http://jsperf.com/closure-with-arguments
-    var i = arguments.length;
-    var args = new Array(i);
-    while (i--) {
-      args[i] = arguments$1[i];
-    }
-    var result = original.apply(this, args);
-    var ob = this.__ob__;
-    var inserted;
-    switch (method) {
-      case 'push':
-        inserted = args;
-        break
-      case 'unshift':
-        inserted = args;
-        break
-      case 'splice':
-        inserted = args.slice(2);
-        break
-    }
-    if (inserted) { ob.observeArray(inserted); }
-    // notify change
-    ob.dep.notify();
-    return result
-  });
-});
-
-/*  */
-
-var arrayKeys = Object.getOwnPropertyNames(arrayMethods);
-
-/**
- * By default, when a reactive property is set, the new value is
- * also converted to become reactive. However when passing down props,
- * we don't want to force conversion because the value may be a nested value
- * under a frozen data structure. Converting it would defeat the optimization.
- */
-var observerState = {
-  shouldConvert: true,
-  isSettingProps: false
-};
-
-/**
- * Observer class that are attached to each observed
- * object. Once attached, the observer converts target
- * object's property keys into getter/setters that
- * collect dependencies and dispatches updates.
- */
-var Observer = function Observer (value) {
-  this.value = value;
-  this.dep = new Dep();
-  this.vmCount = 0;
-  def(value, '__ob__', this);
-  if (Array.isArray(value)) {
-    var augment = hasProto
-      ? protoAugment
-      : copyAugment;
-    augment(value, arrayMethods, arrayKeys);
-    this.observeArray(value);
-  } else {
-    this.walk(value);
-  }
-};
-
-/**
- * Walk through each property and convert them into
- * getter/setters. This method should only be called when
- * value type is Object.
- */
-Observer.prototype.walk = function walk (obj) {
-  var keys = Object.keys(obj);
-  for (var i = 0; i < keys.length; i++) {
-    defineReactive$$1(obj, keys[i], obj[keys[i]]);
-  }
-};
-
-/**
- * Observe a list of Array items.
- */
-Observer.prototype.observeArray = function observeArray (items) {
-  for (var i = 0, l = items.length; i < l; i++) {
-    observe(items[i]);
-  }
-};
-
-// helpers
-
-/**
- * Augment an target Object or Array by intercepting
- * the prototype chain using __proto__
- */
-function protoAugment (target, src) {
-  /* eslint-disable no-proto */
-  target.__proto__ = src;
-  /* eslint-enable no-proto */
-}
-
-/**
- * Augment an target Object or Array by defining
- * hidden properties.
- *
- * istanbul ignore next
- */
-function copyAugment (target, src, keys) {
-  for (var i = 0, l = keys.length; i < l; i++) {
-    var key = keys[i];
-    def(target, key, src[key]);
-  }
-}
-
-/**
- * Attempt to create an observer instance for a value,
- * returns the new observer if successfully observed,
- * or the existing observer if the value already has one.
- */
-function observe (value) {
-  if (!isObject(value)) {
-    return
-  }
-  var ob;
-  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
-    ob = value.__ob__;
-  } else if (
-    observerState.shouldConvert &&
-    !config._isServer &&
-    (Array.isArray(value) || isPlainObject(value)) &&
-    Object.isExtensible(value) &&
-    !value._isVue
-  ) {
-    ob = new Observer(value);
-  }
-  return ob
-}
-
-/**
- * Define a reactive property on an Object.
- */
-function defineReactive$$1 (
-  obj,
-  key,
-  val,
-  customSetter
-) {
-  var dep = new Dep();
-
-  var property = Object.getOwnPropertyDescriptor(obj, key);
-  if (property && property.configurable === false) {
-    return
-  }
-
-  // cater for pre-defined getter/setters
-  var getter = property && property.get;
-  var setter = property && property.set;
-
-  var childOb = observe(val);
-  Object.defineProperty(obj, key, {
-    enumerable: true,
-    configurable: true,
-    get: function reactiveGetter () {
-      var value = getter ? getter.call(obj) : val;
-      if (Dep.target) {
-        dep.depend();
-        if (childOb) {
-          childOb.dep.depend();
-        }
-        if (Array.isArray(value)) {
-          dependArray(value);
-        }
-      }
-      return value
-    },
-    set: function reactiveSetter (newVal) {
-      var value = getter ? getter.call(obj) : val;
-      if (newVal === value) {
-        return
-      }
-      if (process.env.NODE_ENV !== 'production' && customSetter) {
-        customSetter();
-      }
-      if (setter) {
-        setter.call(obj, newVal);
-      } else {
-        val = newVal;
-      }
-      childOb = observe(newVal);
-      dep.notify();
-    }
-  });
-}
-
-/**
- * Set a property on an object. Adds the new property and
- * triggers change notification if the property doesn't
- * already exist.
- */
-function set (obj, key, val) {
-  if (Array.isArray(obj)) {
-    obj.length = Math.max(obj.length, key);
-    obj.splice(key, 1, val);
-    return val
-  }
-  if (hasOwn(obj, key)) {
-    obj[key] = val;
-    return
-  }
-  var ob = obj.__ob__;
-  if (obj._isVue || (ob && ob.vmCount)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Avoid adding reactive properties to a Vue instance or its root $data ' +
-      'at runtime - declare it upfront in the data option.'
-    );
-    return
-  }
-  if (!ob) {
-    obj[key] = val;
-    return
-  }
-  defineReactive$$1(ob.value, key, val);
-  ob.dep.notify();
-  return val
-}
-
-/**
- * Delete a property and trigger change if necessary.
- */
-function del (obj, key) {
-  var ob = obj.__ob__;
-  if (obj._isVue || (ob && ob.vmCount)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Avoid deleting properties on a Vue instance or its root $data ' +
-      '- just set it to null.'
-    );
-    return
-  }
-  if (!hasOwn(obj, key)) {
-    return
-  }
-  delete obj[key];
-  if (!ob) {
-    return
-  }
-  ob.dep.notify();
-}
-
-/**
- * Collect dependencies on array elements when the array is touched, since
- * we cannot intercept array element access like property getters.
- */
-function dependArray (value) {
-  for (var e = (void 0), i = 0, l = value.length; i < l; i++) {
-    e = value[i];
-    e && e.__ob__ && e.__ob__.dep.depend();
-    if (Array.isArray(e)) {
-      dependArray(e);
-    }
   }
 }
 
@@ -2256,7 +2842,7 @@ function renderMixin (Vue) {
       if (config.errorHandler) {
         config.errorHandler.call(null, e, vm);
       } else {
-        if (config._isServer) {
+        if (isServerRendering()) {
           throw e
         } else {
           console.error(e);
@@ -2632,579 +3218,6 @@ eventsMixin(Vue$2);
 lifecycleMixin(Vue$2);
 renderMixin(Vue$2);
 
-var warn = noop;
-var formatComponentName;
-
-if (process.env.NODE_ENV !== 'production') {
-  var hasConsole = typeof console !== 'undefined';
-
-  warn = function (msg, vm) {
-    if (hasConsole && (!config.silent)) {
-      console.error("[Vue warn]: " + msg + " " + (
-        vm ? formatLocation(formatComponentName(vm)) : ''
-      ));
-    }
-  };
-
-  formatComponentName = function (vm) {
-    if (vm.$root === vm) {
-      return 'root instance'
-    }
-    var name = vm._isVue
-      ? vm.$options.name || vm.$options._componentTag
-      : vm.name;
-    return (
-      (name ? ("component <" + name + ">") : "anonymous component") +
-      (vm._isVue && vm.$options.__file ? (" at " + (vm.$options.__file)) : '')
-    )
-  };
-
-  var formatLocation = function (str) {
-    if (str === 'anonymous component') {
-      str += " - use the \"name\" option for better debugging messages.";
-    }
-    return ("\n(found in " + str + ")")
-  };
-}
-
-/*  */
-
-/**
- * Option overwriting strategies are functions that handle
- * how to merge a parent option value and a child option
- * value into the final value.
- */
-var strats = config.optionMergeStrategies;
-
-/**
- * Options with restrictions
- */
-if (process.env.NODE_ENV !== 'production') {
-  strats.el = strats.propsData = function (parent, child, vm, key) {
-    if (!vm) {
-      warn(
-        "option \"" + key + "\" can only be used during instance " +
-        'creation with the `new` keyword.'
-      );
-    }
-    return defaultStrat(parent, child)
-  };
-}
-
-/**
- * Helper that recursively merges two data objects together.
- */
-function mergeData (to, from) {
-  if (!from) { return to }
-  var key, toVal, fromVal;
-  var keys = Object.keys(from);
-  for (var i = 0; i < keys.length; i++) {
-    key = keys[i];
-    toVal = to[key];
-    fromVal = from[key];
-    if (!hasOwn(to, key)) {
-      set(to, key, fromVal);
-    } else if (isPlainObject(toVal) && isPlainObject(fromVal)) {
-      mergeData(toVal, fromVal);
-    }
-  }
-  return to
-}
-
-/**
- * Data
- */
-strats.data = function (
-  parentVal,
-  childVal,
-  vm
-) {
-  if (!vm) {
-    // in a Vue.extend merge, both should be functions
-    if (!childVal) {
-      return parentVal
-    }
-    if (typeof childVal !== 'function') {
-      process.env.NODE_ENV !== 'production' && warn(
-        'The "data" option should be a function ' +
-        'that returns a per-instance value in component ' +
-        'definitions.',
-        vm
-      );
-      return parentVal
-    }
-    if (!parentVal) {
-      return childVal
-    }
-    // when parentVal & childVal are both present,
-    // we need to return a function that returns the
-    // merged result of both functions... no need to
-    // check if parentVal is a function here because
-    // it has to be a function to pass previous merges.
-    return function mergedDataFn () {
-      return mergeData(
-        childVal.call(this),
-        parentVal.call(this)
-      )
-    }
-  } else if (parentVal || childVal) {
-    return function mergedInstanceDataFn () {
-      // instance merge
-      var instanceData = typeof childVal === 'function'
-        ? childVal.call(vm)
-        : childVal;
-      var defaultData = typeof parentVal === 'function'
-        ? parentVal.call(vm)
-        : undefined;
-      if (instanceData) {
-        return mergeData(instanceData, defaultData)
-      } else {
-        return defaultData
-      }
-    }
-  }
-};
-
-/**
- * Hooks and param attributes are merged as arrays.
- */
-function mergeHook (
-  parentVal,
-  childVal
-) {
-  return childVal
-    ? parentVal
-      ? parentVal.concat(childVal)
-      : Array.isArray(childVal)
-        ? childVal
-        : [childVal]
-    : parentVal
-}
-
-config._lifecycleHooks.forEach(function (hook) {
-  strats[hook] = mergeHook;
-});
-
-/**
- * Assets
- *
- * When a vm is present (instance creation), we need to do
- * a three-way merge between constructor options, instance
- * options and parent options.
- */
-function mergeAssets (parentVal, childVal) {
-  var res = Object.create(parentVal || null);
-  return childVal
-    ? extend(res, childVal)
-    : res
-}
-
-config._assetTypes.forEach(function (type) {
-  strats[type + 's'] = mergeAssets;
-});
-
-/**
- * Watchers.
- *
- * Watchers hashes should not overwrite one
- * another, so we merge them as arrays.
- */
-strats.watch = function (parentVal, childVal) {
-  /* istanbul ignore if */
-  if (!childVal) { return parentVal }
-  if (!parentVal) { return childVal }
-  var ret = {};
-  extend(ret, parentVal);
-  for (var key in childVal) {
-    var parent = ret[key];
-    var child = childVal[key];
-    if (parent && !Array.isArray(parent)) {
-      parent = [parent];
-    }
-    ret[key] = parent
-      ? parent.concat(child)
-      : [child];
-  }
-  return ret
-};
-
-/**
- * Other object hashes.
- */
-strats.props =
-strats.methods =
-strats.computed = function (parentVal, childVal) {
-  if (!childVal) { return parentVal }
-  if (!parentVal) { return childVal }
-  var ret = Object.create(null);
-  extend(ret, parentVal);
-  extend(ret, childVal);
-  return ret
-};
-
-/**
- * Default strategy.
- */
-var defaultStrat = function (parentVal, childVal) {
-  return childVal === undefined
-    ? parentVal
-    : childVal
-};
-
-/**
- * Validate component names
- */
-function checkComponents (options) {
-  for (var key in options.components) {
-    var lower = key.toLowerCase();
-    if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
-      warn(
-        'Do not use built-in or reserved HTML elements as component ' +
-        'id: ' + key
-      );
-    }
-  }
-}
-
-/**
- * Ensure all props option syntax are normalized into the
- * Object-based format.
- */
-function normalizeProps (options) {
-  var props = options.props;
-  if (!props) { return }
-  var res = {};
-  var i, val, name;
-  if (Array.isArray(props)) {
-    i = props.length;
-    while (i--) {
-      val = props[i];
-      if (typeof val === 'string') {
-        name = camelize(val);
-        res[name] = { type: null };
-      } else if (process.env.NODE_ENV !== 'production') {
-        warn('props must be strings when using array syntax.');
-      }
-    }
-  } else if (isPlainObject(props)) {
-    for (var key in props) {
-      val = props[key];
-      name = camelize(key);
-      res[name] = isPlainObject(val)
-        ? val
-        : { type: val };
-    }
-  }
-  options.props = res;
-}
-
-/**
- * Normalize raw function directives into object format.
- */
-function normalizeDirectives (options) {
-  var dirs = options.directives;
-  if (dirs) {
-    for (var key in dirs) {
-      var def = dirs[key];
-      if (typeof def === 'function') {
-        dirs[key] = { bind: def, update: def };
-      }
-    }
-  }
-}
-
-/**
- * Merge two option objects into a new one.
- * Core utility used in both instantiation and inheritance.
- */
-function mergeOptions (
-  parent,
-  child,
-  vm
-) {
-  if (process.env.NODE_ENV !== 'production') {
-    checkComponents(child);
-  }
-  normalizeProps(child);
-  normalizeDirectives(child);
-  var extendsFrom = child.extends;
-  if (extendsFrom) {
-    parent = typeof extendsFrom === 'function'
-      ? mergeOptions(parent, extendsFrom.options, vm)
-      : mergeOptions(parent, extendsFrom, vm);
-  }
-  if (child.mixins) {
-    for (var i = 0, l = child.mixins.length; i < l; i++) {
-      var mixin = child.mixins[i];
-      if (mixin.prototype instanceof Vue$2) {
-        mixin = mixin.options;
-      }
-      parent = mergeOptions(parent, mixin, vm);
-    }
-  }
-  var options = {};
-  var key;
-  for (key in parent) {
-    mergeField(key);
-  }
-  for (key in child) {
-    if (!hasOwn(parent, key)) {
-      mergeField(key);
-    }
-  }
-  function mergeField (key) {
-    var strat = strats[key] || defaultStrat;
-    options[key] = strat(parent[key], child[key], vm, key);
-  }
-  return options
-}
-
-/**
- * Resolve an asset.
- * This function is used because child instances need access
- * to assets defined in its ancestor chain.
- */
-function resolveAsset (
-  options,
-  type,
-  id,
-  warnMissing
-) {
-  /* istanbul ignore if */
-  if (typeof id !== 'string') {
-    return
-  }
-  var assets = options[type];
-  var res = assets[id] ||
-    // camelCase ID
-    assets[camelize(id)] ||
-    // Pascal Case ID
-    assets[capitalize(camelize(id))];
-  if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
-    warn(
-      'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
-      options
-    );
-  }
-  return res
-}
-
-/*  */
-
-function validateProp (
-  key,
-  propOptions,
-  propsData,
-  vm
-) {
-  var prop = propOptions[key];
-  var absent = !hasOwn(propsData, key);
-  var value = propsData[key];
-  // handle boolean props
-  if (isBooleanType(prop.type)) {
-    if (absent && !hasOwn(prop, 'default')) {
-      value = false;
-    } else if (value === '' || value === hyphenate(key)) {
-      value = true;
-    }
-  }
-  // check default value
-  if (value === undefined) {
-    value = getPropDefaultValue(vm, prop, key);
-    // since the default value is a fresh copy,
-    // make sure to observe it.
-    var prevShouldConvert = observerState.shouldConvert;
-    observerState.shouldConvert = true;
-    observe(value);
-    observerState.shouldConvert = prevShouldConvert;
-  }
-  if (process.env.NODE_ENV !== 'production') {
-    assertProp(prop, key, value, vm, absent);
-  }
-  return value
-}
-
-/**
- * Get the default value of a prop.
- */
-function getPropDefaultValue (vm, prop, key) {
-  // no default, return undefined
-  if (!hasOwn(prop, 'default')) {
-    return undefined
-  }
-  var def = prop.default;
-  // warn against non-factory defaults for Object & Array
-  if (isObject(def)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Invalid default value for prop "' + key + '": ' +
-      'Props with type Object/Array must use a factory function ' +
-      'to return the default value.',
-      vm
-    );
-  }
-  // the raw prop value was also undefined from previous render,
-  // return previous default value to avoid unnecessary watcher trigger
-  if (vm && vm.$options.propsData &&
-    vm.$options.propsData[key] === undefined &&
-    vm[key] !== undefined) {
-    return vm[key]
-  }
-  // call factory function for non-Function types
-  return typeof def === 'function' && prop.type !== Function
-    ? def.call(vm)
-    : def
-}
-
-/**
- * Assert whether a prop is valid.
- */
-function assertProp (
-  prop,
-  name,
-  value,
-  vm,
-  absent
-) {
-  if (prop.required && absent) {
-    warn(
-      'Missing required prop: "' + name + '"',
-      vm
-    );
-    return
-  }
-  if (value == null && !prop.required) {
-    return
-  }
-  var type = prop.type;
-  var valid = !type || type === true;
-  var expectedTypes = [];
-  if (type) {
-    if (!Array.isArray(type)) {
-      type = [type];
-    }
-    for (var i = 0; i < type.length && !valid; i++) {
-      var assertedType = assertType(value, type[i]);
-      expectedTypes.push(assertedType.expectedType);
-      valid = assertedType.valid;
-    }
-  }
-  if (!valid) {
-    warn(
-      'Invalid prop: type check failed for prop "' + name + '".' +
-      ' Expected ' + expectedTypes.map(capitalize).join(', ') +
-      ', got ' + Object.prototype.toString.call(value).slice(8, -1) + '.',
-      vm
-    );
-    return
-  }
-  var validator = prop.validator;
-  if (validator) {
-    if (!validator(value)) {
-      warn(
-        'Invalid prop: custom validator check failed for prop "' + name + '".',
-        vm
-      );
-    }
-  }
-}
-
-/**
- * Assert the type of a value
- */
-function assertType (value, type) {
-  var valid;
-  var expectedType = getType(type);
-  if (expectedType === 'String') {
-    valid = typeof value === (expectedType = 'string');
-  } else if (expectedType === 'Number') {
-    valid = typeof value === (expectedType = 'number');
-  } else if (expectedType === 'Boolean') {
-    valid = typeof value === (expectedType = 'boolean');
-  } else if (expectedType === 'Function') {
-    valid = typeof value === (expectedType = 'function');
-  } else if (expectedType === 'Object') {
-    valid = isPlainObject(value);
-  } else if (expectedType === 'Array') {
-    valid = Array.isArray(value);
-  } else {
-    valid = value instanceof type;
-  }
-  return {
-    valid: valid,
-    expectedType: expectedType
-  }
-}
-
-/**
- * Use function string name to check built-in types,
- * because a simple equality check will fail when running
- * across different vms / iframes.
- */
-function getType (fn) {
-  var match = fn && fn.toString().match(/^\s*function (\w+)/);
-  return match && match[1]
-}
-
-function isBooleanType (fn) {
-  if (!Array.isArray(fn)) {
-    return getType(fn) === 'Boolean'
-  }
-  for (var i = 0, len = fn.length; i < len; i++) {
-    if (getType(fn[i]) === 'Boolean') {
-      return true
-    }
-  }
-  /* istanbul ignore next */
-  return false
-}
-
-
-
-var util = Object.freeze({
-	defineReactive: defineReactive$$1,
-	_toString: _toString,
-	toNumber: toNumber,
-	makeMap: makeMap,
-	isBuiltInTag: isBuiltInTag,
-	remove: remove$1,
-	hasOwn: hasOwn,
-	isPrimitive: isPrimitive,
-	cached: cached,
-	camelize: camelize,
-	capitalize: capitalize,
-	hyphenate: hyphenate,
-	bind: bind$1,
-	toArray: toArray,
-	extend: extend,
-	isObject: isObject,
-	isPlainObject: isPlainObject,
-	toObject: toObject,
-	noop: noop,
-	no: no,
-	genStaticKeys: genStaticKeys,
-	looseEqual: looseEqual,
-	looseIndexOf: looseIndexOf,
-	isReserved: isReserved,
-	def: def,
-	parsePath: parsePath,
-	hasProto: hasProto,
-	inBrowser: inBrowser,
-	UA: UA,
-	isIE: isIE,
-	isIE9: isIE9,
-	isEdge: isEdge,
-	isAndroid: isAndroid,
-	isIOS: isIOS,
-	devtools: devtools,
-	nextTick: nextTick,
-	get _Set () { return _Set; },
-	mergeOptions: mergeOptions,
-	resolveAsset: resolveAsset,
-	get warn () { return warn; },
-	get formatComponentName () { return formatComponentName; },
-	validateProp: validateProp
-});
-
 /*  */
 
 function initUse (Vue) {
@@ -3415,10 +3428,10 @@ function initGlobalAPI (Vue) {
 initGlobalAPI(Vue$2);
 
 Object.defineProperty(Vue$2.prototype, '$isServer', {
-  get: function () { return config._isServer; }
+  get: isServerRendering
 });
 
-Vue$2.version = '2.0.7';
+Vue$2.version = '2.0.6';
 
 /*  */
 
@@ -5707,14 +5720,14 @@ extend(Vue$2.options.directives, platformDirectives);
 extend(Vue$2.options.components, platformComponents);
 
 // install platform patch function
-Vue$2.prototype.__patch__ = config._isServer ? noop : patch$1;
+Vue$2.prototype.__patch__ = inBrowser ? patch$1 : noop;
 
 // wrap mount
 Vue$2.prototype.$mount = function (
   el,
   hydrating
 ) {
-  el = el && !config._isServer ? query(el) : undefined;
+  el = el && inBrowser ? query(el) : undefined;
   return this._mount(el, hydrating)
 };
 

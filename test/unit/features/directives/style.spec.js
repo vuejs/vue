@@ -277,4 +277,31 @@ describe('Directive v-bind:style', () => {
       expect(style.marginLeft).toBe('40px')
     }).then(done)
   })
+
+  it('should not merge for different adjacent elements', (done) => {
+    const vm = new Vue({
+      template:
+        '<div>' +
+          '<section style="color: blue" :style="style" v-if="!bool"></section>' +
+          '<div></div>' +
+          '<section style="margin-top: 12px" v-if="bool"></section>' +
+        '</div>',
+      data: {
+        bool: false,
+        style: {
+          fontSize: '12px'
+        }
+      }
+    }).$mount()
+    const style = vm.$el.children[0].style
+    expect(style.fontSize).toBe('12px')
+    expect(style.color).toBe('blue')
+    waitForUpdate(() => {
+      vm.bool = true
+    }).then(() => {
+      expect(style.color).toBe('')
+      expect(style.fontSize).toBe('')
+      expect(style.marginTop).toBe('12px')
+    }).then(done)
+  })
 })

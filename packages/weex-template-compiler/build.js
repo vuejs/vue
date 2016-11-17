@@ -2,6 +2,8 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+var he = require('he');
+
 /*  */
 
 /**
@@ -307,12 +309,7 @@ var config = {
   /**
    * Max circular updates allowed in a scheduler flush cycle.
    */
-  _maxUpdateCount: 100,
-
-  /**
-   * Server rendering?
-   */
-  _isServer: process.env.VUE_ENV === 'server'
+  _maxUpdateCount: 100
 };
 
 var warn = noop;
@@ -351,6 +348,47 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 /*  */
+
+/**
+ * Check if a string starts with $ or _
+ */
+function isReserved (str) {
+  var c = (str + '').charCodeAt(0);
+  return c === 0x24 || c === 0x5F
+}
+
+/**
+ * Define a property.
+ */
+function def (obj, key, val, enumerable) {
+  Object.defineProperty(obj, key, {
+    value: val,
+    enumerable: !!enumerable,
+    writable: true,
+    configurable: true
+  });
+}
+
+/**
+ * Parse simple path.
+ */
+var bailRE = /[^\w.$]/;
+function parsePath (path) {
+  if (bailRE.test(path)) {
+    return
+  } else {
+    var segments = path.split('.');
+    return function (obj) {
+      for (var i = 0; i < segments.length; i++) {
+        if (!obj) { return }
+        obj = obj[segments[i]];
+      }
+      return obj
+    }
+  }
+}
+
+/*  */
 /* globals MutationObserver */
 
 // can we use __proto__?
@@ -367,6 +405,23 @@ var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
 var isEdge = UA && UA.indexOf('edge/') > 0;
 var isAndroid = UA && UA.indexOf('android') > 0;
 var isIOS = UA && /iphone|ipad|ipod|ios/.test(UA);
+
+// this needs to be lazy-evaled because vue may be required before
+// vue-server-renderer can set VUE_ENV
+var _isServer;
+var isServerRendering = function () {
+  if (_isServer === undefined) {
+    /* istanbul ignore if */
+    if (!inBrowser && typeof global !== 'undefined') {
+      // detect presence of vue-server-renderer and avoid
+      // Webpack shimming the process
+      _isServer = global['process'].env.VUE_ENV === 'server';
+    } else {
+      _isServer = false;
+    }
+  }
+  return _isServer
+};
 
 // detect devtools
 var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
@@ -471,62 +526,6 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
 
     return Set;
   }());
-}
-
-/*  */
-
-var decode;
-
-/* istanbul ignore else */
-if (inBrowser) {
-  var decoder = document.createElement('div');
-  decode = function (html) {
-    decoder.innerHTML = html;
-    return decoder.textContent
-  };
-} else {
-  decode = require('he').decode;
-}
-
-/*  */
-
-/**
- * Check if a string starts with $ or _
- */
-function isReserved (str) {
-  var c = (str + '').charCodeAt(0);
-  return c === 0x24 || c === 0x5F
-}
-
-/**
- * Define a property.
- */
-function def (obj, key, val, enumerable) {
-  Object.defineProperty(obj, key, {
-    value: val,
-    enumerable: !!enumerable,
-    writable: true,
-    configurable: true
-  });
-}
-
-/**
- * Parse simple path.
- */
-var bailRE = /[^\w.$]/;
-function parsePath (path) {
-  if (bailRE.test(path)) {
-    return
-  } else {
-    var segments = path.split('.');
-    return function (obj) {
-      for (var i = 0; i < segments.length; i++) {
-        if (!obj) { return }
-        obj = obj[segments[i]];
-      }
-      return obj
-    }
-  }
 }
 
 /* not type checking this file because flow doesn't play well with Proxy */
@@ -1106,7 +1105,7 @@ function observe (value) {
     ob = value.__ob__;
   } else if (
     observerState.shouldConvert &&
-    !config._isServer &&
+    !isServerRendering() &&
     (Array.isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
     !value._isVue
@@ -1626,7 +1625,9 @@ function normalizeChildren (
         }
       } else if (c instanceof VNode) {
         if (c.text && last && last.text) {
-          last.text += c.text;
+          if (!last.isCloned) {
+            last.text += c.text;
+          }
         } else {
           // inherit parent namespace
           if (ns) {
@@ -2280,7 +2281,7 @@ function renderMixin (Vue) {
       if (config.errorHandler) {
         config.errorHandler.call(null, e, vm);
       } else {
-        if (config._isServer) {
+        if (isServerRendering()) {
           throw e
         } else {
           console.error(e);
@@ -3938,7 +3939,7 @@ var argRE = /:(.*)$/;
 var modifierRE = /\.[^.]+/g;
 var specialNewlineRE = /\u2028|\u2029/g;
 
-var decodeHTMLCached = cached(decode);
+var decodeHTMLCached = cached(he.decode);
 
 // configurable state
 var warn$1;
@@ -3983,7 +3984,7 @@ function parse (
 
       // handle IE svg bug
       /* istanbul ignore if */
-      if (options.isIE && ns === 'svg') {
+      if (isIE && ns === 'svg') {
         attrs = guardIESVGBug(attrs);
       }
 
@@ -3991,7 +3992,7 @@ function parse (
         type: 1,
         tag: tag,
         attrsList: attrs,
-        attrsMap: makeAttrsMap(attrs, options.isIE),
+        attrsMap: makeAttrsMap(attrs),
         parent: currentParent,
         children: []
       };
@@ -3999,7 +4000,7 @@ function parse (
         element.ns = ns;
       }
 
-      if (process.env.VUE_ENV !== 'server' && isForbiddenTag(element)) {
+      if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true;
         process.env.NODE_ENV !== 'production' && warn$1(
           'Templates should only be responsible for mapping the state to the ' +
@@ -4127,7 +4128,7 @@ function parse (
       }
       // IE textarea placeholder bug
       /* istanbul ignore if */
-      if (options.isIE &&
+      if (isIE &&
           currentParent.tag === 'textarea' &&
           currentParent.attrsMap.placeholder === text) {
         return
@@ -4351,7 +4352,7 @@ function parseModifiers (name) {
   }
 }
 
-function makeAttrsMap (attrs, isIE) {
+function makeAttrsMap (attrs) {
   var map = {};
   for (var i = 0, l = attrs.length; i < l; i++) {
     if (process.env.NODE_ENV !== 'production' && map[attrs[i].name] && !isIE) {
