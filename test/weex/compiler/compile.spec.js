@@ -1,10 +1,10 @@
 import { compile } from '../../../packages/weex-template-compiler'
 
-describe('compile class', () => {
+describe('compile basic', () => {
   it('should be compiled', () => {
-    const { render, staticRenderFns, errors } = compile(`<div></div>`)
-    expect(render).toEqual(`with(this){return _m(0)}`)
-    expect(staticRenderFns).toEqual([`with(this){return _h('div')}`])
+    const { render, staticRenderFns, errors } = compile(`<div>{{hi}}</div>`)
+    expect(render).toEqual(`with(this){return _h('div',[_s(hi)])}`)
+    expect(staticRenderFns.length).toBe(0)
     expect(errors).toEqual([])
   })
 
