@@ -3,6 +3,7 @@
 import { genHandlers } from './events'
 import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
+import { camelize } from 'shared/util'
 
 // configurable state
 let warn
@@ -285,6 +286,10 @@ function genSlot (el: ASTElement): string {
   const children = genChildren(el)
   return `_t(${slotName}${
     children ? `,${children}` : ''
+  }${
+    el.attrs ? `${children ? '' : 'null'},{${
+      el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')
+    }}` : ''
   })`
 }
 

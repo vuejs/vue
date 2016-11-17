@@ -16,6 +16,7 @@ export function initRender (vm: Component) {
   vm._staticTrees = null
   vm._renderContext = vm.$options._parentVnode && vm.$options._parentVnode.context
   vm.$slots = resolveSlots(vm.$options._renderChildren, vm._renderContext)
+  vm.$scopedSlots = null
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
   vm.$createElement = bind(createElement, vm)
@@ -42,6 +43,10 @@ export function renderMixin (Vue: Class<Component>) {
       for (const key in vm.$slots) {
         vm.$slots[key] = cloneVNodes(vm.$slots[key])
       }
+    }
+
+    if (_parentVnode) {
+      vm.$scopedSlots = _parentVnode.data.scopedSlots
     }
 
     if (staticRenderFns && !vm._staticTrees) {
@@ -183,19 +188,27 @@ export function renderMixin (Vue: Class<Component>) {
   // renderSlot
   Vue.prototype._t = function (
     name: string,
-    fallback: ?Array<VNode>
+    fallback: ?Array<VNode>,
+    props: ?Object
   ): ?Array<VNode> {
-    const slotNodes = this.$slots[name]
-    // warn duplicate slot usage
-    if (slotNodes && process.env.NODE_ENV !== 'production') {
-      slotNodes._rendered && warn(
-        `Duplicate presence of slot "${name}" found in the same render tree ` +
-        `- this will likely cause render errors.`,
-        this
-      )
-      slotNodes._rendered = true
+    if (props) { // scoped slot
+      const scopedSlotFn = this.$scopedSlots[name]
+      return scopedSlotFn
+        ? scopedSlotFn(props) || fallback
+        : fallback
+    } else { // static slot
+      const slotNodes = this.$slots[name]
+      // warn duplicate slot usage
+      if (slotNodes && process.env.NODE_ENV !== 'production') {
+        slotNodes._rendered && warn(
+          `Duplicate presence of slot "${name}" found in the same render tree ` +
+          `- this will likely cause render errors.`,
+          this
+        )
+        slotNodes._rendered = true
+      }
+      return slotNodes || fallback
     }
-    return slotNodes || fallback
   }
 
   // apply v-bind object
