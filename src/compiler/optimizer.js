@@ -72,8 +72,8 @@ function markStaticRoots (node: ASTNode, isInFor: boolean) {
         const child = node.children[i]
         isInFor = isInFor || !!node.for
         markStaticRoots(child, isInFor)
-        if (child.type === 1 && child.elseBlock) {
-          markStaticRoots(child.elseBlock, isInFor)
+        if (child.type === 1 && child.conditions) {
+          child.conditions.forEach( _ => { markStaticRoots(_.block, isInFor) })
         }
       }
     }

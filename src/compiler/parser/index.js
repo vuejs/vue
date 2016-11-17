@@ -154,9 +154,12 @@ export function parse (
         checkRootConstraints(root)
       } else if (!stack.length) {
         // allow 2 root elements with v-if and v-else
-        if (root.if && element.else) {
+        if (root.if && (element.alternate)) {
           checkRootConstraints(element)
-          root.elseBlock = element
+          addIfCondition(root, {
+            exp: element.alternate,
+            block: element
+          })
         } else if (process.env.NODE_ENV !== 'production' && !warned) {
           warned = true
           warn(
@@ -165,8 +168,8 @@ export function parse (
         }
       }
       if (currentParent && !element.forbidden) {
-        if (element.else) {
-          processElse(element, currentParent)
+        if (element.alternate) {
+          processIfAternate(element, currentParent)
         } else {
           currentParent.children.push(element)
           element.parent = currentParent
@@ -313,21 +316,43 @@ function processIf (el) {
   const exp = getAndRemoveAttr(el, 'v-if')
   if (exp) {
     el.if = exp
-  }
-  if (getAndRemoveAttr(el, 'v-else') != null) {
-    el.else = true
+    addIfCondition(el, {
+      exp: exp,
+      block: el
+    })
+  } else {
+    if (getAndRemoveAttr(el, 'v-else') != null) {
+      el.else = true
+    }
+
+    const elseif = getAndRemoveAttr(el, 'v-elseif')
+    if (elseif) {
+      el.aternate = elseif
+    }
+
   }
 }
 
-function processElse (el, parent) {
-  const prev = findPrevElement(parent.children)
-  if (prev && prev.if) {
-    prev.elseBlock = el
+function processIfAternate (el, parent) {
+  const prev = findPrevIfElement(parent.children)
+  if (prev) {
+    addIfCondition(prev, {
+      exp: el.aternate,
+      block: el
+    })
   } else if (process.env.NODE_ENV !== 'production') {
     warn(
-      `v-else used on element <${el.tag}> without corresponding v-if.`
+      `v-${el.elseif ? ('elseif="' + el.elseif + '"') : 'else'} ` +
+      `used on element <${el.tag}> without corresponding v-if.`
     )
   }
+}
+
+function addIfCondition (el, condition) {
+  if (!el.conditions) {
+    el.conditions = []
+  }
+  el.conditions.push(condition)
 }
 
 function processOnce (el) {
@@ -448,10 +473,10 @@ function makeAttrsMap (attrs: Array<Object>, isIE: ?boolean): Object {
   return map
 }
 
-function findPrevElement (children: Array<any>): ASTElement | void {
+function findPrevIfElement (children: Array<any>): ASTElement | void {
   let i = children.length
   while (i--) {
-    if (children[i].tag) return children[i]
+    if (children[i].tag && children[i].if) return children[i]
   }
 }
 

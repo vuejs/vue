@@ -59,7 +59,7 @@ describe('optimizer', () => {
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(false)
-    expect(ast.children[0].elseBlock.static).toBeUndefined()
+    expect(ast.children[0].conditions.static).toBeUndefined()
   })
 
   it('v-pre directive', () => {

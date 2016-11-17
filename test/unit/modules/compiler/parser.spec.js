@@ -103,7 +103,7 @@ describe('parser', () => {
       <p v-else></p>
     `, baseOptions)
     expect(ast.tag).toBe('div')
-    expect(ast.elseBlock.tag).toBe('p')
+    expect(ast.conditions[1].block.tag).toBe('p')
   })
 
   it('warn 2 root elements with v-if', () => {
@@ -193,15 +193,16 @@ describe('parser', () => {
   it('v-if directive syntax', () => {
     const ast = parse('<p v-if="show">hello world</p>', baseOptions)
     expect(ast.if).toBe('show')
+    expect(ast.conditions[0].exp).toBe('show')
   })
 
   it('v-else directive syntax', () => {
     const ast = parse('<div><p v-if="show">hello</p><p v-else>world</p></div>', baseOptions)
     const ifAst = ast.children[0]
-    const elseAst = ifAst.elseBlock
-    expect(elseAst.else).toBe(true)
-    expect(elseAst.children[0].text).toBe('world')
-    expect(elseAst.parent).toBe(ast)
+    const conditionsAst = ifAst.conditions
+    expect(conditionsAst.length).toBe(2)
+    expect(conditionsAst[1].block.children[0].text).toBe('world')
+    expect(conditionsAst[1].block.parent).toBe(ast)
   })
 
   it('v-else directive invalid syntax', () => {
