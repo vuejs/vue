@@ -249,4 +249,37 @@ describe('Component scoped slot', () => {
     }).$mount()
     expect(`\`key\` does not work on <slot>`).toHaveBeenWarned()
   })
+
+  it('render function usage', done => {
+    const vm = new Vue({
+      render (h) {
+        return h('test', {
+          ref: 'test',
+          scopedSlots: {
+            item: props => h('span', props.text)
+          }
+        })
+      },
+      components: {
+        test: {
+          data () {
+            return { msg: 'hello' }
+          },
+          render (h) {
+            return h('div', [
+              this.$scopedSlots.item({
+                text: this.msg
+              })
+            ])
+          }
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<span>hello</span>')
+    vm.$refs.test.msg = 'world'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<span>world</span>')
+    }).then(done)
+  })
 })
