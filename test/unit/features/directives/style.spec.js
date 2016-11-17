@@ -284,7 +284,7 @@ describe('Directive v-bind:style', () => {
         '<div>' +
           '<section style="color: blue" :style="style" v-if="!bool"></section>' +
           '<div></div>' +
-          '<section style="margin: 0" v-if="bool"></section>' +
+          '<section style="margin-top: 12px" v-if="bool"></section>' +
         '</div>',
       data: {
         bool: false,
@@ -301,6 +301,7 @@ describe('Directive v-bind:style', () => {
     }).then(() => {
       expect(style.color).toBe('')
       expect(style.fontSize).toBe('')
+      expect(style.marginTop).toBe('12px')
     }).then(done)
   })
 })
