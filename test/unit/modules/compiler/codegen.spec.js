@@ -112,8 +112,7 @@ describe('codegen', () => {
   it('generate slot fallback content', () => {
     assertCodegen(
       '<slot><div>hi</div></slot>',
-      `with(this){return _t("default",[_m(0)])}`,
-      [`with(this){return _h('div',["hi"])}`]
+      `with(this){return _t("default",[_h('div',["hi"])])}`
     )
   })
 
@@ -128,8 +127,7 @@ describe('codegen', () => {
     // static
     assertCodegen(
       '<p class="class1">hello world</p>',
-      'with(this){return _m(0)}',
-      [`with(this){return _h('p',{staticClass:"class1"},["hello world"])}`]
+      `with(this){return _h('p',{staticClass:"class1"},["hello world"])}`,
     )
     // dynamic
     assertCodegen(
@@ -169,8 +167,7 @@ describe('codegen', () => {
   it('generate static attrs', () => {
     assertCodegen(
       '<input name="field1">',
-      `with(this){return _m(0)}`,
-      [`with(this){return _h('input',{attrs:{"name":"field1"}})}`]
+      `with(this){return _h('input',{attrs:{"name":"field1"}})}`
     )
   })
 
@@ -297,22 +294,22 @@ describe('codegen', () => {
   it('generate component with inline-template', () => {
     // have "inline-template'"
     assertCodegen(
-      '<my-component inline-template><p>hello world</p></my-component>',
-      `with(this){return _h('my-component',{inlineTemplate:{render:function(){with(this){return _m(0)}},staticRenderFns:[function(){with(this){return _h('p',["hello world"])}}]}})}`
+      '<my-component inline-template><p><span>hello world</span></p></my-component>',
+      `with(this){return _h('my-component',{inlineTemplate:{render:function(){with(this){return _m(0)}},staticRenderFns:[function(){with(this){return _h('p',[_h('span',["hello world"])])}}]}})}`
     )
     // "have inline-template attrs, but not having extactly one child element
     assertCodegen(
       '<my-component inline-template><hr><hr></my-component>',
-      `with(this){return _h('my-component',{inlineTemplate:{render:function(){with(this){return _m(0)}},staticRenderFns:[function(){with(this){return _h('hr')}}]}})}`
+      `with(this){return _h('my-component',{inlineTemplate:{render:function(){with(this){return _h('hr')}},staticRenderFns:[]}})}`
     )
     expect('Inline-template components must have exactly one child element.').toHaveBeenWarned()
   })
 
   it('generate static trees inside v-for', () => {
     assertCodegen(
-      `<div><div v-for="i in 10"><span></span></div></div>`,
+      `<div><div v-for="i in 10"><p><span></span></p></div></div>`,
       `with(this){return _h('div',[_l((10),function(i){return _h('div',[_m(0,true)])})])}`,
-      [`with(this){return _h('span')}`]
+      [`with(this){return _h('p',[_h('span')])}`]
     )
   })
 
