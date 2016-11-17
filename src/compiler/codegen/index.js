@@ -182,20 +182,11 @@ function genData (el: ASTElement): string {
   }
   // inline-template
   if (el.inlineTemplate) {
-    const ast = el.children[0]
-    if (process.env.NODE_ENV !== 'production' && (
-      el.children.length > 1 || ast.type !== 1
-    )) {
-      warn('Inline-template components must have exactly one child element.')
-    }
-    if (ast.type === 1) {
-      const inlineRenderFns = generate(ast, currentOptions)
-      data += `inlineTemplate:{render:function(){${
-        inlineRenderFns.render
-      }},staticRenderFns:[${
-        inlineRenderFns.staticRenderFns.map(code => `function(){${code}}`).join(',')
-      }]}`
-    }
+    data += `${genInlineTemplate(el)},`
+  }
+  // scoped slots
+  if (el.scopedSlots) {
+    data += `${genScopedSlots(el.scopedSlots)},`
   }
   data = data.replace(/,$/, '') + '}'
   // v-bind data wrap
@@ -234,6 +225,39 @@ function genDirectives (el: ASTElement): string | void {
   if (hasRuntime) {
     return res.slice(0, -1) + ']'
   }
+}
+
+function genInlineTemplate (el) {
+  const ast = el.children[0]
+  if (process.env.NODE_ENV !== 'production' && (
+    el.children.length > 1 || ast.type !== 1
+  )) {
+    warn('Inline-template components must have exactly one child element.')
+  }
+  if (ast.type === 1) {
+    const inlineRenderFns = generate(ast, currentOptions)
+    return `inlineTemplate:{render:function(){${
+      inlineRenderFns.render
+    }},staticRenderFns:[${
+      inlineRenderFns.staticRenderFns.map(code => `function(){${code}}`).join(',')
+    }]}`
+  } else {
+    return ''
+  }
+}
+
+function genScopedSlots (slots) {
+  return `scopedSlots:{${
+    Object.keys(slots).map(key => genScopedSlot(key, slots[key])).join(',')
+  }}`
+}
+
+function genScopedSlot (key: string, el: ASTElement) {
+  return `${key}:function(${String(el.attrsMap.scope)}){` +
+    `return ${el.tag === 'template'
+      ? genChildren(el) || 'void 0'
+      : genElement(el)
+  }}`
 }
 
 function genChildren (el: ASTElement): string | void {

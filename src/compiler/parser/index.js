@@ -167,8 +167,10 @@ export function parse (
         }
       }
       if (currentParent && !element.forbidden) {
-        if (element.else) {
+        if (element.else) { // else block
           processElse(element, currentParent)
+        } else if (element.slotTarget && element.attrsMap.scope) { // scoped slot
+          (currentParent.scopedSlots || (currentParent.scopedSlots = {}))[element.slotTarget] = element
         } else {
           currentParent.children.push(element)
           element.parent = currentParent

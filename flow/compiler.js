@@ -87,6 +87,7 @@ declare type ASTElement = {
   transitionMode?: string | null;
   slotName?: ?string;
   slotTarget?: ?string;
+  scopedSlots?: { [name: string]: ASTElement };
 
   ref?: string;
   refInFor?: boolean;
