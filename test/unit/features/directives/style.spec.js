@@ -277,4 +277,22 @@ describe('Directive v-bind:style', () => {
       expect(style.marginLeft).toBe('40px')
     }).then(done)
   })
+
+  it('should not merge for different adjacent elements', (done) => {
+    const vm = new Vue({
+      template: '<div>' +
+                  '<section style="color: blue" v-if="!bool"></section>' +
+                  '<div></div>' +
+                  '<section style="margin: 0" v-if="bool"></section>' +
+                '</div>',
+      data: {
+        bool: false
+      }
+    }).$mount()
+    waitForUpdate(() => {
+      vm.bool = true
+    }).then(() => {
+      expect(vm.$el.children[1].style.color).not.toBe('blue')
+    }).then(done)
+  })
 })
