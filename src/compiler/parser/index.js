@@ -379,7 +379,7 @@ function processAttrs (el) {
           name = camelize(name)
           if (name === 'innerHtml') name = 'innerHTML'
         }
-        if (isProp || platformMustUseProp(name)) {
+        if (isProp || platformMustUseProp(el.tag, name)) {
           addProp(el, name, value)
         } else {
           addAttr(el, name, value)

@@ -14,7 +14,7 @@ export type Config = {
   isReservedTag: (x?: string) => boolean;
   isUnknownElement: (x?: string) => boolean;
   getTagNamespace: (x?: string) => string | void;
-  mustUseProp: (x?: string) => boolean;
+  mustUseProp: (tag?: string, x?: string) => boolean;
   // internal
   _assetTypes: Array<string>;
   _lifecycleHooks: Array<string>;
