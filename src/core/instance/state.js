@@ -18,7 +18,8 @@ import {
   isPlainObject,
   bind,
   validateProp,
-  noop
+  noop,
+  makeMap
 } from '../util/index'
 
 export function initState (vm: Component) {
@@ -29,6 +30,8 @@ export function initState (vm: Component) {
   initMethods(vm)
   initWatch(vm)
 }
+
+const isReservedProp = makeMap('key,ref,slot')
 
 function initProps (vm: Component) {
   const props = vm.$options.props
@@ -42,6 +45,12 @@ function initProps (vm: Component) {
       const key = keys[i]
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
+        if (isReservedProp(key)) {
+          warn(
+            `"${key}" is a reserved attribute and cannot be used as component prop.`,
+            vm
+          )
+        }
         defineReactive(vm, key, validateProp(key, props, propsData, vm), () => {
           if (vm.$parent && !observerState.isSettingProps) {
             warn(
