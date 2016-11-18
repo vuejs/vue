@@ -270,6 +270,39 @@ describe('codegen', () => {
     )
   })
 
+  it('generate events with inline function expression', () => {
+    // normal function
+    assertCodegen(
+      '<input @input="function () { current++ }">',
+      `with(this){return _h('input',{on:{"input":function () { current++ }}})}`
+    )
+    // arrow with no args
+    assertCodegen(
+      '<input @input="()=>current++">',
+      `with(this){return _h('input',{on:{"input":()=>current++}})}`
+    )
+    // arrow with parens, single arg
+    assertCodegen(
+      '<input @input="(e) => current++">',
+      `with(this){return _h('input',{on:{"input":(e) => current++}})}`
+    )
+    // arrow with parens, multi args
+    assertCodegen(
+      '<input @input="(a, b, c) => current++">',
+      `with(this){return _h('input',{on:{"input":(a, b, c) => current++}})}`
+    )
+    // arrow with destructuring
+    assertCodegen(
+      '<input @input="({ a, b }) => current++">',
+      `with(this){return _h('input',{on:{"input":({ a, b }) => current++}})}`
+    )
+    // arrow single arg no parens
+    assertCodegen(
+      '<input @input="e=>current++">',
+      `with(this){return _h('input',{on:{"input":e=>current++}})}`
+    )
+  })
+
   // #3893
   it('should not treat handler with unexpected whitespace as inline statement', () => {
     assertCodegen(
