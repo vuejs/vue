@@ -162,7 +162,7 @@ export function defineReactive (
     },
     set: function reactiveSetter (newVal) {
       const value = getter ? getter.call(obj) : val
-      if (newVal === value) {
+      if (newVal === value || (newVal !== newVal && value !== value)) {
         return
       }
       if (process.env.NODE_ENV !== 'production' && customSetter) {
