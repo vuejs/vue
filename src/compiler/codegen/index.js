@@ -110,7 +110,6 @@ function genOnce (el: ASTElement): string {
 }
 
 function genIf (el: any): string {
-  const exp = el.if
   el.ifProcessed = true // avoid recursion
   return genIfConditions(el.conditions)
 }

@@ -154,10 +154,10 @@ export function parse (
         checkRootConstraints(root)
       } else if (!stack.length) {
         // allow 2 root elements with v-if and v-else
-        if (root.if && (element.alternate)) {
+        if (root.if && element.condition) {
           checkRootConstraints(element)
           addIfCondition(root, {
-            exp: element.alternate,
+            exp: element.elseif,
             block: element
           })
         } else if (process.env.NODE_ENV !== 'production' && !warned) {
@@ -168,7 +168,7 @@ export function parse (
         }
       }
       if (currentParent && !element.forbidden) {
-        if (element.alternate) {
+        if (element.condition) {
           processIfAternate(element, currentParent)
         } else {
           currentParent.children.push(element)
@@ -321,15 +321,12 @@ function processIf (el) {
       block: el
     })
   } else {
-    if (getAndRemoveAttr(el, 'v-else') != null) {
-      el.else = true
-    }
-
+    const hasElse = getAndRemoveAttr(el, 'v-else') != null
     const elseif = getAndRemoveAttr(el, 'v-elseif')
-    if (elseif) {
-      el.aternate = elseif
+    if (hasElse || elseif) {
+      el.condition = true
     }
-
+    elseif && (el.elseif = elseif)
   }
 }
 
@@ -337,7 +334,7 @@ function processIfAternate (el, parent) {
   const prev = findPrevIfElement(parent.children)
   if (prev) {
     addIfCondition(prev, {
-      exp: el.aternate,
+      exp: el.elseif,
       block: el
     })
   } else if (process.env.NODE_ENV !== 'production') {
