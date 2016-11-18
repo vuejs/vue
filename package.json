@@ -60,8 +60,11 @@
   "devDependencies": {
     "babel-core": "^6.9.0",
     "babel-eslint": "^7.1.0",
+    "babel-helper-vue-jsx-merge-props": "^2.0.2",
     "babel-loader": "^6.2.4",
     "babel-plugin-coverage": "^1.0.0",
+    "babel-plugin-syntax-jsx": "^6.18.0",
+    "babel-plugin-transform-vue-jsx": "^3.2.0",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-flow-vue": "^1.0.0",
     "buble": "^0.14.0",

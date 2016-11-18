@@ -191,9 +191,6 @@ export function renderMixin (Vue: Class<Component>) {
     fallback: ?Array<VNode>,
     props: ?Object
   ): ?Array<VNode> {
-    if (process.env.NODE_ENV !== 'production' && name === 'default' && props) {
-      warn(`Scoped slots must be named`, this)
-    }
     const scopedSlotFn = this.$scopedSlots && this.$scopedSlots[name]
     if (scopedSlotFn) { // scoped slot
       return scopedSlotFn(props || {}) || fallback

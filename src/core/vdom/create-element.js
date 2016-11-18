@@ -39,6 +39,13 @@ export function _createElement (
     // in case of component :is set to falsy value
     return emptyVNode()
   }
+  // support single function children as default scoped slot
+  if (Array.isArray(children) &&
+      typeof children[0] === 'function') {
+    data = data || {}
+    data.scopedSlots = { default: children[0] }
+    children.length = 0
+  }
   if (typeof tag === 'string') {
     let Ctor
     const ns = config.getTagNamespace(tag)

@@ -1,6 +1,25 @@
 import Vue from 'vue'
 
 describe('Component scoped slot', () => {
+  it('default slot', () => {
+    const vm = new Vue({
+      template: `<test><span slot scope="props">{{ props.msg }}</span></test>`,
+      components: {
+        test: {
+          data () {
+            return { msg: 'hello' }
+          },
+          template: `
+            <div>
+              <slot :msg="msg"></slot>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<span>hello</span>')
+  })
+
   it('normal element slot', done => {
     const vm = new Vue({
       template: `
@@ -204,25 +223,6 @@ describe('Component scoped slot', () => {
     expect(vm.$el.innerHTML).toBe('<span>meh</span>')
   })
 
-  it('warn un-named scoped slot', () => {
-    new Vue({
-      template: `<test><span scope="lol"></span></test>`,
-      components: {
-        test: {
-          data () {
-            return { msg: 'hello' }
-          },
-          template: `
-            <div>
-              <slot :msg="msg"></slot>
-            </div>
-          `
-        }
-      }
-    }).$mount()
-    expect('Scoped slots must be named').toHaveBeenWarned()
-  })
-
   it('warn key on slot', () => {
     new Vue({
       template: `
@@ -250,7 +250,7 @@ describe('Component scoped slot', () => {
     expect(`\`key\` does not work on <slot>`).toHaveBeenWarned()
   })
 
-  it('render function usage', done => {
+  it('render function usage (named, via data)', done => {
     const vm = new Vue({
       render (h) {
         return h('test', {
@@ -281,5 +281,51 @@ describe('Component scoped slot', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('<span>world</span>')
     }).then(done)
+  })
+
+  it('render function usage (default, as children)', () => {
+    const vm = new Vue({
+      render (h) {
+        return h('test', [
+          props => h('span', [props.msg])
+        ])
+      },
+      components: {
+        test: {
+          data () {
+            return { msg: 'hello' }
+          },
+          render (h) {
+            return h('div', [
+              this.$scopedSlots.default({ msg: this.msg })
+            ])
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<span>hello</span>')
+  })
+
+  it('render function usage (JSX)', () => {
+    const vm = new Vue({
+      render (h) {
+        return <test>{
+          props => <span>{props.msg}</span>
+        }</test>
+      },
+      components: {
+        test: {
+          data () {
+            return { msg: 'hello' }
+          },
+          render (h) {
+            return <div>
+              {this.$scopedSlots.default({ msg: this.msg })}
+            </div>
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<span>hello</span>')
   })
 })

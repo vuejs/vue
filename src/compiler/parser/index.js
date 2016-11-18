@@ -355,7 +355,7 @@ function processSlot (el) {
   } else {
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
-      el.slotTarget = slotTarget
+      el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
       el.slotScope = getAndRemoveAttr(el, 'scope')
     }
   }
