@@ -107,6 +107,38 @@ describe('Component keep-alive', () => {
     }).then(done)
   })
 
+  // #4237
+  it('should update latest props/listners for a re-activated component', done => {
+    const one = {
+      props: ['prop'],
+      template: `<div>one {{ prop }}</div>`
+    }
+    const two = {
+      props: ['prop'],
+      template: `<div>two {{ prop }}</div>`
+    }
+    const vm = new Vue({
+      data: { view: 'one', n: 1 },
+      template: `
+        <div>
+          <keep-alive>
+            <component :is="view" :prop="n"></component>
+          </keep-alive>
+        </div>
+      `,
+      components: { one, two }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('one 1')
+    vm.n++
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('one 2')
+      vm.view = 'two'
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('two 2')
+    }).then(done)
+  })
+
   if (!isIE9) {
     it('with transition-mode out-in', done => {
       let next

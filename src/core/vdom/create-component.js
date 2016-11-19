@@ -154,6 +154,9 @@ function init (vnode: VNodeWithData, hydrating: boolean) {
   if (!vnode.child || vnode.child._isDestroyed) {
     const child = vnode.child = createComponentInstanceForVnode(vnode, activeInstance)
     child.$mount(hydrating ? vnode.elm : undefined, hydrating)
+  } else if (vnode.data.keepAlive) {
+    // kept-alive components, treat as a patch
+    prepatch(vnode, vnode)
   }
 }
 
