@@ -1,30 +1,13 @@
 import Vue from 'vue'
 
-describe('Component scoped slot', () => {
-  it('default slot', () => {
-    const vm = new Vue({
-      template: `<test><span slot scope="props">{{ props.msg }}</span></test>`,
-      components: {
-        test: {
-          data () {
-            return { msg: 'hello' }
-          },
-          template: `
-            <div>
-              <slot :msg="msg"></slot>
-            </div>
-          `
-        }
-      }
-    }).$mount()
-    expect(vm.$el.innerHTML).toBe('<span>hello</span>')
-  })
-
-  it('normal element slot', done => {
+fdescribe('Component scoped slot', () => {
+  it('default slot', done => {
     const vm = new Vue({
       template: `
         <test ref="test">
-          <span slot="item" scope="props">{{ props.text }}</span>
+          <template scope="props">
+            <span>{{ props.msg }}</span>
+          </template>
         </test>
       `,
       components: {
@@ -34,7 +17,7 @@ describe('Component scoped slot', () => {
           },
           template: `
             <div>
-              <slot name="item" :text="msg"></slot>
+              <slot :msg="msg"></slot>
             </div>
           `
         }
@@ -204,7 +187,9 @@ describe('Component scoped slot', () => {
     const vm = new Vue({
       template: `
         <test ref="test">
-          <span slot="item" scope="props">{{ props.text || 'meh' }}</span>
+          <template slot="item" scope="props">
+            <span>{{ props.text || 'meh' }}</span>
+          </template>
         </test>
       `,
       components: {

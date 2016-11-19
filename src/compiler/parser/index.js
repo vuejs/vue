@@ -169,9 +169,10 @@ export function parse (
       if (currentParent && !element.forbidden) {
         if (element.else) { // else block
           processElse(element, currentParent)
-        } else if (element.slotTarget && element.slotScope) { // scoped slot
-          (currentParent.scopedSlots || (currentParent.scopedSlots = {}))[element.slotTarget] = element
+        } else if (element.slotScope) { // scoped slot
           currentParent.plain = false
+          const name = element.slotTarget || 'default'
+          ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
         } else {
           currentParent.children.push(element)
           element.parent = currentParent
@@ -356,6 +357,8 @@ function processSlot (el) {
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
+    }
+    if (el.tag === 'template') {
       el.slotScope = getAndRemoveAttr(el, 'scope')
     }
   }
