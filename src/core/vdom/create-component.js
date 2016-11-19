@@ -156,7 +156,8 @@ function init (vnode: VNodeWithData, hydrating: boolean) {
     child.$mount(hydrating ? vnode.elm : undefined, hydrating)
   } else if (vnode.data.keepAlive) {
     // kept-alive components, treat as a patch
-    prepatch(vnode, vnode)
+    const mountedNode: any = vnode // work around flow
+    prepatch(mountedNode, mountedNode)
   }
 }
 
