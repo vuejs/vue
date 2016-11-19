@@ -89,7 +89,7 @@ export default {
 
   updated () {
     const children = this.prevChildren
-    const moveClass = this.moveClass || (this.name + '-move')
+    const moveClass = this.moveClass || ((this.name || 'v') + '-move')
     if (!children.length || !this.hasMove(children[0].elm, moveClass)) {
       return
     }
