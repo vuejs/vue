@@ -109,7 +109,7 @@ describe('Directive v-bind', () => {
     }).then(done)
   })
 
-  it('bind as prop', () => {
+  it('.prop modifier', () => {
     const vm = new Vue({
       template: '<div><span v-bind:text-content.prop="foo"></span><span :inner-html.prop="bar"></span></div>',
       data: {
@@ -119,6 +119,16 @@ describe('Directive v-bind', () => {
     }).$mount()
     expect(vm.$el.children[0].textContent).toBe('hello')
     expect(vm.$el.children[1].innerHTML).toBe('<span>qux</span>')
+  })
+
+  it('.camel modifier', () => {
+    const vm = new Vue({
+      template: '<svg :view-box.camel="viewBox"></svg>',
+      data: {
+        viewBox: '0 0 1 1'
+      }
+    }).$mount()
+    expect(vm.$el.getAttribute('viewBox')).toBe('0 0 1 1')
   })
 
   it('bind object', done => {

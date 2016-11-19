@@ -391,10 +391,15 @@ function processAttrs (el) {
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
         value = parseFilters(value)
-        if (modifiers && modifiers.prop) {
-          isProp = true
-          name = camelize(name)
-          if (name === 'innerHtml') name = 'innerHTML'
+        if (modifiers) {
+          if (modifiers.prop) {
+            isProp = true
+            name = camelize(name)
+            if (name === 'innerHtml') name = 'innerHTML'
+          }
+          if (modifiers.camel) {
+            name = camelize(name)
+          }
         }
         if (isProp || platformMustUseProp(el.tag, name)) {
           addProp(el, name, value)

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-fdescribe('Component scoped slot', () => {
+describe('Component scoped slot', () => {
   it('default slot', done => {
     const vm = new Vue({
       template: `
