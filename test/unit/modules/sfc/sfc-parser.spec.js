@@ -78,7 +78,7 @@ describe('Single File Component parser', () => {
     expect(res.template.content.trim()).toBe(`div\n  h1(v-if='1 < 2') hello`)
   })
 
-  it('should handle custom blocks without without parsing them', () => {
+  it('should handle custom blocks without parsing them', () => {
     const res = parseComponent(`
       <template>
         <div></div>

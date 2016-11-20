@@ -52,14 +52,13 @@ const isSpecialTag = (tag, isSFC, stack) => {
   if (isScriptOrStyle(tag)) {
     return true
   }
-  // top-level template that has a pre-processor
-  if (
-    isSFC &&
-    tag === 'template' &&
-    stack.length === 1 &&
-    stack[0].attrs.some(hasLang)
-  ) {
-    return true
+  if (isSFC) {
+    // top-level template that has no pre-processor
+    if (tag === 'template' && stack.length === 1 && !stack[0].attrs.some(hasLang)) {
+      return false
+    } else {
+      return true
+    }
   }
   return false
 }
