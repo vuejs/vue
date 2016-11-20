@@ -177,7 +177,7 @@ describe('Observer', () => {
   })
 
   it('observing object prop change', () => {
-    const obj = { a: { b: 2 }}
+    const obj = { a: { b: 2 }, c: NaN }
     observe(obj)
     // mock a watcher!
     const watcher = {
@@ -192,19 +192,24 @@ describe('Observer', () => {
     Dep.target = watcher
     obj.a.b
     Dep.target = null
-    expect(watcher.deps.length).toBe(3) // obj.a + a.b + b
+    expect(watcher.deps.length).toBe(3) // obj.a + a + a.b
     obj.a.b = 3
     expect(watcher.update.calls.count()).toBe(1)
     // swap object
     obj.a = { b: 4 }
     expect(watcher.update.calls.count()).toBe(2)
     watcher.deps = []
+
     Dep.target = watcher
     obj.a.b
+    obj.c
     Dep.target = null
-    expect(watcher.deps.length).toBe(3)
+    expect(watcher.deps.length).toBe(4)
     // set on the swapped object
     obj.a.b = 5
+    expect(watcher.update.calls.count()).toBe(3)
+    // should not trigger on NaN -> NaN set
+    obj.c = NaN
     expect(watcher.update.calls.count()).toBe(3)
   })
 

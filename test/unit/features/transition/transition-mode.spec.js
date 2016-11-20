@@ -5,7 +5,7 @@ import { nextFrame } from 'web/runtime/transition-util'
 
 if (!isIE9) {
   describe('Transition mode', () => {
-    const duration = injectStyles()
+    const { duration, buffer } = injectStyles()
     const components = {
       one: { template: '<div>one</div>' },
       two: { template: '<div>two</div>' }
@@ -40,7 +40,7 @@ if (!isIE9) {
           '<div class="test v-leave-active">one</div>' +
           '<div class="test v-enter-active">two</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
@@ -84,7 +84,7 @@ if (!isIE9) {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter-active">two</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
@@ -132,7 +132,7 @@ if (!isIE9) {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter-active">two</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
@@ -183,7 +183,7 @@ if (!isIE9) {
           '<div class="test test-leave-active">one</div>' +
           '<div class="test">two</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
@@ -249,7 +249,7 @@ if (!isIE9) {
           '<div class="test test-leave-active">two</div>' +
           '<div class="test">one</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>'
         )
@@ -278,7 +278,7 @@ if (!isIE9) {
           '<div class="test v-leave-active">one</div>' +
           '<div class="test v-enter-active">two</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
@@ -321,7 +321,7 @@ if (!isIE9) {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter-active">two</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
@@ -371,7 +371,7 @@ if (!isIE9) {
           '<div class="test test-leave-active">one</div>' +
           '<div class="test">two</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )

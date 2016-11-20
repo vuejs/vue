@@ -4,11 +4,18 @@ import { baseOptions } from 'web/compiler/index'
 
 describe('optimizer', () => {
   it('simple', () => {
-    const ast = parse('<h1 id="section1">hello world</h1>', baseOptions)
+    const ast = parse('<h1 id="section1"><span>hello world</span></h1>', baseOptions)
     optimize(ast, baseOptions)
     expect(ast.static).toBe(true) // h1
     expect(ast.staticRoot).toBe(true)
-    expect(ast.children[0].static).toBe(true) // text node
+    expect(ast.children[0].static).toBe(true) // span
+  })
+
+  it('skip simple nodes', () => {
+    const ast = parse('<h1 id="section1">hello</h1>', baseOptions)
+    optimize(ast, baseOptions)
+    expect(ast.static).toBe(true)
+    expect(ast.staticRoot).toBe(false) // this is too simple to warrant a static tree
   })
 
   it('interpolation', () => {
@@ -197,7 +204,7 @@ describe('optimizer', () => {
   })
 
   it('mark static trees inside v-for', () => {
-    const ast = parse(`<div><div v-for="i in 10"><span>hi</span></div></div>`, baseOptions)
+    const ast = parse(`<div><div v-for="i in 10"><p><span>hi</span></p></div></div>`, baseOptions)
     optimize(ast, baseOptions)
     expect(ast.children[0].children[0].staticRoot).toBe(true)
     expect(ast.children[0].children[0].staticInFor).toBe(true)

@@ -123,6 +123,8 @@ Vue.component('component', {
   mounted() {},
   beforeUpdate() {},
   updated() {},
+  activated() {},
+  deactivated() {},
 
   directives: {
     a: {

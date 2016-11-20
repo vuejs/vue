@@ -6,8 +6,8 @@ describe('compile style', () => {
     const { render, staticRenderFns, errors } = compile(`<div style="a: x; b: y"></div>`)
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).not.toBeUndefined()
-    expect(staticRenderFns.length).toEqual(1)
-    expect(staticRenderFns).toMatch(strToRegExp(`staticStyle:{a:"x",b:"y"}`))
+    expect(staticRenderFns.length).toEqual(0)
+    expect(render).toMatch(strToRegExp(`staticStyle:{a:"x",b:"y"}`))
     expect(errors).toEqual([])
   })
 
@@ -15,8 +15,8 @@ describe('compile style', () => {
     const { render, staticRenderFns, errors } = compile(`<div style=""></div>`)
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).not.toBeUndefined()
-    expect(staticRenderFns.length).toEqual(1)
-    expect(staticRenderFns).toMatch(/[(^style|^staticStyle)]/)
+    expect(staticRenderFns.length).toEqual(0)
+    expect(render).toMatch(/[(^style|^staticStyle)]/)
     expect(errors).toEqual([])
   })
 
@@ -24,8 +24,8 @@ describe('compile style', () => {
     const { render, staticRenderFns, errors } = compile(`<div style="a: x; b: y;"></div>`)
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).not.toBeUndefined()
-    expect(staticRenderFns.length).toEqual(1)
-    expect(staticRenderFns).toMatch(strToRegExp(`staticStyle:{a:"x",b:"y"}`))
+    expect(staticRenderFns.length).toEqual(0)
+    expect(render).toMatch(strToRegExp(`staticStyle:{a:"x",b:"y"}`))
     expect(errors).toEqual([])
   })
 
@@ -33,8 +33,8 @@ describe('compile style', () => {
     const { render, staticRenderFns, errors } = compile(`<div style="-abc-def: x-y; abc-def: x-y"></div>`)
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).not.toBeUndefined()
-    expect(staticRenderFns.length).toEqual(1)
-    expect(staticRenderFns).toMatch(strToRegExp(`staticStyle:{AbcDef:"x-y",abcDef:"x-y"}`))
+    expect(staticRenderFns.length).toEqual(0)
+    expect(render).toMatch(strToRegExp(`staticStyle:{AbcDef:"x-y",abcDef:"x-y"}`))
     expect(errors).toEqual([])
   })
 

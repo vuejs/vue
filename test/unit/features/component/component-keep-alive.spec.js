@@ -4,7 +4,7 @@ import { isIE9 } from 'core/util/env'
 import { nextFrame } from 'web/runtime/transition-util'
 
 describe('Component keep-alive', () => {
-  const duration = injectStyles()
+  const { duration, buffer } = injectStyles()
   let components, one, two, el
   beforeEach(() => {
     one = {
@@ -107,6 +107,38 @@ describe('Component keep-alive', () => {
     }).then(done)
   })
 
+  // #4237
+  it('should update latest props/listners for a re-activated component', done => {
+    const one = {
+      props: ['prop'],
+      template: `<div>one {{ prop }}</div>`
+    }
+    const two = {
+      props: ['prop'],
+      template: `<div>two {{ prop }}</div>`
+    }
+    const vm = new Vue({
+      data: { view: 'one', n: 1 },
+      template: `
+        <div>
+          <keep-alive>
+            <component :is="view" :prop="n"></component>
+          </keep-alive>
+        </div>
+      `,
+      components: { one, two }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('one 1')
+    vm.n++
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('one 2')
+      vm.view = 'two'
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('two 2')
+    }).then(done)
+  })
+
   if (!isIE9) {
     it('with transition-mode out-in', done => {
       let next
@@ -154,7 +186,7 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter-active">two</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
@@ -184,7 +216,7 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter-active">one</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>'
         )
@@ -244,7 +276,7 @@ describe('Component keep-alive', () => {
           '<div class="test test-leave-active">one</div>' +
           '<div class="test">two</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
@@ -279,7 +311,7 @@ describe('Component keep-alive', () => {
           '<div class="test test-leave-active">two</div>' +
           '<div class="test">one</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>'
         )
@@ -349,7 +381,7 @@ describe('Component keep-alive', () => {
           '<div class="test test-leave-active">two</div>' +
           '<div class="test">one</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>'
         )

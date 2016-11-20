@@ -5,7 +5,7 @@ import { nextFrame } from 'web/runtime/transition-util'
 
 if (!isIE9) {
   describe('Transition group', () => {
-    const duration = injectStyles()
+    const { duration, buffer } = injectStyles()
 
     let el
     beforeEach(() => {
@@ -55,7 +55,7 @@ if (!isIE9) {
             `<div class="test v-enter-active">e</div>` +
           `</span>`
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
             vm.items.map(i => `<div class="test">${i}</div>`).join('') +
@@ -83,7 +83,7 @@ if (!isIE9) {
             `<div class="test v-leave-active">c</div>` +
           `</span>`
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
             vm.items.map(i => `<div class="test">${i}</div>`).join('') +
@@ -113,7 +113,7 @@ if (!isIE9) {
             `<div class="test v-enter-active">d</div>` +
           `</span>`
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
             vm.items.map(i => `<div class="test">${i}</div>`).join('') +
@@ -143,7 +143,7 @@ if (!isIE9) {
             `<div class="test v-enter-active">d</div>` +
           `</span>`
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
             vm.items.map(i => `<div class="test">${i}</div>`).join('') +
@@ -166,7 +166,7 @@ if (!isIE9) {
             vm.items.map(i => `<div class="test v-enter-active">${i}</div>`).join('') +
           `</span>`
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
             vm.items.map(i => `<div class="test">${i}</div>`).join('') +

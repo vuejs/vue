@@ -441,4 +441,13 @@ describe('Options props', () => {
       expect(spy.calls.count()).toBe(2)
     }).then(done)
   })
+
+  it('warn reserved props', () => {
+    new Vue({
+      props: {
+        key: String
+      }
+    })
+    expect(`"key" is a reserved attribute`).toHaveBeenWarned()
+  })
 })

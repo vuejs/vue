@@ -5,10 +5,11 @@ function insertCSS (text) {
 }
 
 const duration = process.env.TRANSITION_DURATION || 50
+const buffer = process.env.TRANSITION_BUFFER || 10
 let injected = false
 
 export default function injectStyles () {
-  if (injected) return duration
+  if (injected) return { duration, buffer }
   injected = true
   insertCSS(`
     .test {
@@ -58,6 +59,6 @@ export default function injectStyles () {
       to { opacity: 0 }
     }
   `)
-  return duration
+  return { duration, buffer }
 }
 

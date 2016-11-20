@@ -6,8 +6,8 @@ describe('compile class', () => {
     const { render, staticRenderFns, errors } = compile(`<div class="a b c"></div>`)
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).not.toBeUndefined()
-    expect(staticRenderFns.length).toEqual(1)
-    expect(staticRenderFns).toMatch(strToRegExp(`staticClass:["a","b","c"]`))
+    expect(staticRenderFns.length).toEqual(0)
+    expect(render).toMatch(strToRegExp(`staticClass:["a","b","c"]`))
     expect(errors).toEqual([])
   })
 

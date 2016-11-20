@@ -201,6 +201,7 @@ export function renderMixin (Vue: Class<Component>) {
   // apply v-bind object
   Vue.prototype._b = function bindProps (
     data: any,
+    tag: string,
     value: any,
     asProp?: boolean
   ): VNodeData {
@@ -218,7 +219,7 @@ export function renderMixin (Vue: Class<Component>) {
           if (key === 'class' || key === 'style') {
             data[key] = value[key]
           } else {
-            const hash = asProp || config.mustUseProp(key)
+            const hash = asProp || config.mustUseProp(tag, key)
               ? data.domProps || (data.domProps = {})
               : data.attrs || (data.attrs = {})
             hash[key] = value[key]
