@@ -88,8 +88,7 @@ function markStaticRoots (node: ASTNode, isInFor: boolean) {
 
 function walkThroughConditionsBlocks (conditionBlocks: array, isInFor: boolean): void {
   for (let i = 1, conditionBlock; conditionBlock = conditionBlocks[i++];) {
-    const node = conditionBlock.block
-    markStaticRoots(node, isInFor)
+    markStaticRoots(conditionBlock.block, isInFor)
   }
 }
 
