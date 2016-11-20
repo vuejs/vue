@@ -145,6 +145,16 @@ declare type SFCDescriptor = {
   template: ?SFCBlock;
   script: ?SFCBlock;
   styles: Array<SFCBlock>;
+  customBlocks: Array<SFCCustomBlock>;
+}
+
+declare type SFCCustomBlock = {
+  type: string;
+  content: string;
+  start?: number;
+  end?: number;
+  src?: string;
+  attrs: {[attribute:string]: string};
 }
 
 declare type SFCBlock = {
