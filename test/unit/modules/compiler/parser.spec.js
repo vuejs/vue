@@ -291,8 +291,8 @@ describe('parser', () => {
   })
 
   it('v-elseif directive invalid syntax', () => {
-    parse('<div><p v-elseif>world</p></div>', baseOptions)
-    expect('v-elseif used on element').toHaveBeenWarned()
+    parse('<div><p v-elseif="1">world</p></div>', baseOptions)
+    expect('v-elseif="1" used on element').toHaveBeenWarned()
   })
 
   it('v-else directive invalid syntax', () => {
