@@ -213,6 +213,35 @@ describe('Directive v-once', () => {
     }).then(done)
   })
 
+  it('should work inside v-for with nested v-else', done => {
+    const vm = new Vue({
+      data: {
+        list: [{ id: 0, text: 'a', tester: true, truthy: 'y' }]
+      },
+      template: `
+        <div v-if="0"></div>
+        <div v-else>
+          <div v-for="i in list" :key="i.id">
+            <span v-if="i.tester" v-once>{{ i.truthy }}</span>
+            <span v-else v-once>{{ i.text }}</span>
+          </div>
+        </div>
+      `
+    }).$mount()
+
+    expectTextContent(vm, 'y')
+    vm.list[0].truthy = 'yy'
+    waitForUpdate(() => {
+      expectTextContent(vm, 'y')
+      vm.list[0].tester = false
+    }).then(() => {
+      expectTextContent(vm, 'a')
+      vm.list[0].text = 'nn'
+    }).then(() => {
+      expectTextContent(vm, 'a')
+    }).then(done)
+  })
+
   it('should warn inside non-keyed v-for', () => {
     const vm = new Vue({
       data: {

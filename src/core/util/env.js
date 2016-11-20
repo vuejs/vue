@@ -87,13 +87,17 @@ export const nextTick = (function () {
   }
 
   return function queueNextTick (cb: Function, ctx?: Object) {
-    const func = ctx
-      ? function () { cb.call(ctx) }
-      : cb
-    callbacks.push(func)
-    if (!pending) {
-      pending = true
-      timerFunc()
+    if (cb) {
+      var func = ctx
+        ? function () { cb.call(ctx) }
+        : cb
+      callbacks.push(func)
+      if (!pending) {
+        pending = true
+        timerFunc()
+      }
+    } else if (typeof Promise !== 'undefined') {
+      return Promise.resolve(ctx)
     }
   }
 })()

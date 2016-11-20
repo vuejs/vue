@@ -109,5 +109,22 @@ describe('Instance methods lifecycle', () => {
         done()
       })
     })
+
+    if (typeof Promise !== 'undefined') {
+      it('should be called after DOM update in correct context, when using Promise syntax', done => {
+        const vm = new Vue({
+          template: '<div>{{ msg }}</div>',
+          data: {
+            msg: 'foo'
+          }
+        }).$mount()
+        vm.msg = 'bar'
+        vm.$nextTick().then(function (ctx) {
+          expect(ctx).toBe(vm)
+          expect(vm.$el.textContent).toBe('bar')
+          done()
+        })
+      })
+    }
   })
 })

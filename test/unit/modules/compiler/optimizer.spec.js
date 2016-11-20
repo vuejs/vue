@@ -209,4 +209,18 @@ describe('optimizer', () => {
     expect(ast.children[0].children[0].staticRoot).toBe(true)
     expect(ast.children[0].children[0].staticInFor).toBe(true)
   })
+
+  it('mark static trees inside v-for with nested v-else and v-once', () => {
+    const ast = parse(`
+      <div v-if="1"></div>
+      <div v-else>
+        <div v-for="i in 10" :key="i">
+          <div v-if="1">{{ i }}</div>
+          <div v-else v-once>{{ i }}</div>
+        </div>
+      <div>`, baseOptions)
+    optimize(ast, baseOptions)
+    expect(ast.elseBlock.children[0].children[0].elseBlock.staticRoot).toBe(false)
+    expect(ast.elseBlock.children[0].children[0].elseBlock.staticInFor).toBe(true)
+  })
 })
