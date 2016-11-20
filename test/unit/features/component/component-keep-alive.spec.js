@@ -4,7 +4,7 @@ import { isIE9 } from 'core/util/env'
 import { nextFrame } from 'web/runtime/transition-util'
 
 describe('Component keep-alive', () => {
-  const duration = injectStyles()
+  const { duration, buffer } = injectStyles()
   let components, one, two, el
   beforeEach(() => {
     one = {
@@ -186,7 +186,7 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter-active">two</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
@@ -216,7 +216,7 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter-active">one</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>'
         )
@@ -276,7 +276,7 @@ describe('Component keep-alive', () => {
           '<div class="test test-leave-active">one</div>' +
           '<div class="test">two</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
@@ -311,7 +311,7 @@ describe('Component keep-alive', () => {
           '<div class="test test-leave-active">two</div>' +
           '<div class="test">one</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>'
         )
@@ -381,7 +381,7 @@ describe('Component keep-alive', () => {
           '<div class="test test-leave-active">two</div>' +
           '<div class="test">one</div>'
         )
-      }).thenWaitFor(duration + 10).then(() => {
+      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>'
         )
