@@ -224,6 +224,22 @@ describe('codegen', () => {
       '<input @input.self="onInput">',
       `with(this){return _h('input',{on:{"input":function($event){if($event.target !== $event.currentTarget)return;onInput($event)}}})}`
     )
+    assertCodegen(
+      '<input @input.ctrl="onInput">',
+      `with(this){return _h('input',{on:{"input":function($event){if(!$event.ctrlKey)return;onInput($event)}}})}`
+    )
+    assertCodegen(
+      '<input @input.shift="onInput">',
+      `with(this){return _h('input',{on:{"input":function($event){if(!$event.shiftKey)return;onInput($event)}}})}`
+    )
+    assertCodegen(
+      '<input @input.alt="onInput">',
+      `with(this){return _h('input',{on:{"input":function($event){if(!$event.altKey)return;onInput($event)}}})}`
+    )
+    assertCodegen(
+      '<input @input.meta="onInput">',
+      `with(this){return _h('input',{on:{"input":function($event){if(!$event.metaKey)return;onInput($event)}}})}`
+    )
   })
 
   it('generate events with multiple modifers', () => {
