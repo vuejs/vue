@@ -6,7 +6,7 @@ describe('nextTick', () => {
   })
 
   it('returns undefined when passed a callback', () => {
-    expect(typeof nextTick(() => {})).toBe('undefined')
+    expect(nextTick(() => {})).toBeUndefined()
   })
 
   if (typeof Promise !== 'undefined') {
@@ -18,6 +18,15 @@ describe('nextTick', () => {
       const obj = {}
       nextTick(undefined, obj).then(ctx => {
         expect(ctx).toBe(obj)
+        done()
+      })
+    })
+
+    it('returned Promise should resolve correctly vs callback', done => {
+      const spy = jasmine.createSpy()
+      nextTick(spy)
+      nextTick().then(() => {
+        expect(spy).toHaveBeenCalled()
         done()
       })
     })

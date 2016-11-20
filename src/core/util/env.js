@@ -86,18 +86,20 @@ export const nextTick = (function () {
     }
   }
 
-  return function queueNextTick (cb: Function, ctx?: Object) {
-    if (cb) {
-      var func = ctx
-        ? function () { cb.call(ctx) }
-        : cb
-      callbacks.push(func)
-      if (!pending) {
-        pending = true
-        timerFunc()
-      }
-    } else if (typeof Promise !== 'undefined') {
-      return Promise.resolve(ctx)
+  return function queueNextTick (cb?: Function, ctx?: Object) {
+    let _resolve
+    callbacks.push(() => {
+      if (cb) cb.call(ctx)
+      if (_resolve) _resolve(ctx)
+    })
+    if (!pending) {
+      pending = true
+      timerFunc()
+    }
+    if (!cb && typeof Promise !== 'undefined') {
+      return new Promise(resolve => {
+        _resolve = resolve
+      })
     }
   }
 })()
