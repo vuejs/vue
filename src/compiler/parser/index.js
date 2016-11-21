@@ -363,7 +363,8 @@ function processAttrs (el) {
   let i, l, name, rawName, value, arg, modifiers, isProp
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
-    value = list[i].value
+    // #4268 Use an ecmascript valid lf character
+    value = list[i].value.replace(specialNewlineRE, '\n')
     if (dirRE.test(name)) {
       // mark element as dynamic
       el.hasBindings = true
