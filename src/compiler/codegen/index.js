@@ -115,7 +115,7 @@ function genIf (el: any): string {
   return genIfConditions(el.conditions)
 }
 
-function genIfConditions (conditions: any): string {
+function genIfConditions (conditions: ASTIfConditions): string {
   if (!conditions.length) {
     return '_e()'
   }

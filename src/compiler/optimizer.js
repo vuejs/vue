@@ -86,9 +86,9 @@ function markStaticRoots (node: ASTNode, isInFor: boolean) {
   }
 }
 
-function walkThroughConditionsBlocks (conditionBlocks: array, isInFor: boolean): void {
-  for (let i = 1, conditionBlock; conditionBlock = conditionBlocks[i++];) {
-    markStaticRoots(conditionBlock.block, isInFor)
+function walkThroughConditionsBlocks (conditionBlocks: ASTIfConditions, isInFor: boolean): void {
+  for (let i = 1, len = conditionBlocks.length; i < len; i++) {
+    markStaticRoots(conditionBlocks[i].block, isInFor)
   }
 }
 
