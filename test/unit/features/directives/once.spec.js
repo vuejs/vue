@@ -242,6 +242,56 @@ describe('Directive v-once', () => {
     }).then(done)
   })
 
+  it('should work inside v-for with nested v-elseif and v-else', done => {
+    const vm = new Vue({
+      data: {
+        tester: false,
+        list: [{ id: 0, text: 'a', tester: true, truthy: 'y' }]
+      },
+      template: `
+        <div v-if="0"></div>
+        <div v-elseif="tester">
+          <div v-for="i in list" :key="i.id">
+            <span v-if="i.tester" v-once>{{ i.truthy }}</span>
+            <span v-elseif="tester" v-once>{{ i.text }}elseif</span>
+            <span v-else v-once>{{ i.text }}</span>
+          </div>
+        </div>
+        <div v-else>
+          <div v-for="i in list" :key="i.id">
+            <span v-if="i.tester" v-once>{{ i.truthy }}</span>
+            <span v-elseif="tester">{{ i.text }}elseif</span>
+            <span v-else v-once>{{ i.text }}</span>
+          </div>
+        </div>
+      `
+    }).$mount()
+
+    expectTextContent(vm, 'y')
+    vm.list[0].truthy = 'yy'
+    waitForUpdate(() => {
+      expectTextContent(vm, 'y')
+      vm.list[0].tester = false
+    }).then(() => {
+      expectTextContent(vm, 'a')
+      vm.list[0].text = 'nn'
+    }).then(() => {
+      expectTextContent(vm, 'a')
+      vm.tester = true
+    }).then(() => {
+      expectTextContent(vm, 'nnelseif')
+      vm.list[0].text = 'xx'
+    }).then(() => {
+      expectTextContent(vm, 'nnelseif')
+      vm.list[0].tester = true
+    }).then(() => {
+      expectTextContent(vm, 'yy')
+      vm.list[0].truthy = 'nn'
+    }).then(() => {
+      expectTextContent(vm, 'yy')
+    }).then(done)
+  })
+
   it('should warn inside non-keyed v-for', () => {
     const vm = new Vue({
       data: {
