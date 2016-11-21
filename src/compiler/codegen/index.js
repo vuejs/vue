@@ -279,7 +279,7 @@ function genNode (node: ASTNode) {
 function genText (text: ASTText | ASTExpression): string {
   return text.type === 2
     ? text.expression // no need for () because already wrapped in _s()
-    : JSON.stringify(text.text)
+    : transformSpecialNewlines(JSON.stringify(text.text))
 }
 
 function genSlot (el: ASTElement): string {
@@ -306,7 +306,14 @@ function genProps (props: Array<{ name: string, value: string }>): string {
   let res = ''
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
-    res += `"${prop.name}":${prop.value},`
+    res += `"${prop.name}":${transformSpecialNewlines(prop.value)},`
   }
   return res.slice(0, -1)
+}
+
+// #3895, #4268
+function transformSpecialNewlines (text: string): string {
+  return text
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029')
 }

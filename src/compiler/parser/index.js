@@ -24,7 +24,6 @@ const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
 const argRE = /:(.*)$/
 const modifierRE = /\.[^.]+/g
-const specialNewlineRE = /\u2028|\u2029/g
 
 const decodeHTMLCached = cached(decode)
 
@@ -237,8 +236,6 @@ export function parse (
             text
           })
         } else {
-          // #3895 special character
-          text = text.replace(specialNewlineRE, '')
           currentParent.children.push({
             type: 3,
             text
