@@ -248,7 +248,7 @@ describe('codegen', () => {
     )
   })
 
-  it('generate events with modifiers', () => {
+  it('generate events with generic modifiers', () => {
     assertCodegen(
       '<input @input.stop="onInput">',
       `with(this){return _h('input',{on:{"input":function($event){$event.stopPropagation();onInput($event)}}})}`
@@ -261,21 +261,24 @@ describe('codegen', () => {
       '<input @input.self="onInput">',
       `with(this){return _h('input',{on:{"input":function($event){if($event.target !== $event.currentTarget)return;onInput($event)}}})}`
     )
+  })
+
+  it('generate events with mouse event modifiers', () => {
     assertCodegen(
-      '<input @input.ctrl="onInput">',
-      `with(this){return _h('input',{on:{"input":function($event){if(!$event.ctrlKey)return;onInput($event)}}})}`
+      '<input @click.ctrl="onClick">',
+      `with(this){return _h('input',{on:{"click":function($event){if(!$event.ctrlKey)return;onClick($event)}}})}`
     )
     assertCodegen(
-      '<input @input.shift="onInput">',
-      `with(this){return _h('input',{on:{"input":function($event){if(!$event.shiftKey)return;onInput($event)}}})}`
+      '<input @click.shift="onClick">',
+      `with(this){return _h('input',{on:{"click":function($event){if(!$event.shiftKey)return;onClick($event)}}})}`
     )
     assertCodegen(
-      '<input @input.alt="onInput">',
-      `with(this){return _h('input',{on:{"input":function($event){if(!$event.altKey)return;onInput($event)}}})}`
+      '<input @click.alt="onClick">',
+      `with(this){return _h('input',{on:{"click":function($event){if(!$event.altKey)return;onClick($event)}}})}`
     )
     assertCodegen(
-      '<input @input.meta="onInput">',
-      `with(this){return _h('input',{on:{"input":function($event){if(!$event.metaKey)return;onInput($event)}}})}`
+      '<input @click.meta="onClick">',
+      `with(this){return _h('input',{on:{"click":function($event){if(!$event.metaKey)return;onClick($event)}}})}`
     )
   })
 
