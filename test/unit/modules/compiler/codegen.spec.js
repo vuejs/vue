@@ -256,6 +256,13 @@ describe('codegen', () => {
     )
   })
 
+  it('generate events with once modifier', () => {
+    assertCodegen(
+      '<input @input.once="onInput">',
+      `with(this){return _h('input',{on:{"~input":function($event){onInput($event)}}})}`
+    )
+  })
+
   it('generate events with inline statement', () => {
     assertCodegen(
       '<input @input="curent++">',

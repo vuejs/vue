@@ -9,7 +9,7 @@ export function updateListeners (
   remove: Function,
   vm: Component
 ) {
-  let name, cur, old, fn, event, capture
+  let name, cur, old, fn, event, capture, once
   for (name in on) {
     cur = on[name]
     old = oldOn[name]
@@ -20,9 +20,10 @@ export function updateListeners (
       )
     } else if (!old) {
       capture = name.charAt(0) === '!'
-      event = capture ? name.slice(1) : name
+      once = name.charAt(0) === '~'
+      event = capture || once ? name.slice(1) : name
       if (Array.isArray(cur)) {
-        add(event, (cur.invoker = arrInvoker(cur)), capture)
+        add(event, (cur.invoker = arrInvoker(cur)), capture, once)
       } else {
         if (!cur.invoker) {
           fn = cur
@@ -30,7 +31,7 @@ export function updateListeners (
           cur.fn = fn
           cur.invoker = fnInvoker(cur)
         }
-        add(event, cur.invoker, capture)
+        add(event, cur.invoker, capture, once)
       }
     } else if (cur !== old) {
       if (Array.isArray(old)) {

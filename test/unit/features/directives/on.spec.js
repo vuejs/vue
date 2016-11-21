@@ -102,6 +102,24 @@ describe('Directive v-on', () => {
     expect(callOrder.toString()).toBe('1,2')
   })
 
+  it('should support once', () => {
+    const numberPushed = []
+    vm = new Vue({
+      el,
+      template: `
+        <div @click.once="foo">
+        </div>
+      `,
+      methods: {
+        foo () { numberPushed.push(1) }
+      }
+    })
+    triggerEvent(vm.$el, 'click')
+    expect(numberPushed.toString()).toBe('1')
+    triggerEvent(vm.$el, 'click')
+    expect(numberPushed.toString()).toBe('1')
+  })
+
   it('should support keyCode', () => {
     vm = new Vue({
       el,
