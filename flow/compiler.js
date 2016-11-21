@@ -41,6 +41,7 @@ declare type ModuleOptions = {
 }
 
 declare type ASTModifiers = { [key: string]: boolean }
+declare type ASTIfConditions = Array<{ exp: ?string; block: ASTElement }>
 
 declare type ASTElementHandler = {
   value: string;
@@ -95,8 +96,9 @@ declare type ASTElement = {
 
   if?: string;
   ifProcessed?: boolean;
+  elseif?: string;
   else?: true;
-  elseBlock?: ASTElement;
+  conditions?: ASTIfConditions;
 
   for?: string;
   forProcessed?: boolean;

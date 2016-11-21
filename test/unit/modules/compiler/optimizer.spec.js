@@ -66,7 +66,7 @@ describe('optimizer', () => {
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(false)
-    expect(ast.children[0].elseBlock.static).toBeUndefined()
+    expect(ast.children[0].conditions[1].block.static).toBeUndefined()
   })
 
   it('v-pre directive', () => {
@@ -213,14 +213,28 @@ describe('optimizer', () => {
   it('mark static trees inside v-for with nested v-else and v-once', () => {
     const ast = parse(`
       <div v-if="1"></div>
+      <div v-elseif="2">
+        <div v-for="i in 10" :key="i">
+          <div v-if="1">{{ i }}</div>
+          <div v-elseif="2" v-once>{{ i }}</div>
+          <div v-else v-once>{{ i }}</div>
+        </div>
+      </div>
       <div v-else>
         <div v-for="i in 10" :key="i">
           <div v-if="1">{{ i }}</div>
           <div v-else v-once>{{ i }}</div>
         </div>
-      <div>`, baseOptions)
+      </div>
+      `, baseOptions)
     optimize(ast, baseOptions)
-    expect(ast.elseBlock.children[0].children[0].elseBlock.staticRoot).toBe(false)
-    expect(ast.elseBlock.children[0].children[0].elseBlock.staticInFor).toBe(true)
+    expect(ast.conditions[1].block.children[0].children[0].conditions[1].block.staticRoot).toBe(false)
+    expect(ast.conditions[1].block.children[0].children[0].conditions[1].block.staticInFor).toBe(true)
+
+    expect(ast.conditions[1].block.children[0].children[0].conditions[2].block.staticRoot).toBe(false)
+    expect(ast.conditions[1].block.children[0].children[0].conditions[2].block.staticInFor).toBe(true)
+
+    expect(ast.conditions[2].block.children[0].children[0].conditions[1].block.staticRoot).toBe(false)
+    expect(ast.conditions[2].block.children[0].children[0].conditions[1].block.staticInFor).toBe(true)
   })
 })

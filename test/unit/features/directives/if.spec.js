@@ -88,6 +88,55 @@ describe('Directive v-if', () => {
     }).then(done)
   })
 
+  it('should work well with v-elseif', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <span v-if="foo">hello</span>
+          <span v-elseif="bar">elseif</span>
+          <span v-else>bye</span>
+        </div>
+      `,
+      data: { foo: true, bar: false }
+    }).$mount()
+    expect(vm.$el.innerHTML.trim()).toBe('<span>hello</span>')
+    vm.foo = false
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span>')
+      vm.bar = true
+    }).then(() => {
+      expect(vm.$el.innerHTML.trim()).toBe('<span>elseif</span>')
+      vm.bar = false
+    }).then(() => {
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span>')
+      vm.foo = true
+    }).then(() => {
+      expect(vm.$el.innerHTML.trim()).toBe('<span>hello</span>')
+      vm.foo = false
+      vm.bar = {}
+    }).then(() => {
+      expect(vm.$el.innerHTML.trim()).toBe('<span>elseif</span>')
+      vm.bar = 0
+    }).then(() => {
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span>')
+      vm.bar = []
+    }).then(() => {
+      expect(vm.$el.innerHTML.trim()).toBe('<span>elseif</span>')
+      vm.bar = null
+    }).then(() => {
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span>')
+      vm.bar = '0'
+    }).then(() => {
+      expect(vm.$el.innerHTML.trim()).toBe('<span>elseif</span>')
+      vm.bar = undefined
+    }).then(() => {
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span>')
+      vm.bar = 1
+    }).then(() => {
+      expect(vm.$el.innerHTML.trim()).toBe('<span>elseif</span>')
+    }).then(done)
+  })
+
   it('should work well with v-for', done => {
     const vm = new Vue({
       template: `

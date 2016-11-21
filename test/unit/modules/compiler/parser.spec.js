@@ -88,6 +88,12 @@ describe('parser', () => {
       .not.toHaveBeenWarned()
   })
 
+  it('not warn 3 root elements with v-if, v-elseif and v-else', () => {
+    parse('<div v-if="1"></div><div v-elseif="2"></div><div v-else></div>', baseOptions)
+    expect('Component template should contain exactly one root element')
+        .not.toHaveBeenWarned()
+  })
+
   it('not warn 2 root elements with v-if and v-else on separate lines', () => {
     parse(`
       <div v-if="1"></div>
@@ -97,13 +103,59 @@ describe('parser', () => {
       .not.toHaveBeenWarned()
   })
 
+  it('not warn 3 or more root elements with v-if, v-elseif and v-else on separate lines', () => {
+    parse(`
+      <div v-if="1"></div>
+      <div v-elseif="2"></div>
+      <div v-else></div>
+    `, baseOptions)
+    expect('Component template should contain exactly one root element')
+        .not.toHaveBeenWarned()
+
+    parse(`
+      <div v-if="1"></div>
+      <div v-elseif="2"></div>
+      <div v-elseif="3"></div>
+      <div v-elseif="4"></div>
+      <div v-else></div>
+    `, baseOptions)
+    expect('Component template should contain exactly one root element')
+        .not.toHaveBeenWarned()
+  })
+
   it('generate correct ast for 2 root elements with v-if and v-else on separate lines', () => {
     const ast = parse(`
       <div v-if="1"></div>
       <p v-else></p>
     `, baseOptions)
     expect(ast.tag).toBe('div')
-    expect(ast.elseBlock.tag).toBe('p')
+    expect(ast.conditions[1].block.tag).toBe('p')
+  })
+
+  it('generate correct ast for 3 or more root elements with v-if and v-else on separate lines', () => {
+    const ast = parse(`
+      <div v-if="1"></div>
+      <span v-elseif="2"></span>
+      <p v-else></p>
+    `, baseOptions)
+    expect(ast.tag).toBe('div')
+    expect(ast.conditions[0].block.tag).toBe('div')
+    expect(ast.conditions[1].block.tag).toBe('span')
+    expect(ast.conditions[2].block.tag).toBe('p')
+
+    const astMore = parse(`
+      <div v-if="1"></div>
+      <span v-elseif="2"></span>
+      <div v-elseif="3"></div>
+      <span v-elseif="4"></span>
+      <p v-else></p>
+    `, baseOptions)
+    expect(astMore.tag).toBe('div')
+    expect(astMore.conditions[0].block.tag).toBe('div')
+    expect(astMore.conditions[1].block.tag).toBe('span')
+    expect(astMore.conditions[2].block.tag).toBe('div')
+    expect(astMore.conditions[3].block.tag).toBe('span')
+    expect(astMore.conditions[4].block.tag).toBe('p')
   })
 
   it('warn 2 root elements with v-if', () => {
@@ -118,10 +170,32 @@ describe('parser', () => {
       .toHaveBeenWarned()
   })
 
+  it('warn 3 root elements with v-if and v-elseif on first 2', () => {
+    parse('<div v-if="1"></div><div v-elseif></div><div></div>', baseOptions)
+    expect('Component template should contain exactly one root element:\n\n' +
+        '<div v-if="1"></div><div v-elseif></div><div></div>')
+        .toHaveBeenWarned()
+  })
+
+  it('warn 4 root elements with v-if, v-elseif and v-else on first 2', () => {
+    parse('<div v-if="1"></div><div v-elseif></div><div v-else></div><div></div>', baseOptions)
+    expect('Component template should contain exactly one root element:\n\n' +
+        '<div v-if="1"></div><div v-elseif></div><div v-else></div><div></div>')
+        .toHaveBeenWarned()
+  })
+
   it('warn 2 root elements with v-if and v-else with v-for on 2nd', () => {
     parse('<div v-if="1"></div><div v-else v-for="i in [1]"></div>', baseOptions)
-    expect('Cannot use v-for on stateful component root element because it renders multiple elements:\n<div v-if="1"></div><div v-else v-for="i in [1]"></div>')
+    expect('Cannot use v-for on stateful component root element because it renders multiple elements:\n' +
+        '<div v-if="1"></div><div v-else v-for="i in [1]"></div>')
       .toHaveBeenWarned()
+  })
+
+  it('warn 2 root elements with v-if and v-elseif with v-for on 2nd', () => {
+    parse('<div v-if="1"></div><div v-elseif="2" v-for="i in [1]"></div>', baseOptions)
+    expect('Cannot use v-for on stateful component root element because it renders multiple elements:\n' +
+        '<div v-if="1"></div><div v-elseif="2" v-for="i in [1]"></div>')
+        .toHaveBeenWarned()
   })
 
   it('warn <template> as root element', () => {
@@ -193,15 +267,32 @@ describe('parser', () => {
   it('v-if directive syntax', () => {
     const ast = parse('<p v-if="show">hello world</p>', baseOptions)
     expect(ast.if).toBe('show')
+    expect(ast.conditions[0].exp).toBe('show')
+  })
+
+  it('v-elseif directive syntax', () => {
+    const ast = parse('<div><p v-if="show">hello</p><span v-elseif="2">elseif</span><p v-else>world</p></div>', baseOptions)
+    const ifAst = ast.children[0]
+    const conditionsAst = ifAst.conditions
+    expect(conditionsAst.length).toBe(3)
+    expect(conditionsAst[1].block.children[0].text).toBe('elseif')
+    expect(conditionsAst[1].block.parent).toBe(ast)
+    expect(conditionsAst[2].block.children[0].text).toBe('world')
+    expect(conditionsAst[2].block.parent).toBe(ast)
   })
 
   it('v-else directive syntax', () => {
     const ast = parse('<div><p v-if="show">hello</p><p v-else>world</p></div>', baseOptions)
     const ifAst = ast.children[0]
-    const elseAst = ifAst.elseBlock
-    expect(elseAst.else).toBe(true)
-    expect(elseAst.children[0].text).toBe('world')
-    expect(elseAst.parent).toBe(ast)
+    const conditionsAst = ifAst.conditions
+    expect(conditionsAst.length).toBe(2)
+    expect(conditionsAst[1].block.children[0].text).toBe('world')
+    expect(conditionsAst[1].block.parent).toBe(ast)
+  })
+
+  it('v-elseif directive invalid syntax', () => {
+    parse('<div><p v-elseif="1">world</p></div>', baseOptions)
+    expect('v-elseif="1" used on element').toHaveBeenWarned()
   })
 
   it('v-else directive invalid syntax', () => {

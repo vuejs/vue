@@ -110,17 +110,27 @@ function genOnce (el: ASTElement): string {
   }
 }
 
-// v-if with v-once shuold generate code like (a)?_m(0):_m(1)
 function genIf (el: any): string {
-  const exp = el.if
   el.ifProcessed = true // avoid recursion
-  return `(${exp})?${el.once ? genOnce(el) : genElement(el)}:${genElse(el)}`
+  return genIfConditions(el.conditions)
 }
 
-function genElse (el: ASTElement): string {
-  return el.elseBlock
-    ? genElement(el.elseBlock)
-    : '_e()'
+function genIfConditions (conditions: ASTIfConditions): string {
+  if (!conditions.length) {
+    return '_e()'
+  }
+
+  var condition = conditions.shift()
+  if (condition.exp) {
+    return `(${condition.exp})?${genTernaryExp(condition.block)}:${genIfConditions(conditions)}`
+  } else {
+    return `${genTernaryExp(condition.block)}`
+  }
+
+  // v-if with v-once shuold generate code like (a)?_m(0):_m(1)
+  function genTernaryExp (el) {
+    return el.once ? genOnce(el) : genElement(el)
+  }
 }
 
 function genFor (el: any): string {

@@ -154,10 +154,13 @@ export function parse (
         root = element
         checkRootConstraints(root)
       } else if (!stack.length) {
-        // allow 2 root elements with v-if and v-else
-        if (root.if && element.else) {
+        // allow root elements with v-if, v-elseif and v-else
+        if (root.if && (element.elseif || element.else)) {
           checkRootConstraints(element)
-          root.elseBlock = element
+          addIfCondition(root, {
+            exp: element.elseif,
+            block: element
+          })
         } else if (process.env.NODE_ENV !== 'production' && !warned) {
           warned = true
           warn(
@@ -166,8 +169,8 @@ export function parse (
         }
       }
       if (currentParent && !element.forbidden) {
-        if (element.else) { // else block
-          processElse(element, currentParent)
+        if (element.elseif || element.else) {
+          processIfConditions(element, currentParent)
         } else if (element.slotScope) { // scoped slot
           currentParent.plain = false
           const name = element.slotTarget || 'default'
@@ -316,21 +319,41 @@ function processIf (el) {
   const exp = getAndRemoveAttr(el, 'v-if')
   if (exp) {
     el.if = exp
-  }
-  if (getAndRemoveAttr(el, 'v-else') != null) {
-    el.else = true
+    addIfCondition(el, {
+      exp: exp,
+      block: el
+    })
+  } else {
+    if (getAndRemoveAttr(el, 'v-else') != null) {
+      el.else = true
+    }
+    const elseif = getAndRemoveAttr(el, 'v-elseif')
+    if (elseif) {
+      el.elseif = elseif
+    }
   }
 }
 
-function processElse (el, parent) {
+function processIfConditions (el, parent) {
   const prev = findPrevElement(parent.children)
   if (prev && prev.if) {
-    prev.elseBlock = el
+    addIfCondition(prev, {
+      exp: el.elseif,
+      block: el
+    })
   } else if (process.env.NODE_ENV !== 'production') {
     warn(
-      `v-else used on element <${el.tag}> without corresponding v-if.`
+      `v-${el.elseif ? ('elseif="' + el.elseif + '"') : 'else'} ` +
+      `used on element <${el.tag}> without corresponding v-if.`
     )
   }
+}
+
+function addIfCondition (el, condition) {
+  if (!el.conditions) {
+    el.conditions = []
+  }
+  el.conditions.push(condition)
 }
 
 function processOnce (el) {
