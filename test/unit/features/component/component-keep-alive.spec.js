@@ -3,7 +3,7 @@ import injectStyles from '../transition/inject-styles'
 import { isIE9 } from 'core/util/env'
 import { nextFrame } from 'web/runtime/transition-util'
 
-fdescribe('Component keep-alive', () => {
+describe('Component keep-alive', () => {
   const { duration, buffer } = injectStyles()
   let components, one, two, el
   beforeEach(() => {
