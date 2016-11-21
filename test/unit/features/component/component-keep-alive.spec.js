@@ -82,6 +82,123 @@ describe('Component keep-alive', () => {
     }).then(done)
   })
 
+  function sharedAssertions (vm, done) {
+    expect(vm.$el.textContent).toBe('one')
+    assertHookCalls(one, [1, 1, 1, 0, 0])
+    assertHookCalls(two, [0, 0, 0, 0, 0])
+    vm.view = 'two'
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('two')
+      assertHookCalls(one, [1, 1, 1, 1, 0])
+      assertHookCalls(two, [1, 1, 0, 0, 0])
+      vm.view = 'one'
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('one')
+      assertHookCalls(one, [1, 1, 2, 1, 0])
+      assertHookCalls(two, [1, 1, 0, 0, 1])
+      vm.view = 'two'
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('two')
+      assertHookCalls(one, [1, 1, 2, 2, 0])
+      assertHookCalls(two, [2, 2, 0, 0, 1])
+      vm.ok = false // teardown
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('')
+      assertHookCalls(one, [1, 1, 2, 3, 1])
+      assertHookCalls(two, [2, 2, 0, 0, 2])
+    }).then(done)
+  }
+
+  it('include (string)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive include="one">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
+  it('include (regex)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive :include="/^one$/">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
+  it('exclude (string)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive exclude="two">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
+  it('exclude (regex)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive :exclude="/^two$/">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
+  it('include + exclude', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive include="one,two" exclude="two">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
   // #3882
   it('deeply nested keep-alive should be destroyed properly', done => {
     one.template = `<div><keep-alive><two></two></keep-alive></div>`

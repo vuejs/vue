@@ -1,4 +1,4 @@
-import Vue from '../../../dist/vue.common.js'
+import Vue from '../../../dist/vue.runtime.common.js'
 
 const app = {
   name: 'app',

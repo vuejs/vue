@@ -1,6 +1,5 @@
 /* @flow */
 
-import config from '../config'
 import Dep from './dep'
 import { arrayMethods } from './array'
 import {
@@ -9,7 +8,8 @@ import {
   isPlainObject,
   hasProto,
   hasOwn,
-  warn
+  warn,
+  isServerRendering
 } from '../util/index'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
@@ -113,7 +113,7 @@ export function observe (value: any): Observer | void {
     ob = value.__ob__
   } else if (
     observerState.shouldConvert &&
-    !config._isServer &&
+    !isServerRendering() &&
     (Array.isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
     !value._isVue

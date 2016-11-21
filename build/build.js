@@ -69,35 +69,32 @@ function buildEntry (config) {
           pure_funcs: ['makeMap']
         }
       }).code
-      return write(config.dest, minified).then(zip(config.dest))
+      return write(config.dest, minified, true)
     } else {
       return write(config.dest, code)
     }
   })
 }
 
-function write (dest, code) {
-  return new Promise(function (resolve, reject) {
-    fs.writeFile(dest, code, function (err) {
-      if (err) return reject(err)
-      console.log(blue(path.relative(process.cwd(), dest)) + ' ' + getSize(code))
+function write (dest, code, zip) {
+  return new Promise((resolve, reject) => {
+    function report (extra) {
+      console.log(blue(path.relative(process.cwd(), dest)) + ' ' + getSize(code) + (extra || ''))
       resolve()
+    }
+
+    fs.writeFile(dest, code, err => {
+      if (err) return reject(err)
+      if (zip) {
+        zlib.gzip(code, (err, zipped) => {
+          if (err) return reject(err)
+          report(' (gzipped: ' + getSize(zipped) + ')')
+        })
+      } else {
+        report()
+      }
     })
   })
-}
-
-function zip (file) {
-  return function () {
-    return new Promise(function (resolve, reject) {
-      fs.readFile(file, function (err, buf) {
-        if (err) return reject(err)
-        zlib.gzip(buf, function (err, buf) {
-          if (err) return reject(err)
-          write(file + '.gz', buf).then(resolve)
-        })
-      })
-    })
-  }
 }
 
 function getSize (code) {

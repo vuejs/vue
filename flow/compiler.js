@@ -1,6 +1,5 @@
 declare type CompilerOptions = {
   warn?: Function; // allow customizing warning in different environments; e.g. node
-  isIE?: boolean; // for detecting IE SVG innerHTML bug
   expectHTML?: boolean; // only false for non-web builds
   modules?: Array<ModuleOptions>; // platform specific modules; e.g. style; class
   staticKeys?: string; // a list of AST properties to be considered static; for optimization
@@ -88,6 +87,8 @@ declare type ASTElement = {
   transitionMode?: string | null;
   slotName?: ?string;
   slotTarget?: ?string;
+  slotScope?: ?string;
+  scopedSlots?: { [name: string]: ASTElement };
 
   ref?: string;
   refInFor?: boolean;
@@ -146,6 +147,16 @@ declare type SFCDescriptor = {
   template: ?SFCBlock;
   script: ?SFCBlock;
   styles: Array<SFCBlock>;
+  customBlocks: Array<SFCCustomBlock>;
+}
+
+declare type SFCCustomBlock = {
+  type: string;
+  content: string;
+  start?: number;
+  end?: number;
+  src?: string;
+  attrs: {[attribute:string]: string};
 }
 
 declare type SFCBlock = {

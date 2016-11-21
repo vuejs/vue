@@ -26,14 +26,14 @@ extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function
-Vue.prototype.__patch__ = config._isServer ? noop : patch
+Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // wrap mount
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
-  el = el && !config._isServer ? query(el) : undefined
+  el = el && inBrowser ? query(el) : undefined
   return this._mount(el, hydrating)
 }
 

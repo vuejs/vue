@@ -3,6 +3,7 @@
 import { genHandlers } from './events'
 import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
+import { camelize } from 'shared/util'
 
 // configurable state
 let warn
@@ -167,10 +168,6 @@ function genData (el: ASTElement): string {
   if (el.component) {
     data += `tag:"${el.tag}",`
   }
-  // slot target
-  if (el.slotTarget) {
-    data += `slot:${el.slotTarget},`
-  }
   // module data generation functions
   for (let i = 0; i < dataGenFns.length; i++) {
     data += dataGenFns[i](el)
@@ -190,21 +187,19 @@ function genData (el: ASTElement): string {
   if (el.nativeEvents) {
     data += `${genHandlers(el.nativeEvents, true)},`
   }
+  // slot target
+  if (el.slotTarget) {
+    data += `slot:${el.slotTarget},`
+  }
+  // scoped slots
+  if (el.scopedSlots) {
+    data += `${genScopedSlots(el.scopedSlots)},`
+  }
   // inline-template
   if (el.inlineTemplate) {
-    const ast = el.children[0]
-    if (process.env.NODE_ENV !== 'production' && (
-      el.children.length > 1 || ast.type !== 1
-    )) {
-      warn('Inline-template components must have exactly one child element.')
-    }
-    if (ast.type === 1) {
-      const inlineRenderFns = generate(ast, currentOptions)
-      data += `inlineTemplate:{render:function(){${
-        inlineRenderFns.render
-      }},staticRenderFns:[${
-        inlineRenderFns.staticRenderFns.map(code => `function(){${code}}`).join(',')
-      }]}`
+    const inlineTemplate = genInlineTemplate(el)
+    if (inlineTemplate) {
+      data += `${inlineTemplate},`
     }
   }
   data = data.replace(/,$/, '') + '}'
@@ -246,6 +241,37 @@ function genDirectives (el: ASTElement): string | void {
   }
 }
 
+function genInlineTemplate (el: ASTElement): ?string {
+  const ast = el.children[0]
+  if (process.env.NODE_ENV !== 'production' && (
+    el.children.length > 1 || ast.type !== 1
+  )) {
+    warn('Inline-template components must have exactly one child element.')
+  }
+  if (ast.type === 1) {
+    const inlineRenderFns = generate(ast, currentOptions)
+    return `inlineTemplate:{render:function(){${
+      inlineRenderFns.render
+    }},staticRenderFns:[${
+      inlineRenderFns.staticRenderFns.map(code => `function(){${code}}`).join(',')
+    }]}`
+  }
+}
+
+function genScopedSlots (slots) {
+  return `scopedSlots:{${
+    Object.keys(slots).map(key => genScopedSlot(key, slots[key])).join(',')
+  }}`
+}
+
+function genScopedSlot (key: string, el: ASTElement) {
+  return `${key}:function(${String(el.attrsMap.scope)}){` +
+    `return ${el.tag === 'template'
+      ? genChildren(el) || 'void 0'
+      : genElement(el)
+  }}`
+}
+
 function genChildren (el: ASTElement): string | void {
   if (el.children.length) {
     return '[' + el.children.map(genNode).join(',') + ']'
@@ -263,7 +289,7 @@ function genNode (node: ASTNode) {
 function genText (text: ASTText | ASTExpression): string {
   return text.type === 2
     ? text.expression // no need for () because already wrapped in _s()
-    : JSON.stringify(text.text)
+    : transformSpecialNewlines(JSON.stringify(text.text))
 }
 
 function genSlot (el: ASTElement): string {
@@ -271,6 +297,10 @@ function genSlot (el: ASTElement): string {
   const children = genChildren(el)
   return `_t(${slotName}${
     children ? `,${children}` : ''
+  }${
+    el.attrs ? `${children ? '' : ',null'},{${
+      el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')
+    }}` : ''
   })`
 }
 
@@ -286,7 +316,14 @@ function genProps (props: Array<{ name: string, value: string }>): string {
   let res = ''
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
-    res += `"${prop.name}":${prop.value},`
+    res += `"${prop.name}":${transformSpecialNewlines(prop.value)},`
   }
   return res.slice(0, -1)
+}
+
+// #3895, #4268
+function transformSpecialNewlines (text: string): string {
+  return text
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029')
 }

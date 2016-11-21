@@ -262,6 +262,7 @@ export function createRenderFunction (
     write: (text: string, next: Function) => void,
     done: Function
   ) {
+    checkBuild(component)
     warned = Object.create(null)
     const context = {
       activeInstance: component,
@@ -275,4 +276,24 @@ export function createRenderFunction (
     normalizeRender(component)
     renderNode(component._render(), true, context)
   }
+}
+
+function checkBuild (component) {
+  let Vue = component.constructor
+  while (Vue.super) {
+    Vue = Vue.super
+  }
+  if (Vue.compile) {
+    console.error(
+      red(`\n[vue-server-renderer] You are using the standalone build (vue/dist/vue.js) for ` +
+      `server-side rendering. It is recommended to use the CommonJS build ` +
+      `(vue/dist/vue.common.js) instead so that the code can run in ` +
+      `production mode by setting NODE_ENV=production. The server renderer ` +
+      `supports the template option regardless of what build you are using.\n`)
+    )
+  }
+}
+
+function red (str) {
+  return '\u001B[1m\u001B[31m' + str + '\u001B[39m\u001B[22m'
 }

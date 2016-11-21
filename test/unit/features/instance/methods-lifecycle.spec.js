@@ -119,7 +119,7 @@ describe('Instance methods lifecycle', () => {
           }
         }).$mount()
         vm.msg = 'bar'
-        vm.$nextTick().then(function (ctx) {
+        vm.$nextTick().then(ctx => {
           expect(ctx).toBe(vm)
           expect(vm.$el.textContent).toBe('bar')
           done()

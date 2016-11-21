@@ -37,6 +37,13 @@ describe('codegen', () => {
     )
   })
 
+  it('generate filters', () => {
+    assertCodegen(
+      '<div :id="a | b | c">{{ d | e | f }}</div>',
+      `with(this){return _h('div',{attrs:{"id":_f("c")(_f("b")(a))}},[_s(_f("f")(_f("e")(d)))])}`
+    )
+  })
+
   it('generate v-for directive', () => {
     assertCodegen(
       '<li v-for="item in items" :key="item.uid"></li>',
@@ -281,6 +288,39 @@ describe('codegen', () => {
     assertCodegen(
       '<input @input="curent++">',
       `with(this){return _h('input',{on:{"input":function($event){curent++}}})}`
+    )
+  })
+
+  it('generate events with inline function expression', () => {
+    // normal function
+    assertCodegen(
+      '<input @input="function () { current++ }">',
+      `with(this){return _h('input',{on:{"input":function () { current++ }}})}`
+    )
+    // arrow with no args
+    assertCodegen(
+      '<input @input="()=>current++">',
+      `with(this){return _h('input',{on:{"input":()=>current++}})}`
+    )
+    // arrow with parens, single arg
+    assertCodegen(
+      '<input @input="(e) => current++">',
+      `with(this){return _h('input',{on:{"input":(e) => current++}})}`
+    )
+    // arrow with parens, multi args
+    assertCodegen(
+      '<input @input="(a, b, c) => current++">',
+      `with(this){return _h('input',{on:{"input":(a, b, c) => current++}})}`
+    )
+    // arrow with destructuring
+    assertCodegen(
+      '<input @input="({ a, b }) => current++">',
+      `with(this){return _h('input',{on:{"input":({ a, b }) => current++}})}`
+    )
+    // arrow single arg no parens
+    assertCodegen(
+      '<input @input="e=>current++">',
+      `with(this){return _h('input',{on:{"input":e=>current++}})}`
     )
   })
 

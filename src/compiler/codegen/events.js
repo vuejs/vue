@@ -1,5 +1,6 @@
 /* @flow */
 
+const fnExpRE = /^\s*([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
 const simplePathRE = /^\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?']|\[".*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*\s*$/
 
 // keyCode aliases
@@ -41,7 +42,7 @@ function genHandler (
   } else if (Array.isArray(handler)) {
     return `[${handler.map(genHandler).join(',')}]`
   } else if (!handler.modifiers) {
-    return simplePathRE.test(handler.value)
+    return fnExpRE.test(handler.value) || simplePathRE.test(handler.value)
       ? handler.value
       : `function($event){${handler.value}}`
   } else {

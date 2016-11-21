@@ -28,7 +28,7 @@ describe('Directive v-on', () => {
     expect(event.type).toBe('click')
   })
 
-  it('should bind event to a inline method', () => {
+  it('should bind event to a inline statement', () => {
     vm = new Vue({
       el,
       template: '<div v-on:click="foo(1,2,3,$event)"></div>',
@@ -44,6 +44,19 @@ describe('Directive v-on', () => {
     expect(firstArgs[1]).toBe(2)
     expect(firstArgs[2]).toBe(3)
     expect(firstArgs[3].type).toBe('click')
+  })
+
+  it('should support inline function expression', () => {
+    const spy = jasmine.createSpy()
+    vm = new Vue({
+      el,
+      template: `<div class="test" @click="function (e) { log(e.target.className) }"></div>`,
+      methods: {
+        log: spy
+      }
+    }).$mount()
+    triggerEvent(vm.$el, 'click')
+    expect(spy).toHaveBeenCalledWith('test')
   })
 
   it('should support shorthand', () => {

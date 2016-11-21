@@ -18,6 +18,23 @@ export const isEdge = UA && UA.indexOf('edge/') > 0
 export const isAndroid = UA && UA.indexOf('android') > 0
 export const isIOS = UA && /iphone|ipad|ipod|ios/.test(UA)
 
+// this needs to be lazy-evaled because vue may be required before
+// vue-server-renderer can set VUE_ENV
+let _isServer
+export const isServerRendering = () => {
+  if (_isServer === undefined) {
+    /* istanbul ignore if */
+    if (!inBrowser && typeof global !== 'undefined') {
+      // detect presence of vue-server-renderer and avoid
+      // Webpack shimming the process
+      _isServer = global['process'].env.VUE_ENV === 'server'
+    } else {
+      _isServer = false
+    }
+  }
+  return _isServer
+}
+
 // detect devtools
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
@@ -86,18 +103,20 @@ export const nextTick = (function () {
     }
   }
 
-  return function queueNextTick (cb: Function, ctx?: Object) {
-    if (cb) {
-      var func = ctx
-        ? function () { cb.call(ctx) }
-        : cb
-      callbacks.push(func)
-      if (!pending) {
-        pending = true
-        timerFunc()
-      }
-    } else if (typeof Promise !== 'undefined') {
-      return Promise.resolve(ctx)
+  return function queueNextTick (cb?: Function, ctx?: Object) {
+    let _resolve
+    callbacks.push(() => {
+      if (cb) cb.call(ctx)
+      if (_resolve) _resolve(ctx)
+    })
+    if (!pending) {
+      pending = true
+      timerFunc()
+    }
+    if (!cb && typeof Promise !== 'undefined') {
+      return new Promise(resolve => {
+        _resolve = resolve
+      })
     }
   }
 })()

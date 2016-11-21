@@ -19,7 +19,6 @@ export type Config = {
   _assetTypes: Array<string>;
   _lifecycleHooks: Array<string>;
   _maxUpdateCount: number;
-  _isServer: boolean;
 }
 
 const config: Config = {
@@ -104,12 +103,7 @@ const config: Config = {
   /**
    * Max circular updates allowed in a scheduler flush cycle.
    */
-  _maxUpdateCount: 100,
-
-  /**
-   * Server rendering?
-   */
-  _isServer: process.env.VUE_ENV === 'server'
+  _maxUpdateCount: 100
 }
 
 export default config

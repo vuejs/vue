@@ -4,7 +4,7 @@ import config from '../config'
 import VNode, { emptyVNode, cloneVNode, cloneVNodes } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers/index'
 import {
-  warn, formatComponentName, bind, isObject, toObject,
+  warn, formatComponentName, bind, isObject, toObject, isServerRendering,
   nextTick, resolveAsset, _toString, toNumber, looseEqual, looseIndexOf
 } from '../util/index'
 
@@ -16,6 +16,7 @@ export function initRender (vm: Component) {
   vm._staticTrees = null
   vm._renderContext = vm.$options._parentVnode && vm.$options._parentVnode.context
   vm.$slots = resolveSlots(vm.$options._renderChildren, vm._renderContext)
+  vm.$scopedSlots = null
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
   vm.$createElement = bind(createElement, vm)
@@ -44,6 +45,10 @@ export function renderMixin (Vue: Class<Component>) {
       }
     }
 
+    if (_parentVnode) {
+      vm.$scopedSlots = _parentVnode.data.scopedSlots
+    }
+
     if (staticRenderFns && !vm._staticTrees) {
       vm._staticTrees = []
     }
@@ -62,7 +67,7 @@ export function renderMixin (Vue: Class<Component>) {
       if (config.errorHandler) {
         config.errorHandler.call(null, e, vm)
       } else {
-        if (config._isServer) {
+        if (isServerRendering()) {
           throw e
         } else {
           console.error(e)
@@ -183,19 +188,25 @@ export function renderMixin (Vue: Class<Component>) {
   // renderSlot
   Vue.prototype._t = function (
     name: string,
-    fallback: ?Array<VNode>
+    fallback: ?Array<VNode>,
+    props: ?Object
   ): ?Array<VNode> {
-    const slotNodes = this.$slots[name]
-    // warn duplicate slot usage
-    if (slotNodes && process.env.NODE_ENV !== 'production') {
-      slotNodes._rendered && warn(
-        `Duplicate presence of slot "${name}" found in the same render tree ` +
-        `- this will likely cause render errors.`,
-        this
-      )
-      slotNodes._rendered = true
+    const scopedSlotFn = this.$scopedSlots && this.$scopedSlots[name]
+    if (scopedSlotFn) { // scoped slot
+      return scopedSlotFn(props || {}) || fallback
+    } else {
+      const slotNodes = this.$slots[name]
+      // warn duplicate slot usage
+      if (slotNodes && process.env.NODE_ENV !== 'production') {
+        slotNodes._rendered && warn(
+          `Duplicate presence of slot "${name}" found in the same render tree ` +
+          `- this will likely cause render errors.`,
+          this
+        )
+        slotNodes._rendered = true
+      }
+      return slotNodes || fallback
     }
-    return slotNodes || fallback
   }
 
   // apply v-bind object

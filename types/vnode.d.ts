@@ -24,7 +24,7 @@ export interface VNode {
 }
 
 export interface VNodeComponentOptions {
-  Ctor: Vue;
+  Ctor: typeof Vue;
   propsData?: Object;
   listeners?: Object;
   children?: VNodeChildren;

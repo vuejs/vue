@@ -14,30 +14,38 @@ const banner =
 
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
-  'web-runtime-dev': {
+  'web-runtime-cjs': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
-    dest: path.resolve(__dirname, '../dist/vue.common.js'),
+    dest: path.resolve(__dirname, '../dist/vue.runtime.common.js'),
     format: 'cjs',
     banner
   },
-  // runtime-only build for CDN
-  'web-runtime-cdn-dev': {
+  // Runtime+compiler CommonJS build (CommonJS)
+  'web-full-cjs': {
+    entry: path.resolve(__dirname, '../src/entries/web-runtime-with-compiler.js'),
+    dest: path.resolve(__dirname, '../dist/vue.common.js'),
+    format: 'cjs',
+    alias: { he: './entity-decoder' },
+    banner
+  },
+  // runtime-only build (Browser)
+  'web-runtime-dev': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
     dest: path.resolve(__dirname, '../dist/vue.runtime.js'),
     format: 'umd',
     env: 'development',
     banner
   },
-  // runtime-only production build for CDN
-  'web-runtime-cdn-prod': {
+  // runtime-only production build (Browser)
+  'web-runtime-prod': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
     dest: path.resolve(__dirname, '../dist/vue.runtime.min.js'),
     format: 'umd',
     env: 'production',
     banner
   },
-  // Runtime+compiler standalone development build.
-  'web-standalone-dev': {
+  // Runtime+compiler development build (Browser)
+  'web-full-dev': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime-with-compiler.js'),
     dest: path.resolve(__dirname, '../dist/vue.js'),
     format: 'umd',
@@ -45,8 +53,8 @@ const builds = {
     alias: { he: './entity-decoder' },
     banner
   },
-  // Runtime+compiler standalone production build.
-  'web-standalone-prod': {
+  // Runtime+compiler production build  (Browser)
+  'web-full-prod': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime-with-compiler.js'),
     dest: path.resolve(__dirname, '../dist/vue.min.js'),
     format: 'umd',
@@ -100,8 +108,7 @@ function genConfig (opts) {
 
   if (opts.env) {
     config.plugins.push(replace({
-      'process.env.NODE_ENV': JSON.stringify(opts.env),
-      'process.env.VUE_ENV': JSON.stringify('client')
+      'process.env.NODE_ENV': JSON.stringify(opts.env)
     }))
   }
 

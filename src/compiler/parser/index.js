@@ -3,7 +3,9 @@
 import { decode } from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
+import { parseFilters } from './filter-parser'
 import { cached, no, camelize } from 'shared/util'
+import { isIE, isServerRendering } from 'core/util/env'
 import {
   pluckModuleFunction,
   getAndRemoveAttr,
@@ -22,7 +24,6 @@ const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
 const argRE = /:(.*)$/
 const modifierRE = /\.[^.]+/g
-const specialNewlineRE = /\u2028|\u2029/g
 
 const decodeHTMLCached = cached(decode)
 
@@ -69,7 +70,7 @@ export function parse (
 
       // handle IE svg bug
       /* istanbul ignore if */
-      if (options.isIE && ns === 'svg') {
+      if (isIE && ns === 'svg') {
         attrs = guardIESVGBug(attrs)
       }
 
@@ -77,7 +78,7 @@ export function parse (
         type: 1,
         tag,
         attrsList: attrs,
-        attrsMap: makeAttrsMap(attrs, options.isIE),
+        attrsMap: makeAttrsMap(attrs),
         parent: currentParent,
         children: []
       }
@@ -85,7 +86,7 @@ export function parse (
         element.ns = ns
       }
 
-      if (process.env.VUE_ENV !== 'server' && isForbiddenTag(element)) {
+      if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
         process.env.NODE_ENV !== 'production' && warn(
           'Templates should only be responsible for mapping the state to the ' +
@@ -170,6 +171,10 @@ export function parse (
       if (currentParent && !element.forbidden) {
         if (element.elseif || element.else) {
           processIfConditions(element, currentParent)
+        } else if (element.slotScope) { // scoped slot
+          currentParent.plain = false
+          const name = element.slotTarget || 'default'
+          ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
         } else {
           currentParent.children.push(element)
           element.parent = currentParent
@@ -216,7 +221,7 @@ export function parse (
       }
       // IE textarea placeholder bug
       /* istanbul ignore if */
-      if (options.isIE &&
+      if (isIE &&
           currentParent.tag === 'textarea' &&
           currentParent.attrsMap.placeholder === text) {
         return
@@ -234,8 +239,6 @@ export function parse (
             text
           })
         } else {
-          // #3895 special character
-          text = text.replace(specialNewlineRE, '')
           currentParent.children.push({
             type: 3,
             text
@@ -363,10 +366,20 @@ function processOnce (el) {
 function processSlot (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
+    if (process.env.NODE_ENV !== 'production' && el.key) {
+      warn(
+        `\`key\` does not work on <slot> because slots are abstract outlets ` +
+        `and can possibly expand into multiple elements. ` +
+        `Use the key on a wrapping element instead.`
+      )
+    }
   } else {
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
-      el.slotTarget = slotTarget
+      el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
+    }
+    if (el.tag === 'template') {
+      el.slotScope = getAndRemoveAttr(el, 'scope')
     }
   }
 }
@@ -397,10 +410,16 @@ function processAttrs (el) {
       }
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
-        if (modifiers && modifiers.prop) {
-          isProp = true
-          name = camelize(name)
-          if (name === 'innerHtml') name = 'innerHTML'
+        value = parseFilters(value)
+        if (modifiers) {
+          if (modifiers.prop) {
+            isProp = true
+            name = camelize(name)
+            if (name === 'innerHtml') name = 'innerHTML'
+          }
+          if (modifiers.camel) {
+            name = camelize(name)
+          }
         }
         if (isProp || platformMustUseProp(el.tag, name)) {
           addProp(el, name, value)
@@ -460,7 +479,7 @@ function parseModifiers (name: string): Object | void {
   }
 }
 
-function makeAttrsMap (attrs: Array<Object>, isIE: ?boolean): Object {
+function makeAttrsMap (attrs: Array<Object>): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
     if (process.env.NODE_ENV !== 'production' && map[attrs[i].name] && !isIE) {

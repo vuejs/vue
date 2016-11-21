@@ -25,6 +25,7 @@ declare interface Component {
   $children: Array<Component>;
   $refs: { [key: string]: Component | Element | Array<Component | Element> | void };
   $slots: { [key: string]: Array<VNode> };
+  $scopedSlots: ?{ [key: string]: () => VNodeChildren };
   $vnode: VNode;
   $isServer: boolean;
 
@@ -100,7 +101,7 @@ declare interface Component {
   // renderList
   _l: (val: any, render: Function) => ?Array<VNode>;
   // renderSlot
-  _t: (name: string, fallback: ?Array<VNode>) => ?Array<VNode>;
+  _t: (name: string, fallback: ?Array<VNode>, props: ?Object) => ?Array<VNode>;
   // apply v-bind object
   _b: (data: any, value: any, asProp?: boolean) => VNodeData;
   // retrive custom keyCode
