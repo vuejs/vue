@@ -95,7 +95,7 @@ declare type ASTElement = {
   if?: string;
   ifProcessed?: boolean;
   elseif?: string;
-  condition?: true;
+  else?: true;
   conditions?: Array<{ exp: ?string; block: ASTElement }>;
 
   for?: string;

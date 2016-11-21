@@ -153,8 +153,8 @@ export function parse (
         root = element
         checkRootConstraints(root)
       } else if (!stack.length) {
-        // allow 2 root elements with v-if and v-else
-        if (root.if && element.condition) {
+        // allow root elements with v-if, v-elseif and v-else
+        if (root.if && (element.elseif || element.else)) {
           checkRootConstraints(element)
           addIfCondition(root, {
             exp: element.elseif,
@@ -168,8 +168,8 @@ export function parse (
         }
       }
       if (currentParent && !element.forbidden) {
-        if (element.condition) {
-          processIfAternate(element, currentParent)
+        if (element.elseif || element.else) {
+          processIfConditions(element, currentParent)
         } else {
           currentParent.children.push(element)
           element.parent = currentParent
@@ -321,18 +321,19 @@ function processIf (el) {
       block: el
     })
   } else {
-    const hasElse = getAndRemoveAttr(el, 'v-else') != null
-    const elseif = getAndRemoveAttr(el, 'v-elseif')
-    if (hasElse || elseif) {
-      el.condition = true
+    if (getAndRemoveAttr(el, 'v-else') != null) {
+      el.else = true
     }
-    elseif && (el.elseif = elseif)
+    const elseif = getAndRemoveAttr(el, 'v-elseif')
+    if (elseif) {
+      el.elseif = elseif
+    }
   }
 }
 
-function processIfAternate (el, parent) {
-  const prev = findPrevIfElement(parent.children)
-  if (prev) {
+function processIfConditions (el, parent) {
+  const prev = findPrevElement(parent.children)
+  if (prev && prev.if) {
     addIfCondition(prev, {
       exp: el.elseif,
       block: el
@@ -470,10 +471,10 @@ function makeAttrsMap (attrs: Array<Object>, isIE: ?boolean): Object {
   return map
 }
 
-function findPrevIfElement (children: Array<any>): ASTElement | void {
+function findPrevElement (children: Array<any>): ASTElement | void {
   let i = children.length
   while (i--) {
-    if (children[i].tag && children[i].if) return children[i]
+    if (children[i].tag) return children[i]
   }
 }
 
