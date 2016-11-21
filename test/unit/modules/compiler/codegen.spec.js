@@ -58,6 +58,15 @@ describe('codegen', () => {
       '<li v-for="(item, key, index) in items"></li>',
       `with(this){return _l((items),function(item,key,index){return _h('li')})}`
     )
+    // destructuring
+    assertCodegen(
+      '<li v-for="{ a, b } in items"></li>',
+      `with(this){return _l((items),function({ a, b }){return _h('li')})}`
+    )
+    assertCodegen(
+      '<li v-for="({ a, b }, key, index) in items"></li>',
+      `with(this){return _l((items),function({ a, b },key,index){return _h('li')})}`
+    )
   })
 
   it('generate v-if directive', () => {
