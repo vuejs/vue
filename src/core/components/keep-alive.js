@@ -1,20 +1,44 @@
+/* @flow */
+
 import { callHook } from 'core/instance/lifecycle'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
+
+const patternTypes = [String, RegExp]
+
+function matches (pattern: string | RegExp, name: string): boolean {
+  if (typeof pattern === 'string') {
+    return pattern.split(',').indexOf(name) > -1
+  } else {
+    return pattern.test(name)
+  }
+}
 
 export default {
   name: 'keep-alive',
   abstract: true,
+  props: {
+    include: patternTypes,
+    exclude: patternTypes
+  },
   created () {
     this.cache = Object.create(null)
   },
   render () {
-    const vnode = getFirstComponentChild(this.$slots.default)
+    const vnode: VNode = getFirstComponentChild(this.$slots.default)
     if (vnode && vnode.componentOptions) {
-      const opts = vnode.componentOptions
+      const opts: VNodeComponentOptions = vnode.componentOptions
+      // check pattern
+      const name = opts.tag || opts.Ctor.options.name
+      if (name && (
+        (this.include && !matches(this.include, name)) ||
+        (this.exclude && matches(this.exclude, name))
+      )) {
+        return vnode
+      }
       const key = vnode.key == null
         // same constructor may get registered as different local components
         // so cid alone is not enough (#3269)
-        ? opts.Ctor.cid + '::' + opts.tag
+        ? opts.Ctor.cid + (opts.tag ? `::${opts.tag}` : '')
         : vnode.key
       if (this.cache[key]) {
         vnode.child = this.cache[key].child
