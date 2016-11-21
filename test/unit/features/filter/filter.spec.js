@@ -54,6 +54,21 @@ describe('Filters', () => {
     expect(vm.$refs.bar).toBe(vm.$el)
   })
 
+  it('handle regex with pipe', () => {
+    const vm = new Vue({
+      template: `<test ref="test" :pattern="/a|b\\// | identity"></test>`,
+      filters: { identity: v => v },
+      components: {
+        test: {
+          props: ['pattern'],
+          template: '<div></div>'
+        }
+      }
+    }).$mount()
+    expect(vm.$refs.test.pattern instanceof RegExp).toBe(true)
+    expect(vm.$refs.test.pattern.toString()).toBe('/a|b\\//')
+  })
+
   it('arguments', () => {
     const vm = new Vue({
       template: `<div>{{ msg | add(a, 3) }}</div>`,
