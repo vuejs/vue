@@ -28,7 +28,7 @@ export default {
     if (vnode && vnode.componentOptions) {
       const opts: VNodeComponentOptions = vnode.componentOptions
       // check pattern
-      const name = opts.tag || opts.Ctor.options.name
+      const name = opts.Ctor.options.name || opts.tag
       if (name && (
         (this.include && !matches(this.include, name)) ||
         (this.exclude && matches(this.exclude, name))
