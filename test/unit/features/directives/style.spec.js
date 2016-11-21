@@ -305,12 +305,12 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
-  it('should not merge for v-if, v-elseif and v-else elements', (done) => {
+  it('should not merge for v-if, v-else-if and v-else elements', (done) => {
     const vm = new Vue({
       template:
         '<div>' +
           '<section style="color: blue" :style="style" v-if="foo"></section>' +
-          '<section style="margin-top: 12px" v-elseif="bar"></section>' +
+          '<section style="margin-top: 12px" v-else-if="bar"></section>' +
           '<section style="margin-bottom: 24px" v-else></section>' +
           '<div></div>' +
         '</div>',

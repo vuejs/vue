@@ -154,7 +154,7 @@ export function parse (
         root = element
         checkRootConstraints(root)
       } else if (!stack.length) {
-        // allow root elements with v-if, v-elseif and v-else
+        // allow root elements with v-if, v-else-if and v-else
         if (root.if && (element.elseif || element.else)) {
           checkRootConstraints(element)
           addIfCondition(root, {
@@ -164,7 +164,10 @@ export function parse (
         } else if (process.env.NODE_ENV !== 'production' && !warned) {
           warned = true
           warn(
-            `Component template should contain exactly one root element:\n\n${template}`
+            `Component template should contain exactly one root element:` +
+            `\n\n${template}\n\n` +
+            `If you are using v-if on multiple elements, ` +
+            `use v-else-if to chain them instead.`
           )
         }
       }
@@ -327,7 +330,7 @@ function processIf (el) {
     if (getAndRemoveAttr(el, 'v-else') != null) {
       el.else = true
     }
-    const elseif = getAndRemoveAttr(el, 'v-elseif')
+    const elseif = getAndRemoveAttr(el, 'v-else-if')
     if (elseif) {
       el.elseif = elseif
     }
@@ -343,7 +346,7 @@ function processIfConditions (el, parent) {
     })
   } else if (process.env.NODE_ENV !== 'production') {
     warn(
-      `v-${el.elseif ? ('elseif="' + el.elseif + '"') : 'else'} ` +
+      `v-${el.elseif ? ('else-if="' + el.elseif + '"') : 'else'} ` +
       `used on element <${el.tag}> without corresponding v-if.`
     )
   }

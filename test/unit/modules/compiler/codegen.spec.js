@@ -83,23 +83,23 @@ describe('codegen', () => {
     )
   })
 
-  it('generate v-elseif directive', () => {
+  it('generate v-else-if directive', () => {
     assertCodegen(
-      '<div><p v-if="show">hello</p><p v-elseif="hide">world</p></div>',
+      '<div><p v-if="show">hello</p><p v-else-if="hide">world</p></div>',
       `with(this){return _h('div',[(show)?_h('p',["hello"]):(hide)?_h('p',["world"]):_e()])}`
     )
   })
 
-  it('generate v-elseif with v-else directive', () => {
+  it('generate v-else-if with v-else directive', () => {
     assertCodegen(
-      '<div><p v-if="show">hello</p><p v-elseif="hide">world</p><p v-else>bye</p></div>',
+      '<div><p v-if="show">hello</p><p v-else-if="hide">world</p><p v-else>bye</p></div>',
       `with(this){return _h('div',[(show)?_h('p',["hello"]):(hide)?_h('p',["world"]):_h('p',["bye"])])}`
     )
   })
 
-  it('generate mutli v-elseif with v-else directive', () => {
+  it('generate mutli v-else-if with v-else directive', () => {
     assertCodegen(
-        '<div><p v-if="show">hello</p><p v-elseif="hide">world</p><p v-elseif="3">elseif</p><p v-else>bye</p></div>',
+        '<div><p v-if="show">hello</p><p v-else-if="hide">world</p><p v-else-if="3">elseif</p><p v-else>bye</p></div>',
         `with(this){return _h('div',[(show)?_h('p',["hello"]):(hide)?_h('p',["world"]):(3)?_h('p',["elseif"]):_h('p',["bye"])])}`
     )
   })

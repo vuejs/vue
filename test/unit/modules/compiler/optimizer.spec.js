@@ -213,10 +213,10 @@ describe('optimizer', () => {
   it('mark static trees inside v-for with nested v-else and v-once', () => {
     const ast = parse(`
       <div v-if="1"></div>
-      <div v-elseif="2">
+      <div v-else-if="2">
         <div v-for="i in 10" :key="i">
           <div v-if="1">{{ i }}</div>
-          <div v-elseif="2" v-once>{{ i }}</div>
+          <div v-else-if="2" v-once>{{ i }}</div>
           <div v-else v-once>{{ i }}</div>
         </div>
       </div>

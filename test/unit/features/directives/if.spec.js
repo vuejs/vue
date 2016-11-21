@@ -88,12 +88,12 @@ describe('Directive v-if', () => {
     }).then(done)
   })
 
-  it('should work well with v-elseif', done => {
+  it('should work well with v-else-if', done => {
     const vm = new Vue({
       template: `
         <div>
           <span v-if="foo">hello</span>
-          <span v-elseif="bar">elseif</span>
+          <span v-else-if="bar">elseif</span>
           <span v-else>bye</span>
         </div>
       `,

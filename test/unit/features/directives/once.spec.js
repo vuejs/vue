@@ -242,7 +242,7 @@ describe('Directive v-once', () => {
     }).then(done)
   })
 
-  it('should work inside v-for with nested v-elseif and v-else', done => {
+  it('should work inside v-for with nested v-else-if and v-else', done => {
     const vm = new Vue({
       data: {
         tester: false,
@@ -250,17 +250,17 @@ describe('Directive v-once', () => {
       },
       template: `
         <div v-if="0"></div>
-        <div v-elseif="tester">
+        <div v-else-if="tester">
           <div v-for="i in list" :key="i.id">
             <span v-if="i.tester" v-once>{{ i.truthy }}</span>
-            <span v-elseif="tester" v-once>{{ i.text }}elseif</span>
+            <span v-else-if="tester" v-once>{{ i.text }}elseif</span>
             <span v-else v-once>{{ i.text }}</span>
           </div>
         </div>
         <div v-else>
           <div v-for="i in list" :key="i.id">
             <span v-if="i.tester" v-once>{{ i.truthy }}</span>
-            <span v-elseif="tester">{{ i.text }}elseif</span>
+            <span v-else-if="tester">{{ i.text }}elseif</span>
             <span v-else v-once>{{ i.text }}</span>
           </div>
         </div>
