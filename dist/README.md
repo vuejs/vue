@@ -1,5 +1,7 @@
 ## Explanation of Build Files
 
+> A rule of thumb: files that end in `common.js` are meant for built tools, files that do not end in `common.js` are meant for direct browser usage.
+
 - ### vue.js
 
   The full (compiler-included) browser build. This is the build you can just include with a script tag:
