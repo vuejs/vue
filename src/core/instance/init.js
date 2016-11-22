@@ -72,6 +72,7 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
       Ctor.superOptions = superOptions
       extendOptions.render = options.render
       extendOptions.staticRenderFns = options.staticRenderFns
+      extendOptions._scopeId = options._scopeId
       options = Ctor.options = mergeOptions(superOptions, extendOptions)
       if (options.name) {
         options.components[options.name] = Ctor
