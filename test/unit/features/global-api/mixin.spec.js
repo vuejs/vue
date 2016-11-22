@@ -70,4 +70,18 @@ describe('Global API: mixin', () => {
 
     expect(vm.$el.textContent).toBe('hello')
   })
+
+  // #4266
+  it('should not drop scopedId', () => {
+    const Test = Vue.extend({})
+    Test.options._scopeId = 'foo'
+
+    Vue.mixin({})
+
+    const vm = new Test({
+      template: '<div><p>hi<p></div>'
+    }).$mount()
+
+    expect(vm.$el.children[0].hasAttribute('foo')).toBe(true)
+  })
 })
