@@ -232,13 +232,13 @@ describe('Directive v-on', () => {
     const spy2 = jasmine.createSpy('remove listener')
     vm = new Vue({
       el,
-      methods: { foo: spy, bar: spy2 , stopped (ev) {ev.stopPropagation()} },
+      methods: { foo: spy, bar: spy2, stopped (ev) { ev.stopPropagation() } },
       data: {
         ok: true
       },
       render (h) {
         return this.ok
-          ? h('div', { on: { '!click': this.foo }}, [h('div', { on: { click: this.stopped } })])
+          ? h('div', { on: { '!click': this.foo }}, [h('div', { on: { click: this.stopped }})])
           : h('div', { on: { mouseOver: this.bar }}, [h('div')])
       }
     })
@@ -286,13 +286,13 @@ describe('Directive v-on', () => {
     const spy2 = jasmine.createSpy('remove listener')
     vm = new Vue({
       el,
-      methods: { foo: spy, bar: spy2, stopped (ev) {ev.stopPropagation()} },
+      methods: { foo: spy, bar: spy2, stopped (ev) { ev.stopPropagation() } },
       data: {
         ok: true
       },
       render (h) {
         return this.ok
-          ? h('div', { on: { '~!click': this.foo }}, [h('div', { on: { click: this.stopped } })])
+          ? h('div', { on: { '~!click': this.foo }}, [h('div', { on: { click: this.stopped }})])
           : h('div', { on: { mouseOver: this.bar }}, [h('div')])
       }
     })
