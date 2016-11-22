@@ -228,6 +228,88 @@ describe('Directive v-on', () => {
     }).then(done)
   })
 
+  it('remove capturing listener', done => {
+    const spy2 = jasmine.createSpy('remove listener')
+    vm = new Vue({
+      el,
+      methods: { foo: spy, bar: spy2 , stopped (ev) {ev.stopPropagation()} },
+      data: {
+        ok: true
+      },
+      render (h) {
+        return this.ok
+          ? h('div', { on: { '!click': this.foo }}, [h('div', { on: { click: this.stopped } })])
+          : h('div', { on: { mouseOver: this.bar }}, [h('div')])
+      }
+    })
+    triggerEvent(vm.$el.firstChild, 'click')
+    expect(spy.calls.count()).toBe(1)
+    expect(spy2.calls.count()).toBe(0)
+    vm.ok = false
+    waitForUpdate(() => {
+      triggerEvent(vm.$el.firstChild, 'click')
+      expect(spy.calls.count()).toBe(1) // should no longer trigger
+      triggerEvent(vm.$el, 'mouseOver')
+      expect(spy2.calls.count()).toBe(1)
+    }).then(done)
+  })
+
+  it('remove once listener', done => {
+    const spy2 = jasmine.createSpy('remove listener')
+    vm = new Vue({
+      el,
+      methods: { foo: spy, bar: spy2 },
+      data: {
+        ok: true
+      },
+      render (h) {
+        return this.ok
+          ? h('input', { on: { '~click': this.foo }})
+          : h('input', { on: { input: this.bar }})
+      }
+    })
+    triggerEvent(vm.$el, 'click')
+    expect(spy.calls.count()).toBe(1)
+    triggerEvent(vm.$el, 'click')
+    expect(spy.calls.count()).toBe(1) // should no longer trigger
+    expect(spy2.calls.count()).toBe(0)
+    vm.ok = false
+    waitForUpdate(() => {
+      triggerEvent(vm.$el, 'click')
+      expect(spy.calls.count()).toBe(1) // should no longer trigger
+      triggerEvent(vm.$el, 'input')
+      expect(spy2.calls.count()).toBe(1)
+    }).then(done)
+  })
+
+  it('remove capturing and once listener', done => {
+    const spy2 = jasmine.createSpy('remove listener')
+    vm = new Vue({
+      el,
+      methods: { foo: spy, bar: spy2, stopped (ev) {ev.stopPropagation()} },
+      data: {
+        ok: true
+      },
+      render (h) {
+        return this.ok
+          ? h('div', { on: { '~!click': this.foo }}, [h('div', { on: { click: this.stopped } })])
+          : h('div', { on: { mouseOver: this.bar }}, [h('div')])
+      }
+    })
+    triggerEvent(vm.$el.firstChild, 'click')
+    expect(spy.calls.count()).toBe(1)
+    triggerEvent(vm.$el.firstChild, 'click')
+    expect(spy.calls.count()).toBe(1) // should no longer trigger
+    expect(spy2.calls.count()).toBe(0)
+    vm.ok = false
+    waitForUpdate(() => {
+      triggerEvent(vm.$el.firstChild, 'click')
+      expect(spy.calls.count()).toBe(1) // should no longer trigger
+      triggerEvent(vm.$el, 'mouseOver')
+      expect(spy2.calls.count()).toBe(1)
+    }).then(done)
+  })
+
   it('remove listener on child component', done => {
     const spy2 = jasmine.createSpy('remove listener')
     vm = new Vue({

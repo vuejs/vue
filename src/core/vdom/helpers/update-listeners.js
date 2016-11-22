@@ -47,8 +47,11 @@ export function updateListeners (
   }
   for (name in oldOn) {
     if (!on[name]) {
-      event = name.charAt(0) === '!' ? name.slice(1) : name
-      remove(event, oldOn[name].invoker)
+      once = name.charAt(0) === '~' // Prefixed last, checked first
+      event = once ? name.slice(1) : name
+      capture = event.charAt(0) === '!'
+      event = capture ? event.slice(1) : event
+      remove(event, oldOn[name].invoker, capture) // Removal of a capturing listener does not affect a non-capturing version of the same listener, and vice versa.
     }
   }
 }
