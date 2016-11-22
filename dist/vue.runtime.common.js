@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.7
+ * Vue.js v2.1.0
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -371,13 +371,19 @@ var nextTick = (function () {
   }
 
   return function queueNextTick (cb, ctx) {
-    var func = ctx
-      ? function () { cb.call(ctx); }
-      : cb;
-    callbacks.push(func);
+    var _resolve;
+    callbacks.push(function () {
+      if (cb) { cb.call(ctx); }
+      if (_resolve) { _resolve(ctx); }
+    });
     if (!pending) {
       pending = true;
       timerFunc();
+    }
+    if (!cb && typeof Promise !== 'undefined') {
+      return new Promise(function (resolve) {
+        _resolve = resolve;
+      })
     }
   }
 })();
@@ -2829,7 +2835,7 @@ function initRender (vm) {
 
 function renderMixin (Vue) {
   Vue.prototype.$nextTick = function (fn) {
-    nextTick(fn, this);
+    return nextTick(fn, this)
   };
 
   Vue.prototype._render = function () {
@@ -3228,6 +3234,7 @@ function resolveConstructorOptions (Ctor) {
       Ctor.superOptions = superOptions;
       extendOptions.render = options.render;
       extendOptions.staticRenderFns = options.staticRenderFns;
+      extendOptions._scopeId = options._scopeId;
       options = Ctor.options = mergeOptions(superOptions, extendOptions);
       if (options.name) {
         options.components[options.name] = Ctor;
@@ -3383,9 +3390,25 @@ function initAssetRegisters (Vue) {
   });
 }
 
+/*  */
+
+var patternTypes = [String, RegExp];
+
+function matches (pattern, name) {
+  if (typeof pattern === 'string') {
+    return pattern.split(',').indexOf(name) > -1
+  } else {
+    return pattern.test(name)
+  }
+}
+
 var KeepAlive = {
   name: 'keep-alive',
   abstract: true,
+  props: {
+    include: patternTypes,
+    exclude: patternTypes
+  },
   created: function created () {
     this.cache = Object.create(null);
   },
@@ -3393,10 +3416,18 @@ var KeepAlive = {
     var vnode = getFirstComponentChild(this.$slots.default);
     if (vnode && vnode.componentOptions) {
       var opts = vnode.componentOptions;
+      // check pattern
+      var name = opts.Ctor.options.name || opts.tag;
+      if (name && (
+        (this.include && !matches(this.include, name)) ||
+        (this.exclude && matches(this.exclude, name))
+      )) {
+        return vnode
+      }
       var key = vnode.key == null
         // same constructor may get registered as different local components
         // so cid alone is not enough (#3269)
-        ? opts.Ctor.cid + '::' + opts.tag
+        ? opts.Ctor.cid + (opts.tag ? ("::" + (opts.tag)) : '')
         : vnode.key;
       if (this.cache[key]) {
         vnode.child = this.cache[key].child;
@@ -3464,7 +3495,7 @@ Object.defineProperty(Vue$2.prototype, '$isServer', {
   get: isServerRendering
 });
 
-Vue$2.version = '2.0.7';
+Vue$2.version = '2.1.0';
 
 /*  */
 
