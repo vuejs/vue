@@ -103,21 +103,38 @@ describe('Directive v-on', () => {
   })
 
   it('should support once', () => {
-    const numberPushed = []
     vm = new Vue({
       el,
       template: `
         <div @click.once="foo">
         </div>
       `,
-      methods: {
-        foo () { numberPushed.push(1) }
-      }
+      methods: { foo: spy }
     })
     triggerEvent(vm.$el, 'click')
-    expect(numberPushed.toString()).toBe('1')
+    expect(spy.calls.count()).toBe(1)
     triggerEvent(vm.$el, 'click')
-    expect(numberPushed.toString()).toBe('1')
+    expect(spy.calls.count()).toBe(1) // should no longer trigger
+  })
+
+  it('should support capture and once', () => {
+    const callOrder = []
+    vm = new Vue({
+      el,
+      template: `
+        <div @click.capture.once="foo">
+          <div @click="bar"></div>
+        </div>
+      `,
+      methods: {
+        foo () { callOrder.push(1) },
+        bar () { callOrder.push(2) }
+      }
+    })
+    triggerEvent(vm.$el.firstChild, 'click')
+    expect(callOrder.toString()).toBe('1,2')
+    triggerEvent(vm.$el.firstChild, 'click')
+    expect(callOrder.toString()).toBe('1,2,2')
   })
 
   it('should support keyCode', () => {

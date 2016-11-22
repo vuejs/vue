@@ -3,9 +3,6 @@
 
 import { updateListeners } from 'core/vdom/helpers/index'
 
-const onceFlags = {}
-const randomHex = () => (Math.random() + '').substr(2).toString(16)
-
 function updateDOMListeners (oldVnode, vnode) {
   if (!oldVnode.data.on && !vnode.data.on) {
     return
@@ -14,20 +11,17 @@ function updateDOMListeners (oldVnode, vnode) {
   const oldOn = oldVnode.data.on || {}
   const add = vnode.elm._v_add || (vnode.elm._v_add = (event, handler, capture, once) => {
     if (once) {
-      const randomKey = randomHex() + new Date().valueOf().toString(16) + randomHex()
-      onceFlags[randomKey] = false
       const oldHandler = handler
-      handler = () => {
-        if (!onceFlags[randomKey]) {
-          onceFlags[randomKey] = true
-          oldHandler()
-        }
+      handler = function (ev) {
+        remove(event, handler, capture)
+
+        arguments.length === 1 ? oldHandler(ev) : oldHandler.apply(null, arguments)
       }
     }
     vnode.elm.addEventListener(event, handler, capture)
   })
-  const remove = vnode.elm._v_remove || (vnode.elm._v_remove = (event, handler) => {
-    vnode.elm.removeEventListener(event, handler)
+  const remove = vnode.elm._v_remove || (vnode.elm._v_remove = (event, handler, capture) => {
+    vnode.elm.removeEventListener(event, handler, capture)
   })
   updateListeners(on, oldOn, add, remove, vnode.context)
 }

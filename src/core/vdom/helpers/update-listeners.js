@@ -19,9 +19,10 @@ export function updateListeners (
         vm
       )
     } else if (!old) {
-      capture = name.charAt(0) === '!'
-      once = name.charAt(0) === '~'
-      event = capture || once ? name.slice(1) : name
+      once = name.charAt(0) === '~' // Prefixed last, checked first
+      event = once ? name.slice(1) : name
+      capture = event.charAt(0) === '!'
+      event = capture ? event.slice(1) : event
       if (Array.isArray(cur)) {
         add(event, (cur.invoker = arrInvoker(cur)), capture, once)
       } else {
