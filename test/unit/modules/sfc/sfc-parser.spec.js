@@ -123,4 +123,22 @@ describe('Single File Component parser', () => {
     expect(simpleTest.attrs.name).toBe('simple')
     expect(simpleTest.attrs.foo).toBe('bar')
   })
+
+  // Regression #4289
+  it('accepts nested template tag', () => {
+    const raw = `<div>
+      <template v-if="true === true">
+        <section class="section">
+          <div class="container">
+            Should be shown
+          </div>
+        </section>
+      </template>
+      <template v-else>
+        <p>Shoud not be shown</p>
+      </template>
+    </div>`
+    const res = parseComponent(`<template>${raw}</template>`)
+    expect(res.template.content.trim()).toBe(raw)
+  })
 })
