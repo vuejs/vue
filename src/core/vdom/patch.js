@@ -342,6 +342,7 @@ export function createPatchFunction (backend) {
         vnode.key === oldVnode.key &&
         (vnode.isCloned || vnode.isOnce)) {
       vnode.elm = oldVnode.elm
+      vnode.child = oldVnode.child
       return
     }
     let i

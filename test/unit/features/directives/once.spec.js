@@ -313,6 +313,28 @@ describe('Directive v-once', () => {
     expect(vm.$el.textContent).toBe('aabbcc')
     expect(`v-once can only be used inside v-for that is keyed.`).toHaveBeenWarned()
   })
+
+  // #4288
+  it('should inherit child reference for v-once', done => {
+    const vm = new Vue({
+      template: `<div>{{a}}<test v-if="ok" v-once></test></div>`,
+      data: {
+        a: 0,
+        ok: true
+      },
+      components: {
+        test: {
+          template: '<div>foo</div>'
+        }
+      }
+    }).$mount()
+    vm.a++ // first update to force a patch
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('1foo')
+    }).then(() => {
+      vm.ok = false // teardown component with v-once
+    }).then(done) // should not throw
+  })
 })
 
 function expectTextContent (vm, text) {
