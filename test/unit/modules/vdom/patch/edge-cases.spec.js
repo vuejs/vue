@@ -57,4 +57,61 @@ describe('vdom patch: edge cases', () => {
       expect(vm.$el.querySelector('.d').textContent).toBe('2')
     }).then(done)
   })
+
+  it('should synchronize vm\' vnode', done => {
+    const comp = {
+      data: () => ({ swap: true }),
+      render (h) {
+        return this.swap
+          ? h('a', 'atag')
+          : h('span', 'span')
+      }
+    }
+
+    const wrapper = {
+      render: h => h('comp'),
+      components: { comp }
+    }
+
+    const vm = new Vue({
+      render (h) {
+        const children = [
+          h('wrapper'),
+          h('div', 'row')
+        ]
+        if (this.swap) {
+          children.reverse()
+        }
+        return h('div', children)
+      },
+      data: () => ({ swap: false }),
+      components: { wrapper }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>')
+    const wrapperVm = vm.$children[0]
+    const compVm = wrapperVm.$children[0]
+    vm.swap = true
+    waitForUpdate(() => {
+      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+      expect(vm.$el.innerHTML).toBe('<div>row</div><a>atag</a>')
+      vm.swap = false
+    })
+    .then(() => {
+      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+      expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>')
+      compVm.swap = false
+    })
+    .then(() => {
+      expect(vm.$el.innerHTML).toBe('<span>span</span><div>row</div>')
+      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+      vm.swap = true
+    })
+    .then(() => {
+      expect(vm.$el.innerHTML).toBe('<div>row</div><span>span</span>')
+      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+      vm.swap = true
+    })
+    .then(done)
+  })
 })
