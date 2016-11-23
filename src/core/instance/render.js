@@ -16,7 +16,7 @@ export function initRender (vm: Component) {
   vm._staticTrees = null
   vm._renderContext = vm.$options._parentVnode && vm.$options._parentVnode.context
   vm.$slots = resolveSlots(vm.$options._renderChildren, vm._renderContext)
-  vm.$scopedSlots = null
+  vm.$scopedSlots = {}
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
   vm.$createElement = bind(createElement, vm)
@@ -45,7 +45,7 @@ export function renderMixin (Vue: Class<Component>) {
       }
     }
 
-    if (_parentVnode) {
+    if (_parentVnode && _parentVnode.data.scopedSlots) {
       vm.$scopedSlots = _parentVnode.data.scopedSlots
     }
 
@@ -191,7 +191,7 @@ export function renderMixin (Vue: Class<Component>) {
     fallback: ?Array<VNode>,
     props: ?Object
   ): ?Array<VNode> {
-    const scopedSlotFn = this.$scopedSlots && this.$scopedSlots[name]
+    const scopedSlotFn = this.$scopedSlots[name]
     if (scopedSlotFn) { // scoped slot
       return scopedSlotFn(props || {}) || fallback
     } else {
