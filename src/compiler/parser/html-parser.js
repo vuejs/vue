@@ -48,13 +48,14 @@ let IS_REGEX_CAPTURING_BROKEN = false
 // Special Elements (can contain anything)
 const isScriptOrStyle = makeMap('script,style', true)
 const hasLang = attr => attr.name === 'lang' && attr.value !== 'html'
-const isSpecialTag = (tag, isSFC, stack) => {
+const isSpecialTag = (tag, isSFC, stack, depth) => {
   if (isScriptOrStyle(tag)) {
     return true
   }
-  if (isSFC) {
+  // Check SFC block if at depth 0
+  if (isSFC && depth === 0) {
     // top-level template that has no pre-processor
-    if (tag === 'template' && stack.length === 1 && !stack[0].attrs.some(hasLang)) {
+    if (tag === 'template' && !stack[0].attrs.some(hasLang)) {
       return false
     } else {
       return true
@@ -86,12 +87,13 @@ export function parseHTML (html, options) {
   const stack = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
+  let depth = 0
   let index = 0
   let last, lastTag
   while (html) {
     last = html
-    // Make sure we're not in a script or style element
-    if (!lastTag || !isSpecialTag(lastTag, options.sfc, stack)) {
+    // Make sure we're not in a specia tag
+    if (!lastTag || !isSpecialTag(lastTag, options.sfc, stack, depth)) {
       let textEnd = html.indexOf('<')
       if (textEnd === 0) {
         // Comment:
@@ -165,6 +167,8 @@ export function parseHTML (html, options) {
       if (options.chars && text) {
         options.chars(text)
       }
+
+      depth++
     } else {
       var stackedTag = lastTag.toLowerCase()
       var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'))
@@ -184,6 +188,7 @@ export function parseHTML (html, options) {
       index += html.length - rest.length
       html = rest
       parseEndTag('</' + stackedTag + '>', stackedTag, index - endTagLength, index)
+      depth--
     }
 
     if (html === last && options.chars) {

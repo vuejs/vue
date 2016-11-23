@@ -123,4 +123,16 @@ describe('Single File Component parser', () => {
     expect(simpleTest.attrs.name).toBe('simple')
     expect(simpleTest.attrs.foo).toBe('bar')
   })
+
+  // Regression #4289
+  it('accepts nested template tag', () => {
+    const res = parseComponent(`
+      <template>
+        <div>
+          <template>hello</template>
+        </div>
+      </template>
+    `)
+    expect(res.template.content.trim()).toBe('<div>\n  <template>hello</template>\n</div>')
+  })
 })
