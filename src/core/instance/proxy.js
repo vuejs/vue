@@ -12,6 +12,15 @@ if (process.env.NODE_ENV !== 'production') {
     'require' // for Webpack/Browserify
   )
 
+  const warnNonPresent = (target, key) => {
+    warn(
+      `Property or method "${key}" is not defined on the instance but ` +
+      `referenced during render. Make sure to declare reactive data ` +
+      `properties in the data option.`,
+      target
+    )
+  }
+
   hasProxy =
     typeof Proxy !== 'undefined' &&
     Proxy.toString().match(/native code/)
@@ -21,14 +30,16 @@ if (process.env.NODE_ENV !== 'production') {
       const has = key in target
       const isAllowed = allowedGlobals(key) || key.charAt(0) === '_'
       if (!has && !isAllowed) {
-        warn(
-          `Property or method "${key}" is not defined on the instance but ` +
-          `referenced during render. Make sure to declare reactive data ` +
-          `properties in the data option.`,
-          target
-        )
+        warnNonPresent(target, key)
       }
       return has || !isAllowed
+    },
+
+    get (target, key) {
+      if (typeof key === 'string' && !(key in target)) {
+        warnNonPresent(target, key)
+      }
+      return target[key]
     }
   }
 
