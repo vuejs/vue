@@ -116,6 +116,10 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const vm: Component = this
     const hasChildren = !!(vm.$options._renderChildren || renderChildren)
     vm.$options._parentVnode = parentVnode
+    vm.$vnode = parentVnode // update vm's placeholder node without re-render
+    if (vm._vnode) { // update child tree's parent
+      vm._vnode.parent = parentVnode
+    }
     vm.$options._renderChildren = renderChildren
     // update props
     if (propsData && vm.$options.props) {
