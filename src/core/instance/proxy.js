@@ -2,7 +2,7 @@
 
 import { warn, makeMap } from '../util/index'
 
-let hasProxy, proxyHandlers, initProxy
+let initProxy
 
 if (process.env.NODE_ENV !== 'production') {
   const allowedGlobals = makeMap(
@@ -21,11 +21,11 @@ if (process.env.NODE_ENV !== 'production') {
     )
   }
 
-  hasProxy =
+  const hasProxy =
     typeof Proxy !== 'undefined' &&
     Proxy.toString().match(/native code/)
 
-  proxyHandlers = {
+  const hasHandler = {
     has (target, key) {
       const has = key in target
       const isAllowed = allowedGlobals(key) || key.charAt(0) === '_'
@@ -33,8 +33,10 @@ if (process.env.NODE_ENV !== 'production') {
         warnNonPresent(target, key)
       }
       return has || !isAllowed
-    },
+    }
+  }
 
+  const getHandler = {
     get (target, key) {
       if (typeof key === 'string' && !(key in target)) {
         warnNonPresent(target, key)
@@ -45,7 +47,16 @@ if (process.env.NODE_ENV !== 'production') {
 
   initProxy = function initProxy (vm) {
     if (hasProxy) {
-      vm._renderProxy = new Proxy(vm, proxyHandlers)
+      // determine which proxy handler to use
+      let handlers
+      const options = vm.$options
+      if (options.template || options.el) {
+        handlers = hasHandler
+      }
+      if (options.render) {
+        handlers = options.render._withStripped ? getHandler : hasHandler
+      }
+      vm._renderProxy = handlers ? new Proxy(vm, handlers) : vm
     } else {
       vm._renderProxy = vm
     }
