@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.1.0
+ * Vue.js v2.1.1
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -1421,6 +1421,15 @@ if (process.env.NODE_ENV !== 'production') {
     'require' // for Webpack/Browserify
   );
 
+  var warnNonPresent = function (target, key) {
+    warn(
+      "Property or method \"" + key + "\" is not defined on the instance but " +
+      "referenced during render. Make sure to declare reactive data " +
+      "properties in the data option.",
+      target
+    );
+  };
+
   hasProxy =
     typeof Proxy !== 'undefined' &&
     Proxy.toString().match(/native code/);
@@ -1430,14 +1439,16 @@ if (process.env.NODE_ENV !== 'production') {
       var has = key in target;
       var isAllowed = allowedGlobals(key) || key.charAt(0) === '_';
       if (!has && !isAllowed) {
-        warn(
-          "Property or method \"" + key + "\" is not defined on the instance but " +
-          "referenced during render. Make sure to declare reactive data " +
-          "properties in the data option.",
-          target
-        );
+        warnNonPresent(target, key);
       }
       return has || !isAllowed
+    },
+
+    get: function get (target, key) {
+      if (typeof key === 'string' && !(key in target)) {
+        warnNonPresent(target, key);
+      }
+      return target[key]
     }
   };
 
@@ -2351,6 +2362,10 @@ function lifecycleMixin (Vue) {
     var vm = this;
     var hasChildren = !!(vm.$options._renderChildren || renderChildren);
     vm.$options._parentVnode = parentVnode;
+    vm.$vnode = parentVnode; // update vm's placeholder node without re-render
+    if (vm._vnode) { // update child tree's parent
+      vm._vnode.parent = parentVnode;
+    }
     vm.$options._renderChildren = renderChildren;
     // update props
     if (propsData && vm.$options.props) {
@@ -3495,7 +3510,7 @@ Object.defineProperty(Vue$3.prototype, '$isServer', {
   get: isServerRendering
 });
 
-Vue$3.version = '2.1.0';
+Vue$3.version = '2.1.1';
 
 /*  */
 
@@ -4201,6 +4216,7 @@ function createPatchFunction (backend) {
         vnode.key === oldVnode.key &&
         (vnode.isCloned || vnode.isOnce)) {
       vnode.elm = oldVnode.elm;
+      vnode.child = oldVnode.child;
       return
     }
     var i;
@@ -4365,9 +4381,13 @@ function createPatchFunction (backend) {
         createElm(vnode, insertedVnodeQueue);
 
         // component root element replaced.
-        // update parent placeholder node element.
+        // update parent placeholder node element, recursively
         if (vnode.parent) {
-          vnode.parent.elm = vnode.elm;
+          var ancestor = vnode.parent;
+          while (ancestor) {
+            ancestor.elm = vnode.elm;
+            ancestor = ancestor.parent;
+          }
           if (isPatchable(vnode)) {
             for (var i = 0; i < cbs.create.length; ++i) {
               cbs.create[i](emptyNode, vnode.parent);
@@ -5900,9 +5920,9 @@ var isSpecialTag = function (tag, isSFC, stack) {
   if (isScriptOrStyle(tag)) {
     return true
   }
-  if (isSFC) {
+  if (isSFC && stack.length === 1) {
     // top-level template that has no pre-processor
-    if (tag === 'template' && stack.length === 1 && !stack[0].attrs.some(hasLang)) {
+    if (tag === 'template' && !stack[0].attrs.some(hasLang)) {
       return false
     } else {
       return true

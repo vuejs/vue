@@ -551,6 +551,15 @@ if (process.env.NODE_ENV !== 'production') {
     'require' // for Webpack/Browserify
   );
 
+  var warnNonPresent = function (target, key) {
+    warn(
+      "Property or method \"" + key + "\" is not defined on the instance but " +
+      "referenced during render. Make sure to declare reactive data " +
+      "properties in the data option.",
+      target
+    );
+  };
+
   hasProxy =
     typeof Proxy !== 'undefined' &&
     Proxy.toString().match(/native code/);
@@ -560,14 +569,16 @@ if (process.env.NODE_ENV !== 'production') {
       var has = key in target;
       var isAllowed = allowedGlobals(key) || key.charAt(0) === '_';
       if (!has && !isAllowed) {
-        warn(
-          "Property or method \"" + key + "\" is not defined on the instance but " +
-          "referenced during render. Make sure to declare reactive data " +
-          "properties in the data option.",
-          target
-        );
+        warnNonPresent(target, key);
       }
       return has || !isAllowed
+    },
+
+    get: function get (target, key) {
+      if (typeof key === 'string' && !(key in target)) {
+        warnNonPresent(target, key);
+      }
+      return target[key]
     }
   };
 
@@ -1793,6 +1804,10 @@ function lifecycleMixin (Vue) {
     var vm = this;
     var hasChildren = !!(vm.$options._renderChildren || renderChildren);
     vm.$options._parentVnode = parentVnode;
+    vm.$vnode = parentVnode; // update vm's placeholder node without re-render
+    if (vm._vnode) { // update child tree's parent
+      vm._vnode.parent = parentVnode;
+    }
     vm.$options._renderChildren = renderChildren;
     // update props
     if (propsData && vm.$options.props) {
@@ -3230,14 +3245,6 @@ var isAttr = makeMap(
   'target,title,type,usemap,value,width,wrap'
 );
 
-
-
-
-
-var isXlink = function (name) {
-  return name.charAt(5) === ':' && name.slice(0, 5) === 'xlink'
-};
-
 /*  */
 
 
@@ -3421,9 +3428,9 @@ var isSpecialTag = function (tag, isSFC, stack) {
   if (isScriptOrStyle(tag)) {
     return true
   }
-  if (isSFC) {
+  if (isSFC && stack.length === 1) {
     // top-level template that has no pre-processor
-    if (tag === 'template' && stack.length === 1 && !stack[0].attrs.some(hasLang)) {
+    if (tag === 'template' && !stack[0].attrs.some(hasLang)) {
       return false
     } else {
       return true
