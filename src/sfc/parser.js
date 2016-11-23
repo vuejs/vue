@@ -85,7 +85,8 @@ export function parseComponent (
   }
 
   function end (tag: string, start: number, end: number) {
-    if (depth === 1 && currentBlock) {
+    depth--
+    if (depth === 0 && currentBlock) {
       currentBlock.end = start
       let text = deindent(content.slice(currentBlock.start, currentBlock.end))
       // pad content so that linters and pre-processors can output correct
@@ -96,7 +97,6 @@ export function parseComponent (
       currentBlock.content = text
       currentBlock = null
     }
-    depth--
   }
 
   function padContent (block: SFCBlock | SFCCustomBlock) {
