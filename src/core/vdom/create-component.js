@@ -187,7 +187,7 @@ function insert (vnode: MountedComponentVNode) {
 }
 
 function destroy (vnode: MountedComponentVNode) {
-  if (!vnode.child._isDestroyed) {
+  if (vnode.child && !vnode.child._isDestroyed) {
     if (!vnode.data.keepAlive) {
       vnode.child.$destroy()
     } else {
