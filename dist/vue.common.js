@@ -1409,8 +1409,6 @@ var util = Object.freeze({
 
 /* not type checking this file because flow doesn't play well with Proxy */
 
-var hasProxy;
-var proxyHandlers;
 var initProxy;
 
 if (process.env.NODE_ENV !== 'production') {
@@ -1430,11 +1428,11 @@ if (process.env.NODE_ENV !== 'production') {
     );
   };
 
-  hasProxy =
+  var hasProxy =
     typeof Proxy !== 'undefined' &&
     Proxy.toString().match(/native code/);
 
-  proxyHandlers = {
+  var hasHandler = {
     has: function has (target, key) {
       var has = key in target;
       var isAllowed = allowedGlobals(key) || key.charAt(0) === '_';
@@ -1442,8 +1440,10 @@ if (process.env.NODE_ENV !== 'production') {
         warnNonPresent(target, key);
       }
       return has || !isAllowed
-    },
+    }
+  };
 
+  var getHandler = {
     get: function get (target, key) {
       if (typeof key === 'string' && !(key in target)) {
         warnNonPresent(target, key);
@@ -1454,7 +1454,12 @@ if (process.env.NODE_ENV !== 'production') {
 
   initProxy = function initProxy (vm) {
     if (hasProxy) {
-      vm._renderProxy = new Proxy(vm, proxyHandlers);
+      // determine which proxy handler to use
+      var options = vm.$options;
+      var handlers = options.render && options.render._withStripped
+        ? getHandler
+        : hasHandler;
+      vm._renderProxy = new Proxy(vm, handlers);
     } else {
       vm._renderProxy = vm;
     }
@@ -2839,7 +2844,7 @@ function initRender (vm) {
   vm._staticTrees = null;
   vm._renderContext = vm.$options._parentVnode && vm.$options._parentVnode.context;
   vm.$slots = resolveSlots(vm.$options._renderChildren, vm._renderContext);
-  vm.$scopedSlots = null;
+  vm.$scopedSlots = {};
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
   vm.$createElement = bind$1(createElement, vm);
@@ -2867,7 +2872,7 @@ function renderMixin (Vue) {
       }
     }
 
-    if (_parentVnode) {
+    if (_parentVnode && _parentVnode.data.scopedSlots) {
       vm.$scopedSlots = _parentVnode.data.scopedSlots;
     }
 
@@ -3013,7 +3018,7 @@ function renderMixin (Vue) {
     fallback,
     props
   ) {
-    var scopedSlotFn = this.$scopedSlots && this.$scopedSlots[name];
+    var scopedSlotFn = this.$scopedSlots[name];
     if (scopedSlotFn) { // scoped slot
       return scopedSlotFn(props || {}) || fallback
     } else {
