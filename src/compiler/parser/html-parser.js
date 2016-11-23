@@ -92,7 +92,7 @@ export function parseHTML (html, options) {
   let last, lastTag
   while (html) {
     last = html
-    // Make sure we're not in a specia tag
+    // Make sure we're not in a special tag
     if (!lastTag || !isSpecialTag(lastTag, options.sfc, stack, depth)) {
       let textEnd = html.indexOf('<')
       if (textEnd === 0) {
