@@ -505,9 +505,13 @@ export function createPatchFunction (backend) {
         createElm(vnode, insertedVnodeQueue)
 
         // component root element replaced.
-        // update parent placeholder node element.
+        // update parent placeholder node element, recursively
         if (vnode.parent) {
-          vnode.parent.elm = vnode.elm
+          let ancestor = vnode.parent
+          while (ancestor) {
+            ancestor.elm = vnode.elm
+            ancestor = ancestor.parent
+          }
           if (isPatchable(vnode)) {
             for (let i = 0; i < cbs.create.length; ++i) {
               cbs.create[i](emptyNode, vnode.parent)
