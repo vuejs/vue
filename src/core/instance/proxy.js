@@ -48,15 +48,11 @@ if (process.env.NODE_ENV !== 'production') {
   initProxy = function initProxy (vm) {
     if (hasProxy) {
       // determine which proxy handler to use
-      let handlers
       const options = vm.$options
-      if (options.template || options.el) {
-        handlers = hasHandler
-      }
-      if (options.render) {
-        handlers = options.render._withStripped ? getHandler : hasHandler
-      }
-      vm._renderProxy = handlers ? new Proxy(vm, handlers) : vm
+      const handlers = options.render && options.render._withStripped
+        ? getHandler
+        : hasHandler
+      vm._renderProxy = new Proxy(vm, handlers)
     } else {
       vm._renderProxy = vm
     }
