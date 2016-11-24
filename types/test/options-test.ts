@@ -171,7 +171,7 @@ Vue.component('component-with-scoped-slot', {
     return h('div', [
       h('child', [
         // default scoped slot as children
-        (props: ScopedSlotProps) => h('span', [props.msg])
+        (props: ScopedSlotProps) => [h('span', [props.msg])]
       ]),
       h('child', {
         scopedSlots: {

@@ -1,6 +1,6 @@
 import { Vue } from "./vue";
 
-export type ScopedSlot = (props: any) => VNodeChildren;
+export type ScopedSlot = (props: any) => VNodeChildrenArrayContents | string;
 
 export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string;
 export interface VNodeChildrenArrayContents {
