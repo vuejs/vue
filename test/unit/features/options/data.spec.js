@@ -75,4 +75,34 @@ describe('Options data', () => {
     vm.$data = {}
     expect('Avoid replacing instance root $data').toHaveBeenWarned()
   })
+
+  it('should have access to props', () => {
+    const Test = {
+      props: ['a'],
+      data () {
+        return {
+          b: this.a
+        }
+      }
+    }
+    const vm = new Vue({
+      template: `<test ref="test" :a="1"></test>`,
+      components: { Test }
+    }).$mount()
+    expect(vm.$refs.test.b).toBe(1)
+  })
+
+  it('should have access to methods', () => {
+    const vm = new Vue({
+      methods: {
+        get () {
+          return { a: 1 }
+        }
+      },
+      data () {
+        return this.get()
+      }
+    })
+    expect(vm.a).toBe(1)
+  })
 })

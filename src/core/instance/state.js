@@ -25,9 +25,9 @@ import {
 export function initState (vm: Component) {
   vm._watchers = []
   initProps(vm)
+  initMethods(vm)
   initData(vm)
   initComputed(vm)
-  initMethods(vm)
   initWatch(vm)
 }
 
