@@ -166,14 +166,14 @@ export default class Watcher {
           try {
             this.cb.call(this.vm, value, oldValue)
           } catch (e) {
-            process.env.NODE_ENV !== 'production' && warn(
-              `Error in watcher "${this.expression}"`,
-              this.vm
-            )
             /* istanbul ignore else */
             if (config.errorHandler) {
               config.errorHandler.call(null, e, this.vm)
             } else {
+              process.env.NODE_ENV !== 'production' && warn(
+                `Error in watcher "${this.expression}"`,
+                this.vm
+              )
               throw e
             }
           }

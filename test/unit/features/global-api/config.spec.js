@@ -39,6 +39,7 @@ describe('Global config', () => {
       Vue.config.errorHandler = spy
       const err = new Error()
       const vm = new Vue({
+        render () {},
         data: { a: 1 },
         watch: {
           a: () => {

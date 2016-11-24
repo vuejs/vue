@@ -60,18 +60,14 @@ export function renderMixin (Vue: Class<Component>) {
     try {
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
-      if (process.env.NODE_ENV !== 'production') {
-        warn(`Error when rendering ${formatComponentName(vm)}:`)
-      }
       /* istanbul ignore else */
       if (config.errorHandler) {
         config.errorHandler.call(null, e, vm)
       } else {
-        if (isServerRendering()) {
-          throw e
-        } else {
-          console.error(e)
+        if (process.env.NODE_ENV !== 'production') {
+          warn(`Error when rendering ${formatComponentName(vm)}:`)
         }
+        throw e
       }
       // return previous vnode to prevent render error causing blank component
       vnode = vm._vnode
