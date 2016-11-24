@@ -8,7 +8,7 @@ import {
   DirectiveOptions,
   DirectiveFunction
 } from "./options";
-import { VNode, VNodeData, VNodeChildren } from "./vnode";
+import { VNode, VNodeData, VNodeChildren, ScopedSlot } from "./vnode";
 import { PluginFunction, PluginObject } from "./plugin";
 
 export type CreateElement = {
@@ -40,6 +40,7 @@ export declare class Vue {
   readonly $children: Vue[];
   readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[]};
   readonly $slots: { [key: string]: VNode[] };
+  readonly $scopedSlots: { [key: string]: ScopedSlot };
   readonly $isServer: boolean;
 
   $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
