@@ -83,6 +83,13 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
+  it('!important', () => {
+    vm.styles = { display: 'block !important' }
+    waitForUpdate(() => {
+      expect(vm.$el.style.getPropertyPriority('display')).toBe('important')
+    })
+  })
+
   it('object with multiple entries', done => {
     vm.$el.style.color = 'red'
     vm.styles = {
