@@ -84,6 +84,7 @@ export function createPatchFunction (backend) {
     }
   }
 
+  let inPre = 0
   function createElm (vnode, insertedVnodeQueue, nested) {
     let i
     const data = vnode.data
@@ -103,7 +104,11 @@ export function createPatchFunction (backend) {
     const tag = vnode.tag
     if (isDef(tag)) {
       if (process.env.NODE_ENV !== 'production') {
+        if (data && data.pre) {
+          inPre++
+        }
         if (
+          !inPre &&
           !vnode.ns &&
           !(config.ignoredElements && config.ignoredElements.indexOf(tag) > -1) &&
           config.isUnknownElement(tag)
@@ -123,6 +128,9 @@ export function createPatchFunction (backend) {
       createChildren(vnode, children, insertedVnodeQueue)
       if (isDef(data)) {
         invokeCreateHooks(vnode, insertedVnodeQueue)
+      }
+      if (process.env.NODE_ENV !== 'production' && data && data.pre) {
+        inPre--
       }
     } else if (vnode.isComment) {
       vnode.elm = nodeOps.createComment(vnode.text)

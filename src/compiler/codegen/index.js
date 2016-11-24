@@ -164,6 +164,10 @@ function genData (el: ASTElement): string {
   if (el.refInFor) {
     data += `refInFor:true,`
   }
+  // pre
+  if (el.pre) {
+    data += `pre:true,`
+  }
   // record original tag name for components using "is" attribute
   if (el.component) {
     data += `tag:"${el.tag}",`
