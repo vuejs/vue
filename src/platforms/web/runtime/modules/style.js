@@ -4,10 +4,13 @@ import { cached, camelize, extend } from 'shared/util'
 import { normalizeStyleBinding, getStyle } from 'web/util/style'
 
 const cssVarRE = /^--/
+const importantRE = /\s*!important$/
 const setProp = (el, name, val) => {
   /* istanbul ignore if */
   if (cssVarRE.test(name)) {
     el.style.setProperty(name, val)
+  } else if (importantRE.test(val)) {
+    el.style.setProperty(name, val.replace(importantRE, ''), 'important')
   } else {
     el.style[normalize(name)] = val
   }
