@@ -306,15 +306,15 @@ describe('parser', () => {
   })
 
   it('slot tag single syntax', () => {
-    const ast = parse('<slot></slot>', baseOptions)
-    expect(ast.tag).toBe('slot')
-    expect(ast.slotName).toBeUndefined()
+    const ast = parse('<div><slot></slot></div>', baseOptions)
+    expect(ast.children[0].tag).toBe('slot')
+    expect(ast.children[0].slotName).toBeUndefined()
   })
 
   it('slot tag namped syntax', () => {
-    const ast = parse('<slot name="one">hello world</slot>', baseOptions)
-    expect(ast.tag).toBe('slot')
-    expect(ast.slotName).toBe('"one"')
+    const ast = parse('<div><slot name="one">hello world</slot></div>', baseOptions)
+    expect(ast.children[0].tag).toBe('slot')
+    expect(ast.children[0].slotName).toBe('"one"')
   })
 
   it('slot target', () => {

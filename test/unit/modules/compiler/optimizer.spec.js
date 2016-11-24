@@ -98,17 +98,17 @@ describe('optimizer', () => {
   })
 
   it('single slot', () => {
-    const ast = parse('<slot>hello</slot>', baseOptions)
+    const ast = parse('<div><slot>hello</slot></div>', baseOptions)
     optimize(ast, baseOptions)
-    expect(ast.static).toBe(false) // slot
-    expect(ast.children[0].static).toBe(true) // text node
+    expect(ast.children[0].static).toBe(false) // slot
+    expect(ast.children[0].children[0].static).toBe(true) // text node
   })
 
   it('named slot', () => {
-    const ast = parse('<slot name="one">hello world</slot>', baseOptions)
+    const ast = parse('<div><slot name="one">hello world</slot></div>', baseOptions)
     optimize(ast, baseOptions)
-    expect(ast.static).toBe(false) // slot
-    expect(ast.children[0].static).toBe(true) // text node
+    expect(ast.children[0].static).toBe(false) // slot
+    expect(ast.children[0].children[0].static).toBe(true) // text node
   })
 
   it('slot target', () => {

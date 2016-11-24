@@ -32,7 +32,7 @@ function assertCodegen (template, generatedCode, ...args) {
 describe('codegen', () => {
   it('generate directive', () => {
     assertCodegen(
-      '<p v-custom1:arg1.modifier="value1" v-custom2><p>',
+      '<p v-custom1:arg1.modifier="value1" v-custom2></p>',
       `with(this){return _h('p',{directives:[{name:"custom1",rawName:"v-custom1:arg1.modifier",value:(value1),expression:"value1",arg:"arg1",modifiers:{"modifier":true}},{name:"custom2",rawName:"v-custom2",arg:"arg1"}]})}`
     )
   })
@@ -46,26 +46,26 @@ describe('codegen', () => {
 
   it('generate v-for directive', () => {
     assertCodegen(
-      '<li v-for="item in items" :key="item.uid"></li>',
-      `with(this){return _l((items),function(item){return _h('li',{key:item.uid})})}`
+      '<div><li v-for="item in items" :key="item.uid"></li></div>',
+      `with(this){return _h('div',[_l((items),function(item){return _h('li',{key:item.uid})})])}`
     )
     // iterator syntax
     assertCodegen(
-      '<li v-for="(item, i) in items"></li>',
-      `with(this){return _l((items),function(item,i){return _h('li')})}`
+      '<div><li v-for="(item, i) in items"></li></div>',
+      `with(this){return _h('div',[_l((items),function(item,i){return _h('li')})])}`
     )
     assertCodegen(
-      '<li v-for="(item, key, index) in items"></li>',
-      `with(this){return _l((items),function(item,key,index){return _h('li')})}`
+      '<div><li v-for="(item, key, index) in items"></li></div>',
+      `with(this){return _h('div',[_l((items),function(item,key,index){return _h('li')})])}`
     )
     // destructuring
     assertCodegen(
-      '<li v-for="{ a, b } in items"></li>',
-      `with(this){return _l((items),function({ a, b }){return _h('li')})}`
+      '<div><li v-for="{ a, b } in items"></li></div>',
+      `with(this){return _h('div',[_l((items),function({ a, b }){return _h('li')})])}`
     )
     assertCodegen(
-      '<li v-for="({ a, b }, key, index) in items"></li>',
-      `with(this){return _l((items),function({ a, b },key,index){return _h('li')})}`
+      '<div><li v-for="({ a, b }, key, index) in items"></li></div>',
+      `with(this){return _h('div',[_l((items),function({ a, b },key,index){return _h('li')})])}`
     )
   })
 
@@ -127,29 +127,29 @@ describe('codegen', () => {
 
   it('generate template tag', () => {
     assertCodegen(
-      '<template><p>{{hello}}</p></template>',
-      `with(this){return [_h('p',[_s(hello)])]}`
+      '<div><template><p>{{hello}}</p></template></div>',
+      `with(this){return _h('div',[[_h('p',[_s(hello)])]])}`
     )
   })
 
   it('generate single slot', () => {
     assertCodegen(
-      '<slot></slot>',
-      `with(this){return _t("default")}`
+      '<div><slot></slot></div>',
+      `with(this){return _h('div',[_t("default")])}`
     )
   })
 
   it('generate named slot', () => {
     assertCodegen(
-      '<slot name="one"></slot>',
-      `with(this){return _t("one")}`
+      '<div><slot name="one"></slot></div>',
+      `with(this){return _h('div',[_t("one")])}`
     )
   })
 
   it('generate slot fallback content', () => {
     assertCodegen(
-      '<slot><div>hi</div></slot>',
-      `with(this){return _t("default",[_h('div',["hi"])])}`
+      '<div><slot><div>hi</div></slot></div>',
+      `with(this){return _h('div',[_t("default",[_h('div',["hi"])])])}`
     )
   })
 
@@ -356,8 +356,8 @@ describe('codegen', () => {
 
   it('generate multiple event handlers', () => {
     assertCodegen(
-      '<input @input="curent++" @input="onInput">',
-      `with(this){return _h('input',{on:{"input":[function($event){curent++},onInput]}})}`
+      '<input @input="curent++" @input.stop="onInput">',
+      `with(this){return _h('input',{on:{"input":[function($event){curent++},function($event){$event.stopPropagation();onInput($event)}]}})}`
     )
   })
 
