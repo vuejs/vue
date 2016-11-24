@@ -849,5 +849,12 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
+
+    it('warn when used on multiple elements', () => {
+      new Vue({
+        template: `<transition><p>1</p><p>2</p></transition>`
+      }).$mount()
+      expect(`<transition> can only be used on a single element`).toHaveBeenWarned()
+    })
   })
 }
