@@ -45,6 +45,7 @@ describe('Options lifecyce hooks', () => {
   describe('beforeMount', () => {
     it('should not have mounted', () => {
       const vm = new Vue({
+        render () {},
         beforeMount () {
           spy()
           expect(this._isMounted).toBe(false)
@@ -160,6 +161,7 @@ describe('Options lifecyce hooks', () => {
   describe('beforeDestroy', () => {
     it('should be called before destroy', () => {
       const vm = new Vue({
+        render () {},
         beforeDestroy () {
           spy()
           expect(this._isBeingDestroyed).toBe(false)
@@ -177,6 +179,7 @@ describe('Options lifecyce hooks', () => {
   describe('destroyed', () => {
     it('should be called after destroy', () => {
       const vm = new Vue({
+        render () {},
         destroyed () {
           spy()
           expect(this._isBeingDestroyed).toBe(true)

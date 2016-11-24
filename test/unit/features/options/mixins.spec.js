@@ -17,7 +17,7 @@ describe('Options mixins', () => {
       methods: {
         b: function () {}
       }
-    }).$mount()
+    })
 
     expect(vm.a).toBeDefined()
     expect(vm.b).toBeDefined()
@@ -103,7 +103,7 @@ describe('Options mixins', () => {
       methods: {
         b: function () {}
       }
-    }).$mount()
+    })
 
     expect(vm.a).toBeDefined()
     expect(vm.b).toBeDefined()

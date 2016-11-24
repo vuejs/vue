@@ -16,7 +16,8 @@ describe('create-component', () => {
   it('create a component basically', () => {
     const child = {
       name: 'child',
-      props: ['msg']
+      props: ['msg'],
+      render () {}
     }
     const init = jasmine.createSpy()
     const data = {

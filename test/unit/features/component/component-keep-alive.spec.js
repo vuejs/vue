@@ -265,7 +265,7 @@ describe('Component keep-alive', () => {
             <keep-alive>
               <component :is="view" class="test"></component>
             </keep-alive>
-          <transition>
+          </transition>
         </div>`,
         data: {
           view: 'one'

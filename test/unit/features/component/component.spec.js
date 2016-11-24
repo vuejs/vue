@@ -294,7 +294,6 @@ describe('Component', () => {
     expect(spy).not.toHaveBeenCalled()
     vm.a = null
     waitForUpdate(() => {
-      expect('Error when rendering root instance').toHaveBeenWarned()
       expect(spy).toHaveBeenCalled()
       expect(vm.$el.textContent).toBe('123') // should preserve rendered DOM
       vm.a = { b: 234 }

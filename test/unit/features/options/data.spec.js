@@ -79,6 +79,7 @@ describe('Options data', () => {
   it('should have access to props', () => {
     const Test = {
       props: ['a'],
+      render () {},
       data () {
         return {
           b: this.a
