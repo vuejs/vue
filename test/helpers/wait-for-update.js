@@ -40,7 +40,7 @@ window.waitForUpdate = initialCb => {
 
   Vue.nextTick(() => {
     if (!queue.length || !queue[queue.length - 1].fail) {
-      console.warn('waitForUpdate chain is missing .then(done)')
+      throw new Error('waitForUpdate chain is missing .then(done)')
     }
     shift()
   })

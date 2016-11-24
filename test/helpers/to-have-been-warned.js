@@ -5,6 +5,7 @@ if (typeof console === 'undefined') {
   }
 }
 
+let asserted
 function hasWarned (msg) {
   var count = console.error.calls.count()
   var args
@@ -23,11 +24,13 @@ function hasWarned (msg) {
 
 // define custom matcher for warnings
 beforeEach(() => {
+  asserted = []
   spyOn(console, 'error')
   jasmine.addMatchers({
     toHaveBeenWarned: () => {
       return {
         compare: msg => {
+          asserted = asserted.concat(msg)
           var warned = Array.isArray(msg)
             ? msg.some(hasWarned)
             : hasWarned(msg)
@@ -41,4 +44,18 @@ beforeEach(() => {
       }
     }
   })
+})
+
+afterEach(done => {
+  const warned = msg => asserted.some(assertedMsg => msg.indexOf(assertedMsg) > -1)
+  let count = console.error.calls.count()
+  let args
+  while (count--) {
+    args = console.error.calls.argsFor(count)
+    if (!warned(args[0])) {
+      done.fail(`Unexpected console.error message: ${args[0]}`)
+      return
+    }
+  }
+  done()
 })
