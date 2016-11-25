@@ -78,12 +78,14 @@ const builds = {
   },
   // Weex runtime framework (CommonJS).
   'weex-framework': {
+    weex: true,
     entry: path.resolve(__dirname, '../src/entries/weex-framework.js'),
     dest: path.resolve(__dirname, '../packages/weex-vue-framework/index.js'),
     format: 'cjs'
   },
   // Weex compiler (CommonJS). Used by Weex's Webpack loader.
   'weex-compiler': {
+    weex: true,
     entry: path.resolve(__dirname, '../src/entries/weex-compiler.js'),
     dest: path.resolve(__dirname, '../packages/weex-template-compiler/build.js'),
     format: 'cjs',
@@ -100,6 +102,9 @@ function genConfig (opts) {
     banner: opts.banner,
     moduleName: 'Vue',
     plugins: [
+      replace({
+        __WEEX__: !!opts.weex
+      }),
       flow(),
       buble(),
       alias(Object.assign({}, require('./alias'), opts.alias))

@@ -129,7 +129,9 @@ function createFunctionalComponent (
 
 export function createComponentInstanceForVnode (
   vnode: any, // we know it's MountedComponentVNode but flow doesn't
-  parent: any // activeInstance in lifecycle state
+  parent: any, // activeInstance in lifecycle state
+  parentElm?: ?Node,
+  refElm?: ?Node
 ): Component {
   const vnodeComponentOptions = vnode.componentOptions
   const options: InternalComponentOptions = {
@@ -139,7 +141,9 @@ export function createComponentInstanceForVnode (
     _componentTag: vnodeComponentOptions.tag,
     _parentVnode: vnode,
     _parentListeners: vnodeComponentOptions.listeners,
-    _renderChildren: vnodeComponentOptions.children
+    _renderChildren: vnodeComponentOptions.children,
+    _parentElm: parentElm || null,
+    _refElm: refElm || null
   }
   // check inline-template render functions
   const inlineTemplate = vnode.data.inlineTemplate
@@ -150,14 +154,25 @@ export function createComponentInstanceForVnode (
   return new vnodeComponentOptions.Ctor(options)
 }
 
-function init (vnode: VNodeWithData, hydrating: boolean) {
+function init (
+  vnode: VNodeWithData,
+  hydrating: boolean,
+  parentElm: ?Node,
+  refElm: ?Node
+): ?boolean {
   if (!vnode.child || vnode.child._isDestroyed) {
-    const child = vnode.child = createComponentInstanceForVnode(vnode, activeInstance)
+    const child = vnode.child = createComponentInstanceForVnode(
+      vnode,
+      activeInstance,
+      parentElm,
+      refElm
+    )
     child.$mount(hydrating ? vnode.elm : undefined, hydrating)
   } else if (vnode.data.keepAlive) {
     // kept-alive components, treat as a patch
     const mountedNode: any = vnode // work around flow
     prepatch(mountedNode, mountedNode)
+    return true // let the patcher know this is a reactivated component
   }
 }
 

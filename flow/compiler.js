@@ -125,7 +125,7 @@ declare type ASTElement = {
   wrapData?: (code: string) => string;
 
   // weex specific
-  atom?: boolean;
+  appendAsTree?: boolean;
 }
 
 declare type ASTExpression = {
