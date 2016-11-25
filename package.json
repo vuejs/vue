@@ -42,7 +42,8 @@
     "sauce": "SAUCE=true karma start build/karma.sauce.config.js",
     "bench:ssr": "npm run build:ssr && NODE_ENV=production node benchmarks/ssr/renderToString.js && NODE_ENV=production VUE_ENV=server node benchmarks/ssr/renderToStream.js",
     "release": "bash build/release.sh",
-    "release:weex": "bash build/release-weex.sh"
+    "release:weex": "bash build/release-weex.sh",
+    "install:hooks": "ln -fs ../../build/git-hooks/pre-commit .git/hooks/pre-commit"
   },
   "repository": {
     "type": "git",
