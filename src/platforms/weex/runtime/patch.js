@@ -9,4 +9,8 @@ import platformModules from 'weex/runtime/modules/index'
 // built-in modules have been applied.
 const modules = platformModules.concat(baseModules)
 
-export const patch: Function = createPatchFunction({ nodeOps, modules })
+export const patch: Function = createPatchFunction({
+  nodeOps,
+  modules,
+  LONG_LIST_THRESHOLD: 10
+})

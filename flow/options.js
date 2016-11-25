@@ -6,6 +6,8 @@ declare type InternalComponentOptions = {
   _parentListeners: ?Object;
   _renderChildren: ?VNodeChildren;
   _componentTag: ?string;
+  _parentElm: ?Node;
+  _refElm: ?Node;
   render?: Function;
   staticRenderFns?: Array<Function>
 }
@@ -61,6 +63,8 @@ declare type ComponentOptions = {
   _componentTag: ?string;
   _scopeId: ?string;
   _base: Class<Component>;
+  _parentElm: ?Node;
+  _refElm: ?Node;
 }
 
 declare type PropOptions = {

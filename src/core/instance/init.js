@@ -55,6 +55,8 @@ function initInternalComponent (vm: Component, options: InternalComponentOptions
   opts._parentListeners = options._parentListeners
   opts._renderChildren = options._renderChildren
   opts._componentTag = options._componentTag
+  opts._parentElm = options._parentElm
+  opts._refElm = options._refElm
   if (options.render) {
     opts.render = options.render
     opts.staticRenderFns = options.staticRenderFns

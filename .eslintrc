@@ -3,6 +3,9 @@
   "parser": "babel-eslint",
   "extends": "vue",
   "plugins": ["flowtype"],
+  "globals": {
+    "__WEEX__": true
+  },
   "rules": {
     "no-useless-escape": 0,
     "flowtype/define-flow-type": 1,
