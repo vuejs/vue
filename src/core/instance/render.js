@@ -14,8 +14,9 @@ export function initRender (vm: Component) {
   vm.$vnode = null // the placeholder node in parent tree
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null
-  vm._renderContext = vm.$options._parentVnode && vm.$options._parentVnode.context
-  vm.$slots = resolveSlots(vm.$options._renderChildren, vm._renderContext)
+  const parentVnode = vm.$options._parentVnode
+  const renderContext = parentVnode && parentVnode.context
+  vm.$slots = resolveSlots(vm.$options._renderChildren, renderContext)
   vm.$scopedSlots = {}
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
@@ -256,6 +257,7 @@ export function resolveSlots (
   let name, child
   for (let i = 0, l = children.length; i < l; i++) {
     child = children[i]
+    debugger
     // named slots should only be respected if the vnode was rendered in the
     // same context.
     if ((child.context === context || child.functionalContext === context) &&

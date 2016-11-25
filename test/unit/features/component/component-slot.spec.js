@@ -597,4 +597,34 @@ describe('Component slot', () => {
       expect(vm.$el.textContent).toBe('2foobar')
     }).then(done)
   })
+
+  // #4315
+  it('functional component passing slot content to stateful child component', done => {
+    const ComponentWithSlots = {
+      render (h) {
+        return h('div', this.$slots.slot1)
+      }
+    }
+
+    const FunctionalComp = {
+      functional: true,
+      render (h) {
+        return h(ComponentWithSlots, [h('span', { slot: 'slot1' }, 'foo')])
+      }
+    }
+
+    const vm = new Vue({
+      data: { n: 1 },
+      render (h) {
+        return h('div', [this.n, h(FunctionalComp)])
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('1foo')
+    vm.n++
+    waitForUpdate(() => {
+      // should not lose named slot
+      expect(vm.$el.textContent).toBe('2foo')
+    }).then(done)
+  })
 })
