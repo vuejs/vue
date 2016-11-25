@@ -3,5 +3,5 @@
 files_to_lint=$(git diff --cached --name-only --diff-filter=ACM | grep '\.js$')
 
 if [ -n "$files_to_lint" ]; then
-  flow && NODE_ENV=production eslint $files_to_lint
+  NODE_ENV=production eslint $files_to_lint
 fi

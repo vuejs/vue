@@ -65,7 +65,7 @@ If you are on a Unix-like system, optionally install the Git pre-commit hook wit
 $ npm run install:hooks
 ```
 
-This will run Flow and ESLint on changed files before each commit.
+This will run ESLint on changed files before each commit.
 
 ### Commonly used NPM scripts
 
