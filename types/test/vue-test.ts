@@ -45,6 +45,7 @@ class Test extends Vue {
     this.$nextTick(function() {
       this.$nextTick;
     });
+    this.$nextTick().then(() => {});
     this.$createElement("div", {}, "message");
   }
 
@@ -71,6 +72,7 @@ class Test extends Vue {
       }
     });
     this.nextTick(() => {});
+    this.nextTick().then(() => {});
     this.set({}, "", "");
     this.set([true, false, true], 1, true);
     this.delete({}, "");

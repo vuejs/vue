@@ -162,6 +162,37 @@ Vue.component('component', {
   delimiters: ["${", "}"]
 } as ComponentOptions<Component>);
 
+Vue.component('component-with-scoped-slot', {
+  render (h) {
+    interface ScopedSlotProps {
+      msg: string
+    }
+
+    return h('div', [
+      h('child', [
+        // default scoped slot as children
+        (props: ScopedSlotProps) => [h('span', [props.msg])]
+      ]),
+      h('child', {
+        scopedSlots: {
+          // named scoped slot as vnode data
+          item: (props: ScopedSlotProps) => [h('span', [props.msg])]
+        }
+      })
+    ])
+  },
+  components: {
+    child: {
+      render (h) {
+        return h('div', [
+          this.$scopedSlots['default']({ msg: 'hi' }),
+          this.$scopedSlots['item']({ msg: 'hello' })
+        ])
+      }
+    } as ComponentOptions<Vue>
+  }
+} as ComponentOptions<Vue>)
+
 Vue.component('functional-component', {
   props: ['prop'],
   functional: true,
