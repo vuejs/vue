@@ -98,7 +98,7 @@ declare type ASTElement = {
   ifProcessed?: boolean;
   elseif?: string;
   else?: true;
-  conditions?: ASTIfConditions;
+  ifConditions?: ASTIfConditions;
 
   for?: string;
   forProcessed?: boolean;

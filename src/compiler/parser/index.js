@@ -353,10 +353,10 @@ function processIfConditions (el, parent) {
 }
 
 function addIfCondition (el, condition) {
-  if (!el.conditions) {
-    el.conditions = []
+  if (!el.ifConditions) {
+    el.ifConditions = []
   }
-  el.conditions.push(condition)
+  el.ifConditions.push(condition)
 }
 
 function processOnce (el) {

@@ -66,7 +66,7 @@ describe('optimizer', () => {
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(false)
-    expect(ast.children[0].conditions[1].block.static).toBeUndefined()
+    expect(ast.children[0].ifConditions[1].block.static).toBeUndefined()
   })
 
   it('v-pre directive', () => {
@@ -228,13 +228,13 @@ describe('optimizer', () => {
       </div>
       `, baseOptions)
     optimize(ast, baseOptions)
-    expect(ast.conditions[1].block.children[0].children[0].conditions[1].block.staticRoot).toBe(false)
-    expect(ast.conditions[1].block.children[0].children[0].conditions[1].block.staticInFor).toBe(true)
+    expect(ast.ifConditions[1].block.children[0].children[0].ifConditions[1].block.staticRoot).toBe(false)
+    expect(ast.ifConditions[1].block.children[0].children[0].ifConditions[1].block.staticInFor).toBe(true)
 
-    expect(ast.conditions[1].block.children[0].children[0].conditions[2].block.staticRoot).toBe(false)
-    expect(ast.conditions[1].block.children[0].children[0].conditions[2].block.staticInFor).toBe(true)
+    expect(ast.ifConditions[1].block.children[0].children[0].ifConditions[2].block.staticRoot).toBe(false)
+    expect(ast.ifConditions[1].block.children[0].children[0].ifConditions[2].block.staticInFor).toBe(true)
 
-    expect(ast.conditions[2].block.children[0].children[0].conditions[1].block.staticRoot).toBe(false)
-    expect(ast.conditions[2].block.children[0].children[0].conditions[1].block.staticInFor).toBe(true)
+    expect(ast.ifConditions[2].block.children[0].children[0].ifConditions[1].block.staticRoot).toBe(false)
+    expect(ast.ifConditions[2].block.children[0].children[0].ifConditions[1].block.staticInFor).toBe(true)
   })
 })

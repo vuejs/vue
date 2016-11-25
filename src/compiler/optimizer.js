@@ -80,8 +80,8 @@ function markStaticRoots (node: ASTNode, isInFor: boolean) {
         markStaticRoots(node.children[i], isInFor || !!node.for)
       }
     }
-    if (node.conditions) {
-      walkThroughConditionsBlocks(node.conditions, isInFor)
+    if (node.ifConditions) {
+      walkThroughConditionsBlocks(node.ifConditions, isInFor)
     }
   }
 }

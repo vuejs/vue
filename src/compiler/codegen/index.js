@@ -112,7 +112,7 @@ function genOnce (el: ASTElement): string {
 
 function genIf (el: any): string {
   el.ifProcessed = true // avoid recursion
-  return genIfConditions(el.conditions)
+  return genIfConditions(el.ifConditions.slice())
 }
 
 function genIfConditions (conditions: ASTIfConditions): string {
@@ -127,7 +127,7 @@ function genIfConditions (conditions: ASTIfConditions): string {
     return `${genTernaryExp(condition.block)}`
   }
 
-  // v-if with v-once shuold generate code like (a)?_m(0):_m(1)
+  // v-if with v-once should generate code like (a)?_m(0):_m(1)
   function genTernaryExp (el) {
     return el.once ? genOnce(el) : genElement(el)
   }
