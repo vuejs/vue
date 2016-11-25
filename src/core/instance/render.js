@@ -257,7 +257,6 @@ export function resolveSlots (
   let name, child
   for (let i = 0, l = children.length; i < l; i++) {
     child = children[i]
-    debugger
     // named slots should only be respected if the vnode was rendered in the
     // same context.
     if ((child.context === context || child.functionalContext === context) &&
