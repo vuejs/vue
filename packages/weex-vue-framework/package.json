@@ -1,6 +1,6 @@
 {
   "name": "weex-vue-framework",
-  "version": "2.0.6-weex.1",
+  "version": "2.1.3-weex.1",
   "description": "Vue 2.0 Framework for Weex",
   "main": "index.js",
   "repository": {
