@@ -243,7 +243,7 @@ export function renderMixin (Vue: Class<Component>) {
     eventKeyCode: number,
     key: string,
     buildinAlias: number | Array<number> | void
-  ): any {
+  ): boolean {
     const keyCodes = config.keyCodes[key] || buildinAlias
     if (Array.isArray(keyCodes)) {
       return keyCodes.indexOf(eventKeyCode) === -1
