@@ -84,5 +84,5 @@ function genFilterCode (key: number | string): string {
     return `$event.keyCode!==${keyVal}`
   }
   const alias = keyCodes[key]
-  return `_k($event.keyCode, ${JSON.stringify(key)}${alias ? ',' + JSON.stringify(alias) : ''})`
+  return `_k($event.keyCode,${JSON.stringify(key)}${alias ? ',' + JSON.stringify(alias) : ''})`
 }

@@ -224,17 +224,17 @@ describe('codegen', () => {
   it('generate events with keycode', () => {
     assertCodegen(
       '<input @input.enter="onInput">',
-      `with(this){return _h('input',{on:{"input":function($event){if($event.keyCode!==13)return;onInput($event)}}})}`
+      `with(this){return _h('input',{on:{"input":function($event){if(_k($event.keyCode,"enter",13))return;onInput($event)}}})}`
     )
     // multiple keycodes (delete)
     assertCodegen(
       '<input @input.delete="onInput">',
-      `with(this){return _h('input',{on:{"input":function($event){if($event.keyCode!==8&&$event.keyCode!==46)return;onInput($event)}}})}`
+      `with(this){return _h('input',{on:{"input":function($event){if(_k($event.keyCode,"delete",[8,46]))return;onInput($event)}}})}`
     )
     // multiple keycodes (chained)
     assertCodegen(
       '<input @keydown.enter.delete="onInput">',
-      `with(this){return _h('input',{on:{"keydown":function($event){if($event.keyCode!==13&&$event.keyCode!==8&&$event.keyCode!==46)return;onInput($event)}}})}`
+      `with(this){return _h('input',{on:{"keydown":function($event){if(_k($event.keyCode,"enter",13)&&_k($event.keyCode,"delete",[8,46]))return;onInput($event)}}})}`
     )
     // number keycode
     assertCodegen(
@@ -244,7 +244,7 @@ describe('codegen', () => {
     // custom keycode
     assertCodegen(
       '<input @input.custom="onInput">',
-      `with(this){return _h('input',{on:{"input":function($event){if($event.keyCode!==_k("custom"))return;onInput($event)}}})}`
+      `with(this){return _h('input',{on:{"input":function($event){if(_k($event.keyCode,"custom"))return;onInput($event)}}})}`
     )
   })
 
