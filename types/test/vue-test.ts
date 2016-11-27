@@ -47,6 +47,23 @@ class Test extends Vue {
     });
     this.$nextTick().then(() => {});
     this.$createElement("div", {}, "message");
+
+    this._h('div', 'Hello world.')
+    this._s(true)
+    this._n('10')
+    this._e()
+    this._q(true, false)
+    this._i([true], true)
+    this._m(1, false)
+    this._o(this._e(), 0, 'key')
+    this._o([this._e()], 0, 'key')[0]
+    this._f('filter')
+    this._l(['hello'], (val) => this._h('div', val))
+    this._l(10, (val) => this._h('div', this._s(val)))
+    this._l({a: '0', b: '1'} as { [key: string]: string }, (v, k, i) => this._h('div', `${k}: ${v}`))
+    this._t('child', [this._e()], {})
+    this._b({}, 'key', {}, true)
+    this._k('enter')
   }
 
   static testConfig() {

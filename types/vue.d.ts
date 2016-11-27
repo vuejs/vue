@@ -38,7 +38,7 @@ export declare class Vue {
   readonly $parent: Vue;
   readonly $root: Vue;
   readonly $children: Vue[];
-  readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[]};
+  readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[] };
   readonly $slots: { [key: string]: VNode[] };
   readonly $scopedSlots: { [key: string]: ScopedSlot };
   readonly $isServer: boolean;
@@ -60,6 +60,47 @@ export declare class Vue {
   $nextTick(callback: (this: this) => void): void;
   $nextTick(): Promise<void>;
   $createElement: CreateElement;
+
+  /** shorthands used in render functions */
+  _h: CreateElement;
+
+  /** toString for mustaches */
+  _s(val: any): string;
+
+  /** number conversion */
+  _n(val: string): number | string;
+
+  /** empty vnode */
+  _e(): VNode;
+
+  /** loose equal */
+  _q(a: any, b: any): boolean;
+
+  /** loose indexOf */
+  _i(arr: any[], val: any): number;
+
+  /** render static tree by index */
+  _m(index: number, isInFor?: boolean): VNode | VNode[];
+
+  /** mark node as static (v-once) */
+  _o<T extends (VNode | VNode[])>(tree: T, index: number, key: string): T;
+
+  /** filter resolution helper */
+  _f(id: string): Function;
+
+  /** render v-for */
+  _l<T>(val: T[], render: (val: T, index: number) => VNode): VNode[];
+  _l(val: number, render: (val: number, index: number) => VNode): VNode[];
+  _l<T>(val: { [key: string]: T }, render: (val: T, key: string, index: number) => VNode): VNode[];
+
+  /** renderSlot */
+  _t(name: string, fallback?: VNode[], props?: { [key: string]: any }): VNode[] | null;
+
+  /** apply v-bind object */
+  _b(data: any, tag: string, value: any, asProp?: boolean): VNodeData;
+
+  /** expose v-on keyCodes */
+  _k(key: string): any;
 
   static config: {
     silent: boolean;
