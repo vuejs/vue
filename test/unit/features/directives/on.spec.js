@@ -187,6 +187,28 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalled()
   })
 
+  it('should override build-in keyCode', () => {
+    Vue.config.keyCodes.up = [1, 87]
+    vm = new Vue({
+      el,
+      template: `<input @keyup.up="foo" @keyup.down="foo">`,
+      methods: { foo: spy }
+    })
+    triggerEvent(vm.$el, 'keyup', e => {
+      e.keyCode = 87
+    })
+    expect(spy).toHaveBeenCalled()
+    triggerEvent(vm.$el, 'keyup', e => {
+      e.keyCode = 1
+    })
+    expect(spy).toHaveBeenCalledTimes(2)
+    // should not affect build-in down keycode
+    triggerEvent(vm.$el, 'keyup', e => {
+      e.keyCode = 40
+    })
+    expect(spy).toHaveBeenCalledTimes(3)
+  })
+
   it('should bind to a child component', () => {
     Vue.component('bar', {
       template: '<span>Hello</span>'

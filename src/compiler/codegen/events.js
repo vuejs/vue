@@ -74,20 +74,15 @@ function genHandler (
 }
 
 function genKeyFilter (keys: Array<string>): string {
-  const code = keys.length === 1
-    ? normalizeKeyCode(keys[0])
-    : Array.prototype.concat.apply([], keys.map(normalizeKeyCode))
-  if (Array.isArray(code)) {
-    return `if(${code.map(c => `$event.keyCode!==${c}`).join('&&')})return;`
-  } else {
-    return `if($event.keyCode!==${code})return;`
-  }
+  const code = keys.map(genFilterCode)
+  return `if(${code.join('&&')})return;`
 }
 
-function normalizeKeyCode (key) {
-  return (
-    parseInt(key, 10) || // number keyCode
-    keyCodes[key] || // built-in alias
-    `_k(${JSON.stringify(key)})` // custom alias
-  )
+function genFilterCode (key: number | string): string {
+  const keyVal = parseInt(key, 10)
+  if (keyVal) {
+    return `$event.keyCode!==${keyVal}`
+  }
+  const alias = keyCodes[key]
+  return `_k($event.keyCode,${JSON.stringify(key)}${alias ? ',' + JSON.stringify(alias) : ''})`
 }

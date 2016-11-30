@@ -104,8 +104,8 @@ declare interface Component {
   _t: (name: string, fallback: ?Array<VNode>, props: ?Object) => ?Array<VNode>;
   // apply v-bind object
   _b: (data: any, value: any, asProp?: boolean) => VNodeData;
-  // retrive custom keyCode
-  _k: (key: string) => ?number;
+  // check custom keyCode
+  _k: (eventKeyCode: number, key: string, buildinAlias: number | Array<number> | void) => boolean;
 
   // allow dynamic method registration
   [key: string]: any

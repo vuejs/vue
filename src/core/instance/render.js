@@ -238,9 +238,18 @@ export function renderMixin (Vue: Class<Component>) {
     return data
   }
 
-  // expose v-on keyCodes
-  Vue.prototype._k = function getKeyCodes (key: string): any {
-    return config.keyCodes[key]
+  // check v-on keyCodes
+  Vue.prototype._k = function checkKeyCodes (
+    eventKeyCode: number,
+    key: string,
+    buildinAlias: number | Array<number> | void
+  ): boolean {
+    const keyCodes = config.keyCodes[key] || buildinAlias
+    if (Array.isArray(keyCodes)) {
+      return keyCodes.indexOf(eventKeyCode) === -1
+    } else {
+      return keyCodes !== eventKeyCode
+    }
   }
 }
 
