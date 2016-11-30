@@ -237,6 +237,21 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalled()
   })
 
+  it('.once modifier should work with child components', () => {
+    Vue.component('bar', {
+      template: '<span>Hello</span>'
+    })
+    vm = new Vue({
+      el,
+      template: '<bar @custom.once="foo"></bar>',
+      methods: { foo: spy }
+    })
+    vm.$children[0].$emit('custom')
+    expect(spy.calls.count()).toBe(1)
+    vm.$children[0].$emit('custom')
+    expect(spy.calls.count()).toBe(1) // should not be called again
+  })
+
   it('remove listener', done => {
     const spy2 = jasmine.createSpy('remove listener')
     vm = new Vue({

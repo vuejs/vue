@@ -24,7 +24,7 @@ export function updateListeners (
       capture = event.charAt(0) === '!'
       event = capture ? event.slice(1) : event
       if (Array.isArray(cur)) {
-        add(event, (cur.invoker = arrInvoker(cur)), capture, once)
+        add(event, (cur.invoker = arrInvoker(cur)), once, capture)
       } else {
         if (!cur.invoker) {
           fn = cur
@@ -32,7 +32,7 @@ export function updateListeners (
           cur.fn = fn
           cur.invoker = fnInvoker(cur)
         }
-        add(event, cur.invoker, capture, once)
+        add(event, cur.invoker, once, capture)
       }
     } else if (cur !== old) {
       if (Array.isArray(old)) {
@@ -51,7 +51,7 @@ export function updateListeners (
       event = once ? name.slice(1) : name
       capture = event.charAt(0) === '!'
       event = capture ? event.slice(1) : event
-      remove(event, oldOn[name].invoker, capture) // Removal of a capturing listener does not affect a non-capturing version of the same listener, and vice versa.
+      remove(event, oldOn[name].invoker, capture)
     }
   }
 }
