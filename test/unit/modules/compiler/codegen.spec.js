@@ -296,6 +296,27 @@ describe('codegen', () => {
     )
   })
 
+  it('generate events with once modifier', () => {
+    assertCodegen(
+      '<input @input.once="onInput">',
+      `with(this){return _h('input',{on:{"~input":function($event){onInput($event)}}})}`
+    )
+  })
+
+  it('generate events with capture and once modifier', () => {
+    assertCodegen(
+      '<input @input.capture.once="onInput">',
+      `with(this){return _h('input',{on:{"~!input":function($event){onInput($event)}}})}`
+    )
+  })
+
+  it('generate events with once and capture modifier', () => {
+    assertCodegen(
+      '<input @input.once.capture="onInput">',
+      `with(this){return _h('input',{on:{"~!input":function($event){onInput($event)}}})}`
+    )
+  })
+
   it('generate events with inline statement', () => {
     assertCodegen(
       '<input @input="curent++">',

@@ -46,6 +46,10 @@ export function addHandler (
     delete modifiers.capture
     name = '!' + name // mark the event as captured
   }
+  if (modifiers && modifiers.once) {
+    delete modifiers.once
+    name = '~' + name // mark the event as once
+  }
   let events
   if (modifiers && modifiers.native) {
     delete modifiers.native
