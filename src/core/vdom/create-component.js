@@ -172,7 +172,6 @@ function init (
     // kept-alive components, treat as a patch
     const mountedNode: any = vnode // work around flow
     prepatch(mountedNode, mountedNode)
-    return true // let the patcher know this is a reactivated component
   }
 }
 
@@ -318,11 +317,9 @@ function mergeHooks (data: VNodeData) {
   }
 }
 
-function mergeHook (a: Function, b: Function): Function {
-  // since all hooks have at most two args, use fixed args
-  // to avoid having to use fn.apply().
-  return (_, __) => {
-    a(_, __)
-    b(_, __)
+function mergeHook (one: Function, two: Function): Function {
+  return function (a, b, c, d) {
+    one(a, b, c, d)
+    two(a, b, c, d)
   }
 }
