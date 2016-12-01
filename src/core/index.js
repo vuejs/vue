@@ -10,13 +10,13 @@ for (const key in modifierCode) {
   Vue.config.keyCodes[key] = undefined
 }
 
-const configWatcherVM = new Vue({
+new Vue({
   data: {
     config: Vue.config
   },
   watch: {
     'config.keyCodes': {
-      handler: (val, oldVal) => {
+      handler: () => {
         if (process.env.NODE_ENV !== 'production') {
           for (const key in modifierCode) {
             if (Vue.config.keyCodes[key]) {
