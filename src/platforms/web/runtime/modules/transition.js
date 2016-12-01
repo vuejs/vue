@@ -51,10 +51,12 @@ export function enter (vnode: VNodeWithData) {
   // transition. One edge case to check is when the <transition> is placed
   // as the root node of a child component. In that case we need to check
   // <transition>'s parent for appear check.
-  const transitionNode = activeInstance.$vnode
-  const context = transitionNode && transitionNode.parent
-    ? transitionNode.parent.context
-    : activeInstance
+  let context = activeInstance
+  let transitionNode = activeInstance.$vnode
+  while (transitionNode && transitionNode.parent) {
+    transitionNode = transitionNode.parent
+    context = transitionNode.context
+  }
 
   const isAppear = !context._isMounted || !vnode.isRootInsert
 
@@ -96,7 +98,10 @@ export function enter (vnode: VNodeWithData) {
     mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
       const parent = el.parentNode
       const pendingNode = parent && parent._pending && parent._pending[vnode.key]
-      if (pendingNode && pendingNode.tag === vnode.tag && pendingNode.elm._leaveCb) {
+      if (pendingNode &&
+          pendingNode.context === vnode.context &&
+          pendingNode.tag === vnode.tag &&
+          pendingNode.elm._leaveCb) {
         pendingNode.elm._leaveCb()
       }
       enterHook && enterHook(el, cb)
