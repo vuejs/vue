@@ -16,14 +16,10 @@ const keyCodes = {
   'delete': [8, 46]
 }
 
-const modifierCode = {
+export const modifierCode = {
   stop: '$event.stopPropagation();',
   prevent: '$event.preventDefault();',
-  self: 'if($event.target !== $event.currentTarget)return;'
-}
-
-const isMouseEventRE = /^mouse|^pointer|^(click|dblclick|contextmenu|wheel)$/
-const mouseEventModifierCode = {
+  self: 'if($event.target !== $event.currentTarget)return;',
   ctrl: 'if(!$event.ctrlKey)return;',
   shift: 'if(!$event.shiftKey)return;',
   alt: 'if(!$event.altKey)return;',
@@ -33,19 +29,18 @@ const mouseEventModifierCode = {
 export function genHandlers (events: ASTElementHandlers, native?: boolean): string {
   let res = native ? 'nativeOn:{' : 'on:{'
   for (const name in events) {
-    res += `"${name}":${genHandler(name, events[name])},`
+    res += `"${name}":${genHandler(events[name])},`
   }
   return res.slice(0, -1) + '}'
 }
 
 function genHandler (
-  name: string,
   handler: ASTElementHandler | Array<ASTElementHandler>
 ): string {
   if (!handler) {
     return 'function(){}'
   } else if (Array.isArray(handler)) {
-    return `[${handler.map(handler => genHandler(name, handler)).join(',')}]`
+    return `[${handler.map(genHandler).join(',')}]`
   } else if (!handler.modifiers) {
     return fnExpRE.test(handler.value) || simplePathRE.test(handler.value)
       ? handler.value
@@ -53,12 +48,9 @@ function genHandler (
   } else {
     let code = ''
     const keys = []
-    const isMouseEvnet = isMouseEventRE.test(name)
     for (const key in handler.modifiers) {
       if (modifierCode[key]) {
         code += modifierCode[key]
-      } else if (isMouseEvnet && mouseEventModifierCode[key]) {
-        code += mouseEventModifierCode[key]
       } else {
         keys.push(key)
       }
