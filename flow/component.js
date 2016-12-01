@@ -105,7 +105,7 @@ declare interface Component {
   // apply v-bind object
   _b: (data: any, value: any, asProp?: boolean) => VNodeData;
   // check custom keyCode
-  _k: (eventKeyCode: number, key: string, buildinAlias: number | Array<number> | void) => boolean;
+  _k: (eventKeyCode: number, key: string, builtInAlias: number | Array<number> | void) => boolean;
 
   // allow dynamic method registration
   [key: string]: any

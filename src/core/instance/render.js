@@ -242,9 +242,9 @@ export function renderMixin (Vue: Class<Component>) {
   Vue.prototype._k = function checkKeyCodes (
     eventKeyCode: number,
     key: string,
-    buildinAlias: number | Array<number> | void
+    builtInAlias: number | Array<number> | void
   ): boolean {
-    const keyCodes = config.keyCodes[key] || buildinAlias
+    const keyCodes = config.keyCodes[key] || builtInAlias
     if (Array.isArray(keyCodes)) {
       return keyCodes.indexOf(eventKeyCode) === -1
     } else {
