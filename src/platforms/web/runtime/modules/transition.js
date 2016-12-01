@@ -253,12 +253,15 @@ function once (fn: Function): Function {
   }
 }
 
+function _enter (_: any, vnode: VNodeWithData) {
+  if (!vnode.data.show) {
+    enter(vnode)
+  }
+}
+
 export default inBrowser ? {
-  create (_: any, vnode: VNodeWithData) {
-    if (!vnode.data.show) {
-      enter(vnode)
-    }
-  },
+  create: _enter,
+  activate: _enter,
   remove (vnode: VNode, rm: Function) {
     /* istanbul ignore else */
     if (!vnode.data.show) {
