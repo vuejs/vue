@@ -10,7 +10,7 @@
  */
 
 import { makeMap, no } from 'shared/util'
-import { isNonPhrasingTag, canBeLeftOpenTag } from 'web/util/index'
+import { isNonPhrasingTag, canBeLeftOpenTag } from 'web/compiler/util'
 
 // Regular Expressions for parsing tags and attributes
 const singleAttrIdentifier = /([^\s"'<>/=]+)/
