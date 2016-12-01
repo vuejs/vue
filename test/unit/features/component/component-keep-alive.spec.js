@@ -539,6 +539,21 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">bar</div>'
         )
+        vm.view = 'foo'
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave test-leave-active">bar</div>' +
+          '<div class="test v-enter v-enter-active">foo</div>'
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave-active">bar</div>' +
+          '<div class="test v-enter-active">foo</div>'
+        )
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">foo</div>'
+        )
       }).then(done)
     })
   }
