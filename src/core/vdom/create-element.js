@@ -1,6 +1,6 @@
 /* @flow */
 
-import VNode, { emptyVNode } from './vnode'
+import VNode, { createEmptyVNode } from './vnode'
 import config from '../config'
 import { createComponent } from './create-component'
 import { normalizeChildren } from './helpers/index'
@@ -37,7 +37,7 @@ export function _createElement (
   }
   if (!tag) {
     // in case of component :is set to falsy value
-    return emptyVNode()
+    return createEmptyVNode()
   }
   // support single function children as default scoped slot
   if (Array.isArray(children) &&

@@ -51,7 +51,7 @@ export default class VNode {
   }
 }
 
-export const emptyVNode = () => {
+export const createEmptyVNode = () => {
   const node = new VNode()
   node.text = ''
   node.isComment = true

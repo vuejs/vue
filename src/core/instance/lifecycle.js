@@ -1,7 +1,7 @@
 /* @flow */
 
 import Watcher from '../observer/watcher'
-import { emptyVNode } from '../vdom/vnode'
+import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { warn, validateProp, remove, noop } from '../util/index'
 import { resolveSlots } from './render'
@@ -41,7 +41,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const vm: Component = this
     vm.$el = el
     if (!vm.$options.render) {
-      vm.$options.render = emptyVNode
+      vm.$options.render = createEmptyVNode
       if (process.env.NODE_ENV !== 'production') {
         /* istanbul ignore if */
         if (vm.$options.template && vm.$options.template.charAt(0) !== '#') {

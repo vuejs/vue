@@ -1,7 +1,7 @@
 /* @flow */
 
 import config from '../config'
-import VNode, { emptyVNode, cloneVNode, cloneVNodes } from '../vdom/vnode'
+import VNode, { createEmptyVNode, cloneVNode, cloneVNodes } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers/index'
 import {
   warn, formatComponentName, bind, isObject, toObject,
@@ -82,7 +82,7 @@ export function renderMixin (Vue: Class<Component>) {
           vm
         )
       }
-      vnode = emptyVNode()
+      vnode = createEmptyVNode()
     }
     // set parent
     vnode.parent = _parentVnode
@@ -96,7 +96,7 @@ export function renderMixin (Vue: Class<Component>) {
   // number conversion
   Vue.prototype._n = toNumber
   // empty vnode
-  Vue.prototype._e = emptyVNode
+  Vue.prototype._e = createEmptyVNode
   // loose equal
   Vue.prototype._q = looseEqual
   // loose indexOf
