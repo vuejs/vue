@@ -26,7 +26,6 @@ export default class VNode {
     children?: Array<VNode> | void,
     text?: string,
     elm?: Node,
-    ns?: string | void,
     context?: Component,
     componentOptions?: VNodeComponentOptions
   ) {
@@ -35,7 +34,7 @@ export default class VNode {
     this.children = children
     this.text = text
     this.elm = elm
-    this.ns = ns
+    this.ns = undefined
     this.context = context
     this.functionalContext = undefined
     this.key = data && data.key
@@ -73,10 +72,10 @@ export function cloneVNode (vnode: VNode): VNode {
     vnode.children,
     vnode.text,
     vnode.elm,
-    vnode.ns,
     vnode.context,
     vnode.componentOptions
   )
+  cloned.ns = vnode.ns
   cloned.isStatic = vnode.isStatic
   cloned.key = vnode.key
   cloned.isCloned = true

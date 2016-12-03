@@ -85,7 +85,7 @@ export function createComponent (
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
-    data, undefined, undefined, undefined, undefined, context,
+    data, undefined, undefined, undefined, context,
     { Ctor, propsData, listeners, tag, children }
   )
   return vnode
@@ -108,7 +108,7 @@ function createFunctionalComponent (
   // ensure the createElement function in functional components
   // gets a unique context - this is necessary for correct named slot check
   const _context = Object.create(context)
-  const h = (a, b, c, d) => createElement(_context, a, b, c, !d)
+  const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
   const vnode = Ctor.options.render.call(null, h, {
     props,
     data,

@@ -51,30 +51,49 @@ export function _createElement (
     data.scopedSlots = { default: children[0] }
     children.length = 0
   }
+  let vnode, ns
   if (typeof tag === 'string') {
     let Ctor
-    const ns = config.getTagNamespace(tag)
+    ns = config.getTagNamespace(tag)
     if (config.isReservedTag(tag)) {
       // platform built-in elements
-      return new VNode(
-        tag, data, needNormalization ? normalizeChildren(children, ns) : children,
-        undefined, undefined, ns, context
+      vnode = new VNode(
+        tag, data, needNormalization ? normalizeChildren(children) : children,
+        undefined, undefined, context
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
-      return createComponent(Ctor, data, context, children, tag) || createEmptyVNode()
+      vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
-      const childNs = tag === 'foreignObject' ? 'xhtml' : ns
-      return new VNode(
-        tag, data, needNormalization ? normalizeChildren(children, childNs) : children,
-        undefined, undefined, ns, context
+      ns = tag === 'foreignObject' ? 'xhtml' : ns
+      vnode = new VNode(
+        tag, data, needNormalization ? normalizeChildren(children) : children,
+        undefined, undefined, context
       )
     }
   } else {
     // direct component options / constructor
-    return createComponent(tag, data, context, children) || createEmptyVNode()
+    vnode = createComponent(tag, data, context, children)
+  }
+  if (vnode) {
+    if (ns) applyNS(vnode, ns)
+    return vnode
+  } else {
+    return createEmptyVNode()
+  }
+}
+
+function applyNS (vnode, ns) {
+  vnode.ns = ns
+  if (vnode.children) {
+    for (let i = 0, l = vnode.children.length; i < l; i++) {
+      const child = vnode.children[i]
+      if (child.tag && !child.ns) {
+        applyNS(child, ns)
+      }
+    }
   }
 }

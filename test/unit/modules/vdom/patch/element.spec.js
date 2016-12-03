@@ -11,7 +11,8 @@ describe('vdom patch: element', () => {
   })
 
   it('should create an element which having the namespace', () => {
-    const vnode = new VNode('svg', {}, undefined, undefined, undefined, 'svg')
+    const vnode = new VNode('svg', {})
+    vnode.ns = 'svg'
     const elm = patch(null, vnode)
     expect(elm.namespaceURI).toBe('http://www.w3.org/2000/svg')
   })
