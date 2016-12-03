@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import { createElement } from 'core/vdom/create-element'
-import { emptyVNode } from 'core/vdom/vnode'
+import { createEmptyVNode } from 'core/vdom/vnode'
 import { bind } from 'shared/util'
 
 describe('create-element', () => {
@@ -62,7 +62,7 @@ describe('create-element', () => {
     })
     const h = bind(createElement, vm)
     const vnode = h(null, {})
-    expect(vnode).toEqual(emptyVNode())
+    expect(vnode).toEqual(createEmptyVNode())
   })
 
   it('render vnode with not string tag using createElement', () => {
