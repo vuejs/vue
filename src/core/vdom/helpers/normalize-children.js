@@ -1,7 +1,7 @@
 /* @flow */
 
 import { isPrimitive } from 'core/util/index'
-import VNode from 'core/vdom/vnode'
+import VNode, { createTextVNode } from 'core/vdom/vnode'
 
 export function normalizeChildren (children: any, ns: ?string): Array<VNode> | void {
   return isPrimitive(children)
@@ -30,9 +30,7 @@ function normalizeArrayChildren (children: any, ns: ?string, nestedIndex?: strin
       }
     } else {
       if (c.text && last && last.text) {
-        if (!last.isCloned) {
-          last.text += c.text
-        }
+        res[res.length - 1] = createTextVNode(last.text + c.text)
       } else {
         // inherit parent namespace
         if (ns) {
@@ -47,10 +45,6 @@ function normalizeArrayChildren (children: any, ns: ?string, nestedIndex?: strin
     }
   }
   return res
-}
-
-function createTextVNode (val) {
-  return new VNode(undefined, undefined, undefined, String(val))
 }
 
 function applyNS (vnode, ns) {

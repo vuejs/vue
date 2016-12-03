@@ -61,7 +61,7 @@ function genElement (el: ASTElement): string {
     } else {
       const data = el.plain ? undefined : genData(el)
 
-      const children = el.inlineTemplate ? null : genChildren(el)
+      const children = el.inlineTemplate ? null : genChildren(el, true)
       code = `_h('${el.tag}'${
         data ? `,${data}` : '' // data
       }${
@@ -276,10 +276,34 @@ function genScopedSlot (key: string, el: ASTElement) {
   }}`
 }
 
-function genChildren (el: ASTElement): string | void {
-  if (el.children.length) {
-    return '[' + el.children.map(genNode).join(',') + ']'
+function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
+  const children = el.children
+  if (children.length) {
+    const el: any = children[0]
+    // optimize single v-for
+    if (children.length === 1 &&
+        el.for &&
+        el.tag !== 'template' &&
+        el.tag !== 'slot') {
+      return genElement(el)
+    }
+    return `[${children.map(genNode).join(',')}]${
+      checkSkip
+        ? canSkipNormalization(children) ? '' : ',true'
+        : ''
+    }`
   }
+}
+
+function canSkipNormalization (children): boolean {
+  for (let i = 0; i < children.length; i++) {
+    const el: any = children[i]
+    if (el.for || el.tag === 'template' || el.tag === 'slot' ||
+      (el.if && el.ifConditions.some(c => c.tag === 'template'))) {
+      return false
+    }
+  }
+  return true
 }
 
 function genNode (node: ASTNode) {
@@ -291,9 +315,10 @@ function genNode (node: ASTNode) {
 }
 
 function genText (text: ASTText | ASTExpression): string {
-  return text.type === 2
+  return `_v(${text.type === 2
     ? text.expression // no need for () because already wrapped in _s()
     : transformSpecialNewlines(JSON.stringify(text.text))
+  })`
 }
 
 function genSlot (el: ASTElement): string {
@@ -310,7 +335,7 @@ function genSlot (el: ASTElement): string {
 
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement
 function genComponent (componentName, el): string {
-  const children = el.inlineTemplate ? null : genChildren(el)
+  const children = el.inlineTemplate ? null : genChildren(el, true)
   return `_h(${componentName},${genData(el)}${
     children ? `,${children}` : ''
   })`

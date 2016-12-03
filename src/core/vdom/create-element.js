@@ -4,36 +4,41 @@ import VNode, { createEmptyVNode } from './vnode'
 import config from '../config'
 import { createComponent } from './create-component'
 import { normalizeChildren } from './helpers/index'
-import { warn, resolveAsset } from '../util/index'
+import { warn, resolveAsset, isPrimitive } from '../util/index'
 
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
 export function createElement (
+  context: Component,
   tag: any,
   data: any,
-  children: any
-): VNode | void {
-  if (data && (Array.isArray(data) || typeof data !== 'object')) {
+  children: any,
+  needNormalization: any,
+  flipNormalization: boolean
+): VNode {
+  if (Array.isArray(data) || isPrimitive(data)) {
+    needNormalization = children
     children = data
     data = undefined
   }
-  // make sure to use real instance instead of proxy as context
-  return _createElement(this._self, tag, data, children)
+  if (flipNormalization) needNormalization = !needNormalization
+  return _createElement(context, tag, data, children, needNormalization)
 }
 
 export function _createElement (
   context: Component,
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
-  children?: VNodeChildren | void
-): VNode | void {
+  children?: any,
+  needNormalization?: boolean
+): VNode {
   if (data && data.__ob__) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
       'Always create fresh vnode data objects in each render!',
       context
     )
-    return
+    return createEmptyVNode()
   }
   if (!tag) {
     // in case of component :is set to falsy value
@@ -52,24 +57,24 @@ export function _createElement (
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       return new VNode(
-        tag, data, normalizeChildren(children, ns),
+        tag, data, needNormalization ? normalizeChildren(children, ns) : children,
         undefined, undefined, ns, context
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
-      return createComponent(Ctor, data, context, children, tag)
+      return createComponent(Ctor, data, context, children, tag) || createEmptyVNode()
     } else {
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
       const childNs = tag === 'foreignObject' ? 'xhtml' : ns
       return new VNode(
-        tag, data, normalizeChildren(children, childNs),
+        tag, data, needNormalization ? normalizeChildren(children, childNs) : children,
         undefined, undefined, ns, context
       )
     }
   } else {
     // direct component options / constructor
-    return createComponent(tag, data, context, children)
+    return createComponent(tag, data, context, children) || createEmptyVNode()
   }
 }

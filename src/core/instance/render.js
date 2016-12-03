@@ -1,11 +1,24 @@
 /* @flow */
 
 import config from '../config'
-import VNode, { createEmptyVNode, cloneVNode, cloneVNodes } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers/index'
+import VNode, {
+  cloneVNode,
+  cloneVNodes,
+  createTextVNode,
+  createEmptyVNode
+} from '../vdom/vnode'
 import {
-  warn, formatComponentName, bind, isObject, toObject,
-  nextTick, resolveAsset, _toString, toNumber, looseEqual, looseIndexOf
+  warn,
+  isObject,
+  toObject,
+  nextTick,
+  toNumber,
+  _toString,
+  looseEqual,
+  looseIndexOf,
+  resolveAsset,
+  formatComponentName
 } from '../util/index'
 
 import { createElement } from '../vdom/create-element'
@@ -18,9 +31,12 @@ export function initRender (vm: Component) {
   const renderContext = parentVnode && parentVnode.context
   vm.$slots = resolveSlots(vm.$options._renderChildren, renderContext)
   vm.$scopedSlots = {}
-  // bind the public createElement fn to this instance
+  // bind the createElement fn to this instance
   // so that we get proper render context inside it.
-  vm.$createElement = bind(createElement, vm)
+  // args order: tag, data, children, needNormalization
+  // the needNormalization flag is flipped and defaults to true for the public version.
+  vm._h = (a, b, c, d) => createElement(vm, a, b, c, d, false)
+  vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
   if (vm.$options.el) {
     vm.$mount(vm.$options.el)
   }
@@ -89,10 +105,10 @@ export function renderMixin (Vue: Class<Component>) {
     return vnode
   }
 
-  // shorthands used in render functions
-  Vue.prototype._h = createElement
   // toString for mustaches
   Vue.prototype._s = _toString
+  // convert text to vnode
+  Vue.prototype._v = createTextVNode
   // number conversion
   Vue.prototype._n = toNumber
   // empty vnode

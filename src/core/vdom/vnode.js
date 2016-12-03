@@ -58,6 +58,10 @@ export const createEmptyVNode = () => {
   return node
 }
 
+export function createTextVNode (val: string | number) {
+  return new VNode(undefined, undefined, undefined, String(val))
+}
+
 // optimized shallow clone
 // used for static nodes and slot nodes because they may be reused across
 // multiple renders, cloning them avoids errors when DOM manipulations rely

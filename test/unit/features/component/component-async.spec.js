@@ -17,7 +17,7 @@ describe('Component async', () => {
         }
       }
     }).$mount()
-    expect(vm.$el.innerHTML).toBe('')
+    expect(vm.$el.innerHTML).toBe('<!---->')
     expect(vm.$children.length).toBe(0)
     function next () {
       expect(vm.$el.innerHTML).toBe('<div>hi</div>')
@@ -151,7 +151,7 @@ describe('Component async', () => {
         }
       }
     }).$mount()
-    expect(vm.$el.innerHTML).toBe('')
+    expect(vm.$el.innerHTML).toBe('<!---->')
     expect(vm.$children.length).toBe(0)
     function next () {
       expect(vm.$el.innerHTML).toBe('<div>hi</div>')

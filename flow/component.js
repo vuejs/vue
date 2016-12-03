@@ -88,6 +88,8 @@ declare interface Component {
   _o: (vnode: VNode | Array<VNode>, index: number, key: string) => VNode | VNodeChildren;
   // toString
   _s: (value: any) => string;
+  // text to VNode
+  _v: (value: string | number) => VNode;
   // toNumber
   _n: (value: string) => number | string;
   // empty vnode
