@@ -1,7 +1,6 @@
 /* @flow */
 
 import VNode from './vnode'
-import { normalizeChildren } from './helpers/index'
 import { resolveConstructorOptions } from '../instance/init'
 import { activeInstance, callHook } from '../instance/lifecycle'
 import { resolveSlots } from '../instance/render'
@@ -15,7 +14,7 @@ export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data?: VNodeData,
   context: Component,
-  children?: VNodeChildren,
+  children: ?Array<VNode>,
   tag?: string
 ): VNode | void {
   if (!Ctor) {
@@ -96,7 +95,7 @@ function createFunctionalComponent (
   propsData: ?Object,
   data: VNodeData,
   context: Component,
-  children?: VNodeChildren
+  children: ?Array<VNode>
 ): VNode | void {
   const props = {}
   const propOptions = Ctor.options.props
@@ -113,7 +112,7 @@ function createFunctionalComponent (
     props,
     data,
     parent: context,
-    children: normalizeChildren(children),
+    children,
     slots: () => resolveSlots(children, context)
   })
   if (vnode instanceof VNode) {

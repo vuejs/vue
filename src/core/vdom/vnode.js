@@ -3,7 +3,7 @@
 export default class VNode {
   tag: string | void;
   data: VNodeData | void;
-  children: Array<VNode> | void;
+  children: ?Array<VNode>;
   text: string | void;
   elm: Node | void;
   ns: string | void;
@@ -23,7 +23,7 @@ export default class VNode {
   constructor (
     tag?: string,
     data?: VNodeData,
-    children?: Array<VNode> | void,
+    children?: ?Array<VNode>,
     text?: string,
     elm?: Node,
     context?: Component,

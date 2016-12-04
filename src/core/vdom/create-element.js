@@ -14,14 +14,14 @@ export function createElement (
   data: any,
   children: any,
   needNormalization: any,
-  flipNormalization: boolean
+  alwaysNormalize: boolean
 ): VNode {
   if (Array.isArray(data) || isPrimitive(data)) {
     needNormalization = children
     children = data
     data = undefined
   }
-  if (flipNormalization) needNormalization = !needNormalization
+  if (alwaysNormalize) needNormalization = true
   return _createElement(context, tag, data, children, needNormalization)
 }
 
@@ -51,6 +51,9 @@ export function _createElement (
     data.scopedSlots = { default: children[0] }
     children.length = 0
   }
+  if (needNormalization) {
+    children = normalizeChildren(children)
+  }
   let vnode, ns
   if (typeof tag === 'string') {
     let Ctor
@@ -58,7 +61,7 @@ export function _createElement (
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       vnode = new VNode(
-        tag, data, needNormalization ? normalizeChildren(children) : children,
+        tag, data, children,
         undefined, undefined, context
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
@@ -70,7 +73,7 @@ export function _createElement (
       // parent normalizes children
       ns = tag === 'foreignObject' ? 'xhtml' : ns
       vnode = new VNode(
-        tag, data, needNormalization ? normalizeChildren(children) : children,
+        tag, data, children,
         undefined, undefined, context
       )
     }

@@ -75,7 +75,7 @@ declare interface Component {
     propsData: ?Object,
     listeners: ?{ [key: string]: Function | Array<Function> },
     parentVnode: VNode,
-    renderChildren: ?VNodeChildren
+    renderChildren: ?Array<VNode>
   ) => void;
   // rendering
   _render: () => VNode;

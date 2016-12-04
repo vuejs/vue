@@ -1,7 +1,6 @@
 /* @flow */
 
 import config from '../config'
-import { normalizeChildren } from '../vdom/helpers/index'
 import VNode, {
   cloneVNode,
   cloneVNodes,
@@ -34,7 +33,7 @@ export function initRender (vm: Component) {
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
   // args order: tag, data, children, needNormalization
-  // the needNormalization flag is flipped and defaults to true for the public version.
+  // the needNormalization flag is disabled for the public version.
   vm._h = (a, b, c, d) => createElement(vm, a, b, c, d, false)
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
   if (vm.$options.el) {
@@ -270,14 +269,13 @@ export function renderMixin (Vue: Class<Component>) {
 }
 
 export function resolveSlots (
-  renderChildren: ?VNodeChildren,
+  children: ?Array<VNode>,
   context: ?Component
 ): { [key: string]: Array<VNode> } {
   const slots = {}
-  if (!renderChildren) {
+  if (!children) {
     return slots
   }
-  const children = normalizeChildren(renderChildren) || []
   const defaultSlot = []
   let name, child
   for (let i = 0, l = children.length; i < l; i++) {

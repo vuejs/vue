@@ -3,7 +3,7 @@
 import { isPrimitive } from 'core/util/index'
 import VNode, { createTextVNode } from 'core/vdom/vnode'
 
-export function normalizeChildren (children: any): Array<VNode> | void {
+export function normalizeChildren (children: any): ?Array<VNode> {
   return isPrimitive(children)
     ? [createTextVNode(children)]
     : Array.isArray(children)

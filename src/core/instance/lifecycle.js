@@ -117,7 +117,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     propsData: ?Object,
     listeners: ?Object,
     parentVnode: VNode,
-    renderChildren: ?VNodeChildren
+    renderChildren: ?Array<VNode>
   ) {
     const vm: Component = this
     const hasChildren = !!(vm.$options._renderChildren || renderChildren)
