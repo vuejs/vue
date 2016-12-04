@@ -104,7 +104,7 @@ describe('Component', () => {
     vm.view = 'view-b'
     waitForUpdate(() => {
       expect(vm.$el.outerHTML).toBe('<div view="view-b">bar</div>')
-      vm.view = ''
+      vm.view = undefined
     })
     .then(() => {
       expect(vm.$el.nodeType).toBe(8)
