@@ -81,7 +81,7 @@ declare interface Component {
   _render: () => VNode;
   __patch__: (a: Element | VNode | void, b: VNode) => any;
   // createElement
-  _h: (vnode?: VNode, data?: VNodeData, children?: VNodeChildren) => VNode | void;
+  _c: (vnode?: VNode, data?: VNodeData, children?: VNodeChildren) => VNode | void;
   // renderStatic
   _m: (index: number, isInFor?: boolean) => VNode | VNodeChildren;
   // markOnce

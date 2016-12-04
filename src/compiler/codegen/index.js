@@ -31,7 +31,7 @@ export function generate (
   transforms = pluckModuleFunction(options.modules, 'transformCode')
   dataGenFns = pluckModuleFunction(options.modules, 'genData')
   platformDirectives = options.directives || {}
-  const code = ast ? genElement(ast) : '_h("div")'
+  const code = ast ? genElement(ast) : '_c("div")'
   staticRenderFns = prevStaticRenderFns
   onceCount = prevOnceCount
   return {
@@ -62,7 +62,7 @@ function genElement (el: ASTElement): string {
       const data = el.plain ? undefined : genData(el)
 
       const children = el.inlineTemplate ? null : genChildren(el, true)
-      code = `_h('${el.tag}'${
+      code = `_c('${el.tag}'${
         data ? `,${data}` : '' // data
       }${
         children ? `,${children}` : '' // children
@@ -336,7 +336,7 @@ function genSlot (el: ASTElement): string {
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement
 function genComponent (componentName, el): string {
   const children = el.inlineTemplate ? null : genChildren(el, true)
-  return `_h(${componentName},${genData(el)}${
+  return `_c(${componentName},${genData(el)}${
     children ? `,${children}` : ''
   })`
 }

@@ -32,9 +32,11 @@ export function initRender (vm: Component) {
   vm.$scopedSlots = {}
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
-  // args order: tag, data, children, needNormalization
-  // the needNormalization flag is disabled for the public version.
-  vm._h = (a, b, c, d) => createElement(vm, a, b, c, d, false)
+  // args order: tag, data, children, needNormalization, alwaysNormalize
+  // internal version is used by render functions compiled from templates
+  vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
+  // normalization is always applied for the public version, used in
+  // user-written render functions.
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
   if (vm.$options.el) {
     vm.$mount(vm.$options.el)
