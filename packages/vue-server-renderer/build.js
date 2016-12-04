@@ -5546,9 +5546,10 @@ function isBooleanType (fn) {
 /*  */
 
 // attributes that should be using props for binding
+const acceptValue = makeMap('input,textarea,option,select')
 var mustUseProp = function (tag, attr) {
   return (
-    (attr === 'value' && (tag === 'input' || tag === 'textarea' || tag === 'option')) ||
+    (attr === 'value' && acceptValue(tag)) ||
     (attr === 'selected' && tag === 'option') ||
     (attr === 'checked' && tag === 'input') ||
     (attr === 'muted' && tag === 'video')
