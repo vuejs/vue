@@ -4,6 +4,7 @@ const buble = require('rollup-plugin-buble')
 const replace = require('rollup-plugin-replace')
 const alias = require('rollup-plugin-alias')
 const version = process.env.VERSION || require('../package.json').version
+const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
 
 const banner =
   '/*!\n' +
@@ -103,7 +104,9 @@ function genConfig (opts) {
     moduleName: 'Vue',
     plugins: [
       replace({
-        __WEEX__: !!opts.weex
+        __WEEX__: !!opts.weex,
+        __WEEX_VERSION__: weexVersion,
+        __VERSION__: version
       }),
       flow(),
       buble(),
