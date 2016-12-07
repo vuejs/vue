@@ -1,6 +1,7 @@
 /* @flow */
 
-import { extend } from 'shared/util'
+import { extend, toNumber } from 'shared/util'
+import { getModelModifier, isToNumber, isToTrim } from 'web/util/model'
 
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.domProps && !vnode.data.domProps) {
@@ -35,13 +36,30 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       elm._value = cur
       // avoid resetting cursor position when value is the same
       const strCur = cur == null ? '' : String(cur)
-      if (elm.value !== strCur && !elm.composing) {
+      if (!elm.composing && (
+          (document.activeElement !== elm && elm.value !== strCur) ||
+          (isValueChanged(vnode, strCur))
+      )) {
         elm.value = strCur
       }
     } else {
       elm[key] = cur
     }
   }
+}
+
+function isValueChanged (vnode: VNodeWithData, val: string): boolean {
+  const value = vnode.elm.value
+  const modifiers = getModelModifier(vnode)
+  const needNumber = isToNumber(modifiers, vnode.elm.type)
+  const needTrim = isToTrim(modifiers)
+  if (needNumber) {
+    return toNumber(value, val) !== toNumber(val)
+  }
+  if (needTrim) {
+    return value.trim() !== val.trim()
+  }
+  return value !== val
 }
 
 export default {
