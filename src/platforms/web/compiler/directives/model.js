@@ -1,7 +1,6 @@
 /* @flow */
 
 import { isIE } from 'core/util/env'
-import { isToNumber } from 'web/util/model'
 import { addHandler, addProp, getBindingAttr, parseModel } from 'compiler/helpers'
 
 let warn
@@ -51,7 +50,7 @@ function genCheckboxModel (
       'Declare initial values in the component\'s data option instead.'
     )
   }
-  const number = isToNumber(modifiers)
+  const number = modifiers && modifiers.number
   const valueBinding = getBindingAttr(el, 'value') || 'null'
   const trueValueBinding = getBindingAttr(el, 'true-value') || 'true'
   const falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
@@ -87,7 +86,7 @@ function genRadioModel (
       'Declare initial values in the component\'s data option instead.'
     )
   }
-  const number = isToNumber(modifiers)
+  const number = modifiers && modifiers.number
   let valueBinding = getBindingAttr(el, 'value') || 'null'
   valueBinding = number ? `_n(${valueBinding})` : valueBinding
   addProp(el, 'checked', `_q(${value},${valueBinding})`)
@@ -117,7 +116,7 @@ function genDefaultModel (
   }
 
   const type = el.attrsMap.type
-  const { lazy, trim } = modifiers || {}
+  const { lazy, number, trim } = modifiers || {}
   const event = lazy || (isIE && type === 'range') ? 'change' : 'input'
   const needCompositionGuard = !lazy && type !== 'range'
   const isNative = el.tag === 'input' || el.tag === 'textarea'
@@ -125,7 +124,7 @@ function genDefaultModel (
   let valueExpression = isNative
     ? `$event.target.value${trim ? '.trim()' : ''}`
     : trim ? `(typeof $event === 'string' ? $event.trim() : $event)` : `$event`
-  valueExpression = isToNumber(modifiers, type)
+  valueExpression = number || type === 'number'
     ? `_n(${valueExpression})`
     : valueExpression
   let code = genAssignmentCode(value, valueExpression)

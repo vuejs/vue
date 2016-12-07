@@ -1,7 +1,6 @@
 /* @flow */
 
 import { extend, toNumber } from 'shared/util'
-import { getModelModifier, isToNumber, isToTrim } from 'web/util/model'
 
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.domProps && !vnode.data.domProps) {
@@ -51,8 +50,8 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 function isValueChanged (vnode: VNodeWithData, val: string): boolean {
   const value = vnode.elm.value
   const modifiers = getModelModifier(vnode)
-  const needNumber = isToNumber(modifiers, vnode.elm.type)
-  const needTrim = isToTrim(modifiers)
+  const needNumber = (modifiers && modifiers.number) || vnode.elm.type === 'number'
+  const needTrim = modifiers && modifiers.trim
   if (needNumber) {
     return toNumber(value, val) !== toNumber(val)
   }
@@ -60,6 +59,17 @@ function isValueChanged (vnode: VNodeWithData, val: string): boolean {
     return value.trim() !== val.trim()
   }
   return value !== val
+}
+
+function getModelModifier (vnode: VNodeWithData): ASTModifiers | void {
+  const directives = vnode.data.directives || []
+  for (let i = 0, directive; i < directives.length; i++) {
+    directive = directives[i]
+    if (directive.name === 'model') {
+      return directive.modifiers
+    }
+  }
+  return undefined
 }
 
 export default {
