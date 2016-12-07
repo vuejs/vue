@@ -8,10 +8,11 @@ export function getModelModifier (vnode: VNodeWithData): ASTModifiers | void {
       return directive.modifiers
     }
   }
+  return undefined
 }
 
 export function isToNumber (modifiers: ?ASTModifiers, type: ?string): boolean {
-  return modifiers && modifiers.number || (type === 'number')
+  return (modifiers && modifiers.number) || type === 'number'
 }
 
 export function isToTrim (modifiers: ?ASTModifiers) {
