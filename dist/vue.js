@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.1.3
+ * Vue.js v2.1.4
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -232,193 +232,6 @@ function looseIndexOf (arr, val) {
 
 /*  */
 
-/**
- * Check if a string starts with $ or _
- */
-function isReserved (str) {
-  var c = (str + '').charCodeAt(0);
-  return c === 0x24 || c === 0x5F
-}
-
-/**
- * Define a property.
- */
-function def (obj, key, val, enumerable) {
-  Object.defineProperty(obj, key, {
-    value: val,
-    enumerable: !!enumerable,
-    writable: true,
-    configurable: true
-  });
-}
-
-/**
- * Parse simple path.
- */
-var bailRE = /[^\w.$]/;
-function parsePath (path) {
-  if (bailRE.test(path)) {
-    return
-  } else {
-    var segments = path.split('.');
-    return function (obj) {
-      for (var i = 0; i < segments.length; i++) {
-        if (!obj) { return }
-        obj = obj[segments[i]];
-      }
-      return obj
-    }
-  }
-}
-
-/*  */
-/* globals MutationObserver */
-
-// can we use __proto__?
-var hasProto = '__proto__' in {};
-
-// Browser environment sniffing
-var inBrowser =
-  typeof window !== 'undefined' &&
-  Object.prototype.toString.call(window) !== '[object Object]';
-
-var UA = inBrowser && window.navigator.userAgent.toLowerCase();
-var isIE = UA && /msie|trident/.test(UA);
-var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
-var isEdge = UA && UA.indexOf('edge/') > 0;
-var isAndroid = UA && UA.indexOf('android') > 0;
-var isIOS = UA && /iphone|ipad|ipod|ios/.test(UA);
-
-// this needs to be lazy-evaled because vue may be required before
-// vue-server-renderer can set VUE_ENV
-var _isServer;
-var isServerRendering = function () {
-  if (_isServer === undefined) {
-    /* istanbul ignore if */
-    if (!inBrowser && typeof global !== 'undefined') {
-      // detect presence of vue-server-renderer and avoid
-      // Webpack shimming the process
-      _isServer = global['process'].env.VUE_ENV === 'server';
-    } else {
-      _isServer = false;
-    }
-  }
-  return _isServer
-};
-
-// detect devtools
-var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
-
-/* istanbul ignore next */
-function isNative (Ctor) {
-  return /native code/.test(Ctor.toString())
-}
-
-/**
- * Defer a task to execute it asynchronously.
- */
-var nextTick = (function () {
-  var callbacks = [];
-  var pending = false;
-  var timerFunc;
-
-  function nextTickHandler () {
-    pending = false;
-    var copies = callbacks.slice(0);
-    callbacks.length = 0;
-    for (var i = 0; i < copies.length; i++) {
-      copies[i]();
-    }
-  }
-
-  // the nextTick behavior leverages the microtask queue, which can be accessed
-  // via either native Promise.then or MutationObserver.
-  // MutationObserver has wider support, however it is seriously bugged in
-  // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
-  // completely stops working after triggering a few times... so, if native
-  // Promise is available, we will use it:
-  /* istanbul ignore if */
-  if (typeof Promise !== 'undefined' && isNative(Promise)) {
-    var p = Promise.resolve();
-    timerFunc = function () {
-      p.then(nextTickHandler);
-      // in problematic UIWebViews, Promise.then doesn't completely break, but
-      // it can get stuck in a weird state where callbacks are pushed into the
-      // microtask queue but the queue isn't being flushed, until the browser
-      // needs to do some other work, e.g. handle a timer. Therefore we can
-      // "force" the microtask queue to be flushed by adding an empty timer.
-      if (isIOS) { setTimeout(noop); }
-    };
-  } else if (typeof MutationObserver !== 'undefined' && (
-    isNative(MutationObserver) ||
-    // PhantomJS and iOS 7.x
-    MutationObserver.toString() === '[object MutationObserverConstructor]'
-  )) {
-    // use MutationObserver where native Promise is not available,
-    // e.g. PhantomJS IE11, iOS7, Android 4.4
-    var counter = 1;
-    var observer = new MutationObserver(nextTickHandler);
-    var textNode = document.createTextNode(String(counter));
-    observer.observe(textNode, {
-      characterData: true
-    });
-    timerFunc = function () {
-      counter = (counter + 1) % 2;
-      textNode.data = String(counter);
-    };
-  } else {
-    // fallback to setTimeout
-    /* istanbul ignore next */
-    timerFunc = function () {
-      setTimeout(nextTickHandler, 0);
-    };
-  }
-
-  return function queueNextTick (cb, ctx) {
-    var _resolve;
-    callbacks.push(function () {
-      if (cb) { cb.call(ctx); }
-      if (_resolve) { _resolve(ctx); }
-    });
-    if (!pending) {
-      pending = true;
-      timerFunc();
-    }
-    if (!cb && typeof Promise !== 'undefined') {
-      return new Promise(function (resolve) {
-        _resolve = resolve;
-      })
-    }
-  }
-})();
-
-var _Set;
-/* istanbul ignore if */
-if (typeof Set !== 'undefined' && isNative(Set)) {
-  // use native Set when available.
-  _Set = Set;
-} else {
-  // a non-standard Set polyfill that only works with primitive keys.
-  _Set = (function () {
-    function Set () {
-      this.set = Object.create(null);
-    }
-    Set.prototype.has = function has (key) {
-      return this.set[key] !== undefined
-    };
-    Set.prototype.add = function add (key) {
-      this.set[key] = 1;
-    };
-    Set.prototype.clear = function clear () {
-      this.set = Object.create(null);
-    };
-
-    return Set;
-  }());
-}
-
-/*  */
-
 var config = {
   /**
    * Option merge strategies (used in core/util/options)
@@ -503,6 +316,191 @@ var config = {
    */
   _maxUpdateCount: 100
 };
+
+/*  */
+
+/**
+ * Check if a string starts with $ or _
+ */
+function isReserved (str) {
+  var c = (str + '').charCodeAt(0);
+  return c === 0x24 || c === 0x5F
+}
+
+/**
+ * Define a property.
+ */
+function def (obj, key, val, enumerable) {
+  Object.defineProperty(obj, key, {
+    value: val,
+    enumerable: !!enumerable,
+    writable: true,
+    configurable: true
+  });
+}
+
+/**
+ * Parse simple path.
+ */
+var bailRE = /[^\w.$]/;
+function parsePath (path) {
+  if (bailRE.test(path)) {
+    return
+  } else {
+    var segments = path.split('.');
+    return function (obj) {
+      for (var i = 0; i < segments.length; i++) {
+        if (!obj) { return }
+        obj = obj[segments[i]];
+      }
+      return obj
+    }
+  }
+}
+
+/*  */
+/* globals MutationObserver */
+
+// can we use __proto__?
+var hasProto = '__proto__' in {};
+
+// Browser environment sniffing
+var inBrowser = typeof window !== 'undefined';
+var UA = inBrowser && window.navigator.userAgent.toLowerCase();
+var isIE = UA && /msie|trident/.test(UA);
+var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
+var isEdge = UA && UA.indexOf('edge/') > 0;
+var isAndroid = UA && UA.indexOf('android') > 0;
+var isIOS = UA && /iphone|ipad|ipod|ios/.test(UA);
+
+// this needs to be lazy-evaled because vue may be required before
+// vue-server-renderer can set VUE_ENV
+var _isServer;
+var isServerRendering = function () {
+  if (_isServer === undefined) {
+    /* istanbul ignore if */
+    if (!inBrowser && typeof global !== 'undefined') {
+      // detect presence of vue-server-renderer and avoid
+      // Webpack shimming the process
+      _isServer = global['process'].env.VUE_ENV === 'server';
+    } else {
+      _isServer = false;
+    }
+  }
+  return _isServer
+};
+
+// detect devtools
+var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
+
+/* istanbul ignore next */
+function isNative (Ctor) {
+  return /native code/.test(Ctor.toString())
+}
+
+/**
+ * Defer a task to execute it asynchronously.
+ */
+var nextTick = (function () {
+  var callbacks = [];
+  var pending = false;
+  var timerFunc;
+
+  function nextTickHandler () {
+    pending = false;
+    var copies = callbacks.slice(0);
+    callbacks.length = 0;
+    for (var i = 0; i < copies.length; i++) {
+      copies[i]();
+    }
+  }
+
+  // the nextTick behavior leverages the microtask queue, which can be accessed
+  // via either native Promise.then or MutationObserver.
+  // MutationObserver has wider support, however it is seriously bugged in
+  // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
+  // completely stops working after triggering a few times... so, if native
+  // Promise is available, we will use it:
+  /* istanbul ignore if */
+  if (typeof Promise !== 'undefined' && isNative(Promise)) {
+    var p = Promise.resolve();
+    var logError = function (err) { console.error(err); };
+    timerFunc = function () {
+      p.then(nextTickHandler).catch(logError);
+      // in problematic UIWebViews, Promise.then doesn't completely break, but
+      // it can get stuck in a weird state where callbacks are pushed into the
+      // microtask queue but the queue isn't being flushed, until the browser
+      // needs to do some other work, e.g. handle a timer. Therefore we can
+      // "force" the microtask queue to be flushed by adding an empty timer.
+      if (isIOS) { setTimeout(noop); }
+    };
+  } else if (typeof MutationObserver !== 'undefined' && (
+    isNative(MutationObserver) ||
+    // PhantomJS and iOS 7.x
+    MutationObserver.toString() === '[object MutationObserverConstructor]'
+  )) {
+    // use MutationObserver where native Promise is not available,
+    // e.g. PhantomJS IE11, iOS7, Android 4.4
+    var counter = 1;
+    var observer = new MutationObserver(nextTickHandler);
+    var textNode = document.createTextNode(String(counter));
+    observer.observe(textNode, {
+      characterData: true
+    });
+    timerFunc = function () {
+      counter = (counter + 1) % 2;
+      textNode.data = String(counter);
+    };
+  } else {
+    // fallback to setTimeout
+    /* istanbul ignore next */
+    timerFunc = function () {
+      setTimeout(nextTickHandler, 0);
+    };
+  }
+
+  return function queueNextTick (cb, ctx) {
+    var _resolve;
+    callbacks.push(function () {
+      if (cb) { cb.call(ctx); }
+      if (_resolve) { _resolve(ctx); }
+    });
+    if (!pending) {
+      pending = true;
+      timerFunc();
+    }
+    if (!cb && typeof Promise !== 'undefined') {
+      return new Promise(function (resolve) {
+        _resolve = resolve;
+      })
+    }
+  }
+})();
+
+var _Set;
+/* istanbul ignore if */
+if (typeof Set !== 'undefined' && isNative(Set)) {
+  // use native Set when available.
+  _Set = Set;
+} else {
+  // a non-standard Set polyfill that only works with primitive keys.
+  _Set = (function () {
+    function Set () {
+      this.set = Object.create(null);
+    }
+    Set.prototype.has = function has (key) {
+      return this.set[key] !== undefined
+    };
+    Set.prototype.add = function add (key) {
+      this.set[key] = 1;
+    };
+    Set.prototype.clear = function clear () {
+      this.set = Object.create(null);
+    };
+
+    return Set;
+  }());
+}
 
 var warn = noop;
 var formatComponentName;
@@ -809,7 +807,7 @@ function defineReactive$$1 (
  * triggers change notification if the property doesn't
  * already exist.
  */
-function set (obj, key, val) {
+function set$1 (obj, key, val) {
   if (Array.isArray(obj)) {
     obj.length = Math.max(obj.length, key);
     obj.splice(key, 1, val);
@@ -908,7 +906,7 @@ function mergeData (to, from) {
     toVal = to[key];
     fromVal = from[key];
     if (!hasOwn(to, key)) {
-      set(to, key, fromVal);
+      set$1(to, key, fromVal);
     } else if (isPlainObject(toVal) && isPlainObject(fromVal)) {
       mergeData(toVal, fromVal);
     }
@@ -1436,6 +1434,21 @@ var initProxy;
     typeof Proxy !== 'undefined' &&
     Proxy.toString().match(/native code/);
 
+  if (hasProxy) {
+    var isBuiltInModifier = makeMap('stop,prevent,self,ctrl,shift,alt,meta');
+    config.keyCodes = new Proxy(config.keyCodes, {
+      set: function set (target, key, value) {
+        if (isBuiltInModifier(key)) {
+          warn(("Avoid overwriting built-in modifier in config.keyCodes: ." + key));
+          return false
+        } else {
+          target[key] = value;
+          return true
+        }
+      }
+    });
+  }
+
   var hasHandler = {
     has: function has (target, key) {
       var has = key in target;
@@ -1712,14 +1725,14 @@ Watcher.prototype.run = function run () {
         try {
           this.cb.call(this.vm, value, oldValue);
         } catch (e) {
-          "development" !== 'production' && warn(
-            ("Error in watcher \"" + (this.expression) + "\""),
-            this.vm
-          );
           /* istanbul ignore else */
           if (config.errorHandler) {
             config.errorHandler.call(null, e, this.vm);
           } else {
+            "development" !== 'production' && warn(
+              ("Error in watcher \"" + (this.expression) + "\""),
+              this.vm
+            );
             throw e
           }
         }
@@ -1812,13 +1825,13 @@ function _traverse (val, seen) {
 function initState (vm) {
   vm._watchers = [];
   initProps(vm);
+  initMethods(vm);
   initData(vm);
   initComputed(vm);
-  initMethods(vm);
   initWatch(vm);
 }
 
-var isReservedProp = makeMap('key,ref,slot');
+var isReservedProp = { key: 1, ref: 1, slot: 1 };
 
 function initProps (vm) {
   var props = vm.$options.props;
@@ -1832,7 +1845,7 @@ function initProps (vm) {
       var key = keys[i];
       /* istanbul ignore else */
       {
-        if (isReservedProp(key)) {
+        if (isReservedProp[key]) {
           warn(
             ("\"" + key + "\" is a reserved attribute and cannot be used as component prop."),
             vm
@@ -1997,7 +2010,7 @@ function stateMixin (Vue) {
   }
   Object.defineProperty(Vue.prototype, '$data', dataDef);
 
-  Vue.prototype.$set = set;
+  Vue.prototype.$set = set$1;
   Vue.prototype.$delete = del;
 
   Vue.prototype.$watch = function (
@@ -2129,7 +2142,7 @@ function updateListeners (
   remove$$1,
   vm
 ) {
-  var name, cur, old, fn, event, capture;
+  var name, cur, old, fn, event, capture, once;
   for (name in on) {
     cur = on[name];
     old = oldOn[name];
@@ -2139,10 +2152,12 @@ function updateListeners (
         vm
       );
     } else if (!old) {
-      capture = name.charAt(0) === '!';
-      event = capture ? name.slice(1) : name;
+      once = name.charAt(0) === '~'; // Prefixed last, checked first
+      event = once ? name.slice(1) : name;
+      capture = event.charAt(0) === '!';
+      event = capture ? event.slice(1) : event;
       if (Array.isArray(cur)) {
-        add(event, (cur.invoker = arrInvoker(cur)), capture);
+        add(event, (cur.invoker = arrInvoker(cur)), once, capture);
       } else {
         if (!cur.invoker) {
           fn = cur;
@@ -2150,7 +2165,7 @@ function updateListeners (
           cur.fn = fn;
           cur.invoker = fnInvoker(cur);
         }
-        add(event, cur.invoker, capture);
+        add(event, cur.invoker, once, capture);
       }
     } else if (cur !== old) {
       if (Array.isArray(old)) {
@@ -2165,8 +2180,11 @@ function updateListeners (
   }
   for (name in oldOn) {
     if (!on[name]) {
-      event = name.charAt(0) === '!' ? name.slice(1) : name;
-      remove$$1(event, oldOn[name].invoker);
+      once = name.charAt(0) === '~'; // Prefixed last, checked first
+      event = once ? name.slice(1) : name;
+      capture = event.charAt(0) === '!';
+      event = capture ? event.slice(1) : event;
+      remove$$1(event, oldOn[name].invoker, capture);
     }
   }
 }
@@ -2332,15 +2350,21 @@ function lifecycleMixin (Vue) {
       callHook(vm, 'beforeUpdate');
     }
     var prevEl = vm.$el;
+    var prevVnode = vm._vnode;
     var prevActiveInstance = activeInstance;
     activeInstance = vm;
-    var prevVnode = vm._vnode;
     vm._vnode = vnode;
+    // Vue.prototype.__patch__ is injected in entry points
+    // based on the rendering backend used.
     if (!prevVnode) {
-      // Vue.prototype.__patch__ is injected in entry points
-      // based on the rendering backend used.
-      vm.$el = vm.__patch__(vm.$el, vnode, hydrating);
+      // initial render
+      vm.$el = vm.__patch__(
+        vm.$el, vnode, hydrating, false /* removeOnly */,
+        vm.$options._parentElm,
+        vm.$options._refElm
+      );
     } else {
+      // updates
       vm.$el = vm.__patch__(prevVnode, vnode);
     }
     activeInstance = prevActiveInstance;
@@ -2399,7 +2423,7 @@ function lifecycleMixin (Vue) {
     }
     // resolve slots + force update if has children
     if (hasChildren) {
-      vm.$slots = resolveSlots(renderChildren, vm._renderContext);
+      vm.$slots = resolveSlots(renderChildren, parentVnode.context);
       vm.$forceUpdate();
     }
   };
@@ -2583,7 +2607,9 @@ function createFunctionalComponent (
 
 function createComponentInstanceForVnode (
   vnode, // we know it's MountedComponentVNode but flow doesn't
-  parent // activeInstance in lifecycle state
+  parent, // activeInstance in lifecycle state
+  parentElm,
+  refElm
 ) {
   var vnodeComponentOptions = vnode.componentOptions;
   var options = {
@@ -2593,7 +2619,9 @@ function createComponentInstanceForVnode (
     _componentTag: vnodeComponentOptions.tag,
     _parentVnode: vnode,
     _parentListeners: vnodeComponentOptions.listeners,
-    _renderChildren: vnodeComponentOptions.children
+    _renderChildren: vnodeComponentOptions.children,
+    _parentElm: parentElm || null,
+    _refElm: refElm || null
   };
   // check inline-template render functions
   var inlineTemplate = vnode.data.inlineTemplate;
@@ -2604,9 +2632,19 @@ function createComponentInstanceForVnode (
   return new vnodeComponentOptions.Ctor(options)
 }
 
-function init (vnode, hydrating) {
+function init (
+  vnode,
+  hydrating,
+  parentElm,
+  refElm
+) {
   if (!vnode.child || vnode.child._isDestroyed) {
-    var child = vnode.child = createComponentInstanceForVnode(vnode, activeInstance);
+    var child = vnode.child = createComponentInstanceForVnode(
+      vnode,
+      activeInstance,
+      parentElm,
+      refElm
+    );
     child.$mount(hydrating ? vnode.elm : undefined, hydrating);
   } else if (vnode.data.keepAlive) {
     // kept-alive components, treat as a patch
@@ -2759,12 +2797,10 @@ function mergeHooks (data) {
   }
 }
 
-function mergeHook$1 (a, b) {
-  // since all hooks have at most two args, use fixed args
-  // to avoid having to use fn.apply().
-  return function (_, __) {
-    a(_, __);
-    b(_, __);
+function mergeHook$1 (one, two) {
+  return function (a, b, c, d) {
+    one(a, b, c, d);
+    two(a, b, c, d);
   }
 }
 
@@ -2844,8 +2880,9 @@ function initRender (vm) {
   vm.$vnode = null; // the placeholder node in parent tree
   vm._vnode = null; // the root of the child tree
   vm._staticTrees = null;
-  vm._renderContext = vm.$options._parentVnode && vm.$options._parentVnode.context;
-  vm.$slots = resolveSlots(vm.$options._renderChildren, vm._renderContext);
+  var parentVnode = vm.$options._parentVnode;
+  var renderContext = parentVnode && parentVnode.context;
+  vm.$slots = resolveSlots(vm.$options._renderChildren, renderContext);
   vm.$scopedSlots = {};
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
@@ -2889,18 +2926,14 @@ function renderMixin (Vue) {
     try {
       vnode = render.call(vm._renderProxy, vm.$createElement);
     } catch (e) {
-      {
-        warn(("Error when rendering " + (formatComponentName(vm)) + ":"));
-      }
       /* istanbul ignore else */
       if (config.errorHandler) {
         config.errorHandler.call(null, e, vm);
       } else {
-        if (isServerRendering()) {
-          throw e
-        } else {
-          console.error(e);
+        {
+          warn(("Error when rendering " + (formatComponentName(vm)) + ":"));
         }
+        throw e
       }
       // return previous vnode to prevent render error causing blank component
       vnode = vm._vnode;
@@ -3070,9 +3103,18 @@ function renderMixin (Vue) {
     return data
   };
 
-  // expose v-on keyCodes
-  Vue.prototype._k = function getKeyCodes (key) {
-    return config.keyCodes[key]
+  // check v-on keyCodes
+  Vue.prototype._k = function checkKeyCodes (
+    eventKeyCode,
+    key,
+    builtInAlias
+  ) {
+    var keyCodes = config.keyCodes[key] || builtInAlias;
+    if (Array.isArray(keyCodes)) {
+      return keyCodes.indexOf(eventKeyCode) === -1
+    } else {
+      return keyCodes !== eventKeyCode
+    }
   };
 }
 
@@ -3119,10 +3161,12 @@ function initEvents (vm) {
   vm._events = Object.create(null);
   // init parent attached events
   var listeners = vm.$options._parentListeners;
-  var on = bind$1(vm.$on, vm);
-  var off = bind$1(vm.$off, vm);
+  var add = function (event, fn, once) {
+    once ? vm.$once(event, fn) : vm.$on(event, fn);
+  };
+  var remove$$1 = bind$1(vm.$off, vm);
   vm._updateListeners = function (listeners, oldListeners) {
-    updateListeners(listeners, oldListeners || {}, on, off, vm);
+    updateListeners(listeners, oldListeners || {}, add, remove$$1, vm);
   };
   if (listeners) {
     vm._updateListeners(listeners);
@@ -3237,6 +3281,8 @@ function initInternalComponent (vm, options) {
   opts._parentListeners = options._parentListeners;
   opts._renderChildren = options._renderChildren;
   opts._componentTag = options._componentTag;
+  opts._parentElm = options._parentElm;
+  opts._refElm = options._refElm;
   if (options.render) {
     opts.render = options.render;
     opts.staticRenderFns = options.staticRenderFns;
@@ -3488,7 +3534,7 @@ function initGlobalAPI (Vue) {
   }
   Object.defineProperty(Vue, 'config', configDef);
   Vue.util = util;
-  Vue.set = set;
+  Vue.set = set$1;
   Vue.delete = del;
   Vue.nextTick = nextTick;
 
@@ -3515,7 +3561,7 @@ Object.defineProperty(Vue$3.prototype, '$isServer', {
   get: isServerRendering
 });
 
-Vue$3.version = '2.1.3';
+Vue$3.version = '2.1.4';
 
 /*  */
 
@@ -3539,24 +3585,6 @@ var isBooleanAttr = makeMap(
   'required,reversed,scoped,seamless,selected,sortable,translate,' +
   'truespeed,typemustmatch,visible'
 );
-
-var isAttr = makeMap(
-  'accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' +
-  'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' +
-  'checked,cite,class,code,codebase,color,cols,colspan,content,http-equiv,' +
-  'name,contenteditable,contextmenu,controls,coords,data,datetime,default,' +
-  'defer,dir,dirname,disabled,download,draggable,dropzone,enctype,method,for,' +
-  'form,formaction,headers,<th>,height,hidden,high,href,hreflang,http-equiv,' +
-  'icon,id,ismap,itemprop,keytype,kind,label,lang,language,list,loop,low,' +
-  'manifest,max,maxlength,media,method,GET,POST,min,multiple,email,file,' +
-  'muted,name,novalidate,open,optimum,pattern,ping,placeholder,poster,' +
-  'preload,radiogroup,readonly,rel,required,reversed,rows,rowspan,sandbox,' +
-  'scope,scoped,seamless,selected,shape,size,type,text,password,sizes,span,' +
-  'spellcheck,src,srcdoc,srclang,srcset,start,step,style,summary,tabindex,' +
-  'target,title,type,usemap,value,width,wrap'
-);
-
-
 
 var xlinkNS = 'http://www.w3.org/1999/xlink';
 
@@ -3664,30 +3692,6 @@ var isHTMLTag = makeMap(
   'output,progress,select,textarea,' +
   'details,dialog,menu,menuitem,summary,' +
   'content,element,shadow,template'
-);
-
-var isUnaryTag = makeMap(
-  'area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
-  'link,meta,param,source,track,wbr',
-  true
-);
-
-// Elements that you can, intentionally, leave open
-// (and which close themselves)
-var canBeLeftOpenTag = makeMap(
-  'colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source',
-  true
-);
-
-// HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
-// Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
-var isNonPhrasingTag = makeMap(
-  'address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' +
-  'details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,' +
-  'h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,' +
-  'optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,' +
-  'title,tr,track',
-  true
 );
 
 // this map is intentionally selective, only covering SVG elements that may
@@ -3898,7 +3902,7 @@ function registerRef (vnode, isRemoval) {
 
 var emptyNode = new VNode('', {}, []);
 
-var hooks$1 = ['create', 'update', 'remove', 'destroy'];
+var hooks$1 = ['create', 'activate', 'update', 'remove', 'destroy'];
 
 function isUndef (s) {
   return s == null
@@ -3963,26 +3967,23 @@ function createPatchFunction (backend) {
     }
   }
 
-  function createElm (vnode, insertedVnodeQueue, nested) {
-    var i;
-    var data = vnode.data;
-    vnode.isRootInsert = !nested;
-    if (isDef(data)) {
-      if (isDef(i = data.hook) && isDef(i = i.init)) { i(vnode); }
-      // after calling the init hook, if the vnode is a child component
-      // it should've created a child instance and mounted it. the child
-      // component also has set the placeholder vnode's elm.
-      // in that case we can just return the element and be done.
-      if (isDef(i = vnode.child)) {
-        initComponent(vnode, insertedVnodeQueue);
-        return vnode.elm
-      }
+  var inPre = 0;
+  function createElm (vnode, insertedVnodeQueue, parentElm, refElm, nested) {
+    vnode.isRootInsert = !nested; // for transition enter check
+    if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
+      return
     }
+
+    var data = vnode.data;
     var children = vnode.children;
     var tag = vnode.tag;
     if (isDef(tag)) {
       {
+        if (data && data.pre) {
+          inPre++;
+        }
         if (
+          !inPre &&
           !vnode.ns &&
           !(config.ignoredElements && config.ignoredElements.indexOf(tag) > -1) &&
           config.isUnknownElement(tag)
@@ -3999,22 +4000,81 @@ function createPatchFunction (backend) {
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag, vnode);
       setScope(vnode);
-      createChildren(vnode, children, insertedVnodeQueue);
-      if (isDef(data)) {
-        invokeCreateHooks(vnode, insertedVnodeQueue);
+
+      /* istanbul ignore if */
+      {
+        createChildren(vnode, children, insertedVnodeQueue);
+        if (isDef(data)) {
+          invokeCreateHooks(vnode, insertedVnodeQueue);
+        }
+        insert(parentElm, vnode.elm, refElm);
+      }
+
+      if ("development" !== 'production' && data && data.pre) {
+        inPre--;
       }
     } else if (vnode.isComment) {
       vnode.elm = nodeOps.createComment(vnode.text);
+      insert(parentElm, vnode.elm, refElm);
     } else {
       vnode.elm = nodeOps.createTextNode(vnode.text);
+      insert(parentElm, vnode.elm, refElm);
     }
-    return vnode.elm
+  }
+
+  function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
+    var i = vnode.data;
+    if (isDef(i)) {
+      var isReactivated = isDef(vnode.child) && i.keepAlive;
+      if (isDef(i = i.hook) && isDef(i = i.init)) {
+        i(vnode, false /* hydrating */, parentElm, refElm);
+      }
+      // after calling the init hook, if the vnode is a child component
+      // it should've created a child instance and mounted it. the child
+      // component also has set the placeholder vnode's elm.
+      // in that case we can just return the element and be done.
+      if (isDef(vnode.child)) {
+        initComponent(vnode, insertedVnodeQueue);
+        if (isReactivated) {
+          reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm);
+        }
+        return true
+      }
+    }
+  }
+
+  function reactivateComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
+    var i;
+    // hack for #4339: a reactivated component with inner transition
+    // does not trigger because the inner node's created hooks are not called
+    // again. It's not ideal to involve module-specific logic in here but
+    // there doesn't seem to be a better way to do it.
+    var innerNode = vnode;
+    while (innerNode.child) {
+      innerNode = innerNode.child._vnode;
+      if (isDef(i = innerNode.data) && isDef(i = i.transition)) {
+        for (i = 0; i < cbs.activate.length; ++i) {
+          cbs.activate[i](emptyNode, innerNode);
+        }
+        insertedVnodeQueue.push(innerNode);
+        break
+      }
+    }
+    // unlike a newly created component,
+    // a reactivated keep-alive component doesn't insert itself
+    insert(parentElm, vnode.elm, refElm);
+  }
+
+  function insert (parent, elm, ref) {
+    if (parent) {
+      nodeOps.insertBefore(parent, elm, ref);
+    }
   }
 
   function createChildren (vnode, children, insertedVnodeQueue) {
     if (Array.isArray(children)) {
       for (var i = 0; i < children.length; ++i) {
-        nodeOps.appendChild(vnode.elm, createElm(children[i], insertedVnodeQueue, true));
+        createElm(children[i], insertedVnodeQueue, vnode.elm, null, true);
       }
     } else if (isPrimitive(vnode.text)) {
       nodeOps.appendChild(vnode.elm, nodeOps.createTextNode(vnode.text));
@@ -4071,9 +4131,9 @@ function createPatchFunction (backend) {
     }
   }
 
-  function addVnodes (parentElm, before, vnodes, startIdx, endIdx, insertedVnodeQueue) {
+  function addVnodes (parentElm, refElm, vnodes, startIdx, endIdx, insertedVnodeQueue) {
     for (; startIdx <= endIdx; ++startIdx) {
-      nodeOps.insertBefore(parentElm, createElm(vnodes[startIdx], insertedVnodeQueue), before);
+      createElm(vnodes[startIdx], insertedVnodeQueue, parentElm, refElm);
     }
   }
 
@@ -4142,7 +4202,7 @@ function createPatchFunction (backend) {
     var newEndIdx = newCh.length - 1;
     var newStartVnode = newCh[0];
     var newEndVnode = newCh[newEndIdx];
-    var oldKeyToIdx, idxInOld, elmToMove, before;
+    var oldKeyToIdx, idxInOld, elmToMove, refElm;
 
     // removeOnly is a special flag used only by <transition-group>
     // to ensure removed elements stay in correct relative positions
@@ -4176,7 +4236,7 @@ function createPatchFunction (backend) {
         if (isUndef(oldKeyToIdx)) { oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx); }
         idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx[newStartVnode.key] : null;
         if (isUndef(idxInOld)) { // New element
-          nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm);
+          createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm);
           newStartVnode = newCh[++newStartIdx];
         } else {
           elmToMove = oldCh[idxInOld];
@@ -4189,7 +4249,7 @@ function createPatchFunction (backend) {
           }
           if (elmToMove.tag !== newStartVnode.tag) {
             // same key but different element. treat as new element
-            nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm);
+            createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm);
             newStartVnode = newCh[++newStartIdx];
           } else {
             patchVnode(elmToMove, newStartVnode, insertedVnodeQueue);
@@ -4201,8 +4261,8 @@ function createPatchFunction (backend) {
       }
     }
     if (oldStartIdx > oldEndIdx) {
-      before = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm;
-      addVnodes(parentElm, before, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);
+      refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm;
+      addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);
     } else if (newStartIdx > newEndIdx) {
       removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx);
     }
@@ -4335,7 +4395,7 @@ function createPatchFunction (backend) {
     }
   }
 
-  return function patch (oldVnode, vnode, hydrating, removeOnly) {
+  return function patch (oldVnode, vnode, hydrating, removeOnly, parentElm, refElm) {
     if (!vnode) {
       if (oldVnode) { invokeDestroyHook(oldVnode); }
       return
@@ -4346,12 +4406,13 @@ function createPatchFunction (backend) {
     var insertedVnodeQueue = [];
 
     if (!oldVnode) {
-      // empty mount, create new root element
+      // empty mount (likely as component), create new root element
       isInitialPatch = true;
-      createElm(vnode, insertedVnodeQueue);
+      createElm(vnode, insertedVnodeQueue, parentElm, refElm);
     } else {
       var isRealElement = isDef(oldVnode.nodeType);
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
+        // patch existing root node
         patchVnode(oldVnode, vnode, insertedVnodeQueue, removeOnly);
       } else {
         if (isRealElement) {
@@ -4380,14 +4441,15 @@ function createPatchFunction (backend) {
           // create an empty node and replace it
           oldVnode = emptyNodeAt(oldVnode);
         }
+
+        // replacing existing element
         elm = oldVnode.elm;
         parent = nodeOps.parentNode(elm);
+        createElm(vnode, insertedVnodeQueue, parent, nodeOps.nextSibling(elm));
 
-        createElm(vnode, insertedVnodeQueue);
-
-        // component root element replaced.
-        // update parent placeholder node element, recursively
         if (vnode.parent) {
+          // component root element replaced.
+          // update parent placeholder node element, recursively
           var ancestor = vnode.parent;
           while (ancestor) {
             ancestor.elm = vnode.elm;
@@ -4401,7 +4463,6 @@ function createPatchFunction (backend) {
         }
 
         if (parent !== null) {
-          nodeOps.insertBefore(parent, vnode.elm, nodeOps.nextSibling(elm));
           removeVnodes(parent, [oldVnode], 0, 0);
         } else if (isDef(oldVnode.tag)) {
           invokeDestroyHook(oldVnode);
@@ -4631,12 +4692,25 @@ function updateDOMListeners (oldVnode, vnode) {
   }
   var on = vnode.data.on || {};
   var oldOn = oldVnode.data.on || {};
-  var add = vnode.elm._v_add || (vnode.elm._v_add = function (event, handler, capture) {
-    vnode.elm.addEventListener(event, handler, capture);
-  });
-  var remove = vnode.elm._v_remove || (vnode.elm._v_remove = function (event, handler) {
-    vnode.elm.removeEventListener(event, handler);
-  });
+  var add = vnode.elm._v_add || (
+    vnode.elm._v_add = function (event, handler, once, capture) {
+      if (once) {
+        var oldHandler = handler;
+        handler = function (ev) {
+          remove(event, handler, capture);
+          arguments.length === 1
+            ? oldHandler(ev)
+            : oldHandler.apply(null, arguments);
+        };
+      }
+      vnode.elm.addEventListener(event, handler, capture);
+    }
+  );
+  var remove = vnode.elm._v_remove || (
+    vnode.elm._v_remove = function (event, handler, capture) {
+      vnode.elm.removeEventListener(event, handler, capture);
+    }
+  );
   updateListeners(on, oldOn, add, remove, vnode.context);
 }
 
@@ -4698,10 +4772,8 @@ var domProps = {
 
 var parseStyleText = cached(function (cssText) {
   var res = {};
-  var hasBackground = cssText.indexOf('background') >= 0;
-  // maybe with background-image: url(http://xxx) or base64 img
-  var listDelimiter = hasBackground ? /;(?![^(]*\))/g : ';';
-  var propertyDelimiter = hasBackground ? /:(.+)/ : ':';
+  var listDelimiter = /;(?![^(]*\))/g;
+  var propertyDelimiter = /:(.+)/;
   cssText.split(listDelimiter).forEach(function (item) {
     if (item) {
       var tmp = item.split(propertyDelimiter);
@@ -4766,10 +4838,13 @@ function getStyle (vnode, checkChild) {
 /*  */
 
 var cssVarRE = /^--/;
+var importantRE = /\s*!important$/;
 var setProp = function (el, name, val) {
   /* istanbul ignore if */
   if (cssVarRE.test(name)) {
     el.style.setProperty(name, val);
+  } else if (importantRE.test(val)) {
+    el.style.setProperty(name, val.replace(importantRE, ''), 'important');
   } else {
     el.style[normalize(name)] = val;
   }
@@ -5070,10 +5145,12 @@ function enter (vnode) {
   // transition. One edge case to check is when the <transition> is placed
   // as the root node of a child component. In that case we need to check
   // <transition>'s parent for appear check.
+  var context = activeInstance;
   var transitionNode = activeInstance.$vnode;
-  var context = transitionNode && transitionNode.parent
-    ? transitionNode.parent.context
-    : activeInstance;
+  while (transitionNode && transitionNode.parent) {
+    transitionNode = transitionNode.parent;
+    context = transitionNode.context;
+  }
 
   var isAppear = !context._isMounted || !vnode.isRootInsert;
 
@@ -5115,7 +5192,10 @@ function enter (vnode) {
     mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', function () {
       var parent = el.parentNode;
       var pendingNode = parent && parent._pending && parent._pending[vnode.key];
-      if (pendingNode && pendingNode.tag === vnode.tag && pendingNode.elm._leaveCb) {
+      if (pendingNode &&
+          pendingNode.context === vnode.context &&
+          pendingNode.tag === vnode.tag &&
+          pendingNode.elm._leaveCb) {
         pendingNode.elm._leaveCb();
       }
       enterHook && enterHook(el, cb);
@@ -5270,12 +5350,15 @@ function once (fn) {
   }
 }
 
+function _enter (_, vnode) {
+  if (!vnode.data.show) {
+    enter(vnode);
+  }
+}
+
 var transition = inBrowser ? {
-  create: function create (_, vnode) {
-    if (!vnode.data.show) {
-      enter(vnode);
-    }
-  },
+  create: _enter,
+  activate: _enter,
   remove: function remove (vnode, rm) {
     /* istanbul ignore else */
     if (!vnode.data.show) {
@@ -5874,6 +5957,32 @@ function decode (html) {
   return decoder.textContent
 }
 
+/*  */
+
+var isUnaryTag = makeMap(
+  'area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
+  'link,meta,param,source,track,wbr',
+  true
+);
+
+// Elements that you can, intentionally, leave open
+// (and which close themselves)
+var canBeLeftOpenTag = makeMap(
+  'colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source',
+  true
+);
+
+// HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
+// Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
+var isNonPhrasingTag = makeMap(
+  'address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' +
+  'details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,' +
+  'h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,' +
+  'optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,' +
+  'title,tr,track',
+  true
+);
+
 /**
  * Not type-checking this file because it's mostly vendor code.
  */
@@ -6356,6 +6465,10 @@ function addHandler (
     delete modifiers.capture;
     name = '!' + name; // mark the event as captured
   }
+  if (modifiers && modifiers.once) {
+    delete modifiers.once;
+    name = '~' + name; // mark the event as once
+  }
   var events;
   if (modifiers && modifiers.native) {
     delete modifiers.native;
@@ -6833,10 +6946,10 @@ function processIfConditions (el, parent) {
 }
 
 function addIfCondition (el, condition) {
-  if (!el.conditions) {
-    el.conditions = [];
+  if (!el.ifConditions) {
+    el.ifConditions = [];
   }
-  el.conditions.push(condition);
+  el.ifConditions.push(condition);
 }
 
 function processOnce (el) {
@@ -7043,7 +7156,7 @@ var genStaticKeysCached = cached(genStaticKeys$1);
 function optimize (root, options) {
   if (!root) { return }
   isStaticKey = genStaticKeysCached(options.staticKeys || '');
-  isPlatformReservedTag = options.isReservedTag || (function () { return false; });
+  isPlatformReservedTag = options.isReservedTag || no;
   // first pass: mark all non-static nodes.
   markStatic(root);
   // second pass: mark static roots.
@@ -7102,8 +7215,8 @@ function markStaticRoots (node, isInFor) {
         markStaticRoots(node.children[i], isInFor || !!node.for);
       }
     }
-    if (node.conditions) {
-      walkThroughConditionsBlocks(node.conditions, isInFor);
+    if (node.ifConditions) {
+      walkThroughConditionsBlocks(node.ifConditions, isInFor);
     }
   }
 }
@@ -7165,11 +7278,7 @@ var keyCodes = {
 var modifierCode = {
   stop: '$event.stopPropagation();',
   prevent: '$event.preventDefault();',
-  self: 'if($event.target !== $event.currentTarget)return;'
-};
-
-var isMouseEventRE = /^mouse|^pointer|^(click|dblclick|contextmenu|wheel)$/;
-var mouseEventModifierCode = {
+  self: 'if($event.target !== $event.currentTarget)return;',
   ctrl: 'if(!$event.ctrlKey)return;',
   shift: 'if(!$event.shiftKey)return;',
   alt: 'if(!$event.altKey)return;',
@@ -7199,12 +7308,9 @@ function genHandler (
   } else {
     var code = '';
     var keys = [];
-    var isMouseEvnet = isMouseEventRE.test(name);
     for (var key in handler.modifiers) {
       if (modifierCode[key]) {
         code += modifierCode[key];
-      } else if (isMouseEvnet && mouseEventModifierCode[key]) {
-        code += mouseEventModifierCode[key];
       } else {
         keys.push(key);
       }
@@ -7220,22 +7326,16 @@ function genHandler (
 }
 
 function genKeyFilter (keys) {
-  var code = keys.length === 1
-    ? normalizeKeyCode(keys[0])
-    : Array.prototype.concat.apply([], keys.map(normalizeKeyCode));
-  if (Array.isArray(code)) {
-    return ("if(" + (code.map(function (c) { return ("$event.keyCode!==" + c); }).join('&&')) + ")return;")
-  } else {
-    return ("if($event.keyCode!==" + code + ")return;")
-  }
+  return ("if(" + (keys.map(genFilterCode).join('&&')) + ")return;")
 }
 
-function normalizeKeyCode (key) {
-  return (
-    parseInt(key, 10) || // number keyCode
-    keyCodes[key] || // built-in alias
-    ("_k(" + (JSON.stringify(key)) + ")") // custom alias
-  )
+function genFilterCode (key) {
+  var keyVal = parseInt(key, 10);
+  if (keyVal) {
+    return ("$event.keyCode!==" + keyVal)
+  }
+  var alias = keyCodes[key];
+  return ("_k($event.keyCode," + (JSON.stringify(key)) + (alias ? ',' + JSON.stringify(alias) : '') + ")")
 }
 
 /*  */
@@ -7353,7 +7453,7 @@ function genOnce (el) {
 
 function genIf (el) {
   el.ifProcessed = true; // avoid recursion
-  return genIfConditions(el.conditions)
+  return genIfConditions(el.ifConditions.slice())
 }
 
 function genIfConditions (conditions) {
@@ -7368,7 +7468,7 @@ function genIfConditions (conditions) {
     return ("" + (genTernaryExp(condition.block)))
   }
 
-  // v-if with v-once shuold generate code like (a)?_m(0):_m(1)
+  // v-if with v-once should generate code like (a)?_m(0):_m(1)
   function genTernaryExp (el) {
     return el.once ? genOnce(el) : genElement(el)
   }
@@ -7404,6 +7504,10 @@ function genData (el) {
   }
   if (el.refInFor) {
     data += "refInFor:true,";
+  }
+  // pre
+  if (el.pre) {
+    data += "pre:true,";
   }
   // record original tag name for components using "is" attribute
   if (el.component) {

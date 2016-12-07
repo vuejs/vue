@@ -75,19 +75,21 @@ declare interface Component {
     propsData: ?Object,
     listeners: ?{ [key: string]: Function | Array<Function> },
     parentVnode: VNode,
-    renderChildren: ?VNodeChildren
+    renderChildren: ?Array<VNode>
   ) => void;
   // rendering
   _render: () => VNode;
   __patch__: (a: Element | VNode | void, b: VNode) => any;
   // createElement
-  _h: (vnode?: VNode, data?: VNodeData, children?: VNodeChildren) => VNode | void;
+  _c: (vnode?: VNode, data?: VNodeData, children?: VNodeChildren) => VNode | void;
   // renderStatic
   _m: (index: number, isInFor?: boolean) => VNode | VNodeChildren;
   // markOnce
   _o: (vnode: VNode | Array<VNode>, index: number, key: string) => VNode | VNodeChildren;
   // toString
   _s: (value: any) => string;
+  // text to VNode
+  _v: (value: string | number) => VNode;
   // toNumber
   _n: (value: string) => number | string;
   // empty vnode
@@ -105,7 +107,7 @@ declare interface Component {
   // apply v-bind object
   _b: (data: any, value: any, asProp?: boolean) => VNodeData;
   // check custom keyCode
-  _k: (eventKeyCode: number, key: string, buildinAlias: number | Array<number> | void) => boolean;
+  _k: (eventKeyCode: number, key: string, builtInAlias: number | Array<number> | void) => boolean;
 
   // allow dynamic method registration
   [key: string]: any

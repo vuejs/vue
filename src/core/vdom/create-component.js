@@ -1,12 +1,11 @@
 /* @flow */
 
 import VNode from './vnode'
-import { normalizeChildren } from './helpers/index'
 import { resolveConstructorOptions } from '../instance/init'
 import { activeInstance, callHook } from '../instance/lifecycle'
 import { resolveSlots } from '../instance/render'
 import { createElement } from './create-element'
-import { warn, isObject, hasOwn, hyphenate, validateProp, bind } from '../util/index'
+import { warn, isObject, hasOwn, hyphenate, validateProp } from '../util/index'
 
 const hooks = { init, prepatch, insert, destroy }
 const hooksToMerge = Object.keys(hooks)
@@ -15,7 +14,7 @@ export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data?: VNodeData,
   context: Component,
-  children?: VNodeChildren,
+  children: ?Array<VNode>,
   tag?: string
 ): VNode | void {
   if (!Ctor) {
@@ -85,7 +84,7 @@ export function createComponent (
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
-    data, undefined, undefined, undefined, undefined, context,
+    data, undefined, undefined, undefined, context,
     { Ctor, propsData, listeners, tag, children }
   )
   return vnode
@@ -96,7 +95,7 @@ function createFunctionalComponent (
   propsData: ?Object,
   data: VNodeData,
   context: Component,
-  children?: VNodeChildren
+  children: ?Array<VNode>
 ): VNode | void {
   const props = {}
   const propOptions = Ctor.options.props
@@ -105,19 +104,17 @@ function createFunctionalComponent (
       props[key] = validateProp(key, propOptions, propsData)
     }
   }
-  const vnode = Ctor.options.render.call(
-    null,
-    // ensure the createElement function in functional components
-    // gets a unique context - this is necessary for correct named slot check
-    bind(createElement, { _self: Object.create(context) }),
-    {
-      props,
-      data,
-      parent: context,
-      children: normalizeChildren(children),
-      slots: () => resolveSlots(children, context)
-    }
-  )
+  // ensure the createElement function in functional components
+  // gets a unique context - this is necessary for correct named slot check
+  const _context = Object.create(context)
+  const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
+  const vnode = Ctor.options.render.call(null, h, {
+    props,
+    data,
+    parent: context,
+    children,
+    slots: () => resolveSlots(children, context)
+  })
   if (vnode instanceof VNode) {
     vnode.functionalContext = context
     if (data.slot) {
@@ -172,7 +169,6 @@ function init (
     // kept-alive components, treat as a patch
     const mountedNode: any = vnode // work around flow
     prepatch(mountedNode, mountedNode)
-    return true // let the patcher know this is a reactivated component
   }
 }
 
@@ -318,11 +314,9 @@ function mergeHooks (data: VNodeData) {
   }
 }
 
-function mergeHook (a: Function, b: Function): Function {
-  // since all hooks have at most two args, use fixed args
-  // to avoid having to use fn.apply().
-  return (_, __) => {
-    a(_, __)
-    b(_, __)
+function mergeHook (one: Function, two: Function): Function {
+  return function (a, b, c, d) {
+    one(a, b, c, d)
+    two(a, b, c, d)
   }
 }

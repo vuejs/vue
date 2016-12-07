@@ -40,7 +40,7 @@ describe('create-component', () => {
     expect(vnode.context).toEqual(vm)
 
     vnode.data.hook.init(vnode)
-    expect(init).toHaveBeenCalledWith(vnode, undefined)
+    expect(init.calls.argsFor(0)[0]).toBe(vnode)
   })
 
   it('create a component when resolved with async loading', done => {

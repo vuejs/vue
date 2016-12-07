@@ -6,10 +6,8 @@ import { compile as baseCompile } from 'compiler/index'
 import { detectErrors } from 'compiler/error-detector'
 import modules from './modules/index'
 import directives from './directives/index'
-import {
-  isReservedTag, isUnaryTag,
-  mustUseProp, getTagNamespace, isPreTag
-} from '../util/index'
+import { isReservedTag, mustUseProp, getTagNamespace, isPreTag } from '../util/index'
+import { isUnaryTag } from './util'
 
 const cache: { [key: string]: CompiledFunctionResult } = Object.create(null)
 

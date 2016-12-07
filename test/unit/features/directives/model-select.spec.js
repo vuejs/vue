@@ -334,7 +334,7 @@ describe('Directive v-model select', () => {
       .toHaveBeenWarned()
   })
 
-  it('should warn multiple with non-Array value', () => {
+  it('should warn multiple with non-Array value', done => {
     new Vue({
       data: {
         test: 'meh'
@@ -342,7 +342,11 @@ describe('Directive v-model select', () => {
       template:
         '<select v-model="test" multiple></select>'
     }).$mount()
-    expect('<select multiple v-model="test"> expects an Array value for its binding, but got String')
-      .toHaveBeenWarned()
+    // IE warns on a setTimeout as well
+    setTimeout(() => {
+      expect('<select multiple v-model="test"> expects an Array value for its binding, but got String')
+        .toHaveBeenWarned()
+      done()
+    }, 0)
   })
 })

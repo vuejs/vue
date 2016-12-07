@@ -19,11 +19,7 @@ const keyCodes = {
 const modifierCode = {
   stop: '$event.stopPropagation();',
   prevent: '$event.preventDefault();',
-  self: 'if($event.target !== $event.currentTarget)return;'
-}
-
-const isMouseEventRE = /^mouse|^pointer|^(click|dblclick|contextmenu|wheel)$/
-const mouseEventModifierCode = {
+  self: 'if($event.target !== $event.currentTarget)return;',
   ctrl: 'if(!$event.ctrlKey)return;',
   shift: 'if(!$event.shiftKey)return;',
   alt: 'if(!$event.altKey)return;',
@@ -53,12 +49,9 @@ function genHandler (
   } else {
     let code = ''
     const keys = []
-    const isMouseEvnet = isMouseEventRE.test(name)
     for (const key in handler.modifiers) {
       if (modifierCode[key]) {
         code += modifierCode[key]
-      } else if (isMouseEvnet && mouseEventModifierCode[key]) {
-        code += mouseEventModifierCode[key]
       } else {
         keys.push(key)
       }
@@ -74,8 +67,7 @@ function genHandler (
 }
 
 function genKeyFilter (keys: Array<string>): string {
-  const code = keys.map(genFilterCode)
-  return `if(${code.join('&&')})return;`
+  return `if(${keys.map(genFilterCode).join('&&')})return;`
 }
 
 function genFilterCode (key: number | string): string {

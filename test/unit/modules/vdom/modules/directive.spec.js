@@ -16,7 +16,7 @@ describe('vdom directive module', () => {
         directives: [{
           name: 'directive1', value: 'hello', arg: 'arg1', modifiers: { modifire1: true }
         }]
-      }, undefined, 'hello world', undefined, undefined, vm)
+      }, undefined, 'hello world', undefined, vm)
     ])
     patch(null, vnode1)
     expect(directive1.bind).toHaveBeenCalled()
@@ -26,7 +26,7 @@ describe('vdom directive module', () => {
         directives: [{
           name: 'directive1', value: 'world', arg: 'arg1', modifiers: { modifire1: true }
         }]
-      }, undefined, 'hello world', undefined, undefined, vm)
+      }, undefined, 'hello world', undefined, vm)
     ])
     patch(vnode1, vnode2)
     expect(directive1.update).toHaveBeenCalled()

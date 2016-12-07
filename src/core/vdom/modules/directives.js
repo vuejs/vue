@@ -12,13 +12,13 @@ export default {
   }
 }
 
-function updateDirectives (
-  oldVnode: VNodeWithData,
-  vnode: VNodeWithData
-) {
-  if (!oldVnode.data.directives && !vnode.data.directives) {
-    return
+function updateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+  if (oldVnode.data.directives || vnode.data.directives) {
+    _update(oldVnode, vnode)
   }
+}
+
+function _update (oldVnode, vnode) {
   const isCreate = oldVnode === emptyNode
   const oldDirs = normalizeDirectives(oldVnode.data.directives, oldVnode.context)
   const newDirs = normalizeDirectives(vnode.data.directives, vnode.context)
@@ -48,9 +48,9 @@ function updateDirectives (
 
   if (dirsWithInsert.length) {
     const callInsert = () => {
-      dirsWithInsert.forEach(dir => {
-        callHook(dir, 'inserted', vnode, oldVnode)
-      })
+      for (let i = 0; i < dirsWithInsert.length; i++) {
+        callHook(dirsWithInsert[i], 'inserted', vnode, oldVnode)
+      }
     }
     if (isCreate) {
       mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', callInsert, 'dir-insert')
@@ -61,9 +61,9 @@ function updateDirectives (
 
   if (dirsWithPostpatch.length) {
     mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'postpatch', () => {
-      dirsWithPostpatch.forEach(dir => {
-        callHook(dir, 'componentUpdated', vnode, oldVnode)
-      })
+      for (let i = 0; i < dirsWithPostpatch.length; i++) {
+        callHook(dirsWithPostpatch[i], 'componentUpdated', vnode, oldVnode)
+      }
     }, 'dir-postpatch')
   }
 

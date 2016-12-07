@@ -20,7 +20,7 @@ import { registerRef } from './modules/ref'
 
 export const emptyNode = new VNode('', {}, [])
 
-const hooks = ['create', 'update', 'remove', 'destroy']
+const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
 function isUndef (s) {
   return s == null
@@ -86,27 +86,12 @@ export function createPatchFunction (backend) {
 
   let inPre = 0
   function createElm (vnode, insertedVnodeQueue, parentElm, refElm, nested) {
-    let i, isReactivated
-    const data = vnode.data
-    vnode.isRootInsert = !nested
-    if (isDef(data)) {
-      if (isDef(i = data.hook) && isDef(i = i.init)) {
-        isReactivated = i(vnode, false /* hydrating */, parentElm, refElm)
-      }
-      // after calling the init hook, if the vnode is a child component
-      // it should've created a child instance and mounted it. the child
-      // component also has set the placeholder vnode's elm.
-      // in that case we can just return the element and be done.
-      if (isDef(i = vnode.child)) {
-        initComponent(vnode, insertedVnodeQueue)
-        if (isReactivated) {
-          // unlike a newly created component,
-          // a reactivated keep-alive component doesn't insert itself
-          insert(parentElm, vnode.child.$el, refElm)
-        }
-        return
-      }
+    vnode.isRootInsert = !nested // for transition enter check
+    if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
+      return
     }
+
+    const data = vnode.data
     const children = vnode.children
     const tag = vnode.tag
     if (isDef(tag)) {
@@ -170,6 +155,49 @@ export function createPatchFunction (backend) {
       vnode.elm = nodeOps.createTextNode(vnode.text)
       insert(parentElm, vnode.elm, refElm)
     }
+  }
+
+  function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
+    let i = vnode.data
+    if (isDef(i)) {
+      const isReactivated = isDef(vnode.child) && i.keepAlive
+      if (isDef(i = i.hook) && isDef(i = i.init)) {
+        i(vnode, false /* hydrating */, parentElm, refElm)
+      }
+      // after calling the init hook, if the vnode is a child component
+      // it should've created a child instance and mounted it. the child
+      // component also has set the placeholder vnode's elm.
+      // in that case we can just return the element and be done.
+      if (isDef(vnode.child)) {
+        initComponent(vnode, insertedVnodeQueue)
+        if (isReactivated) {
+          reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm)
+        }
+        return true
+      }
+    }
+  }
+
+  function reactivateComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
+    let i
+    // hack for #4339: a reactivated component with inner transition
+    // does not trigger because the inner node's created hooks are not called
+    // again. It's not ideal to involve module-specific logic in here but
+    // there doesn't seem to be a better way to do it.
+    let innerNode = vnode
+    while (innerNode.child) {
+      innerNode = innerNode.child._vnode
+      if (isDef(i = innerNode.data) && isDef(i = i.transition)) {
+        for (i = 0; i < cbs.activate.length; ++i) {
+          cbs.activate[i](emptyNode, innerNode)
+        }
+        insertedVnodeQueue.push(innerNode)
+        break
+      }
+    }
+    // unlike a newly created component,
+    // a reactivated keep-alive component doesn't insert itself
+    insert(parentElm, vnode.elm, refElm)
   }
 
   function insert (parent, elm, ref) {

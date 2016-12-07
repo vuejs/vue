@@ -4,7 +4,7 @@ declare type VNodeComponentOptions = {
   Ctor: Class<Component>;
   propsData: ?Object;
   listeners: ?Object;
-  children: ?VNodeChildren;
+  children: ?Array<VNode>;
   tag?: string;
 }
 
@@ -19,7 +19,7 @@ declare type MountedComponentVNode = {
 declare type VNodeWithData = {
   tag: string;
   data: VNodeData;
-  children: Array<VNode> | void;
+  children: ?Array<VNode>;
   text: void;
   elm: any;
   ns: string | void;

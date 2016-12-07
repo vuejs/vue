@@ -3,7 +3,7 @@
 export default class VNode {
   tag: string | void;
   data: VNodeData | void;
-  children: Array<VNode> | void;
+  children: ?Array<VNode>;
   text: string | void;
   elm: Node | void;
   ns: string | void;
@@ -23,10 +23,9 @@ export default class VNode {
   constructor (
     tag?: string,
     data?: VNodeData,
-    children?: Array<VNode> | void,
+    children?: ?Array<VNode>,
     text?: string,
     elm?: Node,
-    ns?: string | void,
     context?: Component,
     componentOptions?: VNodeComponentOptions
   ) {
@@ -35,7 +34,7 @@ export default class VNode {
     this.children = children
     this.text = text
     this.elm = elm
-    this.ns = ns
+    this.ns = undefined
     this.context = context
     this.functionalContext = undefined
     this.key = data && data.key
@@ -51,11 +50,15 @@ export default class VNode {
   }
 }
 
-export const emptyVNode = () => {
+export const createEmptyVNode = () => {
   const node = new VNode()
   node.text = ''
   node.isComment = true
   return node
+}
+
+export function createTextVNode (val: string | number) {
+  return new VNode(undefined, undefined, undefined, String(val))
 }
 
 // optimized shallow clone
@@ -69,10 +72,10 @@ export function cloneVNode (vnode: VNode): VNode {
     vnode.children,
     vnode.text,
     vnode.elm,
-    vnode.ns,
     vnode.context,
     vnode.componentOptions
   )
+  cloned.ns = vnode.ns
   cloned.isStatic = vnode.isStatic
   cloned.key = vnode.key
   cloned.isCloned = true

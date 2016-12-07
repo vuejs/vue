@@ -2,7 +2,7 @@
 
 import VNode from 'core/vdom/vnode'
 import { renderAttr } from './attrs'
-import { propsToAttrMap, isRenderableAttr } from 'web/util/attrs'
+import { propsToAttrMap, isRenderableAttr } from '../util'
 
 export default function renderDOMProps (node: VNodeWithData): string {
   let props = node.data.domProps
