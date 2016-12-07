@@ -69,10 +69,6 @@ export function setTextContent (node, text) {
   node.parentNode.setAttr('value', text)
 }
 
-export function childNodes (node) {
-  return node.pureChildren
-}
-
 export function setAttribute (node, key, val) {
   node.setAttr(key, val)
 }

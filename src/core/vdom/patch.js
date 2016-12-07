@@ -14,7 +14,7 @@
 
 import config from '../config'
 import VNode from './vnode'
-import { isPrimitive, _toString, warn } from '../util/index'
+import { makeMap, isPrimitive, _toString, warn } from '../util/index'
 import { activeInstance } from '../instance/lifecycle'
 import { registerRef } from './modules/ref'
 
@@ -468,6 +468,11 @@ export function createPatchFunction (backend) {
   }
 
   let bailed = false
+  // list of modules that can skip create hook during hydration because they
+  // are already rendered on the client or has no need for initialization
+  const isRenderedModule = makeMap('attrs,style,class,staticClass,staticStyle,key')
+
+  // Note: this is a browser-only function so we can assume elms are DOM nodes.
   function hydrate (elm, vnode, insertedVnodeQueue) {
     if (process.env.NODE_ENV !== 'production') {
       if (!assertNodeMatch(elm, vnode)) {
@@ -486,36 +491,40 @@ export function createPatchFunction (backend) {
     }
     if (isDef(tag)) {
       if (isDef(children)) {
-        const childNodes = nodeOps.childNodes(elm)
         // empty element, allow client to pick up and populate children
-        if (!childNodes.length) {
+        if (!elm.hasChildNodes()) {
           createChildren(vnode, children, insertedVnodeQueue)
         } else {
           let childrenMatch = true
-          if (childNodes.length !== children.length) {
-            childrenMatch = false
-          } else {
-            for (let i = 0; i < children.length; i++) {
-              if (!hydrate(childNodes[i], children[i], insertedVnodeQueue)) {
-                childrenMatch = false
-                break
-              }
+          let childNode = elm.firstChild
+          for (let i = 0; i < children.length; i++) {
+            if (!childNode || !hydrate(childNode, children[i], insertedVnodeQueue)) {
+              childrenMatch = false
+              break
             }
+            childNode = childNode.nextSibling
           }
-          if (!childrenMatch) {
+          // if childNode is not null, it means the actual childNodes list is
+          // longer than the virtual children list.
+          if (!childrenMatch || childNode) {
             if (process.env.NODE_ENV !== 'production' &&
                 typeof console !== 'undefined' &&
                 !bailed) {
               bailed = true
               console.warn('Parent: ', elm)
-              console.warn('Mismatching childNodes vs. VNodes: ', childNodes, children)
+              console.warn('Mismatching childNodes vs. VNodes: ', elm.childNodes, children)
             }
             return false
           }
         }
       }
       if (isDef(data)) {
-        invokeCreateHooks(vnode, insertedVnodeQueue)
+        for (const key in data) {
+          if (!isRenderedModule(key)) {
+            invokeCreateHooks(vnode, insertedVnodeQueue)
+            break
+          }
+        }
       }
     }
     return true
@@ -525,7 +534,7 @@ export function createPatchFunction (backend) {
     if (vnode.tag) {
       return (
         vnode.tag.indexOf('vue-component') === 0 ||
-        vnode.tag.toLowerCase() === nodeOps.tagName(node).toLowerCase()
+        vnode.tag.toLowerCase() === node.tagName.toLowerCase()
       )
     } else {
       return _toString(vnode.text) === node.data
