@@ -10,7 +10,7 @@ export function getModelModifier (vnode: VNodeWithData): ASTModifiers | void {
   }
 }
 
-export function isToNumber (modifiers: ?ASTModifiers, type: string): boolean {
+export function isToNumber (modifiers: ?ASTModifiers, type: ?string): boolean {
   return modifiers && modifiers.number || (type === 'number')
 }
 

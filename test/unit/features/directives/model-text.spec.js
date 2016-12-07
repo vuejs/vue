@@ -64,6 +64,61 @@ describe('Directive v-model text', () => {
     expect(vm.test).toBe('what')
   })
 
+  it('.number focus and typing', (done) => {
+    const vm = new Vue({
+      data: {
+        test: 0,
+        update: 0
+      },
+      template:
+        '<div>' +
+          '<input ref="input" v-model="test" type="number">{{ update }}' +
+          '<input ref="blur"/>' +
+        '</div>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.$refs.input.focus()
+    expect(vm.test).toBe(0)
+    vm.$refs.input.value = '1.0'
+    triggerEvent(vm.$refs.input, 'input')
+    expect(vm.test).toBe(1)
+    vm.update++
+    waitForUpdate(() => {
+      expect(vm.$refs.input.value).toBe('1.0')
+      vm.$refs.blur.focus()
+      vm.update++
+    }).then(() => {
+      expect(vm.$refs.input.value).toBe('1')
+    }).then(done)
+  })
+
+  it('.trim focus and typing', (done) => {
+    const vm = new Vue({
+      data: {
+        test: 'abc',
+        update: 0
+      },
+      template:
+        '<div>' +
+          '<input ref="input" v-model.trim="test" type="text">{{ update }}' +
+          '<input ref="blur"/>' +
+        '</div>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.$refs.input.focus()
+    vm.$refs.input.value = ' abc '
+    triggerEvent(vm.$refs.input, 'input')
+    expect(vm.test).toBe('abc')
+    vm.update++
+    waitForUpdate(() => {
+      expect(vm.$refs.input.value).toBe(' abc ')
+      vm.$refs.blur.focus()
+      vm.update++
+    }).then(() => {
+      expect(vm.$refs.input.value).toBe('abc')
+    }).then(done)
+  })
+
   it('multiple inputs', (done) => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
