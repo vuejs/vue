@@ -19,9 +19,6 @@ export function createComment (text) {
 }
 
 export function insertBefore (node, target, before) {
-  if (!before) {
-    return appendChild(node, target)
-  }
   if (target.nodeType === 3) {
     if (node.type === 'text') {
       node.setAttr('value', target.text)
