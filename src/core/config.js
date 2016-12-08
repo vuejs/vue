@@ -12,6 +12,7 @@ export type Config = {
   keyCodes: { [key: string]: number };
   // platform
   isReservedTag: (x?: string) => boolean;
+  parsePlatformTagName: (x: string) => string;
   isUnknownElement: (x?: string) => boolean;
   getTagNamespace: (x?: string) => string | void;
   mustUseProp: (tag?: string, x?: string) => boolean;
@@ -68,6 +69,11 @@ const config: Config = {
    * Get the namespace of an element
    */
   getTagNamespace: noop,
+
+  /**
+   * Parse the real tag name for the specific platform.
+   */
+  parsePlatformTagName: (x: string): string => x,
 
   /**
    * Check if an attribute must be bound using property, e.g. value

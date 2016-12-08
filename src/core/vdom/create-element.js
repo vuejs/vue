@@ -61,7 +61,7 @@ export function _createElement (
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       vnode = new VNode(
-        tag, data, children,
+        config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
