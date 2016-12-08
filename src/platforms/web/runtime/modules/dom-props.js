@@ -1,6 +1,6 @@
 /* @flow */
 
-import { extend } from 'shared/util'
+import { extend, toNumber } from 'shared/util'
 
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.domProps && !vnode.data.domProps) {
@@ -35,13 +35,41 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       elm._value = cur
       // avoid resetting cursor position when value is the same
       const strCur = cur == null ? '' : String(cur)
-      if (elm.value !== strCur && !elm.composing) {
+      if (!elm.composing && (
+          (document.activeElement !== elm && elm.value !== strCur) ||
+          isValueChanged(vnode, strCur)
+      )) {
         elm.value = strCur
       }
     } else {
       elm[key] = cur
     }
   }
+}
+
+function isValueChanged (vnode: VNodeWithData, newVal: string): boolean {
+  const value = vnode.elm.value
+  const modifiers = getModelModifier(vnode)
+  const needNumber = modifiers.number || vnode.elm.type === 'number'
+  const needTrim = modifiers.trim
+  if (needNumber) {
+    return toNumber(value) !== toNumber(newVal)
+  }
+  if (needTrim) {
+    return value.trim() !== newVal.trim()
+  }
+  return value !== newVal
+}
+
+function getModelModifier (vnode: VNodeWithData): ASTModifiers | Object {
+  const directives = vnode.data.directives || []
+  for (let i = 0, directive; i < directives.length; i++) {
+    directive = directives[i]
+    if (directive.name === 'model') {
+      return directive.modifiers || {}
+    }
+  }
+  return {}
 }
 
 export default {
