@@ -47,29 +47,29 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 }
 
-function isValueChanged (vnode: VNodeWithData, val: string): boolean {
+function isValueChanged (vnode: VNodeWithData, newVal: string): boolean {
   const value = vnode.elm.value
   const modifiers = getModelModifier(vnode)
-  const needNumber = (modifiers && modifiers.number) || vnode.elm.type === 'number'
-  const needTrim = modifiers && modifiers.trim
+  const needNumber = modifiers.number || vnode.elm.type === 'number'
+  const needTrim = modifiers.trim
   if (needNumber) {
-    return toNumber(value, val) !== toNumber(val)
+    return toNumber(value) !== toNumber(newVal)
   }
   if (needTrim) {
-    return value.trim() !== val.trim()
+    return value.trim() !== newVal.trim()
   }
-  return value !== val
+  return value !== newVal
 }
 
-function getModelModifier (vnode: VNodeWithData): ASTModifiers | void {
+function getModelModifier (vnode: VNodeWithData): ASTModifiers | Object {
   const directives = vnode.data.directives || []
   for (let i = 0, directive; i < directives.length; i++) {
     directive = directives[i]
     if (directive.name === 'model') {
-      return directive.modifiers
+      return directive.modifiers || {}
     }
   }
-  return undefined
+  return {}
 }
 
 export default {
