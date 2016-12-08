@@ -14,12 +14,16 @@ export default {
   bind (el: any, { value }: VNodeDirective, vnode: VNodeWithData) {
     vnode = locateNode(vnode)
     const transition = vnode.data && vnode.data.transition
+    const originalDisplay = el.__vOriginalDisplay =
+      el.style.display === 'none' ? '' : el.style.display
     if (value && transition && !isIE9) {
-      enter(vnode)
+      vnode.data.show = true
+      enter(vnode, () => {
+        el.style.display = originalDisplay
+      })
+    } else {
+      el.style.display = value ? originalDisplay : 'none'
     }
-    const originalDisplay = el.style.display === 'none' ? '' : el.style.display
-    el.style.display = value ? originalDisplay : 'none'
-    el.__vOriginalDisplay = originalDisplay
   },
   update (el: any, { value, oldValue }: VNodeDirective, vnode: VNodeWithData) {
     /* istanbul ignore if */
@@ -27,9 +31,11 @@ export default {
     vnode = locateNode(vnode)
     const transition = vnode.data && vnode.data.transition
     if (transition && !isIE9) {
+      vnode.data.show = true
       if (value) {
-        enter(vnode)
-        el.style.display = el.__vOriginalDisplay
+        enter(vnode, () => {
+          el.style.display = el.__vOriginalDisplay
+        })
       } else {
         leave(vnode, () => {
           el.style.display = 'none'

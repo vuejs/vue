@@ -11,7 +11,7 @@ import {
   whenTransitionEnds
 } from '../transition-util'
 
-export function enter (vnode: VNodeWithData) {
+export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const el: any = vnode.elm
 
   // call leave callback now
@@ -122,6 +122,7 @@ export function enter (vnode: VNodeWithData) {
   }
 
   if (vnode.data.show) {
+    toggleDisplay && toggleDisplay()
     enterHook && enterHook(el, cb)
   }
 
