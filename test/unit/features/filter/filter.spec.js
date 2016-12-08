@@ -69,6 +69,15 @@ describe('Filters', () => {
     expect(vm.$refs.test.pattern.toString()).toBe('/a|b\\//')
   })
 
+  it('handle division', () => {
+    const vm = new Vue({
+      data: { a: 2 },
+      template: `<div>{{ 1/a / 4 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(1 / 4))
+  })
+
   it('arguments', () => {
     const vm = new Vue({
       template: `<div>{{ msg | add(a, 3) }}</div>`,
