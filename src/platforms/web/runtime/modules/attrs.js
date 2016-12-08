@@ -1,6 +1,7 @@
 /* @flow */
 
 import { extend } from 'shared/util'
+import { isIE9 } from 'core/util/env'
 import {
   isBooleanAttr,
   isEnumeratedAttr,
@@ -17,7 +18,7 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   let key, cur, old
   const elm = vnode.elm
   const oldAttrs = oldVnode.data.attrs || {}
-  let attrs = vnode.data.attrs || {}
+  let attrs: any = vnode.data.attrs || {}
   // clone observed objects, as the user probably wants to mutate it
   if (attrs.__ob__) {
     attrs = vnode.data.attrs = extend({}, attrs)
@@ -29,6 +30,10 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     if (old !== cur) {
       setAttr(elm, key, cur)
     }
+  }
+  // #4391: in IE9, setting type can reset value for input[type=radio]
+  if (isIE9 && attrs.value !== oldAttrs.value) {
+    setAttr(elm, 'value', attrs.value)
   }
   for (key in oldAttrs) {
     if (attrs[key] == null) {
