@@ -35,7 +35,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       elm._value = cur
       // avoid resetting cursor position when value is the same
       const strCur = cur == null ? '' : String(cur)
-      if (elm.value !== strCur && !elm.composing) {
+      if (elm.value !== strCur && !elm.composing && document.activeElement !== elm) {
         elm.value = strCur
       }
     } else {
