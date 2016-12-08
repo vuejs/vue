@@ -1,6 +1,6 @@
 /* @flow */
 
-import { no, noop } from 'shared/util'
+import { no, noop, identity } from 'shared/util'
 
 export type Config = {
   // user
@@ -73,7 +73,7 @@ const config: Config = {
   /**
    * Parse the real tag name for the specific platform.
    */
-  parsePlatformTagName: (x: string): string => x,
+  parsePlatformTagName: identity,
 
   /**
    * Check if an attribute must be bound using property, e.g. value

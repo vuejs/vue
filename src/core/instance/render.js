@@ -9,6 +9,7 @@ import VNode, {
 } from '../vdom/vnode'
 import {
   warn,
+  identity,
   isObject,
   toObject,
   nextTick,
@@ -167,7 +168,6 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
   // filter resolution helper
-  const identity = _ => _
   Vue.prototype._f = function resolveFilter (id) {
     return resolveAsset(this.$options, 'filters', id, true) || identity
   }
