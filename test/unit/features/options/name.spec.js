@@ -15,7 +15,16 @@ describe('Options name', () => {
     })
 
     /* eslint-disable */
-    expect(`Invalid component name: "Hyper*Vue". Component names can only contain alphanumeric characaters and the hyphen.`)
+    expect(`Invalid component name: "Hyper*Vue". Component names can only contain alphanumeric characters and the hyphen, and must start with a letter.`)
+      .toHaveBeenWarned()
+    /* eslint-enable */
+
+    Vue.extend({
+      name: '2Cool2BValid'
+    })
+
+    /* eslint-disable */
+    expect(`Invalid component name: "2Cool2BValid". Component names can only contain alphanumeric characters and the hyphen, and must start with a letter.`)
       .toHaveBeenWarned()
     /* eslint-enable */
   })
