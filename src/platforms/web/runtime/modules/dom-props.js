@@ -36,8 +36,8 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       // avoid resetting cursor position when value is the same
       const strCur = cur == null ? '' : String(cur)
       if (!elm.composing && (
-          (document.activeElement !== elm && elm.value !== strCur) ||
-          isValueChanged(vnode, strCur)
+        (document.activeElement !== elm && elm.value !== strCur) ||
+        isValueChanged(vnode, strCur)
       )) {
         elm.value = strCur
       }
@@ -49,7 +49,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
 function isValueChanged (vnode: VNodeWithData, newVal: string): boolean {
   const value = vnode.elm.value
-  const modifiers = getModelModifier(vnode)
+  const modifiers = vnode.elm._vModifiers // injected by v-model runtime
   if ((modifiers && modifiers.number) || vnode.elm.type === 'number') {
     return toNumber(value) !== toNumber(newVal)
   }
@@ -57,17 +57,6 @@ function isValueChanged (vnode: VNodeWithData, newVal: string): boolean {
     return value.trim() !== newVal.trim()
   }
   return value !== newVal
-}
-
-function getModelModifier (vnode: VNodeWithData): ?ASTModifiers {
-  const directives = vnode.data.directives
-  if (!directives) return
-  for (let i = 0, directive; i < directives.length; i++) {
-    directive = directives[i]
-    if (directive.name === 'model') {
-      return directive.modifiers
-    }
-  }
 }
 
 export default {

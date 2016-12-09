@@ -40,17 +40,17 @@ export default {
       if (isIE || isEdge) {
         setTimeout(cb, 0)
       }
-    } else if (
-      (vnode.tag === 'textarea' || el.type === 'text') &&
-      !binding.modifiers.lazy
-    ) {
-      if (!isAndroid) {
-        el.addEventListener('compositionstart', onCompositionStart)
-        el.addEventListener('compositionend', onCompositionEnd)
-      }
-      /* istanbul ignore if */
-      if (isIE9) {
-        el.vmodel = true
+    } else if (vnode.tag === 'textarea' || el.type === 'text') {
+      el._vModifiers = binding.modifiers
+      if (!binding.modifiers.lazy) {
+        if (!isAndroid) {
+          el.addEventListener('compositionstart', onCompositionStart)
+          el.addEventListener('compositionend', onCompositionEnd)
+        }
+        /* istanbul ignore if */
+        if (isIE9) {
+          el.vmodel = true
+        }
       }
     }
   },
