@@ -414,6 +414,7 @@ function processAttrs (el) {
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
         value = parseFilters(value)
+        isProp = false
         if (modifiers) {
           if (modifiers.prop) {
             isProp = true
