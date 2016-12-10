@@ -126,11 +126,11 @@ describe('Directive v-bind', () => {
       template: '<input :some.prop="some" :id="id">',
       data: {
         some: 'hello',
-        id: 'world'
+        id: false
       }
     }).$mount()
     expect(vm.$el.some).toBe('hello')
-    expect(vm.$el.getAttribute('id')).toBe('world')
+    expect(vm.$el.getAttribute('id')).toBe(null)
   })
 
   it('.camel modifier', () => {
