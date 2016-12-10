@@ -121,7 +121,7 @@ describe('Directive v-bind', () => {
     expect(vm.$el.children[1].innerHTML).toBe('<span>qux</span>')
   })
 
-  it('.prop modifier with normal attribute bind', () => {
+  it('.prop modifier with normal attribute binding', () => {
     const vm = new Vue({
       template: '<input :some.prop="some" :id="id">',
       data: {
