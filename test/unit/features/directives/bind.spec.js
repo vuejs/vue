@@ -121,6 +121,18 @@ describe('Directive v-bind', () => {
     expect(vm.$el.children[1].innerHTML).toBe('<span>qux</span>')
   })
 
+  it('.prop modifier with normal attribute binding', () => {
+    const vm = new Vue({
+      template: '<input :some.prop="some" :id="id">',
+      data: {
+        some: 'hello',
+        id: false
+      }
+    }).$mount()
+    expect(vm.$el.some).toBe('hello')
+    expect(vm.$el.getAttribute('id')).toBe(null)
+  })
+
   it('.camel modifier', () => {
     const vm = new Vue({
       template: '<svg :view-box.camel="viewBox"></svg>',
