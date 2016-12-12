@@ -26,7 +26,7 @@ export default function runInVm (code, _context = {}) {
       filename: '__vue_ssr_bundle__',
       displayErrors: true
     })
-    const m = { exports: {}}
+    const m = { exports: {} }
     compiledWrapper.call(m.exports, m.exports, require, m)
     const res = Object.prototype.hasOwnProperty.call(m.exports, 'default')
       ? m.exports.default
