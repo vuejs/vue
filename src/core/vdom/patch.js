@@ -534,7 +534,7 @@ export function createPatchFunction (backend) {
     if (vnode.tag) {
       return (
         vnode.tag.indexOf('vue-component') === 0 ||
-        vnode.tag.toLowerCase() === node.tagName.toLowerCase()
+        vnode.tag.toLowerCase() === (node.tagName && node.tagName.toLowerCase())
       )
     } else {
       return _toString(vnode.text) === node.data
