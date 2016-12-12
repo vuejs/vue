@@ -279,11 +279,11 @@ export function createRenderFunction (
 }
 
 function checkBuild (component) {
-  let Vue = component.constructor
+  let Vue: any = component.constructor
   while (Vue.super) {
     Vue = Vue.super
   }
-  if (Vue.compile) {
+  if (Vue.compile && Vue.config.devtools !== false) {
     console.error(
       red(`\n[vue-server-renderer] You are using the standalone build (vue/dist/vue.js) for ` +
       `server-side rendering. It is recommended to use the CommonJS build ` +
