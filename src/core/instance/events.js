@@ -1,6 +1,6 @@
 /* @flow */
 
-import { bind, toArray } from '../util/index'
+import { bind, toArray, warn } from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
@@ -68,13 +68,17 @@ export function eventsMixin (Vue: Class<Component>) {
 
   Vue.prototype.$emit = function (event: string): Component {
     const vm: Component = this
-    let cbs = vm._events[event]
+    const camelCaseRE = /([a-z0-9._:])([A-Z])/g
+    let cbs = vm._events[event.toLowerCase()] ||
+              vm._events[event.replace(camelCaseRE, '$1-$2').toLowerCase()]
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
       const args = toArray(arguments, 1)
       for (let i = 0, l = cbs.length; i < l; i++) {
         cbs[i].apply(vm, args)
       }
+    } else if (!event.match(/^hook:/g)) {
+      warn(`Cannot find event '${event}' in vm._events!`)
     }
     return vm
   }
