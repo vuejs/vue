@@ -16,7 +16,7 @@ function normalizeArrayChildren (children: any, nestedIndex?: string): Array<VNo
   let i, c, last
   for (i = 0; i < children.length; i++) {
     c = children[i]
-    if (c == null) continue
+    if (c == null || typeof c === 'boolean') continue
     last = res[res.length - 1]
     //  nested
     if (Array.isArray(c)) {
@@ -28,7 +28,7 @@ function normalizeArrayChildren (children: any, nestedIndex?: string): Array<VNo
         // convert primitive to vnode
         res.push(createTextVNode(c))
       }
-    } else if (c instanceof VNode) {
+    } else {
       if (c.text && last && last.text) {
         res[res.length - 1] = createTextVNode(last.text + c.text)
       } else {
