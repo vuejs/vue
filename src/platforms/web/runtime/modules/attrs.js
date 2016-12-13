@@ -32,6 +32,7 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     }
   }
   // #4391: in IE9, setting type can reset value for input[type=radio]
+  /* istanbul ignore if */
   if (isIE9 && attrs.value !== oldAttrs.value) {
     setAttr(elm, 'value', attrs.value)
   }
