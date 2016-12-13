@@ -98,7 +98,7 @@ describe('create-element', () => {
     expect(vnode.children[2].tag).toBe('br')
   })
 
-  it('render vnode with children, including boolean type', () => {
+  it('render vnode with children, including boolean and null type', () => {
     const vm = new Vue({})
     const h = vm.$createElement
     const vnode = h('p', [h('br'), true, 123, h('br'), 'abc', null])
