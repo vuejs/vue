@@ -4,7 +4,8 @@
   "extends": "vue",
   "plugins": ["flowtype"],
   "globals": {
-    "__WEEX__": true
+    "__WEEX__": true,
+    "requestIdleCallback": true
   },
   "rules": {
     "no-useless-escape": 0,

@@ -20,6 +20,9 @@ import { registerRef } from './modules/ref'
 
 export const emptyNode = new VNode('', {}, [])
 
+// used for delaying component mounting for "progressive boot"
+const hasRIC = typeof requestIdleCallback !== 'undefined'
+
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
 function isUndef (s) {
@@ -87,7 +90,14 @@ export function createPatchFunction (backend) {
   let inPre = 0
   function createElm (vnode, insertedVnodeQueue, parentElm, refElm, nested) {
     vnode.isRootInsert = !nested // for transition enter check
-    if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
+    if (isDef(vnode.componentOptions)) {
+      if (hasRIC && vnode.componentOptions.Ctor.options.bootAsync) {
+        requestIdleCallback(() => {
+          createComponent(vnode, insertedVnodeQueue, parentElm, refElm)
+        })
+      } else {
+        createComponent(vnode, insertedVnodeQueue, parentElm, refElm)
+      }
       return
     }
 
@@ -158,23 +168,11 @@ export function createPatchFunction (backend) {
   }
 
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
-    let i = vnode.data
-    if (isDef(i)) {
-      const isReactivated = isDef(vnode.child) && i.keepAlive
-      if (isDef(i = i.hook) && isDef(i = i.init)) {
-        i(vnode, false /* hydrating */, parentElm, refElm)
-      }
-      // after calling the init hook, if the vnode is a child component
-      // it should've created a child instance and mounted it. the child
-      // component also has set the placeholder vnode's elm.
-      // in that case we can just return the element and be done.
-      if (isDef(vnode.child)) {
-        initComponent(vnode, insertedVnodeQueue)
-        if (isReactivated) {
-          reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm)
-        }
-        return true
-      }
+    const isReactivated = isDef(vnode.child) && vnode.data.keepAlive
+    vnode.data.hook.init(vnode, false /* hydrating */, parentElm, refElm)
+    initComponent(vnode, insertedVnodeQueue)
+    if (isReactivated) {
+      reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm)
     }
   }
 
@@ -481,13 +479,16 @@ export function createPatchFunction (backend) {
     }
     vnode.elm = elm
     const { tag, data, children } = vnode
-    if (isDef(data)) {
-      if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode, true /* hydrating */)
-      if (isDef(i = vnode.child)) {
-        // child component. it should have hydrated its own tree.
-        initComponent(vnode, insertedVnodeQueue)
-        return true
+    if (isDef(vnode.componentOptions)) {
+      // child component. it should have hydrated its own tree.
+      if (hasRIC && vnode.componentOptions.Ctor.options.bootAsync) {
+        requestIdleCallback(() => {
+          hydrateComponent(vnode, insertedVnodeQueue)
+        })
+      } else {
+        hydrateComponent(vnode, insertedVnodeQueue)
       }
+      return true
     }
     if (isDef(tag)) {
       if (isDef(children)) {
@@ -528,6 +529,11 @@ export function createPatchFunction (backend) {
       }
     }
     return true
+  }
+
+  function hydrateComponent (vnode, insertedVnodeQueue) {
+    vnode.data.hook.init(vnode, true /* hydrating */)
+    initComponent(vnode, insertedVnodeQueue)
   }
 
   function assertNodeMatch (node, vnode) {
