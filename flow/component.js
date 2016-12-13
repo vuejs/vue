@@ -33,13 +33,13 @@ declare interface Component {
   $mount: (el?: Element | string, hydrating?: boolean) => Component;
   $forceUpdate: () => void;
   $destroy: () => void;
-  $set: (obj: Array<any> | Object, key: any, val: any) => void;
+  $set: (obj: Array<mixed> | Object, key: mixed, val: mixed) => void;
   $delete: (obj: Object, key: string) => void;
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;
   $on: (event: string, fn: Function) => Component;
   $once: (event: string, fn: Function) => Component;
   $off: (event?: string, fn?: Function) => Component;
-  $emit: (event: string, ...args: Array<any>) => Component;
+  $emit: (event: string, ...args: Array<mixed>) => Component;
   $nextTick: (fn: Function) => void;
   $createElement: (
     tag?: string | Component,
@@ -87,7 +87,7 @@ declare interface Component {
   // markOnce
   _o: (vnode: VNode | Array<VNode>, index: number, key: string) => VNode | VNodeChildren;
   // toString
-  _s: (value: any) => string;
+  _s: (value: mixed) => string;
   // text to VNode
   _v: (value: string | number) => VNode;
   // toNumber
@@ -101,7 +101,7 @@ declare interface Component {
   // resolveFilter
   _f: (id: string) => Function;
   // renderList
-  _l: (val: any, render: Function) => ?Array<VNode>;
+  _l: (val: mixed, render: Function) => ?Array<VNode>;
   // renderSlot
   _t: (name: string, fallback: ?Array<VNode>, props: ?Object) => ?Array<VNode>;
   // apply v-bind object
