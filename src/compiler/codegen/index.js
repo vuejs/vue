@@ -298,12 +298,16 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
 function canSkipNormalization (children): boolean {
   for (let i = 0; i < children.length; i++) {
     const el: any = children[i]
-    if (el.for || el.tag === 'template' || el.tag === 'slot' ||
-      (el.if && el.ifConditions.some(c => c.tag === 'template'))) {
+    if (needsNormalization(el) ||
+        (el.if && el.ifConditions.some(c => needsNormalization(c.block)))) {
       return false
     }
   }
   return true
+}
+
+function needsNormalization (el) {
+  return el.for || el.tag === 'template' || el.tag === 'slot'
 }
 
 function genNode (node: ASTNode) {
