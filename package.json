@@ -1,6 +1,6 @@
 {
   "name": "vue",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "Reactive, component-oriented view layer for modern web interfaces.",
   "main": "dist/vue.runtime.common.js",
   "typings": "types/index.d.ts",
