@@ -48,4 +48,21 @@ describe('Global API: assets', () => {
     // extended registration should not pollute global
     expect(Vue.options.components.test).toBeUndefined()
   })
+
+  // #4434
+  it('local registration should take priority regardless of naming convention', () => {
+    Vue.component('x-foo', {
+      template: '<span>global</span>'
+    })
+    const vm = new Vue({
+      components: {
+        xFoo: {
+          template: '<span>local</span>'
+        }
+      },
+      template: '<div><x-foo></x-foo></div>'
+    }).$mount()
+    expect(vm.$el.textContent).toBe('local')
+    delete Vue.options.components['x-foo']
+  })
 })
