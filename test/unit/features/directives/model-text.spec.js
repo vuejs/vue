@@ -72,8 +72,8 @@ describe('Directive v-model text', () => {
       },
       template:
         '<div>' +
-          '<input ref="input" v-model="test" type="number">{{ update }}' +
-          '<input ref="blur"/>' +
+          '<input ref="input" v-model.number="test">{{ update }}' +
+          '<input ref="blur">' +
         '</div>'
     }).$mount()
     document.body.appendChild(vm.$el)
