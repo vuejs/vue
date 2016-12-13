@@ -98,6 +98,17 @@ describe('create-element', () => {
     expect(vnode.children[2].tag).toBe('br')
   })
 
+  it('render vnode with children, including boolean and null type', () => {
+    const vm = new Vue({})
+    const h = vm.$createElement
+    const vnode = h('p', [h('br'), true, 123, h('br'), 'abc', null])
+    expect(vnode.children.length).toBe(4)
+    expect(vnode.children[0].tag).toBe('br')
+    expect(vnode.children[1].text).toBe('123')
+    expect(vnode.children[2].tag).toBe('br')
+    expect(vnode.children[3].text).toBe('abc')
+  })
+
   it('render svg elements with correct namespace', () => {
     const vm = new Vue({})
     const h = vm.$createElement
