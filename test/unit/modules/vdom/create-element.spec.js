@@ -132,6 +132,15 @@ describe('create-element', () => {
     expect(vnode.children[0].componentOptions).toBeUndefined()
   })
 
+  it('render svg foreignObject with correct namespace', () => {
+    const vm = new Vue({})
+    const h = vm.$createElement
+    const vnode = h('svg', [h('foreignObject', [h('p')])])
+    expect(vnode.ns).toBe('svg')
+    expect(vnode.children[0].ns).toBe('svg')
+    expect(vnode.children[0].children[0].ns).toBeUndefined()
+  })
+
   it('warn observed data objects', () => {
     new Vue({
       data: {

@@ -71,7 +71,6 @@ export function _createElement (
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
-      ns = tag === 'foreignObject' ? 'xhtml' : ns
       vnode = new VNode(
         tag, data, children,
         undefined, undefined, context
@@ -91,6 +90,10 @@ export function _createElement (
 
 function applyNS (vnode, ns) {
   vnode.ns = ns
+  if (vnode.tag === 'foreignObject') {
+    // use default namespace inside foreignObject
+    return
+  }
   if (vnode.children) {
     for (let i = 0, l = vnode.children.length; i < l; i++) {
       const child = vnode.children[i]
