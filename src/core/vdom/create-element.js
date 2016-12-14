@@ -3,8 +3,11 @@
 import VNode, { createEmptyVNode } from './vnode'
 import config from '../config'
 import { createComponent } from './create-component'
-import { normalizeChildren } from './helpers/index'
+import { normalizeChildren, simpleNormalizeChildren } from './helpers/index'
 import { warn, resolveAsset, isPrimitive } from '../util/index'
+
+const SIMPLE_NORMALIZE = 1
+const ALWAYS_NORMALIZE = 2
 
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
@@ -13,16 +16,16 @@ export function createElement (
   tag: any,
   data: any,
   children: any,
-  needNormalization: any,
+  normalizationType: any,
   alwaysNormalize: boolean
 ): VNode {
   if (Array.isArray(data) || isPrimitive(data)) {
-    needNormalization = children
+    normalizationType = children
     children = data
     data = undefined
   }
-  if (alwaysNormalize) needNormalization = true
-  return _createElement(context, tag, data, children, needNormalization)
+  if (alwaysNormalize) normalizationType = ALWAYS_NORMALIZE
+  return _createElement(context, tag, data, children, normalizationType)
 }
 
 export function _createElement (
@@ -30,7 +33,7 @@ export function _createElement (
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
   children?: any,
-  needNormalization?: boolean
+  normalizationType?: number
 ): VNode {
   if (data && data.__ob__) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -51,8 +54,10 @@ export function _createElement (
     data.scopedSlots = { default: children[0] }
     children.length = 0
   }
-  if (needNormalization) {
+  if (normalizationType === ALWAYS_NORMALIZE) {
     children = normalizeChildren(children)
+  } else if (normalizationType === SIMPLE_NORMALIZE) {
+    children = simpleNormalizeChildren(children)
   }
   let vnode, ns
   if (typeof tag === 'string') {

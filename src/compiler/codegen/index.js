@@ -3,13 +3,14 @@
 import { genHandlers } from './events'
 import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
-import { camelize } from 'shared/util'
+import { camelize, no } from 'shared/util'
 
 // configurable state
 let warn
 let transforms
 let dataGenFns
 let platformDirectives
+let isPlatformReservedTag
 let staticRenderFns
 let onceCount
 let currentOptions
@@ -31,6 +32,7 @@ export function generate (
   transforms = pluckModuleFunction(options.modules, 'transformCode')
   dataGenFns = pluckModuleFunction(options.modules, 'genData')
   platformDirectives = options.directives || {}
+  isPlatformReservedTag = options.isReservedTag || no
   const code = ast ? genElement(ast) : '_c("div")'
   staticRenderFns = prevStaticRenderFns
   onceCount = prevOnceCount
@@ -287,27 +289,40 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
         el.tag !== 'slot') {
       return genElement(el)
     }
+    const normalizationType = getNormalizationType(children)
     return `[${children.map(genNode).join(',')}]${
       checkSkip
-        ? canSkipNormalization(children) ? '' : ',true'
+        ? normalizationType ? `,${normalizationType}` : ''
         : ''
     }`
   }
 }
 
-function canSkipNormalization (children): boolean {
+// determine the normalzation needed for the children array.
+// 0: no normalization needed
+// 1: simple normalization needed (possible 1-level deep nested array)
+// 2: full nomralization needed
+function getNormalizationType (children): number {
   for (let i = 0; i < children.length; i++) {
     const el: any = children[i]
     if (needsNormalization(el) ||
         (el.if && el.ifConditions.some(c => needsNormalization(c.block)))) {
-      return false
+      return 2
+    }
+    if (maybeComponent(el) ||
+        (el.if && el.ifConditions.some(c => maybeComponent(c.block)))) {
+      return 1
     }
   }
-  return true
+  return 0
 }
 
 function needsNormalization (el) {
   return el.for || el.tag === 'template' || el.tag === 'slot'
+}
+
+function maybeComponent (el) {
+  return el.type === 1 && !isPlatformReservedTag(el.tag)
 }
 
 function genNode (node: ASTNode) {
