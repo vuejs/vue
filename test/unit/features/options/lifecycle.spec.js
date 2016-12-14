@@ -193,4 +193,29 @@ describe('Options lifecyce hooks', () => {
       expect(spy.calls.count()).toBe(1)
     })
   })
+
+  it('should emit hook events', () => {
+    const created = jasmine.createSpy()
+    const mounted = jasmine.createSpy()
+    const destroyed = jasmine.createSpy()
+    const vm = new Vue({
+      render () {},
+      beforeCreate () {
+        this.$on('hook:created', created)
+        this.$on('hook:mounted', mounted)
+        this.$on('hook:destroyed', destroyed)
+      }
+    })
+
+    expect(created).toHaveBeenCalled()
+    expect(mounted).not.toHaveBeenCalled()
+    expect(destroyed).not.toHaveBeenCalled()
+
+    vm.$mount()
+    expect(mounted).toHaveBeenCalled()
+    expect(destroyed).not.toHaveBeenCalled()
+
+    vm.$destroy()
+    expect(destroyed).toHaveBeenCalled()
+  })
 })
