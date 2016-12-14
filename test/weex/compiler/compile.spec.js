@@ -38,7 +38,7 @@ describe('compile basic', () => {
         <text style="margin-left:36px;color:#eee;">Load more...</text>
       </refresh>
     `)
-    expect(render).toEqual(`with(this){return _c('refresh',{staticClass:["refresh"],staticStyle:{flexDirection:"row"},attrs:{"display":displayRefresh},on:{"refresh":handleRefresh}},[_c('loading-indicator'),_c('text',{staticStyle:{marginLeft:"36px",color:"#eee"}},[_v("Load more...")])])}`)
+    expect(render).toEqual(`with(this){return _c('refresh',{staticClass:["refresh"],staticStyle:{flexDirection:"row"},attrs:{"display":displayRefresh},on:{"refresh":handleRefresh}},[_c('loading-indicator'),_c('text',{staticStyle:{marginLeft:"36px",color:"#eee"}},[_v("Load more...")])],1)}`)
     expect(staticRenderFns).toEqual([])
     expect(errors).toEqual([])
   })
