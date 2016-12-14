@@ -285,7 +285,6 @@ if (!isIE9) {
             beforeLeaveSpy(el)
           },
           leave: (el) => {
-            expect(el.style.display).toBe('')
             onLeaveSpy(el)
           },
           afterLeave: (el) => {
@@ -298,7 +297,6 @@ if (!isIE9) {
             beforeEnterSpy(el)
           },
           enter: (el) => {
-            expect(el.style.display).toBe('')
             onEnterSpy(el)
           },
           afterEnter: (el) => {
