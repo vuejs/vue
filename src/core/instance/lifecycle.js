@@ -5,6 +5,7 @@ import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { warn, validateProp, remove, noop } from '../util/index'
 import { resolveSlots } from './render'
+import { updateComponentListeners } from './events'
 
 export let activeInstance: any = null
 
@@ -148,7 +149,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (listeners) {
       const oldListeners = vm.$options._parentListeners
       vm.$options._parentListeners = listeners
-      vm._updateListeners(listeners, oldListeners)
+      updateComponentListeners(vm, listeners, oldListeners)
     }
     // resolve slots + force update if has children
     if (hasChildren) {
