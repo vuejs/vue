@@ -26,7 +26,11 @@ export function initState (vm: Component) {
   const opts = vm.$options
   if (opts.props) initProps(vm, opts.props)
   if (opts.methods) initMethods(vm, opts.methods)
-  initData(vm)
+  if (opts.data) {
+    initData(vm)
+  } else {
+    observe(vm._data = {}, true /* asRootData */)
+  }
   if (opts.computed) initComputed(vm, opts.computed)
   if (opts.watch) initWatch(vm, opts.watch)
 }
@@ -96,8 +100,7 @@ function initData (vm: Component) {
     }
   }
   // observe data
-  observe(data)
-  data.__ob__ && data.__ob__.vmCount++
+  observe(data, true /* asRootData */)
 }
 
 const computedSharedDefinition = {
