@@ -23,50 +23,48 @@ import {
 
 export function initState (vm: Component) {
   vm._watchers = []
-  initProps(vm)
-  initMethods(vm)
+  const opts = vm.$options
+  if (opts.props) initProps(vm, opts.props)
+  if (opts.methods) initMethods(vm, opts.methods)
   initData(vm)
-  initComputed(vm)
-  initWatch(vm)
+  if (opts.computed) initComputed(vm, opts.computed)
+  if (opts.watch) initWatch(vm, opts.watch)
 }
 
 const isReservedProp = { key: 1, ref: 1, slot: 1 }
 
-function initProps (vm: Component) {
-  const props = vm.$options.props
-  if (props) {
-    const propsData = vm.$options.propsData || {}
-    const keys = vm.$options._propKeys = Object.keys(props)
-    const isRoot = !vm.$parent
-    // root instance props should be converted
-    observerState.shouldConvert = isRoot
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i]
-      /* istanbul ignore else */
-      if (process.env.NODE_ENV !== 'production') {
-        if (isReservedProp[key]) {
+function initProps (vm: Component, props: Object) {
+  const propsData = vm.$options.propsData || {}
+  const keys = vm.$options._propKeys = Object.keys(props)
+  const isRoot = !vm.$parent
+  // root instance props should be converted
+  observerState.shouldConvert = isRoot
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i]
+    /* istanbul ignore else */
+    if (process.env.NODE_ENV !== 'production') {
+      if (isReservedProp[key]) {
+        warn(
+          `"${key}" is a reserved attribute and cannot be used as component prop.`,
+          vm
+        )
+      }
+      defineReactive(vm, key, validateProp(key, props, propsData, vm), () => {
+        if (vm.$parent && !observerState.isSettingProps) {
           warn(
-            `"${key}" is a reserved attribute and cannot be used as component prop.`,
+            `Avoid mutating a prop directly since the value will be ` +
+            `overwritten whenever the parent component re-renders. ` +
+            `Instead, use a data or computed property based on the prop's ` +
+            `value. Prop being mutated: "${key}"`,
             vm
           )
         }
-        defineReactive(vm, key, validateProp(key, props, propsData, vm), () => {
-          if (vm.$parent && !observerState.isSettingProps) {
-            warn(
-              `Avoid mutating a prop directly since the value will be ` +
-              `overwritten whenever the parent component re-renders. ` +
-              `Instead, use a data or computed property based on the prop's ` +
-              `value. Prop being mutated: "${key}"`,
-              vm
-            )
-          }
-        })
-      } else {
-        defineReactive(vm, key, validateProp(key, props, propsData, vm))
-      }
+      })
+    } else {
+      defineReactive(vm, key, validateProp(key, props, propsData, vm))
     }
-    observerState.shouldConvert = true
   }
+  observerState.shouldConvert = true
 }
 
 function initData (vm: Component) {
@@ -109,26 +107,23 @@ const computedSharedDefinition = {
   set: noop
 }
 
-function initComputed (vm: Component) {
-  const computed = vm.$options.computed
-  if (computed) {
-    for (const key in computed) {
-      const userDef = computed[key]
-      if (typeof userDef === 'function') {
-        computedSharedDefinition.get = makeComputedGetter(userDef, vm)
-        computedSharedDefinition.set = noop
-      } else {
-        computedSharedDefinition.get = userDef.get
-          ? userDef.cache !== false
-            ? makeComputedGetter(userDef.get, vm)
-            : bind(userDef.get, vm)
-          : noop
-        computedSharedDefinition.set = userDef.set
-          ? bind(userDef.set, vm)
-          : noop
-      }
-      Object.defineProperty(vm, key, computedSharedDefinition)
+function initComputed (vm: Component, computed: Object) {
+  for (const key in computed) {
+    const userDef = computed[key]
+    if (typeof userDef === 'function') {
+      computedSharedDefinition.get = makeComputedGetter(userDef, vm)
+      computedSharedDefinition.set = noop
+    } else {
+      computedSharedDefinition.get = userDef.get
+        ? userDef.cache !== false
+          ? makeComputedGetter(userDef.get, vm)
+          : bind(userDef.get, vm)
+        : noop
+      computedSharedDefinition.set = userDef.set
+        ? bind(userDef.set, vm)
+        : noop
     }
+    Object.defineProperty(vm, key, computedSharedDefinition)
   }
 }
 
@@ -147,34 +142,28 @@ function makeComputedGetter (getter: Function, owner: Component): Function {
   }
 }
 
-function initMethods (vm: Component) {
-  const methods = vm.$options.methods
-  if (methods) {
-    for (const key in methods) {
-      vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
-      if (process.env.NODE_ENV !== 'production' && methods[key] == null) {
-        warn(
-          `method "${key}" has an undefined value in the component definition. ` +
-          `Did you reference the function correctly?`,
-          vm
-        )
-      }
+function initMethods (vm: Component, methods: Object) {
+  for (const key in methods) {
+    vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
+    if (process.env.NODE_ENV !== 'production' && methods[key] == null) {
+      warn(
+        `method "${key}" has an undefined value in the component definition. ` +
+        `Did you reference the function correctly?`,
+        vm
+      )
     }
   }
 }
 
-function initWatch (vm: Component) {
-  const watch = vm.$options.watch
-  if (watch) {
-    for (const key in watch) {
-      const handler = watch[key]
-      if (Array.isArray(handler)) {
-        for (let i = 0; i < handler.length; i++) {
-          createWatcher(vm, key, handler[i])
-        }
-      } else {
-        createWatcher(vm, key, handler)
+function initWatch (vm: Component, watch: Object) {
+  for (const key in watch) {
+    const handler = watch[key]
+    if (Array.isArray(handler)) {
+      for (let i = 0; i < handler.length; i++) {
+        createWatcher(vm, key, handler[i])
       }
+    } else {
+      createWatcher(vm, key, handler)
     }
   }
 }

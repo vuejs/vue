@@ -49,7 +49,6 @@ export default class Watcher {
     this.user = !!options.user
     this.lazy = !!options.lazy
     this.sync = !!options.sync
-    this.expression = expOrFn.toString()
     this.cb = cb
     this.id = ++uid // uid for batching
     this.active = true
@@ -58,6 +57,9 @@ export default class Watcher {
     this.newDeps = []
     this.depIds = new Set()
     this.newDepIds = new Set()
+    this.expression = process.env.NODE_ENV !== 'production'
+      ? expOrFn.toString()
+      : ''
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn

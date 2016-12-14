@@ -87,7 +87,7 @@ export function eventsMixin (Vue: Class<Component>) {
     let cbs = vm._events[event]
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
-      const args = toArray(arguments, 1)
+      const args = arguments.length > 1 ? toArray(arguments, 1) : void 0
       for (let i = 0, l = cbs.length; i < l; i++) {
         cbs[i].apply(vm, args)
       }
