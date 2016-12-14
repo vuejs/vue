@@ -64,6 +64,7 @@ declare interface Component {
   _isBeingDestroyed: boolean;
   _vnode: ?VNode;
   _staticTrees: ?Array<VNode>;
+  _hasHookEvent: boolean;
 
   // private methods
   // lifecycle

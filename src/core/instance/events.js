@@ -5,6 +5,7 @@ import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
   vm._events = Object.create(null)
+  vm._hasHookEvent = false
   // init parent attached events
   const listeners = vm.$options._parentListeners
   if (listeners) {
@@ -36,9 +37,15 @@ export function updateComponentListeners (
 }
 
 export function eventsMixin (Vue: Class<Component>) {
+  const hookRE = /^hook:/
   Vue.prototype.$on = function (event: string, fn: Function): Component {
     const vm: Component = this
     ;(vm._events[event] || (vm._events[event] = [])).push(fn)
+    // optimize hook:event cost by using a boolean flag marked at registration
+    // instead of a hash lookup
+    if (hookRE.test(event)) {
+      vm._hasHookEvent = true
+    }
     return vm
   }
 
@@ -87,7 +94,7 @@ export function eventsMixin (Vue: Class<Component>) {
     let cbs = vm._events[event]
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
-      const args = arguments.length > 1 ? toArray(arguments, 1) : void 0
+      const args = toArray(arguments, 1)
       for (let i = 0, l = cbs.length; i < l; i++) {
         cbs[i].apply(vm, args)
       }
