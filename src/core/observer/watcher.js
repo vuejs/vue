@@ -40,15 +40,19 @@ export default class Watcher {
     vm: Component,
     expOrFn: string | Function,
     cb: Function,
-    options?: Object = {}
+    options?: Object
   ) {
     this.vm = vm
     vm._watchers.push(this)
     // options
-    this.deep = !!options.deep
-    this.user = !!options.user
-    this.lazy = !!options.lazy
-    this.sync = !!options.sync
+    if (options) {
+      this.deep = !!options.deep
+      this.user = !!options.user
+      this.lazy = !!options.lazy
+      this.sync = !!options.sync
+    } else {
+      this.deep = this.user = this.lazy = this.sync = false
+    }
     this.cb = cb
     this.id = ++uid // uid for batching
     this.active = true
