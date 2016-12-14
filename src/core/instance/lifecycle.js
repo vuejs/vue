@@ -211,7 +211,5 @@ export function callHook (vm: Component, hook: string) {
       handlers[i].call(vm)
     }
   }
-  // if (vm._events['hook:' + hook]) {
-  //   vm.$emit('hook:' + hook)
-  // }
+  vm.$emit('hook:' + hook)
 }
