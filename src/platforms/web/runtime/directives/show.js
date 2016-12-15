@@ -39,8 +39,13 @@ export default {
       el.style.display = value ? el.__vOriginalDisplay : 'none'
     }
   },
-  unbind (el: any, { value, oldValue }: VNodeDirective, vnode: VNodeWithData) {
+  unbind (el: any, { value }: VNodeDirective, vnode: VNodeWithData) {
     if (el.parentNode) {
+      vnode = locateNode(vnode)
+      const transition = vnode.data && vnode.data.transition
+      if (!value && transition && !isIE9) {
+        enter(vnode)
+      }
       el.style.display = el.__vOriginalDisplay
     }
   }
