@@ -38,5 +38,10 @@ export default {
     } else {
       el.style.display = value ? el.__vOriginalDisplay : 'none'
     }
+  },
+  unbind (el: any, { value, oldValue }: VNodeDirective, vnode: VNodeWithData) {
+    if (el.parentNode) {
+      el.style.display = el.__vOriginalDisplay
+    }
   }
 }

@@ -64,4 +64,21 @@ describe('Directive v-show', () => {
       expect(vm.$el.firstChild.style.display).toBe('block')
     }).then(done)
   })
+
+  it('should support unbind when reused', done => {
+    const vm = new Vue({
+      template:
+        '<div v-if="tester"><span v-show="false"></span></div>' +
+        '<div v-else><span @click="tester=!tester">show</span></div>',
+      data: { tester: true }
+    }).$mount()
+    expect(vm.$el.firstChild.style.display).toBe('none')
+    vm.tester = false
+    waitForUpdate(() => {
+      expect(vm.$el.firstChild.style.display).toBe('')
+      vm.tester = true
+    }).then(() => {
+      expect(vm.$el.firstChild.style.display).toBe('none')
+    }).then(done)
+  })
 })
