@@ -428,4 +428,22 @@ describe('Directive v-for', () => {
       expect(vm.$el.textContent).toMatch(/\s+foo\s+bar\s+/)
     }).then(done)
   })
+
+  it('strings', done => {
+    const vm = new Vue({
+      data: {
+        text: 'foo'
+      },
+      template: `
+        <div>
+          <span v-for="letter in text">{{ letter }}.</span
+        </div>
+      `
+    }).$mount()
+    expect(vm.$el.textContent).toMatch('f.o.o.')
+    vm.text += 'bar'
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toMatch('f.o.o.b.a.r.')
+    }).then(done)
+  })
 })
