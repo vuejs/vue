@@ -37,7 +37,8 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       const strCur = cur == null ? '' : String(cur)
       if (!elm.composing && (
         (document.activeElement !== elm && elm.value !== strCur) ||
-        isValueChanged(vnode, strCur)
+        isValueChanged(vnode, strCur) ||
+        elm.tagName.toLowerCase() === 'option'
       )) {
         elm.value = strCur
       }
