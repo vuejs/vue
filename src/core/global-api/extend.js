@@ -28,7 +28,8 @@ export function initExtend (Vue: GlobalAPI) {
       if (!/^[a-zA-Z][\w-]*$/.test(name)) {
         warn(
           'Invalid component name: "' + name + '". Component names ' +
-          'can only contain alphanumeric characaters and the hyphen.'
+          'can only contain alphanumeric characters and the hyphen, ' +
+          'and must start with a letter.'
         )
       }
     }

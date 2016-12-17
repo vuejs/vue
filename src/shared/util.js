@@ -190,6 +190,11 @@ export function noop () {}
 export const no = () => false
 
 /**
+ * Return same value
+ */
+export const identity = (_: any) => _
+
+/**
  * Generate a static keys string from compiler modules.
  */
 export function genStaticKeys (modules: Array<ModuleOptions>): string {

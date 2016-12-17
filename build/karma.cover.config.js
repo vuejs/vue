@@ -15,8 +15,8 @@ module.exports = function (config) {
 
   // add babel-plugin-coverage for code intrumentation
   options.webpack.babel = {
-    plugins: [['coverage', {
-      ignore: [
+    plugins: [['istanbul', {
+      exclude: [
         'test/',
         'src/compiler/parser/html-parser.js',
         'src/core/instance/proxy.js',

@@ -3,7 +3,7 @@
 import Vue from 'core/index'
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
-import { devtools, inBrowser } from 'core/util/index'
+import { devtools, inBrowser, isEdge } from 'core/util/index'
 import { patch } from 'web/runtime/patch'
 import platformDirectives from 'web/runtime/directives/index'
 import platformComponents from 'web/runtime/components/index'
@@ -45,7 +45,7 @@ setTimeout(() => {
       devtools.emit('init', Vue)
     } else if (
       process.env.NODE_ENV !== 'production' &&
-      inBrowser && /Chrome\/\d+/.test(window.navigator.userAgent)
+      inBrowser && !isEdge && /Chrome\/\d+/.test(window.navigator.userAgent)
     ) {
       console.log(
         'Download the Vue Devtools for a better development experience:\n' +

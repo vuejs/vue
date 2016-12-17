@@ -127,10 +127,12 @@ function genDefaultModel (
   valueExpression = number || type === 'number'
     ? `_n(${valueExpression})`
     : valueExpression
+
   let code = genAssignmentCode(value, valueExpression)
   if (isNative && needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
   }
+
   // inputs with type="file" are read only and setting the input's
   // value will throw an error.
   if (process.env.NODE_ENV !== 'production' &&
@@ -140,8 +142,12 @@ function genDefaultModel (
       `File inputs are read only. Use a v-on:change listener instead.`
     )
   }
+
   addProp(el, 'value', isNative ? `_s(${value})` : `(${value})`)
   addHandler(el, event, code, null, true)
+  if (trim || number || type === 'number') {
+    addHandler(el, 'blur', '$forceUpdate()')
+  }
 }
 
 function genSelect (

@@ -19,9 +19,6 @@ export function createComment (text) {
 }
 
 export function insertBefore (node, target, before) {
-  if (!before) {
-    return appendChild(node, target)
-  }
   if (target.nodeType === 3) {
     if (node.type === 'text') {
       node.setAttr('value', target.text)
@@ -70,10 +67,6 @@ export function tagName (node) {
 
 export function setTextContent (node, text) {
   node.parentNode.setAttr('value', text)
-}
-
-export function childNodes (node) {
-  return node.pureChildren
 }
 
 export function setAttribute (node, key, val) {

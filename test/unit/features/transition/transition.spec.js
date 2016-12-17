@@ -279,20 +279,32 @@ if (!isIE9) {
         data: { ok: true },
         methods: {
           beforeLeave: (el) => {
+            expect(el.style.display).toBe('')
             expect(el).toBe(vm.$el.children[0])
             expect(el.className).toBe('test')
             beforeLeaveSpy(el)
           },
-          leave: (el) => onLeaveSpy(el),
-          afterLeave: (el) => afterLeaveSpy(el),
+          leave: (el) => {
+            expect(el.style.display).toBe('')
+            onLeaveSpy(el)
+          },
+          afterLeave: (el) => {
+            expect(el.style.display).toBe('none')
+            afterLeaveSpy(el)
+          },
           beforeEnter: (el) => {
             expect(el.className).toBe('test')
+            expect(el.style.display).toBe('none')
             beforeEnterSpy(el)
           },
           enter: (el) => {
+            expect(el.style.display).toBe('')
             onEnterSpy(el)
           },
-          afterEnter: (el) => afterEnterSpy(el)
+          afterEnter: (el) => {
+            expect(el.style.display).toBe('')
+            afterEnterSpy(el)
+          }
         }
       }).$mount(el)
 

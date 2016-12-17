@@ -1,28 +1,51 @@
 /* @flow */
 
-import { bind, toArray } from '../util/index'
+import { toArray } from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
   vm._events = Object.create(null)
+  vm._hasHookEvent = false
   // init parent attached events
   const listeners = vm.$options._parentListeners
-  const add = (event, fn, once) => {
-    once ? vm.$once(event, fn) : vm.$on(event, fn)
-  }
-  const remove = bind(vm.$off, vm)
-  vm._updateListeners = (listeners, oldListeners) => {
-    updateListeners(listeners, oldListeners || {}, add, remove, vm)
-  }
   if (listeners) {
-    vm._updateListeners(listeners)
+    updateComponentListeners(vm, listeners)
   }
 }
 
+let target: Component
+
+function add (event, fn, once) {
+  if (once) {
+    target.$once(event, fn)
+  } else {
+    target.$on(event, fn)
+  }
+}
+
+function remove (event, fn) {
+  target.$off(event, fn)
+}
+
+export function updateComponentListeners (
+  vm: Component,
+  listeners: Object,
+  oldListeners: ?Object
+) {
+  target = vm
+  updateListeners(listeners, oldListeners || {}, add, remove, vm)
+}
+
 export function eventsMixin (Vue: Class<Component>) {
+  const hookRE = /^hook:/
   Vue.prototype.$on = function (event: string, fn: Function): Component {
     const vm: Component = this
     ;(vm._events[event] || (vm._events[event] = [])).push(fn)
+    // optimize hook:event cost by using a boolean flag marked at registration
+    // instead of a hash lookup
+    if (hookRE.test(event)) {
+      vm._hasHookEvent = true
+    }
     return vm
   }
 

@@ -7,7 +7,7 @@
   The full (compiler-included) browser build. This is the build you can just include with a script tag:
 
   ```
-  <script src="https://unkpg.com/vue/dist/vue.js"><script>
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
   ```
 
   Note that this build is hard-coded to development mode.

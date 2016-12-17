@@ -1,6 +1,6 @@
 /* @flow */
 
-import { extend } from 'shared/util'
+import { extend, toNumber } from 'shared/util'
 
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.domProps && !vnode.data.domProps) {
@@ -35,13 +35,28 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       elm._value = cur
       // avoid resetting cursor position when value is the same
       const strCur = cur == null ? '' : String(cur)
-      if (elm.value !== strCur && !elm.composing) {
+      if (!elm.composing && (
+        (document.activeElement !== elm && elm.value !== strCur) ||
+        isValueChanged(vnode, strCur)
+      )) {
         elm.value = strCur
       }
     } else {
       elm[key] = cur
     }
   }
+}
+
+function isValueChanged (vnode: VNodeWithData, newVal: string): boolean {
+  const value = vnode.elm.value
+  const modifiers = vnode.elm._vModifiers // injected by v-model runtime
+  if ((modifiers && modifiers.number) || vnode.elm.type === 'number') {
+    return toNumber(value) !== toNumber(newVal)
+  }
+  if (modifiers && modifiers.trim) {
+    return value.trim() !== newVal.trim()
+  }
+  return value !== newVal
 }
 
 export default {

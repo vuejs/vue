@@ -70,7 +70,7 @@ describe('codegen', () => {
     // v-for with extra element
     assertCodegen(
       '<div><p></p><li v-for="item in items"></li></div>',
-      `with(this){return _c('div',[_c('p'),_l((items),function(item){return _c('li')})],true)}`
+      `with(this){return _c('div',[_c('p'),_l((items),function(item){return _c('li')})],2)}`
     )
   })
 
@@ -133,28 +133,28 @@ describe('codegen', () => {
   it('generate template tag', () => {
     assertCodegen(
       '<div><template><p>{{hello}}</p></template></div>',
-      `with(this){return _c('div',[[_c('p',[_v(_s(hello))])]],true)}`
+      `with(this){return _c('div',[[_c('p',[_v(_s(hello))])]],2)}`
     )
   })
 
   it('generate single slot', () => {
     assertCodegen(
       '<div><slot></slot></div>',
-      `with(this){return _c('div',[_t("default")],true)}`
+      `with(this){return _c('div',[_t("default")],2)}`
     )
   })
 
   it('generate named slot', () => {
     assertCodegen(
       '<div><slot name="one"></slot></div>',
-      `with(this){return _c('div',[_t("one")],true)}`
+      `with(this){return _c('div',[_t("one")],2)}`
     )
   })
 
   it('generate slot fallback content', () => {
     assertCodegen(
       '<div><slot><div>hi</div></slot></div>',
-      `with(this){return _c('div',[_t("default",[_c('div',[_v("hi")])])],true)}`
+      `with(this){return _c('div',[_t("default",[_c('div',[_v("hi")])])],2)}`
     )
   })
 
@@ -397,7 +397,7 @@ describe('codegen', () => {
   it('generate svg component with children', () => {
     assertCodegen(
       '<svg><my-comp><circle :r="10"></circle></my-comp></svg>',
-      `with(this){return _c('svg',[_c('my-comp',[_c('circle',{attrs:{"r":10}})])])}`
+      `with(this){return _c('svg',[_c('my-comp',[_c('circle',{attrs:{"r":10}})])],1)}`
     )
   })
 

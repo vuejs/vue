@@ -132,10 +132,10 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
       this.set = Object.create(null)
     }
     has (key: string | number) {
-      return this.set[key] !== undefined
+      return this.set[key] === true
     }
     add (key: string | number) {
-      this.set[key] = 1
+      this.set[key] = true
     }
     clear () {
       this.set = Object.create(null)

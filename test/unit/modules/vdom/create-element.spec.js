@@ -98,6 +98,17 @@ describe('create-element', () => {
     expect(vnode.children[2].tag).toBe('br')
   })
 
+  it('render vnode with children, including boolean and null type', () => {
+    const vm = new Vue({})
+    const h = vm.$createElement
+    const vnode = h('p', [h('br'), true, 123, h('br'), 'abc', null])
+    expect(vnode.children.length).toBe(4)
+    expect(vnode.children[0].tag).toBe('br')
+    expect(vnode.children[1].text).toBe('123')
+    expect(vnode.children[2].tag).toBe('br')
+    expect(vnode.children[3].text).toBe('abc')
+  })
+
   it('render svg elements with correct namespace', () => {
     const vm = new Vue({})
     const h = vm.$createElement
@@ -119,6 +130,15 @@ describe('create-element', () => {
     // although not explicitly listed, elements nested under <math>
     // should not be treated as component
     expect(vnode.children[0].componentOptions).toBeUndefined()
+  })
+
+  it('render svg foreignObject with correct namespace', () => {
+    const vm = new Vue({})
+    const h = vm.$createElement
+    const vnode = h('svg', [h('foreignObject', [h('p')])])
+    expect(vnode.ns).toBe('svg')
+    expect(vnode.children[0].ns).toBe('svg')
+    expect(vnode.children[0].children[0].ns).toBeUndefined()
   })
 
   it('warn observed data objects', () => {

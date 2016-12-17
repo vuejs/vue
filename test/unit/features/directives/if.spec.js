@@ -141,7 +141,7 @@ describe('Directive v-if', () => {
     const vm = new Vue({
       template: `
         <div>
-          <span v-for="item,i in list" v-if="item.value">{{i}}</span>
+          <span v-for="(item, i) in list" v-if="item.value">{{i}}</span>
         </div>
       `,
       data: {
@@ -169,7 +169,7 @@ describe('Directive v-if', () => {
     const vm = new Vue({
       template: `
         <div>
-          <span v-for="item,i in list" v-if="item.value">hello</span>
+          <span v-for="(item, i) in list" v-if="item.value">hello</span>
           <span v-else>bye</span>
         </div>
       `,
@@ -191,6 +191,25 @@ describe('Directive v-if', () => {
       vm.list.splice(1, 2)
     }).then(() => {
       expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span><span>hello</span>')
+    }).then(done)
+  })
+
+  it('should work with v-for on v-else branch', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <span v-if="false">hello</span>
+          <span v-else v-for="item in list">{{ item }}</span>
+        </div>
+      `,
+      data: {
+        list: [1, 2, 3]
+      }
+    }).$mount()
+    expect(vm.$el.textContent.trim()).toBe('123')
+    vm.list.reverse()
+    waitForUpdate(() => {
+      expect(vm.$el.textContent.trim()).toBe('321')
     }).then(done)
   })
 

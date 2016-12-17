@@ -5,8 +5,7 @@ import { makeMap } from 'shared/util'
 
 export const namespaceMap = {
   svg: 'http://www.w3.org/2000/svg',
-  math: 'http://www.w3.org/1998/Math/MathML',
-  xhtml: 'http://www.w3.org/1999/xhtml'
+  math: 'http://www.w3.org/1998/Math/MathML'
 }
 
 export const isHTMLTag = makeMap(
@@ -26,7 +25,7 @@ export const isHTMLTag = makeMap(
 // this map is intentionally selective, only covering SVG elements that may
 // contain child elements.
 export const isSVG = makeMap(
-  'svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,font,' +
+  'svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,' +
   'font-face,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' +
   'polygon,polyline,rect,switch,symbol,text,textpath,tspan,use,view',
   true

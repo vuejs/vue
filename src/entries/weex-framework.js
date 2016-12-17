@@ -1,7 +1,7 @@
 import Vue from 'weex/runtime/index'
 import renderer from 'weex/runtime/config'
 
-Vue.weexVersion = '2.0.5-weex.1'
+Vue.weexVersion = '__WEEX_VERSION__'
 export { Vue }
 
 const {

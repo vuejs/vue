@@ -89,9 +89,8 @@ function protoAugment (target, src: Object) {
 /**
  * Augment an target Object or Array by defining
  * hidden properties.
- *
- * istanbul ignore next
  */
+/* istanbul ignore next */
 function copyAugment (target: Object, src: Object, keys: Array<string>) {
   for (let i = 0, l = keys.length; i < l; i++) {
     const key = keys[i]
@@ -104,7 +103,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
  */
-export function observe (value: any): Observer | void {
+export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value)) {
     return
   }
@@ -119,6 +118,9 @@ export function observe (value: any): Observer | void {
     !value._isVue
   ) {
     ob = new Observer(value)
+  }
+  if (asRootData && ob) {
+    ob.vmCount++
   }
   return ob
 }
