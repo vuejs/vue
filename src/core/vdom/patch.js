@@ -536,6 +536,9 @@ export function createPatchFunction (backend) {
         vnode.tag.indexOf('vue-component') === 0 ||
         vnode.tag.toLowerCase() === (node.tagName && node.tagName.toLowerCase())
       )
+    } else if (vnode.isAsyncPlaceholder) {
+      // skip checking if component hasn't been resolved
+      return true
     } else {
       return _toString(vnode.text) === node.data
     }

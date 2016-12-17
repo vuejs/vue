@@ -1,6 +1,6 @@
 /* @flow */
 
-import VNode from './vnode'
+import VNode, { createAsyncPlaceholder } from './vnode'
 import { resolveConstructorOptions } from '../instance/init'
 import { activeInstance, callHook } from '../instance/lifecycle'
 import { resolveSlots } from '../instance/render'
@@ -46,7 +46,7 @@ export function createComponent (
       if (!Ctor) {
         // return nothing if this is indeed an async component
         // wait for the callback to trigger parent update.
-        return
+        return Ctor === undefined ? createAsyncPlaceholder() : undefined
       }
     }
   }
@@ -208,6 +208,10 @@ function destroy (vnode: MountedComponentVNode) {
   }
 }
 
+// return three possible result
+// 1. Ctor -> component constructor if resolved successfully
+// 2. undefined -> component is pending
+// 3. null -> component rejected
 function resolveAsyncComponent (
   factory: Function,
   baseCtor: Class<Component>,
@@ -216,6 +220,10 @@ function resolveAsyncComponent (
   if (factory.requested) {
     // pool callbacks
     factory.pendingCallbacks.push(cb)
+    if (factory.resolved !== undefined) {
+      // component rejected
+      return factory.resolved
+    }
   } else {
     factory.requested = true
     const cbs = factory.pendingCallbacks = [cb]
@@ -241,6 +249,7 @@ function resolveAsyncComponent (
         `Failed to resolve async component: ${String(factory)}` +
         (reason ? `\nReason: ${reason}` : '')
       )
+      factory.resolved = null // flag component resolution failed
     }
 
     const res = factory(resolve, reject)

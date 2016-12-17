@@ -19,6 +19,7 @@ export default class VNode {
   isComment: boolean; // empty comment placeholder?
   isCloned: boolean; // is a cloned node?
   isOnce: boolean; // is a v-once node?
+  isAsyncPlaceholder: boolean; // placeholder node for async component
 
   constructor (
     tag?: string,
@@ -54,6 +55,12 @@ export const createEmptyVNode = () => {
   const node = new VNode()
   node.text = ''
   node.isComment = true
+  return node
+}
+
+export const createAsyncPlaceholder = () => {
+  const node = createEmptyVNode()
+  node.isAsyncPlaceholder = true
   return node
 }
 
