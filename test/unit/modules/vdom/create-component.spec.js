@@ -61,7 +61,7 @@ describe('create-component', () => {
     }
     function go () {
       vnode = createComponent(async, data, vm, vm)
-      expect(vnode).toBeUndefined() // not to be loaded yet.
+      expect(vnode.isAsyncPlaceholder).toBe(true) // not to be loaded yet.
     }
     function loaded () {
       vnode = createComponent(async, data, vm, vm)
@@ -93,7 +93,7 @@ describe('create-component', () => {
     }
     function go () {
       vnode = createComponent(async, data, vm, vm)
-      expect(vnode).toBeUndefined() // not to be loaded yet.
+      expect(vnode.isAsyncPlaceholder).toBe(true) // not to be loaded yet.
     }
     function failed () {
       vnode = createComponent(async, data, vm, vm)

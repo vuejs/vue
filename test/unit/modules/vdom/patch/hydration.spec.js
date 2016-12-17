@@ -173,4 +173,68 @@ describe('vdom patch: hydration', () => {
       expect(vm.$el.innerHTML).toBe('<div><span>foo</span></div>')
     }).then(done)
   })
+
+  it('should hydrate async components when SSR dom is consistent with virtual DOM', done => {
+    const dom = document.createElement('div')
+    dom.setAttribute('server-rendered', 'true')
+    dom.innerHTML = '<div class="foo">foo</div>'
+    const originalNode = dom.children[0]
+
+    const vm = new Vue({
+      template: '<div><foo></foo></div>',
+      components: {
+        foo: resolve => {
+          setTimeout(() => {
+            resolve({
+              template: '<div class="foo">foo</div>'
+            })
+            test()
+          }, 0)
+        }
+      }
+    })
+
+    expect(() => { vm.$mount(dom) }).not.toThrow()
+    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect(vm.$el).toBe(dom)
+    expect(vm.$el.children[0]).toBe(originalNode)
+    function test () {
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<div class="foo">foo</div>')
+        expect(vm.$el.children[0]).not.toBe(originalNode)
+      }).then(done)
+    }
+  })
+
+  it('should hydrate async components when SSR and virtual DOM are inconsistent', done => {
+    const dom = document.createElement('div')
+    dom.setAttribute('server-rendered', 'true')
+    dom.innerHTML = '<div class="foo">foo</div>'
+    const originalNode = dom.children[0]
+
+    const vm = new Vue({
+      template: '<div><foo></foo></div>',
+      components: {
+        foo: resolve => {
+          setTimeout(() => {
+            resolve({
+              template: '<p class="foo">foo</p>'
+            })
+            test()
+          }, 0)
+        }
+      }
+    })
+
+    expect(() => { vm.$mount(dom) }).not.toThrow()
+    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect(vm.$el).toBe(dom)
+    expect(vm.$el.children[0]).toBe(originalNode)
+    function test () {
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<p class="foo">foo</p>')
+        expect(vm.$el.children[0]).not.toBe(originalNode)
+      }).then(done)
+    }
+  })
 })
