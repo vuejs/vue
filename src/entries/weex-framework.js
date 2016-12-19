@@ -54,57 +54,69 @@ function clear (obj) {
  * @param {string} appCode
  * @param {object} config
  * @param {object} data
+ * @param {object} env { info, config, services }
  */
 export function createInstance (
-  instanceId, appCode = '', config = {} /* {bundleUrl, debug} */, data) {
+  instanceId,
+  appCode = '',
+  config = {},
+  data,
+  env = {}
+) {
   // Set active instance id and put some information into `instances` map.
   activeId = instanceId
+
+  // Virtual-DOM object.
+  const document = new renderer.Document(instanceId, config.bundleUrl)
+
+  // All function/callback of parameters before sent to native
+  // will be converted as an id. So `callbacks` is used to store
+  // these real functions. When a callback invoked and won't be
+  // called again, it should be removed from here automatically.
+  const callbacks = []
+
+  // The latest callback id, incremental.
+  const callbackId = 1
+
   instances[instanceId] = {
     instanceId, config, data,
-    // Virtual-DOM object.
-    document: new renderer.Document(instanceId, config.bundleUrl),
-    // All function/callback of parameters before sent to native
-    // will be converted as an id. So `callbacks` is used to store
-    // these real functions. When a callback invoked and won't be
-    // called again, it should be removed from here automatically.
-    callbacks: [],
-    // The latest callback id, incremental.
-    callbackId: 1
+    document, callbacks, callbackId
   }
-
-  // The function which create a closure the JS Bundle will run in.
-  // It will declare some global variables like `Vue`, HTML5 Timer APIs,
-  // and native module getter.
-  const start = new Function(
-    'Vue',
-    '__weex_require_module__',
-    'setTimeout',
-    'setInterval',
-    'clearTimeout',
-    'clearInterval',
-    appCode)
-
-  // Each instance has a independent `Vue` object and it should have
-  // all top-level public APIs.
-  const subVue = Vue.extend({})
-  // ensure plain-object components are extended from the subVue
-  subVue.options._base = subVue
-  // expose global utility
-  ;['util', 'set', 'delete', 'nextTick'].forEach(name => {
-    subVue[name] = Vue[name]
-  })
 
   // Prepare native module getter and HTML5 Timer APIs.
   const moduleGetter = genModuleGetter(instanceId)
   const timerAPIs = getInstanceTimer(instanceId, moduleGetter)
 
-  // Run the JS Bundle and send `createFinish` signal to native.
-  start(
-    subVue, moduleGetter,
-    timerAPIs.setTimeout,
-    timerAPIs.setInterval,
-    timerAPIs.clearTimeout,
-    timerAPIs.clearInterval)
+  // Prepare `weex` instance variable.
+  const weexInstanceVar = {
+    config,
+    document,
+    require: moduleGetter
+  }
+  Object.freeze(weexInstanceVar)
+
+  // Each instance has a independent `Vue` variable and it should have
+  // all top-level public APIs.
+  const subVue = Vue.extend({})
+
+  // ensure plain-object components are extended from the subVue
+  subVue.options._base = subVue
+
+  // expose global utility
+  ;['util', 'set', 'delete', 'nextTick'].forEach(name => {
+    subVue[name] = Vue[name]
+  })
+
+  // The function which create a closure the JS Bundle will run in.
+  // It will declare some instance variables like `Vue`, HTML5 Timer APIs etc.
+  const instanceVars = Object.assign({
+    Vue: subVue,
+    weex: weexInstanceVar,
+    __weex_require_module__: weexInstanceVar.require // deprecated
+  }, timerAPIs)
+  callFunction(instanceVars, appCode)
+
+  // Send `createFinish` signal to native.
   renderer.sendTasks(instanceId + '', [{ module: 'dom', method: 'createFinish', args: [] }], -1)
 }
 
@@ -266,6 +278,7 @@ Vue.mixin({
 })
 
 /**
+ * @deprecated Just instance variable `weex.config`
  * Get instance config.
  * @return {object}
  */
@@ -338,6 +351,25 @@ function getInstanceTimer (instanceId, moduleGetter) {
     }
   }
   return timerAPIs
+}
+
+/**
+ * Call a new function body with some global objects.
+ * @param  {object} globalObjects
+ * @param  {string} code
+ * @return {any}
+ */
+function callFunction (globalObjects, body) {
+  const globalKeys = []
+  const globalValues = []
+  for (const key in globalObjects) {
+    globalKeys.push(key)
+    globalValues.push(globalObjects[key])
+  }
+  globalKeys.push(body)
+
+  const result = new Function(...globalKeys)
+  return result(...globalValues)
 }
 
 /**
