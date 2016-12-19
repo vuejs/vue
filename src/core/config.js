@@ -8,7 +8,7 @@ export type Config = {
   silent: boolean;
   devtools: boolean;
   errorHandler: ?Function;
-  ignoredElements: ?Array<string>;
+  ignoredElements: Array<string>;
   keyCodes: { [key: string]: number };
   // platform
   isReservedTag: (x?: string) => boolean;
@@ -46,7 +46,7 @@ const config: Config = {
   /**
    * Ignore certain custom elements
    */
-  ignoredElements: null,
+  ignoredElements: [],
 
   /**
    * Custom user key aliases for v-on
