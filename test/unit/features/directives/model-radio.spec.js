@@ -146,6 +146,35 @@ describe('Directive v-model radio', () => {
     expect(vm.test).toBe(2)
   })
 
+  it('should respect different primitive type value', (done) => {
+    const vm = new Vue({
+      data: {
+        test: 1
+      },
+      template:
+        '<div>' +
+          '<input type="radio" value="" v-model="test" name="test">' +
+          '<input type="radio" value="0" v-model="test" name="test">' +
+          '<input type="radio" value="1" v-model="test" name="test">' +
+        '</div>'
+    }).$mount()
+    var radioboxInput = vm.$el.children
+    expect(radioboxInput[0].checked).toBe(false)
+    expect(radioboxInput[1].checked).toBe(false)
+    expect(radioboxInput[2].checked).toBe(true)
+    vm.test = 0
+    waitForUpdate(() => {
+      expect(radioboxInput[0].checked).toBe(false)
+      expect(radioboxInput[1].checked).toBe(true)
+      expect(radioboxInput[2].checked).toBe(false)
+      vm.test = ''
+    }).then(() => {
+      expect(radioboxInput[0].checked).toBe(true)
+      expect(radioboxInput[1].checked).toBe(false)
+      expect(radioboxInput[2].checked).toBe(false)
+    }).then(done)
+  })
+
   it('warn inline checked', () => {
     const vm = new Vue({
       template: `<input v-model="test" type="radio" value="1" checked>`,

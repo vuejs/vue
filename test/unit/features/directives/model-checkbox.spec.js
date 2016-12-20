@@ -159,6 +159,40 @@ describe('Directive v-model checkbox', () => {
     expect(vm.check).toEqual(false)
   })
 
+  it('should respect different primitive type value', (done) => {
+    const vm = new Vue({
+      data: {
+        test: [0]
+      },
+      template:
+        '<div>' +
+          '<input type="checkbox" value="" v-model="test">' +
+          '<input type="checkbox" value="0" v-model="test">' +
+          '<input type="checkbox" value="1" v-model="test">' +
+        '</div>'
+    }).$mount()
+    var checkboxInput = vm.$el.children
+    expect(checkboxInput[0].checked).toBe(false)
+    expect(checkboxInput[1].checked).toBe(true)
+    expect(checkboxInput[2].checked).toBe(false)
+    vm.test = [1]
+    waitForUpdate(() => {
+      expect(checkboxInput[0].checked).toBe(false)
+      expect(checkboxInput[1].checked).toBe(false)
+      expect(checkboxInput[2].checked).toBe(true)
+      vm.test = ['']
+    }).then(() => {
+      expect(checkboxInput[0].checked).toBe(true)
+      expect(checkboxInput[1].checked).toBe(false)
+      expect(checkboxInput[2].checked).toBe(false)
+      vm.test = ['', 0, 1]
+    }).then(() => {
+      expect(checkboxInput[0].checked).toBe(true)
+      expect(checkboxInput[1].checked).toBe(true)
+      expect(checkboxInput[2].checked).toBe(true)
+    }).then(done)
+  })
+
   it('warn inline checked', () => {
     const vm = new Vue({
       template: `<input type="checkbox" v-model="test" checked>`,
