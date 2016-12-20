@@ -91,7 +91,7 @@ export function parse (
         process.env.NODE_ENV !== 'production' && warn(
           'Templates should only be responsible for mapping the state to the ' +
           'UI. Avoid placing tags with side-effects in your templates, such as ' +
-          `<${tag}>.`
+          `<${tag}>` + ', as they will not be parsed.'
         )
       }
 
