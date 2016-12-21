@@ -38,7 +38,7 @@ The optional `options` object can contain the following:
 
 - `modules`
 
-  An array of compiler modules. For details on compiler modules, refer to its [type definition](https://github.com/vuejs/vue/blob/dev/flow/compiler.js#L35) and the [built-in modules](https://github.com/vuejs/vue/tree/dev/src/platforms/web/compiler/modules).
+  An array of compiler modules. For details on compiler modules, refer to the `ModuleOptions` type in [flow declarations](https://github.com/vuejs/vue/blob/dev/flow/compiler.js) and the [built-in modules](https://github.com/vuejs/vue/tree/dev/src/platforms/web/compiler/modules).
 
 - `directives`
 
@@ -80,7 +80,7 @@ This is only useful at runtime with pre-configured builds, so it doesn't accept 
 
 ### compiler.parseComponent(file, [options])
 
-Parse a SFC (single-file component, or `*.vue` file) into a [descriptor](https://github.com/vuejs/vue/blob/dev/flow/compiler.js#L137). This is used in SFC build tools like `vue-loader` and `vueify`.
+Parse a SFC (single-file component, or `*.vue` file) into a descriptor (refer to the `SFCDescriptor` type in [flow declarations](https://github.com/vuejs/vue/blob/dev/flow/compiler.js)). This is used in SFC build tools like `vue-loader` and `vueify`.
 
 #### Options
 
