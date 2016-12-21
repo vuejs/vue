@@ -41,12 +41,7 @@ declare interface Component {
   $off: (event?: string, fn?: Function) => Component;
   $emit: (event: string, ...args: Array<mixed>) => Component;
   $nextTick: (fn: Function) => void;
-  $createElement: (
-    tag?: string | Component,
-    data?: Object,
-    children?: VNodeChildren,
-    namespace?: string
-  ) => VNode;
+  $createElement: (tag?: string | Component, data?: Object, children?: VNodeChildren) => VNode;
 
   // private properties
   _uid: number;
@@ -81,7 +76,8 @@ declare interface Component {
   _render: () => VNode;
   __patch__: (a: Element | VNode | void, b: VNode) => any;
   // createElement
-  _c: (vnode?: VNode, data?: VNodeData, children?: VNodeChildren) => VNode | void;
+  // _c is internal that accepts `normalizationType` optimization hint
+  _c: (vnode?: VNode, data?: VNodeData, children?: VNodeChildren, normalizationType?: number) => VNode | void;
   // renderStatic
   _m: (index: number, isInFor?: boolean) => VNode | VNodeChildren;
   // markOnce
