@@ -25,6 +25,7 @@ export default {
       el.style.display = value ? originalDisplay : 'none'
     }
   },
+
   update (el: any, { value, oldValue }: VNodeDirective, vnode: VNodeWithData) {
     /* istanbul ignore if */
     if (value === oldValue) return
@@ -43,6 +44,18 @@ export default {
       }
     } else {
       el.style.display = value ? el.__vOriginalDisplay : 'none'
+    }
+  },
+
+  unbind (
+    el: any,
+    binding: VNodeDirective,
+    vnode: VNodeWithData,
+    oldVnode: VNodeWithData,
+    isDestroy: boolean
+  ) {
+    if (!isDestroy) {
+      el.style.display = el.__vOriginalDisplay
     }
   }
 }

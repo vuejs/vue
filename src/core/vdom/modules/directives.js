@@ -20,6 +20,7 @@ function updateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
 function _update (oldVnode, vnode) {
   const isCreate = oldVnode === emptyNode
+  const isDestroy = vnode === emptyNode
   const oldDirs = normalizeDirectives(oldVnode.data.directives, oldVnode.context)
   const newDirs = normalizeDirectives(vnode.data.directives, vnode.context)
 
@@ -71,7 +72,7 @@ function _update (oldVnode, vnode) {
     for (key in oldDirs) {
       if (!newDirs[key]) {
         // no longer present, unbind
-        callHook(oldDirs[key], 'unbind', oldVnode)
+        callHook(oldDirs[key], 'unbind', oldVnode, oldVnode, isDestroy)
       }
     }
   }
@@ -103,9 +104,9 @@ function getRawDirName (dir: VNodeDirective): string {
   return dir.rawName || `${dir.name}.${Object.keys(dir.modifiers || {}).join('.')}`
 }
 
-function callHook (dir, hook, vnode, oldVnode) {
+function callHook (dir, hook, vnode, oldVnode, isDestroy) {
   const fn = dir.def && dir.def[hook]
   if (fn) {
-    fn(vnode.elm, dir, vnode, oldVnode)
+    fn(vnode.elm, dir, vnode, oldVnode, isDestroy)
   }
 }
