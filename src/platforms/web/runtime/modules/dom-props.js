@@ -2,6 +2,9 @@
 
 import { extend, toNumber } from 'shared/util'
 
+// check platforms/web/util/attrs.js acceptValue
+declare type acceptValueElm = HTMLInputElement | HTMLSelectElement | HTMLOptionElement
+
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.domProps && !vnode.data.domProps) {
     return
@@ -35,10 +38,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       elm._value = cur
       // avoid resetting cursor position when value is the same
       const strCur = cur == null ? '' : String(cur)
-      if (!elm.composing && (
-        (document.activeElement !== elm && elm.value !== strCur) ||
-        isValueChanged(vnode, strCur)
-      )) {
+      if (needUpdateValue(elm, vnode, strCur)) {
         elm.value = strCur
       }
     } else {
@@ -47,7 +47,20 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 }
 
-function isValueChanged (vnode: VNodeWithData, newVal: string): boolean {
+function needUpdateValue (elm: acceptValueElm, vnode: VNodeWithData, checkVal: string): boolean {
+  // inputing
+  if (elm.composing) return false
+  if (elm.tagName.toLowerCase() === 'option') return true
+  if (isDirty(elm, checkVal)) return true
+  if (isInputChanged(vnode, checkVal)) return true
+  return false
+}
+
+function isDirty (elm: acceptValueElm, checkVal: string): boolean {
+  return document.activeElement !== elm && elm.value !== checkVal
+}
+
+function isInputChanged (vnode: VNodeWithData, newVal: string): boolean {
   const value = vnode.elm.value
   const modifiers = vnode.elm._vModifiers // injected by v-model runtime
   if ((modifiers && modifiers.number) || vnode.elm.type === 'number') {

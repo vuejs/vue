@@ -248,6 +248,17 @@ describe('Directive v-bind', () => {
     expect('v-bind without argument expects an Object or Array value').toHaveBeenWarned()
   })
 
+  it('set value for option element', () => {
+    const vm = new Vue({
+      template: '<select><option :value="val">val</option></select>',
+      data: {
+        val: 'val'
+      }
+    }).$mount()
+    // check value attribute
+    expect(vm.$el.options[0].getAttribute('value')).toBe('val')
+  })
+
   // a vdom patch edge case where the user has several un-keyed elements of the
   // same tag next to each other, and toggling them.
   it('properly update for toggling un-keyed children', done => {
