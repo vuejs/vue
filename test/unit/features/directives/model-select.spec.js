@@ -310,13 +310,42 @@ describe('Directive v-model select', () => {
         '<select v-model.number="test">' +
           '<option value="1">a</option>' +
           '<option :value="2">b</option>' +
-        ' <option :value="3">c</option>' +
+          '<option :value="3">c</option>' +
         '</select>'
     }).$mount()
     document.body.appendChild(vm.$el)
     updateSelect(vm.$el, '1')
     triggerEvent(vm.$el, 'change')
     expect(vm.test).toBe(1)
+  })
+
+  it('should respect different pritive type value', (done) => {
+    const vm = new Vue({
+      data: {
+        test: 0
+      },
+      template:
+        '<select v-model.number="test">' +
+          '<option value="">a</option>' +
+          '<option value="0">b</option>' +
+          '<option value="1">c</option>' +
+        '</select>'
+    }).$mount()
+    var opts = vm.$el.options
+    expect(opts[0].selected).toBe(false)
+    expect(opts[1].selected).toBe(true)
+    expect(opts[2].selected).toBe(false)
+    vm.test = 1
+    waitForUpdate(() => {
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(false)
+      expect(opts[2].selected).toBe(true)
+      vm.test = ''
+    }).then(() => {
+      expect(opts[0].selected).toBe(true)
+      expect(opts[1].selected).toBe(false)
+      expect(opts[2].selected).toBe(false)
+    }).then(done)
   })
 
   it('should warn inline selected', () => {
