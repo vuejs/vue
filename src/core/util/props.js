@@ -21,10 +21,10 @@ export function validateProp (
   const absent = !hasOwn(propsData, key)
   let value = propsData[key]
   // handle boolean props
-  if (isBooleanType(prop.type)) {
+  if (isType(Boolean, prop.type)) {
     if (absent && !hasOwn(prop, 'default')) {
       value = false
-    } else if (value === '' || value === hyphenate(key)) {
+    } else if (!isType(String, prop.type) && (value === '' || value === hyphenate(key))) {
       value = true
     }
   }
@@ -168,12 +168,12 @@ function getType (fn) {
   return match && match[1]
 }
 
-function isBooleanType (fn) {
+function isType (type, fn) {
   if (!Array.isArray(fn)) {
-    return getType(fn) === 'Boolean'
+    return getType(fn) === getType(type)
   }
   for (let i = 0, len = fn.length; i < len; i++) {
-    if (getType(fn[i]) === 'Boolean') {
+    if (getType(fn[i]) === getType(type)) {
       return true
     }
   }
