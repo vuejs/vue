@@ -169,27 +169,51 @@ describe('Directive v-model checkbox', () => {
           '<input type="checkbox" value="" v-model="test">' +
           '<input type="checkbox" value="0" v-model="test">' +
           '<input type="checkbox" value="1" v-model="test">' +
+          '<input type="checkbox" value="false" v-model="test">' +
+          '<input type="checkbox" value="true" v-model="test">' +
         '</div>'
     }).$mount()
     var checkboxInput = vm.$el.children
     expect(checkboxInput[0].checked).toBe(false)
     expect(checkboxInput[1].checked).toBe(true)
     expect(checkboxInput[2].checked).toBe(false)
+    expect(checkboxInput[3].checked).toBe(false)
+    expect(checkboxInput[4].checked).toBe(false)
     vm.test = [1]
     waitForUpdate(() => {
       expect(checkboxInput[0].checked).toBe(false)
       expect(checkboxInput[1].checked).toBe(false)
       expect(checkboxInput[2].checked).toBe(true)
+      expect(checkboxInput[3].checked).toBe(false)
+      expect(checkboxInput[4].checked).toBe(false)
       vm.test = ['']
     }).then(() => {
       expect(checkboxInput[0].checked).toBe(true)
       expect(checkboxInput[1].checked).toBe(false)
       expect(checkboxInput[2].checked).toBe(false)
-      vm.test = ['', 0, 1]
+      expect(checkboxInput[3].checked).toBe(false)
+      expect(checkboxInput[4].checked).toBe(false)
+      vm.test = [false]
+    }).then(() => {
+      expect(checkboxInput[0].checked).toBe(false)
+      expect(checkboxInput[1].checked).toBe(false)
+      expect(checkboxInput[2].checked).toBe(false)
+      expect(checkboxInput[3].checked).toBe(true)
+      expect(checkboxInput[4].checked).toBe(false)
+      vm.test = [true]
+    }).then(() => {
+      expect(checkboxInput[0].checked).toBe(false)
+      expect(checkboxInput[1].checked).toBe(false)
+      expect(checkboxInput[2].checked).toBe(false)
+      expect(checkboxInput[3].checked).toBe(false)
+      expect(checkboxInput[4].checked).toBe(true)
+      vm.test = ['', 0, 1, false, true]
     }).then(() => {
       expect(checkboxInput[0].checked).toBe(true)
       expect(checkboxInput[1].checked).toBe(true)
       expect(checkboxInput[2].checked).toBe(true)
+      expect(checkboxInput[3].checked).toBe(true)
+      expect(checkboxInput[4].checked).toBe(true)
     }).then(done)
   })
 

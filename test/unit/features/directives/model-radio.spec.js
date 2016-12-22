@@ -156,22 +156,44 @@ describe('Directive v-model radio', () => {
           '<input type="radio" value="" v-model="test" name="test">' +
           '<input type="radio" value="0" v-model="test" name="test">' +
           '<input type="radio" value="1" v-model="test" name="test">' +
+          '<input type="radio" value="false" v-model="test" name="test">' +
+          '<input type="radio" value="true" v-model="test" name="test">' +
         '</div>'
     }).$mount()
     var radioboxInput = vm.$el.children
     expect(radioboxInput[0].checked).toBe(false)
     expect(radioboxInput[1].checked).toBe(false)
     expect(radioboxInput[2].checked).toBe(true)
+    expect(radioboxInput[3].checked).toBe(false)
+    expect(radioboxInput[4].checked).toBe(false)
     vm.test = 0
     waitForUpdate(() => {
       expect(radioboxInput[0].checked).toBe(false)
       expect(radioboxInput[1].checked).toBe(true)
       expect(radioboxInput[2].checked).toBe(false)
+      expect(radioboxInput[3].checked).toBe(false)
+      expect(radioboxInput[4].checked).toBe(false)
       vm.test = ''
     }).then(() => {
       expect(radioboxInput[0].checked).toBe(true)
       expect(radioboxInput[1].checked).toBe(false)
       expect(radioboxInput[2].checked).toBe(false)
+      expect(radioboxInput[3].checked).toBe(false)
+      expect(radioboxInput[4].checked).toBe(false)
+      vm.test = false
+    }).then(() => {
+      expect(radioboxInput[0].checked).toBe(false)
+      expect(radioboxInput[1].checked).toBe(false)
+      expect(radioboxInput[2].checked).toBe(false)
+      expect(radioboxInput[3].checked).toBe(true)
+      expect(radioboxInput[4].checked).toBe(false)
+      vm.test = true
+    }).then(() => {
+      expect(radioboxInput[0].checked).toBe(false)
+      expect(radioboxInput[1].checked).toBe(false)
+      expect(radioboxInput[2].checked).toBe(false)
+      expect(radioboxInput[3].checked).toBe(false)
+      expect(radioboxInput[4].checked).toBe(true)
     }).then(done)
   })
 

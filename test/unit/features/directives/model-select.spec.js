@@ -329,22 +329,44 @@ describe('Directive v-model select', () => {
           '<option value="">a</option>' +
           '<option value="0">b</option>' +
           '<option value="1">c</option>' +
+          '<option value="false">c</option>' +
+          '<option value="true">c</option>' +
         '</select>'
     }).$mount()
     var opts = vm.$el.options
     expect(opts[0].selected).toBe(false)
     expect(opts[1].selected).toBe(true)
     expect(opts[2].selected).toBe(false)
+    expect(opts[3].selected).toBe(false)
+    expect(opts[4].selected).toBe(false)
     vm.test = 1
     waitForUpdate(() => {
       expect(opts[0].selected).toBe(false)
       expect(opts[1].selected).toBe(false)
       expect(opts[2].selected).toBe(true)
+      expect(opts[3].selected).toBe(false)
+      expect(opts[4].selected).toBe(false)
       vm.test = ''
     }).then(() => {
       expect(opts[0].selected).toBe(true)
       expect(opts[1].selected).toBe(false)
       expect(opts[2].selected).toBe(false)
+      expect(opts[3].selected).toBe(false)
+      expect(opts[4].selected).toBe(false)
+      vm.test = false
+    }).then(() => {
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(false)
+      expect(opts[2].selected).toBe(false)
+      expect(opts[3].selected).toBe(true)
+      expect(opts[4].selected).toBe(false)
+      vm.test = true
+    }).then(() => {
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(false)
+      expect(opts[2].selected).toBe(false)
+      expect(opts[3].selected).toBe(false)
+      expect(opts[4].selected).toBe(true)
     }).then(done)
   })
 
