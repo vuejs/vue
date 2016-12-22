@@ -69,16 +69,16 @@ export function createPatchFunction (backend) {
   function createRmCb (childElm, listeners) {
     function remove () {
       if (--remove.listeners === 0) {
-        removeElement(childElm)
+        removeNode(childElm)
       }
     }
     remove.listeners = listeners
     return remove
   }
 
-  function removeElement (el) {
+  function removeNode (el) {
     const parent = nodeOps.parentNode(el)
-    // element may have already been removed due to v-html
+    // element may have already been removed due to v-html / v-text
     if (parent) {
       nodeOps.removeChild(parent, el)
     }
@@ -298,7 +298,7 @@ export function createPatchFunction (backend) {
           removeAndInvokeRemoveHook(ch)
           invokeDestroyHook(ch)
         } else { // Text node
-          nodeOps.removeChild(parentElm, ch.elm)
+          removeNode(ch.elm)
         }
       }
     }
@@ -328,7 +328,7 @@ export function createPatchFunction (backend) {
         rm()
       }
     } else {
-      removeElement(vnode.elm)
+      removeNode(vnode.elm)
     }
   }
 
