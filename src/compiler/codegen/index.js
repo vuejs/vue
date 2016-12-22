@@ -343,13 +343,19 @@ function genText (text: ASTText | ASTExpression): string {
 function genSlot (el: ASTElement): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el)
-  return `_t(${slotName}${
-    children ? `,${children}` : ''
-  }${
-    el.attrs ? `${children ? '' : ',null'},{${
-      el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')
-    }}` : ''
-  })`
+  let res = `_t(${slotName}${children ? `,${children}` : ''}`
+  const attrs = el.attrs && `{${el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')}}`
+  const bind = el.attrsMap['v-bind']
+  if ((attrs || bind) && !children) {
+    res += `,null`
+  }
+  if (attrs) {
+    res += `,${attrs}`
+  }
+  if (bind) {
+    res += `${attrs ? '' : ',null'},${bind}`
+  }
+  return res + ')'
 }
 
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement
