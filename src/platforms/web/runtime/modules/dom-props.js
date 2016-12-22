@@ -2,9 +2,6 @@
 
 import { extend, toNumber } from 'shared/util'
 
-// check platforms/web/util/attrs.js acceptValue
-declare type acceptValueElm = HTMLInputElement | HTMLSelectElement | HTMLOptionElement
-
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.domProps && !vnode.data.domProps) {
     return
@@ -32,13 +29,19 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       if (vnode.children) vnode.children.length = 0
       if (cur === oldProps[key]) continue
     }
+    // #4521: if a click event triggers update before the change event is
+    // dispatched on a checkbox/radio input, the input's checked state will
+    // be reset and fail to trigger another update.
+    if (key === 'checked' && !isDirty(elm, cur)) {
+      continue
+    }
     if (key === 'value') {
       // store value as _value as well since
       // non-string values will be stringified
       elm._value = cur
       // avoid resetting cursor position when value is the same
       const strCur = cur == null ? '' : String(cur)
-      if (needUpdateValue(elm, vnode, strCur)) {
+      if (shouldUpdateValue(elm, vnode, strCur)) {
         elm.value = strCur
       }
     } else {
@@ -47,12 +50,21 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 }
 
-function needUpdateValue (elm: acceptValueElm, vnode: VNodeWithData, checkVal: string): boolean {
-  // inputing
-  if (elm.composing) return false
-  if (elm.tagName.toLowerCase() === 'option') return true
-  if (isDirty(elm, checkVal)) return true
-  if (isInputChanged(vnode, checkVal)) return true
+// check platforms/web/util/attrs.js acceptValue
+type acceptValueElm = HTMLInputElement | HTMLSelectElement | HTMLOptionElement
+
+function shouldUpdateValue (
+  elm: acceptValueElm,
+  vnode: VNodeWithData,
+  checkVal: string
+): boolean {
+  if (!elm.composing && (
+    vnode.tag === 'option' ||
+    isDirty(elm, checkVal) ||
+    isInputChanged(vnode, checkVal)
+  )) {
+    return true
+  }
   return false
 }
 
