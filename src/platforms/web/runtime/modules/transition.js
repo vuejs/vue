@@ -112,9 +112,9 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   beforeEnterHook && beforeEnterHook(el)
   if (expectsCSS) {
     addTransitionClass(el, startClass)
-    addTransitionClass(el, activeClass)
     nextFrame(() => {
       removeTransitionClass(el, startClass)
+      addTransitionClass(el, activeClass)
       if (!cb.cancelled && !userWantsControl) {
         whenTransitionEnds(el, type, cb)
       }
@@ -206,9 +206,9 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     beforeLeave && beforeLeave(el)
     if (expectsCSS) {
       addTransitionClass(el, leaveClass)
-      addTransitionClass(el, leaveActiveClass)
       nextFrame(() => {
         removeTransitionClass(el, leaveClass)
+        addTransitionClass(el, leaveActiveClass)
         if (!cb.cancelled && !userWantsControl) {
           whenTransitionEnds(el, type, cb)
         }
