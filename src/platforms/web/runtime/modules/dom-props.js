@@ -32,6 +32,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     // #4521: if a click event triggers update before the change event is
     // dispatched on a checkbox/radio input, the input's checked state will
     // be reset and fail to trigger another update.
+    /* istanbul ignore next */
     if (key === 'checked' && !isDirty(elm, cur)) {
       continue
     }
