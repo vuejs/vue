@@ -352,6 +352,23 @@ function processIfConditions (el, parent) {
   }
 }
 
+function findPrevElement (children: Array<any>): ASTElement | void {
+  let i = children.length
+  while (i--) {
+    if (children[i].type === 1) {
+      return children[i]
+    } else {
+      if (process.env.NODE_ENV !== 'production' && children[i].text !== ' ') {
+        warn(
+          `text "${children[i].text.trim()}" between v-if and v-else(-if) ` +
+          `will be ignored.`
+        )
+      }
+      children.pop()
+    }
+  }
+}
+
 function addIfCondition (el, condition) {
   if (!el.ifConditions) {
     el.ifConditions = []
@@ -501,13 +518,6 @@ function makeAttrsMap (attrs: Array<Object>): Object {
     map[attrs[i].name] = attrs[i].value
   }
   return map
-}
-
-function findPrevElement (children: Array<any>): ASTElement | void {
-  let i = children.length
-  while (i--) {
-    if (children[i].tag) return children[i]
-  }
 }
 
 function isForbiddenTag (el): boolean {

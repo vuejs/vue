@@ -82,6 +82,20 @@ describe('parser', () => {
     expect('Component template should contain exactly one root element:\n\n<div></div><div></div>').toHaveBeenWarned()
   })
 
+  it('remove text nodes between v-if conditions', () => {
+    const ast = parse(`<div><div v-if="1"></div> <div v-else-if="2"></div> <div v-else></div> <span></span></div>`, baseOptions)
+    expect(ast.children.length).toBe(3)
+    expect(ast.children[0].tag).toBe('div')
+    expect(ast.children[0].ifConditions.length).toBe(3)
+    expect(ast.children[1].text).toBe(' ') // text
+    expect(ast.children[2].tag).toBe('span')
+  })
+
+  it('warn non whitespace text between v-if conditions', () => {
+    parse(`<div><div v-if="1"></div> foo <div v-else></div></div>`, baseOptions)
+    expect(`text "foo" between v-if and v-else(-if) will be ignored`).toHaveBeenWarned()
+  })
+
   it('not warn 2 root elements with v-if and v-else', () => {
     parse('<div v-if="1"></div><div v-else></div>', baseOptions)
     expect('Component template should contain exactly one root element')
