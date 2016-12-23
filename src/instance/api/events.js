@@ -137,7 +137,7 @@ export default function (Vue) {
     // then there's no need to broadcast.
     if (!this._eventsCount[event]) return
     var children = this.$children
-    if (typeof children === null) return
+    if (children === null) return
     var args = toArray(arguments)
     if (isSource) {
       // use object event to indicate non-source emit
