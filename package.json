@@ -114,5 +114,6 @@
     "weex-js-runtime": "^0.17.0-alpha4",
     "weex-vdom-tester": "^0.1.3"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "unpkg": "dist/vue.js"
 }
