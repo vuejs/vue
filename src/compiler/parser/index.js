@@ -459,6 +459,15 @@ function processAttrs (el) {
         }
       }
       addAttr(el, name, JSON.stringify(value))
+      // #4530 also bind special attributes as props even if they are static
+      // so that patches between dynamic/static are consistent
+      if (platformMustUseProp(el.tag, name)) {
+        if (name === 'value') {
+          addProp(el, name, JSON.stringify(value))
+        } else {
+          addProp(el, name, 'true')
+        }
+      }
     }
   }
 }
