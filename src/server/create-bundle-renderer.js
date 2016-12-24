@@ -4,7 +4,7 @@ import { PassThrough } from 'stream'
 export function createBundleRendererCreator (createRenderer) {
   return (code, rendererOptions) => {
     const renderer = createRenderer(rendererOptions)
-    const errorMapper = rendererOptions && rendererOptions.errorMapper
+    const sourceMap = rendererOptions && rendererOptions.sourceMap
     return {
       renderToString: (context, cb) => {
         if (typeof context === 'function') {
@@ -13,16 +13,10 @@ export function createBundleRendererCreator (createRenderer) {
         }
         runInVm(code, context).then(app => {
           renderer.renderToString(app, (err, html) => {
-            if (err && errorMapper) {
-              errorMapper(err)
-            }
-            cb(err, html)
+            cb(err, html, sourceMap)
           })
         }).catch(err => {
-          if (err && errorMapper) {
-            errorMapper(err)
-          }
-          cb(err)
+          cb(err, null, sourceMap)
         })
       },
       renderToStream: (context) => {
@@ -30,18 +24,12 @@ export function createBundleRendererCreator (createRenderer) {
         runInVm(code, context).then(app => {
           const renderStream = renderer.renderToStream(app)
           renderStream.on('error', err => {
-            if (errorMapper) {
-              errorMapper(err)
-            }
-            res.emit('error', err)
+            res.emit('error', err, sourceMap)
           })
           renderStream.pipe(res)
         }).catch(err => {
           process.nextTick(() => {
-            if (errorMapper) {
-              errorMapper(err)
-            }
-            res.emit('error', err)
+            res.emit('error', err, sourceMap)
           })
         })
         return res

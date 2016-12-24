@@ -29,14 +29,10 @@ function createRenderer (file, cb, options) {
     expect(stats.errors).toBeFalsy()
     const code = fs.readFileSync('/bundle.js', 'utf-8')
     if (options && options.map) {
-      const mapping = sourceMapStack.get(code)
-      options.errorMapper = error => {
-        const stack = sourceMapStack.stack(mapping, error)
-        expect(stack).toContain('/test/ssr/fixtures/error.js:1\nthrow new Error(\'foo\')')
-      }
+      options.sourceMap = sourceMapStack.get(code)
     }
     const renderer = rendererCache[file] = createBundleRenderer(code, options)
-    cb(renderer)
+    cb(renderer, code)
   })
 }
 
@@ -88,19 +84,23 @@ describe('SSR: bundle renderer', () => {
     })
   })
 
-  it('renderToString bundle sourcemap handling', done => {
+  it('renderToString catch with sourcemap', done => {
     createRenderer('error-bundle.js', renderer => {
-      renderer.renderToString(err => {
+      renderer.renderToString((err, html, sourceMap) => {
+        const sourceError = sourceMapStack.stack(sourceMap, err)
+        expect(sourceError).toContain('/test/ssr/fixtures/error.js:1\nthrow new Error(\'foo\')')
         expect(err.message).toBe('foo')
         done()
       })
     }, { map: true })
   })
 
-  it('renderToStream bundle sourcemap handling', done => {
+  it('renderToStream catch with sourcemap', done => {
     createRenderer('error-bundle.js', renderer => {
       const stream = renderer.renderToStream()
-      stream.on('error', err => {
+      stream.on('error', (err, sourceMap) => {
+        const sourceError = sourceMapStack.stack(sourceMap, err)
+        expect(sourceError).toContain('/test/ssr/fixtures/error.js:1\nthrow new Error(\'foo\')')
         expect(err.message).toBe('foo')
         done()
       })
