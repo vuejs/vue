@@ -587,7 +587,6 @@ export function createPatchFunction (backend) {
           // create an empty node and replace it
           oldVnode = emptyNodeAt(oldVnode)
         }
-
         // replacing existing element
         elm = oldVnode.elm
         parent = nodeOps.parentNode(elm)
