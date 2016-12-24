@@ -82,6 +82,14 @@ describe('parser', () => {
     expect('Component template should contain exactly one root element:\n\n<div></div><div></div>').toHaveBeenWarned()
   })
 
+  it('remove duplicate whitespace text nodes caused by comments', () => {
+    const ast = parse(`<div><a></a> <!----> <a></a></div>`, baseOptions)
+    expect(ast.children.length).toBe(3)
+    expect(ast.children[0].tag).toBe('a')
+    expect(ast.children[1].text).toBe(' ')
+    expect(ast.children[2].tag).toBe('a')
+  })
+
   it('remove text nodes between v-if conditions', () => {
     const ast = parse(`<div><div v-if="1"></div> <div v-else-if="2"></div> <div v-else></div> <span></span></div>`, baseOptions)
     expect(ast.children.length).toBe(3)

@@ -229,19 +229,20 @@ export function parse (
           currentParent.attrsMap.placeholder === text) {
         return
       }
+      const children = currentParent.children
       text = inPre || text.trim()
         ? decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
-        : preserveWhitespace && currentParent.children.length ? ' ' : ''
+        : preserveWhitespace && children.length ? ' ' : ''
       if (text) {
         let expression
         if (!inVPre && text !== ' ' && (expression = parseText(text, delimiters))) {
-          currentParent.children.push({
+          children.push({
             type: 2,
             expression,
             text
           })
-        } else {
+        } else if (text !== ' ' || children[children.length - 1].text !== ' ') {
           currentParent.children.push({
             type: 3,
             text
