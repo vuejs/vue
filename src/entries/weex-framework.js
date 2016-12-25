@@ -103,7 +103,7 @@ export function createInstance (
   subVue.options._base = subVue
 
   // expose global utility
-  ;['util', 'set', 'delete', 'nextTick'].forEach(name => {
+  ;['util', 'set', 'delete', 'nextTick', 'version', 'weexVersion', 'config'].forEach(name => {
     subVue[name] = Vue[name]
   })
 
