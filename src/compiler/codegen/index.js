@@ -307,18 +307,20 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
 // 1: simple normalization needed (possible 1-level deep nested array)
 // 2: full nomralization needed
 function getNormalizationType (children): number {
+  let res = 0
   for (let i = 0; i < children.length; i++) {
     const el: any = children[i]
     if (needsNormalization(el) ||
         (el.if && el.ifConditions.some(c => needsNormalization(c.block)))) {
-      return 2
+      res = 2
+      break
     }
     if (maybeComponent(el) ||
         (el.if && el.ifConditions.some(c => maybeComponent(c.block)))) {
-      return 1
+      res = 1
     }
   }
-  return 0
+  return res
 }
 
 function needsNormalization (el: ASTElement) {
