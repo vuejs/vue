@@ -112,6 +112,14 @@ const computedSharedDefinition = {
 
 function initComputed (vm: Component, computed: Object) {
   for (const key in computed) {
+    /* istanbul ignore if */
+    if (process.env.NODE_ENV !== 'production' && key in vm) {
+      warn(
+        `existing instance property "${key}" will be ` +
+        `overwritten by a computed property with the same name.`,
+        vm
+      )
+    }
     const userDef = computed[key]
     if (typeof userDef === 'function') {
       computedSharedDefinition.get = makeComputedGetter(userDef, vm)
