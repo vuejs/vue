@@ -104,7 +104,7 @@ function assertProp (
     }
     for (let i = 0; i < type.length && !valid; i++) {
       const assertedType = assertType(value, type[i])
-      expectedTypes.push(assertedType.expectedType)
+      expectedTypes.push(assertedType.expectedType || '')
       valid = assertedType.valid
     }
   }

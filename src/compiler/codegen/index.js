@@ -5,10 +5,14 @@ import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
 import { camelize, no } from 'shared/util'
 
+type TransformFunction = (el: ASTElement, code: string) => string
+type DataGenFunction = (el: ASTElement) => string
+type DirctiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean
+
 // configurable state
 let warn
-let transforms
-let dataGenFns
+let transforms: Array<TransformFunction>
+let dataGenFns: Array<DataGenFunction>
 let platformDirectives
 let isPlatformReservedTag
 let staticRenderFns
@@ -225,7 +229,7 @@ function genDirectives (el: ASTElement): string | void {
   for (i = 0, l = dirs.length; i < l; i++) {
     dir = dirs[i]
     needRuntime = true
-    const gen = platformDirectives[dir.name] || baseDirectives[dir.name]
+    const gen: DirctiveFunction = platformDirectives[dir.name] || baseDirectives[dir.name]
     if (gen) {
       // compile-time directive that manipulates AST.
       // returns true if it also needs a runtime counterpart.
@@ -317,11 +321,11 @@ function getNormalizationType (children): number {
   return 0
 }
 
-function needsNormalization (el) {
+function needsNormalization (el: ASTElement) {
   return el.for || el.tag === 'template' || el.tag === 'slot'
 }
 
-function maybeComponent (el) {
+function maybeComponent (el: ASTElement) {
   return el.type === 1 && !isPlatformReservedTag(el.tag)
 }
 
