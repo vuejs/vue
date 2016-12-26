@@ -6,10 +6,10 @@ export function baseWarn (msg: string) {
   console.error(`[Vue parser]: ${msg}`)
 }
 
-export function pluckModuleFunction (
+export function pluckModuleFunction<F: Function> (
   modules: ?Array<Object>,
   key: string
-): Array<Function> {
+): Array<F> {
   return modules
     ? modules.map(m => m[key]).filter(_ => _)
     : []

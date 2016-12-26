@@ -4,7 +4,7 @@ const fnExpRE = /^\s*([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
 const simplePathRE = /^\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?']|\[".*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*\s*$/
 
 // keyCode aliases
-const keyCodes = {
+const keyCodes: { [k: any]: number | [number, number] } = {
   esc: 27,
   tab: 9,
   enter: 13,
@@ -16,7 +16,7 @@ const keyCodes = {
   'delete': [8, 46]
 }
 
-const modifierCode = {
+const modifierCode: { [k: string]: string } = {
   stop: '$event.stopPropagation();',
   prevent: '$event.preventDefault();',
   self: 'if($event.target !== $event.currentTarget)return;',

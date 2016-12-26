@@ -73,12 +73,12 @@ export function isPrimitive (value: any): boolean {
 /**
  * Create a cached version of a pure function.
  */
-export function cached (fn: Function): Function {
+export function cached<F: Function> (fn: F): F {
   const cache = Object.create(null)
-  return function cachedFn (str: string): any {
+  return (function cachedFn (str: string) {
     const hit = cache[str]
     return hit || (cache[str] = fn(str))
-  }
+  }: any)
 }
 
 /**
