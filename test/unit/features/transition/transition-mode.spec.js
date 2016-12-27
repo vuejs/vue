@@ -33,7 +33,7 @@ if (!isIE9) {
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test v-leave">one</div>' +
-          '<div class="test v-enter">two</div>'
+          '<div class="test v-enter v-enter-active">two</div>'
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -78,7 +78,7 @@ if (!isIE9) {
         expect(vm.$el.innerHTML).toBe('<!---->')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-enter">two</div>'
+          '<div class="test test-enter test-enter-active">two</div>'
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -126,7 +126,7 @@ if (!isIE9) {
         expect(vm.$el.innerHTML).toBe('<!---->')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-enter">two</div>'
+          '<div class="test test-enter test-enter-active">two</div>'
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -161,7 +161,7 @@ if (!isIE9) {
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
-          '<div class="test test-enter">two</div>'
+          '<div class="test test-enter test-enter-active">two</div>'
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -211,7 +211,7 @@ if (!isIE9) {
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
-          '<div class="test test-enter">two</div>'
+          '<div class="test test-enter test-enter-active">two</div>'
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -227,7 +227,7 @@ if (!isIE9) {
         // 3. a new "one" is created and entering
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>' +
-          '<div class="test test-enter">one</div>'
+          '<div class="test test-enter test-enter-active">one</div>'
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -271,7 +271,7 @@ if (!isIE9) {
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test v-leave">one</div>' +
-          '<div class="test v-enter">two</div>'
+          '<div class="test v-enter v-enter-active">two</div>'
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -315,7 +315,7 @@ if (!isIE9) {
         expect(vm.$el.innerHTML).toBe('<!---->')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-enter">two</div>'
+          '<div class="test test-enter test-enter-active">two</div>'
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -349,7 +349,7 @@ if (!isIE9) {
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
-          '<div class="test test-enter">two</div>'
+          '<div class="test test-enter test-enter-active">two</div>'
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(

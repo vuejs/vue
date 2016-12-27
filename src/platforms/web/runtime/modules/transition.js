@@ -112,9 +112,9 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   beforeEnterHook && beforeEnterHook(el)
   if (expectsCSS) {
     addTransitionClass(el, startClass)
+    addTransitionClass(el, activeClass)
     nextFrame(() => {
       removeTransitionClass(el, startClass)
-      addTransitionClass(el, activeClass)
       if (!cb.cancelled && !userWantsControl) {
         whenTransitionEnds(el, type, cb)
       }
