@@ -302,10 +302,10 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
   }
 }
 
-// determine the normalzation needed for the children array.
+// determine the normalization needed for the children array.
 // 0: no normalization needed
 // 1: simple normalization needed (possible 1-level deep nested array)
-// 2: full nomralization needed
+// 2: full normalization needed
 function getNormalizationType (children): number {
   let res = 0
   for (let i = 0; i < children.length; i++) {
