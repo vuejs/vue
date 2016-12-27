@@ -56,8 +56,11 @@ function genCheckboxModel (
   const falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
   addProp(el, 'checked',
     `Array.isArray(${value})` +
-      `?_i(${value},${valueBinding})>-1` +
-      `:_q(${value},${trueValueBinding})`
+      `?_i(${value},${valueBinding})>-1` + (
+        trueValueBinding === 'true'
+          ? `:(${value})`
+          : `:_q(${value},${trueValueBinding})`
+      )
   )
   addHandler(el, 'change',
     `var $$a=${value},` +
