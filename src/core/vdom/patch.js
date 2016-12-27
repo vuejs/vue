@@ -14,7 +14,7 @@
 
 import config from '../config'
 import VNode from './vnode'
-import { makeMap, isPrimitive, _toString, warn } from '../util/index'
+import { makeMap, isPrimitive, warn } from '../util/index'
 import { activeInstance } from '../instance/lifecycle'
 import { registerRef } from './modules/ref'
 
@@ -526,6 +526,8 @@ export function createPatchFunction (backend) {
           }
         }
       }
+    } else if (elm.data !== vnode.text) {
+      elm.data = vnode.text
     }
     return true
   }
@@ -537,7 +539,7 @@ export function createPatchFunction (backend) {
         vnode.tag.toLowerCase() === (node.tagName && node.tagName.toLowerCase())
       )
     } else {
-      return _toString(vnode.text) === node.data
+      return node.nodeType === (vnode.isComment ? 8 : 3)
     }
   }
 
