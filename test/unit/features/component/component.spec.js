@@ -87,23 +87,52 @@ describe('Component', () => {
       },
       components: {
         'view-a': {
-          template: '<div>foo</div>',
+          template: '<div>foo {{view}}</div>',
           data () {
             return { view: 'a' }
           }
         },
         'view-b': {
-          template: '<div>bar</div>',
+          template: '<div>bar {{view}}</div>',
           data () {
             return { view: 'b' }
           }
         }
       }
     }).$mount()
-    expect(vm.$el.outerHTML).toBe('<div view="view-a">foo</div>')
+    expect(vm.$el.outerHTML).toBe('<div view="view-a">foo a</div>')
     vm.view = 'view-b'
     waitForUpdate(() => {
-      expect(vm.$el.outerHTML).toBe('<div view="view-b">bar</div>')
+      expect(vm.$el.outerHTML).toBe('<div view="view-b">bar b</div>')
+      vm.view = ''
+    })
+    .then(() => {
+      expect(vm.$el.nodeType).toBe(8)
+      expect(vm.$el.data).toBe('')
+    }).then(done)
+  })
+
+  it('dynamic with props', done => {
+    const vm = new Vue({
+      template: '<component :is="view" :view="view"></component>',
+      data: {
+        view: 'view-a'
+      },
+      components: {
+        'view-a': {
+          template: '<div>foo {{view}}</div>',
+          props: ['view']
+        },
+        'view-b': {
+          template: '<div>bar {{view}}</div>',
+          props: ['view']
+        }
+      }
+    }).$mount()
+    expect(vm.$el.outerHTML).toBe('<div>foo view-a</div>')
+    vm.view = 'view-b'
+    waitForUpdate(() => {
+      expect(vm.$el.outerHTML).toBe('<div>bar view-b</div>')
       vm.view = ''
     })
     .then(() => {
