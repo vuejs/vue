@@ -24,7 +24,7 @@ Reporting a bug?
 
 - It is recommended that you make a JSFiddle/JSBin/Codepen to demonstrate your issue. You could start with [this template](http://jsfiddle.net/5sH6A/) that already includes the latest version of Vue.
 
-- For bugs that involves build setups, you can create a reproduction repository with steps in the README.
+- For potential SSR (Server Side Rendering) issue or bugs that involves build setups, you can create a reproduction repository with steps in the README.
 
 - If your issue is resolved but still open, don’t hesitate to close it. In case you found a solution by yourself, it could be helpful to explain how you fixed it.
 
