@@ -62,6 +62,10 @@ function hasParentTransition (vnode) {
   }
 }
 
+function isSameChild (child, oldChild) {
+  return oldChild.key === child.key && oldChild.tag === child.tag
+}
+
 export default {
   name: 'transition',
   props: transitionProps,
@@ -126,11 +130,10 @@ export default {
     const oldRawChild = this._vnode
     const oldChild: any = getRealChild(oldRawChild)
 
-    if (oldChild && oldChild.data && oldChild.key !== key) {
+    if (oldChild && oldChild.data && !isSameChild(child, oldChild)) {
       // replace old child transition data with fresh one
       // important for dynamic transitions!
-      const oldData = oldChild.data.transition = extend({}, data)
-
+      const oldData = oldChild && (oldChild.data.transition = extend({}, data))
       // handle transition mode
       if (mode === 'out-in') {
         // return placeholder node and queue update when leave finishes
