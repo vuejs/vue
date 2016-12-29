@@ -86,8 +86,8 @@ It could be you!
 - Greg McCarvell
 - Yoshiya Hinosawa
 - Wasim Khamlichi
-- Jivan Roquet
 - errorrik
+- Alex Balashov
 
 ---
 
@@ -184,3 +184,23 @@ It could be you!
 - Christian Griffith
 - Matt Rockwell
 - Jarek Tkaczyk
+- Michael Laccetti
+- Jonothan Allen
+- Andrew Davis
+- Jason Rys
+- Sean
+- Xiaojie Li
+- Joakim Bugge
+- Lacey Pevey
+- David Hess
+- Niannian Modisette
+- Kim Cuartero
+- Luke Sampson
+- Dariusz Jastrzębski
+- Ivan Sieder
+- Jivan Roquet
+- Shane
+- Stew Heckenberg
+- Matt Jones
+- Dave Chenell
+- Frank Baele
