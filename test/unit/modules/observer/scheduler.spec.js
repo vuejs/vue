@@ -1,6 +1,11 @@
 import Vue from 'vue'
 import config from 'core/config'
-import { queueWatcher } from 'core/observer/scheduler'
+import { queueWatcher as _queueWatcher } from 'core/observer/scheduler'
+
+function queueWatcher (watcher) {
+  watcher.vm = {} // mock vm
+  _queueWatcher(watcher)
+}
 
 describe('Scheduler', () => {
   let spy

@@ -156,6 +156,34 @@ describe('Options lifecyce hooks', () => {
         expect(spy).toHaveBeenCalled()
       }).then(done)
     })
+
+    it('should be called after children are updated', done => {
+      const calls = []
+      const vm = new Vue({
+        template: '<div><test ref="child">{{ msg }}</test></div>',
+        data: { msg: 'foo' },
+        components: {
+          test: {
+            template: `<div><slot></slot></div>`,
+            updated () {
+              expect(this.$el.textContent).toBe('bar')
+              calls.push('child')
+            }
+          }
+        },
+        updated () {
+          expect(this.$el.textContent).toBe('bar')
+          calls.push('parent')
+        }
+      }).$mount()
+
+      expect(calls).toEqual([])
+      vm.msg = 'bar'
+      expect(calls).toEqual([])
+      waitForUpdate(() => {
+        expect(calls).toEqual(['child', 'parent'])
+      }).then(done)
+    })
   })
 
   describe('beforeDestroy', () => {
