@@ -271,7 +271,7 @@ export function parseHTML (html, options) {
     if (end == null) end = index
 
     if (tagName) {
-      const lowerCasedTagName = tagName.toLowerCase()
+      lowerCasedTagName = tagName.toLowerCase()
     }
 
     // Find the closest opened tag of the same type
