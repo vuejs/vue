@@ -52,15 +52,11 @@ const isSpecialTag = (tag, isSFC, stack) => {
   if (isScriptOrStyle(tag)) {
     return true
   }
-  if (isSFC && stack.length === 1) {
-    // top-level template that has no pre-processor
-    if (tag === 'template' && !stack[0].attrs.some(hasLang)) {
-      return false
-    } else {
-      return true
-    }
-  }
-  return false
+  return (isSFC &&
+    stack.length === 1 &&
+    tag === 'template' &&
+    stack[0].attrs.some(hasLang)
+  )
 }
 
 const reCache = {}
@@ -126,7 +122,7 @@ export function parseHTML (html, options) {
         if (endTagMatch) {
           const curIndex = index
           advance(endTagMatch[0].length)
-          parseEndTag(endTagMatch[0], endTagMatch[1], curIndex, index)
+          parseEndTag(endTagMatch[1], curIndex, index)
           continue
         }
 
@@ -183,7 +179,7 @@ export function parseHTML (html, options) {
       })
       index += html.length - rest.length
       html = rest
-      parseEndTag('</' + stackedTag + '>', stackedTag, index - endTagLength, index)
+      parseEndTag(stackedTag, index - endTagLength, index)
     }
 
     if (html === last && options.chars) {
@@ -229,10 +225,10 @@ export function parseHTML (html, options) {
 
     if (expectHTML) {
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
-        parseEndTag('', lastTag)
+        parseEndTag(lastTag)
       }
       if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
-        parseEndTag('', tagName)
+        parseEndTag(tagName)
       }
     }
 
@@ -259,7 +255,7 @@ export function parseHTML (html, options) {
     }
 
     if (!unary) {
-      stack.push({ tag: tagName, attrs: attrs })
+      stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs })
       lastTag = tagName
       unarySlash = ''
     }
@@ -269,16 +265,19 @@ export function parseHTML (html, options) {
     }
   }
 
-  function parseEndTag (tag, tagName, start, end) {
-    let pos
+  function parseEndTag (tagName, start, end) {
+    let pos, lowerCasedTagName
     if (start == null) start = index
     if (end == null) end = index
 
+    if (tagName) {
+      const lowerCasedTagName = tagName.toLowerCase()
+    }
+
     // Find the closest opened tag of the same type
     if (tagName) {
-      const needle = tagName.toLowerCase()
       for (pos = stack.length - 1; pos >= 0; pos--) {
-        if (stack[pos].tag.toLowerCase() === needle) {
+        if (stack[pos].lowerCasedTag === lowerCasedTagName) {
           break
         }
       }
@@ -298,11 +297,11 @@ export function parseHTML (html, options) {
       // Remove the open elements from the stack
       stack.length = pos
       lastTag = pos && stack[pos - 1].tag
-    } else if (tagName.toLowerCase() === 'br') {
+    } else if (lowerCasedTagName === 'br') {
       if (options.start) {
         options.start(tagName, [], true, start, end)
       }
-    } else if (tagName.toLowerCase() === 'p') {
+    } else if (lowerCasedTagName === 'p') {
       if (options.start) {
         options.start(tagName, [], false, start, end)
       }
