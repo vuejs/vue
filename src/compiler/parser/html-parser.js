@@ -47,18 +47,6 @@ let IS_REGEX_CAPTURING_BROKEN = false
 
 // Special Elements (can contain anything)
 const isScriptOrStyle = makeMap('script,style', true)
-const hasLang = attr => attr.name === 'lang' && attr.value !== 'html'
-const isSpecialTag = (tag, isSFC, stack) => {
-  if (isScriptOrStyle(tag)) {
-    return true
-  }
-  return (isSFC &&
-    stack.length === 1 &&
-    tag === 'template' &&
-    stack[0].attrs.some(hasLang)
-  )
-}
-
 const reCache = {}
 
 const ltRE = /&lt;/g
@@ -87,7 +75,7 @@ export function parseHTML (html, options) {
   while (html) {
     last = html
     // Make sure we're not in a script or style element
-    if (!lastTag || !isSpecialTag(lastTag, options.sfc, stack)) {
+    if (!lastTag || !isScriptOrStyle(lastTag)) {
       let textEnd = html.indexOf('<')
       if (textEnd === 0) {
         // Comment:
