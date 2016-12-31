@@ -13,7 +13,7 @@ module.exports = function (config) {
     singleRun: true
   })
 
-  // add babel-plugin-coverage for code intrumentation
+  // add babel-plugin-istanbul for code intrumentation
   options.webpack.babel = {
     plugins: [['istanbul', {
       exclude: [
