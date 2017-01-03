@@ -148,7 +148,7 @@ describe('Directive v-model checkbox', () => {
       `
     }).$mount()
     document.body.appendChild(vm.$el)
-    var checkboxInputs = vm.$el.getElementsByTagName('input')
+    const checkboxInputs = vm.$el.getElementsByTagName('input')
     expect(checkboxInputs[0].checked).toBe(false)
     expect(checkboxInputs[1].checked).toBe(false)
     expect(checkboxInputs[2].checked).toBe(true)
@@ -173,7 +173,7 @@ describe('Directive v-model checkbox', () => {
           '<input type="checkbox" value="true" v-model="test">' +
         '</div>'
     }).$mount()
-    var checkboxInput = vm.$el.children
+    const checkboxInput = vm.$el.children
     expect(checkboxInput[0].checked).toBe(false)
     expect(checkboxInput[1].checked).toBe(true)
     expect(checkboxInput[2].checked).toBe(false)
@@ -214,6 +214,46 @@ describe('Directive v-model checkbox', () => {
       expect(checkboxInput[2].checked).toBe(true)
       expect(checkboxInput[3].checked).toBe(true)
       expect(checkboxInput[4].checked).toBe(true)
+    }).then(done)
+  })
+
+  // #4521
+  it('should work with click event', (done) => {
+    const vm = new Vue({
+      data: {
+        num: 1,
+        checked: false
+      },
+      template: '<div @click="add">click {{ num }}<input ref="checkbox" type="checkbox" v-model="checked"/></div>',
+      methods: {
+        add: function () {
+          this.num++
+        }
+      }
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    const checkbox = vm.$refs.checkbox
+    checkbox.click()
+    waitForUpdate(() => {
+      expect(checkbox.checked).toBe(true)
+      expect(vm.num).toBe(2)
+    }).then(done)
+  })
+
+  it('should get updated with model when in focus', (done) => {
+    const vm = new Vue({
+      data: {
+        a: '2'
+      },
+      template: '<input type="checkbox" value="1" v-model="a"/>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.$el.click()
+    waitForUpdate(() => {
+      expect(vm.$el.checked).toBe(true)
+      vm.a = 2
+    }).then(() => {
+      expect(vm.$el.checked).toBe(false)
     }).then(done)
   })
 
