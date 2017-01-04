@@ -2,7 +2,7 @@
 
 import config from '../config'
 import Dep, { pushTarget, popTarget } from './dep'
-import { queueWatcher } from './scheduler'
+import { queueWatcher, wrapWatcherGetter } from './scheduler'
 import {
   warn,
   remove,
@@ -79,6 +79,7 @@ export default class Watcher {
         )
       }
     }
+    this.getter = wrapWatcherGetter(this.getter);
     this.value = this.lazy
       ? undefined
       : this.get()
@@ -89,15 +90,19 @@ export default class Watcher {
    */
   get () {
     pushTarget(this)
-    const value = this.getter.call(this.vm, this.vm)
-    // "touch" every property so they are all tracked as
-    // dependencies for deep watching
-    if (this.deep) {
-      traverse(value)
+    try {
+      const value = this.getter.call(this.vm, this.vm)
+      // "touch" every property so they are all tracked as
+      // dependencies for deep watching
+      if (this.deep) {
+        traverse(value)
+      }
+      this.cleanupDeps()
+      return value
     }
-    popTarget()
-    this.cleanupDeps()
-    return value
+    finally {
+      popTarget()
+    }
   }
 
   /**
