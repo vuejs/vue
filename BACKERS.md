@@ -63,15 +63,19 @@ It could be you!
 ### $100
 
 <a href="http://tighten.co/">
-  <img width="200px" src="http://i.imgur.com/T7fQYLT.png">
+  <img width="240px" src="http://i.imgur.com/T7fQYLT.png">
 </a>
 
 <a href="http://invoicemachine.com/">
-  <img width="200px" src="http://assets.invoicemachine.com/images/flat_logo.png">
+  <img width="220px" src="http://assets.invoicemachine.com/images/flat_logo.png">
 </a>
 
 <a href="https://statamic.com/">
   <img width="240px" src="http://i.imgur.com/MRIkKgp.png">
+</a>
+
+<a href="https://alligator.io"></a>
+  <img width="240px" src="https://alligator.io/images/alligator-logo.svg">
 </a>
 
 ---
