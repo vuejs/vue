@@ -25,9 +25,8 @@ function resetSchedulerState () {
   // if we got to the end of the queue, we can just empty the queue
   if (index === queue.length) {
     queue.length = 0
-  }
   // else, we only remove watchers we ran
-  else {
+  } else {
     queue.splice(0, index)
   }
   has = {}
@@ -42,11 +41,11 @@ function resetSchedulerState () {
  */
 function flushSchedulerQueue (maxUpdateCount?: number) {
   if (flushing) {
-    throw new Error("Cannot flush while already flushing.")
+    throw new Error('Cannot flush while already flushing.')
   }
 
   if (insideRun) {
-    throw new Error("Cannot flush while running a watcher.")
+    throw new Error('Cannot flush while running a watcher.')
   }
 
   maxUpdateCount = maxUpdateCount || config._maxUpdateCount
@@ -97,7 +96,7 @@ function flushSchedulerQueue (maxUpdateCount?: number) {
       if (afterFlushCallbacks.length) {
         // call one afterFlush callback, which may queue more watchers
         // TODO: Optimize to not modify array at every run.
-        let func = afterFlushCallbacks.shift()
+        const func = afterFlushCallbacks.shift()
         try {
           func()
         } catch (e) {
@@ -113,8 +112,7 @@ function flushSchedulerQueue (maxUpdateCount?: number) {
         }
       }
     }
-  }
-  finally {
+  } finally {
     // a hook can throw as well
     try {
       // call updated hooks
@@ -132,8 +130,7 @@ function flushSchedulerQueue (maxUpdateCount?: number) {
       if (devtools && config.devtools) {
         devtools.emit('flush')
       }
-    }
-    finally {
+    } finally {
       resetSchedulerState()
     }
   }

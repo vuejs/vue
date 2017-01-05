@@ -79,7 +79,7 @@ export default class Watcher {
         )
       }
     }
-    this.getter = wrapWatcherGetter(this.getter);
+    this.getter = wrapWatcherGetter(this.getter)
     this.value = this.lazy
       ? undefined
       : this.get()
@@ -99,8 +99,7 @@ export default class Watcher {
       }
       this.cleanupDeps()
       return value
-    }
-    finally {
+    } finally {
       popTarget()
     }
   }
