@@ -3,7 +3,7 @@
 import { updateListeners } from 'core/vdom/helpers/index'
 
 function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  let target: HTMLElement
+  const target: HTMLElement = vnode.elm
 
   function add (event: string, handler: Function, once: boolean, capture: boolean) {
     if (once) {
@@ -27,7 +27,6 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
   const on = vnode.data.on || {}
   const oldOn = oldVnode.data.on || {}
-  target = vnode.elm
   updateListeners(on, oldOn, add, remove, vnode.context)
 }
 
