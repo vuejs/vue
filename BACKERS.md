@@ -74,7 +74,7 @@ It could be you!
   <img width="240px" src="http://i.imgur.com/MRIkKgp.png">
 </a>
 
-<a href="https://alligator.io"></a>
+<a href="https://alligator.io">
   <img width="240px" src="https://alligator.io/images/alligator-logo.svg">
 </a>
 
