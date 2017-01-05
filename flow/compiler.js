@@ -75,7 +75,6 @@ declare type ASTElement = {
   staticInFor?: boolean;
   staticProcessed?: boolean;
   hasBindings?: boolean;
-  hasNormalProp?: true;
 
   text?: string;
   attrs?: Array<{ name: string; value: string }>;
@@ -83,6 +82,7 @@ declare type ASTElement = {
   plain?: boolean;
   pre?: true;
   ns?: string;
+  staticProps?: Array<string>;
 
   component?: string;
   inlineTemplate?: true;

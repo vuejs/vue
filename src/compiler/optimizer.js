@@ -30,7 +30,7 @@ export function optimize (root: ?ASTElement, options: CompilerOptions) {
 
 function genStaticKeys (keys: string): Function {
   return makeMap(
-    'type,tag,attrsList,attrsMap,plain,parent,children,attrs' +
+    'type,tag,attrsList,attrsMap,plain,parent,children,attrs,staticProps' +
     (keys ? ',' + keys : '')
   )
 }
@@ -100,7 +100,7 @@ function isStatic (node: ASTNode): boolean {
     return true
   }
   const nodeAttrs = Object.keys(node)
-  if (!node.hasNormalProp && node.props && node.props.length) {
+  if (node.staticProps && node.props && node.staticProps.length === node.props.length) {
     remove(nodeAttrs, 'props')
   }
   return !!(node.pre || (
