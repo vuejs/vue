@@ -243,17 +243,17 @@ describe('Directive v-model checkbox', () => {
   it('should get updated with model when in focus', (done) => {
     const vm = new Vue({
       data: {
-        a: '2'
+        a: 2
       },
-      template: '<input type="checkbox" value="1" v-model="a"/>'
+      template: '<input type="checkbox" v-model="a"/>'
     }).$mount()
     document.body.appendChild(vm.$el)
     vm.$el.click()
     waitForUpdate(() => {
-      expect(vm.$el.checked).toBe(true)
+      expect(vm.$el.checked).toBe(false)
       vm.a = 2
     }).then(() => {
-      expect(vm.$el.checked).toBe(false)
+      expect(vm.$el.checked).toBe(true)
     }).then(done)
   })
 
