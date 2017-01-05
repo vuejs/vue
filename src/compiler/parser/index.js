@@ -444,6 +444,7 @@ function processAttrs (el) {
           }
         }
         if (isProp || platformMustUseProp(el.tag, name)) {
+          el.hasNormalProp = true
           addProp(el, name, value)
         } else {
           addAttr(el, name, value)
