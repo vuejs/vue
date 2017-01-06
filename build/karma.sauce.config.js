@@ -90,6 +90,9 @@ module.exports = function (config) {
     sauceLabs: {
       testName: 'Vue.js unit tests',
       recordScreenshots: false,
+      connectOptions: {
+        'no-ssl-bump-domains': 'all', // Ignore SSL error on Android emulator
+      },
       build: process.env.CIRCLE_BUILD_NUM || process.env.SAUCE_BUILD_ID || Date.now()
     },
     // mobile emulators are really slow
