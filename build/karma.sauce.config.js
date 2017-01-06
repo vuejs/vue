@@ -67,7 +67,7 @@ var batches = [
       browserName: 'Browser',
       platform: 'Android',
       version: '4.4',
-      device: 'Android Emulator',
+      device: 'Android Emulator'
     },
     sl_android_5_1: {
       base: 'SauceLabs',
@@ -91,7 +91,7 @@ module.exports = function (config) {
       testName: 'Vue.js unit tests',
       recordScreenshots: false,
       connectOptions: {
-        'no-ssl-bump-domains': 'all', // Ignore SSL error on Android emulator
+        'no-ssl-bump-domains': 'all' // Ignore SSL error on Android emulator
       },
       build: process.env.CIRCLE_BUILD_NUM || process.env.SAUCE_BUILD_ID || Date.now()
     },
