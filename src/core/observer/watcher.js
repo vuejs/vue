@@ -125,13 +125,11 @@ export default class Watcher {
         dep.removeSub(this)
       }
     }
-    let tmp = this.depIds
-    this.depIds = this.newDepIds
-    this.newDepIds = tmp
-    this.newDepIds.clear()
-    tmp = this.deps
-    this.deps = this.newDeps
-    this.newDeps = tmp
+    // $FlowFixMe
+    [this.depIds, this.newDepIds] = [this.newDepIds, this.depIds]
+    this.newDepIds.clear();
+    // $FlowFixMe
+    [this.deps, this.newDeps] = [this.newDeps, this.deps]
     this.newDeps.length = 0
   }
 
