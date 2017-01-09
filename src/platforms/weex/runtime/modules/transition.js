@@ -81,11 +81,9 @@ function enter (_, vnode) {
     el._enterCb = null
   })
 
-  // remove pending leave element on enter by injecting an insert hook
-  // mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
-
-  // }, 'transition-insert')
-
+  // We need to wait until the native element has been inserted, but currently
+  // there's no API to do that. So we have to wait "one frame" - not entirely
+  // sure if this is guaranteed to be enough (e.g. on slow devices?)
   setTimeout(() => {
     const parent = el.parentNode
     const pendingNode = parent && parent._pending && parent._pending[vnode.key]
@@ -98,7 +96,7 @@ function enter (_, vnode) {
     enterHook && enterHook(el, cb)
 
     if (endState) {
-      const animation = vnode.context.$options.animation
+      const animation = vnode.context._requireWeexModule('animation')
       animation.transition(el.ref, {
         styles: endState,
         duration: 300,
@@ -107,17 +105,6 @@ function enter (_, vnode) {
     } else if (!userWantsControl) {
       cb()
     }
-    // if (expectsCSS) {
-    //   animation.transition(el.ref, {
-    //     styles: startState
-    //   }, () => {
-    //     animation.transition(el.ref, {
-    //       styles: endState,
-    //       duration: 300,
-    //       timingFunction: 'ease-in-out'
-    //     }, userWantsControl ? noop : cb)
-    //   })
-    // }
   }, 16)
 
   // start enter transition
@@ -193,7 +180,7 @@ function leave (vnode, rm) {
   }
 
   function performLeave () {
-    const animation = vnode.context.$options.animation
+    const animation = vnode.context._requireWeexModule('animation')
     // the delayed leave may have already been cancelled
     if (cb.cancelled) {
       return
