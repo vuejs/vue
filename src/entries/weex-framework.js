@@ -107,6 +107,10 @@ export function createInstance (
     subVue[name] = Vue[name]
   })
 
+  // expose weex native module getter on subVue prototype so that
+  // vdom runtime modules can access native modules via vnode.context
+  subVue.prototype._requireWeexModule = moduleGetter
+
   // The function which create a closure the JS Bundle will run in.
   // It will declare some instance variables like `Vue`, HTML5 Timer APIs etc.
   const instanceVars = Object.assign({
