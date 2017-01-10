@@ -481,9 +481,9 @@ function processAttrs (el) {
       // so that patches between dynamic/static are consistent
       if (platformMustUseProp(el.tag, name)) {
         if (name === 'value') {
-          addProp(el, name, JSON.stringify(value))
+          addProp(el, name, JSON.stringify(value), true)
         } else {
-          addProp(el, name, 'true')
+          addProp(el, name, 'true', true)
         }
       }
     }
