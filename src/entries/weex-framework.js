@@ -91,7 +91,7 @@ export function createInstance (
   const weexInstanceVar = {
     config,
     document,
-    require: moduleGetter
+    requireModule: moduleGetter
   }
   Object.freeze(weexInstanceVar)
 
@@ -112,7 +112,7 @@ export function createInstance (
   const instanceVars = Object.assign({
     Vue: subVue,
     weex: weexInstanceVar,
-    __weex_require_module__: weexInstanceVar.require // deprecated
+    __weex_require_module__: weexInstanceVar.requireModule // deprecated
   }, timerAPIs)
   callFunction(instanceVars, appCode)
 
