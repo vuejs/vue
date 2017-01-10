@@ -28,8 +28,10 @@ function enter (_, vnode) {
 
   const {
     enterClass,
+    enterToClass,
     enterActiveClass,
     appearClass,
+    appearToClass,
     appearActiveClass,
     beforeEnter,
     enter,
@@ -55,6 +57,7 @@ function enter (_, vnode) {
   }
 
   const startClass = isAppear ? appearClass : enterClass
+  const toClass = isAppear ? appearToClass : enterToClass
   const activeClass = isAppear ? appearActiveClass : enterActiveClass
   const beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter
   const enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter
@@ -69,7 +72,8 @@ function enter (_, vnode) {
 
   const stylesheet = vnode.context.$options.style || {}
   const startState = stylesheet[startClass]
-  const endState = stylesheet[activeClass]
+  const endState = stylesheet[toClass] || stylesheet[activeClass]
+  const transitionProperties = (stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][activeClass]) || {}
   const expectsCSS = startState && endState
 
   const cb = el._enterCb = once(() => {
@@ -99,8 +103,9 @@ function enter (_, vnode) {
       const animation = vnode.context._requireWeexModule('animation')
       animation.transition(el.ref, {
         styles: endState,
-        duration: 300,
-        timingFunction: 'ease-in-out'
+        duration: transitionProperties.duration || 0,
+        delay: transitionProperties.delay || 0,
+        timingFunction: transitionProperties.timingFunction || 'linear'
       }, userWantsControl ? noop : cb)
     } else if (!userWantsControl) {
       cb()
@@ -141,6 +146,7 @@ function leave (vnode, rm) {
 
   const {
     leaveClass,
+    leaveToClass,
     leaveActiveClass,
     beforeLeave,
     leave,
@@ -157,7 +163,8 @@ function leave (vnode, rm) {
 
   const stylesheet = vnode.context.$options.style || {}
   const startState = stylesheet[leaveClass]
-  const endState = stylesheet[leaveActiveClass]
+  const endState = stylesheet[leaveToClass] || stylesheet[leaveActiveClass]
+  const transitionProperties = (stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][leaveActiveClass]) || {}
   const expectsCSS = startState && endState
 
   const cb = el._leaveCb = once(() => {
@@ -202,8 +209,9 @@ function leave (vnode, rm) {
     function next () {
       animation.transition(el.ref, {
         styles: endState,
-        duration: 300,
-        timingFunction: 'ease-in-out'
+        duration: transitionProperties.duration || 0,
+        delay: transitionProperties.delay || 0,
+        timingFunction: transitionProperties.timingFunction || 'linear'
       }, userWantsControl ? noop : cb)
     }
 
@@ -246,6 +254,9 @@ const autoCssTransition = cached(name => {
     enterClass: `${name}-enter`,
     leaveClass: `${name}-leave`,
     appearClass: `${name}-enter`,
+    enterToClass: `${name}-enter-to`,
+    leaveToClass: `${name}-leave-to`,
+    appearToClass: `${name}-enter-to`,
     enterActiveClass: `${name}-enter-active`,
     leaveActiveClass: `${name}-leave-active`,
     appearActiveClass: `${name}-enter-active`
