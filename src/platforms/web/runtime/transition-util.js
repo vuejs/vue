@@ -1,8 +1,39 @@
 /* @flow */
 
 import { inBrowser, isIE9 } from 'core/util/index'
-import { remove } from 'shared/util'
+import { remove, extend, cached } from 'shared/util'
 import { addClass, removeClass } from './class-util'
+
+export function resolveTransition (def?: string | Object): ?Object {
+  if (!def) {
+    return
+  }
+  /* istanbul ignore else */
+  if (typeof def === 'object') {
+    const res = {}
+    if (def.css !== false) {
+      extend(res, autoCssTransition(def.name || 'v'))
+    }
+    extend(res, def)
+    return res
+  } else if (typeof def === 'string') {
+    return autoCssTransition(def)
+  }
+}
+
+const autoCssTransition: (name: string) => Object = cached(name => {
+  return {
+    enterClass: `${name}-enter`,
+    leaveClass: `${name}-leave`,
+    appearClass: `${name}-enter`,
+    enterToClass: `${name}-enter-to`,
+    leaveToClass: `${name}-leave-to`,
+    appearToClass: `${name}-enter-to`,
+    enterActiveClass: `${name}-enter-active`,
+    leaveActiveClass: `${name}-leave-active`,
+    appearActiveClass: `${name}-enter-active`
+  }
+})
 
 export const hasTransition = inBrowser && !isIE9
 const TRANSITION = 'transition'

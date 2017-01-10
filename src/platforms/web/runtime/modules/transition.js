@@ -1,10 +1,11 @@
 /* @flow */
 
 import { inBrowser, isIE9 } from 'core/util/index'
-import { cached, extend } from 'shared/util'
+import { once } from 'shared/util'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
 import {
+  resolveTransition,
   nextFrame,
   addTransitionClass,
   removeTransitionClass,
@@ -224,47 +225,6 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     leave && leave(el, cb)
     if (!expectsCSS && !userWantsControl) {
       cb()
-    }
-  }
-}
-
-function resolveTransition (def?: string | Object): ?Object {
-  if (!def) {
-    return
-  }
-  /* istanbul ignore else */
-  if (typeof def === 'object') {
-    const res = {}
-    if (def.css !== false) {
-      extend(res, autoCssTransition(def.name || 'v'))
-    }
-    extend(res, def)
-    return res
-  } else if (typeof def === 'string') {
-    return autoCssTransition(def)
-  }
-}
-
-const autoCssTransition: (name: string) => Object = cached(name => {
-  return {
-    enterClass: `${name}-enter`,
-    leaveClass: `${name}-leave`,
-    appearClass: `${name}-enter`,
-    enterToClass: `${name}-enter-to`,
-    leaveToClass: `${name}-leave-to`,
-    appearToClass: `${name}-enter-to`,
-    enterActiveClass: `${name}-enter-active`,
-    leaveActiveClass: `${name}-leave-active`,
-    appearActiveClass: `${name}-enter-active`
-  }
-})
-
-function once (fn: Function): Function {
-  let called = false
-  return () => {
-    if (!called) {
-      called = true
-      fn()
     }
   }
 }

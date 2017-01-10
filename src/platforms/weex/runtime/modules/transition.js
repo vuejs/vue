@@ -1,5 +1,6 @@
-import { extend, cached, noop } from 'shared/util'
+import { extend, once, noop } from 'shared/util'
 import { activeInstance } from 'core/instance/lifecycle'
+import { resolveTransition } from 'web/runtime/transition-util'
 
 export default {
   create: enter,
@@ -220,47 +221,6 @@ function leave (vnode, rm) {
     }
   }
 }
-
-function resolveTransition (def) {
-  if (!def) {
-    return
-  }
-  /* istanbul ignore else */
-  if (typeof def === 'object') {
-    const res = {}
-    if (def.css !== false) {
-      extend(res, autoCssTransition(def.name || 'v'))
-    }
-    extend(res, def)
-    return res
-  } else if (typeof def === 'string') {
-    return autoCssTransition(def)
-  }
-}
-
-function once (fn) {
-  let called = false
-  return () => {
-    if (!called) {
-      called = true
-      fn()
-    }
-  }
-}
-
-const autoCssTransition = cached(name => {
-  return {
-    enterClass: `${name}-enter`,
-    leaveClass: `${name}-leave`,
-    appearClass: `${name}-enter`,
-    enterToClass: `${name}-enter-to`,
-    leaveToClass: `${name}-leave-to`,
-    appearToClass: `${name}-enter-to`,
-    enterActiveClass: `${name}-enter-active`,
-    leaveActiveClass: `${name}-leave-active`,
-    appearActiveClass: `${name}-enter-active`
-  }
-})
 
 // determine the target animation style for an entering transition.
 function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass, vm) {
