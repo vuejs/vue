@@ -72,9 +72,9 @@ function enter (_, vnode) {
 
   const stylesheet = vnode.context.$options.style || {}
   const startState = stylesheet[startClass]
-  const endState = stylesheet[toClass] || stylesheet[activeClass]
   const transitionProperties = (stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][activeClass]) || {}
-  const expectsCSS = startState && endState
+  const endState = getEnterTargetState(el, stylesheet, startClass, toClass, activeClass, vnode.context)
+  const needAnimation = Object.keys(endState).length > 0
 
   const cb = el._enterCb = once(() => {
     if (cb.cancelled) {
@@ -99,7 +99,7 @@ function enter (_, vnode) {
     }
     enterHook && enterHook(el, cb)
 
-    if (endState) {
+    if (needAnimation) {
       const animation = vnode.context._requireWeexModule('animation')
       animation.transition(el.ref, {
         styles: endState,
@@ -121,7 +121,7 @@ function enter (_, vnode) {
     }
   }
 
-  if (!expectsCSS && !userWantsControl) {
+  if (!needAnimation && !userWantsControl) {
     cb()
   }
 }
@@ -165,7 +165,6 @@ function leave (vnode, rm) {
   const startState = stylesheet[leaveClass]
   const endState = stylesheet[leaveToClass] || stylesheet[leaveActiveClass]
   const transitionProperties = (stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][leaveActiveClass]) || {}
-  const expectsCSS = startState && endState
 
   const cb = el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
@@ -216,7 +215,7 @@ function leave (vnode, rm) {
     }
 
     leave && leave(el, cb)
-    if (!expectsCSS && !userWantsControl) {
+    if (!endState && !userWantsControl) {
       cb()
     }
   }
@@ -262,3 +261,43 @@ const autoCssTransition = cached(name => {
     appearActiveClass: `${name}-enter-active`
   }
 })
+
+// determine the target animation style for an entering transition.
+function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass, vm) {
+  const targetState = {}
+  const startState = stylesheet[startClass]
+  const endState = stylesheet[endClass]
+  const activeState = stylesheet[activeClass]
+  // 1. fallback to element's default styling
+  if (startState) {
+    for (const key in startState) {
+      targetState[key] = el.style[key]
+      if (
+        targetState[key] == null &&
+        (!activeState || activeState[key] == null) &&
+        (!endState || endState[key] == null)
+      ) {
+        console.log(
+          `transition property "${key}" is declared in enter starting class (.${startClass}), ` +
+          `but not declared anywhere in enter ending class (.${endClass}), ` +
+          `enter active cass (.${activeClass}) or the element's default styling. ` +
+          `Note in Weex, CSS properties need explicit values to be transitionable.`
+        )
+      }
+    }
+  }
+  // 2. if state is mixed in active state, extract them while excluding
+  //    transition properties
+  if (activeState) {
+    for (const key in activeState) {
+      if (key.indexOf('transition') !== 0) {
+        targetState[key] = activeState[key]
+      }
+    }
+  }
+  // 3. explicit endState has highest priority
+  if (endState) {
+    extend(targetState, endState)
+  }
+  return targetState
+}
