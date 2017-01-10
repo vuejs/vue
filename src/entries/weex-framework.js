@@ -91,7 +91,7 @@ export function createInstance (
   const weexInstanceVar = {
     config,
     document,
-    require: moduleGetter
+    requireModule: moduleGetter
   }
   Object.freeze(weexInstanceVar)
 
