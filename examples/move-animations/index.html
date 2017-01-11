@@ -15,17 +15,19 @@
         border: 1px solid #666;
         box-sizing: border-box;
       }
+      /* 1. declare transition */
       .fade-move, .fade-enter-active, .fade-leave-active {
         transition: all .5s cubic-bezier(.55,0,.1,1);
       }
-      .fade-enter {
-        opacity: 0;
-        transform: scaleY(0) translate(30px, 0);
-      }
-      .fade-leave-active {
-        position: absolute;
+      /* 2. declare enter from and leave to state */
+      .fade-enter, .fade-leave-to {
         opacity: 0;
         transform: scaleY(0.01) translate(30px, 0);
+      }
+      /* 3. ensure leaving items are taken out of layout flow so that moving
+            animations can be calculated correctly. */
+      .fade-leave-active {
+        position: absolute;
       }
     </style>
     <script src="https://cdn.jsdelivr.net/lodash/4.3.0/lodash.min.js"></script>

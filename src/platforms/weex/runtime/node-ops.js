@@ -34,6 +34,10 @@ export function insertBefore (node, target, before) {
 }
 
 export function removeChild (node, child) {
+  if (child.nodeType === 3) {
+    node.setAttr('value', '')
+    return
+  }
   node.removeChild(child)
 }
 

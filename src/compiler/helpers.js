@@ -6,16 +6,19 @@ export function baseWarn (msg: string) {
   console.error(`[Vue parser]: ${msg}`)
 }
 
-export function pluckModuleFunction (
+export function pluckModuleFunction<F: Function> (
   modules: ?Array<Object>,
   key: string
-): Array<Function> {
+): Array<F> {
   return modules
     ? modules.map(m => m[key]).filter(_ => _)
     : []
 }
 
-export function addProp (el: ASTElement, name: string, value: string) {
+export function addProp (el: ASTElement, name: string, value: string, fromStaticAttr?: boolean) {
+  if (fromStaticAttr) {
+    (el.staticProps || (el.staticProps = [])).push(name)
+  }
   (el.props || (el.props = [])).push({ name, value })
 }
 

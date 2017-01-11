@@ -434,6 +434,14 @@ describe('codegen', () => {
     )
   })
 
+  it('generate component with v-for', () => {
+    // normalize type: 2
+    assertCodegen(
+      '<div><child></child><template v-for="item in list">{{ item }}</template></div>',
+      `with(this){return _c('div',[_c('child'),_l((list),function(item){return [_v(_s(item))]})],2)}`
+    )
+  })
+
   it('not specified ast type', () => {
     const res = generate(null, baseOptions)
     expect(res.render).toBe(`with(this){return _c("div")}`)

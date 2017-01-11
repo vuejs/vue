@@ -1,9 +1,14 @@
+function noop () {}
+
 if (typeof console === 'undefined') {
   window.console = {
-    warn: function () {},
-    error: function () {}
+    warn: noop,
+    error: noop
   }
 }
+
+// avoid info messages during test
+console.info = noop
 
 let asserted
 function hasWarned (msg) {

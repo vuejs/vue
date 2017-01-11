@@ -1,6 +1,6 @@
 /* @flow */
 
-import { makeMap, isBuiltInTag, cached, no } from 'shared/util'
+import { makeMap, isBuiltInTag, cached, no, remove } from 'shared/util'
 
 let isStaticKey
 let isPlatformReservedTag
@@ -30,7 +30,7 @@ export function optimize (root: ?ASTElement, options: CompilerOptions) {
 
 function genStaticKeys (keys: string): Function {
   return makeMap(
-    'type,tag,attrsList,attrsMap,plain,parent,children,attrs' +
+    'type,tag,attrsList,attrsMap,plain,parent,children,attrs,staticProps' +
     (keys ? ',' + keys : '')
   )
 }
@@ -99,13 +99,17 @@ function isStatic (node: ASTNode): boolean {
   if (node.type === 3) { // text
     return true
   }
+  const nodeAttrs = Object.keys(node)
+  if (node.staticProps && node.props && node.staticProps.length === node.props.length) {
+    remove(nodeAttrs, 'props')
+  }
   return !!(node.pre || (
     !node.hasBindings && // no dynamic bindings
     !node.if && !node.for && // not v-if or v-for or v-else
     !isBuiltInTag(node.tag) && // not a built-in
     isPlatformReservedTag(node.tag) && // not a component
     !isDirectChildOfTemplateFor(node) &&
-    Object.keys(node).every(isStaticKey)
+    nodeAttrs.every(isStaticKey)
   ))
 }
 

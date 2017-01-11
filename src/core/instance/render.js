@@ -9,6 +9,7 @@ import VNode, {
 } from '../vdom/vnode'
 import {
   warn,
+  extend,
   identity,
   isObject,
   toObject,
@@ -203,11 +204,16 @@ export function renderMixin (Vue: Class<Component>) {
   Vue.prototype._t = function (
     name: string,
     fallback: ?Array<VNode>,
-    props: ?Object
+    props: ?Object,
+    bindObject: ?Object
   ): ?Array<VNode> {
     const scopedSlotFn = this.$scopedSlots[name]
     if (scopedSlotFn) { // scoped slot
-      return scopedSlotFn(props || {}) || fallback
+      props = props || {}
+      if (bindObject) {
+        extend(props, bindObject)
+      }
+      return scopedSlotFn(props) || fallback
     } else {
       const slotNodes = this.$slots[name]
       // warn duplicate slot usage

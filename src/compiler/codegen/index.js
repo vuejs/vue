@@ -5,10 +5,14 @@ import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
 import { camelize, no } from 'shared/util'
 
+type TransformFunction = (el: ASTElement, code: string) => string
+type DataGenFunction = (el: ASTElement) => string
+type DirctiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean
+
 // configurable state
 let warn
-let transforms
-let dataGenFns
+let transforms: Array<TransformFunction>
+let dataGenFns: Array<DataGenFunction>
 let platformDirectives
 let isPlatformReservedTag
 let staticRenderFns
@@ -225,7 +229,7 @@ function genDirectives (el: ASTElement): string | void {
   for (i = 0, l = dirs.length; i < l; i++) {
     dir = dirs[i]
     needRuntime = true
-    const gen = platformDirectives[dir.name] || baseDirectives[dir.name]
+    const gen: DirctiveFunction = platformDirectives[dir.name] || baseDirectives[dir.name]
     if (gen) {
       // compile-time directive that manipulates AST.
       // returns true if it also needs a runtime counterpart.
@@ -298,30 +302,32 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
   }
 }
 
-// determine the normalzation needed for the children array.
+// determine the normalization needed for the children array.
 // 0: no normalization needed
 // 1: simple normalization needed (possible 1-level deep nested array)
-// 2: full nomralization needed
+// 2: full normalization needed
 function getNormalizationType (children): number {
+  let res = 0
   for (let i = 0; i < children.length; i++) {
     const el: any = children[i]
     if (needsNormalization(el) ||
         (el.if && el.ifConditions.some(c => needsNormalization(c.block)))) {
-      return 2
+      res = 2
+      break
     }
     if (maybeComponent(el) ||
         (el.if && el.ifConditions.some(c => maybeComponent(c.block)))) {
-      return 1
+      res = 1
     }
   }
-  return 0
+  return res
 }
 
-function needsNormalization (el) {
+function needsNormalization (el: ASTElement) {
   return el.for || el.tag === 'template' || el.tag === 'slot'
 }
 
-function maybeComponent (el) {
+function maybeComponent (el: ASTElement) {
   return el.type === 1 && !isPlatformReservedTag(el.tag)
 }
 
@@ -343,13 +349,19 @@ function genText (text: ASTText | ASTExpression): string {
 function genSlot (el: ASTElement): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el)
-  return `_t(${slotName}${
-    children ? `,${children}` : ''
-  }${
-    el.attrs ? `${children ? '' : ',null'},{${
-      el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')
-    }}` : ''
-  })`
+  let res = `_t(${slotName}${children ? `,${children}` : ''}`
+  const attrs = el.attrs && `{${el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')}}`
+  const bind = el.attrsMap['v-bind']
+  if ((attrs || bind) && !children) {
+    res += `,null`
+  }
+  if (attrs) {
+    res += `,${attrs}`
+  }
+  if (bind) {
+    res += `${attrs ? '' : ',null'},${bind}`
+  }
+  return res + ')'
 }
 
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement

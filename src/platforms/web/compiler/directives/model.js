@@ -56,10 +56,13 @@ function genCheckboxModel (
   const falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
   addProp(el, 'checked',
     `Array.isArray(${value})` +
-      `?_i(${value},${valueBinding})>-1` +
-      `:_q(${value},${trueValueBinding})`
+      `?_i(${value},${valueBinding})>-1` + (
+        trueValueBinding === 'true'
+          ? `:(${value})`
+          : `:_q(${value},${trueValueBinding})`
+      )
   )
-  addHandler(el, 'change',
+  addHandler(el, 'click',
     `var $$a=${value},` +
         '$$el=$event.target,' +
         `$$c=$$el.checked?(${trueValueBinding}):(${falseValueBinding});` +
@@ -90,7 +93,7 @@ function genRadioModel (
   let valueBinding = getBindingAttr(el, 'value') || 'null'
   valueBinding = number ? `_n(${valueBinding})` : valueBinding
   addProp(el, 'checked', `_q(${value},${valueBinding})`)
-  addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true)
+  addHandler(el, 'click', genAssignmentCode(value, valueBinding), null, true)
 }
 
 function genDefaultModel (

@@ -73,12 +73,12 @@ export function isPrimitive (value: any): boolean {
 /**
  * Create a cached version of a pure function.
  */
-export function cached (fn: Function): Function {
+export function cached<F: Function> (fn: F): F {
   const cache = Object.create(null)
-  return function cachedFn (str: string): any {
+  return (function cachedFn (str: string) {
     const hit = cache[str]
     return hit || (cache[str] = fn(str))
-  }
+  }: any)
 }
 
 /**
@@ -208,13 +208,15 @@ export function genStaticKeys (modules: Array<ModuleOptions>): string {
  * if they are plain objects, do they have the same shape?
  */
 export function looseEqual (a: mixed, b: mixed): boolean {
-  /* eslint-disable eqeqeq */
-  return a == b || (
-    isObject(a) && isObject(b)
-      ? JSON.stringify(a) === JSON.stringify(b)
-      : false
-  )
-  /* eslint-enable eqeqeq */
+  const isObjectA = isObject(a)
+  const isObjectB = isObject(b)
+  if (isObjectA && isObjectB) {
+    return JSON.stringify(a) === JSON.stringify(b)
+  } else if (!isObjectA && !isObjectB) {
+    return String(a) === String(b)
+  } else {
+    return false
+  }
 }
 
 export function looseIndexOf (arr: Array<mixed>, val: mixed): number {

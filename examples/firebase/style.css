@@ -19,7 +19,7 @@ ul {
   border-bottom: 1px solid #eee;
 }
 
-.v-enter, .v-leave-active {
+.v-enter, .v-leave-to {
   height: 0;
   padding-top: 0;
   padding-bottom: 0;

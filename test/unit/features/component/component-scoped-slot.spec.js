@@ -31,6 +31,40 @@ describe('Component scoped slot', () => {
     }).then(done)
   })
 
+  it('with v-bind', done => {
+    const vm = new Vue({
+      template: `
+        <test ref="test">
+          <template scope="props">
+            <span>{{ props.msg }} {{ props.msg2 }}</span>
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          data () {
+            return {
+              msg: 'hello',
+              obj: { msg2: 'world' }
+            }
+          },
+          template: `
+            <div>
+              <slot :msg="msg" v-bind="obj"></slot>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<span>hello world</span>')
+    vm.$refs.test.msg = 'bye'
+    vm.$refs.test.obj.msg2 = 'bye'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<span>bye bye</span>')
+    }).then(done)
+  })
+
   it('template slot', done => {
     const vm = new Vue({
       template: `

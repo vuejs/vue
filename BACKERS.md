@@ -63,15 +63,19 @@ It could be you!
 ### $100
 
 <a href="http://tighten.co/">
-  <img width="200px" src="http://i.imgur.com/T7fQYLT.png">
+  <img width="240px" src="http://i.imgur.com/T7fQYLT.png">
 </a>
 
 <a href="http://invoicemachine.com/">
-  <img width="200px" src="http://assets.invoicemachine.com/images/flat_logo.png">
+  <img width="220px" src="http://assets.invoicemachine.com/images/flat_logo.png">
 </a>
 
 <a href="https://statamic.com/">
   <img width="240px" src="http://i.imgur.com/MRIkKgp.png">
+</a>
+
+<a href="https://alligator.io">
+  <img width="240px" src="https://alligator.io/images/alligator-logo.svg">
 </a>
 
 ---
@@ -86,8 +90,8 @@ It could be you!
 - Greg McCarvell
 - Yoshiya Hinosawa
 - Wasim Khamlichi
-- Jivan Roquet
 - errorrik
+- Alex Balashov
 
 ---
 
@@ -184,3 +188,23 @@ It could be you!
 - Christian Griffith
 - Matt Rockwell
 - Jarek Tkaczyk
+- Michael Laccetti
+- Jonothan Allen
+- Andrew Davis
+- Jason Rys
+- Sean
+- Xiaojie Li
+- Joakim Bugge
+- Lacey Pevey
+- David Hess
+- Niannian Modisette
+- Kim Cuartero
+- Luke Sampson
+- Dariusz Jastrzębski
+- Ivan Sieder
+- Jivan Roquet
+- Shane
+- Stew Heckenberg
+- Matt Jones
+- Dave Chenell
+- Frank Baele

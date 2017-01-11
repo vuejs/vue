@@ -37,8 +37,8 @@ if (!isIE9) {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test v-leave-active">one</div>' +
-          '<div class="test v-enter-active">two</div>'
+          '<div class="test v-leave-active v-leave-to">one</div>' +
+          '<div class="test v-enter-active v-enter-to">two</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -72,7 +72,7 @@ if (!isIE9) {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">one</div><!---->'
+          '<div class="test test-leave-active test-leave-to">one</div><!---->'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe('<!---->')
@@ -82,7 +82,7 @@ if (!isIE9) {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-enter-active">two</div>'
+          '<div class="test test-enter-active test-enter-to">two</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -117,7 +117,7 @@ if (!isIE9) {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">one</div><!---->'
+          '<div class="test test-leave-active test-leave-to">one</div><!---->'
         )
         // Force re-render before the element finishes leaving
         // this should not cause the incoming element to enter early
@@ -130,7 +130,7 @@ if (!isIE9) {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-enter-active">two</div>'
+          '<div class="test test-enter-active test-enter-to">two</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -166,7 +166,7 @@ if (!isIE9) {
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
-          '<div class="test test-enter-active">two</div>'
+          '<div class="test test-enter-active test-enter-to">two</div>'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -180,7 +180,7 @@ if (!isIE9) {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">one</div>' +
+          '<div class="test test-leave-active test-leave-to">one</div>' +
           '<div class="test">two</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
@@ -216,7 +216,7 @@ if (!isIE9) {
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
-          '<div class="test test-enter-active">two</div>'
+          '<div class="test test-enter-active test-enter-to">two</div>'
         )
         // switch again before enter finishes,
         // this cancels both enter and leave.
@@ -232,7 +232,7 @@ if (!isIE9) {
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>' +
-          '<div class="test test-enter-active">one</div>'
+          '<div class="test test-enter-active test-enter-to">one</div>'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -246,7 +246,7 @@ if (!isIE9) {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">two</div>' +
+          '<div class="test test-leave-active test-leave-to">two</div>' +
           '<div class="test">one</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
@@ -275,8 +275,8 @@ if (!isIE9) {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test v-leave-active">one</div>' +
-          '<div class="test v-enter-active">two</div>'
+          '<div class="test v-leave-active v-leave-to">one</div>' +
+          '<div class="test v-enter-active v-enter-to">two</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -309,7 +309,7 @@ if (!isIE9) {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">one</div><!---->'
+          '<div class="test test-leave-active test-leave-to">one</div><!---->'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe('<!---->')
@@ -319,7 +319,7 @@ if (!isIE9) {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-enter-active">two</div>'
+          '<div class="test test-enter-active test-enter-to">two</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -354,7 +354,7 @@ if (!isIE9) {
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
-          '<div class="test test-enter-active">two</div>'
+          '<div class="test test-enter-active test-enter-to">two</div>'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -368,7 +368,7 @@ if (!isIE9) {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">one</div>' +
+          '<div class="test test-leave-active test-leave-to">one</div>' +
           '<div class="test">two</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {

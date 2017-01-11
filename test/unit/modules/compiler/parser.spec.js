@@ -82,6 +82,28 @@ describe('parser', () => {
     expect('Component template should contain exactly one root element:\n\n<div></div><div></div>').toHaveBeenWarned()
   })
 
+  it('remove duplicate whitespace text nodes caused by comments', () => {
+    const ast = parse(`<div><a></a> <!----> <a></a></div>`, baseOptions)
+    expect(ast.children.length).toBe(3)
+    expect(ast.children[0].tag).toBe('a')
+    expect(ast.children[1].text).toBe(' ')
+    expect(ast.children[2].tag).toBe('a')
+  })
+
+  it('remove text nodes between v-if conditions', () => {
+    const ast = parse(`<div><div v-if="1"></div> <div v-else-if="2"></div> <div v-else></div> <span></span></div>`, baseOptions)
+    expect(ast.children.length).toBe(3)
+    expect(ast.children[0].tag).toBe('div')
+    expect(ast.children[0].ifConditions.length).toBe(3)
+    expect(ast.children[1].text).toBe(' ') // text
+    expect(ast.children[2].tag).toBe('span')
+  })
+
+  it('warn non whitespace text between v-if conditions', () => {
+    parse(`<div><div v-if="1"></div> foo <div v-else></div></div>`, baseOptions)
+    expect(`text "foo" between v-if and v-else(-if) will be ignored`).toHaveBeenWarned()
+  })
+
   it('not warn 2 root elements with v-if and v-else', () => {
     parse('<div v-if="1"></div><div v-else></div>', baseOptions)
     expect('Component template should contain exactly one root element')
@@ -391,7 +413,7 @@ describe('parser', () => {
 
   it('literal attribute', () => {
     // basic
-    const ast1 = parse('<input type="text" name="field1" value="hello world">', baseOptions)
+    const ast1 = parse('<input type="text" name="field1" value="hello world" checked>', baseOptions)
     expect(ast1.attrsList[0].name).toBe('type')
     expect(ast1.attrsList[0].value).toBe('text')
     expect(ast1.attrsList[1].name).toBe('name')
@@ -407,6 +429,13 @@ describe('parser', () => {
     expect(ast1.attrs[1].value).toBe('"field1"')
     expect(ast1.attrs[2].name).toBe('value')
     expect(ast1.attrs[2].value).toBe('"hello world"')
+    expect(ast1.attrs[3].name).toBe('checked')
+    expect(ast1.attrs[3].value).toBe('""')
+    // also bind speicals as props
+    expect(ast1.props[0].name).toBe('value')
+    expect(ast1.props[0].value).toBe('"hello world"')
+    expect(ast1.props[1].name).toBe('checked')
+    expect(ast1.props[1].value).toBe('true')
     // interpolation warning
     parse('<input type="text" name="field1" value="{{msg}}">', baseOptions)
     expect('Interpolation inside attributes has been removed').toHaveBeenWarned()

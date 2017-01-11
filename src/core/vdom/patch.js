@@ -14,7 +14,7 @@
 
 import config from '../config'
 import VNode from './vnode'
-import { makeMap, isPrimitive, _toString, warn } from '../util/index'
+import { makeMap, isPrimitive, warn } from '../util/index'
 import { activeInstance } from '../instance/lifecycle'
 import { registerRef } from './modules/ref'
 
@@ -69,16 +69,16 @@ export function createPatchFunction (backend) {
   function createRmCb (childElm, listeners) {
     function remove () {
       if (--remove.listeners === 0) {
-        removeElement(childElm)
+        removeNode(childElm)
       }
     }
     remove.listeners = listeners
     return remove
   }
 
-  function removeElement (el) {
+  function removeNode (el) {
     const parent = nodeOps.parentNode(el)
-    // element may have already been removed due to v-html
+    // element may have already been removed due to v-html / v-text
     if (parent) {
       nodeOps.removeChild(parent, el)
     }
@@ -102,7 +102,7 @@ export function createPatchFunction (backend) {
         if (
           !inPre &&
           !vnode.ns &&
-          !(config.ignoredElements && config.ignoredElements.indexOf(tag) > -1) &&
+          !(config.ignoredElements.length && config.ignoredElements.indexOf(tag) > -1) &&
           config.isUnknownElement(tag)
         ) {
           warn(
@@ -298,7 +298,7 @@ export function createPatchFunction (backend) {
           removeAndInvokeRemoveHook(ch)
           invokeDestroyHook(ch)
         } else { // Text node
-          nodeOps.removeChild(parentElm, ch.elm)
+          removeNode(ch.elm)
         }
       }
     }
@@ -328,7 +328,7 @@ export function createPatchFunction (backend) {
         rm()
       }
     } else {
-      removeElement(vnode.elm)
+      removeNode(vnode.elm)
     }
   }
 
@@ -526,6 +526,8 @@ export function createPatchFunction (backend) {
           }
         }
       }
+    } else if (elm.data !== vnode.text) {
+      elm.data = vnode.text
     }
     return true
   }
@@ -537,7 +539,7 @@ export function createPatchFunction (backend) {
         vnode.tag.toLowerCase() === (node.tagName && node.tagName.toLowerCase())
       )
     } else {
-      return _toString(vnode.text) === node.data
+      return node.nodeType === (vnode.isComment ? 8 : 3)
     }
   }
 
@@ -587,7 +589,6 @@ export function createPatchFunction (backend) {
           // create an empty node and replace it
           oldVnode = emptyNodeAt(oldVnode)
         }
-
         // replacing existing element
         elm = oldVnode.elm
         parent = nodeOps.parentNode(elm)

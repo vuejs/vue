@@ -34,8 +34,10 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     css,
     type,
     enterClass,
+    enterToClass,
     enterActiveClass,
     appearClass,
+    appearToClass,
     appearActiveClass,
     beforeEnter,
     enter,
@@ -66,6 +68,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
 
   const startClass = isAppear ? appearClass : enterClass
   const activeClass = isAppear ? appearActiveClass : enterActiveClass
+  const toClass = isAppear ? appearToClass : enterToClass
   const beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter
   const enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter
   const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
@@ -80,6 +83,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
 
   const cb = el._enterCb = once(() => {
     if (expectsCSS) {
+      removeTransitionClass(el, toClass)
       removeTransitionClass(el, activeClass)
     }
     if (cb.cancelled) {
@@ -114,6 +118,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     addTransitionClass(el, startClass)
     addTransitionClass(el, activeClass)
     nextFrame(() => {
+      addTransitionClass(el, toClass)
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
         whenTransitionEnds(el, type, cb)
@@ -154,6 +159,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     css,
     type,
     leaveClass,
+    leaveToClass,
     leaveActiveClass,
     beforeLeave,
     leave,
@@ -174,6 +180,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       el.parentNode._pending[vnode.key] = null
     }
     if (expectsCSS) {
+      removeTransitionClass(el, leaveToClass)
       removeTransitionClass(el, leaveActiveClass)
     }
     if (cb.cancelled) {
@@ -208,6 +215,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       addTransitionClass(el, leaveClass)
       addTransitionClass(el, leaveActiveClass)
       nextFrame(() => {
+        addTransitionClass(el, leaveToClass)
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
           whenTransitionEnds(el, type, cb)
@@ -243,6 +251,9 @@ const autoCssTransition: (name: string) => Object = cached(name => {
     enterClass: `${name}-enter`,
     leaveClass: `${name}-leave`,
     appearClass: `${name}-enter`,
+    enterToClass: `${name}-enter-to`,
+    leaveToClass: `${name}-leave-to`,
+    appearToClass: `${name}-enter-to`,
     enterActiveClass: `${name}-enter-active`,
     leaveActiveClass: `${name}-leave-active`,
     appearActiveClass: `${name}-enter-active`

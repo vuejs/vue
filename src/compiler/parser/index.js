@@ -91,7 +91,7 @@ export function parse (
         process.env.NODE_ENV !== 'production' && warn(
           'Templates should only be responsible for mapping the state to the ' +
           'UI. Avoid placing tags with side-effects in your templates, such as ' +
-          `<${tag}>.`
+          `<${tag}>` + ', as they will not be parsed.'
         )
       }
 
@@ -229,19 +229,20 @@ export function parse (
           currentParent.attrsMap.placeholder === text) {
         return
       }
+      const children = currentParent.children
       text = inPre || text.trim()
         ? decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
-        : preserveWhitespace && currentParent.children.length ? ' ' : ''
+        : preserveWhitespace && children.length ? ' ' : ''
       if (text) {
         let expression
         if (!inVPre && text !== ' ' && (expression = parseText(text, delimiters))) {
-          currentParent.children.push({
+          children.push({
             type: 2,
             expression,
             text
           })
-        } else {
+        } else if (text !== ' ' || children[children.length - 1].text !== ' ') {
           currentParent.children.push({
             type: 3,
             text
@@ -352,6 +353,23 @@ function processIfConditions (el, parent) {
   }
 }
 
+function findPrevElement (children: Array<any>): ASTElement | void {
+  let i = children.length
+  while (i--) {
+    if (children[i].type === 1) {
+      return children[i]
+    } else {
+      if (process.env.NODE_ENV !== 'production' && children[i].text !== ' ') {
+        warn(
+          `text "${children[i].text.trim()}" between v-if and v-else(-if) ` +
+          `will be ignored.`
+        )
+      }
+      children.pop()
+    }
+  }
+}
+
 function addIfCondition (el, condition) {
   if (!el.ifConditions) {
     el.ifConditions = []
@@ -459,6 +477,15 @@ function processAttrs (el) {
         }
       }
       addAttr(el, name, JSON.stringify(value))
+      // #4530 also bind special attributes as props even if they are static
+      // so that patches between dynamic/static are consistent
+      if (platformMustUseProp(el.tag, name)) {
+        if (name === 'value') {
+          addProp(el, name, JSON.stringify(value), true)
+        } else {
+          addProp(el, name, 'true', true)
+        }
+      }
     }
   }
 }
@@ -492,13 +519,6 @@ function makeAttrsMap (attrs: Array<Object>): Object {
     map[attrs[i].name] = attrs[i].value
   }
   return map
-}
-
-function findPrevElement (children: Array<any>): ASTElement | void {
-  let i = children.length
-  while (i--) {
-    if (children[i].tag) return children[i]
-  }
 }
 
 function isForbiddenTag (el): boolean {

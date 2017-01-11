@@ -20,6 +20,7 @@ export default function renderDOMProps (node: VNodeWithData): string {
     return res
   }
 
+  const attrs = node.data.attrs
   for (const key in props) {
     if (key === 'innerHTML') {
       setText(node, props[key], true)
@@ -27,7 +28,9 @@ export default function renderDOMProps (node: VNodeWithData): string {
       setText(node, props[key])
     } else {
       const attr = propsToAttrMap[key] || key.toLowerCase()
-      if (isRenderableAttr(attr)) {
+      if (isRenderableAttr(attr) &&
+          // avoid rendering double-bound props/attrs twice
+          !(attrs && attrs[attr])) {
         res += renderAttr(attr, props[key])
       }
     }

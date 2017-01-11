@@ -289,7 +289,7 @@ describe('Component keep-alive', () => {
         assertHookCalls(two, [0, 0, 0, 0, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">one</div><!---->'
+          '<div class="test test-leave-active test-leave-to">one</div><!---->'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe('<!---->')
@@ -301,7 +301,7 @@ describe('Component keep-alive', () => {
         assertHookCalls(two, [1, 1, 1, 0, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-enter-active">two</div>'
+          '<div class="test test-enter-active test-enter-to">two</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -319,7 +319,7 @@ describe('Component keep-alive', () => {
         assertHookCalls(two, [1, 1, 1, 1, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">two</div><!---->'
+          '<div class="test test-leave-active test-leave-to">two</div><!---->'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe('<!---->')
@@ -331,7 +331,7 @@ describe('Component keep-alive', () => {
         assertHookCalls(two, [1, 1, 1, 1, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-enter-active">one</div>'
+          '<div class="test test-enter-active test-enter-to">one</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -376,7 +376,7 @@ describe('Component keep-alive', () => {
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
-          '<div class="test test-enter-active">two</div>'
+          '<div class="test test-enter-active test-enter-to">two</div>'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -390,7 +390,7 @@ describe('Component keep-alive', () => {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">one</div>' +
+          '<div class="test test-leave-active test-leave-to">one</div>' +
           '<div class="test">two</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
@@ -411,7 +411,7 @@ describe('Component keep-alive', () => {
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>' +
-          '<div class="test test-enter-active">one</div>'
+          '<div class="test test-enter-active test-enter-to">one</div>'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -425,7 +425,7 @@ describe('Component keep-alive', () => {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">two</div>' +
+          '<div class="test test-leave-active test-leave-to">two</div>' +
           '<div class="test">one</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
@@ -465,7 +465,7 @@ describe('Component keep-alive', () => {
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
-          '<div class="test test-enter-active">two</div>'
+          '<div class="test test-enter-active test-enter-to">two</div>'
         )
         // switch again before enter finishes,
         // this cancels both enter and leave.
@@ -481,7 +481,7 @@ describe('Component keep-alive', () => {
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>' +
-          '<div class="test test-enter-active">one</div>'
+          '<div class="test test-enter-active test-enter-to">one</div>'
         )
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -495,7 +495,7 @@ describe('Component keep-alive', () => {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">two</div>' +
+          '<div class="test test-leave-active test-leave-to">two</div>' +
           '<div class="test">one</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
@@ -532,8 +532,8 @@ describe('Component keep-alive', () => {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test v-leave-active">foo</div>' +
-          '<div class="test test-enter-active">bar</div>'
+          '<div class="test v-leave-active v-leave-to">foo</div>' +
+          '<div class="test test-enter-active test-enter-to">bar</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -547,8 +547,8 @@ describe('Component keep-alive', () => {
         )
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
-          '<div class="test test-leave-active">bar</div>' +
-          '<div class="test v-enter-active">foo</div>'
+          '<div class="test test-leave-active test-leave-to">bar</div>' +
+          '<div class="test v-enter-active v-enter-to">foo</div>'
         )
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe(

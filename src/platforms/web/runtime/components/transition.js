@@ -15,10 +15,13 @@ export const transitionProps = {
   type: String,
   enterClass: String,
   leaveClass: String,
+  enterToClass: String,
+  leaveToClass: String,
   enterActiveClass: String,
   leaveActiveClass: String,
   appearClass: String,
-  appearActiveClass: String
+  appearActiveClass: String,
+  appearToClass: String
 }
 
 // in case the child is also an abstract component, e.g. <keep-alive>
@@ -60,6 +63,10 @@ function hasParentTransition (vnode) {
       return true
     }
   }
+}
+
+function isSameChild (child, oldChild) {
+  return oldChild.key === child.key && oldChild.tag === child.tag
 }
 
 export default {
@@ -132,11 +139,10 @@ export default {
       child.data.show = true
     }
 
-    if (oldChild && oldChild.data && oldChild.key !== key) {
+    if (oldChild && oldChild.data && !isSameChild(child, oldChild)) {
       // replace old child transition data with fresh one
       // important for dynamic transitions!
-      const oldData = oldChild.data.transition = extend({}, data)
-
+      const oldData = oldChild && (oldChild.data.transition = extend({}, data))
       // handle transition mode
       if (mode === 'out-in') {
         // return placeholder node and queue update when leave finishes

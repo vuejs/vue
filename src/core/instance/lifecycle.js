@@ -109,9 +109,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
       vm.$parent.$el = vm.$el
     }
-    if (vm._isMounted) {
-      callHook(vm, 'updated')
-    }
+    // updated hook is called by the scheduler to ensure that children are
+    // updated in a parent's updated hook.
   }
 
   Vue.prototype._updateFromParent = function (
