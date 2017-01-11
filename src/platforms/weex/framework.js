@@ -1,5 +1,7 @@
-import Vue from 'weex/runtime/index'
-import renderer from 'weex/runtime/config'
+import Vue from './runtime/index'
+import renderer from './runtime/config'
+import genRaxRequire from './rax-interop/require'
+import genRaxWrapper from './rax-interop/wrap'
 
 Vue.weexVersion = '__WEEX_VERSION__'
 export { Vue }
@@ -107,11 +109,16 @@ export function createInstance (
     subVue[name] = Vue[name]
   })
 
-  // The function which create a closure the JS Bundle will run in.
-  // It will declare some instance variables like `Vue`, HTML5 Timer APIs etc.
+  // rax interop for require('rax')
+  // NOTE: need to config rax as external in Webpack
+  const raxRequire = genRaxRequire(document)
+  // expose wrapRaxComponent
+  subVue.wrapRaxComponent = genRaxWrapper(raxRequire('rax'))
+
   const instanceVars = Object.assign({
     Vue: subVue,
     weex: weexInstanceVar,
+    require: raxRequire,
     __weex_require_module__: weexInstanceVar.requireModule // deprecated
   }, timerAPIs)
   callFunction(instanceVars, appCode)
