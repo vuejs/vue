@@ -39,10 +39,13 @@ export function initMixin (Vue: Class<Component>) {
     vm._self = vm
     initLifecycle(vm)
     initEvents(vm)
+    initRender(vm)
     callHook(vm, 'beforeCreate')
     initState(vm)
     callHook(vm, 'created')
-    initRender(vm)
+    if (vm.$options.el) {
+      vm.$mount(vm.$options.el)
+    }
   }
 }
 

@@ -40,9 +40,6 @@ export function initRender (vm: Component) {
   // normalization is always applied for the public version, used in
   // user-written render functions.
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
-  if (vm.$options.el) {
-    vm.$mount(vm.$options.el)
-  }
 }
 
 export function renderMixin (Vue: Class<Component>) {
