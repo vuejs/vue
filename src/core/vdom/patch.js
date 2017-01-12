@@ -178,6 +178,23 @@ export function createPatchFunction (backend) {
     }
   }
 
+  function initComponent (vnode, insertedVnodeQueue) {
+    if (vnode.data.pendingInsert) {
+      insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
+    }
+    vnode.elm = vnode.componentInstance.$el
+    if (isPatchable(vnode)) {
+      invokeCreateHooks(vnode, insertedVnodeQueue)
+      setScope(vnode)
+    } else {
+      // empty component root.
+      // skip all element-related modules except for ref (#3455)
+      registerRef(vnode)
+      // make sure to invoke the insert hook
+      insertedVnodeQueue.push(vnode)
+    }
+  }
+
   function reactivateComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i
     // hack for #4339: a reactivated component with inner transition
@@ -235,23 +252,6 @@ export function createPatchFunction (backend) {
     if (isDef(i)) {
       if (i.create) i.create(emptyNode, vnode)
       if (i.insert) insertedVnodeQueue.push(vnode)
-    }
-  }
-
-  function initComponent (vnode, insertedVnodeQueue) {
-    if (vnode.data.pendingInsert) {
-      insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
-    }
-    vnode.elm = vnode.componentInstance.$el
-    if (isPatchable(vnode)) {
-      invokeCreateHooks(vnode, insertedVnodeQueue)
-      setScope(vnode)
-    } else {
-      // empty component root.
-      // skip all element-related modules except for ref (#3455)
-      registerRef(vnode)
-      // make sure to invoke the insert hook
-      insertedVnodeQueue.push(vnode)
     }
   }
 
@@ -549,7 +549,6 @@ export function createPatchFunction (backend) {
       return
     }
 
-    let elm, parent
     let isInitialPatch = false
     const insertedVnodeQueue = []
 
@@ -590,9 +589,17 @@ export function createPatchFunction (backend) {
           oldVnode = emptyNodeAt(oldVnode)
         }
         // replacing existing element
-        elm = oldVnode.elm
-        parent = nodeOps.parentNode(elm)
-        createElm(vnode, insertedVnodeQueue, parent, nodeOps.nextSibling(elm))
+        const oldElm = oldVnode.elm
+        const parentElm = nodeOps.parentNode(oldElm)
+        createElm(
+          vnode,
+          insertedVnodeQueue,
+          // extremely rare edge case: do not insert if old element is in a
+          // leaving transition. Only happens when combining transition +
+          // keep-alive + HOCs. (#4590)
+          oldElm._leaveCb ? null : parentElm,
+          nodeOps.nextSibling(oldElm)
+        )
 
         if (vnode.parent) {
           // component root element replaced.
@@ -609,8 +616,8 @@ export function createPatchFunction (backend) {
           }
         }
 
-        if (parent !== null) {
-          removeVnodes(parent, [oldVnode], 0, 0)
+        if (parentElm !== null) {
+          removeVnodes(parentElm, [oldVnode], 0, 0)
         } else if (isDef(oldVnode.tag)) {
           invokeDestroyHook(oldVnode)
         }
