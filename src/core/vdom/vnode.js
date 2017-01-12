@@ -48,6 +48,11 @@ export default class VNode {
     this.isCloned = false
     this.isOnce = false
   }
+
+  // DEPRECATED: alias for componentInstance for backwards compat.
+  get child (): Component | void {
+    return this.componentInstance
+  }
 }
 
 export const createEmptyVNode = () => {
