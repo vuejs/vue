@@ -82,7 +82,7 @@ export function cached<F: Function> (fn: F): F {
 }
 
 /**
- * Camelize a hyphen-delmited string.
+ * Camelize a hyphen-delimited string.
  */
 const camelizeRE = /-(\w)/g
 export const camelize = cached((str: string): string => {
