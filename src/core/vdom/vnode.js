@@ -11,7 +11,7 @@ export default class VNode {
   functionalContext: Component | void; // only for functional component root nodes
   key: string | number | void;
   componentOptions: VNodeComponentOptions | void;
-  child: Component | void; // component instance
+  componentInstance: Component | void; // component instance
   parent: VNode | void; // component placeholder node
   raw: boolean; // contains raw HTML? (server only)
   isStatic: boolean; // hoisted static node
@@ -39,7 +39,7 @@ export default class VNode {
     this.functionalContext = undefined
     this.key = data && data.key
     this.componentOptions = componentOptions
-    this.child = undefined
+    this.componentInstance = undefined
     this.parent = undefined
     this.raw = false
     this.isStatic = false

@@ -157,8 +157,8 @@ function init (
   parentElm: ?Node,
   refElm: ?Node
 ): ?boolean {
-  if (!vnode.child || vnode.child._isDestroyed) {
-    const child = vnode.child = createComponentInstanceForVnode(
+  if (!vnode.componentInstance || vnode.componentInstance._isDestroyed) {
+    const child = vnode.componentInstance = createComponentInstanceForVnode(
       vnode,
       activeInstance,
       parentElm,
@@ -177,7 +177,7 @@ function prepatch (
   vnode: MountedComponentVNode
 ) {
   const options = vnode.componentOptions
-  const child = vnode.child = oldVnode.child
+  const child = vnode.componentInstance = oldVnode.componentInstance
   child._updateFromParent(
     options.propsData, // updated props
     options.listeners, // updated listeners
@@ -187,23 +187,23 @@ function prepatch (
 }
 
 function insert (vnode: MountedComponentVNode) {
-  if (!vnode.child._isMounted) {
-    vnode.child._isMounted = true
-    callHook(vnode.child, 'mounted')
+  if (!vnode.componentInstance._isMounted) {
+    vnode.componentInstance._isMounted = true
+    callHook(vnode.componentInstance, 'mounted')
   }
   if (vnode.data.keepAlive) {
-    vnode.child._inactive = false
-    callHook(vnode.child, 'activated')
+    vnode.componentInstance._inactive = false
+    callHook(vnode.componentInstance, 'activated')
   }
 }
 
 function destroy (vnode: MountedComponentVNode) {
-  if (!vnode.child._isDestroyed) {
+  if (!vnode.componentInstance._isDestroyed) {
     if (!vnode.data.keepAlive) {
-      vnode.child.$destroy()
+      vnode.componentInstance.$destroy()
     } else {
-      vnode.child._inactive = true
-      callHook(vnode.child, 'deactivated')
+      vnode.componentInstance._inactive = true
+      callHook(vnode.componentInstance, 'deactivated')
     }
   }
 }

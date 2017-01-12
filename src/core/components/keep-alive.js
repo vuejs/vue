@@ -41,7 +41,7 @@ export default {
         ? opts.Ctor.cid + (opts.tag ? `::${opts.tag}` : '')
         : vnode.key
       if (this.cache[key]) {
-        vnode.child = this.cache[key].child
+        vnode.componentInstance = this.cache[key].componentInstance
       } else {
         this.cache[key] = vnode
       }
@@ -52,8 +52,8 @@ export default {
   destroyed () {
     for (const key in this.cache) {
       const vnode = this.cache[key]
-      callHook(vnode.child, 'deactivated')
-      vnode.child.$destroy()
+      callHook(vnode.componentInstance, 'deactivated')
+      vnode.componentInstance.$destroy()
     }
   }
 }

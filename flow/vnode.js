@@ -10,7 +10,7 @@ declare type VNodeComponentOptions = {
 
 declare type MountedComponentVNode = {
   componentOptions: VNodeComponentOptions;
-  child: Component;
+  componentInstance: Component;
   parent: VNode;
   data: VNodeData;
 }
@@ -26,7 +26,7 @@ declare type VNodeWithData = {
   context: Component;
   key: string | number | void;
   parent?: VNodeWithData;
-  child?: Component;
+  componentInstance?: Component;
   isRootInsert: boolean;
 }
 
