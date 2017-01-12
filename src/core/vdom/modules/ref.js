@@ -25,13 +25,17 @@ export function registerRef (vnode: VNodeWithData, isRemoval: ?boolean) {
   const ref = vnode.componentInstance || vnode.elm
   const refs = vm.$refs
   if (isRemoval) {
-    if (Array.isArray(refs[key])) {
+    if (typeof key === 'function') {
+      key(ref, true)
+    } else if (Array.isArray(refs[key])) {
       remove(refs[key], ref)
     } else if (refs[key] === ref) {
       refs[key] = undefined
     }
   } else {
-    if (vnode.data.refInFor) {
+    if (typeof key === 'function') {
+      key(ref)
+    } else if (vnode.data.refInFor) {
       if (Array.isArray(refs[key]) && refs[key].indexOf(ref) < 0) {
         refs[key].push(ref)
       } else {
