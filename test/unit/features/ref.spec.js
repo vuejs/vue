@@ -157,4 +157,49 @@ describe('ref', () => {
     }).$mount()
     expect(vm.$refs.test).toBe(vm.$children[0])
   })
+
+  it('should should call callback (v-for)', done => {
+    const vm = new Vue({
+      data: {
+        items: [1, 2, 3]
+      },
+      template: `
+        <div>
+          <test v-for="n in items" :ref="onRef" :n="n"></test>
+        </div>
+      `,
+      components: {
+        test: {
+          props: ['n'],
+          template: '<div>{{ n }}</div>'
+        }
+      },
+      methods: {
+        onRef (ref, remove) {
+          if (!this.$refs.list) this.$refs.list = []
+
+          if (remove) {
+            const index = this.$refs.list.indexOf(ref)
+
+            if (index > -1) this.$refs.list.splice(index, 1)
+          } else {
+            this.$refs.list.push(ref)
+          }
+        }
+      }
+    }).$mount()
+    assertRefs()
+    // updating
+    vm.items.push(4)
+    waitForUpdate(assertRefs)
+      .then(() => { vm.items = [] })
+      .then(assertRefs)
+      .then(done)
+
+    function assertRefs () {
+      expect(Array.isArray(vm.$refs.list)).toBe(true)
+      expect(vm.$refs.list.length).toBe(vm.items.length)
+      expect(vm.$refs.list.every((comp, i) => comp.$el.textContent === String(i + 1))).toBe(true)
+    }
+  })
 })
