@@ -62,10 +62,12 @@ var batches = [
       browserName: 'iphone',
       version: '9.3'
     },
-    sl_android_4_2: {
+    sl_android_4_4: {
       base: 'SauceLabs',
-      browserName: 'android',
-      version: '4.2'
+      browserName: 'Browser',
+      platform: 'Android',
+      version: '4.4',
+      device: 'Android Emulator'
     },
     sl_android_5_1: {
       base: 'SauceLabs',
@@ -88,6 +90,9 @@ module.exports = function (config) {
     sauceLabs: {
       testName: 'Vue.js unit tests',
       recordScreenshots: false,
+      connectOptions: {
+        'no-ssl-bump-domains': 'all' // Ignore SSL error on Android emulator
+      },
       build: process.env.CIRCLE_BUILD_NUM || process.env.SAUCE_BUILD_ID || Date.now()
     },
     // mobile emulators are really slow
