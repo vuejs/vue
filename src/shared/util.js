@@ -16,8 +16,8 @@ export function _toString (val: any): string {
  * If the conversion fails, return original string.
  */
 export function toNumber (val: string): number | string {
-  const n = parseFloat(val, 10)
-  return (n || n === 0) ? n : val
+  const n = parseFloat(val)
+  return isNaN(n) ? val : n
 }
 
 /**
