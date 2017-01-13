@@ -73,6 +73,7 @@ export default {
   name: 'transition',
   props: transitionProps,
   abstract: true,
+
   render (h: Function) {
     let children = this.$slots.default
     if (!children) {

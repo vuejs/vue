@@ -77,7 +77,7 @@ describe('Component keep-alive', () => {
       vm.ok = false // teardown
     }).then(() => {
       expect(vm.$el.textContent).toBe('')
-      assertHookCalls(one, [1, 1, 2, 3, 1])
+      assertHookCalls(one, [1, 1, 2, 2, 1])
       assertHookCalls(two, [1, 1, 2, 2, 1])
     }).then(done)
   })
@@ -104,7 +104,7 @@ describe('Component keep-alive', () => {
       vm.ok = false // teardown
     }).then(() => {
       expect(vm.$el.textContent).toBe('')
-      assertHookCalls(one, [1, 1, 2, 3, 1])
+      assertHookCalls(one, [1, 1, 2, 2, 1])
       assertHookCalls(two, [2, 2, 0, 0, 2])
     }).then(done)
   }
@@ -197,6 +197,34 @@ describe('Component keep-alive', () => {
       components
     }).$mount()
     sharedAssertions(vm, done)
+  })
+
+  it('prune cache on include/exclude change', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <keep-alive :include="include">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        include: 'one,two'
+      },
+      components
+    }).$mount()
+
+    vm.view = 'two'
+    waitForUpdate(() => {
+      assertHookCalls(one, [1, 1, 1, 1, 0])
+      assertHookCalls(two, [1, 1, 1, 0, 0])
+      vm.include = 'two'
+      vm.view = 'one'
+    }).then(() => {
+      assertHookCalls(one, [2, 2, 1, 1, 1])
+      assertHookCalls(two, [1, 1, 1, 1, 0])
+    }).then(done)
   })
 
   // #3882
