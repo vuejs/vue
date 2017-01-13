@@ -64,10 +64,8 @@ var batches = [
     },
     sl_android_4_4: {
       base: 'SauceLabs',
-      browserName: 'Browser',
-      platform: 'Android',
-      version: '4.4',
-      device: 'Android Emulator'
+      browserName: 'android',
+      version: '4.4'
     },
     sl_android_5_1: {
       base: 'SauceLabs',
