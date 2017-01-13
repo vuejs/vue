@@ -126,7 +126,7 @@ function genIfConditions (conditions: ASTIfConditions): string {
     return '_e()'
   }
 
-  var condition = conditions.shift()
+  const condition = conditions.shift()
   if (condition.exp) {
     return `(${condition.exp})?${genTernaryExp(condition.block)}:${genIfConditions(conditions)}`
   } else {
