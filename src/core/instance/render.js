@@ -247,7 +247,8 @@ export function renderMixin (Vue: Class<Component>) {
           if (key === 'class' || key === 'style') {
             data[key] = value[key]
           } else {
-            const hash = asProp || config.mustUseProp(tag, key)
+            const type = data.attrs && data.attrs.type
+            const hash = asProp || config.mustUseProp(tag, type, key)
               ? data.domProps || (data.domProps = {})
               : data.attrs || (data.attrs = {})
             hash[key] = value[key]

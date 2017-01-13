@@ -15,7 +15,7 @@ export type Config = {
   parsePlatformTagName: (x: string) => string;
   isUnknownElement: (x?: string) => boolean;
   getTagNamespace: (x?: string) => string | void;
-  mustUseProp: (tag?: string, x?: string) => boolean;
+  mustUseProp: (tag: string, type: ?string, name: string) => boolean;
   // internal
   _assetTypes: Array<string>;
   _lifecycleHooks: Array<string>;

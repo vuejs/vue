@@ -114,4 +114,25 @@ describe('vdom patch: edge cases', () => {
     })
     .then(done)
   })
+
+  // #4530
+  it('should not reset value when patching bewteen dyanmic/static bindings', done => {
+    const vm = new Vue({
+      data: { ok: true },
+      template: `
+        <div>
+          <input type="button" v-if="ok" value="a">
+          <input type="button" :value="'b'">
+        </div>
+      `
+    }).$mount()
+    expect(vm.$el.children[0].value).toBe('a')
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].value).toBe('b')
+      vm.ok = true
+    }).then(() => {
+      expect(vm.$el.children[0].value).toBe('a')
+    }).then(done)
+  })
 })

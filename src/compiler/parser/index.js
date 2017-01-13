@@ -443,7 +443,7 @@ function processAttrs (el) {
             name = camelize(name)
           }
         }
-        if (isProp || platformMustUseProp(el.tag, name)) {
+        if (isProp || platformMustUseProp(el.tag, el.attrsMap.type, name)) {
           addProp(el, name, value)
         } else {
           addAttr(el, name, value)
