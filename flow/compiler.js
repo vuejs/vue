@@ -82,7 +82,6 @@ declare type ASTElement = {
   plain?: boolean;
   pre?: true;
   ns?: string;
-  staticProps?: Array<string>;
 
   component?: string;
   inlineTemplate?: true;

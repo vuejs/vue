@@ -15,10 +15,7 @@ export function pluckModuleFunction<F: Function> (
     : []
 }
 
-export function addProp (el: ASTElement, name: string, value: string, fromStaticAttr?: boolean) {
-  if (fromStaticAttr) {
-    (el.staticProps || (el.staticProps = [])).push(name)
-  }
+export function addProp (el: ASTElement, name: string, value: string) {
   (el.props || (el.props = [])).push({ name, value })
 }
 

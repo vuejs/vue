@@ -191,12 +191,6 @@ describe('optimizer', () => {
     expect(ast.children[0].static).toBe(false)
   })
 
-  it('mark static with static dom property', () => {
-    const ast = parse('<input type="text" value="1">', baseOptions)
-    optimize(ast, baseOptions)
-    expect(ast.static).toBe(true)
-  })
-
   it('not root ast', () => {
     const ast = null
     optimize(ast, baseOptions)
