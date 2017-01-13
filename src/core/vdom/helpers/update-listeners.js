@@ -9,10 +9,12 @@ export function updateListeners (
   remove: Function,
   vm: Component
 ) {
-  let name, cur, old, fn, event, capture, once
+  let name, cur, old, curIsArray, oldIsArray, fn, event, capture, once
   for (name in on) {
     cur = on[name]
     old = oldOn[name]
+    curIsArray = Array.isArray(cur)
+    oldIsArray = Array.isArray(old)
     if (!cur) {
       process.env.NODE_ENV !== 'production' && warn(
         `Invalid handler for event "${name}": got ` + String(cur),
@@ -23,7 +25,7 @@ export function updateListeners (
       event = once ? name.slice(1) : name
       capture = event.charAt(0) === '!'
       event = capture ? event.slice(1) : event
-      if (Array.isArray(cur)) {
+      if (curIsArray) {
         add(event, (cur.invoker = arrInvoker(cur)), once, capture)
       } else {
         if (!cur.invoker) {
@@ -35,7 +37,9 @@ export function updateListeners (
         add(event, cur.invoker, once, capture)
       }
     } else if (cur !== old) {
-      if (Array.isArray(old)) {
+      if (curIsArray || oldIsArray) {
+        if (!curIsArray) cur = [cur]
+        if (!oldIsArray) old = [old]
         old.length = cur.length
         for (let i = 0; i < old.length; i++) old[i] = cur[i]
         on[name] = old
