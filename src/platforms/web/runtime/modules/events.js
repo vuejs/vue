@@ -4,11 +4,17 @@ import { updateListeners } from 'core/vdom/helpers/index'
 
 let target: HTMLElement
 
-function add (event: string, handler: Function, once: boolean, capture: boolean) {
+function add (
+  event: string,
+  handler: Function,
+  once: boolean,
+  capture: boolean
+) {
   if (once) {
     const oldHandler = handler
+    const _target = target // save current target element in closure
     handler = function (ev) {
-      remove(event, handler, capture)
+      remove(event, handler, capture, _target)
       arguments.length === 1
         ? oldHandler(ev)
         : oldHandler.apply(null, arguments)
@@ -17,8 +23,13 @@ function add (event: string, handler: Function, once: boolean, capture: boolean)
   target.addEventListener(event, handler, capture)
 }
 
-function remove (event: string, handler: Function, capture: boolean) {
-  target.removeEventListener(event, handler, capture)
+function remove (
+  event: string,
+  handler: Function,
+  capture: boolean,
+  _target?: HTMLElement
+) {
+  (_target || target).removeEventListener(event, handler, capture)
 }
 
 function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
