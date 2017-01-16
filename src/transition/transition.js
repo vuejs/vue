@@ -32,16 +32,20 @@ const animDurationProp = animationProp + 'Duration'
  * transitions but not raf (e.g. Android 4.2 browser) - since
  * these environments are usually slow, we are giving it a
  * relatively large timeout.
- * 
+ *
  * Binding to window is necessary to make hot reload work in
  * IE in strict mode
  */
 
-const raf = inBrowser && window.requestAnimationFrame.bind(window)
-const waitForTransitionStart = raf
-  /* istanbul ignore next */
-  ? function (fn) { raf(function () { raf(fn) }) }
-  : function (fn) { setTimeout(fn, 50) }
+const raf = inBrowser && window.requestAnimationFrame
+  ? window.requestAnimationFrame.bind(window)
+  : setTimeout
+
+function waitForTransitionStart (fn) {
+  raf(() => {
+    raf(fn)
+  })
+}
 
 /**
  * A Transition object that encapsulates the state and logic

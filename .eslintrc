@@ -1,6 +1,7 @@
 {
   "extends": "vue",
   "rules": {
-    "no-duplicate-imports": 0
+    "no-duplicate-imports": 0,
+    "no-useless-escape": 0
   }
 }
