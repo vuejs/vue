@@ -309,14 +309,17 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
 function getNormalizationType (children: Array<ASTNode>): number {
   let res = 0
   for (let i = 0; i < children.length; i++) {
-    const el: any = children[i]
+    const el: ASTNode = children[i]
+    if (el.type !== 1) {
+      continue
+    }
     if (needsNormalization(el) ||
-        (el.if && el.ifConditions.some(c => needsNormalization(c.block)))) {
+        (el.ifConditions && el.ifConditions.some(c => needsNormalization(c.block)))) {
       res = 2
       break
     }
     if (maybeComponent(el) ||
-        (el.if && el.ifConditions.some(c => maybeComponent(c.block)))) {
+        (el.ifConditions && el.ifConditions.some(c => maybeComponent(c.block)))) {
       res = 1
     }
   }
@@ -328,7 +331,7 @@ function needsNormalization (el: ASTElement): boolean {
 }
 
 function maybeComponent (el: ASTElement): boolean {
-  return el.type === 1 && !isPlatformReservedTag(el.tag)
+  return !isPlatformReservedTag(el.tag)
 }
 
 function genNode (node: ASTNode): string {
