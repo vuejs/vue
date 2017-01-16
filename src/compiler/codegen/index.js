@@ -268,7 +268,7 @@ function genInlineTemplate (el: ASTElement): ?string {
   }
 }
 
-function genScopedSlots (slots) {
+function genScopedSlots (slots: { [key: string]: ASTElement }): string {
   return `scopedSlots:{${
     Object.keys(slots).map(key => genScopedSlot(key, slots[key])).join(',')
   }}`
@@ -306,32 +306,35 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
 // 0: no normalization needed
 // 1: simple normalization needed (possible 1-level deep nested array)
 // 2: full normalization needed
-function getNormalizationType (children): number {
+function getNormalizationType (children: Array<ASTNode>): number {
   let res = 0
   for (let i = 0; i < children.length; i++) {
-    const el: any = children[i]
+    const el: ASTNode = children[i]
+    if (el.type !== 1) {
+      continue
+    }
     if (needsNormalization(el) ||
-        (el.if && el.ifConditions.some(c => needsNormalization(c.block)))) {
+        (el.ifConditions && el.ifConditions.some(c => needsNormalization(c.block)))) {
       res = 2
       break
     }
     if (maybeComponent(el) ||
-        (el.if && el.ifConditions.some(c => maybeComponent(c.block)))) {
+        (el.ifConditions && el.ifConditions.some(c => maybeComponent(c.block)))) {
       res = 1
     }
   }
   return res
 }
 
-function needsNormalization (el: ASTElement) {
-  return el.for || el.tag === 'template' || el.tag === 'slot'
+function needsNormalization (el: ASTElement): boolean {
+  return el.for !== undefined || el.tag === 'template' || el.tag === 'slot'
 }
 
-function maybeComponent (el: ASTElement) {
-  return el.type === 1 && !isPlatformReservedTag(el.tag)
+function maybeComponent (el: ASTElement): boolean {
+  return !isPlatformReservedTag(el.tag)
 }
 
-function genNode (node: ASTNode) {
+function genNode (node: ASTNode): string {
   if (node.type === 1) {
     return genElement(node)
   } else {
@@ -365,7 +368,7 @@ function genSlot (el: ASTElement): string {
 }
 
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement
-function genComponent (componentName, el): string {
+function genComponent (componentName: string, el: ASTElement): string {
   const children = el.inlineTemplate ? null : genChildren(el, true)
   return `_c(${componentName},${genData(el)}${
     children ? `,${children}` : ''
