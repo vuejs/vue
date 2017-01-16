@@ -28,7 +28,10 @@ if (hasTransition) {
 }
 
 // binding to window is necessary to make hot reload work in IE in strict mode
-const raf = (inBrowser && window.requestAnimationFrame.bind(window)) || setTimeout
+const raf = inBrowser && window.requestAnimationFrame
+  ? window.requestAnimationFrame.bind(window)
+  : setTimeout
+
 export function nextFrame (fn: Function) {
   raf(() => {
     raf(fn)
