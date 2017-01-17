@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.1.9
+ * Vue.js v2.1.10
  * (c) 2014-2017 Evan You
  * Released under the MIT License.
  */
@@ -3708,7 +3708,7 @@ Object.defineProperty(Vue$2.prototype, '$isServer', {
   get: isServerRendering
 });
 
-Vue$2.version = '2.1.9';
+Vue$2.version = '2.1.10';
 
 /*  */
 
@@ -5949,7 +5949,9 @@ var Transition = {
     var id = "__transition-" + (this._uid) + "-";
     var key = child.key = child.key == null
       ? id + child.tag
-      : child.key.indexOf(id) === 0 ? child.key : id + child.key;
+      : isPrimitive(child.key)
+        ? (String(child.key).indexOf(id) === 0 ? child.key : id + child.key)
+        : child.key;
     var data = (child.data || (child.data = {})).transition = extractTransitionData(this);
     var oldRawChild = this._vnode;
     var oldChild = getRealChild(oldRawChild);
