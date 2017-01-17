@@ -17,8 +17,10 @@ declare global {
     export type Directive = Options.DirectiveInstance<Vue>;
     export type TransitionOpsion = Options.TransitionOptions;
     export type ComponentOption = Options.ComponentOptions<any>;
+    export type FilterOption = Options.FilterOptions;
     export type Vue = V.Vue;
     export type VueStatic = typeof V.Vue;
+    export type VueConfig = typeof V.Vue.config;
   }
 }
 
