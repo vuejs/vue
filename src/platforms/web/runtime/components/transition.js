@@ -4,7 +4,7 @@
 // supports transition mode (out-in / in-out)
 
 import { warn } from 'core/util/index'
-import { camelize, extend } from 'shared/util'
+import { camelize, extend, isPrimitive } from 'shared/util'
 import { mergeVNodeHook, getFirstComponentChild } from 'core/vdom/helpers/index'
 
 export const transitionProps = {
@@ -133,7 +133,9 @@ export default {
     const id = `__transition-${this._uid}-`
     const key = child.key = child.key == null
       ? id + child.tag
-      : child.key.indexOf(id) === 0 ? child.key : id + child.key
+      : isPrimitive(child.key)
+        ? (String(child.key).indexOf(id) === 0 ? child.key : id + child.key)
+        : child.key
     const data = (child.data || (child.data = {})).transition = extractTransitionData(this)
     const oldRawChild = this._vnode
     const oldChild: any = getRealChild(oldRawChild)
