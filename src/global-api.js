@@ -87,7 +87,7 @@ export default function (Vue) {
    * @param {Object} extendOptions
    */
 
-  Vue.extend = function (extendOptions) {
+  Vue.extend = function (extendOptions, components, key) {
     extendOptions = extendOptions || {}
     var Super = this
     var isFirstExtend = Super.cid === 0
@@ -105,6 +105,9 @@ export default function (Vue) {
       }
     }
     var Sub = createClass(name || 'VueComponent')
+    if(components && key) {
+      components[key] = Sub
+    }
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
     Sub.cid = cid++

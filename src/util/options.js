@@ -242,7 +242,7 @@ function guardComponents (options) {
       }
       def = components[key]
       if (isPlainObject(def)) {
-        components[key] = Vue.extend(def)
+        Vue.extend(def, components, key)
       }
     }
   }
