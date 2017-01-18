@@ -105,7 +105,7 @@ export default function (Vue) {
       }
     }
     var Sub = createClass(name || 'VueComponent')
-    if(components && key) {
+    if (components && key) {
       components[key] = Sub
     }
     Sub.prototype = Object.create(Super.prototype)
