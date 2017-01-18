@@ -46,7 +46,7 @@ export default class Dep {
 // this is globally unique because there could be only one
 // watcher being evaluated at any time.
 Dep.target = null
-const targetStack = []
+let targetStack = []
 
 export function pushTarget (_target: Watcher) {
   if (Dep.target) targetStack.push(Dep.target)
@@ -55,4 +55,9 @@ export function pushTarget (_target: Watcher) {
 
 export function popTarget () {
   Dep.target = targetStack.pop()
+}
+
+export function resetTarget () {
+  Dep.target = null
+  targetStack = []
 }
