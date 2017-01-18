@@ -1,6 +1,7 @@
 import Vue from 'weex/runtime/index'
 import renderer from 'weex/runtime/config'
 import { resetTarget } from 'core/observer/dep'
+import { resetSchedulerState } from 'core/observer/scheduler'
 
 Vue.weexVersion = '__WEEX_VERSION__'
 export { Vue }
@@ -67,6 +68,8 @@ export function createInstance (
   // reset the state of Dep.target
   resetTarget()
 
+  resetSchedulerState()
+
   // Set active instance id and put some information into `instances` map.
   activeId = instanceId
 
@@ -131,6 +134,7 @@ export function createInstance (
  */
 export function destroyInstance (instanceId) {
   resetTarget()
+  resetSchedulerState()
   const instance = instances[instanceId] || {}
   if (instance.app instanceof Vue) {
     instance.app.$destroy()
