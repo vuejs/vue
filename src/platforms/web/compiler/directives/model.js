@@ -168,8 +168,9 @@ function genSelect (
     `.map(function(o){var val = "_value" in o ? o._value : o.value;` +
     `return ${number ? '_n(val)' : 'val'}})`
 
-  const assignment = `$event.target.multiple ? ${selectedVal}: ${selectedVal}[0]`
-  const code = genAssignmentCode(value, assignment)
+  const assignment = '$event.target.multiple ? $$selectedVal:$$selectedVal[0]'
+  let code = `var $$selectedVal = ${selectedVal};`
+  code = `${code} ${genAssignmentCode(value, assignment)}`
   addHandler(el, 'change', code, null, true)
 }
 
