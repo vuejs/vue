@@ -12,9 +12,10 @@ function getComponentName (opts: ?VNodeComponentOptions): ?string {
 function matches (pattern: string | RegExp, name: string): boolean {
   if (typeof pattern === 'string') {
     return pattern.split(',').indexOf(name) > -1
-  } else {
+  } else if (pattern instanceof RegExp) {
     return pattern.test(name)
   }
+  return false
 }
 
 function pruneCache (cache, filter) {
