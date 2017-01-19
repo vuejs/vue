@@ -37,7 +37,9 @@ export class MarkdownPage {
         const editor = Selector('#editor')
 
         this.src = editor.find('textarea')
-        this.result = editor.find('div')
+        this.result = editor.find('div').addCustomDOMProperties({
+            innerHTML: el => el.innerHTML
+        })
     }
 }
 

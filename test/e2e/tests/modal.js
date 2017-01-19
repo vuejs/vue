@@ -10,7 +10,6 @@ test('modal', async t => {
     await t
         .click(showModalBtn)
         .expect(modal.mainElement.exists).ok()
-        .expect(modal.mainElement.hasClass('modal-enter-active')).ok()
         .expect(modal.wrapper.exists).ok()
         .expect(modal.container.exists).ok()
         .expect(modal.mainElement.hasClass('modal-enter-active')).notOk()
