@@ -205,12 +205,12 @@ describe('v-if', function () {
     document.body.appendChild(el)
     var attachSpy = jasmine.createSpy('attached')
     var detachSpy = jasmine.createSpy('detached')
-    var transcluded = {
+    var transcluded = Vue.extend({
       props: ['a'],
       template: '{{a}}',
       attached: attachSpy,
       detached: detachSpy
-    }
+    })
     var vm = new Vue({
       el: el,
       data: {
