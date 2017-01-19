@@ -1,6 +1,6 @@
 {
   "name": "weex-template-compiler",
-  "version": "2.1.8-weex.1",
+  "version": "2.1.9-weex.1",
   "description": "Weex template compiler for Vue 2.0",
   "main": "index.js",
   "repository": {

@@ -6,10 +6,11 @@ import { looseEqual } from 'shared/util'
 function hasMultiSelectBug () {
   var s = document.createElement('select')
   s.setAttribute('multiple', '')
-  s.innerHTML = '<option>1</option>'
-  s.options[0].selected = true
-  s.options[0].selected = false
-  return s.options[0].selected !== false
+  var o = document.createElement('option')
+  s.appendChild(o)
+  o.selected = true
+  o.selected = false
+  return o.selected !== false
 }
 
 /**
