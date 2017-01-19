@@ -163,13 +163,14 @@ function genSelect (
   }
 
   const number = modifiers && modifiers.number
-  const assignment = `Array.prototype.filter` +
+  const selectedVal = `Array.prototype.filter` +
     `.call($event.target.options,function(o){return o.selected})` +
     `.map(function(o){var val = "_value" in o ? o._value : o.value;` +
-    `return ${number ? '_n(val)' : 'val'}})` +
-    (el.attrsMap.multiple == null ? '[0]' : '')
+    `return ${number ? '_n(val)' : 'val'}})`
 
-  const code = genAssignmentCode(value, assignment)
+  const assignment = '$event.target.multiple ? $$selectedVal : $$selectedVal[0]'
+  let code = `var $$selectedVal = ${selectedVal};`
+  code = `${code} ${genAssignmentCode(value, assignment)}`
   addHandler(el, 'change', code, null, true)
 }
 

@@ -262,6 +262,31 @@ describe('Directive v-model select', () => {
     })
   }
 
+  it('should work with multiple binding', (done) => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        isMultiple: true,
+        selections: ['1']
+      },
+      template:
+        '<select v-model="selections" :multiple="isMultiple">' +
+          '<option value="1">item 1</option>' +
+          '<option value="2">item 2</option>' +
+        '</select>',
+      watch: {
+        selections: spy
+      }
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.$el.options[1].selected = true
+    triggerEvent(vm.$el, 'change')
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalled()
+      expect(vm.selections).toEqual(['1', '2'])
+    }).then(done)
+  })
+
   it('multiple with static template', () => {
     const vm = new Vue({
       template:
