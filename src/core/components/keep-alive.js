@@ -15,6 +15,7 @@ function matches (pattern: string | RegExp, name: string): boolean {
   } else if (pattern instanceof RegExp) {
     return pattern.test(name)
   }
+  /* istanbul ignore next */
   return false
 }
 
