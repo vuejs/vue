@@ -197,7 +197,7 @@ export function parse (
       // remove trailing whitespace
       const element = stack[stack.length - 1]
       const lastNode = element.children[element.children.length - 1]
-      if (lastNode && lastNode.type === 3 && lastNode.text === ' ') {
+      if (lastNode && lastNode.type === 3 && lastNode.text === ' ' && !inPre) {
         element.children.pop()
       }
       // pop stack
@@ -242,7 +242,7 @@ export function parse (
             expression,
             text
           })
-        } else if (text !== ' ' || children[children.length - 1].text !== ' ') {
+        } else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
           currentParent.children.push({
             type: 3,
             text
