@@ -120,13 +120,10 @@ export function parseHTML (html, options) {
           handleStartTag(startTagMatch)
           continue
         }
-
-        // < in plain text, treat it as text
-        advance(1)
       }
 
       let text, rest, next
-      if (textEnd > 0) {
+      if (textEnd >= 0) {
         rest = html.slice(textEnd)
         while (
           !endTag.test(rest) &&
