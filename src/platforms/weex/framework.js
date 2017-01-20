@@ -114,8 +114,8 @@ export function createInstance (
  * @param {string} instanceId
  */
 export function destroyInstance (instanceId) {
-  const instance = instances[instanceId] || {}
-  if (instance.app instanceof instance.Vue) {
+  const instance = instances[instanceId]
+  if (instance && instance.app instanceof instance.Vue) {
     instance.app.$destroy()
   }
   delete instances[instanceId]
@@ -129,8 +129,8 @@ export function destroyInstance (instanceId) {
  * @param {object} data
  */
 export function refreshInstance (instanceId, data) {
-  const instance = instances[instanceId] || {}
-  if (!(instance.app instanceof instance.Vue)) {
+  const instance = instances[instanceId]
+  if (!instance || !(instance.app instanceof instance.Vue)) {
     return new Error(`refreshInstance: instance ${instanceId} not found!`)
   }
   for (const key in data) {
@@ -145,8 +145,8 @@ export function refreshInstance (instanceId, data) {
  * @param {string} instanceId
  */
 export function getRoot (instanceId) {
-  const instance = instances[instanceId] || {}
-  if (!(instance.app instanceof instance.Vue)) {
+  const instance = instances[instanceId]
+  if (!instance || !(instance.app instanceof instance.Vue)) {
     return new Error(`getRoot: instance ${instanceId} not found!`)
   }
   return instance.app.$el.toJSON()
@@ -160,8 +160,8 @@ export function getRoot (instanceId) {
  * @param {array}  tasks
  */
 export function receiveTasks (instanceId, tasks) {
-  const instance = instances[instanceId] || {}
-  if (!(instance.app instanceof instance.Vue)) {
+  const instance = instances[instanceId]
+  if (!instance || !(instance.app instanceof instance.Vue)) {
     return new Error(`receiveTasks: instance ${instanceId} not found!`)
   }
   const { callbacks, document } = instance
@@ -275,7 +275,6 @@ function createVueModuleInstance (instanceId, moduleGetter) {
    * @return {object}
    */
   Vue.prototype.$getConfig = function () {
-    const instance = instances[this.$instanceId] || {}
     if (instance.app instanceof Vue) {
       return instance.config
     }
