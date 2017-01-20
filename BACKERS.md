@@ -32,10 +32,6 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
 </a>
 
-<a href="http://gold.xitu.io/?utm_source=vuejs&utm_medium=image&utm_content=juejin&utm_campaign=q3_website">
-  <img width="180px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/juejin.png">
-</a>
-
 <a href="http://monterail.com/" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
 </a>
@@ -50,6 +46,14 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 <a href="https://vuejsjob.com/?ref=vuejs" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
+</a>
+
+<a href="https://leanpub.com/vuejs2" target="_blank">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
+</a>
+
+<a href="https://stdlib.com/" target="_blank">
+  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
 </a>
 
 ---
@@ -70,10 +74,6 @@ It could be you!
   <img width="220px" src="http://assets.invoicemachine.com/images/flat_logo.png">
 </a>
 
-<a href="https://statamic.com/">
-  <img width="240px" src="http://i.imgur.com/MRIkKgp.png">
-</a>
-
 <a href="https://alligator.io">
   <img width="240px" src="https://alligator.io/images/alligator-logo.svg">
 </a>
@@ -92,6 +92,7 @@ It could be you!
 - Wasim Khamlichi
 - errorrik
 - Alex Balashov
+- Cheng-Wei Chien
 
 ---
 
@@ -208,3 +209,10 @@ It could be you!
 - Matt Jones
 - Dave Chenell
 - Frank Baele
+- Jack McDade
+- Patrick O'Dacre
+- Wietse Wind
+- Donny Donny
+- Duncan Kenzie
+- Mike Margerum
+- Michael Richards

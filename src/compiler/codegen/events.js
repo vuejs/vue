@@ -4,7 +4,7 @@ const fnExpRE = /^\s*([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
 const simplePathRE = /^\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?']|\[".*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*\s*$/
 
 // keyCode aliases
-const keyCodes: { [k: any]: number | [number, number] } = {
+const keyCodes: { [key: string]: number | Array<number> } = {
   esc: 27,
   tab: 9,
   enter: 13,
@@ -16,7 +16,7 @@ const keyCodes: { [k: any]: number | [number, number] } = {
   'delete': [8, 46]
 }
 
-const modifierCode: { [k: string]: string } = {
+const modifierCode: { [key: string]: string } = {
   stop: '$event.stopPropagation();',
   prevent: '$event.preventDefault();',
   self: 'if($event.target !== $event.currentTarget)return;',
@@ -70,7 +70,7 @@ function genKeyFilter (keys: Array<string>): string {
   return `if(${keys.map(genFilterCode).join('&&')})return;`
 }
 
-function genFilterCode (key: number | string): string {
+function genFilterCode (key: string): string {
   const keyVal = parseInt(key, 10)
   if (keyVal) {
     return `$event.keyCode!==${keyVal}`

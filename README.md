@@ -41,10 +41,6 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
     <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
   </a>
   <br><br>
-  <a href="http://gold.xitu.io/?utm_source=vuejs&utm_medium=image&utm_content=juejin&utm_campaign=q3_website">
-    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/juejin.png">
-  </a>
-  <br><br>
   <a href="http://monterail.com/" target="_blank">
     <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
   </a>
@@ -59,6 +55,14 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
   <br><br>
   <a href="https://vuejsjob.com/?ref=vuejs" target="_blank">
     <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
+  </a>
+  <br><br>
+  <a href="https://leanpub.com/vuejs2" target="_blank">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
+  </a>
+  <br><br>
+  <a href="https://stdlib.com/" target="_blank">
+    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
   </a>
 </p>
 

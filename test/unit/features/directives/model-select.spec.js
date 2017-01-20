@@ -6,10 +6,11 @@ import { looseEqual } from 'shared/util'
 function hasMultiSelectBug () {
   var s = document.createElement('select')
   s.setAttribute('multiple', '')
-  s.innerHTML = '<option>1</option>'
-  s.options[0].selected = true
-  s.options[0].selected = false
-  return s.options[0].selected !== false
+  var o = document.createElement('option')
+  s.appendChild(o)
+  o.selected = true
+  o.selected = false
+  return o.selected !== false
 }
 
 /**
@@ -260,6 +261,31 @@ describe('Directive v-model select', () => {
       }).then(done)
     })
   }
+
+  it('should work with multiple binding', (done) => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        isMultiple: true,
+        selections: ['1']
+      },
+      template:
+        '<select v-model="selections" :multiple="isMultiple">' +
+          '<option value="1">item 1</option>' +
+          '<option value="2">item 2</option>' +
+        '</select>',
+      watch: {
+        selections: spy
+      }
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.$el.options[1].selected = true
+    triggerEvent(vm.$el, 'change')
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalled()
+      expect(vm.selections).toEqual(['1', '2'])
+    }).then(done)
+  })
 
   it('multiple with static template', () => {
     const vm = new Vue({
