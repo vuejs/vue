@@ -12,7 +12,7 @@ export default {
   props,
 
   created () {
-    const dom = this._requireWeexModule('dom')
+    const dom = this.$requireWeexModule('dom')
     this.getPosition = el => new Promise((resolve, reject) => {
       dom.getComponentRect(el.ref, res => {
         if (!res.result) {
@@ -23,7 +23,7 @@ export default {
       })
     })
 
-    const animation = this._requireWeexModule('animation')
+    const animation = this.$requireWeexModule('animation')
     this.animate = (el, options) => new Promise(resolve => {
       animation.transition(el.ref, options, resolve)
     })
@@ -57,12 +57,11 @@ export default {
     if (prevChildren) {
       const kept = []
       const removed = []
-      const positionPromises = []
       prevChildren.forEach(c => {
         c.data.transition = transitionData
-        positionPromises.push(this.getPosition(c.elm).then(pos => {
-          c.data.pos = pos
-        }))
+
+        // TODO: record before patch positions
+
         if (map[c.key]) {
           kept.push(c)
         } else {
@@ -71,7 +70,6 @@ export default {
       })
       this.kept = h(tag, null, kept)
       this.removed = removed
-      this.pendingPositions = Promise.all(positionPromises)
     }
 
     return h(tag, null, children)
@@ -96,39 +94,38 @@ export default {
       return
     }
 
-    children.forEach(callPendingCbs)
-    this.pendingPositions.then(() => Promise.all(children.map(c => {
-      // record new position
-      return this.getPosition(c.elm).then(pos => {
-        c.data.newPos = pos
-      })
-    }))).then(() => Promise.all(children.map(c => {
-      const oldPos = c.data.pos
-      const newPos = c.data.newPos
-      const dx = oldPos.left - newPos.left
-      const dy = oldPos.top - newPos.top
-      if (dx || dy) {
-        c.data.moved = true
-        return this.animate(c.elm, {
-          styles: {
-            transform: `translate(${dx}px,${dy}px)`
-          }
-        })
-      }
-    }))).then(() => {
-      children.forEach(c => {
-        if (c.data.moved) {
-          this.animate(c.elm, {
-            styles: {
-              transform: ''
-            },
-            duration: moveData.duration || 0,
-            delay: moveData.delay || 0,
-            timingFunction: moveData.timingFunction || 'linear'
-          })
-        }
-      })
-    })
+    // TODO: finish implementing move animations once
+    // we have access to sync getComponentRect()
+
+    // children.forEach(callPendingCbs)
+
+    // Promise.all(children.map(c => {
+    //   const oldPos = c.data.pos
+    //   const newPos = c.data.newPos
+    //   const dx = oldPos.left - newPos.left
+    //   const dy = oldPos.top - newPos.top
+    //   if (dx || dy) {
+    //     c.data.moved = true
+    //     return this.animate(c.elm, {
+    //       styles: {
+    //         transform: `translate(${dx}px,${dy}px)`
+    //       }
+    //     })
+    //   }
+    // })).then(() => {
+    //   children.forEach(c => {
+    //     if (c.data.moved) {
+    //       this.animate(c.elm, {
+    //         styles: {
+    //           transform: ''
+    //         },
+    //         duration: moveData.duration || 0,
+    //         delay: moveData.delay || 0,
+    //         timingFunction: moveData.timingFunction || 'linear'
+    //       })
+    //     }
+    //   })
+    // })
   },
 
   methods: {
