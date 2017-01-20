@@ -87,7 +87,7 @@ export default function (Vue) {
    * @param {Object} extendOptions
    */
 
-  Vue.extend = function (extendOptions, components, key) {
+  Vue.extend = function (extendOptions) {
     extendOptions = extendOptions || {}
     var Super = this
     var isFirstExtend = Super.cid === 0
@@ -105,8 +105,9 @@ export default function (Vue) {
       }
     }
     var Sub = createClass(name || 'VueComponent')
-    if (components && key) {
-      components[key] = Sub
+    // cache constructor
+    if (isFirstExtend) {
+      extendOptions._Ctor = Sub
     }
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
@@ -126,10 +127,6 @@ export default function (Vue) {
     // enable recursive self-lookup
     if (name) {
       Sub.options.components[name] = Sub
-    }
-    // cache constructor
-    if (isFirstExtend) {
-      extendOptions._Ctor = Sub
     }
     return Sub
   }
