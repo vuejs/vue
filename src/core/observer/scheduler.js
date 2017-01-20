@@ -19,7 +19,7 @@ let index = 0
 /**
  * Reset the scheduler's state.
  */
-function resetSchedulerState () {
+export function resetSchedulerState () {
   queue.length = 0
   has = {}
   if (process.env.NODE_ENV !== 'production') {

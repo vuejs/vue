@@ -56,3 +56,8 @@ export function pushTarget (_target: Watcher) {
 export function popTarget () {
   Dep.target = targetStack.pop()
 }
+
+export function resetTarget () {
+  Dep.target = null
+  targetStack.length = 0
+}
