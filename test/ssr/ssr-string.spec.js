@@ -102,7 +102,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="background-color:black;font-size:14px;color:red"></div>'
+        '<div server-rendered="true" style="background-color:black;font-size:14px;color:red;"></div>'
       )
       done()
     })
@@ -116,7 +116,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="color:red"></div>'
+        '<div server-rendered="true" style="color:red;"></div>'
       )
       done()
     })
@@ -135,7 +135,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<section server-rendered="true"><div style="color:red"></div></section>'
+        '<section server-rendered="true"><div style="color:red;"></div></section>'
       )
       done()
     })
@@ -159,7 +159,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="text-align:left;font-size:520rem;color:red"></div>'
+        '<div server-rendered="true" style="text-align:left;font-size:520rem;color:red;"></div>'
       )
       done()
     })
@@ -178,7 +178,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="color:red"><div></div></div>'
+        '<div server-rendered="true" style="color:red;"><div></div></div>'
       )
       done()
     })
@@ -197,7 +197,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="color:red"><span style="color:black"></span></div>'
+        '<div server-rendered="true" style="color:red;"><span style="color:black;"></span></div>'
       )
       done()
     })
