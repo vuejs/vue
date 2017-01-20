@@ -102,7 +102,7 @@ function enter (_, vnode) {
     enterHook && enterHook(el, cb)
 
     if (needAnimation) {
-      const animation = vnode.context._requireWeexModule('animation')
+      const animation = vnode.context.$requireWeexModule('animation')
       animation.transition(el.ref, {
         styles: endState,
         duration: transitionProperties.duration || 0,
@@ -188,7 +188,7 @@ function leave (vnode, rm) {
   }
 
   function performLeave () {
-    const animation = vnode.context._requireWeexModule('animation')
+    const animation = vnode.context.$requireWeexModule('animation')
     // the delayed leave may have already been cancelled
     if (cb.cancelled) {
       return

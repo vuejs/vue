@@ -1,17 +1,18 @@
-import Vue from 'weex/runtime/index'
-import renderer from 'weex/runtime/config'
+import TextNode from 'weex/runtime/text-node'
 
-Vue.weexVersion = '__WEEX_VERSION__'
-export { Vue }
+// this will be preserved during build
+const VueFactory = require('./factory')
 
-const {
+const instances = {}
+const modules = {}
+const components = {}
+
+const renderer = {
+  TextNode,
   instances,
   modules,
   components
-} = renderer
-
-let activeId
-const oriIsReservedTag = (Vue && Vue.config && typeof Vue.config.isReservedTag === 'function') ? Vue.config.isReservedTag : function () {}
+}
 
 /**
  * Prepare framework config, basically about the virtual-DOM and JS bridge.
@@ -35,7 +36,6 @@ export function reset () {
   delete renderer.Element
   delete renderer.Comment
   delete renderer.sendTasks
-  Vue.config.isReservedTag = oriIsReservedTag
 }
 
 /**
@@ -63,9 +63,6 @@ export function createInstance (
   data,
   env = {}
 ) {
-  // Set active instance id and put some information into `instances` map.
-  activeId = instanceId
-
   // Virtual-DOM object.
   const document = new renderer.Document(instanceId, config.bundleUrl)
 
@@ -78,7 +75,7 @@ export function createInstance (
   // The latest callback id, incremental.
   const callbackId = 1
 
-  instances[instanceId] = {
+  const instance = instances[instanceId] = {
     instanceId, config, data,
     document, callbacks, callbackId
   }
@@ -95,26 +92,13 @@ export function createInstance (
   }
   Object.freeze(weexInstanceVar)
 
-  // Each instance has a independent `Vue` variable and it should have
-  // all top-level public APIs.
-  const subVue = Vue.extend({})
-
-  // ensure plain-object components are extended from the subVue
-  subVue.options._base = subVue
-
-  // expose global utility
-  ;['util', 'set', 'delete', 'nextTick', 'version', 'weexVersion', 'config'].forEach(name => {
-    subVue[name] = Vue[name]
-  })
-
-  // expose weex native module getter on subVue prototype so that
-  // vdom runtime modules can access native modules via vnode.context
-  subVue.prototype._requireWeexModule = moduleGetter
+  // Each instance has a independent `Vue` mdoule instance
+  const Vue = instance.Vue = createVueModuleInstance(instanceId, moduleGetter)
 
   // The function which create a closure the JS Bundle will run in.
   // It will declare some instance variables like `Vue`, HTML5 Timer APIs etc.
   const instanceVars = Object.assign({
-    Vue: subVue,
+    Vue,
     weex: weexInstanceVar,
     __weex_require_module__: weexInstanceVar.requireModule // deprecated
   }, timerAPIs)
@@ -131,7 +115,7 @@ export function createInstance (
  */
 export function destroyInstance (instanceId) {
   const instance = instances[instanceId] || {}
-  if (instance.app instanceof Vue) {
+  if (instance.app instanceof instance.Vue) {
     instance.app.$destroy()
   }
   delete instances[instanceId]
@@ -146,11 +130,11 @@ export function destroyInstance (instanceId) {
  */
 export function refreshInstance (instanceId, data) {
   const instance = instances[instanceId] || {}
-  if (!(instance.app instanceof Vue)) {
+  if (!(instance.app instanceof instance.Vue)) {
     return new Error(`refreshInstance: instance ${instanceId} not found!`)
   }
   for (const key in data) {
-    Vue.set(instance.app, key, data[key])
+    instance.Vue.set(instance.app, key, data[key])
   }
   // Finally `refreshFinish` signal needed.
   renderer.sendTasks(instanceId + '', [{ module: 'dom', method: 'refreshFinish', args: [] }], -1)
@@ -162,7 +146,7 @@ export function refreshInstance (instanceId, data) {
  */
 export function getRoot (instanceId) {
   const instance = instances[instanceId] || {}
-  if (!(instance.app instanceof Vue)) {
+  if (!(instance.app instanceof instance.Vue)) {
     return new Error(`getRoot: instance ${instanceId} not found!`)
   }
   return instance.app.$el.toJSON()
@@ -177,7 +161,7 @@ export function getRoot (instanceId) {
  */
 export function receiveTasks (instanceId, tasks) {
   const instance = instances[instanceId] || {}
-  if (!(instance.app instanceof Vue)) {
+  if (!(instance.app instanceof instance.Vue)) {
     return new Error(`receiveTasks: instance ${instanceId} not found!`)
   }
   const { callbacks, document } = instance
@@ -229,8 +213,6 @@ export function registerModules (newModules) {
  * @param {array} newComponents
  */
 export function registerComponents (newComponents) {
-  const config = Vue.config
-  const newConfig = {}
   if (Array.isArray(newComponents)) {
     newComponents.forEach(component => {
       if (!component) {
@@ -238,59 +220,68 @@ export function registerComponents (newComponents) {
       }
       if (typeof component === 'string') {
         components[component] = true
-        newConfig[component] = true
       } else if (typeof component === 'object' && typeof component.type === 'string') {
         components[component.type] = component
-        newConfig[component.type] = true
       }
     })
-    const oldIsReservedTag = config.isReservedTag
-    config.isReservedTag = name => {
-      return newConfig[name] || oldIsReservedTag(name)
-    }
   }
 }
 
-// Hack `Vue` behavior to handle instance information and data
-// before root component created.
-Vue.mixin({
-  beforeCreate () {
-    const options = this.$options
-    const parentOptions = (options.parent && options.parent.$options) || {}
+/**
+ * Create a fresh instance of Vue for each Weex instance.
+ */
+function createVueModuleInstance (instanceId, moduleGetter) {
+  const exports = {}
+  VueFactory(exports, renderer)
+  const Vue = exports.Vue
 
-    // root component (vm)
-    if (options.el) {
-      // record instance info
-      const instance = instances[activeId] || {}
-      this.$instanceId = activeId
-      options.instanceId = activeId
-      this.$document = instance.document
+  const instance = instances[instanceId]
 
-      // set external data of instance
-      const dataOption = options.data
-      const internalData = (typeof dataOption === 'function' ? dataOption() : dataOption) || {}
-      options.data = Object.assign(internalData, instance.data)
+  // patch reserved tag detection to account for dynamically registered
+  // components
+  const isReservedTag = Vue.config.isReservedTag || (() => false)
+  Vue.config.isReservedTag = name => {
+    return components[name] || isReservedTag(name)
+  }
 
-      // record instance by id
-      instance.app = this
+  // expose weex-specific info
+  Vue.prototype.$instanceId = instanceId
+  Vue.prototype.$document = instance.document
 
-      activeId = undefined
-    } else {
-      this.$instanceId = options.instanceId = parentOptions.instanceId
+  // expose weex native module getter on subVue prototype so that
+  // vdom runtime modules can access native modules via vnode.context
+  Vue.prototype.$requireWeexModule = moduleGetter
+
+  // Hack `Vue` behavior to handle instance information and data
+  // before root component created.
+  Vue.mixin({
+    beforeCreate () {
+      const options = this.$options
+      // root component (vm)
+      if (options.el) {
+        // set external data of instance
+        const dataOption = options.data
+        const internalData = (typeof dataOption === 'function' ? dataOption() : dataOption) || {}
+        options.data = Object.assign(internalData, instance.data)
+        // record instance by id
+        instance.app = this
+      }
+    }
+  })
+
+  /**
+   * @deprecated Just instance variable `weex.config`
+   * Get instance config.
+   * @return {object}
+   */
+  Vue.prototype.$getConfig = function () {
+    const instance = instances[this.$instanceId] || {}
+    if (instance.app instanceof Vue) {
+      return instance.config
     }
   }
-})
 
-/**
- * @deprecated Just instance variable `weex.config`
- * Get instance config.
- * @return {object}
- */
-Vue.prototype.$getConfig = function () {
-  const instance = instances[this.$instanceId] || {}
-  if (instance.app instanceof Vue) {
-    return instance.config
-  }
+  return Vue
 }
 
 /**
