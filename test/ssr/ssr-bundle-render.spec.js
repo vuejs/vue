@@ -1,6 +1,7 @@
 import path from 'path'
 import webpack from 'webpack'
 import MemoeryFS from 'memory-fs'
+import sourceMapStack from 'source-map-stack'
 import { createBundleRenderer } from '../../packages/vue-server-renderer'
 
 const rendererCache = {}
@@ -9,6 +10,7 @@ function createRenderer (file, cb, options) {
     return cb(rendererCache[file])
   }
   const compiler = webpack({
+    devtool: '#inline-source-map',
     target: 'node',
     entry: path.resolve(__dirname, 'fixtures', file),
     output: {
@@ -26,8 +28,11 @@ function createRenderer (file, cb, options) {
     expect(err).toBeFalsy()
     expect(stats.errors).toBeFalsy()
     const code = fs.readFileSync('/bundle.js', 'utf-8')
+    if (options && options.map) {
+      options.sourceMap = sourceMapStack.get(code)
+    }
     const renderer = rendererCache[file] = createBundleRenderer(code, options)
-    cb(renderer)
+    cb(renderer, code)
   })
 }
 
@@ -77,6 +82,29 @@ describe('SSR: bundle renderer', () => {
         done()
       })
     })
+  })
+
+  it('renderToString catch with sourcemap', done => {
+    createRenderer('error-bundle.js', renderer => {
+      renderer.renderToString((err, html, sourceMap) => {
+        const sourceError = sourceMapStack.stack(sourceMap, err)
+        expect(sourceError).toContain('/test/ssr/fixtures/error.js:1\nthrow new Error(\'foo\')')
+        expect(err.message).toBe('foo')
+        done()
+      })
+    }, { map: true })
+  })
+
+  it('renderToStream catch with sourcemap', done => {
+    createRenderer('error-bundle.js', renderer => {
+      const stream = renderer.renderToStream()
+      stream.on('error', (err, sourceMap) => {
+        const sourceError = sourceMapStack.stack(sourceMap, err)
+        expect(sourceError).toContain('/test/ssr/fixtures/error.js:1\nthrow new Error(\'foo\')')
+        expect(err.message).toBe('foo')
+        done()
+      })
+    }, { map: true })
   })
 
   it('render with cache (get/set)', done => {
