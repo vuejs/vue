@@ -481,12 +481,16 @@ describe('parser', () => {
 
   it('preserve whitespace in <pre> tag', function () {
     const options = extend({}, baseOptions)
-    const ast = parse('<pre><code>  \n<span>hi</span>\n  </code></pre>', options)
+    const ast = parse('<pre><code>  \n<span>hi</span>\n  </code><span> </span></pre>', options)
     const code = ast.children[0]
     expect(code.children[0].type).toBe(3)
     expect(code.children[0].text).toBe('  \n')
     expect(code.children[2].type).toBe(3)
     expect(code.children[2].text).toBe('\n  ')
+
+    const span = ast.children[1]
+    expect(span.children[0].type).toBe(3)
+    expect(span.children[0].text).toBe(' ')
   })
 
   it('forgivingly handle < in plain text', () => {
