@@ -1,28 +1,31 @@
 /* @flow */
 
 import config from '../config'
-import VNode, {
-  cloneVNode,
-  cloneVNodes,
-  createTextVNode,
-  createEmptyVNode
-} from '../vdom/vnode'
+
 import {
   warn,
-  extend,
-  identity,
-  isObject,
-  toObject,
   nextTick,
   toNumber,
   _toString,
   looseEqual,
   looseIndexOf,
-  resolveAsset,
   formatComponentName
 } from '../util/index'
 
+import VNode, {
+  cloneVNodes,
+  createTextVNode,
+  createEmptyVNode
+} from '../vdom/vnode'
+
 import { createElement } from '../vdom/create-element'
+import { renderList } from './render-helpers/render-list'
+import { renderSlot } from './render-helpers/render-slot'
+import { resolveSlots } from './render-helpers/resolve-slots'
+import { resolveFilter } from './render-helpers/resolve-filter'
+import { checkKeyCodes } from './render-helpers/check-keycodes'
+import { bindObjectProps } from './render-helpers/bind-object-props'
+import { renderStatic, markOnce } from './render-helpers/render-static'
 
 export function initRender (vm: Component) {
   vm.$vnode = null // the placeholder node in parent tree
@@ -105,207 +108,20 @@ export function renderMixin (Vue: Class<Component>) {
     return vnode
   }
 
-  // toString for mustaches
-  Vue.prototype._s = _toString
-  // convert text to vnode
-  Vue.prototype._v = createTextVNode
-  // number conversion
+  // internal render helpers.
+  // these are exposed on the instance prototype to reduce generated render
+  // code size.
+  Vue.prototype._o = markOnce
   Vue.prototype._n = toNumber
-  // empty vnode
-  Vue.prototype._e = createEmptyVNode
-  // loose equal
+  Vue.prototype._s = _toString
+  Vue.prototype._l = renderList
+  Vue.prototype._t = renderSlot
   Vue.prototype._q = looseEqual
-  // loose indexOf
   Vue.prototype._i = looseIndexOf
-
-  // render static tree by index
-  Vue.prototype._m = function renderStatic (
-    index: number,
-    isInFor?: boolean
-  ): VNode | Array<VNode> {
-    let tree = this._staticTrees[index]
-    // if has already-rendered static tree and not inside v-for,
-    // we can reuse the same tree by doing a shallow clone.
-    if (tree && !isInFor) {
-      return Array.isArray(tree)
-        ? cloneVNodes(tree)
-        : cloneVNode(tree)
-    }
-    // otherwise, render a fresh tree.
-    tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy)
-    markStatic(tree, `__static__${index}`, false)
-    return tree
-  }
-
-  // mark node as static (v-once)
-  Vue.prototype._o = function markOnce (
-    tree: VNode | Array<VNode>,
-    index: number,
-    key: string
-  ) {
-    markStatic(tree, `__once__${index}${key ? `_${key}` : ``}`, true)
-    return tree
-  }
-
-  function markStatic (tree, key, isOnce) {
-    if (Array.isArray(tree)) {
-      for (let i = 0; i < tree.length; i++) {
-        if (tree[i] && typeof tree[i] !== 'string') {
-          markStaticNode(tree[i], `${key}_${i}`, isOnce)
-        }
-      }
-    } else {
-      markStaticNode(tree, key, isOnce)
-    }
-  }
-
-  function markStaticNode (node, key, isOnce) {
-    node.isStatic = true
-    node.key = key
-    node.isOnce = isOnce
-  }
-
-  // filter resolution helper
-  Vue.prototype._f = function resolveFilter (id) {
-    return resolveAsset(this.$options, 'filters', id, true) || identity
-  }
-
-  // render v-for
-  Vue.prototype._l = function renderList (
-    val: any,
-    render: () => VNode
-  ): ?Array<VNode> {
-    let ret: ?Array<VNode>, i, l, keys, key
-    if (Array.isArray(val) || typeof val === 'string') {
-      ret = new Array(val.length)
-      for (i = 0, l = val.length; i < l; i++) {
-        ret[i] = render(val[i], i)
-      }
-    } else if (typeof val === 'number') {
-      ret = new Array(val)
-      for (i = 0; i < val; i++) {
-        ret[i] = render(i + 1, i)
-      }
-    } else if (isObject(val)) {
-      keys = Object.keys(val)
-      ret = new Array(keys.length)
-      for (i = 0, l = keys.length; i < l; i++) {
-        key = keys[i]
-        ret[i] = render(val[key], key, i)
-      }
-    }
-    return ret
-  }
-
-  // renderSlot
-  Vue.prototype._t = function (
-    name: string,
-    fallback: ?Array<VNode>,
-    props: ?Object,
-    bindObject: ?Object
-  ): ?Array<VNode> {
-    const scopedSlotFn = this.$scopedSlots[name]
-    if (scopedSlotFn) { // scoped slot
-      props = props || {}
-      if (bindObject) {
-        extend(props, bindObject)
-      }
-      return scopedSlotFn(props) || fallback
-    } else {
-      const slotNodes = this.$slots[name]
-      // warn duplicate slot usage
-      if (slotNodes && process.env.NODE_ENV !== 'production') {
-        slotNodes._rendered && warn(
-          `Duplicate presence of slot "${name}" found in the same render tree ` +
-          `- this will likely cause render errors.`,
-          this
-        )
-        slotNodes._rendered = true
-      }
-      return slotNodes || fallback
-    }
-  }
-
-  // apply v-bind object
-  Vue.prototype._b = function bindProps (
-    data: any,
-    tag: string,
-    value: any,
-    asProp?: boolean
-  ): VNodeData {
-    if (value) {
-      if (!isObject(value)) {
-        process.env.NODE_ENV !== 'production' && warn(
-          'v-bind without argument expects an Object or Array value',
-          this
-        )
-      } else {
-        if (Array.isArray(value)) {
-          value = toObject(value)
-        }
-        for (const key in value) {
-          if (key === 'class' || key === 'style') {
-            data[key] = value[key]
-          } else {
-            const type = data.attrs && data.attrs.type
-            const hash = asProp || config.mustUseProp(tag, type, key)
-              ? data.domProps || (data.domProps = {})
-              : data.attrs || (data.attrs = {})
-            hash[key] = value[key]
-          }
-        }
-      }
-    }
-    return data
-  }
-
-  // check v-on keyCodes
-  Vue.prototype._k = function checkKeyCodes (
-    eventKeyCode: number,
-    key: string,
-    builtInAlias: number | Array<number> | void
-  ): boolean {
-    const keyCodes = config.keyCodes[key] || builtInAlias
-    if (Array.isArray(keyCodes)) {
-      return keyCodes.indexOf(eventKeyCode) === -1
-    } else {
-      return keyCodes !== eventKeyCode
-    }
-  }
-}
-
-export function resolveSlots (
-  children: ?Array<VNode>,
-  context: ?Component
-): { [key: string]: Array<VNode> } {
-  const slots = {}
-  if (!children) {
-    return slots
-  }
-  const defaultSlot = []
-  let name, child
-  for (let i = 0, l = children.length; i < l; i++) {
-    child = children[i]
-    // named slots should only be respected if the vnode was rendered in the
-    // same context.
-    if ((child.context === context || child.functionalContext === context) &&
-        child.data && (name = child.data.slot)) {
-      const slot = (slots[name] || (slots[name] = []))
-      if (child.tag === 'template') {
-        slot.push.apply(slot, child.children)
-      } else {
-        slot.push(child)
-      }
-    } else {
-      defaultSlot.push(child)
-    }
-  }
-  // ignore single whitespace
-  if (defaultSlot.length && !(
-    defaultSlot.length === 1 &&
-    (defaultSlot[0].text === ' ' || defaultSlot[0].isComment)
-  )) {
-    slots.default = defaultSlot
-  }
-  return slots
+  Vue.prototype._m = renderStatic
+  Vue.prototype._f = resolveFilter
+  Vue.prototype._k = checkKeyCodes
+  Vue.prototype._b = bindObjectProps
+  Vue.prototype._v = createTextVNode
+  Vue.prototype._e = createEmptyVNode
 }

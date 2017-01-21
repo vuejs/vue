@@ -4,7 +4,7 @@ import Watcher from '../observer/watcher'
 import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { warn, validateProp, remove, noop } from '../util/index'
-import { resolveSlots } from './render'
+import { resolveSlots } from './render-helpers/resolve-slots'
 import { updateComponentListeners } from './events'
 
 export let activeInstance: any = null

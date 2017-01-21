@@ -3,7 +3,7 @@
 import VNode from './vnode'
 import { resolveConstructorOptions } from '../instance/init'
 import { activeInstance, callHook } from '../instance/lifecycle'
-import { resolveSlots } from '../instance/render'
+import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 import { createElement } from './create-element'
 import { warn, isObject, hasOwn, hyphenate, validateProp } from '../util/index'
 
