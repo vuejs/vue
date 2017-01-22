@@ -110,7 +110,7 @@ strats.data = function (
 }
 
 /**
- * Hooks and param attributes are merged as arrays.
+ * Hooks and props are merged as arrays.
  */
 function mergeHook (
   parentVal: ?Array<Function>,
@@ -155,7 +155,7 @@ config._assetTypes.forEach(function (type) {
  */
 strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
   /* istanbul ignore if */
-  if (!childVal) return parentVal
+  if (!childVal) return Object.create(parentVal || null)
   if (!parentVal) return childVal
   const ret = {}
   extend(ret, parentVal)
@@ -178,7 +178,7 @@ strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
 strats.props =
 strats.methods =
 strats.computed = function (parentVal: ?Object, childVal: ?Object): ?Object {
-  if (!childVal) return parentVal
+  if (!childVal) return Object.create(parentVal || null)
   if (!parentVal) return childVal
   const ret = Object.create(null)
   extend(ret, parentVal)

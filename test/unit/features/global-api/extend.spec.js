@@ -122,4 +122,13 @@ describe('Global API: extend', () => {
     const B = Vue.extend(options)
     expect(A).toBe(B)
   })
+
+  // #4767
+  it('extended options should use different identitfy from parent', () => {
+    const A = Vue.extend({ computed: {}})
+    const B = A.extend()
+    B.options.computed.b = () => 'foo'
+    expect(B.options.computed).not.toBe(A.options.computed)
+    expect(A.options.computed.b).toBeUndefined()
+  })
 })
