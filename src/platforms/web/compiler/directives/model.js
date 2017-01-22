@@ -15,6 +15,7 @@ export default function model (
   const modifiers = dir.modifiers
   const tag = el.tag
   const type = el.attrsMap.type
+
   if (process.env.NODE_ENV !== 'production') {
     const dynamicType = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
     if (tag === 'input' && dynamicType) {
@@ -23,7 +24,16 @@ export default function model (
         `v-model does not support dynamic input types. Use v-if branches instead.`
       )
     }
+    // inputs with type="file" are read only and setting the input's
+    // value will throw an error.
+    if (tag === 'input' && type === 'file') {
+      warn(
+        `<${el.tag} v-model="${value}" type="file">:\n` +
+        `File inputs are read only. Use a v-on:change listener instead.`
+      )
+    }
   }
+
   if (tag === 'select') {
     genSelect(el, value, modifiers)
   } else if (tag === 'input' && type === 'checkbox') {
@@ -33,6 +43,7 @@ export default function model (
   } else {
     genDefaultModel(el, value, modifiers)
   }
+
   // ensure runtime directive metadata
   return true
 }
@@ -134,16 +145,6 @@ function genDefaultModel (
   let code = genAssignmentCode(value, valueExpression)
   if (isNative && needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
-  }
-
-  // inputs with type="file" are read only and setting the input's
-  // value will throw an error.
-  if (process.env.NODE_ENV !== 'production' &&
-      type === 'file') {
-    warn(
-      `<${el.tag} v-model="${value}" type="file">:\n` +
-      `File inputs are read only. Use a v-on:change listener instead.`
-    )
   }
 
   addProp(el, 'value', isNative ? `_s(${value})` : `(${value})`)
