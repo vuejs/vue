@@ -117,6 +117,11 @@ declare type ASTElement = {
   transition?: string | true;
   transitionOnAppear?: boolean;
 
+  model?: {
+    value: string;
+    callback: string;
+  };
+
   directives?: Array<ASTDirective>;
 
   forbidden?: true;

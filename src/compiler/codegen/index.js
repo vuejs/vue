@@ -205,6 +205,10 @@ function genData (el: ASTElement): string {
   if (el.scopedSlots) {
     data += `${genScopedSlots(el.scopedSlots)},`
   }
+  // component v-model
+  if (el.model) {
+    data += `model:{value:${el.model.value},callback:${el.model.callback}},`
+  }
   // inline-template
   if (el.inlineTemplate) {
     const inlineTemplate = genInlineTemplate(el)

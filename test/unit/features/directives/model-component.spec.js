@@ -2,71 +2,77 @@ import Vue from 'vue'
 
 describe('Directive v-model component', () => {
   it('should work', done => {
-    const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
-        msg: ['hello']
-      },
-      watch: {
-        msg: spy
+        msg: 'hello'
       },
       template: `
         <div>
           <p>{{ msg }}</p>
-          <validate v-model="msg[0]">
-            <input type="text">
-          </validate>
+          <test v-model="msg"></test>
         </div>
       `,
       components: {
-        validate: {
-          template: '<div><slot></slot></div>',
+        test: {
           props: ['value'],
-          methods: {
-            onInput (e) {
-              // something validate ...
-              this.$emit('input', e.target.value)
-            }
-          },
-          mounted () {
-            this.$el.addEventListener('input', this.onInput)
-          },
-          destroyed () {
-            this.$el.removeEventListener('input', this.onInput)
-          }
+          template: `<input :value="value" @input="$emit('input', $event.target.value)">`
         }
       }
     }).$mount()
     document.body.appendChild(vm.$el)
     waitForUpdate(() => {
-      expect('v-model is not supported on element type').not.toHaveBeenWarned()
       const input = vm.$el.querySelector('input')
       input.value = 'world'
       triggerEvent(input, 'input')
     }).then(() => {
-      expect(vm.msg).toEqual(['world'])
-      expect(spy).toHaveBeenCalled()
+      expect(vm.msg).toEqual('world')
+      expect(vm.$el.querySelector('p').textContent).toEqual('world')
+      vm.msg = 'changed'
+    }).then(() => {
+      expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+      expect(vm.$el.querySelector('input').value).toEqual('changed')
     }).then(() => {
       document.body.removeChild(vm.$el)
-      vm.$destroy()
     }).then(done)
   })
 
-  it('modifier: .lazy', () => {
+  it('should support customization via model option', done => {
     const vm = new Vue({
-      template: `<div><my-input ref="input" v-model.lazy="text"></my-input></div>`,
-      data: { text: 'foo' },
+      data: {
+        msg: 'hello'
+      },
+      template: `
+        <div>
+          <p>{{ msg }}</p>
+          <test v-model="msg"></test>
+        </div>
+      `,
       components: {
-        'my-input': {
-          template: '<input>'
+        test: {
+          model: {
+            prop: 'currentValue',
+            event: 'update'
+          },
+          props: ['currentValue'],
+          template: `<input :value="currentValue" @input="$emit('update', $event.target.value)">`
         }
       }
     }).$mount()
-    expect(vm.text).toBe('foo')
-    vm.$refs.input.$emit('input', 'bar')
-    expect(vm.text).toBe('foo')
-    vm.$refs.input.$emit('change', 'bar')
-    expect(vm.text).toBe('bar')
+    document.body.appendChild(vm.$el)
+    waitForUpdate(() => {
+      const input = vm.$el.querySelector('input')
+      input.value = 'world'
+      triggerEvent(input, 'input')
+    }).then(() => {
+      expect(vm.msg).toEqual('world')
+      expect(vm.$el.querySelector('p').textContent).toEqual('world')
+      vm.msg = 'changed'
+    }).then(() => {
+      expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+      expect(vm.$el.querySelector('input').value).toEqual('changed')
+    }).then(() => {
+      document.body.removeChild(vm.$el)
+    }).then(done)
   })
 
   it('modifier: .number', () => {

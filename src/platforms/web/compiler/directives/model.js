@@ -1,5 +1,6 @@
 /* @flow */
 
+import config from 'core/config'
 import { isIE } from 'core/util/env'
 import { addHandler, addProp, getBindingAttr, parseModel } from 'compiler/helpers'
 
@@ -40,8 +41,19 @@ export default function model (
     genCheckboxModel(el, value, modifiers)
   } else if (tag === 'input' && type === 'radio') {
     genRadioModel(el, value, modifiers)
-  } else {
+  } else if (tag === 'input' || tag === 'textarea') {
     genDefaultModel(el, value, modifiers)
+  } else if (!config.isReservedTag(tag)) {
+    genComponentModel(el, value, modifiers)
+    // component v-model doesn't need extra runtime
+    return false
+  } else if (process.env.NODE_ENV !== 'production') {
+    warn(
+      `<${el.tag} v-model="${value}">: ` +
+      `v-model is not supported on this element type. ` +
+      'If you are working with contenteditable, it\'s recommended to ' +
+      'wrap a library dedicated for that purpose inside a custom component.'
+    )
   }
 
   // ensure runtime directive metadata
@@ -107,53 +119,6 @@ function genRadioModel (
   addHandler(el, 'click', genAssignmentCode(value, valueBinding), null, true)
 }
 
-function genDefaultModel (
-  el: ASTElement,
-  value: string,
-  modifiers: ?ASTModifiers
-): ?boolean {
-  if (process.env.NODE_ENV !== 'production') {
-    if (el.tag === 'input' && el.attrsMap.value) {
-      warn(
-        `<${el.tag} v-model="${value}" value="${el.attrsMap.value}">:\n` +
-        'inline value attributes will be ignored when using v-model. ' +
-        'Declare initial values in the component\'s data option instead.'
-      )
-    }
-    if (el.tag === 'textarea' && el.children.length) {
-      warn(
-        `<textarea v-model="${value}">:\n` +
-        'inline content inside <textarea> will be ignored when using v-model. ' +
-        'Declare initial values in the component\'s data option instead.'
-      )
-    }
-  }
-
-  const type = el.attrsMap.type
-  const { lazy, number, trim } = modifiers || {}
-  const event = lazy || (isIE && type === 'range') ? 'change' : 'input'
-  const needCompositionGuard = !lazy && type !== 'range'
-  const isNative = el.tag === 'input' || el.tag === 'textarea'
-
-  let valueExpression = isNative
-    ? `$event.target.value${trim ? '.trim()' : ''}`
-    : trim ? `(typeof $event === 'string' ? $event.trim() : $event)` : `$event`
-  valueExpression = number || type === 'number'
-    ? `_n(${valueExpression})`
-    : valueExpression
-
-  let code = genAssignmentCode(value, valueExpression)
-  if (isNative && needCompositionGuard) {
-    code = `if($event.target.composing)return;${code}`
-  }
-
-  addProp(el, 'value', isNative ? `_s(${value})` : `(${value})`)
-  addHandler(el, event, code, null, true)
-  if (trim || number || type === 'number') {
-    addHandler(el, 'blur', '$forceUpdate()')
-  }
-}
-
 function genSelect (
     el: ASTElement,
     value: string,
@@ -187,6 +152,74 @@ function checkOptionWarning (option: any): boolean {
     return true
   }
   return false
+}
+
+function genDefaultModel (
+  el: ASTElement,
+  value: string,
+  modifiers: ?ASTModifiers
+): ?boolean {
+  if (process.env.NODE_ENV !== 'production') {
+    if (el.tag === 'input' && el.attrsMap.value) {
+      warn(
+        `<${el.tag} v-model="${value}" value="${el.attrsMap.value}">:\n` +
+        'inline value attributes will be ignored when using v-model. ' +
+        'Declare initial values in the component\'s data option instead.'
+      )
+    }
+    if (el.tag === 'textarea' && el.children.length) {
+      warn(
+        `<textarea v-model="${value}">:\n` +
+        'inline content inside <textarea> will be ignored when using v-model. ' +
+        'Declare initial values in the component\'s data option instead.'
+      )
+    }
+  }
+
+  const type = el.attrsMap.type
+  const { lazy, number, trim } = modifiers || {}
+  const event = lazy || (isIE && type === 'range') ? 'change' : 'input'
+  const needCompositionGuard = !lazy && type !== 'range'
+
+  let valueExpression = '$event.target.value'
+  if (trim) {
+    valueExpression = `$event.target.value.trim()`
+  }
+  if (number) {
+    valueExpression = `_n(${valueExpression})`
+  }
+
+  let code = genAssignmentCode(value, valueExpression)
+  if (needCompositionGuard) {
+    code = `if($event.target.composing)return;${code}`
+  }
+
+  addProp(el, 'value', `(${value})`)
+  addHandler(el, event, code, null, true)
+  if (trim || number || type === 'number') {
+    addHandler(el, 'blur', '$forceUpdate()')
+  }
+}
+
+function genComponentModel (
+  el: ASTElement,
+  value: string,
+  modifiers: ?ASTModifiers
+): ?boolean {
+  const { number, trim } = modifiers || {}
+
+  let valueExpression = 'value'
+  if (trim) {
+    valueExpression = `(typeof value === 'string' ? value.trim() : value)`
+  }
+  if (number) {
+    valueExpression = `_n(${valueExpression})`
+  }
+
+  el.model = {
+    value,
+    callback: `function (value) {${genAssignmentCode(value, valueExpression)}}`
+  }
 }
 
 function genAssignmentCode (value: string, assignment: string): string {
