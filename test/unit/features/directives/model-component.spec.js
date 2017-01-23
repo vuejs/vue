@@ -37,14 +37,18 @@ describe('Directive v-model component', () => {
   })
 
   it('should support customization via model option', done => {
+    const spy = jasmine.createSpy('update')
     const vm = new Vue({
       data: {
         msg: 'hello'
       },
+      methods: {
+        spy
+      },
       template: `
         <div>
           <p>{{ msg }}</p>
-          <test v-model="msg"></test>
+          <test v-model="msg" @update="spy"></test>
         </div>
       `,
       components: {
@@ -66,6 +70,7 @@ describe('Directive v-model component', () => {
     }).then(() => {
       expect(vm.msg).toEqual('world')
       expect(vm.$el.querySelector('p').textContent).toEqual('world')
+      expect(spy).toHaveBeenCalledWith('world')
       vm.msg = 'changed'
     }).then(() => {
       expect(vm.$el.querySelector('p').textContent).toEqual('changed')
