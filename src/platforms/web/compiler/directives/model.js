@@ -159,23 +159,6 @@ function genDefaultModel (
   value: string,
   modifiers: ?ASTModifiers
 ): ?boolean {
-  if (process.env.NODE_ENV !== 'production') {
-    if (el.tag === 'input' && el.attrsMap.value) {
-      warn(
-        `<${el.tag} v-model="${value}" value="${el.attrsMap.value}">:\n` +
-        'inline value attributes will be ignored when using v-model. ' +
-        'Declare initial values in the component\'s data option instead.'
-      )
-    }
-    if (el.tag === 'textarea' && el.children.length) {
-      warn(
-        `<textarea v-model="${value}">:\n` +
-        'inline content inside <textarea> will be ignored when using v-model. ' +
-        'Declare initial values in the component\'s data option instead.'
-      )
-    }
-  }
-
   const type = el.attrsMap.type
   const { lazy, number, trim } = modifiers || {}
   const event = lazy || (isIE && type === 'range') ? 'change' : 'input'
