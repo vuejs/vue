@@ -2,7 +2,8 @@
 
 import config from 'core/config'
 import { isIE } from 'core/util/env'
-import { addHandler, addProp, getBindingAttr, parseModel } from 'compiler/helpers'
+import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
+import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
 
 let warn
 
@@ -181,38 +182,5 @@ function genDefaultModel (
   addHandler(el, event, code, null, true)
   if (trim || number || type === 'number') {
     addHandler(el, 'blur', '$forceUpdate()')
-  }
-}
-
-function genComponentModel (
-  el: ASTElement,
-  value: string,
-  modifiers: ?ASTModifiers
-): ?boolean {
-  const { number, trim } = modifiers || {}
-
-  let valueExpression = 'value'
-  if (trim) {
-    valueExpression = `(typeof value === 'string' ? value.trim() : value)`
-  }
-  if (number) {
-    valueExpression = `_n(${valueExpression})`
-  }
-
-  el.model = {
-    value,
-    callback: `function (value) {${genAssignmentCode(value, valueExpression)}}`
-  }
-}
-
-function genAssignmentCode (value: string, assignment: string): string {
-  const modelRs = parseModel(value)
-  if (modelRs.idx === null) {
-    return `${value}=${assignment}`
-  } else {
-    return `var $$exp = ${modelRs.exp}, $$idx = ${modelRs.idx};` +
-      `if (!Array.isArray($$exp)){` +
-        `${value}=${assignment}}` +
-      `else{$$exp.splice($$idx, 1, ${assignment})}`
   }
 }
