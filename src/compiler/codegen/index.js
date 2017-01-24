@@ -5,9 +5,9 @@ import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
 import { camelize, no } from 'shared/util'
 
-type TransformFunction = (el: ASTElement, code: string) => string
-type DataGenFunction = (el: ASTElement) => string
-type DirctiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean
+type TransformFunction = (el: ASTElement, code: string) => string;
+type DataGenFunction = (el: ASTElement) => string;
+type DirctiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean;
 
 // configurable state
 let warn

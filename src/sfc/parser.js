@@ -10,7 +10,7 @@ const isSpecialTag = makeMap('script,style,template', true)
 type Attribute = {
   name: string,
   value: string
-}
+};
 
 /**
  * Parse a single-file component (*.vue) file into an SFC Descriptor Object.

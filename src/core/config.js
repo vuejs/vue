@@ -20,7 +20,7 @@ export type Config = {
   _assetTypes: Array<string>;
   _lifecycleHooks: Array<string>;
   _maxUpdateCount: number;
-}
+};
 
 const config: Config = {
   /**

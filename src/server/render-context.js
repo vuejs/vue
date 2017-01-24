@@ -14,7 +14,7 @@ type RenderState = {
   buffer: Array<string>;
   bufferIndex: number;
   key: string;
-}
+};
 
 export class RenderContext {
   activeInstance: Component;
