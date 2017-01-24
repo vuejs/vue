@@ -144,6 +144,18 @@ function genFor (el: any): string {
   const alias = el.alias
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
   const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
+
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    maybeComponent(el) && el.tag !== 'slot' && el.tag !== 'template' && !el.key
+  ) {
+    warn(
+      `<${el.tag} v-for="${alias} in ${exp}">: component lists rendered with ` +
+      `v-for should have explicit keys. ` +
+      `See https://vuejs.org/guide/list.html#key for more info.`
+    )
+  }
+
   el.forProcessed = true // avoid recursion
   return `_l((${exp}),` +
     `function(${alias}${iterator1}${iterator2}){` +

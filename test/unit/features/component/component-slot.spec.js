@@ -243,7 +243,7 @@ describe('Component slot', () => {
 
   it('combined with v-for', () => {
     const vm = new Vue({
-      template: '<div><test v-for="i in 3">{{ i }}</test></div>',
+      template: '<div><test v-for="i in 3" :key="i">{{ i }}</test></div>',
       components: {
         test: {
           template: '<div><slot></slot></div>'

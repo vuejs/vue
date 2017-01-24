@@ -3,7 +3,7 @@
 import { parseFilters } from './parser/filter-parser'
 
 export function baseWarn (msg: string) {
-  console.error(`[Vue parser]: ${msg}`)
+  console.error(`[Vue compiler]: ${msg}`)
 }
 
 export function pluckModuleFunction<F: Function> (
