@@ -3,9 +3,9 @@
 import Watcher from '../observer/watcher'
 import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
-import { warn, validateProp, remove, noop } from '../util/index'
-import { resolveSlots } from './render-helpers/resolve-slots'
 import { updateComponentListeners } from './events'
+import { resolveSlots } from './render-helpers/resolve-slots'
+import { warn, validateProp, remove, noop, emptyObject } from '../util/index'
 
 export let activeInstance: any = null
 
@@ -120,13 +120,23 @@ export function lifecycleMixin (Vue: Class<Component>) {
     renderChildren: ?Array<VNode>
   ) {
     const vm: Component = this
-    const hasChildren = !!(vm.$options._renderChildren || renderChildren)
+
+    // determine whether component has slot children
+    // we need to do this before overwriting $options._renderChildren
+    const hasChildren = !!(
+      renderChildren ||               // has new static slots
+      vm.$options._renderChildren ||  // has old static slots
+      parentVnode.data.scopedSlots || // has new scoped slots
+      vm.$scopedSlots !== emptyObject // has old scoped slots
+    )
+
     vm.$options._parentVnode = parentVnode
     vm.$vnode = parentVnode // update vm's placeholder node without re-render
     if (vm._vnode) { // update child tree's parent
       vm._vnode.parent = parentVnode
     }
     vm.$options._renderChildren = renderChildren
+
     // update props
     if (propsData && vm.$options.props) {
       observerState.shouldConvert = false

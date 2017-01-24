@@ -8,6 +8,7 @@ import {
   toNumber,
   _toString,
   looseEqual,
+  emptyObject,
   looseIndexOf,
   formatComponentName
 } from '../util/index'
@@ -21,11 +22,11 @@ import VNode, {
 import { createElement } from '../vdom/create-element'
 import { renderList } from './render-helpers/render-list'
 import { renderSlot } from './render-helpers/render-slot'
-import { resolveSlots } from './render-helpers/resolve-slots'
 import { resolveFilter } from './render-helpers/resolve-filter'
 import { checkKeyCodes } from './render-helpers/check-keycodes'
 import { bindObjectProps } from './render-helpers/bind-object-props'
 import { renderStatic, markOnce } from './render-helpers/render-static'
+import { resolveSlots, resolveScopedSlots } from './render-helpers/resolve-slots'
 
 export function initRender (vm: Component) {
   vm.$vnode = null // the placeholder node in parent tree
@@ -34,7 +35,7 @@ export function initRender (vm: Component) {
   const parentVnode = vm.$options._parentVnode
   const renderContext = parentVnode && parentVnode.context
   vm.$slots = resolveSlots(vm.$options._renderChildren, renderContext)
-  vm.$scopedSlots = {}
+  vm.$scopedSlots = emptyObject
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
@@ -65,9 +66,7 @@ export function renderMixin (Vue: Class<Component>) {
       }
     }
 
-    if (_parentVnode && _parentVnode.data.scopedSlots) {
-      vm.$scopedSlots = _parentVnode.data.scopedSlots
-    }
+    vm.$scopedSlots = (_parentVnode && _parentVnode.data.scopedSlots) || emptyObject
 
     if (staticRenderFns && !vm._staticTrees) {
       vm._staticTrees = []
@@ -124,4 +123,5 @@ export function renderMixin (Vue: Class<Component>) {
   Vue.prototype._b = bindObjectProps
   Vue.prototype._v = createTextVNode
   Vue.prototype._e = createEmptyVNode
+  Vue.prototype._u = resolveScopedSlots
 }

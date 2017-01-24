@@ -273,17 +273,17 @@ function genInlineTemplate (el: ASTElement): ?string {
 }
 
 function genScopedSlots (slots: { [key: string]: ASTElement }): string {
-  return `scopedSlots:{${
+  return `scopedSlots:_u([${
     Object.keys(slots).map(key => genScopedSlot(key, slots[key])).join(',')
-  }}`
+  }])`
 }
 
 function genScopedSlot (key: string, el: ASTElement) {
-  return `${key}:function(${String(el.attrsMap.scope)}){` +
+  return `[${key},function(${String(el.attrsMap.scope)}){` +
     `return ${el.tag === 'template'
       ? genChildren(el) || 'void 0'
       : genElement(el)
-  }}`
+  }}]`
 }
 
 function genChildren (el: ASTElement, checkSkip?: boolean): string | void {

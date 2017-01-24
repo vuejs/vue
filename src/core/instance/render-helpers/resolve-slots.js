@@ -38,3 +38,13 @@ export function resolveSlots (
   }
   return slots
 }
+
+export function resolveScopedSlots (
+  fns: Array<[string, Function]>
+): { [key: string]: Function } {
+  const res = {}
+  for (let i = 0; i < fns.length; i++) {
+    res[fns[i][0]] = fns[i][1]
+  }
+  return res
+}

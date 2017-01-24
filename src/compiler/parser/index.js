@@ -176,7 +176,7 @@ export function parse (
           processIfConditions(element, currentParent)
         } else if (element.slotScope) { // scoped slot
           currentParent.plain = false
-          const name = element.slotTarget || 'default'
+          const name = element.slotTarget || '"default"'
           ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
         } else {
           currentParent.children.push(element)
