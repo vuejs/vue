@@ -19,12 +19,12 @@ function createContext (context) {
   return sandbox
 }
 
-function evaluateModule (filename, chunks, context, evaluatedModules) {
+function evaluateModule (filename, files, context, evaluatedModules) {
   if (evaluatedModules[filename]) {
     return evaluatedModules[filename]
   }
 
-  const code = chunks[filename]
+  const code = files[filename]
   const wrapper = NativeModule.wrap(code)
   const compiledWrapper = vm.runInNewContext(wrapper, context, {
     filename,
@@ -33,8 +33,8 @@ function evaluateModule (filename, chunks, context, evaluatedModules) {
   const m = { exports: {}}
   const r = file => {
     file = path.join('.', file)
-    if (chunks[file]) {
-      return evaluateModule(file, chunks, context, evaluatedModules)
+    if (files[file]) {
+      return evaluateModule(file, files, context, evaluatedModules)
     } else {
       return require(file)
     }
@@ -48,10 +48,10 @@ function evaluateModule (filename, chunks, context, evaluatedModules) {
   return res
 }
 
-export default function runInVm (entry, chunks, _context = {}) {
+export default function runInVm (entry, files, _context = {}) {
   return new Promise((resolve, reject) => {
     const context = createContext(_context)
-    const res = evaluateModule(entry, chunks, context, {})
+    const res = evaluateModule(entry, files, context, {})
     resolve(typeof res === 'function' ? res(_context) : res)
   })
 }
