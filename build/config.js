@@ -84,7 +84,7 @@ const builds = {
     entry: path.resolve(__dirname, '../src/entries/web-server-renderer.js'),
     dest: path.resolve(__dirname, '../packages/vue-server-renderer/build.js'),
     format: 'cjs',
-    external: ['stream', 'module', 'vm', 'he', 'de-indent']
+    external: ['he', 'de-indent', 'source-map']
   },
   // Weex runtime factory
   'weex-factory': {

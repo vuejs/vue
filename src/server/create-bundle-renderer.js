@@ -1,8 +1,10 @@
 /* @flow */
 
 import runInVm from './run-in-vm'
-import { PassThrough } from 'stream'
 import type { Renderer, RenderOptions } from './create-renderer'
+import { createSourceMapConsumers, rewriteErrorTrace } from './source-map-support'
+
+const PassThrough = require('stream').PassThrough
 
 const INVALID_MSG =
   'Invalid server-rendering bundle format. Should be a string ' +
@@ -24,16 +26,18 @@ type RenderBundle = string | {
 export function createBundleRendererCreator (createRenderer: () => Renderer) {
   return (bundle: RenderBundle, rendererOptions?: RenderOptions) => {
     const renderer = createRenderer(rendererOptions)
-    let files, entry
+    let files, entry, maps
     if (typeof bundle === 'object') {
       entry = bundle.entry
       files = bundle.files
+      maps = createSourceMapConsumers(bundle.maps)
       if (typeof entry !== 'string' || typeof files !== 'object') {
         throw new Error(INVALID_MSG)
       }
     } else if (typeof bundle === 'string') {
       entry = '__vue_ssr_bundle__'
       files = { '__vue_ssr_bundle__': bundle }
+      maps = {}
     } else {
       throw new Error(INVALID_MSG)
     }
@@ -45,18 +49,23 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
         }
         runInVm(entry, files, context).then(app => {
           renderer.renderToString(app, cb)
-        }).catch(cb)
+        }).catch(err => {
+          rewriteErrorTrace(err, maps)
+          cb(err)
+        })
       },
       renderToStream: (context?: Object) => {
         const res = new PassThrough()
         runInVm(entry, files, context).then(app => {
           const renderStream = renderer.renderToStream(app)
           renderStream.on('error', err => {
+            rewriteErrorTrace(err, maps)
             res.emit('error', err)
           })
           renderStream.pipe(res)
         }).catch(err => {
           process.nextTick(() => {
+            rewriteErrorTrace(err, maps)
             res.emit('error', err)
           })
         })

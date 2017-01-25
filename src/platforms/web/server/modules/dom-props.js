@@ -25,7 +25,7 @@ export default function renderDOMProps (node: VNodeWithData): string {
     if (key === 'innerHTML') {
       setText(node, props[key], true)
     } else if (key === 'textContent') {
-      setText(node, props[key])
+      setText(node, props[key], false)
     } else {
       const attr = propsToAttrMap[key] || key.toLowerCase()
       if (isRenderableAttr(attr) &&
