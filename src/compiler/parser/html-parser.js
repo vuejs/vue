@@ -56,9 +56,11 @@ const decodingMap = {
   '&amp;': '&',
   '&#10;': '\n'
 }
+const encodedAttr = /&(lt|gt|quot|amp);/g
+const encodedAttrWithNewLines = /&(lt|gt|quot|amp|#10);/g
 
 function decodeAttr (value, shouldDecodeNewlines) {
-  const re = shouldDecodeNewlines ? /&(lt|gt|quot|amp|#10);/g : /&(lt|gt|quot|amp);/g
+  const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
   return value.replace(re, match => decodingMap[match])
 }
 
