@@ -158,7 +158,7 @@ describe('ref', () => {
     expect(vm.$refs.test).toBe(vm.$children[0])
   })
 
-  it('should should call callback (v-for)', done => {
+  it('should should call callback method (v-for)', done => {
     const vm = new Vue({
       data: {
         items: [1, 2, 3]
@@ -200,6 +200,34 @@ describe('ref', () => {
       expect(Array.isArray(vm.$refs.list)).toBe(true)
       expect(vm.$refs.list.length).toBe(vm.items.length)
       expect(vm.$refs.list.every((comp, i) => comp.$el.textContent === String(i + 1))).toBe(true)
+    }
+  })
+
+  it('should should call inline callback (v-for)', done => {
+    const vm = new Vue({
+      data: {
+        items: [1, 2, 3]
+      },
+      template: `
+        <div>
+          <test v-for="n in items" :ref="ref => { $refs[n] = ref }" :n="n"></test>
+        </div>
+      `,
+      components: {
+        test: {
+          props: ['n'],
+          template: '<div>{{ n }}</div>'
+        }
+      }
+    }).$mount()
+    assertRefs()
+    // updating
+    vm.items.push(4)
+    waitForUpdate(assertRefs).then(done)
+
+    function assertRefs () {
+      expect(Object.keys(vm.$refs).length).toBe(vm.items.length)
+      expect(Object.keys(vm.$refs).every(i => vm.$refs[i].$el.textContent === String(i))).toBe(true)
     }
   })
 })
