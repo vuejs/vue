@@ -50,7 +50,9 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
         runInVm(entry, files, context).then(app => {
           renderer.renderToString(app, cb)
         }).catch(err => {
-          rewriteErrorTrace(err, maps)
+          if (err instanceof Error) {
+            rewriteErrorTrace(err, maps)
+          }
           cb(err)
         })
       },
@@ -65,7 +67,9 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
           renderStream.pipe(res)
         }).catch(err => {
           process.nextTick(() => {
-            rewriteErrorTrace(err, maps)
+            if (err instanceof Error) {
+              rewriteErrorTrace(err, maps)
+            }
             res.emit('error', err)
           })
         })
