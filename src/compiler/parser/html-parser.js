@@ -49,21 +49,19 @@ let IS_REGEX_CAPTURING_BROKEN = false
 const isScriptOrStyle = makeMap('script,style', true)
 const reCache = {}
 
-const ltRE = /&lt;/g
-const gtRE = /&gt;/g
-const nlRE = /&#10;/g
-const ampRE = /&amp;/g
-const quoteRE = /&quot;/g
+const decodingMap = {
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&amp;': '&',
+  '&#10;': '\n'
+}
+const encodedAttr = /&(lt|gt|quot|amp);/g
+const encodedAttrWithNewLines = /&(lt|gt|quot|amp|#10);/g
 
 function decodeAttr (value, shouldDecodeNewlines) {
-  if (shouldDecodeNewlines) {
-    value = value.replace(nlRE, '\n')
-  }
-  return value
-    .replace(ltRE, '<')
-    .replace(gtRE, '>')
-    .replace(ampRE, '&')
-    .replace(quoteRE, '"')
+  const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
+  return value.replace(re, match => decodingMap[match])
 }
 
 export function parseHTML (html, options) {
