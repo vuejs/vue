@@ -47,31 +47,36 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
           cb = context
           context = {}
         }
-        runInVm(entry, files, context).then(app => {
-          renderer.renderToString(app, cb)
-        }).catch(err => {
-          if (err instanceof Error) {
-            rewriteErrorTrace(err, maps)
-          }
+        runInVm(entry, files, context).catch(err => {
+          rewriteErrorTrace(err, maps)
           cb(err)
+        }).then(app => {
+          if (app) {
+            renderer.renderToString(app, (err, res) => {
+              rewriteErrorTrace(err, maps)
+              cb(err, res)
+            })
+          }
         })
       },
       renderToStream: (context?: Object) => {
         const res = new PassThrough()
-        runInVm(entry, files, context).then(app => {
-          const renderStream = renderer.renderToStream(app)
-          renderStream.on('error', err => {
-            rewriteErrorTrace(err, maps)
-            res.emit('error', err)
-          })
-          renderStream.pipe(res)
-        }).catch(err => {
+        runInVm(entry, files, context).catch(err => {
+          rewriteErrorTrace(err, maps)
+          // avoid emitting synchronously before user can
+          // attach error listener
           process.nextTick(() => {
-            if (err instanceof Error) {
-              rewriteErrorTrace(err, maps)
-            }
             res.emit('error', err)
           })
+        }).then(app => {
+          if (app) {
+            const renderStream = renderer.renderToStream(app)
+            renderStream.on('error', err => {
+              rewriteErrorTrace(err, maps)
+              res.emit('error', err)
+            })
+            renderStream.pipe(res)
+          }
         })
         return res
       }

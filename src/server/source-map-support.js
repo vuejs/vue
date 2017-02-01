@@ -12,12 +12,14 @@ export function createSourceMapConsumers (rawMaps: Object) {
   return maps
 }
 
-export function rewriteErrorTrace (e: Error, mapConsumers: {
+export function rewriteErrorTrace (e: any, mapConsumers: {
   [key: string]: SourceMapConsumer
 }) {
-  e.stack = e.stack.split('\n').map(line => {
-    return rewriteTraceLine(line, mapConsumers)
-  }).join('\n')
+  if (e && typeof e.stack === 'string') {
+    e.stack = e.stack.split('\n').map(line => {
+      return rewriteTraceLine(line, mapConsumers)
+    }).join('\n')
+  }
 }
 
 function rewriteTraceLine (trace: string, mapConsumers: {

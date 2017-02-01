@@ -1,6 +1,7 @@
 import path from 'path'
 import webpack from 'webpack'
 import MemoeryFS from 'memory-fs'
+import VueSSRPlugin from 'vue-ssr-webpack-plugin'
 import { createBundleRenderer } from '../../packages/vue-server-renderer'
 
 const rendererCache = {}
@@ -8,9 +9,14 @@ function createRenderer (file, cb, options) {
   if (!options && rendererCache[file]) {
     return cb(rendererCache[file])
   }
-  const compiler = webpack({
+
+  const asBundle = !!(options && options.asBundle)
+  if (options) delete options.asBundle
+
+  const config = {
     target: 'node',
     entry: path.resolve(__dirname, 'fixtures', file),
+    devtool: asBundle ? '#source-map' : false,
     output: {
       path: '/',
       filename: 'bundle.js',
@@ -18,15 +24,23 @@ function createRenderer (file, cb, options) {
     },
     module: {
       rules: [{ test: /\.js$/, loader: 'babel-loader' }]
-    }
-  })
+    },
+    plugins: asBundle
+      ? [new VueSSRPlugin()]
+      : []
+  }
+
+  const compiler = webpack(config)
   const fs = new MemoeryFS()
   compiler.outputFileSystem = fs
+
   compiler.run((err, stats) => {
     expect(err).toBeFalsy()
     expect(stats.errors).toBeFalsy()
-    const code = fs.readFileSync('/bundle.js', 'utf-8')
-    const renderer = rendererCache[file] = createBundleRenderer(code, options)
+    const bundle = asBundle
+      ? JSON.parse(fs.readFileSync('/vue-ssr-bundle.json', 'utf-8'))
+      : fs.readFileSync('/bundle.js', 'utf-8')
+    const renderer = rendererCache[file] = createBundleRenderer(bundle, options)
     cb(renderer)
   })
 }
@@ -161,5 +175,52 @@ describe('SSR: bundle renderer', () => {
         })
       })
     }, options)
+  })
+
+  it('renderToString (bundle format with code split)', done => {
+    createRenderer('split.js', renderer => {
+      const context = { url: '/test' }
+      renderer.renderToString(context, (err, res) => {
+        expect(err).toBeNull()
+        expect(res).toBe('<div server-rendered="true">/test<div>async</div></div>')
+        done()
+      })
+    }, { asBundle: true })
+  })
+
+  it('renderToStream (bundle format with code split)', done => {
+    createRenderer('split.js', renderer => {
+      const context = { url: '/test' }
+      const stream = renderer.renderToStream(context)
+      let res = ''
+      stream.on('data', chunk => {
+        res += chunk.toString()
+      })
+      stream.on('end', () => {
+        expect(res).toBe('<div server-rendered="true">/test<div>async</div></div>')
+        done()
+      })
+    }, { asBundle: true })
+  })
+
+  it('renderToString catch error (bundle format with source map)', done => {
+    createRenderer('error.js', renderer => {
+      renderer.renderToString(err => {
+        expect(err.stack).toContain('test/ssr/fixtures/error.js:1:6')
+        expect(err.message).toBe('foo')
+        done()
+      })
+    }, { asBundle: true })
+  })
+
+  it('renderToString catch error (bundle format with source map)', done => {
+    createRenderer('error.js', renderer => {
+      const stream = renderer.renderToStream()
+      stream.on('error', err => {
+        expect(err.stack).toContain('test/ssr/fixtures/error.js:1:6')
+        expect(err.message).toBe('foo')
+        done()
+      })
+    }, { asBundle: true })
   })
 })

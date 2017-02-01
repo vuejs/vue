@@ -64,6 +64,7 @@
     "babel-helper-vue-jsx-merge-props": "^2.0.2",
     "babel-loader": "^6.2.4",
     "babel-plugin-istanbul": "^3.0.0",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-plugin-syntax-jsx": "^6.18.0",
     "babel-plugin-transform-vue-jsx": "^3.2.0",
     "babel-preset-es2015": "^6.9.0",
@@ -110,10 +111,10 @@
     "selenium-server": "^2.53.1",
     "typescript": "^2.0.9",
     "uglify-js": "^2.6.2",
+    "vue-ssr-webpack-plugin": "^1.0.0",
     "webpack": "^2.2.0",
     "weex-js-runtime": "^0.17.0-alpha4",
     "weex-vdom-tester": "^0.1.4"
   },
-  "dependencies": {},
   "unpkg": "dist/vue.js"
 }
