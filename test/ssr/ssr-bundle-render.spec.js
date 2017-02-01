@@ -17,7 +17,7 @@ function createRenderer (file, cb, options) {
       libraryTarget: 'commonjs2'
     },
     module: {
-      loaders: [{ test: /\.js$/, loader: 'babel' }]
+      rules: [{ test: /\.js$/, loader: 'babel-loader' }]
     }
   })
   const fs = new MemoeryFS()

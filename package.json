@@ -110,7 +110,7 @@
     "selenium-server": "^2.53.1",
     "typescript": "^2.0.9",
     "uglify-js": "^2.6.2",
-    "webpack": "^1.13.2",
+    "webpack": "^2.2.0",
     "weex-js-runtime": "^0.17.0-alpha4",
     "weex-vdom-tester": "^0.1.4"
   },
