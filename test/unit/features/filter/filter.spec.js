@@ -78,6 +78,15 @@ describe('Filters', () => {
     expect(vm.$el.textContent).toBe(String(1 / 4))
   })
 
+  it('handle division with parenthesis', () => {
+    const vm = new Vue({
+      data: { a: 20 },
+      template: `<div>{{ (a*2) / 5 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(16))
+  })
+
   it('arguments', () => {
     const vm = new Vue({
       template: `<div>{{ msg | add(a, 3) }}</div>`,
