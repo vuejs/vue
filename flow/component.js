@@ -28,6 +28,7 @@ declare interface Component {
   $scopedSlots: { [key: string]: () => VNodeChildren };
   $vnode: VNode;
   $isServer: boolean;
+  $props: Object;
 
   // public methods
   $mount: (el?: Element | string, hydrating?: boolean) => Component;
