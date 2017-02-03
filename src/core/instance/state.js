@@ -39,6 +39,7 @@ const isReservedProp = { key: 1, ref: 1, slot: 1 }
 
 function initProps (vm: Component, props: Object) {
   const propsData = vm.$options.propsData || {}
+  vm.$props = {}
   // cache prop keys so that future props updates can iterate using Array
   // instead of dyanmic object key enumeration.
   const keys = vm.$options._propKeys = []
@@ -55,7 +56,7 @@ function initProps (vm: Component, props: Object) {
           vm
         )
       }
-      defineReactive(vm, key, validateProp(key, props, propsData, vm), () => {
+      defineReactive(vm.$props, key, validateProp(key, props, propsData, vm), () => {
         if (vm.$parent && !observerState.isSettingProps) {
           warn(
             `Avoid mutating a prop directly since the value will be ` +
@@ -67,8 +68,9 @@ function initProps (vm: Component, props: Object) {
         }
       })
     } else {
-      defineReactive(vm, key, validateProp(key, props, propsData, vm))
+      defineReactive(vm.$props, key, validateProp(key, props, propsData, vm))
     }
+    proxy(vm, '$props', key)
   }
   observerState.shouldConvert = true
 }
@@ -97,8 +99,8 @@ function initData (vm: Component) {
         `Use prop default value instead.`,
         vm
       )
-    } else {
-      proxy(vm, keys[i])
+    } else if (!isReserved(keys[i])) {
+      proxy(vm, '_data', keys[i])
     }
   }
   // observe data
@@ -233,17 +235,15 @@ export function stateMixin (Vue: Class<Component>) {
   }
 }
 
-function proxy (vm: Component, key: string) {
-  if (!isReserved(key)) {
-    Object.defineProperty(vm, key, {
-      configurable: true,
-      enumerable: true,
-      get: function proxyGetter () {
-        return vm._data[key]
-      },
-      set: function proxySetter (val) {
-        vm._data[key] = val
-      }
-    })
-  }
+function proxy (vm: Component, proxyName: '$props' | '_data', key: string) {
+  Object.defineProperty(vm, key, {
+    configurable: true,
+    enumerable: true,
+    get: function proxyGetter () {
+      return vm[proxyName][key]
+    },
+    set: function proxySetter (val) {
+      vm[proxyName][key] = val
+    }
+  })
 }

@@ -79,4 +79,21 @@ describe('Instance properties', () => {
     }).$mount()
     expect(calls).toEqual(['outer:undefined', 'middle:outer', 'inner:middle', 'next:undefined'])
   })
+
+  it('$props', () => {
+    var Comp = Vue.extend({
+      props: ['msg'],
+      template: '<div>{{ msg }}</div>'
+    })
+    var vm = new Comp({
+      propsData: {
+        msg: 'foo'
+      }
+    })
+    // check existence
+    expect(vm.$props.msg).toBe('foo')
+    // check change
+    Vue.set(vm, 'msg', 'bar')
+    expect(vm.$props.msg).toBe('bar')
+  })
 })
