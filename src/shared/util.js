@@ -243,11 +243,12 @@ export function once (fn: Function): Function {
  * Returns the number of ms corresponding to the text expression.
  * @param text Time expression with a time unit ('ms' or 's')
  */
-export function parseTime (text: String): number {
-  const matched = text.match(/(\d+|\d+\.\d+|\.\d+)\s*(s|ms)/i)
+export function parseTime (text: string): any {
+  const matched: ?Array<string> = text.match(/(\d+|\d+\.\d+|\.\d+)\s*(s|ms)/i)
   if (matched) {
-    const [, durationText, unit] = matched
-    let duration = parseFloat(durationText)
+    /* eslint no-unused-vars:0 */
+    const [_, durationText: string, unit: string] = matched
+    let duration: number = parseFloat(durationText)
     if (unit === 's') {
       duration *= 1000
     }
