@@ -9,7 +9,8 @@ import {
   nextFrame,
   addTransitionClass,
   removeTransitionClass,
-  whenTransitionEnds
+  whenTransitionEnds,
+  parseDuration
 } from '../transition-util'
 
 export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
@@ -47,7 +48,8 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     beforeAppear,
     appear,
     afterAppear,
-    appearCancelled
+    appearCancelled,
+    duration
   } = data
 
   // activeInstance will always be the <transition> component managing this
@@ -70,10 +72,17 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const startClass = isAppear ? appearClass : enterClass
   const activeClass = isAppear ? appearActiveClass : enterActiveClass
   const toClass = isAppear ? appearToClass : enterToClass
+
   const beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter
   const enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter
   const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
   const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
+
+  const explicitDuration = parseDuration((
+      duration !== null &&
+      typeof duration === 'object' &&
+      duration.enter
+    ) || duration)
 
   const expectsCSS = css !== false && !isIE9
   const userWantsControl =
@@ -121,7 +130,11 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       addTransitionClass(el, toClass)
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
-        whenTransitionEnds(el, type, cb)
+        if (typeof explicitDuration !== 'undefined') {
+          setTimeout(cb, explicitDuration)
+        } else {
+          whenTransitionEnds(el, type, cb)
+        }
       }
     })
   }
@@ -165,7 +178,8 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     leave,
     afterLeave,
     leaveCancelled,
-    delayLeave
+    delayLeave,
+    duration
   } = data
 
   const expectsCSS = css !== false && !isIE9
@@ -174,6 +188,12 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     // leave hook may be a bound method which exposes
     // the length of original fn as _length
     (leave._length || leave.length) > 1
+
+  const explicitDuration = parseDuration((
+      duration !== null &&
+      typeof duration === 'object' &&
+      duration.leave
+    ) || duration)
 
   const cb = el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
@@ -218,7 +238,11 @@ export function leave (vnode: VNodeWithData, rm: Function) {
         addTransitionClass(el, leaveToClass)
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
-          whenTransitionEnds(el, type, cb)
+          if (typeof explicitDuration !== 'undefined') {
+            setTimeout(cb, explicitDuration)
+          } else {
+            whenTransitionEnds(el, type, cb)
+          }
         }
       })
     }

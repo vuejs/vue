@@ -238,3 +238,16 @@ export function once (fn: Function): Function {
     }
   }
 }
+
+/**
+ * Returns the number of ms corresponding to the text expression.
+ * @param text Time expression with a time unit ('ms' or 's')
+ */
+export function parseTime (text: String): Number {
+  const [, durationText, unit] = text.match(/(\d+|\d+\.\d+|\.\d+)\s*(s|ms)/i)
+  let duration = parseFloat(durationText)
+  if (unit === 's') {
+    duration *= 1000
+  }
+  return duration
+}

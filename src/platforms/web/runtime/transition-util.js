@@ -1,7 +1,7 @@
 /* @flow */
 
 import { inBrowser, isIE9 } from 'core/util/index'
-import { remove, extend, cached } from 'shared/util'
+import { remove, extend, cached, parseTime } from 'shared/util'
 import { addClass, removeClass } from './class-util'
 
 export function resolveTransition (def?: string | Object): ?Object {
@@ -178,4 +178,14 @@ function getTimeout (delays: Array<string>, durations: Array<string>): number {
 
 function toMs (s: string): number {
   return Number(s.slice(0, -1)) * 1000
+}
+
+export function parseDuration (value: Object): Object {
+  if (typeof value === 'number') {
+    return value * 1000
+  } else if (typeof value === 'string') {
+    return parseTime(value)
+  } else {
+    return undefined
+  }
 }
