@@ -1095,7 +1095,7 @@ if (!isIE9) {
       const leave2 = 300
 
       const vm = new Vue({
-        template: `<div><transition :duration="{ enter, leave }"><div v-if="ok" class="test">foo</div></transition></div>`,
+        template: `<div><transition :duration="{ enter: enter, leave: leave }"><div v-if="ok" class="test">foo</div></transition></div>`,
         data: {
           ok: true,
           enter: enter1,
