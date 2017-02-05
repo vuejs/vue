@@ -1089,12 +1089,17 @@ if (!isIE9) {
     })
 
     it('explicit transition enter and leave duration (number) + duration change', done => {
+      const enter1 = 200
+      const enter2 = 100
+      const leave1 = 50
+      const leave2 = 300
+
       const vm = new Vue({
         template: `<div><transition :duration="{ enter, leave }"><div v-if="ok" class="test">foo</div></transition></div>`,
         data: {
           ok: true,
-          enter: 200,
-          leave: 100
+          enter: enter1,
+          leave: leave1
         }
       }).$mount(el)
 
@@ -1104,7 +1109,7 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
-      }).thenWaitFor(vm.leave - buffer).then(() => {
+      }).thenWaitFor(vm.leave1 - buffer).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
       }).thenWaitFor(buffer * 2).then(() => {
         expect(vm.$el.children.length).toBe(0)
@@ -1113,18 +1118,19 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test v-enter v-enter-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
-      }).thenWaitFor(vm.enter - buffer).then(() => {
+      }).thenWaitFor(vm.enter1 - buffer).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
       }).thenWaitFor(buffer * 2).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
-        vm.enter = 100
-        vm.leave = 200
+        vm.enter = enter2
+        vm.leave = leave2
+      }).then(() => {
         vm.ok = false
       }).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
-      }).thenWaitFor(vm.leave - buffer).then(() => {
+      }).thenWaitFor(vm.leave2 - buffer).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
       }).thenWaitFor(buffer * 2).then(() => {
         expect(vm.$el.children.length).toBe(0)
@@ -1133,7 +1139,7 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test v-enter v-enter-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
-      }).thenWaitFor(vm.enter - buffer).then(() => {
+      }).thenWaitFor(vm.enter2 - buffer).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
       }).thenWaitFor(buffer * 2).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
