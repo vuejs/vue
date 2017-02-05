@@ -253,6 +253,6 @@ export function parseTime (text: String): number {
     }
     return duration
   } else {
-    return 0
+    return parseFloat(text)
   }
 }

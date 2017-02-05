@@ -182,7 +182,7 @@ function toMs (s: string): number {
 
 export function parseDuration (value: Object): any {
   if (typeof value === 'number') {
-    return value * 1000
+    return value
   } else if (typeof value === 'string') {
     return parseTime(value)
   } else {

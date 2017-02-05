@@ -929,12 +929,11 @@ if (!isIE9) {
       }).then(done)
     })
 
-    it('explicit transition total duration in s (number)', done => {
+    it('explicit transition total duration in ms (number)', done => {
       const milliseconds = 100
-      const seconds = milliseconds / 1000
 
       const vm = new Vue({
-        template: `<div><transition :duration="${seconds}"><div v-if="ok" class="test">foo</div></transition></div>`,
+        template: `<div><transition :duration="${milliseconds}"><div v-if="ok" class="test">foo</div></transition></div>`,
         data: { ok: true }
       }).$mount(el)
 
@@ -956,12 +955,11 @@ if (!isIE9) {
       }).then(done)
     })
 
-    it('explicit transition total duration in s (number, dot)', done => {
+    it('explicit transition total duration in ms (string without unit)', done => {
       const milliseconds = 100
-      const seconds = '.1'
 
       const vm = new Vue({
-        template: `<div><transition :duration="${seconds}"><div v-if="ok" class="test">foo</div></transition></div>`,
+        template: `<div><transition duration="${milliseconds}"><div v-if="ok" class="test">foo</div></transition></div>`,
         data: { ok: true }
       }).$mount(el)
 
