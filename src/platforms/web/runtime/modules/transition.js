@@ -1,6 +1,6 @@
 /* @flow */
 
-import { inBrowser, isIE9 } from 'core/util/index'
+import { inBrowser, isIE9, warn } from 'core/util/index'
 import { once } from 'shared/util'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
@@ -12,6 +12,16 @@ import {
   whenTransitionEnds,
   parseDuration
 } from '../transition-util'
+
+function explicitDurationNaNWarn (name, vnode) {
+  warn(
+    `<transition> explicit ${name} duration is NaN and ` +
+    'may yield unexpected results. ' +
+    'The duration expression might be incorrect. ' +
+    `Valid examples: '500ms', '.5s' or 500`,
+    vnode.context
+  )
+}
 
 export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const el: any = vnode.elm
@@ -78,11 +88,15 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
   const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
 
-  const explicitDuration = parseDuration((
+  const explicitEnterDuration = parseDuration((
       duration !== null &&
       typeof duration === 'object' &&
       duration.enter
     ) || duration)
+
+  if (process.env.NODE_ENV !== 'production' && isNaN(explicitEnterDuration)) {
+    explicitDurationNaNWarn('enter', vnode)
+  }
 
   const expectsCSS = css !== false && !isIE9
   const userWantsControl =
@@ -130,8 +144,8 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       addTransitionClass(el, toClass)
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
-        if (typeof explicitDuration !== 'undefined') {
-          setTimeout(cb, explicitDuration)
+        if (typeof explicitEnterDuration === 'number') {
+          setTimeout(cb, explicitEnterDuration)
         } else {
           whenTransitionEnds(el, type, cb)
         }
@@ -189,11 +203,15 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     // the length of original fn as _length
     (leave._length || leave.length) > 1
 
-  const explicitDuration = parseDuration((
+  const explicitLeaveDuration = parseDuration((
       duration !== null &&
       typeof duration === 'object' &&
       duration.leave
     ) || duration)
+
+  if (process.env.NODE_ENV !== 'production' && isNaN(explicitLeaveDuration)) {
+    explicitDurationNaNWarn('leave', vnode)
+  }
 
   const cb = el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
@@ -238,8 +256,8 @@ export function leave (vnode: VNodeWithData, rm: Function) {
         addTransitionClass(el, leaveToClass)
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
-          if (typeof explicitDuration !== 'undefined') {
-            setTimeout(cb, explicitDuration)
+          if (typeof explicitLeaveDuration === 'number') {
+            setTimeout(cb, explicitLeaveDuration)
           } else {
             whenTransitionEnds(el, type, cb)
           }
