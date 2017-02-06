@@ -53,7 +53,7 @@ export declare class Vue {
     callback: WatchHandler<this>,
     options?: WatchOptions
   ): (() => void);
-  $on(event: string, callback: Function): this;
+  $on(event: string | string[], callback: Function): this;
   $once(event: string, callback: Function): this;
   $off(event?: string, callback?: Function): this;
   $emit(event: string, ...args: any[]): this;
