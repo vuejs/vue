@@ -6,7 +6,7 @@
  */
 export function addClass (el: Element, cls: ?string) {
   /* istanbul ignore if */
-  if (!cls || !cls.trim()) {
+  if (!cls || !(cls = cls.trim())) {
     return
   }
 
@@ -31,7 +31,7 @@ export function addClass (el: Element, cls: ?string) {
  */
 export function removeClass (el: Element, cls: ?string) {
   /* istanbul ignore if */
-  if (!cls || !cls.trim()) {
+  if (!cls || !(cls = cls.trim())) {
     return
   }
 
