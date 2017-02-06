@@ -10,7 +10,7 @@ import {
   addTransitionClass,
   removeTransitionClass,
   whenTransitionEnds,
-  parseDuration
+  parseDurationProp
 } from '../transition-util'
 
 function explicitDurationNaNWarn (name, vnode) {
@@ -88,15 +88,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
   const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
 
-  const explicitEnterDuration = parseDuration((
-      duration !== null &&
-      typeof duration === 'object' &&
-      duration.enter
-    ) || duration)
-
-  if (process.env.NODE_ENV !== 'production' && isNaN(explicitEnterDuration)) {
-    explicitDurationNaNWarn('enter', vnode)
-  }
+  const explicitEnterDuration = parseDurationProp(duration, 'enter')
 
   const expectsCSS = css !== false && !isIE9
   const userWantsControl =
@@ -145,6 +137,10 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
         if (typeof explicitEnterDuration === 'number') {
+          if (process.env.NODE_ENV !== 'production' && isNaN(explicitEnterDuration)) {
+            explicitDurationNaNWarn('enter', vnode)
+          }
+
           setTimeout(cb, explicitEnterDuration)
         } else {
           whenTransitionEnds(el, type, cb)
@@ -203,15 +199,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     // the length of original fn as _length
     (leave._length || leave.length) > 1
 
-  const explicitLeaveDuration = parseDuration((
-      duration !== null &&
-      typeof duration === 'object' &&
-      duration.leave
-    ) || duration)
-
-  if (process.env.NODE_ENV !== 'production' && isNaN(explicitLeaveDuration)) {
-    explicitDurationNaNWarn('leave', vnode)
-  }
+  const explicitLeaveDuration = parseDurationProp(duration, 'leave')
 
   const cb = el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
@@ -257,6 +245,9 @@ export function leave (vnode: VNodeWithData, rm: Function) {
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
           if (typeof explicitLeaveDuration === 'number') {
+            if (process.env.NODE_ENV !== 'production' && isNaN(explicitLeaveDuration)) {
+              explicitDurationNaNWarn('leave', vnode)
+            }
             setTimeout(cb, explicitLeaveDuration)
           } else {
             whenTransitionEnds(el, type, cb)
