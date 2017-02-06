@@ -25,6 +25,7 @@ function createRenderer (file, cb, options) {
     module: {
       rules: [{ test: /\.js$/, loader: 'babel-loader' }]
     },
+    externals: [require.resolve('../../dist/vue.runtime.common.js')],
     plugins: asBundle
       ? [new VueSSRPlugin()]
       : []
