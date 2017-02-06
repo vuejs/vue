@@ -23,7 +23,10 @@ const modifierCode: { [key: string]: string } = {
   ctrl: 'if(!$event.ctrlKey)return;',
   shift: 'if(!$event.shiftKey)return;',
   alt: 'if(!$event.altKey)return;',
-  meta: 'if(!$event.metaKey)return;'
+  meta: 'if(!$event.metaKey)return;',
+  left: 'if($event.button !== 0)return;',
+  middle: 'if($event.button !== 1)return;',
+  right: 'if($event.button !== 2)return;'
 }
 
 export function genHandlers (events: ASTElementHandlers, native?: boolean): string {
