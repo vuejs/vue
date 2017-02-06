@@ -6,13 +6,12 @@
  */
 export function addClass (el: Element, cls: ?string) {
   /* istanbul ignore if */
-  if (!cls || !cls.trim()) {
+  if (!cls || !(cls = cls.trim())) {
     return
   }
 
   /* istanbul ignore else */
   if (el.classList) {
-    cls = cls.trim()
     if (cls.indexOf(' ') > -1) {
       cls.split(/\s+/).forEach(c => el.classList.add(c))
     } else {
@@ -32,7 +31,7 @@ export function addClass (el: Element, cls: ?string) {
  */
 export function removeClass (el: Element, cls: ?string) {
   /* istanbul ignore if */
-  if (!cls || !cls.trim()) {
+  if (!cls || !(cls = cls.trim())) {
     return
   }
 
