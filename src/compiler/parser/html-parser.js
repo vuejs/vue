@@ -168,8 +168,8 @@ export function parseHTML (html, options) {
       parseEndTag(stackedTag, index - endTagLength, index)
     }
 
-    if (html === last && options.chars) {
-      options.chars(html)
+    if (html === last) {
+      options.chars && options.chars(html)
       break
     }
   }
