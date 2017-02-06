@@ -52,6 +52,7 @@ export function parse (
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
   delimiters = options.delimiters
+
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
   let root
@@ -59,6 +60,17 @@ export function parse (
   let inVPre = false
   let inPre = false
   let warned = false
+
+  function endPre (element) {
+    // check pre state
+    if (element.pre) {
+      inVPre = false
+    }
+    if (platformIsPreTag(element.tag)) {
+      inPre = false
+    }
+  }
+
   parseHTML(template, {
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
@@ -186,6 +198,8 @@ export function parse (
       if (!unary) {
         currentParent = element
         stack.push(element)
+      } else {
+        endPre(element)
       }
       // apply post-transforms
       for (let i = 0; i < postTransforms.length; i++) {
@@ -203,13 +217,7 @@ export function parse (
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
-      // check pre state
-      if (element.pre) {
-        inVPre = false
-      }
-      if (platformIsPreTag(element.tag)) {
-        inPre = false
-      }
+      endPre(element)
     },
 
     chars (text: string) {
