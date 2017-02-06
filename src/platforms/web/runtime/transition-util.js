@@ -180,7 +180,7 @@ function toMs (s: string): number {
   return Number(s.slice(0, -1)) * 1000
 }
 
-export function parseDuration (value: Object): any {
+export function parseDuration (value: Object): number | typeof NaN | typeof undefined {
   if (typeof value === 'number') {
     return value
   } else if (typeof value === 'string') {

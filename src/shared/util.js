@@ -243,7 +243,7 @@ export function once (fn: Function): Function {
  * Returns the number of ms corresponding to the text expression.
  * @param text Time expression with a time unit ('ms' or 's')
  */
-export function parseTime (text: string): any {
+export function parseTime (text: string): number | typeof NaN {
   const matched: ?Array<string> = text.match(/(\d+|\d+\.\d+|\.\d+)\s*(s|ms)/i)
   if (matched) {
     /* eslint no-unused-vars:0 */
