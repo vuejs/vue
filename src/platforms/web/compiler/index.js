@@ -1,13 +1,14 @@
 /* @flow */
 
-import { extend, genStaticKeys, noop } from 'shared/util'
+import { isUnaryTag } from './util'
 import { warn } from 'core/util/debug'
-import { compile as baseCompile } from 'compiler/index'
 import { detectErrors } from 'compiler/error-detector'
+import { compile as baseCompile } from 'compiler/index'
+import { extend, genStaticKeys, noop } from 'shared/util'
+import { isReservedTag, mustUseProp, getTagNamespace, isPreTag } from '../util/index'
+
 import modules from './modules/index'
 import directives from './directives/index'
-import { isReservedTag, mustUseProp, getTagNamespace, isPreTag } from '../util/index'
-import { isUnaryTag } from './util'
 
 const cache: { [key: string]: CompiledFunctionResult } = Object.create(null)
 
@@ -23,7 +24,7 @@ export const baseOptions: CompilerOptions = {
   isPreTag
 }
 
-export function compile (
+function compileWithOptions (
   template: string,
   options?: CompilerOptions
 ): CompiledResult {
@@ -33,15 +34,49 @@ export function compile (
   return baseCompile(template, options)
 }
 
+export function compile (
+  template: string,
+  options?: CompilerOptions
+): CompiledResult {
+  options = options || {}
+  const errors = []
+  // allow injecting modules/directives
+  const baseModules = baseOptions.modules || []
+  const modules = options.modules
+    ? baseModules.concat(options.modules)
+    : baseModules
+  const directives = options.directives
+    ? extend(extend({}, baseOptions.directives), options.directives)
+    : baseOptions.directives
+  const compiled = compileWithOptions(template, {
+    modules,
+    directives,
+    preserveWhitespace: options.preserveWhitespace,
+    warn: msg => {
+      errors.push(msg)
+    }
+  })
+  if (process.env.NODE_ENV !== 'production') {
+    compiled.errors = errors.concat(detectErrors(compiled.ast))
+  }
+  return compiled
+}
+
 export function compileToFunctions (
   template: string,
   options?: CompilerOptions,
   vm?: Component
 ): CompiledFunctionResult {
-  const _warn = (options && options.warn) || warn
-  // detect possible CSP restriction
+  options = extend({}, options)
+  const _warn = options.warn || warn
+  const errors = []
   /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'production') {
+    options.warn = msg => {
+      errors.push(msg)
+    }
+
+    // detect possible CSP restriction
     try {
       new Function('return 1')
     } catch (e) {
@@ -56,14 +91,14 @@ export function compileToFunctions (
       }
     }
   }
-  const key = options && options.delimiters
+  const key = options.delimiters
     ? String(options.delimiters) + template
     : template
   if (cache[key]) {
     return cache[key]
   }
   const res = {}
-  const compiled = compile(template, options)
+  const compiled = compileWithOptions(template, options)
   res.render = makeFunction(compiled.render)
   const l = compiled.staticRenderFns.length
   res.staticRenderFns = new Array(l)
@@ -71,11 +106,16 @@ export function compileToFunctions (
     res.staticRenderFns[i] = makeFunction(compiled.staticRenderFns[i])
   }
   if (process.env.NODE_ENV !== 'production') {
-    if (res.render === noop || res.staticRenderFns.some(fn => fn === noop)) {
+    if (
+      errors.length ||
+      res.render === noop ||
+      res.staticRenderFns.some(fn => fn === noop)
+    ) {
+      const expressionErrors = detectErrors(compiled.ast)
       _warn(
-        `failed to compile template:\n\n${template}\n\n` +
-        detectErrors(compiled.ast).join('\n') +
-        '\n\n',
+        `Error compiling template:\n\n${template}\n\n` +
+        (errors.length ? errors.map(e => `- ${e}`).join('\n') + '\n' : '') +
+        (expressionErrors.length ? expressionErrors.join('\n') + '\n' : ''),
         vm
       )
     }

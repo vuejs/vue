@@ -249,14 +249,14 @@ describe('parser', () => {
   })
 
   it('v-for directive basic syntax', () => {
-    const ast = parse('<ul><li v-for="item in items"></li><ul>', baseOptions)
+    const ast = parse('<ul><li v-for="item in items"></li></ul>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
   })
 
   it('v-for directive iteration syntax', () => {
-    const ast = parse('<ul><li v-for="(item, index) in items"></li><ul>', baseOptions)
+    const ast = parse('<ul><li v-for="(item, index) in items"></li><ul/>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
@@ -265,7 +265,7 @@ describe('parser', () => {
   })
 
   it('v-for directive iteration syntax (multiple)', () => {
-    const ast = parse('<ul><li v-for="(item, key, index) in items"></li><ul>', baseOptions)
+    const ast = parse('<ul><li v-for="(item, key, index) in items"></li></ul>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
@@ -274,7 +274,7 @@ describe('parser', () => {
   })
 
   it('v-for directive key', () => {
-    const ast = parse('<ul><li v-for="item in items" :key="item.uid"></li><ul>', baseOptions)
+    const ast = parse('<ul><li v-for="item in items" :key="item.uid"></li></ul>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
@@ -282,7 +282,7 @@ describe('parser', () => {
   })
 
   it('v-for directive invalid syntax', () => {
-    parse('<ul><li v-for="item into items"></li><ul>', baseOptions)
+    parse('<ul><li v-for="item into items"></li></ul>', baseOptions)
     expect('Invalid v-for expression').toHaveBeenWarned()
   })
 

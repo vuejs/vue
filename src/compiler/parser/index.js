@@ -72,6 +72,7 @@ export function parse (
   }
 
   parseHTML(template, {
+    warn,
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,

@@ -655,7 +655,7 @@ describe('SSR: renderToString', () => {
 
   it('comment nodes', done => {
     renderVmWithOptions({
-      template: '<div><transition><div v-if="false"></test></transition></div>'
+      template: '<div><transition><div v-if="false"></div></transition></div>'
     }, result => {
       expect(result).toContain(`<div server-rendered="true"><!----></div>`)
       done()
