@@ -9,6 +9,13 @@ declare module 'source-map' {
     addMapping(mapping: Object): void;
     toString(): string;
   }
+  declare class SourceMapConsumer {
+    originalPositionFor(position: { line: number; column: number; }): {
+      source: ?string;
+      line: ?number;
+      column: ?number;
+    };
+  }
 }
 
 declare module 'lru-cache' {

@@ -150,4 +150,9 @@ describe('Single File Component parser', () => {
     const res = parseComponent(`<template>${raw}</template>`)
     expect(res.template.content.trim()).toBe(raw)
   })
+
+  it('should not hang on trailing text', () => {
+    const res = parseComponent(`<template>hi</`)
+    expect(res.template.content).toBe('hi')
+  })
 })

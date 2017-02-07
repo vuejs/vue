@@ -73,7 +73,7 @@ if (!isIE9) {
               enter-to-class="hello-to"
               leave-class="bye"
               leave-to-class="bye-to"
-              leave-active-class="byebye active">
+              leave-active-class="byebye active more ">
               <div v-if="ok" class="test">foo</div>
             </transition>
           </div>
@@ -85,9 +85,9 @@ if (!isIE9) {
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
       waitForUpdate(() => {
-        expect(vm.$el.children[0].className).toBe('test bye byebye active')
+        expect(vm.$el.children[0].className).toBe('test bye byebye active more')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].className).toBe('test byebye active bye-to')
+        expect(vm.$el.children[0].className).toBe('test byebye active more bye-to')
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true

@@ -52,6 +52,7 @@ export function parse (
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
   delimiters = options.delimiters
+
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
   let root
@@ -59,7 +60,19 @@ export function parse (
   let inVPre = false
   let inPre = false
   let warned = false
+
+  function endPre (element) {
+    // check pre state
+    if (element.pre) {
+      inVPre = false
+    }
+    if (platformIsPreTag(element.tag)) {
+      inPre = false
+    }
+  }
+
   parseHTML(template, {
+    warn,
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
@@ -136,14 +149,14 @@ export function parse (
             warned = true
             warn(
               `Cannot use <${el.tag}> as component root element because it may ` +
-              'contain multiple nodes:\n' + template
+              'contain multiple nodes.'
             )
           }
           if (el.attrsMap.hasOwnProperty('v-for')) {
             warned = true
             warn(
               'Cannot use v-for on stateful component root element because ' +
-              'it renders multiple elements:\n' + template
+              'it renders multiple elements.'
             )
           }
         }
@@ -164,8 +177,7 @@ export function parse (
         } else if (process.env.NODE_ENV !== 'production' && !warned) {
           warned = true
           warn(
-            `Component template should contain exactly one root element:` +
-            `\n\n${template}\n\n` +
+            `Component template should contain exactly one root element. ` +
             `If you are using v-if on multiple elements, ` +
             `use v-else-if to chain them instead.`
           )
@@ -186,6 +198,8 @@ export function parse (
       if (!unary) {
         currentParent = element
         stack.push(element)
+      } else {
+        endPre(element)
       }
       // apply post-transforms
       for (let i = 0; i < postTransforms.length; i++) {
@@ -203,13 +217,7 @@ export function parse (
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
-      // check pre state
-      if (element.pre) {
-        inVPre = false
-      }
-      if (platformIsPreTag(element.tag)) {
-        inPre = false
-      }
+      endPre(element)
     },
 
     chars (text: string) {
@@ -217,7 +225,7 @@ export function parse (
         if (process.env.NODE_ENV !== 'production' && !warned && text === template) {
           warned = true
           warn(
-            'Component template requires a root element, rather than just text:\n\n' + template
+            'Component template requires a root element, rather than just text.'
           )
         }
         return
