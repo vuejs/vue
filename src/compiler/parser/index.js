@@ -149,14 +149,14 @@ export function parse (
             warned = true
             warn(
               `Cannot use <${el.tag}> as component root element because it may ` +
-              'contain multiple nodes:\n' + template
+              'contain multiple nodes.'
             )
           }
           if (el.attrsMap.hasOwnProperty('v-for')) {
             warned = true
             warn(
               'Cannot use v-for on stateful component root element because ' +
-              'it renders multiple elements:\n' + template
+              'it renders multiple elements.'
             )
           }
         }
@@ -177,8 +177,7 @@ export function parse (
         } else if (process.env.NODE_ENV !== 'production' && !warned) {
           warned = true
           warn(
-            `Component template should contain exactly one root element:` +
-            `\n\n${template}\n\n` +
+            `Component template should contain exactly one root element. ` +
             `If you are using v-if on multiple elements, ` +
             `use v-else-if to chain them instead.`
           )
@@ -226,7 +225,7 @@ export function parse (
         if (process.env.NODE_ENV !== 'production' && !warned && text === template) {
           warned = true
           warn(
-            'Component template requires a root element, rather than just text:\n\n' + template
+            'Component template requires a root element, rather than just text.'
           )
         }
         return

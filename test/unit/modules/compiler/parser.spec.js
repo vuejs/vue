@@ -79,7 +79,7 @@ describe('parser', () => {
 
   it('warn multiple root elements', () => {
     parse('<div></div><div></div>', baseOptions)
-    expect('Component template should contain exactly one root element:\n\n<div></div><div></div>').toHaveBeenWarned()
+    expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
   it('remove duplicate whitespace text nodes caused by comments', () => {
@@ -182,41 +182,33 @@ describe('parser', () => {
 
   it('warn 2 root elements with v-if', () => {
     parse('<div v-if="1"></div><div v-if="2"></div>', baseOptions)
-    expect('Component template should contain exactly one root element:\n\n<div v-if="1"></div><div v-if="2"></div>')
-      .toHaveBeenWarned()
+    expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
   it('warn 3 root elements with v-if and v-else on first 2', () => {
     parse('<div v-if="1"></div><div v-else></div><div></div>', baseOptions)
-    expect('Component template should contain exactly one root element:\n\n<div v-if="1"></div><div v-else></div><div></div>')
-      .toHaveBeenWarned()
+    expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
   it('warn 3 root elements with v-if and v-else-if on first 2', () => {
     parse('<div v-if="1"></div><div v-else-if></div><div></div>', baseOptions)
-    expect('Component template should contain exactly one root element:\n\n' +
-        '<div v-if="1"></div><div v-else-if></div><div></div>')
-        .toHaveBeenWarned()
+    expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
   it('warn 4 root elements with v-if, v-else-if and v-else on first 2', () => {
     parse('<div v-if="1"></div><div v-else-if></div><div v-else></div><div></div>', baseOptions)
-    expect('Component template should contain exactly one root element:\n\n' +
-        '<div v-if="1"></div><div v-else-if></div><div v-else></div><div></div>')
-        .toHaveBeenWarned()
+    expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
   it('warn 2 root elements with v-if and v-else with v-for on 2nd', () => {
     parse('<div v-if="1"></div><div v-else v-for="i in [1]"></div>', baseOptions)
-    expect('Cannot use v-for on stateful component root element because it renders multiple elements:\n' +
-        '<div v-if="1"></div><div v-else v-for="i in [1]"></div>')
+    expect('Cannot use v-for on stateful component root element because it renders multiple elements')
       .toHaveBeenWarned()
   })
 
   it('warn 2 root elements with v-if and v-else-if with v-for on 2nd', () => {
     parse('<div v-if="1"></div><div v-else-if="2" v-for="i in [1]"></div>', baseOptions)
-    expect('Cannot use v-for on stateful component root element because it renders multiple elements:\n' +
-        '<div v-if="1"></div><div v-else-if="2" v-for="i in [1]"></div>')
+    expect('Cannot use v-for on stateful component root element because it renders multiple elements')
         .toHaveBeenWarned()
   })
 
