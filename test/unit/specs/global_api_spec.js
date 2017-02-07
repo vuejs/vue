@@ -126,13 +126,11 @@ describe('Global API', function () {
     it('convert recursive components correctly', function () {
       var components = {}
       components['CompB'] = {
-        name: 'comp-b',
         props: ['level'],
         template: '<div>B{{level}}<div v-if="level<11111"><comp-a :level="level+1"></comp-a></div></div>',
         components: components
       }
       components['CompA'] = {
-        name: 'comp-a',
         props: ['level'],
         template: '<div>A{{level}}<div v-if="level<11111"><comp-b :level="level+1"></comp-b></div></div>',
         components: components
