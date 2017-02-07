@@ -113,6 +113,33 @@ describe('Filters', () => {
     expect(vm.$el.textContent).toBe(String(8))
   })
 
+  it('handle division with variable++', () => {
+    const vm = new Vue({
+      data: { a: 7 },
+      template: `<div>{{ a++ / 2 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(7))
+  })
+
+  it('handle division with variable--', () => {
+    const vm = new Vue({
+      data: { a: 7 },
+      template: `<div>{{ a++ / 2 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(7))
+  })
+
+  it('handle division with variable_', () => {
+    const vm = new Vue({
+      data: { a_: 8 },
+      template: `<div>{{ a_ / 2 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(8))
+  })
+
   it('arguments', () => {
     const vm = new Vue({
       template: `<div>{{ msg | add(a, 3) }}</div>`,
