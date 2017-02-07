@@ -111,11 +111,10 @@ export function compileToFunctions (
       res.render === noop ||
       res.staticRenderFns.some(fn => fn === noop)
     ) {
-      const expressionErrors = detectErrors(compiled.ast)
+      const allErrors = errors.concat(detectErrors(compiled.ast))
       _warn(
         `Error compiling template:\n\n${template}\n\n` +
-        (errors.length ? errors.map(e => `- ${e}`).join('\n') + '\n' : '') +
-        (expressionErrors.length ? expressionErrors.join('\n') + '\n' : ''),
+        (allErrors.length ? allErrors.map(e => `- ${e}`).join('\n') + '\n' : ''),
         vm
       )
     }
