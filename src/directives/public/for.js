@@ -16,7 +16,8 @@ import {
   def,
   cancellable,
   isArray,
-  isPlainObject
+  isPlainObject,
+  nextTick
 } from '../../util/index'
 
 let uid = 0
@@ -304,7 +305,9 @@ const vFor = {
       var parent = this.start.parentNode
       var model = parent && parent.__v_model
       if (model) {
-        model.forceUpdate()
+        nextTick(function () {
+          model.forceUpdate()
+        })
       }
     }
   },
