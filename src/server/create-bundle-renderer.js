@@ -41,13 +41,14 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
     } else {
       throw new Error(INVALID_MSG)
     }
+    const evaluate = runInVm(entry, files)
     return {
       renderToString: (context?: Object, cb: (err: ?Error, res: ?string) => void) => {
         if (typeof context === 'function') {
           cb = context
           context = {}
         }
-        runInVm(entry, files, context).catch(err => {
+        evaluate(context).catch(err => {
           rewriteErrorTrace(err, maps)
           cb(err)
         }).then(app => {
@@ -61,7 +62,7 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
       },
       renderToStream: (context?: Object) => {
         const res = new PassThrough()
-        runInVm(entry, files, context).catch(err => {
+        evaluate(context).catch(err => {
           rewriteErrorTrace(err, maps)
           // avoid emitting synchronously before user can
           // attach error listener
