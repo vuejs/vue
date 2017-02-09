@@ -315,6 +315,48 @@ describe('Instance Events', function () {
         expect(spy2.calls.count()).toBe(2)
       })
 
+      // Github issues #3870
+      it('detached then destroyed', function (done) {
+        var el = document.createElement('div')
+        document.body.appendChild(el) // for inDoc.
+        var vm = new Vue({
+          el: el,
+          template: '<div><mod v-if="show"></mod></div>',
+          data: {
+            show: false
+          },
+          components: {
+            mod: {
+              template: '<div><comp></comp></div>',
+              components: {
+                comp: {
+                  template: '<div>123</div>',
+                  detached: function () {
+                    spy()
+                    expect(spy2).not.toHaveBeenCalled()
+                  },
+                  destroyed: function () {
+                    spy2()
+                    expect(spy).toHaveBeenCalled()
+                  }
+                }
+              }
+            }
+          }
+        })
+        _.nextTick(function () {
+          vm.show = true
+          _.nextTick(function () {
+            vm.show = false
+            _.nextTick(function () {
+              expect(spy).toHaveBeenCalled()
+              expect(spy2).toHaveBeenCalled()
+              done()
+            })
+          })
+        })
+      })
+
       it('should not fire on detached child', function () {
         var el = document.createElement('div')
         var childEl = document.createElement('div')
