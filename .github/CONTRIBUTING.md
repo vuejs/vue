@@ -26,7 +26,7 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
 
 - Issues with no clear repro steps will not be triaged. If an issue labeled "need repro" receives no further input from the issue author for more than 5 days, it will be closed.
 
-- It is recommended that you make a JSFiddle/JSBin/Codepen to demonstrate your issue. You could start with [this template](http://jsfiddle.net/df4Lnuw6/) that already includes the latest version of Vue.
+- It is recommended that you make a JSFiddle/JSBin/Codepen to demonstrate your issue. You could start with [this template](https://jsfiddle.net/z11fe07p/) that already includes the latest version of Vue.
 
 - For potential SSR (Server Side Rendering) issue or bugs that involves build setups, you can create a reproduction repository with steps in the README.
 
