@@ -6,8 +6,8 @@ export function genClassForVnode (vnode: VNode): string {
   let data = vnode.data
   let parentNode = vnode
   let childNode = vnode
-  while (childNode.child) {
-    childNode = childNode.child._vnode
+  while (childNode.componentInstance) {
+    childNode = childNode.componentInstance._vnode
     if (childNode.data) {
       data = mergeClassData(childNode.data, data)
     }

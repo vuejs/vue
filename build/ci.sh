@@ -11,8 +11,3 @@ npm run test:weex
 if [[ -z $CI_PULL_REQUEST ]]; then
   cat ./coverage/lcov.info | ./node_modules/.bin/codecov
 fi
-
-# run full browser suites on saucelabs for master branch
-if [[ $CIRCLE_BRANCH = master ]]; then
-  npm run test:sauce
-fi

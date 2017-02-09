@@ -9,7 +9,7 @@ type PropOptions = {
   default: any,
   required: ?boolean,
   validator: ?Function
-}
+};
 
 export function validateProp (
   key: string,

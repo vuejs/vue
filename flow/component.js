@@ -104,6 +104,8 @@ declare interface Component {
   _b: (data: any, value: any, asProp?: boolean) => VNodeData;
   // check custom keyCode
   _k: (eventKeyCode: number, key: string, builtInAlias: number | Array<number> | void) => boolean;
+  // resolve scoped slots
+  _u: (scopedSlots: Array<[string, Function]>) => { [key: string]: Function };
 
   // allow dynamic method registration
   [key: string]: any

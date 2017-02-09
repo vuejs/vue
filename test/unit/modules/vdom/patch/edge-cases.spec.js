@@ -121,23 +121,18 @@ describe('vdom patch: edge cases', () => {
       data: { ok: true },
       template: `
         <div>
-          <input v-if="ok" value="a">
-          <input v-else :value="'b'">
-          <input v-if="ok" type="checkbox" checked>
-          <input v-else type="checkbox" :checked="false">
+          <input type="button" v-if="ok" value="a">
+          <input type="button" :value="'b'">
         </div>
       `
     }).$mount()
     expect(vm.$el.children[0].value).toBe('a')
-    expect(vm.$el.children[1].checked).toBe(true)
     vm.ok = false
     waitForUpdate(() => {
       expect(vm.$el.children[0].value).toBe('b')
-      expect(vm.$el.children[1].checked).toBe(false)
       vm.ok = true
     }).then(() => {
       expect(vm.$el.children[0].value).toBe('a')
-      expect(vm.$el.children[1].checked).toBe(true)
     }).then(done)
   })
 })

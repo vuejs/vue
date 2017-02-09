@@ -13,6 +13,15 @@ const banner =
   ' * Released under the MIT License.\n' +
   ' */'
 
+const weexFactoryPlugin = {
+  intro () {
+    return 'module.exports = function weexFactory (exports, renderer) {'
+  },
+  outro () {
+    return '}'
+  }
+}
+
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
   'web-runtime-cjs': {
@@ -75,7 +84,15 @@ const builds = {
     entry: path.resolve(__dirname, '../src/entries/web-server-renderer.js'),
     dest: path.resolve(__dirname, '../packages/vue-server-renderer/build.js'),
     format: 'cjs',
-    external: ['stream', 'module', 'vm', 'he', 'de-indent']
+    external: ['he', 'de-indent', 'source-map']
+  },
+  // Weex runtime factory
+  'weex-factory': {
+    weex: true,
+    entry: path.resolve(__dirname, '../src/entries/weex-factory.js'),
+    dest: path.resolve(__dirname, '../packages/weex-vue-framework/factory.js'),
+    format: 'cjs',
+    plugins: [weexFactoryPlugin]
   },
   // Weex runtime framework (CommonJS).
   'weex-framework': {
@@ -111,7 +128,7 @@ function genConfig (opts) {
       flow(),
       buble(),
       alias(Object.assign({}, require('./alias'), opts.alias))
-    ]
+    ].concat(opts.plugins || [])
   }
 
   if (opts.env) {

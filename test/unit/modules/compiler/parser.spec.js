@@ -79,7 +79,7 @@ describe('parser', () => {
 
   it('warn multiple root elements', () => {
     parse('<div></div><div></div>', baseOptions)
-    expect('Component template should contain exactly one root element:\n\n<div></div><div></div>').toHaveBeenWarned()
+    expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
   it('remove duplicate whitespace text nodes caused by comments', () => {
@@ -182,41 +182,33 @@ describe('parser', () => {
 
   it('warn 2 root elements with v-if', () => {
     parse('<div v-if="1"></div><div v-if="2"></div>', baseOptions)
-    expect('Component template should contain exactly one root element:\n\n<div v-if="1"></div><div v-if="2"></div>')
-      .toHaveBeenWarned()
+    expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
   it('warn 3 root elements with v-if and v-else on first 2', () => {
     parse('<div v-if="1"></div><div v-else></div><div></div>', baseOptions)
-    expect('Component template should contain exactly one root element:\n\n<div v-if="1"></div><div v-else></div><div></div>')
-      .toHaveBeenWarned()
+    expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
   it('warn 3 root elements with v-if and v-else-if on first 2', () => {
     parse('<div v-if="1"></div><div v-else-if></div><div></div>', baseOptions)
-    expect('Component template should contain exactly one root element:\n\n' +
-        '<div v-if="1"></div><div v-else-if></div><div></div>')
-        .toHaveBeenWarned()
+    expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
   it('warn 4 root elements with v-if, v-else-if and v-else on first 2', () => {
     parse('<div v-if="1"></div><div v-else-if></div><div v-else></div><div></div>', baseOptions)
-    expect('Component template should contain exactly one root element:\n\n' +
-        '<div v-if="1"></div><div v-else-if></div><div v-else></div><div></div>')
-        .toHaveBeenWarned()
+    expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
   it('warn 2 root elements with v-if and v-else with v-for on 2nd', () => {
     parse('<div v-if="1"></div><div v-else v-for="i in [1]"></div>', baseOptions)
-    expect('Cannot use v-for on stateful component root element because it renders multiple elements:\n' +
-        '<div v-if="1"></div><div v-else v-for="i in [1]"></div>')
+    expect('Cannot use v-for on stateful component root element because it renders multiple elements')
       .toHaveBeenWarned()
   })
 
   it('warn 2 root elements with v-if and v-else-if with v-for on 2nd', () => {
     parse('<div v-if="1"></div><div v-else-if="2" v-for="i in [1]"></div>', baseOptions)
-    expect('Cannot use v-for on stateful component root element because it renders multiple elements:\n' +
-        '<div v-if="1"></div><div v-else-if="2" v-for="i in [1]"></div>')
+    expect('Cannot use v-for on stateful component root element because it renders multiple elements')
         .toHaveBeenWarned()
   })
 
@@ -249,14 +241,14 @@ describe('parser', () => {
   })
 
   it('v-for directive basic syntax', () => {
-    const ast = parse('<ul><li v-for="item in items"></li><ul>', baseOptions)
+    const ast = parse('<ul><li v-for="item in items"></li></ul>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
   })
 
   it('v-for directive iteration syntax', () => {
-    const ast = parse('<ul><li v-for="(item, index) in items"></li><ul>', baseOptions)
+    const ast = parse('<ul><li v-for="(item, index) in items"></li><ul/>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
@@ -265,7 +257,7 @@ describe('parser', () => {
   })
 
   it('v-for directive iteration syntax (multiple)', () => {
-    const ast = parse('<ul><li v-for="(item, key, index) in items"></li><ul>', baseOptions)
+    const ast = parse('<ul><li v-for="(item, key, index) in items"></li></ul>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
@@ -274,7 +266,7 @@ describe('parser', () => {
   })
 
   it('v-for directive key', () => {
-    const ast = parse('<ul><li v-for="item in items" :key="item.uid"></li><ul>', baseOptions)
+    const ast = parse('<ul><li v-for="item in items" :key="item.uid"></li></ul>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
@@ -282,7 +274,7 @@ describe('parser', () => {
   })
 
   it('v-for directive invalid syntax', () => {
-    parse('<ul><li v-for="item into items"></li><ul>', baseOptions)
+    parse('<ul><li v-for="item into items"></li></ul>', baseOptions)
     expect('Invalid v-for expression').toHaveBeenWarned()
   })
 
@@ -413,7 +405,7 @@ describe('parser', () => {
 
   it('literal attribute', () => {
     // basic
-    const ast1 = parse('<input type="text" name="field1" value="hello world" checked>', baseOptions)
+    const ast1 = parse('<input type="text" name="field1" value="hello world">', baseOptions)
     expect(ast1.attrsList[0].name).toBe('type')
     expect(ast1.attrsList[0].value).toBe('text')
     expect(ast1.attrsList[1].name).toBe('name')
@@ -429,13 +421,6 @@ describe('parser', () => {
     expect(ast1.attrs[1].value).toBe('"field1"')
     expect(ast1.attrs[2].name).toBe('value')
     expect(ast1.attrs[2].value).toBe('"hello world"')
-    expect(ast1.attrs[3].name).toBe('checked')
-    expect(ast1.attrs[3].value).toBe('""')
-    // also bind speicals as props
-    expect(ast1.props[0].name).toBe('value')
-    expect(ast1.props[0].value).toBe('"hello world"')
-    expect(ast1.props[1].name).toBe('checked')
-    expect(ast1.props[1].value).toBe('true')
     // interpolation warning
     parse('<input type="text" name="field1" value="{{msg}}">', baseOptions)
     expect('Interpolation inside attributes has been removed').toHaveBeenWarned()
@@ -488,12 +473,16 @@ describe('parser', () => {
 
   it('preserve whitespace in <pre> tag', function () {
     const options = extend({}, baseOptions)
-    const ast = parse('<pre><code>  \n<span>hi</span>\n  </code></pre>', options)
+    const ast = parse('<pre><code>  \n<span>hi</span>\n  </code><span> </span></pre>', options)
     const code = ast.children[0]
     expect(code.children[0].type).toBe(3)
     expect(code.children[0].text).toBe('  \n')
     expect(code.children[2].type).toBe(3)
     expect(code.children[2].text).toBe('\n  ')
+
+    const span = ast.children[1]
+    expect(span.children[0].type).toBe(3)
+    expect(span.children[0].text).toBe(' ')
   })
 
   it('forgivingly handle < in plain text', () => {

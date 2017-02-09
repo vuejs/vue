@@ -11,7 +11,7 @@ import {
 type StaticStyleResult = {
   dynamic: boolean,
   styleResult: string
-}
+};
 
 const normalize = cached(camelize)
 

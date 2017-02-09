@@ -166,7 +166,7 @@ describe('Component', () => {
     const vm = new Vue({
       template:
         '<div>' +
-          '<component v-for="c in comps" :is="c.type"></component>' +
+          '<component v-for="c in comps" :key="c.type" :is="c.type"></component>' +
         '</div>',
       data: {
         comps: [{ type: 'one' }, { type: 'two' }]

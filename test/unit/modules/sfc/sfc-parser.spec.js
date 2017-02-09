@@ -78,6 +78,15 @@ describe('Single File Component parser', () => {
     expect(res.template.content.trim()).toBe(`div\n  h1(v-if='1 < 2') hello`)
   })
 
+  it('should handle component contains "<" only', () => {
+    const res = parseComponent(`
+      <template>
+        <span><</span>
+      </template>
+    `)
+    expect(res.template.content.trim()).toBe(`<span><</span>`)
+  })
+
   it('should handle custom blocks without parsing them', () => {
     const res = parseComponent(`
       <template>
@@ -140,5 +149,10 @@ describe('Single File Component parser', () => {
     </div>`
     const res = parseComponent(`<template>${raw}</template>`)
     expect(res.template.content.trim()).toBe(raw)
+  })
+
+  it('should not hang on trailing text', () => {
+    const res = parseComponent(`<template>hi</`)
+    expect(res.template.content).toBe('hi')
   })
 })

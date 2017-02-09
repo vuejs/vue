@@ -130,6 +130,29 @@ describe('Directive v-on', () => {
     expect(spy.calls.count()).toBe(1) // should no longer trigger
   })
 
+  // #4655
+  it('should handle .once on multiple elements properly', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <button ref="one" @click.once="foo">one</button>
+          <button ref="two" @click.once="foo">two</button>
+        </div>
+      `,
+      methods: { foo: spy }
+    })
+    triggerEvent(vm.$refs.one, 'click')
+    expect(spy.calls.count()).toBe(1)
+    triggerEvent(vm.$refs.one, 'click')
+    expect(spy.calls.count()).toBe(1)
+    triggerEvent(vm.$refs.two, 'click')
+    expect(spy.calls.count()).toBe(2)
+    triggerEvent(vm.$refs.one, 'click')
+    triggerEvent(vm.$refs.two, 'click')
+    expect(spy.calls.count()).toBe(2)
+  })
+
   it('should support capture and once', () => {
     const callOrder = []
     vm = new Vue({

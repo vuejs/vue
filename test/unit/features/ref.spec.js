@@ -121,7 +121,7 @@ describe('ref', () => {
       },
       template: `
         <div>
-          <test v-for="n in items" ref="list" :n="n"></test>
+          <test v-for="n in items" ref="list" :key="n" :n="n"></test>
         </div>
       `,
       components: {

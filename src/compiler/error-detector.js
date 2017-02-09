@@ -55,7 +55,7 @@ function checkFor (node: ASTElement, text: string, errors: Array<string>) {
 
 function checkIdentifier (ident: ?string, type: string, text: string, errors: Array<string>) {
   if (typeof ident === 'string' && !identRE.test(ident)) {
-    errors.push(`- invalid ${type} "${ident}" in expression: ${text}`)
+    errors.push(`invalid ${type} "${ident}" in expression: ${text.trim()}`)
   }
 }
 
@@ -66,11 +66,11 @@ function checkExpression (exp: string, text: string, errors: Array<string>) {
     const keywordMatch = exp.replace(stripStringRE, '').match(prohibitedKeywordRE)
     if (keywordMatch) {
       errors.push(
-        `- avoid using JavaScript keyword as property name: ` +
-        `"${keywordMatch[0]}" in expression ${text}`
+        `avoid using JavaScript keyword as property name: ` +
+        `"${keywordMatch[0]}" in expression ${text.trim()}`
       )
     } else {
-      errors.push(`- invalid expression: ${text}`)
+      errors.push(`invalid expression: ${text.trim()}`)
     }
   }
 }

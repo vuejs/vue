@@ -14,7 +14,7 @@ module.exports = function (config) {
   })
 
   // add babel-plugin-istanbul for code intrumentation
-  options.webpack.babel = {
+  options.webpack.module.rules[0].options = {
     plugins: [['istanbul', {
       exclude: [
         'test/',

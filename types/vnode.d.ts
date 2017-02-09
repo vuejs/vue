@@ -17,7 +17,7 @@ export interface VNode {
   context?: Vue;
   key?: string | number;
   componentOptions?: VNodeComponentOptions;
-  child?: Vue;
+  componentInstance?: Vue;
   parent?: VNode;
   raw?: boolean;
   isStatic?: boolean;

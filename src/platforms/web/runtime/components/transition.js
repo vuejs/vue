@@ -4,7 +4,7 @@
 // supports transition mode (out-in / in-out)
 
 import { warn } from 'core/util/index'
-import { camelize, extend } from 'shared/util'
+import { camelize, extend, isPrimitive } from 'shared/util'
 import { mergeVNodeHook, getFirstComponentChild } from 'core/vdom/helpers/index'
 
 export const transitionProps = {
@@ -73,6 +73,7 @@ export default {
   name: 'transition',
   props: transitionProps,
   abstract: true,
+
   render (h: Function) {
     let children = this.$slots.default
     if (!children) {
@@ -126,9 +127,15 @@ export default {
       return placeholder(h, rawChild)
     }
 
-    const key = child.key = child.key == null || child.isStatic
-      ? `__v${child.tag + this._uid}__`
-      : child.key
+    // ensure a key that is unique to the vnode type and to this transition
+    // component instance. This key will be used to remove pending leaving nodes
+    // during entering.
+    const id = `__transition-${this._uid}-`
+    const key = child.key = child.key == null
+      ? id + child.tag
+      : isPrimitive(child.key)
+        ? (String(child.key).indexOf(id) === 0 ? child.key : id + child.key)
+        : child.key
     const data = (child.data || (child.data = {})).transition = extractTransitionData(this)
     const oldRawChild = this._vnode
     const oldChild: any = getRealChild(oldRawChild)
