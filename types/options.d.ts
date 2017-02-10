@@ -17,7 +17,7 @@ export interface ComponentOptions<V extends Vue> {
   propsData?: Object;
   computed?: { [key: string]: ((this: V) => any) | ComputedOptions<V> };
   methods?: { [key: string]: (this: V, ...args: any[]) => any };
-  watch?: { [key: string]: ({ handler: WatchHandler<V> } & WatchOptions) | WatchHandler<V> | string };
+  watch?: { [key: string]: ({ handler: WatchHandler<V, any> } & WatchOptions) | WatchHandler<V, any> | string };
 
   el?: Element | String;
   template?: string;
@@ -75,7 +75,7 @@ export interface ComputedOptions<V> {
   cache?: boolean;
 }
 
-export type WatchHandler<V> = (this: V, val: any, oldVal: any) => void;
+export type WatchHandler<V, T> = (this: V, val: T, oldVal: T) => void;
 
 export interface WatchOptions {
   deep?: boolean;

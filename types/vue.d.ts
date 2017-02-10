@@ -50,8 +50,13 @@ export declare class Vue {
   $set: typeof Vue.set;
   $delete: typeof Vue.delete;
   $watch(
-    expOrFn: string | Function,
-    callback: WatchHandler<this>,
+    expOrFn: string,
+    callback: WatchHandler<this, any>,
+    options?: WatchOptions
+  ): (() => void);
+  $watch<T>(
+    expOrFn: () => T,
+    callback: WatchHandler<this, T>,
     options?: WatchOptions
   ): (() => void);
   $on(event: string, callback: Function): this;
