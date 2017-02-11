@@ -293,5 +293,44 @@ if (!isIE9) {
       }).$mount()
       expect('<transition-group> children must be keyed: <div>').toHaveBeenWarned()
     })
+
+    // Issue #4900
+    it('stagger animations on initial empty children', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition-group name="test-empty-array">
+              <div v-for="item in items" :key="item">{{ item }}</div>
+            </transition-group>
+          </div>
+        `,
+        data: {
+          items: []
+        }
+      }).$mount(el)
+      vm.items.push(0)
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="test-empty-array-enter test-empty-array-enter-active">0</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(duration / 3).then(() => {
+        vm.items.push(1)
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="test-empty-array-enter-active test-empty-array-enter-to">0</div>` +
+            `<div class="test-empty-array-enter-active test-empty-array-enter-to">1</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            vm.items.map(i => `<div class="">${i}</div>`).join('') +
+          `</span>`
+        )
+      }).then(done)
+    })
   })
 }
