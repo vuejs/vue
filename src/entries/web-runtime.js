@@ -38,7 +38,10 @@ Vue.prototype.$mount = function (
 }
 
 if (process.env.NODE_ENV !== 'production' &&
-    inBrowser && typeof console !== 'undefined') {
+    inBrowser &&
+    typeof console !== 'undefined' &&
+    process.env.ADD_DEV_WARNING
+  ) {
   console[console.info ? 'info' : 'log'](
     `You are running Vue in development mode.\n` +
     `Make sure to turn on production mode when deploying for production.\n` +
