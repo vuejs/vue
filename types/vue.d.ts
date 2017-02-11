@@ -55,7 +55,7 @@ export declare class Vue {
     options?: WatchOptions
   ): (() => void);
   $watch<T>(
-    expOrFn: () => T,
+    expOrFn: (this: this) => T,
     callback: WatchHandler<this, T>,
     options?: WatchOptions
   ): (() => void);
