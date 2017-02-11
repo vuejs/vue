@@ -22,7 +22,7 @@ Reporting a bug?
 
 - It is **required** that you clearly describe the steps necessary to reproduce the issue you are running into. Issues with no clear repro steps will not be triaged. If an issue labeled "need repro" receives no further input from the issue author for more than 5 days, it will be closed.
 
-- It is recommended that you make a JSFiddle/JSBin/Codepen to demonstrate your issue. You could start with [this template](https://jsfiddle.net/z11fe07p/) that already includes the latest version of Vue.
+- It is recommended that you make a JSFiddle/JSBin/Codepen to demonstrate your issue. You could start with [this template](https://jsfiddle.net/39epgLj0/) that already includes the latest version of Vue.
 
 - For potential SSR (Server Side Rendering) issue or bugs that involves build setups, you can create a reproduction repository with steps in the README.
 
@@ -39,7 +39,7 @@ Remove the template from below and provide thoughtful commentary *and code sampl
 
 ### Reproduction Link
 <!-- A minimal JSBin, JSFiddle, Codepen, or a GitHub repository that can reproduce the bug. -->
-<!-- You could start with this template: https://jsfiddle.net/z11fe07p/ -->
+<!-- You could start with this template: https://jsfiddle.net/39epgLj0/ -->
 
 ### Steps to reproduce
 
