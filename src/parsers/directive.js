@@ -115,9 +115,7 @@ function parseExpression () {
       if (chr === pipeChr) {
         next()
       } else {
-        if (state === startState || state === filterArgState) {
-          state = filterState
-        }
+        state = filterState
         break
       }
     } else if (chr === spaceChr && (state === filterNameState || state === filterArgState)) {
@@ -149,12 +147,15 @@ function parseFilter () {
   state = filterState
   filter.name = parseExpression().trim()
 
-  state = filterArgState
-  args = parseFilterArguments()
+  if (state === filterNameState) {
+    state = filterArgState
+    args = parseFilterArguments()
 
-  if (args.length) {
-    filter.args = args
+    if (args.length) {
+      filter.args = args
+    }
   }
+
   return filter
 }
 
