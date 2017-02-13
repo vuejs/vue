@@ -101,7 +101,8 @@ export default {
     children.forEach(applyTranslation)
 
     // force reflow to put everything in position
-    const f = document.body.offsetHeight // eslint-disable-line
+    const body: any = document.body
+    const f = body.offsetHeight // eslint-disable-line
 
     children.forEach(c => {
       if (c.data.moved) {

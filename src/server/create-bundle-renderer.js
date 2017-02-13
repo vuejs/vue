@@ -24,8 +24,12 @@ type RenderBundle = {
 };
 
 export function createBundleRendererCreator (createRenderer: () => Renderer) {
-  return (bundle: string | RenderBundle, rendererOptions?: RenderOptions) => {
+  return function createBundleRenderer (
+    bundle: string | RenderBundle,
+    rendererOptions?: RenderOptions
+  ) {
     const renderer = createRenderer(rendererOptions)
+
     let files, entry, maps
     if (typeof bundle === 'object') {
       entry = bundle.entry
@@ -60,6 +64,7 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
           }
         })
       },
+
       renderToStream: (context?: Object) => {
         const res = new PassThrough()
         evaluate(context).catch(err => {
@@ -79,6 +84,7 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
             renderStream.pipe(res)
           }
         })
+
         return res
       }
     }

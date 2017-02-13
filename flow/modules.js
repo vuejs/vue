@@ -29,3 +29,14 @@ declare module 'de-indent' {
     (input: string): string
   }
 }
+
+declare module 'vue-ssr-html-stream' {
+  declare interface HTMLStreamOptions {
+    template: string;
+    context: Object;
+  }
+  declare class HTMLStream extends stream$Transform {
+    constructor(options: HTMLStreamOptions): void;
+  }
+  declare module.exports: HTMLStream
+}

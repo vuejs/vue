@@ -9,11 +9,18 @@ export type Renderer = {
   renderToStream: (component: Component) => RenderStream;
 };
 
+type RenderCache = {
+  get: (key: string, cb?: Function) => string | void;
+  set: (key: string, val: string) => void;
+  has?: (key: string, cb?: Function) => boolean | void;
+};
+
 export type RenderOptions = {
-  modules: Array<Function>,
-  directives: Object,
-  isUnaryTag: Function,
-  cache: ?Object
+  modules?: Array<(vnode: VNode) => string>;
+  directives?: Object;
+  isUnaryTag?: Function;
+  cache?: RenderCache;
+  template?: string;
 };
 
 export function createRenderer ({

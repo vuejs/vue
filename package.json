@@ -81,7 +81,7 @@
     "eslint-plugin-flowtype": "^2.16.0",
     "eslint-plugin-jasmine": "^2.1.0",
     "eslint-plugin-vue": "^1.0.0",
-    "flow-bin": "^0.33.0",
+    "flow-bin": "^0.39.0",
     "he": "^1.1.0",
     "http-server": "^0.9.0",
     "jasmine": "^2.5.2",
