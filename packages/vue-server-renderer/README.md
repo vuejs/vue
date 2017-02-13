@@ -162,7 +162,7 @@ Provide a template for the entire page's HTML. The template should contain a com
 
 In addition, when both a template and a render context is provided (e.g. when using the `bundleRenderer`), the renderer will also automatically inject the following properties found on the render context:
 
-- `context.head`: (string) any head markup that should be injected into the head of the page. Note when using the bundle format generated with `vue-ssr-webpack-plugin`, this property will automatically contain `<link rel="preload/prefetch">` directives for chunks in the bundle.
+- `context.head`: (string) any head markup that should be injected into the head of the page.
 
 - `context.styles`: (string) any inline CSS that should be injected into the head of the page. Note that `vue-loader` 10.2.0+ (which uses `vue-style-loader` 2.0) will automatically populate this property with styles used in rendered components.
 
@@ -208,9 +208,13 @@ As an example, check out [`v-show`'s server-side implementation](https://github.
 
 ## Why Use `bundleRenderer`?
 
-In a typical Node.js app, the server is a long-running process. If we directly require our application code, the instantiated modules will be shared across every request. This imposes some inconvenient restrictions to the application structure: we will have to avoid any use of global stateful singletons (e.g. the store), otherwise state mutations caused by one request will affect the result of the next.
+When we bundle our front-end code with a module bundler such as webpack, it can introduce some complexity when we want to reuse the same code on the server. For example, if we use `vue-loader`, TypeScript or JSX, the code cannot run natively in Node. Our code may also rely on some webpack-specific features such as file handling with `file-loader` or style injection with `style-loader`, both of which can be problematic when running inside a native Node module environment.
 
-Instead, it's more straightforward to run our app "fresh" for each request, so that we don't have to think about avoiding state contamination across requests. This is exactly what `bundleRenderer` helps us achieve.
+The most straightforward solution to this is to leverage webpack's `target: 'node'` feature and simply use webpack to bundle our code on both the client AND the server.
+
+Having a compiled server bundle also provides another advantage in terms of code organization. In a typical Node.js app, the server is a long-running process. If we run our application modules directly, the instantiated modules will be shared across every request. This imposes some inconvenient restrictions to the application structure: we will have to avoid any use of global stateful singletons (e.g. the store), otherwise state mutations caused by one request will affect the result of the next.
+
+Instead, it's more straightforward to run our app "fresh", in a sandboxed context for each request, so that we don't have to think about avoiding state contamination across requests.
 
 ## Creating the Server Bundle
 
@@ -226,7 +230,9 @@ type RenderBundle = {
 }
 ```
 
-Although theoretically you can use any build tool to generate the bundle, it is recommended to use Webpack + `vue-loader` + [vue-ssr-webpack-plugin](https://github.com/vuejs/vue-ssr-webpack-plugin) for this purpose. The usual workflow is setting up a base webpack configuration file for the client-side, then modify it to generate the server-side bundle with the following changes:
+Although theoretically you can use any build tool to generate the bundle, it is recommended to use webpack + `vue-loader` + [vue-ssr-webpack-plugin](https://github.com/vuejs/vue-ssr-webpack-plugin) for this purpose. This setup works seamlessly even if you use webpack's on-demand code splitting features such as dynamic `import()`.
+
+The usual workflow is setting up a base webpack configuration file for the client-side, then modify it to generate the server-side bundle with the following changes:
 
 1. Set `target: 'node'` and `output: { libraryTarget: 'commonjs2' }` in your webpack config.
 
