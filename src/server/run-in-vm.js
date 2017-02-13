@@ -19,39 +19,55 @@ function createContext (context) {
   return sandbox
 }
 
-function evaluateModule (filename, files, context, evaluatedModules) {
-  if (evaluatedModules[filename]) {
-    return evaluatedModules[filename]
-  }
+function compileModule (files) {
+  const compiledScripts = {}
 
-  const code = files[filename]
-  const wrapper = NativeModule.wrap(code)
-  const compiledWrapper = vm.runInNewContext(wrapper, context, {
-    filename,
-    displayErrors: true
-  })
-  const m = { exports: {}}
-  const r = file => {
-    file = path.join('.', file)
-    if (files[file]) {
-      return evaluateModule(file, files, context, evaluatedModules)
-    } else {
-      return require(file)
+  function getCompiledScript (filename) {
+    if (compiledScripts[filename]) {
+      return compiledScripts[filename]
     }
+    const code = files[filename]
+    const wrapper = NativeModule.wrap(code)
+    const script = new vm.Script(wrapper, {
+      filename,
+      displayErrors: true
+    })
+    compiledScripts[filename] = script
+    return script
   }
-  compiledWrapper.call(m.exports, m.exports, r, m)
 
-  const res = Object.prototype.hasOwnProperty.call(m.exports, 'default')
-    ? m.exports.default
-    : m.exports
-  evaluatedModules[filename] = res
-  return res
+  function evaluateModule (filename, context, evaluatedModules) {
+    if (evaluatedModules[filename]) {
+      return evaluatedModules[filename]
+    }
+
+    const script = getCompiledScript(filename)
+    const compiledWrapper = script.runInNewContext(context)
+    const m = { exports: {}}
+    const r = file => {
+      file = path.join('.', file)
+      if (files[file]) {
+        return evaluateModule(file, context, evaluatedModules)
+      } else {
+        return require(file)
+      }
+    }
+    compiledWrapper.call(m.exports, m.exports, r, m)
+
+    const res = Object.prototype.hasOwnProperty.call(m.exports, 'default')
+      ? m.exports.default
+      : m.exports
+    evaluatedModules[filename] = res
+    return res
+  }
+  return evaluateModule
 }
 
-export default function runInVm (entry, files, _context = {}) {
-  return new Promise((resolve, reject) => {
+export default function runInVm (entry, files) {
+  const evaluate = compileModule(files)
+  return (_context = {}) => new Promise((resolve, reject) => {
     const context = createContext(_context)
-    const res = evaluateModule(entry, files, context, {})
+    const res = evaluate(entry, context, {})
     resolve(typeof res === 'function' ? res(_context) : res)
   })
 }
