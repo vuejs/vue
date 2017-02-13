@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import injectStyles from './inject-styles'
 import { isIE9 } from 'core/util/env'
-import { nextFrame } from 'web/runtime/transition-util'
+import { nextFrame, nextOneFrame } from 'web/runtime/transition-util'
 
 if (!isIE9) {
   describe('Transition group', () => {
@@ -315,12 +315,26 @@ if (!isIE9) {
             `<div class="test-empty-array-enter test-empty-array-enter-active">0</div>` +
           `</span>`
         )
-      }).thenWaitFor(duration / 3).then(() => {
+      }).thenWaitFor(duration / 2).then(() => {
         vm.items.push(1)
-      }).thenWaitFor(nextFrame).then(() => {
+      }).thenWaitFor(nextOneFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
             `<div class="test-empty-array-enter-active test-empty-array-enter-to">0</div>` +
+            `<div class="test-empty-array-enter test-empty-array-enter-active">1</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(nextOneFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="test-empty-array-enter-active test-empty-array-enter-to">0</div>` +
+            `<div class="test-empty-array-enter-active test-empty-array-enter-to">1</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(duration / 2).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="">0</div>` +
             `<div class="test-empty-array-enter-active test-empty-array-enter-to">1</div>` +
           `</span>`
         )
