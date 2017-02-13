@@ -1,6 +1,6 @@
 /* @flow */
 
-import runInVm from './run-in-vm'
+import { createBundleRunner } from './create-bundle-runner'
 import type { Renderer, RenderOptions } from './create-renderer'
 import { createSourceMapConsumers, rewriteErrorTrace } from './source-map-support'
 
@@ -45,14 +45,14 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
     } else {
       throw new Error(INVALID_MSG)
     }
-    const evaluate = runInVm(entry, files)
+    const run = createBundleRunner(entry, files)
     return {
       renderToString: (context?: Object, cb: (err: ?Error, res: ?string) => void) => {
         if (typeof context === 'function') {
           cb = context
           context = {}
         }
-        evaluate(context).catch(err => {
+        run(context).catch(err => {
           rewriteErrorTrace(err, maps)
           cb(err)
         }).then(app => {
@@ -67,7 +67,7 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
 
       renderToStream: (context?: Object) => {
         const res = new PassThrough()
-        evaluate(context).catch(err => {
+        run(context).catch(err => {
           rewriteErrorTrace(err, maps)
           // avoid emitting synchronously before user can
           // attach error listener

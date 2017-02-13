@@ -63,7 +63,7 @@ function compileModule (files) {
   return evaluateModule
 }
 
-export default function runInVm (entry, files) {
+export function createBundleRunner (entry, files) {
   const evaluate = compileModule(files)
   return (_context = {}) => new Promise((resolve, reject) => {
     const context = createContext(_context)
