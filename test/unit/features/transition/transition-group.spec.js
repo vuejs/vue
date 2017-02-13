@@ -244,16 +244,22 @@ if (!isIE9) {
     })
 
     it('move', done => {
+      const beforeMoveSpy = jasmine.createSpy()
+      const afterMoveSpy = jasmine.createSpy()
       const vm = new Vue({
         template: `
           <div>
-            <transition-group name="group">
+            <transition-group name="group" @before-move="before" @after-move="after">
               <div v-for="item in items" :key="item" class="test">{{ item }}</div>
             </transition-group>
           </div>
         `,
         data: {
           items: ['a', 'b', 'c']
+        },
+        methods: {
+          before: beforeMoveSpy,
+          after: afterMoveSpy
         }
       }).$mount(el)
 
@@ -284,6 +290,9 @@ if (!isIE9) {
             `<div class="test">a</div>` +
           `</span>`
         )
+      }).then(() => {
+        expect(beforeMoveSpy.calls.count()).toBe(1)
+        expect(afterMoveSpy.calls.count()).toBe(1)
       }).then(done)
     })
 

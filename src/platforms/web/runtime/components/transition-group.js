@@ -103,20 +103,33 @@ export default {
     // force reflow to put everything in position
     const f = document.body.offsetHeight // eslint-disable-line
 
-    children.forEach(c => {
+    const transitionData = extractTransitionData(this)
+    const {
+      beforeMove,
+      afterMove
+    } = transitionData
+
+    beforeMove && beforeMove()
+    const moveActions = children.map(c => {
       if (c.data.moved) {
-        var el = c.elm
-        var s = el.style
-        addTransitionClass(el, moveClass)
-        s.transform = s.WebkitTransform = s.transitionDuration = ''
-        el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
-          if (!e || /transform$/.test(e.propertyName)) {
-            el.removeEventListener(transitionEndEvent, cb)
-            el._moveCb = null
-            removeTransitionClass(el, moveClass)
-          }
+        return new Promise(resolve => {
+          var el = c.elm
+          var s = el.style
+          addTransitionClass(el, moveClass)
+          s.transform = s.WebkitTransform = s.transitionDuration = ''
+          el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
+            if (!e || /transform$/.test(e.propertyName)) {
+              el.removeEventListener(transitionEndEvent, cb)
+              el._moveCb = null
+              removeTransitionClass(el, moveClass)
+              resolve()
+            }
+          })
         })
       }
+    }).filter(action => action)
+    Promise.all(moveActions).then(() => {
+      afterMove && afterMove()
     })
   },
 
