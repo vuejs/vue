@@ -110,34 +110,16 @@ bundleRenderer
 
 ## Renderer Options
 
-### directives
-
-Allows you to provide server-side implementations for your custom directives:
-
-``` js
-const renderer = createRenderer({
-  directives: {
-    example (vnode, directiveMeta) {
-      // transform vnode based on directive binding metadata
-    }
-  }
-})
-```
-
-As an example, check out [`v-show`'s server-side implementation](https://github.com/vuejs/vue/blob/dev/src/platforms/web/server/directives/show.js).
-
----
-
 ### cache
 
-Provide a [component cache](#component-caching) implementation. The cache object must implement the following interface:
+Provide a [component cache](#component-caching) implementation. The cache object must implement the following interface (using Flow notations):
 
 ``` js
-{
-  get: (key: string, [cb: Function]) => string | void,
-  set: (key: string, val: string) => void,
-  has?: (key: string, [cb: Function]) => boolean | void // optional
-}
+type RenderCache = {
+  get: (key: string, cb?: Function) => string | void;
+  set: (key: string, val: string) => void;
+  has?: (key: string, cb?: Function) => boolean | void;
+};
 ```
 
 A typical usage is passing in an [lru-cache](https://github.com/isaacs/node-lru-cache):
@@ -169,6 +151,60 @@ const renderer = createRenderer({
   }
 })
 ```
+
+---
+
+### template
+
+> New in 2.2.0
+
+Provide a template for the entire page's HTML. The template should contain a comment `<!--vue-ssr-outlet-->` which serves as the placeholder for rendered app content.
+
+In addition, when both a template and a render context is provided (e.g. when using the `bundleRenderer`), the renderer will also automatically inject the following properties found on the render context:
+
+- `context.head`: (string) any head markup that should be injected into the head of the page. Note when using the bundle format generated with `vue-ssr-webpack-plugin`, this property will automatically contain `<link rel="preload/prefetch">` directives for chunks in the bundle.
+
+- `context.styles`: (string) any inline CSS that should be injected into the head of the page. Note that `vue-loader` 10.2.0+ (which uses `vue-style-loader` 2.0) will automatically populate this property with styles used in rendered components.
+
+- `context.state`: (Object) initial Vuex store state that should be inlined in the page as `window.__INITIAL_STATE__`. The inlined JSON is automatically sanitized with [serialize-javascript](https://github.com/yahoo/serialize-javascript).
+
+**Example:**
+
+``` js
+const renderer = createRenderer({
+  template:
+    '<!DOCTYPE html>' +
+    '<html lang="en">' +
+      '<head>' +
+        '<meta charset="utf-8">' +
+        // context.head will be injected here
+        // context.styles will be injected here
+      '</head>' +
+      '<body>' +
+        '<!--vue-ssr-outlet-->' + // <- app content rendered here
+        // context.state will be injected here
+      '</body>' +
+    '</html>'
+})
+```
+
+---
+
+### directives
+
+Allows you to provide server-side implementations for your custom directives:
+
+``` js
+const renderer = createRenderer({
+  directives: {
+    example (vnode, directiveMeta) {
+      // transform vnode based on directive binding metadata
+    }
+  }
+})
+```
+
+As an example, check out [`v-show`'s server-side implementation](https://github.com/vuejs/vue/blob/dev/src/platforms/web/server/directives/show.js).
 
 ## Why Use `bundleRenderer`?
 

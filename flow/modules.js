@@ -31,12 +31,18 @@ declare module 'de-indent' {
 }
 
 declare module 'vue-ssr-html-stream' {
+  declare interface parsedTemplate {
+    head: string;
+    neck: string;
+    tail: string;
+  }
   declare interface HTMLStreamOptions {
-    template: string;
-    context: Object;
+    template: string | parsedTemplate;
+    context?: ?Object;
   }
-  declare class HTMLStream extends stream$Transform {
+  declare class exports extends stream$Transform {
     constructor(options: HTMLStreamOptions): void;
+    static parseTemplate(template: string): parsedTemplate;
+    static renderTemplate(template: parsedTemplate, content: string, context?: ?Object): string;
   }
-  declare module.exports: HTMLStream
 }

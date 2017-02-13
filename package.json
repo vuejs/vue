@@ -111,6 +111,7 @@
     "selenium-server": "^2.53.1",
     "typescript": "^2.0.9",
     "uglify-js": "^2.6.2",
+    "vue-ssr-html-stream": "^2.1.0",
     "vue-ssr-webpack-plugin": "^1.0.0",
     "webpack": "^2.2.0",
     "weex-js-runtime": "^0.17.0-alpha4",

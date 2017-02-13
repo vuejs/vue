@@ -60,7 +60,7 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
             renderer.renderToString(app, (err, res) => {
               rewriteErrorTrace(err, maps)
               cb(err, res)
-            })
+            }, context)
           }
         })
       },
@@ -76,11 +76,23 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
           })
         }).then(app => {
           if (app) {
-            const renderStream = renderer.renderToStream(app)
+            const renderStream = renderer.renderToStream(app, context)
+
             renderStream.on('error', err => {
               rewriteErrorTrace(err, maps)
               res.emit('error', err)
             })
+
+            // relay HTMLStream special events
+            if (rendererOptions && rendererOptions.template) {
+              renderStream.on('beforeStart', () => {
+                res.emit('beforeStart')
+              })
+              renderStream.on('beforeEnd', () => {
+                res.emit('beforeEnd')
+              })
+            }
+
             renderStream.pipe(res)
           }
         })
