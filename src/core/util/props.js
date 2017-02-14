@@ -85,7 +85,7 @@ function assertProp (
   vm: ?Component,
   absent: boolean
 ) {
-  const required = prop.required instanceof Function 
+  const required = prop.required instanceof Function
     ? prop.required()
     : prop.required
   if (required && absent) {
