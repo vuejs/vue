@@ -55,7 +55,7 @@ export function parseFilters (exp: string): string {
           p = exp.charAt(j)
           if (p !== ' ') break
         }
-        if (!p || !/[\w$]/.test(p)) {
+        if (!p || !/[\w).\]\+\-\_$]/.test(p)) {
           inRegex = true
         }
       }
