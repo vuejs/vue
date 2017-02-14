@@ -42,7 +42,7 @@ export declare class Vue {
   readonly $slots: { [key: string]: VNode[] };
   readonly $scopedSlots: { [key: string]: ScopedSlot };
   readonly $isServer: boolean;
-  $props: Object;
+  readonly $props: any;
 
   $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
   $forceUpdate(): void;
