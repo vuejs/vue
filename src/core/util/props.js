@@ -71,7 +71,7 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
   }
   // call factory function for non-Function types
   // a value is Function if its prototype is function even across different execution context
-  return typeof def === 'function' && (!prop.type || typeof prop.type.prototype !== 'function')
+  return typeof def === 'function' && getType(prop.type) === 'Function'
     ? def.call(vm)
     : def
 }
