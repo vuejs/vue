@@ -37,17 +37,18 @@ export function initState (vm: Component) {
 
 const isReservedProp = { key: 1, ref: 1, slot: 1 }
 
-function initProps (vm: Component, props: Object) {
+function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
-  vm.$props = {}
+  const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
   // instead of dyanmic object key enumeration.
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
   observerState.shouldConvert = isRoot
-  for (const key in props) {
+  for (const key in propsOptions) {
     keys.push(key)
+    const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       if (isReservedProp[key]) {
@@ -56,7 +57,7 @@ function initProps (vm: Component, props: Object) {
           vm
         )
       }
-      defineReactive(vm.$props, key, validateProp(key, props, propsData, vm), () => {
+      defineReactive(props, key, value, () => {
         if (vm.$parent && !observerState.isSettingProps) {
           warn(
             `Avoid mutating a prop directly since the value will be ` +
@@ -68,9 +69,9 @@ function initProps (vm: Component, props: Object) {
         }
       })
     } else {
-      defineReactive(vm.$props, key, validateProp(key, props, propsData, vm))
+      defineReactive(props, key, value)
     }
-    proxy(vm, '$props', key)
+    proxy(vm, props, key)
   }
   observerState.shouldConvert = true
 }
@@ -100,7 +101,7 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(keys[i])) {
-      proxy(vm, '_data', keys[i])
+      proxy(vm, data, keys[i])
     }
   }
   // observe data
@@ -200,9 +201,9 @@ export function stateMixin (Vue: Class<Component>) {
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.
   const dataDef = {}
-  dataDef.get = function () {
-    return this._data
-  }
+  dataDef.get = function () { return this._data }
+  const propsDef = {}
+  propsDef.get = function () { return this._props }
   if (process.env.NODE_ENV !== 'production') {
     dataDef.set = function (newData: Object) {
       warn(
@@ -211,8 +212,12 @@ export function stateMixin (Vue: Class<Component>) {
         this
       )
     }
+    propsDef.set = function () {
+      warn(`$props is readonly.`, this)
+    }
   }
   Object.defineProperty(Vue.prototype, '$data', dataDef)
+  Object.defineProperty(Vue.prototype, '$props', propsDef)
 
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
@@ -235,15 +240,15 @@ export function stateMixin (Vue: Class<Component>) {
   }
 }
 
-function proxy (vm: Component, proxyName: '$props' | '_data', key: string) {
+function proxy (vm: Component, source: Object, key: string) {
   Object.defineProperty(vm, key, {
     configurable: true,
     enumerable: true,
     get: function proxyGetter () {
-      return vm[proxyName][key]
+      return source[key]
     },
     set: function proxySetter (val) {
-      vm[proxyName][key] = val
+      source[key] = val
     }
   })
 }
