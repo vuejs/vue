@@ -1,5 +1,7 @@
 /* @flow */
 
+export const emptyObject = Object.freeze({})
+
 /**
  * Check if a string starts with $ or _
  */

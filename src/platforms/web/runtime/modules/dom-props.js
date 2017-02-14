@@ -46,7 +46,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 }
 
 // check platforms/web/util/attrs.js acceptValue
-type acceptValueElm = HTMLInputElement | HTMLSelectElement | HTMLOptionElement
+type acceptValueElm = HTMLInputElement | HTMLSelectElement | HTMLOptionElement;
 
 function shouldUpdateValue (
   elm: acceptValueElm,

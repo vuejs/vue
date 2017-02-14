@@ -3,7 +3,7 @@
 import { callHook } from 'core/instance/lifecycle'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
-const patternTypes = [String, RegExp]
+const patternTypes: Array<Function> = [String, RegExp]
 
 function getComponentName (opts: ?VNodeComponentOptions): ?string {
   return opts && (opts.Ctor.options.name || opts.tag)
@@ -15,6 +15,7 @@ function matches (pattern: string | RegExp, name: string): boolean {
   } else if (pattern instanceof RegExp) {
     return pattern.test(name)
   }
+  /* istanbul ignore next */
   return false
 }
 

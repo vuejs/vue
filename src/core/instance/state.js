@@ -39,12 +39,14 @@ const isReservedProp = { key: 1, ref: 1, slot: 1 }
 
 function initProps (vm: Component, props: Object) {
   const propsData = vm.$options.propsData || {}
-  const keys = vm.$options._propKeys = Object.keys(props)
+  // cache prop keys so that future props updates can iterate using Array
+  // instead of dyanmic object key enumeration.
+  const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
   observerState.shouldConvert = isRoot
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i]
+  for (const key in props) {
+    keys.push(key)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       if (isReservedProp[key]) {

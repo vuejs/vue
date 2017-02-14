@@ -325,6 +325,41 @@ describe('Component scoped slot', () => {
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
   })
 
+  // #4779
+  it('should support dynamic slot target', done => {
+    const Child = {
+      template: `
+        <div>
+          <slot name="a" msg="a" />
+          <slot name="b" msg="b" />
+        </div>
+      `
+    }
+
+    const vm = new Vue({
+      data: {
+        a: 'a',
+        b: 'b'
+      },
+      template: `
+        <child>
+          <template :slot="a" scope="props">A {{ props.msg }}</template>
+          <template :slot="b" scope="props">B {{ props.msg }}</template>
+        </child>
+      `,
+      components: { Child }
+    }).$mount()
+
+    expect(vm.$el.textContent.trim()).toBe('A a B b')
+
+    // switch slots
+    vm.a = 'b'
+    vm.b = 'a'
+    waitForUpdate(() => {
+      expect(vm.$el.textContent.trim()).toBe('B a A b')
+    }).then(done)
+  })
+
   it('render function usage (JSX)', () => {
     const vm = new Vue({
       render (h) {

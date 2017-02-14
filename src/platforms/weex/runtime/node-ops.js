@@ -1,4 +1,5 @@
-import renderer from './config'
+/* globals renderer */
+// renderer is injected by weex factory wrapper
 
 export const namespaceMap = {}
 

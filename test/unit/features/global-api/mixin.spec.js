@@ -79,7 +79,7 @@ describe('Global API: mixin', () => {
     Vue.mixin({})
 
     const vm = new Test({
-      template: '<div><p>hi<p></div>'
+      template: '<div><p>hi</p></div>'
     }).$mount()
 
     expect(vm.$el.children[0].hasAttribute('foo')).toBe(true)

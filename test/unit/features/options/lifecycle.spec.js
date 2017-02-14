@@ -93,7 +93,7 @@ describe('Options lifecyce hooks', () => {
     it('should mount child parent in correct order', () => {
       const calls = []
       new Vue({
-        template: '<div><test></test><div>',
+        template: '<div><test></test></div>',
         mounted () {
           calls.push('parent')
         },

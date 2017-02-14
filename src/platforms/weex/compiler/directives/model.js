@@ -1,13 +1,18 @@
 /* @flow */
 
-import { addHandler, addAttr, parseModel } from 'compiler/helpers'
+import { addHandler, addAttr } from 'compiler/helpers'
+import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
 
 export default function model (
   el: ASTElement,
   dir: ASTDirective,
   _warn: Function
 ): ?boolean {
-  genDefaultModel(el, dir.value, dir.modifiers)
+  if (el.tag === 'input' || el.tag === 'textarea') {
+    genDefaultModel(el, dir.value, dir.modifiers)
+  } else {
+    genComponentModel(el, dir.value, dir.modifiers)
+  }
 }
 
 function genDefaultModel (
@@ -15,25 +20,15 @@ function genDefaultModel (
   value: string,
   modifiers: ?ASTModifiers
 ): ?boolean {
-  const { lazy, trim } = modifiers || {}
+  const { lazy, trim, number } = modifiers || {}
   const event = lazy ? 'change' : 'input'
-  const isNative = el.tag === 'input' || el.tag === 'textarea'
-  const valueExpression = isNative
-    ? `$event.target.attr.value${trim ? '.trim()' : ''}`
-    : `$event`
+
+  let valueExpression = `$event.target.attr.value${trim ? '.trim()' : ''}`
+  if (number) {
+    valueExpression = `_n(${valueExpression})`
+  }
+
   const code = genAssignmentCode(value, valueExpression)
   addAttr(el, 'value', `(${value})`)
   addHandler(el, event, code, null, true)
-}
-
-function genAssignmentCode (value: string, assignment: string): string {
-  const modelRs = parseModel(value)
-  if (modelRs.idx === null) {
-    return `${value}=${assignment}`
-  } else {
-    return `var $$exp = ${modelRs.exp}, $$idx = ${modelRs.idx};` +
-      `if (!Array.isArray($$exp)){` +
-        `${value}=${assignment}}` +
-      `else{$$exp.splice($$idx, 1, ${assignment})}`
-  }
 }

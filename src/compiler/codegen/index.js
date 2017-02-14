@@ -5,9 +5,9 @@ import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
 import { camelize, no } from 'shared/util'
 
-type TransformFunction = (el: ASTElement, code: string) => string
-type DataGenFunction = (el: ASTElement) => string
-type DirctiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean
+type TransformFunction = (el: ASTElement, code: string) => string;
+type DataGenFunction = (el: ASTElement) => string;
+type DirctiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean;
 
 // configurable state
 let warn
@@ -144,6 +144,18 @@ function genFor (el: any): string {
   const alias = el.alias
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
   const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
+
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    maybeComponent(el) && el.tag !== 'slot' && el.tag !== 'template' && !el.key
+  ) {
+    warn(
+      `<${el.tag} v-for="${alias} in ${exp}">: component lists rendered with ` +
+      `v-for should have explicit keys. ` +
+      `See https://vuejs.org/guide/list.html#key for more info.`
+    )
+  }
+
   el.forProcessed = true // avoid recursion
   return `_l((${exp}),` +
     `function(${alias}${iterator1}${iterator2}){` +
@@ -204,6 +216,10 @@ function genData (el: ASTElement): string {
   // scoped slots
   if (el.scopedSlots) {
     data += `${genScopedSlots(el.scopedSlots)},`
+  }
+  // component v-model
+  if (el.model) {
+    data += `model:{value:${el.model.value},callback:${el.model.callback}},`
   }
   // inline-template
   if (el.inlineTemplate) {
@@ -269,17 +285,17 @@ function genInlineTemplate (el: ASTElement): ?string {
 }
 
 function genScopedSlots (slots: { [key: string]: ASTElement }): string {
-  return `scopedSlots:{${
+  return `scopedSlots:_u([${
     Object.keys(slots).map(key => genScopedSlot(key, slots[key])).join(',')
-  }}`
+  }])`
 }
 
 function genScopedSlot (key: string, el: ASTElement) {
-  return `${key}:function(${String(el.attrsMap.scope)}){` +
+  return `[${key},function(${String(el.attrsMap.scope)}){` +
     `return ${el.tag === 'template'
       ? genChildren(el) || 'void 0'
       : genElement(el)
-  }}`
+  }}]`
 }
 
 function genChildren (el: ASTElement, checkSkip?: boolean): string | void {

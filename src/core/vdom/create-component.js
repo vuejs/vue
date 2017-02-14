@@ -3,7 +3,7 @@
 import VNode from './vnode'
 import { resolveConstructorOptions } from '../instance/init'
 import { activeInstance, callHook } from '../instance/lifecycle'
-import { resolveSlots } from '../instance/render'
+import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 import { createElement } from './create-element'
 import { warn, isObject, hasOwn, hyphenate, validateProp } from '../util/index'
 
@@ -56,6 +56,11 @@ export function createComponent (
   resolveConstructorOptions(Ctor)
 
   data = data || {}
+
+  // transform component v-model data into props & events
+  if (data.model) {
+    transformModel(Ctor.options, data)
+  }
 
   // extract props
   const propsData = extractProps(data, Ctor)
@@ -318,5 +323,19 @@ function mergeHook (one: Function, two: Function): Function {
   return function (a, b, c, d) {
     one(a, b, c, d)
     two(a, b, c, d)
+  }
+}
+
+// transform component v-model info (value and callback) into
+// prop and event handler respectively.
+function transformModel (options, data: any) {
+  const prop = (options.model && options.model.prop) || 'value'
+  const event = (options.model && options.model.event) || 'input'
+  ;(data.props || (data.props = {}))[prop] = data.model.value
+  const on = data.on || (data.on = {})
+  if (on[event]) {
+    on[event] = [data.model.callback].concat(on[event])
+  } else {
+    on[event] = data.model.callback
   }
 }

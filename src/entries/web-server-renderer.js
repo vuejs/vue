@@ -12,14 +12,16 @@ export function createRenderer (options?: Object = {}): {
   renderToString: Function,
   renderToStream: Function
 } {
-  // user can provide server-side implementations for custom directives
-  // when creating the renderer.
-  const directives = Object.assign(baseDirectives, options.directives)
   return _createRenderer({
     isUnaryTag,
     modules,
-    directives,
-    cache: options.cache
+    // user can provide server-side implementations for custom directives
+    // when creating the renderer.
+    directives: Object.assign(baseDirectives, options.directives),
+    // component cache (optional)
+    cache: options.cache,
+    // page template (optional)
+    template: options.template
   })
 }
 

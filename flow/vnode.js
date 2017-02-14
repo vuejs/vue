@@ -54,7 +54,11 @@ declare interface VNodeData {
   };
   directives?: Array<VNodeDirective>;
   keepAlive?: boolean;
-  scopedSlots?: { [key: string]: Function }
+  scopedSlots?: { [key: string]: Function };
+  model?: {
+    value: any;
+    callback: Function;
+  };
 }
 
 declare type VNodeDirective = {

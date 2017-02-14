@@ -1,26 +1,15 @@
 /* @flow */
 
 import { escape } from 'he'
+import { RenderContext } from './render-context'
 import { compileToFunctions } from 'web/compiler/index'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
-import { noop } from 'shared/util'
 
 let warned = Object.create(null)
 const warnOnce = msg => {
   if (!warned[msg]) {
     warned[msg] = true
     console.warn(`\n\u001b[31m${msg}\u001b[39m\n`)
-  }
-}
-
-const normalizeAsync = (cache, method) => {
-  const fn = cache[method]
-  if (!fn) {
-    return
-  } else if (fn.length > 1) {
-    return (key, cb) => fn.call(cache, key, cb)
-  } else {
-    return (key, cb) => cb(fn.call(cache, key))
   }
 }
 
@@ -202,76 +191,24 @@ function renderStartingTag (node: VNode, context) {
   return markup + '>'
 }
 
-const nextFactory = context => function next () {
-  const lastState = context.renderStates.pop()
-  if (!lastState) {
-    context.done()
-    // cleanup context, avoid leakage
-    context = (null: any)
-    return
-  }
-  switch (lastState.type) {
-    case 'Component':
-      context.activeInstance = lastState.prevActive
-      next()
-      break
-    case 'Element':
-      const { children, total } = lastState
-      const rendered = lastState.rendered++
-      if (rendered < total) {
-        context.renderStates.push(lastState)
-        renderNode(children[rendered], false, context)
-      } else {
-        context.write(lastState.endTag, next)
-      }
-      break
-    case 'ComponentWithCache':
-      const { buffer, bufferIndex, key } = lastState
-      const result = buffer[bufferIndex]
-      context.cache.set(key, result)
-      if (bufferIndex === 0) {
-        // this is a top-level cached component,
-        // exit caching mode.
-        context.write.caching = false
-      } else {
-        // parent component is also being cached,
-        // merge self into parent's result
-        buffer[bufferIndex - 1] += result
-      }
-      buffer.length = bufferIndex
-      next()
-      break
-  }
-}
-
 export function createRenderFunction (
   modules: Array<Function>,
   directives: Object,
   isUnaryTag: Function,
   cache: any
 ) {
-  if (cache && (!cache.get || !cache.set)) {
-    throw new Error('renderer cache must implement at least get & set.')
-  }
-
-  const get = cache && normalizeAsync(cache, 'get')
-  const has = cache && normalizeAsync(cache, 'has')
-
   return function render (
     component: Component,
     write: (text: string, next: Function) => void,
     done: Function
   ) {
     warned = Object.create(null)
-    const context = {
+    const context = new RenderContext({
       activeInstance: component,
-      renderStates: [],
-      next: noop, // for flow
-      write, done,
+      write, done, renderNode,
       isUnaryTag, modules, directives,
-      cache, get, has
-    }
-    context.next = nextFactory(context)
+      cache
+    })
     normalizeRender(component)
     renderNode(component._render(), true, context)
   }

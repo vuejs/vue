@@ -78,6 +78,10 @@ It could be you!
   <img width="240px" src="https://alligator.io/images/alligator-logo.svg">
 </a>
 
+<a href="https://monei.net/">
+  <img width="200px" src="http://i.imgur.com/JUSjHAi.png">
+</a>
+
 ---
 
 ### $50+
@@ -216,3 +220,5 @@ It could be you!
 - Duncan Kenzie
 - Mike Margerum
 - Michael Richards
+- Eduardo Reveles
+- Jan Kremlacek

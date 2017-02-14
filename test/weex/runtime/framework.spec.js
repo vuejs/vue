@@ -608,8 +608,6 @@ describe('framework APIs', () => {
       type: 'div',
       children: [{ type: 'text', attr: { value: 'Hello' }}]
     })
-    // ensure base Vue is unaffected
-    expect(framework.Vue.options.components.test).toBeUndefined()
   })
 
   it('adding prototype methods', () => {
@@ -632,8 +630,6 @@ describe('framework APIs', () => {
       type: 'div',
       children: [{ type: 'text', attr: { value: 'Hello' }}]
     })
-    // ensure base Vue is unaffected
-    expect(framework.Vue.prototype.$test).toBeUndefined()
   })
 
   it('using global mixins', () => {
@@ -662,9 +658,5 @@ describe('framework APIs', () => {
       type: 'div',
       children: [{ type: 'text', attr: { value: 'Hello' }}]
     })
-    const vm = new framework.Vue({
-      data: { test: false }
-    })
-    expect(vm.test).toBe(false)
   })
 })
