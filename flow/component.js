@@ -52,6 +52,7 @@ declare interface Component {
   _renderContext: ?Component;
   _watcher: Watcher;
   _watchers: Array<Watcher>;
+  _computedWatchers: { [key: string]: Watcher };
   _data: Object;
   _props: Object;
   _events: Object;

@@ -1,7 +1,7 @@
 /* @flow */
 
-import Watcher from '../observer/watcher'
 import Dep from '../observer/dep'
+import Watcher from '../observer/watcher'
 
 import {
   set,
@@ -108,6 +108,26 @@ function initData (vm: Component) {
   observe(data, true /* asRootData */)
 }
 
+const computedWatcherOptions = { lazy: true }
+
+function initComputed (vm: Component, computed: Object) {
+  const watchers = vm._computedWatchers = Object.create(null)
+
+  for (const key in computed) {
+    const userDef = computed[key]
+    const getter = typeof userDef === 'function' ? userDef : userDef.get
+    // create internal watcher for the computed property.
+    watchers[key] = new Watcher(vm, getter, noop, computedWatcherOptions)
+
+    // component-defined computed properties are already defined on the
+    // component prototype. We only need to define on-the-fly computed
+    // properties here.
+    if (!(key in vm)) {
+      defineComputed(vm, key, userDef)
+    }
+  }
+}
+
 const computedSharedDefinition = {
   enumerable: true,
   configurable: true,
@@ -115,46 +135,35 @@ const computedSharedDefinition = {
   set: noop
 }
 
-function initComputed (vm: Component, computed: Object) {
-  for (const key in computed) {
-    /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' && key in vm) {
-      warn(
-        `existing instance property "${key}" will be ` +
-        `overwritten by a computed property with the same name.`,
-        vm
-      )
-    }
-    const userDef = computed[key]
-    if (typeof userDef === 'function') {
-      computedSharedDefinition.get = makeComputedGetter(userDef, vm)
-      computedSharedDefinition.set = noop
-    } else {
-      computedSharedDefinition.get = userDef.get
-        ? userDef.cache !== false
-          ? makeComputedGetter(userDef.get, vm)
-          : bind(userDef.get, vm)
-        : noop
-      computedSharedDefinition.set = userDef.set
-        ? bind(userDef.set, vm)
-        : noop
-    }
-    Object.defineProperty(vm, key, computedSharedDefinition)
+export function defineComputed (target: any, key: string, userDef: Object | Function) {
+  if (typeof userDef === 'function') {
+    computedSharedDefinition.get = createComputedGetter(key)
+    computedSharedDefinition.set = noop
+  } else {
+    computedSharedDefinition.get = userDef.get
+      ? userDef.cache !== false
+        ? createComputedGetter(key)
+        : userDef.get
+      : noop
+    computedSharedDefinition.set = userDef.set
+      ? userDef.set
+      : noop
   }
+  Object.defineProperty(target, key, computedSharedDefinition)
 }
 
-function makeComputedGetter (getter: Function, owner: Component): Function {
-  const watcher = new Watcher(owner, getter, noop, {
-    lazy: true
-  })
+function createComputedGetter (key) {
   return function computedGetter () {
-    if (watcher.dirty) {
-      watcher.evaluate()
+    const watcher = this._computedWatchers && this._computedWatchers[key]
+    if (watcher) {
+      if (watcher.dirty) {
+        watcher.evaluate()
+      }
+      if (Dep.target) {
+        watcher.depend()
+      }
+      return watcher.value
     }
-    if (Dep.target) {
-      watcher.depend()
-    }
-    return watcher.value
   }
 }
 
