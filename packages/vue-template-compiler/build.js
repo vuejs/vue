@@ -5822,16 +5822,6 @@ function parseComponent (
   var depth = 0;
   var currentBlock = null;
 
-  function reduceAttrs(attrs) {
-    return attrs.reduce(function (cumulated, ref) {
-      var name = ref.name;
-      var value = ref.value;
-
-      cumulated[name] = value;
-      return cumulated
-    }, Object.create(null));
-  }
-
   function start (
     tag,
     attrs,
@@ -5844,8 +5834,7 @@ function parseComponent (
         currentBlock = {
           type: tag,
           content: '',
-          start: end,
-          attrs: reduceAttrs(attrs)
+          start: end
         };
         checkAttrs(currentBlock, attrs);
         if (tag === 'style') {
@@ -5858,7 +5847,13 @@ function parseComponent (
           type: tag,
           content: '',
           start: end,
-          attrs: reduceAttrs(attrs)
+          attrs: attrs.reduce(function (cumulated, ref) {
+            var name = ref.name;
+            var value = ref.value;
+
+            cumulated[name] = value;
+            return cumulated
+          }, Object.create(null))
         };
         sfc.customBlocks.push(currentBlock);
       }
