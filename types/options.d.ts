@@ -64,7 +64,7 @@ export interface RenderContext {
 
 export interface PropOptions {
   type?: Constructor | Constructor[] | null;
-  required?: boolean;
+  required?: any;
   default?: any;
   validator?(value: any): boolean;
 }
