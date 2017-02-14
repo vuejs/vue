@@ -28,6 +28,16 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+export function proxy (target: Object, sourceKey: string, key: string) {
+  sharedPropertyDefinition.get = function proxyGetter () {
+    return this[sourceKey][key]
+  }
+  sharedPropertyDefinition.set = function proxySetter (val) {
+    this[sourceKey][key] = val
+  }
+  Object.defineProperty(target, key, sharedPropertyDefinition)
+}
+
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
@@ -78,6 +88,9 @@ function initProps (vm: Component, propsOptions: Object) {
     } else {
       defineReactive(props, key, value)
     }
+    // static props are already proxied on the component's prototype
+    // during Vue.extend(). We only need to proxy props defined at
+    // instantiation here.
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
@@ -129,8 +142,8 @@ function initComputed (vm: Component, computed: Object) {
     watchers[key] = new Watcher(vm, getter, noop, computedWatcherOptions)
 
     // component-defined computed properties are already defined on the
-    // component prototype. We only need to define on-the-fly computed
-    // properties here.
+    // component prototype. We only need to define computed properties defined
+    // at instantiation here.
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
     }
@@ -249,14 +262,4 @@ export function stateMixin (Vue: Class<Component>) {
       watcher.teardown()
     }
   }
-}
-
-export function proxy (target: Object, sourceKey: string, key: string) {
-  sharedPropertyDefinition.get = function proxyGetter () {
-    return this[sourceKey][key]
-  }
-  sharedPropertyDefinition.set = function proxySetter (val) {
-    this[sourceKey][key] = val
-  }
-  Object.defineProperty(target, key, sharedPropertyDefinition)
 }
