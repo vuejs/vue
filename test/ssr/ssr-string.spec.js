@@ -655,7 +655,7 @@ describe('SSR: renderToString', () => {
 
   it('comment nodes', done => {
     renderVmWithOptions({
-      template: '<div><transition><div v-if="false"></test></transition></div>'
+      template: '<div><transition><div v-if="false"></div></transition></div>'
     }, result => {
       expect(result).toContain(`<div server-rendered="true"><!----></div>`)
       done()
@@ -673,6 +673,31 @@ describe('SSR: renderToString', () => {
       Vue.config.silent = false
       done()
     })
+  })
+
+  it('should accept template option', done => {
+    const renderer = createRenderer({
+      template: `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
+    })
+
+    const context = {
+      head: '<meta name="viewport" content="width=device-width">',
+      styles: '<style>h1 { color: red }</style>',
+      state: { a: 1 }
+    }
+
+    renderer.renderToString(new Vue({
+      template: '<div>hi</div>'
+    }), (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain(
+        `<html><head>${context.head}${context.styles}</head><body>` +
+        `<div server-rendered="true">hi</div>` +
+        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        `</body></html>`
+      )
+      done()
+    }, context)
   })
 })
 

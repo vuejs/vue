@@ -102,4 +102,34 @@ describe('SSR: renderToStream', () => {
     stream1.read(1)
     stream2.read(1)
   })
+
+  it('should accept template option', done => {
+    const renderer = createRenderer({
+      template: `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
+    })
+
+    const context = {
+      head: '<meta name="viewport" content="width=device-width">',
+      styles: '<style>h1 { color: red }</style>',
+      state: { a: 1 }
+    }
+
+    const stream = renderer.renderToStream(new Vue({
+      template: '<div>hi</div>'
+    }), context)
+
+    let res = ''
+    stream.on('data', chunk => {
+      res += chunk
+    })
+    stream.on('end', () => {
+      expect(res).toContain(
+        `<html><head>${context.head}${context.styles}</head><body>` +
+        `<div server-rendered="true">hi</div>` +
+        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        `</body></html>`
+      )
+      done()
+    })
+  })
 })

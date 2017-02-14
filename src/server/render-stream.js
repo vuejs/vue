@@ -8,7 +8,8 @@
  * Modified by Evan You (@yyx990803)
  */
 
-import stream from 'stream'
+const stream = require('stream')
+
 import { createWriteFunction } from './write'
 
 export default class RenderStream extends stream.Readable {

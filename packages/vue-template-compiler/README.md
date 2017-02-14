@@ -22,6 +22,7 @@ Compiles a template string and returns compiled JavaScript code. The returned re
 
 ``` js
 {
+  ast: ?ASTElement, // parsed template elements to AST
   render: string, // main render function code
   staticRenderFns: Array<string>, // render code for static sub trees, if any
   errors: Array<string> // template syntax errors, if any
