@@ -70,6 +70,6 @@ declare type ComponentOptions = {
 declare type PropOptions = {
   type: Function | Array<Function> | null;
   default: any;
-  required: ?boolean;
+  required: ?any;
   validator: ?Function;
 }
