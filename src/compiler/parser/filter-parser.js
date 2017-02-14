@@ -1,5 +1,7 @@
 /* @flow */
 
+const validDivisionCharRE = /[\w).+\-_$\]]/
+
 export function parseFilters (exp: string): string {
   let inSingle = false
   let inDouble = false
@@ -55,7 +57,7 @@ export function parseFilters (exp: string): string {
           p = exp.charAt(j)
           if (p !== ' ') break
         }
-        if (!p || !/[\w).\]\+\-\_$]/.test(p)) {
+        if (!p || !validDivisionCharRE.test(p)) {
           inRegex = true
         }
       }
