@@ -200,7 +200,7 @@ describe('codegen', () => {
     )
     // non input
     assertCodegen(
-      '<p :value="msg">',
+      '<p :value="msg"/>',
       `with(this){return _c('p',{attrs:{"value":msg}})}`
     )
   })
