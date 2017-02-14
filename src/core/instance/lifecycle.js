@@ -143,15 +143,17 @@ export function lifecycleMixin (Vue: Class<Component>) {
       if (process.env.NODE_ENV !== 'production') {
         observerState.isSettingProps = true
       }
+      const props = vm._props
       const propKeys = vm.$options._propKeys || []
       for (let i = 0; i < propKeys.length; i++) {
         const key = propKeys[i]
-        vm[key] = validateProp(key, vm.$options.props, propsData, vm)
+        props[key] = validateProp(key, vm.$options.props, propsData, vm)
       }
       observerState.shouldConvert = true
       if (process.env.NODE_ENV !== 'production') {
         observerState.isSettingProps = false
       }
+      // keep a copy of raw propsData
       vm.$options.propsData = propsData
     }
     // update listeners
