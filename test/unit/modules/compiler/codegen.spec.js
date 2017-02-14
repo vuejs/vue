@@ -229,27 +229,27 @@ describe('codegen', () => {
   it('generate events with keycode', () => {
     assertCodegen(
       '<input @input.enter="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(_k($event.keyCode,"enter",13))return;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(_k($event.keyCode,"enter",13))return null;onInput($event)}}})}`
     )
     // multiple keycodes (delete)
     assertCodegen(
       '<input @input.delete="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(_k($event.keyCode,"delete",[8,46]))return;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(_k($event.keyCode,"delete",[8,46]))return null;onInput($event)}}})}`
     )
     // multiple keycodes (chained)
     assertCodegen(
       '<input @keydown.enter.delete="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(_k($event.keyCode,"enter",13)&&_k($event.keyCode,"delete",[8,46]))return;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(_k($event.keyCode,"enter",13)&&_k($event.keyCode,"delete",[8,46]))return null;onInput($event)}}})}`
     )
     // number keycode
     assertCodegen(
       '<input @input.13="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if($event.keyCode!==13)return;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if($event.keyCode!==13)return null;onInput($event)}}})}`
     )
     // custom keycode
     assertCodegen(
       '<input @input.custom="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(_k($event.keyCode,"custom"))return;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(_k($event.keyCode,"custom"))return null;onInput($event)}}})}`
     )
   })
 
@@ -264,33 +264,33 @@ describe('codegen', () => {
     )
     assertCodegen(
       '<input @input.self="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if($event.target !== $event.currentTarget)return;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if($event.target !== $event.currentTarget)return null;onInput($event)}}})}`
     )
   })
 
   it('generate events with mouse event modifiers', () => {
     assertCodegen(
       '<input @click.ctrl="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return;onClick($event)}}})}`
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;onClick($event)}}})}`
     )
     assertCodegen(
       '<input @click.shift="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.shiftKey)return;onClick($event)}}})}`
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.shiftKey)return null;onClick($event)}}})}`
     )
     assertCodegen(
       '<input @click.alt="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.altKey)return;onClick($event)}}})}`
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.altKey)return null;onClick($event)}}})}`
     )
     assertCodegen(
       '<input @click.meta="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.metaKey)return;onClick($event)}}})}`
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.metaKey)return null;onClick($event)}}})}`
     )
   })
 
   it('generate events with multiple modifers', () => {
     assertCodegen(
       '<input @input.stop.prevent.self="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){$event.stopPropagation();$event.preventDefault();if($event.target !== $event.currentTarget)return;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){$event.stopPropagation();$event.preventDefault();if($event.target !== $event.currentTarget)return null;onInput($event)}}})}`
     )
   })
 
