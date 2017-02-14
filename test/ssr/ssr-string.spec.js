@@ -1,4 +1,5 @@
 import Vue from '../../dist/vue.runtime.common.js'
+import VM from 'vm'
 import { createRenderer } from '../../packages/vue-server-renderer'
 const { renderToString } = createRenderer()
 
@@ -698,6 +699,23 @@ describe('SSR: renderToString', () => {
       )
       done()
     }, context)
+  })
+
+  it('default value Foreign Function', () => {
+    const FunctionConstructor = VM.runInNewContext('Function')
+    const func = () => 123
+    const vm = new Vue({
+      props: {
+        a: {
+          type: FunctionConstructor,
+          default: func
+        }
+      },
+      propsData: {
+        a: undefined
+      }
+    })
+    expect(vm.a).toBe(func)
   })
 })
 
