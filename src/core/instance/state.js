@@ -21,6 +21,13 @@ import {
   noop
 } from '../util/index'
 
+const sharedPropertyDefinition = {
+  enumerable: true,
+  configurable: true,
+  get: noop,
+  set: noop
+}
+
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
@@ -71,7 +78,9 @@ function initProps (vm: Component, propsOptions: Object) {
     } else {
       defineReactive(props, key, value)
     }
-    proxy(vm, props, key)
+    if (!(key in vm)) {
+      proxy(vm, `_props`, key)
+    }
   }
   observerState.shouldConvert = true
 }
@@ -101,7 +110,7 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(keys[i])) {
-      proxy(vm, data, keys[i])
+      proxy(vm, `_data`, keys[i])
     }
   }
   // observe data
@@ -128,28 +137,21 @@ function initComputed (vm: Component, computed: Object) {
   }
 }
 
-const computedSharedDefinition = {
-  enumerable: true,
-  configurable: true,
-  get: noop,
-  set: noop
-}
-
 export function defineComputed (target: any, key: string, userDef: Object | Function) {
   if (typeof userDef === 'function') {
-    computedSharedDefinition.get = createComputedGetter(key)
-    computedSharedDefinition.set = noop
+    sharedPropertyDefinition.get = createComputedGetter(key)
+    sharedPropertyDefinition.set = noop
   } else {
-    computedSharedDefinition.get = userDef.get
+    sharedPropertyDefinition.get = userDef.get
       ? userDef.cache !== false
         ? createComputedGetter(key)
         : userDef.get
       : noop
-    computedSharedDefinition.set = userDef.set
+    sharedPropertyDefinition.set = userDef.set
       ? userDef.set
       : noop
   }
-  Object.defineProperty(target, key, computedSharedDefinition)
+  Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
 function createComputedGetter (key) {
@@ -249,15 +251,12 @@ export function stateMixin (Vue: Class<Component>) {
   }
 }
 
-function proxy (vm: Component, source: Object, key: string) {
-  Object.defineProperty(vm, key, {
-    configurable: true,
-    enumerable: true,
-    get: function proxyGetter () {
-      return source[key]
-    },
-    set: function proxySetter (val) {
-      source[key] = val
-    }
-  })
+export function proxy (target: Object, sourceKey: string, key: string) {
+  sharedPropertyDefinition.get = function proxyGetter () {
+    return this[sourceKey][key]
+  }
+  sharedPropertyDefinition.set = function proxySetter (val) {
+    this[sourceKey][key] = val
+  }
+  Object.defineProperty(target, key, sharedPropertyDefinition)
 }

@@ -2,7 +2,7 @@
 
 import config from '../config'
 import { warn, mergeOptions } from '../util/index'
-import { defineComputed } from '../instance/state'
+import { defineComputed, proxy } from '../instance/state'
 
 export function initExtend (Vue: GlobalAPI) {
   /**
@@ -48,6 +48,12 @@ export function initExtend (Vue: GlobalAPI) {
     )
     Sub['super'] = Super
 
+    // For props and computed properties, we define the proxy getters on
+    // the Vue instances at extension time, on the extended prototype. This
+    // avoids Object.defineProperty calls for each instance created.
+    if (Sub.options.props) {
+      initProps(Sub)
+    }
     if (Sub.options.computed) {
       initComputed(Sub)
     }
@@ -76,6 +82,13 @@ export function initExtend (Vue: GlobalAPI) {
     // cache constructor
     cachedCtors[SuperId] = Sub
     return Sub
+  }
+}
+
+function initProps (Comp) {
+  const props = Comp.options.props
+  for (const key in props) {
+    proxy(Comp.prototype, `_props`, key)
   }
 }
 
