@@ -16,6 +16,7 @@ describe('Single File Component parser', () => {
       <style module>
         h1 { font-weight: bold }
       </style>
+      <style bool-attr val-attr="test"></style>
       <script>
         export default {}
       </script>
@@ -24,12 +25,14 @@ describe('Single File Component parser', () => {
       </div>
     `)
     expect(res.template.content.trim()).toBe('<div>hi</div>')
-    expect(res.styles.length).toBe(3)
+    expect(res.styles.length).toBe(4)
     expect(res.styles[0].src).toBe('./test.css')
     expect(res.styles[1].lang).toBe('stylus')
     expect(res.styles[1].scoped).toBe(true)
     expect(res.styles[1].content.trim()).toBe('h1\n  color red\nh2\n  color green')
     expect(res.styles[2].module).toBe(true)
+    expect(res.styles[3].attrs['bool-attr']).toBe(true)
+    expect(res.styles[3].attrs['val-attr']).toBe('test')
     expect(res.script.content.trim()).toBe('export default {}')
   })
 
