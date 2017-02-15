@@ -221,9 +221,8 @@ describe('ref', () => {
       .then(done)
 
     function assertRefs () {
-      expect(Array.isArray(vm.$refs.list)).toBe(true)
-      expect(vm.$refs.list.length).toBe(vm.items.length)
-      expect(vm.$refs.list.every((comp, i) => comp.$el.textContent === String(i + 1))).toBe(true)
+      expect(Object.keys(vm.$refs).length).toBe(vm.items.length)
+      expect(Object.keys(vm.$refs).every(i => vm.$refs[i].$el.textContent === String(i))).toBe(true)
     }
   })
 })
