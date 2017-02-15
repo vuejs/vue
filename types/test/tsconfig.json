@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "es5",
+      "dom",
+      "es2015.promise"
+    ],
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noEmit": true
+  },
+  "files": [
+    "../index.d.ts",
+    "../options.d.ts",
+    "../plugin.d.ts",
+    "../vue.d.ts",
+    "options-test.ts",
+    "plugin-test.ts",
+    "vue-test.ts",
+    "augmentation-test.ts",
+    "global-test.ts"
+  ],
+  "compileOnSave": false
+}
