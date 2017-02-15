@@ -407,8 +407,9 @@ describe('v-model', function () {
       _.nextTick(function () {
         expect(opts[0].selected).toBe(true)
         expect(opts[1].selected).toBe(false)
+        // select should after insert
+        vm.opts.push({ text: 'c', value: { msg: 'C' } })
         vm.test = { msg: 'C' }
-        vm.opts.push({text: 'c', value: vm.test})
         _.nextTick(function () {
           // updating the opts array should force the
           // v-model to update
@@ -418,6 +419,32 @@ describe('v-model', function () {
           done()
         })
       })
+    })
+  })
+
+  // # GitHub issues #3821
+  it('select + v-for with $index', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: {
+        selected: 0,
+        options: ['a', 'b']
+      },
+      template:
+        '<select v-model="selected">' +
+          '<option v-for="opt in options" :value="$index">{{opt}}</option>' +
+        '</select>'
+    })
+    var select = el.firstChild
+    var options = select.options
+    expect(vm.selected).toBe(0)
+    expect(options[0].selected).toBe(true)
+    expect(options[1].selected).toBe(false)
+    vm.options.splice(0, 1)
+    _.nextTick(function () {
+      expect(vm.selected).toBe(0)
+      expect(options[0].selected).toBe(true)
+      done()
     })
   })
 
