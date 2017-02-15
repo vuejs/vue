@@ -1,26 +1,28 @@
-const NativeModule = require('module')
 const vm = require('vm')
 const path = require('path')
+const resolve = require('resolve')
+const NativeModule = require('module')
 
 function createContext (context) {
   const sandbox = {
     Buffer,
-    clearImmediate,
-    clearInterval,
-    clearTimeout,
-    setImmediate,
-    setInterval,
-    setTimeout,
     console,
     process,
+    setTimeout,
+    setInterval,
+    setImmediate,
+    clearTimeout,
+    clearInterval,
+    clearImmediate,
     __VUE_SSR_CONTEXT__: context
   }
   sandbox.global = sandbox
   return sandbox
 }
 
-function compileModule (files) {
+function compileModule (files, basedir) {
   const compiledScripts = {}
+  const reoslvedModules = {}
 
   function getCompiledScript (filename) {
     if (compiledScripts[filename]) {
@@ -48,6 +50,11 @@ function compileModule (files) {
       file = path.join('.', file)
       if (files[file]) {
         return evaluateModule(file, context, evaluatedModules)
+      } else if (basedir) {
+        return require(
+          reoslvedModules[file] ||
+          (reoslvedModules[file] = resolve.sync(file, { basedir }))
+        )
       } else {
         return require(file)
       }
@@ -63,8 +70,8 @@ function compileModule (files) {
   return evaluateModule
 }
 
-export function createBundleRunner (entry, files) {
-  const evaluate = compileModule(files)
+export function createBundleRunner (entry, files, basedir) {
+  const evaluate = compileModule(files, basedir)
   return (_context = {}) => new Promise((resolve, reject) => {
     const context = createContext(_context)
     const res = evaluate(entry, context, {})

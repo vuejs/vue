@@ -20,6 +20,7 @@
   "dependencies": {
     "he": "^1.1.0",
     "de-indent": "^1.0.2",
+    "resolve": "^1.2.0",
     "source-map": "0.5.6",
     "vue-ssr-html-stream": "^2.1.0"
   },

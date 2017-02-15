@@ -23,6 +23,7 @@ export type RenderOptions = {
   isUnaryTag?: Function;
   cache?: RenderCache;
   template?: string;
+  basedir?: string;
 };
 
 export function createRenderer ({
