@@ -22,7 +22,7 @@ export const transitionProps = {
   appearClass: String,
   appearActiveClass: String,
   appearToClass: String,
-  duration: [Number, String, Object]
+  duration: [Number, Object]
 }
 
 // in case the child is also an abstract component, e.g. <keep-alive>

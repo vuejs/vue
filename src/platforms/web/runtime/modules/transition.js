@@ -1,27 +1,16 @@
 /* @flow */
 
+import { once, isObject } from 'shared/util'
 import { inBrowser, isIE9, warn } from 'core/util/index'
-import { once } from 'shared/util'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
 import {
-  resolveTransition,
   nextFrame,
-  addTransitionClass,
-  removeTransitionClass,
+  resolveTransition,
   whenTransitionEnds,
-  parseDurationProp
+  addTransitionClass,
+  removeTransitionClass
 } from '../transition-util'
-
-function explicitDurationNaNWarn (name, vnode) {
-  warn(
-    `<transition> explicit ${name} duration is NaN and ` +
-    'may yield unexpected results. ' +
-    'The duration expression might be incorrect. ' +
-    `Valid examples: '500ms', '.5s' or 500`,
-    vnode.context
-  )
-}
 
 export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const el: any = vnode.elm
@@ -88,7 +77,10 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
   const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
 
-  const explicitEnterDuration = parseDurationProp(duration, 'enter')
+  const explicitEnterDuration = isObject(duration) ? duration.enter : duration
+  if (process.env.NODE_ENV !== 'production' && explicitEnterDuration != null) {
+    checkDuration(explicitEnterDuration, 'enter', vnode)
+  }
 
   const expectsCSS = css !== false && !isIE9
   const userWantsControl =
@@ -136,11 +128,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       addTransitionClass(el, toClass)
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
-        if (typeof explicitEnterDuration === 'number') {
-          if (process.env.NODE_ENV !== 'production' && isNaN(explicitEnterDuration)) {
-            explicitDurationNaNWarn('enter', vnode)
-          }
-
+        if (isValidDuration(explicitEnterDuration)) {
           setTimeout(cb, explicitEnterDuration)
         } else {
           whenTransitionEnds(el, type, cb)
@@ -199,7 +187,10 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     // the length of original fn as _length
     (leave._length || leave.length) > 1
 
-  const explicitLeaveDuration = parseDurationProp(duration, 'leave')
+  const explicitLeaveDuration = isObject(duration) ? duration.leave : duration
+  if (process.env.NODE_ENV !== 'production' && explicitLeaveDuration != null) {
+    checkDuration(explicitLeaveDuration, 'leave', vnode)
+  }
 
   const cb = el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
@@ -244,10 +235,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
         addTransitionClass(el, leaveToClass)
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
-          if (typeof explicitLeaveDuration === 'number') {
-            if (process.env.NODE_ENV !== 'production' && isNaN(explicitLeaveDuration)) {
-              explicitDurationNaNWarn('leave', vnode)
-            }
+          if (isValidDuration(explicitLeaveDuration)) {
             setTimeout(cb, explicitLeaveDuration)
           } else {
             whenTransitionEnds(el, type, cb)
@@ -260,6 +248,27 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       cb()
     }
   }
+}
+
+// only used in dev mode
+function checkDuration (val, name, vnode) {
+  if (typeof val !== 'number') {
+    warn(
+      `<transition> explicit ${name} duration is not a valid number - ` +
+      `got ${JSON.stringify(val)}.`,
+      vnode.context
+    )
+  } else if (isNaN(val)) {
+    warn(
+      `<transition> explicit ${name} duration is NaN - ` +
+      'the duration expression might be incorrect.',
+      vnode.context
+    )
+  }
+}
+
+function isValidDuration (val) {
+  return typeof val === 'number' && !isNaN(val)
 }
 
 function _enter (_: any, vnode: VNodeWithData) {
