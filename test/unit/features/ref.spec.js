@@ -202,7 +202,7 @@ describe('ref', () => {
       },
       template: `
         <div>
-          <test v-for="n in items" :key="n" :ref="ref => { $refs[n] = ref }" :n="n"></test>
+          <test v-for="n in items" :key="n" :ref="function (ref) { $refs[n] = ref }" :n="n"></test>
         </div>
       `,
       components: {
