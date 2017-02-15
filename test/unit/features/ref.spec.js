@@ -165,7 +165,7 @@ describe('ref', () => {
       },
       template: `
         <div>
-          <test v-for="n in items" :ref="onRef" :n="n"></test>
+          <test v-for="n in items" :key="n" :ref="onRef" :n="n"></test>
         </div>
       `,
       components: {
@@ -175,16 +175,8 @@ describe('ref', () => {
         }
       },
       methods: {
-        onRef (ref, remove) {
-          if (!this.$refs.list) this.$refs.list = []
-
-          if (remove) {
-            const index = this.$refs.list.indexOf(ref)
-
-            if (index > -1) this.$refs.list.splice(index, 1)
-          } else {
-            this.$refs.list.push(ref)
-          }
+        onRef (ref) {
+          (this.$refs.list || (this.$refs.list = [])).push(ref)
         }
       }
     }).$mount()
@@ -210,7 +202,7 @@ describe('ref', () => {
       },
       template: `
         <div>
-          <test v-for="n in items" :ref="ref => { $refs[n] = ref }" :n="n"></test>
+          <test v-for="n in items" :key="n" :ref="ref => { $refs[n] = ref }" :n="n"></test>
         </div>
       `,
       components: {
@@ -223,11 +215,15 @@ describe('ref', () => {
     assertRefs()
     // updating
     vm.items.push(4)
-    waitForUpdate(assertRefs).then(done)
+    waitForUpdate(assertRefs)
+      .then(() => { vm.items = [] })
+      .then(assertRefs)
+      .then(done)
 
     function assertRefs () {
-      expect(Object.keys(vm.$refs).length).toBe(vm.items.length)
-      expect(Object.keys(vm.$refs).every(i => vm.$refs[i].$el.textContent === String(i))).toBe(true)
+      expect(Array.isArray(vm.$refs.list)).toBe(true)
+      expect(vm.$refs.list.length).toBe(vm.items.length)
+      expect(vm.$refs.list.every((comp, i) => comp.$el.textContent === String(i + 1))).toBe(true)
     }
   })
 })
