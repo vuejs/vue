@@ -105,6 +105,10 @@ export default function (Vue) {
       }
     }
     var Sub = createClass(name || 'VueComponent')
+    // cache constructor
+    if (isFirstExtend) {
+      extendOptions._Ctor = Sub
+    }
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
     Sub.cid = cid++
@@ -123,10 +127,6 @@ export default function (Vue) {
     // enable recursive self-lookup
     if (name) {
       Sub.options.components[name] = Sub
-    }
-    // cache constructor
-    if (isFirstExtend) {
-      extendOptions._Ctor = Sub
     }
     return Sub
   }

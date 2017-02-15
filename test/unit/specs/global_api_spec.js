@@ -121,5 +121,32 @@ describe('Global API', function () {
       expect(typeof component).toBe('function')
       expect(component.options.name).toBe('Component1')
     })
+
+    // GitHub issue #4187
+    it('convert recursive components correctly', function () {
+      var components = {}
+      components['CompB'] = {
+        props: ['level'],
+        template: '<div>B{{level}}<div v-if="level<11111"><comp-a :level="level+1"></comp-a></div></div>',
+        components: components
+      }
+      components['CompA'] = {
+        props: ['level'],
+        template: '<div>A{{level}}<div v-if="level<11111"><comp-b :level="level+1"></comp-b></div></div>',
+        components: components
+      }
+      components['App'] = {
+        template: '<div>Start<comp-a level="1"></comp-a></div>',
+        components: components
+      }
+
+      var app = new Vue({
+        components: components
+      })
+
+      expect(app.$options.components.App.name).toBe('VueComponent')
+      expect(typeof app.$options.components.CompA).toBe('function')
+      expect(typeof app.$options.components.CompB).toBe('function')
+    })
   })
 })
