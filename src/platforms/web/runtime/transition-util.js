@@ -1,8 +1,8 @@
 /* @flow */
 
 import { inBrowser, isIE9 } from 'core/util/index'
-import { remove, extend, cached } from 'shared/util'
 import { addClass, removeClass } from './class-util'
+import { remove, extend, cached } from 'shared/util'
 
 export function resolveTransition (def?: string | Object): ?Object {
   if (!def) {
