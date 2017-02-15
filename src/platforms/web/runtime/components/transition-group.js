@@ -12,13 +12,15 @@
 // nodes will remain where they should be.
 
 import { warn, extend } from 'core/util/index'
+import { addClass, removeClass } from '../class-util'
 import { transitionProps, extractTransitionData } from './transition'
+
 import {
   hasTransition,
-  addTransitionClass,
-  removeTransitionClass,
   getTransitionInfo,
-  transitionEndEvent
+  transitionEndEvent,
+  addTransitionClass,
+  removeTransitionClass
 } from '../transition-util'
 
 const props = extend({
@@ -122,7 +124,7 @@ export default {
   },
 
   methods: {
-    hasMove (el: Element, moveClass: string): boolean {
+    hasMove (el: any, moveClass: string): boolean {
       /* istanbul ignore if */
       if (!hasTransition) {
         return false
@@ -130,9 +132,20 @@ export default {
       if (this._hasMove != null) {
         return this._hasMove
       }
-      addTransitionClass(el, moveClass)
-      const info = getTransitionInfo(el)
-      removeTransitionClass(el, moveClass)
+      // Detect whether an element with the move class applied has
+      // CSS transitions. Since the element may be inside an entering
+      // transition at this very moment, we make a clone of it and remove
+      // all other transition classes applied to ensure only the move class
+      // is applied.
+      const clone = el.cloneNode()
+      if (el._transitionClasses) {
+        el._transitionClasses.forEach(cls => { removeClass(clone, cls) })
+      }
+      addClass(clone, moveClass)
+      clone.style.display = 'none'
+      this.$el.appendChild(clone)
+      const info = getTransitionInfo(clone)
+      this.$el.removeChild(clone)
       return (this._hasMove = info.hasTransform)
     }
   }
