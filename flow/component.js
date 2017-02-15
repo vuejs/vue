@@ -41,7 +41,7 @@ declare interface Component {
   $set: (obj: Array<mixed> | Object, key: mixed, val: mixed) => void;
   $delete: (obj: Object, key: string) => void;
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;
-  $on: (event: string, fn: Function) => Component;
+  $on: (event: string | Array<string>, fn: Function) => Component;
   $once: (event: string, fn: Function) => Component;
   $off: (event?: string, fn?: Function) => Component;
   $emit: (event: string, ...args: Array<mixed>) => Component;
