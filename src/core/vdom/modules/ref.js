@@ -15,9 +15,10 @@ export function registerRef (_: any, vnode: VNodeWithData) {
   if (typeof key === 'function') {
     key(ref)
   } else if (vnode.data.refInFor) {
-    if (Array.isArray(refs[key])) {
-      if (refs[key].indexOf(ref) < 0) {
-        refs[key].push(ref)
+    const refArray = refs[key]
+    if (Array.isArray(refArray)) {
+      if (refArray.indexOf(ref) < 0) {
+        refArray.push(ref)
       }
     } else {
       refs[key] = [ref]
