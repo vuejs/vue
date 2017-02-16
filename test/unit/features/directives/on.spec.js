@@ -212,6 +212,49 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalled()
   })
 
+  it('should support mouse modifier', () => {
+    const left = 0
+    const middle = 1
+    const right = 2
+    const spyLeft = jasmine.createSpy()
+    const spyMiddle = jasmine.createSpy()
+    const spyRight = jasmine.createSpy()
+
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <div ref="left" @mousedown.left="foo">left</div>
+          <div ref="right" @mousedown.right="foo1">right</div>
+          <div ref="middle" @mousedown.middle="foo2">right</div>
+        </div>
+      `,
+      methods: {
+        foo: spyLeft,
+        foo1: spyRight,
+        foo2: spyMiddle
+      }
+    })
+
+    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = right })
+    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = middle })
+    expect(spyLeft).not.toHaveBeenCalled()
+    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = left })
+    expect(spyLeft).toHaveBeenCalled()
+
+    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = left })
+    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = middle })
+    expect(spyRight).not.toHaveBeenCalled()
+    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = right })
+    expect(spyRight).toHaveBeenCalled()
+
+    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = left })
+    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = right })
+    expect(spyMiddle).not.toHaveBeenCalled()
+    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = middle })
+    expect(spyMiddle).toHaveBeenCalled()
+  })
+
   it('should support custom keyCode', () => {
     Vue.config.keyCodes.test = 1
     vm = new Vue({
