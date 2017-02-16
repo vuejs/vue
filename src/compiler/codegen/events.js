@@ -16,20 +16,22 @@ const keyCodes: { [key: string]: number | Array<number> } = {
   'delete': [8, 46]
 }
 
+// #4868: modifiers that prevent the execution of the listener
+// need to explicitly return null so that we can determine whether to remove
+// the listener for .once
+const genGuard = condition => `if(${condition})return null;`
+
 const modifierCode: { [key: string]: string } = {
   stop: '$event.stopPropagation();',
   prevent: '$event.preventDefault();',
-  // #4868: modifiers that prevent the execution of the listener
-  // need to explicitly return null so that we can determine whether to remove
-  // the listener for .once
-  self: 'if($event.target !== $event.currentTarget)return null;',
-  ctrl: 'if(!$event.ctrlKey)return null;',
-  shift: 'if(!$event.shiftKey)return null;',
-  alt: 'if(!$event.altKey)return null;',
-  meta: 'if(!$event.metaKey)return null;',
-  left: 'if($event.button !== 0)return null;',
-  middle: 'if($event.button !== 1)return null;',
-  right: 'if($event.button !== 2)return null;'
+  self: genGuard(`$event.target !== $event.currentTarget`),
+  ctrl: genGuard(`!$event.ctrlKey`),
+  shift: genGuard(`!$event.shiftKey`),
+  alt: genGuard(`!$event.altKey`),
+  meta: genGuard(`!$event.metaKey`),
+  left: genGuard(`$event.button !== 0`),
+  middle: genGuard(`$event.button !== 1`),
+  right: genGuard(`$event.button !== 2`)
 }
 
 export function genHandlers (events: ASTElementHandlers, native?: boolean): string {
