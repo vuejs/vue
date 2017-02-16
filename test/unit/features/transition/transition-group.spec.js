@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import injectStyles from './inject-styles'
 import { isIE9 } from 'core/util/env'
-import { nextFrame } from 'web/runtime/transition-util'
+import { nextFrame, nextOneFrame } from 'web/runtime/transition-util'
 
 if (!isIE9) {
   describe('Transition group', () => {
@@ -292,6 +292,59 @@ if (!isIE9) {
         template: `<div><transition-group><div v-for="i in 3"></div></transition-group></div>`
       }).$mount()
       expect('<transition-group> children must be keyed: <div>').toHaveBeenWarned()
+    })
+
+    // Issue #4900
+    it('stagger animations on initial empty children', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition-group name="test-empty-array">
+              <div v-for="item in items" :key="item">{{ item }}</div>
+            </transition-group>
+          </div>
+        `,
+        data: {
+          items: []
+        }
+      }).$mount(el)
+      vm.items.push(0)
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="test-empty-array-enter test-empty-array-enter-active">0</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(duration / 2).then(() => {
+        vm.items.push(1)
+      }).thenWaitFor(nextOneFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="test-empty-array-enter-active test-empty-array-enter-to">0</div>` +
+            `<div class="test-empty-array-enter test-empty-array-enter-active">1</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(nextOneFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="test-empty-array-enter-active test-empty-array-enter-to">0</div>` +
+            `<div class="test-empty-array-enter-active test-empty-array-enter-to">1</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(duration / 2).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="">0</div>` +
+            `<div class="test-empty-array-enter-active test-empty-array-enter-to">1</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            vm.items.map(i => `<div class="">${i}</div>`).join('') +
+          `</span>`
+        )
+      }).then(done)
     })
   })
 }

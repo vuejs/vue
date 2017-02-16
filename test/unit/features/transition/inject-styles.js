@@ -23,6 +23,7 @@ export default function injectStyles () {
     .v-appear, .v-enter, .v-leave-active,
     .test-appear, .test-enter, .test-leave-active,
     .hello, .bye.active,
+    .test-empty-array-enter-active,
     .changed-enter {
       opacity: 0;
     }
@@ -57,6 +58,10 @@ export default function injectStyles () {
     @-webkit-keyframes test-leave {
       from { opacity: 1 }
       to { opacity: 0 }
+    }
+    .test-empty-array-enter-active, .test-empty-array-leave-active {
+      -webkit-transition: opacity ${duration}ms ease;
+      transition: opacity ${duration}ms ease;
     }
   `)
   return { duration, buffer }

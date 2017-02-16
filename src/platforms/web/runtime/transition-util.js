@@ -69,6 +69,10 @@ export function nextFrame (fn: Function) {
   })
 }
 
+export function nextOneFrame (fn: Function) {
+  raf(fn)
+}
+
 export function addTransitionClass (el: any, cls: string) {
   (el._transitionClasses || (el._transitionClasses = [])).push(cls)
   addClass(el, cls)
