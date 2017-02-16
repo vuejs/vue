@@ -6,6 +6,7 @@ export type Config = {
   // user
   optionMergeStrategies: { [key: string]: Function };
   silent: boolean;
+  productionTip: boolean;
   devtools: boolean;
   errorHandler: ?Function;
   ignoredElements: Array<string>;
@@ -32,6 +33,11 @@ const config: Config = {
    * Whether to suppress warnings.
    */
   silent: false,
+
+  /**
+   * Show production mode tip message on boot?
+   */
+  productionTip: process.env.NODE_ENV !== 'production',
 
   /**
    * Whether to enable devtools

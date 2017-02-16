@@ -189,7 +189,7 @@ export function createPatchFunction (backend) {
     } else {
       // empty component root.
       // skip all element-related modules except for ref (#3455)
-      registerRef(vnode)
+      registerRef(null, vnode)
       // make sure to invoke the insert hook
       insertedVnodeQueue.push(vnode)
     }

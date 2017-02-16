@@ -3,6 +3,8 @@
 import { callHook } from 'core/instance/lifecycle'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
+type VNodeCache = { [key: string]: ?VNode };
+
 const patternTypes: Array<Function> = [String, RegExp]
 
 function getComponentName (opts: ?VNodeComponentOptions): ?string {
@@ -19,11 +21,11 @@ function matches (pattern: string | RegExp, name: string): boolean {
   return false
 }
 
-function pruneCache (cache, filter) {
+function pruneCache (cache: VNodeCache, filter: Function) {
   for (const key in cache) {
-    const cachedNode = cache[key]
+    const cachedNode: ?VNode = cache[key]
     if (cachedNode) {
-      const name = getComponentName(cachedNode.componentOptions)
+      const name: ?string = getComponentName(cachedNode.componentOptions)
       if (name && !filter(name)) {
         pruneCacheEntry(cachedNode)
         cache[key] = null
@@ -32,7 +34,7 @@ function pruneCache (cache, filter) {
   }
 }
 
-function pruneCacheEntry (vnode: ?MountedComponentVNode) {
+function pruneCacheEntry (vnode: ?VNode) {
   if (vnode) {
     if (!vnode.componentInstance._inactive) {
       callHook(vnode.componentInstance, 'deactivated')
@@ -71,17 +73,17 @@ export default {
 
   render () {
     const vnode: VNode = getFirstComponentChild(this.$slots.default)
-    const componentOptions = vnode && vnode.componentOptions
+    const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
       // check pattern
-      const name = getComponentName(componentOptions)
+      const name: ?string = getComponentName(componentOptions)
       if (name && (
         (this.include && !matches(this.include, name)) ||
         (this.exclude && matches(this.exclude, name))
       )) {
         return vnode
       }
-      const key = vnode.key == null
+      const key: ?string = vnode.key == null
         // same constructor may get registered as different local components
         // so cid alone is not enough (#3269)
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')

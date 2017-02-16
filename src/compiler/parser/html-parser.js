@@ -56,8 +56,8 @@ const decodingMap = {
   '&amp;': '&',
   '&#10;': '\n'
 }
-const encodedAttr = /&(lt|gt|quot|amp);/g
-const encodedAttrWithNewLines = /&(lt|gt|quot|amp|#10);/g
+const encodedAttr = /&(?:lt|gt|quot|amp);/g
+const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10);/g
 
 function decodeAttr (value, shouldDecodeNewlines) {
   const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
@@ -168,8 +168,11 @@ export function parseHTML (html, options) {
       parseEndTag(stackedTag, index - endTagLength, index)
     }
 
-    if (html === last && options.chars) {
-      options.chars(html)
+    if (html === last) {
+      options.chars && options.chars(html)
+      if (process.env.NODE_ENV !== 'production' && !stack.length && options.warn) {
+        options.warn(`Mal-formatted tag at end of template: "${html}"`)
+      }
       break
     }
   }
@@ -207,7 +210,7 @@ export function parseHTML (html, options) {
 
   function handleStartTag (match) {
     const tagName = match.tagName
-    let unarySlash = match.unarySlash
+    const unarySlash = match.unarySlash
 
     if (expectHTML) {
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
@@ -243,7 +246,6 @@ export function parseHTML (html, options) {
     if (!unary) {
       stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs })
       lastTag = tagName
-      unarySlash = ''
     }
 
     if (options.start) {
@@ -275,6 +277,13 @@ export function parseHTML (html, options) {
     if (pos >= 0) {
       // Close all the open elements, up the stack
       for (let i = stack.length - 1; i >= pos; i--) {
+        if (process.env.NODE_ENV !== 'production' &&
+            (i > pos || !tagName) &&
+            options.warn) {
+          options.warn(
+            `tag <${stack[i].tag}> has no matching end tag.`
+          )
+        }
         if (options.end) {
           options.end(stack[i].tag, start, end)
         }

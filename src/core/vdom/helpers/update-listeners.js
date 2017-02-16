@@ -32,7 +32,8 @@ function createEventHandle (fn: Function | Array<Function>): {
           fn[i].apply(null, arguments)
         }
       } else {
-        fn.apply(null, arguments)
+        // return handler return value for single handlers
+        return fn.apply(null, arguments)
       }
     }
   }

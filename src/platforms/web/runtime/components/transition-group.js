@@ -12,13 +12,15 @@
 // nodes will remain where they should be.
 
 import { warn, extend } from 'core/util/index'
+import { addClass, removeClass } from '../class-util'
 import { transitionProps, extractTransitionData } from './transition'
+
 import {
   hasTransition,
-  addTransitionClass,
-  removeTransitionClass,
   getTransitionInfo,
-  transitionEndEvent
+  transitionEndEvent,
+  addTransitionClass,
+  removeTransitionClass
 } from '../transition-util'
 
 const props = extend({
@@ -32,35 +34,33 @@ export default {
   props,
 
   render (h: Function) {
-    const tag = this.tag || this.$vnode.data.tag || 'span'
-    const map = Object.create(null)
-    const prevChildren = this.prevChildren = this.children
-    const rawChildren = this.$slots.default || []
-    const children = this.children = []
-    const transitionData = extractTransitionData(this)
+    const tag: string = this.tag || this.$vnode.data.tag || 'span'
+    const map: Object = Object.create(null)
+    const prevChildren: Array<VNode> = this.prevChildren = this.children
+    const rawChildren: Array<VNode> = this.$slots.default || []
+    const children: Array<VNode> = this.children = []
+    const transitionData: Object = extractTransitionData(this)
 
     for (let i = 0; i < rawChildren.length; i++) {
-      const c = rawChildren[i]
+      const c: VNode = rawChildren[i]
       if (c.tag) {
         if (c.key != null && String(c.key).indexOf('__vlist') !== 0) {
           children.push(c)
           map[c.key] = c
           ;(c.data || (c.data = {})).transition = transitionData
         } else if (process.env.NODE_ENV !== 'production') {
-          const opts = c.componentOptions
-          const name = opts
-            ? (opts.Ctor.options.name || opts.tag)
-            : c.tag
+          const opts: ?VNodeComponentOptions = c.componentOptions
+          const name: string = opts ? (opts.Ctor.options.name || opts.tag || '') : c.tag
           warn(`<transition-group> children must be keyed: <${name}>`)
         }
       }
     }
 
     if (prevChildren) {
-      const kept = []
-      const removed = []
+      const kept: Array<VNode> = []
+      const removed: Array<VNode> = []
       for (let i = 0; i < prevChildren.length; i++) {
-        const c = prevChildren[i]
+        const c: VNode = prevChildren[i]
         c.data.transition = transitionData
         c.data.pos = c.elm.getBoundingClientRect()
         if (map[c.key]) {
@@ -88,8 +88,8 @@ export default {
   },
 
   updated () {
-    const children = this.prevChildren
-    const moveClass = this.moveClass || ((this.name || 'v') + '-move')
+    const children: Array<VNode> = this.prevChildren
+    const moveClass: string = this.moveClass || ((this.name || 'v') + '-move')
     if (!children.length || !this.hasMove(children[0].elm, moveClass)) {
       return
     }
@@ -101,12 +101,13 @@ export default {
     children.forEach(applyTranslation)
 
     // force reflow to put everything in position
-    const f = document.body.offsetHeight // eslint-disable-line
+    const body: any = document.body
+    const f: number = body.offsetHeight // eslint-disable-line
 
-    children.forEach(c => {
+    children.forEach((c: VNode) => {
       if (c.data.moved) {
-        var el = c.elm
-        var s = el.style
+        var el: any = c.elm
+        var s: any = el.style
         addTransitionClass(el, moveClass)
         s.transform = s.WebkitTransform = s.transitionDuration = ''
         el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
@@ -121,7 +122,7 @@ export default {
   },
 
   methods: {
-    hasMove (el: Element, moveClass: string): boolean {
+    hasMove (el: any, moveClass: string): boolean {
       /* istanbul ignore if */
       if (!hasTransition) {
         return false
@@ -129,15 +130,26 @@ export default {
       if (this._hasMove != null) {
         return this._hasMove
       }
-      addTransitionClass(el, moveClass)
-      const info = getTransitionInfo(el)
-      removeTransitionClass(el, moveClass)
+      // Detect whether an element with the move class applied has
+      // CSS transitions. Since the element may be inside an entering
+      // transition at this very moment, we make a clone of it and remove
+      // all other transition classes applied to ensure only the move class
+      // is applied.
+      const clone: HTMLElement = el.cloneNode()
+      if (el._transitionClasses) {
+        el._transitionClasses.forEach((cls: string) => { removeClass(clone, cls) })
+      }
+      addClass(clone, moveClass)
+      clone.style.display = 'none'
+      this.$el.appendChild(clone)
+      const info: Object = getTransitionInfo(clone)
+      this.$el.removeChild(clone)
       return (this._hasMove = info.hasTransform)
     }
   }
 }
 
-function callPendingCbs (c) {
+function callPendingCbs (c: VNode) {
   /* istanbul ignore if */
   if (c.elm._moveCb) {
     c.elm._moveCb()
@@ -148,11 +160,11 @@ function callPendingCbs (c) {
   }
 }
 
-function recordPosition (c) {
+function recordPosition (c: VNode) {
   c.data.newPos = c.elm.getBoundingClientRect()
 }
 
-function applyTranslation (c) {
+function applyTranslation (c: VNode) {
   const oldPos = c.data.pos
   const newPos = c.data.newPos
   const dx = oldPos.left - newPos.left

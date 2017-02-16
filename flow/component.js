@@ -2,6 +2,10 @@ import type { Config } from '../src/core/config'
 import type VNode from '../src/core/vdom/vnode'
 import type Watcher from '../src/core/observer/watcher'
 
+declare type Refs = {
+  [key: string]: Component | Element | Array<Component | Element> | void;
+};
+
 declare interface Component {
   // constructor information
   static cid: number;
@@ -23,11 +27,12 @@ declare interface Component {
   $parent: Component | void;
   $root: Component;
   $children: Array<Component>;
-  $refs: { [key: string]: Component | Element | Array<Component | Element> | void };
+  $refs: Refs;
   $slots: { [key: string]: Array<VNode> };
   $scopedSlots: { [key: string]: () => VNodeChildren };
   $vnode: VNode;
   $isServer: boolean;
+  $props: Object;
 
   // public methods
   $mount: (el?: Element | string, hydrating?: boolean) => Component;
@@ -36,7 +41,7 @@ declare interface Component {
   $set: (obj: Array<mixed> | Object, key: mixed, val: mixed) => void;
   $delete: (obj: Object, key: string) => void;
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;
-  $on: (event: string, fn: Function) => Component;
+  $on: (event: string | Array<string>, fn: Function) => Component;
   $once: (event: string, fn: Function) => Component;
   $off: (event?: string, fn?: Function) => Component;
   $emit: (event: string, ...args: Array<mixed>) => Component;
@@ -51,7 +56,9 @@ declare interface Component {
   _renderContext: ?Component;
   _watcher: Watcher;
   _watchers: Array<Watcher>;
+  _computedWatchers: { [key: string]: Watcher };
   _data: Object;
+  _props: Object;
   _events: Object;
   _inactive: boolean;
   _isMounted: boolean;

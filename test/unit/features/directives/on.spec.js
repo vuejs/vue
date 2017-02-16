@@ -173,6 +173,21 @@ describe('Directive v-on', () => {
     expect(callOrder.toString()).toBe('1,2,2')
   })
 
+  // #4846
+  it('should support once and other modifiers', () => {
+    vm = new Vue({
+      el,
+      template: `<div @click.once.self="foo"><span/></div>`,
+      methods: { foo: spy }
+    })
+    triggerEvent(vm.$el.firstChild, 'click')
+    expect(spy).not.toHaveBeenCalled()
+    triggerEvent(vm.$el, 'click')
+    expect(spy).toHaveBeenCalled()
+    triggerEvent(vm.$el, 'click')
+    expect(spy.calls.count()).toBe(1)
+  })
+
   it('should support keyCode', () => {
     vm = new Vue({
       el,

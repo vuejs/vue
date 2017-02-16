@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/vuejs/vue/issues"
   },
-  "homepage": "https://github.com/vuejs/vue/tree/dev/packages/weex-template-compiler#readme"
+  "homepage": "https://github.com/vuejs/vue/tree/dev/packages/weex-template-compiler#readme",
+  "dependencies": {
+    "he": "^1.1.0"
+  }
 }

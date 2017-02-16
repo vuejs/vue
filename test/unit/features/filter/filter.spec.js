@@ -78,6 +78,68 @@ describe('Filters', () => {
     expect(vm.$el.textContent).toBe(String(1 / 4))
   })
 
+  it('handle division with parenthesis', () => {
+    const vm = new Vue({
+      data: { a: 20 },
+      template: `<div>{{ (a*2) / 5 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(16))
+  })
+
+  it('handle division with dot', () => {
+    const vm = new Vue({
+      template: `<div>{{ 20. / 5 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(8))
+  })
+
+  it('handle division with array values', () => {
+    const vm = new Vue({
+      data: { a: [20] },
+      template: `<div>{{ a[0] / 5 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(8))
+  })
+
+  it('handle division with hash values', () => {
+    const vm = new Vue({
+      data: { a: { n: 20 }},
+      template: `<div>{{ a['n'] / 5 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(8))
+  })
+
+  it('handle division with variable++', () => {
+    const vm = new Vue({
+      data: { a: 7 },
+      template: `<div>{{ a++ / 2 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(7))
+  })
+
+  it('handle division with variable--', () => {
+    const vm = new Vue({
+      data: { a: 7 },
+      template: `<div>{{ a++ / 2 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(7))
+  })
+
+  it('handle division with variable_', () => {
+    const vm = new Vue({
+      data: { a_: 8 },
+      template: `<div>{{ a_ / 2 | double }}</div>`,
+      filters: { double: v => v * 2 }
+    }).$mount()
+    expect(vm.$el.textContent).toBe(String(8))
+  })
+
   it('arguments', () => {
     const vm = new Vue({
       template: `<div>{{ msg | add(a, 3) }}</div>`,

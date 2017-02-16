@@ -1,6 +1,7 @@
 /* @flow */
 
 import Watcher from '../observer/watcher'
+import { resetRefs } from '../vdom/modules/ref'
 import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { updateComponentListeners } from './events'
@@ -83,6 +84,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const prevVnode = vm._vnode
     const prevActiveInstance = activeInstance
     activeInstance = vm
+    vm.$refs = resetRefs(vm.$refs)
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
@@ -143,15 +145,17 @@ export function lifecycleMixin (Vue: Class<Component>) {
       if (process.env.NODE_ENV !== 'production') {
         observerState.isSettingProps = true
       }
+      const props = vm._props
       const propKeys = vm.$options._propKeys || []
       for (let i = 0; i < propKeys.length; i++) {
         const key = propKeys[i]
-        vm[key] = validateProp(key, vm.$options.props, propsData, vm)
+        props[key] = validateProp(key, vm.$options.props, propsData, vm)
       }
       observerState.shouldConvert = true
       if (process.env.NODE_ENV !== 'production') {
         observerState.isSettingProps = false
       }
+      // keep a copy of raw propsData
       vm.$options.propsData = propsData
     }
     // update listeners
