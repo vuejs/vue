@@ -1,15 +1,15 @@
 /* @flow */
 
-import { inBrowser, isIE9 } from 'core/util/index'
-import { once } from 'shared/util'
+import { once, isObject } from 'shared/util'
+import { inBrowser, isIE9, warn } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
 import {
-  resolveTransition,
   nextFrame,
+  resolveTransition,
+  whenTransitionEnds,
   addTransitionClass,
-  removeTransitionClass,
-  whenTransitionEnds
+  removeTransitionClass
 } from '../transition-util'
 
 export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
@@ -47,7 +47,8 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     beforeAppear,
     appear,
     afterAppear,
-    appearCancelled
+    appearCancelled,
+    duration
   } = data
 
   // activeInstance will always be the <transition> component managing this
@@ -70,10 +71,16 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const startClass = isAppear ? appearClass : enterClass
   const activeClass = isAppear ? appearActiveClass : enterActiveClass
   const toClass = isAppear ? appearToClass : enterToClass
+
   const beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter
   const enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter
   const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
   const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
+
+  const explicitEnterDuration = isObject(duration) ? duration.enter : duration
+  if (process.env.NODE_ENV !== 'production' && explicitEnterDuration != null) {
+    checkDuration(explicitEnterDuration, 'enter', vnode)
+  }
 
   const expectsCSS = css !== false && !isIE9
   const userWantsControl =
@@ -121,7 +128,11 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       addTransitionClass(el, toClass)
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
-        whenTransitionEnds(el, type, cb)
+        if (isValidDuration(explicitEnterDuration)) {
+          setTimeout(cb, explicitEnterDuration)
+        } else {
+          whenTransitionEnds(el, type, cb)
+        }
       }
     })
   }
@@ -165,7 +176,8 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     leave,
     afterLeave,
     leaveCancelled,
-    delayLeave
+    delayLeave,
+    duration
   } = data
 
   const expectsCSS = css !== false && !isIE9
@@ -174,6 +186,11 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     // leave hook may be a bound method which exposes
     // the length of original fn as _length
     (leave._length || leave.length) > 1
+
+  const explicitLeaveDuration = isObject(duration) ? duration.leave : duration
+  if (process.env.NODE_ENV !== 'production' && explicitLeaveDuration != null) {
+    checkDuration(explicitLeaveDuration, 'leave', vnode)
+  }
 
   const cb = el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
@@ -218,7 +235,11 @@ export function leave (vnode: VNodeWithData, rm: Function) {
         addTransitionClass(el, leaveToClass)
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
-          whenTransitionEnds(el, type, cb)
+          if (isValidDuration(explicitLeaveDuration)) {
+            setTimeout(cb, explicitLeaveDuration)
+          } else {
+            whenTransitionEnds(el, type, cb)
+          }
         }
       })
     }
@@ -227,6 +248,27 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       cb()
     }
   }
+}
+
+// only used in dev mode
+function checkDuration (val, name, vnode) {
+  if (typeof val !== 'number') {
+    warn(
+      `<transition> explicit ${name} duration is not a valid number - ` +
+      `got ${JSON.stringify(val)}.`,
+      vnode.context
+    )
+  } else if (isNaN(val)) {
+    warn(
+      `<transition> explicit ${name} duration is NaN - ` +
+      'the duration expression might be incorrect.',
+      vnode.context
+    )
+  }
+}
+
+function isValidDuration (val) {
+  return typeof val === 'number' && !isNaN(val)
 }
 
 function _enter (_: any, vnode: VNodeWithData) {

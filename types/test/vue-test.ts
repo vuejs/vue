@@ -1,6 +1,8 @@
 import Vue = require("../index");
 
 class Test extends Vue {
+  a: number;
+
   testProperties() {
     this.$data;
     this.$el;
@@ -37,7 +39,7 @@ class Test extends Vue {
       immediate: true,
       deep: false
     })();
-    this.$watch(() => {}, (val: number) => {});
+    this.$watch(() => this.a, (val: number) => {});
     this.$on("", () => {});
     this.$once("", () => {});
     this.$off("", () => {});

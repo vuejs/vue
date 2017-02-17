@@ -13,7 +13,7 @@ export function initUse (Vue: GlobalAPI) {
     args.unshift(this)
     if (typeof plugin.install === 'function') {
       plugin.install.apply(plugin, args)
-    } else {
+    } else if (typeof plugin === 'function') {
       plugin.apply(null, args)
     }
     plugin.installed = true

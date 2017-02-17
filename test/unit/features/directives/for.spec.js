@@ -449,7 +449,7 @@ describe('Directive v-for', () => {
       },
       template: `
         <div>
-          <span v-for="letter in text">{{ letter }}.</span
+          <span v-for="letter in text">{{ letter }}.</span>
         </div>
       `
     }).$mount()

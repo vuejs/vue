@@ -98,6 +98,22 @@ describe('Options props', () => {
     }).then(done)
   })
 
+  it('default value Function', () => {
+    const func = () => 132
+    const vm = new Vue({
+      props: {
+        a: {
+          type: Function,
+          default: func
+        }
+      },
+      propsData: {
+        a: undefined
+      }
+    })
+    expect(vm.a).toBe(func)
+  })
+
   it('warn object/array default values', () => {
     new Vue({
       props: {

@@ -16,14 +16,22 @@ const keyCodes: { [key: string]: number | Array<number> } = {
   'delete': [8, 46]
 }
 
+// #4868: modifiers that prevent the execution of the listener
+// need to explicitly return null so that we can determine whether to remove
+// the listener for .once
+const genGuard = condition => `if(${condition})return null;`
+
 const modifierCode: { [key: string]: string } = {
   stop: '$event.stopPropagation();',
   prevent: '$event.preventDefault();',
-  self: 'if($event.target !== $event.currentTarget)return;',
-  ctrl: 'if(!$event.ctrlKey)return;',
-  shift: 'if(!$event.shiftKey)return;',
-  alt: 'if(!$event.altKey)return;',
-  meta: 'if(!$event.metaKey)return;'
+  self: genGuard(`$event.target !== $event.currentTarget`),
+  ctrl: genGuard(`!$event.ctrlKey`),
+  shift: genGuard(`!$event.shiftKey`),
+  alt: genGuard(`!$event.altKey`),
+  meta: genGuard(`!$event.metaKey`),
+  left: genGuard(`$event.button !== 0`),
+  middle: genGuard(`$event.button !== 1`),
+  right: genGuard(`$event.button !== 2`)
 }
 
 export function genHandlers (events: ASTElementHandlers, native?: boolean): string {
@@ -62,12 +70,12 @@ function genHandler (
     const handlerCode = simplePathRE.test(handler.value)
       ? handler.value + '($event)'
       : handler.value
-    return 'function($event){' + code + handlerCode + '}'
+    return `function($event){${code}${handlerCode}}`
   }
 }
 
 function genKeyFilter (keys: Array<string>): string {
-  return `if(${keys.map(genFilterCode).join('&&')})return;`
+  return `if(${keys.map(genFilterCode).join('&&')})return null;`
 }
 
 function genFilterCode (key: string): string {

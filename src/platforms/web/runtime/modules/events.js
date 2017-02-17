@@ -14,10 +14,12 @@ function add (
     const oldHandler = handler
     const _target = target // save current target element in closure
     handler = function (ev) {
-      remove(event, handler, capture, _target)
-      arguments.length === 1
+      const res = arguments.length === 1
         ? oldHandler(ev)
         : oldHandler.apply(null, arguments)
+      if (res !== null) {
+        remove(event, handler, capture, _target)
+      }
     }
   }
   target.addEventListener(event, handler, capture)

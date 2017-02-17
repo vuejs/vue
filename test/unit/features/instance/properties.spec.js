@@ -79,4 +79,50 @@ describe('Instance properties', () => {
     }).$mount()
     expect(calls).toEqual(['outer:undefined', 'middle:outer', 'inner:middle', 'next:undefined'])
   })
+
+  it('$props', done => {
+    const Comp = Vue.extend({
+      props: ['msg'],
+      template: '<div>{{ msg }} {{ $props.msg }}</div>'
+    })
+    const vm = new Comp({
+      propsData: {
+        msg: 'foo'
+      }
+    }).$mount()
+    // check render
+    expect(vm.$el.textContent).toContain('foo foo')
+    // warn set
+    vm.$props = {}
+    expect('$props is readonly').toHaveBeenWarned()
+    // check existence
+    expect(vm.$props.msg).toBe('foo')
+    // check change
+    vm.msg = 'bar'
+    expect(vm.$props.msg).toBe('bar')
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toContain('bar bar')
+    }).then(() => {
+      vm.$props.msg = 'baz'
+      expect(vm.msg).toBe('baz')
+    }).then(() => {
+      expect(vm.$el.textContent).toContain('baz baz')
+    }).then(done)
+  })
+
+  it('warn mutating $props', () => {
+    const Comp = {
+      props: ['msg'],
+      render () {},
+      mounted () {
+        expect(this.$props.msg).toBe('foo')
+        this.$props.msg = 'bar'
+      }
+    }
+    new Vue({
+      template: `<comp ref="comp" msg="foo" />`,
+      components: { Comp }
+    }).$mount()
+    expect(`Avoid mutating a prop`).toHaveBeenWarned()
+  })
 })

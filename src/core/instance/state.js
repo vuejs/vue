@@ -1,7 +1,7 @@
 /* @flow */
 
-import Watcher from '../observer/watcher'
 import Dep from '../observer/dep'
+import Watcher from '../observer/watcher'
 
 import {
   set,
@@ -21,6 +21,23 @@ import {
   noop
 } from '../util/index'
 
+const sharedPropertyDefinition = {
+  enumerable: true,
+  configurable: true,
+  get: noop,
+  set: noop
+}
+
+export function proxy (target: Object, sourceKey: string, key: string) {
+  sharedPropertyDefinition.get = function proxyGetter () {
+    return this[sourceKey][key]
+  }
+  sharedPropertyDefinition.set = function proxySetter (val) {
+    this[sourceKey][key] = val
+  }
+  Object.defineProperty(target, key, sharedPropertyDefinition)
+}
+
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
@@ -37,16 +54,18 @@ export function initState (vm: Component) {
 
 const isReservedProp = { key: 1, ref: 1, slot: 1 }
 
-function initProps (vm: Component, props: Object) {
+function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
+  const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
   // instead of dyanmic object key enumeration.
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
   observerState.shouldConvert = isRoot
-  for (const key in props) {
+  for (const key in propsOptions) {
     keys.push(key)
+    const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       if (isReservedProp[key]) {
@@ -55,7 +74,7 @@ function initProps (vm: Component, props: Object) {
           vm
         )
       }
-      defineReactive(vm, key, validateProp(key, props, propsData, vm), () => {
+      defineReactive(props, key, value, () => {
         if (vm.$parent && !observerState.isSettingProps) {
           warn(
             `Avoid mutating a prop directly since the value will be ` +
@@ -67,7 +86,13 @@ function initProps (vm: Component, props: Object) {
         }
       })
     } else {
-      defineReactive(vm, key, validateProp(key, props, propsData, vm))
+      defineReactive(props, key, value)
+    }
+    // static props are already proxied on the component's prototype
+    // during Vue.extend(). We only need to proxy props defined at
+    // instantiation here.
+    if (!(key in vm)) {
+      proxy(vm, `_props`, key)
     }
   }
   observerState.shouldConvert = true
@@ -97,61 +122,63 @@ function initData (vm: Component) {
         `Use prop default value instead.`,
         vm
       )
-    } else {
-      proxy(vm, keys[i])
+    } else if (!isReserved(keys[i])) {
+      proxy(vm, `_data`, keys[i])
     }
   }
   // observe data
   observe(data, true /* asRootData */)
 }
 
-const computedSharedDefinition = {
-  enumerable: true,
-  configurable: true,
-  get: noop,
-  set: noop
-}
+const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
+  const watchers = vm._computedWatchers = Object.create(null)
+
   for (const key in computed) {
-    /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' && key in vm) {
-      warn(
-        `existing instance property "${key}" will be ` +
-        `overwritten by a computed property with the same name.`,
-        vm
-      )
-    }
     const userDef = computed[key]
-    if (typeof userDef === 'function') {
-      computedSharedDefinition.get = makeComputedGetter(userDef, vm)
-      computedSharedDefinition.set = noop
-    } else {
-      computedSharedDefinition.get = userDef.get
-        ? userDef.cache !== false
-          ? makeComputedGetter(userDef.get, vm)
-          : bind(userDef.get, vm)
-        : noop
-      computedSharedDefinition.set = userDef.set
-        ? bind(userDef.set, vm)
-        : noop
+    const getter = typeof userDef === 'function' ? userDef : userDef.get
+    // create internal watcher for the computed property.
+    watchers[key] = new Watcher(vm, getter, noop, computedWatcherOptions)
+
+    // component-defined computed properties are already defined on the
+    // component prototype. We only need to define computed properties defined
+    // at instantiation here.
+    if (!(key in vm)) {
+      defineComputed(vm, key, userDef)
     }
-    Object.defineProperty(vm, key, computedSharedDefinition)
   }
 }
 
-function makeComputedGetter (getter: Function, owner: Component): Function {
-  const watcher = new Watcher(owner, getter, noop, {
-    lazy: true
-  })
+export function defineComputed (target: any, key: string, userDef: Object | Function) {
+  if (typeof userDef === 'function') {
+    sharedPropertyDefinition.get = createComputedGetter(key)
+    sharedPropertyDefinition.set = noop
+  } else {
+    sharedPropertyDefinition.get = userDef.get
+      ? userDef.cache !== false
+        ? createComputedGetter(key)
+        : userDef.get
+      : noop
+    sharedPropertyDefinition.set = userDef.set
+      ? userDef.set
+      : noop
+  }
+  Object.defineProperty(target, key, sharedPropertyDefinition)
+}
+
+function createComputedGetter (key) {
   return function computedGetter () {
-    if (watcher.dirty) {
-      watcher.evaluate()
+    const watcher = this._computedWatchers && this._computedWatchers[key]
+    if (watcher) {
+      if (watcher.dirty) {
+        watcher.evaluate()
+      }
+      if (Dep.target) {
+        watcher.depend()
+      }
+      return watcher.value
     }
-    if (Dep.target) {
-      watcher.depend()
-    }
-    return watcher.value
   }
 }
 
@@ -198,9 +225,9 @@ export function stateMixin (Vue: Class<Component>) {
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.
   const dataDef = {}
-  dataDef.get = function () {
-    return this._data
-  }
+  dataDef.get = function () { return this._data }
+  const propsDef = {}
+  propsDef.get = function () { return this._props }
   if (process.env.NODE_ENV !== 'production') {
     dataDef.set = function (newData: Object) {
       warn(
@@ -209,8 +236,12 @@ export function stateMixin (Vue: Class<Component>) {
         this
       )
     }
+    propsDef.set = function () {
+      warn(`$props is readonly.`, this)
+    }
   }
   Object.defineProperty(Vue.prototype, '$data', dataDef)
+  Object.defineProperty(Vue.prototype, '$props', propsDef)
 
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
@@ -230,20 +261,5 @@ export function stateMixin (Vue: Class<Component>) {
     return function unwatchFn () {
       watcher.teardown()
     }
-  }
-}
-
-function proxy (vm: Component, key: string) {
-  if (!isReserved(key)) {
-    Object.defineProperty(vm, key, {
-      configurable: true,
-      enumerable: true,
-      get: function proxyGetter () {
-        return vm._data[key]
-      },
-      set: function proxySetter (val) {
-        vm._data[key] = val
-      }
-    })
   }
 }

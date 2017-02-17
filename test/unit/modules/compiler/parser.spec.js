@@ -248,7 +248,7 @@ describe('parser', () => {
   })
 
   it('v-for directive iteration syntax', () => {
-    const ast = parse('<ul><li v-for="(item, index) in items"></li><ul/>', baseOptions)
+    const ast = parse('<ul><li v-for="(item, index) in items"></li></ul>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')

@@ -77,14 +77,14 @@ const builds = {
     entry: path.resolve(__dirname, '../src/entries/web-compiler.js'),
     dest: path.resolve(__dirname, '../packages/vue-template-compiler/build.js'),
     format: 'cjs',
-    external: ['he', 'de-indent']
+    external: Object.keys(require('../packages/vue-template-compiler/package.json').dependencies)
   },
   // Web server renderer (CommonJS).
   'web-server-renderer': {
     entry: path.resolve(__dirname, '../src/entries/web-server-renderer.js'),
     dest: path.resolve(__dirname, '../packages/vue-server-renderer/build.js'),
     format: 'cjs',
-    external: ['he', 'de-indent', 'source-map']
+    external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
   },
   // Weex runtime factory
   'weex-factory': {
@@ -107,7 +107,7 @@ const builds = {
     entry: path.resolve(__dirname, '../src/entries/weex-compiler.js'),
     dest: path.resolve(__dirname, '../packages/weex-template-compiler/build.js'),
     format: 'cjs',
-    external: ['he', 'de-indent']
+    external: Object.keys(require('../packages/weex-template-compiler/package.json').dependencies)
   }
 }
 
