@@ -1,6 +1,6 @@
 /* @flow */
 
-import VNode from './vnode'
+import VNode, { createAsyncPlaceholder } from './vnode'
 import { resolveConstructorOptions } from '../instance/init'
 import { activeInstance, callHook } from '../instance/lifecycle'
 import { resolveSlots } from '../instance/render-helpers/resolve-slots'
@@ -38,15 +38,17 @@ export function createComponent (
     if (Ctor.resolved) {
       Ctor = Ctor.resolved
     } else {
-      Ctor = resolveAsyncComponent(Ctor, baseCtor, () => {
+      const resolveStatus = resolveAsyncComponent(Ctor, baseCtor, () => {
         // it's ok to queue this on every render because
         // $forceUpdate is buffered by the scheduler.
         context.$forceUpdate()
       })
-      if (!Ctor) {
+      if (resolveStatus === RESOLVED) {
+        Ctor = Ctor.resolved
+      } else {
         // return nothing if this is indeed an async component
         // wait for the callback to trigger parent update.
-        return
+        return resolveStatus === PENDING ? createAsyncPlaceholder() : undefined
       }
     }
   }
@@ -213,16 +215,20 @@ function destroy (vnode: MountedComponentVNode) {
   }
 }
 
+const RESOLVED = 2
+const PENDING = 1
+const REJECTED = -1
 function resolveAsyncComponent (
   factory: Function,
   baseCtor: Class<Component>,
   cb: Function
 ): Class<Component> | void {
-  if (factory.requested) {
+  if (factory.resolveStatus) {
     // pool callbacks
     factory.pendingCallbacks.push(cb)
+    return factory.resolveStatus
   } else {
-    factory.requested = true
+    factory.resolveStatus = PENDING
     const cbs = factory.pendingCallbacks = [cb]
     let sync = true
 
@@ -232,6 +238,7 @@ function resolveAsyncComponent (
       }
       // cache resolved
       factory.resolved = res
+      factory.resolveStatus = RESOLVED
       // invoke callbacks only if this is not a synchronous resolve
       // (async resolves are shimmed as synchronous during SSR)
       if (!sync) {
@@ -246,6 +253,7 @@ function resolveAsyncComponent (
         `Failed to resolve async component: ${String(factory)}` +
         (reason ? `\nReason: ${reason}` : '')
       )
+      factory.resolveStatus = REJECTED
     }
 
     const res = factory(resolve, reject)
@@ -257,7 +265,7 @@ function resolveAsyncComponent (
 
     sync = false
     // return in case resolved synchronously
-    return factory.resolved
+    return factory.resolveStatus
   }
 }
 
