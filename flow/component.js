@@ -60,7 +60,8 @@ declare interface Component {
   _data: Object;
   _props: Object;
   _events: Object;
-  _inactive: boolean;
+  _inactive: boolean | null;
+  _directInactive: boolean;
   _isMounted: boolean;
   _isDestroyed: boolean;
   _isBeingDestroyed: boolean;
@@ -73,12 +74,6 @@ declare interface Component {
   _init: Function;
   _mount: (el?: Element | void, hydrating?: boolean) => Component;
   _update: (vnode: VNode, hydrating?: boolean) => void;
-  _updateFromParent: (
-    propsData: ?Object,
-    listeners: ?{ [key: string]: Function | Array<Function> },
-    parentVnode: VNode,
-    renderChildren: ?Array<VNode>
-  ) => void;
   // rendering
   _render: () => VNode;
   __patch__: (a: Element | VNode | void, b: VNode) => any;

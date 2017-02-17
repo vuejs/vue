@@ -2,24 +2,26 @@
 
 import Vue from 'core/index'
 import config from 'core/config'
-import { extend, noop } from 'shared/util'
-import { devtools, inBrowser, isEdge } from 'core/util/index'
 import { patch } from 'web/runtime/patch'
+import { extend, noop } from 'shared/util'
+import { mountComponent } from 'core/instance/lifecycle'
+import { devtools, inBrowser, isEdge } from 'core/util/index'
 import platformDirectives from 'web/runtime/directives/index'
 import platformComponents from 'web/runtime/components/index'
+
 import {
   query,
-  isUnknownElement,
+  mustUseProp,
   isReservedTag,
   getTagNamespace,
-  mustUseProp
+  isUnknownElement
 } from 'web/util/index'
 
 // install platform specific utils
-Vue.config.isUnknownElement = isUnknownElement
+Vue.config.mustUseProp = mustUseProp
 Vue.config.isReservedTag = isReservedTag
 Vue.config.getTagNamespace = getTagNamespace
-Vue.config.mustUseProp = mustUseProp
+Vue.config.isUnknownElement = isUnknownElement
 
 // install platform runtime directives & components
 extend(Vue.options.directives, platformDirectives)
@@ -28,13 +30,13 @@ extend(Vue.options.components, platformComponents)
 // install platform patch function
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
-// wrap mount
+// public mount method
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
   el = el && inBrowser ? query(el) : undefined
-  return this._mount(el, hydrating)
+  return mountComponent(this, el, hydrating)
 }
 
 // devtools global hook

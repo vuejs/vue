@@ -1,11 +1,25 @@
 /* @flow */
 
 import VNode from './vnode'
-import { resolveConstructorOptions } from '../instance/init'
-import { activeInstance, callHook } from '../instance/lifecycle'
-import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 import { createElement } from './create-element'
-import { warn, isObject, hasOwn, hyphenate, validateProp } from '../util/index'
+import { resolveConstructorOptions } from '../instance/init'
+import { resolveSlots } from '../instance/render-helpers/resolve-slots'
+
+import {
+  warn,
+  isObject,
+  hasOwn,
+  hyphenate,
+  validateProp
+} from '../util/index'
+
+import {
+  callHook,
+  activeInstance,
+  updateChildComponent,
+  activateChildComponent,
+  deactivateChildComponent
+} from '../instance/lifecycle'
 
 const hooks = { init, prepatch, insert, destroy }
 const hooksToMerge = Object.keys(hooks)
@@ -183,7 +197,8 @@ function prepatch (
 ) {
   const options = vnode.componentOptions
   const child = vnode.componentInstance = oldVnode.componentInstance
-  child._updateFromParent(
+  updateChildComponent(
+    child,
     options.propsData, // updated props
     options.listeners, // updated listeners
     vnode, // new parent vnode
@@ -197,8 +212,7 @@ function insert (vnode: MountedComponentVNode) {
     callHook(vnode.componentInstance, 'mounted')
   }
   if (vnode.data.keepAlive) {
-    vnode.componentInstance._inactive = false
-    callHook(vnode.componentInstance, 'activated')
+    activateChildComponent(vnode.componentInstance, true /* direct */)
   }
 }
 
@@ -207,8 +221,7 @@ function destroy (vnode: MountedComponentVNode) {
     if (!vnode.data.keepAlive) {
       vnode.componentInstance.$destroy()
     } else {
-      vnode.componentInstance._inactive = true
-      callHook(vnode.componentInstance, 'deactivated')
+      deactivateChildComponent(vnode.componentInstance, true /* direct */)
     }
   }
 }

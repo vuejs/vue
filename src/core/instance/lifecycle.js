@@ -29,52 +29,14 @@ export function initLifecycle (vm: Component) {
   vm.$refs = {}
 
   vm._watcher = null
-  vm._inactive = false
+  vm._inactive = null
+  vm._directInactive = false
   vm._isMounted = false
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
-  Vue.prototype._mount = function (
-    el?: Element | void,
-    hydrating?: boolean
-  ): Component {
-    const vm: Component = this
-    vm.$el = el
-    if (!vm.$options.render) {
-      vm.$options.render = createEmptyVNode
-      if (process.env.NODE_ENV !== 'production') {
-        /* istanbul ignore if */
-        if (vm.$options.template && vm.$options.template.charAt(0) !== '#') {
-          warn(
-            'You are using the runtime-only build of Vue where the template ' +
-            'option is not available. Either pre-compile the templates into ' +
-            'render functions, or use the compiler-included build.',
-            vm
-          )
-        } else {
-          warn(
-            'Failed to mount component: template or render function not defined.',
-            vm
-          )
-        }
-      }
-    }
-    callHook(vm, 'beforeMount')
-    vm._watcher = new Watcher(vm, function updateComponent () {
-      vm._update(vm._render(), hydrating)
-    }, noop)
-    hydrating = false
-    // manually mounted instance, call mounted on self
-    // mounted is called for render-created child components in its inserted hook
-    if (vm.$vnode == null) {
-      vm._isMounted = true
-      callHook(vm, 'mounted')
-    }
-    return vm
-  }
-
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     if (vm._isMounted) {
@@ -113,62 +75,6 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     // updated hook is called by the scheduler to ensure that children are
     // updated in a parent's updated hook.
-  }
-
-  Vue.prototype._updateFromParent = function (
-    propsData: ?Object,
-    listeners: ?Object,
-    parentVnode: VNode,
-    renderChildren: ?Array<VNode>
-  ) {
-    const vm: Component = this
-
-    // determine whether component has slot children
-    // we need to do this before overwriting $options._renderChildren
-    const hasChildren = !!(
-      renderChildren ||               // has new static slots
-      vm.$options._renderChildren ||  // has old static slots
-      parentVnode.data.scopedSlots || // has new scoped slots
-      vm.$scopedSlots !== emptyObject // has old scoped slots
-    )
-
-    vm.$options._parentVnode = parentVnode
-    vm.$vnode = parentVnode // update vm's placeholder node without re-render
-    if (vm._vnode) { // update child tree's parent
-      vm._vnode.parent = parentVnode
-    }
-    vm.$options._renderChildren = renderChildren
-
-    // update props
-    if (propsData && vm.$options.props) {
-      observerState.shouldConvert = false
-      if (process.env.NODE_ENV !== 'production') {
-        observerState.isSettingProps = true
-      }
-      const props = vm._props
-      const propKeys = vm.$options._propKeys || []
-      for (let i = 0; i < propKeys.length; i++) {
-        const key = propKeys[i]
-        props[key] = validateProp(key, vm.$options.props, propsData, vm)
-      }
-      observerState.shouldConvert = true
-      if (process.env.NODE_ENV !== 'production') {
-        observerState.isSettingProps = false
-      }
-      // keep a copy of raw propsData
-      vm.$options.propsData = propsData
-    }
-    // update listeners
-    if (listeners) {
-      const oldListeners = vm.$options._parentListeners
-      vm.$options._parentListeners = listeners
-      updateComponentListeners(vm, listeners, oldListeners)
-    }
-    // resolve slots + force update if has children
-    if (hasChildren) {
-      vm.$slots = resolveSlots(renderChildren, parentVnode.context)
-      vm.$forceUpdate()
-    }
   }
 
   Vue.prototype.$forceUpdate = function () {
@@ -214,6 +120,141 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     // invoke destroy hooks on current rendered tree
     vm.__patch__(vm._vnode, null)
+  }
+}
+
+export function mountComponent (
+  vm: Component,
+  el: ?Element,
+  hydrating?: boolean
+): Component {
+  vm.$el = el
+  if (!vm.$options.render) {
+    vm.$options.render = createEmptyVNode
+    if (process.env.NODE_ENV !== 'production') {
+      /* istanbul ignore if */
+      if (vm.$options.template && vm.$options.template.charAt(0) !== '#') {
+        warn(
+          'You are using the runtime-only build of Vue where the template ' +
+          'option is not available. Either pre-compile the templates into ' +
+          'render functions, or use the compiler-included build.',
+          vm
+        )
+      } else {
+        warn(
+          'Failed to mount component: template or render function not defined.',
+          vm
+        )
+      }
+    }
+  }
+  callHook(vm, 'beforeMount')
+  vm._watcher = new Watcher(vm, function updateComponent () {
+    vm._update(vm._render(), hydrating)
+  }, noop)
+  hydrating = false
+  // manually mounted instance, call mounted on self
+  // mounted is called for render-created child components in its inserted hook
+  if (vm.$vnode == null) {
+    vm._isMounted = true
+    callHook(vm, 'mounted')
+  }
+  return vm
+}
+
+export function updateChildComponent (
+  vm: Component,
+  propsData: ?Object,
+  listeners: ?Object,
+  parentVnode: VNode,
+  renderChildren: ?Array<VNode>
+) {
+  // determine whether component has slot children
+  // we need to do this before overwriting $options._renderChildren
+  const hasChildren = !!(
+    renderChildren ||               // has new static slots
+    vm.$options._renderChildren ||  // has old static slots
+    parentVnode.data.scopedSlots || // has new scoped slots
+    vm.$scopedSlots !== emptyObject // has old scoped slots
+  )
+
+  vm.$options._parentVnode = parentVnode
+  vm.$vnode = parentVnode // update vm's placeholder node without re-render
+  if (vm._vnode) { // update child tree's parent
+    vm._vnode.parent = parentVnode
+  }
+  vm.$options._renderChildren = renderChildren
+
+  // update props
+  if (propsData && vm.$options.props) {
+    observerState.shouldConvert = false
+    if (process.env.NODE_ENV !== 'production') {
+      observerState.isSettingProps = true
+    }
+    const props = vm._props
+    const propKeys = vm.$options._propKeys || []
+    for (let i = 0; i < propKeys.length; i++) {
+      const key = propKeys[i]
+      props[key] = validateProp(key, vm.$options.props, propsData, vm)
+    }
+    observerState.shouldConvert = true
+    if (process.env.NODE_ENV !== 'production') {
+      observerState.isSettingProps = false
+    }
+    // keep a copy of raw propsData
+    vm.$options.propsData = propsData
+  }
+  // update listeners
+  if (listeners) {
+    const oldListeners = vm.$options._parentListeners
+    vm.$options._parentListeners = listeners
+    updateComponentListeners(vm, listeners, oldListeners)
+  }
+  // resolve slots + force update if has children
+  if (hasChildren) {
+    vm.$slots = resolveSlots(renderChildren, parentVnode.context)
+    vm.$forceUpdate()
+  }
+}
+
+function isInInactiveTree (vm) {
+  while (vm && (vm = vm.$parent)) {
+    if (vm._inactive) return true
+  }
+  return false
+}
+
+export function activateChildComponent (vm: Component, direct?: boolean) {
+  if (direct) {
+    vm._directInactive = false
+    if (isInInactiveTree(vm)) {
+      return
+    }
+  } else if (vm._directInactive) {
+    return
+  }
+  if (vm._inactive || vm._inactive == null) {
+    vm._inactive = false
+    for (let i = 0; i < vm.$children.length; i++) {
+      activateChildComponent(vm.$children[i])
+    }
+    callHook(vm, 'activated')
+  }
+}
+
+export function deactivateChildComponent (vm: Component, direct?: boolean) {
+  if (direct) {
+    vm._directInactive = true
+    if (isInInactiveTree(vm)) {
+      return
+    }
+  }
+  if (!vm._inactive) {
+    vm._inactive = true
+    for (let i = 0; i < vm.$children.length; i++) {
+      deactivateChildComponent(vm.$children[i])
+    }
+    callHook(vm, 'deactivated')
   }
 }
 
