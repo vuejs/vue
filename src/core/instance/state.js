@@ -196,7 +196,7 @@ function initMethods (vm: Component, methods: Object) {
       }
       if (props && hasOwn(props, key)) {
         warn(
-          `method "${key}" has already been defined as a property value.`,
+          `method "${key}" has already been defined as a prop.`,
           vm
         )
       }
