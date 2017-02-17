@@ -4,22 +4,29 @@ import { cached, camelize } from 'shared/util'
 
 const normalize = cached(camelize)
 
-function shouldCamelize (str: string) : boolean {
-  if (!str || !str.match(/\-/)) {
-    return false
+function normalizeKeyName (str: string) : string {
+  if (str.match(/^v\-/)) {
+    return str.replace(/(v-[a-z\-]+\:)([a-z\-]+)$/i, ($, directive, prop) => {
+      return directive + normalize(prop)
+    })
   }
-  return !str.match(/v\-bind|v\-for|v\-if|v\-model|@/)
+  return normalize(str)
 }
 
-function preTransformNode (el: ASTElement, options: CompilerOptions) {
+function transformNode (el: ASTElement, options: CompilerOptions) {
   if (Array.isArray(el.attrsList)) {
     el.attrsList.forEach(attr => {
-      if (shouldCamelize(attr.name)) {
-        attr.name = normalize(attr.name)
+      if (attr.name && attr.name.match(/\-/)) {
+        const realName = normalizeKeyName(attr.name)
+        if (el.attrsMap) {
+          el.attrsMap[realName] = el.attrsMap[attr.name]
+          delete el.attrsMap[attr.name]
+        }
+        attr.name = realName
       }
     })
   }
 }
 export default {
-  preTransformNode
+  transformNode
 }
