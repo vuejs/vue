@@ -306,6 +306,27 @@ describe('Options props', () => {
     expect('already declared as a prop').toHaveBeenWarned()
   })
 
+  it('should warn methods already defined as a prop', () => {
+    new Vue({
+      template: '<test a="1"></test>',
+      components: {
+        test: {
+          template: '<div></div>',
+          props: {
+            a: null
+          },
+          methods: {
+            a () {
+
+            }
+          }
+        }
+      }
+    }).$mount()
+    expect(`method "a" has already been defined as a prop`).toHaveBeenWarned()
+    expect(`Avoid mutating a prop directly`).toHaveBeenWarned()
+  })
+
   it('treat boolean props properly', () => {
     const vm = new Vue({
       template: '<comp ref="child" prop-a prop-b="prop-b"></comp>',
