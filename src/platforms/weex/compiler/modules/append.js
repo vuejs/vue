@@ -1,6 +1,6 @@
 /* @flow */
 
-function transformNode (el: ASTElement, options: CompilerOptions) {
+function preTransformNode (el: ASTElement, options: CompilerOptions) {
   if (el.tag === 'cell' && !el.attrsList.some(item => item.name === 'append')) {
     el.attrsMap.append = 'tree'
     el.attrsList.push({ name: 'append', value: 'tree' })
@@ -16,6 +16,6 @@ function genData (el: ASTElement): string {
 
 export default {
   staticKeys: ['appendAsTree'],
-  transformNode,
+  preTransformNode,
   genData
 }
