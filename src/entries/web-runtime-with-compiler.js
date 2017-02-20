@@ -1,8 +1,10 @@
 /* @flow */
 
 import Vue from './web-runtime'
-import { warn, cached } from 'core/util/index'
+import config from 'core/config'
+import { perf } from 'core/util/perf'
 import { query } from 'web/util/index'
+import { warn, cached } from 'core/util/index'
 import { shouldDecodeNewlines } from 'web/util/compat'
 import { compileToFunctions } from 'web/compiler/index'
 
@@ -54,6 +56,10 @@ Vue.prototype.$mount = function (
       template = getOuterHTML(el)
     }
     if (template) {
+      if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
+        perf.mark('compile')
+      }
+
       const { render, staticRenderFns } = compileToFunctions(template, {
         warn: msg => warn(msg, this),
         shouldDecodeNewlines,
@@ -61,6 +67,11 @@ Vue.prototype.$mount = function (
       }, this)
       options.render = render
       options.staticRenderFns = staticRenderFns
+
+      if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
+        perf.mark('compile end')
+        perf.measure(`${this._name} compile`, 'compile', 'compile end')
+      }
     }
   }
   return mount.call(this, el, hydrating)

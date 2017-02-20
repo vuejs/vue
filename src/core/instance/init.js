@@ -1,17 +1,23 @@
 /* @flow */
 
+import config from '../config'
+import { perf } from '../util/perf'
 import { initProxy } from './proxy'
 import { initState } from './state'
 import { initRender } from './render'
 import { initEvents } from './events'
 import { initInjections } from './inject'
 import { initLifecycle, callHook } from './lifecycle'
-import { mergeOptions } from '../util/index'
+import { mergeOptions, formatComponentName } from '../util/index'
 
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
+    if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
+      perf.mark('init')
+    }
+
     const vm: Component = this
     // a uid
     vm._uid = uid++
@@ -45,6 +51,13 @@ export function initMixin (Vue: Class<Component>) {
     initState(vm)
     initInjections(vm)
     callHook(vm, 'created')
+
+    if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
+      vm._name = formatComponentName(vm, false)
+      perf.mark('init end')
+      perf.measure(`${vm._name} init`, 'init', 'init end')
+    }
+
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }

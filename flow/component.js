@@ -50,6 +50,7 @@ declare interface Component {
 
   // private properties
   _uid: number;
+  _name: string; // this only exists in dev mode
   _isVue: true;
   _self: Component;
   _renderProxy: Component;

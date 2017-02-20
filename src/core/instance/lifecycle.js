@@ -1,12 +1,22 @@
 /* @flow */
 
+import config from '../config'
+import { perf } from '../util/perf'
 import Watcher from '../observer/watcher'
 import { resetRefs } from '../vdom/modules/ref'
 import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { updateComponentListeners } from './events'
 import { resolveSlots } from './render-helpers/resolve-slots'
-import { warn, validateProp, remove, noop, emptyObject, handleError } from '../util/index'
+
+import {
+  warn,
+  noop,
+  remove,
+  handleError,
+  emptyObject,
+  validateProp
+} from '../util/index'
 
 export let activeInstance: any = null
 
@@ -149,10 +159,31 @@ export function mountComponent (
     }
   }
   callHook(vm, 'beforeMount')
-  vm._watcher = new Watcher(vm, function updateComponent () {
-    vm._update(vm._render(), hydrating)
-  }, noop)
+
+  let updateComponent
+  if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
+    updateComponent = () => {
+      const name = vm._name
+      const startTag = `start ${name}`
+      const endTag = `end ${name}`
+      perf.mark(startTag)
+      const vnode = vm._render()
+      perf.mark(endTag)
+      perf.measure(`${name} render`, startTag, endTag)
+      perf.mark(startTag)
+      vm._update(vnode, hydrating)
+      perf.mark(endTag)
+      perf.measure(`${name} patch`, startTag, endTag)
+    }
+  } else {
+    updateComponent = () => {
+      vm._update(vm._render(), hydrating)
+    }
+  }
+
+  vm._watcher = new Watcher(vm, updateComponent, noop)
   hydrating = false
+
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
