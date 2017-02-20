@@ -78,8 +78,15 @@ export function renderMixin (Vue: Class<Component>) {
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
       handleError(e, vm, `render function`)
-      // return previous vnode to prevent render error causing blank component
-      vnode = vm._vnode
+      // return error render result,
+      // or previous vnode to prevent render error causing blank component
+      if (process.env.NODE_ENV !== 'production') {
+        vnode = vm.$options.renderError
+          ? vm.$options.renderError.call(vm._renderProxy, vm.$createElement, e)
+          : vm._vnode
+      } else {
+        vnode = vm._vnode
+      }
     }
     // return empty vnode in case the render function errored out
     if (!(vnode instanceof VNode)) {

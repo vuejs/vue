@@ -33,7 +33,8 @@ declare type ComponentOptions = {
   // DOM
   el?: string | Element;
   template?: string;
-  render: () => VNode;
+  render: (h: () => VNode) => VNode;
+  renderError?: (h: () => VNode, err: Error) => VNode;
   staticRenderFns?: Array<() => VNode>;
   // lifecycle
   beforeCreate?: Function;

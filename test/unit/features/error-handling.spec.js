@@ -96,7 +96,9 @@ describe('Error handling', () => {
     expect(args[1]).toBe(vm.$refs.child) // vm
     expect(args[2]).toContain('render function') // description
 
-    assertRootInstanceActive(vm).then(done)
+    assertRootInstanceActive(vm).then(() => {
+      Vue.config.errorHandler = null
+    }).then(done)
   })
 })
 
