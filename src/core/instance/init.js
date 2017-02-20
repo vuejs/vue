@@ -13,7 +13,7 @@ export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
     // a uid
-    vm._uid = uid++
+    vm._uid = (Math.floor(Math.random() * 100) + 1) + uid++
     // a flag to avoid this being observed
     vm._isVue = true
     // merge options
