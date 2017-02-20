@@ -6,7 +6,7 @@ import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { updateComponentListeners } from './events'
 import { resolveSlots } from './render-helpers/resolve-slots'
-import { warn, validateProp, remove, noop, emptyObject } from '../util/index'
+import { warn, validateProp, remove, noop, emptyObject, handleError } from '../util/index'
 
 export let activeInstance: any = null
 
@@ -262,7 +262,11 @@ export function callHook (vm: Component, hook: string) {
   const handlers = vm.$options[hook]
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
-      handlers[i].call(vm)
+      try {
+        handlers[i].call(vm)
+      } catch (e) {
+        handleError(e, vm, `${hook} hook`)
+      }
     }
   }
   if (vm._hasHookEvent) {

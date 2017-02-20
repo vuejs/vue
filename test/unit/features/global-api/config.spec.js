@@ -22,39 +22,6 @@ describe('Global config', () => {
     })
   })
 
-  describe('errorHandler', () => {
-    it('should be called with correct args', () => {
-      const spy = jasmine.createSpy('errorHandler')
-      Vue.config.errorHandler = spy
-      const err = new Error()
-      const vm = new Vue({
-        render () { throw err }
-      }).$mount()
-      expect(spy).toHaveBeenCalledWith(err, vm)
-      Vue.config.errorHandler = null
-    })
-
-    it('should capture user watcher callback errors', done => {
-      const spy = jasmine.createSpy('errorHandler')
-      Vue.config.errorHandler = spy
-      const err = new Error()
-      const vm = new Vue({
-        render () {},
-        data: { a: 1 },
-        watch: {
-          a: () => {
-            throw err
-          }
-        }
-      }).$mount()
-      vm.a = 2
-      waitForUpdate(() => {
-        expect(spy).toHaveBeenCalledWith(err, vm)
-        Vue.config.errorHandler = null
-      }).then(done)
-    })
-  })
-
   describe('optionMergeStrategies', () => {
     it('should allow defining custom option merging strategies', () => {
       const spy = jasmine.createSpy('option merging')
