@@ -1,5 +1,6 @@
 import config from '../config'
 import { warn } from './debug'
+import { inBrowser } from './env'
 
 export function handleError (err, vm, type) {
   if (config.errorHandler) {
@@ -8,8 +9,10 @@ export function handleError (err, vm, type) {
     if (process.env.NODE_ENV !== 'production') {
       warn(`Error in ${type}:`, vm)
     }
-    if (typeof console !== 'undefined') {
+    if (inBrowser && typeof console !== 'undefined') {
       console.error(err)
+    } else {
+      throw err
     }
   }
 }
