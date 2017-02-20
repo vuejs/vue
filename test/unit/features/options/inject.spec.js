@@ -1,0 +1,127 @@
+import Vue from 'vue'
+
+describe('Options provide/inject', () => {
+  let injected
+  const injectedComp = {
+    inject: ['foo', 'bar'],
+    render () {},
+    created () {
+      injected = [this.foo, this.bar]
+    }
+  }
+
+  beforeEach(() => {
+    injected = null
+  })
+
+  it('should work', () => {
+    new Vue({
+      template: `<child/>`,
+      provide: {
+        foo: 1,
+        bar: 2
+      },
+      components: {
+        child: {
+          template: `<injected-comp/>`,
+          components: {
+            injectedComp
+          }
+        }
+      }
+    }).$mount()
+
+    expect(injected).toEqual([1, 2])
+  })
+
+  it('should use closest parent', () => {
+    new Vue({
+      template: `<child/>`,
+      provide: {
+        foo: 1,
+        bar: 2
+      },
+      components: {
+        child: {
+          provide: {
+            foo: 3
+          },
+          template: `<injected-comp/>`,
+          components: {
+            injectedComp
+          }
+        }
+      }
+    }).$mount()
+
+    expect(injected).toEqual([3, 2])
+  })
+
+  it('provide function', () => {
+    new Vue({
+      template: `<child/>`,
+      data: {
+        a: 1,
+        b: 2
+      },
+      provide () {
+        return {
+          foo: this.a,
+          bar: this.b
+        }
+      },
+      components: {
+        child: {
+          template: `<injected-comp/>`,
+          components: {
+            injectedComp
+          }
+        }
+      }
+    }).$mount()
+
+    expect(injected).toEqual([1, 2])
+  })
+
+  it('inject with alias', () => {
+    const injectAlias = {
+      inject: {
+        baz: 'foo',
+        qux: 'bar'
+      },
+      render () {},
+      created () {
+        injected = [this.baz, this.qux]
+      }
+    }
+
+    new Vue({
+      template: `<child/>`,
+      provide: {
+        foo: 1,
+        bar: 2
+      },
+      components: {
+        child: {
+          template: `<inject-alias/>`,
+          components: {
+            injectAlias
+          }
+        }
+      }
+    }).$mount()
+
+    expect(injected).toEqual([1, 2])
+  })
+
+  it('self-inject', () => {
+    const vm = new Vue({
+      provide: {
+        foo: 1
+      },
+      inject: ['foo']
+    })
+
+    expect(vm.foo).toBe(1)
+  })
+})

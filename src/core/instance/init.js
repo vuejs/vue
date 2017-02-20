@@ -4,6 +4,7 @@ import { initProxy } from './proxy'
 import { initState } from './state'
 import { initRender } from './render'
 import { initEvents } from './events'
+import { initInjections } from './inject'
 import { initLifecycle, callHook } from './lifecycle'
 import { mergeOptions } from '../util/index'
 
@@ -42,6 +43,7 @@ export function initMixin (Vue: Class<Component>) {
     initRender(vm)
     callHook(vm, 'beforeCreate')
     initState(vm)
+    initInjections(vm)
     callHook(vm, 'created')
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
