@@ -100,7 +100,8 @@ export function createInstance (
   const instanceVars = Object.assign({
     Vue,
     weex: weexInstanceVar,
-    __weex_require_module__: weexInstanceVar.requireModule // deprecated
+    // deprecated
+    __weex_require_module__: weexInstanceVar.requireModule // eslint-disable-line
   }, timerAPIs)
   callFunction(instanceVars, appCode)
 
