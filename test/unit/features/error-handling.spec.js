@@ -100,6 +100,29 @@ describe('Error handling', () => {
       Vue.config.errorHandler = null
     }).then(done)
   })
+
+  it('properly format component names', () => {
+    const format = Vue.util.formatComponentName
+    const vm = new Vue()
+    expect(format(vm)).toBe('<Root>')
+
+    vm.$root = null
+    vm.$options.name = 'hello-there'
+    expect(format(vm)).toBe('<HelloThere>')
+
+    vm.$options.name = null
+    vm.$options._componentTag = 'foo-bar-1'
+    expect(format(vm)).toBe('<FooBar1>')
+
+    vm.$options._componentTag = null
+    vm.$options.__file = '/foo/bar/baz/SomeThing.vue'
+    expect(format(vm)).toBe(`<SomeThing> at ${vm.$options.__file}`)
+    expect(format(vm, false)).toBe('<SomeThing>')
+
+    vm.$options.__file = 'C:\\foo\\bar\\baz\\windows_file.vue'
+    expect(format(vm)).toBe(`<WindowsFile> at ${vm.$options.__file}`)
+    expect(format(vm, false)).toBe('<WindowsFile>')
+  })
 })
 
 function createErrorTestComponents () {

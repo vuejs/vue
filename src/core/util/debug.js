@@ -6,10 +6,10 @@ let formatComponentName
 
 if (process.env.NODE_ENV !== 'production') {
   const hasConsole = typeof console !== 'undefined'
-  const classifyRE = /(?:^|[-_/])(\w)/g
+  const classifyRE = /(?:^|[-_])(\w)/g
   const classify = str => str
     .replace(classifyRE, c => c.toUpperCase())
-    .replace(/-/g, '')
+    .replace(/[-_]/g, '')
 
   warn = (msg, vm) => {
     if (hasConsole && (!config.silent)) {
@@ -35,7 +35,7 @@ if (process.env.NODE_ENV !== 'production') {
 
     return (
       (name ? `<${classify(name)}>` : `<Anonymous>`) +
-      (file && includeFile !== false ? file : '')
+      (file && includeFile !== false ? ` at ${file}` : '')
     )
   }
 

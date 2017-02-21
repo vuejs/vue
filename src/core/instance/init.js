@@ -14,6 +14,7 @@ let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
+    /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
       perf.mark('init')
     }
@@ -52,6 +53,7 @@ export function initMixin (Vue: Class<Component>) {
     initInjections(vm)
     callHook(vm, 'created')
 
+    /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
       vm._name = formatComponentName(vm, false)
       perf.mark('init end')

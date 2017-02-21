@@ -56,6 +56,7 @@ Vue.prototype.$mount = function (
       template = getOuterHTML(el)
     }
     if (template) {
+      /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
         perf.mark('compile')
       }
@@ -68,6 +69,7 @@ Vue.prototype.$mount = function (
       options.render = render
       options.staticRenderFns = staticRenderFns
 
+      /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
         perf.mark('compile end')
         perf.measure(`${this._name} compile`, 'compile', 'compile end')
