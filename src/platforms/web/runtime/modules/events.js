@@ -1,6 +1,28 @@
 /* @flow */
 
+import { isChrome, isIE } from 'core/util/env'
 import { updateListeners } from 'core/vdom/helpers/index'
+import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model'
+
+// normalize v-model event tokens that can only be determined at runtime.
+// it's important to place the event as the first in the array because
+// the whole point is ensuring the v-model callback gets called before
+// user-attached handlers.
+function normalizeEvents (on) {
+  let event
+  if (on[RANGE_TOKEN]) {
+    // IE input[type=range] only supports `change` event
+    event = isIE ? 'change' : 'input'
+    on[event] = [].concat(on[RANGE_TOKEN], on[event] || [])
+    delete on[RANGE_TOKEN]
+  }
+  if (on[CHECKBOX_RADIO_TOKEN]) {
+    // Chrome fires microtasks in between click/change, leads to #4521
+    event = isChrome ? 'click' : 'change'
+    on[event] = [].concat(on[CHECKBOX_RADIO_TOKEN], on[event] || [])
+    delete on[CHECKBOX_RADIO_TOKEN]
+  }
+}
 
 let target: HTMLElement
 
@@ -41,6 +63,7 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const on = vnode.data.on || {}
   const oldOn = oldVnode.data.on || {}
   target = vnode.elm
+  normalizeEvents(on)
   updateListeners(on, oldOn, add, remove, vnode.context)
 }
 

@@ -5,7 +5,7 @@ import config from 'core/config'
 import { patch } from 'web/runtime/patch'
 import { extend, noop } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
-import { devtools, inBrowser, isEdge } from 'core/util/index'
+import { devtools, inBrowser, isChrome } from 'core/util/index'
 import platformDirectives from 'web/runtime/directives/index'
 import platformComponents from 'web/runtime/components/index'
 
@@ -45,10 +45,7 @@ setTimeout(() => {
   if (config.devtools) {
     if (devtools) {
       devtools.emit('init', Vue)
-    } else if (
-      process.env.NODE_ENV !== 'production' &&
-      inBrowser && !isEdge && /Chrome\/\d+/.test(window.navigator.userAgent)
-    ) {
+    } else if (process.env.NODE_ENV !== 'production' && isChrome) {
       console[console.info ? 'info' : 'log'](
         'Download the Vue Devtools extension for a better development experience:\n' +
         'https://github.com/vuejs/vue-devtools'
