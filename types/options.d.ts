@@ -22,6 +22,7 @@ export interface ComponentOptions<V extends Vue> {
   el?: Element | String;
   template?: string;
   render?(this: V, createElement: CreateElement): VNode;
+  renderError?: (h: () => VNode, err: Error) => VNode;
   staticRenderFns?: ((createElement: CreateElement) => VNode)[];
 
   beforeCreate?(this: V): void;
