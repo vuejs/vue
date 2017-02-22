@@ -71,7 +71,10 @@ export declare class Vue {
     silent: boolean;
     optionMergeStrategies: any;
     devtools: boolean;
-    errorHandler(err: Error, vm: Vue): void;
+    productionTip: boolean;
+    performance: boolean;
+    errorHandler(err: Error, vm: Vue, info: string): void;
+    ignoredElements: string[];
     keyCodes: { [key: string]: number };
   }
 

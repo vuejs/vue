@@ -40,6 +40,14 @@ export interface ComponentOptions<V extends Vue> {
   transitions?: { [key: string]: Object };
   filters?: { [key: string]: Function };
 
+  provide?: Object | (() => Object);
+  inject?: { [key: string]: string } | Array<string>;
+
+  model?: {
+    prop?: string;
+    event?: string;
+  };
+
   parent?: Vue;
   mixins?: (ComponentOptions<Vue> | typeof Vue)[];
   name?: string;

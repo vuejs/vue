@@ -69,6 +69,7 @@ declare interface Component {
   _vnode: ?VNode;
   _staticTrees: ?Array<VNode>;
   _hasHookEvent: boolean;
+  _provided: ?Object;
 
   // private methods
   // lifecycle

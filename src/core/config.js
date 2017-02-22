@@ -9,7 +9,7 @@ export type Config = {
   productionTip: boolean;
   performance: boolean;
   devtools: boolean;
-  errorHandler: ?Function;
+  errorHandler: ?(err: Error, vm: Component, info: string) => void;
   ignoredElements: Array<string>;
   keyCodes: { [key: string]: number };
   // platform
