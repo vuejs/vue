@@ -1,7 +1,7 @@
 /* @flow */
 
 import config from '../config'
-import { warn, mergeOptions } from '../util/index'
+import { warn, extend, mergeOptions } from '../util/index'
 import { defineComputed, proxy } from '../instance/state'
 
 export function initExtend (Vue: GlobalAPI) {
@@ -78,6 +78,7 @@ export function initExtend (Vue: GlobalAPI) {
     // been updated.
     Sub.superOptions = Super.options
     Sub.extendOptions = extendOptions
+    Sub.sealedOptions = extend({}, Sub.options)
 
     // cache constructor
     cachedCtors[SuperId] = Sub
