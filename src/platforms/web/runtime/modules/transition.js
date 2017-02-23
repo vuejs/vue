@@ -83,11 +83,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   }
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl =
-    enterHook &&
-    // enterHook may be a bound method which exposes
-    // the length of original fn as _length
-    (enterHook._length || enterHook.length) > 1
+  const userWantsControl = getHookAgumentsLength(enterHook)
 
   const cb = el._enterCb = once(() => {
     if (expectsCSS) {
@@ -116,7 +112,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
         pendingNode.elm._leaveCb()
       }
       enterHook && enterHook(el, cb)
-    }, 'transition-insert')
+    })
   }
 
   // start enter transition
@@ -181,11 +177,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   } = data
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl =
-    leave &&
-    // leave hook may be a bound method which exposes
-    // the length of original fn as _length
-    (leave._length || leave.length) > 1
+  const userWantsControl = getHookAgumentsLength(leave)
 
   const explicitLeaveDuration = isObject(duration) ? duration.leave : duration
   if (process.env.NODE_ENV !== 'production' && explicitLeaveDuration != null) {
@@ -269,6 +261,27 @@ function checkDuration (val, name, vnode) {
 
 function isValidDuration (val) {
   return typeof val === 'number' && !isNaN(val)
+}
+
+/**
+ * Normalize a transition hook's argument length. The hook may be:
+ * - a merged hook (invoker) with the original in .fns
+ * - a wrapped component method (check ._length)
+ * - a plain function (.length)
+ */
+function getHookAgumentsLength (fn: Function): boolean {
+  if (!fn) return false
+  const invokerFns = fn.fns
+  if (invokerFns) {
+    // invoker
+    return getHookAgumentsLength(
+      Array.isArray(invokerFns)
+        ? invokerFns[0]
+        : invokerFns
+    )
+  } else {
+    return (fn._length || fn.length) > 1
+  }
 }
 
 function _enter (_: any, vnode: VNodeWithData) {

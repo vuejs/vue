@@ -19,25 +19,20 @@ const normalizeEvent = cached((name: string): {
   }
 })
 
-function createEventHandle (fn: Function | Array<Function>): {
-  fn: Function | Array<Function>;
-  invoker: Function;
-} {
-  const handle = {
-    fn,
-    invoker: function () {
-      const fn = handle.fn
-      if (Array.isArray(fn)) {
-        for (let i = 0; i < fn.length; i++) {
-          fn[i].apply(null, arguments)
-        }
-      } else {
-        // return handler return value for single handlers
-        return fn.apply(null, arguments)
+export function createFnInvoker (fns: Function | Array<Function>): Function {
+  function invoker () {
+    const fns = invoker.fns
+    if (Array.isArray(fns)) {
+      for (let i = 0; i < fns.length; i++) {
+        fns[i].apply(null, arguments)
       }
+    } else {
+      // return handler return value for single handlers
+      return fns.apply(null, arguments)
     }
   }
-  return handle
+  invoker.fns = fns
+  return invoker
 }
 
 export function updateListeners (
@@ -58,19 +53,19 @@ export function updateListeners (
         vm
       )
     } else if (!old) {
-      if (!cur.invoker) {
-        cur = on[name] = createEventHandle(cur)
+      if (!cur.fns) {
+        cur = on[name] = createFnInvoker(cur)
       }
-      add(event.name, cur.invoker, event.once, event.capture)
+      add(event.name, cur, event.once, event.capture)
     } else if (cur !== old) {
-      old.fn = cur
+      old.fns = cur
       on[name] = old
     }
   }
   for (name in oldOn) {
     if (!on[name]) {
       event = normalizeEvent(name)
-      remove(event.name, oldOn[name].invoker, event.capture)
+      remove(event.name, oldOn[name], event.capture)
     }
   }
 }

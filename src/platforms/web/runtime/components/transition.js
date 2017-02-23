@@ -47,7 +47,7 @@ export function extractTransitionData (comp: Component): Object {
   // extract listeners and pass them directly to the transition methods
   const listeners: ?Object = options._parentListeners
   for (const key in listeners) {
-    data[camelize(key)] = listeners[key].fn
+    data[camelize(key)] = listeners[key]
   }
   return data
 }
@@ -132,11 +132,12 @@ export default {
     // component instance. This key will be used to remove pending leaving nodes
     // during entering.
     const id: string = `__transition-${this._uid}-`
-    const key: string = child.key = child.key == null
+    child.key = child.key == null
       ? id + child.tag
       : isPrimitive(child.key)
         ? (String(child.key).indexOf(id) === 0 ? child.key : id + child.key)
         : child.key
+
     const data: Object = (child.data || (child.data = {})).transition = extractTransitionData(this)
     const oldRawChild: VNode = this._vnode
     const oldChild: VNode = getRealChild(oldRawChild)
@@ -158,16 +159,14 @@ export default {
         mergeVNodeHook(oldData, 'afterLeave', () => {
           this._leaving = false
           this.$forceUpdate()
-        }, key)
+        })
         return placeholder(h, rawChild)
       } else if (mode === 'in-out') {
         let delayedLeave
         const performLeave = () => { delayedLeave() }
-        mergeVNodeHook(data, 'afterEnter', performLeave, key)
-        mergeVNodeHook(data, 'enterCancelled', performLeave, key)
-        mergeVNodeHook(oldData, 'delayLeave', leave => {
-          delayedLeave = leave
-        }, key)
+        mergeVNodeHook(data, 'afterEnter', performLeave)
+        mergeVNodeHook(data, 'enterCancelled', performLeave)
+        mergeVNodeHook(oldData, 'delayLeave', leave => { delayedLeave = leave })
       }
     }
 

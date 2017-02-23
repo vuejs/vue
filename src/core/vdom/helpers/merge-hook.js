@@ -1,18 +1,34 @@
 /* @flow */
 
-export function mergeVNodeHook (def: Object, hookKey: string, hook: Function, key: string) {
-  key = key + hookKey
-  const injectedHash: Object = def.__injected || (def.__injected = {})
-  if (!injectedHash[key]) {
-    injectedHash[key] = true
-    const oldHook: ?Function = def[hookKey]
-    if (oldHook) {
-      def[hookKey] = function () {
-        oldHook.apply(this, arguments)
-        hook.apply(this, arguments)
-      }
+import { remove } from 'shared/util'
+import { createFnInvoker } from './update-listeners'
+
+export function mergeVNodeHook (def: Object, hookKey: string, hook: Function) {
+  let invoker
+  const oldHook = def[hookKey]
+
+  function wrappedHook () {
+    hook.apply(this, arguments)
+    // important: remove merged hook to ensure it's called only once
+    // and prevent memory leak
+    remove(invoker.fns, wrappedHook)
+  }
+
+  if (!oldHook) {
+    // no existing hook
+    invoker = createFnInvoker([wrappedHook])
+  } else {
+    /* istanbul ignore if */
+    if (oldHook.fns && oldHook.merged) {
+      // already a merged invoker
+      invoker = oldHook
+      invoker.fns.push(wrappedHook)
     } else {
-      def[hookKey] = hook
+      // existing plain hook
+      invoker = createFnInvoker([oldHook, wrappedHook])
     }
   }
+
+  invoker.merged = true
+  def[hookKey] = invoker
 }

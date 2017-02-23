@@ -1,8 +1,8 @@
 /* @flow */
 
+import { emptyNode } from 'core/vdom/patch'
 import { resolveAsset } from 'core/util/options'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
-import { emptyNode } from 'core/vdom/patch'
 
 export default {
   create: updateDirectives,
@@ -54,7 +54,7 @@ function _update (oldVnode, vnode) {
       }
     }
     if (isCreate) {
-      mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', callInsert, 'dir-insert')
+      mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', callInsert)
     } else {
       callInsert()
     }
@@ -65,7 +65,7 @@ function _update (oldVnode, vnode) {
       for (let i = 0; i < dirsWithPostpatch.length; i++) {
         callHook(dirsWithPostpatch[i], 'componentUpdated', vnode, oldVnode)
       }
-    }, 'dir-postpatch')
+    })
   }
 
   if (!isCreate) {

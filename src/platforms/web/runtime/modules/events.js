@@ -10,6 +10,7 @@ import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model
 // user-attached handlers.
 function normalizeEvents (on) {
   let event
+  /* istanbul ignore if */
   if (on[RANGE_TOKEN]) {
     // IE input[type=range] only supports `change` event
     event = isIE ? 'change' : 'input'
