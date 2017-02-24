@@ -1,7 +1,7 @@
 /* @flow */
 
 import { isUnaryTag } from './util'
-import { warn } from 'core/util/debug'
+import { warn, tip } from 'core/util/debug'
 import { detectErrors } from 'compiler/error-detector'
 import { compile as baseCompile } from 'compiler/index'
 import { extend, genStaticKeys, noop } from 'shared/util'
@@ -24,43 +24,43 @@ export const baseOptions: CompilerOptions = {
   isPreTag
 }
 
-function compileWithOptions (
-  template: string,
-  options?: CompilerOptions
-): CompiledResult {
-  options = options
-    ? extend(extend({}, baseOptions), options)
-    : baseOptions
-  return baseCompile(template, options)
-}
-
 export function compile (
   template: string,
   options?: CompilerOptions
 ): CompiledResult {
-  options = options || {}
+  const finalOptions = Object.create(baseOptions)
   const errors = []
-  // allow injecting modules/directives
-  const baseModules = baseOptions.modules || []
-  const modules = options.modules
-    ? baseModules.concat(options.modules)
-    : baseModules
-  const directives = options.directives
-    ? extend(extend({}, baseOptions.directives), options.directives)
-    : baseOptions.directives
-  const compiled = compileWithOptions(template, {
-    modules,
-    directives,
-    preserveWhitespace: options.preserveWhitespace,
-    warn: msg => {
-      errors.push(msg)
-    }
-  })
-  if (process.env.NODE_ENV !== 'production') {
-    compiled.errors = errors.concat(detectErrors(compiled.ast))
-  } else {
-    compiled.errors = errors
+  const tips = []
+  finalOptions.warn = (msg, tip) => {
+    (tip ? tips : errors).push(msg)
   }
+
+  if (options) {
+    // merge custom modules
+    if (options.modules) {
+      finalOptions.modules = (baseOptions.modules || []).concat(options.modules)
+    }
+    // merge custom directives
+    if (options.directives) {
+      finalOptions.directives = extend(
+        Object.create(baseOptions.directives),
+        options.directives
+      )
+    }
+    // copy other options
+    for (const key in options) {
+      if (key !== 'modules' && key !== 'directives') {
+        finalOptions[key] = options[key]
+      }
+    }
+  }
+
+  const compiled = baseCompile(template, finalOptions)
+  if (process.env.NODE_ENV !== 'production') {
+    errors.push.apply(errors, detectErrors(compiled.ast))
+  }
+  compiled.errors = errors
+  compiled.tips = tips
   return compiled
 }
 
@@ -70,20 +70,15 @@ export function compileToFunctions (
   vm?: Component
 ): CompiledFunctionResult {
   options = extend({}, options)
-  const _warn = options.warn || warn
-  const errors = []
+
   /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'production') {
-    options.warn = msg => {
-      errors.push(msg)
-    }
-
     // detect possible CSP restriction
     try {
       new Function('return 1')
     } catch (e) {
       if (e.toString().match(/unsafe-eval|CSP/)) {
-        _warn(
+        warn(
           'It seems you are using the standalone build of Vue.js in an ' +
           'environment with Content Security Policy that prohibits unsafe-eval. ' +
           'The template compiler cannot work in this environment. Consider ' +
@@ -93,41 +88,64 @@ export function compileToFunctions (
       }
     }
   }
+
+  // check cache
   const key = options.delimiters
     ? String(options.delimiters) + template
     : template
   if (cache[key]) {
     return cache[key]
   }
+
+  // compile
+  const compiled = compile(template, options)
+
+  // check compilation errors/tips
+  if (process.env.NODE_ENV !== 'production') {
+    if (compiled.errors && compiled.errors.length) {
+      warn(
+        `Error compiling template:\n\n${template}\n\n` +
+        compiled.errors.map(e => `- ${e}`).join('\n') + '\n',
+        vm
+      )
+    }
+    if (compiled.tips && compiled.tips.length) {
+      compiled.tips.forEach(msg => tip(msg, vm))
+    }
+  }
+
+  // turn code into functions
   const res = {}
-  const compiled = compileWithOptions(template, options)
-  res.render = makeFunction(compiled.render)
+  const fnGenErrors = []
+  res.render = makeFunction(compiled.render, fnGenErrors)
   const l = compiled.staticRenderFns.length
   res.staticRenderFns = new Array(l)
   for (let i = 0; i < l; i++) {
-    res.staticRenderFns[i] = makeFunction(compiled.staticRenderFns[i])
+    res.staticRenderFns[i] = makeFunction(compiled.staticRenderFns[i], fnGenErrors)
   }
+
+  // check function generation errors.
+  // this should only happen if there is a bug in the compiler itself.
+  // mostly for codegen development use
+  /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'production') {
-    if (
-      errors.length ||
-      res.render === noop ||
-      res.staticRenderFns.some(fn => fn === noop)
-    ) {
-      const allErrors = errors.concat(detectErrors(compiled.ast))
-      _warn(
-        `Error compiling template:\n\n${template}\n\n` +
-        (allErrors.length ? allErrors.map(e => `- ${e}`).join('\n') + '\n' : ''),
+    if ((!compiled.errors || !compiled.errors.length) && fnGenErrors.length) {
+      warn(
+        `Failed to generate render function:\n\n` +
+        fnGenErrors.map(({ err, code }) => `${err.toString()} in\n\n${code}\n`).join('\n'),
         vm
       )
     }
   }
+
   return (cache[key] = res)
 }
 
-function makeFunction (code) {
+function makeFunction (code, errors) {
   try {
     return new Function(code)
-  } catch (e) {
+  } catch (err) {
+    errors.push({ err, code })
     return noop
   }
 }

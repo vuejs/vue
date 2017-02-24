@@ -406,6 +406,8 @@ describe('Directive v-for', () => {
   })
 
   it('should warn component v-for without keys', () => {
+    const warn = console.warn
+    console.warn = jasmine.createSpy()
     new Vue({
       template: `<div><test v-for="i in 3"></test></div>`,
       components: {
@@ -414,8 +416,10 @@ describe('Directive v-for', () => {
         }
       }
     }).$mount()
-    expect('<test v-for="i in 3">: component lists rendered with v-for should have explicit keys')
-      .toHaveBeenWarned()
+    expect(console.warn.calls.argsFor(0)[0]).toContain(
+      `<test v-for="i in 3">: component lists rendered with v-for should have explicit keys`
+    )
+    console.warn = warn
   })
 
   it('multi nested array reactivity', done => {

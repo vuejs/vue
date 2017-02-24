@@ -2,6 +2,7 @@ import config from '../config'
 import { noop } from 'shared/util'
 
 let warn = noop
+let tip = noop
 let formatComponentName
 
 if (process.env.NODE_ENV !== 'production') {
@@ -14,6 +15,14 @@ if (process.env.NODE_ENV !== 'production') {
   warn = (msg, vm) => {
     if (hasConsole && (!config.silent)) {
       console.error(`[Vue warn]: ${msg} ` + (
+        vm ? formatLocation(formatComponentName(vm)) : ''
+      ))
+    }
+  }
+
+  tip = (msg, vm) => {
+    if (hasConsole && (!config.silent)) {
+      console.warn(`[Vue tip]: ${msg} ` + (
         vm ? formatLocation(formatComponentName(vm)) : ''
       ))
     }
@@ -47,4 +56,4 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-export { warn, formatComponentName }
+export { warn, tip, formatComponentName }
