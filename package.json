@@ -40,9 +40,7 @@
     "release": "bash build/release.sh",
     "release-csp": "bash build/release-csp.sh"
   },
-  "dependencies": {
-    "envify": "^3.4.0"
-  },
+  "dependencies": {},
   "browserify": {
     "transform": [
       "envify"
