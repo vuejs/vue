@@ -86,7 +86,7 @@ function initInternalComponent (vm: Component, options: InternalComponentOptions
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   let options = Ctor.options
   if (Ctor.super) {
-    const superOptions = Ctor.super.options
+    const superOptions = resolveConstructorOptions(Ctor.super)
     const cachedSuperOptions = Ctor.superOptions
     if (superOptions !== cachedSuperOptions) {
       // super option changed,
@@ -108,14 +108,31 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
 }
 
 function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
-  let res
-  const options = Ctor.options
+  let modified
+  const latest = Ctor.options
   const sealed = Ctor.sealedOptions
-  for (const key in options) {
-    if (sealed[key] !== options[key]) {
-      if (!res) res = {}
-      res[key] = options[key]
+  for (const key in latest) {
+    if (latest[key] !== sealed[key]) {
+      if (!modified) modified = {}
+      modified[key] = dedupe(latest[key], sealed[key])
     }
   }
-  return res
+  return modified
+}
+
+function dedupe (latest, sealed) {
+  // compare latest and sealed to ensure lifecycle hooks won't be duplicated
+  // between merges
+  if (Array.isArray(latest)) {
+    const res = []
+    sealed = Array.isArray(sealed) ? sealed : [sealed]
+    for (let i = 0; i < latest.length; i++) {
+      if (sealed.indexOf(latest[i]) < 0) {
+        res.push(latest[i])
+      }
+    }
+    return res
+  } else {
+    return latest
+  }
 }
