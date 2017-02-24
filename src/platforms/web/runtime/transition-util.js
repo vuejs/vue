@@ -24,14 +24,11 @@ export function resolveTransition (def?: string | Object): ?Object {
 const autoCssTransition: (name: string) => Object = cached(name => {
   return {
     enterClass: `${name}-enter`,
-    leaveClass: `${name}-leave`,
-    appearClass: `${name}-enter`,
     enterToClass: `${name}-enter-to`,
-    leaveToClass: `${name}-leave-to`,
-    appearToClass: `${name}-enter-to`,
     enterActiveClass: `${name}-enter-active`,
-    leaveActiveClass: `${name}-leave-active`,
-    appearActiveClass: `${name}-enter-active`
+    leaveClass: `${name}-leave`,
+    leaveToClass: `${name}-leave-to`,
+    leaveActiveClass: `${name}-leave-active`
   }
 })
 
