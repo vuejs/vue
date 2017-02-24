@@ -2,10 +2,6 @@ import type { Config } from '../src/core/config'
 import type VNode from '../src/core/vdom/vnode'
 import type Watcher from '../src/core/observer/watcher'
 
-declare type Refs = {
-  [key: string]: Component | Element | Array<Component | Element> | void;
-};
-
 declare interface Component {
   // constructor information
   static cid: number;
@@ -28,7 +24,7 @@ declare interface Component {
   $parent: Component | void;
   $root: Component;
   $children: Array<Component>;
-  $refs: Refs;
+  $refs: { [key: string]: Component | Element | Array<Component | Element> | void };
   $slots: { [key: string]: Array<VNode> };
   $scopedSlots: { [key: string]: () => VNodeChildren };
   $vnode: VNode;

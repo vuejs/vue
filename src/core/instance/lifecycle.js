@@ -3,7 +3,6 @@
 import config from '../config'
 import { perf } from '../util/perf'
 import Watcher from '../observer/watcher'
-import { resetRefs } from '../vdom/modules/ref'
 import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { updateComponentListeners } from './events'
@@ -56,7 +55,6 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const prevVnode = vm._vnode
     const prevActiveInstance = activeInstance
     activeInstance = vm
-    vm.$refs = resetRefs(vm.$refs)
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
