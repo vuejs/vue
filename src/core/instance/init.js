@@ -8,7 +8,7 @@ import { initRender } from './render'
 import { initEvents } from './events'
 import { initInjections } from './inject'
 import { initLifecycle, callHook } from './lifecycle'
-import { mergeOptions, formatComponentName } from '../util/index'
+import { extend, mergeOptions, formatComponentName } from '../util/index'
 
 let uid = 0
 
@@ -86,20 +86,53 @@ function initInternalComponent (vm: Component, options: InternalComponentOptions
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   let options = Ctor.options
   if (Ctor.super) {
-    const superOptions = Ctor.super.options
+    const superOptions = resolveConstructorOptions(Ctor.super)
     const cachedSuperOptions = Ctor.superOptions
-    const extendOptions = Ctor.extendOptions
     if (superOptions !== cachedSuperOptions) {
-      // super option changed
+      // super option changed,
+      // need to resolve new options.
       Ctor.superOptions = superOptions
-      extendOptions.render = options.render
-      extendOptions.staticRenderFns = options.staticRenderFns
-      extendOptions._scopeId = options._scopeId
-      options = Ctor.options = mergeOptions(superOptions, extendOptions)
+      // check if there are any late-modified/attached options (#4976)
+      const modifiedOptions = resolveModifiedOptions(Ctor)
+      // update base extend options
+      if (modifiedOptions) {
+        extend(Ctor.extendOptions, modifiedOptions)
+      }
+      options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
       if (options.name) {
         options.components[options.name] = Ctor
       }
     }
   }
   return options
+}
+
+function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
+  let modified
+  const latest = Ctor.options
+  const sealed = Ctor.sealedOptions
+  for (const key in latest) {
+    if (latest[key] !== sealed[key]) {
+      if (!modified) modified = {}
+      modified[key] = dedupe(latest[key], sealed[key])
+    }
+  }
+  return modified
+}
+
+function dedupe (latest, sealed) {
+  // compare latest and sealed to ensure lifecycle hooks won't be duplicated
+  // between merges
+  if (Array.isArray(latest)) {
+    const res = []
+    sealed = Array.isArray(sealed) ? sealed : [sealed]
+    for (let i = 0; i < latest.length; i++) {
+      if (sealed.indexOf(latest[i]) < 0) {
+        res.push(latest[i])
+      }
+    }
+    return res
+  } else {
+    return latest
+  }
 }

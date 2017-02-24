@@ -84,4 +84,44 @@ describe('Global API: mixin', () => {
 
     expect(vm.$el.children[0].hasAttribute('foo')).toBe(true)
   })
+
+  // #4976
+  it('should not drop late-attached custom options on existing constructors', () => {
+    const baseSpy = jasmine.createSpy('base')
+    const Base = Vue.extend({
+      beforeCreate: baseSpy
+    })
+
+    const Test = Base.extend({})
+
+    // Inject options later
+    // vue-loader and vue-hot-reload-api are doing like this
+    Test.options.computed = {
+      $style: () => 123
+    }
+
+    const spy = jasmine.createSpy('late attached')
+    Test.options.beforeCreate = Test.options.beforeCreate.concat(spy)
+
+    // Update super constructor's options
+    const mixinSpy = jasmine.createSpy('mixin')
+    Vue.mixin({
+      beforeCreate: mixinSpy
+    })
+
+    // mount the component
+    const vm = new Test({
+      template: '<div>{{ $style }}</div>'
+    }).$mount()
+
+    expect(spy.calls.count()).toBe(1)
+    expect(baseSpy.calls.count()).toBe(1)
+    expect(mixinSpy.calls.count()).toBe(1)
+    expect(vm.$el.textContent).toBe('123')
+    expect(vm.$style).toBe(123)
+
+    // Should not be dropped
+    expect(Test.options.computed.$style()).toBe(123)
+    expect(Test.options.beforeCreate).toEqual([mixinSpy, baseSpy, spy])
+  })
 })
