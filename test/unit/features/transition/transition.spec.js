@@ -1055,7 +1055,7 @@ if (!isIE9) {
         }).thenWaitFor(enter2 + buffer).then(() => {
           expect(vm.$el.children[0].className).toBe('test')
         }).then(done)
-      })
+      }, 10000)
 
       it('warn invalid durations', done => {
         const vm = new Vue({
