@@ -45,5 +45,9 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   # publish
   git push origin refs/tags/v$VERSION
   git push
-  npm publish
+  if [[ -z $RELEASE_TAG ]]; then
+    npm publish --tag $RELEASE_TAG
+  else
+    npm publish
+  fi
 fi
