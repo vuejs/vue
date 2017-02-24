@@ -58,6 +58,8 @@ export function compile (
   })
   if (process.env.NODE_ENV !== 'production') {
     compiled.errors = errors.concat(detectErrors(compiled.ast))
+  } else {
+    compiled.errors = errors
   }
   return compiled
 }
