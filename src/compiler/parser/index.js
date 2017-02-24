@@ -251,7 +251,7 @@ export function parse (
             text
           })
         } else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
-          currentParent.children.push({
+          children.push({
             type: 3,
             text
           })
