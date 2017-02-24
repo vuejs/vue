@@ -68,9 +68,9 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     return
   }
 
-  const startClass = isAppear ? appearClass : enterClass
-  const activeClass = isAppear ? appearActiveClass : enterActiveClass
-  const toClass = isAppear ? appearToClass : enterToClass
+  const startClass = isAppear && appearClass ? appearClass : enterClass
+  const activeClass = isAppear && appearActiveClass ? appearActiveClass : enterActiveClass
+  const toClass = isAppear && appearToClass ? appearToClass : enterToClass
 
   const beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter
   const enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter
