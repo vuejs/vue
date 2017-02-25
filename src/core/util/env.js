@@ -37,7 +37,7 @@ export const isServerRendering = () => {
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
 /* istanbul ignore next */
-function isNative (Ctor: Function): boolean {
+export function isNative (Ctor: Function): boolean {
   return /native code/.test(Ctor.toString())
 }
 
