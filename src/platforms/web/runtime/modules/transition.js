@@ -1,6 +1,6 @@
 /* @flow */
 
-import { once, isObject } from 'shared/util'
+import { once, isObject, toNumber } from 'shared/util'
 import { inBrowser, isIE9, warn } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
@@ -77,7 +77,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
   const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
 
-  const explicitEnterDuration = isObject(duration) ? duration.enter : duration
+  const explicitEnterDuration = toNumber(isObject(duration) ? duration.enter : duration)
   if (process.env.NODE_ENV !== 'production' && explicitEnterDuration != null) {
     checkDuration(explicitEnterDuration, 'enter', vnode)
   }
@@ -179,7 +179,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   const expectsCSS = css !== false && !isIE9
   const userWantsControl = getHookAgumentsLength(leave)
 
-  const explicitLeaveDuration = isObject(duration) ? duration.leave : duration
+  const explicitLeaveDuration = toNumber(isObject(duration) ? duration.leave : duration)
   if (process.env.NODE_ENV !== 'production' && explicitLeaveDuration != null) {
     checkDuration(explicitLeaveDuration, 'leave', vnode)
   }
