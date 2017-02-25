@@ -11,7 +11,7 @@ export type Config = {
   devtools: boolean;
   errorHandler: ?(err: Error, vm: Component, info: string) => void;
   ignoredElements: Array<string>;
-  keyCodes: { [key: string]: number };
+  keyCodes: { [key: string]: number | Array<number> };
   // platform
   isReservedTag: (x?: string) => boolean;
   parsePlatformTagName: (x: string) => string;
