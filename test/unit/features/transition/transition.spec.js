@@ -882,7 +882,7 @@ if (!isIE9) {
         const vm = new Vue({
           template: `
             <div>
-              <transition :duration="${explicitDuration}">
+              <transition duration="${explicitDuration}">
                 <div v-if="ok" class="test">foo</div>
               </transition>
             </div>
