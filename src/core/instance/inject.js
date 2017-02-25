@@ -1,8 +1,6 @@
 /* @flow */
 
-import { isNative } from 'core/util/env'
-
-const hasReflect = typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)
+import { hasSymbol } from 'core/util/env'
 
 export function initInjections (vm: Component) {
   const provide = vm.$options.provide
@@ -18,7 +16,7 @@ export function initInjections (vm: Component) {
     const isArray = Array.isArray(inject)
     const keys = isArray
       ? inject
-      : hasReflect
+      : hasSymbol
         ? Reflect.ownKeys(inject)
         : Object.keys(inject)
 
