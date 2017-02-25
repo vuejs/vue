@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.2.0-beta.1
+ * Vue.js v2.2.0-beta.2
  * (c) 2014-2017 Evan You
  * Released under the MIT License.
  */
@@ -546,6 +546,7 @@ function parsePath (path) {
 }
 
 var warn = noop;
+var tip = noop;
 var formatComponentName;
 
 if (process.env.NODE_ENV !== 'production') {
@@ -558,6 +559,14 @@ if (process.env.NODE_ENV !== 'production') {
   warn = function (msg, vm) {
     if (hasConsole && (!config.silent)) {
       console.error("[Vue warn]: " + msg + " " + (
+        vm ? formatLocation(formatComponentName(vm)) : ''
+      ));
+    }
+  };
+
+  tip = function (msg, vm) {
+    if (hasConsole && (!config.silent)) {
+      console.warn("[Vue tip]: " + msg + " " + (
         vm ? formatLocation(formatComponentName(vm)) : ''
       ));
     }
@@ -1489,6 +1498,7 @@ var util = Object.freeze({
 	mergeOptions: mergeOptions,
 	resolveAsset: resolveAsset,
 	get warn () { return warn; },
+	get tip () { return tip; },
 	get formatComponentName () { return formatComponentName; },
 	validateProp: validateProp,
 	handleError: handleError
@@ -1566,47 +1576,6 @@ if (process.env.NODE_ENV !== 'production') {
       vm._renderProxy = vm;
     }
   };
-}
-
-/*  */
-
-var ref = {
-  create: registerRef,
-  update: registerRef
-};
-
-function registerRef (_, vnode) {
-  var key = vnode.data.ref;
-  if (!key) { return }
-
-  var ref = vnode.componentInstance || vnode.elm;
-  var refs = vnode.context.$refs;
-
-  if (typeof key === 'function') {
-    key(ref);
-  } else if (vnode.data.refInFor) {
-    var refArray = refs[key];
-    if (Array.isArray(refArray)) {
-      if (refArray.indexOf(ref) < 0) {
-        refArray.push(ref);
-      }
-    } else {
-      refs[key] = [ref];
-    }
-  } else {
-    refs[key] = ref;
-  }
-}
-
-function resetRefs (refs) {
-  var res = {};
-  // keep existing v-for ref arrays even if empty
-  for (var key in refs) {
-    if (Array.isArray(refs[key])) {
-      res[key] = [];
-    }
-  }
-  return res
 }
 
 /*  */
@@ -2063,7 +2032,6 @@ function lifecycleMixin (Vue) {
     var prevVnode = vm._vnode;
     var prevActiveInstance = activeInstance;
     activeInstance = vm;
-    vm.$refs = resetRefs(vm.$refs);
     vm._vnode = vnode;
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
@@ -4128,7 +4096,7 @@ Object.defineProperty(Vue$2.prototype, '$isServer', {
   get: isServerRendering
 });
 
-Vue$2.version = '2.2.0-beta.1';
+Vue$2.version = '2.2.0-beta.2';
 
 /*  */
 
@@ -4407,6 +4375,49 @@ var nodeOps = Object.freeze({
 	setAttribute: setAttribute
 });
 
+/*  */
+
+var ref = {
+  create: function create (_, vnode) {
+    registerRef(vnode);
+  },
+  update: function update (oldVnode, vnode) {
+    if (oldVnode.data.ref !== vnode.data.ref) {
+      registerRef(oldVnode, true);
+      registerRef(vnode);
+    }
+  },
+  destroy: function destroy (vnode) {
+    registerRef(vnode, true);
+  }
+};
+
+function registerRef (vnode, isRemoval) {
+  var key = vnode.data.ref;
+  if (!key) { return }
+
+  var vm = vnode.context;
+  var ref = vnode.componentInstance || vnode.elm;
+  var refs = vm.$refs;
+  if (isRemoval) {
+    if (Array.isArray(refs[key])) {
+      remove(refs[key], ref);
+    } else if (refs[key] === ref) {
+      refs[key] = undefined;
+    }
+  } else {
+    if (vnode.data.refInFor) {
+      if (Array.isArray(refs[key]) && refs[key].indexOf(ref) < 0) {
+        refs[key].push(ref);
+      } else {
+        refs[key] = [ref];
+      }
+    } else {
+      refs[key] = ref;
+    }
+  }
+}
+
 /**
  * Virtual DOM patching algorithm based on Snabbdom by
  * Simon Friis Vindum (@paldepind)
@@ -4575,7 +4586,7 @@ function createPatchFunction (backend) {
     } else {
       // empty component root.
       // skip all element-related modules except for ref (#3455)
-      registerRef(null, vnode);
+      registerRef(vnode);
       // make sure to invoke the insert hook
       insertedVnodeQueue.push(vnode);
     }
@@ -5663,14 +5674,11 @@ function resolveTransition (def$$1) {
 var autoCssTransition = cached(function (name) {
   return {
     enterClass: (name + "-enter"),
-    leaveClass: (name + "-leave"),
-    appearClass: (name + "-enter"),
     enterToClass: (name + "-enter-to"),
-    leaveToClass: (name + "-leave-to"),
-    appearToClass: (name + "-enter-to"),
     enterActiveClass: (name + "-enter-active"),
-    leaveActiveClass: (name + "-leave-active"),
-    appearActiveClass: (name + "-enter-active")
+    leaveClass: (name + "-leave"),
+    leaveToClass: (name + "-leave-to"),
+    leaveActiveClass: (name + "-leave-active")
   }
 });
 
@@ -5873,9 +5881,9 @@ function enter (vnode, toggleDisplay) {
     return
   }
 
-  var startClass = isAppear ? appearClass : enterClass;
-  var activeClass = isAppear ? appearActiveClass : enterActiveClass;
-  var toClass = isAppear ? appearToClass : enterToClass;
+  var startClass = isAppear && appearClass ? appearClass : enterClass;
+  var activeClass = isAppear && appearActiveClass ? appearActiveClass : enterActiveClass;
+  var toClass = isAppear && appearToClass ? appearToClass : enterToClass;
 
   var beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter;
   var enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter;
