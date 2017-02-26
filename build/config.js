@@ -38,6 +38,22 @@ const builds = {
     alias: { he: './entity-decoder' },
     banner
   },
+  // Runtime only (ES Modules). Used by bundlers that support ES Modules,
+  // e.g. Rollup & Webpack 2
+  'web-runtime-esm': {
+    entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),
+    dest: path.resolve(__dirname, '../dist/vue.runtime.esm.js'),
+    format: 'es',
+    banner
+  },
+  // Runtime+compiler CommonJS build (ES Modules)
+  'web-full-esm': {
+    entry: path.resolve(__dirname, '../src/entries/web-runtime-with-compiler.js'),
+    dest: path.resolve(__dirname, '../dist/vue.esm.js'),
+    format: 'es',
+    alias: { he: './entity-decoder' },
+    banner
+  },
   // runtime-only build (Browser)
   'web-runtime-dev': {
     entry: path.resolve(__dirname, '../src/entries/web-runtime.js'),

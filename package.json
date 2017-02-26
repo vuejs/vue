@@ -3,6 +3,8 @@
   "version": "2.2.0-beta.2",
   "description": "Reactive, component-oriented view layer for modern web interfaces.",
   "main": "dist/vue.runtime.common.js",
+  "module": "dist/vue.runtime.esm.js",
+  "unpkg": "dist/vue.js",
   "typings": "types/index.d.ts",
   "files": [
     "dist/vue.js",
@@ -117,6 +119,5 @@
     "webpack": "^2.2.0",
     "weex-js-runtime": "^0.17.0-alpha4",
     "weex-vdom-tester": "^0.1.4"
-  },
-  "unpkg": "dist/vue.js"
+  }
 }
