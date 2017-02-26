@@ -42,7 +42,7 @@ export interface ComponentOptions<V extends Vue> {
   filters?: { [key: string]: Function };
 
   provide?: Object | (() => Object);
-  inject?: { [key: string]: string } | Array<string>;
+  inject?: { [key: string]: string | symbol } | Array<string>;
 
   model?: {
     prop?: string;
