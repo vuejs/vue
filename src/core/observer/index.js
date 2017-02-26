@@ -181,7 +181,7 @@ export function defineReactive (
         if (process.env.NODE_ENV !== 'production' && customSetter) {
           customSetter()
         }
-        if(setter) {
+        if (setter) {
           setter.call(obj, newVal)
         } else {
           val = newVal
@@ -275,13 +275,13 @@ export function del (obj: Array<any> | Object, key: any) {
     return
   }
   if (!ob) {
-    delete obj[key];
-    return;
+    delete obj[key]
+    return
   }
-  let value = obj[key]
+  const oldValue = obj[key]
   obj[key] = DELETE_ME
-  if (typeof value === "object" && value.__ob__) {
-    value.__ob__.dep.notify()
+  if (typeof oldValue === 'object' && oldValue.__ob__) {
+    oldValue.__ob__.dep.notify()
   }
 }
 

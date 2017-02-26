@@ -271,7 +271,8 @@ describe('Observer', () => {
     delProp(obj1, 'a')
     expect(dep1.notify.calls.count()).toBe(2)
     // should not notify object observer when Vue.get() is used
-    const prop1 = getProp(obj1, 'd', {})
+    const prop1 = getProp(obj1, 'd', 'foo')
+    expect(prop1).toBe('foo')
     expect(dep1.notify.calls.count()).toBe(2)
     delProp(obj1, 'd')
     expect(dep1.notify.calls.count()).toBe(2)

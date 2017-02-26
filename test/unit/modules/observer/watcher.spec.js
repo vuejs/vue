@@ -164,8 +164,8 @@ describe('Watcher', () => {
   })
 
   it('do not mix Vue.get() with . or []', done => {
-    let spy2 = jasmine.createSpy('watcher')
-    let spy3 = jasmine.createSpy('watcher')
+    const spy2 = jasmine.createSpy('watcher')
+    const spy3 = jasmine.createSpy('watcher')
     // An initial watcher using '.' will not leave any traces on q.
     new Watcher(vm, () => { return vm.b.q }, spy)
     // Calling Vue.get() will create the field without notifying
