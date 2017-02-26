@@ -1,8 +1,10 @@
 {
   "name": "vue",
-  "version": "2.1.10",
+  "version": "2.2.0",
   "description": "Reactive, component-oriented view layer for modern web interfaces.",
   "main": "dist/vue.runtime.common.js",
+  "module": "dist/vue.runtime.esm.js",
+  "unpkg": "dist/vue.js",
   "typings": "types/index.d.ts",
   "files": [
     "dist/vue.js",
@@ -63,7 +65,7 @@
     "babel-eslint": "^7.1.0",
     "babel-helper-vue-jsx-merge-props": "^2.0.2",
     "babel-loader": "^6.2.4",
-    "babel-plugin-istanbul": "^3.0.0",
+    "babel-plugin-istanbul": "^4.0.0",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-plugin-syntax-jsx": "^6.18.0",
     "babel-plugin-transform-vue-jsx": "^3.2.0",
@@ -80,7 +82,7 @@
     "eslint-loader": "^1.3.0",
     "eslint-plugin-flowtype": "^2.16.0",
     "eslint-plugin-jasmine": "^2.1.0",
-    "eslint-plugin-vue": "^1.0.0",
+    "eslint-plugin-vue": "^2.0.0",
     "flow-bin": "^0.39.0",
     "he": "^1.1.0",
     "http-server": "^0.9.0",
@@ -110,13 +112,12 @@
     "rollup-plugin-replace": "^1.1.0",
     "rollup-watch": "^3.2.2",
     "selenium-server": "^2.53.1",
-    "typescript": "^2.0.9",
+    "typescript": "^2.1.6",
     "uglify-js": "^2.6.2",
     "vue-ssr-html-stream": "^2.1.0",
     "vue-ssr-webpack-plugin": "^1.0.0",
     "webpack": "^2.2.0",
     "weex-js-runtime": "^0.17.0-alpha4",
     "weex-vdom-tester": "^0.1.4"
-  },
-  "unpkg": "dist/vue.js"
+  }
 }

@@ -9,6 +9,7 @@ export function handleError (err, vm, type) {
     if (process.env.NODE_ENV !== 'production') {
       warn(`Error in ${type}:`, vm)
     }
+    /* istanbul ignore else */
     if (inBrowser && typeof console !== 'undefined') {
       console.error(err)
     } else {

@@ -24,6 +24,7 @@ declare type CompiledResult = {
   render: string;
   staticRenderFns: Array<string>;
   errors?: Array<string>;
+  tips?: Array<string>;
 }
 
 declare type CompiledFunctionResult = {

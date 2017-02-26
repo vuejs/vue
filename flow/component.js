@@ -2,10 +2,6 @@ import type { Config } from '../src/core/config'
 import type VNode from '../src/core/vdom/vnode'
 import type Watcher from '../src/core/observer/watcher'
 
-declare type Refs = {
-  [key: string]: Component | Element | Array<Component | Element> | void;
-};
-
 declare interface Component {
   // constructor information
   static cid: number;
@@ -14,6 +10,7 @@ declare interface Component {
   static extend: (options: Object) => Function;
   static superOptions: Object;
   static extendOptions: Object;
+  static sealedOptions: Object;
   static super: Class<Component>;
   // assets
   static directive: (id: string, def?: Function | Object) => Function | Object | void;
@@ -27,7 +24,7 @@ declare interface Component {
   $parent: Component | void;
   $root: Component;
   $children: Array<Component>;
-  $refs: Refs;
+  $refs: { [key: string]: Component | Element | Array<Component | Element> | void };
   $slots: { [key: string]: Array<VNode> };
   $scopedSlots: { [key: string]: () => VNodeChildren };
   $vnode: VNode;
@@ -51,6 +48,7 @@ declare interface Component {
 
   // private properties
   _uid: number;
+  _name: string; // this only exists in dev mode
   _isVue: true;
   _self: Component;
   _renderProxy: Component;
@@ -69,6 +67,7 @@ declare interface Component {
   _vnode: ?VNode;
   _staticTrees: ?Array<VNode>;
   _hasHookEvent: boolean;
+  _provided: ?Object;
 
   // private methods
   // lifecycle

@@ -1,11 +1,15 @@
 /* @flow */
 
 import config from 'core/config'
-import { isIE } from 'core/util/env'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
 
 let warn
+
+// in some cases, the event used has to be determined at runtime
+// so we used some reserved tokens during compile.
+export const RANGE_TOKEN = '__r'
+export const CHECKBOX_RADIO_TOKEN = '__c'
 
 export default function model (
   el: ASTElement,
@@ -86,7 +90,7 @@ function genCheckboxModel (
           : `:_q(${value},${trueValueBinding})`
       )
   )
-  addHandler(el, 'click',
+  addHandler(el, CHECKBOX_RADIO_TOKEN,
     `var $$a=${value},` +
         '$$el=$event.target,' +
         `$$c=$$el.checked?(${trueValueBinding}):(${falseValueBinding});` +
@@ -117,7 +121,7 @@ function genRadioModel (
   let valueBinding = getBindingAttr(el, 'value') || 'null'
   valueBinding = number ? `_n(${valueBinding})` : valueBinding
   addProp(el, 'checked', `_q(${value},${valueBinding})`)
-  addHandler(el, 'click', genAssignmentCode(value, valueBinding), null, true)
+  addHandler(el, CHECKBOX_RADIO_TOKEN, genAssignmentCode(value, valueBinding), null, true)
 }
 
 function genSelect (
@@ -162,8 +166,12 @@ function genDefaultModel (
 ): ?boolean {
   const type = el.attrsMap.type
   const { lazy, number, trim } = modifiers || {}
-  const event = lazy || (isIE && type === 'range') ? 'change' : 'input'
   const needCompositionGuard = !lazy && type !== 'range'
+  const event = lazy
+    ? 'change'
+    : type === 'range'
+      ? RANGE_TOKEN
+      : 'input'
 
   let valueExpression = '$event.target.value'
   if (trim) {

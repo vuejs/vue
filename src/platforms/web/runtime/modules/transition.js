@@ -1,9 +1,10 @@
 /* @flow */
 
-import { once, isObject } from 'shared/util'
+import { once, isObject, toNumber } from 'shared/util'
 import { inBrowser, isIE9, warn } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
+
 import {
   nextFrame,
   resolveTransition,
@@ -68,26 +69,41 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     return
   }
 
-  const startClass = isAppear ? appearClass : enterClass
-  const activeClass = isAppear ? appearActiveClass : enterActiveClass
-  const toClass = isAppear ? appearToClass : enterToClass
+  const startClass = isAppear && appearClass
+    ? appearClass
+    : enterClass
+  const activeClass = isAppear && appearActiveClass
+    ? appearActiveClass
+    : enterActiveClass
+  const toClass = isAppear && appearToClass
+    ? appearToClass
+    : enterToClass
 
-  const beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter
-  const enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter
-  const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
-  const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
+  const beforeEnterHook = isAppear
+    ? (beforeAppear || beforeEnter)
+    : beforeEnter
+  const enterHook = isAppear
+    ? (typeof appear === 'function' ? appear : enter)
+    : enter
+  const afterEnterHook = isAppear
+    ? (afterAppear || afterEnter)
+    : afterEnter
+  const enterCancelledHook = isAppear
+    ? (appearCancelled || enterCancelled)
+    : enterCancelled
 
-  const explicitEnterDuration = isObject(duration) ? duration.enter : duration
+  const explicitEnterDuration: any = toNumber(
+    isObject(duration)
+      ? duration.enter
+      : duration
+  )
+
   if (process.env.NODE_ENV !== 'production' && explicitEnterDuration != null) {
     checkDuration(explicitEnterDuration, 'enter', vnode)
   }
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl =
-    enterHook &&
-    // enterHook may be a bound method which exposes
-    // the length of original fn as _length
-    (enterHook._length || enterHook.length) > 1
+  const userWantsControl = getHookAgumentsLength(enterHook)
 
   const cb = el._enterCb = once(() => {
     if (expectsCSS) {
@@ -116,7 +132,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
         pendingNode.elm._leaveCb()
       }
       enterHook && enterHook(el, cb)
-    }, 'transition-insert')
+    })
   }
 
   // start enter transition
@@ -181,13 +197,14 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   } = data
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl =
-    leave &&
-    // leave hook may be a bound method which exposes
-    // the length of original fn as _length
-    (leave._length || leave.length) > 1
+  const userWantsControl = getHookAgumentsLength(leave)
 
-  const explicitLeaveDuration = isObject(duration) ? duration.leave : duration
+  const explicitLeaveDuration: any = toNumber(
+    isObject(duration)
+      ? duration.leave
+      : duration
+  )
+
   if (process.env.NODE_ENV !== 'production' && explicitLeaveDuration != null) {
     checkDuration(explicitLeaveDuration, 'leave', vnode)
   }
@@ -269,6 +286,27 @@ function checkDuration (val, name, vnode) {
 
 function isValidDuration (val) {
   return typeof val === 'number' && !isNaN(val)
+}
+
+/**
+ * Normalize a transition hook's argument length. The hook may be:
+ * - a merged hook (invoker) with the original in .fns
+ * - a wrapped component method (check ._length)
+ * - a plain function (.length)
+ */
+function getHookAgumentsLength (fn: Function): boolean {
+  if (!fn) return false
+  const invokerFns = fn.fns
+  if (invokerFns) {
+    // invoker
+    return getHookAgumentsLength(
+      Array.isArray(invokerFns)
+        ? invokerFns[0]
+        : invokerFns
+    )
+  } else {
+    return (fn._length || fn.length) > 1
+  }
 }
 
 function _enter (_: any, vnode: VNodeWithData) {

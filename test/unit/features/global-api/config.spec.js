@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { warn } from 'core/util/debug'
 
 describe('Global config', () => {
   it('should warn replacing config object', () => {
@@ -10,13 +11,13 @@ describe('Global config', () => {
 
   describe('silent', () => {
     it('should be false by default', () => {
-      Vue.util.warn('foo')
+      warn('foo')
       expect('foo').toHaveBeenWarned()
     })
 
     it('should work when set to true', () => {
       Vue.config.silent = true
-      Vue.util.warn('foo')
+      warn('foo')
       expect('foo').not.toHaveBeenWarned()
       Vue.config.silent = false
     })

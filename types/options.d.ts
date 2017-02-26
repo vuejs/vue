@@ -22,6 +22,7 @@ export interface ComponentOptions<V extends Vue> {
   el?: Element | String;
   template?: string;
   render?(this: V, createElement: CreateElement): VNode;
+  renderError?: (h: () => VNode, err: Error) => VNode;
   staticRenderFns?: ((createElement: CreateElement) => VNode)[];
 
   beforeCreate?(this: V): void;
@@ -39,6 +40,14 @@ export interface ComponentOptions<V extends Vue> {
   components?: { [key: string]: Component | AsyncComponent };
   transitions?: { [key: string]: Object };
   filters?: { [key: string]: Function };
+
+  provide?: Object | (() => Object);
+  inject?: { [key: string]: string | symbol } | Array<string>;
+
+  model?: {
+    prop?: string;
+    event?: string;
+  };
 
   parent?: Vue;
   mixins?: (ComponentOptions<Vue> | typeof Vue)[];

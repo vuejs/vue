@@ -3,8 +3,6 @@
  * (c) 2014-2017 Evan You
  * Released under the MIT License.
  */
-'use strict';
-
 /*  */
 
 /**
@@ -6700,4 +6698,4 @@ setTimeout(function () {
   }
 }, 0);
 
-module.exports = Vue$2;
+export default Vue$2;

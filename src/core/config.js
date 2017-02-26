@@ -7,10 +7,11 @@ export type Config = {
   optionMergeStrategies: { [key: string]: Function };
   silent: boolean;
   productionTip: boolean;
+  performance: boolean;
   devtools: boolean;
-  errorHandler: ?Function;
+  errorHandler: ?(err: Error, vm: Component, info: string) => void;
   ignoredElements: Array<string>;
-  keyCodes: { [key: string]: number };
+  keyCodes: { [key: string]: number | Array<number> };
   // platform
   isReservedTag: (x?: string) => boolean;
   parsePlatformTagName: (x: string) => string;
@@ -43,6 +44,11 @@ const config: Config = {
    * Whether to enable devtools
    */
   devtools: process.env.NODE_ENV !== 'production',
+
+  /**
+   * Whether to record perf
+   */
+  performance: process.env.NODE_ENV !== 'production',
 
   /**
    * Error handler for watcher errors
