@@ -13,6 +13,8 @@
     "dist/vue.runtime.min.js",
     "dist/vue.common.js",
     "dist/vue.runtime.common.js",
+    "dist/vue.esm.js",
+    "dist/vue.runtime.esm.js",
     "src",
     "types/index.d.ts",
     "types/options.d.ts",
