@@ -41,7 +41,9 @@ export function isNative (Ctor: Function): boolean {
   return /native code/.test(Ctor.toString())
 }
 
-export const hasSymbol = typeof Symbol !== 'undefined' && isNative(Symbol)
+export const hasSymbol =
+  typeof Symbol !== 'undefined' && isNative(Symbol) &&
+  typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)
 
 /**
  * Defer a task to execute it asynchronously.
