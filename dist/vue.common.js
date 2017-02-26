@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.2.0-beta.2
+ * Vue.js v2.2.0
  * (c) 2014-2017 Evan You
  * Released under the MIT License.
  */
@@ -388,6 +388,10 @@ var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
 function isNative (Ctor) {
   return /native code/.test(Ctor.toString())
 }
+
+var hasSymbol =
+  typeof Symbol !== 'undefined' && isNative(Symbol) &&
+  typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys);
 
 /**
  * Defer a task to execute it asynchronously.
@@ -1449,60 +1453,6 @@ function handleError (err, vm, type) {
     }
   }
 }
-
-
-
-var util = Object.freeze({
-	defineReactive: defineReactive$$1,
-	_toString: _toString,
-	toNumber: toNumber,
-	makeMap: makeMap,
-	isBuiltInTag: isBuiltInTag,
-	remove: remove,
-	hasOwn: hasOwn,
-	isPrimitive: isPrimitive,
-	cached: cached,
-	camelize: camelize,
-	capitalize: capitalize,
-	hyphenate: hyphenate,
-	bind: bind,
-	toArray: toArray,
-	extend: extend,
-	isObject: isObject,
-	isPlainObject: isPlainObject,
-	toObject: toObject,
-	noop: noop,
-	no: no,
-	identity: identity,
-	genStaticKeys: genStaticKeys,
-	looseEqual: looseEqual,
-	looseIndexOf: looseIndexOf,
-	once: once,
-	emptyObject: emptyObject,
-	isReserved: isReserved,
-	def: def,
-	parsePath: parsePath,
-	hasProto: hasProto,
-	inBrowser: inBrowser,
-	UA: UA,
-	isIE: isIE,
-	isIE9: isIE9,
-	isEdge: isEdge,
-	isAndroid: isAndroid,
-	isIOS: isIOS,
-	isChrome: isChrome,
-	isServerRendering: isServerRendering,
-	devtools: devtools,
-	nextTick: nextTick,
-	get _Set () { return _Set; },
-	mergeOptions: mergeOptions,
-	resolveAsset: resolveAsset,
-	get warn () { return warn; },
-	get tip () { return tip; },
-	get formatComponentName () { return formatComponentName; },
-	validateProp: validateProp,
-	handleError: handleError
-});
 
 /* not type checking this file because flow doesn't play well with Proxy */
 
@@ -3629,7 +3579,12 @@ function initInjections (vm) {
     // inject is :any because flow is not smart enough to figure out cached
     // isArray here
     var isArray = Array.isArray(inject);
-    var keys = isArray ? inject : Object.keys(inject);
+    var keys = isArray
+      ? inject
+      : hasSymbol
+        ? Reflect.ownKeys(inject)
+        : Object.keys(inject);
+
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
       var provideKey = isArray ? key : inject[key];
@@ -4068,7 +4023,17 @@ function initGlobalAPI (Vue) {
     };
   }
   Object.defineProperty(Vue, 'config', configDef);
-  Vue.util = util;
+
+  // exposed util methods.
+  // NOTE: these are not considered part of the public API - avoid relying on
+  // them unless you are aware of the risk.
+  Vue.util = {
+    warn: warn,
+    extend: extend,
+    mergeOptions: mergeOptions,
+    defineReactive: defineReactive$$1
+  };
+
   Vue.set = set;
   Vue.delete = del;
   Vue.nextTick = nextTick;
@@ -4096,7 +4061,7 @@ Object.defineProperty(Vue$3.prototype, '$isServer', {
   get: isServerRendering
 });
 
-Vue$3.version = '2.2.0-beta.2';
+Vue$3.version = '2.2.0';
 
 /*  */
 
@@ -6358,16 +6323,35 @@ function enter (vnode, toggleDisplay) {
     return
   }
 
-  var startClass = isAppear && appearClass ? appearClass : enterClass;
-  var activeClass = isAppear && appearActiveClass ? appearActiveClass : enterActiveClass;
-  var toClass = isAppear && appearToClass ? appearToClass : enterToClass;
+  var startClass = isAppear && appearClass
+    ? appearClass
+    : enterClass;
+  var activeClass = isAppear && appearActiveClass
+    ? appearActiveClass
+    : enterActiveClass;
+  var toClass = isAppear && appearToClass
+    ? appearToClass
+    : enterToClass;
 
-  var beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter;
-  var enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter;
-  var afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter;
-  var enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled;
+  var beforeEnterHook = isAppear
+    ? (beforeAppear || beforeEnter)
+    : beforeEnter;
+  var enterHook = isAppear
+    ? (typeof appear === 'function' ? appear : enter)
+    : enter;
+  var afterEnterHook = isAppear
+    ? (afterAppear || afterEnter)
+    : afterEnter;
+  var enterCancelledHook = isAppear
+    ? (appearCancelled || enterCancelled)
+    : enterCancelled;
 
-  var explicitEnterDuration = isObject(duration) ? duration.enter : duration;
+  var explicitEnterDuration = toNumber(
+    isObject(duration)
+      ? duration.enter
+      : duration
+  );
+
   if (process.env.NODE_ENV !== 'production' && explicitEnterDuration != null) {
     checkDuration(explicitEnterDuration, 'enter', vnode);
   }
@@ -6467,7 +6451,12 @@ function leave (vnode, rm) {
   var expectsCSS = css !== false && !isIE9;
   var userWantsControl = getHookAgumentsLength(leave);
 
-  var explicitLeaveDuration = isObject(duration) ? duration.leave : duration;
+  var explicitLeaveDuration = toNumber(
+    isObject(duration)
+      ? duration.leave
+      : duration
+  );
+
   if (process.env.NODE_ENV !== 'production' && explicitLeaveDuration != null) {
     checkDuration(explicitLeaveDuration, 'leave', vnode);
   }
@@ -6818,7 +6807,7 @@ var transitionProps = {
   appearClass: String,
   appearActiveClass: String,
   appearToClass: String,
-  duration: [Number, Object]
+  duration: [Number, String, Object]
 };
 
 // in case the child is also an abstract component, e.g. <keep-alive>
