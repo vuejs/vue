@@ -255,19 +255,20 @@ describe('Observer', () => {
     expect(dep1.notify.calls.count()).toBe(1)
     delProp(obj1, 'a')
     expect(hasOwn(obj1, 'a')).toBe(false)
-    expect(dep1.notify.calls.count()).toBe(2)
+    // delProp should not trigger a global notify
+    expect(dep1.notify.calls.count()).toBe(1)
     // set existing key, should be a plain set and not
     // trigger own ob's notify
     setProp(obj1, 'b', 3)
     expect(obj1.b).toBe(3)
-    expect(dep1.notify.calls.count()).toBe(2)
+    expect(dep1.notify.calls.count()).toBe(1)
     // set non-existing key
     setProp(obj1, 'c', 1)
     expect(obj1.c).toBe(1)
-    expect(dep1.notify.calls.count()).toBe(3)
+    expect(dep1.notify.calls.count()).toBe(2)
     // should ignore deleting non-existing key
     delProp(obj1, 'a')
-    expect(dep1.notify.calls.count()).toBe(3)
+    expect(dep1.notify.calls.count()).toBe(2)
     // should work on non-observed objects
     const obj2 = { a: 1 }
     delProp(obj2, 'a')
@@ -283,7 +284,7 @@ describe('Observer', () => {
     expect(dep3.notify.calls.count()).toBe(1)
     delProp(obj3, 'a')
     expect(hasOwn(obj3, 'a')).toBe(false)
-    expect(dep3.notify.calls.count()).toBe(2)
+    expect(dep3.notify.calls.count()).toBe(1)
   })
 
   it('warning set/delete on a Vue instance', done => {

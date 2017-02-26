@@ -126,7 +126,40 @@ describe('Watcher', () => {
       expect(spy.calls.count()).toBe(1)
       Vue.delete(vm.b, 'e')
     }).then(() => {
+      expect(spy.calls.count()).toBe(1)
+    }).then(done)
+  })
+
+  it('fire change on prop watcher upon addition/deletion', done => {
+    new Watcher(vm, 'b.y', spy)
+    expect(spy.calls.count()).toBe(0)
+    // should NOT trigger notify since 'y' went from undefined to undefined
+    Vue.set(vm.b, 'x', 123)
+    waitForUpdate(() => {
+      expect(spy.calls.count()).toBe(0)
+      // should trigger notify since 'y' does not exist on the object yet
+      Vue.set(vm.b, 'y', 234)
+    }).then(() => {
+      expect(spy).toHaveBeenCalledWith(234, undefined)
+      expect(spy.calls.count()).toBe(1)
+      // should NOT trigger notify since watcher depends on 'y', not 'x'
+      Vue.set(vm.b, 'x', 345)
+    }).then(() => {
+      expect(spy.calls.count()).toBe(1)
+      // should trigger notify since watcher depends on 'y'
+      Vue.set(vm.b, 'y', 456)
+    }).then(() => {
+      expect(spy).toHaveBeenCalledWith(456, 234)
       expect(spy.calls.count()).toBe(2)
+      // should NOT trigger notify since watcher depends on 'y', not 'x'
+      Vue.delete(vm.b, 'x')
+    }).then(() => {
+      expect(spy.calls.count()).toBe(2)
+      // should trigger notify since watcher depends on 'y'
+      Vue.delete(vm.b, 'y')
+    }).then(() => {
+      expect(spy).toHaveBeenCalledWith(undefined, 456)
+      expect(spy.calls.count()).toBe(3)
     }).then(done)
   })
 

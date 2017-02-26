@@ -99,6 +99,12 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
 }
 
 /**
+ * A dummy variable used to trigger reactive property deletion.
+ * Takes advantage of the fact that no two objects are equal.
+ */
+const DELETE_ME = {}
+
+/**
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
@@ -168,16 +174,20 @@ export function defineReactive (
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
       }
-      /* eslint-enable no-self-compare */
-      if (process.env.NODE_ENV !== 'production' && customSetter) {
-        customSetter()
-      }
-      if (setter) {
-        setter.call(obj, newVal)
+      if (newVal === DELETE_ME) {
+        delete obj[key]
       } else {
-        val = newVal
+        /* eslint-enable no-self-compare */
+        if (process.env.NODE_ENV !== 'production' && customSetter) {
+          customSetter()
+        }
+        if(setter) {
+          setter.call(obj, newVal)
+        } else {
+          val = newVal
+        }
+        childOb = observe(newVal)
       }
-      childOb = observe(newVal)
       dep.notify()
     }
   })
@@ -234,11 +244,15 @@ export function del (obj: Array<any> | Object, key: any) {
   if (!hasOwn(obj, key)) {
     return
   }
-  delete obj[key]
   if (!ob) {
-    return
+    delete obj[key];
+    return;
   }
-  ob.dep.notify()
+  let value = obj[key]
+  obj[key] = DELETE_ME
+  if (typeof value === "object" && value.__ob__) {
+    value.__ob__.dep.notify()
+  }
 }
 
 /**
