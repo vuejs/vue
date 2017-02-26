@@ -952,6 +952,10 @@ function isNative (Ctor) {
   return /native code/.test(Ctor.toString())
 }
 
+var hasSymbol =
+  typeof Symbol !== 'undefined' && isNative(Symbol) &&
+  typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys);
+
 /**
  * Defer a task to execute it asynchronously.
  */
@@ -5630,7 +5634,12 @@ function initInjections (vm) {
     // inject is :any because flow is not smart enough to figure out cached
     // isArray here
     var isArray = Array.isArray(inject);
-    var keys = isArray ? inject : Object.keys(inject);
+    var keys = isArray
+      ? inject
+      : hasSymbol
+        ? Reflect.ownKeys(inject)
+        : Object.keys(inject);
+
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
       var provideKey = isArray ? key : inject[key];
@@ -6902,7 +6911,11 @@ function createBundleRendererCreator (createRenderer) {
     var basedir = rendererOptions && rendererOptions.basedir;
 
     // load bundle if given filepath
-    if (typeof bundle === 'string' && bundle.charAt(0) === '/') {
+    if (
+      typeof bundle === 'string' &&
+      /\.js(on)?$/.test(bundle) &&
+      path.isAbsolute(bundle)
+    ) {
       if (fs.existsSync(bundle)) {
         basedir = basedir || path.dirname(bundle);
         bundle = fs.readFileSync(bundle, 'utf-8');
