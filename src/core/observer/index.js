@@ -194,6 +194,36 @@ export function defineReactive (
 }
 
 /**
+ * Gets a property from an object. If the property does not exist, sets it to
+ * the default value. If the third argument is not given, sets the value to
+ * undefined. This method should be used to avoid a global notify when adding
+ * a new property via Vue.set().
+ */
+export function get (obj: Array<any> | Object, key: any, defaultVal: any) {
+  if (Array.isArray(obj)) {
+    obj.length = Math.max(obj.length, key)
+    return obj[key]
+  }
+  if (hasOwn(obj, key)) {
+    return obj[key]
+  }
+  const ob = obj.__ob__
+  if (obj._isVue || (ob && ob.vmCount)) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Avoid adding reactive properties to a Vue instance or its root $data ' +
+      'at runtime - declare it upfront in the data option.'
+    )
+    return
+  }
+  if (!ob) {
+    obj[key] = defaultVal
+    return defaultVal
+  }
+  defineReactive(ob.value, key, defaultVal)
+  return obj[key] // triggers depend() on the property's dep
+}
+
+/**
  * Set a property on an object. Adds the new property and
  * triggers change notification if the property doesn't
  * already exist.

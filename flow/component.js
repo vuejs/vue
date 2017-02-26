@@ -38,6 +38,7 @@ declare interface Component {
   $mount: (el?: Element | string, hydrating?: boolean) => Component;
   $forceUpdate: () => void;
   $destroy: () => void;
+  $get: (obj: Array<mixed> | Object, key: mixed, defaultVal: mixed) => void;
   $set: (obj: Array<mixed> | Object, key: mixed, val: mixed) => void;
   $delete: (obj: Object, key: string) => void;
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;

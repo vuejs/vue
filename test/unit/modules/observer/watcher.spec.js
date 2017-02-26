@@ -163,6 +163,33 @@ describe('Watcher', () => {
     }).then(done)
   })
 
+  it('do not mix Vue.get() with . or []', done => {
+    let spy2 = jasmine.createSpy('watcher')
+    let spy3 = jasmine.createSpy('watcher')
+    // An initial watcher using '.' will not leave any traces on q.
+    new Watcher(vm, () => { return vm.b.q }, spy)
+    // Calling Vue.get() will create the field without notifying
+    // the first watcher.
+    new Watcher(vm, () => { return Vue.get(vm.b, 'q') }, spy2)
+    // We can now create a watcher using '.' since the field exists.
+    new Watcher(vm, () => { return vm.b.q }, spy3)
+    waitForUpdate(() => {
+      expect(spy.calls.count()).toBe(0)
+      expect(spy2.calls.count()).toBe(0)
+      expect(spy3.calls.count()).toBe(0)
+      Vue.set(vm.b, 'q', 123)
+    }).then(() => {
+      expect(spy.calls.count()).toBe(0)
+      expect(spy2.calls.count()).toBe(1)
+      expect(spy3.calls.count()).toBe(1)
+      Vue.delete(vm.b, 'q')
+    }).then(() => {
+      expect(spy.calls.count()).toBe(0)
+      expect(spy2.calls.count()).toBe(2)
+      expect(spy3.calls.count()).toBe(2)
+    }).then(done)
+  })
+
   it('watch function', done => {
     const watcher = new Watcher(vm, function () {
       return this.a + this.b.d

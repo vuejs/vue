@@ -2,6 +2,7 @@ import Vue from 'vue'
 import {
   Observer,
   observe,
+  get as getProp,
   set as setProp,
   del as delProp
 } from 'core/observer/index'
@@ -269,10 +270,17 @@ describe('Observer', () => {
     // should ignore deleting non-existing key
     delProp(obj1, 'a')
     expect(dep1.notify.calls.count()).toBe(2)
+    // should not notify object observer when Vue.get() is used
+    const prop1 = getProp(obj1, 'd', {})
+    expect(dep1.notify.calls.count()).toBe(2)
+    delProp(obj1, 'd')
+    expect(dep1.notify.calls.count()).toBe(2)
     // should work on non-observed objects
     const obj2 = { a: 1 }
     delProp(obj2, 'a')
+    setProp(obj2, 'b')
     expect(hasOwn(obj2, 'a')).toBe(false)
+    expect(hasOwn(obj2, 'b')).toBe(true)
     // should work on Object.create(null)
     const obj3 = Object.create(null)
     obj3.a = 1

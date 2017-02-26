@@ -1,9 +1,9 @@
 import Vue from 'vue'
 
 describe('Instance methods data', () => {
-  it('$set/$delete', done => {
+  it('$get/$set/$delete', done => {
     const vm = new Vue({
-      template: '<div>{{ a.msg }}</div>',
+      template: '<div>{{ $get(a, "msg") }}</div>',
       data: {
         a: {}
       }

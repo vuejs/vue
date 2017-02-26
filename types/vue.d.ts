@@ -47,6 +47,7 @@ export declare class Vue {
   $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
   $forceUpdate(): void;
   $destroy(): void;
+  $get: typeof Vue.get;
   $set: typeof Vue.set;
   $delete: typeof Vue.delete;
   $watch(
