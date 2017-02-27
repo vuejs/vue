@@ -37,9 +37,13 @@ export const isServerRendering = () => {
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
 /* istanbul ignore next */
-function isNative (Ctor: Function): boolean {
+export function isNative (Ctor: Function): boolean {
   return /native code/.test(Ctor.toString())
 }
+
+export const hasSymbol =
+  typeof Symbol !== 'undefined' && isNative(Symbol) &&
+  typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)
 
 /**
  * Defer a task to execute it asynchronously.

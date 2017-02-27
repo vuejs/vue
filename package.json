@@ -1,22 +1,15 @@
 {
   "name": "vue",
-  "version": "2.1.10",
+  "version": "2.2.1",
   "description": "Reactive, component-oriented view layer for modern web interfaces.",
   "main": "dist/vue.runtime.common.js",
+  "module": "dist/vue.runtime.esm.js",
+  "unpkg": "dist/vue.js",
   "typings": "types/index.d.ts",
   "files": [
-    "dist/vue.js",
-    "dist/vue.min.js",
-    "dist/vue.runtime.js",
-    "dist/vue.runtime.min.js",
-    "dist/vue.common.js",
-    "dist/vue.runtime.common.js",
     "src",
-    "types/index.d.ts",
-    "types/options.d.ts",
-    "types/plugin.d.ts",
-    "types/vnode.d.ts",
-    "types/vue.d.ts"
+    "dist/*.js",
+    "types/*.d.ts"
   ],
   "scripts": {
     "dev": "TARGET=web-full-dev rollup -w -c build/config.js",
@@ -117,6 +110,5 @@
     "webpack": "^2.2.0",
     "weex-js-runtime": "^0.17.0-alpha4",
     "weex-vdom-tester": "^0.1.4"
-  },
-  "unpkg": "dist/vue.js"
+  }
 }

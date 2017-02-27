@@ -53,8 +53,8 @@ declare type ComponentOptions = {
   filters?: { [key: string]: Function };
 
   // context
-  provide?: Object | () => Object;
-  inject?: { [key: string]: string } | Array<string>;
+  provide?: { [key: string | Symbol]: any } | () => { [key: string | Symbol]: any };
+  inject?: { [key: string]: string | Symbol } | Array<string>;
 
   // component v-model customization
   model?: {

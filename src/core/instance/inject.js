@@ -1,5 +1,7 @@
 /* @flow */
 
+import { hasSymbol } from 'core/util/env'
+
 export function initInjections (vm: Component) {
   const provide = vm.$options.provide
   const inject: any = vm.$options.inject
@@ -12,7 +14,12 @@ export function initInjections (vm: Component) {
     // inject is :any because flow is not smart enough to figure out cached
     // isArray here
     const isArray = Array.isArray(inject)
-    const keys = isArray ? inject : Object.keys(inject)
+    const keys = isArray
+      ? inject
+      : hasSymbol
+        ? Reflect.ownKeys(inject)
+        : Object.keys(inject)
+
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
       const provideKey = isArray ? key : inject[key]

@@ -10,17 +10,22 @@ export function genComponentModel (
 ): ?boolean {
   const { number, trim } = modifiers || {}
 
-  let valueExpression = 'value'
+  const baseValueExpression = '$$v'
+  let valueExpression = baseValueExpression
   if (trim) {
-    valueExpression = `(typeof value === 'string' ? value.trim() : value)`
+    valueExpression =
+      `(typeof ${baseValueExpression} === 'string'` +
+        `? ${baseValueExpression}.trim()` +
+        `: ${baseValueExpression})`
   }
   if (number) {
     valueExpression = `_n(${valueExpression})`
   }
+  const assignment = genAssignmentCode(value, valueExpression)
 
   el.model = {
     value: `(${value})`,
-    callback: `function (value) {${genAssignmentCode(value, valueExpression)}}`
+    callback: `function (${baseValueExpression}) {${assignment}}`
   }
 }
 

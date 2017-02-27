@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { isNative } from 'core/util/env'
 
 describe('Options provide/inject', () => {
   let injected
@@ -124,4 +125,23 @@ describe('Options provide/inject', () => {
 
     expect(vm.foo).toBe(1)
   })
+
+  if (typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)) {
+    it('with Symbol keys', () => {
+      const s = Symbol()
+      const vm = new Vue({
+        template: `<child/>`,
+        provide: {
+          [s]: 123
+        },
+        components: {
+          child: {
+            inject: { s },
+            template: `<div>{{ s }}</div>`
+          }
+        }
+      }).$mount()
+      expect(vm.$el.textContent).toBe('123')
+    })
+  }
 })
