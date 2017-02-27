@@ -9,7 +9,8 @@
   "files": [
     "src",
     "dist/*.js",
-    "types/*.d.ts"
+    "types/*.d.ts",
+    "decls/**/*.js"
   ],
   "scripts": {
     "dev": "TARGET=web-full-dev rollup -w -c build/config.js",
@@ -22,7 +23,7 @@
     "build": "node build/build.js",
     "build:ssr": "npm run build -- vue.runtime.common.js,vue-server-renderer",
     "build:weex": "npm run build -- weex-vue-framework,weex-template-compiler",
-    "test": "npm run lint && flow check && npm run test:types && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr",
+    "test": "npm run lint && flow check && npm run test:types && npm run test:flow && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr",
     "test:unit": "karma start build/karma.unit.config.js",
     "test:cover": "karma start build/karma.cover.config.js",
     "test:e2e": "npm run build -- vue.min.js && node test/e2e/runner.js",
@@ -30,6 +31,7 @@
     "test:ssr": "npm run build:ssr && jasmine JASMINE_CONFIG_PATH=test/ssr/jasmine.json",
     "test:sauce": "npm run sauce -- 0 && npm run sauce -- 1 && npm run sauce -- 2",
     "test:types": "tsc -p ./types/test/tsconfig.json",
+    "test:flow": "flow check --lib decls/vue_v2.2.x/flow_v0.39.x-/vue_v2.2.x.js decls/vue_v2.2.x/test_vue_v2.2.x.js",
     "lint": "eslint src build test",
     "flow": "flow check",
     "sauce": "SAUCE=true karma start build/karma.sauce.config.js",
