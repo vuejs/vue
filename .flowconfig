@@ -4,6 +4,7 @@
 .*/build/.*
 .*/examples/.*
 .*/benchmarks/.*
+.*/decls/.*
 
 [include]
 
