@@ -310,7 +310,7 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
         el.tag !== 'slot') {
       return genElement(el)
     }
-    const normalizationType = checkSkip ? getNormalizationType(children) : false
+    const normalizationType = checkSkip ? getNormalizationType(children) : 0
     return `[${children.map(genNode).join(',')}]${
       normalizationType ? `,${normalizationType}` : ''
     }`
