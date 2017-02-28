@@ -6,21 +6,23 @@ export type Config = {
   // user
   optionMergeStrategies: { [key: string]: Function };
   silent: boolean;
+  productionTip: boolean;
+  performance: boolean;
   devtools: boolean;
-  errorHandler: ?Function;
+  errorHandler: ?(err: Error, vm: Component, info: string) => void;
   ignoredElements: Array<string>;
-  keyCodes: { [key: string]: number };
+  keyCodes: { [key: string]: number | Array<number> };
   // platform
   isReservedTag: (x?: string) => boolean;
   parsePlatformTagName: (x: string) => string;
   isUnknownElement: (x?: string) => boolean;
   getTagNamespace: (x?: string) => string | void;
-  mustUseProp: (tag?: string, x?: string) => boolean;
+  mustUseProp: (tag: string, type: ?string, name: string) => boolean;
   // internal
   _assetTypes: Array<string>;
   _lifecycleHooks: Array<string>;
   _maxUpdateCount: number;
-}
+};
 
 const config: Config = {
   /**
@@ -34,9 +36,19 @@ const config: Config = {
   silent: false,
 
   /**
+   * Show production mode tip message on boot?
+   */
+  productionTip: process.env.NODE_ENV !== 'production',
+
+  /**
    * Whether to enable devtools
    */
   devtools: process.env.NODE_ENV !== 'production',
+
+  /**
+   * Whether to record perf
+   */
+  performance: process.env.NODE_ENV !== 'production',
 
   /**
    * Error handler for watcher errors

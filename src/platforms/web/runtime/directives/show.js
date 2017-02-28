@@ -5,8 +5,8 @@ import { enter, leave } from '../modules/transition'
 
 // recursively search for possible transition defined inside the component root
 function locateNode (vnode: VNode): VNodeWithData {
-  return vnode.child && (!vnode.data || !vnode.data.transition)
-    ? locateNode(vnode.child._vnode)
+  return vnode.componentInstance && (!vnode.data || !vnode.data.transition)
+    ? locateNode(vnode.componentInstance._vnode)
     : vnode
 }
 

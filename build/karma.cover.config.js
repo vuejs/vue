@@ -10,11 +10,15 @@ module.exports = function (config) {
         { type: 'text-summary', dir: '../coverage', subdir: '.' }
       ]
     },
-    singleRun: true
+    singleRun: true,
+    plugins: base.plugins.concat([
+      'karma-coverage',
+      'karma-phantomjs-launcher'
+    ])
   })
 
   // add babel-plugin-istanbul for code intrumentation
-  options.webpack.babel = {
+  options.webpack.module.rules[0].options = {
     plugins: [['istanbul', {
       exclude: [
         'test/',

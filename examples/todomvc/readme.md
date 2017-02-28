@@ -13,7 +13,6 @@ Here are some links you may find helpful:
 * [Official Guide](https://vuejs.org/guide/)
 * [API Reference](https://vuejs.org/api/)
 * [Examples](https://vuejs.org/examples/)
-* [Building Larger Apps with Vue.js](https://vuejs.org/guide/application.html)
 
 Get help from other Vue.js users:
 

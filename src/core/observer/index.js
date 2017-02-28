@@ -218,7 +218,11 @@ export function set (obj: Array<any> | Object, key: any, val: any) {
 /**
  * Delete a property and trigger change if necessary.
  */
-export function del (obj: Object, key: string) {
+export function del (obj: Array<any> | Object, key: any) {
+  if (Array.isArray(obj)) {
+    obj.splice(key, 1)
+    return
+  }
   const ob = obj.__ob__
   if (obj._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(

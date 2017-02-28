@@ -49,21 +49,19 @@ let IS_REGEX_CAPTURING_BROKEN = false
 const isScriptOrStyle = makeMap('script,style', true)
 const reCache = {}
 
-const ltRE = /&lt;/g
-const gtRE = /&gt;/g
-const nlRE = /&#10;/g
-const ampRE = /&amp;/g
-const quoteRE = /&quot;/g
+const decodingMap = {
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&amp;': '&',
+  '&#10;': '\n'
+}
+const encodedAttr = /&(?:lt|gt|quot|amp);/g
+const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10);/g
 
 function decodeAttr (value, shouldDecodeNewlines) {
-  if (shouldDecodeNewlines) {
-    value = value.replace(nlRE, '\n')
-  }
-  return value
-    .replace(ltRE, '<')
-    .replace(gtRE, '>')
-    .replace(ampRE, '&')
-    .replace(quoteRE, '"')
+  const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
+  return value.replace(re, match => decodingMap[match])
 }
 
 export function parseHTML (html, options) {
@@ -123,7 +121,7 @@ export function parseHTML (html, options) {
       }
 
       let text, rest, next
-      if (textEnd > 0) {
+      if (textEnd >= 0) {
         rest = html.slice(textEnd)
         while (
           !endTag.test(rest) &&
@@ -170,8 +168,11 @@ export function parseHTML (html, options) {
       parseEndTag(stackedTag, index - endTagLength, index)
     }
 
-    if (html === last && options.chars) {
-      options.chars(html)
+    if (html === last) {
+      options.chars && options.chars(html)
+      if (process.env.NODE_ENV !== 'production' && !stack.length && options.warn) {
+        options.warn(`Mal-formatted tag at end of template: "${html}"`)
+      }
       break
     }
   }
@@ -209,7 +210,7 @@ export function parseHTML (html, options) {
 
   function handleStartTag (match) {
     const tagName = match.tagName
-    let unarySlash = match.unarySlash
+    const unarySlash = match.unarySlash
 
     if (expectHTML) {
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
@@ -245,7 +246,6 @@ export function parseHTML (html, options) {
     if (!unary) {
       stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs })
       lastTag = tagName
-      unarySlash = ''
     }
 
     if (options.start) {
@@ -277,6 +277,13 @@ export function parseHTML (html, options) {
     if (pos >= 0) {
       // Close all the open elements, up the stack
       for (let i = stack.length - 1; i >= pos; i--) {
+        if (process.env.NODE_ENV !== 'production' &&
+            (i > pos || !tagName) &&
+            options.warn) {
+          options.warn(
+            `tag <${stack[i].tag}> has no matching end tag.`
+          )
+        }
         if (options.end) {
           options.end(stack[i].tag, start, end)
         }

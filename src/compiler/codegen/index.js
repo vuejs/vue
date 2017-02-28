@@ -5,9 +5,9 @@ import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
 import { camelize, no } from 'shared/util'
 
-type TransformFunction = (el: ASTElement, code: string) => string
-type DataGenFunction = (el: ASTElement) => string
-type DirctiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean
+type TransformFunction = (el: ASTElement, code: string) => string;
+type DataGenFunction = (el: ASTElement) => string;
+type DirctiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean;
 
 // configurable state
 let warn
@@ -126,7 +126,7 @@ function genIfConditions (conditions: ASTIfConditions): string {
     return '_e()'
   }
 
-  var condition = conditions.shift()
+  const condition = conditions.shift()
   if (condition.exp) {
     return `(${condition.exp})?${genTernaryExp(condition.block)}:${genIfConditions(conditions)}`
   } else {
@@ -144,6 +144,19 @@ function genFor (el: any): string {
   const alias = el.alias
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
   const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
+
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    maybeComponent(el) && el.tag !== 'slot' && el.tag !== 'template' && !el.key
+  ) {
+    warn(
+      `<${el.tag} v-for="${alias} in ${exp}">: component lists rendered with ` +
+      `v-for should have explicit keys. ` +
+      `See https://vuejs.org/guide/list.html#key for more info.`,
+      true /* tip */
+    )
+  }
+
   el.forProcessed = true // avoid recursion
   return `_l((${exp}),` +
     `function(${alias}${iterator1}${iterator2}){` +
@@ -204,6 +217,10 @@ function genData (el: ASTElement): string {
   // scoped slots
   if (el.scopedSlots) {
     data += `${genScopedSlots(el.scopedSlots)},`
+  }
+  // component v-model
+  if (el.model) {
+    data += `model:{value:${el.model.value},callback:${el.model.callback}},`
   }
   // inline-template
   if (el.inlineTemplate) {
@@ -268,18 +285,18 @@ function genInlineTemplate (el: ASTElement): ?string {
   }
 }
 
-function genScopedSlots (slots) {
-  return `scopedSlots:{${
+function genScopedSlots (slots: { [key: string]: ASTElement }): string {
+  return `scopedSlots:_u([${
     Object.keys(slots).map(key => genScopedSlot(key, slots[key])).join(',')
-  }}`
+  }])`
 }
 
 function genScopedSlot (key: string, el: ASTElement) {
-  return `${key}:function(${String(el.attrsMap.scope)}){` +
+  return `[${key},function(${String(el.attrsMap.scope)}){` +
     `return ${el.tag === 'template'
       ? genChildren(el) || 'void 0'
       : genElement(el)
-  }}`
+  }}]`
 }
 
 function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
@@ -306,32 +323,35 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
 // 0: no normalization needed
 // 1: simple normalization needed (possible 1-level deep nested array)
 // 2: full normalization needed
-function getNormalizationType (children): number {
+function getNormalizationType (children: Array<ASTNode>): number {
   let res = 0
   for (let i = 0; i < children.length; i++) {
-    const el: any = children[i]
+    const el: ASTNode = children[i]
+    if (el.type !== 1) {
+      continue
+    }
     if (needsNormalization(el) ||
-        (el.if && el.ifConditions.some(c => needsNormalization(c.block)))) {
+        (el.ifConditions && el.ifConditions.some(c => needsNormalization(c.block)))) {
       res = 2
       break
     }
     if (maybeComponent(el) ||
-        (el.if && el.ifConditions.some(c => maybeComponent(c.block)))) {
+        (el.ifConditions && el.ifConditions.some(c => maybeComponent(c.block)))) {
       res = 1
     }
   }
   return res
 }
 
-function needsNormalization (el: ASTElement) {
-  return el.for || el.tag === 'template' || el.tag === 'slot'
+function needsNormalization (el: ASTElement): boolean {
+  return el.for !== undefined || el.tag === 'template' || el.tag === 'slot'
 }
 
-function maybeComponent (el: ASTElement) {
-  return el.type === 1 && !isPlatformReservedTag(el.tag)
+function maybeComponent (el: ASTElement): boolean {
+  return !isPlatformReservedTag(el.tag)
 }
 
-function genNode (node: ASTNode) {
+function genNode (node: ASTNode): string {
   if (node.type === 1) {
     return genElement(node)
   } else {
@@ -365,7 +385,7 @@ function genSlot (el: ASTElement): string {
 }
 
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement
-function genComponent (componentName, el): string {
+function genComponent (componentName: string, el: ASTElement): string {
   const children = el.inlineTemplate ? null : genChildren(el, true)
   return `_c(${componentName},${genData(el)}${
     children ? `,${children}` : ''

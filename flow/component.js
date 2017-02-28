@@ -10,6 +10,7 @@ declare interface Component {
   static extend: (options: Object) => Function;
   static superOptions: Object;
   static extendOptions: Object;
+  static sealedOptions: Object;
   static super: Class<Component>;
   // assets
   static directive: (id: string, def?: Function | Object) => Function | Object | void;
@@ -28,6 +29,7 @@ declare interface Component {
   $scopedSlots: { [key: string]: () => VNodeChildren };
   $vnode: VNode;
   $isServer: boolean;
+  $props: Object;
 
   // public methods
   $mount: (el?: Element | string, hydrating?: boolean) => Component;
@@ -36,7 +38,7 @@ declare interface Component {
   $set: (obj: Array<mixed> | Object, key: mixed, val: mixed) => void;
   $delete: (obj: Object, key: string) => void;
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;
-  $on: (event: string, fn: Function) => Component;
+  $on: (event: string | Array<string>, fn: Function) => Component;
   $once: (event: string, fn: Function) => Component;
   $off: (event?: string, fn?: Function) => Component;
   $emit: (event: string, ...args: Array<mixed>) => Component;
@@ -45,33 +47,32 @@ declare interface Component {
 
   // private properties
   _uid: number;
+  _name: string; // this only exists in dev mode
   _isVue: true;
   _self: Component;
   _renderProxy: Component;
   _renderContext: ?Component;
   _watcher: Watcher;
   _watchers: Array<Watcher>;
+  _computedWatchers: { [key: string]: Watcher };
   _data: Object;
+  _props: Object;
   _events: Object;
-  _inactive: boolean;
+  _inactive: boolean | null;
+  _directInactive: boolean;
   _isMounted: boolean;
   _isDestroyed: boolean;
   _isBeingDestroyed: boolean;
   _vnode: ?VNode;
   _staticTrees: ?Array<VNode>;
   _hasHookEvent: boolean;
+  _provided: ?Object;
 
   // private methods
   // lifecycle
   _init: Function;
   _mount: (el?: Element | void, hydrating?: boolean) => Component;
   _update: (vnode: VNode, hydrating?: boolean) => void;
-  _updateFromParent: (
-    propsData: ?Object,
-    listeners: ?{ [key: string]: Function | Array<Function> },
-    parentVnode: VNode,
-    renderChildren: ?Array<VNode>
-  ) => void;
   // rendering
   _render: () => VNode;
   __patch__: (a: Element | VNode | void, b: VNode) => any;
@@ -104,6 +105,8 @@ declare interface Component {
   _b: (data: any, value: any, asProp?: boolean) => VNodeData;
   // check custom keyCode
   _k: (eventKeyCode: number, key: string, builtInAlias: number | Array<number> | void) => boolean;
+  // resolve scoped slots
+  _u: (scopedSlots: Array<[string, Function]>) => { [key: string]: Function };
 
   // allow dynamic method registration
   [key: string]: any

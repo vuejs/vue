@@ -6,10 +6,10 @@ var webpackConfig = {
     alias: alias
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
-        loader: 'babel',
+        loader: 'babel-loader',
         exclude: /node_modules/
       }
     ]
@@ -39,5 +39,11 @@ module.exports = {
   webpack: webpackConfig,
   webpackMiddleware: {
     noInfo: true
-  }
+  },
+  plugins: [
+    'karma-jasmine',
+    'karma-mocha-reporter',
+    'karma-sourcemap-loader',
+    'karma-webpack'
+  ]
 }

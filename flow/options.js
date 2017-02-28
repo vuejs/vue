@@ -24,17 +24,16 @@ declare type ComponentOptions = {
       cache?: boolean
     }
   };
-  methods?: {
-    [key: string]: Function
-  };
-  watch?: {
-    [key: string]: Function | string
-  };
+  methods?: { [key: string]: Function };
+  watch?: { [key: string]: Function | string };
+
   // DOM
   el?: string | Element;
   template?: string;
-  render: () => VNode;
+  render: (h: () => VNode) => VNode;
+  renderError?: (h: () => VNode, err: Error) => VNode;
   staticRenderFns?: Array<() => VNode>;
+
   // lifecycle
   beforeCreate?: Function;
   created?: Function;
@@ -42,11 +41,27 @@ declare type ComponentOptions = {
   mounted?: Function;
   beforeUpdate?: Function;
   updated?: Function;
+  activated?: Function;
+  deactivated?: Function;
+  beforeDestroy?: Function;
+  destroyed?: Function;
+
   // assets
   directives?: { [key: string]: Object };
   components?: { [key: string]: Class<Component> };
   transitions?: { [key: string]: Object };
   filters?: { [key: string]: Function };
+
+  // context
+  provide?: { [key: string | Symbol]: any } | () => { [key: string | Symbol]: any };
+  inject?: { [key: string]: string | Symbol } | Array<string>;
+
+  // component v-model customization
+  model?: {
+    prop?: string;
+    event?: string;
+  };
+
   // misc
   parent?: Component;
   mixins?: Array<Object>;

@@ -98,6 +98,22 @@ describe('Options props', () => {
     }).then(done)
   })
 
+  it('default value Function', () => {
+    const func = () => 132
+    const vm = new Vue({
+      props: {
+        a: {
+          type: Function,
+          default: func
+        }
+      },
+      propsData: {
+        a: undefined
+      }
+    })
+    expect(vm.a).toBe(func)
+  })
+
   it('warn object/array default values', () => {
     new Vue({
       props: {
@@ -288,6 +304,27 @@ describe('Options props', () => {
       }
     }).$mount()
     expect('already declared as a prop').toHaveBeenWarned()
+  })
+
+  it('should warn methods already defined as a prop', () => {
+    new Vue({
+      template: '<test a="1"></test>',
+      components: {
+        test: {
+          template: '<div></div>',
+          props: {
+            a: null
+          },
+          methods: {
+            a () {
+
+            }
+          }
+        }
+      }
+    }).$mount()
+    expect(`method "a" has already been defined as a prop`).toHaveBeenWarned()
+    expect(`Avoid mutating a prop directly`).toHaveBeenWarned()
   })
 
   it('treat boolean props properly', () => {

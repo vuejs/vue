@@ -46,7 +46,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 }
 
 // check platforms/web/util/attrs.js acceptValue
-type acceptValueElm = HTMLInputElement | HTMLSelectElement | HTMLOptionElement
+type acceptValueElm = HTMLInputElement | HTMLSelectElement | HTMLOptionElement;
 
 function shouldUpdateValue (
   elm: acceptValueElm,
@@ -56,7 +56,7 @@ function shouldUpdateValue (
   return (!elm.composing && (
     vnode.tag === 'option' ||
     isDirty(elm, checkVal) ||
-    isInputChanged(vnode, checkVal)
+    isInputChanged(elm, checkVal)
   ))
 }
 
@@ -65,10 +65,10 @@ function isDirty (elm: acceptValueElm, checkVal: string): boolean {
   return document.activeElement !== elm && elm.value !== checkVal
 }
 
-function isInputChanged (vnode: VNodeWithData, newVal: string): boolean {
-  const value = vnode.elm.value
-  const modifiers = vnode.elm._vModifiers // injected by v-model runtime
-  if ((modifiers && modifiers.number) || vnode.elm.type === 'number') {
+function isInputChanged (elm: any, newVal: string): boolean {
+  const value = elm.value
+  const modifiers = elm._vModifiers // injected by v-model runtime
+  if ((modifiers && modifiers.number) || elm.type === 'number') {
     return toNumber(value) !== toNumber(newVal)
   }
   if (modifiers && modifiers.trim) {

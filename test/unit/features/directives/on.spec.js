@@ -130,6 +130,29 @@ describe('Directive v-on', () => {
     expect(spy.calls.count()).toBe(1) // should no longer trigger
   })
 
+  // #4655
+  it('should handle .once on multiple elements properly', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <button ref="one" @click.once="foo">one</button>
+          <button ref="two" @click.once="foo">two</button>
+        </div>
+      `,
+      methods: { foo: spy }
+    })
+    triggerEvent(vm.$refs.one, 'click')
+    expect(spy.calls.count()).toBe(1)
+    triggerEvent(vm.$refs.one, 'click')
+    expect(spy.calls.count()).toBe(1)
+    triggerEvent(vm.$refs.two, 'click')
+    expect(spy.calls.count()).toBe(2)
+    triggerEvent(vm.$refs.one, 'click')
+    triggerEvent(vm.$refs.two, 'click')
+    expect(spy.calls.count()).toBe(2)
+  })
+
   it('should support capture and once', () => {
     const callOrder = []
     vm = new Vue({
@@ -148,6 +171,21 @@ describe('Directive v-on', () => {
     expect(callOrder.toString()).toBe('1,2')
     triggerEvent(vm.$el.firstChild, 'click')
     expect(callOrder.toString()).toBe('1,2,2')
+  })
+
+  // #4846
+  it('should support once and other modifiers', () => {
+    vm = new Vue({
+      el,
+      template: `<div @click.once.self="foo"><span/></div>`,
+      methods: { foo: spy }
+    })
+    triggerEvent(vm.$el.firstChild, 'click')
+    expect(spy).not.toHaveBeenCalled()
+    triggerEvent(vm.$el, 'click')
+    expect(spy).toHaveBeenCalled()
+    triggerEvent(vm.$el, 'click')
+    expect(spy.calls.count()).toBe(1)
   })
 
   it('should support keyCode', () => {
@@ -172,6 +210,49 @@ describe('Directive v-on', () => {
       e.keyCode = 13
     })
     expect(spy).toHaveBeenCalled()
+  })
+
+  it('should support mouse modifier', () => {
+    const left = 0
+    const middle = 1
+    const right = 2
+    const spyLeft = jasmine.createSpy()
+    const spyMiddle = jasmine.createSpy()
+    const spyRight = jasmine.createSpy()
+
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <div ref="left" @mousedown.left="foo">left</div>
+          <div ref="right" @mousedown.right="foo1">right</div>
+          <div ref="middle" @mousedown.middle="foo2">right</div>
+        </div>
+      `,
+      methods: {
+        foo: spyLeft,
+        foo1: spyRight,
+        foo2: spyMiddle
+      }
+    })
+
+    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = right })
+    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = middle })
+    expect(spyLeft).not.toHaveBeenCalled()
+    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = left })
+    expect(spyLeft).toHaveBeenCalled()
+
+    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = left })
+    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = middle })
+    expect(spyRight).not.toHaveBeenCalled()
+    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = right })
+    expect(spyRight).toHaveBeenCalled()
+
+    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = left })
+    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = right })
+    expect(spyMiddle).not.toHaveBeenCalled()
+    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = middle })
+    expect(spyMiddle).toHaveBeenCalled()
   })
 
   it('should support custom keyCode', () => {

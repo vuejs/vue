@@ -1,14 +1,16 @@
 /* @flow */
 
-import { inBrowser, isIE9 } from 'core/util/index'
-import { cached, extend } from 'shared/util'
+import { once, isObject, toNumber } from 'shared/util'
+import { inBrowser, isIE9, warn } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
+
 import {
   nextFrame,
+  resolveTransition,
+  whenTransitionEnds,
   addTransitionClass,
-  removeTransitionClass,
-  whenTransitionEnds
+  removeTransitionClass
 } from '../transition-util'
 
 export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
@@ -46,7 +48,8 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     beforeAppear,
     appear,
     afterAppear,
-    appearCancelled
+    appearCancelled,
+    duration
   } = data
 
   // activeInstance will always be the <transition> component managing this
@@ -66,20 +69,41 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     return
   }
 
-  const startClass = isAppear ? appearClass : enterClass
-  const activeClass = isAppear ? appearActiveClass : enterActiveClass
-  const toClass = isAppear ? appearToClass : enterToClass
-  const beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter
-  const enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter
-  const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
-  const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
+  const startClass = isAppear && appearClass
+    ? appearClass
+    : enterClass
+  const activeClass = isAppear && appearActiveClass
+    ? appearActiveClass
+    : enterActiveClass
+  const toClass = isAppear && appearToClass
+    ? appearToClass
+    : enterToClass
+
+  const beforeEnterHook = isAppear
+    ? (beforeAppear || beforeEnter)
+    : beforeEnter
+  const enterHook = isAppear
+    ? (typeof appear === 'function' ? appear : enter)
+    : enter
+  const afterEnterHook = isAppear
+    ? (afterAppear || afterEnter)
+    : afterEnter
+  const enterCancelledHook = isAppear
+    ? (appearCancelled || enterCancelled)
+    : enterCancelled
+
+  const explicitEnterDuration: any = toNumber(
+    isObject(duration)
+      ? duration.enter
+      : duration
+  )
+
+  if (process.env.NODE_ENV !== 'production' && explicitEnterDuration != null) {
+    checkDuration(explicitEnterDuration, 'enter', vnode)
+  }
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl =
-    enterHook &&
-    // enterHook may be a bound method which exposes
-    // the length of original fn as _length
-    (enterHook._length || enterHook.length) > 1
+  const userWantsControl = getHookAgumentsLength(enterHook)
 
   const cb = el._enterCb = once(() => {
     if (expectsCSS) {
@@ -103,13 +127,12 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       const parent = el.parentNode
       const pendingNode = parent && parent._pending && parent._pending[vnode.key]
       if (pendingNode &&
-          pendingNode.context === vnode.context &&
           pendingNode.tag === vnode.tag &&
           pendingNode.elm._leaveCb) {
         pendingNode.elm._leaveCb()
       }
       enterHook && enterHook(el, cb)
-    }, 'transition-insert')
+    })
   }
 
   // start enter transition
@@ -121,7 +144,11 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       addTransitionClass(el, toClass)
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
-        whenTransitionEnds(el, type, cb)
+        if (isValidDuration(explicitEnterDuration)) {
+          setTimeout(cb, explicitEnterDuration)
+        } else {
+          whenTransitionEnds(el, type, cb)
+        }
       }
     })
   }
@@ -165,15 +192,22 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     leave,
     afterLeave,
     leaveCancelled,
-    delayLeave
+    delayLeave,
+    duration
   } = data
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl =
-    leave &&
-    // leave hook may be a bound method which exposes
-    // the length of original fn as _length
-    (leave._length || leave.length) > 1
+  const userWantsControl = getHookAgumentsLength(leave)
+
+  const explicitLeaveDuration: any = toNumber(
+    isObject(duration)
+      ? duration.leave
+      : duration
+  )
+
+  if (process.env.NODE_ENV !== 'production' && explicitLeaveDuration != null) {
+    checkDuration(explicitLeaveDuration, 'leave', vnode)
+  }
 
   const cb = el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
@@ -218,7 +252,11 @@ export function leave (vnode: VNodeWithData, rm: Function) {
         addTransitionClass(el, leaveToClass)
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
-          whenTransitionEnds(el, type, cb)
+          if (isValidDuration(explicitLeaveDuration)) {
+            setTimeout(cb, explicitLeaveDuration)
+          } else {
+            whenTransitionEnds(el, type, cb)
+          }
         }
       })
     }
@@ -229,44 +267,45 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   }
 }
 
-function resolveTransition (def?: string | Object): ?Object {
-  if (!def) {
-    return
-  }
-  /* istanbul ignore else */
-  if (typeof def === 'object') {
-    const res = {}
-    if (def.css !== false) {
-      extend(res, autoCssTransition(def.name || 'v'))
-    }
-    extend(res, def)
-    return res
-  } else if (typeof def === 'string') {
-    return autoCssTransition(def)
+// only used in dev mode
+function checkDuration (val, name, vnode) {
+  if (typeof val !== 'number') {
+    warn(
+      `<transition> explicit ${name} duration is not a valid number - ` +
+      `got ${JSON.stringify(val)}.`,
+      vnode.context
+    )
+  } else if (isNaN(val)) {
+    warn(
+      `<transition> explicit ${name} duration is NaN - ` +
+      'the duration expression might be incorrect.',
+      vnode.context
+    )
   }
 }
 
-const autoCssTransition: (name: string) => Object = cached(name => {
-  return {
-    enterClass: `${name}-enter`,
-    leaveClass: `${name}-leave`,
-    appearClass: `${name}-enter`,
-    enterToClass: `${name}-enter-to`,
-    leaveToClass: `${name}-leave-to`,
-    appearToClass: `${name}-enter-to`,
-    enterActiveClass: `${name}-enter-active`,
-    leaveActiveClass: `${name}-leave-active`,
-    appearActiveClass: `${name}-enter-active`
-  }
-})
+function isValidDuration (val) {
+  return typeof val === 'number' && !isNaN(val)
+}
 
-function once (fn: Function): Function {
-  let called = false
-  return () => {
-    if (!called) {
-      called = true
-      fn()
-    }
+/**
+ * Normalize a transition hook's argument length. The hook may be:
+ * - a merged hook (invoker) with the original in .fns
+ * - a wrapped component method (check ._length)
+ * - a plain function (.length)
+ */
+function getHookAgumentsLength (fn: Function): boolean {
+  if (!fn) return false
+  const invokerFns = fn.fns
+  if (invokerFns) {
+    // invoker
+    return getHookAgumentsLength(
+      Array.isArray(invokerFns)
+        ? invokerFns[0]
+        : invokerFns
+    )
+  } else {
+    return (fn._length || fn.length) > 1
   }
 }
 

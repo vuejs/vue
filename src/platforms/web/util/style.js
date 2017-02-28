@@ -46,8 +46,8 @@ export function getStyle (vnode: VNode, checkChild: boolean): Object {
 
   if (checkChild) {
     let childNode = vnode
-    while (childNode.child) {
-      childNode = childNode.child._vnode
+    while (childNode.componentInstance) {
+      childNode = childNode.componentInstance._vnode
       if (childNode.data && (styleData = normalizeStyleData(childNode.data))) {
         extend(res, styleData)
       }

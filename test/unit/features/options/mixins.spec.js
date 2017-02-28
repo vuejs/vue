@@ -1,5 +1,5 @@
 import Vue from 'vue'
-const mergeOptions = Vue.util.mergeOptions
+import { mergeOptions } from 'core/util/index'
 
 describe('Options mixins', () => {
   it('vm should have options from mixin', () => {

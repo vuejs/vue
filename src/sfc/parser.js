@@ -10,7 +10,7 @@ const isSpecialTag = makeMap('script,style,template', true)
 type Attribute = {
   name: string,
   value: string
-}
+};
 
 /**
  * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
@@ -36,12 +36,16 @@ export function parseComponent (
     end: number
   ) {
     if (depth === 0) {
+      currentBlock = {
+        type: tag,
+        content: '',
+        start: end,
+        attrs: attrs.reduce((cumulated, { name, value }) => {
+          cumulated[name] = value || true
+          return cumulated
+        }, Object.create(null))
+      }
       if (isSpecialTag(tag)) {
-        currentBlock = {
-          type: tag,
-          content: '',
-          start: end
-        }
         checkAttrs(currentBlock, attrs)
         if (tag === 'style') {
           sfc.styles.push(currentBlock)
@@ -49,15 +53,6 @@ export function parseComponent (
           sfc[tag] = currentBlock
         }
       } else { // custom blocks
-        currentBlock = {
-          type: tag,
-          content: '',
-          start: end,
-          attrs: attrs.reduce((cumulated, { name, value }) => {
-            cumulated[name] = value
-            return cumulated
-          }, Object.create(null))
-        }
         sfc.customBlocks.push(currentBlock)
       }
     }

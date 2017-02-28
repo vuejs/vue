@@ -1,4 +1,4 @@
-import { parseModel } from 'compiler/helpers'
+import { parseModel } from 'compiler/directives/model'
 
 describe('model expression parser', () => {
   it('parse object dot notation', () => {

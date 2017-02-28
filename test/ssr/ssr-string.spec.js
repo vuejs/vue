@@ -1,4 +1,5 @@
 import Vue from '../../dist/vue.runtime.common.js'
+import VM from 'vm'
 import { createRenderer } from '../../packages/vue-server-renderer'
 const { renderToString } = createRenderer()
 
@@ -102,7 +103,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="background-color:black;font-size:14px;color:red"></div>'
+        '<div server-rendered="true" style="background-color:black;font-size:14px;color:red;"></div>'
       )
       done()
     })
@@ -116,7 +117,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="color:red"></div>'
+        '<div server-rendered="true" style="color:red;"></div>'
       )
       done()
     })
@@ -135,7 +136,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<section server-rendered="true"><div style="color:red"></div></section>'
+        '<section server-rendered="true"><div style="color:red;"></div></section>'
       )
       done()
     })
@@ -159,7 +160,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="text-align:left;font-size:520rem;color:red"></div>'
+        '<div server-rendered="true" style="text-align:left;font-size:520rem;color:red;"></div>'
       )
       done()
     })
@@ -178,7 +179,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="color:red"><div></div></div>'
+        '<div server-rendered="true" style="color:red;"><div></div></div>'
       )
       done()
     })
@@ -197,7 +198,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="color:red"><span style="color:black"></span></div>'
+        '<div server-rendered="true" style="color:red;"><span style="color:black;"></span></div>'
       )
       done()
     })
@@ -655,7 +656,7 @@ describe('SSR: renderToString', () => {
 
   it('comment nodes', done => {
     renderVmWithOptions({
-      template: '<div><transition><div v-if="false"></test></transition></div>'
+      template: '<div><transition><div v-if="false"></div></transition></div>'
     }, result => {
       expect(result).toContain(`<div server-rendered="true"><!----></div>`)
       done()
@@ -673,6 +674,48 @@ describe('SSR: renderToString', () => {
       Vue.config.silent = false
       done()
     })
+  })
+
+  it('should accept template option', done => {
+    const renderer = createRenderer({
+      template: `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
+    })
+
+    const context = {
+      head: '<meta name="viewport" content="width=device-width">',
+      styles: '<style>h1 { color: red }</style>',
+      state: { a: 1 }
+    }
+
+    renderer.renderToString(new Vue({
+      template: '<div>hi</div>'
+    }), (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain(
+        `<html><head>${context.head}${context.styles}</head><body>` +
+        `<div server-rendered="true">hi</div>` +
+        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        `</body></html>`
+      )
+      done()
+    }, context)
+  })
+
+  it('default value Foreign Function', () => {
+    const FunctionConstructor = VM.runInNewContext('Function')
+    const func = () => 123
+    const vm = new Vue({
+      props: {
+        a: {
+          type: FunctionConstructor,
+          default: func
+        }
+      },
+      propsData: {
+        a: undefined
+      }
+    })
+    expect(vm.a).toBe(func)
   })
 })
 

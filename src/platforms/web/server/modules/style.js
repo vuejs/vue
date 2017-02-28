@@ -8,7 +8,7 @@ function genStyleText (vnode: VNode): string {
   for (const key in style) {
     styleText += `${hyphenate(key)}:${style[key]};`
   }
-  return styleText.slice(0, -1)
+  return styleText
 }
 
 export default function renderStyle (vnode: VNodeWithData): ?string {

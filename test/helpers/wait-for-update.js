@@ -13,6 +13,7 @@ import Vue from 'vue'
 // })
 // .then(done)
 window.waitForUpdate = initialCb => {
+  let end
   const queue = initialCb ? [initialCb] : []
 
   function shift () {
@@ -33,13 +34,13 @@ window.waitForUpdate = initialCb => {
           Vue.nextTick(shift)
         }
       }
-    } else if (job && job.fail) {
+    } else if (job && (job.fail || job === end)) {
       job() // done
     }
   }
 
   Vue.nextTick(() => {
-    if (!queue.length || !queue[queue.length - 1].fail) {
+    if (!queue.length || (!end && !queue[queue.length - 1].fail)) {
       throw new Error('waitForUpdate chain is missing .then(done)')
     }
     shift()
@@ -57,6 +58,10 @@ window.waitForUpdate = initialCb => {
       wait.wait = true
       queue.push(wait)
       return chainer
+    },
+    end: endFn => {
+      queue.push(endFn)
+      end = endFn
     }
   }
 

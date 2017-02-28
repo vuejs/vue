@@ -22,8 +22,7 @@ function hasWarned (msg) {
   }
 
   function containsMsg (arg) {
-    if (arg instanceof Error) throw arg
-    return typeof arg === 'string' && arg.indexOf(msg) > -1
+    return arg.toString().indexOf(msg) > -1
   }
 }
 
@@ -52,7 +51,7 @@ beforeEach(() => {
 })
 
 afterEach(done => {
-  const warned = msg => asserted.some(assertedMsg => msg.indexOf(assertedMsg) > -1)
+  const warned = msg => asserted.some(assertedMsg => msg.toString().indexOf(assertedMsg) > -1)
   let count = console.error.calls.count()
   let args
   while (count--) {

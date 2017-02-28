@@ -6,7 +6,7 @@ declare type CompilerOptions = {
   directives?: { [key: string]: Function }; // platform specific directives
   isUnaryTag?: (tag: string) => ?boolean; // check if a tag is unary for the platform
   isReservedTag?: (tag: string) => ?boolean; // check if a tag is a native for the platform
-  mustUseProp?: (tag: string, attr: string) => ?boolean; // check if an attribute should be bound as a property
+  mustUseProp?: (tag: string, type: ?string, name: string) => boolean; // check if an attribute should be bound as a property
   isPreTag?: (attr: string) => ?boolean; // check if a tag needs to preserve whitespace
   getTagNamespace?: (tag: string) => ?string; // check the namespace for a tag
   transforms?: Array<Function>; // a list of transforms on parsed AST before codegen
@@ -24,6 +24,7 @@ declare type CompiledResult = {
   render: string;
   staticRenderFns: Array<string>;
   errors?: Array<string>;
+  tips?: Array<string>;
 }
 
 declare type CompiledFunctionResult = {
@@ -116,6 +117,11 @@ declare type ASTElement = {
 
   transition?: string | true;
   transitionOnAppear?: boolean;
+
+  model?: {
+    value: string;
+    callback: string;
+  };
 
   directives?: Array<ASTDirective>;
 

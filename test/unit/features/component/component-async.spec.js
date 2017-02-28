@@ -110,7 +110,7 @@ describe('Component async', () => {
 
   it('with v-for', done => {
     const vm = new Vue({
-      template: '<div><test v-for="n in list" :n="n"></test></div>',
+      template: '<div><test v-for="n in list" :key="n" :n="n"></test></div>',
       data: {
         list: [1, 2, 3]
       },

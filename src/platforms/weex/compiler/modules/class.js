@@ -10,7 +10,7 @@ import {
 type StaticClassResult = {
   dynamic: boolean,
   classResult: string
-}
+};
 
 function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn

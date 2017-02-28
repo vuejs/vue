@@ -1,3 +1,7 @@
+// suppress logs from vdom-tester
+const domModule = require('weex-vdom-tester/lib/modules/dom')
+domModule.updateFinish = domModule.createFinish = domModule.refreshFinish = () => {}
+
 import * as Vue from '../../../packages/weex-vue-framework'
 import { compile } from '../../../packages/weex-template-compiler'
 import { Runtime, Instance } from 'weex-vdom-tester'

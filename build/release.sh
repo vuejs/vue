@@ -29,12 +29,20 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   # update packages
   cd packages/vue-template-compiler
   npm version $VERSION
-  npm publish
+  if [[ -z $RELEASE_TAG ]]; then
+    npm publish
+  else
+    npm publish --tag $RELEASE_TAG
+  fi
   cd -
 
   cd packages/vue-server-renderer
   npm version $VERSION
-  npm publish
+  if [[ -z $RELEASE_TAG ]]; then
+    npm publish
+  else
+    npm publish --tag $RELEASE_TAG
+  fi
   cd -
 
   # commit
@@ -45,5 +53,9 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   # publish
   git push origin refs/tags/v$VERSION
   git push
-  npm publish
+  if [[ -z $RELEASE_TAG ]]; then
+    npm publish
+  else
+    npm publish --tag $RELEASE_TAG
+  fi
 fi

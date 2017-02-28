@@ -72,5 +72,29 @@ describe('Global API: set/delete', () => {
         expect(vm.$el.innerHTML).toBe('')
       }).then(done)
     })
+
+    it('be able to delete an item in array', done => {
+      const vm = new Vue({
+        template: '<div><p v-for="obj in lists">{{obj.name}}</p></div>',
+        data: {
+          lists: [
+            { name: 'A' },
+            { name: 'B' },
+            { name: 'C' }
+          ]
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe('<p>A</p><p>B</p><p>C</p>')
+      Vue.delete(vm.lists, 1)
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
+        Vue.delete(vm.lists, 1)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p>')
+        Vue.delete(vm.lists, 0)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('')
+      }).then(done)
+    })
   })
 })

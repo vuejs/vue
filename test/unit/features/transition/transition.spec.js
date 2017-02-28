@@ -6,6 +6,7 @@ import { nextFrame } from 'web/runtime/transition-util'
 if (!isIE9) {
   describe('Transition basic', () => {
     const { duration, buffer } = injectStyles()
+    const explicitDuration = duration * 2
 
     let el
     beforeEach(() => {
@@ -73,7 +74,7 @@ if (!isIE9) {
               enter-to-class="hello-to"
               leave-class="bye"
               leave-to-class="bye-to"
-              leave-active-class="byebye active">
+              leave-active-class="byebye active more ">
               <div v-if="ok" class="test">foo</div>
             </transition>
           </div>
@@ -85,9 +86,9 @@ if (!isIE9) {
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
       waitForUpdate(() => {
-        expect(vm.$el.children[0].className).toBe('test bye byebye active')
+        expect(vm.$el.children[0].className).toBe('test bye byebye active more')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].className).toBe('test byebye active bye-to')
+        expect(vm.$el.children[0].className).toBe('test byebye active more bye-to')
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
@@ -874,6 +875,211 @@ if (!isIE9) {
         template: `<transition><p>1</p><p>2</p></transition>`
       }).$mount()
       expect(`<transition> can only be used on a single element`).toHaveBeenWarned()
+    })
+
+    describe('explicit durations -', () => {
+      it('single value', done => {
+        const vm = new Vue({
+          template: `
+            <div>
+              <transition duration="${explicitDuration}">
+                <div v-if="ok" class="test">foo</div>
+              </transition>
+            </div>
+          `,
+          data: { ok: true }
+        }).$mount(el)
+
+        vm.ok = false
+
+        waitForUpdate(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
+        }).thenWaitFor(explicitDuration + buffer).then(() => {
+          expect(vm.$el.children.length).toBe(0)
+          vm.ok = true
+        }).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter v-enter-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
+        }).thenWaitFor(explicitDuration + buffer).then(() => {
+          expect(vm.$el.children[0].className).toBe('test')
+        }).then(done)
+      })
+
+      it('enter and auto leave', done => {
+        const vm = new Vue({
+          template: `
+            <div>
+              <transition :duration="{ enter: ${explicitDuration} }">
+                <div v-if="ok" class="test">foo</div>
+              </transition>
+            </div>
+          `,
+          data: { ok: true }
+        }).$mount(el)
+
+        vm.ok = false
+
+        waitForUpdate(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
+        }).thenWaitFor(duration + buffer).then(() => {
+          expect(vm.$el.children.length).toBe(0)
+          vm.ok = true
+        }).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter v-enter-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
+        }).thenWaitFor(explicitDuration + buffer).then(() => {
+          expect(vm.$el.children[0].className).toBe('test')
+        }).then(done)
+      })
+
+      it('leave and auto enter', done => {
+        const vm = new Vue({
+          template: `
+            <div>
+              <transition :duration="{ leave: ${explicitDuration} }">
+                <div v-if="ok" class="test">foo</div>
+              </transition>
+            </div>
+          `,
+          data: { ok: true }
+        }).$mount(el)
+
+        vm.ok = false
+
+        waitForUpdate(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
+        }).thenWaitFor(explicitDuration + buffer).then(() => {
+          expect(vm.$el.children.length).toBe(0)
+          vm.ok = true
+        }).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter v-enter-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
+        }).thenWaitFor(duration + buffer).then(() => {
+          expect(vm.$el.children[0].className).toBe('test')
+        }).then(done)
+      })
+
+      it('separate enter and leave', done => {
+        const enter = explicitDuration
+        const leave = explicitDuration * 2
+
+        const vm = new Vue({
+          template: `
+            <div>
+              <transition :duration="{ enter: ${enter}, leave: ${leave} }">
+                <div v-if="ok" class="test">foo</div>
+              </transition>
+            </div>
+          `,
+          data: { ok: true }
+        }).$mount(el)
+
+        vm.ok = false
+
+        waitForUpdate(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
+        }).thenWaitFor(leave + buffer).then(() => {
+          expect(vm.$el.children.length).toBe(0)
+          vm.ok = true
+        }).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter v-enter-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
+        }).thenWaitFor(enter + buffer).then(() => {
+          expect(vm.$el.children[0].className).toBe('test')
+        }).then(done)
+      })
+
+      it('enter and leave + duration change', done => {
+        const enter1 = explicitDuration * 2
+        const enter2 = explicitDuration
+        const leave1 = explicitDuration * 0.5
+        const leave2 = explicitDuration * 3
+
+        const vm = new Vue({
+          template: `
+            <div>
+              <transition :duration="{ enter: enter, leave: leave }">
+                <div v-if="ok" class="test">foo</div>
+              </transition>
+            </div>
+          `,
+          data: {
+            ok: true,
+            enter: enter1,
+            leave: leave1
+          }
+        }).$mount(el)
+
+        vm.ok = false
+
+        waitForUpdate(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
+        }).thenWaitFor(leave1 + buffer).then(() => {
+          expect(vm.$el.children.length).toBe(0)
+          vm.ok = true
+        }).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter v-enter-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
+        }).thenWaitFor(enter1 + buffer).then(() => {
+          expect(vm.$el.children[0].className).toBe('test')
+          vm.enter = enter2
+          vm.leave = leave2
+        }).then(() => {
+          vm.ok = false
+        }).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
+        }).thenWaitFor(leave2 + buffer).then(() => {
+          expect(vm.$el.children.length).toBe(0)
+          vm.ok = true
+        }).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter v-enter-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
+        }).thenWaitFor(enter2 + buffer).then(() => {
+          expect(vm.$el.children[0].className).toBe('test')
+        }).then(done)
+      }, 10000)
+
+      it('warn invalid durations', done => {
+        const vm = new Vue({
+          template: `
+            <div>
+              <transition :duration="{ enter: NaN, leave: 'foo' }">
+                <div v-if="ok" class="test">foo</div>
+              </transition>
+            </div>
+          `,
+          data: {
+            ok: true
+          }
+        }).$mount(el)
+
+        vm.ok = false
+        waitForUpdate(() => {
+          expect(`<transition> explicit leave duration is not a valid number - got "foo"`).toHaveBeenWarned()
+        }).thenWaitFor(duration + buffer).then(() => {
+          vm.ok = true
+        }).then(() => {
+          expect(`<transition> explicit enter duration is NaN`).toHaveBeenWarned()
+        }).then(done)
+      })
     })
   })
 }
