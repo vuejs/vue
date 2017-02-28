@@ -16,6 +16,10 @@ import {
   defineReactive
 } from '../util/index'
 
+import { default as Dep, pushTarget, popTarget } from '../observer/dep'
+import { afterFlush, forceFlush } from '../observer/scheduler'
+import { default as Watcher } from '../observer/watcher'
+
 export function initGlobalAPI (Vue: GlobalAPI) {
   // config
   const configDef = {}
@@ -37,6 +41,16 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     extend,
     mergeOptions,
     defineReactive
+  }
+
+  // exposed observer methods.
+  Vue.observer = {
+    Dep,
+    pushTarget,
+    popTarget,
+    afterFlush,
+    forceFlush,
+    Watcher
   }
 
   Vue.set = set
