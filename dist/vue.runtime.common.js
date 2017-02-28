@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.2.0
+ * Vue.js v2.2.1
  * (c) 2014-2017 Evan You
  * Released under the MIT License.
  */
@@ -4057,7 +4057,7 @@ Object.defineProperty(Vue$2.prototype, '$isServer', {
   get: isServerRendering
 });
 
-Vue$2.version = '2.2.0';
+Vue$2.version = '2.2.1';
 
 /*  */
 
