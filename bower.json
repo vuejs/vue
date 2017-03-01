@@ -1,0 +1,21 @@
+{
+  "name": "vue",
+  "main": "dist/vue.js",
+  "description": "A progressive, incrementally-adoptable JavaScript framework for building UI on the web.",
+  "authors": "Evan You",
+  "license": "MIT",
+  "ignore": [
+    "benchmarks",
+    "examples",
+    "test",
+    "docs",
+    ".github",
+    ".gitignore",
+    ".eslintrc",
+    ".babelrc",
+    "*.json",
+    "*.md",
+    "*.yml",
+    "*.lock"
+  ]
+}
