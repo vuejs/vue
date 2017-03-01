@@ -3,6 +3,7 @@ declare interface GlobalAPI {
   options: Object;
   config: Config;
   util: Object;
+  observer: Object;
 
   extend: (options: Object) => Function;
   set: (obj: Object, key: string, value: any) => void;
