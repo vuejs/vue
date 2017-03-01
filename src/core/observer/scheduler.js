@@ -6,7 +6,8 @@ import { callHook } from '../instance/lifecycle'
 import {
   warn,
   nextTick,
-  devtools
+  devtools,
+  handleError
 } from '../util/index'
 
 const queue: Array<Watcher> = []
@@ -100,15 +101,7 @@ function flushSchedulerQueue (maxUpdateCount?: number) {
         try {
           func()
         } catch (e) {
-          /* istanbul ignore else */
-          if (config.errorHandler) {
-            config.errorHandler.call(null, e)
-          } else {
-            process.env.NODE_ENV !== 'production' && warn(
-              `Error in an after flush callback.`
-            )
-            throw e
-          }
+          handleError(e, null, `Error in an after flush callback.`)
         }
       }
     }
