@@ -31,6 +31,16 @@ describe('Instance methods events', () => {
     expect(spy).toHaveBeenCalledWith(5, 6, 7, 8)
   })
 
+  it('$off multi event', () => {
+    vm.$on(['test1', 'test2', 'test3'], spy)
+    vm.$off(['test1', 'test2'], spy)
+    vm.$emit('test1')
+    vm.$emit('test2')
+    expect(spy).not.toHaveBeenCalled()
+    vm.$emit('test3', 1, 2, 3, 4)
+    expect(spy.calls.count()).toBe(1)
+  })
+
   it('$once', () => {
     vm.$once('test', spy)
     vm.$emit('test', 1, 2, 3)
