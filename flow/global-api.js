@@ -5,8 +5,8 @@ declare interface GlobalAPI {
   util: Object;
 
   extend: (options: Object) => Function;
-  set: (obj: Object, key: string, value: any) => void;
-  delete: (obj: Object, key: string) => void;
+  set: <T>(target: Object | Array<T>, key: string | number, value: T) => T;
+  delete: <T>(target: Object| Array<T>, key: string | number) => void;
   nextTick: (fn: Function, context?: Object) => void;
   use: (plugin: Function | Object) => void;
   mixin: (mixin: Object) => void;

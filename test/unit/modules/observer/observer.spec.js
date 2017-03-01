@@ -312,7 +312,7 @@ describe('Observer', () => {
       data
     }).$mount()
     expect(vm.$el.outerHTML).toBe('<div>1</div>')
-    Vue.set(data, 'a', 2)
+    expect(Vue.set(data, 'a', 2)).toBe(2)
     waitForUpdate(() => {
       expect(vm.$el.outerHTML).toBe('<div>2</div>')
       expect('Avoid adding reactive properties to a Vue instance').not.toHaveBeenWarned()
@@ -320,7 +320,7 @@ describe('Observer', () => {
     }).then(() => {
       expect('Avoid deleting properties on a Vue instance').toHaveBeenWarned()
       expect(vm.$el.outerHTML).toBe('<div>2</div>')
-      Vue.set(data, 'b', 123)
+      expect(Vue.set(data, 'b', 123)).toBe(123)
       expect('Avoid adding reactive properties to a Vue instance').toHaveBeenWarned()
     }).then(done)
   })

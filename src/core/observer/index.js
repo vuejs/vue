@@ -188,27 +188,27 @@ export function defineReactive (
  * triggers change notification if the property doesn't
  * already exist.
  */
-export function set (obj: Array<any> | Object, key: any, val: any) {
-  if (Array.isArray(obj)) {
-    obj.length = Math.max(obj.length, key)
-    obj.splice(key, 1, val)
+export function set (target: Array<any> | Object, key: any, val: any): any {
+  if (Array.isArray(target)) {
+    target.length = Math.max(target.length, key)
+    target.splice(key, 1, val)
     return val
   }
-  if (hasOwn(obj, key)) {
-    obj[key] = val
-    return
+  if (hasOwn(target, key)) {
+    target[key] = val
+    return val
   }
-  const ob = obj.__ob__
-  if (obj._isVue || (ob && ob.vmCount)) {
+  const ob = target.__ob__
+  if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
       'at runtime - declare it upfront in the data option.'
     )
-    return
+    return val
   }
   if (!ob) {
-    obj[key] = val
-    return
+    target[key] = val
+    return val
   }
   defineReactive(ob.value, key, val)
   ob.dep.notify()
@@ -218,23 +218,23 @@ export function set (obj: Array<any> | Object, key: any, val: any) {
 /**
  * Delete a property and trigger change if necessary.
  */
-export function del (obj: Array<any> | Object, key: any) {
-  if (Array.isArray(obj)) {
-    obj.splice(key, 1)
+export function del (target: Array<any> | Object, key: any) {
+  if (Array.isArray(target)) {
+    target.splice(key, 1)
     return
   }
-  const ob = obj.__ob__
-  if (obj._isVue || (ob && ob.vmCount)) {
+  const ob = target.__ob__
+  if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid deleting properties on a Vue instance or its root $data ' +
       '- just set it to null.'
     )
     return
   }
-  if (!hasOwn(obj, key)) {
+  if (!hasOwn(target, key)) {
     return
   }
-  delete obj[key]
+  delete target[key]
   if (!ob) {
     return
   }
