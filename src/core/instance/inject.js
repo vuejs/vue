@@ -25,7 +25,7 @@ export function initInjections (vm: Component) {
       const provideKey = isArray ? key : inject[key]
       let source = vm
       while (source) {
-        if (source._provided && source._provided[provideKey]) {
+        if (source._provided && provideKey in source._provided) {
           vm[key] = source._provided[provideKey]
           break
         }

@@ -20,7 +20,7 @@ describe('Options provide/inject', () => {
       template: `<child/>`,
       provide: {
         foo: 1,
-        bar: 2
+        bar: false
       },
       components: {
         child: {
@@ -32,7 +32,7 @@ describe('Options provide/inject', () => {
       }
     }).$mount()
 
-    expect(injected).toEqual([1, 2])
+    expect(injected).toEqual([1, false])
   })
 
   it('should use closest parent', () => {
@@ -40,7 +40,7 @@ describe('Options provide/inject', () => {
       template: `<child/>`,
       provide: {
         foo: 1,
-        bar: 2
+        bar: null
       },
       components: {
         child: {
@@ -55,7 +55,7 @@ describe('Options provide/inject', () => {
       }
     }).$mount()
 
-    expect(injected).toEqual([3, 2])
+    expect(injected).toEqual([3, null])
   })
 
   it('provide function', () => {
@@ -63,7 +63,7 @@ describe('Options provide/inject', () => {
       template: `<child/>`,
       data: {
         a: 1,
-        b: 2
+        b: false
       },
       provide () {
         return {
@@ -81,7 +81,7 @@ describe('Options provide/inject', () => {
       }
     }).$mount()
 
-    expect(injected).toEqual([1, 2])
+    expect(injected).toEqual([1, false])
   })
 
   it('inject with alias', () => {
@@ -99,7 +99,7 @@ describe('Options provide/inject', () => {
     new Vue({
       template: `<child/>`,
       provide: {
-        foo: 1,
+        foo: false,
         bar: 2
       },
       components: {
@@ -112,7 +112,7 @@ describe('Options provide/inject', () => {
       }
     }).$mount()
 
-    expect(injected).toEqual([1, 2])
+    expect(injected).toEqual([false, 2])
   })
 
   it('self-inject', () => {
