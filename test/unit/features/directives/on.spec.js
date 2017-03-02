@@ -288,6 +288,8 @@ describe('Directive v-on', () => {
       e.keyCode = 40
     })
     expect(spy).toHaveBeenCalledTimes(3)
+    // reset config
+    Vue.config.keyCodes = Object.create(null)
   })
 
   it('should bind to a child component', () => {
