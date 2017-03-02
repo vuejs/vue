@@ -67,8 +67,17 @@ describe('Single File Component parser', () => {
         h1 { color: red }
       </style>
     `.trim(), { pad: true })
-    expect(res.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
-    expect(res.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
+    expect(res.script.content).toBe(`<template>
+        <div></div>
+      </template>
+      <script>`.replace(/./g, ' ') + '\nexport default {}\n')
+    expect(res.styles[0].content).toBe(`<template>
+        <div></div>
+      </template>
+      <script>
+        export default {}
+      </script>
+      <style>`.replace(/./g, ' ') + '\nh1 { color: red }\n')
   })
 
   it('should handle template blocks with lang as special text', () => {

@@ -4,7 +4,6 @@ import deindent from 'de-indent'
 import { parseHTML } from 'compiler/parser/html-parser'
 import { makeMap } from 'shared/util'
 
-const splitRE = /\r?\n/g
 const isSpecialTag = makeMap('script,style,template', true)
 
 type Attribute = {
@@ -95,11 +94,7 @@ export function parseComponent (
   }
 
   function padContent (block: SFCBlock | SFCCustomBlock) {
-    const offset = content.slice(0, block.start).split(splitRE).length
-    const padChar = block.type === 'script' && !block.lang
-      ? '//\n'
-      : '\n'
-    return Array(offset).join(padChar)
+    return content.slice(0, block.start).replace(/./g, ' ')
   }
 
   parseHTML(content, {
