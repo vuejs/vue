@@ -49,8 +49,8 @@ export function initMixin (Vue: Class<Component>) {
     initEvents(vm)
     initRender(vm)
     callHook(vm, 'beforeCreate')
-    initState(vm)
     initInjections(vm)
+    initState(vm)
     callHook(vm, 'created')
 
     /* istanbul ignore if */
