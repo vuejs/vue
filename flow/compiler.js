@@ -5,6 +5,7 @@ declare type CompilerOptions = {
   staticKeys?: string; // a list of AST properties to be considered static; for optimization
   directives?: { [key: string]: Function }; // platform specific directives
   isUnaryTag?: (tag: string) => ?boolean; // check if a tag is unary for the platform
+  canBeLeftOpenTag?: (tag: string) => ?boolean; // check if a tag can be left opened
   isReservedTag?: (tag: string) => ?boolean; // check if a tag is a native for the platform
   mustUseProp?: (tag: string, type: ?string, name: string) => boolean; // check if an attribute should be bound as a property
   isPreTag?: (attr: string) => ?boolean; // check if a tag needs to preserve whitespace

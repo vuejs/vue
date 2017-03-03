@@ -10,7 +10,7 @@
  */
 
 import { makeMap, no } from 'shared/util'
-import { isNonPhrasingTag, canBeLeftOpenTag } from 'web/compiler/util'
+import { isNonPhrasingTag } from 'web/compiler/util'
 
 // Regular Expressions for parsing tags and attributes
 const singleAttrIdentifier = /([^\s"'<>/=]+)/
@@ -68,6 +68,7 @@ export function parseHTML (html, options) {
   const stack = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
+  const canBeLeftOpenTag = options.canBeLeftOpenTag || no
   let index = 0
   let last, lastTag
   while (html) {
