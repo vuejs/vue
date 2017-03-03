@@ -69,7 +69,6 @@ export function isUnknownElement (tag: string): boolean {
       el.constructor === window.HTMLUnknownElement ||
       el.constructor === window.HTMLElement
     ))
-  } else {
-    return (unknownElementCache[tag] = /HTMLUnknownElement/.test(el.toString()))
   }
+  return (unknownElementCache[tag] = /HTMLUnknownElement/.test(el.toString()))
 }

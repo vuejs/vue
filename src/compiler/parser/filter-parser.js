@@ -89,9 +89,8 @@ function wrapFilter (exp: string, filter: string): string {
   if (i < 0) {
     // _f: resolveFilter
     return `_f("${filter}")(${exp})`
-  } else {
-    const name = filter.slice(0, i)
-    const args = filter.slice(i + 1)
-    return `_f("${name}")(${exp},${args}`
   }
+  const name = filter.slice(0, i)
+  const args = filter.slice(i + 1)
+  return `_f("${name}")(${exp},${args}`
 }

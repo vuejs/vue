@@ -59,27 +59,26 @@ function genElement (el: ASTElement): string {
     return genChildren(el) || 'void 0'
   } else if (el.tag === 'slot') {
     return genSlot(el)
-  } else {
-    // component or element
-    let code
-    if (el.component) {
-      code = genComponent(el.component, el)
-    } else {
-      const data = el.plain ? undefined : genData(el)
-
-      const children = el.inlineTemplate ? null : genChildren(el, true)
-      code = `_c('${el.tag}'${
-        data ? `,${data}` : '' // data
-      }${
-        children ? `,${children}` : '' // children
-      })`
-    }
-    // module transforms
-    for (let i = 0; i < transforms.length; i++) {
-      code = transforms[i](el, code)
-    }
-    return code
   }
+  // component or element
+  let code
+  if (el.component) {
+    code = genComponent(el.component, el)
+  } else {
+    const data = el.plain ? undefined : genData(el)
+
+    const children = el.inlineTemplate ? null : genChildren(el, true)
+    code = `_c('${el.tag}'${
+      data ? `,${data}` : '' // data
+    }${
+      children ? `,${children}` : '' // children
+    })`
+  }
+  // module transforms
+  for (let i = 0; i < transforms.length; i++) {
+    code = transforms[i](el, code)
+  }
+  return code
 }
 
 // hoist static sub-trees out
@@ -111,9 +110,9 @@ function genOnce (el: ASTElement): string {
       return genElement(el)
     }
     return `_o(${genElement(el)},${onceCount++}${key ? `,${key}` : ``})`
-  } else {
-    return genStatic(el)
   }
+
+  return genStatic(el)
 }
 
 function genIf (el: any): string {
@@ -129,9 +128,9 @@ function genIfConditions (conditions: ASTIfConditions): string {
   const condition = conditions.shift()
   if (condition.exp) {
     return `(${condition.exp})?${genTernaryExp(condition.block)}:${genIfConditions(conditions)}`
-  } else {
-    return `${genTernaryExp(condition.block)}`
   }
+
+  return `${genTernaryExp(condition.block)}`
 
   // v-if with v-once should generate code like (a)?_m(0):_m(1)
   function genTernaryExp (el) {
@@ -352,9 +351,9 @@ function maybeComponent (el: ASTElement): boolean {
 function genNode (node: ASTNode): string {
   if (node.type === 1) {
     return genElement(node)
-  } else {
-    return genText(node)
   }
+
+  return genText(node)
 }
 
 function genText (text: ASTText | ASTExpression): string {

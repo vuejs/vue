@@ -88,9 +88,8 @@ export function _createElement (
   if (vnode) {
     if (ns) applyNS(vnode, ns)
     return vnode
-  } else {
-    return createEmptyVNode()
   }
+  return createEmptyVNode()
 }
 
 function applyNS (vnode, ns) {

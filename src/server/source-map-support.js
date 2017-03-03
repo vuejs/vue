@@ -36,10 +36,8 @@ function rewriteTraceLine (trace: string, mapConsumers: {
       const { source, line, column } = originalPosition
       const mappedPosition = `(${source.replace(/^webpack:\/\/\//, '')}:${String(line)}:${String(column)})`
       return trace.replace(filenameRE, mappedPosition)
-    } else {
-      return trace
     }
-  } else {
     return trace
   }
+  return trace
 }

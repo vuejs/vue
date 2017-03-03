@@ -39,12 +39,11 @@ export function genAssignmentCode (
   const modelRs = parseModel(value)
   if (modelRs.idx === null) {
     return `${value}=${assignment}`
-  } else {
-    return `var $$exp = ${modelRs.exp}, $$idx = ${modelRs.idx};` +
-      `if (!Array.isArray($$exp)){` +
-        `${value}=${assignment}}` +
-      `else{$$exp.splice($$idx, 1, ${assignment})}`
   }
+  return `var $$exp = ${modelRs.exp}, $$idx = ${modelRs.idx};` +
+    `if (!Array.isArray($$exp)){` +
+      `${value}=${assignment}}` +
+    `else{$$exp.splice($$idx, 1, ${assignment})}`
 }
 
 /**

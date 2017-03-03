@@ -133,7 +133,6 @@ function dedupe (latest, sealed) {
       }
     }
     return res
-  } else {
-    return latest
   }
+  return latest
 }

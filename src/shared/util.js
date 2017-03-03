@@ -219,9 +219,8 @@ export function looseEqual (a: mixed, b: mixed): boolean {
     }
   } else if (!isObjectA && !isObjectB) {
     return String(a) === String(b)
-  } else {
-    return false
   }
+  return false
 }
 
 export function looseIndexOf (arr: Array<mixed>, val: mixed): number {

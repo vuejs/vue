@@ -55,9 +55,8 @@ function compileModule (files, basedir) {
           reoslvedModules[file] ||
           (reoslvedModules[file] = resolve.sync(file, { basedir }))
         )
-      } else {
-        return require(file)
       }
+      return require(file)
     }
     compiledWrapper.call(m.exports, m.exports, r, m)
 
