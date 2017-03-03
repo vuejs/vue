@@ -56,7 +56,7 @@ describe('Single File Component parser', () => {
   })
 
   it('pad content', () => {
-    const res = parseComponent(`
+    const content = `
       <template>
         <div></div>
       </template>
@@ -66,12 +66,20 @@ describe('Single File Component parser', () => {
       <style>
         h1 { color: red }
       </style>
-    `.trim(), { pad: true })
-    expect(res.script.content).toBe(`<template>
+`
+    const padDefault = parseComponent(content.trim(), { pad: true })
+    const padLine = parseComponent(content.trim(), { pad: 'line' })
+    const padSpace = parseComponent(content.trim(), { pad: 'space' })
+
+    expect(padDefault.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
+    expect(padDefault.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
+    expect(padLine.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
+    expect(padLine.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
+    expect(padSpace.script.content).toBe(`<template>
         <div></div>
       </template>
       <script>`.replace(/./g, ' ') + '\nexport default {}\n')
-    expect(res.styles[0].content).toBe(`<template>
+    expect(padSpace.styles[0].content).toBe(`<template>
         <div></div>
       </template>
       <script>
