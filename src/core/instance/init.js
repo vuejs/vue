@@ -6,8 +6,8 @@ import { initProxy } from './proxy'
 import { initState } from './state'
 import { initRender } from './render'
 import { initEvents } from './events'
-import { initInjections } from './inject'
 import { initLifecycle, callHook } from './lifecycle'
+import { initProvide, initInjections } from './inject'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
 
 let uid = 0
@@ -49,8 +49,9 @@ export function initMixin (Vue: Class<Component>) {
     initEvents(vm)
     initRender(vm)
     callHook(vm, 'beforeCreate')
+    initInjections(vm) // resolve injections before data/props
     initState(vm)
-    initInjections(vm)
+    initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
 
     /* istanbul ignore if */
