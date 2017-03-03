@@ -266,7 +266,6 @@ describe('Component slot', () => {
   })
 
   it('default slot should use fallback content if has only whitespace', () => {
-    Vue.config.preserveWhitespace = true
     mount({
       childTemplate: `
         <div>
@@ -280,7 +279,6 @@ describe('Component slot', () => {
     expect(child.$el.innerHTML).toBe(
       '<div>1</div> <p>this is the default slot</p> <div>2</div>'
     )
-    Vue.config.preserveWhitespace = false
   })
 
   it('programmatic access to $slots', () => {
