@@ -29,9 +29,9 @@ const modifierCode: { [key: string]: string } = {
   shift: genGuard(`!$event.shiftKey`),
   alt: genGuard(`!$event.altKey`),
   meta: genGuard(`!$event.metaKey`),
-  left: genGuard(`$event.button !== 0`),
-  middle: genGuard(`$event.button !== 1`),
-  right: genGuard(`$event.button !== 2`)
+  btnleft: genGuard(`$event.button !== 0`),
+  btnmiddle: genGuard(`$event.button !== 1`),
+  btnright: genGuard(`$event.button !== 2`)
 }
 
 export function genHandlers (events: ASTElementHandlers, native?: boolean): string {

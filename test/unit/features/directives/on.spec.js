@@ -224,9 +224,9 @@ describe('Directive v-on', () => {
       el,
       template: `
         <div>
-          <div ref="left" @mousedown.left="foo">left</div>
-          <div ref="right" @mousedown.right="foo1">right</div>
-          <div ref="middle" @mousedown.middle="foo2">right</div>
+          <div ref="left" @mousedown.btnleft="foo">left</div>
+          <div ref="right" @mousedown.btnright="foo1">right</div>
+          <div ref="middle" @mousedown.btnmiddle="foo2">right</div>
         </div>
       `,
       methods: {
@@ -288,6 +288,8 @@ describe('Directive v-on', () => {
       e.keyCode = 40
     })
     expect(spy).toHaveBeenCalledTimes(3)
+    // reset config
+    Vue.config.keyCodes = Object.create(null)
   })
 
   it('should bind to a child component', () => {
@@ -482,5 +484,38 @@ describe('Directive v-on', () => {
     expect(() => {
       triggerEvent(vm.$el, 'click')
     }).not.toThrow()
+  })
+
+  // Github Issue #5046
+  it('should support keyboard modifier', () => {
+    const spyLeft = jasmine.createSpy()
+    const spyRight = jasmine.createSpy()
+    const spyUp = jasmine.createSpy()
+    const spyDown = jasmine.createSpy()
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <input ref="left" @keydown.left="foo"></input>
+          <input ref="right" @keydown.right="foo1"></input>
+          <input ref="up" @keydown.up="foo2"></input>
+          <input ref="down" @keydown.down="foo3"></input>
+        </div>
+      `,
+      methods: {
+        foo: spyLeft,
+        foo1: spyRight,
+        foo2: spyUp,
+        foo3: spyDown
+      }
+    })
+    triggerEvent(vm.$refs.left, 'keydown', e => { e.keyCode = 37 })
+    triggerEvent(vm.$refs.right, 'keydown', e => { e.keyCode = 39 })
+    triggerEvent(vm.$refs.up, 'keydown', e => { e.keyCode = 38 })
+    triggerEvent(vm.$refs.down, 'keydown', e => { e.keyCode = 40 })
+    expect(spyLeft).toHaveBeenCalled()
+    expect(spyRight).toHaveBeenCalled()
+    expect(spyUp).toHaveBeenCalled()
+    expect(spyDown).toHaveBeenCalled()
   })
 })
