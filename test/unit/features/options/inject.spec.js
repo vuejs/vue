@@ -115,15 +115,33 @@ describe('Options provide/inject', () => {
     expect(injected).toEqual([false, 2])
   })
 
-  it('self-inject', () => {
+  it('inject before resolving data/props', () => {
     const vm = new Vue({
       provide: {
         foo: 1
-      },
-      inject: ['foo']
+      }
     })
 
-    expect(vm.foo).toBe(1)
+    const child = new Vue({
+      parent: vm,
+      inject: ['foo'],
+      data () {
+        return {
+          bar: this.foo + 1
+        }
+      },
+      props: {
+        baz: {
+          default () {
+            return this.foo + 2
+          }
+        }
+      }
+    })
+
+    expect(child.foo).toBe(1)
+    expect(child.bar).toBe(2)
+    expect(child.baz).toBe(3)
   })
 
   if (typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)) {
