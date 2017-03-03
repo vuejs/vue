@@ -1,4 +1,5 @@
 import { compile } from '../../../packages/weex-template-compiler'
+import { strToRegExp } from '../helpers/index'
 
 describe('compile basic', () => {
   it('should be compiled', () => {
@@ -27,6 +28,36 @@ describe('compile basic', () => {
     expect(render).toEqual(`with(this){return _c('foo',{attrs:{"a":b}},[_c('text',[_v("Hello")])])}`)
     expect(staticRenderFns).toEqual([])
     expect(errors).toEqual([])
+  })
+
+  it('should compile unary tag', () => {
+    const inputCase = compile(`<div><input><text>abc</text></div>`)
+    expect(inputCase.render).toMatch(strToRegExp(`return _m(0)`))
+    expect(inputCase.staticRenderFns).toMatch(strToRegExp(`_c('div',[_c('input'),_c('text',[_v("abc")])])`))
+    expect(inputCase.errors).toEqual([])
+
+    const imageCase = compile(`<div><image src="path"><text>abc</text></div>`)
+    expect(imageCase.render).toMatch(strToRegExp(`return _m(0)`))
+    expect(imageCase.staticRenderFns).toMatch(strToRegExp(`_c('div',[_c('image',{attrs:{"src":"path"}}),_c('text',[_v("abc")])])`))
+    expect(imageCase.errors).toEqual([])
+
+    const complexCase = compile(`
+      <div>
+        <image src="path">
+        <image></image>
+        <div>
+          <embed>
+          <text>start</text>
+          <input type="text">
+          <input type="url" />
+          <text>end</text>
+        </div>
+      </div>
+    `)
+    expect(complexCase.render).toMatch(strToRegExp(`return _m(0)`))
+    expect(complexCase.staticRenderFns).toMatch(strToRegExp(`_c('image',{attrs:{"src":"path"}}),_c('image'),_c('div'`))
+    expect(complexCase.staticRenderFns).toMatch(strToRegExp(`_c('div',[_c('embed'),_c('text',[_v("start")]),_c('input',{attrs:{"type":"text"}}),_c('input',{attrs:{"type":"url"}}),_c('text',[_v("end")])]`))
+    expect(complexCase.errors).toEqual([])
   })
 
   it('should compile more complex situation', () => {
