@@ -40,7 +40,7 @@ declare interface Component {
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;
   $on: (event: string | Array<string>, fn: Function) => Component;
   $once: (event: string, fn: Function) => Component;
-  $off: (event?: string, fn?: Function) => Component;
+  $off: (event?: string | Array<string>, fn?: Function) => Component;
   $emit: (event: string, ...args: Array<mixed>) => Component;
   $nextTick: (fn: Function) => void;
   $createElement: (tag?: string | Component, data?: Object, children?: VNodeChildren) => VNode;

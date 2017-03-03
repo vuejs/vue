@@ -61,7 +61,7 @@ export declare class Vue {
   ): (() => void);
   $on(event: string | string[], callback: Function): this;
   $once(event: string, callback: Function): this;
-  $off(event?: string, callback?: Function): this;
+  $off(event?: string | string[], callback?: Function): this;
   $emit(event: string, ...args: any[]): this;
   $nextTick(callback: (this: this) => void): void;
   $nextTick(): Promise<void>;
