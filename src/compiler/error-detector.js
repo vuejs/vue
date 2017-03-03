@@ -8,6 +8,10 @@ const prohibitedKeywordRE = new RegExp('\\b' + (
   'super,throw,while,yield,delete,export,import,return,switch,default,' +
   'extends,finally,continue,debugger,function,arguments'
 ).split(',').join('\\b|\\b') + '\\b')
+const unaryOperatorsRE = new RegExp('\\b' + (
+  'delete,typeof,void'
+).split(',').join('\\s*\\([^\\)]*\\)|\\b') + '\\s*\\([^\\)]*\\)')
+const eventAttrRE = /^@|^v-on:/
 // check valid identifier for v-for
 const identRE = /[A-Za-z_$][\w$]*/
 // strip strings in expressions
@@ -30,6 +34,8 @@ function checkNode (node: ASTNode, errors: Array<string>) {
         if (value) {
           if (name === 'v-for') {
             checkFor(node, `v-for="${value}"`, errors)
+          } else if (eventAttrRE.test(name)) {
+            checkEvent(value, `${name}="${value}"`, errors)
           } else {
             checkExpression(value, `${name}="${value}"`, errors)
           }
@@ -44,6 +50,17 @@ function checkNode (node: ASTNode, errors: Array<string>) {
   } else if (node.type === 2) {
     checkExpression(node.expression, node.text, errors)
   }
+}
+
+function checkEvent (exp: string, text: string, errors: Array<string>) {
+  const keywordMatch = exp.replace(stripStringRE, '').match(unaryOperatorsRE)
+  if (keywordMatch) {
+    errors.push(
+      `avoid using JavaScript unary operator as property name: ` +
+      `"${keywordMatch[0]}" in expression ${text.trim()}`
+    )
+  }
+  checkExpression(exp, text, errors)
 }
 
 function checkFor (node: ASTElement, text: string, errors: Array<string>) {
