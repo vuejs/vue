@@ -229,27 +229,27 @@ describe('codegen', () => {
   it('generate events with keycode', () => {
     assertCodegen(
       '<input @input.enter="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(_k($event.keyCode,"enter",13))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;onInput($event)}}})}`
     )
     // multiple keycodes (delete)
     assertCodegen(
       '<input @input.delete="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(_k($event.keyCode,"delete",[8,46]))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"delete",[8,46]))return null;onInput($event)}}})}`
     )
     // multiple keycodes (chained)
     assertCodegen(
       '<input @keydown.enter.delete="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(_k($event.keyCode,"enter",13)&&_k($event.keyCode,"delete",[8,46]))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13)&&_k($event.keyCode,"delete",[8,46]))return null;onInput($event)}}})}`
     )
     // number keycode
     assertCodegen(
       '<input @input.13="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if($event.keyCode!==13)return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&$event.keyCode!==13)return null;onInput($event)}}})}`
     )
     // custom keycode
     assertCodegen(
       '<input @input.custom="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(_k($event.keyCode,"custom"))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"custom"))return null;onInput($event)}}})}`
     )
   })
 

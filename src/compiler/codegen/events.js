@@ -29,9 +29,9 @@ const modifierCode: { [key: string]: string } = {
   shift: genGuard(`!$event.shiftKey`),
   alt: genGuard(`!$event.altKey`),
   meta: genGuard(`!$event.metaKey`),
-  left: genGuard(`$event.button !== 0`),
-  middle: genGuard(`$event.button !== 1`),
-  right: genGuard(`$event.button !== 2`)
+  left: genGuard(`'button' in $event && $event.button !== 0`),
+  middle: genGuard(`'button' in $event && $event.button !== 1`),
+  right: genGuard(`'button' in $event && $event.button !== 2`)
 }
 
 export function genHandlers (events: ASTElementHandlers, native?: boolean): string {
@@ -60,12 +60,16 @@ function genHandler (
     for (const key in handler.modifiers) {
       if (modifierCode[key]) {
         code += modifierCode[key]
+        // left/right
+        if (keyCodes[key]) {
+          keys.push(key)
+        }
       } else {
         keys.push(key)
       }
     }
     if (keys.length) {
-      code = genKeyFilter(keys) + code
+      code += genKeyFilter(keys)
     }
     const handlerCode = simplePathRE.test(handler.value)
       ? handler.value + '($event)'
@@ -75,7 +79,7 @@ function genHandler (
 }
 
 function genKeyFilter (keys: Array<string>): string {
-  return `if(${keys.map(genFilterCode).join('&&')})return null;`
+  return `if(!('button' in $event)&&${keys.map(genFilterCode).join('&&')})return null;`
 }
 
 function genFilterCode (key: string): string {
