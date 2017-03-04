@@ -45,6 +45,7 @@ describe('Directive v-model text', () => {
     expect(vm.test).toBe(1)
     vm.$el.value = '2'
     triggerEvent(vm.$el, 'input')
+    expect(vm.test).toBe(2)
     // should let strings pass through
     vm.$el.value = 'f'
     triggerEvent(vm.$el, 'input')
