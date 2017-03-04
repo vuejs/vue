@@ -153,7 +153,7 @@ describe('Component slot', () => {
         b: 2,
         show: true
       },
-      template: '<test :show="show"><p slot="b">{{b}}</a><p>{{a}}</p></test>',
+      template: '<test :show="show"><p slot="b">{{b}}</p><p>{{a}}</p></test>',
       components: {
         test: {
           props: ['show'],
@@ -283,7 +283,7 @@ describe('Component slot', () => {
 
   it('programmatic access to $slots', () => {
     const vm = new Vue({
-      template: '<test><p slot="a">A</p><div>C</div><p slot="b">B</div></p></test>',
+      template: '<test><p slot="a">A</p><div>C</div><p slot="b">B</p></test>',
       components: {
         test: {
           render () {
