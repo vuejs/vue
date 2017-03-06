@@ -12,7 +12,7 @@ describe('Options el', () => {
     expect(vm.$el.textContent).toBe(vm.message)
   })
 
-  it('should be replaced when use togther with `template` option', () => {
+  it('should be replaced when use together with `template` option', () => {
     const el = document.createElement('div')
     el.innerHTML = '<span>{{message}}</span>'
     const vm = new Vue({
@@ -24,7 +24,7 @@ describe('Options el', () => {
     expect(vm.$el.textContent).toBe(vm.message)
   })
 
-  it('should be replaced when use togther with `render` option', () => {
+  it('should be replaced when use together with `render` option', () => {
     const el = document.createElement('div')
     el.innerHTML = '<span>{{message}}</span>'
     const vm = new Vue({

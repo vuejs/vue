@@ -45,7 +45,7 @@ describe('optimizer', () => {
     // ul
     expect(ast.static).toBe(false) // ul
     // li
-    expect(ast.children[0].static).toBe(false) // firts
+    expect(ast.children[0].static).toBe(false) // first
     expect(ast.children[1].static).toBe(true) // second
     expect(ast.children[2].static).toBe(false) // third
     // text node inside li

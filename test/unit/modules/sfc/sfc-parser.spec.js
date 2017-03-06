@@ -164,7 +164,7 @@ describe('Single File Component parser', () => {
         </section>
       </template>
       <template v-else>
-        <p>Shoud not be shown</p>
+        <p>Should not be shown</p>
       </template>
     </div>`
     const res = parseComponent(`<template>${raw}</template>`)

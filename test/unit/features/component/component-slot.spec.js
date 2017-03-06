@@ -80,7 +80,7 @@ describe('Component slot', () => {
     expect(child.$el.children[1].textContent).toBe('slot b')
   })
 
-  it('fallback content with mixed named/unamed slots', () => {
+  it('fallback content with mixed named/unnamed slots', () => {
     mount({
       childTemplate: `
         <div>
