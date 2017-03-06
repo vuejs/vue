@@ -115,9 +115,9 @@ export function getTransitionInfo (el: Element, expectedType?: ?string): {
   hasTransform: boolean;
 } {
   const styles: any = window.getComputedStyle(el)
-  const transitioneDelays: Array<string> = styles[transitionProp + 'Delay'].split(', ')
+  const transitionDelays: Array<string> = styles[transitionProp + 'Delay'].split(', ')
   const transitionDurations: Array<string> = styles[transitionProp + 'Duration'].split(', ')
-  const transitionTimeout: number = getTimeout(transitioneDelays, transitionDurations)
+  const transitionTimeout: number = getTimeout(transitionDelays, transitionDurations)
   const animationDelays: Array<string> = styles[animationProp + 'Delay'].split(', ')
   const animationDurations: Array<string> = styles[animationProp + 'Duration'].split(', ')
   const animationTimeout: number = getTimeout(animationDelays, animationDurations)
