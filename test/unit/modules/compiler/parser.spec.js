@@ -494,16 +494,18 @@ describe('parser', () => {
     expect(ast.children[0].text).toBe('1 < 2 < 3')
   })
 
-  it('IE conditional comments', () => {
-    const options = extend({}, baseOptions)
-    const ast = parse(`
-      <div>
-        <!--[if lte IE 8]>
-          <p>Test 1</p>
-        <![endif]-->
-      </div>
-    `, options)
-    expect(ast.tag).toBe('div')
-    expect(ast.chilldren).toBeUndefined()
-  })
+  if (isIE) {
+    it('IE conditional comments', () => {
+      const options = extend({}, baseOptions)
+      const ast = parse(`
+        <div>
+          <!--[if lte IE 8]>
+            <p>Test 1</p>
+          <![endif]-->
+        </div>
+      `, options)
+      expect(ast.tag).toBe('div')
+      expect(ast.children).toBeUndefined()
+    })
+  }
 })
