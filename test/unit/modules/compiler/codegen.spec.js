@@ -102,7 +102,7 @@ describe('codegen', () => {
     )
   })
 
-  it('generate mutli v-else-if with v-else directive', () => {
+  it('generate multi v-else-if with v-else directive', () => {
     assertCodegen(
         '<div><p v-if="show">hello</p><p v-else-if="hide">world</p><p v-else-if="3">elseif</p><p v-else>bye</p></div>',
         `with(this){return _c('div',[(show)?_c('p',[_v("hello")]):(hide)?_c('p',[_v("world")]):(3)?_c('p',[_v("elseif")]):_c('p',[_v("bye")])])}`
@@ -287,7 +287,7 @@ describe('codegen', () => {
     )
   })
 
-  it('generate events with multiple modifers', () => {
+  it('generate events with multiple modifiers', () => {
     assertCodegen(
       '<input @input.stop.prevent.self="onInput">',
       `with(this){return _c('input',{on:{"input":function($event){$event.stopPropagation();$event.preventDefault();if($event.target !== $event.currentTarget)return null;onInput($event)}}})}`
@@ -324,8 +324,8 @@ describe('codegen', () => {
 
   it('generate events with inline statement', () => {
     assertCodegen(
-      '<input @input="curent++">',
-      `with(this){return _c('input',{on:{"input":function($event){curent++}}})}`
+      '<input @input="current++">',
+      `with(this){return _c('input',{on:{"input":function($event){current++}}})}`
     )
   })
 
@@ -372,7 +372,7 @@ describe('codegen', () => {
 
   it('generate unhandled events', () => {
     assertCodegen(
-      '<input @input="curent++">',
+      '<input @input="current++">',
       `with(this){return _c('input',{on:{"input":function(){}}})}`,
       ast => {
         ast.events.input = undefined
@@ -382,8 +382,8 @@ describe('codegen', () => {
 
   it('generate multiple event handlers', () => {
     assertCodegen(
-      '<input @input="curent++" @input.stop="onInput">',
-      `with(this){return _c('input',{on:{"input":[function($event){curent++},function($event){$event.stopPropagation();onInput($event)}]}})}`
+      '<input @input="current++" @input.stop="onInput">',
+      `with(this){return _c('input',{on:{"input":[function($event){current++},function($event){$event.stopPropagation();onInput($event)}]}})}`
     )
   })
 
@@ -418,7 +418,7 @@ describe('codegen', () => {
       '<my-component inline-template><p><span>hello world</span></p></my-component>',
       `with(this){return _c('my-component',{inlineTemplate:{render:function(){with(this){return _m(0)}},staticRenderFns:[function(){with(this){return _c('p',[_c('span',[_v("hello world")])])}}]}})}`
     )
-    // "have inline-template attrs, but not having extactly one child element
+    // "have inline-template attrs, but not having exactly one child element
     assertCodegen(
       '<my-component inline-template><hr><hr></my-component>',
       `with(this){return _c('my-component',{inlineTemplate:{render:function(){with(this){return _c('hr')}},staticRenderFns:[]}})}`

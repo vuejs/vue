@@ -85,7 +85,7 @@ module.exports = {
       createNewItem('test')
       .assert.count('.todo', 2)
 
-    // complted filter
+    // completed filter
     browser.click('.filters li:nth-child(3) a')
       .assert.count('.todo', 2)
       .assert.count('.todo.completed', 2)
