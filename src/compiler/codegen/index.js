@@ -7,7 +7,7 @@ import { camelize, no } from 'shared/util'
 
 type TransformFunction = (el: ASTElement, code: string) => string;
 type DataGenFunction = (el: ASTElement) => string;
-type DirctiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean;
+type DirectiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean;
 
 // configurable state
 let warn
@@ -246,7 +246,7 @@ function genDirectives (el: ASTElement): string | void {
   for (i = 0, l = dirs.length; i < l; i++) {
     dir = dirs[i]
     needRuntime = true
-    const gen: DirctiveFunction = platformDirectives[dir.name] || baseDirectives[dir.name]
+    const gen: DirectiveFunction = platformDirectives[dir.name] || baseDirectives[dir.name]
     if (gen) {
       // compile-time directive that manipulates AST.
       // returns true if it also needs a runtime counterpart.
