@@ -378,7 +378,7 @@ if (!isIE9) {
       }).then(done)
     })
 
-    it('warn invaid mode', () => {
+    it('warn invalid mode', () => {
       new Vue({
         template: '<transition mode="foo"><div>123</div></transition>'
       }).$mount()

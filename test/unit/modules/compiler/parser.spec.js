@@ -325,7 +325,7 @@ describe('parser', () => {
     expect(ast.children[0].slotName).toBeUndefined()
   })
 
-  it('slot tag namped syntax', () => {
+  it('slot tag named syntax', () => {
     const ast = parse('<div><slot name="one">hello world</slot></div>', baseOptions)
     expect(ast.children[0].tag).toBe('slot')
     expect(ast.children[0].slotName).toBe('"one"')

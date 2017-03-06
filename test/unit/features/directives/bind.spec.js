@@ -67,7 +67,7 @@ describe('Directive v-bind', () => {
     }).then(done)
   })
 
-  it('enumrated attr', done => {
+  it('enumerated attr', done => {
     const vm = new Vue({
       template: '<div><span :draggable="foo">hello</span></div>',
       data: { foo: true }
