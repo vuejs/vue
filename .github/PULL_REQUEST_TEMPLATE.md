@@ -32,10 +32,4 @@ If yes, please describe the impact and migration path for existing applications:
 If adding a **new feature**, the PR's description includes:
 - [ ] A convincing reason for adding this feature (to avoid wasting your time, it's best to open a suggestion issue first and wait for approval before working on it)
 
-If fixing a **bug**, the PR's description includes:
-- [ ] The observed behavior
-- [ ] The expected behavior
-- [ ] The conditions required for it to appear
-- [ ] A _minimal_ reproduction of the bug (preferrably a live demo on JSFiddle, though an example project on GitHub is acceptable where that's not possible)
-
 **Other information:**
