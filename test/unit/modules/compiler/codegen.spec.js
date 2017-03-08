@@ -360,6 +360,11 @@ describe('codegen', () => {
       '<input @input="e=>current++">',
       `with(this){return _c('input',{on:{"input":e=>current++}})}`
     )
+    // with modifiers
+    assertCodegen(
+      `<input @keyup.enter="e=>current++">`,
+      `with(this){return _c('input',{on:{"keyup":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;(e=>current++)($event)}}})}`
+    )
   })
 
   // #3893
