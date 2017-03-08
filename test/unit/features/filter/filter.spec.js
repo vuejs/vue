@@ -125,7 +125,7 @@ describe('Filters', () => {
   it('handle division with variable--', () => {
     const vm = new Vue({
       data: { a: 7 },
-      template: `<div>{{ a++ / 2 | double }}</div>`,
+      template: `<div>{{ a-- / 2 | double }}</div>`,
       filters: { double: v => v * 2 }
     }).$mount()
     expect(vm.$el.textContent).toBe(String(7))

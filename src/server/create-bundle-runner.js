@@ -22,7 +22,7 @@ function createContext (context) {
 
 function compileModule (files, basedir) {
   const compiledScripts = {}
-  const reoslvedModules = {}
+  const resolvedModules = {}
 
   function getCompiledScript (filename) {
     if (compiledScripts[filename]) {
@@ -52,8 +52,8 @@ function compileModule (files, basedir) {
         return evaluateModule(file, context, evaluatedModules)
       } else if (basedir) {
         return require(
-          reoslvedModules[file] ||
-          (reoslvedModules[file] = resolve.sync(file, { basedir }))
+          resolvedModules[file] ||
+          (resolvedModules[file] = resolve.sync(file, { basedir }))
         )
       } else {
         return require(file)

@@ -103,7 +103,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   }
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl = getHookAgumentsLength(enterHook)
+  const userWantsControl = getHookArgumentsLength(enterHook)
 
   const cb = el._enterCb = once(() => {
     if (expectsCSS) {
@@ -197,7 +197,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   } = data
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl = getHookAgumentsLength(leave)
+  const userWantsControl = getHookArgumentsLength(leave)
 
   const explicitLeaveDuration: any = toNumber(
     isObject(duration)
@@ -294,12 +294,12 @@ function isValidDuration (val) {
  * - a wrapped component method (check ._length)
  * - a plain function (.length)
  */
-function getHookAgumentsLength (fn: Function): boolean {
+function getHookArgumentsLength (fn: Function): boolean {
   if (!fn) return false
   const invokerFns = fn.fns
   if (invokerFns) {
     // invoker
-    return getHookAgumentsLength(
+    return getHookArgumentsLength(
       Array.isArray(invokerFns)
         ? invokerFns[0]
         : invokerFns

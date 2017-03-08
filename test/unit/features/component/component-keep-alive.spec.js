@@ -380,7 +380,7 @@ describe('Component keep-alive', () => {
   })
 
   // #4237
-  it('should update latest props/listners for a re-activated component', done => {
+  it('should update latest props/listeners for a re-activated component', done => {
     const one = {
       props: ['prop'],
       template: `<div>one {{ prop }}</div>`

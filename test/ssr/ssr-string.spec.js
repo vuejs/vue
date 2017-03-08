@@ -58,7 +58,7 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('custome component class', done => {
+  it('custom component class', done => {
     renderVmWithOptions({
       template: '<div><cmp class="cmp"></cmp></div>',
       components: {
@@ -512,7 +512,7 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('enumrated attr', done => {
+  it('enumerated attr', done => {
     renderVmWithOptions({
       template: `
         <div>

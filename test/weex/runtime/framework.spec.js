@@ -199,7 +199,7 @@ describe('framework APIs', () => {
     expect(root).toMatch(/not found/)
   })
 
-  it('reveiveTasks: fireEvent', (done) => {
+  it('receiveTasks: fireEvent', (done) => {
     const instance = new Instance(runtime)
     framework.createInstance(instance.id, `
       new Vue({
@@ -254,7 +254,7 @@ describe('framework APIs', () => {
     })
   })
 
-  it('reveiveTasks: callback', (done) => {
+  it('receiveTasks: callback', (done) => {
     framework.registerModules({
       foo: ['a', 'b', 'c']
     })

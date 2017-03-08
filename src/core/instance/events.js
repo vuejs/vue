@@ -66,11 +66,18 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
-  Vue.prototype.$off = function (event?: string, fn?: Function): Component {
+  Vue.prototype.$off = function (event?: string | Array<string>, fn?: Function): Component {
     const vm: Component = this
     // all
     if (!arguments.length) {
       vm._events = Object.create(null)
+      return vm
+    }
+    // array of events
+    if (Array.isArray(event)) {
+      for (let i = 0, l = event.length; i < l; i++) {
+        this.$off(event[i], fn)
+      }
       return vm
     }
     // specific event

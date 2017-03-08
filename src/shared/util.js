@@ -211,7 +211,12 @@ export function looseEqual (a: mixed, b: mixed): boolean {
   const isObjectA = isObject(a)
   const isObjectB = isObject(b)
   if (isObjectA && isObjectB) {
-    return JSON.stringify(a) === JSON.stringify(b)
+    try {
+      return JSON.stringify(a) === JSON.stringify(b)
+    } catch (e) {
+      // possible circular reference
+      return a === b
+    }
   } else if (!isObjectA && !isObjectB) {
     return String(a) === String(b)
   } else {
