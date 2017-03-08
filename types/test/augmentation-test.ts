@@ -2,21 +2,21 @@ import Vue from "../index";
 
 declare module "../vue" {
   // add instance property and method
-  interface Vue {
+  interface Vue<Data, Methods, Computed> {
     $instanceProperty: string;
     $instanceMethod(): void;
   }
 
   // add static property and method
-  namespace Vue {
-    const staticProperty: string;
-    function staticMethod(): void;
+  interface VueConstructor {
+    staticProperty: string;
+    staticMethod(): void;
   }
 }
 
 // augment ComponentOptions
 declare module "../options" {
-  interface ComponentOptions<V extends Vue> {
+  interface ComponentOptions<Data, Methods, Computed> {
     foo?: string;
   }
 }
