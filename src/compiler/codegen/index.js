@@ -40,7 +40,6 @@ export function generate (
   const code = ast ? genElement(ast) : '_c("div")'
   staticRenderFns = prevStaticRenderFns
   onceCount = prevOnceCount
-  console.log(code)
   return {
     render: `with(this){return ${code}}`,
     staticRenderFns: currentStaticRenderFns
