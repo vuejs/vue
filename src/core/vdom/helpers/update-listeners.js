@@ -6,8 +6,11 @@ import { warn } from 'core/util/index'
 const normalizeEvent = cached((name: string): {
   name: string,
   once: boolean,
-  capture: boolean
+  capture: boolean,
+  passive: boolean
 } => {
+  const passive = name.charAt(0) === '&'
+  name = passive ? name.slice(1) : name
   const once = name.charAt(0) === '~' // Prefixed last, checked first
   name = once ? name.slice(1) : name
   const capture = name.charAt(0) === '!'
@@ -15,7 +18,8 @@ const normalizeEvent = cached((name: string): {
   return {
     name,
     once,
-    capture
+    capture,
+    passive
   }
 })
 
@@ -56,7 +60,7 @@ export function updateListeners (
       if (!cur.fns) {
         cur = on[name] = createFnInvoker(cur)
       }
-      add(event.name, cur, event.once, event.capture)
+      add(event.name, cur, event.once, event.capture, event.passive)
     } else if (cur !== old) {
       old.fns = cur
       on[name] = old

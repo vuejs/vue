@@ -526,4 +526,28 @@ describe('Directive v-on', () => {
     expect(spyUp.calls.count()).toBe(1)
     expect(spyDown.calls.count()).toBe(1)
   })
+
+  it('should support passive', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <input type="checkbox" ref="normal" @click="foo"/>
+          <input type="checkbox" ref="passive" @click.passive="foo"/>
+        </div>
+      `,
+      methods: {
+        foo (e) {
+          e.preventDefault()
+        }
+      }
+    })
+
+    vm.$refs.normal.checked = false
+    vm.$refs.passive.checked = false
+    vm.$refs.normal.click()
+    vm.$refs.passive.click()
+    expect(vm.$refs.normal.checked).toBe(false)
+    expect(vm.$refs.passive.checked).toBe(true)
+  })
 })

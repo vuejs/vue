@@ -50,6 +50,10 @@ export function addHandler (
     delete modifiers.once
     name = '~' + name // mark the event as once
   }
+  if (modifiers && modifiers.passive) {
+    delete modifiers.passive
+    name = '&' + name // mark the event as passive
+  }
   let events
   if (modifiers && modifiers.native) {
     delete modifiers.native
