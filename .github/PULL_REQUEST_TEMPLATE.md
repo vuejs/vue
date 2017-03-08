@@ -3,38 +3,33 @@ Please make sure to read the Pull Request Guidelines:
 https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md#pull-request-guidelines
 -->
 
-<!-- ISSUE TEMPLATE -->
-**Please check if the PR fulfills these requirements**
-- [ ] Do not submit PRs against the master branch.
-- [ ] Checkout a topic branch from the relevant branch, e.g. dev, and merge back against that branch.
-- [ ] The tests are running: https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md#development-setup
+<!-- PULL REQUEST TEMPLATE -->
+<!-- (Update "[ ]" to "[x]" to check a box) -->
 
-If adding new feature:
-- [ ] Added accompanying test case.
-- [ ] In the commit message, provide convincing reason to add this feature.
-      Ideally you should open a suggestion issue first and have it greenlighted before working on it.
+**What kind of change does this PR introduce?** (check at least one)
 
-If fixing a bug:
-- [ ] If you are resolving a special issue, add (fix #xxxx[,#xxx]) (#xxxx is the issue id) in your PR title
-- [ ] Provide detailed description of the bug in the PR. Live demo preferred.
-- [ ] Add appropriate test coverage if applicable.
+- [ ] Bugfix
+- [ ] Feature
+- [ ] Code style update
+- [ ] Refactor
+- [ ] Build-related changes
+- [ ] Other, please describe:
 
-**What kind of change does this PR introduce?** (check at least one with "x")
-```
-[ ] Bugfix
-[ ] Feature
-[ ] Code style update
-[ ] Refactoring
-[ ] Build related changes
-[ ] Other... Please describe:
-```
+**Does this PR introduce a breaking change?** (check one)
 
-**Does this PR introduce a breaking change?** (check one with "x")
-```
-[ ] Yes
-[ ] No
-```
+- [ ] Yes
+- [ ] No
 
-If this PR contains a breaking change, please describe the impact and migration path for existing applications:
+If yes, please describe the impact and migration path for existing applications:
 
-**Other information**:
+**The PR fulfills these requirements:**
+
+- [ ] It's submitted to the `dev` branch for v2.x (or to a previous version branch), _not_ the `master` branch
+- [ ] When resolving a specific issue, it's referenced in the PR's title (e.g. `fix #xxx[,#xxx]`, where "xxx" is the issue number)
+- [ ] All tests are passing: https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md#development-setup
+- [ ] New/updated tests are included
+
+If adding a **new feature**, the PR's description includes:
+- [ ] A convincing reason for adding this feature (to avoid wasting your time, it's best to open a suggestion issue first and wait for approval before working on it)
+
+**Other information:**
