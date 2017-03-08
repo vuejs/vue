@@ -274,10 +274,10 @@ describe('Component slot', () => {
           <slot name="second"><p>second named slot</p></slot>
         </div>
       `,
-      parentContent: `<div slot="first">1</div> <div slot="second">2</div>`
+      parentContent: `<div slot="first">1</div> <div slot="second">2</div> <div slot="second">2+</div>`
     })
     expect(child.$el.innerHTML).toBe(
-      '<div>1</div> <p>this is the default slot</p> <div>2</div>'
+      '<div>1</div> <p>this is the default slot</p> <div>2</div><div>2+</div>'
     )
   })
 
