@@ -220,7 +220,13 @@ function genData (el: ASTElement): string {
   }
   // component v-model
   if (el.model) {
-    data += `model:{value:${el.model.value},callback:${el.model.callback}},`
+    data += `model:{value:${
+      el.model.value
+    },callback:${
+      el.model.callback
+    },expression:${
+      el.model.expression
+    }},`
   }
   // inline-template
   if (el.inlineTemplate) {
