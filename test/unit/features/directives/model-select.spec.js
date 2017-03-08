@@ -430,21 +430,6 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
-  it('should warn inline selected', () => {
-    const vm = new Vue({
-      data: {
-        test: null
-      },
-      template:
-        '<select v-model="test">' +
-          '<option selected>a</option>' +
-        '</select>'
-    }).$mount()
-    expect(vm.$el.selectedIndex).toBe(-1)
-    expect('inline selected attributes on <option> will be ignored when using v-model')
-      .toHaveBeenWarned()
-  })
-
   it('should warn multiple with non-Array value', done => {
     new Vue({
       data: {

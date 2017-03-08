@@ -251,15 +251,4 @@ describe('Directive v-model radio', () => {
       expect(vm.$el.checked).toBe(false)
     }).then(done)
   })
-
-  it('warn inline checked', () => {
-    const vm = new Vue({
-      template: `<input v-model="test" type="radio" value="1" checked>`,
-      data: {
-        test: '2'
-      }
-    }).$mount()
-    expect(vm.$el.checked).toBe(false)
-    expect('inline checked attributes will be ignored when using v-model').toHaveBeenWarned()
-  })
 })

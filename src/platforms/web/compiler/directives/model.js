@@ -70,14 +70,6 @@ function genCheckboxModel (
   value: string,
   modifiers: ?ASTModifiers
 ) {
-  if (process.env.NODE_ENV !== 'production' &&
-    el.attrsMap.checked != null) {
-    warn(
-      `<${el.tag} v-model="${value}" checked>:\n` +
-      `inline checked attributes will be ignored when using v-model. ` +
-      'Declare initial values in the component\'s data option instead.'
-    )
-  }
   const number = modifiers && modifiers.number
   const valueBinding = getBindingAttr(el, 'value') || 'null'
   const trueValueBinding = getBindingAttr(el, 'true-value') || 'true'
@@ -109,14 +101,6 @@ function genRadioModel (
     value: string,
     modifiers: ?ASTModifiers
 ) {
-  if (process.env.NODE_ENV !== 'production' &&
-    el.attrsMap.checked != null) {
-    warn(
-      `<${el.tag} v-model="${value}" checked>:\n` +
-      `inline checked attributes will be ignored when using v-model. ` +
-      'Declare initial values in the component\'s data option instead.'
-    )
-  }
   const number = modifiers && modifiers.number
   let valueBinding = getBindingAttr(el, 'value') || 'null'
   valueBinding = number ? `_n(${valueBinding})` : valueBinding
@@ -129,10 +113,6 @@ function genSelect (
     value: string,
     modifiers: ?ASTModifiers
 ) {
-  if (process.env.NODE_ENV !== 'production') {
-    el.children.some(checkOptionWarning)
-  }
-
   const number = modifiers && modifiers.number
   const selectedVal = `Array.prototype.filter` +
     `.call($event.target.options,function(o){return o.selected})` +
@@ -143,20 +123,6 @@ function genSelect (
   let code = `var $$selectedVal = ${selectedVal};`
   code = `${code} ${genAssignmentCode(value, assignment)}`
   addHandler(el, 'change', code, null, true)
-}
-
-function checkOptionWarning (option: any): boolean {
-  if (option.type === 1 &&
-    option.tag === 'option' &&
-    option.attrsMap.selected != null) {
-    warn(
-      `<select v-model="${option.parent.attrsMap['v-model']}">:\n` +
-      'inline selected attributes on <option> will be ignored when using v-model. ' +
-      'Declare initial values in the component\'s data option instead.'
-    )
-    return true
-  }
-  return false
 }
 
 function genDefaultModel (
