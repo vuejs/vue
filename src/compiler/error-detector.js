@@ -1,6 +1,6 @@
 /* @flow */
 
-import { dirRE } from './parser/index'
+import { dirRE, onRE } from './parser/index'
 
 // operators like typeof, instanceof and in are allowed
 const prohibitedKeywordRE = new RegExp('\\b' + (
@@ -11,7 +11,6 @@ const prohibitedKeywordRE = new RegExp('\\b' + (
 const unaryOperatorsRE = new RegExp('\\b' + (
   'delete,typeof,void'
 ).split(',').join('\\s*\\([^\\)]*\\)|\\b') + '\\s*\\([^\\)]*\\)')
-const eventAttrRE = /^@|^v-on:/
 // check valid identifier for v-for
 const identRE = /[A-Za-z_$][\w$]*/
 // strip strings in expressions
@@ -34,7 +33,7 @@ function checkNode (node: ASTNode, errors: Array<string>) {
         if (value) {
           if (name === 'v-for') {
             checkFor(node, `v-for="${value}"`, errors)
-          } else if (eventAttrRE.test(name)) {
+          } else if (onRE.test(name)) {
             checkEvent(value, `${name}="${value}"`, errors)
           } else {
             checkExpression(value, `${name}="${value}"`, errors)
