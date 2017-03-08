@@ -89,8 +89,9 @@ export function cloneVNode (vnode: VNode): VNode {
 }
 
 export function cloneVNodes (vnodes: Array<VNode>): Array<VNode> {
-  const res = new Array(vnodes.length)
-  for (let i = 0; i < vnodes.length; i++) {
+  const len = vnodes.length
+  const res = new Array(len)
+  for (let i = 0; i < len; i++) {
     res[i] = cloneVNode(vnodes[i])
   }
   return res
