@@ -121,6 +121,7 @@ declare type ASTElement = {
   model?: {
     value: string;
     callback: string;
+    expression: string;
   };
 
   directives?: Array<ASTDirective>;
