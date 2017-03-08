@@ -14,7 +14,7 @@ describe('compile v-model', () => {
   it('should compile other component with whole $event as the value', () => {
     const { render, staticRenderFns, errors } = compile(`<div><foo v-model="x" /></div>`)
     expect(render).not.toBeUndefined()
-    expect(render).toMatch(strToRegExp(`model:{value:(x),callback:function ($$v) {x=$$v}}`))
+    expect(render).toMatch(strToRegExp(`model:{value:(x),callback:function ($$v) {x=$$v},expression:"x"}`))
     expect(staticRenderFns).toEqual([])
     expect(errors).toEqual([])
   })
