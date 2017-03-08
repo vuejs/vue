@@ -18,10 +18,10 @@ import {
 } from '../helpers'
 
 export const dirRE = /^v-|^@|^:/
+export const onRE = /^@|^v-on:/
 export const forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/
 export const forIteratorRE = /\((\{[^}]*\}|[^,]*),([^,]*)(?:,([^,]*))?\)/
 const bindRE = /^:|^v-bind:/
-const onRE = /^@|^v-on:/
 const argRE = /:(.*)$/
 const modifierRE = /\.[^.]+/g
 
