@@ -256,15 +256,4 @@ describe('Directive v-model checkbox', () => {
       expect(vm.$el.checked).toBe(true)
     }).then(done)
   })
-
-  it('warn inline checked', () => {
-    const vm = new Vue({
-      template: `<input type="checkbox" v-model="test" checked>`,
-      data: {
-        test: false
-      }
-    }).$mount()
-    expect(vm.$el.checked).toBe(false)
-    expect('inline checked attributes will be ignored when using v-model').toHaveBeenWarned()
-  })
 })
