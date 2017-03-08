@@ -86,15 +86,14 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: `
-        <div @click="bar">
-          <div @click.stop="foo"></div>
-        </div>
+        <input type="checkbox" ref="input" @click.prevent="foo">
       `,
-      methods: { foo: spy, bar: spy2 }
+      methods: { foo: spy2 }
     })
-    triggerEvent(vm.$el.firstChild, 'click')
-    expect(spy).toHaveBeenCalled()
-    expect(spy2).not.toHaveBeenCalled()
+    vm.$refs.input.checked = false
+    triggerEvent(vm.$refs.input, 'click')
+    expect(spy2).toHaveBeenCalled()
+    expect(vm.$refs.input.checked).toBe(false)
   })
 
   it('should support capture', () => {

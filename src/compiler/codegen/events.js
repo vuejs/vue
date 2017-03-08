@@ -48,12 +48,19 @@ function genHandler (
 ): string {
   if (!handler) {
     return 'function(){}'
-  } else if (Array.isArray(handler)) {
+  }
+
+  if (Array.isArray(handler)) {
     return `[${handler.map(handler => genHandler(name, handler)).join(',')}]`
-  } else if (!handler.modifiers) {
-    return fnExpRE.test(handler.value) || simplePathRE.test(handler.value)
+  }
+
+  const isMethodPath = simplePathRE.test(handler.value)
+  const isFunctionExpression = fnExpRE.test(handler.value)
+
+  if (!handler.modifiers) {
+    return isMethodPath || isFunctionExpression
       ? handler.value
-      : `function($event){${handler.value}}`
+      : `function($event){${handler.value}}` // inline statement
   } else {
     let code = ''
     const keys = []
@@ -71,9 +78,11 @@ function genHandler (
     if (keys.length) {
       code += genKeyFilter(keys)
     }
-    const handlerCode = simplePathRE.test(handler.value)
+    const handlerCode = isMethodPath
       ? handler.value + '($event)'
-      : handler.value
+      : isFunctionExpression
+        ? `(${handler.value})($event)`
+        : handler.value
     return `function($event){${code}${handlerCode}}`
   }
 }
