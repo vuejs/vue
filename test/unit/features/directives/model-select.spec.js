@@ -80,9 +80,14 @@ describe('Directive v-model select', () => {
     waitForUpdate(function () {
       expect(vm.$el.value).toBe('3')
       expect(vm.$el.childNodes[2].selected).toBe(true)
+
       updateSelect(vm.$el, '1')
       triggerEvent(vm.$el, 'change')
       expect(vm.test).toBe('1')
+
+      updateSelect(vm.$el, '2')
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toBe(2)
     }).then(done)
   })
 
@@ -152,7 +157,7 @@ describe('Directive v-model select', () => {
       },
       template:
         '<select v-model="test">' +
-          '<option v-for="o in opts" :value="o">optio {{ o }}</option>' +
+          '<option v-for="o in opts" :value="o">option {{ o }}</option>' +
         '</select>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -374,7 +379,7 @@ describe('Directive v-model select', () => {
     expect(vm.test).toBe(1)
   })
 
-  it('should respect different pritive type value', (done) => {
+  it('should respect different primitive type value', (done) => {
     const vm = new Vue({
       data: {
         test: 0
