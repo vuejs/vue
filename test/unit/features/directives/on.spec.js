@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { supportsPassive } from 'core/util/env'
 
 describe('Directive v-on', () => {
   let vm, spy, spy2, el
@@ -527,27 +528,30 @@ describe('Directive v-on', () => {
     expect(spyDown.calls.count()).toBe(1)
   })
 
-  it('should support passive', () => {
-    vm = new Vue({
-      el,
-      template: `
-        <div>
-          <input type="checkbox" ref="normal" @click="foo"/>
-          <input type="checkbox" ref="passive" @click.passive="foo"/>
-        </div>
-      `,
-      methods: {
-        foo (e) {
-          e.preventDefault()
+  // This test case should only run when the test browser supports passive.
+  if (supportsPassive) {
+    it('should support passive', () => {
+      vm = new Vue({
+        el,
+        template: `
+          <div>
+            <input type="checkbox" ref="normal" @click="foo"/>
+            <input type="checkbox" ref="passive" @click.passive="foo"/>
+          </div>
+        `,
+        methods: {
+          foo (e) {
+            e.preventDefault()
+          }
         }
-      }
-    })
+      })
 
-    vm.$refs.normal.checked = false
-    vm.$refs.passive.checked = false
-    vm.$refs.normal.click()
-    vm.$refs.passive.click()
-    expect(vm.$refs.normal.checked).toBe(false)
-    expect(vm.$refs.passive.checked).toBe(true)
-  })
+      vm.$refs.normal.checked = false
+      vm.$refs.passive.checked = false
+      vm.$refs.normal.click()
+      vm.$refs.passive.click()
+      expect(vm.$refs.normal.checked).toBe(false)
+      expect(vm.$refs.passive.checked).toBe(true)
+    })
+  }
 })

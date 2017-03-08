@@ -16,17 +16,16 @@ export const isAndroid = UA && UA.indexOf('android') > 0
 export const isIOS = UA && /iphone|ipad|ipod|ios/.test(UA)
 export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
 
-let _supportsPassive = false
+export let supportsPassive = false
 if (inBrowser) {
   try {
     const opts = {}
     Object.defineProperty(opts, 'passive', ({
-      get: function () { _supportsPassive = true }
+      get: function () { supportsPassive = true }
     } : Object)) // https://github.com/facebook/flow/issues/285
     window.addEventListener('test-passive', null, opts)
   } catch (e) {}
 }
-export const supportsPassive = _supportsPassive
 
 // this needs to be lazy-evaled because vue may be required before
 // vue-server-renderer can set VUE_ENV
