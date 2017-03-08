@@ -504,6 +504,6 @@ describe('parser', () => {
       </div>
     `, options)
     expect(ast.tag).toBe('div')
-    expect(ast.chilldren).toBeUndefined()
+    expect(ast.children.length).toBe(0)
   })
 })
