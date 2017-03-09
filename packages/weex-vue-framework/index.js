@@ -108,7 +108,7 @@ function createInstance (
   };
   Object.freeze(weexInstanceVar);
 
-  // Each instance has a independent `Vue` mdoule instance
+  // Each instance has a independent `Vue` module instance
   var Vue = instance.Vue = createVueModuleInstance(instanceId, moduleGetter);
 
   // The function which create a closure the JS Bundle will run in.
@@ -312,7 +312,7 @@ function createVueModuleInstance (instanceId, moduleGetter) {
 
 /**
  * Generate native module getter. Each native module has several
- * methods to call. And all the hebaviors is instance-related. So
+ * methods to call. And all the behaviors is instance-related. So
  * this getter will return a set of methods which additionally
  * send current instance id to native when called. Also the args
  * will be normalized into "safe" value. For example function arg
@@ -345,7 +345,7 @@ function genModuleGetter (instanceId) {
 /**
  * Generate HTML5 Timer APIs. An important point is that the callback
  * will be converted into callback id when sent to native. So the
- * framework can make sure no side effect of the callabck happened after
+ * framework can make sure no side effect of the callback happened after
  * an instance destroyed.
  * @param  {[type]} instanceId   [description]
  * @param  {[type]} moduleGetter [description]
