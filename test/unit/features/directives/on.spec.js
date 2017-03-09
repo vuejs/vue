@@ -1,11 +1,10 @@
 import Vue from 'vue'
 
 describe('Directive v-on', () => {
-  let vm, spy, spy2, el
+  let vm, spy, el
 
   beforeEach(() => {
     spy = jasmine.createSpy()
-    spy2 = jasmine.createSpy()
     el = document.createElement('div')
     document.body.appendChild(el)
   })
@@ -88,12 +87,15 @@ describe('Directive v-on', () => {
       template: `
         <input type="checkbox" ref="input" @click.prevent="foo">
       `,
-      methods: { foo: spy2 }
+      methods: {
+        foo ($event) {
+          spy($event.defaultPrevented)
+        }
+      }
     })
     vm.$refs.input.checked = false
     triggerEvent(vm.$refs.input, 'click')
-    expect(spy2).toHaveBeenCalled()
-    expect(vm.$refs.input.checked).toBe(false)
+    expect(spy).toHaveBeenCalledWith(true)
   })
 
   it('should support capture', () => {
