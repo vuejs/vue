@@ -274,6 +274,11 @@ describe('codegen', () => {
       '<input @keydown.enter.prevent="onInput">',
       `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;$event.preventDefault();onInput($event)}}})}`
     )
+
+    assertCodegen(
+      '<input @keydown.enter.stop="onInput">',
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;$event.stopPropagation();onInput($event)}}})}`
+    )
   })
 
   it('generate events with mouse event modifiers', () => {
