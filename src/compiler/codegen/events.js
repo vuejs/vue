@@ -79,6 +79,7 @@ function genHandler (
     if (keys.length) {
       code += genKeyFilter(keys)
     }
+    // Make sure modifiers like prevent and stop get executed after key filtering
     if (genModifierCode) {
       code += genModifierCode
     }
