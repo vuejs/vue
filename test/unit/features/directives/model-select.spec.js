@@ -445,4 +445,30 @@ describe('Directive v-model select', () => {
       done()
     }, 0)
   })
+
+  it('should work with option value that has circular reference', done => {
+    const circular = {}
+    circular.self = circular
+
+    const vm = new Vue({
+      data: {
+        test: 'b',
+        circular
+      },
+      template:
+        '<select v-model="test">' +
+          '<option :value="circular">a</option>' +
+          '<option>b</option>' +
+          '<option>c</option>' +
+        '</select>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.test).toBe('b')
+    expect(vm.$el.value).toBe('b')
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = circular
+    waitForUpdate(function () {
+      expect(vm.$el.childNodes[0].selected).toBe(true)
+    }).then(done)
+  })
 })
