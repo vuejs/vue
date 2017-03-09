@@ -537,6 +537,7 @@ describe('Directive v-on', () => {
           <div>
             <input type="checkbox" ref="normal" @click="foo"/>
             <input type="checkbox" ref="passive" @click.passive="foo"/>
+            <input type="checkbox" ref="exclusive" @click.prevent.passive/>
           </div>
         `,
         methods: {
@@ -548,10 +549,14 @@ describe('Directive v-on', () => {
 
       vm.$refs.normal.checked = false
       vm.$refs.passive.checked = false
+      vm.$refs.exclusive.checked = false
       vm.$refs.normal.click()
       vm.$refs.passive.click()
+      vm.$refs.exclusive.click()
       expect(vm.$refs.normal.checked).toBe(false)
       expect(vm.$refs.passive.checked).toBe(true)
+      expect(vm.$refs.exclusive.checked).toBe(true)
+      expect('passive and prevent can\t be used together. Passive handler can\'t prevent default event.').toHaveBeenWarned()
     })
   }
 })
