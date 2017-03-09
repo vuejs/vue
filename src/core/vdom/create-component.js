@@ -21,8 +21,63 @@ import {
   deactivateChildComponent
 } from '../instance/lifecycle'
 
-const hooks = { init, prepatch, insert, destroy }
-const hooksToMerge = Object.keys(hooks)
+// hooks to be invoked on component VNodes during patch
+const componentVNodeHooks = {
+  init (
+    vnode: VNodeWithData,
+    hydrating: boolean,
+    parentElm: ?Node,
+    refElm: ?Node
+  ): ?boolean {
+    if (!vnode.componentInstance || vnode.componentInstance._isDestroyed) {
+      const child = vnode.componentInstance = createComponentInstanceForVnode(
+        vnode,
+        activeInstance,
+        parentElm,
+        refElm
+      )
+      child.$mount(hydrating ? vnode.elm : undefined, hydrating)
+    } else if (vnode.data.keepAlive) {
+      // kept-alive components, treat as a patch
+      const mountedNode: any = vnode // work around flow
+      componentVNodeHooks.prepatch(mountedNode, mountedNode)
+    }
+  },
+
+  prepatch (oldVnode: MountedComponentVNode, vnode: MountedComponentVNode) {
+    const options = vnode.componentOptions
+    const child = vnode.componentInstance = oldVnode.componentInstance
+    updateChildComponent(
+      child,
+      options.propsData, // updated props
+      options.listeners, // updated listeners
+      vnode, // new parent vnode
+      options.children // new children
+    )
+  },
+
+  insert (vnode: MountedComponentVNode) {
+    if (!vnode.componentInstance._isMounted) {
+      vnode.componentInstance._isMounted = true
+      callHook(vnode.componentInstance, 'mounted')
+    }
+    if (vnode.data.keepAlive) {
+      activateChildComponent(vnode.componentInstance, true /* direct */)
+    }
+  },
+
+  destroy (vnode: MountedComponentVNode) {
+    if (!vnode.componentInstance._isDestroyed) {
+      if (!vnode.data.keepAlive) {
+        vnode.componentInstance.$destroy()
+      } else {
+        deactivateChildComponent(vnode.componentInstance, true /* direct */)
+      }
+    }
+  }
+}
+
+const hooksToMerge = Object.keys(componentVNodeHooks)
 
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
@@ -170,62 +225,6 @@ export function createComponentInstanceForVnode (
   return new vnodeComponentOptions.Ctor(options)
 }
 
-function init (
-  vnode: VNodeWithData,
-  hydrating: boolean,
-  parentElm: ?Node,
-  refElm: ?Node
-): ?boolean {
-  if (!vnode.componentInstance || vnode.componentInstance._isDestroyed) {
-    const child = vnode.componentInstance = createComponentInstanceForVnode(
-      vnode,
-      activeInstance,
-      parentElm,
-      refElm
-    )
-    child.$mount(hydrating ? vnode.elm : undefined, hydrating)
-  } else if (vnode.data.keepAlive) {
-    // kept-alive components, treat as a patch
-    const mountedNode: any = vnode // work around flow
-    prepatch(mountedNode, mountedNode)
-  }
-}
-
-function prepatch (
-  oldVnode: MountedComponentVNode,
-  vnode: MountedComponentVNode
-) {
-  const options = vnode.componentOptions
-  const child = vnode.componentInstance = oldVnode.componentInstance
-  updateChildComponent(
-    child,
-    options.propsData, // updated props
-    options.listeners, // updated listeners
-    vnode, // new parent vnode
-    options.children // new children
-  )
-}
-
-function insert (vnode: MountedComponentVNode) {
-  if (!vnode.componentInstance._isMounted) {
-    vnode.componentInstance._isMounted = true
-    callHook(vnode.componentInstance, 'mounted')
-  }
-  if (vnode.data.keepAlive) {
-    activateChildComponent(vnode.componentInstance, true /* direct */)
-  }
-}
-
-function destroy (vnode: MountedComponentVNode) {
-  if (!vnode.componentInstance._isDestroyed) {
-    if (!vnode.data.keepAlive) {
-      vnode.componentInstance.$destroy()
-    } else {
-      deactivateChildComponent(vnode.componentInstance, true /* direct */)
-    }
-  }
-}
-
 function resolveAsyncComponent (
   factory: Function,
   baseCtor: Class<Component>,
@@ -327,7 +326,7 @@ function mergeHooks (data: VNodeData) {
   for (let i = 0; i < hooksToMerge.length; i++) {
     const key = hooksToMerge[i]
     const fromParent = data.hook[key]
-    const ours = hooks[key]
+    const ours = componentVNodeHooks[key]
     data.hook[key] = fromParent ? mergeHook(ours, fromParent) : ours
   }
 }
