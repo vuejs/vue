@@ -77,6 +77,16 @@ describe('parser', () => {
     expect('Component template requires a root element, rather than just text').toHaveBeenWarned()
   })
 
+  it('warn text before root element', () => {
+    parse('before root {{ interpolation }}<div></div>', baseOptions)
+    expect('text "before root {{ interpolation }}" outside root element will be ignored.').toHaveBeenWarned()
+  })
+
+  it('warn text after root element', () => {
+    parse('<div></div>after root {{ interpolation }}', baseOptions)
+    expect('text "after root {{ interpolation }}" outside root element will be ignored.').toHaveBeenWarned()
+  })
+
   it('warn multiple root elements', () => {
     parse('<div></div><div></div>', baseOptions)
     expect('Component template should contain exactly one root element').toHaveBeenWarned()
