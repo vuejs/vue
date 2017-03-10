@@ -427,7 +427,7 @@ function processComponent (el) {
 
 function processAttrs (el) {
   const list = el.attrsList
-  let i, l, name, rawName, value, arg, modifiers, isProp
+  let i, l, name, rawName, value, modifiers, isProp
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
     value = list[i].value
@@ -465,7 +465,8 @@ function processAttrs (el) {
         name = name.replace(dirRE, '')
         // parse arg
         const argMatch = name.match(argRE)
-        if (argMatch && (arg = argMatch[1])) {
+        const arg = argMatch && argMatch[1]
+        if (arg) {
           name = name.slice(0, -(arg.length + 1))
         }
         addDirective(el, name, rawName, value, arg, modifiers)
