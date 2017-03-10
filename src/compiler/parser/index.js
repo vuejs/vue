@@ -6,36 +6,38 @@ import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { cached, no, camelize } from 'shared/util'
 import { isIE, isServerRendering } from 'core/util/env'
+
 import {
-  pluckModuleFunction,
-  getAndRemoveAttr,
   addProp,
   addAttr,
+  baseWarn,
   addHandler,
   addDirective,
   getBindingAttr,
-  baseWarn
+  getAndRemoveAttr,
+  pluckModuleFunction
 } from '../helpers'
 
-export const dirRE = /^v-|^@|^:/
 export const onRE = /^@|^v-on:/
+export const dirRE = /^v-|^@|^:/
 export const forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/
 export const forIteratorRE = /\((\{[^}]*\}|[^,]*),([^,]*)(?:,([^,]*))?\)/
-const bindRE = /^:|^v-bind:/
+
 const argRE = /:(.*)$/
+const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
 
 const decodeHTMLCached = cached(decode)
 
 // configurable state
 let warn
-let platformGetTagNamespace
-let platformMustUseProp
-let platformIsPreTag
-let preTransforms
-let transforms
-let postTransforms
 let delimiters
+let transforms
+let preTransforms
+let postTransforms
+let platformIsPreTag
+let platformMustUseProp
+let platformGetTagNamespace
 
 /**
  * Convert HTML string to AST.
