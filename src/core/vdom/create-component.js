@@ -287,6 +287,17 @@ function extractProps (data: VNodeData, Ctor: Class<Component>): ?Object {
   if (attrs || props || domProps) {
     for (const key in propOptions) {
       const altKey = hyphenate(key)
+      const keyInLowerCase = key.toLowerCase()
+      if (
+        process.env.NODE_ENV !== 'production' &&
+        key !== keyInLowerCase &&
+        attrs && attrs.hasOwnProperty(keyInLowerCase)
+      ) {
+        warn(
+          `HTML attributes are case-insensitive. camelCased prop names need ` +
+          `to use their kebab-case equivalents. ${key} should be ${altKey}.`
+        )
+      }
       checkProp(res, props, key, altKey, true) ||
       checkProp(res, attrs, key, altKey) ||
       checkProp(res, domProps, key, altKey)
