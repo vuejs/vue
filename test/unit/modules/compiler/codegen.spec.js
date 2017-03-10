@@ -268,6 +268,19 @@ describe('codegen', () => {
     )
   })
 
+  // Github Issues #5146
+  it('generate events with generic modifiers and keycode correct order', () => {
+    assertCodegen(
+      '<input @keydown.enter.prevent="onInput">',
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;$event.preventDefault();onInput($event)}}})}`
+    )
+
+    assertCodegen(
+      '<input @keydown.enter.stop="onInput">',
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;$event.stopPropagation();onInput($event)}}})}`
+    )
+  })
+
   it('generate events with mouse event modifiers', () => {
     assertCodegen(
       '<input @click.ctrl="onClick">',

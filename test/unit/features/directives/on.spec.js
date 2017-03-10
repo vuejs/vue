@@ -527,4 +527,25 @@ describe('Directive v-on', () => {
     expect(spyUp.calls.count()).toBe(1)
     expect(spyDown.calls.count()).toBe(1)
   })
+
+  // Github Issues #5146
+  it('should only prevent when match keycode', () => {
+    let prevented = false
+    vm = new Vue({
+      el,
+      template: `
+        <input ref="input" @keydown.enter.prevent="foo">
+      `,
+      methods: {
+        foo ($event) {
+          prevented = $event.defaultPrevented
+        }
+      }
+    })
+
+    triggerEvent(vm.$refs.input, 'keydown', e => { e.keyCode = 32 })
+    expect(prevented).toBe(false)
+    triggerEvent(vm.$refs.input, 'keydown', e => { e.keyCode = 13 })
+    expect(prevented).toBe(true)
+  })
 })
