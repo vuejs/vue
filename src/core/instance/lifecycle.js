@@ -164,8 +164,9 @@ export function mountComponent (
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
     updateComponent = () => {
       const name = vm._name
-      const startTag = `start ${name}`
-      const endTag = `end ${name}`
+      const id = vm._uid
+      const startTag = `vue-perf-start:${id}`
+      const endTag = `vue-perf-end:${id}`
 
       mark(startTag)
       const vnode = vm._render()
