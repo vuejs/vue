@@ -61,6 +61,13 @@ export function parse (
   let inPre = false
   let warned = false
 
+  function warnOnce (msg) {
+    if (!warned) {
+      warned = true
+      warn(msg)
+    }
+  }
+
   function endPre (element) {
     // check pre state
     if (element.pre) {
@@ -144,17 +151,15 @@ export function parse (
       }
 
       function checkRootConstraints (el) {
-        if (process.env.NODE_ENV !== 'production' && !warned) {
+        if (process.env.NODE_ENV !== 'production') {
           if (el.tag === 'slot' || el.tag === 'template') {
-            warned = true
-            warn(
+            warnOnce(
               `Cannot use <${el.tag}> as component root element because it may ` +
               'contain multiple nodes.'
             )
           }
           if (el.attrsMap.hasOwnProperty('v-for')) {
-            warned = true
-            warn(
+            warnOnce(
               'Cannot use v-for on stateful component root element because ' +
               'it renders multiple elements.'
             )
@@ -174,9 +179,8 @@ export function parse (
             exp: element.elseif,
             block: element
           })
-        } else if (process.env.NODE_ENV !== 'production' && !warned) {
-          warned = true
-          warn(
+        } else if (process.env.NODE_ENV !== 'production') {
+          warnOnce(
             `Component template should contain exactly one root element. ` +
             `If you are using v-if on multiple elements, ` +
             `use v-else-if to chain them instead.`
@@ -222,15 +226,13 @@ export function parse (
 
     chars (text: string) {
       if (!currentParent) {
-        if (process.env.NODE_ENV !== 'production' && !warned) {
+        if (process.env.NODE_ENV !== 'production') {
           if (text === template) {
-            warned = true
-            warn(
+            warnOnce(
               'Component template requires a root element, rather than just text.'
             )
           } else if ((text = text.trim())) {
-            warned = true
-            warn(
+            warnOnce(
               `text "${text}" outside root element will be ignored.`
             )
           }
