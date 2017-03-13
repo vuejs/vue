@@ -223,12 +223,13 @@ export function parse (
     chars (text: string) {
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production' && !warned) {
-          warned = true
           if (text === template) {
+            warned = true
             warn(
               'Component template requires a root element, rather than just text.'
             )
           } else if ((text = text.trim())) {
+            warned = true
             warn(
               `text "${text}" outside root element will be ignored.`
             )
