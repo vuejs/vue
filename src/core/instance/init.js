@@ -16,7 +16,7 @@ export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
-      mark('init')
+      mark('vue-perf-init')
     }
 
     const vm: Component = this
@@ -57,8 +57,8 @@ export function initMixin (Vue: Class<Component>) {
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
       vm._name = formatComponentName(vm, false)
-      mark('init end')
-      measure(`${vm._name} init`, 'init', 'init end')
+      mark('vue-perf-init-end')
+      measure(`${vm._name} init`, 'vue-perf-init', 'vue-perf-init-end')
     }
 
     if (vm.$options.el) {
