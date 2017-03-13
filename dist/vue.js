@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.2.3
+ * Vue.js v2.2.4
  * (c) 2014-2017 Evan You
  * Released under the MIT License.
  */
@@ -2126,8 +2126,9 @@ function mountComponent (
   if ("development" !== 'production' && config.performance && mark) {
     updateComponent = function () {
       var name = vm._name;
-      var startTag = "start " + name;
-      var endTag = "end " + name;
+      var id = vm._uid;
+      var startTag = "vue-perf-start:" + id;
+      var endTag = "vue-perf-end:" + id;
 
       mark(startTag);
       var vnode = vm._render();
@@ -3660,7 +3661,7 @@ function initMixin (Vue) {
   Vue.prototype._init = function (options) {
     /* istanbul ignore if */
     if ("development" !== 'production' && config.performance && mark) {
-      mark('init');
+      mark('vue-perf-init');
     }
 
     var vm = this;
@@ -3699,8 +3700,8 @@ function initMixin (Vue) {
     /* istanbul ignore if */
     if ("development" !== 'production' && config.performance && mark) {
       vm._name = formatComponentName(vm, false);
-      mark('init end');
-      measure(((vm._name) + " init"), 'init', 'init end');
+      mark('vue-perf-init-end');
+      measure(((vm._name) + " init"), 'vue-perf-init', 'vue-perf-init-end');
     }
 
     if (vm.$options.el) {
@@ -4112,7 +4113,7 @@ Object.defineProperty(Vue$3.prototype, '$isServer', {
   get: isServerRendering
 });
 
-Vue$3.version = '2.2.3';
+Vue$3.version = '2.2.4';
 
 /*  */
 
