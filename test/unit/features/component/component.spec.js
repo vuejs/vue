@@ -272,8 +272,7 @@ describe('Component', () => {
       }
     }).$mount()
     expect(
-      'HTML attributes are case-insensitive. camelCased prop names need ' +
-      'to use their kebab-case equivalents. someCollection should be some-collection.'
+      'You should probably use "some-collection" instead of "someCollection".'
     ).toHaveBeenWarned()
   })
 

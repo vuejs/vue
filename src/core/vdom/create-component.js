@@ -10,7 +10,8 @@ import {
   isObject,
   hasOwn,
   hyphenate,
-  validateProp
+  validateProp,
+  formatComponentName
 } from '../util/index'
 
 import {
@@ -293,8 +294,11 @@ function extractProps (data: VNodeData, Ctor: Class<Component>): ?Object {
           attrs && attrs.hasOwnProperty(keyInLowerCase)
         ) {
           warn(
-            `HTML attributes are case-insensitive. camelCased prop names need ` +
-            `to use their kebab-case equivalents. ${key} should be ${altKey}.`
+            `Prop "${keyInLowerCase}" is not declared in component ` +
+            `${formatComponentName(Ctor)}. Note that HTML attributes are ` +
+            `case-insensitive and camelCased props need to use their kebab-case ` +
+            `equivalents when using in-DOM templates. You should probably use ` +
+            `"${altKey}" instead of "${key}".`
           )
         }
       }
