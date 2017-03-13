@@ -1,11 +1,11 @@
 /* @flow */
 
 import config from '../config'
-import { perf } from '../util/perf'
 import { initProxy } from './proxy'
 import { initState } from './state'
 import { initRender } from './render'
 import { initEvents } from './events'
+import { mark, measure } from '../util/perf'
 import { initLifecycle, callHook } from './lifecycle'
 import { initProvide, initInjections } from './inject'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
@@ -15,8 +15,8 @@ let uid = 0
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
-      perf.mark('init')
+    if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+      mark('init')
     }
 
     const vm: Component = this
@@ -55,10 +55,10 @@ export function initMixin (Vue: Class<Component>) {
     callHook(vm, 'created')
 
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
+    if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
       vm._name = formatComponentName(vm, false)
-      perf.mark('init end')
-      perf.measure(`${vm._name} init`, 'init', 'init end')
+      mark('init end')
+      measure(`${vm._name} init`, 'init', 'init end')
     }
 
     if (vm.$options.el) {
