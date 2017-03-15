@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isUnaryTag } from './util'
+import { isUnaryTag, canBeLeftOpenTag } from './util'
 import { genStaticKeys } from 'shared/util'
 import { createCompiler } from 'compiler/index'
 
@@ -21,6 +21,7 @@ export const baseOptions: CompilerOptions = {
   isPreTag,
   isUnaryTag,
   mustUseProp,
+  canBeLeftOpenTag,
   isReservedTag,
   getTagNamespace,
   staticKeys: genStaticKeys(modules)

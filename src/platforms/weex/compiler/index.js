@@ -10,6 +10,7 @@ import {
   isUnaryTag,
   mustUseProp,
   isReservedTag,
+  canBeLeftOpenTag,
   getTagNamespace
 } from '../util/index'
 
@@ -18,6 +19,7 @@ export const baseOptions: CompilerOptions = {
   directives,
   isUnaryTag,
   mustUseProp,
+  canBeLeftOpenTag,
   isReservedTag,
   getTagNamespace,
   preserveWhitespace: false,
