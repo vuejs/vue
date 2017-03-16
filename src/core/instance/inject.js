@@ -1,6 +1,7 @@
 /* @flow */
 
 import { hasSymbol } from 'core/util/env'
+import { extend } from 'shared/util'
 
 export function initProvide (vm: Component) {
   const provide = vm.$options.provide
@@ -12,11 +13,16 @@ export function initProvide (vm: Component) {
 }
 
 export function initInjections (vm: Component) {
-  const inject: any = vm.$options.inject
+  const result = resolveInject(vm.$options.inject, vm)
+  extend(vm, result)
+}
+
+export function resolveInject (inject: any, vm: Component): ?Object {
   if (inject) {
     // inject is :any because flow is not smart enough to figure out cached
     // isArray here
     const isArray = Array.isArray(inject)
+    const result = Object.create(null)
     const keys = isArray
       ? inject
       : hasSymbol
@@ -29,11 +35,12 @@ export function initInjections (vm: Component) {
       let source = vm
       while (source) {
         if (source._provided && provideKey in source._provided) {
-          vm[key] = source._provided[provideKey]
+          result[key] = source._provided[provideKey]
           break
         }
         source = source.$parent
       }
     }
+    return result
   }
 }
