@@ -1,4 +1,4 @@
-import { Vue } from "./vue";
+import { Vue, AnyVue } from "./vue";
 
 export type ScopedSlot = (props: any) => VNodeChildrenArrayContents | string;
 
@@ -14,10 +14,10 @@ export interface VNode {
   text?: string;
   elm?: Node;
   ns?: string;
-  context?: Vue;
+  context?: AnyVue;
   key?: string | number;
   componentOptions?: VNodeComponentOptions;
-  componentInstance?: Vue;
+  componentInstance?: AnyVue;
   parent?: VNode;
   raw?: boolean;
   isStatic?: boolean;
