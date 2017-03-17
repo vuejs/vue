@@ -19,8 +19,8 @@ var webpackConfig = {
       __WEEX__: false,
       'process.env': {
         NODE_ENV: '"development"',
-        TRANSITION_DURATION: process.env.SAUCE ? 500 : 50,
-        TRANSITION_BUFFER: process.env.SAUCE ? 50 : 10
+        TRANSITION_DURATION: 50,
+        TRANSITION_BUFFER: 10
       }
     })
   ],
