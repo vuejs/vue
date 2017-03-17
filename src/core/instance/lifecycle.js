@@ -71,12 +71,18 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     activeInstance = prevActiveInstance
     // update __vue__ reference
-    if (prevEl) {
-      prevEl.__vue__ = null
+    if (process.env.VUE_DISMISS_DEVTOOLS !== 'yes') {
+      if (prevEl) {
+        prevEl.__vue__ = null
+      }
     }
-    if (vm.$el) {
-      vm.$el.__vue__ = vm
+
+    if (process.env.VUE_DISMISS_DEVTOOLS !== 'yes') {
+      if (vm.$el) {
+        vm.$el.__vue__ = vm
+      }
     }
+
     // if parent is an HOC, update its $el as well
     if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
       vm.$parent.$el = vm.$el
@@ -122,10 +128,14 @@ export function lifecycleMixin (Vue: Class<Component>) {
     callHook(vm, 'destroyed')
     // turn off all instance listeners.
     vm.$off()
-    // remove __vue__ reference
-    if (vm.$el) {
-      vm.$el.__vue__ = null
+
+    if (process.env.VUE_DISMISS_DEVTOOLS !== 'yes') {
+      // remove __vue__ reference
+      if (vm.$el) {
+        vm.$el.__vue__ = null
+      }
     }
+
     // invoke destroy hooks on current rendered tree
     vm.__patch__(vm._vnode, null)
   }
