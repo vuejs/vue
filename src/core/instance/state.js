@@ -7,18 +7,19 @@ import {
   set,
   del,
   observe,
-  defineReactive,
-  observerState
+  observerState,
+  defineReactive
 } from '../observer/index'
 
 import {
   warn,
+  bind,
+  noop,
   hasOwn,
   isReserved,
-  isPlainObject,
-  bind,
+  handleError,
   validateProp,
-  noop
+  isPlainObject
 } from '../util/index'
 
 const sharedPropertyDefinition = {
@@ -101,7 +102,7 @@ function initProps (vm: Component, propsOptions: Object) {
 function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
-    ? data.call(vm)
+    ? getData(data, vm)
     : data || {}
   if (!isPlainObject(data)) {
     data = {}
@@ -128,6 +129,15 @@ function initData (vm: Component) {
   }
   // observe data
   observe(data, true /* asRootData */)
+}
+
+function getData (data: Function, vm: Component): any {
+  try {
+    return data.call(vm)
+  } catch (e) {
+    handleError(e, vm, `data()`)
+    return {}
+  }
 }
 
 const computedWatcherOptions = { lazy: true }
