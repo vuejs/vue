@@ -556,7 +556,7 @@ describe('Directive v-on', () => {
       expect(vm.$refs.normal.checked).toBe(false)
       expect(vm.$refs.passive.checked).toBe(true)
       expect(vm.$refs.exclusive.checked).toBe(true)
-      expect('passive and prevent can\t be used together. Passive handler can\'t prevent default event.').toHaveBeenWarned()
+      expect('passive and prevent can\'t be used together. Passive handler can\'t prevent default event.').toHaveBeenWarned()
     })
   }
 })
