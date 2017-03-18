@@ -1,8 +1,8 @@
 /* @flow */
 
 import config from '../config'
-import { perf } from '../util/perf'
 import Watcher from '../observer/watcher'
+import { mark, measure } from '../util/perf'
 import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { updateComponentListeners } from './events'
@@ -141,10 +141,11 @@ export function mountComponent (
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
       /* istanbul ignore if */
-      if (vm.$options.template && vm.$options.template.charAt(0) !== '#') {
+      if ((vm.$options.template && vm.$options.template.charAt(0) !== '#') ||
+        vm.$options.el || el) {
         warn(
           'You are using the runtime-only build of Vue where the template ' +
-          'option is not available. Either pre-compile the templates into ' +
+          'compiler is not available. Either pre-compile the templates into ' +
           'render functions, or use the compiler-included build.',
           vm
         )
@@ -160,19 +161,22 @@ export function mountComponent (
 
   let updateComponent
   /* istanbul ignore if */
-  if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
+  if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
     updateComponent = () => {
       const name = vm._name
-      const startTag = `start ${name}`
-      const endTag = `end ${name}`
-      perf.mark(startTag)
+      const id = vm._uid
+      const startTag = `vue-perf-start:${id}`
+      const endTag = `vue-perf-end:${id}`
+
+      mark(startTag)
       const vnode = vm._render()
-      perf.mark(endTag)
-      perf.measure(`${name} render`, startTag, endTag)
-      perf.mark(startTag)
+      mark(endTag)
+      measure(`${name} render`, startTag, endTag)
+
+      mark(startTag)
       vm._update(vnode, hydrating)
-      perf.mark(endTag)
-      perf.measure(`${name} patch`, startTag, endTag)
+      mark(endTag)
+      measure(`${name} patch`, startTag, endTag)
     }
   } else {
     updateComponent = () => {

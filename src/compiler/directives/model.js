@@ -25,6 +25,7 @@ export function genComponentModel (
 
   el.model = {
     value: `(${value})`,
+    expression: `"${value}"`,
     callback: `function (${baseValueExpression}) {${assignment}}`
   }
 }

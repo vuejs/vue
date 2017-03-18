@@ -199,16 +199,16 @@ export function defineReactive (
  * undefined. This method should be used to avoid a global notify when adding
  * a new property via Vue.set().
  */
-export function get (obj: Array<any> | Object, key: any, defaultVal: any) {
-  if (Array.isArray(obj)) {
-    obj.length = Math.max(obj.length, key)
-    return obj[key]
+export function get (target: Array<any> | Object, key: any, defaultVal: any) {
+  if (Array.isArray(target)) {
+    target.length = Math.max(target.length, key)
+    return target[key]
   }
-  if (hasOwn(obj, key)) {
-    return obj[key]
+  if (hasOwn(target, key)) {
+    return target[key]
   }
-  const ob = obj.__ob__
-  if (obj._isVue || (ob && ob.vmCount)) {
+  const ob = target.__ob__
+  if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
       'at runtime - declare it upfront in the data option.'
@@ -216,11 +216,11 @@ export function get (obj: Array<any> | Object, key: any, defaultVal: any) {
     return
   }
   if (!ob) {
-    obj[key] = defaultVal
+    target[key] = defaultVal
     return defaultVal
   }
   defineReactive(ob.value, key, defaultVal)
-  return obj[key] // triggers depend() on the property's dep
+  return target[key] // triggers depend() on the property's dep
 }
 
 /**
@@ -228,27 +228,27 @@ export function get (obj: Array<any> | Object, key: any, defaultVal: any) {
  * triggers change notification if the property doesn't
  * already exist.
  */
-export function set (obj: Array<any> | Object, key: any, val: any) {
-  if (Array.isArray(obj)) {
-    obj.length = Math.max(obj.length, key)
-    obj.splice(key, 1, val)
+export function set (target: Array<any> | Object, key: any, val: any): any {
+  if (Array.isArray(target)) {
+    target.length = Math.max(target.length, key)
+    target.splice(key, 1, val)
     return val
   }
-  if (hasOwn(obj, key)) {
-    obj[key] = val
-    return
+  if (hasOwn(target, key)) {
+    target[key] = val
+    return val
   }
-  const ob = obj.__ob__
-  if (obj._isVue || (ob && ob.vmCount)) {
+  const ob = target.__ob__
+  if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
       'at runtime - declare it upfront in the data option.'
     )
-    return
+    return val
   }
   if (!ob) {
-    obj[key] = val
-    return
+    target[key] = val
+    return val
   }
   defineReactive(ob.value, key, val)
   ob.dep.notify()
@@ -258,28 +258,28 @@ export function set (obj: Array<any> | Object, key: any, val: any) {
 /**
  * Delete a property and trigger change if necessary.
  */
-export function del (obj: Array<any> | Object, key: any) {
-  if (Array.isArray(obj)) {
-    obj.splice(key, 1)
+export function del (target: Array<any> | Object, key: any) {
+  if (Array.isArray(target)) {
+    target.splice(key, 1)
     return
   }
-  const ob = obj.__ob__
-  if (obj._isVue || (ob && ob.vmCount)) {
+  const ob = target.__ob__
+  if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid deleting properties on a Vue instance or its root $data ' +
       '- just set it to null.'
     )
     return
   }
-  if (!hasOwn(obj, key)) {
+  if (!hasOwn(target, key)) {
     return
   }
   if (!ob) {
-    delete obj[key]
+    delete target[key]
     return
   }
-  const oldValue = obj[key]
-  obj[key] = DELETE_ME
+  const oldValue = target[key]
+  target[key] = DELETE_ME
   if (typeof oldValue === 'object' && oldValue.__ob__) {
     oldValue.__ob__.dep.notify()
   }

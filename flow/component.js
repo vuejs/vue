@@ -35,13 +35,13 @@ declare interface Component {
   $mount: (el?: Element | string, hydrating?: boolean) => Component;
   $forceUpdate: () => void;
   $destroy: () => void;
-  $get: (obj: Array<mixed> | Object, key: mixed, defaultVal: mixed) => void;
-  $set: (obj: Array<mixed> | Object, key: mixed, val: mixed) => void;
-  $delete: (obj: Object, key: string) => void;
+  $get: <T>(target: Object | Array<T>, key: string | number, defaultVal: T) => T;
+  $set: <T>(target: Object | Array<T>, key: string | number, val: T) => T;
+  $delete: <T>(target: Object | Array<T>, key: string | number) => void;
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;
   $on: (event: string | Array<string>, fn: Function) => Component;
   $once: (event: string, fn: Function) => Component;
-  $off: (event?: string, fn?: Function) => Component;
+  $off: (event?: string | Array<string>, fn?: Function) => Component;
   $emit: (event: string, ...args: Array<mixed>) => Component;
   $nextTick: (fn: Function) => void;
   $createElement: (tag?: string | Component, data?: Object, children?: VNodeChildren) => VNode;

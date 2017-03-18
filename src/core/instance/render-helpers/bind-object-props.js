@@ -22,14 +22,17 @@ export function bindObjectProps (
       if (Array.isArray(value)) {
         value = toObject(value)
       }
+      let hash
       for (const key in value) {
         if (key === 'class' || key === 'style') {
-          data[key] = value[key]
+          hash = data
         } else {
           const type = data.attrs && data.attrs.type
-          const hash = asProp || config.mustUseProp(tag, type, key)
+          hash = asProp || config.mustUseProp(tag, type, key)
             ? data.domProps || (data.domProps = {})
             : data.attrs || (data.attrs = {})
+        }
+        if (!(key in hash)) {
           hash[key] = value[key]
         }
       }

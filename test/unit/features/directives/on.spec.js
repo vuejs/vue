@@ -1,11 +1,10 @@
 import Vue from 'vue'
 
 describe('Directive v-on', () => {
-  let vm, spy, spy2, el
+  let vm, spy, el
 
   beforeEach(() => {
     spy = jasmine.createSpy()
-    spy2 = jasmine.createSpy()
     el = document.createElement('div')
     document.body.appendChild(el)
   })
@@ -86,15 +85,17 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: `
-        <div @click="bar">
-          <div @click.stop="foo"></div>
-        </div>
+        <input type="checkbox" ref="input" @click.prevent="foo">
       `,
-      methods: { foo: spy, bar: spy2 }
+      methods: {
+        foo ($event) {
+          spy($event.defaultPrevented)
+        }
+      }
     })
-    triggerEvent(vm.$el.firstChild, 'click')
-    expect(spy).toHaveBeenCalled()
-    expect(spy2).not.toHaveBeenCalled()
+    vm.$refs.input.checked = false
+    triggerEvent(vm.$refs.input, 'click')
+    expect(spy).toHaveBeenCalledWith(true)
   })
 
   it('should support capture', () => {
@@ -266,6 +267,7 @@ describe('Directive v-on', () => {
       e.keyCode = 1
     })
     expect(spy).toHaveBeenCalled()
+    Vue.config.keyCodes = Object.create(null)
   })
 
   it('should override build-in keyCode', () => {
@@ -288,6 +290,7 @@ describe('Directive v-on', () => {
       e.keyCode = 40
     })
     expect(spy).toHaveBeenCalledTimes(3)
+    Vue.config.keyCodes = Object.create(null)
   })
 
   it('should bind to a child component', () => {
@@ -482,5 +485,67 @@ describe('Directive v-on', () => {
     expect(() => {
       triggerEvent(vm.$el, 'click')
     }).not.toThrow()
+  })
+
+  // Github Issue #5046
+  it('should support keyboard modifier', () => {
+    const spyLeft = jasmine.createSpy()
+    const spyRight = jasmine.createSpy()
+    const spyUp = jasmine.createSpy()
+    const spyDown = jasmine.createSpy()
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <input ref="left" @keydown.left="foo"></input>
+          <input ref="right" @keydown.right="foo1"></input>
+          <input ref="up" @keydown.up="foo2"></input>
+          <input ref="down" @keydown.down="foo3"></input>
+        </div>
+      `,
+      methods: {
+        foo: spyLeft,
+        foo1: spyRight,
+        foo2: spyUp,
+        foo3: spyDown
+      }
+    })
+    triggerEvent(vm.$refs.left, 'keydown', e => { e.keyCode = 37 })
+    triggerEvent(vm.$refs.left, 'keydown', e => { e.keyCode = 39 })
+
+    triggerEvent(vm.$refs.right, 'keydown', e => { e.keyCode = 39 })
+    triggerEvent(vm.$refs.right, 'keydown', e => { e.keyCode = 38 })
+
+    triggerEvent(vm.$refs.up, 'keydown', e => { e.keyCode = 38 })
+    triggerEvent(vm.$refs.up, 'keydown', e => { e.keyCode = 37 })
+
+    triggerEvent(vm.$refs.down, 'keydown', e => { e.keyCode = 40 })
+    triggerEvent(vm.$refs.down, 'keydown', e => { e.keyCode = 39 })
+
+    expect(spyLeft.calls.count()).toBe(1)
+    expect(spyRight.calls.count()).toBe(1)
+    expect(spyUp.calls.count()).toBe(1)
+    expect(spyDown.calls.count()).toBe(1)
+  })
+
+  // Github Issues #5146
+  it('should only prevent when match keycode', () => {
+    let prevented = false
+    vm = new Vue({
+      el,
+      template: `
+        <input ref="input" @keydown.enter.prevent="foo">
+      `,
+      methods: {
+        foo ($event) {
+          prevented = $event.defaultPrevented
+        }
+      }
+    })
+
+    triggerEvent(vm.$refs.input, 'keydown', e => { e.keyCode = 32 })
+    expect(prevented).toBe(false)
+    triggerEvent(vm.$refs.input, 'keydown', e => { e.keyCode = 13 })
+    expect(prevented).toBe(true)
   })
 })

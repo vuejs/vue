@@ -2,9 +2,9 @@
 
 import Vue from './web-runtime'
 import config from 'core/config'
-import { perf } from 'core/util/perf'
 import { query } from 'web/util/index'
 import { warn, cached } from 'core/util/index'
+import { mark, measure } from 'core/util/perf'
 import { shouldDecodeNewlines } from 'web/util/compat'
 import { compileToFunctions } from 'web/compiler/index'
 
@@ -57,8 +57,8 @@ Vue.prototype.$mount = function (
     }
     if (template) {
       /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
-        perf.mark('compile')
+      if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+        mark('compile')
       }
 
       const { render, staticRenderFns } = compileToFunctions(template, {
@@ -69,9 +69,9 @@ Vue.prototype.$mount = function (
       options.staticRenderFns = staticRenderFns
 
       /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
-        perf.mark('compile end')
-        perf.measure(`${this._name} compile`, 'compile', 'compile end')
+      if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+        mark('compile end')
+        measure(`${this._name} compile`, 'compile', 'compile end')
       }
     }
   }

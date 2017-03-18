@@ -80,7 +80,7 @@ describe('Component slot', () => {
     expect(child.$el.children[1].textContent).toBe('slot b')
   })
 
-  it('fallback content with mixed named/unamed slots', () => {
+  it('fallback content with mixed named/unnamed slots', () => {
     mount({
       childTemplate: `
         <div>
@@ -153,7 +153,7 @@ describe('Component slot', () => {
         b: 2,
         show: true
       },
-      template: '<test :show="show"><p slot="b">{{b}}</a><p>{{a}}</p></test>',
+      template: '<test :show="show"><p slot="b">{{b}}</p><p>{{a}}</p></test>',
       components: {
         test: {
           props: ['show'],
@@ -266,7 +266,6 @@ describe('Component slot', () => {
   })
 
   it('default slot should use fallback content if has only whitespace', () => {
-    Vue.config.preserveWhitespace = true
     mount({
       childTemplate: `
         <div>
@@ -275,17 +274,16 @@ describe('Component slot', () => {
           <slot name="second"><p>second named slot</p></slot>
         </div>
       `,
-      parentContent: `<div slot="first">1</div> <div slot="second">2</div>`
+      parentContent: `<div slot="first">1</div> <div slot="second">2</div> <div slot="second">2+</div>`
     })
     expect(child.$el.innerHTML).toBe(
-      '<div>1</div> <p>this is the default slot</p> <div>2</div>'
+      '<div>1</div> <p>this is the default slot</p> <div>2</div><div>2+</div>'
     )
-    Vue.config.preserveWhitespace = false
   })
 
   it('programmatic access to $slots', () => {
     const vm = new Vue({
-      template: '<test><p slot="a">A</p><div>C</div><p slot="b">B</div></p></test>',
+      template: '<test><p slot="a">A</p><div>C</div><p slot="b">B</p></test>',
       components: {
         test: {
           render () {
