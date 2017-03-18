@@ -213,7 +213,7 @@ export function get (target: Array<any> | Object, key: any, defaultVal: any) {
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
       'at runtime - declare it upfront in the data option.'
     )
-    return
+    return defaultVal
   }
   if (!ob) {
     target[key] = defaultVal
