@@ -242,15 +242,10 @@ describe('SSR: renderToString', () => {
 
   it('v-show directive render', done => {
     renderVmWithOptions({
-      template: '<foo v-show="false"></foo>',
-      components: {
-        foo: {
-          render: h => h('div', 'inner')
-        }
-      }
+      template: '<div v-show="false"><span>inner</span></div>'
     }, res => {
       expect(res).toContain(
-        '<div server-rendered="true" style="display:none;">inner</div>'
+        '<div server-rendered="true" style="display:none;"><span>inner</span></div>'
       )
       done()
     })
