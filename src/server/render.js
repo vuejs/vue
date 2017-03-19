@@ -185,9 +185,9 @@ function renderStartingTag (node: VNode, context) {
     }
 
     // v-show directive needs to be merged from parent to child
-    const showDirectiveInfo = getVShowDirectiveInfo(node)
-    if (showDirectiveInfo) {
-      directives.show(node, showDirectiveInfo)
+    const vshowDirectiveInfo = getVShowDirectiveInfo(node)
+    if (vshowDirectiveInfo) {
+      directives.show(node, vshowDirectiveInfo)
     }
 
     // apply other modules
