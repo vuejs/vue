@@ -240,6 +240,33 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-show directive merging on components', done => {
+    renderVmWithOptions({
+      template: `
+        <foo v-show="false">
+          <div>
+            <bar class="test" v-show="true"></bar>
+          </div>
+        </foo>
+      `,
+      components: {
+        foo: {
+          render: h => h('bar'),
+          components: {
+            bar: {
+              render: h => h('div', 'inner')
+            }
+          }
+        }
+      }
+    }, res => {
+      expect(res).toContain(
+        '<div server-rendered="true" style="display:none;">inner</div>'
+      )
+      done()
+    })
+  })
+
   it('text interpolation', done => {
     renderVmWithOptions({
       template: '<div>{{ foo }} side {{ bar }}</div>',
