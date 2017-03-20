@@ -1,6 +1,7 @@
 /* @flow */
 
 import { hasSymbol } from 'core/util/env'
+import { defineReactive } from '../observer/index'
 
 export function initProvide (vm: Component) {
   const provide = vm.$options.provide
@@ -29,7 +30,7 @@ export function initInjections (vm: Component) {
       let source = vm
       while (source) {
         if (source._provided && provideKey in source._provided) {
-          vm[key] = source._provided[provideKey]
+          defineReactive(vm, key, source._provided[provideKey])
           break
         }
         source = source.$parent
