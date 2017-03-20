@@ -581,5 +581,4 @@ describe('Directive v-on', () => {
     triggerEvent(vm.$refs.input, 'keydown', e => { e.keyCode = 13 })
     expect(prevented).toBe(true)
   })
-
 })
