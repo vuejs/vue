@@ -430,21 +430,6 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
-  it('should warn inline selected', () => {
-    const vm = new Vue({
-      data: {
-        test: null
-      },
-      template:
-        '<select v-model="test">' +
-          '<option selected>a</option>' +
-        '</select>'
-    }).$mount()
-    expect(vm.$el.selectedIndex).toBe(-1)
-    expect('inline selected attributes on <option> will be ignored when using v-model')
-      .toHaveBeenWarned()
-  })
-
   it('should warn multiple with non-Array value', done => {
     new Vue({
       data: {
@@ -459,5 +444,31 @@ describe('Directive v-model select', () => {
         .toHaveBeenWarned()
       done()
     }, 0)
+  })
+
+  it('should work with option value that has circular reference', done => {
+    const circular = {}
+    circular.self = circular
+
+    const vm = new Vue({
+      data: {
+        test: 'b',
+        circular
+      },
+      template:
+        '<select v-model="test">' +
+          '<option :value="circular">a</option>' +
+          '<option>b</option>' +
+          '<option>c</option>' +
+        '</select>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.test).toBe('b')
+    expect(vm.$el.value).toBe('b')
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = circular
+    waitForUpdate(function () {
+      expect(vm.$el.childNodes[0].selected).toBe(true)
+    }).then(done)
   })
 })

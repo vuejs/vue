@@ -166,6 +166,29 @@ describe('Directive v-bind', () => {
     }).then(done)
   })
 
+  it('bind object with overwrite', done => {
+    const vm = new Vue({
+      template: '<input v-bind="test" id="foo" :class="test.value">',
+      data: {
+        test: {
+          id: 'test',
+          class: 'ok',
+          value: 'hello'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.getAttribute('id')).toBe('foo')
+    expect(vm.$el.getAttribute('class')).toBe('hello')
+    expect(vm.$el.value).toBe('hello')
+    vm.test.id = 'hi'
+    vm.test.value = 'bye'
+    waitForUpdate(() => {
+      expect(vm.$el.getAttribute('id')).toBe('foo')
+      expect(vm.$el.getAttribute('class')).toBe('bye')
+      expect(vm.$el.value).toBe('bye')
+    }).then(done)
+  })
+
   it('bind object with class/style', done => {
     const vm = new Vue({
       template: '<input class="a" style="color:red" v-bind="test">',

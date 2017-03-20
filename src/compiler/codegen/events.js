@@ -63,10 +63,11 @@ function genHandler (
       : `function($event){${handler.value}}` // inline statement
   } else {
     let code = ''
+    let genModifierCode = ''
     const keys = []
     for (const key in handler.modifiers) {
       if (modifierCode[key]) {
-        code += modifierCode[key]
+        genModifierCode += modifierCode[key]
         // left/right
         if (keyCodes[key]) {
           keys.push(key)
@@ -77,6 +78,10 @@ function genHandler (
     }
     if (keys.length) {
       code += genKeyFilter(keys)
+    }
+    // Make sure modifiers like prevent and stop get executed after key filtering
+    if (genModifierCode) {
+      code += genModifierCode
     }
     const handlerCode = isMethodPath
       ? handler.value + '($event)'

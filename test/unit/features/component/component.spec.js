@@ -258,6 +258,24 @@ describe('Component', () => {
     expect(vm.$el.outerHTML).toBe('<ul><li>1</li><li>2</li></ul>')
   })
 
+  it('should warn when not passing props in kebab-case', () => {
+    new Vue({
+      data: {
+        list: [{ a: 1 }, { a: 2 }]
+      },
+      template: '<test :somecollection="list"></test>',
+      components: {
+        test: {
+          template: '<ul><li v-for="item in someCollection">{{item.a}}</li></ul>',
+          props: ['someCollection']
+        }
+      }
+    }).$mount()
+    expect(
+      'You should probably use "some-collection" instead of "someCollection".'
+    ).toHaveBeenWarned()
+  })
+
   it('not found component should not throw', () => {
     expect(function () {
       new Vue({

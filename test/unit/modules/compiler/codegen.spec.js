@@ -33,7 +33,7 @@ describe('codegen', () => {
   it('generate directive', () => {
     assertCodegen(
       '<p v-custom1:arg1.modifier="value1" v-custom2></p>',
-      `with(this){return _c('p',{directives:[{name:"custom1",rawName:"v-custom1:arg1.modifier",value:(value1),expression:"value1",arg:"arg1",modifiers:{"modifier":true}},{name:"custom2",rawName:"v-custom2",arg:"arg1"}]})}`
+      `with(this){return _c('p',{directives:[{name:"custom1",rawName:"v-custom1:arg1.modifier",value:(value1),expression:"value1",arg:"arg1",modifiers:{"modifier":true}},{name:"custom2",rawName:"v-custom2"}]})}`
     )
   })
 
@@ -265,6 +265,19 @@ describe('codegen', () => {
     assertCodegen(
       '<input @input.self="onInput">',
       `with(this){return _c('input',{on:{"input":function($event){if($event.target !== $event.currentTarget)return null;onInput($event)}}})}`
+    )
+  })
+
+  // Github Issues #5146
+  it('generate events with generic modifiers and keycode correct order', () => {
+    assertCodegen(
+      '<input @keydown.enter.prevent="onInput">',
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;$event.preventDefault();onInput($event)}}})}`
+    )
+
+    assertCodegen(
+      '<input @keydown.enter.stop="onInput">',
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;$event.stopPropagation();onInput($event)}}})}`
     )
   })
 
