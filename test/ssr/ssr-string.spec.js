@@ -240,6 +240,75 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-show directive render', done => {
+    renderVmWithOptions({
+      template: '<div v-show="false"><span>inner</span></div>'
+    }, res => {
+      expect(res).toContain(
+        '<div server-rendered="true" style="display:none;"><span>inner</span></div>'
+      )
+      done()
+    })
+  })
+
+  it('v-show directive not passed to child', done => {
+    renderVmWithOptions({
+      template: '<foo v-show="false"></foo>',
+      components: {
+        foo: {
+          template: '<div><span>inner</span></div>'
+        }
+      }
+    }, res => {
+      expect(res).toContain(
+        '<div server-rendered="true" style="display:none;"><span>inner</span></div>'
+      )
+      done()
+    })
+  })
+
+  it('v-show directive not passed to slot', done => {
+    renderVmWithOptions({
+      template: '<foo v-show="false"><span>inner</span></foo>',
+      components: {
+        foo: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    }, res => {
+      expect(res).toContain(
+        '<div server-rendered="true" style="display:none;"><span>inner</span></div>'
+      )
+      done()
+    })
+  })
+
+  it('v-show directive merging on components', done => {
+    renderVmWithOptions({
+      template: '<foo v-show="false"></foo>',
+      components: {
+        foo: {
+          render: h => h('bar', {
+            directives: [{
+              name: 'show',
+              value: true
+            }]
+          }),
+          components: {
+            bar: {
+              render: h => h('div', 'inner')
+            }
+          }
+        }
+      }
+    }, res => {
+      expect(res).toContain(
+        '<div server-rendered="true" style="display:none;">inner</div>'
+      )
+      done()
+    })
+  })
+
   it('text interpolation', done => {
     renderVmWithOptions({
       template: '<div>{{ foo }} side {{ bar }}</div>',
