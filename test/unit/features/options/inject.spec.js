@@ -213,8 +213,8 @@ describe('Options provide/inject', () => {
     expect(child.foo).toBe(1)
     child.foo = 2
     expect(
-      `Avoid mutating a injections directly since the value will be ` +
+      `Avoid mutating an injected value directly since the changes will be ` +
       `overwritten whenever the provided component re-renders. ` +
-      `injections being mutated: "${key}"`).toHaveBeenWarned()
+      `injection being mutated: "${key}"`).toHaveBeenWarned()
   })
 })
