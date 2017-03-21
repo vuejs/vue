@@ -34,9 +34,9 @@ export function initInjections (vm: Component) {
           if (process.env.NODE_ENV !== 'production') {
             defineReactive(vm, key, source._provided[provideKey], () => {
               warn(
-                `Avoid mutating a injections directly since the value will be ` +
+                `Avoid mutating an injected value directly since the changes will be ` +
                 `overwritten whenever the provided component re-renders. ` +
-                `injections being mutated: "${key}"`,
+                `injection being mutated: "${key}"`,
                 vm
               )
             })
