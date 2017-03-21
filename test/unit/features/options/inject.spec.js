@@ -162,4 +162,59 @@ describe('Options provide/inject', () => {
       expect(vm.$el.textContent).toBe('123')
     })
   }
+
+  // Github issue #5223
+  it('should work with reactive array', done => {
+    const vm = new Vue({
+      template: `<div><child></child></div>`,
+      data () {
+        return {
+          foo: []
+        }
+      },
+      provide () {
+        return {
+          foo: this.foo
+        }
+      },
+      components: {
+        child: {
+          inject: ['foo'],
+          template: `<span>{{foo.length}}</span>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toEqual(`<span>0</span>`)
+    vm.foo.push(vm.foo.length)
+    vm.$nextTick(() => {
+      expect(vm.$el.innerHTML).toEqual(`<span>1</span>`)
+      vm.foo.pop()
+      vm.$nextTick(() => {
+        expect(vm.$el.innerHTML).toEqual(`<span>0</span>`)
+        done()
+      })
+    })
+  })
+
+  it('should warn when injections has been modified', () => {
+    const key = 'foo'
+    const vm = new Vue({
+      provide: {
+        foo: 1
+      }
+    })
+
+    const child = new Vue({
+      parent: vm,
+      inject: ['foo']
+    })
+
+    expect(child.foo).toBe(1)
+    child.foo = 2
+    expect(
+      `Avoid mutating a injections directly since the value will be ` +
+      `overwritten whenever the provided component re-renders. ` +
+      `injections being mutated: "${key}"`).toHaveBeenWarned()
+  })
 })
