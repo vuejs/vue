@@ -196,4 +196,25 @@ describe('Options provide/inject', () => {
       })
     })
   })
+
+  it('should warn when injections has been modified', () => {
+    const key = 'foo'
+    const vm = new Vue({
+      provide: {
+        foo: 1
+      }
+    })
+
+    const child = new Vue({
+      parent: vm,
+      inject: ['foo']
+    })
+
+    expect(child.foo).toBe(1)
+    child.foo = 2
+    expect(
+      `Avoid mutating a injections directly since the value will be ` +
+      `overwritten whenever the provided component re-renders. ` +
+      `injections being mutated: "${key}"`).toHaveBeenWarned()
+  })
 })
