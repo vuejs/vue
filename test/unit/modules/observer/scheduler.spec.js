@@ -144,4 +144,35 @@ describe('Scheduler', () => {
       expect(callOrder).toEqual([1, 2, 3])
     }).then(done)
   })
+
+  // Github issue #5191
+  it('emit should work when updated hook called', done => {
+    const el = document.createElement('div')
+    const vm = new Vue({
+      template: `<div><child @change="bar" :foo="foo"></child></div>`,
+      data: {
+        foo: 0
+      },
+      methods: {
+        bar: spy
+      },
+      components: {
+        child: {
+          template: `<div>{{foo}}</div>`,
+          props: ['foo'],
+          updated () {
+            this.$emit('change')
+          }
+        }
+      }
+    }).$mount(el)
+    vm.$nextTick(() => {
+      vm.foo = 1
+      vm.$nextTick(() => {
+        expect(vm.$el.innerHTML).toBe('<div>1</div>')
+        expect(spy).toHaveBeenCalled()
+        done()
+      })
+    })
+  })
 })
