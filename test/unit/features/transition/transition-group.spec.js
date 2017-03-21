@@ -293,5 +293,22 @@ if (!isIE9) {
       }).$mount()
       expect('<transition-group> children must be keyed: <div>').toHaveBeenWarned()
     })
+
+    it('component tag in transition group', () => {
+      const component = { template: '<div><slot></slot></div>' }
+      Vue.component('component', component)
+
+      const vm = new Vue({
+        template: `<transition-group tag="component"><span v-for="i in 3" :key="i">{{i}}</span></transition-group>`
+      }).$mount()
+
+      expect(vm.$el.outerHTML).toBe(
+          `<div>` +
+              `<span>1</span>` +
+              `<span>2</span>` +
+              `<span>3</span>` +
+          `</div>`
+      )
+    })
   })
 }
