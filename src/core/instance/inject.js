@@ -1,7 +1,8 @@
 /* @flow */
 
 import { hasSymbol } from 'core/util/env'
-import { extend } from 'shared/util'
+import { warn } from '../util/index'
+import { defineReactive } from '../observer/index'
 
 export function initProvide (vm: Component) {
   const provide = vm.$options.provide
@@ -14,7 +15,22 @@ export function initProvide (vm: Component) {
 
 export function initInjections (vm: Component) {
   const result = resolveInject(vm.$options.inject, vm)
-  extend(vm, result)
+  if (result) {
+    Object.keys(result).forEach(key => {
+      if (process.env.NODE_ENV !== 'production') {
+        defineReactive(vm, key, result[key], () => {
+          warn(
+            `Avoid mutating an injected value directly since the changes will be ` +
+            `overwritten whenever the provided component re-renders. ` +
+            `injection being mutated: "${key}"`,
+            vm
+          )
+        })
+      } else {
+        defineReactive(vm, key, result[key])
+      }
+    })
+  }
 }
 
 export function resolveInject (inject: any, vm: Component): ?Object {

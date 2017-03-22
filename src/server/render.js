@@ -144,6 +144,22 @@ function hasAncestorData (node: VNode) {
   return parentNode && (parentNode.data || hasAncestorData(parentNode))
 }
 
+function getVShowDirectiveInfo (node: VNode): ?VNodeDirective {
+  let dir: VNodeDirective
+  let tmp
+
+  while (node) {
+    if (node.data && node.data.directives) {
+      tmp = node.data.directives.find(dir => dir.name === 'show')
+      if (tmp) {
+        dir = tmp
+      }
+    }
+    node = node.parent
+  }
+  return dir
+}
+
 function renderStartingTag (node: VNode, context) {
   let markup = `<${node.tag}`
   const { directives, modules } = context
@@ -158,14 +174,22 @@ function renderStartingTag (node: VNode, context) {
     const dirs = node.data.directives
     if (dirs) {
       for (let i = 0; i < dirs.length; i++) {
-        const dirRenderer = directives[dirs[i].name]
-        if (dirRenderer) {
+        const name = dirs[i].name
+        const dirRenderer = directives[name]
+        if (dirRenderer && name !== 'show') {
           // directives mutate the node's data
           // which then gets rendered by modules
           dirRenderer(node, dirs[i])
         }
       }
     }
+
+    // v-show directive needs to be merged from parent to child
+    const vshowDirectiveInfo = getVShowDirectiveInfo(node)
+    if (vshowDirectiveInfo) {
+      directives.show(node, vshowDirectiveInfo)
+    }
+
     // apply other modules
     for (let i = 0; i < modules.length; i++) {
       const res = modules[i](node)
