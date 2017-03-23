@@ -284,6 +284,17 @@ describe('Observer', () => {
     delProp(obj3, 'a')
     expect(hasOwn(obj3, 'a')).toBe(false)
     expect(dep3.notify.calls.count()).toBe(2)
+    // set and delete non-numeric key on array
+    const arr2 = ['a']
+    const ob2 = observe(arr2)
+    const dep2 = ob2.dep
+    spyOn(dep2, 'notify')
+    setProp(arr2, 'b', 2)
+    expect(arr2.b).toBe(2)
+    expect(dep2.notify.calls.count()).toBe(1)
+    delProp(arr2, 'b')
+    expect(hasOwn(arr2, 'b')).toBe(false)
+    expect(dep2.notify.calls.count()).toBe(2)
   })
 
   it('warning set/delete on a Vue instance', done => {
