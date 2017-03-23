@@ -126,7 +126,67 @@ describe('Watcher', () => {
       expect(spy.calls.count()).toBe(1)
       Vue.delete(vm.b, 'e')
     }).then(() => {
+      expect(spy.calls.count()).toBe(1)
+    }).then(done)
+  })
+
+  it('fire change on prop watcher upon addition/deletion', done => {
+    new Watcher(vm, 'b.y', spy)
+    expect(spy.calls.count()).toBe(0)
+    // should NOT trigger notify since 'y' went from undefined to undefined
+    Vue.set(vm.b, 'x', 123)
+    waitForUpdate(() => {
+      expect(spy.calls.count()).toBe(0)
+      // should trigger notify since 'y' does not exist on the object yet
+      Vue.set(vm.b, 'y', 234)
+    }).then(() => {
+      expect(spy).toHaveBeenCalledWith(234, undefined)
+      expect(spy.calls.count()).toBe(1)
+      // should NOT trigger notify since watcher depends on 'y', not 'x'
+      Vue.set(vm.b, 'x', 345)
+    }).then(() => {
+      expect(spy.calls.count()).toBe(1)
+      // should trigger notify since watcher depends on 'y'
+      Vue.set(vm.b, 'y', 456)
+    }).then(() => {
+      expect(spy).toHaveBeenCalledWith(456, 234)
       expect(spy.calls.count()).toBe(2)
+      // should NOT trigger notify since watcher depends on 'y', not 'x'
+      Vue.delete(vm.b, 'x')
+    }).then(() => {
+      expect(spy.calls.count()).toBe(2)
+      // should trigger notify since watcher depends on 'y'
+      Vue.delete(vm.b, 'y')
+    }).then(() => {
+      expect(spy).toHaveBeenCalledWith(undefined, 456)
+      expect(spy.calls.count()).toBe(3)
+    }).then(done)
+  })
+
+  it('do not mix Vue.get() with . or []', done => {
+    const spy2 = jasmine.createSpy('watcher')
+    const spy3 = jasmine.createSpy('watcher')
+    // An initial watcher using '.' will not leave any traces on q.
+    new Watcher(vm, () => { return vm.b.q }, spy)
+    // Calling Vue.get() will create the field without notifying
+    // the first watcher.
+    new Watcher(vm, () => { return Vue.get(vm.b, 'q') }, spy2)
+    // We can now create a watcher using '.' since the field exists.
+    new Watcher(vm, () => { return vm.b.q }, spy3)
+    waitForUpdate(() => {
+      expect(spy.calls.count()).toBe(0)
+      expect(spy2.calls.count()).toBe(0)
+      expect(spy3.calls.count()).toBe(0)
+      Vue.set(vm.b, 'q', 123)
+    }).then(() => {
+      expect(spy.calls.count()).toBe(0)
+      expect(spy2.calls.count()).toBe(1)
+      expect(spy3.calls.count()).toBe(1)
+      Vue.delete(vm.b, 'q')
+    }).then(() => {
+      expect(spy.calls.count()).toBe(0)
+      expect(spy2.calls.count()).toBe(2)
+      expect(spy3.calls.count()).toBe(2)
     }).then(done)
   })
 

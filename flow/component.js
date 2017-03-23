@@ -35,6 +35,7 @@ declare interface Component {
   $mount: (el?: Element | string, hydrating?: boolean) => Component;
   $forceUpdate: () => void;
   $destroy: () => void;
+  $get: <T>(target: Object | Array<T>, key: string | number, defaultVal: T) => T;
   $set: <T>(target: Object | Array<T>, key: string | number, val: T) => T;
   $delete: <T>(target: Object | Array<T>, key: string | number) => void;
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;

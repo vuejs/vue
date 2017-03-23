@@ -5,7 +5,7 @@ import { initUse } from './use'
 import { initMixin } from './mixin'
 import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
-import { set, del } from '../observer/index'
+import { get, set, del } from '../observer/index'
 import builtInComponents from '../components/index'
 
 import {
@@ -28,7 +28,6 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     }
   }
   Object.defineProperty(Vue, 'config', configDef)
-
   // exposed util methods.
   // NOTE: these are not considered part of the public API - avoid relying on
   // them unless you are aware of the risk.
@@ -39,6 +38,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     defineReactive
   }
 
+  Vue.get = get
   Vue.set = set
   Vue.delete = del
   Vue.nextTick = nextTick

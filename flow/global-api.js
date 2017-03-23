@@ -5,6 +5,7 @@ declare interface GlobalAPI {
   util: Object;
 
   extend: (options: Object) => Function;
+  get: <T>(target: Object | Array<T>, key: string | number, defaultValue: T) => T;
   set: <T>(target: Object | Array<T>, key: string | number, value: T) => T;
   delete: <T>(target: Object| Array<T>, key: string | number) => void;
   nextTick: (fn: Function, context?: Object) => void;

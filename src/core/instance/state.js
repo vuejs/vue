@@ -4,6 +4,7 @@ import Dep from '../observer/dep'
 import Watcher from '../observer/watcher'
 
 import {
+  get,
   set,
   del,
   observe,
@@ -262,6 +263,7 @@ export function stateMixin (Vue: Class<Component>) {
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
+  Vue.prototype.$get = get
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
 
