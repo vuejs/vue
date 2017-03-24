@@ -31,6 +31,7 @@ export function initInjections (vm: Component) {
       let source = vm
       while (source) {
         if (source._provided && provideKey in source._provided) {
+          /* istanbul ignore else */
           if (process.env.NODE_ENV !== 'production') {
             defineReactive(vm, key, source._provided[provideKey], () => {
               warn(
