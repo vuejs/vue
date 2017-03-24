@@ -106,25 +106,24 @@ function flushSchedulerQueue (maxUpdateCount?: number) {
       }
     }
   } finally {
-    // a hook can throw as well
-    try {
-      // call updated hooks
-      hookIndex = index
-      while (hookIndex--) {
-        watcher = queue[hookIndex]
-        vm = watcher.vm
-        if (vm._watcher === watcher && vm._isMounted) {
-          callHook(vm, 'updated')
-        }
-      }
+    // reset scheduler before updated hook called
+    hookIndex = index
+    const oldQueue = queue.slice(0, hookIndex)
+    resetSchedulerState()
 
-      // devtool hook
-      /* istanbul ignore if */
-      if (devtools && config.devtools) {
-        devtools.emit('flush')
+    // call updated hooks
+    while (hookIndex--) {
+      watcher = oldQueue[hookIndex]
+      vm = watcher.vm
+      if (vm._watcher === watcher && vm._isMounted) {
+        callHook(vm, 'updated')
       }
-    } finally {
-      resetSchedulerState()
+    }
+
+    // devtool hook
+    /* istanbul ignore if */
+    if (devtools && config.devtools) {
+      devtools.emit('flush')
     }
   }
 }

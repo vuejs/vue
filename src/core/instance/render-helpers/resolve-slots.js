@@ -29,14 +29,15 @@ export function resolveSlots (
       defaultSlot.push(child)
     }
   }
-  // ignore single whitespace
-  if (defaultSlot.length && !(
-    defaultSlot.length === 1 &&
-    (defaultSlot[0].text === ' ' || defaultSlot[0].isComment)
-  )) {
+  // ignore whitespace
+  if (!defaultSlot.every(isWhitespace)) {
     slots.default = defaultSlot
   }
   return slots
+}
+
+function isWhitespace (node: VNode): boolean {
+  return node.isComment || node.text === ' '
 }
 
 export function resolveScopedSlots (

@@ -438,7 +438,7 @@ describe('Options props', () => {
   })
 
   // #4090
-  it('should not trigger wathcer on default value', done => {
+  it('should not trigger watcher on default value', done => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       template: `<test :value="a" :test="b"></test>`,

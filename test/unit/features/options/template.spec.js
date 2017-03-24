@@ -70,4 +70,15 @@ describe('Options template', () => {
     expect('invalid v-for iterator "2"').toHaveBeenWarned()
     expect('invalid expression: v-for="(1, 2) in a----"').toHaveBeenWarned()
   })
+
+  it('warn error in generated function (v-on)', () => {
+    new Vue({
+      template: `<div @click="delete('Delete')"></div>`,
+      methods: { delete: function () {} }
+    }).$mount()
+    expect('Error compiling template').toHaveBeenWarned()
+    expect(
+      `avoid using JavaScript unary operator as property name: "delete()" in expression @click="delete('Delete')"`
+    ).toHaveBeenWarned()
+  })
 })

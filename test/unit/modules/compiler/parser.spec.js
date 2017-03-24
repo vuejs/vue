@@ -77,6 +77,16 @@ describe('parser', () => {
     expect('Component template requires a root element, rather than just text').toHaveBeenWarned()
   })
 
+  it('warn text before root element', () => {
+    parse('before root {{ interpolation }}<div></div>', baseOptions)
+    expect('text "before root {{ interpolation }}" outside root element will be ignored.').toHaveBeenWarned()
+  })
+
+  it('warn text after root element', () => {
+    parse('<div></div>after root {{ interpolation }}', baseOptions)
+    expect('text "after root {{ interpolation }}" outside root element will be ignored.').toHaveBeenWarned()
+  })
+
   it('warn multiple root elements', () => {
     parse('<div></div><div></div>', baseOptions)
     expect('Component template should contain exactly one root element').toHaveBeenWarned()
@@ -325,7 +335,7 @@ describe('parser', () => {
     expect(ast.children[0].slotName).toBeUndefined()
   })
 
-  it('slot tag namped syntax', () => {
+  it('slot tag named syntax', () => {
     const ast = parse('<div><slot name="one">hello world</slot></div>', baseOptions)
     expect(ast.children[0].tag).toBe('slot')
     expect(ast.children[0].slotName).toBe('"one"')
@@ -504,6 +514,31 @@ describe('parser', () => {
       </div>
     `, options)
     expect(ast.tag).toBe('div')
-    expect(ast.chilldren).toBeUndefined()
+    expect(ast.children.length).toBe(0)
+  })
+
+  it('parse content in textarea as text', () => {
+    const options = extend({}, baseOptions)
+
+    const whitespace = parse(`
+      <textarea>
+        <p>Test 1</p>
+        test2
+      </textarea>
+    `, options)
+    expect(whitespace.tag).toBe('textarea')
+    expect(whitespace.children.length).toBe(1)
+    expect(whitespace.children[0].type).toBe(3)
+    // textarea is whitespace sensitive
+    expect(whitespace.children[0].text).toBe(`
+        <p>Test 1</p>
+        test2
+      `)
+
+    const comment = parse('<textarea><!--comment--></textarea>', options)
+    expect(comment.tag).toBe('textarea')
+    expect(comment.children.length).toBe(1)
+    expect(comment.children[0].type).toBe(3)
+    expect(comment.children[0].text).toBe('<!--comment-->')
   })
 })

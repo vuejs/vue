@@ -152,15 +152,13 @@ function genStaticKeys (modules) {
 
 var isUnaryTag = makeMap(
   'area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
-  'link,meta,param,source,track,wbr',
-  true
+  'link,meta,param,source,track,wbr'
 );
 
 // Elements that you can, intentionally, leave open
 // (and which close themselves)
 var canBeLeftOpenTag = makeMap(
-  'colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source',
-  true
+  'colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source'
 );
 
 // HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
@@ -170,8 +168,7 @@ var isNonPhrasingTag = makeMap(
   'details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,' +
   'h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,' +
   'optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,' +
-  'title,tr,track',
-  true
+  'title,tr,track'
 );
 
 /**
@@ -219,7 +216,7 @@ var IS_REGEX_CAPTURING_BROKEN = false;
 });
 
 // Special Elements (can contain anything)
-var isScriptOrStyle = makeMap('script,style', true);
+var isPlainTextElement = makeMap('script,style,textarea', true);
 var reCache = {};
 
 var decodingMap = {
@@ -245,8 +242,8 @@ function parseHTML (html, options) {
   var last, lastTag;
   while (html) {
     last = html;
-    // Make sure we're not in a script or style element
-    if (!lastTag || !isScriptOrStyle(lastTag)) {
+    // Make sure we're not in a plaintext content element like script/style
+    if (!lastTag || !isPlainTextElement(lastTag)) {
       var textEnd = html.indexOf('<');
       if (textEnd === 0) {
         // Comment:
@@ -326,7 +323,7 @@ function parseHTML (html, options) {
       var endTagLength = 0;
       var rest = html.replace(reStackedTag, function (all, text, endTag) {
         endTagLength = endTag.length;
-        if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
+        if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
           text = text
             .replace(/<!--([\s\S]*?)-->/g, '$1')
             .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1');
@@ -658,6 +655,10 @@ function isNative (Ctor) {
   return /native code/.test(Ctor.toString())
 }
 
+var hasSymbol =
+  typeof Symbol !== 'undefined' && isNative(Symbol) &&
+  typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys);
+
 /**
  * Defer a task to execute it asynchronously.
  */
@@ -865,25 +866,26 @@ function getAndRemoveAttr (el, name) {
 
 /*  */
 
+var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:/;
 var forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/;
 var forIteratorRE = /\((\{[^}]*\}|[^,]*),([^,]*)(?:,([^,]*))?\)/;
-var bindRE = /^:|^v-bind:/;
-var onRE = /^@|^v-on:/;
+
 var argRE = /:(.*)$/;
+var bindRE = /^:|^v-bind:/;
 var modifierRE = /\.[^.]+/g;
 
 var decodeHTMLCached = cached(he.decode);
 
 // configurable state
 var warn;
-var platformGetTagNamespace;
-var platformMustUseProp;
-var platformIsPreTag;
-var preTransforms;
-var transforms;
-var postTransforms;
 var delimiters;
+var transforms;
+var preTransforms;
+var postTransforms;
+var platformIsPreTag;
+var platformMustUseProp;
+var platformGetTagNamespace;
 
 /**
  * Convert HTML string to AST.
@@ -908,6 +910,13 @@ function parse (
   var inVPre = false;
   var inPre = false;
   var warned = false;
+
+  function warnOnce (msg) {
+    if (!warned) {
+      warned = true;
+      warn(msg);
+    }
+  }
 
   function endPre (element) {
     // check pre state
@@ -992,17 +1001,15 @@ function parse (
       }
 
       function checkRootConstraints (el) {
-        if (process.env.NODE_ENV !== 'production' && !warned) {
+        if (process.env.NODE_ENV !== 'production') {
           if (el.tag === 'slot' || el.tag === 'template') {
-            warned = true;
-            warn(
+            warnOnce(
               "Cannot use <" + (el.tag) + "> as component root element because it may " +
               'contain multiple nodes.'
             );
           }
           if (el.attrsMap.hasOwnProperty('v-for')) {
-            warned = true;
-            warn(
+            warnOnce(
               'Cannot use v-for on stateful component root element because ' +
               'it renders multiple elements.'
             );
@@ -1022,9 +1029,8 @@ function parse (
             exp: element.elseif,
             block: element
           });
-        } else if (process.env.NODE_ENV !== 'production' && !warned) {
-          warned = true;
-          warn(
+        } else if (process.env.NODE_ENV !== 'production') {
+          warnOnce(
             "Component template should contain exactly one root element. " +
             "If you are using v-if on multiple elements, " +
             "use v-else-if to chain them instead."
@@ -1069,11 +1075,16 @@ function parse (
 
     chars: function chars (text) {
       if (!currentParent) {
-        if (process.env.NODE_ENV !== 'production' && !warned && text === template) {
-          warned = true;
-          warn(
-            'Component template requires a root element, rather than just text.'
-          );
+        if (process.env.NODE_ENV !== 'production') {
+          if (text === template) {
+            warnOnce(
+              'Component template requires a root element, rather than just text.'
+            );
+          } else if ((text = text.trim())) {
+            warnOnce(
+              ("text \"" + text + "\" outside root element will be ignored.")
+            );
+          }
         }
         return
       }
@@ -1272,7 +1283,7 @@ function processComponent (el) {
 
 function processAttrs (el) {
   var list = el.attrsList;
-  var i, l, name, rawName, value, arg, modifiers, isProp;
+  var i, l, name, rawName, value, modifiers, isProp;
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name;
     value = list[i].value;
@@ -1310,7 +1321,8 @@ function processAttrs (el) {
         name = name.replace(dirRE, '');
         // parse arg
         var argMatch = name.match(argRE);
-        if (argMatch && (arg = argMatch[1])) {
+        var arg = argMatch && argMatch[1];
+        if (arg) {
           name = name.slice(0, -(arg.length + 1));
         }
         addDirective(el, name, rawName, value, arg, modifiers);
@@ -1562,9 +1574,9 @@ var modifierCode = {
   shift: genGuard("!$event.shiftKey"),
   alt: genGuard("!$event.altKey"),
   meta: genGuard("!$event.metaKey"),
-  left: genGuard("$event.button !== 0"),
-  middle: genGuard("$event.button !== 1"),
-  right: genGuard("$event.button !== 2")
+  left: genGuard("'button' in $event && $event.button !== 0"),
+  middle: genGuard("'button' in $event && $event.button !== 1"),
+  right: genGuard("'button' in $event && $event.button !== 2")
 };
 
 function genHandlers (events, native) {
@@ -1581,34 +1593,52 @@ function genHandler (
 ) {
   if (!handler) {
     return 'function(){}'
-  } else if (Array.isArray(handler)) {
+  }
+
+  if (Array.isArray(handler)) {
     return ("[" + (handler.map(function (handler) { return genHandler(name, handler); }).join(',')) + "]")
-  } else if (!handler.modifiers) {
-    return fnExpRE.test(handler.value) || simplePathRE.test(handler.value)
+  }
+
+  var isMethodPath = simplePathRE.test(handler.value);
+  var isFunctionExpression = fnExpRE.test(handler.value);
+
+  if (!handler.modifiers) {
+    return isMethodPath || isFunctionExpression
       ? handler.value
-      : ("function($event){" + (handler.value) + "}")
+      : ("function($event){" + (handler.value) + "}") // inline statement
   } else {
     var code = '';
+    var genModifierCode = '';
     var keys = [];
     for (var key in handler.modifiers) {
       if (modifierCode[key]) {
-        code += modifierCode[key];
+        genModifierCode += modifierCode[key];
+        // left/right
+        if (keyCodes[key]) {
+          keys.push(key);
+        }
       } else {
         keys.push(key);
       }
     }
     if (keys.length) {
-      code = genKeyFilter(keys) + code;
+      code += genKeyFilter(keys);
     }
-    var handlerCode = simplePathRE.test(handler.value)
+    // Make sure modifiers like prevent and stop get executed after key filtering
+    if (genModifierCode) {
+      code += genModifierCode;
+    }
+    var handlerCode = isMethodPath
       ? handler.value + '($event)'
-      : handler.value;
+      : isFunctionExpression
+        ? ("(" + (handler.value) + ")($event)")
+        : handler.value;
     return ("function($event){" + code + handlerCode + "}")
   }
 }
 
 function genKeyFilter (keys) {
-  return ("if(" + (keys.map(genFilterCode).join('&&')) + ")return null;")
+  return ("if(!('button' in $event)&&" + (keys.map(genFilterCode).join('&&')) + ")return null;")
 }
 
 function genFilterCode (key) {
@@ -1841,7 +1871,7 @@ function genData (el) {
   }
   // component v-model
   if (el.model) {
-    data += "model:{value:" + (el.model.value) + ",callback:" + (el.model.callback) + "},";
+    data += "model:{value:" + (el.model.value) + ",callback:" + (el.model.callback) + ",expression:" + (el.model.expression) + "},";
   }
   // inline-template
   if (el.inlineTemplate) {
@@ -1918,10 +1948,8 @@ function genChildren (el, checkSkip) {
         el$1.tag !== 'slot') {
       return genElement(el$1)
     }
-    var normalizationType = getNormalizationType(children);
-    return ("[" + (children.map(genNode).join(',')) + "]" + (checkSkip
-        ? normalizationType ? ("," + normalizationType) : ''
-        : ''))
+    var normalizationType = checkSkip ? getNormalizationType(children) : 0;
+    return ("[" + (children.map(genNode).join(',')) + "]" + (normalizationType ? ("," + normalizationType) : ''))
   }
 }
 
@@ -2013,14 +2041,22 @@ function transformSpecialNewlines (text) {
 
 /*  */
 
-// operators like typeof, instanceof and in are allowed
+// these keywords should not appear inside expressions, but operators like
+// typeof, instanceof and in are allowed
 var prohibitedKeywordRE = new RegExp('\\b' + (
   'do,if,for,let,new,try,var,case,else,with,await,break,catch,class,const,' +
   'super,throw,while,yield,delete,export,import,return,switch,default,' +
   'extends,finally,continue,debugger,function,arguments'
 ).split(',').join('\\b|\\b') + '\\b');
+
+// these unary operators should not be used as property/method names
+var unaryOperatorsRE = new RegExp('\\b' + (
+  'delete,typeof,void'
+).split(',').join('\\s*\\([^\\)]*\\)|\\b') + '\\s*\\([^\\)]*\\)');
+
 // check valid identifier for v-for
 var identRE = /[A-Za-z_$][\w$]*/;
+
 // strip strings in expressions
 var stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`/g;
 
@@ -2041,6 +2077,8 @@ function checkNode (node, errors) {
         if (value) {
           if (name === 'v-for') {
             checkFor(node, ("v-for=\"" + value + "\""), errors);
+          } else if (onRE.test(name)) {
+            checkEvent(value, (name + "=\"" + value + "\""), errors);
           } else {
             checkExpression(value, (name + "=\"" + value + "\""), errors);
           }
@@ -2055,6 +2093,17 @@ function checkNode (node, errors) {
   } else if (node.type === 2) {
     checkExpression(node.expression, node.text, errors);
   }
+}
+
+function checkEvent (exp, text, errors) {
+  var keywordMatch = exp.replace(stripStringRE, '').match(unaryOperatorsRE);
+  if (keywordMatch) {
+    errors.push(
+      "avoid using JavaScript unary operator as property name: " +
+      "\"" + (keywordMatch[0]) + "\" in expression " + (text.trim())
+    );
+  }
+  checkExpression(exp, text, errors);
 }
 
 function checkFor (node, text, errors) {
@@ -2112,7 +2161,7 @@ var config = {
   /**
    * Whether to record perf
    */
-  performance: process.env.NODE_ENV !== 'production',
+  performance: false,
 
   /**
    * Error handler for watcher errors
@@ -2219,9 +2268,11 @@ if (process.env.NODE_ENV !== 'production') {
     if (vm.$root === vm) {
       return '<Root>'
     }
-    var name = vm._isVue
-      ? vm.$options.name || vm.$options._componentTag
-      : vm.name;
+    var name = typeof vm === 'function' && vm.options
+      ? vm.options.name
+      : vm._isVue
+        ? vm.$options.name || vm.$options._componentTag
+        : vm.name;
 
     var file = vm._isVue && vm.$options.__file;
     if (!name && file) {
@@ -2624,6 +2675,7 @@ function genComponentModel (
 
   el.model = {
     value: ("(" + value + ")"),
+    expression: ("\"" + value + "\""),
     callback: ("function (" + baseValueExpression + ") {" + assignment + "}")
   };
 }
