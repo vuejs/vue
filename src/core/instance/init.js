@@ -18,8 +18,8 @@ export function initMixin (Vue: Class<Component>) {
     // a uid
     vm._uid = uid++
 
-    /* istanbul ignore if */
     let startTag, endTag
+    /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
       startTag = `vue-perf-init:${vm._uid}`
       endTag = `vue-perf-end:${vm._uid}`
