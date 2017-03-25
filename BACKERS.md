@@ -4,8 +4,8 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 ### $2000
 
-<a href="http://www.thedifferenceengine.io/">
-  <img width="600px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tde.png">
+<a href="https://stdlib.com/">
+  <img width="600px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
 </a>
 
 ---
@@ -52,15 +52,13 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
 </a>
 
-<a href="https://stdlib.com/" target="_blank">
-  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
-</a>
+#### Sacha Kupambana
 
 ---
 
 ### $250
 
-It could be you!
+[It could be you!](https://www.patreon.com/bePatron?u=2341390)
 
 ---
 
@@ -80,6 +78,10 @@ It could be you!
 
 <a href="https://monei.net/">
   <img width="200px" src="http://i.imgur.com/JUSjHAi.png">
+</a>
+
+<a href="https://www.accelebrate.com/">
+  <img width="220px" src="https://www.accelebrate.com/assets/images/accelebrate_logo@2x.png">
 </a>
 
 ---
@@ -222,3 +224,14 @@ It could be you!
 - Michael Richards
 - Eduardo Reveles
 - Jan Kremlacek
+- Guy Gavergun
+- Keith Bailey
+- Joel Birch
+- Bernhard E. Reiter
+- Radu Cretu
+- Luiz
+- Poamrong Rith
+- Chengzhi Yin
+- Dan Barrett
+- Zoran Knezevic
+- Charles Beaumont
