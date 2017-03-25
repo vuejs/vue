@@ -296,7 +296,7 @@ function extractProps (data: VNodeData, Ctor: Class<Component>, tag?: string): ?
         ) {
           tip(
             `Prop "${keyInLowerCase}" is passed to component ` +
-            `${formatComponentName(tag || Ctor)}, but the delared prop name is` +
+            `${formatComponentName(tag || Ctor)}, but the declared prop name is` +
             ` "${key}". ` +
             `Note that HTML attributes are case-insensitive and camelCased ` +
             `props need to use their kebab-case equivalents when using in-DOM ` +
