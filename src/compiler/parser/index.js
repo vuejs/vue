@@ -336,6 +336,10 @@ function processFor (el) {
     } else {
       el.alias = alias
     }
+    const scope = getAndRemoveAttr(el, 'with')
+    if (scope) {
+      el.forScope = scope
+    }
   }
 }
 
