@@ -104,6 +104,7 @@ declare type ASTElement = {
 
   for?: string;
   forProcessed?: boolean;
+  forScope?: string;
   key?: string;
   alias?: string;
   iterator1?: string;
