@@ -235,10 +235,9 @@ export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
  * Ensure a function is called only once.
  */
 export function once (fn: Function): Function {
-  let called = false
   return () => {
-    if (!called) {
-      called = true
+    if (!fn.called) {
+      fn.called = true
       fn()
     }
   }
