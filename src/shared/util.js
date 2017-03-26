@@ -236,8 +236,8 @@ export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
  */
 export function once (fn: Function): Function {
   return () => {
-    if (!fn.called) {
-      fn.called = true
+    if (!fn._INVOKED_FN) {
+      fn._INVOKED_FN = true
       fn()
     }
   }
