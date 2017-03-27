@@ -36,8 +36,9 @@ export default class TemplateStream extends Transform {
     }
 
     // inline preload directives for initial chunks
-    if (this.renderer.preloadLinks) {
-      this.push(this.renderer.preloadLinks)
+    const preloadLinks = this.renderer.renderPreloadLinks(this.context)
+    if (preloadLinks) {
+      this.push(preloadLinks)
     }
 
     // inline prefetch directives for async chunks not used during render
