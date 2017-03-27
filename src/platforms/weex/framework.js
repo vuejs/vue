@@ -23,6 +23,7 @@ export function init (cfg) {
   renderer.Element = cfg.Element
   renderer.Comment = cfg.Comment
   renderer.sendTasks = cfg.sendTasks
+  renderer.compileBundle = cfg.compileBundle
 }
 
 /**
@@ -103,7 +104,12 @@ export function createInstance (
     // deprecated
     __weex_require_module__: weexInstanceVar.requireModule // eslint-disable-line
   }, timerAPIs)
-  callFunction(instanceVars, appCode)
+
+  if (!callFunctionNative(instanceVars, appCode)) {
+    // If failed to compile functionBody on native side,
+    // fallback to 'callFunction()'.
+    callFunction(instanceVars, appCode)
+  }
 
   // Send `createFinish` signal to native.
   renderer.sendTasks(instanceId + '', [{ module: 'dom', method: 'createFinish', args: [] }], -1)
@@ -365,6 +371,58 @@ function callFunction (globalObjects, body) {
 
   const result = new Function(...globalKeys)
   return result(...globalValues)
+}
+
+/**
+ * Call a new function generated on the V8 native side.
+ *
+ * This function helps speed up bundle compiling. Normally, the V8
+ * engine needs to download, parse, and compile a bundle on every
+ * visit. If 'compileBundle()' is available on native side,
+ * the downloding, parsing, and compiling steps would be skipped.
+ * @param  {object} globalObjects
+ * @param  {string} body
+ * @return {boolean}
+ */
+function callFunctionNative (globalObjects, body) {
+  if (typeof renderer.compileBundle !== 'function') {
+    return false
+  }
+
+  let fn = void 0
+  let isNativeCompileOk = false
+  let script = '(function ('
+  const globalKeys = []
+  const globalValues = []
+  for (const key in globalObjects) {
+    globalKeys.push(key)
+    globalValues.push(globalObjects[key])
+  }
+  for (let i = 0; i < globalKeys.length - 1; ++i) {
+    script += globalKeys[i]
+    script += ','
+  }
+  script += globalKeys[globalKeys.length - 1]
+  script += ') {'
+  script += body
+  script += '} )'
+
+  try {
+    const weex = globalObjects.weex || {}
+    const config = weex.config || {}
+    fn = renderer.compileBundle(script,
+                                config.bundleUrl,
+                                config.bundleDigest,
+                                config.codeCachePath)
+    if (fn && typeof fn === 'function') {
+      fn(...globalValues)
+      isNativeCompileOk = true
+    }
+  } catch (e) {
+    console.error(e)
+  }
+
+  return isNativeCompileOk
 }
 
 /**
