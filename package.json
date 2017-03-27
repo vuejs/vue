@@ -103,6 +103,7 @@
     "rollup-plugin-replace": "^1.1.0",
     "rollup-watch": "^3.2.2",
     "selenium-server": "^2.53.1",
+    "serialize-javascript": "^1.3.0",
     "typescript": "^2.1.6",
     "uglify-js": "^2.6.2",
     "vue-ssr-html-stream": "^2.1.0",
