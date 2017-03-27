@@ -23,8 +23,8 @@ export type ParsedTemplate = {
 export default class TemplateRenderer {
   template: ParsedTemplate;
   publicPath: string;
-  preloadLinks: ?string;
-  asyncFiles: ?Array<string>;
+  preloadFiles: ?Array<string>;
+  prefetchFiles: ?Array<string>;
   mapFiles: ?(files: Array<string>) => Array<string>;
 
   constructor (options: TemplateRendererOptions) {
@@ -43,8 +43,8 @@ export default class TemplateRenderer {
       this.publicPath = clientManifest.publicPath.replace(/\/$/, '')
 
       // preload/prefetch drectives
-      const clientInitialFiles = []
-      const clientAsyncFiles = []
+      const clientInitialFiles = this.preloadFiles = []
+      const clientAsyncFiles = this.prefetchFiles = []
       clientManifest.chunks.forEach(chunk => {
         chunk.files.forEach(file => {
           if (chunk.initial) {
@@ -54,9 +54,6 @@ export default class TemplateRenderer {
           }
         })
       })
-
-      this.preloadLinks = this.renderPreloadLinks(clientInitialFiles)
-      this.asyncFiles = clientAsyncFiles
 
       // initial async chunk mapping
       this.mapFiles = createMapper(serverManifest, clientManifest)
@@ -70,7 +67,7 @@ export default class TemplateRenderer {
     return (
       template.head +
       (context.head || '') +
-      (this.preloadLinks || '') +
+      this.renderPreloadLinks(context) +
       this.renderPrefetchLinks(context) +
       (context.styles || '') +
       template.neck +
@@ -82,20 +79,25 @@ export default class TemplateRenderer {
     )
   }
 
-  renderPreloadLinks (files: Array<string>): string {
-    return files.map(file => {
-      return `<link rel="preload" href="${
-        this.publicPath}/${file
-      }" as="${
-        /\.css$/.test(file) ? 'style' : 'script'
-      }">`
-    }).join('')
+  renderPreloadLinks (context: Object): string {
+    const renderedFiles = this.getRenderedFilesFromContext(context)
+    if (this.preloadFiles || renderedFiles) {
+      return (this.preloadFiles || []).concat(renderedFiles || []).map(file => {
+        return `<link rel="preload" href="${
+          this.publicPath}/${file
+        }" as="${
+          /\.css$/.test(file) ? 'style' : 'script'
+        }">`
+      }).join('')
+    } else {
+      return ''
+    }
   }
 
   renderPrefetchLinks (context: Object): string {
     const renderedFiles = this.getRenderedFilesFromContext(context)
-    if (this.asyncFiles) {
-      return this.asyncFiles.map(file => {
+    if (this.prefetchFiles) {
+      return this.prefetchFiles.map(file => {
         if (!renderedFiles || renderedFiles.indexOf(file) < 0) {
           return `<link rel="prefetch" href="${this.publicPath}/${file}" as="script">`
         } else {
@@ -127,8 +129,12 @@ export default class TemplateRenderer {
   }
 
   getRenderedFilesFromContext (context: Object) {
+    if (context._mappedFiles) {
+      return context._mappedFiles
+    }
     if (context._evaluatedFiles && this.mapFiles) {
-      return this.mapFiles(Object.keys(context._evaluatedFiles))
+      const mapped = this.mapFiles(Object.keys(context._evaluatedFiles))
+      return (context._mappedFiles = mapped)
     }
   }
 
