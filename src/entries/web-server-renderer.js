@@ -3,7 +3,7 @@
 process.env.VUE_ENV = 'server'
 
 import { createRenderer as _createRenderer } from 'server/create-renderer'
-import { createBundleRendererCreator } from 'server/create-bundle-renderer'
+import { createBundleRendererCreator } from 'server/bundle-renderer/create-bundle-renderer'
 import { isUnaryTag, canBeLeftOpenTag } from 'web/compiler/util'
 import modules from 'web/server/modules/index'
 import baseDirectives from 'web/server/directives/index'
