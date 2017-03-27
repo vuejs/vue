@@ -22,7 +22,9 @@ export function createRenderer (options?: Object = {}): {
     // component cache (optional)
     cache: options.cache,
     // page template (optional)
-    template: options.template
+    template: options.template,
+    // server/client build manifests (optional)
+    manifest: options.manifest
   })
 }
 
