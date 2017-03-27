@@ -1,7 +1,7 @@
 /* @flow */
 
 import { createBundleRunner } from './create-bundle-runner'
-import type { Renderer, RenderOptions } from './create-renderer'
+import type { Renderer, RenderOptions } from '../create-renderer'
 import { createSourceMapConsumers, rewriteErrorTrace } from './source-map-support'
 
 const fs = require('fs')
