@@ -40,7 +40,7 @@ export type Accessors<T> = {
  */
 export type ThisTypedComponentOptions<Data, Methods, Computed, PropNames extends string = never, Instance extends AnyVue = Vue<Data, Methods, Computed, Record<PropNames, any>>> =
   object &
-  ComponentOptions<Data, Methods, Computed, PropNames[] | Record<PropNames, PropOptions>> &
+  ComponentOptions<Data | ((this: Record<PropNames, any> & AnyVue) => Data), Methods, Computed, PropNames[] | Record<PropNames, PropOptions>> &
   ThisType<Data & Methods & Computed & Record<PropNames, any> & Instance>;
 
 /**
@@ -49,7 +49,7 @@ export type ThisTypedComponentOptions<Data, Methods, Computed, PropNames extends
  */
 export type ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, PropNames extends string, Instance extends AnyVue = Vue<Data, Methods, Computed, PropNames>> =
   object &
-  ComponentOptions<Data, Methods, Computed, PropNames[]> &
+  ComponentOptions<Data | ((this: Record<PropNames, any> & AnyVue) => Data), Methods, Computed, PropNames[]> &
   ThisType<Data & Methods & Computed & Record<PropNames, any> & Instance>;
 
 /**
@@ -58,7 +58,7 @@ export type ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, Pro
  */
 export type ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Props, Instance extends AnyVue = Vue<Data, Methods, Computed, Props>> =
   object &
-  ComponentOptions<Data, Methods, Computed, Props> &
+  ComponentOptions<Data | ((this: Record<keyof Props, any> & AnyVue) => Data), Methods, Computed, Props> &
   ThisType<Data & Methods & Computed & Record<keyof Props, any> & Instance>;
 
 /**
@@ -71,7 +71,7 @@ export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, PropNa
 
 
 export interface ComponentOptions<Data, Methods, Computed, Props> {
-  data?: Data | (() => Data);
+  data?: Data;
   props?: Props;
   propsData?: Object;
   computed?: Accessors<Computed>;
