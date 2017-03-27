@@ -229,7 +229,7 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - Joel Birch
 - Bernhard E. Reiter
 - Radu Cretu
-- Luiz
+- Luiz Tanure
 - Poamrong Rith
 - Chengzhi Yin
 - Dan Barrett
