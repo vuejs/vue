@@ -1,5 +1,8 @@
 /* @flow */
 
+// TODO: handle <script> tag embedding (so we can get rid of html-webpack-plugin)
+// TODO: remove need for separate server manifest (should be included in bundle)
+
 import TemplateStream from './template-stream'
 import { createMapper } from './create-async-file-mapper'
 
@@ -23,6 +26,7 @@ export type ParsedTemplate = {
 export default class TemplateRenderer {
   template: ParsedTemplate;
   publicPath: string;
+  clientManifest: Object;
   preloadFiles: ?Array<string>;
   prefetchFiles: ?Array<string>;
   mapFiles: ?(files: Array<string>) => Array<string>;
@@ -40,6 +44,7 @@ export default class TemplateRenderer {
         )
       }
 
+      this.clientManifest = clientManifest
       this.publicPath = clientManifest.publicPath.replace(/\/$/, '')
 
       // preload/prefetch drectives
@@ -133,7 +138,16 @@ export default class TemplateRenderer {
       return context._mappedFiles
     }
     if (context._evaluatedFiles && this.mapFiles) {
-      const mapped = this.mapFiles(Object.keys(context._evaluatedFiles))
+      let mapped = this.mapFiles(Object.keys(context._evaluatedFiles))
+      // if a file has a no-css version (produced by vue-ssr-webpack-plugin),
+      // we should use that instead.
+      if (this.clientManifest && this.clientManifest.noCssAssets) {
+        mapped = mapped.map(file => {
+          return this.clientManifest.noCssAssets[file]
+            ? file.replace(/\.js$/, '.no-css.js')
+            : file
+        })
+      }
       return (context._mappedFiles = mapped)
     }
   }
