@@ -4,6 +4,7 @@ import RenderStream from './render-stream'
 import TemplateRenderer from './template-renderer/index'
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
+import type { ClientManifest, ServerManifest } from './template-renderer/index'
 
 export type Renderer = {
   renderToString: (component: Component, cb: (err: ?Error, res: ?string) => void) => void;
@@ -23,10 +24,8 @@ export type RenderOptions = {
   cache?: RenderCache;
   template?: string;
   basedir?: string;
-  manifest?: {
-    server: Object;
-    client: Object;
-  }
+  serverManifest?: ServerManifest;
+  clientManifest?: ClientManifest;
 };
 
 export function createRenderer ({
@@ -35,12 +34,14 @@ export function createRenderer ({
   isUnaryTag = (() => false),
   template,
   cache,
-  manifest
+  serverManifest,
+  clientManifest
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
   const templateRenderer = template && new TemplateRenderer({
     template,
-    manifest
+    serverManifest,
+    clientManifest
   })
 
   return {

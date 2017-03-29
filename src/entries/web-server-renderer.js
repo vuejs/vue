@@ -12,20 +12,14 @@ export function createRenderer (options?: Object = {}): {
   renderToString: Function,
   renderToStream: Function
 } {
-  return _createRenderer({
+  return _createRenderer(Object.assign({}, options, {
     isUnaryTag,
     canBeLeftOpenTag,
     modules,
     // user can provide server-side implementations for custom directives
     // when creating the renderer.
-    directives: Object.assign(baseDirectives, options.directives),
-    // component cache (optional)
-    cache: options.cache,
-    // page template (optional)
-    template: options.template,
-    // server/client build manifests (optional)
-    manifest: options.manifest
-  })
+    directives: Object.assign(baseDirectives, options.directives)
+  }))
 }
 
 export const createBundleRenderer = createBundleRendererCreator(createRenderer)

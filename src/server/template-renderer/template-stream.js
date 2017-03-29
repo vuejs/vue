@@ -1,7 +1,8 @@
 /* @flow */
 
 const Transform = require('stream').Transform
-import type TemplateRenderer, { ParsedTemplate } from './index'
+import type TemplateRenderer from './index'
+import type { ParsedTemplate } from './parse-template'
 
 export default class TemplateStream extends Transform {
   started: boolean;
