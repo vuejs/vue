@@ -3,7 +3,6 @@
 export type ParsedTemplate = {
   head: string;
   neck: string;
-  waist: string;
   tail: string;
 };
 
@@ -29,19 +28,9 @@ export function parseTemplate (
     }
   }
 
-  let waist = ''
-  let tail = template.slice(j + contentPlaceholder.length)
-  let k = tail.indexOf('</script>')
-  if (k > 0) {
-    k += '</script>'.length
-    waist = tail.slice(0, k)
-    tail = tail.slice(k)
-  }
-
   return {
     head: template.slice(0, i),
     neck: template.slice(i, j),
-    waist,
-    tail
+    tail: template.slice(j + contentPlaceholder.length)
   }
 }

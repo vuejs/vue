@@ -65,12 +65,10 @@ export default class TemplateStream extends Transform {
       this.push(state)
     }
 
-    this.push(this.template.waist)
-
-    // embed async chunks used in initial render
-    const asyncChunks = this.renderer.renderAsyncChunks(this.context)
-    if (asyncChunks) {
-      this.push(asyncChunks)
+    // embed scripts needed
+    const scripts = this.renderer.renderScripts(this.context)
+    if (scripts) {
+      this.push(scripts)
     }
 
     this.push(this.template.tail)
