@@ -6,8 +6,16 @@
  * directly in the rendered HTML to avoid waterfall requests.
  */
 
-export function createMapper (serverStats: Object, clientStats: Object) {
-  const fileMap = createFileMap(serverStats, clientStats)
+import type { ServerManifest, ClientManifest } from './index'
+
+export type AsyncFileMapper = (files: Array<string>) => Array<string>;
+
+export function createMapper (
+  serverManifest: ServerManifest,
+  clientManifest: ClientManifest
+): AsyncFileMapper {
+  const fileMap = createFileMap(serverManifest, clientManifest)
+
   return function mapFiles (files: Array<string>): Array<string> {
     const res = new Set()
     for (let i = 0; i < files.length; i++) {
@@ -22,54 +30,27 @@ export function createMapper (serverStats: Object, clientStats: Object) {
   }
 }
 
-function createFileMap (serverStats, clientStats) {
+function createFileMap (serverManifest, clientManifest) {
   const fileMap = new Map()
-  serverStats.assets
-    .filter(asset => /\.js$/.test(asset.name))
-    .forEach(asset => {
-      const mapped = mapFile(asset.name, serverStats, clientStats)
-      fileMap.set(asset.name, mapped)
-    })
+  Object.keys(serverManifest.modules).forEach(file => {
+    fileMap.set(file, mapFile(serverManifest.modules[file], clientManifest))
+  })
   return fileMap
 }
 
-function mapFile (file, serverStats, clientStats) {
-  // 1. server file -> server chunk ids
-  const serverChunkIds = new Set()
-  const asset = serverStats.assets.find(asset => asset.name === file)
-  if (!asset) return []
-  asset.chunks.forEach(id => {
-    const chunk = serverStats.chunks.find(c => c.id === id)
-    if (!chunk.initial) { // only map async chunks
-      serverChunkIds.add(id)
+function mapFile (moduleIds, clientManifest) {
+  const files = new Set()
+  moduleIds.forEach(id => {
+    const fileIndices = clientManifest.modules[id]
+    if (fileIndices) {
+      fileIndices.forEach(index => {
+        const file = clientManifest.all[index]
+        // only include async files
+        if (clientManifest.async.indexOf(file) > -1) {
+          files.add(file)
+        }
+      })
     }
   })
-
-  // 2. server chunk ids -> module identifiers
-  const moduleIdentifiers = []
-  serverStats.modules.forEach(module => {
-    if (module.chunks.some(id => serverChunkIds.has(id))) {
-      moduleIdentifiers.push(module.identifier)
-    }
-  })
-
-  // 3. module identifiers -> client chunk ids
-  const clientChunkIds = new Set()
-  moduleIdentifiers.forEach(identifier => {
-    const clientModule = clientStats.modules.find(m => m.identifier === identifier)
-    if (clientModule && clientModule.chunks.length === 1) { // ignore modules duplicated in multiple chunks
-      clientChunkIds.add(clientModule.chunks[0])
-    }
-  })
-
-  // 4. client chunks -> client files
-  const clientFiles = new Set()
-  Array.from(clientChunkIds).forEach(id => {
-    const chunk = clientStats.chunks.find(chunk => chunk.id === id)
-    if (!chunk.initial) {
-      chunk.files.forEach(file => clientFiles.add(file))
-    }
-  })
-
-  return Array.from(clientFiles)
+  return Array.from(files)
 }
