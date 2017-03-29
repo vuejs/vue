@@ -102,9 +102,8 @@ strats.data = function (
         : undefined
       if (instanceData) {
         return mergeData(instanceData, defaultData)
-      } else {
-        return defaultData
       }
+      return defaultData
     }
   }
 }

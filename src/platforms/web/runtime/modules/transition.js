@@ -304,9 +304,8 @@ function getHookArgumentsLength (fn: Function): boolean {
         ? invokerFns[0]
         : invokerFns
     )
-  } else {
-    return (fn._length || fn.length) > 1
   }
+  return (fn._length || fn.length) > 1
 }
 
 function _enter (_: any, vnode: VNodeWithData) {

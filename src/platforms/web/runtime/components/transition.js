@@ -31,9 +31,8 @@ function getRealChild (vnode: ?VNode): ?VNode {
   const compOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
   if (compOptions && compOptions.Ctor.options.abstract) {
     return getRealChild(getFirstComponentChild(compOptions.children))
-  } else {
-    return vnode
   }
+  return vnode
 }
 
 export function extractTransitionData (comp: Component): Object {

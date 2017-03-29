@@ -19,7 +19,6 @@ export function query (el: string | Element): Element {
       return document.createElement('div')
     }
     return selected
-  } else {
-    return el
   }
+  return el
 }

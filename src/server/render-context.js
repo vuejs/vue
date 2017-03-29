@@ -103,7 +103,6 @@ function normalizeAsync (cache, method) {
     return
   } else if (fn.length > 1) {
     return (key, cb) => fn.call(cache, key, cb)
-  } else {
-    return (key, cb) => cb(fn.call(cache, key))
   }
+  return (key, cb) => cb(fn.call(cache, key))
 }
