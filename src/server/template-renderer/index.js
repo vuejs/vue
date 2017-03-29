@@ -1,7 +1,5 @@
 /* @flow */
 
-// TODO: handle <script> tag embedding (so we can get rid of html-webpack-plugin)
-
 const serialize = require('serialize-javascript')
 
 import TemplateStream from './template-stream'
@@ -73,8 +71,7 @@ export default class TemplateRenderer {
       template.neck +
       content +
       this.renderState(context) +
-      template.waist +
-      this.renderAsyncChunks(context) +
+      this.renderScripts(context) +
       template.tail
     )
   }
@@ -117,10 +114,12 @@ export default class TemplateRenderer {
       : ''
   }
 
-  renderAsyncChunks (context: Object): string {
-    const renderedFiles = this.getRenderedFilesFromContext(context)
-    if (renderedFiles) {
-      return renderedFiles.map(file => {
+  renderScripts (context: Object): string {
+    if (this.clientManifest) {
+      const initial = this.clientManifest.initial
+      const async = this.getRenderedFilesFromContext(context)
+      const needed = [initial[0]].concat(async || [], initial.slice(1))
+      return needed.map(file => {
         return `<script src="${this.publicPath}/${file}"></script>`
       }).join('')
     } else {
