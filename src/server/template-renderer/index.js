@@ -38,9 +38,9 @@ export default class TemplateRenderer {
   publicPath: string;
   serverManifest: ServerManifest;
   clientManifest: ClientManifest;
-  preloadFiles: ?Array<string>;
-  prefetchFiles: ?Array<string>;
-  mapFiles: ?AsyncFileMapper;
+  preloadFiles: Array<string>;
+  prefetchFiles: Array<string>;
+  mapFiles: AsyncFileMapper;
 
   constructor (options: TemplateRendererOptions) {
     this.template = parseTemplate(options.template)
@@ -77,9 +77,9 @@ export default class TemplateRenderer {
   }
 
   renderPreloadLinks (context: Object): string {
-    const renderedFiles = this.getRenderedFilesFromContext(context)
-    if (this.preloadFiles || renderedFiles) {
-      return (this.preloadFiles || []).concat(renderedFiles || []).map(file => {
+    const usedAsyncFiles = this.getUsedAsyncFiles(context)
+    if (this.preloadFiles || usedAsyncFiles) {
+      return (this.preloadFiles || []).concat(usedAsyncFiles || []).map(file => {
         return `<link rel="preload" href="${
           this.publicPath}/${file
         }" as="${
@@ -92,10 +92,13 @@ export default class TemplateRenderer {
   }
 
   renderPrefetchLinks (context: Object): string {
-    const renderedFiles = this.getRenderedFilesFromContext(context)
     if (this.prefetchFiles) {
+      const usedAsyncFiles = this.getUsedAsyncFiles(context, true)
+      const alreadyRendered = file => {
+        return usedAsyncFiles && usedAsyncFiles.some(f => f === file)
+      }
       return this.prefetchFiles.map(file => {
-        if (!renderedFiles || renderedFiles.indexOf(file) < 0) {
+        if (!alreadyRendered(file)) {
           return `<link rel="prefetch" href="${this.publicPath}/${file}" as="script">`
         } else {
           return ''
@@ -117,7 +120,7 @@ export default class TemplateRenderer {
   renderScripts (context: Object): string {
     if (this.clientManifest) {
       const initial = this.clientManifest.initial
-      const async = this.getRenderedFilesFromContext(context)
+      const async = this.getUsedAsyncFiles(context)
       const needed = [initial[0]].concat(async || [], initial.slice(1))
       return needed.map(file => {
         return `<script src="${this.publicPath}/${file}"></script>`
@@ -127,12 +130,10 @@ export default class TemplateRenderer {
     }
   }
 
-  getRenderedFilesFromContext (context: Object) {
-    if (context._mappedFiles) {
-      return context._mappedFiles
-    }
-    if (context._evaluatedFiles && this.mapFiles) {
+  getUsedAsyncFiles (context: Object, raw?: boolean): ?Array<string> {
+    if (!context._mappedfiles && context._evaluatedFiles && this.mapFiles) {
       let mapped = this.mapFiles(Object.keys(context._evaluatedFiles))
+      context._rawMappedFiles = mapped
       // if a file has a no-css version (produced by vue-ssr-webpack-plugin),
       // we should use that instead.
       const noCssHash = this.clientManifest && this.clientManifest.hasNoCssVersion
@@ -143,12 +144,15 @@ export default class TemplateRenderer {
             : file
         })
       }
-      return (context._mappedFiles = mapped)
+      context._mappedFiles = mapped
     }
+    return raw
+      ? context._rawMappedFiles
+      : context._mappedFiles
   }
 
   // create a transform stream
-  createStream (context: ?Object) {
+  createStream (context: ?Object): TemplateStream {
     return new TemplateStream(this, context || {})
   }
 }
