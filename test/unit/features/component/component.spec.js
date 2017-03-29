@@ -366,4 +366,46 @@ describe('Component', () => {
       Vue.config.errorHandler = null
     }).then(done)
   })
+
+  it('relocates node without error', done => {
+    const el = document.createElement('div')
+    document.body.appendChild(el)
+    const target = document.createElement('div')
+    document.body.appendChild(target)
+
+    const Test = {
+      render (h) {
+        return h('div', { class: 'test' }, this.$slots.default)
+      },
+      mounted () {
+        target.appendChild(this.$el)
+      },
+      beforeDestroy () {
+        const parent = this.$el.parentNode
+        if (parent) {
+          parent.removeChild(this.$el)
+        }
+      }
+    }
+    const vm = new Vue({
+      data () {
+        return {
+          view: true
+        }
+      },
+      template: `<div><test v-if="view">Test</test></div>`,
+      components: {
+        test: Test
+      }
+    }).$mount(el)
+
+    expect(el.outerHTML).toBe('<div></div>')
+    expect(target.outerHTML).toBe('<div><div class="test">Test</div></div>')
+    vm.view = false
+    waitForUpdate(() => {
+      expect(el.outerHTML).toBe('<div></div>')
+      expect(target.outerHTML).toBe('<div></div>')
+      vm.$destroy()
+    }).then(done)
+  })
 })
