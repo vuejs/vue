@@ -1,5 +1,7 @@
 /* @flow */
 
+export const SSR_ATTR = 'data-server-rendered'
+
 /**
  * Convert a value to a string that is actually rendered.
  */

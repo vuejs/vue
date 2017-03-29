@@ -47,7 +47,7 @@ describe('SSR: bundle renderer', () => {
       const context = { url: '/test' }
       renderer.renderToString(context, (err, res) => {
         expect(err).toBeNull()
-        expect(res).toBe('<div server-rendered="true">/test</div>')
+        expect(res).toBe('<div data-server-rendered="true">/test</div>')
         expect(context.msg).toBe('hello')
         done()
       })
@@ -63,7 +63,7 @@ describe('SSR: bundle renderer', () => {
         res += chunk.toString()
       })
       stream.on('end', () => {
-        expect(res).toBe('<div server-rendered="true">/test</div>')
+        expect(res).toBe('<div data-server-rendered="true">/test</div>')
         expect(context.msg).toBe('hello')
         done()
       })
@@ -109,7 +109,7 @@ describe('SSR: bundle renderer', () => {
       }
     }
     createRenderer('cache.js', renderer => {
-      const expected = '<div server-rendered="true">/test</div>'
+      const expected = '<div data-server-rendered="true">/test</div>'
       const key = 'app::1'
       renderer.renderToString((err, res) => {
         expect(err).toBeNull()
@@ -152,7 +152,7 @@ describe('SSR: bundle renderer', () => {
       }
     }
     createRenderer('cache.js', renderer => {
-      const expected = '<div server-rendered="true">/test</div>'
+      const expected = '<div data-server-rendered="true">/test</div>'
       const key = 'app::1'
       renderer.renderToString((err, res) => {
         expect(err).toBeNull()
@@ -178,7 +178,7 @@ describe('SSR: bundle renderer', () => {
       const context = { url: '/test' }
       renderer.renderToString(context, (err, res) => {
         expect(err).toBeNull()
-        expect(res).toBe('<div server-rendered="true">/test<div>async</div></div>')
+        expect(res).toBe('<div data-server-rendered="true">/test<div>async</div></div>')
         done()
       })
     }, { asBundle: true })
@@ -193,7 +193,7 @@ describe('SSR: bundle renderer', () => {
         res += chunk.toString()
       })
       stream.on('end', () => {
-        expect(res).toBe('<div server-rendered="true">/test<div>async</div></div>')
+        expect(res).toBe('<div data-server-rendered="true">/test<div>async</div></div>')
         done()
       })
     }, { asBundle: true })
@@ -232,7 +232,7 @@ describe('SSR: bundle renderer', () => {
         expect(err).toBeNull()
         expect(res).toContain(
           `<html><head>${context.head}${context.styles}</head><body>` +
-          `<div server-rendered="true">/test</div>` +
+          `<div data-server-rendered="true">/test</div>` +
           `<script>window.__INITIAL_STATE__={"a":1}</script>` +
           `</body></html>`
         )
@@ -260,7 +260,7 @@ describe('SSR: bundle renderer', () => {
       stream.on('end', () => {
         expect(res).toContain(
           `<html><head>${context.head}${context.styles}</head><body>` +
-          `<div server-rendered="true">/test</div>` +
+          `<div data-server-rendered="true">/test</div>` +
           `<script>window.__INITIAL_STATE__={"a":1}</script>` +
           `</body></html>`
         )

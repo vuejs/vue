@@ -1,6 +1,7 @@
 import Vue from 'vue'
-import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
+import { SSR_ATTR } from 'shared/util'
+import { patch } from 'web/runtime/patch'
 
 describe('vdom patch: hydration', () => {
   let vnode0
@@ -14,7 +15,7 @@ describe('vdom patch: hydration', () => {
     function init (vnode) { result.push(vnode) }
     function createServerRenderedDOM () {
       const root = document.createElement('div')
-      root.setAttribute('server-rendered', 'true')
+      root.setAttribute(SSR_ATTR, 'true')
       const span = document.createElement('span')
       root.appendChild(span)
       const div = document.createElement('div')
@@ -65,7 +66,7 @@ describe('vdom patch: hydration', () => {
   it('should warn message that virtual DOM tree is not matching when hydrate element', () => {
     function createServerRenderedDOM () {
       const root = document.createElement('div')
-      root.setAttribute('server-rendered', 'true')
+      root.setAttribute(SSR_ATTR, 'true')
       const span = document.createElement('span')
       root.appendChild(span)
       const div = document.createElement('div')
@@ -89,7 +90,7 @@ describe('vdom patch: hydration', () => {
   // component hydration is better off with a more e2e approach
   it('should hydrate components when server-rendered DOM tree is same as virtual DOM tree', done => {
     const dom = document.createElement('div')
-    dom.setAttribute('server-rendered', 'true')
+    dom.setAttribute(SSR_ATTR, 'true')
     dom.innerHTML = '<span>foo</span><div class="b a"><span>foo qux</span></div><!---->'
     const originalNode1 = dom.children[0]
     const originalNode2 = dom.children[1]
@@ -131,7 +132,7 @@ describe('vdom patch: hydration', () => {
 
   it('should warn failed hydration for non-matching DOM in child component', () => {
     const dom = document.createElement('div')
-    dom.setAttribute('server-rendered', 'true')
+    dom.setAttribute(SSR_ATTR, 'true')
     dom.innerHTML = '<div><span></span></div>'
 
     new Vue({
@@ -148,7 +149,7 @@ describe('vdom patch: hydration', () => {
 
   it('should overwrite textNodes in the correct position but with mismatching text without warning', () => {
     const dom = document.createElement('div')
-    dom.setAttribute('server-rendered', 'true')
+    dom.setAttribute(SSR_ATTR, 'true')
     dom.innerHTML = '<div><span>foo</span></div>'
 
     new Vue({
@@ -169,7 +170,7 @@ describe('vdom patch: hydration', () => {
 
   it('should pick up elements with no children and populate without warning', done => {
     const dom = document.createElement('div')
-    dom.setAttribute('server-rendered', 'true')
+    dom.setAttribute(SSR_ATTR, 'true')
     dom.innerHTML = '<div><span></span></div>'
     const span = dom.querySelector('span')
 
