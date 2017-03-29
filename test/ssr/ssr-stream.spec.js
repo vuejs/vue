@@ -51,7 +51,7 @@ describe('SSR: renderToStream', () => {
     })
     stream.on('end', () => {
       expect(res).toContain(
-        '<div server-rendered="true">' +
+        '<div data-server-rendered="true">' +
           '<p class="hi">yoyo</p> ' +
           '<div id="ho" class="a red"></div> ' +
           '<span>hi</span> ' +
@@ -125,7 +125,7 @@ describe('SSR: renderToStream', () => {
     stream.on('end', () => {
       expect(res).toContain(
         `<html><head>${context.head}${context.styles}</head><body>` +
-        `<div server-rendered="true">hi</div>` +
+        `<div data-server-rendered="true">hi</div>` +
         `<script>window.__INITIAL_STATE__={"a":1}</script>` +
         `</body></html>`
       )
