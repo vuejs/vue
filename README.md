@@ -60,6 +60,10 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
   <a href="https://leanpub.com/vuejs2" target="_blank">
     <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
   </a>
+  <br><br>
+  <a href="https://fancygrid.com" target="_blank">
+    <img width="120px" src="http://fancygrid.com/logo/logo.png">
+  </a>
 </p>
 
 ## Intro
