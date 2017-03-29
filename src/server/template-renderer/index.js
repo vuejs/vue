@@ -141,9 +141,9 @@ export default class TemplateRenderer {
       let mapped = this.mapFiles(Object.keys(context._evaluatedFiles))
       // if a file has a no-css version (produced by vue-ssr-webpack-plugin),
       // we should use that instead.
-      if (this.clientManifest && this.clientManifest.noCssAssets) {
+      if (this.clientManifest && this.clientManifest.hasNoCssVersion) {
         mapped = mapped.map(file => {
-          return this.clientManifest.noCssAssets[file]
+          return this.clientManifest.hasNoCssVersion[file]
             ? file.replace(/\.js$/, '.no-css.js')
             : file
         })
