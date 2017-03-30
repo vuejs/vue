@@ -80,11 +80,7 @@ export default class TemplateRenderer {
     const usedAsyncFiles = this.getUsedAsyncFiles(context)
     if (this.preloadFiles || usedAsyncFiles) {
       return (this.preloadFiles || []).concat(usedAsyncFiles || []).map(file => {
-        return `<link rel="preload" href="${
-          this.publicPath}/${file
-        }" as="${
-          /\.css$/.test(file) ? 'style' : 'script'
-        }">`
+        return `<link rel="preload" href="${this.publicPath}/${file}" as="script">`
       }).join('')
     } else {
       return ''
