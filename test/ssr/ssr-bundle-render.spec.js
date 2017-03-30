@@ -1,38 +1,28 @@
-import path from 'path'
-import webpack from 'webpack'
-import MemoeryFS from 'memory-fs'
-import VueSSRPlugin from 'vue-ssr-webpack-plugin'
+import { VueSSRServerPlugin } from 'vue-ssr-webpack-plugin'
+import { compileWithWebpack } from './compile-with-webpack'
 import { createBundleRenderer } from '../../packages/vue-server-renderer'
 
-export function createRenderer (file, cb, options) {
+export function createRenderer (file, options, cb) {
+  if (typeof options === 'function') {
+    cb = options
+    options = undefined
+  }
   const asBundle = !!(options && options.asBundle)
   if (options) delete options.asBundle
 
-  const config = {
+  compileWithWebpack(file, {
     target: 'node',
-    entry: path.resolve(__dirname, 'fixtures', file),
     devtool: asBundle ? '#source-map' : false,
     output: {
       path: '/',
       filename: 'bundle.js',
       libraryTarget: 'commonjs2'
     },
-    module: {
-      rules: [{ test: /\.js$/, loader: 'babel-loader' }]
-    },
     externals: [require.resolve('../../dist/vue.runtime.common.js')],
     plugins: asBundle
-      ? [new VueSSRPlugin()]
+      ? [new VueSSRServerPlugin()]
       : []
-  }
-
-  const compiler = webpack(config)
-  const fs = new MemoeryFS()
-  compiler.outputFileSystem = fs
-
-  compiler.run((err, stats) => {
-    expect(err).toBeFalsy()
-    expect(stats.errors).toBeFalsy()
+  }, fs => {
     const bundle = asBundle
       ? JSON.parse(fs.readFileSync('/vue-ssr-bundle.json', 'utf-8'))
       : fs.readFileSync('/bundle.js', 'utf-8')
@@ -108,7 +98,7 @@ describe('SSR: bundle renderer', () => {
         }
       }
     }
-    createRenderer('cache.js', renderer => {
+    createRenderer('cache.js', options, renderer => {
       const expected = '<div data-server-rendered="true">/test</div>'
       const key = 'app::1'
       renderer.renderToString((err, res) => {
@@ -125,7 +115,7 @@ describe('SSR: bundle renderer', () => {
           done()
         })
       })
-    }, options)
+    })
   })
 
   it('render with cache (get/set/has)', done => {
@@ -151,7 +141,7 @@ describe('SSR: bundle renderer', () => {
         }
       }
     }
-    createRenderer('cache.js', renderer => {
+    createRenderer('cache.js', options, renderer => {
       const expected = '<div data-server-rendered="true">/test</div>'
       const key = 'app::1'
       renderer.renderToString((err, res) => {
@@ -170,22 +160,22 @@ describe('SSR: bundle renderer', () => {
           done()
         })
       })
-    }, options)
+    })
   })
 
   it('renderToString (bundle format with code split)', done => {
-    createRenderer('split.js', renderer => {
+    createRenderer('split.js', { asBundle: true }, renderer => {
       const context = { url: '/test' }
       renderer.renderToString(context, (err, res) => {
         expect(err).toBeNull()
         expect(res).toBe('<div data-server-rendered="true">/test<div>async</div></div>')
         done()
       })
-    }, { asBundle: true })
+    })
   })
 
   it('renderToStream (bundle format with code split)', done => {
-    createRenderer('split.js', renderer => {
+    createRenderer('split.js', { asBundle: true }, renderer => {
       const context = { url: '/test' }
       const stream = renderer.renderToStream(context)
       let res = ''
@@ -196,27 +186,27 @@ describe('SSR: bundle renderer', () => {
         expect(res).toBe('<div data-server-rendered="true">/test<div>async</div></div>')
         done()
       })
-    }, { asBundle: true })
+    })
   })
 
   it('renderToString catch error (bundle format with source map)', done => {
-    createRenderer('error.js', renderer => {
+    createRenderer('error.js', { asBundle: true }, renderer => {
       renderer.renderToString(err => {
         expect(err.stack).toContain('test/ssr/fixtures/error.js:1:6')
         expect(err.message).toBe('foo')
         done()
       })
-    }, { asBundle: true })
+    })
   })
 
   it('renderToString catch error (bundle format with source map)', done => {
-    createRenderer('error.js', renderer => {
+    createRenderer('error.js', { asBundle: true }, renderer => {
       const stream = renderer.renderToStream()
       stream.on('error', err => {
         expect(err.stack).toContain('test/ssr/fixtures/error.js:1:6')
         expect(err.message).toBe('foo')
         done()
       })
-    }, { asBundle: true })
+    })
   })
 })

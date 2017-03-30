@@ -1,11 +1,44 @@
+import webpack from 'webpack'
 import Vue from '../../dist/vue.runtime.common.js'
+import { VueSSRClientPlugin } from 'vue-ssr-webpack-plugin'
+import { compileWithWebpack } from './compile-with-webpack'
 import { createRenderer } from '../../packages/vue-server-renderer'
 import { createRenderer as createBundleRenderer } from './ssr-bundle-render.spec.js'
+
+const defaultTemplate = `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
+
+function generateClientManifest (file, cb) {
+  compileWithWebpack(file, {
+    output: {
+      path: '/',
+      filename: '[name].js'
+    },
+    plugins: [
+      new webpack.optimize.CommonsChunkPlugin({
+        name: 'manifest',
+        minChunks: Infinity
+      }),
+      new VueSSRClientPlugin()
+    ]
+  }, fs => {
+    cb(JSON.parse(fs.readFileSync('/vue-ssr-client-manifest.json', 'utf-8')))
+  })
+}
+
+function createRendererWithManifest (file, cb) {
+  generateClientManifest(file, clientManifest => {
+    createBundleRenderer(file, {
+      asBundle: true,
+      template: defaultTemplate,
+      clientManifest
+    }, cb)
+  })
+}
 
 describe('SSR: template option', () => {
   it('renderToString', done => {
     const renderer = createRenderer({
-      template: `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
+      template: defaultTemplate
     })
 
     const context = {
@@ -30,7 +63,7 @@ describe('SSR: template option', () => {
 
   it('renderToStream', done => {
     const renderer = createRenderer({
-      template: `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
+      template: defaultTemplate
     })
 
     const context = {
@@ -59,7 +92,10 @@ describe('SSR: template option', () => {
   })
 
   it('bundleRenderer + renderToString', done => {
-    createBundleRenderer('app.js', renderer => {
+    createBundleRenderer('app.js', {
+      asBundle: true,
+      template: defaultTemplate
+    }, renderer => {
       const context = {
         head: '<meta name="viewport" content="width=device-width">',
         styles: '<style>h1 { color: red }</style>',
@@ -77,13 +113,14 @@ describe('SSR: template option', () => {
         expect(context.msg).toBe('hello')
         done()
       })
-    }, {
-      template: `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
     })
   })
 
   it('bundleRenderer + renderToStream', done => {
-    createBundleRenderer('app.js', renderer => {
+    createBundleRenderer('app.js', {
+      asBundle: true,
+      template: defaultTemplate
+    }, renderer => {
       const context = {
         head: '<meta name="viewport" content="width=device-width">',
         styles: '<style>h1 { color: red }</style>',
@@ -105,8 +142,47 @@ describe('SSR: template option', () => {
         expect(context.msg).toBe('hello')
         done()
       })
-    }, {
-      template: `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
+    })
+  })
+
+  const expectedHTMLWithManifest =
+    `<html><head>` +
+      // used chunks should have preload
+      `<link rel="preload" href="/manifest.js" as="script">` +
+      `<link rel="preload" href="/main.js" as="script">` +
+      `<link rel="preload" href="/0.js" as="script">` +
+      // unused chunks should have prefetch
+      `<link rel="prefetch" href="/1.js" as="script">` +
+    `</head><body>` +
+      `<div data-server-rendered="true"><div>async</div></div>` +
+      // manifest chunk should be first
+      `<script src="/manifest.js"></script>` +
+      // async chunks should be before main chunk
+      `<script src="/0.js"></script>` +
+      `<script src="/main.js"></script>` +
+    `</body></html>`
+
+  it('bundleRenderer + renderToString + clientManifest', done => {
+    createRendererWithManifest('split.js', renderer => {
+      renderer.renderToString({}, (err, res) => {
+        expect(err).toBeNull()
+        expect(res).toContain(expectedHTMLWithManifest)
+        done()
+      })
+    })
+  })
+
+  it('bundleRenderer + renderToStream + clientManifest', done => {
+    createRendererWithManifest('split.js', renderer => {
+      const stream = renderer.renderToStream({})
+      let res = ''
+      stream.on('data', chunk => {
+        res += chunk.toString()
+      })
+      stream.on('end', () => {
+        expect(res).toContain(expectedHTMLWithManifest)
+        done()
+      })
     })
   })
 })
