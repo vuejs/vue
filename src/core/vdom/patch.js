@@ -237,7 +237,7 @@ export function createPatchFunction (backend) {
   function insert (parent, elm, ref) {
     if (isDef(parent)) {
       if (isDef(ref)) {
-        if (ref.parentNode && ref.parentNode === parent) {
+        if (ref.parentNode === parent) {
           nodeOps.insertBefore(parent, elm, ref)
         }
       } else {
