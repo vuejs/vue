@@ -45,8 +45,8 @@ function mapFile (moduleIds, clientManifest) {
     if (fileIndices) {
       fileIndices.forEach(index => {
         const file = clientManifest.all[index]
-        // only include async files
-        if (clientManifest.async.indexOf(file) > -1) {
+        // only include async files or non-js assets
+        if (clientManifest.async.indexOf(file) > -1 || !(/\.js($|\?)/.test(file))) {
           files.add(file)
         }
       })

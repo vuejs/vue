@@ -25,12 +25,13 @@ function generateClientManifest (file, cb) {
   })
 }
 
-function createRendererWithManifest (file, cb) {
+function createRendererWithManifest (file, cb, shouldPreload) {
   generateClientManifest(file, clientManifest => {
     createBundleRenderer(file, {
       asBundle: true,
       template: defaultTemplate,
-      clientManifest
+      clientManifest,
+      shouldPreload
     }, cb)
   })
 }
@@ -145,16 +146,20 @@ describe('SSR: template option', () => {
     })
   })
 
-  const expectedHTMLWithManifest =
+  const expectedHTMLWithManifest = preloadImage =>
     `<html><head>` +
       // used chunks should have preload
       `<link rel="preload" href="/manifest.js" as="script">` +
       `<link rel="preload" href="/main.js" as="script">` +
       `<link rel="preload" href="/0.js" as="script">` +
+      // images are only preloaded when explicitly asked for
+      (preloadImage ? `<link rel="preload" href="/test.png" as="image">` : ``) +
+      // critical assets like fonts are preloaded by default
+      `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` +
       // unused chunks should have prefetch
       `<link rel="prefetch" href="/1.js" as="script">` +
     `</head><body>` +
-      `<div data-server-rendered="true"><div>async</div></div>` +
+      `<div data-server-rendered="true"><div>async test.woff2 test.png</div></div>` +
       // manifest chunk should be first
       `<script src="/manifest.js"></script>` +
       // async chunks should be before main chunk
@@ -166,7 +171,7 @@ describe('SSR: template option', () => {
     createRendererWithManifest('split.js', renderer => {
       renderer.renderToString({}, (err, res) => {
         expect(err).toBeNull()
-        expect(res).toContain(expectedHTMLWithManifest)
+        expect(res).toContain(expectedHTMLWithManifest(false))
         done()
       })
     })
@@ -180,9 +185,13 @@ describe('SSR: template option', () => {
         res += chunk.toString()
       })
       stream.on('end', () => {
-        expect(res).toContain(expectedHTMLWithManifest)
+        expect(res).toContain(expectedHTMLWithManifest(true))
         done()
       })
+    }, (file, type) => {
+      if (type === 'image' || type === 'script' || type === 'font') {
+        return true
+      }
     })
   })
 })
