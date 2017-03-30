@@ -106,8 +106,7 @@
     "serialize-javascript": "^1.3.0",
     "typescript": "^2.1.6",
     "uglify-js": "^2.6.2",
-    "vue-ssr-html-stream": "^2.1.0",
-    "vue-ssr-webpack-plugin": "^1.0.0",
+    "vue-ssr-webpack-plugin": "^2.0.0",
     "webpack": "^2.2.0",
     "weex-js-runtime": "^0.17.0-alpha4",
     "weex-vdom-tester": "^0.1.4"
