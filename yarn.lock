@@ -2418,6 +2418,10 @@ has@^1.0.1:
   dependencies:
     function-bind "^1.0.2"
 
+hash-sum@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/hash-sum/-/hash-sum-1.0.2.tgz#33b40777754c6432573c120cc3808bbd10d47f04"
+
 hash.js@^1.0.0, hash.js@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/hash.js/-/hash.js-1.0.3.tgz#1332ff00156c0a0ffdd8236013d07b77a0451573"
@@ -5042,17 +5046,12 @@ void-elements@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
 
-vue-ssr-html-stream@^2.1.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/vue-ssr-html-stream/-/vue-ssr-html-stream-2.2.0.tgz#56d78b96c9c172b43749a324c156e888aca96d92"
-  dependencies:
-    serialize-javascript "^1.3.0"
-
-vue-ssr-webpack-plugin@^1.0.0:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/vue-ssr-webpack-plugin/-/vue-ssr-webpack-plugin-1.0.2.tgz#d093f266180966b6072d25900e01fd67b2deffff"
+vue-ssr-webpack-plugin@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/vue-ssr-webpack-plugin/-/vue-ssr-webpack-plugin-2.0.1.tgz#dc9d442961ebe2bb49eb06638ce141ef2ecd68b8"
   dependencies:
     chalk "^1.1.3"
+    hash-sum "^1.0.2"
 
 walkdir@^0.0.11:
   version "0.0.11"
