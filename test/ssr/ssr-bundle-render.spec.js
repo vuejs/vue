@@ -4,7 +4,7 @@ import MemoeryFS from 'memory-fs'
 import VueSSRPlugin from 'vue-ssr-webpack-plugin'
 import { createBundleRenderer } from '../../packages/vue-server-renderer'
 
-function createRenderer (file, cb, options) {
+export function createRenderer (file, cb, options) {
   const asBundle = !!(options && options.asBundle)
   if (options) delete options.asBundle
 
@@ -218,57 +218,5 @@ describe('SSR: bundle renderer', () => {
         done()
       })
     }, { asBundle: true })
-  })
-
-  it('renderToString with template', done => {
-    createRenderer('app.js', renderer => {
-      const context = {
-        head: '<meta name="viewport" content="width=device-width">',
-        styles: '<style>h1 { color: red }</style>',
-        state: { a: 1 },
-        url: '/test'
-      }
-      renderer.renderToString(context, (err, res) => {
-        expect(err).toBeNull()
-        expect(res).toContain(
-          `<html><head>${context.head}${context.styles}</head><body>` +
-          `<div data-server-rendered="true">/test</div>` +
-          `<script>window.__INITIAL_STATE__={"a":1}</script>` +
-          `</body></html>`
-        )
-        expect(context.msg).toBe('hello')
-        done()
-      })
-    }, {
-      template: `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
-    })
-  })
-
-  it('renderToStream with template', done => {
-    createRenderer('app.js', renderer => {
-      const context = {
-        head: '<meta name="viewport" content="width=device-width">',
-        styles: '<style>h1 { color: red }</style>',
-        state: { a: 1 },
-        url: '/test'
-      }
-      const stream = renderer.renderToStream(context)
-      let res = ''
-      stream.on('data', chunk => {
-        res += chunk.toString()
-      })
-      stream.on('end', () => {
-        expect(res).toContain(
-          `<html><head>${context.head}${context.styles}</head><body>` +
-          `<div data-server-rendered="true">/test</div>` +
-          `<script>window.__INITIAL_STATE__={"a":1}</script>` +
-          `</body></html>`
-        )
-        expect(context.msg).toBe('hello')
-        done()
-      })
-    }, {
-      template: `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
-    })
   })
 })

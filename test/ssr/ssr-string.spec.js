@@ -745,31 +745,6 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('should accept template option', done => {
-    const renderer = createRenderer({
-      template: `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
-    })
-
-    const context = {
-      head: '<meta name="viewport" content="width=device-width">',
-      styles: '<style>h1 { color: red }</style>',
-      state: { a: 1 }
-    }
-
-    renderer.renderToString(new Vue({
-      template: '<div>hi</div>'
-    }), (err, res) => {
-      expect(err).toBeNull()
-      expect(res).toContain(
-        `<html><head>${context.head}${context.styles}</head><body>` +
-        `<div data-server-rendered="true">hi</div>` +
-        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
-        `</body></html>`
-      )
-      done()
-    }, context)
-  })
-
   it('default value Foreign Function', () => {
     const FunctionConstructor = VM.runInNewContext('Function')
     const func = () => 123
