@@ -168,7 +168,7 @@ describe('SSR: bundle renderer', () => {
       const context = { url: '/test' }
       renderer.renderToString(context, (err, res) => {
         expect(err).toBeNull()
-        expect(res).toBe('<div data-server-rendered="true">/test<div>async</div></div>')
+        expect(res).toBe('<div data-server-rendered="true">/test<div>async test.woff2 test.png</div></div>')
         done()
       })
     })
@@ -183,7 +183,7 @@ describe('SSR: bundle renderer', () => {
         res += chunk.toString()
       })
       stream.on('end', () => {
-        expect(res).toBe('<div data-server-rendered="true">/test<div>async</div></div>')
+        expect(res).toBe('<div data-server-rendered="true">/test<div>async test.woff2 test.png</div></div>')
         done()
       })
     })

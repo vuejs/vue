@@ -1,5 +1,6 @@
 /* @flow */
 
+const path = require('path')
 const serialize = require('serialize-javascript')
 
 import TemplateStream from './template-stream'
@@ -8,10 +9,14 @@ import { createMapper } from './create-async-file-mapper'
 import type { ParsedTemplate } from './parse-template'
 import type { AsyncFileMapper } from './create-async-file-mapper'
 
+const JS_RE = /\.js($|\?)/
+export const isJS = (file: string): boolean => JS_RE.test(file)
+
 type TemplateRendererOptions = {
   template: string;
   serverManifest?: ServerManifest;
   clientManifest?: ClientManifest;
+  shouldPreload?: (file: string, type: string) => boolean;
 };
 
 export type ServerManifest = {
@@ -34,6 +39,7 @@ export type ClientManifest = {
 };
 
 export default class TemplateRenderer {
+  options: TemplateRendererOptions;
   template: ParsedTemplate;
   publicPath: string;
   serverManifest: ServerManifest;
@@ -43,6 +49,7 @@ export default class TemplateRenderer {
   mapFiles: AsyncFileMapper;
 
   constructor (options: TemplateRendererOptions) {
+    this.options = options
     this.template = parseTemplate(options.template)
 
     // extra functionality with client manifest
@@ -80,7 +87,29 @@ export default class TemplateRenderer {
     const usedAsyncFiles = this.getUsedAsyncFiles(context)
     if (this.preloadFiles || usedAsyncFiles) {
       return (this.preloadFiles || []).concat(usedAsyncFiles || []).map(file => {
-        return `<link rel="preload" href="${this.publicPath}/${file}" as="script">`
+        let extra = ''
+        const withoutQuery = file.replace(/\?.*/, '')
+        const ext = path.extname(withoutQuery).slice(1)
+        const type = getPreloadType(ext)
+        const shouldPreload = this.options.shouldPreload
+        // by default, we only preload scripts and fonts
+        if (!shouldPreload && type !== 'script' && type !== 'font') {
+          return ''
+        }
+        // user wants to explicitly control what to preload
+        if (shouldPreload && !shouldPreload(withoutQuery, type)) {
+          return ''
+        }
+        if (type === 'font') {
+          extra = ` type="font/${ext}" crossorigin`
+        }
+        return `<link rel="preload" href="${
+          this.publicPath}/${file
+        }"${
+          type !== '' ? ` as="${type}"` : ''
+        }${
+          extra
+        }>`
       }).join('')
     } else {
       return ''
@@ -118,7 +147,7 @@ export default class TemplateRenderer {
       const initial = this.clientManifest.initial
       const async = this.getUsedAsyncFiles(context)
       const needed = [initial[0]].concat(async || [], initial.slice(1))
-      return needed.map(file => {
+      return needed.filter(isJS).map(file => {
         return `<script src="${this.publicPath}/${file}"></script>`
       }).join('')
     } else {
@@ -136,7 +165,7 @@ export default class TemplateRenderer {
       if (noCssHash) {
         mapped = mapped.map(file => {
           return noCssHash[file]
-            ? file.replace(/\.js$/, '.no-css.js')
+            ? file.replace(JS_RE, '.no-css.js')
             : file
         })
       }
@@ -150,5 +179,20 @@ export default class TemplateRenderer {
   // create a transform stream
   createStream (context: ?Object): TemplateStream {
     return new TemplateStream(this, context || {})
+  }
+}
+
+function getPreloadType (ext: string): string {
+  if (ext === 'js') {
+    return 'script'
+  } else if (ext === 'css') {
+    return 'style'
+  } else if (/jpe?g|png|svg|gif|webp|ico/.test(ext)) {
+    return 'image'
+  } else if (/woff2?|ttf|otf|eot/.test(ext)) {
+    return 'font'
+  } else {
+    // not exhausting all possbilities here, but above covers common cases
+    return ''
   }
 }

@@ -6,7 +6,19 @@ export function compileWithWebpack (file, extraConfig, cb) {
   const config = Object.assign({
     entry: path.resolve(__dirname, 'fixtures', file),
     module: {
-      rules: [{ test: /\.js$/, loader: 'babel-loader' }]
+      rules: [
+        {
+          test: /\.js$/,
+          loader: 'babel-loader'
+        },
+        {
+          test: /\.(png|woff2)$/,
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]'
+          }
+        }
+      ]
     }
   }, extraConfig)
 
