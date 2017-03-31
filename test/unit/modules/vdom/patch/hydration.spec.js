@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VNode from 'core/vdom/vnode'
-import { SSR_ATTR } from 'shared/util'
 import { patch } from 'web/runtime/patch'
+import { SSR_ATTR } from 'shared/constants'
 
 describe('vdom patch: hydration', () => {
   let vnode0
