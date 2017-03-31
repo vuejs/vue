@@ -14,12 +14,14 @@ import {
   mustUseProp,
   isReservedTag,
   getTagNamespace,
+  isBuitInDirective,
   isUnknownElement
 } from 'web/util/index'
 
 // install platform specific utils
 Vue.config.mustUseProp = mustUseProp
 Vue.config.isReservedTag = isReservedTag
+Vue.config.isBuitInDirective = isBuitInDirective
 Vue.config.getTagNamespace = getTagNamespace
 Vue.config.isUnknownElement = isUnknownElement
 

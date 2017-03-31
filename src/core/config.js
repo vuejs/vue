@@ -14,6 +14,7 @@ export type Config = {
   keyCodes: { [key: string]: number | Array<number> };
   // platform
   isReservedTag: (x?: string) => boolean;
+  isBuitInDirective: (x?: string) => boolean;
   parsePlatformTagName: (x: string) => string;
   isUnknownElement: (x?: string) => boolean;
   getTagNamespace: (x?: string) => string | void;
@@ -70,6 +71,11 @@ const config: Config = {
    * component. This is platform-dependent and may be overwritten.
    */
   isReservedTag: no,
+
+  /**
+   * Check if a directive is buit-in directive
+   */
+  isBuitInDirective: no,
 
   /**
    * Check if a tag is an unknown element.
