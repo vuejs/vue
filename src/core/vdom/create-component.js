@@ -114,19 +114,11 @@ export function createComponent (
 
   // async component
   if (isUndef(Ctor.cid)) {
-    if (isDef(Ctor.resolved)) {
-      Ctor = Ctor.resolved
-    } else {
-      Ctor = resolveAsyncComponent(Ctor, baseCtor, () => {
-        // it's ok to queue this on every render because
-        // $forceUpdate is buffered by the scheduler.
-        context.$forceUpdate()
-      })
-      if (!Ctor) {
-        // return nothing if this is indeed an async component
-        // wait for the callback to trigger parent update.
-        return
-      }
+    Ctor = resolveAsyncComponent(Ctor, baseCtor, context)
+    if (Ctor === undefined) {
+      // return nothing if this is indeed an async component
+      // wait for the callback to trigger parent update.
+      return
     }
   }
 

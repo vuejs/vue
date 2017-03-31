@@ -8,8 +8,13 @@ import {
 export function resolveAsyncComponent (
   factory: Function,
   baseCtor: Class<Component>,
-  cb: Function
+  context: Component
 ): Class<Component> | void {
+  if (factory.resolved) {
+    return factory.resolved
+  }
+
+  const cb = () => context.$forceUpdate()
   if (factory.requested) {
     // pool callbacks
     factory.pendingCallbacks.push(cb)
