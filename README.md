@@ -21,6 +21,10 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
     <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
   </a>
   <br><br>
+  <a href="https://deepstreamhub.com" target="_blank">
+    <img width="140px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/deepstream.png">
+  </a>
+  <br><br>
   <a href="https://jsfiddle.net/">
     <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
   </a>

@@ -12,6 +12,10 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 ### $500
 
+<a href="https://deepstreamhub.com">
+  <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/deepstream.png">
+</a>
+
 <a href="https://jsfiddle.net/">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
 </a>
