@@ -1,6 +1,10 @@
 /* @flow */
 
-import { no, noop, identity } from 'shared/util'
+import {
+  no,
+  noop,
+  identity
+} from 'shared/util'
 
 export type Config = {
   // user
@@ -18,13 +22,9 @@ export type Config = {
   isUnknownElement: (x?: string) => boolean;
   getTagNamespace: (x?: string) => string | void;
   mustUseProp: (tag: string, type: ?string, name: string) => boolean;
-  // internal
-  _assetTypes: Array<string>;
-  _lifecycleHooks: Array<string>;
-  _maxUpdateCount: number;
 };
 
-const config: Config = {
+export default ({
   /**
    * Option merge strategies (used in core/util/options)
    */
@@ -91,37 +91,5 @@ const config: Config = {
    * Check if an attribute must be bound using property, e.g. value
    * Platform-dependent.
    */
-  mustUseProp: no,
-
-  /**
-   * List of asset types that a component can own.
-   */
-  _assetTypes: [
-    'component',
-    'directive',
-    'filter'
-  ],
-
-  /**
-   * List of lifecycle hooks.
-   */
-  _lifecycleHooks: [
-    'beforeCreate',
-    'created',
-    'beforeMount',
-    'mounted',
-    'beforeUpdate',
-    'updated',
-    'beforeDestroy',
-    'destroyed',
-    'activated',
-    'deactivated'
-  ],
-
-  /**
-   * Max circular updates allowed in a scheduler flush cycle.
-   */
-  _maxUpdateCount: 100
-}
-
-export default config
+  mustUseProp: no
+}: Config)

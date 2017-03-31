@@ -3,11 +3,14 @@
 import type Watcher from './watcher'
 import config from '../config'
 import { callHook } from '../instance/lifecycle'
+
 import {
   warn,
   nextTick,
   devtools
 } from '../util/index'
+
+export const MAX_UPDATE_COUNT = 100
 
 const queue: Array<Watcher> = []
 let has: { [key: number]: ?true } = {}
@@ -55,7 +58,7 @@ function flushSchedulerQueue () {
     // in dev build, check and stop circular updates.
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
-      if (circular[id] > config._maxUpdateCount) {
+      if (circular[id] > MAX_UPDATE_COUNT) {
         warn(
           'You may have an infinite update loop ' + (
             watcher.user
