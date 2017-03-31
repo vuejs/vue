@@ -7,6 +7,9 @@ import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 
 import {
   warn,
+  isDef,
+  isUndef,
+  isTrue,
   isObject,
   validateProp
 } from '../util/index'
@@ -83,21 +86,25 @@ const componentVNodeHooks = {
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
 export function createComponent (
-  Ctor: Class<Component> | Function | Object | void,
+  Ctor: any,
   data?: VNodeData,
   context: Component,
   children: ?Array<VNode>,
   tag?: string
 ): VNode | void {
-  if (!Ctor) {
+  if (isUndef(Ctor)) {
     return
   }
 
   const baseCtor = context.$options._base
+
+  // plain options object: turn it into a constructor
   if (isObject(Ctor)) {
     Ctor = baseCtor.extend(Ctor)
   }
 
+  // if at this stage it's not a constructor or an async component factory,
+  // reject.
   if (typeof Ctor !== 'function') {
     if (process.env.NODE_ENV !== 'production') {
       warn(`Invalid Component definition: ${String(Ctor)}`, context)
@@ -106,8 +113,8 @@ export function createComponent (
   }
 
   // async component
-  if (!Ctor.cid) {
-    if (Ctor.resolved) {
+  if (isUndef(Ctor.cid)) {
+    if (isDef(Ctor.resolved)) {
       Ctor = Ctor.resolved
     } else {
       Ctor = resolveAsyncComponent(Ctor, baseCtor, () => {
@@ -130,7 +137,7 @@ export function createComponent (
   data = data || {}
 
   // transform component v-model data into props & events
-  if (data.model) {
+  if (isDef(data.model)) {
     transformModel(Ctor.options, data)
   }
 
@@ -138,7 +145,7 @@ export function createComponent (
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
   // functional component
-  if (Ctor.options.functional) {
+  if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }
 
@@ -148,7 +155,7 @@ export function createComponent (
   // replace with listeners with .native modifier
   data.on = data.nativeOn
 
-  if (Ctor.options.abstract) {
+  if (isTrue(Ctor.options.abstract)) {
     // abstract components do not keep anything
     // other than props & listeners
     data = {}
@@ -176,7 +183,7 @@ function createFunctionalComponent (
 ): VNode | void {
   const props = {}
   const propOptions = Ctor.options.props
-  if (propOptions) {
+  if (isDef(propOptions)) {
     for (const key in propOptions) {
       props[key] = validateProp(key, propOptions, propsData)
     }
@@ -221,7 +228,7 @@ export function createComponentInstanceForVnode (
   }
   // check inline-template render functions
   const inlineTemplate = vnode.data.inlineTemplate
-  if (inlineTemplate) {
+  if (isDef(inlineTemplate)) {
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
@@ -254,7 +261,7 @@ function transformModel (options, data: any) {
   const event = (options.model && options.model.event) || 'input'
   ;(data.props || (data.props = {}))[prop] = data.model.value
   const on = data.on || (data.on = {})
-  if (on[event]) {
+  if (isDef(on[event])) {
     on[event] = [data.model.callback].concat(on[event])
   } else {
     on[event] = data.model.callback
