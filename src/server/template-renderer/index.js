@@ -92,8 +92,8 @@ export default class TemplateRenderer {
         const ext = path.extname(withoutQuery).slice(1)
         const type = getPreloadType(ext)
         const shouldPreload = this.options.shouldPreload
-        // by default, we only preload scripts and fonts
-        if (!shouldPreload && type !== 'script' && type !== 'font') {
+        // by default, we only preload scripts
+        if (!shouldPreload && type !== 'script') {
           return ''
         }
         // user wants to explicitly control what to preload
