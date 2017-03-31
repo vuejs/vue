@@ -14,7 +14,7 @@
 
 import VNode from './vnode'
 import config from '../config'
-import { SSR_ATTR } from 'shared/util'
+import { SSR_ATTR } from 'shared/constants'
 import { registerRef } from './modules/ref'
 import { activeInstance } from '../instance/lifecycle'
 
