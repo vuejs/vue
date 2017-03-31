@@ -6,14 +6,15 @@ import { resolveConstructorOptions } from '../instance/init'
 import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 
 import {
-  tip,
   warn,
   isObject,
-  hasOwn,
-  hyphenate,
-  validateProp,
-  formatComponentName
+  validateProp
 } from '../util/index'
+
+import {
+  resolveAsyncComponent,
+  extractPropsFromVNodeData
+} from './helpers/index'
 
 import {
   callHook,
@@ -134,7 +135,7 @@ export function createComponent (
   }
 
   // extract props
-  const propsData = extractProps(data, Ctor, tag)
+  const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
   // functional component
   if (Ctor.options.functional) {
@@ -225,116 +226,6 @@ export function createComponentInstanceForVnode (
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
   return new vnodeComponentOptions.Ctor(options)
-}
-
-function resolveAsyncComponent (
-  factory: Function,
-  baseCtor: Class<Component>,
-  cb: Function
-): Class<Component> | void {
-  if (factory.requested) {
-    // pool callbacks
-    factory.pendingCallbacks.push(cb)
-  } else {
-    factory.requested = true
-    const cbs = factory.pendingCallbacks = [cb]
-    let sync = true
-
-    const resolve = (res: Object | Class<Component>) => {
-      if (isObject(res)) {
-        res = baseCtor.extend(res)
-      }
-      // cache resolved
-      factory.resolved = res
-      // invoke callbacks only if this is not a synchronous resolve
-      // (async resolves are shimmed as synchronous during SSR)
-      if (!sync) {
-        for (let i = 0, l = cbs.length; i < l; i++) {
-          cbs[i](res)
-        }
-      }
-    }
-
-    const reject = reason => {
-      process.env.NODE_ENV !== 'production' && warn(
-        `Failed to resolve async component: ${String(factory)}` +
-        (reason ? `\nReason: ${reason}` : '')
-      )
-    }
-
-    const res = factory(resolve, reject)
-
-    // handle promise
-    if (res && typeof res.then === 'function' && !factory.resolved) {
-      res.then(resolve, reject)
-    }
-
-    sync = false
-    // return in case resolved synchronously
-    return factory.resolved
-  }
-}
-
-function extractProps (data: VNodeData, Ctor: Class<Component>, tag?: string): ?Object {
-  // we are only extracting raw values here.
-  // validation and default values are handled in the child
-  // component itself.
-  const propOptions = Ctor.options.props
-  if (!propOptions) {
-    return
-  }
-  const res = {}
-  const { attrs, props, domProps } = data
-  if (attrs || props || domProps) {
-    for (const key in propOptions) {
-      const altKey = hyphenate(key)
-      if (process.env.NODE_ENV !== 'production') {
-        const keyInLowerCase = key.toLowerCase()
-        if (
-          key !== keyInLowerCase &&
-          attrs && attrs.hasOwnProperty(keyInLowerCase)
-        ) {
-          tip(
-            `Prop "${keyInLowerCase}" is passed to component ` +
-            `${formatComponentName(tag || Ctor)}, but the declared prop name is` +
-            ` "${key}". ` +
-            `Note that HTML attributes are case-insensitive and camelCased ` +
-            `props need to use their kebab-case equivalents when using in-DOM ` +
-            `templates. You should probably use "${altKey}" instead of "${key}".`
-          )
-        }
-      }
-      checkProp(res, props, key, altKey, true) ||
-      checkProp(res, attrs, key, altKey) ||
-      checkProp(res, domProps, key, altKey)
-    }
-  }
-  return res
-}
-
-function checkProp (
-  res: Object,
-  hash: ?Object,
-  key: string,
-  altKey: string,
-  preserve?: boolean
-): boolean {
-  if (hash) {
-    if (hasOwn(hash, key)) {
-      res[key] = hash[key]
-      if (!preserve) {
-        delete hash[key]
-      }
-      return true
-    } else if (hasOwn(hash, altKey)) {
-      res[key] = hash[altKey]
-      if (!preserve) {
-        delete hash[altKey]
-      }
-      return true
-    }
-  }
-  return false
 }
 
 function mergeHooks (data: VNodeData) {
