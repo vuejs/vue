@@ -146,16 +146,15 @@ describe('SSR: template option', () => {
     })
   })
 
-  const expectedHTMLWithManifest = preloadImage =>
+  const expectedHTMLWithManifest = preloadOtherAssets =>
     `<html><head>` +
       // used chunks should have preload
       `<link rel="preload" href="/manifest.js" as="script">` +
       `<link rel="preload" href="/main.js" as="script">` +
       `<link rel="preload" href="/0.js" as="script">` +
-      // images are only preloaded when explicitly asked for
-      (preloadImage ? `<link rel="preload" href="/test.png" as="image">` : ``) +
-      // critical assets like fonts are preloaded by default
-      `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` +
+      // images and fonts are only preloaded when explicitly asked for
+      (preloadOtherAssets ? `<link rel="preload" href="/test.png" as="image">` : ``) +
+      (preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
       // unused chunks should have prefetch
       `<link rel="prefetch" href="/1.js" as="script">` +
     `</head><body>` +
