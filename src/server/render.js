@@ -1,7 +1,7 @@
 /* @flow */
 
 import { escape } from 'he'
-import { SSR_ATTR } from 'shared/util'
+import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
 import { compileToFunctions } from 'web/compiler/index'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
