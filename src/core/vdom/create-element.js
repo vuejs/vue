@@ -1,10 +1,19 @@
 /* @flow */
 
-import VNode, { createEmptyVNode } from './vnode'
 import config from '../config'
+import VNode, { createEmptyVNode } from './vnode'
 import { createComponent } from './create-component'
-import { normalizeChildren, simpleNormalizeChildren } from './helpers/index'
-import { warn, resolveAsset, isPrimitive } from '../util/index'
+
+import {
+  warn,
+  resolveAsset,
+  isPrimitive
+} from '../util/index'
+
+import {
+  normalizeChildren,
+  simpleNormalizeChildren
+} from './helpers/index'
 
 const SIMPLE_NORMALIZE = 1
 const ALWAYS_NORMALIZE = 2
