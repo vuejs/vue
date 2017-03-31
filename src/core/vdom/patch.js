@@ -15,25 +15,21 @@
 import VNode from './vnode'
 import config from '../config'
 import { SSR_ATTR } from 'shared/util'
-import { makeMap, isPrimitive, warn } from '../util/index'
-import { activeInstance } from '../instance/lifecycle'
 import { registerRef } from './modules/ref'
+import { activeInstance } from '../instance/lifecycle'
+
+import {
+  warn,
+  isDef,
+  isUndef,
+  isTrue,
+  makeMap,
+  isPrimitive
+} from '../util/index'
 
 export const emptyNode = new VNode('', {}, [])
 
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
-
-function isUndef (v) {
-  return v === undefined || v === null
-}
-
-function isDef (v) {
-  return v !== undefined && v !== null
-}
-
-function isTrue (v) {
-  return v === true
-}
 
 function sameVnode (a, b) {
   return (

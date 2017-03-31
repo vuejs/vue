@@ -2,6 +2,20 @@
 
 export const SSR_ATTR = 'data-server-rendered'
 
+// these helpers produces better vm code in JS engines due to their
+// explicitness and function inlining
+export function isUndef (v: any): boolean {
+  return v === undefined || v === null
+}
+
+export function isDef (v: any): boolean {
+  return v !== undefined && v !== null
+}
+
+export function isTrue (v: any): boolean {
+  return v === true
+}
+
 /**
  * Convert a value to a string that is actually rendered.
  */
