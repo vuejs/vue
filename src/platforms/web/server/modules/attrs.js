@@ -1,5 +1,7 @@
 /* @flow */
 
+import { escape } from 'he'
+
 import {
   isBooleanAttr,
   isEnumeratedAttr,
@@ -40,7 +42,7 @@ export function renderAttr (key: string, value: string): string {
   } else if (isEnumeratedAttr(key)) {
     return ` ${key}="${isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true'}"`
   } else if (!isFalsyAttrValue(value)) {
-    return ` ${key}="${value}"`
+    return ` ${key}="${typeof value === 'string' ? escape(value) : value}"`
   }
   return ''
 }

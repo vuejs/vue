@@ -1,5 +1,12 @@
 /* @flow */
 
+// () => ({
+//   component: import('./xxx.vue'),
+//   delay: 200,
+//   loading: LoadingComponent,
+//   error: ErrorComponent
+// })
+
 import {
   warn,
   isObject
