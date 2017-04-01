@@ -761,6 +761,21 @@ describe('SSR: renderToString', () => {
     })
     expect(vm.a).toBe(func)
   })
+
+  it('should prevent xss in attribtues', () => {
+    renderVmWithOptions({
+      data: {
+        xss: '"><script>alert(1)</script>'
+      },
+      template: `
+        <div>
+          <a :title="xss" :style="{ color: xss }" :class="[xss]">foo</a>
+        </div>
+      `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
