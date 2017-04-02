@@ -10,11 +10,15 @@ export default class TemplateStream extends Transform {
   template: ParsedTemplate;
   context: Object;
 
-  constructor (renderer: TemplateRenderer, context: Object) {
+  constructor (
+    renderer: TemplateRenderer,
+    template: ParsedTemplate,
+    context: Object
+  ) {
     super()
     this.started = false
     this.renderer = renderer
-    this.template = renderer.template
+    this.template = template
     this.context = context || {}
   }
 

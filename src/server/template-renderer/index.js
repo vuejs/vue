@@ -13,7 +13,7 @@ const JS_RE = /\.js($|\?)/
 export const isJS = (file: string): boolean => JS_RE.test(file)
 
 type TemplateRendererOptions = {
-  template: string;
+  template: ?string;
   serverManifest?: ServerManifest;
   clientManifest?: ClientManifest;
   shouldPreload?: (file: string, type: string) => boolean;
@@ -40,7 +40,7 @@ export type ClientManifest = {
 
 export default class TemplateRenderer {
   options: TemplateRendererOptions;
-  template: ParsedTemplate;
+  parsedTemplate: ParsedTemplate | null;
   publicPath: string;
   serverManifest: ServerManifest;
   clientManifest: ClientManifest;
@@ -50,7 +50,11 @@ export default class TemplateRenderer {
 
   constructor (options: TemplateRendererOptions) {
     this.options = options
-    this.template = parseTemplate(options.template)
+    // if no template option is provided, the renderer is created
+    // as a utility object for rendering assets like preload links and scripts.
+    this.parsedTemplate = options.template
+      ? parseTemplate(options.template)
+      : null
 
     // extra functionality with client manifest
     if (options.serverManifest && options.clientManifest) {
@@ -67,7 +71,10 @@ export default class TemplateRenderer {
 
   // render synchronously given rendered app content and render context
   renderSync (content: string, context: ?Object) {
-    const template = this.template
+    const template = this.parsedTemplate
+    if (!template) {
+      throw new Error('renderSync cannot be called without a template.')
+    }
     context = context || {}
     return (
       template.head +
@@ -178,7 +185,10 @@ export default class TemplateRenderer {
 
   // create a transform stream
   createStream (context: ?Object): TemplateStream {
-    return new TemplateStream(this, context || {})
+    if (!this.parsedTemplate) {
+      throw new Error('createStream cannot be called without a template.')
+    }
+    return new TemplateStream(this, this.parsedTemplate, context || {})
   }
 }
 

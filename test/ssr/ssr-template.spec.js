@@ -25,14 +25,17 @@ function generateClientManifest (file, cb) {
   })
 }
 
-function createRendererWithManifest (file, cb, shouldPreload) {
+function createRendererWithManifest (file, options, cb) {
+  if (typeof options === 'function') {
+    cb = options
+    options = null
+  }
   generateClientManifest(file, clientManifest => {
-    createBundleRenderer(file, {
+    createBundleRenderer(file, Object.assign({
       asBundle: true,
       template: defaultTemplate,
-      clientManifest,
-      shouldPreload
-    }, cb)
+      clientManifest
+    }, options), cb)
   })
 }
 
@@ -176,8 +179,14 @@ describe('SSR: template option', () => {
     })
   })
 
-  it('bundleRenderer + renderToStream + clientManifest', done => {
-    createRendererWithManifest('split.js', renderer => {
+  it('bundleRenderer + renderToStream + clientManifest + shouldPreload', done => {
+    createRendererWithManifest('split.js', {
+      shouldPreload: (file, type) => {
+        if (type === 'image' || type === 'script' || type === 'font') {
+          return true
+        }
+      }
+    }, renderer => {
       const stream = renderer.renderToStream({})
       let res = ''
       stream.on('data', chunk => {
@@ -187,10 +196,29 @@ describe('SSR: template option', () => {
         expect(res).toContain(expectedHTMLWithManifest(true))
         done()
       })
-    }, (file, type) => {
-      if (type === 'image' || type === 'script' || type === 'font') {
-        return true
-      }
+    })
+  })
+
+  it('bundleRenderer + renderToString + clientManifest + no template', done => {
+    createRendererWithManifest('split.js', {
+      template: null
+    }, renderer => {
+      const context = {}
+      renderer.renderToString(context, (err, res) => {
+        expect(err).toBeNull()
+
+        const customOutput =
+          `<html><head>${
+            context.renderPreloadLinks() +
+            context.renderPrefetchLinks()
+          }</head><body>${
+            res +
+            context.renderScripts()
+          }</body></html>`
+
+        expect(customOutput).toContain(expectedHTMLWithManifest(false))
+        done()
+      })
     })
   })
 })

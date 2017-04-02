@@ -40,7 +40,7 @@ export function createRenderer ({
   clientManifest
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
-  const templateRenderer = template && new TemplateRenderer({
+  const templateRenderer = new TemplateRenderer({
     template,
     shouldPreload,
     serverManifest,
@@ -53,13 +53,16 @@ export function createRenderer ({
       done: (err: ?Error, res: ?string) => any,
       context?: ?Object
     ): void {
+      if (!template && context && clientManifest) {
+        exposeAssetRenderFns(context, templateRenderer)
+      }
       let result = ''
       const write = createWriteFunction(text => {
         result += text
       }, done)
       try {
         render(component, write, () => {
-          if (templateRenderer) {
+          if (template) {
             result = templateRenderer.renderSync(result, context)
           }
           done(null, result)
@@ -76,7 +79,10 @@ export function createRenderer ({
       const renderStream = new RenderStream((write, done) => {
         render(component, write, done)
       })
-      if (!templateRenderer) {
+      if (!template) {
+        if (context && clientManifest) {
+          exposeAssetRenderFns(context, templateRenderer)
+        }
         return renderStream
       } else {
         const templateStream = templateRenderer.createStream(context)
@@ -88,4 +94,12 @@ export function createRenderer ({
       }
     }
   }
+}
+
+// Expose preload/prefetch and script render fns when client manifest is
+// available.
+function exposeAssetRenderFns (context: Object, renderer: TemplateRenderer) {
+  context.renderPreloadLinks = renderer.renderPreloadLinks.bind(renderer, context)
+  context.renderPrefetchLinks = renderer.renderPrefetchLinks.bind(renderer, context)
+  context.renderScripts = renderer.renderScripts.bind(renderer, context)
 }
