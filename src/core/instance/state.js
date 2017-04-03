@@ -165,6 +165,12 @@ function initComputed (vm: Component, computed: Object) {
     // at instantiation here.
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
+    } else if (process.env.NODE_ENV !== 'production') {
+      if (key in vm.$data) {
+        warn(`The computed property "${key}" is already defined in data.`, vm)
+      } else if (vm.$options.props && key in vm.$options.props) {
+        warn(`The computed property "${key}" is already defined as a prop.`, vm)
+      }
     }
   }
 }
