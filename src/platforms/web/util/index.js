@@ -1,7 +1,7 @@
 /* @flow */
 
 import { warn } from 'core/util/index'
-
+import directives from 'web/runtime/directives/index'
 export * from './attrs'
 export * from './class'
 export * from './element'
@@ -22,4 +22,8 @@ export function query (el: string | Element): Element {
   } else {
     return el
   }
+}
+
+export function isBuitInDirective (key) {
+  return key in directives
 }

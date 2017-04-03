@@ -217,6 +217,21 @@ function checkComponents (options: Object) {
 }
 
 /**
+ * avoid overwriting built-in directive
+ */
+function checkDirectives (parent: Object, child: Object) {
+  if (!child) { return }
+  for (const key in child) {
+    if (config.isBuitInDirective(key) && child[key] !== parent[key]) {
+      warn(
+        'Do not use built-in directive as directive ' +
+        'id: ' + key
+      )
+    }
+  }
+}
+
+/**
  * Ensure all props option syntax are normalized into the
  * Object-based format.
  */
@@ -274,6 +289,7 @@ export function mergeOptions (
 ): Object {
   if (process.env.NODE_ENV !== 'production') {
     checkComponents(child)
+    checkDirectives(parent.directives, child.directives)
   }
   normalizeProps(child)
   normalizeDirectives(child)

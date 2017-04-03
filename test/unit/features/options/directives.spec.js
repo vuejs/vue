@@ -227,4 +227,15 @@ describe('Options directives', () => {
     }).$mount()
     expect('Failed to resolve directive: test').toHaveBeenWarned()
   })
+
+  it('warn overriding native directives', () => {
+    new Vue({
+      directives: {
+        show: {},
+        model: {}
+      }
+    })
+    expect('Do not use built-in directive as directive id: show').toHaveBeenWarned()
+    expect('Do not use built-in directive as directive id: model').toHaveBeenWarned()
+  })
 })
