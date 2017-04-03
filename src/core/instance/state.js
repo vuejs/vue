@@ -1,5 +1,6 @@
 /* @flow */
 
+import config from '../config'
 import Dep from '../observer/dep'
 import Watcher from '../observer/watcher'
 
@@ -53,7 +54,11 @@ export function initState (vm: Component) {
   if (opts.watch) initWatch(vm, opts.watch)
 }
 
-const isReservedProp = { key: 1, ref: 1, slot: 1 }
+const isReservedProp = {
+  key: 1,
+  ref: 1,
+  slot: 1
+}
 
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
@@ -69,7 +74,7 @@ function initProps (vm: Component, propsOptions: Object) {
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
-      if (isReservedProp[key]) {
+      if (isReservedProp[key] || config.isReservedAttr(key)) {
         warn(
           `"${key}" is a reserved attribute and cannot be used as component prop.`,
           vm
