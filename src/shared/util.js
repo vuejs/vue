@@ -14,6 +14,10 @@ export function isTrue (v: any): boolean {
   return v === true
 }
 
+export function isFunction (v: any): boolean {
+  return typeof v === 'function'
+}
+
 /**
  * Convert a value to a string that is actually rendered.
  */
@@ -250,10 +254,10 @@ export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
  */
 export function once (fn: Function): Function {
   let called = false
-  return () => {
+  return function () {
     if (!called) {
       called = true
-      fn()
+      fn.apply(this, arguments)
     }
   }
 }
