@@ -14,10 +14,6 @@ export function isTrue (v: any): boolean {
   return v === true
 }
 
-export function isFunction (v: any): boolean {
-  return typeof v === 'function'
-}
-
 /**
  * Convert a value to a string that is actually rendered.
  */
