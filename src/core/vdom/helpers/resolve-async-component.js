@@ -6,8 +6,7 @@ import {
   isDef,
   isUndef,
   isTrue,
-  isObject,
-  isFunction
+  isObject
 } from 'core/util/index'
 
 function ensureCtor (comp, base) {
@@ -70,12 +69,12 @@ export function resolveAsyncComponent (
     const res = factory(resolve, reject)
 
     if (isObject(res)) {
-      if (isFunction(res.then)) {
+      if (typeof res.then === 'function') {
         // () => Promise
         if (isUndef(factory.resolved)) {
           res.then(resolve, reject)
         }
-      } else if (isDef(res.component) && isFunction(res.component.then)) {
+      } else if (isDef(res.component) && typeof res.component.then === 'function') {
         if (isDef(res.error)) {
           factory.errorComp = ensureCtor(res.error, baseCtor)
         }
