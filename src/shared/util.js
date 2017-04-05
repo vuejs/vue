@@ -250,10 +250,10 @@ export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
  */
 export function once (fn: Function): Function {
   let called = false
-  return () => {
+  return function () {
     if (!called) {
       called = true
-      fn()
+      fn.apply(this, arguments)
     }
   }
 }
