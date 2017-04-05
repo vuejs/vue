@@ -3,6 +3,11 @@
 import { escape } from 'he'
 
 import {
+  isDef,
+  isUndef
+} from 'shared/util'
+
+import {
   isBooleanAttr,
   isEnumeratedAttr,
   isFalsyAttrValue
@@ -12,15 +17,15 @@ export default function renderAttrs (node: VNodeWithData): string {
   let attrs = node.data.attrs
   let res = ''
 
-  let parent = node.parent
-  while (parent) {
-    if (parent.data && parent.data.attrs) {
+  let parent: any = node.parent
+  while (isDef(parent)) {
+    if (isDef(parent.data) && isDef(parent.data.attrs)) {
       attrs = Object.assign({}, attrs, parent.data.attrs)
     }
     parent = parent.parent
   }
 
-  if (!attrs) {
+  if (isUndef(attrs)) {
     return res
   }
 

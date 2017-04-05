@@ -59,6 +59,7 @@ export function createRenderer ({
       let result = ''
       const write = createWriteFunction(text => {
         result += text
+        return false
       }, done)
       try {
         render(component, write, () => {
