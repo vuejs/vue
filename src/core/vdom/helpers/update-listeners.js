@@ -1,7 +1,7 @@
 /* @flow */
 
-import { cached } from 'shared/util'
 import { warn } from 'core/util/index'
+import { cached, isUndef } from 'shared/util'
 
 const normalizeEvent = cached((name: string): {
   name: string,
@@ -51,13 +51,13 @@ export function updateListeners (
     cur = on[name]
     old = oldOn[name]
     event = normalizeEvent(name)
-    if (!cur) {
+    if (isUndef(cur)) {
       process.env.NODE_ENV !== 'production' && warn(
         `Invalid handler for event "${event.name}": got ` + String(cur),
         vm
       )
-    } else if (!old) {
-      if (!cur.fns) {
+    } else if (isUndef(old)) {
+      if (isUndef(cur.fns)) {
         cur = on[name] = createFnInvoker(cur)
       }
       add(event.name, cur, event.once, event.capture, event.passive)
@@ -67,7 +67,7 @@ export function updateListeners (
     }
   }
   for (name in oldOn) {
-    if (!on[name]) {
+    if (isUndef(on[name])) {
       event = normalizeEvent(name)
       remove(event.name, oldOn[name], event.capture)
     }
