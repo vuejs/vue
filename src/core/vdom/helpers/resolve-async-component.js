@@ -75,30 +75,42 @@ export function resolveAsyncComponent (
           res.then(resolve, reject)
         }
       } else if (isDef(res.component) && typeof res.component.then === 'function') {
+        res.component.then(resolve, reject)
+
         if (isDef(res.error)) {
           factory.errorComp = ensureCtor(res.error, baseCtor)
         }
 
         if (isDef(res.loading)) {
           factory.loadingComp = ensureCtor(res.loading, baseCtor)
-          setTimeout(() => {
-            if (isUndef(factory.resolved) && isUndef(factory.error)) {
-              factory.loading = true
-              forceRender()
-            }
-          }, res.delay || 200)
+          if (res.delay === 0) {
+            factory.loading = true
+          } else {
+            setTimeout(() => {
+              if (isUndef(factory.resolved) && isUndef(factory.error)) {
+                factory.loading = true
+                forceRender()
+              }
+            }, res.delay || 200)
+          }
         }
 
         if (isDef(res.timeout)) {
-          setTimeout(reject, res.timeout)
+          setTimeout(() => {
+            reject(
+              process.env.NODE_ENV !== 'production'
+                ? `timeout (${res.timeout}ms)`
+                : null
+            )
+          }, res.timeout)
         }
-
-        res.component.then(resolve, reject)
       }
     }
 
     sync = false
     // return in case resolved synchronously
-    return factory.resolved
+    return factory.loading
+      ? factory.loadingComp
+      : factory.resolved
   }
 }
