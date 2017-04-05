@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { supportsPassive } from 'core/util/env'
 
 describe('Directive v-on', () => {
   let vm, spy, el
@@ -530,6 +531,38 @@ describe('Directive v-on', () => {
     expect(spyUp.calls.count()).toBe(1)
     expect(spyDown.calls.count()).toBe(1)
   })
+
+  // This test case should only run when the test browser supports passive.
+  if (supportsPassive) {
+    it('should support passive', () => {
+      vm = new Vue({
+        el,
+        template: `
+          <div>
+            <input type="checkbox" ref="normal" @click="foo"/>
+            <input type="checkbox" ref="passive" @click.passive="foo"/>
+            <input type="checkbox" ref="exclusive" @click.prevent.passive/>
+          </div>
+        `,
+        methods: {
+          foo (e) {
+            e.preventDefault()
+          }
+        }
+      })
+
+      vm.$refs.normal.checked = false
+      vm.$refs.passive.checked = false
+      vm.$refs.exclusive.checked = false
+      vm.$refs.normal.click()
+      vm.$refs.passive.click()
+      vm.$refs.exclusive.click()
+      expect(vm.$refs.normal.checked).toBe(false)
+      expect(vm.$refs.passive.checked).toBe(true)
+      expect(vm.$refs.exclusive.checked).toBe(true)
+      expect('passive and prevent can\'t be used together. Passive handler can\'t prevent default event.').toHaveBeenWarned()
+    })
+  }
 
   // Github Issues #5146
   it('should only prevent when match keycode', () => {

@@ -1,5 +1,6 @@
 /* @flow */
 
+import { warn } from 'core/util/index'
 import { parseFilters } from './parser/filter-parser'
 
 export function baseWarn (msg: string) {
@@ -41,6 +42,13 @@ export function addHandler (
   modifiers: ?ASTModifiers,
   important: ?boolean
 ) {
+  // warn prevent and passive modifier
+  if (process.env.NODE_ENV !== 'production' && modifiers && modifiers.prevent && modifiers.passive) {
+    warn(
+      'passive and prevent can\'t be used together. ' +
+      'Passive handler can\'t prevent default event.'
+    )
+  }
   // check capture modifier
   if (modifiers && modifiers.capture) {
     delete modifiers.capture
@@ -49,6 +57,10 @@ export function addHandler (
   if (modifiers && modifiers.once) {
     delete modifiers.once
     name = '~' + name // mark the event as once
+  }
+  if (modifiers && modifiers.passive) {
+    delete modifiers.passive
+    name = '&' + name // mark the event as passive
   }
   let events
   if (modifiers && modifiers.native) {
