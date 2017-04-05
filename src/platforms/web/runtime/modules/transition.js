@@ -1,9 +1,16 @@
 /* @flow */
 
-import { once, isObject, toNumber } from 'shared/util'
 import { inBrowser, isIE9, warn } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
+
+import {
+  once,
+  isDef,
+  isUndef,
+  isObject,
+  toNumber
+} from 'shared/util'
 
 import {
   nextFrame,
@@ -17,18 +24,18 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const el: any = vnode.elm
 
   // call leave callback now
-  if (el._leaveCb) {
+  if (isDef(el._leaveCb)) {
     el._leaveCb.cancelled = true
     el._leaveCb()
   }
 
   const data = resolveTransition(vnode.data.transition)
-  if (!data) {
+  if (isUndef(data)) {
     return
   }
 
   /* istanbul ignore if */
-  if (el._enterCb || el.nodeType !== 1) {
+  if (isDef(el._enterCb) || el.nodeType !== 1) {
     return
   }
 
@@ -50,7 +57,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     afterAppear,
     appearCancelled,
     duration
-  } = data
+  } = (data: any)
 
   // activeInstance will always be the <transition> component managing this
   // transition. One edge case to check is when the <transition> is placed
@@ -167,18 +174,18 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   const el: any = vnode.elm
 
   // call enter callback now
-  if (el._enterCb) {
+  if (isDef(el._enterCb)) {
     el._enterCb.cancelled = true
     el._enterCb()
   }
 
   const data = resolveTransition(vnode.data.transition)
-  if (!data) {
+  if (isUndef(data)) {
     return rm()
   }
 
   /* istanbul ignore if */
-  if (el._leaveCb || el.nodeType !== 1) {
+  if (isDef(el._leaveCb) || el.nodeType !== 1) {
     return
   }
 
@@ -194,7 +201,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     leaveCancelled,
     delayLeave,
     duration
-  } = data
+  } = (data: any)
 
   const expectsCSS = css !== false && !isIE9
   const userWantsControl = getHookArgumentsLength(leave)
@@ -295,9 +302,11 @@ function isValidDuration (val) {
  * - a plain function (.length)
  */
 function getHookArgumentsLength (fn: Function): boolean {
-  if (!fn) return false
+  if (isUndef(fn)) {
+    return false
+  }
   const invokerFns = fn.fns
-  if (invokerFns) {
+  if (isDef(invokerFns)) {
     // invoker
     return getHookArgumentsLength(
       Array.isArray(invokerFns)
@@ -310,7 +319,7 @@ function getHookArgumentsLength (fn: Function): boolean {
 }
 
 function _enter (_: any, vnode: VNodeWithData) {
-  if (!vnode.data.show) {
+  if (vnode.data.show !== true) {
     enter(vnode)
   }
 }
@@ -320,7 +329,7 @@ export default inBrowser ? {
   activate: _enter,
   remove (vnode: VNode, rm: Function) {
     /* istanbul ignore else */
-    if (!vnode.data.show) {
+    if (vnode.data.show !== true) {
       leave(vnode, rm)
     } else {
       rm()
