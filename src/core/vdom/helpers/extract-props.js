@@ -22,8 +22,8 @@ export function extractPropsFromVNodeData (
     return
   }
   const res = {}
-  const { attrs, props, domProps } = data
-  if (isDef(attrs) || isDef(props) || isDef(domProps)) {
+  const { attrs, props } = data
+  if (isDef(attrs) || isDef(props)) {
     for (const key in propOptions) {
       const altKey = hyphenate(key)
       if (process.env.NODE_ENV !== 'production') {
@@ -43,8 +43,7 @@ export function extractPropsFromVNodeData (
         }
       }
       checkProp(res, props, key, altKey, true) ||
-      checkProp(res, attrs, key, altKey, false) ||
-      checkProp(res, domProps, key, altKey, false)
+      checkProp(res, attrs, key, altKey, false)
     }
   }
   return res
