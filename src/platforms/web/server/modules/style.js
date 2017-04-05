@@ -15,7 +15,7 @@ function genStyleText (vnode: VNode): string {
 
 export default function renderStyle (vnode: VNodeWithData): ?string {
   const styleText = genStyleText(vnode)
-  if (styleText) {
+  if (styleText !== '') {
     return ` style=${JSON.stringify(escape(styleText))}`
   }
 }

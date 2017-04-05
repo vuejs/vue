@@ -1,5 +1,7 @@
 /* @flow */
 
+import { isUndef } from 'shared/util'
+
 type RenderState = {
   type: 'Element';
   rendered: number;
@@ -57,7 +59,7 @@ export class RenderContext {
 
   next () {
     const lastState = this.renderStates[this.renderStates.length - 1]
-    if (!lastState) {
+    if (isUndef(lastState)) {
       return this.done()
     }
     switch (lastState.type) {
@@ -99,7 +101,7 @@ export class RenderContext {
 
 function normalizeAsync (cache, method) {
   const fn = cache[method]
-  if (!fn) {
+  if (isUndef(fn)) {
     return
   } else if (fn.length > 1) {
     return (key, cb) => fn.call(cache, key, cb)
