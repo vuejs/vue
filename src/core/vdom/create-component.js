@@ -1,18 +1,16 @@
 /* @flow */
 
 import VNode from './vnode'
-import { createElement } from './create-element'
-import { resolveConstructorOptions } from '../instance/init'
-import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 import { resolveInject } from '../instance/inject'
+import { resolveConstructorOptions } from '../instance/init'
+import { createFunctionalComponent } from './create-functional-component'
 
 import {
   warn,
   isDef,
   isUndef,
   isTrue,
-  isObject,
-  validateProp
+  isObject
 } from '../util/index'
 
 import {
@@ -164,44 +162,6 @@ export function createComponent (
     data, undefined, undefined, undefined, context,
     { Ctor, propsData, listeners, tag, children }
   )
-  return vnode
-}
-
-function createFunctionalComponent (
-  Ctor: Class<Component>,
-  propsData: ?Object,
-  data: VNodeData,
-  context: Component,
-  children: ?Array<VNode>
-): VNode | void {
-  const props = {}
-  const propOptions = Ctor.options.props
-  if (isDef(propOptions)) {
-    for (const key in propOptions) {
-      props[key] = validateProp(key, propOptions, propsData)
-    }
-  }
-  // ensure the createElement function in functional components
-  // gets a unique context - this is necessary for correct named slot check
-  const _context = Object.create(context)
-  const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
-
-  // functional injections should not reactive
-  const injections = resolveInject(Ctor.options.inject, _context)
-  const vnode = Ctor.options.render.call(null, h, {
-    props,
-    data,
-    parent: context,
-    children,
-    injections,
-    slots: () => resolveSlots(children, context)
-  })
-  if (vnode instanceof VNode) {
-    vnode.functionalContext = context
-    if (data.slot) {
-      (vnode.data || (vnode.data = {})).slot = data.slot
-    }
-  }
   return vnode
 }
 
