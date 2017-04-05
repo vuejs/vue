@@ -144,6 +144,29 @@ describe('Options provide/inject', () => {
     expect(child.baz).toBe(3)
   })
 
+  // Github issue #5194
+  it('should work with functional', () => {
+    new Vue({
+      template: `<child/>`,
+      provide: {
+        foo: 1,
+        bar: false
+      },
+      components: {
+        child: {
+          functional: true,
+          inject: ['foo', 'bar'],
+          render (h, context) {
+            const { injections } = context
+            injected = [injections.foo, injections.bar]
+          }
+        }
+      }
+    }).$mount()
+
+    expect(injected).toEqual([1, false])
+  })
+
   if (typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)) {
     it('with Symbol keys', () => {
       const s = Symbol()
