@@ -6,6 +6,7 @@ import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 
 import {
   isDef,
+  camelize,
   validateProp
 } from '../util/index'
 
@@ -22,6 +23,9 @@ export function createFunctionalComponent (
     for (const key in propOptions) {
       props[key] = validateProp(key, propOptions, propsData)
     }
+  } else {
+    if (isDef(data.attrs)) mergeProps(props, data.attrs)
+    if (isDef(data.props)) mergeProps(props, data.props)
   }
   // ensure the createElement function in functional components
   // gets a unique context - this is necessary for correct named slot check
@@ -29,6 +33,7 @@ export function createFunctionalComponent (
   const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
   const vnode = Ctor.options.render.call(null, h, {
     props,
+    listeners: data.on || {},
     data,
     parent: context,
     children,
@@ -41,4 +46,10 @@ export function createFunctionalComponent (
     }
   }
   return vnode
+}
+
+function mergeProps (to, from) {
+  for (const key in from) {
+    to[camelize(key)] = from[key]
+  }
 }
