@@ -4,6 +4,7 @@ import VNode from './vnode'
 import { createElement } from './create-element'
 import { resolveConstructorOptions } from '../instance/init'
 import { resolveSlots } from '../instance/render-helpers/resolve-slots'
+import { resolveInject } from '../instance/inject'
 
 import {
   warn,
@@ -184,11 +185,15 @@ function createFunctionalComponent (
   // gets a unique context - this is necessary for correct named slot check
   const _context = Object.create(context)
   const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
+
+  // functional injections should not reactive
+  const injections = resolveInject(Ctor.options.inject, _context)
   const vnode = Ctor.options.render.call(null, h, {
     props,
     data,
     parent: context,
     children,
+    injections,
     slots: () => resolveSlots(children, context)
   })
   if (vnode instanceof VNode) {
