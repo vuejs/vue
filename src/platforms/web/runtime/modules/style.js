@@ -45,15 +45,20 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
   let cur, name
   const el: any = vnode.elm
-  const oldStaticStyle: any = oldVnode.data.staticStyle
-  const oldStyleBinding: any = oldVnode.data.style || {}
+  const oldStaticStyle: any = oldData.staticStyle
+  const oldStyleBinding: any = oldData.normalizedStyle || oldData.style || {}
 
   // if static style exists, stylebinding already merged into it when doing normalizeStyleData
   const oldStyle = oldStaticStyle || oldStyleBinding
 
   const style = normalizeStyleBinding(vnode.data.style) || {}
 
-  vnode.data.style = style.__ob__ ? extend({}, style) : style
+  // store normalized style under a different key for next diff
+  // make sure to clone it if it's reactive, since the user likley wants
+  // to mutate it.
+  vnode.data.normalizedStyle = style.__ob__
+    ? extend({}, style)
+    : style
 
   const newStyle = getStyle(vnode, true)
 

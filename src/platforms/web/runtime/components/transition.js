@@ -53,9 +53,11 @@ export function extractTransitionData (comp: Component): Object {
 }
 
 function placeholder (h: Function, rawChild: VNode): ?VNode {
-  return /\d-keep-alive$/.test(rawChild.tag)
-    ? h('keep-alive')
-    : null
+  if (/\d-keep-alive$/.test(rawChild.tag)) {
+    return h('keep-alive', {
+      props: rawChild.componentOptions.propsData
+    })
+  }
 }
 
 function hasParentTransition (vnode: VNode): ?boolean {

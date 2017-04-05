@@ -258,12 +258,12 @@ describe('Component', () => {
     expect(vm.$el.outerHTML).toBe('<ul><li>1</li><li>2</li></ul>')
   })
 
-  it('should warn when not passing props in kebab-case', () => {
+  it('should warn when using camelCased props in in-DOM template', () => {
     new Vue({
       data: {
         list: [{ a: 1 }, { a: 2 }]
       },
-      template: '<test :somecollection="list"></test>',
+      template: '<test :somecollection="list"></test>', // <-- simulate lowercased template
       components: {
         test: {
           template: '<ul><li v-for="item in someCollection">{{item.a}}</li></ul>',
@@ -273,7 +273,24 @@ describe('Component', () => {
     }).$mount()
     expect(
       'You should probably use "some-collection" instead of "someCollection".'
-    ).toHaveBeenWarned()
+    ).toHaveBeenTipped()
+  })
+
+  it('should warn when using camelCased events in in-DOM template', () => {
+    new Vue({
+      template: '<test @foobar="a++"></test>', // <-- simulate lowercased template
+      components: {
+        test: {
+          template: '<div></div>',
+          created () {
+            this.$emit('fooBar')
+          }
+        }
+      }
+    }).$mount()
+    expect(
+      'You should probably use "foo-bar" instead of "fooBar".'
+    ).toHaveBeenTipped()
   })
 
   it('not found component should not throw', () => {
@@ -347,6 +364,48 @@ describe('Component', () => {
     }).then(() => {
       expect(vm.$el.textContent).toBe('234') // should be able to recover
       Vue.config.errorHandler = null
+    }).then(done)
+  })
+
+  it('relocates node without error', done => {
+    const el = document.createElement('div')
+    document.body.appendChild(el)
+    const target = document.createElement('div')
+    document.body.appendChild(target)
+
+    const Test = {
+      render (h) {
+        return h('div', { class: 'test' }, this.$slots.default)
+      },
+      mounted () {
+        target.appendChild(this.$el)
+      },
+      beforeDestroy () {
+        const parent = this.$el.parentNode
+        if (parent) {
+          parent.removeChild(this.$el)
+        }
+      }
+    }
+    const vm = new Vue({
+      data () {
+        return {
+          view: true
+        }
+      },
+      template: `<div><test v-if="view">Test</test></div>`,
+      components: {
+        test: Test
+      }
+    }).$mount(el)
+
+    expect(el.outerHTML).toBe('<div></div>')
+    expect(target.outerHTML).toBe('<div><div class="test">Test</div></div>')
+    vm.view = false
+    waitForUpdate(() => {
+      expect(el.outerHTML).toBe('<div></div>')
+      expect(target.outerHTML).toBe('<div></div>')
+      vm.$destroy()
     }).then(done)
   })
 })

@@ -346,4 +346,25 @@ describe('Directive v-bind:style', () => {
       expect(style.marginTop).toBe('12px')
     }).then(done)
   })
+
+  // #5318
+  it('should work for elements passed down as a slot', done => {
+    const vm = new Vue({
+      template: `<test><div :style="style"/></test>`,
+      data: {
+        style: { color: 'red' }
+      },
+      components: {
+        test: {
+          template: `<div><slot/></div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.children[0].style.color).toBe('red')
+    vm.style.color = 'green'
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].style.color).toBe('green')
+    }).then(done)
+  })
 })

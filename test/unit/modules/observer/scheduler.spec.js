@@ -1,6 +1,8 @@
 import Vue from 'vue'
-import config from 'core/config'
-import { queueWatcher as _queueWatcher } from 'core/observer/scheduler'
+import {
+  MAX_UPDATE_COUNT,
+  queueWatcher as _queueWatcher
+} from 'core/observer/scheduler'
 
 function queueWatcher (watcher) {
   watcher.vm = {} // mock vm
@@ -119,7 +121,7 @@ describe('Scheduler', () => {
     }
     queueWatcher(job)
     waitForUpdate(() => {
-      expect(count).toBe(config._maxUpdateCount + 1)
+      expect(count).toBe(MAX_UPDATE_COUNT + 1)
       expect('infinite update loop').toHaveBeenWarned()
     }).then(done)
   })

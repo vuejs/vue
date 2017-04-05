@@ -4,13 +4,17 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 ### $2000
 
-<a href="http://www.thedifferenceengine.io/">
-  <img width="600px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tde.png">
+<a href="https://stdlib.com/">
+  <img width="600px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
 </a>
 
 ---
 
 ### $500
+
+<a href="https://deepstreamhub.com">
+  <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/deepstream.png">
+</a>
 
 <a href="https://jsfiddle.net/">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
@@ -52,15 +56,21 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
 </a>
 
-<a href="https://stdlib.com/" target="_blank">
-  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
+<a href="https://fancygrid.com" target="_blank">
+  <img width="240px" src="http://fancygrid.com/logo/logo.png">
 </a>
+
+<a href="https://component.io/" target="_blank">
+  <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/component_io.png">
+</a>
+
+#### Sacha Kupambana
 
 ---
 
 ### $250
 
-It could be you!
+[It could be you!](https://www.patreon.com/bePatron?u=2341390)
 
 ---
 
@@ -80,6 +90,10 @@ It could be you!
 
 <a href="https://monei.net/">
   <img width="200px" src="http://i.imgur.com/JUSjHAi.png">
+</a>
+
+<a href="https://www.accelebrate.com/">
+  <img width="220px" src="https://www.accelebrate.com/assets/images/accelebrate_logo@2x.png">
 </a>
 
 ---
@@ -222,3 +236,14 @@ It could be you!
 - Michael Richards
 - Eduardo Reveles
 - Jan Kremlacek
+- Guy Gavergun
+- Keith Bailey
+- Joel Birch
+- Bernhard E. Reiter
+- Radu Cretu
+- Luiz Tanure
+- Poamrong Rith
+- Chengzhi Yin
+- Dan Barrett
+- Zoran Knezevic
+- Charles Beaumont

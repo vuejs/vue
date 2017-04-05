@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isChrome, isIE } from 'core/util/env'
+import { isChrome, isIE, supportsPassive } from 'core/util/env'
 import { updateListeners } from 'core/vdom/helpers/index'
 import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model'
 
@@ -31,7 +31,8 @@ function add (
   event: string,
   handler: Function,
   once: boolean,
-  capture: boolean
+  capture: boolean,
+  passive: boolean
 ) {
   if (once) {
     const oldHandler = handler
@@ -45,7 +46,7 @@ function add (
       }
     }
   }
-  target.addEventListener(event, handler, capture)
+  target.addEventListener(event, handler, supportsPassive ? { capture, passive } : capture)
 }
 
 function remove (

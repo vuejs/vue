@@ -48,6 +48,33 @@ describe('Options computed', () => {
     }).then(done)
   })
 
+  it('warn with setter and no getter', () => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <test></test>
+        </div>
+      `,
+      components: {
+        test: {
+          data () {
+            return {
+              a: 1
+            }
+          },
+          computed: {
+            b: {
+              set (v) { this.a = v }
+            }
+          },
+          template: `<div>{{a}}</div>`
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<div>1</div>')
+    expect('No getter function has been defined for computed property "b".').toHaveBeenWarned()
+  })
+
   it('watching computed', done => {
     const spy = jasmine.createSpy('watch computed')
     const vm = new Vue({

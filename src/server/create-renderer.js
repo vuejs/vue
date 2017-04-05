@@ -1,10 +1,10 @@
 /* @flow */
 
-const HTMLStream = require('vue-ssr-html-stream')
-
 import RenderStream from './render-stream'
+import TemplateRenderer from './template-renderer/index'
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
+import type { ClientManifest, ServerManifest } from './template-renderer/index'
 
 export type Renderer = {
   renderToString: (component: Component, cb: (err: ?Error, res: ?string) => void) => void;
@@ -24,6 +24,9 @@ export type RenderOptions = {
   cache?: RenderCache;
   template?: string;
   basedir?: string;
+  shouldPreload?: Function;
+  serverManifest?: ServerManifest;
+  clientManifest?: ClientManifest;
 };
 
 export function createRenderer ({
@@ -31,10 +34,18 @@ export function createRenderer ({
   directives = {},
   isUnaryTag = (() => false),
   template,
-  cache
+  cache,
+  shouldPreload,
+  serverManifest,
+  clientManifest
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
-  const parsedTemplate = template && HTMLStream.parseTemplate(template)
+  const templateRenderer = new TemplateRenderer({
+    template,
+    shouldPreload,
+    serverManifest,
+    clientManifest
+  })
 
   return {
     renderToString (
@@ -42,14 +53,17 @@ export function createRenderer ({
       done: (err: ?Error, res: ?string) => any,
       context?: ?Object
     ): void {
+      if (!template && context && clientManifest) {
+        exposeAssetRenderFns(context, templateRenderer)
+      }
       let result = ''
       const write = createWriteFunction(text => {
         result += text
       }, done)
       try {
         render(component, write, () => {
-          if (parsedTemplate) {
-            result = HTMLStream.renderTemplate(parsedTemplate, result, context)
+          if (template) {
+            result = templateRenderer.renderSync(result, context)
           }
           done(null, result)
         })
@@ -65,19 +79,27 @@ export function createRenderer ({
       const renderStream = new RenderStream((write, done) => {
         render(component, write, done)
       })
-      if (!parsedTemplate) {
+      if (!template) {
+        if (context && clientManifest) {
+          exposeAssetRenderFns(context, templateRenderer)
+        }
         return renderStream
       } else {
-        const htmlStream = new HTMLStream({
-          template: parsedTemplate,
-          context
-        })
+        const templateStream = templateRenderer.createStream(context)
         renderStream.on('error', err => {
-          htmlStream.emit('error', err)
+          templateStream.emit('error', err)
         })
-        renderStream.pipe(htmlStream)
-        return htmlStream
+        renderStream.pipe(templateStream)
+        return templateStream
       }
     }
   }
+}
+
+// Expose preload/prefetch and script render fns when client manifest is
+// available.
+function exposeAssetRenderFns (context: Object, renderer: TemplateRenderer) {
+  context.renderPreloadLinks = renderer.renderPreloadLinks.bind(renderer, context)
+  context.renderPrefetchLinks = renderer.renderPrefetchLinks.bind(renderer, context)
+  context.renderScripts = renderer.renderScripts.bind(renderer, context)
 }
