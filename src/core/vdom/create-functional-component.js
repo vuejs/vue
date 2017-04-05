@@ -2,6 +2,7 @@
 
 import VNode from './vnode'
 import { createElement } from './create-element'
+import { resolveInject } from '../instance/inject'
 import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 
 import {
@@ -32,11 +33,12 @@ export function createFunctionalComponent (
   const _context = Object.create(context)
   const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
   const vnode = Ctor.options.render.call(null, h, {
-    props,
-    listeners: data.on || {},
     data,
-    parent: context,
+    props,
     children,
+    parent: context,
+    listeners: data.on || {},
+    injections: resolveInject(Ctor.options.inject, context),
     slots: () => resolveSlots(children, context)
   })
   if (vnode instanceof VNode) {
