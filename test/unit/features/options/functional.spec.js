@@ -22,6 +22,53 @@ describe('Options functional', () => {
     }).then(done)
   })
 
+  it('should expose all props when not declared', done => {
+    const vm = new Vue({
+      data: { test: 'foo' },
+      template: '<div><wrap :msg="test" kebab-msg="bar"></wrap></div>',
+      components: {
+        wrap: {
+          functional: true,
+          render (h, { props }) {
+            return h('div', `${props.msg} ${props.kebabMsg}`)
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<div>foo bar</div>')
+    vm.test = 'qux'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div>qux bar</div>')
+    }).then(done)
+  })
+
+  it('should expose data.on as listeners', () => {
+    const foo = jasmine.createSpy('foo')
+    const bar = jasmine.createSpy('bar')
+    const vm = new Vue({
+      template: '<div><wrap @click="foo" @test="bar"/></div>',
+      methods: { foo, bar },
+      components: {
+        wrap: {
+          functional: true,
+          render (h, { listeners }) {
+            return h('div', {
+              on: {
+                click: [listeners.click, () => listeners.test('bar')]
+              }
+            })
+          }
+        }
+      }
+    }).$mount()
+
+    triggerEvent(vm.$el.children[0], 'click')
+    expect(foo).toHaveBeenCalled()
+    expect(foo.calls.argsFor(0)[0].type).toBe('click') // should have click event
+    triggerEvent(vm.$el.children[0], 'mousedown')
+    expect(bar).toHaveBeenCalledWith('bar')
+  })
+
   it('should support returning more than one root node', () => {
     const vm = new Vue({
       template: `<div><test></test></div>`,
