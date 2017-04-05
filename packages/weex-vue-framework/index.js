@@ -47,6 +47,7 @@ function reset () {
   delete renderer.Document;
   delete renderer.Element;
   delete renderer.Comment;
+  delete renderer.compileBundle;
 }
 
 /**
@@ -317,7 +318,7 @@ function createVueModuleInstance (instanceId, moduleGetter) {
  * Generate native module getter. Each native module has several
  * methods to call. And all the behaviors is instance-related. So
  * this getter will return a set of methods which additionally
- * send current instance id to native when called. 
+ * send current instance id to native when called.
  * @param  {string}  instanceId
  * @return {function}
  */
@@ -330,7 +331,7 @@ function genModuleGetter (instanceId) {
       Object.defineProperty(output, methodName, {
         enumerable: true,
         configurable: true,
-        get: function proxyGetter() {
+        get: function proxyGetter () {
           return function () {
             var args = [], len = arguments.length;
             while ( len-- ) args[ len ] = arguments[ len ];
@@ -338,7 +339,7 @@ function genModuleGetter (instanceId) {
             return instance.document.taskCenter.send('module', { module: name, method: methodName }, args)
           }
         },
-        set: function proxySetter(val) {
+        set: function proxySetter (val) {
           if (typeof val === 'function') {
             return instance.document.taskCenter.send('module', { module: name, method: methodName }, [val])
           }
@@ -361,7 +362,6 @@ function genModuleGetter (instanceId) {
  * @return {[type]}              [description]
  */
 function getInstanceTimer (instanceId, moduleGetter) {
-  var instance = instances[instanceId];
   var timer = moduleGetter('timer');
   var timerAPIs = {
     setTimeout: function () {
