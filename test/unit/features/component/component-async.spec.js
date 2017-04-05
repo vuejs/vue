@@ -159,4 +159,138 @@ describe('Component async', () => {
       done()
     }
   })
+
+  describe('loading/error/timeout', () => {
+    it('with loading component', done => {
+      const vm = new Vue({
+        template: `<div><test/></div>`,
+        components: {
+          test: () => ({
+            component: new Promise(resolve => {
+              setTimeout(() => {
+                resolve({ template: '<div>hi</div>' })
+                // wait for promise resolve and then parent update
+                Promise.resolve().then(() => {
+                  Vue.nextTick(next)
+                })
+              }, 5)
+            }),
+            loading: { template: `<div>loading</div>` },
+            delay: 1
+          })
+        }
+      }).$mount()
+
+      expect(vm.$el.innerHTML).toBe('<!---->')
+
+      let loadingAsserted = false
+      setTimeout(() => {
+        Vue.nextTick(() => {
+          loadingAsserted = true
+          expect(vm.$el.textContent).toBe('loading')
+        })
+      }, 1)
+
+      function next () {
+        expect(loadingAsserted).toBe(true)
+        expect(vm.$el.textContent).toBe('hi')
+        done()
+      }
+    })
+
+    it('with loading component (0 delay)', done => {
+      const vm = new Vue({
+        template: `<div><test/></div>`,
+        components: {
+          test: () => ({
+            component: new Promise(resolve => {
+              setTimeout(() => {
+                resolve({ template: '<div>hi</div>' })
+                // wait for promise resolve and then parent update
+                Promise.resolve().then(() => {
+                  Vue.nextTick(next)
+                })
+              }, 0)
+            }),
+            loading: { template: `<div>loading</div>` },
+            delay: 0
+          })
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('loading')
+
+      function next () {
+        expect(vm.$el.textContent).toBe('hi')
+        done()
+      }
+    })
+
+    it('with error component', done => {
+      const vm = new Vue({
+        template: `<div><test/></div>`,
+        components: {
+          test: () => ({
+            component: new Promise((resolve, reject) => {
+              setTimeout(() => {
+                reject()
+                // wait for promise resolve and then parent update
+                Promise.resolve().then(() => {
+                  Vue.nextTick(next)
+                })
+              }, 0)
+            }),
+            loading: { template: `<div>loading</div>` },
+            error: { template: `<div>error</div>` },
+            delay: 0
+          })
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('loading')
+
+      function next () {
+        expect(`Failed to resolve async component`).toHaveBeenWarned()
+        expect(vm.$el.textContent).toBe('error')
+        done()
+      }
+    })
+
+    it('with error component + timeout', done => {
+      const vm = new Vue({
+        template: `<div><test/></div>`,
+        components: {
+          test: () => ({
+            component: new Promise((resolve, reject) => {
+              setTimeout(() => {
+                resolve({ template: '<div>hi</div>' })
+                // wait for promise resolve and then parent update
+                Promise.resolve().then(() => {
+                  Vue.nextTick(next)
+                })
+              }, 5)
+            }),
+            loading: { template: `<div>loading</div>` },
+            error: { template: `<div>error</div>` },
+            delay: 0,
+            timeout: 1
+          })
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('loading')
+
+      setTimeout(() => {
+        Vue.nextTick(() => {
+          expect(`Failed to resolve async component`).toHaveBeenWarned()
+          expect(vm.$el.textContent).toBe('error')
+        })
+      }, 1)
+
+      function next () {
+        expect(vm.$el.textContent).toBe('error') // late resolve ignored
+        done()
+      }
+    })
+  })
 })
