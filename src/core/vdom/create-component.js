@@ -1,7 +1,6 @@
 /* @flow */
 
 import VNode from './vnode'
-import { resolveInject } from '../instance/inject'
 import { resolveConstructorOptions } from '../instance/init'
 import { createFunctionalComponent } from './create-functional-component'
 

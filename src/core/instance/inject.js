@@ -51,19 +51,7 @@ export function resolveInject (inject: any, vm: Component): ?Object {
       let source = vm
       while (source) {
         if (source._provided && provideKey in source._provided) {
-          /* istanbul ignore else */
-          if (process.env.NODE_ENV !== 'production') {
-            defineReactive(vm, key, source._provided[provideKey], () => {
-              warn(
-                `Avoid mutating an injected value directly since the changes will be ` +
-                `overwritten whenever the provided component re-renders. ` +
-                `injection being mutated: "${key}"`,
-                vm
-              )
-            })
-          } else {
-            defineReactive(vm, key, source._provided[provideKey])
-          }
+          result[key] = source._provided[provideKey]
           break
         }
         source = source.$parent
