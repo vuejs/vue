@@ -15,6 +15,32 @@ export function isTrue (v: any): boolean {
 }
 
 /**
+ * Check if value is primitive
+ */
+export function isPrimitive (value: any): boolean {
+  return typeof value === 'string' || typeof value === 'number'
+}
+
+/**
+ * Quick object check - this is primarily used to tell
+ * Objects from primitive values when we know the value
+ * is a JSON-compliant type.
+ */
+export function isObject (obj: mixed): boolean {
+  return obj !== null && typeof obj === 'object'
+}
+
+/**
+ * Strict object type check. Only returns true
+ * for plain JavaScript objects.
+ */
+const toString = Object.prototype.toString
+const OBJECT_STRING = '[object Object]'
+export function isPlainObject (obj: any): boolean {
+  return toString.call(obj) === OBJECT_STRING
+}
+
+/**
  * Convert a value to a string that is actually rendered.
  */
 export function _toString (val: any): string {
@@ -75,13 +101,6 @@ export function remove (arr: Array<any>, item: any): Array<any> | void {
 const hasOwnProperty = Object.prototype.hasOwnProperty
 export function hasOwn (obj: Object, key: string): boolean {
   return hasOwnProperty.call(obj, key)
-}
-
-/**
- * Check if value is primitive
- */
-export function isPrimitive (value: any): boolean {
-  return typeof value === 'string' || typeof value === 'number'
 }
 
 /**
@@ -159,25 +178,6 @@ export function extend (to: Object, _from: ?Object): Object {
     to[key] = _from[key]
   }
   return to
-}
-
-/**
- * Quick object check - this is primarily used to tell
- * Objects from primitive values when we know the value
- * is a JSON-compliant type.
- */
-export function isObject (obj: mixed): boolean {
-  return obj !== null && typeof obj === 'object'
-}
-
-/**
- * Strict object type check. Only returns true
- * for plain JavaScript objects.
- */
-const toString = Object.prototype.toString
-const OBJECT_STRING = '[object Object]'
-export function isPlainObject (obj: any): boolean {
-  return toString.call(obj) === OBJECT_STRING
 }
 
 /**
