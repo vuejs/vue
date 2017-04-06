@@ -67,14 +67,15 @@ function mergeData (to: Object, from: ?Object): Object {
 strats.data = function (
   parentVal: any,
   childVal: any,
-  vm?: Component
+  vm?: Component,
+  option: String
 ): ?Function {
   if (!vm) {
     // in a Vue.extend merge, both should be functions
     if (!childVal) {
       return parentVal
     }
-    if (typeof childVal !== 'function') {
+    if (option === 'data' && typeof childVal !== 'function') {
       process.env.NODE_ENV !== 'production' && warn(
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
