@@ -6,6 +6,7 @@ import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { cached, no, camelize } from 'shared/util'
 import { isIE, isServerRendering } from 'core/util/env'
+import { genAssignmentCode } from '../directives/model'
 
 import {
   addProp,
@@ -461,6 +462,13 @@ function processAttrs (el) {
           }
           if (modifiers.camel) {
             name = camelize(name)
+          }
+          if (modifiers.sync) {
+            addHandler(
+              el,
+              `update:${camelize(name)}`,
+              genAssignmentCode(value, `$event`)
+            )
           }
         }
         if (isProp || platformMustUseProp(el.tag, el.attrsMap.type, name)) {
