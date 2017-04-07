@@ -134,10 +134,11 @@ export const capitalize = cached((str: string): string => {
  */
 const hyphenateRE = /([^-])([A-Z])/g
 export const hyphenate = cached((str: string): string => {
-  return str
-    .replace(hyphenateRE, '$1-$2')
-    .replace(hyphenateRE, '$1-$2')
-    .toLowerCase()
+ // return str
+ //   .replace(hyphenateRE, '$1-$2')
+ //   .replace(hyphenateRE, '$1-$2')
+ //   .toLowerCase()
+  return str.replace(/_/g, '-')
 })
 
 /**
