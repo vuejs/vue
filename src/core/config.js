@@ -6,6 +6,8 @@ import {
   identity
 } from 'shared/util'
 
+import { LIFECYCLE_HOOKS } from 'shared/constants'
+
 export type Config = {
   // user
   optionMergeStrategies: { [key: string]: Function };
@@ -16,6 +18,7 @@ export type Config = {
   errorHandler: ?(err: Error, vm: Component, info: string) => void;
   ignoredElements: Array<string>;
   keyCodes: { [key: string]: number | Array<number> };
+
   // platform
   isReservedTag: (x?: string) => boolean;
   isReservedAttr: (x?: string) => boolean;
@@ -23,6 +26,9 @@ export type Config = {
   isUnknownElement: (x?: string) => boolean;
   getTagNamespace: (x?: string) => string | void;
   mustUseProp: (tag: string, type: ?string, name: string) => boolean;
+
+  // legacy
+  _lifecycleHooks: Array<string>;
 };
 
 export default ({
@@ -98,5 +104,10 @@ export default ({
    * Check if an attribute must be bound using property, e.g. value
    * Platform-dependent.
    */
-  mustUseProp: no
+  mustUseProp: no,
+
+  /**
+   * Exposed for legacy reasons
+   */
+  _lifecycleHooks: LIFECYCLE_HOOKS
 }: Config)
