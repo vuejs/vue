@@ -21,7 +21,10 @@ if (inBrowser) {
   try {
     const opts = {}
     Object.defineProperty(opts, 'passive', ({
-      get: function () { supportsPassive = true }
+      get () {
+        /* istanbul ignore next */
+        supportsPassive = true
+      }
     } : Object)) // https://github.com/facebook/flow/issues/285
     window.addEventListener('test-passive', null, opts)
   } catch (e) {}

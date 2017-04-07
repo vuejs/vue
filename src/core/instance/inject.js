@@ -17,6 +17,7 @@ export function initInjections (vm: Component) {
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
     Object.keys(result).forEach(key => {
+      /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
         defineReactive(vm, key, result[key], () => {
           warn(

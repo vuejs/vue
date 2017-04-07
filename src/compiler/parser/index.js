@@ -31,7 +31,7 @@ const modifierRE = /\.[^.]+/g
 const decodeHTMLCached = cached(decode)
 
 // configurable state
-let warn
+export let warn
 let delimiters
 let transforms
 let preTransforms
@@ -478,7 +478,7 @@ function processAttrs (el) {
         }
       } else if (onRE.test(name)) { // v-on
         name = name.replace(onRE, '')
-        addHandler(el, name, value, modifiers)
+        addHandler(el, name, value, modifiers, false, warn)
       } else { // normal directives
         name = name.replace(dirRE, '')
         // parse arg
