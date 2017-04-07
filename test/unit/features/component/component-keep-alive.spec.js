@@ -347,10 +347,40 @@ describe('Component keep-alive', () => {
       assertHookCalls(one, [1, 1, 1, 1, 0])
       assertHookCalls(two, [1, 1, 1, 0, 0])
       vm.include = 'two'
+    }).then(() => {
+      assertHookCalls(one, [1, 1, 1, 1, 1])
+      assertHookCalls(two, [1, 1, 1, 0, 0])
       vm.view = 'one'
     }).then(() => {
       assertHookCalls(one, [2, 2, 1, 1, 1])
       assertHookCalls(two, [1, 1, 1, 1, 0])
+    }).then(done)
+  })
+
+  it('should not prune currently active instance', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <keep-alive :include="include">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        include: 'one,two'
+      },
+      components
+    }).$mount()
+
+    vm.include = 'two'
+    waitForUpdate(() => {
+      assertHookCalls(one, [1, 1, 1, 0, 0])
+      assertHookCalls(two, [0, 0, 0, 0, 0])
+      vm.view = 'two'
+    }).then(() => {
+      assertHookCalls(one, [1, 1, 1, 0, 1])
+      assertHookCalls(two, [1, 1, 1, 0, 0])
     }).then(done)
   })
 
