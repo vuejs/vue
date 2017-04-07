@@ -9,6 +9,7 @@ declare type VNodeComponentOptions = {
 }
 
 declare type MountedComponentVNode = {
+  context: Component;
   componentOptions: VNodeComponentOptions;
   componentInstance: Component;
   parent: VNode;
