@@ -55,7 +55,19 @@ if (process.env.NODE_ENV !== 'production') {
   const generateComponentTrace = vm => {
     if (vm._isVue && vm.$parent && String.prototype.repeat) {
       const tree = []
+      let currentRecursiveSequence = 0
       while (vm) {
+        if (tree.length > 0) {
+          const last = tree[tree.length - 1]
+          if (last.constructor === vm.constructor) {
+            currentRecursiveSequence++
+            vm = vm.$parent
+            continue
+          } else if (currentRecursiveSequence > 0) {
+            tree[tree.length - 1] = [last, currentRecursiveSequence]
+            currentRecursiveSequence = 0
+          }
+        }
         tree.push(vm)
         vm = vm.$parent
       }
@@ -63,7 +75,9 @@ if (process.env.NODE_ENV !== 'production') {
         .map((vm, i) => `${
           i === 0 ? '---> ' : ' '.repeat(5 + i * 2)
         }${
-          formatComponentName(vm)
+          Array.isArray(vm)
+            ? `${formatComponentName(vm[0])}... (${vm[1]} recursive calls)`
+            : formatComponentName(vm)
         }`)
         .join('\n')
     } else {
