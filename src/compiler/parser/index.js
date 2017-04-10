@@ -5,8 +5,8 @@ import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { cached, no, camelize } from 'shared/util'
-import { isIE, isServerRendering } from 'core/util/env'
 import { genAssignmentCode } from '../directives/model'
+import { isIE, isEdge, isServerRendering } from 'core/util/env'
 
 import {
   addProp,
@@ -533,7 +533,10 @@ function parseModifiers (name: string): Object | void {
 function makeAttrsMap (attrs: Array<Object>): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
-    if (process.env.NODE_ENV !== 'production' && map[attrs[i].name] && !isIE) {
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      map[attrs[i].name] && !isIE && !isEdge
+    ) {
       warn('duplicate attribute: ' + attrs[i].name)
     }
     map[attrs[i].name] = attrs[i].value
