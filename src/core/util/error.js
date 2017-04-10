@@ -7,7 +7,7 @@ export function handleError (err, vm, info) {
     config.errorHandler.call(null, err, vm, info)
   } else {
     if (process.env.NODE_ENV !== 'production') {
-      warn(`Error in ${info}:`, vm)
+      warn(`Error in ${info}: "${err.toString()}"`, vm)
     }
     /* istanbul ignore else */
     if (inBrowser && typeof console !== 'undefined') {

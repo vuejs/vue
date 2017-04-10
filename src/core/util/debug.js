@@ -14,16 +14,16 @@ if (process.env.NODE_ENV !== 'production') {
 
   warn = (msg, vm) => {
     if (hasConsole && (!config.silent)) {
-      console.error(`[Vue warn]: ${msg} ` + (
-        vm ? formatLocation(formatComponentName(vm)) : ''
+      console.error(`[Vue warn]: ${msg}` + (
+        vm ? generateComponentTrace(vm) : ''
       ))
     }
   }
 
   tip = (msg, vm) => {
     if (hasConsole && (!config.silent)) {
-      console.warn(`[Vue tip]: ${msg} ` + (
-        vm ? formatLocation(formatComponentName(vm)) : ''
+      console.warn(`[Vue tip]: ${msg}` + (
+        vm ? generateComponentTrace(vm) : ''
       ))
     }
   }
@@ -52,11 +52,23 @@ if (process.env.NODE_ENV !== 'production') {
     )
   }
 
-  const formatLocation = str => {
-    if (str === `<Anonymous>`) {
-      str += ` - use the "name" option for better debugging messages.`
+  const generateComponentTrace = vm => {
+    if (vm._isVue && vm.$parent && String.prototype.repeat) {
+      const tree = []
+      while (vm) {
+        tree.push(vm)
+        vm = vm.$parent
+      }
+      return '\n\nfound in\n\n' + tree
+        .map((vm, i) => `${
+          i === 0 ? '---> ' : ' '.repeat(5 + i * 2)
+        }${
+          formatComponentName(vm)
+        }`)
+        .join('\n')
+    } else {
+      return `\n\n(found in ${formatComponentName(vm)})`
     }
-    return `\n(found in ${str})`
   }
 }
 
