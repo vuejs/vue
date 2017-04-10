@@ -32,7 +32,7 @@ export default {
       el._vModifiers = binding.modifiers
       if (!binding.modifiers.lazy) {
         // Safari < 10.2 & UIWebView doesn't fire compositionend when
-        // siwtching focus before confirming composition choice
+        // switching focus before confirming composition choice
         // this also fixes the issue where some browsers e.g. iOS Chrome
         // fires "change" instead of "input" on autocomplete.
         el.addEventListener('change', onCompositionEnd)
