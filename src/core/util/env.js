@@ -2,6 +2,7 @@
 /* globals MutationObserver */
 
 import { noop } from 'shared/util'
+import { handleError } from './error'
 
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
@@ -123,15 +124,22 @@ export const nextTick = (function () {
   return function queueNextTick (cb?: Function, ctx?: Object) {
     let _resolve
     callbacks.push(() => {
-      if (cb) cb.call(ctx)
-      if (_resolve) _resolve(ctx)
+      if (cb) {
+        try {
+          cb.call(ctx)
+        } catch (e) {
+          handleError(e, ctx, 'nextTick')
+        }
+      } else if (_resolve) {
+        _resolve(ctx)
+      }
     })
     if (!pending) {
       pending = true
       timerFunc()
     }
     if (!cb && typeof Promise !== 'undefined') {
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
         _resolve = resolve
       })
     }

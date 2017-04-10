@@ -106,6 +106,25 @@ describe('Error handling', () => {
     }).then(done)
   })
 
+  it('should capture and recover from nextTick errors', done => {
+    const err1 = new Error('nextTick')
+    const err2 = new Error('nextTick2')
+    const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
+    Vue.nextTick(() => { throw err1 })
+    Vue.nextTick(() => {
+      expect(spy).toHaveBeenCalledWith(err1, undefined, 'nextTick')
+
+      const vm = new Vue()
+      vm.$nextTick(() => { throw err2 })
+      Vue.nextTick(() => {
+        // should be called with correct instance info
+        expect(spy).toHaveBeenCalledWith(err2, vm, 'nextTick')
+        Vue.config.errorHandler = null
+        done()
+      })
+    })
+  })
+
   it('properly format component names', () => {
     const vm = new Vue()
     expect(formatComponentName(vm)).toBe('<Root>')
