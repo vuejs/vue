@@ -1,3 +1,5 @@
+import { isObject } from 'shared/util'
+
 const vm = require('vm')
 const path = require('path')
 const resolve = require('resolve')
@@ -70,6 +72,20 @@ function compileModule (files, basedir) {
   return evaluateModule
 }
 
+function deepClone (val) {
+  if (isObject(val)) {
+    const res = {}
+    for (const key in val) {
+      res[key] = deepClone(val[key])
+    }
+    return res
+  } else if (Array.isArray(val)) {
+    return val.slice()
+  } else {
+    return val
+  }
+}
+
 export function createBundleRunner (entry, files, basedir, direct) {
   const evaluate = compileModule(files, basedir)
   if (!direct) {
@@ -87,13 +103,18 @@ export function createBundleRunner (entry, files, basedir, direct) {
     // each render, it simply calls the exported function. This avoids the
     // module evaluation costs but requires the source code to be structured
     // slightly differently.
-    const context = createContext()
+    const initialExposedContext = {}
+    const context = createContext(initialExposedContext)
     const runner = evaluate(entry, context, {})
     if (typeof runner !== 'function') {
       throw new Error('direct mode expects bundle export to be a function.')
     }
     return (_context = {}) => {
       context.__VUE_SSR_CONTEXT__ = _context
+      // vue-style-loader styles imported outside of component lifecycle hooks
+      if (initialExposedContext._styles) {
+        _context._styles = deepClone(initialExposedContext._styles)
+      }
       return runner(_context)
     }
   }
