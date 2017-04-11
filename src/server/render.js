@@ -43,6 +43,7 @@ function renderNode (node, isRoot, context) {
     const Ctor = node.componentOptions.Ctor
     const getKey = Ctor.options.serverCacheKey
     const name = Ctor.options.name
+    const injectStyles = Ctor.options._injectStyles
     const cache = context.cache
     if (isDef(getKey) && isDef(cache) && isDef(name)) {
       const key = name + '::' + getKey(node.componentOptions.propsData)
@@ -50,7 +51,10 @@ function renderNode (node, isRoot, context) {
       if (isDef(has)) {
         (has: any)(key, hit => {
           if (hit === true && isDef(get)) {
-            (get: any)(key, res => write(res, next))
+            (get: any)(key, res => {
+              injectStyles && injectStyles.call({})
+              write(res, next)
+            })
           } else {
             renderComponentWithCache(node, isRoot, key, context)
           }
@@ -58,6 +62,7 @@ function renderNode (node, isRoot, context) {
       } else if (isDef(get)) {
         (get: any)(key, res => {
           if (isDef(res)) {
+            injectStyles && injectStyles.call({})
             write(res, next)
           } else {
             renderComponentWithCache(node, isRoot, key, context)
