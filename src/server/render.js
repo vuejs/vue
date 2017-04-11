@@ -43,6 +43,8 @@ function renderNode (node, isRoot, context) {
     const Ctor = node.componentOptions.Ctor
     const getKey = Ctor.options.serverCacheKey
     const name = Ctor.options.name
+    // exposed by vue-loader, need to call this if cache hit because
+    // component lifecycle hooks will not be called.
     const injectStyles = Ctor.options._injectStyles
     const cache = context.cache
     if (isDef(getKey) && isDef(cache) && isDef(name)) {
