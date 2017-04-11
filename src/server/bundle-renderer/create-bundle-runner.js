@@ -70,12 +70,31 @@ function compileModule (files, basedir) {
   return evaluateModule
 }
 
-export function createBundleRunner (entry, files, basedir) {
+export function createBundleRunner (entry, files, basedir, direct) {
   const evaluate = compileModule(files, basedir)
-  return (_context = {}) => new Promise((resolve, reject) => {
-    const context = createContext(_context)
-    const evaluatedFiles = _context._evaluatedFiles = {}
-    const res = evaluate(entry, context, evaluatedFiles)
-    resolve(typeof res === 'function' ? res(_context) : res)
-  })
+  if (!direct) {
+    // default mode: creates a fresh context and re-evaluate the bundle
+    // on each render. Ensures entire application state is fresh for each
+    // render, but incurs extra evaluation cost.
+    return (_context = {}) => new Promise((resolve, reject) => {
+      const context = createContext(_context)
+      const evaluatedFiles = _context._evaluatedFiles = {}
+      const res = evaluate(entry, context, evaluatedFiles)
+      resolve(typeof res === 'function' ? res(_context) : res)
+    })
+  } else {
+    // direct mode: instead of re-evaluating the whole bundle on
+    // each render, it simply calls the exported function. This avoids the
+    // module evaluation costs but requires the source code to be structured
+    // slightly differently.
+    const context = createContext()
+    const runner = evaluate(entry, context, {})
+    if (typeof runner !== 'function') {
+      throw new Error('direct mode expects bundle export to be a function.')
+    }
+    return (_context = {}) => {
+      context.__VUE_SSR_CONTEXT__ = _context
+      return runner(_context)
+    }
+  }
 }

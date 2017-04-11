@@ -30,10 +30,11 @@ type RenderBundle = {
 export function createBundleRendererCreator (createRenderer: () => Renderer) {
   return function createBundleRenderer (
     bundle: string | RenderBundle,
-    rendererOptions?: RenderOptions
+    rendererOptions?: RenderOptions = {}
   ) {
     let files, entry, maps, moduleMappings
-    let basedir = rendererOptions && rendererOptions.basedir
+    let basedir = rendererOptions.basedir
+    const direct = rendererOptions.directMode
 
     // load bundle if given filepath
     if (
@@ -83,7 +84,7 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
     }
     const renderer = createRenderer(rendererOptions)
 
-    const run = createBundleRunner(entry, files, basedir)
+    const run = createBundleRunner(entry, files, basedir, direct)
 
     return {
       renderToString: (context?: Object, cb: (err: ?Error, res: ?string) => void) => {

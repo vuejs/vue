@@ -24,6 +24,7 @@ export type RenderOptions = {
   cache?: RenderCache;
   template?: string;
   basedir?: string;
+  directMode?: boolean;
   shouldPreload?: Function;
   serverManifest?: ServerManifest;
   clientManifest?: ClientManifest;
