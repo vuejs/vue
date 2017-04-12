@@ -195,8 +195,7 @@ describe('SSR: bundle renderer', () => {
           expect(cache.set.calls.count()).toBe(3) // no new cache sets
           expect(cache.get.calls.count()).toBe(2) // 1 get for root
 
-          console.log(context1)
-          console.log(context2)
+          expect(context2.registered).toEqual(['app', 'child', 'grandchild'])
           done()
         })
       })
