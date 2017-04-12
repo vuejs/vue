@@ -37,89 +37,88 @@ const normalizeRender = vm => {
 }
 
 function renderNode (node, isRoot, context) {
-  const { write, next, userContext } = context
   if (isDef(node.componentOptions)) {
-    // check cache hit
-    const Ctor = node.componentOptions.Ctor
-    const getKey = Ctor.options.serverCacheKey
-    const name = Ctor.options.name
-
-    // exposed by vue-loader, need to call this if cache hit because
-    // component lifecycle hooks will not be called.
-    const registerComponent = Ctor.options._ssrRegister
-    if (write.caching && isDef(registerComponent)) {
-      write.componentBuffer[write.componentBuffer.length - 1].add(registerComponent)
-    }
-
-    const cache = context.cache
-    if (isDef(getKey) && isDef(cache) && isDef(name)) {
-      const key = name + '::' + getKey(node.componentOptions.propsData)
-      const { has, get } = context
-      if (isDef(has)) {
-        (has: any)(key, hit => {
-          if (hit === true && isDef(get)) {
-            (get: any)(key, res => {
-              registerComponent && registerComponent(userContext)
-              res.components.forEach(register => register(userContext))
-              write(res.html, next)
-            })
-          } else {
-            renderComponentWithCache(node, isRoot, key, context)
-          }
-        })
-      } else if (isDef(get)) {
-        (get: any)(key, res => {
-          if (isDef(res)) {
-            registerComponent && registerComponent(userContext)
-            res.components.forEach(register => register(userContext))
-            write(res.html, next)
-          } else {
-            renderComponentWithCache(node, isRoot, key, context)
-          }
-        })
-      }
-    } else {
-      if (isDef(getKey) && isUndef(cache)) {
-        warnOnce(
-          `[vue-server-renderer] Component ${
-            Ctor.options.name || '(anonymous)'
-          } implemented serverCacheKey, ` +
-          'but no cache was provided to the renderer.'
-        )
-      }
-      if (isDef(getKey) && isUndef(name)) {
-        warnOnce(
-          `[vue-server-renderer] Components that implement "serverCacheKey" ` +
-          `must also define a unique "name" option.`
-        )
-      }
-      renderComponent(node, isRoot, context)
-    }
+    renderComponent(node, isRoot, context)
   } else {
     if (isDef(node.tag)) {
       renderElement(node, isRoot, context)
     } else if (isTrue(node.isComment)) {
-      write(`<!--${node.text}-->`, next)
+      context.write(
+        `<!--${node.text}-->`,
+        context.next
+      )
     } else {
-      write(node.raw ? node.text : escape(String(node.text)), next)
+      context.write(
+        node.raw ? node.text : escape(String(node.text)),
+        context.next
+      )
     }
   }
 }
 
 function renderComponent (node, isRoot, context) {
-  const prevActive = context.activeInstance
-  const child = context.activeInstance = createComponentInstanceForVnode(
-    node,
-    context.activeInstance
-  )
-  normalizeRender(child)
-  const childNode = child._render()
-  childNode.parent = node
-  context.renderStates.push({
-    type: 'Component',
-    prevActive
-  })
-  renderNode(childNode, isRoot, context)
+  const { write, next, userContext } = context
+
+  // check cache hit
+  const Ctor = node.componentOptions.Ctor
+  const getKey = Ctor.options.serverCacheKey
+  const name = Ctor.options.name
+
+  // exposed by vue-loader, need to call this if cache hit because
+  // component lifecycle hooks will not be called.
+  const registerComponent = Ctor.options._ssrRegister
+  if (write.caching && isDef(registerComponent)) {
+    write.componentBuffer[write.componentBuffer.length - 1].add(registerComponent)
+  }
+
+  const cache = context.cache
+  if (isDef(getKey) && isDef(cache) && isDef(name)) {
+    const key = name + '::' + getKey(node.componentOptions.propsData)
+    const { has, get } = context
+    if (isDef(has)) {
+      (has: any)(key, hit => {
+        if (hit === true && isDef(get)) {
+          (get: any)(key, res => {
+            if (isDef(registerComponent)) {
+              registerComponent(userContext)
+            }
+            res.components.forEach(register => register(userContext))
+            write(res.html, next)
+          })
+        } else {
+          renderComponentWithCache(node, isRoot, key, context)
+        }
+      })
+    } else if (isDef(get)) {
+      (get: any)(key, res => {
+        if (isDef(res)) {
+          if (isDef(registerComponent)) {
+            registerComponent(userContext)
+          }
+          res.components.forEach(register => register(userContext))
+          write(res.html, next)
+        } else {
+          renderComponentWithCache(node, isRoot, key, context)
+        }
+      })
+    }
+  } else {
+    if (isDef(getKey) && isUndef(cache)) {
+      warnOnce(
+        `[vue-server-renderer] Component ${
+          Ctor.options.name || '(anonymous)'
+        } implemented serverCacheKey, ` +
+        'but no cache was provided to the renderer.'
+      )
+    }
+    if (isDef(getKey) && isUndef(name)) {
+      warnOnce(
+        `[vue-server-renderer] Components that implement "serverCacheKey" ` +
+        `must also define a unique "name" option.`
+      )
+    }
+    renderComponentInner(node, isRoot, context)
+  }
 }
 
 function renderComponentWithCache (node, isRoot, key, context) {
@@ -136,7 +135,23 @@ function renderComponentWithCache (node, isRoot, key, context) {
     bufferIndex,
     componentBuffer
   })
-  renderComponent(node, isRoot, context)
+  renderComponentInner(node, isRoot, context)
+}
+
+function renderComponentInner (node, isRoot, context) {
+  const prevActive = context.activeInstance
+  const child = context.activeInstance = createComponentInstanceForVnode(
+    node,
+    context.activeInstance
+  )
+  normalizeRender(child)
+  const childNode = child._render()
+  childNode.parent = node
+  context.renderStates.push({
+    type: 'Component',
+    prevActive
+  })
+  renderNode(childNode, isRoot, context)
 }
 
 function renderElement (el, isRoot, context) {
@@ -166,7 +181,7 @@ function renderElement (el, isRoot, context) {
 
 function hasAncestorData (node: VNode) {
   const parentNode = node.parent
-  return parentNode && (parentNode.data || hasAncestorData(parentNode))
+  return isDef(parentNode) && (isDef(parentNode.data) || hasAncestorData(parentNode))
 }
 
 function getVShowDirectiveInfo (node: VNode): ?VNodeDirective {
