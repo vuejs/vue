@@ -15,10 +15,12 @@ type RenderState = {
   type: 'ComponentWithCache';
   buffer: Array<string>;
   bufferIndex: number;
+  componentBuffer: Array<Set<Class<Component>>>;
   key: string;
 };
 
 export class RenderContext {
+  userContext: ?Object;
   activeInstance: Component;
   renderStates: Array<RenderState>;
   write: (text: string, next: Function) => void;
@@ -35,6 +37,7 @@ export class RenderContext {
   has: ?(key: string, cb: Function) => void;
 
   constructor (options: Object) {
+    this.userContext = options.userContext
     this.activeInstance = options.activeInstance
     this.renderStates = []
 
@@ -80,8 +83,11 @@ export class RenderContext {
         break
       case 'ComponentWithCache':
         this.renderStates.pop()
-        const { buffer, bufferIndex, key } = lastState
-        const result = buffer[bufferIndex]
+        const { buffer, bufferIndex, componentBuffer, key } = lastState
+        const result = {
+          html: buffer[bufferIndex],
+          components: componentBuffer[bufferIndex]
+        }
         this.cache.set(key, result)
         if (bufferIndex === 0) {
           // this is a top-level cached component,
@@ -90,9 +96,12 @@ export class RenderContext {
         } else {
           // parent component is also being cached,
           // merge self into parent's result
-          buffer[bufferIndex - 1] += result
+          buffer[bufferIndex - 1] += result.html
+          const prev = componentBuffer[bufferIndex - 1]
+          result.components.forEach(c => prev.add(c))
         }
         buffer.length = bufferIndex
+        componentBuffer.length = bufferIndex
         this.next()
         break
     }

@@ -37,15 +37,20 @@ const normalizeRender = vm => {
 }
 
 function renderNode (node, isRoot, context) {
-  const { write, next } = context
+  const { write, next, userContext } = context
   if (isDef(node.componentOptions)) {
     // check cache hit
     const Ctor = node.componentOptions.Ctor
     const getKey = Ctor.options.serverCacheKey
     const name = Ctor.options.name
+
     // exposed by vue-loader, need to call this if cache hit because
     // component lifecycle hooks will not be called.
-    const injectStyles = Ctor.options._injectStyles
+    const registerComponent = Ctor.options._ssrRegister
+    if (write.caching && isDef(registerComponent)) {
+      write.componentBuffer[write.componentBuffer.length - 1].add(registerComponent)
+    }
+
     const cache = context.cache
     if (isDef(getKey) && isDef(cache) && isDef(name)) {
       const key = name + '::' + getKey(node.componentOptions.propsData)
@@ -54,8 +59,9 @@ function renderNode (node, isRoot, context) {
         (has: any)(key, hit => {
           if (hit === true && isDef(get)) {
             (get: any)(key, res => {
-              injectStyles && injectStyles.call({})
-              write(res, next)
+              registerComponent && registerComponent(userContext)
+              res.components.forEach(register => register(userContext))
+              write(res.html, next)
             })
           } else {
             renderComponentWithCache(node, isRoot, key, context)
@@ -64,8 +70,9 @@ function renderNode (node, isRoot, context) {
       } else if (isDef(get)) {
         (get: any)(key, res => {
           if (isDef(res)) {
-            injectStyles && injectStyles.call({})
-            write(res, next)
+            registerComponent && registerComponent(userContext)
+            res.components.forEach(register => register(userContext))
+            write(res.html, next)
           } else {
             renderComponentWithCache(node, isRoot, key, context)
           }
@@ -101,7 +108,10 @@ function renderNode (node, isRoot, context) {
 
 function renderComponent (node, isRoot, context) {
   const prevActive = context.activeInstance
-  const child = context.activeInstance = createComponentInstanceForVnode(node, context.activeInstance)
+  const child = context.activeInstance = createComponentInstanceForVnode(
+    node,
+    context.activeInstance
+  )
   normalizeRender(child)
   const childNode = child._render()
   childNode.parent = node
@@ -117,9 +127,14 @@ function renderComponentWithCache (node, isRoot, key, context) {
   write.caching = true
   const buffer = write.cacheBuffer
   const bufferIndex = buffer.push('') - 1
+  const componentBuffer = write.componentBuffer
+  componentBuffer.push(new Set())
   context.renderStates.push({
     type: 'ComponentWithCache',
-    buffer, bufferIndex, key
+    key,
+    buffer,
+    bufferIndex,
+    componentBuffer
   })
   renderComponent(node, isRoot, context)
 }
@@ -234,11 +249,13 @@ export function createRenderFunction (
   return function render (
     component: Component,
     write: (text: string, next: Function) => void,
+    userContext: ?Object,
     done: Function
   ) {
     warned = Object.create(null)
     const context = new RenderContext({
       activeInstance: component,
+      userContext,
       write, done, renderNode,
       isUnaryTag, modules, directives,
       cache
