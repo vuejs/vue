@@ -28,5 +28,6 @@ export function createWriteFunction (
   }
   cachedWrite.caching = false
   cachedWrite.cacheBuffer = []
+  cachedWrite.componentBuffer = []
   return cachedWrite
 }

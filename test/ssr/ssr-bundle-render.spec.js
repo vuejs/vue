@@ -1,3 +1,4 @@
+import LRU from 'lru-cache'
 import { VueSSRServerPlugin } from 'vue-ssr-webpack-plugin'
 import { compileWithWebpack } from './compile-with-webpack'
 import { createBundleRenderer } from '../../packages/vue-server-renderer'
@@ -105,8 +106,10 @@ describe('SSR: bundle renderer', () => {
         expect(err).toBeNull()
         expect(res).toBe(expected)
         expect(get).toHaveBeenCalledWith(key)
-        expect(set).toHaveBeenCalledWith(key, expected)
-        expect(cache[key]).toBe(expected)
+        const setArgs = set.calls.argsFor(0)
+        expect(setArgs[0]).toBe(key)
+        expect(setArgs[1].html).toBe(expected)
+        expect(cache[key].html).toBe(expected)
         renderer.renderToString((err, res) => {
           expect(err).toBeNull()
           expect(res).toBe(expected)
@@ -149,14 +152,51 @@ describe('SSR: bundle renderer', () => {
         expect(res).toBe(expected)
         expect(has).toHaveBeenCalledWith(key)
         expect(get).not.toHaveBeenCalled()
-        expect(set).toHaveBeenCalledWith(key, expected)
-        expect(cache[key]).toBe(expected)
+        const setArgs = set.calls.argsFor(0)
+        expect(setArgs[0]).toBe(key)
+        expect(setArgs[1].html).toBe(expected)
+        expect(cache[key].html).toBe(expected)
         renderer.renderToString((err, res) => {
           expect(err).toBeNull()
           expect(res).toBe(expected)
           expect(has.calls.count()).toBe(2)
           expect(get.calls.count()).toBe(1)
           expect(set.calls.count()).toBe(1)
+          done()
+        })
+      })
+    })
+  })
+
+  it('render with cache (nested)', done => {
+    const cache = LRU({ maxAge: Infinity })
+    spyOn(cache, 'get').and.callThrough()
+    spyOn(cache, 'set').and.callThrough()
+    const options = { cache }
+    createRenderer('nested-cache.js', options, renderer => {
+      const expected = '<div data-server-rendered="true">/test</div>'
+      const key = 'app::1'
+      const context1 = { registered: [] }
+      const context2 = { registered: [] }
+      renderer.renderToString(context1, (err, res) => {
+        expect(err).toBeNull()
+        expect(res).toBe(expected)
+        expect(cache.set.calls.count()).toBe(3) // 3 nested components cached
+        const cached = cache.get(key)
+        expect(cached.html).toBe(expected)
+        expect(cache.get.calls.count()).toBe(1)
+
+        // assert component usage registration for nested children
+        expect(context1.registered).toEqual(['app', 'child', 'grandchild'])
+
+        renderer.renderToString(context2, (err, res) => {
+          expect(err).toBeNull()
+          expect(res).toBe(expected)
+          expect(cache.set.calls.count()).toBe(3) // no new cache sets
+          expect(cache.get.calls.count()).toBe(2) // 1 get for root
+
+          console.log(context1)
+          console.log(context2)
           done()
         })
       })

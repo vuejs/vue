@@ -63,7 +63,7 @@ export function createRenderer ({
         return false
       }, done)
       try {
-        render(component, write, () => {
+        render(component, write, context, () => {
           if (template) {
             result = templateRenderer.renderSync(result, context)
           }
@@ -79,7 +79,7 @@ export function createRenderer ({
       context?: ?Object
     ): stream$Readable {
       const renderStream = new RenderStream((write, done) => {
-        render(component, write, done)
+        render(component, write, context, done)
       })
       if (!template) {
         if (context && clientManifest) {
