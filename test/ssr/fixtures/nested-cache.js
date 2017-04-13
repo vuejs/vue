@@ -1,7 +1,9 @@
+/* globals __VUE_SSR_CONTEXT__ */
+
 import Vue from '../../../dist/vue.runtime.common.js'
 
 function register (id, context) {
-  context = context || __VUE_SSR_CONTEXT__ // eslint-disable-line
+  context = context || __VUE_SSR_CONTEXT__
   context.registered.push(id)
 }
 

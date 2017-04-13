@@ -40,7 +40,7 @@ function compileModule (files, basedir) {
     return script
   }
 
-  function evaluateModule (filename, context, evaluatedFiles) {
+  function evaluateModule (filename, context, evaluatedFiles = {}) {
     if (evaluatedFiles[filename]) {
       return evaluatedFiles[filename]
     }
@@ -93,9 +93,8 @@ export function createBundleRunner (entry, files, basedir, direct) {
     // on each render. Ensures entire application state is fresh for each
     // render, but incurs extra evaluation cost.
     return (_context = {}) => new Promise((resolve, reject) => {
-      const context = createContext(_context)
-      const evaluatedFiles = _context._evaluatedFiles = {}
-      const res = evaluate(entry, context, evaluatedFiles)
+      _context._registeredComponents = new Set()
+      const res = evaluate(entry, createContext(_context))
       resolve(typeof res === 'function' ? res(_context) : res)
     })
   } else {
@@ -105,12 +104,13 @@ export function createBundleRunner (entry, files, basedir, direct) {
     // slightly differently.
     const initialExposedContext = {}
     const context = createContext(initialExposedContext)
-    const runner = evaluate(entry, context, {})
+    const runner = evaluate(entry, context)
     if (typeof runner !== 'function') {
       throw new Error('direct mode expects bundle export to be a function.')
     }
     return (_context = {}) => {
       context.__VUE_SSR_CONTEXT__ = _context
+      _context._registeredComponents = new Set()
       // vue-style-loader styles imported outside of component lifecycle hooks
       if (initialExposedContext._styles) {
         _context._styles = deepClone(initialExposedContext._styles)

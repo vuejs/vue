@@ -14,15 +14,8 @@ export const isJS = (file: string): boolean => JS_RE.test(file)
 
 type TemplateRendererOptions = {
   template: ?string;
-  serverManifest?: ServerManifest;
   clientManifest?: ClientManifest;
   shouldPreload?: (file: string, type: string) => boolean;
-};
-
-export type ServerManifest = {
-  modules: {
-    [file: string]: Array<string>;
-  }
 };
 
 export type ClientManifest = {
@@ -42,7 +35,6 @@ export default class TemplateRenderer {
   options: TemplateRendererOptions;
   parsedTemplate: ParsedTemplate | null;
   publicPath: string;
-  serverManifest: ServerManifest;
   clientManifest: ClientManifest;
   preloadFiles: Array<string>;
   prefetchFiles: Array<string>;
@@ -57,15 +49,14 @@ export default class TemplateRenderer {
       : null
 
     // extra functionality with client manifest
-    if (options.serverManifest && options.clientManifest) {
-      const serverManifest = this.serverManifest = options.serverManifest
+    if (options.clientManifest) {
       const clientManifest = this.clientManifest = options.clientManifest
       this.publicPath = clientManifest.publicPath.replace(/\/$/, '')
       // preload/prefetch drectives
       this.preloadFiles = clientManifest.initial
       this.prefetchFiles = clientManifest.async
       // initial async chunk mapping
-      this.mapFiles = createMapper(serverManifest, clientManifest)
+      this.mapFiles = createMapper(clientManifest)
     }
   }
 
@@ -125,7 +116,7 @@ export default class TemplateRenderer {
 
   renderPrefetchLinks (context: Object): string {
     if (this.prefetchFiles) {
-      const usedAsyncFiles = this.getUsedAsyncFiles(context, true)
+      const usedAsyncFiles = this.getUsedAsyncFiles(context)
       const alreadyRendered = file => {
         return usedAsyncFiles && usedAsyncFiles.some(f => f === file)
       }
@@ -162,25 +153,11 @@ export default class TemplateRenderer {
     }
   }
 
-  getUsedAsyncFiles (context: Object, raw?: boolean): ?Array<string> {
-    if (!context._mappedfiles && context._evaluatedFiles && this.mapFiles) {
-      let mapped = this.mapFiles(Object.keys(context._evaluatedFiles))
-      context._rawMappedFiles = mapped
-      // if a file has a no-css version (produced by vue-ssr-webpack-plugin),
-      // we should use that instead.
-      const noCssHash = this.clientManifest && this.clientManifest.hasNoCssVersion
-      if (noCssHash) {
-        mapped = mapped.map(file => {
-          return noCssHash[file]
-            ? file.replace(JS_RE, '.no-css.js')
-            : file
-        })
-      }
-      context._mappedFiles = mapped
+  getUsedAsyncFiles (context: Object): ?Array<string> {
+    if (!context._mappedfiles && context._registeredComponents && this.mapFiles) {
+      context._mappedFiles = this.mapFiles(Array.from(context._registeredComponents))
     }
-    return raw
-      ? context._rawMappedFiles
-      : context._mappedFiles
+    return context._mappedFiles
   }
 
   // create a transform stream
