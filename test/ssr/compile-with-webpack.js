@@ -12,6 +12,10 @@ export function compileWithWebpack (file, extraConfig, cb) {
           loader: 'babel-loader'
         },
         {
+          test: /async-.*\.js$/,
+          loader: require.resolve('./async-loader')
+        },
+        {
           test: /\.(png|woff2)$/,
           loader: 'file-loader',
           options: {

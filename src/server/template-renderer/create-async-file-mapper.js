@@ -1,25 +1,24 @@
 /* @flow */
 
 /**
- * Creates a mapper that maps files used during a server-side render
+ * Creates a mapper that maps components used during a server-side render
  * to async chunk files in the client-side build, so that we can inline them
  * directly in the rendered HTML to avoid waterfall requests.
  */
 
-import type { ServerManifest, ClientManifest } from './index'
+import type { ClientManifest } from './index'
 
 export type AsyncFileMapper = (files: Array<string>) => Array<string>;
 
 export function createMapper (
-  serverManifest: ServerManifest,
   clientManifest: ClientManifest
 ): AsyncFileMapper {
-  const fileMap = createFileMap(serverManifest, clientManifest)
-
-  return function mapFiles (files: Array<string>): Array<string> {
+  const map = createMap(clientManifest)
+  // map server-side moduleIds to client-side files
+  return function mapper (moduleIds: Array<string>): Array<string> {
     const res = new Set()
-    for (let i = 0; i < files.length; i++) {
-      const mapped = fileMap.get(files[i])
+    for (let i = 0; i < moduleIds.length; i++) {
+      const mapped = map.get(moduleIds[i])
       if (mapped) {
         for (let j = 0; j < mapped.length; j++) {
           res.add(mapped[j])
@@ -30,27 +29,25 @@ export function createMapper (
   }
 }
 
-function createFileMap (serverManifest, clientManifest) {
-  const fileMap = new Map()
-  Object.keys(serverManifest.modules).forEach(file => {
-    fileMap.set(file, mapFile(serverManifest.modules[file], clientManifest))
+function createMap (clientManifest) {
+  const map = new Map()
+  Object.keys(clientManifest.modules).forEach(id => {
+    map.set(id, mapIdToFile(id, clientManifest))
   })
-  return fileMap
+  return map
 }
 
-function mapFile (moduleIds, clientManifest) {
-  const files = new Set()
-  moduleIds.forEach(id => {
-    const fileIndices = clientManifest.modules[id]
-    if (fileIndices) {
-      fileIndices.forEach(index => {
-        const file = clientManifest.all[index]
-        // only include async files or non-js assets
-        if (clientManifest.async.indexOf(file) > -1 || !(/\.js($|\?)/.test(file))) {
-          files.add(file)
-        }
-      })
-    }
-  })
-  return Array.from(files)
+function mapIdToFile (id, clientManifest) {
+  const files = []
+  const fileIndices = clientManifest.modules[id]
+  if (fileIndices) {
+    fileIndices.forEach(index => {
+      const file = clientManifest.all[index]
+      // only include async files or non-js assets
+      if (clientManifest.async.indexOf(file) > -1 || !(/\.js($|\?)/.test(file))) {
+        files.push(file)
+      }
+    })
+  }
+  return files
 }

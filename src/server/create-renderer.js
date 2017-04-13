@@ -4,7 +4,7 @@ import RenderStream from './render-stream'
 import TemplateRenderer from './template-renderer/index'
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
-import type { ClientManifest, ServerManifest } from './template-renderer/index'
+import type { ClientManifest } from './template-renderer/index'
 
 export type Renderer = {
   renderToString: (component: Component, cb: (err: ?Error, res: ?string) => void) => void;
@@ -26,7 +26,6 @@ export type RenderOptions = {
   basedir?: string;
   directMode?: boolean;
   shouldPreload?: Function;
-  serverManifest?: ServerManifest;
   clientManifest?: ClientManifest;
 };
 
@@ -37,14 +36,12 @@ export function createRenderer ({
   template,
   cache,
   shouldPreload,
-  serverManifest,
   clientManifest
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
   const templateRenderer = new TemplateRenderer({
     template,
     shouldPreload,
-    serverManifest,
     clientManifest
   })
 

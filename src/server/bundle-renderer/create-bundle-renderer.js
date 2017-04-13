@@ -32,7 +32,7 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
     bundle: string | RenderBundle,
     rendererOptions?: RenderOptions = {}
   ) {
-    let files, entry, maps, moduleMappings
+    let files, entry, maps
     let basedir = rendererOptions.basedir
     const direct = rendererOptions.directMode
 
@@ -63,7 +63,6 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
       files = bundle.files
       basedir = basedir || bundle.basedir
       maps = createSourceMapConsumers(bundle.maps)
-      moduleMappings = bundle.modules
       if (typeof entry !== 'string' || typeof files !== 'object') {
         throw new Error(INVALID_MSG)
       }
@@ -75,13 +74,6 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
       throw new Error(INVALID_MSG)
     }
 
-    if (moduleMappings) {
-      rendererOptions = Object.assign({}, rendererOptions, {
-        serverManifest: {
-          modules: moduleMappings
-        }
-      })
-    }
     const renderer = createRenderer(rendererOptions)
 
     const run = createBundleRunner(entry, files, basedir, direct)
