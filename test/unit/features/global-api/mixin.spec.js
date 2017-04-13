@@ -124,4 +124,21 @@ describe('Global API: mixin', () => {
     expect(Test.options.computed.$style()).toBe(123)
     expect(Test.options.beforeCreate).toEqual([mixinSpy, baseSpy, spy])
   })
+
+  // vue-class-component#83
+  it('should work for a constructor mixin', () => {
+    const spy = jasmine.createSpy('global mixin')
+    const Mixin = Vue.extend({
+      created () {
+        spy(this.$options.myOption)
+      }
+    })
+
+    Vue.mixin(Mixin)
+
+    new Vue({
+      myOption: 'hello'
+    })
+    expect(spy).toHaveBeenCalledWith('hello')
+  })
 })
