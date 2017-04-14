@@ -1,9 +1,9 @@
 import config from '../config'
 import { noop } from 'shared/util'
 
-let warn = noop
-let tip = noop
-let formatComponentName
+export let warn = noop
+export let tip = noop
+export let formatComponentName
 
 if (process.env.NODE_ENV !== 'production') {
   const hasConsole = typeof console !== 'undefined'
@@ -52,8 +52,18 @@ if (process.env.NODE_ENV !== 'production') {
     )
   }
 
+  const repeat = (str, n) => {
+    let res = ''
+    while (n) {
+      if (n % 2 === 1) res += str
+      if (n > 1) str += str
+      n >>= 1
+    }
+    return res
+  }
+
   const generateComponentTrace = vm => {
-    if (vm._isVue && vm.$parent && String.prototype.repeat) {
+    if (vm._isVue && vm.$parent) {
       const tree = []
       let currentRecursiveSequence = 0
       while (vm) {
@@ -73,7 +83,7 @@ if (process.env.NODE_ENV !== 'production') {
       }
       return '\n\nfound in\n\n' + tree
         .map((vm, i) => `${
-          i === 0 ? '---> ' : ' '.repeat(5 + i * 2)
+          i === 0 ? '---> ' : repeat(' ', 5 + i * 2)
         }${
           Array.isArray(vm)
             ? `${formatComponentName(vm[0])}... (${vm[1]} recursive calls)`
@@ -85,5 +95,3 @@ if (process.env.NODE_ENV !== 'production') {
     }
   }
 }
-
-export { warn, tip, formatComponentName }
