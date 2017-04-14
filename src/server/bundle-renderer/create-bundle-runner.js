@@ -92,30 +92,33 @@ export function createBundleRunner (entry, files, basedir, direct) {
     // default mode: creates a fresh context and re-evaluate the bundle
     // on each render. Ensures entire application state is fresh for each
     // render, but incurs extra evaluation cost.
-    return (_context = {}) => new Promise((resolve, reject) => {
-      _context._registeredComponents = new Set()
-      const res = evaluate(entry, createContext(_context))
-      resolve(typeof res === 'function' ? res(_context) : res)
+    return (userContext = {}) => new Promise(resolve => {
+      userContext._registeredComponents = new Set()
+      const res = evaluate(entry, createContext(userContext))
+      resolve(typeof res === 'function' ? res(userContext) : res)
     })
   } else {
     // direct mode: instead of re-evaluating the whole bundle on
     // each render, it simply calls the exported function. This avoids the
     // module evaluation costs but requires the source code to be structured
     // slightly differently.
-    const initialExposedContext = {}
-    const context = createContext(initialExposedContext)
-    const runner = evaluate(entry, context)
-    if (typeof runner !== 'function') {
-      throw new Error('direct mode expects bundle export to be a function.')
-    }
-    return (_context = {}) => {
-      context.__VUE_SSR_CONTEXT__ = _context
-      _context._registeredComponents = new Set()
-      // vue-style-loader styles imported outside of component lifecycle hooks
-      if (initialExposedContext._styles) {
-        _context._styles = deepClone(initialExposedContext._styles)
+    const initialContext = {}
+    const sharedContext = createContext(initialContext)
+    let runner // lazy creation so that errors can be caught by user
+    return (userContext = {}) => new Promise(resolve => {
+      if (!runner) {
+        runner = evaluate(entry, sharedContext)
+        if (typeof runner !== 'function') {
+          throw new Error('direct mode expects bundle export to be a function.')
+        }
       }
-      return runner(_context)
-    }
+      sharedContext.__VUE_SSR_CONTEXT__ = userContext
+      userContext._registeredComponents = new Set()
+      // vue-style-loader styles imported outside of component lifecycle hooks
+      if (initialContext._styles) {
+        userContext._styles = deepClone(initialContext._styles)
+      }
+      resolve(runner(userContext))
+    })
   }
 }
