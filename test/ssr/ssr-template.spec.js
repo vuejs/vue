@@ -169,56 +169,63 @@ describe('SSR: template option', () => {
       `<script src="/main.js"></script>` +
     `</body></html>`
 
-  it('bundleRenderer + renderToString + clientManifest', done => {
-    createRendererWithManifest('split.js', renderer => {
-      renderer.renderToString({}, (err, res) => {
-        expect(err).toBeNull()
-        expect(res).toContain(expectedHTMLWithManifest(false))
-        done()
+  createClientManifestAssertions(true)
+  createClientManifestAssertions(false)
+
+  function createClientManifestAssertions (directMode) {
+    it('bundleRenderer + renderToString + clientManifest', done => {
+      createRendererWithManifest('split.js', { directMode }, renderer => {
+        renderer.renderToString({}, (err, res) => {
+          expect(err).toBeNull()
+          expect(res).toContain(expectedHTMLWithManifest(false))
+          done()
+        })
       })
     })
-  })
 
-  it('bundleRenderer + renderToStream + clientManifest + shouldPreload', done => {
-    createRendererWithManifest('split.js', {
-      shouldPreload: (file, type) => {
-        if (type === 'image' || type === 'script' || type === 'font') {
-          return true
+    it('bundleRenderer + renderToStream + clientManifest + shouldPreload', done => {
+      createRendererWithManifest('split.js', {
+        directMode,
+        shouldPreload: (file, type) => {
+          if (type === 'image' || type === 'script' || type === 'font') {
+            return true
+          }
         }
-      }
-    }, renderer => {
-      const stream = renderer.renderToStream({})
-      let res = ''
-      stream.on('data', chunk => {
-        res += chunk.toString()
-      })
-      stream.on('end', () => {
-        expect(res).toContain(expectedHTMLWithManifest(true))
-        done()
-      })
-    })
-  })
-
-  it('bundleRenderer + renderToString + clientManifest + no template', done => {
-    createRendererWithManifest('split.js', {
-      template: null
-    }, renderer => {
-      const context = {}
-      renderer.renderToString(context, (err, res) => {
-        expect(err).toBeNull()
-
-        const customOutput =
-          `<html><head>${
-            context.renderPreloadLinks() +
-            context.renderPrefetchLinks()
-          }</head><body>${
-            res +
-            context.renderScripts()
-          }</body></html>`
-
-        expect(customOutput).toContain(expectedHTMLWithManifest(false))
-        done()
+      }, renderer => {
+        const stream = renderer.renderToStream({})
+        let res = ''
+        stream.on('data', chunk => {
+          res += chunk.toString()
+        })
+        stream.on('end', () => {
+          expect(res).toContain(expectedHTMLWithManifest(true))
+          done()
+        })
       })
     })
-  })
+
+    it('bundleRenderer + renderToString + clientManifest + no template', done => {
+      createRendererWithManifest('split.js', {
+        directMode,
+        template: null
+      }, renderer => {
+        const context = {}
+        renderer.renderToString(context, (err, res) => {
+          expect(err).toBeNull()
+
+          const customOutput =
+            `<html><head>${
+              context.renderPreloadLinks() +
+              context.renderPrefetchLinks()
+            }</head><body>${
+              res +
+              context.renderScripts()
+            }</body></html>`
+
+          expect(customOutput).toContain(expectedHTMLWithManifest(false))
+          done()
+        })
+      })
+    })
+  }
 })

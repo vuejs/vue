@@ -33,8 +33,13 @@ export function createRenderer (file, options, cb) {
 }
 
 describe('SSR: bundle renderer', () => {
+  createAssertions(true)
+  createAssertions(false)
+})
+
+function createAssertions (directMode) {
   it('renderToString', done => {
-    createRenderer('app.js', renderer => {
+    createRenderer('app.js', { directMode }, renderer => {
       const context = { url: '/test' }
       renderer.renderToString(context, (err, res) => {
         expect(err).toBeNull()
@@ -46,7 +51,7 @@ describe('SSR: bundle renderer', () => {
   })
 
   it('renderToStream', done => {
-    createRenderer('app.js', renderer => {
+    createRenderer('app.js', { directMode }, renderer => {
       const context = { url: '/test' }
       const stream = renderer.renderToStream(context)
       let res = ''
@@ -62,7 +67,7 @@ describe('SSR: bundle renderer', () => {
   })
 
   it('renderToString catch error', done => {
-    createRenderer('error.js', renderer => {
+    createRenderer('error.js', { directMode }, renderer => {
       renderer.renderToString(err => {
         expect(err.message).toBe('foo')
         done()
@@ -71,7 +76,7 @@ describe('SSR: bundle renderer', () => {
   })
 
   it('renderToStream catch error', done => {
-    createRenderer('error.js', renderer => {
+    createRenderer('error.js', { directMode }, renderer => {
       const stream = renderer.renderToStream()
       stream.on('error', err => {
         expect(err.message).toBe('foo')
@@ -85,6 +90,7 @@ describe('SSR: bundle renderer', () => {
     const get = jasmine.createSpy('get')
     const set = jasmine.createSpy('set')
     const options = {
+      directMode,
       cache: {
         // async
         get: (key, cb) => {
@@ -127,6 +133,7 @@ describe('SSR: bundle renderer', () => {
     const get = jasmine.createSpy('get')
     const set = jasmine.createSpy('set')
     const options = {
+      directMode,
       cache: {
         // async
         has: (key, cb) => {
@@ -172,7 +179,10 @@ describe('SSR: bundle renderer', () => {
     const cache = LRU({ maxAge: Infinity })
     spyOn(cache, 'get').and.callThrough()
     spyOn(cache, 'set').and.callThrough()
-    const options = { cache }
+    const options = {
+      cache,
+      directMode
+    }
     createRenderer('nested-cache.js', options, renderer => {
       const expected = '<div data-server-rendered="true">/test</div>'
       const key = 'app::1'
@@ -203,7 +213,7 @@ describe('SSR: bundle renderer', () => {
   })
 
   it('renderToString (bundle format with code split)', done => {
-    createRenderer('split.js', { asBundle: true }, renderer => {
+    createRenderer('split.js', { directMode, asBundle: true }, renderer => {
       const context = { url: '/test' }
       renderer.renderToString(context, (err, res) => {
         expect(err).toBeNull()
@@ -214,7 +224,7 @@ describe('SSR: bundle renderer', () => {
   })
 
   it('renderToStream (bundle format with code split)', done => {
-    createRenderer('split.js', { asBundle: true }, renderer => {
+    createRenderer('split.js', { directMode, asBundle: true }, renderer => {
       const context = { url: '/test' }
       const stream = renderer.renderToStream(context)
       let res = ''
@@ -229,7 +239,7 @@ describe('SSR: bundle renderer', () => {
   })
 
   it('renderToString catch error (bundle format with source map)', done => {
-    createRenderer('error.js', { asBundle: true }, renderer => {
+    createRenderer('error.js', { directMode, asBundle: true }, renderer => {
       renderer.renderToString(err => {
         expect(err.stack).toContain('test/ssr/fixtures/error.js:1:6')
         expect(err.message).toBe('foo')
@@ -239,7 +249,7 @@ describe('SSR: bundle renderer', () => {
   })
 
   it('renderToString catch error (bundle format with source map)', done => {
-    createRenderer('error.js', { asBundle: true }, renderer => {
+    createRenderer('error.js', { directMode, asBundle: true }, renderer => {
       const stream = renderer.renderToStream()
       stream.on('error', err => {
         expect(err.stack).toContain('test/ssr/fixtures/error.js:1:6')
@@ -248,4 +258,4 @@ describe('SSR: bundle renderer', () => {
       })
     })
   })
-})
+}
