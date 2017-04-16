@@ -64,6 +64,7 @@
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-flow-vue": "^1.0.0",
     "buble": "^0.15.2",
+    "chalk": "^1.1.3",
     "chromedriver": "^2.21.2",
     "codecov.io": "^0.1.6",
     "cross-spawn": "^5.0.1",
