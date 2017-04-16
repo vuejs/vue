@@ -1,7 +1,7 @@
 import LRU from 'lru-cache'
-import { VueSSRServerPlugin } from 'vue-ssr-webpack-plugin'
 import { compileWithWebpack } from './compile-with-webpack'
 import { createBundleRenderer } from '../../packages/vue-server-renderer'
+import VueSSRServerPlugin from '../../packages/vue-server-renderer/server-plugin'
 
 export function createRenderer (file, options, cb) {
   if (typeof options === 'function') {
@@ -25,7 +25,7 @@ export function createRenderer (file, options, cb) {
       : []
   }, fs => {
     const bundle = asBundle
-      ? JSON.parse(fs.readFileSync('/vue-ssr-bundle.json', 'utf-8'))
+      ? JSON.parse(fs.readFileSync('/vue-ssr-server-bundle.json', 'utf-8'))
       : fs.readFileSync('/bundle.js', 'utf-8')
     const renderer = createBundleRenderer(bundle, options)
     cb(renderer)

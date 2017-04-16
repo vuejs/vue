@@ -1,8 +1,8 @@
 import webpack from 'webpack'
 import Vue from '../../dist/vue.runtime.common.js'
-import { VueSSRClientPlugin } from 'vue-ssr-webpack-plugin'
 import { compileWithWebpack } from './compile-with-webpack'
 import { createRenderer } from '../../packages/vue-server-renderer'
+import VueSSRClientPlugin from '../../packages/vue-server-renderer/client-plugin'
 import { createRenderer as createBundleRenderer } from './ssr-bundle-render.spec.js'
 
 const defaultTemplate = `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
