@@ -279,7 +279,7 @@ export function createPatchFunction (backend) {
     let ancestor = vnode
     while (ancestor) {
       if (isDef(i = ancestor.context) && isDef(i = i.$options._scopeId)) {
-        nodeOps.setAttribute(vnode.elm, i, '')
+        nodeOps.addClass(vnode.elm, i)
       }
       ancestor = ancestor.parent
     }
@@ -287,7 +287,7 @@ export function createPatchFunction (backend) {
     if (isDef(i = activeInstance) &&
         i !== vnode.context &&
         isDef(i = i.$options._scopeId)) {
-      nodeOps.setAttribute(vnode.elm, i, '')
+      nodeOps.addClass(vnode.elm, i)
     }
   }
 
