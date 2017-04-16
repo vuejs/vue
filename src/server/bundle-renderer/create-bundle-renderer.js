@@ -34,7 +34,7 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
   ) {
     let files, entry, maps
     let basedir = rendererOptions.basedir
-    const direct = rendererOptions.directMode
+    const runInNewContext = rendererOptions.runInNewContext !== false
 
     // load bundle if given filepath
     if (
@@ -76,7 +76,7 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
 
     const renderer = createRenderer(rendererOptions)
 
-    const run = createBundleRunner(entry, files, basedir, direct)
+    const run = createBundleRunner(entry, files, basedir, runInNewContext)
 
     return {
       renderToString: (context?: Object, cb: (err: ?Error, res: ?string) => void) => {

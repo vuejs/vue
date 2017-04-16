@@ -37,9 +37,9 @@ describe('SSR: bundle renderer', () => {
   createAssertions(false)
 })
 
-function createAssertions (directMode) {
+function createAssertions (runInNewContext) {
   it('renderToString', done => {
-    createRenderer('app.js', { directMode }, renderer => {
+    createRenderer('app.js', { runInNewContext }, renderer => {
       const context = { url: '/test' }
       renderer.renderToString(context, (err, res) => {
         expect(err).toBeNull()
@@ -51,7 +51,7 @@ function createAssertions (directMode) {
   })
 
   it('renderToStream', done => {
-    createRenderer('app.js', { directMode }, renderer => {
+    createRenderer('app.js', { runInNewContext }, renderer => {
       const context = { url: '/test' }
       const stream = renderer.renderToStream(context)
       let res = ''
@@ -67,7 +67,7 @@ function createAssertions (directMode) {
   })
 
   it('renderToString catch error', done => {
-    createRenderer('error.js', { directMode }, renderer => {
+    createRenderer('error.js', { runInNewContext }, renderer => {
       renderer.renderToString(err => {
         expect(err.message).toBe('foo')
         done()
@@ -76,7 +76,7 @@ function createAssertions (directMode) {
   })
 
   it('renderToStream catch error', done => {
-    createRenderer('error.js', { directMode }, renderer => {
+    createRenderer('error.js', { runInNewContext }, renderer => {
       const stream = renderer.renderToStream()
       stream.on('error', err => {
         expect(err.message).toBe('foo')
@@ -90,7 +90,7 @@ function createAssertions (directMode) {
     const get = jasmine.createSpy('get')
     const set = jasmine.createSpy('set')
     const options = {
-      directMode,
+      runInNewContext,
       cache: {
         // async
         get: (key, cb) => {
@@ -133,7 +133,7 @@ function createAssertions (directMode) {
     const get = jasmine.createSpy('get')
     const set = jasmine.createSpy('set')
     const options = {
-      directMode,
+      runInNewContext,
       cache: {
         // async
         has: (key, cb) => {
@@ -181,7 +181,7 @@ function createAssertions (directMode) {
     spyOn(cache, 'set').and.callThrough()
     const options = {
       cache,
-      directMode
+      runInNewContext
     }
     createRenderer('nested-cache.js', options, renderer => {
       const expected = '<div data-server-rendered="true">/test</div>'
@@ -213,7 +213,7 @@ function createAssertions (directMode) {
   })
 
   it('renderToString (bundle format with code split)', done => {
-    createRenderer('split.js', { directMode, asBundle: true }, renderer => {
+    createRenderer('split.js', { runInNewContext, asBundle: true }, renderer => {
       const context = { url: '/test' }
       renderer.renderToString(context, (err, res) => {
         expect(err).toBeNull()
@@ -224,7 +224,7 @@ function createAssertions (directMode) {
   })
 
   it('renderToStream (bundle format with code split)', done => {
-    createRenderer('split.js', { directMode, asBundle: true }, renderer => {
+    createRenderer('split.js', { runInNewContext, asBundle: true }, renderer => {
       const context = { url: '/test' }
       const stream = renderer.renderToStream(context)
       let res = ''
@@ -239,7 +239,7 @@ function createAssertions (directMode) {
   })
 
   it('renderToString catch error (bundle format with source map)', done => {
-    createRenderer('error.js', { directMode, asBundle: true }, renderer => {
+    createRenderer('error.js', { runInNewContext, asBundle: true }, renderer => {
       renderer.renderToString(err => {
         expect(err.stack).toContain('test/ssr/fixtures/error.js:1:6')
         expect(err.message).toBe('foo')
@@ -249,7 +249,7 @@ function createAssertions (directMode) {
   })
 
   it('renderToString catch error (bundle format with source map)', done => {
-    createRenderer('error.js', { directMode, asBundle: true }, renderer => {
+    createRenderer('error.js', { runInNewContext, asBundle: true }, renderer => {
       const stream = renderer.renderToStream()
       stream.on('error', err => {
         expect(err.stack).toContain('test/ssr/fixtures/error.js:1:6')

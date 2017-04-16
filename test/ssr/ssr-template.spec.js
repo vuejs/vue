@@ -172,9 +172,9 @@ describe('SSR: template option', () => {
   createClientManifestAssertions(true)
   createClientManifestAssertions(false)
 
-  function createClientManifestAssertions (directMode) {
+  function createClientManifestAssertions (runInNewContext) {
     it('bundleRenderer + renderToString + clientManifest', done => {
-      createRendererWithManifest('split.js', { directMode }, renderer => {
+      createRendererWithManifest('split.js', { runInNewContext }, renderer => {
         renderer.renderToString({}, (err, res) => {
           expect(err).toBeNull()
           expect(res).toContain(expectedHTMLWithManifest(false))
@@ -185,7 +185,7 @@ describe('SSR: template option', () => {
 
     it('bundleRenderer + renderToStream + clientManifest + shouldPreload', done => {
       createRendererWithManifest('split.js', {
-        directMode,
+        runInNewContext,
         shouldPreload: (file, type) => {
           if (type === 'image' || type === 'script' || type === 'font') {
             return true
@@ -206,7 +206,7 @@ describe('SSR: template option', () => {
 
     it('bundleRenderer + renderToString + clientManifest + no template', done => {
       createRendererWithManifest('split.js', {
-        directMode,
+        runInNewContext,
         template: null
       }, renderer => {
         const context = {}
