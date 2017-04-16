@@ -24,9 +24,9 @@ export type RenderOptions = {
   cache?: RenderCache;
   template?: string;
   basedir?: string;
-  directMode?: boolean;
   shouldPreload?: Function;
   clientManifest?: ClientManifest;
+  runInNewContext?: boolean;
 };
 
 export function createRenderer ({

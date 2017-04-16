@@ -86,10 +86,10 @@ function deepClone (val) {
   }
 }
 
-export function createBundleRunner (entry, files, basedir, direct) {
+export function createBundleRunner (entry, files, basedir, runInNewContext) {
   const evaluate = compileModule(files, basedir)
-  if (!direct) {
-    // default mode: creates a fresh context and re-evaluate the bundle
+  if (runInNewContext) {
+    // new context mode: creates a fresh context and re-evaluate the bundle
     // on each render. Ensures entire application state is fresh for each
     // render, but incurs extra evaluation cost.
     return (userContext = {}) => new Promise(resolve => {
@@ -109,7 +109,10 @@ export function createBundleRunner (entry, files, basedir, direct) {
       if (!runner) {
         runner = evaluate(entry, sharedContext)
         if (typeof runner !== 'function') {
-          throw new Error('direct mode expects bundle export to be a function.')
+          throw new Error(
+            'bundle export should be a function when using ' +
+            '{ runInNewContext: false }.'
+          )
         }
       }
       sharedContext.__VUE_SSR_CONTEXT__ = userContext
