@@ -12,7 +12,17 @@ const setProp = (el, name, val) => {
   } else if (importantRE.test(val)) {
     el.style.setProperty(name, val.replace(importantRE, ''), 'important')
   } else {
-    el.style[normalize(name)] = val
+    const normalizedName = normalize(name)
+    if (Array.isArray(val)) {
+      // Support values array created by autoprefixer, e.g.
+      // {display: ["-webkit-box", "-ms-flexbox", "flex"]}
+      // Set them one by one, and the browser will only set those it can recognize
+      for (let i = 0, len = val.length; i < len; i++) {
+        el.style[normalizedName] = val[i]
+      }
+    } else {
+      el.style[normalizedName] = val
+    }
   }
 }
 

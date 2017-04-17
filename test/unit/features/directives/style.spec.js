@@ -83,6 +83,17 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
+  it('auto-prefixed style value as array', done => {
+    vm.styles = { display: ['-webkit-box', '-ms-flexbox', 'flex'] }
+    const testEl = document.createElement('div')
+    vm.styles.display.forEach(value => {
+      testEl.style.display = value
+    })
+    waitForUpdate(() => {
+      expect(vm.$el.style.display).toBe(testEl.style.display)
+    }).then(done)
+  })
+
   it('!important', done => {
     vm.styles = { display: 'block !important' }
     waitForUpdate(() => {
