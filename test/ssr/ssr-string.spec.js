@@ -123,6 +123,22 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('auto-prefixed style value as array', done => {
+    renderVmWithOptions({
+      template: '<div :style="style"></div>',
+      data: {
+        style: {
+          display: ['-webkit-box', '-ms-flexbox', 'flex']
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true" style="display:-webkit-box;display:-ms-flexbox;display:flex;"></div>'
+      )
+      done()
+    })
+  })
+
   it('custom component style', done => {
     renderVmWithOptions({
       template: '<section><comp :style="style"></comp></section>',
