@@ -1,12 +1,13 @@
 /* @flow */
 
-import Vue from './web-runtime'
 import config from 'core/config'
-import { query } from 'web/util/index'
 import { warn, cached } from 'core/util/index'
 import { mark, measure } from 'core/util/perf'
-import { shouldDecodeNewlines } from 'web/util/compat'
-import { compileToFunctions } from 'web/compiler/index'
+
+import Vue from './runtime/index'
+import { query } from './util/index'
+import { shouldDecodeNewlines } from './util/compat'
+import { compileToFunctions } from './compiler/index'
 
 const idToTemplate = cached(id => {
   const el = query(id)

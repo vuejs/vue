@@ -2,12 +2,9 @@
 
 import Vue from 'core/index'
 import config from 'core/config'
-import { patch } from 'web/runtime/patch'
 import { extend, noop } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
 import { devtools, inBrowser, isChrome } from 'core/util/index'
-import platformDirectives from 'web/runtime/directives/index'
-import platformComponents from 'web/runtime/components/index'
 
 import {
   query,
@@ -17,6 +14,10 @@ import {
   getTagNamespace,
   isUnknownElement
 } from 'web/util/index'
+
+import { patch } from './patch'
+import platformDirectives from './directives/index'
+import platformComponents from './components/index'
 
 // install platform specific utils
 Vue.config.mustUseProp = mustUseProp
