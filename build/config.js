@@ -107,7 +107,7 @@ const builds = {
   },
   // Web server renderer (CommonJS).
   'web-server-renderer': {
-    entry: resolve('server/index.js'),
+    entry: resolve('web/server-renderer.js'),
     dest: resolve('packages/vue-server-renderer/build.js'),
     format: 'cjs',
     external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)

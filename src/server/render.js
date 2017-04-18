@@ -1,6 +1,7 @@
 /* @flow */
 
-import { escape } from 'he'
+const { escape } = require('he')
+
 import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
 import { compileToFunctions } from 'web/compiler/index'
