@@ -10,65 +10,71 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 ---
 
+### $1000
+
+<a href="https://www.upyun.com/?utm_source=vue&utm_medium=ad&utm_content=github">
+  <img width="400px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/upyun-large.png">
+</a>
+
+---
+
 ### $500
 
 <a href="https://deepstreamhub.com">
   <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/deepstream.png">
 </a>
-
+<br><br>
 <a href="https://jsfiddle.net/">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
 </a>
-
+<br><br>
 <a href="https://laravel.com">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
 </a>
-
+<br><br>
 <a href="https://chaitin.cn">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/chaitin.png">
 </a>
-
+<br><br>
 <a href="https://htmlburger.com/">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
 </a>
-
+<br><br>
 <a href="https://starter.someline.com/">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
 </a>
-
+<br><br>
 <a href="http://monterail.com/" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
 </a>
-
+<br><br>
 <a href="https://www.trisoft.ro/" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/trisoft.png">
 </a>
-
+<br><br>
 <a href="https://www.2mhost.com/" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/2mhost.png">
 </a>
-
+<br><br>
 <a href="https://vuejsjob.com/?ref=vuejs" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
 </a>
-
+<br><br>
 <a href="https://leanpub.com/vuejs2" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
 </a>
-
+<br><br>
 <a href="https://famebroker.com" target="_blank">
   <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/famebroker.png">
 </a>
-
+<br><br>
 <a href="https://fancygrid.com" target="_blank">
   <img width="240px" src="http://fancygrid.com/logo/logo.png">
 </a>
-
+<br><br>
 <a href="https://component.io/" target="_blank">
   <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/component_io.png">
 </a>
-
-#### Sacha Kupambana
 
 ---
 
