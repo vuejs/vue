@@ -73,9 +73,15 @@ The default test script will do the following: lint with ESLint -> type check wi
 
 ## Project Structure
 
-- **`build`**: contains build-related configuration files. In most cases you don't need to touch them.
+- **`build`**: contains build-related configuration files. In most cases you don't need to touch them. However, it would be helpful to familiarize yourself with the following files:
+
+  - `build/alias.js`: module import aliases used across all source code and tests.
+
+  - `build/config.js`: contains the build configurations for all files found in `dist/`. Check this file if you want to find out the entry source file for a dist file.
 
 - **`dist`**: contains built files for distribution. Note this directory is only updated when a release happens; they do not reflect the latest changes in development branches.
+
+  See [dist/README.md](https://github.com/vuejs/vue/blob/dev/dist/README.md) for more details on dist files.
 
 - **`flow`**: contains type declarations for [Flow](https://flowtype.org/). These declarations are loaded **globally** and you will see them used in type annotations in normal source code.
 
@@ -84,16 +90,6 @@ The default test script will do the following: lint with ESLint -> type check wi
 - **`test`**: contains all tests. The unit tests are written with [Jasmine](http://jasmine.github.io/2.3/introduction.html) and run with [Karma](http://karma-runner.github.io/0.13/index.html). The e2e tests are written for and run with [Nightwatch.js](http://nightwatchjs.org/).
 
 - **`src`**: contains the source code, obviously. The codebase is written in ES2015 with [Flow](https://flowtype.org/) type annotations.
-
-  - **`entries`**: contains entries for different builds and packages.
-
-    - **`web-runtime`**: the entry for `dist/vue.common.js`, a.k.a the runtime-only build. It does not include the template to render function compiler, so it does not support the `template` option. **This is set as the `main` field in `package.json` so it is the default export when you import Vue as an NPM package.**
-
-    - **`web-runtime-with-compiler`**: the entry for `dist/vue.js`, a.k.a the standalone build. It includes the template to render function compiler. To use this build from the NPM packages, do `import Vue from 'vue/dist/vue'`, or alias `vue` to `vue/dist/vue` in your build tool configuration.
-
-    - **`web-compiler.js`**: the entry for the `vue-template-compiler` NPM package.
-
-    - **`web-server-renderer.js`**: the entry for the `vue-server-renderer` NPM package.
 
   - **`compiler`**: contains code for the template-to-render-function compiler.
 
@@ -116,6 +112,8 @@ The default test script will do the following: lint with ESLint -> type check wi
   - **`server`**: contains code related to server-side rendering.
 
   - **`platforms`**: contains platform-specific code.
+
+    Entry files for dist builds are located in their respective platform directory.
 
     Each platform module contains three parts: `compiler`, `runtime` and `server`, corresponding to the three directories above. Each part contains platform-specific modules/utilities which are then imported and injected to the core counterparts in platform-specific entry files. For example, the code implementing the logic behind `v-bind:class` is in `platforms/web/runtime/modules/class.js` - which is imported in `entries/web-runtime.js` and used to create the browser-specific vdom patching function.
 
