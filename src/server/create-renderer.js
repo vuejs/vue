@@ -23,6 +23,7 @@ export type RenderOptions = {
   isUnaryTag?: Function;
   cache?: RenderCache;
   template?: string;
+  inject?: boolean;
   basedir?: string;
   shouldPreload?: Function;
   clientManifest?: ClientManifest;
@@ -34,6 +35,7 @@ export function createRenderer ({
   directives = {},
   isUnaryTag = (() => false),
   template,
+  inject,
   cache,
   shouldPreload,
   clientManifest
@@ -41,6 +43,7 @@ export function createRenderer ({
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
   const templateRenderer = new TemplateRenderer({
     template,
+    inject,
     shouldPreload,
     clientManifest
   })

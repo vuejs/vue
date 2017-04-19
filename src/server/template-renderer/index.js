@@ -14,6 +14,7 @@ export const isJS = (file: string): boolean => JS_RE.test(file)
 
 type TemplateRendererOptions = {
   template: ?string;
+  inject?: boolean;
   clientManifest?: ClientManifest;
   shouldPreload?: (file: string, type: string) => boolean;
 };
@@ -33,6 +34,7 @@ export type ClientManifest = {
 
 export default class TemplateRenderer {
   options: TemplateRendererOptions;
+  inject: boolean;
   parsedTemplate: ParsedTemplate | null;
   publicPath: string;
   clientManifest: ClientManifest;
@@ -42,6 +44,7 @@ export default class TemplateRenderer {
 
   constructor (options: TemplateRendererOptions) {
     this.options = options
+    this.inject = options.inject !== false
     // if no template option is provided, the renderer is created
     // as a utility object for rendering assets like preload links and scripts.
     this.parsedTemplate = options.template
@@ -74,17 +77,26 @@ export default class TemplateRenderer {
       throw new Error('renderSync cannot be called without a template.')
     }
     context = context || {}
-    return (
-      template.head(context) +
-      (context.head || '') +
-      this.renderLinks(context) +
-      this.renderStyles(context) +
-      template.neck(context) +
-      content +
-      this.renderState(context) +
-      this.renderScripts(context) +
-      template.tail(context)
-    )
+    if (this.inject) {
+      return (
+        template.head(context) +
+        (context.head || '') +
+        this.renderLinks(context) +
+        this.renderStyles(context) +
+        template.neck(context) +
+        content +
+        this.renderState(context) +
+        this.renderScripts(context) +
+        template.tail(context)
+      )
+    } else {
+      return (
+        template.head(context) +
+        template.neck(context) +
+        content +
+        template.tail(context)
+      )
+    }
   }
 
   renderStyles (context: Object): string {

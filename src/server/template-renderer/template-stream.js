@@ -9,6 +9,7 @@ export default class TemplateStream extends Transform {
   renderer: TemplateRenderer;
   template: ParsedTemplate;
   context: Object;
+  inject: boolean;
 
   constructor (
     renderer: TemplateRenderer,
@@ -20,6 +21,7 @@ export default class TemplateStream extends Transform {
     this.renderer = renderer
     this.template = template
     this.context = context || {}
+    this.inject = renderer.inject
   }
 
   _transform (data: Buffer | string, encoding: string, done: Function) {
@@ -35,26 +37,22 @@ export default class TemplateStream extends Transform {
     this.started = true
     this.push(this.template.head(this.context))
 
-    // inline server-rendered head meta information
-    if (this.context.head) {
-      this.push(this.context.head)
-    }
+    if (this.inject) {
+      // inline server-rendered head meta information
+      if (this.context.head) {
+        this.push(this.context.head)
+      }
 
-    // inline preload directives for initial chunks
-    const preloadLinks = this.renderer.renderPreloadLinks(this.context)
-    if (preloadLinks) {
-      this.push(preloadLinks)
-    }
+      // inline preload/prefetch directives for initial/async chunks
+      const links = this.renderer.renderLinks(this.context)
+      if (links) {
+        this.push(links)
+      }
 
-    // inline prefetch directives for async chunks not used during render
-    const prefetchLinks = this.renderer.renderPrefetchLinks(this.context)
-    if (prefetchLinks) {
-      this.push(prefetchLinks)
-    }
-
-    // inline server-rendered CSS collected by vue-style-loader
-    if (this.context.styles) {
-      this.push(this.context.styles)
+      // inline server-rendered CSS collected by vue-style-loader
+      if (this.context.styles) {
+        this.push(this.context.styles)
+      }
     }
 
     this.push(this.template.neck(this.context))
@@ -63,16 +61,18 @@ export default class TemplateStream extends Transform {
   _flush (done: Function) {
     this.emit('beforeEnd')
 
-    // inline initial store state
-    const state = this.renderer.renderState(this.context)
-    if (state) {
-      this.push(state)
-    }
+    if (this.inject) {
+      // inline initial store state
+      const state = this.renderer.renderState(this.context)
+      if (state) {
+        this.push(state)
+      }
 
-    // embed scripts needed
-    const scripts = this.renderer.renderScripts(this.context)
-    if (scripts) {
-      this.push(scripts)
+      // embed scripts needed
+      const scripts = this.renderer.renderScripts(this.context)
+      if (scripts) {
+        this.push(scripts)
+      }
     }
 
     this.push(this.template.tail(this.context))
