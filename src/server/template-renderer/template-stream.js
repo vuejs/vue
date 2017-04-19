@@ -33,7 +33,7 @@ export default class TemplateStream extends Transform {
 
   start () {
     this.started = true
-    this.push(this.template.head)
+    this.push(this.template.head(this.context))
 
     // inline server-rendered head meta information
     if (this.context.head) {
@@ -57,7 +57,7 @@ export default class TemplateStream extends Transform {
       this.push(this.context.styles)
     }
 
-    this.push(this.template.neck)
+    this.push(this.template.neck(this.context))
   }
 
   _flush (done: Function) {
@@ -75,7 +75,7 @@ export default class TemplateStream extends Transform {
       this.push(scripts)
     }
 
-    this.push(this.template.tail)
+    this.push(this.template.tail(this.context))
     done()
   }
 }

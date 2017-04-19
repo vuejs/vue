@@ -1,9 +1,15 @@
 /* @flow */
 
+const compile = require('lodash.template')
+const compileOptions = {
+  escape: /{{[^{]([\s\S]+?)[^}]}}/g,
+  interpolate: /{{{([\s\S]+?)}}}/g
+}
+
 export type ParsedTemplate = {
-  head: string;
-  neck: string;
-  tail: string;
+  head: (data: any) => string;
+  neck: (data: any) => string;
+  tail: (data: any) => string;
 };
 
 export function parseTemplate (
@@ -29,8 +35,8 @@ export function parseTemplate (
   }
 
   return {
-    head: template.slice(0, i),
-    neck: template.slice(i, j),
-    tail: template.slice(j + contentPlaceholder.length)
+    head: compile(template.slice(0, i), compileOptions),
+    neck: compile(template.slice(i, j), compileOptions),
+    tail: compile(template.slice(j + contentPlaceholder.length), compileOptions)
   }
 }

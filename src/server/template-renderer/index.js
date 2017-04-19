@@ -60,6 +60,13 @@ export default class TemplateRenderer {
     }
   }
 
+  bindRenderFns (context: Object) {
+    const renderer: any = this
+    ;['Links', 'State', 'Scripts', 'Styles'].forEach(type => {
+      context[`render${type}`] = renderer[`render${type}`].bind(renderer, context)
+    })
+  }
+
   // render synchronously given rendered app content and render context
   renderSync (content: string, context: ?Object) {
     const template = this.parsedTemplate
@@ -68,17 +75,25 @@ export default class TemplateRenderer {
     }
     context = context || {}
     return (
-      template.head +
+      template.head(context) +
       (context.head || '') +
-      this.renderPreloadLinks(context) +
-      this.renderPrefetchLinks(context) +
-      (context.styles || '') +
-      template.neck +
+      this.renderLinks(context) +
+      this.renderStyles(context) +
+      template.neck(context) +
       content +
       this.renderState(context) +
       this.renderScripts(context) +
-      template.tail
+      template.tail(context)
     )
+  }
+
+  renderStyles (context: Object): string {
+    // context.styles is a getter exposed by vue-style-loader
+    return context.styles || ''
+  }
+
+  renderLinks (context: Object): string {
+    return this.renderPreloadLinks(context) + this.renderPrefetchLinks(context)
   }
 
   renderPreloadLinks (context: Object): string {
