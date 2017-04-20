@@ -89,10 +89,10 @@ export function createBundleRendererCreator (createRenderer: () => Renderer) {
           cb(err)
         }).then(app => {
           if (app) {
-            renderer.renderToString(app, (err, res) => {
+            renderer.renderToString(app, context, (err, res) => {
               rewriteErrorTrace(err, maps)
               cb(err, res)
-            }, context)
+            })
           }
         })
       },

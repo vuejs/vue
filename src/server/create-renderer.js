@@ -7,8 +7,8 @@ import { createRenderFunction } from './render'
 import type { ClientManifest } from './template-renderer/index'
 
 export type Renderer = {
-  renderToString: (component: Component, cb: (err: ?Error, res: ?string) => void) => void;
-  renderToStream: (component: Component) => stream$Readable;
+  renderToString: (component: Component, context: any, cb: any) => void;
+  renderToStream: (component: Component, context?: Object) => stream$Readable;
 };
 
 type RenderCache = {
@@ -51,9 +51,13 @@ export function createRenderer ({
   return {
     renderToString (
       component: Component,
-      done: (err: ?Error, res: ?string) => any,
-      context?: ?Object
+      context: any,
+      done: any
     ): void {
+      if (typeof context === 'function') {
+        done = context
+        context = {}
+      }
       if (context) {
         templateRenderer.bindRenderFns(context)
       }
@@ -76,7 +80,7 @@ export function createRenderer ({
 
     renderToStream (
       component: Component,
-      context?: ?Object
+      context?: Object
     ): stream$Readable {
       if (context) {
         templateRenderer.bindRenderFns(context)

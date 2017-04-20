@@ -54,7 +54,7 @@ describe('SSR: template option', () => {
 
     renderer.renderToString(new Vue({
       template: '<div>hi</div>'
-    }), (err, res) => {
+    }), context, (err, res) => {
       expect(err).toBeNull()
       expect(res).toContain(
         `<html><head>${context.head}${context.styles}</head><body>` +
@@ -63,7 +63,7 @@ describe('SSR: template option', () => {
         `</body></html>`
       )
       done()
-    }, context)
+    })
   })
 
   it('renderToString with interpolation', done => {
@@ -81,7 +81,7 @@ describe('SSR: template option', () => {
 
     renderer.renderToString(new Vue({
       template: '<div>hi</div>'
-    }), (err, res) => {
+    }), context, (err, res) => {
       expect(err).toBeNull()
       expect(res).toContain(
         `<html><head>` +
@@ -95,7 +95,7 @@ describe('SSR: template option', () => {
         `</body></html>`
       )
       done()
-    }, context)
+    })
   })
 
   it('renderToStream', done => {
