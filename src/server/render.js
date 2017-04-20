@@ -141,10 +141,13 @@ function renderComponentWithCache (node, isRoot, key, context) {
 
 function renderComponentInner (node, isRoot, context) {
   const prevActive = context.activeInstance
+  // expose userContext on vnode
+  node.ssrContext = context.userContext
   const child = context.activeInstance = createComponentInstanceForVnode(
     node,
     context.activeInstance
   )
+  node.ssrContext = null
   normalizeRender(child)
   const childNode = child._render()
   childNode.parent = node

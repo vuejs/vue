@@ -104,6 +104,7 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
     // slightly differently.
     const initialContext = {}
     const sharedContext = createContext(initialContext)
+    delete sharedContext.__VUE_SSR_CONTEXT__
     let runner // lazy creation so that errors can be caught by user
     return (userContext = {}) => new Promise(resolve => {
       if (!runner) {
@@ -115,7 +116,6 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
           )
         }
       }
-      sharedContext.__VUE_SSR_CONTEXT__ = userContext
       userContext._registeredComponents = new Set()
       // vue-style-loader styles imported outside of component lifecycle hooks
       if (initialContext._styles) {
