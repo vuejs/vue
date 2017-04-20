@@ -102,9 +102,16 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
     // each render, it simply calls the exported function. This avoids the
     // module evaluation costs but requires the source code to be structured
     // slightly differently.
+
+    // the initial context is only used for collecting possible non-component
+    // styles injected by vue-style-loader.
     const initialContext = {}
     const sharedContext = createContext(initialContext)
+
+    // On subsequent renders, __VUE_SSR_CONTEXT__ will not be avaialbe
+    // to prevent cross-request pollution.
     delete sharedContext.__VUE_SSR_CONTEXT__
+
     let runner // lazy creation so that errors can be caught by user
     return (userContext = {}) => new Promise(resolve => {
       if (!runner) {
