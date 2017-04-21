@@ -44,7 +44,7 @@ export default class TemplateStream extends Transform {
       }
 
       // inline preload/prefetch directives for initial/async chunks
-      const links = this.renderer.renderLinks(this.context)
+      const links = this.renderer.renderResourceHints(this.context)
       if (links) {
         this.push(links)
       }

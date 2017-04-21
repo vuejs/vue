@@ -278,7 +278,7 @@ describe('SSR: template option', () => {
       createRendererWithManifest('split.js', {
         runInNewContext,
         template: `<html>` +
-          `<head>{{{ renderLinks() }}}</head>` +
+          `<head>{{{ renderResourceHints() }}}</head>` +
           `<body><!--vue-ssr-outlet-->{{{ renderScripts() }}}</body>` +
         `</html>`,
         inject: false
@@ -303,7 +303,7 @@ describe('SSR: template option', () => {
 
           const customOutput =
             `<html><head>${
-              context.renderLinks()
+              context.renderResourceHints()
             }</head><body>${
               res +
               context.renderScripts()

@@ -65,7 +65,7 @@ export default class TemplateRenderer {
 
   bindRenderFns (context: Object) {
     const renderer: any = this
-    ;['Links', 'State', 'Scripts', 'Styles'].forEach(type => {
+    ;['ResourceHints', 'State', 'Scripts', 'Styles'].forEach(type => {
       context[`render${type}`] = renderer[`render${type}`].bind(renderer, context)
     })
   }
@@ -81,7 +81,7 @@ export default class TemplateRenderer {
       return (
         template.head(context) +
         (context.head || '') +
-        this.renderLinks(context) +
+        this.renderResourceHints(context) +
         this.renderStyles(context) +
         template.neck(context) +
         content +
@@ -104,7 +104,7 @@ export default class TemplateRenderer {
     return context.styles || ''
   }
 
-  renderLinks (context: Object): string {
+  renderResourceHints (context: Object): string {
     return this.renderPreloadLinks(context) + this.renderPrefetchLinks(context)
   }
 
