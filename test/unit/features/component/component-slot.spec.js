@@ -57,6 +57,20 @@ describe('Component slot', () => {
     }).then(done)
   })
 
+  it('named slot with 0 as a number', done => {
+    mount({
+      childTemplate: '<div><slot :name="0"></slot></div>',
+      parentContent: '<p :slot="0">{{ msg }}</p>'
+    })
+    expect(child.$el.tagName).toBe('DIV')
+    expect(child.$el.children[0].tagName).toBe('P')
+    expect(child.$el.children[0].textContent).toBe('parent message')
+    vm.msg = 'changed'
+    waitForUpdate(() => {
+      expect(child.$el.children[0].textContent).toBe('changed')
+    }).then(done)
+  })
+
   it('fallback content', () => {
     mount({
       childTemplate: '<div><slot><p>{{msg}}</p></slot></div>'
