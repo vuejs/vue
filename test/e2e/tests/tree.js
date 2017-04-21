@@ -1,7 +1,7 @@
 import { TreePage } from '../page-models'
 
 fixture `Tree`
-    .page('http://localhost:8080/examples/tree/')
+    .page('../../../examples/tree/index.html')
 
 const page = new TreePage()
 const { allItems, allAddItems, allChildFolders, topLevelRoot } = page

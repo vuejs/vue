@@ -1,7 +1,7 @@
 import { CommitsPage } from '../page-models'
 
 fixture `Commits`
-    .page('http://localhost:8080/examples/commits/')
+    .page('../../../examples/commits/index.html')
 
 const page = new CommitsPage()
 const { branch, commits } = page

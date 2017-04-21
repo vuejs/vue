@@ -2,7 +2,7 @@ import { SvgPage } from '../page-models'
 import { assertPoligonPoints } from '../testing-helpers'
 
 fixture `Svg`
-    .page('http://localhost:8080/examples/svg/')
+    .page('../../../examples/svg/index.html')
 
 const page = new SvgPage()
 const { svg, labels, buttons, ranges, addForm } = page

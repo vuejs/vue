@@ -2,7 +2,7 @@
 import { Select2Page } from '../page-models'
 
 fixture `Select2`
-    .page('http://localhost:8080/examples/select2/')
+    .page('../../../examples/select2/index.html')
 
 const page = new Select2Page()
 const { select2, selected } = page

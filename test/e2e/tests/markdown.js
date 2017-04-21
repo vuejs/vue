@@ -1,7 +1,7 @@
 import { MarkdownPage } from '../page-models'
 
 fixture `Markdown`
-    .page('http://localhost:8080/examples/markdown/')
+    .page('../../../examples/markdown/index.html')
 
 const page = new MarkdownPage()
 const { src, result } = page

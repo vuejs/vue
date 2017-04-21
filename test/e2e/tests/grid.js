@@ -3,7 +3,7 @@ import { assertTable } from '../testing-helpers'
 import gridManipulationResults from '../grid-manipulation-results'
 
 fixture `Grid`
-    .page('http://localhost:8080/examples/grid/')
+    .page('../../../examples/grid/index.html')
 
 const page = new GridPage()
 const { table, query, noMatchesFound } = page

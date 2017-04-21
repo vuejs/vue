@@ -1,7 +1,7 @@
 import { ModalPage } from '../page-models'
 
 fixture `Modal`
-    .page('http://localhost:8080/examples/modal/')
+    .page('../../../examples/modal/index.html')
 
 const page = new ModalPage()
 const { showModalBtn, modal } = page

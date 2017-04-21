@@ -1,7 +1,7 @@
 import { TodomvcPage } from '../page-models'
 
 fixture `TodoMVC`
-    .page('http://localhost:8080/examples/todomvc/#test')
+    .page('../../../examples/todomvc/index.html#test')
 
 const page = new TodomvcPage()
 const { newTodo, items, footer } = page
@@ -98,13 +98,13 @@ test('todomvc', async t => {
         .expect(items.completed.count).eql(2)
 
         // filter on page load
-        .navigateTo('http://localhost:8080/examples/todomvc/#active')
+        .navigateTo('#active')
         .expect(items.all.count).eql(2)
         .expect(items.completed.count).eql(0)
         .expect(footer.countLeftItems.textContent).contains('2')
 
         // completed on page load
-        .navigateTo('http://localhost:8080/examples/todomvc/#completed')
+        .navigateTo('#completed')
         .expect(items.all.count).eql(2)
         .expect(items.completed.count).eql(2)
         .expect(footer.countLeftItems.textContent).contains('2')
