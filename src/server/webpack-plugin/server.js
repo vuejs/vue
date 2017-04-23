@@ -38,7 +38,7 @@ export default class VueSSRServerPlugin {
       stats.assets.forEach(asset => {
         if (asset.name.match(/\.js$/)) {
           bundle.files[asset.name] = compilation.assets[asset.name].source()
-        } else if (asset.name.match(/\.map$/)) {
+        } else if (asset.name.match(/\.js\.map$/)) {
           bundle.maps[asset.name.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.name].source())
         }
         // do not emit anything else for server
