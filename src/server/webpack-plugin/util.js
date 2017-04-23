@@ -21,4 +21,4 @@ export const validate = compiler => {
   }
 }
 
-export const isJS = file => /\.js($|\?)/.test(file)
+export { isJS, isCSS } from '../util'

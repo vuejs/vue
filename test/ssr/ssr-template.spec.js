@@ -225,11 +225,14 @@ describe('SSR: template option', () => {
       `<link rel="preload" href="/manifest.js" as="script">` +
       `<link rel="preload" href="/main.js" as="script">` +
       `<link rel="preload" href="/0.js" as="script">` +
+      `<link rel="preload" href="/test.css" as="style">` +
       // images and fonts are only preloaded when explicitly asked for
       (preloadOtherAssets ? `<link rel="preload" href="/test.png" as="image">` : ``) +
       (preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
       // unused chunks should have prefetch
       `<link rel="prefetch" href="/1.js" as="script">` +
+      // css assets should be loaded
+      `<link rel="stylesheet" href="/test.css">` +
     `</head><body>` +
       `<div data-server-rendered="true"><div>async test.woff2 test.png</div></div>` +
       // manifest chunk should be first
@@ -243,7 +246,7 @@ describe('SSR: template option', () => {
   createClientManifestAssertions(false)
 
   function createClientManifestAssertions (runInNewContext) {
-    it('bundleRenderer + renderToString + clientManifest', done => {
+    it('bundleRenderer + renderToString + clientManifest ()', done => {
       createRendererWithManifest('split.js', { runInNewContext }, renderer => {
         renderer.renderToString({}, (err, res) => {
           expect(err).toBeNull()
@@ -257,7 +260,7 @@ describe('SSR: template option', () => {
       createRendererWithManifest('split.js', {
         runInNewContext,
         shouldPreload: (file, type) => {
-          if (type === 'image' || type === 'script' || type === 'font') {
+          if (type === 'image' || type === 'script' || type === 'font' || type === 'style') {
             return true
           }
         }
@@ -278,7 +281,7 @@ describe('SSR: template option', () => {
       createRendererWithManifest('split.js', {
         runInNewContext,
         template: `<html>` +
-          `<head>{{{ renderResourceHints() }}}</head>` +
+          `<head>{{{ renderResourceHints() }}}{{{ renderStyles() }}}</head>` +
           `<body><!--vue-ssr-outlet-->{{{ renderScripts() }}}</body>` +
         `</html>`,
         inject: false
@@ -303,7 +306,8 @@ describe('SSR: template option', () => {
 
           const customOutput =
             `<html><head>${
-              context.renderResourceHints()
+              context.renderResourceHints() +
+              context.renderStyles()
             }</head><body>${
               res +
               context.renderScripts()

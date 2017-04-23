@@ -16,7 +16,7 @@ export function compileWithWebpack (file, extraConfig, cb) {
           loader: require.resolve('./async-loader')
         },
         {
-          test: /\.(png|woff2)$/,
+          test: /\.(png|woff2|css)$/,
           loader: 'file-loader',
           options: {
             name: '[name].[ext]'

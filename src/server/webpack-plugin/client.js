@@ -15,20 +15,20 @@ export default class VueSSRClientPlugin {
       const allFiles = stats.assets
         .map(a => a.name)
 
-      const initialScripts = Object.keys(stats.entrypoints)
+      const initialFiles = Object.keys(stats.entrypoints)
         .map(name => stats.entrypoints[name].assets)
         .reduce((assets, all) => all.concat(assets), [])
         .filter(isJS)
 
-      const asyncScripts = allFiles
+      const asyncFiles = allFiles
         .filter(isJS)
-        .filter(file => initialScripts.indexOf(file) < 0)
+        .filter(file => initialFiles.indexOf(file) < 0)
 
       const manifest = {
         publicPath: stats.publicPath,
         all: allFiles,
-        initial: initialScripts,
-        async: asyncScripts,
+        initial: initialFiles,
+        async: asyncFiles,
         modules: { /* [identifier: string]: Array<index: number> */ }
       }
 

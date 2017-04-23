@@ -1,4 +1,5 @@
 // import image and font
+import './test.css'
 import font from './test.woff2'
 import image from './test.png'
 

@@ -3,14 +3,12 @@
 const path = require('path')
 const serialize = require('serialize-javascript')
 
+import { isJS, isCSS } from '../util'
 import TemplateStream from './template-stream'
 import { parseTemplate } from './parse-template'
 import { createMapper } from './create-async-file-mapper'
 import type { ParsedTemplate } from './parse-template'
 import type { AsyncFileMapper } from './create-async-file-mapper'
-
-const JS_RE = /\.js($|\?)/
-export const isJS = (file: string): boolean => JS_RE.test(file)
 
 type TemplateRendererOptions = {
   template: ?string;
@@ -100,8 +98,18 @@ export default class TemplateRenderer {
   }
 
   renderStyles (context: Object): string {
-    // context.styles is a getter exposed by vue-style-loader
-    return context.styles || ''
+    const cssFiles = this.clientManifest
+      ? this.clientManifest.all.filter(isCSS)
+      : []
+    return (
+      // render links for css files
+      (cssFiles.length
+        ? cssFiles.map(file => `<link rel="stylesheet" href="${this.publicPath}/${file}">`).join('')
+        : '') +
+      // context.styles is a getter exposed by vue-style-loader which contains
+      // the inline component styles collected during SSR
+      (context.styles || '')
+    )
   }
 
   renderResourceHints (context: Object): string {
@@ -117,8 +125,8 @@ export default class TemplateRenderer {
         const ext = path.extname(withoutQuery).slice(1)
         const type = getPreloadType(ext)
         const shouldPreload = this.options.shouldPreload
-        // by default, we only preload scripts
-        if (!shouldPreload && type !== 'script') {
+        // by default, we only preload scripts or css
+        if (!shouldPreload && type !== 'script' && type !== 'style') {
           return ''
         }
         // user wants to explicitly control what to preload

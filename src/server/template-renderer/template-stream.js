@@ -49,9 +49,10 @@ export default class TemplateStream extends Transform {
         this.push(links)
       }
 
-      // inline server-rendered CSS collected by vue-style-loader
-      if (this.context.styles) {
-        this.push(this.context.styles)
+      // CSS files and inline server-rendered CSS collected by vue-style-loader
+      const styles = this.renderer.renderStyles(this.context)
+      if (styles) {
+        this.push(styles)
       }
     }
 
