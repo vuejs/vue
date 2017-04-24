@@ -66,6 +66,8 @@ export default class TemplateRenderer {
     ;['ResourceHints', 'State', 'Scripts', 'Styles'].forEach(type => {
       context[`render${type}`] = renderer[`render${type}`].bind(renderer, context)
     })
+    // also expose getPreloadFiles, useful for HTTP/2 push
+    context.getPreloadFiles = renderer.getPreloadFiles.bind(renderer, context)
   }
 
   // render synchronously given rendered app content and render context
@@ -116,10 +118,19 @@ export default class TemplateRenderer {
     return this.renderPreloadLinks(context) + this.renderPrefetchLinks(context)
   }
 
-  renderPreloadLinks (context: Object): string {
+  getPreloadFiles (context: Object) {
     const usedAsyncFiles = this.getUsedAsyncFiles(context)
     if (this.preloadFiles || usedAsyncFiles) {
-      return (this.preloadFiles || []).concat(usedAsyncFiles || []).map(file => {
+      return (this.preloadFiles || []).concat(usedAsyncFiles || [])
+    } else {
+      return []
+    }
+  }
+
+  renderPreloadLinks (context: Object): string {
+    const files = this.getPreloadFiles(context)
+    if (files.length) {
+      return files.map(file => {
         let extra = ''
         const withoutQuery = file.replace(/\?.*/, '')
         const ext = path.extname(withoutQuery).slice(1)
