@@ -1,5 +1,6 @@
 /* @flow */
 
+import { isRegExp } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
 type VNodeCache = { [key: string]: ?VNode };
@@ -13,7 +14,7 @@ function getComponentName (opts: ?VNodeComponentOptions): ?string {
 function matches (pattern: string | RegExp, name: string): boolean {
   if (typeof pattern === 'string') {
     return pattern.split(',').indexOf(name) > -1
-  } else if (pattern instanceof RegExp) {
+  } else if (isRegExp(pattern)) {
     return pattern.test(name)
   }
   /* istanbul ignore next */

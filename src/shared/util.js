@@ -30,14 +30,18 @@ export function isObject (obj: mixed): boolean {
   return obj !== null && typeof obj === 'object'
 }
 
+const toString = Object.prototype.toString
+
 /**
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
  */
-const toString = Object.prototype.toString
-const OBJECT_STRING = '[object Object]'
 export function isPlainObject (obj: any): boolean {
-  return toString.call(obj) === OBJECT_STRING
+  return toString.call(obj) === '[object Object]'
+}
+
+export function isRegExp (v: any): boolean {
+  return toString.call(v) === '[object RegExp]'
 }
 
 /**
