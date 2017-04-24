@@ -340,45 +340,23 @@ function getInstanceTimer (instanceId, moduleGetter) {
       const handler = function () {
         args[0](...args.slice(2))
       }
-
-      var instance = instances[instanceId]
-      var timerId, callbackId
-      if (global.setTimeoutWeex && (typeof global.setTimeoutWeex === 'function')) {
-        callbackId = instance.document.taskCenter.normalize(handler)
-        timerId = global.setTimeoutWeex(instanceId, callbackId, args[1])
-        return timerId
-      } else {
-        timer.setTimeout(handler, args[1])
-      }
+      
+      timer.setTimeout(handler, args[1])
+      return instance.callbackId.toString()
     },
     setInterval: (...args) => {
       const handler = function () {
         args[0](...args.slice(2))
       }
 
-      var instance = instances[instanceId]
-      var timerId, callbackId
-      if (global.setIntervalWeex && (typeof global.setIntervalWeex === 'function')) {
-        callbackId = instance.document.taskCenter.normalize(handler)
-        timerId = global.setIntervalWeex(instanceId, callbackId, args[1])
-        return timerId
-      } else {
-        timer.setInterval(handler, args[1])
-      }
+      timer.setInterval(handler, args[1])
+      return instance.callbackId.toString()
     },
     clearTimeout: (n) => {
-      if (global.clearTimeoutWeex && (typeof global.clearTimeoutWeex === 'function')) {
-        global.clearTimeoutWeex(n)
-      } else {
-        timer.clearTimeout(n)
-      }
+      timer.clearTimeout(n)
     },
     clearInterval: (n) => {
-      if (global.clearIntervalWeex && (typeof global.clearIntervalWeex === 'function')) {
-        global.clearIntervalWeex(n)
-      } else {
-        timer.clearInterval(n)
-      }
+      timer.clearInterval(n)
     }
   }
   return timerAPIs
