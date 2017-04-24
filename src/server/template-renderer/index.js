@@ -30,6 +30,13 @@ export type ClientManifest = {
   }
 };
 
+type PreloadFile = {
+  file: string;
+  extension: string;
+  fileWithoutQuery: string;
+  asType: string;
+};
+
 export default class TemplateRenderer {
   options: TemplateRendererOptions;
   inject: boolean;
@@ -118,10 +125,19 @@ export default class TemplateRenderer {
     return this.renderPreloadLinks(context) + this.renderPrefetchLinks(context)
   }
 
-  getPreloadFiles (context: Object) {
+  getPreloadFiles (context: Object): Array<PreloadFile> {
     const usedAsyncFiles = this.getUsedAsyncFiles(context)
     if (this.preloadFiles || usedAsyncFiles) {
-      return (this.preloadFiles || []).concat(usedAsyncFiles || [])
+      return (this.preloadFiles || []).concat(usedAsyncFiles || []).map(file => {
+        const withoutQuery = file.replace(/\?.*/, '')
+        const extension = path.extname(withoutQuery).slice(1)
+        return {
+          file,
+          extension,
+          fileWithoutQuery: withoutQuery,
+          asType: getPreloadType(extension)
+        }
+      })
     } else {
       return []
     }
@@ -130,27 +146,24 @@ export default class TemplateRenderer {
   renderPreloadLinks (context: Object): string {
     const files = this.getPreloadFiles(context)
     if (files.length) {
-      return files.map(file => {
+      return files.map(({ file, extension, fileWithoutQuery, asType }) => {
         let extra = ''
-        const withoutQuery = file.replace(/\?.*/, '')
-        const ext = path.extname(withoutQuery).slice(1)
-        const type = getPreloadType(ext)
         const shouldPreload = this.options.shouldPreload
         // by default, we only preload scripts or css
-        if (!shouldPreload && type !== 'script' && type !== 'style') {
+        if (!shouldPreload && asType !== 'script' && asType !== 'style') {
           return ''
         }
         // user wants to explicitly control what to preload
-        if (shouldPreload && !shouldPreload(withoutQuery, type)) {
+        if (shouldPreload && !shouldPreload(fileWithoutQuery, asType)) {
           return ''
         }
-        if (type === 'font') {
-          extra = ` type="font/${ext}" crossorigin`
+        if (asType === 'font') {
+          extra = ` type="font/${extension}" crossorigin`
         }
         return `<link rel="preload" href="${
           this.publicPath}/${file
         }"${
-          type !== '' ? ` as="${type}"` : ''
+          asType !== '' ? ` as="${asType}"` : ''
         }${
           extra
         }>`
