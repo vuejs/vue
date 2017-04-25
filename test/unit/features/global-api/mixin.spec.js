@@ -141,4 +141,25 @@ describe('Global API: mixin', () => {
     })
     expect(spy).toHaveBeenCalledWith('hello')
   })
+
+  // vue-class-component#87
+  it('should not drop original lifecycle hooks', () => {
+    const base = jasmine.createSpy('base')
+
+    const Base = Vue.extend({
+      beforeCreate: base
+    })
+
+    const injected = jasmine.createSpy('injected')
+
+    // inject a function
+    Base.options.beforeCreate = Base.options.beforeCreate.concat(injected)
+
+    Vue.mixin({})
+
+    new Base({})
+
+    expect(base).toHaveBeenCalled()
+    expect(injected).toHaveBeenCalled()
+  })
 })
