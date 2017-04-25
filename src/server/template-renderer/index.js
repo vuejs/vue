@@ -191,10 +191,14 @@ export default class TemplateRenderer {
     }
   }
 
-  renderState (context: Object): string {
-    return context.state
-      ? `<script>window.__INITIAL_STATE__=${
-          serialize(context.state, { isJSON: true })
+  renderState (context: Object, options?: Object): string {
+    const {
+      contextKey = 'state',
+      windowKey = '__INITIAL_STATE__'
+    } = options || {}
+    return context[contextKey]
+      ? `<script>window.${windowKey}=${
+          serialize(context[contextKey], { isJSON: true })
         }</script>`
       : ''
   }

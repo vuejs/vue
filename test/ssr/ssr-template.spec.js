@@ -219,7 +219,7 @@ describe('SSR: template option', () => {
     })
   })
 
-  const expectedHTMLWithManifest = preloadOtherAssets =>
+  const expectedHTMLWithManifest = (options = {}) =>
     `<html><head>` +
       // used chunks should have preload
       `<link rel="preload" href="/manifest.js" as="script">` +
@@ -227,14 +227,16 @@ describe('SSR: template option', () => {
       `<link rel="preload" href="/0.js" as="script">` +
       `<link rel="preload" href="/test.css" as="style">` +
       // images and fonts are only preloaded when explicitly asked for
-      (preloadOtherAssets ? `<link rel="preload" href="/test.png" as="image">` : ``) +
-      (preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
+      (options.preloadOtherAssets ? `<link rel="preload" href="/test.png" as="image">` : ``) +
+      (options.preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
       // unused chunks should have prefetch
       `<link rel="prefetch" href="/1.js" as="script">` +
       // css assets should be loaded
       `<link rel="stylesheet" href="/test.css">` +
     `</head><body>` +
       `<div data-server-rendered="true"><div>async test.woff2 test.png</div></div>` +
+      // state should be inlined before scripts
+      `<script>window.${options.stateKey || '__INITIAL_STATE__'}={"a":1}</script>` +
       // manifest chunk should be first
       `<script src="/manifest.js"></script>` +
       // async chunks should be before main chunk
@@ -248,9 +250,9 @@ describe('SSR: template option', () => {
   function createClientManifestAssertions (runInNewContext) {
     it('bundleRenderer + renderToString + clientManifest ()', done => {
       createRendererWithManifest('split.js', { runInNewContext }, renderer => {
-        renderer.renderToString({}, (err, res) => {
+        renderer.renderToString({ state: { a: 1 }}, (err, res) => {
           expect(err).toBeNull()
-          expect(res).toContain(expectedHTMLWithManifest(false))
+          expect(res).toContain(expectedHTMLWithManifest())
           done()
         })
       })
@@ -265,13 +267,15 @@ describe('SSR: template option', () => {
           }
         }
       }, renderer => {
-        const stream = renderer.renderToStream({})
+        const stream = renderer.renderToStream({ state: { a: 1 }})
         let res = ''
         stream.on('data', chunk => {
           res += chunk.toString()
         })
         stream.on('end', () => {
-          expect(res).toContain(expectedHTMLWithManifest(true))
+          expect(res).toContain(expectedHTMLWithManifest({
+            preloadOtherAssets: true
+          }))
           done()
         })
       })
@@ -282,14 +286,16 @@ describe('SSR: template option', () => {
         runInNewContext,
         template: `<html>` +
           `<head>{{{ renderResourceHints() }}}{{{ renderStyles() }}}</head>` +
-          `<body><!--vue-ssr-outlet-->{{{ renderScripts() }}}</body>` +
+          `<body><!--vue-ssr-outlet-->{{{ renderState({ windowKey: '__FOO__', contextKey: 'foo' }) }}}{{{ renderScripts() }}}</body>` +
         `</html>`,
         inject: false
       }, renderer => {
-        const context = {}
+        const context = { foo: { a: 1 }}
         renderer.renderToString(context, (err, res) => {
           expect(err).toBeNull()
-          expect(res).toContain(expectedHTMLWithManifest(false))
+          expect(res).toContain(expectedHTMLWithManifest({
+            stateKey: '__FOO__'
+          }))
           done()
         })
       })
@@ -300,7 +306,7 @@ describe('SSR: template option', () => {
         runInNewContext,
         template: null
       }, renderer => {
-        const context = {}
+        const context = { foo: { a: 1 }}
         renderer.renderToString(context, (err, res) => {
           expect(err).toBeNull()
 
@@ -310,10 +316,16 @@ describe('SSR: template option', () => {
               context.renderStyles()
             }</head><body>${
               res +
+              context.renderState({
+                windowKey: '__FOO__',
+                contextKey: 'foo'
+              }) +
               context.renderScripts()
             }</body></html>`
 
-          expect(customOutput).toContain(expectedHTMLWithManifest(false))
+          expect(customOutput).toContain(expectedHTMLWithManifest({
+            stateKey: '__FOO__'
+          }))
           done()
         })
       })
