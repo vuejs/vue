@@ -1,4 +1,4 @@
-import { isObject } from 'shared/util'
+import { isPlainObject } from 'shared/util'
 
 const vm = require('vm')
 const path = require('path')
@@ -73,7 +73,7 @@ function compileModule (files, basedir) {
 }
 
 function deepClone (val) {
-  if (isObject(val)) {
+  if (isPlainObject(val)) {
     const res = {}
     for (const key in val) {
       res[key] = deepClone(val[key])
@@ -108,14 +108,13 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
     const initialContext = {}
     const sharedContext = createContext(initialContext)
 
-    // On subsequent renders, __VUE_SSR_CONTEXT__ will not be avaialbe
-    // to prevent cross-request pollution.
-    delete sharedContext.__VUE_SSR_CONTEXT__
-
     let runner // lazy creation so that errors can be caught by user
     return (userContext = {}) => new Promise(resolve => {
       if (!runner) {
         runner = evaluate(entry, sharedContext)
+        // On subsequent renders, __VUE_SSR_CONTEXT__ will not be avaialbe
+        // to prevent cross-request pollution.
+        delete sharedContext.__VUE_SSR_CONTEXT__
         if (typeof runner !== 'function') {
           throw new Error(
             'bundle export should be a function when using ' +
