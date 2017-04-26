@@ -173,7 +173,7 @@ describe('Component async', () => {
                 Promise.resolve().then(() => {
                   Vue.nextTick(next)
                 })
-              }, 5)
+              }, 50)
             }),
             loading: { template: `<div>loading</div>` },
             delay: 1
@@ -210,7 +210,7 @@ describe('Component async', () => {
                 Promise.resolve().then(() => {
                   Vue.nextTick(next)
                 })
-              }, 0)
+              }, 50)
             }),
             loading: { template: `<div>loading</div>` },
             delay: 0
