@@ -31,8 +31,8 @@ export function createFunctionalComponent (
   // ensure the createElement function in functional components
   // gets a unique context - this is necessary for correct named slot check
   const _context = Object.create(context)
-  const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
-  const vnode = Ctor.options.render.call(null, h, {
+  _context.$createElement = (a, b, c, d) => createElement(_context, a, b, c, d, true)
+  const vnode = Ctor.options.render.call(_context, _context.$createElement, {
     data,
     props,
     children,
