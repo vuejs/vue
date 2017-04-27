@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.3.0-beta.1
+ * Vue.js v2.3.0
  * (c) 2014-2017 Evan You
  * Released under the MIT License.
  */
@@ -4382,7 +4382,7 @@ Object.defineProperty(Vue$3.prototype, '$isServer', {
   get: isServerRendering
 });
 
-Vue$3.version = '2.3.0-beta.1';
+Vue$3.version = '2.3.0';
 
 /*  */
 
@@ -8168,7 +8168,7 @@ function parse (
       }
       var children = currentParent.children;
       text = inPre || text.trim()
-        ? decodeHTMLCached(text)
+        ? isTextTag(currentParent) ? text : decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
         : preserveWhitespace && children.length ? ' ' : '';
       if (text) {
@@ -8458,6 +8458,11 @@ function makeAttrsMap (attrs) {
     map[attrs[i].name] = attrs[i].value;
   }
   return map
+}
+
+// for script (e.g. type="x/template") or style, do not decode content
+function isTextTag (el) {
+  return el.tag === 'script' || el.tag === 'style'
 }
 
 function isForbiddenTag (el) {
