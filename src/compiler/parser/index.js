@@ -252,7 +252,7 @@ export function parse (
       }
       const children = currentParent.children
       text = inPre || text.trim()
-        ? decodeHTMLCached(text)
+        ? isTextTag(currentParent) ? text : decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
         : preserveWhitespace && children.length ? ' ' : ''
       if (text) {
@@ -542,6 +542,11 @@ function makeAttrsMap (attrs: Array<Object>): Object {
     map[attrs[i].name] = attrs[i].value
   }
   return map
+}
+
+// for script (e.g. type="x/template") or style, do not decode content
+function isTextTag (el): boolean {
+  return el.tag === 'script' || el.tag === 'style'
 }
 
 function isForbiddenTag (el): boolean {

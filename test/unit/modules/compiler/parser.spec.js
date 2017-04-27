@@ -541,4 +541,11 @@ describe('parser', () => {
     expect(comment.children[0].type).toBe(3)
     expect(comment.children[0].text).toBe('<!--comment-->')
   })
+
+  // #5526
+  it('should not decode text in script tags', () => {
+    const options = extend({}, baseOptions)
+    const ast = parse(`<script type="x/template">&gt;<foo>&lt;</script>`, options)
+    expect(ast.children[0].text).toBe(`&gt;<foo>&lt;`)
+  })
 })

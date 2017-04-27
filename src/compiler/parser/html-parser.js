@@ -46,7 +46,7 @@ let IS_REGEX_CAPTURING_BROKEN = false
 })
 
 // Special Elements (can contain anything)
-const isPlainTextElement = makeMap('script,style,textarea', true)
+export const isPlainTextElement = makeMap('script,style,textarea', true)
 const reCache = {}
 
 const decodingMap = {
