@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { createEmptyVNode } from 'core/vdom/vnode'
 
 describe('Options functional', () => {
   it('should work', done => {
@@ -166,5 +167,22 @@ describe('Options functional', () => {
       document.body.removeChild(vm.$el)
       vm.$destroy()
     }).then(done)
+  })
+
+  it('create empty vnode when render return null', () => {
+    const child = {
+      functional: true,
+      render () {
+        return null
+      }
+    }
+    const vm = new Vue({
+      components: {
+        child
+      }
+    })
+    const h = vm.$createElement
+    const vnode = h('child')
+    expect(vnode).toEqual(createEmptyVNode())
   })
 })
