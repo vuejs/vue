@@ -1,9 +1,11 @@
+/* @flow */
+
 import config from '../config'
 import { noop } from 'shared/util'
 
 export let warn = noop
 export let tip = noop
-export let formatComponentName
+export let formatComponentName: Function = (null: any) // work around flow check
 
 if (process.env.NODE_ENV !== 'production') {
   const hasConsole = typeof console !== 'undefined'

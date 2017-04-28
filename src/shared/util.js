@@ -103,7 +103,7 @@ export function remove (arr: Array<any>, item: any): Array<any> | void {
  * Check whether the object has the property.
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty
-export function hasOwn (obj: Object, key: string): boolean {
+export function hasOwn (obj: Object | Array<*>, key: string): boolean {
   return hasOwnProperty.call(obj, key)
 }
 
