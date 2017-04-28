@@ -93,7 +93,7 @@ export function createInstance (
     weex: weexInstanceVar,
     // deprecated
     __weex_require_module__: weexInstanceVar.requireModule // eslint-disable-line
-  }, timerAPIs)
+  }, timerAPIs, env.services)
 
   if (!callFunctionNative(instanceVars, appCode)) {
     // If failed to compile functionBody on native side,

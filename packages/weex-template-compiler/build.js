@@ -238,6 +238,7 @@ function parseHTML (html, options) {
   var stack = [];
   var expectHTML = options.expectHTML;
   var isUnaryTag$$1 = options.isUnaryTag || no;
+  var canBeLeftOpenTag$$1 = options.canBeLeftOpenTag || no;
   var index = 0;
   var last, lastTag;
   while (html) {
@@ -386,7 +387,7 @@ function parseHTML (html, options) {
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag);
       }
-      if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
+      if (canBeLeftOpenTag$$1(tagName) && lastTag === tagName) {
         parseEndTag(tagName);
       }
     }
@@ -911,6 +912,13 @@ function parse (
   var inPre = false;
   var warned = false;
 
+  function warnOnce (msg) {
+    if (!warned) {
+      warned = true;
+      warn(msg);
+    }
+  }
+
   function endPre (element) {
     // check pre state
     if (element.pre) {
@@ -925,6 +933,7 @@ function parse (
     warn: warn,
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
+    canBeLeftOpenTag: options.canBeLeftOpenTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
     start: function start (tag, attrs, unary) {
       // check namespace.
@@ -994,17 +1003,15 @@ function parse (
       }
 
       function checkRootConstraints (el) {
-        if (process.env.NODE_ENV !== 'production' && !warned) {
+        if (process.env.NODE_ENV !== 'production') {
           if (el.tag === 'slot' || el.tag === 'template') {
-            warned = true;
-            warn(
+            warnOnce(
               "Cannot use <" + (el.tag) + "> as component root element because it may " +
               'contain multiple nodes.'
             );
           }
           if (el.attrsMap.hasOwnProperty('v-for')) {
-            warned = true;
-            warn(
+            warnOnce(
               'Cannot use v-for on stateful component root element because ' +
               'it renders multiple elements.'
             );
@@ -1024,9 +1031,8 @@ function parse (
             exp: element.elseif,
             block: element
           });
-        } else if (process.env.NODE_ENV !== 'production' && !warned) {
-          warned = true;
-          warn(
+        } else if (process.env.NODE_ENV !== 'production') {
+          warnOnce(
             "Component template should contain exactly one root element. " +
             "If you are using v-if on multiple elements, " +
             "use v-else-if to chain them instead."
@@ -1071,11 +1077,16 @@ function parse (
 
     chars: function chars (text) {
       if (!currentParent) {
-        if (process.env.NODE_ENV !== 'production' && !warned && text === template) {
-          warned = true;
-          warn(
-            'Component template requires a root element, rather than just text.'
-          );
+        if (process.env.NODE_ENV !== 'production') {
+          if (text === template) {
+            warnOnce(
+              'Component template requires a root element, rather than just text.'
+            );
+          } else if ((text = text.trim())) {
+            warnOnce(
+              ("text \"" + text + "\" outside root element will be ignored.")
+            );
+          }
         }
         return
       }
@@ -2152,7 +2163,7 @@ var config = {
   /**
    * Whether to record perf
    */
-  performance: process.env.NODE_ENV !== 'production',
+  performance: false,
 
   /**
    * Error handler for watcher errors
@@ -2259,9 +2270,13 @@ if (process.env.NODE_ENV !== 'production') {
     if (vm.$root === vm) {
       return '<Root>'
     }
-    var name = vm._isVue
-      ? vm.$options.name || vm.$options._componentTag
-      : vm.name;
+    var name = typeof vm === 'string'
+      ? vm
+      : typeof vm === 'function' && vm.options
+        ? vm.options.name
+        : vm._isVue
+          ? vm.$options.name || vm.$options._componentTag
+          : vm.name;
 
     var file = vm._isVue && vm.$options.__file;
     if (!name && file) {
@@ -2818,10 +2833,27 @@ var directives = {
 /* globals renderer */
 
 var isReservedTag = makeMap(
-  'div,img,image,input,switch,indicator,list,scroller,cell,template,text,slider,image'
+  'template,script,style,element,content,slot,link,meta,svg,view,' +
+  'a,div,img,image,text,span,richtext,input,switch,textarea,spinner,select,' +
+  'slider,slider-neighbor,indicator,trisition,trisition-group,canvas,' +
+  'list,cell,header,loading,loading-indicator,refresh,scrollable,scroller,' +
+  'video,web,embed,tabbar,tabheader,datepicker,timepicker,marquee,countdown',
+  true
 );
 
-function isUnaryTag$1 () { /* console.log('isUnaryTag') */ }
+// Elements that you can, intentionally, leave open (and which close themselves)
+// more flexable than web
+var canBeLeftOpenTag$1 = makeMap(
+  'web,spinner,switch,video,textarea,canvas,' +
+  'indicator,marquee,countdown',
+  true
+);
+
+var isUnaryTag$1 = makeMap(
+  'embed,img,image,input,link,meta',
+  true
+);
+
 function mustUseProp () { /* console.log('mustUseProp') */ }
 function getTagNamespace () { /* console.log('getTagNamespace') */ }
 
@@ -2832,6 +2864,7 @@ var baseOptions = {
   directives: directives,
   isUnaryTag: isUnaryTag$1,
   mustUseProp: mustUseProp,
+  canBeLeftOpenTag: canBeLeftOpenTag$1,
   isReservedTag: isReservedTag,
   getTagNamespace: getTagNamespace,
   preserveWhitespace: false,

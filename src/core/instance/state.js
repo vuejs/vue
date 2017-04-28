@@ -7,18 +7,19 @@ import {
   set,
   del,
   observe,
-  defineReactive,
-  observerState
+  observerState,
+  defineReactive
 } from '../observer/index'
 
 import {
   warn,
+  bind,
+  noop,
   hasOwn,
   isReserved,
-  isPlainObject,
-  bind,
+  handleError,
   validateProp,
-  noop
+  isPlainObject
 } from '../util/index'
 
 const sharedPropertyDefinition = {
@@ -101,7 +102,7 @@ function initProps (vm: Component, propsOptions: Object) {
 function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
-    ? data.call(vm)
+    ? getData(data, vm)
     : data || {}
   if (!isPlainObject(data)) {
     data = {}
@@ -130,6 +131,15 @@ function initData (vm: Component) {
   observe(data, true /* asRootData */)
 }
 
+function getData (data: Function, vm: Component): any {
+  try {
+    return data.call(vm)
+  } catch (e) {
+    handleError(e, vm, `data()`)
+    return {}
+  }
+}
+
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
@@ -137,7 +147,16 @@ function initComputed (vm: Component, computed: Object) {
 
   for (const key in computed) {
     const userDef = computed[key]
-    const getter = typeof userDef === 'function' ? userDef : userDef.get
+    let getter = typeof userDef === 'function' ? userDef : userDef.get
+    if (process.env.NODE_ENV !== 'production') {
+      if (getter === undefined) {
+        warn(
+          `No getter function has been defined for computed property "${key}".`,
+          vm
+        )
+        getter = noop
+      }
+    }
     // create internal watcher for the computed property.
     watchers[key] = new Watcher(vm, getter, noop, computedWatcherOptions)
 

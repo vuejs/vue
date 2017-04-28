@@ -1,8 +1,8 @@
 /* @flow */
 
 import config from '../config'
-import { perf } from '../util/perf'
 import Watcher from '../observer/watcher'
+import { mark, measure } from '../util/perf'
 import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { updateComponentListeners } from './events'
@@ -119,6 +119,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     // call the last hook...
     vm._isDestroyed = true
+    // invoke destroy hooks on current rendered tree
+    vm.__patch__(vm._vnode, null)
+    // fire destroyed hook
     callHook(vm, 'destroyed')
     // turn off all instance listeners.
     vm.$off()
@@ -126,8 +129,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm.$el) {
       vm.$el.__vue__ = null
     }
-    // invoke destroy hooks on current rendered tree
-    vm.__patch__(vm._vnode, null)
+    // remove reference to DOM nodes (prevents leak)
+    vm.$options._parentElm = vm.$options._refElm = null
   }
 }
 
@@ -161,19 +164,22 @@ export function mountComponent (
 
   let updateComponent
   /* istanbul ignore if */
-  if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
+  if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
     updateComponent = () => {
       const name = vm._name
-      const startTag = `start ${name}`
-      const endTag = `end ${name}`
-      perf.mark(startTag)
+      const id = vm._uid
+      const startTag = `vue-perf-start:${id}`
+      const endTag = `vue-perf-end:${id}`
+
+      mark(startTag)
       const vnode = vm._render()
-      perf.mark(endTag)
-      perf.measure(`${name} render`, startTag, endTag)
-      perf.mark(startTag)
+      mark(endTag)
+      measure(`${name} render`, startTag, endTag)
+
+      mark(startTag)
       vm._update(vnode, hydrating)
-      perf.mark(endTag)
-      perf.measure(`${name} patch`, startTag, endTag)
+      mark(endTag)
+      measure(`${name} patch`, startTag, endTag)
     }
   } else {
     updateComponent = () => {

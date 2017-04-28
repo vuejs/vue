@@ -28,7 +28,7 @@ export default {
       if (isIE || isEdge) {
         setTimeout(cb, 0)
       }
-    } else if (vnode.tag === 'textarea' || el.type === 'text') {
+    } else if (vnode.tag === 'textarea' || el.type === 'text' || el.type === 'password') {
       el._vModifiers = binding.modifiers
       if (!binding.modifiers.lazy) {
         if (!isAndroid) {
