@@ -334,6 +334,7 @@ function genModuleGetter (instanceId) {
  * @return {[type]}              [description]
  */
 function getInstanceTimer (instanceId, moduleGetter) {
+  const instance = instances[instanceId]
   const timer = moduleGetter('timer')
   const timerAPIs = {
     setTimeout: (...args) => {
@@ -342,7 +343,7 @@ function getInstanceTimer (instanceId, moduleGetter) {
       }
       
       timer.setTimeout(handler, args[1])
-      return instance.callbackId.toString()
+      return instance.document.taskCenter.callbackManager.lastCallbackId.toString()
     },
     setInterval: (...args) => {
       const handler = function () {
@@ -350,7 +351,7 @@ function getInstanceTimer (instanceId, moduleGetter) {
       }
 
       timer.setInterval(handler, args[1])
-      return instance.callbackId.toString()
+      return instance.document.taskCenter.callbackManager.lastCallbackId.toString()
     },
     clearTimeout: (n) => {
       timer.clearTimeout(n)
