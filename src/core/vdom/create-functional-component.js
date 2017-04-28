@@ -21,8 +21,9 @@ export function createFunctionalComponent (
   const props = {}
   const propOptions = Ctor.options.props
   if (isDef(propOptions)) {
+    propsData = propsData || {}
     for (const key in propOptions) {
-      props[key] = validateProp(key, propOptions, propsData || {})
+      props[key] = validateProp(key, propOptions, propsData)
     }
   } else {
     if (isDef(data.attrs)) mergeProps(props, data.attrs)
