@@ -96,6 +96,7 @@
     "karma-webpack": "^2.0.1",
     "lodash": "^4.17.1",
     "lodash.template": "^4.4.0",
+    "lodash.uniq": "^4.5.0",
     "lru-cache": "^4.0.2",
     "nightwatch": "^0.9.9",
     "nightwatch-helpers": "^1.2.0",
