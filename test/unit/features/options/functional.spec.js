@@ -167,4 +167,26 @@ describe('Options functional', () => {
       vm.$destroy()
     }).then(done)
   })
+
+  it('should work with this.$createElement', done => {
+    const vm = new Vue({
+      data: { test: 'foo' },
+      template: '<div><wrap :msg="test">bar</wrap></div>',
+      components: {
+        wrap: {
+          functional: true,
+          props: ['msg'],
+          render (_, { props, children }) {
+            const h = this.$createElement
+            return h('div', null, [props.msg, ' '].concat(children))
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<div>foo bar</div>')
+    vm.test = 'qux'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div>qux bar</div>')
+    }).then(done)
+  })
 })
