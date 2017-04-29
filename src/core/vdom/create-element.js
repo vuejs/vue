@@ -99,7 +99,7 @@ export function _createElement (
     // direct component options / constructor
     vnode = createComponent(tag, data, context, children)
   }
-  if (vnode != null) {
+  if (isDef(vnode)) {
     if (ns) applyNS(vnode, ns)
     return vnode
   } else {
