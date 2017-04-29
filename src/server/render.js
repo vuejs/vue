@@ -77,9 +77,9 @@ function renderComponent (node, isRoot, context) {
     const key = name + '::' + getKey(node.componentOptions.propsData)
     const { has, get } = context
     if (isDef(has)) {
-      (has: any)(key, hit => {
+      has(key, hit => {
         if (hit === true && isDef(get)) {
-          (get: any)(key, res => {
+          get(key, res => {
             if (isDef(registerComponent)) {
               registerComponent(userContext)
             }
@@ -91,7 +91,7 @@ function renderComponent (node, isRoot, context) {
         }
       })
     } else if (isDef(get)) {
-      (get: any)(key, res => {
+      get(key, res => {
         if (isDef(res)) {
           if (isDef(registerComponent)) {
             registerComponent(userContext)

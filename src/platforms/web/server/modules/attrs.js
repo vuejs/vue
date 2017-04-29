@@ -17,7 +17,7 @@ export default function renderAttrs (node: VNodeWithData): string {
   let attrs = node.data.attrs
   let res = ''
 
-  let parent: any = node.parent
+  let parent = node.parent
   while (isDef(parent)) {
     if (isDef(parent.data) && isDef(parent.data.attrs)) {
       attrs = Object.assign({}, attrs, parent.data.attrs)

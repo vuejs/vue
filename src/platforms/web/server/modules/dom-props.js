@@ -9,7 +9,7 @@ export default function renderDOMProps (node: VNodeWithData): string {
   let props = node.data.domProps
   let res = ''
 
-  let parent: any = node.parent
+  let parent = node.parent
   while (isDef(parent)) {
     if (parent.data && parent.data.domProps) {
       props = Object.assign({}, props, parent.data.domProps)
@@ -21,7 +21,7 @@ export default function renderDOMProps (node: VNodeWithData): string {
     return res
   }
 
-  const attrs: any = node.data.attrs
+  const attrs = node.data.attrs
   for (const key in props) {
     if (key === 'innerHTML') {
       setText(node, props[key], true)

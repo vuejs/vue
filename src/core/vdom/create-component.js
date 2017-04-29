@@ -96,7 +96,7 @@ const componentVNodeHooks = {
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
 export function createComponent (
-  Ctor: any,
+  Ctor: Class<Component> | Function | Object | void,
   data?: VNodeData,
   context: Component,
   children: ?Array<VNode>,
