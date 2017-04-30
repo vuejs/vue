@@ -171,8 +171,8 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
 }
 
 interface ISet {
-  has(key: string| number): boolean;
-  add(key: string| number): mixed;
+  has(key: string | number): boolean;
+  add(key: string | number): mixed;
   clear(): void;
 }
 
