@@ -22,7 +22,7 @@ function createContext (context) {
   return sandbox
 }
 
-function compileModule (files, basedir) {
+function compileModule (files, basedir, runInNewContext) {
   const compiledScripts = {}
   const resolvedModules = {}
 
@@ -46,7 +46,9 @@ function compileModule (files, basedir) {
     }
 
     const script = getCompiledScript(filename)
-    const compiledWrapper = script.runInNewContext(context)
+    const compiledWrapper = runInNewContext
+      ? script.runInNewContext(context)
+      : script.runInThisContext()
     const m = { exports: {}}
     const r = file => {
       file = path.join('.', file)
@@ -87,7 +89,7 @@ function deepClone (val) {
 }
 
 export function createBundleRunner (entry, files, basedir, runInNewContext) {
-  const evaluate = compileModule(files, basedir)
+  const evaluate = compileModule(files, basedir, runInNewContext)
   if (runInNewContext) {
     // new context mode: creates a fresh context and re-evaluate the bundle
     // on each render. Ensures entire application state is fresh for each
@@ -102,19 +104,17 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
     // each render, it simply calls the exported function. This avoids the
     // module evaluation costs but requires the source code to be structured
     // slightly differently.
-
-    // the initial context is only used for collecting possible non-component
-    // styles injected by vue-style-loader.
-    const initialContext = {}
-    const sharedContext = createContext(initialContext)
-
     let runner // lazy creation so that errors can be caught by user
+    let initialContext
     return (userContext = {}) => new Promise(resolve => {
       if (!runner) {
-        runner = evaluate(entry, sharedContext)
+        // the initial context is only used for collecting possible non-component
+        // styles injected by vue-style-loader.
+        initialContext = global.__VUE_SSR_CONTEXT__ = {}
+        runner = evaluate(entry)
         // On subsequent renders, __VUE_SSR_CONTEXT__ will not be avaialbe
         // to prevent cross-request pollution.
-        delete sharedContext.__VUE_SSR_CONTEXT__
+        delete global.__VUE_SSR_CONTEXT__
         if (typeof runner !== 'function') {
           throw new Error(
             'bundle export should be a function when using ' +
