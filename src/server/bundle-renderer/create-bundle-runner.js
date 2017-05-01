@@ -16,6 +16,7 @@ function createContext (context) {
     clearTimeout,
     clearInterval,
     clearImmediate,
+    Error,
     __VUE_SSR_CONTEXT__: context
   }
   sandbox.global = sandbox
