@@ -5,7 +5,7 @@ const path = require('path')
 const resolve = require('resolve')
 const NativeModule = require('module')
 
-function createContext (context) {
+function createSandbox (context) {
   const sandbox = {
     Buffer,
     console,
@@ -40,20 +40,20 @@ function compileModule (files, basedir, runInNewContext) {
     return script
   }
 
-  function evaluateModule (filename, context, evaluatedFiles = {}) {
+  function evaluateModule (filename, sandbox, evaluatedFiles = {}) {
     if (evaluatedFiles[filename]) {
       return evaluatedFiles[filename]
     }
 
     const script = getCompiledScript(filename)
-    const compiledWrapper = runInNewContext
-      ? script.runInNewContext(context)
-      : script.runInThisContext()
+    const compiledWrapper = runInNewContext === false
+      ? script.runInThisContext()
+      : script.runInNewContext(sandbox)
     const m = { exports: {}}
     const r = file => {
       file = path.join('.', file)
       if (files[file]) {
-        return evaluateModule(file, context, evaluatedFiles)
+        return evaluateModule(file, sandbox, evaluatedFiles)
       } else if (basedir) {
         return require(
           resolvedModules[file] ||
@@ -90,13 +90,13 @@ function deepClone (val) {
 
 export function createBundleRunner (entry, files, basedir, runInNewContext) {
   const evaluate = compileModule(files, basedir, runInNewContext)
-  if (runInNewContext) {
+  if (runInNewContext !== false && runInNewContext !== 'once') {
     // new context mode: creates a fresh context and re-evaluate the bundle
     // on each render. Ensures entire application state is fresh for each
     // render, but incurs extra evaluation cost.
     return (userContext = {}) => new Promise(resolve => {
       userContext._registeredComponents = new Set()
-      const res = evaluate(entry, createContext(userContext))
+      const res = evaluate(entry, createSandbox(userContext))
       resolve(typeof res === 'function' ? res(userContext) : res)
     })
   } else {
@@ -108,13 +108,16 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
     let initialContext
     return (userContext = {}) => new Promise(resolve => {
       if (!runner) {
+        const sandbox = runInNewContext === 'once'
+          ? createSandbox()
+          : global
         // the initial context is only used for collecting possible non-component
         // styles injected by vue-style-loader.
-        initialContext = global.__VUE_SSR_CONTEXT__ = {}
-        runner = evaluate(entry)
+        initialContext = sandbox.__VUE_SSR_CONTEXT__ = {}
+        runner = evaluate(entry, sandbox)
         // On subsequent renders, __VUE_SSR_CONTEXT__ will not be avaialbe
         // to prevent cross-request pollution.
-        delete global.__VUE_SSR_CONTEXT__
+        delete sandbox.__VUE_SSR_CONTEXT__
         if (typeof runner !== 'function') {
           throw new Error(
             'bundle export should be a function when using ' +
