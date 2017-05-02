@@ -51,6 +51,9 @@ export function tagName (node: Element): string {
 }
 
 export function setTextContent (node: Node, text: string) {
+  if (typeof text !== 'string' && typeof text.toString === 'function') {
+    text = text.toString()
+  }
   node.textContent = text
 }
 
