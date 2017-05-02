@@ -34,14 +34,14 @@ function isObject (obj) {
   return obj !== null && typeof obj === 'object'
 }
 
-var toString = Object.prototype.toString;
+var _toString = Object.prototype.toString;
 
 /**
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
  */
 function isPlainObject (obj) {
-  return toString.call(obj) === '[object Object]'
+  return _toString.call(obj) === '[object Object]'
 }
 
 
@@ -554,9 +554,11 @@ var config = ({
   _lifecycleHooks: LIFECYCLE_HOOKS
 });
 
+/*  */
+
 var warn = noop;
 var tip = noop;
-var formatComponentName;
+var formatComponentName = (null); // work around flow check
 
 if (process.env.NODE_ENV !== 'production') {
   var hasConsole = typeof console !== 'undefined';
@@ -644,6 +646,8 @@ if (process.env.NODE_ENV !== 'production') {
     }
   };
 }
+
+/*  */
 
 function handleError (err, vm, info) {
   if (config.errorHandler) {
@@ -1344,6 +1348,8 @@ var defaultStrat = function (parentVal, childVal) {
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
  */
+
+/*  */
 
 /*  */
 
@@ -5434,9 +5440,9 @@ function renderComponent (node, isRoot, context) {
     var has = context.has;
     var get = context.get;
     if (isDef(has)) {
-      (has)(key, function (hit) {
+      has(key, function (hit) {
         if (hit === true && isDef(get)) {
-          (get)(key, function (res) {
+          get(key, function (res) {
             if (isDef(registerComponent)) {
               registerComponent(userContext);
             }
@@ -5448,7 +5454,7 @@ function renderComponent (node, isRoot, context) {
         }
       });
     } else if (isDef(get)) {
-      (get)(key, function (res) {
+      get(key, function (res) {
         if (isDef(res)) {
           if (isDef(registerComponent)) {
             registerComponent(userContext);
@@ -5721,7 +5727,7 @@ var path$2 = require('path');
 var resolve = require('resolve');
 var NativeModule = require('module');
 
-function createContext (context) {
+function createSandbox (context) {
   var sandbox = {
     Buffer: Buffer,
     console: console,
@@ -5738,7 +5744,7 @@ function createContext (context) {
   return sandbox
 }
 
-function compileModule (files, basedir) {
+function compileModule (files, basedir, runInNewContext) {
   var compiledScripts = {};
   var resolvedModules = {};
 
@@ -5756,7 +5762,7 @@ function compileModule (files, basedir) {
     return script
   }
 
-  function evaluateModule (filename, context, evaluatedFiles) {
+  function evaluateModule (filename, sandbox, evaluatedFiles) {
     if ( evaluatedFiles === void 0 ) evaluatedFiles = {};
 
     if (evaluatedFiles[filename]) {
@@ -5764,12 +5770,14 @@ function compileModule (files, basedir) {
     }
 
     var script = getCompiledScript(filename);
-    var compiledWrapper = script.runInNewContext(context);
+    var compiledWrapper = runInNewContext === false
+      ? script.runInThisContext()
+      : script.runInNewContext(sandbox);
     var m = { exports: {}};
     var r = function (file) {
       file = path$2.join('.', file);
       if (files[file]) {
-        return evaluateModule(file, context, evaluatedFiles)
+        return evaluateModule(file, sandbox, evaluatedFiles)
       } else if (basedir) {
         return require(
           resolvedModules[file] ||
@@ -5805,8 +5813,8 @@ function deepClone (val) {
 }
 
 function createBundleRunner (entry, files, basedir, runInNewContext) {
-  var evaluate = compileModule(files, basedir);
-  if (runInNewContext) {
+  var evaluate = compileModule(files, basedir, runInNewContext);
+  if (runInNewContext !== false && runInNewContext !== 'once') {
     // new context mode: creates a fresh context and re-evaluate the bundle
     // on each render. Ensures entire application state is fresh for each
     // render, but incurs extra evaluation cost.
@@ -5815,7 +5823,7 @@ function createBundleRunner (entry, files, basedir, runInNewContext) {
 
       return new Promise(function (resolve) {
       userContext._registeredComponents = new Set();
-      var res = evaluate(entry, createContext(userContext));
+      var res = evaluate(entry, createSandbox(userContext));
       resolve(typeof res === 'function' ? res(userContext) : res);
     });
     }
@@ -5824,22 +5832,23 @@ function createBundleRunner (entry, files, basedir, runInNewContext) {
     // each render, it simply calls the exported function. This avoids the
     // module evaluation costs but requires the source code to be structured
     // slightly differently.
-
-    // the initial context is only used for collecting possible non-component
-    // styles injected by vue-style-loader.
-    var initialContext = {};
-    var sharedContext = createContext(initialContext);
-
     var runner; // lazy creation so that errors can be caught by user
+    var initialContext;
     return function (userContext) {
       if ( userContext === void 0 ) userContext = {};
 
       return new Promise(function (resolve) {
       if (!runner) {
-        runner = evaluate(entry, sharedContext);
+        var sandbox = runInNewContext === 'once'
+          ? createSandbox()
+          : global;
+        // the initial context is only used for collecting possible non-component
+        // styles injected by vue-style-loader.
+        initialContext = sandbox.__VUE_SSR_CONTEXT__ = {};
+        runner = evaluate(entry, sandbox);
         // On subsequent renders, __VUE_SSR_CONTEXT__ will not be avaialbe
         // to prevent cross-request pollution.
-        delete sharedContext.__VUE_SSR_CONTEXT__;
+        delete sandbox.__VUE_SSR_CONTEXT__;
         if (typeof runner !== 'function') {
           throw new Error(
             'bundle export should be a function when using ' +
@@ -5926,7 +5935,6 @@ function createBundleRendererCreator (createRenderer) {
 
     var files, entry, maps;
     var basedir = rendererOptions.basedir;
-    var runInNewContext = rendererOptions.runInNewContext !== false;
 
     // load bundle if given filepath
     if (
@@ -5968,7 +5976,12 @@ function createBundleRendererCreator (createRenderer) {
 
     var renderer = createRenderer(rendererOptions);
 
-    var run = createBundleRunner(entry, files, basedir, runInNewContext);
+    var run = createBundleRunner(
+      entry,
+      files,
+      basedir,
+      rendererOptions.runInNewContext
+    );
 
     return {
       renderToString: function (context, cb) {

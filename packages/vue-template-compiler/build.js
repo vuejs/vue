@@ -31,14 +31,14 @@ function isObject (obj) {
   return obj !== null && typeof obj === 'object'
 }
 
-var toString = Object.prototype.toString;
+var _toString = Object.prototype.toString;
 
 /**
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
  */
 function isPlainObject (obj) {
-  return toString.call(obj) === '[object Object]'
+  return _toString.call(obj) === '[object Object]'
 }
 
 
@@ -1009,9 +1009,11 @@ var config = ({
   _lifecycleHooks: LIFECYCLE_HOOKS
 });
 
+/*  */
+
 var warn$1 = noop;
 var tip = noop;
-var formatComponentName;
+var formatComponentName = (null); // work around flow check
 
 if (process.env.NODE_ENV !== 'production') {
   var hasConsole = typeof console !== 'undefined';
@@ -1099,6 +1101,8 @@ if (process.env.NODE_ENV !== 'production') {
     }
   };
 }
+
+/*  */
 
 function handleError (err, vm, info) {
   if (config.errorHandler) {
@@ -3683,6 +3687,8 @@ var defaultStrat = function (parentVal, childVal) {
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
  */
+
+/*  */
 
 /*  */
 
