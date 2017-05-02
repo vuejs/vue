@@ -5417,6 +5417,16 @@ function renderNode (node, isRoot, context) {
   }
 }
 
+function registerComponentForCache (options, write) {
+  // exposed by vue-loader, need to call this if cache hit because
+  // component lifecycle hooks will not be called.
+  var register = options._ssrRegister;
+  if (write.caching && isDef(register)) {
+    write.componentBuffer[write.componentBuffer.length - 1].add(register);
+  }
+  return register
+}
+
 function renderComponent (node, isRoot, context) {
   var write = context.write;
   var next = context.next;
@@ -5426,15 +5436,9 @@ function renderComponent (node, isRoot, context) {
   var Ctor = node.componentOptions.Ctor;
   var getKey = Ctor.options.serverCacheKey;
   var name = Ctor.options.name;
-
-  // exposed by vue-loader, need to call this if cache hit because
-  // component lifecycle hooks will not be called.
-  var registerComponent = Ctor.options._ssrRegister;
-  if (write.caching && isDef(registerComponent)) {
-    write.componentBuffer[write.componentBuffer.length - 1].add(registerComponent);
-  }
-
   var cache = context.cache;
+  var registerComponent = registerComponentForCache(Ctor.options, write);
+
   if (isDef(getKey) && isDef(cache) && isDef(name)) {
     var key = name + '::' + getKey(node.componentOptions.propsData);
     var has = context.has;
@@ -5508,7 +5512,6 @@ function renderComponentInner (node, isRoot, context) {
     node,
     context.activeInstance
   );
-  node.ssrContext = null;
   normalizeRender(child);
   var childNode = child._render();
   childNode.parent = node;
@@ -5520,15 +5523,21 @@ function renderComponentInner (node, isRoot, context) {
 }
 
 function renderElement (el, isRoot, context) {
+  var write = context.write;
+  var next = context.next;
+
   if (isTrue(isRoot)) {
     if (!el.data) { el.data = {}; }
     if (!el.data.attrs) { el.data.attrs = {}; }
     el.data.attrs[SSR_ATTR] = 'true';
   }
+
+  if (el.functionalOptions) {
+    registerComponentForCache(el.functionalOptions, write);
+  }
+
   var startTag = renderStartingTag(el, context);
   var endTag = "</" + (el.tag) + ">";
-  var write = context.write;
-  var next = context.next;
   if (context.isUnaryTag(el.tag)) {
     write(startTag, next);
   } else if (isUndef(el.children) || el.children.length === 0) {
