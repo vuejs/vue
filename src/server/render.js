@@ -57,6 +57,16 @@ function renderNode (node, isRoot, context) {
   }
 }
 
+function registerComponentForCache (options, write) {
+  // exposed by vue-loader, need to call this if cache hit because
+  // component lifecycle hooks will not be called.
+  const register = options._ssrRegister
+  if (write.caching && isDef(register)) {
+    write.componentBuffer[write.componentBuffer.length - 1].add(register)
+  }
+  return register
+}
+
 function renderComponent (node, isRoot, context) {
   const { write, next, userContext } = context
 
@@ -64,15 +74,9 @@ function renderComponent (node, isRoot, context) {
   const Ctor = node.componentOptions.Ctor
   const getKey = Ctor.options.serverCacheKey
   const name = Ctor.options.name
-
-  // exposed by vue-loader, need to call this if cache hit because
-  // component lifecycle hooks will not be called.
-  const registerComponent = Ctor.options._ssrRegister
-  if (write.caching && isDef(registerComponent)) {
-    write.componentBuffer[write.componentBuffer.length - 1].add(registerComponent)
-  }
-
   const cache = context.cache
+  const registerComponent = registerComponentForCache(Ctor.options, write)
+
   if (isDef(getKey) && isDef(cache) && isDef(name)) {
     const key = name + '::' + getKey(node.componentOptions.propsData)
     const { has, get } = context
@@ -147,7 +151,6 @@ function renderComponentInner (node, isRoot, context) {
     node,
     context.activeInstance
   )
-  node.ssrContext = null
   normalizeRender(child)
   const childNode = child._render()
   childNode.parent = node
@@ -159,14 +162,20 @@ function renderComponentInner (node, isRoot, context) {
 }
 
 function renderElement (el, isRoot, context) {
+  const { write, next } = context
+
   if (isTrue(isRoot)) {
     if (!el.data) el.data = {}
     if (!el.data.attrs) el.data.attrs = {}
     el.data.attrs[SSR_ATTR] = 'true'
   }
+
+  if (el.functionalOptions) {
+    registerComponentForCache(el.functionalOptions, write)
+  }
+
   const startTag = renderStartingTag(el, context)
   const endTag = `</${el.tag}>`
-  const { write, next } = context
   if (context.isUnaryTag(el.tag)) {
     write(startTag, next)
   } else if (isUndef(el.children) || el.children.length === 0) {

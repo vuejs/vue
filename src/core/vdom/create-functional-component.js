@@ -43,6 +43,7 @@ export function createFunctionalComponent (
   })
   if (vnode instanceof VNode) {
     vnode.functionalContext = context
+    vnode.functionalOptions = Ctor.options
     if (data.slot) {
       (vnode.data || (vnode.data = {})).slot = data.slot
     }
