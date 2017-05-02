@@ -53,7 +53,7 @@ function normalizeArrayChildren (children: any, nestedIndex?: string): Array<VNo
         // convert primitive to vnode
         res.push(createTextVNode(c))
       }
-    } else {
+    } else if (!c.isComment) {
       if (isDef(c.text) && isDef(last) && isDef(last.text)) {
         res[res.length - 1] = createTextVNode(last.text + c.text)
       } else {
