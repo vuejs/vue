@@ -14,6 +14,9 @@ export function isTrue (v: any): boolean %checks {
   return v === true
 }
 
+export function isFalse (v: any): boolean %checks {
+  return v === false
+}
 /**
  * Check if value is primitive
  */
