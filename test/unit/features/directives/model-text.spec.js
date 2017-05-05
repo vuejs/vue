@@ -250,7 +250,7 @@ describe('Directive v-model text', () => {
     expect('You are binding v-model directly to a v-for iteration alias').toHaveBeenWarned()
   })
 
-  it('does not trigger extra input events with compositionend', () => {
+  it('does not trigger extra input events with single compositionend', () => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
@@ -272,7 +272,7 @@ describe('Directive v-model text', () => {
     expect(spy.calls.count()).toBe(1)
   })
 
-  it('triggers extra input on compositionend', () => {
+  it('triggers extra input on compositionstart + end', () => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
