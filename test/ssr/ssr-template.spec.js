@@ -330,5 +330,38 @@ describe('SSR: template option', () => {
         })
       })
     })
+
+    it('whitespace insensitive interpolation', done => {
+      const interpolateTemplate = `<html><head><title>{{title}}</title></head><body><!--vue-ssr-outlet-->{{{snippet}}}</body></html>`
+      const renderer = createRenderer({
+        template: interpolateTemplate
+      })
+
+      const context = {
+        title: '<script>hacks</script>',
+        snippet: '<div>foo</div>',
+        head: '<meta name="viewport" content="width=device-width">',
+        styles: '<style>h1 { color: red }</style>',
+        state: { a: 1 }
+      }
+
+      renderer.renderToString(new Vue({
+        template: '<div>hi</div>'
+      }), context, (err, res) => {
+        expect(err).toBeNull()
+        expect(res).toContain(
+          `<html><head>` +
+          // double mustache should be escaped
+          `<title>&lt;script&gt;hacks&lt;/script&gt;</title>` +
+          `${context.head}${context.styles}</head><body>` +
+          `<div data-server-rendered="true">hi</div>` +
+          `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+          // triple should be raw
+          `<div>foo</div>` +
+          `</body></html>`
+        )
+        done()
+      })
+    })
   }
 })
