@@ -1,7 +1,7 @@
 /* @flow */
 
 import VNode, { createTextVNode } from 'core/vdom/vnode'
-import { isDef, isUndef, isPrimitive } from 'shared/util'
+import { isDef, isUndef, isPrimitive, isObject } from 'shared/util'
 
 // The template compiler attempts to minimize the need for normalization by
 // statically analyzing the template at compile time.
@@ -45,7 +45,11 @@ function normalizeArrayChildren (children: any, nestedIndex?: string): Array<VNo
     last = res[res.length - 1]
     //  nested
     if (Array.isArray(c)) {
-      res.push.apply(res, normalizeArrayChildren(c, `${nestedIndex || ''}_${i}`))
+      if (hasNestedIndex(c)) {
+        res.push.apply(res, normalizeArrayChildren(c, `${nestedIndex || ''}_${i}`))
+      } else {
+        res.push.apply(res, normalizeArrayChildren(c))
+      }
     } else if (isPrimitive(c)) {
       if (isDef(last) && isDef(last.text)) {
         last.text += String(c)
@@ -66,4 +70,22 @@ function normalizeArrayChildren (children: any, nestedIndex?: string): Array<VNo
     }
   }
   return res
+}
+
+function hasNestedIndex (children: any): boolean {
+  const length = children.length
+  if (length <= 1) return true
+  if (isObject(children[0]) === false || isUndef(children[0].tag) || isDef(children[0].key)) return false
+  let i
+  for (i = 1; i < length; i++) {
+    if (isObject(children[i]) === false || similarVNode(children[0], children[i]) === false) return false
+  }
+  return true
+}
+
+function similarVNode (a: VNode, b: VNode): boolean {
+  return (
+    a.tag === b.tag &&
+    a.key === b.key
+  )
 }
