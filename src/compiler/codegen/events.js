@@ -36,10 +36,10 @@ const modifierCode: { [key: string]: string } = {
 
 export function genHandlers (
   events: ASTElementHandlers,
-  native: boolean,
+  isNative: boolean,
   warn: Function
 ): string {
-  let res = native ? 'nativeOn:{' : 'on:{'
+  let res = isNative ? 'nativeOn:{' : 'on:{'
   for (const name in events) {
     const handler = events[name]
     // #5330: warn click.right, since right clicks do not actually fire click events.
