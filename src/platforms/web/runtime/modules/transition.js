@@ -134,8 +134,9 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       const parent = el.parentNode
       const pendingNode = parent && parent._pending && parent._pending[vnode.key]
       if (pendingNode &&
-          pendingNode.tag === vnode.tag &&
-          pendingNode.elm._leaveCb) {
+        pendingNode.tag === vnode.tag &&
+        pendingNode.elm._leaveCb
+      ) {
         pendingNode.elm._leaveCb()
       }
       enterHook && enterHook(el, cb)

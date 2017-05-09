@@ -255,8 +255,9 @@ function renderStartingTag (node: VNode, context) {
   let scopeId
   const activeInstance = context.activeInstance
   if (isDef(activeInstance) &&
-      activeInstance !== node.context &&
-      isDef(scopeId = activeInstance.$options._scopeId)) {
+    activeInstance !== node.context &&
+    isDef(scopeId = activeInstance.$options._scopeId)
+  ) {
     markup += ` ${(scopeId: any)}`
   }
   while (isDef(node)) {

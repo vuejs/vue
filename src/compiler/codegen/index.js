@@ -311,9 +311,10 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
     const el: any = children[0]
     // optimize single v-for
     if (children.length === 1 &&
-        el.for &&
-        el.tag !== 'template' &&
-        el.tag !== 'slot') {
+      el.for &&
+      el.tag !== 'template' &&
+      el.tag !== 'slot'
+    ) {
       return genElement(el)
     }
     const normalizationType = checkSkip ? getNormalizationType(children) : 0

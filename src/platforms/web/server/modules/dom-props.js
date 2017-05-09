@@ -30,8 +30,9 @@ export default function renderDOMProps (node: VNodeWithData): string {
     } else {
       const attr = propsToAttrMap[key] || key.toLowerCase()
       if (isRenderableAttr(attr) &&
-          // avoid rendering double-bound props/attrs twice
-          !(isDef(attrs) && isDef(attrs[attr]))) {
+        // avoid rendering double-bound props/attrs twice
+        !(isDef(attrs) && isDef(attrs[attr]))
+      ) {
         res += renderAttr(attr, props[key])
       }
     }
