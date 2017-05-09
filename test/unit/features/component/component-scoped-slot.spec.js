@@ -392,6 +392,9 @@ describe('Component scoped slot', () => {
           <template v-for="n in names" :slot="n" scope="props">
             <span>{{ props.msg }}</span>
           </template>
+          <template slot="abc" scope="props">
+            <span>{{ props.msg }}</span>
+          </template>
         </test>
       `,
       components: {
@@ -401,16 +404,17 @@ describe('Component scoped slot', () => {
             <div>
               <slot name="foo" :msg="msg + ' foo'"></slot>
               <slot name="bar" :msg="msg + ' bar'"></slot>
+              <slot name="abc" :msg="msg + ' abc'"></slot>
             </div>
           `
         }
       }
     }).$mount()
 
-    expect(vm.$el.innerHTML).toBe('<span>hello foo</span> <span>hello bar</span>')
+    expect(vm.$el.innerHTML).toBe('<span>hello foo</span> <span>hello bar</span> <span>hello abc</span>')
     vm.$refs.test.msg = 'world'
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML).toBe('<span>world foo</span> <span>world bar</span>')
+      expect(vm.$el.innerHTML).toBe('<span>world foo</span> <span>world bar</span> <span>world abc</span>')
     }).then(done)
   })
 })
