@@ -250,48 +250,48 @@ describe('Directive v-model text', () => {
     expect('You are binding v-model directly to a v-for iteration alias').toHaveBeenWarned()
   })
 
-  it('does not trigger extra input events with single compositionend', () => {
-    const spy = jasmine.createSpy()
-    const vm = new Vue({
-      data: {
-        a: 'a'
-      },
-      template: '<input v-model="a" @input="onInput">',
-      methods: {
-        onInput (e) {
-          spy(e.target.value)
+  if (!isAndroid) {
+    it('does not trigger extra input events with single compositionend', () => {
+      const spy = jasmine.createSpy()
+      const vm = new Vue({
+        data: {
+          a: 'a'
+        },
+        template: '<input v-model="a" @input="onInput">',
+        methods: {
+          onInput (e) {
+            spy(e.target.value)
+          }
         }
-      }
-    }).$mount()
-    console.log(spy.calls.count())
-    expect(spy.calls.count()).toBe(0)
-    vm.$el.value = 'b'
-    triggerEvent(vm.$el, 'input')
-    expect(spy.calls.count()).toBe(1)
-    triggerEvent(vm.$el, 'compositionend')
-    expect(spy.calls.count()).toBe(1)
-  })
+      }).$mount()
+      expect(spy.calls.count()).toBe(0)
+      vm.$el.value = 'b'
+      triggerEvent(vm.$el, 'input')
+      expect(spy.calls.count()).toBe(1)
+      triggerEvent(vm.$el, 'compositionend')
+      expect(spy.calls.count()).toBe(1)
+    })
 
-  it('triggers extra input on compositionstart + end', () => {
-    const spy = jasmine.createSpy()
-    const vm = new Vue({
-      data: {
-        a: 'a'
-      },
-      template: '<input v-model="a" @input="onInput">',
-      methods: {
-        onInput (e) {
-          spy(e.target.value)
+    it('triggers extra input on compositionstart + end', () => {
+      const spy = jasmine.createSpy()
+      const vm = new Vue({
+        data: {
+          a: 'a'
+        },
+        template: '<input v-model="a" @input="onInput">',
+        methods: {
+          onInput (e) {
+            spy(e.target.value)
+          }
         }
-      }
-    }).$mount()
-    console.log(spy.calls.count())
-    expect(spy.calls.count()).toBe(0)
-    vm.$el.value = 'b'
-    triggerEvent(vm.$el, 'input')
-    expect(spy.calls.count()).toBe(1)
-    triggerEvent(vm.$el, 'compositionstart')
-    triggerEvent(vm.$el, 'compositionend')
-    expect(spy.calls.count()).toBe(2)
-  })
+      }).$mount()
+      expect(spy.calls.count()).toBe(0)
+      vm.$el.value = 'b'
+      triggerEvent(vm.$el, 'input')
+      expect(spy.calls.count()).toBe(1)
+      triggerEvent(vm.$el, 'compositionstart')
+      triggerEvent(vm.$el, 'compositionend')
+      expect(spy.calls.count()).toBe(2)
+    })
+  }
 })
