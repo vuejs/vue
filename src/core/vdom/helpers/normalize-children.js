@@ -1,7 +1,7 @@
 /* @flow */
 
 import VNode, { createTextVNode } from 'core/vdom/vnode'
-import { isFalse, isDef, isUndef, isPrimitive } from 'shared/util'
+import { isFalse, isTrue, isDef, isUndef, isPrimitive } from 'shared/util'
 
 // The template compiler attempts to minimize the need for normalization by
 // statically analyzing the template at compile time.
@@ -45,7 +45,8 @@ function normalizeArrayChildren (children: any, nestedIndex?: string): Array<VNo
     last = res[res.length - 1]
     //  nested
     if (Array.isArray(c)) {
-      res.push.apply(res, normalizeArrayChildren(c, `${nestedIndex || ''}_${i}`))
+      const subIndex = isTrue(c._isVList) ? `${nestedIndex || ''}_${i}` : undefined
+      res.push.apply(res, normalizeArrayChildren(c, subIndex))
     } else if (isPrimitive(c)) {
       if (isDef(last) && isDef(last.text)) {
         last.text += String(c)
