@@ -2,6 +2,8 @@
 
 import { namespaceMap } from 'web/util/index'
 
+export { addClass, removeClass } from './class-util'
+
 export function createElement (tagName: string, vnode: VNode): Element {
   const elm = document.createElement(tagName)
   if (tagName !== 'select') {

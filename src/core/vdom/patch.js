@@ -271,23 +271,27 @@ export function createPatchFunction (backend) {
     }
   }
 
-  // set scope id attribute for scoped CSS.
+  // set scope id attribute/class for scoped CSS.
   // this is implemented as a special case to avoid the overhead
   // of going through the normal attribute patching process.
   function setScope (vnode) {
-    let i
+    let i, v
     let ancestor = vnode
     while (ancestor) {
-      if (isDef(i = ancestor.context) && isDef(i = i.$options._scopeId)) {
-        nodeOps.setAttribute(vnode.elm, i, '')
+      if (isDef(i = ancestor.context) && isDef(v = i.$options._scopeId)) {
+        i.$options._scopeUseClass
+          ? nodeOps.addClass(vnode.elm, v)
+          : nodeOps.setAttribute(vnode.elm, v, '')
       }
       ancestor = ancestor.parent
     }
     // for slot content they should also get the scopeId from the host instance.
     if (isDef(i = activeInstance) &&
         i !== vnode.context &&
-        isDef(i = i.$options._scopeId)) {
-      nodeOps.setAttribute(vnode.elm, i, '')
+        isDef(v = i.$options._scopeId)) {
+      i.$options._scopeUseClass
+        ? nodeOps.addClass(vnode.elm, v)
+        : nodeOps.setAttribute(vnode.elm, v, '')
     }
   }
 
