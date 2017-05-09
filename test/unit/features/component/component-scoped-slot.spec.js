@@ -382,4 +382,35 @@ describe('Component scoped slot', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
   })
+
+  // #5615
+  it('scoped slot with v-for', done => {
+    const vm = new Vue({
+      data: { names: ['foo', 'bar'] },
+      template: `
+        <test ref="test">
+          <template v-for="n in names" :slot="n" scope="props">
+            <span>{{ props.msg }}</span>
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          data: () => ({ msg: 'hello' }),
+          template: `
+            <div>
+              <slot name="foo" :msg="msg + ' foo'"></slot>
+              <slot name="bar" :msg="msg + ' bar'"></slot>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<span>hello foo</span> <span>hello bar</span>')
+    vm.$refs.test.msg = 'world'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<span>world foo</span> <span>world bar</span>')
+    }).then(done)
+  })
 })

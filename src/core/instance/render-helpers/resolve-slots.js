@@ -42,11 +42,16 @@ function isWhitespace (node: VNode): boolean {
 }
 
 export function resolveScopedSlots (
-  fns: Array<[string, Function]>
+  fns: ScopedSlotsData, // see flow/vnode
+  res?: Object
 ): { [key: string]: Function } {
-  const res = {}
+  res = res || {}
   for (let i = 0; i < fns.length; i++) {
-    res[fns[i][0]] = fns[i][1]
+    if (Array.isArray(fns[i])) {
+      resolveScopedSlots(fns[i], res)
+    } else {
+      res[fns[i].key] = fns[i].fn
+    }
   }
   return res
 }

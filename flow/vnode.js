@@ -71,4 +71,6 @@ declare type VNodeDirective = {
   arg?: string;
   modifiers?: ASTModifiers;
   def?: Object;
-}
+};
+
+declare type ScopedSlotsData = Array<{ key: string, fn: Function } | ScopedSlotsData>;

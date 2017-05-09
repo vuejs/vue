@@ -298,11 +298,26 @@ function genScopedSlots (slots: { [key: string]: ASTElement }): string {
 }
 
 function genScopedSlot (key: string, el: ASTElement) {
-  return `[${key},function(${String(el.attrsMap.scope)}){` +
+  if (el.for && !el.forProcessed) {
+    return genForScopedSlot(key, el)
+  }
+  return `{key:${key},fn:function(${String(el.attrsMap.scope)}){` +
     `return ${el.tag === 'template'
       ? genChildren(el) || 'void 0'
       : genElement(el)
-  }}]`
+  }}}`
+}
+
+function genForScopedSlot (key: string, el: any) {
+  const exp = el.for
+  const alias = el.alias
+  const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
+  const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
+  el.forProcessed = true // avoid recursion
+  return `_l((${exp}),` +
+    `function(${alias}${iterator1}${iterator2}){` +
+      `return ${genScopedSlot(key, el)}` +
+    '})'
 }
 
 function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
