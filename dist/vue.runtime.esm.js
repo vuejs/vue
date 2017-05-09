@@ -4602,7 +4602,7 @@ function query (el) {
 
 /*  */
 
-function createElement$1 (tagName, vnode) {
+function createElement$1(tagName, vnode) {
   var elm = document.createElement(tagName);
   if (tagName !== 'select') {
     return elm
@@ -4614,47 +4614,51 @@ function createElement$1 (tagName, vnode) {
   return elm
 }
 
-function createElementNS (namespace, tagName) {
+function createElementNS(namespace, tagName) {
   return document.createElementNS(namespaceMap[namespace], tagName)
 }
 
-function createTextNode (text) {
+function createTextNode(text) {
   return document.createTextNode(text)
 }
 
-function createComment (text) {
+function createComment(text) {
   return document.createComment(text)
 }
 
-function insertBefore (parentNode, newNode, referenceNode) {
+function insertBefore(parentNode, newNode, referenceNode) {
   parentNode.insertBefore(newNode, referenceNode);
 }
 
-function removeChild (node, child) {
+function removeChild(node, child) {
   node.removeChild(child);
 }
 
-function appendChild (node, child) {
+function appendChild(node, child) {
   node.appendChild(child);
 }
 
-function parentNode (node) {
+function parentNode(node) {
   return node.parentNode
 }
 
-function nextSibling (node) {
+function nextSibling(node) {
   return node.nextSibling
 }
 
-function tagName (node) {
+function tagName(node) {
   return node.tagName
 }
 
 function setTextContent (node, text) {
-  node.textContent = text;
+  try {
+    node.textContent = text;
+  } catch(err) {
+    node.innerText = text;
+  }
 }
 
-function setAttribute (node, key, val) {
+function setAttribute(node, key, val) {
   node.setAttribute(key, val);
 }
 
