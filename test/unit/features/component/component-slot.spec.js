@@ -639,4 +639,25 @@ describe('Component slot', () => {
       expect(vm.$el.textContent).toBe('2foo')
     }).then(done)
   })
+
+  it('the elements of slot should be updated correctly', done => {
+    const vm = new Vue({
+      data: { n: 1 },
+      template: '<div><test><span v-for="i in n" :key="i">{{ i }}</span><input value="a"/></test></div>',
+      components: {
+        test: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<div><span>1</span><input value="a"></div>')
+    const input = vm.$el.querySelector('input')
+    input.value = 'b'
+    vm.n++
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div><span>1</span><span>2</span><input value="a"></div>')
+      expect(vm.$el.querySelector('input')).toBe(input)
+      expect(vm.$el.querySelector('input').value).toBe('b')
+    }).then(done)
+  })
 })
