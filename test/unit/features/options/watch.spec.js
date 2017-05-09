@@ -23,6 +23,13 @@ describe('Options watch', () => {
     }).then(done)
   })
 
+  it('warn non object', () => {
+    new Vue({
+      watch: 'wrong'
+    })
+    expect('watch should be an object').toHaveBeenWarned()
+  })
+
   it('string method name', done => {
     const vm = new Vue({
       data: {

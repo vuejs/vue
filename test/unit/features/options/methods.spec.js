@@ -24,4 +24,11 @@ describe('Options methods', () => {
     })
     expect(`method "hello" has an undefined value in the component definition`).toHaveBeenWarned()
   })
+
+  it('should warn non object', () => {
+    new Vue({
+      methods: 'wrong'
+    })
+    expect('methods should be an object').toHaveBeenWarned()
+  })
 })

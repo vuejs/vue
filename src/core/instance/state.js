@@ -148,8 +148,14 @@ function getData (data: Function, vm: Component): any {
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
+  if (!isPlainObject(computed)) {
+    computed = {}
+    process.env.NODE_ENV !== 'production' && warn(
+      'computed should be an object.',
+      vm
+    )
+  }
   const watchers = vm._computedWatchers = Object.create(null)
-
   for (const key in computed) {
     const userDef = computed[key]
     let getter = typeof userDef === 'function' ? userDef : userDef.get
@@ -213,6 +219,13 @@ function createComputedGetter (key) {
 }
 
 function initMethods (vm: Component, methods: Object) {
+  if (!isPlainObject(methods)) {
+    methods = {}
+    process.env.NODE_ENV !== 'production' && warn(
+      'methods should be an object.',
+      vm
+    )
+  }
   const props = vm.$options.props
   for (const key in methods) {
     vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
@@ -235,6 +248,13 @@ function initMethods (vm: Component, methods: Object) {
 }
 
 function initWatch (vm: Component, watch: Object) {
+  if (!isPlainObject(watch)) {
+    watch = {}
+    process.env.NODE_ENV !== 'production' && warn(
+      'watch should be an object.',
+      vm
+    )
+  }
   for (const key in watch) {
     const handler = watch[key]
     if (Array.isArray(handler)) {
