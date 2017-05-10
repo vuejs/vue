@@ -55,6 +55,13 @@ describe('Options computed', () => {
     expect('computed should be an object').toHaveBeenWarned()
   })
 
+  it('don\'t warn when is an object', () => {
+    new Vue({
+      computed: {}
+    })
+    expect('computed should be an object').not.toHaveBeenWarned()
+  })
+
   it('warn with setter and no getter', () => {
     const vm = new Vue({
       template: `

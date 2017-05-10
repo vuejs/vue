@@ -31,4 +31,11 @@ describe('Options methods', () => {
     })
     expect('methods should be an object').toHaveBeenWarned()
   })
+
+  it('don\'t warn when is an object', () => {
+    new Vue({
+      methods: {}
+    })
+    expect('computed should be an object').not.toHaveBeenWarned()
+  })
 })

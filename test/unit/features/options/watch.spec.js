@@ -30,6 +30,13 @@ describe('Options watch', () => {
     expect('watch should be an object').toHaveBeenWarned()
   })
 
+  it('don\'t warn when is an object', () => {
+    new Vue({
+      watch: {}
+    })
+    expect('computed should be an object').not.toHaveBeenWarned()
+  })
+
   it('string method name', done => {
     const vm = new Vue({
       data: {
