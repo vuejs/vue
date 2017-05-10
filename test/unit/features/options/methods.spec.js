@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options methods', () => {
   it('should have correct context', () => {
@@ -16,6 +17,8 @@ describe('Options methods', () => {
     expect(vm.a).toBe(2)
   })
 
+  testObjectOption('methods')
+
   it('should warn undefined methods', () => {
     new Vue({
       methods: {
@@ -23,19 +26,5 @@ describe('Options methods', () => {
       }
     })
     expect(`method "hello" has an undefined value in the component definition`).toHaveBeenWarned()
-  })
-
-  it('should warn non object', () => {
-    new Vue({
-      methods: 'wrong'
-    })
-    expect('methods should be an object').toHaveBeenWarned()
-  })
-
-  it('don\'t warn when is an object', () => {
-    new Vue({
-      methods: {}
-    })
-    expect('computed should be an object').not.toHaveBeenWarned()
   })
 })

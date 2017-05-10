@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options watch', () => {
   let spy
@@ -23,19 +24,7 @@ describe('Options watch', () => {
     }).then(done)
   })
 
-  it('warn non object', () => {
-    new Vue({
-      watch: 'wrong'
-    })
-    expect('watch should be an object').toHaveBeenWarned()
-  })
-
-  it('don\'t warn when is an object', () => {
-    new Vue({
-      watch: {}
-    })
-    expect('computed should be an object').not.toHaveBeenWarned()
-  })
+  testObjectOption('watch')
 
   it('string method name', done => {
     const vm = new Vue({

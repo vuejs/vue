@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options computed', () => {
   it('basic usage', done => {
@@ -48,19 +49,7 @@ describe('Options computed', () => {
     }).then(done)
   })
 
-  it('warn non object', () => {
-    new Vue({
-      computed: 'wrong'
-    })
-    expect('computed should be an object').toHaveBeenWarned()
-  })
-
-  it('don\'t warn when is an object', () => {
-    new Vue({
-      computed: {}
-    })
-    expect('computed should be an object').not.toHaveBeenWarned()
-  })
+  testObjectOption('computed')
 
   it('warn with setter and no getter', () => {
     const vm = new Vue({
