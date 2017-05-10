@@ -160,6 +160,7 @@ const computedWatcherOptions = { lazy: true }
 function initComputed (vm: Component, computed: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
   const watchers = vm._computedWatchers = Object.create(null)
+
   for (const key in computed) {
     const userDef = computed[key]
     let getter = typeof userDef === 'function' ? userDef : userDef.get
