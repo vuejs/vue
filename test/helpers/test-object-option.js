@@ -3,7 +3,7 @@ import Vue from 'vue'
 export default function testObjectOption (name: string) {
   it('should warn non object', () => {
     const options = {}
-    options[name] = 'wrong'
+    options[name] = () => {}
     new Vue(options)
     expect(`${name} should be an object`).toHaveBeenWarned()
   })
