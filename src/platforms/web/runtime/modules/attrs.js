@@ -1,18 +1,24 @@
 /* @flow */
 
-import { extend } from 'shared/util'
 import { isIE9 } from 'core/util/env'
+
 import {
-  isBooleanAttr,
-  isEnumeratedAttr,
+  extend,
+  isDef,
+  isUndef
+} from 'shared/util'
+
+import {
   isXlink,
   xlinkNS,
   getXlinkProp,
+  isBooleanAttr,
+  isEnumeratedAttr,
   isFalsyAttrValue
 } from 'web/util/index'
 
 function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  if (!oldVnode.data.attrs && !vnode.data.attrs) {
+  if (isUndef(oldVnode.data.attrs) && isUndef(vnode.data.attrs)) {
     return
   }
   let key, cur, old
@@ -20,7 +26,7 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const oldAttrs = oldVnode.data.attrs || {}
   let attrs: any = vnode.data.attrs || {}
   // clone observed objects, as the user probably wants to mutate it
-  if (attrs.__ob__) {
+  if (isDef(attrs.__ob__)) {
     attrs = vnode.data.attrs = extend({}, attrs)
   }
 
@@ -37,7 +43,7 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     setAttr(elm, 'value', attrs.value)
   }
   for (key in oldAttrs) {
-    if (attrs[key] == null) {
+    if (isUndef(attrs[key])) {
       if (isXlink(key)) {
         elm.removeAttributeNS(xlinkNS, getXlinkProp(key))
       } else if (!isEnumeratedAttr(key)) {

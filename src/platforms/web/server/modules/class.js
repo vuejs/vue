@@ -5,7 +5,7 @@ import { genClassForVnode } from 'web/util/index'
 
 export default function renderClass (node: VNodeWithData): ?string {
   const classList = genClassForVnode(node)
-  if (classList) {
+  if (classList !== '') {
     return ` class="${escape(classList)}"`
   }
 }

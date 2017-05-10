@@ -57,8 +57,9 @@ function checkNode (node: ASTNode, errors: Array<string>) {
 }
 
 function checkEvent (exp: string, text: string, errors: Array<string>) {
-  const keywordMatch = exp.replace(stripStringRE, '').match(unaryOperatorsRE)
-  if (keywordMatch) {
+  const stipped = exp.replace(stripStringRE, '')
+  const keywordMatch: any = stipped.match(unaryOperatorsRE)
+  if (keywordMatch && stipped.charAt(keywordMatch.index - 1) !== '$') {
     errors.push(
       `avoid using JavaScript unary operator as property name: ` +
       `"${keywordMatch[0]}" in expression ${text.trim()}`

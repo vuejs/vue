@@ -3,26 +3,18 @@
 const path = require('path')
 const serialize = require('serialize-javascript')
 
+import { isJS, isCSS } from '../util'
 import TemplateStream from './template-stream'
 import { parseTemplate } from './parse-template'
 import { createMapper } from './create-async-file-mapper'
 import type { ParsedTemplate } from './parse-template'
 import type { AsyncFileMapper } from './create-async-file-mapper'
 
-const JS_RE = /\.js($|\?)/
-export const isJS = (file: string): boolean => JS_RE.test(file)
-
 type TemplateRendererOptions = {
   template: ?string;
-  serverManifest?: ServerManifest;
+  inject?: boolean;
   clientManifest?: ClientManifest;
   shouldPreload?: (file: string, type: string) => boolean;
-};
-
-export type ServerManifest = {
-  modules: {
-    [file: string]: Array<string>;
-  }
 };
 
 export type ClientManifest = {
@@ -38,11 +30,18 @@ export type ClientManifest = {
   }
 };
 
+type PreloadFile = {
+  file: string;
+  extension: string;
+  fileWithoutQuery: string;
+  asType: string;
+};
+
 export default class TemplateRenderer {
   options: TemplateRendererOptions;
+  inject: boolean;
   parsedTemplate: ParsedTemplate | null;
   publicPath: string;
-  serverManifest: ServerManifest;
   clientManifest: ClientManifest;
   preloadFiles: Array<string>;
   prefetchFiles: Array<string>;
@@ -50,6 +49,7 @@ export default class TemplateRenderer {
 
   constructor (options: TemplateRendererOptions) {
     this.options = options
+    this.inject = options.inject !== false
     // if no template option is provided, the renderer is created
     // as a utility object for rendering assets like preload links and scripts.
     this.parsedTemplate = options.template
@@ -57,16 +57,24 @@ export default class TemplateRenderer {
       : null
 
     // extra functionality with client manifest
-    if (options.serverManifest && options.clientManifest) {
-      const serverManifest = this.serverManifest = options.serverManifest
+    if (options.clientManifest) {
       const clientManifest = this.clientManifest = options.clientManifest
       this.publicPath = clientManifest.publicPath.replace(/\/$/, '')
       // preload/prefetch drectives
       this.preloadFiles = clientManifest.initial
       this.prefetchFiles = clientManifest.async
       // initial async chunk mapping
-      this.mapFiles = createMapper(serverManifest, clientManifest)
+      this.mapFiles = createMapper(clientManifest)
     }
+  }
+
+  bindRenderFns (context: Object) {
+    const renderer: any = this
+    ;['ResourceHints', 'State', 'Scripts', 'Styles'].forEach(type => {
+      context[`render${type}`] = renderer[`render${type}`].bind(renderer, context)
+    })
+    // also expose getPreloadFiles, useful for HTTP/2 push
+    context.getPreloadFiles = renderer.getPreloadFiles.bind(renderer, context)
   }
 
   // render synchronously given rendered app content and render context
@@ -76,44 +84,86 @@ export default class TemplateRenderer {
       throw new Error('renderSync cannot be called without a template.')
     }
     context = context || {}
+    if (this.inject) {
+      return (
+        template.head(context) +
+        (context.head || '') +
+        this.renderResourceHints(context) +
+        this.renderStyles(context) +
+        template.neck(context) +
+        content +
+        this.renderState(context) +
+        this.renderScripts(context) +
+        template.tail(context)
+      )
+    } else {
+      return (
+        template.head(context) +
+        template.neck(context) +
+        content +
+        template.tail(context)
+      )
+    }
+  }
+
+  renderStyles (context: Object): string {
+    const cssFiles = this.clientManifest
+      ? this.clientManifest.all.filter(isCSS)
+      : []
     return (
-      template.head +
-      (context.head || '') +
-      this.renderPreloadLinks(context) +
-      this.renderPrefetchLinks(context) +
-      (context.styles || '') +
-      template.neck +
-      content +
-      this.renderState(context) +
-      this.renderScripts(context) +
-      template.tail
+      // render links for css files
+      (cssFiles.length
+        ? cssFiles.map(file => `<link rel="stylesheet" href="${this.publicPath}/${file}">`).join('')
+        : '') +
+      // context.styles is a getter exposed by vue-style-loader which contains
+      // the inline component styles collected during SSR
+      (context.styles || '')
     )
   }
 
-  renderPreloadLinks (context: Object): string {
+  renderResourceHints (context: Object): string {
+    return this.renderPreloadLinks(context) + this.renderPrefetchLinks(context)
+  }
+
+  getPreloadFiles (context: Object): Array<PreloadFile> {
     const usedAsyncFiles = this.getUsedAsyncFiles(context)
     if (this.preloadFiles || usedAsyncFiles) {
       return (this.preloadFiles || []).concat(usedAsyncFiles || []).map(file => {
-        let extra = ''
         const withoutQuery = file.replace(/\?.*/, '')
-        const ext = path.extname(withoutQuery).slice(1)
-        const type = getPreloadType(ext)
+        const extension = path.extname(withoutQuery).slice(1)
+        return {
+          file,
+          extension,
+          fileWithoutQuery: withoutQuery,
+          asType: getPreloadType(extension)
+        }
+      })
+    } else {
+      return []
+    }
+  }
+
+  renderPreloadLinks (context: Object): string {
+    const files = this.getPreloadFiles(context)
+    if (files.length) {
+      return files.map(({ file, extension, fileWithoutQuery, asType }) => {
+        let extra = ''
         const shouldPreload = this.options.shouldPreload
-        // by default, we only preload scripts
-        if (!shouldPreload && type !== 'script') {
+        // by default, we only preload scripts or css
+        if (!shouldPreload && asType !== 'script' && asType !== 'style') {
           return ''
         }
         // user wants to explicitly control what to preload
-        if (shouldPreload && !shouldPreload(withoutQuery, type)) {
+        if (shouldPreload && !shouldPreload(fileWithoutQuery, asType)) {
           return ''
         }
-        if (type === 'font') {
-          extra = ` type="font/${ext}" crossorigin`
+        if (asType === 'font') {
+          extra = ` type="font/${extension}" crossorigin`
         }
         return `<link rel="preload" href="${
           this.publicPath}/${file
         }"${
-          type !== '' ? ` as="${type}"` : ''
+          asType !== '' ? ` as="${asType}"` : ''
         }${
           extra
         }>`
@@ -125,7 +175,7 @@ export default class TemplateRenderer {
 
   renderPrefetchLinks (context: Object): string {
     if (this.prefetchFiles) {
-      const usedAsyncFiles = this.getUsedAsyncFiles(context, true)
+      const usedAsyncFiles = this.getUsedAsyncFiles(context)
       const alreadyRendered = file => {
         return usedAsyncFiles && usedAsyncFiles.some(f => f === file)
       }
@@ -141,10 +191,14 @@ export default class TemplateRenderer {
     }
   }
 
-  renderState (context: Object): string {
-    return context.state
-      ? `<script>window.__INITIAL_STATE__=${
-          serialize(context.state, { isJSON: true })
+  renderState (context: Object, options?: Object): string {
+    const {
+      contextKey = 'state',
+      windowKey = '__INITIAL_STATE__'
+    } = options || {}
+    return context[contextKey]
+      ? `<script>window.${windowKey}=${
+          serialize(context[contextKey], { isJSON: true })
         }</script>`
       : ''
   }
@@ -162,25 +216,11 @@ export default class TemplateRenderer {
     }
   }
 
-  getUsedAsyncFiles (context: Object, raw?: boolean): ?Array<string> {
-    if (!context._mappedfiles && context._evaluatedFiles && this.mapFiles) {
-      let mapped = this.mapFiles(Object.keys(context._evaluatedFiles))
-      context._rawMappedFiles = mapped
-      // if a file has a no-css version (produced by vue-ssr-webpack-plugin),
-      // we should use that instead.
-      const noCssHash = this.clientManifest && this.clientManifest.hasNoCssVersion
-      if (noCssHash) {
-        mapped = mapped.map(file => {
-          return noCssHash[file]
-            ? file.replace(JS_RE, '.no-css.js')
-            : file
-        })
-      }
-      context._mappedFiles = mapped
+  getUsedAsyncFiles (context: Object): ?Array<string> {
+    if (!context._mappedfiles && context._registeredComponents && this.mapFiles) {
+      context._mappedFiles = this.mapFiles(Array.from(context._registeredComponents))
     }
-    return raw
-      ? context._rawMappedFiles
-      : context._mappedFiles
+    return context._mappedFiles
   }
 
   // create a transform stream

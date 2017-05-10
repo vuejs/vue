@@ -1,17 +1,16 @@
 /* @flow */
 
 import VNode from './vnode'
-import { createElement } from './create-element'
-import { resolveConstructorOptions } from '../instance/init'
-import { resolveSlots } from '../instance/render-helpers/resolve-slots'
+import { resolveConstructorOptions } from 'core/instance/init'
+import { queueActivatedComponent } from 'core/observer/scheduler'
+import { createFunctionalComponent } from './create-functional-component'
 
 import {
   warn,
   isDef,
   isUndef,
   isTrue,
-  isObject,
-  validateProp
+  isObject
 } from '../util/index'
 
 import {
@@ -63,21 +62,32 @@ const componentVNodeHooks = {
   },
 
   insert (vnode: MountedComponentVNode) {
-    if (!vnode.componentInstance._isMounted) {
-      vnode.componentInstance._isMounted = true
-      callHook(vnode.componentInstance, 'mounted')
+    const { context, componentInstance } = vnode
+    if (!componentInstance._isMounted) {
+      componentInstance._isMounted = true
+      callHook(componentInstance, 'mounted')
     }
     if (vnode.data.keepAlive) {
-      activateChildComponent(vnode.componentInstance, true /* direct */)
+      if (context._isMounted) {
+        // vue-router#1212
+        // During updates, a kept-alive component's child components may
+        // change, so directly walking the tree here may call activated hooks
+        // on incorrect children. Instead we push them into a queue which will
+        // be processed after the whole patch process ended.
+        queueActivatedComponent(componentInstance)
+      } else {
+        activateChildComponent(componentInstance, true /* direct */)
+      }
     }
   },
 
   destroy (vnode: MountedComponentVNode) {
-    if (!vnode.componentInstance._isDestroyed) {
+    const { componentInstance } = vnode
+    if (!componentInstance._isDestroyed) {
       if (!vnode.data.keepAlive) {
-        vnode.componentInstance.$destroy()
+        componentInstance.$destroy()
       } else {
-        deactivateChildComponent(vnode.componentInstance, true /* direct */)
+        deactivateChildComponent(componentInstance, true /* direct */)
       }
     }
   }
@@ -86,7 +96,7 @@ const componentVNodeHooks = {
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
 export function createComponent (
-  Ctor: any,
+  Ctor: Class<Component> | Function | Object | void,
   data?: VNodeData,
   context: Component,
   children: ?Array<VNode>,
@@ -163,40 +173,6 @@ export function createComponent (
     data, undefined, undefined, undefined, context,
     { Ctor, propsData, listeners, tag, children }
   )
-  return vnode
-}
-
-function createFunctionalComponent (
-  Ctor: Class<Component>,
-  propsData: ?Object,
-  data: VNodeData,
-  context: Component,
-  children: ?Array<VNode>
-): VNode | void {
-  const props = {}
-  const propOptions = Ctor.options.props
-  if (isDef(propOptions)) {
-    for (const key in propOptions) {
-      props[key] = validateProp(key, propOptions, propsData)
-    }
-  }
-  // ensure the createElement function in functional components
-  // gets a unique context - this is necessary for correct named slot check
-  const _context = Object.create(context)
-  const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
-  const vnode = Ctor.options.render.call(null, h, {
-    props,
-    data,
-    parent: context,
-    children,
-    slots: () => resolveSlots(children, context)
-  })
-  if (vnode instanceof VNode) {
-    vnode.functionalContext = context
-    if (data.slot) {
-      (vnode.data || (vnode.data = {})).slot = data.slot
-    }
-  }
   return vnode
 }
 

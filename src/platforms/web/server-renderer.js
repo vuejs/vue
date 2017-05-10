@@ -2,11 +2,12 @@
 
 process.env.VUE_ENV = 'server'
 
+import modules from './server/modules/index'
+import baseDirectives from './server/directives/index'
+import { isUnaryTag, canBeLeftOpenTag } from './compiler/util'
+
 import { createRenderer as _createRenderer } from 'server/create-renderer'
 import { createBundleRendererCreator } from 'server/bundle-renderer/create-bundle-renderer'
-import { isUnaryTag, canBeLeftOpenTag } from 'web/compiler/util'
-import modules from 'web/server/modules/index'
-import baseDirectives from 'web/server/directives/index'
 
 export function createRenderer (options?: Object = {}): {
   renderToString: Function,

@@ -35,3 +35,9 @@ declare module 'serialize-javascript' {
     (input: string, options: { isJSON: boolean }): string
   }
 }
+
+declare module 'lodash.template' {
+  declare var exports: {
+    (input: string, options: { interpolate: RegExp, escape: RegExp }): Function
+  }
+}

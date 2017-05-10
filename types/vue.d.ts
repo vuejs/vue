@@ -84,6 +84,7 @@ export declare class Vue {
   static set<T>(object: Object, key: string, value: T): T;
   static set<T>(array: T[], key: number, value: T): T;
   static delete(object: Object, key: string): void;
+  static delete<T>(array: T[], key: number): void;
 
   static directive(
     id: string,

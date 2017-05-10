@@ -6,7 +6,7 @@ export function initUse (Vue: GlobalAPI) {
   Vue.use = function (plugin: Function | Object) {
     /* istanbul ignore if */
     if (plugin.installed) {
-      return
+      return this
     }
     // additional parameters
     const args = toArray(arguments, 1)

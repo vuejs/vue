@@ -4,11 +4,11 @@ import RenderStream from './render-stream'
 import TemplateRenderer from './template-renderer/index'
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
-import type { ClientManifest, ServerManifest } from './template-renderer/index'
+import type { ClientManifest } from './template-renderer/index'
 
 export type Renderer = {
-  renderToString: (component: Component, cb: (err: ?Error, res: ?string) => void) => void;
-  renderToStream: (component: Component) => stream$Readable;
+  renderToString: (component: Component, context: any, cb: any) => void;
+  renderToStream: (component: Component, context?: Object) => stream$Readable;
 };
 
 type RenderCache = {
@@ -23,10 +23,11 @@ export type RenderOptions = {
   isUnaryTag?: Function;
   cache?: RenderCache;
   template?: string;
+  inject?: boolean;
   basedir?: string;
   shouldPreload?: Function;
-  serverManifest?: ServerManifest;
   clientManifest?: ClientManifest;
+  runInNewContext?: boolean | 'once';
 };
 
 export function createRenderer ({
@@ -34,34 +35,39 @@ export function createRenderer ({
   directives = {},
   isUnaryTag = (() => false),
   template,
+  inject,
   cache,
   shouldPreload,
-  serverManifest,
   clientManifest
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
   const templateRenderer = new TemplateRenderer({
     template,
+    inject,
     shouldPreload,
-    serverManifest,
     clientManifest
   })
 
   return {
     renderToString (
       component: Component,
-      done: (err: ?Error, res: ?string) => any,
-      context?: ?Object
+      context: any,
+      done: any
     ): void {
-      if (!template && context && clientManifest) {
-        exposeAssetRenderFns(context, templateRenderer)
+      if (typeof context === 'function') {
+        done = context
+        context = {}
+      }
+      if (context) {
+        templateRenderer.bindRenderFns(context)
       }
       let result = ''
       const write = createWriteFunction(text => {
         result += text
+        return false
       }, done)
       try {
-        render(component, write, () => {
+        render(component, write, context, () => {
           if (template) {
             result = templateRenderer.renderSync(result, context)
           }
@@ -74,15 +80,15 @@ export function createRenderer ({
 
     renderToStream (
       component: Component,
-      context?: ?Object
+      context?: Object
     ): stream$Readable {
+      if (context) {
+        templateRenderer.bindRenderFns(context)
+      }
       const renderStream = new RenderStream((write, done) => {
-        render(component, write, done)
+        render(component, write, context, done)
       })
       if (!template) {
-        if (context && clientManifest) {
-          exposeAssetRenderFns(context, templateRenderer)
-        }
         return renderStream
       } else {
         const templateStream = templateRenderer.createStream(context)
@@ -94,12 +100,4 @@ export function createRenderer ({
       }
     }
   }
-}
-
-// Expose preload/prefetch and script render fns when client manifest is
-// available.
-function exposeAssetRenderFns (context: Object, renderer: TemplateRenderer) {
-  context.renderPreloadLinks = renderer.renderPreloadLinks.bind(renderer, context)
-  context.renderPrefetchLinks = renderer.renderPrefetchLinks.bind(renderer, context)
-  context.renderScripts = renderer.renderScripts.bind(renderer, context)
 }

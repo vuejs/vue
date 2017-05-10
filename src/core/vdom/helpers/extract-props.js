@@ -3,6 +3,8 @@
 import {
   tip,
   hasOwn,
+  isDef,
+  isUndef,
   hyphenate,
   formatComponentName
 } from 'core/util/index'
@@ -16,19 +18,19 @@ export function extractPropsFromVNodeData (
   // validation and default values are handled in the child
   // component itself.
   const propOptions = Ctor.options.props
-  if (!propOptions) {
+  if (isUndef(propOptions)) {
     return
   }
   const res = {}
-  const { attrs, props, domProps } = data
-  if (attrs || props || domProps) {
+  const { attrs, props } = data
+  if (isDef(attrs) || isDef(props)) {
     for (const key in propOptions) {
       const altKey = hyphenate(key)
       if (process.env.NODE_ENV !== 'production') {
         const keyInLowerCase = key.toLowerCase()
         if (
           key !== keyInLowerCase &&
-          attrs && attrs.hasOwnProperty(keyInLowerCase)
+          attrs && hasOwn(attrs, keyInLowerCase)
         ) {
           tip(
             `Prop "${keyInLowerCase}" is passed to component ` +
@@ -41,8 +43,7 @@ export function extractPropsFromVNodeData (
         }
       }
       checkProp(res, props, key, altKey, true) ||
-      checkProp(res, attrs, key, altKey) ||
-      checkProp(res, domProps, key, altKey)
+      checkProp(res, attrs, key, altKey, false)
     }
   }
   return res
@@ -53,9 +54,9 @@ function checkProp (
   hash: ?Object,
   key: string,
   altKey: string,
-  preserve?: boolean
+  preserve: boolean
 ): boolean {
-  if (hash) {
+  if (isDef(hash)) {
     if (hasOwn(hash, key)) {
       res[key] = hash[key]
       if (!preserve) {
