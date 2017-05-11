@@ -5,13 +5,13 @@ export default function testObjectOption (name: string) {
     const options = {}
     options[name] = () => {}
     new Vue(options)
-    expect(`${name} should be an object`).toHaveBeenWarned()
+    expect(`component option "${name}" should be an object`).toHaveBeenWarned()
   })
 
   it('don\'t warn when is an object', () => {
     const options = {}
     options[name] = {}
     new Vue(options)
-    expect(`${name} should be an object`).not.toHaveBeenWarned()
+    expect(`component option "${name}" should be an object`).not.toHaveBeenWarned()
   })
 }
