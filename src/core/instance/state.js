@@ -64,7 +64,7 @@ function checkOptionType (vm: Component, name: string) {
   const option = vm.$options[name]
   if (!isPlainObject(option)) {
     warn(
-      `${name} should be an object.`,
+      `component option "${name}" should be an object.`,
       vm
     )
   }
