@@ -13,6 +13,7 @@ class Test extends Vue {
     this.$refs;
     this.$slots;
     this.$isServer;
+    this.$ssrContext;
   }
 
   // test property reification
