@@ -412,7 +412,7 @@ export function createPatchFunction (backend) {
           if (sameVnode(elmToMove, newStartVnode)) {
             patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
             oldCh[idxInOld] = undefined
-            canMove && nodeOps.insertBefore(parentElm, newStartVnode.elm, oldStartVnode.elm)
+            canMove && nodeOps.insertBefore(parentElm, elmToMove.elm, oldStartVnode.elm)
             newStartVnode = newCh[++newStartIdx]
           } else {
             // same key but different element. treat as new element
