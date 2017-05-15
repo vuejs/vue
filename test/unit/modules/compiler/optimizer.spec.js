@@ -55,18 +55,21 @@ describe('optimizer', () => {
   })
 
   it('v-if directive', () => {
-    const ast = parse('<h1 id="section1" v-if="show">hello world</h1>', baseOptions)
+    const ast = parse('<div id="section1" v-if="show"><p><span>hello world</span></p></div>', baseOptions)
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(true)
   })
 
   it('v-else directive', () => {
-    const ast = parse('<div><p v-if="show">hello world</p><p v-else>foo bar</p></div>', baseOptions)
+    const ast = parse('<div><p v-if="show">hello world</p><div v-else><p><span>foo bar</span></p></div></div>', baseOptions)
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(false)
-    expect(ast.children[0].ifConditions[1].block.static).toBeUndefined()
+    expect(ast.children[0].ifConditions[0].block.static).toBe(false)
+    expect(ast.children[0].ifConditions[1].block.static).toBe(false)
+    expect(ast.children[0].ifConditions[0].block.children[0].static).toBe(true)
+    expect(ast.children[0].ifConditions[1].block.children[0].static).toBe(true)
   })
 
   it('v-pre directive', () => {
