@@ -132,6 +132,10 @@ declare type ASTElement = {
   onceProcessed?: boolean;
   wrapData?: (code: string) => string;
 
+  // 2.4 ssr optimization
+  ssrOptimizable?: boolean;
+  ssrOptimizableRoot?: boolean;
+
   // weex specific
   appendAsTree?: boolean;
 }
@@ -141,12 +145,18 @@ declare type ASTExpression = {
   expression: string;
   text: string;
   static?: boolean;
+  // 2.4 ssr optimization
+  ssrOptimizable?: boolean;
+  ssrOptimizableRoot?: boolean;
 }
 
 declare type ASTText = {
   type: 3;
   text: string;
   static?: boolean;
+  // 2.4 ssr optimization
+  ssrOptimizable?: boolean;
+  ssrOptimizableRoot?: boolean;
 }
 
 // SFC-parser related declarations

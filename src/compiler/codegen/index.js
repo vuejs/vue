@@ -9,7 +9,7 @@ type TransformFunction = (el: ASTElement, code: string) => string;
 type DataGenFunction = (el: ASTElement) => string;
 type DirectiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean;
 
-class CodegenState {
+export class CodegenState {
   options: CompilerOptions;
   warn: Function;
   transforms: Array<TransformFunction>;
@@ -19,7 +19,7 @@ class CodegenState {
   onceId: number;
   staticRenderFns: Array<string>;
 
-  constructor (options = {}) {
+  constructor (options: CompilerOptions) {
     this.options = options
     this.warn = options.warn || baseWarn
     this.transforms = pluckModuleFunction(options.modules, 'transformCode')
@@ -32,13 +32,15 @@ class CodegenState {
   }
 }
 
+type CodegenResult = {
+  render: string,
+  staticRenderFns: Array<string>
+};
+
 export function generate (
   ast: ASTElement | void,
   options: CompilerOptions
-): {
-  render: string,
-  staticRenderFns: Array<string>
-} {
+): CodegenResult {
   const state = new CodegenState(options)
   const code = ast ? genElement(ast, state) : '_c("div")'
   return {
