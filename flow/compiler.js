@@ -18,20 +18,16 @@ declare type CompilerOptions = {
 
   // runtime user-configurable
   delimiters?: [string, string]; // template delimiters
-}
+};
 
 declare type CompiledResult = {
   ast: ?ASTElement;
   render: string;
   staticRenderFns: Array<string>;
+  stringRenderFns?: Array<string>;
   errors?: Array<string>;
   tips?: Array<string>;
-}
-
-declare type CompiledFunctionResult = {
-  render: Function;
-  staticRenderFns: Array<Function>;
-}
+};
 
 declare type ModuleOptions = {
   preTransformNode: (el: ASTElement) => void;
@@ -40,19 +36,19 @@ declare type ModuleOptions = {
   genData: (el: ASTElement) => string; // generate extra data string for an element
   transformCode?: (el: ASTElement, code: string) => string; // further transform generated code for an element
   staticKeys?: Array<string>; // AST properties to be considered static
-}
+};
 
-declare type ASTModifiers = { [key: string]: boolean }
-declare type ASTIfConditions = Array<{ exp: ?string; block: ASTElement }>
+declare type ASTModifiers = { [key: string]: boolean };
+declare type ASTIfConditions = Array<{ exp: ?string; block: ASTElement }>;
 
 declare type ASTElementHandler = {
   value: string;
   modifiers: ?ASTModifiers;
-}
+};
 
 declare type ASTElementHandlers = {
   [key: string]: ASTElementHandler | Array<ASTElementHandler>;
-}
+};
 
 declare type ASTDirective = {
   name: string;
@@ -60,9 +56,9 @@ declare type ASTDirective = {
   value: string;
   arg: ?string;
   modifiers: ?ASTModifiers;
-}
+};
 
-declare type ASTNode = ASTElement | ASTText | ASTExpression
+declare type ASTNode = ASTElement | ASTText | ASTExpression;
 
 declare type ASTElement = {
   type: 1;
@@ -138,7 +134,7 @@ declare type ASTElement = {
 
   // weex specific
   appendAsTree?: boolean;
-}
+};
 
 declare type ASTExpression = {
   type: 2;
@@ -148,7 +144,7 @@ declare type ASTExpression = {
   // 2.4 ssr optimization
   ssrOptimizable?: boolean;
   ssrOptimizableRoot?: boolean;
-}
+};
 
 declare type ASTText = {
   type: 3;
@@ -157,7 +153,7 @@ declare type ASTText = {
   // 2.4 ssr optimization
   ssrOptimizable?: boolean;
   ssrOptimizableRoot?: boolean;
-}
+};
 
 // SFC-parser related declarations
 
@@ -176,7 +172,7 @@ declare type SFCCustomBlock = {
   end?: number;
   src?: string;
   attrs: {[attribute:string]: string};
-}
+};
 
 declare type SFCBlock = {
   type: string;
@@ -187,4 +183,4 @@ declare type SFCBlock = {
   src?: string;
   scoped?: boolean;
   module?: string | boolean;
-}
+};

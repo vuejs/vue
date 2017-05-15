@@ -110,4 +110,4 @@ declare interface Component {
 
   // allow dynamic method registration
   [key: string]: any
-}
+};
