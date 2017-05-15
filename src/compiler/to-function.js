@@ -3,6 +3,12 @@
 import { noop } from 'shared/util'
 import { warn, tip } from 'core/util/debug'
 
+type CompiledFunctionResult = {
+  render: Function;
+  staticRenderFns: Array<Function>;
+  stringRenderFns?: Array<Function>;
+};
+
 function createFunction (code, errors) {
   try {
     return new Function(code)
@@ -71,10 +77,14 @@ export function createCompileToFunctionFn (compile: Function): Function {
     const res = {}
     const fnGenErrors = []
     res.render = createFunction(compiled.render, fnGenErrors)
-    const l = compiled.staticRenderFns.length
-    res.staticRenderFns = new Array(l)
-    for (let i = 0; i < l; i++) {
-      res.staticRenderFns[i] = createFunction(compiled.staticRenderFns[i], fnGenErrors)
+    res.staticRenderFns = compiled.staticRenderFns.map(code => {
+      return createFunction(code, fnGenErrors)
+    })
+    // ssr-specific
+    if (res.stringRenderFns) {
+      res.stringRenderFns = compiled.stringRenderFns.map(code => {
+        return createFunction(code, fnGenErrors)
+      })
     }
 
     // check function generation errors.
