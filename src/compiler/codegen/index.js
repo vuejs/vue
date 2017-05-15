@@ -49,7 +49,7 @@ export function generate (
   }
 }
 
-function genElement (el: ASTElement, state: CodegenState): string {
+export function genElement (el: ASTElement, state: CodegenState): string {
   if (el.staticRoot && !el.staticProcessed) {
     return genStatic(el, state)
   } else if (el.once && !el.onceProcessed) {
