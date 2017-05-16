@@ -10,7 +10,7 @@
  */
 
 import { makeMap, no } from 'shared/util'
-import { isNonPhrasingTag, canBeLeftOpenTag } from 'web/compiler/util'
+import { isNonPhrasingTag } from 'web/compiler/util'
 
 // Regular Expressions for parsing tags and attributes
 const singleAttrIdentifier = /([^\s"'<>/=]+)/
@@ -46,7 +46,7 @@ let IS_REGEX_CAPTURING_BROKEN = false
 })
 
 // Special Elements (can contain anything)
-const isScriptOrStyle = makeMap('script,style', true)
+export const isPlainTextElement = makeMap('script,style,textarea', true)
 const reCache = {}
 
 const decodingMap = {
@@ -68,12 +68,13 @@ export function parseHTML (html, options) {
   const stack = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
+  const canBeLeftOpenTag = options.canBeLeftOpenTag || no
   let index = 0
   let last, lastTag
   while (html) {
     last = html
-    // Make sure we're not in a script or style element
-    if (!lastTag || !isScriptOrStyle(lastTag)) {
+    // Make sure we're not in a plaintext content element like script/style
+    if (!lastTag || !isPlainTextElement(lastTag)) {
       let textEnd = html.indexOf('<')
       if (textEnd === 0) {
         // Comment:
@@ -153,7 +154,7 @@ export function parseHTML (html, options) {
       var endTagLength = 0
       var rest = html.replace(reStackedTag, function (all, text, endTag) {
         endTagLength = endTag.length
-        if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
+        if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
           text = text
             .replace(/<!--([\s\S]*?)-->/g, '$1')
             .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1')

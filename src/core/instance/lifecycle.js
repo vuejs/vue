@@ -1,8 +1,8 @@
 /* @flow */
 
 import config from '../config'
-import { perf } from '../util/perf'
 import Watcher from '../observer/watcher'
+import { mark, measure } from '../util/perf'
 import { createEmptyVNode } from '../vdom/vnode'
 import { observerState } from '../observer/index'
 import { updateComponentListeners } from './events'
@@ -119,6 +119,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     // call the last hook...
     vm._isDestroyed = true
+    // invoke destroy hooks on current rendered tree
+    vm.__patch__(vm._vnode, null)
+    // fire destroyed hook
     callHook(vm, 'destroyed')
     // turn off all instance listeners.
     vm.$off()
@@ -126,8 +129,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm.$el) {
       vm.$el.__vue__ = null
     }
-    // invoke destroy hooks on current rendered tree
-    vm.__patch__(vm._vnode, null)
+    // remove reference to DOM nodes (prevents leak)
+    vm.$options._parentElm = vm.$options._refElm = null
   }
 }
 
@@ -141,10 +144,11 @@ export function mountComponent (
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
       /* istanbul ignore if */
-      if (vm.$options.template && vm.$options.template.charAt(0) !== '#') {
+      if ((vm.$options.template && vm.$options.template.charAt(0) !== '#') ||
+        vm.$options.el || el) {
         warn(
           'You are using the runtime-only build of Vue where the template ' +
-          'option is not available. Either pre-compile the templates into ' +
+          'compiler is not available. Either pre-compile the templates into ' +
           'render functions, or use the compiler-included build.',
           vm
         )
@@ -160,19 +164,22 @@ export function mountComponent (
 
   let updateComponent
   /* istanbul ignore if */
-  if (process.env.NODE_ENV !== 'production' && config.performance && perf) {
+  if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
     updateComponent = () => {
       const name = vm._name
-      const startTag = `start ${name}`
-      const endTag = `end ${name}`
-      perf.mark(startTag)
+      const id = vm._uid
+      const startTag = `vue-perf-start:${id}`
+      const endTag = `vue-perf-end:${id}`
+
+      mark(startTag)
       const vnode = vm._render()
-      perf.mark(endTag)
-      perf.measure(`${name} render`, startTag, endTag)
-      perf.mark(startTag)
+      mark(endTag)
+      measure(`${name} render`, startTag, endTag)
+
+      mark(startTag)
       vm._update(vnode, hydrating)
-      perf.mark(endTag)
-      perf.measure(`${name} patch`, startTag, endTag)
+      mark(endTag)
+      measure(`${name} patch`, startTag, endTag)
     }
   } else {
     updateComponent = () => {
@@ -263,7 +270,7 @@ export function activateChildComponent (vm: Component, direct?: boolean) {
   } else if (vm._directInactive) {
     return
   }
-  if (vm._inactive || vm._inactive == null) {
+  if (vm._inactive || vm._inactive === null) {
     vm._inactive = false
     for (let i = 0; i < vm.$children.length; i++) {
       activateChildComponent(vm.$children[i])

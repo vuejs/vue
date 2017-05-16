@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://circleci.com/gh/vuejs/vue/tree/dev"><img src="https://img.shields.io/circleci/project/vuejs/vue/dev.svg" alt="Build Status"></a>
   <a href="https://codecov.io/github/vuejs/vue?branch=dev"><img src="https://img.shields.io/codecov/c/github/vuejs/vue/dev.svg" alt="Coverage Status"></a>
-  <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/dt/vue.svg" alt="Downloads"></a>
+  <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/dm/vue.svg" alt="Downloads"></a>
   <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/v/vue.svg" alt="Version"></a>
   <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/l/vue.svg" alt="License"></a>
   <br>
@@ -17,8 +17,16 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
 <p align="center">
   <b>Special thanks to the generous sponsorship by:</b>
   <br><br>
-  <a href="http://www.thedifferenceengine.io/">
-    <img width="300px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tde.png">
+  <a href="https://stdlib.com">
+    <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
+  </a>
+  <br><br>
+  <a href="https://www.upyun.com/?utm_source=vue&utm_medium=ad&utm_content=github">
+    <img width="160px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/upyun-small.png">
+  </a>
+  <br><br>
+  <a href="https://deepstreamhub.com" target="_blank">
+    <img width="140px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/deepstream.png">
   </a>
   <br><br>
   <a href="https://jsfiddle.net/">
@@ -61,8 +69,16 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
     <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
   </a>
   <br><br>
-  <a href="https://stdlib.com/" target="_blank">
-    <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
+  <a href="https://famebroker.com" target="_blank">
+    <img width="130px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/famebroker.png">
+  </a>
+  <br><br>
+  <a href="https://fancygrid.com" target="_blank">
+    <img width="120px" src="http://fancygrid.com/logo/logo.png">
+  </a>
+  <br><br>
+  <a href="https://component.io/" target="_blank">
+    <img width="130px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/component_io.png">
   </a>
 </p>
 
@@ -70,7 +86,7 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
 
 Vue.js is a library for building interactive web interfaces. It provides data-reactive components with a simple and flexible API. Core features include:
 
-- [Declarative rendering with a plain JavaScript object based reactivity system.](https://vuejs.org/guide/index.html#Declarative-Rendering)
+- [Declarative rendering with a plain JavaScript object based reactivity system](https://vuejs.org/guide/index.html#Declarative-Rendering)
 - [Component-oriented development style with tooling support](https://vuejs.org/guide/index.html#Composing-with-Components)
 - Lean and extensible core
 - [Flexible transition effect system](https://vuejs.org/guide/transitions.html)
@@ -96,7 +112,7 @@ Details changes for each release are documented in the [release notes](https://g
 
 ## Stay In Touch
 
-- For latest releases and announcements, follow on Twitter: [@vuejs](https://twitter.com/vuejs)
+For the latest releases and announcements, follow on Twitter: [@vuejs](https://twitter.com/vuejs)
 
 ## License
 

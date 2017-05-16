@@ -6,6 +6,7 @@ import { initMixin } from './mixin'
 import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
 import { set, del } from '../observer/index'
+import { ASSET_TYPES } from 'shared/constants'
 import builtInComponents from '../components/index'
 
 import {
@@ -44,7 +45,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   Vue.nextTick = nextTick
 
   Vue.options = Object.create(null)
-  config._assetTypes.forEach(type => {
+  ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
   })
 

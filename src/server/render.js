@@ -1,9 +1,13 @@
 /* @flow */
 
-import { escape } from 'he'
+const { escape } = require('he')
+
+import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
 import { compileToFunctions } from 'web/compiler/index'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
+
+import { isDef, isUndef, isTrue } from 'shared/util'
 
 let warned = Object.create(null)
 const warnOnce = msg => {
@@ -16,7 +20,7 @@ const warnOnce = msg => {
 const compilationCache = Object.create(null)
 const normalizeRender = vm => {
   const { render, template } = vm.$options
-  if (!render) {
+  if (isUndef(render)) {
     if (template) {
       const renderFns = (
         compilationCache[template] ||
@@ -34,64 +38,116 @@ const normalizeRender = vm => {
 }
 
 function renderNode (node, isRoot, context) {
-  const { write, next } = context
-  if (node.componentOptions) {
-    // check cache hit
-    const Ctor = node.componentOptions.Ctor
-    const getKey = Ctor.options.serverCacheKey
-    const name = Ctor.options.name
-    const cache = context.cache
-    if (getKey && cache && name) {
-      const key = name + '::' + getKey(node.componentOptions.propsData)
-      const { has, get } = context
-      if (has) {
-        has(key, hit => {
-          if (hit && get) {
-            get(key, res => write(res, next))
-          } else {
-            renderComponentWithCache(node, isRoot, key, context)
-          }
-        })
-      } else if (get) {
-        get(key, res => {
-          if (res) {
-            write(res, next)
-          } else {
-            renderComponentWithCache(node, isRoot, key, context)
-          }
-        })
-      }
-    } else {
-      if (getKey && !cache) {
-        warnOnce(
-          `[vue-server-renderer] Component ${
-            Ctor.options.name || '(anonymous)'
-          } implemented serverCacheKey, ` +
-          'but no cache was provided to the renderer.'
-        )
-      }
-      if (getKey && !name) {
-        warnOnce(
-          `[vue-server-renderer] Components that implement "serverCacheKey" ` +
-          `must also define a unique "name" option.`
-        )
-      }
-      renderComponent(node, isRoot, context)
-    }
+  if (isDef(node.componentOptions)) {
+    renderComponent(node, isRoot, context)
   } else {
-    if (node.tag) {
+    if (isDef(node.tag)) {
       renderElement(node, isRoot, context)
-    } else if (node.isComment) {
-      write(`<!--${node.text}-->`, next)
+    } else if (isTrue(node.isComment)) {
+      context.write(
+        `<!--${node.text}-->`,
+        context.next
+      )
     } else {
-      write(node.raw ? node.text : escape(String(node.text)), next)
+      context.write(
+        node.raw ? node.text : escape(String(node.text)),
+        context.next
+      )
     }
   }
 }
 
 function renderComponent (node, isRoot, context) {
+  const { write, next, userContext } = context
+
+  // check cache hit
+  const Ctor = node.componentOptions.Ctor
+  const getKey = Ctor.options.serverCacheKey
+  const name = Ctor.options.name
+
+  // exposed by vue-loader, need to call this if cache hit because
+  // component lifecycle hooks will not be called.
+  const registerComponent = Ctor.options._ssrRegister
+  if (write.caching && isDef(registerComponent)) {
+    write.componentBuffer[write.componentBuffer.length - 1].add(registerComponent)
+  }
+
+  const cache = context.cache
+  if (isDef(getKey) && isDef(cache) && isDef(name)) {
+    const key = name + '::' + getKey(node.componentOptions.propsData)
+    const { has, get } = context
+    if (isDef(has)) {
+      (has: any)(key, hit => {
+        if (hit === true && isDef(get)) {
+          (get: any)(key, res => {
+            if (isDef(registerComponent)) {
+              registerComponent(userContext)
+            }
+            res.components.forEach(register => register(userContext))
+            write(res.html, next)
+          })
+        } else {
+          renderComponentWithCache(node, isRoot, key, context)
+        }
+      })
+    } else if (isDef(get)) {
+      (get: any)(key, res => {
+        if (isDef(res)) {
+          if (isDef(registerComponent)) {
+            registerComponent(userContext)
+          }
+          res.components.forEach(register => register(userContext))
+          write(res.html, next)
+        } else {
+          renderComponentWithCache(node, isRoot, key, context)
+        }
+      })
+    }
+  } else {
+    if (isDef(getKey) && isUndef(cache)) {
+      warnOnce(
+        `[vue-server-renderer] Component ${
+          Ctor.options.name || '(anonymous)'
+        } implemented serverCacheKey, ` +
+        'but no cache was provided to the renderer.'
+      )
+    }
+    if (isDef(getKey) && isUndef(name)) {
+      warnOnce(
+        `[vue-server-renderer] Components that implement "serverCacheKey" ` +
+        `must also define a unique "name" option.`
+      )
+    }
+    renderComponentInner(node, isRoot, context)
+  }
+}
+
+function renderComponentWithCache (node, isRoot, key, context) {
+  const write = context.write
+  write.caching = true
+  const buffer = write.cacheBuffer
+  const bufferIndex = buffer.push('') - 1
+  const componentBuffer = write.componentBuffer
+  componentBuffer.push(new Set())
+  context.renderStates.push({
+    type: 'ComponentWithCache',
+    key,
+    buffer,
+    bufferIndex,
+    componentBuffer
+  })
+  renderComponentInner(node, isRoot, context)
+}
+
+function renderComponentInner (node, isRoot, context) {
   const prevActive = context.activeInstance
-  const child = context.activeInstance = createComponentInstanceForVnode(node, context.activeInstance)
+  // expose userContext on vnode
+  node.ssrContext = context.userContext
+  const child = context.activeInstance = createComponentInstanceForVnode(
+    node,
+    context.activeInstance
+  )
+  node.ssrContext = null
   normalizeRender(child)
   const childNode = child._render()
   childNode.parent = node
@@ -102,30 +158,18 @@ function renderComponent (node, isRoot, context) {
   renderNode(childNode, isRoot, context)
 }
 
-function renderComponentWithCache (node, isRoot, key, context) {
-  const write = context.write
-  write.caching = true
-  const buffer = write.cacheBuffer
-  const bufferIndex = buffer.push('') - 1
-  context.renderStates.push({
-    type: 'ComponentWithCache',
-    buffer, bufferIndex, key
-  })
-  renderComponent(node, isRoot, context)
-}
-
 function renderElement (el, isRoot, context) {
-  if (isRoot) {
+  if (isTrue(isRoot)) {
     if (!el.data) el.data = {}
     if (!el.data.attrs) el.data.attrs = {}
-    el.data.attrs['server-rendered'] = 'true'
+    el.data.attrs[SSR_ATTR] = 'true'
   }
   const startTag = renderStartingTag(el, context)
   const endTag = `</${el.tag}>`
   const { write, next } = context
   if (context.isUnaryTag(el.tag)) {
     write(startTag, next)
-  } else if (!el.children || !el.children.length) {
+  } else if (isUndef(el.children) || el.children.length === 0) {
     write(startTag + endTag, next)
   } else {
     const children: Array<VNode> = el.children
@@ -141,7 +185,23 @@ function renderElement (el, isRoot, context) {
 
 function hasAncestorData (node: VNode) {
   const parentNode = node.parent
-  return parentNode && (parentNode.data || hasAncestorData(parentNode))
+  return isDef(parentNode) && (isDef(parentNode.data) || hasAncestorData(parentNode))
+}
+
+function getVShowDirectiveInfo (node: VNode): ?VNodeDirective {
+  let dir: VNodeDirective
+  let tmp
+
+  while (isDef(node)) {
+    if (node.data && node.data.directives) {
+      tmp = node.data.directives.find(dir => dir.name === 'show')
+      if (tmp) {
+        dir = tmp
+      }
+    }
+    node = node.parent
+  }
+  return dir
 }
 
 function renderStartingTag (node: VNode, context) {
@@ -150,22 +210,30 @@ function renderStartingTag (node: VNode, context) {
 
   // construct synthetic data for module processing
   // because modules like style also produce code by parent VNode data
-  if (!node.data && hasAncestorData(node)) {
+  if (isUndef(node.data) && hasAncestorData(node)) {
     node.data = {}
   }
-  if (node.data) {
+  if (isDef(node.data)) {
     // check directives
     const dirs = node.data.directives
     if (dirs) {
       for (let i = 0; i < dirs.length; i++) {
-        const dirRenderer = directives[dirs[i].name]
-        if (dirRenderer) {
+        const name = dirs[i].name
+        const dirRenderer = directives[name]
+        if (dirRenderer && name !== 'show') {
           // directives mutate the node's data
           // which then gets rendered by modules
           dirRenderer(node, dirs[i])
         }
       }
     }
+
+    // v-show directive needs to be merged from parent to child
+    const vshowDirectiveInfo = getVShowDirectiveInfo(node)
+    if (vshowDirectiveInfo) {
+      directives.show(node, vshowDirectiveInfo)
+    }
+
     // apply other modules
     for (let i = 0; i < modules.length; i++) {
       const res = modules[i](node)
@@ -177,13 +245,13 @@ function renderStartingTag (node: VNode, context) {
   // attach scoped CSS ID
   let scopeId
   const activeInstance = context.activeInstance
-  if (activeInstance &&
+  if (isDef(activeInstance) &&
       activeInstance !== node.context &&
-      (scopeId = activeInstance.$options._scopeId)) {
-    markup += ` ${scopeId}`
+      isDef(scopeId = activeInstance.$options._scopeId)) {
+    markup += ` ${(scopeId: any)}`
   }
-  while (node) {
-    if ((scopeId = node.context.$options._scopeId)) {
+  while (isDef(node)) {
+    if (isDef(scopeId = node.context.$options._scopeId)) {
       markup += ` ${scopeId}`
     }
     node = node.parent
@@ -200,11 +268,13 @@ export function createRenderFunction (
   return function render (
     component: Component,
     write: (text: string, next: Function) => void,
+    userContext: ?Object,
     done: Function
   ) {
     warned = Object.create(null)
     const context = new RenderContext({
       activeInstance: component,
+      userContext,
       write, done, renderNode,
       isUnaryTag, modules, directives,
       cache

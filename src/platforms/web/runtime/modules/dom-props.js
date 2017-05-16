@@ -1,9 +1,9 @@
 /* @flow */
 
-import { extend, toNumber } from 'shared/util'
+import { isDef, isUndef, extend, toNumber } from 'shared/util'
 
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  if (!oldVnode.data.domProps && !vnode.data.domProps) {
+  if (isUndef(oldVnode.data.domProps) && isUndef(vnode.data.domProps)) {
     return
   }
   let key, cur
@@ -11,12 +11,12 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const oldProps = oldVnode.data.domProps || {}
   let props = vnode.data.domProps || {}
   // clone observed objects, as the user probably wants to mutate it
-  if (props.__ob__) {
+  if (isDef(props.__ob__)) {
     props = vnode.data.domProps = extend({}, props)
   }
 
   for (key in oldProps) {
-    if (props[key] == null) {
+    if (isUndef(props[key])) {
       elm[key] = ''
     }
   }
@@ -68,10 +68,10 @@ function isDirty (elm: acceptValueElm, checkVal: string): boolean {
 function isInputChanged (elm: any, newVal: string): boolean {
   const value = elm.value
   const modifiers = elm._vModifiers // injected by v-model runtime
-  if ((modifiers && modifiers.number) || elm.type === 'number') {
+  if ((isDef(modifiers) && modifiers.number) || elm.type === 'number') {
     return toNumber(value) !== toNumber(newVal)
   }
-  if (modifiers && modifiers.trim) {
+  if (isDef(modifiers) && modifiers.trim) {
     return value.trim() !== newVal.trim()
   }
   return value !== newVal

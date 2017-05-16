@@ -29,7 +29,7 @@ describe('compile style', () => {
     expect(errors).toEqual([])
   })
 
-  it('should compile hyphanted style name & value', () => {
+  it('should compile hyphenated style name & value', () => {
     const { render, staticRenderFns, errors } = compile(`<div style="-abc-def: x-y; abc-def: x-y"></div>`)
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).not.toBeUndefined()

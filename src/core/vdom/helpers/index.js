@@ -1,9 +1,8 @@
 /* @flow */
 
 export * from './merge-hook'
+export * from './extract-props'
 export * from './update-listeners'
 export * from './normalize-children'
-
-export function getFirstComponentChild (children: ?Array<VNode>): ?VNode {
-  return children && children.filter((c: VNode) => c && c.componentOptions)[0]
-}
+export * from './resolve-async-component'
+export * from './get-first-component-child'

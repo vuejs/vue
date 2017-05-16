@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import { formatComponentName } from 'core/util/debug'
 
 const components = createErrorTestComponents()
 
@@ -7,10 +6,12 @@ describe('Error handling', () => {
   // hooks that prevents the component from rendering, but should not
   // break parent component
   ;[
+    ['data', 'data()'],
     ['render', 'render function'],
     ['beforeCreate', 'beforeCreate hook'],
     ['created', 'created hook'],
-    ['beforeMount', 'beforeMount hook']
+    ['beforeMount', 'beforeMount hook'],
+    ['directive bind', 'directive foo bind hook']
   ].forEach(([type, description]) => {
     it(`should recover from errors in ${type}`, done => {
       const vm = createTestInstance(components[type])
@@ -31,7 +32,8 @@ describe('Error handling', () => {
   // error in beforeUpdate/updated should affect neither child nor parent
   ;[
     ['beforeUpdate', 'beforeUpdate hook'],
-    ['updated', 'updated hook']
+    ['updated', 'updated hook'],
+    ['directive update', 'directive foo update hook']
   ].forEach(([type, description]) => {
     it(`should recover from errors in ${type} hook`, done => {
       const vm = createTestInstance(components[type])
@@ -44,7 +46,8 @@ describe('Error handling', () => {
 
   ;[
     ['beforeDestroy', 'beforeDestroy hook'],
-    ['destroyed', 'destroyed hook']
+    ['destroyed', 'destroyed hook'],
+    ['directive unbind', 'directive foo unbind hook']
   ].forEach(([type, description]) => {
     it(`should recover from errors in ${type} hook`, done => {
       const vm = createTestInstance(components[type])
@@ -102,31 +105,38 @@ describe('Error handling', () => {
     }).then(done)
   })
 
-  it('properly format component names', () => {
-    const vm = new Vue()
-    expect(formatComponentName(vm)).toBe('<Root>')
+  it('should capture and recover from nextTick errors', done => {
+    const err1 = new Error('nextTick')
+    const err2 = new Error('nextTick2')
+    const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
+    Vue.nextTick(() => { throw err1 })
+    Vue.nextTick(() => {
+      expect(spy).toHaveBeenCalledWith(err1, undefined, 'nextTick')
 
-    vm.$root = null
-    vm.$options.name = 'hello-there'
-    expect(formatComponentName(vm)).toBe('<HelloThere>')
-
-    vm.$options.name = null
-    vm.$options._componentTag = 'foo-bar-1'
-    expect(formatComponentName(vm)).toBe('<FooBar1>')
-
-    vm.$options._componentTag = null
-    vm.$options.__file = '/foo/bar/baz/SomeThing.vue'
-    expect(formatComponentName(vm)).toBe(`<SomeThing> at ${vm.$options.__file}`)
-    expect(formatComponentName(vm, false)).toBe('<SomeThing>')
-
-    vm.$options.__file = 'C:\\foo\\bar\\baz\\windows_file.vue'
-    expect(formatComponentName(vm)).toBe(`<WindowsFile> at ${vm.$options.__file}`)
-    expect(formatComponentName(vm, false)).toBe('<WindowsFile>')
+      const vm = new Vue()
+      vm.$nextTick(() => { throw err2 })
+      Vue.nextTick(() => {
+        // should be called with correct instance info
+        expect(spy).toHaveBeenCalledWith(err2, vm, 'nextTick')
+        Vue.config.errorHandler = null
+        done()
+      })
+    })
   })
 })
 
 function createErrorTestComponents () {
   const components = {}
+
+  // data
+  components.data = {
+    data () {
+      throw new Error('data')
+    },
+    render (h) {
+      return h('div')
+    }
+  }
 
   // render error
   components.render = {
@@ -159,6 +169,22 @@ function createErrorTestComponents () {
     }
     afterComp[after] = function () {
       throw new Error(after)
+    }
+  })
+
+  // directive hooks errors
+  ;['bind', 'update', 'unbind'].forEach(hook => {
+    const key = 'directive ' + hook
+    const dirComp = components[key] = {
+      props: ['n'],
+      template: `<div v-foo="n">{{ n }}</div>`
+    }
+    const dirFoo = {}
+    dirFoo[hook] = function () {
+      throw new Error(key)
+    }
+    dirComp.directives = {
+      foo: dirFoo
     }
   })
 

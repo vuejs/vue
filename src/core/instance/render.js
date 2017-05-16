@@ -27,10 +27,9 @@ import { renderStatic, markOnce } from './render-helpers/render-static'
 import { resolveSlots, resolveScopedSlots } from './render-helpers/resolve-slots'
 
 export function initRender (vm: Component) {
-  vm.$vnode = null // the placeholder node in parent tree
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null
-  const parentVnode = vm.$options._parentVnode
+  const parentVnode = vm.$vnode = vm.$options._parentVnode // the placeholder node in parent tree
   const renderContext = parentVnode && parentVnode.context
   vm.$slots = resolveSlots(vm.$options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject

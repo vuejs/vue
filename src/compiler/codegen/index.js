@@ -7,7 +7,7 @@ import { camelize, no } from 'shared/util'
 
 type TransformFunction = (el: ASTElement, code: string) => string;
 type DataGenFunction = (el: ASTElement) => string;
-type DirctiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean;
+type DirectiveFunction = (el: ASTElement, dir: ASTDirective, warn: Function) => boolean;
 
 // configurable state
 let warn
@@ -205,10 +205,10 @@ function genData (el: ASTElement): string {
   }
   // event handlers
   if (el.events) {
-    data += `${genHandlers(el.events)},`
+    data += `${genHandlers(el.events, false, warn)},`
   }
   if (el.nativeEvents) {
-    data += `${genHandlers(el.nativeEvents, true)},`
+    data += `${genHandlers(el.nativeEvents, true, warn)},`
   }
   // slot target
   if (el.slotTarget) {
@@ -220,7 +220,13 @@ function genData (el: ASTElement): string {
   }
   // component v-model
   if (el.model) {
-    data += `model:{value:${el.model.value},callback:${el.model.callback}},`
+    data += `model:{value:${
+      el.model.value
+    },callback:${
+      el.model.callback
+    },expression:${
+      el.model.expression
+    }},`
   }
   // inline-template
   if (el.inlineTemplate) {
@@ -246,7 +252,7 @@ function genDirectives (el: ASTElement): string | void {
   for (i = 0, l = dirs.length; i < l; i++) {
     dir = dirs[i]
     needRuntime = true
-    const gen: DirctiveFunction = platformDirectives[dir.name] || baseDirectives[dir.name]
+    const gen: DirectiveFunction = platformDirectives[dir.name] || baseDirectives[dir.name]
     if (gen) {
       // compile-time directive that manipulates AST.
       // returns true if it also needs a runtime counterpart.
@@ -310,11 +316,9 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
         el.tag !== 'slot') {
       return genElement(el)
     }
-    const normalizationType = getNormalizationType(children)
+    const normalizationType = checkSkip ? getNormalizationType(children) : 0
     return `[${children.map(genNode).join(',')}]${
-      checkSkip
-        ? normalizationType ? `,${normalizationType}` : ''
-        : ''
+      normalizationType ? `,${normalizationType}` : ''
     }`
   }
 }

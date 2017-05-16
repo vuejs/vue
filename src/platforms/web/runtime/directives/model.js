@@ -28,9 +28,14 @@ export default {
       if (isIE || isEdge) {
         setTimeout(cb, 0)
       }
-    } else if (vnode.tag === 'textarea' || el.type === 'text') {
+    } else if (vnode.tag === 'textarea' || el.type === 'text' || el.type === 'password') {
       el._vModifiers = binding.modifiers
       if (!binding.modifiers.lazy) {
+        // Safari < 10.2 & UIWebView doesn't fire compositionend when
+        // switching focus before confirming composition choice
+        // this also fixes the issue where some browsers e.g. iOS Chrome
+        // fires "change" instead of "input" on autocomplete.
+        el.addEventListener('change', onCompositionEnd)
         if (!isAndroid) {
           el.addEventListener('compositionstart', onCompositionStart)
           el.addEventListener('compositionend', onCompositionEnd)

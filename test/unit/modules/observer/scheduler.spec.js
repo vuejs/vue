@@ -1,6 +1,8 @@
 import Vue from 'vue'
-import config from 'core/config'
-import { queueWatcher as _queueWatcher } from 'core/observer/scheduler'
+import {
+  MAX_UPDATE_COUNT,
+  queueWatcher as _queueWatcher
+} from 'core/observer/scheduler'
 
 function queueWatcher (watcher) {
   watcher.vm = {} // mock vm
@@ -119,7 +121,7 @@ describe('Scheduler', () => {
     }
     queueWatcher(job)
     waitForUpdate(() => {
-      expect(count).toBe(config._maxUpdateCount + 1)
+      expect(count).toBe(MAX_UPDATE_COUNT + 1)
       expect('infinite update loop').toHaveBeenWarned()
     }).then(done)
   })
@@ -143,5 +145,36 @@ describe('Scheduler', () => {
     waitForUpdate(() => {
       expect(callOrder).toEqual([1, 2, 3])
     }).then(done)
+  })
+
+  // Github issue #5191
+  it('emit should work when updated hook called', done => {
+    const el = document.createElement('div')
+    const vm = new Vue({
+      template: `<div><child @change="bar" :foo="foo"></child></div>`,
+      data: {
+        foo: 0
+      },
+      methods: {
+        bar: spy
+      },
+      components: {
+        child: {
+          template: `<div>{{foo}}</div>`,
+          props: ['foo'],
+          updated () {
+            this.$emit('change')
+          }
+        }
+      }
+    }).$mount(el)
+    vm.$nextTick(() => {
+      vm.foo = 1
+      vm.$nextTick(() => {
+        expect(vm.$el.innerHTML).toBe('<div>1</div>')
+        expect(spy).toHaveBeenCalled()
+        done()
+      })
+    })
   })
 })

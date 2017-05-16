@@ -4,63 +4,83 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 ### $2000
 
-<a href="http://www.thedifferenceengine.io/">
-  <img width="600px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tde.png">
+<a href="https://stdlib.com/">
+  <img width="600px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
+</a>
+
+---
+
+### $1000
+
+<a href="https://www.upyun.com/?utm_source=vue&utm_medium=ad&utm_content=github">
+  <img width="400px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/upyun-large.png">
 </a>
 
 ---
 
 ### $500
 
+<a href="https://deepstreamhub.com">
+  <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/deepstream.png">
+</a>
+<br><br>
 <a href="https://jsfiddle.net/">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
 </a>
-
+<br><br>
 <a href="https://laravel.com">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
 </a>
-
+<br><br>
 <a href="https://chaitin.cn">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/chaitin.png">
 </a>
-
+<br><br>
 <a href="https://htmlburger.com/">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
 </a>
-
+<br><br>
 <a href="https://starter.someline.com/">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
 </a>
-
+<br><br>
 <a href="http://monterail.com/" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
 </a>
-
+<br><br>
 <a href="https://www.trisoft.ro/" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/trisoft.png">
 </a>
-
+<br><br>
 <a href="https://www.2mhost.com/" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/2mhost.png">
 </a>
-
+<br><br>
 <a href="https://vuejsjob.com/?ref=vuejs" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
 </a>
-
+<br><br>
 <a href="https://leanpub.com/vuejs2" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
 </a>
-
-<a href="https://stdlib.com/" target="_blank">
-  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
+<br><br>
+<a href="https://famebroker.com" target="_blank">
+  <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/famebroker.png">
+</a>
+<br><br>
+<a href="https://fancygrid.com" target="_blank">
+  <img width="240px" src="http://fancygrid.com/logo/logo.png">
+</a>
+<br><br>
+<a href="https://component.io/" target="_blank">
+  <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/component_io.png">
 </a>
 
 ---
 
 ### $250
 
-It could be you!
+[It could be you!](https://www.patreon.com/bePatron?u=2341390)
 
 ---
 
@@ -80,6 +100,10 @@ It could be you!
 
 <a href="https://monei.net/">
   <img width="200px" src="http://i.imgur.com/JUSjHAi.png">
+</a>
+
+<a href="https://www.accelebrate.com/">
+  <img width="220px" src="https://www.accelebrate.com/assets/images/accelebrate_logo@2x.png">
 </a>
 
 ---
@@ -222,3 +246,14 @@ It could be you!
 - Michael Richards
 - Eduardo Reveles
 - Jan Kremlacek
+- Guy Gavergun
+- Keith Bailey
+- Joel Birch
+- Bernhard E. Reiter
+- Radu Cretu
+- Luiz Tanure
+- Poamrong Rith
+- Chengzhi Yin
+- Dan Barrett
+- Zoran Knezevic
+- Charles Beaumont
