@@ -1,16 +1,5 @@
 /* @flow */
 
-import { no, makeMap, isBuiltInTag } from 'shared/util'
-
-// optimizability constants
-export const FALSE = 0 // whole sub tree un-optimizable
-export const FULL = 1 // whole sub tree optimizable
-export const SELF = 2 // self optimizable but has some un-optimizable children
-export const CHILDREN = 3 // self un-optimizable but have fully optimizable children
-export const PARTIAL = 4 // self un-optimizable with some un-optimizable children
-
-let isPlatformReservedTag
-
 /**
  * In SSR, the vdom tree is generated only once and never patched, so
  * we can optimize most element / trees into plain string render functions.
@@ -20,6 +9,20 @@ let isPlatformReservedTag
  * detection (which is designed for client re-render). In SSR we bail only for
  * components/slots/custom directives.
  */
+
+import { no, makeMap, isBuiltInTag } from 'shared/util'
+
+// optimizability constants
+export const optimizability = {
+  FALSE: 0,    // whole sub tree un-optimizable
+  FULL: 1,     // whole sub tree optimizable
+  SELF: 2,     // self optimizable but has some un-optimizable children
+  CHILDREN: 3, // self un-optimizable but have fully optimizable children
+  PARTIAL: 4   // self un-optimizable with some un-optimizable children
+}
+
+let isPlatformReservedTag
+
 export function optimize (root: ?ASTElement, options: CompilerOptions) {
   if (!root) return
   isPlatformReservedTag = options.isReservedTag || no
@@ -28,39 +31,39 @@ export function optimize (root: ?ASTElement, options: CompilerOptions) {
 
 function walk (node: ASTNode, isRoot?: boolean) {
   if (isUnOptimizableTree(node)) {
-    node.ssrOptimizability = FALSE
+    node.ssrOptimizability = optimizability.FALSE
     return
   }
   // root node or nodes with custom directives should always be a VNode
   if (isRoot || hasCustomDirective(node)) {
-    node.ssrOptimizability = CHILDREN
+    node.ssrOptimizability = optimizability.CHILDREN
   }
   if (node.type === 1) {
     for (let i = 0, l = node.children.length; i < l; i++) {
       const child = node.children[i]
       walk(child)
-      if (child.ssrOptimizability !== FULL) {
-        node.ssrOptimizability = node.ssrOptimizability === CHILDREN
-          ? PARTIAL
-          : SELF
+      if (child.ssrOptimizability !== optimizability.FULL) {
+        node.ssrOptimizability = node.ssrOptimizability === optimizability.CHILDREN
+          ? optimizability.PARTIAL
+          : optimizability.SELF
       }
     }
     if (node.ifConditions) {
       for (let i = 1, l = node.ifConditions.length; i < l; i++) {
         const block = node.ifConditions[i].block
         walk(block)
-        if (block.ssrOptimizability !== FULL) {
-          node.ssrOptimizability = node.ssrOptimizability === CHILDREN
-            ? PARTIAL
-            : SELF
+        if (block.ssrOptimizability !== optimizability.FULL) {
+          node.ssrOptimizability = node.ssrOptimizability === optimizability.CHILDREN
+            ? optimizability.PARTIAL
+            : optimizability.SELF
         }
       }
     }
     if (node.ssrOptimizability == null) {
-      node.ssrOptimizability = FULL
+      node.ssrOptimizability = optimizability.FULL
     }
   } else {
-    node.ssrOptimizability = FULL
+    node.ssrOptimizability = optimizability.FULL
   }
 }
 

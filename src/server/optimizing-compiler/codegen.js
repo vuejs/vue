@@ -5,8 +5,7 @@
 // a node is not optimizable it simply falls back to the default codegen.
 
 // import * as directives from './directives'
-import { FULL, SELF, PARTIAL, CHILDREN } from './optimizer'
-
+import { optimizability } from './optimizer'
 import {
   genIf,
   genFor,
@@ -21,6 +20,16 @@ type SSRCompileResult = {
   render: string;
   staticRenderFns: Array<string>;
   stringRenderFns: Array<string>;
+};
+
+// segment types
+const HTML = 0
+const TEXT = 1
+const EXP = 2
+
+type StringSegment = {
+  type: number;
+  value: string;
 };
 
 class SSRCodegenState extends CodegenState {
@@ -53,16 +62,16 @@ function genSSRElement (el: ASTElement, state: SSRCodegenState): string {
   }
 
   switch (el.ssrOptimizability) {
-    case FULL:
+    case optimizability.FULL:
       // stringify whole tree
       return genStringElement(el, state, true)
-    case SELF:
+    case optimizability.SELF:
       // stringify self and check children
       return genStringElement(el, state, false)
-    case CHILDREN:
+    case optimizability.CHILDREN:
       // generate self as VNode and stringify children
       return genNormalElement(el, state, true)
-    case PARTIAL:
+    case optimizability.PARTIAL:
       // generate self as VNode and check children
       return genNormalElement(el, state, false)
     default:
@@ -71,32 +80,81 @@ function genSSRElement (el: ASTElement, state: SSRCodegenState): string {
   }
 }
 
-function genSSRNode (el, state) {
-  return el.type === 1
-    ? genSSRElement(el, state)
-    : genText(el, state)
-}
-
-function genSSRChildren (el, state, checkSkip) {
-  return genChildren(el, state, checkSkip, genSSRElement, genSSRNode)
-}
-
 function genNormalElement (el, state, stringifyChildren) {
   const data = el.plain ? undefined : genData(el, state)
   const children = stringifyChildren
     ? genStringChildren(el, state)
     : genSSRChildren(el, state, true)
   return `_c('${el.tag}'${
-    data ? `,${data}` : '' // data
+    data ? `,${data}` : ''
   }${
-    children ? `,${children}` : '' // children
+    children ? `,${children}` : ''
   })`
 }
 
-function genStringElement (el, state, stringifyChildren) {
-  return '"string element"'
+function genSSRChildren (el, state, checkSkip) {
+  return genChildren(el, state, checkSkip, genSSRElement, genSSRNode)
+}
+
+function genSSRNode (el, state) {
+  return el.type === 1
+    ? genSSRElement(el, state)
+    : genText(el, state)
 }
 
 function genStringChildren (el, state) {
-  return '"string children"'
+  return `[_ss(${flattenSegments(childrenToSegments(el, state))})]`
+}
+
+function genStringElement (el, state, stringifyChildren) {
+  if (stringifyChildren) {
+    return `_ss(${flattenSegments(elementToSegments(el, state))})`
+  } else {
+    const children = genSSRChildren(el, state, true)
+    return `_ss(${
+      flattenSegments(elementToOpenTagSegments(el, state))
+    }","${el.tag}"${
+      children ? `,${children}` : ''
+    })`
+  }
+}
+
+function elementToSegments (el, state): Array<StringSegment> {
+  const openSegments = elementToOpenTagSegments(el, state)
+  const childrenSegments = childrenToSegments(el, state)
+  const { isUnaryTag } = state.options
+  const close = (isUnaryTag && isUnaryTag(el.tag))
+    ? []
+    : [{ type: HTML, value: `</${el.tag}>` }]
+  return openSegments.concat(childrenSegments, close)
+}
+
+function elementToOpenTagSegments (el, state): Array<StringSegment> {
+  // TODO: handle attrs/props/styles/classes/directives
+  return [{ type: HTML, value: `<${el.tag}>` }]
+}
+
+function childrenToSegments (el, state): Array<StringSegment> {
+  const children = el.children
+  if (children) {
+    const segments = []
+    for (let i = 0; i < children.length; i++) {
+      const c = children[i]
+      if (c.type === 1) {
+        segments.push.apply(segments, elementToSegments(c, state))
+      } else if (c.type === 2) {
+        segments.push({ type: EXP, value: c.expression })
+      } else if (c.type === 3) {
+        segments.push({ type: TEXT, value: c.text })
+      }
+    }
+    return segments
+  } else {
+    return []
+  }
+}
+
+function flattenSegments (segments: Array<StringSegment>): string {
+  console.log(segments)
+  return 'TODO'
 }
