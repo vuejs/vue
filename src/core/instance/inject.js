@@ -60,7 +60,6 @@ export function resolveInject (inject: any, vm: Component): ?Object {
       process.env.NODE_ENV !== 'production' && typeof result[key] === 'undefined' &&
         warn(`injection "${key}" not found`, vm)
     }
-
     return result
   }
 }
