@@ -417,7 +417,7 @@ function genNode (node: ASTNode, state: CodegenState): string {
   }
 }
 
-function genText (text: ASTText | ASTExpression): string {
+export function genText (text: ASTText | ASTExpression): string {
   return `_v(${text.type === 2
     ? text.expression // no need for () because already wrapped in _s()
     : transformSpecialNewlines(JSON.stringify(text.text))

@@ -5,12 +5,13 @@
 // a node is not optimizable it simply falls back to the default codegen.
 
 // import * as directives from './directives'
-import { FULL, PARTIAL, CHILDREN } from './optimizer'
+import { FULL, SELF, PARTIAL, CHILDREN } from './optimizer'
 
 import {
   genIf,
   genFor,
   genData,
+  genText,
   genElement,
   genChildren,
   CodegenState
@@ -54,13 +55,16 @@ function genSSRElement (el: ASTElement, state: SSRCodegenState): string {
   switch (el.ssrOptimizability) {
     case FULL:
       // stringify whole tree
-      return genStringNode(el, state, true)
-    case PARTIAL:
+      return genStringElement(el, state, true)
+    case SELF:
       // stringify self and check children
-      return genStringNode(el, state, false)
+      return genStringElement(el, state, false)
     case CHILDREN:
+      // generate self as VNode and stringify children
+      return genNormalElement(el, state, true)
+    case PARTIAL:
       // generate self as VNode and check children
-      return genVNode(el, state)
+      return genNormalElement(el, state, false)
     default:
       // bail whole tree
       return genElement(el, state)
@@ -70,29 +74,29 @@ function genSSRElement (el: ASTElement, state: SSRCodegenState): string {
 function genSSRNode (el, state) {
   return el.type === 1
     ? genSSRElement(el, state)
-    : genStringNode(el, state)
+    : genText(el, state)
 }
 
 function genSSRChildren (el, state, checkSkip) {
   return genChildren(el, state, checkSkip, genSSRElement, genSSRNode)
 }
 
-function genVNode (el, state) {
-  let code
+function genNormalElement (el, state, stringifyChildren) {
   const data = el.plain ? undefined : genData(el, state)
-  const children = el.inlineTemplate ? null : genSSRChildren(el, state, true)
-  code = `_c('${el.tag}'${
+  const children = stringifyChildren
+    ? genStringChildren(el, state)
+    : genSSRChildren(el, state, true)
+  return `_c('${el.tag}'${
     data ? `,${data}` : '' // data
   }${
     children ? `,${children}` : '' // children
   })`
-  // module transforms
-  for (let i = 0; i < state.transforms.length; i++) {
-    code = state.transforms[i](el, code)
-  }
-  return code
 }
 
-function genStringNode (el, state, includeChildren) {
-  return '!!!'
+function genStringElement (el, state, stringifyChildren) {
+  return '"string element"'
+}
+
+function genStringChildren (el, state) {
+  return '"string children"'
 }

@@ -5,8 +5,9 @@ import { no, makeMap, isBuiltInTag } from 'shared/util'
 // optimizability constants
 export const FALSE = 0 // whole sub tree un-optimizable
 export const FULL = 1 // whole sub tree optimizable
-export const PARTIAL = 2 // self optimizable but has un-optimizable children
-export const CHILDREN = 3 // self un-optimizable but may have optimizable children
+export const SELF = 2 // self optimizable but has some un-optimizable children
+export const CHILDREN = 3 // self un-optimizable but have fully optimizable children
+export const PARTIAL = 4 // self un-optimizable with some un-optimizable children
 
 let isPlatformReservedTag
 
@@ -38,16 +39,20 @@ function walk (node: ASTNode, isRoot?: boolean) {
     for (let i = 0, l = node.children.length; i < l; i++) {
       const child = node.children[i]
       walk(child)
-      if (child.ssrOptimizability !== FULL && node.ssrOptimizability == null) {
-        node.ssrOptimizability = PARTIAL
+      if (child.ssrOptimizability !== FULL) {
+        node.ssrOptimizability = node.ssrOptimizability === CHILDREN
+          ? PARTIAL
+          : SELF
       }
     }
     if (node.ifConditions) {
       for (let i = 1, l = node.ifConditions.length; i < l; i++) {
         const block = node.ifConditions[i].block
         walk(block)
-        if (block.ssrOptimizability !== FULL && node.ssrOptimizability == null) {
-          node.ssrOptimizability = PARTIAL
+        if (block.ssrOptimizability !== FULL) {
+          node.ssrOptimizability = node.ssrOptimizability === CHILDREN
+            ? PARTIAL
+            : SELF
         }
       }
     }
@@ -65,7 +70,8 @@ function isUnOptimizableTree (node: ASTNode): boolean {
   }
   return (
     isBuiltInTag(node.tag) || // built-in (slot, component)
-    !isPlatformReservedTag(node.tag) // custom component
+    !isPlatformReservedTag(node.tag) || // custom component
+    !!node.component // "is" component
   )
 }
 
