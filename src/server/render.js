@@ -38,8 +38,8 @@ const normalizeRender = vm => {
 }
 
 function renderNode (node, isRoot, context) {
-  if (node.isTextNode) {
-    renderTextNode(node, context)
+  if (node.isString) {
+    renderStringNode(node, context)
   } else if (isDef(node.componentOptions)) {
     renderComponent(node, isRoot, context)
   } else {
@@ -145,6 +145,18 @@ function renderComponentWithCache (node, isRoot, key, context) {
   renderComponentInner(node, isRoot, context)
 }
 
+function StringNode (open, close, children) {
+  this.isString = true
+  this.open = open
+  this.close = close
+  this.children = children
+}
+
+function createStringNode (id, children) {
+  const { open, close } = this.$options.stringRenderFns[id]
+  return new StringNode(open, close, children)
+}
+
 function renderComponentInner (node, isRoot, context) {
   const prevActive = context.activeInstance
   // expose userContext on vnode
@@ -154,6 +166,7 @@ function renderComponentInner (node, isRoot, context) {
     context.activeInstance
   )
   normalizeRender(child)
+  child._ss = createStringNode
   const childNode = child._render()
   childNode.parent = node
   context.renderStates.push({
@@ -163,7 +176,7 @@ function renderComponentInner (node, isRoot, context) {
   renderNode(childNode, isRoot, context)
 }
 
-function renderTextNode (el, context) {
+function renderStringNode (el, context) {
   const { write, next } = context
   if (isUndef(el.children) || el.children.length === 0) {
     write(el.open() + (el.close || ''), next)

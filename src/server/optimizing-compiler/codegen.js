@@ -5,7 +5,16 @@
 // a node is not optimizable it simply falls back to the default codegen.
 
 // import * as directives from './directives'
-import { CodegenState, genElement } from 'compiler/codegen/index'
+import { FULL, PARTIAL, CHILDREN } from './optimizer'
+
+import {
+  genIf,
+  genFor,
+  genData,
+  genElement,
+  genChildren,
+  CodegenState
+} from 'compiler/codegen/index'
 
 type SSRCompileResult = {
   render: string;
@@ -27,7 +36,7 @@ export function generate (
   options: CompilerOptions
 ): SSRCompileResult {
   const state = new SSRCodegenState(options)
-  const code = ast ? genSSRElement(ast, state, true) : '_c("div")'
+  const code = ast ? genSSRElement(ast, state) : '_c("div")'
   return {
     render: `with(this){return ${code}}`,
     staticRenderFns: state.staticRenderFns,
@@ -35,18 +44,55 @@ export function generate (
   }
 }
 
-function genSSRElement (
-  el: ASTElement,
-  state: SSRCodegenState,
-  isComponentRoot?: boolean
-): string {
-  if (el.ssrOptimizableRoot && !isComponentRoot) {
-    return genStringRenderFn(el, state)
-  } else {
-    return genElement(el, state)
+function genSSRElement (el: ASTElement, state: SSRCodegenState): string {
+  if (el.for && !el.forProcessed) {
+    return genFor(el, state, genSSRElement)
+  } else if (el.if && !el.ifProcessed) {
+    return genIf(el, state, genSSRElement)
+  }
+
+  switch (el.ssrOptimizability) {
+    case FULL:
+      // stringify whole tree
+      return genStringNode(el, state, true)
+    case PARTIAL:
+      // stringify self and check children
+      return genStringNode(el, state, false)
+    case CHILDREN:
+      // generate self as VNode and check children
+      return genVNode(el, state)
+    default:
+      // bail whole tree
+      return genElement(el, state)
   }
 }
 
-function genStringRenderFn (el, state) {
-  return ''
+function genSSRNode (el, state) {
+  return el.type === 1
+    ? genSSRElement(el, state)
+    : genStringNode(el, state)
+}
+
+function genSSRChildren (el, state, checkSkip) {
+  return genChildren(el, state, checkSkip, genSSRElement, genSSRNode)
+}
+
+function genVNode (el, state) {
+  let code
+  const data = el.plain ? undefined : genData(el, state)
+  const children = el.inlineTemplate ? null : genSSRChildren(el, state, true)
+  code = `_c('${el.tag}'${
+    data ? `,${data}` : '' // data
+  }${
+    children ? `,${children}` : '' // children
+  })`
+  // module transforms
+  for (let i = 0; i < state.transforms.length; i++) {
+    code = state.transforms[i](el, code)
+  }
+  return code
+}
+
+function genStringNode (el, state, includeChildren) {
+  return '!!!'
 }

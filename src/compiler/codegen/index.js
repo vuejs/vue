@@ -119,14 +119,15 @@ function genOnce (el: ASTElement, state: CodegenState): string {
   }
 }
 
-function genIf (el: any, state: CodegenState): string {
+export function genIf (el: any, state: CodegenState, altGen?: Function): string {
   el.ifProcessed = true // avoid recursion
-  return genIfConditions(el.ifConditions.slice(), state)
+  return genIfConditions(el.ifConditions.slice(), state, altGen)
 }
 
 function genIfConditions (
   conditions: ASTIfConditions,
-  state: CodegenState
+  state: CodegenState,
+  altGen?: Function
 ): string {
   if (!conditions.length) {
     return '_e()'
@@ -145,11 +146,15 @@ function genIfConditions (
 
   // v-if with v-once should generate code like (a)?_m(0):_m(1)
   function genTernaryExp (el) {
-    return el.once ? genOnce(el, state) : genElement(el, state)
+    return altGen
+      ? altGen(el, state)
+      : el.once
+        ? genOnce(el, state)
+        : genElement(el, state)
   }
 }
 
-function genFor (el: any, state: CodegenState): string {
+export function genFor (el: any, state: CodegenState, altGen?: Function): string {
   const exp = el.for
   const alias = el.alias
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
@@ -172,11 +177,11 @@ function genFor (el: any, state: CodegenState): string {
   el.forProcessed = true // avoid recursion
   return `_l((${exp}),` +
     `function(${alias}${iterator1}${iterator2}){` +
-      `return ${genElement(el, state)}` +
+      `return ${(altGen || genElement)(el, state)}` +
     '})'
 }
 
-function genData (el: ASTElement, state: CodegenState): string {
+export function genData (el: ASTElement, state: CodegenState): string {
   let data = '{'
 
   // directives first.
@@ -345,10 +350,12 @@ function genForScopedSlot (
     '})'
 }
 
-function genChildren (
+export function genChildren (
   el: ASTElement,
   state: CodegenState,
-  checkSkip?: boolean
+  checkSkip?: boolean,
+  altGenElement?: Function,
+  altGenNode?: Function
 ): string | void {
   const children = el.children
   if (children.length) {
@@ -359,12 +366,13 @@ function genChildren (
       el.tag !== 'template' &&
       el.tag !== 'slot'
     ) {
-      return genElement(el, state)
+      return (altGenElement || genElement)(el, state)
     }
     const normalizationType = checkSkip
       ? getNormalizationType(children, state.maybeComponent)
       : 0
-    return `[${children.map(c => genNode(c, state)).join(',')}]${
+    const gen = altGenNode || genNode
+    return `[${children.map(c => gen(c, state)).join(',')}]${
       normalizationType ? `,${normalizationType}` : ''
     }`
   }

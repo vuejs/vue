@@ -1,6 +1,12 @@
 /* @flow */
 
-import { no, isBuiltInTag } from 'shared/util'
+import { no, makeMap, isBuiltInTag } from 'shared/util'
+
+// optimizability constants
+export const FALSE = 0 // whole sub tree un-optimizable
+export const FULL = 1 // whole sub tree optimizable
+export const PARTIAL = 2 // self optimizable but has un-optimizable children
+export const CHILDREN = 3 // self un-optimizable but may have optimizable children
 
 let isPlatformReservedTag
 
@@ -16,70 +22,60 @@ let isPlatformReservedTag
 export function optimize (root: ?ASTElement, options: CompilerOptions) {
   if (!root) return
   isPlatformReservedTag = options.isReservedTag || no
-  // first pass: mark all non-optimizable nodes.
-  markNonOptimizable(root)
-  // second pass: mark optimizable trees.
-  markOptimizableTrees(root, false)
+  walk(root, true)
 }
 
-function markNonOptimizable (node: ASTNode) {
-  node.ssrOptimizable = isOptimizable(node)
+function walk (node: ASTNode, isRoot?: boolean) {
+  if (isUnOptimizableTree(node)) {
+    node.ssrOptimizability = FALSE
+    return
+  }
+  // root node or nodes with custom directives should always be a VNode
+  if (isRoot || hasCustomDirective(node)) {
+    node.ssrOptimizability = CHILDREN
+  }
   if (node.type === 1) {
-    // do not make component slot content optimizable so that render fns can
-    // still manipulate the nodes.
-    if (
-      !isPlatformReservedTag(node.tag) &&
-      node.tag !== 'slot' &&
-      node.attrsMap['inline-template'] == null
-    ) {
-      return
-    }
     for (let i = 0, l = node.children.length; i < l; i++) {
       const child = node.children[i]
-      markNonOptimizable(child)
-      if (!child.ssrOptimizable) {
-        node.ssrOptimizable = false
+      walk(child)
+      if (child.ssrOptimizability !== FULL && node.ssrOptimizability == null) {
+        node.ssrOptimizability = PARTIAL
       }
     }
     if (node.ifConditions) {
       for (let i = 1, l = node.ifConditions.length; i < l; i++) {
         const block = node.ifConditions[i].block
-        markNonOptimizable(block)
-        if (!block.ssrOptimizable) {
-          node.ssrOptimizable = false
+        walk(block)
+        if (block.ssrOptimizability !== FULL && node.ssrOptimizability == null) {
+          node.ssrOptimizability = PARTIAL
         }
       }
     }
+    if (node.ssrOptimizability == null) {
+      node.ssrOptimizability = FULL
+    }
+  } else {
+    node.ssrOptimizability = FULL
   }
 }
 
-function isOptimizable (node: ASTNode): boolean {
+function isUnOptimizableTree (node: ASTNode): boolean {
   if (node.type === 2 || node.type === 3) { // text or expression
-    return true
+    return false
   }
   return (
-    !isBuiltInTag(node.tag) && // not a built-in (slot, component)
-    !!isPlatformReservedTag(node.tag) // not a component
+    isBuiltInTag(node.tag) || // built-in (slot, component)
+    !isPlatformReservedTag(node.tag) // custom component
   )
 }
 
-function markOptimizableTrees (node: ASTNode) {
-  if (node.type === 1) {
-    if (node.ssrOptimizable) {
-      node.ssrOptimizableRoot = true
-      return
-    } else {
-      node.ssrOptimizableRoot = false
-    }
-    if (node.children) {
-      for (let i = 0, l = node.children.length; i < l; i++) {
-        markOptimizableTrees(node.children[i])
-      }
-    }
-    if (node.ifConditions) {
-      for (let i = 1, l = node.ifConditions.length; i < l; i++) {
-        markOptimizableTrees(node.ifConditions[i].block)
-      }
-    }
-  }
+// only need to check built-in dirs with runtime
+const isBuiltInDir = makeMap('model,show')
+
+function hasCustomDirective (node: ASTNode): ?boolean {
+  return (
+    node.type === 1 &&
+    node.directives &&
+    node.directives.some(d => !isBuiltInDir(d.name))
+  )
 }
