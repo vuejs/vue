@@ -142,6 +142,7 @@ function genIfConditions (conditions: ASTIfConditions): string {
 function genFor (el: any): string {
   const exp = el.for
   const alias = el.alias
+  const scope = el.forScope
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
   const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
 
@@ -160,7 +161,10 @@ function genFor (el: any): string {
   el.forProcessed = true // avoid recursion
   return `_l((${exp}),` +
     `function(${alias}${iterator1}${iterator2}){` +
-      `return ${genElement(el)}` +
+    (scope
+      ? `with(${scope}||{}){return ${genElement(el)}}`
+      : `return ${genElement(el)}`
+    ) +
     '})'
 }
 

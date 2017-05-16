@@ -463,4 +463,29 @@ describe('Directive v-for', () => {
       expect(vm.$el.textContent).toMatch('f.o.o.b.a.r.')
     }).then(done)
   })
+
+  it('render with scope', done => {
+    const vm = new Vue({
+      data: {
+        pos: [0, 2],
+        list: [{
+          name: 'a'
+        }, {
+          name: 'b'
+        }, {
+          name: 'c'
+        }]
+      },
+      template: `
+        <ul>
+          <li v-for="i in pos" with="{ item: list[i] }">{{ item.name }}</li>
+        </ul>
+      `
+    }).$mount()
+    expect(vm.$el.textContent).toMatch('ac')
+    vm.pos.push(1)
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toMatch('acb')
+    }).then(done)
+  })
 })
