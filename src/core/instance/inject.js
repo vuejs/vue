@@ -57,7 +57,7 @@ export function resolveInject (inject: any, vm: Component): ?Object {
         }
         source = source.$parent
       }
-      process.env.NODE_ENV !== 'production' && typeof result[key] === 'undefined' &&
+      process.env.NODE_ENV !== 'production' && Object.keys(result).indexOf(key) < 0 &&
         warn(`Injection "${key}" not found`, vm)
     }
     return result

@@ -256,12 +256,13 @@ describe('Options provide/inject', () => {
     const vm = new Vue({
       provide: {
         foo: 1,
-        bar: false
+        bar: false,
+        baz: undefined
       }
     })
     new Vue({
       parent: vm,
-      inject: ['foo', 'bar'],
+      inject: ['foo', 'bar', 'baz'],
       created () {}
     })
     expect(`Injection "foo" not found`).not.toHaveBeenWarned()
