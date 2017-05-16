@@ -103,6 +103,10 @@ export function createInstance (
     // deprecated
     __weex_require_module__: weexInstanceVar.requireModule // eslint-disable-line
   }, timerAPIs)
+
+  // wrap IFFE and use strict mode
+  appCode = `(function(global){"use strict";\n ${appCode} \n})(Object.create(this))`
+
   callFunction(instanceVars, appCode)
 
   // Send `createFinish` signal to native.
