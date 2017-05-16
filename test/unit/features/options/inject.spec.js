@@ -248,8 +248,8 @@ describe('Options provide/inject', () => {
       inject: ['foo', 'bar'],
       created () {}
     })
-    expect(`injection "foo" not found`).toHaveBeenWarned()
-    expect(`injection "bar" not found`).toHaveBeenWarned()
+    expect(`Injection "foo" not found`).toHaveBeenWarned()
+    expect(`Injection "bar" not found`).toHaveBeenWarned()
   })
 
   it('should not warn when injections can be found', () => {
@@ -264,7 +264,7 @@ describe('Options provide/inject', () => {
       inject: ['foo', 'bar'],
       created () {}
     })
-    expect(`injection "foo" not found`).not.toHaveBeenWarned()
-    expect(`injection "bar" not found`).not.toHaveBeenWarned()
+    expect(`Injection "foo" not found`).not.toHaveBeenWarned()
+    expect(`Injection "bar" not found`).not.toHaveBeenWarned()
   })
 })
