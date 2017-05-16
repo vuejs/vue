@@ -417,7 +417,24 @@ describe('Directive v-for', () => {
       }
     }).$mount()
     expect(console.warn.calls.argsFor(0)[0]).toContain(
-      `<test v-for="i in 3">: component lists rendered with v-for should have explicit keys`
+      `<test v-for="i in 3">: component lists rendered with v-for should have explicit string keys`
+    )
+    console.warn = warn
+  })
+
+  it('should warn component v-for for non string keys', () => {
+    const warn = console.warn
+    console.warn = jasmine.createSpy()
+    new Vue({
+      template: `<div><test v-for="i in 3" :key="i"></test></div>`,
+      components: {
+        test: {
+          render () {}
+        }
+      }
+    }).$mount()
+    expect(console.warn.calls.argsFor(0)[0]).toContain(
+      `<test v-for="i in 3">: component lists rendered with v-for should have explicit string keys`
     )
     console.warn = warn
   })

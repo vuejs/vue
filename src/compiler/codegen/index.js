@@ -147,11 +147,12 @@ function genFor (el: any): string {
 
   if (
     process.env.NODE_ENV !== 'production' &&
-    maybeComponent(el) && el.tag !== 'slot' && el.tag !== 'template' && !el.key
+    maybeComponent(el) && el.tag !== 'slot' && el.tag !== 'template' &&
+    typeof (el.key) !== 'string'
   ) {
     warn(
       `<${el.tag} v-for="${alias} in ${exp}">: component lists rendered with ` +
-      `v-for should have explicit keys. ` +
+      `v-for should have explicit string keys. ` +
       `See https://vuejs.org/guide/list.html#key for more info.`,
       true /* tip */
     )
