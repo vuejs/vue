@@ -120,7 +120,7 @@ function genStringElementWithChildren (el, state) {
 }
 
 function elementToString (el, state) {
-  return flattenSegments(elementToSegments(el, state))
+  return `(${flattenSegments(elementToSegments(el, state))})`
 }
 
 function elementToSegments (el, state): Array<StringSegment> {
