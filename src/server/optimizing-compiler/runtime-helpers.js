@@ -1,10 +1,11 @@
 /* @flow */
 
 import { escape } from 'web/server/util'
-import { isObject } from 'shared/util'
+import { isObject, extend } from 'shared/util'
 import { renderAttr } from 'web/server/modules/attrs'
 import { renderClass } from 'web/util/class'
 import { genStyle } from 'web/server/modules/style'
+import { normalizeStyleBinding } from 'web/util/style'
 
 import {
   propsToAttrMap,
@@ -104,6 +105,10 @@ function renderSSRStyle (
   dynamic: any,
   extra: ?Object
 ): string {
-  // TODO
-  return genStyle({})
+  const style = {}
+  if (staticStyle) extend(style, staticStyle)
+  if (dynamic) extend(style, normalizeStyleBinding(dynamic))
+  if (extra) extend(style, extra)
+  const res = genStyle(style)
+  return res === '' ? res : ` style=${JSON.stringify(escape(res))}`
 }

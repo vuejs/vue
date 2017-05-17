@@ -175,7 +175,12 @@ function elementToOpenTagSegments (el, state): Array<StringSegment> {
   if (el.staticStyle || el.styleBinding || el.attrsMap['v-show']) {
     segments.push.apply(
       segments,
-      genStyleSegments(el.staticStyle, el.styleBinding, el.attrsMap['v-show'])
+      genStyleSegments(
+        el.attrsMap.style,
+        el.staticStyle,
+        el.styleBinding,
+        el.attrsMap['v-show']
+      )
     )
   }
   // console.log(segments)

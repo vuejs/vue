@@ -86,8 +86,24 @@ export function genClassSegments (
 
 export function genStyleSegments (
   staticStyle: ?string,
+  parsedStaticStyle: ?string,
   styleBinding: ?string,
   vShowExpression: ?string
 ): Array<StringSegment> {
-  return []
+  if (staticStyle && !styleBinding && !vShowExpression) {
+    return [{ type: RAW, value: ` style=${JSON.stringify(staticStyle)}` }]
+  } else {
+    return [{
+      type: EXPRESSION,
+      value: `_ssrStyle(${
+        parsedStaticStyle || 'null'
+      },${
+        styleBinding || 'null'
+      }, ${
+        vShowExpression
+          ? `{ display: (${vShowExpression}) ? '' : 'none' }`
+          : 'null'
+      })`
+    }]
+  }
 }
