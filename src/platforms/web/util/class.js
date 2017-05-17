@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isDef, isUndef, isObject } from 'shared/util'
+import { isDef, isObject } from 'shared/util'
 
 export function genClassForVnode (vnode: VNode): string {
   let data = vnode.data
@@ -48,31 +48,38 @@ export function concat (a: ?string, b: ?string): string {
 }
 
 export function stringifyClass (value: any): string {
-  if (isUndef(value)) {
-    return ''
+  if (Array.isArray(value)) {
+    return stringifyArray(value)
+  }
+  if (isObject(value)) {
+    return stringifyObject(value)
   }
   if (typeof value === 'string') {
     return value
   }
-  let res = ''
-  if (Array.isArray(value)) {
-    let stringified
-    for (let i = 0, l = value.length; i < l; i++) {
-      if (isDef(value[i])) {
-        if (isDef(stringified = stringifyClass(value[i])) && stringified !== '') {
-          res += stringified + ' '
-        }
-      }
-    }
-    return res.slice(0, -1)
-  }
-  if (isObject(value)) {
-    for (const key in value) {
-      if (res) res += ' '
-      if (value[key]) res += key
-    }
-    return res
-  }
   /* istanbul ignore next */
+  return ''
+}
+
+function stringifyArray (value: Array<any>): string {
+  let res = ''
+  let stringified
+  for (let i = 0, l = value.length; i < l; i++) {
+    if (isDef(stringified = stringifyClass(value[i])) && stringified !== '') {
+      if (res) res += ' '
+      res += stringified
+    }
+  }
+  return res
+}
+
+function stringifyObject (value: Object): string {
+  let res = ''
+  for (const key in value) {
+    if (value[key]) {
+      if (res) res += ' '
+      res += key
+    }
+  }
   return res
 }
