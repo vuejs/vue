@@ -4,8 +4,6 @@
 // SSR-optimizable nodes and turn them into string render fns. In cases where
 // a node is not optimizable it simply falls back to the default codegen.
 
-// import * as directives from './directives'
-import { optimizability } from './optimizer'
 import {
   genIf,
   genFor,
@@ -15,13 +13,13 @@ import {
   genChildren,
   CodegenState
 } from 'compiler/codegen/index'
-
+import { optimizability } from './optimizer'
 import type { CodegenResult } from 'compiler/codegen/index'
 
 // segment types
 const RAW = 0
 const INTERPOLATION = 1
-const FLOW_CONTROL = 2
+const EXPRESSION = 2
 
 type StringSegment = {
   type: number;
@@ -50,10 +48,10 @@ function genSSRElement (el: ASTElement, state: CodegenState): string {
   switch (el.ssrOptimizability) {
     case optimizability.FULL:
       // stringify whole tree
-      return genStringElement(el, state, true)
+      return genStringElement(el, state)
     case optimizability.SELF:
       // stringify self and check children
-      return genStringElement(el, state, false)
+      return genStringElementWithChildren(el, state)
     case optimizability.CHILDREN:
       // generate self as VNode and stringify children
       return genNormalElement(el, state, true)
@@ -94,17 +92,21 @@ function genStringChildren (el, state) {
     : ''
 }
 
-function genStringElement (el, state, stringifyChildren) {
-  if (stringifyChildren) {
-    return `_ssrNode(${flattenSegments(elementToSegments(el, state))})`
-  } else {
-    const children = genSSRChildren(el, state, true)
-    return `_ssrNode(${
-      flattenSegments(elementToOpenTagSegments(el, state))
-    },"${el.tag}"${
-      children ? `,${children}` : ''
-    })`
-  }
+function genStringElement (el, state) {
+  return `_ssrNode(${elementToString(el, state)})`
+}
+
+function genStringElementWithChildren (el, state) {
+  const children = genSSRChildren(el, state, true)
+  return `_ssrNode(${
+    flattenSegments(elementToOpenTagSegments(el, state))
+  },"</${el.tag}>"${
+    children ? `,${children}` : ''
+  })`
+}
+
+function elementToString (el, state) {
+  return flattenSegments(elementToSegments(el, state))
 }
 
 function elementToSegments (el, state): Array<StringSegment> {
@@ -112,19 +114,27 @@ function elementToSegments (el, state): Array<StringSegment> {
   if (el.for && !el.forProcessed) {
     el.forProcessed = true
     return [{
-      type: FLOW_CONTROL,
+      type: EXPRESSION,
       value: genFor(el, state, elementToString, '_ssrList')
     }]
   } else if (el.if && !el.ifProcessed) {
     el.ifProcessed = true
     return [{
-      type: FLOW_CONTROL,
+      type: EXPRESSION,
       value: genIf(el, state, elementToString, '""')
     }]
   }
 
-  // v-html / v-text
-  console.log(el)
+  // let binding
+  // // v-show
+  // if ((binding = el.attrsMap['v-show'])) {
+
+  // }
+
+  // // v-model
+  // if ((binding = el.attrsMap['v-model'])) {
+
+  // }
 
   const openSegments = elementToOpenTagSegments(el, state)
   const childrenSegments = childrenToSegments(el, state)
@@ -135,10 +145,6 @@ function elementToSegments (el, state): Array<StringSegment> {
   return openSegments.concat(childrenSegments, close)
 }
 
-function elementToString (el, state) {
-  return flattenSegments(elementToSegments(el, state))
-}
-
 function elementToOpenTagSegments (el, state): Array<StringSegment> {
   // TODO: handle v-show, v-html & v-text
   // TODO: handle attrs/props/styles/classes
@@ -146,6 +152,14 @@ function elementToOpenTagSegments (el, state): Array<StringSegment> {
 }
 
 function childrenToSegments (el, state): Array<StringSegment> {
+  let binding
+  if ((binding = el.attrsMap['v-html'])) {
+    return [{ type: EXPRESSION, value: binding }]
+  }
+  if ((binding = el.attrsMap['v-text'])) {
+    return [{ type: INTERPOLATION, value: binding }]
+  }
+
   const children = el.children
   if (children) {
     const segments = []
@@ -183,7 +197,7 @@ function flattenSegments (segments: Array<StringSegment>): string {
     } else if (s.type === INTERPOLATION) {
       pushBuffer()
       mergedSegments.push(`_ssrEscape(${s.value})`)
-    } else if (s.type === FLOW_CONTROL) {
+    } else if (s.type === EXPRESSION) {
       pushBuffer()
       mergedSegments.push(`(${s.value})`)
     }

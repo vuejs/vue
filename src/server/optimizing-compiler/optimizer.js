@@ -59,7 +59,10 @@ function walk (node: ASTNode, isRoot?: boolean) {
         check(block)
       }
     }
-    if (node.ssrOptimizability == null) {
+    if (node.ssrOptimizability == null ||
+      node.attrsMap['v-html'] ||
+      node.attrsMap['v-text']
+    ) {
       node.ssrOptimizability = optimizability.FULL
     }
   } else {
@@ -78,8 +81,7 @@ function isUnOptimizableTree (node: ASTNode): boolean {
   )
 }
 
-// only need to check built-in dirs with runtime
-const isBuiltInDir = makeMap('model,show')
+const isBuiltInDir = makeMap('text,html,show,on,bind,model,pre,cloak,once')
 
 function hasCustomDirective (node: ASTNode): ?boolean {
   return (

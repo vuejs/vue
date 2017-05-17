@@ -1,7 +1,0 @@
-/* @flow */
-
-export default {
-  show () {
-
-  }
-}
