@@ -89,7 +89,9 @@ function genSSRNode (el, state) {
 }
 
 function genStringChildren (el, state) {
-  return `[_ssrNode(${flattenSegments(childrenToSegments(el, state))})]`
+  return el.children.length
+    ? `[_ssrNode(${flattenSegments(childrenToSegments(el, state))})]`
+    : ''
 }
 
 function genStringElement (el, state, stringifyChildren) {
@@ -106,6 +108,7 @@ function genStringElement (el, state, stringifyChildren) {
 }
 
 function elementToSegments (el, state): Array<StringSegment> {
+  // v-for / v-if
   if (el.for && !el.forProcessed) {
     el.forProcessed = true
     return [{
@@ -119,6 +122,9 @@ function elementToSegments (el, state): Array<StringSegment> {
       value: genIf(el, state, elementToString, '""')
     }]
   }
+
+  // v-html / v-text
+  console.log(el)
 
   const openSegments = elementToOpenTagSegments(el, state)
   const childrenSegments = childrenToSegments(el, state)
