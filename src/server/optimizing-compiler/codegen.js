@@ -23,9 +23,9 @@ type SSRCompileResult = {
 };
 
 // segment types
-const HTML = 0
-const TEXT = 1
-const EXP = 2
+const RAW = 0
+const INTERPOLATION = 1
+const FLOW_CONTROL = 2
 
 type StringSegment = {
   type: number;
@@ -103,15 +103,15 @@ function genSSRNode (el, state) {
 }
 
 function genStringChildren (el, state) {
-  return `[_ss(${flattenSegments(childrenToSegments(el, state))})]`
+  return `[_ssrNode(${flattenSegments(childrenToSegments(el, state))})]`
 }
 
 function genStringElement (el, state, stringifyChildren) {
   if (stringifyChildren) {
-    return `_ss(${flattenSegments(elementToSegments(el, state))})`
+    return `_ssrNode(${flattenSegments(elementToSegments(el, state))})`
   } else {
     const children = genSSRChildren(el, state, true)
-    return `_ss(${
+    return `_ssrNode(${
       flattenSegments(elementToOpenTagSegments(el, state))
     }","${el.tag}"${
       children ? `,${children}` : ''
@@ -120,18 +120,37 @@ function genStringElement (el, state, stringifyChildren) {
 }
 
 function elementToSegments (el, state): Array<StringSegment> {
+  if (el.for && !el.forProcessed) {
+    el.forProcessed = true
+    return [{
+      type: FLOW_CONTROL,
+      value: genFor(el, state, elementToString, '_ssrList')
+    }]
+  } else if (el.if && !el.ifProcessed) {
+    el.ifProcessed = true
+    return [{
+      type: FLOW_CONTROL,
+      value: genIf(el, state, elementToString, '""')
+    }]
+  }
+
   const openSegments = elementToOpenTagSegments(el, state)
   const childrenSegments = childrenToSegments(el, state)
   const { isUnaryTag } = state.options
   const close = (isUnaryTag && isUnaryTag(el.tag))
     ? []
-    : [{ type: HTML, value: `</${el.tag}>` }]
+    : [{ type: RAW, value: `</${el.tag}>` }]
   return openSegments.concat(childrenSegments, close)
 }
 
+function elementToString (el, state) {
+  return flattenSegments(elementToSegments(el, state))
+}
+
 function elementToOpenTagSegments (el, state): Array<StringSegment> {
-  // TODO: handle attrs/props/styles/classes/directives
-  return [{ type: HTML, value: `<${el.tag}>` }]
+  // TODO: handle v-show, v-html & v-text
+  // TODO: handle attrs/props/styles/classes
+  return [{ type: RAW, value: `<${el.tag}>` }]
 }
 
 function childrenToSegments (el, state): Array<StringSegment> {
@@ -143,9 +162,9 @@ function childrenToSegments (el, state): Array<StringSegment> {
       if (c.type === 1) {
         segments.push.apply(segments, elementToSegments(c, state))
       } else if (c.type === 2) {
-        segments.push({ type: EXP, value: c.expression })
+        segments.push({ type: INTERPOLATION, value: c.expression })
       } else if (c.type === 3) {
-        segments.push({ type: TEXT, value: c.text })
+        segments.push({ type: RAW, value: c.text })
       }
     }
     return segments
@@ -155,6 +174,29 @@ function childrenToSegments (el, state): Array<StringSegment> {
 }
 
 function flattenSegments (segments: Array<StringSegment>): string {
-  console.log(segments)
-  return 'TODO'
+  const mergedSegments = []
+  let textBuffer = ''
+
+  const pushBuffer = () => {
+    if (textBuffer) {
+      mergedSegments.push(JSON.stringify(textBuffer))
+      textBuffer = ''
+    }
+  }
+
+  for (let i = 0; i < segments.length; i++) {
+    const s = segments[i]
+    if (s.type === RAW) {
+      textBuffer += s.value
+    } else if (s.type === INTERPOLATION) {
+      pushBuffer()
+      mergedSegments.push(`_ssrEscape(${s.value})`)
+    } else if (s.type === FLOW_CONTROL) {
+      pushBuffer()
+      mergedSegments.push(`(${s.value})`)
+    }
+  }
+  pushBuffer()
+
+  return mergedSegments.join('+')
 }

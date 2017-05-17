@@ -7,7 +7,7 @@ import { RenderContext } from './render-context'
 import { compileToFunctions } from 'web/compiler/index'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
-import { isDef, isUndef, isTrue } from 'shared/util'
+import { isDef, isUndef, isTrue, isObject } from 'shared/util'
 
 let warned = Object.create(null)
 const warnOnce = msg => {
@@ -152,9 +152,30 @@ function StringNode (open, close, children) {
   this.children = children
 }
 
-function createStringNode (id, children) {
-  const { open, close } = this.$options.stringRenderFns[id]
+function createStringNode (open, close, children) {
   return new StringNode(open, close, children)
+}
+
+function createSSRList (val, render) {
+  let ret = ''
+  let i, l, keys, key
+  if (Array.isArray(val) || typeof val === 'string') {
+    for (i = 0, l = val.length; i < l; i++) {
+      ret += render(val[i], i)
+    }
+  } else if (typeof val === 'number') {
+    for (i = 0; i < val; i++) {
+      ret += render(i + 1, i)
+    }
+  } else if (isObject(val)) {
+    keys = Object.keys(val)
+    ret = new Array(keys.length)
+    for (i = 0, l = keys.length; i < l; i++) {
+      key = keys[i]
+      ret += render(val[key], key, i)
+    }
+  }
+  return ret
 }
 
 function renderComponentInner (node, isRoot, context) {
@@ -166,7 +187,11 @@ function renderComponentInner (node, isRoot, context) {
     context.activeInstance
   )
   normalizeRender(child)
-  child._ss = createStringNode
+
+  child._ssrNode = createStringNode
+  child._ssrEscape = escape
+  child._ssrList = createSSRList
+
   const childNode = child._render()
   childNode.parent = node
   context.renderStates.push({

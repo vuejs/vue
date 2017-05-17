@@ -119,18 +119,24 @@ function genOnce (el: ASTElement, state: CodegenState): string {
   }
 }
 
-export function genIf (el: any, state: CodegenState, altGen?: Function): string {
+export function genIf (
+  el: any,
+  state: CodegenState,
+  altGen?: Function,
+  altEmpty?: string
+): string {
   el.ifProcessed = true // avoid recursion
-  return genIfConditions(el.ifConditions.slice(), state, altGen)
+  return genIfConditions(el.ifConditions.slice(), state, altGen, altEmpty)
 }
 
 function genIfConditions (
   conditions: ASTIfConditions,
   state: CodegenState,
-  altGen?: Function
+  altGen?: Function,
+  altEmpty?: string
 ): string {
   if (!conditions.length) {
-    return '_e()'
+    return altEmpty || '_e()'
   }
 
   const condition = conditions.shift()
@@ -138,7 +144,7 @@ function genIfConditions (
     return `(${condition.exp})?${
       genTernaryExp(condition.block)
     }:${
-      genIfConditions(conditions, state)
+      genIfConditions(conditions, state, altGen, altEmpty)
     }`
   } else {
     return `${genTernaryExp(condition.block)}`
@@ -154,7 +160,12 @@ function genIfConditions (
   }
 }
 
-export function genFor (el: any, state: CodegenState, altGen?: Function): string {
+export function genFor (
+  el: any,
+  state: CodegenState,
+  altGen?: Function,
+  altHelper?: string
+): string {
   const exp = el.for
   const alias = el.alias
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
@@ -175,7 +186,7 @@ export function genFor (el: any, state: CodegenState, altGen?: Function): string
   }
 
   el.forProcessed = true // avoid recursion
-  return `_l((${exp}),` +
+  return `${altHelper || '_l'}((${exp}),` +
     `function(${alias}${iterator1}${iterator2}){` +
       `return ${(altGen || genElement)(el, state)}` +
     '})'
