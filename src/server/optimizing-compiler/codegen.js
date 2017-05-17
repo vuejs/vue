@@ -16,11 +16,7 @@ import {
   CodegenState
 } from 'compiler/codegen/index'
 
-type SSRCompileResult = {
-  render: string;
-  staticRenderFns: Array<string>;
-  stringRenderFns: Array<string>;
-};
+import type { CodegenResult } from 'compiler/codegen/index'
 
 // segment types
 const RAW = 0
@@ -32,29 +28,19 @@ type StringSegment = {
   value: string;
 };
 
-class SSRCodegenState extends CodegenState {
-  stringRenderFns: Array<string>;
-
-  constructor (options: CompilerOptions) {
-    super(options)
-    this.stringRenderFns = []
-  }
-}
-
 export function generate (
   ast: ASTElement | void,
   options: CompilerOptions
-): SSRCompileResult {
-  const state = new SSRCodegenState(options)
+): CodegenResult {
+  const state = new CodegenState(options)
   const code = ast ? genSSRElement(ast, state) : '_c("div")'
   return {
     render: `with(this){return ${code}}`,
-    staticRenderFns: state.staticRenderFns,
-    stringRenderFns: state.stringRenderFns
+    staticRenderFns: state.staticRenderFns
   }
 }
 
-function genSSRElement (el: ASTElement, state: SSRCodegenState): string {
+function genSSRElement (el: ASTElement, state: CodegenState): string {
   if (el.for && !el.forProcessed) {
     return genFor(el, state, genSSRElement)
   } else if (el.if && !el.ifProcessed) {

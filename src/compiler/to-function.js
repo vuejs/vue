@@ -6,7 +6,6 @@ import { warn, tip } from 'core/util/debug'
 type CompiledFunctionResult = {
   render: Function;
   staticRenderFns: Array<Function>;
-  stringRenderFns?: Array<Function>;
 };
 
 function createFunction (code, errors) {
@@ -80,12 +79,6 @@ export function createCompileToFunctionFn (compile: Function): Function {
     res.staticRenderFns = compiled.staticRenderFns.map(code => {
       return createFunction(code, fnGenErrors)
     })
-    // ssr-specific
-    if (res.stringRenderFns) {
-      res.stringRenderFns = compiled.stringRenderFns.map(code => {
-        return createFunction(code, fnGenErrors)
-      })
-    }
 
     // check function generation errors.
     // this should only happen if there is a bug in the compiler itself.

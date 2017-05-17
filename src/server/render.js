@@ -5,14 +5,10 @@ const { escape } = require('he')
 import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
 import { ssrCompileToFunctions } from 'web/server/compiler'
+import { installSSRHelpers } from './optimizing-compiler/runtime-helpers'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
 import { isDef, isUndef, isTrue } from 'shared/util'
-
-import {
-  createStringNode,
-  createStringList
-} from './optimizing-compiler/runtime-helpers'
 
 let warned = Object.create(null)
 const warnOnce = msg => {
@@ -23,9 +19,6 @@ const warnOnce = msg => {
 }
 
 const normalizeRender = vm => {
-  vm._ssrEscape = escape
-  vm._ssrNode = createStringNode
-  vm._ssrList = createStringList
   const { render, template } = vm.$options
   if (isUndef(render)) {
     if (template) {
@@ -310,6 +303,7 @@ export function createRenderFunction (
       isUnaryTag, modules, directives,
       cache
     })
+    installSSRHelpers(component)
     normalizeRender(component)
     renderNode(component._render(), true, context)
   }

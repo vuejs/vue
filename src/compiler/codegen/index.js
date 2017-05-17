@@ -32,7 +32,7 @@ export class CodegenState {
   }
 }
 
-type CodegenResult = {
+export type CodegenResult = {
   render: string,
   staticRenderFns: Array<string>
 };

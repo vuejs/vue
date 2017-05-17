@@ -1,6 +1,7 @@
 import type { Config } from '../src/core/config'
 import type VNode from '../src/core/vdom/vnode'
 import type Watcher from '../src/core/observer/watcher'
+import type StringNode from '../src/server/optimizing-compiler/runtime-helpers'
 
 declare interface Component {
   // constructor information
@@ -107,6 +108,11 @@ declare interface Component {
   _k: (eventKeyCode: number, key: string, builtInAlias: number | Array<number> | void) => boolean;
   // resolve scoped slots
   _u: (scopedSlots: ScopedSlotsData, res?: Object) => { [key: string]: Function };
+
+  // SSR specific
+  _ssrNode: (open: string, close?: string, ) => StringNode;
+  _ssrList: (val: any, render: () => string) => string;
+  _ssrEscape: (v: string) => string;
 
   // allow dynamic method registration
   [key: string]: any

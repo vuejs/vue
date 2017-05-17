@@ -1,15 +1,35 @@
 /* @flow */
 
+import { escape } from 'he'
 import { isObject } from 'shared/util'
 
-function StringNode (open, close, children) {
-  this.isString = true
-  this.open = open
-  this.close = close
-  this.children = children
+export function installSSRHelpers (vm: Component) {
+  let Ctor = vm.constructor
+  while (Ctor.super) {
+    Ctor = Ctor.super
+  }
+  if (!Ctor.prototype._ssrNode) {
+    Ctor.prototype._ssrNode = createStringNode
+    Ctor.prototype._ssrList = createStringList
+    Ctor.prototype._ssrEscape = escape
+  }
 }
 
-export function createStringNode (
+export class StringNode {
+  isString: boolean;
+  open: string;
+  close: ?string;
+  children: ?Array<any>;
+
+  constructor (open: string, close?: string, children?: Array<any>) {
+    this.isString = true
+    this.open = open
+    this.close = close
+    this.children = children
+  }
+}
+
+function createStringNode (
   open: string,
   close?: string,
   children?: Array<any>
@@ -17,7 +37,7 @@ export function createStringNode (
   return new StringNode(open, close, children)
 }
 
-export function createStringList (val: any, render: () => string): string {
+function createStringList (val: any, render: () => string): string {
   let ret = ''
   let i, l, keys, key
   if (Array.isArray(val) || typeof val === 'string') {
