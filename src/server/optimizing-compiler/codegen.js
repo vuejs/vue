@@ -99,7 +99,7 @@ function genStringElement (el, state, stringifyChildren) {
     const children = genSSRChildren(el, state, true)
     return `_ssrNode(${
       flattenSegments(elementToOpenTagSegments(el, state))
-    }","${el.tag}"${
+    },"${el.tag}"${
       children ? `,${children}` : ''
     })`
   }

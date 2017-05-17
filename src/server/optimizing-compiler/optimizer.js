@@ -35,28 +35,28 @@ function walk (node: ASTNode, isRoot?: boolean) {
     return
   }
   // root node or nodes with custom directives should always be a VNode
-  if (isRoot || hasCustomDirective(node)) {
+  const selfUnoptimizable = isRoot || hasCustomDirective(node)
+  const check = child => {
+    if (child.ssrOptimizability !== optimizability.FULL) {
+      node.ssrOptimizability = selfUnoptimizable
+        ? optimizability.PARTIAL
+        : optimizability.SELF
+    }
+  }
+  if (selfUnoptimizable) {
     node.ssrOptimizability = optimizability.CHILDREN
   }
   if (node.type === 1) {
     for (let i = 0, l = node.children.length; i < l; i++) {
       const child = node.children[i]
       walk(child)
-      if (child.ssrOptimizability !== optimizability.FULL) {
-        node.ssrOptimizability = node.ssrOptimizability === optimizability.CHILDREN
-          ? optimizability.PARTIAL
-          : optimizability.SELF
-      }
+      check(child)
     }
     if (node.ifConditions) {
       for (let i = 1, l = node.ifConditions.length; i < l; i++) {
         const block = node.ifConditions[i].block
         walk(block)
-        if (block.ssrOptimizability !== optimizability.FULL) {
-          node.ssrOptimizability = node.ssrOptimizability === optimizability.CHILDREN
-            ? optimizability.PARTIAL
-            : optimizability.SELF
-        }
+        check(block)
       }
     }
     if (node.ssrOptimizability == null) {
