@@ -1,6 +1,6 @@
 /* @flow */
 
-import { escape } from 'he'
+import { escape } from '../util'
 import { hyphenate } from 'shared/util'
 import { getStyle } from 'web/util/style'
 

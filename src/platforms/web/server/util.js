@@ -34,3 +34,18 @@ export const propsToAttrMap = {
   htmlFor: 'for',
   httpEquiv: 'http-equiv'
 }
+
+const ESC = {
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  '&': '&amp;'
+}
+
+export function escape (s: string) {
+  return s.replace(/[<>"&]/g, escapeChar)
+}
+
+function escapeChar (a) {
+  return ESC[a] || a
+}

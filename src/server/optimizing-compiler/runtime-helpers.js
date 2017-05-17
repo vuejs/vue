@@ -1,6 +1,6 @@
 /* @flow */
 
-import { escape } from 'he'
+import { escape } from 'web/server/util'
 import { isObject } from 'shared/util'
 import { renderAttr } from 'web/server/modules/attrs'
 import { renderClass } from 'web/util/class'

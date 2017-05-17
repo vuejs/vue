@@ -1,6 +1,6 @@
 /* @flow */
 
-import { escape } from 'he'
+import { escape } from '../util'
 
 import {
   isDef,
