@@ -2,6 +2,7 @@
 
 import { escape } from 'he'
 import { isObject } from 'shared/util'
+import { renderAttr } from 'web/server/modules/attrs'
 
 export function installSSRHelpers (vm: Component) {
   let Ctor = vm.constructor
@@ -12,6 +13,7 @@ export function installSSRHelpers (vm: Component) {
     Ctor.prototype._ssrNode = createStringNode
     Ctor.prototype._ssrList = createStringList
     Ctor.prototype._ssrEscape = escape
+    Ctor.prototype._ssrAttr = renderAttr
   }
 }
 

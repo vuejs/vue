@@ -13,18 +13,26 @@ import {
   genChildren,
   CodegenState
 } from 'compiler/codegen/index'
+
+import {
+  genAttrSegments,
+  genDOMPropSegments,
+  applyModelTransform
+} from './modules'
+
 import { optimizability } from './optimizer'
+
 import type { CodegenResult } from 'compiler/codegen/index'
 
-// segment types
-const RAW = 0
-const INTERPOLATION = 1
-const EXPRESSION = 2
-
-type StringSegment = {
+export type StringSegment = {
   type: number;
   value: string;
 };
+
+// segment types
+export const RAW = 0
+export const INTERPOLATION = 1
+export const EXPRESSION = 2
 
 export function generate (
   ast: ASTElement | void,
@@ -125,17 +133,6 @@ function elementToSegments (el, state): Array<StringSegment> {
     }]
   }
 
-  // let binding
-  // // v-show
-  // if ((binding = el.attrsMap['v-show'])) {
-
-  // }
-
-  // // v-model
-  // if ((binding = el.attrsMap['v-model'])) {
-
-  // }
-
   const openSegments = elementToOpenTagSegments(el, state)
   const childrenSegments = childrenToSegments(el, state)
   const { isUnaryTag } = state.options
@@ -146,9 +143,40 @@ function elementToSegments (el, state): Array<StringSegment> {
 }
 
 function elementToOpenTagSegments (el, state): Array<StringSegment> {
-  // TODO: handle v-show, v-html & v-text
-  // TODO: handle attrs/props/styles/classes
-  return [{ type: RAW, value: `<${el.tag}>` }]
+  applyModelTransform(el, state)
+  let binding
+  const segments = [{ type: RAW, value: `<${el.tag}` }]
+  // attrs
+  if (el.attrs) {
+    segments.push.apply(segments, genAttrSegments(el.attrs))
+  }
+  // domProps
+  if (el.props) {
+    segments.push.apply(segments, genDOMPropSegments(el.props, el.attrs))
+  }
+  // v-bind="object"
+  if ((binding = el.attrsMap['v-bind'])) {
+    segments.push({ type: EXPRESSION, value: `_ssrAttrs(${binding})` })
+  }
+  // v-bind.prop="object"
+  if ((binding = el.attrsMap['v-bind.prop'])) {
+    segments.push({ type: EXPRESSION, value: `_ssrDOMProps(${binding})` })
+  }
+  // class
+  if (el.staticClass || el.classBinding) {
+    if (el.staticClass && !el.classBinding) {
+      segments.push({ type: RAW, value: ` class=${el.staticClass}` })
+    } else {
+      // TODO
+    }
+  }
+  // style & v-show
+  if (el.staticStyle || el.styleBinding) {
+    // TODO
+  }
+  // console.log(segments)
+  segments.push({ type: RAW, value: `>` })
+  return segments
 }
 
 function childrenToSegments (el, state): Array<StringSegment> {
