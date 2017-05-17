@@ -17,7 +17,7 @@ export function genClassForVnode (vnode: VNode): string {
       data = mergeClassData(data, parentNode.data)
     }
   }
-  return genClassFromData(data)
+  return renderClass(data.staticClass, data.class)
 }
 
 function mergeClassData (child: VNodeData, parent: VNodeData): {
@@ -32,9 +32,10 @@ function mergeClassData (child: VNodeData, parent: VNodeData): {
   }
 }
 
-function genClassFromData (data: Object): string {
-  const dynamicClass = data.class
-  const staticClass = data.staticClass
+export function renderClass (
+  staticClass: ?string,
+  dynamicClass: any
+): string {
   if (isDef(staticClass) || isDef(dynamicClass)) {
     return concat(staticClass, stringifyClass(dynamicClass))
   }

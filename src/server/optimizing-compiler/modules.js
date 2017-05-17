@@ -56,10 +56,11 @@ export function genDOMPropSegments (
 
 function genAttrSegment (name: string, value: string): StringSegment {
   if (plainStringRE.test(value)) {
-    // TODO attr type checks
     return {
       type: RAW,
-      value: ` ${name}=${value}`
+      value: value === '""'
+        ? ` ${name}`
+        : ` ${name}=${value}`
     }
   } else {
     return {
@@ -67,4 +68,26 @@ function genAttrSegment (name: string, value: string): StringSegment {
       value: `_ssrAttr(${JSON.stringify(name)},${value})`
     }
   }
+}
+
+export function genClassSegments (
+  staticClass: ?string,
+  classBinding: ?string
+): Array<StringSegment> {
+  if (staticClass && !classBinding) {
+    return [{ type: RAW, value: ` class=${staticClass}` }]
+  } else {
+    return [{
+      type: EXPRESSION,
+      value: `_ssrClass(${staticClass || 'null'},${classBinding || 'null'})`
+    }]
+  }
+}
+
+export function genStyleSegments (
+  staticStyle: ?string,
+  styleBinding: ?string,
+  vShowExpression: ?string
+): Array<StringSegment> {
+  return []
 }

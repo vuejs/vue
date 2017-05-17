@@ -3,21 +3,33 @@
 import { escape } from 'he'
 import { isObject } from 'shared/util'
 import { renderAttr } from 'web/server/modules/attrs'
+import { renderClass } from 'web/util/class'
+import { genStyle } from 'web/server/modules/style'
+
+import {
+  propsToAttrMap,
+  isRenderableAttr
+} from 'web/server/util'
 
 export function installSSRHelpers (vm: Component) {
+  if (vm._ssrNode) return
   let Ctor = vm.constructor
   while (Ctor.super) {
     Ctor = Ctor.super
   }
-  if (!Ctor.prototype._ssrNode) {
-    Ctor.prototype._ssrNode = createStringNode
-    Ctor.prototype._ssrList = createStringList
-    Ctor.prototype._ssrEscape = escape
-    Ctor.prototype._ssrAttr = renderAttr
-  }
+  Object.assign(Ctor.prototype, {
+    _ssrEscape: escape,
+    _ssrNode: renderStringNode,
+    _ssrList: renderStringList,
+    _ssrAttr: renderAttr,
+    _ssrAttrs: renderAttrs,
+    _ssrDOMProps: renderDOMProps,
+    _ssrClass: renderSSRClass,
+    _ssrStyle: renderSSRStyle
+  })
 }
 
-export class StringNode {
+class StringNode {
   isString: boolean;
   open: string;
   close: ?string;
@@ -31,15 +43,15 @@ export class StringNode {
   }
 }
 
-function createStringNode (
+function renderStringNode (
   open: string,
   close?: string,
   children?: Array<any>
-) {
+): StringNode {
   return new StringNode(open, close, children)
 }
 
-function createStringList (val: any, render: () => string): string {
+function renderStringList (val: any, render: () => string): string {
   let ret = ''
   let i, l, keys, key
   if (Array.isArray(val) || typeof val === 'string') {
@@ -58,4 +70,40 @@ function createStringList (val: any, render: () => string): string {
     }
   }
   return ret
+}
+
+function renderAttrs (obj: Object): string {
+  let res = ''
+  for (const key in obj) {
+    res += renderAttr(key, obj[key])
+  }
+  return res
+}
+
+function renderDOMProps (obj: Object): string {
+  let res = ''
+  for (const key in obj) {
+    const attr = propsToAttrMap[key] || key.toLowerCase()
+    if (isRenderableAttr(attr)) {
+      res += renderAttr(attr, obj[key])
+    }
+  }
+  return res
+}
+
+function renderSSRClass (
+  staticClass: ?string,
+  dynamic: any
+): string {
+  const res = renderClass(staticClass, dynamic)
+  return res === '' ? res : ` class="${escape(res)}"`
+}
+
+function renderSSRStyle (
+  staticStyle: ?Object,
+  dynamic: any,
+  extra: ?Object
+): string {
+  // TODO
+  return genStyle({})
 }

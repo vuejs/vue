@@ -17,6 +17,8 @@ import {
 import {
   genAttrSegments,
   genDOMPropSegments,
+  genClassSegments,
+  genStyleSegments,
   applyModelTransform
 } from './modules'
 
@@ -164,15 +166,17 @@ function elementToOpenTagSegments (el, state): Array<StringSegment> {
   }
   // class
   if (el.staticClass || el.classBinding) {
-    if (el.staticClass && !el.classBinding) {
-      segments.push({ type: RAW, value: ` class=${el.staticClass}` })
-    } else {
-      // TODO
-    }
+    segments.push.apply(
+      segments,
+      genClassSegments(el.staticClass, el.classBinding)
+    )
   }
   // style & v-show
-  if (el.staticStyle || el.styleBinding) {
-    // TODO
+  if (el.staticStyle || el.styleBinding || el.attrsMap['v-show']) {
+    segments.push.apply(
+      segments,
+      genStyleSegments(el.staticStyle, el.styleBinding, el.attrsMap['v-show'])
+    )
   }
   // console.log(segments)
   segments.push({ type: RAW, value: `>` })

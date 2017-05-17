@@ -1,7 +1,6 @@
 import type { Config } from '../src/core/config'
 import type VNode from '../src/core/vdom/vnode'
 import type Watcher from '../src/core/observer/watcher'
-import type StringNode from '../src/server/optimizing-compiler/runtime-helpers'
 
 declare interface Component {
   // constructor information
@@ -110,9 +109,14 @@ declare interface Component {
   _u: (scopedSlots: ScopedSlotsData, res?: Object) => { [key: string]: Function };
 
   // SSR specific
-  _ssrNode: (open: string, close?: string, ) => StringNode;
-  _ssrList: (val: any, render: () => string) => string;
-  _ssrEscape: (v: string) => string;
+  _ssrNode: Function;
+  _ssrList: Function;
+  _ssrEscape: Function;
+  _ssrAttr: Function;
+  _ssrAttrs: Function;
+  _ssrDOMProps: Function;
+  _ssrClass: Function;
+  _ssrStyle: Function;
 
   // allow dynamic method registration
   [key: string]: any
