@@ -4,10 +4,15 @@ const { escape } = require('he')
 
 import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
-import { compileToFunctions } from 'web/compiler/index'
+import { ssrCompileToFunctions } from 'web/server/compiler'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
-import { isDef, isUndef, isTrue, isObject } from 'shared/util'
+import { isDef, isUndef, isTrue } from 'shared/util'
+
+import {
+  createStringNode,
+  createStringList
+} from './optimizing-compiler/runtime-helpers'
 
 let warned = Object.create(null)
 const warnOnce = msg => {
@@ -17,16 +22,14 @@ const warnOnce = msg => {
   }
 }
 
-const compilationCache = Object.create(null)
 const normalizeRender = vm => {
+  vm._ssrEscape = escape
+  vm._ssrNode = createStringNode
+  vm._ssrList = createStringList
   const { render, template } = vm.$options
   if (isUndef(render)) {
     if (template) {
-      const renderFns = (
-        compilationCache[template] ||
-        (compilationCache[template] = compileToFunctions(template))
-      )
-      Object.assign(vm.$options, renderFns)
+      Object.assign(vm.$options, ssrCompileToFunctions(template))
     } else {
       throw new Error(
         `render function or template not defined in component: ${
@@ -145,39 +148,6 @@ function renderComponentWithCache (node, isRoot, key, context) {
   renderComponentInner(node, isRoot, context)
 }
 
-function StringNode (open, close, children) {
-  this.isString = true
-  this.open = open
-  this.close = close
-  this.children = children
-}
-
-function createStringNode (open, close, children) {
-  return new StringNode(open, close, children)
-}
-
-function createSSRList (val, render) {
-  let ret = ''
-  let i, l, keys, key
-  if (Array.isArray(val) || typeof val === 'string') {
-    for (i = 0, l = val.length; i < l; i++) {
-      ret += render(val[i], i)
-    }
-  } else if (typeof val === 'number') {
-    for (i = 0; i < val; i++) {
-      ret += render(i + 1, i)
-    }
-  } else if (isObject(val)) {
-    keys = Object.keys(val)
-    ret = new Array(keys.length)
-    for (i = 0, l = keys.length; i < l; i++) {
-      key = keys[i]
-      ret += render(val[key], key, i)
-    }
-  }
-  return ret
-}
-
 function renderComponentInner (node, isRoot, context) {
   const prevActive = context.activeInstance
   // expose userContext on vnode
@@ -187,11 +157,6 @@ function renderComponentInner (node, isRoot, context) {
     context.activeInstance
   )
   normalizeRender(child)
-
-  child._ssrNode = createStringNode
-  child._ssrEscape = escape
-  child._ssrList = createSSRList
-
   const childNode = child._render()
   childNode.parent = node
   context.renderStates.push({
@@ -204,7 +169,7 @@ function renderComponentInner (node, isRoot, context) {
 function renderStringNode (el, context) {
   const { write, next } = context
   if (isUndef(el.children) || el.children.length === 0) {
-    write(el.open() + (el.close || ''), next)
+    write(el.open + (el.close || ''), next)
   } else {
     const children: Array<VNode> = el.children
     context.renderStates.push({
@@ -213,7 +178,7 @@ function renderStringNode (el, context) {
       total: children.length,
       endTag: el.close, children
     })
-    write(el.open(), next)
+    write(el.open, next)
   }
 }
 
