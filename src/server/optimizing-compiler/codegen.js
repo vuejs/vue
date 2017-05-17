@@ -55,6 +55,10 @@ function genSSRElement (el: ASTElement, state: CodegenState): string {
     return genIf(el, state, genSSRElement)
   }
 
+  // TODO handle <template> tag
+  // TODO optimize style/class rendering
+  // TODO optimize merge sibling nodes
+
   switch (el.ssrOptimizability) {
     case optimizability.FULL:
       // stringify whole tree

@@ -68,9 +68,10 @@ export function stringifyClass (value: any): string {
   }
   if (isObject(value)) {
     for (const key in value) {
-      if (value[key]) res += key + ' '
+      if (res) res += ' '
+      if (value[key]) res += key
     }
-    return res.slice(0, -1)
+    return res
   }
   /* istanbul ignore next */
   return res
