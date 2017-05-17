@@ -28,6 +28,7 @@ export type RenderOptions = {
   shouldPreload?: Function;
   clientManifest?: ClientManifest;
   runInNewContext?: boolean | 'once';
+  contentPlaceholder?: string;
 };
 
 export function createRenderer ({
@@ -38,14 +39,16 @@ export function createRenderer ({
   inject,
   cache,
   shouldPreload,
-  clientManifest
+  clientManifest,
+  contentPlaceholder
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
   const templateRenderer = new TemplateRenderer({
     template,
     inject,
     shouldPreload,
-    clientManifest
+    clientManifest,
+    contentPlaceholder
   })
 
   return {

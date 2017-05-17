@@ -5,7 +5,9 @@ import { createRenderer } from '../../packages/vue-server-renderer'
 import VueSSRClientPlugin from '../../packages/vue-server-renderer/client-plugin'
 import { createRenderer as createBundleRenderer } from './ssr-bundle-render.spec.js'
 
+const contentPlaceholder = '<!--my-vue-ssr-outlet-->'
 const defaultTemplate = `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
+const contentPlaceholderTemplate = `<html><head></head><body>${contentPlaceholder}</body></html>`
 const interpolateTemplate = `<html><head><title>{{ title }}</title></head><body><!--vue-ssr-outlet-->{{{ snippet }}}</body></html>`
 
 function generateClientManifest (file, cb) {
@@ -44,6 +46,32 @@ describe('SSR: template option', () => {
   it('renderToString', done => {
     const renderer = createRenderer({
       template: defaultTemplate
+    })
+
+    const context = {
+      head: '<meta name="viewport" content="width=device-width">',
+      styles: '<style>h1 { color: red }</style>',
+      state: { a: 1 }
+    }
+
+    renderer.renderToString(new Vue({
+      template: '<div>hi</div>'
+    }), context, (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain(
+        `<html><head>${context.head}${context.styles}</head><body>` +
+        `<div data-server-rendered="true">hi</div>` +
+        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        `</body></html>`
+      )
+      done()
+    })
+  })
+
+  it('renderToString with contentPlaceholder', done => {
+    const renderer = createRenderer({
+      template: contentPlaceholderTemplate,
+      contentPlaceholder
     })
 
     const context = {

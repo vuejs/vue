@@ -15,6 +15,7 @@ type TemplateRendererOptions = {
   inject?: boolean;
   clientManifest?: ClientManifest;
   shouldPreload?: (file: string, type: string) => boolean;
+  contentPlaceholder?: string;
 };
 
 export type ClientManifest = {
@@ -53,7 +54,7 @@ export default class TemplateRenderer {
     // if no template option is provided, the renderer is created
     // as a utility object for rendering assets like preload links and scripts.
     this.parsedTemplate = options.template
-      ? parseTemplate(options.template)
+      ? parseTemplate(options.template, options.contentPlaceholder)
       : null
 
     // extra functionality with client manifest
