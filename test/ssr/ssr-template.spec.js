@@ -5,9 +5,9 @@ import { createRenderer } from '../../packages/vue-server-renderer'
 import VueSSRClientPlugin from '../../packages/vue-server-renderer/client-plugin'
 import { createRenderer as createBundleRenderer } from './ssr-bundle-render.spec.js'
 
-const contentPlaceholder = '<!--my-vue-ssr-outlet-->'
+const myContentPlaceholder = '<!--my-vue-ssr-outlet-->'
 const defaultTemplate = `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
-const contentPlaceholderTemplate = `<html><head></head><body>${contentPlaceholder}</body></html>`
+const contentPlaceholderTemplate = `<html><head></head><body>${myContentPlaceholder}</body></html>`
 const interpolateTemplate = `<html><head><title>{{ title }}</title></head><body><!--vue-ssr-outlet-->{{{ snippet }}}</body></html>`
 
 function generateClientManifest (file, cb) {
@@ -71,7 +71,7 @@ describe('SSR: template option', () => {
   it('renderToString with contentPlaceholder', done => {
     const renderer = createRenderer({
       template: contentPlaceholderTemplate,
-      contentPlaceholder
+      contentPlaceholder: myContentPlaceholder
     })
 
     const context = {
