@@ -60,6 +60,16 @@ const isReservedProp = {
   slot: 1
 }
 
+function checkOptionType (vm: Component, name: string) {
+  const option = vm.$options[name]
+  if (!isPlainObject(option)) {
+    warn(
+      `component option "${name}" should be an object.`,
+      vm
+    )
+  }
+}
+
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
@@ -148,6 +158,7 @@ function getData (data: Function, vm: Component): any {
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
+  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
   const watchers = vm._computedWatchers = Object.create(null)
 
   for (const key in computed) {
@@ -213,6 +224,7 @@ function createComputedGetter (key) {
 }
 
 function initMethods (vm: Component, methods: Object) {
+  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'methods')
   const props = vm.$options.props
   for (const key in methods) {
     vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
@@ -235,6 +247,7 @@ function initMethods (vm: Component, methods: Object) {
 }
 
 function initWatch (vm: Component, watch: Object) {
+  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'watch')
   for (const key in watch) {
     const handler = watch[key]
     if (Array.isArray(handler)) {
@@ -247,8 +260,12 @@ function initWatch (vm: Component, watch: Object) {
   }
 }
 
-function createWatcher (vm: Component, key: string, handler: any) {
-  let options
+function createWatcher (
+  vm: Component,
+  keyOrFn: string | Function,
+  handler: any,
+  options?: Object
+) {
   if (isPlainObject(handler)) {
     options = handler
     handler = handler.handler
@@ -256,7 +273,7 @@ function createWatcher (vm: Component, key: string, handler: any) {
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
-  vm.$watch(key, handler, options)
+  return vm.$watch(keyOrFn, handler, options)
 }
 
 export function stateMixin (Vue: Class<Component>) {
@@ -287,10 +304,13 @@ export function stateMixin (Vue: Class<Component>) {
 
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
-    cb: Function,
+    cb: any,
     options?: Object
   ): Function {
     const vm: Component = this
+    if (isPlainObject(cb)) {
+      return createWatcher(vm, expOrFn, cb, options)
+    }
     options = options || {}
     options.user = true
     const watcher = new Watcher(vm, expOrFn, cb, options)

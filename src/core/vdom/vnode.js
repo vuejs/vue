@@ -84,6 +84,7 @@ export function cloneVNode (vnode: VNode): VNode {
   cloned.ns = vnode.ns
   cloned.isStatic = vnode.isStatic
   cloned.key = vnode.key
+  cloned.isComment = vnode.isComment
   cloned.isCloned = true
   return cloned
 }

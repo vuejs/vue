@@ -181,7 +181,7 @@ export default class TemplateRenderer {
       }
       return this.prefetchFiles.map(file => {
         if (!alreadyRendered(file)) {
-          return `<link rel="prefetch" href="${this.publicPath}/${file}" as="script">`
+          return `<link rel="prefetch" href="${this.publicPath}/${file}">`
         } else {
           return ''
         }

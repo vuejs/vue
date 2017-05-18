@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options methods', () => {
   it('should have correct context', () => {
@@ -15,6 +16,8 @@ describe('Options methods', () => {
     vm.plus()
     expect(vm.a).toBe(2)
   })
+
+  testObjectOption('methods')
 
   it('should warn undefined methods', () => {
     new Vue({

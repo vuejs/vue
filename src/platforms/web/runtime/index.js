@@ -56,8 +56,9 @@ setTimeout(() => {
     }
   }
   if (process.env.NODE_ENV !== 'production' &&
-      config.productionTip !== false &&
-      inBrowser && typeof console !== 'undefined') {
+    config.productionTip !== false &&
+    inBrowser && typeof console !== 'undefined'
+  ) {
     console[console.info ? 'info' : 'log'](
       `You are running Vue in development mode.\n` +
       `Make sure to turn on production mode when deploying for production.\n` +

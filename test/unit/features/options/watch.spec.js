@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options watch', () => {
   let spy
@@ -22,6 +23,8 @@ describe('Options watch', () => {
       expect(spy).toHaveBeenCalledWith(2, 1)
     }).then(done)
   })
+
+  testObjectOption('watch')
 
   it('string method name', done => {
     const vm = new Vue({

@@ -68,19 +68,9 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/famebroker.png">
 </a>
 <br><br>
-<a href="https://fancygrid.com" target="_blank">
-  <img width="240px" src="http://fancygrid.com/logo/logo.png">
-</a>
-<br><br>
 <a href="https://component.io/" target="_blank">
   <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/component_io.png">
 </a>
-
----
-
-### $250
-
-[It could be you!](https://www.patreon.com/bePatron?u=2341390)
 
 ---
 
@@ -89,21 +79,25 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 <a href="http://tighten.co/">
   <img width="240px" src="http://i.imgur.com/T7fQYLT.png">
 </a>
-
+<br><br>
 <a href="http://invoicemachine.com/">
   <img width="220px" src="http://assets.invoicemachine.com/images/flat_logo.png">
 </a>
-
+<br><br>
 <a href="https://alligator.io">
   <img width="240px" src="https://alligator.io/images/alligator-logo.svg">
 </a>
-
+<br><br>
 <a href="https://monei.net/">
   <img width="200px" src="http://i.imgur.com/JUSjHAi.png">
 </a>
-
+<br><br>
 <a href="https://www.accelebrate.com/">
   <img width="220px" src="https://www.accelebrate.com/assets/images/accelebrate_logo@2x.png">
+</a>
+<br><br>
+<a href="https://www.waterfall.com">
+  <img width="200px" src="https://waterfall.com/waterfall_logo_large.png">
 </a>
 
 ---
@@ -120,7 +114,6 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - Wasim Khamlichi
 - errorrik
 - Alex Balashov
-- Cheng-Wei Chien
 
 ---
 
@@ -165,7 +158,6 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - Anders
 - Dexter Miguel
 - Stephen Michael Hartley
-- TJ Fogarty
 - Wen-Tien Chang
 - Ole Støvern
 - Valerian Cure
@@ -257,3 +249,17 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - Dan Barrett
 - Zoran Knezevic
 - Charles Beaumont
+- Jonathan Kent
+- James Simpson
+- Pascal Germain
+- Pierre Vanhulst
+- Vincent Gabriel
+- Kyovo Digaw
+- devneko
+- Cheng-Wei Chien
+- Michael Mazurczak
+- Daniel
+- Chris Anderson
+- Jon Hobbs-Smith
+- Chez Tschetter
+- Akiho Nagao
