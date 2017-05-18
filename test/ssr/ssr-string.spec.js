@@ -338,7 +338,7 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('v-html', done => {
+  it('v-html on root', done => {
     renderVmWithOptions({
       template: '<div v-html="text"></div>',
       data: {
@@ -350,7 +350,7 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('v-text', done => {
+  it('v-text on root', done => {
     renderVmWithOptions({
       template: '<div v-text="text"></div>',
       data: {
@@ -358,6 +358,30 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain('<div data-server-rendered="true">&lt;span&gt;foo&lt;/span&gt;</div>')
+      done()
+    })
+  })
+
+  it('v-html', done => {
+    renderVmWithOptions({
+      template: '<div><div v-html="text"></div></div>',
+      data: {
+        text: '<span>foo</span>'
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div><span>foo</span></div></div>')
+      done()
+    })
+  })
+
+  it('v-text', done => {
+    renderVmWithOptions({
+      template: '<div><div v-text="text"></div></div>',
+      data: {
+        text: '<span>foo</span>'
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div>&lt;span&gt;foo&lt;/span&gt;</div></div>')
       done()
     })
   })

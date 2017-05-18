@@ -60,8 +60,7 @@ function walk (node: ASTNode, isRoot?: boolean) {
       }
     }
     if (node.ssrOptimizability == null ||
-      node.attrsMap['v-html'] ||
-      node.attrsMap['v-text']
+      (!isRoot && (node.attrsMap['v-html'] || node.attrsMap['v-text']))
     ) {
       node.ssrOptimizability = optimizability.FULL
     } else {
