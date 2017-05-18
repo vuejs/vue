@@ -53,10 +53,10 @@ function genSSRElement (el: ASTElement, state: CodegenState): string {
     return genFor(el, state, genSSRElement)
   } else if (el.if && !el.ifProcessed) {
     return genIf(el, state, genSSRElement)
+  } else if (el.tag === 'template' && !el.slotTarget) {
+    return genSSRChildren(el, state) || 'void 0'
   }
 
-  // TODO handle <template> tag
-  // TODO optimize style/class rendering
   // TODO optimize merge sibling nodes
 
   switch (el.ssrOptimizability) {
@@ -137,6 +137,8 @@ function elementToSegments (el, state): Array<StringSegment> {
       type: EXPRESSION,
       value: genIf(el, state, elementToString, '""')
     }]
+  } else if (el.tag === 'template') {
+    return childrenToSegments(el, state)
   }
 
   const openSegments = elementToOpenTagSegments(el, state)
