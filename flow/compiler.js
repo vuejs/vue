@@ -16,6 +16,9 @@ declare type CompilerOptions = {
   shouldDecodeTags?: boolean;
   shouldDecodeNewlines?: boolean;
 
+  // for ssr optimization compiler
+  scopeId?: string;
+
   // runtime user-configurable
   delimiters?: [string, string]; // template delimiters
 };

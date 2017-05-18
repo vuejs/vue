@@ -18,10 +18,12 @@ const warnOnce = msg => {
 }
 
 const normalizeRender = vm => {
-  const { render, template } = vm.$options
+  const { render, template, _scopeId } = vm.$options
   if (isUndef(render)) {
     if (template) {
-      Object.assign(vm.$options, ssrCompileToFunctions(template))
+      Object.assign(vm.$options, ssrCompileToFunctions(template, {
+        scopeId: _scopeId
+      }))
     } else {
       throw new Error(
         `render function or template not defined in component: ${

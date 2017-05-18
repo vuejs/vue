@@ -189,7 +189,10 @@ function elementToOpenTagSegments (el, state): Array<StringSegment> {
       )
     )
   }
-  // console.log(segments)
+  // _scopedId
+  if (state.options.scopeId) {
+    segments.push({ type: RAW, value: ` ${state.options.scopeId}` })
+  }
   segments.push({ type: RAW, value: `>` })
   return segments
 }
