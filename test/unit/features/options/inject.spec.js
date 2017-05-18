@@ -267,6 +267,5 @@ describe('Options provide/inject', () => {
     })
     expect(`Injection "foo" not found`).not.toHaveBeenWarned()
     expect(`Injection "bar" not found`).not.toHaveBeenWarned()
-    expect(`Injection "baz" not found`).not.toHaveBeenWarned()
   })
 })
