@@ -818,6 +818,34 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-if', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span v-if="true">foo</span>
+          <span v-if="false">bar</span>
+        </div>
+      `
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span> <!----></div>`)
+      done()
+    })
+  })
+
+  it('v-for', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>foo</span>
+          <span v-for="i in 2">{{ i }}</span>
+        </div>
+      `
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span> <span>1</span><span>2</span></div>`)
+      done()
+    })
+  })
+
   it('template v-if', done => {
     renderVmWithOptions({
       template: `

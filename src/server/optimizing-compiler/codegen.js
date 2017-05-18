@@ -135,7 +135,7 @@ function elementToSegments (el, state): Array<StringSegment> {
     el.ifProcessed = true
     return [{
       type: EXPRESSION,
-      value: genIf(el, state, elementToString, '""')
+      value: genIf(el, state, elementToString, '"<!---->"')
     }]
   } else if (el.tag === 'template') {
     return childrenToSegments(el, state)
