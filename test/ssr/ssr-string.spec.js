@@ -778,7 +778,7 @@ describe('SSR: renderToString', () => {
     expect(vm.a).toBe(func)
   })
 
-  it('should prevent xss in attribtues', () => {
+  it('should prevent xss in attribtues', done => {
     renderVmWithOptions({
       data: {
         xss: '"><script>alert(1)</script>'
@@ -790,6 +790,39 @@ describe('SSR: renderToString', () => {
       `
     }, res => {
       expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
+  it('template v-if', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>foo</span>
+          <template v-if="true">
+            <span>foo</span> bar <span>baz</span>
+          </template>
+        </div>
+      `
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span> <span>foo</span> bar <span>baz</span></div>`)
+      done()
+    })
+  })
+
+  it('template v-for', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>foo</span>
+          <template v-for="i in 2">
+            <span>{{ i }}</span><span>bar</span>
+          </template>
+        </div>
+      `
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span> <span>1</span><span>bar</span><span>2</span><span>bar</span></div>`)
+      done()
     })
   })
 })
