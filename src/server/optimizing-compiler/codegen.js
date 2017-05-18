@@ -54,7 +54,9 @@ function genSSRElement (el: ASTElement, state: CodegenState): string {
   } else if (el.if && !el.ifProcessed) {
     return genIf(el, state, genSSRElement)
   } else if (el.tag === 'template' && !el.slotTarget) {
-    return genSSRChildren(el, state) || 'void 0'
+    return el.ssrOptimizability === optimizability.FULL
+      ? genChildrenAsStringNode(el, state)
+      : genSSRChildren(el, state) || 'void 0'
   }
 
   switch (el.ssrOptimizability) {
@@ -79,7 +81,7 @@ function genSSRElement (el: ASTElement, state: CodegenState): string {
 function genNormalElement (el, state, stringifyChildren) {
   const data = el.plain ? undefined : genData(el, state)
   const children = stringifyChildren
-    ? genStringChildren(el, state)
+    ? `[${genChildrenAsStringNode(el, state)}]`
     : genSSRChildren(el, state, true)
   return `_c('${el.tag}'${
     data ? `,${data}` : ''
@@ -98,9 +100,9 @@ function genSSRNode (el, state) {
     : genText(el, state)
 }
 
-function genStringChildren (el, state) {
+function genChildrenAsStringNode (el, state) {
   return el.children.length
-    ? `[_ssrNode(${flattenSegments(childrenToSegments(el, state))})]`
+    ? `_ssrNode(${flattenSegments(childrenToSegments(el, state))})`
     : ''
 }
 
@@ -200,24 +202,27 @@ function childrenToSegments (el, state): Array<StringSegment> {
   if ((binding = el.attrsMap['v-text'])) {
     return [{ type: INTERPOLATION, value: binding }]
   }
+  return el.children
+    ? nodesToSegments(el.children, state)
+    : []
+}
 
-  const children = el.children
-  if (children) {
-    const segments = []
-    for (let i = 0; i < children.length; i++) {
-      const c = children[i]
-      if (c.type === 1) {
-        segments.push.apply(segments, elementToSegments(c, state))
-      } else if (c.type === 2) {
-        segments.push({ type: INTERPOLATION, value: c.expression })
-      } else if (c.type === 3) {
-        segments.push({ type: RAW, value: c.text })
-      }
+function nodesToSegments (
+  children: Array<ASTNode>,
+  state: CodegenState
+): Array<StringSegment> {
+  const segments = []
+  for (let i = 0; i < children.length; i++) {
+    const c = children[i]
+    if (c.type === 1) {
+      segments.push.apply(segments, elementToSegments(c, state))
+    } else if (c.type === 2) {
+      segments.push({ type: INTERPOLATION, value: c.expression })
+    } else if (c.type === 3) {
+      segments.push({ type: RAW, value: c.text })
     }
-    return segments
-  } else {
-    return []
   }
+  return segments
 }
 
 function flattenSegments (segments: Array<StringSegment>): string {

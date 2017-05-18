@@ -64,10 +64,47 @@ function walk (node: ASTNode, isRoot?: boolean) {
       node.attrsMap['v-text']
     ) {
       node.ssrOptimizability = optimizability.FULL
+    } else {
+      node.children = optimizeSiblings(node)
     }
   } else {
     node.ssrOptimizability = optimizability.FULL
   }
+}
+
+function optimizeSiblings (el) {
+  const children = el.children
+  const optimizedChildren = []
+
+  let currentOptimizableGroup = []
+  const pushGroup = () => {
+    if (currentOptimizableGroup.length) {
+      optimizedChildren.push({
+        type: 1,
+        parent: el,
+        tag: 'template',
+        attrsList: [],
+        attrsMap: {},
+        children: currentOptimizableGroup,
+        ssrOptimizability: optimizability.FULL
+      })
+    }
+    currentOptimizableGroup = []
+  }
+
+  for (let i = 0; i < children.length; i++) {
+    const c = children[i]
+    if (c.ssrOptimizability === optimizability.FULL) {
+      currentOptimizableGroup.push(c)
+    } else {
+      // wrap fully-optimizable adjacent siblings inside a template tag
+      // so that they can be optimized into a single ssrNode by codegen
+      pushGroup()
+      optimizedChildren.push(c)
+    }
+  }
+  pushGroup()
+  return optimizedChildren
 }
 
 function isUnOptimizableTree (node: ASTNode): boolean {
