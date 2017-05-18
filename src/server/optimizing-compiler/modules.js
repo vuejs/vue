@@ -11,6 +11,11 @@ import {
   isRenderableAttr
 } from 'web/server/util'
 
+import {
+  isBooleanAttr,
+  isEnumeratedAttr
+} from 'web/util/attrs'
+
 import type { StringSegment } from './codegen'
 import type { CodegenState } from 'compiler/codegen/index'
 
@@ -56,11 +61,19 @@ export function genDOMPropSegments (
 
 function genAttrSegment (name: string, value: string): StringSegment {
   if (plainStringRE.test(value)) {
+    // force double quote
+    value = value.replace(/^'|'$/g, '"')
+    // force enumerated attr to "true"
+    if (isEnumeratedAttr(name) && value !== `"false"`) {
+      value = `"true"`
+    }
     return {
       type: RAW,
-      value: value === '""'
-        ? ` ${name}`
-        : ` ${name}=${value}`
+      value: isBooleanAttr(name)
+        ? ` ${name}="${name}"`
+        : value === '""'
+          ? ` ${name}`
+          : ` ${name}=${value}`
     }
   } else {
     return {
