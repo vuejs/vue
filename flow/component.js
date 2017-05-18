@@ -108,6 +108,16 @@ declare interface Component {
   // resolve scoped slots
   _u: (scopedSlots: ScopedSlotsData, res?: Object) => { [key: string]: Function };
 
+  // SSR specific
+  _ssrNode: Function;
+  _ssrList: Function;
+  _ssrEscape: Function;
+  _ssrAttr: Function;
+  _ssrAttrs: Function;
+  _ssrDOMProps: Function;
+  _ssrClass: Function;
+  _ssrStyle: Function;
+
   // allow dynamic method registration
   [key: string]: any
-}
+};

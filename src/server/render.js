@@ -1,10 +1,10 @@
 /* @flow */
 
-const { escape } = require('he')
-
+import { escape } from 'web/server/util'
 import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
-import { compileToFunctions } from 'web/compiler/index'
+import { ssrCompileToFunctions } from 'web/server/compiler'
+import { installSSRHelpers } from './optimizing-compiler/runtime-helpers'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
 import { isDef, isUndef, isTrue } from 'shared/util'
@@ -17,16 +17,13 @@ const warnOnce = msg => {
   }
 }
 
-const compilationCache = Object.create(null)
 const normalizeRender = vm => {
-  const { render, template } = vm.$options
+  const { render, template, _scopeId } = vm.$options
   if (isUndef(render)) {
     if (template) {
-      const renderFns = (
-        compilationCache[template] ||
-        (compilationCache[template] = compileToFunctions(template))
-      )
-      Object.assign(vm.$options, renderFns)
+      Object.assign(vm.$options, ssrCompileToFunctions(template, {
+        scopeId: _scopeId
+      }))
     } else {
       throw new Error(
         `render function or template not defined in component: ${
@@ -38,7 +35,9 @@ const normalizeRender = vm => {
 }
 
 function renderNode (node, isRoot, context) {
-  if (isDef(node.componentOptions)) {
+  if (node.isString) {
+    renderStringNode(node, context)
+  } else if (isDef(node.componentOptions)) {
     renderComponent(node, isRoot, context)
   } else {
     if (isDef(node.tag)) {
@@ -159,6 +158,22 @@ function renderComponentInner (node, isRoot, context) {
     prevActive
   })
   renderNode(childNode, isRoot, context)
+}
+
+function renderStringNode (el, context) {
+  const { write, next } = context
+  if (isUndef(el.children) || el.children.length === 0) {
+    write(el.open + (el.close || ''), next)
+  } else {
+    const children: Array<VNode> = el.children
+    context.renderStates.push({
+      type: 'Element',
+      rendered: 0,
+      total: children.length,
+      endTag: el.close, children
+    })
+    write(el.open, next)
+  }
 }
 
 function renderElement (el, isRoot, context) {
@@ -289,6 +304,7 @@ export function createRenderFunction (
       isUnaryTag, modules, directives,
       cache
     })
+    installSSRHelpers(component)
     normalizeRender(component)
     renderNode(component._render(), true, context)
   }
