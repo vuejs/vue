@@ -8,6 +8,11 @@ import { genStyle } from 'web/server/modules/style'
 import { normalizeStyleBinding } from 'web/util/style'
 
 import {
+  normalizeChildren,
+  simpleNormalizeChildren
+} from 'core/vdom/helpers/normalize-children'
+
+import {
   propsToAttrMap,
   isRenderableAttr
 } from 'web/server/util'
@@ -36,20 +41,34 @@ class StringNode {
   close: ?string;
   children: ?Array<any>;
 
-  constructor (open: string, close?: string, children?: Array<any>) {
+  constructor (
+    open: string,
+    close?: string,
+    children?: Array<any>,
+    normalizationType?: number
+  ) {
     this.isString = true
     this.open = open
     this.close = close
-    this.children = children
+    if (children) {
+      this.children = normalizationType === 1
+        ? simpleNormalizeChildren(children)
+        : normalizationType === 2
+          ? normalizeChildren(children)
+          : children
+    } else {
+      this.children = void 0
+    }
   }
 }
 
 function renderStringNode (
   open: string,
   close?: string,
-  children?: Array<any>
+  children?: Array<any>,
+  normalizationType?: number
 ): StringNode {
-  return new StringNode(open, close, children)
+  return new StringNode(open, close, children, normalizationType)
 }
 
 function renderStringList (val: any, render: () => string): string {

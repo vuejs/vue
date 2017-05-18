@@ -57,8 +57,6 @@ function genSSRElement (el: ASTElement, state: CodegenState): string {
     return genSSRChildren(el, state) || 'void 0'
   }
 
-  // TODO optimize merge sibling nodes
-
   switch (el.ssrOptimizability) {
     case optimizability.FULL:
       // stringify whole tree
