@@ -209,7 +209,7 @@ export default class TemplateRenderer {
       const async = this.getUsedAsyncFiles(context)
       const needed = [initial[0]].concat(async || [], initial.slice(1))
       return needed.filter(isJS).map(file => {
-        return `<script src="${this.publicPath}/${file}"></script>`
+        return `<script src="${this.publicPath}/${file}" async></script>`
       }).join('')
     } else {
       return ''
