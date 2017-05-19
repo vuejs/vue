@@ -98,7 +98,7 @@ const hooksToMerge = Object.keys(componentVNodeHooks)
 
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
-  data?: VNodeData,
+  data: ?VNodeData,
   context: Component,
   children: ?Array<VNode>,
   tag?: string
@@ -123,19 +123,26 @@ export function createComponent (
     return
   }
 
-  data = data || {}
-
   // async component
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor, context)
     if (Ctor === undefined) {
-      // return nothing if this is indeed an async component
-      // wait for the callback to trigger parent update.
-      return createAsyncPlaceholder(asyncFactory, data.key)
+      // return a placeholder node for async component, which is rendered
+      // as a comment node but preserves all the raw information for the node.
+      // the information will be used for async server-rendering and hydration.
+      return createAsyncPlaceholder(
+        asyncFactory,
+        data,
+        context,
+        children,
+        tag
+      )
     }
   }
+
+  data = data || {}
 
   // resolve constructor options in case global mixins are applied after
   // component constructor creation

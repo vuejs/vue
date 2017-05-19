@@ -20,7 +20,9 @@ export default class VNode {
   isCloned: boolean; // is a cloned node?
   isOnce: boolean; // is a v-once node?
   asyncFactory: ?Function; // async component factory function
+  asyncMeta: ?Object;
   isAsyncPlaceholder: boolean;
+  ssrContext: ?Object;
 
   constructor (
     tag?: string,
@@ -51,6 +53,7 @@ export default class VNode {
     this.isCloned = false
     this.isOnce = false
     this.asyncFactory = asyncFactory
+    this.asyncMeta = undefined
     this.isAsyncPlaceholder = false
   }
 

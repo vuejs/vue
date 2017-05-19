@@ -19,11 +19,14 @@ function ensureCtor (comp, base) {
 
 export function createAsyncPlaceholder (
   factory: Function,
-  key: string | number | void
+  data: ?VNodeData,
+  context: Component,
+  children: ?Array<VNode>,
+  tag: ?string
 ): VNode {
   const node = createEmptyVNode()
   node.asyncFactory = factory
-  node.key = key
+  node.asyncMeta = { data, context, children, tag }
   return node
 }
 
