@@ -33,11 +33,17 @@ const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
 function sameVnode (a, b) {
   return (
-    a.key === b.key &&
-    a.tag === b.tag &&
-    a.isComment === b.isComment &&
-    isDef(a.data) === isDef(b.data) &&
-    sameInputType(a, b)
+    a.key === b.key && (
+      (
+        a.isAsyncPlaceholder === true &&
+        a.asyncFactory === b.asyncFactory
+      ) || (
+        a.tag === b.tag &&
+        a.isComment === b.isComment &&
+        isDef(a.data) === isDef(b.data) &&
+        sameInputType(a, b)
+      )
+    )
   )
 }
 
@@ -434,6 +440,9 @@ export function createPatchFunction (backend) {
     if (oldVnode === vnode) {
       return
     }
+    if (oldVnode.isAsyncPlaceholder) {
+      return hydrate(oldVnode.elm, vnode, insertedVnodeQueue)
+    }
     // reuse element for static trees.
     // note we only do this if the vnode is cloned -
     // if the new node is not cloned it means the render functions have been
@@ -497,6 +506,11 @@ export function createPatchFunction (backend) {
 
   // Note: this is a browser-only function so we can assume elms are DOM nodes.
   function hydrate (elm, vnode, insertedVnodeQueue) {
+    if (isTrue(vnode.isComment) && isDef(vnode.asyncFactory)) {
+      vnode.elm = elm
+      vnode.isAsyncPlaceholder = true
+      return true
+    }
     if (process.env.NODE_ENV !== 'production') {
       if (!assertNodeMatch(elm, vnode)) {
         return false

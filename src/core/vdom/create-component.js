@@ -15,6 +15,7 @@ import {
 
 import {
   resolveAsyncComponent,
+  createAsyncPlaceholder,
   extractPropsFromVNodeData
 } from './helpers/index'
 
@@ -122,21 +123,23 @@ export function createComponent (
     return
   }
 
+  data = data || {}
+
   // async component
+  let asyncFactory
   if (isUndef(Ctor.cid)) {
-    Ctor = resolveAsyncComponent(Ctor, baseCtor, context)
+    asyncFactory = Ctor
+    Ctor = resolveAsyncComponent(asyncFactory, baseCtor, context)
     if (Ctor === undefined) {
       // return nothing if this is indeed an async component
       // wait for the callback to trigger parent update.
-      return
+      return createAsyncPlaceholder(asyncFactory, data.key)
     }
   }
 
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
   resolveConstructorOptions(Ctor)
-
-  data = data || {}
 
   // transform component v-model data into props & events
   if (isDef(data.model)) {
@@ -171,7 +174,8 @@ export function createComponent (
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, context,
-    { Ctor, propsData, listeners, tag, children }
+    { Ctor, propsData, listeners, tag, children },
+    asyncFactory
   )
   return vnode
 }

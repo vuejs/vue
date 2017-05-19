@@ -9,10 +9,22 @@ import {
   isObject
 } from 'core/util/index'
 
+import { createEmptyVNode } from 'core/vdom/vnode'
+
 function ensureCtor (comp, base) {
   return isObject(comp)
     ? base.extend(comp)
     : comp
+}
+
+export function createAsyncPlaceholder (
+  factory: Function,
+  key: string | number | void
+): VNode {
+  const node = createEmptyVNode()
+  node.asyncFactory = factory
+  node.key = key
+  return node
 }
 
 export function resolveAsyncComponent (
