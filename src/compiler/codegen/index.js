@@ -225,11 +225,11 @@ export function genData (el: ASTElement, state: CodegenState): string {
   }
   // attributes
   if (el.attrs) {
-    data += `attrs:{${genProps(el.attrs, state)}},`
+    data += `attrs:{${genProps(el.attrs)}},`
   }
   // DOM props
   if (el.props) {
-    data += `domProps:{${genProps(el.props, state)}},`
+    data += `domProps:{${genProps(el.props)}},`
   }
   // event handlers
   if (el.events) {
