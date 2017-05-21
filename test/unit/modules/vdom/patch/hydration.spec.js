@@ -3,6 +3,13 @@ import VNode from 'core/vdom/vnode'
 import { patch } from 'web/runtime/patch'
 import { SSR_ATTR } from 'shared/constants'
 
+function createMockSSRDOM (innerHTML) {
+  const dom = document.createElement('div')
+  dom.setAttribute(SSR_ATTR, 'true')
+  dom.innerHTML = innerHTML
+  return dom
+}
+
 describe('vdom patch: hydration', () => {
   let vnode0
   beforeEach(() => {
@@ -89,9 +96,7 @@ describe('vdom patch: hydration', () => {
 
   // component hydration is better off with a more e2e approach
   it('should hydrate components when server-rendered DOM tree is same as virtual DOM tree', done => {
-    const dom = document.createElement('div')
-    dom.setAttribute(SSR_ATTR, 'true')
-    dom.innerHTML = '<span>foo</span><div class="b a"><span>foo qux</span></div><!---->'
+    const dom = createMockSSRDOM('<span>foo</span><div class="b a"><span>foo qux</span></div><!---->')
     const originalNode1 = dom.children[0]
     const originalNode2 = dom.children[1]
 
@@ -131,9 +136,7 @@ describe('vdom patch: hydration', () => {
   })
 
   it('should warn failed hydration for non-matching DOM in child component', () => {
-    const dom = document.createElement('div')
-    dom.setAttribute(SSR_ATTR, 'true')
-    dom.innerHTML = '<div><span></span></div>'
+    const dom = createMockSSRDOM('<div><span></span></div>')
 
     new Vue({
       template: '<div><test></test></div>',
@@ -148,9 +151,7 @@ describe('vdom patch: hydration', () => {
   })
 
   it('should overwrite textNodes in the correct position but with mismatching text without warning', () => {
-    const dom = document.createElement('div')
-    dom.setAttribute(SSR_ATTR, 'true')
-    dom.innerHTML = '<div><span>foo</span></div>'
+    const dom = createMockSSRDOM('<div><span>foo</span></div>')
 
     new Vue({
       template: '<div><test></test></div>',
@@ -169,9 +170,7 @@ describe('vdom patch: hydration', () => {
   })
 
   it('should pick up elements with no children and populate without warning', done => {
-    const dom = document.createElement('div')
-    dom.setAttribute(SSR_ATTR, 'true')
-    dom.innerHTML = '<div><span></span></div>'
+    const dom = createMockSSRDOM('<div><span></span></div>')
     const span = dom.querySelector('span')
 
     const vm = new Vue({
@@ -194,5 +193,108 @@ describe('vdom patch: hydration', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('<div><span>foo</span></div>')
     }).then(done)
+  })
+
+  it('should hydrate async component', done => {
+    const dom = createMockSSRDOM('<span>foo</span>')
+    const span = dom.querySelector('span')
+
+    const Foo = resolve => setTimeout(() => {
+      resolve({
+        data: () => ({ msg: 'foo' }),
+        template: `<span>{{ msg }}</span>`
+      })
+    }, 0)
+
+    const vm = new Vue({
+      template: '<div><foo ref="foo" /></div>',
+      components: { Foo }
+    }).$mount(dom)
+
+    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect(dom.innerHTML).toBe('<span>foo</span>')
+    expect(vm.$refs.foo).toBeUndefined()
+
+    setTimeout(() => {
+      expect(dom.innerHTML).toBe('<span>foo</span>')
+      expect(vm.$refs.foo).not.toBeUndefined()
+      vm.$refs.foo.msg = 'bar'
+      waitForUpdate(() => {
+        expect(dom.innerHTML).toBe('<span>bar</span>')
+        expect(dom.querySelector('span')).toBe(span)
+      }).then(done)
+    }, 0)
+  })
+
+  it('should hydrate async component without showing loading', done => {
+    const dom = createMockSSRDOM('<span>foo</span>')
+    const span = dom.querySelector('span')
+
+    const Foo = () => ({
+      component: new Promise(resolve => {
+        setTimeout(() => {
+          resolve({
+            data: () => ({ msg: 'foo' }),
+            template: `<span>{{ msg }}</span>`
+          })
+        }, 10)
+      }),
+      delay: 1,
+      loading: {
+        render: h => h('span', 'loading')
+      }
+    })
+
+    const vm = new Vue({
+      template: '<div><foo ref="foo" /></div>',
+      components: { Foo }
+    }).$mount(dom)
+
+    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect(dom.innerHTML).toBe('<span>foo</span>')
+    expect(vm.$refs.foo).toBeUndefined()
+
+    setTimeout(() => {
+      expect(dom.innerHTML).toBe('<span>foo</span>')
+    }, 1)
+
+    setTimeout(() => {
+      expect(dom.innerHTML).toBe('<span>foo</span>')
+      expect(vm.$refs.foo).not.toBeUndefined()
+      vm.$refs.foo.msg = 'bar'
+      waitForUpdate(() => {
+        expect(dom.innerHTML).toBe('<span>bar</span>')
+        expect(dom.querySelector('span')).toBe(span)
+      }).then(done)
+    }, 10)
+  })
+
+  it('should hydrate async component by replacing DOM if error occurs', done => {
+    const dom = createMockSSRDOM('<span>foo</span>')
+
+    const Foo = () => ({
+      component: new Promise((resolve, reject) => {
+        setTimeout(() => {
+          reject('something went wrong')
+        }, 10)
+      }),
+      error: {
+        render: h => h('span', 'error')
+      }
+    })
+
+    new Vue({
+      template: '<div><foo ref="foo" /></div>',
+      components: { Foo }
+    }).$mount(dom)
+
+    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect(dom.innerHTML).toBe('<span>foo</span>')
+
+    setTimeout(() => {
+      expect('Failed to resolve async').toHaveBeenWarned()
+      expect(dom.innerHTML).toBe('<span>error</span>')
+      done()
+    }, 10)
   })
 })

@@ -35,13 +35,14 @@ function sameVnode (a, b) {
   return (
     a.key === b.key && (
       (
-        a.isAsyncPlaceholder === true &&
-        a.asyncFactory === b.asyncFactory
-      ) || (
         a.tag === b.tag &&
         a.isComment === b.isComment &&
         isDef(a.data) === isDef(b.data) &&
         sameInputType(a, b)
+      ) || (
+        isTrue(a.isAsyncPlaceholder) &&
+        a.asyncFactory === b.asyncFactory &&
+        isUndef(b.asyncFactory.error)
       )
     )
   )
@@ -440,9 +441,18 @@ export function createPatchFunction (backend) {
     if (oldVnode === vnode) {
       return
     }
-    if (oldVnode.isAsyncPlaceholder) {
-      return hydrate(oldVnode.elm, vnode, insertedVnodeQueue)
+
+    const elm = vnode.elm = oldVnode.elm
+
+    if (isTrue(oldVnode.isAsyncPlaceholder)) {
+      if (isDef(vnode.asyncFactory.resolved)) {
+        hydrate(oldVnode.elm, vnode, insertedVnodeQueue)
+      } else {
+        vnode.isAsyncPlaceholder = true
+      }
+      return
     }
+
     // reuse element for static trees.
     // note we only do this if the vnode is cloned -
     // if the new node is not cloned it means the render functions have been
@@ -452,16 +462,16 @@ export function createPatchFunction (backend) {
       vnode.key === oldVnode.key &&
       (isTrue(vnode.isCloned) || isTrue(vnode.isOnce))
     ) {
-      vnode.elm = oldVnode.elm
       vnode.componentInstance = oldVnode.componentInstance
       return
     }
+
     let i
     const data = vnode.data
     if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) {
       i(oldVnode, vnode)
     }
-    const elm = vnode.elm = oldVnode.elm
+
     const oldCh = oldVnode.children
     const ch = vnode.children
     if (isDef(data) && isPatchable(vnode)) {
