@@ -877,6 +877,23 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('render async components', done => {
+    const Foo = () => Promise.resolve({
+      render: h => h('div', [h('span', 'foo'), h(Bar)])
+    })
+    const Bar = () => ({
+      component: Promise.resolve({
+        render: h => h('span', 'bar')
+      })
+    })
+    renderVmWithOptions({
+      render: h => h(Foo)
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span><span>bar</span></div>`)
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
