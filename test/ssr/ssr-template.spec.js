@@ -238,10 +238,10 @@ describe('SSR: template option', () => {
       // state should be inlined before scripts
       `<script>window.${options.stateKey || '__INITIAL_STATE__'}={"a":1}</script>` +
       // manifest chunk should be first
-      `<script src="/manifest.js"></script>` +
+      `<script src="/manifest.js" defer></script>` +
       // async chunks should be before main chunk
-      `<script src="/0.js"></script>` +
-      `<script src="/main.js"></script>` +
+      `<script src="/0.js" defer></script>` +
+      `<script src="/main.js" defer></script>` +
     `</body></html>`
 
   createClientManifestAssertions(true)
