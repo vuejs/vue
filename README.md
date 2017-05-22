@@ -88,7 +88,11 @@ Vue.js is a library for building interactive web interfaces. It provides data-re
 - [Flexible transition effect system](https://vuejs.org/guide/transitions.html)
 - Fast without the need for complex optimization
 
-Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported). To check out live examples and docs, visit [vuejs.org](https://vuejs.org).
+Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported).
+
+## Documentation
+
+To check out live examples and docs, visit [vuejs.org](https://vuejs.org).
 
 ## Questions
 
