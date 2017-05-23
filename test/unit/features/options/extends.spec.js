@@ -46,13 +46,23 @@ describe('Options extends', () => {
     expect(vm.b).toBe(2)
     expect(vm.c).toBe(3)
   })
+})
 
-  it('should work with global mixins and Object.prototype.watch polyfill', done => {
+describe('Options extends with Object.prototype.watch', () => {
+  beforeAll(function () {
     if (!Object.prototype.watch) {
       // eslint-disable-next-line no-extend-native
-      Object.prototype.watch = { remove: true }
+      Object.prototype.watch = {
+        remove: true
+      }
     }
-
+  })
+  afterAll(function () {
+    if (Object.prototype.watch && Object.prototype.watch.remove) {
+      delete Object.prototype.watch
+    }
+  })
+  it('should work with global mixins', done => {
     Vue.use({
       install: function () {
         Vue.mixin({})
@@ -74,13 +84,7 @@ describe('Options extends', () => {
       extends: A
     })
     waitForUpdate(() => {
-      delete Object.prototype.watch
       expect(spy).toHaveBeenCalledWith(2, 1)
     }).then(done)
-  })
-  afterEach(function () {
-    if (Object.prototype.watch && Object.prototype.watch.remove) {
-      delete Object.prototype.watch
-    }
   })
 })
