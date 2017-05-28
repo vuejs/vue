@@ -3,7 +3,7 @@ import { Readable } from 'stream';
 
 export declare function createRenderer(options?: RendererOptions): Renderer;
 
-export declare function createBundleRenderer(bundle: any, options?: BundleRendererOptions): BundleRenderer;
+export declare function createBundleRenderer(bundle: string | object, options?: BundleRendererOptions): BundleRenderer;
 
 type RenderCallback = (err: Error | null, html: string) => void;
 
@@ -32,7 +32,7 @@ interface RendererOptions {
 }
 
 interface BundleRendererOptions extends RendererOptions {
-  clientManifest?: any;
+  clientManifest?: object;
   runInNewContext?: boolean | 'once';
   basedir?: string;
 }
