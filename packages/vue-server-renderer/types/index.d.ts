@@ -5,7 +5,7 @@ export declare function createRenderer(options?: RendererOptions): Renderer;
 
 export declare function createBundleRenderer(bundle: any, options?: BundleRendererOptions): BundleRenderer;
 
-type RenderCallback = (err: Error, html: string) => void;
+type RenderCallback = (err: Error | null, html: string) => void;
 
 interface Renderer {
   renderToString(vm: Vue, callback: RenderCallback): void;
