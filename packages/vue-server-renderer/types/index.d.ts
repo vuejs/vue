@@ -27,7 +27,7 @@ interface RendererOptions {
   shouldPreload?: (file: string, type: string) => boolean;
   cache?: RenderCache;
   directives?: {
-    [key: string]: Vue.DirectiveOptions | Vue.DirectiveFunction
+    [key: string]: (vnode: Vue.VNode, dir: Vue.VNodeDirective) => void
   };
 }
 

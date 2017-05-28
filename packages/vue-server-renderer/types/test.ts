@@ -68,7 +68,7 @@ const bundleRenderer = createBundleRenderer('/path/to/vue-ssr-server-bundle.json
   },
 
   directives: {
-    example (vnode, directiveMeta) {
+    example (vnode: Vue.VNode, directiveMeta: Vue.VNodeDirective) {
       // transform vnode based on directive binding metadata
     }
   }
