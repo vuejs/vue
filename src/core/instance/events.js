@@ -1,7 +1,13 @@
 /* @flow */
 
+import {
+  tip,
+  toArray,
+  hyphenate,
+  handleError,
+  formatComponentName
+} from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
-import { toArray, tip, hyphenate, formatComponentName, handleError } from '../util/index'
 
 export function initEvents (vm: Component) {
   vm._events = Object.create(null)
