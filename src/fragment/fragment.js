@@ -144,6 +144,7 @@ function multiRemove () {
     }
     self.destroy()
   })
+  this.afterRemove()
 }
 
 /**
@@ -157,6 +158,22 @@ Fragment.prototype.beforeRemove = function () {
     // fragments, depth-first
     this.childFrags[i].beforeRemove(false)
   }
+
+  var dirs = this.unlink.dirs
+  for (i = 0, l = dirs.length; i < l; i++) {
+    // disable the watchers on all the directives
+    // so that the rendered content stays the same
+    // during removal.
+    dirs[i]._watcher && dirs[i]._watcher.teardown()
+  }
+}
+
+/**
+ * ensure destroyed after detached.
+ */
+
+Fragment.prototype.afterRemove = function () {
+  var i, l
   for (i = 0, l = this.children.length; i < l; i++) {
     // Call destroy for all contained instances,
     // with remove:false and defer:true.
@@ -164,13 +181,6 @@ Fragment.prototype.beforeRemove = function () {
     // keep the children to call detach hooks
     // on them.
     this.children[i].$destroy(false, true)
-  }
-  var dirs = this.unlink.dirs
-  for (i = 0, l = dirs.length; i < l; i++) {
-    // disable the watchers on all the directives
-    // so that the rendered content stays the same
-    // during removal.
-    dirs[i]._watcher && dirs[i]._watcher.teardown()
   }
 }
 
