@@ -240,4 +240,33 @@ describe('Options provide/inject', () => {
       `overwritten whenever the provided component re-renders. ` +
       `injection being mutated: "${key}"`).toHaveBeenWarned()
   })
+
+  it('should warn when injections cannot be found', () => {
+    const vm = new Vue({})
+    new Vue({
+      parent: vm,
+      inject: ['foo', 'bar'],
+      created () {}
+    })
+    expect(`Injection "foo" not found`).toHaveBeenWarned()
+    expect(`Injection "bar" not found`).toHaveBeenWarned()
+  })
+
+  it('should not warn when injections can be found', () => {
+    const vm = new Vue({
+      provide: {
+        foo: 1,
+        bar: false,
+        baz: undefined
+      }
+    })
+    new Vue({
+      parent: vm,
+      inject: ['foo', 'bar', 'baz'],
+      created () {}
+    })
+    expect(`Injection "foo" not found`).not.toHaveBeenWarned()
+    expect(`Injection "bar" not found`).not.toHaveBeenWarned()
+    expect(`Injection "baz" not found`).not.toHaveBeenWarned()
+  })
 })

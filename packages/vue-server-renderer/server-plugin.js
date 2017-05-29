@@ -45,7 +45,14 @@ VueSSRServerPlugin.prototype.apply = function apply (compiler) {
   compiler.plugin('emit', function (compilation, cb) {
     var stats = compilation.getStats().toJson();
     var entryName = Object.keys(stats.entrypoints)[0];
-    var entryAssets = stats.entrypoints[entryName].assets.filter(isJS);
+    var entryInfo = stats.entrypoints[entryName];
+
+    if (!entryInfo) {
+      // #5553
+      return cb()
+    }
+
+    var entryAssets = entryInfo.assets.filter(isJS);
 
     if (entryAssets.length > 1) {
       throw new Error(

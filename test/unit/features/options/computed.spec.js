@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options computed', () => {
   it('basic usage', done => {
@@ -47,6 +48,8 @@ describe('Options computed', () => {
       expect(vm.$el.textContent).toBe('1')
     }).then(done)
   })
+
+  testObjectOption('computed')
 
   it('warn with setter and no getter', () => {
     const vm = new Vue({

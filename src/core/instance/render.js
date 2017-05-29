@@ -4,7 +4,7 @@ import {
   warn,
   nextTick,
   toNumber,
-  _toString,
+  toString,
   looseEqual,
   emptyObject,
   handleError,
@@ -109,7 +109,7 @@ export function renderMixin (Vue: Class<Component>) {
   // code size.
   Vue.prototype._o = markOnce
   Vue.prototype._n = toNumber
-  Vue.prototype._s = _toString
+  Vue.prototype._s = toString
   Vue.prototype._l = renderList
   Vue.prototype._t = renderSlot
   Vue.prototype._q = looseEqual

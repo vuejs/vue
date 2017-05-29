@@ -1,6 +1,6 @@
 /* @flow */
 
-import { escape } from 'he'
+import { cachedEscape } from '../util'
 
 import {
   isDef,
@@ -17,7 +17,7 @@ export default function renderAttrs (node: VNodeWithData): string {
   let attrs = node.data.attrs
   let res = ''
 
-  let parent: any = node.parent
+  let parent = node.parent
   while (isDef(parent)) {
     if (isDef(parent.data) && isDef(parent.data.attrs)) {
       attrs = Object.assign({}, attrs, parent.data.attrs)
@@ -47,7 +47,7 @@ export function renderAttr (key: string, value: string): string {
   } else if (isEnumeratedAttr(key)) {
     return ` ${key}="${isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true'}"`
   } else if (!isFalsyAttrValue(value)) {
-    return ` ${key}="${typeof value === 'string' ? escape(value) : value}"`
+    return ` ${key}="${typeof value === 'string' ? cachedEscape(value) : value}"`
   }
   return ''
 }

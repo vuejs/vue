@@ -42,7 +42,7 @@ declare interface Component {
   $once: (event: string, fn: Function) => Component;
   $off: (event?: string | Array<string>, fn?: Function) => Component;
   $emit: (event: string, ...args: Array<mixed>) => Component;
-  $nextTick: (fn: Function) => void;
+  $nextTick: (fn: Function) => void | Promise<*>;
   $createElement: (tag?: string | Component, data?: Object, children?: VNodeChildren) => VNode;
 
   // private properties
@@ -106,8 +106,18 @@ declare interface Component {
   // check custom keyCode
   _k: (eventKeyCode: number, key: string, builtInAlias: number | Array<number> | void) => boolean;
   // resolve scoped slots
-  _u: (scopedSlots: Array<[string, Function]>) => { [key: string]: Function };
+  _u: (scopedSlots: ScopedSlotsData, res?: Object) => { [key: string]: Function };
+
+  // SSR specific
+  _ssrNode: Function;
+  _ssrList: Function;
+  _ssrEscape: Function;
+  _ssrAttr: Function;
+  _ssrAttrs: Function;
+  _ssrDOMProps: Function;
+  _ssrClass: Function;
+  _ssrStyle: Function;
 
   // allow dynamic method registration
   [key: string]: any
-}
+};

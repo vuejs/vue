@@ -1,13 +1,21 @@
 /* @flow */
 
-const { escape } = require('he')
+import {
+  isDef,
+  isUndef,
+  isTrue
+} from 'shared/util'
 
+import { escape } from 'web/server/util'
 import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
-import { compileToFunctions } from 'web/compiler/index'
-import { createComponentInstanceForVnode } from 'core/vdom/create-component'
+import { ssrCompileToFunctions } from 'web/server/compiler'
+import { installSSRHelpers } from './optimizing-compiler/runtime-helpers'
 
-import { isDef, isUndef, isTrue } from 'shared/util'
+import {
+  createComponent,
+  createComponentInstanceForVnode
+} from 'core/vdom/create-component'
 
 let warned = Object.create(null)
 const warnOnce = msg => {
@@ -17,16 +25,13 @@ const warnOnce = msg => {
   }
 }
 
-const compilationCache = Object.create(null)
 const normalizeRender = vm => {
-  const { render, template } = vm.$options
+  const { render, template, _scopeId } = vm.$options
   if (isUndef(render)) {
     if (template) {
-      const renderFns = (
-        compilationCache[template] ||
-        (compilationCache[template] = compileToFunctions(template))
-      )
-      Object.assign(vm.$options, renderFns)
+      Object.assign(vm.$options, ssrCompileToFunctions(template, {
+        scopeId: _scopeId
+      }))
     } else {
       throw new Error(
         `render function or template not defined in component: ${
@@ -38,23 +43,35 @@ const normalizeRender = vm => {
 }
 
 function renderNode (node, isRoot, context) {
-  if (isDef(node.componentOptions)) {
+  if (node.isString) {
+    renderStringNode(node, context)
+  } else if (isDef(node.componentOptions)) {
     renderComponent(node, isRoot, context)
-  } else {
-    if (isDef(node.tag)) {
-      renderElement(node, isRoot, context)
-    } else if (isTrue(node.isComment)) {
-      context.write(
-        `<!--${node.text}-->`,
-        context.next
-      )
+  } else if (isDef(node.tag)) {
+    renderElement(node, isRoot, context)
+  } else if (isTrue(node.isComment)) {
+    if (isDef(node.asyncFactory)) {
+      // async component
+      renderAsyncComponent(node, isRoot, context)
     } else {
-      context.write(
-        node.raw ? node.text : escape(String(node.text)),
-        context.next
-      )
+      context.write(`<!--${node.text}-->`, context.next)
     }
+  } else {
+    context.write(
+      node.raw ? node.text : escape(String(node.text)),
+      context.next
+    )
   }
+}
+
+function registerComponentForCache (options, write) {
+  // exposed by vue-loader, need to call this if cache hit because
+  // component lifecycle hooks will not be called.
+  const register = options._ssrRegister
+  if (write.caching && isDef(register)) {
+    write.componentBuffer[write.componentBuffer.length - 1].add(register)
+  }
+  return register
 }
 
 function renderComponent (node, isRoot, context) {
@@ -64,22 +81,16 @@ function renderComponent (node, isRoot, context) {
   const Ctor = node.componentOptions.Ctor
   const getKey = Ctor.options.serverCacheKey
   const name = Ctor.options.name
-
-  // exposed by vue-loader, need to call this if cache hit because
-  // component lifecycle hooks will not be called.
-  const registerComponent = Ctor.options._ssrRegister
-  if (write.caching && isDef(registerComponent)) {
-    write.componentBuffer[write.componentBuffer.length - 1].add(registerComponent)
-  }
-
   const cache = context.cache
+  const registerComponent = registerComponentForCache(Ctor.options, write)
+
   if (isDef(getKey) && isDef(cache) && isDef(name)) {
     const key = name + '::' + getKey(node.componentOptions.propsData)
     const { has, get } = context
     if (isDef(has)) {
-      (has: any)(key, hit => {
+      has(key, hit => {
         if (hit === true && isDef(get)) {
-          (get: any)(key, res => {
+          get(key, res => {
             if (isDef(registerComponent)) {
               registerComponent(userContext)
             }
@@ -91,7 +102,7 @@ function renderComponent (node, isRoot, context) {
         }
       })
     } else if (isDef(get)) {
-      (get: any)(key, res => {
+      get(key, res => {
         if (isDef(res)) {
           if (isDef(registerComponent)) {
             registerComponent(userContext)
@@ -147,7 +158,6 @@ function renderComponentInner (node, isRoot, context) {
     node,
     context.activeInstance
   )
-  node.ssrContext = null
   normalizeRender(child)
   const childNode = child._render()
   childNode.parent = node
@@ -158,15 +168,87 @@ function renderComponentInner (node, isRoot, context) {
   renderNode(childNode, isRoot, context)
 }
 
+function renderAsyncComponent (node, isRoot, context) {
+  const factory = node.asyncFactory
+
+  const resolve = comp => {
+    const { data, children, tag } = node.asyncMeta
+    const nodeContext = node.asyncMeta.context
+    const resolvedNode: any = createComponent(
+      comp,
+      data,
+      nodeContext,
+      children,
+      tag
+    )
+    if (resolvedNode) {
+      renderComponent(resolvedNode, isRoot, context)
+    } else {
+      reject()
+    }
+  }
+
+  const reject = err => {
+    console.error(`[vue-server-renderer] error when rendering async component:\n`)
+    if (err) console.error(err.stack)
+    context.write(`<!--${node.text}-->`, context.next)
+  }
+
+  if (factory.resolved) {
+    resolve(factory.resolved)
+    return
+  }
+
+  let res
+  try {
+    res = factory(resolve, reject)
+  } catch (e) {
+    reject(e)
+  }
+  if (res) {
+    if (typeof res.then === 'function') {
+      res.then(resolve, reject).catch(reject)
+    } else {
+      // new syntax in 2.3
+      const comp = res.component
+      if (comp && typeof comp.then === 'function') {
+        comp.then(resolve, reject).catch(reject)
+      }
+    }
+  }
+}
+
+function renderStringNode (el, context) {
+  const { write, next } = context
+  if (isUndef(el.children) || el.children.length === 0) {
+    write(el.open + (el.close || ''), next)
+  } else {
+    const children: Array<VNode> = el.children
+    context.renderStates.push({
+      type: 'Element',
+      rendered: 0,
+      total: children.length,
+      endTag: el.close, children
+    })
+    write(el.open, next)
+  }
+}
+
 function renderElement (el, isRoot, context) {
+  const { write, next } = context
+
   if (isTrue(isRoot)) {
     if (!el.data) el.data = {}
     if (!el.data.attrs) el.data.attrs = {}
     el.data.attrs[SSR_ATTR] = 'true'
   }
+
+  if (el.functionalOptions) {
+    registerComponentForCache(el.functionalOptions, write)
+  }
+
   const startTag = renderStartingTag(el, context)
   const endTag = `</${el.tag}>`
-  const { write, next } = context
   if (context.isUnaryTag(el.tag)) {
     write(startTag, next)
   } else if (isUndef(el.children) || el.children.length === 0) {
@@ -246,8 +328,9 @@ function renderStartingTag (node: VNode, context) {
   let scopeId
   const activeInstance = context.activeInstance
   if (isDef(activeInstance) &&
-      activeInstance !== node.context &&
-      isDef(scopeId = activeInstance.$options._scopeId)) {
+    activeInstance !== node.context &&
+    isDef(scopeId = activeInstance.$options._scopeId)
+  ) {
     markup += ` ${(scopeId: any)}`
   }
   while (isDef(node)) {
@@ -279,6 +362,7 @@ export function createRenderFunction (
       isUnaryTag, modules, directives,
       cache
     })
+    installSSRHelpers(component)
     normalizeRender(component)
     renderNode(component._render(), true, context)
   }

@@ -20,6 +20,7 @@ function isTrue (v) {
   return v === true
 }
 
+
 /**
  * Check if value is primitive
  */
@@ -34,14 +35,14 @@ function isObject (obj) {
   return obj !== null && typeof obj === 'object'
 }
 
-var toString = Object.prototype.toString;
+var _toString = Object.prototype.toString;
 
 /**
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
  */
 function isPlainObject (obj) {
-  return toString.call(obj) === '[object Object]'
+  return _toString.call(obj) === '[object Object]'
 }
 
 
@@ -393,8 +394,9 @@ function renderDOMProps (node) {
     } else {
       var attr = propsToAttrMap[key] || key.toLowerCase();
       if (isRenderableAttr(attr) &&
-          // avoid rendering double-bound props/attrs twice
-          !(isDef(attrs) && isDef(attrs[attr]))) {
+        // avoid rendering double-bound props/attrs twice
+        !(isDef(attrs) && isDef(attrs[attr]))
+      ) {
         res += renderAttr(attr, props[key]);
       }
     }
@@ -554,9 +556,11 @@ var config = ({
   _lifecycleHooks: LIFECYCLE_HOOKS
 });
 
+/*  */
+
 var warn = noop;
 var tip = noop;
-var formatComponentName;
+var formatComponentName = (null); // work around flow check
 
 if (process.env.NODE_ENV !== 'production') {
   var hasConsole = typeof console !== 'undefined';
@@ -644,6 +648,8 @@ if (process.env.NODE_ENV !== 'production') {
     }
   };
 }
+
+/*  */
 
 function handleError (err, vm, info) {
   if (config.errorHandler) {
@@ -1349,6 +1355,8 @@ var defaultStrat = function (parentVal, childVal) {
 
 /*  */
 
+/*  */
+
 function genClassForVnode (vnode) {
   var data = vnode.data;
   var parentNode = vnode;
@@ -1833,7 +1841,7 @@ var TemplateStream = (function (Transform) {
 
 var compile = require('lodash.template');
 var compileOptions = {
-  escape: /{{[^{]([\s\S]+?)[^}]}}/g,
+  escape: /{{([^{][\s\S]+?[^}])}}/g,
   interpolate: /{{{([\s\S]+?)}}}/g
 };
 
@@ -2497,8 +2505,9 @@ function parseHTML (html, options) {
       // Close all the open elements, up the stack
       for (var i = stack.length - 1; i >= pos; i--) {
         if (process.env.NODE_ENV !== 'production' &&
-            (i > pos || !tagName) &&
-            options.warn) {
+          (i > pos || !tagName) &&
+          options.warn
+        ) {
           options.warn(
             ("tag <" + (stack[i].tag) + "> has no matching end tag.")
           );
@@ -3150,8 +3159,9 @@ function parse (
       // IE textarea placeholder bug
       /* istanbul ignore if */
       if (isIE &&
-          currentParent.tag === 'textarea' &&
-          currentParent.attrsMap.placeholder === text) {
+        currentParent.tag === 'textarea' &&
+        currentParent.attrsMap.placeholder === text
+      ) {
         return
       }
       var children = currentParent.children;
@@ -3655,17 +3665,17 @@ var modifierCode = {
 
 function genHandlers (
   events,
-  native,
+  isNative,
   warn
 ) {
-  var res = native ? 'nativeOn:{' : 'on:{';
+  var res = isNative ? 'nativeOn:{' : 'on:{';
   for (var name in events) {
     var handler = events[name];
     // #5330: warn click.right, since right clicks do not actually fire click events.
     if (process.env.NODE_ENV !== 'production' &&
-        name === 'click' &&
-        handler && handler.modifiers && handler.modifiers.right
-      ) {
+      name === 'click' &&
+      handler && handler.modifiers && handler.modifiers.right
+    ) {
       warn(
         "Use \"contextmenu\" instead of \"click.right\" since right clicks " +
         "do not actually fire \"click\" events."
@@ -4020,10 +4030,25 @@ function genScopedSlots (slots) {
 }
 
 function genScopedSlot (key, el) {
-  return "[" + key + ",function(" + (String(el.attrsMap.scope)) + "){" +
+  if (el.for && !el.forProcessed) {
+    return genForScopedSlot(key, el)
+  }
+  return "{key:" + key + ",fn:function(" + (String(el.attrsMap.scope)) + "){" +
     "return " + (el.tag === 'template'
       ? genChildren(el) || 'void 0'
-      : genElement(el)) + "}]"
+      : genElement(el)) + "}}"
+}
+
+function genForScopedSlot (key, el) {
+  var exp = el.for;
+  var alias = el.alias;
+  var iterator1 = el.iterator1 ? ("," + (el.iterator1)) : '';
+  var iterator2 = el.iterator2 ? ("," + (el.iterator2)) : '';
+  el.forProcessed = true; // avoid recursion
+  return "_l((" + exp + ")," +
+    "function(" + alias + iterator1 + iterator2 + "){" +
+      "return " + (genScopedSlot(key, el)) +
+    '})'
 }
 
 function genChildren (el, checkSkip) {
@@ -4032,9 +4057,10 @@ function genChildren (el, checkSkip) {
     var el$1 = children[0];
     // optimize single v-for
     if (children.length === 1 &&
-        el$1.for &&
-        el$1.tag !== 'template' &&
-        el$1.tag !== 'slot') {
+      el$1.for &&
+      el$1.tag !== 'template' &&
+      el$1.tag !== 'slot'
+    ) {
       return genElement(el$1)
     }
     var normalizationType = checkSkip ? getNormalizationType(children) : 0;
@@ -4882,7 +4908,7 @@ var index$1 = 0;
  * Reset the scheduler's state.
  */
 function resetSchedulerState () {
-  queue.length = activatedChildren.length = 0;
+  index$1 = queue.length = activatedChildren.length = 0;
   has = {};
   if (process.env.NODE_ENV !== 'production') {
     circular = {};
@@ -4987,10 +5013,10 @@ function queueWatcher (watcher) {
       // if already flushing, splice the watcher based on its id
       // if already past its id, it will be run next immediately.
       var i = queue.length - 1;
-      while (i >= 0 && queue[i].id > watcher.id) {
+      while (i > index$1 && queue[i].id > watcher.id) {
         i--;
       }
-      queue.splice(Math.max(i, index$1) + 1, 0, watcher);
+      queue.splice(i + 1, 0, watcher);
     }
     // queue the flush
     if (!waiting) {
@@ -5411,6 +5437,16 @@ function renderNode (node, isRoot, context) {
   }
 }
 
+function registerComponentForCache (options, write) {
+  // exposed by vue-loader, need to call this if cache hit because
+  // component lifecycle hooks will not be called.
+  var register = options._ssrRegister;
+  if (write.caching && isDef(register)) {
+    write.componentBuffer[write.componentBuffer.length - 1].add(register);
+  }
+  return register
+}
+
 function renderComponent (node, isRoot, context) {
   var write = context.write;
   var next = context.next;
@@ -5420,23 +5456,17 @@ function renderComponent (node, isRoot, context) {
   var Ctor = node.componentOptions.Ctor;
   var getKey = Ctor.options.serverCacheKey;
   var name = Ctor.options.name;
-
-  // exposed by vue-loader, need to call this if cache hit because
-  // component lifecycle hooks will not be called.
-  var registerComponent = Ctor.options._ssrRegister;
-  if (write.caching && isDef(registerComponent)) {
-    write.componentBuffer[write.componentBuffer.length - 1].add(registerComponent);
-  }
-
   var cache = context.cache;
+  var registerComponent = registerComponentForCache(Ctor.options, write);
+
   if (isDef(getKey) && isDef(cache) && isDef(name)) {
     var key = name + '::' + getKey(node.componentOptions.propsData);
     var has = context.has;
     var get = context.get;
     if (isDef(has)) {
-      (has)(key, function (hit) {
+      has(key, function (hit) {
         if (hit === true && isDef(get)) {
-          (get)(key, function (res) {
+          get(key, function (res) {
             if (isDef(registerComponent)) {
               registerComponent(userContext);
             }
@@ -5448,7 +5478,7 @@ function renderComponent (node, isRoot, context) {
         }
       });
     } else if (isDef(get)) {
-      (get)(key, function (res) {
+      get(key, function (res) {
         if (isDef(res)) {
           if (isDef(registerComponent)) {
             registerComponent(userContext);
@@ -5502,7 +5532,6 @@ function renderComponentInner (node, isRoot, context) {
     node,
     context.activeInstance
   );
-  node.ssrContext = null;
   normalizeRender(child);
   var childNode = child._render();
   childNode.parent = node;
@@ -5514,15 +5543,21 @@ function renderComponentInner (node, isRoot, context) {
 }
 
 function renderElement (el, isRoot, context) {
+  var write = context.write;
+  var next = context.next;
+
   if (isTrue(isRoot)) {
     if (!el.data) { el.data = {}; }
     if (!el.data.attrs) { el.data.attrs = {}; }
     el.data.attrs[SSR_ATTR] = 'true';
   }
+
+  if (el.functionalOptions) {
+    registerComponentForCache(el.functionalOptions, write);
+  }
+
   var startTag = renderStartingTag(el, context);
   var endTag = "</" + (el.tag) + ">";
-  var write = context.write;
-  var next = context.next;
   if (context.isUnaryTag(el.tag)) {
     write(startTag, next);
   } else if (isUndef(el.children) || el.children.length === 0) {
@@ -5603,8 +5638,9 @@ function renderStartingTag (node, context) {
   var scopeId;
   var activeInstance = context.activeInstance;
   if (isDef(activeInstance) &&
-      activeInstance !== node.context &&
-      isDef(scopeId = activeInstance.$options._scopeId)) {
+    activeInstance !== node.context &&
+    isDef(scopeId = activeInstance.$options._scopeId)
+  ) {
     markup += " " + ((scopeId));
   }
   while (isDef(node)) {
@@ -5721,7 +5757,7 @@ var path$2 = require('path');
 var resolve = require('resolve');
 var NativeModule = require('module');
 
-function createContext (context) {
+function createSandbox (context) {
   var sandbox = {
     Buffer: Buffer,
     console: console,
@@ -5738,7 +5774,7 @@ function createContext (context) {
   return sandbox
 }
 
-function compileModule (files, basedir) {
+function compileModule (files, basedir, runInNewContext) {
   var compiledScripts = {};
   var resolvedModules = {};
 
@@ -5756,7 +5792,7 @@ function compileModule (files, basedir) {
     return script
   }
 
-  function evaluateModule (filename, context, evaluatedFiles) {
+  function evaluateModule (filename, sandbox, evaluatedFiles) {
     if ( evaluatedFiles === void 0 ) evaluatedFiles = {};
 
     if (evaluatedFiles[filename]) {
@@ -5764,12 +5800,14 @@ function compileModule (files, basedir) {
     }
 
     var script = getCompiledScript(filename);
-    var compiledWrapper = script.runInNewContext(context);
+    var compiledWrapper = runInNewContext === false
+      ? script.runInThisContext()
+      : script.runInNewContext(sandbox);
     var m = { exports: {}};
     var r = function (file) {
       file = path$2.join('.', file);
       if (files[file]) {
-        return evaluateModule(file, context, evaluatedFiles)
+        return evaluateModule(file, sandbox, evaluatedFiles)
       } else if (basedir) {
         return require(
           resolvedModules[file] ||
@@ -5805,8 +5843,8 @@ function deepClone (val) {
 }
 
 function createBundleRunner (entry, files, basedir, runInNewContext) {
-  var evaluate = compileModule(files, basedir);
-  if (runInNewContext) {
+  var evaluate = compileModule(files, basedir, runInNewContext);
+  if (runInNewContext !== false && runInNewContext !== 'once') {
     // new context mode: creates a fresh context and re-evaluate the bundle
     // on each render. Ensures entire application state is fresh for each
     // render, but incurs extra evaluation cost.
@@ -5815,7 +5853,7 @@ function createBundleRunner (entry, files, basedir, runInNewContext) {
 
       return new Promise(function (resolve) {
       userContext._registeredComponents = new Set();
-      var res = evaluate(entry, createContext(userContext));
+      var res = evaluate(entry, createSandbox(userContext));
       resolve(typeof res === 'function' ? res(userContext) : res);
     });
     }
@@ -5824,22 +5862,23 @@ function createBundleRunner (entry, files, basedir, runInNewContext) {
     // each render, it simply calls the exported function. This avoids the
     // module evaluation costs but requires the source code to be structured
     // slightly differently.
-
-    // the initial context is only used for collecting possible non-component
-    // styles injected by vue-style-loader.
-    var initialContext = {};
-    var sharedContext = createContext(initialContext);
-
     var runner; // lazy creation so that errors can be caught by user
+    var initialContext;
     return function (userContext) {
       if ( userContext === void 0 ) userContext = {};
 
       return new Promise(function (resolve) {
       if (!runner) {
-        runner = evaluate(entry, sharedContext);
+        var sandbox = runInNewContext === 'once'
+          ? createSandbox()
+          : global;
+        // the initial context is only used for collecting possible non-component
+        // styles injected by vue-style-loader.
+        initialContext = sandbox.__VUE_SSR_CONTEXT__ = {};
+        runner = evaluate(entry, sandbox);
         // On subsequent renders, __VUE_SSR_CONTEXT__ will not be avaialbe
         // to prevent cross-request pollution.
-        delete sharedContext.__VUE_SSR_CONTEXT__;
+        delete sandbox.__VUE_SSR_CONTEXT__;
         if (typeof runner !== 'function') {
           throw new Error(
             'bundle export should be a function when using ' +
@@ -5926,7 +5965,6 @@ function createBundleRendererCreator (createRenderer) {
 
     var files, entry, maps;
     var basedir = rendererOptions.basedir;
-    var runInNewContext = rendererOptions.runInNewContext !== false;
 
     // load bundle if given filepath
     if (
@@ -5968,7 +6006,12 @@ function createBundleRendererCreator (createRenderer) {
 
     var renderer = createRenderer(rendererOptions);
 
-    var run = createBundleRunner(entry, files, basedir, runInNewContext);
+    var run = createBundleRunner(
+      entry,
+      files,
+      basedir,
+      rendererOptions.runInNewContext
+    );
 
     return {
       renderToString: function (context, cb) {

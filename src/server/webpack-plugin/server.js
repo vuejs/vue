@@ -13,7 +13,14 @@ export default class VueSSRServerPlugin {
     compiler.plugin('emit', (compilation, cb) => {
       const stats = compilation.getStats().toJson()
       const entryName = Object.keys(stats.entrypoints)[0]
-      const entryAssets = stats.entrypoints[entryName].assets.filter(isJS)
+      const entryInfo = stats.entrypoints[entryName]
+
+      if (!entryInfo) {
+        // #5553
+        return cb()
+      }
+
+      const entryAssets = entryInfo.assets.filter(isJS)
 
       if (entryAssets.length > 1) {
         throw new Error(

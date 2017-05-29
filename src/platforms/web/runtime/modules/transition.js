@@ -57,7 +57,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     afterAppear,
     appearCancelled,
     duration
-  } = (data: any)
+  } = data
 
   // activeInstance will always be the <transition> component managing this
   // transition. One edge case to check is when the <transition> is placed
@@ -134,8 +134,9 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       const parent = el.parentNode
       const pendingNode = parent && parent._pending && parent._pending[vnode.key]
       if (pendingNode &&
-          pendingNode.tag === vnode.tag &&
-          pendingNode.elm._leaveCb) {
+        pendingNode.tag === vnode.tag &&
+        pendingNode.elm._leaveCb
+      ) {
         pendingNode.elm._leaveCb()
       }
       enterHook && enterHook(el, cb)
@@ -201,7 +202,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     leaveCancelled,
     delayLeave,
     duration
-  } = (data: any)
+  } = data
 
   const expectsCSS = css !== false && !isIE9
   const userWantsControl = getHookArgumentsLength(leave)
@@ -212,7 +213,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       : duration
   )
 
-  if (process.env.NODE_ENV !== 'production' && explicitLeaveDuration != null) {
+  if (process.env.NODE_ENV !== 'production' && isDef(explicitLeaveDuration)) {
     checkDuration(explicitLeaveDuration, 'leave', vnode)
   }
 
@@ -249,7 +250,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     }
     // record leaving element
     if (!vnode.data.show) {
-      (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode
+      (el.parentNode._pending || (el.parentNode._pending = {}))[(vnode.key: any)] = vnode
     }
     beforeLeave && beforeLeave(el)
     if (expectsCSS) {
