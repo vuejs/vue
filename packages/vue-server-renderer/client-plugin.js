@@ -13,6 +13,7 @@ var warn = exports.warn = function (msg) { return console.error(red((prefix + " 
 var tip = exports.tip = function (msg) { return console.log(yellow((prefix + " " + msg + "\n"))); };
 
 var hash = require('hash-sum');
+var uniq = require('lodash.uniq');
 var VueSSRClientPlugin = function VueSSRClientPlugin (options) {
   if ( options === void 0 ) options = {};
 
@@ -27,13 +28,13 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
   compiler.plugin('emit', function (compilation, cb) {
     var stats = compilation.getStats().toJson();
 
-    var allFiles = stats.assets
-      .map(function (a) { return a.name; });
+    var allFiles = uniq(stats.assets
+      .map(function (a) { return a.name; }));
 
-    var initialFiles = Object.keys(stats.entrypoints)
+    var initialFiles = uniq(Object.keys(stats.entrypoints)
       .map(function (name) { return stats.entrypoints[name].assets; })
       .reduce(function (assets, all) { return all.concat(assets); }, [])
-      .filter(isJS);
+      .filter(isJS));
 
     var asyncFiles = allFiles
       .filter(isJS)
@@ -54,6 +55,9 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
       if (m.chunks.length === 1) {
         var cid = m.chunks[0];
         var chunk = stats.chunks.find(function (c) { return c.id === cid; });
+        if (!chunk || !chunk.files) {
+          return
+        }
         var files = manifest.modules[hash(m.identifier)] = chunk.files.map(fileToIndex);
         // find all asset modules associated with the same chunk
         assetModules.forEach(function (m) {

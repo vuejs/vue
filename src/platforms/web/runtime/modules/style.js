@@ -49,7 +49,8 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const oldData = oldVnode.data
 
   if (isUndef(data.staticStyle) && isUndef(data.style) &&
-      isUndef(oldData.staticStyle) && isUndef(oldData.style)) {
+    isUndef(oldData.staticStyle) && isUndef(oldData.style)
+  ) {
     return
   }
 

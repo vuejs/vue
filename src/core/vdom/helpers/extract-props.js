@@ -51,7 +51,7 @@ export function extractPropsFromVNodeData (
 
 function checkProp (
   res: Object,
-  hash: any,
+  hash: ?Object,
   key: string,
   altKey: string,
   preserve: boolean

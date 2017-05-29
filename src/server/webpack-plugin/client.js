@@ -1,4 +1,5 @@
 const hash = require('hash-sum')
+const uniq = require('lodash.uniq')
 import { isJS } from './util'
 
 export default class VueSSRClientPlugin {
@@ -12,13 +13,13 @@ export default class VueSSRClientPlugin {
     compiler.plugin('emit', (compilation, cb) => {
       const stats = compilation.getStats().toJson()
 
-      const allFiles = stats.assets
-        .map(a => a.name)
+      const allFiles = uniq(stats.assets
+        .map(a => a.name))
 
-      const initialFiles = Object.keys(stats.entrypoints)
+      const initialFiles = uniq(Object.keys(stats.entrypoints)
         .map(name => stats.entrypoints[name].assets)
         .reduce((assets, all) => all.concat(assets), [])
-        .filter(isJS)
+        .filter(isJS))
 
       const asyncFiles = allFiles
         .filter(isJS)
@@ -39,6 +40,9 @@ export default class VueSSRClientPlugin {
         if (m.chunks.length === 1) {
           const cid = m.chunks[0]
           const chunk = stats.chunks.find(c => c.id === cid)
+          if (!chunk || !chunk.files) {
+            return
+          }
           const files = manifest.modules[hash(m.identifier)] = chunk.files.map(fileToIndex)
           // find all asset modules associated with the same chunk
           assetModules.forEach(m => {

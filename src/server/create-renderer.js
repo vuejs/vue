@@ -27,7 +27,7 @@ export type RenderOptions = {
   basedir?: string;
   shouldPreload?: Function;
   clientManifest?: ClientManifest;
-  runInNewContext?: boolean;
+  runInNewContext?: boolean | 'once';
 };
 
 export function createRenderer ({

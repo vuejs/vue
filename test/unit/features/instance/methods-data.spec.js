@@ -21,14 +21,17 @@ describe('Instance methods data', () => {
   describe('$watch', () => {
     let vm, spy
     beforeEach(() => {
+      spy = jasmine.createSpy('watch')
       vm = new Vue({
         data: {
           a: {
             b: 1
           }
+        },
+        methods: {
+          foo: spy
         }
       })
-      spy = jasmine.createSpy('watch')
     })
 
     it('basic usage', done => {
@@ -79,6 +82,30 @@ describe('Instance methods data', () => {
       }).then(() => {
         expect(spy).toHaveBeenCalledWith(vm.a, oldA)
       }).then(done)
+    })
+
+    it('handler option', done => {
+      var oldA = vm.a
+      vm.$watch('a', {
+        handler: spy,
+        deep: true
+      })
+      vm.a.b = 2
+      waitForUpdate(() => {
+        expect(spy).toHaveBeenCalledWith(oldA, oldA)
+        vm.a = { b: 3 }
+      }).then(() => {
+        expect(spy).toHaveBeenCalledWith(vm.a, oldA)
+      }).then(done)
+    })
+
+    it('handler option in string', () => {
+      vm.$watch('a.b', {
+        handler: 'foo',
+        immediate: true
+      })
+      expect(spy.calls.count()).toBe(1)
+      expect(spy).toHaveBeenCalledWith(1)
     })
 
     it('warn expresssion', () => {

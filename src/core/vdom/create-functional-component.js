@@ -22,7 +22,7 @@ export function createFunctionalComponent (
   const propOptions = Ctor.options.props
   if (isDef(propOptions)) {
     for (const key in propOptions) {
-      props[key] = validateProp(key, propOptions, propsData)
+      props[key] = validateProp(key, propOptions, propsData || {})
     }
   } else {
     if (isDef(data.attrs)) mergeProps(props, data.attrs)
@@ -43,6 +43,7 @@ export function createFunctionalComponent (
   })
   if (vnode instanceof VNode) {
     vnode.functionalContext = context
+    vnode.functionalOptions = Ctor.options
     if (data.slot) {
       (vnode.data || (vnode.data = {})).slot = data.slot
     }
