@@ -220,7 +220,7 @@ function makePropsLinkFn (props) {
 }
 
 /**
- * Process a prop with a rawValue, applying necessary coersions,
+ * Process a prop with a rawValue, applying necessary coercions,
  * default values & assertions and call the given callback with
  * processed value.
  *
