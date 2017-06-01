@@ -57,6 +57,20 @@ describe('Component slot', () => {
     }).then(done)
   })
 
+  it('named slot with 0 as a number', done => {
+    mount({
+      childTemplate: '<div><slot :name="0"></slot></div>',
+      parentContent: '<p :slot="0">{{ msg }}</p>'
+    })
+    expect(child.$el.tagName).toBe('DIV')
+    expect(child.$el.children[0].tagName).toBe('P')
+    expect(child.$el.children[0].textContent).toBe('parent message')
+    vm.msg = 'changed'
+    waitForUpdate(() => {
+      expect(child.$el.children[0].textContent).toBe('changed')
+    }).then(done)
+  })
+
   it('fallback content', () => {
     mount({
       childTemplate: '<div><slot><p>{{msg}}</p></slot></div>'
@@ -80,7 +94,7 @@ describe('Component slot', () => {
     expect(child.$el.children[1].textContent).toBe('slot b')
   })
 
-  it('fallback content with mixed named/unamed slots', () => {
+  it('fallback content with mixed named/unnamed slots', () => {
     mount({
       childTemplate: `
         <div>
@@ -153,7 +167,7 @@ describe('Component slot', () => {
         b: 2,
         show: true
       },
-      template: '<test :show="show"><p slot="b">{{b}}</a><p>{{a}}</p></test>',
+      template: '<test :show="show"><p slot="b">{{b}}</p><p>{{a}}</p></test>',
       components: {
         test: {
           props: ['show'],
@@ -266,7 +280,6 @@ describe('Component slot', () => {
   })
 
   it('default slot should use fallback content if has only whitespace', () => {
-    Vue.config.preserveWhitespace = true
     mount({
       childTemplate: `
         <div>
@@ -275,17 +288,16 @@ describe('Component slot', () => {
           <slot name="second"><p>second named slot</p></slot>
         </div>
       `,
-      parentContent: `<div slot="first">1</div> <div slot="second">2</div>`
+      parentContent: `<div slot="first">1</div> <div slot="second">2</div> <div slot="second">2+</div>`
     })
     expect(child.$el.innerHTML).toBe(
-      '<div>1</div> <p>this is the default slot</p> <div>2</div>'
+      '<div>1</div> <p>this is the default slot</p> <div>2</div><div>2+</div>'
     )
-    Vue.config.preserveWhitespace = false
   })
 
   it('programmatic access to $slots', () => {
     const vm = new Vue({
-      template: '<test><p slot="a">A</p><div>C</div><p slot="b">B</div></p></test>',
+      template: '<test><p slot="a">A</p><div>C</div><p slot="b">B</p></test>',
       components: {
         test: {
           render () {
@@ -625,6 +637,27 @@ describe('Component slot', () => {
     waitForUpdate(() => {
       // should not lose named slot
       expect(vm.$el.textContent).toBe('2foo')
+    }).then(done)
+  })
+
+  it('the elements of slot should be updated correctly', done => {
+    const vm = new Vue({
+      data: { n: 1 },
+      template: '<div><test><span v-for="i in n" :key="i">{{ i }}</span><input value="a"/></test></div>',
+      components: {
+        test: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<div><span>1</span><input value="a"></div>')
+    const input = vm.$el.querySelector('input')
+    input.value = 'b'
+    vm.n++
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div><span>1</span><span>2</span><input value="a"></div>')
+      expect(vm.$el.querySelector('input')).toBe(input)
+      expect(vm.$el.querySelector('input').value).toBe('b')
     }).then(done)
   })
 })

@@ -1,7 +1,8 @@
 /* @flow */
 
-import { isChrome, isIE } from 'core/util/env'
+import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
+import { isChrome, isIE, supportsPassive } from 'core/util/env'
 import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model'
 
 // normalize v-model event tokens that can only be determined at runtime.
@@ -11,13 +12,13 @@ import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model
 function normalizeEvents (on) {
   let event
   /* istanbul ignore if */
-  if (on[RANGE_TOKEN]) {
+  if (isDef(on[RANGE_TOKEN])) {
     // IE input[type=range] only supports `change` event
     event = isIE ? 'change' : 'input'
     on[event] = [].concat(on[RANGE_TOKEN], on[event] || [])
     delete on[RANGE_TOKEN]
   }
-  if (on[CHECKBOX_RADIO_TOKEN]) {
+  if (isDef(on[CHECKBOX_RADIO_TOKEN])) {
     // Chrome fires microtasks in between click/change, leads to #4521
     event = isChrome ? 'click' : 'change'
     on[event] = [].concat(on[CHECKBOX_RADIO_TOKEN], on[event] || [])
@@ -31,7 +32,8 @@ function add (
   event: string,
   handler: Function,
   once: boolean,
-  capture: boolean
+  capture: boolean,
+  passive: boolean
 ) {
   if (once) {
     const oldHandler = handler
@@ -45,7 +47,13 @@ function add (
       }
     }
   }
-  target.addEventListener(event, handler, capture)
+  target.addEventListener(
+    event,
+    handler,
+    supportsPassive
+      ? { capture, passive }
+      : capture
+  )
 }
 
 function remove (
@@ -58,7 +66,7 @@ function remove (
 }
 
 function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  if (!oldVnode.data.on && !vnode.data.on) {
+  if (isUndef(oldVnode.data.on) && isUndef(vnode.data.on)) {
     return
   }
   const on = vnode.data.on || {}

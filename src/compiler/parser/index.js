@@ -5,37 +5,40 @@ import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { cached, no, camelize } from 'shared/util'
-import { isIE, isServerRendering } from 'core/util/env'
+import { genAssignmentCode } from '../directives/model'
+import { isIE, isEdge, isServerRendering } from 'core/util/env'
+
 import {
-  pluckModuleFunction,
-  getAndRemoveAttr,
   addProp,
   addAttr,
+  baseWarn,
   addHandler,
   addDirective,
   getBindingAttr,
-  baseWarn
+  getAndRemoveAttr,
+  pluckModuleFunction
 } from '../helpers'
 
+export const onRE = /^@|^v-on:/
 export const dirRE = /^v-|^@|^:/
 export const forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/
 export const forIteratorRE = /\((\{[^}]*\}|[^,]*),([^,]*)(?:,([^,]*))?\)/
-const bindRE = /^:|^v-bind:/
-const onRE = /^@|^v-on:/
+
 const argRE = /:(.*)$/
+const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
 
 const decodeHTMLCached = cached(decode)
 
 // configurable state
-let warn
-let platformGetTagNamespace
-let platformMustUseProp
-let platformIsPreTag
-let preTransforms
-let transforms
-let postTransforms
+export let warn
 let delimiters
+let transforms
+let preTransforms
+let postTransforms
+let platformIsPreTag
+let platformMustUseProp
+let platformGetTagNamespace
 
 /**
  * Convert HTML string to AST.
@@ -45,12 +48,15 @@ export function parse (
   options: CompilerOptions
 ): ASTElement | void {
   warn = options.warn || baseWarn
-  platformGetTagNamespace = options.getTagNamespace || no
-  platformMustUseProp = options.mustUseProp || no
+
   platformIsPreTag = options.isPreTag || no
-  preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
+  platformMustUseProp = options.mustUseProp || no
+  platformGetTagNamespace = options.getTagNamespace || no
+
   transforms = pluckModuleFunction(options.modules, 'transformNode')
+  preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
+
   delimiters = options.delimiters
 
   const stack = []
@@ -60,6 +66,13 @@ export function parse (
   let inVPre = false
   let inPre = false
   let warned = false
+
+  function warnOnce (msg) {
+    if (!warned) {
+      warned = true
+      warn(msg)
+    }
+  }
 
   function endPre (element) {
     // check pre state
@@ -75,6 +88,7 @@ export function parse (
     warn,
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
+    canBeLeftOpenTag: options.canBeLeftOpenTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
     start (tag, attrs, unary) {
       // check namespace.
@@ -144,17 +158,15 @@ export function parse (
       }
 
       function checkRootConstraints (el) {
-        if (process.env.NODE_ENV !== 'production' && !warned) {
+        if (process.env.NODE_ENV !== 'production') {
           if (el.tag === 'slot' || el.tag === 'template') {
-            warned = true
-            warn(
+            warnOnce(
               `Cannot use <${el.tag}> as component root element because it may ` +
               'contain multiple nodes.'
             )
           }
           if (el.attrsMap.hasOwnProperty('v-for')) {
-            warned = true
-            warn(
+            warnOnce(
               'Cannot use v-for on stateful component root element because ' +
               'it renders multiple elements.'
             )
@@ -174,9 +186,8 @@ export function parse (
             exp: element.elseif,
             block: element
           })
-        } else if (process.env.NODE_ENV !== 'production' && !warned) {
-          warned = true
-          warn(
+        } else if (process.env.NODE_ENV !== 'production') {
+          warnOnce(
             `Component template should contain exactly one root element. ` +
             `If you are using v-if on multiple elements, ` +
             `use v-else-if to chain them instead.`
@@ -222,24 +233,30 @@ export function parse (
 
     chars (text: string) {
       if (!currentParent) {
-        if (process.env.NODE_ENV !== 'production' && !warned && text === template) {
-          warned = true
-          warn(
-            'Component template requires a root element, rather than just text.'
-          )
+        if (process.env.NODE_ENV !== 'production') {
+          if (text === template) {
+            warnOnce(
+              'Component template requires a root element, rather than just text.'
+            )
+          } else if ((text = text.trim())) {
+            warnOnce(
+              `text "${text}" outside root element will be ignored.`
+            )
+          }
         }
         return
       }
       // IE textarea placeholder bug
       /* istanbul ignore if */
       if (isIE &&
-          currentParent.tag === 'textarea' &&
-          currentParent.attrsMap.placeholder === text) {
+        currentParent.tag === 'textarea' &&
+        currentParent.attrsMap.placeholder === text
+      ) {
         return
       }
       const children = currentParent.children
       text = inPre || text.trim()
-        ? decodeHTMLCached(text)
+        ? isTextTag(currentParent) ? text : decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
         : preserveWhitespace && children.length ? ' ' : ''
       if (text) {
@@ -425,7 +442,7 @@ function processComponent (el) {
 
 function processAttrs (el) {
   const list = el.attrsList
-  let i, l, name, rawName, value, arg, modifiers, isProp
+  let i, l, name, rawName, value, modifiers, isProp
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
     value = list[i].value
@@ -450,6 +467,13 @@ function processAttrs (el) {
           if (modifiers.camel) {
             name = camelize(name)
           }
+          if (modifiers.sync) {
+            addHandler(
+              el,
+              `update:${camelize(name)}`,
+              genAssignmentCode(value, `$event`)
+            )
+          }
         }
         if (isProp || platformMustUseProp(el.tag, el.attrsMap.type, name)) {
           addProp(el, name, value)
@@ -458,12 +482,13 @@ function processAttrs (el) {
         }
       } else if (onRE.test(name)) { // v-on
         name = name.replace(onRE, '')
-        addHandler(el, name, value, modifiers)
+        addHandler(el, name, value, modifiers, false, warn)
       } else { // normal directives
         name = name.replace(dirRE, '')
         // parse arg
         const argMatch = name.match(argRE)
-        if (argMatch && (arg = argMatch[1])) {
+        const arg = argMatch && argMatch[1]
+        if (arg) {
           name = name.slice(0, -(arg.length + 1))
         }
         addDirective(el, name, rawName, value, arg, modifiers)
@@ -512,12 +537,20 @@ function parseModifiers (name: string): Object | void {
 function makeAttrsMap (attrs: Array<Object>): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
-    if (process.env.NODE_ENV !== 'production' && map[attrs[i].name] && !isIE) {
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      map[attrs[i].name] && !isIE && !isEdge
+    ) {
       warn('duplicate attribute: ' + attrs[i].name)
     }
     map[attrs[i].name] = attrs[i].value
   }
   return map
+}
+
+// for script (e.g. type="x/template") or style, do not decode content
+function isTextTag (el): boolean {
+  return el.tag === 'script' || el.tag === 'style'
 }
 
 function isForbiddenTag (el): boolean {

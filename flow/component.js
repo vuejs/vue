@@ -27,7 +27,7 @@ declare interface Component {
   $refs: { [key: string]: Component | Element | Array<Component | Element> | void };
   $slots: { [key: string]: Array<VNode> };
   $scopedSlots: { [key: string]: () => VNodeChildren };
-  $vnode: VNode;
+  $vnode: VNode; // the placeholder node for the component in parent's render tree
   $isServer: boolean;
   $props: Object;
 
@@ -35,14 +35,14 @@ declare interface Component {
   $mount: (el?: Element | string, hydrating?: boolean) => Component;
   $forceUpdate: () => void;
   $destroy: () => void;
-  $set: (obj: Array<mixed> | Object, key: mixed, val: mixed) => void;
-  $delete: (obj: Object, key: string) => void;
+  $set: <T>(target: Object | Array<T>, key: string | number, val: T) => T;
+  $delete: <T>(target: Object | Array<T>, key: string | number) => void;
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;
   $on: (event: string | Array<string>, fn: Function) => Component;
   $once: (event: string, fn: Function) => Component;
-  $off: (event?: string, fn?: Function) => Component;
+  $off: (event?: string | Array<string>, fn?: Function) => Component;
   $emit: (event: string, ...args: Array<mixed>) => Component;
-  $nextTick: (fn: Function) => void;
+  $nextTick: (fn: Function) => void | Promise<*>;
   $createElement: (tag?: string | Component, data?: Object, children?: VNodeChildren) => VNode;
 
   // private properties
@@ -63,7 +63,7 @@ declare interface Component {
   _isMounted: boolean;
   _isDestroyed: boolean;
   _isBeingDestroyed: boolean;
-  _vnode: ?VNode;
+  _vnode: ?VNode; // self root node
   _staticTrees: ?Array<VNode>;
   _hasHookEvent: boolean;
   _provided: ?Object;
@@ -106,8 +106,18 @@ declare interface Component {
   // check custom keyCode
   _k: (eventKeyCode: number, key: string, builtInAlias: number | Array<number> | void) => boolean;
   // resolve scoped slots
-  _u: (scopedSlots: Array<[string, Function]>) => { [key: string]: Function };
+  _u: (scopedSlots: ScopedSlotsData, res?: Object) => { [key: string]: Function };
+
+  // SSR specific
+  _ssrNode: Function;
+  _ssrList: Function;
+  _ssrEscape: Function;
+  _ssrAttr: Function;
+  _ssrAttrs: Function;
+  _ssrDOMProps: Function;
+  _ssrClass: Function;
+  _ssrStyle: Function;
 
   // allow dynamic method registration
   [key: string]: any
-}
+};

@@ -1,6 +1,6 @@
 /* @flow */
 
-import config from '../config'
+import { ASSET_TYPES } from 'shared/constants'
 import { warn, extend, mergeOptions } from '../util/index'
 import { defineComputed, proxy } from '../instance/state'
 
@@ -65,7 +65,7 @@ export function initExtend (Vue: GlobalAPI) {
 
     // create asset registers, so extended classes
     // can have their private assets too.
-    config._assetTypes.forEach(function (type) {
+    ASSET_TYPES.forEach(function (type) {
       Sub[type] = Super[type]
     })
     // enable recursive self-lookup

@@ -1,5 +1,6 @@
 /* @flow */
 
+import config from '../config'
 import Dep from '../observer/dep'
 import Watcher from '../observer/watcher'
 
@@ -7,18 +8,19 @@ import {
   set,
   del,
   observe,
-  defineReactive,
-  observerState
+  observerState,
+  defineReactive
 } from '../observer/index'
 
 import {
   warn,
+  bind,
+  noop,
   hasOwn,
   isReserved,
-  isPlainObject,
-  bind,
+  handleError,
   validateProp,
-  noop
+  isPlainObject
 } from '../util/index'
 
 const sharedPropertyDefinition = {
@@ -52,7 +54,21 @@ export function initState (vm: Component) {
   if (opts.watch) initWatch(vm, opts.watch)
 }
 
-const isReservedProp = { key: 1, ref: 1, slot: 1 }
+const isReservedProp = {
+  key: 1,
+  ref: 1,
+  slot: 1
+}
+
+function checkOptionType (vm: Component, name: string) {
+  const option = vm.$options[name]
+  if (!isPlainObject(option)) {
+    warn(
+      `component option "${name}" should be an object.`,
+      vm
+    )
+  }
+}
 
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
@@ -68,7 +84,7 @@ function initProps (vm: Component, propsOptions: Object) {
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
-      if (isReservedProp[key]) {
+      if (isReservedProp[key] || config.isReservedAttr(key)) {
         warn(
           `"${key}" is a reserved attribute and cannot be used as component prop.`,
           vm
@@ -101,7 +117,7 @@ function initProps (vm: Component, propsOptions: Object) {
 function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
-    ? data.call(vm)
+    ? getData(data, vm)
     : data || {}
   if (!isPlainObject(data)) {
     data = {}
@@ -130,14 +146,33 @@ function initData (vm: Component) {
   observe(data, true /* asRootData */)
 }
 
+function getData (data: Function, vm: Component): any {
+  try {
+    return data.call(vm)
+  } catch (e) {
+    handleError(e, vm, `data()`)
+    return {}
+  }
+}
+
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
+  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
   const watchers = vm._computedWatchers = Object.create(null)
 
   for (const key in computed) {
     const userDef = computed[key]
-    const getter = typeof userDef === 'function' ? userDef : userDef.get
+    let getter = typeof userDef === 'function' ? userDef : userDef.get
+    if (process.env.NODE_ENV !== 'production') {
+      if (getter === undefined) {
+        warn(
+          `No getter function has been defined for computed property "${key}".`,
+          vm
+        )
+        getter = noop
+      }
+    }
     // create internal watcher for the computed property.
     watchers[key] = new Watcher(vm, getter, noop, computedWatcherOptions)
 
@@ -146,6 +181,12 @@ function initComputed (vm: Component, computed: Object) {
     // at instantiation here.
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
+    } else if (process.env.NODE_ENV !== 'production') {
+      if (key in vm.$data) {
+        warn(`The computed property "${key}" is already defined in data.`, vm)
+      } else if (vm.$options.props && key in vm.$options.props) {
+        warn(`The computed property "${key}" is already defined as a prop.`, vm)
+      }
     }
   }
 }
@@ -183,6 +224,7 @@ function createComputedGetter (key) {
 }
 
 function initMethods (vm: Component, methods: Object) {
+  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'methods')
   const props = vm.$options.props
   for (const key in methods) {
     vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
@@ -205,6 +247,7 @@ function initMethods (vm: Component, methods: Object) {
 }
 
 function initWatch (vm: Component, watch: Object) {
+  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'watch')
   for (const key in watch) {
     const handler = watch[key]
     if (Array.isArray(handler)) {
@@ -217,8 +260,12 @@ function initWatch (vm: Component, watch: Object) {
   }
 }
 
-function createWatcher (vm: Component, key: string, handler: any) {
-  let options
+function createWatcher (
+  vm: Component,
+  keyOrFn: string | Function,
+  handler: any,
+  options?: Object
+) {
   if (isPlainObject(handler)) {
     options = handler
     handler = handler.handler
@@ -226,7 +273,7 @@ function createWatcher (vm: Component, key: string, handler: any) {
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
-  vm.$watch(key, handler, options)
+  return vm.$watch(keyOrFn, handler, options)
 }
 
 export function stateMixin (Vue: Class<Component>) {
@@ -257,10 +304,13 @@ export function stateMixin (Vue: Class<Component>) {
 
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
-    cb: Function,
+    cb: any,
     options?: Object
   ): Function {
     const vm: Component = this
+    if (isPlainObject(cb)) {
+      return createWatcher(vm, expOrFn, cb, options)
+    }
     options = options || {}
     options.user = true
     const watcher = new Watcher(vm, expOrFn, cb, options)

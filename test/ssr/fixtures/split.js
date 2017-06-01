@@ -1,7 +1,8 @@
 import Vue from '../../../dist/vue.runtime.common.js'
 
 // async component!
-const Foo = () => import('./comp')
+const Foo = () => import('./async-foo')
+const Bar = () => import('./async-bar') // eslint-disable-line
 
 export default context => {
   return new Promise(resolve => {

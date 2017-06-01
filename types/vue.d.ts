@@ -44,6 +44,7 @@ export interface Vue<Data = object, Methods = object, Computed = object, Props =
   readonly $scopedSlots: { [key: string]: ScopedSlot };
   readonly $isServer: boolean;
   readonly $props: Props;
+  readonly $ssrContext: any;
 
   $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
   $forceUpdate(): void;
@@ -62,7 +63,7 @@ export interface Vue<Data = object, Methods = object, Computed = object, Props =
   ): (() => void);
   $on(event: string | string[], callback: Function): this;
   $once(event: string, callback: Function): this;
-  $off(event?: string, callback?: Function): this;
+  $off(event?: string | string[], callback?: Function): this;
   $emit(event: string, ...args: any[]): this;
   $nextTick(callback: (this: this) => void): void;
   $nextTick(): Promise<void>;
@@ -88,6 +89,7 @@ export interface VueConstructor {
   set<T>(object: Object, key: string, value: T): T;
   set<T>(array: T[], key: number, value: T): T;
   delete(object: Object, key: string): void;
+  delete<T>(array: T[], key: number): void;
 
   directive(
     id: string,

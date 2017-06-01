@@ -67,7 +67,7 @@ describe('Directive v-bind', () => {
     }).then(done)
   })
 
-  it('enumrated attr', done => {
+  it('enumerated attr', done => {
     const vm = new Vue({
       template: '<div><span :draggable="foo">hello</span></div>',
       data: { foo: true }
@@ -143,6 +143,27 @@ describe('Directive v-bind', () => {
     expect(vm.$el.getAttribute('viewBox')).toBe('0 0 1 1')
   })
 
+  it('.sync modifier', done => {
+    const vm = new Vue({
+      template: `<test :foo-bar.sync="bar"/>`,
+      data: {
+        bar: 1
+      },
+      components: {
+        test: {
+          props: ['fooBar'],
+          template: `<div @click="$emit('update:fooBar', 2)">{{ fooBar }}</div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('1')
+    triggerEvent(vm.$el, 'click')
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('2')
+    }).then(done)
+  })
+
   it('bind object', done => {
     const vm = new Vue({
       template: '<input v-bind="test">',
@@ -162,6 +183,29 @@ describe('Directive v-bind', () => {
     waitForUpdate(() => {
       expect(vm.$el.getAttribute('id')).toBe('hi')
       expect(vm.$el.getAttribute('class')).toBe('ok')
+      expect(vm.$el.value).toBe('bye')
+    }).then(done)
+  })
+
+  it('bind object with overwrite', done => {
+    const vm = new Vue({
+      template: '<input v-bind="test" id="foo" :class="test.value">',
+      data: {
+        test: {
+          id: 'test',
+          class: 'ok',
+          value: 'hello'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.getAttribute('id')).toBe('foo')
+    expect(vm.$el.getAttribute('class')).toBe('hello')
+    expect(vm.$el.value).toBe('hello')
+    vm.test.id = 'hi'
+    vm.test.value = 'bye'
+    waitForUpdate(() => {
+      expect(vm.$el.getAttribute('id')).toBe('foo')
+      expect(vm.$el.getAttribute('class')).toBe('bye')
       expect(vm.$el.value).toBe('bye')
     }).then(done)
   })

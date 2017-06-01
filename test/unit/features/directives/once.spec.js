@@ -338,5 +338,5 @@ describe('Directive v-once', () => {
 })
 
 function expectTextContent (vm, text) {
-  expect(vm.$el.textContent.replace(/\r?\n|\r|\s/g, '')).toBe(text)
+  expect(vm.$el.textContent.replace(/\s+/g, '')).toBe(text)
 }

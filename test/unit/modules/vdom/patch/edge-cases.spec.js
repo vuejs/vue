@@ -116,7 +116,7 @@ describe('vdom patch: edge cases', () => {
   })
 
   // #4530
-  it('should not reset value when patching bewteen dyanmic/static bindings', done => {
+  it('should not reset value when patching between dynamic/static bindings', done => {
     const vm = new Vue({
       data: { ok: true },
       template: `

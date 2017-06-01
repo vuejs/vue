@@ -121,6 +121,7 @@ export interface RenderContext<Props> {
   slots(): any;
   data: VNodeData;
   parent: Vue;
+  injections: any
 }
 
 export type PropValidator = PropOptions | Constructor | Constructor[];

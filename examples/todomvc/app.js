@@ -131,8 +131,8 @@ var app = new Vue({
   // before focusing on the input field.
   // https://vuejs.org/guide/custom-directive.html
   directives: {
-    'todo-focus': function (el, value) {
-      if (value) {
+    'todo-focus': function (el, binding) {
+      if (binding.value) {
         el.focus()
       }
     }

@@ -1,6 +1,6 @@
 # vue-template-compiler
 
-> This package is auto-generated. For pull requests please see [src/entries/web-compiler.js](https://github.com/vuejs/vue/blob/dev/src/entries/web-compiler.js).
+> This package is auto-generated. For pull requests please see [src/entries/web-compiler.js](https://github.com/vuejs/vue/tree/dev/src/platforms/web/compiler).
 
 This package can be used to pre-compile Vue 2.0 templates into render functions to avoid runtime-compilation overhead and CSP restrictions. You will only need it if you are writing build tools with very specific needs. In most cases you should be using [vue-loader](https://github.com/vuejs/vue-loader) or [vueify](https://github.com/vuejs/vueify) instead, both of which use this package internally.
 
@@ -85,4 +85,9 @@ Parse a SFC (single-file component, or `*.vue` file) into a descriptor (refer to
 
 #### Options
 
-- `pad`: with `{ pad: true }`, the extracted content for each block will be padded with newlines to ensure that the line numbers align with the original file. This is useful when you are piping the extracted content into other pre-processors, as you will get correct line numbers if there are any syntax errors.
+#### `pad`
+
+`pad` is useful when you are piping the extracted content into other pre-processors, as you will get correct line numbers or character indices if there are any syntax errors.
+
+- with `{ pad: "line" }`, the extracted content for each block will be prefixed with one newline for each line in the leading content from the original file to ensure that the line numbers align with the original file. 
+- with `{ pad: "space" }`, the extracted content for each block will be prefixed with one space for each character in the leading content from the original file to ensure that the character count remains the same as the original file.

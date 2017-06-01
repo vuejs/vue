@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { hasSymbol } from 'core/util/env'
 
 describe('Options props', () => {
   it('array syntax', done => {
@@ -204,6 +205,15 @@ describe('Options props', () => {
       makeInstance({}, Array)
       expect('Expected Array').toHaveBeenWarned()
     })
+
+    if (hasSymbol) {
+      it('symbol', () => {
+        makeInstance(Symbol('foo'), Symbol)
+        expect(console.error.calls.count()).toBe(0)
+        makeInstance({}, Symbol)
+        expect('Expected Symbol').toHaveBeenWarned()
+      })
+    }
 
     it('custom constructor', () => {
       function Class () {}
@@ -438,7 +448,7 @@ describe('Options props', () => {
   })
 
   // #4090
-  it('should not trigger wathcer on default value', done => {
+  it('should not trigger watcher on default value', done => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       template: `<test :value="a" :test="b"></test>`,
