@@ -16,6 +16,7 @@ export {
   ComputedOptions,
   WatchHandler,
   WatchOptions,
+  WatchOptionsWithHandler,
   DirectiveFunction,
   DirectiveOptions
 } from "./options";

@@ -68,7 +68,7 @@ export interface ComponentOptions<Data, Methods, Computed, Props> {
   propsData?: Object;
   computed?: Accessors<Computed>;
   methods?: Methods;
-  watch?: { [key: string]: ({ handler: WatchHandler<any> } & WatchOptions) | WatchHandler<any> | string };
+  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any> | string>;
 
   el?: Element | String;
   template?: string;
@@ -143,6 +143,10 @@ export type WatchHandler<T> = (val: T, oldVal: T) => void;
 export interface WatchOptions {
   deep?: boolean;
   immediate?: boolean;
+}
+
+export interface WatchOptionsWithHandler<T> extends WatchOptions {
+  handler: WatchHandler<T>;
 }
 
 export type DirectiveFunction = (
