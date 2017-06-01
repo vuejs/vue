@@ -16,7 +16,7 @@ declare module "../vue" {
 
 // augment ComponentOptions
 declare module "../options" {
-  interface ComponentOptions<Data, Methods, Computed> {
+  interface ComponentOptions<Data, Methods, Computed, Props> {
     foo?: string;
   }
 }

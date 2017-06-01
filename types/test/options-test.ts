@@ -1,5 +1,6 @@
 import Vue from "../index";
 import { ComponentOptions, FunctionalComponentOptions } from "../index";
+import { CreateElement } from "../vue";
 
 interface Component extends Vue {
   a: number;
@@ -19,7 +20,7 @@ Vue.component('component', {
       type: String,
       default: 0,
       required: true,
-      validator(value) {
+      validator(value: number) {
         return value > 0;
       }
     }
@@ -91,18 +92,18 @@ Vue.component('component', {
       createElement(),
       createElement("div", "message"),
       createElement(Vue.component("component")),
-      createElement({} as ComponentOptions<Vue>),
+      createElement({} as ComponentOptions<object, object, object, object>),
       createElement({ functional: true }),
 
       createElement(() => Vue.component("component")),
-      createElement(() => ( {} as ComponentOptions<Vue> )),
+      createElement(() => ( {} as ComponentOptions<object, object, object, object> )),
       createElement(() => {
         return new Promise((resolve) => {
-          resolve({} as ComponentOptions<Vue>);
+          resolve({} as ComponentOptions<object, object, object, object>);
         })
       }),
       createElement((resolve, reject) => {
-        resolve({} as ComponentOptions<Vue>);
+        resolve({} as ComponentOptions<object, object, object, object>);
         reject();
       }),
 
@@ -147,7 +148,7 @@ Vue.component('component', {
   },
   components: {
     a: Vue.component(""),
-    b: {} as ComponentOptions<Vue>
+    b: {} as ComponentOptions<object, object, object, object>
   },
   transitions: {},
   filters: {
@@ -156,11 +157,11 @@ Vue.component('component', {
     }
   },
   parent: new Vue,
-  mixins: [Vue.component(""), ({} as ComponentOptions<Vue>)],
+  mixins: [Vue.component(""), ({} as ComponentOptions<object, object, object, object>)],
   name: "Component",
-  extends: {} as ComponentOptions<Vue>,
+  extends: {} as ComponentOptions<object, object, object, object>,
   delimiters: ["${", "}"]
-} as ComponentOptions<Component>);
+});
 
 Vue.component('component-with-scoped-slot', {
   render (h) {
@@ -183,15 +184,15 @@ Vue.component('component-with-scoped-slot', {
   },
   components: {
     child: {
-      render (h) {
+      render (this: Vue, h: CreateElement) {
         return h('div', [
           this.$scopedSlots['default']({ msg: 'hi' }),
           this.$scopedSlots['item']({ msg: 'hello' })
         ])
       }
-    } as ComponentOptions<Vue>
+    }
   }
-} as ComponentOptions<Vue>)
+})
 
 Vue.component('functional-component', {
   props: ['prop'],
@@ -204,7 +205,7 @@ Vue.component('functional-component', {
     context.parent;
     return createElement("div", {}, context.children);
   }
-} as FunctionalComponentOptions);
+});
 
 Vue.component("async-component", (resolve, reject) => {
   setTimeout(() => {
