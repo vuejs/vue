@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-export default function testObjectOption (name: string) {
+export default function testObjectOption (name) {
   it('should warn non object', () => {
     const options = {}
     options[name] = () => {}
