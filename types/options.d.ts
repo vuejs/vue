@@ -87,7 +87,7 @@ export interface ComponentOptions<Data, Methods, Computed, Props> {
   activated?(): void;
   deactivated?(): void;
 
-  directives?: { [key: string]: DirectiveOptions | DirectiveFunction };
+  directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
   components?: { [key: string]: Component<any, any, any, never> | AsyncComponent<any, any, any, never> };
   transitions?: { [key: string]: Object };
   filters?: { [key: string]: Function };
