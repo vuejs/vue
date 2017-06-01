@@ -1,6 +1,6 @@
 import Vue from "../index";
 
-class Test extends Vue {
+class Test extends Vue<object, object, object> {
   a: number;
 
   testProperties() {
@@ -17,9 +17,9 @@ class Test extends Vue {
 
   // test property reification
   $refs: {
-    vue: Vue,
+    vue: Vue<object, object, object, never>,
     element: HTMLInputElement,
-    vues: Vue[],
+    vues: Vue<object, object, object, never>[],
     elements: HTMLInputElement[]
   }
   testReification() {
@@ -81,9 +81,41 @@ class Test extends Vue {
     this.directive("", {bind() {}});
     this.filter("", (value: number) => value);
     this.component("", { data: () => ({}) });
-    this.component("", { functional: true });
+    this.component("", { functional: true, render(h) { return h("div", "hello!") } });
     this.use;
     this.mixin(Test);
     this.compile("<div>{{ message }}</div>");
   }
 }
+
+const HelloWorldComponent = Vue.extend({
+  props: ["name"],
+  data() {
+    return {
+      message: "Hello " + this.name,
+    }
+  },
+  computed: {
+    shouted(): string {
+      return this.message.toUpperCase();
+    }
+  },
+  methods: {
+    getMoreExcited() {
+      this.message += "!";
+    }
+  },
+  watch: {
+    message(a: string) {
+      console.log(`Message ${this.message} was changed!`);
+    }
+  }
+});
+
+const FunctionalHelloWorldComponent = Vue.extend({
+  functional: true,
+  props: ["name"],
+  render(createElement, ctxt) {
+    return createElement("div", "Hello " + ctxt.props.name)
+  }
+})
