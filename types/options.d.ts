@@ -1,4 +1,4 @@
-import { Vue, CreateElement, AnyVue } from "./vue";
+import { Vue, CreateElement, CombinedVueInstance } from "./vue";
 import { VNode, VNodeData, VNodeDirective } from "./vnode";
 
 type Constructor = {
@@ -14,12 +14,6 @@ export type AsyncComponent<Data, Methods, Computed, PropNames extends string> = 
   reject: (reason?: any) => void
 ) => Promise<Component<Data, Methods, Computed, PropNames>> | Component<Data, Methods, Computed, PropNames> | void;
 
-export type MyAsyncComponent<Data, Methods, Computed, PropNames extends string> = (
-  resolve: (component: Component<Data, Methods, Computed, PropNames>) => void,
-  reject: (reason?: any) => void
-) => Promise<Component<Data, Methods, Computed, PropNames>> | Component<Data, Methods, Computed, PropNames> | void;
-
-
 /**
  * When the `Computed` type parameter on `ComponentOptions` is inferred,
  * it should have a property with the return type of every get-accessor.
@@ -31,35 +25,33 @@ export type Accessors<T> = {
 }
 
 /**
- * A general type that
+ * A general type that describes non-functional component options in Vue.
  *
- * - Describes (non-functional) component options in Vue.
- * - Gives the appropriate type to `this` in each method in objects of this type.
- *
- * Use this only if the following two types become too cumbersome.
+ * While `ThisTypedComponentOptionsWithArrayProps` and `ThisTypedComponentOptionsWithRecordProps` will
+ * lead to more accurate inferences, you can use this if the two are too cumbersome.
  */
-export type ThisTypedComponentOptions<Data, Methods, Computed, PropNames extends string = never, Instance extends AnyVue = Vue<Data, Methods, Computed, Record<PropNames, any>>> =
+export type ThisTypedComponentOptions<Data, Methods, Computed, PropNames extends string = never> =
   object &
-  ComponentOptions<Data | ((this: Record<PropNames, any> & AnyVue) => Data), Methods, Computed, PropNames[] | Record<PropNames, PropOptions>> &
-  ThisType<Data & Methods & Computed & Record<PropNames, any> & Instance>;
+  ComponentOptions<Data | ((this: Record<PropNames, any> & Vue) => Data), Methods, Computed, PropNames[] | Record<PropNames, PropOptions>> &
+  ThisType<CombinedVueInstance<Data, Methods, Computed, Record<PropNames, any>>>;
 
 /**
  * A specialized version of `ThisTypedComponentOptions`.
  * This type should be used when a parameter type only contains an array of strings for its `props` value.
  */
-export type ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, PropNames extends string, Instance extends AnyVue = Vue<Data, Methods, Computed, PropNames>> =
+export type ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, PropNames extends string> =
   object &
-  ComponentOptions<Data | ((this: Record<PropNames, any> & AnyVue) => Data), Methods, Computed, PropNames[]> &
-  ThisType<Data & Methods & Computed & Record<PropNames, any> & Instance>;
+  ComponentOptions<Data | ((this: Record<PropNames, any> & Vue) => Data), Methods, Computed, PropNames[]> &
+  ThisType<CombinedVueInstance<Data, Methods, Computed, Record<PropNames, any>>>;
 
 /**
  * A specialized version of `ThisTypedComponentOptions`.
  * This type should be used when a parameter type only contains an object mapped to `PropOptions` for its `props` value.
  */
-export type ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Props, Instance extends AnyVue = Vue<Data, Methods, Computed, Props>> =
+export type ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Props> =
   object &
-  ComponentOptions<Data | ((this: Record<keyof Props, any> & AnyVue) => Data), Methods, Computed, Props> &
-  ThisType<Data & Methods & Computed & Record<keyof Props, any> & Instance>;
+  ComponentOptions<Data | ((this: Record<keyof Props, any> & Vue) => Data), Methods, Computed, Props> &
+  ThisType<CombinedVueInstance<Data, Methods, Computed, Props>>;
 
 /**
  * A helper type that describes options for either functional or non-functional components.
@@ -108,7 +100,7 @@ export interface ComponentOptions<Data, Methods, Computed, Props> {
     event?: string;
   };
 
-  parent?: AnyVue;
+  parent?: Vue;
   mixins?: (ComponentOptions<any, any, any, any> | typeof Vue)[];
   name?: string;
   // TODO: support properly inferred 'extends'
@@ -116,10 +108,10 @@ export interface ComponentOptions<Data, Methods, Computed, Props> {
   delimiters?: [string, string];
 }
 
-export interface FunctionalComponentOptions<Props, ContextProps> {
-  props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
+export interface FunctionalComponentOptions<Props = object, ContextProps = object> {
+  props?: Props;
   functional: boolean;
-  render(this: never, createElement: CreateElement, context: RenderContext<ContextProps>): VNode;
+  render(this: undefined, createElement: CreateElement, context: RenderContext<ContextProps>): VNode;
   name?: string;
 }
 
@@ -128,7 +120,7 @@ export interface RenderContext<Props> {
   children: VNode[];
   slots(): any;
   data: VNodeData;
-  parent: AnyVue;
+  parent: Vue;
 }
 
 export type PropValidator = PropOptions | Constructor | Constructor[];

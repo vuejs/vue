@@ -14,10 +14,10 @@ export interface VNode {
   text?: string;
   elm?: Node;
   ns?: string;
-  context?: AnyVue;
+  context?: Vue;
   key?: string | number;
   componentOptions?: VNodeComponentOptions;
-  componentInstance?: AnyVue;
+  componentInstance?: Vue;
   parent?: VNode;
   raw?: boolean;
   isStatic?: boolean;
