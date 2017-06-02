@@ -23,6 +23,7 @@ import {
   isDef,
   isUndef,
   isTrue,
+  isObject,
   makeMap,
   isPrimitive
 } from '../util/index'
@@ -30,6 +31,8 @@ import {
 export const emptyNode = new VNode('', {}, [])
 
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
+
+const VNODE_KEY_PROP = '__key_prefix_' + Date.now()
 
 function sameVnode (a, b) {
   return (
@@ -63,9 +66,14 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   const map = {}
   for (i = beginIdx; i <= endIdx; ++i) {
     key = children[i].key
-    if (isDef(key)) map[key] = i
+    if (isDef(key)) {
+      if (isObject(key)) key[VNODE_KEY_PROP] = i
+      else map[key] = i
+    }
   }
-  return map
+  return function mapFn (key) {
+    return isObject(key) ? key[VNODE_KEY_PROP] : map[key]
+  }
 }
 
 export function createPatchFunction (backend) {
@@ -403,7 +411,7 @@ export function createPatchFunction (backend) {
         newStartVnode = newCh[++newStartIdx]
       } else {
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
-        idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx[newStartVnode.key] : null
+        idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx(newStartVnode.key) : null
         if (isUndef(idxInOld)) { // New element
           createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm)
           newStartVnode = newCh[++newStartIdx]
