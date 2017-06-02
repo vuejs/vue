@@ -1,7 +1,6 @@
 {
   "root": true,
   "plugins": [
-    "vue-libs",
     "flowtype"
   ],
   "extends": [

@@ -1826,9 +1826,9 @@ eslint-plugin-jasmine@^2.1.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-jasmine/-/eslint-plugin-jasmine-2.2.0.tgz#7135879383c39a667c721d302b9f20f0389543de"
 
-eslint-plugin-vue-libs@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-vue-libs/-/eslint-plugin-vue-libs-1.0.0.tgz#05e6f8ba777b4a9093879ef68c57749b6d2c21b6"
+eslint-plugin-vue-libs@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-vue-libs/-/eslint-plugin-vue-libs-1.2.0.tgz#eff85ecd66e8f1c9538d668205fa8d65136f1eac"
   dependencies:
     eslint-plugin-html "^2.0.0"
 
