@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isObject } from 'core/util/index'
+import { isObject, isDef } from 'core/util/index'
 
 /**
  * Runtime helper for rendering v-for lists.
@@ -27,6 +27,9 @@ export function renderList (
       key = keys[i]
       ret[i] = render(val[key], key, i)
     }
+  }
+  if (isDef(ret)) {
+    (ret: any)._isVList = true
   }
   return ret
 }

@@ -3,7 +3,7 @@
 const MAX_STACK_DEPTH = 1000
 
 export function createWriteFunction (
-  write: (text: string, next: Function) => ?boolean,
+  write: (text: string, next: Function) => boolean,
   onError: Function
 ): Function {
   let stackDepth = 0
@@ -12,7 +12,7 @@ export function createWriteFunction (
       cachedWrite.cacheBuffer[cachedWrite.cacheBuffer.length - 1] += text
     }
     const waitForNext = write(text, next)
-    if (!waitForNext) {
+    if (waitForNext !== true) {
       if (stackDepth >= MAX_STACK_DEPTH) {
         process.nextTick(() => {
           try { next() } catch (e) {
@@ -28,5 +28,6 @@ export function createWriteFunction (
   }
   cachedWrite.caching = false
   cachedWrite.cacheBuffer = []
+  cachedWrite.componentBuffer = []
   return cachedWrite
 }

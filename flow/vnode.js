@@ -9,6 +9,7 @@ declare type VNodeComponentOptions = {
 }
 
 declare type MountedComponentVNode = {
+  context: Component;
   componentOptions: VNodeComponentOptions;
   componentInstance: Component;
   parent: VNode;
@@ -40,6 +41,7 @@ declare interface VNodeData {
   class?: any;
   staticStyle?: { [key: string]: any };
   style?: Array<Object> | Object;
+  normalizedStyle?: Object;
   props?: { [key: string]: any };
   attrs?: { [key: string]: string };
   domProps?: { [key: string]: any };
@@ -69,4 +71,6 @@ declare type VNodeDirective = {
   arg?: string;
   modifiers?: ASTModifiers;
   def?: Object;
-}
+};
+
+declare type ScopedSlotsData = Array<{ key: string, fn: Function } | ScopedSlotsData>;

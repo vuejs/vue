@@ -1,9 +1,56 @@
 /* @flow */
 
+// these helpers produces better vm code in JS engines due to their
+// explicitness and function inlining
+export function isUndef (v: any): boolean %checks {
+  return v === undefined || v === null
+}
+
+export function isDef (v: any): boolean %checks {
+  return v !== undefined && v !== null
+}
+
+export function isTrue (v: any): boolean %checks {
+  return v === true
+}
+
+export function isFalse (v: any): boolean %checks {
+  return v === false
+}
+/**
+ * Check if value is primitive
+ */
+export function isPrimitive (value: any): boolean %checks {
+  return typeof value === 'string' || typeof value === 'number'
+}
+
+/**
+ * Quick object check - this is primarily used to tell
+ * Objects from primitive values when we know the value
+ * is a JSON-compliant type.
+ */
+export function isObject (obj: mixed): boolean %checks {
+  return obj !== null && typeof obj === 'object'
+}
+
+const _toString = Object.prototype.toString
+
+/**
+ * Strict object type check. Only returns true
+ * for plain JavaScript objects.
+ */
+export function isPlainObject (obj: any): boolean {
+  return _toString.call(obj) === '[object Object]'
+}
+
+export function isRegExp (v: any): boolean {
+  return _toString.call(v) === '[object RegExp]'
+}
+
 /**
  * Convert a value to a string that is actually rendered.
  */
-export function _toString (val: any): string {
+export function toString (val: any): string {
   return val == null
     ? ''
     : typeof val === 'object'
@@ -59,15 +106,8 @@ export function remove (arr: Array<any>, item: any): Array<any> | void {
  * Check whether the object has the property.
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty
-export function hasOwn (obj: Object, key: string): boolean {
+export function hasOwn (obj: Object | Array<*>, key: string): boolean {
   return hasOwnProperty.call(obj, key)
-}
-
-/**
- * Check if value is primitive
- */
-export function isPrimitive (value: any): boolean {
-  return typeof value === 'string' || typeof value === 'number'
 }
 
 /**
@@ -148,25 +188,6 @@ export function extend (to: Object, _from: ?Object): Object {
 }
 
 /**
- * Quick object check - this is primarily used to tell
- * Objects from primitive values when we know the value
- * is a JSON-compliant type.
- */
-export function isObject (obj: mixed): boolean {
-  return obj !== null && typeof obj === 'object'
-}
-
-/**
- * Strict object type check. Only returns true
- * for plain JavaScript objects.
- */
-const toString = Object.prototype.toString
-const OBJECT_STRING = '[object Object]'
-export function isPlainObject (obj: any): boolean {
-  return toString.call(obj) === OBJECT_STRING
-}
-
-/**
  * Merge an Array of Objects into a single Object.
  */
 export function toObject (arr: Array<any>): Object {
@@ -236,10 +257,10 @@ export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
  */
 export function once (fn: Function): Function {
   let called = false
-  return () => {
+  return function () {
     if (!called) {
       called = true
-      fn()
+      fn.apply(this, arguments)
     }
   }
 }

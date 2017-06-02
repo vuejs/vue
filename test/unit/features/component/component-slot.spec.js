@@ -57,6 +57,20 @@ describe('Component slot', () => {
     }).then(done)
   })
 
+  it('named slot with 0 as a number', done => {
+    mount({
+      childTemplate: '<div><slot :name="0"></slot></div>',
+      parentContent: '<p :slot="0">{{ msg }}</p>'
+    })
+    expect(child.$el.tagName).toBe('DIV')
+    expect(child.$el.children[0].tagName).toBe('P')
+    expect(child.$el.children[0].textContent).toBe('parent message')
+    vm.msg = 'changed'
+    waitForUpdate(() => {
+      expect(child.$el.children[0].textContent).toBe('changed')
+    }).then(done)
+  })
+
   it('fallback content', () => {
     mount({
       childTemplate: '<div><slot><p>{{msg}}</p></slot></div>'
@@ -623,6 +637,27 @@ describe('Component slot', () => {
     waitForUpdate(() => {
       // should not lose named slot
       expect(vm.$el.textContent).toBe('2foo')
+    }).then(done)
+  })
+
+  it('the elements of slot should be updated correctly', done => {
+    const vm = new Vue({
+      data: { n: 1 },
+      template: '<div><test><span v-for="i in n" :key="i">{{ i }}</span><input value="a"/></test></div>',
+      components: {
+        test: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<div><span>1</span><input value="a"></div>')
+    const input = vm.$el.querySelector('input')
+    input.value = 'b'
+    vm.n++
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div><span>1</span><span>2</span><input value="a"></div>')
+      expect(vm.$el.querySelector('input')).toBe(input)
+      expect(vm.$el.querySelector('input').value).toBe('b')
     }).then(done)
   })
 })

@@ -205,10 +205,10 @@ function genData (el: ASTElement): string {
   }
   // event handlers
   if (el.events) {
-    data += `${genHandlers(el.events)},`
+    data += `${genHandlers(el.events, false, warn)},`
   }
   if (el.nativeEvents) {
-    data += `${genHandlers(el.nativeEvents, true)},`
+    data += `${genHandlers(el.nativeEvents, true, warn)},`
   }
   // slot target
   if (el.slotTarget) {
@@ -298,11 +298,26 @@ function genScopedSlots (slots: { [key: string]: ASTElement }): string {
 }
 
 function genScopedSlot (key: string, el: ASTElement) {
-  return `[${key},function(${String(el.attrsMap.scope)}){` +
+  if (el.for && !el.forProcessed) {
+    return genForScopedSlot(key, el)
+  }
+  return `{key:${key},fn:function(${String(el.attrsMap.scope)}){` +
     `return ${el.tag === 'template'
       ? genChildren(el) || 'void 0'
       : genElement(el)
-  }}]`
+  }}}`
+}
+
+function genForScopedSlot (key: string, el: any) {
+  const exp = el.for
+  const alias = el.alias
+  const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
+  const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
+  el.forProcessed = true // avoid recursion
+  return `_l((${exp}),` +
+    `function(${alias}${iterator1}${iterator2}){` +
+      `return ${genScopedSlot(key, el)}` +
+    '})'
 }
 
 function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
@@ -311,9 +326,10 @@ function genChildren (el: ASTElement, checkSkip?: boolean): string | void {
     const el: any = children[0]
     // optimize single v-for
     if (children.length === 1 &&
-        el.for &&
-        el.tag !== 'template' &&
-        el.tag !== 'slot') {
+      el.for &&
+      el.tag !== 'template' &&
+      el.tag !== 'slot'
+    ) {
       return genElement(el)
     }
     const normalizationType = checkSkip ? getNormalizationType(children) : 0

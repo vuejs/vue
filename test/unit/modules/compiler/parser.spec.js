@@ -1,7 +1,7 @@
 import { parse } from 'compiler/parser/index'
 import { extend } from 'shared/util'
 import { baseOptions } from 'web/compiler/index'
-import { isIE } from 'core/util/env'
+import { isIE, isEdge } from 'core/util/env'
 
 describe('parser', () => {
   it('simple element', () => {
@@ -436,7 +436,7 @@ describe('parser', () => {
     expect('Interpolation inside attributes has been removed').toHaveBeenWarned()
   })
 
-  if (!isIE) {
+  if (!isIE && !isEdge) {
     it('duplicate attribute', () => {
       parse('<p class="class1" class="class1">hello world</p>', baseOptions)
       expect('duplicate attribute').toHaveBeenWarned()
@@ -540,5 +540,12 @@ describe('parser', () => {
     expect(comment.children.length).toBe(1)
     expect(comment.children[0].type).toBe(3)
     expect(comment.children[0].text).toBe('<!--comment-->')
+  })
+
+  // #5526
+  it('should not decode text in script tags', () => {
+    const options = extend({}, baseOptions)
+    const ast = parse(`<script type="x/template">&gt;<foo>&lt;</script>`, options)
+    expect(ast.children[0].text).toBe(`&gt;<foo>&lt;`)
   })
 })

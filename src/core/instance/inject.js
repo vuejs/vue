@@ -14,11 +14,32 @@ export function initProvide (vm: Component) {
 }
 
 export function initInjections (vm: Component) {
-  const inject: any = vm.$options.inject
+  const result = resolveInject(vm.$options.inject, vm)
+  if (result) {
+    Object.keys(result).forEach(key => {
+      /* istanbul ignore else */
+      if (process.env.NODE_ENV !== 'production') {
+        defineReactive(vm, key, result[key], () => {
+          warn(
+            `Avoid mutating an injected value directly since the changes will be ` +
+            `overwritten whenever the provided component re-renders. ` +
+            `injection being mutated: "${key}"`,
+            vm
+          )
+        })
+      } else {
+        defineReactive(vm, key, result[key])
+      }
+    })
+  }
+}
+
+export function resolveInject (inject: any, vm: Component): ?Object {
   if (inject) {
     // inject is :any because flow is not smart enough to figure out cached
     // isArray here
     const isArray = Array.isArray(inject)
+    const result = Object.create(null)
     const keys = isArray
       ? inject
       : hasSymbol
@@ -31,23 +52,12 @@ export function initInjections (vm: Component) {
       let source = vm
       while (source) {
         if (source._provided && provideKey in source._provided) {
-          /* istanbul ignore else */
-          if (process.env.NODE_ENV !== 'production') {
-            defineReactive(vm, key, source._provided[provideKey], () => {
-              warn(
-                `Avoid mutating an injected value directly since the changes will be ` +
-                `overwritten whenever the provided component re-renders. ` +
-                `injection being mutated: "${key}"`,
-                vm
-              )
-            })
-          } else {
-            defineReactive(vm, key, source._provided[provideKey])
-          }
+          result[key] = source._provided[provideKey]
           break
         }
         source = source.$parent
       }
     }
+    return result
   }
 }

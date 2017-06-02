@@ -167,4 +167,27 @@ describe('Options computed', () => {
       expect(vm.$el.textContent).toBe('3 4')
     }).then(done)
   })
+
+  it('warn conflict with data', () => {
+    new Vue({
+      data: {
+        a: 1
+      },
+      computed: {
+        a: () => 2
+      }
+    })
+    expect(`computed property "a" is already defined in data`).toHaveBeenWarned()
+  })
+
+  it('warn conflict with props', () => {
+    new Vue({
+      props: ['a'],
+      propsData: { a: 1 },
+      computed: {
+        a: () => 2
+      }
+    })
+    expect(`computed property "a" is already defined as a prop`).toHaveBeenWarned()
+  })
 })

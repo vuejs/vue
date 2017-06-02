@@ -143,6 +143,27 @@ describe('Directive v-bind', () => {
     expect(vm.$el.getAttribute('viewBox')).toBe('0 0 1 1')
   })
 
+  it('.sync modifier', done => {
+    const vm = new Vue({
+      template: `<test :foo-bar.sync="bar"/>`,
+      data: {
+        bar: 1
+      },
+      components: {
+        test: {
+          props: ['fooBar'],
+          template: `<div @click="$emit('update:fooBar', 2)">{{ fooBar }}</div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('1')
+    triggerEvent(vm.$el, 'click')
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('2')
+    }).then(done)
+  })
+
   it('bind object', done => {
     const vm = new Vue({
       template: '<input v-bind="test">',
