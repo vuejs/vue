@@ -60,10 +60,16 @@ function sameInputType (a, b) {
 
 function createKeyToOldIdx (children, beginIdx, endIdx) {
   let i, key
-  const map = {}
+  const map = {
+    keys: [],
+    indexes: []
+  }
   for (i = beginIdx; i <= endIdx; ++i) {
     key = children[i].key
-    if (isDef(key)) map[key] = i
+    if (isDef(key)) {
+      map.keys.push(key)
+      map.indexes.push(i)
+    }
   }
   return map
 }
@@ -403,7 +409,9 @@ export function createPatchFunction (backend) {
         newStartVnode = newCh[++newStartIdx]
       } else {
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
-        idxInOld = isDef(newStartVnode.key) ? oldKeyToIdx[newStartVnode.key] : null
+        idxInOld = isDef(newStartVnode.key)
+          ? oldKeyToIdx.indexes[oldKeyToIdx.keys.indexOf(newStartVnode.key)]
+          : null
         if (isUndef(idxInOld)) { // New element
           createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm)
           newStartVnode = newCh[++newStartIdx]
