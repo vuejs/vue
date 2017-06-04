@@ -1,7 +1,13 @@
 /* @flow */
 
+import {
+  tip,
+  toArray,
+  hyphenate,
+  handleError,
+  formatComponentName
+} from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
-import { toArray, tip, hyphenate, formatComponentName } from '../util/index'
 
 export function initEvents (vm: Component) {
   vm._events = Object.create(null)
@@ -121,7 +127,11 @@ export function eventsMixin (Vue: Class<Component>) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
       const args = toArray(arguments, 1)
       for (let i = 0, l = cbs.length; i < l; i++) {
-        cbs[i].apply(vm, args)
+        try {
+          cbs[i].apply(vm, args)
+        } catch (e) {
+          handleError(e, vm, `event handler for "${event}"`)
+        }
       }
     }
     return vm

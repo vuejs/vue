@@ -3,7 +3,7 @@ import { optimize } from 'compiler/optimizer'
 import { generate } from 'compiler/codegen'
 import { isObject } from 'shared/util'
 import { isReservedTag } from 'web/util/index'
-import { baseOptions } from 'web/compiler/index'
+import { baseOptions } from 'web/compiler/options'
 
 function assertCodegen (template, generatedCode, ...args) {
   let staticRenderFnCodes = []

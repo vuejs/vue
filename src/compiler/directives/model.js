@@ -41,10 +41,7 @@ export function genAssignmentCode (
   if (modelRs.idx === null) {
     return `${value}=${assignment}`
   } else {
-    return `var $$exp = ${modelRs.exp}, $$idx = ${modelRs.idx};` +
-      `if (!Array.isArray($$exp)){` +
-        `${value}=${assignment}}` +
-      `else{$$exp.splice($$idx, 1, ${assignment})}`
+    return `$set(${modelRs.exp}, ${modelRs.idx}, ${assignment})`
   }
 }
 
