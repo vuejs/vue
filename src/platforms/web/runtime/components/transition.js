@@ -4,8 +4,15 @@
 // supports transition mode (out-in / in-out)
 
 import { warn } from 'core/util/index'
-import { camelize, extend, isPrimitive } from 'shared/util'
+import { createTransitionPlaceholder } from 'core/vdom/vnode'
 import { mergeVNodeHook, getFirstComponentChild } from 'core/vdom/helpers/index'
+
+import {
+  camelize,
+  extend,
+  isPrimitive,
+  isDef
+} from 'shared/util'
 
 export const transitionProps = {
   name: String,
@@ -72,6 +79,10 @@ function isSameChild (child: VNode, oldChild: VNode): boolean {
   return oldChild.key === child.key && oldChild.tag === child.tag
 }
 
+function isAsyncCompPlaceholder (child: VNode): boolean {
+  return child.isComment && isDef(child.asyncFactory)
+}
+
 export default {
   name: 'transition',
   props: transitionProps,
@@ -80,11 +91,20 @@ export default {
   render (h: Function) {
     let children: ?Array<VNode> = this.$slots.default
     if (!children) {
-      return
+      const renderChildren = this.$options._renderChildren
+      if (
+        this._isMounted &&
+        isDef(renderChildren) &&
+        renderChildren.some(isAsyncCompPlaceholder)
+      ) {
+        children = [createTransitionPlaceholder()]
+      } else {
+        return
+      }
     }
 
     // filter out text nodes (possible whitespaces)
-    children = children.filter((c: VNode) => c.tag)
+    children = children.filter((c: VNode) => c.tag || c.isTransitionPlaceholder)
     /* istanbul ignore if */
     if (!children.length) {
       return
@@ -149,6 +169,10 @@ export default {
     // so that the transition module can hand over the control to the directive
     if (child.data.directives && child.data.directives.some(d => d.name === 'show')) {
       child.data.show = true
+    }
+
+    if (oldChild && child.isTransitionPlaceholder) {
+      return oldRawChild
     }
 
     if (oldChild && oldChild.data && !isSameChild(child, oldChild)) {
