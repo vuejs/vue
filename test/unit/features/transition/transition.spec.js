@@ -1080,6 +1080,51 @@ if (!isIE9) {
           expect(`<transition> explicit enter duration is NaN`).toHaveBeenWarned()
         }).then(done)
       })
+
+      it('transition on async component', done => {
+        const vm = new Vue({
+          template: `
+            <div>
+              <transition name="test-anim" mode="out-in">
+                <component-a v-if="ok"></component-a>
+                <component-b v-else></component-b>
+              </transition>
+            </div>
+          `,
+          components: {
+            componentA: { template: '<div><h1>component A</h1></div>' },
+            componentB: resolve => {
+              setTimeout(() => {
+                resolve({ template: '<div><h1>component B</h1></div>' })
+                Promise.resolve().then(next)
+              }, 50)
+            }
+          },
+          data: {
+            ok: true
+          }
+        }).$mount(el)
+        expect(vm.$el.innerHTML).toBe('<div><h1>component A</h1></div>')
+
+        vm.ok = false
+        function next () {
+          waitForUpdate(() => {
+            expect(vm.$el.children.length).toBe(1)
+            expect(vm.$el.textContent).toBe('component A')
+            expect(vm.$el.children[0].className).toBe('test-anim-leave test-anim-leave-active')
+          }).thenWaitFor(nextFrame).then(() => {
+            expect(vm.$el.children[0].className).toBe('test-anim-leave-active test-anim-leave-to')
+          }).thenWaitFor(duration + buffer).then(() => {
+            expect(vm.$el.children.length).toBe(1)
+            expect(vm.$el.textContent).toBe('component B')
+            expect(vm.$el.children[0].className).toBe('test-anim-enter test-anim-enter-active')
+          }).thenWaitFor(nextFrame).then(() => {
+            expect(vm.$el.children[0].className).toBe('test-anim-enter-active test-anim-enter-to')
+          }).thenWaitFor(duration + buffer).then(() => {
+            expect(vm.$el.children[0].className).toBe('')
+          }).then(done)
+        }
+      })
     })
   })
 }
