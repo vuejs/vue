@@ -61,6 +61,16 @@ export function _createElement (
     // in case of component :is set to falsy value
     return createEmptyVNode()
   }
+  // warn against non-primitive key
+  if (process.env.NODE_ENV !== 'production' &&
+    isDef(data) && isDef(data.key) && !isPrimitive(data.key)
+  ) {
+    warn(
+      'Avoid using non-primitive value as key, ' +
+      'use string/number value instead.',
+      context
+    )
+  }
   // support single function children as default scoped slot
   if (Array.isArray(children) &&
     typeof children[0] === 'function'
