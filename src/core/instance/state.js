@@ -157,7 +157,7 @@ function getData (data: Function, vm: Component): any {
 
 const computedWatcherOptions = { lazy: true }
 
-function initComputed (vm: Component, computed: Object) {
+function initComputed (vm: Component, computed: Object | Function) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
   const watchers = vm._computedWatchers = Object.create(null)
 
