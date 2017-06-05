@@ -430,7 +430,15 @@ export function createPatchFunction (backend) {
       }
     }
     if (oldStartIdx > oldEndIdx) {
-      refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
+      if (isUndef(newCh[newEndIdx + 1])) {
+        if (isUndef(newCh[newEndIdx - 1]) || newCh[newEndIdx - 1].elm === undefined) {
+          refElm = null
+        } else {
+          refElm = newCh[newEndIdx - 1].elm.nextSibling
+        }
+      } else {
+        refElm = newCh[newEndIdx + 1].elm
+      }
       addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
     } else if (newStartIdx > newEndIdx) {
       removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
