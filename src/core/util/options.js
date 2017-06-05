@@ -248,6 +248,9 @@ function normalizeProps (options: Object) {
   options.props = res
 }
 
+/**
+ * Normalize all injections into Object-based format
+ */
 function normalizeInject (options: Object) {
   const inject = options.inject
   if (!inject) return
