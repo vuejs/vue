@@ -39,7 +39,9 @@ export function validateProp (
     observerState.shouldConvert = prevShouldConvert
   }
   if (process.env.NODE_ENV !== 'production') {
-    assertProp(prop, key, value, vm, absent)
+    if (assertProp(prop, key, value, vm, absent) === false) {
+      value = undefined
+    }
   }
   return value
 }
@@ -92,7 +94,7 @@ function assertProp (
       'Missing required prop: "' + name + '"',
       vm
     )
-    return
+    return false
   }
   if (value == null && !prop.required) {
     return
@@ -117,7 +119,7 @@ function assertProp (
       ', got ' + Object.prototype.toString.call(value).slice(8, -1) + '.',
       vm
     )
-    return
+    return false
   }
   const validator = prop.validator
   if (validator) {
@@ -126,6 +128,7 @@ function assertProp (
         'Invalid prop: custom validator check failed for prop "' + name + '".',
         vm
       )
+      return false
     }
   }
 }
