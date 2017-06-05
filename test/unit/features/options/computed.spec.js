@@ -23,6 +23,25 @@ describe('Options computed', () => {
     }).then(done)
   })
 
+  it('increment operator', done => {
+    const vm = new Vue({
+      data: {
+        a: 1
+      },
+      computed: {
+        b () {
+          return this.a++
+        }
+      }
+    })
+    expect(vm.a).toBe(1)
+    expect(vm.b).toBe(1)
+    waitForUpdate(() => {
+      expect(vm.a).toBe(2)
+      expect(vm.b).toBe(2)
+    }).then(done)
+  })
+
   it('with setter', done => {
     const vm = new Vue({
       template: '<div>{{ b }}</div>',
