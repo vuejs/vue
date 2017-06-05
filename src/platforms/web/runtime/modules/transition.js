@@ -162,8 +162,8 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   }
 
   if (vnode.data.show) {
-    toggleDisplay && toggleDisplay()
     enterHook && enterHook(el, cb)
+    toggleDisplay && toggleDisplay()
   }
 
   if (!expectsCSS && !userWantsControl) {
