@@ -140,7 +140,9 @@ export default {
     // during entering.
     const id: string = `__transition-${this._uid}-`
     child.key = child.key == null
-      ? id + child.tag
+      ? child.isComment
+        ? id + 'comment'
+        : id + child.tag
       : isPrimitive(child.key)
         ? (String(child.key).indexOf(id) === 0 ? child.key : id + child.key)
         : child.key
