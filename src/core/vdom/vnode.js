@@ -22,6 +22,7 @@ export default class VNode {
   asyncFactory: ?Function; // async component factory function
   asyncMeta: ?Object;
   isAsyncPlaceholder: boolean;
+  isTransitionPlaceholder: boolean;
   ssrContext: ?Object;
 
   constructor (
@@ -55,6 +56,7 @@ export default class VNode {
     this.asyncFactory = asyncFactory
     this.asyncMeta = undefined
     this.isAsyncPlaceholder = false
+    this.isTransitionPlaceholder = false
   }
 
   // DEPRECATED: alias for componentInstance for backwards compat.
@@ -73,6 +75,12 @@ export const createEmptyVNode = () => {
 
 export function createTextVNode (val: string | number) {
   return new VNode(undefined, undefined, undefined, String(val))
+}
+
+export function createTransitionPlaceholder () {
+  const node = createEmptyVNode()
+  node.isTransitionPlaceholder = true
+  return node
 }
 
 // optimized shallow clone
