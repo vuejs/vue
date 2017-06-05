@@ -174,6 +174,9 @@ export default {
         })
         return placeholder(h, rawChild)
       } else if (mode === 'in-out') {
+        if (isAsyncPlaceholder(child)) {
+          return oldRawChild
+        }
         let delayedLeave
         const performLeave = () => { delayedLeave() }
         mergeVNodeHook(data, 'afterEnter', performLeave)

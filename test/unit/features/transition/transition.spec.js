@@ -991,6 +991,73 @@ if (!isIE9) {
       }).then(done)
     })
 
+    it('transition in-out on async component', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition name="test-anim" mode="in-out">
+              <component-a v-if="ok"></component-a>
+              <component-b v-else></component-b>
+            </transition>
+          </div>
+        `,
+        components: {
+          componentA: resolve => {
+            setTimeout(() => {
+              resolve({ template: '<div><h1>component A</h1></div>' })
+              next1()
+            }, duration / 2)
+          },
+          componentB: resolve => {
+            setTimeout(() => {
+              resolve({ template: '<div><h1>component B</h1></div>' })
+              next2()
+            }, duration / 2)
+          }
+        },
+        data: {
+          ok: true
+        }
+      }).$mount(el)
+
+      expect(vm.$el.innerHTML).toBe('<!---->')
+
+      function next1 () {
+        Vue.nextTick(() => {
+          expect(vm.$el.children.length).toBe(1)
+          expect(vm.$el.textContent).toBe('component A')
+          expect(vm.$el.children[0].className).toBe('test-anim-enter test-anim-enter-active')
+          nextFrame(() => {
+            expect(vm.$el.children[0].className).toBe('test-anim-enter-active test-anim-enter-to')
+            setTimeout(() => {
+              expect(vm.$el.children[0].className).toBe('')
+              vm.ok = false
+            }, duration + buffer)
+          })
+        })
+      }
+
+      function next2 () {
+        waitForUpdate(() => {
+          expect(vm.$el.children.length).toBe(2)
+          expect(vm.$el.textContent).toBe('component Acomponent B')
+          expect(vm.$el.children[0].className).toBe('')
+          expect(vm.$el.children[1].className).toBe('test-anim-enter test-anim-enter-active')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.children[1].className).toBe('test-anim-enter-active test-anim-enter-to')
+        }).thenWaitFor(duration + buffer).then(() => {
+          expect(vm.$el.children.length).toBe(2)
+          expect(vm.$el.textContent).toBe('component Acomponent B')
+          expect(vm.$el.children[0].className).toBe('test-anim-leave-active test-anim-leave-to')
+          expect(vm.$el.children[1].className).toBe('')
+        }).thenWaitFor(duration + buffer).then(() => {
+          expect(vm.$el.children.length).toBe(1)
+          expect(vm.$el.textContent).toBe('component B')
+          expect(vm.$el.children[0].className).toBe('')
+        }).then(done)
+      }
+    })
+
     describe('explicit durations -', () => {
       it('single value', done => {
         const vm = new Vue({
