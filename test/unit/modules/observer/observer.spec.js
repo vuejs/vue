@@ -38,6 +38,19 @@ describe('Observer', () => {
     const ob2 = observe(obj)
     expect(ob2).toBe(ob1)
   })
+  
+  it('normalize', () => {
+    // on object
+    const obj = {
+      a: {},
+      b: {}
+    }
+    const ob1 = observe(obj)
+    expect(typeof obj.normalize).toBe('function')
+    expect(obj.__ob__ instanceof Observer).toBe(true)
+    expect(obj.normalize().__ob__).toBeUndefined()
+    expect(obj.normalize().a).toEqual(ob1.value.a)
+  })
 
   it('create on null', () => {
     // on null
