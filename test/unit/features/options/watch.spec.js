@@ -104,4 +104,43 @@ describe('Options watch', () => {
       expect(spy).toHaveBeenCalledWith(vm.a, oldA)
     }).then(done)
   })
+
+  it('correctly merges multiple extends', done => {
+    var spy2 = jasmine.createSpy('A')
+    var spy3 = jasmine.createSpy('B')
+    var A = Vue.extend({
+      data: function () {
+        return {
+          a: 0,
+          b: 0
+        }
+      },
+      watch: {
+        b: spy
+      }
+    })
+
+    var B = Vue.extend({
+      extends: A,
+      watch: {
+        a: spy2
+      }
+    })
+
+    var C = Vue.extend({
+      extends: B,
+      watch: {
+        a: spy3
+      }
+    })
+
+    var vm = new C()
+    vm.a = 1
+
+    waitForUpdate(() => {
+      expect(spy).not.toHaveBeenCalled()
+      expect(spy2).toHaveBeenCalledWith(1, 0)
+      expect(spy3).toHaveBeenCalledWith(1, 0)
+    }).then(done)
+  })
 })

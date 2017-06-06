@@ -172,7 +172,7 @@ strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
     }
     ret[key] = parent
       ? parent.concat(child)
-      : [child]
+      : Array.isArray(child) ? child : [child]
   }
   return ret
 }
