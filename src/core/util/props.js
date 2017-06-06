@@ -7,7 +7,7 @@ import { warn } from './debug'
 type PropOptions = {
   type: Function | Array<Function> | null,
   default: any,
-  required: ?boolean,
+  required: ?any,
   validator: ?Function
 };
 
@@ -87,14 +87,17 @@ function assertProp (
   vm: ?Component,
   absent: boolean
 ) {
-  if (prop.required && absent) {
+  const required = prop.required instanceof Function
+    ? prop.required()
+    : prop.required
+  if (required && absent) {
     warn(
       'Missing required prop: "' + name + '"',
       vm
     )
     return
   }
-  if (value == null && !prop.required) {
+  if (value == null && !required) {
     return
   }
   let type = prop.type
