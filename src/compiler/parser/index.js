@@ -455,6 +455,9 @@ function processAttrs (el) {
         name = name.replace(modifierRE, '')
       }
       if (bindRE.test(name)) { // v-bind
+        if (process.env.NODE_ENV !== 'production') {
+          checkVBindingVal(rawName, value)
+        }
         name = name.replace(bindRE, '')
         value = parseFilters(value)
         isProp = false
@@ -485,6 +488,9 @@ function processAttrs (el) {
         addHandler(el, name, value, modifiers, false, warn)
       } else { // normal directives
         name = name.replace(dirRE, '')
+        if (process.env.NODE_ENV !== 'production' && name === 'bind') {
+          checkVBindingVal(rawName, value)
+        }
         // parse arg
         const argMatch = name.match(argRE)
         const arg = argMatch && argMatch[1]
@@ -512,6 +518,31 @@ function processAttrs (el) {
       addAttr(el, name, JSON.stringify(value))
     }
   }
+}
+
+function checkVBindingVal (name: string, value: string): void {
+  let func
+
+  // there may be template error, leave it to the compiler detectErrors
+  try {
+    func = new Function(`(${value})`)
+  } catch (ex) {
+    return
+  }
+
+  try {
+    func()
+  } catch (ex) {
+    return
+  }
+  // if v-bind value is literal, the evaluation causes no error, we should introduce a warning.
+  warn(
+    `${name}="${value}": ` +
+    `You are using v-bind with literal. ` +
+    `To get better performance, ` +
+    `if is an object/array literal, save the literal in data/computed property, use like <component :ids="list"> instead of <component :ids="[1,2,3]">; ` +
+    `otherwise use like <component ids="1"> instead of <component :ids="1">`
+  )
 }
 
 function checkInFor (el: ASTElement): boolean {
