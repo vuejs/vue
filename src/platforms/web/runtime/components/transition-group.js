@@ -106,18 +106,24 @@ export default {
 
     children.forEach((c: VNode) => {
       if (c.data.moved) {
-        var el: any = c.elm
-        var s: any = el.style
-        addTransitionClass(el, moveClass)
-        s.transform = s.WebkitTransform = s.transitionDuration = ''
-        el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
-          if (!e || /transform$/.test(e.propertyName)) {
-            el.removeEventListener(transitionEndEvent, cb)
-            el._moveCb = null
-            removeTransitionClass(el, moveClass)
-          }
+        return new Promise(resolve => {
+          var el: any = c.elm
+          var s: any = el.style
+          addTransitionClass(el, moveClass)
+          s.transform = s.WebkitTransform = s.transitionDuration = ''
+          el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
+            if (!e || /transform$/.test(e.propertyName)) {
+              el.removeEventListener(transitionEndEvent, cb)
+              el._moveCb = null
+              removeTransitionClass(el, moveClass)
+              resolve()
+            }
+          })
         })
       }
+    }).filter(action => action)
+    Promise.all(moveActions).then(() => {
+      afterMove && afterMove()
     })
   },
 
