@@ -11,7 +11,7 @@
 // into the final desired state. This way in the second pass removed
 // nodes will remain where they should be.
 
-import { warn, extend } from 'core/util/index'
+import { warn, extend, resolveAsset } from 'core/util/index'
 import { addClass, removeClass } from '../class-util'
 import { transitionProps, extractTransitionData } from './transition'
 
@@ -40,6 +40,7 @@ export default {
     const rawChildren: Array<VNode> = this.$slots.default || []
     const children: Array<VNode> = this.children = []
     const transitionData: Object = extractTransitionData(this)
+    const Ctor = resolveAsset(this.$options, 'components', tag, false)
 
     for (let i = 0; i < rawChildren.length; i++) {
       const c: VNode = rawChildren[i]
@@ -69,11 +70,11 @@ export default {
           removed.push(c)
         }
       }
-      this.kept = h(tag, null, kept)
+      this.kept = h(Ctor || tag, null, kept)
       this.removed = removed
     }
 
-    return h(tag, null, children)
+    return h(Ctor || tag, null, children)
   },
 
   beforeUpdate () {

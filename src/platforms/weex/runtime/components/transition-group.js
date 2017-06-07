@@ -1,4 +1,4 @@
-import { warn, extend } from 'core/util/index'
+import { warn, extend, resolveAsset } from 'core/util/index'
 import { transitionProps, extractTransitionData } from './transition'
 
 const props = extend({
@@ -36,6 +36,7 @@ export default {
     const rawChildren = this.$slots.default || []
     const children = this.children = []
     const transitionData = extractTransitionData(this)
+    const Ctor = resolveAsset(this.$options, 'components', tag, false)
 
     for (let i = 0; i < rawChildren.length; i++) {
       const c = rawChildren[i]
@@ -68,11 +69,11 @@ export default {
           removed.push(c)
         }
       })
-      this.kept = h(tag, null, kept)
+      this.kept = h(Ctor || tag, null, kept)
       this.removed = removed
     }
 
-    return h(tag, null, children)
+    return h(Ctor || tag, null, children)
   },
 
   beforeUpdate () {
