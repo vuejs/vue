@@ -240,7 +240,7 @@ describe('vdom patch: children', () => {
     const elms = 14
     const samples = 5
     function spanNumWithOpacity (n, o) {
-      return new VNode('span', { key: n, style: { opacity: o }}, undefined, n.toString())
+      return new VNode('span', { key: { id: n }, style: { opacity: o }}, undefined, n.toString())
     }
 
     for (n = 0; n < elms; ++n) { arr[n] = n }
