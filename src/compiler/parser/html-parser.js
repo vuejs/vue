@@ -32,7 +32,7 @@ const attribute = new RegExp(
 // could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
 // but for Vue templates we can enforce a simple charset
 const ncname = '[a-zA-Z_][\\w\\-\\.]*'
-const qnameCapture = '((?:' + ncname + '\\:)?' + ncname + ')'
+const qnameCapture = '((?:' + ncname + '\\:)?' + ncname.slice(0, ncname.length - 2) + '\\@]*[\\!\\?]?)'
 const startTagOpen = new RegExp('^<' + qnameCapture)
 const startTagClose = /^\s*(\/?)>/
 const endTag = new RegExp('^<\\/' + qnameCapture + '[^>]*>')
@@ -259,14 +259,16 @@ export function parseHTML (html, options) {
     if (start == null) start = index
     if (end == null) end = index
 
-    if (tagName) {
-      lowerCasedTagName = tagName.toLowerCase()
-    }
-
     // Find the closest opened tag of the same type
     if (tagName) {
+      lowerCasedTagName = tagName.toLowerCase()
+      pos = lowerCasedTagName.search(/[.@!?]/)
+      if (pos > -1) lowerCasedTagName = lowerCasedTagName.slice(0, pos)
       for (pos = stack.length - 1; pos >= 0; pos--) {
-        if (stack[pos].lowerCasedTag === lowerCasedTagName) {
+        let who = stack[pos].lowerCasedTag
+        const idx = who.search(/[.@!?]/)
+        if (idx > -1) who = who.slice(0, idx)
+        if (who === lowerCasedTagName) {
           break
         }
       }
