@@ -15,3 +15,4 @@ export default function testObjectOption (name) {
     expect(`component option "${name}" should be an object`).not.toHaveBeenWarned()
   })
 }
+console.log('i am at branch1')
