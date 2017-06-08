@@ -3,6 +3,8 @@
 import { isRegExp } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
+import { tip } from '../util/index'
+
 type VNodeCache = { [key: string]: ?VNode };
 
 const patternTypes: Array<Function> = [String, RegExp]
@@ -93,6 +95,11 @@ export default {
         this.cache[key] = vnode
       }
       vnode.data.keepAlive = true
+    } else {
+      process.env.NODE_ENV !== 'production' && tip(
+        `keep-alive only works with components, ` +
+        `are you using it with HTML element? `
+      )
     }
     return vnode
   }
