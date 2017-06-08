@@ -202,6 +202,7 @@ export function createPatchFunction (backend) {
   function initComponent (vnode, insertedVnodeQueue) {
     if (isDef(vnode.data.pendingInsert)) {
       insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
+      vnode.data.pendingInsert = null
     }
     vnode.elm = vnode.componentInstance.$el
     if (isPatchable(vnode)) {
