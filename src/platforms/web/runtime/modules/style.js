@@ -26,20 +26,20 @@ const setProp = (el, name, val) => {
   }
 }
 
-const prefixes = ['Webkit', 'Moz', 'ms']
+const vendorNames = ['Webkit', 'Moz', 'ms']
 
-let testEl
+let emptyStyle
 const normalize = cached(function (prop) {
-  testEl = testEl || document.createElement('div')
+  emptyStyle = emptyStyle || document.createElement('div').style
   prop = camelize(prop)
-  if (prop !== 'filter' && (prop in testEl.style)) {
+  if (prop !== 'filter' && (prop in emptyStyle)) {
     return prop
   }
-  const upper = prop.charAt(0).toUpperCase() + prop.slice(1)
-  for (let i = 0; i < prefixes.length; i++) {
-    const prefixed = prefixes[i] + upper
-    if (prefixed in testEl.style) {
-      return prefixed
+  const capName = prop.charAt(0).toUpperCase() + prop.slice(1)
+  for (let i = 0; i < vendorNames.length; i++) {
+    const name = vendorNames[i] + capName
+    if (name in emptyStyle) {
+      return name
     }
   }
 })
