@@ -1,6 +1,6 @@
 /* @flow */
 
-import { decode } from 'he'
+import he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
@@ -28,7 +28,7 @@ const argRE = /:(.*)$/
 const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
 
-const decodeHTMLCached = cached(decode)
+const decodeHTMLCached = cached(he.decode)
 
 // configurable state
 export let warn
