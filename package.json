@@ -110,7 +110,7 @@
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-replace": "^1.1.1",
     "rollup-watch": "^4.0.0",
-    "selenium-server": "^3.4.0",
+    "selenium-server": "^2.53.1",
     "serialize-javascript": "^1.3.0",
     "typescript": "^2.3.4",
     "uglify-js": "^3.0.15",
