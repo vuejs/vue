@@ -69,16 +69,34 @@ declare interface Component {
   _provided: ?Object;
 
   // private methods
+
   // lifecycle
   _init: Function;
   _mount: (el?: Element | void, hydrating?: boolean) => Component;
   _update: (vnode: VNode, hydrating?: boolean) => void;
+
   // rendering
   _render: () => VNode;
-  __patch__: (a: Element | VNode | void, b: VNode) => any;
+
+  __patch__: (
+    a: Element | VNode | void,
+    b: VNode,
+    hydrating?: boolean,
+    removeOnly?: boolean,
+    parentElm?: any,
+    refElm?: any
+  ) => any;
+
   // createElement
+
   // _c is internal that accepts `normalizationType` optimization hint
-  _c: (vnode?: VNode, data?: VNodeData, children?: VNodeChildren, normalizationType?: number) => VNode | void;
+  _c: (
+    vnode?: VNode,
+    data?: VNodeData,
+    children?: VNodeChildren,
+    normalizationType?: number
+  ) => VNode | void;
+
   // renderStatic
   _m: (index: number, isInFor?: boolean) => VNode | VNodeChildren;
   // markOnce

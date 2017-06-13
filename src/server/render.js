@@ -343,7 +343,7 @@ function renderStartingTag (node: VNode, context) {
 }
 
 export function createRenderFunction (
-  modules: Array<Function>,
+  modules: Array<(node: VNode) => ?string>,
   directives: Object,
   isUnaryTag: Function,
   cache: any

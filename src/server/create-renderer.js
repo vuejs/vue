@@ -18,7 +18,7 @@ type RenderCache = {
 };
 
 export type RenderOptions = {
-  modules?: Array<(vnode: VNode) => string>;
+  modules?: Array<(vnode: VNode) => ?string>;
   directives?: Object;
   isUnaryTag?: Function;
   cache?: RenderCache;

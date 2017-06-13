@@ -97,7 +97,7 @@ function genSSRChildren (el, state, checkSkip) {
 function genSSRNode (el, state) {
   return el.type === 1
     ? genSSRElement(el, state)
-    : genText(el, state)
+    : genText(el)
 }
 
 function genChildrenAsStringNode (el, state) {

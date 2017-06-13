@@ -7,7 +7,11 @@ import { isObject, isDef } from 'core/util/index'
  */
 export function renderList (
   val: any,
-  render: () => VNode
+  render: (
+    val: any,
+    keyOrIndex: string | number,
+    index?: number
+  ) => VNode
 ): ?Array<VNode> {
   let ret: ?Array<VNode>, i, l, keys, key
   if (Array.isArray(val) || typeof val === 'string') {
