@@ -15,10 +15,12 @@ if (process.env.NODE_ENV !== 'production') {
     .replace(/[-_]/g, '')
 
   warn = (msg, vm) => {
-    if (hasConsole && (!config.silent)) {
-      console.error(`[Vue warn]: ${msg}` + (
-        vm ? generateComponentTrace(vm) : ''
-      ))
+    const trace = vm ? generateComponentTrace(vm) : ''
+
+    if (config.warnHandler) {
+      config.warnHandler.call(null, msg, vm, trace)
+    } else if (hasConsole && (!config.silent)) {
+      console.error(`[Vue warn]: ${msg}${trace}`)
     }
   }
 

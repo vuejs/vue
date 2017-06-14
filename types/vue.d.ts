@@ -75,6 +75,7 @@ export declare class Vue {
     productionTip: boolean;
     performance: boolean;
     errorHandler(err: Error, vm: Vue, info: string): void;
+    warnHandler(msg: string, vm: Vue, trace: string): void;
     ignoredElements: string[];
     keyCodes: { [key: string]: number };
   }
