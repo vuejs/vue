@@ -1,6 +1,6 @@
 import Vue from "../index";
 
-class Test extends Vue<object, object, object> {
+class Test extends Vue {
   a: number;
 
   testProperties() {

@@ -76,8 +76,8 @@ export type ExtendedVue<Constructor extends VueConstructor, Data, Methods, Compu
   Constructor;
 
 export interface VueConstructor {
-  new <Data, Methods, Computed, PropNames extends string = never>(options?: ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, PropNames>): CombinedVueInstance<Data, Methods, Computed, Record<PropNames, any>>;
-  new <Data, Methods, Computed, Props extends Record<string, PropValidator>>(options?: ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Props>): CombinedVueInstance<Data, Methods, Computed, Record<keyof Props, any>>;
+  new <Data = object, Methods = object, Computed = object, PropNames extends string = never>(options?: ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, PropNames>): CombinedVueInstance<Data, Methods, Computed, Record<PropNames, any>>;
+  new <Data = object, Methods = object, Computed = object, Props extends Record<string, PropValidator> = {}>(options?: ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Props>): CombinedVueInstance<Data, Methods, Computed, Record<keyof Props, any>>;
 
   extend<VC extends VueConstructor, PropNames extends string = never>(this: VC, definition: FunctionalComponentOptions<PropNames[], Record<PropNames, any>>): ExtendedVue<VC, {}, {}, {}, Record<PropNames, any>>;
   extend<VC extends VueConstructor, Props extends Record<string, PropValidator>>(this: VC, definition: FunctionalComponentOptions<Props, Record<keyof Props, any>>): ExtendedVue<VC, {}, {}, {}, Record<keyof Props, any>>;
