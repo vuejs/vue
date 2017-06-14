@@ -93,7 +93,12 @@ Vue.component('component', {
       createElement("div", "message"),
       createElement(Vue.component("component")),
       createElement({} as ComponentOptions<object, object, object, object>),
-      createElement({ functional: true }),
+      createElement({
+        functional: true,
+        render(c: CreateElement) {
+          return createElement()
+        }
+      }),
 
       createElement(() => Vue.component("component")),
       createElement(() => ( {} as ComponentOptions<object, object, object, object> )),

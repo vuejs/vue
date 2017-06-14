@@ -72,19 +72,23 @@ function isSameChild (child: VNode, oldChild: VNode): boolean {
   return oldChild.key === child.key && oldChild.tag === child.tag
 }
 
+function isAsyncPlaceholder (node: VNode): boolean {
+  return node.isComment && node.asyncFactory
+}
+
 export default {
   name: 'transition',
   props: transitionProps,
   abstract: true,
 
   render (h: Function) {
-    let children: ?Array<VNode> = this.$slots.default
+    let children: ?Array<VNode> = this.$options._renderChildren
     if (!children) {
       return
     }
 
     // filter out text nodes (possible whitespaces)
-    children = children.filter((c: VNode) => c.tag)
+    children = children.filter((c: VNode) => c.tag || isAsyncPlaceholder(c))
     /* istanbul ignore if */
     if (!children.length) {
       return
@@ -136,7 +140,9 @@ export default {
     // during entering.
     const id: string = `__transition-${this._uid}-`
     child.key = child.key == null
-      ? id + child.tag
+      ? child.isComment
+        ? id + 'comment'
+        : id + child.tag
       : isPrimitive(child.key)
         ? (String(child.key).indexOf(id) === 0 ? child.key : id + child.key)
         : child.key
@@ -151,7 +157,12 @@ export default {
       child.data.show = true
     }
 
-    if (oldChild && oldChild.data && !isSameChild(child, oldChild)) {
+    if (
+      oldChild &&
+      oldChild.data &&
+      !isSameChild(child, oldChild) &&
+      !isAsyncPlaceholder(oldChild)
+    ) {
       // replace old child transition data with fresh one
       // important for dynamic transitions!
       const oldData: Object = oldChild && (oldChild.data.transition = extend({}, data))
@@ -165,6 +176,9 @@ export default {
         })
         return placeholder(h, rawChild)
       } else if (mode === 'in-out') {
+        if (isAsyncPlaceholder(child)) {
+          return oldRawChild
+        }
         let delayedLeave
         const performLeave = () => { delayedLeave() }
         mergeVNodeHook(data, 'afterEnter', performLeave)

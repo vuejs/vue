@@ -15,7 +15,7 @@ import {
 import { VNode, VNodeData, VNodeChildren, ScopedSlot } from "./vnode";
 import { PluginFunction, PluginObject } from "./plugin";
 
-export type CreateElement = {
+export interface CreateElement {
   // empty node
   (): VNode;
 
@@ -119,6 +119,7 @@ export interface VueConstructor {
     productionTip: boolean;
     performance: boolean;
     errorHandler(err: Error, vm: Vue, info: string): void;
+    warnHandler(msg: string, vm: Vue, trace: string): void;
     ignoredElements: string[];
     keyCodes: { [key: string]: number };
   }

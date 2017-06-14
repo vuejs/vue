@@ -28,7 +28,7 @@ export class RenderContext {
   next: () => void;
   done: () => void;
 
-  modules: Array<() => ?string>;
+  modules: Array<(node: VNode) => ?string>;
   directives: Object;
   isUnaryTag: (tag: string) => boolean;
 

@@ -130,16 +130,26 @@ function initData (vm: Component) {
   // proxy data on instance
   const keys = Object.keys(data)
   const props = vm.$options.props
+  const methods = vm.$options.methods
   let i = keys.length
   while (i--) {
-    if (props && hasOwn(props, keys[i])) {
+    const key = keys[i]
+    if (process.env.NODE_ENV !== 'production') {
+      if (methods && hasOwn(methods, key)) {
+        warn(
+          `method "${key}" has already been defined as a data property.`,
+          vm
+        )
+      }
+    }
+    if (props && hasOwn(props, key)) {
       process.env.NODE_ENV !== 'production' && warn(
-        `The data property "${keys[i]}" is already declared as a prop. ` +
+        `The data property "${key}" is already declared as a prop. ` +
         `Use prop default value instead.`,
         vm
       )
-    } else if (!isReserved(keys[i])) {
-      proxy(vm, `_data`, keys[i])
+    } else if (!isReserved(key)) {
+      proxy(vm, `_data`, key)
     }
   }
   // observe data

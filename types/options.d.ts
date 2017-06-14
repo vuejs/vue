@@ -45,9 +45,9 @@ export type ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Pr
  * Useful for `Vue.extend` and `Vue.component`.
  */
 export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, PropNames extends string = never> =
-  ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, PropNames> |
-  ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Record<PropNames, PropOptions>> |
-  FunctionalComponentOptions<PropNames[] | Record<PropNames, PropValidator>, Record<PropNames, any>>;
+  | FunctionalComponentOptions<PropNames[] | Record<PropNames, PropValidator>, Record<PropNames, any>>
+  | ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, PropNames>
+  | ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Record<PropNames, PropOptions>>;
 
 
 export interface ComponentOptions<Data, Methods, Computed, Props> {
@@ -97,10 +97,10 @@ export interface ComponentOptions<Data, Methods, Computed, Props> {
 }
 
 export interface FunctionalComponentOptions<Props = object, ContextProps = object> {
+  name?: string;
   props?: Props;
   functional: boolean;
   render(this: undefined, createElement: CreateElement, context: RenderContext<ContextProps>): VNode;
-  name?: string;
 }
 
 export interface RenderContext<Props> {

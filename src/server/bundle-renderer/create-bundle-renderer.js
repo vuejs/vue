@@ -27,7 +27,9 @@ type RenderBundle = {
   modules?: { [filename: string]: Array<string> };
 };
 
-export function createBundleRendererCreator (createRenderer: () => Renderer) {
+export function createBundleRendererCreator (
+  createRenderer: (options?: RenderOptions) => Renderer
+) {
   return function createBundleRenderer (
     bundle: string | RenderBundle,
     rendererOptions?: RenderOptions = {}

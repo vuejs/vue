@@ -1,7 +1,9 @@
 const path = require('path')
 const buble = require('rollup-plugin-buble')
 const alias = require('rollup-plugin-alias')
+const cjs = require('rollup-plugin-commonjs')
 const replace = require('rollup-plugin-replace')
+const node = require('rollup-plugin-node-resolve')
 const flow = require('rollup-plugin-flow-no-whitespace')
 const version = process.env.VERSION || require('../package.json').version
 const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
@@ -112,6 +114,14 @@ const builds = {
     format: 'cjs',
     external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
   },
+  'web-server-basic-renderer': {
+    entry: resolve('web/entry-server-basic-renderer.js'),
+    dest: resolve('packages/vue-server-renderer/basic.js'),
+    format: 'umd',
+    env: 'development',
+    moduleName: 'renderVueComponentToString',
+    plugins: [node(), cjs()]
+  },
   'web-server-renderer-webpack-server-plugin': {
     entry: resolve('server/webpack-plugin/server.js'),
     dest: resolve('packages/vue-server-renderer/server-plugin.js'),
@@ -156,7 +166,7 @@ function genConfig (opts) {
     external: opts.external,
     format: opts.format,
     banner: opts.banner,
-    moduleName: 'Vue',
+    moduleName: opts.moduleName || 'Vue',
     plugins: [
       replace({
         __WEEX__: !!opts.weex,

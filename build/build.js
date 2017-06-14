@@ -46,9 +46,7 @@ function buildEntry (config) {
     const code = bundle.generate(config).code
     if (isProd) {
       var minified = (config.banner ? config.banner + '\n' : '') + uglify.minify(code, {
-        fromString: true,
         output: {
-          screw_ie8: true,
           ascii_only: true
         },
         compress: {

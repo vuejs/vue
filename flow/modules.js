@@ -10,6 +10,7 @@ declare module 'source-map' {
     toString(): string;
   }
   declare class SourceMapConsumer {
+    constructor (map: Object): void;
     originalPositionFor(position: { line: number; column: number; }): {
       source: ?string;
       line: ?number;

@@ -71,7 +71,14 @@ function renderStringNode (
   return new StringNode(open, close, children, normalizationType)
 }
 
-function renderStringList (val: any, render: () => string): string {
+function renderStringList (
+  val: any,
+  render: (
+    val: any,
+    keyOrIndex: string | number,
+    index?: number
+  ) => string
+): string {
   let ret = ''
   let i, l, keys, key
   if (Array.isArray(val) || typeof val === 'string') {
