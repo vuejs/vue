@@ -25,19 +25,7 @@ export type Accessors<T> = {
 }
 
 /**
- * A general type that describes non-functional component options in Vue.
- *
- * While `ThisTypedComponentOptionsWithArrayProps` and `ThisTypedComponentOptionsWithRecordProps` will
- * lead to more accurate inferences, you can use this if the two are too cumbersome.
- */
-export type ThisTypedComponentOptions<Data, Methods, Computed, PropNames extends string = never> =
-  object &
-  ComponentOptions<Data | ((this: Record<PropNames, any> & Vue) => Data), Methods, Computed, PropNames[] | Record<PropNames, PropOptions>> &
-  ThisType<CombinedVueInstance<Data, Methods, Computed, Record<PropNames, any>>>;
-
-/**
- * A specialized version of `ThisTypedComponentOptions`.
- * This type should be used when a parameter type only contains an array of strings for its `props` value.
+ * This type should be used when an array of strings is used for a component's `props` value.
  */
 export type ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, PropNames extends string> =
   object &
@@ -45,8 +33,7 @@ export type ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, Pro
   ThisType<CombinedVueInstance<Data, Methods, Computed, Record<PropNames, any>>>;
 
 /**
- * A specialized version of `ThisTypedComponentOptions`.
- * This type should be used when a parameter type only contains an object mapped to `PropOptions` for its `props` value.
+ * This type should be used when an object mapped to `PropOptions` is used for a component's `props` value.
  */
 export type ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Props> =
   object &
@@ -58,7 +45,8 @@ export type ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Pr
  * Useful for `Vue.extend` and `Vue.component`.
  */
 export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, PropNames extends string = never> =
-  ThisTypedComponentOptions<Data, Methods, Computed, PropNames> |
+  ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, PropNames> |
+  ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Record<PropNames, PropOptions>> |
   FunctionalComponentOptions<PropNames[] | Record<PropNames, PropValidator>, Record<PropNames, any>>;
 
 
