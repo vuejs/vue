@@ -63,6 +63,12 @@ class Test extends Vue {
         vm.testMethods();
       }
     };
+    config.warnHandler = (msg, vm) => {
+      if (vm instanceof Test) {
+        vm.testProperties();
+        vm.testMethods();
+      }
+    };
     config.keyCodes = { esc: 27 };
   }
 
