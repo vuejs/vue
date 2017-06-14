@@ -1,4 +1,4 @@
-import { Vue, AnyVue } from "./vue";
+import { Vue } from "./vue";
 
 export type ScopedSlot = (props: any) => VNodeChildrenArrayContents | string;
 

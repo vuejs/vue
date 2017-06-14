@@ -32,10 +32,9 @@ export type CreateElement = {
   (tag: AsyncComponent<any, any, any, any>, data?: VNodeData, children?: VNodeChildren): VNode;
 }
 
-export interface Vue<Data = object, Methods = object, Computed = object, Props = object> {
-  $data: Data;
+export interface Vue {
   readonly $el: HTMLElement;
-  readonly $options: ComponentOptions<Data, Methods, Computed, Props>;
+  readonly $options: ComponentOptions<any, any, any, any>;
   readonly $parent: Vue;
   readonly $root: Vue;
   readonly $children: Vue[];
@@ -43,7 +42,8 @@ export interface Vue<Data = object, Methods = object, Computed = object, Props =
   readonly $slots: { [key: string]: VNode[] };
   readonly $scopedSlots: { [key: string]: ScopedSlot };
   readonly $isServer: boolean;
-  readonly $props: Props;
+  readonly $data: Record<string, any>;
+  readonly $props: Record<string, any>;
   readonly $ssrContext: any;
 
   $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
@@ -70,7 +70,7 @@ export interface Vue<Data = object, Methods = object, Computed = object, Props =
   $createElement: CreateElement;
 }
 
-export type CombinedVueInstance<Data, Methods, Computed, Props> = Data & Methods & Computed & Props & Vue<Data, Methods, Computed, Props>
+export type CombinedVueInstance<Data, Methods, Computed, Props> = Data & Methods & Computed & Props & Vue;
 export type ExtendedVue<Constructor extends VueConstructor, Data, Methods, Computed, Props> =
   (new (...args: any[]) => CombinedVueInstance<Data, Methods, Computed, Props>) &
   Constructor;

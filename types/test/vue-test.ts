@@ -18,9 +18,9 @@ class Test extends Vue<object, object, object> {
 
   // test property reification
   $refs: {
-    vue: Vue<object, object, object, never>,
+    vue: Vue,
     element: HTMLInputElement,
-    vues: Vue<object, object, object, never>[],
+    vues: Vue[],
     elements: HTMLInputElement[]
   }
   testReification() {

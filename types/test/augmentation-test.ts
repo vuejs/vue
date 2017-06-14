@@ -2,7 +2,7 @@ import Vue from "../index";
 
 declare module "../vue" {
   // add instance property and method
-  interface Vue<Data, Methods, Computed> {
+  interface Vue {
     $instanceProperty: string;
     $instanceMethod(): void;
   }
@@ -22,10 +22,20 @@ declare module "../options" {
 }
 
 const vm = new Vue({
+  props: ["bar"],
   data: {
     a: true
   },
-  foo: "foo"
+  methods: {
+    foo() {
+      this.a = false;
+    }
+  },
+  computed: {
+    BAR(): string {
+      return this.bar.toUpperCase();
+    }
+  }
 });
 
 vm.$instanceProperty;
