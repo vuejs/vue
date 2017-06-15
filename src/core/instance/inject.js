@@ -35,8 +35,9 @@ export function initInjections (vm: Component) {
   }
 }
 
-export function resolveInject (inject: ?Object, vm: Component): ?Object {
+export function resolveInject (inject: any, vm: Component): ?Object {
   if (inject) {
+    // inject is :any because flow is not smart enough to figure out cached
     const result = Object.create(null)
     const keys = hasSymbol
         ? Reflect.ownKeys(inject)
