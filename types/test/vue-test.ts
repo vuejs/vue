@@ -126,4 +126,28 @@ const FunctionalHelloWorldComponent = Vue.extend({
   render(createElement, ctxt) {
     return createElement("div", "Hello " + ctxt.props.name)
   }
-})
+});
+
+const Parent = Vue.extend({
+  data() {
+    return { greeting: 'Hello' }
+  }
+});
+
+const Child = Parent.extend({
+  methods: {
+    foo() {
+      console.log(this.greeting.toLowerCase());
+    }
+  }
+});
+
+const GrandChild = Child.extend({
+  computed: {
+    lower(): string {
+      return this.greeting.toLowerCase();
+    }
+  }
+});
+
+new GrandChild().lower.toUpperCase();
