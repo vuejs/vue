@@ -27,18 +27,18 @@ export type Accessors<T> = {
 /**
  * This type should be used when an array of strings is used for a component's `props` value.
  */
-export type ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, PropNames extends string> =
+export type ThisTypedComponentOptionsWithArrayProps<Instance extends Vue, Data, Methods, Computed, PropNames extends string> =
   object &
-  ComponentOptions<Data | ((this: Record<PropNames, any> & Vue) => Data), Methods, Computed, PropNames[]> &
-  ThisType<CombinedVueInstance<Data, Methods, Computed, Record<PropNames, any>>>;
+  ComponentOptions<Data | ((this: Record<PropNames, any> & Instance) => Data), Methods, Computed, PropNames[]> &
+  ThisType<CombinedVueInstance<Instance, Data, Methods, Computed, Record<PropNames, any>>>;
 
 /**
  * This type should be used when an object mapped to `PropOptions` is used for a component's `props` value.
  */
-export type ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Props> =
+export type ThisTypedComponentOptionsWithRecordProps<Instance extends Vue, Data, Methods, Computed, Props> =
   object &
-  ComponentOptions<Data | ((this: Record<keyof Props, any> & Vue) => Data), Methods, Computed, Props> &
-  ThisType<CombinedVueInstance<Data, Methods, Computed, Props>>;
+  ComponentOptions<Data | ((this: Record<keyof Props, any> & Instance) => Data), Methods, Computed, Props> &
+  ThisType<CombinedVueInstance<Instance, Data, Methods, Computed, Props>>;
 
 /**
  * A helper type that describes options for either functional or non-functional components.
@@ -46,8 +46,8 @@ export type ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Pr
  */
 export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, PropNames extends string = never> =
   | FunctionalComponentOptions<PropNames[] | Record<PropNames, PropValidator>, Record<PropNames, any>>
-  | ThisTypedComponentOptionsWithArrayProps<Data, Methods, Computed, PropNames>
-  | ThisTypedComponentOptionsWithRecordProps<Data, Methods, Computed, Record<PropNames, PropOptions>>;
+  | ThisTypedComponentOptionsWithArrayProps<Vue, Data, Methods, Computed, PropNames>
+  | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Record<PropNames, PropOptions>>;
 
 
 export interface ComponentOptions<Data, Methods, Computed, Props> {
