@@ -253,19 +253,12 @@ function normalizeProps (options: Object) {
  */
 function normalizeInject (options: Object) {
   const inject = options.inject
-  if (!Array.isArray(inject)) return
-  const res = {}
-  let i = inject.length
-  let val
-  while (i--) {
-    val = inject[i]
-    if (typeof val === 'string') {
-      res[val] = val
-    } else if (process.env.NODE_ENV !== 'production') {
-      warn('inject must be strings when using array syntax.')
+  if (Array.isArray(inject)) {
+    const normalized = options.inject = {}
+    for (let i = 0; i < inject.length; i++) {
+      normalized[inject[i]] = inject[i]
     }
   }
-  options.inject = res
 }
 
 /**
