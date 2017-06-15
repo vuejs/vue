@@ -220,6 +220,35 @@ describe('Options provide/inject', () => {
     })
   })
 
+  it('should extend properly', () => {
+    const parent = Vue.extend({
+      template: `<span/>`,
+      inject: ['foo']
+    })
+
+    const child = parent.extend({
+      template: `<span/>`,
+      inject: ['bar'],
+      created () {
+        injected = [this.foo, this.bar]
+      }
+    })
+
+    new Vue({
+      template: `<div><parent/><child/></div>`,
+      provide: {
+        foo: 1,
+        bar: false
+      },
+      components: {
+        parent,
+        child
+      }
+    }).$mount()
+
+    expect(injected).toEqual([1, false])
+  })
+
   it('should warn when injections has been modified', () => {
     const key = 'foo'
     const vm = new Vue({
