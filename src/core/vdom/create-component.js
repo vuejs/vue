@@ -169,8 +169,14 @@ export function createComponent (
 
   if (isTrue(Ctor.options.abstract)) {
     // abstract components do not keep anything
-    // other than props & listeners
+    // other than props & listeners & slot
+
+    // work around flow
+    const slot = data.slot
     data = {}
+    if (slot) {
+      data.slot = slot
+    }
   }
 
   // merge component management hooks onto the placeholder node
