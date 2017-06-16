@@ -1,7 +1,13 @@
 /* @flow */
 
 import config from 'core/config'
-import { isObject, warn, toObject } from 'core/util/index'
+
+import {
+  warn,
+  isObject,
+  toObject,
+  isReservedAttribute
+} from 'core/util/index'
 
 /**
  * Runtime helper for merging v-bind="object" into a VNode's data.
@@ -24,7 +30,11 @@ export function bindObjectProps (
       }
       let hash
       for (const key in value) {
-        if (key === 'class' || key === 'style') {
+        if (
+          key === 'class' ||
+          key === 'style' ||
+          isReservedAttribute(key)
+        ) {
           hash = data
         } else {
           const type = data.attrs && data.attrs.type
