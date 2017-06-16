@@ -325,4 +325,60 @@ describe('Directive v-bind', () => {
       expect(vm.$el.children[0].getAttribute('data-test')).toBe(null)
     }).then(done)
   })
+
+  describe('bind object with special attribute', () => {
+    function makeInstance (options) {
+      return new Vue({
+        template: `<div>${options.parentTemp}</div>`,
+        data: {
+          attrs: {
+            [options.attr]: options.value
+          }
+        },
+        components: {
+          comp: {
+            template: options.childTemp
+          }
+        }
+      }).$mount()
+    }
+
+    it('key', () => {
+      const vm = makeInstance({
+        attr: 'key',
+        value: 'test',
+        parentTemp: '<div v-bind="attrs"></div>'
+      })
+      expect(vm._vnode.children[0].key).toBe('test')
+    })
+
+    it('ref', () => {
+      const vm = makeInstance({
+        attr: 'ref',
+        value: 'test',
+        parentTemp: '<div v-bind="attrs"></div>'
+      })
+      expect(vm.$refs.test).toBe(vm.$el.firstChild)
+    })
+
+    it('slot', () => {
+      const vm = makeInstance({
+        attr: 'slot',
+        value: 'test',
+        parentTemp: '<comp><span v-bind="attrs">123</span></comp>',
+        childTemp: '<div>slot:<slot name="test"></slot></div>'
+      })
+      expect(vm.$el.innerHTML).toBe('<div>slot:<span>123</span></div>')
+    })
+
+    it('is', () => {
+      const vm = makeInstance({
+        attr: 'is',
+        value: 'comp',
+        parentTemp: '<component v-bind="attrs"></component>',
+        childTemp: '<div>comp</div>'
+      })
+      expect(vm.$el.innerHTML).toBe('<div>comp</div>')
+    })
+  })
 })
