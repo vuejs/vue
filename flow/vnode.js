@@ -35,6 +35,7 @@ declare interface VNodeData {
   key?: string | number;
   slot?: string;
   ref?: string;
+  is?: string;
   pre?: boolean;
   tag?: string;
   staticClass?: string;
