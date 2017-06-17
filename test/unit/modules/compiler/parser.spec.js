@@ -123,7 +123,7 @@ describe('parser', () => {
   it('not warn 3 root elements with v-if, v-else-if and v-else', () => {
     parse('<div v-if="1"></div><div v-else-if="2"></div><div v-else></div>', baseOptions)
     expect('Component template should contain exactly one root element')
-        .not.toHaveBeenWarned()
+      .not.toHaveBeenWarned()
   })
 
   it('not warn 2 root elements with v-if and v-else on separate lines', () => {
@@ -142,7 +142,7 @@ describe('parser', () => {
       <div v-else></div>
     `, baseOptions)
     expect('Component template should contain exactly one root element')
-        .not.toHaveBeenWarned()
+      .not.toHaveBeenWarned()
 
     parse(`
       <div v-if="1"></div>
@@ -152,7 +152,7 @@ describe('parser', () => {
       <div v-else></div>
     `, baseOptions)
     expect('Component template should contain exactly one root element')
-        .not.toHaveBeenWarned()
+      .not.toHaveBeenWarned()
   })
 
   it('generate correct ast for 2 root elements with v-if and v-else on separate lines', () => {
@@ -219,7 +219,7 @@ describe('parser', () => {
   it('warn 2 root elements with v-if and v-else-if with v-for on 2nd', () => {
     parse('<div v-if="1"></div><div v-else-if="2" v-for="i in [1]"></div>', baseOptions)
     expect('Cannot use v-for on stateful component root element because it renders multiple elements')
-        .toHaveBeenWarned()
+      .toHaveBeenWarned()
   })
 
   it('warn <template> as root element', () => {
@@ -547,5 +547,23 @@ describe('parser', () => {
     const options = extend({}, baseOptions)
     const ast = parse(`<script type="x/template">&gt;<foo>&lt;</script>`, options)
     expect(ast.children[0].text).toBe(`&gt;<foo>&lt;`)
+  })
+
+  // #4881
+  it('should not break array class match on white space', () => {
+    const ast = parse(`<p :class=[color, decoration]>{{message}}</p>`, baseOptions)
+    expect(ast.tag).toBe('p')
+    expect(ast.plain).toBe(false)
+    expect(ast.classBinding).toBe('[color, decoration]')
+    expect(ast.attrsMap[':class']).toBe('[color, decoration]')
+  })
+
+  // #4881
+  it('should not break object class match on white space', () => {
+    const ast = parse(`<p :class={enabled: isEnabled, error: hasError}>{{message}}</p>`, baseOptions)
+    expect(ast.tag).toBe('p')
+    expect(ast.plain).toBe(false)
+    expect(ast.classBinding).toBe('{enabled: isEnabled, error: hasError}')
+    expect(ast.attrsMap[':class']).toBe('{enabled: isEnabled, error: hasError}')
   })
 })
