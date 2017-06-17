@@ -43,7 +43,10 @@ After cloning the repo, run:
 $ npm install
 ```
 
-This would also run the `postinstall` script which will link git commit hooks if you are on a Unix-like system.
+This will also run the `postinstall` script which links two git hooks:
+
+- `pre-commit`: runs ESLint on staged files.
+- `commit-msg`: validates commit message format (see below).
 
 ### Commiting Changes
 
