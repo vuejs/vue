@@ -21,7 +21,7 @@ const singleAttrValues = [
   // attr value, single quotes
   /'([^']*)'+/.source,
   // attr value, no quotes
-  /([^\s"'=<>`]+)/.source
+  /([^"'=<>`]+)/.source
 ]
 const attribute = new RegExp(
   '^\\s*' + singleAttrIdentifier.source +
