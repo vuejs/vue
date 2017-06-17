@@ -43,13 +43,11 @@ After cloning the repo, run:
 $ npm install
 ```
 
-If you are on a Unix-like system, optionally install the Git pre-commit hook with:
+This would also run the `postinstall` script which will link git commit hooks if you are on a Unix-like system.
 
-``` bash
-$ npm run install:hooks
-```
+### Commiting Changes
 
-This will run ESLint on changed files before each commit.
+Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. If git hooks have been properly linked, commit messages will be automatically validated upon commit. It is recommended to use `npm run commit` instead of `git commit`, which provides an interactive CLI for generating proper commit messages.
 
 ### Commonly used NPM scripts
 
