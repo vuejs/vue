@@ -20,7 +20,8 @@ import {
   isReserved,
   handleError,
   validateProp,
-  isPlainObject
+  isPlainObject,
+  isReservedAttribute
 } from '../util/index'
 
 const sharedPropertyDefinition = {
@@ -54,12 +55,6 @@ export function initState (vm: Component) {
   if (opts.watch) initWatch(vm, opts.watch)
 }
 
-const isReservedProp = {
-  key: 1,
-  ref: 1,
-  slot: 1
-}
-
 function checkOptionType (vm: Component, name: string) {
   const option = vm.$options[name]
   if (!isPlainObject(option)) {
@@ -84,7 +79,7 @@ function initProps (vm: Component, propsOptions: Object) {
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
-      if (isReservedProp[key] || config.isReservedAttr(key)) {
+      if (isReservedAttribute(key) || config.isReservedAttr(key)) {
         warn(
           `"${key}" is a reserved attribute and cannot be used as component prop.`,
           vm
