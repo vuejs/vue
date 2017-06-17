@@ -9,4 +9,4 @@ dist/vue.common.min.js
 test/e2e/reports
 test/e2e/screenshots
 coverage
-RELEASE_NOTE.md
+RELEASE_NOTE*.md

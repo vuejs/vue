@@ -58,4 +58,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   else
     npm publish --tag $RELEASE_TAG
   fi
+
+  # generate release note
+  VERSION=$VERSION npm run release:note
 fi
