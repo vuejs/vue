@@ -21,6 +21,8 @@ declare type CompilerOptions = {
 
   // runtime user-configurable
   delimiters?: [string, string]; // template delimiters
+
+  plugins?: Array<Function>; // customizing plugins to process ast
 };
 
 declare type CompiledResult = {

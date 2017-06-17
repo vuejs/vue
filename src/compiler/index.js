@@ -14,6 +14,9 @@ export const createCompiler = createCompilerCreator(function baseCompile (
 ): CompiledResult {
   const ast = parse(template.trim(), options)
   optimize(ast, options)
+  if (options.plugins) {
+    options.plugins.forEach(plugin => plugin(ast, options))
+  }
   const code = generate(ast, options)
   return {
     ast,
