@@ -48,11 +48,32 @@ export default {
 
   props: {
     include: patternTypes,
-    exclude: patternTypes
+    exclude: patternTypes,
+    maxAlive: Number
+  },
+
+  methods: {
+    toCache (key: string | number, vnode: VNode) {
+      if (this.cache[key]) {
+        vnode.componentInstance = this.cache[key].componentInstance
+      } else {
+        if (this.maxAlive > 0) {
+          while (this.queue.length >= this.maxAlive) {
+            const willDestroyKey = this.queue.shift()
+            pruneCacheEntry(this.cache[willDestroyKey])
+            this.cache[willDestroyKey].data.keepAlive = false
+            this.cache[willDestroyKey] = null
+          }
+        }
+        this.queue.push(key)
+        this.cache[key] = vnode
+      }
+    }
   },
 
   created () {
     this.cache = Object.create(null)
+    this.queue = []
   },
 
   destroyed () {
@@ -87,11 +108,7 @@ export default {
         // so cid alone is not enough (#3269)
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')
         : vnode.key
-      if (this.cache[key]) {
-        vnode.componentInstance = this.cache[key].componentInstance
-      } else {
-        this.cache[key] = vnode
-      }
+      this.toCache(key, vnode)
       vnode.data.keepAlive = true
     }
     return vnode

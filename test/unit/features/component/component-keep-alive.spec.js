@@ -5,7 +5,7 @@ import { nextFrame } from 'web/runtime/transition-util'
 
 describe('Component keep-alive', () => {
   const { duration, buffer } = injectStyles()
-  let components, one, two, el
+  let components, one, two, three, el
   beforeEach(() => {
     one = {
       template: '<div>one</div>',
@@ -23,9 +23,18 @@ describe('Component keep-alive', () => {
       deactivated: jasmine.createSpy('two deactivated'),
       destroyed: jasmine.createSpy('two destroyed')
     }
+    three = {
+      template: '<div>three</div>',
+      created: jasmine.createSpy('three created'),
+      mounted: jasmine.createSpy('three mounted'),
+      activated: jasmine.createSpy('three activated'),
+      deactivated: jasmine.createSpy('three deactivated'),
+      destroyed: jasmine.createSpy('three destroyed')
+    }
     components = {
       one,
-      two
+      two,
+      three
     }
     el = document.createElement('div')
     document.body.appendChild(el)
@@ -824,6 +833,58 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">foo</div>'
         )
+      }).then(done)
+    })
+
+    it('max-alive should work', done => {
+      const vm = new Vue({
+        template: `
+          <div v-if="ok">
+            <keep-alive :max-alive="2">
+              <component :is="view"></component>
+            </keep-alive>
+          </div>
+        `,
+        data: {
+          view: 'one',
+          ok: true
+        },
+        components
+      }).$mount()
+      expect(vm.$el.textContent).toBe('one')
+      assertHookCalls(one, [1, 1, 1, 0, 0])
+      assertHookCalls(two, [0, 0, 0, 0, 0])
+      assertHookCalls(three, [0, 0, 0, 0, 0])
+      vm.view = 'two'
+      waitForUpdate(() => {
+        expect(vm.$el.textContent).toBe('two')
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 0, 0])
+        assertHookCalls(three, [0, 0, 0, 0, 0])
+        vm.view = 'three'
+      }).then(() => {
+        expect(vm.$el.textContent).toBe('three')
+        assertHookCalls(one, [1, 1, 1, 1, 1])
+        assertHookCalls(two, [1, 1, 1, 1, 0])
+        assertHookCalls(three, [1, 1, 1, 0, 0])
+        vm.view = 'two'
+      }).then(() => {
+        expect(vm.$el.textContent).toBe('two')
+        assertHookCalls(one, [1, 1, 1, 1, 1])
+        assertHookCalls(two, [1, 1, 2, 1, 0])
+        assertHookCalls(three, [1, 1, 1, 1, 0])
+        vm.view = 'one'
+      }).then(() => {
+        expect(vm.$el.textContent).toBe('one')
+        assertHookCalls(one, [2, 2, 2, 1, 1])
+        assertHookCalls(two, [1, 1, 2, 2, 1])
+        assertHookCalls(three, [1, 1, 1, 1, 0])
+        vm.ok = false // teardown
+      }).then(() => {
+        expect(vm.$el.textContent).toBe('')
+        assertHookCalls(one, [2, 2, 2, 2, 2])
+        assertHookCalls(two, [1, 1, 2, 2, 1])
+        assertHookCalls(three, [1, 1, 1, 1, 1])
       }).then(done)
     })
   }
