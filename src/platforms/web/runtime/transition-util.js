@@ -68,6 +68,10 @@ export function nextFrame (fn: Function) {
   })
 }
 
+export function hasTransitionClass (el: any, cls: string) {
+  return el._transitionClasses && el._transitionClasses.indexOf(cls) > -1
+}
+
 export function addTransitionClass (el: any, cls: string) {
   (el._transitionClasses || (el._transitionClasses = [])).push(cls)
   addClass(el, cls)

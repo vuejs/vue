@@ -16,6 +16,7 @@ import {
   nextFrame,
   resolveTransition,
   whenTransitionEnds,
+  hasTransitionClass,
   addTransitionClass,
   removeTransitionClass
 } from '../transition-util'
@@ -149,7 +150,9 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     addTransitionClass(el, startClass)
     addTransitionClass(el, activeClass)
     nextFrame(() => {
-      addTransitionClass(el, toClass)
+      if (!hasTransitionClass(el, toClass)) {
+        addTransitionClass(el, toClass)
+      }
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
         if (isValidDuration(explicitEnterDuration)) {
@@ -257,7 +260,9 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       addTransitionClass(el, leaveClass)
       addTransitionClass(el, leaveActiveClass)
       nextFrame(() => {
-        addTransitionClass(el, leaveToClass)
+        if (!hasTransitionClass(el, leaveToClass)) {
+          addTransitionClass(el, leaveToClass)
+        }
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
           if (isValidDuration(explicitLeaveDuration)) {
