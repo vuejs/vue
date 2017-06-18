@@ -52,6 +52,24 @@ describe('Global API: set/delete', () => {
         expect(vm.$el.innerHTML).toBe('')
       }).then(done)
     })
+
+    it('be able to use string type index in array', done => {
+      const vm = new Vue({
+        template: '<div><p v-for="obj in lists">{{obj.name}}</p></div>',
+        data: {
+          lists: [
+            { name: 'A' },
+            { name: 'B' },
+            { name: 'C' }
+          ]
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe('<p>A</p><p>B</p><p>C</p>')
+      Vue.set(vm.lists, '0', { name: 'D' })
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<p>D</p><p>B</p><p>C</p>')
+      }).then(done)
+    })
   })
 
   describe('Vue.delete', () => {
@@ -94,24 +112,6 @@ describe('Global API: set/delete', () => {
         Vue.delete(vm.lists, 0)
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('')
-      }).then(done)
-    })
-
-    it('be able to use string type index in array', done => {
-      const vm = new Vue({
-        template: '<div><p v-for="obj in lists">{{obj.name}}</p></div>',
-        data: {
-          lists: [
-            { name: 'A' },
-            { name: 'B' },
-            { name: 'C' }
-          ]
-        }
-      }).$mount()
-      expect(vm.$el.innerHTML).toBe('<p>A</p><p>B</p><p>C</p>')
-      Vue.set(vm.lists, '0', { name: 'D' })
-      waitForUpdate(() => {
-        expect(vm.$el.innerHTML).toBe('<p>D</p><p>B</p><p>C</p>')
       }).then(done)
     })
   })
