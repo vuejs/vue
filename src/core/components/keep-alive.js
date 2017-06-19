@@ -11,8 +11,10 @@ function getComponentName (opts: ?VNodeComponentOptions): ?string {
   return opts && (opts.Ctor.options.name || opts.tag)
 }
 
-function matches (pattern: string | RegExp, name: string): boolean {
-  if (typeof pattern === 'string') {
+function matches (pattern: string | RegExp | Array, name: string): boolean {
+  if (Array.isArray(pattern)) {
+    return pattern.indexOf(name) > -1
+  } else if (typeof pattern === 'string') {
     return pattern.split(',').indexOf(name) > -1
   } else if (isRegExp(pattern)) {
     return pattern.test(name)
