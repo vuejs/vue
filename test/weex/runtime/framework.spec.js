@@ -199,7 +199,7 @@ describe('framework APIs', () => {
     expect(root).toMatch(/not found/)
   })
 
-  it('reveiveTasks: fireEvent', (done) => {
+  it('receiveTasks: fireEvent', (done) => {
     const instance = new Instance(runtime)
     framework.createInstance(instance.id, `
       new Vue({
@@ -254,7 +254,7 @@ describe('framework APIs', () => {
     })
   })
 
-  it('reveiveTasks: callback', (done) => {
+  it('receiveTasks: callback', (done) => {
     framework.registerModules({
       foo: ['a', 'b', 'c']
     })
@@ -455,7 +455,7 @@ describe('framework APIs', () => {
         },
         el: "body"
       })
-    `, { a: 1, b: 2 })
+    `, undefined, { a: 1, b: 2 })
     expect(JSON.parse(instance2.getRealRoot().children[0].attr.value)).toEqual({ a: 1, b: 2, env: DEFAULT_ENV })
   })
 

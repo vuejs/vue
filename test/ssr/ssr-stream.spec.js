@@ -51,7 +51,7 @@ describe('SSR: renderToStream', () => {
     })
     stream.on('end', () => {
       expect(res).toContain(
-        '<div server-rendered="true">' +
+        '<div data-server-rendered="true">' +
           '<p class="hi">yoyo</p> ' +
           '<div id="ho" class="a red"></div> ' +
           '<span>hi</span> ' +

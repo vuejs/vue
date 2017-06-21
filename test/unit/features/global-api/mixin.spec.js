@@ -84,4 +84,82 @@ describe('Global API: mixin', () => {
 
     expect(vm.$el.children[0].hasAttribute('foo')).toBe(true)
   })
+
+  // #4976
+  it('should not drop late-attached custom options on existing constructors', () => {
+    const baseSpy = jasmine.createSpy('base')
+    const Base = Vue.extend({
+      beforeCreate: baseSpy
+    })
+
+    const Test = Base.extend({})
+
+    // Inject options later
+    // vue-loader and vue-hot-reload-api are doing like this
+    Test.options.computed = {
+      $style: () => 123
+    }
+
+    const spy = jasmine.createSpy('late attached')
+    Test.options.beforeCreate = Test.options.beforeCreate.concat(spy)
+
+    // Update super constructor's options
+    const mixinSpy = jasmine.createSpy('mixin')
+    Vue.mixin({
+      beforeCreate: mixinSpy
+    })
+
+    // mount the component
+    const vm = new Test({
+      template: '<div>{{ $style }}</div>'
+    }).$mount()
+
+    expect(spy.calls.count()).toBe(1)
+    expect(baseSpy.calls.count()).toBe(1)
+    expect(mixinSpy.calls.count()).toBe(1)
+    expect(vm.$el.textContent).toBe('123')
+    expect(vm.$style).toBe(123)
+
+    // Should not be dropped
+    expect(Test.options.computed.$style()).toBe(123)
+    expect(Test.options.beforeCreate).toEqual([mixinSpy, baseSpy, spy])
+  })
+
+  // vue-class-component#83
+  it('should work for a constructor mixin', () => {
+    const spy = jasmine.createSpy('global mixin')
+    const Mixin = Vue.extend({
+      created () {
+        spy(this.$options.myOption)
+      }
+    })
+
+    Vue.mixin(Mixin)
+
+    new Vue({
+      myOption: 'hello'
+    })
+    expect(spy).toHaveBeenCalledWith('hello')
+  })
+
+  // vue-class-component#87
+  it('should not drop original lifecycle hooks', () => {
+    const base = jasmine.createSpy('base')
+
+    const Base = Vue.extend({
+      beforeCreate: base
+    })
+
+    const injected = jasmine.createSpy('injected')
+
+    // inject a function
+    Base.options.beforeCreate = Base.options.beforeCreate.concat(injected)
+
+    Vue.mixin({})
+
+    new Base({})
+
+    expect(base).toHaveBeenCalled()
+    expect(injected).toHaveBeenCalled()
+  })
 })

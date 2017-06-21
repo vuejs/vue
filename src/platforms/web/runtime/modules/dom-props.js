@@ -1,9 +1,9 @@
 /* @flow */
 
-import { extend, toNumber } from 'shared/util'
+import { isDef, isUndef, extend, toNumber } from 'shared/util'
 
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  if (!oldVnode.data.domProps && !vnode.data.domProps) {
+  if (isUndef(oldVnode.data.domProps) && isUndef(vnode.data.domProps)) {
     return
   }
   let key, cur
@@ -11,12 +11,12 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const oldProps = oldVnode.data.domProps || {}
   let props = vnode.data.domProps || {}
   // clone observed objects, as the user probably wants to mutate it
-  if (props.__ob__) {
+  if (isDef(props.__ob__)) {
     props = vnode.data.domProps = extend({}, props)
   }
 
   for (key in oldProps) {
-    if (props[key] == null) {
+    if (isUndef(props[key])) {
       elm[key] = ''
     }
   }
@@ -35,7 +35,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       // non-string values will be stringified
       elm._value = cur
       // avoid resetting cursor position when value is the same
-      const strCur = cur == null ? '' : String(cur)
+      const strCur = isUndef(cur) ? '' : String(cur)
       if (shouldUpdateValue(elm, vnode, strCur)) {
         elm.value = strCur
       }
@@ -56,22 +56,23 @@ function shouldUpdateValue (
   return (!elm.composing && (
     vnode.tag === 'option' ||
     isDirty(elm, checkVal) ||
-    isInputChanged(vnode, checkVal)
+    isInputChanged(elm, checkVal)
   ))
 }
 
 function isDirty (elm: acceptValueElm, checkVal: string): boolean {
-  // return true when textbox (.number and .trim) loses focus and its value is not equal to the updated value
+  // return true when textbox (.number and .trim) loses focus and its value is
+  // not equal to the updated value
   return document.activeElement !== elm && elm.value !== checkVal
 }
 
-function isInputChanged (vnode: VNodeWithData, newVal: string): boolean {
-  const value = vnode.elm.value
-  const modifiers = vnode.elm._vModifiers // injected by v-model runtime
-  if ((modifiers && modifiers.number) || vnode.elm.type === 'number') {
+function isInputChanged (elm: any, newVal: string): boolean {
+  const value = elm.value
+  const modifiers = elm._vModifiers // injected by v-model runtime
+  if ((isDef(modifiers) && modifiers.number) || elm.type === 'number') {
     return toNumber(value) !== toNumber(newVal)
   }
-  if (modifiers && modifiers.trim) {
+  if (isDef(modifiers) && modifiers.trim) {
     return value.trim() !== newVal.trim()
   }
   return value !== newVal

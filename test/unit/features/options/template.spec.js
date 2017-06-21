@@ -61,6 +61,13 @@ describe('Options template', () => {
     expect('avoid using JavaScript keyword as property name: "do" in expression {{ do + 1 }}').toHaveBeenWarned()
   })
 
+  it('should not warn $ prefixed keywords', () => {
+    new Vue({
+      template: `<div @click="$delete(foo, 'bar')"></div>`
+    }).$mount()
+    expect('avoid using JavaScript keyword as property name').not.toHaveBeenWarned()
+  })
+
   it('warn error in generated function (v-for)', () => {
     new Vue({
       template: '<div><div v-for="(1, 2) in a----"></div></div>'
@@ -69,5 +76,16 @@ describe('Options template', () => {
     expect('invalid v-for alias "1"').toHaveBeenWarned()
     expect('invalid v-for iterator "2"').toHaveBeenWarned()
     expect('invalid expression: v-for="(1, 2) in a----"').toHaveBeenWarned()
+  })
+
+  it('warn error in generated function (v-on)', () => {
+    new Vue({
+      template: `<div @click="delete('Delete')"></div>`,
+      methods: { delete: function () {} }
+    }).$mount()
+    expect('Error compiling template').toHaveBeenWarned()
+    expect(
+      `avoid using JavaScript unary operator as property name: "delete()" in expression @click="delete('Delete')"`
+    ).toHaveBeenWarned()
   })
 })

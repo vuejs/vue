@@ -8,8 +8,10 @@ function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
   const data: VNodeData = vnode.data
   const oldData: VNodeData = oldVnode.data
-  if (!data.staticClass && !data.class &&
-      (!oldData || (!oldData.staticClass && !oldData.class))) {
+  if (!data.staticClass &&
+    !data.class &&
+    (!oldData || (!oldData.staticClass && !oldData.class))
+  ) {
     return
   }
 

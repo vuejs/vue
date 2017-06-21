@@ -39,8 +39,20 @@ export function addHandler (
   name: string,
   value: string,
   modifiers: ?ASTModifiers,
-  important: ?boolean
+  important?: boolean,
+  warn?: Function
 ) {
+  // warn prevent and passive modifier
+  /* istanbul ignore if */
+  if (
+    process.env.NODE_ENV !== 'production' && warn &&
+    modifiers && modifiers.prevent && modifiers.passive
+  ) {
+    warn(
+      'passive and prevent can\'t be used together. ' +
+      'Passive handler can\'t prevent default event.'
+    )
+  }
   // check capture modifier
   if (modifiers && modifiers.capture) {
     delete modifiers.capture
@@ -49,6 +61,11 @@ export function addHandler (
   if (modifiers && modifiers.once) {
     delete modifiers.once
     name = '~' + name // mark the event as once
+  }
+  /* istanbul ignore if */
+  if (modifiers && modifiers.passive) {
+    delete modifiers.passive
+    name = '&' + name // mark the event as passive
   }
   let events
   if (modifiers && modifiers.native) {

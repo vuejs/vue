@@ -1,7 +1,9 @@
 /* @flow */
 
-import { callHook } from 'core/instance/lifecycle'
+import { isRegExp } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
+
+type VNodeCache = { [key: string]: ?VNode };
 
 const patternTypes: Array<Function> = [String, RegExp]
 
@@ -12,31 +14,30 @@ function getComponentName (opts: ?VNodeComponentOptions): ?string {
 function matches (pattern: string | RegExp, name: string): boolean {
   if (typeof pattern === 'string') {
     return pattern.split(',').indexOf(name) > -1
-  } else if (pattern instanceof RegExp) {
+  } else if (isRegExp(pattern)) {
     return pattern.test(name)
   }
   /* istanbul ignore next */
   return false
 }
 
-function pruneCache (cache, filter) {
+function pruneCache (cache: VNodeCache, current: VNode, filter: Function) {
   for (const key in cache) {
-    const cachedNode = cache[key]
+    const cachedNode: ?VNode = cache[key]
     if (cachedNode) {
-      const name = getComponentName(cachedNode.componentOptions)
+      const name: ?string = getComponentName(cachedNode.componentOptions)
       if (name && !filter(name)) {
-        pruneCacheEntry(cachedNode)
+        if (cachedNode !== current) {
+          pruneCacheEntry(cachedNode)
+        }
         cache[key] = null
       }
     }
   }
 }
 
-function pruneCacheEntry (vnode: ?MountedComponentVNode) {
+function pruneCacheEntry (vnode: ?VNode) {
   if (vnode) {
-    if (!vnode.componentInstance._inactive) {
-      callHook(vnode.componentInstance, 'deactivated')
-    }
     vnode.componentInstance.$destroy()
   }
 }
@@ -62,26 +63,26 @@ export default {
 
   watch: {
     include (val: string | RegExp) {
-      pruneCache(this.cache, name => matches(val, name))
+      pruneCache(this.cache, this._vnode, name => matches(val, name))
     },
     exclude (val: string | RegExp) {
-      pruneCache(this.cache, name => !matches(val, name))
+      pruneCache(this.cache, this._vnode, name => !matches(val, name))
     }
   },
 
   render () {
     const vnode: VNode = getFirstComponentChild(this.$slots.default)
-    const componentOptions = vnode && vnode.componentOptions
+    const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
       // check pattern
-      const name = getComponentName(componentOptions)
+      const name: ?string = getComponentName(componentOptions)
       if (name && (
         (this.include && !matches(this.include, name)) ||
         (this.exclude && matches(this.exclude, name))
       )) {
         return vnode
       }
-      const key = vnode.key == null
+      const key: ?string = vnode.key == null
         // same constructor may get registered as different local components
         // so cid alone is not enough (#3269)
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')

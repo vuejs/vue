@@ -42,6 +42,8 @@ export declare class Vue {
   readonly $slots: { [key: string]: VNode[] };
   readonly $scopedSlots: { [key: string]: ScopedSlot };
   readonly $isServer: boolean;
+  readonly $ssrContext: any;
+  readonly $props: any;
 
   $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
   $forceUpdate(): void;
@@ -49,13 +51,18 @@ export declare class Vue {
   $set: typeof Vue.set;
   $delete: typeof Vue.delete;
   $watch(
-    expOrFn: string | Function,
-    callback: WatchHandler<this>,
+    expOrFn: string,
+    callback: WatchHandler<this, any>,
     options?: WatchOptions
   ): (() => void);
-  $on(event: string, callback: Function): this;
+  $watch<T>(
+    expOrFn: (this: this) => T,
+    callback: WatchHandler<this, T>,
+    options?: WatchOptions
+  ): (() => void);
+  $on(event: string | string[], callback: Function): this;
   $once(event: string, callback: Function): this;
-  $off(event?: string, callback?: Function): this;
+  $off(event?: string | string[], callback?: Function): this;
   $emit(event: string, ...args: any[]): this;
   $nextTick(callback: (this: this) => void): void;
   $nextTick(): Promise<void>;
@@ -65,7 +72,11 @@ export declare class Vue {
     silent: boolean;
     optionMergeStrategies: any;
     devtools: boolean;
-    errorHandler(err: Error, vm: Vue): void;
+    productionTip: boolean;
+    performance: boolean;
+    errorHandler(err: Error, vm: Vue, info: string): void;
+    warnHandler(msg: string, vm: Vue, trace: string): void;
+    ignoredElements: string[];
     keyCodes: { [key: string]: number };
   }
 
@@ -75,6 +86,7 @@ export declare class Vue {
   static set<T>(object: Object, key: string, value: T): T;
   static set<T>(array: T[], key: number, value: T): T;
   static delete(object: Object, key: string): void;
+  static delete<T>(array: T[], key: number): void;
 
   static directive(
     id: string,

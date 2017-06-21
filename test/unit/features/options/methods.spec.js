@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options methods', () => {
   it('should have correct context', () => {
@@ -16,6 +17,8 @@ describe('Options methods', () => {
     expect(vm.a).toBe(2)
   })
 
+  testObjectOption('methods')
+
   it('should warn undefined methods', () => {
     new Vue({
       methods: {
@@ -23,5 +26,17 @@ describe('Options methods', () => {
       }
     })
     expect(`method "hello" has an undefined value in the component definition`).toHaveBeenWarned()
+  })
+
+  it('should warn methods conflicting with data', () => {
+    new Vue({
+      data: {
+        foo: 1
+      },
+      methods: {
+        foo () {}
+      }
+    })
+    expect(`method "foo" has already been defined as a data property`).toHaveBeenWarned()
   })
 })

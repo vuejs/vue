@@ -82,6 +82,133 @@ describe('Component keep-alive', () => {
     }).then(done)
   })
 
+  it('should invoke hooks on the entire sub tree', done => {
+    one.template = '<two/>'
+    one.components = { two }
+
+    const vm = new Vue({
+      template: `
+        <div>
+          <keep-alive>
+            <one v-if="ok"/>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        ok: true
+      },
+      components
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('two')
+    assertHookCalls(one, [1, 1, 1, 0, 0])
+    assertHookCalls(two, [1, 1, 1, 0, 0])
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('')
+      assertHookCalls(one, [1, 1, 1, 1, 0])
+      assertHookCalls(two, [1, 1, 1, 1, 0])
+      vm.ok = true
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('two')
+      assertHookCalls(one, [1, 1, 2, 1, 0])
+      assertHookCalls(two, [1, 1, 2, 1, 0])
+      vm.ok = false
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('')
+      assertHookCalls(one, [1, 1, 2, 2, 0])
+      assertHookCalls(two, [1, 1, 2, 2, 0])
+    }).then(done)
+  })
+
+  it('should handle nested keep-alive hooks properly', done => {
+    one.template = '<keep-alive><two v-if="ok" /></keep-alive>'
+    one.data = () => ({ ok: true })
+    one.components = { two }
+
+    const vm = new Vue({
+      template: `
+        <div>
+          <keep-alive>
+            <one v-if="ok" ref="one" />
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        ok: true
+      },
+      components
+    }).$mount()
+
+    var oneInstance = vm.$refs.one
+    expect(vm.$el.textContent).toBe('two')
+    assertHookCalls(one, [1, 1, 1, 0, 0])
+    assertHookCalls(two, [1, 1, 1, 0, 0])
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('')
+      assertHookCalls(one, [1, 1, 1, 1, 0])
+      assertHookCalls(two, [1, 1, 1, 1, 0])
+    }).then(() => {
+      vm.ok = true
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('two')
+      assertHookCalls(one, [1, 1, 2, 1, 0])
+      assertHookCalls(two, [1, 1, 2, 1, 0])
+    }).then(() => {
+      // toggle sub component when activated
+      oneInstance.ok = false
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('')
+      assertHookCalls(one, [1, 1, 2, 1, 0])
+      assertHookCalls(two, [1, 1, 2, 2, 0])
+    }).then(() => {
+      oneInstance.ok = true
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('two')
+      assertHookCalls(one, [1, 1, 2, 1, 0])
+      assertHookCalls(two, [1, 1, 3, 2, 0])
+    }).then(() => {
+      vm.ok = false
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('')
+      assertHookCalls(one, [1, 1, 2, 2, 0])
+      assertHookCalls(two, [1, 1, 3, 3, 0])
+    }).then(() => {
+      // toggle sub component when parent is deactivated
+      oneInstance.ok = false
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('')
+      assertHookCalls(one, [1, 1, 2, 2, 0])
+      assertHookCalls(two, [1, 1, 3, 3, 0]) // should not be affected
+    }).then(() => {
+      oneInstance.ok = true
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('')
+      assertHookCalls(one, [1, 1, 2, 2, 0])
+      assertHookCalls(two, [1, 1, 3, 3, 0]) // should not be affected
+    }).then(() => {
+      vm.ok = true
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('two')
+      assertHookCalls(one, [1, 1, 3, 2, 0])
+      assertHookCalls(two, [1, 1, 4, 3, 0])
+    }).then(() => {
+      oneInstance.ok = false
+      vm.ok = false
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('')
+      assertHookCalls(one, [1, 1, 3, 3, 0])
+      assertHookCalls(two, [1, 1, 4, 4, 0])
+    }).then(() => {
+      vm.ok = true
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('')
+      assertHookCalls(one, [1, 1, 4, 3, 0])
+      assertHookCalls(two, [1, 1, 4, 4, 0]) // should remain inactive
+    }).then(done)
+  })
+
   function sharedAssertions (vm, done) {
     expect(vm.$el.textContent).toBe('one')
     assertHookCalls(one, [1, 1, 1, 0, 0])
@@ -220,10 +347,40 @@ describe('Component keep-alive', () => {
       assertHookCalls(one, [1, 1, 1, 1, 0])
       assertHookCalls(two, [1, 1, 1, 0, 0])
       vm.include = 'two'
+    }).then(() => {
+      assertHookCalls(one, [1, 1, 1, 1, 1])
+      assertHookCalls(two, [1, 1, 1, 0, 0])
       vm.view = 'one'
     }).then(() => {
       assertHookCalls(one, [2, 2, 1, 1, 1])
       assertHookCalls(two, [1, 1, 1, 1, 0])
+    }).then(done)
+  })
+
+  it('should not prune currently active instance', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <keep-alive :include="include">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        include: 'one,two'
+      },
+      components
+    }).$mount()
+
+    vm.include = 'two'
+    waitForUpdate(() => {
+      assertHookCalls(one, [1, 1, 1, 0, 0])
+      assertHookCalls(two, [0, 0, 0, 0, 0])
+      vm.view = 'two'
+    }).then(() => {
+      assertHookCalls(one, [1, 1, 1, 0, 1])
+      assertHookCalls(two, [1, 1, 1, 0, 0])
     }).then(done)
   })
 
@@ -253,7 +410,7 @@ describe('Component keep-alive', () => {
   })
 
   // #4237
-  it('should update latest props/listners for a re-activated component', done => {
+  it('should update latest props/listeners for a re-activated component', done => {
     const one = {
       props: ['prop'],
       template: `<div>one {{ prop }}</div>`
@@ -367,6 +524,91 @@ describe('Component keep-alive', () => {
         )
         assertHookCalls(one, [1, 1, 2, 1, 0])
         assertHookCalls(two, [1, 1, 1, 1, 0])
+      }).then(done)
+    })
+
+    it('with transition-mode out-in + include', done => {
+      let next
+      const vm = new Vue({
+        template: `<div>
+          <transition name="test" mode="out-in" @after-leave="afterLeave">
+            <keep-alive include="one">
+              <component :is="view" class="test"></component>
+            </keep-alive>
+          </transition>
+        </div>`,
+        data: {
+          view: 'one'
+        },
+        components,
+        methods: {
+          afterLeave () {
+            next()
+          }
+        }
+      }).$mount(el)
+      expect(vm.$el.textContent).toBe('one')
+      assertHookCalls(one, [1, 1, 1, 0, 0])
+      assertHookCalls(two, [0, 0, 0, 0, 0])
+      vm.view = 'two'
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave test-leave-active">one</div><!---->'
+        )
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [0, 0, 0, 0, 0])
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave-active test-leave-to">one</div><!---->'
+        )
+      }).thenWaitFor(_next => { next = _next }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<!---->')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-enter test-enter-active">two</div>'
+        )
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [1, 1, 0, 0, 0])
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-enter-active test-enter-to">two</div>'
+        )
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">two</div>'
+        )
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [1, 1, 0, 0, 0])
+      }).then(() => {
+        vm.view = 'one'
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave test-leave-active">two</div><!---->'
+        )
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [1, 1, 0, 0, 1])
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-leave-active test-leave-to">two</div><!---->'
+        )
+      }).thenWaitFor(_next => { next = _next }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<!---->')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-enter test-enter-active">one</div>'
+        )
+        assertHookCalls(one, [1, 1, 2, 1, 0])
+        assertHookCalls(two, [1, 1, 0, 0, 1])
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test test-enter-active test-enter-to">one</div>'
+        )
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<div class="test">one</div>'
+        )
+        assertHookCalls(one, [1, 1, 2, 1, 0])
+        assertHookCalls(two, [1, 1, 0, 0, 1])
       }).then(done)
     })
 

@@ -1,15 +1,18 @@
 /* @flow */
 
-import config from '../config'
-import Dep, { pushTarget, popTarget } from './dep'
 import { queueWatcher } from './scheduler'
+import Dep, { pushTarget, popTarget } from './dep'
+
 import {
   warn,
   remove,
   isObject,
   parsePath,
-  _Set as Set
+  _Set as Set,
+  handleError
 } from '../util/index'
+
+import type { ISet } from '../util/index'
 
 let uid = 0
 
@@ -31,8 +34,8 @@ export default class Watcher {
   active: boolean;
   deps: Array<Dep>;
   newDeps: Array<Dep>;
-  depIds: Set;
-  newDepIds: Set;
+  depIds: ISet;
+  newDepIds: ISet;
   getter: Function;
   value: any;
 
@@ -89,7 +92,17 @@ export default class Watcher {
    */
   get () {
     pushTarget(this)
-    const value = this.getter.call(this.vm, this.vm)
+    let value
+    const vm = this.vm
+    if (this.user) {
+      try {
+        value = this.getter.call(vm, vm)
+      } catch (e) {
+        handleError(e, vm, `getter for watcher "${this.expression}"`)
+      }
+    } else {
+      value = this.getter.call(vm, vm)
+    }
     // "touch" every property so they are all tracked as
     // dependencies for deep watching
     if (this.deep) {
@@ -172,16 +185,7 @@ export default class Watcher {
           try {
             this.cb.call(this.vm, value, oldValue)
           } catch (e) {
-            /* istanbul ignore else */
-            if (config.errorHandler) {
-              config.errorHandler.call(null, e, this.vm)
-            } else {
-              process.env.NODE_ENV !== 'production' && warn(
-                `Error in watcher "${this.expression}"`,
-                this.vm
-              )
-              throw e
-            }
+            handleError(e, this.vm, `callback for watcher "${this.expression}"`)
           }
         } else {
           this.cb.call(this.vm, value, oldValue)
@@ -240,7 +244,7 @@ function traverse (val: any) {
   _traverse(val, seenObjects)
 }
 
-function _traverse (val: any, seen: Set) {
+function _traverse (val: any, seen: ISet) {
   let i, keys
   const isA = Array.isArray(val)
   if ((!isA && !isObject(val)) || !Object.isExtensible(val)) {

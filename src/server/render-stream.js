@@ -10,6 +10,7 @@
 
 const stream = require('stream')
 
+import { isTrue, isUndef } from 'shared/util'
 import { createWriteFunction } from './write'
 
 export default class RenderStream extends stream.Readable {
@@ -35,6 +36,7 @@ export default class RenderStream extends stream.Readable {
         this.pushBySize(n)
         return true // we will decide when to call next
       }
+      return false
     }, err => {
       this.emit('error', err)
     })
@@ -73,7 +75,7 @@ export default class RenderStream extends stream.Readable {
     // it's possible that the last chunk added bumped the buffer up to > 2 * n,
     // which means we will need to go through multiple read calls to drain it
     // down to < n.
-    if (this.done) {
+    if (isTrue(this.done)) {
       this.push(null)
       return
     }
@@ -81,7 +83,7 @@ export default class RenderStream extends stream.Readable {
       this.pushBySize(n)
       return
     }
-    if (!this.next) {
+    if (isUndef(this.next)) {
       // start the rendering chain.
       this.tryRender()
     } else {

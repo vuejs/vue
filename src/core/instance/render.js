@@ -1,16 +1,14 @@
 /* @flow */
 
-import config from '../config'
-
 import {
   warn,
   nextTick,
   toNumber,
-  _toString,
+  toString,
   looseEqual,
   emptyObject,
-  looseIndexOf,
-  formatComponentName
+  handleError,
+  looseIndexOf
 } from '../util/index'
 
 import VNode, {
@@ -29,10 +27,9 @@ import { renderStatic, markOnce } from './render-helpers/render-static'
 import { resolveSlots, resolveScopedSlots } from './render-helpers/resolve-slots'
 
 export function initRender (vm: Component) {
-  vm.$vnode = null // the placeholder node in parent tree
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null
-  const parentVnode = vm.$options._parentVnode
+  const parentVnode = vm.$vnode = vm.$options._parentVnode // the placeholder node in parent tree
   const renderContext = parentVnode && parentVnode.context
   vm.$slots = resolveSlots(vm.$options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject
@@ -79,17 +76,17 @@ export function renderMixin (Vue: Class<Component>) {
     try {
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
+      handleError(e, vm, `render function`)
+      // return error render result,
+      // or previous vnode to prevent render error causing blank component
       /* istanbul ignore else */
-      if (config.errorHandler) {
-        config.errorHandler.call(null, e, vm)
+      if (process.env.NODE_ENV !== 'production') {
+        vnode = vm.$options.renderError
+          ? vm.$options.renderError.call(vm._renderProxy, vm.$createElement, e)
+          : vm._vnode
       } else {
-        if (process.env.NODE_ENV !== 'production') {
-          warn(`Error when rendering ${formatComponentName(vm)}:`)
-        }
-        throw e
+        vnode = vm._vnode
       }
-      // return previous vnode to prevent render error causing blank component
-      vnode = vm._vnode
     }
     // return empty vnode in case the render function errored out
     if (!(vnode instanceof VNode)) {
@@ -112,7 +109,7 @@ export function renderMixin (Vue: Class<Component>) {
   // code size.
   Vue.prototype._o = markOnce
   Vue.prototype._n = toNumber
-  Vue.prototype._s = _toString
+  Vue.prototype._s = toString
   Vue.prototype._l = renderList
   Vue.prototype._t = renderSlot
   Vue.prototype._q = looseEqual

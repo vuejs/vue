@@ -11,48 +11,52 @@ if (typeof console === 'undefined') {
 console.info = noop
 
 let asserted
-function hasWarned (msg) {
-  var count = console.error.calls.count()
-  var args
-  while (count--) {
-    args = console.error.calls.argsFor(count)
-    if (args.some(containsMsg)) {
-      return true
+
+function createCompareFn (spy) {
+  const hasWarned = msg => {
+    var count = spy.calls.count()
+    var args
+    while (count--) {
+      args = spy.calls.argsFor(count)
+      if (args.some(containsMsg)) {
+        return true
+      }
+    }
+
+    function containsMsg (arg) {
+      return arg.toString().indexOf(msg) > -1
     }
   }
 
-  function containsMsg (arg) {
-    if (arg instanceof Error) throw arg
-    return typeof arg === 'string' && arg.indexOf(msg) > -1
+  return {
+    compare: msg => {
+      asserted = asserted.concat(msg)
+      var warned = Array.isArray(msg)
+        ? msg.some(hasWarned)
+        : hasWarned(msg)
+      return {
+        pass: warned,
+        message: warned
+          ? 'Expected message "' + msg + '" not to have been warned'
+          : 'Expected message "' + msg + '" to have been warned'
+      }
+    }
   }
 }
 
 // define custom matcher for warnings
 beforeEach(() => {
   asserted = []
+  spyOn(console, 'warn')
   spyOn(console, 'error')
   jasmine.addMatchers({
-    toHaveBeenWarned: () => {
-      return {
-        compare: msg => {
-          asserted = asserted.concat(msg)
-          var warned = Array.isArray(msg)
-            ? msg.some(hasWarned)
-            : hasWarned(msg)
-          return {
-            pass: warned,
-            message: warned
-              ? 'Expected message "' + msg + '" not to have been warned'
-              : 'Expected message "' + msg + '" to have been warned'
-          }
-        }
-      }
-    }
+    toHaveBeenWarned: () => createCompareFn(console.error),
+    toHaveBeenTipped: () => createCompareFn(console.warn)
   })
 })
 
 afterEach(done => {
-  const warned = msg => asserted.some(assertedMsg => msg.indexOf(assertedMsg) > -1)
+  const warned = msg => asserted.some(assertedMsg => msg.toString().indexOf(assertedMsg) > -1)
   let count = console.error.calls.count()
   let args
   while (count--) {

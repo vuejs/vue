@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-describe('Options lifecyce hooks', () => {
+describe('Options lifecycle hooks', () => {
   let spy
   beforeEach(() => {
     spy = jasmine.createSpy('hook')

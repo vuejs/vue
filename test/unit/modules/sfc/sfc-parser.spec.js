@@ -16,6 +16,7 @@ describe('Single File Component parser', () => {
       <style module>
         h1 { font-weight: bold }
       </style>
+      <style bool-attr val-attr="test"></style>
       <script>
         export default {}
       </script>
@@ -24,12 +25,14 @@ describe('Single File Component parser', () => {
       </div>
     `)
     expect(res.template.content.trim()).toBe('<div>hi</div>')
-    expect(res.styles.length).toBe(3)
+    expect(res.styles.length).toBe(4)
     expect(res.styles[0].src).toBe('./test.css')
     expect(res.styles[1].lang).toBe('stylus')
     expect(res.styles[1].scoped).toBe(true)
     expect(res.styles[1].content.trim()).toBe('h1\n  color red\nh2\n  color green')
     expect(res.styles[2].module).toBe(true)
+    expect(res.styles[3].attrs['bool-attr']).toBe(true)
+    expect(res.styles[3].attrs['val-attr']).toBe('test')
     expect(res.script.content.trim()).toBe('export default {}')
   })
 
@@ -53,7 +56,7 @@ describe('Single File Component parser', () => {
   })
 
   it('pad content', () => {
-    const res = parseComponent(`
+    const content = `
       <template>
         <div></div>
       </template>
@@ -63,9 +66,26 @@ describe('Single File Component parser', () => {
       <style>
         h1 { color: red }
       </style>
-    `.trim(), { pad: true })
-    expect(res.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
-    expect(res.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
+`
+    const padDefault = parseComponent(content.trim(), { pad: true })
+    const padLine = parseComponent(content.trim(), { pad: 'line' })
+    const padSpace = parseComponent(content.trim(), { pad: 'space' })
+
+    expect(padDefault.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
+    expect(padDefault.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
+    expect(padLine.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
+    expect(padLine.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
+    expect(padSpace.script.content).toBe(`<template>
+        <div></div>
+      </template>
+      <script>`.replace(/./g, ' ') + '\nexport default {}\n')
+    expect(padSpace.styles[0].content).toBe(`<template>
+        <div></div>
+      </template>
+      <script>
+        export default {}
+      </script>
+      <style>`.replace(/./g, ' ') + '\nh1 { color: red }\n')
   })
 
   it('should handle template blocks with lang as special text', () => {
@@ -144,7 +164,7 @@ describe('Single File Component parser', () => {
         </section>
       </template>
       <template v-else>
-        <p>Shoud not be shown</p>
+        <p>Should not be shown</p>
       </template>
     </div>`
     const res = parseComponent(`<template>${raw}</template>`)

@@ -1,33 +1,41 @@
 /* @flow */
 
-import { inBrowser, isIE9 } from 'core/util/index'
-import { once } from 'shared/util'
+import { inBrowser, isIE9, warn } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
+
 import {
-  resolveTransition,
+  once,
+  isDef,
+  isUndef,
+  isObject,
+  toNumber
+} from 'shared/util'
+
+import {
   nextFrame,
+  resolveTransition,
+  whenTransitionEnds,
   addTransitionClass,
-  removeTransitionClass,
-  whenTransitionEnds
+  removeTransitionClass
 } from '../transition-util'
 
 export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const el: any = vnode.elm
 
   // call leave callback now
-  if (el._leaveCb) {
+  if (isDef(el._leaveCb)) {
     el._leaveCb.cancelled = true
     el._leaveCb()
   }
 
   const data = resolveTransition(vnode.data.transition)
-  if (!data) {
+  if (isUndef(data)) {
     return
   }
 
   /* istanbul ignore if */
-  if (el._enterCb || el.nodeType !== 1) {
+  if (isDef(el._enterCb) || el.nodeType !== 1) {
     return
   }
 
@@ -47,7 +55,8 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     beforeAppear,
     appear,
     afterAppear,
-    appearCancelled
+    appearCancelled,
+    duration
   } = data
 
   // activeInstance will always be the <transition> component managing this
@@ -67,20 +76,41 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     return
   }
 
-  const startClass = isAppear ? appearClass : enterClass
-  const activeClass = isAppear ? appearActiveClass : enterActiveClass
-  const toClass = isAppear ? appearToClass : enterToClass
-  const beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter
-  const enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter
-  const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
-  const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
+  const startClass = isAppear && appearClass
+    ? appearClass
+    : enterClass
+  const activeClass = isAppear && appearActiveClass
+    ? appearActiveClass
+    : enterActiveClass
+  const toClass = isAppear && appearToClass
+    ? appearToClass
+    : enterToClass
+
+  const beforeEnterHook = isAppear
+    ? (beforeAppear || beforeEnter)
+    : beforeEnter
+  const enterHook = isAppear
+    ? (typeof appear === 'function' ? appear : enter)
+    : enter
+  const afterEnterHook = isAppear
+    ? (afterAppear || afterEnter)
+    : afterEnter
+  const enterCancelledHook = isAppear
+    ? (appearCancelled || enterCancelled)
+    : enterCancelled
+
+  const explicitEnterDuration: any = toNumber(
+    isObject(duration)
+      ? duration.enter
+      : duration
+  )
+
+  if (process.env.NODE_ENV !== 'production' && explicitEnterDuration != null) {
+    checkDuration(explicitEnterDuration, 'enter', vnode)
+  }
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl =
-    enterHook &&
-    // enterHook may be a bound method which exposes
-    // the length of original fn as _length
-    (enterHook._length || enterHook.length) > 1
+  const userWantsControl = getHookArgumentsLength(enterHook)
 
   const cb = el._enterCb = once(() => {
     if (expectsCSS) {
@@ -104,12 +134,13 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       const parent = el.parentNode
       const pendingNode = parent && parent._pending && parent._pending[vnode.key]
       if (pendingNode &&
-          pendingNode.tag === vnode.tag &&
-          pendingNode.elm._leaveCb) {
+        pendingNode.tag === vnode.tag &&
+        pendingNode.elm._leaveCb
+      ) {
         pendingNode.elm._leaveCb()
       }
       enterHook && enterHook(el, cb)
-    }, 'transition-insert')
+    })
   }
 
   // start enter transition
@@ -121,7 +152,11 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       addTransitionClass(el, toClass)
       removeTransitionClass(el, startClass)
       if (!cb.cancelled && !userWantsControl) {
-        whenTransitionEnds(el, type, cb)
+        if (isValidDuration(explicitEnterDuration)) {
+          setTimeout(cb, explicitEnterDuration)
+        } else {
+          whenTransitionEnds(el, type, cb)
+        }
       }
     })
   }
@@ -140,18 +175,18 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   const el: any = vnode.elm
 
   // call enter callback now
-  if (el._enterCb) {
+  if (isDef(el._enterCb)) {
     el._enterCb.cancelled = true
     el._enterCb()
   }
 
   const data = resolveTransition(vnode.data.transition)
-  if (!data) {
+  if (isUndef(data)) {
     return rm()
   }
 
   /* istanbul ignore if */
-  if (el._leaveCb || el.nodeType !== 1) {
+  if (isDef(el._leaveCb) || el.nodeType !== 1) {
     return
   }
 
@@ -165,15 +200,22 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     leave,
     afterLeave,
     leaveCancelled,
-    delayLeave
+    delayLeave,
+    duration
   } = data
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl =
-    leave &&
-    // leave hook may be a bound method which exposes
-    // the length of original fn as _length
-    (leave._length || leave.length) > 1
+  const userWantsControl = getHookArgumentsLength(leave)
+
+  const explicitLeaveDuration: any = toNumber(
+    isObject(duration)
+      ? duration.leave
+      : duration
+  )
+
+  if (process.env.NODE_ENV !== 'production' && isDef(explicitLeaveDuration)) {
+    checkDuration(explicitLeaveDuration, 'leave', vnode)
+  }
 
   const cb = el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
@@ -208,7 +250,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     }
     // record leaving element
     if (!vnode.data.show) {
-      (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode
+      (el.parentNode._pending || (el.parentNode._pending = {}))[(vnode.key: any)] = vnode
     }
     beforeLeave && beforeLeave(el)
     if (expectsCSS) {
@@ -218,7 +260,11 @@ export function leave (vnode: VNodeWithData, rm: Function) {
         addTransitionClass(el, leaveToClass)
         removeTransitionClass(el, leaveClass)
         if (!cb.cancelled && !userWantsControl) {
-          whenTransitionEnds(el, type, cb)
+          if (isValidDuration(explicitLeaveDuration)) {
+            setTimeout(cb, explicitLeaveDuration)
+          } else {
+            whenTransitionEnds(el, type, cb)
+          }
         }
       })
     }
@@ -229,8 +275,52 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   }
 }
 
+// only used in dev mode
+function checkDuration (val, name, vnode) {
+  if (typeof val !== 'number') {
+    warn(
+      `<transition> explicit ${name} duration is not a valid number - ` +
+      `got ${JSON.stringify(val)}.`,
+      vnode.context
+    )
+  } else if (isNaN(val)) {
+    warn(
+      `<transition> explicit ${name} duration is NaN - ` +
+      'the duration expression might be incorrect.',
+      vnode.context
+    )
+  }
+}
+
+function isValidDuration (val) {
+  return typeof val === 'number' && !isNaN(val)
+}
+
+/**
+ * Normalize a transition hook's argument length. The hook may be:
+ * - a merged hook (invoker) with the original in .fns
+ * - a wrapped component method (check ._length)
+ * - a plain function (.length)
+ */
+function getHookArgumentsLength (fn: Function): boolean {
+  if (isUndef(fn)) {
+    return false
+  }
+  const invokerFns = fn.fns
+  if (isDef(invokerFns)) {
+    // invoker
+    return getHookArgumentsLength(
+      Array.isArray(invokerFns)
+        ? invokerFns[0]
+        : invokerFns
+    )
+  } else {
+    return (fn._length || fn.length) > 1
+  }
+}
+
 function _enter (_: any, vnode: VNodeWithData) {
-  if (!vnode.data.show) {
+  if (vnode.data.show !== true) {
     enter(vnode)
   }
 }
@@ -240,7 +330,7 @@ export default inBrowser ? {
   activate: _enter,
   remove (vnode: VNode, rm: Function) {
     /* istanbul ignore else */
-    if (!vnode.data.show) {
+    if (vnode.data.show !== true) {
       leave(vnode, rm)
     } else {
       rm()

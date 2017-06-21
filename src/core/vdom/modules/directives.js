@@ -1,8 +1,8 @@
 /* @flow */
 
-import { resolveAsset } from 'core/util/options'
-import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { emptyNode } from 'core/vdom/patch'
+import { resolveAsset, handleError } from 'core/util/index'
+import { mergeVNodeHook } from 'core/vdom/helpers/index'
 
 export default {
   create: updateDirectives,
@@ -54,7 +54,7 @@ function _update (oldVnode, vnode) {
       }
     }
     if (isCreate) {
-      mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', callInsert, 'dir-insert')
+      mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', callInsert)
     } else {
       callInsert()
     }
@@ -65,7 +65,7 @@ function _update (oldVnode, vnode) {
       for (let i = 0; i < dirsWithPostpatch.length; i++) {
         callHook(dirsWithPostpatch[i], 'componentUpdated', vnode, oldVnode)
       }
-    }, 'dir-postpatch')
+    })
   }
 
   if (!isCreate) {
@@ -107,6 +107,10 @@ function getRawDirName (dir: VNodeDirective): string {
 function callHook (dir, hook, vnode, oldVnode, isDestroy) {
   const fn = dir.def && dir.def[hook]
   if (fn) {
-    fn(vnode.elm, dir, vnode, oldVnode, isDestroy)
+    try {
+      fn(vnode.elm, dir, vnode, oldVnode, isDestroy)
+    } catch (e) {
+      handleError(e, vnode.context, `directive ${dir.name} ${hook} hook`)
+    }
   }
 }

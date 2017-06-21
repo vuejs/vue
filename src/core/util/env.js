@@ -2,6 +2,7 @@
 /* globals MutationObserver */
 
 import { noop } from 'shared/util'
+import { handleError } from './error'
 
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
@@ -14,6 +15,21 @@ export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
 export const isEdge = UA && UA.indexOf('edge/') > 0
 export const isAndroid = UA && UA.indexOf('android') > 0
 export const isIOS = UA && /iphone|ipad|ipod|ios/.test(UA)
+export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
+
+export let supportsPassive = false
+if (inBrowser) {
+  try {
+    const opts = {}
+    Object.defineProperty(opts, 'passive', ({
+      get () {
+        /* istanbul ignore next */
+        supportsPassive = true
+      }
+    }: Object)) // https://github.com/facebook/flow/issues/285
+    window.addEventListener('test-passive', null, opts)
+  } catch (e) {}
+}
 
 // this needs to be lazy-evaled because vue may be required before
 // vue-server-renderer can set VUE_ENV
@@ -36,9 +52,13 @@ export const isServerRendering = () => {
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
 /* istanbul ignore next */
-function isNative (Ctor: Function): boolean {
-  return /native code/.test(Ctor.toString())
+export function isNative (Ctor: any): boolean {
+  return typeof Ctor === 'function' && /native code/.test(Ctor.toString())
 }
+
+export const hasSymbol =
+  typeof Symbol !== 'undefined' && isNative(Symbol) &&
+  typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)
 
 /**
  * Defer a task to execute it asynchronously.
@@ -104,15 +124,22 @@ export const nextTick = (function () {
   return function queueNextTick (cb?: Function, ctx?: Object) {
     let _resolve
     callbacks.push(() => {
-      if (cb) cb.call(ctx)
-      if (_resolve) _resolve(ctx)
+      if (cb) {
+        try {
+          cb.call(ctx)
+        } catch (e) {
+          handleError(e, ctx, 'nextTick')
+        }
+      } else if (_resolve) {
+        _resolve(ctx)
+      }
     })
     if (!pending) {
       pending = true
       timerFunc()
     }
     if (!cb && typeof Promise !== 'undefined') {
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
         _resolve = resolve
       })
     }
@@ -126,7 +153,7 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
   _Set = Set
 } else {
   // a non-standard Set polyfill that only works with primitive keys.
-  _Set = class Set {
+  _Set = class Set implements ISet {
     set: Object;
     constructor () {
       this.set = Object.create(null)
@@ -143,4 +170,11 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
   }
 }
 
+interface ISet {
+  has(key: string | number): boolean;
+  add(key: string | number): mixed;
+  clear(): void;
+}
+
 export { _Set }
+export type { ISet }

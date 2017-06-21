@@ -1,7 +1,7 @@
 import { parse } from 'compiler/parser/index'
 import { extend } from 'shared/util'
-import { baseOptions } from 'web/compiler/index'
-import { isIE } from 'core/util/env'
+import { baseOptions } from 'web/compiler/options'
+import { isIE, isEdge } from 'core/util/env'
 
 describe('parser', () => {
   it('simple element', () => {
@@ -75,6 +75,16 @@ describe('parser', () => {
   it('not contain root element', () => {
     parse('hello world', baseOptions)
     expect('Component template requires a root element, rather than just text').toHaveBeenWarned()
+  })
+
+  it('warn text before root element', () => {
+    parse('before root {{ interpolation }}<div></div>', baseOptions)
+    expect('text "before root {{ interpolation }}" outside root element will be ignored.').toHaveBeenWarned()
+  })
+
+  it('warn text after root element', () => {
+    parse('<div></div>after root {{ interpolation }}', baseOptions)
+    expect('text "after root {{ interpolation }}" outside root element will be ignored.').toHaveBeenWarned()
   })
 
   it('warn multiple root elements', () => {
@@ -248,7 +258,7 @@ describe('parser', () => {
   })
 
   it('v-for directive iteration syntax', () => {
-    const ast = parse('<ul><li v-for="(item, index) in items"></li><ul/>', baseOptions)
+    const ast = parse('<ul><li v-for="(item, index) in items"></li></ul>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
@@ -325,7 +335,7 @@ describe('parser', () => {
     expect(ast.children[0].slotName).toBeUndefined()
   })
 
-  it('slot tag namped syntax', () => {
+  it('slot tag named syntax', () => {
     const ast = parse('<div><slot name="one">hello world</slot></div>', baseOptions)
     expect(ast.children[0].tag).toBe('slot')
     expect(ast.children[0].slotName).toBe('"one"')
@@ -426,7 +436,7 @@ describe('parser', () => {
     expect('Interpolation inside attributes has been removed').toHaveBeenWarned()
   })
 
-  if (!isIE) {
+  if (!isIE && !isEdge) {
     it('duplicate attribute', () => {
       parse('<p class="class1" class="class1">hello world</p>', baseOptions)
       expect('duplicate attribute').toHaveBeenWarned()
@@ -504,6 +514,38 @@ describe('parser', () => {
       </div>
     `, options)
     expect(ast.tag).toBe('div')
-    expect(ast.chilldren).toBeUndefined()
+    expect(ast.children.length).toBe(0)
+  })
+
+  it('parse content in textarea as text', () => {
+    const options = extend({}, baseOptions)
+
+    const whitespace = parse(`
+      <textarea>
+        <p>Test 1</p>
+        test2
+      </textarea>
+    `, options)
+    expect(whitespace.tag).toBe('textarea')
+    expect(whitespace.children.length).toBe(1)
+    expect(whitespace.children[0].type).toBe(3)
+    // textarea is whitespace sensitive
+    expect(whitespace.children[0].text).toBe(`
+        <p>Test 1</p>
+        test2
+      `)
+
+    const comment = parse('<textarea><!--comment--></textarea>', options)
+    expect(comment.tag).toBe('textarea')
+    expect(comment.children.length).toBe(1)
+    expect(comment.children[0].type).toBe(3)
+    expect(comment.children[0].text).toBe('<!--comment-->')
+  })
+
+  // #5526
+  it('should not decode text in script tags', () => {
+    const options = extend({}, baseOptions)
+    const ast = parse(`<script type="x/template">&gt;<foo>&lt;</script>`, options)
+    expect(ast.children[0].text).toBe(`&gt;<foo>&lt;`)
   })
 })

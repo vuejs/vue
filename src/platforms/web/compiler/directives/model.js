@@ -1,11 +1,15 @@
 /* @flow */
 
 import config from 'core/config'
-import { isIE } from 'core/util/env'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
 
 let warn
+
+// in some cases, the event used has to be determined at runtime
+// so we used some reserved tokens during compile.
+export const RANGE_TOKEN = '__r'
+export const CHECKBOX_RADIO_TOKEN = '__c'
 
 export default function model (
   el: ASTElement,
@@ -66,14 +70,6 @@ function genCheckboxModel (
   value: string,
   modifiers: ?ASTModifiers
 ) {
-  if (process.env.NODE_ENV !== 'production' &&
-    el.attrsMap.checked != null) {
-    warn(
-      `<${el.tag} v-model="${value}" checked>:\n` +
-      `inline checked attributes will be ignored when using v-model. ` +
-      'Declare initial values in the component\'s data option instead.'
-    )
-  }
   const number = modifiers && modifiers.number
   const valueBinding = getBindingAttr(el, 'value') || 'null'
   const trueValueBinding = getBindingAttr(el, 'true-value') || 'true'
@@ -86,7 +82,7 @@ function genCheckboxModel (
           : `:_q(${value},${trueValueBinding})`
       )
   )
-  addHandler(el, 'click',
+  addHandler(el, CHECKBOX_RADIO_TOKEN,
     `var $$a=${value},` +
         '$$el=$event.target,' +
         `$$c=$$el.checked?(${trueValueBinding}):(${falseValueBinding});` +
@@ -95,7 +91,7 @@ function genCheckboxModel (
           '$$i=_i($$a,$$v);' +
       `if($$c){$$i<0&&(${value}=$$a.concat($$v))}` +
       `else{$$i>-1&&(${value}=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}` +
-    `}else{${value}=$$c}`,
+    `}else{${genAssignmentCode(value, '$$c')}}`,
     null, true
   )
 }
@@ -105,19 +101,11 @@ function genRadioModel (
     value: string,
     modifiers: ?ASTModifiers
 ) {
-  if (process.env.NODE_ENV !== 'production' &&
-    el.attrsMap.checked != null) {
-    warn(
-      `<${el.tag} v-model="${value}" checked>:\n` +
-      `inline checked attributes will be ignored when using v-model. ` +
-      'Declare initial values in the component\'s data option instead.'
-    )
-  }
   const number = modifiers && modifiers.number
   let valueBinding = getBindingAttr(el, 'value') || 'null'
   valueBinding = number ? `_n(${valueBinding})` : valueBinding
   addProp(el, 'checked', `_q(${value},${valueBinding})`)
-  addHandler(el, 'click', genAssignmentCode(value, valueBinding), null, true)
+  addHandler(el, CHECKBOX_RADIO_TOKEN, genAssignmentCode(value, valueBinding), null, true)
 }
 
 function genSelect (
@@ -125,10 +113,6 @@ function genSelect (
     value: string,
     modifiers: ?ASTModifiers
 ) {
-  if (process.env.NODE_ENV !== 'production') {
-    el.children.some(checkOptionWarning)
-  }
-
   const number = modifiers && modifiers.number
   const selectedVal = `Array.prototype.filter` +
     `.call($event.target.options,function(o){return o.selected})` +
@@ -141,20 +125,6 @@ function genSelect (
   addHandler(el, 'change', code, null, true)
 }
 
-function checkOptionWarning (option: any): boolean {
-  if (option.type === 1 &&
-    option.tag === 'option' &&
-    option.attrsMap.selected != null) {
-    warn(
-      `<select v-model="${option.parent.attrsMap['v-model']}">:\n` +
-      'inline selected attributes on <option> will be ignored when using v-model. ' +
-      'Declare initial values in the component\'s data option instead.'
-    )
-    return true
-  }
-  return false
-}
-
 function genDefaultModel (
   el: ASTElement,
   value: string,
@@ -162,8 +132,12 @@ function genDefaultModel (
 ): ?boolean {
   const type = el.attrsMap.type
   const { lazy, number, trim } = modifiers || {}
-  const event = lazy || (isIE && type === 'range') ? 'change' : 'input'
   const needCompositionGuard = !lazy && type !== 'range'
+  const event = lazy
+    ? 'change'
+    : type === 'range'
+      ? RANGE_TOKEN
+      : 'input'
 
   let valueExpression = '$event.target.value'
   if (trim) {

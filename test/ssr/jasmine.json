@@ -1,10 +1,7 @@
 {
   "spec_dir": "test/ssr",
   "spec_files": [
-    "ssr-env.spec.js",
-    "ssr-string.spec.js",
-    "ssr-stream.spec.js",
-    "ssr-bundle-render.spec.js"
+    "*.spec.js"
   ],
   "helpers": [
     "../../node_modules/babel-register/lib/node.js"

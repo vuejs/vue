@@ -1,4 +1,5 @@
 import Vue from '../../dist/vue.runtime.common.js'
+import VM from 'vm'
 import { createRenderer } from '../../packages/vue-server-renderer'
 const { renderToString } = createRenderer()
 
@@ -7,7 +8,7 @@ describe('SSR: renderToString', () => {
     renderVmWithOptions({
       template: '<div id="foo" bar="123"></div>'
     }, result => {
-      expect(result).toContain('<div id="foo" bar="123" server-rendered="true"></div>')
+      expect(result).toContain('<div id="foo" bar="123" data-server-rendered="true"></div>')
       done()
     })
   })
@@ -16,7 +17,7 @@ describe('SSR: renderToString', () => {
     renderVmWithOptions({
       template: '<input value="123">'
     }, result => {
-      expect(result).toContain('<input value="123" server-rendered="true">')
+      expect(result).toContain('<input value="123" data-server-rendered="true">')
       done()
     })
   })
@@ -29,7 +30,7 @@ describe('SSR: renderToString', () => {
         baz: 123
       }
     }, result => {
-      expect(result).toContain('<div qux="quux" id="hi" bar="123" server-rendered="true"></div>')
+      expect(result).toContain('<div qux="quux" id="hi" bar="123" data-server-rendered="true"></div>')
       done()
     })
   })
@@ -38,7 +39,7 @@ describe('SSR: renderToString', () => {
     renderVmWithOptions({
       template: '<div class="foo bar"></div>'
     }, result => {
-      expect(result).toContain('<div server-rendered="true" class="foo bar"></div>')
+      expect(result).toContain('<div data-server-rendered="true" class="foo bar"></div>')
       done()
     })
   })
@@ -52,12 +53,12 @@ describe('SSR: renderToString', () => {
         hasQuux: false
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true" class="foo bar baz qux"></div>')
+      expect(result).toContain('<div data-server-rendered="true" class="foo bar baz qux"></div>')
       done()
     })
   })
 
-  it('custome component class', done => {
+  it('custom component class', done => {
     renderVmWithOptions({
       template: '<div><cmp class="cmp"></cmp></div>',
       components: {
@@ -66,7 +67,7 @@ describe('SSR: renderToString', () => {
         }
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true"><div class="cmp">test</div></div>')
+      expect(result).toContain('<div data-server-rendered="true"><div class="cmp">test</div></div>')
       done()
     })
   })
@@ -86,7 +87,7 @@ describe('SSR: renderToString', () => {
         }
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true" class="outer success">' +
+      expect(result).toContain('<div data-server-rendered="true" class="outer success">' +
           '<div class="inner nested error">test</div>' +
         '</div>')
       done()
@@ -102,7 +103,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="background-color:black;font-size:14px;color:red;"></div>'
+        '<div data-server-rendered="true" style="background-color:black;font-size:14px;color:red;"></div>'
       )
       done()
     })
@@ -116,7 +117,23 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="color:red;"></div>'
+        '<div data-server-rendered="true" style="color:red;"></div>'
+      )
+      done()
+    })
+  })
+
+  it('auto-prefixed style value as array', done => {
+    renderVmWithOptions({
+      template: '<div :style="style"></div>',
+      data: {
+        style: {
+          display: ['-webkit-box', '-ms-flexbox', 'flex']
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true" style="display:-webkit-box;display:-ms-flexbox;display:flex;"></div>'
       )
       done()
     })
@@ -135,7 +152,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<section server-rendered="true"><div style="color:red;"></div></section>'
+        '<section data-server-rendered="true"><div style="color:red;"></div></section>'
       )
       done()
     })
@@ -159,7 +176,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="text-align:left;font-size:520rem;color:red;"></div>'
+        '<div data-server-rendered="true" style="text-align:left;font-size:520rem;color:red;"></div>'
       )
       done()
     })
@@ -178,7 +195,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="color:red;"><div></div></div>'
+        '<div data-server-rendered="true" style="color:red;"><div></div></div>'
       )
       done()
     })
@@ -197,7 +214,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" style="color:red;"><span style="color:black;"></span></div>'
+        '<div data-server-rendered="true" style="color:red;"><span style="color:black;"></span></div>'
       )
       done()
     })
@@ -215,7 +232,7 @@ describe('SSR: renderToString', () => {
       })
     }, res => {
       expect(res).toContain(
-        '<div id="b" server-rendered="true" name="c"></div>'
+        '<div id="b" data-server-rendered="true" name="c"></div>'
       )
       done()
     })
@@ -233,7 +250,76 @@ describe('SSR: renderToString', () => {
       })
     }, res => {
       expect(res).toContain(
-        '<div server-rendered="true" value="c">b</div>'
+        '<div data-server-rendered="true" value="c">b</div>'
+      )
+      done()
+    })
+  })
+
+  it('v-show directive render', done => {
+    renderVmWithOptions({
+      template: '<div v-show="false"><span>inner</span></div>'
+    }, res => {
+      expect(res).toContain(
+        '<div data-server-rendered="true" style="display:none;"><span>inner</span></div>'
+      )
+      done()
+    })
+  })
+
+  it('v-show directive not passed to child', done => {
+    renderVmWithOptions({
+      template: '<foo v-show="false"></foo>',
+      components: {
+        foo: {
+          template: '<div><span>inner</span></div>'
+        }
+      }
+    }, res => {
+      expect(res).toContain(
+        '<div data-server-rendered="true" style="display:none;"><span>inner</span></div>'
+      )
+      done()
+    })
+  })
+
+  it('v-show directive not passed to slot', done => {
+    renderVmWithOptions({
+      template: '<foo v-show="false"><span>inner</span></foo>',
+      components: {
+        foo: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    }, res => {
+      expect(res).toContain(
+        '<div data-server-rendered="true" style="display:none;"><span>inner</span></div>'
+      )
+      done()
+    })
+  })
+
+  it('v-show directive merging on components', done => {
+    renderVmWithOptions({
+      template: '<foo v-show="false"></foo>',
+      components: {
+        foo: {
+          render: h => h('bar', {
+            directives: [{
+              name: 'show',
+              value: true
+            }]
+          }),
+          components: {
+            bar: {
+              render: h => h('div', 'inner')
+            }
+          }
+        }
+      }
+    }, res => {
+      expect(res).toContain(
+        '<div data-server-rendered="true" style="display:none;">inner</div>'
       )
       done()
     })
@@ -247,31 +333,55 @@ describe('SSR: renderToString', () => {
         bar: '<span>rendering</span>'
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true">server side &lt;span&gt;rendering&lt;/span&gt;</div>')
+      expect(result).toContain('<div data-server-rendered="true">server side &lt;span&gt;rendering&lt;/span&gt;</div>')
       done()
     })
   })
 
-  it('v-html', done => {
+  it('v-html on root', done => {
     renderVmWithOptions({
       template: '<div v-html="text"></div>',
       data: {
         text: '<span>foo</span>'
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true"><span>foo</span></div>')
+      expect(result).toContain('<div data-server-rendered="true"><span>foo</span></div>')
       done()
     })
   })
 
-  it('v-text', done => {
+  it('v-text on root', done => {
     renderVmWithOptions({
       template: '<div v-text="text"></div>',
       data: {
         text: '<span>foo</span>'
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true">&lt;span&gt;foo&lt;/span&gt;</div>')
+      expect(result).toContain('<div data-server-rendered="true">&lt;span&gt;foo&lt;/span&gt;</div>')
+      done()
+    })
+  })
+
+  it('v-html', done => {
+    renderVmWithOptions({
+      template: '<div><div v-html="text"></div></div>',
+      data: {
+        text: '<span>foo</span>'
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div><span>foo</span></div></div>')
+      done()
+    })
+  })
+
+  it('v-text', done => {
+    renderVmWithOptions({
+      template: '<div><div v-text="text"></div></div>',
+      data: {
+        text: '<span>foo</span>'
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div>&lt;span&gt;foo&lt;/span&gt;</div></div>')
       done()
     })
   })
@@ -295,7 +405,7 @@ describe('SSR: renderToString', () => {
         }
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true" class="foo bar">hello bar</div>')
+      expect(result).toContain('<div data-server-rendered="true" class="foo bar">hello bar</div>')
       done()
     })
   })
@@ -331,7 +441,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true">' +
+        '<div data-server-rendered="true">' +
           '<span>hello</span>' +
           '<span class="b">testAsync</span>' +
         '</div>'
@@ -358,7 +468,7 @@ describe('SSR: renderToString', () => {
         expect(this.b).toBe(3)
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true">3</div>')
+      expect(result).toContain('<div data-server-rendered="true">3</div>')
       done()
     })
   })
@@ -380,7 +490,7 @@ describe('SSR: renderToString', () => {
         }
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true"><span class="b">testAsync</span></div>')
+      expect(result).toContain('<div data-server-rendered="true"><span class="b">testAsync</span></div>')
       done()
     })
   })
@@ -398,7 +508,7 @@ describe('SSR: renderToString', () => {
         }
       }
     }, result => {
-      expect(result).toContain('<span server-rendered="true" class="b">testAsync</span>')
+      expect(result).toContain('<span data-server-rendered="true" class="b">testAsync</span>')
       done()
     })
   })
@@ -433,7 +543,7 @@ describe('SSR: renderToString', () => {
         }
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true"><span class="b"><div class="c">testSubAsync</div></span></div>')
+      expect(result).toContain('<div data-server-rendered="true"><span class="b"><div class="c">testSubAsync</div></span></div>')
       done()
     })
   })
@@ -472,7 +582,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true">' +
+        '<div data-server-rendered="true">' +
           '<p class="hi">yoyo</p> ' +
           '<div id="ho" class="red"></div> ' +
           '<span>hi</span> ' +
@@ -499,7 +609,7 @@ describe('SSR: renderToString', () => {
       `
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true">' +
+        '<div data-server-rendered="true">' +
           '<span test="ok">hello</span> ' +
           '<span>hello</span> ' +
           '<span>hello</span> ' +
@@ -511,7 +621,7 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('enumrated attr', done => {
+  it('enumerated attr', done => {
     renderVmWithOptions({
       template: `
         <div>
@@ -525,7 +635,7 @@ describe('SSR: renderToString', () => {
       `
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true">' +
+        '<div data-server-rendered="true">' +
           '<span draggable="true">hello</span> ' +
           '<span draggable="true">hello</span> ' +
           '<span draggable="false">hello</span> ' +
@@ -550,7 +660,7 @@ describe('SSR: renderToString', () => {
       `
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true">' +
+        '<div data-server-rendered="true">' +
           '<span disabled="disabled">hello</span> ' +
           '<span disabled="disabled">hello</span> ' +
           '<span>hello</span> ' +
@@ -568,7 +678,7 @@ describe('SSR: renderToString', () => {
       },
       template: '<input v-bind="test">'
     }, result => {
-      expect(result).toContain('<input id="a" server-rendered="true" value="c" class="a b">')
+      expect(result).toContain('<input id="a" data-server-rendered="true" value="c" class="a b">')
       done()
     })
   })
@@ -600,7 +710,7 @@ describe('SSR: renderToString', () => {
       }
     }), (err, result) => {
       expect(err).toBeNull()
-      expect(result).toContain('<p server-rendered="true" class="my-class2 my-class1">hello world</p>')
+      expect(result).toContain('<p data-server-rendered="true" class="my-class2 my-class1">hello world</p>')
       done()
     })
   })
@@ -620,7 +730,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div id="foo" server-rendered="true" _v-parent>' +
+        '<div id="foo" data-server-rendered="true" _v-parent>' +
           '<p _v-parent>' +
             '<div _v-child _v-parent><span _v-child>foo</span></div>' +
           '</p>' +
@@ -645,7 +755,7 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain(
-        '<div server-rendered="true" _v-parent>' +
+        '<div data-server-rendered="true" _v-parent>' +
           '<div _v-child _v-parent><p _v-child _v-parent>foo</p></div>' +
         '</div>'
       )
@@ -657,7 +767,7 @@ describe('SSR: renderToString', () => {
     renderVmWithOptions({
       template: '<div><transition><div v-if="false"></div></transition></div>'
     }, result => {
-      expect(result).toContain(`<div server-rendered="true"><!----></div>`)
+      expect(result).toContain(`<div data-server-rendered="true"><!----></div>`)
       done()
     })
   })
@@ -671,6 +781,116 @@ describe('SSR: renderToString', () => {
     }), err => {
       expect(err instanceof Error).toBe(true)
       Vue.config.silent = false
+      done()
+    })
+  })
+
+  it('default value Foreign Function', () => {
+    const FunctionConstructor = VM.runInNewContext('Function')
+    const func = () => 123
+    const vm = new Vue({
+      props: {
+        a: {
+          type: FunctionConstructor,
+          default: func
+        }
+      },
+      propsData: {
+        a: undefined
+      }
+    })
+    expect(vm.a).toBe(func)
+  })
+
+  it('should prevent xss in attribtues', done => {
+    renderVmWithOptions({
+      data: {
+        xss: '"><script>alert(1)</script>'
+      },
+      template: `
+        <div>
+          <a :title="xss" :style="{ color: xss }" :class="[xss]">foo</a>
+        </div>
+      `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
+  it('v-if', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span v-if="true">foo</span>
+          <span v-if="false">bar</span>
+        </div>
+      `
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span> <!----></div>`)
+      done()
+    })
+  })
+
+  it('v-for', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>foo</span>
+          <span v-for="i in 2">{{ i }}</span>
+        </div>
+      `
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span> <span>1</span><span>2</span></div>`)
+      done()
+    })
+  })
+
+  it('template v-if', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>foo</span>
+          <template v-if="true">
+            <span>foo</span> bar <span>baz</span>
+          </template>
+        </div>
+      `
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span> <span>foo</span> bar <span>baz</span></div>`)
+      done()
+    })
+  })
+
+  it('template v-for', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>foo</span>
+          <template v-for="i in 2">
+            <span>{{ i }}</span><span>bar</span>
+          </template>
+        </div>
+      `
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span> <span>1</span><span>bar</span><span>2</span><span>bar</span></div>`)
+      done()
+    })
+  })
+
+  it('render async components', done => {
+    const Foo = () => Promise.resolve({
+      render: h => h('div', [h('span', 'foo'), h(Bar)])
+    })
+    const Bar = () => ({
+      component: Promise.resolve({
+        render: h => h('span', 'bar')
+      })
+    })
+    renderVmWithOptions({
+      render: h => h(Foo)
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span><span>bar</span></div>`)
       done()
     })
   })

@@ -16,20 +16,43 @@ const keyCodes: { [key: string]: number | Array<number> } = {
   'delete': [8, 46]
 }
 
+// #4868: modifiers that prevent the execution of the listener
+// need to explicitly return null so that we can determine whether to remove
+// the listener for .once
+const genGuard = condition => `if(${condition})return null;`
+
 const modifierCode: { [key: string]: string } = {
   stop: '$event.stopPropagation();',
   prevent: '$event.preventDefault();',
-  self: 'if($event.target !== $event.currentTarget)return;',
-  ctrl: 'if(!$event.ctrlKey)return;',
-  shift: 'if(!$event.shiftKey)return;',
-  alt: 'if(!$event.altKey)return;',
-  meta: 'if(!$event.metaKey)return;'
+  self: genGuard(`$event.target !== $event.currentTarget`),
+  ctrl: genGuard(`!$event.ctrlKey`),
+  shift: genGuard(`!$event.shiftKey`),
+  alt: genGuard(`!$event.altKey`),
+  meta: genGuard(`!$event.metaKey`),
+  left: genGuard(`'button' in $event && $event.button !== 0`),
+  middle: genGuard(`'button' in $event && $event.button !== 1`),
+  right: genGuard(`'button' in $event && $event.button !== 2`)
 }
 
-export function genHandlers (events: ASTElementHandlers, native?: boolean): string {
-  let res = native ? 'nativeOn:{' : 'on:{'
+export function genHandlers (
+  events: ASTElementHandlers,
+  isNative: boolean,
+  warn: Function
+): string {
+  let res = isNative ? 'nativeOn:{' : 'on:{'
   for (const name in events) {
-    res += `"${name}":${genHandler(name, events[name])},`
+    const handler = events[name]
+    // #5330: warn click.right, since right clicks do not actually fire click events.
+    if (process.env.NODE_ENV !== 'production' &&
+      name === 'click' &&
+      handler && handler.modifiers && handler.modifiers.right
+    ) {
+      warn(
+        `Use "contextmenu" instead of "click.right" since right clicks ` +
+        `do not actually fire "click" events.`
+      )
+    }
+    res += `"${name}":${genHandler(name, handler)},`
   }
   return res.slice(0, -1) + '}'
 }
@@ -40,34 +63,52 @@ function genHandler (
 ): string {
   if (!handler) {
     return 'function(){}'
-  } else if (Array.isArray(handler)) {
+  }
+
+  if (Array.isArray(handler)) {
     return `[${handler.map(handler => genHandler(name, handler)).join(',')}]`
-  } else if (!handler.modifiers) {
-    return fnExpRE.test(handler.value) || simplePathRE.test(handler.value)
+  }
+
+  const isMethodPath = simplePathRE.test(handler.value)
+  const isFunctionExpression = fnExpRE.test(handler.value)
+
+  if (!handler.modifiers) {
+    return isMethodPath || isFunctionExpression
       ? handler.value
-      : `function($event){${handler.value}}`
+      : `function($event){${handler.value}}` // inline statement
   } else {
     let code = ''
+    let genModifierCode = ''
     const keys = []
     for (const key in handler.modifiers) {
       if (modifierCode[key]) {
-        code += modifierCode[key]
+        genModifierCode += modifierCode[key]
+        // left/right
+        if (keyCodes[key]) {
+          keys.push(key)
+        }
       } else {
         keys.push(key)
       }
     }
     if (keys.length) {
-      code = genKeyFilter(keys) + code
+      code += genKeyFilter(keys)
     }
-    const handlerCode = simplePathRE.test(handler.value)
+    // Make sure modifiers like prevent and stop get executed after key filtering
+    if (genModifierCode) {
+      code += genModifierCode
+    }
+    const handlerCode = isMethodPath
       ? handler.value + '($event)'
-      : handler.value
-    return 'function($event){' + code + handlerCode + '}'
+      : isFunctionExpression
+        ? `(${handler.value})($event)`
+        : handler.value
+    return `function($event){${code}${handlerCode}}`
   }
 }
 
 function genKeyFilter (keys: Array<string>): string {
-  return `if(${keys.map(genFilterCode).join('&&')})return;`
+  return `if(!('button' in $event)&&${keys.map(genFilterCode).join('&&')})return null;`
 }
 
 function genFilterCode (key: string): string {

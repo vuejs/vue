@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { hasSymbol } from 'core/util/env'
 
 describe('Options props', () => {
   it('array syntax', done => {
@@ -98,6 +99,22 @@ describe('Options props', () => {
     }).then(done)
   })
 
+  it('default value Function', () => {
+    const func = () => 132
+    const vm = new Vue({
+      props: {
+        a: {
+          type: Function,
+          default: func
+        }
+      },
+      propsData: {
+        a: undefined
+      }
+    })
+    expect(vm.a).toBe(func)
+  })
+
   it('warn object/array default values', () => {
     new Vue({
       props: {
@@ -188,6 +205,15 @@ describe('Options props', () => {
       makeInstance({}, Array)
       expect('Expected Array').toHaveBeenWarned()
     })
+
+    if (hasSymbol) {
+      it('symbol', () => {
+        makeInstance(Symbol('foo'), Symbol)
+        expect(console.error.calls.count()).toBe(0)
+        makeInstance({}, Symbol)
+        expect('Expected Symbol').toHaveBeenWarned()
+      })
+    }
 
     it('custom constructor', () => {
       function Class () {}
@@ -288,6 +314,27 @@ describe('Options props', () => {
       }
     }).$mount()
     expect('already declared as a prop').toHaveBeenWarned()
+  })
+
+  it('should warn methods already defined as a prop', () => {
+    new Vue({
+      template: '<test a="1"></test>',
+      components: {
+        test: {
+          template: '<div></div>',
+          props: {
+            a: null
+          },
+          methods: {
+            a () {
+
+            }
+          }
+        }
+      }
+    }).$mount()
+    expect(`method "a" has already been defined as a prop`).toHaveBeenWarned()
+    expect(`Avoid mutating a prop directly`).toHaveBeenWarned()
   })
 
   it('treat boolean props properly', () => {
@@ -401,7 +448,7 @@ describe('Options props', () => {
   })
 
   // #4090
-  it('should not trigger wathcer on default value', done => {
+  it('should not trigger watcher on default value', done => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       template: `<test :value="a" :test="b"></test>`,
@@ -443,11 +490,12 @@ describe('Options props', () => {
   })
 
   it('warn reserved props', () => {
+    const specialAttrs = ['key', 'ref', 'slot', 'is']
     new Vue({
-      props: {
-        key: String
-      }
+      props: specialAttrs
     })
-    expect(`"key" is a reserved attribute`).toHaveBeenWarned()
+    specialAttrs.forEach(attr => {
+      expect(`"${attr}" is a reserved attribute`).toHaveBeenWarned()
+    })
   })
 })
