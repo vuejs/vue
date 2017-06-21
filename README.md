@@ -6,6 +6,8 @@
   <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/dm/vue.svg" alt="Downloads"></a>
   <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/v/vue.svg" alt="Version"></a>
   <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/l/vue.svg" alt="License"></a>
+  <a href="https://gitter.im/vuejs/vue"><img src="https://img.shields.io/gitter/room/nwjs/nw.js.svg" alt="Gitter">
+  <a href="https://discordapp.com/invite/eKWPvZ9"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg" alt="Discord">
   <br>
   <a href="https://saucelabs.com/u/vuejs"><img src="https://saucelabs.com/browser-matrix/vuejs.svg" alt="Sauce Test Status"></a>
 </p>
