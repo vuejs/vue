@@ -120,7 +120,7 @@ declare interface Component {
   // renderSlot
   _t: (name: string, fallback: ?Array<VNode>, props: ?Object) => ?Array<VNode>;
   // apply v-bind object
-  _b: (data: any, value: any, asProp?: boolean) => VNodeData;
+  _b: (data: any, tag: string, value: any, asProp: boolean, isSync?: boolean) => VNodeData;
   // check custom keyCode
   _k: (eventKeyCode: number, key: string, builtInAlias: number | Array<number> | void) => boolean;
   // resolve scoped slots

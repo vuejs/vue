@@ -187,6 +187,36 @@ describe('Directive v-bind', () => {
     }).then(done)
   })
 
+  it('.sync modifier with bind object', done => {
+    const vm = new Vue({
+      template: `<test v-bind.sync="test"/>`,
+      data: {
+        test: {
+          fooBar: 1
+        }
+      },
+      components: {
+        test: {
+          props: ['fooBar'],
+          template: `<div @click="handleUpdate">{{ fooBar }}</div>`,
+          methods: {
+            handleUpdate () {
+              this.$emit('update:fooBar', 2)
+            }
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('1')
+    triggerEvent(vm.$el, 'click')
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('2')
+      vm.test.fooBar = 3
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('3')
+    }).then(done)
+  })
+
   it('bind object with overwrite', done => {
     const vm = new Vue({
       template: '<input v-bind="test" id="foo" :class="test.value">',

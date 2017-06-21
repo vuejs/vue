@@ -16,7 +16,8 @@ export function bindObjectProps (
   data: any,
   tag: string,
   value: any,
-  asProp?: boolean
+  asProp: boolean,
+  isSync?: boolean
 ): VNodeData {
   if (value) {
     if (!isObject(value)) {
@@ -44,6 +45,13 @@ export function bindObjectProps (
         }
         if (!(key in hash)) {
           hash[key] = value[key]
+
+          if (isSync) {
+            const on = data.on || (data.on = {})
+            on[`update:${key}`] = function ($event) {
+              value[key] = $event
+            }
+          }
         }
       }
     }
