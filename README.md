@@ -96,7 +96,7 @@ To check out live examples and docs, visit [vuejs.org](https://vuejs.org).
 
 ## Questions
 
-For questions and support please use the [Discord chat room](https://discord.gg/eKWPvZ9), [Gitter chat room](https://gitter.im/vuejs/vue), or [the official forum](http://forum.vuejs.org). The issue list of this repo is **exclusively** for bug reports and feature requests.
+For questions and support please use the [Discord chat room](https://vue-land.js.org/), [Gitter chat room](https://gitter.im/vuejs/vue), or [the official forum](http://forum.vuejs.org). The issue list of this repo is **exclusively** for bug reports and feature requests.
 
 ## Issues
 
