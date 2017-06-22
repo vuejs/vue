@@ -77,7 +77,7 @@ function markStaticRoots (node: ASTNode, isInFor: boolean) {
     // outweigh the benefits and it's better off to just always render it fresh.
     if (node.static && node.children.length && !(
       node.children.length === 1 &&
-      node.children[0].type === 3
+      (node.children[0].type === 3 || node.children[0].type === 4)
     )) {
       node.staticRoot = true
       return
@@ -102,6 +102,9 @@ function isStatic (node: ASTNode): boolean {
     return false
   }
   if (node.type === 3) { // text
+    return true
+  }
+  if (node.type === 4) { // comment
     return true
   }
   return !!(node.pre || (

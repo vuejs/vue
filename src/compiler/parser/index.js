@@ -90,6 +90,7 @@ export function parse (
     isUnaryTag: options.isUnaryTag,
     canBeLeftOpenTag: options.canBeLeftOpenTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
+    shouldKeptComment: options.comments,
     start (tag, attrs, unary) {
       // check namespace.
       // inherit parent ns if there is one
@@ -274,6 +275,12 @@ export function parse (
           })
         }
       }
+    },
+    comment (text: string) {
+      currentParent.children.push({
+        type: 4,
+        text
+      })
     }
   })
   return root

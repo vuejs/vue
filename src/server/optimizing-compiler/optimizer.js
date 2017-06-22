@@ -107,7 +107,8 @@ function optimizeSiblings (el) {
 }
 
 function isUnOptimizableTree (node: ASTNode): boolean {
-  if (node.type === 2 || node.type === 3) { // text or expression
+  // text or expression or comment
+  if (node.type === 2 || node.type === 3 || node.type === 4) {
     return false
   }
   return (
