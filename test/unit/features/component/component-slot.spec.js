@@ -660,4 +660,29 @@ describe('Component slot', () => {
       expect(vm.$el.querySelector('input').value).toBe('b')
     }).then(done)
   })
+
+  // Github issue #5888
+  it('should resolve correctly slot with keep-alive', () => {
+    const vm = new Vue({
+      template: `
+      <div>
+        <container>
+          <keep-alive slot="foo">
+            <child></child>
+          </keep-alive>
+        </container>
+      </div>
+      `,
+      components: {
+        container: {
+          template:
+            '<div><slot>default</slot><slot name="foo">named</slot></div>'
+        },
+        child: {
+          template: '<span>foo</span>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<div>default<span>foo</span></div>')
+  })
 })

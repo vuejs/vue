@@ -15,7 +15,7 @@
     "dev": "rollup -w -c build/config.js --environment TARGET:web-full-dev",
     "dev:cjs": "rollup -w -c build/config.js --environment TARGET:web-runtime-cjs",
     "dev:esm": "rollup -w -c build/config.js --environment TARGET:web-runtime-esm",
-    "dev:test": "karma start build/karma.dev.config.js",
+    "dev:test": "karma start test/unit/karma.dev.config.js",
     "dev:ssr": "rollup -w -c build/config.js --environment TARGET:web-server-renderer",
     "dev:compiler": "rollup -w -c build/config.js --environment TARGET:web-compiler ",
     "dev:weex": "rollup -w -c build/config.js --environment TARGET:weex-framework ",
@@ -24,8 +24,8 @@
     "build:ssr": "npm run build -- vue.runtime.common.js,vue-server-renderer",
     "build:weex": "npm run build -- weex-vue-framework,weex-template-compiler",
     "test": "npm run lint && flow check && npm run test:types && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr && npm run test:weex",
-    "test:unit": "karma start build/karma.unit.config.js",
-    "test:cover": "karma start build/karma.cover.config.js",
+    "test:unit": "karma start test/unit/karma.unit.config.js",
+    "test:cover": "karma start test/unit/karma.cover.config.js",
     "test:e2e": "npm run build -- vue.min.js && node test/e2e/runner.js",
     "test:weex": "npm run build:weex && jasmine JASMINE_CONFIG_PATH=test/weex/jasmine.json",
     "test:ssr": "npm run build:ssr && jasmine JASMINE_CONFIG_PATH=test/ssr/jasmine.json",
@@ -33,11 +33,13 @@
     "test:types": "tsc -p ./types/test/tsconfig.json",
     "lint": "eslint src build test",
     "flow": "flow check",
-    "sauce": "karma start build/karma.sauce.config.js",
+    "sauce": "karma start test/unit/karma.sauce.config.js",
     "bench:ssr": "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",
     "release": "bash build/release.sh",
     "release:weex": "bash build/release-weex.sh",
-    "install:hooks": "ln -fs ../../build/git-hooks/pre-commit .git/hooks/pre-commit"
+    "release:note": "node build/gen-release-note.js",
+    "postinstall": "node build/install-hooks.js",
+    "commit": "git-cz"
   },
   "repository": {
     "type": "git",
@@ -67,7 +69,10 @@
     "chalk": "^1.1.3",
     "chromedriver": "^2.30.1",
     "codecov.io": "^0.1.6",
+    "commitizen": "^2.9.6",
+    "conventional-changelog": "^1.1.3",
     "cross-spawn": "^5.1.0",
+    "cz-conventional-changelog": "^2.0.0",
     "de-indent": "^1.0.2",
     "es6-promise": "^4.1.0",
     "eslint": "^3.0.0",
@@ -112,10 +117,16 @@
     "rollup-watch": "^4.0.0",
     "selenium-server": "^2.53.1",
     "serialize-javascript": "^1.3.0",
+    "shelljs": "^0.7.8",
     "typescript": "^2.3.4",
     "uglify-js": "^3.0.15",
     "webpack": "^2.6.1",
     "weex-js-runtime": "^0.20.5",
     "weex-vdom-tester": "^0.2.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
