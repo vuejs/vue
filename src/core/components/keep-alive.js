@@ -64,10 +64,10 @@ export default {
   },
 
   watch: {
-    include (val: string | RegExp) {
+    include (val: string | RegExp | Array<string>) {
       pruneCache(this.cache, this._vnode, name => matches(val, name))
     },
-    exclude (val: string | RegExp) {
+    exclude (val: string | RegExp | Array<string>) {
       pruneCache(this.cache, this._vnode, name => !matches(val, name))
     }
   },
