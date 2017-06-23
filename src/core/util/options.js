@@ -182,6 +182,7 @@ strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
  */
 strats.props =
 strats.methods =
+strats.inject =
 strats.computed = function (parentVal: ?Object, childVal: ?Object): ?Object {
   if (!childVal) return Object.create(parentVal || null)
   if (!parentVal) return childVal
@@ -248,6 +249,19 @@ function normalizeProps (options: Object) {
 }
 
 /**
+ * Normalize all injections into Object-based format
+ */
+function normalizeInject (options: Object) {
+  const inject = options.inject
+  if (Array.isArray(inject)) {
+    const normalized = options.inject = {}
+    for (let i = 0; i < inject.length; i++) {
+      normalized[inject[i]] = inject[i]
+    }
+  }
+}
+
+/**
  * Normalize raw function directives into object format.
  */
 function normalizeDirectives (options: Object) {
@@ -280,6 +294,7 @@ export function mergeOptions (
   }
 
   normalizeProps(child)
+  normalizeInject(child)
   normalizeDirectives(child)
   const extendsFrom = child.extends
   if (extendsFrom) {

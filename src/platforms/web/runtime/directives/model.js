@@ -3,8 +3,10 @@
  * properties to Elements.
  */
 
-import { looseEqual, looseIndexOf } from 'shared/util'
+import { looseEqual, looseIndexOf, makeMap } from 'shared/util'
 import { warn, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
+
+const isTextInputType = makeMap('text,password,search,email,tel,url')
 
 /* istanbul ignore if */
 if (isIE9) {
@@ -28,7 +30,7 @@ export default {
       if (isIE || isEdge) {
         setTimeout(cb, 0)
       }
-    } else if (vnode.tag === 'textarea' || el.type === 'text' || el.type === 'password') {
+    } else if (vnode.tag === 'textarea' || isTextInputType(el.type)) {
       el._vModifiers = binding.modifiers
       if (!binding.modifiers.lazy) {
         // Safari < 10.2 & UIWebView doesn't fire compositionend when

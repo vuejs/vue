@@ -38,18 +38,14 @@ export function initInjections (vm: Component) {
 export function resolveInject (inject: any, vm: Component): ?Object {
   if (inject) {
     // inject is :any because flow is not smart enough to figure out cached
-    // isArray here
-    const isArray = Array.isArray(inject)
     const result = Object.create(null)
-    const keys = isArray
-      ? inject
-      : hasSymbol
+    const keys = hasSymbol
         ? Reflect.ownKeys(inject)
         : Object.keys(inject)
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
-      const provideKey = isArray ? key : inject[key]
+      const provideKey = inject[key]
       let source = vm
       while (source) {
         if (source._provided && provideKey in source._provided) {

@@ -9,7 +9,7 @@ server.listen(8080)
 
 var args = process.argv.slice(2)
 if (args.indexOf('--config') === -1) {
-  args = args.concat(['--config', 'build/nightwatch.config.js'])
+  args = args.concat(['--config', 'test/e2e/nightwatch.config.js'])
 }
 if (args.indexOf('--env') === -1) {
   args = args.concat(['--env', 'chrome,phantomjs'])

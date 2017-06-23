@@ -490,11 +490,12 @@ describe('Options props', () => {
   })
 
   it('warn reserved props', () => {
+    const specialAttrs = ['key', 'ref', 'slot', 'is']
     new Vue({
-      props: {
-        key: String
-      }
+      props: specialAttrs
     })
-    expect(`"key" is a reserved attribute`).toHaveBeenWarned()
+    specialAttrs.forEach(attr => {
+      expect(`"${attr}" is a reserved attribute`).toHaveBeenWarned()
+    })
   })
 })
