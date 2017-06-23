@@ -278,8 +278,9 @@ export function parse (
     },
     comment (text: string) {
       currentParent.children.push({
-        type: 4,
-        text
+        type: 3,
+        text,
+        isComment: true
       })
     }
   })

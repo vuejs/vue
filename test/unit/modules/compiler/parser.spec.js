@@ -567,7 +567,8 @@ describe('parser', () => {
     expect(ast.children.length).toBe(2)
     expect(ast.children[0].type).toBe(3)
     expect(ast.children[0].text).toBe('123')
-    expect(ast.children[1].type).toBe(4)
+    expect(ast.children[1].type).toBe(3) // parse comment with ASTText
+    expect(ast.children[1].isComment).toBe(true) // parse comment with ASTText
     expect(ast.children[1].text).toBe('comment here')
   })
 })

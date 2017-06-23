@@ -64,7 +64,7 @@ declare type ASTDirective = {
   modifiers: ?ASTModifiers;
 };
 
-declare type ASTNode = ASTElement | ASTText | ASTExpression | ASTComment;
+declare type ASTNode = ASTElement | ASTText | ASTExpression;
 
 declare type ASTElement = {
   type: 1;
@@ -154,15 +154,7 @@ declare type ASTText = {
   type: 3;
   text: string;
   static?: boolean;
-  // 2.4 ssr optimization
-  ssrOptimizability?: number;
-};
-
-declare type ASTComment = {
-  type: 4;
-  text: string;
-  static?: boolean;
-
+  isComment?: boolean;
   // 2.4 ssr optimization
   ssrOptimizability?: number;
 };
