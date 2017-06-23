@@ -5,7 +5,7 @@ import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
 type VNodeCache = { [key: string]: ?VNode };
 
-const patternTypes: Array<Function> = [String, RegExp]
+const patternTypes: Array<Function> = [String, RegExp, Array]
 
 function getComponentName (opts: ?VNodeComponentOptions): ?string {
   return opts && (opts.Ctor.options.name || opts.tag)
