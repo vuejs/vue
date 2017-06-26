@@ -10,3 +10,9 @@ test/e2e/reports
 test/e2e/screenshots
 coverage
 RELEASE_NOTE*.md
+dist/*.js
+packages/vue-server-renderer/basic.js
+packages/vue-server-renderer/build.js
+packages/vue-server-renderer/server-plugin.js
+packages/vue-server-renderer/client-plugin.js
+packages/vue-template-compiler/build.js
