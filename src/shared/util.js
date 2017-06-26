@@ -17,6 +17,7 @@ export function isTrue (v: any): boolean %checks {
 export function isFalse (v: any): boolean %checks {
   return v === false
 }
+
 /**
  * Check if value is primitive
  */
@@ -45,6 +46,15 @@ export function isPlainObject (obj: any): boolean {
 
 export function isRegExp (v: any): boolean {
   return _toString.call(v) === '[object RegExp]'
+}
+
+/**
+ * Check if v is numeric
+ */
+export function isNumeric (v: any): boolean %checks {
+  return typeof v === 'number' ||
+    isObject(v) && _toString.call(v) === '[object Number]' ||
+    /^\d+$/.test(v)
 }
 
 /**
