@@ -31,7 +31,8 @@ const modifierCode: { [key: string]: string } = {
   meta: genGuard(`!$event.metaKey`),
   left: genGuard(`'button' in $event && $event.button !== 0`),
   middle: genGuard(`'button' in $event && $event.button !== 1`),
-  right: genGuard(`'button' in $event && $event.button !== 2`)
+  right: genGuard(`'button' in $event && $event.button !== 2`),
+  plain: genGuard(`$event.ctrlKey || $event.shiftKey || $event.altKey || $event.metaKey`)
 }
 
 export function genHandlers (
