@@ -101,6 +101,18 @@ describe('Global API: set/delete', () => {
         Vue.delete(vm.lists, NaN)
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
+        Vue.delete(vm.lists, -1)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
+        Vue.delete(vm.lists, '1.3')
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
+        Vue.delete(vm.lists, true)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
+        Vue.delete(vm.lists, {})
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
         Vue.delete(vm.lists, '1')
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('<p>A</p>')
