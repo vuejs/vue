@@ -6,7 +6,7 @@ import {
   def,
   isObject,
   isPlainObject,
-  isNumeric,
+  isValidArrayIndex,
   hasProto,
   hasOwn,
   warn,
@@ -190,7 +190,7 @@ export function defineReactive (
  * already exist.
  */
 export function set (target: Array<any> | Object, key: any, val: any): any {
-  if (Array.isArray(target) && isNumeric(key)) {
+  if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
     return val
@@ -220,7 +220,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
  * Delete a property and trigger change if necessary.
  */
 export function del (target: Array<any> | Object, key: any) {
-  if (Array.isArray(target) && isNumeric(key)) {
+  if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1)
     return
   }

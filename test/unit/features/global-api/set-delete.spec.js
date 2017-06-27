@@ -42,6 +42,9 @@ describe('Global API: set/delete', () => {
         Vue.set(vm.list, new Number(1), 'f')
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('<div>0-a</div><div>1-f</div><div>2-e</div>')
+        Vue.set(vm.list, '3g', 'g')
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<div>0-a</div><div>1-f</div><div>2-e</div>')
       }).then(done)
     })
 
@@ -94,6 +97,9 @@ describe('Global API: set/delete', () => {
       expect(vm.$el.innerHTML).toBe('<p>A</p><p>B</p><p>C</p>')
       Vue.delete(vm.lists, 1)
       waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
+        Vue.delete(vm.lists, NaN)
+      }).then(() => {
         expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
         Vue.delete(vm.lists, '1')
       }).then(() => {

@@ -49,12 +49,11 @@ export function isRegExp (v: any): boolean {
 }
 
 /**
- * Check if v is numeric
+ * Check if val is a valid array index.
  */
-export function isNumeric (v: any): boolean %checks {
-  return typeof v === 'number' ||
-    isObject(v) && _toString.call(v) === '[object Number]' ||
-    /^\d+$/.test(v)
+export function isValidArrayIndex (val: any): boolean {
+  const n = parseFloat(val)
+  return n >= 0 && Math.floor(n) === n && isFinite(val)
 }
 
 /**
