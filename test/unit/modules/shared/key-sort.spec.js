@@ -44,7 +44,7 @@ describe('keySort', () => {
   it('Sorts an unsorted Object, which are equal', () => {
     const unsortedTestObj = unsortedObject()
     const sortedObject = keySort(unsortedTestObj)
-    expect(looseEqual(sortedObject, sortedObject)).toBe(true)
+    expect(looseEqual(sortedObject, unsortedTestObj)).toBe(true)
   })
 
   it('does not unsort a sorted object', () => {
