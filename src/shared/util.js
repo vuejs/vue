@@ -23,7 +23,7 @@ export function isFalse (v: any): boolean %checks {
  * by succinct key order. Guaranteed to at least return an
  * empty object.
  */
-export function keySort (obj: Object): Object {
+export function keySort (obj: any): Object {
   if (isObject(obj) === false) {
     return {}
   }
