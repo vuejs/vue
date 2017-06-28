@@ -17,6 +17,23 @@ export function isTrue (v: any): boolean %checks {
 export function isFalse (v: any): boolean %checks {
   return v === false
 }
+
+/**
+ * Sorts an object by key to ensure seraialized equality
+ * by succinct key order. Guaranteed to at least return an
+ * empty object.
+ */
+export function keySort (obj: Object): Object {
+  if (isObject(obj) === false) {
+    return {}
+  }
+  const sorted = {}
+  Object.keys(obj).sort().forEach(key => {
+    sorted[key] = obj[key]
+  })
+  return sorted
+}
+
 /**
  * Check if value is primitive
  */
@@ -240,7 +257,7 @@ export function looseEqual (a: mixed, b: mixed): boolean {
   const isObjectB = isObject(b)
   if (isObjectA && isObjectB) {
     try {
-      return JSON.stringify(a) === JSON.stringify(b)
+      return JSON.stringify(keySort(a)) === JSON.stringify(keySort(b))
     } catch (e) {
       // possible circular reference
       return a === b
