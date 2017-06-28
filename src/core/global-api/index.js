@@ -17,9 +17,9 @@ import {
   defineReactive
 } from '../util/index'
 
-import { default as Dep, pushTarget, popTarget } from '../observer/dep'
+import Dep, { pushTarget, popTarget } from '../observer/dep'
 import { afterFlush, forceFlush } from '../observer/scheduler'
-import { default as Watcher } from '../observer/watcher'
+import Watcher from '../observer/watcher'
 
 export function initGlobalAPI (Vue: GlobalAPI) {
   // config
