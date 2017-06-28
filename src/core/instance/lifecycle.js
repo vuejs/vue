@@ -65,6 +65,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
         vm.$options._parentElm,
         vm.$options._refElm
       )
+      // no need for the ref nodes after initial patch
+      // this prevents keeping a detached DOM tree in memory (#5851)
+      vm.$options._parentElm = vm.$options._refElm = null
     } else {
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode)
@@ -119,6 +122,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     // call the last hook...
     vm._isDestroyed = true
+    // invoke destroy hooks on current rendered tree
+    vm.__patch__(vm._vnode, null)
+    // fire destroyed hook
     callHook(vm, 'destroyed')
     // turn off all instance listeners.
     vm.$off()
@@ -126,8 +132,6 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm.$el) {
       vm.$el.__vue__ = null
     }
-    // invoke destroy hooks on current rendered tree
-    vm.__patch__(vm._vnode, null)
   }
 }
 
@@ -267,7 +271,7 @@ export function activateChildComponent (vm: Component, direct?: boolean) {
   } else if (vm._directInactive) {
     return
   }
-  if (vm._inactive || vm._inactive == null) {
+  if (vm._inactive || vm._inactive === null) {
     vm._inactive = false
     for (let i = 0; i < vm.$children.length; i++) {
       activateChildComponent(vm.$children[i])

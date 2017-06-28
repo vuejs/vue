@@ -1,4 +1,4 @@
-var alias = require('./alias')
+var alias = require('../../build/alias')
 var webpack = require('webpack')
 
 var webpackConfig = {
@@ -31,10 +31,10 @@ var webpackConfig = {
 module.exports = {
   frameworks: ['jasmine'],
   files: [
-    '../test/unit/index.js'
+    './index.js'
   ],
   preprocessors: {
-    '../test/unit/index.js': ['webpack', 'sourcemap']
+    './index.js': ['webpack', 'sourcemap']
   },
   webpack: webpackConfig,
   webpackMiddleware: {

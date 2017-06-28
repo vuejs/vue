@@ -1,6 +1,12 @@
 /* @flow */
 
-import { no, noop, identity } from 'shared/util'
+import {
+  no,
+  noop,
+  identity
+} from 'shared/util'
+
+import { LIFECYCLE_HOOKS } from 'shared/constants'
 
 export type Config = {
   // user
@@ -10,21 +16,23 @@ export type Config = {
   performance: boolean;
   devtools: boolean;
   errorHandler: ?(err: Error, vm: Component, info: string) => void;
+  warnHandler: ?(msg: string, vm: Component, trace: string) => void;
   ignoredElements: Array<string>;
   keyCodes: { [key: string]: number | Array<number> };
+
   // platform
   isReservedTag: (x?: string) => boolean;
+  isReservedAttr: (x?: string) => boolean;
   parsePlatformTagName: (x: string) => string;
   isUnknownElement: (x?: string) => boolean;
   getTagNamespace: (x?: string) => string | void;
   mustUseProp: (tag: string, type: ?string, name: string) => boolean;
-  // internal
-  _assetTypes: Array<string>;
+
+  // legacy
   _lifecycleHooks: Array<string>;
-  _maxUpdateCount: number;
 };
 
-const config: Config = {
+export default ({
   /**
    * Option merge strategies (used in core/util/options)
    */
@@ -56,6 +64,11 @@ const config: Config = {
   errorHandler: null,
 
   /**
+   * Warn handler for watcher warns
+   */
+  warnHandler: null,
+
+  /**
    * Ignore certain custom elements
    */
   ignoredElements: [],
@@ -70,6 +83,12 @@ const config: Config = {
    * component. This is platform-dependent and may be overwritten.
    */
   isReservedTag: no,
+
+  /**
+   * Check if an attribute is reserved so that it cannot be used as a component
+   * prop. This is platform-dependent and may be overwritten.
+   */
+  isReservedAttr: no,
 
   /**
    * Check if a tag is an unknown element.
@@ -94,34 +113,7 @@ const config: Config = {
   mustUseProp: no,
 
   /**
-   * List of asset types that a component can own.
+   * Exposed for legacy reasons
    */
-  _assetTypes: [
-    'component',
-    'directive',
-    'filter'
-  ],
-
-  /**
-   * List of lifecycle hooks.
-   */
-  _lifecycleHooks: [
-    'beforeCreate',
-    'created',
-    'beforeMount',
-    'mounted',
-    'beforeUpdate',
-    'updated',
-    'beforeDestroy',
-    'destroyed',
-    'activated',
-    'deactivated'
-  ],
-
-  /**
-   * Max circular updates allowed in a scheduler flush cycle.
-   */
-  _maxUpdateCount: 100
-}
-
-export default config
+  _lifecycleHooks: LIFECYCLE_HOOKS
+}: Config)

@@ -19,6 +19,10 @@ export default class VNode {
   isComment: boolean; // empty comment placeholder?
   isCloned: boolean; // is a cloned node?
   isOnce: boolean; // is a v-once node?
+  asyncFactory: ?Function; // async component factory function
+  asyncMeta: ?Object;
+  isAsyncPlaceholder: boolean;
+  ssrContext: ?Object;
 
   constructor (
     tag?: string,
@@ -27,7 +31,8 @@ export default class VNode {
     text?: string,
     elm?: Node,
     context?: Component,
-    componentOptions?: VNodeComponentOptions
+    componentOptions?: VNodeComponentOptions,
+    asyncFactory?: Function
   ) {
     this.tag = tag
     this.data = data
@@ -47,6 +52,9 @@ export default class VNode {
     this.isComment = false
     this.isCloned = false
     this.isOnce = false
+    this.asyncFactory = asyncFactory
+    this.asyncMeta = undefined
+    this.isAsyncPlaceholder = false
   }
 
   // DEPRECATED: alias for componentInstance for backwards compat.
@@ -84,6 +92,7 @@ export function cloneVNode (vnode: VNode): VNode {
   cloned.ns = vnode.ns
   cloned.isStatic = vnode.isStatic
   cloned.key = vnode.key
+  cloned.isComment = vnode.isComment
   cloned.isCloned = true
   return cloned
 }

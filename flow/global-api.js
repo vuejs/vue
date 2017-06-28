@@ -8,7 +8,7 @@ declare interface GlobalAPI {
   extend: (options: Object) => Function;
   set: <T>(target: Object | Array<T>, key: string | number, value: T) => T;
   delete: <T>(target: Object| Array<T>, key: string | number) => void;
-  nextTick: (fn: Function, context?: Object) => void;
+  nextTick: (fn: Function, context?: Object) => void | Promise<*>;
   use: (plugin: Function | Object) => void;
   mixin: (mixin: Object) => void;
   compile: (template: string) => { render: Function, staticRenderFns: Array<Function> };
@@ -19,4 +19,4 @@ declare interface GlobalAPI {
 
   // allow dynamic method registration
   [key: string]: any
-}
+};

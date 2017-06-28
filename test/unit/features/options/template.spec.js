@@ -61,6 +61,13 @@ describe('Options template', () => {
     expect('avoid using JavaScript keyword as property name: "do" in expression {{ do + 1 }}').toHaveBeenWarned()
   })
 
+  it('should not warn $ prefixed keywords', () => {
+    new Vue({
+      template: `<div @click="$delete(foo, 'bar')"></div>`
+    }).$mount()
+    expect('avoid using JavaScript keyword as property name').not.toHaveBeenWarned()
+  })
+
   it('warn error in generated function (v-for)', () => {
     new Vue({
       template: '<div><div v-for="(1, 2) in a----"></div></div>'

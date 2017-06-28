@@ -144,6 +144,29 @@ describe('Options provide/inject', () => {
     expect(child.baz).toBe(3)
   })
 
+  // Github issue #5194
+  it('should work with functional', () => {
+    new Vue({
+      template: `<child/>`,
+      provide: {
+        foo: 1,
+        bar: false
+      },
+      components: {
+        child: {
+          functional: true,
+          inject: ['foo', 'bar'],
+          render (h, context) {
+            const { injections } = context
+            injected = [injections.foo, injections.bar]
+          }
+        }
+      }
+    }).$mount()
+
+    expect(injected).toEqual([1, false])
+  })
+
   if (typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)) {
     it('with Symbol keys', () => {
       const s = Symbol()
@@ -197,6 +220,35 @@ describe('Options provide/inject', () => {
     })
   })
 
+  it('should extend properly', () => {
+    const parent = Vue.extend({
+      template: `<span/>`,
+      inject: ['foo']
+    })
+
+    const child = parent.extend({
+      template: `<span/>`,
+      inject: ['bar'],
+      created () {
+        injected = [this.foo, this.bar]
+      }
+    })
+
+    new Vue({
+      template: `<div><parent/><child/></div>`,
+      provide: {
+        foo: 1,
+        bar: false
+      },
+      components: {
+        parent,
+        child
+      }
+    }).$mount()
+
+    expect(injected).toEqual([1, false])
+  })
+
   it('should warn when injections has been modified', () => {
     const key = 'foo'
     const vm = new Vue({
@@ -216,5 +268,34 @@ describe('Options provide/inject', () => {
       `Avoid mutating an injected value directly since the changes will be ` +
       `overwritten whenever the provided component re-renders. ` +
       `injection being mutated: "${key}"`).toHaveBeenWarned()
+  })
+
+  it('should warn when injections cannot be found', () => {
+    const vm = new Vue({})
+    new Vue({
+      parent: vm,
+      inject: ['foo', 'bar'],
+      created () {}
+    })
+    expect(`Injection "foo" not found`).toHaveBeenWarned()
+    expect(`Injection "bar" not found`).toHaveBeenWarned()
+  })
+
+  it('should not warn when injections can be found', () => {
+    const vm = new Vue({
+      provide: {
+        foo: 1,
+        bar: false,
+        baz: undefined
+      }
+    })
+    new Vue({
+      parent: vm,
+      inject: ['foo', 'bar', 'baz'],
+      created () {}
+    })
+    expect(`Injection "foo" not found`).not.toHaveBeenWarned()
+    expect(`Injection "bar" not found`).not.toHaveBeenWarned()
+    expect(`Injection "baz" not found`).not.toHaveBeenWarned()
   })
 })

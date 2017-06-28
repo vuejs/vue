@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { compile } from 'entries/web-compiler'
+import { compile } from 'web/compiler'
 import { getAndRemoveAttr } from 'compiler/helpers'
 
 describe('compile options', () => {

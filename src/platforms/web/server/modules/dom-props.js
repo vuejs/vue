@@ -2,6 +2,7 @@
 
 import VNode from 'core/vdom/vnode'
 import { renderAttr } from './attrs'
+import { isDef, isUndef } from 'shared/util'
 import { propsToAttrMap, isRenderableAttr } from '../util'
 
 export default function renderDOMProps (node: VNodeWithData): string {
@@ -9,14 +10,14 @@ export default function renderDOMProps (node: VNodeWithData): string {
   let res = ''
 
   let parent = node.parent
-  while (parent) {
+  while (isDef(parent)) {
     if (parent.data && parent.data.domProps) {
       props = Object.assign({}, props, parent.data.domProps)
     }
     parent = parent.parent
   }
 
-  if (!props) {
+  if (isUndef(props)) {
     return res
   }
 
@@ -29,8 +30,9 @@ export default function renderDOMProps (node: VNodeWithData): string {
     } else {
       const attr = propsToAttrMap[key] || key.toLowerCase()
       if (isRenderableAttr(attr) &&
-          // avoid rendering double-bound props/attrs twice
-          !(attrs && attrs[attr])) {
+        // avoid rendering double-bound props/attrs twice
+        !(isDef(attrs) && isDef(attrs[attr]))
+      ) {
         res += renderAttr(attr, props[key])
       }
     }

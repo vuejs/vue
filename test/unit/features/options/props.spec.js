@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { hasSymbol } from 'core/util/env'
 
 describe('Options props', () => {
   it('array syntax', done => {
@@ -204,6 +205,15 @@ describe('Options props', () => {
       makeInstance({}, Array)
       expect('Expected Array').toHaveBeenWarned()
     })
+
+    if (hasSymbol) {
+      it('symbol', () => {
+        makeInstance(Symbol('foo'), Symbol)
+        expect(console.error.calls.count()).toBe(0)
+        makeInstance({}, Symbol)
+        expect('Expected Symbol').toHaveBeenWarned()
+      })
+    }
 
     it('custom constructor', () => {
       function Class () {}
@@ -480,11 +490,12 @@ describe('Options props', () => {
   })
 
   it('warn reserved props', () => {
+    const specialAttrs = ['key', 'ref', 'slot', 'is']
     new Vue({
-      props: {
-        key: String
-      }
+      props: specialAttrs
     })
-    expect(`"key" is a reserved attribute`).toHaveBeenWarned()
+    specialAttrs.forEach(attr => {
+      expect(`"${attr}" is a reserved attribute`).toHaveBeenWarned()
+    })
   })
 })

@@ -143,6 +143,27 @@ describe('Directive v-bind', () => {
     expect(vm.$el.getAttribute('viewBox')).toBe('0 0 1 1')
   })
 
+  it('.sync modifier', done => {
+    const vm = new Vue({
+      template: `<test :foo-bar.sync="bar"/>`,
+      data: {
+        bar: 1
+      },
+      components: {
+        test: {
+          props: ['fooBar'],
+          template: `<div @click="$emit('update:fooBar', 2)">{{ fooBar }}</div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('1')
+    triggerEvent(vm.$el, 'click')
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('2')
+    }).then(done)
+  })
+
   it('bind object', done => {
     const vm = new Vue({
       template: '<input v-bind="test">',
@@ -303,5 +324,61 @@ describe('Directive v-bind', () => {
       expect(vm.$el.children[0].id).toBe('b')
       expect(vm.$el.children[0].getAttribute('data-test')).toBe(null)
     }).then(done)
+  })
+
+  describe('bind object with special attribute', () => {
+    function makeInstance (options) {
+      return new Vue({
+        template: `<div>${options.parentTemp}</div>`,
+        data: {
+          attrs: {
+            [options.attr]: options.value
+          }
+        },
+        components: {
+          comp: {
+            template: options.childTemp
+          }
+        }
+      }).$mount()
+    }
+
+    it('key', () => {
+      const vm = makeInstance({
+        attr: 'key',
+        value: 'test',
+        parentTemp: '<div v-bind="attrs"></div>'
+      })
+      expect(vm._vnode.children[0].key).toBe('test')
+    })
+
+    it('ref', () => {
+      const vm = makeInstance({
+        attr: 'ref',
+        value: 'test',
+        parentTemp: '<div v-bind="attrs"></div>'
+      })
+      expect(vm.$refs.test).toBe(vm.$el.firstChild)
+    })
+
+    it('slot', () => {
+      const vm = makeInstance({
+        attr: 'slot',
+        value: 'test',
+        parentTemp: '<comp><span v-bind="attrs">123</span></comp>',
+        childTemp: '<div>slot:<slot name="test"></slot></div>'
+      })
+      expect(vm.$el.innerHTML).toBe('<div>slot:<span>123</span></div>')
+    })
+
+    it('is', () => {
+      const vm = makeInstance({
+        attr: 'is',
+        value: 'comp',
+        parentTemp: '<component v-bind="attrs"></component>',
+        childTemp: '<div>comp</div>'
+      })
+      expect(vm.$el.innerHTML).toBe('<div>comp</div>')
+    })
   })
 })

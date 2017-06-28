@@ -256,4 +256,29 @@ describe('Directive v-model checkbox', () => {
       expect(vm.$el.checked).toBe(true)
     }).then(done)
   })
+
+  it('triggers a watcher when binding to an array value in a checkbox', done => {
+    const vm = new Vue({
+      data: {
+        test: {
+          thing: false,
+          arr: [true]
+        }
+      },
+      template: `
+        <div>
+          <input type="checkbox" v-model="test.arr[0]">
+          <span>{{ test.arr[0] }}</span>
+        </div>
+      `
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].textContent).toBe('true')
+    vm.$el.children[0].click()
+    expect(vm.$el.children[0].checked).toBe(false)
+    waitForUpdate(() => {
+      expect(vm.$el.children[1].textContent).toBe('false')
+    }).then(done)
+  })
 })

@@ -2,7 +2,8 @@
 
 import type Watcher from './watcher'
 import config from '../config'
-import { callHook } from '../instance/lifecycle'
+import { callHook, activateChildComponent } from '../instance/lifecycle'
+
 import {
   warn,
   nextTick,
@@ -10,7 +11,10 @@ import {
   handleError
 } from '../util/index'
 
+export const MAX_UPDATE_COUNT = 100
+
 const queue: Array<Watcher> = []
+const activatedChildren: Array<Component> = []
 let has: { [key: number]: ?true } = {}
 let circular: { [key: number]: number } = {}
 let waiting = false
@@ -25,10 +29,12 @@ const afterFlushCallbacks: Array<Function> = []
 function resetSchedulerState () {
   // if we got to the end of the queue, we can just empty the queue
   if (index === queue.length) {
-    queue.length = 0
+    index = queue.length = activatedChildren.length = 0
   // else, we only remove watchers we ran
   } else {
     queue.splice(0, index)
+    activatedChildren.splice(0, index)
+    index = 0
   }
   has = {}
   if (process.env.NODE_ENV !== 'production') {
@@ -49,10 +55,10 @@ function flushSchedulerQueue (maxUpdateCount?: number) {
     throw new Error('Cannot flush while running a watcher.')
   }
 
-  maxUpdateCount = maxUpdateCount || config._maxUpdateCount
+  maxUpdateCount = maxUpdateCount || MAX_UPDATE_COUNT
 
   flushing = true
-  let watcher, id, vm, hookIndex
+  let watcher, id
 
   // a watcher's run can throw
   try {
@@ -106,19 +112,16 @@ function flushSchedulerQueue (maxUpdateCount?: number) {
       }
     }
   } finally {
-    // reset scheduler before updated hook called
-    hookIndex = index
-    const oldQueue = queue.slice(0, hookIndex)
+    // keep copies of post queues before resetting state
+    const activatedQueue = activatedChildren.slice()
+    const updatedQueue = queue.slice()
+    const endIndex = index
+
     resetSchedulerState()
 
-    // call updated hooks
-    while (hookIndex--) {
-      watcher = oldQueue[hookIndex]
-      vm = watcher.vm
-      if (vm._watcher === watcher && vm._isMounted) {
-        callHook(vm, 'updated')
-      }
-    }
+    // call component updated and activated hooks
+    callActivatedHooks(activatedQueue, endIndex)
+    callUpdatedHooks(updatedQueue, endIndex)
 
     // devtool hook
     /* istanbul ignore if */
@@ -138,6 +141,35 @@ function requireFlush () {
   }
 }
 
+function callUpdatedHooks (queue, endIndex) {
+  let i = endIndex
+  while (i--) {
+    const watcher = queue[i]
+    const vm = watcher.vm
+    if (vm._watcher === watcher && vm._isMounted) {
+      callHook(vm, 'updated')
+    }
+  }
+}
+
+/**
+ * Queue a kept-alive component that was activated during patch.
+ * The queue will be processed after the entire tree has been patched.
+ */
+export function queueActivatedComponent (vm: Component) {
+  // setting _inactive to false here so that a render function can
+  // rely on checking whether it's in an inactive tree (e.g. router-view)
+  vm._inactive = false
+  activatedChildren.push(vm)
+}
+
+function callActivatedHooks (queue, endIndex) {
+  for (let i = 0; i < endIndex; i++) {
+    queue[i]._inactive = true
+    activateChildComponent(queue[i], true /* true */)
+  }
+}
+
 /**
  * Push a watcher into the watcher queue.
  * Jobs with duplicate IDs will be skipped unless it's
@@ -153,10 +185,10 @@ export function queueWatcher (watcher: Watcher) {
       // if already flushing, splice the watcher based on its id
       // if already past its id, it will be run next immediately.
       let i = queue.length - 1
-      while (i >= 0 && queue[i].id > watcher.id) {
+      while (i > index && queue[i].id > watcher.id) {
         i--
       }
-      queue.splice(Math.max(i, index) + 1, 0, watcher)
+      queue.splice(i + 1, 0, watcher)
     }
     requireFlush()
   }

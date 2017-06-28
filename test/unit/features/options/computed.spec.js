@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options computed', () => {
   it('basic usage', done => {
@@ -46,6 +47,35 @@ describe('Options computed', () => {
     }).then(() => {
       expect(vm.$el.textContent).toBe('1')
     }).then(done)
+  })
+
+  testObjectOption('computed')
+
+  it('warn with setter and no getter', () => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <test></test>
+        </div>
+      `,
+      components: {
+        test: {
+          data () {
+            return {
+              a: 1
+            }
+          },
+          computed: {
+            b: {
+              set (v) { this.a = v }
+            }
+          },
+          template: `<div>{{a}}</div>`
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<div>1</div>')
+    expect('No getter function has been defined for computed property "b".').toHaveBeenWarned()
   })
 
   it('watching computed', done => {
@@ -139,5 +169,28 @@ describe('Options computed', () => {
     waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('3 4')
     }).then(done)
+  })
+
+  it('warn conflict with data', () => {
+    new Vue({
+      data: {
+        a: 1
+      },
+      computed: {
+        a: () => 2
+      }
+    })
+    expect(`computed property "a" is already defined in data`).toHaveBeenWarned()
+  })
+
+  it('warn conflict with props', () => {
+    new Vue({
+      props: ['a'],
+      propsData: { a: 1 },
+      computed: {
+        a: () => 2
+      }
+    })
+    expect(`computed property "a" is already defined as a prop`).toHaveBeenWarned()
   })
 })
