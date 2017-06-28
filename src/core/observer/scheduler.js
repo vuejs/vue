@@ -33,8 +33,8 @@ function resetSchedulerState () {
   // else, we only remove watchers we ran
   } else {
     queue.splice(0, index)
-    activatedChildren.splice(0, index)
     index = 0
+    activatedChildren.length = 0
   }
   has = {}
   if (process.env.NODE_ENV !== 'production') {
@@ -120,7 +120,7 @@ function flushSchedulerQueue (maxUpdateCount?: number) {
     resetSchedulerState()
 
     // call component updated and activated hooks
-    callActivatedHooks(activatedQueue, endIndex)
+    callActivatedHooks(activatedQueue)
     callUpdatedHooks(updatedQueue, endIndex)
 
     // devtool hook
@@ -163,8 +163,8 @@ export function queueActivatedComponent (vm: Component) {
   activatedChildren.push(vm)
 }
 
-function callActivatedHooks (queue, endIndex) {
-  for (let i = 0; i < endIndex; i++) {
+function callActivatedHooks (queue) {
+  for (let i = 0; i < queue.length; i++) {
     queue[i]._inactive = true
     activateChildComponent(queue[i], true /* true */)
   }
