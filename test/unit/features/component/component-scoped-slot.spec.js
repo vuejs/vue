@@ -95,6 +95,74 @@ describe('Component scoped slot', () => {
     }).then(done)
   })
 
+  it('html element slot', done => {
+    const vm = new Vue({
+      template: `
+        <test ref="test">
+          <h1 slot="item" scope="props">
+            <span>{{ props.foo }}</span><span>{{ props.bar }}</span>
+          </h1>
+        </test>
+      `,
+      components: {
+        test: {
+          data () {
+            return { foo: 'FOO', bar: 'BAR' }
+          },
+          template: `
+            <div>
+              <slot name="item" :foo="foo" :bar="bar"></slot>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<h1><span>FOO</span><span>BAR</span></h1>')
+    vm.$refs.test.foo = 'BAZ'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<h1><span>BAZ</span><span>BAR</span></h1>')
+    }).then(done)
+  })
+
+  it('component slot', done => {
+    const vm = new Vue({
+      template: `
+        <test ref="test">
+          <test2 scope="props" :foo="props.foo">
+            <span>{{ props.bar }}</span>
+          </test2>
+        </test>
+      `,
+      components: {
+        test: {
+          data () {
+            return { foo: 'FOO', bar: 'BAR' }
+          },
+          template: `
+            <div>
+              <slot :foo="foo" :bar="bar"></slot>
+            </div>
+          `
+        },
+        test2: {
+          props: ['foo'],
+          template: `
+            <div>
+              <span>{{ foo }}</span><slot></slot>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<div><span>FOO</span><span>BAR</span></div>')
+    vm.$refs.test.foo = 'BAZ'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div><span>BAZ</span><span>BAR</span></div>')
+    }).then(done)
+  })
+
   it('fallback content', () => {
     const vm = new Vue({
       template: `<test></test>`,

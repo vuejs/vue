@@ -424,8 +424,9 @@ function processSlot (el) {
     if (slotTarget) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
     }
-    if (el.tag === 'template') {
-      el.slotScope = getAndRemoveAttr(el, 'scope')
+    const slotScope = getAndRemoveAttr(el, 'scope')
+    if (slotScope) {
+      el.slotScope = slotScope
     }
   }
 }
