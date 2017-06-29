@@ -50,4 +50,21 @@ describe('SSR: basicRenderer', () => {
       done()
     })
   })
+
+  // #5941
+  it('should work peoperly when accessing $ssrContext in root component', done => {
+    let ssrContext
+    renderToString(new Vue({
+      template: `
+        <div></div>
+      `,
+      created () {
+        ssrContext = this.$ssrContext
+      }
+    }), (err, result) => {
+      expect(err).toBeNull()
+      expect(ssrContext).toBeUndefined()
+      done()
+    })
+  })
 })
