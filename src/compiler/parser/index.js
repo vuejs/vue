@@ -90,7 +90,7 @@ export function parse (
     isUnaryTag: options.isUnaryTag,
     canBeLeftOpenTag: options.canBeLeftOpenTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
-    shouldKeptComment: options.comments,
+    shouldKeepComment: options.comments,
     start (tag, attrs, unary) {
       // check namespace.
       // inherit parent ns if there is one
