@@ -293,5 +293,95 @@ if (!isIE9) {
       }).$mount()
       expect('<transition-group> children must be keyed: <div>').toHaveBeenWarned()
     })
+    it('move hooks should work', done => {
+      const beforeMoveSpy = jasmine.createSpy('beforeMove')
+      const afterMoveSpy = jasmine.createSpy('afterMove')
+
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition-group name="group" @before-move="beforeMove" @after-move="afterMove">
+              <div v-for="item in items" :key="item" class="test">{{ item }}</div>
+            </transition-group>
+          </div>
+        `,
+        data: {
+          items: ['a', 'b']
+        },
+        methods: {
+          beforeMove: beforeMoveSpy,
+          afterMove: afterMoveSpy
+        }
+      }).$mount(el)
+
+      // should not apply transition on initial render by default
+      expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+        `<span>` +
+          `<div class="test">a</div>` +
+          `<div class="test">b</div>` +
+        `</span>`
+      )
+
+      vm.items.push('c')
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="test">a</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test group-enter group-enter-active">c</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+
+            `<div class="test">a</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test group-enter-active group-enter-to">c</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(duration * 2).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="test">a</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test">c</div>` +
+          `</span>`
+        )
+      }).then(() => {
+        expect(beforeMoveSpy).toHaveBeenCalledTimes(1)
+        expect(afterMoveSpy).toHaveBeenCalledTimes(1)
+        vm.items = ['d', 'b', 'a']
+      }).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="test group-enter group-enter-active">d</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test group-move">a</div>` +
+            `<div class="test group-leave group-leave-active group-move">c</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="test group-enter-active group-enter-to">d</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test group-move">a</div>` +
+            `<div class="test group-leave-active group-move group-leave-to">c</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(duration * 2).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="test">d</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test">a</div>` +
+          `</span>`
+        )
+      }).then(() => {
+        expect(beforeMoveSpy).toHaveBeenCalledTimes(2)
+        expect(afterMoveSpy).toHaveBeenCalledTimes(2)
+      }).then(done)
+    })
   })
 }

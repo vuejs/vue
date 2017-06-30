@@ -11,7 +11,8 @@
 // into the final desired state. This way in the second pass removed
 // nodes will remain where they should be.
 
-import { warn, extend } from 'core/util/index'
+import { warn, extend, makeTask, waitForAllTask } from 'core/util/index'
+import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { addClass, removeClass } from '../class-util'
 import { transitionProps, extractTransitionData } from './transition'
 
@@ -25,7 +26,9 @@ import {
 
 const props = extend({
   tag: String,
-  moveClass: String
+  moveClass: String,
+  beforeMove: Function,
+  afterMove: Function
 }, transitionProps)
 
 delete props.mode
@@ -59,18 +62,46 @@ export default {
     if (prevChildren) {
       const kept: Array<VNode> = []
       const removed: Array<VNode> = []
+      const created: Array<VNode> = []
+      const prevMap = Object.create(null)
+
       for (let i = 0; i < prevChildren.length; i++) {
         const c: VNode = prevChildren[i]
         c.data.transition = transitionData
         c.data.pos = c.elm.getBoundingClientRect()
+        prevMap[c.key] = c
+
         if (map[c.key]) {
           kept.push(c)
         } else {
           removed.push(c)
         }
       }
+      for (let i = 0, l = rawChildren.length; i < l; i++) {
+        const rawC: VNode = rawChildren[i]
+        if (!prevMap[rawC.key]) {
+          created.push(rawC)
+        }
+      }
+
       this.kept = h(tag, null, kept)
       this.removed = removed
+      this.created = created
+
+      this.leaveHooks = removed.map((x: VNode) => {
+        return makeTask(resolve => {
+          mergeVNodeHook(x.data.transition, 'afterLeave', () => {
+            resolve()
+          })
+        })
+      })
+      this.enterHooks = created.map((x: VNode) => {
+        return makeTask(resolve => {
+          mergeVNodeHook(x.data.transition, 'afterEnter', () => {
+            resolve()
+          })
+        })
+      })
     }
 
     return h(tag, null, children)
@@ -90,35 +121,44 @@ export default {
   updated () {
     const children: Array<VNode> = this.prevChildren
     const moveClass: string = this.moveClass || ((this.name || 'v') + '-move')
-    if (!children.length || !this.hasMove(children[0].elm, moveClass)) {
-      return
+    const transitionData: Object = extractTransitionData(this)
+    const hasMoveHook: Boolean = !!(transitionData.beforeMove || transitionData.afterMove)
+    const shouldResolveMoveHook: Boolean = children && hasMoveHook
+
+    if (children.length && this.hasMove(children[0].elm, moveClass)) {
+      // we divide the work into three loops to avoid mixing DOM reads and writes
+      // in each iteration - which helps prevent layout thrashing.
+      children.forEach(callPendingCbs)
+      children.forEach(recordPosition)
+      children.forEach(applyTranslation)
+
+      // force reflow to put everything in position
+      const body: any = document.body
+      const f: number = body.offsetHeight // eslint-disable-line
+
+      this.moveHooks = children.map((c: VNode) => {
+        if (c.data.moved) {
+          return makeTask(resolve => {
+            var el: any = c.elm
+            var s: any = el.style
+            addTransitionClass(el, moveClass)
+            s.transform = s.WebkitTransform = s.transitionDuration = ''
+            el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
+              if (!e || /transform$/.test(e.propertyName)) {
+                el.removeEventListener(transitionEndEvent, cb)
+                el._moveCb = null
+                removeTransitionClass(el, moveClass)
+                resolve(c)
+              }
+            })
+          })
+        }
+      }).filter(x => x)
     }
 
-    // we divide the work into three loops to avoid mixing DOM reads and writes
-    // in each iteration - which helps prevent layout thrashing.
-    children.forEach(callPendingCbs)
-    children.forEach(recordPosition)
-    children.forEach(applyTranslation)
-
-    // force reflow to put everything in position
-    const body: any = document.body
-    const f: number = body.offsetHeight // eslint-disable-line
-
-    children.forEach((c: VNode) => {
-      if (c.data.moved) {
-        var el: any = c.elm
-        var s: any = el.style
-        addTransitionClass(el, moveClass)
-        s.transform = s.WebkitTransform = s.transitionDuration = ''
-        el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
-          if (!e || /transform$/.test(e.propertyName)) {
-            el.removeEventListener(transitionEndEvent, cb)
-            el._moveCb = null
-            removeTransitionClass(el, moveClass)
-          }
-        })
-      }
-    })
+    if (shouldResolveMoveHook) {
+      this.resolveMoveHook(transitionData)
+    }
   },
 
   methods: {
@@ -145,6 +185,16 @@ export default {
       const info: Object = getTransitionInfo(clone)
       this.$el.removeChild(clone)
       return (this._hasMove = info.hasTransform)
+    },
+    resolveMoveHook (transitionData: Object) {
+      const { beforeMove, afterMove } = transitionData
+      const { leaveHooks = [], enterHooks = [], moveHooks = [] } = this
+      beforeMove && beforeMove()
+      const hooks = leaveHooks.concat(enterHooks).concat(moveHooks)
+      waitForAllTask(hooks, () => {
+        this.leaveHooks = this.enterHooks = this.moveHooks = null
+        afterMove && afterMove()
+      })
     }
   }
 }
