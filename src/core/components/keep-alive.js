@@ -5,14 +5,16 @@ import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
 type VNodeCache = { [key: string]: ?VNode };
 
-const patternTypes: Array<Function> = [String, RegExp]
+const patternTypes: Array<Function> = [String, RegExp, Array]
 
 function getComponentName (opts: ?VNodeComponentOptions): ?string {
   return opts && (opts.Ctor.options.name || opts.tag)
 }
 
-function matches (pattern: string | RegExp, name: string): boolean {
-  if (typeof pattern === 'string') {
+function matches (pattern: string | RegExp | Array<string>, name: string): boolean {
+  if (Array.isArray(pattern)) {
+    return pattern.indexOf(name) > -1
+  } else if (typeof pattern === 'string') {
     return pattern.split(',').indexOf(name) > -1
   } else if (isRegExp(pattern)) {
     return pattern.test(name)
@@ -62,10 +64,10 @@ export default {
   },
 
   watch: {
-    include (val: string | RegExp) {
+    include (val: string | RegExp | Array<string>) {
       pruneCache(this.cache, this._vnode, name => matches(val, name))
     },
-    exclude (val: string | RegExp) {
+    exclude (val: string | RegExp | Array<string>) {
       pruneCache(this.cache, this._vnode, name => !matches(val, name))
     }
   },
