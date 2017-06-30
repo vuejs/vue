@@ -1,7 +1,7 @@
 import { parse } from 'compiler/parser/index'
 import { optimize } from 'compiler/optimizer'
 import { generate } from 'compiler/codegen'
-import { isObject } from 'shared/util'
+import { isObject, extend } from 'shared/util'
 import { isReservedTag } from 'web/util/index'
 import { baseOptions } from 'web/compiler/options'
 
@@ -472,6 +472,19 @@ describe('codegen', () => {
       '<div><child></child><template v-for="item in list">{{ item }}</template></div>',
       `with(this){return _c('div',[_c('child'),_l((list),function(item){return [_v(_s(item))]})],2)}`
     )
+  })
+
+  it('generate component with comment', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const template = '<div><!--comment--></div>'
+    const generatedCode = `with(this){return _c('div',[_e('comment')])}`
+
+    const ast = parse(template, options)
+    optimize(ast, options)
+    const res = generate(ast, options)
+    expect(res.render).toBe(generatedCode)
   })
 
   it('not specified ast type', () => {
