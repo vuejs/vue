@@ -60,8 +60,8 @@ setTimeout(() => {
     inBrowser && typeof console !== 'undefined'
   ) {
     console[console.info ? 'info' : 'log'](
-      `You are running Vue in development mode.\n` +
-      `Make sure to turn on production mode when deploying for production.\n` +
+      `You are running Vue in development mode. ` +
+      `Make sure to turn on production mode when deploying for production. ` +
       `See more tips at https://vuejs.org/guide/deployment.html`
     )
   }
