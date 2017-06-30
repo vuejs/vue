@@ -69,8 +69,11 @@ export function nextFrame (fn: Function) {
 }
 
 export function addTransitionClass (el: any, cls: string) {
-  (el._transitionClasses || (el._transitionClasses = [])).push(cls)
-  addClass(el, cls)
+  const transitionClasses = el._transitionClasses || (el._transitionClasses = [])
+  if (transitionClasses.indexOf(cls) < 0) {
+    transitionClasses.push(cls)
+    addClass(el, cls)
+  }
 }
 
 export function removeTransitionClass (el: any, cls: string) {
