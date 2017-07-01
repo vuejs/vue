@@ -115,7 +115,7 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
         // styles injected by vue-style-loader.
         initialContext = sandbox.__VUE_SSR_CONTEXT__ = {}
         runner = evaluate(entry, sandbox)
-        // On subsequent renders, __VUE_SSR_CONTEXT__ will not be avaialbe
+        // On subsequent renders, __VUE_SSR_CONTEXT__ will not be available
         // to prevent cross-request pollution.
         delete sandbox.__VUE_SSR_CONTEXT__
         if (typeof runner !== 'function') {
