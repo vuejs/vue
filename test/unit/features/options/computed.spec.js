@@ -23,6 +23,31 @@ describe('Options computed', () => {
     }).then(done)
   })
 
+  it('string getter alias', done => {
+    const vm = new Vue({
+      template: '<div>{{ b }}</div>',
+      data: {
+        a: {
+          b: {
+            c: {
+              d: 2
+            }
+          }
+        }
+      },
+      computed: {
+        b: 'a.b.c.d'
+      }
+    }).$mount()
+    expect(vm.b).toBe(2)
+    expect(vm.$el.textContent).toBe('2')
+    vm.a.b.c.d = 3
+    expect(vm.b).toBe(3)
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('3')
+    }).then(done)
+  })
+
   it('with setter', done => {
     const vm = new Vue({
       template: '<div>{{ b }}</div>',
