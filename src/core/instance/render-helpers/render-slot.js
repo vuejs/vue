@@ -1,6 +1,6 @@
 /* @flow */
 
-import { extend, warn } from 'core/util/index'
+import { toObject, warn } from 'core/util/index'
 
 /**
  * Runtime helper for rendering <slot>
@@ -13,10 +13,7 @@ export function renderSlot (
 ): ?Array<VNode> {
   const scopedSlotFn = this.$scopedSlots[name]
   if (scopedSlotFn) { // scoped slot
-    props = props || {}
-    if (bindObject) {
-      props = extend(extend({}, bindObject), props)
-    }
+    props = toObject([bindObject, props])
     return scopedSlotFn(props) || fallback
   } else {
     const slotNodes = this.$slots[name]
