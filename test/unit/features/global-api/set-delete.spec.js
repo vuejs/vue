@@ -35,6 +35,16 @@ describe('Global API: set/delete', () => {
       Vue.set(vm.list, 1, 'd')
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('<div>0-a</div><div>1-d</div><div>2-c</div>')
+        Vue.set(vm.list, '2', 'e')
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<div>0-a</div><div>1-d</div><div>2-e</div>')
+        /* eslint-disable no-new-wrappers */
+        Vue.set(vm.list, new Number(1), 'f')
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<div>0-a</div><div>1-f</div><div>2-e</div>')
+        Vue.set(vm.list, '3g', 'g')
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<div>0-a</div><div>1-f</div><div>2-e</div>')
       }).then(done)
     })
 
@@ -106,10 +116,26 @@ describe('Global API: set/delete', () => {
       Vue.delete(vm.lists, 1)
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
-        Vue.delete(vm.lists, 1)
+        Vue.delete(vm.lists, NaN)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
+        Vue.delete(vm.lists, -1)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
+        Vue.delete(vm.lists, '1.3')
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
+        Vue.delete(vm.lists, true)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
+        Vue.delete(vm.lists, {})
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<p>A</p><p>C</p>')
+        Vue.delete(vm.lists, '1')
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('<p>A</p>')
-        Vue.delete(vm.lists, 0)
+        /* eslint-disable no-new-wrappers */
+        Vue.delete(vm.lists, new Number(0))
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('')
       }).then(done)
