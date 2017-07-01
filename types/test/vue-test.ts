@@ -1,4 +1,4 @@
-import Vue = require("../index");
+import Vue from "../index";
 
 class Test extends Vue {
   a: number;

@@ -1,4 +1,4 @@
-import Vue = require("../index");
+import Vue from "../index";
 
 declare module "../vue" {
   // add instance property and method

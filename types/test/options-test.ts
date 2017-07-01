@@ -1,4 +1,4 @@
-import Vue = require("../index");
+import Vue from "../index";
 import { ComponentOptions, FunctionalComponentOptions } from "../index";
 
 interface Component extends Vue {
