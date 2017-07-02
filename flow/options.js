@@ -18,7 +18,7 @@ declare type ComponentOptions = {
   props?: { [key: string]: PropOptions };
   propsData?: ?Object;
   computed?: {
-    [key: string]: Function | {
+    [key: string]: Function | string | {
       get?: Function;
       set?: Function;
       cache?: boolean
