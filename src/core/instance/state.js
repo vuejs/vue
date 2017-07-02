@@ -168,7 +168,14 @@ function initComputed (vm: Component, computed: Object) {
 
   for (const key in computed) {
     const userDef = computed[key]
-    let getter = typeof userDef === 'function' ? userDef : userDef.get
+    let getter
+    if (typeof userDef === 'function') {
+      getter = userDef
+    } else if (typeof userDef === 'string') {
+      getter = new Function(`return this.${userDef}`)
+    } else {
+      getter = userDef.get
+    }
     if (process.env.NODE_ENV !== 'production') {
       if (getter === undefined) {
         warn(
@@ -196,8 +203,10 @@ function initComputed (vm: Component, computed: Object) {
   }
 }
 
-export function defineComputed (target: any, key: string, userDef: Object | Function) {
-  if (typeof userDef === 'function') {
+export function defineComputed (target: any, key: string, userDef: Object | Function | string) {
+  const isFunction = typeof userDef === 'function'
+  const isString = typeof userDef === 'string'
+  if (isFunction || isString) {
     sharedPropertyDefinition.get = createComputedGetter(key)
     sharedPropertyDefinition.set = noop
   } else {
