@@ -333,9 +333,9 @@ if (!isIE9) {
       }).thenWaitFor(duration * 2 + buffer).then(() => {
         expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
           `<span>` +
-            `<div class="">a</div>` +
-            `<div class="">b</div>` +
-            `<div class="">c</div>` +
+            `<div>a</div>` +
+            `<div>b</div>` +
+            `<div>c</div>` +
           `</span>`
         )
       }).then(done)
