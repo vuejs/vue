@@ -59,6 +59,7 @@ const decodingMap = {
 const encodedAttr = /&(?:lt|gt|quot|amp);/g
 const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10);/g
 
+// #5992
 const ignoreFirstLFTagList = makeMap('pre,textarea', true)
 const isIgnoreFirstLf = (tag, html) => tag && ignoreFirstLFTagList(tag.toLowerCase()) && html[0] === '\n'
 
@@ -78,7 +79,6 @@ export function parseHTML (html, options) {
     last = html
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
-      // #5992
       if (isIgnoreFirstLf(lastTag, html)) {
         advance(1)
       }
