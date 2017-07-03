@@ -530,8 +530,7 @@ describe('parser', () => {
     expect(whitespace.children.length).toBe(1)
     expect(whitespace.children[0].type).toBe(3)
     // textarea is whitespace sensitive
-    expect(whitespace.children[0].text).toBe(`
-        <p>Test 1</p>
+    expect(whitespace.children[0].text).toBe(`        <p>Test 1</p>
         test2
       `)
 
