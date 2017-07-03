@@ -127,7 +127,7 @@ export default {
       if (!hasTransition) {
         return false
       }
-      if (this._hasMove != null) {
+      if (this._hasMove) {
         return this._hasMove
       }
       // Detect whether an element with the move class applied has
