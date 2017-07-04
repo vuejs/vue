@@ -289,22 +289,6 @@ function getVShowDirectiveInfo (node: VNode): ?VNodeDirective {
   return dir
 }
 
-function getVShowDirectiveInfo (node: VNode): ?VNodeDirective {
-  let dir: VNodeDirective
-  let tmp
-
-  while (node) {
-    if (node.data && node.data.directives) {
-      tmp = node.data.directives.find(dir => dir.name === 'show')
-      if (tmp) {
-        dir = tmp
-      }
-    }
-    node = node.parent
-  }
-  return dir
-}
-
 function renderStartingTag (node: VNode, context) {
   let markup = `<${node.tag}`
   const { directives, modules } = context

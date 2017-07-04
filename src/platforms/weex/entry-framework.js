@@ -341,7 +341,7 @@ function getInstanceTimer (instanceId, moduleGetter) {
       const handler = function () {
         args[0](...args.slice(2))
       }
-      
+
       timer.setTimeout(handler, args[1])
       return instance.document.taskCenter.callbackManager.lastCallbackId.toString()
     },
@@ -420,9 +420,9 @@ function callFunctionNative (globalObjects, body) {
     const weex = globalObjects.weex || {}
     const config = weex.config || {}
     fn = renderer.compileBundle(script,
-                                config.bundleUrl,
-                                config.bundleDigest,
-                                config.codeCachePath)
+      config.bundleUrl,
+      config.bundleDigest,
+      config.codeCachePath)
     if (fn && typeof fn === 'function') {
       fn(...globalValues)
       isNativeCompileOk = true
