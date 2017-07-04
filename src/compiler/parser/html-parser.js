@@ -61,7 +61,7 @@ const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10);/g
 
 // #5992
 const ignoreFirstLFTagList = makeMap('pre,textarea', true)
-const isIgnoreFirstLf = (tag, html) => tag && ignoreFirstLFTagList(tag.toLowerCase()) && html[0] === '\n'
+const isIgnoreFirstLf = (tag, html) => tag && ignoreFirstLFTagList(tag) && html[0] === '\n'
 
 function decodeAttr (value, shouldDecodeNewlines) {
   const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
