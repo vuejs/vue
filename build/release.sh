@@ -47,6 +47,14 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
   # commit
   git add -A
+  git add -f \
+    dist/*.js \
+    !dist/vue.common.min.js \
+    packages/vue-server-renderer/basic.js \
+    packages/vue-server-renderer/build.js \
+    packages/vue-server-renderer/server-plugin.js \
+    packages/vue-server-renderer/client-plugin.js \
+    packages/vue-template-compiler/build.js
   git commit -m "[build] $VERSION"
   npm version $VERSION --message "[release] $VERSION"
 
@@ -58,4 +66,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   else
     npm publish --tag $RELEASE_TAG
   fi
+
+  # generate release note
+  VERSION=$VERSION npm run release:note
 fi

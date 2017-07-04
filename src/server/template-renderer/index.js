@@ -181,7 +181,7 @@ export default class TemplateRenderer {
       }
       return this.prefetchFiles.map(file => {
         if (!alreadyRendered(file)) {
-          return `<link rel="prefetch" href="${this.publicPath}/${file}" as="script">`
+          return `<link rel="prefetch" href="${this.publicPath}/${file}">`
         } else {
           return ''
         }
@@ -209,7 +209,7 @@ export default class TemplateRenderer {
       const async = this.getUsedAsyncFiles(context)
       const needed = [initial[0]].concat(async || [], initial.slice(1))
       return needed.filter(isJS).map(file => {
-        return `<script src="${this.publicPath}/${file}"></script>`
+        return `<script src="${this.publicPath}/${file}" defer></script>`
       }).join('')
     } else {
       return ''
@@ -217,7 +217,7 @@ export default class TemplateRenderer {
   }
 
   getUsedAsyncFiles (context: Object): ?Array<string> {
-    if (!context._mappedfiles && context._registeredComponents && this.mapFiles) {
+    if (!context._mappedFiles && context._registeredComponents && this.mapFiles) {
       context._mappedFiles = this.mapFiles(Array.from(context._registeredComponents))
     }
     return context._mappedFiles

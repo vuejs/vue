@@ -81,7 +81,7 @@ function flushSchedulerQueue () {
 
   // call component updated and activated hooks
   callActivatedHooks(activatedQueue)
-  callUpdateHooks(updatedQueue)
+  callUpdatedHooks(updatedQueue)
 
   // devtool hook
   /* istanbul ignore if */
@@ -90,7 +90,7 @@ function flushSchedulerQueue () {
   }
 }
 
-function callUpdateHooks (queue) {
+function callUpdatedHooks (queue) {
   let i = queue.length
   while (i--) {
     const watcher = queue[i]

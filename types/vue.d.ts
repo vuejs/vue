@@ -42,6 +42,7 @@ export declare class Vue {
   readonly $slots: { [key: string]: VNode[] };
   readonly $scopedSlots: { [key: string]: ScopedSlot };
   readonly $isServer: boolean;
+  readonly $ssrContext: any;
   readonly $props: any;
 
   $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
@@ -74,6 +75,7 @@ export declare class Vue {
     productionTip: boolean;
     performance: boolean;
     errorHandler(err: Error, vm: Vue, info: string): void;
+    warnHandler(msg: string, vm: Vue, trace: string): void;
     ignoredElements: string[];
     keyCodes: { [key: string]: number };
   }

@@ -10,7 +10,7 @@ declare type InternalComponentOptions = {
   _refElm: ?Node;
   render?: Function;
   staticRenderFns?: Array<Function>
-}
+};
 
 declare type ComponentOptions = {
   // data
@@ -68,6 +68,7 @@ declare type ComponentOptions = {
   name?: string;
   extends?: Class<Component> | Object;
   delimiters?: [string, string];
+  comments?: boolean;
 
   // private
   _isComponent?: true;
@@ -80,7 +81,7 @@ declare type ComponentOptions = {
   _base: Class<Component>;
   _parentElm: ?Node;
   _refElm: ?Node;
-}
+};
 
 declare type PropOptions = {
   type: Function | Array<Function> | null;

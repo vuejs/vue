@@ -1,6 +1,6 @@
 /* @flow */
 
-import { decode } from 'he'
+import he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
@@ -28,7 +28,7 @@ const argRE = /:(.*)$/
 const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
 
-const decodeHTMLCached = cached(decode)
+const decodeHTMLCached = cached(he.decode)
 
 // configurable state
 export let warn
@@ -48,12 +48,15 @@ export function parse (
   options: CompilerOptions
 ): ASTElement | void {
   warn = options.warn || baseWarn
-  platformGetTagNamespace = options.getTagNamespace || no
-  platformMustUseProp = options.mustUseProp || no
+
   platformIsPreTag = options.isPreTag || no
-  preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
+  platformMustUseProp = options.mustUseProp || no
+  platformGetTagNamespace = options.getTagNamespace || no
+
   transforms = pluckModuleFunction(options.modules, 'transformNode')
+  preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
+
   delimiters = options.delimiters
 
   const stack = []
@@ -87,6 +90,7 @@ export function parse (
     isUnaryTag: options.isUnaryTag,
     canBeLeftOpenTag: options.canBeLeftOpenTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
+    shouldKeepComment: options.comments,
     start (tag, attrs, unary) {
       // check namespace.
       // inherit parent ns if there is one
@@ -271,6 +275,13 @@ export function parse (
           })
         }
       }
+    },
+    comment (text: string) {
+      currentParent.children.push({
+        type: 3,
+        text,
+        isComment: true
+      })
     }
   })
   return root

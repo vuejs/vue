@@ -455,7 +455,7 @@ describe('framework APIs', () => {
         },
         el: "body"
       })
-    `, { a: 1, b: 2 })
+    `, undefined, { a: 1, b: 2 })
     expect(JSON.parse(instance2.getRealRoot().children[0].attr.value)).toEqual({ a: 1, b: 2, env: DEFAULT_ENV })
   })
 

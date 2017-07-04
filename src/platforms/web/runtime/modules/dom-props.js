@@ -61,7 +61,8 @@ function shouldUpdateValue (
 }
 
 function isDirty (elm: acceptValueElm, checkVal: string): boolean {
-  // return true when textbox (.number and .trim) loses focus and its value is not equal to the updated value
+  // return true when textbox (.number and .trim) loses focus and its value is
+  // not equal to the updated value
   return document.activeElement !== elm && elm.value !== checkVal
 }
 

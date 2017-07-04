@@ -230,7 +230,7 @@ describe('SSR: template option', () => {
       (options.preloadOtherAssets ? `<link rel="preload" href="/test.png" as="image">` : ``) +
       (options.preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
       // unused chunks should have prefetch
-      `<link rel="prefetch" href="/1.js" as="script">` +
+      `<link rel="prefetch" href="/1.js">` +
       // css assets should be loaded
       `<link rel="stylesheet" href="/test.css">` +
     `</head><body>` +
@@ -238,10 +238,10 @@ describe('SSR: template option', () => {
       // state should be inlined before scripts
       `<script>window.${options.stateKey || '__INITIAL_STATE__'}={"a":1}</script>` +
       // manifest chunk should be first
-      `<script src="/manifest.js"></script>` +
+      `<script src="/manifest.js" defer></script>` +
       // async chunks should be before main chunk
-      `<script src="/0.js"></script>` +
-      `<script src="/main.js"></script>` +
+      `<script src="/0.js" defer></script>` +
+      `<script src="/main.js" defer></script>` +
     `</body></html>`
 
   createClientManifestAssertions(true)

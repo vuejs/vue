@@ -64,7 +64,8 @@ Vue.prototype.$mount = function (
 
       const { render, staticRenderFns } = compileToFunctions(template, {
         shouldDecodeNewlines,
-        delimiters: options.delimiters
+        delimiters: options.delimiters,
+        comments: options.comments
       }, this)
       options.render = render
       options.staticRenderFns = staticRenderFns

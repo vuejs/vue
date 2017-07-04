@@ -17,6 +17,7 @@ export function isTrue (v: any): boolean %checks {
 export function isFalse (v: any): boolean %checks {
   return v === false
 }
+
 /**
  * Check if value is primitive
  */
@@ -45,6 +46,14 @@ export function isPlainObject (obj: any): boolean {
 
 export function isRegExp (v: any): boolean {
   return _toString.call(v) === '[object RegExp]'
+}
+
+/**
+ * Check if val is a valid array index.
+ */
+export function isValidArrayIndex (val: any): boolean {
+  const n = parseFloat(val)
+  return n >= 0 && Math.floor(n) === n && isFinite(val)
 }
 
 /**
@@ -89,6 +98,11 @@ export function makeMap (
  * Check if a tag is a built-in tag.
  */
 export const isBuiltInTag = makeMap('slot,component', true)
+
+/**
+ * Check if a attribute is a reserved attribute.
+ */
+export const isReservedAttribute = makeMap('key,ref,slot,is')
 
 /**
  * Remove an item from an array
@@ -202,13 +216,15 @@ export function toObject (arr: Array<any>): Object {
 
 /**
  * Perform no operation.
+ * Stubbing args to make Flow happy without leaving useless transpiled code
+ * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/)
  */
-export function noop () {}
+export function noop (a?: any, b?: any, c?: any) {}
 
 /**
  * Always return false.
  */
-export const no = () => false
+export const no = (a?: any, b?: any, c?: any) => false
 
 /**
  * Return same value

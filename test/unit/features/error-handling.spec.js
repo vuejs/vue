@@ -11,7 +11,8 @@ describe('Error handling', () => {
     ['beforeCreate', 'beforeCreate hook'],
     ['created', 'created hook'],
     ['beforeMount', 'beforeMount hook'],
-    ['directive bind', 'directive foo bind hook']
+    ['directive bind', 'directive foo bind hook'],
+    ['event', 'event handler for "e"']
   ].forEach(([type, description]) => {
     it(`should recover from errors in ${type}`, done => {
       const vm = createTestInstance(components[type])
@@ -212,6 +213,19 @@ function createErrorTestComponents () {
     },
     render (h) {
       return h('div', this.n)
+    }
+  }
+
+  // event errors
+  components.event = {
+    beforeCreate () {
+      this.$on('e', () => { throw new Error('event') })
+    },
+    mounted () {
+      this.$emit('e')
+    },
+    render (h) {
+      return h('div')
     }
   }
 

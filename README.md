@@ -6,6 +6,8 @@
   <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/dm/vue.svg" alt="Downloads"></a>
   <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/v/vue.svg" alt="Version"></a>
   <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/l/vue.svg" alt="License"></a>
+  <a href="https://gitter.im/vuejs/vue"><img src="https://img.shields.io/gitter/room/nwjs/nw.js.svg" alt="Gitter">
+  <a href="https://discordapp.com/invite/eKWPvZ9"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg" alt="Discord">
   <br>
   <a href="https://saucelabs.com/u/vuejs"><img src="https://saucelabs.com/browser-matrix/vuejs.svg" alt="Sauce Test Status"></a>
 </p>
@@ -73,10 +75,6 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
     <img width="130px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/famebroker.png">
   </a>
   <br><br>
-  <a href="https://fancygrid.com" target="_blank">
-    <img width="120px" src="http://fancygrid.com/logo/logo.png">
-  </a>
-  <br><br>
   <a href="https://component.io/" target="_blank">
     <img width="130px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/component_io.png">
   </a>
@@ -92,11 +90,15 @@ Vue.js is a library for building interactive web interfaces. It provides data-re
 - [Flexible transition effect system](https://vuejs.org/guide/transitions.html)
 - Fast without the need for complex optimization
 
-Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported). To check out live examples and docs, visit [vuejs.org](https://vuejs.org).
+Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported).
+
+## Documentation
+
+To check out live examples and docs, visit [vuejs.org](https://vuejs.org).
 
 ## Questions
 
-For questions and support please use the [Gitter chat room](https://gitter.im/vuejs/vue) or [the official forum](http://forum.vuejs.org). The issue list of this repo is **exclusively** for bug reports and feature requests.
+For questions and support please use the [Discord chat room](https://vue-land.js.org/), [Gitter chat room](https://gitter.im/vuejs/vue), or [the official forum](http://forum.vuejs.org). The issue list of this repo is **exclusively** for bug reports and feature requests.
 
 ## Issues
 
