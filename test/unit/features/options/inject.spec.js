@@ -298,4 +298,44 @@ describe('Options provide/inject', () => {
     expect(`Injection "bar" not found`).not.toHaveBeenWarned()
     expect(`Injection "baz" not found`).not.toHaveBeenWarned()
   })
+
+  // Github issue #6008
+  it('should merge provide from mixins', () => {
+    const mixinA = { provide: { foo: 'foo' }}
+    const mixinB = { provide: { bar: 'bar' }}
+    const child = {
+      inject: ['foo', 'bar'],
+      template: `<span/>`,
+      created () {
+        injected = [this.foo, this.bar]
+      }
+    }
+    new Vue({
+      mixins: [mixinA, mixinB],
+      render (h) {
+        return h(child)
+      }
+    }).$mount()
+
+    expect(injected).toEqual(['foo', 'bar'])
+  })
+  it('should merge provide from mixins and override existing keys', () => {
+    const mixinA = { provide: { foo: 'foo' }}
+    const mixinB = { provide: { foo: 'bar' }}
+    const child = {
+      inject: ['foo'],
+      template: `<span/>`,
+      created () {
+        injected = [this.foo]
+      }
+    }
+    new Vue({
+      mixins: [mixinA, mixinB],
+      render (h) {
+        return h(child)
+      }
+    }).$mount()
+
+    expect(injected).toEqual(['bar'])
+  })
 })
