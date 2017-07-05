@@ -437,7 +437,7 @@ if (!isIE9) {
         expect(enterSpy).toHaveBeenCalled()
         expect(vm.$el.innerHTML).toBe('<div class="nope-enter nope-enter-active">foo</div>')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.innerHTML).toMatch(/<div( class="")?>foo<\/div>/)
+        expect(vm.$el.innerHTML).toBe('<div>foo</div>')
       }).then(done)
     })
 
