@@ -1,0 +1,132 @@
+version: 2
+
+references:
+  container_config: &container_config
+    working_directory: ~/root/vue
+    docker:
+      - image: circleci/node:6
+  workspace_root: &workspace_root
+    /tmp/workspace
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace_root
+  load_code: &load_code
+    run:
+      name: load code from workspace
+      command: |
+        # Move all files and dotfiles to current working_directory
+        mv /tmp/workspace/vue/* /tmp/workspace/vue/.[!.]* .
+  js_cache_key: &js_cache_key
+    key: npm-dependency-cache-{{ checksum "package.json" }}
+  restore_node_modules: &restore_node_modules
+    run:
+      name: Restore npm dependencies from workspace
+      command: mv /tmp/workspace/node_modules ./
+
+jobs:
+
+  checkout_code:
+    <<: *container_config
+    steps:
+      - checkout
+      - run:
+          command: |
+            mkdir -p /tmp/workspace/vue
+            mv * .[!.]* /tmp/workspace/vue/
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - vue
+  
+  node_dependencies:
+    <<: *container_config
+    steps:
+      - *attach_workspace
+      - *load_code
+      - restore_cache:
+          <<: *js_cache_key
+      - run:
+          name: download npm modules
+          # Might need more logic to account for other modules / bower
+          command: npm install
+      - save_cache:
+          <<: *js_cache_key
+          paths:
+            - ~/root/vue/node_modules
+      - run:
+          name: Move dependencies to workspace
+          command: |
+            mv node_modules /tmp/workspace/vue/
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - node_modules
+
+  test_lint-flow-types:
+    <<: *container_config
+    steps:
+      - *attach_workspace
+      - *load_code
+      - run: 
+          name: "Testing lint / flow / types"
+          command: npm run lint && npm run flow && npm run test:types
+
+  test_coverage:
+    <<: *container_config
+    steps:
+      - *attach_workspace
+      - *load_code
+      - run: 
+          name: "Testing coverage"
+          command: npm run test:cover
+      - run:
+          command: | # report coverage stats for non-PRs
+            if [[ -z $CI_PULL_REQUEST ]]; then
+              cat ~/root/vue/coverage/lcov.info | ~/root/vue/node_modules/.bin/codecov
+            fi
+
+  test_e2e-weex:
+    <<: *container_config
+    steps:
+      - *attach_workspace
+      - *load_code
+      - run: 
+          name: "Testing end-to-end"
+          command: npm run test:e2e -- --env phantomjs
+      - run: 
+          name: "Testing Weex"
+          command: npm run test:weex
+
+  test_ssr:
+    <<: *container_config
+    steps:
+      - *attach_workspace
+      - *load_code
+      - run: 
+          name: "Testing server-side rendering"
+          command: npm run test:ssr
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - checkout_code
+      - node_dependencies:
+          requires:
+            - checkout_code
+      - test_lint-flow-types:
+          requires:
+            - checkout_code
+            - node_dependencies
+      - test_coverage:
+          requires:
+            - checkout_code
+            - node_dependencies
+      - test_e2e-weex:
+          requires:
+            - checkout_code
+            - node_dependencies
+      - test_ssr:
+          requires:
+            - checkout_code
+            - node_dependencies
