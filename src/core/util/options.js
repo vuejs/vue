@@ -63,7 +63,7 @@ function mergeData (to: Object, from: ?Object): Object {
 /**
  * Data
  */
-strats.data = function (
+export function mergeDataOrFn (
   parentVal: any,
   childVal: any,
   vm?: Component
@@ -71,15 +71,6 @@ strats.data = function (
   if (!vm) {
     // in a Vue.extend merge, both should be functions
     if (!childVal) {
-      return parentVal
-    }
-    if (typeof childVal !== 'function') {
-      process.env.NODE_ENV !== 'production' && warn(
-        'The "data" option should be a function ' +
-        'that returns a per-instance value in component ' +
-        'definitions.',
-        vm
-      )
       return parentVal
     }
     if (!parentVal) {
@@ -92,7 +83,7 @@ strats.data = function (
     // it has to be a function to pass previous merges.
     return function mergedDataFn () {
       return mergeData(
-        childVal.call(this),
+        typeof childVal === 'function' ? childVal.call(this) : childVal,
         parentVal.call(this)
       )
     }
@@ -112,6 +103,28 @@ strats.data = function (
       }
     }
   }
+}
+
+strats.data = function (
+  parentVal: any,
+  childVal: any,
+  vm?: Component
+): ?Function {
+  if (!vm) {
+    if (childVal && typeof childVal !== 'function') {
+      process.env.NODE_ENV !== 'production' && warn(
+        'The "data" option should be a function ' +
+        'that returns a per-instance value in component ' +
+        'definitions.',
+        vm
+      )
+
+      return parentVal
+    }
+    return mergeDataOrFn.call(this, parentVal, childVal)
+  }
+
+  return mergeDataOrFn(parentVal, childVal, vm)
 }
 
 /**
@@ -191,6 +204,7 @@ strats.computed = function (parentVal: ?Object, childVal: ?Object): ?Object {
   extend(ret, childVal)
   return ret
 }
+strats.provide = mergeDataOrFn
 
 /**
  * Default strategy.
