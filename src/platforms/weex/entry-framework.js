@@ -222,7 +222,7 @@ export function registerModules (newModules) {
  * @param {String} module name
  * @param {String} method name (optional)
  */
-function isRegisteredModule (name, method) {
+export function isRegisteredModule (name, method) {
   if (typeof method === 'string') {
     return !!(modules[name] && modules[name][method])
   }
@@ -252,7 +252,7 @@ export function registerComponents (newComponents) {
  * Check whether the component has been registered.
  * @param {String} component name
  */
-function isRegisteredComponent (name) {
+export function isRegisteredComponent (name) {
   return !!components[name]
 }
 
@@ -260,7 +260,7 @@ function isRegisteredComponent (name) {
  * Detects whether Weex supports specific features.
  * @param {String} condition
  */
-function supports (condition) {
+export function supports (condition) {
   if (typeof condition !== 'string') return null
 
   const res = condition.match(/^@(\w+)\/(\w+)(\.(\w+))?$/i)
