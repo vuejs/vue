@@ -548,4 +548,27 @@ describe('parser', () => {
     const ast = parse(`<script type="x/template">&gt;<foo>&lt;</script>`, options)
     expect(ast.children[0].text).toBe(`&gt;<foo>&lt;`)
   })
+
+  it('should ignore comments', () => {
+    const options = extend({}, baseOptions)
+    const ast = parse(`<div>123<!--comment here--></div>`, options)
+    expect(ast.tag).toBe('div')
+    expect(ast.children.length).toBe(1)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('123')
+  })
+
+  it('should kept comments', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const ast = parse(`<div>123<!--comment here--></div>`, options)
+    expect(ast.tag).toBe('div')
+    expect(ast.children.length).toBe(2)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('123')
+    expect(ast.children[1].type).toBe(3) // parse comment with ASTText
+    expect(ast.children[1].isComment).toBe(true) // parse comment with ASTText
+    expect(ast.children[1].text).toBe('comment here')
+  })
 })

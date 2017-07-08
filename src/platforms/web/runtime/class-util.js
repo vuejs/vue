@@ -42,12 +42,20 @@ export function removeClass (el: HTMLElement, cls: ?string) {
     } else {
       el.classList.remove(cls)
     }
+    if (!el.classList.length) {
+      el.removeAttribute('class')
+    }
   } else {
     let cur = ` ${el.getAttribute('class') || ''} `
     const tar = ' ' + cls + ' '
     while (cur.indexOf(tar) >= 0) {
       cur = cur.replace(tar, ' ')
     }
-    el.setAttribute('class', cur.trim())
+    cur = cur.trim()
+    if (cur) {
+      el.setAttribute('class', cur)
+    } else {
+      el.removeAttribute('class')
+    }
   }
 }

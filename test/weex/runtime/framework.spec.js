@@ -248,8 +248,8 @@ describe('framework APIs', () => {
         { method: 'fireEvent', args: [textRef, 'click'] }
       ])
       expect(result instanceof Error).toBe(true)
-      expect(result).toMatch(/receiveTasks/)
-      expect(result).toMatch(/not found/)
+      expect(result).toMatch(/invalid\sinstance\sid/)
+      expect(result).toMatch(instance.id)
       done()
     })
   })
@@ -341,8 +341,8 @@ describe('framework APIs', () => {
             { method: 'callback', args: [callbackId] }
           ])
           expect(result instanceof Error).toBe(true)
-          expect(result).toMatch(/receiveTasks/)
-          expect(result).toMatch(/not found/)
+          expect(result).toMatch(/invalid\sinstance\sid/)
+          expect(result).toMatch(instance.id)
           done()
         })
       })

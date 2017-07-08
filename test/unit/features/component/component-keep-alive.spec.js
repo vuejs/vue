@@ -272,6 +272,24 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
+  it('include (array)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive :include="['one']">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
   it('exclude (string)', done => {
     const vm = new Vue({
       template: `
@@ -295,6 +313,24 @@ describe('Component keep-alive', () => {
       template: `
         <div v-if="ok">
           <keep-alive :exclude="/^two$/">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
+  it('exclude (array)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive :exclude="['two']">
             <component :is="view"></component>
           </keep-alive>
         </div>

@@ -217,7 +217,7 @@ export default class TemplateRenderer {
   }
 
   getUsedAsyncFiles (context: Object): ?Array<string> {
-    if (!context._mappedfiles && context._registeredComponents && this.mapFiles) {
+    if (!context._mappedFiles && context._registeredComponents && this.mapFiles) {
       context._mappedFiles = this.mapFiles(Array.from(context._registeredComponents))
     }
     return context._mappedFiles

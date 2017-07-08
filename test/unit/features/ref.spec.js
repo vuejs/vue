@@ -146,6 +146,56 @@ describe('ref', () => {
     }
   })
 
+  it('should work with v-for on dynamic component', done => {
+    components.test3 = {
+      id: 'test3',
+      template: `<test1 v-if="!normal"></test1><div v-else>test3</div>`,
+      data () {
+        return { normal: false }
+      },
+      components: { test1: components.test }
+    }
+    // a flag that representing whether to test component content or not
+    let testContent = false
+
+    const vm = new Vue({
+      template: `
+        <div>
+          <component
+            v-for="(item, index) in items"
+            :key="index"
+            :is="item"
+            ref="children">
+          </component>
+        </div>
+      `,
+      data: {
+        items: ['test2', 'test3']
+      },
+      components
+    }).$mount()
+    assertRefs()
+    expect(vm.$refs.children[0].$el.textContent).toBe('test2')
+    expect(vm.$refs.children[1].$el.textContent).toBe('test')
+    // updating
+    vm.$refs.children[1].normal = true
+    testContent = true
+    waitForUpdate(assertRefs)
+      .then(() => { vm.items.push('test') })
+      .then(assertRefs)
+      .then(done)
+
+    function assertRefs () {
+      expect(Array.isArray(vm.$refs.children)).toBe(true)
+      expect(vm.$refs.children.length).toBe(vm.items.length)
+      if (testContent) {
+        expect(
+          vm.$refs.children.every((comp, i) => comp.$el.textContent === vm.items[i])
+        ).toBe(true)
+      }
+    }
+  })
+
   it('should register on component with empty roots', () => {
     const vm = new Vue({
       template: '<child ref="test"></child>',

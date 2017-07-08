@@ -1,4 +1,5 @@
 import { parse } from 'compiler/parser/index'
+import { extend } from 'shared/util'
 import { optimize } from 'compiler/optimizer'
 import { baseOptions } from 'web/compiler/options'
 
@@ -9,6 +10,19 @@ describe('optimizer', () => {
     expect(ast.static).toBe(true) // h1
     expect(ast.staticRoot).toBe(true)
     expect(ast.children[0].static).toBe(true) // span
+  })
+
+  it('simple with comment', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const ast = parse('<h1 id="section1"><span>hello world</span><!--comment--></h1>', options)
+    optimize(ast, options)
+    expect(ast.static).toBe(true) // h1
+    expect(ast.staticRoot).toBe(true)
+    expect(ast.children.length).toBe(2)
+    expect(ast.children[0].static).toBe(true) // span
+    expect(ast.children[1].static).toBe(true) // comment
   })
 
   it('skip simple nodes', () => {

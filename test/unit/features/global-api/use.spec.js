@@ -33,4 +33,20 @@ describe('Global API: use', () => {
     expect(Vue.options.directives['plugin-test']).toBeUndefined()
     expect(Ctor.options.directives['plugin-test']).toBe(def)
   })
+
+  // Github issue #5970
+  it('should work on multi version', () => {
+    const Ctor1 = Vue.extend({})
+    const Ctor2 = Vue.extend({})
+
+    Ctor1.use(pluginStub, options)
+    expect(Vue.options.directives['plugin-test']).toBeUndefined()
+    expect(Ctor1.options.directives['plugin-test']).toBe(def)
+
+    // multi version Vue Ctor with the same cid
+    Ctor2.cid = Ctor1.cid
+    Ctor2.use(pluginStub, options)
+    expect(Vue.options.directives['plugin-test']).toBeUndefined()
+    expect(Ctor2.options.directives['plugin-test']).toBe(def)
+  })
 })

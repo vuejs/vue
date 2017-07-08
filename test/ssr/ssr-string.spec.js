@@ -473,7 +473,7 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('renders asynchronous component', done => {
+  it('renders async component', done => {
     renderVmWithOptions({
       template: `
         <div>
@@ -482,11 +482,11 @@ describe('SSR: renderToString', () => {
       `,
       components: {
         testAsync (resolve) {
-          resolve({
+          setTimeout(() => resolve({
             render () {
               return this.$createElement('span', { class: ['b'] }, 'testAsync')
             }
-          })
+          }), 1)
         }
       }
     }, result => {
@@ -495,55 +495,58 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('renders asynchronous component (hoc)', done => {
+  it('renders async component (Promise, nested)', done => {
+    const Foo = () => Promise.resolve({
+      render: h => h('div', [h('span', 'foo'), h(Bar)])
+    })
+    const Bar = () => ({
+      component: Promise.resolve({
+        render: h => h('span', 'bar')
+      })
+    })
     renderVmWithOptions({
-      template: '<test-async></test-async>',
-      components: {
-        testAsync (resolve) {
-          resolve({
-            render () {
-              return this.$createElement('span', { class: ['b'] }, 'testAsync')
-            }
-          })
-        }
-      }
-    }, result => {
-      expect(result).toContain('<span data-server-rendered="true" class="b">testAsync</span>')
+      render: h => h(Foo)
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span><span>bar</span></div>`)
       done()
     })
   })
 
-  it('renders nested asynchronous component', done => {
-    renderVmWithOptions({
-      template: `
-        <div>
-          <test-async></test-async>
-        </div>
-      `,
-      components: {
-        testAsync (resolve) {
-          const options = {
-            template: `
-              <span class="b">
-                <test-sub-async></test-sub-async>
-              </span>
-            `
-          }
-
-          options.components = {
-            testSubAsync (resolve) {
-              resolve({
-                render () {
-                  return this.$createElement('div', { class: ['c'] }, 'testSubAsync')
-                }
-              })
-            }
-          }
-          resolve(options)
+  it('renders async component (ES module)', done => {
+    const Foo = () => Promise.resolve({
+      __esModule: true,
+      default: {
+        render: h => h('div', [h('span', 'foo'), h(Bar)])
+      }
+    })
+    const Bar = () => ({
+      component: Promise.resolve({
+        __esModule: true,
+        default: {
+          render: h => h('span', 'bar')
         }
+      })
+    })
+    renderVmWithOptions({
+      render: h => h(Foo)
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span><span>bar</span></div>`)
+      done()
+    })
+  })
+
+  it('renders async component (hoc)', done => {
+    renderVmWithOptions({
+      template: '<test-async></test-async>',
+      components: {
+        testAsync: () => Promise.resolve({
+          render () {
+            return this.$createElement('span', { class: ['b'] }, 'testAsync')
+          }
+        })
       }
     }, result => {
-      expect(result).toContain('<div data-server-rendered="true"><span class="b"><div class="c">testSubAsync</div></span></div>')
+      expect(result).toContain('<span data-server-rendered="true" class="b">testAsync</span>')
       done()
     })
   })
@@ -874,23 +877,6 @@ describe('SSR: renderToString', () => {
       `
     }, res => {
       expect(res).toContain(`<div data-server-rendered="true"><span>foo</span> <span>1</span><span>bar</span><span>2</span><span>bar</span></div>`)
-      done()
-    })
-  })
-
-  it('render async components', done => {
-    const Foo = () => Promise.resolve({
-      render: h => h('div', [h('span', 'foo'), h(Bar)])
-    })
-    const Bar = () => ({
-      component: Promise.resolve({
-        render: h => h('span', 'bar')
-      })
-    })
-    renderVmWithOptions({
-      render: h => h(Foo)
-    }, res => {
-      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span><span>bar</span></div>`)
       done()
     })
   })

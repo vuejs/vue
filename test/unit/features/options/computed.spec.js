@@ -193,4 +193,15 @@ describe('Options computed', () => {
     })
     expect(`computed property "a" is already defined as a prop`).toHaveBeenWarned()
   })
+
+  it('rethrow computed error', () => {
+    const vm = new Vue({
+      computed: {
+        a: () => {
+          throw new Error('rethrow')
+        }
+      }
+    })
+    expect(() => vm.a).toThrowError('rethrow')
+  })
 })
