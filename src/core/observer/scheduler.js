@@ -216,7 +216,7 @@ export function forceFlush (maxUpdateCount?: number) {
  * Are we inside a flush?
  */
 export function isFlushing () {
-  return flushing;
+  return flushing
 }
 
 /**
