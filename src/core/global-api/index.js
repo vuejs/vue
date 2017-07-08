@@ -18,7 +18,7 @@ import {
 } from '../util/index'
 
 import Dep, { pushTarget, popTarget } from '../observer/dep'
-import { afterFlush, forceFlush } from '../observer/scheduler'
+import { afterFlush, forceFlush, isFlushing } from '../observer/scheduler'
 import Watcher from '../observer/watcher'
 
 export function initGlobalAPI (Vue: GlobalAPI) {
@@ -51,6 +51,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     popTarget,
     afterFlush,
     forceFlush,
+    isFlushing,
     Watcher
   }
 

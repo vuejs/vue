@@ -213,6 +213,13 @@ export function forceFlush (maxUpdateCount?: number) {
 }
 
 /**
+ * Are we inside a flush?
+ */
+export function isFlushing () {
+  return flushing;
+}
+
+/**
  * Used in watchers to wrap provided getters to set scheduler flags.
  */
 export function wrapWatcherGetter (f: Function): Function {
