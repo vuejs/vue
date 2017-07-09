@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import { isNative } from 'core/util/env'
+import { isObserver } from 'core/observer'
 
 describe('Options provide/inject', () => {
   let injected
@@ -186,38 +187,76 @@ describe('Options provide/inject', () => {
     })
   }
 
-  // Github issue #5223
-  it('should work with reactive array', done => {
+  it('should work when the provide change', done => {
     const vm = new Vue({
       template: `<div><child></child></div>`,
       data () {
         return {
-          foo: []
+          foo: 0,
+          bar: {
+            val: 0
+          },
+          baz: []
         }
       },
       provide () {
         return {
-          foo: this.foo
+          foo: this.foo,
+          bar: this.bar,
+          baz: this.baz
         }
       },
       components: {
         child: {
-          inject: ['foo'],
-          template: `<span>{{foo.length}}</span>`
+          inject: ['foo', 'bar', 'baz'],
+          template: `<span>{{foo}},{{bar.val}},{{baz.length}}</span>`
         }
       }
     }).$mount()
 
-    expect(vm.$el.innerHTML).toEqual(`<span>0</span>`)
-    vm.foo.push(vm.foo.length)
+    expect(vm.$el.innerHTML).toEqual(`<span>0,0,0</span>`)
+    vm.foo = 1 // primitive should no modified
+    vm.bar.val = 1 // reactive should modified
+    vm.baz.push(0) // reactive array should modified
     vm.$nextTick(() => {
-      expect(vm.$el.innerHTML).toEqual(`<span>1</span>`)
-      vm.foo.pop()
-      vm.$nextTick(() => {
-        expect(vm.$el.innerHTML).toEqual(`<span>0</span>`)
-        done()
-      })
+      expect(vm.$el.innerHTML).toEqual(`<span>0,1,1</span>`)
+      done()
     })
+  })
+
+  // Github issue #5913
+  it('should keep the reactive with provide', () => {
+    const vm = new Vue({
+      template: `<div><child ref='child'></child></div>`,
+      data () {
+        return {
+          foo: {},
+          $foo: {},
+          foo1: []
+        }
+      },
+      provide () {
+        return {
+          foo: this.foo,
+          $foo: this.$foo,
+          foo1: this.foo1,
+          bar: {},
+          baz: []
+        }
+      },
+      components: {
+        child: {
+          inject: ['foo', '$foo', 'foo1', 'bar', 'baz'],
+          template: `<span/>`
+        }
+      }
+    }).$mount()
+    const child = vm.$refs.child
+    expect(isObserver(child.foo)).toBe(true)
+    expect(isObserver(child.$foo)).toBe(false)
+    expect(isObserver(child.foo1)).toBe(true)
+    expect(isObserver(child.bar)).toBe(false)
+    expect(isObserver(child.baz)).toBe(false)
   })
 
   it('should extend properly', () => {
@@ -250,24 +289,31 @@ describe('Options provide/inject', () => {
   })
 
   it('should warn when injections has been modified', () => {
-    const key = 'foo'
+    const makeWarnText = key =>
+      `Avoid mutating an injected value directly since the changes will be ` +
+      `overwritten whenever the provided component re-renders. ` +
+      `injection being mutated: "${key}"`
+
     const vm = new Vue({
       provide: {
-        foo: 1
+        foo: 1,
+        bar: {
+          val: 1
+        }
       }
     })
 
     const child = new Vue({
       parent: vm,
-      inject: ['foo']
+      inject: ['foo', 'bar']
     })
 
     expect(child.foo).toBe(1)
+    expect(child.bar.val).toBe(1)
     child.foo = 2
-    expect(
-      `Avoid mutating an injected value directly since the changes will be ` +
-      `overwritten whenever the provided component re-renders. ` +
-      `injection being mutated: "${key}"`).toHaveBeenWarned()
+    expect(makeWarnText('foo')).toHaveBeenWarned()
+    child.bar = { val: 2 }
+    expect(makeWarnText('bar')).toHaveBeenWarned()
   })
 
   it('should warn when injections cannot be found', () => {

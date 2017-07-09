@@ -109,7 +109,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     return
   }
   let ob: Observer | void
-  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+  if (isObserver(value)) {
     ob = value.__ob__
   } else if (
     observerState.shouldConvert &&
@@ -254,4 +254,11 @@ function dependArray (value: Array<any>) {
       dependArray(e)
     }
   }
+}
+
+export function isObserver (obj: any): boolean {
+  if (isObject(obj)) {
+    return hasOwn(obj, '__ob__') && obj.__ob__ instanceof Observer
+  }
+  return false
 }
