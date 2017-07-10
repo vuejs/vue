@@ -1,8 +1,8 @@
 /* @flow */
 
 import { hasSymbol } from 'core/util/env'
-import { warn } from '../util/index'
-import { defineReactive } from '../observer/index'
+import { warn, defWithGetterSetter } from '../util/index'
+import { defineReactive, isObserver } from '../observer/index'
 import { hasOwn } from 'shared/util'
 
 export function initProvide (vm: Component) {
@@ -18,18 +18,28 @@ export function initInjections (vm: Component) {
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
     Object.keys(result).forEach(key => {
+      const value = result[key]
+      const warnSetter = () => {
+        warn(
+          `Avoid mutating an injected value directly since the changes will be ` +
+          `overwritten whenever the provided component re-renders. ` +
+          `injection being mutated: "${key}"`,
+          vm
+        )
+      }
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
-        defineReactive(vm, key, result[key], () => {
-          warn(
-            `Avoid mutating an injected value directly since the changes will be ` +
-            `overwritten whenever the provided component re-renders. ` +
-            `injection being mutated: "${key}"`,
-            vm
-          )
-        })
+        if (isObserver(value)) {
+          defineReactive(vm, key, value, warnSetter)
+        } else {
+          defWithGetterSetter(vm, key, value, warnSetter)
+        }
       } else {
-        defineReactive(vm, key, result[key])
+        if (isObserver(value)) {
+          defineReactive(vm, key, value)
+        } else {
+          defWithGetterSetter(vm, key, value)
+        }
       }
     })
   }

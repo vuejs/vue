@@ -23,6 +23,26 @@ export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
 }
 
 /**
+ * Define a property with getter and setter.
+ */
+export function defWithGetterSetter (obj: Object, key: string, val: any, customSetter?: Function) {
+  Object.defineProperty(obj, key, {
+    enumerable: true,
+    configurable: true,
+    get: function getter () {
+      return val
+    },
+    set: function setter (newVal) {
+      /* eslint-enable no-self-compare */
+      if (process.env.NODE_ENV !== 'production' && customSetter) {
+        customSetter()
+      }
+      val = newVal
+    }
+  })
+}
+
+/**
  * Parse simple path.
  */
 const bailRE = /[^\w.$]/
