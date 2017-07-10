@@ -496,7 +496,7 @@ describe('parser', () => {
   })
 
   // #5992
-  it('ignore the first LF in <pre> tag', function () {
+  it('ignore the first newline in <pre> tag', function () {
     const options = extend({}, baseOptions)
     const ast = parse('<div><pre>\nabc</pre>\ndef<pre>\n\nabc</pre></div>', options)
     const pre = ast.children[0]
