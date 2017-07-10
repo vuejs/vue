@@ -289,10 +289,12 @@ function createVueModuleInstance (instanceId, moduleGetter) {
 
   // patch reserved tag detection to account for dynamically registered
   // components
+  const weexRegex = /^weex:/i
   const isReservedTag = Vue.config.isReservedTag || (() => false)
   Vue.config.isReservedTag = name => {
-    return components[name] || isReservedTag(name)
+    return components[name] || isReservedTag(name) || weexRegex.test(name)
   }
+  Vue.config.parsePlatformTagName = name => name.replace(weexRegex, '')
 
   // expose weex-specific info
   Vue.prototype.$instanceId = instanceId
