@@ -409,6 +409,30 @@ describe('framework APIs', () => {
     ).toEqual(['b(1)'])
   })
 
+  it('isRegisteredModule', () => {
+    framework.registerModules({
+      foo: ['a', 'b'],
+      bar: [
+        { name: 'x', args: ['string'] },
+        { name: 'y', args: ['number'] }
+      ]
+    })
+    expect(framework.isRegisteredModule('foo')).toBe(true)
+    expect(framework.isRegisteredModule('bar')).toBe(true)
+    expect(framework.isRegisteredModule('foo', 'a')).toBe(true)
+    expect(framework.isRegisteredModule('foo', 'b')).toBe(true)
+    expect(framework.isRegisteredModule('bar', 'x')).toBe(true)
+    expect(framework.isRegisteredModule('bar', 'y')).toBe(true)
+    expect(framework.isRegisteredModule('FOO')).toBe(false)
+    expect(framework.isRegisteredModule(' bar ')).toBe(false)
+    expect(framework.isRegisteredModule('unknown')).toBe(false)
+    expect(framework.isRegisteredModule('#}{)=}')).toBe(false)
+    expect(framework.isRegisteredModule('foo', '')).toBe(false)
+    expect(framework.isRegisteredModule('foo', 'c')).toBe(false)
+    expect(framework.isRegisteredModule('bar', 'z')).toBe(false)
+    expect(framework.isRegisteredModule('unknown', 'unknown')).toBe(false)
+  })
+
   it('registerComponents', () => {
     framework.registerComponents(['foo', { type: 'bar' }, 'text'])
     const instance = new Instance(runtime)
@@ -429,6 +453,42 @@ describe('framework APIs', () => {
       type: 'div',
       children: [{ type: 'text' }, { type: 'foo' }, { type: 'bar' }, { type: 'baz' }]
     })
+  })
+
+  it('isRegisteredComponent', () => {
+    framework.registerComponents(['foo', { type: 'bar' }, 'text'])
+    expect(framework.isRegisteredComponent('foo')).toBe(true)
+    expect(framework.isRegisteredComponent('bar')).toBe(true)
+    expect(framework.isRegisteredComponent('text')).toBe(true)
+    expect(framework.isRegisteredComponent('FOO')).toBe(false)
+    expect(framework.isRegisteredComponent(' bar ')).toBe(false)
+    expect(framework.isRegisteredComponent('<text>')).toBe(false)
+    expect(framework.isRegisteredComponent('#}{)=}')).toBe(false)
+  })
+
+  it('weex.supports', () => {
+    framework.registerComponents(['apple', { type: 'banana' }])
+    framework.registerModules({
+      cat: ['eat', 'sleep'],
+      dog: [
+        { name: 'bark', args: ['string'] }
+      ]
+    })
+    expect(framework.supports('@component/apple')).toBe(true)
+    expect(framework.supports('@component/banana')).toBe(true)
+    expect(framework.supports('@module/cat')).toBe(true)
+    expect(framework.supports('@module/cat.eat')).toBe(true)
+    expect(framework.supports('@module/cat.sleep')).toBe(true)
+    expect(framework.supports('@module/dog.bark')).toBe(true)
+    expect(framework.supports('@component/candy')).toBe(false)
+    expect(framework.supports('@module/bird')).toBe(false)
+    expect(framework.supports('@module/bird.sing')).toBe(false)
+    expect(framework.supports('@module/dog.sleep')).toBe(false)
+    expect(framework.supports('apple')).toBe(null)
+    expect(framework.supports('<banana>')).toBe(null)
+    expect(framework.supports('cat')).toBe(null)
+    expect(framework.supports('@dog')).toBe(null)
+    expect(framework.supports('@component/dog#bark')).toBe(null)
   })
 
   it('vm.$getConfig', () => {

@@ -79,6 +79,7 @@ export function createInstance (
   const weexInstanceVar = {
     config,
     document,
+    supports,
     requireModule: moduleGetter
   }
   Object.freeze(weexInstanceVar)
@@ -217,6 +218,18 @@ export function registerModules (newModules) {
 }
 
 /**
+ * Check whether the module or the method has been registered.
+ * @param {String} module name
+ * @param {String} method name (optional)
+ */
+export function isRegisteredModule (name, method) {
+  if (typeof method === 'string') {
+    return !!(modules[name] && modules[name][method])
+  }
+  return !!modules[name]
+}
+
+/**
  * Register native components information.
  * @param {array} newComponents
  */
@@ -233,6 +246,35 @@ export function registerComponents (newComponents) {
       }
     })
   }
+}
+
+/**
+ * Check whether the component has been registered.
+ * @param {String} component name
+ */
+export function isRegisteredComponent (name) {
+  return !!components[name]
+}
+
+/**
+ * Detects whether Weex supports specific features.
+ * @param {String} condition
+ */
+export function supports (condition) {
+  if (typeof condition !== 'string') return null
+
+  const res = condition.match(/^@(\w+)\/(\w+)(\.(\w+))?$/i)
+  if (res) {
+    const type = res[1]
+    const name = res[2]
+    const method = res[4]
+    switch (type) {
+      case 'module': return isRegisteredModule(name, method)
+      case 'component': return isRegisteredComponent(name)
+    }
+  }
+
+  return null
 }
 
 /**
