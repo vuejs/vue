@@ -1,5 +1,6 @@
 import Vue from 'vue'
-import { isNative } from 'core/util/env'
+import { Observer } from 'core/observer/index'
+import { isNative, isObject, hasOwn } from 'core/util/index'
 
 describe('Options provide/inject', () => {
   let injected
@@ -398,5 +399,47 @@ describe('Options provide/inject', () => {
     new Ctor().$mount()
 
     expect(injected).toEqual(['foo', 'bar'])
+  })
+
+  // #5913
+  it('should keep the reactive with provide', () => {
+    function isObserver (obj) {
+      if (isObject(obj)) {
+        return hasOwn(obj, '__ob__') && obj.__ob__ instanceof Observer
+      }
+      return false
+    }
+
+    const vm = new Vue({
+      template: `<div><child ref='child'></child></div>`,
+      data () {
+        return {
+          foo: {},
+          $foo: {},
+          foo1: []
+        }
+      },
+      provide () {
+        return {
+          foo: this.foo,
+          $foo: this.$foo,
+          foo1: this.foo1,
+          bar: {},
+          baz: []
+        }
+      },
+      components: {
+        child: {
+          inject: ['foo', '$foo', 'foo1', 'bar', 'baz'],
+          template: `<span/>`
+        }
+      }
+    }).$mount()
+    const child = vm.$refs.child
+    expect(isObserver(child.foo)).toBe(true)
+    expect(isObserver(child.$foo)).toBe(false)
+    expect(isObserver(child.foo1)).toBe(true)
+    expect(isObserver(child.bar)).toBe(false)
+    expect(isObserver(child.baz)).toBe(false)
   })
 })

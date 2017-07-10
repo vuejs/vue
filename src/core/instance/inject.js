@@ -3,7 +3,7 @@
 import { warn } from '../util/index'
 import { hasOwn } from 'shared/util'
 import { hasSymbol } from 'core/util/env'
-import { defineReactive } from '../observer/index'
+import { defineReactive, observerState } from '../observer/index'
 
 export function initProvide (vm: Component) {
   const provide = vm.$options.provide
@@ -17,6 +17,7 @@ export function initProvide (vm: Component) {
 export function initInjections (vm: Component) {
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
+    observerState.shouldConvert = false
     Object.keys(result).forEach(key => {
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
@@ -32,6 +33,7 @@ export function initInjections (vm: Component) {
         defineReactive(vm, key, result[key])
       }
     })
+    observerState.shouldConvert = true
   }
 }
 
