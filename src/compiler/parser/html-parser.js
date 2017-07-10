@@ -60,8 +60,8 @@ const encodedAttr = /&(?:lt|gt|quot|amp);/g
 const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10);/g
 
 // #5992
-const ignoreFirstLFTagList = makeMap('pre,textarea', true)
-const isIgnoreFirstLf = (tag, html) => tag && ignoreFirstLFTagList(tag) && html[0] === '\n'
+const isIgnoreNewlineTag = makeMap('pre,textarea', true)
+const shouldIgnoreFirstNewline = (tag, html) => tag && isIgnoreNewlineTag(tag) && html[0] === '\n'
 
 function decodeAttr (value, shouldDecodeNewlines) {
   const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
@@ -79,7 +79,7 @@ export function parseHTML (html, options) {
     last = html
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
-      if (isIgnoreFirstLf(lastTag, html)) {
+      if (shouldIgnoreFirstNewline(lastTag, html)) {
         advance(1)
       }
       let textEnd = html.indexOf('<')
@@ -169,8 +169,8 @@ export function parseHTML (html, options) {
             .replace(/<!--([\s\S]*?)-->/g, '$1')
             .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1')
         }
-        if (isIgnoreFirstLf(stackedTag, text)) {
-          text = text.substring(1)
+        if (shouldIgnoreFirstNewline(stackedTag, text)) {
+          text = text.slice(1)
         }
         if (options.chars) {
           options.chars(text)
