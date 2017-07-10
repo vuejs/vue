@@ -483,7 +483,9 @@ function processAttrs (el) {
             )
           }
         }
-        if (isProp || platformMustUseProp(el.tag, el.attrsMap.type, name)) {
+        if (!el.component && (
+          isProp || platformMustUseProp(el.tag, el.attrsMap.type, name)
+        )) {
           addProp(el, name, value)
         } else {
           addAttr(el, name, value)

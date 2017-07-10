@@ -40,7 +40,11 @@ export default function model (
     }
   }
 
-  if (tag === 'select') {
+  if (el.component) {
+    genComponentModel(el, value, modifiers)
+    // component v-model doesn't need extra runtime
+    return false
+  } else if (tag === 'select') {
     genSelect(el, value, modifiers)
   } else if (tag === 'input' && type === 'checkbox') {
     genCheckboxModel(el, value, modifiers)
