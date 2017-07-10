@@ -57,8 +57,6 @@ describe('richtext component', () => {
   })
 
   describe('span', () => {
-    // pending('work in progress')
-
     it('single node', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -126,8 +124,6 @@ describe('richtext component', () => {
   })
 
   describe('a', () => {
-    // pending('work in progress')
-
     it('single node', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -166,8 +162,6 @@ describe('richtext component', () => {
   })
 
   describe('image', () => {
-    pending('work in progress')
-
     it('single node', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -185,7 +179,6 @@ describe('richtext component', () => {
     })
 
     it('multiple node', () => {
-      // pending('work in progress')
       expect(compileSnippet(runtime, `
         <richtext>
           <image src="path/to/A.png"></image>
@@ -218,7 +211,7 @@ describe('richtext component', () => {
         attr: {
           value: [{
             type: 'image',
-            style: { width: '150px', height: '150px' },
+            style: { width: 150, height: 150 },
             attr: { src: 'path/to/profile.png' }
           }]
         }
@@ -227,8 +220,6 @@ describe('richtext component', () => {
   })
 
   describe('nested', () => {
-    pending('work in progress')
-
     it('span', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -273,7 +264,7 @@ describe('richtext component', () => {
         <richtext>
           <span>title</span>
           <a href="http://remote.com/xx.js">
-            <span>name</span>
+            <span><span>name</span></span>
             <image src="path/to/yy.gif"></image>
           </a>
         </richtext>
@@ -288,7 +279,10 @@ describe('richtext component', () => {
             attr: { href: 'http://remote.com/xx.js' },
             children: [{
               type: 'span',
-              attr: { value: 'name' }
+              children: [{
+                type: 'span',
+                attr: { value: 'name' }
+              }]
             }, {
               type: 'image',
               attr: { src: 'path/to/yy.gif' }
@@ -300,6 +294,27 @@ describe('richtext component', () => {
   })
 
   describe('with styles', () => {
-    pending('work in progress')
+    // pending('work in progress')
+    it('inline', () => {
+      expect(compileSnippet(runtime, `
+        <richtext>
+          <span style="font-size:16px;color:#FF6600;">ABCD</span>
+          <image style="width:40px;height:60px" src="path/to/A.png"></image>
+        </richtext>
+      `)).toEqual({
+        type: 'richtext',
+        attr: {
+          value: [{
+            type: 'span',
+            style: { fontSize: 16, color: '#FF6600' },
+            attr: { value: 'ABCD' }
+          }, {
+            type: 'image',
+            style: { width: 40, height: 60 },
+            attr: { src: 'path/to/A.png' }
+          }]
+        }
+      })
+    })
   })
 })
