@@ -1,9 +1,9 @@
 /* @flow */
 
-import { hasSymbol } from 'core/util/env'
 import { warn } from '../util/index'
-import { defineReactive } from '../observer/index'
 import { hasOwn } from 'shared/util'
+import { hasSymbol } from 'core/util/env'
+import { defineReactive } from '../observer/index'
 
 export function initProvide (vm: Component) {
   const provide = vm.$options.provide

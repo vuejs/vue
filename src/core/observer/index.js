@@ -4,12 +4,12 @@ import Dep from './dep'
 import { arrayMethods } from './array'
 import {
   def,
+  warn,
+  hasOwn,
+  hasProto,
   isObject,
   isPlainObject,
   isValidArrayIndex,
-  hasProto,
-  hasOwn,
-  warn,
   isServerRendering
 } from '../util/index'
 

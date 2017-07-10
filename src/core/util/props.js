@@ -1,8 +1,14 @@
 /* @flow */
 
-import { hasOwn, isObject, isPlainObject, capitalize, hyphenate } from 'shared/util'
-import { observe, observerState } from '../observer/index'
 import { warn } from './debug'
+import { observe, observerState } from '../observer/index'
+import {
+  hasOwn,
+  isObject,
+  hyphenate,
+  capitalize,
+  isPlainObject
+} from 'shared/util'
 
 type PropOptions = {
   type: Function | Array<Function> | null,
