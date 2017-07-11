@@ -27,6 +27,7 @@ declare type VNodeWithData = {
   context: Component;
   key: string | number | void;
   parent?: VNodeWithData;
+  componentOptions?: VNodeComponentOptions;
   componentInstance?: Component;
   isRootInsert: boolean;
 };

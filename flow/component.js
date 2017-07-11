@@ -121,6 +121,8 @@ declare interface Component {
   _t: (name: string, fallback: ?Array<VNode>, props: ?Object) => ?Array<VNode>;
   // apply v-bind object
   _b: (data: any, tag: string, value: any, asProp: boolean, isSync?: boolean) => VNodeData;
+  // apply v-on object
+  _g: (data: any, value: any) => VNodeData;
   // check custom keyCode
   _k: (eventKeyCode: number, key: string, builtInAlias: number | Array<number> | void) => boolean;
   // resolve scoped slots

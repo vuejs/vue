@@ -133,6 +133,7 @@ declare type ASTElement = {
   once?: true;
   onceProcessed?: boolean;
   wrapData?: (code: string) => string;
+  wrapListeners?: (code: string) => string;
 
   // 2.4 ssr optimization
   ssrOptimizability?: number;

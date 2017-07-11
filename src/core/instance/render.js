@@ -24,6 +24,7 @@ import { resolveFilter } from './render-helpers/resolve-filter'
 import { checkKeyCodes } from './render-helpers/check-keycodes'
 import { bindObjectProps } from './render-helpers/bind-object-props'
 import { renderStatic, markOnce } from './render-helpers/render-static'
+import { bindObjectListeners } from './render-helpers/bind-object-listeners'
 import { resolveSlots, resolveScopedSlots } from './render-helpers/resolve-slots'
 
 export function initRender (vm: Component) {
@@ -121,4 +122,5 @@ export function renderMixin (Vue: Class<Component>) {
   Vue.prototype._v = createTextVNode
   Vue.prototype._e = createEmptyVNode
   Vue.prototype._u = resolveScopedSlots
+  Vue.prototype._g = bindObjectListeners
 }

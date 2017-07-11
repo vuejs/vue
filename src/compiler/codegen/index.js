@@ -1,9 +1,9 @@
 /* @flow */
 
 import { genHandlers } from './events'
-import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
 import { camelize, no, extend } from 'shared/util'
+import { baseWarn, pluckModuleFunction } from '../helpers'
 
 type TransformFunction = (el: ASTElement, code: string) => string;
 type DataGenFunction = (el: ASTElement) => string;
@@ -267,6 +267,10 @@ export function genData (el: ASTElement, state: CodegenState): string {
   // v-bind data wrap
   if (el.wrapData) {
     data = el.wrapData(data)
+  }
+  // v-on data wrap
+  if (el.wrapListeners) {
+    data = el.wrapListeners(data)
   }
   return data
 }

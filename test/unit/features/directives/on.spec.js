@@ -298,26 +298,30 @@ describe('Directive v-on', () => {
   })
 
   it('should bind to a child component', () => {
-    Vue.component('bar', {
-      template: '<span>Hello</span>'
-    })
     vm = new Vue({
       el,
       template: '<bar @custom="foo"></bar>',
-      methods: { foo: spy }
+      methods: { foo: spy },
+      components: {
+        bar: {
+          template: '<span>Hello</span>'
+        }
+      }
     })
     vm.$children[0].$emit('custom', 'foo', 'bar')
     expect(spy).toHaveBeenCalledWith('foo', 'bar')
   })
 
   it('should be able to bind native events for a child component', () => {
-    Vue.component('bar', {
-      template: '<span>Hello</span>'
-    })
     vm = new Vue({
       el,
       template: '<bar @click.native="foo"></bar>',
-      methods: { foo: spy }
+      methods: { foo: spy },
+      components: {
+        bar: {
+          template: '<span>Hello</span>'
+        }
+      }
     })
     vm.$children[0].$emit('click')
     expect(spy).not.toHaveBeenCalled()
@@ -326,13 +330,15 @@ describe('Directive v-on', () => {
   })
 
   it('.once modifier should work with child components', () => {
-    Vue.component('bar', {
-      template: '<span>Hello</span>'
-    })
     vm = new Vue({
       el,
       template: '<bar @custom.once="foo"></bar>',
-      methods: { foo: spy }
+      methods: { foo: spy },
+      components: {
+        bar: {
+          template: '<span>Hello</span>'
+        }
+      }
     })
     vm.$children[0].$emit('custom')
     expect(spy.calls.count()).toBe(1)
@@ -592,5 +598,107 @@ describe('Directive v-on', () => {
     }).$mount()
 
     expect(`Use "contextmenu" instead`).toHaveBeenWarned()
+  })
+
+  it('object syntax (no argument)', () => {
+    const click = jasmine.createSpy('click')
+    const mouseup = jasmine.createSpy('mouseup')
+    vm = new Vue({
+      el,
+      template: `<button v-on="listeners">foo</button>`,
+      created () {
+        this.listeners = {
+          click,
+          mouseup
+        }
+      }
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(click.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(0)
+
+    triggerEvent(vm.$el, 'mouseup')
+    expect(click.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(1)
+  })
+
+  it('object syntax (no argument, mixed with normal listeners)', () => {
+    const click1 = jasmine.createSpy('click1')
+    const click2 = jasmine.createSpy('click2')
+    const mouseup = jasmine.createSpy('mouseup')
+    vm = new Vue({
+      el,
+      template: `<button v-on="listeners" @click="click2">foo</button>`,
+      created () {
+        this.listeners = {
+          click: click1,
+          mouseup
+        }
+      },
+      methods: {
+        click2
+      }
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(click1.calls.count()).toBe(1)
+    expect(click2.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(0)
+
+    triggerEvent(vm.$el, 'mouseup')
+    expect(click1.calls.count()).toBe(1)
+    expect(click2.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(1)
+  })
+
+  it('object syntax (usage in HOC, mixed with native listners)', () => {
+    const click = jasmine.createSpy('click')
+    const mouseup = jasmine.createSpy('mouseup')
+    const mousedown = jasmine.createSpy('mousedown')
+
+    var vm = new Vue({
+      el,
+      template: `
+        <foo-button
+          id="foo"
+          @click="click"
+          @mousedown="mousedown"
+          @mouseup.native="mouseup">
+          hello
+        </foo-button>
+      `,
+      methods: {
+        click,
+        mouseup,
+        mousedown
+      },
+      components: {
+        fooButton: {
+          template: `
+            <button
+              v-bind="$vnode.data.attrs"
+              v-on="$vnode.data.on">
+              <slot/>
+            </button>
+          `
+        }
+      }
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(click.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(0)
+    expect(mousedown.calls.count()).toBe(0)
+
+    triggerEvent(vm.$el, 'mouseup')
+    expect(click.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(1)
+    expect(mousedown.calls.count()).toBe(0)
+
+    triggerEvent(vm.$el, 'mousedown')
+    expect(click.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(1)
+    expect(mousedown.calls.count()).toBe(1)
   })
 })

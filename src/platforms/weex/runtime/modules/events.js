@@ -39,11 +39,14 @@ function remove (
 }
 
 function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  if (!oldVnode.data.on && !vnode.data.on) {
+  const isComponentRoot = !!vnode.componentOptions
+  let oldOn = isComponentRoot ? oldVnode.data.nativeOn : oldVnode.data.on
+  let on = isComponentRoot ? vnode.data.nativeOn : vnode.data.on
+  if (!oldOn && !on) {
     return
   }
-  const on = vnode.data.on || {}
-  const oldOn = oldVnode.data.on || {}
+  on = on || {}
+  oldOn = oldOn || {}
   target = vnode.elm
   updateListeners(on, oldOn, add, remove, vnode.context)
 }
