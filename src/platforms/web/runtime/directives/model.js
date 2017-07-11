@@ -6,7 +6,7 @@
 import { looseEqual, looseIndexOf, makeMap } from 'shared/util'
 import { warn, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
 
-const isTextInputType = makeMap('text,password,search,email,tel,url')
+const isTextInputType = makeMap('text,number,password,search,email,tel,url')
 
 /* istanbul ignore if */
 if (isIE9) {
