@@ -20,6 +20,7 @@ declare interface Component {
   // public properties
   $el: any; // so that we can attach __vue__ to it
   $data: Object;
+  $props: Object;
   $options: ComponentOptions;
   $parent: Component | void;
   $root: Component;
@@ -28,8 +29,9 @@ declare interface Component {
   $slots: { [key: string]: Array<VNode> };
   $scopedSlots: { [key: string]: () => VNodeChildren };
   $vnode: VNode; // the placeholder node for the component in parent's render tree
+  $attrs: ?{ [key: string] : string };
+  $listeners: ?{ [key: string]: Function | Array<Function> };
   $isServer: boolean;
-  $props: Object;
 
   // public methods
   $mount: (el?: Element | string, hydrating?: boolean) => Component;

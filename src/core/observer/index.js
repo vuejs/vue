@@ -22,8 +22,7 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
  * under a frozen data structure. Converting it would defeat the optimization.
  */
 export const observerState = {
-  shouldConvert: true,
-  isSettingProps: false
+  shouldConvert: true
 }
 
 /**
@@ -133,7 +132,8 @@ export function defineReactive (
   obj: Object,
   key: string,
   val: any,
-  customSetter?: Function
+  customSetter?: ?Function,
+  shallow?: boolean
 ) {
   const dep = new Dep()
 
@@ -146,7 +146,7 @@ export function defineReactive (
   const getter = property && property.get
   const setter = property && property.set
 
-  let childOb = observe(val)
+  let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
@@ -178,7 +178,7 @@ export function defineReactive (
       } else {
         val = newVal
       }
-      childOb = observe(newVal)
+      childOb = !shallow && observe(newVal)
       dep.notify()
     }
   })

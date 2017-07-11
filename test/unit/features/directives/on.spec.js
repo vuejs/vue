@@ -664,7 +664,6 @@ describe('Directive v-on', () => {
           @click="click"
           @mousedown="mousedown"
           @mouseup.native="mouseup">
-          hello
         </foo-button>
       `,
       methods: {
@@ -675,11 +674,7 @@ describe('Directive v-on', () => {
       components: {
         fooButton: {
           template: `
-            <button
-              v-bind="$vnode.data.attrs"
-              v-on="$vnode.data.on">
-              <slot/>
-            </button>
+            <button v-on="$listeners"></button>
           `
         }
       }

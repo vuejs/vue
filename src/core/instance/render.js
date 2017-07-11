@@ -8,7 +8,8 @@ import {
   looseEqual,
   emptyObject,
   handleError,
-  looseIndexOf
+  looseIndexOf,
+  defineReactive
 } from '../util/index'
 
 import VNode, {
@@ -16,6 +17,8 @@ import VNode, {
   createTextVNode,
   createEmptyVNode
 } from '../vdom/vnode'
+
+import { isUpdatingChildComponent } from './lifecycle'
 
 import { createElement } from '../vdom/create-element'
 import { renderList } from './render-helpers/render-list'
@@ -42,6 +45,21 @@ export function initRender (vm: Component) {
   // normalization is always applied for the public version, used in
   // user-written render functions.
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+
+  // $attrs & $listeners are exposed for easier HOC creation.
+  // they need to be reactive so that HOCs using them are always updated
+  const parentData = parentVnode && parentVnode.data
+  if (process.env.NODE_ENV !== 'production') {
+    defineReactive(vm, '$attrs', parentData && parentData.attrs, () => {
+      !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
+    }, true)
+    defineReactive(vm, '$listeners', parentData && parentData.on, () => {
+      !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
+    }, true)
+  } else {
+    defineReactive(vm, '$attrs', parentData && parentData.attrs, null, true)
+    defineReactive(vm, '$listeners', parentData && parentData.on, null, true)
+  }
 }
 
 export function renderMixin (Vue: Class<Component>) {
