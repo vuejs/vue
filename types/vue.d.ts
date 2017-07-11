@@ -44,6 +44,7 @@ export declare class Vue {
   readonly $isServer: boolean;
   readonly $ssrContext: any;
   readonly $props: any;
+  readonly $vnode: VNode;
 
   $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
   $forceUpdate(): void;
