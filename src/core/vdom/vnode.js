@@ -19,10 +19,10 @@ export default class VNode {
   isComment: boolean; // empty comment placeholder?
   isCloned: boolean; // is a cloned node?
   isOnce: boolean; // is a v-once node?
-  asyncFactory: ?Function; // async component factory function
-  asyncMeta: ?Object;
+  asyncFactory: Function | void; // async component factory function
+  asyncMeta: Object | void;
   isAsyncPlaceholder: boolean;
-  ssrContext: ?Object;
+  ssrContext: Object | void;
 
   constructor (
     tag?: string,
@@ -87,7 +87,8 @@ export function cloneVNode (vnode: VNode): VNode {
     vnode.text,
     vnode.elm,
     vnode.context,
-    vnode.componentOptions
+    vnode.componentOptions,
+    vnode.asyncFactory
   )
   cloned.ns = vnode.ns
   cloned.isStatic = vnode.isStatic
