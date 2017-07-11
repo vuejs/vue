@@ -661,7 +661,6 @@ describe('Directive v-on', () => {
       el,
       template: `
         <foo-button
-          id="foo"
           @click="click"
           @mousedown="mousedown"
           @mouseup.native="mouseup">
