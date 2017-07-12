@@ -223,7 +223,7 @@ describe('vdom patch: hydration', () => {
         expect(dom.innerHTML).toBe('<span>bar</span>')
         expect(dom.querySelector('span')).toBe(span)
       }).then(done)
-    }, 0)
+    }, 10)
   })
 
   it('should hydrate async component without showing loading', done => {
@@ -256,7 +256,7 @@ describe('vdom patch: hydration', () => {
 
     setTimeout(() => {
       expect(dom.innerHTML).toBe('<span>foo</span>')
-    }, 1)
+    }, 2)
 
     setTimeout(() => {
       expect(dom.innerHTML).toBe('<span>foo</span>')
@@ -266,7 +266,7 @@ describe('vdom patch: hydration', () => {
         expect(dom.innerHTML).toBe('<span>bar</span>')
         expect(dom.querySelector('span')).toBe(span)
       }).then(done)
-    }, 10)
+    }, 50)
   })
 
   it('should hydrate async component by replacing DOM if error occurs', done => {
@@ -295,6 +295,6 @@ describe('vdom patch: hydration', () => {
       expect('Failed to resolve async').toHaveBeenWarned()
       expect(dom.innerHTML).toBe('<span>error</span>')
       done()
-    }, 10)
+    }, 50)
   })
 })

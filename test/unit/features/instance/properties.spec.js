@@ -165,6 +165,9 @@ describe('Instance properties', () => {
       }
     }).$mount()
 
+    // has to be in dom for test to pass in IE
+    document.body.appendChild(vm.$el)
+
     triggerEvent(vm.$el, 'click')
     expect(spyA.calls.count()).toBe(1)
     expect(spyB.calls.count()).toBe(0)
@@ -174,6 +177,7 @@ describe('Instance properties', () => {
       triggerEvent(vm.$el, 'click')
       expect(spyA.calls.count()).toBe(1)
       expect(spyB.calls.count()).toBe(1)
+      document.body.removeChild(vm.$el)
     }).then(done)
   })
 

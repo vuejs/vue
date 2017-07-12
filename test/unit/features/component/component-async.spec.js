@@ -340,7 +340,7 @@ describe('Component async', () => {
         expect(vm.$el.textContent).toBe('hi')
         expect(`Failed to resolve async component`).not.toHaveBeenWarned()
         done()
-      }, 30)
+      }, 50)
     })
   })
 })
