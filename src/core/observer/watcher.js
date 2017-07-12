@@ -91,7 +91,7 @@ export default class Watcher {
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
-  get () {
+  get (dontCleanupDeps: ?boolean) {
     pushTarget(this)
     let value
     const vm = this.vm
@@ -110,7 +110,9 @@ export default class Watcher {
         traverse(value)
       }
       popTarget()
-      this.cleanupDeps()
+      if (!dontCleanupDeps) {
+        this.cleanupDeps()
+      }
     }
     return value
   }
