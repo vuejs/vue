@@ -20,6 +20,7 @@ import {
   hasOwn,
   isReserved,
   handleError,
+  nativeWatch,
   validateProp,
   isPlainObject,
   isReservedAttribute
@@ -53,7 +54,9 @@ export function initState (vm: Component) {
     observe(vm._data = {}, true /* asRootData */)
   }
   if (opts.computed) initComputed(vm, opts.computed)
-  if (opts.watch) initWatch(vm, opts.watch)
+  if (opts.watch && opts.watch !== nativeWatch) {
+    initWatch(vm, opts.watch)
+  }
 }
 
 function checkOptionType (vm: Component, name: string) {
