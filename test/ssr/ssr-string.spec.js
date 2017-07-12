@@ -880,6 +880,21 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('with inheritAttrs: false + $attrs', done => {
+    renderVmWithOptions({
+      template: `<foo id="a"/>`,
+      components: {
+        foo: {
+          inheritAttrs: false,
+          template: `<div><div v-bind="$attrs"></div></div>`
+        }
+      }
+    }, res => {
+      expect(res).toBe(`<div data-server-rendered="true"><div id="a"></div></div>`)
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
