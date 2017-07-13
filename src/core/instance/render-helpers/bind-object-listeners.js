@@ -14,7 +14,7 @@ export function bindObjectListeners (data: any, value: any): VNodeData {
       for (const key in value) {
         const existing = on[key]
         const ours = value[key]
-        on[key] = existing ? [ours].concat(existing) : ours
+        on[key] = existing ? [].concat(ours, existing) : ours
       }
     }
   }
