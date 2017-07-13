@@ -695,4 +695,18 @@ describe('Directive v-on', () => {
     expect(mouseup.calls.count()).toBe(1)
     expect(mousedown.calls.count()).toBe(1)
   })
+
+  it('warn object syntax with modifier', () => {
+    new Vue({
+      template: `<button v-on.self="{}"></button>`
+    }).$mount()
+    expect(`v-on without argument does not support modifiers`).toHaveBeenWarned()
+  })
+
+  it('warn object syntax with non-object value', () => {
+    new Vue({
+      template: `<button v-on="123"></button>`
+    }).$mount()
+    expect(`v-on without argument expects an Object value`).toHaveBeenWarned()
+  })
 })

@@ -127,6 +127,7 @@ export default {
       if (!hasTransition) {
         return false
       }
+      /* istanbul ignore if */
       if (this._hasMove) {
         return this._hasMove
       }
