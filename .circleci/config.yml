@@ -1,23 +1,27 @@
 version: 2
 
+
 references:
+  # Define node image to be used for all tests
   container_config: &container_config
     working_directory: ~/root/vue
     docker:
       - image: circleci/node:6
+  # Define workspace folder where code and dependencies will be introduced once and then cached/shared in tests 
   workspace_root: &workspace_root
     /tmp/workspace
   attach_workspace: &attach_workspace
     attach_workspace:
       at: *workspace_root
+  # Move all files and dotfiles to current working_directory
   load_code: &load_code
     run:
       name: load code from workspace
       command: |
-        # Move all files and dotfiles to current working_directory
         mv /tmp/workspace/vue/* /tmp/workspace/vue/.[!.]* .
   js_cache_key: &js_cache_key
     key: npm-dependency-cache-{{ checksum "package.json" }}
+  # Move dependencies to current working_directory
   restore_node_modules: &restore_node_modules
     run:
       name: Restore npm dependencies from workspace
@@ -25,6 +29,7 @@ references:
 
 jobs:
 
+  # Checkout code and move to workspace
   checkout_code:
     <<: *container_config
     steps:
@@ -37,7 +42,8 @@ jobs:
           root: *workspace_root
           paths:
             - vue
-  
+
+  # Restore, update, and save a new dependencies cache
   node_dependencies:
     <<: *container_config
     steps:
@@ -46,8 +52,7 @@ jobs:
       - restore_cache:
           <<: *js_cache_key
       - run:
-          name: download npm modules
-          # Might need more logic to account for other modules / bower
+          name: Update/install dependencies
           command: npm install
       - save_cache:
           <<: *js_cache_key
@@ -62,6 +67,8 @@ jobs:
           paths:
             - node_modules
 
+  # Tests are split below by amount of time to run--coverage tends to take the longest
+  # Maximum of 4 concurrent testing containers for OSS projects on CircleCI, otherwise queueing occurs
   test_lint-flow-types:
     <<: *container_config
     steps:
@@ -106,6 +113,7 @@ jobs:
           name: "Testing server-side rendering"
           command: npm run test:ssr
 
+# Define the workflow for testing: Checkout code, then get dependencies, then run all testing containers in parallel
 workflows:
   version: 2
   build_and_test:
