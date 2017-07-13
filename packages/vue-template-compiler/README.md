@@ -79,6 +79,24 @@ This is only useful at runtime with pre-configured builds, so it doesn't accept 
 
 ---
 
+### compiler.ssrCompile(template, [options])
+
+> 2.4.0+
+
+Same as `compiler.compile` but generates SSR-specific render function code by optimizing parts of the template into string concatenation in order to improve SSR performance.
+
+This is used by default in `vue-loader@>=12` and can be disabled using the [optimizeSSR](https://vue-loader.vuejs.org/en/options.html#optimizessr) option.
+
+---
+
+### compiler.ssrCompileToFunction(template)
+
+> 2.4.0+
+
+Same as `compiler.compileToFunction` but generates SSR-specific render function code by optimizing parts of the template into string concatenation in order to improve SSR performance.
+
+---
+
 ### compiler.parseComponent(file, [options])
 
 Parse a SFC (single-file component, or `*.vue` file) into a descriptor (refer to the `SFCDescriptor` type in [flow declarations](https://github.com/vuejs/vue/blob/dev/flow/compiler.js)). This is used in SFC build tools like `vue-loader` and `vueify`.
@@ -89,5 +107,5 @@ Parse a SFC (single-file component, or `*.vue` file) into a descriptor (refer to
 
 `pad` is useful when you are piping the extracted content into other pre-processors, as you will get correct line numbers or character indices if there are any syntax errors.
 
-- with `{ pad: "line" }`, the extracted content for each block will be prefixed with one newline for each line in the leading content from the original file to ensure that the line numbers align with the original file. 
+- with `{ pad: "line" }`, the extracted content for each block will be prefixed with one newline for each line in the leading content from the original file to ensure that the line numbers align with the original file.
 - with `{ pad: "space" }`, the extracted content for each block will be prefixed with one space for each character in the leading content from the original file to ensure that the character count remains the same as the original file.
