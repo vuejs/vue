@@ -1,7 +1,6 @@
 /* @flow */
 
 import { warn } from '../util/index'
-import { hasOwn } from 'shared/util'
 import { hasSymbol } from 'core/util/env'
 import { defineReactive, observerState } from '../observer/index'
 
@@ -56,7 +55,7 @@ export function resolveInject (inject: any, vm: Component): ?Object {
         }
         source = source.$parent
       }
-      if (process.env.NODE_ENV !== 'production' && !hasOwn(result, key)) {
+      if (process.env.NODE_ENV !== 'production' && !source) {
         warn(`Injection "${key}" not found`, vm)
       }
     }
