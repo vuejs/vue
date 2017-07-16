@@ -22,7 +22,7 @@ export function isFalse (v: any): boolean %checks {
  * Check if value is primitive
  */
 export function isPrimitive (value: any): boolean %checks {
-  return typeof value === 'string' || typeof value === 'number'
+  return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
 }
 
 /**
