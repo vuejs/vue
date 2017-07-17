@@ -40,8 +40,8 @@ jobs:
             mv * .[!.]* /tmp/workspace/vue/
       - persist_to_workspace:
           root: *workspace_root
-          paths:
-            - /
+          # paths:
+          #   - vue
 
   # Restore, update, and save a new dependencies cache
   node_dependencies:
