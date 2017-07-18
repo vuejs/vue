@@ -11,7 +11,28 @@ function isSimpleSpan (vnode) {
 }
 
 function trimCSSUnit (prop) {
-  return Number(prop.replace(/px$/i, '')) || prop
+  return Number(String(prop).replace(/px$/i, '')) || prop
+}
+
+function parseStyle (vnode) {
+  const { staticStyle, staticClass } = vnode.data
+  if (vnode.data.style || vnode.data.class || staticStyle || staticClass) {
+    const styles = Object.assign({}, staticStyle, vnode.data.style)
+
+    // TODO: more reliable
+    const cssMap = vnode.context.$options.style
+    const classList = [].concat(staticClass, vnode.data.class)
+    classList.forEach(name => {
+      if (name && cssMap[name]) {
+        Object.assign(styles, cssMap[name])
+      }
+    })
+
+    for (const key in styles) {
+      styles[key] = trimCSSUnit(styles[key])
+    }
+    return styles
+  }
 }
 
 function convertVNodeChildren (children) {
@@ -31,15 +52,8 @@ function convertVNodeChildren (children) {
     }
 
     if (vnode.data) {
-      props.style = vnode.data.staticStyle
+      props.style = parseStyle(vnode)
       props.attr = vnode.data.attrs
-
-      // TODO: convert inline styles
-      if (props.style) {
-        for (const key in props.style) {
-          props.style[key] = trimCSSUnit(props.style[key])
-        }
-      }
     }
 
     if (type === 'span' && isSimpleSpan(vnode)) {

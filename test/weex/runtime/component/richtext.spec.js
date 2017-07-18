@@ -5,17 +5,17 @@ import {
   createInstance
 } from '../../helpers/index'
 
-function compileSnippet (runtime, snippet) {
+function compileSnippet (runtime, snippet, additional) {
   const { render, staticRenderFns } = compileAndStringify(`<div>${snippet}</div>`)
   const instance = createInstance(runtime, `
     new Vue({
+      el: 'body',
       render: ${render},
       staticRenderFns: ${staticRenderFns},
-      el: 'body'
+      ${additional}
     })
   `)
-  const result = instance.getRealRoot().children[0]
-  return result
+  return instance.getRealRoot().children[0]
 }
 
 describe('richtext component', () => {
@@ -57,6 +57,7 @@ describe('richtext component', () => {
   })
 
   describe('span', () => {
+    // pending('work in progress')
     it('single node', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -124,6 +125,7 @@ describe('richtext component', () => {
   })
 
   describe('a', () => {
+    // pending('work in progress')
     it('single node', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -162,6 +164,7 @@ describe('richtext component', () => {
   })
 
   describe('image', () => {
+    // pending('work in progress')
     it('single node', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -220,6 +223,7 @@ describe('richtext component', () => {
   })
 
   describe('nested', () => {
+    // pending('work in progress')
     it('span', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -296,6 +300,7 @@ describe('richtext component', () => {
   describe('with styles', () => {
     // pending('work in progress')
     it('inline', () => {
+      // pending('work in progress')
       expect(compileSnippet(runtime, `
         <richtext>
           <span style="font-size:16px;color:#FF6600;">ABCD</span>
@@ -312,6 +317,291 @@ describe('richtext component', () => {
             type: 'image',
             style: { width: 40, height: 60 },
             attr: { src: 'path/to/A.png' }
+          }]
+        }
+      })
+    })
+
+    it('class list', () => {
+      // pending('work in progress')
+      expect(compileSnippet(runtime, `
+        <richtext>
+          <image class="icon" src="path/to/A.png"></image>
+          <span class="title large">ABCD</span>
+        </richtext>
+      `, `
+        style: {
+          title: { color: '#FF6600' },
+          large: { fontSize: 24 },
+          icon: { width: 40, height: 60 }
+        }
+      `)).toEqual({
+        type: 'richtext',
+        attr: {
+          value: [{
+            type: 'image',
+            style: { width: 40, height: 60 },
+            attr: { src: 'path/to/A.png' }
+          }, {
+            type: 'span',
+            style: { fontSize: 24, color: '#FF6600' },
+            attr: { value: 'ABCD' }
+          }]
+        }
+      })
+    })
+  })
+
+  describe('data binding', () => {
+    // pending('work in progress')
+    it('simple', () => {
+      expect(compileSnippet(runtime, `
+        <richtext>
+          <span>{{name}}</span>
+        </richtext>
+      `, `data: { name: 'ABCDEFG' }`)).toEqual({
+        type: 'richtext',
+        attr: {
+          value: [{
+            type: 'span',
+            attr: { value: 'ABCDEFG' }
+          }]
+        }
+      })
+    })
+
+    it('nested', () => {
+      expect(compileSnippet(runtime, `
+        <richtext>
+          <span>{{a}}</span>
+          <span>{{b}}<span>{{c.d}}</span></span>
+          <span>{{e}}</span>
+        </richtext>
+      `, `data: { a: 'A', b: 'B', c: { d: 'CD' }, e: 'E' }`))
+      .toEqual({
+        type: 'richtext',
+        attr: {
+          value: [{
+            type: 'span',
+            attr: { value: 'A' }
+          }, {
+            type: 'span',
+            children: [{
+              type: 'span',
+              attr: { value: 'B' }
+            }, {
+              type: 'span',
+              attr: { value: 'CD' }
+            }]
+          }, {
+            type: 'span',
+            attr: { value: 'E' }
+          }]
+        }
+      })
+    })
+
+    it('update', () => {
+      expect(compileSnippet(runtime, `
+        <richtext>
+          <span>{{name}}</span>
+        </richtext>
+      `, `
+        data: { name: 'default' },
+        created: function () {
+          this.name = 'updated'
+        }
+      `)).toEqual({
+        type: 'richtext',
+        attr: {
+          value: [{
+            type: 'span',
+            attr: { value: 'updated' }
+          }]
+        }
+      })
+    })
+
+    it('attribute', () => {
+      expect(compileSnippet(runtime, `
+        <richtext>
+          <span :label="label">{{name}}</span>
+        </richtext>
+      `, `
+        data: {
+          label: 'uid',
+          name: '10100'
+        }
+      `)).toEqual({
+        type: 'richtext',
+        attr: {
+          value: [{
+            type: 'span',
+            attr: {
+              label: 'uid',
+              value: '10100'
+            }
+          }]
+        }
+      })
+    })
+
+    it('update attribute', () => {
+      expect(compileSnippet(runtime, `
+        <richtext>
+          <span :label="label">{{name}}</span>
+        </richtext>
+      `, `
+        data: {
+          label: 'name',
+          name: 'Hanks'
+        },
+        created: function () {
+          this.label = 'uid';
+          this.name = '10100';
+        }
+      `)).toEqual({
+        type: 'richtext',
+        attr: {
+          value: [{
+            type: 'span',
+            attr: {
+              label: 'uid',
+              value: '10100'
+            }
+          }]
+        }
+      })
+    })
+
+    it('inline style', () => {
+      expect(compileSnippet(runtime, `
+        <richtext>
+          <span :style="styleObject">ABCD</span>
+          <span :style="{ textAlign: align, color: 'red' }">EFGH</span>
+        </richtext>
+      `, `
+        data: {
+          styleObject: { fontSize: '32px', color: '#F6F660' },
+          align: 'center'
+        }
+      `)).toEqual({
+        type: 'richtext',
+        attr: {
+          value: [{
+            type: 'span',
+            style: { fontSize: 32, color: '#F6F660' },
+            attr: { value: 'ABCD' }
+          }, {
+            type: 'span',
+            style: { textAlign: 'center', color: 'red' },
+            attr: { value: 'EFGH' }
+          }]
+        }
+      })
+    })
+
+    it('class list', () => {
+      // pending('work in progress')
+      expect(compileSnippet(runtime, `
+        <richtext>
+          <image :class="classList" src="path/to/A.png"></image>
+          <span :class="['title', size]">ABCD</span>
+          <span class="large" style="color:#F6F0F4">EFGH</span>
+        </richtext>
+      `, `
+        style: {
+          title: { color: '#FF6600' },
+          large: { fontSize: 24 },
+          icon: { width: 40, height: 60 }
+        },
+        data: {
+          classList: ['unknown'],
+          size: 'small'
+        },
+        created: function () {
+          this.classList = ['icon'];
+          this.size = 'large';
+        }
+      `)).toEqual({
+        type: 'richtext',
+        attr: {
+          value: [{
+            type: 'image',
+            style: { width: 40, height: 60 },
+            attr: { src: 'path/to/A.png' }
+          }, {
+            type: 'span',
+            style: { fontSize: 24, color: '#FF6600' },
+            attr: { value: 'ABCD' }
+          }, {
+            type: 'span',
+            style: { fontSize: 24, color: '#F6F0F4' },
+            attr: { value: 'EFGH' }
+          }]
+        }
+      })
+    })
+
+    it('update inline style', () => {
+      expect(compileSnippet(runtime, `
+        <richtext>
+          <span :style="styleObject">ABCD</span>
+          <span :style="{ textAlign: align, color: 'red' }">EFGH</span>
+        </richtext>
+      `, `
+        data: {
+          styleObject: { fontSize: '32px', color: '#F6F660' }
+        },
+        created: function () {
+          this.styleObject = { fontSize: '24px', color: 'blue' }
+          this.styleObject.color = '#ABCDEF'
+          this.align = 'left'
+        }
+      `)).toEqual({
+        type: 'richtext',
+        attr: {
+          value: [{
+            type: 'span',
+            style: { fontSize: 24, color: '#ABCDEF' },
+            attr: { value: 'ABCD' }
+          }, {
+            type: 'span',
+            style: { textAlign: 'left', color: 'red' },
+            attr: { value: 'EFGH' }
+          }]
+        }
+      })
+    })
+  })
+
+  describe('bind events', () => {
+    pending('work in progress')
+    it('inline', () => {
+      const { render, staticRenderFns } = compileAndStringify(`
+        <div>
+        <richtext>
+          <span @click="handler">Button</span>
+        </richtext>
+        </div>
+      `)
+      const instance = createInstance(runtime, `
+        new Vue({
+          el: 'body',
+          render: ${render},
+          staticRenderFns: ${staticRenderFns},
+          methods: {
+            handler: function () {}
+          }
+        })
+      `)
+      expect(instance.getRealRoot().children[0]).toEqual({
+        type: 'richtext',
+        attr: {
+          value: [{
+            type: 'span',
+            events: { click: 'handler' },
+            attr: { value: 'Button' }
           }]
         }
       })
