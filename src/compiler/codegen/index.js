@@ -442,7 +442,7 @@ export function genText (text: ASTText | ASTExpression): string {
 }
 
 export function genComment (comment: ASTText): string {
-  return `_e('${comment.text}')`
+  return `_e(${JSON.stringify(comment.text)})`
 }
 
 function genSlot (el: ASTElement, state: CodegenState): string {
