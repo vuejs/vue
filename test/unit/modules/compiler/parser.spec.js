@@ -463,6 +463,14 @@ describe('parser', () => {
     expect(ast.props).toBeUndefined()
   })
 
+  it('use prop when prop modifier was explicitly declared', () => {
+    const ast = parse('<component is="textarea" :value.prop="val" />', baseOptions)
+    expect(ast.attrs).toBeUndefined()
+    expect(ast.props.length).toBe(1)
+    expect(ast.props[0].name).toBe('value')
+    expect(ast.props[0].value).toBe('val')
+  })
+
   it('pre/post transforms', () => {
     const options = extend({}, baseOptions)
     const spy1 = jasmine.createSpy('preTransform')
