@@ -22,8 +22,11 @@ export function isFalse (v: any): boolean %checks {
  * Check if value is primitive
  */
 export function isPrimitive (value: any): boolean %checks {
-  const type = typeof value
-  return type === 'string' || type === 'number' || type === 'boolean'
+  return (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean'
+  )
 }
 
 /**
