@@ -504,4 +504,25 @@ describe('Options provide/inject', () => {
     expect(isObserver(child.bar)).toBe(false)
     expect(isObserver(child.baz)).toBe(false)
   })
+
+  // #6093
+  it('should merge inject from mixins properly', () => {
+    const mixinA = { inject: ['foo'] }
+    const mixinB = { inject: ['bar'] }
+    const child = {
+      template: `<span/>`,
+      mixins: [mixinA, mixinB],
+      created () {
+        injected = [this.foo, this.bar]
+      }
+    }
+    new Vue({
+      provide: { foo: 'foo', bar: 'bar' },
+      render (h) {
+        return h(child)
+      }
+    }).$mount()
+
+    expect(injected).toEqual(['foo', 'bar'])
+  })
 })
