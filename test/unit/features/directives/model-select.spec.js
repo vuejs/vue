@@ -471,4 +471,22 @@ describe('Directive v-model select', () => {
       expect(vm.$el.childNodes[0].selected).toBe(true)
     }).then(done)
   })
+
+  // #6112
+  it('should not set non-matching value to undefined if options did not change', done => {
+    const vm = new Vue({
+      data: {
+        test: '1'
+      },
+      template:
+        '<select v-model="test">' +
+          '<option>a</option>' +
+        '</select>'
+    }).$mount()
+
+    vm.test = '2'
+    waitForUpdate(() => {
+      expect(vm.test).toBe('2')
+    }).then(done)
+  })
 })

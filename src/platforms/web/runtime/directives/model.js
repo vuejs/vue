@@ -30,6 +30,7 @@ export default {
       if (isIE || isEdge) {
         setTimeout(cb, 0)
       }
+      el._vOptions = [].map.call(el.options, getValue)
     } else if (vnode.tag === 'textarea' || isTextInputType(el.type)) {
       el._vModifiers = binding.modifiers
       if (!binding.modifiers.lazy) {
@@ -56,10 +57,9 @@ export default {
       // it's possible that the value is out-of-sync with the rendered options.
       // detect such cases and filter out values that no longer has a matching
       // option in the DOM.
-      const needReset = el.multiple
-        ? binding.value.some(v => hasNoMatchingOption(v, el.options))
-        : binding.value !== binding.oldValue && hasNoMatchingOption(binding.value, el.options)
-      if (needReset) {
+      const prevOptions = el._vOptions
+      const curOptions = el._vOptions = [].map.call(el.options, getValue)
+      if (curOptions.some((o, i) => !looseEqual(o, prevOptions[i]))) {
         trigger(el, 'change')
       }
     }
@@ -99,15 +99,6 @@ function setSelected (el, binding, vm) {
   if (!isMultiple) {
     el.selectedIndex = -1
   }
-}
-
-function hasNoMatchingOption (value, options) {
-  for (let i = 0, l = options.length; i < l; i++) {
-    if (looseEqual(getValue(options[i]), value)) {
-      return false
-    }
-  }
-  return true
 }
 
 function getValue (option) {
