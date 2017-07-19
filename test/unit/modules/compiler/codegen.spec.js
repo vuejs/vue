@@ -479,7 +479,21 @@ describe('codegen', () => {
       comments: true
     }, baseOptions)
     const template = '<div><!--comment--></div>'
-    const generatedCode = `with(this){return _c('div',[_e('comment')])}`
+    const generatedCode = `with(this){return _c('div',[_e("comment")])}`
+
+    const ast = parse(template, options)
+    optimize(ast, options)
+    const res = generate(ast, options)
+    expect(res.render).toBe(generatedCode)
+  })
+
+  // #6150
+  it('generate comments with special characters', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const template = '<div><!--\n\'comment\'\n--></div>'
+    const generatedCode = `with(this){return _c('div',[_e("\\n'comment'\\n")])}`
 
     const ast = parse(template, options)
     optimize(ast, options)
