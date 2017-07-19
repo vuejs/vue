@@ -54,12 +54,12 @@ export function initRender (vm: Component) {
     defineReactive(vm, '$attrs', parentData && parentData.attrs, () => {
       !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
     }, true)
-    defineReactive(vm, '$listeners', parentData && parentData.on, () => {
+    defineReactive(vm, '$listeners', vm.$options._parentListeners, () => {
       !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
     }, true)
   } else {
     defineReactive(vm, '$attrs', parentData && parentData.attrs, null, true)
-    defineReactive(vm, '$listeners', parentData && parentData.on, null, true)
+    defineReactive(vm, '$listeners', vm.$options._parentListeners, null, true)
   }
 }
 
