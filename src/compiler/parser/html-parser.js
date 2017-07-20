@@ -79,9 +79,6 @@ export function parseHTML (html, options) {
     last = html
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
-      if (shouldIgnoreFirstNewline(lastTag, html)) {
-        advance(1)
-      }
       let textEnd = html.indexOf('<')
       if (textEnd === 0) {
         // Comment:
@@ -127,6 +124,9 @@ export function parseHTML (html, options) {
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
           handleStartTag(startTagMatch)
+          if (shouldIgnoreFirstNewline(lastTag, html)) {
+            advance(1)
+          }
           continue
         }
       }
