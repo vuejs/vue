@@ -77,6 +77,34 @@ describe('Directive v-model checkbox', () => {
     }).then(done)
   })
 
+  it('bind to Array value ignores false-value', done => {
+    const vm = new Vue({
+      data: {
+        test: ['1']
+      },
+      template: `
+        <div>
+          <input type="checkbox" v-model="test" value="1" :false-value="true">
+          <input type="checkbox" v-model="test" value="2" :false-value="true">
+        </div>
+      `
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
+    vm.$el.children[0].click()
+    expect(vm.test.length).toBe(0)
+    vm.$el.children[1].click()
+    expect(vm.test).toEqual(['2'])
+    vm.$el.children[0].click()
+    expect(vm.test).toEqual(['2', '1'])
+    vm.test = ['1']
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].checked).toBe(true)
+      expect(vm.$el.children[1].checked).toBe(false)
+    }).then(done)
+  })
+
   it('bind to Array value with value bindings', done => {
     const vm = new Vue({
       data: {
