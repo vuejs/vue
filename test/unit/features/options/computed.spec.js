@@ -75,7 +75,19 @@ describe('Options computed', () => {
       }
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<div>1</div>')
-    expect('No getter function has been defined for computed property "b".').toHaveBeenWarned()
+    expect('Getter is missing for computed property "b".').toHaveBeenWarned()
+  })
+
+  it('warn assigning to computed with no setter', () => {
+    const vm = new Vue({
+      computed: {
+        b () {
+          return 1
+        }
+      }
+    })
+    vm.b = 2
+    expect(`Computed property "b" was assigned to but it has no setter.`).toHaveBeenWarned()
   })
 
   it('watching computed', done => {

@@ -172,18 +172,15 @@ function initComputed (vm: Component, computed: Object) {
 
   for (const key in computed) {
     const userDef = computed[key]
-    let getter = typeof userDef === 'function' ? userDef : userDef.get
-    if (process.env.NODE_ENV !== 'production') {
-      if (getter === undefined) {
-        warn(
-          `No getter function has been defined for computed property "${key}".`,
-          vm
-        )
-        getter = noop
-      }
+    const getter = typeof userDef === 'function' ? userDef : userDef.get
+    if (process.env.NODE_ENV !== 'production' && getter == null) {
+      warn(
+        `Getter is missing for computed property "${key}".`,
+        vm
+      )
     }
     // create internal watcher for the computed property.
-    watchers[key] = new Watcher(vm, getter, noop, computedWatcherOptions)
+    watchers[key] = new Watcher(vm, getter || noop, noop, computedWatcherOptions)
 
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
@@ -213,6 +210,15 @@ export function defineComputed (target: any, key: string, userDef: Object | Func
     sharedPropertyDefinition.set = userDef.set
       ? userDef.set
       : noop
+  }
+  if (process.env.NODE_ENV !== 'production' &&
+      sharedPropertyDefinition.set === noop) {
+    sharedPropertyDefinition.set = function () {
+      warn(
+        `Computed property "${key}" was assigned to but it has no setter.`,
+        this
+      )
+    }
   }
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
