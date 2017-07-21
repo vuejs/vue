@@ -119,6 +119,34 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
+  it('should work with value bindings (Array loose equal)', done => {
+    const vm = new Vue({
+      data: {
+        test: [{ a: 2 }]
+      },
+      template:
+        '<select v-model="test">' +
+          '<option value="1">a</option>' +
+          '<option :value="[{ a: 2 }]">b</option>' +
+          '<option :value="[{ a: 3 }]">c</option>' +
+        '</select>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = [{ a: 3 }]
+    waitForUpdate(function () {
+      expect(vm.$el.childNodes[2].selected).toBe(true)
+
+      updateSelect(vm.$el, '1')
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toBe('1')
+
+      updateSelect(vm.$el, [{ a: 2 }])
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toEqual([{ a: 2 }])
+    }).then(done)
+  })
+
   it('should work with v-for', done => {
     const vm = new Vue({
       data: {
