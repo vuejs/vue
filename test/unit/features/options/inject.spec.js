@@ -382,6 +382,7 @@ describe('Options provide/inject', () => {
 
     expect(injected).toEqual(['foo', 'bar'])
   })
+
   it('should merge provide from mixins (functions)', () => {
     const mixinA = { provide: () => ({ foo: 'foo' }) }
     const mixinB = { provide: () => ({ bar: 'bar' }) }
@@ -401,6 +402,7 @@ describe('Options provide/inject', () => {
 
     expect(injected).toEqual(['foo', 'bar'])
   })
+
   it('should merge provide from mixins (mix of objects and functions)', () => {
     const mixinA = { provide: { foo: 'foo' }}
     const mixinB = { provide: () => ({ bar: 'bar' }) }
@@ -422,6 +424,7 @@ describe('Options provide/inject', () => {
 
     expect(injected).toEqual(['foo', 'bar', 'baz', 'bam'])
   })
+
   it('should merge provide from mixins and override existing keys', () => {
     const mixinA = { provide: { foo: 'foo' }}
     const mixinB = { provide: { foo: 'bar' }}
@@ -441,6 +444,7 @@ describe('Options provide/inject', () => {
 
     expect(injected).toEqual(['bar'])
   })
+
   it('should merge provide when Vue.extend', () => {
     const mixinA = { provide: () => ({ foo: 'foo' }) }
     const child = {
@@ -503,5 +507,42 @@ describe('Options provide/inject', () => {
     expect(isObserver(child.foo1)).toBe(true)
     expect(isObserver(child.bar)).toBe(false)
     expect(isObserver(child.baz)).toBe(false)
+  })
+
+  // #6175
+  it('merge provide properly from mixins', () => {
+    const ProvideFooMixin = {
+      provide: {
+        foo: 'foo injected'
+      }
+    }
+
+    const ProvideBarMixin = {
+      provide: {
+        bar: 'bar injected'
+      }
+    }
+
+    const Child = {
+      inject: ['foo', 'bar'],
+      render (h) {
+        return h('div', [`foo: ${this.foo}, `, `bar: ${this.bar}`])
+      }
+    }
+
+    const Parent = {
+      mixins: [ProvideFooMixin, ProvideBarMixin],
+      render (h) {
+        return h(Child)
+      }
+    }
+
+    const vm = new Vue({
+      render (h) {
+        return h(Parent)
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(`foo: foo injected, bar: bar injected`)
   })
 })
