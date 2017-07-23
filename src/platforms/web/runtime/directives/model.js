@@ -60,7 +60,14 @@ export default {
       const prevOptions = el._vOptions
       const curOptions = el._vOptions = [].map.call(el.options, getValue)
       if (curOptions.some((o, i) => !looseEqual(o, prevOptions[i]))) {
-        trigger(el, 'change')
+        // trigger change event if
+        // no matching option found for at least one value
+        const needReset = el.multiple
+          ? binding.value.some(v => hasNoMatchingOption(v, el.options))
+          : binding.value !== binding.oldValue && hasNoMatchingOption(binding.value, el.options)
+        if (needReset) {
+          trigger(el, 'change')
+        }
       }
     }
   }
@@ -99,6 +106,15 @@ function setSelected (el, binding, vm) {
   if (!isMultiple) {
     el.selectedIndex = -1
   }
+}
+
+function hasNoMatchingOption (value, options) {
+  for (let i = 0, l = options.length; i < l; i++) {
+    if (looseEqual(getValue(options[i]), value)) {
+      return false
+    }
+  }
+  return true
 }
 
 function getValue (option) {

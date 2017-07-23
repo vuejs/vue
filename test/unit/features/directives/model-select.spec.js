@@ -519,7 +519,7 @@ describe('Directive v-model select', () => {
   })
 
   // #6193
-  it('should not trigger change event when match option can be found for each value', done => {
+  it('should not trigger change event when matching option can be found for each value', done => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
