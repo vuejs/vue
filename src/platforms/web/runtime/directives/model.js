@@ -63,8 +63,8 @@ export default {
         // trigger change event if
         // no matching option found for at least one value
         const needReset = el.multiple
-          ? binding.value.some(v => hasNoMatchingOption(v, el.options))
-          : binding.value !== binding.oldValue && hasNoMatchingOption(binding.value, el.options)
+          ? binding.value.some(v => hasNoMatchingOption(v, curOptions))
+          : binding.value !== binding.oldValue && hasNoMatchingOption(binding.value, curOptions)
         if (needReset) {
           trigger(el, 'change')
         }
@@ -109,12 +109,7 @@ function setSelected (el, binding, vm) {
 }
 
 function hasNoMatchingOption (value, options) {
-  for (let i = 0, l = options.length; i < l; i++) {
-    if (looseEqual(getValue(options[i]), value)) {
-      return false
-    }
-  }
-  return true
+  return options.every(o => !looseEqual(o, value))
 }
 
 function getValue (option) {
