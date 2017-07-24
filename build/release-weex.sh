@@ -31,7 +31,6 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   cd -
 
   # commit
-  git add src/entries/weex*
   git add packages/weex*
   git commit -m "[release] weex-vue-framework@$NEXT_VERSION"
 fi
