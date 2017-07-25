@@ -577,12 +577,12 @@ describe('richtext component', () => {
 
   describe('bind events', () => {
     pending('work in progress')
-    it('inline', () => {
+    it('inline', (done) => {
       const { render, staticRenderFns } = compileAndStringify(`
         <div>
-        <richtext>
-          <span @click="handler">Button</span>
-        </richtext>
+          <richtext>
+            <span @click="handler">{{label}}</span>
+          </richtext>
         </div>
       `)
       const instance = createInstance(runtime, `
@@ -590,21 +590,113 @@ describe('richtext component', () => {
           el: 'body',
           render: ${render},
           staticRenderFns: ${staticRenderFns},
+          data: { label: 'AAA' },
           methods: {
-            handler: function () {}
+            handler: function () {
+              this.label = 'BBB'
+            }
           }
         })
       `)
-      expect(instance.getRealRoot().children[0]).toEqual({
+      // instance.$fireEvent(instance.doc.body.children[0].ref, 'click', {})
+      const richtext = instance.doc.body.children[0]
+      const span = richtext.children[0].ref
+      instance.$fireEvent(span.ref, 'click', {})
+      setTimeout(() => {
+        expect(instance.getRealRoot().children[0]).toEqual({
+          type: 'richtext',
+          event: ['click'],
+          attr: {
+            value: [{
+              type: 'span',
+              attr: { value: 'BBB' }
+            }]
+          }
+        })
+        done()
+      }, 0)
+    })
+  })
+
+  describe('itself', () => {
+    // pending('work in progress')
+    it('inline styles', () => {
+      expect(compileSnippet(runtime, `
+        <richtext style="background-color:red">
+          <span>empty</span>
+        </richtext>
+      `)).toEqual({
         type: 'richtext',
+        style: { backgroundColor: 'red' },
         attr: {
           value: [{
             type: 'span',
-            events: { click: 'handler' },
-            attr: { value: 'Button' }
+            attr: { value: 'empty' }
           }]
         }
       })
+    })
+
+    it('class list', () => {
+      // pending('work in progress')
+      expect(compileSnippet(runtime, `
+        <richtext class="title">
+          <span class="large">ABCD</span>
+        </richtext>
+      `, `
+        style: {
+          title: { backgroundColor: '#FF6600', height: 200 },
+          large: { fontSize: 24 }
+        }
+      `)).toEqual({
+        type: 'richtext',
+        style: { backgroundColor: '#FF6600', height: 200 },
+        attr: {
+          value: [{
+            type: 'span',
+            style: { fontSize: 24 },
+            attr: { value: 'ABCD' }
+          }]
+        }
+      })
+    })
+
+    it('bind events', (done) => {
+      const { render, staticRenderFns } = compileAndStringify(`
+        <div>
+          <richtext @click="handler">
+            <span>Label: {{label}}</span>
+          </richtext>
+        </div>
+      `)
+      const instance = createInstance(runtime, `
+        new Vue({
+          el: 'body',
+          render: ${render},
+          staticRenderFns: ${staticRenderFns},
+          data: { label: 'AAA' },
+          methods: {
+            handler: function () {
+              this.label = 'BBB'
+            }
+          }
+        })
+      `)
+      const richtext = instance.doc.body.children[0]
+      instance.$fireEvent(richtext.ref, 'click', {})
+      setTimeout(() => {
+        expect(instance.getRealRoot().children[0]).toEqual({
+          type: 'richtext',
+          event: ['click'],
+          attr: {
+            value: [{
+              type: 'span',
+              attr: { value: 'Label: BBB' }
+            }]
+          }
+        })
+        done()
+      }, 0)
     })
   })
 })
