@@ -1,3 +1,4 @@
+import config from 'core/config'
 import { parse } from 'compiler/parser/index'
 import { extend } from 'shared/util'
 import { baseOptions } from 'web/compiler/options'
@@ -16,6 +17,17 @@ describe('parser', () => {
     expect(ast.tag).toBe('h1')
     expect(ast.plain).toBe(true)
     expect(ast.children[0].expression).toBe('_s(msg)')
+  })
+
+  it('not interpolation in element, when Vue.config.interpolation is false', () => {
+    config.interpolation = false
+
+    const ast = parse('<h1>{{msg}}</h1>', baseOptions)
+    expect(ast.tag).toBe('h1')
+    expect(ast.plain).toBe(true)
+    expect(ast.children[0].expression).toBeUndefined()
+
+    config.interpolation = true
   })
 
   it('child elements', () => {

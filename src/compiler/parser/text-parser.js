@@ -1,5 +1,6 @@
 /* @flow */
 
+import config from 'core/config'
 import { cached } from 'shared/util'
 import { parseFilters } from './filter-parser'
 
@@ -17,7 +18,7 @@ export function parseText (
   delimiters?: [string, string]
 ): string | void {
   const tagRE = delimiters ? buildRegex(delimiters) : defaultTagRE
-  if (!tagRE.test(text)) {
+  if (!config.interpolation || !tagRE.test(text)) {
     return
   }
   const tokens = []
