@@ -291,8 +291,11 @@ function createVueModuleInstance (instanceId, moduleGetter) {
   // components
   const weexRegex = /^weex:/i
   const isReservedTag = Vue.config.isReservedTag || (() => false)
+  const isRuntimeComponent = Vue.config.isRuntimeComponent || (() => false)
   Vue.config.isReservedTag = name => {
-    return components[name] || isReservedTag(name) || weexRegex.test(name)
+    return (!isRuntimeComponent(name) && components[name]) ||
+      isReservedTag(name) ||
+      weexRegex.test(name)
   }
   Vue.config.parsePlatformTagName = name => name.replace(weexRegex, '')
 

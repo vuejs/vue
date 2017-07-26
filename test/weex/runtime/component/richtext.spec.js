@@ -31,7 +31,6 @@ describe('richtext component', () => {
   })
 
   it('with no child', () => {
-    // pending('work in progress')
     expect(compileSnippet(runtime, `
       <richtext></richtext>
     `)).toEqual({
@@ -40,7 +39,6 @@ describe('richtext component', () => {
   })
 
   it('with single text node', () => {
-    // pending('work in progress')
     expect(compileSnippet(runtime, `
       <richtext>single</richtext>
     `)).toEqual({
@@ -57,7 +55,6 @@ describe('richtext component', () => {
   })
 
   describe('span', () => {
-    // pending('work in progress')
     it('single node', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -125,7 +122,6 @@ describe('richtext component', () => {
   })
 
   describe('a', () => {
-    // pending('work in progress')
     it('single node', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -164,7 +160,6 @@ describe('richtext component', () => {
   })
 
   describe('image', () => {
-    // pending('work in progress')
     it('single node', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -223,7 +218,6 @@ describe('richtext component', () => {
   })
 
   describe('nested', () => {
-    // pending('work in progress')
     it('span', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -298,13 +292,11 @@ describe('richtext component', () => {
   })
 
   describe('with styles', () => {
-    // pending('work in progress')
     it('inline', () => {
-      // pending('work in progress')
       expect(compileSnippet(runtime, `
         <richtext>
           <span style="font-size:16px;color:#FF6600;">ABCD</span>
-          <image style="width:40px;height:60px" src="path/to/A.png"></image>
+          <image style="width:33.33px;height:66.67px" src="path/to/A.png"></image>
         </richtext>
       `)).toEqual({
         type: 'richtext',
@@ -315,7 +307,7 @@ describe('richtext component', () => {
             attr: { value: 'ABCD' }
           }, {
             type: 'image',
-            style: { width: 40, height: 60 },
+            style: { width: 33.33, height: 66.67 },
             attr: { src: 'path/to/A.png' }
           }]
         }
@@ -323,7 +315,6 @@ describe('richtext component', () => {
     })
 
     it('class list', () => {
-      // pending('work in progress')
       expect(compileSnippet(runtime, `
         <richtext>
           <image class="icon" src="path/to/A.png"></image>
@@ -353,7 +344,6 @@ describe('richtext component', () => {
   })
 
   describe('data binding', () => {
-    // pending('work in progress')
     it('simple', () => {
       expect(compileSnippet(runtime, `
         <richtext>
@@ -502,7 +492,6 @@ describe('richtext component', () => {
     })
 
     it('class list', () => {
-      // pending('work in progress')
       expect(compileSnippet(runtime, `
         <richtext>
           <image :class="classList" src="path/to/A.png"></image>
@@ -575,51 +564,7 @@ describe('richtext component', () => {
     })
   })
 
-  describe('bind events', () => {
-    pending('work in progress')
-    it('inline', (done) => {
-      const { render, staticRenderFns } = compileAndStringify(`
-        <div>
-          <richtext>
-            <span @click="handler">{{label}}</span>
-          </richtext>
-        </div>
-      `)
-      const instance = createInstance(runtime, `
-        new Vue({
-          el: 'body',
-          render: ${render},
-          staticRenderFns: ${staticRenderFns},
-          data: { label: 'AAA' },
-          methods: {
-            handler: function () {
-              this.label = 'BBB'
-            }
-          }
-        })
-      `)
-      // instance.$fireEvent(instance.doc.body.children[0].ref, 'click', {})
-      const richtext = instance.doc.body.children[0]
-      const span = richtext.children[0].ref
-      instance.$fireEvent(span.ref, 'click', {})
-      setTimeout(() => {
-        expect(instance.getRealRoot().children[0]).toEqual({
-          type: 'richtext',
-          event: ['click'],
-          attr: {
-            value: [{
-              type: 'span',
-              attr: { value: 'BBB' }
-            }]
-          }
-        })
-        done()
-      }, 0)
-    })
-  })
-
   describe('itself', () => {
-    // pending('work in progress')
     it('inline styles', () => {
       expect(compileSnippet(runtime, `
         <richtext style="background-color:red">
@@ -638,7 +583,6 @@ describe('richtext component', () => {
     })
 
     it('class list', () => {
-      // pending('work in progress')
       expect(compileSnippet(runtime, `
         <richtext class="title">
           <span class="large">ABCD</span>
@@ -647,6 +591,33 @@ describe('richtext component', () => {
         style: {
           title: { backgroundColor: '#FF6600', height: 200 },
           large: { fontSize: 24 }
+        }
+      `)).toEqual({
+        type: 'richtext',
+        style: { backgroundColor: '#FF6600', height: 200 },
+        attr: {
+          value: [{
+            type: 'span',
+            style: { fontSize: 24 },
+            attr: { value: 'ABCD' }
+          }]
+        }
+      })
+    })
+
+    it('update styles', () => {
+      expect(compileSnippet(runtime, `
+        <richtext :class="classList" :style="{ backgroundColor: color }">
+          <span class="large">ABCD</span>
+        </richtext>
+      `, `
+        data: { classList: ['unknow'], color: '#FF6600' },
+        style: {
+          title: { height: 200 },
+          large: { fontSize: 24 }
+        },
+        created: function () {
+          this.classList = ['title']
         }
       `)).toEqual({
         type: 'richtext',
@@ -697,6 +668,32 @@ describe('richtext component', () => {
         })
         done()
       }, 0)
+    })
+
+    it('v-for', () => {
+      expect(compileSnippet(runtime, `
+        <div>
+          <richtext v-for="k in labels">
+            <span>{{k}}</span>
+          </richtext>
+        </div>
+      `, `
+        data: {
+          labels: ['A', 'B', 'C']
+        }
+      `)).toEqual({
+        type: 'div',
+        children: [{
+          type: 'richtext',
+          attr: { value: [{ type: 'span', attr: { value: 'A' }}] }
+        }, {
+          type: 'richtext',
+          attr: { value: [{ type: 'span', attr: { value: 'B' }}] }
+        }, {
+          type: 'richtext',
+          attr: { value: [{ type: 'span', attr: { value: 'C' }}] }
+        }]
+      })
     })
   })
 })
