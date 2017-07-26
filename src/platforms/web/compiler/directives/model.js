@@ -4,6 +4,7 @@ import config from 'core/config'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
 
+const ternaryTextInputRE = /^[^?]{1,}\?\s*('|"|`)(?:text|number|password|search|email|tel|url)\1\s*:\s*('|"|`)(?:text|number|password|search|email|tel|url)\2\s*$/
 let warn
 
 // in some cases, the event used has to be determined at runtime
@@ -24,7 +25,7 @@ export default function model (
 
   if (process.env.NODE_ENV !== 'production') {
     const dynamicType = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
-    if (tag === 'input' && dynamicType) {
+    if (tag === 'input' && dynamicType && !ternaryTextInputRE.test(dynamicType)) {
       warn(
         `<input :type="${dynamicType}" v-model="${value}">:\n` +
         `v-model does not support dynamic input types. Use v-if branches instead.`
