@@ -9,9 +9,13 @@ function isSimpleSpan (vnode) {
   return vnode.children && vnode.children.length === 1 && !vnode.children[0].tag
 }
 
+const cssLengthRE = /^([+-]?[0-9]+(\.[0-9]+)?)(px|em|ex|%|in|cm|mm|pt|pc)$/i
 function trimCSSUnit (prop) {
-  // TODO: more reliable
-  return Number(String(prop).replace(/px$/i, '')) || prop
+  const res = String(prop).match(cssLengthRE)
+  if (res) {
+    return Number(res[1])
+  }
+  return prop
 }
 
 function parseStyle (vnode) {
@@ -23,8 +27,7 @@ function parseStyle (vnode) {
   if (vnode.data.style || vnode.data.class || staticStyle || staticClass) {
     const styles = Object.assign({}, staticStyle, vnode.data.style)
 
-    // TODO: more reliable
-    const cssMap = vnode.context.$options.style
+    const cssMap = vnode.context.$options.style || {}
     const classList = [].concat(staticClass, vnode.data.class)
     classList.forEach(name => {
       if (name && cssMap[name]) {

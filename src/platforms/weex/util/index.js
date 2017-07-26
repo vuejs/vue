@@ -5,7 +5,7 @@ import { makeMap } from 'shared/util'
 export const isReservedTag = makeMap(
   'template,script,style,element,content,slot,link,meta,svg,view,' +
   'a,div,img,image,text,span,input,switch,textarea,spinner,select,' +
-  'slider,slider-neighbor,indicator,trisition,trisition-group,canvas,' +
+  'slider,slider-neighbor,indicator,canvas,' +
   'list,cell,header,loading,loading-indicator,refresh,scrollable,scroller,' +
   'video,web,embed,tabbar,tabheader,datepicker,timepicker,marquee,countdown',
   true
@@ -16,6 +16,11 @@ export const isReservedTag = makeMap(
 export const canBeLeftOpenTag = makeMap(
   'web,spinner,switch,video,textarea,canvas,' +
   'indicator,marquee,countdown',
+  true
+)
+
+export const isRuntimeComponent = makeMap(
+  'richtext,trisition,trisition-group',
   true
 )
 
