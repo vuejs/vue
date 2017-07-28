@@ -1,9 +1,8 @@
 /* @flow */
 
-import { hasSymbol } from 'core/util/env'
 import { warn } from '../util/index'
-import { defineReactive } from '../observer/index'
-import { hasOwn } from 'shared/util'
+import { hasSymbol } from 'core/util/env'
+import { defineReactive, observerState } from '../observer/index'
 
 export function initProvide (vm: Component) {
   const provide = vm.$options.provide
@@ -17,6 +16,7 @@ export function initProvide (vm: Component) {
 export function initInjections (vm: Component) {
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
+    observerState.shouldConvert = false
     Object.keys(result).forEach(key => {
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
@@ -32,6 +32,7 @@ export function initInjections (vm: Component) {
         defineReactive(vm, key, result[key])
       }
     })
+    observerState.shouldConvert = true
   }
 }
 
@@ -54,7 +55,7 @@ export function resolveInject (inject: any, vm: Component): ?Object {
         }
         source = source.$parent
       }
-      if (process.env.NODE_ENV !== 'production' && !hasOwn(result, key)) {
+      if (process.env.NODE_ENV !== 'production' && !source) {
         warn(`Injection "${key}" not found`, vm)
       }
     }

@@ -59,6 +59,10 @@ const decodingMap = {
 const encodedAttr = /&(?:lt|gt|quot|amp);/g
 const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10);/g
 
+// #5992
+const isIgnoreNewlineTag = makeMap('pre,textarea', true)
+const shouldIgnoreFirstNewline = (tag, html) => tag && isIgnoreNewlineTag(tag) && html[0] === '\n'
+
 function decodeAttr (value, shouldDecodeNewlines) {
   const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
   return value.replace(re, match => decodingMap[match])
@@ -82,6 +86,9 @@ export function parseHTML (html, options) {
           const commentEnd = html.indexOf('-->')
 
           if (commentEnd >= 0) {
+            if (options.shouldKeepComment) {
+              options.comment(html.substring(4, commentEnd))
+            }
             advance(commentEnd + 3)
             continue
           }
@@ -117,6 +124,9 @@ export function parseHTML (html, options) {
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
           handleStartTag(startTagMatch)
+          if (shouldIgnoreFirstNewline(lastTag, html)) {
+            advance(1)
+          }
           continue
         }
       }
@@ -149,15 +159,18 @@ export function parseHTML (html, options) {
         options.chars(text)
       }
     } else {
-      var stackedTag = lastTag.toLowerCase()
-      var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'))
-      var endTagLength = 0
-      var rest = html.replace(reStackedTag, function (all, text, endTag) {
+      let endTagLength = 0
+      const stackedTag = lastTag.toLowerCase()
+      const reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'))
+      const rest = html.replace(reStackedTag, function (all, text, endTag) {
         endTagLength = endTag.length
         if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
           text = text
             .replace(/<!--([\s\S]*?)-->/g, '$1')
             .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1')
+        }
+        if (shouldIgnoreFirstNewline(stackedTag, text)) {
+          text = text.slice(1)
         }
         if (options.chars) {
           options.chars(text)
@@ -222,7 +235,7 @@ export function parseHTML (html, options) {
       }
     }
 
-    const unary = isUnaryTag(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash
+    const unary = isUnaryTag(tagName) || !!unarySlash
 
     const l = match.attrs.length
     const attrs = new Array(l)

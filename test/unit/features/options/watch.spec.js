@@ -7,6 +7,8 @@ describe('Options watch', () => {
     spy = jasmine.createSpy('watch')
   })
 
+  testObjectOption('watch')
+
   it('basic usage', done => {
     const vm = new Vue({
       data: {
@@ -23,8 +25,6 @@ describe('Options watch', () => {
       expect(spy).toHaveBeenCalledWith(2, 1)
     }).then(done)
   })
-
-  testObjectOption('watch')
 
   it('string method name', done => {
     const vm = new Vue({

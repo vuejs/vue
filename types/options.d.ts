@@ -94,6 +94,8 @@ export interface ComponentOptions<Data, Methods, Computed, Props> {
   // TODO: support properly inferred 'extends'
   extends?: ComponentOptions<any, any, any, any> | typeof Vue;
   delimiters?: [string, string];
+  comments?: boolean;
+  inheritAttrs?: boolean;
 }
 
 export interface FunctionalComponentOptions<Props = object, ContextProps = object> {

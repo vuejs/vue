@@ -36,7 +36,7 @@ describe('Component scoped slot', () => {
       template: `
         <test ref="test">
           <template scope="props">
-            <span>{{ props.msg }} {{ props.msg2 }}</span>
+            <span>{{ props.msg }} {{ props.msg2 }} {{ props.msg3 }}</span>
           </template>
         </test>
       `,
@@ -45,23 +45,23 @@ describe('Component scoped slot', () => {
           data () {
             return {
               msg: 'hello',
-              obj: { msg2: 'world' }
+              obj: { msg2: 'world', msg3: '.' }
             }
           },
           template: `
             <div>
-              <slot :msg="msg" v-bind="obj"></slot>
+              <slot :msg="msg" v-bind="obj" msg3="!"></slot>
             </div>
           `
         }
       }
     }).$mount()
 
-    expect(vm.$el.innerHTML).toBe('<span>hello world</span>')
+    expect(vm.$el.innerHTML).toBe('<span>hello world !</span>')
     vm.$refs.test.msg = 'bye'
     vm.$refs.test.obj.msg2 = 'bye'
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML).toBe('<span>bye bye</span>')
+      expect(vm.$el.innerHTML).toBe('<span>bye bye !</span>')
     }).then(done)
   })
 

@@ -40,7 +40,11 @@ export default function model (
     }
   }
 
-  if (tag === 'select') {
+  if (el.component) {
+    genComponentModel(el, value, modifiers)
+    // component v-model doesn't need extra runtime
+    return false
+  } else if (tag === 'select') {
     genSelect(el, value, modifiers)
   } else if (tag === 'input' && type === 'checkbox') {
     genCheckboxModel(el, value, modifiers)
@@ -89,7 +93,7 @@ function genCheckboxModel (
     'if(Array.isArray($$a)){' +
       `var $$v=${number ? '_n(' + valueBinding + ')' : valueBinding},` +
           '$$i=_i($$a,$$v);' +
-      `if($$c){$$i<0&&(${value}=$$a.concat($$v))}` +
+      `if($$el.checked){$$i<0&&(${value}=$$a.concat($$v))}` +
       `else{$$i>-1&&(${value}=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}` +
     `}else{${genAssignmentCode(value, '$$c')}}`,
     null, true
@@ -154,7 +158,7 @@ function genDefaultModel (
 
   addProp(el, 'value', `(${value})`)
   addHandler(el, event, code, null, true)
-  if (trim || number || type === 'number') {
+  if (trim || number) {
     addHandler(el, 'blur', '$forceUpdate()')
   }
 }

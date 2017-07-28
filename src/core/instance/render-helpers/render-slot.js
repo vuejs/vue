@@ -15,7 +15,7 @@ export function renderSlot (
   if (scopedSlotFn) { // scoped slot
     props = props || {}
     if (bindObject) {
-      extend(props, bindObject)
+      props = extend(extend({}, bindObject), props)
     }
     return scopedSlotFn(props) || fallback
   } else {

@@ -3,6 +3,7 @@
 import config from '../config'
 import Dep from '../observer/dep'
 import Watcher from '../observer/watcher'
+import { isUpdatingChildComponent } from './lifecycle'
 
 import {
   set,
@@ -19,6 +20,7 @@ import {
   hasOwn,
   isReserved,
   handleError,
+  nativeWatch,
   validateProp,
   isPlainObject,
   isReservedAttribute
@@ -52,7 +54,9 @@ export function initState (vm: Component) {
     observe(vm._data = {}, true /* asRootData */)
   }
   if (opts.computed) initComputed(vm, opts.computed)
-  if (opts.watch) initWatch(vm, opts.watch)
+  if (opts.watch && opts.watch !== nativeWatch) {
+    initWatch(vm, opts.watch)
+  }
 }
 
 function checkOptionType (vm: Component, name: string) {
@@ -86,7 +90,7 @@ function initProps (vm: Component, propsOptions: Object) {
         )
       }
       defineReactive(props, key, value, () => {
-        if (vm.$parent && !observerState.isSettingProps) {
+        if (vm.$parent && !isUpdatingChildComponent) {
           warn(
             `Avoid mutating a prop directly since the value will be ` +
             `overwritten whenever the parent component re-renders. ` +
@@ -168,18 +172,15 @@ function initComputed (vm: Component, computed: Object) {
 
   for (const key in computed) {
     const userDef = computed[key]
-    let getter = typeof userDef === 'function' ? userDef : userDef.get
-    if (process.env.NODE_ENV !== 'production') {
-      if (getter === undefined) {
-        warn(
-          `No getter function has been defined for computed property "${key}".`,
-          vm
-        )
-        getter = noop
-      }
+    const getter = typeof userDef === 'function' ? userDef : userDef.get
+    if (process.env.NODE_ENV !== 'production' && getter == null) {
+      warn(
+        `Getter is missing for computed property "${key}".`,
+        vm
+      )
     }
     // create internal watcher for the computed property.
-    watchers[key] = new Watcher(vm, getter, noop, computedWatcherOptions)
+    watchers[key] = new Watcher(vm, getter || noop, noop, computedWatcherOptions)
 
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
@@ -209,6 +210,15 @@ export function defineComputed (target: any, key: string, userDef: Object | Func
     sharedPropertyDefinition.set = userDef.set
       ? userDef.set
       : noop
+  }
+  if (process.env.NODE_ENV !== 'production' &&
+      sharedPropertyDefinition.set === noop) {
+    sharedPropertyDefinition.set = function () {
+      warn(
+        `Computed property "${key}" was assigned to but it has no setter.`,
+        this
+      )
+    }
   }
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }

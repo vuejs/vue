@@ -125,4 +125,65 @@ describe('Instance properties', () => {
     }).$mount()
     expect(`Avoid mutating a prop`).toHaveBeenWarned()
   })
+
+  it('$attrs', done => {
+    const vm = new Vue({
+      template: `<foo :id="foo" bar="1"/>`,
+      data: { foo: 'foo' },
+      components: {
+        foo: {
+          props: ['bar'],
+          template: `<div><div v-bind="$attrs"></div></div>`
+        }
+      }
+    }).$mount()
+    expect(vm.$el.children[0].id).toBe('foo')
+    expect(vm.$el.children[0].hasAttribute('bar')).toBe(false)
+    vm.foo = 'bar'
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].id).toBe('bar')
+      expect(vm.$el.children[0].hasAttribute('bar')).toBe(false)
+    }).then(done)
+  })
+
+  it('warn mutating $attrs', () => {
+    const vm = new Vue()
+    vm.$attrs = {}
+    expect(`$attrs is readonly`).toHaveBeenWarned()
+  })
+
+  it('$listeners', done => {
+    const spyA = jasmine.createSpy('A')
+    const spyB = jasmine.createSpy('B')
+    const vm = new Vue({
+      template: `<foo @click="foo"/>`,
+      data: { foo: spyA },
+      components: {
+        foo: {
+          template: `<div v-on="$listeners"></div>`
+        }
+      }
+    }).$mount()
+
+    // has to be in dom for test to pass in IE
+    document.body.appendChild(vm.$el)
+
+    triggerEvent(vm.$el, 'click')
+    expect(spyA.calls.count()).toBe(1)
+    expect(spyB.calls.count()).toBe(0)
+
+    vm.foo = spyB
+    waitForUpdate(() => {
+      triggerEvent(vm.$el, 'click')
+      expect(spyA.calls.count()).toBe(1)
+      expect(spyB.calls.count()).toBe(1)
+      document.body.removeChild(vm.$el)
+    }).then(done)
+  })
+
+  it('warn mutating $listeners', () => {
+    const vm = new Vue()
+    vm.$listeners = {}
+    expect(`$listeners is readonly`).toHaveBeenWarned()
+  })
 })

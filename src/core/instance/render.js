@@ -8,7 +8,8 @@ import {
   looseEqual,
   emptyObject,
   handleError,
-  looseIndexOf
+  looseIndexOf,
+  defineReactive
 } from '../util/index'
 
 import VNode, {
@@ -17,6 +18,8 @@ import VNode, {
   createEmptyVNode
 } from '../vdom/vnode'
 
+import { isUpdatingChildComponent } from './lifecycle'
+
 import { createElement } from '../vdom/create-element'
 import { renderList } from './render-helpers/render-list'
 import { renderSlot } from './render-helpers/render-slot'
@@ -24,6 +27,7 @@ import { resolveFilter } from './render-helpers/resolve-filter'
 import { checkKeyCodes } from './render-helpers/check-keycodes'
 import { bindObjectProps } from './render-helpers/bind-object-props'
 import { renderStatic, markOnce } from './render-helpers/render-static'
+import { bindObjectListeners } from './render-helpers/bind-object-listeners'
 import { resolveSlots, resolveScopedSlots } from './render-helpers/resolve-slots'
 
 export function initRender (vm: Component) {
@@ -41,6 +45,22 @@ export function initRender (vm: Component) {
   // normalization is always applied for the public version, used in
   // user-written render functions.
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+
+  // $attrs & $listeners are exposed for easier HOC creation.
+  // they need to be reactive so that HOCs using them are always updated
+  const parentData = parentVnode && parentVnode.data
+  /* istanbul ignore else */
+  if (process.env.NODE_ENV !== 'production') {
+    defineReactive(vm, '$attrs', parentData && parentData.attrs, () => {
+      !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
+    }, true)
+    defineReactive(vm, '$listeners', vm.$options._parentListeners, () => {
+      !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
+    }, true)
+  } else {
+    defineReactive(vm, '$attrs', parentData && parentData.attrs, null, true)
+    defineReactive(vm, '$listeners', vm.$options._parentListeners, null, true)
+  }
 }
 
 export function renderMixin (Vue: Class<Component>) {
@@ -121,4 +141,5 @@ export function renderMixin (Vue: Class<Component>) {
   Vue.prototype._v = createTextVNode
   Vue.prototype._e = createEmptyVNode
   Vue.prototype._u = resolveScopedSlots
+  Vue.prototype._g = bindObjectListeners
 }
