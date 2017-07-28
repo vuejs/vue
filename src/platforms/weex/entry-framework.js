@@ -91,9 +91,7 @@ export function createInstance (
   // It will declare some instance variables like `Vue`, HTML5 Timer APIs etc.
   const instanceVars = Object.assign({
     Vue,
-    weex: weexInstanceVar,
-    // deprecated
-    __weex_require_module__: weexInstanceVar.requireModule // eslint-disable-line
+    weex: weexInstanceVar
   }, timerAPIs, env.services)
 
   if (!callFunctionNative(instanceVars, appCode)) {
