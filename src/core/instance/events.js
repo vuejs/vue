@@ -5,7 +5,8 @@ import {
   toArray,
   hyphenate,
   handleError,
-  formatComponentName
+  formatComponentName,
+  parsePath
 } from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
 
@@ -20,6 +21,8 @@ export function initEvents (vm: Component) {
 }
 
 let target: Component
+
+const updateEventRE = /^update:([\w.$]+)\.([\w$]+)$/
 
 function add (event, fn, once) {
   if (once) {
@@ -131,6 +134,15 @@ export function eventsMixin (Vue: Class<Component>) {
           cbs[i].apply(vm, args)
         } catch (e) {
           handleError(e, vm, `event handler for "${event}"`)
+        }
+      }
+    } else if (vm._events[event.split('.')[0]]) {
+      // dynamic update event for prop object with .sync modifier
+      const match = event.match(updateEventRE)
+      if (match && match.length === 3) {
+        const targetParent = parsePath(match[1])(vm)
+        if (targetParent) {
+          vm.$set(targetParent, match[2], arguments[1])
         }
       }
     }
