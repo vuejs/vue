@@ -94,6 +94,8 @@ export function createInstance (
     weex: weexInstanceVar
   }, timerAPIs, env.services)
 
+  appCode = `(function(global){ \n${appCode}\n })(Object.create(this))`
+
   if (!callFunctionNative(instanceVars, appCode)) {
     // If failed to compile functionBody on native side,
     // fallback to 'callFunction()'.
