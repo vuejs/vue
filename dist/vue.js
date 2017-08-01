@@ -12,7 +12,8 @@
 /*  */
 
 // these helpers produces better vm code in JS engines due to their
-// explicitness and function inlining
+// 这些函数可以帮助我们把vm code写得更好
+// 因为他们表意明确而且是内联的
 function isUndef (v) {
   return v === undefined || v === null
 }
@@ -30,7 +31,7 @@ function isFalse (v) {
 }
 
 /**
- * Check if value is primitive
+ * 检查是否是原始值
  */
 function isPrimitive (value) {
   return (
@@ -41,7 +42,7 @@ function isPrimitive (value) {
 }
 
 /**
- * Quick object check - this is primarily used to tell
+ * 快速对象检查 - this is primarily used to tell
  * Objects from primitive values when we know the value
  * is a JSON-compliant type.
  */
@@ -52,9 +53,10 @@ function isObject (obj) {
 var _toString = Object.prototype.toString;
 
 /**
- * Strict object type check. Only returns true
+ * 严格对象检查. Only returns true
  * for plain JavaScript objects.
  */
+// The PlainObject type is a JavaScript object containing zero or more key-value pairs.
 function isPlainObject (obj) {
   return _toString.call(obj) === '[object Object]'
 }
@@ -64,16 +66,19 @@ function isRegExp (v) {
 }
 
 /**
- * Check if val is a valid array index.
+ * 检查val是不是合法的数组索引
  */
 function isValidArrayIndex (val) {
   var n = parseFloat(val);
+  // 关于isFinite()
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isFinite
   return n >= 0 && Math.floor(n) === n && isFinite(val)
 }
 
 /**
  * Convert a value to a string that is actually rendered.
  */
+// JSON.stringify(value[, replacer[, space]])
 function toString (val) {
   return val == null
     ? ''
@@ -92,8 +97,7 @@ function toNumber (val) {
 }
 
 /**
- * Make a map and return a function for checking if a key
- * is in that map.
+ * 创建一个map并返回一个检查关键字是否在map内的函数
  */
 function makeMap (
   str,
@@ -110,12 +114,12 @@ function makeMap (
 }
 
 /**
- * Check if a tag is a built-in tag.
+ * 检查一个tag是不是预设tag
  */
 var isBuiltInTag = makeMap('slot,component', true);
 
 /**
- * Check if a attribute is a reserved attribute.
+ * 检查一个属性是不是保留属性
  */
 var isReservedAttribute = makeMap('key,ref,slot,is');
 
@@ -140,7 +144,8 @@ function hasOwn (obj, key) {
 }
 
 /**
- * Create a cached version of a pure function.
+ * 缓存纯函数结果
+ * 关于纯函数：https://en.wikipedia.org/wiki/Pure_function
  */
 function cached (fn) {
   var cache = Object.create(null);
@@ -151,7 +156,7 @@ function cached (fn) {
 }
 
 /**
- * Camelize a hyphen-delimited string.
+ * 连字符转驼峰
  */
 var camelizeRE = /-(\w)/g;
 var camelize = cached(function (str) {
@@ -159,14 +164,14 @@ var camelize = cached(function (str) {
 });
 
 /**
- * Capitalize a string.
+ * 字符串首字母大写
  */
 var capitalize = cached(function (str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 });
 
 /**
- * Hyphenate a camelCase string.
+ * 驼峰转连字符
  */
 var hyphenateRE = /([^-])([A-Z])/g;
 var hyphenate = cached(function (str) {
@@ -177,7 +182,7 @@ var hyphenate = cached(function (str) {
 });
 
 /**
- * Simple bind, faster than native
+ * 一个比原生快的bind
  */
 function bind (fn, ctx) {
   function boundFn (a) {
@@ -194,7 +199,7 @@ function bind (fn, ctx) {
 }
 
 /**
- * Convert an Array-like object to a real Array.
+ * 转换类数组对象为数组
  */
 function toArray (list, start) {
   start = start || 0;
@@ -207,7 +212,7 @@ function toArray (list, start) {
 }
 
 /**
- * Mix properties into target object.
+ * 混合两个对象
  */
 function extend (to, _from) {
   for (var key in _from) {
@@ -218,6 +223,7 @@ function extend (to, _from) {
 
 /**
  * Merge an Array of Objects into a single Object.
+ * 合并一个对象数组的全部对象
  */
 function toObject (arr) {
   var res = {};
@@ -231,6 +237,7 @@ function toObject (arr) {
 
 /**
  * Perform no operation.
+ * 什么都不做
  * Stubbing args to make Flow happy without leaving useless transpiled code
  * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/)
  */
@@ -238,16 +245,19 @@ function noop (a, b, c) {}
 
 /**
  * Always return false.
+ * 总返回false
  */
 var no = function (a, b, c) { return false; };
 
 /**
  * Return same value
+ * 返回自身
  */
 var identity = function (_) { return _; };
 
 /**
  * Generate a static keys string from compiler modules.
+ * 生成静态密钥
  */
 function genStaticKeys (modules) {
   return modules.reduce(function (keys, m) {
@@ -258,6 +268,7 @@ function genStaticKeys (modules) {
 /**
  * Check if two values are loosely equal - that is,
  * if they are plain objects, do they have the same shape?
+ * 检测两个对象是否相等（人类理解的相等）
  */
 function looseEqual (a, b) {
   if (a === b) { return true }
@@ -301,6 +312,7 @@ function looseIndexOf (arr, val) {
 
 /**
  * Ensure a function is called only once.
+ * 保证一个函数只调用一次
  */
 function once (fn) {
   var called = false;
@@ -333,7 +345,7 @@ var LIFECYCLE_HOOKS = [
   'deactivated'
 ];
 
-/*  */
+/* 设置 */
 
 var config = ({
   /**
@@ -373,11 +385,13 @@ var config = ({
 
   /**
    * Ignore certain custom elements
+   * 忽略整个元素
    */
   ignoredElements: [],
 
   /**
    * Custom user key aliases for v-on
+   * v-on的自定义别名
    */
   keyCodes: Object.create(null),
 
@@ -427,6 +441,7 @@ var emptyObject = Object.freeze({});
 
 /**
  * Check if a string starts with $ or _
+ * _和$开头的是保留字
  */
 function isReserved (str) {
   var c = (str + '').charCodeAt(0);

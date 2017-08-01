@@ -166,6 +166,7 @@ function getData (data: Function, vm: Component): any {
 
 const computedWatcherOptions = { lazy: true }
 
+//初始化computed属性
 function initComputed (vm: Component, computed: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
   const watchers = vm._computedWatchers = Object.create(null)
@@ -180,8 +181,10 @@ function initComputed (vm: Component, computed: Object) {
       )
     }
     // create internal watcher for the computed property.
+    //watcher参数：实例，表达式或函数，回调函数，选项
     watchers[key] = new Watcher(vm, getter || noop, noop, computedWatcherOptions)
-
+    // 组件定义的computed属性准备被定义在组件原型
+    // 我们只需要在实例定义computed属性
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
@@ -203,7 +206,7 @@ export function defineComputed (target: any, key: string, userDef: Object | Func
     sharedPropertyDefinition.set = noop
   } else {
     sharedPropertyDefinition.get = userDef.get
-      ? userDef.cache !== false
+      ? userDef.cache !== false //cache是什么？
         ? createComputedGetter(key)
         : userDef.get
       : noop
