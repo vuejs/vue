@@ -2880,6 +2880,8 @@ var uid$2 = 0;
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
+ * 在表达式的值改变时，watcher处理一个表达式，依赖集合和调用回调函数。
+ * $watch() api和指令都有使用
  */
 var Watcher = function Watcher (
   vm,
@@ -3260,9 +3262,10 @@ var computedWatcherOptions = { lazy: true };
 function initComputed (vm, computed) {
   "development" !== 'production' && checkOptionType(vm, 'computed');
   var watchers = vm._computedWatchers = Object.create(null);
-
+  
+  // 遍历computed的每个属性
   for (var key in computed) {
-    var userDef = computed[key];
+    var userDef = computed[key];// 计算函数
     var getter = typeof userDef === 'function' ? userDef : userDef.get;
     if ("development" !== 'production' && getter == null) {
       warn(
@@ -3270,12 +3273,13 @@ function initComputed (vm, computed) {
         vm
       );
     }
-    // create internal watcher for the computed property.
+    // 为计算属性创建内部watcher
     watchers[key] = new Watcher(vm, getter || noop, noop, computedWatcherOptions);
 
-    // component-defined computed properties are already defined on the
+    // component-defined computed properties are already defined on the 
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
+    // 组件定义的计算属性已经定义在组件原型上。这里我们只需要定义那些定义在实例的计算属性。（未定）
     if (!(key in vm)) {
       defineComputed(vm, key, userDef);
     } else {
@@ -3287,7 +3291,12 @@ function initComputed (vm, computed) {
     }
   }
 }
-
+/**
+ * 定义计算函数
+ * @param {*} target 
+ * @param {*} key 
+ * @param {*} userDef 
+ */
 function defineComputed (target, key, userDef) {
   if (typeof userDef === 'function') {
     sharedPropertyDefinition.get = createComputedGetter(key);
