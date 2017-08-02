@@ -598,6 +598,7 @@ function handleError (err, vm, info) {
 var hasProto = '__proto__' in {};
 
 // Browser environment sniffing
+// 浏览器环境判断
 var inBrowser = typeof window !== 'undefined';
 var UA = inBrowser && window.navigator.userAgent.toLowerCase();
 var isIE = UA && /msie|trident/.test(UA);
@@ -656,6 +657,7 @@ var hasSymbol =
 /**
  * Defer a task to execute it asynchronously.
  */
+// 在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
 var nextTick = (function () {
   var callbacks = [];
   var pending = false;
@@ -772,26 +774,36 @@ var uid = 0;
 /**
  * A dep is an observable that can have multiple
  * directives subscribing to it.
+ * Dep（依赖）是可观察的 可以被多个指令订阅
+ * 每当数据变化，都会通知Dep.subs内的watcher
  */
 var Dep = function Dep () {
   this.id = uid++;
   this.subs = [];
 };
 
+// 添加订阅
 Dep.prototype.addSub = function addSub (sub) {
   this.subs.push(sub);
 };
 
+// 移除订阅
 Dep.prototype.removeSub = function removeSub (sub) {
   remove(this.subs, sub);
 };
 
+// 添加依赖
 Dep.prototype.depend = function depend () {
+  /** 
+   * Dep.target是一个watcher
+   * addDep来自watcher实例
+   */
   if (Dep.target) {
     Dep.target.addDep(this);
   }
 };
 
+// 订阅更新
 Dep.prototype.notify = function notify () {
   // stabilize the subscriber list first
   var subs = this.subs.slice();
@@ -803,6 +815,10 @@ Dep.prototype.notify = function notify () {
 // the current target watcher being evaluated.
 // this is globally unique because there could be only one
 // watcher being evaluated at any time.
+
+// 当前目标watcher正在被赋值
+// Dep.target是全局唯一的，
+// 因为任何时间只能有一个watcher被赋值到target
 Dep.target = null;
 var targetStack = [];
 
@@ -815,13 +831,11 @@ function popTarget () {
   Dep.target = targetStack.pop();
 }
 
-/*
- * not type checking this file because flow doesn't play well with
- * dynamically accessing methods on Array prototype
- */
 
+// 数组更新监测
 var arrayProto = Array.prototype;
-var arrayMethods = Object.create(arrayProto);[
+var arrayMethods = Object.create(arrayProto);
+[
   'push',
   'pop',
   'shift',
@@ -831,8 +845,9 @@ var arrayMethods = Object.create(arrayProto);[
   'reverse'
 ]
 .forEach(function (method) {
-  // cache original method
+  // cache original method 缓存原始方法
   var original = arrayProto[method];
+  // def(对象，键，值，可枚举)
   def(arrayMethods, method, function mutator () {
     var args = [], len = arguments.length;
     while ( len-- ) args[ len ] = arguments[ len ];
@@ -850,7 +865,7 @@ var arrayMethods = Object.create(arrayProto);[
         break
     }
     if (inserted) { ob.observeArray(inserted); }
-    // notify change
+    // notify change 数组变化通知
     ob.dep.notify();
     return result
   });
@@ -865,6 +880,9 @@ var arrayKeys = Object.getOwnPropertyNames(arrayMethods);
  * also converted to become reactive. However when passing down props,
  * we don't want to force conversion because the value may be a nested value
  * under a frozen data structure. Converting it would defeat the optimization.
+ * 默认情况下，一个响应式属性设定时，新值会被转换为响应式的。
+ * 但是这个属性下的属性更改，我们不能强制转换，因为这个值可能是嵌套值，
+ * 在冻结的数据结构下，转换它会影响优化？（未定）
  */
 var observerState = {
   shouldConvert: true
@@ -875,13 +893,19 @@ var observerState = {
  * object. Once attached, the observer converts target
  * object's property keys into getter/setters that
  * collect dependencies and dispatches updates.
+ * Observer class附属于他的观察对象（也就是__ob__）
+ * 一但关联，观察者会转换目标对象的属性为getter/setter
+ * 这样做可以收集依赖和分发更新
  */
 var Observer = function Observer (value) {
   this.value = value;
+  // Observer自动初始化一个Dep
   this.dep = new Dep();
   this.vmCount = 0;
+  // def(对象，键，值，可枚举)
   def(value, '__ob__', this);
   if (Array.isArray(value)) {
+    // 如果观察对象是数组
     var augment = hasProto
       ? protoAugment
       : copyAugment;
@@ -896,6 +920,8 @@ var Observer = function Observer (value) {
  * Walk through each property and convert them into
  * getter/setters. This method should only be called when
  * value type is Object.
+ * 遍历每个属性，把他们转换为getter/setters。
+ * 这个方法仅在值为object时调用
  */
 Observer.prototype.walk = function walk (obj) {
   var keys = Object.keys(obj);
@@ -906,6 +932,7 @@ Observer.prototype.walk = function walk (obj) {
 
 /**
  * Observe a list of Array items.
+ * Observe一个数组所有条目
  */
 Observer.prototype.observeArray = function observeArray (items) {
   for (var i = 0, l = items.length; i < l; i++) {
@@ -913,7 +940,7 @@ Observer.prototype.observeArray = function observeArray (items) {
   }
 };
 
-// helpers
+// 辅助函数
 
 /**
  * Augment an target Object or Array by intercepting
@@ -929,7 +956,6 @@ function protoAugment (target, src, keys) {
  * Augment an target Object or Array by defining
  * hidden properties.
  */
-/* istanbul ignore next */
 function copyAugment (target, src, keys) {
   for (var i = 0, l = keys.length; i < l; i++) {
     var key = keys[i];
@@ -941,13 +967,17 @@ function copyAugment (target, src, keys) {
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
+ * 尝试为一个值创建一个观察者实例，
+ * 成功是返回一个new observer，
+ * 如果已经存在，则返回原有的observer
  */
 function observe (value, asRootData) {
   if (!isObject(value)) {
     return
   }
   var ob;
-  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) { 
+    // 有__ob__ 且 是Observer实例，直接返回原来的__ob__
     ob = value.__ob__;
   } else if (
     observerState.shouldConvert &&
@@ -955,10 +985,12 @@ function observe (value, asRootData) {
     (Array.isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
     !value._isVue
-  ) {
+  ) { 
+    // 需转换 且 不是服务器渲染 且 这是数组或者PlainObject 且 可以新增属性 且 可被观察
     ob = new Observer(value);
   }
   if (asRootData && ob) {
+    // 作为根
     ob.vmCount++;
   }
   return ob
@@ -966,6 +998,9 @@ function observe (value, asRootData) {
 
 /**
  * Define a reactive property on an Object.
+ * 在对象定义响应式属性
+ * 参数
+ * 对象 键 值 自定义setter 是否有子属性（未定）
  */
 function defineReactive$$1 (
   obj,
@@ -975,7 +1010,7 @@ function defineReactive$$1 (
   shallow
 ) {
   var dep = new Dep();
-
+  // 如果指定的属性存在于对象上，则返回其属性描述符（property descriptor），否则返回 undefined
   var property = Object.getOwnPropertyDescriptor(obj, key);
   if (property && property.configurable === false) {
     return
@@ -990,6 +1025,7 @@ function defineReactive$$1 (
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
+      // 存在原有getter，把函数上下文设定为当前实例（未定），否则等于传入值
       var value = getter ? getter.call(obj) : val;
       if (Dep.target) {
         dep.depend();
@@ -1002,13 +1038,14 @@ function defineReactive$$1 (
       }
       return value
     },
+    // 响应式setter
     set: function reactiveSetter (newVal) {
       var value = getter ? getter.call(obj) : val;
-      /* eslint-disable no-self-compare */
+      // 新值等于原值 或 新旧值都是NaN（未定）,直接return
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
       }
-      /* eslint-enable no-self-compare */
+      // 传入了customSetter
       if ("development" !== 'production' && customSetter) {
         customSetter();
       }
@@ -1027,6 +1064,9 @@ function defineReactive$$1 (
  * Set a property on an object. Adds the new property and
  * triggers change notification if the property doesn't
  * already exist.
+ * 在对象设置一个属性，
+ * 如果属性不存在，
+ * 新增属性并触发change notification
  */
 function set (target, key, val) {
   if (Array.isArray(target) && isValidArrayIndex(key)) {
@@ -2916,6 +2956,7 @@ Watcher.prototype.get = function get () {
 
 /**
  * Add a dependency to this directive.
+ * 在这个指令上添加依赖
  */
 Watcher.prototype.addDep = function addDep (dep) {
   var id = dep.id;
@@ -3092,6 +3133,7 @@ function proxy (target, sourceKey, key) {
   Object.defineProperty(target, key, sharedPropertyDefinition);
 }
 
+// 初始化state
 function initState (vm) {
   vm._watchers = [];
   var opts = vm.$options;
@@ -4187,6 +4229,11 @@ function renderMixin (Vue) {
 
 var uid$1 = 0;
 
+/*
+ * mixins 选项接受一个混合对象的数组。
+ * 这些混合实例对象可以像正常的实例对象一样包含选项,
+ * 他们将在 Vue.extend() 里最终选择使用相同的选项合并逻辑合并。
+ */
 function initMixin (Vue) {
   Vue.prototype._init = function (options) {
     var vm = this;
@@ -4364,8 +4411,11 @@ function initMixin$1 (Vue) {
   };
 }
 
-/*  */
-
+/**
+ * 允许声明扩展另一个组件(可以是一个简单的选项对象或构造函数),
+ * 而无需使用 Vue.extend。
+ * 这主要是为了便于扩展单文件组件。
+ */
 function initExtend (Vue) {
   /**
    * Each instance constructor, including Vue, has a unique
@@ -8111,6 +8161,7 @@ var he = {
 
 /**
  * Not type-checking this file because it's mostly vendor code.
+ * 以下大部分为第三方代码
  */
 
 /*!
@@ -8455,6 +8506,7 @@ var platformGetTagNamespace;
 
 /**
  * Convert HTML string to AST.
+ * html转抽象语法树
  */
 function parse (
   template,
