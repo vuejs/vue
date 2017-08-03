@@ -12,8 +12,8 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 ### $1000
 
-<a href="https://www.upyun.com/?utm_source=vue&utm_medium=ad&utm_content=github">
-  <img width="400px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/upyun-large.png">
+<a href="https://xiaozhuanlan.com">
+  <img width="400px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/xiaozhuanlan.png">
 </a>
 
 ---
@@ -48,10 +48,6 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
 </a>
 <br><br>
-<a href="https://www.trisoft.ro/" target="_blank">
-  <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/trisoft.png">
-</a>
-<br><br>
 <a href="https://www.2mhost.com/" target="_blank">
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/2mhost.png">
 </a>
@@ -71,6 +67,16 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 <a href="https://component.io/" target="_blank">
   <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/component_io.png">
 </a>
+<br><br>
+<a href="https://www.v2ex.com/t/379389" target="_blank">
+  <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/v2exer.png">
+</a>
+
+---
+
+### $250
+
+- Matt Mullenweg
 
 ---
 
@@ -114,6 +120,7 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - Wasim Khamlichi
 - errorrik
 - Alex Balashov
+- Konstantin Levinski
 
 ---
 
@@ -263,3 +270,21 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - Jon Hobbs-Smith
 - Chez Tschetter
 - Akiho Nagao
+- Alexander Karelas
+- Asaf Yishai
+- Diana Espino
+- Alexandre Madurell
+- alxs
+- Anthony Estebe
+- Haim Yulzari
+- Blake Campbell
+- David McGuigan
+- Niklas Wallentin
+- Jeremy Tan
+- Jim Raden
+- Luka Savic
+- IMGNRY
+- Pascal Germain
+- Raphaël Saunier
+- Kirk Lewis
+- Nicholas Reid
