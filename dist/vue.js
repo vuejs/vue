@@ -350,6 +350,7 @@ var LIFECYCLE_HOOKS = [
 var config = ({
   /**
    * Option merge strategies (used in core/util/options)
+   * 自定义选项混合策略
    */
   optionMergeStrategies: Object.create(null),
 
@@ -1020,12 +1021,13 @@ function defineReactive$$1 (
   var getter = property && property.get;
   var setter = property && property.set;
 
+  // 有子元素的遍历子元素
   var childOb = !shallow && observe(val);
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
-      // 存在原有getter，把函数上下文设定为当前实例（未定），否则等于传入值
+      // 如果定义了getter，把getter函数上下文设定为当前实例，否则等于传入值
       var value = getter ? getter.call(obj) : val;
       if (Dep.target) {
         dep.depend();
@@ -1141,6 +1143,7 @@ function dependArray (value) {
  * Option overwriting strategies are functions that handle
  * how to merge a parent option value and a child option
  * value into the final value.
+ * 用于Mixin的混合策略
  */
 var strats = config.optionMergeStrategies;
 
@@ -2882,6 +2885,11 @@ var uid$2 = 0;
  * This is used for both the $watch() api and directives.
  * 在表达式的值改变时，watcher处理一个表达式，依赖集合和调用回调函数。
  * $watch() api和指令都有使用
+ * 参数
+ * vm 实例
+ * expOrFn 表达式或函数
+ * cb 回调函数
+ * option 选项
  */
 var Watcher = function Watcher (
   vm,
@@ -2910,6 +2918,7 @@ var Watcher = function Watcher (
   this.newDepIds = new _Set();
   this.expression = expOrFn.toString();
   // parse expression for getter
+  // 表达式赋值给getter
   if (typeof expOrFn === 'function') {
     this.getter = expOrFn;
   } else {
@@ -2931,6 +2940,7 @@ var Watcher = function Watcher (
 
 /**
  * Evaluate the getter, and re-collect dependencies.
+ * 对getter求值，重新收集依赖
  */
 Watcher.prototype.get = function get () {
   pushTarget(this);
@@ -2997,6 +3007,8 @@ Watcher.prototype.cleanupDeps = function cleanupDeps () {
 /**
  * Subscriber interface.
  * Will be called when a dependency changes.
+ * 订阅接口
+ * 依赖变更时，会运行这个函数
  */
 Watcher.prototype.update = function update () {
   /* istanbul ignore else */
@@ -3012,6 +3024,8 @@ Watcher.prototype.update = function update () {
 /**
  * Scheduler job interface.
  * Will be called by the scheduler.
+ * 调度任务接口（未定）
+ * 会被scheduler调用
  */
 Watcher.prototype.run = function run () {
   if (this.active) {
@@ -3220,6 +3234,7 @@ function initData (vm) {
     );
   }
   // proxy data on instance
+  // 在实例上代理data
   var keys = Object.keys(data);
   var props = vm.$options.props;
   var methods = vm.$options.methods;
