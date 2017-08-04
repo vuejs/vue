@@ -78,6 +78,7 @@
     "eslint": "^3.0.0",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-flowtype": "^2.34.0",
+    "eslint-plugin-html": "^3.1.1",
     "eslint-plugin-jasmine": "^2.2.0",
     "eslint-plugin-vue-libs": "^1.2.0",
     "file-loader": "^0.11.2",
