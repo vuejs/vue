@@ -17,10 +17,10 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         return this.options[type + 's'][id]
       }
       /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && 
-          type === 'component' && 
+      if (process.env.NODE_ENV !== 'production' &&
+          type === 'component' &&
           config.isReservedTag(id)) {
-          warn('Do not use built-in or reserved HTML elements as component id: ' + id)
+            warn('Do not use built-in or reserved HTML elements as component id: ' + id)
       }
       if (type === 'component' && isPlainObject(definition)) {
         definition.name = definition.name || id
