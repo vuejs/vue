@@ -148,4 +148,38 @@ describe('Directive v-model component', () => {
     vm.$refs.input.$emit('input', '   foo o  ')
     expect(vm.text).toBe('foo o')
   })
+
+  it('should work with v-bind="$attrs" plus v-on="$listeners"', done => {
+    const vm = new Vue({
+      data: {
+        msg: 'hello'
+      },
+      template: `
+        <div>
+          <p>{{ msg }}</p>
+          <test v-model="msg"></test>
+        </div>
+      `,
+      components: {
+        test: {
+          template: `<input v-bind="$attrs" v-on="$listeners">`
+        }
+      }
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    waitForUpdate(() => {
+      const input = vm.$el.querySelector('input')
+      input.value = 'world'
+      triggerEvent(input, 'input')
+    }).then(() => {
+      expect(vm.msg).toEqual('world')
+      expect(vm.$el.querySelector('p').textContent).toEqual('world')
+      vm.msg = 'changed'
+    }).then(() => {
+      expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+      expect(vm.$el.querySelector('input').value).toEqual('changed')
+    }).then(() => {
+      document.body.removeChild(vm.$el)
+    }).then(done)
+  })
 })
