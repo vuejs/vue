@@ -370,6 +370,23 @@ describe('Options provide/inject', () => {
     expect(`Injection "__ob__" not found`).not.toHaveBeenWarned()
   })
 
+  // Github issue #6097
+  it('should not warn when injections cannot be found but have default value', () => {
+    const vm = new Vue({})
+    new Vue({
+      parent: vm,
+      inject: {
+        foo: { default: 1 },
+        bar: { default: false },
+        baz: { default: undefined }
+      },
+      created () {}
+    })
+    expect(`Injection "foo" not found`).not.toHaveBeenWarned()
+    expect(`Injection "bar" not found`).not.toHaveBeenWarned()
+    expect(`Injection "baz" not found`).not.toHaveBeenWarned()
+  })
+
   // Github issue #6008
   it('should merge provide from mixins (objects)', () => {
     const mixinA = { provide: { foo: 'foo' }}
