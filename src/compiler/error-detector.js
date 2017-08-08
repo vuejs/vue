@@ -82,9 +82,7 @@ function checkIdentifier (ident: ?string, type: string, text: string, errors: Ar
 }
 
 function checkExpression (exp: string, text: string, errors: Array<string>) {
-  try {
-    new Function(`return ${exp}`)
-  } catch (e) {
+  if (!isValidExpression(exp)) {
     const keywordMatch = exp.replace(stripStringRE, '').match(prohibitedKeywordRE)
     if (keywordMatch) {
       errors.push(
@@ -93,6 +91,30 @@ function checkExpression (exp: string, text: string, errors: Array<string>) {
       )
     } else {
       errors.push(`invalid expression: ${text.trim()}`)
+    }
+  }
+}
+
+function isValidExpression (exp: string) {
+  try {
+    new Function(`return ${exp}`)
+    return true
+  } catch (e) {
+    /* istanbul ignore next */
+    try {
+      const babylon = (new Function(`return require('babylon')`))()
+      /* $flow-disable-line */
+      babylon.parseExpression(exp, {
+        plugins: [
+          'objectRestSpread',
+          'functionBind',
+          'numericSeparator',
+          'optionalChaining'
+        ]
+      })
+      return true
+    } catch (e) {
+      return false
     }
   }
 }
