@@ -387,6 +387,28 @@ describe('Options provide/inject', () => {
     expect(`Injection "baz" not found`).not.toHaveBeenWarned()
   })
 
+  it('should use provided value even if inject has default', () => {
+    const vm = new Vue({
+      provide: {
+        foo: 1,
+        bar: false,
+        baz: undefined
+      }
+    })
+    new Vue({
+      parent: vm,
+      inject: {
+        foo: { default: 2 },
+        bar: { default: 2 },
+        baz: { default: 2 }
+      },
+      created () {
+        injected = [this.foo, this.bar, this.baz]
+      }
+    })
+    expect(injected).toEqual([1, false, undefined])
+  })
+
   // Github issue #6008
   it('should merge provide from mixins (objects)', () => {
     const mixinA = { provide: { foo: 'foo' }}
