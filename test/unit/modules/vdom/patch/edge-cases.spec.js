@@ -147,15 +147,18 @@ describe('vdom patch: edge cases', () => {
       `
     }).$mount()
     const node = vm.$el.children[0]
+    expect(vm.$el.children[0].type).toBe('password')
     vm.$el.children[0].value = 'test'
     vm.show = true
     waitForUpdate(() => {
       expect(vm.$el.children[0]).toBe(node)
       expect(vm.$el.children[0].value).toBe('test')
+      expect(vm.$el.children[0].type).toBe('text')
       vm.show = false
     }).then(() => {
       expect(vm.$el.children[0]).toBe(node)
       expect(vm.$el.children[0].value).toBe('test')
+      expect(vm.$el.children[0].type).toBe('password')
     }).then(done)
   })
 })
