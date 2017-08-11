@@ -141,4 +141,77 @@ describe('generate events', () => {
       })
     })
   })
+
+  it('should work with v-model', (done) => {
+    const { render, staticRenderFns } = compileAndStringify(`
+      <div>
+        <text>{{ msg }}</text>
+        <input v-model="msg">
+      </div>
+    `)
+    const instance = createInstance(runtime, `
+      new Vue({
+        el: 'body',
+        data: {
+          msg: 'hello'
+        },
+        render: ${render},
+        staticRenderFns: ${staticRenderFns}
+      })
+    `)
+    setTimeout(() => {
+      const $text = instance.doc.body.children[0]
+      const $input = instance.doc.body.children[1]
+      expect($text.attr.value).toEqual('hello')
+      expect($input.attr.value).toEqual('hello')
+      $input.attr.value = 'world'
+      instance.$fireEvent($input.ref, 'input', {}, { attrs: $input.attr })
+      setTimeout(() => {
+        expect($input.attr.value).toEqual('world')
+        expect($text.attr.value).toEqual('world')
+        done()
+      }, 0)
+    }, 0)
+  })
+
+  it('should work with v-bind="$attrs" plus v-on="$listeners"', (done) => {
+    const childTemplate = compileAndStringify(`
+      <input v-bind="$attrs" v-on="$listeners">
+    `)
+    const { render, staticRenderFns } = compileAndStringify(`
+      <div>
+        <text>{{ msg }}</text>
+        <child v-model="msg"></child>
+      </div>
+    `)
+    const instance = createInstance(runtime, `
+      new Vue({
+        el: 'body',
+        data: {
+          msg: 'hello'
+        },
+        render: ${render},
+        staticRenderFns: ${staticRenderFns},
+        components: {
+          child: {
+            render: ${childTemplate.render},
+            staticRenderFns: ${childTemplate.staticRenderFns}
+          }
+        }
+      })
+    `)
+    setTimeout(() => {
+      const $text = instance.doc.body.children[0]
+      const $input = instance.doc.body.children[1]
+      expect($text.attr.value).toEqual('hello')
+      expect($input.attr.value).toEqual('hello')
+      $input.attr.value = 'world'
+      instance.$fireEvent($input.ref, 'input', {}, { attrs: $input.attr })
+      setTimeout(() => {
+        expect($input.attr.value).toEqual('world')
+        expect($text.attr.value).toEqual('world')
+        done()
+      }, 0)
+    }, 0)
+  })
 })
