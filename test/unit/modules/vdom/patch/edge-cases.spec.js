@@ -148,11 +148,11 @@ describe('vdom patch: edge cases', () => {
     }).$mount()
     const node = vm.$el.children[0]
     vm.$el.children[0].value = 'test'
-    vm.ok = true
+    vm.show = true
     waitForUpdate(() => {
       expect(vm.$el.children[0]).toBe(node)
       expect(vm.$el.children[0].value).toBe('test')
-      vm.ok = false
+      vm.show = false
     }).then(() => {
       expect(vm.$el.children[0]).toBe(node)
       expect(vm.$el.children[0].value).toBe('test')

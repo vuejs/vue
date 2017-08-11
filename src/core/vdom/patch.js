@@ -12,9 +12,10 @@
 
 import VNode from './vnode'
 import config from '../config'
-import { SSR_ATTR, TEXT_INPUT_TYPES } from 'shared/constants'
+import { SSR_ATTR } from 'shared/constants'
 import { registerRef } from './modules/ref'
 import { activeInstance } from '../instance/lifecycle'
+import { isTextInputType } from 'web/util/element'
 
 import {
   warn,
@@ -24,8 +25,6 @@ import {
   makeMap,
   isPrimitive
 } from '../util/index'
-
-const isTextInputType = makeMap(TEXT_INPUT_TYPES)
 
 export const emptyNode = new VNode('', {}, [])
 

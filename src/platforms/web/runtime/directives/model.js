@@ -3,11 +3,9 @@
  * properties to Elements.
  */
 
-import { looseEqual, looseIndexOf, makeMap } from 'shared/util'
-import { TEXT_INPUT_TYPES } from 'shared/constants'
+import { looseEqual, looseIndexOf } from 'shared/util'
 import { warn, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
-
-const isTextInputType = makeMap(TEXT_INPUT_TYPES)
+import { isTextInputType } from 'web/util/element'
 
 /* istanbul ignore if */
 if (isIE9) {
