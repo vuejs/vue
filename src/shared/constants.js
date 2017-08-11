@@ -18,3 +18,5 @@ export const LIFECYCLE_HOOKS = [
   'activated',
   'deactivated'
 ]
+
+export const TEXT_INPUT_TYPES = 'text,number,password,search,email,tel,url'

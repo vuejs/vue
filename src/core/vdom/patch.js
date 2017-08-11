@@ -6,15 +6,13 @@
  *
  * modified by Evan You (@yyx990803)
  *
-
-/*
  * Not type-checking this because this file is perf-critical and the cost
  * of making flow understand it is not worth it.
  */
 
 import VNode from './vnode'
 import config from '../config'
-import { SSR_ATTR } from 'shared/constants'
+import { SSR_ATTR, TEXT_INPUT_TYPES } from 'shared/constants'
 import { registerRef } from './modules/ref'
 import { activeInstance } from '../instance/lifecycle'
 
@@ -26,6 +24,8 @@ import {
   makeMap,
   isPrimitive
 } from '../util/index'
+
+const isTextInputType = makeMap(TEXT_INPUT_TYPES)
 
 export const emptyNode = new VNode('', {}, [])
 
@@ -48,14 +48,12 @@ function sameVnode (a, b) {
   )
 }
 
-// Some browsers do not support dynamically changing type for <input>
-// so they need to be treated as different nodes
 function sameInputType (a, b) {
   if (a.tag !== 'input') return true
   let i
   const typeA = isDef(i = a.data) && isDef(i = i.attrs) && i.type
   const typeB = isDef(i = b.data) && isDef(i = i.attrs) && i.type
-  return typeA === typeB
+  return typeA === typeB || isTextInputType(typeA) && isTextInputType(typeB)
 }
 
 function createKeyToOldIdx (children, beginIdx, endIdx) {

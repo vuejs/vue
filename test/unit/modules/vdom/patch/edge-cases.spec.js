@@ -135,4 +135,27 @@ describe('vdom patch: edge cases', () => {
       expect(vm.$el.children[0].value).toBe('a')
     }).then(done)
   })
+
+  // #6313
+  it('should not replace node when switching between text-like inputs', done => {
+    const vm = new Vue({
+      data: { show: false },
+      template: `
+        <div>
+          <input :type="show ? 'text' : 'password'">
+        </div>
+      `
+    }).$mount()
+    const node = vm.$el.children[0]
+    vm.$el.children[0].value = 'test'
+    vm.ok = true
+    waitForUpdate(() => {
+      expect(vm.$el.children[0]).toBe(node)
+      expect(vm.$el.children[0].value).toBe('test')
+      vm.ok = false
+    }).then(() => {
+      expect(vm.$el.children[0]).toBe(node)
+      expect(vm.$el.children[0].value).toBe('test')
+    }).then(done)
+  })
 })
