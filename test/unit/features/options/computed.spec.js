@@ -23,6 +23,36 @@ describe('Options computed', () => {
     }).then(done)
   })
 
+  it('support exp', done => {
+    const vm = new Vue({
+      template: '<div>{{ d }}</div>',
+      data: {
+        a: {
+          b: {
+            c: null
+          }
+        }
+      },
+      computed: {
+        d: 'a.b.c.d',
+        f: {
+          get: 'a.b.c.e.f'
+        }
+      }
+    }).$mount()
+    expect(vm.d).toBe(undefined)
+    expect(vm.f).toBe(undefined)
+    vm.a.b.c = {
+      d: 1,
+      e: { f: 2 }
+    }
+    waitForUpdate(() => {
+      expect(vm.d).toBe(1)
+      expect(vm.f).toBe(2)
+      expect(vm.$el.textContent).toBe('1')
+    }).then(done)
+  })
+
   it('with setter', done => {
     const vm = new Vue({
       template: '<div>{{ b }}</div>',

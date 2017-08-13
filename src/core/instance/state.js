@@ -18,6 +18,7 @@ import {
   bind,
   noop,
   hasOwn,
+  parsePath,
   isReserved,
   handleError,
   nativeWatch,
@@ -171,8 +172,10 @@ function initComputed (vm: Component, computed: Object) {
   const watchers = vm._computedWatchers = Object.create(null)
 
   for (const key in computed) {
-    const userDef = computed[key]
-    const getter = typeof userDef === 'function' ? userDef : userDef.get
+    let userDef = computed[key]
+    const isObject = isPlainObject(userDef)
+    let getter = isObject ? userDef.get : userDef
+    getter = typeof getter === 'string' ? parsePath(getter) : getter
     if (process.env.NODE_ENV !== 'production' && getter == null) {
       warn(
         `Getter is missing for computed property "${key}".`,
@@ -186,6 +189,7 @@ function initComputed (vm: Component, computed: Object) {
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
     if (!(key in vm)) {
+      isObject ? userDef.get = getter : userDef = getter
       defineComputed(vm, key, userDef)
     } else if (process.env.NODE_ENV !== 'production') {
       if (key in vm.$data) {
