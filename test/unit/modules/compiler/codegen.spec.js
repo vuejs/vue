@@ -299,7 +299,7 @@ describe('codegen', () => {
       `with(this){return _c('input',{on:{"click":function($event){if(!$event.metaKey)return null;onClick($event)}}})}`
     )
     assertCodegen(
-      '<input @click.plain="onClick">',
+      '<input @click.bare="onClick">',
       `with(this){return _c('input',{on:{"click":function($event){if($event.ctrlKey || $event.shiftKey || $event.altKey || $event.metaKey)return null;onClick($event)}}})}`
     )
   })
