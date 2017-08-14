@@ -99,6 +99,7 @@ export declare class Vue {
   static component(id: string, definition?: Component | AsyncComponent): typeof Vue;
 
   static use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): void;
+  static use(plugin: PluginObject<any> | PluginFunction<any>, ...options: any[]): void;
   static mixin(mixin: typeof Vue | ComponentOptions<Vue>): void;
   static compile(template: string): {
     render(createElement: typeof Vue.prototype.$createElement): VNode;
