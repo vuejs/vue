@@ -9,6 +9,8 @@ import {
   isReservedAttribute
 } from 'core/util/index'
 
+import { set } from 'core/observer/index'
+
 /**
  * Runtime helper for merging v-bind="object" into a VNode's data.
  */
@@ -49,7 +51,7 @@ export function bindObjectProps (
           if (isSync) {
             const on = data.on || (data.on = {})
             on[`update:${key}`] = function ($event) {
-              value[key] = $event
+              set(value, key, $event)
             }
           }
         }
