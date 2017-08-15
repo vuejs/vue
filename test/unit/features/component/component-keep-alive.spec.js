@@ -862,5 +862,89 @@ describe('Component keep-alive', () => {
         )
       }).then(done)
     })
+
+    it('async components with transition-mode out-in', done => {
+      const barResolve = jasmine.createSpy('bar resolved')
+      let next
+      const foo = (resolve) => {
+        setTimeout(() => {
+          resolve(one)
+          Vue.nextTick(next)
+        }, duration / 2)
+      }
+      const bar = (resolve) => {
+        setTimeout(() => {
+          resolve(two)
+          barResolve()
+        }, duration / 2)
+      }
+      components = {
+        foo,
+        bar
+      }
+      const vm = new Vue({
+        template: `<div>
+          <transition name="test" mode="out-in" @after-enter="afterEnter" @after-leave="afterLeave">
+            <keep-alive>
+              <component :is="view" class="test"></component>
+            </keep-alive>
+          </transition>
+        </div>`,
+        data: {
+          view: 'foo'
+        },
+        components,
+        methods: {
+          afterEnter () {
+            next()
+          },
+          afterLeave () {
+            next()
+          }
+        }
+      }).$mount(el)
+      expect(vm.$el.textContent).toBe('')
+      next = () => {
+        assertHookCalls(one, [1, 1, 1, 0, 0])
+        assertHookCalls(two, [0, 0, 0, 0, 0])
+        waitForUpdate(() => {
+          expect(vm.$el.innerHTML).toBe(
+            '<div class="test test-enter test-enter-active">one</div>'
+          )
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.innerHTML).toBe(
+            '<div class="test test-enter-active test-enter-to">one</div>'
+          )
+        }).thenWaitFor(_next => { next = _next }).then(() => {
+          // foo afterEnter get called
+          expect(vm.$el.innerHTML).toBe('<div class="test">one</div>')
+          vm.view = 'bar'
+        }).thenWaitFor(nextFrame).then(() => {
+          assertHookCalls(one, [1, 1, 1, 1, 0])
+          assertHookCalls(two, [0, 0, 0, 0, 0])
+          expect(vm.$el.innerHTML).toBe(
+            '<div class="test test-leave-active test-leave-to">one</div><!---->'
+          )
+        }).thenWaitFor(_next => { next = _next }).then(() => {
+          // foo afterLeave get called
+          // and bar has already been resolved before afterLeave get called
+          expect(barResolve.calls.count()).toBe(1)
+          expect(vm.$el.innerHTML).toBe('<!---->')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.innerHTML).toBe(
+            '<div class="test test-enter test-enter-active">two</div>'
+          )
+          assertHookCalls(one, [1, 1, 1, 1, 0])
+          assertHookCalls(two, [1, 1, 1, 0, 0])
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.innerHTML).toBe(
+            '<div class="test test-enter-active test-enter-to">two</div>'
+          )
+        }).thenWaitFor(_next => { next = _next }).then(() => {
+          // bar afterEnter get called
+          expect(vm.$el.innerHTML).toBe('<div class="test">two</div>')
+        }).then(done)
+      }
+    })
   }
 })
