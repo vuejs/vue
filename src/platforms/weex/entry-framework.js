@@ -104,6 +104,8 @@ export function createInstance (
 
   // Send `createFinish` signal to native.
   instance.document.taskCenter.send('dom', { action: 'createFinish' }, [])
+
+  return instance
 }
 
 /**
