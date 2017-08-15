@@ -109,6 +109,17 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('preserves html entities', done => {
+    renderVmWithOptions({
+      template: '<div>&lt;hello</div>'
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true">&lt;hello</div>'
+      )
+      done()
+    })
+  })
+
   it('dynamic string style', done => {
     renderVmWithOptions({
       template: '<div :style="style"></div>',
