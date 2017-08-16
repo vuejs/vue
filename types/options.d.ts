@@ -27,18 +27,18 @@ export type Accessors<T> = {
 /**
  * This type should be used when an array of strings is used for a component's `props` value.
  */
-export type ThisTypedComponentOptionsWithArrayProps<Instance extends Vue, Data, Methods, Computed, PropNames extends string> =
+export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, PropNames extends string> =
   object &
-  ComponentOptions<Data | ((this: Record<PropNames, any> & Instance) => Data), Methods, Computed, PropNames[]> &
-  ThisType<CombinedVueInstance<Instance, Data, Methods, Computed, Record<PropNames, any>>>;
+  ComponentOptions<V, Data | ((this: Record<PropNames, any> & V) => Data), Methods, Computed, PropNames[]> &
+  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Record<PropNames, any>>>;
 
 /**
  * This type should be used when an object mapped to `PropOptions` is used for a component's `props` value.
  */
-export type ThisTypedComponentOptionsWithRecordProps<Instance extends Vue, Data, Methods, Computed, Props> =
+export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props> =
   object &
-  ComponentOptions<Data | ((this: Record<keyof Props, any> & Instance) => Data), Methods, Computed, Props> &
-  ThisType<CombinedVueInstance<Instance, Data, Methods, Computed, Props>>;
+  ComponentOptions<V, Data | ((this: Record<keyof Props, any> & V) => Data), Methods, Computed, Props> &
+  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Props>>;
 
 /**
  * A helper type that describes options for either functional or non-functional components.
@@ -49,8 +49,16 @@ export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, PropNa
   | ThisTypedComponentOptionsWithArrayProps<Vue, Data, Methods, Computed, PropNames>
   | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Record<PropNames, PropOptions>>;
 
-
-export interface ComponentOptions<Data, Methods, Computed, Props> {
+type DefaultData<V> =  object | ((this: V) => object);
+type DefaultProp = string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
+type DefaultMethods<V> =  { [key: string]: (this: V, ...args: any[]) => any };
+type DefaultComputed<V> = { [key: string]: ((this: V) => any) | ComputedOptions<V> };
+export interface ComponentOptions<
+  V extends Vue,
+  Data=DefaultData<V>,
+  Methods=DefaultMethods<V>,
+  Computed=DefaultComputed<V>,
+  Props=DefaultProp> {
   data?: Data;
   props?: Props;
   propsData?: Object;

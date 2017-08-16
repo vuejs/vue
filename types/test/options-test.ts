@@ -92,7 +92,7 @@ Vue.component('component', {
       createElement(),
       createElement("div", "message"),
       createElement(Vue.component("component")),
-      createElement({} as ComponentOptions<object, object, object, object>),
+      createElement({} as ComponentOptions<Vue, object, object, object, object>),
       createElement({
         functional: true,
         render(c: CreateElement) {
@@ -101,14 +101,14 @@ Vue.component('component', {
       }),
 
       createElement(() => Vue.component("component")),
-      createElement(() => ( {} as ComponentOptions<object, object, object, object> )),
+      createElement(() => ( {} as ComponentOptions<Vue, object, object, object, object> )),
       createElement(() => {
         return new Promise((resolve) => {
-          resolve({} as ComponentOptions<object, object, object, object>);
+          resolve({} as ComponentOptions<Vue, object, object, object, object>);
         })
       }),
       createElement((resolve, reject) => {
-        resolve({} as ComponentOptions<object, object, object, object>);
+        resolve({} as ComponentOptions<Vue, object, object, object, object>);
         reject();
       }),
 
@@ -153,7 +153,7 @@ Vue.component('component', {
   },
   components: {
     a: Vue.component(""),
-    b: {} as ComponentOptions<object, object, object, object>
+    b: {} as ComponentOptions<Vue, object, object, object, object>
   },
   transitions: {},
   filters: {
@@ -162,9 +162,9 @@ Vue.component('component', {
     }
   },
   parent: new Vue,
-  mixins: [Vue.component(""), ({} as ComponentOptions<object, object, object, object>)],
+  mixins: [Vue.component(""), ({} as ComponentOptions<Vue, object, object, object, {}>)],
   name: "Component",
-  extends: {} as ComponentOptions<object, object, object, object>,
+  extends: {} as ComponentOptions<Vue, object, object, object, {}>,
   delimiters: ["${", "}"]
 });
 
