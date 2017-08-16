@@ -9,7 +9,7 @@ interface Component extends Vue {
 Vue.component('component', {
   data() {
     this.$mount
-    this.a
+    this.size
     return {
       a: 1
     }
@@ -20,9 +20,6 @@ Vue.component('component', {
       type: String,
       default: 0,
       required: true,
-      validator(value: number) {
-        return value > 0;
-      }
     }
   },
   propsData: {
@@ -45,6 +42,9 @@ Vue.component('component', {
   methods: {
     plus() {
       this.a++;
+      this.aDouble.toFixed();
+      this.aPlus = 1;
+      this.size.toFixed();
     }
   },
   watch: {

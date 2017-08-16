@@ -38,7 +38,7 @@ export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods
 export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props> =
   object &
   ComponentOptions<V, Data | ((this: Record<keyof Props, any> & V) => Data), Methods, Computed, Props> &
-  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Props>>;
+  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Record<keyof Props, any>>>;
 
 /**
  * A helper type that describes options for either functional or non-functional components.
