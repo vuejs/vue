@@ -6,6 +6,30 @@ interface Component extends Vue {
   a: number;
 }
 
+Vue.component('sub-component', {
+  components: {
+    a: Vue.component(""),
+    b: {}
+  }
+});
+
+Vue.component('prop-component', {
+  props: {
+    size: Number,
+    name: {
+      type: String,
+      default: '0',
+      required: true,
+    }
+  },
+  data() {
+    return {
+      fixedSize: this.size.toFixed(),
+      capName: this.name.toUpperCase()
+    }
+  }
+});
+
 Vue.component('component', {
   data() {
     this.$mount
