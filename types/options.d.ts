@@ -142,7 +142,7 @@ export interface PropOptions<T=any> {
 export type RecordPropsDefinition<T> = {
   [K in keyof T]: PropValidator<T[K]>
 }
-export type ArrayPropsDefinition<T> = keyof T;
+export type ArrayPropsDefinition<T> = (keyof T)[];
 export type PropsDefinition<T> = ArrayPropsDefinition<T> | RecordPropsDefinition<T>;
 
 export interface ComputedOptions<T> {

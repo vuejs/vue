@@ -1,4 +1,5 @@
 import Vue from "../index";
+import { ComponentOptions } from "../options";
 
 class Test extends Vue {
   a: number;
@@ -152,3 +153,9 @@ const GrandChild = Child.extend({
 });
 
 new GrandChild().lower.toUpperCase();
+for (let _ in (new Test()).$options) {
+}
+declare const options: ComponentOptions<Vue>;
+Vue.extend(options);
+Vue.component('test-comp', options);
+new Vue(options);
