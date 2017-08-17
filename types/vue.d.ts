@@ -96,6 +96,7 @@ export interface VueConstructor<V extends Vue = Vue> {
 
   component(id: string): VueConstructor;
   component<VC extends VueConstructor>(id: string, constructor: VC): VC;
+  component<Data, Methods, Computed, Props>(id: string, definition: AsyncComponent<Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props>;
   component<Props>(id: string, definition: FunctionalComponentOptions<Props>): ExtendedVue<V, {}, {}, {}, Props>;
   component<Data, Methods, Computed, Props>(id: string, definition?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props>;
 

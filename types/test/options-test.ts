@@ -217,6 +217,6 @@ Vue.component("async-component", (resolve, reject) => {
     resolve(Vue.component("component"));
   }, 0);
   return new Promise((resolve) => {
-    resolve({ functional: true } as FunctionalComponentOptions);
+    resolve({ functional: true });
   })
 });
