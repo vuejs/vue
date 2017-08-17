@@ -30,6 +30,16 @@ Vue.component('prop-component', {
   }
 });
 
+Vue.component('string-prop', {
+  props: ['size', 'name'],
+  data() {
+    return {
+      fixedSize: this.size.whatever,
+      capName: this.name.isany
+    }
+  }
+});
+
 Vue.component('component', {
   data() {
     this.$mount
