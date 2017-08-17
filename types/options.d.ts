@@ -5,6 +5,7 @@ type Constructor = {
   new (...args: any[]): any;
 }
 
+// we don't support infer props in async component
 export type Component<Data=DefaultData<Vue>, Methods=DefaultMethods<Vue>, Computed=DefaultComputed, Props=DefaultProps> =
   | typeof Vue
   | FunctionalComponentOptions<Props>
@@ -39,7 +40,7 @@ export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods
  */
 export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props> =
   object &
-  ComponentOptions<V, Data | ((this: Props & V) => Data), Methods, Computed, Props> &
+  ComponentOptions<V, Data | ((this: Props & V) => Data), Methods, Computed, RecordPropsDefinition<Props>> &
   ThisType<CombinedVueInstance<V, Data, Methods, Computed, Props>>;
 
 type DefaultData<V> =  object | ((this: V) => object);
