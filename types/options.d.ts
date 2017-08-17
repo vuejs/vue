@@ -44,13 +44,13 @@ export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Method
  * A helper type that describes options for either functional or non-functional components.
  * Useful for `Vue.extend` and `Vue.component`.
  */
-export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, PropNames extends string = never> =
-  | FunctionalComponentOptions<PropNames[] | Record<PropNames, PropValidator>, Record<PropNames, any>>
-  | ThisTypedComponentOptionsWithArrayProps<Vue, Data, Methods, Computed, PropNames>
-  | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Record<PropNames, PropOptions>>;
+export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, Props> =
+  | FunctionalComponentOptions<Props>
+  | ThisTypedComponentOptionsWithArrayProps<Vue, Data, Methods, Computed, keyof Props>
+  | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Props>;
 
 type DefaultData<V> =  object | ((this: V) => object);
-type DefaultProp = string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
+type DefaultProp = Record<string, any>;
 type DefaultMethods<V> =  { [key: string]: (this: V, ...args: any[]) => any };
 type DefaultComputed = { [key: string]: any };
 export interface ComponentOptions<
@@ -60,7 +60,7 @@ export interface ComponentOptions<
   Computed=DefaultComputed,
   Props=DefaultProp> {
   data?: Data;
-  props?: Props;
+  props?: (keyof Props)[] | PropsDefinition<Props>;
   propsData?: Object;
   computed?: Accessors<Computed>;
   methods?: Methods;
@@ -97,7 +97,7 @@ export interface ComponentOptions<
   };
 
   parent?: Vue;
-  mixins?: (ComponentOptions<any, any, any, any> | typeof Vue)[];
+  mixins?: (ComponentOptions<Vue> | typeof Vue)[];
   name?: string;
   // TODO: support properly inferred 'extends'
   extends?: ComponentOptions<any, any, any, any> | typeof Vue;
@@ -106,11 +106,11 @@ export interface ComponentOptions<
   inheritAttrs?: boolean;
 }
 
-export interface FunctionalComponentOptions<Props = object, ContextProps = object> {
+export interface FunctionalComponentOptions<Props> {
   name?: string;
-  props?: Props;
+  props?: keyof Props | PropsDefinition<Props>;
   functional: boolean;
-  render(this: undefined, createElement: CreateElement, context: RenderContext<ContextProps>): VNode;
+  render(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode;
 }
 
 export interface RenderContext<Props> {
@@ -122,13 +122,31 @@ export interface RenderContext<Props> {
   injections: any
 }
 
-export type PropValidator = PropOptions | Constructor | Constructor[];
+declare global {
+  interface StringConstructor {
+    '@@vueProp': string;
+  }
+  interface BooleanConstructor {
+    '@@vueProp': boolean;
+  }
+  interface NumberConstructor {
+    '@@vueProp': number;
+  }
+}
 
-export interface PropOptions {
-  type?: Constructor | Constructor[] | null;
+export type Prop<T> = { '@@vueProp': T } | { new (...args: any[]): T }
+
+export type PropValidator<T> = PropOptions<T> | Prop<T> | Prop<T>[];
+
+export interface PropOptions<T> {
+  type?: Prop<T> | Prop<T>[];
   required?: boolean;
-  default?: string | number | boolean | null | undefined | (() => object);
+  default?: T | null | undefined | (() => object);
   validator?(value: any): boolean;
+}
+
+export type PropsDefinition<T> = {
+  [K in keyof T]: PropValidator<T[K]>
 }
 
 export interface ComputedOptions<T> {
