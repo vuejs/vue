@@ -18,7 +18,7 @@ Vue.component('component', {
     size: Number,
     name: {
       type: String,
-      default: 0,
+      default: '0',
       required: true,
     }
   },
@@ -92,7 +92,7 @@ Vue.component('component', {
       createElement(),
       createElement("div", "message"),
       createElement(Vue.component("component")),
-      createElement({} as ComponentOptions<Vue, object, object, object, object>),
+      createElement({} as ComponentOptions<Vue>),
       createElement({
         functional: true,
         render(c: CreateElement) {
@@ -101,14 +101,14 @@ Vue.component('component', {
       }),
 
       createElement(() => Vue.component("component")),
-      createElement(() => ( {} as ComponentOptions<Vue, object, object, object, object> )),
+      createElement(() => ( {} as ComponentOptions<Vue> )),
       createElement(() => {
         return new Promise((resolve) => {
-          resolve({} as ComponentOptions<Vue, object, object, object, object>);
+          resolve({} as ComponentOptions<Vue>);
         })
       }),
       createElement((resolve, reject) => {
-        resolve({} as ComponentOptions<Vue, object, object, object, object>);
+        resolve({} as ComponentOptions<Vue>);
         reject();
       }),
 
@@ -153,7 +153,7 @@ Vue.component('component', {
   },
   components: {
     a: Vue.component(""),
-    b: {} as ComponentOptions<Vue, object, object, object, object>
+    b: {} as ComponentOptions<Vue>
   },
   transitions: {},
   filters: {

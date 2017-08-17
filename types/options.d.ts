@@ -5,14 +5,14 @@ type Constructor = {
   new (...args: any[]): any;
 }
 
-export type Component<Data, Methods, Computed, PropNames extends string = never> =
+export type Component<Data, Methods, Computed, Props> =
   typeof Vue |
-  FunctionalOrStandardComponentOptions<Data, Methods, Computed, PropNames>;
+  FunctionalOrStandardComponentOptions<Data, Methods, Computed, Props>;
 
-export type AsyncComponent<Data, Methods, Computed, PropNames extends string> = (
-  resolve: (component: Component<Data, Methods, Computed, PropNames>) => void,
+export type AsyncComponent<Data, Methods, Computed, Props> = (
+  resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
-) => Promise<Component<Data, Methods, Computed, PropNames>> | Component<Data, Methods, Computed, PropNames> | void;
+) => Promise<Component<Data, Methods, Computed, Props>> | Component<Data, Methods, Computed, Props> | void;
 
 /**
  * When the `Computed` type parameter on `ComponentOptions` is inferred,
@@ -27,18 +27,18 @@ export type Accessors<T> = {
 /**
  * This type should be used when an array of strings is used for a component's `props` value.
  */
-export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, PropNames extends string> =
+export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, Props> =
   object &
-  ComponentOptions<V, Data | ((this: Record<PropNames, any> & V) => Data), Methods, Computed, PropNames[]> &
-  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Record<PropNames, any>>>;
+  ComponentOptions<V, Data | ((this: Props & V) => Data), Methods, Computed, Props> &
+  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Props>>;
 
 /**
  * This type should be used when an object mapped to `PropOptions` is used for a component's `props` value.
  */
 export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props> =
   object &
-  ComponentOptions<V, Data | ((this: Record<keyof Props, any> & V) => Data), Methods, Computed, Props> &
-  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Record<keyof Props, any>>>;
+  ComponentOptions<V, Data | ((this: Props & V) => Data), Methods, Computed, Props> &
+  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Props>>;
 
 /**
  * A helper type that describes options for either functional or non-functional components.
@@ -134,7 +134,7 @@ declare global {
   }
 }
 
-export type Prop<T> = { '@@vueProp': T } | { new (...args: any[]): T }
+export type Prop<T> = { '@@vueProp': T } | { new (...args: any[]): T & object }
 
 export type PropValidator<T> = PropOptions<T> | Prop<T> | Prop<T>[];
 
