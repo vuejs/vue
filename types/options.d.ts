@@ -25,14 +25,6 @@ export type Accessors<T> = {
 }
 
 /**
- * This type should be used when an array of strings is used for a component's `props` value.
- */
-export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, Props> =
-  object &
-  ComponentOptions<V, Data | ((this: Props & V) => Data), Methods, Computed, Props> &
-  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Props>>;
-
-/**
  * This type should be used when an object mapped to `PropOptions` is used for a component's `props` value.
  */
 export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props> =
@@ -46,7 +38,6 @@ export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Method
  */
 export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, Props> =
   | FunctionalComponentOptions<Props>
-  | ThisTypedComponentOptionsWithArrayProps<Vue, Data, Methods, Computed, keyof Props>
   | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Props>;
 
 type DefaultData<V> =  object | ((this: V) => object);
@@ -84,7 +75,7 @@ export interface ComponentOptions<
   deactivated?(): void;
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
-  components?: { [key: string]: Component<any, any, any, never> | AsyncComponent<any, any, any, never> };
+  components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> };
   transitions?: { [key: string]: Object };
   filters?: { [key: string]: Function };
 
@@ -100,13 +91,13 @@ export interface ComponentOptions<
   mixins?: (ComponentOptions<Vue> | typeof Vue)[];
   name?: string;
   // TODO: support properly inferred 'extends'
-  extends?: ComponentOptions<any, any, any, any> | typeof Vue;
+  extends?: ComponentOptions<Vue> | typeof Vue;
   delimiters?: [string, string];
   comments?: boolean;
   inheritAttrs?: boolean;
 }
 
-export interface FunctionalComponentOptions<Props> {
+export interface FunctionalComponentOptions<Props = DefaultProp> {
   name?: string;
   props?: keyof Props | PropsDefinition<Props>;
   functional: boolean;

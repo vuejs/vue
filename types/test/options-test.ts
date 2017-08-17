@@ -162,9 +162,9 @@ Vue.component('component', {
     }
   },
   parent: new Vue,
-  mixins: [Vue.component(""), ({} as ComponentOptions<Vue, object, object, object, {}>)],
+  mixins: [Vue.component(""), ({} as ComponentOptions<Vue>)],
   name: "Component",
-  extends: {} as ComponentOptions<Vue, object, object, object, {}>,
+  extends: {} as ComponentOptions<Vue>,
   delimiters: ["${", "}"]
 });
 

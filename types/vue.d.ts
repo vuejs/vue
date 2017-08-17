@@ -8,7 +8,6 @@ import {
   DirectiveOptions,
   DirectiveFunction,
   PropValidator,
-  ThisTypedComponentOptionsWithArrayProps,
   ThisTypedComponentOptionsWithRecordProps,
   WatchOptions,
 } from "./options";
@@ -34,7 +33,7 @@ export interface CreateElement {
 
 export interface Vue {
   readonly $el: HTMLElement;
-  readonly $options: ComponentOptions<this, any, any, any, any>;
+  readonly $options: ComponentOptions<this>;
   readonly $parent: Vue;
   readonly $root: Vue;
   readonly $children: Vue[];
@@ -101,7 +100,7 @@ export interface VueConstructor<V extends Vue = Vue> {
   component<Data, Methods, Computed, Props>(id: string, definition?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props>;
 
   use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): void;
-  mixin(mixin: typeof Vue | ComponentOptions<any, any, any, any>): void;
+  mixin(mixin: typeof Vue | ComponentOptions<Vue>): void;
   compile(template: string): {
     render(createElement: typeof Vue.prototype.$createElement): VNode;
     staticRenderFns: (() => VNode)[];
