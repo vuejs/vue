@@ -1,43 +1,90 @@
-import { Vue, CreateElement } from "./vue";
+import { Vue, CreateElement, CombinedVueInstance } from "./vue";
 import { VNode, VNodeData, VNodeDirective } from "./vnode";
 
 type Constructor = {
   new (...args: any[]): any;
 }
 
-export type Component = typeof Vue | ComponentOptions<Vue> | FunctionalComponentOptions;
-export type AsyncComponent = (
-  resolve: (component: Component) => void,
-  reject: (reason?: any) => void
-) => Promise<Component> | Component | void;
+export type Component<Data, Methods, Computed, PropNames extends string = never> =
+  typeof Vue |
+  FunctionalOrStandardComponentOptions<Data, Methods, Computed, PropNames>;
 
-export interface ComponentOptions<V extends Vue> {
-  data?: Object | ((this: V) => Object);
-  props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
+export type AsyncComponent<Data, Methods, Computed, PropNames extends string> = (
+  resolve: (component: Component<Data, Methods, Computed, PropNames>) => void,
+  reject: (reason?: any) => void
+) => Promise<Component<Data, Methods, Computed, PropNames>> | Component<Data, Methods, Computed, PropNames> | void;
+
+/**
+ * When the `Computed` type parameter on `ComponentOptions` is inferred,
+ * it should have a property with the return type of every get-accessor.
+ * Since there isn't a way to query for the return type of a function, we allow TypeScript
+ * to infer from the shape of `Accessors<Computed>` and work backwards.
+ */
+export type Accessors<T> = {
+  [K in keyof T]: (() => T[K]) | ComputedOptions<T[K]>
+}
+
+/**
+ * This type should be used when an array of strings is used for a component's `props` value.
+ */
+export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, PropNames extends string> =
+  object &
+  ComponentOptions<V, Data | ((this: Record<PropNames, any> & V) => Data), Methods, Computed, PropNames[]> &
+  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Record<PropNames, any>>>;
+
+/**
+ * This type should be used when an object mapped to `PropOptions` is used for a component's `props` value.
+ */
+export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props> =
+  object &
+  ComponentOptions<V, Data | ((this: Record<keyof Props, any> & V) => Data), Methods, Computed, Props> &
+  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Record<keyof Props, any>>>;
+
+/**
+ * A helper type that describes options for either functional or non-functional components.
+ * Useful for `Vue.extend` and `Vue.component`.
+ */
+export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, PropNames extends string = never> =
+  | FunctionalComponentOptions<PropNames[] | Record<PropNames, PropValidator>, Record<PropNames, any>>
+  | ThisTypedComponentOptionsWithArrayProps<Vue, Data, Methods, Computed, PropNames>
+  | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Record<PropNames, PropOptions>>;
+
+type DefaultData<V> =  object | ((this: V) => object);
+type DefaultProp = string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
+type DefaultMethods<V> =  { [key: string]: (this: V, ...args: any[]) => any };
+type DefaultComputed<V> = { [key: string]: ((this: V) => any) | ComputedOptions<V> };
+export interface ComponentOptions<
+  V extends Vue,
+  Data=DefaultData<V>,
+  Methods=DefaultMethods<V>,
+  Computed=DefaultComputed<V>,
+  Props=DefaultProp> {
+  data?: Data;
+  props?: Props;
   propsData?: Object;
-  computed?: { [key: string]: ((this: V) => any) | ComputedOptions<V> };
-  methods?: { [key: string]: (this: V, ...args: any[]) => any };
-  watch?: { [key: string]: ({ handler: WatchHandler<V, any> } & WatchOptions) | WatchHandler<V, any> | string };
+  computed?: Accessors<Computed>;
+  methods?: Methods;
+  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any> | string>;
 
   el?: Element | String;
   template?: string;
-  render?(this: V, createElement: CreateElement): VNode;
+  render?(createElement: CreateElement): VNode;
   renderError?: (h: () => VNode, err: Error) => VNode;
   staticRenderFns?: ((createElement: CreateElement) => VNode)[];
 
-  beforeCreate?(this: V): void;
-  created?(this: V): void;
-  beforeDestroy?(this: V): void;
-  destroyed?(this: V): void;
-  beforeMount?(this: V): void;
-  mounted?(this: V): void;
-  beforeUpdate?(this: V): void;
-  updated?(this: V): void;
-  activated?(this: V): void;
-  deactivated?(this: V): void;
+  beforeCreate?(): void;
+  created?(): void;
+  beforeDestroy?(): void;
+  destroyed?(): void;
+  beforeMount?(): void;
+  mounted?(): void;
+  beforeUpdate?(): void;
+  updated?(): void;
+  activated?(): void;
+  deactivated?(): void;
 
-  directives?: { [key: string]: DirectiveOptions | DirectiveFunction };
-  components?: { [key: string]: Component | AsyncComponent };
+  directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
+  components?: { [key: string]: Component<any, any, any, never> | AsyncComponent<any, any, any, never> };
   transitions?: { [key: string]: Object };
   filters?: { [key: string]: Function };
 
@@ -50,23 +97,24 @@ export interface ComponentOptions<V extends Vue> {
   };
 
   parent?: Vue;
-  mixins?: (ComponentOptions<Vue> | typeof Vue)[];
+  mixins?: (ComponentOptions<any, any, any, any> | typeof Vue)[];
   name?: string;
-  extends?: ComponentOptions<Vue> | typeof Vue;
+  // TODO: support properly inferred 'extends'
+  extends?: ComponentOptions<any, any, any, any> | typeof Vue;
   delimiters?: [string, string];
   comments?: boolean;
   inheritAttrs?: boolean;
 }
 
-export interface FunctionalComponentOptions {
+export interface FunctionalComponentOptions<Props = object, ContextProps = object> {
   name?: string;
-  props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
+  props?: Props;
   functional: boolean;
-  render(this: never, createElement: CreateElement, context: RenderContext): VNode | void;
+  render(this: undefined, createElement: CreateElement, context: RenderContext<ContextProps>): VNode;
 }
 
-export interface RenderContext {
-  props: any;
+export interface RenderContext<Props> {
+  props: Props;
   children: VNode[];
   slots(): any;
   data: VNodeData;
@@ -74,24 +122,30 @@ export interface RenderContext {
   injections: any
 }
 
+export type PropValidator = PropOptions | Constructor | Constructor[];
+
 export interface PropOptions {
   type?: Constructor | Constructor[] | null;
   required?: boolean;
-  default?: any;
+  default?: string | number | boolean | null | undefined | (() => object);
   validator?(value: any): boolean;
 }
 
-export interface ComputedOptions<V> {
-  get?(this: V): any;
-  set?(this: V, value: any): void;
+export interface ComputedOptions<T> {
+  get?(): T;
+  set?(value: T): void;
   cache?: boolean;
 }
 
-export type WatchHandler<V, T> = (this: V, val: T, oldVal: T) => void;
+export type WatchHandler<T> = (val: T, oldVal: T) => void;
 
 export interface WatchOptions {
   deep?: boolean;
   immediate?: boolean;
+}
+
+export interface WatchOptionsWithHandler<T> extends WatchOptions {
+  handler: WatchHandler<T>;
 }
 
 export type DirectiveFunction = (
