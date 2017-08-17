@@ -6,8 +6,10 @@ type Constructor = {
 }
 
 export type Component<Data=DefaultData<Vue>, Methods=DefaultMethods<Vue>, Computed=DefaultComputed, Props=DefaultProps> =
-  typeof Vue |
-  FunctionalOrStandardComponentOptions<Data, Methods, Computed, Props>;
+  | typeof Vue
+  | FunctionalComponentOptions<Props>
+  | ThisTypedComponentOptionsWithArrayProps<Vue, Data, Methods, Computed, keyof Props>
+  | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Props>;
 
 export type AsyncComponent<Data, Methods, Computed, Props> = (
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
@@ -40,14 +42,6 @@ export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Method
   ComponentOptions<V, Data | ((this: Props & V) => Data), Methods, Computed, Props> &
   ThisType<CombinedVueInstance<V, Data, Methods, Computed, Props>>;
 
-/**
- * A helper type that describes options for either functional or non-functional components.
- * Useful for `Vue.extend` and `Vue.component`.
- */
-export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, Props> =
-  | FunctionalComponentOptions<Props>
-  | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Props>;
-
 type DefaultData<V> =  object | ((this: V) => object);
 type DefaultProps = Record<string, any>;
 type DefaultMethods<V> =  { [key: string]: (this: V, ...args: any[]) => any };
@@ -57,9 +51,9 @@ export interface ComponentOptions<
   Data=DefaultData<V>,
   Methods=DefaultMethods<V>,
   Computed=DefaultComputed,
-  Props=DefaultProps> {
+  PropsDef=PropsDefinition<DefaultProps>> {
   data?: Data;
-  props?: (keyof Props)[] | PropsDefinition<Props>;
+  props?: PropsDef;
   propsData?: Object;
   computed?: Accessors<Computed>;
   methods?: Methods;
@@ -105,7 +99,7 @@ export interface ComponentOptions<
   inheritAttrs?: boolean;
 }
 
-export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = (keyof Props)[] | PropsDefinition<Props>> {
+export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = PropsDefinition<Props>> {
   name?: string;
   props?: PropDefs;
   functional: boolean;
@@ -144,9 +138,11 @@ export interface PropOptions<T=any> {
   validator?(value: any): boolean;
 }
 
-export type PropsDefinition<T> = {
+export type RecordPropsDefinition<T> = {
   [K in keyof T]: PropValidator<T[K]>
 }
+export type ArrayPropsDefinition<T> = keyof T;
+export type PropsDefinition<T> = ArrayPropsDefinition<T> | RecordPropsDefinition<T>;
 
 export interface ComputedOptions<T> {
   get?(): T;
