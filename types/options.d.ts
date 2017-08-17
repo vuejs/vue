@@ -52,12 +52,12 @@ export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, PropNa
 type DefaultData<V> =  object | ((this: V) => object);
 type DefaultProp = string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
 type DefaultMethods<V> =  { [key: string]: (this: V, ...args: any[]) => any };
-type DefaultComputed<V> = { [key: string]: ((this: V) => any) | ComputedOptions<V> };
+type DefaultComputed = { [key: string]: any };
 export interface ComponentOptions<
   V extends Vue,
   Data=DefaultData<V>,
   Methods=DefaultMethods<V>,
-  Computed=DefaultComputed<V>,
+  Computed=DefaultComputed,
   Props=DefaultProp> {
   data?: Data;
   props?: Props;
