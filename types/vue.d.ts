@@ -77,6 +77,7 @@ export type ExtendedVue<Instance extends Vue, Data, Methods, Computed, Props> = 
 
 export interface VueConstructor<V extends Vue = Vue> {
   new <Data = object, Methods = object, Computed = object, Props = object>(options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): CombinedVueInstance<V, Data, Methods, Computed, Props>;
+  new(options?: ThisTypedComponentOptionsWithRecordProps<V, object, object, object, object>): CombinedVueInstance<V, object, object, object, object>;
 
   extend<Props>(definition: FunctionalComponentOptions<Props>): ExtendedVue<V, {}, {}, {}, Props>;
   extend<Data, Methods, Computed, Props>(options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props>;
@@ -101,7 +102,7 @@ export interface VueConstructor<V extends Vue = Vue> {
   component<Data, Methods, Computed, Props>(id: string, definition?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props>;
 
   use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): void;
-  mixin(mixin: typeof Vue | ComponentOptions<Vue>): void;
+  mixin(mixin: VueConstructor | ComponentOptions<Vue>): void;
   compile(template: string): {
     render(createElement: typeof Vue.prototype.$createElement): VNode;
     staticRenderFns: (() => VNode)[];

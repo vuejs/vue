@@ -5,7 +5,7 @@ type Constructor = {
   new (...args: any[]): any;
 }
 
-export type Component<Data, Methods, Computed, Props> =
+export type Component<Data=DefaultData<Vue>, Methods=DefaultMethods<Vue>, Computed=DefaultComputed, Props=DefaultProps> =
   typeof Vue |
   FunctionalOrStandardComponentOptions<Data, Methods, Computed, Props>;
 
@@ -25,6 +25,14 @@ export type Accessors<T> = {
 }
 
 /**
+ * This type should be used when an array of strings is used for a component's `props` value.
+ */
+export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, PropNames extends string> =
+  object &
+  ComponentOptions<V, Data | ((this: Record<PropNames, any> & V) => Data), Methods, Computed, PropNames[]> &
+  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Record<PropNames, any>>>;
+
+/**
  * This type should be used when an object mapped to `PropOptions` is used for a component's `props` value.
  */
 export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props> =
@@ -41,7 +49,7 @@ export type FunctionalOrStandardComponentOptions<Data, Methods, Computed, Props>
   | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Props>;
 
 type DefaultData<V> =  object | ((this: V) => object);
-type DefaultProp = Record<string, any>;
+type DefaultProps = Record<string, any>;
 type DefaultMethods<V> =  { [key: string]: (this: V, ...args: any[]) => any };
 type DefaultComputed = { [key: string]: any };
 export interface ComponentOptions<
@@ -49,7 +57,7 @@ export interface ComponentOptions<
   Data=DefaultData<V>,
   Methods=DefaultMethods<V>,
   Computed=DefaultComputed,
-  Props=DefaultProp> {
+  Props=DefaultProps> {
   data?: Data;
   props?: (keyof Props)[] | PropsDefinition<Props>;
   propsData?: Object;
@@ -97,14 +105,14 @@ export interface ComponentOptions<
   inheritAttrs?: boolean;
 }
 
-export interface FunctionalComponentOptions<Props = DefaultProp> {
+export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = (keyof Props)[] | PropsDefinition<Props>> {
   name?: string;
-  props?: keyof Props | PropsDefinition<Props>;
+  props?: PropDefs;
   functional: boolean;
   render(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode;
 }
 
-export interface RenderContext<Props> {
+export interface RenderContext<Props=DefaultProps> {
   props: Props;
   children: VNode[];
   slots(): any;
@@ -129,7 +137,7 @@ export type Prop<T> = { '@@vueProp': T } | { new (...args: any[]): T & object }
 
 export type PropValidator<T> = PropOptions<T> | Prop<T> | Prop<T>[];
 
-export interface PropOptions<T> {
+export interface PropOptions<T=any> {
   type?: Prop<T> | Prop<T>[];
   required?: boolean;
   default?: T | null | undefined | (() => object);
