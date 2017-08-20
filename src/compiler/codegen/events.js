@@ -31,8 +31,7 @@ const modifierCode: { [key: string]: string } = {
   meta: genGuard(`!$event.metaKey`),
   left: genGuard(`'button' in $event && $event.button !== 0`),
   middle: genGuard(`'button' in $event && $event.button !== 1`),
-  right: genGuard(`'button' in $event && $event.button !== 2`),
-  bare: genGuard(`$event.ctrlKey || $event.shiftKey || $event.altKey || $event.metaKey`)
+  right: genGuard(`'button' in $event && $event.button !== 2`)
 }
 
 export function genHandlers (
@@ -88,6 +87,14 @@ function genHandler (
         if (keyCodes[key]) {
           keys.push(key)
         }
+      } else if (key === 'bare') {
+        const modifiers: ASTModifiers = (handler.modifiers: any)
+        genModifierCode += genGuard(
+          ['ctrl', 'shift', 'alt', 'meta']
+            .filter(keyModifier => !modifiers[keyModifier])
+            .map(keyModifier => `$event.${keyModifier}Key`)
+            .join(' || ')
+          )
       } else {
         keys.push(key)
       }
