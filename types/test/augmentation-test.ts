@@ -26,6 +26,7 @@ const vm = new Vue({
   data: {
     a: true
   },
+  foo: "foo",
   methods: {
     foo() {
       this.a = false;

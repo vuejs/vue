@@ -56,12 +56,12 @@ export interface Vue {
   $delete: typeof Vue.delete;
   $watch(
     expOrFn: string,
-    callback: WatchHandler<any>,
+    callback: (this: this, n: any, o: any) => void,
     options?: WatchOptions
   ): (() => void);
   $watch<T>(
     expOrFn: (this: this) => T,
-    callback: WatchHandler<T>,
+    callback: (this: this, n: T, o: T) => void,
     options?: WatchOptions
   ): (() => void);
   $on(event: string | string[], callback: Function): this;

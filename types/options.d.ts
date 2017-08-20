@@ -136,7 +136,7 @@ export interface PropOptions<T=any> {
   type?: Prop<T> | Prop<T>[];
   required?: boolean;
   default?: T | null | undefined | (() => object);
-  validator?(value: any): boolean;
+  validator?(value: T): boolean;
 }
 
 export type RecordPropsDefinition<T> = {
