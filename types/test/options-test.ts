@@ -40,6 +40,29 @@ Vue.component('string-prop', {
   }
 });
 
+class User {
+  private u: number
+}
+class Cat {
+  private u: number
+}
+
+Vue.component('union-prop', {
+  props: {
+    primitive: [String, Number],
+    object: [Cat, User],
+    union: [User, Number] as {new(): User | Number}[] // requires annotation
+  },
+  data() {
+    this.primitive;
+    this.object;
+    this.union;
+    return {
+      fixedSize: this.union,
+    }
+  }
+});
+
 Vue.component('component', {
   data() {
     this.$mount
