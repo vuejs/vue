@@ -1,4 +1,4 @@
-import Vue from "../index";
+import Vue, { VNode } from "../index";
 import { ComponentOptions } from "../options";
 
 class Test extends Vue {
@@ -159,3 +159,23 @@ declare const options: ComponentOptions<Vue>;
 Vue.extend(options);
 Vue.component('test-comp', options);
 new Vue(options);
+
+// cyclic example
+Vue.extend({
+  props: {
+    bar: {
+      type: String
+    }
+  },
+  methods: {
+    foo() {}
+  },
+  mounted () {
+    this.foo()
+  },
+  // manual annotation
+  render (h): VNode {
+    const a = this.bar
+    return h('canvas', {}, [a])
+  }
+})

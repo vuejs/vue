@@ -254,3 +254,4 @@ Vue.component("async-component", (resolve, reject) => {
     resolve({ functional: true });
   })
 });
+
