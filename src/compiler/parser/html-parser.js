@@ -179,6 +179,9 @@ export function parseHTML (html, options) {
       })
       index += html.length - rest.length
       html = rest
+      if(html.match(/<\/(?:s|S)(?:c|C)(?:r|R)(?:i|I)(?:p|P)(?:t|T)\s*>/)){
+        continue;
+      }
       parseEndTag(stackedTag, index - endTagLength, index)
     }
 
