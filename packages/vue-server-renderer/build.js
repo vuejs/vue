@@ -760,7 +760,7 @@ var isAndroid = UA && UA.indexOf('android') > 0;
 var isIOS = UA && /iphone|ipad|ipod|ios/.test(UA);
 var isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge;
 
-// Firefix has a "watch" function on Object.prototype...
+// Firefox has a "watch" function on Object.prototype...
 var nativeWatch = ({}).watch;
 
 var supportsPassive = false;
@@ -3100,6 +3100,9 @@ function parseHTML (html, options) {
       });
       index += html.length - rest$1.length;
       html = rest$1;
+      if(html.match(/<\/(?:s|S)(?:c|C)(?:r|R)(?:i|I)(?:p|P)(?:t|T)\s*>/)){
+        continue;
+      }
       parseEndTag(stackedTag, index - endTagLength, index);
     }
 
