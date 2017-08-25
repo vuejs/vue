@@ -206,16 +206,16 @@ describe('Options props', () => {
       expect('Expected Array').toHaveBeenWarned()
     })
 
-    /* eslint-disable no-new-wrappers */
     it('primitive wrapper objects', () => {
+      /* eslint-disable no-new-wrappers */
       makeInstance(new String('s'), String)
       expect(console.error.calls.count()).toBe(0)
       makeInstance(new Number(1), Number)
       expect(console.error.calls.count()).toBe(0)
       makeInstance(new Boolean(true), Boolean)
       expect(console.error.calls.count()).toBe(0)
+      /* eslint-enable no-new-wrappers */
     })
-    /* eslint-enable no-new-wrappers */
 
     if (hasSymbol) {
       it('symbol', () => {
