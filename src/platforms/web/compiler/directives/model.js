@@ -40,7 +40,7 @@ export default function model (
     }
   }
 
-  if (el.component) {
+  if (el.component && el.component !== '"input"' && el.component !== '"select"' && el.component !== '"textarea"') {
     genComponentModel(el, value, modifiers)
     // component v-model doesn't need extra runtime
     return false
