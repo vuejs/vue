@@ -116,19 +116,7 @@ export interface RenderContext<Props=DefaultProps> {
   injections: any
 }
 
-declare global {
-  interface StringConstructor {
-    '@@vueProp': string;
-  }
-  interface BooleanConstructor {
-    '@@vueProp': boolean;
-  }
-  interface NumberConstructor {
-    '@@vueProp': number;
-  }
-}
-
-export type Prop<T> = { '@@vueProp': T } | { new (...args: any[]): T & object }
+export type Prop<T> = { (): T } | { new (...args: any[]): T & object }
 
 export type PropValidator<T> = PropOptions<T> | Prop<T> | Prop<T>[];
 
