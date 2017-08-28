@@ -3,7 +3,7 @@
 import config from 'core/config'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
-
+import { makeMap } from 'shared/util'
 let warn
 
 // in some cases, the event used has to be determined at runtime
@@ -40,7 +40,7 @@ export default function model (
     }
   }
 
-  if (el.component && el.component !== '"input"' && el.component !== '"select"' && el.component !== '"textarea"') {
+  if (el.component && !isInputTag(el.attrsMap.is)) {
     genComponentModel(el, value, modifiers)
     // component v-model doesn't need extra runtime
     return false
@@ -68,6 +68,8 @@ export default function model (
   // ensure runtime directive metadata
   return true
 }
+
+const isInputTag = makeMap('input,select,textarea', true)
 
 function genCheckboxModel (
   el: ASTElement,
