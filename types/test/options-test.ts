@@ -51,12 +51,16 @@ Vue.component('union-prop', {
   props: {
     primitive: [String, Number],
     object: [Cat, User],
+    regex: RegExp,
+    mixed: [RegExp, Array],
     union: [User, Number] as {new(): User | Number}[] // requires annotation
   },
   data() {
     this.primitive;
     this.object;
     this.union;
+    this.regex.compile;
+    this.mixed;
     return {
       fixedSize: this.union,
     }
