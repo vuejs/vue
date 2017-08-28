@@ -40,7 +40,7 @@ export default function model (
     }
   }
 
-  if (el.component && !isInputTag(el.attrsMap.is)) {
+  if (el.component && (!el.attrsMap.is || !isInputTag(el.attrsMap.is))) {
     genComponentModel(el, value, modifiers)
     // component v-model doesn't need extra runtime
     return false
