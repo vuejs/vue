@@ -181,7 +181,7 @@ Vue.component('component', {
   staticRenderFns: [],
 
   beforeCreate() {
-    this.a = 1;
+    (this as any).a = 1;
   },
   created() {},
   beforeDestroy() {},
