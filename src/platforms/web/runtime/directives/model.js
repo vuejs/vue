@@ -60,45 +60,47 @@ export default {
 }
 
 function setSelected (el, binding, vm) {
-  const cb = () => {
-    const value = binding.value
-    const isMultiple = el.multiple
-    if (isMultiple && !Array.isArray(value)) {
-      process.env.NODE_ENV !== 'production' && warn(
-        `<select multiple v-model="${binding.expression}"> ` +
-        `expects an Array value for its binding, but got ${
-          Object.prototype.toString.call(value).slice(8, -1)
-        }`,
-        vm
-      )
-      return
-    }
-    let selected, option
-    for (let i = 0, l = el.options.length; i < l; i++) {
-      option = el.options[i]
-      if (isMultiple) {
-        selected = looseIndexOf(value, getValue(option)) > -1
-        if (option.selected !== selected) {
-          option.selected = selected
-        }
-      } else {
-        if (looseEqual(getValue(option), value)) {
-          if (el.selectedIndex !== i) {
-            el.selectedIndex = i
-          }
-          return
-        }
-      }
-    }
-    if (!isMultiple) {
-      el.selectedIndex = -1
-    }
-  }
-
-  cb()
+  actuallySetSelected(el, binding, vm)
   /* istanbul ignore if */
   if (isIE || isEdge) {
-    setTimeout(cb, 0)
+    setTimeout(() => {
+      actuallySetSelected(el, binding, vm)
+    }, 0)
+  }
+}
+
+function actuallySetSelected (el, binding, vm) {
+  const value = binding.value
+  const isMultiple = el.multiple
+  if (isMultiple && !Array.isArray(value)) {
+    process.env.NODE_ENV !== 'production' && warn(
+      `<select multiple v-model="${binding.expression}"> ` +
+      `expects an Array value for its binding, but got ${
+        Object.prototype.toString.call(value).slice(8, -1)
+      }`,
+      vm
+    )
+    return
+  }
+  let selected, option
+  for (let i = 0, l = el.options.length; i < l; i++) {
+    option = el.options[i]
+    if (isMultiple) {
+      selected = looseIndexOf(value, getValue(option)) > -1
+      if (option.selected !== selected) {
+        option.selected = selected
+      }
+    } else {
+      if (looseEqual(getValue(option), value)) {
+        if (el.selectedIndex !== i) {
+          el.selectedIndex = i
+        }
+        return
+      }
+    }
+  }
+  if (!isMultiple) {
+    el.selectedIndex = -1
   }
 }
 
