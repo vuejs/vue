@@ -4,8 +4,12 @@
 // supports transition mode (out-in / in-out)
 
 import { warn } from 'core/util/index'
-import { camelize, extend, isPrimitive, isDef } from 'shared/util'
-import { mergeVNodeHook } from 'core/vdom/helpers/index'
+import { camelize, extend, isPrimitive } from 'shared/util'
+import {
+  mergeVNodeHook,
+  isAsyncPlaceholder,
+  getFirstComponentChild
+} from 'core/vdom/helpers/index'
 
 export const transitionProps = {
   name: String,
@@ -25,25 +29,12 @@ export const transitionProps = {
   duration: [Number, String, Object]
 }
 
-// similar with getFirstComponentChild
-// but consider async placeholder as valid child
-function getFirstValidChild (children: ?Array<VNode>): ?VNode {
-  if (Array.isArray(children)) {
-    for (let i = 0; i < children.length; i++) {
-      const c = children[i]
-      if (isDef(c) && (isDef(c.componentOptions) || isAsyncPlaceholder(c))) {
-        return c
-      }
-    }
-  }
-}
-
 // in case the child is also an abstract component, e.g. <keep-alive>
 // we want to recursively retrieve the real component to be rendered
 function getRealChild (vnode: ?VNode): ?VNode {
   const compOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
   if (compOptions && compOptions.Ctor.options.abstract) {
-    return getRealChild(getFirstValidChild(compOptions.children))
+    return getRealChild(getFirstComponentChild(compOptions.children))
   } else {
     return vnode
   }
@@ -83,10 +74,6 @@ function hasParentTransition (vnode: VNode): ?boolean {
 
 function isSameChild (child: VNode, oldChild: VNode): boolean {
   return oldChild.key === child.key && oldChild.tag === child.tag
-}
-
-function isAsyncPlaceholder (node: VNode): boolean {
-  return node.isComment && node.asyncFactory
 }
 
 export default {
