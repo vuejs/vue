@@ -908,6 +908,15 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('should escape static strings', done => {
+    renderVmWithOptions(({
+      template: `<div>&lt;foo&gt;</div>`
+    }), res => {
+      expect(res).toBe(`<div data-server-rendered="true">&lt;foo&gt;</div>`)
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
