@@ -66,7 +66,7 @@ export interface ComponentOptions<
   renderError?: (h: () => VNode, err: Error) => VNode;
   staticRenderFns?: ((createElement: CreateElement) => VNode)[];
 
-  beforeCreate?(): void;
+  beforeCreate?(this: Vue): void;
   created?(): void;
   beforeDestroy?(): void;
   destroyed?(): void;
