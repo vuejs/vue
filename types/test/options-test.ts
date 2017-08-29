@@ -87,14 +87,14 @@ Vue.component('component', {
     msg: "Hello"
   },
   computed: {
-    aDouble(this: Component) {
+    aDouble(): number {
       return this.a * 2;
     },
     aPlus: {
-      get(this: Component) {
+      get(): number {
         return this.a + 1;
       },
-      set(this: Component, v: number) {
+      set(v: number) {
         this.a = v - 1;
       },
       cache: false
