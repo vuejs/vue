@@ -50,7 +50,7 @@ export function renderAttr (key: string, value: string): string {
   } else if (isEnumeratedAttr(key)) {
     return ` ${key}="${isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true'}"`
   } else if (!isFalsyAttrValue(value)) {
-    return ` ${key}="${typeof value === 'string' ? cachedEscape(value) : value}"`
+    return ` ${key}="${cachedEscape(String(value))}"`
   }
   return ''
 }
