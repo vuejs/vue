@@ -517,4 +517,33 @@ describe('Directive v-model select', () => {
       expect(vm.test).toBe('2')
     }).then(done)
   })
+
+  // #6193
+  it('should not trigger change event when matching option can be found for each value', done => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        options: ['1']
+      },
+      computed: {
+        test: {
+          get () {
+            return '1'
+          },
+          set () {
+            spy()
+          }
+        }
+      },
+      template:
+        '<select v-model="test">' +
+          '<option :key="opt" v-for="opt in options" :value="opt">{{ opt }}</option>' +
+        '</select>'
+    }).$mount()
+
+    vm.options = ['1', '2']
+    waitForUpdate(() => {
+      expect(spy).not.toHaveBeenCalled()
+    }).then(done)
+  })
 })
