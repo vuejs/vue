@@ -1,4 +1,4 @@
-import Vue = require("../index");
+import Vue from "../index";
 
 class Test extends Vue {
   a: number;
@@ -90,9 +90,65 @@ class Test extends Vue {
     this.directive("", {bind() {}});
     this.filter("", (value: number) => value);
     this.component("", { data: () => ({}) });
-    this.component("", { functional: true, render () {}});
+    this.component("", { functional: true, render(h) { return h("div", "hello!") } });
     this.use;
     this.mixin(Test);
     this.compile("<div>{{ message }}</div>");
   }
 }
+
+const HelloWorldComponent = Vue.extend({
+  props: ["name"],
+  data() {
+    return {
+      message: "Hello " + this.name,
+    }
+  },
+  computed: {
+    shouted(): string {
+      return this.message.toUpperCase();
+    }
+  },
+  methods: {
+    getMoreExcited() {
+      this.message += "!";
+    }
+  },
+  watch: {
+    message(a: string) {
+      console.log(`Message ${this.message} was changed!`);
+    }
+  }
+});
+
+const FunctionalHelloWorldComponent = Vue.extend({
+  functional: true,
+  props: ["name"],
+  render(createElement, ctxt) {
+    return createElement("div", "Hello " + ctxt.props.name)
+  }
+});
+
+const Parent = Vue.extend({
+  data() {
+    return { greeting: 'Hello' }
+  }
+});
+
+const Child = Parent.extend({
+  methods: {
+    foo() {
+      console.log(this.greeting.toLowerCase());
+    }
+  }
+});
+
+const GrandChild = Child.extend({
+  computed: {
+    lower(): string {
+      return this.greeting.toLowerCase();
+    }
+  }
+});
+
+new GrandChild().lower.toUpperCase();

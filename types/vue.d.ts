@@ -3,15 +3,19 @@ import {
   AsyncComponent,
   ComponentOptions,
   FunctionalComponentOptions,
-  WatchOptions,
+  WatchOptionsWithHandler,
   WatchHandler,
   DirectiveOptions,
-  DirectiveFunction
+  DirectiveFunction,
+  PropValidator,
+  ThisTypedComponentOptionsWithArrayProps,
+  ThisTypedComponentOptionsWithRecordProps,
+  WatchOptions,
 } from "./options";
 import { VNode, VNodeData, VNodeChildren, ScopedSlot } from "./vnode";
 import { PluginFunction, PluginObject } from "./plugin";
 
-export type CreateElement = {
+export interface CreateElement {
   // empty node
   (): VNode;
 
@@ -20,33 +24,30 @@ export type CreateElement = {
   (tag: string, data?: VNodeData, children?: VNodeChildren): VNode;
 
   // component constructor or options
-  (tag: Component, children: VNodeChildren): VNode;
-  (tag: Component, data?: VNodeData, children?: VNodeChildren): VNode;
+  (tag: Component<any, any, any, any>, children: VNodeChildren): VNode;
+  (tag: Component<any, any, any, any>, data?: VNodeData, children?: VNodeChildren): VNode;
 
   // async component
-  (tag: AsyncComponent, children: VNodeChildren): VNode;
-  (tag: AsyncComponent, data?: VNodeData, children?: VNodeChildren): VNode;
+  (tag: AsyncComponent<any, any, any, any>, children: VNodeChildren): VNode;
+  (tag: AsyncComponent<any, any, any, any>, data?: VNodeData, children?: VNodeChildren): VNode;
 }
 
-export declare class Vue {
-
-  constructor(options?: ComponentOptions<Vue>);
-
-  $data: Object;
+export interface Vue {
   readonly $el: HTMLElement;
-  readonly $options: ComponentOptions<this>;
+  readonly $options: ComponentOptions<any, any, any, any>;
   readonly $parent: Vue;
   readonly $root: Vue;
   readonly $children: Vue[];
-  readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[]};
+  readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[] };
   readonly $slots: { [key: string]: VNode[] };
   readonly $scopedSlots: { [key: string]: ScopedSlot };
   readonly $isServer: boolean;
+  readonly $data: Record<string, any>;
+  readonly $props: Record<string, any>;
   readonly $ssrContext: any;
-  readonly $props: any;
   readonly $vnode: VNode;
-  readonly $attrs: { [key: string] : string } | void;
-  readonly $listeners: { [key: string]: Function | Array<Function> } | void;
+  readonly $attrs: Record<string, string> | undefined;
+  readonly $listeners: Record<string, Function | Function[]> | undefined;
 
   $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
   $forceUpdate(): void;
@@ -55,12 +56,12 @@ export declare class Vue {
   $delete: typeof Vue.delete;
   $watch(
     expOrFn: string,
-    callback: WatchHandler<this, any>,
+    callback: WatchHandler<any>,
     options?: WatchOptions
   ): (() => void);
   $watch<T>(
     expOrFn: (this: this) => T,
-    callback: WatchHandler<this, T>,
+    callback: WatchHandler<T>,
     options?: WatchOptions
   ): (() => void);
   $on(event: string | string[], callback: Function): this;
@@ -70,8 +71,49 @@ export declare class Vue {
   $nextTick(callback: (this: this) => void): void;
   $nextTick(): Promise<void>;
   $createElement: CreateElement;
+}
 
-  static config: {
+export type CombinedVueInstance<Instance extends Vue, Data, Methods, Computed, Props> = Instance & Data & Methods & Computed & Props;
+export type ExtendedVue<Instance extends Vue, Data, Methods, Computed, Props> = VueConstructor<CombinedVueInstance<Instance, Data, Methods, Computed, Props> & Vue>;
+
+export interface VueConstructor<V extends Vue = Vue> {
+  new <Data = object, Methods = object, Computed = object, PropNames extends string = never>(options?: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames>): CombinedVueInstance<V, Data, Methods, Computed, Record<PropNames, any>>;
+  new <Data = object, Methods = object, Computed = object, Props extends Record<string, PropValidator> = {}>(options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): CombinedVueInstance<V, Data, Methods, Computed, Record<keyof Props, any>>;
+
+  extend<PropNames extends string = never>(definition: FunctionalComponentOptions<PropNames[], Record<PropNames, any>>): ExtendedVue<V, {}, {}, {}, Record<PropNames, any>>;
+  extend<Props extends Record<string, PropValidator>>(definition: FunctionalComponentOptions<Props, Record<keyof Props, any>>): ExtendedVue<V, {}, {}, {}, Record<keyof Props, any>>;
+  extend<Data, Methods, Computed, PropNames extends string = never>(options: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames>): ExtendedVue<V, Data, Methods, Computed, Record<PropNames, any>>;
+  extend<Data, Methods, Computed, Props extends Record<string, PropValidator>>(options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Record<keyof Props, any>>;
+
+  nextTick(callback: () => void, context?: any[]): void;
+  nextTick(): Promise<void>
+  set<T>(object: Object, key: string, value: T): T;
+  set<T>(array: T[], key: number, value: T): T;
+  delete(object: Object, key: string): void;
+  delete<T>(array: T[], key: number): void;
+
+  directive(
+    id: string,
+    definition?: DirectiveOptions | DirectiveFunction
+  ): DirectiveOptions;
+  filter(id: string, definition?: Function): Function;
+
+  component(id: string): VueConstructor;
+  component<VC extends VueConstructor>(id: string, constructor: VC): VC;
+  component<Data, Methods, Computed, PropNames extends string = never>(id: string, definition: AsyncComponent<Data, Methods, Computed, PropNames>): ExtendedVue<V, Data, Methods, Computed, Record<PropNames, any>>;
+  component<PropNames extends string = never>(id: string, definition: FunctionalComponentOptions<PropNames[], Record<PropNames, any>>): ExtendedVue<V, {}, {}, {}, Record<PropNames, any>>;
+  component<Props extends Record<string, PropValidator>>(id: string, definition: FunctionalComponentOptions<Props, Record<keyof Props, any>>): ExtendedVue<V, {}, {}, {}, Record<keyof Props, any>>;
+  component<Data, Methods, Computed, PropNames extends string = never>(id: string, definition: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames>): ExtendedVue<V, Data, Methods, Computed, Record<PropNames, any>>;
+  component<Data, Methods, Computed, Props extends Record<string, PropValidator>>(id: string, definition?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Record<keyof Props, any>>;
+
+  use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): void;
+  mixin(mixin: typeof Vue | ComponentOptions<any, any, any, any>): void;
+  compile(template: string): {
+    render(createElement: typeof Vue.prototype.$createElement): VNode;
+    staticRenderFns: (() => VNode)[];
+  };
+
+  config: {
     silent: boolean;
     optionMergeStrategies: any;
     devtools: boolean;
@@ -82,26 +124,6 @@ export declare class Vue {
     ignoredElements: string[];
     keyCodes: { [key: string]: number };
   }
-
-  static extend(options: ComponentOptions<Vue> | FunctionalComponentOptions): typeof Vue;
-  static nextTick(callback: () => void, context?: any[]): void;
-  static nextTick(): Promise<void>
-  static set<T>(object: Object, key: string, value: T): T;
-  static set<T>(array: T[], key: number, value: T): T;
-  static delete(object: Object, key: string): void;
-  static delete<T>(array: T[], key: number): void;
-
-  static directive(
-    id: string,
-    definition?: DirectiveOptions | DirectiveFunction
-  ): DirectiveOptions;
-  static filter(id: string, definition?: Function): Function;
-  static component(id: string, definition?: Component | AsyncComponent): typeof Vue;
-
-  static use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): void;
-  static mixin(mixin: typeof Vue | ComponentOptions<Vue>): void;
-  static compile(template: string): {
-    render(createElement: typeof Vue.prototype.$createElement): VNode;
-    staticRenderFns: (() => VNode)[];
-  };
 }
+
+export const Vue: VueConstructor;
