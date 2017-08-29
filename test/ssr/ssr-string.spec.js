@@ -821,6 +821,19 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('should prevent script xss with v-bind object syntax + array value', done => {
+    renderVmWithOptions({
+      data: {
+        test: ['"><script>alert(1)</script><!--"']
+      },
+      template: `<div v-bind="{ test }"></div>`
+    }, res => {
+      console.log(res)
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
   it('v-if', done => {
     renderVmWithOptions({
       template: `
