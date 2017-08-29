@@ -80,7 +80,7 @@ export function renderMixin (Vue: Class<Component>) {
     if (vm._isMounted) {
       // clone slot nodes on re-renders
       for (const key in vm.$slots) {
-        vm.$slots[key] = cloneVNodes(vm.$slots[key])
+        vm.$slots[key] = cloneVNodes(vm.$slots[key], true /* deep cloning */)
       }
     }
 

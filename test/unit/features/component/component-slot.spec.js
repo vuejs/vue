@@ -685,4 +685,42 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<div>default<span>foo</span></div>')
   })
+
+  it('should re-create nested components in slot when rerendering container', done => {
+    const created = jasmine.createSpy()
+    const destroyed = jasmine.createSpy()
+    const vm = new Vue({
+      template: `
+        <div>
+          <container ref="container">
+            <div>
+              <child></child>
+            </div>
+          </container>
+        </div>
+      `,
+      components: {
+        container: {
+          template:
+            '<component :is="tag"><slot></slot></component>',
+          data () {
+            return { tag: 'h1' }
+          }
+        },
+        child: {
+          template: '<span>foo</span>',
+          created,
+          destroyed
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<h1><div><span>foo</span></div></h1>')
+    expect(created.calls.count()).toBe(1)
+    vm.$refs.container.tag = 'h2'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<h2><div><span>foo</span></div></h2>')
+      expect(created.calls.count()).toBe(2)
+      expect(destroyed.calls.count()).toBe(1)
+    }).then(done)
+  })
 })

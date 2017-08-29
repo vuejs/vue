@@ -98,11 +98,18 @@ export function cloneVNode (vnode: VNode): VNode {
   return cloned
 }
 
-export function cloneVNodes (vnodes: Array<VNode>): Array<VNode> {
+function deepCloneVNode (vnode: VNode): VNode {
+  const cloned = cloneVNode(vnode)
+  if (vnode.children) cloned.children = cloneVNodes(vnode.children, true)
+  return cloned
+}
+
+export function cloneVNodes (vnodes: Array<VNode>, deep?: boolean): Array<VNode> {
   const len = vnodes.length
   const res = new Array(len)
+  const clone = deep ? deepCloneVNode : cloneVNode
   for (let i = 0; i < len; i++) {
-    res[i] = cloneVNode(vnodes[i])
+    res[i] = clone(vnodes[i])
   }
   return res
 }
