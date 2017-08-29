@@ -22,8 +22,8 @@ import {
   applyModelTransform
 } from './modules'
 
+import { escape } from 'web/server/util'
 import { optimizability } from './optimizer'
-
 import type { CodegenResult } from 'compiler/codegen/index'
 
 export type StringSegment = {
@@ -222,7 +222,7 @@ function nodesToSegments (
     } else if (c.type === 2) {
       segments.push({ type: INTERPOLATION, value: c.expression })
     } else if (c.type === 3) {
-      segments.push({ type: RAW, value: c.text })
+      segments.push({ type: RAW, value: escape(c.text) })
     }
   }
   return segments
