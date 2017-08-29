@@ -45,8 +45,8 @@ export declare class Vue {
   readonly $ssrContext: any;
   readonly $props: any;
   readonly $vnode: VNode;
-  readonly $attrs: { [key: string] : string } | void;
-  readonly $listeners: { [key: string]: Function | Array<Function> } | void;
+  readonly $attrs: { [key: string] : string };
+  readonly $listeners: { [key: string]: Function | Array<Function> };
 
   $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
   $forceUpdate(): void;
