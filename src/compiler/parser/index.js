@@ -1,10 +1,9 @@
 /* @flow */
 
-import he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
-import { cached, no, camelize } from 'shared/util'
+import { no, camelize } from 'shared/util'
 import { genAssignmentCode } from '../directives/model'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
 
@@ -27,8 +26,6 @@ export const forIteratorRE = /\((\{[^}]*\}|[^,]*),([^,]*)(?:,([^,]*))?\)/
 const argRE = /:(.*)$/
 const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
-
-const decodeHTMLCached = cached(he.decode)
 
 // configurable state
 export let warn
@@ -256,8 +253,7 @@ export function parse (
         return
       }
       const children = currentParent.children
-      text = inPre || text.trim()
-        ? isTextTag(currentParent) ? text : decodeHTMLCached(text)
+      text = inPre || text.trim() ? text
         // only preserve whitespace if its not right after a starting tag
         : preserveWhitespace && children.length ? ' ' : ''
       if (text) {
@@ -556,11 +552,6 @@ function makeAttrsMap (attrs: Array<Object>): Object {
     map[attrs[i].name] = attrs[i].value
   }
   return map
-}
-
-// for script (e.g. type="x/template") or style, do not decode content
-function isTextTag (el): boolean {
-  return el.tag === 'script' || el.tag === 'style'
 }
 
 function isForbiddenTag (el): boolean {
