@@ -29,8 +29,8 @@ declare interface Component {
   $slots: { [key: string]: Array<VNode> };
   $scopedSlots: { [key: string]: () => VNodeChildren };
   $vnode: VNode; // the placeholder node for the component in parent's render tree
-  $attrs: ?{ [key: string] : string };
-  $listeners: ?{ [key: string]: Function | Array<Function> };
+  $attrs: { [key: string] : string };
+  $listeners: { [key: string]: Function | Array<Function> };
   $isServer: boolean;
 
   // public methods
