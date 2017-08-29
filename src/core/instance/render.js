@@ -78,9 +78,13 @@ export function renderMixin (Vue: Class<Component>) {
     } = vm.$options
 
     if (vm._isMounted) {
-      // clone slot nodes on re-renders
+      // if the parent didn't update, the slot nodes will be the ones from
+      // last render. They need to be cloned to ensure "freshness" for this render.
       for (const key in vm.$slots) {
-        vm.$slots[key] = cloneVNodes(vm.$slots[key])
+        const slot = vm.$slots[key]
+        if (slot._rendered) {
+          vm.$slots[key] = cloneVNodes(slot, true /* deep */)
+        }
       }
     }
 

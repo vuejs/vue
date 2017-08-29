@@ -685,4 +685,47 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<div>default<span>foo</span></div>')
   })
+
+  it('should handle nested components in slots properly', done => {
+    const TestComponent = {
+      template: `
+        <component :is="toggleEl ? 'b' : 'i'">
+          <slot />
+        </component>
+      `,
+      data () {
+        return {
+          toggleEl: true
+        }
+      }
+    }
+
+    const vm = new Vue({
+      template: `
+        <div>
+          <test-component ref="test">
+            <div>
+              <foo/>
+            </div><bar/>
+          </test-component>
+        </div>
+      `,    
+      components: {
+        TestComponent,
+        foo: {
+          template: `<div>foo</div>`
+        },
+        bar: {
+          template: `<div>bar</div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe(`<b><div><div>foo</div></div><div>bar</div></b>`)
+
+    vm.$refs.test.toggleEl = false
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe(`<i><div><div>foo</div></div><div>bar</div></i>`)
+    }).then(done)
+  })
 })
