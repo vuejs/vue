@@ -96,7 +96,7 @@ export function mergeDataOrFn (
         : childVal
       const defaultData = typeof parentVal === 'function'
         ? parentVal.call(vm)
-        : undefined
+        : parentVal
       if (instanceData) {
         return mergeData(instanceData, defaultData)
       } else {
