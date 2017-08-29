@@ -5,7 +5,11 @@
 
 import { warn } from 'core/util/index'
 import { camelize, extend, isPrimitive } from 'shared/util'
-import { mergeVNodeHook, getFirstComponentChild } from 'core/vdom/helpers/index'
+import {
+  mergeVNodeHook,
+  isAsyncPlaceholder,
+  getFirstComponentChild
+} from 'core/vdom/helpers/index'
 
 export const transitionProps = {
   name: String,
@@ -70,10 +74,6 @@ function hasParentTransition (vnode: VNode): ?boolean {
 
 function isSameChild (child: VNode, oldChild: VNode): boolean {
   return oldChild.key === child.key && oldChild.tag === child.tag
-}
-
-function isAsyncPlaceholder (node: VNode): boolean {
-  return node.isComment && node.asyncFactory
 }
 
 export default {
