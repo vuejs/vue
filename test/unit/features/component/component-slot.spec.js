@@ -709,7 +709,7 @@ describe('Component slot', () => {
             </div><bar/>
           </test-component>
         </div>
-      `,    
+      `,
       components: {
         TestComponent,
         foo: {
