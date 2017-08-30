@@ -95,8 +95,8 @@ export function cloneVNode (vnode: VNode, deep?: boolean): VNode {
   cloned.key = vnode.key
   cloned.isComment = vnode.isComment
   cloned.isCloned = true
-  if (deep) {
-    cloned.children = vnode.children && cloneVNodes(vnode.children)
+  if (deep && vnode.children) {
+    cloned.children = cloneVNodes(vnode.children)
   }
   return cloned
 }
