@@ -5,7 +5,12 @@ type Constructor = {
   new (...args: any[]): any;
 }
 
-export type Component = typeof Vue | ComponentOptions<Vue> | FunctionalComponentOptions;
+type NormalComponent = typeof Vue | ComponentOptions<Vue> | FunctionalComponentOptions;
+type EsModuleComponent = {
+  default: NormalComponent
+}
+
+export type Component = NormalComponent | EsModuleComponent;
 export type AsyncComponent = (
   resolve: (component: Component) => void,
   reject: (reason?: any) => void
