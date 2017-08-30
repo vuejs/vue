@@ -4,14 +4,9 @@ import TextNode from 'weex/runtime/text-node'
 const VueFactory = require('./factory')
 
 const instances = {}
-const modules = {}
-const components = {}
 
 const renderer = {
-  TextNode,
-  instances,
-  modules,
-  components
+  TextNode
 }
 
 /**
@@ -29,8 +24,6 @@ export function init (cfg) {
  */
 export function reset () {
   clear(instances)
-  clear(modules)
-  clear(components)
   delete renderer.Document
   delete renderer.Element
   delete renderer.Comment
@@ -61,35 +54,23 @@ export function createInstance (
   data,
   env = {}
 ) {
-  // Virtual-DOM object.
-  const document = new renderer.Document(instanceId, config.bundleUrl)
-
+  const weex = env.weex
+  const document = weex.document
   const instance = instances[instanceId] = {
     instanceId, config, data,
     document
   }
 
-  // Prepare native module getter and HTML5 Timer APIs.
-  const moduleGetter = genModuleGetter(instanceId)
-  const timerAPIs = getInstanceTimer(instanceId, moduleGetter)
-
-  // Prepare `weex` instance variable.
-  const weexInstanceVar = {
-    config,
-    document,
-    supports,
-    requireModule: moduleGetter
-  }
-  Object.freeze(weexInstanceVar)
+  const timerAPIs = getInstanceTimer(instanceId, weex.requireModule)
 
   // Each instance has a independent `Vue` module instance
-  const Vue = instance.Vue = createVueModuleInstance(instanceId, moduleGetter)
+  const Vue = instance.Vue = createVueModuleInstance(instanceId, weex)
 
   // The function which create a closure the JS Bundle will run in.
   // It will declare some instance variables like `Vue`, HTML5 Timer APIs etc.
   const instanceVars = Object.assign({
     Vue,
-    weex: weexInstanceVar
+    weex
   }, timerAPIs, env.services)
 
   appCode = `(function(global){ \n${appCode}\n })(Object.create(this))`
@@ -97,7 +78,7 @@ export function createInstance (
   callFunction(instanceVars, appCode)
 
   // Send `createFinish` signal to native.
-  instance.document.taskCenter.send('dom', { action: 'createFinish' }, [])
+  document.taskCenter.send('dom', { action: 'createFinish' }, [])
 
   return instance
 }
@@ -195,88 +176,9 @@ export function receiveTasks (id, tasks) {
 }
 
 /**
- * Register native modules information.
- * @param {object} newModules
- */
-export function registerModules (newModules) {
-  for (const name in newModules) {
-    if (!modules[name]) {
-      modules[name] = {}
-    }
-    newModules[name].forEach(method => {
-      if (typeof method === 'string') {
-        modules[name][method] = true
-      } else {
-        modules[name][method.name] = method.args
-      }
-    })
-  }
-}
-
-/**
- * Check whether the module or the method has been registered.
- * @param {String} module name
- * @param {String} method name (optional)
- */
-export function isRegisteredModule (name, method) {
-  if (typeof method === 'string') {
-    return !!(modules[name] && modules[name][method])
-  }
-  return !!modules[name]
-}
-
-/**
- * Register native components information.
- * @param {array} newComponents
- */
-export function registerComponents (newComponents) {
-  if (Array.isArray(newComponents)) {
-    newComponents.forEach(component => {
-      if (!component) {
-        return
-      }
-      if (typeof component === 'string') {
-        components[component] = true
-      } else if (typeof component === 'object' && typeof component.type === 'string') {
-        components[component.type] = component
-      }
-    })
-  }
-}
-
-/**
- * Check whether the component has been registered.
- * @param {String} component name
- */
-export function isRegisteredComponent (name) {
-  return !!components[name]
-}
-
-/**
- * Detects whether Weex supports specific features.
- * @param {String} condition
- */
-export function supports (condition) {
-  if (typeof condition !== 'string') return null
-
-  const res = condition.match(/^@(\w+)\/(\w+)(\.(\w+))?$/i)
-  if (res) {
-    const type = res[1]
-    const name = res[2]
-    const method = res[4]
-    switch (type) {
-      case 'module': return isRegisteredModule(name, method)
-      case 'component': return isRegisteredComponent(name)
-    }
-  }
-
-  return null
-}
-
-/**
  * Create a fresh instance of Vue for each Weex instance.
  */
-function createVueModuleInstance (instanceId, moduleGetter) {
+function createVueModuleInstance (instanceId, weex) {
   const exports = {}
   VueFactory(exports, renderer)
   const Vue = exports.Vue
@@ -289,7 +191,7 @@ function createVueModuleInstance (instanceId, moduleGetter) {
   const isReservedTag = Vue.config.isReservedTag || (() => false)
   const isRuntimeComponent = Vue.config.isRuntimeComponent || (() => false)
   Vue.config.isReservedTag = name => {
-    return (!isRuntimeComponent(name) && components[name]) ||
+    return (!isRuntimeComponent(name) && weex.supports(`@component/${name}`)) ||
       isReservedTag(name) ||
       weexRegex.test(name)
   }
@@ -301,7 +203,7 @@ function createVueModuleInstance (instanceId, moduleGetter) {
 
   // expose weex native module getter on subVue prototype so that
   // vdom runtime modules can access native modules via vnode.context
-  Vue.prototype.$requireWeexModule = moduleGetter
+  Vue.prototype.$requireWeexModule = weex.requireModule
 
   // Hack `Vue` behavior to handle instance information and data
   // before root component created.
@@ -332,39 +234,6 @@ function createVueModuleInstance (instanceId, moduleGetter) {
   }
 
   return Vue
-}
-
-/**
- * Generate native module getter. Each native module has several
- * methods to call. And all the behaviors is instance-related. So
- * this getter will return a set of methods which additionally
- * send current instance id to native when called.
- * @param  {string}  instanceId
- * @return {function}
- */
-function genModuleGetter (instanceId) {
-  const instance = instances[instanceId]
-  return function (name) {
-    const nativeModule = modules[name] || []
-    const output = {}
-    for (const methodName in nativeModule) {
-      Object.defineProperty(output, methodName, {
-        enumerable: true,
-        configurable: true,
-        get: function proxyGetter () {
-          return (...args) => {
-            return instance.document.taskCenter.send('module', { module: name, method: methodName }, args)
-          }
-        },
-        set: function proxySetter (val) {
-          if (typeof val === 'function') {
-            return instance.document.taskCenter.send('module', { module: name, method: methodName }, [val])
-          }
-        }
-      })
-    }
-    return output
-  }
 }
 
 /**
