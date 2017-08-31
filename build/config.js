@@ -17,7 +17,7 @@ const banner =
 
 const weexFactoryPlugin = {
   intro () {
-    return 'module.exports = function weexFactory (exports, renderer) {'
+    return 'module.exports = function weexFactory (exports, document) {'
   },
   outro () {
     return '}'

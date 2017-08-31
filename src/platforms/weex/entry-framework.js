@@ -1,32 +1,19 @@
-import TextNode from 'weex/runtime/text-node'
-
 // this will be preserved during build
 const VueFactory = require('./factory')
 
 const instances = {}
 
-const renderer = {
-  TextNode
-}
-
 /**
- * Prepare framework config, basically about the virtual-DOM and JS bridge.
- * @param {object} cfg
+ * Prepare framework config.
+ * Nothing need to do actually, just an interface provided to weex runtime.
  */
-export function init (cfg) {
-  renderer.Document = cfg.Document
-  renderer.Element = cfg.Element
-  renderer.Comment = cfg.Comment
-}
+export function init () {}
 
 /**
  * Reset framework config and clear all registrations.
  */
 export function reset () {
   clear(instances)
-  delete renderer.Document
-  delete renderer.Element
-  delete renderer.Comment
 }
 
 /**
@@ -182,7 +169,7 @@ export function receiveTasks (id, tasks) {
  */
 function createVueModuleInstance (instanceId, weex) {
   const exports = {}
-  VueFactory(exports, renderer)
+  VueFactory(exports, weex.document)
   const Vue = exports.Vue
 
   const instance = instances[instanceId]

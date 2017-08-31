@@ -1,4 +1,4 @@
-/* globals renderer */
+/* globals document */
 
 import { makeMap } from 'shared/util'
 
@@ -34,8 +34,8 @@ export function getTagNamespace () { /* console.log('getTagNamespace') */ }
 export function isUnknownElement () { /* console.log('isUnknownElement') */ }
 
 export function query (el, document) {
-  // renderer is injected by weex factory wrapper
-  const placeholder = new renderer.Comment('root')
+  // document is injected by weex factory wrapper
+  const placeholder = document.createComment('root')
   placeholder.hasAttribute = placeholder.removeAttribute = function () {} // hack for patch
   document.documentElement.appendChild(placeholder)
   return placeholder
