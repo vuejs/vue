@@ -93,6 +93,8 @@ export function destroyInstance (instanceId) {
   if (instance && instance.app instanceof instance.Vue) {
     instance.document.destroy()
     instance.app.$destroy()
+    delete instance.document
+    delete instance.app
   }
   delete instances[instanceId]
 }
