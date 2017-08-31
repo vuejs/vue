@@ -7,7 +7,7 @@ type Constructor = {
 
 export type Component = typeof Vue | ComponentOptions<Vue> | FunctionalComponentOptions;
 
-type EsModuleComponent = {
+interface EsModuleComponent {
   default: Component
 }
 
