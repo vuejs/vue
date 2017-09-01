@@ -164,6 +164,38 @@ describe('Directive v-bind', () => {
     }).then(done)
   })
 
+  it('.sync modifier for object', done => {
+    const vm = new Vue({
+      template: `<test ref="test" :a.sync="a" :e="e" />`,
+      data: {
+        a: {
+          b: 'B',
+          c: {
+            d: 'D'
+          }
+        },
+        e: {
+          f: 'F'
+        }
+      },
+      components: {
+        test: {
+          props: ['a', 'e'],
+          template: `<div>{{ a.b }}{{ a.c.d }}{{ e.f }}{{ a.c.g }}</div>`
+        }
+      }
+    }).$mount()
+    const testComp = vm.$refs.test
+    expect(vm.$el.textContent).toBe('BDF')
+    testComp.$emit('update:a.b', 'b')
+    testComp.$emit('update:a.c.d', 'd')
+    testComp.$emit('update:a.c.g', 'g')
+    testComp.$emit('update:e.f', 'f')
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('bdFg')
+    }).then(done)
+  })
+
   it('bind object', done => {
     const vm = new Vue({
       template: '<input v-bind="test">',
@@ -214,6 +246,35 @@ describe('Directive v-bind', () => {
       vm.test.fooBar = 3
     }).then(() => {
       expect(vm.$el.textContent).toBe('3')
+    }).then(done)
+  })
+
+  it('.sync modifier with bind object in deep', done => {
+    const vm = new Vue({
+      template: `<test ref="test" v-bind.sync="a" />`,
+      data: {
+        a: {
+          b: {
+            c: 'C'
+          }
+        }
+      },
+      components: {
+        test: {
+          props: ['b'],
+          template: `<div>{{ b.c }}{{ b.d }}</div>`
+        }
+      }
+    }).$mount()
+    const testComp = vm.$refs.test
+    expect(vm.$el.textContent).toBe('C')
+    testComp.$emit('update:b.c', 'c')
+    testComp.$emit('update:b.d', 'd')
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('cd')
+      testComp.$emit('update:b', { c: 'new C' })
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('new C')
     }).then(done)
   })
 
