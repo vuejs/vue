@@ -909,10 +909,27 @@ describe('SSR: renderToString', () => {
   })
 
   it('should escape static strings', done => {
-    renderVmWithOptions(({
+    renderVmWithOptions({
       template: `<div>&lt;foo&gt;</div>`
-    }), res => {
+    }, res => {
       expect(res).toBe(`<div data-server-rendered="true">&lt;foo&gt;</div>`)
+      done()
+    })
+  })
+
+  it('should not cache computed properties', done => {
+    renderVmWithOptions({
+      template: `<div>{{ foo }}</div>`,
+      data: () => ({ bar: 1 }),
+      computed: {
+        foo () { return this.bar + 1 }
+      },
+      created () {
+        this.foo // access
+        this.bar++ // trigger change
+      }
+    }, res => {
+      expect(res).toBe(`<div data-server-rendered="true">3</div>`)
       done()
     })
   })
