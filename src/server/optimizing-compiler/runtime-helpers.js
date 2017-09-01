@@ -1,6 +1,6 @@
 /* @flow */
 
-import { escape, cachedEscape } from 'web/server/util'
+import { escape } from 'web/server/util'
 import { isObject, extend } from 'shared/util'
 import { renderAttr } from 'web/server/modules/attrs'
 import { renderClass } from 'web/util/class'
@@ -123,7 +123,7 @@ function renderSSRClass (
   dynamic: any
 ): string {
   const res = renderClass(staticClass, dynamic)
-  return res === '' ? res : ` class="${cachedEscape(res)}"`
+  return res === '' ? res : ` class="${escape(res)}"`
 }
 
 function renderSSRStyle (
@@ -136,5 +136,5 @@ function renderSSRStyle (
   if (dynamic) extend(style, normalizeStyleBinding(dynamic))
   if (extra) extend(style, extra)
   const res = genStyle(style)
-  return res === '' ? res : ` style=${JSON.stringify(cachedEscape(res))}`
+  return res === '' ? res : ` style=${JSON.stringify(escape(res))}`
 }

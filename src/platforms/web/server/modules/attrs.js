@@ -1,6 +1,6 @@
 /* @flow */
 
-import { cachedEscape } from '../util'
+import { escape } from '../util'
 
 import {
   isDef,
@@ -50,7 +50,7 @@ export function renderAttr (key: string, value: string): string {
   } else if (isEnumeratedAttr(key)) {
     return ` ${key}="${isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true'}"`
   } else if (!isFalsyAttrValue(value)) {
-    return ` ${key}="${cachedEscape(String(value))}"`
+    return ` ${key}="${escape(String(value))}"`
   }
   return ''
 }
