@@ -3,9 +3,9 @@
  * properties to Elements.
  */
 
+import { isTextInputType } from 'web/util/element'
 import { looseEqual, looseIndexOf } from 'shared/util'
 import { warn, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
-import { isTextInputType } from 'web/util/element'
 
 /* istanbul ignore if */
 if (isIE9) {

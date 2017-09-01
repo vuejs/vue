@@ -3,14 +3,6 @@
 import config from 'core/config'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
-import { isTextInputType } from 'web/util/element'
-
-const ternaryRE = /^[^?]{1,}\?\s*('|"|`)([a-z]*)\1\s*:\s*('|"|`)([a-z]*)\3\s*$/
-
-const isTextTypeTernary = dynamicType => {
-  const match = dynamicType.match(ternaryRE)
-  return match && isTextInputType(match[2]) && isTextInputType(match[4])
-}
 
 let warn
 
@@ -32,7 +24,7 @@ export default function model (
 
   if (process.env.NODE_ENV !== 'production') {
     const dynamicType = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
-    if (tag === 'input' && dynamicType && !isTextTypeTernary(dynamicType)) {
+    if (tag === 'input' && dynamicType) {
       warn(
         `<input :type="${dynamicType}" v-model="${value}">:\n` +
         `v-model does not support dynamic input types. Use v-if branches instead.`
