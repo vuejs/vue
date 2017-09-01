@@ -333,7 +333,7 @@ describe('Options props', () => {
         }
       }
     }).$mount()
-    expect(`method "a" has already been defined as a prop`).toHaveBeenWarned()
+    expect(`Method "a" has already been defined as a prop`).toHaveBeenWarned()
     expect(`Avoid mutating a prop directly`).toHaveBeenWarned()
   })
 

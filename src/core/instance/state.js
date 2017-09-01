@@ -137,7 +137,7 @@ function initData (vm: Component) {
     if (process.env.NODE_ENV !== 'production') {
       if (methods && hasOwn(methods, key)) {
         warn(
-          `method "${key}" has already been defined as a data property.`,
+          `Method "${key}" has already been defined as a data property.`,
           vm
         )
       }
@@ -260,22 +260,28 @@ function initMethods (vm: Component, methods: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'methods')
   const props = vm.$options.props
   for (const key in methods) {
-    vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
     if (process.env.NODE_ENV !== 'production') {
       if (methods[key] == null) {
         warn(
-          `method "${key}" has an undefined value in the component definition. ` +
+          `Method "${key}" has an undefined value in the component definition. ` +
           `Did you reference the function correctly?`,
           vm
         )
       }
       if (props && hasOwn(props, key)) {
         warn(
-          `method "${key}" has already been defined as a prop.`,
+          `Method "${key}" has already been defined as a prop.`,
           vm
         )
       }
+      if ((key in vm) && isReserved(key)) {
+        warn(
+          `Method "${key}" conflicts with an existing Vue instance method. ` +
+          `Avoid defining component methods that start with _ or $.`
+        )
+      }
     }
+    vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
   }
 }
 
