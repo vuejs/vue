@@ -828,7 +828,6 @@ describe('SSR: renderToString', () => {
       },
       template: `<div v-bind="{ test }"></div>`
     }, res => {
-      console.log(res)
       expect(res).not.toContain(`<script>alert(1)</script>`)
       done()
     })
