@@ -23,6 +23,7 @@ import {
   nativeWatch,
   validateProp,
   isPlainObject,
+  isServerRendering,
   isReservedAttribute
 } from '../util/index'
 
@@ -169,6 +170,8 @@ const computedWatcherOptions = { lazy: true }
 function initComputed (vm: Component, computed: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
   const watchers = vm._computedWatchers = Object.create(null)
+  // computed properties are just getters during SSR
+  const isSSR = isServerRendering()
 
   for (const key in computed) {
     const userDef = computed[key]
@@ -179,8 +182,16 @@ function initComputed (vm: Component, computed: Object) {
         vm
       )
     }
-    // create internal watcher for the computed property.
-    watchers[key] = new Watcher(vm, getter || noop, noop, computedWatcherOptions)
+
+    if (!isSSR) {
+      // create internal watcher for the computed property.
+      watchers[key] = new Watcher(
+        vm,
+        getter || noop,
+        noop,
+        computedWatcherOptions
+      )
+    }
 
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
@@ -197,13 +208,20 @@ function initComputed (vm: Component, computed: Object) {
   }
 }
 
-export function defineComputed (target: any, key: string, userDef: Object | Function) {
+export function defineComputed (
+  target: any,
+  key: string,
+  userDef: Object | Function
+) {
+  const shouldCache = !isServerRendering()
   if (typeof userDef === 'function') {
-    sharedPropertyDefinition.get = createComputedGetter(key)
+    sharedPropertyDefinition.get = shouldCache
+      ? createComputedGetter(key)
+      : userDef
     sharedPropertyDefinition.set = noop
   } else {
     sharedPropertyDefinition.get = userDef.get
-      ? userDef.cache !== false
+      ? shouldCache && userDef.cache !== false
         ? createComputedGetter(key)
         : userDef.get
       : noop
