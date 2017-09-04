@@ -56,7 +56,7 @@ export function isRegExp (v: any): boolean {
  * Check if val is a valid array index.
  */
 export function isValidArrayIndex (val: any): boolean {
-  const n = parseFloat(val)
+  const n: number = parseFloat(val)
   return n >= 0 && Math.floor(n) === n && isFinite(val)
 }
 
@@ -76,7 +76,7 @@ export function toString (val: any): string {
  * If the conversion fails, return original string.
  */
 export function toNumber (val: string): number | string {
-  const n = parseFloat(val)
+  const n: number = parseFloat(val)
   return isNaN(n) ? val : n
 }
 
@@ -88,7 +88,7 @@ export function makeMap (
   str: string,
   expectsLowerCase?: boolean
 ): (key: string) => true | void {
-  const map = Object.create(null)
+  const map: Object = Object.create(null)
   const list: Array<string> = str.split(',')
   for (let i = 0; i < list.length; i++) {
     map[list[i]] = true
@@ -113,7 +113,7 @@ export const isReservedAttribute = makeMap('key,ref,slot,is')
  */
 export function remove (arr: Array<any>, item: any): Array<any> | void {
   if (arr.length) {
-    const index = arr.indexOf(item)
+    const index: number = arr.indexOf(item)
     if (index > -1) {
       return arr.splice(index, 1)
     }
@@ -132,9 +132,9 @@ export function hasOwn (obj: Object | Array<*>, key: string): boolean {
  * Create a cached version of a pure function.
  */
 export function cached<F: Function> (fn: F): F {
-  const cache = Object.create(null)
+  const cache: Object = Object.create(null)
   return (function cachedFn (str: string) {
-    const hit = cache[str]
+    const hit: any = cache[str]
     return hit || (cache[str] = fn(str))
   }: any)
 }
@@ -187,7 +187,7 @@ export function bind (fn: Function, ctx: Object): Function {
  */
 export function toArray (list: any, start?: number): Array<any> {
   start = start || 0
-  let i = list.length - start
+  let i: number = list.length - start
   const ret: Array<any> = new Array(i)
   while (i--) {
     ret[i] = list[i + start]
@@ -209,7 +209,7 @@ export function extend (to: Object, _from: ?Object): Object {
  * Merge an Array of Objects into a single Object.
  */
 export function toObject (arr: Array<any>): Object {
-  const res = {}
+  const res: Object = {}
   for (let i = 0; i < arr.length; i++) {
     if (arr[i]) {
       extend(res, arr[i])
@@ -250,20 +250,20 @@ export function genStaticKeys (modules: Array<ModuleOptions>): string {
  */
 export function looseEqual (a: any, b: any): boolean {
   if (a === b) return true
-  const isObjectA = isObject(a)
-  const isObjectB = isObject(b)
+  const isObjectA: boolean = isObject(a)
+  const isObjectB: boolean = isObject(b)
   if (isObjectA && isObjectB) {
     try {
-      const isArrayA = Array.isArray(a)
-      const isArrayB = Array.isArray(b)
+      const isArrayA: boolean = Array.isArray(a)
+      const isArrayB: boolean = Array.isArray(b)
       if (isArrayA && isArrayB) {
-        return a.length === b.length && a.every((e, i) => {
+        return a.length === b.length && a.every((e: mixed, i: number): boolean => {
           return looseEqual(e, b[i])
         })
       } else if (!isArrayA && !isArrayB) {
-        const keysA = Object.keys(a)
-        const keysB = Object.keys(b)
-        return keysA.length === keysB.length && keysA.every(key => {
+        const keysA: Array<string> = Object.keys(a)
+        const keysB: Array<string> = Object.keys(b)
+        return keysA.length === keysB.length && keysA.every((key: string): boolean => {
           return looseEqual(a[key], b[key])
         })
       } else {
@@ -292,7 +292,7 @@ export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
  * Ensure a function is called only once.
  */
 export function once (fn: Function): Function {
-  let called = false
+  let called: boolean = false
   return function () {
     if (!called) {
       called = true
