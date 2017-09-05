@@ -1,4 +1,7 @@
 import Vue = require('vue');
+import VueSSRClientPlugin = require('../client-plugin');
+import VueSSRServerPlugin = require('../server-plugin');
+import webpack = require('webpack');
 import { readFileSync } from 'fs';
 import { createRenderer, createBundleRenderer } from '../';
 
@@ -81,4 +84,16 @@ bundleRenderer.renderToString(context, (err, html) => {
 
 bundleRenderer.renderToStream(context).on('data', chunk => {
   const html = chunk.toString();
+});
+
+// webpack plugins
+webpack({
+  plugins: [
+    new VueSSRClientPlugin({
+      filename: 'client-manifest.json'
+    }),
+    new VueSSRServerPlugin({
+      filename: 'server-bundle.json'
+    })
+  ]
 });
