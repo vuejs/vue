@@ -406,7 +406,6 @@ export function createPatchFunction (backend) {
           : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx)
         if (isUndef(idxInOld)) { // New element
           createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm)
-          newStartVnode = newCh[++newStartIdx]
         } else {
           elmToMove = oldCh[idxInOld]
           /* istanbul ignore if */
@@ -420,13 +419,12 @@ export function createPatchFunction (backend) {
             patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
             oldCh[idxInOld] = undefined
             canMove && nodeOps.insertBefore(parentElm, elmToMove.elm, oldStartVnode.elm)
-            newStartVnode = newCh[++newStartIdx]
           } else {
             // same key but different element. treat as new element
             createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm)
-            newStartVnode = newCh[++newStartIdx]
           }
         }
+        newStartVnode = newCh[++newStartIdx]
       }
     }
     if (oldStartIdx > oldEndIdx) {
