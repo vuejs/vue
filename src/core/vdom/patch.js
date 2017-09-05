@@ -660,14 +660,18 @@ export function createPatchFunction (backend) {
           // component root element replaced.
           // update parent placeholder node element, recursively
           let ancestor = vnode.parent
+          const patchable = isPatchable(vnode)
           while (ancestor) {
-            ancestor.elm = vnode.elm
-            ancestor = ancestor.parent
-          }
-          if (isPatchable(vnode)) {
-            for (let i = 0; i < cbs.create.length; ++i) {
-              cbs.create[i](emptyNode, vnode.parent)
+            for (let i = 0; i < cbs.destroy.length; ++i) {
+              cbs.destroy[i](ancestor)
             }
+            ancestor.elm = vnode.elm
+            if (patchable) {
+              for (let i = 0; i < cbs.create.length; ++i) {
+                cbs.create[i](emptyNode, ancestor)
+              }
+            }
+            ancestor = ancestor.parent
           }
         }
 
