@@ -88,10 +88,11 @@ export function _createElement (
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children)
   }
-  let vnode, ns
+  let vnode
+  let ns = context.$vnode && context.$vnode.ns
   if (typeof tag === 'string') {
     let Ctor
-    ns = config.getTagNamespace(tag)
+    if (!ns) ns = config.getTagNamespace(tag)
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       vnode = new VNode(
