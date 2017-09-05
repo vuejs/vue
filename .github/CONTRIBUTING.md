@@ -49,7 +49,7 @@ The `setup` script links two git hooks:
 - `pre-commit`: runs ESLint on staged files.
 - `commit-msg`: validates commit message format (see below).
 
-### Commiting Changes
+### Committing Changes
 
 Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. If git hooks have been properly linked, commit messages will be automatically validated upon commit. It is recommended to use `npm run commit` instead of `git commit`, which provides an interactive CLI for generating proper commit messages.
 
