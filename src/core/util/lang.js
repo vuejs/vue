@@ -5,8 +5,9 @@ export const emptyObject = Object.freeze({})
 /**
  * Check if a string starts with $ or _
  */
+const charCodeAt = String.prototype.charCodeAt
 export function isReserved (str: string): boolean {
-  const c = (str + '').charCodeAt(0)
+  const c = charCodeAt.call(str, 0)
   return c === 0x24 || c === 0x5F
 }
 
