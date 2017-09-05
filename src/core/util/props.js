@@ -145,7 +145,12 @@ function assertType (value: any, type: Function): {
   let valid
   const expectedType = getType(type)
   if (simpleCheckRE.test(expectedType)) {
-    valid = typeof value === expectedType.toLowerCase()
+    const t = typeof value
+    valid = t === expectedType.toLowerCase()
+    // for primitive wrapper objects
+    if (!valid && t === 'object') {
+      valid = value instanceof type
+    }
   } else if (expectedType === 'Object') {
     valid = isPlainObject(value)
   } else if (expectedType === 'Array') {
