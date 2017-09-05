@@ -15,6 +15,7 @@ export type Config = {
   productionTip: boolean;
   performance: boolean;
   devtools: boolean;
+  interpolation: boolean;
   errorHandler: ?(err: Error, vm: Component, info: string) => void;
   warnHandler: ?(msg: string, vm: Component, trace: string) => void;
   ignoredElements: Array<string>;
@@ -57,6 +58,11 @@ export default ({
    * Whether to record perf
    */
   performance: false,
+
+  /**
+   * Use interpolation (Mustache syntax)
+   */
+  interpolation: true,
 
   /**
    * Error handler for watcher errors
