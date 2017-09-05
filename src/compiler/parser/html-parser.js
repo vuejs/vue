@@ -14,7 +14,7 @@ import { isNonPhrasingTag } from 'web/compiler/util'
 
 // Regular Expressions for parsing tags and attributes
 const singleAttrIdentifier = /([^\s"'<>/=]+)/
-const singleAttrAssign = /(?:=)/
+const singleAttrAssign = /(=)/
 const singleAttrValues = [
   // attr value double quotes
   /"([^"]*)"+/.source,
@@ -25,7 +25,7 @@ const singleAttrValues = [
 ]
 const attribute = new RegExp(
   '^\\s*' + singleAttrIdentifier.source +
-  '(?:\\s*(' + singleAttrAssign.source + ')' +
+  '(?:\\s*' + singleAttrAssign.source +
   '\\s*(?:' + singleAttrValues.join('|') + '))?'
 )
 
