@@ -261,6 +261,8 @@ function normalizeProps (options: Object) {
         ? val
         : { type: val }
     }
+  } else if (process.env.NODE_ENV !== 'production') {
+    warn('props must be array or object.')
   }
   options.props = res
 }
