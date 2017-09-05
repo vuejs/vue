@@ -71,6 +71,35 @@ describe('Directive v-model component', () => {
     }).then(done)
   })
 
+  it('should work when input tags declared in "is"', done => {
+    const vm = new Vue({
+      data: {
+        msg: 'hello'
+      },
+      template: `
+        <div>
+          <p>{{ msg }}</p>
+          <input is="textarea" v-model="msg">
+        </div>
+      `
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    waitForUpdate(() => {
+      const textarea = vm.$el.querySelector('textarea')
+      textarea.value = 'world'
+      triggerEvent(textarea, 'input')
+    }).then(() => {
+      expect(vm.msg).toEqual('world')
+      expect(vm.$el.querySelector('p').textContent).toEqual('world')
+      vm.msg = 'changed'
+    }).then(() => {
+      expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+      expect(vm.$el.querySelector('textarea').value).toEqual('changed')
+    }).then(() => {
+      document.body.removeChild(vm.$el)
+    }).then(done)
+  })
+
   it('should support customization via model option', done => {
     const spy = jasmine.createSpy('update')
     const vm = new Vue({
