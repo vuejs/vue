@@ -661,7 +661,7 @@ describe('Component slot', () => {
     }).then(done)
   })
 
-  // Github issue #5888
+  // GitHub issue #5888
   it('should resolve correctly slot with keep-alive', () => {
     const vm = new Vue({
       template: `

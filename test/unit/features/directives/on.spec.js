@@ -497,7 +497,7 @@ describe('Directive v-on', () => {
     }).not.toThrow()
   })
 
-  // Github Issue #5046
+  // GitHub Issue #5046
   it('should support keyboard modifier', () => {
     const spyLeft = jasmine.createSpy()
     const spyRight = jasmine.createSpy()
@@ -570,7 +570,7 @@ describe('Directive v-on', () => {
     })
   }
 
-  // Github Issues #5146
+  // GitHub Issues #5146
   it('should only prevent when match keycode', () => {
     let prevented = false
     vm = new Vue({
