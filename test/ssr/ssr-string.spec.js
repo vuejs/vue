@@ -805,7 +805,7 @@ describe('SSR: renderToString', () => {
     expect(vm.a).toBe(func)
   })
 
-  it('should prevent xss in attribtues', done => {
+  it('should prevent xss in attributes', done => {
     renderVmWithOptions({
       data: {
         xss: '"><script>alert(1)</script>'
