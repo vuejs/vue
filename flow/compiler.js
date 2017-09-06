@@ -36,8 +36,11 @@ declare type CompiledResult = {
 };
 
 declare type ModuleOptions = {
+  // transform an AST node before any attributes are processed
   preTransformNode: (el: ASTElement) => void;
-  transformNode: (el: ASTElement) => void; // transform an element's AST node
+  // transform an AST node after built-ins like v-if, v-for are processed
+  transformNode: (el: ASTElement) => void;
+  // transform an AST node after its children have been processed
   postTransformNode: (el: ASTElement) => void;
   genData: (el: ASTElement) => string; // generate extra data string for an element
   transformCode?: (el: ASTElement, code: string) => string; // further transform generated code for an element
