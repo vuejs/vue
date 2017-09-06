@@ -47,7 +47,7 @@ export interface ComponentOptions<V extends Vue> {
   filters?: { [key: string]: Function };
 
   provide?: Object | (() => Object);
-  inject?: { [key: string]: string | symbol } | Array<string>;
+  inject?: { [key: string]: string | symbol } | string[];
 
   model?: {
     prop?: string;
@@ -66,6 +66,7 @@ export interface ComponentOptions<V extends Vue> {
 export interface FunctionalComponentOptions {
   name?: string;
   props?: string[] | { [key: string]: PropOptions | Constructor | Constructor[] };
+  inject?: { [key: string]: string | symbol } | string[];
   functional: boolean;
   render(this: never, createElement: CreateElement, context: RenderContext): VNode | void;
 }
