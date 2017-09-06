@@ -98,13 +98,17 @@ export function parse (
     }
   }
 
-  function endPre (element) {
+  function closeElement (element) {
     // check pre state
     if (element.pre) {
       inVPre = false
     }
     if (platformIsPreTag(element.tag)) {
       inPre = false
+    }
+    // apply post-transforms
+    for (let i = 0; i < postTransforms.length; i++) {
+      postTransforms[i](element, options)
     }
   }
 
@@ -219,7 +223,7 @@ export function parse (
         currentParent = element
         stack.push(element)
       } else {
-        endPre(element)
+        closeElement(element)
       }
     },
 
@@ -233,12 +237,7 @@ export function parse (
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
-      endPre(element)
-
-      // apply post-transforms
-      for (let i = 0; i < postTransforms.length; i++) {
-        postTransforms[i](element, options)
-      }
+      closeElement(element)
     },
 
     chars (text: string) {
@@ -270,11 +269,12 @@ export function parse (
         // only preserve whitespace if its not right after a starting tag
         : preserveWhitespace && children.length ? ' ' : ''
       if (text) {
-        let expression
-        if (!inVPre && text !== ' ' && (expression = parseText(text, delimiters))) {
+        let res
+        if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
           children.push({
             type: 2,
-            expression,
+            expression: res.expression,
+            tokens: res.tokens,
             text
           })
         } else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
@@ -571,8 +571,8 @@ function processAttrs (el) {
     } else {
       // literal attribute
       if (process.env.NODE_ENV !== 'production') {
-        const expression = parseText(value, delimiters)
-        if (expression) {
+        const res = parseText(value, delimiters)
+        if (res) {
           warn(
             `${name}="${value}": ` +
             'Interpolation inside attributes has been removed. ' +
