@@ -60,7 +60,7 @@ export default class TemplateRenderer {
     if (options.clientManifest) {
       const clientManifest = this.clientManifest = options.clientManifest
       this.publicPath = clientManifest.publicPath.replace(/\/$/, '')
-      // preload/prefetch drectives
+      // preload/prefetch directives
       this.preloadFiles = clientManifest.initial
       this.prefetchFiles = clientManifest.async
       // initial async chunk mapping
