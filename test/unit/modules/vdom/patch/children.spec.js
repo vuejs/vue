@@ -1,5 +1,5 @@
 import { patch } from 'web/runtime/patch'
-import VNode from 'core/vdom/vnode'
+import VNode, { createEmptyVNode } from 'core/vdom/vnode'
 
 function prop (name) {
   return obj => { return obj[name] }
@@ -445,7 +445,7 @@ describe('vdom patch: children', () => {
     expect(child2.className).toBe('')
   })
 
-  it('should handle static vnodes properly', function () {
+  it('should handle static vnodes properly', () => {
     function makeNode (text) {
       return new VNode('div', undefined, [
         new VNode(undefined, undefined, undefined, text)
@@ -466,7 +466,7 @@ describe('vdom patch: children', () => {
     expect(elm.textContent).toBe('ABC')
   })
 
-  it('should handle static vnodes inside ', function () {
+  it('should handle static vnodes inside ', () => {
     function makeNode (text) {
       return new VNode('div', undefined, [
         new VNode(undefined, undefined, undefined, text)
@@ -485,5 +485,26 @@ describe('vdom patch: children', () => {
     expect(elm.textContent).toBe('B')
     elm = patch(vnode2, vnode3)
     expect(elm.textContent).toBe('ABC')
+  })
+
+  // #6502
+  it('should not de-opt when both head and tail are changed', () => {
+    const vnode1 = new VNode('div', {}, [
+      createEmptyVNode(),
+      new VNode('div'),
+      createEmptyVNode()
+    ])
+    const vnode2 = new VNode('div', {}, [
+      new VNode('p'),
+      new VNode('div'),
+      new VNode('p')
+    ])
+    let root = patch(null, vnode1)
+    const original = root.childNodes[1]
+
+    root = patch(vnode1, vnode2)
+    const postPatch = root.childNodes[1]
+
+    expect(postPatch).toBe(original)
   })
 })

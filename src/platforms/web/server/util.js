@@ -1,6 +1,6 @@
 /* @flow */
 
-import { makeMap, cached } from 'shared/util'
+import { makeMap } from 'shared/util'
 
 const isAttr = makeMap(
   'accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' +
@@ -45,8 +45,6 @@ const ESC = {
 export function escape (s: string) {
   return s.replace(/[<>"&]/g, escapeChar)
 }
-
-export const cachedEscape = cached(escape)
 
 function escapeChar (a) {
   return ESC[a] || a
