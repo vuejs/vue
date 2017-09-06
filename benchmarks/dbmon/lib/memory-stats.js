@@ -59,7 +59,7 @@ var MemoryStats = function (){
 	}
 	
 	// TODO, add a sanity check to see if values are bucketed.
-	// If so, reminde user to adopt the --enable-precise-memory-info flag.
+	// If so, remind user to adopt the --enable-precise-memory-info flag.
 	// open -a "/Applications/Google Chrome.app" --args --enable-precise-memory-info
 
 	var lastTime	= Date.now();
