@@ -64,7 +64,7 @@ function parseStaticStyle (staticStyle: ?string, options: CompilerOptions): Stat
       const dynamicValue = parseText(value, options.delimiters)
       if (dynamicValue) {
         dynamic = true
-        return key + ':' + dynamicValue
+        return key + ':' + dynamicValue.expression
       }
       return key + ':' + JSON.stringify(value)
     }).filter(result => result)
