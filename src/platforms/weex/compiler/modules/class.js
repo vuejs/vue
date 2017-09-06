@@ -55,7 +55,7 @@ function parseStaticClass (staticClass: ?string, options: CompilerOptions): Stat
       const result = parseText(name, options.delimiters)
       if (result) {
         dynamic = true
-        return result
+        return result.expression
       }
       return JSON.stringify(name)
     })
