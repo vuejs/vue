@@ -221,10 +221,6 @@ export function parse (
       } else {
         endPre(element)
       }
-      // apply post-transforms
-      for (let i = 0; i < postTransforms.length; i++) {
-        postTransforms[i](element, options)
-      }
     },
 
     end () {
@@ -238,6 +234,11 @@ export function parse (
       stack.length -= 1
       currentParent = stack[stack.length - 1]
       endPre(element)
+
+      // apply post-transforms
+      for (let i = 0; i < postTransforms.length; i++) {
+        postTransforms[i](element, options)
+      }
     },
 
     chars (text: string) {
