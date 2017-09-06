@@ -1,5 +1,5 @@
 import Vue from "../index";
-import { ComponentOptions, FunctionalComponentOptions } from "../index";
+import { AsyncComponent, ComponentOptions, FunctionalComponentOptions } from "../index";
 import { CreateElement } from "../vue";
 
 interface Component extends Vue {
@@ -273,12 +273,13 @@ Vue.component('functional-component', {
   }
 });
 
-Vue.component("async-component", (resolve, reject) => {
+Vue.component("async-component", ((resolve, reject) => {
   setTimeout(() => {
     resolve(Vue.component("component"));
   }, 0);
   return new Promise((resolve) => {
     resolve({ functional: true });
   })
-});
+}));
 
+Vue.component('async-es-module-component', () => import('./es-module'))

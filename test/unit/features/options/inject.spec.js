@@ -545,4 +545,24 @@ describe('Options provide/inject', () => {
 
     expect(vm.$el.textContent).toBe(`foo: foo injected, bar: bar injected`)
   })
+
+  it('merge provide with object syntax when using Vue.extend', () => {
+    const child = {
+      inject: ['foo'],
+      template: `<span/>`,
+      created () {
+        injected = this.foo
+      }
+    }
+    const Ctor = Vue.extend({
+      provide: { foo: 'foo' },
+      render (h) {
+        return h(child)
+      }
+    })
+
+    new Ctor().$mount()
+
+    expect(injected).toEqual('foo')
+  })
 })

@@ -821,6 +821,18 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('should prevent script xss with v-bind object syntax + array value', done => {
+    renderVmWithOptions({
+      data: {
+        test: ['"><script>alert(1)</script><!--"']
+      },
+      template: `<div v-bind="{ test }"></div>`
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
   it('v-if', done => {
     renderVmWithOptions({
       template: `
@@ -892,6 +904,32 @@ describe('SSR: renderToString', () => {
       }
     }, res => {
       expect(res).toBe(`<div data-server-rendered="true"><div id="a"></div></div>`)
+      done()
+    })
+  })
+
+  it('should escape static strings', done => {
+    renderVmWithOptions({
+      template: `<div>&lt;foo&gt;</div>`
+    }, res => {
+      expect(res).toBe(`<div data-server-rendered="true">&lt;foo&gt;</div>`)
+      done()
+    })
+  })
+
+  it('should not cache computed properties', done => {
+    renderVmWithOptions({
+      template: `<div>{{ foo }}</div>`,
+      data: () => ({ bar: 1 }),
+      computed: {
+        foo () { return this.bar + 1 }
+      },
+      created () {
+        this.foo // access
+        this.bar++ // trigger change
+      }
+    }, res => {
+      expect(res).toBe(`<div data-server-rendered="true">3</div>`)
       done()
     })
   })

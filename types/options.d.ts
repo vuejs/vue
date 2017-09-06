@@ -12,10 +12,14 @@ export type Component<Data=DefaultData<Vue>, Methods=DefaultMethods<Vue>, Comput
   | ThisTypedComponentOptionsWithArrayProps<Vue, Data, Methods, Computed, keyof Props>
   | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Props>;
 
-export type AsyncComponent<Data, Methods, Computed, Props> = (
+interface EsModuleComponent {
+  default: Component
+}
+
+export type AsyncComponent<Data=DefaultData<Vue>, Methods=DefaultMethods<Vue>, Computed=DefaultComputed, Props=DefaultProps> = (
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
-) => Promise<Component<Data, Methods, Computed, Props>> | Component<Data, Methods, Computed, Props> | void;
+) => Promise<Component | EsModuleComponent> | Component | void;
 
 /**
  * When the `Computed` type parameter on `ComponentOptions` is inferred,

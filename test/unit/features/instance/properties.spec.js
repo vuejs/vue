@@ -146,6 +146,20 @@ describe('Instance properties', () => {
     }).then(done)
   })
 
+  // #6263
+  it('$attrs should not be undefined when no props passed in', () => {
+    const vm = new Vue({
+      template: `<foo/>`,
+      data: { foo: 'foo' },
+      components: {
+        foo: {
+          template: `<div>{{ this.foo }}</div>`
+        }
+      }
+    }).$mount()
+    expect(vm.$attrs).toBeDefined()
+  })
+
   it('warn mutating $attrs', () => {
     const vm = new Vue()
     vm.$attrs = {}

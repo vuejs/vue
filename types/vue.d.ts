@@ -46,8 +46,8 @@ export interface Vue {
   readonly $props: Record<string, any>;
   readonly $ssrContext: any;
   readonly $vnode: VNode;
-  readonly $attrs: Record<string, string> | undefined;
-  readonly $listeners: Record<string, Function | Function[]> | undefined;
+  readonly $attrs: Record<string, string>;
+  readonly $listeners: Record<string, Function | Function[]>;
 
   $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
   $forceUpdate(): void;
@@ -111,6 +111,7 @@ export interface VueConstructor<V extends Vue = Vue> {
   component(id: string, definition?: ComponentOptions<V>): ExtendedVue<V, {}, {}, {}, {}>;
 
   use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): void;
+  use(plugin: PluginObject<any> | PluginFunction<any>, ...options: any[]): void;
   mixin(mixin: VueConstructor | ComponentOptions<Vue>): void;
   compile(template: string): {
     render(createElement: typeof Vue.prototype.$createElement): VNode;

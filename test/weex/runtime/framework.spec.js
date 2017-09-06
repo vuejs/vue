@@ -261,7 +261,7 @@ describe('framework APIs', () => {
 
     const instance = new Instance(runtime)
     framework.createInstance(instance.id, `
-      const moduleFoo = __weex_require_module__('foo')
+      const moduleFoo = weex.requireModule('foo')
       new Vue({
         data: {
           x: 'Hello'
@@ -361,9 +361,9 @@ describe('framework APIs', () => {
 
     const instance = new Instance(runtime)
     framework.createInstance(instance.id, `
-      const moduleFoo = __weex_require_module__('foo')
-      const moduleBar = __weex_require_module__('bar')
-      const moduleBaz = __weex_require_module__('baz')
+      const moduleFoo = weex.requireModule('foo')
+      const moduleBar = weex.requireModule('bar')
+      const moduleBaz = weex.requireModule('baz')
       new Vue({
         render: function (createElement) {
           const value = []
@@ -592,7 +592,7 @@ describe('framework APIs', () => {
 
     const instance = new Instance(runtime)
     framework.createInstance(instance.id, `
-      const moduleFoo = __weex_require_module__('foo')
+      const moduleFoo = weex.requireModule('foo')
       new Vue({
         mounted: function () {
           moduleFoo.a(a => a + 1)
@@ -624,7 +624,7 @@ describe('framework APIs', () => {
 
     const instance = new Instance(runtime)
     framework.createInstance(instance.id, `
-      const moduleFoo = __weex_require_module__('foo')
+      const moduleFoo = weex.requireModule('foo')
       new Vue({
         mounted: function () {
           moduleFoo.a(this.$refs.x)

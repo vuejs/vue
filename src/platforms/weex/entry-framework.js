@@ -91,10 +91,10 @@ export function createInstance (
   // It will declare some instance variables like `Vue`, HTML5 Timer APIs etc.
   const instanceVars = Object.assign({
     Vue,
-    weex: weexInstanceVar,
-    // deprecated
-    __weex_require_module__: weexInstanceVar.requireModule // eslint-disable-line
+    weex: weexInstanceVar
   }, timerAPIs, env.services)
+
+  appCode = `(function(global){ \n${appCode}\n })(Object.create(this))`
 
   if (!callFunctionNative(instanceVars, appCode)) {
     // If failed to compile functionBody on native side,
@@ -104,6 +104,8 @@ export function createInstance (
 
   // Send `createFinish` signal to native.
   instance.document.taskCenter.send('dom', { action: 'createFinish' }, [])
+
+  return instance
 }
 
 /**
@@ -289,10 +291,15 @@ function createVueModuleInstance (instanceId, moduleGetter) {
 
   // patch reserved tag detection to account for dynamically registered
   // components
+  const weexRegex = /^weex:/i
   const isReservedTag = Vue.config.isReservedTag || (() => false)
+  const isRuntimeComponent = Vue.config.isRuntimeComponent || (() => false)
   Vue.config.isReservedTag = name => {
-    return components[name] || isReservedTag(name)
+    return (!isRuntimeComponent(name) && components[name]) ||
+      isReservedTag(name) ||
+      weexRegex.test(name)
   }
+  Vue.config.parsePlatformTagName = name => name.replace(weexRegex, '')
 
   // expose weex-specific info
   Vue.prototype.$instanceId = instanceId
