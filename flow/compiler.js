@@ -37,9 +37,12 @@ declare type CompiledResult = {
 };
 
 declare type ModuleOptions = {
+  // transform an AST node before any attributes are processed
   // returning an ASTElement from pre/transforms replaces the element
   preTransformNode: (el: ASTElement) => ?ASTElement;
+  // transform an AST node after built-ins like v-if, v-for are processed
   transformNode: (el: ASTElement) => ?ASTElement;
+  // transform an AST node after its children have been processed
   // cannot return replacement in postTransform because tree is already finalized
   postTransformNode: (el: ASTElement) => void;
   genData: (el: ASTElement) => string; // generate extra data string for an element
