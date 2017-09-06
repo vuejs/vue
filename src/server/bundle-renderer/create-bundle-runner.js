@@ -129,6 +129,10 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
       // vue-style-loader styles imported outside of component lifecycle hooks
       if (initialContext._styles) {
         userContext._styles = deepClone(initialContext._styles)
+        Object.defineProperty(userContext, 'styles', {
+          enumerable: true,
+          get: () => initialContext._renderStyles(userContext._styles)
+        })
       }
       resolve(runner(userContext))
     })
