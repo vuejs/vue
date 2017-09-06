@@ -652,7 +652,7 @@ describe('Directive v-on', () => {
     expect(mouseup.calls.count()).toBe(1)
   })
 
-  it('object syntax (usage in HOC, mixed with native listners)', () => {
+  it('object syntax (usage in HOC, mixed with native listeners)', () => {
     const click = jasmine.createSpy('click')
     const mouseup = jasmine.createSpy('mouseup')
     const mousedown = jasmine.createSpy('mousedown')
