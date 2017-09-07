@@ -7,7 +7,7 @@
 
 /*  */
 
-// these helpers produces better vm code in JS engines due to their
+// these helper produces better vm code in JS engines due to their
 // explicitness and function inlining
 function isUndef (v) {
   return v === undefined || v === null
