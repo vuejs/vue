@@ -547,27 +547,46 @@ export function createPatchFunction (backend) {
         if (!elm.hasChildNodes()) {
           createChildren(vnode, children, insertedVnodeQueue)
         } else {
-          let childrenMatch = true
-          let childNode = elm.firstChild
-          for (let i = 0; i < children.length; i++) {
-            if (!childNode || !hydrate(childNode, children[i], insertedVnodeQueue)) {
-              childrenMatch = false
-              break
+          // v-html and domProps: innerHTML
+          if (isDef(i = data) && isDef(i = i.domProps) && isDef(i = i.innerHTML)) {
+            if (i !== elm.innerHTML) {
+              /* istanbul ignore if */
+              if (process.env.NODE_ENV !== 'production' &&
+                typeof console !== 'undefined' &&
+                !bailed
+              ) {
+                bailed = true
+                console.warn('Parent: ', elm)
+                console.warn('server innerHTML: ', i)
+                console.warn('client innerHTML: ', elm.innerHTML)
+              }
+              return false
             }
-            childNode = childNode.nextSibling
-          }
-          // if childNode is not null, it means the actual childNodes list is
-          // longer than the virtual children list.
-          if (!childrenMatch || childNode) {
-            if (process.env.NODE_ENV !== 'production' &&
-              typeof console !== 'undefined' &&
-              !bailed
-            ) {
-              bailed = true
-              console.warn('Parent: ', elm)
-              console.warn('Mismatching childNodes vs. VNodes: ', elm.childNodes, children)
+          } else {
+            // iterate and compare children lists
+            let childrenMatch = true
+            let childNode = elm.firstChild
+            for (let i = 0; i < children.length; i++) {
+              if (!childNode || !hydrate(childNode, children[i], insertedVnodeQueue)) {
+                childrenMatch = false
+                break
+              }
+              childNode = childNode.nextSibling
             }
-            return false
+            // if childNode is not null, it means the actual childNodes list is
+            // longer than the virtual children list.
+            if (!childrenMatch || childNode) {
+              /* istanbul ignore if */
+              if (process.env.NODE_ENV !== 'production' &&
+                typeof console !== 'undefined' &&
+                !bailed
+              ) {
+                bailed = true
+                console.warn('Parent: ', elm)
+                console.warn('Mismatching childNodes vs. VNodes: ', elm.childNodes, children)
+              }
+              return false
+            }
           }
         }
       }
