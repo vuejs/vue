@@ -138,6 +138,7 @@ export function parse (
         inPre = true
       }
       if (inVPre) {
+        processSlot(element)
         processRawAttrs(element)
       } else {
         processFor(element)

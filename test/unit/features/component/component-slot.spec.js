@@ -267,6 +267,24 @@ describe('Component slot', () => {
     expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
   })
 
+  // #6543
+  it('combined with v-pre', () => {
+    const vm = new Vue({
+      template: `<div>
+        <test><pre v-pre>default slot</pre></test>
+        <test><pre slot="foo" v-pre>named slot</pre></test>
+      </div>`,
+      components: {
+        test: {
+          template: '<div><slot>fallback for default slot</slot><slot name="foo">fallback for named slot</slot></div>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.children.length).toBe(2)
+    expect(vm.$el.children[0].innerHTML).toBe('<pre>default slot</pre>fallback for named slot')
+    expect(vm.$el.children[1].innerHTML).toBe('fallback for default slot<pre>named slot</pre>')
+  })
+
   it('inside template v-if', () => {
     mount({
       childTemplate: `
