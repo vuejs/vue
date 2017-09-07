@@ -2,7 +2,7 @@ import Vue from 'vue'
 import { looseEqual } from 'shared/util'
 
 // Android 4.4 Chrome 30 has the bug that a multi-select option cannot be
-// deseleted by setting its "selected" prop via JavaScript.
+// deselected by setting its "selected" prop via JavaScript.
 function hasMultiSelectBug () {
   var s = document.createElement('select')
   s.setAttribute('multiple', '')

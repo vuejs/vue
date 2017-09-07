@@ -282,7 +282,7 @@ describe('codegen', () => {
     )
   })
 
-  // Github Issues #5146
+  // GitHub Issues #5146
   it('generate events with generic modifiers and keycode correct order', () => {
     assertCodegen(
       '<input @keydown.enter.prevent="onInput">',

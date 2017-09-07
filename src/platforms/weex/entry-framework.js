@@ -437,7 +437,7 @@ function callFunction (globalObjects, body) {
  * This function helps speed up bundle compiling. Normally, the V8
  * engine needs to download, parse, and compile a bundle on every
  * visit. If 'compileBundle()' is available on native side,
- * the downloding, parsing, and compiling steps would be skipped.
+ * the downloading, parsing, and compiling steps would be skipped.
  * @param  {object} globalObjects
  * @param  {string} body
  * @return {boolean}
