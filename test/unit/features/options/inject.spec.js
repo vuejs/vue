@@ -145,7 +145,7 @@ describe('Options provide/inject', () => {
     expect(child.baz).toBe(3)
   })
 
-  // Github issue #5194
+  // GitHub issue #5194
   it('should work with functional', () => {
     new Vue({
       template: `<child/>`,
@@ -187,7 +187,7 @@ describe('Options provide/inject', () => {
     })
   }
 
-  // Github issue #5223
+  // GitHub issue #5223
   it('should work with reactive array', done => {
     const vm = new Vue({
       template: `<div><child></child></div>`,
@@ -362,7 +362,7 @@ describe('Options provide/inject', () => {
     expect(`Injection "baz" not found`).not.toHaveBeenWarned()
   })
 
-  // Github issue #6008
+  // GitHub issue #6008
   it('should merge provide from mixins (objects)', () => {
     const mixinA = { provide: { foo: 'foo' }}
     const mixinB = { provide: { bar: 'bar' }}

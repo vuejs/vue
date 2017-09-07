@@ -65,7 +65,7 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const style = normalizeStyleBinding(vnode.data.style) || {}
 
   // store normalized style under a different key for next diff
-  // make sure to clone it if it's reactive, since the user likley wants
+  // make sure to clone it if it's reactive, since the user likely wants
   // to mutate it.
   vnode.data.normalizedStyle = isDef(style.__ob__)
     ? extend({}, style)

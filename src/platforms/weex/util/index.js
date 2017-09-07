@@ -12,7 +12,7 @@ export const isReservedTag = makeMap(
 )
 
 // Elements that you can, intentionally, leave open (and which close themselves)
-// more flexable than web
+// more flexible than web
 export const canBeLeftOpenTag = makeMap(
   'web,spinner,switch,video,textarea,canvas,' +
   'indicator,marquee,countdown',
