@@ -109,7 +109,7 @@ Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/b
 
 ## Changelog
 
-Details changes for each release are documented in the [release notes](https://github.com/vuejs/vue/releases).
+Detailed changes for each release are documented in the [release notes](https://github.com/vuejs/vue/releases).
 
 ## Stay In Touch
 
