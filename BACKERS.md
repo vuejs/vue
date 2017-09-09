@@ -105,6 +105,10 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 <a href="https://www.waterfall.com">
   <img width="200px" src="https://waterfall.com/waterfall_logo_large.png">
 </a>
+<br><br>
+<a href="https://vuetifyjs.com">
+  <img width="80px" src="https://vuetifyjs.com/static/doc-images/logo.svg"> Vuetify
+</a>
 
 ---
 
@@ -121,6 +125,7 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - errorrik
 - Alex Balashov
 - Konstantin Levinski
+- Samuel Smith
 
 ---
 
@@ -288,3 +293,12 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - Raphaël Saunier
 - Kirk Lewis
 - Nicholas Reid
+- Tyler
+- Yong Jun Thong
+- Jonatan Machado
+- Tai Shi Ling
+- Bryan Gruneberg
+- Matthew McMillion
+- Keith Mancuso
+- Alexander Karelas
+- Matias Verdier
