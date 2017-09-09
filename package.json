@@ -39,7 +39,8 @@
     "release:weex": "bash build/release-weex.sh",
     "release:note": "node build/gen-release-note.js",
     "setup": "node build/install-hooks.js",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "postinstall": "node -e \"console.log('\\u001b[92m\\u001b[1mLove Vue? You can now donate to our open collective:\\u001b[22m\\u001b[90m\\n > \\u001b[90mhttps://opencollective.com/vuejs/donate\\u001b[0m')\""
   },
   "repository": {
     "type": "git",
@@ -128,5 +129,9 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "collective": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/vuejs"
   }
 }
