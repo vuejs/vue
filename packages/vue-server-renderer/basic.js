@@ -156,7 +156,6 @@ var hyphenateRE = /([^-])([A-Z])/g;
 var hyphenate = cached(function (str) {
   return str
     .replace(hyphenateRE, '$1-$2')
-    .replace(hyphenateRE, '$1-$2')
     .toLowerCase()
 });
 
