@@ -1,13 +1,15 @@
 const path = require('path')
 
+const resolve = p => path.resolve(__dirname, '../', p)
+
 module.exports = {
-  vue: path.resolve(__dirname, '../src/platforms/web/entry-runtime-with-compiler'),
-  compiler: path.resolve(__dirname, '../src/compiler'),
-  core: path.resolve(__dirname, '../src/core'),
-  shared: path.resolve(__dirname, '../src/shared'),
-  web: path.resolve(__dirname, '../src/platforms/web'),
-  weex: path.resolve(__dirname, '../src/platforms/weex'),
-  server: path.resolve(__dirname, '../src/server'),
-  entries: path.resolve(__dirname, '../src/entries'),
-  sfc: path.resolve(__dirname, '../src/sfc')
+  vue: resolve('src/platforms/web/entry-runtime-with-compiler'),
+  compiler: resolve('src/compiler'),
+  core: resolve('src/core'),
+  shared: resolve('src/shared'),
+  web: resolve('src/platforms/web'),
+  weex: resolve('src/platforms/weex'),
+  server: resolve('src/server'),
+  entries: resolve('src/entries'),
+  sfc: resolve('src/sfc')
 }
