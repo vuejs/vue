@@ -13,11 +13,18 @@
 
 ## Supporting Vue.js
 
-Vue.js is an MIT-licensed open source project. Its ongoing development is made possible thanks to the support by these awesome [backers](https://github.com/vuejs/vue/blob/dev/BACKERS.md). If you'd like to join them, check out [Vue.js' Patreon campaign](https://www.patreon.com/evanyou).
+Vue.js is an MIT-licensed open source project. It's an independent project with its ongoing development made possible entirely thanks to the support by these awesome [backers](https://github.com/vuejs/vue/blob/dev/BACKERS.md). If you'd like to join them, please consider:
+
+- [Become a backer or sponsor on Patreon](https://www.patreon.com/evanyou).
+- [Become a backer or sponsor on OpenCollective](https://opencollective.com/vuejs).
+
+#### What's the difference between Patreon and OpenCollective?
+
+Funds donated via Patreon goes directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses by core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
+
+### Sponsors via Patreon
 
 <p align="center">
-  <b>Special thanks to the generous sponsorship by:</b>
-  <br><br>
   <a href="https://stdlib.com">
     <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
   </a>
@@ -75,6 +82,39 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
   </a>
 </p>
 
+### Sponsors via OpenCollective
+
+<a href="https://opencollective.com/vuejs/sponsor/0/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/1/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/2/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/3/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/4/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/5/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/6/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/7/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/8/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/9/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/9/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/10/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/10/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/11/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/11/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/12/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/12/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/13/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/13/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/14/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/14/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/15/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/15/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/16/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/16/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/17/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/17/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/18/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/18/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/19/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/19/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/20/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/20/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/21/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/21/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/22/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/22/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/23/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/23/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/24/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/24/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/25/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/25/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/26/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/26/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/27/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/27/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/28/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/28/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/sponsor/29/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/29/avatar.svg"></a>
+
 ## Intro
 
 Vue.js is a library for building interactive web interfaces. It provides data-reactive components with a simple and flexible API. Core features include:
@@ -102,6 +142,10 @@ Please make sure to read the [Issue Reporting Checklist](https://github.com/vuej
 ## Contribution
 
 Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md) before making a pull request. If you have a Vue-related project/component/tool, add it with a pull-request to [this curated list](https://github.com/vuejs/awesome-vue)!
+
+Thank you to all the people who already contributed to Vue!
+
+<a href="graphs/contributors"><img src="https://opencollective.com/vuejs/contributors.svg?width=890" /></a>
 
 ## Changelog
 
