@@ -60,10 +60,6 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="240px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
 </a>
 <br><br>
-<a href="https://famebroker.com" target="_blank">
-  <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/famebroker.png">
-</a>
-<br><br>
 <a href="https://component.io/" target="_blank">
   <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/component_io.png">
 </a>
