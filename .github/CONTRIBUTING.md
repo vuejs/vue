@@ -123,3 +123,19 @@ The default test script will do the following: lint with ESLint -> type check wi
 
   - **`shared`**: contains utilities shared across the entire codebase.
 
+## Financial Contribution
+
+As a pure community-driven project without major corporate backing, we also welcome financial contributions via Patreon or OpenCollective.
+
+- [Become a backer or sponsor on Patreon](https://www.patreon.com/evanyou)
+- [Become a backer or sponsor on OpenCollective](https://opencollective.com/vuejs)
+
+### What's the difference between Patreon and OpenCollective?
+
+Funds donated via Patreon goes directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses by core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
+
+## Credits
+
+Thank you to all the people who have already contributed to vuejs!
+
+<a href="graphs/contributors"><img src="https://opencollective.com/vuejs/contributors.svg?width=890" /></a>
