@@ -145,7 +145,7 @@ Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/b
 
 Thank you to all the people who already contributed to Vue!
 
-<a href="graphs/contributors"><img src="https://opencollective.com/vuejs/contributors.svg?width=890" /></a>
+<a href="https://github.com/vuejs/vue/graphs/contributors"><img src="https://opencollective.com/vuejs/contributors.svg?width=890" /></a>
 
 ## Changelog
 
