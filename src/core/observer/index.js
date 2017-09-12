@@ -4,11 +4,12 @@ import Dep from './dep'
 import { arrayMethods } from './array'
 import {
   def,
+  warn,
+  hasOwn,
+  hasProto,
   isObject,
   isPlainObject,
-  hasProto,
-  hasOwn,
-  warn,
+  isValidArrayIndex,
   isServerRendering
 } from '../util/index'
 
@@ -21,8 +22,7 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
  * under a frozen data structure. Converting it would defeat the optimization.
  */
 export const observerState = {
-  shouldConvert: true,
-  isSettingProps: false
+  shouldConvert: true
 }
 
 /**
@@ -132,7 +132,8 @@ export function defineReactive (
   obj: Object,
   key: string,
   val: any,
-  customSetter?: Function
+  customSetter?: ?Function,
+  shallow?: boolean
 ) {
   const dep = new Dep()
 
@@ -145,7 +146,7 @@ export function defineReactive (
   const getter = property && property.get
   const setter = property && property.set
 
-  let childOb = observe(val)
+  let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
@@ -177,7 +178,7 @@ export function defineReactive (
       } else {
         val = newVal
       }
-      childOb = observe(newVal)
+      childOb = !shallow && observe(newVal)
       dep.notify()
     }
   })
@@ -189,7 +190,7 @@ export function defineReactive (
  * already exist.
  */
 export function set (target: Array<any> | Object, key: any, val: any): any {
-  if (Array.isArray(target) && (typeof key === 'number' || /^\d+$/.test(key))) {
+  if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
     return val
@@ -219,7 +220,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
  * Delete a property and trigger change if necessary.
  */
 export function del (target: Array<any> | Object, key: any) {
-  if (Array.isArray(target) && typeof key === 'number') {
+  if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1)
     return
   }

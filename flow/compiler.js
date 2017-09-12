@@ -21,6 +21,9 @@ declare type CompilerOptions = {
 
   // runtime user-configurable
   delimiters?: [string, string]; // template delimiters
+
+  // allow user kept comments
+  comments?: boolean
 };
 
 declare type CompiledResult = {
@@ -130,6 +133,7 @@ declare type ASTElement = {
   once?: true;
   onceProcessed?: boolean;
   wrapData?: (code: string) => string;
+  wrapListeners?: (code: string) => string;
 
   // 2.4 ssr optimization
   ssrOptimizability?: number;
@@ -151,6 +155,7 @@ declare type ASTText = {
   type: 3;
   text: string;
   static?: boolean;
+  isComment?: boolean;
   // 2.4 ssr optimization
   ssrOptimizability?: number;
 };

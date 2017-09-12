@@ -8,6 +8,7 @@ import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 import {
   isDef,
   camelize,
+  emptyObject,
   validateProp
 } from '../util/index'
 
@@ -22,7 +23,7 @@ export function createFunctionalComponent (
   const propOptions = Ctor.options.props
   if (isDef(propOptions)) {
     for (const key in propOptions) {
-      props[key] = validateProp(key, propOptions, propsData || {})
+      props[key] = validateProp(key, propOptions, propsData || emptyObject)
     }
   } else {
     if (isDef(data.attrs)) mergeProps(props, data.attrs)
@@ -37,7 +38,7 @@ export function createFunctionalComponent (
     props,
     children,
     parent: context,
-    listeners: data.on || {},
+    listeners: data.on || emptyObject,
     injections: resolveInject(Ctor.options.inject, context),
     slots: () => resolveSlots(children, context)
   })

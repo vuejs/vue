@@ -45,8 +45,8 @@ module.exports = {
               template: '<td class="item">' +
                 // 25 plain elements for each cell
                 '<ul class="yoyo">' +
-                  '<li class="hihi" v-for="i in 5">' +
-                    '<span v-for="i in 5">fsefs</span>' +
+                  `<li v-for="i in 5" :class="'hihi' + i">` +
+                    `<span :id="i + '_' + j" v-for="j in 5">fsefs</span>` +
                     '</li>' +
                 '</ul>' +
               '</td>'

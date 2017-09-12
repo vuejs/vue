@@ -18,6 +18,10 @@ import {
 } from 'web/util/index'
 
 function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+  const opts = vnode.componentOptions
+  if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) {
+    return
+  }
   if (isUndef(oldVnode.data.attrs) && isUndef(vnode.data.attrs)) {
     return
   }
@@ -60,7 +64,12 @@ function setAttr (el: Element, key: string, value: any) {
     if (isFalsyAttrValue(value)) {
       el.removeAttribute(key)
     } else {
-      el.setAttribute(key, key)
+      // technically allowfullscreen is a boolean attribute for <iframe>,
+      // but Flash expects a value of "true" when used on <embed> tag
+      value = key === 'allowfullscreen' && el.tagName === 'EMBED'
+        ? 'true'
+        : key
+      el.setAttribute(key, value)
     }
   } else if (isEnumeratedAttr(key)) {
     el.setAttribute(key, isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true')

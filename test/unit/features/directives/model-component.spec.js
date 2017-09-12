@@ -36,6 +36,41 @@ describe('Directive v-model component', () => {
     }).then(done)
   })
 
+  it('should work with native tags with "is"', done => {
+    const vm = new Vue({
+      data: {
+        msg: 'hello'
+      },
+      template: `
+        <div>
+          <p>{{ msg }}</p>
+          <input is="test" v-model="msg">
+        </div>
+      `,
+      components: {
+        test: {
+          props: ['value'],
+          template: `<input :value="value" @input="$emit('input', $event.target.value)">`
+        }
+      }
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    waitForUpdate(() => {
+      const input = vm.$el.querySelector('input')
+      input.value = 'world'
+      triggerEvent(input, 'input')
+    }).then(() => {
+      expect(vm.msg).toEqual('world')
+      expect(vm.$el.querySelector('p').textContent).toEqual('world')
+      vm.msg = 'changed'
+    }).then(() => {
+      expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+      expect(vm.$el.querySelector('input').value).toEqual('changed')
+    }).then(() => {
+      document.body.removeChild(vm.$el)
+    }).then(done)
+  })
+
   it('should support customization via model option', done => {
     const spy = jasmine.createSpy('update')
     const vm = new Vue({

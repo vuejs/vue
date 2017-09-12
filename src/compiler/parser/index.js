@@ -90,6 +90,7 @@ export function parse (
     isUnaryTag: options.isUnaryTag,
     canBeLeftOpenTag: options.canBeLeftOpenTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
+    shouldKeepComment: options.comments,
     start (tag, attrs, unary) {
       // check namespace.
       // inherit parent ns if there is one
@@ -274,6 +275,13 @@ export function parse (
           })
         }
       }
+    },
+    comment (text: string) {
+      currentParent.children.push({
+        type: 3,
+        text,
+        isComment: true
+      })
     }
   })
   return root
@@ -475,7 +483,9 @@ function processAttrs (el) {
             )
           }
         }
-        if (isProp || platformMustUseProp(el.tag, el.attrsMap.type, name)) {
+        if (isProp || (
+          !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
+        )) {
           addProp(el, name, value)
         } else {
           addAttr(el, name, value)

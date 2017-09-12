@@ -660,4 +660,72 @@ describe('Component slot', () => {
       expect(vm.$el.querySelector('input').value).toBe('b')
     }).then(done)
   })
+
+  // GitHub issue #5888
+  it('should resolve correctly slot with keep-alive', () => {
+    const vm = new Vue({
+      template: `
+      <div>
+        <container>
+          <keep-alive slot="foo">
+            <child></child>
+          </keep-alive>
+        </container>
+      </div>
+      `,
+      components: {
+        container: {
+          template:
+            '<div><slot>default</slot><slot name="foo">named</slot></div>'
+        },
+        child: {
+          template: '<span>foo</span>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<div>default<span>foo</span></div>')
+  })
+
+  it('should handle nested components in slots properly', done => {
+    const TestComponent = {
+      template: `
+        <component :is="toggleEl ? 'b' : 'i'">
+          <slot />
+        </component>
+      `,
+      data () {
+        return {
+          toggleEl: true
+        }
+      }
+    }
+
+    const vm = new Vue({
+      template: `
+        <div>
+          <test-component ref="test">
+            <div>
+              <foo/>
+            </div><bar/>
+          </test-component>
+        </div>
+      `,
+      components: {
+        TestComponent,
+        foo: {
+          template: `<div>foo</div>`
+        },
+        bar: {
+          template: `<div>bar</div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe(`<b><div><div>foo</div></div><div>bar</div></b>`)
+
+    vm.$refs.test.toggleEl = false
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe(`<i><div><div>foo</div></div><div>bar</div></i>`)
+    }).then(done)
+  })
 })

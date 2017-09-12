@@ -172,6 +172,9 @@ function renderAsyncComponent (node, isRoot, context) {
   const factory = node.asyncFactory
 
   const resolve = comp => {
+    if (comp.__esModule && comp.default) {
+      comp = comp.default
+    }
     const { data, children, tag } = node.asyncMeta
     const nodeContext = node.asyncMeta.context
     const resolvedNode: any = createComponent(

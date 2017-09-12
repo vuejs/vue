@@ -1,7 +1,13 @@
 /* @flow */
 
 import config from 'core/config'
-import { isObject, warn, toObject } from 'core/util/index'
+
+import {
+  warn,
+  isObject,
+  toObject,
+  isReservedAttribute
+} from 'core/util/index'
 
 /**
  * Runtime helper for merging v-bind="object" into a VNode's data.
@@ -10,7 +16,8 @@ export function bindObjectProps (
   data: any,
   tag: string,
   value: any,
-  asProp?: boolean
+  asProp: boolean,
+  isSync?: boolean
 ): VNodeData {
   if (value) {
     if (!isObject(value)) {
@@ -24,7 +31,11 @@ export function bindObjectProps (
       }
       let hash
       for (const key in value) {
-        if (key === 'class' || key === 'style') {
+        if (
+          key === 'class' ||
+          key === 'style' ||
+          isReservedAttribute(key)
+        ) {
           hash = data
         } else {
           const type = data.attrs && data.attrs.type
@@ -34,6 +45,13 @@ export function bindObjectProps (
         }
         if (!(key in hash)) {
           hash[key] = value[key]
+
+          if (isSync) {
+            const on = data.on || (data.on = {})
+            on[`update:${key}`] = function ($event) {
+              value[key] = $event
+            }
+          }
         }
       }
     }

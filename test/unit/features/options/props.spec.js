@@ -206,6 +206,17 @@ describe('Options props', () => {
       expect('Expected Array').toHaveBeenWarned()
     })
 
+    it('primitive wrapper objects', () => {
+      /* eslint-disable no-new-wrappers */
+      makeInstance(new String('s'), String)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(new Number(1), Number)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(new Boolean(true), Boolean)
+      expect(console.error.calls.count()).toBe(0)
+      /* eslint-enable no-new-wrappers */
+    })
+
     if (hasSymbol) {
       it('symbol', () => {
         makeInstance(Symbol('foo'), Symbol)
@@ -333,7 +344,7 @@ describe('Options props', () => {
         }
       }
     }).$mount()
-    expect(`method "a" has already been defined as a prop`).toHaveBeenWarned()
+    expect(`Method "a" has already been defined as a prop`).toHaveBeenWarned()
     expect(`Avoid mutating a prop directly`).toHaveBeenWarned()
   })
 
@@ -490,11 +501,12 @@ describe('Options props', () => {
   })
 
   it('warn reserved props', () => {
+    const specialAttrs = ['key', 'ref', 'slot', 'is']
     new Vue({
-      props: {
-        key: String
-      }
+      props: specialAttrs
     })
-    expect(`"key" is a reserved attribute`).toHaveBeenWarned()
+    specialAttrs.forEach(attr => {
+      expect(`"${attr}" is a reserved attribute`).toHaveBeenWarned()
+    })
   })
 })

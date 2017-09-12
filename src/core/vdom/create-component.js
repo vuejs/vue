@@ -165,12 +165,19 @@ export function createComponent (
   // child component listeners instead of DOM listeners
   const listeners = data.on
   // replace with listeners with .native modifier
+  // so it gets processed during parent component patch.
   data.on = data.nativeOn
 
   if (isTrue(Ctor.options.abstract)) {
     // abstract components do not keep anything
-    // other than props & listeners
+    // other than props & listeners & slot
+
+    // work around flow
+    const slot = data.slot
     data = {}
+    if (slot) {
+      data.slot = slot
+    }
   }
 
   // merge component management hooks onto the placeholder node
