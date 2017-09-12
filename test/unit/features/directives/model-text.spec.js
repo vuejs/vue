@@ -293,5 +293,66 @@ describe('Directive v-model text', () => {
       triggerEvent(vm.$el, 'compositionend')
       expect(spy.calls.count()).toBe(2)
     })
+
+    // #4392
+    it('should not update value with modifiers when in focus if post-conversion values are the same', done => {
+      const vm = new Vue({
+        data: {
+          a: 1,
+          foo: false
+        },
+        template: '<div>{{ foo }}<input ref="input" v-model.number="a"></div>'
+      }).$mount()
+
+      document.body.appendChild(vm.$el)
+      vm.$refs.input.focus()
+      vm.$refs.input.value = '1.000'
+      vm.foo = true
+
+      waitForUpdate(() => {
+        expect(vm.$refs.input.value).toBe('1.000')
+      }).then(done)
+    })
+
+    // #6552
+    // Root cause: input listeners with modifiers are added as a separate
+    // DOM listener. If a change is triggered inside this listener, an update
+    // will happen before the second listener is fired! (obviously microtasks
+    // can be processed in between DOM events on the same element)
+    // This causes the domProps module to receive state that has not been
+    // updated by v-model yet (because v-model's listener has not fired yet)
+    // Solution: make sure to always fire v-model's listener first
+    it('should not block input when another input listener with modifier is used', done => {
+      const vm = new Vue({
+        data: {
+          a: 'a',
+          foo: false
+        },
+        template: `
+          <div>
+            <input ref="input" v-model="a" @input.capture="onInput">{{ a }}
+            <div v-if="foo">foo</div>
+          </div>
+        `,
+        methods: {
+          onInput (e) {
+            this.foo = true
+          }
+        }
+      }).$mount()
+
+      document.body.appendChild(vm.$el)
+      vm.$refs.input.focus()
+      vm.$refs.input.value = 'b'
+      triggerEvent(vm.$refs.input, 'input')
+
+      // not using wait for update here because there will be two update cycles
+      // one caused by onInput in the first listener
+      setTimeout(() => {
+        expect(vm.a).toBe('b')
+        expect(vm.$refs.input.value).toBe('b')
+        done()
+      }, 16)
+    })
   }
 })
