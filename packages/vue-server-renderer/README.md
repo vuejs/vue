@@ -1,6 +1,6 @@
 # vue-server-renderer
 
-> This package is auto-generated. For pull requests please see [src/entries/web-server-renderer.js](https://github.com/vuejs/vue/blob/dev/src/platforms/web/server-renderer.js).
+> This package is auto-generated. For pull requests please see [src/platforms/web/entry-server-renderer.js](https://github.com/vuejs/vue/blob/dev/src/platforms/web/entry-server-renderer.js).
 
 This package offers Node.js server-side rendering for Vue 2.0.
 
