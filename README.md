@@ -84,6 +84,20 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 
 ### Sponsors via OpenCollective
 
+#### Platinum
+
+<a href="https://opencollective.com/vuejs/platinumsponsor/0/website" target="_blank"><img src="https://opencollective.com/vuejs/platinumsponsor/0/avatar.svg"></a>
+
+#### Gold
+
+<a href="https://opencollective.com/vuejs/goldsponsor/0/website" target="_blank"><img src="https://opencollective.com/vuejs/goldsponsor/0/avatar.svg"></a>
+
+#### Silver
+
+<a href="https://opencollective.com/vuejs/silversponsor/0/website" target="_blank"><img src="https://opencollective.com/vuejs/silversponsor/0/avatar.svg"></a>
+
+#### Bronze
+
 <a href="https://opencollective.com/vuejs/sponsor/0/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/vuejs/sponsor/1/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/1/avatar.svg"></a>
 <a href="https://opencollective.com/vuejs/sponsor/2/website" target="_blank"><img src="https://opencollective.com/vuejs/sponsor/2/avatar.svg"></a>
