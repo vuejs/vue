@@ -362,7 +362,15 @@ describe('Options provide/inject', () => {
     expect(`Injection "baz" not found`).not.toHaveBeenWarned()
   })
 
-  // GitHub issue #6008
+  it('should not warn when injection key which is not provided is not enumerable', () => {
+    const parent = new Vue({ provide: { foo: 1 }})
+    const inject = { foo: 'foo' }
+    Object.defineProperty(inject, '__ob__', { enumerable: false, value: '__ob__' })
+    new Vue({ parent, inject })
+    expect(`Injection "__ob__" not found`).not.toHaveBeenWarned()
+  })
+
+  // Github issue #6008
   it('should merge provide from mixins (objects)', () => {
     const mixinA = { provide: { foo: 'foo' }}
     const mixinB = { provide: { bar: 'bar' }}
