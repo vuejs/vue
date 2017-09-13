@@ -42,6 +42,7 @@ export function resolveInject (inject: any, vm: Component): ?Object {
     const result = Object.create(null)
     const keys = hasSymbol
         ? Reflect.ownKeys(inject).filter(key => {
+          /* istanbul ignore next */
           return Object.getOwnPropertyDescriptor(inject, key).enumerable
         })
         : Object.keys(inject)
