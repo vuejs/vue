@@ -157,7 +157,7 @@ export function defineReactive (
         if (childOb) {
           childOb.dep.depend()
         }
-        if (Array.isArray(value)) {
+        if (Array.isArray(value) && Object.isExtensible(value)) {
           dependArray(value)
         }
       }
