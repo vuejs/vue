@@ -129,6 +129,10 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
       // vue-style-loader styles imported outside of component lifecycle hooks
       if (initialContext._styles) {
         userContext._styles = deepClone(initialContext._styles)
+        Object.defineProperty(userContext, 'styles', {
+          enumerable: true,
+          get: () => initialContext._renderStyles(userContext._styles)
+        })
       }
       // #6353 after the app is resolved, if the userContext doesn't have a
       // styles property, it means the app doesn't have any lifecycle-injected
