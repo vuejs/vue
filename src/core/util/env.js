@@ -61,7 +61,7 @@ export function isNative (Ctor: any): boolean {
 
 export const hasSymbol =
   typeof Symbol !== 'undefined' && isNative(Symbol) &&
-  typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys) && isNative(Reflect.getOwnPropertyDescriptor)
+  typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)
 
 /**
  * Defer a task to execute it asynchronously.
