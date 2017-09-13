@@ -130,7 +130,23 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
       if (initialContext._styles) {
         userContext._styles = deepClone(initialContext._styles)
       }
-      resolve(runner(userContext))
+      // #6353 after the app is resolved, if the userContext doesn't have a
+      // styles property, it means the app doesn't have any lifecycle-injected
+      // styles, so vue-style-loader never defined the styles getter.
+      // just expose the same styles from the initialContext.
+      const exposeStylesAndResolve = app => {
+        if (!userContext.hasOwnProperty('styles')) {
+          userContext.styles = initialContext.styles
+        }
+        resolve(app)
+      }
+
+      const res = runner(userContext)
+      if (typeof res.then === 'function') {
+        res.then(exposeStylesAndResolve)
+      } else {
+        exposeStylesAndResolve(res)
+      }
     })
   }
 }

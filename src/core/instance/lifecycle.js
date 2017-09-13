@@ -229,11 +229,11 @@ export function updateChildComponent (
   }
   vm.$options._renderChildren = renderChildren
 
-  // update $attrs and $listensers hash
+  // update $attrs and $listeners hash
   // these are also reactive so they may trigger child update if the child
   // used them during render
-  vm.$attrs = parentVnode.data && parentVnode.data.attrs
-  vm.$listeners = listeners
+  vm.$attrs = (parentVnode.data && parentVnode.data.attrs) || emptyObject
+  vm.$listeners = listeners || emptyObject
 
   // update props
   if (propsData && vm.$options.props) {

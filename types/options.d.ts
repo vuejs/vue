@@ -6,10 +6,15 @@ type Constructor = {
 }
 
 export type Component = typeof Vue | ComponentOptions<Vue> | FunctionalComponentOptions;
+
+interface EsModuleComponent {
+  default: Component
+}
+
 export type AsyncComponent = (
   resolve: (component: Component) => void,
   reject: (reason?: any) => void
-) => Promise<Component> | Component | void;
+) => Promise<Component | EsModuleComponent> | Component | void;
 
 export interface ComponentOptions<V extends Vue> {
   data?: Object | ((this: V) => Object);

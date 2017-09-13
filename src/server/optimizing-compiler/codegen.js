@@ -22,8 +22,8 @@ import {
   applyModelTransform
 } from './modules'
 
+import { escape } from 'web/server/util'
 import { optimizability } from './optimizer'
-
 import type { CodegenResult } from 'compiler/codegen/index'
 
 export type StringSegment = {
@@ -200,10 +200,10 @@ function elementToOpenTagSegments (el, state): Array<StringSegment> {
 function childrenToSegments (el, state): Array<StringSegment> {
   let binding
   if ((binding = el.attrsMap['v-html'])) {
-    return [{ type: EXPRESSION, value: binding }]
+    return [{ type: EXPRESSION, value: `_s(${binding})` }]
   }
   if ((binding = el.attrsMap['v-text'])) {
-    return [{ type: INTERPOLATION, value: binding }]
+    return [{ type: INTERPOLATION, value: `_s(${binding})` }]
   }
   return el.children
     ? nodesToSegments(el.children, state)
@@ -222,7 +222,7 @@ function nodesToSegments (
     } else if (c.type === 2) {
       segments.push({ type: INTERPOLATION, value: c.expression })
     } else if (c.type === 3) {
-      segments.push({ type: RAW, value: c.text })
+      segments.push({ type: RAW, value: escape(c.text) })
     }
   }
   return segments

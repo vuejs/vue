@@ -91,7 +91,7 @@ export function _createElement (
   let vnode, ns
   if (typeof tag === 'string') {
     let Ctor
-    ns = config.getTagNamespace(tag)
+    ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       vnode = new VNode(

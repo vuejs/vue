@@ -10,12 +10,14 @@ import {
   query,
   mustUseProp,
   isReservedTag,
+  isRuntimeComponent,
   isUnknownElement
 } from 'weex/util/index'
 
 // install platform specific utils
 Vue.config.mustUseProp = mustUseProp
 Vue.config.isReservedTag = isReservedTag
+Vue.config.isRuntimeComponent = isRuntimeComponent
 Vue.config.isUnknownElement = isUnknownElement
 
 // install platform runtime directives and components

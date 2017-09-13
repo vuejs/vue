@@ -49,17 +49,18 @@ export function initRender (vm: Component) {
   // $attrs & $listeners are exposed for easier HOC creation.
   // they need to be reactive so that HOCs using them are always updated
   const parentData = parentVnode && parentVnode.data
+
   /* istanbul ignore else */
   if (process.env.NODE_ENV !== 'production') {
-    defineReactive(vm, '$attrs', parentData && parentData.attrs, () => {
+    defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, () => {
       !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
     }, true)
-    defineReactive(vm, '$listeners', vm.$options._parentListeners, () => {
+    defineReactive(vm, '$listeners', vm.$options._parentListeners || emptyObject, () => {
       !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
     }, true)
   } else {
-    defineReactive(vm, '$attrs', parentData && parentData.attrs, null, true)
-    defineReactive(vm, '$listeners', vm.$options._parentListeners, null, true)
+    defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, null, true)
+    defineReactive(vm, '$listeners', vm.$options._parentListeners || emptyObject, null, true)
   }
 }
 
@@ -77,9 +78,13 @@ export function renderMixin (Vue: Class<Component>) {
     } = vm.$options
 
     if (vm._isMounted) {
-      // clone slot nodes on re-renders
+      // if the parent didn't update, the slot nodes will be the ones from
+      // last render. They need to be cloned to ensure "freshness" for this render.
       for (const key in vm.$slots) {
-        vm.$slots[key] = cloneVNodes(vm.$slots[key])
+        const slot = vm.$slots[key]
+        if (slot._rendered) {
+          vm.$slots[key] = cloneVNodes(slot, true /* deep */)
+        }
       }
     }
 

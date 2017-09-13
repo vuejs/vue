@@ -135,4 +135,58 @@ describe('vdom patch: edge cases', () => {
       expect(vm.$el.children[0].value).toBe('a')
     }).then(done)
   })
+
+  // #6313
+  it('should not replace node when switching between text-like inputs', done => {
+    const vm = new Vue({
+      data: { show: false },
+      template: `
+        <div>
+          <input :type="show ? 'text' : 'password'">
+        </div>
+      `
+    }).$mount()
+    const node = vm.$el.children[0]
+    expect(vm.$el.children[0].type).toBe('password')
+    vm.$el.children[0].value = 'test'
+    vm.show = true
+    waitForUpdate(() => {
+      expect(vm.$el.children[0]).toBe(node)
+      expect(vm.$el.children[0].value).toBe('test')
+      expect(vm.$el.children[0].type).toBe('text')
+      vm.show = false
+    }).then(() => {
+      expect(vm.$el.children[0]).toBe(node)
+      expect(vm.$el.children[0].value).toBe('test')
+      expect(vm.$el.children[0].type).toBe('password')
+    }).then(done)
+  })
+
+  it('should properly patch nested HOC when root element is replaced', done => {
+    const vm = new Vue({
+      template: `<foo class="hello" ref="foo" />`,
+      components: {
+        foo: {
+          template: `<bar ref="bar" />`,
+          components: {
+            bar: {
+              template: `<div v-if="ok"></div><span v-else></span>`,
+              data () {
+                return { ok: true }
+              }
+            }
+          }
+        }
+      }
+    }).$mount()
+
+    expect(vm.$refs.foo.$refs.bar.$el.tagName).toBe('DIV')
+    expect(vm.$refs.foo.$refs.bar.$el.className).toBe(`hello`)
+
+    vm.$refs.foo.$refs.bar.ok = false
+    waitForUpdate(() => {
+      expect(vm.$refs.foo.$refs.bar.$el.tagName).toBe('SPAN')
+      expect(vm.$refs.foo.$refs.bar.$el.className).toBe(`hello`)
+    }).then(done)
+  })
 })

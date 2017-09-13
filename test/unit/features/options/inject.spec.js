@@ -145,7 +145,7 @@ describe('Options provide/inject', () => {
     expect(child.baz).toBe(3)
   })
 
-  // Github issue #5194
+  // GitHub issue #5194
   it('should work with functional', () => {
     new Vue({
       template: `<child/>`,
@@ -187,7 +187,7 @@ describe('Options provide/inject', () => {
     })
   }
 
-  // Github issue #5223
+  // GitHub issue #5223
   it('should work with reactive array', done => {
     const vm = new Vue({
       template: `<div><child></child></div>`,
@@ -552,5 +552,25 @@ describe('Options provide/inject', () => {
     }).$mount()
 
     expect(vm.$el.textContent).toBe(`foo: foo injected, bar: bar injected`)
+  })
+
+  it('merge provide with object syntax when using Vue.extend', () => {
+    const child = {
+      inject: ['foo'],
+      template: `<span/>`,
+      created () {
+        injected = this.foo
+      }
+    }
+    const Ctor = Vue.extend({
+      provide: { foo: 'foo' },
+      render (h) {
+        return h(child)
+      }
+    })
+
+    new Ctor().$mount()
+
+    expect(injected).toEqual('foo')
   })
 })
