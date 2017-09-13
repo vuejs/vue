@@ -728,4 +728,15 @@ describe('Component slot', () => {
       expect(vm.$el.innerHTML).toBe(`<i><div><div>foo</div></div><div>bar</div></i>`)
     }).then(done)
   })
+
+  it('should preserve slot attribute if not absorbed by a Vue component', () => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <div slot="foo"></div>
+        </div>
+      `
+    }).$mount()
+    expect(vm.$el.children[0].getAttribute('slot')).toBe('foo')
+  })
 })

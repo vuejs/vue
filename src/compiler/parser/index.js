@@ -431,6 +431,8 @@ function processSlot (el) {
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
+      // preserve slot as an attribute for native shadow DOM compat
+      addAttr(el, 'slot', slotTarget)
     }
     if (el.tag === 'template') {
       el.slotScope = getAndRemoveAttr(el, 'scope')
