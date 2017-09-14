@@ -39,7 +39,9 @@ export function genAssignmentCode (
 ): string {
   const modelRs = parseModel(value)
   if (modelRs.idx === null) {
-    return `${value}=${assignment}`
+    return `if (typeof (${assignment}) === 'object' && (${assignment}).type === 'input') {` +
+      `${value}=(${assignment}).target.value || (${assignment}).target.attr.value` +
+      `} else { ${value}=${assignment} }`
   } else {
     return `$set(${modelRs.exp}, ${modelRs.idx}, ${assignment})`
   }
