@@ -274,6 +274,9 @@ Vue.component('functional-component-object-inject', {
   inject: {
     foo: 'bar',
     baz: Symbol()
+  },
+  render(h) {
+    return h('div')
   }
 })
 
