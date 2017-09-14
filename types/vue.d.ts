@@ -16,20 +16,8 @@ import { VNode, VNodeData, VNodeChildren, ScopedSlot } from "./vnode";
 import { PluginFunction, PluginObject } from "./plugin";
 
 export interface CreateElement {
-  // empty node
-  (): VNode;
-
-  // element or component name
-  (tag: string, children: VNodeChildren): VNode;
-  (tag: string, data?: VNodeData, children?: VNodeChildren): VNode;
-
-  // component constructor or options
-  (tag: Component<any, any, any, any>, children: VNodeChildren): VNode;
-  (tag: Component<any, any, any, any>, data?: VNodeData, children?: VNodeChildren): VNode;
-
-  // async component
-  (tag: AsyncComponent<any, any, any, any>, children: VNodeChildren): VNode;
-  (tag: AsyncComponent<any, any, any, any>, data?: VNodeData, children?: VNodeChildren): VNode;
+  (tag?: string | Component<any, any, any, any> | AsyncComponent<any, any, any, any>, children?: VNodeChildren): VNode;
+  (tag?: string | Component<any, any, any, any> | AsyncComponent<any, any, any, any>, data?: VNodeData, children?: VNodeChildren): VNode;
 }
 
 export interface Vue {

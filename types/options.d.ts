@@ -19,7 +19,7 @@ interface EsModuleComponent {
 export type AsyncComponent<Data=DefaultData<Vue>, Methods=DefaultMethods<Vue>, Computed=DefaultComputed, Props=DefaultProps> = (
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
-) => Promise<Component | EsModuleComponent> | Component | void;
+) => Promise<Component | EsModuleComponent> | void;
 
 /**
  * When the `Computed` type parameter on `ComponentOptions` is inferred,
