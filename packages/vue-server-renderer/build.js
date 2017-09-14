@@ -7833,27 +7833,25 @@ function createBundleRunner (entry, files, basedir, runInNewContext) {
         }
       }
       userContext._registeredComponents = new Set();
+
       // vue-style-loader styles imported outside of component lifecycle hooks
       if (initialContext._styles) {
         userContext._styles = deepClone(initialContext._styles);
-      }
-      // #6353 after the app is resolved, if the userContext doesn't have a
-      // styles property, it means the app doesn't have any lifecycle-injected
-      // styles, so vue-style-loader never defined the styles getter.
-      // just expose the same styles from the initialContext.
-      var exposeStylesAndResolve = function (app) {
-        if (!userContext.hasOwnProperty('styles')) {
-          userContext.styles = initialContext.styles;
+        // #6353 ensure "styles" is exposed even if no styles are injected
+        // in component lifecycles.
+        // the renderStyles fn is exposed by vue-style-loader >= 3.0.3
+        var renderStyles = initialContext._renderStyles;
+        if (renderStyles) {
+          Object.defineProperty(userContext, 'styles', {
+            enumerable: true,
+            get: function get () {
+              return renderStyles(userContext._styles)
+            }
+          });
         }
-        resolve(app);
-      };
-
-      var res = runner(userContext);
-      if (typeof res.then === 'function') {
-        res.then(exposeStylesAndResolve);
-      } else {
-        exposeStylesAndResolve(res);
       }
+
+      resolve(runner(userContext));
     });
     }
   }

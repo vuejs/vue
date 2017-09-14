@@ -1,6 +1,6 @@
 {
   "name": "vue-server-renderer",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "description": "server renderer for Vue 2.0",
   "main": "index.js",
   "types": "types/index.d.ts",
