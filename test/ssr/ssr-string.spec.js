@@ -374,6 +374,18 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-html with null value', done => {
+    renderVmWithOptions({
+      template: '<div><div v-html="text"></div></div>',
+      data: {
+        text: null
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div></div></div>')
+      done()
+    })
+  })
+
   it('v-text', done => {
     renderVmWithOptions({
       template: '<div><div v-text="text"></div></div>',
@@ -382,6 +394,18 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain('<div data-server-rendered="true"><div>&lt;span&gt;foo&lt;/span&gt;</div></div>')
+      done()
+    })
+  })
+
+  it('v-text with null value', done => {
+    renderVmWithOptions({
+      template: '<div><div v-text="text"></div></div>',
+      data: {
+        text: null
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div></div></div>')
       done()
     })
   })
@@ -805,7 +829,7 @@ describe('SSR: renderToString', () => {
     expect(vm.a).toBe(func)
   })
 
-  it('should prevent xss in attribtues', done => {
+  it('should prevent xss in attributes', done => {
     renderVmWithOptions({
       data: {
         xss: '"><script>alert(1)</script>'

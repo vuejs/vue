@@ -14,7 +14,7 @@ describe('vdom directive module', () => {
     const vnode1 = new VNode('div', {}, [
       new VNode('p', {
         directives: [{
-          name: 'directive1', value: 'hello', arg: 'arg1', modifiers: { modifire1: true }
+          name: 'directive1', value: 'hello', arg: 'arg1', modifiers: { modifier1: true }
         }]
       }, undefined, 'hello world', undefined, vm)
     ])
@@ -24,7 +24,7 @@ describe('vdom directive module', () => {
     const vnode2 = new VNode('div', {}, [
       new VNode('p', {
         directives: [{
-          name: 'directive1', value: 'world', arg: 'arg1', modifiers: { modifire1: true }
+          name: 'directive1', value: 'world', arg: 'arg1', modifiers: { modifier1: true }
         }]
       }, undefined, 'hello world', undefined, vm)
     ])

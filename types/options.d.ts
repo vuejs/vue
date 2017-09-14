@@ -87,7 +87,7 @@ export interface ComponentOptions<
   filters?: { [key: string]: Function };
 
   provide?: Object | (() => Object);
-  inject?: { [key: string]: string | symbol } | Array<string>;
+  inject?: { [key: string]: string | symbol } | string[];
 
   model?: {
     prop?: string;
@@ -107,6 +107,7 @@ export interface ComponentOptions<
 export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = PropsDefinition<Props>> {
   name?: string;
   props?: PropDefs;
+  inject?: { [key: string]: string | symbol } | string[];
   functional: boolean;
   render(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode;
 }

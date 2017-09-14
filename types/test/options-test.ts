@@ -263,6 +263,7 @@ Vue.component('component-with-scoped-slot', {
 Vue.component('functional-component', {
   props: ['prop'],
   functional: true,
+  inject: ['foo'],
   render(createElement, context) {
     context.props;
     context.children;
@@ -272,6 +273,14 @@ Vue.component('functional-component', {
     return createElement("div", {}, context.children);
   }
 });
+
+Vue.component('functional-component-object-inject', {
+  functional: true,
+  inject: {
+    foo: 'bar',
+    baz: Symbol()
+  }
+})
 
 Vue.component("async-component", ((resolve, reject) => {
   setTimeout(() => {
