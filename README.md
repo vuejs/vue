@@ -111,7 +111,13 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         <a href="https://www.xfive.co/" target="_blank">
           <img width="80px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/xfive.png">
         </a>
-     </tr>
+      </td>
+      <td align="center" valign="middle">
+        <a href="http://www.frontenddevelopermeetups.com/" target="_blank">
+          <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/frontend-meetups.png">
+        </a>
+      </td>
+    </tr>
   </tbody>
 </table>
 
