@@ -106,7 +106,7 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
     // slightly differently.
     let runner // lazy creation so that errors can be caught by user
     let initialContext
-    return (userContext = {}) => new Promise(resolve => {
+    return (userContext = {}) => new Promise((resolve, reject) => {
       if (!runner) {
         const sandbox = runInNewContext === 'once'
           ? createSandbox()
@@ -143,7 +143,7 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
 
       const res = runner(userContext)
       if (typeof res.then === 'function') {
-        res.then(exposeStylesAndResolve)
+        res.then(exposeStylesAndResolve).catch(reject)
       } else {
         exposeStylesAndResolve(res)
       }
