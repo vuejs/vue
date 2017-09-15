@@ -28,6 +28,16 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     if (key === 'textContent' || key === 'innerHTML') {
       if (vnode.children) vnode.children.length = 0
       if (cur === oldProps[key]) continue
+
+      // in old version of chrome, textNode will always in the dom tree
+      // which causes the wrong behavior when patching
+      // see #6601
+      if (oldVnode.children &&
+        oldVnode.children.length === 1 &&
+        isDef(oldVnode.children[0].text)
+      ) {
+        elm._isContentReset = true
+      }
     }
 
     if (key === 'value') {
