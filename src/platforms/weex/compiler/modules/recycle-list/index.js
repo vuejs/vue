@@ -11,14 +11,17 @@ function preTransformNode (el: ASTElement) {
   if (el.tag === 'recycle-list') {
     currentRecycleList = el
   }
+  if (currentRecycleList) {
+    // TODO
+    transformVBind(el)
+    transformVIf(el)
+    transformVFor(el)
+  }
 }
 
 function transformNode (el: ASTElement) {
   if (currentRecycleList) {
     // TODO
-    transformVIf(el)
-    transformVFor(el)
-    transformVBind(el)
   }
 }
 

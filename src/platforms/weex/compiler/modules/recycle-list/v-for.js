@@ -1,35 +1,31 @@
 /* @flow */
 
-import { addAttr } from 'compiler/helpers'
-
-function isVForAttr (name: string): boolean {
-  return /^v\-for/.test(name)
-}
+import { forAliasRE, forIteratorRE } from 'compiler/parser/index'
+import { getAndRemoveAttr } from 'compiler/helpers'
 
 export function transformVFor (el: ASTElement) {
-  for (const attr in el.attrsMap) {
-    if (!isVForAttr(attr)) {
-      continue
-    }
+  const exp = getAndRemoveAttr(el, 'v-for')
+  if (!exp) {
+    return
+  }
+  const inMatch = exp.match(forAliasRE)
+  if (inMatch) {
+    const alias = inMatch[1].trim()
     const desc: Object = {
-      '@expression': el.for,
-      '@alias': el.alias
+      '@expression': inMatch[2].trim(),
+      '@alias': alias
     }
-    if (el.iterator1) {
-      desc['@index'] = el.iterator1
+    const iteratorMatch = alias.match(forIteratorRE)
+    if (iteratorMatch) {
+      desc['@alias'] = iteratorMatch[1].trim()
+      desc['@index'] = iteratorMatch[2].trim()
+      if (iteratorMatch[3]) {
+        desc['@key'] = iteratorMatch[2].trim()
+        desc['@index'] = iteratorMatch[3].trim()
+      }
     }
-    if (el.iterator2) {
-      desc['@key'] = el.iterator1
-      desc['@index'] = el.iterator2
-    }
-    addAttr(el, '[[repeat]]', desc)
+    delete el.attrsMap['v-for']
     el.attrsMap['[[repeat]]'] = desc
     el.attrsList.push({ name: '[[repeat]]', value: desc })
-    delete el.attrsMap[attr]
-    delete el.for
-    delete el.alias
-    delete el.key
-    delete el.iterator1
-    delete el.iterator2
   }
 }
