@@ -26,7 +26,7 @@ export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 
 const argRE = /:(.*)$/
-const bindRE = /^:|^v-bind:/
+export const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
 
 const literalValueRE = /^(\{.*\}|\[.*\])$/
