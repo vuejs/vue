@@ -76,8 +76,8 @@ declare type ASTNode = ASTElement | ASTText | ASTExpression;
 declare type ASTElement = {
   type: 1;
   tag: string;
-  attrsList: Array<{ name: string; value: string }>;
-  attrsMap: { [key: string]: string | null };
+  attrsList: Array<{ name: string; value: any }>;
+  attrsMap: { [key: string]: any };
   parent: ASTElement | void;
   children: Array<ASTNode>;
 
@@ -90,7 +90,7 @@ declare type ASTElement = {
   hasBindings?: boolean;
 
   text?: string;
-  attrs?: Array<{ name: string; value: string }>;
+  attrs?: Array<{ name: string; value: any }>;
   props?: Array<{ name: string; value: string }>;
   plain?: boolean;
   pre?: true;
