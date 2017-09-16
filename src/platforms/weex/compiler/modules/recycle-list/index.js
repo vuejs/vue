@@ -3,6 +3,7 @@
 import { transformText } from './text'
 import { transformVBind } from './v-bind'
 import { transformVIf } from './v-if'
+import { transformVFor } from './v-for'
 
 let currentRecycleList = null
 
@@ -16,6 +17,7 @@ function transformNode (el: ASTElement) {
   if (currentRecycleList) {
     // TODO
     transformVIf(el)
+    transformVFor(el)
     transformVBind(el)
   }
 }
