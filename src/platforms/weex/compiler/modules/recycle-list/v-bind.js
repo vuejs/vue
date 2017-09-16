@@ -1,26 +1,25 @@
 /* @flow */
 
 import { camelize } from 'shared/util'
-import { getAndRemoveAttr, addAttr } from 'compiler/helpers'
-
-function isBindingAttr (name: string): boolean {
-  return /^(v\-bind)?\:/.test(name)
-}
+import { bindRE } from 'compiler/parser/index'
+import { getAndRemoveAttr } from 'compiler/helpers'
 
 function parseAttrName (name: string): string {
-  return camelize(name.replace(/^(v\-bind)?\:/, ''))
+  return camelize(name.replace(bindRE, ''))
 }
 
 export function transformVBind (el: ASTElement) {
-  if (!el.attrsList || !el.attrsList.length) {
-    return
-  }
-  el.attrsList.forEach(attr => {
-    if (isBindingAttr(attr.name)) {
-      const name: string = parseAttrName(attr.name)
-      const binding = getAndRemoveAttr(el, attr.name)
-      addAttr(el, name, { '@binding': binding })
+  for (const attr in el.attrsMap) {
+    if (bindRE.test(attr)) {
+      const name: string = parseAttrName(attr)
+      const value = {
+        '@binding': getAndRemoveAttr(el, attr)
+      }
+      delete el.attrsMap[attr]
+      el.attrsMap[name] = value
+      el.attrsList.push({ name, value })
+      // addAttr(el, name, value)
+      // el.hasBindings = false
     }
-  })
-  el.hasBindings = false
+  }
 }
