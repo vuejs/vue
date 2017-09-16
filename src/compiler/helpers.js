@@ -20,7 +20,7 @@ export function addProp (el: ASTElement, name: string, value: string) {
   (el.props || (el.props = [])).push({ name, value })
 }
 
-export function addAttr (el: ASTElement, name: string, value: string) {
+export function addAttr (el: ASTElement, name: string, value: any) {
   (el.attrs || (el.attrs = [])).push({ name, value })
 }
 

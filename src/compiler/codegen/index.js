@@ -483,13 +483,20 @@ function genComponent (
   })`
 }
 
-function genProps (props: Array<{ name: string, value: string }>): string {
+function genProps (props: Array<{ name: string, value: any }>): string {
   let res = ''
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
-    res += `"${prop.name}":${transformSpecialNewlines(prop.value)},`
+    res += `"${prop.name}":${generateValue(prop.value)},`
   }
   return res.slice(0, -1)
+}
+
+function generateValue (value) {
+  if (typeof value === 'string') {
+    return transformSpecialNewlines(value)
+  }
+  return JSON.stringify(value)
 }
 
 // #3895, #4268
