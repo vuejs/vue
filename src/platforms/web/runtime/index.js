@@ -42,6 +42,12 @@ Vue.prototype.$mount = function (
   return mountComponent(this, el, hydrating)
 }
 
+/*
+  determin wheather the code has minified
+  if the code has minified, then `hasCrashed.name !== 'hasCrashed'`
+*/
+function hasCrashed () {}
+
 // devtools global hook
 /* istanbul ignore next */
 setTimeout(() => {
@@ -57,6 +63,8 @@ setTimeout(() => {
   }
   if (process.env.NODE_ENV !== 'production' &&
     config.productionTip !== false &&
+    typeof hasCrashed.name === 'string' &&
+    hasCrashed.name === 'hasCrashed' &&
     inBrowser && typeof console !== 'undefined'
   ) {
     console[console.info ? 'info' : 'log'](
