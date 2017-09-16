@@ -16,7 +16,9 @@ function genText (node: ASTNode) {
 export function transformText (el: ASTElement) {
   // weex <text> can only contain text, so the parser
   // always generates a single child.
-  addAttr(el, 'value', genText(el.children[0]))
-  el.children = []
-  el.plain = false
+  if (el.children.length) {
+    addAttr(el, 'value', genText(el.children[0]))
+    el.children = []
+    el.plain = false
+  }
 }
