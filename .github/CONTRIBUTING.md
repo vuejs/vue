@@ -138,4 +138,4 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 
 Thank you to all the people who have already contributed to vuejs!
 
-<a href="graphs/contributors"><img src="https://opencollective.com/vuejs/contributors.svg?width=890" /></a>
+<a href="https://github.com/vuejs/vue/graphs/contributors"><img src="https://opencollective.com/vuejs/contributors.svg?width=890" /></a>
