@@ -145,7 +145,7 @@ describe('Options provide/inject', () => {
     expect(child.baz).toBe(3)
   })
 
-  // Github issue #5194
+  // GitHub issue #5194
   it('should work with functional', () => {
     new Vue({
       template: `<child/>`,
@@ -187,7 +187,7 @@ describe('Options provide/inject', () => {
     })
   }
 
-  // Github issue #5223
+  // GitHub issue #5223
   it('should work with reactive array', done => {
     const vm = new Vue({
       template: `<div><child></child></div>`,
@@ -360,6 +360,14 @@ describe('Options provide/inject', () => {
     expect(`Injection "foo" not found`).not.toHaveBeenWarned()
     expect(`Injection "bar" not found`).not.toHaveBeenWarned()
     expect(`Injection "baz" not found`).not.toHaveBeenWarned()
+  })
+
+  it('should not warn when injection key which is not provided is not enumerable', () => {
+    const parent = new Vue({ provide: { foo: 1 }})
+    const inject = { foo: 'foo' }
+    Object.defineProperty(inject, '__ob__', { enumerable: false, value: '__ob__' })
+    new Vue({ parent, inject })
+    expect(`Injection "__ob__" not found`).not.toHaveBeenWarned()
   })
 
   // Github issue #6008
@@ -544,5 +552,25 @@ describe('Options provide/inject', () => {
     }).$mount()
 
     expect(vm.$el.textContent).toBe(`foo: foo injected, bar: bar injected`)
+  })
+
+  it('merge provide with object syntax when using Vue.extend', () => {
+    const child = {
+      inject: ['foo'],
+      template: `<span/>`,
+      created () {
+        injected = this.foo
+      }
+    }
+    const Ctor = Vue.extend({
+      provide: { foo: 'foo' },
+      render (h) {
+        return h(child)
+      }
+    })
+
+    new Ctor().$mount()
+
+    expect(injected).toEqual('foo')
   })
 })

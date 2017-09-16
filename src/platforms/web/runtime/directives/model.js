@@ -3,10 +3,9 @@
  * properties to Elements.
  */
 
-import { looseEqual, looseIndexOf, makeMap } from 'shared/util'
+import { isTextInputType } from 'web/util/element'
+import { looseEqual, looseIndexOf } from 'shared/util'
 import { warn, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
-
-const isTextInputType = makeMap('text,number,password,search,email,tel,url')
 
 /* istanbul ignore if */
 if (isIE9) {

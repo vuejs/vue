@@ -60,7 +60,7 @@ export default class TemplateRenderer {
     if (options.clientManifest) {
       const clientManifest = this.clientManifest = options.clientManifest
       this.publicPath = clientManifest.publicPath.replace(/\/$/, '')
-      // preload/prefetch drectives
+      // preload/prefetch directives
       this.preloadFiles = clientManifest.initial
       this.prefetchFiles = clientManifest.async
       // initial async chunk mapping
@@ -242,7 +242,7 @@ function getPreloadType (ext: string): string {
   } else if (/woff2?|ttf|otf|eot/.test(ext)) {
     return 'font'
   } else {
-    // not exhausting all possbilities here, but above covers common cases
+    // not exhausting all possibilities here, but above covers common cases
     return ''
   }
 }

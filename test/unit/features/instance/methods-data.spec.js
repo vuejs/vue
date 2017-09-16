@@ -108,7 +108,7 @@ describe('Instance methods data', () => {
       expect(spy).toHaveBeenCalledWith(1)
     })
 
-    it('warn expresssion', () => {
+    it('warn expression', () => {
       vm.$watch('a + b', spy)
       expect('Watcher only accepts simple dot-delimited paths').toHaveBeenWarned()
     })

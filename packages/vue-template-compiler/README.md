@@ -1,6 +1,6 @@
 # vue-template-compiler
 
-> This package is auto-generated. For pull requests please see [src/entries/web-compiler.js](https://github.com/vuejs/vue/tree/dev/src/platforms/web/compiler).
+> This package is auto-generated. For pull requests please see [src/platforms/web/entry-compiler.js](https://github.com/vuejs/vue/tree/dev/src/platforms/web/entry-compiler.js).
 
 This package can be used to pre-compile Vue 2.0 templates into render functions to avoid runtime-compilation overhead and CSP restrictions. You will only need it if you are writing build tools with very specific needs. In most cases you should be using [vue-loader](https://github.com/vuejs/vue-loader) or [vueify](https://github.com/vuejs/vueify) instead, both of which use this package internally.
 
@@ -39,7 +39,7 @@ The optional `options` object can contain the following:
 
 - `modules`
 
-  An array of compiler modules. For details on compiler modules, refer to the `ModuleOptions` type in [flow declarations](https://github.com/vuejs/vue/blob/dev/flow/compiler.js) and the [built-in modules](https://github.com/vuejs/vue/tree/dev/src/platforms/web/compiler/modules).
+  An array of compiler modules. For details on compiler modules, refer to the `ModuleOptions` type in [flow declarations](https://github.com/vuejs/vue/blob/dev/flow/compiler.js#L38-L45) and the [built-in modules](https://github.com/vuejs/vue/tree/dev/src/platforms/web/compiler/modules).
 
 - `directives`
 
@@ -51,6 +51,7 @@ The optional `options` object can contain the following:
       test (node, directiveMeta) {
         // transform node based on directiveMeta
       }
+    }
   })
   ```
 

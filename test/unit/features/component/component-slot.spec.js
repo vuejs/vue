@@ -661,7 +661,7 @@ describe('Component slot', () => {
     }).then(done)
   })
 
-  // Github issue #5888
+  // GitHub issue #5888
   it('should resolve correctly slot with keep-alive', () => {
     const vm = new Vue({
       template: `
@@ -727,5 +727,16 @@ describe('Component slot', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe(`<i><div><div>foo</div></div><div>bar</div></i>`)
     }).then(done)
+  })
+
+  it('should preserve slot attribute if not absorbed by a Vue component', () => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <div slot="foo"></div>
+        </div>
+      `
+    }).$mount()
+    expect(vm.$el.children[0].getAttribute('slot')).toBe('foo')
   })
 })
