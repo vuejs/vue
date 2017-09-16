@@ -1,6 +1,7 @@
 /* @flow */
 
 import { transformText } from './text'
+import { transformVBind } from './v-bind'
 
 let currentRecycleList = null
 
@@ -22,6 +23,7 @@ function postTransformNode (el: ASTElement) {
     if (el.tag === 'text') {
       transformText(el)
     }
+    transformVBind(el)
   }
   if (el === currentRecycleList) {
     currentRecycleList = null
