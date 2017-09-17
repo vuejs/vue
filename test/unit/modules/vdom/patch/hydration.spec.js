@@ -323,4 +323,23 @@ describe('vdom patch: hydration', () => {
 
     expect('not matching server-rendered content').toHaveBeenWarned()
   })
+
+  it('should hydrate with adjacent text nodes from array children (e.g. slots)', () => {
+    const dom = createMockSSRDOM('<div>foo</div> hello')
+
+    new Vue({
+      template: `<test>hello</test>`,
+      components: {
+        test: {
+          template: `
+            <div>
+              <div>foo</div>
+              <slot/>
+            </div>
+          `
+        }
+      }
+    }).$mount(dom)
+    expect('not matching server-rendered content').not.toHaveBeenWarned()
+  })
 })

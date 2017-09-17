@@ -51,6 +51,7 @@ The optional `options` object can contain the following:
       test (node, directiveMeta) {
         // transform node based on directiveMeta
       }
+    }
   })
   ```
 

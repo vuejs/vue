@@ -1,6 +1,7 @@
 /* @flow */
 
 import Dep from './dep'
+import VNode from '../vdom/vnode'
 import { arrayMethods } from './array'
 import {
   def,
@@ -104,7 +105,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * or the existing observer if the value already has one.
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
-  if (!isObject(value)) {
+  if (!isObject(value) || value instanceof VNode) {
     return
   }
   let ob: Observer | void
