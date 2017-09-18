@@ -122,8 +122,7 @@
     "typescript": "^2.3.4",
     "uglify-js": "^3.0.15",
     "webpack": "^2.6.1",
-    "weex-js-runtime": "^0.20.5",
-    "weex-vdom-tester": "^0.2.0"
+    "weex-js-runtime": "^0.22.0"
   },
   "config": {
     "commitizen": {
