@@ -1,13 +1,8 @@
-// suppress logs from vdom-tester
-const domModule = require('weex-vdom-tester/lib/modules/dom')
-domModule.updateFinish = domModule.createFinish = domModule.refreshFinish = () => {}
-
 import * as Vue from '../../../packages/weex-vue-framework'
 import { compile } from '../../../packages/weex-template-compiler'
-import { Runtime, Instance } from 'weex-vdom-tester'
-import { init, config } from 'weex-js-runtime'
+import WeexRuntime from 'weex-js-runtime'
 
-init()
+console.debug = () => {}
 
 // http://stackoverflow.com/a/35478115
 const matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g
@@ -27,30 +22,64 @@ function parseStatic (fns) {
   return '[' + fns.map(fn => `function () { ${fn} }`).join(',') + ']'
 }
 
-export function prepareRuntime () {
-  let sendTasksHandler = function () {}
-  config.sendTasks = config.Document.handler = function () {
-    sendTasksHandler.apply(null, arguments)
-  }
-  Vue.init(config)
-  const runtime = new Runtime(Vue)
-  sendTasksHandler = function () {
-    runtime.target.callNative.apply(runtime.target, arguments)
-  }
-  return runtime
+function isObject (object) {
+  return object !== null && typeof object === 'object'
 }
 
-export function resetRuntime () {
-  delete config.Document.handler
-  Vue.reset()
+function isEmptyObject (object) {
+  return isObject(object) && Object.keys(object).length < 1
 }
 
-export function createInstance (runtime, code) {
-  const instance = new Instance(runtime)
-  if (code) {
-    instance.$create(code)
+function omitUseless (object) {
+  if (isObject(object)) {
+    delete object.ref
+    for (const key in object) {
+      if (isEmptyObject(object[key]) || object[key] === undefined) {
+        delete object[key]
+      }
+      omitUseless(object[key])
+    }
   }
+  return object
+}
+
+export function getRoot (instance) {
+  return omitUseless(instance.document.body.toJSON())
+}
+
+export function fireEvent (instance, ref, type, event = {}) {
+  const el = instance.document.getRef(ref)
+  if (el) {
+    instance.document.fireEvent(el, type, event = {})
+  }
+}
+
+export function createInstance (id, code, ...args) {
+  WeexRuntime.config.frameworks = { Vue }
+  const context = WeexRuntime.init(WeexRuntime.config)
+  context.registerModules({
+    timer: ['setTimeout', 'setInterval']
+  })
+  const instance = context.createInstance(id, `// { "framework": "Vue" }\n${code}`, ...args)
+  instance.$refresh = (data) => context.refreshInstance(id, data)
+  instance.$destroy = () => context.destroyInstance(id)
   return instance
+}
+
+export function compileAndExecute (template, additional = '') {
+  return new Promise(resolve => {
+    const id = String(Date.now() * Math.random())
+    const { render, staticRenderFns } = compile(template)
+    const instance = createInstance(id, `
+      new Vue({
+        el: '#whatever',
+        render: function () { ${render} },
+        staticRenderFns: ${parseStatic(staticRenderFns)},
+        ${additional}
+      })
+    `)
+    setTimeout(() => resolve(instance), 10)
+  })
 }
 
 export function syncPromise (arr) {
@@ -65,7 +94,7 @@ export function checkRefresh (instance, data, checker) {
   return () => new Promise(res => {
     instance.$refresh(data)
     setTimeout(() => {
-      checker(instance.getRealRoot())
+      checker(getRoot(instance))
       res()
     })
   })
