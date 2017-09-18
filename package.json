@@ -5,6 +5,7 @@
   "main": "dist/vue.runtime.common.js",
   "module": "dist/vue.runtime.esm.js",
   "unpkg": "dist/vue.js",
+  "jsdelivr": "dist/vue.js",
   "typings": "types/index.d.ts",
   "files": [
     "src",
