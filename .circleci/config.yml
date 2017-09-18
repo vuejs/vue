@@ -1,0 +1,140 @@
+version: 2
+
+
+references:
+  # Define node image to be used for all tests
+  container_config: &container_config
+    working_directory: ~/root/vue
+    docker:
+      - image: circleci/node:6
+  # Define workspace folder where code and dependencies will be introduced once and then cached/shared in tests 
+  workspace_root: &workspace_root
+    /tmp/workspace
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace_root
+  # Move all files and dotfiles to current working_directory
+  load_code: &load_code
+    run:
+      name: load code from workspace
+      command: |
+        mv /tmp/workspace/vue/* /tmp/workspace/vue/.[!.]* .
+  js_cache_key: &js_cache_key
+    key: npm-dependency-cache-{{ checksum "package.json" }}
+  # Move dependencies to current working_directory
+  restore_node_modules: &restore_node_modules
+    run:
+      name: Restore npm dependencies from workspace
+      command: mv /tmp/workspace/node_modules ./
+
+jobs:
+
+  # Checkout code and move to workspace
+  checkout_code:
+    <<: *container_config
+    steps:
+      - checkout
+      - run:
+          command: |
+            mkdir -p /tmp/workspace/vue
+            mv * .[!.]* /tmp/workspace/vue/
+      - persist_to_workspace:
+          root: *workspace_root
+          # paths:
+          #   - vue
+
+  # Restore, update, and save a new dependencies cache
+  node_dependencies:
+    <<: *container_config
+    steps:
+      - *attach_workspace
+      - *load_code
+      - restore_cache:
+          <<: *js_cache_key
+      - run:
+          name: Update/install dependencies
+          command: npm install
+      - save_cache:
+          <<: *js_cache_key
+          paths:
+            - ~/root/vue/node_modules
+      - run:
+          name: Move dependencies to workspace
+          command: |
+            mv node_modules /tmp/workspace/vue/
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - node_modules
+
+  # Tests are split below by amount of time to run--coverage tends to take the longest
+  # Maximum of 4 concurrent testing containers for OSS projects on CircleCI, otherwise queueing occurs
+  test_lint-flow-types:
+    <<: *container_config
+    steps:
+      - *attach_workspace
+      - *load_code
+      - run: 
+          name: "Testing lint / flow / types"
+          command: npm run lint && npm run flow && npm run test:types
+
+  test_coverage:
+    <<: *container_config
+    steps:
+      - *attach_workspace
+      - *load_code
+      - run: 
+          name: "Testing coverage"
+          command: npm run test:cover
+      - run:
+          command: | # report coverage stats for non-PRs
+            if [[ -z $CI_PULL_REQUEST ]]; then
+              cat ~/root/vue/coverage/lcov.info | ~/root/vue/node_modules/.bin/codecov
+            fi
+
+  test_e2e-weex:
+    <<: *container_config
+    steps:
+      - *attach_workspace
+      - *load_code
+      - run: 
+          name: "Testing end-to-end"
+          command: npm run test:e2e -- --env phantomjs
+      - run: 
+          name: "Testing Weex"
+          command: npm run test:weex
+
+  test_ssr:
+    <<: *container_config
+    steps:
+      - *attach_workspace
+      - *load_code
+      - run: 
+          name: "Testing server-side rendering"
+          command: npm run test:ssr
+
+# Define the workflow for testing: Checkout code, then get dependencies, then run all testing containers in parallel
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - checkout_code
+      - node_dependencies:
+          requires:
+            - checkout_code
+      - test_lint-flow-types:
+          requires:
+            - checkout_code
+            - node_dependencies
+      - test_coverage:
+          requires:
+            - checkout_code
+            - node_dependencies
+      - test_e2e-weex:
+          requires:
+            - checkout_code
+            - node_dependencies
+      - test_ssr:
+          requires:
+            - checkout_code
+            - node_dependencies
