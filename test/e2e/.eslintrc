@@ -1,4 +1,6 @@
 {
+  "plugins": ["testcafe"],
+  "extends": "plugin:testcafe/recommended",
   "rules": {
     "indent": 0
   }
