@@ -122,10 +122,10 @@ const jsHandlers = {
   }
 }
 
-function fireEvent (instance, nodeId, type, e, domChanges) {
+function fireEvent (instance, nodeId, type, e, domChanges, params) {
   const el = instance.document.getRef(nodeId)
   if (el) {
-    return instance.document.fireEvent(el, type, e, domChanges)
+    return instance.document.fireEvent(el, type, e, domChanges, params)
   }
   return new Error(`invalid element reference "${nodeId}"`)
 }
