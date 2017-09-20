@@ -63,7 +63,7 @@ function renderNode (node, isRoot, context) {
     )
   }
 
-  if (process.env.BASIC_RENDERER === 'true' && isRoot === true) {
+  if (__BASIC_RENDERER__ === true && isRoot === true) {
     context.nextSync()
   }
 }
@@ -89,7 +89,7 @@ function renderComponent (node, isRoot, context) {
   const registerComponent = registerComponentForCache(Ctor.options, write)
 
   if (isDef(getKey) && isDef(cache) && isDef(name)) {
-    process.env.BASIC_RENDERER === 'true' && context.suspendNext()
+    __BASIC_RENDERER__ === true && context.suspendNext()
     const key = name + '::' + getKey(node.componentOptions.propsData)
     const { has, get } = context
     if (isDef(has)) {
@@ -105,7 +105,7 @@ function renderComponent (node, isRoot, context) {
         } else {
           renderComponentWithCache(node, isRoot, key, context)
         }
-        process.env.BASIC_RENDERER === 'true' && context.resumeNext()
+        __BASIC_RENDERER__ === true && context.resumeNext()
       })
     } else if (isDef(get)) {
       get(key, res => {
@@ -118,7 +118,7 @@ function renderComponent (node, isRoot, context) {
         } else {
           renderComponentWithCache(node, isRoot, key, context)
         }
-        process.env.BASIC_RENDERER === 'true' && context.resumeNext()
+        __BASIC_RENDERER__ === true && context.resumeNext()
       })
     }
   } else {
@@ -196,7 +196,7 @@ function renderAsyncComponent (node, isRoot, context) {
     } else {
       reject()
     }
-    process.env.BASIC_RENDERER === 'true' && context.resumeNext()
+    __BASIC_RENDERER__ === true && context.resumeNext()
   }
 
   const reject = err => {
@@ -209,7 +209,7 @@ function renderAsyncComponent (node, isRoot, context) {
     resolve(factory.resolved)
     return
   }
-  process.env.BASIC_RENDERER === 'true' && context.suspendNext()
+  __BASIC_RENDERER__ === true && context.suspendNext()
 
   let res
   try {

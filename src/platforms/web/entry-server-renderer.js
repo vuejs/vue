@@ -1,7 +1,6 @@
 /* @flow */
 
 process.env.VUE_ENV = 'server'
-process.env.BASIC_RENDERER = 'false'
 
 import modules from './server/modules/index'
 import baseDirectives from './server/directives/index'

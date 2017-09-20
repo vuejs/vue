@@ -61,7 +61,7 @@ export class RenderContext {
     this.has = cache && normalizeAsync(cache, 'has')
 
     this.next = this.next.bind(this)
-    if (process.env.BASIC_RENDERER === 'true') {
+    if (__BASIC_RENDERER__ === true) {
       this.finished = false
       this.markAsync = false
     }
@@ -85,7 +85,7 @@ export class RenderContext {
   next () {
     const lastState = this.renderStates[this.renderStates.length - 1]
     if (isUndef(lastState)) {
-      if (process.env.BASIC_RENDERER === 'true') {
+      if (__BASIC_RENDERER__ === true) {
         this.finished = true
       }
       return this.done()
@@ -104,7 +104,7 @@ export class RenderContext {
       case 'Component':
         this.renderStates.pop()
         this.activeInstance = lastState.prevActive
-        process.env.BASIC_RENDERER !== 'true' && this.next()
+        __BASIC_RENDERER__ !== true && this.next()
         break
       case 'ComponentWithCache':
         this.renderStates.pop()
@@ -127,7 +127,7 @@ export class RenderContext {
         }
         buffer.length = bufferIndex
         componentBuffer.length = bufferIndex
-        process.env.BASIC_RENDERER !== 'true' && this.next()
+        __BASIC_RENDERER__ !== true && this.next()
         break
     }
   }
