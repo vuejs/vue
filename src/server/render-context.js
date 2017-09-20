@@ -64,11 +64,11 @@ export class RenderContext {
     }
   }
 
-  suspendNext() {
+  suspendNext () {
     this.markAsync = true
   }
 
-  resumeNext() {
+  resumeNext () {
     this.markAsync = false
     this.nextSync()
   }
