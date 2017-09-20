@@ -12,7 +12,7 @@ export function createWriteFunction (
       cachedWrite.cacheBuffer[cachedWrite.cacheBuffer.length - 1] += text
     }
     const waitForNext = write(text, next)
-    if (waitForNext !== true) {
+    if (process.env.BASIC_RENDERER !== 'true' && waitForNext !== true) {
       if (stackDepth >= MAX_STACK_DEPTH) {
         process.nextTick(() => {
           try { next() } catch (e) {
