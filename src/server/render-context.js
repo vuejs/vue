@@ -36,6 +36,9 @@ export class RenderContext {
   get: ?(key: string, cb: Function) => void;
   has: ?(key: string, cb: Function) => void;
 
+  finished: boolean;
+  markAsync: boolean;
+
   constructor (options: Object) {
     this.userContext = options.userContext
     this.activeInstance = options.activeInstance
@@ -73,7 +76,7 @@ export class RenderContext {
     this.nextSync()
   }
 
-  nextSync (resume) {
+  nextSync () {
     while (this.finished !== true && this.markAsync === false) {
       this.next()
     }
