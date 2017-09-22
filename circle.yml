@@ -1,7 +1,0 @@
-machine:
-  node:
-    version: 6
-
-test:
-  override:
-    - bash build/ci.sh

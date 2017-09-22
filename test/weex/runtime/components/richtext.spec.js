@@ -1,13 +1,14 @@
 import {
   compileAndStringify,
-  prepareRuntime,
-  resetRuntime,
+  getRoot,
+  fireEvent,
   createInstance
 } from '../../helpers/index'
 
-function compileSnippet (runtime, snippet, additional) {
+function compileSnippet (snippet, additional) {
   const { render, staticRenderFns } = compileAndStringify(`<div>${snippet}</div>`)
-  const instance = createInstance(runtime, `
+  const id = String(Date.now() * Math.random())
+  const instance = createInstance(id, `
     new Vue({
       el: 'body',
       render: ${render},
@@ -15,23 +16,12 @@ function compileSnippet (runtime, snippet, additional) {
       ${additional}
     })
   `)
-  return instance.getRealRoot().children[0]
+  return getRoot(instance).children[0]
 }
 
 describe('richtext component', () => {
-  let runtime
-
-  beforeAll(() => {
-    runtime = prepareRuntime()
-  })
-
-  afterAll(() => {
-    resetRuntime()
-    runtime = null
-  })
-
   it('with no child', () => {
-    expect(compileSnippet(runtime, `
+    expect(compileSnippet(`
       <richtext></richtext>
     `)).toEqual({
       type: 'richtext'
@@ -39,7 +29,7 @@ describe('richtext component', () => {
   })
 
   it('with single text node', () => {
-    expect(compileSnippet(runtime, `
+    expect(compileSnippet(`
       <richtext>single</richtext>
     `)).toEqual({
       type: 'richtext',
@@ -56,7 +46,7 @@ describe('richtext component', () => {
 
   describe('span', () => {
     it('single node', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span>single</span>
         </richtext>
@@ -74,7 +64,7 @@ describe('richtext component', () => {
     })
 
     it('multiple node', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span>AAA</span>
           <span>BBB</span>
@@ -94,7 +84,7 @@ describe('richtext component', () => {
     })
 
     it('with raw text', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           AAA
           <span>BBB</span>CCC
@@ -123,7 +113,7 @@ describe('richtext component', () => {
 
   describe('a', () => {
     it('single node', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <a href="http://whatever.com"></a>
         </richtext>
@@ -139,7 +129,7 @@ describe('richtext component', () => {
     })
 
     it('multiple node', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <a href="http://a.whatever.com"></a>
           <a href="http://b.whatever.com"></a>
@@ -161,7 +151,7 @@ describe('richtext component', () => {
 
   describe('image', () => {
     it('single node', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <image src="path/to/profile.png"></image>
         </richtext>
@@ -177,7 +167,7 @@ describe('richtext component', () => {
     })
 
     it('multiple node', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <image src="path/to/A.png"></image>
           <image src="path/to/B.png"></image>
@@ -197,7 +187,7 @@ describe('richtext component', () => {
     })
 
     it('with width and height', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <image
             style="width:150px;height:150px;"
@@ -219,7 +209,7 @@ describe('richtext component', () => {
 
   describe('nested', () => {
     it('span', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span>AAA
             <span>
@@ -258,7 +248,7 @@ describe('richtext component', () => {
     })
 
     it('image and a', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span>title</span>
           <a href="http://remote.com/xx.js">
@@ -293,7 +283,7 @@ describe('richtext component', () => {
 
   describe('with styles', () => {
     it('inline', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span style="font-size:16px;color:#FF6600;">ABCD</span>
           <image style="width:33.33px;height:66.67px" src="path/to/A.png"></image>
@@ -315,7 +305,7 @@ describe('richtext component', () => {
     })
 
     it('class list', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <image class="icon" src="path/to/A.png"></image>
           <span class="title large">ABCD</span>
@@ -345,7 +335,7 @@ describe('richtext component', () => {
 
   describe('data binding', () => {
     it('simple', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span>{{name}}</span>
         </richtext>
@@ -361,14 +351,15 @@ describe('richtext component', () => {
     })
 
     it('nested', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span>{{a}}</span>
           <span>{{b}}<span>{{c.d}}</span></span>
           <span>{{e}}</span>
         </richtext>
-      `, `data: { a: 'A', b: 'B', c: { d: 'CD' }, e: 'E' }`))
-      .toEqual({
+      `, `
+        data: { a: 'A', b: 'B', c: { d: 'CD' }, e: 'E' }
+      `)).toEqual({
         type: 'richtext',
         attr: {
           value: [{
@@ -392,7 +383,7 @@ describe('richtext component', () => {
     })
 
     it('update', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span>{{name}}</span>
         </richtext>
@@ -413,7 +404,7 @@ describe('richtext component', () => {
     })
 
     it('attribute', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span :label="label">{{name}}</span>
         </richtext>
@@ -437,7 +428,7 @@ describe('richtext component', () => {
     })
 
     it('update attribute', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span :label="label">{{name}}</span>
         </richtext>
@@ -465,7 +456,7 @@ describe('richtext component', () => {
     })
 
     it('inline style', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span :style="styleObject">ABCD</span>
           <span :style="{ textAlign: align, color: 'red' }">EFGH</span>
@@ -492,7 +483,7 @@ describe('richtext component', () => {
     })
 
     it('class list', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <image :class="classList" src="path/to/A.png"></image>
           <span :class="['title', size]">ABCD</span>
@@ -533,7 +524,7 @@ describe('richtext component', () => {
     })
 
     it('update inline style', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext>
           <span :style="styleObject">ABCD</span>
           <span :style="{ textAlign: align, color: 'red' }">EFGH</span>
@@ -566,7 +557,7 @@ describe('richtext component', () => {
 
   describe('itself', () => {
     it('inline styles', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext style="background-color:red">
           <span>empty</span>
         </richtext>
@@ -583,7 +574,7 @@ describe('richtext component', () => {
     })
 
     it('class list', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext class="title">
           <span class="large">ABCD</span>
         </richtext>
@@ -606,7 +597,7 @@ describe('richtext component', () => {
     })
 
     it('update styles', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <richtext :class="classList" :style="{ backgroundColor: color }">
           <span class="large">ABCD</span>
         </richtext>
@@ -640,7 +631,8 @@ describe('richtext component', () => {
           </richtext>
         </div>
       `)
-      const instance = createInstance(runtime, `
+      const id = String(Date.now() * Math.random())
+      const instance = createInstance(id, `
         new Vue({
           el: 'body',
           render: ${render},
@@ -653,10 +645,10 @@ describe('richtext component', () => {
           }
         })
       `)
-      const richtext = instance.doc.body.children[0]
-      instance.$fireEvent(richtext.ref, 'click', {})
+      const richtext = instance.document.body.children[0]
+      fireEvent(instance, richtext.ref, 'click')
       setTimeout(() => {
-        expect(instance.getRealRoot().children[0]).toEqual({
+        expect(getRoot(instance).children[0]).toEqual({
           type: 'richtext',
           event: ['click'],
           attr: {
@@ -671,7 +663,7 @@ describe('richtext component', () => {
     })
 
     it('v-for', () => {
-      expect(compileSnippet(runtime, `
+      expect(compileSnippet(`
         <div>
           <richtext v-for="k in labels">
             <span>{{k}}</span>

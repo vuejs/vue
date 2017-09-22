@@ -1,22 +1,24 @@
-/* globals renderer */
-// renderer is injected by weex factory wrapper
+/* globals document */
+// document is injected by weex factory wrapper
+
+import TextNode from 'weex/runtime/text-node'
 
 export const namespaceMap = {}
 
 export function createElement (tagName) {
-  return new renderer.Element(tagName)
+  return document.createElement(tagName)
 }
 
 export function createElementNS (namespace, tagName) {
-  return new renderer.Element(namespace + ':' + tagName)
+  return document.createElement(namespace + ':' + tagName)
 }
 
 export function createTextNode (text) {
-  return new renderer.TextNode(text)
+  return new TextNode(text)
 }
 
 export function createComment (text) {
-  return new renderer.Comment(text)
+  return document.createComment(text)
 }
 
 export function insertBefore (node, target, before) {
