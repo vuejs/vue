@@ -126,13 +126,34 @@ function applyNS (vnode, ns) {
   vnode.ns = ns
   if (vnode.tag === 'foreignObject') {
     // use default namespace inside foreignObject
+    // #6642
+    removeNS(vnode)
     return
   }
+  walkChildren(
+    vnode,
+    child => isDef(child.tag) && isUndef(child.ns),
+    child => applyNS(child, ns)
+  )
+}
+
+function removeNS (vnode: VNode): void {
+  walkChildren(
+    vnode,
+    child => isDef(child.tag) && isDef(child.ns),
+    child => {
+      child.ns = undefined
+      removeNS(child);
+    }
+  )
+}
+
+function walkChildren (vnode: VNode, tester: Function, cb: Function): void {
   if (isDef(vnode.children)) {
     for (let i = 0, l = vnode.children.length; i < l; i++) {
-      const child = vnode.children[i]
-      if (isDef(child.tag) && isUndef(child.ns)) {
-        applyNS(child, ns)
+      const child = vnode.children[i];
+      if (tester(child)) {
+        cb(child)
       }
     }
   }

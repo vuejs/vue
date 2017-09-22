@@ -141,6 +141,32 @@ describe('create-element', () => {
     expect(vnode.children[0].children[0].ns).toBeUndefined()
   })
 
+  // #6642
+  it('render svg foreignObject component with correct namespace', () => {
+    const vm = new Vue({
+      template: `
+        <svg>
+          <test></test>
+        </svg>
+      `,
+      components: {
+        test: {
+          template: `
+          <foreignObject>
+            <p xmlns="http://www.w3.org/1999/xhtml"></p>
+          </foreignObject>
+          `
+        }
+      }
+    }).$mount()
+    const testComp = vm.$children[0]
+    expect(testComp.$vnode.ns).toBe('svg')
+    expect(testComp._vnode.tag).toBe('foreignObject')
+    expect(testComp._vnode.ns).toBe('svg')
+    expect(testComp._vnode.children[0].tag).toBe('p')
+    expect(testComp._vnode.children[0].ns).toBeUndefined()
+  })
+
   // #6506
   it('render SVGAElement in a component correctly', () => {
     const vm = new Vue({
