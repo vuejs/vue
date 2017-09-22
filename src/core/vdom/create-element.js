@@ -151,7 +151,7 @@ function removeNS (vnode: VNode): void {
 function walkChildren (vnode: VNode, tester: Function, cb: Function): void {
   if (isDef(vnode.children)) {
     for (let i = 0, l = vnode.children.length; i < l; i++) {
-      const child = vnode.children[i];
+      const child = vnode.children[i]
       if (tester(child)) {
         cb(child)
       }
