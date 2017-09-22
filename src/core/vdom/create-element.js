@@ -143,7 +143,7 @@ function removeNS (vnode: VNode): void {
     child => isDef(child.tag) && isDef(child.ns),
     child => {
       child.ns = undefined
-      removeNS(child);
+      removeNS(child)
     }
   )
 }
