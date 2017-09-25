@@ -2,7 +2,7 @@
 
 > This package is auto-generated. For pull requests please see [src/platforms/web/entry-compiler.js](https://github.com/vuejs/vue/tree/dev/src/platforms/web/entry-compiler.js).
 
-This package can be used to pre-compile Vue 2.0 templates into render functions to avoid runtime-compilation overhead and CSP restrictions. You will only need it if you are writing build tools with very specific needs. In most cases you should be using [vue-loader](https://github.com/vuejs/vue-loader) or [vueify](https://github.com/vuejs/vueify) instead, both of which use this package internally.
+This package can be used to pre-compile Vue 2.0 templates into render functions to avoid runtime-compilation overhead and CSP restrictions. You will only need it if you are writing build tools with very specific needs. In most cases you should be using [`vue-loader`](https://github.com/vuejs/vue-loader) or [`vueify`](https://github.com/vuejs/vueify) instead, both of which use this package internally.
 
 ## Installation
 
@@ -61,7 +61,7 @@ The optional `options` object can contain the following:
 
 - `preserveWhitespace`
 
-  Defaults to `true`. This means the compiled render function respects all the whitespaces between HTML tags. If set to `false`, all whitespaces between tags will be ignored. This can result in slightly better performance but may affect layout for inline elements.
+  Defaults to `true`. This means the compiled render function preserves all whitespace characters between HTML tags. If set to `false`, whitespace between tags will be ignored. This can result in slightly better performance but may affect layout for inline elements.
 
 ---
 
@@ -86,7 +86,7 @@ This is only useful at runtime with pre-configured builds, so it doesn't accept 
 
 Same as `compiler.compile` but generates SSR-specific render function code by optimizing parts of the template into string concatenation in order to improve SSR performance.
 
-This is used by default in `vue-loader@>=12` and can be disabled using the [optimizeSSR](https://vue-loader.vuejs.org/en/options.html#optimizessr) option.
+This is used by default in `vue-loader@>=12` and can be disabled using the [`optimizeSSR`](https://vue-loader.vuejs.org/en/options.html#optimizessr) option.
 
 ---
 
