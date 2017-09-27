@@ -1,5 +1,7 @@
 /* @flow */
 
+import { inProduction } from 'core/util/index'
+
 const fnExpRE = /^\s*([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
 const simplePathRE = /^\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?']|\[".*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*\s*$/
 
@@ -43,7 +45,7 @@ export function genHandlers (
   for (const name in events) {
     const handler = events[name]
     // #5330: warn click.right, since right clicks do not actually fire click events.
-    if (process.env.NODE_ENV !== 'production' &&
+    if (!inProduction &&
       name === 'click' &&
       handler && handler.modifiers && handler.modifiers.right
     ) {

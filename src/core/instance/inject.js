@@ -1,7 +1,6 @@
 /* @flow */
 
-import { warn } from '../util/index'
-import { hasSymbol } from 'core/util/env'
+import { hasSymbol, inProduction, warn } from '../util/index'
 import { defineReactive, observerState } from '../observer/index'
 
 export function initProvide (vm: Component) {
@@ -19,7 +18,7 @@ export function initInjections (vm: Component) {
     observerState.shouldConvert = false
     Object.keys(result).forEach(key => {
       /* istanbul ignore else */
-      if (process.env.NODE_ENV !== 'production') {
+      if (!inProduction) {
         defineReactive(vm, key, result[key], () => {
           warn(
             `Avoid mutating an injected value directly since the changes will be ` +
@@ -58,7 +57,7 @@ export function resolveInject (inject: any, vm: Component): ?Object {
         }
         source = source.$parent
       }
-      if (process.env.NODE_ENV !== 'production' && !source) {
+      if (!inProduction && !source) {
         warn(`Injection "${key}" not found`, vm)
       }
     }

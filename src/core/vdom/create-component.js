@@ -10,7 +10,8 @@ import {
   isDef,
   isUndef,
   isTrue,
-  isObject
+  isObject,
+  inProduction
 } from '../util/index'
 
 import {
@@ -117,7 +118,7 @@ export function createComponent (
   // if at this stage it's not a constructor or an async component factory,
   // reject.
   if (typeof Ctor !== 'function') {
-    if (process.env.NODE_ENV !== 'production') {
+    if (!inProduction) {
       warn(`Invalid Component definition: ${String(Ctor)}`, context)
     }
     return

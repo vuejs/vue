@@ -6,6 +6,7 @@ import {
   warn,
   isObject,
   toObject,
+  inProduction,
   isReservedAttribute
 } from 'core/util/index'
 
@@ -21,7 +22,7 @@ export function bindObjectProps (
 ): VNodeData {
   if (value) {
     if (!isObject(value)) {
-      process.env.NODE_ENV !== 'production' && warn(
+      !inProduction && warn(
         'v-bind without argument expects an Object or Array value',
         this
       )

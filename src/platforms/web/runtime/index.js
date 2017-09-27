@@ -4,7 +4,7 @@ import Vue from 'core/index'
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
-import { devtools, inBrowser, isChrome } from 'core/util/index'
+import { devtools, inBrowser, inProduction, isChrome } from 'core/util/index'
 
 import {
   query,
@@ -48,14 +48,14 @@ setTimeout(() => {
   if (config.devtools) {
     if (devtools) {
       devtools.emit('init', Vue)
-    } else if (process.env.NODE_ENV !== 'production' && isChrome) {
+    } else if (!inProduction && isChrome) {
       console[console.info ? 'info' : 'log'](
         'Download the Vue Devtools extension for a better development experience:\n' +
         'https://github.com/vuejs/vue-devtools'
       )
     }
   }
-  if (process.env.NODE_ENV !== 'production' &&
+  if (!inProduction &&
     config.productionTip !== false &&
     inBrowser && typeof console !== 'undefined'
   ) {

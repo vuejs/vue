@@ -10,6 +10,7 @@ import {
   isUndef,
   isTrue,
   isPrimitive,
+  inProduction,
   resolveAsset
 } from '../util/index'
 
@@ -50,7 +51,7 @@ export function _createElement (
   normalizationType?: number
 ): VNode {
   if (isDef(data) && isDef((data: any).__ob__)) {
-    process.env.NODE_ENV !== 'production' && warn(
+    !inProduction && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
       'Always create fresh vnode data objects in each render!',
       context
@@ -66,7 +67,7 @@ export function _createElement (
     return createEmptyVNode()
   }
   // warn against non-primitive key
-  if (process.env.NODE_ENV !== 'production' &&
+  if (!inProduction &&
     isDef(data) && isDef(data.key) && !isPrimitive(data.key)
   ) {
     warn(

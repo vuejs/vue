@@ -13,6 +13,7 @@ import {
   warn,
   extend,
   nextTick,
+  inProduction,
   mergeOptions,
   defineReactive
 } from '../util/index'
@@ -21,7 +22,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   // config
   const configDef = {}
   configDef.get = () => config
-  if (process.env.NODE_ENV !== 'production') {
+  if (!inProduction) {
     configDef.set = () => {
       warn(
         'Do not replace the Vue.config object, set individual fields instead.'

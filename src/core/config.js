@@ -3,7 +3,8 @@
 import {
   no,
   noop,
-  identity
+  identity,
+  inProduction
 } from 'shared/util'
 
 import { LIFECYCLE_HOOKS } from 'shared/constants'
@@ -46,12 +47,12 @@ export default ({
   /**
    * Show production mode tip message on boot?
    */
-  productionTip: process.env.NODE_ENV !== 'production',
+  productionTip: inProduction,
 
   /**
    * Whether to enable devtools
    */
-  devtools: process.env.NODE_ENV !== 'production',
+  devtools: inProduction,
 
   /**
    * Whether to record perf

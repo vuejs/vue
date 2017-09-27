@@ -1,6 +1,7 @@
 /* @flow */
 
 import { parseFilters } from './parser/filter-parser'
+import { inProduction } from 'core/util/index'
 
 export function baseWarn (msg: string) {
   console.error(`[Vue compiler]: ${msg}`)
@@ -44,10 +45,7 @@ export function addHandler (
 ) {
   // warn prevent and passive modifier
   /* istanbul ignore if */
-  if (
-    process.env.NODE_ENV !== 'production' && warn &&
-    modifiers && modifiers.prevent && modifiers.passive
-  ) {
+  if (!inProduction && warn && modifiers && modifiers.prevent && modifiers.passive) {
     warn(
       'passive and prevent can\'t be used together. ' +
       'Passive handler can\'t prevent default event.'

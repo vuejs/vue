@@ -9,7 +9,7 @@
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
-import { makeMap, no } from 'shared/util'
+import { inProduction, makeMap, no } from 'shared/util'
 import { isNonPhrasingTag } from 'web/compiler/util'
 
 // Regular Expressions for parsing tags and attributes
@@ -169,7 +169,7 @@ export function parseHTML (html, options) {
 
     if (html === last) {
       options.chars && options.chars(html)
-      if (process.env.NODE_ENV !== 'production' && !stack.length && options.warn) {
+      if (!inProduction && !stack.length && options.warn) {
         options.warn(`Mal-formatted tag at end of template: "${html}"`)
       }
       break
@@ -276,10 +276,7 @@ export function parseHTML (html, options) {
     if (pos >= 0) {
       // Close all the open elements, up the stack
       for (let i = stack.length - 1; i >= pos; i--) {
-        if (process.env.NODE_ENV !== 'production' &&
-          (i > pos || !tagName) &&
-          options.warn
-        ) {
+        if (!inProduction && (i > pos || !tagName) && options.warn) {
           options.warn(
             `tag <${stack[i].tag}> has no matching end tag.`
           )

@@ -4,7 +4,7 @@ import he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
-import { cached, no, camelize } from 'shared/util'
+import { cached, camelize, inProduction, no } from 'shared/util'
 import { genAssignmentCode } from '../directives/model'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
 
@@ -116,7 +116,7 @@ export function parse (
 
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
-        process.env.NODE_ENV !== 'production' && warn(
+        !inProduction && warn(
           'Templates should only be responsible for mapping the state to the ' +
           'UI. Avoid placing tags with side-effects in your templates, such as ' +
           `<${tag}>` + ', as they will not be parsed.'
@@ -159,7 +159,7 @@ export function parse (
       }
 
       function checkRootConstraints (el) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (!inProduction) {
           if (el.tag === 'slot' || el.tag === 'template') {
             warnOnce(
               `Cannot use <${el.tag}> as component root element because it may ` +
@@ -187,7 +187,7 @@ export function parse (
             exp: element.elseif,
             block: element
           })
-        } else if (process.env.NODE_ENV !== 'production') {
+        } else if (!inProduction) {
           warnOnce(
             `Component template should contain exactly one root element. ` +
             `If you are using v-if on multiple elements, ` +
@@ -234,7 +234,7 @@ export function parse (
 
     chars (text: string) {
       if (!currentParent) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (!inProduction) {
           if (text === template) {
             warnOnce(
               'Component template requires a root element, rather than just text.'
@@ -312,7 +312,7 @@ function processRawAttrs (el) {
 function processKey (el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
-    if (process.env.NODE_ENV !== 'production' && el.tag === 'template') {
+    if (!inProduction && el.tag === 'template') {
       warn(`<template> cannot be keyed. Place the key on real elements instead.`)
     }
     el.key = exp
@@ -332,7 +332,7 @@ function processFor (el) {
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
     const inMatch = exp.match(forAliasRE)
     if (!inMatch) {
-      process.env.NODE_ENV !== 'production' && warn(
+      !inProduction && warn(
         `Invalid v-for expression: ${exp}`
       )
       return
@@ -378,7 +378,7 @@ function processIfConditions (el, parent) {
       exp: el.elseif,
       block: el
     })
-  } else if (process.env.NODE_ENV !== 'production') {
+  } else if (!inProduction) {
     warn(
       `v-${el.elseif ? ('else-if="' + el.elseif + '"') : 'else'} ` +
       `used on element <${el.tag}> without corresponding v-if.`
@@ -392,7 +392,7 @@ function findPrevElement (children: Array<any>): ASTElement | void {
     if (children[i].type === 1) {
       return children[i]
     } else {
-      if (process.env.NODE_ENV !== 'production' && children[i].text !== ' ') {
+      if (!inProduction && children[i].text !== ' ') {
         warn(
           `text "${children[i].text.trim()}" between v-if and v-else(-if) ` +
           `will be ignored.`
@@ -420,7 +420,7 @@ function processOnce (el) {
 function processSlot (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
-    if (process.env.NODE_ENV !== 'production' && el.key) {
+    if (!inProduction && el.key) {
       warn(
         `\`key\` does not work on <slot> because slots are abstract outlets ` +
         `and can possibly expand into multiple elements. ` +
@@ -504,13 +504,13 @@ function processAttrs (el) {
           name = name.slice(0, -(arg.length + 1))
         }
         addDirective(el, name, rawName, value, arg, modifiers)
-        if (process.env.NODE_ENV !== 'production' && name === 'model') {
+        if (!inProduction && name === 'model') {
           checkForAliasModel(el, value)
         }
       }
     } else {
       // literal attribute
-      if (process.env.NODE_ENV !== 'production') {
+      if (!inProduction) {
         const expression = parseText(value, delimiters)
         if (expression) {
           warn(
@@ -550,7 +550,7 @@ function makeAttrsMap (attrs: Array<Object>): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
     if (
-      process.env.NODE_ENV !== 'production' &&
+      !inProduction &&
       map[attrs[i].name] && !isIE && !isEdge
     ) {
       warn('duplicate attribute: ' + attrs[i].name)

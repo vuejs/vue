@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ASSET_TYPES } from 'shared/constants'
-import { warn, extend, mergeOptions } from '../util/index'
+import { warn, extend, mergeOptions, inProduction } from '../util/index'
 import { defineComputed, proxy } from '../instance/state'
 
 export function initExtend (Vue: GlobalAPI) {
@@ -26,7 +26,7 @@ export function initExtend (Vue: GlobalAPI) {
     }
 
     const name = extendOptions.name || Super.options.name
-    if (process.env.NODE_ENV !== 'production') {
+    if (!inProduction) {
       if (!/^[a-zA-Z][\w-]*$/.test(name)) {
         warn(
           'Invalid component name: "' + name + '". Component names ' +

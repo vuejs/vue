@@ -5,6 +5,7 @@ import {
   toArray,
   hyphenate,
   handleError,
+  inProduction,
   formatComponentName
 } from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
@@ -112,7 +113,7 @@ export function eventsMixin (Vue: Class<Component>) {
 
   Vue.prototype.$emit = function (event: string): Component {
     const vm: Component = this
-    if (process.env.NODE_ENV !== 'production') {
+    if (!inProduction) {
       const lowerCaseEvent = event.toLowerCase()
       if (lowerCaseEvent !== event && vm._events[lowerCaseEvent]) {
         tip(

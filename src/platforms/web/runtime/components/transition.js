@@ -3,8 +3,7 @@
 // Provides transition support for a single element/component.
 // supports transition mode (out-in / in-out)
 
-import { warn } from 'core/util/index'
-import { camelize, extend, isPrimitive } from 'shared/util'
+import { camelize, extend, inProduction, isPrimitive, warn } from 'core/util/index'
 import {
   mergeVNodeHook,
   isAsyncPlaceholder,
@@ -95,7 +94,7 @@ export default {
     }
 
     // warn multiple elements
-    if (process.env.NODE_ENV !== 'production' && children.length > 1) {
+    if (!inProduction && children.length > 1) {
       warn(
         '<transition> can only be used on a single element. Use ' +
         '<transition-group> for lists.',
@@ -106,9 +105,7 @@ export default {
     const mode: string = this.mode
 
     // warn invalid mode
-    if (process.env.NODE_ENV !== 'production' &&
-      mode && mode !== 'in-out' && mode !== 'out-in'
-    ) {
+    if (!inProduction && mode && mode !== 'in-out' && mode !== 'out-in') {
       warn(
         'invalid <transition> mode: ' + mode,
         this.$parent

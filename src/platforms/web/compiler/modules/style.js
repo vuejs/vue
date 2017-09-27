@@ -7,13 +7,14 @@ import {
   getBindingAttr,
   baseWarn
 } from 'compiler/helpers'
+import { inProduction } from 'core/util/index'
 
 function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticStyle = getAndRemoveAttr(el, 'style')
   if (staticStyle) {
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production') {
+    if (!inProduction) {
       const expression = parseText(staticStyle, options.delimiters)
       if (expression) {
         warn(

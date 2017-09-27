@@ -21,6 +21,7 @@ import {
   isReserved,
   handleError,
   nativeWatch,
+  inProduction,
   validateProp,
   isPlainObject,
   isServerRendering,
@@ -83,7 +84,7 @@ function initProps (vm: Component, propsOptions: Object) {
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
-    if (process.env.NODE_ENV !== 'production') {
+    if (!inProduction) {
       if (isReservedAttribute(key) || config.isReservedAttr(key)) {
         warn(
           `"${key}" is a reserved attribute and cannot be used as component prop.`,
@@ -121,7 +122,7 @@ function initData (vm: Component) {
     : data || {}
   if (!isPlainObject(data)) {
     data = {}
-    process.env.NODE_ENV !== 'production' && warn(
+    !inProduction && warn(
       'data functions should return an object:\n' +
       'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
       vm
@@ -134,7 +135,7 @@ function initData (vm: Component) {
   let i = keys.length
   while (i--) {
     const key = keys[i]
-    if (process.env.NODE_ENV !== 'production') {
+    if (!inProduction) {
       if (methods && hasOwn(methods, key)) {
         warn(
           `Method "${key}" has already been defined as a data property.`,
@@ -143,7 +144,7 @@ function initData (vm: Component) {
       }
     }
     if (props && hasOwn(props, key)) {
-      process.env.NODE_ENV !== 'production' && warn(
+      !inProduction && warn(
         `The data property "${key}" is already declared as a prop. ` +
         `Use prop default value instead.`,
         vm
@@ -168,7 +169,7 @@ function getData (data: Function, vm: Component): any {
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
-  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
+  !inProduction && checkOptionType(vm, 'computed')
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
   const isSSR = isServerRendering()
@@ -176,7 +177,7 @@ function initComputed (vm: Component, computed: Object) {
   for (const key in computed) {
     const userDef = computed[key]
     const getter = typeof userDef === 'function' ? userDef : userDef.get
-    if (process.env.NODE_ENV !== 'production' && getter == null) {
+    if (!inProduction && getter == null) {
       warn(
         `Getter is missing for computed property "${key}".`,
         vm
@@ -198,7 +199,7 @@ function initComputed (vm: Component, computed: Object) {
     // at instantiation here.
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
-    } else if (process.env.NODE_ENV !== 'production') {
+    } else if (!inProduction) {
       if (key in vm.$data) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
       } else if (vm.$options.props && key in vm.$options.props) {
@@ -229,7 +230,7 @@ export function defineComputed (
       ? userDef.set
       : noop
   }
-  if (process.env.NODE_ENV !== 'production' &&
+  if (!inProduction &&
       sharedPropertyDefinition.set === noop) {
     sharedPropertyDefinition.set = function () {
       warn(
@@ -257,10 +258,10 @@ function createComputedGetter (key) {
 }
 
 function initMethods (vm: Component, methods: Object) {
-  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'methods')
+  !inProduction && checkOptionType(vm, 'methods')
   const props = vm.$options.props
   for (const key in methods) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (!inProduction) {
       if (methods[key] == null) {
         warn(
           `Method "${key}" has an undefined value in the component definition. ` +
@@ -286,7 +287,7 @@ function initMethods (vm: Component, methods: Object) {
 }
 
 function initWatch (vm: Component, watch: Object) {
-  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'watch')
+  !inProduction && checkOptionType(vm, 'watch')
   for (const key in watch) {
     const handler = watch[key]
     if (Array.isArray(handler)) {
@@ -323,7 +324,7 @@ export function stateMixin (Vue: Class<Component>) {
   dataDef.get = function () { return this._data }
   const propsDef = {}
   propsDef.get = function () { return this._props }
-  if (process.env.NODE_ENV !== 'production') {
+  if (!inProduction) {
     dataDef.set = function (newData: Object) {
       warn(
         'Avoid replacing instance root $data. ' +

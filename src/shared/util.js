@@ -297,3 +297,8 @@ export function once (fn: Function): Function {
     }
   }
 }
+
+/**
+ * Check if we're in the production environment.
+ */
+export const inProduction = process.env.NODE_ENV === 'production'

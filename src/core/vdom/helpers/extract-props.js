@@ -6,6 +6,7 @@ import {
   isDef,
   isUndef,
   hyphenate,
+  inProduction,
   formatComponentName
 } from 'core/util/index'
 
@@ -26,7 +27,7 @@ export function extractPropsFromVNodeData (
   if (isDef(attrs) || isDef(props)) {
     for (const key in propOptions) {
       const altKey = hyphenate(key)
-      if (process.env.NODE_ENV !== 'production') {
+      if (!inProduction) {
         const keyInLowerCase = key.toLowerCase()
         if (
           key !== keyInLowerCase &&

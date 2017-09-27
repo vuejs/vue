@@ -15,6 +15,7 @@ import {
   hasOwn,
   camelize,
   capitalize,
+  inProduction,
   isBuiltInTag,
   isPlainObject
 } from 'shared/util'
@@ -29,7 +30,7 @@ const strats = config.optionMergeStrategies
 /**
  * Options with restrictions
  */
-if (process.env.NODE_ENV !== 'production') {
+if (!inProduction) {
   strats.el = strats.propsData = function (parent, child, vm, key) {
     if (!vm) {
       warn(
@@ -113,7 +114,7 @@ strats.data = function (
 ): ?Function {
   if (!vm) {
     if (childVal && typeof childVal !== 'function') {
-      process.env.NODE_ENV !== 'production' && warn(
+      !inProduction && warn(
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
         'definitions.',
@@ -249,7 +250,7 @@ function normalizeProps (options: Object) {
       if (typeof val === 'string') {
         name = camelize(val)
         res[name] = { type: null }
-      } else if (process.env.NODE_ENV !== 'production') {
+      } else if (!inProduction) {
         warn('props must be strings when using array syntax.')
       }
     }
@@ -302,7 +303,7 @@ export function mergeOptions (
   child: Object,
   vm?: Component
 ): Object {
-  if (process.env.NODE_ENV !== 'production') {
+  if (!inProduction) {
     checkComponents(child)
   }
 
@@ -363,7 +364,7 @@ export function resolveAsset (
   if (hasOwn(assets, PascalCaseId)) return assets[PascalCaseId]
   // fallback to prototype chain
   const res = assets[id] || assets[camelizedId] || assets[PascalCaseId]
-  if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
+  if (!inProduction && warnMissing && !res) {
     warn(
       'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
       options

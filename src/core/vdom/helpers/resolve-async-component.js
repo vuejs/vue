@@ -6,7 +6,8 @@ import {
   isDef,
   isUndef,
   isTrue,
-  isObject
+  isObject,
+  inProduction
 } from 'core/util/index'
 
 import { createEmptyVNode } from 'core/vdom/vnode'
@@ -74,7 +75,7 @@ export function resolveAsyncComponent (
     })
 
     const reject = once(reason => {
-      process.env.NODE_ENV !== 'production' && warn(
+      !inProduction && warn(
         `Failed to resolve async component: ${String(factory)}` +
         (reason ? `\nReason: ${reason}` : '')
       )
@@ -117,7 +118,7 @@ export function resolveAsyncComponent (
           setTimeout(() => {
             if (isUndef(factory.resolved)) {
               reject(
-                process.env.NODE_ENV !== 'production'
+                !inProduction
                   ? `timeout (${res.timeout}ms)`
                   : null
               )
