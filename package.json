@@ -82,7 +82,7 @@
     "eslint-plugin-jasmine": "^2.2.0",
     "eslint-plugin-vue-libs": "^1.2.0",
     "file-loader": "^0.11.2",
-    "flow-bin": "^0.48.0",
+    "flow-bin": "^0.54.0",
     "hash-sum": "^1.0.2",
     "he": "^1.1.1",
     "http-server": "^0.10.0",
