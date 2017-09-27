@@ -86,7 +86,7 @@ export const nextTick = (function () {
   // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
   // completely stops working after triggering a few times... so, if native
   // Promise is available, we will use it:
-  /* istanbul ignore if */
+  /* istanbul ignore if */ // $flow-disable-line
   if (typeof Promise !== 'undefined' && isNative(Promise)) {
     var p = Promise.resolve()
     var logError = err => { console.error(err) }
@@ -141,6 +141,7 @@ export const nextTick = (function () {
       pending = true
       timerFunc()
     }
+    // $flow-disable-line
     if (!cb && typeof Promise !== 'undefined') {
       return new Promise((resolve, reject) => {
         _resolve = resolve
@@ -150,7 +151,7 @@ export const nextTick = (function () {
 })()
 
 let _Set
-/* istanbul ignore if */
+/* istanbul ignore if */ // $flow-disable-line
 if (typeof Set !== 'undefined' && isNative(Set)) {
   // use native Set when available.
   _Set = Set
