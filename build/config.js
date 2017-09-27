@@ -161,12 +161,8 @@ const builds = {
 
 function genConfig (opts) {
   const config = {
-    entry: opts.entry,
-    dest: opts.dest,
+    input: opts.entry,
     external: opts.external,
-    format: opts.format,
-    banner: opts.banner,
-    moduleName: opts.moduleName || 'Vue',
     plugins: [
       replace({
         __WEEX__: !!opts.weex,
@@ -176,7 +172,13 @@ function genConfig (opts) {
       flow(),
       buble(),
       alias(Object.assign({}, aliases, opts.alias))
-    ].concat(opts.plugins || [])
+    ].concat(opts.plugins || []),
+    output: {
+      file: opts.dest,
+      format: opts.format,
+      banner: opts.banner,
+      name: opts.moduleName || 'Vue'
+    }
   }
 
   if (opts.env) {
