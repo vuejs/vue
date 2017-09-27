@@ -7,6 +7,7 @@ import {
   isObject,
   hyphenate,
   capitalize,
+  inProduction,
   isPlainObject
 } from 'shared/util'
 
@@ -44,7 +45,7 @@ export function validateProp (
     observe(value)
     observerState.shouldConvert = prevShouldConvert
   }
-  if (process.env.NODE_ENV !== 'production') {
+  if (!inProduction) {
     assertProp(prop, key, value, vm, absent)
   }
   return value
@@ -60,7 +61,7 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
   }
   const def = prop.default
   // warn against non-factory defaults for Object & Array
-  if (process.env.NODE_ENV !== 'production' && isObject(def)) {
+  if (!inProduction && isObject(def)) {
     warn(
       'Invalid default value for prop "' + key + '": ' +
       'Props with type Object/Array must use a factory function ' +

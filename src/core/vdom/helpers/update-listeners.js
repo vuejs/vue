@@ -1,7 +1,6 @@
 /* @flow */
 
-import { warn } from 'core/util/index'
-import { cached, isUndef } from 'shared/util'
+import { cached, inProduction, isUndef, warn } from 'core/util/index'
 
 const normalizeEvent = cached((name: string): {
   name: string,
@@ -65,7 +64,7 @@ export function updateListeners (
     event = normalizeEvent(name)
     if (!event.plain) hasModifier = true
     if (isUndef(cur)) {
-      process.env.NODE_ENV !== 'production' && warn(
+      !inProduction && warn(
         `Invalid handler for event "${event.name}": got ` + String(cur),
         vm
       )

@@ -1,6 +1,6 @@
 /* @flow */
 
-import { extend, warn } from 'core/util/index'
+import { extend, warn, inProduction } from 'core/util/index'
 
 /**
  * Runtime helper for rendering <slot>
@@ -21,7 +21,7 @@ export function renderSlot (
   } else {
     const slotNodes = this.$slots[name]
     // warn duplicate slot usage
-    if (slotNodes && process.env.NODE_ENV !== 'production') {
+    if (slotNodes && !inProduction) {
       slotNodes._rendered && warn(
         `Duplicate presence of slot "${name}" found in the same render tree ` +
         `- this will likely cause render errors.`,

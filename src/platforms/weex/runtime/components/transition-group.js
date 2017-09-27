@@ -1,4 +1,4 @@
-import { warn, extend } from 'core/util/index'
+import { extend, warn, inProduction } from 'core/util/index'
 import { transitionProps, extractTransitionData } from './transition'
 
 const props = extend({
@@ -44,7 +44,7 @@ export default {
           children.push(c)
           map[c.key] = c
           ;(c.data || (c.data = {})).transition = transitionData
-        } else if (process.env.NODE_ENV !== 'production') {
+        } else if (!inProduction) {
           const opts = c.componentOptions
           const name = opts
             ? (opts.Ctor.options.name || opts.tag)

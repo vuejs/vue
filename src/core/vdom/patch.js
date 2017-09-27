@@ -23,7 +23,8 @@ import {
   isUndef,
   isTrue,
   makeMap,
-  isPrimitive
+  isPrimitive,
+  inProduction
 } from '../util/index'
 
 export const emptyNode = new VNode('', {}, [])
@@ -113,7 +114,7 @@ export function createPatchFunction (backend) {
     const children = vnode.children
     const tag = vnode.tag
     if (isDef(tag)) {
-      if (process.env.NODE_ENV !== 'production') {
+      if (!inProduction) {
         if (data && data.pre) {
           inPre++
         }
@@ -163,7 +164,7 @@ export function createPatchFunction (backend) {
         insert(parentElm, vnode.elm, refElm)
       }
 
-      if (process.env.NODE_ENV !== 'production' && data && data.pre) {
+      if (!inProduction && data && data.pre) {
         inPre--
       }
     } else if (isTrue(vnode.isComment)) {
@@ -409,7 +410,7 @@ export function createPatchFunction (backend) {
         } else {
           elmToMove = oldCh[idxInOld]
           /* istanbul ignore if */
-          if (process.env.NODE_ENV !== 'production' && !elmToMove) {
+          if (!inProduction && !elmToMove) {
             warn(
               'It seems there are duplicate keys that is causing an update error. ' +
               'Make sure each v-for item has a unique key.'
@@ -526,7 +527,7 @@ export function createPatchFunction (backend) {
       vnode.isAsyncPlaceholder = true
       return true
     }
-    if (process.env.NODE_ENV !== 'production') {
+    if (!inProduction) {
       if (!assertNodeMatch(elm, vnode)) {
         return false
       }
@@ -551,10 +552,7 @@ export function createPatchFunction (backend) {
           if (isDef(i = data) && isDef(i = i.domProps) && isDef(i = i.innerHTML)) {
             if (i !== elm.innerHTML) {
               /* istanbul ignore if */
-              if (process.env.NODE_ENV !== 'production' &&
-                typeof console !== 'undefined' &&
-                !bailed
-              ) {
+              if (!inProduction && typeof console !== 'undefined' && !bailed) {
                 bailed = true
                 console.warn('Parent: ', elm)
                 console.warn('server innerHTML: ', i)
@@ -577,10 +575,7 @@ export function createPatchFunction (backend) {
             // longer than the virtual children list.
             if (!childrenMatch || childNode) {
               /* istanbul ignore if */
-              if (process.env.NODE_ENV !== 'production' &&
-                typeof console !== 'undefined' &&
-                !bailed
-              ) {
+              if (!inProduction && typeof console !== 'undefined' && !bailed) {
                 bailed = true
                 console.warn('Parent: ', elm)
                 console.warn('Mismatching childNodes vs. VNodes: ', elm.childNodes, children)
@@ -646,7 +641,7 @@ export function createPatchFunction (backend) {
             if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
               invokeInsertHook(vnode, insertedVnodeQueue, true)
               return oldVnode
-            } else if (process.env.NODE_ENV !== 'production') {
+            } else if (!inProduction) {
               warn(
                 'The client-side rendered virtual DOM tree is not matching ' +
                 'server-rendered content. This is likely caused by incorrect ' +

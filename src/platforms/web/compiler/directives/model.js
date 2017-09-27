@@ -3,6 +3,7 @@
 import config from 'core/config'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
+import { inProduction } from 'core/util/index'
 
 let warn
 
@@ -22,7 +23,7 @@ export default function model (
   const tag = el.tag
   const type = el.attrsMap.type
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (!inProduction) {
     const dynamicType = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
     if (tag === 'input' && dynamicType) {
       warn(
@@ -56,7 +57,7 @@ export default function model (
     genComponentModel(el, value, modifiers)
     // component v-model doesn't need extra runtime
     return false
-  } else if (process.env.NODE_ENV !== 'production') {
+  } else if (!inProduction) {
     warn(
       `<${el.tag} v-model="${value}">: ` +
       `v-model is not supported on this element type. ` +

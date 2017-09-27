@@ -3,6 +3,7 @@
 import { extend } from 'shared/util'
 import { detectErrors } from './error-detector'
 import { createCompileToFunctionFn } from './to-function'
+import { inProduction } from 'core/util/index'
 
 export function createCompilerCreator (baseCompile: Function): Function {
   return function createCompiler (baseOptions: CompilerOptions) {
@@ -39,7 +40,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
       }
 
       const compiled = baseCompile(template, finalOptions)
-      if (process.env.NODE_ENV !== 'production') {
+      if (!inProduction) {
         errors.push.apply(errors, detectErrors(compiled.ast))
       }
       compiled.errors = errors
