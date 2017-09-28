@@ -455,7 +455,14 @@ describe('codegen', () => {
       '<my-component inline-template><hr><hr></my-component>',
       `with(this){return _c('my-component',{inlineTemplate:{render:function(){with(this){return _c('hr')}},staticRenderFns:[]}})}`
     )
+    try {
+      assertCodegen(
+        '<my-component inline-template></my-component>',
+        ''
+      )
+    } catch (e) {}
     expect('Inline-template components must have exactly one child element.').toHaveBeenWarned()
+    expect(console.error.calls.count()).toBe(2)
   })
 
   it('generate static trees inside v-for', () => {
