@@ -64,4 +64,18 @@ describe('Directive v-html', () => {
       expect(vm.$el.innerHTML).toBe('')
     }).then(done)
   })
+
+  it('should warn when element has children', done => {
+    new Vue({
+      template: '<div v-html="a">test</div>',
+      data: { a: 'hello' }
+    }).$mount()
+
+    setTimeout(() => {
+      expect(`<div v-html="a">:
+Element content should be empty with v-html, because it will be overwritten.`)
+        .toHaveBeenWarned()
+      done()
+    }, 0)
+  })
 })

@@ -50,4 +50,18 @@ describe('Directive v-text', () => {
       expect(vm.$el.innerHTML).toBe('')
     }).then(done)
   })
+
+  it('should warn when element has children', done => {
+    new Vue({
+      template: '<div v-text="a">test</div>',
+      data: { a: 'hello' }
+    }).$mount()
+
+    setTimeout(() => {
+      expect(`<div v-text="a">:
+Element content should be empty with v-text, because it will be overwritten.`)
+        .toHaveBeenWarned()
+      done()
+    }, 0)
+  })
 })
