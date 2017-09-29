@@ -165,7 +165,7 @@ export default {
     ) {
       // replace old child transition data with fresh one
       // important for dynamic transitions!
-      const oldData: Object = oldChild && (oldChild.data.transition = extend({}, data))
+      const oldData: Object = oldChild.data.transition = extend({}, data)
       // handle transition mode
       if (mode === 'out-in') {
         // return placeholder node and queue update when leave finishes
