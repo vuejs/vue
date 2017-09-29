@@ -697,6 +697,8 @@ export function createPatchFunction (backend) {
                   insert.fns[i]()
                 }
               }
+            } else {
+              registerRef(ancestor)
             }
             ancestor = ancestor.parent
           }
