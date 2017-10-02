@@ -90,7 +90,7 @@ This is used by default in `vue-loader@>=12` and can be disabled using the [opti
 
 ---
 
-### compiler.ssrCompileToFunction(template)
+### compiler.ssrCompileToFunctions(template)
 
 > 2.4.0+
 
