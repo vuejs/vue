@@ -107,6 +107,15 @@ const builds = {
     format: 'cjs',
     external: Object.keys(require('../packages/vue-template-compiler/package.json').dependencies)
   },
+  // Web compiler (UMD for in-browser use).
+  'web-compiler-browser': {
+    entry: resolve('web/entry-compiler.js'),
+    dest: resolve('packages/vue-template-compiler/browser.js'),
+    format: 'umd',
+    env: 'development',
+    moduleName: 'VueTemplateCompiler',
+    plugins: [node(), cjs()]
+  },
   // Web server renderer (CommonJS).
   'web-server-renderer': {
     entry: resolve('web/entry-server-renderer.js'),
