@@ -97,7 +97,7 @@ export function createPatchFunction (backend) {
   function removeNode (el) {
     const parent = nodeOps.parentNode(el)
     // element may have already been removed due to v-html / v-text
-    if (isDef(parent)) {
+    if (isDef(parent) && !parent._isContentReset) {
       nodeOps.removeChild(parent, el)
     }
   }
