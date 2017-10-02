@@ -73,7 +73,7 @@ Vue.prototype.$mount = function (
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile end')
-        measure(`${this._name} compile`, 'compile', 'compile end')
+        measure(`vue ${this._name} compile`, 'compile', 'compile end')
       }
     }
   }
