@@ -123,6 +123,11 @@ The default test script will do the following: lint with ESLint -> type check wi
 
   - **`shared`**: contains utilities shared across the entire codebase.
 
+  - **`types`**: contains TypeScript type definitions
+
+    - **`test`**: type definitions tests
+
+
 ## Financial Contribution
 
 As a pure community-driven project without major corporate backing, we also welcome financial contributions via Patreon or OpenCollective.
