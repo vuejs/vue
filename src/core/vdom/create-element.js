@@ -122,17 +122,18 @@ export function _createElement (
   }
 }
 
-function applyNS (vnode, ns) {
+function applyNS (vnode, ns, force) {
   vnode.ns = ns
   if (vnode.tag === 'foreignObject') {
     // use default namespace inside foreignObject
-    return
+    ns = undefined
+    force = true
   }
   if (isDef(vnode.children)) {
     for (let i = 0, l = vnode.children.length; i < l; i++) {
       const child = vnode.children[i]
-      if (isDef(child.tag) && isUndef(child.ns)) {
-        applyNS(child, ns)
+      if (isDef(child.tag) && (isUndef(child.ns) || force)) {
+        applyNS(child, ns, force)
       }
     }
   }
