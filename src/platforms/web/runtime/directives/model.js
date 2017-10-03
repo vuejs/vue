@@ -52,13 +52,13 @@ export default {
       const prevOptions = el._vOptions
       const curOptions = el._vOptions = [].map.call(el.options, getValue)
       if (curOptions.some((o, i) => !looseEqual(o, prevOptions[i]))) {
-        // trigger change event if
+        // trigger input event if
         // no matching option found for at least one value
         const needReset = el.multiple
           ? binding.value.some(v => hasNoMatchingOption(v, curOptions))
           : binding.value !== binding.oldValue && hasNoMatchingOption(binding.value, curOptions)
         if (needReset) {
-          trigger(el, 'change')
+          trigger(el, 'input')
         }
       }
     }
