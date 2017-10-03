@@ -129,6 +129,7 @@ const builds = {
     format: 'umd',
     env: 'development',
     moduleName: 'renderVueComponentToString',
+    basicRenderer: 'true',
     plugins: [node(), cjs()]
   },
   'web-server-renderer-webpack-server-plugin': {
@@ -174,6 +175,7 @@ function genConfig (opts) {
     external: opts.external,
     plugins: [
       replace({
+        __BASIC_RENDERER__: !!opts.basicRenderer,
         __WEEX__: !!opts.weex,
         __WEEX_VERSION__: weexVersion,
         __VERSION__: version

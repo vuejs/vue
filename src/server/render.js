@@ -62,6 +62,10 @@ function renderNode (node, isRoot, context) {
       context.next
     )
   }
+
+  if (__BASIC_RENDERER__ === true && isRoot === true) {
+    context.nextSync()
+  }
 }
 
 function registerComponentForCache (options, write) {
@@ -85,6 +89,7 @@ function renderComponent (node, isRoot, context) {
   const registerComponent = registerComponentForCache(Ctor.options, write)
 
   if (isDef(getKey) && isDef(cache) && isDef(name)) {
+    __BASIC_RENDERER__ === true && context.suspendNext()
     const key = name + '::' + getKey(node.componentOptions.propsData)
     const { has, get } = context
     if (isDef(has)) {
@@ -100,6 +105,7 @@ function renderComponent (node, isRoot, context) {
         } else {
           renderComponentWithCache(node, isRoot, key, context)
         }
+        __BASIC_RENDERER__ === true && context.resumeNext()
       })
     } else if (isDef(get)) {
       get(key, res => {
@@ -112,6 +118,7 @@ function renderComponent (node, isRoot, context) {
         } else {
           renderComponentWithCache(node, isRoot, key, context)
         }
+        __BASIC_RENDERER__ === true && context.resumeNext()
       })
     }
   } else {
@@ -189,6 +196,7 @@ function renderAsyncComponent (node, isRoot, context) {
     } else {
       reject()
     }
+    __BASIC_RENDERER__ === true && context.resumeNext()
   }
 
   const reject = err => {
@@ -201,6 +209,7 @@ function renderAsyncComponent (node, isRoot, context) {
     resolve(factory.resolved)
     return
   }
+  __BASIC_RENDERER__ === true && context.suspendNext()
 
   let res
   try {
