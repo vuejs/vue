@@ -15,11 +15,11 @@ if (process.env.NODE_ENV !== 'production') {
 
   const warnNonPresent = (target, key) => {
     warn(
-      `Property or method "${key}" is not defined on the instance but
-      referenced during render. Make sure that this property is reactive,
-      either in the data option, or for class-based components, by
-      initializing the property.
-      See: https://vuejs.org/v2/guide/reactivity.html#Declaring-Reactive-Properties.`,
+      `Property or method "${key}" is not defined on the instance but` +
+      'referenced during render. Make sure that this property is reactive, ' +
+      'either in the data option, or for class-based components, by ' +
+      'initializing the property.' +
+      'See: https://vuejs.org/v2/guide/reactivity.html#Declaring-Reactive-Properties.',
       target
     )
   }
@@ -31,7 +31,7 @@ if (process.env.NODE_ENV !== 'production') {
   if (hasProxy) {
     const isBuiltInModifier = makeMap('stop,prevent,self,ctrl,shift,alt,meta')
     config.keyCodes = new Proxy(config.keyCodes, {
-      set(target, key, value) {
+      set (target, key, value) {
         if (isBuiltInModifier(key)) {
           warn(`Avoid overwriting built-in modifier in config.keyCodes: .${key}`)
           return false
@@ -44,7 +44,7 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
   const hasHandler = {
-    has(target, key) {
+    has (target, key) {
       const has = key in target
       const isAllowed = allowedGlobals(key) || key.charAt(0) === '_'
       if (!has && !isAllowed) {
@@ -55,7 +55,7 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
   const getHandler = {
-    get(target, key) {
+    get (target, key) {
       if (typeof key === 'string' && !(key in target)) {
         warnNonPresent(target, key)
       }
@@ -63,7 +63,7 @@ if (process.env.NODE_ENV !== 'production') {
     }
   }
 
-  initProxy = function initProxy(vm) {
+  initProxy = function initProxy (vm) {
     if (hasProxy) {
       // determine which proxy handler to use
       const options = vm.$options
