@@ -89,7 +89,7 @@ export const nextTick = (function () {
   /* istanbul ignore if */ // $flow-disable-line
   if (typeof Promise !== 'undefined' && isNative(Promise)) {
     var p = Promise.resolve()
-    var logError = err => { console.error(err) }
+    var logError = err => { handleError(err, null, 'nextTick') }
     timerFunc = () => {
       p.then(nextTickHandler).catch(logError)
       // in problematic UIWebViews, Promise.then doesn't completely break, but
