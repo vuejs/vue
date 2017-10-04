@@ -168,7 +168,8 @@ const builds = {
   }
 }
 
-function genConfig (opts) {
+function genConfig (name) {
+  const opts = builds[name]
   const config = {
     input: opts.entry,
     external: opts.external,
@@ -196,12 +197,17 @@ function genConfig (opts) {
     }))
   }
 
+  Object.defineProperty(config, '_name', {
+    enumerable: false,
+    value: name
+  })
+
   return config
 }
 
 if (process.env.TARGET) {
-  module.exports = genConfig(builds[process.env.TARGET])
+  module.exports = genConfig(process.env.TARGET)
 } else {
-  exports.getBuild = name => genConfig(builds[name])
-  exports.getAllBuilds = () => Object.keys(builds).map(name => genConfig(builds[name]))
+  exports.getBuild = genConfig
+  exports.getAllBuilds = () => Object.keys(builds).map(genConfig)
 }
