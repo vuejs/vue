@@ -299,12 +299,12 @@ describe('codegen', () => {
       `with(this){return _c('input',{on:{"click":function($event){if(!$event.metaKey)return null;onClick($event)}}})}`
     )
     assertCodegen(
-      '<input @click.bare="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if($event.ctrlKey || $event.shiftKey || $event.altKey || $event.metaKey)return null;onClick($event)}}})}`
+      '<input @click.exact="onClick">',
+      `with(this){return _c('input',{on:{"click":function($event){if($event.ctrlKey||$event.shiftKey||$event.altKey||$event.metaKey)return null;onClick($event)}}})}`
     )
     assertCodegen(
-      '<input @click.ctrl.bare="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;if($event.shiftKey || $event.altKey || $event.metaKey)return null;onClick($event)}}})}`
+      '<input @click.ctrl.exact="onClick">',
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;if($event.shiftKey||$event.altKey||$event.metaKey)return null;onClick($event)}}})}`
     )
   })
 

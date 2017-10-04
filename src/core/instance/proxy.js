@@ -27,7 +27,7 @@ if (process.env.NODE_ENV !== 'production') {
     Proxy.toString().match(/native code/)
 
   if (hasProxy) {
-    const isBuiltInModifier = makeMap('stop,prevent,self,ctrl,shift,alt,meta,bare')
+    const isBuiltInModifier = makeMap('stop,prevent,self,ctrl,shift,alt,meta,exact')
     config.keyCodes = new Proxy(config.keyCodes, {
       set (target, key, value) {
         if (isBuiltInModifier(key)) {
