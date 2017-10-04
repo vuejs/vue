@@ -18,6 +18,7 @@ import {
   bind,
   noop,
   hasOwn,
+  hyphenate,
   isReserved,
   handleError,
   nativeWatch,
@@ -84,9 +85,11 @@ function initProps (vm: Component, propsOptions: Object) {
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
-      if (isReservedAttribute(key) || config.isReservedAttr(key)) {
+      const hyphenatedKey = hyphenate(key)
+      if (isReservedAttribute(hyphenatedKey) ||
+          config.isReservedAttr(hyphenatedKey)) {
         warn(
-          `"${key}" is a reserved attribute and cannot be used as component prop.`,
+          `"${hyphenatedKey}" is a reserved attribute and cannot be used as component prop.`,
           vm
         )
       }
