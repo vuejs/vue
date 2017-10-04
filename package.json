@@ -23,7 +23,7 @@
     "dev:weex:compiler": "rollup -w -c build/config.js --environment TARGET:weex-compiler ",
     "build": "node build/build.js",
     "build:ssr": "npm run build -- web-runtime-cjs,web-server-renderer",
-    "build:weex": "npm run build -- weex-framework,weex-compiler",
+    "build:weex": "npm run build -- weex",
     "test": "npm run lint && flow check && npm run test:types && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr && npm run test:weex",
     "test:unit": "karma start test/unit/karma.unit.config.js",
     "test:cover": "karma start test/unit/karma.cover.config.js",
