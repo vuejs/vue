@@ -239,7 +239,8 @@ export function genData (el: ASTElement, state: CodegenState): string {
     data += `${genHandlers(el.nativeEvents, true, state.warn)},`
   }
   // slot target
-  if (el.slotTarget) {
+  // only for non-scoped slots
+  if (el.slotTarget && !el.slotScope) {
     data += `slot:${el.slotTarget},`
   }
   // scoped slots
@@ -342,7 +343,7 @@ function genScopedSlot (
   if (el.for && !el.forProcessed) {
     return genForScopedSlot(key, el, state)
   }
-  return `{key:${key},fn:function(${String(el.attrsMap.scope)}){` +
+  return `{key:${key},fn:function(${String(el.slotScope)}){` +
     `return ${el.tag === 'template'
       ? genChildren(el, state) || 'void 0'
       : genElement(el, state)

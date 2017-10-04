@@ -179,6 +179,28 @@ describe('codegen', () => {
     )
   })
 
+  it('generate scoped slot', () => {
+    assertCodegen(
+      '<foo><template slot-scope="bar">{{ bar }}</template></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(bar){return [_v(_s(bar))]}}])})}`
+    )
+    assertCodegen(
+      '<foo><div slot-scope="bar">{{ bar }}</div></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(bar){return _c('div',{},[_v(_s(bar))])}}])})}`
+    )
+  })
+
+  it('generate named scoped slot', () => {
+    assertCodegen(
+      '<foo><template slot="foo" slot-scope="bar">{{ bar }}</template></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"foo",fn:function(bar){return [_v(_s(bar))]}}])})}`
+    )
+    assertCodegen(
+      '<foo><div slot="foo" slot-scope="bar">{{ bar }}</div></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"foo",fn:function(bar){return _c('div',{},[_v(_s(bar))])}}])})}`
+    )
+  })
+
   it('generate class binding', () => {
     // static
     assertCodegen(
