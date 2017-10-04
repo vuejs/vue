@@ -8,7 +8,7 @@ import { initEvents } from './events'
 import { mark, measure } from '../util/perf'
 import { initLifecycle, callHook } from './lifecycle'
 import { initProvide, initInjections } from './inject'
-import { extend, mergeOptions, formatComponentName } from '../util/index'
+import { extend, mergeOptions, formatComponentName, checkKeyExistence } from '../util/index'
 
 let uid = 0
 
@@ -57,6 +57,13 @@ export function initMixin (Vue: Class<Component>) {
     initState(vm)
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
+
+    // check v-model binding in parent context
+    if (process.env.NODE_ENV !== 'production' &&
+        this.$vnode &&
+        this.$vnode.data.model) {
+      checkKeyExistence(this.$parent, this.$vnode.data.model.expression)
+    }
 
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {

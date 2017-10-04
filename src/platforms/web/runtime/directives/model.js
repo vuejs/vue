@@ -5,7 +5,14 @@
 
 import { isTextInputType } from 'web/util/element'
 import { looseEqual, looseIndexOf } from 'shared/util'
-import { warn, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
+import {
+  warn,
+  isAndroid,
+  isIE9,
+  isIE,
+  isEdge,
+  checkKeyExistence
+} from 'core/util/index'
 
 /* istanbul ignore if */
 if (isIE9) {
@@ -20,6 +27,9 @@ if (isIE9) {
 
 export default {
   inserted (el, binding, vnode) {
+    if (process.env.NODE_ENV !== 'production') {
+      checkKeyExistence(vnode.context, binding.expression)
+    }
     if (vnode.tag === 'select') {
       setSelected(el, binding, vnode.context)
       el._vOptions = [].map.call(el.options, getValue)
