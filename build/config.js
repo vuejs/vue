@@ -17,7 +17,7 @@ const banner =
 
 const weexFactoryPlugin = {
   intro () {
-    return 'module.exports = function weexFactory (exports, renderer) {'
+    return 'module.exports = function weexFactory (exports, document) {'
   },
   outro () {
     return '}'
@@ -107,6 +107,15 @@ const builds = {
     format: 'cjs',
     external: Object.keys(require('../packages/vue-template-compiler/package.json').dependencies)
   },
+  // Web compiler (UMD for in-browser use).
+  'web-compiler-browser': {
+    entry: resolve('web/entry-compiler.js'),
+    dest: resolve('packages/vue-template-compiler/browser.js'),
+    format: 'umd',
+    env: 'development',
+    moduleName: 'VueTemplateCompiler',
+    plugins: [node(), cjs()]
+  },
   // Web server renderer (CommonJS).
   'web-server-renderer': {
     entry: resolve('web/entry-server-renderer.js'),
@@ -161,12 +170,8 @@ const builds = {
 
 function genConfig (opts) {
   const config = {
-    entry: opts.entry,
-    dest: opts.dest,
+    input: opts.entry,
     external: opts.external,
-    format: opts.format,
-    banner: opts.banner,
-    moduleName: opts.moduleName || 'Vue',
     plugins: [
       replace({
         __WEEX__: !!opts.weex,
@@ -176,7 +181,13 @@ function genConfig (opts) {
       flow(),
       buble(),
       alias(Object.assign({}, aliases, opts.alias))
-    ].concat(opts.plugins || [])
+    ].concat(opts.plugins || []),
+    output: {
+      file: opts.dest,
+      format: opts.format,
+      banner: opts.banner,
+      name: opts.moduleName || 'Vue'
+    }
   }
 
   if (opts.env) {

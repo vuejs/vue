@@ -1,6 +1,6 @@
 /* @flow */
 
-import { cachedEscape } from '../util'
+import { escape } from '../util'
 
 import {
   isDef,
@@ -17,12 +17,15 @@ export default function renderAttrs (node: VNodeWithData): string {
   let attrs = node.data.attrs
   let res = ''
 
-  let parent = node.parent
-  while (isDef(parent)) {
-    if (isDef(parent.data) && isDef(parent.data.attrs)) {
-      attrs = Object.assign({}, attrs, parent.data.attrs)
+  const opts = node.parent && node.parent.componentOptions
+  if (isUndef(opts) || opts.Ctor.options.inheritAttrs !== false) {
+    let parent = node.parent
+    while (isDef(parent)) {
+      if (isDef(parent.data) && isDef(parent.data.attrs)) {
+        attrs = Object.assign({}, attrs, parent.data.attrs)
+      }
+      parent = parent.parent
     }
-    parent = parent.parent
   }
 
   if (isUndef(attrs)) {
@@ -47,7 +50,7 @@ export function renderAttr (key: string, value: string): string {
   } else if (isEnumeratedAttr(key)) {
     return ` ${key}="${isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true'}"`
   } else if (!isFalsyAttrValue(value)) {
-    return ` ${key}="${typeof value === 'string' ? cachedEscape(value) : value}"`
+    return ` ${key}="${escape(String(value))}"`
   }
   return ''
 }

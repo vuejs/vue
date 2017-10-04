@@ -68,6 +68,8 @@ declare type ComponentOptions = {
   name?: string;
   extends?: Class<Component> | Object;
   delimiters?: [string, string];
+  comments?: boolean;
+  inheritAttrs?: boolean;
 
   // private
   _isComponent?: true;

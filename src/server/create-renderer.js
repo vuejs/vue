@@ -1,9 +1,9 @@
 /* @flow */
 
 import RenderStream from './render-stream'
-import TemplateRenderer from './template-renderer/index'
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
+import TemplateRenderer from './template-renderer/index'
 import type { ClientManifest } from './template-renderer/index'
 
 export type Renderer = {

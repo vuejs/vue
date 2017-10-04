@@ -1,5 +1,5 @@
 import Vue = require("../index");
-import { ComponentOptions, FunctionalComponentOptions } from "../index";
+import { AsyncComponent, ComponentOptions, FunctionalComponentOptions } from "../index";
 
 interface Component extends Vue {
   a: number;
@@ -196,6 +196,7 @@ Vue.component('component-with-scoped-slot', {
 Vue.component('functional-component', {
   props: ['prop'],
   functional: true,
+  inject: ['foo'],
   render(createElement, context) {
     context.props;
     context.children;
@@ -206,11 +207,21 @@ Vue.component('functional-component', {
   }
 } as FunctionalComponentOptions);
 
-Vue.component("async-component", (resolve, reject) => {
+Vue.component('functional-component-object-inject', {
+  functional: true,
+  inject: {
+    foo: 'bar',
+    baz: Symbol()
+  }
+})
+
+Vue.component("async-component", ((resolve, reject) => {
   setTimeout(() => {
     resolve(Vue.component("component"));
   }, 0);
   return new Promise((resolve) => {
     resolve({ functional: true } as FunctionalComponentOptions);
   })
-});
+}) as AsyncComponent);
+
+Vue.component('async-es-module-component', (() => import('./es-module')) as AsyncComponent)

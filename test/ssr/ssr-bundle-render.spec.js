@@ -75,7 +75,26 @@ function createAssertions (runInNewContext) {
     })
   })
 
+  it('renderToString catch Promise rejection', done => {
+    createRenderer('promise-rejection.js', { runInNewContext }, renderer => {
+      renderer.renderToString(err => {
+        expect(err.message).toBe('foo')
+        done()
+      })
+    })
+  })
+
   it('renderToStream catch error', done => {
+    createRenderer('error.js', { runInNewContext }, renderer => {
+      const stream = renderer.renderToStream()
+      stream.on('error', err => {
+        expect(err.message).toBe('foo')
+        done()
+      })
+    })
+  })
+
+  it('renderToStream catch Promise rejection', done => {
     createRenderer('error.js', { runInNewContext }, renderer => {
       const stream = renderer.renderToStream()
       stream.on('error', err => {

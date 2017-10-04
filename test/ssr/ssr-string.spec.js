@@ -374,6 +374,18 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-html with null value', done => {
+    renderVmWithOptions({
+      template: '<div><div v-html="text"></div></div>',
+      data: {
+        text: null
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div></div></div>')
+      done()
+    })
+  })
+
   it('v-text', done => {
     renderVmWithOptions({
       template: '<div><div v-text="text"></div></div>',
@@ -382,6 +394,18 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain('<div data-server-rendered="true"><div>&lt;span&gt;foo&lt;/span&gt;</div></div>')
+      done()
+    })
+  })
+
+  it('v-text with null value', done => {
+    renderVmWithOptions({
+      template: '<div><div v-text="text"></div></div>',
+      data: {
+        text: null
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div></div></div>')
       done()
     })
   })
@@ -473,7 +497,7 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('renders asynchronous component', done => {
+  it('renders async component', done => {
     renderVmWithOptions({
       template: `
         <div>
@@ -482,11 +506,11 @@ describe('SSR: renderToString', () => {
       `,
       components: {
         testAsync (resolve) {
-          resolve({
+          setTimeout(() => resolve({
             render () {
               return this.$createElement('span', { class: ['b'] }, 'testAsync')
             }
-          })
+          }), 1)
         }
       }
     }, result => {
@@ -495,55 +519,58 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('renders asynchronous component (hoc)', done => {
+  it('renders async component (Promise, nested)', done => {
+    const Foo = () => Promise.resolve({
+      render: h => h('div', [h('span', 'foo'), h(Bar)])
+    })
+    const Bar = () => ({
+      component: Promise.resolve({
+        render: h => h('span', 'bar')
+      })
+    })
     renderVmWithOptions({
-      template: '<test-async></test-async>',
-      components: {
-        testAsync (resolve) {
-          resolve({
-            render () {
-              return this.$createElement('span', { class: ['b'] }, 'testAsync')
-            }
-          })
-        }
-      }
-    }, result => {
-      expect(result).toContain('<span data-server-rendered="true" class="b">testAsync</span>')
+      render: h => h(Foo)
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span><span>bar</span></div>`)
       done()
     })
   })
 
-  it('renders nested asynchronous component', done => {
-    renderVmWithOptions({
-      template: `
-        <div>
-          <test-async></test-async>
-        </div>
-      `,
-      components: {
-        testAsync (resolve) {
-          const options = {
-            template: `
-              <span class="b">
-                <test-sub-async></test-sub-async>
-              </span>
-            `
-          }
-
-          options.components = {
-            testSubAsync (resolve) {
-              resolve({
-                render () {
-                  return this.$createElement('div', { class: ['c'] }, 'testSubAsync')
-                }
-              })
-            }
-          }
-          resolve(options)
+  it('renders async component (ES module)', done => {
+    const Foo = () => Promise.resolve({
+      __esModule: true,
+      default: {
+        render: h => h('div', [h('span', 'foo'), h(Bar)])
+      }
+    })
+    const Bar = () => ({
+      component: Promise.resolve({
+        __esModule: true,
+        default: {
+          render: h => h('span', 'bar')
         }
+      })
+    })
+    renderVmWithOptions({
+      render: h => h(Foo)
+    }, res => {
+      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span><span>bar</span></div>`)
+      done()
+    })
+  })
+
+  it('renders async component (hoc)', done => {
+    renderVmWithOptions({
+      template: '<test-async></test-async>',
+      components: {
+        testAsync: () => Promise.resolve({
+          render () {
+            return this.$createElement('span', { class: ['b'] }, 'testAsync')
+          }
+        })
       }
     }, result => {
-      expect(result).toContain('<div data-server-rendered="true"><span class="b"><div class="c">testSubAsync</div></span></div>')
+      expect(result).toContain('<span data-server-rendered="true" class="b">testAsync</span>')
       done()
     })
   })
@@ -802,7 +829,7 @@ describe('SSR: renderToString', () => {
     expect(vm.a).toBe(func)
   })
 
-  it('should prevent xss in attribtues', done => {
+  it('should prevent xss in attributes', done => {
     renderVmWithOptions({
       data: {
         xss: '"><script>alert(1)</script>'
@@ -812,6 +839,18 @@ describe('SSR: renderToString', () => {
           <a :title="xss" :style="{ color: xss }" :class="[xss]">foo</a>
         </div>
       `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
+  it('should prevent script xss with v-bind object syntax + array value', done => {
+    renderVmWithOptions({
+      data: {
+        test: ['"><script>alert(1)</script><!--"']
+      },
+      template: `<div v-bind="{ test }"></div>`
     }, res => {
       expect(res).not.toContain(`<script>alert(1)</script>`)
       done()
@@ -878,19 +917,43 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('render async components', done => {
-    const Foo = () => Promise.resolve({
-      render: h => h('div', [h('span', 'foo'), h(Bar)])
-    })
-    const Bar = () => ({
-      component: Promise.resolve({
-        render: h => h('span', 'bar')
-      })
-    })
+  it('with inheritAttrs: false + $attrs', done => {
     renderVmWithOptions({
-      render: h => h(Foo)
+      template: `<foo id="a"/>`,
+      components: {
+        foo: {
+          inheritAttrs: false,
+          template: `<div><div v-bind="$attrs"></div></div>`
+        }
+      }
     }, res => {
-      expect(res).toContain(`<div data-server-rendered="true"><span>foo</span><span>bar</span></div>`)
+      expect(res).toBe(`<div data-server-rendered="true"><div id="a"></div></div>`)
+      done()
+    })
+  })
+
+  it('should escape static strings', done => {
+    renderVmWithOptions({
+      template: `<div>&lt;foo&gt;</div>`
+    }, res => {
+      expect(res).toBe(`<div data-server-rendered="true">&lt;foo&gt;</div>`)
+      done()
+    })
+  })
+
+  it('should not cache computed properties', done => {
+    renderVmWithOptions({
+      template: `<div>{{ foo }}</div>`,
+      data: () => ({ bar: 1 }),
+      computed: {
+        foo () { return this.bar + 1 }
+      },
+      created () {
+        this.foo // access
+        this.bar++ // trigger change
+      }
+    }, res => {
+      expect(res).toBe(`<div data-server-rendered="true">3</div>`)
       done()
     })
   })

@@ -1,8 +1,14 @@
 /* @flow */
 
-import { hasOwn, isObject, isPlainObject, capitalize, hyphenate } from 'shared/util'
-import { observe, observerState } from '../observer/index'
 import { warn } from './debug'
+import { observe, observerState } from '../observer/index'
+import {
+  hasOwn,
+  isObject,
+  hyphenate,
+  capitalize,
+  isPlainObject
+} from 'shared/util'
 
 type PropOptions = {
   type: Function | Array<Function> | null,
@@ -139,7 +145,12 @@ function assertType (value: any, type: Function): {
   let valid
   const expectedType = getType(type)
   if (simpleCheckRE.test(expectedType)) {
-    valid = typeof value === expectedType.toLowerCase()
+    const t = typeof value
+    valid = t === expectedType.toLowerCase()
+    // for primitive wrapper objects
+    if (!valid && t === 'object') {
+      valid = value instanceof type
+    }
   } else if (expectedType === 'Object') {
     valid = isPlainObject(value)
   } else if (expectedType === 'Array') {

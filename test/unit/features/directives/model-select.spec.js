@@ -2,7 +2,7 @@ import Vue from 'vue'
 import { looseEqual } from 'shared/util'
 
 // Android 4.4 Chrome 30 has the bug that a multi-select option cannot be
-// deseleted by setting its "selected" prop via JavaScript.
+// deselected by setting its "selected" prop via JavaScript.
 function hasMultiSelectBug () {
   var s = document.createElement('select')
   s.setAttribute('multiple', '')
@@ -116,6 +116,34 @@ describe('Directive v-model select', () => {
       updateSelect(vm.$el, { a: 2 })
       triggerEvent(vm.$el, 'change')
       expect(vm.test).toEqual({ a: 2 })
+    }).then(done)
+  })
+
+  it('should work with value bindings (Array loose equal)', done => {
+    const vm = new Vue({
+      data: {
+        test: [{ a: 2 }]
+      },
+      template:
+        '<select v-model="test">' +
+          '<option value="1">a</option>' +
+          '<option :value="[{ a: 2 }]">b</option>' +
+          '<option :value="[{ a: 3 }]">c</option>' +
+        '</select>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = [{ a: 3 }]
+    waitForUpdate(function () {
+      expect(vm.$el.childNodes[2].selected).toBe(true)
+
+      updateSelect(vm.$el, '1')
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toBe('1')
+
+      updateSelect(vm.$el, [{ a: 2 }])
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toEqual([{ a: 2 }])
     }).then(done)
   })
 
@@ -469,6 +497,53 @@ describe('Directive v-model select', () => {
     vm.test = circular
     waitForUpdate(function () {
       expect(vm.$el.childNodes[0].selected).toBe(true)
+    }).then(done)
+  })
+
+  // #6112
+  it('should not set non-matching value to undefined if options did not change', done => {
+    const vm = new Vue({
+      data: {
+        test: '1'
+      },
+      template:
+        '<select v-model="test">' +
+          '<option>a</option>' +
+        '</select>'
+    }).$mount()
+
+    vm.test = '2'
+    waitForUpdate(() => {
+      expect(vm.test).toBe('2')
+    }).then(done)
+  })
+
+  // #6193
+  it('should not trigger change event when matching option can be found for each value', done => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        options: ['1']
+      },
+      computed: {
+        test: {
+          get () {
+            return '1'
+          },
+          set () {
+            spy()
+          }
+        }
+      },
+      template:
+        '<select v-model="test">' +
+          '<option :key="opt" v-for="opt in options" :value="opt">{{ opt }}</option>' +
+        '</select>'
+    }).$mount()
+
+    vm.options = ['1', '2']
+    waitForUpdate(() => {
+      expect(spy).not.toHaveBeenCalled()
     }).then(done)
   })
 })

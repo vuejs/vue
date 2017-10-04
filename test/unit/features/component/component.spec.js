@@ -187,6 +187,25 @@ describe('Component', () => {
     }).then(done)
   })
 
+  it('dynamic elements with domProps', done => {
+    const vm = new Vue({
+      template: '<component :is="view" :value.prop="val"></component>',
+      data: {
+        view: 'input',
+        val: 'hello'
+      }
+    }).$mount()
+    expect(vm.$el.tagName).toBe('INPUT')
+    expect(vm.$el.value).toBe('hello')
+    vm.view = 'textarea'
+    vm.val += ' world'
+    waitForUpdate(() => {
+      expect(vm.$el.tagName).toBe('TEXTAREA')
+      expect(vm.$el.value).toBe('hello world')
+      vm.view = ''
+    }).then(done)
+  })
+
   it('should compile parent template directives & content in parent scope', done => {
     const vm = new Vue({
       data: {

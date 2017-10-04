@@ -1,9 +1,9 @@
 /* @flow */
 
 import { genHandlers } from './events'
-import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
 import { camelize, no, extend } from 'shared/util'
+import { baseWarn, pluckModuleFunction } from '../helpers'
 
 type TransformFunction = (el: ASTElement, code: string) => string;
 type DataGenFunction = (el: ASTElement) => string;
@@ -113,7 +113,7 @@ function genOnce (el: ASTElement, state: CodegenState): string {
       )
       return genElement(el, state)
     }
-    return `_o(${genElement(el, state)},${state.onceId++}${key ? `,${key}` : ``})`
+    return `_o(${genElement(el, state)},${state.onceId++},${key})`
   } else {
     return genStatic(el, state)
   }
@@ -268,6 +268,10 @@ export function genData (el: ASTElement, state: CodegenState): string {
   if (el.wrapData) {
     data = el.wrapData(data)
   }
+  // v-on data wrap
+  if (el.wrapListeners) {
+    data = el.wrapListeners(data)
+  }
   return data
 }
 
@@ -305,7 +309,7 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
 function genInlineTemplate (el: ASTElement, state: CodegenState): ?string {
   const ast = el.children[0]
   if (process.env.NODE_ENV !== 'production' && (
-    el.children.length > 1 || ast.type !== 1
+    el.children.length !== 1 || ast.type !== 1
   )) {
     state.warn('Inline-template components must have exactly one child element.')
   }
@@ -423,6 +427,8 @@ function needsNormalization (el: ASTElement): boolean {
 function genNode (node: ASTNode, state: CodegenState): string {
   if (node.type === 1) {
     return genElement(node, state)
+  } if (node.type === 3 && node.isComment) {
+    return genComment(node)
   } else {
     return genText(node)
   }
@@ -433,6 +439,10 @@ export function genText (text: ASTText | ASTExpression): string {
     ? text.expression // no need for () because already wrapped in _s()
     : transformSpecialNewlines(JSON.stringify(text.text))
   })`
+}
+
+export function genComment (comment: ASTText): string {
+  return `_e(${JSON.stringify(comment.text)})`
 }
 
 function genSlot (el: ASTElement, state: CodegenState): string {

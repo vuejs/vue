@@ -4,13 +4,11 @@ import { toArray } from '../util/index'
 
 export function initUse (Vue: GlobalAPI) {
   Vue.use = function (plugin: Function | Object) {
-    const cid = this.cid
-    if (!plugin._installed) {
-      plugin._installed = {}
-    }
-    if (plugin._installed[cid]) {
+    const installedPlugins = (this._installedPlugins || (this._installedPlugins = []))
+    if (installedPlugins.indexOf(plugin) > -1) {
       return this
     }
+
     // additional parameters
     const args = toArray(arguments, 1)
     args.unshift(this)
@@ -19,7 +17,7 @@ export function initUse (Vue: GlobalAPI) {
     } else if (typeof plugin === 'function') {
       plugin.apply(null, args)
     }
-    plugin._installed[cid] = true
+    installedPlugins.push(plugin)
     return this
   }
 }

@@ -8,7 +8,7 @@ var stats = [
   { label: 'F', value: 100 }
 ]
 
-// A resusable polygon graph component
+// A reusable polygon graph component
 Vue.component('polygraph', {
   props: ['stats'],
   template: '#polygraph-template',

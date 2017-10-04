@@ -64,7 +64,8 @@ Vue.prototype.$mount = function (
 
       const { render, staticRenderFns } = compileToFunctions(template, {
         shouldDecodeNewlines,
-        delimiters: options.delimiters
+        delimiters: options.delimiters,
+        comments: options.comments
       }, this)
       options.render = render
       options.staticRenderFns = staticRenderFns
@@ -72,7 +73,7 @@ Vue.prototype.$mount = function (
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile end')
-        measure(`${this._name} compile`, 'compile', 'compile end')
+        measure(`vue ${this._name} compile`, 'compile', 'compile end')
       }
     }
   }

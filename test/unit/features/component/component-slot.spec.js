@@ -661,7 +661,7 @@ describe('Component slot', () => {
     }).then(done)
   })
 
-  // Github issue #5888
+  // GitHub issue #5888
   it('should resolve correctly slot with keep-alive', () => {
     const vm = new Vue({
       template: `
@@ -684,5 +684,59 @@ describe('Component slot', () => {
       }
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<div>default<span>foo</span></div>')
+  })
+
+  it('should handle nested components in slots properly', done => {
+    const TestComponent = {
+      template: `
+        <component :is="toggleEl ? 'b' : 'i'">
+          <slot />
+        </component>
+      `,
+      data () {
+        return {
+          toggleEl: true
+        }
+      }
+    }
+
+    const vm = new Vue({
+      template: `
+        <div>
+          <test-component ref="test">
+            <div>
+              <foo/>
+            </div><bar/>
+          </test-component>
+        </div>
+      `,
+      components: {
+        TestComponent,
+        foo: {
+          template: `<div>foo</div>`
+        },
+        bar: {
+          template: `<div>bar</div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe(`<b><div><div>foo</div></div><div>bar</div></b>`)
+
+    vm.$refs.test.toggleEl = false
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe(`<i><div><div>foo</div></div><div>bar</div></i>`)
+    }).then(done)
+  })
+
+  it('should preserve slot attribute if not absorbed by a Vue component', () => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <div slot="foo"></div>
+        </div>
+      `
+    }).$mount()
+    expect(vm.$el.children[0].getAttribute('slot')).toBe('foo')
   })
 })

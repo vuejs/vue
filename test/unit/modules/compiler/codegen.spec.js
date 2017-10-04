@@ -1,7 +1,7 @@
 import { parse } from 'compiler/parser/index'
 import { optimize } from 'compiler/optimizer'
 import { generate } from 'compiler/codegen'
-import { isObject } from 'shared/util'
+import { isObject, extend } from 'shared/util'
 import { isReservedTag } from 'web/util/index'
 import { baseOptions } from 'web/compiler/options'
 
@@ -126,7 +126,21 @@ describe('codegen', () => {
   it('generate v-bind directive', () => {
     assertCodegen(
       '<p v-bind="test"></p>',
-      `with(this){return _c('p',_b({},'p',test))}`
+      `with(this){return _c('p',_b({},'p',test,false))}`
+    )
+  })
+
+  it('generate v-bind with prop directive', () => {
+    assertCodegen(
+      '<p v-bind.prop="test"></p>',
+      `with(this){return _c('p',_b({},'p',test,true))}`
+    )
+  })
+
+  it('generate v-bind directive with sync modifier', () => {
+    assertCodegen(
+      '<p v-bind.sync="test"></p>',
+      `with(this){return _c('p',_b({},'p',test,false,true))}`
     )
   })
 
@@ -161,7 +175,7 @@ describe('codegen', () => {
   it('generate slot target', () => {
     assertCodegen(
       '<p slot="one">hello world</p>',
-      `with(this){return _c('p',{slot:"one"},[_v("hello world")])}`
+      `with(this){return _c('p',{attrs:{"slot":"one"},slot:"one"},[_v("hello world")])}`
     )
   })
 
@@ -268,7 +282,7 @@ describe('codegen', () => {
     )
   })
 
-  // Github Issues #5146
+  // GitHub Issues #5146
   it('generate events with generic modifiers and keycode correct order', () => {
     assertCodegen(
       '<input @keydown.enter.prevent="onInput">',
@@ -449,7 +463,14 @@ describe('codegen', () => {
       '<my-component inline-template><hr><hr></my-component>',
       `with(this){return _c('my-component',{inlineTemplate:{render:function(){with(this){return _c('hr')}},staticRenderFns:[]}})}`
     )
+    try {
+      assertCodegen(
+        '<my-component inline-template></my-component>',
+        ''
+      )
+    } catch (e) {}
     expect('Inline-template components must have exactly one child element.').toHaveBeenWarned()
+    expect(console.error.calls.count()).toBe(2)
   })
 
   it('generate static trees inside v-for', () => {
@@ -466,6 +487,33 @@ describe('codegen', () => {
       '<div><child></child><template v-for="item in list">{{ item }}</template></div>',
       `with(this){return _c('div',[_c('child'),_l((list),function(item){return [_v(_s(item))]})],2)}`
     )
+  })
+
+  it('generate component with comment', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const template = '<div><!--comment--></div>'
+    const generatedCode = `with(this){return _c('div',[_e("comment")])}`
+
+    const ast = parse(template, options)
+    optimize(ast, options)
+    const res = generate(ast, options)
+    expect(res.render).toBe(generatedCode)
+  })
+
+  // #6150
+  it('generate comments with special characters', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const template = '<div><!--\n\'comment\'\n--></div>'
+    const generatedCode = `with(this){return _c('div',[_e("\\n'comment'\\n")])}`
+
+    const ast = parse(template, options)
+    optimize(ast, options)
+    const res = generate(ast, options)
+    expect(res.render).toBe(generatedCode)
   })
 
   it('not specified ast type', () => {

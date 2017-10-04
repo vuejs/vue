@@ -115,7 +115,7 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
         // styles injected by vue-style-loader.
         initialContext = sandbox.__VUE_SSR_CONTEXT__ = {}
         runner = evaluate(entry, sandbox)
-        // On subsequent renders, __VUE_SSR_CONTEXT__ will not be avaialbe
+        // On subsequent renders, __VUE_SSR_CONTEXT__ will not be available
         // to prevent cross-request pollution.
         delete sandbox.__VUE_SSR_CONTEXT__
         if (typeof runner !== 'function') {
@@ -126,10 +126,24 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
         }
       }
       userContext._registeredComponents = new Set()
+
       // vue-style-loader styles imported outside of component lifecycle hooks
       if (initialContext._styles) {
         userContext._styles = deepClone(initialContext._styles)
+        // #6353 ensure "styles" is exposed even if no styles are injected
+        // in component lifecycles.
+        // the renderStyles fn is exposed by vue-style-loader >= 3.0.3
+        const renderStyles = initialContext._renderStyles
+        if (renderStyles) {
+          Object.defineProperty(userContext, 'styles', {
+            enumerable: true,
+            get () {
+              return renderStyles(userContext._styles)
+            }
+          })
+        }
       }
+
       resolve(runner(userContext))
     })
   }

@@ -293,5 +293,52 @@ if (!isIE9) {
       }).$mount()
       expect('<transition-group> children must be keyed: <div>').toHaveBeenWarned()
     })
+
+    // GitHub issue #6006
+    it('should work with dynamic name', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition-group :name="name">
+              <div v-for="item in items" :key="item">{{ item }}</div>
+            </transition-group>
+          </div>
+        `,
+        data: {
+          items: ['a', 'b', 'c'],
+          name: 'group'
+        }
+      }).$mount(el)
+
+      vm.name = 'invalid-name'
+      vm.items = ['b', 'c', 'a']
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div>b</div>` +
+            `<div>c</div>` +
+            `<div>a</div>` +
+          `</span>`
+        )
+        vm.name = 'group'
+        vm.items = ['a', 'b', 'c']
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="group-move">a</div>` +
+            `<div class="group-move">b</div>` +
+            `<div class="group-move">c</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(duration * 2 + buffer).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div>a</div>` +
+            `<div>b</div>` +
+            `<div>c</div>` +
+          `</span>`
+        )
+      }).then(done)
+    })
   })
 }

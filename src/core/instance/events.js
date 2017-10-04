@@ -95,14 +95,16 @@ export function eventsMixin (Vue: Class<Component>) {
       vm._events[event] = null
       return vm
     }
-    // specific handler
-    let cb
-    let i = cbs.length
-    while (i--) {
-      cb = cbs[i]
-      if (cb === fn || cb.fn === fn) {
-        cbs.splice(i, 1)
-        break
+    if (fn) {
+      // specific handler
+      let cb
+      let i = cbs.length
+      while (i--) {
+        cb = cbs[i]
+        if (cb === fn || cb.fn === fn) {
+          cbs.splice(i, 1)
+          break
+        }
       }
     }
     return vm

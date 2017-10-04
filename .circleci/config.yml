@@ -1,0 +1,83 @@
+version: 2
+
+defaults: &defaults
+  working_directory: ~/project/vue
+  docker:
+    - image: circleci/node:6-browsers
+
+jobs:
+  install:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-vue-{{ .Branch }}-{{ checksum "package-lock.json" }}
+            - v1-vue-{{ .Branch }}-
+            - v1-vue-
+      - run:
+          name: Install Dependencies
+          command: npm install
+      - save_cache:
+          key: v1-vue-{{ .Branch }}-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules/
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - vue
+
+  lint-flow-types:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run: npm run lint
+      - run: node_modules/.bin/flow check
+      - run: npm run test:types
+
+  test-cover:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run: npm run test:cover
+      - run:
+         name: report coverage stats for non-PRs
+         command: |
+           if [[ -z $CI_PULL_REQUEST ]]; then
+             cat ./coverage/lcov.info | ./node_modules/.bin/codecov
+           fi
+
+  test-e2e:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run: npm run test:e2e -- --env phantomjs
+
+  test-ssr-weex:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run: npm run test:ssr
+      - run: npm run test:weex
+
+workflows:
+  version: 2
+  install-and-parallel-test:
+    jobs:
+      - install
+      - test-cover:
+          requires:
+            - install
+      - lint-flow-types:
+          requires:
+            - install
+      - test-e2e:
+          requires:
+            - install
+      - test-ssr-weex:
+          requires:
+            - install

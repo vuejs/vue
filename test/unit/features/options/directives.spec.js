@@ -227,4 +227,42 @@ describe('Options directives', () => {
     }).$mount()
     expect('Failed to resolve directive: test').toHaveBeenWarned()
   })
+
+  // #6513
+  it('should invoke unbind & inserted on inner component root element change', done => {
+    const dir = {
+      bind: jasmine.createSpy('bind'),
+      inserted: jasmine.createSpy('inserted'),
+      unbind: jasmine.createSpy('unbind')
+    }
+
+    const Child = {
+      template: `<div v-if="ok"/><span v-else/>`,
+      data: () => ({ ok: true })
+    }
+
+    const vm = new Vue({
+      template: `<child ref="child" v-test />`,
+      directives: { test: dir },
+      components: { Child }
+    }).$mount()
+
+    const oldEl = vm.$el
+    expect(dir.bind.calls.count()).toBe(1)
+    expect(dir.bind.calls.argsFor(0)[0]).toBe(oldEl)
+    expect(dir.inserted.calls.count()).toBe(1)
+    expect(dir.inserted.calls.argsFor(0)[0]).toBe(oldEl)
+    expect(dir.unbind).not.toHaveBeenCalled()
+
+    vm.$refs.child.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.tagName).toBe('SPAN')
+      expect(dir.bind.calls.count()).toBe(2)
+      expect(dir.bind.calls.argsFor(1)[0]).toBe(vm.$el)
+      expect(dir.inserted.calls.count()).toBe(2)
+      expect(dir.inserted.calls.argsFor(1)[0]).toBe(vm.$el)
+      expect(dir.unbind.calls.count()).toBe(1)
+      expect(dir.unbind.calls.argsFor(0)[0]).toBe(oldEl)
+    }).then(done)
+  })
 })

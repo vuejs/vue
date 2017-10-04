@@ -2,6 +2,7 @@
 
 import config from '../config'
 import { warn } from './debug'
+import { nativeWatch } from './env'
 import { set } from '../observer/index'
 
 import {
@@ -63,7 +64,7 @@ function mergeData (to: Object, from: ?Object): Object {
 /**
  * Data
  */
-strats.data = function (
+export function mergeDataOrFn (
   parentVal: any,
   childVal: any,
   vm?: Component
@@ -71,15 +72,6 @@ strats.data = function (
   if (!vm) {
     // in a Vue.extend merge, both should be functions
     if (!childVal) {
-      return parentVal
-    }
-    if (typeof childVal !== 'function') {
-      process.env.NODE_ENV !== 'production' && warn(
-        'The "data" option should be a function ' +
-        'that returns a per-instance value in component ' +
-        'definitions.',
-        vm
-      )
       return parentVal
     }
     if (!parentVal) {
@@ -92,8 +84,8 @@ strats.data = function (
     // it has to be a function to pass previous merges.
     return function mergedDataFn () {
       return mergeData(
-        childVal.call(this),
-        parentVal.call(this)
+        typeof childVal === 'function' ? childVal.call(this) : childVal,
+        typeof parentVal === 'function' ? parentVal.call(this) : parentVal
       )
     }
   } else if (parentVal || childVal) {
@@ -104,7 +96,7 @@ strats.data = function (
         : childVal
       const defaultData = typeof parentVal === 'function'
         ? parentVal.call(vm)
-        : undefined
+        : parentVal
       if (instanceData) {
         return mergeData(instanceData, defaultData)
       } else {
@@ -112,6 +104,28 @@ strats.data = function (
       }
     }
   }
+}
+
+strats.data = function (
+  parentVal: any,
+  childVal: any,
+  vm?: Component
+): ?Function {
+  if (!vm) {
+    if (childVal && typeof childVal !== 'function') {
+      process.env.NODE_ENV !== 'production' && warn(
+        'The "data" option should be a function ' +
+        'that returns a per-instance value in component ' +
+        'definitions.',
+        vm
+      )
+
+      return parentVal
+    }
+    return mergeDataOrFn.call(this, parentVal, childVal)
+  }
+
+  return mergeDataOrFn(parentVal, childVal, vm)
 }
 
 /**
@@ -159,6 +173,9 @@ ASSET_TYPES.forEach(function (type) {
  * another, so we merge them as arrays.
  */
 strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
+  // work around Firefox's Object.prototype.watch...
+  if (parentVal === nativeWatch) parentVal = undefined
+  if (childVal === nativeWatch) childVal = undefined
   /* istanbul ignore if */
   if (!childVal) return Object.create(parentVal || null)
   if (!parentVal) return childVal
@@ -184,13 +201,13 @@ strats.props =
 strats.methods =
 strats.inject =
 strats.computed = function (parentVal: ?Object, childVal: ?Object): ?Object {
-  if (!childVal) return Object.create(parentVal || null)
   if (!parentVal) return childVal
   const ret = Object.create(null)
   extend(ret, parentVal)
-  extend(ret, childVal)
+  if (childVal) extend(ret, childVal)
   return ret
 }
+strats.provide = mergeDataOrFn
 
 /**
  * Default strategy.

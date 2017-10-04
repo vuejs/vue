@@ -147,7 +147,7 @@ describe('Scheduler', () => {
     }).then(done)
   })
 
-  // Github issue #5191
+  // GitHub issue #5191
   it('emit should work when updated hook called', done => {
     const el = document.createElement('div')
     const vm = new Vue({

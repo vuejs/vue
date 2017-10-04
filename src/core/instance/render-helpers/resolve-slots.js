@@ -14,10 +14,15 @@ export function resolveSlots (
   const defaultSlot = []
   for (let i = 0, l = children.length; i < l; i++) {
     const child = children[i]
+    const data = child.data
+    // remove slot attribute if the node is resolved as a Vue slot node
+    if (data && data.attrs && data.attrs.slot) {
+      delete data.attrs.slot
+    }
     // named slots should only be respected if the vnode was rendered in the
     // same context.
     if ((child.context === context || child.functionalContext === context) &&
-      child.data && child.data.slot != null
+      data && data.slot != null
     ) {
       const name = child.data.slot
       const slot = (slots[name] || (slots[name] = []))

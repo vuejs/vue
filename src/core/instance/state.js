@@ -3,6 +3,7 @@
 import config from '../config'
 import Dep from '../observer/dep'
 import Watcher from '../observer/watcher'
+import { isUpdatingChildComponent } from './lifecycle'
 
 import {
   set,
@@ -19,8 +20,10 @@ import {
   hasOwn,
   isReserved,
   handleError,
+  nativeWatch,
   validateProp,
   isPlainObject,
+  isServerRendering,
   isReservedAttribute
 } from '../util/index'
 
@@ -52,7 +55,9 @@ export function initState (vm: Component) {
     observe(vm._data = {}, true /* asRootData */)
   }
   if (opts.computed) initComputed(vm, opts.computed)
-  if (opts.watch) initWatch(vm, opts.watch)
+  if (opts.watch && opts.watch !== nativeWatch) {
+    initWatch(vm, opts.watch)
+  }
 }
 
 function checkOptionType (vm: Component, name: string) {
@@ -86,7 +91,7 @@ function initProps (vm: Component, propsOptions: Object) {
         )
       }
       defineReactive(props, key, value, () => {
-        if (vm.$parent && !observerState.isSettingProps) {
+        if (vm.$parent && !isUpdatingChildComponent) {
           warn(
             `Avoid mutating a prop directly since the value will be ` +
             `overwritten whenever the parent component re-renders. ` +
@@ -132,7 +137,7 @@ function initData (vm: Component) {
     if (process.env.NODE_ENV !== 'production') {
       if (methods && hasOwn(methods, key)) {
         warn(
-          `method "${key}" has already been defined as a data property.`,
+          `Method "${key}" has already been defined as a data property.`,
           vm
         )
       }
@@ -165,21 +170,28 @@ const computedWatcherOptions = { lazy: true }
 function initComputed (vm: Component, computed: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
   const watchers = vm._computedWatchers = Object.create(null)
+  // computed properties are just getters during SSR
+  const isSSR = isServerRendering()
 
   for (const key in computed) {
     const userDef = computed[key]
-    let getter = typeof userDef === 'function' ? userDef : userDef.get
-    if (process.env.NODE_ENV !== 'production') {
-      if (getter === undefined) {
-        warn(
-          `No getter function has been defined for computed property "${key}".`,
-          vm
-        )
-        getter = noop
-      }
+    const getter = typeof userDef === 'function' ? userDef : userDef.get
+    if (process.env.NODE_ENV !== 'production' && getter == null) {
+      warn(
+        `Getter is missing for computed property "${key}".`,
+        vm
+      )
     }
-    // create internal watcher for the computed property.
-    watchers[key] = new Watcher(vm, getter, noop, computedWatcherOptions)
+
+    if (!isSSR) {
+      // create internal watcher for the computed property.
+      watchers[key] = new Watcher(
+        vm,
+        getter || noop,
+        noop,
+        computedWatcherOptions
+      )
+    }
 
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
@@ -196,19 +208,35 @@ function initComputed (vm: Component, computed: Object) {
   }
 }
 
-export function defineComputed (target: any, key: string, userDef: Object | Function) {
+export function defineComputed (
+  target: any,
+  key: string,
+  userDef: Object | Function
+) {
+  const shouldCache = !isServerRendering()
   if (typeof userDef === 'function') {
-    sharedPropertyDefinition.get = createComputedGetter(key)
+    sharedPropertyDefinition.get = shouldCache
+      ? createComputedGetter(key)
+      : userDef
     sharedPropertyDefinition.set = noop
   } else {
     sharedPropertyDefinition.get = userDef.get
-      ? userDef.cache !== false
+      ? shouldCache && userDef.cache !== false
         ? createComputedGetter(key)
         : userDef.get
       : noop
     sharedPropertyDefinition.set = userDef.set
       ? userDef.set
       : noop
+  }
+  if (process.env.NODE_ENV !== 'production' &&
+      sharedPropertyDefinition.set === noop) {
+    sharedPropertyDefinition.set = function () {
+      warn(
+        `Computed property "${key}" was assigned to but it has no setter.`,
+        this
+      )
+    }
   }
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
@@ -232,22 +260,28 @@ function initMethods (vm: Component, methods: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'methods')
   const props = vm.$options.props
   for (const key in methods) {
-    vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
     if (process.env.NODE_ENV !== 'production') {
       if (methods[key] == null) {
         warn(
-          `method "${key}" has an undefined value in the component definition. ` +
+          `Method "${key}" has an undefined value in the component definition. ` +
           `Did you reference the function correctly?`,
           vm
         )
       }
       if (props && hasOwn(props, key)) {
         warn(
-          `method "${key}" has already been defined as a prop.`,
+          `Method "${key}" has already been defined as a prop.`,
           vm
         )
       }
+      if ((key in vm) && isReserved(key)) {
+        warn(
+          `Method "${key}" conflicts with an existing Vue instance method. ` +
+          `Avoid defining component methods that start with _ or $.`
+        )
+      }
     }
+    vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
   }
 }
 

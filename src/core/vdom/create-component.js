@@ -165,6 +165,7 @@ export function createComponent (
   // child component listeners instead of DOM listeners
   const listeners = data.on
   // replace with listeners with .native modifier
+  // so it gets processed during parent component patch.
   data.on = data.nativeOn
 
   if (isTrue(Ctor.options.abstract)) {
