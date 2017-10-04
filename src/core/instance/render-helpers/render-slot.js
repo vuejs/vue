@@ -15,8 +15,8 @@ export function renderSlot (
   if (scopedSlotFn) { // scoped slot
     props = props || {}
     if (bindObject) {
-      if (!isObject(bindObject)) {
-        process.env.NODE_ENV !== 'production' && warn(
+      if (!isObject(bindObject) && process.env.NODE_ENV !== 'production') {
+        warn(
           'slot v-bind without argument expects an Object',
           this
         )
