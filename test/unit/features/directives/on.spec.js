@@ -205,6 +205,96 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalled()
   })
 
+  // ctrl, shift, alt, meta
+  it('should support system modifers', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <input ref="ctrl" @keyup.ctrl="foo">
+          <input ref="shift" @keyup.shift="foo">
+          <input ref="alt" @keyup.alt="foo">
+          <input ref="meta" @keyup.meta="foo">
+        </div>
+      `,
+      methods: { foo: spy }
+    })
+
+    triggerEvent(vm.$refs.ctrl, 'keyup')
+    expect(spy.calls.count()).toBe(0)
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => { e.ctrlKey = true })
+    expect(spy.calls.count()).toBe(1)
+
+    triggerEvent(vm.$refs.shift, 'keyup')
+    expect(spy.calls.count()).toBe(1)
+    triggerEvent(vm.$refs.shift, 'keyup', e => { e.shiftKey = true })
+    expect(spy.calls.count()).toBe(2)
+
+    triggerEvent(vm.$refs.alt, 'keyup')
+    expect(spy.calls.count()).toBe(2)
+    triggerEvent(vm.$refs.alt, 'keyup', e => { e.altKey = true })
+    expect(spy.calls.count()).toBe(3)
+
+    triggerEvent(vm.$refs.meta, 'keyup')
+    expect(spy.calls.count()).toBe(3)
+    triggerEvent(vm.$refs.meta, 'keyup', e => { e.metaKey = true })
+    expect(spy.calls.count()).toBe(4)
+  })
+
+  it('should support exact modifier', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <input ref="ctrl" @keyup.exact="foo">
+        </div>
+      `,
+      methods: { foo: spy }
+    })
+
+    triggerEvent(vm.$refs.ctrl, 'keyup')
+    expect(spy.calls.count()).toBe(1)
+
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => {
+      e.ctrlKey = true
+    })
+    expect(spy.calls.count()).toBe(1)
+
+    // should not trigger if has other system modifiers
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => {
+      e.ctrlKey = true
+      e.altKey = true
+    })
+    expect(spy.calls.count()).toBe(1)
+  })
+
+  it('should support system modifers with exact', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <input ref="ctrl" @keyup.ctrl.exact="foo">
+        </div>
+      `,
+      methods: { foo: spy }
+    })
+
+    triggerEvent(vm.$refs.ctrl, 'keyup')
+    expect(spy.calls.count()).toBe(0)
+
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => {
+      e.ctrlKey = true
+    })
+    expect(spy.calls.count()).toBe(1)
+
+    // should not trigger if has other system modifiers
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => {
+      e.ctrlKey = true
+      e.altKey = true
+    })
+    expect(spy.calls.count()).toBe(1)
+  })
+
   it('should support number keyCode', () => {
     vm = new Vue({
       el,
@@ -497,8 +587,8 @@ describe('Directive v-on', () => {
     }).not.toThrow()
   })
 
-  // GitHub Issue #5046
-  it('should support keyboard modifier', () => {
+  // Github Issue #5046
+  it('should support keyboard modifier for direction keys', () => {
     const spyLeft = jasmine.createSpy()
     const spyRight = jasmine.createSpy()
     const spyUp = jasmine.createSpy()
