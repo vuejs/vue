@@ -37,41 +37,56 @@ export function genAssignmentCode (
   value: string,
   assignment: string
 ): string {
-  const modelRs = parseModel(value)
-  if (modelRs.idx === null) {
+  const res = parseModel(value)
+  if (res.key === null) {
     return `${value}=${assignment}`
   } else {
-    return `$set(${modelRs.exp}, ${modelRs.idx}, ${assignment})`
+    return `$set(${res.exp}, ${res.key}, ${assignment})`
   }
 }
 
 /**
- * parse directive model to do the array update transform. a[idx] = val => $$a.splice($$idx, 1, val)
+ * Parse a v-model expression into a base path and a final key segment.
+ * Handles both dot-path and possible square brackets.
  *
- * for loop possible cases:
+ * Possible cases:
  *
  * - test
- * - test[idx]
- * - test[test1[idx]]
- * - test["a"][idx]
- * - xxx.test[a[a].test1[idx]]
- * - test.xxx.a["asa"][test1[idx]]
+ * - test[key]
+ * - test[test1[key]]
+ * - test["a"][key]
+ * - xxx.test[a[a].test1[key]]
+ * - test.xxx.a["asa"][test1[key]]
  *
  */
 
 let len, str, chr, index, expressionPos, expressionEndPos
 
-export function parseModel (val: string): Object {
-  str = val
-  len = str.length
-  index = expressionPos = expressionEndPos = 0
+type ModelParseResult = {
+  exp: string,
+  key: string | null
+}
+
+export function parseModel (val: string): ModelParseResult {
+  len = val.length
 
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
-    return {
-      exp: val,
-      idx: null
+    index = val.lastIndexOf('.')
+    if (index > -1) {
+      return {
+        exp: val.slice(0, index),
+        key: '"' + val.slice(index + 1) + '"'
+      }
+    } else {
+      return {
+        exp: val,
+        key: null
+      }
     }
   }
+
+  str = val
+  index = expressionPos = expressionEndPos = 0
 
   while (!eof()) {
     chr = next()
@@ -84,8 +99,8 @@ export function parseModel (val: string): Object {
   }
 
   return {
-    exp: val.substring(0, expressionPos),
-    idx: val.substring(expressionPos + 1, expressionEndPos)
+    exp: val.slice(0, expressionPos),
+    key: val.slice(expressionPos + 1, expressionEndPos)
   }
 }
 
