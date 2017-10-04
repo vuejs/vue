@@ -14,7 +14,7 @@ let builds = require('./config').getAllBuilds()
 if (process.argv[2]) {
   const filters = process.argv[2].split(',')
   builds = builds.filter(b => {
-    return filters.some(f => b.output.file.indexOf(f) > -1)
+    return filters.some(f => b.output.file.indexOf(f) > -1 || b._name.indexOf(f) > -1)
   })
 } else {
   // filter out weex builds by default
