@@ -291,6 +291,7 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
       needRuntime = !!gen(el, dir, state.warn)
     }
     if (needRuntime) {
+      let warning
       hasRuntime = true
       res += `{name:"${dir.name}",rawName:"${dir.rawName}"${
         dir.value ? `,value:(${dir.value}),expression:${JSON.stringify(dir.value)}` : ''
@@ -298,6 +299,8 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
         dir.arg ? `,arg:"${dir.arg}"` : ''
       }${
         dir.modifiers ? `,modifiers:${JSON.stringify(dir.modifiers)}` : ''
+      }${
+        process.env.NODE_ENV !== 'production' && (warning = genValidateValue(dir.value)) ? `,warn:${warning}` : ''
       }},`
     }
   }
@@ -489,4 +492,16 @@ function transformSpecialNewlines (text: string): string {
   return text
     .replace(/\u2028/g, '\\u2028')
     .replace(/\u2029/g, '\\u2029')
+}
+
+function genValidateValue (expr: string): string {
+  const parts = expr.split('.')
+  if (parts.length > 1) {
+    const parent = parts.slice(0, -1).join('.')
+    const last = parts[parts.length - 1]
+    if (last.indexOf('[') < 0) {
+      return `!('${last}' in ${parent}) ? 'You are binding v-model to a key that does not exist, expression: ${expr}' : ''`
+    }
+  }
+  return ''
 }

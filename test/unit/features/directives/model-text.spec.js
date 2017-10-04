@@ -354,5 +354,19 @@ describe('Directive v-model text', () => {
         done()
       }, 16)
     })
+
+    it('warn binding v-model to non-existant data property', () => {
+      new Vue({
+        data: {
+          testData: {}
+        },
+        template: `
+          <div>
+            <input v-model="testData.missingKey">
+          </div>
+        `
+      }).$mount()
+      expect('You are binding v-model to a key that does not exist, expression: testData.missingKey').toHaveBeenWarned()
+    })
   }
 })

@@ -41,6 +41,10 @@ export default {
         }
       }
     }
+
+    if (process.env.NODE_ENV !== 'production' && 'warn' in binding) {
+      warn(binding.warn)
+    }
   },
   componentUpdated (el, binding, vnode) {
     if (vnode.tag === 'select') {
