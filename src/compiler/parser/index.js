@@ -31,7 +31,7 @@ const modifierRE = /\.[^.]+/g
 const decodeHTMLCached = cached(he.decode)
 
 // configurable state
-export let warn
+export let warn: any
 let delimiters
 let transforms
 let preTransforms
@@ -428,14 +428,31 @@ function processSlot (el) {
       )
     }
   } else {
+    let slotScope
+    if (el.tag === 'template') {
+      slotScope = getAndRemoveAttr(el, 'scope')
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' && slotScope) {
+        warn(
+          `the "scope" attribute for scoped slots have been deprecated and ` +
+          `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
+          `can also be used on plain elements in addition to <template> to ` +
+          `denote scoped slots.`,
+          true
+        )
+      }
+      el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
+    } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
+      el.slotScope = slotScope
+    }
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
       // preserve slot as an attribute for native shadow DOM compat
-      addAttr(el, 'slot', slotTarget)
-    }
-    if (el.tag === 'template') {
-      el.slotScope = getAndRemoveAttr(el, 'scope')
+      // only for non-scoped slots.
+      if (!el.slotScope) {
+        addAttr(el, 'slot', slotTarget)
+      }
     }
   }
 }
