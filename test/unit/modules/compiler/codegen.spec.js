@@ -312,6 +312,14 @@ describe('codegen', () => {
       '<input @click.meta="onClick">',
       `with(this){return _c('input',{on:{"click":function($event){if(!$event.metaKey)return null;onClick($event)}}})}`
     )
+    assertCodegen(
+      '<input @click.exact="onClick">',
+      `with(this){return _c('input',{on:{"click":function($event){if($event.ctrlKey||$event.shiftKey||$event.altKey||$event.metaKey)return null;onClick($event)}}})}`
+    )
+    assertCodegen(
+      '<input @click.ctrl.exact="onClick">',
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;if($event.shiftKey||$event.altKey||$event.metaKey)return null;onClick($event)}}})}`
+    )
   })
 
   it('generate events with multiple modifiers', () => {
