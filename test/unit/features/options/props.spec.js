@@ -501,7 +501,7 @@ describe('Options props', () => {
   })
 
   it('warn reserved props', () => {
-    const specialAttrs = ['key', 'ref', 'slot', 'is']
+    const specialAttrs = ['key', 'ref', 'slot', 'is', 'slot-scope']
     new Vue({
       props: specialAttrs
     })
