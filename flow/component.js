@@ -126,7 +126,7 @@ declare interface Component {
   // apply v-on object
   _g: (data: any, value: any) => VNodeData;
   // check custom keyCode
-  _k: (eventKeyCode: number, key: string, builtInAlias: number | Array<number> | void) => boolean;
+  _k: (eventKeyCode: number, key: string, builtInAlias?: number | Array<number>, eventKeyName?: string) => ?boolean;
   // resolve scoped slots
   _u: (scopedSlots: ScopedSlotsData, res?: Object) => { [key: string]: Function };
 

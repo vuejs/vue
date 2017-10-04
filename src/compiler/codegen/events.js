@@ -124,6 +124,11 @@ function genFilterCode (key: string): string {
   if (keyVal) {
     return `$event.keyCode!==${keyVal}`
   }
-  const alias = keyCodes[key]
-  return `_k($event.keyCode,${JSON.stringify(key)}${alias ? ',' + JSON.stringify(alias) : ''})`
+  const code = keyCodes[key]
+  return (
+    `_k($event.keyCode,` +
+    `${JSON.stringify(key)},` +
+    `${JSON.stringify(code)},` +
+    `$event.key)`
+  )
 }
