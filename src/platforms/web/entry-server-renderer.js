@@ -2,6 +2,7 @@
 
 process.env.VUE_ENV = 'server'
 
+import { extend } from 'shared/util'
 import modules from './server/modules/index'
 import baseDirectives from './server/directives/index'
 import { isUnaryTag, canBeLeftOpenTag } from './compiler/util'
@@ -13,13 +14,13 @@ export function createRenderer (options?: Object = {}): {
   renderToString: Function,
   renderToStream: Function
 } {
-  return _createRenderer(Object.assign({}, options, {
+  return _createRenderer(extend(extend({}, options), {
     isUnaryTag,
     canBeLeftOpenTag,
     modules,
     // user can provide server-side implementations for custom directives
     // when creating the renderer.
-    directives: Object.assign(baseDirectives, options.directives)
+    directives: extend(baseDirectives, options.directives)
   }))
 }
 

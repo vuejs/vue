@@ -2,7 +2,7 @@
 
 import VNode from 'core/vdom/vnode'
 import { renderAttr } from './attrs'
-import { isDef, isUndef } from 'shared/util'
+import { isDef, isUndef, extend } from 'shared/util'
 import { propsToAttrMap, isRenderableAttr } from '../util'
 
 export default function renderDOMProps (node: VNodeWithData): string {
@@ -12,7 +12,7 @@ export default function renderDOMProps (node: VNodeWithData): string {
   let parent = node.parent
   while (isDef(parent)) {
     if (parent.data && parent.data.domProps) {
-      props = Object.assign({}, props, parent.data.domProps)
+      props = extend(extend({}, props), parent.data.domProps)
     }
     parent = parent.parent
   }
