@@ -205,6 +205,18 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalled()
   })
 
+  it('should support automatic key name inference', () => {
+    vm = new Vue({
+      el,
+      template: `<input @keyup.arrow-right="foo">`,
+      methods: { foo: spy }
+    })
+    triggerEvent(vm.$el, 'keyup', e => {
+      e.key = 'ArrowRight'
+    })
+    expect(spy).toHaveBeenCalled()
+  })
+
   // ctrl, shift, alt, meta
   it('should support system modifers', () => {
     vm = new Vue({
