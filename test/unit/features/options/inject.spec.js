@@ -380,11 +380,14 @@ describe('Options provide/inject', () => {
         bar: { default: false },
         baz: { default: undefined }
       },
-      created () {}
+      created () {
+        injected = [this.foo, this.bar, this.baz]
+      }
     })
     expect(`Injection "foo" not found`).not.toHaveBeenWarned()
     expect(`Injection "bar" not found`).not.toHaveBeenWarned()
     expect(`Injection "baz" not found`).not.toHaveBeenWarned()
+    expect(injected).toEqual([1, false, undefined])
   })
 
   it('should use provided value even if inject has default', () => {
