@@ -270,10 +270,17 @@ function normalizeProps (options: Object) {
  */
 function normalizeInject (options: Object) {
   const inject = options.inject
+  const normalized = options.inject = {}
   if (Array.isArray(inject)) {
-    const normalized = options.inject = {}
     for (let i = 0; i < inject.length; i++) {
-      normalized[inject[i]] = inject[i]
+      normalized[inject[i]] = { name: inject[i] }
+    }
+  } else if (isPlainObject(inject)) {
+    for (const key in inject) {
+      const val = inject[key]
+      normalized[key] = isPlainObject(val)
+        ? extend({ name: key }, val)
+        : { name: val }
     }
   }
 }
