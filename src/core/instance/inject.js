@@ -49,7 +49,7 @@ export function resolveInject (inject: any, vm: Component): ?Object {
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
-      const provideKey = inject[key]
+      const provideKey = inject[key].name
       let source = vm
       while (source) {
         if (source._provided && provideKey in source._provided) {
@@ -58,8 +58,15 @@ export function resolveInject (inject: any, vm: Component): ?Object {
         }
         source = source.$parent
       }
-      if (process.env.NODE_ENV !== 'production' && !source) {
-        warn(`Injection "${key}" not found`, vm)
+      if (!source) {
+        if ('default' in inject[key]) {
+          const provideDefault = inject[key].default
+          result[key] = typeof provideDefault === 'function'
+            ? provideDefault.call(vm)
+            : provideDefault
+        } else if (process.env.NODE_ENV !== 'production') {
+          warn(`Injection "${key}" not found`, vm)
+        }
       }
     }
     return result
