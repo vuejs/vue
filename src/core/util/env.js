@@ -1,7 +1,6 @@
 /* @flow */
-/* globals MutationObserver */
+/* globals MessageChannel */
 
-import { noop } from 'shared/util'
 import { handleError } from './error'
 
 // can we use __proto__?
@@ -80,41 +79,29 @@ export const nextTick = (function () {
     }
   }
 
-  // the nextTick behavior leverages the microtask queue, which can be accessed
-  // via either native Promise.then or MutationObserver.
-  // MutationObserver has wider support, however it is seriously bugged in
-  // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
-  // completely stops working after triggering a few times... so, if native
-  // Promise is available, we will use it:
-  /* istanbul ignore if */ // $flow-disable-line
-  if (typeof Promise !== 'undefined' && isNative(Promise)) {
-    var p = Promise.resolve()
-    var logError = err => { handleError(err, null, 'nextTick') }
+  // An asynchronous deferring mechanism.
+  // In pre 2.4, we used to use microtasks (Promise/MutationObserver)
+  // but microtasks actually has too high a priority and fires in between
+  // supposedly sequential events (e.g. #4521, #6690) or even between
+  // bubbling of the same event (#6566). Technically setImmediate should be
+  // the ideal choice, but it's not available everywhere; and the only polyfill
+  // that consistently queues the callback after all DOM events triggered in the
+  // same loop is by using MessageChannel.
+  /* istanbul ignore if */
+  if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
     timerFunc = () => {
-      p.then(nextTickHandler).catch(logError)
-      // in problematic UIWebViews, Promise.then doesn't completely break, but
-      // it can get stuck in a weird state where callbacks are pushed into the
-      // microtask queue but the queue isn't being flushed, until the browser
-      // needs to do some other work, e.g. handle a timer. Therefore we can
-      // "force" the microtask queue to be flushed by adding an empty timer.
-      if (isIOS) setTimeout(noop)
+      setImmediate(nextTickHandler)
     }
-  } else if (!isIE && typeof MutationObserver !== 'undefined' && (
-    isNative(MutationObserver) ||
-    // PhantomJS and iOS 7.x
-    MutationObserver.toString() === '[object MutationObserverConstructor]'
+  } else if (typeof MessageChannel !== 'undefined' && (
+    isNative(MessageChannel) ||
+    // PhantomJS
+    MessageChannel.toString() === '[object MessageChannelConstructor]'
   )) {
-    // use MutationObserver where native Promise is not available,
-    // e.g. PhantomJS, iOS7, Android 4.4
-    var counter = 1
-    var observer = new MutationObserver(nextTickHandler)
-    var textNode = document.createTextNode(String(counter))
-    observer.observe(textNode, {
-      characterData: true
-    })
+    const channel = new MessageChannel()
+    const port = channel.port2
+    channel.port1.onmessage = nextTickHandler
     timerFunc = () => {
-      counter = (counter + 1) % 2
-      textNode.data = String(counter)
+      port.postMessage(1)
     }
   } else {
     // fallback to setTimeout
