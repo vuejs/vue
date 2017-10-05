@@ -7,7 +7,7 @@ describe('Error handling', () => {
   // break parent component
   ;[
     ['data', 'data()'],
-    ['render', 'render function'],
+    ['render', 'render'],
     ['beforeCreate', 'beforeCreate hook'],
     ['created', 'created hook'],
     ['beforeMount', 'beforeMount hook'],
@@ -99,7 +99,7 @@ describe('Error handling', () => {
     const args = spy.calls.argsFor(0)
     expect(args[0].toString()).toContain('Error: render') // error
     expect(args[1]).toBe(vm.$refs.child) // vm
-    expect(args[2]).toContain('render function') // description
+    expect(args[2]).toContain('render') // description
 
     assertRootInstanceActive(vm).then(() => {
       Vue.config.errorHandler = null

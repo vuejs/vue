@@ -5,12 +5,28 @@ import { warn } from './debug'
 import { inBrowser } from './env'
 
 export function handleError (err: Error, vm: any, info: string) {
+  if (vm) {
+    let cur = vm
+    while ((cur = cur.$parent)) {
+      if (cur.$options.catchError) {
+        try {
+          const propagate = cur.$options.catchError.call(cur, err, vm, info)
+          if (!propagate) return
+        } catch (e) {
+          globalHandleError(e, cur, 'catchError')
+        }
+      }
+    }
+  }
+  globalHandleError(err, vm, info)
+}
+
+function globalHandleError (err, vm, info) {
   if (config.errorHandler) {
     try {
-      config.errorHandler.call(null, err, vm, info)
-      return
+      return config.errorHandler.call(null, err, vm, info)
     } catch (e) {
-      logError(e, null, 'errorHandler')
+      logError(e, null, 'config.errorHandler')
     }
   }
   logError(err, vm, info)
