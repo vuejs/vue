@@ -354,5 +354,26 @@ describe('Directive v-model text', () => {
         done()
       }, 16)
     })
+
+    it('should create and make reactive non-existent properties', done => {
+      const vm = new Vue({
+        data: {
+          foo: {}
+        },
+        template: '<input v-model="foo.bar">'
+      }).$mount()
+      expect(vm.$el.value).toBe('')
+
+      vm.$el.value = 'a'
+      triggerEvent(vm.$el, 'input')
+      expect(vm.foo.bar).toBe('a')
+      vm.foo.bar = 'b'
+      waitForUpdate(() => {
+        expect(vm.$el.value).toBe('b')
+        vm.foo = {}
+      }).then(() => {
+        expect(vm.$el.value).toBe('')
+      }).then(done)
+    })
   }
 })

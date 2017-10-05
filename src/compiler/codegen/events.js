@@ -87,6 +87,14 @@ function genHandler (
         if (keyCodes[key]) {
           keys.push(key)
         }
+      } else if (key === 'exact') {
+        const modifiers: ASTModifiers = (handler.modifiers: any)
+        genModifierCode += genGuard(
+          ['ctrl', 'shift', 'alt', 'meta']
+            .filter(keyModifier => !modifiers[keyModifier])
+            .map(keyModifier => `$event.${keyModifier}Key`)
+            .join('||')
+        )
       } else {
         keys.push(key)
       }
@@ -116,6 +124,11 @@ function genFilterCode (key: string): string {
   if (keyVal) {
     return `$event.keyCode!==${keyVal}`
   }
-  const alias = keyCodes[key]
-  return `_k($event.keyCode,${JSON.stringify(key)}${alias ? ',' + JSON.stringify(alias) : ''})`
+  const code = keyCodes[key]
+  return (
+    `_k($event.keyCode,` +
+    `${JSON.stringify(key)},` +
+    `${JSON.stringify(code)},` +
+    `$event.key)`
+  )
 }

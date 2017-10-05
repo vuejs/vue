@@ -115,6 +115,15 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         </a>
       </td>
     </tr>
+    <tr></tr>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="http://tooltwist.com/" target="_blank">
+          <img width="170px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tooltwist
+          .png">
+        </a>
+      </td>
+    </tr>
   </tbody>
 </table>
 

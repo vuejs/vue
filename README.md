@@ -122,6 +122,12 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
           <img width="130px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/onsen-ui.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="http://tooltwist.com" target="_blank">
+          <img width="14
+          0px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tooltwist.png">
+        </a>
+      </td>
     </tr>
   </tbody>
 </table>

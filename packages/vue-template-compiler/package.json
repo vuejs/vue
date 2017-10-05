@@ -3,6 +3,9 @@
   "version": "2.4.4",
   "description": "template compiler for Vue 2.0",
   "main": "index.js",
+  "unpkg": "browser.js",
+  "jsdelivr": "browser.js",
+  "browser": "browser.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vuejs/vue.git"

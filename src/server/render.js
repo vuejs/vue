@@ -3,7 +3,8 @@
 import {
   isDef,
   isUndef,
-  isTrue
+  isTrue,
+  extend
 } from 'shared/util'
 
 import { escape } from 'web/server/util'
@@ -29,7 +30,7 @@ const normalizeRender = vm => {
   const { render, template, _scopeId } = vm.$options
   if (isUndef(render)) {
     if (template) {
-      Object.assign(vm.$options, ssrCompileToFunctions(template, {
+      extend(vm.$options, ssrCompileToFunctions(template, {
         scopeId: _scopeId
       }))
     } else {

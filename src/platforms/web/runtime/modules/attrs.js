@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isIE9 } from 'core/util/env'
+import { isIE9, isEdge } from 'core/util/env'
 
 import {
   extend,
@@ -42,8 +42,9 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     }
   }
   // #4391: in IE9, setting type can reset value for input[type=radio]
+  // #6666: IE/Edge forces progress value down to 1 before setting a max
   /* istanbul ignore if */
-  if (isIE9 && attrs.value !== oldAttrs.value) {
+  if ((isIE9 || isEdge) && attrs.value !== oldAttrs.value) {
     setAttr(elm, 'value', attrs.value)
   }
   for (key in oldAttrs) {

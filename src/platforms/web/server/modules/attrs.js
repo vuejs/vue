@@ -4,7 +4,8 @@ import { escape } from '../util'
 
 import {
   isDef,
-  isUndef
+  isUndef,
+  extend
 } from 'shared/util'
 
 import {
@@ -22,7 +23,7 @@ export default function renderAttrs (node: VNodeWithData): string {
     let parent = node.parent
     while (isDef(parent)) {
       if (isDef(parent.data) && isDef(parent.data.attrs)) {
-        attrs = Object.assign({}, attrs, parent.data.attrs)
+        attrs = extend(extend({}, attrs), parent.data.attrs)
       }
       parent = parent.parent
     }
