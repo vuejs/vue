@@ -103,6 +103,12 @@ export const nextTick = (function () {
     timerFunc = () => {
       port.postMessage(1)
     }
+  } else if (typeof Promise !== 'undefined' && isNative(Promise)) {
+    // use microtask in non-DOM environments, e.g. Weex
+    const p = Promise.resolve()
+    timerFunc = () => {
+      p.then(nextTickHandler)
+    }
   } else {
     // fallback to setTimeout
     /* istanbul ignore next */
