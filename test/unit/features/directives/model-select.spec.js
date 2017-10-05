@@ -56,7 +56,7 @@ describe('Directive v-model select', () => {
       expect(vm.$el.value).toBe('c')
       expect(vm.$el.childNodes[2].selected).toBe(true)
       updateSelect(vm.$el, 'a')
-      triggerEvent(vm.$el, 'change')
+      triggerEvent(vm.$el, 'input')
       expect(vm.test).toBe('a')
     }).then(done)
   })
@@ -82,11 +82,11 @@ describe('Directive v-model select', () => {
       expect(vm.$el.childNodes[2].selected).toBe(true)
 
       updateSelect(vm.$el, '1')
-      triggerEvent(vm.$el, 'change')
+      triggerEvent(vm.$el, 'input')
       expect(vm.test).toBe('1')
 
       updateSelect(vm.$el, '2')
-      triggerEvent(vm.$el, 'change')
+      triggerEvent(vm.$el, 'input')
       expect(vm.test).toBe(2)
     }).then(done)
   })
@@ -110,11 +110,11 @@ describe('Directive v-model select', () => {
       expect(vm.$el.childNodes[2].selected).toBe(true)
 
       updateSelect(vm.$el, '1')
-      triggerEvent(vm.$el, 'change')
+      triggerEvent(vm.$el, 'input')
       expect(vm.test).toBe('1')
 
       updateSelect(vm.$el, { a: 2 })
-      triggerEvent(vm.$el, 'change')
+      triggerEvent(vm.$el, 'input')
       expect(vm.test).toEqual({ a: 2 })
     }).then(done)
   })
@@ -138,11 +138,11 @@ describe('Directive v-model select', () => {
       expect(vm.$el.childNodes[2].selected).toBe(true)
 
       updateSelect(vm.$el, '1')
-      triggerEvent(vm.$el, 'change')
+      triggerEvent(vm.$el, 'input')
       expect(vm.test).toBe('1')
 
       updateSelect(vm.$el, [{ a: 2 }])
-      triggerEvent(vm.$el, 'change')
+      triggerEvent(vm.$el, 'input')
       expect(vm.test).toEqual([{ a: 2 }])
     }).then(done)
   })
@@ -167,7 +167,7 @@ describe('Directive v-model select', () => {
       expect(vm.$el.value).toBe('c')
       expect(vm.$el.childNodes[2].selected).toBe(true)
       updateSelect(vm.$el, 'a')
-      triggerEvent(vm.$el, 'change')
+      triggerEvent(vm.$el, 'input')
       expect(vm.test).toBe('a')
       // update v-for opts
       vm.opts = ['d', 'a']
@@ -196,7 +196,7 @@ describe('Directive v-model select', () => {
       expect(vm.$el.value).toBe('3')
       expect(vm.$el.childNodes[2].selected).toBe(true)
       updateSelect(vm.$el, 1)
-      triggerEvent(vm.$el, 'change')
+      triggerEvent(vm.$el, 'input')
       expect(vm.test).toBe(1)
       // update v-for opts
       vm.opts = [0, 1]
@@ -256,7 +256,7 @@ describe('Directive v-model select', () => {
         expect(opts[2].selected).toBe(true)
         opts[0].selected = false
         opts[1].selected = true
-        triggerEvent(vm.$el, 'change')
+        triggerEvent(vm.$el, 'input')
         expect(vm.test).toEqual(['b', 'c'])
       }).then(done)
     })
@@ -283,14 +283,14 @@ describe('Directive v-model select', () => {
         expect(opts[2].selected).toBe(true)
         opts[0].selected = false
         opts[1].selected = true
-        triggerEvent(vm.$el, 'change')
+        triggerEvent(vm.$el, 'input')
         expect(vm.test).toEqual(['b', 'c'])
         // update v-for opts
         vm.opts = ['c', 'd']
       }).then(() => {
         expect(opts[0].selected).toBe(true)
         expect(opts[1].selected).toBe(false)
-        expect(vm.test).toEqual(['c']) // should remove 'd' which no longer has a matching option
+        expect(vm.test).toEqual(['c']) // should remove 'b' which no longer has a matching option
       }).then(done)
     })
   }
@@ -313,7 +313,7 @@ describe('Directive v-model select', () => {
     }).$mount()
     document.body.appendChild(vm.$el)
     vm.$el.options[1].selected = true
-    triggerEvent(vm.$el, 'change')
+    triggerEvent(vm.$el, 'input')
     waitForUpdate(() => {
       expect(spy).toHaveBeenCalled()
       expect(vm.selections).toEqual(['1', '2'])
@@ -382,7 +382,7 @@ describe('Directive v-model select', () => {
     var selects = vm.$el.getElementsByTagName('select')
     var select0 = selects[0]
     select0.options[0].selected = true
-    triggerEvent(select0, 'change')
+    triggerEvent(select0, 'input')
     waitForUpdate(() => {
       expect(spy).toHaveBeenCalled()
       expect(vm.selections).toEqual(['foo', ''])
@@ -403,7 +403,7 @@ describe('Directive v-model select', () => {
     }).$mount()
     document.body.appendChild(vm.$el)
     updateSelect(vm.$el, '1')
-    triggerEvent(vm.$el, 'change')
+    triggerEvent(vm.$el, 'input')
     expect(vm.test).toBe(1)
   })
 
@@ -544,6 +544,33 @@ describe('Directive v-model select', () => {
     vm.options = ['1', '2']
     waitForUpdate(() => {
       expect(spy).not.toHaveBeenCalled()
+    }).then(done)
+  })
+
+  // #6690
+  it('should work on an element with an input binding', done => {
+    const vm = new Vue({
+      data: {
+        test1: '',
+        inputEvaluated: ''
+      },
+      template:
+        `<select v-model="test1" v-on:input="inputEvaluated = 'blarg'" v-bind:name="inputEvaluated">` +
+          '<option value="">test1 Please Select</option>' +
+          '<option value="alpha">Alpha</option>' +
+          '<option value="beta">Beta</option>' +
+        '</select>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+
+    vm.$el.children[1].selected = true
+
+    triggerEvent(vm.$el, 'input')
+
+    waitForUpdate(() => {
+      triggerEvent(vm.$el, 'change')
+    }).then(() => {
+      expect(vm.$el.value).toBe('alpha')
     }).then(done)
   })
 })

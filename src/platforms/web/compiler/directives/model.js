@@ -125,7 +125,7 @@ function genSelect (
   const assignment = '$event.target.multiple ? $$selectedVal : $$selectedVal[0]'
   let code = `var $$selectedVal = ${selectedVal};`
   code = `${code} ${genAssignmentCode(value, assignment)}`
-  addHandler(el, 'change', code, null, true)
+  addHandler(el, 'input', code, null, true)
 }
 
 function genDefaultModel (
