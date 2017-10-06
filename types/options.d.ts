@@ -80,6 +80,7 @@ export interface ComponentOptions<
   updated?(): void;
   activated?(): void;
   deactivated?(): void;
+  errorCaptured?(): boolean | void;
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
   components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> };
@@ -87,7 +88,7 @@ export interface ComponentOptions<
   filters?: { [key: string]: Function };
 
   provide?: Object | (() => Object);
-  inject?: { [key: string]: string | symbol } | string[];
+  inject?: InjectOptions;
 
   model?: {
     prop?: string;
@@ -107,7 +108,7 @@ export interface ComponentOptions<
 export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = PropsDefinition<Props>> {
   name?: string;
   props?: PropDefs;
-  inject?: { [key: string]: string | symbol } | string[];
+  inject?: InjectOptions;
   functional: boolean;
   render(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode;
 }
@@ -169,3 +170,9 @@ export interface DirectiveOptions {
   componentUpdated?: DirectiveFunction;
   unbind?: DirectiveFunction;
 }
+
+export type InjectKey = string | symbol;
+
+export type InjectOptions = {
+  [key: string]: InjectKey | { from?: InjectKey, default?: any }
+} | string[];

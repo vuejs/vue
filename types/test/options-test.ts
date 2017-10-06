@@ -187,6 +187,9 @@ Vue.component('component', {
   updated() {},
   activated() {},
   deactivated() {},
+  errorCaptured() {
+    return true
+  },
 
   directives: {
     a: {
@@ -223,6 +226,25 @@ Vue.component('component', {
   extends: {} as ComponentOptions<Vue>,
   delimiters: ["${", "}"]
 });
+
+Vue.component('provide-inject', {
+  provide: {
+    foo: 1
+  },
+  inject: {
+    injectFoo: 'foo',
+    injectBar: Symbol(),
+    injectBaz: { from: 'baz' },
+    injectQux: { default: 1 },
+    injectQuux: { from: 'quuz', default: () => ({ value: 1 })}
+  }
+})
+
+Vue.component('provide-function', {
+  provide: () => ({
+    foo: 1
+  })
+})
 
 Vue.component('component-with-scoped-slot', {
   render (h) {
@@ -272,8 +294,11 @@ Vue.component('functional-component', {
 Vue.component('functional-component-object-inject', {
   functional: true,
   inject: {
-    foo: 'bar',
-    baz: Symbol()
+    foo: 'foo',
+    bar: Symbol(),
+    baz: { from: 'baz' },
+    qux: { default: 1 },
+    quux: { from: 'quuz', default: () => ({ value: 1 })}
   },
   render(h) {
     return h('div')
