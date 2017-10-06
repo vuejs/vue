@@ -80,7 +80,7 @@ export declare class Vue {
     errorHandler(err: Error, vm: Vue, info: string): void;
     warnHandler(msg: string, vm: Vue, trace: string): void;
     ignoredElements: string[];
-    keyCodes: { [key: string]: number };
+    keyCodes: { [key: string]: number | number[] };
   }
 
   static extend(options: ComponentOptions<Vue> | FunctionalComponentOptions): typeof Vue;
