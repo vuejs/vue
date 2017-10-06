@@ -3,11 +3,12 @@
 import RenderStream from './render-stream'
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
+import { createPromiseCallback } from './util'
 import TemplateRenderer from './template-renderer/index'
 import type { ClientManifest } from './template-renderer/index'
 
 export type Renderer = {
-  renderToString: (component: Component, context: any, cb: any) => void;
+  renderToString: (component: Component, context: any, cb: any) => ?Promise<string>;
   renderToStream: (component: Component, context?: Object) => stream$Readable;
 };
 
@@ -52,30 +53,39 @@ export function createRenderer ({
     renderToString (
       component: Component,
       context: any,
-      done: any
-    ): void {
+      cb: any
+    ): ?Promise<string> {
       if (typeof context === 'function') {
-        done = context
+        cb = context
         context = {}
       }
       if (context) {
         templateRenderer.bindRenderFns(context)
       }
+
+      // no callback, return Promise
+      let promise
+      if (!cb) {
+        ({ promise, cb } = createPromiseCallback())
+      }
+
       let result = ''
       const write = createWriteFunction(text => {
         result += text
         return false
-      }, done)
+      }, cb)
       try {
         render(component, write, context, () => {
           if (template) {
             result = templateRenderer.renderSync(result, context)
           }
-          done(null, result)
+          cb(null, result)
         })
       } catch (e) {
-        done(e)
+        cb(e)
       }
+
+      return promise
     },
 
     renderToStream (

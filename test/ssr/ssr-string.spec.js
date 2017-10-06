@@ -957,6 +957,29 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('return Promise', done => {
+    renderToString(new Vue({
+      template: `<div>{{ foo }}</div>`,
+      data: { foo: 'bar' }
+    })).then(res => {
+      expect(res).toBe(`<div data-server-rendered="true">bar</div>`)
+      done()
+    })
+  })
+
+  it('should Promise (error)', done => {
+    Vue.config.silent = true
+    renderToString(new Vue({
+      render () {
+        throw new Error('foobar')
+      }
+    })).catch(err => {
+      expect(err.toString()).toContain(`foobar`)
+      Vue.config.silent = false
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
