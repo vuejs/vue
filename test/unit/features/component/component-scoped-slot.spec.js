@@ -93,6 +93,60 @@ describe('Component scoped slot', () => {
     }).then(done)
   })
 
+  it('should warn when using v-bind with no object', () => {
+    new Vue({
+      template: `
+        <test ref="test">
+          <template scope="props">
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          data () {
+            return {
+              text: 'some text'
+            }
+          },
+          template: `
+            <div>
+              <slot v-bind="text"></slot>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+    expect('slot v-bind without argument expects an Object').toHaveBeenWarned()
+  })
+
+  it('should not warn when using v-bind with object', () => {
+    new Vue({
+      template: `
+        <test ref="test">
+          <template scope="props">
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          data () {
+            return {
+              foo: {
+                text: 'some text'
+              }
+            }
+          },
+          template: `
+            <div>
+              <slot v-bind="foo"></slot>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+    expect('slot v-bind without argument expects an Object').not.toHaveBeenWarned()
+  })
+
   it('named scoped slot', done => {
     const vm = new Vue({
       template: `
