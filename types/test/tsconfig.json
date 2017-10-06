@@ -6,8 +6,7 @@
       "es2015"
     ],
     "module": "commonjs",
-    "noImplicitAny": true,
-    "strictNullChecks": true,
+    "strict": true,
     "noEmit": true
   },
   "files": [

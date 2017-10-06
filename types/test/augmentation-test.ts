@@ -1,4 +1,4 @@
-import Vue = require("../index");
+import Vue from "../index";
 
 declare module "../vue" {
   // add instance property and method
@@ -8,9 +8,9 @@ declare module "../vue" {
   }
 
   // add static property and method
-  namespace Vue {
-    const staticProperty: string;
-    function staticMethod(): void;
+  interface VueConstructor {
+    staticProperty: string;
+    staticMethod(): void;
   }
 }
 
@@ -22,10 +22,21 @@ declare module "../options" {
 }
 
 const vm = new Vue({
+  props: ["bar"],
   data: {
     a: true
   },
-  foo: "foo"
+  foo: "foo",
+  methods: {
+    foo() {
+      this.a = false;
+    }
+  },
+  computed: {
+    BAR(): string {
+      return this.bar.toUpperCase();
+    }
+  }
 });
 
 vm.$instanceProperty;
