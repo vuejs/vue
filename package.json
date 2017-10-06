@@ -79,7 +79,7 @@
     "eslint": "^3.0.0",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-flowtype": "^2.34.0",
-    "eslint-plugin-jasmine": "^2.2.0",
+    "eslint-plugin-jasmine": "^2.8.4",
     "eslint-plugin-vue-libs": "^1.2.0",
     "file-loader": "^0.11.2",
     "flow-bin": "^0.54.0",
@@ -119,7 +119,7 @@
     "selenium-server": "^2.53.1",
     "serialize-javascript": "^1.3.0",
     "shelljs": "^0.7.8",
-    "typescript": "^2.3.4",
+    "typescript": "^2.5.2",
     "uglify-js": "^3.0.15",
     "webpack": "^2.6.1",
     "weex-js-runtime": "^0.22.0"

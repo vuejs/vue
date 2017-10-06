@@ -1,14 +1,76 @@
-import Vue = require("../index");
+import Vue from "../index";
 import { AsyncComponent, ComponentOptions, FunctionalComponentOptions } from "../index";
+import { CreateElement } from "../vue";
 
 interface Component extends Vue {
   a: number;
 }
 
+Vue.component('sub-component', {
+  components: {
+    a: Vue.component(""),
+    b: {}
+  }
+});
+
+Vue.component('prop-component', {
+  props: {
+    size: Number,
+    name: {
+      type: String,
+      default: '0',
+      required: true,
+    }
+  },
+  data() {
+    return {
+      fixedSize: this.size.toFixed(),
+      capName: this.name.toUpperCase()
+    }
+  }
+});
+
+Vue.component('string-prop', {
+  props: ['size', 'name'],
+  data() {
+    return {
+      fixedSize: this.size.whatever,
+      capName: this.name.isany
+    }
+  }
+});
+
+class User {
+  private u: number
+}
+class Cat {
+  private u: number
+}
+
+Vue.component('union-prop', {
+  props: {
+    primitive: [String, Number],
+    object: [Cat, User],
+    regex: RegExp,
+    mixed: [RegExp, Array],
+    union: [User, Number] as {new(): User | Number}[] // requires annotation
+  },
+  data() {
+    this.primitive;
+    this.object;
+    this.union;
+    this.regex.compile;
+    this.mixed;
+    return {
+      fixedSize: this.union,
+    }
+  }
+});
+
 Vue.component('component', {
   data() {
     this.$mount
-    this.a
+    this.size
     return {
       a: 1
     }
@@ -17,25 +79,22 @@ Vue.component('component', {
     size: Number,
     name: {
       type: String,
-      default: 0,
+      default: '0',
       required: true,
-      validator(value) {
-        return value > 0;
-      }
     }
   },
   propsData: {
     msg: "Hello"
   },
   computed: {
-    aDouble(this: Component) {
+    aDouble(): number {
       return this.a * 2;
     },
     aPlus: {
-      get(this: Component) {
+      get(): number {
         return this.a + 1;
       },
-      set(this: Component, v: number) {
+      set(v: number) {
         this.a = v - 1;
       },
       cache: false
@@ -44,6 +103,9 @@ Vue.component('component', {
   methods: {
     plus() {
       this.a++;
+      this.aDouble.toFixed();
+      this.aPlus = 1;
+      this.size.toFixed();
     }
   },
   watch: {
@@ -92,15 +154,15 @@ Vue.component('component', {
       createElement("div", "message"),
       createElement(Vue.component("component")),
       createElement({} as ComponentOptions<Vue>),
-      createElement({ functional: true, render () {}}),
+      createElement({
+        functional: true,
+        render(c: CreateElement) {
+          return createElement()
+        }
+      }),
 
       createElement(() => Vue.component("component")),
       createElement(() => ( {} as ComponentOptions<Vue> )),
-      createElement(() => {
-        return new Promise((resolve) => {
-          resolve({} as ComponentOptions<Vue>);
-        })
-      }),
       createElement((resolve, reject) => {
         resolve({} as ComponentOptions<Vue>);
         reject();
@@ -114,7 +176,7 @@ Vue.component('component', {
   staticRenderFns: [],
 
   beforeCreate() {
-    this.a = 1;
+    (this as any).a = 1;
   },
   created() {},
   beforeDestroy() {},
@@ -160,7 +222,7 @@ Vue.component('component', {
   name: "Component",
   extends: {} as ComponentOptions<Vue>,
   delimiters: ["${", "}"]
-} as ComponentOptions<Component>);
+});
 
 Vue.component('component-with-scoped-slot', {
   render (h) {
@@ -183,15 +245,15 @@ Vue.component('component-with-scoped-slot', {
   },
   components: {
     child: {
-      render (h) {
+      render (this: Vue, h: CreateElement) {
         return h('div', [
           this.$scopedSlots['default']({ msg: 'hi' }),
           this.$scopedSlots['item']({ msg: 'hello' })
         ])
       }
-    } as ComponentOptions<Vue>
+    }
   }
-} as ComponentOptions<Vue>)
+})
 
 Vue.component('functional-component', {
   props: ['prop'],
@@ -205,13 +267,16 @@ Vue.component('functional-component', {
     context.parent;
     return createElement("div", {}, context.children);
   }
-} as FunctionalComponentOptions);
+});
 
 Vue.component('functional-component-object-inject', {
   functional: true,
   inject: {
     foo: 'bar',
     baz: Symbol()
+  },
+  render(h) {
+    return h('div')
   }
 })
 
@@ -220,8 +285,8 @@ Vue.component("async-component", ((resolve, reject) => {
     resolve(Vue.component("component"));
   }, 0);
   return new Promise((resolve) => {
-    resolve({ functional: true } as FunctionalComponentOptions);
+    resolve({ functional: true });
   })
-}) as AsyncComponent);
+}));
 
-Vue.component('async-es-module-component', (() => import('./es-module')) as AsyncComponent)
+Vue.component('async-es-module-component', () => import('./es-module'))
