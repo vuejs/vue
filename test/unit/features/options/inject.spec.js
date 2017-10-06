@@ -384,10 +384,27 @@ describe('Options provide/inject', () => {
         injected = [this.foo, this.bar, this.baz]
       }
     })
-    expect(`Injection "foo" not found`).not.toHaveBeenWarned()
-    expect(`Injection "bar" not found`).not.toHaveBeenWarned()
-    expect(`Injection "baz" not found`).not.toHaveBeenWarned()
     expect(injected).toEqual([1, false, undefined])
+  })
+
+  it('should support name alias and default together', () => {
+    const vm = new Vue({
+      provide: {
+        FOO: 2
+      }
+    })
+    new Vue({
+      parent: vm,
+      inject: {
+        foo: { from: 'FOO', default: 1 },
+        bar: { default: false },
+        baz: { default: undefined }
+      },
+      created () {
+        injected = [this.foo, this.bar, this.baz]
+      }
+    })
+    expect(injected).toEqual([2, false, undefined])
   })
 
   it('should use provided value even if inject has default', () => {
