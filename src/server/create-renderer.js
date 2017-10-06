@@ -27,6 +27,7 @@ export type RenderOptions = {
   inject?: boolean;
   basedir?: string;
   shouldPreload?: Function;
+  shouldPrefetch?: Function;
   clientManifest?: ClientManifest;
   runInNewContext?: boolean | 'once';
 };
@@ -39,6 +40,7 @@ export function createRenderer ({
   inject,
   cache,
   shouldPreload,
+  shouldPrefetch,
   clientManifest
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
@@ -46,6 +48,7 @@ export function createRenderer ({
     template,
     inject,
     shouldPreload,
+    shouldPrefetch,
     clientManifest
   })
 
