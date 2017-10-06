@@ -56,6 +56,8 @@
   },
   "homepage": "https://github.com/vuejs/vue#readme",
   "devDependencies": {
+    "@types/node": "^8.0.33",
+    "@types/webpack": "^3.0.13",
     "babel-core": "^6.25.0",
     "babel-eslint": "^7.2.3",
     "babel-helper-vue-jsx-merge-props": "^2.0.2",

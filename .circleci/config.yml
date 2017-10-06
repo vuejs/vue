@@ -15,13 +15,13 @@ jobs:
             - v1-vue-{{ .Branch }}-{{ checksum "package-lock.json" }}
             - v1-vue-{{ .Branch }}-
             - v1-vue-
-      - run:
-          name: Install Dependencies
-          command: npm install
+      - run: npm install
+      - run: cd packages/vue-server-renderer && npm install
       - save_cache:
           key: v1-vue-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths:
             - node_modules/
+            - packages/vue-server-renderer/node_modules
       - persist_to_workspace:
           root: ~/project
           paths:
@@ -33,7 +33,7 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run: npm run lint
-      - run: node_modules/.bin/flow check
+      - run: npm run flow
       - run: npm run test:types
 
   test-cover:
