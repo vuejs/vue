@@ -1,11 +1,9 @@
 /* @flow */
 
-import { isRegExp } from 'shared/util'
+import { isRegExp, remove } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
 type VNodeCache = { [key: string]: ?VNode };
-
-const patternTypes: Array<Function> = [String, RegExp, Array]
 
 function getComponentName (opts: ?VNodeComponentOptions): ?string {
   return opts && (opts.Ctor.options.name || opts.tag)
@@ -23,26 +21,34 @@ function matches (pattern: string | RegExp | Array<string>, name: string): boole
   return false
 }
 
-function pruneCache (cache: VNodeCache, current: VNode, filter: Function) {
+function pruneCache (keepAliveInstance: any, filter: Function) {
+  const { cache, keys, _vnode } = keepAliveInstance
   for (const key in cache) {
     const cachedNode: ?VNode = cache[key]
     if (cachedNode) {
       const name: ?string = getComponentName(cachedNode.componentOptions)
       if (name && !filter(name)) {
-        if (cachedNode !== current) {
-          pruneCacheEntry(cachedNode)
-        }
-        cache[key] = null
+        pruneCacheEntry(cache, key, keys, _vnode)
       }
     }
   }
 }
 
-function pruneCacheEntry (vnode: ?VNode) {
-  if (vnode) {
-    vnode.componentInstance.$destroy()
+function pruneCacheEntry (
+  cache: VNodeCache,
+  key: string,
+  keys: Array<string>,
+  current?: VNode
+) {
+  const cached = cache[key]
+  if (cached && cached !== current) {
+    cached.componentInstance.$destroy()
   }
+  cache[key] = null
+  remove(keys, key)
 }
+
+const patternTypes: Array<Function> = [String, RegExp, Array]
 
 export default {
   name: 'keep-alive',
@@ -50,25 +56,27 @@ export default {
 
   props: {
     include: patternTypes,
-    exclude: patternTypes
+    exclude: patternTypes,
+    max: [String, Number]
   },
 
   created () {
     this.cache = Object.create(null)
+    this.keys = []
   },
 
   destroyed () {
     for (const key in this.cache) {
-      pruneCacheEntry(this.cache[key])
+      pruneCacheEntry(this.cache, key, this.keys)
     }
   },
 
   watch: {
     include (val: string | RegExp | Array<string>) {
-      pruneCache(this.cache, this._vnode, name => matches(val, name))
+      pruneCache(this, name => matches(val, name))
     },
     exclude (val: string | RegExp | Array<string>) {
-      pruneCache(this.cache, this._vnode, name => !matches(val, name))
+      pruneCache(this, name => !matches(val, name))
     }
   },
 
@@ -84,16 +92,27 @@ export default {
       )) {
         return vnode
       }
+
+      const { cache, keys } = this
       const key: ?string = vnode.key == null
         // same constructor may get registered as different local components
         // so cid alone is not enough (#3269)
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')
         : vnode.key
-      if (this.cache[key]) {
-        vnode.componentInstance = this.cache[key].componentInstance
+      if (cache[key]) {
+        vnode.componentInstance = cache[key].componentInstance
+        // make current key freshest
+        remove(keys, key)
+        keys.push(key)
       } else {
-        this.cache[key] = vnode
+        cache[key] = vnode
+        keys.push(key)
+        // prune oldest entry
+        if (this.max && keys.length > parseInt(this.max)) {
+          pruneCacheEntry(cache, keys[0], keys, this._vnode)
+        }
       }
+
       vnode.data.keepAlive = true
     }
     return vnode
