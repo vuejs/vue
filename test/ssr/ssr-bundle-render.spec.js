@@ -95,7 +95,7 @@ function createAssertions (runInNewContext) {
   })
 
   it('renderToStream catch Promise rejection', done => {
-    createRenderer('error.js', { runInNewContext }, renderer => {
+    createRenderer('promise-rejection.js', { runInNewContext }, renderer => {
       const stream = renderer.renderToStream()
       stream.on('error', err => {
         expect(err.message).toBe('foo')
@@ -272,6 +272,35 @@ function createAssertions (runInNewContext) {
       const stream = renderer.renderToStream()
       stream.on('error', err => {
         expect(err.stack).toContain('test/ssr/fixtures/error.js:1:6')
+        expect(err.message).toBe('foo')
+        done()
+      })
+    })
+  })
+
+  it('renderToString return Promise', done => {
+    createRenderer('app.js', { runInNewContext }, renderer => {
+      const context = { url: '/test' }
+      renderer.renderToString(context).then(res => {
+        expect(res).toBe('<div data-server-rendered="true">/test</div>')
+        expect(context.msg).toBe('hello')
+        done()
+      })
+    })
+  })
+
+  it('renderToString return Promise (error)', done => {
+    createRenderer('error.js', { runInNewContext }, renderer => {
+      renderer.renderToString().catch(err => {
+        expect(err.message).toBe('foo')
+        done()
+      })
+    })
+  })
+
+  it('renderToString return Promise (Promise rejection)', done => {
+    createRenderer('promise-rejection.js', { runInNewContext }, renderer => {
+      renderer.renderToString().catch(err => {
         expect(err.message).toBe('foo')
         done()
       })
