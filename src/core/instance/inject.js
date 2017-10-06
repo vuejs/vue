@@ -49,7 +49,7 @@ export function resolveInject (inject: any, vm: Component): ?Object {
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
-      const provideKey = inject[key].name
+      const provideKey = inject[key].from
       let source = vm
       while (source) {
         if (source._provided && provideKey in source._provided) {
