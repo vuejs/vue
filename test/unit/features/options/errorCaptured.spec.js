@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-describe('Options catchError', () => {
+describe('Options errorCaptured', () => {
   let globalSpy
 
   beforeEach(() => {
@@ -26,7 +26,7 @@ describe('Options catchError', () => {
     }
 
     new Vue({
-      catchError: spy,
+      errorCaptured: spy,
       render: h => h(Child)
     }).$mount()
 
@@ -49,7 +49,7 @@ describe('Options catchError', () => {
       data: {
         error: null
       },
-      catchError (e, vm, info) {
+      errorCaptured (e, vm, info) {
         expect(vm).toBe(child)
         this.error = e.toString() + ' in ' + info
       },
@@ -82,7 +82,7 @@ describe('Options catchError', () => {
     }
 
     new Vue({
-      catchError (err, vm, info) {
+      errorCaptured (err, vm, info) {
         spy(err, vm, info)
         return true
       },
@@ -108,7 +108,7 @@ describe('Options catchError', () => {
 
     let err2
     const vm = new Vue({
-      catchError () {
+      errorCaptured () {
         err2 = new Error('foo')
         throw err2
       },
@@ -116,6 +116,6 @@ describe('Options catchError', () => {
     }).$mount()
 
     expect(globalSpy).toHaveBeenCalledWith(err, child, 'created hook')
-    expect(globalSpy).toHaveBeenCalledWith(err2, vm, 'catchError')
+    expect(globalSpy).toHaveBeenCalledWith(err2, vm, 'errorCaptured hook')
   })
 })
