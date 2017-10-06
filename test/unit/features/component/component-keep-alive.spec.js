@@ -946,5 +946,71 @@ describe('Component keep-alive', () => {
         }).then(done)
       }
     })
+
+    it('max', done => {
+      const spyA = jasmine.createSpy()
+      const spyB = jasmine.createSpy()
+      const spyC = jasmine.createSpy()
+      const spyAD = jasmine.createSpy()
+      const spyBD = jasmine.createSpy()
+      const spyCD = jasmine.createSpy()
+
+      function assertCount (calls) {
+        expect([
+          spyA.calls.count(),
+          spyAD.calls.count(),
+          spyB.calls.count(),
+          spyBD.calls.count(),
+          spyC.calls.count(),
+          spyCD.calls.count()
+        ]).toEqual(calls)
+      }
+
+      const vm = new Vue({
+        template: `
+          <keep-alive max="2">
+            <component :is="n"></component>
+          </keep-alive>
+        `,
+        data: {
+          n: 'aa'
+        },
+        components: {
+          aa: {
+            template: '<div>a</div>',
+            created: spyA,
+            destroyed: spyAD
+          },
+          bb: {
+            template: '<div>bbb</div>',
+            created: spyB,
+            destroyed: spyBD
+          },
+          cc: {
+            template: '<div>ccc</div>',
+            created: spyC,
+            destroyed: spyCD
+          }
+        }
+      }).$mount()
+
+      assertCount([1, 0, 0, 0, 0, 0])
+      vm.n = 'bb'
+      waitForUpdate(() => {
+        assertCount([1, 0, 1, 0, 0, 0])
+        vm.n = 'cc'
+      }).then(() => {
+        // should prune A because max cache reached
+        assertCount([1, 1, 1, 0, 1, 0])
+        vm.n = 'bb'
+      }).then(() => {
+        // B should be reused, and made latest
+        assertCount([1, 1, 1, 0, 1, 0])
+        vm.n = 'aa'
+      }).then(() => {
+        // C should be pruned because B was used last so C is the oldest cached
+        assertCount([2, 1, 1, 0, 1, 1])
+      }).then(done)
+    })
   }
 })
