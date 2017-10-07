@@ -6,13 +6,17 @@ import {
   isDef,
   isUndef,
   isTrue,
-  isObject
+  isObject,
+  hasSymbol
 } from 'core/util/index'
 
 import { createEmptyVNode } from 'core/vdom/vnode'
 
-function ensureCtor (comp, base) {
-  if (comp.__esModule && comp.default) {
+function ensureCtor (comp: any, base) {
+  if (
+    comp.__esModule ||
+    (hasSymbol && comp[Symbol.toStringTag] === 'Module')
+  ) {
     comp = comp.default
   }
   return isObject(comp)
