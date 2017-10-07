@@ -8,12 +8,9 @@ export default context => {
   return new Promise(resolve => {
     context.msg = 'hello'
     const vm = new Vue({
-      render (h) {
-        return h('div', [
-          context.url,
-          h(Foo)
-        ])
-      }
+      render(h) {
+        return h('div', [context.url, h(Foo)])
+      },
     })
 
     // simulate router.onReady

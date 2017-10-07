@@ -10,26 +10,26 @@
  * components/slots/custom directives.
  */
 
-import { no, makeMap, isBuiltInTag } from 'shared/util'
+import {no, makeMap, isBuiltInTag} from 'shared/util'
 
 // optimizability constants
 export const optimizability = {
-  FALSE: 0,    // whole sub tree un-optimizable
-  FULL: 1,     // whole sub tree optimizable
-  SELF: 2,     // self optimizable but has some un-optimizable children
+  FALSE: 0, // whole sub tree un-optimizable
+  FULL: 1, // whole sub tree optimizable
+  SELF: 2, // self optimizable but has some un-optimizable children
   CHILDREN: 3, // self un-optimizable but have fully optimizable children
-  PARTIAL: 4   // self un-optimizable with some un-optimizable children
+  PARTIAL: 4, // self un-optimizable with some un-optimizable children
 }
 
 let isPlatformReservedTag
 
-export function optimize (root: ?ASTElement, options: CompilerOptions) {
+export function optimize(root: ?ASTElement, options: CompilerOptions) {
   if (!root) return
   isPlatformReservedTag = options.isReservedTag || no
   walk(root, true)
 }
 
-function walk (node: ASTNode, isRoot?: boolean) {
+function walk(node: ASTNode, isRoot?: boolean) {
   if (isUnOptimizableTree(node)) {
     node.ssrOptimizability = optimizability.FALSE
     return
@@ -59,7 +59,8 @@ function walk (node: ASTNode, isRoot?: boolean) {
         check(block)
       }
     }
-    if (node.ssrOptimizability == null ||
+    if (
+      node.ssrOptimizability == null ||
       (!isRoot && (node.attrsMap['v-html'] || node.attrsMap['v-text']))
     ) {
       node.ssrOptimizability = optimizability.FULL
@@ -71,7 +72,7 @@ function walk (node: ASTNode, isRoot?: boolean) {
   }
 }
 
-function optimizeSiblings (el) {
+function optimizeSiblings(el) {
   const children = el.children
   const optimizedChildren = []
 
@@ -85,7 +86,7 @@ function optimizeSiblings (el) {
         attrsList: [],
         attrsMap: {},
         children: currentOptimizableGroup,
-        ssrOptimizability: optimizability.FULL
+        ssrOptimizability: optimizability.FULL,
       })
     }
     currentOptimizableGroup = []
@@ -106,8 +107,9 @@ function optimizeSiblings (el) {
   return optimizedChildren
 }
 
-function isUnOptimizableTree (node: ASTNode): boolean {
-  if (node.type === 2 || node.type === 3) { // text or expression
+function isUnOptimizableTree(node: ASTNode): boolean {
+  if (node.type === 2 || node.type === 3) {
+    // text or expression
     return false
   }
   return (
@@ -119,7 +121,7 @@ function isUnOptimizableTree (node: ASTNode): boolean {
 
 const isBuiltInDir = makeMap('text,html,show,on,bind,model,pre,cloak,once')
 
-function hasCustomDirective (node: ASTNode): ?boolean {
+function hasCustomDirective(node: ASTNode): ?boolean {
   return (
     node.type === 1 &&
     node.directives &&

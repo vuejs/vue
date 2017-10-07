@@ -7,7 +7,7 @@ describe('Global API: use', () => {
     install: (Vue, opts) => {
       Vue.directive('plugin-test', def)
       expect(opts).toBe(options)
-    }
+    },
   }
 
   it('should apply Object plugin', () => {

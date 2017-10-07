@@ -4,7 +4,7 @@ describe('Directive v-text', () => {
   it('should render text', () => {
     const vm = new Vue({
       template: '<div v-text="a"></div>',
-      data: { a: 'hello' }
+      data: {a: 'hello'},
     }).$mount()
     expect(vm.$el.innerHTML).toBe('hello')
   })
@@ -12,7 +12,7 @@ describe('Directive v-text', () => {
   it('should encode html entities', () => {
     const vm = new Vue({
       template: '<div v-text="a"></div>',
-      data: { a: '<foo>' }
+      data: {a: '<foo>'},
     }).$mount()
     expect(vm.$el.innerHTML).toBe('&lt;foo&gt;')
   })
@@ -20,34 +20,43 @@ describe('Directive v-text', () => {
   it('should support all value types', done => {
     const vm = new Vue({
       template: '<div v-text="a"></div>',
-      data: { a: false }
+      data: {a: false},
     }).$mount()
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('false')
       vm.a = []
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('[]')
-      vm.a = {}
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('{}')
-      vm.a = 123
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('123')
-      vm.a = 0
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('0')
-      vm.a = ' '
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe(' ')
-      vm.a = '    '
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('    ')
-      vm.a = null
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('')
-      vm.a = undefined
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('[]')
+        vm.a = {}
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('{}')
+        vm.a = 123
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('123')
+        vm.a = 0
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('0')
+        vm.a = ' '
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe(' ')
+        vm.a = '    '
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('    ')
+        vm.a = null
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('')
+        vm.a = undefined
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('')
+      })
+      .then(done)
   })
 })

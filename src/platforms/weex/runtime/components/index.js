@@ -5,5 +5,5 @@ import TransitionGroup from './transition-group'
 export default {
   Richtext,
   Transition,
-  TransitionGroup
+  TransitionGroup,
 }

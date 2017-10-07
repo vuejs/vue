@@ -1,4 +1,4 @@
-import { parseModel } from 'compiler/directives/model'
+import {parseModel} from 'compiler/directives/model'
 
 describe('model expression parser', () => {
   it('parse single path', () => {

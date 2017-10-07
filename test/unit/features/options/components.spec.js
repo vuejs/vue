@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { UA } from 'core/util/env'
+import {UA} from 'core/util/env'
 
 describe('Options components', () => {
   it('should accept plain object', () => {
@@ -7,9 +7,9 @@ describe('Options components', () => {
       template: '<test></test>',
       components: {
         test: {
-          template: '<div>hi</div>'
-        }
-      }
+          template: '<div>hi</div>',
+        },
+      },
     }).$mount()
     expect(vm.$el.tagName).toBe('DIV')
     expect(vm.$el.textContent).toBe('hi')
@@ -17,13 +17,13 @@ describe('Options components', () => {
 
   it('should accept extended constructor', () => {
     const Test = Vue.extend({
-      template: '<div>hi</div>'
+      template: '<div>hi</div>',
     })
     const vm = new Vue({
       template: '<test></test>',
       components: {
-        test: Test
-      }
+        test: Test,
+      },
     }).$mount()
     expect(vm.$el.tagName).toBe('DIV')
     expect(vm.$el.textContent).toBe('hi')
@@ -31,13 +31,13 @@ describe('Options components', () => {
 
   it('should accept camelCase', () => {
     const myComp = {
-      template: '<div>hi</div>'
+      template: '<div>hi</div>',
     }
     const vm = new Vue({
       template: '<my-comp></my-comp>',
       components: {
-        myComp
-      }
+        myComp,
+      },
     }).$mount()
     expect(vm.$el.tagName).toBe('DIV')
     expect(vm.$el.textContent).toBe('hi')
@@ -45,13 +45,13 @@ describe('Options components', () => {
 
   it('should accept PascalCase', () => {
     const MyComp = {
-      template: '<div>hi</div>'
+      template: '<div>hi</div>',
     }
     const vm = new Vue({
       template: '<my-comp></my-comp>',
       components: {
-        MyComp
-      }
+        MyComp,
+      },
     }).$mount()
     expect(vm.$el.tagName).toBe('DIV')
     expect(vm.$el.textContent).toBe('hi')
@@ -60,19 +60,23 @@ describe('Options components', () => {
   it('should warn native HTML elements', () => {
     new Vue({
       components: {
-        div: { template: '<div></div>' }
-      }
+        div: {template: '<div></div>'},
+      },
     })
-    expect('Do not use built-in or reserved HTML elements as component').toHaveBeenWarned()
+    expect(
+      'Do not use built-in or reserved HTML elements as component',
+    ).toHaveBeenWarned()
   })
 
   it('should warn built-in elements', () => {
     new Vue({
       components: {
-        component: { template: '<div></div>' }
-      }
+        component: {template: '<div></div>'},
+      },
     })
-    expect('Do not use built-in or reserved HTML elements as component').toHaveBeenWarned()
+    expect(
+      'Do not use built-in or reserved HTML elements as component',
+    ).toHaveBeenWarned()
   })
 
   // the HTMLUnknownElement check doesn't work in Android 4.2
@@ -81,7 +85,7 @@ describe('Options components', () => {
   if (!(UA && /android 4\.2/.test(UA))) {
     it('warn non-existent', () => {
       new Vue({
-        template: '<test></test>'
+        template: '<test></test>',
       }).$mount()
       expect('Unknown custom element: <test>').toHaveBeenWarned()
     })

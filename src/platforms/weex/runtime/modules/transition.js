@@ -1,15 +1,15 @@
-import { warn } from 'core/util/debug'
-import { extend, once, noop } from 'shared/util'
-import { activeInstance } from 'core/instance/lifecycle'
-import { resolveTransition } from 'web/runtime/transition-util'
+import {warn} from 'core/util/debug'
+import {extend, once, noop} from 'shared/util'
+import {activeInstance} from 'core/instance/lifecycle'
+import {resolveTransition} from 'web/runtime/transition-util'
 
 export default {
   create: enter,
   activate: enter,
-  remove: leave
+  remove: leave,
 }
 
-function enter (_, vnode) {
+function enter(_, vnode) {
   const el = vnode.elm
 
   // call leave callback now
@@ -42,7 +42,7 @@ function enter (_, vnode) {
     beforeAppear,
     appear,
     afterAppear,
-    appearCancelled
+    appearCancelled,
   } = data
 
   let context = activeInstance
@@ -61,10 +61,14 @@ function enter (_, vnode) {
   const startClass = isAppear ? appearClass : enterClass
   const toClass = isAppear ? appearToClass : enterToClass
   const activeClass = isAppear ? appearActiveClass : enterActiveClass
-  const beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter
-  const enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter
-  const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
-  const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
+  const beforeEnterHook = isAppear ? beforeAppear || beforeEnter : beforeEnter
+  const enterHook = isAppear
+    ? typeof appear === 'function' ? appear : enter
+    : enter
+  const afterEnterHook = isAppear ? afterAppear || afterEnter : afterEnter
+  const enterCancelledHook = isAppear
+    ? appearCancelled || enterCancelled
+    : enterCancelled
 
   const userWantsControl =
     enterHook &&
@@ -74,18 +78,26 @@ function enter (_, vnode) {
 
   const stylesheet = vnode.context.$options.style || {}
   const startState = stylesheet[startClass]
-  const transitionProperties = (stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][activeClass]) || {}
-  const endState = getEnterTargetState(el, stylesheet, startClass, toClass, activeClass, vnode.context)
+  const transitionProperties =
+    (stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][activeClass]) || {}
+  const endState = getEnterTargetState(
+    el,
+    stylesheet,
+    startClass,
+    toClass,
+    activeClass,
+    vnode.context,
+  )
   const needAnimation = Object.keys(endState).length > 0
 
-  const cb = el._enterCb = once(() => {
+  const cb = (el._enterCb = once(() => {
     if (cb.cancelled) {
       enterCancelledHook && enterCancelledHook(el)
     } else {
       afterEnterHook && afterEnterHook(el)
     }
     el._enterCb = null
-  })
+  }))
 
   // We need to wait until the native element has been inserted, but currently
   // there's no API to do that. So we have to wait "one frame" - not entirely
@@ -93,7 +105,8 @@ function enter (_, vnode) {
   setTimeout(() => {
     const parent = el.parentNode
     const pendingNode = parent && parent._pending && parent._pending[vnode.key]
-    if (pendingNode &&
+    if (
+      pendingNode &&
       pendingNode.context === vnode.context &&
       pendingNode.tag === vnode.tag &&
       pendingNode.elm._leaveCb
@@ -104,12 +117,16 @@ function enter (_, vnode) {
 
     if (needAnimation) {
       const animation = vnode.context.$requireWeexModule('animation')
-      animation.transition(el.ref, {
-        styles: endState,
-        duration: transitionProperties.duration || 0,
-        delay: transitionProperties.delay || 0,
-        timingFunction: transitionProperties.timingFunction || 'linear'
-      }, userWantsControl ? noop : cb)
+      animation.transition(
+        el.ref,
+        {
+          styles: endState,
+          duration: transitionProperties.duration || 0,
+          delay: transitionProperties.delay || 0,
+          timingFunction: transitionProperties.timingFunction || 'linear',
+        },
+        userWantsControl ? noop : cb,
+      )
     } else if (!userWantsControl) {
       cb()
     }
@@ -129,7 +146,7 @@ function enter (_, vnode) {
   }
 }
 
-function leave (vnode, rm) {
+function leave(vnode, rm) {
   const el = vnode.elm
 
   // call enter callback now
@@ -155,7 +172,7 @@ function leave (vnode, rm) {
     leave,
     afterLeave,
     leaveCancelled,
-    delayLeave
+    delayLeave,
   } = data
 
   const userWantsControl =
@@ -167,9 +184,12 @@ function leave (vnode, rm) {
   const stylesheet = vnode.context.$options.style || {}
   const startState = stylesheet[leaveClass]
   const endState = stylesheet[leaveToClass] || stylesheet[leaveActiveClass]
-  const transitionProperties = (stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][leaveActiveClass]) || {}
+  const transitionProperties =
+    (stylesheet['@TRANSITION'] &&
+      stylesheet['@TRANSITION'][leaveActiveClass]) ||
+    {}
 
-  const cb = el._leaveCb = once(() => {
+  const cb = (el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
       el.parentNode._pending[vnode.key] = null
     }
@@ -180,7 +200,7 @@ function leave (vnode, rm) {
       afterLeave && afterLeave(el)
     }
     el._leaveCb = null
-  })
+  }))
 
   if (delayLeave) {
     delayLeave(performLeave)
@@ -188,7 +208,7 @@ function leave (vnode, rm) {
     performLeave()
   }
 
-  function performLeave () {
+  function performLeave() {
     const animation = vnode.context.$requireWeexModule('animation')
     // the delayed leave may have already been cancelled
     if (cb.cancelled) {
@@ -196,25 +216,35 @@ function leave (vnode, rm) {
     }
     // record leaving element
     if (!vnode.data.show) {
-      (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode
+      ;(el.parentNode._pending || (el.parentNode._pending = {}))[
+        vnode.key
+      ] = vnode
     }
     beforeLeave && beforeLeave(el)
 
     if (startState) {
-      animation.transition(el.ref, {
-        styles: startState
-      }, next)
+      animation.transition(
+        el.ref,
+        {
+          styles: startState,
+        },
+        next,
+      )
     } else {
       next()
     }
 
-    function next () {
-      animation.transition(el.ref, {
-        styles: endState,
-        duration: transitionProperties.duration || 0,
-        delay: transitionProperties.delay || 0,
-        timingFunction: transitionProperties.timingFunction || 'linear'
-      }, userWantsControl ? noop : cb)
+    function next() {
+      animation.transition(
+        el.ref,
+        {
+          styles: endState,
+          duration: transitionProperties.duration || 0,
+          delay: transitionProperties.delay || 0,
+          timingFunction: transitionProperties.timingFunction || 'linear',
+        },
+        userWantsControl ? noop : cb,
+      )
     }
 
     leave && leave(el, cb)
@@ -225,7 +255,14 @@ function leave (vnode, rm) {
 }
 
 // determine the target animation style for an entering transition.
-function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass, vm) {
+function getEnterTargetState(
+  el,
+  stylesheet,
+  startClass,
+  endClass,
+  activeClass,
+  vm,
+) {
   const targetState = {}
   const startState = stylesheet[startClass]
   const endState = stylesheet[endClass]
@@ -242,9 +279,9 @@ function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass,
       ) {
         warn(
           `transition property "${key}" is declared in enter starting class (.${startClass}), ` +
-          `but not declared anywhere in enter ending class (.${endClass}), ` +
-          `enter active cass (.${activeClass}) or the element's default styling. ` +
-          `Note in Weex, CSS properties need explicit values to be transitionable.`
+            `but not declared anywhere in enter ending class (.${endClass}), ` +
+            `enter active cass (.${activeClass}) or the element's default styling. ` +
+            `Note in Weex, CSS properties need explicit values to be transitionable.`,
         )
       }
     }

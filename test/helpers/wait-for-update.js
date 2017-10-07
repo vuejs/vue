@@ -16,7 +16,7 @@ window.waitForUpdate = initialCb => {
   let end
   const queue = initialCb ? [initialCb] : []
 
-  function shift () {
+  function shift() {
     const job = queue.shift()
     if (queue.length) {
       let hasError = false
@@ -51,7 +51,7 @@ window.waitForUpdate = initialCb => {
       queue.push(nextCb)
       return chainer
     },
-    thenWaitFor: (wait) => {
+    thenWaitFor: wait => {
       if (typeof wait === 'number') {
         wait = timeout(wait)
       }
@@ -62,12 +62,12 @@ window.waitForUpdate = initialCb => {
     end: endFn => {
       queue.push(endFn)
       end = endFn
-    }
+    },
   }
 
   return chainer
 }
 
-function timeout (n) {
+function timeout(n) {
   return next => setTimeout(next, n)
 }

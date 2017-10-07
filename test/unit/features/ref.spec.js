@@ -4,24 +4,24 @@ describe('ref', () => {
   const components = {
     test: {
       id: 'test',
-      template: '<div>test</div>'
+      template: '<div>test</div>',
     },
     test2: {
       id: 'test2',
-      template: '<div>test2</div>'
-    }
+      template: '<div>test2</div>',
+    },
   }
 
   it('should work', () => {
     const vm = new Vue({
       data: {
-        value: 'bar'
+        value: 'bar',
       },
       template: `<div>
         <test ref="foo"></test>
         <test2 :ref="value"></test2>
       </div>`,
-      components
+      components,
     })
     vm.$mount()
     expect(vm.$refs.foo).toBeTruthy()
@@ -33,9 +33,9 @@ describe('ref', () => {
   it('should dynamically update refs', done => {
     const vm = new Vue({
       data: {
-        value: 'foo'
+        value: 'foo',
       },
-      template: '<div :ref="value"></div>'
+      template: '<div :ref="value"></div>',
     }).$mount()
     expect(vm.$refs.foo).toBe(vm.$el)
     vm.value = 'bar'
@@ -48,11 +48,9 @@ describe('ref', () => {
   it('should work as a hyperscript prop', () => {
     const vm = new Vue({
       components,
-      render (h) {
-        return h('div', null, [
-          h('test', { ref: 'test' })
-        ])
-      }
+      render(h) {
+        return h('div', null, [h('test', {ref: 'test'})])
+      },
     })
     vm.$mount()
     expect(vm.$refs.test).toBeTruthy()
@@ -62,7 +60,7 @@ describe('ref', () => {
   it('should accept HOC component', () => {
     const vm = new Vue({
       template: '<test ref="test"></test>',
-      components
+      components,
     })
     vm.$mount()
     expect(vm.$refs.test).toBeTruthy()
@@ -75,7 +73,7 @@ describe('ref', () => {
         <component :is="test" ref="test"></component>
       </div>`,
       components,
-      data: { test: 'test' }
+      data: {test: 'test'},
     })
     vm.$mount()
     expect(vm.$refs.test.$options.id).toBe('test')
@@ -83,41 +81,47 @@ describe('ref', () => {
     waitForUpdate(() => {
       expect(vm.$refs.test.$options.id).toBe('test2')
       vm.test = ''
-    }).then(() => {
-      expect(vm.$refs.test).toBeUndefined()
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$refs.test).toBeUndefined()
+      })
+      .then(done)
   })
 
   it('should register as Array when used with v-for', done => {
     const vm = new Vue({
       data: {
-        items: [1, 2, 3]
+        items: [1, 2, 3],
       },
       template: `
         <div>
           <div v-for="n in items" ref="list">{{n}}</div>
         </div>
-      `
+      `,
     }).$mount()
     assertRefs()
     // updating
     vm.items.push(4)
     waitForUpdate(assertRefs)
-      .then(() => { vm.items = [] })
+      .then(() => {
+        vm.items = []
+      })
       .then(assertRefs)
       .then(done)
 
-    function assertRefs () {
+    function assertRefs() {
       expect(Array.isArray(vm.$refs.list)).toBe(true)
       expect(vm.$refs.list.length).toBe(vm.items.length)
-      expect(vm.$refs.list.every((item, i) => item.textContent === String(i + 1))).toBe(true)
+      expect(
+        vm.$refs.list.every((item, i) => item.textContent === String(i + 1)),
+      ).toBe(true)
     }
   })
 
   it('should register as Array when used with v-for (components)', done => {
     const vm = new Vue({
       data: {
-        items: [1, 2, 3]
+        items: [1, 2, 3],
       },
       template: `
         <div>
@@ -127,22 +131,28 @@ describe('ref', () => {
       components: {
         test: {
           props: ['n'],
-          template: '<div>{{ n }}</div>'
-        }
-      }
+          template: '<div>{{ n }}</div>',
+        },
+      },
     }).$mount()
     assertRefs()
     // updating
     vm.items.push(4)
     waitForUpdate(assertRefs)
-      .then(() => { vm.items = [] })
+      .then(() => {
+        vm.items = []
+      })
       .then(assertRefs)
       .then(done)
 
-    function assertRefs () {
+    function assertRefs() {
       expect(Array.isArray(vm.$refs.list)).toBe(true)
       expect(vm.$refs.list.length).toBe(vm.items.length)
-      expect(vm.$refs.list.every((comp, i) => comp.$el.textContent === String(i + 1))).toBe(true)
+      expect(
+        vm.$refs.list.every(
+          (comp, i) => comp.$el.textContent === String(i + 1),
+        ),
+      ).toBe(true)
     }
   })
 
@@ -150,10 +160,10 @@ describe('ref', () => {
     components.test3 = {
       id: 'test3',
       template: `<test1 v-if="!normal"></test1><div v-else>test3</div>`,
-      data () {
-        return { normal: false }
+      data() {
+        return {normal: false}
       },
-      components: { test1: components.test }
+      components: {test1: components.test},
     }
     // a flag that representing whether to test component content or not
     let testContent = false
@@ -170,9 +180,9 @@ describe('ref', () => {
         </div>
       `,
       data: {
-        items: ['test2', 'test3']
+        items: ['test2', 'test3'],
       },
-      components
+      components,
     }).$mount()
     assertRefs()
     expect(vm.$refs.children[0].$el.textContent).toBe('test2')
@@ -181,16 +191,20 @@ describe('ref', () => {
     vm.$refs.children[1].normal = true
     testContent = true
     waitForUpdate(assertRefs)
-      .then(() => { vm.items.push('test') })
+      .then(() => {
+        vm.items.push('test')
+      })
       .then(assertRefs)
       .then(done)
 
-    function assertRefs () {
+    function assertRefs() {
       expect(Array.isArray(vm.$refs.children)).toBe(true)
       expect(vm.$refs.children.length).toBe(vm.items.length)
       if (testContent) {
         expect(
-          vm.$refs.children.every((comp, i) => comp.$el.textContent === vm.items[i])
+          vm.$refs.children.every(
+            (comp, i) => comp.$el.textContent === vm.items[i],
+          ),
         ).toBe(true)
       }
     }
@@ -202,19 +216,21 @@ describe('ref', () => {
       components: {
         child: {
           template: '<div v-if="show"></div>',
-          data () {
-            return { show: false }
-          }
-        }
-      }
+          data() {
+            return {show: false}
+          },
+        },
+      },
     }).$mount()
     expect(vm.$refs.test).toBe(vm.$children[0])
     vm.$refs.test.show = true
     waitForUpdate(() => {
       expect(vm.$refs.test).toBe(vm.$children[0])
       vm.$refs.test.show = false
-    }).then(() => {
-      expect(vm.$refs.test).toBe(vm.$children[0])
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$refs.test).toBe(vm.$children[0])
+      })
+      .then(done)
   })
 })

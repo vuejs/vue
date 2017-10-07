@@ -17,17 +17,17 @@ describe('Options errorCaptured', () => {
     let child
     let err
     const Child = {
-      created () {
+      created() {
         child = this
         err = new Error('child')
         throw err
       },
-      render () {}
+      render() {},
     }
 
     new Vue({
       errorCaptured: spy,
-      render: h => h(Child)
+      render: h => h(Child),
     }).$mount()
 
     expect(spy).toHaveBeenCalledWith(err, child, 'created hook')
@@ -38,27 +38,27 @@ describe('Options errorCaptured', () => {
   it('should be able to render the error in itself', done => {
     let child
     const Child = {
-      created () {
+      created() {
         child = this
         throw new Error('error from child')
       },
-      render () {}
+      render() {},
     }
 
     const vm = new Vue({
       data: {
-        error: null
+        error: null,
       },
-      errorCaptured (e, vm, info) {
+      errorCaptured(e, vm, info) {
         expect(vm).toBe(child)
         this.error = e.toString() + ' in ' + info
       },
-      render (h) {
+      render(h) {
         if (this.error) {
           return h('pre', this.error)
         }
         return h(Child)
-      }
+      },
     }).$mount()
 
     waitForUpdate(() => {
@@ -73,20 +73,20 @@ describe('Options errorCaptured', () => {
     let child
     let err
     const Child = {
-      created () {
+      created() {
         child = this
         err = new Error('child')
         throw err
       },
-      render () {}
+      render() {},
     }
 
     new Vue({
-      errorCaptured (err, vm, info) {
+      errorCaptured(err, vm, info) {
         spy(err, vm, info)
         return true
       },
-      render: h => h(Child, {})
+      render: h => h(Child, {}),
     }).$mount()
 
     expect(spy).toHaveBeenCalledWith(err, child, 'created hook')
@@ -98,21 +98,21 @@ describe('Options errorCaptured', () => {
     let child
     let err
     const Child = {
-      created () {
+      created() {
         child = this
         err = new Error('child')
         throw err
       },
-      render () {}
+      render() {},
     }
 
     let err2
     const vm = new Vue({
-      errorCaptured () {
+      errorCaptured() {
         err2 = new Error('foo')
         throw err2
       },
-      render: h => h(Child, {})
+      render: h => h(Child, {}),
     }).$mount()
 
     expect(globalSpy).toHaveBeenCalledWith(err, child, 'created hook')

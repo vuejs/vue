@@ -4,8 +4,8 @@ describe('Instance methods lifecycle', () => {
   describe('$mount', () => {
     it('empty mount', () => {
       const vm = new Vue({
-        data: { msg: 'hi' },
-        template: '<div>{{ msg }}</div>'
+        data: {msg: 'hi'},
+        template: '<div>{{ msg }}</div>',
       }).$mount()
       expect(vm.$el.tagName).toBe('DIV')
       expect(vm.$el.textContent).toBe('hi')
@@ -15,7 +15,7 @@ describe('Instance methods lifecycle', () => {
       const el = document.createElement('div')
       el.innerHTML = '{{ msg }}'
       const vm = new Vue({
-        data: { msg: 'hi' }
+        data: {msg: 'hi'},
       }).$mount(el)
       expect(vm.$el.tagName).toBe('DIV')
       expect(vm.$el.textContent).toBe('hi')
@@ -27,7 +27,7 @@ describe('Instance methods lifecycle', () => {
       el.innerHTML = '{{ msg }}'
       document.body.appendChild(el)
       const vm = new Vue({
-        data: { msg: 'hi' }
+        data: {msg: 'hi'},
       }).$mount('#mount-test')
       expect(vm.$el.tagName).toBe('DIV')
       expect(vm.$el.textContent).toBe('hi')
@@ -39,8 +39,8 @@ describe('Instance methods lifecycle', () => {
       const vm = new Vue({
         template: '<test></test>',
         components: {
-          test: { template: '<div></div>' }
-        }
+          test: {template: '<div></div>'},
+        },
       }).$mount()
       vm.$children[0].$destroy()
       expect(vm.$children.length).toBe(0)
@@ -48,8 +48,8 @@ describe('Instance methods lifecycle', () => {
 
     it('teardown watchers', () => {
       const vm = new Vue({
-        data: { a: 123 },
-        template: '<div></div>'
+        data: {a: 123},
+        template: '<div></div>',
       }).$mount()
       vm.$watch('a', () => {})
       vm.$destroy()
@@ -58,7 +58,7 @@ describe('Instance methods lifecycle', () => {
     })
 
     it('remove self from data observer', () => {
-      const vm = new Vue({ data: { a: 1 }})
+      const vm = new Vue({data: {a: 1}})
       vm.$destroy()
       expect(vm.$data.__ob__.vmCount).toBe(0)
     })
@@ -66,7 +66,7 @@ describe('Instance methods lifecycle', () => {
     it('avoid duplicate calls', () => {
       const spy = jasmine.createSpy('destroy')
       const vm = new Vue({
-        beforeDestroy: spy
+        beforeDestroy: spy,
       })
       vm.$destroy()
       vm.$destroy()
@@ -78,9 +78,9 @@ describe('Instance methods lifecycle', () => {
     it('should force update', done => {
       const vm = new Vue({
         data: {
-          a: {}
+          a: {},
         },
-        template: '<div>{{ a.b }}</div>'
+        template: '<div>{{ a.b }}</div>',
       }).$mount()
       expect(vm.$el.textContent).toBe('')
       vm.a.b = 'foo'
@@ -88,9 +88,11 @@ describe('Instance methods lifecycle', () => {
         // should not work because adding new property
         expect(vm.$el.textContent).toBe('')
         vm.$forceUpdate()
-      }).then(() => {
-        expect(vm.$el.textContent).toBe('foo')
-      }).then(done)
+      })
+        .then(() => {
+          expect(vm.$el.textContent).toBe('foo')
+        })
+        .then(done)
     })
   })
 
@@ -99,11 +101,11 @@ describe('Instance methods lifecycle', () => {
       const vm = new Vue({
         template: '<div>{{ msg }}</div>',
         data: {
-          msg: 'foo'
-        }
+          msg: 'foo',
+        },
       }).$mount()
       vm.msg = 'bar'
-      vm.$nextTick(function () {
+      vm.$nextTick(function() {
         expect(this).toBe(vm)
         expect(vm.$el.textContent).toBe('bar')
         done()
@@ -115,8 +117,8 @@ describe('Instance methods lifecycle', () => {
         const vm = new Vue({
           template: '<div>{{ msg }}</div>',
           data: {
-            msg: 'foo'
-          }
+            msg: 'foo',
+          },
         }).$mount()
         vm.msg = 'bar'
         vm.$nextTick().then(ctx => {

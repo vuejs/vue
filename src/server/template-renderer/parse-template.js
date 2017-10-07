@@ -3,18 +3,18 @@
 const compile = require('lodash.template')
 const compileOptions = {
   escape: /{{([^{][\s\S]+?[^}])}}/g,
-  interpolate: /{{{([\s\S]+?)}}}/g
+  interpolate: /{{{([\s\S]+?)}}}/g,
 }
 
 export type ParsedTemplate = {
-  head: (data: any) => string;
-  neck: (data: any) => string;
-  tail: (data: any) => string;
-};
+  head: (data: any) => string,
+  neck: (data: any) => string,
+  tail: (data: any) => string,
+}
 
-export function parseTemplate (
+export function parseTemplate(
   template: string,
-  contentPlaceholder?: string = '<!--vue-ssr-outlet-->'
+  contentPlaceholder?: string = '<!--vue-ssr-outlet-->',
 ): ParsedTemplate {
   if (typeof template === 'object') {
     return template
@@ -37,6 +37,9 @@ export function parseTemplate (
   return {
     head: compile(template.slice(0, i), compileOptions),
     neck: compile(template.slice(i, j), compileOptions),
-    tail: compile(template.slice(j + contentPlaceholder.length), compileOptions)
+    tail: compile(
+      template.slice(j + contentPlaceholder.length),
+      compileOptions,
+    ),
   }
 }

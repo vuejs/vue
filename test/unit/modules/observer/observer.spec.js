@@ -3,10 +3,10 @@ import {
   Observer,
   observe,
   set as setProp,
-  del as delProp
+  del as delProp,
 } from 'core/observer/index'
 import Dep from 'core/observer/dep'
-import { hasOwn } from 'core/util/index'
+import {hasOwn} from 'core/util/index'
 
 describe('Observer', () => {
   it('create on non-observables', () => {
@@ -25,7 +25,7 @@ describe('Observer', () => {
     // on object
     const obj = {
       a: {},
-      b: {}
+      b: {},
     }
     const ob1 = observe(obj)
     expect(ob1 instanceof Observer).toBe(true)
@@ -64,11 +64,13 @@ describe('Observer', () => {
     Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
-      get () {
+      get() {
         getCount++
         return val
       },
-      set (v) { val = v }
+      set(v) {
+        val = v
+      },
     })
 
     const ob1 = observe(obj)
@@ -98,7 +100,9 @@ describe('Observer', () => {
     Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
-      get () { return 123 }
+      get() {
+        return 123
+      },
     })
 
     const ob1 = observe(obj)
@@ -126,12 +130,15 @@ describe('Observer', () => {
     // on object
     const obj = {}
     let val = 10
-    Object.defineProperty(obj, 'a', { // eslint-disable-line accessor-pairs
+    /* eslint-disable accessor-pairs */
+    Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
-      set (v) { val = v }
+      set(v) {
+        val = v
+      },
     })
-
+    /* eslint-enable accessor-pairs */
     const ob1 = observe(obj)
     expect(ob1 instanceof Observer).toBe(true)
     expect(ob1.value).toBe(obj)
@@ -155,7 +162,7 @@ describe('Observer', () => {
     Object.defineProperty(obj, 'a', {
       configurable: false,
       enumerable: true,
-      val: 10
+      val: 10,
     })
 
     const ob1 = observe(obj)
@@ -177,16 +184,16 @@ describe('Observer', () => {
   })
 
   it('observing object prop change', () => {
-    const obj = { a: { b: 2 }, c: NaN }
+    const obj = {a: {b: 2}, c: NaN}
     observe(obj)
     // mock a watcher!
     const watcher = {
       deps: [],
-      addDep (dep) {
+      addDep(dep) {
         this.deps.push(dep)
         dep.addSub(this)
       },
-      update: jasmine.createSpy()
+      update: jasmine.createSpy(),
     }
     // collect dep
     Dep.target = watcher
@@ -196,7 +203,7 @@ describe('Observer', () => {
     obj.a.b = 3
     expect(watcher.update.calls.count()).toBe(1)
     // swap object
-    obj.a = { b: 4 }
+    obj.a = {b: 4}
     expect(watcher.update.calls.count()).toBe(2)
     watcher.deps = []
 
@@ -214,26 +221,28 @@ describe('Observer', () => {
   })
 
   it('observing object prop change on defined property', () => {
-    const obj = { val: 2 }
+    const obj = {val: 2}
     Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
-      get () { return this.val },
-      set (v) {
+      get() {
+        return this.val
+      },
+      set(v) {
         this.val = v
         return this.val
-      }
+      },
     })
 
     observe(obj)
     // mock a watcher!
     const watcher = {
       deps: [],
-      addDep: function (dep) {
+      addDep: function(dep) {
         this.deps.push(dep)
         dep.addSub(this)
       },
-      update: jasmine.createSpy()
+      update: jasmine.createSpy(),
     }
     // collect dep
     Dep.target = watcher
@@ -246,7 +255,7 @@ describe('Observer', () => {
   })
 
   it('observing set/delete', () => {
-    const obj1 = { a: 1 }
+    const obj1 = {a: 1}
     const ob1 = observe(obj1)
     const dep1 = ob1.dep
     spyOn(dep1, 'notify')
@@ -269,7 +278,7 @@ describe('Observer', () => {
     delProp(obj1, 'a')
     expect(dep1.notify.calls.count()).toBe(3)
     // should work on non-observed objects
-    const obj2 = { a: 1 }
+    const obj2 = {a: 1}
     delProp(obj2, 'a')
     expect(hasOwn(obj2, 'a')).toBe(false)
     // should work on Object.create(null)
@@ -300,40 +309,52 @@ describe('Observer', () => {
   it('warning set/delete on a Vue instance', done => {
     const vm = new Vue({
       template: '<div>{{a}}</div>',
-      data: { a: 1 }
+      data: {a: 1},
     }).$mount()
     expect(vm.$el.outerHTML).toBe('<div>1</div>')
     Vue.set(vm, 'a', 2)
     waitForUpdate(() => {
       expect(vm.$el.outerHTML).toBe('<div>2</div>')
-      expect('Avoid adding reactive properties to a Vue instance').not.toHaveBeenWarned()
+      expect(
+        'Avoid adding reactive properties to a Vue instance',
+      ).not.toHaveBeenWarned()
       Vue.delete(vm, 'a')
-    }).then(() => {
-      expect('Avoid deleting properties on a Vue instance').toHaveBeenWarned()
-      expect(vm.$el.outerHTML).toBe('<div>2</div>')
-      Vue.set(vm, 'b', 123)
-      expect('Avoid adding reactive properties to a Vue instance').toHaveBeenWarned()
-    }).then(done)
+    })
+      .then(() => {
+        expect('Avoid deleting properties on a Vue instance').toHaveBeenWarned()
+        expect(vm.$el.outerHTML).toBe('<div>2</div>')
+        Vue.set(vm, 'b', 123)
+        expect(
+          'Avoid adding reactive properties to a Vue instance',
+        ).toHaveBeenWarned()
+      })
+      .then(done)
   })
 
   it('warning set/delete on Vue instance root $data', done => {
-    const data = { a: 1 }
+    const data = {a: 1}
     const vm = new Vue({
       template: '<div>{{a}}</div>',
-      data
+      data,
     }).$mount()
     expect(vm.$el.outerHTML).toBe('<div>1</div>')
     expect(Vue.set(data, 'a', 2)).toBe(2)
     waitForUpdate(() => {
       expect(vm.$el.outerHTML).toBe('<div>2</div>')
-      expect('Avoid adding reactive properties to a Vue instance').not.toHaveBeenWarned()
+      expect(
+        'Avoid adding reactive properties to a Vue instance',
+      ).not.toHaveBeenWarned()
       Vue.delete(data, 'a')
-    }).then(() => {
-      expect('Avoid deleting properties on a Vue instance').toHaveBeenWarned()
-      expect(vm.$el.outerHTML).toBe('<div>2</div>')
-      expect(Vue.set(data, 'b', 123)).toBe(123)
-      expect('Avoid adding reactive properties to a Vue instance').toHaveBeenWarned()
-    }).then(done)
+    })
+      .then(() => {
+        expect('Avoid deleting properties on a Vue instance').toHaveBeenWarned()
+        expect(vm.$el.outerHTML).toBe('<div>2</div>')
+        expect(Vue.set(data, 'b', 123)).toBe(123)
+        expect(
+          'Avoid adding reactive properties to a Vue instance',
+        ).toHaveBeenWarned()
+      })
+      .then(done)
   })
 
   it('observing array mutation', () => {

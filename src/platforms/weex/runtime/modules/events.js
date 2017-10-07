@@ -1,14 +1,14 @@
 /* @flow */
 
-import { updateListeners } from 'core/vdom/helpers/update-listeners'
+import {updateListeners} from 'core/vdom/helpers/update-listeners'
 
 let target: any
 
-function add (
+function add(
   event: string,
   handler: Function,
   once: boolean,
-  capture: boolean
+  capture: boolean,
 ) {
   if (capture) {
     console.log('Weex do not support event in bubble phase.')
@@ -17,10 +17,11 @@ function add (
   if (once) {
     const oldHandler = handler
     const _target = target // save current target element in closure
-    handler = function (ev) {
-      const res = arguments.length === 1
-        ? oldHandler(ev)
-        : oldHandler.apply(null, arguments)
+    handler = function(ev) {
+      const res =
+        arguments.length === 1
+          ? oldHandler(ev)
+          : oldHandler.apply(null, arguments)
       if (res !== null) {
         remove(event, null, null, _target)
       }
@@ -29,16 +30,11 @@ function add (
   target.addEvent(event, handler)
 }
 
-function remove (
-  event: string,
-  handler: any,
-  capture: any,
-  _target?: any
-) {
-  (_target || target).removeEvent(event)
+function remove(event: string, handler: any, capture: any, _target?: any) {
+  ;(_target || target).removeEvent(event)
 }
 
-function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+function updateDOMListeners(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.on && !vnode.data.on) {
     return
   }
@@ -50,5 +46,5 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
 export default {
   create: updateDOMListeners,
-  update: updateDOMListeners
+  update: updateDOMListeners,
 }

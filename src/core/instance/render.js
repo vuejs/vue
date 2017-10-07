@@ -9,31 +9,31 @@ import {
   emptyObject,
   handleError,
   looseIndexOf,
-  defineReactive
+  defineReactive,
 } from '../util/index'
 
 import VNode, {
   cloneVNodes,
   createTextVNode,
-  createEmptyVNode
+  createEmptyVNode,
 } from '../vdom/vnode'
 
-import { isUpdatingChildComponent } from './lifecycle'
+import {isUpdatingChildComponent} from './lifecycle'
 
-import { createElement } from '../vdom/create-element'
-import { renderList } from './render-helpers/render-list'
-import { renderSlot } from './render-helpers/render-slot'
-import { resolveFilter } from './render-helpers/resolve-filter'
-import { checkKeyCodes } from './render-helpers/check-keycodes'
-import { bindObjectProps } from './render-helpers/bind-object-props'
-import { renderStatic, markOnce } from './render-helpers/render-static'
-import { bindObjectListeners } from './render-helpers/bind-object-listeners'
-import { resolveSlots, resolveScopedSlots } from './render-helpers/resolve-slots'
+import {createElement} from '../vdom/create-element'
+import {renderList} from './render-helpers/render-list'
+import {renderSlot} from './render-helpers/render-slot'
+import {resolveFilter} from './render-helpers/resolve-filter'
+import {checkKeyCodes} from './render-helpers/check-keycodes'
+import {bindObjectProps} from './render-helpers/bind-object-props'
+import {renderStatic, markOnce} from './render-helpers/render-static'
+import {bindObjectListeners} from './render-helpers/bind-object-listeners'
+import {resolveSlots, resolveScopedSlots} from './render-helpers/resolve-slots'
 
-export function initRender (vm: Component) {
+export function initRender(vm: Component) {
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null
-  const parentVnode = vm.$vnode = vm.$options._parentVnode // the placeholder node in parent tree
+  const parentVnode = (vm.$vnode = vm.$options._parentVnode) // the placeholder node in parent tree
   const renderContext = parentVnode && parentVnode.context
   vm.$slots = resolveSlots(vm.$options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject
@@ -52,30 +52,50 @@ export function initRender (vm: Component) {
 
   /* istanbul ignore else */
   if (process.env.NODE_ENV !== 'production') {
-    defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, () => {
-      !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
-    }, true)
-    defineReactive(vm, '$listeners', vm.$options._parentListeners || emptyObject, () => {
-      !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
-    }, true)
+    defineReactive(
+      vm,
+      '$attrs',
+      (parentData && parentData.attrs) || emptyObject,
+      () => {
+        !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
+      },
+      true,
+    )
+    defineReactive(
+      vm,
+      '$listeners',
+      vm.$options._parentListeners || emptyObject,
+      () => {
+        !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
+      },
+      true,
+    )
   } else {
-    defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, null, true)
-    defineReactive(vm, '$listeners', vm.$options._parentListeners || emptyObject, null, true)
+    defineReactive(
+      vm,
+      '$attrs',
+      (parentData && parentData.attrs) || emptyObject,
+      null,
+      true,
+    )
+    defineReactive(
+      vm,
+      '$listeners',
+      vm.$options._parentListeners || emptyObject,
+      null,
+      true,
+    )
   }
 }
 
-export function renderMixin (Vue: Class<Component>) {
-  Vue.prototype.$nextTick = function (fn: Function) {
+export function renderMixin(Vue: Class<Component>) {
+  Vue.prototype.$nextTick = function(fn: Function) {
     return nextTick(fn, this)
   }
 
-  Vue.prototype._render = function (): VNode {
+  Vue.prototype._render = function(): VNode {
     const vm: Component = this
-    const {
-      render,
-      staticRenderFns,
-      _parentVnode
-    } = vm.$options
+    const {render, staticRenderFns, _parentVnode} = vm.$options
 
     if (vm._isMounted) {
       // if the parent didn't update, the slot nodes will be the ones from
@@ -88,7 +108,8 @@ export function renderMixin (Vue: Class<Component>) {
       }
     }
 
-    vm.$scopedSlots = (_parentVnode && _parentVnode.data.scopedSlots) || emptyObject
+    vm.$scopedSlots =
+      (_parentVnode && _parentVnode.data.scopedSlots) || emptyObject
 
     if (staticRenderFns && !vm._staticTrees) {
       vm._staticTrees = []
@@ -108,7 +129,11 @@ export function renderMixin (Vue: Class<Component>) {
       if (process.env.NODE_ENV !== 'production') {
         if (vm.$options.renderError) {
           try {
-            vnode = vm.$options.renderError.call(vm._renderProxy, vm.$createElement, e)
+            vnode = vm.$options.renderError.call(
+              vm._renderProxy,
+              vm.$createElement,
+              e,
+            )
           } catch (e) {
             handleError(e, vm, `renderError`)
             vnode = vm._vnode
@@ -125,8 +150,8 @@ export function renderMixin (Vue: Class<Component>) {
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
         warn(
           'Multiple root nodes returned from render function. Render function ' +
-          'should return a single root node.',
-          vm
+            'should return a single root node.',
+          vm,
         )
       }
       vnode = createEmptyVNode()

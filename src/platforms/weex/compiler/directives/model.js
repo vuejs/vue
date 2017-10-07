@@ -1,12 +1,12 @@
 /* @flow */
 
-import { addHandler, addAttr } from 'compiler/helpers'
-import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
+import {addHandler, addAttr} from 'compiler/helpers'
+import {genComponentModel, genAssignmentCode} from 'compiler/directives/model'
 
-export default function model (
+export default function model(
   el: ASTElement,
   dir: ASTDirective,
-  _warn: Function
+  _warn: Function,
 ): ?boolean {
   if (el.tag === 'input' || el.tag === 'textarea') {
     genDefaultModel(el, dir.value, dir.modifiers)
@@ -15,12 +15,12 @@ export default function model (
   }
 }
 
-function genDefaultModel (
+function genDefaultModel(
   el: ASTElement,
   value: string,
-  modifiers: ?ASTModifiers
+  modifiers: ?ASTModifiers,
 ): ?boolean {
-  const { lazy, trim, number } = modifiers || {}
+  const {lazy, trim, number} = modifiers || {}
   const event = lazy ? 'change' : 'input'
 
   let valueExpression = `$event.target.attr.value${trim ? '.trim()' : ''}`

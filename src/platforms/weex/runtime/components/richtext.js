@@ -1,16 +1,16 @@
-function getVNodeType (vnode) {
+function getVNodeType(vnode) {
   if (!vnode.tag) {
     return ''
   }
   return vnode.tag.replace(/vue\-component\-(\d+\-)?/, '')
 }
 
-function isSimpleSpan (vnode) {
+function isSimpleSpan(vnode) {
   return vnode.children && vnode.children.length === 1 && !vnode.children[0].tag
 }
 
 const cssLengthRE = /^([+-]?[0-9]+(\.[0-9]+)?)(px|em|ex|%|in|cm|mm|pt|pc)$/i
-function trimCSSUnit (prop) {
+function trimCSSUnit(prop) {
   const res = String(prop).match(cssLengthRE)
   if (res) {
     return Number(res[1])
@@ -18,12 +18,12 @@ function trimCSSUnit (prop) {
   return prop
 }
 
-function parseStyle (vnode) {
+function parseStyle(vnode) {
   if (!vnode || !vnode.data) {
     return
   }
 
-  const { staticStyle, staticClass } = vnode.data
+  const {staticStyle, staticClass} = vnode.data
   if (vnode.data.style || vnode.data.class || staticStyle || staticClass) {
     const styles = Object.assign({}, staticStyle, vnode.data.style)
 
@@ -42,20 +42,20 @@ function parseStyle (vnode) {
   }
 }
 
-function convertVNodeChildren (children) {
+function convertVNodeChildren(children) {
   if (!children.length) {
     return
   }
 
   return children.map(vnode => {
     const type = getVNodeType(vnode)
-    const props = { type }
+    const props = {type}
 
     // convert raw text node
     if (!type) {
       props.type = 'span'
       props.attr = {
-        value: (vnode.text || '').trim()
+        value: (vnode.text || '').trim(),
       }
     } else {
       props.style = parseStyle(vnode)
@@ -84,12 +84,12 @@ function convertVNodeChildren (children) {
 export default {
   name: 'richtext',
   // abstract: true,
-  render (h) {
+  render(h) {
     return h('weex:richtext', {
       on: this._events,
       attrs: {
-        value: convertVNodeChildren(this.$options._renderChildren || [])
-      }
+        value: convertVNodeChildren(this.$options._renderChildren || []),
+      },
     })
-  }
+  },
 }

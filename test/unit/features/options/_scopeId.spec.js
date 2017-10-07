@@ -4,7 +4,7 @@ describe('Options _scopeId', () => {
   it('should add scopeId attributes', () => {
     const vm = new Vue({
       _scopeId: 'foo',
-      template: '<div><p><span></span></p></div>'
+      template: '<div><p><span></span></p></div>',
     }).$mount()
     expect(vm.$el.hasAttribute('foo')).toBe(true)
     expect(vm.$el.children[0].hasAttribute('foo')).toBe(true)
@@ -18,9 +18,9 @@ describe('Options _scopeId', () => {
       components: {
         child: {
           _scopeId: 'bar',
-          template: '<div></div>'
-        }
-      }
+          template: '<div></div>',
+        },
+      },
     }).$mount()
     expect(vm.$el.children[0].hasAttribute('foo')).toBe(true)
     expect(vm.$el.children[0].hasAttribute('bar')).toBe(true)
@@ -33,9 +33,9 @@ describe('Options _scopeId', () => {
       components: {
         child: {
           _scopeId: 'bar',
-          template: '<div><slot></slot></div>'
-        }
-      }
+          template: '<div><slot></slot></div>',
+        },
+      },
     }).$mount()
     expect(vm.$el.children[0].children[0].hasAttribute('foo')).toBe(true)
     expect(vm.$el.children[0].children[0].hasAttribute('bar')).toBe(true)
@@ -49,10 +49,10 @@ describe('Options _scopeId', () => {
       components: {
         child: {
           _scopeId: 'data-2',
-          data: () => ({ show: true }),
-          template: '<div v-if="show"></div>'
-        }
-      }
+          data: () => ({show: true}),
+          template: '<div v-if="show"></div>',
+        },
+      },
     }).$mount()
 
     const child = vm.$refs.child
@@ -63,9 +63,11 @@ describe('Options _scopeId', () => {
     child.show = false
     waitForUpdate(() => {
       child.show = true
-    }).then(() => {
-      expect(child.$el.hasAttribute('data-1')).toBe(true)
-      expect(child.$el.hasAttribute('data-2')).toBe(true)
-    }).then(done)
+    })
+      .then(() => {
+        expect(child.$el.hasAttribute('data-1')).toBe(true)
+        expect(child.$el.hasAttribute('data-2')).toBe(true)
+      })
+      .then(done)
   })
 })

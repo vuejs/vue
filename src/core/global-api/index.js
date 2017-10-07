@@ -1,12 +1,12 @@
 /* @flow */
 
 import config from '../config'
-import { initUse } from './use'
-import { initMixin } from './mixin'
-import { initExtend } from './extend'
-import { initAssetRegisters } from './assets'
-import { set, del } from '../observer/index'
-import { ASSET_TYPES } from 'shared/constants'
+import {initUse} from './use'
+import {initMixin} from './mixin'
+import {initExtend} from './extend'
+import {initAssetRegisters} from './assets'
+import {set, del} from '../observer/index'
+import {ASSET_TYPES} from 'shared/constants'
 import builtInComponents from '../components/index'
 
 import {
@@ -14,17 +14,17 @@ import {
   extend,
   nextTick,
   mergeOptions,
-  defineReactive
+  defineReactive,
 } from '../util/index'
 
-export function initGlobalAPI (Vue: GlobalAPI) {
+export function initGlobalAPI(Vue: GlobalAPI) {
   // config
   const configDef = {}
   configDef.get = () => config
   if (process.env.NODE_ENV !== 'production') {
     configDef.set = () => {
       warn(
-        'Do not replace the Vue.config object, set individual fields instead.'
+        'Do not replace the Vue.config object, set individual fields instead.',
       )
     }
   }
@@ -37,7 +37,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     warn,
     extend,
     mergeOptions,
-    defineReactive
+    defineReactive,
   }
 
   Vue.set = set

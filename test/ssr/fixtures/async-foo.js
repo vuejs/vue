@@ -4,10 +4,10 @@ import font from './test.woff2'
 import image from './test.png'
 
 module.exports = {
-  beforeCreate () {
+  beforeCreate() {
     this.$vnode.ssrContext._registeredComponents.add('__MODULE_ID__')
   },
-  render (h) {
+  render(h) {
     return h('div', `async ${font} ${image}`)
-  }
+  },
 }

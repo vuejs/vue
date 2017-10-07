@@ -11,19 +11,20 @@ describe('Options directives', () => {
     const assertContext = (el, binding, vnode) => {
       expect(vnode.context).toBe(vm)
       expect(binding.arg).toBe('arg')
-      expect(binding.modifiers).toEqual({ hello: true })
+      expect(binding.modifiers).toEqual({hello: true})
     }
 
     const vm = new Vue({
-      template: '<div class="hi"><div v-if="ok" v-test:arg.hello="a">{{ msg }}</div></div>',
+      template:
+        '<div class="hi"><div v-if="ok" v-test:arg.hello="a">{{ msg }}</div></div>',
       data: {
         msg: 'hi',
         a: 'foo',
-        ok: true
+        ok: true,
       },
       directives: {
         test: {
-          bind (el, binding, vnode) {
+          bind(el, binding, vnode) {
             bindSpy()
             assertContext(el, binding, vnode)
             expect(binding.value).toBe('foo')
@@ -31,7 +32,7 @@ describe('Options directives', () => {
             expect(binding.oldValue).toBeUndefined()
             expect(el.parentNode).toBeNull()
           },
-          inserted (el, binding, vnode) {
+          inserted(el, binding, vnode) {
             insertedSpy()
             assertContext(el, binding, vnode)
             expect(binding.value).toBe('foo')
@@ -39,7 +40,7 @@ describe('Options directives', () => {
             expect(binding.oldValue).toBeUndefined()
             expect(el.parentNode.className).toBe('hi')
           },
-          update (el, binding, vnode, oldVnode) {
+          update(el, binding, vnode, oldVnode) {
             updateSpy()
             assertContext(el, binding, vnode)
             expect(el).toBe(vm.$el.children[0])
@@ -50,16 +51,16 @@ describe('Options directives', () => {
               expect(binding.oldValue).toBe('foo')
             }
           },
-          componentUpdated (el, binding, vnode) {
+          componentUpdated(el, binding, vnode) {
             componentUpdatedSpy()
             assertContext(el, binding, vnode)
           },
-          unbind (el, binding, vnode) {
+          unbind(el, binding, vnode) {
             unbindSpy()
             assertContext(el, binding, vnode)
-          }
-        }
-      }
+          },
+        },
+      },
     })
 
     vm.$mount()
@@ -74,27 +75,30 @@ describe('Options directives', () => {
       expect(componentUpdatedSpy).toHaveBeenCalled()
       expect(unbindSpy).not.toHaveBeenCalled()
       vm.msg = 'bye'
-    }).then(() => {
-      expect(componentUpdatedSpy.calls.count()).toBe(2)
-      vm.ok = false
-    }).then(() => {
-      expect(unbindSpy).toHaveBeenCalled()
-    }).then(done)
+    })
+      .then(() => {
+        expect(componentUpdatedSpy.calls.count()).toBe(2)
+        vm.ok = false
+      })
+      .then(() => {
+        expect(unbindSpy).toHaveBeenCalled()
+      })
+      .then(done)
   })
 
   it('function shorthand', done => {
     const spy = jasmine.createSpy('directive')
     const vm = new Vue({
       template: '<div v-test:arg.hello="a"></div>',
-      data: { a: 'foo' },
+      data: {a: 'foo'},
       directives: {
-        test (el, binding, vnode) {
+        test(el, binding, vnode) {
           expect(vnode.context).toBe(vm)
           expect(binding.arg).toBe('arg')
-          expect(binding.modifiers).toEqual({ hello: true })
+          expect(binding.modifiers).toEqual({hello: true})
           spy(binding.value, binding.oldValue)
-        }
-      }
+        },
+      },
     })
     vm.$mount()
     expect(spy).toHaveBeenCalledWith('foo', undefined)
@@ -106,15 +110,15 @@ describe('Options directives', () => {
 
   it('function shorthand (global)', done => {
     const spy = jasmine.createSpy('directive')
-    Vue.directive('test', function (el, binding, vnode) {
+    Vue.directive('test', function(el, binding, vnode) {
       expect(vnode.context).toBe(vm)
       expect(binding.arg).toBe('arg')
-      expect(binding.modifiers).toEqual({ hello: true })
+      expect(binding.modifiers).toEqual({hello: true})
       spy(binding.value, binding.oldValue)
     })
     const vm = new Vue({
       template: '<div v-test:arg.hello="a"></div>',
-      data: { a: 'foo' }
+      data: {a: 'foo'},
     })
     vm.$mount()
     expect(spy).toHaveBeenCalledWith('foo', undefined)
@@ -128,7 +132,7 @@ describe('Options directives', () => {
   it('should teardown directives on old vnodes when new vnodes have none', done => {
     const vm = new Vue({
       data: {
-        ok: true
+        ok: true,
       },
       template: `
         <div>
@@ -138,10 +142,14 @@ describe('Options directives', () => {
       `,
       directives: {
         test: {
-          bind: el => { el.id = 'a' },
-          unbind: el => { el.id = '' }
-        }
-      }
+          bind: el => {
+            el.id = 'a'
+          },
+          unbind: el => {
+            el.id = ''
+          },
+        },
+      },
     }).$mount()
     expect(vm.$el.children[0].id).toBe('a')
     vm.ok = false
@@ -157,7 +165,7 @@ describe('Options directives', () => {
     const vm = new Vue({
       data: {
         ok: true,
-        val: 123
+        val: 123,
       },
       template: `
         <div>
@@ -171,16 +179,16 @@ describe('Options directives', () => {
           inserted: createSpy('inserted1'),
           update: createSpy('update1'),
           componentUpdated: createSpy('componentUpdated1'),
-          unbind: createSpy('unbind1')
+          unbind: createSpy('unbind1'),
         },
         test2: {
           bind: createSpy('bind2'),
           inserted: createSpy('inserted2'),
           update: createSpy('update2'),
           componentUpdated: createSpy('componentUpdated2'),
-          unbind: createSpy('unbind2')
-        }
-      }
+          unbind: createSpy('unbind2'),
+        },
+      },
     }).$mount()
 
     expect(spies.bind1.calls.count()).toBe(2)
@@ -202,28 +210,31 @@ describe('Options directives', () => {
       expect(spies.inserted2.calls.count()).toBe(1)
 
       vm.ok = true
-    }).then(() => {
-      // v-test without modifier should be bound again
-      expect(spies.bind1.calls.count()).toBe(3)
-      expect(spies.inserted1.calls.count()).toBe(3)
+    })
+      .then(() => {
+        // v-test without modifier should be bound again
+        expect(spies.bind1.calls.count()).toBe(3)
+        expect(spies.inserted1.calls.count()).toBe(3)
 
-      // v-test2 should be unbound
-      expect(spies.unbind2.calls.count()).toBe(1)
+        // v-test2 should be unbound
+        expect(spies.unbind2.calls.count()).toBe(1)
 
-      // v-test with modifier should be updated again
-      expect(spies.update1.calls.count()).toBe(2)
-      expect(spies.componentUpdated1.calls.count()).toBe(2)
+        // v-test with modifier should be updated again
+        expect(spies.update1.calls.count()).toBe(2)
+        expect(spies.componentUpdated1.calls.count()).toBe(2)
 
-      vm.val = 234
-    }).then(() => {
-      expect(spies.update1.calls.count()).toBe(4)
-      expect(spies.componentUpdated1.calls.count()).toBe(4)
-    }).then(done)
+        vm.val = 234
+      })
+      .then(() => {
+        expect(spies.update1.calls.count()).toBe(4)
+        expect(spies.componentUpdated1.calls.count()).toBe(4)
+      })
+      .then(done)
   })
 
   it('warn non-existent', () => {
     new Vue({
-      template: '<div v-test></div>'
+      template: '<div v-test></div>',
     }).$mount()
     expect('Failed to resolve directive: test').toHaveBeenWarned()
   })
@@ -233,18 +244,18 @@ describe('Options directives', () => {
     const dir = {
       bind: jasmine.createSpy('bind'),
       inserted: jasmine.createSpy('inserted'),
-      unbind: jasmine.createSpy('unbind')
+      unbind: jasmine.createSpy('unbind'),
     }
 
     const Child = {
       template: `<div v-if="ok"/><span v-else/>`,
-      data: () => ({ ok: true })
+      data: () => ({ok: true}),
     }
 
     const vm = new Vue({
       template: `<child ref="child" v-test />`,
-      directives: { test: dir },
-      components: { Child }
+      directives: {test: dir},
+      components: {Child},
     }).$mount()
 
     const oldEl = vm.$el

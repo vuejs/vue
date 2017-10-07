@@ -1,10 +1,12 @@
 import Vue from 'vue'
-import { patch } from 'web/runtime/patch'
+import {patch} from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 
 describe('vdom patch: element', () => {
   it('should create an element', () => {
-    const vnode = new VNode('p', { attrs: { id: '1' }}, [createTextVNode('hello world')])
+    const vnode = new VNode('p', {attrs: {id: '1'}}, [
+      createTextVNode('hello world'),
+    ])
     const elm = patch(null, vnode)
     expect(elm.tagName).toBe('P')
     expect(elm.outerHTML).toBe('<p id="1">hello world</p>')
@@ -44,7 +46,7 @@ describe('vdom patch: element', () => {
   it('should create create an elements which having span and text content', () => {
     const vnode = new VNode('div', {}, [
       new VNode('span'),
-      createTextVNode('hello world')
+      createTextVNode('hello world'),
     ])
     const elm = patch(null, vnode)
     expect(elm.childNodes[0].tagName).toBe('SPAN')
@@ -53,7 +55,7 @@ describe('vdom patch: element', () => {
 
   it('should create element with scope attribute', () => {
     const vnode = new VNode('div')
-    vnode.context = new Vue({ _scopeId: 'foo' })
+    vnode.context = new Vue({_scopeId: 'foo'})
     const elm = patch(null, vnode)
     expect(elm.hasAttribute('foo')).toBe(true)
   })

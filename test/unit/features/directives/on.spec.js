@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { supportsPassive } from 'core/util/env'
+import {supportsPassive} from 'core/util/env'
 
 describe('Directive v-on', () => {
   let vm, spy, el
@@ -21,13 +21,13 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: '<div v-on:click="foo"></div>',
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     triggerEvent(vm.$el, 'click')
     expect(spy.calls.count()).toBe(1)
 
     const args = spy.calls.allArgs()
-    const event = args[0] && args[0][0] || {}
+    const event = (args[0] && args[0][0]) || {}
     expect(event.type).toBe('click')
   })
 
@@ -35,7 +35,7 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: '<div v-on:click="foo(1,2,3,$event)"></div>',
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     triggerEvent(vm.$el, 'click')
     expect(spy.calls.count()).toBe(1)
@@ -55,8 +55,8 @@ describe('Directive v-on', () => {
       el,
       template: `<div class="test" @click="function (e) { log(e.target.className) }"></div>`,
       methods: {
-        log: spy
-      }
+        log: spy,
+      },
     }).$mount()
     triggerEvent(vm.$el, 'click')
     expect(spy).toHaveBeenCalledWith('test')
@@ -66,7 +66,7 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: '<a href="#test" @click.prevent="foo"></a>',
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     triggerEvent(vm.$el, 'click')
     expect(spy.calls.count()).toBe(1)
@@ -78,7 +78,7 @@ describe('Directive v-on', () => {
       template: `
         <div @click.stop="foo"></div>
       `,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     const hash = window.location.hash
     triggerEvent(vm.$el, 'click')
@@ -92,10 +92,10 @@ describe('Directive v-on', () => {
         <input type="checkbox" ref="input" @click.prevent="foo">
       `,
       methods: {
-        foo ($event) {
+        foo($event) {
           spy($event.defaultPrevented)
-        }
-      }
+        },
+      },
     })
     vm.$refs.input.checked = false
     triggerEvent(vm.$refs.input, 'click')
@@ -112,9 +112,13 @@ describe('Directive v-on', () => {
         </div>
       `,
       methods: {
-        foo () { callOrder.push(1) },
-        bar () { callOrder.push(2) }
-      }
+        foo() {
+          callOrder.push(1)
+        },
+        bar() {
+          callOrder.push(2)
+        },
+      },
     })
     triggerEvent(vm.$el.firstChild, 'click')
     expect(callOrder.toString()).toBe('1,2')
@@ -127,7 +131,7 @@ describe('Directive v-on', () => {
         <div @click.once="foo">
         </div>
       `,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     triggerEvent(vm.$el, 'click')
     expect(spy.calls.count()).toBe(1)
@@ -145,7 +149,7 @@ describe('Directive v-on', () => {
           <button ref="two" @click.once="foo">two</button>
         </div>
       `,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     triggerEvent(vm.$refs.one, 'click')
     expect(spy.calls.count()).toBe(1)
@@ -168,9 +172,13 @@ describe('Directive v-on', () => {
         </div>
       `,
       methods: {
-        foo () { callOrder.push(1) },
-        bar () { callOrder.push(2) }
-      }
+        foo() {
+          callOrder.push(1)
+        },
+        bar() {
+          callOrder.push(2)
+        },
+      },
     })
     triggerEvent(vm.$el.firstChild, 'click')
     expect(callOrder.toString()).toBe('1,2')
@@ -183,7 +191,7 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: `<div @click.once.self="foo"><span/></div>`,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     triggerEvent(vm.$el.firstChild, 'click')
     expect(spy).not.toHaveBeenCalled()
@@ -197,7 +205,7 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: `<input @keyup.enter="foo">`,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     triggerEvent(vm.$el, 'keyup', e => {
       e.keyCode = 13
@@ -209,7 +217,7 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: `<input @keyup.arrow-right="foo">`,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     triggerEvent(vm.$el, 'keyup', e => {
       e.key = 'ArrowRight'
@@ -229,27 +237,35 @@ describe('Directive v-on', () => {
           <input ref="meta" @keyup.meta="foo">
         </div>
       `,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
 
     triggerEvent(vm.$refs.ctrl, 'keyup')
     expect(spy.calls.count()).toBe(0)
-    triggerEvent(vm.$refs.ctrl, 'keyup', e => { e.ctrlKey = true })
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => {
+      e.ctrlKey = true
+    })
     expect(spy.calls.count()).toBe(1)
 
     triggerEvent(vm.$refs.shift, 'keyup')
     expect(spy.calls.count()).toBe(1)
-    triggerEvent(vm.$refs.shift, 'keyup', e => { e.shiftKey = true })
+    triggerEvent(vm.$refs.shift, 'keyup', e => {
+      e.shiftKey = true
+    })
     expect(spy.calls.count()).toBe(2)
 
     triggerEvent(vm.$refs.alt, 'keyup')
     expect(spy.calls.count()).toBe(2)
-    triggerEvent(vm.$refs.alt, 'keyup', e => { e.altKey = true })
+    triggerEvent(vm.$refs.alt, 'keyup', e => {
+      e.altKey = true
+    })
     expect(spy.calls.count()).toBe(3)
 
     triggerEvent(vm.$refs.meta, 'keyup')
     expect(spy.calls.count()).toBe(3)
-    triggerEvent(vm.$refs.meta, 'keyup', e => { e.metaKey = true })
+    triggerEvent(vm.$refs.meta, 'keyup', e => {
+      e.metaKey = true
+    })
     expect(spy.calls.count()).toBe(4)
   })
 
@@ -261,7 +277,7 @@ describe('Directive v-on', () => {
           <input ref="ctrl" @keyup.exact="foo">
         </div>
       `,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
 
     triggerEvent(vm.$refs.ctrl, 'keyup')
@@ -288,7 +304,7 @@ describe('Directive v-on', () => {
           <input ref="ctrl" @keyup.ctrl.exact="foo">
         </div>
       `,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
 
     triggerEvent(vm.$refs.ctrl, 'keyup')
@@ -311,7 +327,7 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: `<input @keyup.13="foo">`,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     triggerEvent(vm.$el, 'keyup', e => {
       e.keyCode = 13
@@ -339,26 +355,44 @@ describe('Directive v-on', () => {
       methods: {
         foo: spyLeft,
         foo1: spyRight,
-        foo2: spyMiddle
-      }
+        foo2: spyMiddle,
+      },
     })
 
-    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = right })
-    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = middle })
+    triggerEvent(vm.$refs.left, 'mousedown', e => {
+      e.button = right
+    })
+    triggerEvent(vm.$refs.left, 'mousedown', e => {
+      e.button = middle
+    })
     expect(spyLeft).not.toHaveBeenCalled()
-    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = left })
+    triggerEvent(vm.$refs.left, 'mousedown', e => {
+      e.button = left
+    })
     expect(spyLeft).toHaveBeenCalled()
 
-    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = left })
-    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = middle })
+    triggerEvent(vm.$refs.right, 'mousedown', e => {
+      e.button = left
+    })
+    triggerEvent(vm.$refs.right, 'mousedown', e => {
+      e.button = middle
+    })
     expect(spyRight).not.toHaveBeenCalled()
-    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = right })
+    triggerEvent(vm.$refs.right, 'mousedown', e => {
+      e.button = right
+    })
     expect(spyRight).toHaveBeenCalled()
 
-    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = left })
-    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = right })
+    triggerEvent(vm.$refs.middle, 'mousedown', e => {
+      e.button = left
+    })
+    triggerEvent(vm.$refs.middle, 'mousedown', e => {
+      e.button = right
+    })
     expect(spyMiddle).not.toHaveBeenCalled()
-    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = middle })
+    triggerEvent(vm.$refs.middle, 'mousedown', e => {
+      e.button = middle
+    })
     expect(spyMiddle).toHaveBeenCalled()
   })
 
@@ -367,7 +401,7 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: `<input @keyup.test="foo">`,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     triggerEvent(vm.$el, 'keyup', e => {
       e.keyCode = 1
@@ -381,7 +415,7 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: `<input @keyup.up="foo" @keyup.down="foo">`,
-      methods: { foo: spy }
+      methods: {foo: spy},
     })
     triggerEvent(vm.$el, 'keyup', e => {
       e.keyCode = 87
@@ -403,12 +437,12 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: '<bar @custom="foo"></bar>',
-      methods: { foo: spy },
+      methods: {foo: spy},
       components: {
         bar: {
-          template: '<span>Hello</span>'
-        }
-      }
+          template: '<span>Hello</span>',
+        },
+      },
     })
     vm.$children[0].$emit('custom', 'foo', 'bar')
     expect(spy).toHaveBeenCalledWith('foo', 'bar')
@@ -418,12 +452,12 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: '<bar @click.native="foo"></bar>',
-      methods: { foo: spy },
+      methods: {foo: spy},
       components: {
         bar: {
-          template: '<span>Hello</span>'
-        }
-      }
+          template: '<span>Hello</span>',
+        },
+      },
     })
     vm.$children[0].$emit('click')
     expect(spy).not.toHaveBeenCalled()
@@ -435,12 +469,12 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: '<bar @custom.once="foo"></bar>',
-      methods: { foo: spy },
+      methods: {foo: spy},
       components: {
         bar: {
-          template: '<span>Hello</span>'
-        }
-      }
+          template: '<span>Hello</span>',
+        },
+      },
     })
     vm.$children[0].$emit('custom')
     expect(spy.calls.count()).toBe(1)
@@ -452,15 +486,15 @@ describe('Directive v-on', () => {
     const spy2 = jasmine.createSpy('remove listener')
     vm = new Vue({
       el,
-      methods: { foo: spy, bar: spy2 },
+      methods: {foo: spy, bar: spy2},
       data: {
-        ok: true
+        ok: true,
       },
-      render (h) {
+      render(h) {
         return this.ok
-          ? h('input', { on: { click: this.foo }})
-          : h('input', { on: { input: this.bar }})
-      }
+          ? h('input', {on: {click: this.foo}})
+          : h('input', {on: {input: this.bar}})
+      },
     })
     triggerEvent(vm.$el, 'click')
     expect(spy.calls.count()).toBe(1)
@@ -478,15 +512,23 @@ describe('Directive v-on', () => {
     const spy2 = jasmine.createSpy('remove listener')
     vm = new Vue({
       el,
-      methods: { foo: spy, bar: spy2, stopped (ev) { ev.stopPropagation() } },
-      data: {
-        ok: true
+      methods: {
+        foo: spy,
+        bar: spy2,
+        stopped(ev) {
+          ev.stopPropagation()
+        },
       },
-      render (h) {
+      data: {
+        ok: true,
+      },
+      render(h) {
         return this.ok
-          ? h('div', { on: { '!click': this.foo }}, [h('div', { on: { click: this.stopped }})])
-          : h('div', { on: { mouseOver: this.bar }}, [h('div')])
-      }
+          ? h('div', {on: {'!click': this.foo}}, [
+              h('div', {on: {click: this.stopped}}),
+            ])
+          : h('div', {on: {mouseOver: this.bar}}, [h('div')])
+      },
     })
     triggerEvent(vm.$el.firstChild, 'click')
     expect(spy.calls.count()).toBe(1)
@@ -504,15 +546,15 @@ describe('Directive v-on', () => {
     const spy2 = jasmine.createSpy('remove listener')
     vm = new Vue({
       el,
-      methods: { foo: spy, bar: spy2 },
+      methods: {foo: spy, bar: spy2},
       data: {
-        ok: true
+        ok: true,
       },
-      render (h) {
+      render(h) {
         return this.ok
-          ? h('input', { on: { '~click': this.foo }})
-          : h('input', { on: { input: this.bar }})
-      }
+          ? h('input', {on: {'~click': this.foo}})
+          : h('input', {on: {input: this.bar}})
+      },
     })
     triggerEvent(vm.$el, 'click')
     expect(spy.calls.count()).toBe(1)
@@ -532,15 +574,23 @@ describe('Directive v-on', () => {
     const spy2 = jasmine.createSpy('remove listener')
     vm = new Vue({
       el,
-      methods: { foo: spy, bar: spy2, stopped (ev) { ev.stopPropagation() } },
-      data: {
-        ok: true
+      methods: {
+        foo: spy,
+        bar: spy2,
+        stopped(ev) {
+          ev.stopPropagation()
+        },
       },
-      render (h) {
+      data: {
+        ok: true,
+      },
+      render(h) {
         return this.ok
-          ? h('div', { on: { '~!click': this.foo }}, [h('div', { on: { click: this.stopped }})])
-          : h('div', { on: { mouseOver: this.bar }}, [h('div')])
-      }
+          ? h('div', {on: {'~!click': this.foo}}, [
+              h('div', {on: {click: this.stopped}}),
+            ])
+          : h('div', {on: {mouseOver: this.bar}}, [h('div')])
+      },
     })
     triggerEvent(vm.$el.firstChild, 'click')
     expect(spy.calls.count()).toBe(1)
@@ -560,20 +610,20 @@ describe('Directive v-on', () => {
     const spy2 = jasmine.createSpy('remove listener')
     vm = new Vue({
       el,
-      methods: { foo: spy, bar: spy2 },
+      methods: {foo: spy, bar: spy2},
       data: {
-        ok: true
+        ok: true,
       },
       components: {
         test: {
-          template: '<div></div>'
-        }
+          template: '<div></div>',
+        },
       },
-      render (h) {
+      render(h) {
         return this.ok
-          ? h('test', { on: { foo: this.foo }})
-          : h('test', { on: { bar: this.bar }})
-      }
+          ? h('test', {on: {foo: this.foo}})
+          : h('test', {on: {bar: this.bar}})
+      },
     })
     vm.$children[0].$emit('foo')
     expect(spy.calls.count()).toBe(1)
@@ -590,8 +640,8 @@ describe('Directive v-on', () => {
   it('warn missing handlers', () => {
     vm = new Vue({
       el,
-      data: { none: null },
-      template: `<div @click="none"></div>`
+      data: {none: null},
+      template: `<div @click="none"></div>`,
     })
     expect(`Invalid handler for event "click": got null`).toHaveBeenWarned()
     expect(() => {
@@ -619,20 +669,36 @@ describe('Directive v-on', () => {
         foo: spyLeft,
         foo1: spyRight,
         foo2: spyUp,
-        foo3: spyDown
-      }
+        foo3: spyDown,
+      },
     })
-    triggerEvent(vm.$refs.left, 'keydown', e => { e.keyCode = 37 })
-    triggerEvent(vm.$refs.left, 'keydown', e => { e.keyCode = 39 })
+    triggerEvent(vm.$refs.left, 'keydown', e => {
+      e.keyCode = 37
+    })
+    triggerEvent(vm.$refs.left, 'keydown', e => {
+      e.keyCode = 39
+    })
 
-    triggerEvent(vm.$refs.right, 'keydown', e => { e.keyCode = 39 })
-    triggerEvent(vm.$refs.right, 'keydown', e => { e.keyCode = 38 })
+    triggerEvent(vm.$refs.right, 'keydown', e => {
+      e.keyCode = 39
+    })
+    triggerEvent(vm.$refs.right, 'keydown', e => {
+      e.keyCode = 38
+    })
 
-    triggerEvent(vm.$refs.up, 'keydown', e => { e.keyCode = 38 })
-    triggerEvent(vm.$refs.up, 'keydown', e => { e.keyCode = 37 })
+    triggerEvent(vm.$refs.up, 'keydown', e => {
+      e.keyCode = 38
+    })
+    triggerEvent(vm.$refs.up, 'keydown', e => {
+      e.keyCode = 37
+    })
 
-    triggerEvent(vm.$refs.down, 'keydown', e => { e.keyCode = 40 })
-    triggerEvent(vm.$refs.down, 'keydown', e => { e.keyCode = 39 })
+    triggerEvent(vm.$refs.down, 'keydown', e => {
+      e.keyCode = 40
+    })
+    triggerEvent(vm.$refs.down, 'keydown', e => {
+      e.keyCode = 39
+    })
 
     expect(spyLeft.calls.count()).toBe(1)
     expect(spyRight.calls.count()).toBe(1)
@@ -653,10 +719,10 @@ describe('Directive v-on', () => {
           </div>
         `,
         methods: {
-          foo (e) {
+          foo(e) {
             e.preventDefault()
-          }
-        }
+          },
+        },
       })
 
       vm.$refs.normal.checked = false
@@ -668,7 +734,9 @@ describe('Directive v-on', () => {
       expect(vm.$refs.normal.checked).toBe(false)
       expect(vm.$refs.passive.checked).toBe(true)
       expect(vm.$refs.exclusive.checked).toBe(true)
-      expect('passive and prevent can\'t be used together. Passive handler can\'t prevent default event.').toHaveBeenWarned()
+      expect(
+        "passive and prevent can't be used together. Passive handler can't prevent default event.",
+      ).toHaveBeenWarned()
     })
   }
 
@@ -681,22 +749,26 @@ describe('Directive v-on', () => {
         <input ref="input" @keydown.enter.prevent="foo">
       `,
       methods: {
-        foo ($event) {
+        foo($event) {
           prevented = $event.defaultPrevented
-        }
-      }
+        },
+      },
     })
 
-    triggerEvent(vm.$refs.input, 'keydown', e => { e.keyCode = 32 })
+    triggerEvent(vm.$refs.input, 'keydown', e => {
+      e.keyCode = 32
+    })
     expect(prevented).toBe(false)
-    triggerEvent(vm.$refs.input, 'keydown', e => { e.keyCode = 13 })
+    triggerEvent(vm.$refs.input, 'keydown', e => {
+      e.keyCode = 13
+    })
     expect(prevented).toBe(true)
   })
 
   it('should warn click.right', () => {
     new Vue({
       template: `<div @click.right="foo"></div>`,
-      methods: { foo () {} }
+      methods: {foo() {}},
     }).$mount()
 
     expect(`Use "contextmenu" instead`).toHaveBeenWarned()
@@ -708,12 +780,12 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: `<button v-on="listeners">foo</button>`,
-      created () {
+      created() {
         this.listeners = {
           click,
-          mouseup
+          mouseup,
         }
-      }
+      },
     })
 
     triggerEvent(vm.$el, 'click')
@@ -732,15 +804,15 @@ describe('Directive v-on', () => {
     vm = new Vue({
       el,
       template: `<button v-on="listeners" @click="click2">foo</button>`,
-      created () {
+      created() {
         this.listeners = {
           click: click1,
-          mouseup
+          mouseup,
         }
       },
       methods: {
-        click2
-      }
+        click2,
+      },
     })
 
     triggerEvent(vm.$el, 'click')
@@ -771,15 +843,15 @@ describe('Directive v-on', () => {
       methods: {
         click,
         mouseup,
-        mousedown
+        mousedown,
       },
       components: {
         fooButton: {
           template: `
             <button v-on="$listeners"></button>
-          `
-        }
-      }
+          `,
+        },
+      },
     })
 
     triggerEvent(vm.$el, 'click')
@@ -800,14 +872,16 @@ describe('Directive v-on', () => {
 
   it('warn object syntax with modifier', () => {
     new Vue({
-      template: `<button v-on.self="{}"></button>`
+      template: `<button v-on.self="{}"></button>`,
     }).$mount()
-    expect(`v-on without argument does not support modifiers`).toHaveBeenWarned()
+    expect(
+      `v-on without argument does not support modifiers`,
+    ).toHaveBeenWarned()
   })
 
   it('warn object syntax with non-object value', () => {
     new Vue({
-      template: `<button v-on="123"></button>`
+      template: `<button v-on="123"></button>`,
     }).$mount()
     expect(`v-on without argument expects an Object value`).toHaveBeenWarned()
   })

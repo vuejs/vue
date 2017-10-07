@@ -5,7 +5,7 @@ describe('Global API: assets', () => {
 
   it('directive / filters', () => {
     const assets = ['directive', 'filter']
-    assets.forEach(function (type) {
+    assets.forEach(function(type) {
       const def = {}
       Test[type]('test', def)
       expect(Test.options[type + 's'].test).toBe(def)
@@ -18,13 +18,13 @@ describe('Global API: assets', () => {
   describe('Vue.component', () => {
     it('should register a component', () => {
       Vue.component('foo', {
-        template: '<span>foo</span>'
+        template: '<span>foo</span>',
       })
       Vue.component('bar', {
-        template: '<span>bar</span>'
+        template: '<span>bar</span>',
       })
       const vm = new Vue({
-        template: '<div><foo></foo><bar></bar></div>'
+        template: '<div><foo></foo><bar></bar></div>',
       }).$mount()
       expect(vm.$el.innerHTML).toBe('<span>foo</span><span>bar</span>')
       // unregister them
@@ -34,7 +34,7 @@ describe('Global API: assets', () => {
   })
 
   it('component on extended constructor', () => {
-    const def = { a: 1 }
+    const def = {a: 1}
     Test.component('test', def)
     const component = Test.options.components.test
     expect(typeof component).toBe('function')
@@ -52,15 +52,15 @@ describe('Global API: assets', () => {
   // #4434
   it('local registration should take priority regardless of naming convention', () => {
     Vue.component('x-foo', {
-      template: '<span>global</span>'
+      template: '<span>global</span>',
     })
     const vm = new Vue({
       components: {
         xFoo: {
-          template: '<span>local</span>'
-        }
+          template: '<span>local</span>',
+        },
       },
-      template: '<div><x-foo></x-foo></div>'
+      template: '<div><x-foo></x-foo></div>',
     }).$mount()
     expect(vm.$el.textContent).toBe('local')
     delete Vue.options.components['x-foo']

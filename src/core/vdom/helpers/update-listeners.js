@@ -1,7 +1,7 @@
 /* @flow */
 
-import { warn } from 'core/util/index'
-import { cached, isUndef } from 'shared/util'
+import {warn} from 'core/util/index'
+import {cached, isUndef} from 'shared/util'
 
 const normalizeEvent = cached((name: string): {
   name: string,
@@ -9,7 +9,7 @@ const normalizeEvent = cached((name: string): {
   once: boolean,
   capture: boolean,
   passive: boolean,
-  handler?: Function
+  handler?: Function,
 } => {
   const passive = name.charAt(0) === '&'
   name = passive ? name.slice(1) : name
@@ -23,12 +23,12 @@ const normalizeEvent = cached((name: string): {
     plain,
     once,
     capture,
-    passive
+    passive,
   }
 })
 
-export function createFnInvoker (fns: Function | Array<Function>): Function {
-  function invoker () {
+export function createFnInvoker(fns: Function | Array<Function>): Function {
+  function invoker() {
     const fns = invoker.fns
     if (Array.isArray(fns)) {
       const cloned = fns.slice()
@@ -45,16 +45,16 @@ export function createFnInvoker (fns: Function | Array<Function>): Function {
 }
 
 // #6552
-function prioritizePlainEvents (a, b) {
+function prioritizePlainEvents(a, b) {
   return a.plain ? -1 : b.plain ? 1 : 0
 }
 
-export function updateListeners (
+export function updateListeners(
   on: Object,
   oldOn: Object,
   add: Function,
   remove: Function,
-  vm: Component
+  vm: Component,
 ) {
   let name, cur, old, event
   const toAdd = []
@@ -65,10 +65,11 @@ export function updateListeners (
     event = normalizeEvent(name)
     if (!event.plain) hasModifier = true
     if (isUndef(cur)) {
-      process.env.NODE_ENV !== 'production' && warn(
-        `Invalid handler for event "${event.name}": got ` + String(cur),
-        vm
-      )
+      process.env.NODE_ENV !== 'production' &&
+        warn(
+          `Invalid handler for event "${event.name}": got ` + String(cur),
+          vm,
+        )
     } else if (isUndef(old)) {
       if (isUndef(cur.fns)) {
         cur = on[name] = createFnInvoker(cur)

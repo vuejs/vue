@@ -1,25 +1,24 @@
 /* @flow */
 
-import { cloneVNode, cloneVNodes } from 'core/vdom/vnode'
+import {cloneVNode, cloneVNodes} from 'core/vdom/vnode'
 
 /**
  * Runtime helper for rendering static trees.
  */
-export function renderStatic (
+export function renderStatic(
   index: number,
-  isInFor?: boolean
+  isInFor?: boolean,
 ): VNode | Array<VNode> {
   let tree = this._staticTrees[index]
   // if has already-rendered static tree and not inside v-for,
   // we can reuse the same tree by doing a shallow clone.
   if (tree && !isInFor) {
-    return Array.isArray(tree)
-      ? cloneVNodes(tree)
-      : cloneVNode(tree)
+    return Array.isArray(tree) ? cloneVNodes(tree) : cloneVNode(tree)
   }
   // otherwise, render a fresh tree.
-  tree = this._staticTrees[index] =
-    this.$options.staticRenderFns[index].call(this._renderProxy)
+  tree = this._staticTrees[index] = this.$options.staticRenderFns[index].call(
+    this._renderProxy,
+  )
   markStatic(tree, `__static__${index}`, false)
   return tree
 }
@@ -28,20 +27,16 @@ export function renderStatic (
  * Runtime helper for v-once.
  * Effectively it means marking the node as static with a unique key.
  */
-export function markOnce (
+export function markOnce(
   tree: VNode | Array<VNode>,
   index: number,
-  key: string
+  key: string,
 ) {
   markStatic(tree, `__once__${index}${key ? `_${key}` : ``}`, true)
   return tree
 }
 
-function markStatic (
-  tree: VNode | Array<VNode>,
-  key: string,
-  isOnce: boolean
-) {
+function markStatic(tree: VNode | Array<VNode>, key: string, isOnce: boolean) {
   if (Array.isArray(tree)) {
     for (let i = 0; i < tree.length; i++) {
       if (tree[i] && typeof tree[i] !== 'string') {
@@ -53,7 +48,7 @@ function markStatic (
   }
 }
 
-function markStaticNode (node, key, isOnce) {
+function markStaticNode(node, key, isOnce) {
   node.isStatic = true
   node.key = key
   node.isOnce = isOnce

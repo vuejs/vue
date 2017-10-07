@@ -1,11 +1,11 @@
 /* @flow */
 
 import VNode from 'core/vdom/vnode'
-import { renderAttr } from './attrs'
-import { isDef, isUndef, extend } from 'shared/util'
-import { propsToAttrMap, isRenderableAttr } from '../util'
+import {renderAttr} from './attrs'
+import {isDef, isUndef, extend} from 'shared/util'
+import {propsToAttrMap, isRenderableAttr} from '../util'
 
-export default function renderDOMProps (node: VNodeWithData): string {
+export default function renderDOMProps(node: VNodeWithData): string {
   let props = node.data.domProps
   let res = ''
 
@@ -29,7 +29,8 @@ export default function renderDOMProps (node: VNodeWithData): string {
       setText(node, props[key], false)
     } else {
       const attr = propsToAttrMap[key] || key.toLowerCase()
-      if (isRenderableAttr(attr) &&
+      if (
+        isRenderableAttr(attr) &&
         // avoid rendering double-bound props/attrs twice
         !(isDef(attrs) && isDef(attrs[attr]))
       ) {
@@ -40,7 +41,7 @@ export default function renderDOMProps (node: VNodeWithData): string {
   return res
 }
 
-function setText (node, text, raw) {
+function setText(node, text, raw) {
   const child = new VNode(undefined, undefined, undefined, text)
   child.raw = raw
   node.children = [child]

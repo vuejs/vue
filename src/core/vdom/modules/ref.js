@@ -1,23 +1,23 @@
 /* @flow */
 
-import { remove } from 'shared/util'
+import {remove} from 'shared/util'
 
 export default {
-  create (_: any, vnode: VNodeWithData) {
+  create(_: any, vnode: VNodeWithData) {
     registerRef(vnode)
   },
-  update (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+  update(oldVnode: VNodeWithData, vnode: VNodeWithData) {
     if (oldVnode.data.ref !== vnode.data.ref) {
       registerRef(oldVnode, true)
       registerRef(vnode)
     }
   },
-  destroy (vnode: VNodeWithData) {
+  destroy(vnode: VNodeWithData) {
     registerRef(vnode, true)
-  }
+  },
 }
 
-export function registerRef (vnode: VNodeWithData, isRemoval: ?boolean) {
+export function registerRef(vnode: VNodeWithData, isRemoval: ?boolean) {
   const key = vnode.data.ref
   if (!key) return
 

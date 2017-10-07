@@ -8,7 +8,7 @@ describe('Instance methods events', () => {
   })
 
   it('$on', () => {
-    vm.$on('test', function () {
+    vm.$on('test', function() {
       // expect correct context
       expect(this).toBe(vm)
       spy.apply(this, arguments)
@@ -19,7 +19,7 @@ describe('Instance methods events', () => {
   })
 
   it('$on multi event', () => {
-    vm.$on(['test1', 'test2'], function () {
+    vm.$on(['test1', 'test2'], function() {
       expect(this).toBe(vm)
       spy.apply(this, arguments)
     })

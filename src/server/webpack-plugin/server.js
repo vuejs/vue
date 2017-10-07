@@ -1,13 +1,16 @@
-import { validate, isJS } from './util'
+import {validate, isJS} from './util'
 
 export default class VueSSRServerPlugin {
-  constructor (options = {}) {
-    this.options = Object.assign({
-      filename: 'vue-ssr-server-bundle.json'
-    }, options)
+  constructor(options = {}) {
+    this.options = Object.assign(
+      {
+        filename: 'vue-ssr-server-bundle.json',
+      },
+      options,
+    )
   }
 
-  apply (compiler) {
+  apply(compiler) {
     validate(compiler)
 
     compiler.plugin('emit', (compilation, cb) => {
@@ -25,28 +28,30 @@ export default class VueSSRServerPlugin {
       if (entryAssets.length > 1) {
         throw new Error(
           `Server-side bundle should have one single entry file. ` +
-          `Avoid using CommonsChunkPlugin in the server config.`
+            `Avoid using CommonsChunkPlugin in the server config.`,
         )
       }
 
       const entry = entryAssets[0]
       if (!entry || typeof entry !== 'string') {
         throw new Error(
-          `Entry "${entryName}" not found. Did you specify the correct entry option?`
+          `Entry "${entryName}" not found. Did you specify the correct entry option?`,
         )
       }
 
       const bundle = {
         entry,
         files: {},
-        maps: {}
+        maps: {},
       }
 
       stats.assets.forEach(asset => {
         if (asset.name.match(/\.js$/)) {
           bundle.files[asset.name] = compilation.assets[asset.name].source()
         } else if (asset.name.match(/\.js\.map$/)) {
-          bundle.maps[asset.name.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.name].source())
+          bundle.maps[asset.name.replace(/\.map$/, '')] = JSON.parse(
+            compilation.assets[asset.name].source(),
+          )
         }
         // do not emit anything else for server
         delete compilation.assets[asset.name]
@@ -57,7 +62,7 @@ export default class VueSSRServerPlugin {
 
       compilation.assets[filename] = {
         source: () => json,
-        size: () => json.length
+        size: () => json.length,
       }
 
       cb()

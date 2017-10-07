@@ -1,1 +1,1 @@
-export { compile } from 'weex/compiler/index'
+export {compile} from 'weex/compiler/index'

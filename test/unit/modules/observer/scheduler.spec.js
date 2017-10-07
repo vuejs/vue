@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import {
   MAX_UPDATE_COUNT,
-  queueWatcher as _queueWatcher
+  queueWatcher as _queueWatcher,
 } from 'core/observer/scheduler'
 
-function queueWatcher (watcher) {
+function queueWatcher(watcher) {
   watcher.vm = {} // mock vm
   _queueWatcher(watcher)
 }
@@ -17,7 +17,7 @@ describe('Scheduler', () => {
 
   it('queueWatcher', done => {
     queueWatcher({
-      run: spy
+      run: spy,
     })
     waitForUpdate(() => {
       expect(spy.calls.count()).toBe(1)
@@ -27,11 +27,11 @@ describe('Scheduler', () => {
   it('dedup', done => {
     queueWatcher({
       id: 1,
-      run: spy
+      run: spy,
     })
     queueWatcher({
       id: 1,
-      run: spy
+      run: spy,
     })
     waitForUpdate(() => {
       expect(spy.calls.count()).toBe(1)
@@ -41,12 +41,14 @@ describe('Scheduler', () => {
   it('allow duplicate when flushing', done => {
     const job = {
       id: 1,
-      run: spy
+      run: spy,
     }
     queueWatcher(job)
     queueWatcher({
       id: 2,
-      run () { queueWatcher(job) }
+      run() {
+        queueWatcher(job)
+      },
     })
     waitForUpdate(() => {
       expect(spy.calls.count()).toBe(2)
@@ -57,15 +59,17 @@ describe('Scheduler', () => {
     const calls = []
     const vm = new Vue({
       data: {
-        a: 1
+        a: 1,
       },
       template: '<div>{{ a }}</div>',
       watch: {
-        a () { calls.push(1) }
+        a() {
+          calls.push(1)
+        },
       },
-      beforeUpdate () {
+      beforeUpdate() {
         calls.push(2)
-      }
+      },
     }).$mount()
     vm.a = 2
     waitForUpdate(() => {
@@ -78,14 +82,14 @@ describe('Scheduler', () => {
     const calls = []
     const vm = new Vue({
       data: {
-        a: 1
+        a: 1,
       },
       watch: {
-        a () {
+        a() {
           calls.push(1)
-        }
+        },
       },
-      beforeUpdate () {
+      beforeUpdate() {
         calls.push(2)
       },
       template: '<div><test :a="a"></test></div>',
@@ -94,15 +98,15 @@ describe('Scheduler', () => {
           props: ['a'],
           template: '<div>{{ a }}</div>',
           watch: {
-            a () {
+            a() {
               calls.push(3)
-            }
+            },
           },
-          beforeUpdate () {
+          beforeUpdate() {
             calls.push(4)
-          }
-        }
-      }
+          },
+        },
+      },
     }).$mount()
     vm.a = 2
     waitForUpdate(() => {
@@ -110,14 +114,14 @@ describe('Scheduler', () => {
     }).then(done)
   })
 
-  it('warn against infinite update loops', function (done) {
+  it('warn against infinite update loops', function(done) {
     let count = 0
     const job = {
       id: 1,
-      run () {
+      run() {
         count++
         queueWatcher(job)
-      }
+      },
     }
     queueWatcher(job)
     waitForUpdate(() => {
@@ -131,16 +135,16 @@ describe('Scheduler', () => {
     queueWatcher({
       id: 1,
       user: true,
-      run () {
+      run() {
         callOrder.push(1)
         queueWatcher({
           id: 2,
-          run () {
+          run() {
             callOrder.push(3)
-          }
+          },
         })
         callOrder.push(2)
-      }
+      },
     })
     waitForUpdate(() => {
       expect(callOrder).toEqual([1, 2, 3])
@@ -153,20 +157,20 @@ describe('Scheduler', () => {
     const vm = new Vue({
       template: `<div><child @change="bar" :foo="foo"></child></div>`,
       data: {
-        foo: 0
+        foo: 0,
       },
       methods: {
-        bar: spy
+        bar: spy,
       },
       components: {
         child: {
           template: `<div>{{foo}}</div>`,
           props: ['foo'],
-          updated () {
+          updated() {
             this.$emit('change')
-          }
-        }
-      }
+          },
+        },
+      },
     }).$mount(el)
     vm.$nextTick(() => {
       vm.foo = 1

@@ -2,7 +2,7 @@ var path = require('path')
 var spawn = require('cross-spawn')
 var httpServer = require('http-server')
 var server = httpServer.createServer({
-  root: path.resolve(__dirname, '../../')
+  root: path.resolve(__dirname, '../../'),
 })
 
 server.listen(8080)
@@ -20,15 +20,15 @@ if (i > -1) {
 }
 
 var runner = spawn('./node_modules/.bin/nightwatch', args, {
-  stdio: 'inherit'
+  stdio: 'inherit',
 })
 
-runner.on('exit', function (code) {
+runner.on('exit', function(code) {
   server.close()
   process.exit(code)
 })
 
-runner.on('error', function (err) {
+runner.on('error', function(err) {
   server.close()
   throw err
 })

@@ -1,10 +1,10 @@
 import Vue from 'vue'
-import { createEmptyVNode } from 'core/vdom/vnode'
+import {createEmptyVNode} from 'core/vdom/vnode'
 
 describe('create-element', () => {
   it('render vnode with basic reserved tag using createElement', () => {
     const vm = new Vue({
-      data: { msg: 'hello world' }
+      data: {msg: 'hello world'},
     })
     const h = vm.$createElement
     const vnode = h('p', {})
@@ -19,17 +19,17 @@ describe('create-element', () => {
 
   it('render vnode with component using createElement', () => {
     const vm = new Vue({
-      data: { message: 'hello world' },
+      data: {message: 'hello world'},
       components: {
         'my-component': {
-          props: ['msg']
-        }
-      }
+          props: ['msg'],
+        },
+      },
     })
     const h = vm.$createElement
-    const vnode = h('my-component', { props: { msg: vm.message }})
+    const vnode = h('my-component', {props: {msg: vm.message}})
     expect(vnode.tag).toMatch(/vue-component-[0-9]+/)
-    expect(vnode.componentOptions.propsData).toEqual({ msg: vm.message })
+    expect(vnode.componentOptions.propsData).toEqual({msg: vm.message})
     expect(vnode.children).toBeUndefined()
     expect(vnode.text).toBeUndefined()
     expect(vnode.elm).toBeUndefined()
@@ -39,7 +39,7 @@ describe('create-element', () => {
 
   it('render vnode with custom tag using createElement', () => {
     const vm = new Vue({
-      data: { msg: 'hello world' }
+      data: {msg: 'hello world'},
     })
     const h = vm.$createElement
     const tag = 'custom-tag'
@@ -56,7 +56,7 @@ describe('create-element', () => {
 
   it('render empty vnode with falsy tag using createElement', () => {
     const vm = new Vue({
-      data: { msg: 'hello world' }
+      data: {msg: 'hello world'},
     })
     const h = vm.$createElement
     const vnode = h(null, {})
@@ -65,14 +65,18 @@ describe('create-element', () => {
 
   it('render vnode with not string tag using createElement', () => {
     const vm = new Vue({
-      data: { msg: 'hello world' }
+      data: {msg: 'hello world'},
     })
     const h = vm.$createElement
-    const vnode = h(Vue.extend({ // Component class
-      props: ['msg']
-    }), { props: { msg: vm.message }})
+    const vnode = h(
+      Vue.extend({
+        // Component class
+        props: ['msg'],
+      }),
+      {props: {msg: vm.message}},
+    )
     expect(vnode.tag).toMatch(/vue-component-[0-9]+/)
-    expect(vnode.componentOptions.propsData).toEqual({ msg: vm.message })
+    expect(vnode.componentOptions.propsData).toEqual({msg: vm.message})
     expect(vnode.children).toBeUndefined()
     expect(vnode.text).toBeUndefined()
     expect(vnode.elm).toBeUndefined()
@@ -155,9 +159,9 @@ describe('create-element', () => {
           <foreignObject>
             <p xmlns="http://www.w3.org/1999/xhtml"></p>
           </foreignObject>
-          `
-        }
-      }
+          `,
+        },
+      },
     }).$mount()
     const testComp = vm.$children[0]
     expect(testComp.$vnode.ns).toBe('svg')
@@ -176,8 +180,8 @@ describe('create-element', () => {
         </svg>
       `,
       components: {
-        test: { render: h => h('a') }
-      }
+        test: {render: h => h('a')},
+      },
     }).$mount()
     const testComp = vm.$children[0]
     expect(testComp.$vnode.ns).toBe('svg')
@@ -188,37 +192,37 @@ describe('create-element', () => {
   it('warn observed data objects', () => {
     new Vue({
       data: {
-        data: {}
+        data: {},
       },
-      render (h) {
+      render(h) {
         return h('div', this.data)
-      }
+      },
     }).$mount()
     expect('Avoid using observed data object as vnode data').toHaveBeenWarned()
   })
 
   it('warn non-primitive key', () => {
     new Vue({
-      render (h) {
-        return h('div', { key: {}})
-      }
+      render(h) {
+        return h('div', {key: {}})
+      },
     }).$mount()
     expect('Avoid using non-primitive value as key').toHaveBeenWarned()
   })
 
-  it('doesn\'t warn boolean key', () => {
+  it("doesn't warn boolean key", () => {
     new Vue({
-      render (h) {
-        return h('div', { key: true })
-      }
+      render(h) {
+        return h('div', {key: true})
+      },
     }).$mount()
     expect('Avoid using non-primitive value as key').not.toHaveBeenWarned()
   })
 
   it('nested child elements should be updated correctly', done => {
     const vm = new Vue({
-      data: { n: 1 },
-      render (h) {
+      data: {n: 1},
+      render(h) {
         const list = []
         for (let i = 0; i < this.n; i++) {
           list.push(h('span', i))
@@ -226,11 +230,11 @@ describe('create-element', () => {
         const input = h('input', {
           attrs: {
             value: 'a',
-            type: 'text'
-          }
+            type: 'text',
+          },
         })
         return h('div', [[...list, input]])
-      }
+      },
     }).$mount()
     expect(vm.$el.innerHTML).toContain('<span>0</span><input')
     const el = vm.$el.querySelector('input')

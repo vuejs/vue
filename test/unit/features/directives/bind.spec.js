@@ -4,25 +4,30 @@ describe('Directive v-bind', () => {
   it('normal attr', done => {
     const vm = new Vue({
       template: '<div><span :test="foo">hello</span></div>',
-      data: { foo: 'ok' }
+      data: {foo: 'ok'},
     }).$mount()
     expect(vm.$el.firstChild.getAttribute('test')).toBe('ok')
     vm.foo = 'again'
     waitForUpdate(() => {
       expect(vm.$el.firstChild.getAttribute('test')).toBe('again')
       vm.foo = null
-    }).then(() => {
-      expect(vm.$el.firstChild.hasAttribute('test')).toBe(false)
-      vm.foo = false
-    }).then(() => {
-      expect(vm.$el.firstChild.hasAttribute('test')).toBe(false)
-      vm.foo = true
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('test')).toBe('true')
-      vm.foo = 0
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('test')).toBe('0')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.firstChild.hasAttribute('test')).toBe(false)
+        vm.foo = false
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.hasAttribute('test')).toBe(false)
+        vm.foo = true
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('test')).toBe('true')
+        vm.foo = 0
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('test')).toBe('0')
+      })
+      .then(done)
   })
 
   it('should set property for input value', done => {
@@ -35,8 +40,8 @@ describe('Directive v-bind', () => {
       `,
       data: {
         foo: 'ok',
-        bar: false
-      }
+        bar: false,
+      },
     }).$mount()
     expect(vm.$el.firstChild.value).toBe('ok')
     expect(vm.$el.lastChild.checked).toBe(false)
@@ -50,8 +55,8 @@ describe('Directive v-bind', () => {
     const vm = new Vue({
       template: '<svg><a :xlink:special="foo"></a></svg>',
       data: {
-        foo: 'ok'
-      }
+        foo: 'ok',
+      },
     }).$mount()
     const xlinkNS = 'http://www.w3.org/1999/xlink'
     expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe('ok')
@@ -59,63 +64,77 @@ describe('Directive v-bind', () => {
     waitForUpdate(() => {
       expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe('again')
       vm.foo = null
-    }).then(() => {
-      expect(vm.$el.firstChild.hasAttributeNS(xlinkNS, 'special')).toBe(false)
-      vm.foo = true
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe('true')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.firstChild.hasAttributeNS(xlinkNS, 'special')).toBe(false)
+        vm.foo = true
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe(
+          'true',
+        )
+      })
+      .then(done)
   })
 
   it('enumerated attr', done => {
     const vm = new Vue({
       template: '<div><span :draggable="foo">hello</span></div>',
-      data: { foo: true }
+      data: {foo: true},
     }).$mount()
     expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
     vm.foo = 'again'
     waitForUpdate(() => {
       expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
       vm.foo = null
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
-      vm.foo = ''
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
-      vm.foo = false
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
-      vm.foo = 'false'
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
+        vm.foo = ''
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
+        vm.foo = false
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
+        vm.foo = 'false'
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
+      })
+      .then(done)
   })
 
   it('boolean attr', done => {
     const vm = new Vue({
       template: '<div><span :disabled="foo">hello</span></div>',
-      data: { foo: true }
+      data: {foo: true},
     }).$mount()
     expect(vm.$el.firstChild.getAttribute('disabled')).toBe('disabled')
     vm.foo = 'again'
     waitForUpdate(() => {
       expect(vm.$el.firstChild.getAttribute('disabled')).toBe('disabled')
       vm.foo = null
-    }).then(() => {
-      expect(vm.$el.firstChild.hasAttribute('disabled')).toBe(false)
-      vm.foo = ''
-    }).then(() => {
-      expect(vm.$el.firstChild.hasAttribute('disabled')).toBe(true)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.firstChild.hasAttribute('disabled')).toBe(false)
+        vm.foo = ''
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.hasAttribute('disabled')).toBe(true)
+      })
+      .then(done)
   })
 
   it('.prop modifier', () => {
     const vm = new Vue({
-      template: '<div><span v-bind:text-content.prop="foo"></span><span :inner-html.prop="bar"></span></div>',
+      template:
+        '<div><span v-bind:text-content.prop="foo"></span><span :inner-html.prop="bar"></span></div>',
       data: {
         foo: 'hello',
-        bar: '<span>qux</span>'
-      }
+        bar: '<span>qux</span>',
+      },
     }).$mount()
     expect(vm.$el.children[0].textContent).toBe('hello')
     expect(vm.$el.children[1].innerHTML).toBe('<span>qux</span>')
@@ -126,8 +145,8 @@ describe('Directive v-bind', () => {
       template: '<input :some.prop="some" :id="id">',
       data: {
         some: 'hello',
-        id: false
-      }
+        id: false,
+      },
     }).$mount()
     expect(vm.$el.some).toBe('hello')
     expect(vm.$el.getAttribute('id')).toBe(null)
@@ -137,8 +156,8 @@ describe('Directive v-bind', () => {
     const vm = new Vue({
       template: '<svg :view-box.camel="viewBox"></svg>',
       data: {
-        viewBox: '0 0 1 1'
-      }
+        viewBox: '0 0 1 1',
+      },
     }).$mount()
     expect(vm.$el.getAttribute('viewBox')).toBe('0 0 1 1')
   })
@@ -147,14 +166,14 @@ describe('Directive v-bind', () => {
     const vm = new Vue({
       template: `<test :foo-bar.sync="bar"/>`,
       data: {
-        bar: 1
+        bar: 1,
       },
       components: {
         test: {
           props: ['fooBar'],
-          template: `<div @click="$emit('update:fooBar', 2)">{{ fooBar }}</div>`
-        }
-      }
+          template: `<div @click="$emit('update:fooBar', 2)">{{ fooBar }}</div>`,
+        },
+      },
     }).$mount()
 
     expect(vm.$el.textContent).toBe('1')
@@ -171,9 +190,9 @@ describe('Directive v-bind', () => {
         test: {
           id: 'test',
           class: 'ok',
-          value: 'hello'
-        }
-      }
+          value: 'hello',
+        },
+      },
     }).$mount()
     expect(vm.$el.getAttribute('id')).toBe('test')
     expect(vm.$el.getAttribute('class')).toBe('ok')
@@ -192,29 +211,31 @@ describe('Directive v-bind', () => {
       template: `<test v-bind.sync="test"/>`,
       data: {
         test: {
-          fooBar: 1
-        }
+          fooBar: 1,
+        },
       },
       components: {
         test: {
           props: ['fooBar'],
           template: `<div @click="handleUpdate">{{ fooBar }}</div>`,
           methods: {
-            handleUpdate () {
+            handleUpdate() {
               this.$emit('update:fooBar', 2)
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     }).$mount()
     expect(vm.$el.textContent).toBe('1')
     triggerEvent(vm.$el, 'click')
     waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('2')
       vm.test.fooBar = 3
-    }).then(() => {
-      expect(vm.$el.textContent).toBe('3')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.textContent).toBe('3')
+      })
+      .then(done)
   })
 
   it('bind object with overwrite', done => {
@@ -224,9 +245,9 @@ describe('Directive v-bind', () => {
         test: {
           id: 'test',
           class: 'ok',
-          value: 'hello'
-        }
-      }
+          value: 'hello',
+        },
+      },
     }).$mount()
     expect(vm.$el.getAttribute('id')).toBe('foo')
     expect(vm.$el.getAttribute('class')).toBe('hello')
@@ -247,9 +268,9 @@ describe('Directive v-bind', () => {
         test: {
           id: 'test',
           class: ['b', 'c'],
-          style: { fontSize: '12px' }
-        }
-      }
+          style: {fontSize: '12px'},
+        },
+      },
     }).$mount()
     expect(vm.$el.id).toBe('test')
     expect(vm.$el.className).toBe('a b c')
@@ -257,7 +278,7 @@ describe('Directive v-bind', () => {
     expect(vm.$el.style.fontSize).toBe('12px')
     vm.test.id = 'hi'
     vm.test.class = ['d']
-    vm.test.style = { fontSize: '14px' }
+    vm.test.style = {fontSize: '14px'}
     waitForUpdate(() => {
       expect(vm.$el.id).toBe('hi')
       expect(vm.$el.className).toBe('a d')
@@ -273,9 +294,9 @@ describe('Directive v-bind', () => {
         test: {
           id: 'test',
           className: 'ok',
-          value: 'hello'
-        }
-      }
+          value: 'hello',
+        },
+      },
     }).$mount()
     expect(vm.$el.id).toBe('test')
     expect(vm.$el.className).toBe('ok')
@@ -294,11 +315,8 @@ describe('Directive v-bind', () => {
     const vm = new Vue({
       template: '<input v-bind="test">',
       data: {
-        test: [
-          { id: 'test', class: 'ok' },
-          { value: 'hello' }
-        ]
-      }
+        test: [{id: 'test', class: 'ok'}, {value: 'hello'}],
+      },
     }).$mount()
     expect(vm.$el.getAttribute('id')).toBe('test')
     expect(vm.$el.getAttribute('class')).toBe('ok')
@@ -316,18 +334,20 @@ describe('Directive v-bind', () => {
     new Vue({
       template: '<input v-bind="test">',
       data: {
-        test: 1
-      }
+        test: 1,
+      },
     }).$mount()
-    expect('v-bind without argument expects an Object or Array value').toHaveBeenWarned()
+    expect(
+      'v-bind without argument expects an Object or Array value',
+    ).toHaveBeenWarned()
   })
 
   it('set value for option element', () => {
     const vm = new Vue({
       template: '<select><option :value="val">val</option></select>',
       data: {
-        val: 'val'
-      }
+        val: 'val',
+      },
     }).$mount()
     // check value attribute
     expect(vm.$el.options[0].getAttribute('value')).toBe('val')
@@ -344,8 +364,8 @@ describe('Directive v-bind', () => {
         </div>
       `,
       data: {
-        ok: true
-      }
+        ok: true,
+      },
     }).$mount()
     expect(vm.$el.children[0].id).toBe('a')
     expect(vm.$el.children[0].getAttribute('data-test')).toBe('1')
@@ -357,19 +377,19 @@ describe('Directive v-bind', () => {
   })
 
   describe('bind object with special attribute', () => {
-    function makeInstance (options) {
+    function makeInstance(options) {
       return new Vue({
         template: `<div>${options.parentTemp}</div>`,
         data: {
           attrs: {
-            [options.attr]: options.value
-          }
+            [options.attr]: options.value,
+          },
         },
         components: {
           comp: {
-            template: options.childTemp
-          }
-        }
+            template: options.childTemp,
+          },
+        },
       }).$mount()
     }
 
@@ -377,7 +397,7 @@ describe('Directive v-bind', () => {
       const vm = makeInstance({
         attr: 'key',
         value: 'test',
-        parentTemp: '<div v-bind="attrs"></div>'
+        parentTemp: '<div v-bind="attrs"></div>',
       })
       expect(vm._vnode.children[0].key).toBe('test')
     })
@@ -386,7 +406,7 @@ describe('Directive v-bind', () => {
       const vm = makeInstance({
         attr: 'ref',
         value: 'test',
-        parentTemp: '<div v-bind="attrs"></div>'
+        parentTemp: '<div v-bind="attrs"></div>',
       })
       expect(vm.$refs.test).toBe(vm.$el.firstChild)
     })
@@ -396,7 +416,7 @@ describe('Directive v-bind', () => {
         attr: 'slot',
         value: 'test',
         parentTemp: '<comp><span v-bind="attrs">123</span></comp>',
-        childTemp: '<div>slot:<slot name="test"></slot></div>'
+        childTemp: '<div>slot:<slot name="test"></slot></div>',
       })
       expect(vm.$el.innerHTML).toBe('<div>slot:<span>123</span></div>')
     })
@@ -406,7 +426,7 @@ describe('Directive v-bind', () => {
         attr: 'is',
         value: 'comp',
         parentTemp: '<component v-bind="attrs"></component>',
-        childTemp: '<div>comp</div>'
+        childTemp: '<div>comp</div>',
       })
       expect(vm.$el.innerHTML).toBe('<div>comp</div>')
     })

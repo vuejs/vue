@@ -3,7 +3,7 @@
  * dynamically accessing methods on Array prototype
  */
 
-import { def } from '../util/index'
+import {def} from '../util/index'
 
 const arrayProto = Array.prototype
 export const arrayMethods = Object.create(arrayProto)
@@ -18,12 +18,11 @@ export const arrayMethods = Object.create(arrayProto)
   'unshift',
   'splice',
   'sort',
-  'reverse'
-]
-.forEach(function (method) {
+  'reverse',
+].forEach(function(method) {
   // cache original method
   const original = arrayProto[method]
-  def(arrayMethods, method, function mutator (...args) {
+  def(arrayMethods, method, function mutator(...args) {
     const result = original.apply(this, args)
     const ob = this.__ob__
     let inserted

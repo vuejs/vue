@@ -8,11 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/vuejs/vue.git"
   },
-  "keywords": [
-    "vue",
-    "server",
-    "ssr"
-  ],
+  "keywords": ["vue", "server", "ssr"],
   "author": "Evan You",
   "license": "MIT",
   "bugs": {

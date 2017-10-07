@@ -3,16 +3,16 @@ var webpack = require('webpack')
 
 var webpackConfig = {
   resolve: {
-    alias: alias
+    alias: alias,
   },
   module: {
     rules: [
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        exclude: /node_modules/
-      }
-    ]
+        exclude: /node_modules/,
+      },
+    ],
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -20,30 +20,28 @@ var webpackConfig = {
       'process.env': {
         NODE_ENV: '"development"',
         TRANSITION_DURATION: 50,
-        TRANSITION_BUFFER: 10
-      }
-    })
+        TRANSITION_BUFFER: 10,
+      },
+    }),
   ],
-  devtool: '#inline-source-map'
+  devtool: '#inline-source-map',
 }
 
 // shared config for all unit tests
 module.exports = {
   frameworks: ['jasmine'],
-  files: [
-    './index.js'
-  ],
+  files: ['./index.js'],
   preprocessors: {
-    './index.js': ['webpack', 'sourcemap']
+    './index.js': ['webpack', 'sourcemap'],
   },
   webpack: webpackConfig,
   webpackMiddleware: {
-    noInfo: true
+    noInfo: true,
   },
   plugins: [
     'karma-jasmine',
     'karma-mocha-reporter',
     'karma-sourcemap-loader',
-    'karma-webpack'
-  ]
+    'karma-webpack',
+  ],
 }

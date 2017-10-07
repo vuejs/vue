@@ -2,9 +2,9 @@ import Vue from 'vue'
 
 describe('Instance properties', () => {
   it('$data', () => {
-    const data = { a: 1 }
+    const data = {a: 1}
     const vm = new Vue({
-      data
+      data,
     })
     expect(vm.a).toBe(1)
     expect(vm.$data).toBe(data)
@@ -19,13 +19,13 @@ describe('Instance properties', () => {
   it('$options', () => {
     const A = Vue.extend({
       methods: {
-        a () {}
-      }
+        a() {},
+      },
     })
     const vm = new A({
       methods: {
-        b () {}
-      }
+        b() {},
+      },
     })
     expect(typeof vm.$options.methods.a).toBe('function')
     expect(typeof vm.$options.methods.b).toBe('function')
@@ -34,12 +34,12 @@ describe('Instance properties', () => {
   it('$root/$children', done => {
     const vm = new Vue({
       template: '<div><test v-if="ok"></test></div>',
-      data: { ok: true },
+      data: {ok: true},
       components: {
         test: {
-          template: '<div></div>'
-        }
-      }
+          template: '<div></div>',
+        },
+      },
     }).$mount()
     expect(vm.$root).toBe(vm)
     expect(vm.$children.length).toBe(1)
@@ -48,10 +48,12 @@ describe('Instance properties', () => {
     waitForUpdate(() => {
       expect(vm.$children.length).toBe(0)
       vm.ok = true
-    }).then(() => {
-      expect(vm.$children.length).toBe(1)
-      expect(vm.$children[0].$root).toBe(vm)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$children.length).toBe(1)
+        expect(vm.$children[0].$root).toBe(vm)
+      })
+      .then(done)
   })
 
   it('$parent', () => {
@@ -59,9 +61,9 @@ describe('Instance properties', () => {
     const makeOption = name => ({
       name,
       template: `<div><slot></slot></div>`,
-      created () {
+      created() {
         calls.push(`${name}:${this.$parent.$options.name}`)
-      }
+      },
     })
     new Vue({
       template: `
@@ -74,21 +76,26 @@ describe('Instance properties', () => {
         outer: makeOption('outer'),
         middle: makeOption('middle'),
         inner: makeOption('inner'),
-        next: makeOption('next')
-      }
+        next: makeOption('next'),
+      },
     }).$mount()
-    expect(calls).toEqual(['outer:undefined', 'middle:outer', 'inner:middle', 'next:undefined'])
+    expect(calls).toEqual([
+      'outer:undefined',
+      'middle:outer',
+      'inner:middle',
+      'next:undefined',
+    ])
   })
 
   it('$props', done => {
     const Comp = Vue.extend({
       props: ['msg'],
-      template: '<div>{{ msg }} {{ $props.msg }}</div>'
+      template: '<div>{{ msg }} {{ $props.msg }}</div>',
     })
     const vm = new Comp({
       propsData: {
-        msg: 'foo'
-      }
+        msg: 'foo',
+      },
     }).$mount()
     // check render
     expect(vm.$el.textContent).toContain('foo foo')
@@ -102,26 +109,29 @@ describe('Instance properties', () => {
     expect(vm.$props.msg).toBe('bar')
     waitForUpdate(() => {
       expect(vm.$el.textContent).toContain('bar bar')
-    }).then(() => {
-      vm.$props.msg = 'baz'
-      expect(vm.msg).toBe('baz')
-    }).then(() => {
-      expect(vm.$el.textContent).toContain('baz baz')
-    }).then(done)
+    })
+      .then(() => {
+        vm.$props.msg = 'baz'
+        expect(vm.msg).toBe('baz')
+      })
+      .then(() => {
+        expect(vm.$el.textContent).toContain('baz baz')
+      })
+      .then(done)
   })
 
   it('warn mutating $props', () => {
     const Comp = {
       props: ['msg'],
-      render () {},
-      mounted () {
+      render() {},
+      mounted() {
         expect(this.$props.msg).toBe('foo')
         this.$props.msg = 'bar'
-      }
+      },
     }
     new Vue({
       template: `<comp ref="comp" msg="foo" />`,
-      components: { Comp }
+      components: {Comp},
     }).$mount()
     expect(`Avoid mutating a prop`).toHaveBeenWarned()
   })
@@ -129,13 +139,13 @@ describe('Instance properties', () => {
   it('$attrs', done => {
     const vm = new Vue({
       template: `<foo :id="foo" bar="1"/>`,
-      data: { foo: 'foo' },
+      data: {foo: 'foo'},
       components: {
         foo: {
           props: ['bar'],
-          template: `<div><div v-bind="$attrs"></div></div>`
-        }
-      }
+          template: `<div><div v-bind="$attrs"></div></div>`,
+        },
+      },
     }).$mount()
     expect(vm.$el.children[0].id).toBe('foo')
     expect(vm.$el.children[0].hasAttribute('bar')).toBe(false)
@@ -150,12 +160,12 @@ describe('Instance properties', () => {
   it('$attrs should not be undefined when no props passed in', () => {
     const vm = new Vue({
       template: `<foo/>`,
-      data: { foo: 'foo' },
+      data: {foo: 'foo'},
       components: {
         foo: {
-          template: `<div>{{ this.foo }}</div>`
-        }
-      }
+          template: `<div>{{ this.foo }}</div>`,
+        },
+      },
     }).$mount()
     expect(vm.$attrs).toBeDefined()
   })
@@ -171,12 +181,12 @@ describe('Instance properties', () => {
     const spyB = jasmine.createSpy('B')
     const vm = new Vue({
       template: `<foo @click="foo"/>`,
-      data: { foo: spyA },
+      data: {foo: spyA},
       components: {
         foo: {
-          template: `<div v-on="$listeners"></div>`
-        }
-      }
+          template: `<div v-on="$listeners"></div>`,
+        },
+      },
     }).$mount()
 
     // has to be in dom for test to pass in IE

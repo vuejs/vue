@@ -1,22 +1,16 @@
 /* @flow */
 
 import VNode from './vnode'
-import { resolveConstructorOptions } from 'core/instance/init'
-import { queueActivatedComponent } from 'core/observer/scheduler'
-import { createFunctionalComponent } from './create-functional-component'
+import {resolveConstructorOptions} from 'core/instance/init'
+import {queueActivatedComponent} from 'core/observer/scheduler'
+import {createFunctionalComponent} from './create-functional-component'
 
-import {
-  warn,
-  isDef,
-  isUndef,
-  isTrue,
-  isObject
-} from '../util/index'
+import {warn, isDef, isUndef, isTrue, isObject} from '../util/index'
 
 import {
   resolveAsyncComponent,
   createAsyncPlaceholder,
-  extractPropsFromVNodeData
+  extractPropsFromVNodeData,
 } from './helpers/index'
 
 import {
@@ -24,24 +18,24 @@ import {
   activeInstance,
   updateChildComponent,
   activateChildComponent,
-  deactivateChildComponent
+  deactivateChildComponent,
 } from '../instance/lifecycle'
 
 // hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {
-  init (
+  init(
     vnode: VNodeWithData,
     hydrating: boolean,
     parentElm: ?Node,
-    refElm: ?Node
+    refElm: ?Node,
   ): ?boolean {
     if (!vnode.componentInstance || vnode.componentInstance._isDestroyed) {
-      const child = vnode.componentInstance = createComponentInstanceForVnode(
+      const child = (vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance,
         parentElm,
-        refElm
-      )
+        refElm,
+      ))
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     } else if (vnode.data.keepAlive) {
       // kept-alive components, treat as a patch
@@ -50,20 +44,20 @@ const componentVNodeHooks = {
     }
   },
 
-  prepatch (oldVnode: MountedComponentVNode, vnode: MountedComponentVNode) {
+  prepatch(oldVnode: MountedComponentVNode, vnode: MountedComponentVNode) {
     const options = vnode.componentOptions
-    const child = vnode.componentInstance = oldVnode.componentInstance
+    const child = (vnode.componentInstance = oldVnode.componentInstance)
     updateChildComponent(
       child,
       options.propsData, // updated props
       options.listeners, // updated listeners
       vnode, // new parent vnode
-      options.children // new children
+      options.children, // new children
     )
   },
 
-  insert (vnode: MountedComponentVNode) {
-    const { context, componentInstance } = vnode
+  insert(vnode: MountedComponentVNode) {
+    const {context, componentInstance} = vnode
     if (!componentInstance._isMounted) {
       componentInstance._isMounted = true
       callHook(componentInstance, 'mounted')
@@ -82,8 +76,8 @@ const componentVNodeHooks = {
     }
   },
 
-  destroy (vnode: MountedComponentVNode) {
-    const { componentInstance } = vnode
+  destroy(vnode: MountedComponentVNode) {
+    const {componentInstance} = vnode
     if (!componentInstance._isDestroyed) {
       if (!vnode.data.keepAlive) {
         componentInstance.$destroy()
@@ -91,17 +85,17 @@ const componentVNodeHooks = {
         deactivateChildComponent(componentInstance, true /* direct */)
       }
     }
-  }
+  },
 }
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
-export function createComponent (
+export function createComponent(
   Ctor: Class<Component> | Function | Object | void,
   data: ?VNodeData,
   context: Component,
   children: ?Array<VNode>,
-  tag?: string
+  tag?: string,
 ): VNode | void {
   if (isUndef(Ctor)) {
     return
@@ -132,13 +126,7 @@ export function createComponent (
       // return a placeholder node for async component, which is rendered
       // as a comment node but preserves all the raw information for the node.
       // the information will be used for async server-rendering and hydration.
-      return createAsyncPlaceholder(
-        asyncFactory,
-        data,
-        context,
-        children,
-        tag
-      )
+      return createAsyncPlaceholder(asyncFactory, data, context, children, tag)
     }
   }
 
@@ -187,18 +175,22 @@ export function createComponent (
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
-    data, undefined, undefined, undefined, context,
-    { Ctor, propsData, listeners, tag, children },
-    asyncFactory
+    data,
+    undefined,
+    undefined,
+    undefined,
+    context,
+    {Ctor, propsData, listeners, tag, children},
+    asyncFactory,
   )
   return vnode
 }
 
-export function createComponentInstanceForVnode (
+export function createComponentInstanceForVnode(
   vnode: any, // we know it's MountedComponentVNode but flow doesn't
   parent: any, // activeInstance in lifecycle state
   parentElm?: ?Node,
-  refElm?: ?Node
+  refElm?: ?Node,
 ): Component {
   const vnodeComponentOptions = vnode.componentOptions
   const options: InternalComponentOptions = {
@@ -210,7 +202,7 @@ export function createComponentInstanceForVnode (
     _parentListeners: vnodeComponentOptions.listeners,
     _renderChildren: vnodeComponentOptions.children,
     _parentElm: parentElm || null,
-    _refElm: refElm || null
+    _refElm: refElm || null,
   }
   // check inline-template render functions
   const inlineTemplate = vnode.data.inlineTemplate
@@ -221,7 +213,7 @@ export function createComponentInstanceForVnode (
   return new vnodeComponentOptions.Ctor(options)
 }
 
-function mergeHooks (data: VNodeData) {
+function mergeHooks(data: VNodeData) {
   if (!data.hook) {
     data.hook = {}
   }
@@ -233,8 +225,8 @@ function mergeHooks (data: VNodeData) {
   }
 }
 
-function mergeHook (one: Function, two: Function): Function {
-  return function (a, b, c, d) {
+function mergeHook(one: Function, two: Function): Function {
+  return function(a, b, c, d) {
     one(a, b, c, d)
     two(a, b, c, d)
   }
@@ -242,7 +234,7 @@ function mergeHook (one: Function, two: Function): Function {
 
 // transform component v-model info (value and callback) into
 // prop and event handler respectively.
-function transformModel (options, data: any) {
+function transformModel(options, data: any) {
   const prop = (options.model && options.model.prop) || 'value'
   const event = (options.model && options.model.event) || 'input'
   ;(data.props || (data.props = {}))[prop] = data.model.value

@@ -1,10 +1,10 @@
 /* @flow */
 
-import { extend, cached, camelize } from 'shared/util'
+import {extend, cached, camelize} from 'shared/util'
 
 const normalize = cached(camelize)
 
-function createStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+function createStyle(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!vnode.data.staticStyle) {
     updateStyle(oldVnode, vnode)
     return
@@ -19,7 +19,7 @@ function createStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   updateStyle(oldVnode, vnode)
 }
 
-function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+function updateStyle(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.style && !vnode.data.style) {
     return
   }
@@ -52,7 +52,7 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 }
 
-function toObject (arr) {
+function toObject(arr) {
   const res = {}
   for (var i = 0; i < arr.length; i++) {
     if (arr[i]) {
@@ -64,5 +64,5 @@ function toObject (arr) {
 
 export default {
   create: createStyle,
-  update: updateStyle
+  update: updateStyle,
 }

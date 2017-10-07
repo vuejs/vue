@@ -1,11 +1,13 @@
-import { patch } from 'web/runtime/patch'
-import VNode, { createEmptyVNode } from 'core/vdom/vnode'
+import {patch} from 'web/runtime/patch'
+import VNode, {createEmptyVNode} from 'core/vdom/vnode'
 
-function prop (name) {
-  return obj => { return obj[name] }
+function prop(name) {
+  return obj => {
+    return obj[name]
+  }
 }
 
-function map (fn, list) {
+function map(fn, list) {
   const ret = []
   for (let i = 0; i < list.length; i++) {
     ret[i] = fn(list[i])
@@ -13,15 +15,15 @@ function map (fn, list) {
   return ret
 }
 
-function spanNum (n) {
+function spanNum(n) {
   if (typeof n === 'string') {
     return new VNode('span', {}, undefined, n)
   } else {
-    return new VNode('span', { key: n }, undefined, n.toString())
+    return new VNode('span', {key: n}, undefined, n.toString())
   }
 }
 
-function shuffle (array) {
+function shuffle(array) {
   let currentIndex = array.length
   let temporaryValue
   let randomIndex
@@ -45,7 +47,9 @@ const tag = prop('tagName')
 describe('vdom patch: children', () => {
   let vnode0
   beforeEach(() => {
-    vnode0 = new VNode('p', { attrs: { id: '1' }}, [createTextVNode('hello world')])
+    vnode0 = new VNode('p', {attrs: {id: '1'}}, [
+      createTextVNode('hello world'),
+    ])
     patch(null, vnode0)
   })
 
@@ -88,8 +92,8 @@ describe('vdom patch: children', () => {
   })
 
   it('should add children to parent with no children', () => {
-    const vnode1 = new VNode('p', { key: 'p' })
-    const vnode2 = new VNode('p', { key: 'p' }, [1, 2, 3].map(spanNum))
+    const vnode1 = new VNode('p', {key: 'p'})
+    const vnode2 = new VNode('p', {key: 'p'}, [1, 2, 3].map(spanNum))
     let elm = patch(vnode0, vnode1)
     expect(elm.children.length).toBe(0)
     elm = patch(vnode1, vnode2)
@@ -97,8 +101,8 @@ describe('vdom patch: children', () => {
   })
 
   it('should remove all children from parent', () => {
-    const vnode1 = new VNode('p', { key: 'p' }, [1, 2, 3].map(spanNum))
-    const vnode2 = new VNode('p', { key: 'p' })
+    const vnode1 = new VNode('p', {key: 'p'}, [1, 2, 3].map(spanNum))
+    const vnode2 = new VNode('p', {key: 'p'})
     let elm = patch(vnode0, vnode1)
     expect(map(inner, elm.children)).toEqual(['1', '2', '3'])
     elm = patch(vnode1, vnode2)
@@ -220,7 +224,16 @@ describe('vdom patch: children', () => {
     let elm = patch(vnode0, vnode1)
     expect(elm.children.length).toBe(8)
     elm = patch(vnode1, vnode2)
-    expect(map(inner, elm.children)).toEqual(['8', '7', '6', '5', '4', '3', '2', '1'])
+    expect(map(inner, elm.children)).toEqual([
+      '8',
+      '7',
+      '6',
+      '5',
+      '4',
+      '3',
+      '2',
+      '1',
+    ])
   })
 
   it('something', () => {
@@ -239,24 +252,41 @@ describe('vdom patch: children', () => {
     const opacities = []
     const elms = 14
     const samples = 5
-    function spanNumWithOpacity (n, o) {
-      return new VNode('span', { key: n, style: { opacity: o }}, undefined, n.toString())
+    function spanNumWithOpacity(n, o) {
+      return new VNode(
+        'span',
+        {key: n, style: {opacity: o}},
+        undefined,
+        n.toString(),
+      )
     }
 
-    for (n = 0; n < elms; ++n) { arr[n] = n }
+    for (n = 0; n < elms; ++n) {
+      arr[n] = n
+    }
     for (n = 0; n < samples; ++n) {
-      const vnode1 = new VNode('span', {}, arr.map(n => {
-        return spanNumWithOpacity(n, '1')
-      }))
+      const vnode1 = new VNode(
+        'span',
+        {},
+        arr.map(n => {
+          return spanNumWithOpacity(n, '1')
+        }),
+      )
       const shufArr = shuffle(arr.slice(0))
       let elm = patch(vnode0, vnode1)
       for (i = 0; i < elms; ++i) {
         expect(elm.children[i].innerHTML).toBe(i.toString())
-        opacities[i] = Math.random().toFixed(5).toString()
+        opacities[i] = Math.random()
+          .toFixed(5)
+          .toString()
       }
-      const vnode2 = new VNode('span', {}, arr.map(n => {
-        return spanNumWithOpacity(shufArr[n], opacities[n])
-      }))
+      const vnode2 = new VNode(
+        'span',
+        {},
+        arr.map(n => {
+          return spanNumWithOpacity(shufArr[n], opacities[n])
+        }),
+      )
       elm = patch(vnode1, vnode2)
       for (i = 0; i < elms; ++i) {
         expect(elm.children[i].innerHTML).toBe(shufArr[i].toString())
@@ -267,11 +297,11 @@ describe('vdom patch: children', () => {
 
   it('should append elements with updating children without keys', () => {
     const vnode1 = new VNode('div', {}, [
-      new VNode('span', {}, undefined, 'hello')
+      new VNode('span', {}, undefined, 'hello'),
     ])
     const vnode2 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'hello'),
-      new VNode('span', {}, undefined, 'world')
+      new VNode('span', {}, undefined, 'world'),
     ])
     let elm = patch(vnode0, vnode1)
     expect(map(inner, elm.children)).toEqual(['hello'])
@@ -282,11 +312,11 @@ describe('vdom patch: children', () => {
   it('should handle unmoved text nodes with updating children without keys', () => {
     const vnode1 = new VNode('div', {}, [
       createTextVNode('text'),
-      new VNode('span', {}, undefined, 'hello')
+      new VNode('span', {}, undefined, 'hello'),
     ])
     const vnode2 = new VNode('div', {}, [
       createTextVNode('text'),
-      new VNode('span', {}, undefined, 'hello')
+      new VNode('span', {}, undefined, 'hello'),
     ])
     let elm = patch(vnode0, vnode1)
     expect(elm.childNodes[0].textContent).toBe('text')
@@ -297,11 +327,11 @@ describe('vdom patch: children', () => {
   it('should handle changing text children with updating children without keys', () => {
     const vnode1 = new VNode('div', {}, [
       createTextVNode('text'),
-      new VNode('span', {}, undefined, 'hello')
+      new VNode('span', {}, undefined, 'hello'),
     ])
     const vnode2 = new VNode('div', {}, [
       createTextVNode('text2'),
-      new VNode('span', {}, undefined, 'hello')
+      new VNode('span', {}, undefined, 'hello'),
     ])
     let elm = patch(vnode0, vnode1)
     expect(elm.childNodes[0].textContent).toBe('text')
@@ -311,11 +341,11 @@ describe('vdom patch: children', () => {
 
   it('should prepend element with updating children without keys', () => {
     const vnode1 = new VNode('div', {}, [
-      new VNode('span', {}, undefined, 'world')
+      new VNode('span', {}, undefined, 'world'),
     ])
     const vnode2 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'hello'),
-      new VNode('span', {}, undefined, 'world')
+      new VNode('span', {}, undefined, 'world'),
     ])
     let elm = patch(vnode0, vnode1)
     expect(map(inner, elm.children)).toEqual(['world'])
@@ -325,11 +355,11 @@ describe('vdom patch: children', () => {
 
   it('should prepend element of different tag type with updating children without keys', () => {
     const vnode1 = new VNode('div', {}, [
-      new VNode('span', {}, undefined, 'world')
+      new VNode('span', {}, undefined, 'world'),
     ])
     const vnode2 = new VNode('div', {}, [
       new VNode('div', {}, undefined, 'hello'),
-      new VNode('span', {}, undefined, 'world')
+      new VNode('span', {}, undefined, 'world'),
     ])
     let elm = patch(vnode0, vnode1)
     expect(map(inner, elm.children)).toEqual(['world'])
@@ -342,11 +372,11 @@ describe('vdom patch: children', () => {
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'one'),
       new VNode('span', {}, undefined, 'two'),
-      new VNode('span', {}, undefined, 'three')
+      new VNode('span', {}, undefined, 'three'),
     ])
     const vnode2 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'one'),
-      new VNode('span', {}, undefined, 'three')
+      new VNode('span', {}, undefined, 'three'),
     ])
     let elm = patch(vnode0, vnode1)
     expect(map(inner, elm.children)).toEqual(['one', 'two', 'three'])
@@ -367,7 +397,7 @@ describe('vdom patch: children', () => {
     const vnode1 = new VNode('div', {}, undefined, 'one')
     const vnode2 = new VNode('div', {}, [
       new VNode('div', {}, undefined, 'two'),
-      new VNode('span', {}, undefined, 'three')
+      new VNode('span', {}, undefined, 'three'),
     ])
     let elm = patch(vnode0, vnode1)
     expect(elm.textContent).toBe('one')
@@ -378,10 +408,10 @@ describe('vdom patch: children', () => {
   it('should remove a text node among other elements', () => {
     const vnode1 = new VNode('div', {}, [
       createTextVNode('one'),
-      new VNode('span', {}, undefined, 'two')
+      new VNode('span', {}, undefined, 'two'),
     ])
     const vnode2 = new VNode('div', {}, [
-      new VNode('div', {}, undefined, 'three')
+      new VNode('div', {}, undefined, 'three'),
     ])
     let elm = patch(vnode0, vnode1)
     expect(map(prop('textContent'), elm.childNodes)).toEqual(['one', 'two'])
@@ -395,12 +425,12 @@ describe('vdom patch: children', () => {
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'one'),
       new VNode('div', {}, undefined, 'two'),
-      new VNode('b', {}, undefined, 'three')
+      new VNode('b', {}, undefined, 'three'),
     ])
     const vnode2 = new VNode('div', {}, [
       new VNode('b', {}, undefined, 'three'),
       new VNode('span', {}, undefined, 'two'),
-      new VNode('div', {}, undefined, 'one')
+      new VNode('div', {}, undefined, 'one'),
     ])
     let elm = patch(vnode0, vnode1)
     expect(map(inner, elm.children)).toEqual(['one', 'two', 'three'])
@@ -410,16 +440,16 @@ describe('vdom patch: children', () => {
 
   it('should handle children with the same key but with different tag', () => {
     const vnode1 = new VNode('div', {}, [
-      new VNode('div', { key: 1 }, undefined, 'one'),
-      new VNode('div', { key: 2 }, undefined, 'two'),
-      new VNode('div', { key: 3 }, undefined, 'three'),
-      new VNode('div', { key: 4 }, undefined, 'four')
+      new VNode('div', {key: 1}, undefined, 'one'),
+      new VNode('div', {key: 2}, undefined, 'two'),
+      new VNode('div', {key: 3}, undefined, 'three'),
+      new VNode('div', {key: 4}, undefined, 'four'),
     ])
     const vnode2 = new VNode('div', {}, [
-      new VNode('div', { key: 4 }, undefined, 'four'),
-      new VNode('span', { key: 3 }, undefined, 'three'),
-      new VNode('span', { key: 2 }, undefined, 'two'),
-      new VNode('div', { key: 1 }, undefined, 'one')
+      new VNode('div', {key: 4}, undefined, 'four'),
+      new VNode('span', {key: 3}, undefined, 'three'),
+      new VNode('span', {key: 2}, undefined, 'two'),
+      new VNode('div', {key: 1}, undefined, 'one'),
     ])
     let elm = patch(vnode0, vnode1)
     expect(map(tag, elm.children)).toEqual(['DIV', 'DIV', 'DIV', 'DIV'])
@@ -431,10 +461,10 @@ describe('vdom patch: children', () => {
 
   it('should handle children with the same tag, same key, but one with data and one without data', () => {
     const vnode1 = new VNode('div', {}, [
-      new VNode('div', { class: 'hi' }, undefined, 'one')
+      new VNode('div', {class: 'hi'}, undefined, 'one'),
     ])
     const vnode2 = new VNode('div', {}, [
-      new VNode('div', undefined, undefined, 'four')
+      new VNode('div', undefined, undefined, 'four'),
     ])
     let elm = patch(vnode0, vnode1)
     const child1 = elm.children[0]
@@ -446,9 +476,9 @@ describe('vdom patch: children', () => {
   })
 
   it('should handle static vnodes properly', () => {
-    function makeNode (text) {
+    function makeNode(text) {
       return new VNode('div', undefined, [
-        new VNode(undefined, undefined, undefined, text)
+        new VNode(undefined, undefined, undefined, text),
       ])
     }
     const b = makeNode('B')
@@ -467,9 +497,9 @@ describe('vdom patch: children', () => {
   })
 
   it('should handle static vnodes inside ', () => {
-    function makeNode (text) {
+    function makeNode(text) {
       return new VNode('div', undefined, [
-        new VNode(undefined, undefined, undefined, text)
+        new VNode(undefined, undefined, undefined, text),
       ])
     }
     const b = makeNode('B')
@@ -492,12 +522,12 @@ describe('vdom patch: children', () => {
     const vnode1 = new VNode('div', {}, [
       createEmptyVNode(),
       new VNode('div'),
-      createEmptyVNode()
+      createEmptyVNode(),
     ])
     const vnode2 = new VNode('div', {}, [
       new VNode('p'),
       new VNode('div'),
-      new VNode('p')
+      new VNode('p'),
     ])
     let root = patch(null, vnode1)
     const original = root.childNodes[1]

@@ -1,7 +1,7 @@
 // reuse same transition component logic from web
 export {
   transitionProps,
-  extractTransitionData
+  extractTransitionData,
 } from 'web/runtime/components/transition'
 
 import Transition from 'web/runtime/components/transition'

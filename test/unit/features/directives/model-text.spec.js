@@ -1,13 +1,13 @@
 import Vue from 'vue'
-import { isIE9, isAndroid } from 'core/util/env'
+import {isIE9, isAndroid} from 'core/util/env'
 
 describe('Directive v-model text', () => {
   it('should update value both ways', done => {
     const vm = new Vue({
       data: {
-        test: 'b'
+        test: 'b',
       },
-      template: '<input v-model="test">'
+      template: '<input v-model="test">',
     }).$mount()
     expect(vm.$el.value).toBe('b')
     vm.test = 'a'
@@ -22,9 +22,9 @@ describe('Directive v-model text', () => {
   it('.lazy modifier', () => {
     const vm = new Vue({
       data: {
-        test: 'b'
+        test: 'b',
       },
-      template: '<input v-model.lazy="test">'
+      template: '<input v-model.lazy="test">',
     }).$mount()
     expect(vm.$el.value).toBe('b')
     expect(vm.test).toBe('b')
@@ -38,9 +38,9 @@ describe('Directive v-model text', () => {
   it('.number modifier', () => {
     const vm = new Vue({
       data: {
-        test: 1
+        test: 1,
       },
-      template: '<input v-model.number="test">'
+      template: '<input v-model.number="test">',
     }).$mount()
     expect(vm.test).toBe(1)
     vm.$el.value = '2'
@@ -55,9 +55,9 @@ describe('Directive v-model text', () => {
   it('.trim modifier', () => {
     const vm = new Vue({
       data: {
-        test: 'hi'
+        test: 'hi',
       },
-      template: '<input v-model.trim="test">'
+      template: '<input v-model.trim="test">',
     }).$mount()
     expect(vm.test).toBe('hi')
     vm.$el.value = ' what '
@@ -65,17 +65,17 @@ describe('Directive v-model text', () => {
     expect(vm.test).toBe('what')
   })
 
-  it('.number focus and typing', (done) => {
+  it('.number focus and typing', done => {
     const vm = new Vue({
       data: {
         test: 0,
-        update: 0
+        update: 0,
       },
       template:
         '<div>' +
-          '<input ref="input" v-model.number="test">{{ update }}' +
-          '<input ref="blur">' +
-        '</div>'
+        '<input ref="input" v-model.number="test">{{ update }}' +
+        '<input ref="blur">' +
+        '</div>',
     }).$mount()
     document.body.appendChild(vm.$el)
     vm.$refs.input.focus()
@@ -88,22 +88,24 @@ describe('Directive v-model text', () => {
       expect(vm.$refs.input.value).toBe('1.0')
       vm.$refs.blur.focus()
       vm.update++
-    }).then(() => {
-      expect(vm.$refs.input.value).toBe('1')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$refs.input.value).toBe('1')
+      })
+      .then(done)
   })
 
-  it('.trim focus and typing', (done) => {
+  it('.trim focus and typing', done => {
     const vm = new Vue({
       data: {
         test: 'abc',
-        update: 0
+        update: 0,
       },
       template:
         '<div>' +
-          '<input ref="input" v-model.trim="test" type="text">{{ update }}' +
-          '<input ref="blur"/>' +
-        '</div>'
+        '<input ref="input" v-model.trim="test" type="text">{{ update }}' +
+        '<input ref="blur"/>' +
+        '</div>',
     }).$mount()
     document.body.appendChild(vm.$el)
     vm.$refs.input.focus()
@@ -115,12 +117,14 @@ describe('Directive v-model text', () => {
       expect(vm.$refs.input.value).toBe(' abc ')
       vm.$refs.blur.focus()
       vm.update++
-    }).then(() => {
-      expect(vm.$refs.input.value).toBe('abc')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$refs.input.value).toBe('abc')
+      })
+      .then(done)
   })
 
-  it('multiple inputs', (done) => {
+  it('multiple inputs', done => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
@@ -128,29 +132,29 @@ describe('Directive v-model text', () => {
         inputList: [
           {
             name: 'questionA',
-            data: ['a', 'b', 'c']
+            data: ['a', 'b', 'c'],
           },
           {
             name: 'questionB',
-            data: ['1', '2']
-          }
-        ]
+            data: ['1', '2'],
+          },
+        ],
       },
       watch: {
-        selections: spy
+        selections: spy,
       },
       template:
         '<div>' +
-          '<div v-for="(inputGroup, idx) in inputList">' +
-            '<div>' +
-              '<span v-for="(item, index) in inputGroup.data">' +
-                '<input v-bind:name="item" type="text" v-model.number="selections[idx][index]" v-bind:id="idx+\'-\'+index"/>' +
-                '<label>{{item}}</label>' +
-              '</span>' +
-            '</div>' +
-          '</div>' +
-          '<span ref="rs">{{selections}}</span>' +
-        '</div>'
+        '<div v-for="(inputGroup, idx) in inputList">' +
+        '<div>' +
+        '<span v-for="(item, index) in inputGroup.data">' +
+        '<input v-bind:name="item" type="text" v-model.number="selections[idx][index]" v-bind:id="idx+\'-\'+index"/>' +
+        '<label>{{item}}</label>' +
+        '</span>' +
+        '</div>' +
+        '</div>' +
+        '<span ref="rs">{{selections}}</span>' +
+        '</div>',
     }).$mount()
     var inputs = vm.$el.getElementsByTagName('input')
     inputs[1].value = 'test'
@@ -165,9 +169,9 @@ describe('Directive v-model text', () => {
     it('IE9 selectionchange', done => {
       const vm = new Vue({
         data: {
-          test: 'foo'
+          test: 'foo',
         },
-        template: '<input v-model="test">'
+        template: '<input v-model="test">',
       }).$mount()
       const input = vm.$el
       input.value = 'bar'
@@ -184,12 +188,12 @@ describe('Directive v-model text', () => {
   }
 
   if (!isAndroid) {
-    it('compositionevents', function (done) {
+    it('compositionevents', function(done) {
       const vm = new Vue({
         data: {
-          test: 'foo'
+          test: 'foo',
         },
-        template: '<input v-model="test">'
+        template: '<input v-model="test">',
       }).$mount()
       const input = vm.$el
       triggerEvent(input, 'compositionstart')
@@ -208,11 +212,13 @@ describe('Directive v-model text', () => {
   it('warn invalid tag', () => {
     new Vue({
       data: {
-        test: 'foo'
+        test: 'foo',
       },
-      template: '<div v-model="test"></div>'
+      template: '<div v-model="test"></div>',
     }).$mount()
-    expect('<div v-model="test">: v-model is not supported on this element type').toHaveBeenWarned()
+    expect(
+      '<div v-model="test">: v-model is not supported on this element type',
+    ).toHaveBeenWarned()
   })
 
   // #3468
@@ -220,14 +226,14 @@ describe('Directive v-model text', () => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
-        a: 'a'
+        a: 'a',
       },
       template: '<input v-model="a" @input="onInput">',
       methods: {
-        onInput (e) {
+        onInput(e) {
           spy(e.target.value)
-        }
-      }
+        },
+      },
     }).$mount()
     vm.$el.value = 'b'
     triggerEvent(vm.$el, 'input')
@@ -237,7 +243,7 @@ describe('Directive v-model text', () => {
   it('warn binding to v-for alias', () => {
     new Vue({
       data: {
-        strings: ['hi']
+        strings: ['hi'],
       },
       template: `
         <div>
@@ -245,9 +251,11 @@ describe('Directive v-model text', () => {
             <input v-model="str">
           </div>
         </div>
-      `
+      `,
     }).$mount()
-    expect('You are binding v-model directly to a v-for iteration alias').toHaveBeenWarned()
+    expect(
+      'You are binding v-model directly to a v-for iteration alias',
+    ).toHaveBeenWarned()
   })
 
   if (!isAndroid) {
@@ -255,14 +263,14 @@ describe('Directive v-model text', () => {
       const spy = jasmine.createSpy()
       const vm = new Vue({
         data: {
-          a: 'a'
+          a: 'a',
         },
         template: '<input v-model="a" @input="onInput">',
         methods: {
-          onInput (e) {
+          onInput(e) {
             spy(e.target.value)
-          }
-        }
+          },
+        },
       }).$mount()
       expect(spy.calls.count()).toBe(0)
       vm.$el.value = 'b'
@@ -276,14 +284,14 @@ describe('Directive v-model text', () => {
       const spy = jasmine.createSpy()
       const vm = new Vue({
         data: {
-          a: 'a'
+          a: 'a',
         },
         template: '<input v-model="a" @input="onInput">',
         methods: {
-          onInput (e) {
+          onInput(e) {
             spy(e.target.value)
-          }
-        }
+          },
+        },
       }).$mount()
       expect(spy.calls.count()).toBe(0)
       vm.$el.value = 'b'
@@ -299,9 +307,9 @@ describe('Directive v-model text', () => {
       const vm = new Vue({
         data: {
           a: 1,
-          foo: false
+          foo: false,
         },
-        template: '<div>{{ foo }}<input ref="input" v-model.number="a"></div>'
+        template: '<div>{{ foo }}<input ref="input" v-model.number="a"></div>',
       }).$mount()
 
       document.body.appendChild(vm.$el)
@@ -326,7 +334,7 @@ describe('Directive v-model text', () => {
       const vm = new Vue({
         data: {
           a: 'a',
-          foo: false
+          foo: false,
         },
         template: `
           <div>
@@ -335,10 +343,10 @@ describe('Directive v-model text', () => {
           </div>
         `,
         methods: {
-          onInput (e) {
+          onInput(e) {
             this.foo = true
-          }
-        }
+          },
+        },
       }).$mount()
 
       document.body.appendChild(vm.$el)
@@ -358,9 +366,9 @@ describe('Directive v-model text', () => {
     it('should create and make reactive non-existent properties', done => {
       const vm = new Vue({
         data: {
-          foo: {}
+          foo: {},
         },
-        template: '<input v-model="foo.bar">'
+        template: '<input v-model="foo.bar">',
       }).$mount()
       expect(vm.$el.value).toBe('')
 
@@ -371,9 +379,11 @@ describe('Directive v-model text', () => {
       waitForUpdate(() => {
         expect(vm.$el.value).toBe('b')
         vm.foo = {}
-      }).then(() => {
-        expect(vm.$el.value).toBe('')
-      }).then(done)
+      })
+        .then(() => {
+          expect(vm.$el.value).toBe('')
+        })
+        .then(done)
     })
   }
 })

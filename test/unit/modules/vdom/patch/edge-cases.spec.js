@@ -8,7 +8,7 @@ describe('vdom patch: edge cases', () => {
   it('should handle static vnodes by key', done => {
     const vm = new Vue({
       data: {
-        ok: true
+        ok: true,
       },
       template: `
         <div>
@@ -16,7 +16,7 @@ describe('vdom patch: edge cases', () => {
             <div v-if="ok">a</div><div>b</div><div v-if="!ok">c</div><div>d</div>
           </div>
         </div>
-      `
+      `,
     }).$mount()
     expect(vm.$el.textContent).toBe('abdabd')
     vm.ok = false
@@ -30,10 +30,10 @@ describe('vdom patch: edge cases', () => {
   // and is inserted into a different parent.
   // later when patching the next element a DOM insertion uses it as the
   // reference node, causing a parent mismatch.
-  it('should handle static node edge case when it\'s reused AND used as a reference node for insertion', done => {
+  it("should handle static node edge case when it's reused AND used as a reference node for insertion", done => {
     const vm = new Vue({
       data: {
-        ok: true
+        ok: true,
       },
       template: `
         <div>
@@ -46,7 +46,7 @@ describe('vdom patch: edge cases', () => {
             <label>{{ 2 }}</label>
           </div>
         </div>
-      `
+      `,
     }).$mount()
 
     expect(vm.$el.querySelector('.c').textContent).toBe('1')
@@ -58,34 +58,29 @@ describe('vdom patch: edge cases', () => {
     }).then(done)
   })
 
-  it('should synchronize vm\' vnode', done => {
+  it("should synchronize vm' vnode", done => {
     const comp = {
-      data: () => ({ swap: true }),
-      render (h) {
-        return this.swap
-          ? h('a', 'atag')
-          : h('span', 'span')
-      }
+      data: () => ({swap: true}),
+      render(h) {
+        return this.swap ? h('a', 'atag') : h('span', 'span')
+      },
     }
 
     const wrapper = {
       render: h => h('comp'),
-      components: { comp }
+      components: {comp},
     }
 
     const vm = new Vue({
-      render (h) {
-        const children = [
-          h('wrapper'),
-          h('div', 'row')
-        ]
+      render(h) {
+        const children = [h('wrapper'), h('div', 'row')]
         if (this.swap) {
           children.reverse()
         }
         return h('div', children)
       },
-      data: () => ({ swap: false }),
-      components: { wrapper }
+      data: () => ({swap: false}),
+      components: {wrapper},
     }).$mount()
 
     expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>')
@@ -97,54 +92,56 @@ describe('vdom patch: edge cases', () => {
       expect(vm.$el.innerHTML).toBe('<div>row</div><a>atag</a>')
       vm.swap = false
     })
-    .then(() => {
-      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
-      expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>')
-      compVm.swap = false
-    })
-    .then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>span</span><div>row</div>')
-      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
-      vm.swap = true
-    })
-    .then(() => {
-      expect(vm.$el.innerHTML).toBe('<div>row</div><span>span</span>')
-      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
-      vm.swap = true
-    })
-    .then(done)
+      .then(() => {
+        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+        expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>')
+        compVm.swap = false
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>span</span><div>row</div>')
+        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+        vm.swap = true
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('<div>row</div><span>span</span>')
+        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+        vm.swap = true
+      })
+      .then(done)
   })
 
   // #4530
   it('should not reset value when patching between dynamic/static bindings', done => {
     const vm = new Vue({
-      data: { ok: true },
+      data: {ok: true},
       template: `
         <div>
           <input type="button" v-if="ok" value="a">
           <input type="button" :value="'b'">
         </div>
-      `
+      `,
     }).$mount()
     expect(vm.$el.children[0].value).toBe('a')
     vm.ok = false
     waitForUpdate(() => {
       expect(vm.$el.children[0].value).toBe('b')
       vm.ok = true
-    }).then(() => {
-      expect(vm.$el.children[0].value).toBe('a')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.children[0].value).toBe('a')
+      })
+      .then(done)
   })
 
   // #6313
   it('should not replace node when switching between text-like inputs', done => {
     const vm = new Vue({
-      data: { show: false },
+      data: {show: false},
       template: `
         <div>
           <input :type="show ? 'text' : 'password'">
         </div>
-      `
+      `,
     }).$mount()
     const node = vm.$el.children[0]
     expect(vm.$el.children[0].type).toBe('password')
@@ -155,11 +152,13 @@ describe('vdom patch: edge cases', () => {
       expect(vm.$el.children[0].value).toBe('test')
       expect(vm.$el.children[0].type).toBe('text')
       vm.show = false
-    }).then(() => {
-      expect(vm.$el.children[0]).toBe(node)
-      expect(vm.$el.children[0].value).toBe('test')
-      expect(vm.$el.children[0].type).toBe('password')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.children[0]).toBe(node)
+        expect(vm.$el.children[0].value).toBe('test')
+        expect(vm.$el.children[0].type).toBe('password')
+      })
+      .then(done)
   })
 
   it('should properly patch nested HOC when root element is replaced', done => {
@@ -171,13 +170,13 @@ describe('vdom patch: edge cases', () => {
           components: {
             bar: {
               template: `<div v-if="ok"></div><span v-else></span>`,
-              data () {
-                return { ok: true }
-              }
-            }
-          }
-        }
-      }
+              data() {
+                return {ok: true}
+              },
+            },
+          },
+        },
+      },
     }).$mount()
 
     expect(vm.$refs.foo.$refs.bar.$el.tagName).toBe('DIV')

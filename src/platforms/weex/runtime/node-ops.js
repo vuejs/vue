@@ -5,23 +5,23 @@ import TextNode from 'weex/runtime/text-node'
 
 export const namespaceMap = {}
 
-export function createElement (tagName) {
+export function createElement(tagName) {
   return document.createElement(tagName)
 }
 
-export function createElementNS (namespace, tagName) {
+export function createElementNS(namespace, tagName) {
   return document.createElement(namespace + ':' + tagName)
 }
 
-export function createTextNode (text) {
+export function createTextNode(text) {
   return new TextNode(text)
 }
 
-export function createComment (text) {
+export function createComment(text) {
   return document.createComment(text)
 }
 
-export function insertBefore (node, target, before) {
+export function insertBefore(node, target, before) {
   if (target.nodeType === 3) {
     if (node.type === 'text') {
       node.setAttr('value', target.text)
@@ -36,7 +36,7 @@ export function insertBefore (node, target, before) {
   node.insertBefore(target, before)
 }
 
-export function removeChild (node, child) {
+export function removeChild(node, child) {
   if (child.nodeType === 3) {
     node.setAttr('value', '')
     return
@@ -44,7 +44,7 @@ export function removeChild (node, child) {
   node.removeChild(child)
 }
 
-export function appendChild (node, child) {
+export function appendChild(node, child) {
   if (child.nodeType === 3) {
     if (node.type === 'text') {
       node.setAttr('value', child.text)
@@ -60,22 +60,22 @@ export function appendChild (node, child) {
   node.appendChild(child)
 }
 
-export function parentNode (node) {
+export function parentNode(node) {
   return node.parentNode
 }
 
-export function nextSibling (node) {
+export function nextSibling(node) {
   return node.nextSibling
 }
 
-export function tagName (node) {
+export function tagName(node) {
   return node.type
 }
 
-export function setTextContent (node, text) {
+export function setTextContent(node, text) {
   node.parentNode.setAttr('value', text)
 }
 
-export function setAttribute (node, key, val) {
+export function setAttribute(node, key, val) {
   node.setAttr(key, val)
 }

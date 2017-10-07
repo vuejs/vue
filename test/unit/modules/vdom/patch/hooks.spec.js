@@ -1,5 +1,5 @@
-import { patch } from 'web/runtime/patch'
-import { createPatchFunction } from 'core/vdom/patch'
+import {patch} from 'web/runtime/patch'
+import {createPatchFunction} from 'core/vdom/patch'
 import baseModules from 'core/vdom/modules/index'
 import * as nodeOps from 'web/runtime/node-ops'
 import platformModules from 'web/runtime/modules/index'
@@ -10,24 +10,26 @@ const modules = baseModules.concat(platformModules)
 describe('vdom patch: hooks', () => {
   let vnode0
   beforeEach(() => {
-    vnode0 = new VNode('p', { attrs: { id: '1' }}, [createTextVNode('hello world')])
+    vnode0 = new VNode('p', {attrs: {id: '1'}}, [
+      createTextVNode('hello world'),
+    ])
     patch(null, vnode0)
   })
 
   it('should call `insert` listener after both parents, siblings and children have been inserted', () => {
     const result = []
-    function insert (vnode) {
+    function insert(vnode) {
       expect(vnode.elm.children.length).toBe(2)
       expect(vnode.elm.parentNode.children.length).toBe(3)
       result.push(vnode)
     }
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
-      new VNode('div', { hook: { insert }}, [
+      new VNode('div', {hook: {insert}}, [
         new VNode('span', {}, undefined, 'child 1'),
-        new VNode('span', {}, undefined, 'child 2')
+        new VNode('span', {}, undefined, 'child 2'),
       ]),
-      new VNode('span', {}, undefined, 'can touch me')
+      new VNode('span', {}, undefined, 'can touch me'),
     ])
     patch(vnode0, vnode1)
     expect(result.length).toBe(1)
@@ -35,24 +37,24 @@ describe('vdom patch: hooks', () => {
 
   it('should call `prepatch` listener', () => {
     const result = []
-    function prepatch (oldVnode, newVnode) {
+    function prepatch(oldVnode, newVnode) {
       expect(oldVnode).toEqual(vnode1.children[1])
       expect(newVnode).toEqual(vnode2.children[1])
       result.push(newVnode)
     }
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
-      new VNode('div', { hook: { prepatch }}, [
+      new VNode('div', {hook: {prepatch}}, [
         new VNode('span', {}, undefined, 'child 1'),
-        new VNode('span', {}, undefined, 'child 2')
-      ])
+        new VNode('span', {}, undefined, 'child 2'),
+      ]),
     ])
     const vnode2 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
-      new VNode('div', { hook: { prepatch }}, [
+      new VNode('div', {hook: {prepatch}}, [
         new VNode('span', {}, undefined, 'child 1'),
-        new VNode('span', {}, undefined, 'child 2')
-      ])
+        new VNode('span', {}, undefined, 'child 2'),
+      ]),
     ])
     patch(vnode0, vnode1)
     patch(vnode1, vnode2)
@@ -62,26 +64,26 @@ describe('vdom patch: hooks', () => {
   it('should call `postpatch` after `prepatch` listener', () => {
     const pre = []
     const post = []
-    function prepatch (oldVnode, newVnode) {
+    function prepatch(oldVnode, newVnode) {
       pre.push(pre)
     }
-    function postpatch (oldVnode, newVnode) {
+    function postpatch(oldVnode, newVnode) {
       expect(pre.length).toBe(post.length + 1)
       post.push(post)
     }
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
-      new VNode('div', { hook: { prepatch, postpatch }}, [
+      new VNode('div', {hook: {prepatch, postpatch}}, [
         new VNode('span', {}, undefined, 'child 1'),
-        new VNode('span', {}, undefined, 'child 2')
-      ])
+        new VNode('span', {}, undefined, 'child 2'),
+      ]),
     ])
     const vnode2 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
-      new VNode('div', { hook: { prepatch, postpatch }}, [
+      new VNode('div', {hook: {prepatch, postpatch}}, [
         new VNode('span', {}, undefined, 'child 1'),
-        new VNode('span', {}, undefined, 'child 2')
-      ])
+        new VNode('span', {}, undefined, 'child 2'),
+      ]),
     ])
     patch(vnode0, vnode1)
     patch(vnode1, vnode2)
@@ -92,7 +94,7 @@ describe('vdom patch: hooks', () => {
   it('should call `update` listener', () => {
     const result1 = []
     const result2 = []
-    function cb (result, oldVnode, newVnode) {
+    function cb(result, oldVnode, newVnode) {
       if (result.length > 1) {
         expect(result[result.length - 1]).toEqual(oldVnode)
       }
@@ -100,17 +102,27 @@ describe('vdom patch: hooks', () => {
     }
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
-      new VNode('div', { hook: { update: cb.bind(null, result1) }}, [
+      new VNode('div', {hook: {update: cb.bind(null, result1)}}, [
         new VNode('span', {}, undefined, 'child 1'),
-        new VNode('span', { hook: { update: cb.bind(null, result2) }}, undefined, 'child 2')
-      ])
+        new VNode(
+          'span',
+          {hook: {update: cb.bind(null, result2)}},
+          undefined,
+          'child 2',
+        ),
+      ]),
     ])
     const vnode2 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
-      new VNode('div', { hook: { update: cb.bind(null, result1) }}, [
+      new VNode('div', {hook: {update: cb.bind(null, result1)}}, [
         new VNode('span', {}, undefined, 'child 1'),
-        new VNode('span', { hook: { update: cb.bind(null, result2) }}, undefined, 'child 2')
-      ])
+        new VNode(
+          'span',
+          {hook: {update: cb.bind(null, result2)}},
+          undefined,
+          'child 2',
+        ),
+      ]),
     ])
     patch(vnode0, vnode1)
     patch(vnode1, vnode2)
@@ -120,7 +132,7 @@ describe('vdom patch: hooks', () => {
 
   it('should call `remove` listener', () => {
     const result = []
-    function remove (vnode, rm) {
+    function remove(vnode, rm) {
       const parent = vnode.elm.parentNode
       expect(vnode.elm.children.length).toBe(2)
       expect(vnode.elm.children.length).toBe(2)
@@ -130,13 +142,13 @@ describe('vdom patch: hooks', () => {
     }
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
-      new VNode('div', { hook: { remove }}, [
+      new VNode('div', {hook: {remove}}, [
         new VNode('span', {}, undefined, 'child 1'),
-        new VNode('span', {}, undefined, 'child 2')
-      ])
+        new VNode('span', {}, undefined, 'child 2'),
+      ]),
     ])
     const vnode2 = new VNode('div', {}, [
-      new VNode('span', {}, undefined, 'first sibling')
+      new VNode('span', {}, undefined, 'first sibling'),
     ])
     patch(vnode0, vnode1)
     patch(vnode1, vnode2)
@@ -145,12 +157,16 @@ describe('vdom patch: hooks', () => {
 
   it('should call `init` and `prepatch` listeners on root', () => {
     let count = 0
-    function init (vnode) { count++ }
-    function prepatch (oldVnode, newVnode) { count++ }
-    const vnode1 = new VNode('div', { hook: { init, prepatch }})
+    function init(vnode) {
+      count++
+    }
+    function prepatch(oldVnode, newVnode) {
+      count++
+    }
+    const vnode1 = new VNode('div', {hook: {init, prepatch}})
     patch(vnode0, vnode1)
     expect(count).toBe(1)
-    const vnode2 = new VNode('span', { hook: { init, prepatch }})
+    const vnode2 = new VNode('span', {hook: {init, prepatch}})
     patch(vnode1, vnode2)
     expect(count).toBe(2)
   })
@@ -160,12 +176,26 @@ describe('vdom patch: hooks', () => {
     const patch1 = createPatchFunction({
       nodeOps,
       modules: modules.concat([
-        { remove (_, rm) { rm1 = rm } },
-        { remove (_, rm) { rm2 = rm } }
-      ])
+        {
+          remove(_, rm) {
+            rm1 = rm
+          },
+        },
+        {
+          remove(_, rm) {
+            rm2 = rm
+          },
+        },
+      ]),
     })
     const vnode1 = new VNode('div', {}, [
-      new VNode('a', { hook: { remove (_, rm) { rm3 = rm } }})
+      new VNode('a', {
+        hook: {
+          remove(_, rm) {
+            rm3 = rm
+          },
+        },
+      }),
     ])
     const vnode2 = new VNode('div', {}, [])
     let elm = patch1(vnode0, vnode1)
@@ -185,17 +215,17 @@ describe('vdom patch: hooks', () => {
     const parent = nodeOps.createElement('div')
     vnode0 = nodeOps.createElement('div')
     parent.appendChild(vnode0)
-    function remove (vnode, rm) {
+    function remove(vnode, rm) {
       result.push(vnode)
       rm()
     }
-    const vnode1 = new VNode('div', { hook: { remove }}, [
+    const vnode1 = new VNode('div', {hook: {remove}}, [
       new VNode('b', {}, undefined, 'child 1'),
-      new VNode('i', {}, undefined, 'child 2')
+      new VNode('i', {}, undefined, 'child 2'),
     ])
     const vnode2 = new VNode('span', {}, [
       new VNode('b', {}, undefined, 'child 1'),
-      new VNode('i', {}, undefined, 'child 2')
+      new VNode('i', {}, undefined, 'child 2'),
     ])
     patch(vnode0, vnode1)
     patch(vnode1, vnode2)
@@ -204,13 +234,15 @@ describe('vdom patch: hooks', () => {
 
   it('should invoke global `destroy` hook for all removed children', () => {
     const result = []
-    function destroy (vnode) { result.push(vnode) }
+    function destroy(vnode) {
+      result.push(vnode)
+    }
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
       new VNode('div', {}, [
-        new VNode('span', { hook: { destroy }}, undefined, 'child 1'),
-        new VNode('span', {}, undefined, 'child 2')
-      ])
+        new VNode('span', {hook: {destroy}}, undefined, 'child 1'),
+        new VNode('span', {}, undefined, 'child 2'),
+      ]),
     ])
     const vnode2 = new VNode('div')
     patch(vnode0, vnode1)
@@ -231,16 +263,24 @@ describe('vdom patch: hooks', () => {
     const patch1 = createPatchFunction({
       nodeOps,
       modules: modules.concat([
-        { create () { created++ } },
-        { destroy () { destroyed++ } }
-      ])
+        {
+          create() {
+            created++
+          },
+        },
+        {
+          destroy() {
+            destroyed++
+          },
+        },
+      ]),
     })
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
       new VNode('div', {}, [
         new VNode('span', {}, undefined, 'child 1'),
-        new VNode('span', {}, undefined, 'child 2')
-      ])
+        new VNode('span', {}, undefined, 'child 2'),
+      ]),
     ])
     const vnode2 = new VNode('div', {})
     patch1(vnode0, vnode1)
@@ -256,14 +296,22 @@ describe('vdom patch: hooks', () => {
     const patch1 = createPatchFunction({
       nodeOps,
       modules: modules.concat([
-        { create () { created++ } },
-        { remove () { removed++ } }
-      ])
+        {
+          create() {
+            created++
+          },
+        },
+        {
+          remove() {
+            removed++
+          },
+        },
+      ]),
     })
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first child'),
       createTextVNode(''),
-      new VNode('span', {}, undefined, 'third child')
+      new VNode('span', {}, undefined, 'third child'),
     ])
     const vnode2 = new VNode('div', {})
     patch1(vnode0, vnode1)
@@ -278,9 +326,17 @@ describe('vdom patch: hooks', () => {
     const patch1 = createPatchFunction({
       nodeOps,
       modules: modules.concat([
-        { create () { created++ } },
-        { destroy () { destroyed++ } }
-      ])
+        {
+          create() {
+            created++
+          },
+        },
+        {
+          destroy() {
+            destroyed++
+          },
+        },
+      ]),
     })
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
@@ -288,9 +344,9 @@ describe('vdom patch: hooks', () => {
         new VNode('span', {}, undefined, 'child 1'),
         new VNode('span', {}, [
           createTextVNode('text1'),
-          createTextVNode('text2')
-        ])
-      ])
+          createTextVNode('text2'),
+        ]),
+      ]),
     ])
     const vnode2 = new VNode('div', {})
     patch1(vnode0, vnode1)
@@ -302,18 +358,18 @@ describe('vdom patch: hooks', () => {
 
   it('should call `create` listener before inserted into parent but after children', () => {
     const result = []
-    function create (empty, vnode) {
+    function create(empty, vnode) {
       expect(vnode.elm.children.length).toBe(2)
       expect(vnode.elm.parentNode).toBe(null)
       result.push(vnode)
     }
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
-      new VNode('div', { hook: { create }}, [
+      new VNode('div', {hook: {create}}, [
         new VNode('span', {}, undefined, 'child 1'),
-        new VNode('span', {}, undefined, 'child 2')
+        new VNode('span', {}, undefined, 'child 2'),
       ]),
-      new VNode('span', {}, undefined, 'can\'t touch me')
+      new VNode('span', {}, undefined, "can't touch me"),
     ])
     patch(vnode0, vnode1)
     expect(result.length).toBe(1)

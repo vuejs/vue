@@ -1,22 +1,22 @@
 import Vue from 'vue'
-import { mergeOptions } from 'core/util/index'
+import {mergeOptions} from 'core/util/index'
 
 describe('Options mixins', () => {
   it('vm should have options from mixin', () => {
     const mixin = {
       directives: {
-        c: {}
+        c: {},
       },
       methods: {
-        a: function () {}
-      }
+        a: function() {},
+      },
     }
 
     const vm = new Vue({
       mixins: [mixin],
       methods: {
-        b: function () {}
-      }
+        b: function() {},
+      },
     })
 
     expect(vm.a).toBeDefined()
@@ -28,32 +28,35 @@ describe('Options mixins', () => {
     const a = {}
     const b = {}
     const c = {}
-    const f1 = function () {}
-    const f2 = function () {}
-    const f3 = function () {}
+    const f1 = function() {}
+    const f2 = function() {}
+    const f3 = function() {}
     const mixinA = {
       a: 1,
       template: 'foo',
       directives: {
-        a: a
+        a: a,
       },
-      created: f1
+      created: f1,
     }
     const mixinB = {
       b: 1,
       directives: {
-        b: b
+        b: b,
       },
-      created: f2
+      created: f2,
     }
-    const result = mergeOptions({}, {
-      directives: {
-        c: c
+    const result = mergeOptions(
+      {},
+      {
+        directives: {
+          c: c,
+        },
+        template: 'bar',
+        mixins: [mixinA, mixinB],
+        created: f3,
       },
-      template: 'bar',
-      mixins: [mixinA, mixinB],
-      created: f3
-    })
+    )
     expect(result.a).toBe(1)
     expect(result.b).toBe(1)
     expect(result.directives.a).toBe(a)
@@ -66,43 +69,46 @@ describe('Options mixins', () => {
   })
 
   it('mixin methods should not override defined method', () => {
-    const f1 = function () {}
-    const f2 = function () {}
-    const f3 = function () {}
+    const f1 = function() {}
+    const f2 = function() {}
+    const f3 = function() {}
     const mixinA = {
       methods: {
-        xyz: f1
-      }
+        xyz: f1,
+      },
     }
     const mixinB = {
       methods: {
-        xyz: f2
-      }
+        xyz: f2,
+      },
     }
-    const result = mergeOptions({}, {
-      mixins: [mixinA, mixinB],
-      methods: {
-        xyz: f3
-      }
-    })
+    const result = mergeOptions(
+      {},
+      {
+        mixins: [mixinA, mixinB],
+        methods: {
+          xyz: f3,
+        },
+      },
+    )
     expect(result.methods.xyz).toBe(f3)
   })
 
   it('should accept constructors as mixins', () => {
     const mixin = Vue.extend({
       directives: {
-        c: {}
+        c: {},
       },
       methods: {
-        a: function () {}
-      }
+        a: function() {},
+      },
     })
 
     const vm = new Vue({
       mixins: [mixin],
       methods: {
-        b: function () {}
-      }
+        b: function() {},
+      },
     })
 
     expect(vm.a).toBeDefined()

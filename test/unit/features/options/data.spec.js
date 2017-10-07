@@ -2,12 +2,12 @@ import Vue from 'vue'
 
 describe('Options data', () => {
   it('should proxy and be reactive', done => {
-    const data = { msg: 'foo' }
+    const data = {msg: 'foo'}
     const vm = new Vue({
       data,
-      template: '<div>{{ msg }}</div>'
+      template: '<div>{{ msg }}</div>',
     }).$mount()
-    expect(vm.$data).toEqual({ msg: 'foo' })
+    expect(vm.$data).toEqual({msg: 'foo'})
     expect(vm.$data).toBe(data)
     data.msg = 'bar'
     waitForUpdate(() => {
@@ -17,12 +17,12 @@ describe('Options data', () => {
 
   it('should merge data properly', () => {
     const Test = Vue.extend({
-      data () {
-        return { a: 1 }
-      }
+      data() {
+        return {a: 1}
+      },
     })
     let vm = new Test({
-      data: { b: 2 }
+      data: {b: 2},
     })
     expect(vm.a).toBe(1)
     expect(vm.b).toBe(2)
@@ -35,20 +35,20 @@ describe('Options data', () => {
     expect(vm.a).toBe(1)
     // recursively merge objects
     const WithObject = Vue.extend({
-      data () {
+      data() {
         return {
           obj: {
-            a: 1
-          }
+            a: 1,
+          },
         }
-      }
+      },
     })
     vm = new WithObject({
       data: {
         obj: {
-          b: 2
-        }
-      }
+          b: 2,
+        },
+      },
     })
     expect(vm.obj.a).toBe(1)
     expect(vm.obj.b).toBe(2)
@@ -56,21 +56,21 @@ describe('Options data', () => {
 
   it('should warn non-function during extend', () => {
     Vue.extend({
-      data: { msg: 'foo' }
+      data: {msg: 'foo'},
     })
     expect('The "data" option should be a function').toHaveBeenWarned()
   })
 
   it('should warn non object return', () => {
     new Vue({
-      data () {}
+      data() {},
     })
     expect('data functions should return an object').toHaveBeenWarned()
   })
 
   it('should warn replacing root $data', () => {
     const vm = new Vue({
-      data: {}
+      data: {},
     })
     vm.$data = {}
     expect('Avoid replacing instance root $data').toHaveBeenWarned()
@@ -79,16 +79,16 @@ describe('Options data', () => {
   it('should have access to props', () => {
     const Test = {
       props: ['a'],
-      render () {},
-      data () {
+      render() {},
+      data() {
         return {
-          b: this.a
+          b: this.a,
         }
-      }
+      },
     }
     const vm = new Vue({
       template: `<test ref="test" :a="1"></test>`,
-      components: { Test }
+      components: {Test},
     }).$mount()
     expect(vm.$refs.test.b).toBe(1)
   })
@@ -96,13 +96,13 @@ describe('Options data', () => {
   it('should have access to methods', () => {
     const vm = new Vue({
       methods: {
-        get () {
-          return { a: 1 }
-        }
+        get() {
+          return {a: 1}
+        },
       },
-      data () {
+      data() {
         return this.get()
-      }
+      },
     })
     expect(vm.a).toBe(1)
   })

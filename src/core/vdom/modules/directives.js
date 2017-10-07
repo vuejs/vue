@@ -1,27 +1,30 @@
 /* @flow */
 
-import { emptyNode } from 'core/vdom/patch'
-import { resolveAsset, handleError } from 'core/util/index'
-import { mergeVNodeHook } from 'core/vdom/helpers/index'
+import {emptyNode} from 'core/vdom/patch'
+import {resolveAsset, handleError} from 'core/util/index'
+import {mergeVNodeHook} from 'core/vdom/helpers/index'
 
 export default {
   create: updateDirectives,
   update: updateDirectives,
-  destroy: function unbindDirectives (vnode: VNodeWithData) {
+  destroy: function unbindDirectives(vnode: VNodeWithData) {
     updateDirectives(vnode, emptyNode)
-  }
+  },
 }
 
-function updateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+function updateDirectives(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (oldVnode.data.directives || vnode.data.directives) {
     _update(oldVnode, vnode)
   }
 }
 
-function _update (oldVnode, vnode) {
+function _update(oldVnode, vnode) {
   const isCreate = oldVnode === emptyNode
   const isDestroy = vnode === emptyNode
-  const oldDirs = normalizeDirectives(oldVnode.data.directives, oldVnode.context)
+  const oldDirs = normalizeDirectives(
+    oldVnode.data.directives,
+    oldVnode.context,
+  )
   const newDirs = normalizeDirectives(vnode.data.directives, vnode.context)
 
   const dirsWithInsert = []
@@ -54,18 +57,26 @@ function _update (oldVnode, vnode) {
       }
     }
     if (isCreate) {
-      mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', callInsert)
+      mergeVNodeHook(
+        vnode.data.hook || (vnode.data.hook = {}),
+        'insert',
+        callInsert,
+      )
     } else {
       callInsert()
     }
   }
 
   if (dirsWithPostpatch.length) {
-    mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'postpatch', () => {
-      for (let i = 0; i < dirsWithPostpatch.length; i++) {
-        callHook(dirsWithPostpatch[i], 'componentUpdated', vnode, oldVnode)
-      }
-    })
+    mergeVNodeHook(
+      vnode.data.hook || (vnode.data.hook = {}),
+      'postpatch',
+      () => {
+        for (let i = 0; i < dirsWithPostpatch.length; i++) {
+          callHook(dirsWithPostpatch[i], 'componentUpdated', vnode, oldVnode)
+        }
+      },
+    )
   }
 
   if (!isCreate) {
@@ -80,10 +91,10 @@ function _update (oldVnode, vnode) {
 
 const emptyModifiers = Object.create(null)
 
-function normalizeDirectives (
+function normalizeDirectives(
   dirs: ?Array<VNodeDirective>,
-  vm: Component
-): { [key: string]: VNodeDirective } {
+  vm: Component,
+): {[key: string]: VNodeDirective} {
   const res = Object.create(null)
   if (!dirs) {
     return res
@@ -100,11 +111,13 @@ function normalizeDirectives (
   return res
 }
 
-function getRawDirName (dir: VNodeDirective): string {
-  return dir.rawName || `${dir.name}.${Object.keys(dir.modifiers || {}).join('.')}`
+function getRawDirName(dir: VNodeDirective): string {
+  return (
+    dir.rawName || `${dir.name}.${Object.keys(dir.modifiers || {}).join('.')}`
+  )
 }
 
-function callHook (dir, hook, vnode, oldVnode, isDestroy) {
+function callHook(dir, hook, vnode, oldVnode, isDestroy) {
   const fn = dir.def && dir.def[hook]
   if (fn) {
     try {

@@ -5,10 +5,10 @@ describe('Global API: compile', () => {
     const res = Vue.compile('<div><span>{{ msg }}</span></div>')
     const vm = new Vue({
       data: {
-        msg: 'hello'
+        msg: 'hello',
       },
       render: res.render,
-      staticRenderFns: res.staticRenderFns
+      staticRenderFns: res.staticRenderFns,
     }).$mount()
     expect(vm.$el.innerHTML).toContain('<span>hello</span>')
   })

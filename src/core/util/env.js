@@ -1,7 +1,7 @@
 /* @flow */
 /* globals MessageChannel */
 
-import { handleError } from './error'
+import {handleError} from './error'
 
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
@@ -17,18 +17,22 @@ export const isIOS = UA && /iphone|ipad|ipod|ios/.test(UA)
 export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
 
 // Firefox has a "watch" function on Object.prototype...
-export const nativeWatch = ({}).watch
+export const nativeWatch = {}.watch
 
 export let supportsPassive = false
 if (inBrowser) {
   try {
     const opts = {}
-    Object.defineProperty(opts, 'passive', ({
-      get () {
-        /* istanbul ignore next */
-        supportsPassive = true
-      }
-    }: Object)) // https://github.com/facebook/flow/issues/285
+    Object.defineProperty(
+      opts,
+      'passive',
+      ({
+        get() {
+          /* istanbul ignore next */
+          supportsPassive = true
+        },
+      }: Object),
+    ) // https://github.com/facebook/flow/issues/285
     window.addEventListener('test-passive', null, opts)
   } catch (e) {}
 }
@@ -54,23 +58,25 @@ export const isServerRendering = () => {
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
 /* istanbul ignore next */
-export function isNative (Ctor: any): boolean {
+export function isNative(Ctor: any): boolean {
   return typeof Ctor === 'function' && /native code/.test(Ctor.toString())
 }
 
 export const hasSymbol =
-  typeof Symbol !== 'undefined' && isNative(Symbol) &&
-  typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)
+  typeof Symbol !== 'undefined' &&
+  isNative(Symbol) &&
+  typeof Reflect !== 'undefined' &&
+  isNative(Reflect.ownKeys)
 
 /**
  * Defer a task to execute it asynchronously.
  */
-export const nextTick = (function () {
+export const nextTick = (function() {
   const callbacks = []
   let pending = false
   let timerFunc
 
-  function nextTickHandler () {
+  function nextTickHandler() {
     pending = false
     const copies = callbacks.slice(0)
     callbacks.length = 0
@@ -92,20 +98,20 @@ export const nextTick = (function () {
     timerFunc = () => {
       setImmediate(nextTickHandler)
     }
-  } else if (typeof MessageChannel !== 'undefined' && (
-    isNative(MessageChannel) ||
-    // PhantomJS
-    MessageChannel.toString() === '[object MessageChannelConstructor]'
-  )) {
+  } else if (
+    typeof MessageChannel !== 'undefined' &&
+    (isNative(MessageChannel) ||
+      // PhantomJS
+      MessageChannel.toString() === '[object MessageChannelConstructor]')
+  ) {
     const channel = new MessageChannel()
     const port = channel.port2
     channel.port1.onmessage = nextTickHandler
     timerFunc = () => {
       port.postMessage(1)
     }
-  } else
-  /* istanbul ignore next */
-  if (typeof Promise !== 'undefined' && isNative(Promise)) {
+  } else if (typeof Promise !== 'undefined' && isNative(Promise)) {
+    /* istanbul ignore next */
     // use microtask in non-DOM environments, e.g. Weex
     const p = Promise.resolve()
     timerFunc = () => {
@@ -118,7 +124,7 @@ export const nextTick = (function () {
     }
   }
 
-  return function queueNextTick (cb?: Function, ctx?: Object) {
+  return function queueNextTick(cb?: Function, ctx?: Object) {
     let _resolve
     callbacks.push(() => {
       if (cb) {
@@ -144,25 +150,24 @@ export const nextTick = (function () {
   }
 })()
 
-let _Set
-/* istanbul ignore if */ // $flow-disable-line
-if (typeof Set !== 'undefined' && isNative(Set)) {
+let _Set // $flow-disable-line
+/* istanbul ignore if */ if (typeof Set !== 'undefined' && isNative(Set)) {
   // use native Set when available.
   _Set = Set
 } else {
   // a non-standard Set polyfill that only works with primitive keys.
   _Set = class Set implements ISet {
-    set: Object;
-    constructor () {
+    set: Object
+    constructor() {
       this.set = Object.create(null)
     }
-    has (key: string | number) {
+    has(key: string | number) {
       return this.set[key] === true
     }
-    add (key: string | number) {
+    add(key: string | number) {
       this.set[key] = true
     }
-    clear () {
+    clear() {
       this.set = Object.create(null)
     }
   }
@@ -174,5 +179,5 @@ interface ISet {
   clear(): void;
 }
 
-export { _Set }
-export type { ISet }
+export {_Set}
+export type {ISet}

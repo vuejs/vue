@@ -20,5 +20,5 @@ if (process.argv[2] === '-c') {
 
 module.exports = {
   base: weexBaseVersion,
-  sub: weexSubVersion
+  sub: weexSubVersion,
 }

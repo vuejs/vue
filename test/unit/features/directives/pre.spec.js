@@ -1,7 +1,7 @@
 import Vue from 'vue'
 
-describe('Directive v-pre', function () {
-  it('should not compile inner content', function () {
+describe('Directive v-pre', function() {
+  it('should not compile inner content', function() {
     const vm = new Vue({
       template: `<div>
         <div v-pre>{{ a }}</div>
@@ -11,8 +11,8 @@ describe('Directive v-pre', function () {
         </div>
       </div>`,
       data: {
-        a: 123
-      }
+        a: 123,
+      },
     })
     vm.$mount()
     expect(vm.$el.firstChild.textContent).toBe('{{ a }}')
@@ -20,13 +20,13 @@ describe('Directive v-pre', function () {
     expect(vm.$el.lastChild.innerHTML).toBe('<component></component>')
   })
 
-  it('should not compile on root node', function () {
+  it('should not compile on root node', function() {
     const vm = new Vue({
       template: '<div v-pre>{{ a }}</div>',
       replace: true,
       data: {
-        a: 123
-      }
+        a: 123,
+      },
     })
     vm.$mount()
     expect(vm.$el.firstChild.textContent).toBe('{{ a }}')

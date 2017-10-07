@@ -11,7 +11,7 @@ import {
   genText,
   genElement,
   genChildren,
-  CodegenState
+  CodegenState,
 } from 'compiler/codegen/index'
 
 import {
@@ -19,36 +19,36 @@ import {
   genDOMPropSegments,
   genClassSegments,
   genStyleSegments,
-  applyModelTransform
+  applyModelTransform,
 } from './modules'
 
-import { escape } from 'web/server/util'
-import { optimizability } from './optimizer'
-import type { CodegenResult } from 'compiler/codegen/index'
+import {escape} from 'web/server/util'
+import {optimizability} from './optimizer'
+import type {CodegenResult} from 'compiler/codegen/index'
 
 export type StringSegment = {
-  type: number;
-  value: string;
-};
+  type: number,
+  value: string,
+}
 
 // segment types
 export const RAW = 0
 export const INTERPOLATION = 1
 export const EXPRESSION = 2
 
-export function generate (
+export function generate(
   ast: ASTElement | void,
-  options: CompilerOptions
+  options: CompilerOptions,
 ): CodegenResult {
   const state = new CodegenState(options)
   const code = ast ? genSSRElement(ast, state) : '_c("div")'
   return {
     render: `with(this){return ${code}}`,
-    staticRenderFns: state.staticRenderFns
+    staticRenderFns: state.staticRenderFns,
   }
 }
 
-function genSSRElement (el: ASTElement, state: CodegenState): string {
+function genSSRElement(el: ASTElement, state: CodegenState): string {
   if (el.for && !el.forProcessed) {
     return genFor(el, state, genSSRElement)
   } else if (el.if && !el.ifProcessed) {
@@ -78,82 +78,79 @@ function genSSRElement (el: ASTElement, state: CodegenState): string {
   }
 }
 
-function genNormalElement (el, state, stringifyChildren) {
+function genNormalElement(el, state, stringifyChildren) {
   const data = el.plain ? undefined : genData(el, state)
   const children = stringifyChildren
     ? `[${genChildrenAsStringNode(el, state)}]`
     : genSSRChildren(el, state, true)
-  return `_c('${el.tag}'${
-    data ? `,${data}` : ''
-  }${
-    children ? `,${children}` : ''
-  })`
+  return `_c('${el.tag}'${data ? `,${data}` : ''}${children
+    ? `,${children}`
+    : ''})`
 }
 
-function genSSRChildren (el, state, checkSkip) {
+function genSSRChildren(el, state, checkSkip) {
   return genChildren(el, state, checkSkip, genSSRElement, genSSRNode)
 }
 
-function genSSRNode (el, state) {
-  return el.type === 1
-    ? genSSRElement(el, state)
-    : genText(el)
+function genSSRNode(el, state) {
+  return el.type === 1 ? genSSRElement(el, state) : genText(el)
 }
 
-function genChildrenAsStringNode (el, state) {
+function genChildrenAsStringNode(el, state) {
   return el.children.length
     ? `_ssrNode(${flattenSegments(childrenToSegments(el, state))})`
     : ''
 }
 
-function genStringElement (el, state) {
+function genStringElement(el, state) {
   return `_ssrNode(${elementToString(el, state)})`
 }
 
-function genStringElementWithChildren (el, state) {
+function genStringElementWithChildren(el, state) {
   const children = genSSRChildren(el, state, true)
-  return `_ssrNode(${
-    flattenSegments(elementToOpenTagSegments(el, state))
-  },"</${el.tag}>"${
-    children ? `,${children}` : ''
-  })`
+  return `_ssrNode(${flattenSegments(
+    elementToOpenTagSegments(el, state),
+  )},"</${el.tag}>"${children ? `,${children}` : ''})`
 }
 
-function elementToString (el, state) {
+function elementToString(el, state) {
   return `(${flattenSegments(elementToSegments(el, state))})`
 }
 
-function elementToSegments (el, state): Array<StringSegment> {
+function elementToSegments(el, state): Array<StringSegment> {
   // v-for / v-if
   if (el.for && !el.forProcessed) {
     el.forProcessed = true
-    return [{
-      type: EXPRESSION,
-      value: genFor(el, state, elementToString, '_ssrList')
-    }]
+    return [
+      {
+        type: EXPRESSION,
+        value: genFor(el, state, elementToString, '_ssrList'),
+      },
+    ]
   } else if (el.if && !el.ifProcessed) {
     el.ifProcessed = true
-    return [{
-      type: EXPRESSION,
-      value: genIf(el, state, elementToString, '"<!---->"')
-    }]
+    return [
+      {
+        type: EXPRESSION,
+        value: genIf(el, state, elementToString, '"<!---->"'),
+      },
+    ]
   } else if (el.tag === 'template') {
     return childrenToSegments(el, state)
   }
 
   const openSegments = elementToOpenTagSegments(el, state)
   const childrenSegments = childrenToSegments(el, state)
-  const { isUnaryTag } = state.options
-  const close = (isUnaryTag && isUnaryTag(el.tag))
-    ? []
-    : [{ type: RAW, value: `</${el.tag}>` }]
+  const {isUnaryTag} = state.options
+  const close =
+    isUnaryTag && isUnaryTag(el.tag) ? [] : [{type: RAW, value: `</${el.tag}>`}]
   return openSegments.concat(childrenSegments, close)
 }
 
-function elementToOpenTagSegments (el, state): Array<StringSegment> {
+function elementToOpenTagSegments(el, state): Array<StringSegment> {
   applyModelTransform(el, state)
   let binding
-  const segments = [{ type: RAW, value: `<${el.tag}` }]
+  const segments = [{type: RAW, value: `<${el.tag}`}]
   // attrs
   if (el.attrs) {
     segments.push.apply(segments, genAttrSegments(el.attrs))
@@ -164,17 +161,17 @@ function elementToOpenTagSegments (el, state): Array<StringSegment> {
   }
   // v-bind="object"
   if ((binding = el.attrsMap['v-bind'])) {
-    segments.push({ type: EXPRESSION, value: `_ssrAttrs(${binding})` })
+    segments.push({type: EXPRESSION, value: `_ssrAttrs(${binding})`})
   }
   // v-bind.prop="object"
   if ((binding = el.attrsMap['v-bind.prop'])) {
-    segments.push({ type: EXPRESSION, value: `_ssrDOMProps(${binding})` })
+    segments.push({type: EXPRESSION, value: `_ssrDOMProps(${binding})`})
   }
   // class
   if (el.staticClass || el.classBinding) {
     segments.push.apply(
       segments,
-      genClassSegments(el.staticClass, el.classBinding)
+      genClassSegments(el.staticClass, el.classBinding),
     )
   }
   // style & v-show
@@ -185,34 +182,32 @@ function elementToOpenTagSegments (el, state): Array<StringSegment> {
         el.attrsMap.style,
         el.staticStyle,
         el.styleBinding,
-        el.attrsMap['v-show']
-      )
+        el.attrsMap['v-show'],
+      ),
     )
   }
   // _scopedId
   if (state.options.scopeId) {
-    segments.push({ type: RAW, value: ` ${state.options.scopeId}` })
+    segments.push({type: RAW, value: ` ${state.options.scopeId}`})
   }
-  segments.push({ type: RAW, value: `>` })
+  segments.push({type: RAW, value: `>`})
   return segments
 }
 
-function childrenToSegments (el, state): Array<StringSegment> {
+function childrenToSegments(el, state): Array<StringSegment> {
   let binding
   if ((binding = el.attrsMap['v-html'])) {
-    return [{ type: EXPRESSION, value: `_s(${binding})` }]
+    return [{type: EXPRESSION, value: `_s(${binding})`}]
   }
   if ((binding = el.attrsMap['v-text'])) {
-    return [{ type: INTERPOLATION, value: `_s(${binding})` }]
+    return [{type: INTERPOLATION, value: `_s(${binding})`}]
   }
-  return el.children
-    ? nodesToSegments(el.children, state)
-    : []
+  return el.children ? nodesToSegments(el.children, state) : []
 }
 
-function nodesToSegments (
+function nodesToSegments(
   children: Array<ASTNode>,
-  state: CodegenState
+  state: CodegenState,
 ): Array<StringSegment> {
   const segments = []
   for (let i = 0; i < children.length; i++) {
@@ -220,15 +215,15 @@ function nodesToSegments (
     if (c.type === 1) {
       segments.push.apply(segments, elementToSegments(c, state))
     } else if (c.type === 2) {
-      segments.push({ type: INTERPOLATION, value: c.expression })
+      segments.push({type: INTERPOLATION, value: c.expression})
     } else if (c.type === 3) {
-      segments.push({ type: RAW, value: escape(c.text) })
+      segments.push({type: RAW, value: escape(c.text)})
     }
   }
   return segments
 }
 
-function flattenSegments (segments: Array<StringSegment>): string {
+function flattenSegments(segments: Array<StringSegment>): string {
   const mergedSegments = []
   let textBuffer = ''
 

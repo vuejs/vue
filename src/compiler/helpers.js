@@ -1,56 +1,63 @@
 /* @flow */
 
-import { parseFilters } from './parser/filter-parser'
+import {parseFilters} from './parser/filter-parser'
 
-export function baseWarn (msg: string) {
+export function baseWarn(msg: string) {
   console.error(`[Vue compiler]: ${msg}`)
 }
 
-export function pluckModuleFunction<F: Function> (
+export function pluckModuleFunction<F: Function>(
   modules: ?Array<Object>,
-  key: string
+  key: string,
 ): Array<F> {
-  return modules
-    ? modules.map(m => m[key]).filter(_ => _)
-    : []
+  return modules ? modules.map(m => m[key]).filter(_ => _) : []
 }
 
-export function addProp (el: ASTElement, name: string, value: string) {
-  (el.props || (el.props = [])).push({ name, value })
+export function addProp(el: ASTElement, name: string, value: string) {
+  ;(el.props || (el.props = [])).push({name, value})
 }
 
-export function addAttr (el: ASTElement, name: string, value: string) {
-  (el.attrs || (el.attrs = [])).push({ name, value })
+export function addAttr(el: ASTElement, name: string, value: string) {
+  ;(el.attrs || (el.attrs = [])).push({name, value})
 }
 
-export function addDirective (
+export function addDirective(
   el: ASTElement,
   name: string,
   rawName: string,
   value: string,
   arg: ?string,
-  modifiers: ?ASTModifiers
+  modifiers: ?ASTModifiers,
 ) {
-  (el.directives || (el.directives = [])).push({ name, rawName, value, arg, modifiers })
+  ;(el.directives || (el.directives = [])).push({
+    name,
+    rawName,
+    value,
+    arg,
+    modifiers,
+  })
 }
 
-export function addHandler (
+export function addHandler(
   el: ASTElement,
   name: string,
   value: string,
   modifiers: ?ASTModifiers,
   important?: boolean,
-  warn?: Function
+  warn?: Function,
 ) {
   // warn prevent and passive modifier
   /* istanbul ignore if */
   if (
-    process.env.NODE_ENV !== 'production' && warn &&
-    modifiers && modifiers.prevent && modifiers.passive
+    process.env.NODE_ENV !== 'production' &&
+    warn &&
+    modifiers &&
+    modifiers.prevent &&
+    modifiers.passive
   ) {
     warn(
-      'passive and prevent can\'t be used together. ' +
-      'Passive handler can\'t prevent default event.'
+      "passive and prevent can't be used together. " +
+        "Passive handler can't prevent default event.",
     )
   }
   // check capture modifier
@@ -74,7 +81,7 @@ export function addHandler (
   } else {
     events = el.events || (el.events = {})
   }
-  const newHandler = { value, modifiers }
+  const newHandler = {value, modifiers}
   const handlers = events[name]
   /* istanbul ignore if */
   if (Array.isArray(handlers)) {
@@ -86,14 +93,13 @@ export function addHandler (
   }
 }
 
-export function getBindingAttr (
+export function getBindingAttr(
   el: ASTElement,
   name: string,
-  getStatic?: boolean
+  getStatic?: boolean,
 ): ?string {
   const dynamicValue =
-    getAndRemoveAttr(el, ':' + name) ||
-    getAndRemoveAttr(el, 'v-bind:' + name)
+    getAndRemoveAttr(el, ':' + name) || getAndRemoveAttr(el, 'v-bind:' + name)
   if (dynamicValue != null) {
     return parseFilters(dynamicValue)
   } else if (getStatic !== false) {
@@ -104,7 +110,7 @@ export function getBindingAttr (
   }
 }
 
-export function getAndRemoveAttr (el: ASTElement, name: string): ?string {
+export function getAndRemoveAttr(el: ASTElement, name: string): ?string {
   let val
   if ((val = el.attrsMap[name]) != null) {
     const list = el.attrsList

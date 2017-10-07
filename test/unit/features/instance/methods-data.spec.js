@@ -5,17 +5,19 @@ describe('Instance methods data', () => {
     const vm = new Vue({
       template: '<div>{{ a.msg }}</div>',
       data: {
-        a: {}
-      }
+        a: {},
+      },
     }).$mount()
     expect(vm.$el.innerHTML).toBe('')
     vm.$set(vm.a, 'msg', 'hello')
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('hello')
       vm.$delete(vm.a, 'msg')
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('')
+      })
+      .then(done)
   })
 
   describe('$watch', () => {
@@ -25,12 +27,12 @@ describe('Instance methods data', () => {
       vm = new Vue({
         data: {
           a: {
-            b: 1
-          }
+            b: 1,
+          },
         },
         methods: {
-          foo: spy
-        }
+          foo: spy,
+        },
       })
     })
 
@@ -40,15 +42,17 @@ describe('Instance methods data', () => {
       waitForUpdate(() => {
         expect(spy.calls.count()).toBe(1)
         expect(spy).toHaveBeenCalledWith(2, 1)
-        vm.a = { b: 3 }
-      }).then(() => {
-        expect(spy.calls.count()).toBe(2)
-        expect(spy).toHaveBeenCalledWith(3, 2)
-      }).then(done)
+        vm.a = {b: 3}
+      })
+        .then(() => {
+          expect(spy.calls.count()).toBe(2)
+          expect(spy).toHaveBeenCalledWith(3, 2)
+        })
+        .then(done)
     })
 
     it('immediate', () => {
-      vm.$watch('a.b', spy, { immediate: true })
+      vm.$watch('a.b', spy, {immediate: true})
       expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith(1)
     })
@@ -63,7 +67,7 @@ describe('Instance methods data', () => {
     })
 
     it('function watch', done => {
-      vm.$watch(function () {
+      vm.$watch(function() {
         return this.a.b
       }, spy)
       vm.a.b = 2
@@ -74,35 +78,39 @@ describe('Instance methods data', () => {
 
     it('deep watch', done => {
       var oldA = vm.a
-      vm.$watch('a', spy, { deep: true })
+      vm.$watch('a', spy, {deep: true})
       vm.a.b = 2
       waitForUpdate(() => {
         expect(spy).toHaveBeenCalledWith(oldA, oldA)
-        vm.a = { b: 3 }
-      }).then(() => {
-        expect(spy).toHaveBeenCalledWith(vm.a, oldA)
-      }).then(done)
+        vm.a = {b: 3}
+      })
+        .then(() => {
+          expect(spy).toHaveBeenCalledWith(vm.a, oldA)
+        })
+        .then(done)
     })
 
     it('handler option', done => {
       var oldA = vm.a
       vm.$watch('a', {
         handler: spy,
-        deep: true
+        deep: true,
       })
       vm.a.b = 2
       waitForUpdate(() => {
         expect(spy).toHaveBeenCalledWith(oldA, oldA)
-        vm.a = { b: 3 }
-      }).then(() => {
-        expect(spy).toHaveBeenCalledWith(vm.a, oldA)
-      }).then(done)
+        vm.a = {b: 3}
+      })
+        .then(() => {
+          expect(spy).toHaveBeenCalledWith(vm.a, oldA)
+        })
+        .then(done)
     })
 
     it('handler option in string', () => {
       vm.$watch('a.b', {
         handler: 'foo',
-        immediate: true
+        immediate: true,
       })
       expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith(1)
@@ -110,7 +118,9 @@ describe('Instance methods data', () => {
 
     it('warn expression', () => {
       vm.$watch('a + b', spy)
-      expect('Watcher only accepts simple dot-delimited paths').toHaveBeenWarned()
+      expect(
+        'Watcher only accepts simple dot-delimited paths',
+      ).toHaveBeenWarned()
     })
   })
 })

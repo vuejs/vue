@@ -1,21 +1,16 @@
 /* @flow */
 
-import {
-  isDef,
-  isUndef,
-  isTrue,
-  extend
-} from 'shared/util'
+import {isDef, isUndef, isTrue, extend} from 'shared/util'
 
-import { escape } from 'web/server/util'
-import { SSR_ATTR } from 'shared/constants'
-import { RenderContext } from './render-context'
-import { ssrCompileToFunctions } from 'web/server/compiler'
-import { installSSRHelpers } from './optimizing-compiler/runtime-helpers'
+import {escape} from 'web/server/util'
+import {SSR_ATTR} from 'shared/constants'
+import {RenderContext} from './render-context'
+import {ssrCompileToFunctions} from 'web/server/compiler'
+import {installSSRHelpers} from './optimizing-compiler/runtime-helpers'
 
 import {
   createComponent,
-  createComponentInstanceForVnode
+  createComponentInstanceForVnode,
 } from 'core/vdom/create-component'
 
 let warned = Object.create(null)
@@ -27,23 +22,27 @@ const warnOnce = msg => {
 }
 
 const normalizeRender = vm => {
-  const { render, template, _scopeId } = vm.$options
+  const {render, template, _scopeId} = vm.$options
   if (isUndef(render)) {
     if (template) {
-      extend(vm.$options, ssrCompileToFunctions(template, {
-        scopeId: _scopeId
-      }))
+      extend(
+        vm.$options,
+        ssrCompileToFunctions(template, {
+          scopeId: _scopeId,
+        }),
+      )
     } else {
       throw new Error(
-        `render function or template not defined in component: ${
-          vm.$options.name || vm.$options._componentTag || 'anonymous'
-        }`
+        `render function or template not defined in component: ${vm.$options
+          .name ||
+          vm.$options._componentTag ||
+          'anonymous'}`,
       )
     }
   }
 }
 
-function renderNode (node, isRoot, context) {
+function renderNode(node, isRoot, context) {
   if (node.isString) {
     renderStringNode(node, context)
   } else if (isDef(node.componentOptions)) {
@@ -60,12 +59,12 @@ function renderNode (node, isRoot, context) {
   } else {
     context.write(
       node.raw ? node.text : escape(String(node.text)),
-      context.next
+      context.next,
     )
   }
 }
 
-function registerComponentForCache (options, write) {
+function registerComponentForCache(options, write) {
   // exposed by vue-loader, need to call this if cache hit because
   // component lifecycle hooks will not be called.
   const register = options._ssrRegister
@@ -75,8 +74,8 @@ function registerComponentForCache (options, write) {
   return register
 }
 
-function renderComponent (node, isRoot, context) {
-  const { write, next, userContext } = context
+function renderComponent(node, isRoot, context) {
+  const {write, next, userContext} = context
 
   // check cache hit
   const Ctor = node.componentOptions.Ctor
@@ -87,7 +86,7 @@ function renderComponent (node, isRoot, context) {
 
   if (isDef(getKey) && isDef(cache) && isDef(name)) {
     const key = name + '::' + getKey(node.componentOptions.propsData)
-    const { has, get } = context
+    const {has, get} = context
     if (isDef(has)) {
       has(key, hit => {
         if (hit === true && isDef(get)) {
@@ -118,23 +117,22 @@ function renderComponent (node, isRoot, context) {
   } else {
     if (isDef(getKey) && isUndef(cache)) {
       warnOnce(
-        `[vue-server-renderer] Component ${
-          Ctor.options.name || '(anonymous)'
-        } implemented serverCacheKey, ` +
-        'but no cache was provided to the renderer.'
+        `[vue-server-renderer] Component ${Ctor.options.name ||
+          '(anonymous)'} implemented serverCacheKey, ` +
+          'but no cache was provided to the renderer.',
       )
     }
     if (isDef(getKey) && isUndef(name)) {
       warnOnce(
         `[vue-server-renderer] Components that implement "serverCacheKey" ` +
-        `must also define a unique "name" option.`
+          `must also define a unique "name" option.`,
       )
     }
     renderComponentInner(node, isRoot, context)
   }
 }
 
-function renderComponentWithCache (node, isRoot, key, context) {
+function renderComponentWithCache(node, isRoot, key, context) {
   const write = context.write
   write.caching = true
   const buffer = write.cacheBuffer
@@ -146,44 +144,44 @@ function renderComponentWithCache (node, isRoot, key, context) {
     key,
     buffer,
     bufferIndex,
-    componentBuffer
+    componentBuffer,
   })
   renderComponentInner(node, isRoot, context)
 }
 
-function renderComponentInner (node, isRoot, context) {
+function renderComponentInner(node, isRoot, context) {
   const prevActive = context.activeInstance
   // expose userContext on vnode
   node.ssrContext = context.userContext
-  const child = context.activeInstance = createComponentInstanceForVnode(
+  const child = (context.activeInstance = createComponentInstanceForVnode(
     node,
-    context.activeInstance
-  )
+    context.activeInstance,
+  ))
   normalizeRender(child)
   const childNode = child._render()
   childNode.parent = node
   context.renderStates.push({
     type: 'Component',
-    prevActive
+    prevActive,
   })
   renderNode(childNode, isRoot, context)
 }
 
-function renderAsyncComponent (node, isRoot, context) {
+function renderAsyncComponent(node, isRoot, context) {
   const factory = node.asyncFactory
 
   const resolve = comp => {
     if (comp.__esModule && comp.default) {
       comp = comp.default
     }
-    const { data, children, tag } = node.asyncMeta
+    const {data, children, tag} = node.asyncMeta
     const nodeContext = node.asyncMeta.context
     const resolvedNode: any = createComponent(
       comp,
       data,
       nodeContext,
       children,
-      tag
+      tag,
     )
     if (resolvedNode) {
       renderComponent(resolvedNode, isRoot, context)
@@ -193,7 +191,9 @@ function renderAsyncComponent (node, isRoot, context) {
   }
 
   const reject = err => {
-    console.error(`[vue-server-renderer] error when rendering async component:\n`)
+    console.error(
+      `[vue-server-renderer] error when rendering async component:\n`,
+    )
     if (err) console.error(err.stack)
     context.write(`<!--${node.text}-->`, context.next)
   }
@@ -222,8 +222,8 @@ function renderAsyncComponent (node, isRoot, context) {
   }
 }
 
-function renderStringNode (el, context) {
-  const { write, next } = context
+function renderStringNode(el, context) {
+  const {write, next} = context
   if (isUndef(el.children) || el.children.length === 0) {
     write(el.open + (el.close || ''), next)
   } else {
@@ -232,14 +232,15 @@ function renderStringNode (el, context) {
       type: 'Element',
       rendered: 0,
       total: children.length,
-      endTag: el.close, children
+      endTag: el.close,
+      children,
     })
     write(el.open, next)
   }
 }
 
-function renderElement (el, isRoot, context) {
-  const { write, next } = context
+function renderElement(el, isRoot, context) {
+  const {write, next} = context
 
   if (isTrue(isRoot)) {
     if (!el.data) el.data = {}
@@ -263,18 +264,21 @@ function renderElement (el, isRoot, context) {
       type: 'Element',
       rendered: 0,
       total: children.length,
-      endTag, children
+      endTag,
+      children,
     })
     write(startTag, next)
   }
 }
 
-function hasAncestorData (node: VNode) {
+function hasAncestorData(node: VNode) {
   const parentNode = node.parent
-  return isDef(parentNode) && (isDef(parentNode.data) || hasAncestorData(parentNode))
+  return (
+    isDef(parentNode) && (isDef(parentNode.data) || hasAncestorData(parentNode))
+  )
 }
 
-function getVShowDirectiveInfo (node: VNode): ?VNodeDirective {
+function getVShowDirectiveInfo(node: VNode): ?VNodeDirective {
   let dir: VNodeDirective
   let tmp
 
@@ -290,9 +294,9 @@ function getVShowDirectiveInfo (node: VNode): ?VNodeDirective {
   return dir
 }
 
-function renderStartingTag (node: VNode, context) {
+function renderStartingTag(node: VNode, context) {
   let markup = `<${node.tag}`
-  const { directives, modules } = context
+  const {directives, modules} = context
 
   // construct synthetic data for module processing
   // because modules like style also produce code by parent VNode data
@@ -331,14 +335,15 @@ function renderStartingTag (node: VNode, context) {
   // attach scoped CSS ID
   let scopeId
   const activeInstance = context.activeInstance
-  if (isDef(activeInstance) &&
+  if (
+    isDef(activeInstance) &&
     activeInstance !== node.context &&
-    isDef(scopeId = activeInstance.$options._scopeId)
+    isDef((scopeId = activeInstance.$options._scopeId))
   ) {
     markup += ` ${(scopeId: any)}`
   }
   while (isDef(node)) {
-    if (isDef(scopeId = node.context.$options._scopeId)) {
+    if (isDef((scopeId = node.context.$options._scopeId))) {
       markup += ` ${scopeId}`
     }
     node = node.parent
@@ -346,25 +351,29 @@ function renderStartingTag (node: VNode, context) {
   return markup + '>'
 }
 
-export function createRenderFunction (
+export function createRenderFunction(
   modules: Array<(node: VNode) => ?string>,
   directives: Object,
   isUnaryTag: Function,
-  cache: any
+  cache: any,
 ) {
-  return function render (
+  return function render(
     component: Component,
     write: (text: string, next: Function) => void,
     userContext: ?Object,
-    done: Function
+    done: Function,
   ) {
     warned = Object.create(null)
     const context = new RenderContext({
       activeInstance: component,
       userContext,
-      write, done, renderNode,
-      isUnaryTag, modules, directives,
-      cache
+      write,
+      done,
+      renderNode,
+      isUnaryTag,
+      modules,
+      directives,
+      cache,
     })
     installSSRHelpers(component)
     normalizeRender(component)

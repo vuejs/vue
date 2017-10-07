@@ -3,7 +3,7 @@ import Vue from 'vue'
 describe('Options name', () => {
   it('should contain itself in self components', () => {
     const vm = Vue.extend({
-      name: 'SuperVue'
+      name: 'SuperVue',
     })
 
     expect(vm.options.components['SuperVue']).toEqual(vm)
@@ -11,7 +11,7 @@ describe('Options name', () => {
 
   it('should warn when incorrect name given', () => {
     Vue.extend({
-      name: 'Hyper*Vue'
+      name: 'Hyper*Vue',
     })
 
     /* eslint-disable */
@@ -20,7 +20,7 @@ describe('Options name', () => {
     /* eslint-enable */
 
     Vue.extend({
-      name: '2Cool2BValid'
+      name: '2Cool2BValid',
     })
 
     /* eslint-disable */
@@ -31,10 +31,14 @@ describe('Options name', () => {
 
   it('id should not override given name when using Vue.component', () => {
     const SuperComponent = Vue.component('super-component', {
-      name: 'SuperVue'
+      name: 'SuperVue',
     })
 
-    expect(SuperComponent.options.components['SuperVue']).toEqual(SuperComponent)
-    expect(SuperComponent.options.components['super-component']).toEqual(SuperComponent)
+    expect(SuperComponent.options.components['SuperVue']).toEqual(
+      SuperComponent,
+    )
+    expect(SuperComponent.options.components['super-component']).toEqual(
+      SuperComponent,
+    )
   })
 })

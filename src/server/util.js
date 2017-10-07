@@ -4,7 +4,7 @@ export const isJS = (file: string): boolean => /\.js(\?[^.]+)?$/.test(file)
 
 export const isCSS = (file: string): boolean => /\.css(\?[^.]+)?$/.test(file)
 
-export function createPromiseCallback () {
+export function createPromiseCallback() {
   let resolve, reject
   const promise: Promise<string> = new Promise((_resolve, _reject) => {
     resolve = _resolve
@@ -14,5 +14,5 @@ export function createPromiseCallback () {
     if (err) return reject(err)
     resolve(res || '')
   }
-  return { promise, cb }
+  return {promise, cb}
 }

@@ -3,21 +3,21 @@ import Vue from 'vue'
 describe('Options extends', () => {
   it('should work on objects', () => {
     const A = {
-      data () {
-        return { a: 1 }
-      }
+      data() {
+        return {a: 1}
+      },
     }
     const B = {
       extends: A,
-      data () {
-        return { b: 2 }
-      }
+      data() {
+        return {b: 2}
+      },
     }
     const vm = new Vue({
       extends: B,
       data: {
-        c: 3
-      }
+        c: 3,
+      },
     })
     expect(vm.a).toBe(1)
     expect(vm.b).toBe(2)
@@ -26,21 +26,21 @@ describe('Options extends', () => {
 
   it('should work on extended constructors', () => {
     const A = Vue.extend({
-      data () {
-        return { a: 1 }
-      }
+      data() {
+        return {a: 1}
+      },
     })
     const B = Vue.extend({
       extends: A,
-      data () {
-        return { b: 2 }
-      }
+      data() {
+        return {b: 2}
+      },
     })
     const vm = new Vue({
       extends: B,
       data: {
-        c: 3
-      }
+        c: 3,
+      },
     })
     expect(vm.a).toBe(1)
     expect(vm.b).toBe(2)
@@ -56,7 +56,7 @@ describe('Options extends', () => {
         writable: true,
         configurable: true,
         enumerable: false,
-        value: () => {}
+        value: () => {},
       })
     }
 
@@ -64,18 +64,18 @@ describe('Options extends', () => {
 
     const spy = jasmine.createSpy('watch')
     const A = Vue.extend({
-      data: function () {
-        return { a: 1 }
+      data: function() {
+        return {a: 1}
       },
       watch: {
-        a: spy
+        a: spy,
       },
-      created: function () {
+      created: function() {
         this.a = 2
-      }
+      },
     })
     new Vue({
-      extends: A
+      extends: A,
     })
     waitForUpdate(() => {
       expect(spy).toHaveBeenCalledWith(2, 1)

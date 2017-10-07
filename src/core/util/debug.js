@@ -1,7 +1,7 @@
 /* @flow */
 
 import config from '../config'
-import { noop } from 'shared/util'
+import {noop} from 'shared/util'
 
 export let warn = noop
 export let tip = noop
@@ -10,25 +10,22 @@ export let formatComponentName: Function = (null: any) // work around flow check
 if (process.env.NODE_ENV !== 'production') {
   const hasConsole = typeof console !== 'undefined'
   const classifyRE = /(?:^|[-_])(\w)/g
-  const classify = str => str
-    .replace(classifyRE, c => c.toUpperCase())
-    .replace(/[-_]/g, '')
+  const classify = str =>
+    str.replace(classifyRE, c => c.toUpperCase()).replace(/[-_]/g, '')
 
   warn = (msg, vm) => {
     const trace = vm ? generateComponentTrace(vm) : ''
 
     if (config.warnHandler) {
       config.warnHandler.call(null, msg, vm, trace)
-    } else if (hasConsole && (!config.silent)) {
+    } else if (hasConsole && !config.silent) {
       console.error(`[Vue warn]: ${msg}${trace}`)
     }
   }
 
   tip = (msg, vm) => {
-    if (hasConsole && (!config.silent)) {
-      console.warn(`[Vue tip]: ${msg}` + (
-        vm ? generateComponentTrace(vm) : ''
-      ))
+    if (hasConsole && !config.silent) {
+      console.warn(`[Vue tip]: ${msg}` + (vm ? generateComponentTrace(vm) : ''))
     }
   }
 
@@ -36,13 +33,12 @@ if (process.env.NODE_ENV !== 'production') {
     if (vm.$root === vm) {
       return '<Root>'
     }
-    let name = typeof vm === 'string'
-      ? vm
-      : typeof vm === 'function' && vm.options
-        ? vm.options.name
-        : vm._isVue
-          ? vm.$options.name || vm.$options._componentTag
-          : vm.name
+    let name =
+      typeof vm === 'string'
+        ? vm
+        : typeof vm === 'function' && vm.options
+          ? vm.options.name
+          : vm._isVue ? vm.$options.name || vm.$options._componentTag : vm.name
 
     const file = vm._isVue && vm.$options.__file
     if (!name && file) {
@@ -85,15 +81,17 @@ if (process.env.NODE_ENV !== 'production') {
         tree.push(vm)
         vm = vm.$parent
       }
-      return '\n\nfound in\n\n' + tree
-        .map((vm, i) => `${
-          i === 0 ? '---> ' : repeat(' ', 5 + i * 2)
-        }${
-          Array.isArray(vm)
-            ? `${formatComponentName(vm[0])}... (${vm[1]} recursive calls)`
-            : formatComponentName(vm)
-        }`)
-        .join('\n')
+      return (
+        '\n\nfound in\n\n' +
+        tree
+          .map(
+            (vm, i) =>
+              `${i === 0 ? '---> ' : repeat(' ', 5 + i * 2)}${Array.isArray(vm)
+                ? `${formatComponentName(vm[0])}... (${vm[1]} recursive calls)`
+                : formatComponentName(vm)}`,
+          )
+          .join('\n')
+      )
     } else {
       return `\n\n(found in ${formatComponentName(vm)})`
     }

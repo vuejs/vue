@@ -1,14 +1,15 @@
 /* @flow */
 
-import { extend } from 'shared/util'
+import {extend} from 'shared/util'
 
-function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+function updateClass(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const el = vnode.elm
   const ctx = vnode.context
 
   const data: VNodeData = vnode.data
   const oldData: VNodeData = oldVnode.data
-  if (!data.staticClass &&
+  if (
+    !data.staticClass &&
     !data.class &&
     (!oldData || (!oldData.staticClass && !oldData.class))
   ) {
@@ -41,7 +42,11 @@ function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 }
 
-function getStyle (oldClassList: Array<string>, classList: Array<string>, ctx: Component): Object {
+function getStyle(
+  oldClassList: Array<string>,
+  classList: Array<string>,
+  ctx: Component,
+): Object {
   // style is a weex-only injected object
   // compiled from <style> tags in weex files
   const stylesheet: any = ctx.$options.style || {}
@@ -63,5 +68,5 @@ function getStyle (oldClassList: Array<string>, classList: Array<string>, ctx: C
 
 export default {
   create: updateClass,
-  update: updateClass
+  update: updateClass,
 }

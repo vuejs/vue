@@ -1,13 +1,13 @@
 /* @flow */
 
-import { createFnInvoker } from './update-listeners'
-import { remove, isDef, isUndef, isTrue } from 'shared/util'
+import {createFnInvoker} from './update-listeners'
+import {remove, isDef, isUndef, isTrue} from 'shared/util'
 
-export function mergeVNodeHook (def: Object, hookKey: string, hook: Function) {
+export function mergeVNodeHook(def: Object, hookKey: string, hook: Function) {
   let invoker
   const oldHook = def[hookKey]
 
-  function wrappedHook () {
+  function wrappedHook() {
     hook.apply(this, arguments)
     // important: remove merged hook to ensure it's called only once
     // and prevent memory leak

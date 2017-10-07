@@ -1,8 +1,8 @@
 /* @flow */
 
 import config from '../config'
-import VNode, { createEmptyVNode } from './vnode'
-import { createComponent } from './create-component'
+import VNode, {createEmptyVNode} from './vnode'
+import {createComponent} from './create-component'
 
 import {
   warn,
@@ -10,26 +10,23 @@ import {
   isUndef,
   isTrue,
   isPrimitive,
-  resolveAsset
+  resolveAsset,
 } from '../util/index'
 
-import {
-  normalizeChildren,
-  simpleNormalizeChildren
-} from './helpers/index'
+import {normalizeChildren, simpleNormalizeChildren} from './helpers/index'
 
 const SIMPLE_NORMALIZE = 1
 const ALWAYS_NORMALIZE = 2
 
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
-export function createElement (
+export function createElement(
   context: Component,
   tag: any,
   data: any,
   children: any,
   normalizationType: any,
-  alwaysNormalize: boolean
+  alwaysNormalize: boolean,
 ): VNode {
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children
@@ -42,19 +39,21 @@ export function createElement (
   return _createElement(context, tag, data, children, normalizationType)
 }
 
-export function _createElement (
+export function _createElement(
   context: Component,
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
   children?: any,
-  normalizationType?: number
+  normalizationType?: number,
 ): VNode {
   if (isDef(data) && isDef((data: any).__ob__)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
-      'Always create fresh vnode data objects in each render!',
-      context
-    )
+    process.env.NODE_ENV !== 'production' &&
+      warn(
+        `Avoid using observed data object as vnode data: ${JSON.stringify(
+          data,
+        )}\n` + 'Always create fresh vnode data objects in each render!',
+        context,
+      )
     return createEmptyVNode()
   }
   // object syntax in v-bind
@@ -66,21 +65,22 @@ export function _createElement (
     return createEmptyVNode()
   }
   // warn against non-primitive key
-  if (process.env.NODE_ENV !== 'production' &&
-    isDef(data) && isDef(data.key) && !isPrimitive(data.key)
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    isDef(data) &&
+    isDef(data.key) &&
+    !isPrimitive(data.key)
   ) {
     warn(
       'Avoid using non-primitive value as key, ' +
-      'use string/number value instead.',
-      context
+        'use string/number value instead.',
+      context,
     )
   }
   // support single function children as default scoped slot
-  if (Array.isArray(children) &&
-    typeof children[0] === 'function'
-  ) {
+  if (Array.isArray(children) && typeof children[0] === 'function') {
     data = data || {}
-    data.scopedSlots = { default: children[0] }
+    data.scopedSlots = {default: children[0]}
     children.length = 0
   }
   if (normalizationType === ALWAYS_NORMALIZE) {
@@ -95,20 +95,23 @@ export function _createElement (
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       vnode = new VNode(
-        config.parsePlatformTagName(tag), data, children,
-        undefined, undefined, context
+        config.parsePlatformTagName(tag),
+        data,
+        children,
+        undefined,
+        undefined,
+        context,
       )
-    } else if (isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
+    } else if (
+      isDef((Ctor = resolveAsset(context.$options, 'components', tag)))
+    ) {
       // component
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
-      vnode = new VNode(
-        tag, data, children,
-        undefined, undefined, context
-      )
+      vnode = new VNode(tag, data, children, undefined, undefined, context)
     }
   } else {
     // direct component options / constructor
@@ -122,7 +125,7 @@ export function _createElement (
   }
 }
 
-function applyNS (vnode, ns, force) {
+function applyNS(vnode, ns, force) {
   vnode.ns = ns
   if (vnode.tag === 'foreignObject') {
     // use default namespace inside foreignObject

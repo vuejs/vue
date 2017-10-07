@@ -1,14 +1,14 @@
 import Vue from 'vue'
-import { createComponent } from 'core/vdom/create-component'
+import {createComponent} from 'core/vdom/create-component'
 
 describe('create-component', () => {
   let vm
   beforeEach(done => {
     vm = new Vue({
       template: '<p>{{msg}}</p>',
-      data () {
-        return { msg: 'hello, my children' }
-      }
+      data() {
+        return {msg: 'hello, my children'}
+      },
     }).$mount()
     Vue.nextTick(done)
   })
@@ -17,22 +17,22 @@ describe('create-component', () => {
     const child = {
       name: 'child',
       props: ['msg'],
-      render () {}
+      render() {},
     }
     const init = jasmine.createSpy()
     const data = {
-      props: { msg: 'hello world' },
-      attrs: { id: 1 },
-      staticAttrs: { class: 'foo' },
-      hook: { init },
-      on: { notify: 'onNotify' }
+      props: {msg: 'hello world'},
+      attrs: {id: 1},
+      staticAttrs: {class: 'foo'},
+      hook: {init},
+      on: {notify: 'onNotify'},
     }
     const vnode = createComponent(child, data, vm, vm)
     expect(vnode.tag).toMatch(/vue-component-[0-9]+-child/)
-    expect(vnode.data.attrs).toEqual({ id: 1 })
-    expect(vnode.data.staticAttrs).toEqual({ class: 'foo' })
-    expect(vnode.componentOptions.propsData).toEqual({ msg: 'hello world' })
-    expect(vnode.componentOptions.listeners).toEqual({ notify: 'onNotify' })
+    expect(vnode.data.attrs).toEqual({id: 1})
+    expect(vnode.data.staticAttrs).toEqual({class: 'foo'})
+    expect(vnode.componentOptions.propsData).toEqual({msg: 'hello world'})
+    expect(vnode.componentOptions.listeners).toEqual({notify: 'onNotify'})
     expect(vnode.children).toBeUndefined()
     expect(vnode.text).toBeUndefined()
     expect(vnode.elm).toBeUndefined()
@@ -47,27 +47,27 @@ describe('create-component', () => {
     let vnode = null
     const data = {
       props: {},
-      staticAttrs: { class: 'foo' }
+      staticAttrs: {class: 'foo'},
     }
     spyOn(vm, '$forceUpdate')
-    function async (resolve, reject) {
+    function async(resolve, reject) {
       setTimeout(() => {
         resolve({
           name: 'child',
-          props: ['msg']
+          props: ['msg'],
         })
         Vue.nextTick(loaded)
       }, 0)
     }
-    function go () {
+    function go() {
       vnode = createComponent(async, data, vm, vm)
       expect(vnode.isComment).toBe(true) // not to be loaded yet.
       expect(vnode.asyncFactory).toBe(async)
     }
-    function loaded () {
+    function loaded() {
       vnode = createComponent(async, data, vm, vm)
       expect(vnode.tag).toMatch(/vue-component-[0-9]+-child/)
-      expect(vnode.data.staticAttrs).toEqual({ class: 'foo' })
+      expect(vnode.data.staticAttrs).toEqual({class: 'foo'})
       expect(vnode.children).toBeUndefined()
       expect(vnode.text).toBeUndefined()
       expect(vnode.elm).toBeUndefined()
@@ -82,24 +82,26 @@ describe('create-component', () => {
   it('not create a component when rejected with async loading', done => {
     let vnode = null
     const data = {
-      props: { msg: 'hello world' },
-      attrs: { id: 1 }
+      props: {msg: 'hello world'},
+      attrs: {id: 1},
     }
     const reason = 'failed!!'
-    function async (resolve, reject) {
+    function async(resolve, reject) {
       setTimeout(() => {
         reject(reason)
         Vue.nextTick(failed)
       }, 0)
     }
-    function go () {
+    function go() {
       vnode = createComponent(async, data, vm, vm)
       expect(vnode.isComment).toBe(true) // not to be loaded yet.
     }
-    function failed () {
+    function failed() {
       vnode = createComponent(async, data, vm, vm)
       expect(vnode.isComment).toBe(true) // failed, still a comment node
-      expect(`Failed to resolve async component: ${async}\nReason: ${reason}`).toHaveBeenWarned()
+      expect(
+        `Failed to resolve async component: ${async}\nReason: ${reason}`,
+      ).toHaveBeenWarned()
       done()
     }
     go()

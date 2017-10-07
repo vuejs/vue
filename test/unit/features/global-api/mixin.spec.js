@@ -2,18 +2,22 @@ import Vue from 'vue'
 
 describe('Global API: mixin', () => {
   let options
-  beforeEach(() => { options = Vue.options })
-  afterEach(() => { Vue.options = options })
+  beforeEach(() => {
+    options = Vue.options
+  })
+  afterEach(() => {
+    Vue.options = options
+  })
 
   it('should work', () => {
     const spy = jasmine.createSpy('global mixin')
     Vue.mixin({
-      created () {
+      created() {
         spy(this.$options.myOption)
-      }
+      },
     })
     new Vue({
-      myOption: 'hello'
+      myOption: 'hello',
     })
     expect(spy).toHaveBeenCalledWith('hello')
   })
@@ -22,18 +26,18 @@ describe('Global API: mixin', () => {
     const calls = []
     const Test = Vue.extend({
       name: 'test',
-      beforeCreate () {
+      beforeCreate() {
         calls.push(this.$options.myOption + ' local')
-      }
+      },
     })
     Vue.mixin({
-      beforeCreate () {
+      beforeCreate() {
         calls.push(this.$options.myOption + ' global')
-      }
+      },
     })
     expect(Test.options.name).toBe('test')
     new Test({
-      myOption: 'hello'
+      myOption: 'hello',
     })
     expect(calls).toEqual(['hello global', 'hello local'])
   })
@@ -41,17 +45,17 @@ describe('Global API: mixin', () => {
   // #3957
   it('should work for global props', () => {
     const Test = Vue.extend({
-      template: `<div>{{ prop }}</div>`
+      template: `<div>{{ prop }}</div>`,
     })
 
     Vue.mixin({
-      props: ['prop']
+      props: ['prop'],
     })
 
     // test child component
     const vm = new Vue({
       template: '<test prop="hi"></test>',
-      components: { Test }
+      components: {Test},
     }).$mount()
 
     expect(vm.$el.textContent).toBe('hi')
@@ -65,7 +69,7 @@ describe('Global API: mixin', () => {
     Vue.mixin({})
 
     const vm = new Vue({
-      render: h => h(Test)
+      render: h => h(Test),
     }).$mount()
 
     expect(vm.$el.textContent).toBe('hello')
@@ -79,7 +83,7 @@ describe('Global API: mixin', () => {
     Vue.mixin({})
 
     const vm = new Test({
-      template: '<div><p>hi</p></div>'
+      template: '<div><p>hi</p></div>',
     }).$mount()
 
     expect(vm.$el.children[0].hasAttribute('foo')).toBe(true)
@@ -89,7 +93,7 @@ describe('Global API: mixin', () => {
   it('should not drop late-attached custom options on existing constructors', () => {
     const baseSpy = jasmine.createSpy('base')
     const Base = Vue.extend({
-      beforeCreate: baseSpy
+      beforeCreate: baseSpy,
     })
 
     const Test = Base.extend({})
@@ -97,7 +101,7 @@ describe('Global API: mixin', () => {
     // Inject options later
     // vue-loader and vue-hot-reload-api are doing like this
     Test.options.computed = {
-      $style: () => 123
+      $style: () => 123,
     }
 
     const spy = jasmine.createSpy('late attached')
@@ -106,12 +110,12 @@ describe('Global API: mixin', () => {
     // Update super constructor's options
     const mixinSpy = jasmine.createSpy('mixin')
     Vue.mixin({
-      beforeCreate: mixinSpy
+      beforeCreate: mixinSpy,
     })
 
     // mount the component
     const vm = new Test({
-      template: '<div>{{ $style }}</div>'
+      template: '<div>{{ $style }}</div>',
     }).$mount()
 
     expect(spy.calls.count()).toBe(1)
@@ -129,15 +133,15 @@ describe('Global API: mixin', () => {
   it('should work for a constructor mixin', () => {
     const spy = jasmine.createSpy('global mixin')
     const Mixin = Vue.extend({
-      created () {
+      created() {
         spy(this.$options.myOption)
-      }
+      },
     })
 
     Vue.mixin(Mixin)
 
     new Vue({
-      myOption: 'hello'
+      myOption: 'hello',
     })
     expect(spy).toHaveBeenCalledWith('hello')
   })
@@ -147,7 +151,7 @@ describe('Global API: mixin', () => {
     const base = jasmine.createSpy('base')
 
     const Base = Vue.extend({
-      beforeCreate: base
+      beforeCreate: base,
     })
 
     const injected = jasmine.createSpy('injected')
