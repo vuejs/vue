@@ -41,7 +41,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       elm._value = cur
       // avoid resetting cursor position when value is the same
       const strCur = isUndef(cur) ? '' : String(cur)
-      if (shouldUpdateValue(elm, vnode, strCur)) {
+      if (shouldUpdateValue(elm, strCur)) {
         elm.value = strCur
       }
     } else {
@@ -53,13 +53,9 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 // check platforms/web/util/attrs.js acceptValue
 type acceptValueElm = HTMLInputElement | HTMLSelectElement | HTMLOptionElement;
 
-function shouldUpdateValue (
-  elm: acceptValueElm,
-  vnode: VNodeWithData,
-  checkVal: string
-): boolean {
+function shouldUpdateValue (elm: acceptValueElm, checkVal: string): boolean {
   return (!elm.composing && (
-    vnode.tag === 'option' ||
+    elm.tagName === 'OPTION' ||
     isDirty(elm, checkVal) ||
     isInputChanged(elm, checkVal)
   ))
