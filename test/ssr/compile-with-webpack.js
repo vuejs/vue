@@ -1,6 +1,6 @@
-import path from 'path';
-import webpack from 'webpack';
-import MemoryFS from 'memory-fs';
+import path from 'path'
+import webpack from 'webpack'
+import MemoryFS from 'memory-fs'
 
 export function compileWithWebpack(file, extraConfig, cb) {
   const config = Object.assign(
@@ -27,15 +27,15 @@ export function compileWithWebpack(file, extraConfig, cb) {
       },
     },
     extraConfig,
-  );
+  )
 
-  const compiler = webpack(config);
-  const fs = new MemoryFS();
-  compiler.outputFileSystem = fs;
+  const compiler = webpack(config)
+  const fs = new MemoryFS()
+  compiler.outputFileSystem = fs
 
   compiler.run((err, stats) => {
-    expect(err).toBeFalsy();
-    expect(stats.errors).toBeFalsy();
-    cb(fs);
-  });
+    expect(err).toBeFalsy()
+    expect(stats.errors).toBeFalsy()
+    cb(fs)
+  })
 }

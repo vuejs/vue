@@ -1,9 +1,9 @@
-import * as framework from '../../../packages/weex-vue-framework';
-import {getRoot, createInstance} from '../helpers/index';
+import * as framework from '../../../packages/weex-vue-framework'
+import {getRoot, createInstance} from '../helpers/index'
 
 describe('framework APIs', () => {
   it('createInstance', () => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -16,15 +16,15 @@ describe('framework APIs', () => {
         el: "body"
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{type: 'text', attr: {value: 'Hello'}}],
-    });
-  });
+    })
+  })
 
   it('createInstance with config', () => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -38,7 +38,7 @@ describe('framework APIs', () => {
       })
     `,
       {bundleUrl: 'http://example.com/', a: 1, b: 2},
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
@@ -49,11 +49,11 @@ describe('framework APIs', () => {
           },
         },
       ],
-    });
-  });
+    })
+  })
 
   it('createInstance with external data', () => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -72,15 +72,15 @@ describe('framework APIs', () => {
     `,
       undefined,
       {a: 111},
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{type: 'text', attr: {value: '111-2'}}],
-    });
-  });
+    })
+  })
 
   it('destroyInstance', done => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -96,21 +96,21 @@ describe('framework APIs', () => {
         el: "body"
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{type: 'text', attr: {value: 'Hello'}}],
-    });
-    instance.$destroy();
+    })
+    instance.$destroy()
     setTimeout(() => {
-      expect(instance.document).toBeUndefined();
-      expect(instance.app).toBeUndefined();
-      done();
-    }, 0);
-  });
+      expect(instance.document).toBeUndefined()
+      expect(instance.app).toBeUndefined()
+      done()
+    }, 0)
+  })
 
   it('refreshInstance', done => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -126,26 +126,26 @@ describe('framework APIs', () => {
         el: "body"
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{type: 'text', attr: {value: 'Hello'}}],
-    });
-    instance.$refresh({x: 'World'});
+    })
+    instance.$refresh({x: 'World'})
     setTimeout(() => {
       expect(getRoot(instance)).toEqual({
         type: 'div',
         children: [{type: 'text', attr: {value: 'World'}}],
-      });
-      instance.$destroy();
-      const result = instance.$refresh({x: 'World'});
-      expect(result instanceof Error).toBe(true);
-      done();
-    });
-  });
+      })
+      instance.$destroy()
+      const result = instance.$refresh({x: 'World'})
+      expect(result instanceof Error).toBe(true)
+      done()
+    })
+  })
 
   it('getRoot', () => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -161,25 +161,25 @@ describe('framework APIs', () => {
         el: "body"
       })
     `,
-    );
+    )
 
-    let root = framework.getRoot(id);
-    expect(root.ref).toEqual('_root');
-    expect(root.type).toEqual('div');
-    expect(root.children.length).toEqual(1);
-    expect(root.children[0].type).toEqual('text');
-    expect(root.children[0].attr).toEqual({value: 'Hello'});
-    framework.destroyInstance(instance.id);
+    let root = framework.getRoot(id)
+    expect(root.ref).toEqual('_root')
+    expect(root.type).toEqual('div')
+    expect(root.children.length).toEqual(1)
+    expect(root.children[0].type).toEqual('text')
+    expect(root.children[0].attr).toEqual({value: 'Hello'})
+    framework.destroyInstance(instance.id)
 
-    root = framework.getRoot(instance.id);
-    expect(root instanceof Error).toBe(true);
-    expect(root).toMatch(/getRoot/);
-    expect(root).toMatch(/not found/);
-  });
+    root = framework.getRoot(instance.id)
+    expect(root instanceof Error).toBe(true)
+    expect(root).toMatch(/getRoot/)
+    expect(root).toMatch(/not found/)
+  })
 
   // TODO: deprecated, move to weex-js-runtime
   it('receiveTasks: fireEvent', done => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -200,7 +200,7 @@ describe('framework APIs', () => {
         el: "body"
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
@@ -210,11 +210,11 @@ describe('framework APIs', () => {
           event: ['click'],
         },
       ],
-    });
-    const textRef = framework.getRoot(id).children[0].ref;
+    })
+    const textRef = framework.getRoot(id).children[0].ref
     framework.receiveTasks(id, [
       {method: 'fireEvent', args: [textRef, 'click']},
-    ]);
+    ])
     setTimeout(() => {
       expect(getRoot(instance)).toEqual({
         type: 'div',
@@ -225,22 +225,22 @@ describe('framework APIs', () => {
             event: ['click'],
           },
         ],
-      });
-      framework.destroyInstance(id);
+      })
+      framework.destroyInstance(id)
       const result = framework.receiveTasks(id, [
         {method: 'fireEvent', args: [textRef, 'click']},
-      ]);
-      expect(result instanceof Error).toBe(true);
-      done();
-    });
-  });
+      ])
+      expect(result instanceof Error).toBe(true)
+      done()
+    })
+  })
 
   it('vm.$getConfig', () => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     global.WXEnvironment = {
       weexVersion: '0.10.0',
       platform: 'Node.js',
-    };
+    }
     const instance = createInstance(
       id,
       `
@@ -254,19 +254,19 @@ describe('framework APIs', () => {
       })
     `,
       {bundleUrl: 'http://whatever.com/x.js'},
-    );
+    )
     expect(JSON.parse(getRoot(instance).children[0].attr.value)).toEqual({
       bundleUrl: 'http://whatever.com/x.js',
       env: {
         weexVersion: '0.10.0',
         platform: 'Node.js',
       },
-    });
-    delete global.WXEnvironment;
-  });
+    })
+    delete global.WXEnvironment
+  })
 
   it('registering global assets', () => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -282,15 +282,15 @@ describe('framework APIs', () => {
         el: 'body'
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{type: 'text', attr: {value: 'Hello'}}],
-    });
-  });
+    })
+  })
 
   it('adding prototype methods', () => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -307,15 +307,15 @@ describe('framework APIs', () => {
         el: 'body'
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{type: 'text', attr: {value: 'Hello'}}],
-    });
-  });
+    })
+  })
 
   it('using global mixins', () => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -338,10 +338,10 @@ describe('framework APIs', () => {
         el: 'body'
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{type: 'text', attr: {value: 'Hello'}}],
-    });
-  });
-});
+    })
+  })
+})

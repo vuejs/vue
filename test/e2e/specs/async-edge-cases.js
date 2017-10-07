@@ -23,6 +23,6 @@ module.exports = {
       .assert.containsText('#case-2 button', 'Expand is True')
       .assert.containsText('.count-a', 'countA: 1')
       .assert.containsText('.count-b', 'countB: 1')
-      .end();
+      .end()
   },
-};
+}

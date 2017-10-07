@@ -1,8 +1,8 @@
 /* @flow */
 
-import Dep from './dep';
-import VNode from '../vdom/vnode';
-import {arrayMethods} from './array';
+import Dep from './dep'
+import VNode from '../vdom/vnode'
+import {arrayMethods} from './array'
 import {
   def,
   warn,
@@ -12,9 +12,9 @@ import {
   isPlainObject,
   isValidArrayIndex,
   isServerRendering,
-} from '../util/index';
+} from '../util/index'
 
-const arrayKeys = Object.getOwnPropertyNames(arrayMethods);
+const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
 /**
  * By default, when a reactive property is set, the new value is
@@ -24,7 +24,7 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods);
  */
 export const observerState = {
   shouldConvert: true,
-};
+}
 
 /**
  * Observer class that are attached to each observed
@@ -33,21 +33,21 @@ export const observerState = {
  * collect dependencies and dispatches updates.
  */
 export class Observer {
-  value: any;
-  dep: Dep;
-  vmCount: number; // number of vms that has this object as root $data
+  value: any
+  dep: Dep
+  vmCount: number // number of vms that has this object as root $data
 
   constructor(value: any) {
-    this.value = value;
-    this.dep = new Dep();
-    this.vmCount = 0;
-    def(value, '__ob__', this);
+    this.value = value
+    this.dep = new Dep()
+    this.vmCount = 0
+    def(value, '__ob__', this)
     if (Array.isArray(value)) {
-      const augment = hasProto ? protoAugment : copyAugment;
-      augment(value, arrayMethods, arrayKeys);
-      this.observeArray(value);
+      const augment = hasProto ? protoAugment : copyAugment
+      augment(value, arrayMethods, arrayKeys)
+      this.observeArray(value)
     } else {
-      this.walk(value);
+      this.walk(value)
     }
   }
 
@@ -57,9 +57,9 @@ export class Observer {
    * value type is Object.
    */
   walk(obj: Object) {
-    const keys = Object.keys(obj);
+    const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
-      defineReactive(obj, keys[i], obj[keys[i]]);
+      defineReactive(obj, keys[i], obj[keys[i]])
     }
   }
 
@@ -68,7 +68,7 @@ export class Observer {
    */
   observeArray(items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
-      observe(items[i]);
+      observe(items[i])
     }
   }
 }
@@ -81,7 +81,7 @@ export class Observer {
  */
 function protoAugment(target, src: Object, keys: any) {
   /* eslint-disable no-proto */
-  target.__proto__ = src;
+  target.__proto__ = src
   /* eslint-enable no-proto */
 }
 
@@ -92,8 +92,8 @@ function protoAugment(target, src: Object, keys: any) {
 /* istanbul ignore next */
 function copyAugment(target: Object, src: Object, keys: Array<string>) {
   for (let i = 0, l = keys.length; i < l; i++) {
-    const key = keys[i];
-    def(target, key, src[key]);
+    const key = keys[i]
+    def(target, key, src[key])
   }
 }
 
@@ -104,11 +104,11 @@ function copyAugment(target: Object, src: Object, keys: Array<string>) {
  */
 export function observe(value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
-    return;
+    return
   }
-  let ob: Observer | void;
+  let ob: Observer | void
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
-    ob = value.__ob__;
+    ob = value.__ob__
   } else if (
     observerState.shouldConvert &&
     !isServerRendering() &&
@@ -116,12 +116,12 @@ export function observe(value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
-    ob = new Observer(value);
+    ob = new Observer(value)
   }
   if (asRootData && ob) {
-    ob.vmCount++;
+    ob.vmCount++
   }
-  return ob;
+  return ob
 }
 
 /**
@@ -134,53 +134,53 @@ export function defineReactive(
   customSetter?: ?Function,
   shallow?: boolean,
 ) {
-  const dep = new Dep();
+  const dep = new Dep()
 
-  const property = Object.getOwnPropertyDescriptor(obj, key);
+  const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
-    return;
+    return
   }
 
   // cater for pre-defined getter/setters
-  const getter = property && property.get;
-  const setter = property && property.set;
+  const getter = property && property.get
+  const setter = property && property.set
 
-  let childOb = !shallow && observe(val);
+  let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter() {
-      const value = getter ? getter.call(obj) : val;
+      const value = getter ? getter.call(obj) : val
       if (Dep.target) {
-        dep.depend();
+        dep.depend()
         if (childOb) {
-          childOb.dep.depend();
+          childOb.dep.depend()
           if (Array.isArray(value)) {
-            dependArray(value);
+            dependArray(value)
           }
         }
       }
-      return value;
+      return value
     },
     set: function reactiveSetter(newVal) {
-      const value = getter ? getter.call(obj) : val;
+      const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
       if (newVal === value || (newVal !== newVal && value !== value)) {
-        return;
+        return
       }
       /* eslint-enable no-self-compare */
       if (process.env.NODE_ENV !== 'production' && customSetter) {
-        customSetter();
+        customSetter()
       }
       if (setter) {
-        setter.call(obj, newVal);
+        setter.call(obj, newVal)
       } else {
-        val = newVal;
+        val = newVal
       }
-      childOb = !shallow && observe(newVal);
-      dep.notify();
+      childOb = !shallow && observe(newVal)
+      dep.notify()
     },
-  });
+  })
 }
 
 /**
@@ -190,30 +190,30 @@ export function defineReactive(
  */
 export function set(target: Array<any> | Object, key: any, val: any): any {
   if (Array.isArray(target) && isValidArrayIndex(key)) {
-    target.length = Math.max(target.length, key);
-    target.splice(key, 1, val);
-    return val;
+    target.length = Math.max(target.length, key)
+    target.splice(key, 1, val)
+    return val
   }
   if (hasOwn(target, key)) {
-    target[key] = val;
-    return val;
+    target[key] = val
+    return val
   }
-  const ob = (target: any).__ob__;
+  const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' &&
       warn(
         'Avoid adding reactive properties to a Vue instance or its root $data ' +
           'at runtime - declare it upfront in the data option.',
-      );
-    return val;
+      )
+    return val
   }
   if (!ob) {
-    target[key] = val;
-    return val;
+    target[key] = val
+    return val
   }
-  defineReactive(ob.value, key, val);
-  ob.dep.notify();
-  return val;
+  defineReactive(ob.value, key, val)
+  ob.dep.notify()
+  return val
 }
 
 /**
@@ -221,26 +221,26 @@ export function set(target: Array<any> | Object, key: any, val: any): any {
  */
 export function del(target: Array<any> | Object, key: any) {
   if (Array.isArray(target) && isValidArrayIndex(key)) {
-    target.splice(key, 1);
-    return;
+    target.splice(key, 1)
+    return
   }
-  const ob = (target: any).__ob__;
+  const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' &&
       warn(
         'Avoid deleting properties on a Vue instance or its root $data ' +
           '- just set it to null.',
-      );
-    return;
+      )
+    return
   }
   if (!hasOwn(target, key)) {
-    return;
+    return
   }
-  delete target[key];
+  delete target[key]
   if (!ob) {
-    return;
+    return
   }
-  ob.dep.notify();
+  ob.dep.notify()
 }
 
 /**
@@ -249,10 +249,10 @@ export function del(target: Array<any> | Object, key: any) {
  */
 function dependArray(value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {
-    e = value[i];
-    e && e.__ob__ && e.__ob__.dep.depend();
+    e = value[i]
+    e && e.__ob__ && e.__ob__.dep.depend()
     if (Array.isArray(e)) {
-      dependArray(e);
+      dependArray(e)
     }
   }
 }

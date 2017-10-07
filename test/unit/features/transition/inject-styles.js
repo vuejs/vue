@@ -1,16 +1,16 @@
 function insertCSS(text) {
-  var cssEl = document.createElement('style');
-  cssEl.textContent = text.trim();
-  document.head.appendChild(cssEl);
+  var cssEl = document.createElement('style')
+  cssEl.textContent = text.trim()
+  document.head.appendChild(cssEl)
 }
 
-const duration = process.env.TRANSITION_DURATION || 50;
-const buffer = process.env.TRANSITION_BUFFER || 10;
-let injected = false;
+const duration = process.env.TRANSITION_DURATION || 50
+const buffer = process.env.TRANSITION_BUFFER || 10
+let injected = false
 
 export default function injectStyles() {
-  if (injected) return {duration, buffer};
-  injected = true;
+  if (injected) return {duration, buffer}
+  injected = true
   insertCSS(`
     .test {
       -webkit-transition: opacity ${duration}ms ease;
@@ -58,6 +58,6 @@ export default function injectStyles() {
       from { opacity: 1 }
       to { opacity: 0 }
     }
-  `);
-  return {duration, buffer};
+  `)
+  return {duration, buffer}
 }

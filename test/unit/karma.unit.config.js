@@ -1,4 +1,4 @@
-var base = require('./karma.base.config.js');
+var base = require('./karma.base.config.js')
 
 module.exports = function(config) {
   config.set(
@@ -12,5 +12,5 @@ module.exports = function(config) {
         'karma-safari-launcher',
       ]),
     }),
-  );
-};
+  )
+}

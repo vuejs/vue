@@ -1,10 +1,10 @@
 /* @flow */
 
-import {genStaticKeys} from 'shared/util';
-import {createCompiler} from 'compiler/index';
+import {genStaticKeys} from 'shared/util'
+import {createCompiler} from 'compiler/index'
 
-import modules from './modules/index';
-import directives from './directives/index';
+import modules from './modules/index'
+import directives from './directives/index'
 
 import {
   isUnaryTag,
@@ -12,7 +12,7 @@ import {
   isReservedTag,
   canBeLeftOpenTag,
   getTagNamespace,
-} from '../util/index';
+} from '../util/index'
 
 export const baseOptions: CompilerOptions = {
   modules,
@@ -24,7 +24,7 @@ export const baseOptions: CompilerOptions = {
   getTagNamespace,
   preserveWhitespace: false,
   staticKeys: genStaticKeys(modules),
-};
+}
 
-const {compile, compileToFunctions} = createCompiler(baseOptions);
-export {compile, compileToFunctions};
+const {compile, compileToFunctions} = createCompiler(baseOptions)
+export {compile, compileToFunctions}

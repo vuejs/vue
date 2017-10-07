@@ -22,6 +22,6 @@ module.exports = {
       .assert.cssClassPresent('.modal-mask', 'modal-leave-active')
       .waitFor(300)
       .assert.elementNotPresent('.modal-mask')
-      .end();
+      .end()
   },
-};
+}

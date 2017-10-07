@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
 describe('vdom patch: edge cases', () => {
   // exposed by #3406
@@ -17,13 +17,13 @@ describe('vdom patch: edge cases', () => {
           </div>
         </div>
       `,
-    }).$mount();
-    expect(vm.$el.textContent).toBe('abdabd');
-    vm.ok = false;
+    }).$mount()
+    expect(vm.$el.textContent).toBe('abdabd')
+    vm.ok = false
     waitForUpdate(() => {
-      expect(vm.$el.textContent).toBe('bcdbcd');
-    }).then(done);
-  });
+      expect(vm.$el.textContent).toBe('bcdbcd')
+    }).then(done)
+  })
 
   // #3533
   // a static node (<br>) is reused in createElm, which changes its elm reference
@@ -47,68 +47,68 @@ describe('vdom patch: edge cases', () => {
           </div>
         </div>
       `,
-    }).$mount();
+    }).$mount()
 
-    expect(vm.$el.querySelector('.c').textContent).toBe('1');
-    expect(vm.$el.querySelector('.d').textContent).toBe('2');
-    vm.ok = false;
+    expect(vm.$el.querySelector('.c').textContent).toBe('1')
+    expect(vm.$el.querySelector('.d').textContent).toBe('2')
+    vm.ok = false
     waitForUpdate(() => {
-      expect(vm.$el.querySelector('.c').textContent).toBe('1');
-      expect(vm.$el.querySelector('.d').textContent).toBe('2');
-    }).then(done);
-  });
+      expect(vm.$el.querySelector('.c').textContent).toBe('1')
+      expect(vm.$el.querySelector('.d').textContent).toBe('2')
+    }).then(done)
+  })
 
   it("should synchronize vm' vnode", done => {
     const comp = {
       data: () => ({swap: true}),
       render(h) {
-        return this.swap ? h('a', 'atag') : h('span', 'span');
+        return this.swap ? h('a', 'atag') : h('span', 'span')
       },
-    };
+    }
 
     const wrapper = {
       render: h => h('comp'),
       components: {comp},
-    };
+    }
 
     const vm = new Vue({
       render(h) {
-        const children = [h('wrapper'), h('div', 'row')];
+        const children = [h('wrapper'), h('div', 'row')]
         if (this.swap) {
-          children.reverse();
+          children.reverse()
         }
-        return h('div', children);
+        return h('div', children)
       },
       data: () => ({swap: false}),
       components: {wrapper},
-    }).$mount();
+    }).$mount()
 
-    expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>');
-    const wrapperVm = vm.$children[0];
-    const compVm = wrapperVm.$children[0];
-    vm.swap = true;
+    expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>')
+    const wrapperVm = vm.$children[0]
+    const compVm = wrapperVm.$children[0]
+    vm.swap = true
     waitForUpdate(() => {
-      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode);
-      expect(vm.$el.innerHTML).toBe('<div>row</div><a>atag</a>');
-      vm.swap = false;
+      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+      expect(vm.$el.innerHTML).toBe('<div>row</div><a>atag</a>')
+      vm.swap = false
     })
       .then(() => {
-        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode);
-        expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>');
-        compVm.swap = false;
+        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+        expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>')
+        compVm.swap = false
       })
       .then(() => {
-        expect(vm.$el.innerHTML).toBe('<span>span</span><div>row</div>');
-        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode);
-        vm.swap = true;
+        expect(vm.$el.innerHTML).toBe('<span>span</span><div>row</div>')
+        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+        vm.swap = true
       })
       .then(() => {
-        expect(vm.$el.innerHTML).toBe('<div>row</div><span>span</span>');
-        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode);
-        vm.swap = true;
+        expect(vm.$el.innerHTML).toBe('<div>row</div><span>span</span>')
+        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+        vm.swap = true
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   // #4530
   it('should not reset value when patching between dynamic/static bindings', done => {
@@ -120,18 +120,18 @@ describe('vdom patch: edge cases', () => {
           <input type="button" :value="'b'">
         </div>
       `,
-    }).$mount();
-    expect(vm.$el.children[0].value).toBe('a');
-    vm.ok = false;
+    }).$mount()
+    expect(vm.$el.children[0].value).toBe('a')
+    vm.ok = false
     waitForUpdate(() => {
-      expect(vm.$el.children[0].value).toBe('b');
-      vm.ok = true;
+      expect(vm.$el.children[0].value).toBe('b')
+      vm.ok = true
     })
       .then(() => {
-        expect(vm.$el.children[0].value).toBe('a');
+        expect(vm.$el.children[0].value).toBe('a')
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   // #6313
   it('should not replace node when switching between text-like inputs', done => {
@@ -142,24 +142,24 @@ describe('vdom patch: edge cases', () => {
           <input :type="show ? 'text' : 'password'">
         </div>
       `,
-    }).$mount();
-    const node = vm.$el.children[0];
-    expect(vm.$el.children[0].type).toBe('password');
-    vm.$el.children[0].value = 'test';
-    vm.show = true;
+    }).$mount()
+    const node = vm.$el.children[0]
+    expect(vm.$el.children[0].type).toBe('password')
+    vm.$el.children[0].value = 'test'
+    vm.show = true
     waitForUpdate(() => {
-      expect(vm.$el.children[0]).toBe(node);
-      expect(vm.$el.children[0].value).toBe('test');
-      expect(vm.$el.children[0].type).toBe('text');
-      vm.show = false;
+      expect(vm.$el.children[0]).toBe(node)
+      expect(vm.$el.children[0].value).toBe('test')
+      expect(vm.$el.children[0].type).toBe('text')
+      vm.show = false
     })
       .then(() => {
-        expect(vm.$el.children[0]).toBe(node);
-        expect(vm.$el.children[0].value).toBe('test');
-        expect(vm.$el.children[0].type).toBe('password');
+        expect(vm.$el.children[0]).toBe(node)
+        expect(vm.$el.children[0].value).toBe('test')
+        expect(vm.$el.children[0].type).toBe('password')
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('should properly patch nested HOC when root element is replaced', done => {
     const vm = new Vue({
@@ -171,21 +171,21 @@ describe('vdom patch: edge cases', () => {
             bar: {
               template: `<div v-if="ok"></div><span v-else></span>`,
               data() {
-                return {ok: true};
+                return {ok: true}
               },
             },
           },
         },
       },
-    }).$mount();
+    }).$mount()
 
-    expect(vm.$refs.foo.$refs.bar.$el.tagName).toBe('DIV');
-    expect(vm.$refs.foo.$refs.bar.$el.className).toBe(`hello`);
+    expect(vm.$refs.foo.$refs.bar.$el.tagName).toBe('DIV')
+    expect(vm.$refs.foo.$refs.bar.$el.className).toBe(`hello`)
 
-    vm.$refs.foo.$refs.bar.ok = false;
+    vm.$refs.foo.$refs.bar.ok = false
     waitForUpdate(() => {
-      expect(vm.$refs.foo.$refs.bar.$el.tagName).toBe('SPAN');
-      expect(vm.$refs.foo.$refs.bar.$el.className).toBe(`hello`);
-    }).then(done);
-  });
-});
+      expect(vm.$refs.foo.$refs.bar.$el.tagName).toBe('SPAN')
+      expect(vm.$refs.foo.$refs.bar.$el.className).toBe(`hello`)
+    }).then(done)
+  })
+})

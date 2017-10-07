@@ -15,6 +15,6 @@ module.exports = {
           '<h2 id="foo">foo</h2>\n' +
           '<ul>\n<li>bar</li>\n<li>baz</li>\n</ul>',
       )
-      .end();
+      .end()
   },
-};
+}

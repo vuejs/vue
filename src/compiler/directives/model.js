@@ -8,37 +8,37 @@ export function genComponentModel(
   value: string,
   modifiers: ?ASTModifiers,
 ): ?boolean {
-  const {number, trim} = modifiers || {};
+  const {number, trim} = modifiers || {}
 
-  const baseValueExpression = '$$v';
-  let valueExpression = baseValueExpression;
+  const baseValueExpression = '$$v'
+  let valueExpression = baseValueExpression
   if (trim) {
     valueExpression =
       `(typeof ${baseValueExpression} === 'string'` +
       `? ${baseValueExpression}.trim()` +
-      `: ${baseValueExpression})`;
+      `: ${baseValueExpression})`
   }
   if (number) {
-    valueExpression = `_n(${valueExpression})`;
+    valueExpression = `_n(${valueExpression})`
   }
-  const assignment = genAssignmentCode(value, valueExpression);
+  const assignment = genAssignmentCode(value, valueExpression)
 
   el.model = {
     value: `(${value})`,
     expression: `"${value}"`,
     callback: `function (${baseValueExpression}) {${assignment}}`,
-  };
+  }
 }
 
 /**
  * Cross-platform codegen helper for generating v-model value assignment code.
  */
 export function genAssignmentCode(value: string, assignment: string): string {
-  const res = parseModel(value);
+  const res = parseModel(value)
   if (res.key === null) {
-    return `${value}=${assignment}`;
+    return `${value}=${assignment}`
   } else {
-    return `$set(${res.exp}, ${res.key}, ${assignment})`;
+    return `$set(${res.exp}, ${res.key}, ${assignment})`
   }
 }
 
@@ -57,86 +57,86 @@ export function genAssignmentCode(value: string, assignment: string): string {
  *
  */
 
-let len, str, chr, index, expressionPos, expressionEndPos;
+let len, str, chr, index, expressionPos, expressionEndPos
 
 type ModelParseResult = {
   exp: string,
   key: string | null,
-};
+}
 
 export function parseModel(val: string): ModelParseResult {
-  len = val.length;
+  len = val.length
 
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
-    index = val.lastIndexOf('.');
+    index = val.lastIndexOf('.')
     if (index > -1) {
       return {
         exp: val.slice(0, index),
         key: '"' + val.slice(index + 1) + '"',
-      };
+      }
     } else {
       return {
         exp: val,
         key: null,
-      };
+      }
     }
   }
 
-  str = val;
-  index = expressionPos = expressionEndPos = 0;
+  str = val
+  index = expressionPos = expressionEndPos = 0
 
   while (!eof()) {
-    chr = next();
+    chr = next()
     /* istanbul ignore if */
     if (isStringStart(chr)) {
-      parseString(chr);
+      parseString(chr)
     } else if (chr === 0x5b) {
-      parseBracket(chr);
+      parseBracket(chr)
     }
   }
 
   return {
     exp: val.slice(0, expressionPos),
     key: val.slice(expressionPos + 1, expressionEndPos),
-  };
+  }
 }
 
 function next(): number {
-  return str.charCodeAt(++index);
+  return str.charCodeAt(++index)
 }
 
 function eof(): boolean {
-  return index >= len;
+  return index >= len
 }
 
 function isStringStart(chr: number): boolean {
-  return chr === 0x22 || chr === 0x27;
+  return chr === 0x22 || chr === 0x27
 }
 
 function parseBracket(chr: number): void {
-  let inBracket = 1;
-  expressionPos = index;
+  let inBracket = 1
+  expressionPos = index
   while (!eof()) {
-    chr = next();
+    chr = next()
     if (isStringStart(chr)) {
-      parseString(chr);
-      continue;
+      parseString(chr)
+      continue
     }
-    if (chr === 0x5b) inBracket++;
-    if (chr === 0x5d) inBracket--;
+    if (chr === 0x5b) inBracket++
+    if (chr === 0x5d) inBracket--
     if (inBracket === 0) {
-      expressionEndPos = index;
-      break;
+      expressionEndPos = index
+      break
     }
   }
 }
 
 function parseString(chr: number): void {
-  const stringQuote = chr;
+  const stringQuote = chr
   while (!eof()) {
-    chr = next();
+    chr = next()
     if (chr === stringQuote) {
-      break;
+      break
     }
   }
 }

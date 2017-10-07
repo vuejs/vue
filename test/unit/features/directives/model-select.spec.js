@@ -1,16 +1,16 @@
-import Vue from 'vue';
-import {looseEqual} from 'shared/util';
+import Vue from 'vue'
+import {looseEqual} from 'shared/util'
 
 // Android 4.4 Chrome 30 has the bug that a multi-select option cannot be
 // deselected by setting its "selected" prop via JavaScript.
 function hasMultiSelectBug() {
-  var s = document.createElement('select');
-  s.setAttribute('multiple', '');
-  var o = document.createElement('option');
-  s.appendChild(o);
-  o.selected = true;
-  o.selected = false;
-  return o.selected !== false;
+  var s = document.createElement('select')
+  s.setAttribute('multiple', '')
+  var o = document.createElement('option')
+  s.appendChild(o)
+  o.selected = true
+  o.selected = false
+  return o.selected !== false
 }
 
 /**
@@ -18,18 +18,18 @@ function hasMultiSelectBug() {
  * we have to manually loop through the options
  */
 function updateSelect(el, value) {
-  var options = el.options;
-  var i = options.length;
+  var options = el.options
+  var i = options.length
   while (i--) {
     if (looseEqual(getValue(options[i]), value)) {
-      options[i].selected = true;
-      break;
+      options[i].selected = true
+      break
     }
   }
 }
 
 function getValue(option) {
-  return '_value' in option ? option._value : option.value || option.text;
+  return '_value' in option ? option._value : option.value || option.text
 }
 
 describe('Directive v-model select', () => {
@@ -44,20 +44,20 @@ describe('Directive v-model select', () => {
         '<option>b</option>' +
         '<option>c</option>' +
         '</select>',
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    expect(vm.test).toBe('b');
-    expect(vm.$el.value).toBe('b');
-    expect(vm.$el.childNodes[1].selected).toBe(true);
-    vm.test = 'c';
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.test).toBe('b')
+    expect(vm.$el.value).toBe('b')
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = 'c'
     waitForUpdate(function() {
-      expect(vm.$el.value).toBe('c');
-      expect(vm.$el.childNodes[2].selected).toBe(true);
-      updateSelect(vm.$el, 'a');
-      triggerEvent(vm.$el, 'change');
-      expect(vm.test).toBe('a');
-    }).then(done);
-  });
+      expect(vm.$el.value).toBe('c')
+      expect(vm.$el.childNodes[2].selected).toBe(true)
+      updateSelect(vm.$el, 'a')
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toBe('a')
+    }).then(done)
+  })
 
   it('should work with value bindings', done => {
     const vm = new Vue({
@@ -70,24 +70,24 @@ describe('Directive v-model select', () => {
         '<option :value="2">b</option>' +
         '<option :value="3">c</option>' +
         '</select>',
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    expect(vm.$el.value).toBe('2');
-    expect(vm.$el.childNodes[1].selected).toBe(true);
-    vm.test = 3;
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.value).toBe('2')
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = 3
     waitForUpdate(function() {
-      expect(vm.$el.value).toBe('3');
-      expect(vm.$el.childNodes[2].selected).toBe(true);
+      expect(vm.$el.value).toBe('3')
+      expect(vm.$el.childNodes[2].selected).toBe(true)
 
-      updateSelect(vm.$el, '1');
-      triggerEvent(vm.$el, 'change');
-      expect(vm.test).toBe('1');
+      updateSelect(vm.$el, '1')
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toBe('1')
 
-      updateSelect(vm.$el, '2');
-      triggerEvent(vm.$el, 'change');
-      expect(vm.test).toBe(2);
-    }).then(done);
-  });
+      updateSelect(vm.$el, '2')
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toBe(2)
+    }).then(done)
+  })
 
   it('should work with value bindings (object loose equal)', done => {
     const vm = new Vue({
@@ -100,22 +100,22 @@ describe('Directive v-model select', () => {
         '<option :value="{ a: 2 }">b</option>' +
         '<option :value="{ a: 3 }">c</option>' +
         '</select>',
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    expect(vm.$el.childNodes[1].selected).toBe(true);
-    vm.test = {a: 3};
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = {a: 3}
     waitForUpdate(function() {
-      expect(vm.$el.childNodes[2].selected).toBe(true);
+      expect(vm.$el.childNodes[2].selected).toBe(true)
 
-      updateSelect(vm.$el, '1');
-      triggerEvent(vm.$el, 'change');
-      expect(vm.test).toBe('1');
+      updateSelect(vm.$el, '1')
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toBe('1')
 
-      updateSelect(vm.$el, {a: 2});
-      triggerEvent(vm.$el, 'change');
-      expect(vm.test).toEqual({a: 2});
-    }).then(done);
-  });
+      updateSelect(vm.$el, {a: 2})
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toEqual({a: 2})
+    }).then(done)
+  })
 
   it('should work with value bindings (Array loose equal)', done => {
     const vm = new Vue({
@@ -128,22 +128,22 @@ describe('Directive v-model select', () => {
         '<option :value="[{ a: 2 }]">b</option>' +
         '<option :value="[{ a: 3 }]">c</option>' +
         '</select>',
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    expect(vm.$el.childNodes[1].selected).toBe(true);
-    vm.test = [{a: 3}];
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = [{a: 3}]
     waitForUpdate(function() {
-      expect(vm.$el.childNodes[2].selected).toBe(true);
+      expect(vm.$el.childNodes[2].selected).toBe(true)
 
-      updateSelect(vm.$el, '1');
-      triggerEvent(vm.$el, 'change');
-      expect(vm.test).toBe('1');
+      updateSelect(vm.$el, '1')
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toBe('1')
 
-      updateSelect(vm.$el, [{a: 2}]);
-      triggerEvent(vm.$el, 'change');
-      expect(vm.test).toEqual([{a: 2}]);
-    }).then(done);
-  });
+      updateSelect(vm.$el, [{a: 2}])
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toEqual([{a: 2}])
+    }).then(done)
+  })
 
   it('should work with v-for', done => {
     const vm = new Vue({
@@ -155,27 +155,27 @@ describe('Directive v-model select', () => {
         '<select v-model="test">' +
         '<option v-for="o in opts">{{ o }}</option>' +
         '</select>',
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    expect(vm.test).toBe('b');
-    expect(vm.$el.value).toBe('b');
-    expect(vm.$el.childNodes[1].selected).toBe(true);
-    vm.test = 'c';
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.test).toBe('b')
+    expect(vm.$el.value).toBe('b')
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = 'c'
     waitForUpdate(function() {
-      expect(vm.$el.value).toBe('c');
-      expect(vm.$el.childNodes[2].selected).toBe(true);
-      updateSelect(vm.$el, 'a');
-      triggerEvent(vm.$el, 'change');
-      expect(vm.test).toBe('a');
+      expect(vm.$el.value).toBe('c')
+      expect(vm.$el.childNodes[2].selected).toBe(true)
+      updateSelect(vm.$el, 'a')
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toBe('a')
       // update v-for opts
-      vm.opts = ['d', 'a'];
+      vm.opts = ['d', 'a']
     })
       .then(() => {
-        expect(vm.$el.childNodes[0].selected).toBe(false);
-        expect(vm.$el.childNodes[1].selected).toBe(true);
+        expect(vm.$el.childNodes[0].selected).toBe(false)
+        expect(vm.$el.childNodes[1].selected).toBe(true)
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('should work with v-for & value bindings', done => {
     const vm = new Vue({
@@ -187,29 +187,29 @@ describe('Directive v-model select', () => {
         '<select v-model="test">' +
         '<option v-for="o in opts" :value="o">option {{ o }}</option>' +
         '</select>',
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    expect(vm.$el.value).toBe('2');
-    expect(vm.$el.childNodes[1].selected).toBe(true);
-    vm.test = 3;
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.value).toBe('2')
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = 3
     waitForUpdate(function() {
-      expect(vm.$el.value).toBe('3');
-      expect(vm.$el.childNodes[2].selected).toBe(true);
-      updateSelect(vm.$el, 1);
-      triggerEvent(vm.$el, 'change');
-      expect(vm.test).toBe(1);
+      expect(vm.$el.value).toBe('3')
+      expect(vm.$el.childNodes[2].selected).toBe(true)
+      updateSelect(vm.$el, 1)
+      triggerEvent(vm.$el, 'change')
+      expect(vm.test).toBe(1)
       // update v-for opts
-      vm.opts = [0, 1];
+      vm.opts = [0, 1]
     })
       .then(() => {
-        expect(vm.$el.childNodes[0].selected).toBe(false);
-        expect(vm.$el.childNodes[1].selected).toBe(true);
+        expect(vm.$el.childNodes[0].selected).toBe(false)
+        expect(vm.$el.childNodes[1].selected).toBe(true)
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('should work with select which has no default selected options', done => {
-    const spy = jasmine.createSpy();
+    const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
         id: 4,
@@ -226,13 +226,13 @@ describe('Directive v-model select', () => {
       methods: {
         test: spy,
       },
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    vm.testChange = 10;
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.testChange = 10
     waitForUpdate(() => {
-      expect(spy.calls.count()).toBe(0);
-    }).then(done);
-  });
+      expect(spy.calls.count()).toBe(0)
+    }).then(done)
+  })
 
   if (!hasMultiSelectBug()) {
     it('multiple', done => {
@@ -246,22 +246,22 @@ describe('Directive v-model select', () => {
           '<option>b</option>' +
           '<option>c</option>' +
           '</select>',
-      }).$mount();
-      var opts = vm.$el.options;
-      expect(opts[0].selected).toBe(false);
-      expect(opts[1].selected).toBe(true);
-      expect(opts[2].selected).toBe(false);
-      vm.test = ['a', 'c'];
+      }).$mount()
+      var opts = vm.$el.options
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(true)
+      expect(opts[2].selected).toBe(false)
+      vm.test = ['a', 'c']
       waitForUpdate(() => {
-        expect(opts[0].selected).toBe(true);
-        expect(opts[1].selected).toBe(false);
-        expect(opts[2].selected).toBe(true);
-        opts[0].selected = false;
-        opts[1].selected = true;
-        triggerEvent(vm.$el, 'change');
-        expect(vm.test).toEqual(['b', 'c']);
-      }).then(done);
-    });
+        expect(opts[0].selected).toBe(true)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(true)
+        opts[0].selected = false
+        opts[1].selected = true
+        triggerEvent(vm.$el, 'change')
+        expect(vm.test).toEqual(['b', 'c'])
+      }).then(done)
+    })
 
     it('multiple + v-for', done => {
       const vm = new Vue({
@@ -273,34 +273,34 @@ describe('Directive v-model select', () => {
           '<select v-model="test" multiple>' +
           '<option v-for="o in opts">{{ o }}</option>' +
           '</select>',
-      }).$mount();
-      var opts = vm.$el.options;
-      expect(opts[0].selected).toBe(false);
-      expect(opts[1].selected).toBe(true);
-      expect(opts[2].selected).toBe(false);
-      vm.test = ['a', 'c'];
+      }).$mount()
+      var opts = vm.$el.options
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(true)
+      expect(opts[2].selected).toBe(false)
+      vm.test = ['a', 'c']
       waitForUpdate(() => {
-        expect(opts[0].selected).toBe(true);
-        expect(opts[1].selected).toBe(false);
-        expect(opts[2].selected).toBe(true);
-        opts[0].selected = false;
-        opts[1].selected = true;
-        triggerEvent(vm.$el, 'change');
-        expect(vm.test).toEqual(['b', 'c']);
+        expect(opts[0].selected).toBe(true)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(true)
+        opts[0].selected = false
+        opts[1].selected = true
+        triggerEvent(vm.$el, 'change')
+        expect(vm.test).toEqual(['b', 'c'])
         // update v-for opts
-        vm.opts = ['c', 'd'];
+        vm.opts = ['c', 'd']
       })
         .then(() => {
-          expect(opts[0].selected).toBe(true);
-          expect(opts[1].selected).toBe(false);
-          expect(vm.test).toEqual(['c']); // should remove 'd' which no longer has a matching option
+          expect(opts[0].selected).toBe(true)
+          expect(opts[1].selected).toBe(false)
+          expect(vm.test).toEqual(['c']) // should remove 'd' which no longer has a matching option
         })
-        .then(done);
-    });
+        .then(done)
+    })
   }
 
   it('should work with multiple binding', done => {
-    const spy = jasmine.createSpy();
+    const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
         isMultiple: true,
@@ -314,15 +314,15 @@ describe('Directive v-model select', () => {
       watch: {
         selections: spy,
       },
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    vm.$el.options[1].selected = true;
-    triggerEvent(vm.$el, 'change');
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.$el.options[1].selected = true
+    triggerEvent(vm.$el, 'change')
     waitForUpdate(() => {
-      expect(spy).toHaveBeenCalled();
-      expect(vm.selections).toEqual(['1', '2']);
-    }).then(done);
-  });
+      expect(spy).toHaveBeenCalled()
+      expect(vm.selections).toEqual(['1', '2'])
+    }).then(done)
+  })
 
   it("should not have multiple attr with falsy values except ''", () => {
     const vm = new Vue({
@@ -333,12 +333,12 @@ describe('Directive v-model select', () => {
         '<select id="false" :multiple="false"></select>' +
         '<select id="string" :multiple="\'\'"></select>' +
         '</div>',
-    }).$mount();
-    expect(vm.$el.querySelector('#undefined').multiple).toEqual(false);
-    expect(vm.$el.querySelector('#null').multiple).toEqual(false);
-    expect(vm.$el.querySelector('#false').multiple).toEqual(false);
-    expect(vm.$el.querySelector('#string').multiple).toEqual(true);
-  });
+    }).$mount()
+    expect(vm.$el.querySelector('#undefined').multiple).toEqual(false)
+    expect(vm.$el.querySelector('#null').multiple).toEqual(false)
+    expect(vm.$el.querySelector('#false').multiple).toEqual(false)
+    expect(vm.$el.querySelector('#string').multiple).toEqual(true)
+  })
 
   it('multiple with static template', () => {
     const vm = new Vue({
@@ -348,15 +348,15 @@ describe('Directive v-model select', () => {
         '<option selected>b</option>' +
         '<option selected>c</option>' +
         '</select>',
-    }).$mount();
-    var opts = vm.$el.options;
-    expect(opts[0].selected).toBe(true);
-    expect(opts[1].selected).toBe(true);
-    expect(opts[2].selected).toBe(true);
-  });
+    }).$mount()
+    var opts = vm.$el.options
+    expect(opts[0].selected).toBe(true)
+    expect(opts[1].selected).toBe(true)
+    expect(opts[2].selected).toBe(true)
+  })
 
   it('multiple selects', done => {
-    const spy = jasmine.createSpy();
+    const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
         selections: ['', ''],
@@ -375,17 +375,17 @@ describe('Directive v-model select', () => {
         '</select>' +
         '<span ref="rs">{{selections}}</span>' +
         '</div>',
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    var selects = vm.$el.getElementsByTagName('select');
-    var select0 = selects[0];
-    select0.options[0].selected = true;
-    triggerEvent(select0, 'change');
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    var selects = vm.$el.getElementsByTagName('select')
+    var select0 = selects[0]
+    select0.options[0].selected = true
+    triggerEvent(select0, 'change')
     waitForUpdate(() => {
-      expect(spy).toHaveBeenCalled();
-      expect(vm.selections).toEqual(['foo', '']);
-    }).then(done);
-  });
+      expect(spy).toHaveBeenCalled()
+      expect(vm.selections).toEqual(['foo', ''])
+    }).then(done)
+  })
 
   it('.number modifier', () => {
     const vm = new Vue({
@@ -398,12 +398,12 @@ describe('Directive v-model select', () => {
         '<option :value="2">b</option>' +
         '<option :value="3">c</option>' +
         '</select>',
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    updateSelect(vm.$el, '1');
-    triggerEvent(vm.$el, 'change');
-    expect(vm.test).toBe(1);
-  });
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    updateSelect(vm.$el, '1')
+    triggerEvent(vm.$el, 'change')
+    expect(vm.test).toBe(1)
+  })
 
   it('should respect different primitive type value', done => {
     const vm = new Vue({
@@ -418,47 +418,47 @@ describe('Directive v-model select', () => {
         '<option value="false">c</option>' +
         '<option value="true">c</option>' +
         '</select>',
-    }).$mount();
-    var opts = vm.$el.options;
-    expect(opts[0].selected).toBe(false);
-    expect(opts[1].selected).toBe(true);
-    expect(opts[2].selected).toBe(false);
-    expect(opts[3].selected).toBe(false);
-    expect(opts[4].selected).toBe(false);
-    vm.test = 1;
+    }).$mount()
+    var opts = vm.$el.options
+    expect(opts[0].selected).toBe(false)
+    expect(opts[1].selected).toBe(true)
+    expect(opts[2].selected).toBe(false)
+    expect(opts[3].selected).toBe(false)
+    expect(opts[4].selected).toBe(false)
+    vm.test = 1
     waitForUpdate(() => {
-      expect(opts[0].selected).toBe(false);
-      expect(opts[1].selected).toBe(false);
-      expect(opts[2].selected).toBe(true);
-      expect(opts[3].selected).toBe(false);
-      expect(opts[4].selected).toBe(false);
-      vm.test = '';
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(false)
+      expect(opts[2].selected).toBe(true)
+      expect(opts[3].selected).toBe(false)
+      expect(opts[4].selected).toBe(false)
+      vm.test = ''
     })
       .then(() => {
-        expect(opts[0].selected).toBe(true);
-        expect(opts[1].selected).toBe(false);
-        expect(opts[2].selected).toBe(false);
-        expect(opts[3].selected).toBe(false);
-        expect(opts[4].selected).toBe(false);
-        vm.test = false;
+        expect(opts[0].selected).toBe(true)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(false)
+        expect(opts[3].selected).toBe(false)
+        expect(opts[4].selected).toBe(false)
+        vm.test = false
       })
       .then(() => {
-        expect(opts[0].selected).toBe(false);
-        expect(opts[1].selected).toBe(false);
-        expect(opts[2].selected).toBe(false);
-        expect(opts[3].selected).toBe(true);
-        expect(opts[4].selected).toBe(false);
-        vm.test = true;
+        expect(opts[0].selected).toBe(false)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(false)
+        expect(opts[3].selected).toBe(true)
+        expect(opts[4].selected).toBe(false)
+        vm.test = true
       })
       .then(() => {
-        expect(opts[0].selected).toBe(false);
-        expect(opts[1].selected).toBe(false);
-        expect(opts[2].selected).toBe(false);
-        expect(opts[3].selected).toBe(false);
-        expect(opts[4].selected).toBe(true);
+        expect(opts[0].selected).toBe(false)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(false)
+        expect(opts[3].selected).toBe(false)
+        expect(opts[4].selected).toBe(true)
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('should warn multiple with non-Array value', done => {
     new Vue({
@@ -466,19 +466,19 @@ describe('Directive v-model select', () => {
         test: 'meh',
       },
       template: '<select v-model="test" multiple></select>',
-    }).$mount();
+    }).$mount()
     // IE warns on a setTimeout as well
     setTimeout(() => {
       expect(
         '<select multiple v-model="test"> expects an Array value for its binding, but got String',
-      ).toHaveBeenWarned();
-      done();
-    }, 0);
-  });
+      ).toHaveBeenWarned()
+      done()
+    }, 0)
+  })
 
   it('should work with option value that has circular reference', done => {
-    const circular = {};
-    circular.self = circular;
+    const circular = {}
+    circular.self = circular
 
     const vm = new Vue({
       data: {
@@ -491,16 +491,16 @@ describe('Directive v-model select', () => {
         '<option>b</option>' +
         '<option>c</option>' +
         '</select>',
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    expect(vm.test).toBe('b');
-    expect(vm.$el.value).toBe('b');
-    expect(vm.$el.childNodes[1].selected).toBe(true);
-    vm.test = circular;
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.test).toBe('b')
+    expect(vm.$el.value).toBe('b')
+    expect(vm.$el.childNodes[1].selected).toBe(true)
+    vm.test = circular
     waitForUpdate(function() {
-      expect(vm.$el.childNodes[0].selected).toBe(true);
-    }).then(done);
-  });
+      expect(vm.$el.childNodes[0].selected).toBe(true)
+    }).then(done)
+  })
 
   // #6112
   it('should not set non-matching value to undefined if options did not change', done => {
@@ -509,17 +509,17 @@ describe('Directive v-model select', () => {
         test: '1',
       },
       template: '<select v-model="test">' + '<option>a</option>' + '</select>',
-    }).$mount();
+    }).$mount()
 
-    vm.test = '2';
+    vm.test = '2'
     waitForUpdate(() => {
-      expect(vm.test).toBe('2');
-    }).then(done);
-  });
+      expect(vm.test).toBe('2')
+    }).then(done)
+  })
 
   // #6193
   it('should not trigger change event when matching option can be found for each value', done => {
-    const spy = jasmine.createSpy();
+    const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
         options: ['1'],
@@ -527,10 +527,10 @@ describe('Directive v-model select', () => {
       computed: {
         test: {
           get() {
-            return '1';
+            return '1'
           },
           set() {
-            spy();
+            spy()
           },
         },
       },
@@ -538,11 +538,11 @@ describe('Directive v-model select', () => {
         '<select v-model="test">' +
         '<option :key="opt" v-for="opt in options" :value="opt">{{ opt }}</option>' +
         '</select>',
-    }).$mount();
+    }).$mount()
 
-    vm.options = ['1', '2'];
+    vm.options = ['1', '2']
     waitForUpdate(() => {
-      expect(spy).not.toHaveBeenCalled();
-    }).then(done);
-  });
-});
+      expect(spy).not.toHaveBeenCalled()
+    }).then(done)
+  })
+})

@@ -12,7 +12,7 @@ module.exports = {
       .click('.bold')
       .assert.visible('#demo ul')
       .assert.evaluate(function() {
-        return document.querySelector('#demo li ul').children.length === 4;
+        return document.querySelector('#demo li ul').children.length === 4
       })
       .assert.containsText('#demo li div span', '[-]')
       .assert.containsText('#demo > .item > ul > .item:nth-child(1)', 'hello')
@@ -25,7 +25,7 @@ module.exports = {
       // add items to root
       .click('#demo > .item > ul > .add')
       .assert.evaluate(function() {
-        return document.querySelector('#demo li ul').children.length === 5;
+        return document.querySelector('#demo li ul').children.length === 5
       })
       .assert.containsText('#demo > .item > ul > .item:nth-child(1)', 'hello')
       .assert.containsText('#demo > .item > ul > .item:nth-child(2)', 'wat')
@@ -41,7 +41,7 @@ module.exports = {
       // add another item
       .click('#demo > .item > ul > .add')
       .assert.evaluate(function() {
-        return document.querySelector('#demo li ul').children.length === 6;
+        return document.querySelector('#demo li ul').children.length === 6
       })
       .assert.containsText('#demo > .item > ul > .item:nth-child(1)', 'hello')
       .assert.containsText('#demo > .item > ul > .item:nth-child(2)', 'wat')
@@ -62,7 +62,7 @@ module.exports = {
       .assert.visible('#demo ul ul')
       .assert.containsText('#demo ul > .item:nth-child(3)', '[-]')
       .assert.evaluate(function() {
-        return document.querySelector('#demo ul ul').children.length === 5;
+        return document.querySelector('#demo ul ul').children.length === 5
       })
       .click('.bold')
       .assert.notVisible('#demo ul')
@@ -75,10 +75,10 @@ module.exports = {
       .assert.count('.item > ul', 5)
       .assert.containsText('#demo ul > .item:nth-child(1)', '[-]')
       .assert.evaluate(function() {
-        var firstItem = document.querySelector('#demo ul > .item:nth-child(1)');
-        var ul = firstItem.querySelector('ul');
-        return ul.children.length === 2;
+        var firstItem = document.querySelector('#demo ul > .item:nth-child(1)')
+        var ul = firstItem.querySelector('ul')
+        return ul.children.length === 2
       })
-      .end();
+      .end()
   },
-};
+}

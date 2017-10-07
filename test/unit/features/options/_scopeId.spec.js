@@ -1,15 +1,15 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
 describe('Options _scopeId', () => {
   it('should add scopeId attributes', () => {
     const vm = new Vue({
       _scopeId: 'foo',
       template: '<div><p><span></span></p></div>',
-    }).$mount();
-    expect(vm.$el.hasAttribute('foo')).toBe(true);
-    expect(vm.$el.children[0].hasAttribute('foo')).toBe(true);
-    expect(vm.$el.children[0].children[0].hasAttribute('foo')).toBe(true);
-  });
+    }).$mount()
+    expect(vm.$el.hasAttribute('foo')).toBe(true)
+    expect(vm.$el.children[0].hasAttribute('foo')).toBe(true)
+    expect(vm.$el.children[0].children[0].hasAttribute('foo')).toBe(true)
+  })
 
   it('should add scopedId attributes from both parent and child on child root', () => {
     const vm = new Vue({
@@ -21,10 +21,10 @@ describe('Options _scopeId', () => {
           template: '<div></div>',
         },
       },
-    }).$mount();
-    expect(vm.$el.children[0].hasAttribute('foo')).toBe(true);
-    expect(vm.$el.children[0].hasAttribute('bar')).toBe(true);
-  });
+    }).$mount()
+    expect(vm.$el.children[0].hasAttribute('foo')).toBe(true)
+    expect(vm.$el.children[0].hasAttribute('bar')).toBe(true)
+  })
 
   it('should add scopedId attributes from both parent and child on slot contents', () => {
     const vm = new Vue({
@@ -36,10 +36,10 @@ describe('Options _scopeId', () => {
           template: '<div><slot></slot></div>',
         },
       },
-    }).$mount();
-    expect(vm.$el.children[0].children[0].hasAttribute('foo')).toBe(true);
-    expect(vm.$el.children[0].children[0].hasAttribute('bar')).toBe(true);
-  });
+    }).$mount()
+    expect(vm.$el.children[0].children[0].hasAttribute('foo')).toBe(true)
+    expect(vm.$el.children[0].children[0].hasAttribute('bar')).toBe(true)
+  })
 
   // #4774
   it('should not discard parent scopeId when component root element is replaced', done => {
@@ -53,21 +53,21 @@ describe('Options _scopeId', () => {
           template: '<div v-if="show"></div>',
         },
       },
-    }).$mount();
+    }).$mount()
 
-    const child = vm.$refs.child;
+    const child = vm.$refs.child
 
-    expect(child.$el.hasAttribute('data-1')).toBe(true);
-    expect(child.$el.hasAttribute('data-2')).toBe(true);
+    expect(child.$el.hasAttribute('data-1')).toBe(true)
+    expect(child.$el.hasAttribute('data-2')).toBe(true)
 
-    child.show = false;
+    child.show = false
     waitForUpdate(() => {
-      child.show = true;
+      child.show = true
     })
       .then(() => {
-        expect(child.$el.hasAttribute('data-1')).toBe(true);
-        expect(child.$el.hasAttribute('data-2')).toBe(true);
+        expect(child.$el.hasAttribute('data-1')).toBe(true)
+        expect(child.$el.hasAttribute('data-2')).toBe(true)
       })
-      .then(done);
-  });
-});
+      .then(done)
+  })
+})

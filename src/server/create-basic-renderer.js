@@ -1,8 +1,8 @@
 /* @flow */
 
-import {createWriteFunction} from './write';
-import {createRenderFunction} from './render';
-import type {RenderOptions} from './create-renderer';
+import {createWriteFunction} from './write'
+import {createRenderFunction} from './render'
+import type {RenderOptions} from './create-renderer'
 
 export function createBasicRenderer(
   {
@@ -12,7 +12,7 @@ export function createBasicRenderer(
     cache,
   }: RenderOptions = {},
 ) {
-  const render = createRenderFunction(modules, directives, isUnaryTag, cache);
+  const render = createRenderFunction(modules, directives, isUnaryTag, cache)
 
   return function renderToString(
     component: Component,
@@ -20,20 +20,20 @@ export function createBasicRenderer(
     done: any,
   ): void {
     if (typeof context === 'function') {
-      done = context;
-      context = {};
+      done = context
+      context = {}
     }
-    let result = '';
+    let result = ''
     const write = createWriteFunction(text => {
-      result += text;
-      return false;
-    }, done);
+      result += text
+      return false
+    }, done)
     try {
       render(component, write, context, () => {
-        done(null, result);
-      });
+        done(null, result)
+      })
     } catch (e) {
-      done(e);
+      done(e)
     }
-  };
+  }
 }

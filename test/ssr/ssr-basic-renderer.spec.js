@@ -1,5 +1,5 @@
-import Vue from '../../dist/vue.runtime.common.js';
-import renderToString from '../../packages/vue-server-renderer/basic';
+import Vue from '../../dist/vue.runtime.common.js'
+import renderToString from '../../packages/vue-server-renderer/basic'
 
 describe('SSR: basicRenderer', () => {
   it('should work', done => {
@@ -24,20 +24,20 @@ describe('SSR: basicRenderer', () => {
         components: {
           test: {
             render() {
-              return this.$createElement('div', {class: ['a']}, 'test');
+              return this.$createElement('div', {class: ['a']}, 'test')
             },
           },
           testAsync(resolve) {
             resolve({
               render() {
-                return this.$createElement('span', {class: ['b']}, 'testAsync');
+                return this.$createElement('span', {class: ['b']}, 'testAsync')
               },
-            });
+            })
           },
         },
       }),
       (err, result) => {
-        expect(err).toBeNull();
+        expect(err).toBeNull()
         expect(result).toContain(
           '<div data-server-rendered="true">' +
             '<p class="hi">yoyo</p> ' +
@@ -48,29 +48,29 @@ describe('SSR: basicRenderer', () => {
             '<div class="a">test</div> ' +
             '<span class="b">testAsync</span>' +
             '</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   // #5941
   it('should work peoperly when accessing $ssrContext in root component', done => {
-    let ssrContext;
+    let ssrContext
     renderToString(
       new Vue({
         template: `
         <div></div>
       `,
         created() {
-          ssrContext = this.$ssrContext;
+          ssrContext = this.$ssrContext
         },
       }),
       (err, result) => {
-        expect(err).toBeNull();
-        expect(ssrContext).toBeUndefined();
-        done();
+        expect(err).toBeNull()
+        expect(ssrContext).toBeUndefined()
+        done()
       },
-    );
-  });
-});
+    )
+  })
+})

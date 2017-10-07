@@ -3,13 +3,11 @@ import {
   getRoot,
   fireEvent,
   createInstance,
-} from '../../helpers/index';
+} from '../../helpers/index'
 
 function compileSnippet(snippet, additional) {
-  const {render, staticRenderFns} = compileAndStringify(
-    `<div>${snippet}</div>`,
-  );
-  const id = String(Date.now() * Math.random());
+  const {render, staticRenderFns} = compileAndStringify(`<div>${snippet}</div>`)
+  const id = String(Date.now() * Math.random())
   const instance = createInstance(
     id,
     `
@@ -20,8 +18,8 @@ function compileSnippet(snippet, additional) {
       ${additional}
     })
   `,
-  );
-  return getRoot(instance).children[0];
+  )
+  return getRoot(instance).children[0]
 }
 
 describe('richtext component', () => {
@@ -32,8 +30,8 @@ describe('richtext component', () => {
     `),
     ).toEqual({
       type: 'richtext',
-    });
-  });
+    })
+  })
 
   it('with single text node', () => {
     expect(
@@ -52,8 +50,8 @@ describe('richtext component', () => {
           },
         ],
       },
-    });
-  });
+    })
+  })
 
   describe('span', () => {
     it('single node', () => {
@@ -75,8 +73,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('multiple node', () => {
       expect(
@@ -100,8 +98,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('with raw text', () => {
       expect(
@@ -134,9 +132,9 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
-  });
+      })
+    })
+  })
 
   describe('a', () => {
     it('single node', () => {
@@ -156,8 +154,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('multiple node', () => {
       expect(
@@ -181,9 +179,9 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
-  });
+      })
+    })
+  })
 
   describe('image', () => {
     it('single node', () => {
@@ -203,8 +201,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('multiple node', () => {
       expect(
@@ -228,8 +226,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('with width and height', () => {
       expect(
@@ -252,9 +250,9 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
-  });
+      })
+    })
+  })
 
   describe('nested', () => {
     it('span', () => {
@@ -306,8 +304,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('image and a', () => {
       expect(
@@ -349,9 +347,9 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
-  });
+      })
+    })
+  })
 
   describe('with styles', () => {
     it('inline', () => {
@@ -378,8 +376,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('class list', () => {
       expect(
@@ -414,9 +412,9 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
-  });
+      })
+    })
+  })
 
   describe('data binding', () => {
     it('simple', () => {
@@ -439,8 +437,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('nested', () => {
       expect(
@@ -483,8 +481,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('update', () => {
       expect(
@@ -511,8 +509,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('attribute', () => {
       expect(
@@ -542,8 +540,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('update attribute', () => {
       expect(
@@ -577,8 +575,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('inline style', () => {
       expect(
@@ -612,8 +610,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('class list', () => {
       expect(
@@ -662,8 +660,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('update inline style', () => {
       expect(
@@ -701,9 +699,9 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
-  });
+      })
+    })
+  })
 
   describe('itself', () => {
     it('inline styles', () => {
@@ -724,8 +722,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('class list', () => {
       expect(
@@ -754,8 +752,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('update styles', () => {
       expect(
@@ -788,8 +786,8 @@ describe('richtext component', () => {
             },
           ],
         },
-      });
-    });
+      })
+    })
 
     it('bind events', done => {
       const {render, staticRenderFns} = compileAndStringify(`
@@ -798,8 +796,8 @@ describe('richtext component', () => {
             <span>Label: {{label}}</span>
           </richtext>
         </div>
-      `);
-      const id = String(Date.now() * Math.random());
+      `)
+      const id = String(Date.now() * Math.random())
       const instance = createInstance(
         id,
         `
@@ -815,9 +813,9 @@ describe('richtext component', () => {
           }
         })
       `,
-      );
-      const richtext = instance.document.body.children[0];
-      fireEvent(instance, richtext.ref, 'click');
+      )
+      const richtext = instance.document.body.children[0]
+      fireEvent(instance, richtext.ref, 'click')
       setTimeout(() => {
         expect(getRoot(instance).children[0]).toEqual({
           type: 'richtext',
@@ -830,10 +828,10 @@ describe('richtext component', () => {
               },
             ],
           },
-        });
-        done();
-      }, 0);
-    });
+        })
+        done()
+      }, 0)
+    })
 
     it('v-for', () => {
       expect(
@@ -867,7 +865,7 @@ describe('richtext component', () => {
             attr: {value: [{type: 'span', attr: {value: 'C'}}]},
           },
         ],
-      });
-    });
-  });
-});
+      })
+    })
+  })
+})

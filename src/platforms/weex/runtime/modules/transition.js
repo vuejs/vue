@@ -1,31 +1,31 @@
-import {warn} from 'core/util/debug';
-import {extend, once, noop} from 'shared/util';
-import {activeInstance} from 'core/instance/lifecycle';
-import {resolveTransition} from 'web/runtime/transition-util';
+import {warn} from 'core/util/debug'
+import {extend, once, noop} from 'shared/util'
+import {activeInstance} from 'core/instance/lifecycle'
+import {resolveTransition} from 'web/runtime/transition-util'
 
 export default {
   create: enter,
   activate: enter,
   remove: leave,
-};
+}
 
 function enter(_, vnode) {
-  const el = vnode.elm;
+  const el = vnode.elm
 
   // call leave callback now
   if (el._leaveCb) {
-    el._leaveCb.cancelled = true;
-    el._leaveCb();
+    el._leaveCb.cancelled = true
+    el._leaveCb()
   }
 
-  const data = resolveTransition(vnode.data.transition);
+  const data = resolveTransition(vnode.data.transition)
   if (!data) {
-    return;
+    return
   }
 
   /* istanbul ignore if */
   if (el._enterCb) {
-    return;
+    return
   }
 
   const {
@@ -43,43 +43,43 @@ function enter(_, vnode) {
     appear,
     afterAppear,
     appearCancelled,
-  } = data;
+  } = data
 
-  let context = activeInstance;
-  let transitionNode = activeInstance.$vnode;
+  let context = activeInstance
+  let transitionNode = activeInstance.$vnode
   while (transitionNode && transitionNode.parent) {
-    transitionNode = transitionNode.parent;
-    context = transitionNode.context;
+    transitionNode = transitionNode.parent
+    context = transitionNode.context
   }
 
-  const isAppear = !context._isMounted || !vnode.isRootInsert;
+  const isAppear = !context._isMounted || !vnode.isRootInsert
 
   if (isAppear && !appear && appear !== '') {
-    return;
+    return
   }
 
-  const startClass = isAppear ? appearClass : enterClass;
-  const toClass = isAppear ? appearToClass : enterToClass;
-  const activeClass = isAppear ? appearActiveClass : enterActiveClass;
-  const beforeEnterHook = isAppear ? beforeAppear || beforeEnter : beforeEnter;
+  const startClass = isAppear ? appearClass : enterClass
+  const toClass = isAppear ? appearToClass : enterToClass
+  const activeClass = isAppear ? appearActiveClass : enterActiveClass
+  const beforeEnterHook = isAppear ? beforeAppear || beforeEnter : beforeEnter
   const enterHook = isAppear
     ? typeof appear === 'function' ? appear : enter
-    : enter;
-  const afterEnterHook = isAppear ? afterAppear || afterEnter : afterEnter;
+    : enter
+  const afterEnterHook = isAppear ? afterAppear || afterEnter : afterEnter
   const enterCancelledHook = isAppear
     ? appearCancelled || enterCancelled
-    : enterCancelled;
+    : enterCancelled
 
   const userWantsControl =
     enterHook &&
     // enterHook may be a bound method which exposes
     // the length of original fn as _length
-    (enterHook._length || enterHook.length) > 1;
+    (enterHook._length || enterHook.length) > 1
 
-  const stylesheet = vnode.context.$options.style || {};
-  const startState = stylesheet[startClass];
+  const stylesheet = vnode.context.$options.style || {}
+  const startState = stylesheet[startClass]
   const transitionProperties =
-    (stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][activeClass]) || {};
+    (stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][activeClass]) || {}
   const endState = getEnterTargetState(
     el,
     stylesheet,
@@ -87,36 +87,36 @@ function enter(_, vnode) {
     toClass,
     activeClass,
     vnode.context,
-  );
-  const needAnimation = Object.keys(endState).length > 0;
+  )
+  const needAnimation = Object.keys(endState).length > 0
 
   const cb = (el._enterCb = once(() => {
     if (cb.cancelled) {
-      enterCancelledHook && enterCancelledHook(el);
+      enterCancelledHook && enterCancelledHook(el)
     } else {
-      afterEnterHook && afterEnterHook(el);
+      afterEnterHook && afterEnterHook(el)
     }
-    el._enterCb = null;
-  }));
+    el._enterCb = null
+  }))
 
   // We need to wait until the native element has been inserted, but currently
   // there's no API to do that. So we have to wait "one frame" - not entirely
   // sure if this is guaranteed to be enough (e.g. on slow devices?)
   setTimeout(() => {
-    const parent = el.parentNode;
-    const pendingNode = parent && parent._pending && parent._pending[vnode.key];
+    const parent = el.parentNode
+    const pendingNode = parent && parent._pending && parent._pending[vnode.key]
     if (
       pendingNode &&
       pendingNode.context === vnode.context &&
       pendingNode.tag === vnode.tag &&
       pendingNode.elm._leaveCb
     ) {
-      pendingNode.elm._leaveCb();
+      pendingNode.elm._leaveCb()
     }
-    enterHook && enterHook(el, cb);
+    enterHook && enterHook(el, cb)
 
     if (needAnimation) {
-      const animation = vnode.context.$requireWeexModule('animation');
+      const animation = vnode.context.$requireWeexModule('animation')
       animation.transition(
         el.ref,
         {
@@ -126,42 +126,42 @@ function enter(_, vnode) {
           timingFunction: transitionProperties.timingFunction || 'linear',
         },
         userWantsControl ? noop : cb,
-      );
+      )
     } else if (!userWantsControl) {
-      cb();
+      cb()
     }
-  }, 16);
+  }, 16)
 
   // start enter transition
-  beforeEnterHook && beforeEnterHook(el);
+  beforeEnterHook && beforeEnterHook(el)
 
   if (startState) {
     for (const key in startState) {
-      el.setStyle(key, startState[key]);
+      el.setStyle(key, startState[key])
     }
   }
 
   if (!needAnimation && !userWantsControl) {
-    cb();
+    cb()
   }
 }
 
 function leave(vnode, rm) {
-  const el = vnode.elm;
+  const el = vnode.elm
 
   // call enter callback now
   if (el._enterCb) {
-    el._enterCb.cancelled = true;
-    el._enterCb();
+    el._enterCb.cancelled = true
+    el._enterCb()
   }
 
-  const data = resolveTransition(vnode.data.transition);
+  const data = resolveTransition(vnode.data.transition)
   if (!data) {
-    return rm();
+    return rm()
   }
 
   if (el._leaveCb) {
-    return;
+    return
   }
 
   const {
@@ -173,54 +173,54 @@ function leave(vnode, rm) {
     afterLeave,
     leaveCancelled,
     delayLeave,
-  } = data;
+  } = data
 
   const userWantsControl =
     leave &&
     // leave hook may be a bound method which exposes
     // the length of original fn as _length
-    (leave._length || leave.length) > 1;
+    (leave._length || leave.length) > 1
 
-  const stylesheet = vnode.context.$options.style || {};
-  const startState = stylesheet[leaveClass];
-  const endState = stylesheet[leaveToClass] || stylesheet[leaveActiveClass];
+  const stylesheet = vnode.context.$options.style || {}
+  const startState = stylesheet[leaveClass]
+  const endState = stylesheet[leaveToClass] || stylesheet[leaveActiveClass]
   const transitionProperties =
     (stylesheet['@TRANSITION'] &&
       stylesheet['@TRANSITION'][leaveActiveClass]) ||
-    {};
+    {}
 
   const cb = (el._leaveCb = once(() => {
     if (el.parentNode && el.parentNode._pending) {
-      el.parentNode._pending[vnode.key] = null;
+      el.parentNode._pending[vnode.key] = null
     }
     if (cb.cancelled) {
-      leaveCancelled && leaveCancelled(el);
+      leaveCancelled && leaveCancelled(el)
     } else {
-      rm();
-      afterLeave && afterLeave(el);
+      rm()
+      afterLeave && afterLeave(el)
     }
-    el._leaveCb = null;
-  }));
+    el._leaveCb = null
+  }))
 
   if (delayLeave) {
-    delayLeave(performLeave);
+    delayLeave(performLeave)
   } else {
-    performLeave();
+    performLeave()
   }
 
   function performLeave() {
-    const animation = vnode.context.$requireWeexModule('animation');
+    const animation = vnode.context.$requireWeexModule('animation')
     // the delayed leave may have already been cancelled
     if (cb.cancelled) {
-      return;
+      return
     }
     // record leaving element
     if (!vnode.data.show) {
-      (el.parentNode._pending || (el.parentNode._pending = {}))[
+      ;(el.parentNode._pending || (el.parentNode._pending = {}))[
         vnode.key
-      ] = vnode;
+      ] = vnode
     }
-    beforeLeave && beforeLeave(el);
+    beforeLeave && beforeLeave(el)
 
     if (startState) {
       animation.transition(
@@ -229,9 +229,9 @@ function leave(vnode, rm) {
           styles: startState,
         },
         next,
-      );
+      )
     } else {
-      next();
+      next()
     }
 
     function next() {
@@ -244,12 +244,12 @@ function leave(vnode, rm) {
           timingFunction: transitionProperties.timingFunction || 'linear',
         },
         userWantsControl ? noop : cb,
-      );
+      )
     }
 
-    leave && leave(el, cb);
+    leave && leave(el, cb)
     if (!endState && !userWantsControl) {
-      cb();
+      cb()
     }
   }
 }
@@ -263,14 +263,14 @@ function getEnterTargetState(
   activeClass,
   vm,
 ) {
-  const targetState = {};
-  const startState = stylesheet[startClass];
-  const endState = stylesheet[endClass];
-  const activeState = stylesheet[activeClass];
+  const targetState = {}
+  const startState = stylesheet[startClass]
+  const endState = stylesheet[endClass]
+  const activeState = stylesheet[activeClass]
   // 1. fallback to element's default styling
   if (startState) {
     for (const key in startState) {
-      targetState[key] = el.style[key];
+      targetState[key] = el.style[key]
       if (
         process.env.NODE_ENV !== 'production' &&
         targetState[key] == null &&
@@ -282,7 +282,7 @@ function getEnterTargetState(
             `but not declared anywhere in enter ending class (.${endClass}), ` +
             `enter active cass (.${activeClass}) or the element's default styling. ` +
             `Note in Weex, CSS properties need explicit values to be transitionable.`,
-        );
+        )
       }
     }
   }
@@ -291,13 +291,13 @@ function getEnterTargetState(
   if (activeState) {
     for (const key in activeState) {
       if (key.indexOf('transition') !== 0) {
-        targetState[key] = activeState[key];
+        targetState[key] = activeState[key]
       }
     }
   }
   // 3. explicit endState has highest priority
   if (endState) {
-    extend(targetState, endState);
+    extend(targetState, endState)
   }
-  return targetState;
+  return targetState
 }

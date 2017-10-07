@@ -1,6 +1,6 @@
 /* @flow */
 
-import {makeMap} from 'shared/util';
+import {makeMap} from 'shared/util'
 
 const isAttr = makeMap(
   'accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' +
@@ -16,34 +16,34 @@ const isAttr = makeMap(
     'scope,scoped,seamless,selected,shape,size,type,text,password,sizes,span,' +
     'spellcheck,src,srcdoc,srclang,srcset,start,step,style,summary,tabindex,' +
     'target,title,type,usemap,value,width,wrap',
-);
+)
 
 /* istanbul ignore next */
 const isRenderableAttr = (name: string): boolean => {
   return (
     isAttr(name) || name.indexOf('data-') === 0 || name.indexOf('aria-') === 0
-  );
-};
-export {isRenderableAttr};
+  )
+}
+export {isRenderableAttr}
 
 export const propsToAttrMap = {
   acceptCharset: 'accept-charset',
   className: 'class',
   htmlFor: 'for',
   httpEquiv: 'http-equiv',
-};
+}
 
 const ESC = {
   '<': '&lt;',
   '>': '&gt;',
   '"': '&quot;',
   '&': '&amp;',
-};
+}
 
 export function escape(s: string) {
-  return s.replace(/[<>"&]/g, escapeChar);
+  return s.replace(/[<>"&]/g, escapeChar)
 }
 
 function escapeChar(a) {
-  return ESC[a] || a;
+  return ESC[a] || a
 }

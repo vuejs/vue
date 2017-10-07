@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
 describe('Directive v-model radio', () => {
   it('should work', done => {
@@ -12,24 +12,24 @@ describe('Directive v-model radio', () => {
           <input type="radio" value="2" v-model="test" name="test">
         </div>
       `,
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    expect(vm.$el.children[0].checked).toBe(true);
-    expect(vm.$el.children[1].checked).toBe(false);
-    vm.test = '2';
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
+    vm.test = '2'
     waitForUpdate(() => {
-      expect(vm.$el.children[0].checked).toBe(false);
-      expect(vm.$el.children[1].checked).toBe(true);
-      vm.$el.children[0].click();
-      expect(vm.$el.children[0].checked).toBe(true);
-      expect(vm.$el.children[1].checked).toBe(false);
-      expect(vm.test).toBe('1');
+      expect(vm.$el.children[0].checked).toBe(false)
+      expect(vm.$el.children[1].checked).toBe(true)
+      vm.$el.children[0].click()
+      expect(vm.$el.children[0].checked).toBe(true)
+      expect(vm.$el.children[1].checked).toBe(false)
+      expect(vm.test).toBe('1')
     })
       .then(() => {
-        document.body.removeChild(vm.$el);
+        document.body.removeChild(vm.$el)
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('should respect value bindings', done => {
     const vm = new Vue({
@@ -42,24 +42,24 @@ describe('Directive v-model radio', () => {
           <input type="radio" :value="2" v-model="test" name="test">
         </div>
       `,
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    expect(vm.$el.children[0].checked).toBe(true);
-    expect(vm.$el.children[1].checked).toBe(false);
-    vm.test = 2;
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
+    vm.test = 2
     waitForUpdate(() => {
-      expect(vm.$el.children[0].checked).toBe(false);
-      expect(vm.$el.children[1].checked).toBe(true);
-      vm.$el.children[0].click();
-      expect(vm.$el.children[0].checked).toBe(true);
-      expect(vm.$el.children[1].checked).toBe(false);
-      expect(vm.test).toBe(1);
+      expect(vm.$el.children[0].checked).toBe(false)
+      expect(vm.$el.children[1].checked).toBe(true)
+      vm.$el.children[0].click()
+      expect(vm.$el.children[0].checked).toBe(true)
+      expect(vm.$el.children[1].checked).toBe(false)
+      expect(vm.test).toBe(1)
     })
       .then(() => {
-        document.body.removeChild(vm.$el);
+        document.body.removeChild(vm.$el)
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('should respect value bindings (object loose equal)', done => {
     const vm = new Vue({
@@ -72,27 +72,27 @@ describe('Directive v-model radio', () => {
           <input type="radio" :value="{ a: 2 }" v-model="test" name="test">
         </div>
       `,
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    expect(vm.$el.children[0].checked).toBe(true);
-    expect(vm.$el.children[1].checked).toBe(false);
-    vm.test = {a: 2};
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
+    vm.test = {a: 2}
     waitForUpdate(() => {
-      expect(vm.$el.children[0].checked).toBe(false);
-      expect(vm.$el.children[1].checked).toBe(true);
-      vm.$el.children[0].click();
-      expect(vm.$el.children[0].checked).toBe(true);
-      expect(vm.$el.children[1].checked).toBe(false);
-      expect(vm.test).toEqual({a: 1});
+      expect(vm.$el.children[0].checked).toBe(false)
+      expect(vm.$el.children[1].checked).toBe(true)
+      vm.$el.children[0].click()
+      expect(vm.$el.children[0].checked).toBe(true)
+      expect(vm.$el.children[1].checked).toBe(false)
+      expect(vm.test).toEqual({a: 1})
     })
       .then(() => {
-        document.body.removeChild(vm.$el);
+        document.body.removeChild(vm.$el)
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('multiple radios ', done => {
-    const spy = jasmine.createSpy();
+    const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
         selections: ['a', '1'],
@@ -121,15 +121,15 @@ describe('Directive v-model radio', () => {
         '</div>' +
         '</div>' +
         '</div>',
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    var inputs = vm.$el.getElementsByTagName('input');
-    inputs[1].click();
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    var inputs = vm.$el.getElementsByTagName('input')
+    inputs[1].click()
     waitForUpdate(() => {
-      expect(vm.selections).toEqual(['b', '1']);
-      expect(spy).toHaveBeenCalled();
-    }).then(done);
-  });
+      expect(vm.selections).toEqual(['b', '1'])
+      expect(spy).toHaveBeenCalled()
+    }).then(done)
+  })
 
   it('.number modifier', () => {
     const vm = new Vue({
@@ -142,15 +142,15 @@ describe('Directive v-model radio', () => {
           <input type="radio" value="2" v-model.number="test" name="test">
         </div>
       `,
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    expect(vm.$el.children[0].checked).toBe(true);
-    expect(vm.$el.children[1].checked).toBe(false);
-    vm.$el.children[1].click();
-    expect(vm.$el.children[0].checked).toBe(false);
-    expect(vm.$el.children[1].checked).toBe(true);
-    expect(vm.test).toBe(2);
-  });
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
+    vm.$el.children[1].click()
+    expect(vm.$el.children[0].checked).toBe(false)
+    expect(vm.$el.children[1].checked).toBe(true)
+    expect(vm.test).toBe(2)
+  })
 
   it('should respect different primitive type value', done => {
     const vm = new Vue({
@@ -165,47 +165,47 @@ describe('Directive v-model radio', () => {
         '<input type="radio" value="false" v-model="test" name="test">' +
         '<input type="radio" value="true" v-model="test" name="test">' +
         '</div>',
-    }).$mount();
-    var radioboxInput = vm.$el.children;
-    expect(radioboxInput[0].checked).toBe(false);
-    expect(radioboxInput[1].checked).toBe(false);
-    expect(radioboxInput[2].checked).toBe(true);
-    expect(radioboxInput[3].checked).toBe(false);
-    expect(radioboxInput[4].checked).toBe(false);
-    vm.test = 0;
+    }).$mount()
+    var radioboxInput = vm.$el.children
+    expect(radioboxInput[0].checked).toBe(false)
+    expect(radioboxInput[1].checked).toBe(false)
+    expect(radioboxInput[2].checked).toBe(true)
+    expect(radioboxInput[3].checked).toBe(false)
+    expect(radioboxInput[4].checked).toBe(false)
+    vm.test = 0
     waitForUpdate(() => {
-      expect(radioboxInput[0].checked).toBe(false);
-      expect(radioboxInput[1].checked).toBe(true);
-      expect(radioboxInput[2].checked).toBe(false);
-      expect(radioboxInput[3].checked).toBe(false);
-      expect(radioboxInput[4].checked).toBe(false);
-      vm.test = '';
+      expect(radioboxInput[0].checked).toBe(false)
+      expect(radioboxInput[1].checked).toBe(true)
+      expect(radioboxInput[2].checked).toBe(false)
+      expect(radioboxInput[3].checked).toBe(false)
+      expect(radioboxInput[4].checked).toBe(false)
+      vm.test = ''
     })
       .then(() => {
-        expect(radioboxInput[0].checked).toBe(true);
-        expect(radioboxInput[1].checked).toBe(false);
-        expect(radioboxInput[2].checked).toBe(false);
-        expect(radioboxInput[3].checked).toBe(false);
-        expect(radioboxInput[4].checked).toBe(false);
-        vm.test = false;
+        expect(radioboxInput[0].checked).toBe(true)
+        expect(radioboxInput[1].checked).toBe(false)
+        expect(radioboxInput[2].checked).toBe(false)
+        expect(radioboxInput[3].checked).toBe(false)
+        expect(radioboxInput[4].checked).toBe(false)
+        vm.test = false
       })
       .then(() => {
-        expect(radioboxInput[0].checked).toBe(false);
-        expect(radioboxInput[1].checked).toBe(false);
-        expect(radioboxInput[2].checked).toBe(false);
-        expect(radioboxInput[3].checked).toBe(true);
-        expect(radioboxInput[4].checked).toBe(false);
-        vm.test = true;
+        expect(radioboxInput[0].checked).toBe(false)
+        expect(radioboxInput[1].checked).toBe(false)
+        expect(radioboxInput[2].checked).toBe(false)
+        expect(radioboxInput[3].checked).toBe(true)
+        expect(radioboxInput[4].checked).toBe(false)
+        vm.test = true
       })
       .then(() => {
-        expect(radioboxInput[0].checked).toBe(false);
-        expect(radioboxInput[1].checked).toBe(false);
-        expect(radioboxInput[2].checked).toBe(false);
-        expect(radioboxInput[3].checked).toBe(false);
-        expect(radioboxInput[4].checked).toBe(true);
+        expect(radioboxInput[0].checked).toBe(false)
+        expect(radioboxInput[1].checked).toBe(false)
+        expect(radioboxInput[2].checked).toBe(false)
+        expect(radioboxInput[3].checked).toBe(false)
+        expect(radioboxInput[4].checked).toBe(true)
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   // #4521
   it('should work with click event', done => {
@@ -221,32 +221,32 @@ describe('Directive v-model radio', () => {
         '</div>',
       methods: {
         add: function() {
-          this.num++;
+          this.num++
         },
       },
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    const radios = vm.$el.getElementsByTagName('input');
-    radios[0].click();
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    const radios = vm.$el.getElementsByTagName('input')
+    radios[0].click()
     waitForUpdate(() => {
-      expect(radios[0].checked).toBe(true);
-      expect(radios[1].checked).toBe(false);
-      expect(vm.num).toBe(2);
-      radios[0].click();
+      expect(radios[0].checked).toBe(true)
+      expect(radios[1].checked).toBe(false)
+      expect(vm.num).toBe(2)
+      radios[0].click()
     })
       .then(() => {
-        expect(radios[0].checked).toBe(true);
-        expect(radios[1].checked).toBe(false);
-        expect(vm.num).toBe(3);
-        radios[1].click();
+        expect(radios[0].checked).toBe(true)
+        expect(radios[1].checked).toBe(false)
+        expect(vm.num).toBe(3)
+        radios[1].click()
       })
       .then(() => {
-        expect(radios[0].checked).toBe(false);
-        expect(radios[1].checked).toBe(true);
-        expect(vm.num).toBe(4);
+        expect(radios[0].checked).toBe(false)
+        expect(radios[1].checked).toBe(true)
+        expect(vm.num).toBe(4)
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('should get updated with model when in focus', done => {
     const vm = new Vue({
@@ -254,16 +254,16 @@ describe('Directive v-model radio', () => {
         a: '2',
       },
       template: '<input type="radio" value="1" v-model="a"/>',
-    }).$mount();
-    document.body.appendChild(vm.$el);
-    vm.$el.click();
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.$el.click()
     waitForUpdate(() => {
-      expect(vm.$el.checked).toBe(true);
-      vm.a = 2;
+      expect(vm.$el.checked).toBe(true)
+      vm.a = 2
     })
       .then(() => {
-        expect(vm.$el.checked).toBe(false);
+        expect(vm.$el.checked).toBe(false)
       })
-      .then(done);
-  });
-});
+      .then(done)
+  })
+})

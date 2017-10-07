@@ -1,33 +1,33 @@
 /* @flow */
 
-import config from 'core/config';
-import {addHandler, addProp, getBindingAttr} from 'compiler/helpers';
-import {genComponentModel, genAssignmentCode} from 'compiler/directives/model';
+import config from 'core/config'
+import {addHandler, addProp, getBindingAttr} from 'compiler/helpers'
+import {genComponentModel, genAssignmentCode} from 'compiler/directives/model'
 
-let warn;
+let warn
 
 // in some cases, the event used has to be determined at runtime
 // so we used some reserved tokens during compile.
-export const RANGE_TOKEN = '__r';
+export const RANGE_TOKEN = '__r'
 
 export default function model(
   el: ASTElement,
   dir: ASTDirective,
   _warn: Function,
 ): ?boolean {
-  warn = _warn;
-  const value = dir.value;
-  const modifiers = dir.modifiers;
-  const tag = el.tag;
-  const type = el.attrsMap.type;
+  warn = _warn
+  const value = dir.value
+  const modifiers = dir.modifiers
+  const tag = el.tag
+  const type = el.attrsMap.type
 
   if (process.env.NODE_ENV !== 'production') {
-    const dynamicType = el.attrsMap['v-bind:type'] || el.attrsMap[':type'];
+    const dynamicType = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
     if (tag === 'input' && dynamicType) {
       warn(
         `<input :type="${dynamicType}" v-model="${value}">:\n` +
           `v-model does not support dynamic input types. Use v-if branches instead.`,
-      );
+      )
     }
     // inputs with type="file" are read only and setting the input's
     // value will throw an error.
@@ -35,37 +35,37 @@ export default function model(
       warn(
         `<${el.tag} v-model="${value}" type="file">:\n` +
           `File inputs are read only. Use a v-on:change listener instead.`,
-      );
+      )
     }
   }
 
   if (el.component) {
-    genComponentModel(el, value, modifiers);
+    genComponentModel(el, value, modifiers)
     // component v-model doesn't need extra runtime
-    return false;
+    return false
   } else if (tag === 'select') {
-    genSelect(el, value, modifiers);
+    genSelect(el, value, modifiers)
   } else if (tag === 'input' && type === 'checkbox') {
-    genCheckboxModel(el, value, modifiers);
+    genCheckboxModel(el, value, modifiers)
   } else if (tag === 'input' && type === 'radio') {
-    genRadioModel(el, value, modifiers);
+    genRadioModel(el, value, modifiers)
   } else if (tag === 'input' || tag === 'textarea') {
-    genDefaultModel(el, value, modifiers);
+    genDefaultModel(el, value, modifiers)
   } else if (!config.isReservedTag(tag)) {
-    genComponentModel(el, value, modifiers);
+    genComponentModel(el, value, modifiers)
     // component v-model doesn't need extra runtime
-    return false;
+    return false
   } else if (process.env.NODE_ENV !== 'production') {
     warn(
       `<${el.tag} v-model="${value}">: ` +
         `v-model is not supported on this element type. ` +
         "If you are working with contenteditable, it's recommended to " +
         'wrap a library dedicated for that purpose inside a custom component.',
-    );
+    )
   }
 
   // ensure runtime directive metadata
-  return true;
+  return true
 }
 
 function genCheckboxModel(
@@ -73,10 +73,10 @@ function genCheckboxModel(
   value: string,
   modifiers: ?ASTModifiers,
 ) {
-  const number = modifiers && modifiers.number;
-  const valueBinding = getBindingAttr(el, 'value') || 'null';
-  const trueValueBinding = getBindingAttr(el, 'true-value') || 'true';
-  const falseValueBinding = getBindingAttr(el, 'false-value') || 'false';
+  const number = modifiers && modifiers.number
+  const valueBinding = getBindingAttr(el, 'value') || 'null'
+  const trueValueBinding = getBindingAttr(el, 'true-value') || 'true'
+  const falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
   addProp(
     el,
     'checked',
@@ -85,7 +85,7 @@ function genCheckboxModel(
       (trueValueBinding === 'true'
         ? `:(${value})`
         : `:_q(${value},${trueValueBinding})`),
-  );
+  )
   addHandler(
     el,
     'change',
@@ -100,7 +100,7 @@ function genCheckboxModel(
       `}else{${genAssignmentCode(value, '$$c')}}`,
     null,
     true,
-  );
+  )
 }
 
 function genRadioModel(
@@ -108,26 +108,25 @@ function genRadioModel(
   value: string,
   modifiers: ?ASTModifiers,
 ) {
-  const number = modifiers && modifiers.number;
-  let valueBinding = getBindingAttr(el, 'value') || 'null';
-  valueBinding = number ? `_n(${valueBinding})` : valueBinding;
-  addProp(el, 'checked', `_q(${value},${valueBinding})`);
-  addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true);
+  const number = modifiers && modifiers.number
+  let valueBinding = getBindingAttr(el, 'value') || 'null'
+  valueBinding = number ? `_n(${valueBinding})` : valueBinding
+  addProp(el, 'checked', `_q(${value},${valueBinding})`)
+  addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true)
 }
 
 function genSelect(el: ASTElement, value: string, modifiers: ?ASTModifiers) {
-  const number = modifiers && modifiers.number;
+  const number = modifiers && modifiers.number
   const selectedVal =
     `Array.prototype.filter` +
     `.call($event.target.options,function(o){return o.selected})` +
     `.map(function(o){var val = "_value" in o ? o._value : o.value;` +
-    `return ${number ? '_n(val)' : 'val'}})`;
+    `return ${number ? '_n(val)' : 'val'}})`
 
-  const assignment =
-    '$event.target.multiple ? $$selectedVal : $$selectedVal[0]';
-  let code = `var $$selectedVal = ${selectedVal};`;
-  code = `${code} ${genAssignmentCode(value, assignment)}`;
-  addHandler(el, 'change', code, null, true);
+  const assignment = '$event.target.multiple ? $$selectedVal : $$selectedVal[0]'
+  let code = `var $$selectedVal = ${selectedVal};`
+  code = `${code} ${genAssignmentCode(value, assignment)}`
+  addHandler(el, 'change', code, null, true)
 }
 
 function genDefaultModel(
@@ -135,27 +134,27 @@ function genDefaultModel(
   value: string,
   modifiers: ?ASTModifiers,
 ): ?boolean {
-  const type = el.attrsMap.type;
-  const {lazy, number, trim} = modifiers || {};
-  const needCompositionGuard = !lazy && type !== 'range';
-  const event = lazy ? 'change' : type === 'range' ? RANGE_TOKEN : 'input';
+  const type = el.attrsMap.type
+  const {lazy, number, trim} = modifiers || {}
+  const needCompositionGuard = !lazy && type !== 'range'
+  const event = lazy ? 'change' : type === 'range' ? RANGE_TOKEN : 'input'
 
-  let valueExpression = '$event.target.value';
+  let valueExpression = '$event.target.value'
   if (trim) {
-    valueExpression = `$event.target.value.trim()`;
+    valueExpression = `$event.target.value.trim()`
   }
   if (number) {
-    valueExpression = `_n(${valueExpression})`;
+    valueExpression = `_n(${valueExpression})`
   }
 
-  let code = genAssignmentCode(value, valueExpression);
+  let code = genAssignmentCode(value, valueExpression)
   if (needCompositionGuard) {
-    code = `if($event.target.composing)return;${code}`;
+    code = `if($event.target.composing)return;${code}`
   }
 
-  addProp(el, 'value', `(${value})`);
-  addHandler(el, event, code, null, true);
+  addProp(el, 'value', `(${value})`)
+  addHandler(el, event, code, null, true)
   if (trim || number) {
-    addHandler(el, 'blur', '$forceUpdate()');
+    addHandler(el, 'blur', '$forceUpdate()')
   }
 }

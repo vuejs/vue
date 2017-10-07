@@ -14,11 +14,11 @@ module.exports = {
       .assert.evaluate(function() {
         var points = stats
           .map(function(stat, i) {
-            var point = valueToPoint(stat.value, i, 6);
-            return point.x + ',' + point.y;
+            var point = valueToPoint(stat.value, i, 6)
+            return point.x + ',' + point.y
           })
-          .join(' ');
-        return document.querySelector('polygon').attributes[0].value === points;
+          .join(' ')
+        return document.querySelector('polygon').attributes[0].value === points
       })
       .click('button.remove')
       .assert.count('text', 5)
@@ -28,11 +28,11 @@ module.exports = {
       .assert.evaluate(function() {
         var points = stats
           .map(function(stat, i) {
-            var point = valueToPoint(stat.value, i, 5);
-            return point.x + ',' + point.y;
+            var point = valueToPoint(stat.value, i, 5)
+            return point.x + ',' + point.y
           })
-          .join(' ');
-        return document.querySelector('polygon').attributes[0].value === points;
+          .join(' ')
+        return document.querySelector('polygon').attributes[0].value === points
       })
       .setValue('input[name="newlabel"]', 'foo')
       .click('#add > button')
@@ -43,12 +43,12 @@ module.exports = {
       .assert.evaluate(function() {
         var points = stats
           .map(function(stat, i) {
-            var point = valueToPoint(stat.value, i, 6);
-            return point.x + ',' + point.y;
+            var point = valueToPoint(stat.value, i, 6)
+            return point.x + ',' + point.y
           })
-          .join(' ');
-        return document.querySelector('polygon').attributes[0].value === points;
+          .join(' ')
+        return document.querySelector('polygon').attributes[0].value === points
       })
-      .end();
+      .end()
   },
-};
+}

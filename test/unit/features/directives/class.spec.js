@@ -1,28 +1,28 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
 function assertClass(assertions, done) {
   const vm = new Vue({
     template: '<div class="foo" :class="value"></div>',
     data: {value: ''},
-  }).$mount();
-  var chain = waitForUpdate();
+  }).$mount()
+  var chain = waitForUpdate()
   assertions.forEach(([value, expected], i) => {
     chain
       .then(() => {
         if (typeof value === 'function') {
-          value(vm.value);
+          value(vm.value)
         } else {
-          vm.value = value;
+          vm.value = value
         }
       })
       .then(() => {
-        expect(vm.$el.className).toBe(expected);
+        expect(vm.$el.className).toBe(expected)
         if (i >= assertions.length - 1) {
-          done();
+          done()
         }
-      });
-  });
-  chain.then(done);
+      })
+  })
+  chain.then(done)
 }
 
 describe('Directive v-bind:class', () => {
@@ -35,8 +35,8 @@ describe('Directive v-bind:class', () => {
         [undefined, 'foo'],
       ],
       done,
-    );
-  });
+    )
+  })
 
   it('object value', done => {
     assertClass(
@@ -48,8 +48,8 @@ describe('Directive v-bind:class', () => {
         [{qux: true}, 'foo qux'],
       ],
       done,
-    );
-  });
+    )
+  })
 
   it('array value', done => {
     assertClass(
@@ -62,8 +62,8 @@ describe('Directive v-bind:class', () => {
         [val => val.push('baz'), 'foo bar baz'],
       ],
       done,
-    );
-  });
+    )
+  })
 
   it('array of mixed values', done => {
     assertClass(
@@ -76,8 +76,8 @@ describe('Directive v-bind:class', () => {
         [undefined, 'foo'],
       ],
       done,
-    );
-  });
+    )
+  })
 
   it('class merge between parent and child', done => {
     const vm = new Vue({
@@ -89,28 +89,28 @@ describe('Directive v-bind:class', () => {
           data: () => ({value: 'd'}),
         },
       },
-    }).$mount();
-    const child = vm.$children[0];
-    expect(vm.$el.className).toBe('c a d b');
-    vm.value = 'e';
+    }).$mount()
+    const child = vm.$children[0]
+    expect(vm.$el.className).toBe('c a d b')
+    vm.value = 'e'
     waitForUpdate(() => {
-      expect(vm.$el.className).toBe('c a d e');
+      expect(vm.$el.className).toBe('c a d e')
     })
       .then(() => {
-        child.value = 'f';
+        child.value = 'f'
       })
       .then(() => {
-        expect(vm.$el.className).toBe('c a f e');
+        expect(vm.$el.className).toBe('c a f e')
       })
       .then(() => {
-        vm.value = {foo: true};
-        child.value = ['bar', 'baz'];
+        vm.value = {foo: true}
+        child.value = ['bar', 'baz']
       })
       .then(() => {
-        expect(vm.$el.className).toBe('c a bar baz foo');
+        expect(vm.$el.className).toBe('c a bar baz foo')
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('class merge between multiple nested components sharing same element', done => {
     const vm = new Vue({
@@ -131,38 +131,38 @@ describe('Directive v-bind:class', () => {
       components: {
         component1: {
           render() {
-            return this.$slots.default[0];
+            return this.$slots.default[0]
           },
         },
         component2: {
           render() {
-            return this.$slots.default[0];
+            return this.$slots.default[0]
           },
         },
         component3: {
           template: '<div class="staticClass"><slot></slot></div>',
         },
       },
-    }).$mount();
+    }).$mount()
     expect(vm.$el.className).toBe(
       'staticClass componentClass3 componentClass2 componentClass1',
-    );
-    vm.componentClass1 = 'c1';
+    )
+    vm.componentClass1 = 'c1'
     waitForUpdate(() => {
       expect(vm.$el.className).toBe(
         'staticClass componentClass3 componentClass2 c1',
-      );
-      vm.componentClass2 = 'c2';
+      )
+      vm.componentClass2 = 'c2'
     })
       .then(() => {
-        expect(vm.$el.className).toBe('staticClass componentClass3 c2 c1');
-        vm.componentClass3 = 'c3';
+        expect(vm.$el.className).toBe('staticClass componentClass3 c2 c1')
+        vm.componentClass3 = 'c3'
       })
       .then(() => {
-        expect(vm.$el.className).toBe('staticClass c3 c2 c1');
+        expect(vm.$el.className).toBe('staticClass c3 c2 c1')
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('deep update', done => {
     const vm = new Vue({
@@ -170,13 +170,13 @@ describe('Directive v-bind:class', () => {
       data: {
         test: {a: true, b: false},
       },
-    }).$mount();
-    expect(vm.$el.className).toBe('a');
-    vm.test.b = true;
+    }).$mount()
+    expect(vm.$el.className).toBe('a')
+    vm.test.b = true
     waitForUpdate(() => {
-      expect(vm.$el.className).toBe('a b');
-    }).then(done);
-  });
+      expect(vm.$el.className).toBe('a b')
+    }).then(done)
+  })
 
   // a vdom patch edge case where the user has several un-keyed elements of the
   // same tag next to each other, and toggling them.
@@ -191,11 +191,11 @@ describe('Directive v-bind:class', () => {
       data: {
         ok: true,
       },
-    }).$mount();
-    expect(vm.$el.children[0].className).toBe('a');
-    vm.ok = false;
+    }).$mount()
+    expect(vm.$el.children[0].className).toBe('a')
+    vm.ok = false
     waitForUpdate(() => {
-      expect(vm.$el.children[0].className).toBe('');
-    }).then(done);
-  });
-});
+      expect(vm.$el.children[0].className).toBe('')
+    }).then(done)
+  })
+})

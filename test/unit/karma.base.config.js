@@ -1,5 +1,5 @@
-var alias = require('../../build/alias');
-var webpack = require('webpack');
+var alias = require('../../build/alias')
+var webpack = require('webpack')
 
 var webpackConfig = {
   resolve: {
@@ -25,7 +25,7 @@ var webpackConfig = {
     }),
   ],
   devtool: '#inline-source-map',
-};
+}
 
 // shared config for all unit tests
 module.exports = {
@@ -44,4 +44,4 @@ module.exports = {
     'karma-sourcemap-loader',
     'karma-webpack',
   ],
-};
+}

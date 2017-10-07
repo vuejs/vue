@@ -1,38 +1,38 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
 describe('Options data', () => {
   it('should proxy and be reactive', done => {
-    const data = {msg: 'foo'};
+    const data = {msg: 'foo'}
     const vm = new Vue({
       data,
       template: '<div>{{ msg }}</div>',
-    }).$mount();
-    expect(vm.$data).toEqual({msg: 'foo'});
-    expect(vm.$data).toBe(data);
-    data.msg = 'bar';
+    }).$mount()
+    expect(vm.$data).toEqual({msg: 'foo'})
+    expect(vm.$data).toBe(data)
+    data.msg = 'bar'
     waitForUpdate(() => {
-      expect(vm.$el.textContent).toBe('bar');
-    }).then(done);
-  });
+      expect(vm.$el.textContent).toBe('bar')
+    }).then(done)
+  })
 
   it('should merge data properly', () => {
     const Test = Vue.extend({
       data() {
-        return {a: 1};
+        return {a: 1}
       },
-    });
+    })
     let vm = new Test({
       data: {b: 2},
-    });
-    expect(vm.a).toBe(1);
-    expect(vm.b).toBe(2);
+    })
+    expect(vm.a).toBe(1)
+    expect(vm.b).toBe(2)
     // no instance data
-    vm = new Test();
-    expect(vm.a).toBe(1);
+    vm = new Test()
+    expect(vm.a).toBe(1)
     // no child-val
-    const Extended = Test.extend({});
-    vm = new Extended();
-    expect(vm.a).toBe(1);
+    const Extended = Test.extend({})
+    vm = new Extended()
+    expect(vm.a).toBe(1)
     // recursively merge objects
     const WithObject = Vue.extend({
       data() {
@@ -40,41 +40,41 @@ describe('Options data', () => {
           obj: {
             a: 1,
           },
-        };
+        }
       },
-    });
+    })
     vm = new WithObject({
       data: {
         obj: {
           b: 2,
         },
       },
-    });
-    expect(vm.obj.a).toBe(1);
-    expect(vm.obj.b).toBe(2);
-  });
+    })
+    expect(vm.obj.a).toBe(1)
+    expect(vm.obj.b).toBe(2)
+  })
 
   it('should warn non-function during extend', () => {
     Vue.extend({
       data: {msg: 'foo'},
-    });
-    expect('The "data" option should be a function').toHaveBeenWarned();
-  });
+    })
+    expect('The "data" option should be a function').toHaveBeenWarned()
+  })
 
   it('should warn non object return', () => {
     new Vue({
       data() {},
-    });
-    expect('data functions should return an object').toHaveBeenWarned();
-  });
+    })
+    expect('data functions should return an object').toHaveBeenWarned()
+  })
 
   it('should warn replacing root $data', () => {
     const vm = new Vue({
       data: {},
-    });
-    vm.$data = {};
-    expect('Avoid replacing instance root $data').toHaveBeenWarned();
-  });
+    })
+    vm.$data = {}
+    expect('Avoid replacing instance root $data').toHaveBeenWarned()
+  })
 
   it('should have access to props', () => {
     const Test = {
@@ -83,27 +83,27 @@ describe('Options data', () => {
       data() {
         return {
           b: this.a,
-        };
+        }
       },
-    };
+    }
     const vm = new Vue({
       template: `<test ref="test" :a="1"></test>`,
       components: {Test},
-    }).$mount();
-    expect(vm.$refs.test.b).toBe(1);
-  });
+    }).$mount()
+    expect(vm.$refs.test.b).toBe(1)
+  })
 
   it('should have access to methods', () => {
     const vm = new Vue({
       methods: {
         get() {
-          return {a: 1};
+          return {a: 1}
         },
       },
       data() {
-        return this.get();
+        return this.get()
       },
-    });
-    expect(vm.a).toBe(1);
-  });
-});
+    })
+    expect(vm.a).toBe(1)
+  })
+})

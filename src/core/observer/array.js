@@ -3,15 +3,15 @@
  * dynamically accessing methods on Array prototype
  */
 
-import {def} from '../util/index';
+import {def} from '../util/index'
 
-const arrayProto = Array.prototype;
-export const arrayMethods = Object.create(arrayProto);
+const arrayProto = Array.prototype
+export const arrayMethods = Object.create(arrayProto)
 
 /**
  * Intercept mutating methods and emit events
  */
-[
+;[
   'push',
   'pop',
   'shift',
@@ -21,23 +21,23 @@ export const arrayMethods = Object.create(arrayProto);
   'reverse',
 ].forEach(function(method) {
   // cache original method
-  const original = arrayProto[method];
+  const original = arrayProto[method]
   def(arrayMethods, method, function mutator(...args) {
-    const result = original.apply(this, args);
-    const ob = this.__ob__;
-    let inserted;
+    const result = original.apply(this, args)
+    const ob = this.__ob__
+    let inserted
     switch (method) {
       case 'push':
       case 'unshift':
-        inserted = args;
-        break;
+        inserted = args
+        break
       case 'splice':
-        inserted = args.slice(2);
-        break;
+        inserted = args.slice(2)
+        break
     }
-    if (inserted) ob.observeArray(inserted);
+    if (inserted) ob.observeArray(inserted)
     // notify change
-    ob.dep.notify();
-    return result;
-  });
-});
+    ob.dep.notify()
+    return result
+  })
+})

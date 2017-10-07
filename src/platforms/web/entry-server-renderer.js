@@ -1,14 +1,14 @@
 /* @flow */
 
-process.env.VUE_ENV = 'server';
+process.env.VUE_ENV = 'server'
 
-import {extend} from 'shared/util';
-import modules from './server/modules/index';
-import baseDirectives from './server/directives/index';
-import {isUnaryTag, canBeLeftOpenTag} from './compiler/util';
+import {extend} from 'shared/util'
+import modules from './server/modules/index'
+import baseDirectives from './server/directives/index'
+import {isUnaryTag, canBeLeftOpenTag} from './compiler/util'
 
-import {createRenderer as _createRenderer} from 'server/create-renderer';
-import {createBundleRendererCreator} from 'server/bundle-renderer/create-bundle-renderer';
+import {createRenderer as _createRenderer} from 'server/create-renderer'
+import {createBundleRendererCreator} from 'server/bundle-renderer/create-bundle-renderer'
 
 export function createRenderer(
   options?: Object = {},
@@ -25,7 +25,7 @@ export function createRenderer(
       // when creating the renderer.
       directives: extend(baseDirectives, options.directives),
     }),
-  );
+  )
 }
 
-export const createBundleRenderer = createBundleRendererCreator(createRenderer);
+export const createBundleRenderer = createBundleRendererCreator(createRenderer)

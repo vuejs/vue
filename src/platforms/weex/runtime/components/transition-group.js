@@ -1,5 +1,5 @@
-import {warn, extend} from 'core/util/index';
-import {transitionProps, extractTransitionData} from './transition';
+import {warn, extend} from 'core/util/index'
+import {transitionProps, extractTransitionData} from './transition'
 
 const props = extend(
   {
@@ -7,75 +7,75 @@ const props = extend(
     moveClass: String,
   },
   transitionProps,
-);
+)
 
-delete props.mode;
+delete props.mode
 
 export default {
   props,
 
   created() {
-    const dom = this.$requireWeexModule('dom');
+    const dom = this.$requireWeexModule('dom')
     this.getPosition = el =>
       new Promise((resolve, reject) => {
         dom.getComponentRect(el.ref, res => {
           if (!res.result) {
-            reject(new Error(`failed to get rect for element: ${el.tag}`));
+            reject(new Error(`failed to get rect for element: ${el.tag}`))
           } else {
-            resolve(res.size);
+            resolve(res.size)
           }
-        });
-      });
+        })
+      })
 
-    const animation = this.$requireWeexModule('animation');
+    const animation = this.$requireWeexModule('animation')
     this.animate = (el, options) =>
       new Promise(resolve => {
-        animation.transition(el.ref, options, resolve);
-      });
+        animation.transition(el.ref, options, resolve)
+      })
   },
 
   render(h) {
-    const tag = this.tag || this.$vnode.data.tag || 'span';
-    const map = Object.create(null);
-    const prevChildren = (this.prevChildren = this.children);
-    const rawChildren = this.$slots.default || [];
-    const children = (this.children = []);
-    const transitionData = extractTransitionData(this);
+    const tag = this.tag || this.$vnode.data.tag || 'span'
+    const map = Object.create(null)
+    const prevChildren = (this.prevChildren = this.children)
+    const rawChildren = this.$slots.default || []
+    const children = (this.children = [])
+    const transitionData = extractTransitionData(this)
 
     for (let i = 0; i < rawChildren.length; i++) {
-      const c = rawChildren[i];
+      const c = rawChildren[i]
       if (c.tag) {
         if (c.key != null && String(c.key).indexOf('__vlist') !== 0) {
-          children.push(c);
-          map[c.key] = c;
-          (c.data || (c.data = {})).transition = transitionData;
+          children.push(c)
+          map[c.key] = c
+          ;(c.data || (c.data = {})).transition = transitionData
         } else if (process.env.NODE_ENV !== 'production') {
-          const opts = c.componentOptions;
-          const name = opts ? opts.Ctor.options.name || opts.tag : c.tag;
-          warn(`<transition-group> children must be keyed: <${name}>`);
+          const opts = c.componentOptions
+          const name = opts ? opts.Ctor.options.name || opts.tag : c.tag
+          warn(`<transition-group> children must be keyed: <${name}>`)
         }
       }
     }
 
     if (prevChildren) {
-      const kept = [];
-      const removed = [];
+      const kept = []
+      const removed = []
       prevChildren.forEach(c => {
-        c.data.transition = transitionData;
+        c.data.transition = transitionData
 
         // TODO: record before patch positions
 
         if (map[c.key]) {
-          kept.push(c);
+          kept.push(c)
         } else {
-          removed.push(c);
+          removed.push(c)
         }
-      });
-      this.kept = h(tag, null, kept);
-      this.removed = removed;
+      })
+      this.kept = h(tag, null, kept)
+      this.removed = removed
     }
 
-    return h(tag, null, children);
+    return h(tag, null, children)
   },
 
   beforeUpdate() {
@@ -85,17 +85,17 @@ export default {
       this.kept,
       false, // hydrating
       true, // removeOnly (!important, avoids unnecessary moves)
-    );
-    this._vnode = this.kept;
+    )
+    this._vnode = this.kept
   },
 
   updated() {
-    const children = this.prevChildren;
-    const moveClass = this.moveClass || (this.name || 'v') + '-move';
+    const children = this.prevChildren
+    const moveClass = this.moveClass || (this.name || 'v') + '-move'
     const moveData =
-      children.length && this.getMoveData(children[0].context, moveClass);
+      children.length && this.getMoveData(children[0].context, moveClass)
     if (!moveData) {
-      return;
+      return
     }
 
     // TODO: finish implementing move animations once
@@ -134,11 +134,11 @@ export default {
 
   methods: {
     getMoveData(context, moveClass) {
-      const stylesheet = context.$options.style || {};
-      return stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][moveClass];
+      const stylesheet = context.$options.style || {}
+      return stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][moveClass]
     },
   },
-};
+}
 
 // function callPendingCbs (c) {
 //   /* istanbul ignore if */

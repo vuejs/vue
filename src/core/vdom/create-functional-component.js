@@ -1,11 +1,11 @@
 /* @flow */
 
-import VNode from './vnode';
-import {createElement} from './create-element';
-import {resolveInject} from '../instance/inject';
-import {resolveSlots} from '../instance/render-helpers/resolve-slots';
+import VNode from './vnode'
+import {createElement} from './create-element'
+import {resolveInject} from '../instance/inject'
+import {resolveSlots} from '../instance/render-helpers/resolve-slots'
 
-import {isDef, camelize, emptyObject, validateProp} from '../util/index';
+import {isDef, camelize, emptyObject, validateProp} from '../util/index'
 
 export function createFunctionalComponent(
   Ctor: Class<Component>,
@@ -14,20 +14,20 @@ export function createFunctionalComponent(
   context: Component,
   children: ?Array<VNode>,
 ): VNode | void {
-  const props = {};
-  const propOptions = Ctor.options.props;
+  const props = {}
+  const propOptions = Ctor.options.props
   if (isDef(propOptions)) {
     for (const key in propOptions) {
-      props[key] = validateProp(key, propOptions, propsData || emptyObject);
+      props[key] = validateProp(key, propOptions, propsData || emptyObject)
     }
   } else {
-    if (isDef(data.attrs)) mergeProps(props, data.attrs);
-    if (isDef(data.props)) mergeProps(props, data.props);
+    if (isDef(data.attrs)) mergeProps(props, data.attrs)
+    if (isDef(data.props)) mergeProps(props, data.props)
   }
   // ensure the createElement function in functional components
   // gets a unique context - this is necessary for correct named slot check
-  const _context = Object.create(context);
-  const h = (a, b, c, d) => createElement(_context, a, b, c, d, true);
+  const _context = Object.create(context)
+  const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
   const vnode = Ctor.options.render.call(null, h, {
     data,
     props,
@@ -36,19 +36,19 @@ export function createFunctionalComponent(
     listeners: data.on || emptyObject,
     injections: resolveInject(Ctor.options.inject, context),
     slots: () => resolveSlots(children, context),
-  });
+  })
   if (vnode instanceof VNode) {
-    vnode.functionalContext = context;
-    vnode.functionalOptions = Ctor.options;
+    vnode.functionalContext = context
+    vnode.functionalOptions = Ctor.options
     if (data.slot) {
-      (vnode.data || (vnode.data = {})).slot = data.slot;
+      ;(vnode.data || (vnode.data = {})).slot = data.slot
     }
   }
-  return vnode;
+  return vnode
 }
 
 function mergeProps(to, from) {
   for (const key in from) {
-    to[camelize(key)] = from[key];
+    to[camelize(key)] = from[key]
   }
 }

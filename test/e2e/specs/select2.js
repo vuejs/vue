@@ -25,7 +25,7 @@ module.exports = {
       .assert.containsText('span.select2', 'Hello')
       // test dynamic options
       .execute(function() {
-        vm.options.push({id: 3, text: 'Vue'});
+        vm.options.push({id: 3, text: 'Vue'})
       })
       .click('.select2-selection__rendered')
       .assert.count('.select2-results__option', 4)
@@ -41,10 +41,10 @@ module.exports = {
       .assert.containsText('p', 'Selected: 3')
       .assert.containsText('span.select2', 'Vue')
       .execute(function() {
-        vm.selected = 2;
+        vm.selected = 2
       })
       .assert.containsText('p', 'Selected: 2')
       .assert.containsText('span.select2', 'World')
-      .end();
+      .end()
   },
-};
+}

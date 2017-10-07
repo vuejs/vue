@@ -1,7 +1,7 @@
 /* @flow */
 
-import config from 'core/config';
-import {hyphenate} from 'shared/util';
+import config from 'core/config'
+import {hyphenate} from 'shared/util'
 
 /**
  * Runtime helper for checking keyCodes from config.
@@ -14,14 +14,14 @@ export function checkKeyCodes(
   builtInAlias?: number | Array<number>,
   eventKeyName?: string,
 ): ?boolean {
-  const keyCodes = config.keyCodes[key] || builtInAlias;
+  const keyCodes = config.keyCodes[key] || builtInAlias
   if (keyCodes) {
     if (Array.isArray(keyCodes)) {
-      return keyCodes.indexOf(eventKeyCode) === -1;
+      return keyCodes.indexOf(eventKeyCode) === -1
     } else {
-      return keyCodes !== eventKeyCode;
+      return keyCodes !== eventKeyCode
     }
   } else if (eventKeyName) {
-    return hyphenate(eventKeyName) !== key;
+    return hyphenate(eventKeyName) !== key
   }
 }

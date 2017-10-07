@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
 describe('Directive v-pre', function() {
   it('should not compile inner content', function() {
@@ -13,12 +13,12 @@ describe('Directive v-pre', function() {
       data: {
         a: 123,
       },
-    });
-    vm.$mount();
-    expect(vm.$el.firstChild.textContent).toBe('{{ a }}');
-    expect(vm.$el.children[1].textContent).toBe('123');
-    expect(vm.$el.lastChild.innerHTML).toBe('<component></component>');
-  });
+    })
+    vm.$mount()
+    expect(vm.$el.firstChild.textContent).toBe('{{ a }}')
+    expect(vm.$el.children[1].textContent).toBe('123')
+    expect(vm.$el.lastChild.innerHTML).toBe('<component></component>')
+  })
 
   it('should not compile on root node', function() {
     const vm = new Vue({
@@ -27,8 +27,8 @@ describe('Directive v-pre', function() {
       data: {
         a: 123,
       },
-    });
-    vm.$mount();
-    expect(vm.$el.firstChild.textContent).toBe('{{ a }}');
-  });
-});
+    })
+    vm.$mount()
+    expect(vm.$el.firstChild.textContent).toBe('{{ a }}')
+  })
+})

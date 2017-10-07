@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
 describe('Options inheritAttrs', () => {
   it('should work', done => {
@@ -11,13 +11,13 @@ describe('Options inheritAttrs', () => {
           template: `<div>foo</div>`,
         },
       },
-    }).$mount();
-    expect(vm.$el.id).toBe('');
-    vm.foo = 'bar';
+    }).$mount()
+    expect(vm.$el.id).toBe('')
+    vm.foo = 'bar'
     waitForUpdate(() => {
-      expect(vm.$el.id).toBe('');
-    }).then(done);
-  });
+      expect(vm.$el.id).toBe('')
+    }).then(done)
+  })
 
   it('with inner v-bind', done => {
     const vm = new Vue({
@@ -29,11 +29,11 @@ describe('Options inheritAttrs', () => {
           template: `<div><div v-bind="$attrs"></div></div>`,
         },
       },
-    }).$mount();
-    expect(vm.$el.children[0].id).toBe('foo');
-    vm.foo = 'bar';
+    }).$mount()
+    expect(vm.$el.children[0].id).toBe('foo')
+    vm.foo = 'bar'
     waitForUpdate(() => {
-      expect(vm.$el.children[0].id).toBe('bar');
-    }).then(done);
-  });
-});
+      expect(vm.$el.children[0].id).toBe('bar')
+    }).then(done)
+  })
+})

@@ -1,4 +1,4 @@
-import {getRoot, fireEvent, compileAndExecute} from '../helpers/index';
+import {getRoot, fireEvent, compileAndExecute} from '../helpers/index'
 
 describe('generate class', () => {
   it('should be generated', () => {
@@ -25,9 +25,9 @@ describe('generate class', () => {
             attr: {value: 'Hello World'},
           },
         ],
-      });
-    });
-  });
+      })
+    })
+  })
 
   it('should be updated', done => {
     compileAndExecute(
@@ -65,9 +65,9 @@ describe('generate class', () => {
               attr: {value: 'Hello World'},
             },
           ],
-        });
-        fireEvent(instance, '_root', 'click');
-        return instance;
+        })
+        fireEvent(instance, '_root', 'click')
+        return instance
       })
       .then(instance => {
         expect(getRoot(instance)).toEqual({
@@ -80,10 +80,10 @@ describe('generate class', () => {
               attr: {value: 'Hello World'},
             },
           ],
-        });
-        done();
-      });
-  });
+        })
+        done()
+      })
+  })
 
   it('should be applied in order', done => {
     compileAndExecute(
@@ -119,9 +119,9 @@ describe('generate class', () => {
               attr: {value: 'Hello World'},
             },
           ],
-        });
-        fireEvent(instance, '_root', 'click');
-        return instance;
+        })
+        fireEvent(instance, '_root', 'click')
+        return instance
       })
       .then(instance => {
         expect(getRoot(instance)).toEqual({
@@ -134,10 +134,10 @@ describe('generate class', () => {
               attr: {value: 'Hello World'},
             },
           ],
-        });
-        done();
-      });
-  });
+        })
+        done()
+      })
+  })
 
   it('should be cleared', done => {
     compileAndExecute(
@@ -171,9 +171,9 @@ describe('generate class', () => {
               attr: {value: 'Hello World'},
             },
           ],
-        });
-        fireEvent(instance, '_root', 'click');
-        return instance;
+        })
+        fireEvent(instance, '_root', 'click')
+        return instance
       })
       .then(instance => {
         expect(getRoot(instance)).toEqual({
@@ -186,8 +186,8 @@ describe('generate class', () => {
               attr: {value: 'Hello World'},
             },
           ],
-        });
-        done();
-      });
-  });
-});
+        })
+        done()
+      })
+  })
+})

@@ -6,6 +6,6 @@ module.exports = {
         '#result',
         '<div data-server-rendered="true">foo</div>',
       )
-      .end();
+      .end()
   },
-};
+}

@@ -3,7 +3,7 @@ import {
   fireEvent,
   compileAndStringify,
   compileAndExecute,
-} from '../helpers/index';
+} from '../helpers/index'
 
 describe('generate events', () => {
   it('should be bound and fired for native component', done => {
@@ -32,9 +32,9 @@ describe('generate events', () => {
               attr: {value: 'Hello World'},
             },
           ],
-        });
-        fireEvent(instance, '_root', 'click');
-        return instance;
+        })
+        fireEvent(instance, '_root', 'click')
+        return instance
       })
       .then(instance => {
         expect(getRoot(instance)).toEqual({
@@ -46,15 +46,15 @@ describe('generate events', () => {
               attr: {value: 'Hello Weex'},
             },
           ],
-        });
-        done();
-      });
-  });
+        })
+        done()
+      })
+  })
 
   it('should be bound and fired by custom component', done => {
     const {render, staticRenderFns} = compileAndStringify(
       `<text>Hello {{x}}</text>`,
-    );
+    )
     compileAndExecute(
       `
       <div>
@@ -100,9 +100,9 @@ describe('generate events', () => {
               attr: {value: 'Hello Sub'},
             },
           ],
-        });
-        fireEvent(instance, instance.document.body.children[1].ref, 'click');
-        return instance;
+        })
+        fireEvent(instance, instance.document.body.children[1].ref, 'click')
+        return instance
       })
       .then(instance => {
         expect(getRoot(instance)).toEqual({
@@ -118,8 +118,8 @@ describe('generate events', () => {
               attr: {value: 'Hello Sub'},
             },
           ],
-        });
-        done();
-      });
-  });
-});
+        })
+        done()
+      })
+  })
+})

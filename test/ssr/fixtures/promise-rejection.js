@@ -1,3 +1,3 @@
 export default () => {
-  return Promise.reject(new Error('foo'));
-};
+  return Promise.reject(new Error('foo'))
+}

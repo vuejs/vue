@@ -1,5 +1,5 @@
-var webpack = require('webpack');
-var base = require('./karma.base.config.js');
+var webpack = require('webpack')
+var base = require('./karma.base.config.js')
 
 base.webpack.plugins = [
   new webpack.DefinePlugin({
@@ -11,7 +11,7 @@ base.webpack.plugins = [
       TRANSITION_BUFFER: 50,
     },
   }),
-];
+]
 
 /**
  * Having too many tests running concurrently on saucelabs
@@ -76,10 +76,10 @@ var batches = [
       version: '6.0',
     },
   },
-];
+]
 
 module.exports = function(config) {
-  var batch = batches[process.argv[4] || 0];
+  var batch = batches[process.argv[4] || 0]
 
   config.set(
     Object.assign(base, {
@@ -105,5 +105,5 @@ module.exports = function(config) {
       browserNoActivityTimeout: 300000,
       plugins: base.plugins.concat(['karma-sauce-launcher']),
     }),
-  );
-};
+  )
+}

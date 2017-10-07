@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
 describe('Directive v-model component', () => {
   it('should work', done => {
@@ -18,27 +18,27 @@ describe('Directive v-model component', () => {
           template: `<input :value="value" @input="$emit('input', $event.target.value)">`,
         },
       },
-    }).$mount();
-    document.body.appendChild(vm.$el);
+    }).$mount()
+    document.body.appendChild(vm.$el)
     waitForUpdate(() => {
-      const input = vm.$el.querySelector('input');
-      input.value = 'world';
-      triggerEvent(input, 'input');
+      const input = vm.$el.querySelector('input')
+      input.value = 'world'
+      triggerEvent(input, 'input')
     })
       .then(() => {
-        expect(vm.msg).toEqual('world');
-        expect(vm.$el.querySelector('p').textContent).toEqual('world');
-        vm.msg = 'changed';
+        expect(vm.msg).toEqual('world')
+        expect(vm.$el.querySelector('p').textContent).toEqual('world')
+        vm.msg = 'changed'
       })
       .then(() => {
-        expect(vm.$el.querySelector('p').textContent).toEqual('changed');
-        expect(vm.$el.querySelector('input').value).toEqual('changed');
+        expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+        expect(vm.$el.querySelector('input').value).toEqual('changed')
       })
       .then(() => {
-        document.body.removeChild(vm.$el);
+        document.body.removeChild(vm.$el)
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('should work with native tags with "is"', done => {
     const vm = new Vue({
@@ -57,30 +57,30 @@ describe('Directive v-model component', () => {
           template: `<input :value="value" @input="$emit('input', $event.target.value)">`,
         },
       },
-    }).$mount();
-    document.body.appendChild(vm.$el);
+    }).$mount()
+    document.body.appendChild(vm.$el)
     waitForUpdate(() => {
-      const input = vm.$el.querySelector('input');
-      input.value = 'world';
-      triggerEvent(input, 'input');
+      const input = vm.$el.querySelector('input')
+      input.value = 'world'
+      triggerEvent(input, 'input')
     })
       .then(() => {
-        expect(vm.msg).toEqual('world');
-        expect(vm.$el.querySelector('p').textContent).toEqual('world');
-        vm.msg = 'changed';
+        expect(vm.msg).toEqual('world')
+        expect(vm.$el.querySelector('p').textContent).toEqual('world')
+        vm.msg = 'changed'
       })
       .then(() => {
-        expect(vm.$el.querySelector('p').textContent).toEqual('changed');
-        expect(vm.$el.querySelector('input').value).toEqual('changed');
+        expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+        expect(vm.$el.querySelector('input').value).toEqual('changed')
       })
       .then(() => {
-        document.body.removeChild(vm.$el);
+        document.body.removeChild(vm.$el)
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('should support customization via model option', done => {
-    const spy = jasmine.createSpy('update');
+    const spy = jasmine.createSpy('update')
     const vm = new Vue({
       data: {
         msg: 'hello',
@@ -104,28 +104,28 @@ describe('Directive v-model component', () => {
           template: `<input :value="currentValue" @input="$emit('update', $event.target.value)">`,
         },
       },
-    }).$mount();
-    document.body.appendChild(vm.$el);
+    }).$mount()
+    document.body.appendChild(vm.$el)
     waitForUpdate(() => {
-      const input = vm.$el.querySelector('input');
-      input.value = 'world';
-      triggerEvent(input, 'input');
+      const input = vm.$el.querySelector('input')
+      input.value = 'world'
+      triggerEvent(input, 'input')
     })
       .then(() => {
-        expect(vm.msg).toEqual('world');
-        expect(vm.$el.querySelector('p').textContent).toEqual('world');
-        expect(spy).toHaveBeenCalledWith('world');
-        vm.msg = 'changed';
+        expect(vm.msg).toEqual('world')
+        expect(vm.$el.querySelector('p').textContent).toEqual('world')
+        expect(spy).toHaveBeenCalledWith('world')
+        vm.msg = 'changed'
       })
       .then(() => {
-        expect(vm.$el.querySelector('p').textContent).toEqual('changed');
-        expect(vm.$el.querySelector('input').value).toEqual('changed');
+        expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+        expect(vm.$el.querySelector('input').value).toEqual('changed')
       })
       .then(() => {
-        document.body.removeChild(vm.$el);
+        document.body.removeChild(vm.$el)
       })
-      .then(done);
-  });
+      .then(done)
+  })
 
   it('modifier: .number', () => {
     const vm = new Vue({
@@ -136,13 +136,13 @@ describe('Directive v-model component', () => {
           template: '<input>',
         },
       },
-    }).$mount();
-    expect(vm.text).toBe('foo');
-    vm.$refs.input.$emit('input', 'bar');
-    expect(vm.text).toBe('bar');
-    vm.$refs.input.$emit('input', '123');
-    expect(vm.text).toBe(123);
-  });
+    }).$mount()
+    expect(vm.text).toBe('foo')
+    vm.$refs.input.$emit('input', 'bar')
+    expect(vm.text).toBe('bar')
+    vm.$refs.input.$emit('input', '123')
+    expect(vm.text).toBe(123)
+  })
 
   it('modifier: .trim', () => {
     const vm = new Vue({
@@ -153,11 +153,11 @@ describe('Directive v-model component', () => {
           template: '<input>',
         },
       },
-    }).$mount();
-    expect(vm.text).toBe('foo');
-    vm.$refs.input.$emit('input', '  bar  ');
-    expect(vm.text).toBe('bar');
-    vm.$refs.input.$emit('input', '   foo o  ');
-    expect(vm.text).toBe('foo o');
-  });
-});
+    }).$mount()
+    expect(vm.text).toBe('foo')
+    vm.$refs.input.$emit('input', '  bar  ')
+    expect(vm.text).toBe('bar')
+    vm.$refs.input.$emit('input', '   foo o  ')
+    expect(vm.text).toBe('foo o')
+  })
+})

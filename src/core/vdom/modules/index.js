@@ -1,4 +1,4 @@
-import directives from './directives';
-import ref from './ref';
+import directives from './directives'
+import ref from './ref'
 
-export default [ref, directives];
+export default [ref, directives]

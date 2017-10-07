@@ -9,15 +9,15 @@ beforeEach(() => {
             : el
                 .getAttribute('class')
                 .split(/\s+/g)
-                .indexOf(cls) > -1;
+                .indexOf(cls) > -1
           return {
             pass,
             message: `Expected element${pass
               ? ' '
               : ' not '}to have class ${cls}`,
-          };
+          }
         },
-      };
+      }
     },
-  });
-});
+  })
+})

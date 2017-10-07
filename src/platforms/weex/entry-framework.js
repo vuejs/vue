@@ -1,7 +1,7 @@
 // this will be preserved during build
-const VueFactory = require('./factory');
+const VueFactory = require('./factory')
 
-const instances = {};
+const instances = {}
 
 /**
  * Prepare framework config.
@@ -13,7 +13,7 @@ export function init() {}
  * Reset framework config and clear all registrations.
  */
 export function reset() {
-  clear(instances);
+  clear(instances)
 }
 
 /**
@@ -22,7 +22,7 @@ export function reset() {
  */
 function clear(obj) {
   for (const key in obj) {
-    delete obj[key];
+    delete obj[key]
   }
 }
 
@@ -41,19 +41,19 @@ export function createInstance(
   data,
   env = {},
 ) {
-  const weex = env.weex;
-  const document = weex.document;
+  const weex = env.weex
+  const document = weex.document
   const instance = (instances[instanceId] = {
     instanceId,
     config,
     data,
     document,
-  });
+  })
 
-  const timerAPIs = getInstanceTimer(instanceId, weex.requireModule);
+  const timerAPIs = getInstanceTimer(instanceId, weex.requireModule)
 
   // Each instance has a independent `Vue` module instance
-  const Vue = (instance.Vue = createVueModuleInstance(instanceId, weex));
+  const Vue = (instance.Vue = createVueModuleInstance(instanceId, weex))
 
   // The function which create a closure the JS Bundle will run in.
   // It will declare some instance variables like `Vue`, HTML5 Timer APIs etc.
@@ -64,16 +64,16 @@ export function createInstance(
     },
     timerAPIs,
     env.services,
-  );
+  )
 
-  appCode = `(function(global){ \n${appCode}\n })(Object.create(this))`;
+  appCode = `(function(global){ \n${appCode}\n })(Object.create(this))`
 
-  callFunction(instanceVars, appCode);
+  callFunction(instanceVars, appCode)
 
   // Send `createFinish` signal to native.
-  document.taskCenter.send('dom', {action: 'createFinish'}, []);
+  document.taskCenter.send('dom', {action: 'createFinish'}, [])
 
-  return instance;
+  return instance
 }
 
 /**
@@ -82,14 +82,14 @@ export function createInstance(
  * @param {string} instanceId
  */
 export function destroyInstance(instanceId) {
-  const instance = instances[instanceId];
+  const instance = instances[instanceId]
   if (instance && instance.app instanceof instance.Vue) {
-    instance.document.destroy();
-    instance.app.$destroy();
-    delete instance.document;
-    delete instance.app;
+    instance.document.destroy()
+    instance.app.$destroy()
+    delete instance.document
+    delete instance.app
   }
-  delete instances[instanceId];
+  delete instances[instanceId]
 }
 
 /**
@@ -100,15 +100,15 @@ export function destroyInstance(instanceId) {
  * @param {object} data
  */
 export function refreshInstance(instanceId, data) {
-  const instance = instances[instanceId];
+  const instance = instances[instanceId]
   if (!instance || !(instance.app instanceof instance.Vue)) {
-    return new Error(`refreshInstance: instance ${instanceId} not found!`);
+    return new Error(`refreshInstance: instance ${instanceId} not found!`)
   }
   for (const key in data) {
-    instance.Vue.set(instance.app, key, data[key]);
+    instance.Vue.set(instance.app, key, data[key])
   }
   // Finally `refreshFinish` signal needed.
-  instance.document.taskCenter.send('dom', {action: 'refreshFinish'}, []);
+  instance.document.taskCenter.send('dom', {action: 'refreshFinish'}, [])
 }
 
 /**
@@ -116,28 +116,28 @@ export function refreshInstance(instanceId, data) {
  * @param {string} instanceId
  */
 export function getRoot(instanceId) {
-  const instance = instances[instanceId];
+  const instance = instances[instanceId]
   if (!instance || !(instance.app instanceof instance.Vue)) {
-    return new Error(`getRoot: instance ${instanceId} not found!`);
+    return new Error(`getRoot: instance ${instanceId} not found!`)
   }
-  return instance.app.$el.toJSON();
+  return instance.app.$el.toJSON()
 }
 
 const jsHandlers = {
   fireEvent: (id, ...args) => {
-    return fireEvent(instances[id], ...args);
+    return fireEvent(instances[id], ...args)
   },
   callback: (id, ...args) => {
-    return callback(instances[id], ...args);
+    return callback(instances[id], ...args)
   },
-};
+}
 
 function fireEvent(instance, nodeId, type, e, domChanges) {
-  const el = instance.document.getRef(nodeId);
+  const el = instance.document.getRef(nodeId)
   if (el) {
-    return instance.document.fireEvent(el, type, e, domChanges);
+    return instance.document.fireEvent(el, type, e, domChanges)
   }
-  return new Error(`invalid element reference "${nodeId}"`);
+  return new Error(`invalid element reference "${nodeId}"`)
 }
 
 function callback(instance, callbackId, data, ifKeepAlive) {
@@ -145,9 +145,9 @@ function callback(instance, callbackId, data, ifKeepAlive) {
     callbackId,
     data,
     ifKeepAlive,
-  );
-  instance.document.taskCenter.send('dom', {action: 'updateFinish'}, []);
-  return result;
+  )
+  instance.document.taskCenter.send('dom', {action: 'updateFinish'}, [])
+  return result
 }
 
 /**
@@ -157,72 +157,72 @@ function callback(instance, callbackId, data, ifKeepAlive) {
  * @param  {array} tasks list with `method` and `args`
  */
 export function receiveTasks(id, tasks) {
-  const instance = instances[id];
+  const instance = instances[id]
   if (instance && Array.isArray(tasks)) {
-    const results = [];
+    const results = []
     tasks.forEach(task => {
-      const handler = jsHandlers[task.method];
-      const args = [...task.args];
+      const handler = jsHandlers[task.method]
+      const args = [...task.args]
       /* istanbul ignore else */
       if (typeof handler === 'function') {
-        args.unshift(id);
-        results.push(handler(...args));
+        args.unshift(id)
+        results.push(handler(...args))
       }
-    });
-    return results;
+    })
+    return results
   }
-  return new Error(`invalid instance id "${id}" or tasks`);
+  return new Error(`invalid instance id "${id}" or tasks`)
 }
 
 /**
  * Create a fresh instance of Vue for each Weex instance.
  */
 function createVueModuleInstance(instanceId, weex) {
-  const exports = {};
-  VueFactory(exports, weex.document);
-  const Vue = exports.Vue;
+  const exports = {}
+  VueFactory(exports, weex.document)
+  const Vue = exports.Vue
 
-  const instance = instances[instanceId];
+  const instance = instances[instanceId]
 
   // patch reserved tag detection to account for dynamically registered
   // components
-  const weexRegex = /^weex:/i;
-  const isReservedTag = Vue.config.isReservedTag || (() => false);
-  const isRuntimeComponent = Vue.config.isRuntimeComponent || (() => false);
+  const weexRegex = /^weex:/i
+  const isReservedTag = Vue.config.isReservedTag || (() => false)
+  const isRuntimeComponent = Vue.config.isRuntimeComponent || (() => false)
   Vue.config.isReservedTag = name => {
     return (
       (!isRuntimeComponent(name) && weex.supports(`@component/${name}`)) ||
       isReservedTag(name) ||
       weexRegex.test(name)
-    );
-  };
-  Vue.config.parsePlatformTagName = name => name.replace(weexRegex, '');
+    )
+  }
+  Vue.config.parsePlatformTagName = name => name.replace(weexRegex, '')
 
   // expose weex-specific info
-  Vue.prototype.$instanceId = instanceId;
-  Vue.prototype.$document = instance.document;
+  Vue.prototype.$instanceId = instanceId
+  Vue.prototype.$document = instance.document
 
   // expose weex native module getter on subVue prototype so that
   // vdom runtime modules can access native modules via vnode.context
-  Vue.prototype.$requireWeexModule = weex.requireModule;
+  Vue.prototype.$requireWeexModule = weex.requireModule
 
   // Hack `Vue` behavior to handle instance information and data
   // before root component created.
   Vue.mixin({
     beforeCreate() {
-      const options = this.$options;
+      const options = this.$options
       // root component (vm)
       if (options.el) {
         // set external data of instance
-        const dataOption = options.data;
+        const dataOption = options.data
         const internalData =
-          (typeof dataOption === 'function' ? dataOption() : dataOption) || {};
-        options.data = Object.assign(internalData, instance.data);
+          (typeof dataOption === 'function' ? dataOption() : dataOption) || {}
+        options.data = Object.assign(internalData, instance.data)
         // record instance by id
-        instance.app = this;
+        instance.app = this
       }
     },
-  });
+  })
 
   /**
    * @deprecated Just instance variable `weex.config`
@@ -231,11 +231,11 @@ function createVueModuleInstance(instanceId, weex) {
    */
   Vue.prototype.$getConfig = function() {
     if (instance.app instanceof Vue) {
-      return instance.config;
+      return instance.config
     }
-  };
+  }
 
-  return Vue;
+  return Vue
 }
 
 /**
@@ -248,33 +248,33 @@ function createVueModuleInstance(instanceId, weex) {
  * @return {[type]}              [description]
  */
 function getInstanceTimer(instanceId, moduleGetter) {
-  const instance = instances[instanceId];
-  const timer = moduleGetter('timer');
+  const instance = instances[instanceId]
+  const timer = moduleGetter('timer')
   const timerAPIs = {
     setTimeout: (...args) => {
       const handler = function() {
-        args[0](...args.slice(2));
-      };
+        args[0](...args.slice(2))
+      }
 
-      timer.setTimeout(handler, args[1]);
-      return instance.document.taskCenter.callbackManager.lastCallbackId.toString();
+      timer.setTimeout(handler, args[1])
+      return instance.document.taskCenter.callbackManager.lastCallbackId.toString()
     },
     setInterval: (...args) => {
       const handler = function() {
-        args[0](...args.slice(2));
-      };
+        args[0](...args.slice(2))
+      }
 
-      timer.setInterval(handler, args[1]);
-      return instance.document.taskCenter.callbackManager.lastCallbackId.toString();
+      timer.setInterval(handler, args[1])
+      return instance.document.taskCenter.callbackManager.lastCallbackId.toString()
     },
     clearTimeout: n => {
-      timer.clearTimeout(n);
+      timer.clearTimeout(n)
     },
     clearInterval: n => {
-      timer.clearInterval(n);
+      timer.clearInterval(n)
     },
-  };
-  return timerAPIs;
+  }
+  return timerAPIs
 }
 
 /**
@@ -284,14 +284,14 @@ function getInstanceTimer(instanceId, moduleGetter) {
  * @return {any}
  */
 function callFunction(globalObjects, body) {
-  const globalKeys = [];
-  const globalValues = [];
+  const globalKeys = []
+  const globalValues = []
   for (const key in globalObjects) {
-    globalKeys.push(key);
-    globalValues.push(globalObjects[key]);
+    globalKeys.push(key)
+    globalValues.push(globalObjects[key])
   }
-  globalKeys.push(body);
+  globalKeys.push(body)
 
-  const result = new Function(...globalKeys);
-  return result(...globalValues);
+  const result = new Function(...globalKeys)
+  return result(...globalValues)
 }

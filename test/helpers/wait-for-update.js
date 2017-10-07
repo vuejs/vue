@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
 // helper for async assertions.
 // Use like this:
@@ -13,61 +13,61 @@ import Vue from 'vue';
 // })
 // .then(done)
 window.waitForUpdate = initialCb => {
-  let end;
-  const queue = initialCb ? [initialCb] : [];
+  let end
+  const queue = initialCb ? [initialCb] : []
 
   function shift() {
-    const job = queue.shift();
+    const job = queue.shift()
     if (queue.length) {
-      let hasError = false;
+      let hasError = false
       try {
-        job.wait ? job(shift) : job();
+        job.wait ? job(shift) : job()
       } catch (e) {
-        hasError = true;
-        const done = queue[queue.length - 1];
+        hasError = true
+        const done = queue[queue.length - 1]
         if (done && done.fail) {
-          done.fail(e);
+          done.fail(e)
         }
       }
       if (!hasError && !job.wait) {
         if (queue.length) {
-          Vue.nextTick(shift);
+          Vue.nextTick(shift)
         }
       }
     } else if (job && (job.fail || job === end)) {
-      job(); // done
+      job() // done
     }
   }
 
   Vue.nextTick(() => {
     if (!queue.length || (!end && !queue[queue.length - 1].fail)) {
-      throw new Error('waitForUpdate chain is missing .then(done)');
+      throw new Error('waitForUpdate chain is missing .then(done)')
     }
-    shift();
-  });
+    shift()
+  })
 
   const chainer = {
     then: nextCb => {
-      queue.push(nextCb);
-      return chainer;
+      queue.push(nextCb)
+      return chainer
     },
     thenWaitFor: wait => {
       if (typeof wait === 'number') {
-        wait = timeout(wait);
+        wait = timeout(wait)
       }
-      wait.wait = true;
-      queue.push(wait);
-      return chainer;
+      wait.wait = true
+      queue.push(wait)
+      return chainer
     },
     end: endFn => {
-      queue.push(endFn);
-      end = endFn;
+      queue.push(endFn)
+      end = endFn
     },
-  };
+  }
 
-  return chainer;
-};
+  return chainer
+}
 
 function timeout(n) {
-  return next => setTimeout(next, n);
+  return next => setTimeout(next, n)
 }

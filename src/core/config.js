@@ -1,8 +1,8 @@
 /* @flow */
 
-import {no, noop, identity} from 'shared/util';
+import {no, noop, identity} from 'shared/util'
 
-import {LIFECYCLE_HOOKS} from 'shared/constants';
+import {LIFECYCLE_HOOKS} from 'shared/constants'
 
 export type Config = {
   // user
@@ -26,7 +26,7 @@ export type Config = {
 
   // legacy
   _lifecycleHooks: Array<string>,
-};
+}
 
 export default ({
   /**
@@ -112,4 +112,4 @@ export default ({
    * Exposed for legacy reasons
    */
   _lifecycleHooks: LIFECYCLE_HOOKS,
-}: Config);
+}: Config)

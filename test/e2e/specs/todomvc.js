@@ -9,8 +9,8 @@ module.exports = {
       .assert.evaluate(function() {
         return (
           document.querySelector('.filters .selected').textContent === 'All'
-        );
-      });
+        )
+      })
 
     createNewItem('test')
       .assert.count('.todo', 1)
@@ -21,12 +21,12 @@ module.exports = {
       .assert.visible('.main')
       .assert.visible('.footer')
       .assert.notVisible('.clear-completed')
-      .assert.value('.new-todo', '');
+      .assert.value('.new-todo', '')
 
     createNewItem('test2')
       .assert.count('.todo', 2)
       .assert.containsText('.todo:nth-child(2) label', 'test2')
-      .assert.containsText('.todo-count strong', '2');
+      .assert.containsText('.todo-count strong', '2')
 
     // toggle
     browser
@@ -34,34 +34,34 @@ module.exports = {
       .assert.count('.todo.completed', 1)
       .assert.cssClassPresent('.todo:nth-child(1)', 'completed')
       .assert.containsText('.todo-count strong', '1')
-      .assert.visible('.clear-completed');
+      .assert.visible('.clear-completed')
 
     createNewItem('test3')
       .assert.count('.todo', 3)
       .assert.containsText('.todo:nth-child(3) label', 'test3')
-      .assert.containsText('.todo-count strong', '2');
+      .assert.containsText('.todo-count strong', '2')
 
-    createNewItem('test4');
+    createNewItem('test4')
     createNewItem('test5')
       .assert.count('.todo', 5)
-      .assert.containsText('.todo-count strong', '4');
+      .assert.containsText('.todo-count strong', '4')
 
     // toggle more
     browser
       .click('.todo:nth-child(4) .toggle')
       .click('.todo:nth-child(5) .toggle')
       .assert.count('.todo.completed', 3)
-      .assert.containsText('.todo-count strong', '2');
+      .assert.containsText('.todo-count strong', '2')
 
     // remove
     removeItemAt(1)
       .assert.count('.todo', 4)
       .assert.count('.todo.completed', 2)
-      .assert.containsText('.todo-count strong', '2');
+      .assert.containsText('.todo-count strong', '2')
     removeItemAt(2)
       .assert.count('.todo', 3)
       .assert.count('.todo.completed', 2)
-      .assert.containsText('.todo-count strong', '1');
+      .assert.containsText('.todo-count strong', '1')
 
     // remove all
     browser
@@ -70,41 +70,41 @@ module.exports = {
       .assert.containsText('.todo label', 'test2')
       .assert.count('.todo.completed', 0)
       .assert.containsText('.todo-count strong', '1')
-      .assert.notVisible('.clear-completed');
+      .assert.notVisible('.clear-completed')
 
     // prepare to test filters
-    createNewItem('test');
+    createNewItem('test')
     createNewItem('test')
       .click('.todo:nth-child(2) .toggle')
-      .click('.todo:nth-child(3) .toggle');
+      .click('.todo:nth-child(3) .toggle')
 
     // active filter
     browser
       .click('.filters li:nth-child(2) a')
       .assert.count('.todo', 1)
-      .assert.count('.todo.completed', 0);
+      .assert.count('.todo.completed', 0)
     // add item with filter active
-    createNewItem('test').assert.count('.todo', 2);
+    createNewItem('test').assert.count('.todo', 2)
 
     // completed filter
     browser
       .click('.filters li:nth-child(3) a')
       .assert.count('.todo', 2)
-      .assert.count('.todo.completed', 2);
+      .assert.count('.todo.completed', 2)
 
     // filter on page load
     browser
       .url('http://localhost:8080/examples/todomvc/#active')
       .assert.count('.todo', 2)
       .assert.count('.todo.completed', 0)
-      .assert.containsText('.todo-count strong', '2');
+      .assert.containsText('.todo-count strong', '2')
 
     // completed on page load
     browser
       .url('http://localhost:8080/examples/todomvc/#completed')
       .assert.count('.todo', 2)
       .assert.count('.todo.completed', 2)
-      .assert.containsText('.todo-count strong', '2');
+      .assert.containsText('.todo-count strong', '2')
 
     // toggling with filter active
     browser
@@ -113,7 +113,7 @@ module.exports = {
       .click('.filters li:nth-child(2) a')
       .assert.count('.todo', 3)
       .click('.todo .toggle')
-      .assert.count('.todo', 2);
+      .assert.count('.todo', 2)
 
     // editing triggered by blur
     browser
@@ -125,14 +125,14 @@ module.exports = {
       .setValue('.todo:nth-child(1) .edit', 'edited!')
       .click('footer') // blur
       .assert.count('.todo.editing', 0)
-      .assert.containsText('.todo:nth-child(1) label', 'edited!');
+      .assert.containsText('.todo:nth-child(1) label', 'edited!')
 
     // editing triggered by enter
     browser
       .dblClick('.todo label')
       .enterValue('.todo:nth-child(1) .edit', 'edited again!')
       .assert.count('.todo.editing', 0)
-      .assert.containsText('.todo:nth-child(1) label', 'edited again!');
+      .assert.containsText('.todo:nth-child(1) label', 'edited again!')
 
     // cancel
     browser
@@ -141,13 +141,13 @@ module.exports = {
       .setValue('.todo:nth-child(1) .edit', 'edited!')
       .trigger('.todo:nth-child(1) .edit', 'keyup', 27)
       .assert.count('.todo.editing', 0)
-      .assert.containsText('.todo:nth-child(1) label', 'edited again!');
+      .assert.containsText('.todo:nth-child(1) label', 'edited again!')
 
     // empty value should remove
     browser
       .dblClick('.todo label')
       .enterValue('.todo:nth-child(1) .edit', ' ')
-      .assert.count('.todo', 3);
+      .assert.count('.todo', 3)
 
     // toggle all
     browser
@@ -155,16 +155,16 @@ module.exports = {
       .assert.count('.todo.completed', 3)
       .click('.toggle-all')
       .assert.count('.todo:not(.completed)', 3)
-      .end();
+      .end()
 
     function createNewItem(text) {
-      return browser.enterValue('.new-todo', text);
+      return browser.enterValue('.new-todo', text)
     }
 
     function removeItemAt(n) {
       return browser
         .moveToElement('.todo:nth-child(' + n + ')', 10, 10)
-        .click('.todo:nth-child(' + n + ') .destroy');
+        .click('.todo:nth-child(' + n + ') .destroy')
     }
   },
-};
+}

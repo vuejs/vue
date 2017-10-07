@@ -1,7 +1,7 @@
-import Vue from '../../dist/vue.runtime.common.js';
-import VM from 'vm';
-import {createRenderer} from '../../packages/vue-server-renderer';
-const {renderToString} = createRenderer();
+import Vue from '../../dist/vue.runtime.common.js'
+import VM from 'vm'
+import {createRenderer} from '../../packages/vue-server-renderer'
+const {renderToString} = createRenderer()
 
 describe('SSR: renderToString', () => {
   it('static attributes', done => {
@@ -12,11 +12,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div id="foo" bar="123" data-server-rendered="true"></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('unary tags', done => {
     renderVmWithOptions(
@@ -26,11 +26,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<input value="123" data-server-rendered="true">',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('dynamic attributes', done => {
     renderVmWithOptions(
@@ -44,11 +44,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div qux="quux" id="hi" bar="123" data-server-rendered="true"></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('static class', done => {
     renderVmWithOptions(
@@ -58,11 +58,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true" class="foo bar"></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('dynamic class', done => {
     renderVmWithOptions(
@@ -78,11 +78,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true" class="foo bar baz qux"></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('custom component class', done => {
     renderVmWithOptions(
@@ -97,11 +97,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true"><div class="cmp">test</div></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('nested component class', done => {
     renderVmWithOptions(
@@ -127,11 +127,11 @@ describe('SSR: renderToString', () => {
           '<div data-server-rendered="true" class="outer success">' +
             '<div class="inner nested error">test</div>' +
             '</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('dynamic style', done => {
     renderVmWithOptions(
@@ -146,11 +146,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true" style="background-color:black;font-size:14px;color:red;"></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('dynamic string style', done => {
     renderVmWithOptions(
@@ -163,11 +163,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true" style="color:red;"></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('auto-prefixed style value as array', done => {
     renderVmWithOptions(
@@ -182,11 +182,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true" style="display:-webkit-box;display:-ms-flexbox;display:flex;"></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('custom component style', done => {
     renderVmWithOptions(
@@ -204,11 +204,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<section data-server-rendered="true"><div style="color:red;"></div></section>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('nested custom component style', done => {
     renderVmWithOptions(
@@ -232,11 +232,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true" style="text-align:left;font-size:520rem;color:red;"></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('component style not passed to child', done => {
     renderVmWithOptions(
@@ -254,11 +254,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true" style="color:red;"><div></div></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('component style not passed to slot', done => {
     renderVmWithOptions(
@@ -277,11 +277,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true" style="color:red;"><span style="color:black;"></span></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('attrs merging on components', done => {
     const Test = {
@@ -289,7 +289,7 @@ describe('SSR: renderToString', () => {
         h('div', {
           attrs: {id: 'a'},
         }),
-    };
+    }
     renderVmWithOptions(
       {
         render: h =>
@@ -300,11 +300,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           '<div id="b" data-server-rendered="true" name="c"></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('domProps merging on components', done => {
     const Test = {
@@ -312,7 +312,7 @@ describe('SSR: renderToString', () => {
         h('div', {
           domProps: {innerHTML: 'a'},
         }),
-    };
+    }
     renderVmWithOptions(
       {
         render: h =>
@@ -323,11 +323,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           '<div data-server-rendered="true" value="c">b</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-show directive render', done => {
     renderVmWithOptions(
@@ -337,11 +337,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           '<div data-server-rendered="true" style="display:none;"><span>inner</span></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-show directive not passed to child', done => {
     renderVmWithOptions(
@@ -356,11 +356,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           '<div data-server-rendered="true" style="display:none;"><span>inner</span></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-show directive not passed to slot', done => {
     renderVmWithOptions(
@@ -375,11 +375,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           '<div data-server-rendered="true" style="display:none;"><span>inner</span></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-show directive merging on components', done => {
     renderVmWithOptions(
@@ -407,11 +407,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           '<div data-server-rendered="true" style="display:none;">inner</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('text interpolation', done => {
     renderVmWithOptions(
@@ -425,11 +425,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true">server side &lt;span&gt;rendering&lt;/span&gt;</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-html on root', done => {
     renderVmWithOptions(
@@ -442,11 +442,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true"><span>foo</span></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-text on root', done => {
     renderVmWithOptions(
@@ -459,11 +459,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true">&lt;span&gt;foo&lt;/span&gt;</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-html', done => {
     renderVmWithOptions(
@@ -476,11 +476,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true"><div><span>foo</span></div></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-html with null value', done => {
     renderVmWithOptions(
@@ -493,11 +493,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true"><div></div></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-text', done => {
     renderVmWithOptions(
@@ -510,11 +510,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true"><div>&lt;span&gt;foo&lt;/span&gt;</div></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-text with null value', done => {
     renderVmWithOptions(
@@ -527,11 +527,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true"><div></div></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('child component (hoc)', done => {
     renderVmWithOptions(
@@ -544,11 +544,11 @@ describe('SSR: renderToString', () => {
           child: {
             props: ['msg'],
             data() {
-              return {name: 'bar'};
+              return {name: 'bar'}
             },
             render() {
-              const h = this.$createElement;
-              return h('div', {class: ['bar']}, [`${this.msg} ${this.name}`]);
+              const h = this.$createElement
+              return h('div', {class: ['bar']}, [`${this.msg} ${this.name}`])
             },
           },
         },
@@ -556,14 +556,14 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true" class="foo bar">hello bar</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('has correct lifecycle during render', done => {
-    let lifecycleCount = 1;
+    let lifecycleCount = 1
     renderVmWithOptions(
       {
         template: '<div><span>{{ val }}</span><test></test></div>',
@@ -571,24 +571,24 @@ describe('SSR: renderToString', () => {
           val: 'hi',
         },
         beforeCreate() {
-          expect(lifecycleCount++).toBe(1);
+          expect(lifecycleCount++).toBe(1)
         },
         created() {
-          this.val = 'hello';
-          expect(this.val).toBe('hello');
-          expect(lifecycleCount++).toBe(2);
+          this.val = 'hello'
+          expect(this.val).toBe('hello')
+          expect(lifecycleCount++).toBe(2)
         },
         components: {
           test: {
             beforeCreate() {
-              expect(lifecycleCount++).toBe(3);
+              expect(lifecycleCount++).toBe(3)
             },
             created() {
-              expect(lifecycleCount++).toBe(4);
+              expect(lifecycleCount++).toBe(4)
             },
             render() {
-              expect(lifecycleCount++).toBeGreaterThan(4);
-              return this.$createElement('span', {class: ['b']}, 'testAsync');
+              expect(lifecycleCount++).toBeGreaterThan(4)
+              return this.$createElement('span', {class: ['b']}, 'testAsync')
             },
           },
         },
@@ -599,11 +599,11 @@ describe('SSR: renderToString', () => {
             '<span>hello</span>' +
             '<span class="b">testAsync</span>' +
             '</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('computed properties', done => {
     renderVmWithOptions(
@@ -616,20 +616,20 @@ describe('SSR: renderToString', () => {
         },
         computed: {
           b() {
-            return this.a.b + 1;
+            return this.a.b + 1
           },
         },
         created() {
-          this.a.b = 2;
-          expect(this.b).toBe(3);
+          this.a.b = 2
+          expect(this.b).toBe(3)
         },
       },
       result => {
-        expect(result).toContain('<div data-server-rendered="true">3</div>');
-        done();
+        expect(result).toContain('<div data-server-rendered="true">3</div>')
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('renders async component', done => {
     renderVmWithOptions(
@@ -649,33 +649,33 @@ describe('SSR: renderToString', () => {
                       'span',
                       {class: ['b']},
                       'testAsync',
-                    );
+                    )
                   },
                 }),
               1,
-            );
+            )
           },
         },
       },
       result => {
         expect(result).toContain(
           '<div data-server-rendered="true"><span class="b">testAsync</span></div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('renders async component (Promise, nested)', done => {
     const Foo = () =>
       Promise.resolve({
         render: h => h('div', [h('span', 'foo'), h(Bar)]),
-      });
+      })
     const Bar = () => ({
       component: Promise.resolve({
         render: h => h('span', 'bar'),
       }),
-    });
+    })
     renderVmWithOptions(
       {
         render: h => h(Foo),
@@ -683,11 +683,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           `<div data-server-rendered="true"><span>foo</span><span>bar</span></div>`,
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('renders async component (ES module)', done => {
     const Foo = () =>
@@ -696,7 +696,7 @@ describe('SSR: renderToString', () => {
         default: {
           render: h => h('div', [h('span', 'foo'), h(Bar)]),
         },
-      });
+      })
     const Bar = () => ({
       component: Promise.resolve({
         __esModule: true,
@@ -704,7 +704,7 @@ describe('SSR: renderToString', () => {
           render: h => h('span', 'bar'),
         },
       }),
-    });
+    })
     renderVmWithOptions(
       {
         render: h => h(Foo),
@@ -712,11 +712,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           `<div data-server-rendered="true"><span>foo</span><span>bar</span></div>`,
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('renders async component (hoc)', done => {
     renderVmWithOptions(
@@ -726,7 +726,7 @@ describe('SSR: renderToString', () => {
           testAsync: () =>
             Promise.resolve({
               render() {
-                return this.$createElement('span', {class: ['b']}, 'testAsync');
+                return this.$createElement('span', {class: ['b']}, 'testAsync')
               },
             }),
         },
@@ -734,11 +734,11 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<span data-server-rendered="true" class="b">testAsync</span>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('everything together', done => {
     renderVmWithOptions(
@@ -762,15 +762,15 @@ describe('SSR: renderToString', () => {
         components: {
           test: {
             render() {
-              return this.$createElement('div', {class: ['a']}, 'test');
+              return this.$createElement('div', {class: ['a']}, 'test')
             },
           },
           testAsync(resolve) {
             resolve({
               render() {
-                return this.$createElement('span', {class: ['b']}, 'testAsync');
+                return this.$createElement('span', {class: ['b']}, 'testAsync')
               },
-            });
+            })
           },
         },
       },
@@ -785,11 +785,11 @@ describe('SSR: renderToString', () => {
             '<div class="a">test</div> ' +
             '<span class="b">testAsync</span>' +
             '</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('normal attr', done => {
     renderVmWithOptions(
@@ -813,11 +813,11 @@ describe('SSR: renderToString', () => {
             '<span test="true">hello</span> ' +
             '<span test="0">hello</span>' +
             '</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('enumerated attr', done => {
     renderVmWithOptions(
@@ -843,11 +843,11 @@ describe('SSR: renderToString', () => {
             '<span draggable="true">hello</span> ' +
             '<span draggable="false">hello</span>' +
             '</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('boolean attr', done => {
     renderVmWithOptions(
@@ -869,11 +869,11 @@ describe('SSR: renderToString', () => {
             '<span>hello</span> ' +
             '<span disabled="disabled">hello</span>' +
             '</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-bind object', done => {
     renderVmWithOptions(
@@ -886,29 +886,29 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           '<input id="a" data-server-rendered="true" value="c" class="a b">',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('custom directives', done => {
     const renderer = createRenderer({
       directives: {
         'class-prefixer': (node, dir) => {
           if (node.data.class) {
-            node.data.class = `${dir.value}-${node.data.class}`;
+            node.data.class = `${dir.value}-${node.data.class}`
           }
           if (node.data.staticClass) {
-            node.data.staticClass = `${dir.value}-${node.data.staticClass}`;
+            node.data.staticClass = `${dir.value}-${node.data.staticClass}`
           }
         },
       },
-    });
+    })
     renderer.renderToString(
       new Vue({
         render() {
-          const h = this.$createElement;
+          const h = this.$createElement
           return h(
             'p',
             {
@@ -922,18 +922,18 @@ describe('SSR: renderToString', () => {
               ],
             },
             ['hello world'],
-          );
+          )
         },
       }),
       (err, result) => {
-        expect(err).toBeNull();
+        expect(err).toBeNull()
         expect(result).toContain(
           '<p data-server-rendered="true" class="my-class2 my-class1">hello world</p>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('_scopeId', done => {
     renderVmWithOptions(
@@ -944,8 +944,8 @@ describe('SSR: renderToString', () => {
           child: {
             _scopeId: '_v-child',
             render() {
-              const h = this.$createElement;
-              return h('div', null, [h('span', null, ['foo'])]);
+              const h = this.$createElement
+              return h('div', null, [h('span', null, ['foo'])])
             },
           },
         },
@@ -957,11 +957,11 @@ describe('SSR: renderToString', () => {
             '<div _v-child _v-parent><span _v-child>foo</span></div>' +
             '</p>' +
             '</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('_scopeId on slot content', done => {
     renderVmWithOptions(
@@ -972,8 +972,8 @@ describe('SSR: renderToString', () => {
           child: {
             _scopeId: '_v-child',
             render() {
-              const h = this.$createElement;
-              return h('div', null, this.$slots.default);
+              const h = this.$createElement
+              return h('div', null, this.$slots.default)
             },
           },
         },
@@ -983,11 +983,11 @@ describe('SSR: renderToString', () => {
           '<div data-server-rendered="true" _v-parent>' +
             '<div _v-child _v-parent><p _v-child _v-parent>foo</p></div>' +
             '</div>',
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('comment nodes', done => {
     renderVmWithOptions(
@@ -998,31 +998,31 @@ describe('SSR: renderToString', () => {
       result => {
         expect(result).toContain(
           `<div data-server-rendered="true"><!----></div>`,
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('should catch error', done => {
-    Vue.config.silent = true;
+    Vue.config.silent = true
     renderToString(
       new Vue({
         render() {
-          throw new Error('oops');
+          throw new Error('oops')
         },
       }),
       err => {
-        expect(err instanceof Error).toBe(true);
-        Vue.config.silent = false;
-        done();
+        expect(err instanceof Error).toBe(true)
+        Vue.config.silent = false
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('default value Foreign Function', () => {
-    const FunctionConstructor = VM.runInNewContext('Function');
-    const func = () => 123;
+    const FunctionConstructor = VM.runInNewContext('Function')
+    const func = () => 123
     const vm = new Vue({
       props: {
         a: {
@@ -1033,9 +1033,9 @@ describe('SSR: renderToString', () => {
       propsData: {
         a: undefined,
       },
-    });
-    expect(vm.a).toBe(func);
-  });
+    })
+    expect(vm.a).toBe(func)
+  })
 
   it('should prevent xss in attributes', done => {
     renderVmWithOptions(
@@ -1050,11 +1050,11 @@ describe('SSR: renderToString', () => {
       `,
       },
       res => {
-        expect(res).not.toContain(`<script>alert(1)</script>`);
-        done();
+        expect(res).not.toContain(`<script>alert(1)</script>`)
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('should prevent script xss with v-bind object syntax + array value', done => {
     renderVmWithOptions(
@@ -1065,11 +1065,11 @@ describe('SSR: renderToString', () => {
         template: `<div v-bind="{ test }"></div>`,
       },
       res => {
-        expect(res).not.toContain(`<script>alert(1)</script>`);
-        done();
+        expect(res).not.toContain(`<script>alert(1)</script>`)
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-if', done => {
     renderVmWithOptions(
@@ -1084,11 +1084,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           `<div data-server-rendered="true"><span>foo</span> <!----></div>`,
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('v-for', done => {
     renderVmWithOptions(
@@ -1103,11 +1103,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           `<div data-server-rendered="true"><span>foo</span> <span>1</span><span>2</span></div>`,
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('template v-if', done => {
     renderVmWithOptions(
@@ -1124,11 +1124,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           `<div data-server-rendered="true"><span>foo</span> <span>foo</span> bar <span>baz</span></div>`,
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('template v-for', done => {
     renderVmWithOptions(
@@ -1145,11 +1145,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toContain(
           `<div data-server-rendered="true"><span>foo</span> <span>1</span><span>bar</span><span>2</span><span>bar</span></div>`,
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('with inheritAttrs: false + $attrs', done => {
     renderVmWithOptions(
@@ -1165,11 +1165,11 @@ describe('SSR: renderToString', () => {
       res => {
         expect(res).toBe(
           `<div data-server-rendered="true"><div id="a"></div></div>`,
-        );
-        done();
+        )
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('should escape static strings', done => {
     renderVmWithOptions(
@@ -1177,11 +1177,11 @@ describe('SSR: renderToString', () => {
         template: `<div>&lt;foo&gt;</div>`,
       },
       res => {
-        expect(res).toBe(`<div data-server-rendered="true">&lt;foo&gt;</div>`);
-        done();
+        expect(res).toBe(`<div data-server-rendered="true">&lt;foo&gt;</div>`)
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('should not cache computed properties', done => {
     renderVmWithOptions(
@@ -1190,20 +1190,20 @@ describe('SSR: renderToString', () => {
         data: () => ({bar: 1}),
         computed: {
           foo() {
-            return this.bar + 1;
+            return this.bar + 1
           },
         },
         created() {
-          this.foo; // access
-          this.bar++; // trigger change
+          this.foo // access
+          this.bar++ // trigger change
         },
       },
       res => {
-        expect(res).toBe(`<div data-server-rendered="true">3</div>`);
-        done();
+        expect(res).toBe(`<div data-server-rendered="true">3</div>`)
+        done()
       },
-    );
-  });
+    )
+  })
 
   it('return Promise', done => {
     renderToString(
@@ -1212,30 +1212,30 @@ describe('SSR: renderToString', () => {
         data: {foo: 'bar'},
       }),
     ).then(res => {
-      expect(res).toBe(`<div data-server-rendered="true">bar</div>`);
-      done();
-    });
-  });
+      expect(res).toBe(`<div data-server-rendered="true">bar</div>`)
+      done()
+    })
+  })
 
   it('should Promise (error)', done => {
-    Vue.config.silent = true;
+    Vue.config.silent = true
     renderToString(
       new Vue({
         render() {
-          throw new Error('foobar');
+          throw new Error('foobar')
         },
       }),
     ).catch(err => {
-      expect(err.toString()).toContain(`foobar`);
-      Vue.config.silent = false;
-      done();
-    });
-  });
-});
+      expect(err.toString()).toContain(`foobar`)
+      Vue.config.silent = false
+      done()
+    })
+  })
+})
 
 function renderVmWithOptions(options, cb) {
   renderToString(new Vue(options), (err, res) => {
-    expect(err).toBeNull();
-    cb(res);
-  });
+    expect(err).toBeNull()
+    cb(res)
+  })
 }

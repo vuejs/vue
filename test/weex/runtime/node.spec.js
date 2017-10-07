@@ -4,11 +4,11 @@ import {
   getRoot,
   syncPromise,
   checkRefresh,
-} from '../helpers/index';
+} from '../helpers/index'
 
 describe('node in render function', () => {
   it('should be generated', () => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -21,15 +21,15 @@ describe('node in render function', () => {
         el: "body"
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{type: 'text', attr: {value: 'Hello'}}],
-    });
-  });
+    })
+  })
 
   it('should be generated with all types of text', () => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -44,7 +44,7 @@ describe('node in render function', () => {
         el: "body"
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
@@ -52,15 +52,15 @@ describe('node in render function', () => {
         {type: 'text', attr: {value: 'World'}},
         {type: 'text', attr: {value: 'Weex'}},
       ],
-    });
-  });
+    })
+  })
 
   it('should be generated with comments', () => {
     // todo
-  });
+  })
 
   it('should be generated with module diff', done => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -109,18 +109,18 @@ describe('node in render function', () => {
         el: "body"
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{type: 'text', attr: {value: 'Hello'}}],
-    });
+    })
 
     syncPromise([
       checkRefresh(instance, {counter: 1}, result => {
         expect(result).toEqual({
           type: 'div',
           children: [{type: 'text', attr: {value: 'World'}}],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 2}, result => {
         expect(result).toEqual({
@@ -128,7 +128,7 @@ describe('node in render function', () => {
           children: [
             {type: 'text', attr: {value: 'World'}, style: {fontSize: 100}},
           ],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 3}, result => {
         expect(result).toEqual({
@@ -141,7 +141,7 @@ describe('node in render function', () => {
               event: ['click'],
             },
           ],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 4}, result => {
         expect(result).toEqual({
@@ -153,14 +153,14 @@ describe('node in render function', () => {
               style: {fontSize: '', color: '#ff0000'},
             },
           ],
-        });
-        done();
+        })
+        done()
       }),
-    ]);
-  });
+    ])
+  })
 
   it('should be generated with sub components', () => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -184,23 +184,23 @@ describe('node in render function', () => {
         el: "body"
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
         {type: 'text', attr: {value: 'Hello'}},
         {type: 'text', attr: {value: 'Weex'}},
       ],
-    });
-  });
+    })
+  })
 
   it('should be generated with if/for diff', done => {
     const {render, staticRenderFns} = compileAndStringify(`
       <div>
         <text v-for="item in list" v-if="item.x">{{item.v}}</text>
       </div>
-    `);
-    const id = String(Date.now() * Math.random());
+    `)
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -238,14 +238,14 @@ describe('node in render function', () => {
         el: "body"
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
         {type: 'text', attr: {value: 'Hello'}},
         {type: 'text', attr: {value: 'Weex'}},
       ],
-    });
+    })
 
     syncPromise([
       checkRefresh(instance, {x: 1}, result => {
@@ -256,7 +256,7 @@ describe('node in render function', () => {
             {type: 'text', attr: {value: 'World'}},
             {type: 'text', attr: {value: 'Weex'}},
           ],
-        });
+        })
       }),
       checkRefresh(instance, {x: 2}, result => {
         expect(result).toEqual({
@@ -266,7 +266,7 @@ describe('node in render function', () => {
             {type: 'text', attr: {value: 'World'}},
             {type: 'text', attr: {value: 'Weex'}},
           ],
-        });
+        })
       }),
       checkRefresh(instance, {x: 3}, result => {
         expect(result).toEqual({
@@ -277,7 +277,7 @@ describe('node in render function', () => {
             {type: 'text', attr: {value: 'Weex'}},
             {type: 'text', attr: {value: 'v-for'}},
           ],
-        });
+        })
       }),
       checkRefresh(instance, {x: 4}, result => {
         expect(result).toEqual({
@@ -286,14 +286,14 @@ describe('node in render function', () => {
             {type: 'text', attr: {value: 'Hello'}},
             {type: 'text', attr: {value: 'v-for'}},
           ],
-        });
-        done();
+        })
+        done()
       }),
-    ]);
-  });
+    ])
+  })
 
   it('should be generated with node structure diff', done => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -348,11 +348,11 @@ describe('node in render function', () => {
         el: "body"
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{type: 'text', attr: {value: 'Hello'}}],
-    });
+    })
 
     syncPromise([
       checkRefresh(instance, {counter: 1}, result => {
@@ -362,7 +362,7 @@ describe('node in render function', () => {
             {type: 'text', attr: {value: 'Hello'}},
             {type: 'text', attr: {value: 'World'}},
           ],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 2}, result => {
         expect(result).toEqual({
@@ -372,7 +372,7 @@ describe('node in render function', () => {
             {type: 'text', attr: {value: 'World'}},
             {type: 'text', attr: {value: 'Weex'}},
           ],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 3}, result => {
         expect(result).toEqual({
@@ -381,13 +381,13 @@ describe('node in render function', () => {
             {type: 'text', attr: {value: 'Hello'}},
             {type: 'text', attr: {value: 'Weex'}},
           ],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 4}, result => {
         expect(result).toEqual({
           type: 'div',
           children: [{type: 'text', attr: {value: 'Weex'}}],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 5}, result => {
         expect(result).toEqual({
@@ -396,7 +396,7 @@ describe('node in render function', () => {
             {type: 'text', attr: {value: 'Hello'}},
             {type: 'text', attr: {value: 'Weex'}},
           ],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 6}, result => {
         expect(result).toEqual({
@@ -405,14 +405,14 @@ describe('node in render function', () => {
             {type: 'input', attr: {value: 'Hello'}},
             {type: 'text', attr: {value: 'Weex'}},
           ],
-        });
-        done();
+        })
+        done()
       }),
-    ]);
-  });
+    ])
+  })
 
   it('should be generated with component diff', done => {
-    const id = String(Date.now() * Math.random());
+    const id = String(Date.now() * Math.random())
     const instance = createInstance(
       id,
       `
@@ -476,24 +476,24 @@ describe('node in render function', () => {
         el: "body"
       })
     `,
-    );
+    )
     expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{type: 'text', attr: {value: '111-2'}}],
-    });
+    })
 
     syncPromise([
       checkRefresh(instance, {counter: 1}, result => {
         expect(result).toEqual({
           type: 'div',
           children: [{type: 'text', attr: {value: '111-222'}}],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 2}, result => {
         expect(result).toEqual({
           type: 'div',
           children: [{type: 'text', attr: {value: '1-2'}}],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 3}, result => {
         expect(result).toEqual({
@@ -501,7 +501,7 @@ describe('node in render function', () => {
           children: [
             {type: 'text', attr: {value: 'Bar'}, style: {fontSize: 100}},
           ],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 4}, result => {
         expect(result).toEqual({
@@ -509,7 +509,7 @@ describe('node in render function', () => {
           children: [
             {type: 'image', attr: {src: 'http://example.com/favicon.ico'}},
           ],
-        });
+        })
       }),
       checkRefresh(instance, {counter: 5}, result => {
         expect(result).toEqual({
@@ -519,9 +519,9 @@ describe('node in render function', () => {
             {type: 'text', attr: {value: 'Bar'}, style: {fontSize: 100}},
             {type: 'image', attr: {src: 'http://example.com/favicon.ico'}},
           ],
-        });
-        done();
+        })
+        done()
       }),
-    ]);
-  });
-});
+    ])
+  })
+})

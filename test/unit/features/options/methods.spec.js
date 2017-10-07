@@ -1,5 +1,5 @@
-import Vue from 'vue';
-import testObjectOption from '../../../helpers/test-object-option';
+import Vue from 'vue'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options methods', () => {
   it('should have correct context', () => {
@@ -9,26 +9,26 @@ describe('Options methods', () => {
       },
       methods: {
         plus() {
-          this.a++;
+          this.a++
         },
       },
-    });
-    vm.plus();
-    expect(vm.a).toBe(2);
-  });
+    })
+    vm.plus()
+    expect(vm.a).toBe(2)
+  })
 
-  testObjectOption('methods');
+  testObjectOption('methods')
 
   it('should warn undefined methods', () => {
     new Vue({
       methods: {
         hello: undefined,
       },
-    });
+    })
     expect(
       `Method "hello" has an undefined value in the component definition`,
-    ).toHaveBeenWarned();
-  });
+    ).toHaveBeenWarned()
+  })
 
   it('should warn methods conflicting with data', () => {
     new Vue({
@@ -38,20 +38,20 @@ describe('Options methods', () => {
       methods: {
         foo() {},
       },
-    });
+    })
     expect(
       `Method "foo" has already been defined as a data property`,
-    ).toHaveBeenWarned();
-  });
+    ).toHaveBeenWarned()
+  })
 
   it('should warn methods conflicting with internal methods', () => {
     new Vue({
       methods: {
         _update() {},
       },
-    });
+    })
     expect(
       `Method "_update" conflicts with an existing Vue instance method`,
-    ).toHaveBeenWarned();
-  });
-});
+    ).toHaveBeenWarned()
+  })
+})

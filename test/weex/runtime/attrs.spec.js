@@ -1,4 +1,4 @@
-import {getRoot, fireEvent, compileAndExecute} from '../helpers/index';
+import {getRoot, fireEvent, compileAndExecute} from '../helpers/index'
 
 describe('generate attribute', () => {
   it('should be generated', done => {
@@ -17,11 +17,11 @@ describe('generate attribute', () => {
               attr: {value: 'Hello World'},
             },
           ],
-        });
-        done();
+        })
+        done()
       })
-      .catch(e => done.fail(e));
-  });
+      .catch(e => done.fail(e))
+  })
 
   it('should be updated', done => {
     compileAndExecute(
@@ -44,20 +44,20 @@ describe('generate attribute', () => {
           type: 'div',
           event: ['click'],
           children: [{type: 'text', attr: {value: 'Hello World'}}],
-        });
-        fireEvent(instance, '_root', 'click');
-        return instance;
+        })
+        fireEvent(instance, '_root', 'click')
+        return instance
       })
       .then(instance => {
         expect(getRoot(instance)).toEqual({
           type: 'div',
           event: ['click'],
           children: [{type: 'text', attr: {value: 'Hello Vue'}}],
-        });
-        done();
+        })
+        done()
       })
-      .catch(e => done.fail(e));
-  });
+      .catch(e => done.fail(e))
+  })
 
   it('should be cleared', done => {
     compileAndExecute(
@@ -80,17 +80,17 @@ describe('generate attribute', () => {
           type: 'div',
           event: ['click'],
           children: [{type: 'text', attr: {value: 'Hello World'}}],
-        });
-        fireEvent(instance, '_root', 'click');
-        return instance;
+        })
+        fireEvent(instance, '_root', 'click')
+        return instance
       })
       .then(instance => {
         expect(getRoot(instance)).toEqual({
           type: 'div',
           event: ['click'],
           children: [{type: 'text', attr: {value: ''}}],
-        });
-        done();
-      });
-  });
-});
+        })
+        done()
+      })
+  })
+})

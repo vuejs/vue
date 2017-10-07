@@ -1,4 +1,4 @@
-var base = require('./karma.base.config.js');
+var base = require('./karma.base.config.js')
 
 module.exports = function(config) {
   var options = Object.assign(base, {
@@ -15,7 +15,7 @@ module.exports = function(config) {
       'karma-coverage',
       'karma-phantomjs-launcher',
     ]),
-  });
+  })
 
   // add babel-plugin-istanbul for code instrumentation
   options.webpack.module.rules[0].options = {
@@ -32,7 +32,7 @@ module.exports = function(config) {
         },
       ],
     ],
-  };
+  }
 
-  config.set(options);
-};
+  config.set(options)
+}
