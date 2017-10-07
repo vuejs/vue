@@ -10,10 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/vuejs/vue.git"
   },
-  "keywords": [
-    "vue",
-    "compiler"
-  ],
+  "keywords": ["vue", "compiler"],
   "author": "Evan You",
   "license": "MIT",
   "bugs": {

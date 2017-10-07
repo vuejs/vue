@@ -1,12 +1,18 @@
 {
   "root": true,
-  "plugins": [
-    "flowtype"
-  ],
-  "extends": [
-    "plugin:vue-libs/recommended",
-    "plugin:flowtype/recommended"
-  ],
+  "plugins": ["flowtype", "prettier"],
+  "extends": ["plugin:vue-libs/recommended", "plugin:flowtype/recommended", "prettier"],
+  "rules": {
+    "prettier/prettier": [
+      2,
+      {
+        "bracketSpacing": false,
+        "printWidth": 80,
+        "singleQuote": true,
+        "trailingComma": "all"
+      }
+    ]
+  },
   "globals": {
     "__WEEX__": true
   }

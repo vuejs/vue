@@ -7,7 +7,5 @@
     "noEmit": true
   },
   "compileOnSave": false,
-  "include": [
-    "**/*.ts"
-  ]
+  "include": ["**/*.ts"]
 }

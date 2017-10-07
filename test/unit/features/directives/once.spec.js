@@ -1,17 +1,17 @@
-import Vue from 'vue'
+import Vue from 'vue';
 
 describe('Directive v-once', () => {
   it('should not rerender component', done => {
     const vm = new Vue({
       template: '<div v-once>{{ a }}</div>',
-      data: { a: 'hello' }
-    }).$mount()
-    expect(vm.$el.innerHTML).toBe('hello')
-    vm.a = 'world'
+      data: {a: 'hello'},
+    }).$mount();
+    expect(vm.$el.innerHTML).toBe('hello');
+    vm.a = 'world';
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML).toBe('hello')
-    }).then(done)
-  })
+      expect(vm.$el.innerHTML).toBe('hello');
+    }).then(done);
+  });
 
   it('should not rerender self and child component', done => {
     const vm = new Vue({
@@ -20,23 +20,21 @@ describe('Directive v-once', () => {
           <span>{{ a }}</span>
           <item :b="a"></item>
         </div>`,
-      data: { a: 'hello' },
+      data: {a: 'hello'},
       components: {
         item: {
           template: '<div>{{ b }}</div>',
-          props: ['b']
-        }
-      }
-    }).$mount()
-    expect(vm.$children.length).toBe(1)
-    expect(vm.$el.innerHTML)
-      .toBe('<span>hello</span> <div>hello</div>')
-    vm.a = 'world'
+          props: ['b'],
+        },
+      },
+    }).$mount();
+    expect(vm.$children.length).toBe(1);
+    expect(vm.$el.innerHTML).toBe('<span>hello</span> <div>hello</div>');
+    vm.a = 'world';
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML)
-        .toBe('<span>hello</span> <div>hello</div>')
-    }).then(done)
-  })
+      expect(vm.$el.innerHTML).toBe('<span>hello</span> <div>hello</div>');
+    }).then(done);
+  });
 
   it('should rerender parent but not self', done => {
     const vm = new Vue({
@@ -45,23 +43,21 @@ describe('Directive v-once', () => {
           <span>{{ a }}</span>
           <item v-once :b="a"></item>
         </div>`,
-      data: { a: 'hello' },
+      data: {a: 'hello'},
       components: {
         item: {
           template: '<div>{{ b }}</div>',
-          props: ['b']
-        }
-      }
-    }).$mount()
-    expect(vm.$children.length).toBe(1)
-    expect(vm.$el.innerHTML)
-      .toBe('<span>hello</span> <div>hello</div>')
-    vm.a = 'world'
+          props: ['b'],
+        },
+      },
+    }).$mount();
+    expect(vm.$children.length).toBe(1);
+    expect(vm.$el.innerHTML).toBe('<span>hello</span> <div>hello</div>');
+    vm.a = 'world';
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML)
-        .toBe('<span>world</span> <div>hello</div>')
-    }).then(done)
-  })
+      expect(vm.$el.innerHTML).toBe('<span>world</span> <div>hello</div>');
+    }).then(done);
+  });
 
   it('should not rerender static sub nodes', done => {
     const vm = new Vue({
@@ -73,34 +69,39 @@ describe('Directive v-once', () => {
         </div>`,
       data: {
         a: 'hello',
-        suffix: '?'
+        suffix: '?',
       },
       components: {
         item: {
           template: '<div>{{ b }}</div>',
-          props: ['b']
-        }
-      }
-    }).$mount()
-    expect(vm.$el.innerHTML)
-      .toBe('<span>hello</span> <div>hello</div> <span>?</span>')
-    vm.a = 'world'
+          props: ['b'],
+        },
+      },
+    }).$mount();
+    expect(vm.$el.innerHTML).toBe(
+      '<span>hello</span> <div>hello</div> <span>?</span>',
+    );
+    vm.a = 'world';
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML)
-        .toBe('<span>hello</span> <div>world</div> <span>?</span>')
-      vm.suffix = '!'
-    }).then(() => {
-      expect(vm.$el.innerHTML)
-        .toBe('<span>hello</span> <div>world</div> <span>!</span>')
-    }).then(done)
-  })
+      expect(vm.$el.innerHTML).toBe(
+        '<span>hello</span> <div>world</div> <span>?</span>',
+      );
+      vm.suffix = '!';
+    })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          '<span>hello</span> <div>world</div> <span>!</span>',
+        );
+      })
+      .then(done);
+  });
 
   it('should work with v-if', done => {
     const vm = new Vue({
       data: {
         tester: true,
         yes: 'y',
-        no: 'n'
+        no: 'n',
       },
       template: `
         <div>
@@ -113,43 +114,42 @@ describe('Directive v-once', () => {
           <div v-if="tester" v-once>{{ yes }}</div>
           <div v-else v-once>{{ no }}</div>
         </div>
-      `
-    }).$mount()
-    expectTextContent(vm, 'yyyy')
-    vm.yes = 'yes'
+      `,
+    }).$mount();
+    expectTextContent(vm, 'yyyy');
+    vm.yes = 'yes';
     waitForUpdate(() => {
-      expectTextContent(vm, 'yesyyesy')
-      vm.tester = false
-    }).then(() => {
-      expectTextContent(vm, 'nnnn')
-      vm.no = 'no'
-    }).then(() => {
-      expectTextContent(vm, 'nononn')
-    }).then(done)
-  })
+      expectTextContent(vm, 'yesyyesy');
+      vm.tester = false;
+    })
+      .then(() => {
+        expectTextContent(vm, 'nnnn');
+        vm.no = 'no';
+      })
+      .then(() => {
+        expectTextContent(vm, 'nononn');
+      })
+      .then(done);
+  });
 
   it('should work with v-for', done => {
     const vm = new Vue({
       data: {
-        list: [1, 2, 3]
+        list: [1, 2, 3],
       },
-      template: `<div><div v-for="i in list" v-once>{{i}}</div></div>`
-    }).$mount()
-    expect(vm.$el.textContent).toBe('123')
-    vm.list.reverse()
+      template: `<div><div v-for="i in list" v-once>{{i}}</div></div>`,
+    }).$mount();
+    expect(vm.$el.textContent).toBe('123');
+    vm.list.reverse();
     waitForUpdate(() => {
-      expect(vm.$el.textContent).toBe('123')
-    }).then(done)
-  })
+      expect(vm.$el.textContent).toBe('123');
+    }).then(done);
+  });
 
   it('should work inside v-for', done => {
     const vm = new Vue({
       data: {
-        list: [
-          { id: 0, text: 'a' },
-          { id: 1, text: 'b' },
-          { id: 2, text: 'c' }
-        ]
+        list: [{id: 0, text: 'a'}, {id: 1, text: 'b'}, {id: 2, text: 'c'}],
       },
       template: `
         <div>
@@ -159,29 +159,30 @@ describe('Directive v-once', () => {
             </div>
           </div>
         </div>
-      `
-    }).$mount()
+      `,
+    }).$mount();
 
-    expect(vm.$el.textContent).toBe('aabbcc')
+    expect(vm.$el.textContent).toBe('aabbcc');
 
-    vm.list[0].text = 'd'
+    vm.list[0].text = 'd';
     waitForUpdate(() => {
-      expect(vm.$el.textContent).toBe('adbbcc')
-      vm.list[1].text = 'e'
-    }).then(() => {
-      expect(vm.$el.textContent).toBe('adbecc')
-      vm.list.reverse()
-    }).then(() => {
-      expect(vm.$el.textContent).toBe('ccbead')
-    }).then(done)
-  })
+      expect(vm.$el.textContent).toBe('adbbcc');
+      vm.list[1].text = 'e';
+    })
+      .then(() => {
+        expect(vm.$el.textContent).toBe('adbecc');
+        vm.list.reverse();
+      })
+      .then(() => {
+        expect(vm.$el.textContent).toBe('ccbead');
+      })
+      .then(done);
+  });
 
   it('should work inside v-for with v-if', done => {
     const vm = new Vue({
       data: {
-        list: [
-          { id: 0, text: 'a', tester: true, truthy: 'y' }
-        ]
+        list: [{id: 0, text: 'a', tester: true, truthy: 'y'}],
       },
       template: `
         <div>
@@ -196,27 +197,30 @@ describe('Directive v-once', () => {
               <span v-else>{{ i.text }}</span>
           </div>
         </div>
-      `
-    }).$mount()
+      `,
+    }).$mount();
 
-    expectTextContent(vm, 'yyyy')
+    expectTextContent(vm, 'yyyy');
 
-    vm.list[0].truthy = 'yy'
+    vm.list[0].truthy = 'yy';
     waitForUpdate(() => {
-      expectTextContent(vm, 'yyyyyy')
-      vm.list[0].tester = false
-    }).then(() => {
-      expectTextContent(vm, 'aaaa')
-      vm.list[0].text = 'nn'
-    }).then(() => {
-      expectTextContent(vm, 'annann')
-    }).then(done)
-  })
+      expectTextContent(vm, 'yyyyyy');
+      vm.list[0].tester = false;
+    })
+      .then(() => {
+        expectTextContent(vm, 'aaaa');
+        vm.list[0].text = 'nn';
+      })
+      .then(() => {
+        expectTextContent(vm, 'annann');
+      })
+      .then(done);
+  });
 
   it('should work inside v-for with nested v-else', done => {
     const vm = new Vue({
       data: {
-        list: [{ id: 0, text: 'a', tester: true, truthy: 'y' }]
+        list: [{id: 0, text: 'a', tester: true, truthy: 'y'}],
       },
       template: `
         <div v-if="0"></div>
@@ -226,27 +230,30 @@ describe('Directive v-once', () => {
             <span v-else v-once>{{ i.text }}</span>
           </div>
         </div>
-      `
-    }).$mount()
+      `,
+    }).$mount();
 
-    expectTextContent(vm, 'y')
-    vm.list[0].truthy = 'yy'
+    expectTextContent(vm, 'y');
+    vm.list[0].truthy = 'yy';
     waitForUpdate(() => {
-      expectTextContent(vm, 'y')
-      vm.list[0].tester = false
-    }).then(() => {
-      expectTextContent(vm, 'a')
-      vm.list[0].text = 'nn'
-    }).then(() => {
-      expectTextContent(vm, 'a')
-    }).then(done)
-  })
+      expectTextContent(vm, 'y');
+      vm.list[0].tester = false;
+    })
+      .then(() => {
+        expectTextContent(vm, 'a');
+        vm.list[0].text = 'nn';
+      })
+      .then(() => {
+        expectTextContent(vm, 'a');
+      })
+      .then(done);
+  });
 
   it('should work inside v-for with nested v-else-if and v-else', done => {
     const vm = new Vue({
       data: {
         tester: false,
-        list: [{ id: 0, text: 'a', tester: true, truthy: 'y' }]
+        list: [{id: 0, text: 'a', tester: true, truthy: 'y'}],
       },
       template: `
         <div v-if="0"></div>
@@ -264,42 +271,45 @@ describe('Directive v-once', () => {
             <span v-else v-once>{{ i.text }}</span>
           </div>
         </div>
-      `
-    }).$mount()
+      `,
+    }).$mount();
 
-    expectTextContent(vm, 'y')
-    vm.list[0].truthy = 'yy'
+    expectTextContent(vm, 'y');
+    vm.list[0].truthy = 'yy';
     waitForUpdate(() => {
-      expectTextContent(vm, 'y')
-      vm.list[0].tester = false
-    }).then(() => {
-      expectTextContent(vm, 'a')
-      vm.list[0].text = 'nn'
-    }).then(() => {
-      expectTextContent(vm, 'a')
-      vm.tester = true
-    }).then(() => {
-      expectTextContent(vm, 'nnelseif')
-      vm.list[0].text = 'xx'
-    }).then(() => {
-      expectTextContent(vm, 'nnelseif')
-      vm.list[0].tester = true
-    }).then(() => {
-      expectTextContent(vm, 'yy')
-      vm.list[0].truthy = 'nn'
-    }).then(() => {
-      expectTextContent(vm, 'yy')
-    }).then(done)
-  })
+      expectTextContent(vm, 'y');
+      vm.list[0].tester = false;
+    })
+      .then(() => {
+        expectTextContent(vm, 'a');
+        vm.list[0].text = 'nn';
+      })
+      .then(() => {
+        expectTextContent(vm, 'a');
+        vm.tester = true;
+      })
+      .then(() => {
+        expectTextContent(vm, 'nnelseif');
+        vm.list[0].text = 'xx';
+      })
+      .then(() => {
+        expectTextContent(vm, 'nnelseif');
+        vm.list[0].tester = true;
+      })
+      .then(() => {
+        expectTextContent(vm, 'yy');
+        vm.list[0].truthy = 'nn';
+      })
+      .then(() => {
+        expectTextContent(vm, 'yy');
+      })
+      .then(done);
+  });
 
   it('should warn inside non-keyed v-for', () => {
     const vm = new Vue({
       data: {
-        list: [
-          { id: 0, text: 'a' },
-          { id: 1, text: 'b' },
-          { id: 2, text: 'c' }
-        ]
+        list: [{id: 0, text: 'a'}, {id: 1, text: 'b'}, {id: 2, text: 'c'}],
       },
       template: `
         <div>
@@ -307,12 +317,14 @@ describe('Directive v-once', () => {
             <span v-once>{{ i.text }}</span><span>{{ i.text }}</span>
           </div>
         </div>
-      `
-    }).$mount()
+      `,
+    }).$mount();
 
-    expect(vm.$el.textContent).toBe('aabbcc')
-    expect(`v-once can only be used inside v-for that is keyed.`).toHaveBeenWarned()
-  })
+    expect(vm.$el.textContent).toBe('aabbcc');
+    expect(
+      `v-once can only be used inside v-for that is keyed.`,
+    ).toHaveBeenWarned();
+  });
 
   // #4288
   it('should inherit child reference for v-once', done => {
@@ -320,23 +332,25 @@ describe('Directive v-once', () => {
       template: `<div>{{a}}<test v-if="ok" v-once></test></div>`,
       data: {
         a: 0,
-        ok: true
+        ok: true,
       },
       components: {
         test: {
-          template: '<div>foo</div>'
-        }
-      }
-    }).$mount()
-    vm.a++ // first update to force a patch
+          template: '<div>foo</div>',
+        },
+      },
+    }).$mount();
+    vm.a++; // first update to force a patch
     waitForUpdate(() => {
-      expect(vm.$el.textContent).toBe('1foo')
-    }).then(() => {
-      vm.ok = false // teardown component with v-once
-    }).then(done) // should not throw
-  })
-})
+      expect(vm.$el.textContent).toBe('1foo');
+    })
+      .then(() => {
+        vm.ok = false; // teardown component with v-once
+      })
+      .then(done); // should not throw
+  });
+});
 
-function expectTextContent (vm, text) {
-  expect(vm.$el.textContent.replace(/\s+/g, '')).toBe(text)
+function expectTextContent(vm, text) {
+  expect(vm.$el.textContent.replace(/\s+/g, '')).toBe(text);
 }

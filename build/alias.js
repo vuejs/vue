@@ -1,6 +1,6 @@
-const path = require('path')
+const path = require('path');
 
-const resolve = p => path.resolve(__dirname, '../', p)
+const resolve = p => path.resolve(__dirname, '../', p);
 
 module.exports = {
   vue: resolve('src/platforms/web/entry-runtime-with-compiler'),
@@ -11,5 +11,5 @@ module.exports = {
   weex: resolve('src/platforms/weex'),
   server: resolve('src/server'),
   entries: resolve('src/entries'),
-  sfc: resolve('src/sfc')
-}
+  sfc: resolve('src/sfc'),
+};

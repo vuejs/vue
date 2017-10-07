@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash'
+import {isEqual} from 'lodash';
 
 beforeEach(() => {
   jasmine.addMatchers({
@@ -7,13 +7,13 @@ beforeEach(() => {
     toEqual: () => {
       return {
         compare: (a, b) => {
-          const pass = isEqual(a, b)
+          const pass = isEqual(a, b);
           return {
             pass,
-            message: `Expected ${a} to equal ${b}`
-          }
-        }
-      }
-    }
-  })
-})
+            message: `Expected ${a} to equal ${b}`,
+          };
+        },
+      };
+    },
+  });
+});

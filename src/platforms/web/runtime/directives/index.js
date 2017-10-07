@@ -1,7 +1,7 @@
-import model from './model'
-import show from './show'
+import model from './model';
+import show from './show';
 
 export default {
   model,
-  show
-}
+  show,
+};

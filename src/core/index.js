@@ -1,20 +1,20 @@
-import Vue from './instance/index'
-import { initGlobalAPI } from './global-api/index'
-import { isServerRendering } from 'core/util/env'
+import Vue from './instance/index';
+import {initGlobalAPI} from './global-api/index';
+import {isServerRendering} from 'core/util/env';
 
-initGlobalAPI(Vue)
+initGlobalAPI(Vue);
 
 Object.defineProperty(Vue.prototype, '$isServer', {
-  get: isServerRendering
-})
+  get: isServerRendering,
+});
 
 Object.defineProperty(Vue.prototype, '$ssrContext', {
-  get () {
+  get() {
     /* istanbul ignore next */
-    return this.$vnode && this.$vnode.ssrContext
-  }
-})
+    return this.$vnode && this.$vnode.ssrContext;
+  },
+});
 
-Vue.version = '__VERSION__'
+Vue.version = '__VERSION__';
 
-export default Vue
+export default Vue;

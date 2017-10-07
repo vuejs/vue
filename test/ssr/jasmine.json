@@ -1,9 +1,5 @@
 {
   "spec_dir": "test/ssr",
-  "spec_files": [
-    "*.spec.js"
-  ],
-  "helpers": [
-    "../../node_modules/babel-register/lib/node.js"
-  ]
+  "spec_files": ["*.spec.js"],
+  "helpers": ["../../node_modules/babel-register/lib/node.js"]
 }
