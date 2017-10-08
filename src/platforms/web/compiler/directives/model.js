@@ -22,13 +22,6 @@ export default function model (
   const type = el.attrsMap.type
 
   if (process.env.NODE_ENV !== 'production') {
-    const dynamicType = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
-    if (tag === 'input' && dynamicType) {
-      warn(
-        `<input :type="${dynamicType}" v-model="${value}">:\n` +
-        `v-model does not support dynamic input types. Use v-if branches instead.`
-      )
-    }
     // inputs with type="file" are read only and setting the input's
     // value will throw an error.
     if (tag === 'input' && type === 'file') {

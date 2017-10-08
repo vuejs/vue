@@ -40,6 +40,22 @@ let platformIsPreTag
 let platformMustUseProp
 let platformGetTagNamespace
 
+type Attr = { name: string; value: string }
+export function createASTElement (
+  tag: string,
+  attrs: Array<Attr>,
+  parent: ASTElement | void
+): ASTElement {
+  return {
+    type: 1,
+    tag,
+    attrsList: attrs,
+    attrsMap: makeAttrsMap(attrs),
+    parent,
+    children: []
+  }
+}
+
 /**
  * Convert HTML string to AST.
  */
@@ -102,14 +118,7 @@ export function parse (
         attrs = guardIESVGBug(attrs)
       }
 
-      const element: ASTElement = {
-        type: 1,
-        tag,
-        attrsList: attrs,
-        attrsMap: makeAttrsMap(attrs),
-        parent: currentParent,
-        children: []
-      }
+      let element: ASTElement = createASTElement(tag, attrs, currentParent)
       if (ns) {
         element.ns = ns
       }
@@ -125,7 +134,7 @@ export function parse (
 
       // apply pre-transforms
       for (let i = 0; i < preTransforms.length; i++) {
-        preTransforms[i](element, options)
+        element = preTransforms[i](element, options) || element
       }
 
       if (!inVPre) {
@@ -139,23 +148,13 @@ export function parse (
       }
       if (inVPre) {
         processRawAttrs(element)
-      } else {
+      } else if (!element.processed) {
+        // structural directives
         processFor(element)
         processIf(element)
         processOnce(element)
-        processKey(element)
-
-        // determine whether this is a plain element after
-        // removing structural attributes
-        element.plain = !element.key && !attrs.length
-
-        processRef(element)
-        processSlot(element)
-        processComponent(element)
-        for (let i = 0; i < transforms.length; i++) {
-          transforms[i](element, options)
-        }
-        processAttrs(element)
+        // element-scope stuff
+        processElement(element, options)
       }
 
       function checkRootConstraints (el) {
@@ -309,6 +308,22 @@ function processRawAttrs (el) {
   }
 }
 
+export function processElement (element: ASTElement, options: CompilerOptions) {
+  processKey(element)
+
+  // determine whether this is a plain element after
+  // removing structural attributes
+  element.plain = !element.key && !element.attrsList.length
+
+  processRef(element)
+  processSlot(element)
+  processComponent(element)
+  for (let i = 0; i < transforms.length; i++) {
+    element = transforms[i](element, options) || element
+  }
+  processAttrs(element)
+}
+
 function processKey (el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
@@ -327,7 +342,7 @@ function processRef (el) {
   }
 }
 
-function processFor (el) {
+export function processFor (el: ASTElement) {
   let exp
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
     const inMatch = exp.match(forAliasRE)
@@ -403,7 +418,7 @@ function findPrevElement (children: Array<any>): ASTElement | void {
   }
 }
 
-function addIfCondition (el, condition) {
+export function addIfCondition (el: ASTElement, condition: ASTIfCondition) {
   if (!el.ifConditions) {
     el.ifConditions = []
   }
