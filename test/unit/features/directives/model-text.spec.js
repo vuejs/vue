@@ -315,13 +315,8 @@ describe('Directive v-model text', () => {
     })
 
     // #6552
-    // Root cause: input listeners with modifiers are added as a separate
-    // DOM listener. If a change is triggered inside this listener, an update
-    // will happen before the second listener is fired! (obviously microtasks
-    // can be processed in between DOM events on the same element)
-    // This causes the domProps module to receive state that has not been
-    // updated by v-model yet (because v-model's listener has not fired yet)
-    // Solution: make sure to always fire v-model's listener first
+    // This was original introduced due to the microtask between DOM events issue
+    // but fixed after switching to MessageChannel.
     it('should not block input when another input listener with modifier is used', done => {
       const vm = new Vue({
         data: {
