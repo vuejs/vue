@@ -5,11 +5,9 @@ import { cached, isUndef } from 'shared/util'
 
 const normalizeEvent = cached((name: string): {
   name: string,
-  plain: boolean,
   once: boolean,
   capture: boolean,
-  passive: boolean,
-  handler?: Function
+  passive: boolean
 } => {
   const passive = name.charAt(0) === '&'
   name = passive ? name.slice(1) : name
@@ -17,10 +15,8 @@ const normalizeEvent = cached((name: string): {
   name = once ? name.slice(1) : name
   const capture = name.charAt(0) === '!'
   name = capture ? name.slice(1) : name
-  const plain = !(passive || once || capture)
   return {
     name,
-    plain,
     once,
     capture,
     passive
@@ -44,11 +40,6 @@ export function createFnInvoker (fns: Function | Array<Function>): Function {
   return invoker
 }
 
-// #6552
-function prioritizePlainEvents (a, b) {
-  return a.plain ? -1 : b.plain ? 1 : 0
-}
-
 export function updateListeners (
   on: Object,
   oldOn: Object,
@@ -57,13 +48,10 @@ export function updateListeners (
   vm: Component
 ) {
   let name, cur, old, event
-  const toAdd = []
-  let hasModifier = false
   for (name in on) {
     cur = on[name]
     old = oldOn[name]
     event = normalizeEvent(name)
-    if (!event.plain) hasModifier = true
     if (isUndef(cur)) {
       process.env.NODE_ENV !== 'production' && warn(
         `Invalid handler for event "${event.name}": got ` + String(cur),
@@ -73,18 +61,10 @@ export function updateListeners (
       if (isUndef(cur.fns)) {
         cur = on[name] = createFnInvoker(cur)
       }
-      event.handler = cur
-      toAdd.push(event)
+      add(event.name, cur, event.once, event.capture, event.passive)
     } else if (cur !== old) {
       old.fns = cur
       on[name] = old
-    }
-  }
-  if (toAdd.length) {
-    if (hasModifier) toAdd.sort(prioritizePlainEvents)
-    for (let i = 0; i < toAdd.length; i++) {
-      const event = toAdd[i]
-      add(event.name, event.handler, event.once, event.capture, event.passive)
     }
   }
   for (name in oldOn) {
