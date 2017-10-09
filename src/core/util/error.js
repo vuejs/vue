@@ -8,12 +8,15 @@ export function handleError (err: Error, vm: any, info: string) {
   if (vm) {
     let cur = vm
     while ((cur = cur.$parent)) {
-      if (cur.$options.errorCaptured) {
-        try {
-          const propagate = cur.$options.errorCaptured.call(cur, err, vm, info)
-          if (!propagate) return
-        } catch (e) {
-          globalHandleError(e, cur, 'errorCaptured hook')
+      const hooks = cur.$options.errorCaptured
+      if (hooks) {
+        for (let i = 0; i < hooks.length; i++) {
+          try {
+            const capture = hooks[i].call(cur, err, vm, info) === false
+            if (capture) return
+          } catch (e) {
+            globalHandleError(e, cur, 'errorCaptured hook')
+          }
         }
       }
     }
