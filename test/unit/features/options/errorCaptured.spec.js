@@ -31,8 +31,8 @@ describe('Options errorCaptured', () => {
     }).$mount()
 
     expect(spy).toHaveBeenCalledWith(err, child, 'created hook')
-    // should not propagate by default
-    expect(globalSpy).not.toHaveBeenCalled()
+    // should propagate by default
+    expect(globalSpy).toHaveBeenCalledWith(err, child, 'created hook')
   })
 
   it('should be able to render the error in itself', done => {
@@ -67,7 +67,7 @@ describe('Options errorCaptured', () => {
     }).then(done)
   })
 
-  it('should propagate to global handler when returning true', () => {
+  it('should not propagate to global handler when returning true', () => {
     const spy = jasmine.createSpy()
 
     let child
@@ -84,14 +84,14 @@ describe('Options errorCaptured', () => {
     new Vue({
       errorCaptured (err, vm, info) {
         spy(err, vm, info)
-        return true
+        return false
       },
       render: h => h(Child, {})
     }).$mount()
 
     expect(spy).toHaveBeenCalledWith(err, child, 'created hook')
-    // should propagate
-    expect(globalSpy).toHaveBeenCalledWith(err, child, 'created hook')
+    // should not propagate
+    expect(globalSpy).not.toHaveBeenCalled()
   })
 
   it('should propagate to global handler if itself throws error', () => {
@@ -117,5 +117,96 @@ describe('Options errorCaptured', () => {
 
     expect(globalSpy).toHaveBeenCalledWith(err, child, 'created hook')
     expect(globalSpy).toHaveBeenCalledWith(err2, vm, 'errorCaptured hook')
+  })
+
+  it('should work across multiple parents, mixins and extends', () => {
+    const calls = []
+
+    const Child = {
+      created () {
+        throw new Error('child')
+      },
+      render () {}
+    }
+
+    const ErrorBoundaryBase = {
+      errorCaptured () {
+        calls.push(1)
+      }
+    }
+
+    const mixin = {
+      errorCaptured () {
+        calls.push(2)
+      }
+    }
+
+    const ErrorBoundaryExtended = {
+      extends: ErrorBoundaryBase,
+      mixins: [mixin],
+      errorCaptured () {
+        calls.push(3)
+      },
+      render: h => h(Child)
+    }
+
+    Vue.config.errorHandler = () => {
+      calls.push(5)
+    }
+
+    new Vue({
+      errorCaptured () {
+        calls.push(4)
+      },
+      render: h => h(ErrorBoundaryExtended)
+    }).$mount()
+
+    expect(calls).toEqual([1, 2, 3, 4, 5])
+  })
+
+  it('should work across multiple parents, mixins and extends with return false', () => {
+    const calls = []
+
+    const Child = {
+      created () {
+        throw new Error('child')
+      },
+      render () {}
+    }
+
+    const ErrorBoundaryBase = {
+      errorCaptured () {
+        calls.push(1)
+      }
+    }
+
+    const mixin = {
+      errorCaptured () {
+        calls.push(2)
+      }
+    }
+
+    const ErrorBoundaryExtended = {
+      extends: ErrorBoundaryBase,
+      mixins: [mixin],
+      errorCaptured () {
+        calls.push(3)
+        return false
+      },
+      render: h => h(Child)
+    }
+
+    Vue.config.errorHandler = () => {
+      calls.push(5)
+    }
+
+    new Vue({
+      errorCaptured () {
+        calls.push(4)
+      },
+      render: h => h(ErrorBoundaryExtended)
+    }).$mount()
+
+    expect(calls).toEqual([1, 2, 3])
   })
 })
