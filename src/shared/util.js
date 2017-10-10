@@ -304,3 +304,27 @@ export function once (fn: Function): Function {
     }
   }
 }
+
+/**
+ * split string with different linefeed.
+ */
+const linefeedRE = /\r\n|\n|\u2028|\u2029/
+export function splitLine (str: string): Array<Object> {
+  const lines = []
+  while (str) {
+    const line = linefeedRE.exec(str)
+    if (line) {
+      const linefeed = line[0]
+      const idx = line.index
+      lines.push({
+        line: str.substring(0, idx),
+        linefeed
+      })
+      str = str.substring(idx + linefeed.length)
+    } else {
+      lines.push({ length: str })
+      break
+    }
+  }
+  return lines
+}
