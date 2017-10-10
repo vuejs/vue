@@ -1,17 +1,13 @@
 /* @flow */
 
-import {
-  isDef,
-  isUndef,
-  isTrue,
-  extend
-} from 'shared/util'
-
 import { escape } from 'web/server/util'
 import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
+import { generateComponentTrace } from 'core/util/debug'
 import { ssrCompileToFunctions } from 'web/server/compiler'
 import { installSSRHelpers } from './optimizing-compiler/runtime-helpers'
+
+import { isDef, isUndef, isTrue } from 'shared/util'
 
 import {
   createComponent,
@@ -26,13 +22,22 @@ const warnOnce = msg => {
   }
 }
 
+const onCompilationError = (err, vm) => {
+  const trace = vm ? generateComponentTrace(vm) : ''
+  throw new Error(`\n\u001b[31m${err}${trace}\u001b[39m\n`)
+}
+
 const normalizeRender = vm => {
   const { render, template, _scopeId } = vm.$options
   if (isUndef(render)) {
     if (template) {
-      extend(vm.$options, ssrCompileToFunctions(template, {
-        scopeId: _scopeId
-      }))
+      const compiled = ssrCompileToFunctions(template, {
+        scopeId: _scopeId,
+        warn: onCompilationError
+      }, vm)
+
+      vm.$options.render = compiled.render
+      vm.$options.staticRenderFns = compiled.staticRenderFns
     } else {
       throw new Error(
         `render function or template not defined in component: ${
