@@ -144,6 +144,22 @@ export function createComponent (
 
   data = data || {}
 
+  // recycle-list optimized render function for extracting cell-slot
+  // template. This is essentailly inline expanding instead of creating
+  // an actual instance.
+  // https://github.com/Hanks10100/weex-native-directive/tree/master/component
+  // $flow-disable-line
+  if (__WEEX__ && data.attrs['@isInRecycleList']) {
+    const altRender = Ctor.options['@render']
+    if (altRender) {
+      return altRender.call(
+        context,
+        context.$createElement,
+        data.attrs
+      )
+    }
+  }
+
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
   resolveConstructorOptions(Ctor)
