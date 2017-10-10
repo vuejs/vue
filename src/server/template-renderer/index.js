@@ -191,10 +191,13 @@ export default class TemplateRenderer {
       contextKey = 'state',
       windowKey = '__INITIAL_STATE__'
     } = options || {}
+    const autoRemove = process.env.NODE_ENV === 'production'
+      ? '(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
+      : ''
     return context[contextKey]
       ? `<script>window.${windowKey}=${
           serialize(context[contextKey], { isJSON: true })
-        }</script>`
+        }${autoRemove}</script>`
       : ''
   }
 
