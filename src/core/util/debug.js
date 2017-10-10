@@ -5,7 +5,8 @@ import { noop } from 'shared/util'
 
 export let warn = noop
 export let tip = noop
-export let formatComponentName: Function = (null: any) // work around flow check
+export let generateComponentTrace = (noop: any) // work around flow check
+export let formatComponentName = (noop: any)
 
 if (process.env.NODE_ENV !== 'production') {
   const hasConsole = typeof console !== 'undefined'
@@ -66,7 +67,7 @@ if (process.env.NODE_ENV !== 'production') {
     return res
   }
 
-  const generateComponentTrace = vm => {
+  generateComponentTrace = vm => {
     if (vm._isVue && vm.$parent) {
       const tree = []
       let currentRecursiveSequence = 0
