@@ -343,11 +343,14 @@ function genScopedSlot (
   if (el.for && !el.forProcessed) {
     return genForScopedSlot(key, el, state)
   }
-  return `{key:${key},fn:function(${String(el.slotScope)}){` +
+  const fn = `function(${String(el.slotScope)}){` +
     `return ${el.tag === 'template'
-      ? genChildren(el, state) || 'void 0'
+      ? el.if
+        ? `${el.if}?${genChildren(el, state) || 'undefined'}:undefined`
+        : genChildren(el, state) || 'undefined'
       : genElement(el, state)
-  }}}`
+  }}`
+  return `{key:${key},fn:${fn}}`
 }
 
 function genForScopedSlot (

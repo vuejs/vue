@@ -557,4 +557,40 @@ describe('Component scoped slot', () => {
       expect(vm.$el.innerHTML).toBe('<span>world foo</span> <span>world bar</span> <span>world abc</span>')
     }).then(done)
   })
+
+  // #6725
+  it('scoped slot with v-if', done => {
+    const vm = new Vue({
+      data: {
+        ok: false
+      },
+      template: `
+        <test>
+          <template v-if="ok" slot-scope="foo">
+            <p>{{ foo.text }}</p>
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          data () {
+            return { msg: 'hello' }
+          },
+          template: `
+            <div>
+              <slot :text="msg">
+                <span>{{ msg }} fallback</span>
+              </slot>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<span>hello fallback</span>')
+
+    vm.ok = true
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<p>hello</p>')
+    }).then(done)
+  })
 })
