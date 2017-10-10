@@ -40,7 +40,8 @@ let platformIsPreTag
 let platformMustUseProp
 let platformGetTagNamespace
 
-type Attr = { name: string; value: string }
+type Attr = { name: string; value: string };
+
 export function createASTElement (
   tag: string,
   attrs: Array<Attr>,
