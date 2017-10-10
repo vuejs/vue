@@ -120,7 +120,14 @@ export function createPatchFunction (backend) {
         if (
           !inPre &&
           !vnode.ns &&
-          !(config.ignoredElements.length && config.ignoredElements.indexOf(tag) > -1) &&
+          !(config.ignoredElements.length &&
+            (config.ignoredElements.indexOf(tag) > -1 ||
+            config.ignoredElements.filter(
+              el => el.length > 1 &&
+              el[el.length - 1] === '*' &&
+              tag.indexOf(el.slice(0, -1)) === 0).length
+            )
+          ) &&
           config.isUnknownElement(tag)
         ) {
           warn(
