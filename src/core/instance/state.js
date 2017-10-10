@@ -161,7 +161,7 @@ function initData (vm: Component) {
 
 function getData (data: Function, vm: Component): any {
   try {
-    return data.call(vm)
+    return data.call(vm, vm)
   } catch (e) {
     handleError(e, vm, `data()`)
     return {}
