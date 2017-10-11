@@ -4,6 +4,7 @@ import VNode from './vnode'
 import { createElement } from './create-element'
 import { resolveInject } from '../instance/inject'
 import { resolveSlots } from '../instance/render-helpers/resolve-slots'
+import { installRenderHelpers } from '../instance/render-helpers/index'
 
 import {
   isDef,
@@ -12,15 +13,43 @@ import {
   validateProp
 } from '../util/index'
 
+function FunctionalRenderContext (
+  data,
+  props,
+  children,
+  parent,
+  Ctor
+) {
+  const options = Ctor.options
+  this.data = data
+  this.props = props
+  this.children = children
+  this.parent = parent
+  this.listeners = data.on || emptyObject
+  this.injections = resolveInject(options.inject, parent)
+  this.slots = () => resolveSlots(children, parent)
+  // support for compiled functional template
+  if (options._compiled) {
+    this.constructor = Ctor
+    this.$options = options
+    this._c = parent._c
+    this.$slots = this.slots()
+    this.$scopedSlots = data.scopedSlots || emptyObject
+  }
+}
+
+installRenderHelpers(FunctionalRenderContext.prototype)
+
 export function createFunctionalComponent (
   Ctor: Class<Component>,
   propsData: ?Object,
   data: VNodeData,
-  context: Component,
+  contextVm: Component,
   children: ?Array<VNode>
 ): VNode | void {
+  const options = Ctor.options
   const props = {}
-  const propOptions = Ctor.options.props
+  const propOptions = options.props
   if (isDef(propOptions)) {
     for (const key in propOptions) {
       props[key] = validateProp(key, propOptions, propsData || emptyObject)
@@ -31,20 +60,19 @@ export function createFunctionalComponent (
   }
   // ensure the createElement function in functional components
   // gets a unique context - this is necessary for correct named slot check
-  const _context = Object.create(context)
-  const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
-  const vnode = Ctor.options.render.call(null, h, {
+  const _contextVm = Object.create(contextVm)
+  const h = (a, b, c, d) => createElement(_contextVm, a, b, c, d, true)
+  const renderContext = new FunctionalRenderContext(
     data,
     props,
     children,
-    parent: context,
-    listeners: data.on || emptyObject,
-    injections: resolveInject(Ctor.options.inject, context),
-    slots: () => resolveSlots(children, context)
-  })
+    contextVm,
+    Ctor
+  )
+  const vnode = options.render.call(null, h, renderContext)
   if (vnode instanceof VNode) {
-    vnode.functionalContext = context
-    vnode.functionalOptions = Ctor.options
+    vnode.functionalContext = contextVm
+    vnode.functionalOptions = options
     if (data.slot) {
       (vnode.data || (vnode.data = {})).slot = data.slot
     }
