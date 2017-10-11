@@ -46,7 +46,7 @@ export default class VNode {
     this.ns = undefined
     this.context = context
     this.functionalContext = undefined
-    this.functioanlOptions = undefined
+    this.functionalOptions = undefined
     this.functionalScopeId = undefined
     this.key = data && data.key
     this.componentOptions = componentOptions
