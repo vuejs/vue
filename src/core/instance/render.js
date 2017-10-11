@@ -3,32 +3,17 @@
 import {
   warn,
   nextTick,
-  toNumber,
-  toString,
-  looseEqual,
   emptyObject,
   handleError,
-  looseIndexOf,
   defineReactive
 } from '../util/index'
 
-import VNode, {
-  cloneVNodes,
-  createTextVNode,
-  createEmptyVNode
-} from '../vdom/vnode'
+import { createElement } from '../vdom/create-element'
+import { installRenderHelpers } from './render-helpers/index'
+import { resolveSlots } from './render-helpers/resolve-slots'
+import VNode, { cloneVNodes, createEmptyVNode } from '../vdom/vnode'
 
 import { isUpdatingChildComponent } from './lifecycle'
-
-import { createElement } from '../vdom/create-element'
-import { renderList } from './render-helpers/render-list'
-import { renderSlot } from './render-helpers/render-slot'
-import { resolveFilter } from './render-helpers/resolve-filter'
-import { checkKeyCodes } from './render-helpers/check-keycodes'
-import { bindObjectProps } from './render-helpers/bind-object-props'
-import { renderStatic, markOnce } from './render-helpers/render-static'
-import { bindObjectListeners } from './render-helpers/bind-object-listeners'
-import { resolveSlots, resolveScopedSlots } from './render-helpers/resolve-slots'
 
 export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
@@ -65,6 +50,9 @@ export function initRender (vm: Component) {
 }
 
 export function renderMixin (Vue: Class<Component>) {
+  // install runtime convenience helpers
+  installRenderHelpers(Vue.prototype)
+
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)
   }
@@ -135,23 +123,4 @@ export function renderMixin (Vue: Class<Component>) {
     vnode.parent = _parentVnode
     return vnode
   }
-
-  // internal render helpers.
-  // these are exposed on the instance prototype to reduce generated render
-  // code size.
-  Vue.prototype._o = markOnce
-  Vue.prototype._n = toNumber
-  Vue.prototype._s = toString
-  Vue.prototype._l = renderList
-  Vue.prototype._t = renderSlot
-  Vue.prototype._q = looseEqual
-  Vue.prototype._i = looseIndexOf
-  Vue.prototype._m = renderStatic
-  Vue.prototype._f = resolveFilter
-  Vue.prototype._k = checkKeyCodes
-  Vue.prototype._b = bindObjectProps
-  Vue.prototype._v = createTextVNode
-  Vue.prototype._e = createEmptyVNode
-  Vue.prototype._u = resolveScopedSlots
-  Vue.prototype._g = bindObjectListeners
 }
