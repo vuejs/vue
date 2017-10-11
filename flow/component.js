@@ -66,7 +66,6 @@ declare interface Component {
   _isDestroyed: boolean;
   _isBeingDestroyed: boolean;
   _vnode: ?VNode; // self root node
-  _staticTrees: ?Array<VNode>;
   _hasHookEvent: boolean;
   _provided: ?Object;
 
