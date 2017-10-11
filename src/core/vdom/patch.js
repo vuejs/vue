@@ -281,7 +281,7 @@ export function createPatchFunction (backend) {
   // of going through the normal attribute patching process.
   function setScope (vnode) {
     let i
-    if (isDef(i = vnode.fnScopeId)) {
+    if (isDef(i = vnode.functionalScopeId)) {
       nodeOps.setAttribute(vnode.elm, i, '')
     } else {
       let ancestor = vnode

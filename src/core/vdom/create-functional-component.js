@@ -51,7 +51,8 @@ function FunctionalRenderContext (
     this._c = (a, b, c, d) => {
       const vnode: ?VNode = createElement(contextVm, a, b, c, d, needNormalization)
       if (vnode) {
-        vnode.fnScopeId = options._scopeId
+        vnode.functionalScopeId = options._scopeId
+        vnode.functionalContext = parent
       }
       return vnode
     }

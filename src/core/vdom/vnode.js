@@ -8,11 +8,12 @@ export default class VNode {
   elm: Node | void;
   ns: string | void;
   context: Component | void; // rendered in this component's scope
-  functionalContext: Component | void; // only for functional component root nodes
   key: string | number | void;
   componentOptions: VNodeComponentOptions | void;
   componentInstance: Component | void; // component instance
   parent: VNode | void; // component placeholder node
+
+  // strictly internal
   raw: boolean; // contains raw HTML? (server only)
   isStatic: boolean; // hoisted static node
   isRootInsert: boolean; // necessary for enter transition check
@@ -23,7 +24,9 @@ export default class VNode {
   asyncMeta: Object | void;
   isAsyncPlaceholder: boolean;
   ssrContext: Object | void;
-  fnScopeId: ?string;
+  functionalContext: Component | void; // real context vm for functional nodes
+  functionalOptions: ?ComponentOptions; // for SSR caching
+  functionalScopeId: ?string; // functioanl scope id support
 
   constructor (
     tag?: string,
@@ -43,6 +46,8 @@ export default class VNode {
     this.ns = undefined
     this.context = context
     this.functionalContext = undefined
+    this.functioanlOptions = undefined
+    this.functionalScopeId = undefined
     this.key = data && data.key
     this.componentOptions = componentOptions
     this.componentInstance = undefined
