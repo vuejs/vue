@@ -17,7 +17,6 @@ import { isUpdatingChildComponent } from './lifecycle'
 
 export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
-  vm._staticTrees = null
   const parentVnode = vm.$vnode = vm.$options._parentVnode // the placeholder node in parent tree
   const renderContext = parentVnode && parentVnode.context
   vm.$slots = resolveSlots(vm.$options._renderChildren, renderContext)
@@ -59,11 +58,7 @@ export function renderMixin (Vue: Class<Component>) {
 
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
-    const {
-      render,
-      staticRenderFns,
-      _parentVnode
-    } = vm.$options
+    const { render, _parentVnode } = vm.$options
 
     if (vm._isMounted) {
       // if the parent didn't update, the slot nodes will be the ones from
@@ -78,9 +73,6 @@ export function renderMixin (Vue: Class<Component>) {
 
     vm.$scopedSlots = (_parentVnode && _parentVnode.data.scopedSlots) || emptyObject
 
-    if (staticRenderFns && !vm._staticTrees) {
-      vm._staticTrees = []
-    }
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
     vm.$vnode = _parentVnode
