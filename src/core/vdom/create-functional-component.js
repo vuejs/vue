@@ -8,6 +8,7 @@ import { installRenderHelpers } from '../instance/render-helpers/index'
 
 import {
   isDef,
+  isTrue,
   camelize,
   emptyObject,
   validateProp
@@ -28,13 +29,34 @@ function FunctionalRenderContext (
   this.listeners = data.on || emptyObject
   this.injections = resolveInject(options.inject, parent)
   this.slots = () => resolveSlots(children, parent)
+
+  // ensure the createElement function in functional components
+  // gets a unique context - this is necessary for correct named slot check
+  const contextVm = Object.create(parent)
+  const isCompiled = isTrue(options._compiled)
+  const needNormalization = !isCompiled
+
   // support for compiled functional template
-  if (options._compiled) {
+  if (isCompiled) {
+    // exposing constructor and $options for renderStatic() because it needs
+    // to cache the rendered trees on shared options
     this.constructor = Ctor
     this.$options = options
-    this._c = parent._c
+    // pre-resolve slots for renderSlot()
     this.$slots = this.slots()
     this.$scopedSlots = data.scopedSlots || emptyObject
+  }
+
+  if (options._scopeId) {
+    this._c = (a, b, c, d) => {
+      const vnode: ?VNode = createElement(contextVm, a, b, c, d, needNormalization)
+      if (vnode) {
+        vnode.fnScopeId = options._scopeId
+      }
+      return vnode
+    }
+  } else {
+    this._c = (a, b, c, d) => createElement(contextVm, a, b, c, d, needNormalization)
   }
 }
 
@@ -58,10 +80,7 @@ export function createFunctionalComponent (
     if (isDef(data.attrs)) mergeProps(props, data.attrs)
     if (isDef(data.props)) mergeProps(props, data.props)
   }
-  // ensure the createElement function in functional components
-  // gets a unique context - this is necessary for correct named slot check
-  const _contextVm = Object.create(contextVm)
-  const h = (a, b, c, d) => createElement(_contextVm, a, b, c, d, true)
+
   const renderContext = new FunctionalRenderContext(
     data,
     props,
@@ -69,7 +88,9 @@ export function createFunctionalComponent (
     contextVm,
     Ctor
   )
-  const vnode = options.render.call(null, h, renderContext)
+
+  const vnode = options.render.call(null, renderContext._c, renderContext)
+
   if (vnode instanceof VNode) {
     vnode.functionalContext = contextVm
     vnode.functionalOptions = options
@@ -77,6 +98,7 @@ export function createFunctionalComponent (
       (vnode.data || (vnode.data = {})).slot = data.slot
     }
   }
+
   return vnode
 }
 

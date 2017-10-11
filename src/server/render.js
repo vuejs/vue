@@ -342,11 +342,15 @@ function renderStartingTag (node: VNode, context) {
   ) {
     markup += ` ${(scopeId: any)}`
   }
-  while (isDef(node)) {
-    if (isDef(scopeId = node.context.$options._scopeId)) {
-      markup += ` ${scopeId}`
+  if (isDef(node.fnScopeId)) {
+    markup += ` ${node.fnScopeId}`
+  } else {
+    while (isDef(node)) {
+      if (isDef(scopeId = node.context.$options._scopeId)) {
+        markup += ` ${scopeId}`
+      }
+      node = node.parent
     }
-    node = node.parent
   }
   return markup + '>'
 }

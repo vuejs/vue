@@ -23,6 +23,7 @@ export default class VNode {
   asyncMeta: Object | void;
   isAsyncPlaceholder: boolean;
   ssrContext: Object | void;
+  fnScopeId: ?string;
 
   constructor (
     tag?: string,
