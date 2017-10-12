@@ -23,6 +23,7 @@ import {
   isUndef,
   isTrue,
   makeMap,
+  isRegExp,
   isPrimitive
 } from '../util/index'
 
@@ -123,7 +124,7 @@ export function createPatchFunction (backend) {
           !(
             config.ignoredElements.length &&
             config.ignoredElements.some(ignore => {
-              return ignore instanceof RegExp
+              return isRegExp(ignore)
                 ? ignore.test(tag)
                 : ignore === tag
             })
