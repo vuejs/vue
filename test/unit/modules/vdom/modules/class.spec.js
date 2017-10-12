@@ -72,8 +72,7 @@ describe('vdom class module', () => {
       class: { class1: true, class2: false, class3: true }
     })
     const vnode2 = new VNode('p', { staticClass: 'foo bar' })
-    let elm = patch(null, vnode1)
-    elm = patch(vnode1, vnode2)
+    const elm = (patch(null, vnode1), patch(vnode1, vnode2))
     expect(elm).not.toHaveClass('class1')
     expect(elm).not.toHaveClass('class2')
     expect(elm).not.toHaveClass('class3')
@@ -86,8 +85,7 @@ describe('vdom class module', () => {
       class: { class1: true, class2: false, class3: true }
     })
     const vnode2 = new VNode('p', { class: {}})
-    let elm = patch(null, vnode1)
-    elm = patch(vnode1, vnode2)
+    const elm = (patch(null, vnode1), patch(vnode1, vnode2))
     expect(elm).not.toHaveClass('class1')
     expect(elm).not.toHaveClass('class2')
     expect(elm).not.toHaveClass('class3')
@@ -98,8 +96,7 @@ describe('vdom class module', () => {
       class: { class1: true, class2: false, class3: true }
     })
     const vnode2 = new VNode('p', {})
-    let elm = patch(null, vnode1)
-    elm = patch(vnode1, vnode2)
+    const elm = (patch(null, vnode1), patch(vnode1, vnode2))
     expect(elm).not.toHaveClass('class1')
     expect(elm).not.toHaveClass('class2')
     expect(elm).not.toHaveClass('class3')
