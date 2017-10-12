@@ -122,7 +122,7 @@ describe('compile options', () => {
 
     compiled = compile('<div v-if="a----">{{ b++++ }}</div>')
     expect(compiled.errors.length).toBe(2)
-    expect(compiled.errors[0]).toContain('invalid expression: v-if="a----"')
-    expect(compiled.errors[1]).toContain('invalid expression: {{ b++++ }}')
+    expect(compiled.errors[0]).toContain('Raw expression: v-if="a----"')
+    expect(compiled.errors[1]).toContain('Raw expression: {{ b++++ }}')
   })
 })

@@ -89,10 +89,14 @@ function checkExpression (exp: string, text: string, errors: Array<string>) {
     if (keywordMatch) {
       errors.push(
         `avoid using JavaScript keyword as property name: ` +
-        `"${keywordMatch[0]}" in expression ${text.trim()}`
+        `"${keywordMatch[0]}"\n  Raw expression: ${text.trim()}`
       )
     } else {
-      errors.push(`invalid expression: ${text.trim()}`)
+      errors.push(
+        `invalid expression: ${e.message} in\n\n` +
+        `    ${exp}\n\n` +
+        `  Raw expression: ${text.trim()}\n`
+      )
     }
   }
 }
