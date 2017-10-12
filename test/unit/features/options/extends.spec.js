@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { nativeWatch } from 'core/util/env'
 
 describe('Options extends', () => {
   it('should work on objects', () => {
@@ -47,42 +48,28 @@ describe('Options extends', () => {
     expect(vm.c).toBe(3)
   })
 
-  it('should work with global mixins + Object.prototype.watch', done => {
-    let fakeWatch = false
-    if (!Object.prototype.watch) {
-      fakeWatch = true
-      // eslint-disable-next-line no-extend-native
-      Object.defineProperty(Object.prototype, 'watch', {
-        writable: true,
-        configurable: true,
-        enumerable: false,
-        value: () => {}
+  if (nativeWatch) {
+    it('should work with global mixins + Object.prototype.watch', done => {
+      Vue.mixin({})
+
+      const spy = jasmine.createSpy('watch')
+      const A = Vue.extend({
+        data: function () {
+          return { a: 1 }
+        },
+        watch: {
+          a: spy
+        },
+        created: function () {
+          this.a = 2
+        }
       })
-    }
-
-    Vue.mixin({})
-
-    const spy = jasmine.createSpy('watch')
-    const A = Vue.extend({
-      data: function () {
-        return { a: 1 }
-      },
-      watch: {
-        a: spy
-      },
-      created: function () {
-        this.a = 2
-      }
+      new Vue({
+        extends: A
+      })
+      waitForUpdate(() => {
+        expect(spy).toHaveBeenCalledWith(2, 1)
+      }).then(done)
     })
-    new Vue({
-      extends: A
-    })
-    waitForUpdate(() => {
-      expect(spy).toHaveBeenCalledWith(2, 1)
-
-      if (fakeWatch) {
-        delete Object.prototype.watch
-      }
-    }).then(done)
-  })
+  }
 })
