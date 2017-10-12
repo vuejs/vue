@@ -44,4 +44,15 @@ describe('Global config', () => {
       expect(test.$options.__test__).toBe(3)
     })
   })
+
+  describe('ignoredElements', () => {
+    it('should work', () => {
+      Vue.config.ignoredElements = ['foo', /^ion-/]
+      new Vue({
+        template: `<div><foo/><ion-foo/><ion-bar/></div>`
+      }).$mount()
+      expect('Unknown custom element').not.toHaveBeenWarned()
+      Vue.config.ignoredElements = []
+    })
+  })
 })
