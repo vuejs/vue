@@ -10,13 +10,10 @@ export function renderStatic (
   isInFor?: boolean
 ): VNode | Array<VNode> {
   // static trees can be rendered once and cached on the contructor options
-  // so every instance shares the same trees
-  let options = this.constructor.options
-  if (this.$options.staticRenderFns !== options.staticRenderFns) {
-    options = this.$options
-  }
-  const trees = options._staticTrees || (options._staticTrees = [])
-  let tree = trees[index]
+  // so every instance shares the same cached trees
+  const renderFns = this.$options.staticRenderFns
+  const cached = renderFns.cached || (renderFns.cached = [])
+  let tree = cached[index]
   // if has already-rendered static tree and not inside v-for,
   // we can reuse the same tree by doing a shallow clone.
   if (tree && !isInFor) {
@@ -25,8 +22,7 @@ export function renderStatic (
       : cloneVNode(tree)
   }
   // otherwise, render a fresh tree.
-  tree = trees[index] =
-    options.staticRenderFns[index].call(this._renderProxy, null, this)
+  tree = cached[index] = renderFns[index].call(this._renderProxy, null, this)
   markStatic(tree, `__static__${index}`, false)
   return tree
 }
