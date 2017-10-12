@@ -1,7 +1,10 @@
 import Vue from 'vue'
 import { hasSymbol } from 'core/util/env'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options props', () => {
+  testObjectOption('props')
+
   it('array syntax', done => {
     const vm = new Vue({
       data: {

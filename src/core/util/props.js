@@ -5,6 +5,7 @@ import { observe, observerState } from '../observer/index'
 import {
   hasOwn,
   isObject,
+  toRawType,
   hyphenate,
   capitalize,
   isPlainObject
@@ -118,9 +119,9 @@ function assertProp (
   }
   if (!valid) {
     warn(
-      'Invalid prop: type check failed for prop "' + name + '".' +
-      ' Expected ' + expectedTypes.map(capitalize).join(', ') +
-      ', got ' + Object.prototype.toString.call(value).slice(8, -1) + '.',
+      `Invalid prop: type check failed for prop "${name}".` +
+      ` Expected ${expectedTypes.map(capitalize).join(', ')}` +
+      `, got ${toRawType(value)}.`,
       vm
     )
     return

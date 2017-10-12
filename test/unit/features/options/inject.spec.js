@@ -1,8 +1,11 @@
 import Vue from 'vue'
 import { Observer } from 'core/observer/index'
 import { isNative, isObject, hasOwn } from 'core/util/index'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options provide/inject', () => {
+  testObjectOption('inject')
+
   let injected
   const injectedComp = {
     inject: ['foo', 'bar'],
