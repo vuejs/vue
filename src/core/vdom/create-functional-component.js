@@ -38,9 +38,7 @@ function FunctionalRenderContext (
 
   // support for compiled functional template
   if (isCompiled) {
-    // exposing constructor and $options for renderStatic() because it needs
-    // to cache the rendered trees on shared options
-    this.constructor = Ctor
+    // exposing $options for renderStatic()
     this.$options = options
     // pre-resolve slots for renderSlot()
     this.$slots = this.slots()
