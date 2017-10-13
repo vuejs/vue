@@ -102,7 +102,7 @@ export default {
 
     // force reflow to put everything in position
     const body: any = document.body
-    const f: number = body.offsetHeight // eslint-disable-line
+    this._h = body.offsetHeight // assign to this to avoid removed in tree-shaking
 
     children.forEach((c: VNode) => {
       if (c.data.moved) {
