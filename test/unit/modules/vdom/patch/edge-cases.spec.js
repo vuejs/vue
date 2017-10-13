@@ -198,4 +198,52 @@ describe('vdom patch: edge cases', () => {
     }).$mount()
     expect(vm.$el.textContent).toBe('')
   })
+
+  // #6803
+  it('backwards compat with checkbox code generated before 2.4', () => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        label: 'foobar',
+        name: 'foobar'
+      },
+      computed: {
+        value: {
+          get () {
+            return 1
+          },
+          set: spy
+        }
+      },
+      render (h) {
+        const _vm = this
+        return h('div', {},
+          [h('input', {
+            directives: [{
+              name: 'model',
+              rawName: 'v-model',
+              value: (_vm.value),
+              expression: 'value'
+            }],
+            attrs: {
+              'type': 'radio',
+              'name': _vm.name
+            },
+            domProps: {
+              'value': _vm.label,
+              'checked': _vm._q(_vm.value, _vm.label)
+            },
+            on: {
+              '__c': function ($event) {
+                _vm.value = _vm.label
+              }
+            }
+          })])
+      }
+    }).$mount()
+
+    document.body.appendChild(vm.$el)
+    vm.$el.children[0].click()
+    expect(spy).toHaveBeenCalled()
+  })
 })
