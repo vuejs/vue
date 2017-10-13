@@ -72,6 +72,7 @@ class Test extends Vue {
       }
     };
     config.keyCodes = { esc: 27 };
+    config.ignoredElements = ['foo', /^ion-/];
   }
 
   static testMethods() {
