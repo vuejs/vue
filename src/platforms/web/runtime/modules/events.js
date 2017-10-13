@@ -2,7 +2,7 @@
 
 import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
-import { isIE, supportsPassive } from 'core/util/env'
+import { withMacroTask, isIE, supportsPassive } from 'core/util/index'
 import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model'
 
 // normalize v-model event tokens that can only be determined at runtime.
@@ -28,6 +28,16 @@ function normalizeEvents (on) {
 
 let target: HTMLElement
 
+function createOnceHandler (handler, event, capture) {
+  const _target = target // save current target element in closure
+  return function onceHandler () {
+    const res = handler.apply(null, arguments)
+    if (res !== null) {
+      remove(event, onceHandler, capture, _target)
+    }
+  }
+}
+
 function add (
   event: string,
   handler: Function,
@@ -35,18 +45,8 @@ function add (
   capture: boolean,
   passive: boolean
 ) {
-  if (once) {
-    const oldHandler = handler
-    const _target = target // save current target element in closure
-    handler = function (ev) {
-      const res = arguments.length === 1
-        ? oldHandler(ev)
-        : oldHandler.apply(null, arguments)
-      if (res !== null) {
-        remove(event, handler, capture, _target)
-      }
-    }
-  }
+  handler = withMacroTask(handler)
+  if (once) handler = createOnceHandler(handler, event, capture)
   target.addEventListener(
     event,
     handler,
@@ -62,7 +62,11 @@ function remove (
   capture: boolean,
   _target?: HTMLElement
 ) {
-  (_target || target).removeEventListener(event, handler, capture)
+  (_target || target).removeEventListener(
+    event,
+    handler._withTask || handler,
+    capture
+  )
 }
 
 function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
