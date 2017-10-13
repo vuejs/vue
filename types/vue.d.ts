@@ -114,7 +114,7 @@ export interface VueConstructor<V extends Vue = Vue> {
     performance: boolean;
     errorHandler(err: Error, vm: Vue, info: string): void;
     warnHandler(msg: string, vm: Vue, trace: string): void;
-    ignoredElements: string[];
+    ignoredElements: (string | RegExp)[];
     keyCodes: { [key: string]: number | number[] };
   }
 }
