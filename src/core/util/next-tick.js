@@ -50,13 +50,14 @@ if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
     port.postMessage(1)
   }
 } else {
+  /* istanbul ignore next */
   macroTimerFunc = () => {
     setTimeout(flushCallbacks, 0)
   }
 }
 
 // Determine MicroTask defer implementation.
-// $flow-disable-line, istanbul ignore next
+/* istanbul ignore next, $flow-disable-line */
 if (typeof Promise !== 'undefined' && isNative(Promise)) {
   const p = Promise.resolve()
   microTimerFunc = () => {
