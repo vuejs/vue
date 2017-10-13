@@ -192,7 +192,7 @@ export default class TemplateRenderer {
       windowKey = '__INITIAL_STATE__'
     } = options || {}
     const autoRemove = process.env.NODE_ENV === 'production'
-      ? '(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
+      ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
       : ''
     return context[contextKey]
       ? `<script>window.${windowKey}=${
