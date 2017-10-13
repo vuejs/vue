@@ -101,8 +101,9 @@ export default {
     children.forEach(applyTranslation)
 
     // force reflow to put everything in position
-    const body: any = document.body
-    this._h = body.offsetHeight // assign to this to avoid removed in tree-shaking
+    // assign to this to avoid being removed in tree-shaking
+    // $flow-disable-line
+    this._reflow = document.body.offsetHeight
 
     children.forEach((c: VNode) => {
       if (c.data.moved) {
