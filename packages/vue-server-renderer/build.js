@@ -1594,7 +1594,7 @@ function normalizeProps (options, vm) {
         ? val
         : { type: val };
     }
-  } else if (process.env.NODE_ENV !== 'production' && props) {
+  } else if (process.env.NODE_ENV !== 'production') {
     warn(
       "Invalid value for option \"props\": expected an Array or an Object, " +
       "but got " + (toRawType(props)) + ".",
@@ -3871,7 +3871,7 @@ function preTransformNode (el, options) {
       addRawAttr(branch0, 'type', 'checkbox');
       processElement(branch0, options);
       branch0.processed = true; // prevent it from double-processed
-      branch0.if = "type==='checkbox'" + ifConditionExtra;
+      branch0.if = "(" + typeBinding + ")==='checkbox'" + ifConditionExtra;
       addIfCondition(branch0, {
         exp: branch0.if,
         block: branch0
@@ -3882,7 +3882,7 @@ function preTransformNode (el, options) {
       addRawAttr(branch1, 'type', 'radio');
       processElement(branch1, options);
       addIfCondition(branch0, {
-        exp: "type==='radio'" + ifConditionExtra,
+        exp: "(" + typeBinding + ")==='radio'" + ifConditionExtra,
         block: branch1
       });
       // 3. other
@@ -3925,6 +3925,7 @@ var warn$2;
 // in some cases, the event used has to be determined at runtime
 // so we used some reserved tokens during compile.
 var RANGE_TOKEN = '__r';
+
 
 function model$1 (
   el,
@@ -5487,14 +5488,16 @@ function normalizeArrayChildren (children, nestedIndex) {
     lastIndex = res.length - 1;
     last = res[lastIndex];
     //  nested
-    if (Array.isArray(c) && c.length > 0) {
-      c = normalizeArrayChildren(c, ((nestedIndex || '') + "_" + i));
-      // merge adjacent text nodes
-      if (isTextNode(c[0]) && isTextNode(last)) {
-        res[lastIndex] = createTextVNode(last.text + (c[0]).text);
-        c.shift();
+    if (Array.isArray(c)) {
+      if (c.length > 0) {
+        c = normalizeArrayChildren(c, ((nestedIndex || '') + "_" + i));
+        // merge adjacent text nodes
+        if (isTextNode(c[0]) && isTextNode(last)) {
+          res[lastIndex] = createTextVNode(last.text + (c[0]).text);
+          c.shift();
+        }
+        res.push.apply(res, c);
       }
-      res.push.apply(res, c);
     } else if (isPrimitive(c)) {
       if (isTextNode(last)) {
         // merge adjacent text nodes
@@ -6905,7 +6908,7 @@ function bindObjectListeners (data, value) {
       for (var key in value) {
         var existing = on[key];
         var ours = value[key];
-        on[key] = existing ? [].concat(ours, existing) : ours;
+        on[key] = existing ? [].concat(existing, ours) : ours;
       }
     }
   }
@@ -8092,7 +8095,7 @@ TemplateRenderer.prototype.renderState = function renderState (context, options)
     var contextKey = ref.contextKey; if ( contextKey === void 0 ) contextKey = 'state';
     var windowKey = ref.windowKey; if ( windowKey === void 0 ) windowKey = '__INITIAL_STATE__';
   var autoRemove = process.env.NODE_ENV === 'production'
-    ? '(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
+    ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
     : '';
   return context[contextKey]
     ? ("<script>window." + windowKey + "=" + (serialize(context[contextKey], { isJSON: true })) + autoRemove + "</script>")

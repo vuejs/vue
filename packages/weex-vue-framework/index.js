@@ -2,52 +2,22 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var latestNodeId = 1;
-
-function TextNode (text) {
-  this.instanceId = '';
-  this.nodeId = latestNodeId++;
-  this.parentNode = null;
-  this.nodeType = 3;
-  this.text = text;
-}
-
 // this will be preserved during build
 var VueFactory = require('./factory');
 
 var instances = {};
-var modules = {};
-var components = {};
-
-var renderer = {
-  TextNode: TextNode,
-  instances: instances,
-  modules: modules,
-  components: components
-};
 
 /**
- * Prepare framework config, basically about the virtual-DOM and JS bridge.
- * @param {object} cfg
+ * Prepare framework config.
+ * Nothing need to do actually, just an interface provided to weex runtime.
  */
-function init (cfg) {
-  renderer.Document = cfg.Document;
-  renderer.Element = cfg.Element;
-  renderer.Comment = cfg.Comment;
-  renderer.compileBundle = cfg.compileBundle;
-}
+function init () {}
 
 /**
  * Reset framework config and clear all registrations.
  */
 function reset () {
   clear(instances);
-  clear(modules);
-  clear(components);
-  delete renderer.Document;
-  delete renderer.Element;
-  delete renderer.Comment;
-  delete renderer.compileBundle;
 }
 
 /**
@@ -79,47 +49,33 @@ function createInstance (
   if ( config === void 0 ) config = {};
   if ( env === void 0 ) env = {};
 
-  // Virtual-DOM object.
-  var document = new renderer.Document(instanceId, config.bundleUrl);
-
+  var weex = env.weex;
+  var document = weex.document;
   var instance = instances[instanceId] = {
     instanceId: instanceId, config: config, data: data,
     document: document
   };
 
-  // Prepare native module getter and HTML5 Timer APIs.
-  var moduleGetter = genModuleGetter(instanceId);
-  var timerAPIs = getInstanceTimer(instanceId, moduleGetter);
-
-  // Prepare `weex` instance variable.
-  var weexInstanceVar = {
-    config: config,
-    document: document,
-    supports: supports,
-    requireModule: moduleGetter
-  };
-  Object.freeze(weexInstanceVar);
+  var timerAPIs = getInstanceTimer(instanceId, weex.requireModule);
 
   // Each instance has a independent `Vue` module instance
-  var Vue = instance.Vue = createVueModuleInstance(instanceId, moduleGetter);
+  var Vue = instance.Vue = createVueModuleInstance(instanceId, weex);
 
   // The function which create a closure the JS Bundle will run in.
   // It will declare some instance variables like `Vue`, HTML5 Timer APIs etc.
   var instanceVars = Object.assign({
     Vue: Vue,
-    weex: weexInstanceVar,
-    // deprecated
-    __weex_require_module__: weexInstanceVar.requireModule // eslint-disable-line
+    weex: weex
   }, timerAPIs, env.services);
 
-  if (!callFunctionNative(instanceVars, appCode)) {
-    // If failed to compile functionBody on native side,
-    // fallback to 'callFunction()'.
-    callFunction(instanceVars, appCode);
-  }
+  appCode = "(function(global){ \n" + appCode + "\n })(Object.create(this))";
+
+  callFunction(instanceVars, appCode);
 
   // Send `createFinish` signal to native.
-  instance.document.taskCenter.send('dom', { action: 'createFinish' }, []);
+  document.taskCenter.send('dom', { action: 'createFinish' }, []);
+
+  return instance
 }
 
 /**
@@ -132,6 +88,8 @@ function destroyInstance (instanceId) {
   if (instance && instance.app instanceof instance.Vue) {
     instance.document.destroy();
     instance.app.$destroy();
+    delete instance.document;
+    delete instance.app;
   }
   delete instances[instanceId];
 }
@@ -221,102 +179,26 @@ function receiveTasks (id, tasks) {
 }
 
 /**
- * Register native modules information.
- * @param {object} newModules
- */
-function registerModules (newModules) {
-  var loop = function ( name ) {
-    if (!modules[name]) {
-      modules[name] = {};
-    }
-    newModules[name].forEach(function (method) {
-      if (typeof method === 'string') {
-        modules[name][method] = true;
-      } else {
-        modules[name][method.name] = method.args;
-      }
-    });
-  };
-
-  for (var name in newModules) loop( name );
-}
-
-/**
- * Check whether the module or the method has been registered.
- * @param {String} module name
- * @param {String} method name (optional)
- */
-function isRegisteredModule (name, method) {
-  if (typeof method === 'string') {
-    return !!(modules[name] && modules[name][method])
-  }
-  return !!modules[name]
-}
-
-/**
- * Register native components information.
- * @param {array} newComponents
- */
-function registerComponents (newComponents) {
-  if (Array.isArray(newComponents)) {
-    newComponents.forEach(function (component) {
-      if (!component) {
-        return
-      }
-      if (typeof component === 'string') {
-        components[component] = true;
-      } else if (typeof component === 'object' && typeof component.type === 'string') {
-        components[component.type] = component;
-      }
-    });
-  }
-}
-
-/**
- * Check whether the component has been registered.
- * @param {String} component name
- */
-function isRegisteredComponent (name) {
-  return !!components[name]
-}
-
-/**
- * Detects whether Weex supports specific features.
- * @param {String} condition
- */
-function supports (condition) {
-  if (typeof condition !== 'string') { return null }
-
-  var res = condition.match(/^@(\w+)\/(\w+)(\.(\w+))?$/i);
-  if (res) {
-    var type = res[1];
-    var name = res[2];
-    var method = res[4];
-    switch (type) {
-      case 'module': return isRegisteredModule(name, method)
-      case 'component': return isRegisteredComponent(name)
-    }
-  }
-
-  return null
-}
-
-/**
  * Create a fresh instance of Vue for each Weex instance.
  */
-function createVueModuleInstance (instanceId, moduleGetter) {
+function createVueModuleInstance (instanceId, weex) {
   var exports = {};
-  VueFactory(exports, renderer);
+  VueFactory(exports, weex.document);
   var Vue = exports.Vue;
 
   var instance = instances[instanceId];
 
   // patch reserved tag detection to account for dynamically registered
   // components
+  var weexRegex = /^weex:/i;
   var isReservedTag = Vue.config.isReservedTag || (function () { return false; });
+  var isRuntimeComponent = Vue.config.isRuntimeComponent || (function () { return false; });
   Vue.config.isReservedTag = function (name) {
-    return components[name] || isReservedTag(name)
+    return (!isRuntimeComponent(name) && weex.supports(("@component/" + name))) ||
+      isReservedTag(name) ||
+      weexRegex.test(name)
   };
+  Vue.config.parsePlatformTagName = function (name) { return name.replace(weexRegex, ''); };
 
   // expose weex-specific info
   Vue.prototype.$instanceId = instanceId;
@@ -324,7 +206,7 @@ function createVueModuleInstance (instanceId, moduleGetter) {
 
   // expose weex native module getter on subVue prototype so that
   // vdom runtime modules can access native modules via vnode.context
-  Vue.prototype.$requireWeexModule = moduleGetter;
+  Vue.prototype.$requireWeexModule = weex.requireModule;
 
   // Hack `Vue` behavior to handle instance information and data
   // before root component created.
@@ -355,44 +237,6 @@ function createVueModuleInstance (instanceId, moduleGetter) {
   };
 
   return Vue
-}
-
-/**
- * Generate native module getter. Each native module has several
- * methods to call. And all the behaviors is instance-related. So
- * this getter will return a set of methods which additionally
- * send current instance id to native when called.
- * @param  {string}  instanceId
- * @return {function}
- */
-function genModuleGetter (instanceId) {
-  var instance = instances[instanceId];
-  return function (name) {
-    var nativeModule = modules[name] || [];
-    var output = {};
-    var loop = function ( methodName ) {
-      Object.defineProperty(output, methodName, {
-        enumerable: true,
-        configurable: true,
-        get: function proxyGetter () {
-          return function () {
-            var args = [], len = arguments.length;
-            while ( len-- ) args[ len ] = arguments[ len ];
-
-            return instance.document.taskCenter.send('module', { module: name, method: methodName }, args)
-          }
-        },
-        set: function proxySetter (val) {
-          if (typeof val === 'function') {
-            return instance.document.taskCenter.send('module', { module: name, method: methodName }, [val])
-          }
-        }
-      });
-    };
-
-    for (var methodName in nativeModule) loop( methodName );
-    return output
-  }
 }
 
 /**
@@ -459,58 +303,6 @@ function callFunction (globalObjects, body) {
   return result.apply(void 0, globalValues)
 }
 
-/**
- * Call a new function generated on the V8 native side.
- *
- * This function helps speed up bundle compiling. Normally, the V8
- * engine needs to download, parse, and compile a bundle on every
- * visit. If 'compileBundle()' is available on native side,
- * the downloding, parsing, and compiling steps would be skipped.
- * @param  {object} globalObjects
- * @param  {string} body
- * @return {boolean}
- */
-function callFunctionNative (globalObjects, body) {
-  if (typeof renderer.compileBundle !== 'function') {
-    return false
-  }
-
-  var fn = void 0;
-  var isNativeCompileOk = false;
-  var script = '(function (';
-  var globalKeys = [];
-  var globalValues = [];
-  for (var key in globalObjects) {
-    globalKeys.push(key);
-    globalValues.push(globalObjects[key]);
-  }
-  for (var i = 0; i < globalKeys.length - 1; ++i) {
-    script += globalKeys[i];
-    script += ',';
-  }
-  script += globalKeys[globalKeys.length - 1];
-  script += ') {';
-  script += body;
-  script += '} )';
-
-  try {
-    var weex = globalObjects.weex || {};
-    var config = weex.config || {};
-    fn = renderer.compileBundle(script,
-      config.bundleUrl,
-      config.bundleDigest,
-      config.codeCachePath);
-    if (fn && typeof fn === 'function') {
-      fn.apply(void 0, globalValues);
-      isNativeCompileOk = true;
-    }
-  } catch (e) {
-    console.error(e);
-  }
-
-  return isNativeCompileOk
-}
-
 exports.init = init;
 exports.reset = reset;
 exports.createInstance = createInstance;
@@ -518,8 +310,3 @@ exports.destroyInstance = destroyInstance;
 exports.refreshInstance = refreshInstance;
 exports.getRoot = getRoot;
 exports.receiveTasks = receiveTasks;
-exports.registerModules = registerModules;
-exports.isRegisteredModule = isRegisteredModule;
-exports.registerComponents = registerComponents;
-exports.isRegisteredComponent = isRegisteredComponent;
-exports.supports = supports;
