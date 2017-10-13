@@ -4,15 +4,15 @@ describe('Directive v-model dynamic input type', () => {
   it('should work', done => {
     const vm = new Vue({
       data: {
-        type: null,
+        inputType: null,
         test: 'b'
       },
-      template: `<input :type="type" v-model="test">`
+      template: `<input :type="inputType" v-model="test">`
     }).$mount()
     document.body.appendChild(vm.$el)
 
     // test text
-    assertInputWorks(vm).then(done)
+    assertInputWorks(vm, 'inputType').then(done)
   })
 
   it('with v-if', done => {
@@ -87,7 +87,11 @@ describe('Directive v-model dynamic input type', () => {
   })
 })
 
-function assertInputWorks (vm, chain) {
+function assertInputWorks (vm, type, chain) {
+  if (typeof type !== 'string') {
+    if (!chain) chain = type
+    type = 'type'
+  }
   if (!chain) chain = waitForUpdate()
   chain.then(() => {
     expect(vm.$el.value).toBe('b')
@@ -99,7 +103,7 @@ function assertInputWorks (vm, chain) {
     expect(vm.test).toBe('c')
   }).then(() => {
     // change it to password
-    vm.type = 'password'
+    vm[type] = 'password'
     vm.test = 'b'
   }).then(() => {
     expect(vm.$el.type).toBe('password')
@@ -109,7 +113,7 @@ function assertInputWorks (vm, chain) {
     expect(vm.test).toBe('c')
   }).then(() => {
     // change it to checkbox...
-    vm.type = 'checkbox'
+    vm[type] = 'checkbox'
   }).then(() => {
     expect(vm.$el.type).toBe('checkbox')
     expect(vm.$el.checked).toBe(true)
