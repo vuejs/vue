@@ -15,21 +15,12 @@ jobs:
             - v1-vue-{{ .Branch }}-{{ checksum "package-lock.json" }}
             - v1-vue-{{ .Branch }}-
             - v1-vue-
-      - restore_cache:
-          keys:
-            - v1-vue-ssr-{{ .Branch }}-{{ checksum "packages/vue-server-renderer/package-lock.json" }}
-            - v1-vue-ssr-{{ .Branch }}-
-            - v1-vue-ssr-
       - run: npm install
-      - run: cd packages/vue-server-renderer && npm install
+      - run: cd packages/vue-server-renderer && npm install vue
       - save_cache:
           key: v1-vue-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths:
             - node_modules/
-      - save_cache:
-          key: v1-vue-ssr-{{ .Branch }}-{{ checksum "packages/vue-server-renderer/package-lock.json" }}
-          paths:
-            - packages/vue-server-renderer/node_modules/
       - persist_to_workspace:
           root: ~/project
           paths:
