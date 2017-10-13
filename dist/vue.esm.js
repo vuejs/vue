@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.5.0
+ * Vue.js v2.5.1
  * (c) 2014-2017 Evan You
  * Released under the MIT License.
  */
@@ -1464,7 +1464,7 @@ function normalizeProps (options, vm) {
         ? val
         : { type: val };
     }
-  } else if (process.env.NODE_ENV !== 'production' && props) {
+  } else if (process.env.NODE_ENV !== 'production') {
     warn(
       "Invalid value for option \"props\": expected an Array or an Object, " +
       "but got " + (toRawType(props)) + ".",
@@ -2093,14 +2093,16 @@ function normalizeArrayChildren (children, nestedIndex) {
     lastIndex = res.length - 1;
     last = res[lastIndex];
     //  nested
-    if (Array.isArray(c) && c.length > 0) {
-      c = normalizeArrayChildren(c, ((nestedIndex || '') + "_" + i));
-      // merge adjacent text nodes
-      if (isTextNode(c[0]) && isTextNode(last)) {
-        res[lastIndex] = createTextVNode(last.text + (c[0]).text);
-        c.shift();
+    if (Array.isArray(c)) {
+      if (c.length > 0) {
+        c = normalizeArrayChildren(c, ((nestedIndex || '') + "_" + i));
+        // merge adjacent text nodes
+        if (isTextNode(c[0]) && isTextNode(last)) {
+          res[lastIndex] = createTextVNode(last.text + (c[0]).text);
+          c.shift();
+        }
+        res.push.apply(res, c);
       }
-      res.push.apply(res, c);
     } else if (isPrimitive(c)) {
       if (isTextNode(last)) {
         // merge adjacent text nodes
@@ -3811,7 +3813,7 @@ function bindObjectListeners (data, value) {
       for (var key in value) {
         var existing = on[key];
         var ours = value[key];
-        on[key] = existing ? [].concat(ours, existing) : ours;
+        on[key] = existing ? [].concat(existing, ours) : ours;
       }
     }
   }
@@ -4895,7 +4897,7 @@ Object.defineProperty(Vue$3.prototype, '$ssrContext', {
   }
 });
 
-Vue$3.version = '2.5.0';
+Vue$3.version = '2.5.1';
 
 /*  */
 
@@ -6552,6 +6554,7 @@ var warn$1;
 // in some cases, the event used has to be determined at runtime
 // so we used some reserved tokens during compile.
 var RANGE_TOKEN = '__r';
+var CHECKBOX_RADIO_TOKEN = '__c';
 
 function model (
   el,
@@ -6714,6 +6717,13 @@ function normalizeEvents (on) {
     var event = isIE ? 'change' : 'input';
     on[event] = [].concat(on[RANGE_TOKEN], on[event] || []);
     delete on[RANGE_TOKEN];
+  }
+  // This was originally intended to fix #4521 but no longer necessary
+  // after 2.5. Keeping it for backwards compat with generated code from < 2.4
+  /* istanbul ignore if */
+  if (isDef(on[CHECKBOX_RADIO_TOKEN])) {
+    on.change = [].concat(on[CHECKBOX_RADIO_TOKEN], on.change || []);
+    delete on[CHECKBOX_RADIO_TOKEN];
   }
 }
 
@@ -8073,6 +8083,10 @@ var TransitionGroup = {
     children.forEach(applyTranslation);
 
     // force reflow to put everything in position
+    // assign to this to avoid being removed in tree-shaking
+    // $flow-disable-line
+    this._reflow = document.body.offsetHeight;
+
     children.forEach(function (c) {
       if (c.data.moved) {
         var el = c.elm;
@@ -9329,7 +9343,7 @@ function preTransformNode (el, options) {
       addRawAttr(branch0, 'type', 'checkbox');
       processElement(branch0, options);
       branch0.processed = true; // prevent it from double-processed
-      branch0.if = "type==='checkbox'" + ifConditionExtra;
+      branch0.if = "(" + typeBinding + ")==='checkbox'" + ifConditionExtra;
       addIfCondition(branch0, {
         exp: branch0.if,
         block: branch0
@@ -9340,7 +9354,7 @@ function preTransformNode (el, options) {
       addRawAttr(branch1, 'type', 'radio');
       processElement(branch1, options);
       addIfCondition(branch0, {
-        exp: "type==='radio'" + ifConditionExtra,
+        exp: "(" + typeBinding + ")==='radio'" + ifConditionExtra,
         block: branch1
       });
       // 3. other
