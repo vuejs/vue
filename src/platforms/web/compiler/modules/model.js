@@ -36,7 +36,7 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
       addRawAttr(branch0, 'type', 'checkbox')
       processElement(branch0, options)
       branch0.processed = true // prevent it from double-processed
-      branch0.if = `type==='checkbox'` + ifConditionExtra
+      branch0.if = `(${typeBinding})==='checkbox'` + ifConditionExtra
       addIfCondition(branch0, {
         exp: branch0.if,
         block: branch0
@@ -47,7 +47,7 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
       addRawAttr(branch1, 'type', 'radio')
       processElement(branch1, options)
       addIfCondition(branch0, {
-        exp: `type==='radio'` + ifConditionExtra,
+        exp: `(${typeBinding})==='radio'` + ifConditionExtra,
         block: branch1
       })
       // 3. other
