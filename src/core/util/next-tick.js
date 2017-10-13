@@ -86,7 +86,7 @@ export function withMacroTask (fn: Function): Function {
   })
 }
 
-export function nextTick (cb?: Function, ctx?: Object): ?Promise {
+export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
   callbacks.push(() => {
     if (cb) {
