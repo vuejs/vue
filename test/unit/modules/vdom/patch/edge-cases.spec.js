@@ -189,4 +189,13 @@ describe('vdom patch: edge cases', () => {
       expect(vm.$refs.foo.$refs.bar.$el.className).toBe(`hello`)
     }).then(done)
   })
+
+  // #6790
+  it('should not render undefined for empty nested arrays', () => {
+    const vm = new Vue({
+      template: `<div><template v-for="i in emptyArr"></template></div>`,
+      data: { emptyArr: [] }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('')
+  })
 })
