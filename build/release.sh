@@ -20,10 +20,13 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     npm run test:ssr
   fi
 
-  if [[ -z $SKIP_SAUCE ]]; then
-    export SAUCE_BUILD_ID=$VERSION:`date +"%s"`
-    npm run test:sauce
-  fi
+  # Sauce Labs tests has a decent change of failing
+  # so we usually manually run them before running the release script.
+
+  # if [[ -z $SKIP_SAUCE ]]; then
+  #   export SAUCE_BUILD_ID=$VERSION:`date +"%s"`
+  #   npm run test:sauce
+  # fi
 
   # build
   VERSION=$VERSION npm run build
