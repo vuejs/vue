@@ -29,7 +29,7 @@
     "source-map": "0.5.6"
   },
   "devDependencies": {
-    "vue": "file:../../"
+    "vue": "file:../.."
   },
   "homepage": "https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#readme"
 }
