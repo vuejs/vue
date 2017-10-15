@@ -22,7 +22,7 @@ export interface CreateElement {
 
 export interface Vue {
   readonly $el: HTMLElement;
-  readonly $options: ComponentOptions<this>;
+  readonly $options: ComponentOptions<Vue>;
   readonly $parent: Vue;
   readonly $root: Vue;
   readonly $children: Vue[];
