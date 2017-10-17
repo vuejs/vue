@@ -17,7 +17,7 @@ describe('Directive v-once', () => {
     const list = ['foo', 'bar']
     const MyComponent = Vue.extend({
       props: ['item'],
-      template: '<div v-once>{{ item }}</div>'
+      template: '<li v-once>{{ item }}</li>'
     })
     const vm = new Vue({
       components: {
