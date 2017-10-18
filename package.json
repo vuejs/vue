@@ -40,7 +40,7 @@
     "release": "bash build/release.sh",
     "release:weex": "bash build/release-weex.sh",
     "release:note": "node build/gen-release-note.js",
-    "setup": "node build/install-hooks.js",
+    "setup": "node build/setup.js",
     "commit": "git-cz"
   },
   "repository": {
