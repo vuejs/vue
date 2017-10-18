@@ -89,7 +89,7 @@ export function mergeDataOrFn (
         typeof parentVal === 'function' ? parentVal.call(this) : parentVal
       )
     }
-  } else if (parentVal || childVal) {
+  } else {
     return function mergedInstanceDataFn () {
       // instance merge
       const instanceData = typeof childVal === 'function'
