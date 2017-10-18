@@ -13,6 +13,26 @@ describe('Directive v-once', () => {
     }).then(done)
   })
 
+  it('should correctly render list items', done => {
+    const list = ['foo', 'bar']
+    const MyComponent = Vue.extend({
+      props: ['item'],
+      template: '<li v-once>{{ item }}</li>'
+    })
+    const vm = new Vue({
+      components: {
+        MyComponent
+      },
+      template: '<ul><my-component v-for="item, index in list" :key="index" :item="item"></my-component></ul>',
+      data: { list }
+    }).$mount()
+    list.forEach((item, index) => expect(vm.$el.children[index].innerHTML).toBe(item))
+    vm.list = ['quz', 'qux']
+    waitForUpdate(() => {
+      list.forEach((item, index) => expect(vm.$el.children[index].innerHTML).toBe(item))
+    }).then(done)
+  })
+
   it('should not rerender self and child component', done => {
     const vm = new Vue({
       template: `
