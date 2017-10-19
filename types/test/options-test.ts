@@ -1,4 +1,4 @@
-import Vue from "../index";
+import Vue, { Prop } from "../index";
 import { AsyncComponent, ComponentOptions, FunctionalComponentOptions } from "../index";
 import { CreateElement } from "../vue";
 
@@ -47,8 +47,19 @@ class Cat {
   private u: number
 }
 
+interface IFoo {
+  foo: string,
+  bar: number
+}
+
+interface IBar {
+  foo: any,
+  bar: object
+}
+
 Vue.component('union-prop', {
   props: {
+    customInterface: [Object as Prop<IFoo>, Object as Prop<IBar>],
     primitive: [String, Number],
     object: [Cat, User],
     regex: RegExp,
@@ -56,6 +67,7 @@ Vue.component('union-prop', {
     union: [User, Number] as {new(): User | Number}[] // requires annotation
   },
   data() {
+    this.customInterface;
     this.primitive;
     this.object;
     this.union;
