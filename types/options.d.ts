@@ -122,9 +122,11 @@ export interface RenderContext<Props=DefaultProps> {
   injections: any
 }
 
-export type Prop<T> = { (): T } | { new (...args: any[]): T & object }
+export type Prop<T> = { (): T } | { new(...args: any[]): T & object }
 
-export type PropValidator<T> = PropOptions<T> | Prop<T> | Prop<T>[];
+export type PropType<T> = Prop<T> | Prop<T>[];
+
+export type PropValidator<T> = PropOptions<T> | PropType<T>;
 
 export interface PropOptions<T=any> {
   type?: Prop<T> | Prop<T>[];

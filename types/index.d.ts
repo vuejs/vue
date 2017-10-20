@@ -12,7 +12,7 @@ export {
   ComponentOptions,
   FunctionalComponentOptions,
   RenderContext,
-  Prop,
+  PropType,
   PropOptions,
   ComputedOptions,
   WatchHandler,
