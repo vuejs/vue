@@ -1,7 +1,4 @@
-const { test, ln, chmod, cd, exec } = require('shelljs')
-const path = require('path')
-
-const baseUrl = path.resolve()
+const { test, ln, chmod } = require('shelljs')
 
 function installHooks () {
   if (test('-e', '.git/hooks')) {
@@ -12,15 +9,4 @@ function installHooks () {
   }
 }
 
-function setupSSR () {
-  const ssrBase = path.resolve('packages/vue-server-renderer')
-  if (!test('-e', path.join(ssrBase, 'node_modules'))) {
-    cd(ssrBase)
-    exec('npm install')
-    cd(baseUrl)
-  }
-}
-
 installHooks()
-setupSSR()
-

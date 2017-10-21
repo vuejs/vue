@@ -7,7 +7,11 @@
     ],
     "module": "commonjs",
     "strict": true,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "vue": ["../index.d.ts"]
+    }
   },
   "files": [
     "../index.d.ts",
