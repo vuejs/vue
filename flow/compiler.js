@@ -55,6 +55,7 @@ declare type ASTIfConditions = Array<ASTIfCondition>;
 
 declare type ASTElementHandler = {
   value: string;
+  params?: Array<any>;
   modifiers: ?ASTModifiers;
 };
 
