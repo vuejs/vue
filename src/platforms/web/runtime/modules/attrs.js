@@ -1,6 +1,7 @@
 /* @flow */
 
 import { isIE9, isEdge } from 'core/util/env'
+import config from 'core/config'
 
 import {
   extend,
@@ -59,6 +60,13 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 }
 
 function setAttr (el: Element, key: string, value: any) {
+  // The attributes are not set to their default values
+  // for elements in the ignoredElements array
+  // eg. <custom-tab-bar selected="tab1"></custom-tab-bar>
+  if (config.ignoredElements.indexOf(el.tagName.toLowerCase()) > -1) {
+    el.setAttribute(key, value)
+    return
+  }
   if (isBooleanAttr(key)) {
     // set attribute for blank value
     // e.g. <option disabled>Select one</option>
