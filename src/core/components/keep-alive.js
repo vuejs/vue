@@ -89,7 +89,6 @@ export default {
       if (name && (
         (this.exclude && matches(this.exclude, name)) ||
         (this.include && !matches(this.include, name)) 
-        
       )) {
         return vnode
       }
