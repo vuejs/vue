@@ -87,8 +87,8 @@ export default {
       // check pattern
       const name: ?string = getComponentName(componentOptions)
       if (name && (
-        (this.include && !matches(this.include, name)) ||
-        (this.exclude && matches(this.exclude, name))
+        (this.exclude && matches(this.exclude, name)) ||
+        (this.include && !matches(this.include, name))
       )) {
         return vnode
       }
