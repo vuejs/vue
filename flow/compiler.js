@@ -14,7 +14,8 @@ declare type CompilerOptions = {
   preserveWhitespace?: boolean;
   isFromDOM?: boolean;
   shouldDecodeTags?: boolean;
-  shouldDecodeNewlines?: boolean;
+  shouldDecodeNewlines?:  boolean;
+  shouldDecodeNewlinesForHref?: boolean;
 
   // for ssr optimization compiler
   scopeId?: string;
