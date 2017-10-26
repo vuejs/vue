@@ -80,6 +80,32 @@ describe('Global API: set/delete', () => {
         expect(vm.$el.innerHTML).toBe('<p>D</p><p>B</p><p>C</p>')
       }).then(done)
     })
+
+    // #6845
+    it('should not overwrite properties on prototype chain', () => {
+      class Model {
+        constructor () {
+          this._bar = null
+        }
+        get bar () {
+          return this._bar
+        }
+        set bar (newvalue) {
+          this._bar = newvalue
+        }
+      }
+
+      const vm = new Vue({
+        data: {
+          data: new Model()
+        }
+      })
+
+      Vue.set(vm.data, 'bar', 123)
+      expect(vm.data.bar).toBe(123)
+      expect(vm.data.hasOwnProperty('bar')).toBe(false)
+      expect(vm.data._bar).toBe(123)
+    })
   })
 
   describe('Vue.delete', () => {
