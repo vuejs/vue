@@ -55,7 +55,7 @@ function walk (node: ASTNode, isRoot?: boolean) {
     if (node.ifConditions) {
       for (let i = 1, l = node.ifConditions.length; i < l; i++) {
         const block = node.ifConditions[i].block
-        walk(block)
+        walk(block, isRoot)
         check(block)
       }
     }
