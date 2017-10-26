@@ -199,14 +199,6 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     target[key] = val
     return val
   }
-  if (!Array.isArray(target)) {
-    const propertyDescriptor = getInheritedPropertyDescriptor(target, key)
-    if (propertyDescriptor && propertyDescriptor.set) {
-      propertyDescriptor.set.call(target, val)
-      return val
-    }
-  }
-
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -219,6 +211,13 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     target[key] = val
     return val
   }
+
+  const propertyDescriptor = getInheritedPropertyDescriptor(ob.value, key)
+  if (propertyDescriptor && propertyDescriptor.set) {
+    propertyDescriptor.set.call(target, val)
+    return val
+  }
+
   defineReactive(ob.value, key, val)
   ob.dep.notify()
   return val
@@ -281,7 +280,7 @@ function getInheritedPropertyDescriptor (obj: Object, key: string) {
     if (property) {
       return property
     }
-  } while (obj)
+  } while (obj && obj.constructor !== Object)
 
   return null
 }
