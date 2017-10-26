@@ -142,7 +142,6 @@ export function defineReactive (
   if (property && property.configurable === false) {
     return
   }
-
   // cater for pre-defined getter/setters
   const getter = property && property.get
   const setter = property && property.set
@@ -200,6 +199,14 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     target[key] = val
     return val
   }
+  if (!Array.isArray(target)) {
+    const propertyDescriptor = getInheritedPropertyDescriptor(target, key)
+    if (propertyDescriptor && propertyDescriptor.set) {
+      propertyDescriptor.set.call(target, val)
+      return val
+    }
+  }
+
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -255,4 +262,26 @@ function dependArray (value: Array<any>) {
       dependArray(e)
     }
   }
+}
+
+/**
+ * Searches an object's prototype chain for the specified property descriptor
+ * Does not check the object itself because this function is only used
+ * when hasOwnProperty has already been confirmed false.
+ */
+function getInheritedPropertyDescriptor (obj: Object, key: string) {
+  // no point in traversing the entire chain for a property that does not exist
+  if (!(key in obj)) {
+    return null
+  }
+
+  do {
+    obj = obj.constructor && obj.constructor.prototype
+    const property = Object.getOwnPropertyDescriptor(obj, key)
+    if (property) {
+      return property
+    }
+  } while (obj)
+
+  return null
 }
