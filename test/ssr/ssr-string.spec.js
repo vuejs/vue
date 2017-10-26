@@ -989,6 +989,17 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  // #6907
+  it('should not optimize root if conditions', done => {
+    renderVmWithOptions({
+      data: { foo: 123 },
+      template: `<input :type="'text'" v-model="foo">`
+    }, res => {
+      expect(res).toBe(`<input type="text" data-server-rendered="true" value="123">`)
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
