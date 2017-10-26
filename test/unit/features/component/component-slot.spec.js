@@ -686,6 +686,7 @@ describe('Component slot', () => {
     expect(vm.$el.innerHTML).toBe('<div>default<span>foo</span></div>')
   })
 
+  // #6372, #6915
   it('should handle nested components in slots properly', done => {
     const TestComponent = {
       template: `
@@ -706,7 +707,10 @@ describe('Component slot', () => {
           <test-component ref="test">
             <div>
               <foo/>
-            </div><bar/>
+            </div>
+            <bar>
+              <foo/>
+            </bar>
           </test-component>
         </div>
       `,
@@ -716,16 +720,16 @@ describe('Component slot', () => {
           template: `<div>foo</div>`
         },
         bar: {
-          template: `<div>bar</div>`
+          template: `<div>bar<slot/></div>`
         }
       }
     }).$mount()
 
-    expect(vm.$el.innerHTML).toBe(`<b><div><div>foo</div></div><div>bar</div></b>`)
+    expect(vm.$el.innerHTML).toBe(`<b><div><div>foo</div></div> <div>bar<div>foo</div></div></b>`)
 
     vm.$refs.test.toggleEl = false
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML).toBe(`<i><div><div>foo</div></div><div>bar</div></i>`)
+      expect(vm.$el.innerHTML).toBe(`<i><div><div>foo</div></div> <div>bar<div>foo</div></div></i>`)
     }).then(done)
   })
 
