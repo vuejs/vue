@@ -26,7 +26,7 @@ function normalizeEvents (on) {
   }
 }
 
-let target: HTMLElement
+let target: any
 
 function createOnceHandler (handler, event, capture) {
   const _target = target // save current target element in closure
@@ -78,6 +78,7 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   target = vnode.elm
   normalizeEvents(on)
   updateListeners(on, oldOn, add, remove, vnode.context)
+  target = undefined
 }
 
 export default {
