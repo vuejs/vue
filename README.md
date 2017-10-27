@@ -13,6 +13,17 @@
 
 ## 贡献学习心得方式
 
+### 添加源码注释
+
 学习者可基于 `docs-src` 分支创建一个自己的学习分支，在自己的分支进行项目改动后，可以向 `docs-src` 分支发一个 merge request。
+
+### 书写学习心得
+
+支持以 Markdown 的形式编写[学习wiki](git clone https://github.com/lizhiyao/vue.wiki.git)
+
+#### 参考
+
+- [给使用 Git 做版本控制的项目添加 Wiki](https://lizhiyao.github.io/2017/01/06/git-wiki/)
+
 
 
