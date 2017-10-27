@@ -336,6 +336,28 @@ describe('Observer', () => {
     }).then(done)
   })
 
+  it('calls setters when found in the prototype chain of observed object', () => {
+    class Seq {
+      constructor () {
+        this.number = 1
+      }
+      get nextNumber () {
+        return this.number + 1
+      }
+      set nextNumber (v) {
+        this.number = v - 1
+      }
+    }
+    const seq = new Seq()
+    observe(seq)
+    expect(seq.hasOwnProperty('nextNumber')).toBe(false)
+    expect(seq.number).toBe(1)
+    expect(seq.nextNumber).toBe(2)
+    Vue.set(seq, 'nextNumber', 5)
+    expect(seq.number).toBe(4)
+    expect(seq.nextNumber).toBe(5)
+  })
+
   it('observing array mutation', () => {
     const arr = []
     const ob = observe(arr)
