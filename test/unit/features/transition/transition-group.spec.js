@@ -294,7 +294,7 @@ if (!isIE9) {
       expect('<transition-group> children must be keyed: <div>').toHaveBeenWarned()
     })
 
-    // Github issue #6006
+    // GitHub issue #6006
     it('should work with dynamic name', done => {
       const vm = new Vue({
         template: `

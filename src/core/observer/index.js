@@ -1,15 +1,16 @@
 /* @flow */
 
 import Dep from './dep'
+import VNode from '../vdom/vnode'
 import { arrayMethods } from './array'
 import {
   def,
+  warn,
+  hasOwn,
+  hasProto,
   isObject,
   isPlainObject,
   isValidArrayIndex,
-  hasProto,
-  hasOwn,
-  warn,
   isServerRendering
 } from '../util/index'
 
@@ -22,8 +23,7 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
  * under a frozen data structure. Converting it would defeat the optimization.
  */
 export const observerState = {
-  shouldConvert: true,
-  isSettingProps: false
+  shouldConvert: true
 }
 
 /**
@@ -105,7 +105,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * or the existing observer if the value already has one.
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
-  if (!isObject(value)) {
+  if (!isObject(value) || value instanceof VNode) {
     return
   }
   let ob: Observer | void
@@ -133,7 +133,8 @@ export function defineReactive (
   obj: Object,
   key: string,
   val: any,
-  customSetter?: Function
+  customSetter?: ?Function,
+  shallow?: boolean
 ) {
   const dep = new Dep()
 
@@ -146,7 +147,7 @@ export function defineReactive (
   const getter = property && property.get
   const setter = property && property.set
 
-  let childOb = observe(val)
+  let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
@@ -156,9 +157,9 @@ export function defineReactive (
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
-        }
-        if (Array.isArray(value)) {
-          dependArray(value)
+          if (Array.isArray(value)) {
+            dependArray(value)
+          }
         }
       }
       return value
@@ -178,7 +179,7 @@ export function defineReactive (
       } else {
         val = newVal
       }
-      childOb = observe(newVal)
+      childOb = !shallow && observe(newVal)
       dep.notify()
     }
   })
@@ -195,7 +196,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     target.splice(key, 1, val)
     return val
   }
-  if (hasOwn(target, key)) {
+  if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
   }

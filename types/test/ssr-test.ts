@@ -1,6 +1,9 @@
-import Vue = require('vue');
+import Vue, { VNode, VNodeDirective } from '../index';
+import VueSSRClientPlugin = require('../../packages/vue-server-renderer/client-plugin');
+import VueSSRServerPlugin = require('../../packages/vue-server-renderer/server-plugin');
+import webpack = require('webpack');
 import { readFileSync } from 'fs';
-import { createRenderer, createBundleRenderer } from '../';
+import { createRenderer, createBundleRenderer } from '../../packages/vue-server-renderer';
 
 function createApp (context: any) {
   return new Vue({
@@ -25,10 +28,23 @@ const context = {
   `
 };
 
+renderer.renderToString(app, (err, html) => {
+  if (err) throw err;
+  const res: string = html;
+});
+
 renderer.renderToString(app, context, (err, html) => {
   if (err) throw err;
   const res: string = html;
 });
+
+renderer.renderToString(app)
+  .then(html => {
+    const res: string = html;
+  })
+  .catch(err => {
+    throw err;
+  });
 
 renderer.renderToStream(app, context).on('data', chunk => {
   const html = chunk.toString();
@@ -68,7 +84,7 @@ const bundleRenderer = createBundleRenderer('/path/to/vue-ssr-server-bundle.json
   },
 
   directives: {
-    example (vnode: Vue.VNode, directiveMeta: Vue.VNodeDirective) {
+    example (vnode: VNode, directiveMeta: VNodeDirective) {
       // transform vnode based on directive binding metadata
     }
   }
@@ -81,4 +97,16 @@ bundleRenderer.renderToString(context, (err, html) => {
 
 bundleRenderer.renderToStream(context).on('data', chunk => {
   const html = chunk.toString();
+});
+
+// webpack plugins
+webpack({
+  plugins: [
+    new VueSSRClientPlugin({
+      filename: 'client-manifest.json'
+    }),
+    new VueSSRServerPlugin({
+      filename: 'server-bundle.json'
+    })
+  ]
 });

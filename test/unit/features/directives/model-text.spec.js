@@ -293,5 +293,82 @@ describe('Directive v-model text', () => {
       triggerEvent(vm.$el, 'compositionend')
       expect(spy.calls.count()).toBe(2)
     })
+
+    // #4392
+    it('should not update value with modifiers when in focus if post-conversion values are the same', done => {
+      const vm = new Vue({
+        data: {
+          a: 1,
+          foo: false
+        },
+        template: '<div>{{ foo }}<input ref="input" v-model.number="a"></div>'
+      }).$mount()
+
+      document.body.appendChild(vm.$el)
+      vm.$refs.input.focus()
+      vm.$refs.input.value = '1.000'
+      vm.foo = true
+
+      waitForUpdate(() => {
+        expect(vm.$refs.input.value).toBe('1.000')
+      }).then(done)
+    })
+
+    // #6552
+    // This was original introduced due to the microtask between DOM events issue
+    // but fixed after switching to MessageChannel.
+    it('should not block input when another input listener with modifier is used', done => {
+      const vm = new Vue({
+        data: {
+          a: 'a',
+          foo: false
+        },
+        template: `
+          <div>
+            <input ref="input" v-model="a" @input.capture="onInput">{{ a }}
+            <div v-if="foo">foo</div>
+          </div>
+        `,
+        methods: {
+          onInput (e) {
+            this.foo = true
+          }
+        }
+      }).$mount()
+
+      document.body.appendChild(vm.$el)
+      vm.$refs.input.focus()
+      vm.$refs.input.value = 'b'
+      triggerEvent(vm.$refs.input, 'input')
+
+      // not using wait for update here because there will be two update cycles
+      // one caused by onInput in the first listener
+      setTimeout(() => {
+        expect(vm.a).toBe('b')
+        expect(vm.$refs.input.value).toBe('b')
+        done()
+      }, 16)
+    })
+
+    it('should create and make reactive non-existent properties', done => {
+      const vm = new Vue({
+        data: {
+          foo: {}
+        },
+        template: '<input v-model="foo.bar">'
+      }).$mount()
+      expect(vm.$el.value).toBe('')
+
+      vm.$el.value = 'a'
+      triggerEvent(vm.$el, 'input')
+      expect(vm.foo.bar).toBe('a')
+      vm.foo.bar = 'b'
+      waitForUpdate(() => {
+        expect(vm.$el.value).toBe('b')
+        vm.foo = {}
+      }).then(() => {
+        expect(vm.$el.value).toBe('')
+      }).then(done)
+    })
   }
 })

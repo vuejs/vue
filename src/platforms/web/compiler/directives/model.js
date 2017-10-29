@@ -23,13 +23,6 @@ export default function model (
   const type = el.attrsMap.type
 
   if (process.env.NODE_ENV !== 'production') {
-    const dynamicType = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
-    if (tag === 'input' && dynamicType) {
-      warn(
-        `<input :type="${dynamicType}" v-model="${value}">:\n` +
-        `v-model does not support dynamic input types. Use v-if branches instead.`
-      )
-    }
     // inputs with type="file" are read only and setting the input's
     // value will throw an error.
     if (tag === 'input' && type === 'file') {
@@ -40,7 +33,11 @@ export default function model (
     }
   }
 
-  if (tag === 'select') {
+  if (el.component) {
+    genComponentModel(el, value, modifiers)
+    // component v-model doesn't need extra runtime
+    return false
+  } else if (tag === 'select') {
     genSelect(el, value, modifiers)
   } else if (tag === 'input' && type === 'checkbox') {
     genCheckboxModel(el, value, modifiers)
@@ -82,14 +79,14 @@ function genCheckboxModel (
           : `:_q(${value},${trueValueBinding})`
       )
   )
-  addHandler(el, CHECKBOX_RADIO_TOKEN,
+  addHandler(el, 'change',
     `var $$a=${value},` +
         '$$el=$event.target,' +
         `$$c=$$el.checked?(${trueValueBinding}):(${falseValueBinding});` +
     'if(Array.isArray($$a)){' +
       `var $$v=${number ? '_n(' + valueBinding + ')' : valueBinding},` +
           '$$i=_i($$a,$$v);' +
-      `if($$c){$$i<0&&(${value}=$$a.concat($$v))}` +
+      `if($$el.checked){$$i<0&&(${value}=$$a.concat([$$v]))}` +
       `else{$$i>-1&&(${value}=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}` +
     `}else{${genAssignmentCode(value, '$$c')}}`,
     null, true
@@ -105,7 +102,7 @@ function genRadioModel (
   let valueBinding = getBindingAttr(el, 'value') || 'null'
   valueBinding = number ? `_n(${valueBinding})` : valueBinding
   addProp(el, 'checked', `_q(${value},${valueBinding})`)
-  addHandler(el, CHECKBOX_RADIO_TOKEN, genAssignmentCode(value, valueBinding), null, true)
+  addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true)
 }
 
 function genSelect (
@@ -154,7 +151,7 @@ function genDefaultModel (
 
   addProp(el, 'value', `(${value})`)
   addHandler(el, event, code, null, true)
-  if (trim || number || type === 'number') {
+  if (trim || number) {
     addHandler(el, 'blur', '$forceUpdate()')
   }
 }

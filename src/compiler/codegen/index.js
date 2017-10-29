@@ -1,9 +1,9 @@
 /* @flow */
 
 import { genHandlers } from './events'
-import { baseWarn, pluckModuleFunction } from '../helpers'
 import baseDirectives from '../directives/index'
 import { camelize, no, extend } from 'shared/util'
+import { baseWarn, pluckModuleFunction } from '../helpers'
 
 type TransformFunction = (el: ASTElement, code: string) => string;
 type DataGenFunction = (el: ASTElement) => string;
@@ -113,7 +113,7 @@ function genOnce (el: ASTElement, state: CodegenState): string {
       )
       return genElement(el, state)
     }
-    return `_o(${genElement(el, state)},${state.onceId++}${key ? `,${key}` : ``})`
+    return `_o(${genElement(el, state)},${state.onceId++},${key})`
   } else {
     return genStatic(el, state)
   }
@@ -239,7 +239,8 @@ export function genData (el: ASTElement, state: CodegenState): string {
     data += `${genHandlers(el.nativeEvents, true, state.warn)},`
   }
   // slot target
-  if (el.slotTarget) {
+  // only for non-scoped slots
+  if (el.slotTarget && !el.slotScope) {
     data += `slot:${el.slotTarget},`
   }
   // scoped slots
@@ -267,6 +268,10 @@ export function genData (el: ASTElement, state: CodegenState): string {
   // v-bind data wrap
   if (el.wrapData) {
     data = el.wrapData(data)
+  }
+  // v-on data wrap
+  if (el.wrapListeners) {
+    data = el.wrapListeners(data)
   }
   return data
 }
@@ -305,7 +310,7 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
 function genInlineTemplate (el: ASTElement, state: CodegenState): ?string {
   const ast = el.children[0]
   if (process.env.NODE_ENV !== 'production' && (
-    el.children.length > 1 || ast.type !== 1
+    el.children.length !== 1 || ast.type !== 1
   )) {
     state.warn('Inline-template components must have exactly one child element.')
   }
@@ -338,11 +343,14 @@ function genScopedSlot (
   if (el.for && !el.forProcessed) {
     return genForScopedSlot(key, el, state)
   }
-  return `{key:${key},fn:function(${String(el.attrsMap.scope)}){` +
+  const fn = `function(${String(el.slotScope)}){` +
     `return ${el.tag === 'template'
-      ? genChildren(el, state) || 'void 0'
+      ? el.if
+        ? `${el.if}?${genChildren(el, state) || 'undefined'}:undefined`
+        : genChildren(el, state) || 'undefined'
       : genElement(el, state)
-  }}}`
+  }}`
+  return `{key:${key},fn:${fn}}`
 }
 
 function genForScopedSlot (
@@ -438,7 +446,7 @@ export function genText (text: ASTText | ASTExpression): string {
 }
 
 export function genComment (comment: ASTText): string {
-  return `_e('${comment.text}')`
+  return `_e(${JSON.stringify(comment.text)})`
 }
 
 function genSlot (el: ASTElement, state: CodegenState): string {

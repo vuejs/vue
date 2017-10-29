@@ -175,7 +175,29 @@ describe('codegen', () => {
   it('generate slot target', () => {
     assertCodegen(
       '<p slot="one">hello world</p>',
-      `with(this){return _c('p',{slot:"one"},[_v("hello world")])}`
+      `with(this){return _c('p',{attrs:{"slot":"one"},slot:"one"},[_v("hello world")])}`
+    )
+  })
+
+  it('generate scoped slot', () => {
+    assertCodegen(
+      '<foo><template slot-scope="bar">{{ bar }}</template></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(bar){return [_v(_s(bar))]}}])})}`
+    )
+    assertCodegen(
+      '<foo><div slot-scope="bar">{{ bar }}</div></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(bar){return _c('div',{},[_v(_s(bar))])}}])})}`
+    )
+  })
+
+  it('generate named scoped slot', () => {
+    assertCodegen(
+      '<foo><template slot="foo" slot-scope="bar">{{ bar }}</template></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"foo",fn:function(bar){return [_v(_s(bar))]}}])})}`
+    )
+    assertCodegen(
+      '<foo><div slot="foo" slot-scope="bar">{{ bar }}</div></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"foo",fn:function(bar){return _c('div',{},[_v(_s(bar))])}}])})}`
     )
   })
 
@@ -243,17 +265,17 @@ describe('codegen', () => {
   it('generate events with keycode', () => {
     assertCodegen(
       '<input @input.enter="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key))return null;onInput($event)}}})}`
     )
     // multiple keycodes (delete)
     assertCodegen(
       '<input @input.delete="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"delete",[8,46]))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"delete",[8,46],$event.key))return null;onInput($event)}}})}`
     )
     // multiple keycodes (chained)
     assertCodegen(
       '<input @keydown.enter.delete="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13)&&_k($event.keyCode,"delete",[8,46]))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key)&&_k($event.keyCode,"delete",[8,46],$event.key))return null;onInput($event)}}})}`
     )
     // number keycode
     assertCodegen(
@@ -263,7 +285,7 @@ describe('codegen', () => {
     // custom keycode
     assertCodegen(
       '<input @input.custom="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"custom"))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"custom",undefined,$event.key))return null;onInput($event)}}})}`
     )
   })
 
@@ -282,16 +304,16 @@ describe('codegen', () => {
     )
   })
 
-  // Github Issues #5146
+  // GitHub Issues #5146
   it('generate events with generic modifiers and keycode correct order', () => {
     assertCodegen(
       '<input @keydown.enter.prevent="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;$event.preventDefault();onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key))return null;$event.preventDefault();onInput($event)}}})}`
     )
 
     assertCodegen(
       '<input @keydown.enter.stop="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;$event.stopPropagation();onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key))return null;$event.stopPropagation();onInput($event)}}})}`
     )
   })
 
@@ -311,6 +333,14 @@ describe('codegen', () => {
     assertCodegen(
       '<input @click.meta="onClick">',
       `with(this){return _c('input',{on:{"click":function($event){if(!$event.metaKey)return null;onClick($event)}}})}`
+    )
+    assertCodegen(
+      '<input @click.exact="onClick">',
+      `with(this){return _c('input',{on:{"click":function($event){if($event.ctrlKey||$event.shiftKey||$event.altKey||$event.metaKey)return null;onClick($event)}}})}`
+    )
+    assertCodegen(
+      '<input @click.ctrl.exact="onClick">',
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;if($event.shiftKey||$event.altKey||$event.metaKey)return null;onClick($event)}}})}`
     )
   })
 
@@ -390,7 +420,7 @@ describe('codegen', () => {
     // with modifiers
     assertCodegen(
       `<input @keyup.enter="e=>current++">`,
-      `with(this){return _c('input',{on:{"keyup":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13))return null;(e=>current++)($event)}}})}`
+      `with(this){return _c('input',{on:{"keyup":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key))return null;(e=>current++)($event)}}})}`
     )
   })
 
@@ -455,7 +485,14 @@ describe('codegen', () => {
       '<my-component inline-template><hr><hr></my-component>',
       `with(this){return _c('my-component',{inlineTemplate:{render:function(){with(this){return _c('hr')}},staticRenderFns:[]}})}`
     )
+    try {
+      assertCodegen(
+        '<my-component inline-template></my-component>',
+        ''
+      )
+    } catch (e) {}
     expect('Inline-template components must have exactly one child element.').toHaveBeenWarned()
+    expect(console.error.calls.count()).toBe(2)
   })
 
   it('generate static trees inside v-for', () => {
@@ -479,7 +516,21 @@ describe('codegen', () => {
       comments: true
     }, baseOptions)
     const template = '<div><!--comment--></div>'
-    const generatedCode = `with(this){return _c('div',[_e('comment')])}`
+    const generatedCode = `with(this){return _c('div',[_e("comment")])}`
+
+    const ast = parse(template, options)
+    optimize(ast, options)
+    const res = generate(ast, options)
+    expect(res.render).toBe(generatedCode)
+  })
+
+  // #6150
+  it('generate comments with special characters', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const template = '<div><!--\n\'comment\'\n--></div>'
+    const generatedCode = `with(this){return _c('div',[_e("\\n'comment'\\n")])}`
 
     const ast = parse(template, options)
     optimize(ast, options)

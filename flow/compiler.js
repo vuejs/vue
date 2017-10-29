@@ -14,7 +14,8 @@ declare type CompilerOptions = {
   preserveWhitespace?: boolean;
   isFromDOM?: boolean;
   shouldDecodeTags?: boolean;
-  shouldDecodeNewlines?: boolean;
+  shouldDecodeNewlines?:  boolean;
+  shouldDecodeNewlinesForHref?: boolean;
 
   // for ssr optimization compiler
   scopeId?: string;
@@ -36,8 +37,10 @@ declare type CompiledResult = {
 };
 
 declare type ModuleOptions = {
-  preTransformNode: (el: ASTElement) => void;
-  transformNode: (el: ASTElement) => void; // transform an element's AST node
+  // returning an ASTElement from pre/transforms replaces the element
+  preTransformNode: (el: ASTElement) => ?ASTElement;
+  transformNode: (el: ASTElement) => ?ASTElement;
+  // cannot return replacement in postTransform because tree is already finalized
   postTransformNode: (el: ASTElement) => void;
   genData: (el: ASTElement) => string; // generate extra data string for an element
   transformCode?: (el: ASTElement, code: string) => string; // further transform generated code for an element
@@ -45,7 +48,8 @@ declare type ModuleOptions = {
 };
 
 declare type ASTModifiers = { [key: string]: boolean };
-declare type ASTIfConditions = Array<{ exp: ?string; block: ASTElement }>;
+declare type ASTIfCondition = { exp: ?string; block: ASTElement };
+declare type ASTIfConditions = Array<ASTIfCondition>;
 
 declare type ASTElementHandler = {
   value: string;
@@ -73,6 +77,8 @@ declare type ASTElement = {
   attrsMap: { [key: string]: string | null };
   parent: ASTElement | void;
   children: Array<ASTNode>;
+
+  processed?: true;
 
   static?: boolean;
   staticRoot?: boolean;
@@ -133,6 +139,7 @@ declare type ASTElement = {
   once?: true;
   onceProcessed?: boolean;
   wrapData?: (code: string) => string;
+  wrapListeners?: (code: string) => string;
 
   // 2.4 ssr optimization
   ssrOptimizability?: number;

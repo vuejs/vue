@@ -2,15 +2,16 @@
   "compilerOptions": {
     "target": "es5",
     "lib": [
-      "es5",
       "dom",
-      "es2015.promise",
-      "es2015.core"
+      "es2015"
     ],
     "module": "commonjs",
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "noEmit": true
+    "strict": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "vue": ["../index.d.ts"]
+    }
   },
   "files": [
     "../index.d.ts",
@@ -21,7 +22,8 @@
     "options-test.ts",
     "plugin-test.ts",
     "vue-test.ts",
-    "augmentation-test.ts"
+    "augmentation-test.ts",
+    "ssr-test.ts"
   ],
   "compileOnSave": false
 }

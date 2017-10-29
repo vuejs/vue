@@ -12,6 +12,8 @@ declare type InternalComponentOptions = {
   staticRenderFns?: Array<Function>
 };
 
+type InjectKey = string | Symbol;
+
 declare type ComponentOptions = {
   // data
   data: Object | Function | void;
@@ -45,6 +47,7 @@ declare type ComponentOptions = {
   deactivated?: Function;
   beforeDestroy?: Function;
   destroyed?: Function;
+  errorCaptured?: () => boolean | void;
 
   // assets
   directives?: { [key: string]: Object };
@@ -54,7 +57,7 @@ declare type ComponentOptions = {
 
   // context
   provide?: { [key: string | Symbol]: any } | () => { [key: string | Symbol]: any };
-  inject?: { [key: string]: string | Symbol } | Array<string>;
+  inject?: { [key: string]: InjectKey | { from?: InjectKey, default?: any }} | Array<string>;
 
   // component v-model customization
   model?: {
@@ -69,6 +72,7 @@ declare type ComponentOptions = {
   extends?: Class<Component> | Object;
   delimiters?: [string, string];
   comments?: boolean;
+  inheritAttrs?: boolean;
 
   // private
   _isComponent?: true;

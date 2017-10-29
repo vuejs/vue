@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Validate commit log
-commit_regex='^Merge.+|(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .{1,50}'
+commit_regex='^Merge.+|(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|types)(\(.+\))?: .{1,50}'
 
 if ! grep -iqE "$commit_regex" "$1"; then
     echo

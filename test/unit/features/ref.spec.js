@@ -196,15 +196,25 @@ describe('ref', () => {
     }
   })
 
-  it('should register on component with empty roots', () => {
+  it('should register on component with empty roots', done => {
     const vm = new Vue({
       template: '<child ref="test"></child>',
       components: {
         child: {
-          template: '<div v-if="false"></div>'
+          template: '<div v-if="show"></div>',
+          data () {
+            return { show: false }
+          }
         }
       }
     }).$mount()
     expect(vm.$refs.test).toBe(vm.$children[0])
+    vm.$refs.test.show = true
+    waitForUpdate(() => {
+      expect(vm.$refs.test).toBe(vm.$children[0])
+      vm.$refs.test.show = false
+    }).then(() => {
+      expect(vm.$refs.test).toBe(vm.$children[0])
+    }).then(done)
   })
 })

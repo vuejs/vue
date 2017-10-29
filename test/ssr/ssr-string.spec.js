@@ -374,6 +374,18 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-html with null value', done => {
+    renderVmWithOptions({
+      template: '<div><div v-html="text"></div></div>',
+      data: {
+        text: null
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div></div></div>')
+      done()
+    })
+  })
+
   it('v-text', done => {
     renderVmWithOptions({
       template: '<div><div v-text="text"></div></div>',
@@ -382,6 +394,18 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain('<div data-server-rendered="true"><div>&lt;span&gt;foo&lt;/span&gt;</div></div>')
+      done()
+    })
+  })
+
+  it('v-text with null value', done => {
+    renderVmWithOptions({
+      template: '<div><div v-text="text"></div></div>',
+      data: {
+        text: null
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div></div></div>')
       done()
     })
   })
@@ -805,7 +829,7 @@ describe('SSR: renderToString', () => {
     expect(vm.a).toBe(func)
   })
 
-  it('should prevent xss in attribtues', done => {
+  it('should prevent xss in attributes', done => {
     renderVmWithOptions({
       data: {
         xss: '"><script>alert(1)</script>'
@@ -815,6 +839,18 @@ describe('SSR: renderToString', () => {
           <a :title="xss" :style="{ color: xss }" :class="[xss]">foo</a>
         </div>
       `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
+  it('should prevent script xss with v-bind object syntax + array value', done => {
+    renderVmWithOptions({
+      data: {
+        test: ['"><script>alert(1)</script><!--"']
+      },
+      template: `<div v-bind="{ test }"></div>`
     }, res => {
       expect(res).not.toContain(`<script>alert(1)</script>`)
       done()
@@ -877,6 +913,90 @@ describe('SSR: renderToString', () => {
       `
     }, res => {
       expect(res).toContain(`<div data-server-rendered="true"><span>foo</span> <span>1</span><span>bar</span><span>2</span><span>bar</span></div>`)
+      done()
+    })
+  })
+
+  it('with inheritAttrs: false + $attrs', done => {
+    renderVmWithOptions({
+      template: `<foo id="a"/>`,
+      components: {
+        foo: {
+          inheritAttrs: false,
+          template: `<div><div v-bind="$attrs"></div></div>`
+        }
+      }
+    }, res => {
+      expect(res).toBe(`<div data-server-rendered="true"><div id="a"></div></div>`)
+      done()
+    })
+  })
+
+  it('should escape static strings', done => {
+    renderVmWithOptions({
+      template: `<div>&lt;foo&gt;</div>`
+    }, res => {
+      expect(res).toBe(`<div data-server-rendered="true">&lt;foo&gt;</div>`)
+      done()
+    })
+  })
+
+  it('should not cache computed properties', done => {
+    renderVmWithOptions({
+      template: `<div>{{ foo }}</div>`,
+      data: () => ({ bar: 1 }),
+      computed: {
+        foo () { return this.bar + 1 }
+      },
+      created () {
+        this.foo // access
+        this.bar++ // trigger change
+      }
+    }, res => {
+      expect(res).toBe(`<div data-server-rendered="true">3</div>`)
+      done()
+    })
+  })
+
+  it('return Promise', done => {
+    renderToString(new Vue({
+      template: `<div>{{ foo }}</div>`,
+      data: { foo: 'bar' }
+    })).then(res => {
+      expect(res).toBe(`<div data-server-rendered="true">bar</div>`)
+      done()
+    })
+  })
+
+  it('return Promise (error)', done => {
+    Vue.config.silent = true
+    renderToString(new Vue({
+      render () {
+        throw new Error('foobar')
+      }
+    })).catch(err => {
+      expect(err.toString()).toContain(`foobar`)
+      Vue.config.silent = false
+      done()
+    })
+  })
+
+  it('should catch template compilation error', done => {
+    renderToString(new Vue({
+      template: `<div></div><div></div>`
+    }), (err, res) => {
+      expect(err.toString()).toContain('Component template should contain exactly one root element')
+      done()
+    })
+  })
+
+  // #6907
+  it('should not optimize root if conditions', done => {
+    renderVmWithOptions({
+      data: { foo: 123 },
+      template: `<input :type="'text'" v-model="foo">`
+    }, res => {
+      expect(res).toBe(`<input type="text" data-server-rendered="true" value="123">`)
       done()
     })
   })

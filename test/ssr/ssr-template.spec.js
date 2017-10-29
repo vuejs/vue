@@ -230,7 +230,7 @@ describe('SSR: template option', () => {
       (options.preloadOtherAssets ? `<link rel="preload" href="/test.png" as="image">` : ``) +
       (options.preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
       // unused chunks should have prefetch
-      `<link rel="prefetch" href="/1.js">` +
+      (options.noPrefetch ? `` : `<link rel="prefetch" href="/1.js">`) +
       // css assets should be loaded
       `<link rel="stylesheet" href="/test.css">` +
     `</head><body>` +
@@ -275,6 +275,29 @@ describe('SSR: template option', () => {
         stream.on('end', () => {
           expect(res).toContain(expectedHTMLWithManifest({
             preloadOtherAssets: true
+          }))
+          done()
+        })
+      })
+    })
+
+    it('bundleRenderer + renderToStream + clientManifest + shouldPrefetch', done => {
+      createRendererWithManifest('split.js', {
+        runInNewContext,
+        shouldPrefetch: (file, type) => {
+          if (type === 'script') {
+            return false
+          }
+        }
+      }, renderer => {
+        const stream = renderer.renderToStream({ state: { a: 1 }})
+        let res = ''
+        stream.on('data', chunk => {
+          res += chunk.toString()
+        })
+        stream.on('end', () => {
+          expect(res).toContain(expectedHTMLWithManifest({
+            noPrefetch: true
           }))
           done()
         })

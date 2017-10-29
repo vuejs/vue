@@ -1,4 +1,4 @@
-import Vue = require('vue');
+import Vue, { VNode, VNodeDirective } from 'vue';
 import { Readable } from 'stream';
 
 export declare function createRenderer(options?: RendererOptions): Renderer;
@@ -10,6 +10,7 @@ type RenderCallback = (err: Error | null, html: string) => void;
 interface Renderer {
   renderToString(vm: Vue, callback: RenderCallback): void;
   renderToString(vm: Vue, context: object, callback: RenderCallback): void;
+  renderToString(vm: Vue): Promise<string>;
 
   renderToStream(vm: Vue, context?: object): Readable;
 }
@@ -25,9 +26,10 @@ interface RendererOptions {
   template?: string;
   inject?: boolean;
   shouldPreload?: (file: string, type: string) => boolean;
+  shouldPrefetch?: (file: string, type: string) => boolean;
   cache?: RenderCache;
   directives?: {
-    [key: string]: (vnode: Vue.VNode, dir: Vue.VNodeDirective) => void
+    [key: string]: (vnode: VNode, dir: VNodeDirective) => void
   };
 }
 

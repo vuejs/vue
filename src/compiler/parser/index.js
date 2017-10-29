@@ -31,7 +31,7 @@ const modifierRE = /\.[^.]+/g
 const decodeHTMLCached = cached(he.decode)
 
 // configurable state
-export let warn
+export let warn: any
 let delimiters
 let transforms
 let preTransforms
@@ -39,6 +39,23 @@ let postTransforms
 let platformIsPreTag
 let platformMustUseProp
 let platformGetTagNamespace
+
+type Attr = { name: string; value: string };
+
+export function createASTElement (
+  tag: string,
+  attrs: Array<Attr>,
+  parent: ASTElement | void
+): ASTElement {
+  return {
+    type: 1,
+    tag,
+    attrsList: attrs,
+    attrsMap: makeAttrsMap(attrs),
+    parent,
+    children: []
+  }
+}
 
 /**
  * Convert HTML string to AST.
@@ -90,6 +107,7 @@ export function parse (
     isUnaryTag: options.isUnaryTag,
     canBeLeftOpenTag: options.canBeLeftOpenTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
+    shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     start (tag, attrs, unary) {
       // check namespace.
@@ -102,14 +120,7 @@ export function parse (
         attrs = guardIESVGBug(attrs)
       }
 
-      const element: ASTElement = {
-        type: 1,
-        tag,
-        attrsList: attrs,
-        attrsMap: makeAttrsMap(attrs),
-        parent: currentParent,
-        children: []
-      }
+      let element: ASTElement = createASTElement(tag, attrs, currentParent)
       if (ns) {
         element.ns = ns
       }
@@ -125,7 +136,7 @@ export function parse (
 
       // apply pre-transforms
       for (let i = 0; i < preTransforms.length; i++) {
-        preTransforms[i](element, options)
+        element = preTransforms[i](element, options) || element
       }
 
       if (!inVPre) {
@@ -139,23 +150,13 @@ export function parse (
       }
       if (inVPre) {
         processRawAttrs(element)
-      } else {
+      } else if (!element.processed) {
+        // structural directives
         processFor(element)
         processIf(element)
         processOnce(element)
-        processKey(element)
-
-        // determine whether this is a plain element after
-        // removing structural attributes
-        element.plain = !element.key && !attrs.length
-
-        processRef(element)
-        processSlot(element)
-        processComponent(element)
-        for (let i = 0; i < transforms.length; i++) {
-          transforms[i](element, options)
-        }
-        processAttrs(element)
+        // element-scope stuff
+        processElement(element, options)
       }
 
       function checkRootConstraints (el) {
@@ -309,6 +310,22 @@ function processRawAttrs (el) {
   }
 }
 
+export function processElement (element: ASTElement, options: CompilerOptions) {
+  processKey(element)
+
+  // determine whether this is a plain element after
+  // removing structural attributes
+  element.plain = !element.key && !element.attrsList.length
+
+  processRef(element)
+  processSlot(element)
+  processComponent(element)
+  for (let i = 0; i < transforms.length; i++) {
+    element = transforms[i](element, options) || element
+  }
+  processAttrs(element)
+}
+
 function processKey (el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
@@ -327,7 +344,7 @@ function processRef (el) {
   }
 }
 
-function processFor (el) {
+export function processFor (el: ASTElement) {
   let exp
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
     const inMatch = exp.match(forAliasRE)
@@ -403,7 +420,7 @@ function findPrevElement (children: Array<any>): ASTElement | void {
   }
 }
 
-function addIfCondition (el, condition) {
+export function addIfCondition (el: ASTElement, condition: ASTIfCondition) {
   if (!el.ifConditions) {
     el.ifConditions = []
   }
@@ -428,12 +445,31 @@ function processSlot (el) {
       )
     }
   } else {
+    let slotScope
+    if (el.tag === 'template') {
+      slotScope = getAndRemoveAttr(el, 'scope')
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' && slotScope) {
+        warn(
+          `the "scope" attribute for scoped slots have been deprecated and ` +
+          `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
+          `can also be used on plain elements in addition to <template> to ` +
+          `denote scoped slots.`,
+          true
+        )
+      }
+      el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
+    } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
+      el.slotScope = slotScope
+    }
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
-    }
-    if (el.tag === 'template') {
-      el.slotScope = getAndRemoveAttr(el, 'scope')
+      // preserve slot as an attribute for native shadow DOM compat
+      // only for non-scoped slots.
+      if (!el.slotScope) {
+        addAttr(el, 'slot', slotTarget)
+      }
     }
   }
 }
@@ -483,7 +519,9 @@ function processAttrs (el) {
             )
           }
         }
-        if (isProp || platformMustUseProp(el.tag, el.attrsMap.type, name)) {
+        if (isProp || (
+          !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
+        )) {
           addProp(el, name, value)
         } else {
           addAttr(el, name, value)

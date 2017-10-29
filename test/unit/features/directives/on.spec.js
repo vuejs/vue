@@ -205,6 +205,108 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalled()
   })
 
+  it('should support automatic key name inference', () => {
+    vm = new Vue({
+      el,
+      template: `<input @keyup.arrow-right="foo">`,
+      methods: { foo: spy }
+    })
+    triggerEvent(vm.$el, 'keyup', e => {
+      e.key = 'ArrowRight'
+    })
+    expect(spy).toHaveBeenCalled()
+  })
+
+  // ctrl, shift, alt, meta
+  it('should support system modifers', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <input ref="ctrl" @keyup.ctrl="foo">
+          <input ref="shift" @keyup.shift="foo">
+          <input ref="alt" @keyup.alt="foo">
+          <input ref="meta" @keyup.meta="foo">
+        </div>
+      `,
+      methods: { foo: spy }
+    })
+
+    triggerEvent(vm.$refs.ctrl, 'keyup')
+    expect(spy.calls.count()).toBe(0)
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => { e.ctrlKey = true })
+    expect(spy.calls.count()).toBe(1)
+
+    triggerEvent(vm.$refs.shift, 'keyup')
+    expect(spy.calls.count()).toBe(1)
+    triggerEvent(vm.$refs.shift, 'keyup', e => { e.shiftKey = true })
+    expect(spy.calls.count()).toBe(2)
+
+    triggerEvent(vm.$refs.alt, 'keyup')
+    expect(spy.calls.count()).toBe(2)
+    triggerEvent(vm.$refs.alt, 'keyup', e => { e.altKey = true })
+    expect(spy.calls.count()).toBe(3)
+
+    triggerEvent(vm.$refs.meta, 'keyup')
+    expect(spy.calls.count()).toBe(3)
+    triggerEvent(vm.$refs.meta, 'keyup', e => { e.metaKey = true })
+    expect(spy.calls.count()).toBe(4)
+  })
+
+  it('should support exact modifier', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <input ref="ctrl" @keyup.exact="foo">
+        </div>
+      `,
+      methods: { foo: spy }
+    })
+
+    triggerEvent(vm.$refs.ctrl, 'keyup')
+    expect(spy.calls.count()).toBe(1)
+
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => {
+      e.ctrlKey = true
+    })
+    expect(spy.calls.count()).toBe(1)
+
+    // should not trigger if has other system modifiers
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => {
+      e.ctrlKey = true
+      e.altKey = true
+    })
+    expect(spy.calls.count()).toBe(1)
+  })
+
+  it('should support system modifers with exact', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <input ref="ctrl" @keyup.ctrl.exact="foo">
+        </div>
+      `,
+      methods: { foo: spy }
+    })
+
+    triggerEvent(vm.$refs.ctrl, 'keyup')
+    expect(spy.calls.count()).toBe(0)
+
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => {
+      e.ctrlKey = true
+    })
+    expect(spy.calls.count()).toBe(1)
+
+    // should not trigger if has other system modifiers
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => {
+      e.ctrlKey = true
+      e.altKey = true
+    })
+    expect(spy.calls.count()).toBe(1)
+  })
+
   it('should support number keyCode', () => {
     vm = new Vue({
       el,
@@ -298,26 +400,30 @@ describe('Directive v-on', () => {
   })
 
   it('should bind to a child component', () => {
-    Vue.component('bar', {
-      template: '<span>Hello</span>'
-    })
     vm = new Vue({
       el,
       template: '<bar @custom="foo"></bar>',
-      methods: { foo: spy }
+      methods: { foo: spy },
+      components: {
+        bar: {
+          template: '<span>Hello</span>'
+        }
+      }
     })
     vm.$children[0].$emit('custom', 'foo', 'bar')
     expect(spy).toHaveBeenCalledWith('foo', 'bar')
   })
 
   it('should be able to bind native events for a child component', () => {
-    Vue.component('bar', {
-      template: '<span>Hello</span>'
-    })
     vm = new Vue({
       el,
       template: '<bar @click.native="foo"></bar>',
-      methods: { foo: spy }
+      methods: { foo: spy },
+      components: {
+        bar: {
+          template: '<span>Hello</span>'
+        }
+      }
     })
     vm.$children[0].$emit('click')
     expect(spy).not.toHaveBeenCalled()
@@ -326,13 +432,15 @@ describe('Directive v-on', () => {
   })
 
   it('.once modifier should work with child components', () => {
-    Vue.component('bar', {
-      template: '<span>Hello</span>'
-    })
     vm = new Vue({
       el,
       template: '<bar @custom.once="foo"></bar>',
-      methods: { foo: spy }
+      methods: { foo: spy },
+      components: {
+        bar: {
+          template: '<span>Hello</span>'
+        }
+      }
     })
     vm.$children[0].$emit('custom')
     expect(spy.calls.count()).toBe(1)
@@ -492,7 +600,7 @@ describe('Directive v-on', () => {
   })
 
   // Github Issue #5046
-  it('should support keyboard modifier', () => {
+  it('should support keyboard modifier for direction keys', () => {
     const spyLeft = jasmine.createSpy()
     const spyRight = jasmine.createSpy()
     const spyUp = jasmine.createSpy()
@@ -564,7 +672,7 @@ describe('Directive v-on', () => {
     })
   }
 
-  // Github Issues #5146
+  // GitHub Issues #5146
   it('should only prevent when match keycode', () => {
     let prevented = false
     vm = new Vue({
@@ -592,5 +700,156 @@ describe('Directive v-on', () => {
     }).$mount()
 
     expect(`Use "contextmenu" instead`).toHaveBeenWarned()
+  })
+
+  it('object syntax (no argument)', () => {
+    const click = jasmine.createSpy('click')
+    const mouseup = jasmine.createSpy('mouseup')
+    vm = new Vue({
+      el,
+      template: `<button v-on="listeners">foo</button>`,
+      created () {
+        this.listeners = {
+          click,
+          mouseup
+        }
+      }
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(click.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(0)
+
+    triggerEvent(vm.$el, 'mouseup')
+    expect(click.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(1)
+  })
+
+  it('object syntax (no argument, mixed with normal listeners)', () => {
+    const click1 = jasmine.createSpy('click1')
+    const click2 = jasmine.createSpy('click2')
+    const mouseup = jasmine.createSpy('mouseup')
+    vm = new Vue({
+      el,
+      template: `<button v-on="listeners" @click="click2">foo</button>`,
+      created () {
+        this.listeners = {
+          click: click1,
+          mouseup
+        }
+      },
+      methods: {
+        click2
+      }
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(click1.calls.count()).toBe(1)
+    expect(click2.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(0)
+
+    triggerEvent(vm.$el, 'mouseup')
+    expect(click1.calls.count()).toBe(1)
+    expect(click2.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(1)
+  })
+
+  it('object syntax (usage in HOC, mixed with native listeners)', () => {
+    const click = jasmine.createSpy('click')
+    const mouseup = jasmine.createSpy('mouseup')
+    const mousedown = jasmine.createSpy('mousedown')
+
+    vm = new Vue({
+      el,
+      template: `
+        <foo-button
+          @click="click"
+          @mousedown="mousedown"
+          @mouseup.native="mouseup">
+        </foo-button>
+      `,
+      methods: {
+        click,
+        mouseup,
+        mousedown
+      },
+      components: {
+        fooButton: {
+          template: `
+            <button v-on="$listeners"></button>
+          `
+        }
+      }
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(click.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(0)
+    expect(mousedown.calls.count()).toBe(0)
+
+    triggerEvent(vm.$el, 'mouseup')
+    expect(click.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(1)
+    expect(mousedown.calls.count()).toBe(0)
+
+    triggerEvent(vm.$el, 'mousedown')
+    expect(click.calls.count()).toBe(1)
+    expect(mouseup.calls.count()).toBe(1)
+    expect(mousedown.calls.count()).toBe(1)
+  })
+
+  // #6805 (v-on="object" bind order problem)
+  it('object syntax (no argument): should fire after high-priority listeners', done => {
+    const MyCheckbox = {
+      template: '<input type="checkbox" v-model="model" v-on="$listeners">',
+      props: {
+        value: false
+      },
+      computed: {
+        model: {
+          get () {
+            return this.value
+          },
+          set (val) {
+            this.$emit('input', val)
+          }
+        }
+      }
+    }
+
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <my-checkbox v-model="check" @change="change"></my-checkbox>
+        </div>
+      `,
+      components: { MyCheckbox },
+      data: {
+        check: false
+      },
+      methods: {
+        change () {
+          expect(this.check).toBe(true)
+          done()
+        }
+      }
+    })
+
+    vm.$el.querySelector('input').click()
+  })
+
+  it('warn object syntax with modifier', () => {
+    new Vue({
+      template: `<button v-on.self="{}"></button>`
+    }).$mount()
+    expect(`v-on without argument does not support modifiers`).toHaveBeenWarned()
+  })
+
+  it('warn object syntax with non-object value', () => {
+    new Vue({
+      template: `<button v-on="123"></button>`
+    }).$mount()
+    expect(`v-on without argument expects an Object value`).toHaveBeenWarned()
   })
 })
