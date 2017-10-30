@@ -29,6 +29,7 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
       const typeBinding: any = getBindingAttr(el, 'type')
       const ifCondition = getAndRemoveAttr(el, 'v-if', true)
       const ifConditionExtra = ifCondition ? `&&(${ifCondition})` : ``
+      const hasElse = getAndRemoveAttr(el, 'v-else', true) != null
       // 1. checkbox
       const branch0 = cloneASTElement(el)
       // process for on the main node
@@ -59,6 +60,11 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
         exp: ifCondition,
         block: branch2
       })
+
+      if (hasElse) {
+        branch0.else = true
+      }
+
       return branch0
     }
   }
