@@ -146,26 +146,6 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 <a href="https://opencollective.com/vuejs/tiers/goldsponsors/4/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/goldsponsors/4
   /avatar.svg"></a>
 
-
-<h4 align="center">Silver</h4>
-
-<a href="https://opencollective.com/vuejs/tiers/silversponsors/0/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/silversponsors/0/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/tiers/silversponsors/1/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/silversponsors/1/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/tiers/silversponsors/2/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/silversponsors/2/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/tiers/silversponsors/3/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/silversponsors/3/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/tiers/silversponsors/4/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/silversponsors/4
-  /avatar.svg"></a>
-  
-
-<h4 align="center">Bronze</h4>
-
-<a href="https://opencollective.com/vuejs/tiers/bronzesponsors/0/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/bronzesponsors/0/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/tiers/bronzesponsors/1/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/bronzesponsors/1/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/tiers/bronzesponsors/2/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/bronzesponsors/2/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/tiers/bronzesponsors/3/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/bronzesponsors/3/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/tiers/bronzesponsors/4/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/bronzesponsors/4
-  /avatar.svg"></a>
-  
 ---
 
 ## Introduction
