@@ -86,10 +86,13 @@ export default {
     if (componentOptions) {
       // check pattern
       const name: ?string = getComponentName(componentOptions)
-      if (name && (
+      if (!name) {
+        return vnode
+      }
+      if (
         (this.exclude && matches(this.exclude, name)) ||
         (this.include && !matches(this.include, name))
-      )) {
+      ) {
         return vnode
       }
 
