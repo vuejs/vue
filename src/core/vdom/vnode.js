@@ -23,6 +23,7 @@ export default class VNode {
   asyncFactory: Function | void; // async component factory function
   asyncMeta: Object | void;
   isAsyncPlaceholder: boolean;
+  isIgnoredElement: boolean;
   ssrContext: Object | void;
   functionalContext: Component | void; // real context vm for functional nodes
   functionalOptions: ?ComponentOptions; // for SSR caching
@@ -58,6 +59,7 @@ export default class VNode {
     this.isComment = false
     this.isCloned = false
     this.isOnce = false
+    this.isIgnoredElement = false
     this.asyncFactory = asyncFactory
     this.asyncMeta = undefined
     this.isAsyncPlaceholder = false

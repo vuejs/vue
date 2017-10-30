@@ -49,7 +49,7 @@ describe('Global config', () => {
     it('should work', () => {
       Vue.config.ignoredElements = ['foo', /^ion-/]
       new Vue({
-        template: `<div><foo/><ion-foo/><ion-bar/></div>`
+        template: `<div><foo selected="tab1"/><ion-foo/><ion-bar/></div>`
       }).$mount()
       expect('Unknown custom element').not.toHaveBeenWarned()
       Vue.config.ignoredElements = []

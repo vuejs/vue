@@ -119,16 +119,19 @@ export function createPatchFunction (backend) {
           inPre++
         }
         if (
+          config.ignoredElements.length &&
+          config.ignoredElements.some(ignore => {
+            return isRegExp(ignore)
+              ? ignore.test(tag)
+              : ignore === tag
+          })
+        ) {
+          vnode.isIgnoredElement = true
+        }
+        if (
           !inPre &&
           !vnode.ns &&
-          !(
-            config.ignoredElements.length &&
-            config.ignoredElements.some(ignore => {
-              return isRegExp(ignore)
-                ? ignore.test(tag)
-                : ignore === tag
-            })
-          ) &&
+          !vnode.isIgnoredElement &&
           config.isUnknownElement(tag)
         ) {
           warn(

@@ -1,7 +1,6 @@
 /* @flow */
 
 import { isIE9, isEdge } from 'core/util/env'
-import config from 'core/config'
 
 import {
   extend,
@@ -39,14 +38,14 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     cur = attrs[key]
     old = oldAttrs[key]
     if (old !== cur) {
-      setAttr(elm, key, cur)
+      setAttr(elm, key, cur, vnode)
     }
   }
   // #4391: in IE9, setting type can reset value for input[type=radio]
   // #6666: IE/Edge forces progress value down to 1 before setting a max
   /* istanbul ignore if */
   if ((isIE9 || isEdge) && attrs.value !== oldAttrs.value) {
-    setAttr(elm, 'value', attrs.value)
+    setAttr(elm, 'value', attrs.value, vnode)
   }
   for (key in oldAttrs) {
     if (isUndef(attrs[key])) {
@@ -59,11 +58,11 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 }
 
-function setAttr (el: Element, key: string, value: any) {
+function setAttr (el: Element, key: string, value: any, vnode: ?VNodeWithData) {
   // The attributes are not set to their default values
   // for elements in the ignoredElements array
   // eg. <custom-tab-bar selected="tab1"></custom-tab-bar>
-  if (config.ignoredElements.indexOf(el.tagName.toLowerCase()) > -1) {
+  if (vnode && vnode.isIgnoredElement) {
     el.setAttribute(key, value)
     return
   }
