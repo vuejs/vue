@@ -16,7 +16,7 @@
 Vue.js is an MIT-licensed open source project. It's an independent project with its ongoing development made possible entirely thanks to the support by these awesome [backers](https://github.com/vuejs/vue/blob/dev/BACKERS.md). If you'd like to join them, please consider:
 
 - [Become a backer or sponsor on Patreon](https://www.patreon.com/evanyou).
-- [Become a backer or sponsor on OpenCollective](https://opencollective.com/vuejs).
+- [Become a backer or sponsor on Open Collective](https://opencollective.com/vuejs).
 
 #### What's the difference between Patreon and OpenCollective?
 
@@ -130,20 +130,20 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
   </tbody>
 </table>
 
-<h3 align="center">Sponsors via OpenCollective</h3>
+<h3 align="center">Sponsors via <a href="https://opencollective.com/vuejs">Open Collective</a></h3>
 
 <h4 align="center">Platinum</h4>
 
-<!-- <a href="https://opencollective.com/vuejs/platinumsponsor/0/website" target="_blank"><img src="https://opencollective.com/vuejs/platinumsponsor/0/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/platinumsponsor/1/website" target="_blank"><img src="https://opencollective.com/vuejs/platinumsponsor/1/avatar.svg"></a> -->
+<a href="https://opencollective.com/vuejs/tiers/platinumsponsors/0/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/platinumsponsors/0/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/platinumsponsors/1/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/platinumsponsors/1/avatar.svg"></a> -->
 
 <h4 align="center">Gold</h4>
 
-<a href="https://opencollective.com/vuejs/goldsponsor/0/website" target="_blank"><img src="https://opencollective.com/vuejs/goldsponsor/0/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/goldsponsor/1/website" target="_blank"><img src="https://opencollective.com/vuejs/goldsponsor/1/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/goldsponsor/2/website" target="_blank"><img src="https://opencollective.com/vuejs/goldsponsor/2/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/goldsponsor/3/website" target="_blank"><img src="https://opencollective.com/vuejs/goldsponsor/3/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/goldsponsor/4/website" target="_blank"><img src="https://opencollective.com/vuejs/goldsponsor/4
+<a href="https://opencollective.com/vuejs/tiers/goldsponsors/0/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/goldsponsors/0/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/goldsponsors/1/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/goldsponsors/1/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/goldsponsors/2/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/goldsponsors/2/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/goldsponsors/3/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/goldsponsors/3/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/goldsponsors/4/website" target="_blank"><img src="https://opencollective.com/vuejs/tiers/goldsponsors/4
   /avatar.svg"></a>
 
 ---
