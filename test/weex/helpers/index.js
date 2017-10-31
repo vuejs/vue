@@ -1,6 +1,11 @@
 import * as Vue from '../../../packages/weex-vue-framework'
 import { compile } from '../../../packages/weex-template-compiler'
 import WeexRuntime from 'weex-js-runtime'
+import styler from 'weex-styler'
+
+const styleRE = /<\s*style\s*\w*>([^(<\/)]*)<\/\s*style\s*>/g
+const scriptRE = /<\s*script.*>([^]*)<\/\s*script\s*>/
+const templateRE = /<\s*template\s*>([^]*)<\/\s*template\s*>/
 
 console.debug = () => {}
 
@@ -8,6 +13,10 @@ console.debug = () => {}
 const matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g
 export function strToRegExp (str) {
   return new RegExp(str.replace(matchOperatorsRe, '\\$&'))
+}
+
+function parseStatic (fns) {
+  return '[' + fns.map(fn => `function () { ${fn} }`).join(',') + ']'
 }
 
 export function compileAndStringify (template) {
@@ -18,8 +27,48 @@ export function compileAndStringify (template) {
   }
 }
 
-function parseStatic (fns) {
-  return '[' + fns.map(fn => `function () { ${fn} }`).join(',') + ']'
+/**
+ * Compile *.vue file into js code
+ * @param {string} source raw text of *.vue file
+ * @param {string} componentName whether compile to a component
+ */
+export function compileVue (source, componentName) {
+  return new Promise((resolve, reject) => {
+    if (!templateRE.test(source)) {
+      return reject('No Template!')
+    }
+    const scriptMatch = scriptRE.exec(source)
+    const script = scriptMatch ? scriptMatch[1] : ''
+    const { render, staticRenderFns } = compile(templateRE.exec(source)[1])
+
+    const generateCode = styles => (`
+      var test_case = Object.assign({
+        style: ${JSON.stringify(styles)},
+        render: function () { ${render} },
+        staticRenderFns: ${parseStatic(staticRenderFns)},
+      }, (function(){
+        var module = { exports: {} };
+        ${script};
+        return module.exports;
+      })());
+    ` + (componentName
+        ? `Vue.component('${componentName}', test_case);\n`
+        : `test_case.el = 'body';new Vue(test_case);`)
+    )
+
+    let cssText = ''
+    let styleMatch = null
+    while ((styleMatch = styleRE.exec(source))) {
+      cssText += `\n${styleMatch[1]}\n`
+    }
+    styler.parse(cssText, (error, result) => {
+      if (error) {
+        return reject(error)
+      }
+      resolve(generateCode(result.jsonStyle))
+    })
+    resolve(generateCode({}))
+  })
 }
 
 function isObject (object) {
@@ -45,6 +94,24 @@ function omitUseless (object) {
 
 export function getRoot (instance) {
   return omitUseless(instance.document.body.toJSON())
+}
+
+// Get all binding events in the instance
+export function getEvents (instance) {
+  const events = []
+  const recordEvent = node => {
+    if (!node) { return }
+    if (Array.isArray(node.event)) {
+      node.event.forEach(type => {
+        events.push({ ref: node.ref, type })
+      })
+    }
+    if (Array.isArray(node.children)) {
+      node.children.forEach(recordEvent)
+    }
+  }
+  recordEvent(instance.document.body.toJSON())
+  return events
 }
 
 export function fireEvent (instance, ref, type, event = {}) {
