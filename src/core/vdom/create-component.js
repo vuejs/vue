@@ -145,11 +145,11 @@ export function createComponent (
   data = data || {}
 
   // recycle-list optimized render function for extracting cell-slot
-  // template. This is essentailly inline expanding instead of creating
+  // template. This is essentially inline expanding instead of creating
   // an actual instance.
   // https://github.com/Hanks10100/weex-native-directive/tree/master/component
   // $flow-disable-line
-  if (__WEEX__ && data.attrs['@isInRecycleList']) {
+  if (__WEEX__ && data.attrs && data.attrs['@isInRecycleList']) {
     const altRender = Ctor.options['@render']
     if (altRender) {
       return altRender.call(
