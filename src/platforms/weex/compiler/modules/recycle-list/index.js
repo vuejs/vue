@@ -4,6 +4,7 @@ import { transformText } from './text'
 import { transformVBind } from './v-bind'
 import { transformVIf } from './v-if'
 import { transformVFor } from './v-for'
+import { postTransformVOn } from './v-on'
 
 let currentRecycleList = null
 
@@ -31,6 +32,7 @@ function postTransformNode (el: ASTElement) {
     if (el.tag === 'text') {
       transformText(el)
     }
+    postTransformVOn(el)
   }
   if (el === currentRecycleList) {
     currentRecycleList = null
