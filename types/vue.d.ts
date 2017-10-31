@@ -22,7 +22,7 @@ export interface CreateElement {
 
 export interface Vue {
   readonly $el: HTMLElement;
-  readonly $options: ComponentOptions<this>;
+  readonly $options: ComponentOptions<Vue>;
   readonly $parent: Vue;
   readonly $root: Vue;
   readonly $children: Vue[];
@@ -61,7 +61,7 @@ export interface Vue {
   $createElement: CreateElement;
 }
 
-export type CombinedVueInstance<Instance extends Vue, Data, Methods, Computed, Props> = Instance & Data & Methods & Computed & Props;
+export type CombinedVueInstance<Instance extends Vue, Data, Methods, Computed, Props> =  Data & Methods & Computed & Props & Instance;
 export type ExtendedVue<Instance extends Vue, Data, Methods, Computed, Props> = VueConstructor<CombinedVueInstance<Instance, Data, Methods, Computed, Props> & Vue>;
 
 export interface VueConstructor<V extends Vue = Vue> {
@@ -114,7 +114,7 @@ export interface VueConstructor<V extends Vue = Vue> {
     performance: boolean;
     errorHandler(err: Error, vm: Vue, info: string): void;
     warnHandler(msg: string, vm: Vue, trace: string): void;
-    ignoredElements: string[];
+    ignoredElements: (string | RegExp)[];
     keyCodes: { [key: string]: number | number[] };
   }
 }

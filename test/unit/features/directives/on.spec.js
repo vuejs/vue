@@ -759,7 +759,7 @@ describe('Directive v-on', () => {
     const mouseup = jasmine.createSpy('mouseup')
     const mousedown = jasmine.createSpy('mousedown')
 
-    var vm = new Vue({
+    vm = new Vue({
       el,
       template: `
         <foo-button
@@ -796,6 +796,47 @@ describe('Directive v-on', () => {
     expect(click.calls.count()).toBe(1)
     expect(mouseup.calls.count()).toBe(1)
     expect(mousedown.calls.count()).toBe(1)
+  })
+
+  // #6805 (v-on="object" bind order problem)
+  it('object syntax (no argument): should fire after high-priority listeners', done => {
+    const MyCheckbox = {
+      template: '<input type="checkbox" v-model="model" v-on="$listeners">',
+      props: {
+        value: false
+      },
+      computed: {
+        model: {
+          get () {
+            return this.value
+          },
+          set (val) {
+            this.$emit('input', val)
+          }
+        }
+      }
+    }
+
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <my-checkbox v-model="check" @change="change"></my-checkbox>
+        </div>
+      `,
+      components: { MyCheckbox },
+      data: {
+        check: false
+      },
+      methods: {
+        change () {
+          expect(this.check).toBe(true)
+          done()
+        }
+      }
+    })
+
+    vm.$el.querySelector('input').click()
   })
 
   it('warn object syntax with modifier', () => {

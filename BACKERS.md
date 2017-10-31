@@ -21,12 +21,16 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
   <a href="https://xiaozhuanlan.com">
     <img width="200px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/xiaozhuanlan.png">
   </a>
+  <br><br>
+  <a href="http://tooltwist.com" target="_blank">
+    <img width="280px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tooltwist.png">
+  </a>
 </p>
 
 <h2 align="center">Platinum via OpenCollective</h2>
 
-<a href="https://opencollective.com/vuejs/platinumsponsor/0/website" target="_blank"><img src="https://opencollective.com/vuejs/platinumsponsor/0/avatar.svg"></a>
-<a href="https://opencollective.com/vuejs/platinumsponsor/1/website" target="_blank"><img src="https://opencollective.com/vuejs/platinumsponsor/1/avatar.svg"></a>
+<!-- <a href="https://opencollective.com/vuejs/platinumsponsor/0/website" target="_blank"><img src="https://opencollective.com/vuejs/platinumsponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/platinumsponsor/1/website" target="_blank"><img src="https://opencollective.com/vuejs/platinumsponsor/1/avatar.svg"></a> -->
 
 <h2 align="center">Gold via Patreon</h2>
 
@@ -95,11 +99,6 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://www.v2ex.com/t/379389" target="_blank">
-          <img width="170px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/v2exer.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://www.xfive.co/" target="_blank">
           <img width="100px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/xfive.png">
         </a>
@@ -114,13 +113,9 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
           <img width="170px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/onsen-ui.png">
         </a>
       </td>
-    </tr>
-    <tr></tr>
-    <tr>
       <td align="center" valign="middle">
-        <a href="http://tooltwist.com/" target="_blank">
-          <img width="170px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tooltwist
-          .png">
+        <a href="https://themeforest.net/item/clear-bootstrap-vuejs-admin-template/19339739?ref=jyostna&utm_source=vuejs&utm_campaign=vuejs_patreon&clickthrough_id=1113830525&redirect_back=true" target="_blank">
+          <img width="150px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejsadmin.png">
         </a>
       </td>
     </tr>
@@ -291,6 +286,7 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Alex Balashov
 - Konstantin Levinski
 - Samuel Smith
+- Harri J Salomaa
 
 <h2 align="center">Backers via Patreon</h2>
 
@@ -465,6 +461,28 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Keith Mancuso
 - Alexander Karelas
 - Matias Verdier
+- Jamie McElwain
+- Travis Gertz
+- Ale Mohamad
+- Jonas Galvez
+- William Correa
+- Raphael Belvederese
+- Mickaël Andrieu
+- Guilherme S L de Souza
+- Rob Yedlin
+- Daniel Waghorn
+- Eric Githinji
+- Vivekanandhan Natarajan
+- Chih-Hsuan Fan
+- Jordan Oroshiba
+- Brian Jorden
+- Cliff Hess
+- Joe Gregory
+- Johnny Eshan
+- Alexander Karelas
+- Kamil Ocean
+- Orney Enrique Martinez Said
+- Tom Striker
 
 <h2 align="center">Backers via OpenCollective</h2>
 

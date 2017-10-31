@@ -1,7 +1,10 @@
 import Vue from 'vue'
 import { UA } from 'core/util/env'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options components', () => {
+  testObjectOption('components')
+
   it('should accept plain object', () => {
     const vm = new Vue({
       template: '<test></test>',

@@ -223,7 +223,7 @@ describe('vdom patch: hydration', () => {
         expect(dom.innerHTML).toBe('<span>bar</span>')
         expect(dom.querySelector('span')).toBe(span)
       }).then(done)
-    }, 10)
+    }, 50)
   })
 
   it('should hydrate async component without showing loading', done => {

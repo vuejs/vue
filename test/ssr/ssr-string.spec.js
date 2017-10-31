@@ -968,7 +968,7 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('should Promise (error)', done => {
+  it('return Promise (error)', done => {
     Vue.config.silent = true
     renderToString(new Vue({
       render () {
@@ -977,6 +977,26 @@ describe('SSR: renderToString', () => {
     })).catch(err => {
       expect(err.toString()).toContain(`foobar`)
       Vue.config.silent = false
+      done()
+    })
+  })
+
+  it('should catch template compilation error', done => {
+    renderToString(new Vue({
+      template: `<div></div><div></div>`
+    }), (err, res) => {
+      expect(err.toString()).toContain('Component template should contain exactly one root element')
+      done()
+    })
+  })
+
+  // #6907
+  it('should not optimize root if conditions', done => {
+    renderVmWithOptions({
+      data: { foo: 123 },
+      template: `<input :type="'text'" v-model="foo">`
+    }, res => {
+      expect(res).toBe(`<input type="text" data-server-rendered="true" value="123">`)
       done()
     })
   })
