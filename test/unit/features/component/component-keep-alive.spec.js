@@ -8,6 +8,7 @@ describe('Component keep-alive', () => {
   let components, one, two, el
   beforeEach(() => {
     one = {
+      name:'one',
       template: '<div>one</div>',
       created: jasmine.createSpy('one created'),
       mounted: jasmine.createSpy('one mounted'),
@@ -16,6 +17,7 @@ describe('Component keep-alive', () => {
       destroyed: jasmine.createSpy('one destroyed')
     }
     two = {
+      name:'two',
       template: '<div>two</div>',
       created: jasmine.createSpy('two created'),
       mounted: jasmine.createSpy('two mounted'),
@@ -448,32 +450,93 @@ describe('Component keep-alive', () => {
   // #4237
   it('should update latest props/listeners for a re-activated component', done => {
     const one = {
-      props: ['prop'],
-      template: `<div>one {{ prop }}</div>`
+      name:'cache',
+      data(){
+        return{
+          random:Math.random(0,10)
+        }
+      },
+      template: `<div class="child">{{ random }}</div>`
     }
     const two = {
-      props: ['prop'],
-      template: `<div>two {{ prop }}</div>`
+      data(){
+        return{
+          random:Math.random(0,10)
+        }
+      },
+      template: `<div class="child">{{ random }}</div>`
     }
     const vm = new Vue({
-      data: { view: 'one', n: 1 },
+      data: { view: 'one'},
       template: `
         <div>
           <keep-alive>
-            <component :is="view" :prop="n"></component>
+            <component :is="view" ></component>
+          </keep-alive>
+        </div>
+      `,
+      components: { one, two }
+    }).$mount()
+    let cacheText, noCacheText
+
+    cacheText = vm.$el.textContent
+    vm.view = 'two'
+    waitForUpdate(() => {
+      noCacheText = vm.$el.textContent
+      vm.view = 'one'
+    }).then(() => {
+      expect(vm.$el.textContent).toBe(cacheText)
+      vm.view = 'two'
+    }).then(() => {
+      expect(vm.$el.textContent).not.toBe(noCacheText)
+    }).then(done)
+  })
+  it('wsgwsgwsgwsgwsgwsgwsgwsgwsgwsgwsgwsgwsgwsgwsgwsg', done => {
+    const one = {
+      name:'cache',
+      data(){
+        return{
+          random:Math.random(0,10)
+        }
+      },
+      template: `<div class="child">{{ random }}</div>`
+    }
+    const two = {
+      data(){
+        return{
+          random:Math.random(0,10)
+        }
+      },
+      template: `<div class="child">{{ random }}</div>`
+    }
+    const vm = new Vue({
+      data: { view: 'one'},
+      template: `
+        <div>
+          <keep-alive>
+            <component :is="view" ></component>
           </keep-alive>
         </div>
       `,
       components: { one, two }
     }).$mount()
 
-    expect(vm.$el.textContent).toBe('one 1')
-    vm.n++
+    
+    let cacheText, noCacheText
+    
     waitForUpdate(() => {
-      expect(vm.$el.textContent).toBe('one 2')
+      cacheText = vm.$el.textContent
       vm.view = 'two'
     }).then(() => {
-      expect(vm.$el.textContent).toBe('two 2')
+
+      noCacheText = vm.$el.textContent
+      expect(noCacheText).not.toBe(cacheText)
+      vm.view = 'one'
+    }).then(() => {
+      expect(vm.$el.textContent).toBe(cacheText)
+      vm.view = 'two'
+    }).then(() => {
+      expect(vm.$el.textContent).not.toBe(noCacheText)
     }).then(done)
   })
 
@@ -977,16 +1040,19 @@ describe('Component keep-alive', () => {
         },
         components: {
           aa: {
+            name:'aa',
             template: '<div>a</div>',
             created: spyA,
             destroyed: spyAD
           },
           bb: {
+            name:'bb',
             template: '<div>bbb</div>',
             created: spyB,
             destroyed: spyBD
           },
           cc: {
+            name:'cc',
             template: '<div>ccc</div>',
             created: spyC,
             destroyed: spyCD
