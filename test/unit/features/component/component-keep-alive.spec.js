@@ -8,6 +8,7 @@ describe('Component keep-alive', () => {
   let components, one, two, el
   beforeEach(() => {
     one = {
+      name: 'one',
       template: '<div>one</div>',
       created: jasmine.createSpy('one created'),
       mounted: jasmine.createSpy('one mounted'),
@@ -16,6 +17,7 @@ describe('Component keep-alive', () => {
       destroyed: jasmine.createSpy('one destroyed')
     }
     two = {
+      name: 'two',
       template: '<div>two</div>',
       created: jasmine.createSpy('two created'),
       mounted: jasmine.createSpy('two mounted'),
@@ -477,6 +479,52 @@ describe('Component keep-alive', () => {
     }).then(done)
   })
 
+  // #6938
+  it('should not cache anonymous component', done => {
+    const one = {
+      name: 'cache',
+      data () {
+        return {
+          random: Math.random(0, 10)
+        }
+      },
+      template: `<div class="child">{{ random }}</div>`
+    }
+    const two = {
+      data () {
+        return {
+          random: Math.random(0, 10)
+        }
+      },
+      template: `<div class="child">{{ random }}</div>`
+    }
+    const vm = new Vue({
+      data: { view: 'one' },
+      template: `
+        <div>
+          <keep-alive>
+            <component :is="view" ></component>
+          </keep-alive>
+        </div>
+      `,
+      components: { one, two }
+    }).$mount()
+
+    let cacheText, noCacheText
+    waitForUpdate(() => {
+      cacheText = vm.$el.textContent
+      vm.view = 'two'
+    }).then(() => {
+      noCacheText = vm.$el.textContent
+      expect(noCacheText).not.toBe(cacheText)
+      vm.view = 'one'
+    }).then(() => {
+      expect(vm.$el.textContent).toBe(cacheText)
+      vm.view = 'two'
+    }).then(() => {
+      expect(vm.$el.textContent).not.toBe(noCacheText)
+    }).then(done)
+  })
   if (!isIE9) {
     it('with transition-mode out-in', done => {
       let next
@@ -977,16 +1025,19 @@ describe('Component keep-alive', () => {
         },
         components: {
           aa: {
+            name: 'aa',
             template: '<div>a</div>',
             created: spyA,
             destroyed: spyAD
           },
           bb: {
+            name: 'bb',
             template: '<div>bbb</div>',
             created: spyB,
             destroyed: spyBD
           },
           cc: {
+            name: 'cc',
             template: '<div>ccc</div>',
             created: spyC,
             destroyed: spyCD
