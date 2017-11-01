@@ -488,7 +488,7 @@ describe('Component keep-alive', () => {
           random: Math.random(0, 10)
         }
       },
-      template: `<div class="child">{{ random }}</div>`
+      template: `<div>{{ random }}</div>`
     }
     const two = {
       data () {
@@ -496,7 +496,7 @@ describe('Component keep-alive', () => {
           random: Math.random(0, 10)
         }
       },
-      template: `<div class="child">{{ random }}</div>`
+      template: `<div>{{ random }}</div>`
     }
     const vm = new Vue({
       data: { view: 'one' },
@@ -516,7 +516,6 @@ describe('Component keep-alive', () => {
       vm.view = 'two'
     }).then(() => {
       noCacheText = vm.$el.textContent
-      expect(noCacheText).not.toBe(cacheText)
       vm.view = 'one'
     }).then(() => {
       expect(vm.$el.textContent).toBe(cacheText)
