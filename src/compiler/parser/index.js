@@ -556,6 +556,13 @@ function processAttrs (el) {
         }
       }
       addAttr(el, name, JSON.stringify(value))
+      // #6887 firefox doesn't update muted state if set via attribute
+      // even immediately after element creation
+      if (!el.component &&
+          platformMustUseProp(el.tag, el.attrsMap.type, name) &&
+          name === 'muted') {
+        addProp(el, name, 'true')
+      }
     }
   }
 }
