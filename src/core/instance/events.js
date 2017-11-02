@@ -92,7 +92,7 @@ export function eventsMixin (Vue: Class<Component>) {
     if (!cbs) {
       return vm
     }
-    if (arguments.length === 1) {
+    if (!fn) {
       vm._events[event] = null
       return vm
     }
