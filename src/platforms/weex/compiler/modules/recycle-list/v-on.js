@@ -1,6 +1,6 @@
 /* @flow */
 
-const inlineStatementRE = /^\s*([A-Za-z_$0-9\.]+)*\s*\(\s*(([A-Za-z_$0-9\'\"]+)?(\s*,\s*([A-Za-z_$0-9\'\"]+))*)\s*\)$/
+const inlineStatementRE = /^\s*([A-Za-z_$0-9\['\."\]]+)*\s*\(\s*(([A-Za-z_$0-9\['\."\]]+)?(\s*,\s*([A-Za-z_$0-9\['\."\]]+))*)\s*\)$/
 
 function parseHandlerParams (handler: ASTElementHandler) {
   const res = inlineStatementRE.exec(handler.value)
