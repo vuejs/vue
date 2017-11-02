@@ -1000,6 +1000,15 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('render muted properly', done => {
+    renderVmWithOptions({
+      template: '<video muted></video>'
+    }, result => {
+      expect(result).toContain('<video muted="muted" data-server-rendered="true"></video>')
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {

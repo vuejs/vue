@@ -395,6 +395,15 @@ describe('parser', () => {
     expect(ast.props[0].value).toBe('msg')
   })
 
+  // #6887
+  it('special case static attribute that must be props', () => {
+    const ast = parse('<video muted></video>', baseOptions)
+    expect(ast.attrs[0].name).toBe('muted')
+    expect(ast.attrs[0].value).toBe('""')
+    expect(ast.props[0].name).toBe('muted')
+    expect(ast.props[0].value).toBe('true')
+  })
+
   it('attribute with v-on', () => {
     const ast = parse('<input type="text" name="field1" :value="msg" @input="onInput">', baseOptions)
     expect(ast.events.input.value).toBe('onInput')
