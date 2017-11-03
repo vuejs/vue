@@ -743,4 +743,40 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.children[0].getAttribute('slot')).toBe('foo')
   })
+
+  it('passing a slot down as named slot', () => {
+    const Bar = {
+      template: `<div class="bar"><slot name="foo"/></div>`
+    }
+
+    const Foo = {
+      components: { Bar },
+      template: `<div class="foo"><bar><slot slot="foo"/></bar></div>`
+    }
+
+    const vm = new Vue({
+      components: { Foo },
+      template: `<div><foo>hello</foo></div>`
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<div class="foo"><div class="bar">hello</div></div>')
+  })
+
+  it('fallback content for named template slot', () => {
+    const Bar = {
+      template: `<div class="bar"><slot name="foo">fallback</slot></div>`
+    }
+
+    const Foo = {
+      components: { Bar },
+      template: `<div class="foo"><bar><template slot="foo"/><slot/></template></bar></div>`
+    }
+
+    const vm = new Vue({
+      components: { Foo },
+      template: `<div><foo></foo></div>`
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<div class="foo"><div class="bar">fallback</div></div>')
+  })
 })
