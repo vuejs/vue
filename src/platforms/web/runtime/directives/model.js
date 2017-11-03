@@ -24,7 +24,7 @@ const directive = {
     if (vnode.tag === 'select') {
       // #6903
       if (oldVnode.elm && !oldVnode.elm._vOptions) {
-        mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'postpatch', () => {
+        mergeVNodeHook(vnode, 'postpatch', () => {
           directive.componentUpdated(el, binding, vnode)
         })
       } else {
