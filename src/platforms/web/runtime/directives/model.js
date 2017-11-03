@@ -6,6 +6,8 @@
 import { isTextInputType } from 'web/util/element'
 import { looseEqual, looseIndexOf } from 'shared/util'
 import { warn, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
+import { mergeVNodeHook } from 'core/vdom/helpers/index'
+import { emptyNode } from 'core/vdom/patch'
 
 /* istanbul ignore if */
 if (isIE9) {
@@ -18,10 +20,17 @@ if (isIE9) {
   })
 }
 
-export default {
-  inserted (el, binding, vnode) {
+const directive = {
+  inserted (el, binding, vnode, oldVnode) {
     if (vnode.tag === 'select') {
-      setSelected(el, binding, vnode.context)
+      // #6903
+      if (oldVnode !== emptyNode && !hasDirective(oldVnode, 'model')) {
+        mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'postpatch', () => {
+          directive.componentUpdated(el, binding, vnode)
+        })
+      } else {
+        setSelected(el, binding, vnode.context)
+      }
       el._vOptions = [].map.call(el.options, getValue)
     } else if (vnode.tag === 'textarea' || isTextInputType(el.type)) {
       el._vModifiers = binding.modifiers
@@ -136,3 +145,11 @@ function trigger (el, type) {
   e.initEvent(type, true, true)
   el.dispatchEvent(e)
 }
+
+function hasDirective (vnode, dirname) {
+  return vnode.data &&
+    vnode.data.directives &&
+    vnode.data.directives.some(dir => dir.name === dirname)
+}
+
+export default directive
