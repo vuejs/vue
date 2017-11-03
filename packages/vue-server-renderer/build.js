@@ -486,6 +486,7 @@ function createTextVNode (val) {
 // multiple renders, cloning them avoids errors when DOM manipulations rely
 // on their elm reference.
 function cloneVNode (vnode, deep) {
+  var componentOptions = vnode.componentOptions;
   var cloned = new VNode(
     vnode.tag,
     vnode.data,
@@ -493,7 +494,7 @@ function cloneVNode (vnode, deep) {
     vnode.text,
     vnode.elm,
     vnode.context,
-    vnode.componentOptions,
+    componentOptions,
     vnode.asyncFactory
   );
   cloned.ns = vnode.ns;
@@ -501,8 +502,13 @@ function cloneVNode (vnode, deep) {
   cloned.key = vnode.key;
   cloned.isComment = vnode.isComment;
   cloned.isCloned = true;
-  if (deep && vnode.children) {
-    cloned.children = cloneVNodes(vnode.children);
+  if (deep) {
+    if (vnode.children) {
+      cloned.children = cloneVNodes(vnode.children, true);
+    }
+    if (componentOptions && componentOptions.children) {
+      componentOptions.children = cloneVNodes(componentOptions.children, true);
+    }
   }
   return cloned
 }
@@ -540,7 +546,10 @@ function renderDOMProps (node) {
       setText(node, props[key], true);
     } else if (key === 'textContent') {
       setText(node, props[key], false);
+    } else if (key === 'value' && node.tag === 'textarea') {
+      setText(node, props[key], false);
     } else {
+      // $flow-disable-line (WTF?)
       var attr = propsToAttrMap[key] || key.toLowerCase();
       if (isRenderableAttr(attr) &&
         // avoid rendering double-bound props/attrs twice
@@ -1158,7 +1167,7 @@ function set (target, key, val) {
     target.splice(key, 1, val);
     return val
   }
-  if (hasOwn(target, key)) {
+  if (key in target && !(key in Object.prototype)) {
     target[key] = val;
     return val
   }
@@ -1269,7 +1278,7 @@ function mergeDataOrFn (
         typeof parentVal === 'function' ? parentVal.call(this) : parentVal
       )
     }
-  } else if (parentVal || childVal) {
+  } else {
     return function mergedInstanceDataFn () {
       // instance merge
       var instanceData = typeof childVal === 'function'
@@ -1303,7 +1312,7 @@ strats.data = function (
 
       return parentVal
     }
-    return mergeDataOrFn.call(this, parentVal, childVal)
+    return mergeDataOrFn(parentVal, childVal)
   }
 
   return mergeDataOrFn(parentVal, childVal, vm)
@@ -2181,8 +2190,52 @@ function show (node, dir) {
   }
 }
 
+/*  */
+
+// this is only applied for <select v-model> because it is the only edge case
+// that must be done at runtime instead of compile time.
+function model (node, dir) {
+  if (!node.children) { return }
+  var value = dir.value;
+  var isMultiple = node.data.attrs && node.data.attrs.multiple;
+  for (var i = 0, l = node.children.length; i < l; i++) {
+    var option = node.children[i];
+    if (option.tag === 'option') {
+      if (isMultiple) {
+        var selected =
+          Array.isArray(value) &&
+          (looseIndexOf(value, getValue(option)) > -1);
+        if (selected) {
+          setSelected(option);
+        }
+      } else {
+        if (looseEqual(value, getValue(option))) {
+          setSelected(option);
+          return
+        }
+      }
+    }
+  }
+}
+
+function getValue (option) {
+  var data = option.data || {};
+  return (
+    (data.attrs && data.attrs.value) ||
+    (data.domProps && data.domProps.value) ||
+    (option.children && option.children[0] && option.children[0].text)
+  )
+}
+
+function setSelected (option) {
+  var data = option.data || (option.data = {});
+  var attrs = data.attrs || (data.attrs = {});
+  attrs.selected = '';
+}
+
 var baseDirectives = {
-  show: show
+  show: show,
+  model: model
 };
 
 /*  */
@@ -2829,10 +2882,11 @@ var decodingMap = {
   '&gt;': '>',
   '&quot;': '"',
   '&amp;': '&',
-  '&#10;': '\n'
+  '&#10;': '\n',
+  '&#9;': '\t'
 };
 var encodedAttr = /&(?:lt|gt|quot|amp);/g;
-var encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10);/g;
+var encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10|#9);/g;
 
 // #5992
 var isIgnoreNewlineTag = makeMap('pre,textarea', true);
@@ -3023,12 +3077,12 @@ function parseHTML (html, options) {
         if (args[5] === '') { delete args[5]; }
       }
       var value = args[3] || args[4] || args[5] || '';
+      var shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
+        ? options.shouldDecodeNewlinesForHref
+        : options.shouldDecodeNewlines;
       attrs[i] = {
         name: args[1],
-        value: decodeAttr(
-          value,
-          options.shouldDecodeNewlines
-        )
+        value: decodeAttr(value, shouldDecodeNewlines)
       };
     }
 
@@ -3337,6 +3391,7 @@ function parse (
     isUnaryTag: options.isUnaryTag,
     canBeLeftOpenTag: options.canBeLeftOpenTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
+    shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     start: function start (tag, attrs, unary) {
       // check namespace.
@@ -3695,7 +3750,7 @@ function processSlot (el) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget;
       // preserve slot as an attribute for native shadow DOM compat
       // only for non-scoped slots.
-      if (!el.slotScope) {
+      if (el.tag !== 'template' && !el.slotScope) {
         addAttr(el, 'slot', slotTarget);
       }
     }
@@ -3784,6 +3839,13 @@ function processAttrs (el) {
         }
       }
       addAttr(el, name, JSON.stringify(value));
+      // #6887 firefox doesn't update muted state if set via attribute
+      // even immediately after element creation
+      if (!el.component &&
+          name === 'muted' &&
+          platformMustUseProp(el.tag, el.attrsMap.type, name)) {
+        addProp(el, name, 'true');
+      }
     }
   }
 }
@@ -3888,6 +3950,8 @@ function preTransformNode (el, options) {
       var typeBinding = getBindingAttr(el, 'type');
       var ifCondition = getAndRemoveAttr(el, 'v-if', true);
       var ifConditionExtra = ifCondition ? ("&&(" + ifCondition + ")") : "";
+      var hasElse = getAndRemoveAttr(el, 'v-else', true) != null;
+      var elseIfCondition = getAndRemoveAttr(el, 'v-else-if', true);
       // 1. checkbox
       var branch0 = cloneASTElement(el);
       // process for on the main node
@@ -3918,6 +3982,13 @@ function preTransformNode (el, options) {
         exp: ifCondition,
         block: branch2
       });
+
+      if (hasElse) {
+        branch0.else = true;
+      } else if (elseIfCondition) {
+        branch0.elseif = elseIfCondition;
+      }
+
       return branch0
     }
   }
@@ -3932,14 +4003,14 @@ function addRawAttr (el, name, value) {
   el.attrsList.push({ name: name, value: value });
 }
 
-var model = {
+var model$1 = {
   preTransformNode: preTransformNode
 };
 
 var modules$1 = [
   klass,
   style,
-  model
+  model$1
 ];
 
 /*  */
@@ -3951,7 +4022,7 @@ var warn$2;
 var RANGE_TOKEN = '__r';
 
 
-function model$1 (
+function model$2 (
   el,
   dir,
   _warn
@@ -4116,7 +4187,7 @@ function html (el, dir) {
 }
 
 var directives = {
-  model: model$1,
+  model: model$2,
   text: text,
   html: html
 };
@@ -4750,6 +4821,10 @@ function applyModelTransform (el, state) {
       var dir = el.directives[i];
       if (dir.name === 'model') {
         state.directives.model(el, dir, state.warn);
+        // remove value for textarea as its converted to text
+        if (el.tag === 'textarea' && el.props) {
+          el.props = el.props.filter(function (p) { return p.name !== 'value'; });
+        }
         break
       }
     }
@@ -4897,7 +4972,7 @@ function walk (node, isRoot) {
     if (node.ifConditions) {
       for (var i$1 = 1, l$1 = node.ifConditions.length; i$1 < l$1; i$1++) {
         var block = node.ifConditions[i$1].block;
-        walk(block);
+        walk(block, isRoot);
         check(block);
       }
     }
@@ -4955,7 +5030,8 @@ function isUnOptimizableTree (node) {
   return (
     isBuiltInTag(node.tag) || // built-in (slot, component)
     !isPlatformReservedTag(node.tag) || // custom component
-    !!node.component // "is" component
+    !!node.component || // "is" component
+    isSelectWithModel(node) // <select v-model> requires runtime inspection
   )
 }
 
@@ -4966,6 +5042,17 @@ function hasCustomDirective (node) {
     node.type === 1 &&
     node.directives &&
     node.directives.some(function (d) { return !isBuiltInDir(d.name); })
+  )
+}
+
+// <select v-model> cannot be optimized because it requires a runtime check
+// to determine proper selected option
+function isSelectWithModel (node) {
+  return (
+    node.type === 1 &&
+    node.tag === 'select' &&
+    node.directives != null &&
+    node.directives.some(function (d) { return d.name === 'model'; })
   )
 }
 
@@ -5140,6 +5227,9 @@ function childrenToSegments (el, state) {
     return [{ type: EXPRESSION, value: ("_s(" + binding + ")") }]
   }
   if ((binding = el.attrsMap['v-text'])) {
+    return [{ type: INTERPOLATION, value: ("_s(" + binding + ")") }]
+  }
+  if (el.tag === 'textarea' && (binding = el.attrsMap['v-model'])) {
     return [{ type: INTERPOLATION, value: ("_s(" + binding + ")") }]
   }
   return el.children
@@ -5997,6 +6087,7 @@ function updateComponentListeners (
 ) {
   target = vm;
   updateListeners(listeners, oldListeners || {}, add, remove$1, vm);
+  target = undefined;
 }
 
 /*  */
@@ -6012,7 +6103,6 @@ function resolveSlots (
   if (!children) {
     return slots
   }
-  var defaultSlot = [];
   for (var i = 0, l = children.length; i < l; i++) {
     var child = children[i];
     var data = child.data;
@@ -6033,12 +6123,14 @@ function resolveSlots (
         slot.push(child);
       }
     } else {
-      defaultSlot.push(child);
+      (slots.default || (slots.default = [])).push(child);
     }
   }
-  // ignore whitespace
-  if (!defaultSlot.every(isWhitespace)) {
-    slots.default = defaultSlot;
+  // ignore slots that contains only whitespace
+  for (var name$1 in slots) {
+    if (slots[name$1].every(isWhitespace)) {
+      delete slots[name$1];
+    }
   }
   return slots
 }
@@ -6741,6 +6833,7 @@ function renderSlot (
   bindObject
 ) {
   var scopedSlotFn = this.$scopedSlots[name];
+  var nodes;
   if (scopedSlotFn) { // scoped slot
     props = props || {};
     if (bindObject) {
@@ -6752,19 +6845,28 @@ function renderSlot (
       }
       props = extend(extend({}, bindObject), props);
     }
-    return scopedSlotFn(props) || fallback
+    nodes = scopedSlotFn(props) || fallback;
   } else {
     var slotNodes = this.$slots[name];
     // warn duplicate slot usage
-    if (slotNodes && process.env.NODE_ENV !== 'production') {
-      slotNodes._rendered && warn(
-        "Duplicate presence of slot \"" + name + "\" found in the same render tree " +
-        "- this will likely cause render errors.",
-        this
-      );
+    if (slotNodes) {
+      if (process.env.NODE_ENV !== 'production' && slotNodes._rendered) {
+        warn(
+          "Duplicate presence of slot \"" + name + "\" found in the same render tree " +
+          "- this will likely cause render errors.",
+          this
+        );
+      }
       slotNodes._rendered = true;
     }
-    return slotNodes || fallback
+    nodes = slotNodes || fallback;
+  }
+
+  var target = props && props.slot;
+  if (target) {
+    return this.$createElement('template', { slot: target }, nodes)
+  } else {
+    return nodes
   }
 }
 
@@ -6867,8 +6969,8 @@ function renderStatic (
 ) {
   // static trees can be rendered once and cached on the contructor options
   // so every instance shares the same cached trees
-  var renderFns = this.$options.staticRenderFns;
-  var cached = renderFns.cached || (renderFns.cached = []);
+  var options = this.$options;
+  var cached = options.cached || (options.cached = []);
   var tree = cached[index];
   // if has already-rendered static tree and not inside v-for,
   // we can reuse the same tree by doing a shallow clone.
@@ -6878,7 +6980,7 @@ function renderStatic (
       : cloneVNode(tree)
   }
   // otherwise, render a fresh tree.
-  tree = cached[index] = renderFns[index].call(this._renderProxy, null, this);
+  tree = cached[index] = options.staticRenderFns[index].call(this._renderProxy, null, this);
   markStatic(tree, ("__static__" + index), false);
   return tree
 }
