@@ -1034,6 +1034,84 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('render v-model with <select> (value binding)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2,
+        options: [
+          { id: 1, label: 'one' },
+          { id: 2, label: 'two' }
+        ]
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option v-for="o in options" :value="o.id">{{ o.label }}</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option value="1">one</option>' +
+          '<option selected="selected" value="2">two</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
+
+  it('render v-model with <select> (static value)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option value="1">one</option>
+          <option value="2">two</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option value="1">one</option> ' +
+          '<option value="2" selected="selected">two</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
+
+  it('render v-model with <select> (text as value)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2,
+        options: [
+          { id: 1, label: 'one' },
+          { id: 2, label: 'two' }
+        ]
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option v-for="o in options">{{ o.id }}</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option>1</option>' +
+          '<option selected="selected">2</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
