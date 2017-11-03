@@ -320,10 +320,11 @@ var decodingMap = {
   '&gt;': '>',
   '&quot;': '"',
   '&amp;': '&',
-  '&#10;': '\n'
+  '&#10;': '\n',
+  '&#9;': '\t'
 };
 var encodedAttr = /&(?:lt|gt|quot|amp);/g;
-var encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10);/g;
+var encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10|#9);/g;
 
 // #5992
 var isIgnoreNewlineTag = makeMap('pre,textarea', true);
@@ -514,12 +515,12 @@ function parseHTML (html, options) {
         if (args[5] === '') { delete args[5]; }
       }
       var value = args[3] || args[4] || args[5] || '';
+      var shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
+        ? options.shouldDecodeNewlinesForHref
+        : options.shouldDecodeNewlines;
       attrs[i] = {
         name: args[1],
-        value: decodeAttr(
-          value,
-          options.shouldDecodeNewlines
-        )
+        value: decodeAttr(value, shouldDecodeNewlines)
       };
     }
 
@@ -1328,7 +1329,7 @@ function set (target, key, val) {
     target.splice(key, 1, val);
     return val
   }
-  if (hasOwn(target, key)) {
+  if (key in target && !(key in Object.prototype)) {
     target[key] = val;
     return val
   }
@@ -1439,7 +1440,7 @@ function mergeDataOrFn (
         typeof parentVal === 'function' ? parentVal.call(this) : parentVal
       )
     }
-  } else if (parentVal || childVal) {
+  } else {
     return function mergedInstanceDataFn () {
       // instance merge
       var instanceData = typeof childVal === 'function'
@@ -1473,7 +1474,7 @@ strats.data = function (
 
       return parentVal
     }
-    return mergeDataOrFn.call(this, parentVal, childVal)
+    return mergeDataOrFn(parentVal, childVal)
   }
 
   return mergeDataOrFn(parentVal, childVal, vm)
@@ -2721,6 +2722,7 @@ function parse (
     isUnaryTag: options.isUnaryTag,
     canBeLeftOpenTag: options.canBeLeftOpenTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
+    shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     start: function start (tag, attrs, unary) {
       // check namespace.
@@ -3079,7 +3081,7 @@ function processSlot (el) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget;
       // preserve slot as an attribute for native shadow DOM compat
       // only for non-scoped slots.
-      if (!el.slotScope) {
+      if (el.tag !== 'template' && !el.slotScope) {
         addAttr(el, 'slot', slotTarget);
       }
     }
@@ -3168,6 +3170,13 @@ function processAttrs (el) {
         }
       }
       addAttr(el, name, JSON.stringify(value));
+      // #6887 firefox doesn't update muted state if set via attribute
+      // even immediately after element creation
+      if (!el.component &&
+          name === 'muted' &&
+          platformMustUseProp(el.tag, el.attrsMap.type, name)) {
+        addProp(el, name, 'true');
+      }
     }
   }
 }
@@ -3272,6 +3281,8 @@ function preTransformNode (el, options) {
       var typeBinding = getBindingAttr(el, 'type');
       var ifCondition = getAndRemoveAttr(el, 'v-if', true);
       var ifConditionExtra = ifCondition ? ("&&(" + ifCondition + ")") : "";
+      var hasElse = getAndRemoveAttr(el, 'v-else', true) != null;
+      var elseIfCondition = getAndRemoveAttr(el, 'v-else-if', true);
       // 1. checkbox
       var branch0 = cloneASTElement(el);
       // process for on the main node
@@ -3302,6 +3313,13 @@ function preTransformNode (el, options) {
         exp: ifCondition,
         block: branch2
       });
+
+      if (hasElse) {
+        branch0.else = true;
+      } else if (elseIfCondition) {
+        branch0.elseif = elseIfCondition;
+      }
+
       return branch0
     }
   }
@@ -4584,6 +4602,10 @@ function applyModelTransform (el, state) {
       var dir = el.directives[i];
       if (dir.name === 'model') {
         state.directives.model(el, dir, state.warn);
+        // remove value for textarea as its converted to text
+        if (el.tag === 'textarea' && el.props) {
+          el.props = el.props.filter(function (p) { return p.name !== 'value'; });
+        }
         break
       }
     }
@@ -4731,7 +4753,7 @@ function walk (node, isRoot) {
     if (node.ifConditions) {
       for (var i$1 = 1, l$1 = node.ifConditions.length; i$1 < l$1; i$1++) {
         var block = node.ifConditions[i$1].block;
-        walk(block);
+        walk(block, isRoot);
         check(block);
       }
     }
@@ -4789,7 +4811,8 @@ function isUnOptimizableTree (node) {
   return (
     isBuiltInTag(node.tag) || // built-in (slot, component)
     !isPlatformReservedTag$1(node.tag) || // custom component
-    !!node.component // "is" component
+    !!node.component || // "is" component
+    isSelectWithModel(node) // <select v-model> requires runtime inspection
   )
 }
 
@@ -4800,6 +4823,17 @@ function hasCustomDirective (node) {
     node.type === 1 &&
     node.directives &&
     node.directives.some(function (d) { return !isBuiltInDir(d.name); })
+  )
+}
+
+// <select v-model> cannot be optimized because it requires a runtime check
+// to determine proper selected option
+function isSelectWithModel (node) {
+  return (
+    node.type === 1 &&
+    node.tag === 'select' &&
+    node.directives != null &&
+    node.directives.some(function (d) { return d.name === 'model'; })
   )
 }
 
@@ -4974,6 +5008,9 @@ function childrenToSegments (el, state) {
     return [{ type: EXPRESSION, value: ("_s(" + binding + ")") }]
   }
   if ((binding = el.attrsMap['v-text'])) {
+    return [{ type: INTERPOLATION, value: ("_s(" + binding + ")") }]
+  }
+  if (el.tag === 'textarea' && (binding = el.attrsMap['v-model'])) {
     return [{ type: INTERPOLATION, value: ("_s(" + binding + ")") }]
   }
   return el.children
