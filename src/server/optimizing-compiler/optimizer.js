@@ -130,11 +130,11 @@ function hasCustomDirective (node: ASTNode): ?boolean {
 
 // <select v-model> cannot be optimized because it requires a runtime check
 // to determine proper selected option
-function isSelectWithModel (node: ASTNode): ?boolean {
+function isSelectWithModel (node: ASTNode): boolean {
   return (
     node.type === 1 &&
     node.tag === 'select' &&
-    node.directives &&
+    node.directives != null &&
     node.directives.some(d => d.name === 'model')
   )
 }
