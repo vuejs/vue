@@ -5,9 +5,8 @@
 
 import { isTextInputType } from 'web/util/element'
 import { looseEqual, looseIndexOf } from 'shared/util'
-import { warn, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
-import { emptyNode } from 'core/vdom/patch'
+import { warn, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
 
 /* istanbul ignore if */
 if (isIE9) {
@@ -24,7 +23,7 @@ const directive = {
   inserted (el, binding, vnode, oldVnode) {
     if (vnode.tag === 'select') {
       // #6903
-      if (oldVnode !== emptyNode && !hasDirective(oldVnode, 'model')) {
+      if (oldVnode.elm && !oldVnode.elm._vOptions) {
         mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'postpatch', () => {
           directive.componentUpdated(el, binding, vnode)
         })
@@ -51,6 +50,7 @@ const directive = {
       }
     }
   },
+
   componentUpdated (el, binding, vnode) {
     if (vnode.tag === 'select') {
       setSelected(el, binding, vnode.context)
@@ -144,12 +144,6 @@ function trigger (el, type) {
   const e = document.createEvent('HTMLEvents')
   e.initEvent(type, true, true)
   el.dispatchEvent(e)
-}
-
-function hasDirective (vnode, dirname) {
-  return vnode.data &&
-    vnode.data.directives &&
-    vnode.data.directives.some(dir => dir.name === dirname)
 }
 
 export default directive
