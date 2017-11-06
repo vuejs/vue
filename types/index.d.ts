@@ -3,7 +3,8 @@ import { Vue } from "./vue";
 export default Vue;
 
 export {
-  CreateElement
+  CreateElement,
+  VueConstructor
 } from "./vue";
 
 export {
