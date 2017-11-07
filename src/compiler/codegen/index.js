@@ -86,10 +86,16 @@ export function genElement (el: ASTElement, state: CodegenState): string {
 }
 
 // hoist static sub-trees out
-function genStatic (el: ASTElement, state: CodegenState): string {
+function genStatic (el: ASTElement, state: CodegenState, once: ?boolean): string {
   el.staticProcessed = true
   state.staticRenderFns.push(`with(this){return ${genElement(el, state)}}`)
-  return `_m(${state.staticRenderFns.length - 1}${el.staticInFor ? ',true' : ''})`
+  return `_m(${
+    state.staticRenderFns.length - 1
+  },${
+    el.staticInFor ? 'true' : 'false'
+  },${
+    once ? 'true' : 'false'
+  })`
 }
 
 // v-once
@@ -115,7 +121,7 @@ function genOnce (el: ASTElement, state: CodegenState): string {
     }
     return `_o(${genElement(el, state)},${state.onceId++},${key})`
   } else {
-    return genStatic(el, state)
+    return genStatic(el, state, true)
   }
 }
 
