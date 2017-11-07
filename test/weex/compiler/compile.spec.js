@@ -32,12 +32,12 @@ describe('compile basic', () => {
 
   it('should compile unary tag', () => {
     const inputCase = compile(`<div><input><text>abc</text></div>`)
-    expect(inputCase.render).toMatch(strToRegExp(`return _m(0)`))
+    expect(inputCase.render).toMatch(strToRegExp(`return _m(0,false,false)`))
     expect(inputCase.staticRenderFns).toMatch(strToRegExp(`_c('div',[_c('input'),_c('text',[_v("abc")])])`))
     expect(inputCase.errors).toEqual([])
 
     const imageCase = compile(`<div><image src="path"><text>abc</text></div>`)
-    expect(imageCase.render).toMatch(strToRegExp(`return _m(0)`))
+    expect(imageCase.render).toMatch(strToRegExp(`return _m(0,false,false)`))
     expect(imageCase.staticRenderFns).toMatch(strToRegExp(`_c('div',[_c('image',{attrs:{"src":"path"}}),_c('text',[_v("abc")])])`))
     expect(imageCase.errors).toEqual([])
 
@@ -54,7 +54,7 @@ describe('compile basic', () => {
         </div>
       </div>
     `)
-    expect(complexCase.render).toMatch(strToRegExp(`return _m(0)`))
+    expect(complexCase.render).toMatch(strToRegExp(`return _m(0,false,false)`))
     expect(complexCase.staticRenderFns).toMatch(strToRegExp(`_c('image',{attrs:{"src":"path"}}),_c('image'),_c('div'`))
     expect(complexCase.staticRenderFns).toMatch(strToRegExp(`_c('div',[_c('embed'),_c('text',[_v("start")]),_c('input',{attrs:{"type":"text"}}),_c('input',{attrs:{"type":"url"}}),_c('text',[_v("end")])]`))
     expect(complexCase.errors).toEqual([])
