@@ -160,6 +160,7 @@ export default {
     if (
       oldChild &&
       oldChild.data &&
+      oldChild.elm.nodeType !== Node.COMMENT_NODE &&
       !isSameChild(child, oldChild) &&
       !isAsyncPlaceholder(oldChild)
     ) {
