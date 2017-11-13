@@ -150,6 +150,17 @@ describe('vdom patch: hydration', () => {
     expect('not matching server-rendered content').toHaveBeenWarned()
   })
 
+  it('should warn failed hydration when component is not properly registered', () => {
+    const dom = createMockSSRDOM('<div><foo></foo></div>')
+
+    new Vue({
+      template: '<div><foo></foo></div>'
+    }).$mount(dom)
+
+    expect('not matching server-rendered content').toHaveBeenWarned()
+    expect('Unknown custom element: <foo>').toHaveBeenWarned()
+  })
+
   it('should overwrite textNodes in the correct position but with mismatching text without warning', () => {
     const dom = createMockSSRDOM('<div><span>foo</span></div>')
 
