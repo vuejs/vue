@@ -693,13 +693,27 @@ describe('Directive v-on', () => {
     expect(prevented).toBe(true)
   })
 
-  it('should warn click.right', () => {
-    new Vue({
+  it('should transform click.right to contextmenu', () => {
+    const spy = jasmine.createSpy('click.right')
+    const vm = new Vue({
       template: `<div @click.right="foo"></div>`,
-      methods: { foo () {} }
+      methods: { foo: spy }
     }).$mount()
 
-    expect(`Use "contextmenu" instead`).toHaveBeenWarned()
+    triggerEvent(vm.$el, 'contextmenu')
+    expect(spy).toHaveBeenCalled()
+  })
+
+  it('should transform click.middle to mouseup', () => {
+    const spy = jasmine.createSpy('click.middle')
+    const vm = new Vue({
+      template: `<div @click.middle="foo"></div>`,
+      methods: { foo: spy }
+    }).$mount()
+    triggerEvent(vm.$el, 'mouseup', e => { e.button = 0 })
+    expect(spy).not.toHaveBeenCalled()
+    triggerEvent(vm.$el, 'mouseup', e => { e.button = 1 })
+    expect(spy).toHaveBeenCalled()
   })
 
   it('object syntax (no argument)', () => {
