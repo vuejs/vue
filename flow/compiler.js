@@ -17,6 +17,9 @@ declare type CompilerOptions = {
   shouldDecodeNewlines?:  boolean;
   shouldDecodeNewlinesForHref?: boolean;
 
+  // support <recycle-list> in weex
+  recyclable?: boolean;
+
   // for ssr optimization compiler
   scopeId?: string;
 
@@ -30,6 +33,7 @@ declare type CompilerOptions = {
 declare type CompiledResult = {
   ast: ?ASTElement;
   render: string;
+  '@render'?: string;
   staticRenderFns: Array<string>;
   stringRenderFns?: Array<string>;
   errors?: Array<string>;

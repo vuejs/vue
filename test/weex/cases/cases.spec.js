@@ -68,5 +68,17 @@ describe('Usage', () => {
   describe('event', () => {
     it('click', createEventTestCase('event/click'))
   })
+
+  describe('recycle-list', () => {
+    it('text node', createRenderTestCase('recycle-list/text-node'))
+    it('attributes', createRenderTestCase('recycle-list/attrs'))
+    it('v-if', createRenderTestCase('recycle-list/v-if'))
+    it('v-else', createRenderTestCase('recycle-list/v-else'))
+    it('v-else-if', createRenderTestCase('recycle-list/v-else-if'))
+    it('v-for', createRenderTestCase('recycle-list/v-for'))
+    it('v-for-iterator', createRenderTestCase('recycle-list/v-for-iterator'))
+    it('v-on', createRenderTestCase('recycle-list/v-on'))
+    it('v-on-inline', createRenderTestCase('recycle-list/v-on-inline'))
+  })
 })
 

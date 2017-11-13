@@ -18,7 +18,7 @@ function getPrevMatch (el: ASTElement): any {
   }
 }
 
-export function transformVIf (el: ASTElement, options: CompilerOptions) {
+export function preTransformVIf (el: ASTElement, options: CompilerOptions) {
   if (hasConditionDirective(el)) {
     let exp
     const ifExp = getAndRemoveAttr(el, 'v-if')

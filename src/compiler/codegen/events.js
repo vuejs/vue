@@ -48,12 +48,18 @@ export function genHandlers (
 
 // Generate handler code with binding params on Weex
 function genWeexHandler (params: Array<any>, handlerCode: string) {
-  const wrapperArgs = params.filter(exp => simplePathRE.test(exp) && exp !== '$event')
-  const handlerParams = wrapperArgs.map(exp => ({ '@binding': exp }))
-  wrapperArgs.push('$event')
-  return '{' +
-    `handler:function(${wrapperArgs.join(',')}){${handlerCode}},\n` +
-    `params:${JSON.stringify(handlerParams)}` +
+  let innerHandlerCode = handlerCode
+  const exps = params.filter(exp => simplePathRE.test(exp) && exp !== '$event')
+  const bindings = exps.map(exp => ({ '@binding': exp }))
+  const args = exps.map((exp, i) => {
+    const key = `$_${i + 1}`
+    innerHandlerCode = innerHandlerCode.replace(exp, key)
+    return key
+  })
+  args.push('$event')
+  return '{\n' +
+    `handler:function(${args.join(',')}){${innerHandlerCode}},\n` +
+    `params:${JSON.stringify(bindings)}\n` +
     '}'
 }
 
