@@ -8,7 +8,7 @@ function parseAttrName (name: string): string {
   return camelize(name.replace(bindRE, ''))
 }
 
-export function transformVBind (el: ASTElement) {
+export function preTransformVBind (el: ASTElement, options: CompilerOptions) {
   for (const attr in el.attrsMap) {
     if (bindRE.test(attr)) {
       const name: string = parseAttrName(attr)
