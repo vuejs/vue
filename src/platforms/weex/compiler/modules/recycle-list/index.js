@@ -1,38 +1,42 @@
 /* @flow */
 
-import { transformText } from './text'
-import { transformVBind } from './v-bind'
-import { transformVIf } from './v-if'
-import { transformVFor } from './v-for'
+import { postTransformText } from './text'
+import { preTransformVBind } from './v-bind'
+import { preTransformVIf } from './v-if'
+import { preTransformVFor } from './v-for'
 import { postTransformVOn } from './v-on'
 
 let currentRecycleList = null
+
+function shouldCompile (el: ASTElement, options: CompilerOptions) {
+  return options.recyclable ||
+    (currentRecycleList && el !== currentRecycleList)
+}
 
 function preTransformNode (el: ASTElement, options: CompilerOptions) {
   if (el.tag === 'recycle-list') {
     currentRecycleList = el
   }
-  if (currentRecycleList) {
-    // TODO
-    transformVBind(el)
-    transformVIf(el, options) // and v-else-if and v-else
-    transformVFor(el, options)
+  if (shouldCompile(el, options)) {
+    preTransformVBind(el, options)
+    preTransformVIf(el, options) // also v-else-if and v-else
+    preTransformVFor(el, options)
   }
 }
 
-function transformNode (el: ASTElement) {
-  if (currentRecycleList) {
-    // TODO
+function transformNode (el: ASTElement, options: CompilerOptions) {
+  if (shouldCompile(el, options)) {
+    // do nothing yet
   }
 }
 
-function postTransformNode (el: ASTElement) {
-  if (currentRecycleList) {
+function postTransformNode (el: ASTElement, options: CompilerOptions) {
+  if (shouldCompile(el, options)) {
     // <text>: transform children text into value attr
     if (el.tag === 'text') {
-      transformText(el)
+      postTransformText(el, options)
     }
-    postTransformVOn(el)
+    postTransformVOn(el, options)
   }
   if (el === currentRecycleList) {
     currentRecycleList = null

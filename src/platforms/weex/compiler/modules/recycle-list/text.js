@@ -13,7 +13,7 @@ function genText (node: ASTNode) {
   return JSON.stringify(value)
 }
 
-export function transformText (el: ASTElement) {
+export function postTransformText (el: ASTElement, options: CompilerOptions) {
   // weex <text> can only contain text, so the parser
   // always generates a single child.
   if (el.children.length) {
