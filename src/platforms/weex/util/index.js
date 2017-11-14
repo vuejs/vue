@@ -1,6 +1,7 @@
 /* globals document */
 
 import { makeMap } from 'shared/util'
+import { warn } from 'core/util/index'
 
 export const isReservedTag = makeMap(
   'template,script,style,element,content,slot,link,meta,svg,view,' +
@@ -20,7 +21,7 @@ export const canBeLeftOpenTag = makeMap(
 )
 
 export const isRuntimeComponent = makeMap(
-  'richtext,trisition,trisition-group',
+  'richtext,transition,transition-group',
   true
 )
 
@@ -39,4 +40,15 @@ export function query (el, document) {
   placeholder.hasAttribute = placeholder.removeAttribute = function () {} // hack for patch
   document.documentElement.appendChild(placeholder)
   return placeholder
+}
+
+export function registerHook (cid, type, hook, fn) {
+  if (!document || !document.taskCenter) {
+    warn(`Can't find available "document" or "taskCenter".`)
+    return
+  }
+  if (typeof document.taskCenter.registerHook === 'function') {
+    return document.taskCenter.registerHook(cid, type, hook, fn)
+  }
+  warn(`Not support to register component hook "${type}@${hook}#${cid}".`)
 }
