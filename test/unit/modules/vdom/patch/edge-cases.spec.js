@@ -246,4 +246,25 @@ describe('vdom patch: edge cases', () => {
     vm.$el.children[0].click()
     expect(spy).toHaveBeenCalled()
   })
+
+  // #7041
+  it('transition children with only deep bindings should be patched on update', done => {
+    const vm = new Vue({
+      template: `
+      <div>
+        <transition>
+          <div :style="style"></div>
+        </transition>
+      </div>
+      `,
+      data: () => ({
+        style: { color: 'red' }
+      })
+    }).$mount()
+    expect(vm.$el.children[0].style.color).toBe('red')
+    vm.style.color = 'green'
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].style.color).toBe('green')
+    }).then(done)
+  })
 })

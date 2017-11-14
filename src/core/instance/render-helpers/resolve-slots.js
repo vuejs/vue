@@ -44,7 +44,7 @@ export function resolveSlots (
 }
 
 function isWhitespace (node: VNode): boolean {
-  return node.isComment || node.text === ' '
+  return (node.isComment && !node.asyncFactory) || node.text === ' '
 }
 
 export function resolveScopedSlots (

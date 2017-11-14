@@ -66,7 +66,9 @@ export function renderMixin (Vue: Class<Component>) {
       // last render. They need to be cloned to ensure "freshness" for this render.
       for (const key in vm.$slots) {
         const slot = vm.$slots[key]
-        if (slot._rendered) {
+        // _rendered is a flag added by renderSlot, but may not be present
+        // if the slot is passed from manually written render functions
+        if (slot._rendered || (slot[0] && slot[0].elm)) {
           vm.$slots[key] = cloneVNodes(slot, true /* deep */)
         }
       }
