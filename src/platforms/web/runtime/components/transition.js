@@ -82,7 +82,7 @@ export default {
   abstract: true,
 
   render (h: Function) {
-    let children: ?Array<VNode> = this.$options._renderChildren
+    let children: any = this.$slots.default
     if (!children) {
       return
     }
