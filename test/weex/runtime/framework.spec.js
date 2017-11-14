@@ -152,57 +152,6 @@ describe('framework APIs', () => {
     expect(root).toMatch(/not found/)
   })
 
-  // TODO: deprecated, move to weex-js-runtime
-  it('receiveTasks: fireEvent', (done) => {
-    const id = String(Date.now() * Math.random())
-    const instance = createInstance(id, `
-      new Vue({
-        data: {
-          x: 'Hello'
-        },
-        methods: {
-          update: function (e) {
-            this.x = 'World'
-          }
-        },
-        render: function (createElement) {
-          return createElement('div', {}, [
-            createElement('text', { attrs: { value: this.x }, on: { click: this.update }}, [])
-          ])
-        },
-        el: "body"
-      })
-    `)
-    expect(getRoot(instance)).toEqual({
-      type: 'div',
-      children: [{
-        type: 'text',
-        attr: { value: 'Hello' },
-        event: ['click']
-      }]
-    })
-    const textRef = framework.getRoot(id).children[0].ref
-    framework.receiveTasks(id, [
-      { method: 'fireEvent', args: [textRef, 'click'] }
-    ])
-    setTimeout(() => {
-      expect(getRoot(instance)).toEqual({
-        type: 'div',
-        children: [{
-          type: 'text',
-          attr: { value: 'World' },
-          event: ['click']
-        }]
-      })
-      framework.destroyInstance(id)
-      const result = framework.receiveTasks(id, [
-        { method: 'fireEvent', args: [textRef, 'click'] }
-      ])
-      expect(result instanceof Error).toBe(true)
-      done()
-    })
-  })
-
   it('vm.$getConfig', () => {
     const id = String(Date.now() * Math.random())
     global.WXEnvironment = {
