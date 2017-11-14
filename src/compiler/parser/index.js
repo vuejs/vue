@@ -598,6 +598,15 @@ function makeAttrsMap (attrs: Array<Object>): Object {
     }
     map[attrs[i].name] = attrs[i].value
   }
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    map['v-model'] &&
+    (map['v-bind:value'] || map[':value']) &&
+    (!map['type'] || map['type'] === 'text')
+  ) {
+    var vBind = map['v-bind:value'] ? 'v-bind:value' : ':value'
+    warn('v-model and ' + vBind + ' used on the same text input')
+  }
   return map
 }
 
