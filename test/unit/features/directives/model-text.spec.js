@@ -250,24 +250,24 @@ describe('Directive v-model text', () => {
     expect('You are binding v-model directly to a v-for iteration alias').toHaveBeenWarned()
   })
 
-  it('warn if both v-model and v-bind:value are used on the same text input', () => {
+  it('warn if both v-model and v-bind:value are used on the same element', () => {
     new Vue({
       data: {
         test: 'foo'
       },
       template: '<input type="text" v-model="test" v-bind:value="test"/>'
     }).$mount()
-    expect('v-model and v-bind:value used on the same text input').toHaveBeenWarned()
+    expect('v-bind:value conflicts with v-model on the same element because the latter already expands to a value binding internally').toHaveBeenWarned()
   })
 
-  it('warn if both v-model and :value are used on the same text input', () => {
+  it('warn if both v-model and :value are used on the same element', () => {
     new Vue({
       data: {
         test: 'foo'
       },
       template: '<input type="text" v-model="test" :value="test"/>'
     }).$mount()
-    expect('v-model and :value used on the same text input').toHaveBeenWarned()
+    expect(':value conflicts with v-model on the same element because the latter already expands to a value binding internally').toHaveBeenWarned()
   })
 
   if (!isAndroid) {

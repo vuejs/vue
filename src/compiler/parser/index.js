@@ -51,7 +51,7 @@ export function createASTElement (
     type: 1,
     tag,
     attrsList: attrs,
-    attrsMap: makeAttrsMap(attrs),
+    attrsMap: makeAttrsMap(attrs, tag),
     parent,
     children: []
   }
@@ -587,7 +587,7 @@ function parseModifiers (name: string): Object | void {
   }
 }
 
-function makeAttrsMap (attrs: Array<Object>): Object {
+function makeAttrsMap (attrs: Array<Object>, tag: string): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
     if (
@@ -600,12 +600,13 @@ function makeAttrsMap (attrs: Array<Object>): Object {
   }
   if (
     process.env.NODE_ENV !== 'production' &&
-    map['v-model'] &&
-    (map['v-bind:value'] || map[':value']) &&
-    (!map['type'] || map['type'] === 'text')
+    map['v-model'] && (map['v-bind:value'] || map[':value']) &&
+    map['type'] !== 'checkbox' &&
+    map['type'] !== 'radio' &&
+    tag !== 'select'
   ) {
-    var vBind = map['v-bind:value'] ? 'v-bind:value' : ':value'
-    warn('v-model and ' + vBind + ' used on the same text input')
+    var vBindValue = map['v-bind:value'] ? 'v-bind:value' : ':value'
+    warn(vBindValue + ' conflicts with v-model on the same element because the latter already expands to a value binding internally')
   }
   return map
 }
