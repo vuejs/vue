@@ -193,7 +193,8 @@ export function mountComponent (
     }
   }
 
-  vm._watcher = new Watcher(vm, updateComponent, noop)
+  vm._watcher = new Watcher(vm, updateComponent, noop, { delayed: true })
+  vm._watcher.get()
   hydrating = false
 
   // manually mounted instance, call mounted on self

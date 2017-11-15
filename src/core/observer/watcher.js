@@ -1,6 +1,6 @@
 /* @flow */
 
-import { queueWatcher } from './scheduler'
+import { queueWatcher, wrapWatcherGetter } from './scheduler'
 import Dep, { pushTarget, popTarget } from './dep'
 
 import {
@@ -82,7 +82,8 @@ export default class Watcher {
         )
       }
     }
-    this.value = this.lazy
+    this.getter = wrapWatcherGetter(this.getter)
+    this.value = this.lazy || (options && options.delayed)
       ? undefined
       : this.get()
   }
@@ -90,7 +91,7 @@ export default class Watcher {
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
-  get () {
+  get (dontCleanupDeps: ?boolean) {
     pushTarget(this)
     let value
     const vm = this.vm
@@ -109,7 +110,9 @@ export default class Watcher {
         traverse(value)
       }
       popTarget()
-      this.cleanupDeps()
+      if (!dontCleanupDeps) {
+        this.cleanupDeps()
+      }
     }
     return value
   }
