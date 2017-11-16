@@ -343,6 +343,11 @@ describe('Directive v-on', () => {
       }
     })
 
+    // unexpected warnings fail the test
+    expect(`Pointer modifier "left" is deprecated. Use "primary" instead.`).toHaveBeenWarned()
+    expect(`Pointer modifier "right" is deprecated. Use "secondary" instead.`).toHaveBeenWarned()
+    expect(`Pointer modifier "middle" is deprecated. Use "auxiliary" instead.`).toHaveBeenWarned()
+
     triggerEvent(vm.$refs.primary, 'mousedown', e => { e.button = secondary })
     triggerEvent(vm.$refs.primary, 'mousedown', e => { e.button = auxiliary })
     expect(spyPrimary).not.toHaveBeenCalled()
@@ -718,6 +723,7 @@ describe('Directive v-on', () => {
       template: `<div @click.secondary="foo" @click.right="foo"></div>`,
       methods: { foo: spy }
     }).$mount()
+    expect(`Pointer modifier "right" is deprecated. Use "secondary" instead.`).toHaveBeenWarned()
 
     triggerEvent(vm.$el, 'contextmenu')
     expect(spy.calls.count()).toBe(2)
@@ -729,6 +735,7 @@ describe('Directive v-on', () => {
       template: `<div @click.auxiliary="foo" @click.middle="foo"></div>`,
       methods: { foo: spy }
     }).$mount()
+    expect(`Pointer modifier "middle" is deprecated. Use "auxiliary" instead.`).toHaveBeenWarned()
 
     triggerEvent(vm.$el, 'mouseup', e => { e.button = 0 })
     expect(spy).not.toHaveBeenCalled()
