@@ -181,12 +181,12 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   }
 
   const data = resolveTransition(vnode.data.transition)
-  if (isUndef(data)) {
+  if (isUndef(data) || el.nodeType !== 1) {
     return rm()
   }
 
   /* istanbul ignore if */
-  if (isDef(el._leaveCb) || el.nodeType !== 1) {
+  if (isDef(el._leaveCb)) {
     return
   }
 
