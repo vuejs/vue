@@ -160,10 +160,10 @@ export default {
     if (
       oldChild &&
       oldChild.data &&
-      oldChild.elm &&
-      oldChild.elm.nodeType !== 8 && // Node.COMMENT_NODE
       !isSameChild(child, oldChild) &&
-      !isAsyncPlaceholder(oldChild)
+      !isAsyncPlaceholder(oldChild) &&
+      // #6687 component root is a comment node
+      !(oldChild.componentInstance && oldChild.componentInstance._vnode.isComment)
     ) {
       // replace old child transition data with fresh one
       // important for dynamic transitions!
