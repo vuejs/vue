@@ -14,6 +14,7 @@ import VNode from './vnode'
 import config from '../config'
 import { SSR_ATTR } from 'shared/constants'
 import { registerRef } from './modules/ref'
+import { traverse } from '../observer/traverse'
 import { activeInstance } from '../instance/lifecycle'
 import { isTextInputType } from 'web/util/element'
 
@@ -534,7 +535,9 @@ export function createPatchFunction (backend) {
   let hydrationBailed = false
   // list of modules that can skip create hook during hydration because they
   // are already rendered on the client or has no need for initialization
-  const isRenderedModule = makeMap('attrs,style,class,staticClass,staticStyle,key')
+  // Note: style is excluded because it relies on initial clone for future
+  // deep updates (#7063).
+  const isRenderedModule = makeMap('attrs,class,staticClass,staticStyle,key')
 
   // Note: this is a browser-only function so we can assume elms are DOM nodes.
   function hydrate (elm, vnode, insertedVnodeQueue, inVPre) {
@@ -611,11 +614,17 @@ export function createPatchFunction (backend) {
         }
       }
       if (isDef(data)) {
+        let fullInvoke = false
         for (const key in data) {
           if (!isRenderedModule(key)) {
+            fullInvoke = true
             invokeCreateHooks(vnode, insertedVnodeQueue)
             break
           }
+        }
+        if (!fullInvoke && data['class']) {
+          // ensure collecting deps for deep class bindings for future updates
+          traverse(data['class'])
         }
       }
     } else if (elm.data !== vnode.text) {
