@@ -353,4 +353,39 @@ describe('vdom patch: hydration', () => {
     }).$mount(dom)
     expect('not matching server-rendered content').not.toHaveBeenWarned()
   })
+
+  // #7063
+  it('should properly initialize dynamic style bindings for future updates', done => {
+    const dom = createMockSSRDOM('<div style="padding-left:0px"></div>')
+
+    const vm = new Vue({
+      data: {
+        style: { paddingLeft: '0px' }
+      },
+      template: `<div><div :style="style"></div></div>`
+    }).$mount(dom)
+
+    // should update
+    vm.style.paddingLeft = '100px'
+    waitForUpdate(() => {
+      expect(dom.children[0].style.paddingLeft).toBe('100px')
+    }).then(done)
+  })
+
+  it('should properly initialize dynamic class bindings for future updates', done => {
+    const dom = createMockSSRDOM('<div class="foo bar"></div>')
+
+    const vm = new Vue({
+      data: {
+        cls: [{ foo: true }, 'bar']
+      },
+      template: `<div><div :class="cls"></div></div>`
+    }).$mount(dom)
+
+    // should update
+    vm.cls[0].foo = false
+    waitForUpdate(() => {
+      expect(dom.children[0].className).toBe('bar')
+    }).then(done)
+  })
 })
