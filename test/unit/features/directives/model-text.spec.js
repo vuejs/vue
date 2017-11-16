@@ -257,7 +257,10 @@ describe('Directive v-model text', () => {
       },
       template: '<input type="text" v-model="test" v-bind:value="test"/>'
     }).$mount()
-    expect('v-bind:value conflicts with v-model on the same element because the latter already expands to a value binding internally').toHaveBeenWarned()
+    expect(
+      'v-bind:value conflicts with v-model on the same element because the latter already ' +
+      'expands to a value binding internally'
+    ).toHaveBeenWarned()
   })
 
   it('warn if v-model and :value conflict', () => {
@@ -267,7 +270,10 @@ describe('Directive v-model text', () => {
       },
       template: '<input type="text" v-model="test" :value="test"/>'
     }).$mount()
-    expect(':value conflicts with v-model on the same element because the latter already expands to a value binding internally').toHaveBeenWarned()
+    expect(
+      ':value conflicts with v-model on the same element because the latter already ' +
+      'expands to a value binding internally'
+    ).toHaveBeenWarned()
   })
 
   if (!isAndroid) {
