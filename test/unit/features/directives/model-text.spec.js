@@ -250,7 +250,7 @@ describe('Directive v-model text', () => {
     expect('You are binding v-model directly to a v-for iteration alias').toHaveBeenWarned()
   })
 
-  it('warn if both v-model and v-bind:value are used on the same element', () => {
+  it('warn if v-model and v-bind:value conflict', () => {
     new Vue({
       data: {
         test: 'foo'
@@ -260,7 +260,7 @@ describe('Directive v-model text', () => {
     expect('v-bind:value conflicts with v-model on the same element because the latter already expands to a value binding internally').toHaveBeenWarned()
   })
 
-  it('warn if both v-model and :value are used on the same element', () => {
+  it('warn if v-model and :value conflict', () => {
     new Vue({
       data: {
         test: 'foo'
