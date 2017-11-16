@@ -319,47 +319,67 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalled()
   })
 
-  it('should support mouse modifier', () => {
-    const left = 0
-    const middle = 1
-    const right = 2
-    const spyLeft = jasmine.createSpy()
-    const spyMiddle = jasmine.createSpy()
-    const spyRight = jasmine.createSpy()
+  it('should support mouse (pointer) modifiers', () => {
+    const primary = 0
+    const auxiliary = 1
+    const secondary = 2
+    const spyPrimary = jasmine.createSpy()
+    const spyAuxiliary = jasmine.createSpy()
+    const spySecondary = jasmine.createSpy()
 
     vm = new Vue({
       el,
       template: `
         <div>
-          <div ref="left" @mousedown.left="foo">left</div>
-          <div ref="right" @mousedown.right="foo1">right</div>
-          <div ref="middle" @mousedown.middle="foo2">right</div>
+          <div ref="primary"   @mousedown.primary="foo"    @mousedown.left="foo">primary</div>
+          <div ref="secondary" @mousedown.secondary="foo1" @mousedown.right="foo1">secondary</div>
+          <div ref="auxiliary" @mousedown.auxiliary="foo2" @mousedown.middle="foo2">auxiliary</div>
         </div>
       `,
       methods: {
-        foo: spyLeft,
-        foo1: spyRight,
-        foo2: spyMiddle
+        foo: spyPrimary,
+        foo1: spySecondary,
+        foo2: spyAuxiliary
       }
     })
 
-    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = right })
-    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = middle })
-    expect(spyLeft).not.toHaveBeenCalled()
-    triggerEvent(vm.$refs.left, 'mousedown', e => { e.button = left })
-    expect(spyLeft).toHaveBeenCalled()
+    triggerEvent(vm.$refs.primary, 'mousedown', e => { e.button = secondary })
+    triggerEvent(vm.$refs.primary, 'mousedown', e => { e.button = auxiliary })
+    expect(spyPrimary).not.toHaveBeenCalled()
+    triggerEvent(vm.$refs.primary, 'mousedown', e => { e.button = primary })
+    expect(spyPrimary.calls.count()).toBe(2)
 
-    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = left })
-    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = middle })
-    expect(spyRight).not.toHaveBeenCalled()
-    triggerEvent(vm.$refs.right, 'mousedown', e => { e.button = right })
-    expect(spyRight).toHaveBeenCalled()
+    triggerEvent(vm.$refs.secondary, 'mousedown', e => { e.button = primary })
+    triggerEvent(vm.$refs.secondary, 'mousedown', e => { e.button = auxiliary })
+    expect(spySecondary).not.toHaveBeenCalled()
+    triggerEvent(vm.$refs.secondary, 'mousedown', e => { e.button = secondary })
+    expect(spySecondary.calls.count()).toBe(2)
 
-    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = left })
-    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = right })
-    expect(spyMiddle).not.toHaveBeenCalled()
-    triggerEvent(vm.$refs.middle, 'mousedown', e => { e.button = middle })
-    expect(spyMiddle).toHaveBeenCalled()
+    triggerEvent(vm.$refs.auxiliary, 'mousedown', e => { e.button = primary })
+    triggerEvent(vm.$refs.auxiliary, 'mousedown', e => { e.button = secondary })
+    expect(spyAuxiliary).not.toHaveBeenCalled()
+    triggerEvent(vm.$refs.auxiliary, 'mousedown', e => { e.button = auxiliary })
+    expect(spyAuxiliary.calls.count()).toBe(2)
+  })
+
+  it('warn deprecated mouse (pointer) modifiers', () => {
+    new Vue({
+      template: `<div @mousedown.left="foo">primary</div>`,
+      methods: { foo: spy }
+    }).$mount()
+    expect(`Pointer modifier "left" is deprecated. Use "primary" instead.`).toHaveBeenWarned()
+
+    new Vue({
+      template: `<div @mousedown.right="foo">secondary</div>`,
+      methods: { foo: spy }
+    }).$mount()
+    expect(`Pointer modifier "right" is deprecated. Use "secondary" instead.`).toHaveBeenWarned()
+
+    new Vue({
+      template: `<div @mousedown.middle="foo">auxiliary</div>`,
+      methods: { foo: spy }
+    }).$mount()
+    expect(`Pointer modifier "middle" is deprecated. Use "auxiliary" instead.`).toHaveBeenWarned()
   })
 
   it('should support custom keyCode', () => {
@@ -693,27 +713,27 @@ describe('Directive v-on', () => {
     expect(prevented).toBe(true)
   })
 
-  it('should transform click.right to contextmenu', () => {
-    const spy = jasmine.createSpy('click.right')
+  it('should transform click.right (click.secondary) to contextmenu', () => {
     const vm = new Vue({
-      template: `<div @click.right="foo"></div>`,
+      template: `<div @click.secondary="foo" @click.right="foo"></div>`,
       methods: { foo: spy }
     }).$mount()
 
     triggerEvent(vm.$el, 'contextmenu')
-    expect(spy).toHaveBeenCalled()
+    expect(spy.calls.count()).toBe(2)
   })
 
-  it('should transform click.middle to mouseup', () => {
+  it('should transform click.middle (click.auxiliary) to mouseup', () => {
     const spy = jasmine.createSpy('click.middle')
     const vm = new Vue({
-      template: `<div @click.middle="foo"></div>`,
+      template: `<div @click.auxiliary="foo" @click.middle="foo"></div>`,
       methods: { foo: spy }
     }).$mount()
+
     triggerEvent(vm.$el, 'mouseup', e => { e.button = 0 })
     expect(spy).not.toHaveBeenCalled()
     triggerEvent(vm.$el, 'mouseup', e => { e.button = 1 })
-    expect(spy).toHaveBeenCalled()
+    expect(spy.calls.count()).toBe(2)
   })
 
   it('object syntax (no argument)', () => {
