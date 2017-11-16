@@ -21,6 +21,7 @@ export default function model (
   const modifiers = dir.modifiers
   const tag = el.tag
   const type = el.attrsMap.type
+  const attrsMap = el.attrsMap
 
   if (process.env.NODE_ENV !== 'production') {
     // inputs with type="file" are read only and setting the input's
@@ -29,6 +30,20 @@ export default function model (
       warn(
         `<${el.tag} v-model="${value}" type="file">:\n` +
         `File inputs are read only. Use a v-on:change listener instead.`
+      )
+    }
+
+    // warn if v-bind:value conflicts with v-model
+    if (
+      (attrsMap['v-bind:value'] || attrsMap[':value']) &&
+      type !== 'checkbox' &&
+      type !== 'radio' &&
+      tag !== 'select'
+    ) {
+      const vBindValue = attrsMap['v-bind:value'] ? 'v-bind:value' : ':value'
+      warn(
+        `${vBindValue} conflicts with v-model on the same element ` +
+        'because the latter already expands to a value binding internally'
       )
     }
   }
