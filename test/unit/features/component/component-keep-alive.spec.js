@@ -550,6 +550,60 @@ describe('Component keep-alive', () => {
     expect(`Unknown custom element: <foo>`).toHaveBeenWarned()
   })
 
+  // #6938
+  it('should not cache anonymous component', done => {
+    const Foo = {
+      name: 'foo',
+      template: `<div>foo</div>`,
+      created: jasmine.createSpy('foo')
+    }
+
+    const Bar = {
+      template: `<div>bar</div>`,
+      created: jasmine.createSpy('bar')
+    }
+
+    const Child = {
+      functional: true,
+      render (h, ctx) {
+        return h(ctx.props.view ? Foo : Bar)
+      }
+    }
+
+    const vm = new Vue({
+      template: `
+        <keep-alive include="foo">
+          <child :view="view"></child>
+        </keep-alive>
+      `,
+      data: {
+        view: true
+      },
+      components: { Child }
+    }).$mount()
+
+    function assert (foo, bar) {
+      expect(Foo.created.calls.count()).toBe(foo)
+      expect(Bar.created.calls.count()).toBe(bar)
+    }
+
+    expect(vm.$el.textContent).toBe('foo')
+    assert(1, 0)
+    vm.view = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('bar')
+      assert(1, 1)
+      vm.view = true
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('foo')
+      assert(1, 1)
+      vm.view = false
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('bar')
+      assert(1, 2)
+    }).then(done)
+  })
+
   if (!isIE9) {
     it('with transition-mode out-in', done => {
       let next
