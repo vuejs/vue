@@ -1,4 +1,5 @@
 {
+  "foobar": "foobar",
   "name": "vue",
   "version": "2.5.4",
   "description": "Reactive, component-oriented view layer for modern web interfaces.",
