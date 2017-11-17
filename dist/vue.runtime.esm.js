@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.5.4
+ * Vue.js v2.5.5
  * (c) 2014-2017 Evan You
  * Released under the MIT License.
  */
@@ -4352,6 +4352,7 @@ function applyNS (vnode, ns, force) {
 
 function initRender (vm) {
   vm._vnode = null; // the root of the child tree
+  vm._staticTrees = null; // v-once cached trees
   var options = vm.$options;
   var parentVnode = vm.$vnode = options._parentVnode; // the placeholder node in parent tree
   var renderContext = parentVnode && parentVnode.context;
@@ -4857,12 +4858,13 @@ var KeepAlive = {
   },
 
   render: function render () {
-    var vnode = getFirstComponentChild(this.$slots.default);
+    var slot = this.$slots.default;
+    var vnode = getFirstComponentChild(slot);
     var componentOptions = vnode && vnode.componentOptions;
     if (componentOptions) {
       // check pattern
       var name = getComponentName(componentOptions);
-      if (name && (
+      if (!name || (
         (this.exclude && matches(this.exclude, name)) ||
         (this.include && !matches(this.include, name))
       )) {
@@ -4893,7 +4895,7 @@ var KeepAlive = {
 
       vnode.data.keepAlive = true;
     }
-    return vnode
+    return vnode || (slot && slot[0])
   }
 };
 
@@ -4960,7 +4962,7 @@ Object.defineProperty(Vue$3.prototype, '$ssrContext', {
   }
 });
 
-Vue$3.version = '2.5.4';
+Vue$3.version = '2.5.5';
 
 /*  */
 
