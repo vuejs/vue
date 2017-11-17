@@ -81,7 +81,8 @@ export default {
   },
 
   render () {
-    const vnode: VNode = getFirstComponentChild(this.$slots.default)
+    const slot = this.$slots.default
+    const vnode: VNode = getFirstComponentChild(slot)
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
       // check pattern
@@ -115,6 +116,6 @@ export default {
 
       vnode.data.keepAlive = true
     }
-    return vnode
+    return vnode || (slot && slot[0])
   }
 }
