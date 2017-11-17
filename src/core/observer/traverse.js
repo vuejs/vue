@@ -18,7 +18,7 @@ export function traverse (val: any) {
 function _traverse (val: any, seen: SimpleSet) {
   let i, keys
   const isA = Array.isArray(val)
-  if ((!isA && !isObject(val)) || !Object.isExtensible(val)) {
+  if ((!isA && !isObject(val)) || Object.isFrozen(val)) {
     return
   }
   if (val.__ob__) {
