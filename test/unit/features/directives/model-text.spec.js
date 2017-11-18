@@ -255,12 +255,9 @@ describe('Directive v-model text', () => {
       data: {
         test: 'foo'
       },
-      template: '<input type="text" v-model="test" v-bind:value="test"/>'
+      template: '<input type="text" v-model="test" v-bind:value="test">'
     }).$mount()
-    expect(
-      'v-bind:value conflicts with v-model on the same element because the latter already ' +
-      'expands to a value binding internally'
-    ).toHaveBeenWarned()
+    expect('v-bind:value="test" conflicts with v-model').toHaveBeenWarned()
   })
 
   it('warn if v-model and :value conflict', () => {
@@ -268,12 +265,30 @@ describe('Directive v-model text', () => {
       data: {
         test: 'foo'
       },
-      template: '<input type="text" v-model="test" :value="test"/>'
+      template: '<input type="text" v-model="test" :value="test">'
     }).$mount()
-    expect(
-      ':value conflicts with v-model on the same element because the latter already ' +
-      'expands to a value binding internally'
-    ).toHaveBeenWarned()
+    expect(':value="test" conflicts with v-model').toHaveBeenWarned()
+  })
+
+  it('should not warn on radio, checkbox, or custom component', () => {
+    new Vue({
+      data: { test: '' },
+      components: {
+        foo: {
+          props: ['model', 'value'],
+          model: { prop: 'model', event: 'change' },
+          template: `<div/>`
+        }
+      },
+      template: `
+        <div>
+          <input type="checkbox" v-model="test" :value="test">
+          <input type="radio" v-model="test" :value="test">
+          <foo v-model="test" :value="test"/>
+        </div>
+      `
+    }).$mount()
+    expect('conflicts with v-model').not.toHaveBeenWarned()
   })
 
   if (!isAndroid) {
