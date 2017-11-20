@@ -142,12 +142,14 @@ function initData (vm: Component) {
         vm
       )
     } else if (isReserved(key)) {
-      warn(
-        `Property "${key}" will not be proxied on the instance because it ` +
-        `may conflict with Vue's internal properties. You will have to access it as ` +
-        `"vm.$data.${key}". Avoid defining component properties that start with _ or $.`,
-        vm
-      )
+      if (process.env.NODE_ENV !== 'production') {
+        warn(
+          `Property "${key}" will not be proxied on the instance because it ` +
+          `may conflict with Vue's internal properties. You will have to access it as ` +
+          `"vm.$data.${key}". Avoid defining component properties that start with _ or $.`,
+          vm
+        )
+      }
     } else {
       proxy(vm, `_data`, key)
     }
