@@ -460,6 +460,15 @@ function processSlot (el) {
       }
       el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
+        warn(
+          `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
+          `(v-for takes higher priority). Use a wrapper <template> for the ` +
+          `scoped slot to make it clearer.`,
+          true
+        )
+      }
       el.slotScope = slotScope
     }
     const slotTarget = getBindingAttr(el, 'slot')
