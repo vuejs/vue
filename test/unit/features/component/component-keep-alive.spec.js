@@ -551,7 +551,7 @@ describe('Component keep-alive', () => {
   })
 
   // #6938
-  it('should not cache anonymous component', done => {
+  it('should not cache anonymous component when include is specified', done => {
     const Foo = {
       name: 'foo',
       template: `<div>foo</div>`,
@@ -601,6 +601,58 @@ describe('Component keep-alive', () => {
     }).then(() => {
       expect(vm.$el.textContent).toBe('bar')
       assert(1, 2)
+    }).then(done)
+  })
+
+  it('should cache anonymous components if include is not specified', done => {
+    const Foo = {
+      template: `<div>foo</div>`,
+      created: jasmine.createSpy('foo')
+    }
+
+    const Bar = {
+      template: `<div>bar</div>`,
+      created: jasmine.createSpy('bar')
+    }
+
+    const Child = {
+      functional: true,
+      render (h, ctx) {
+        return h(ctx.props.view ? Foo : Bar)
+      }
+    }
+
+    const vm = new Vue({
+      template: `
+        <keep-alive>
+          <child :view="view"></child>
+        </keep-alive>
+      `,
+      data: {
+        view: true
+      },
+      components: { Child }
+    }).$mount()
+
+    function assert (foo, bar) {
+      expect(Foo.created.calls.count()).toBe(foo)
+      expect(Bar.created.calls.count()).toBe(bar)
+    }
+
+    expect(vm.$el.textContent).toBe('foo')
+    assert(1, 0)
+    vm.view = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('bar')
+      assert(1, 1)
+      vm.view = true
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('foo')
+      assert(1, 1)
+      vm.view = false
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('bar')
+      assert(1, 1)
     }).then(done)
   })
 
