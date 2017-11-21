@@ -80,7 +80,11 @@ function checkIdentifier (
 ) {
   if (typeof ident === 'string') {
     try {
-      new Function(`var ${ident}`)
+      // #7096 use an array because it makes it possible to destructure
+      // arrays and objects:
+      // var { foo } = [] works
+      // var [ foo ] = [] works
+      new Function(`var ${ident} = []`)
     } catch (e) {
       errors.push(`invalid ${type} "${ident}" in expression: ${text.trim()}`)
     }

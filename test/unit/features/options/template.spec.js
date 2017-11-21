@@ -78,6 +78,26 @@ describe('Options template', () => {
     expect('Raw expression: v-for="(1, 2) in a----"').toHaveBeenWarned()
   })
 
+  // #7096
+  // TODO activate once we use something newer than PhantomJS
+  xit('should not warn with object destructuring in v-for', () => {
+    new Vue({
+      data: { items: [] },
+      template: '<div><div v-for="{ foo } in items"></div></div>'
+    }).$mount()
+    expect('Error compiling template').not.toHaveBeenWarned()
+    expect('invalid v-for alias ').not.toHaveBeenWarned()
+  })
+
+  xit('should not warn with array destructuring in v-for', () => {
+    new Vue({
+      data: { items: [] },
+      template: '<div><div v-for="[ foo ] in items"></div></div>'
+    }).$mount()
+    expect('Error compiling template').not.toHaveBeenWarned()
+    expect('invalid v-for alias ').not.toHaveBeenWarned()
+  })
+
   it('warn error in generated function (v-on)', () => {
     new Vue({
       template: `<div @click="delete('Delete')"></div>`,
