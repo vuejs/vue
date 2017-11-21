@@ -17,7 +17,8 @@ interface Renderer {
 
 interface BundleRenderer {
   renderToString(callback: RenderCallback): void;
-  renderToString(context: object, callback?: RenderCallback): void;
+  renderToString(context: object, callback: RenderCallback): void;
+  renderToString(context: object): Promise<string>;
 
   renderToStream(context?: object): Readable;
 }
