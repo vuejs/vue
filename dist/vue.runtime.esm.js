@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.5.7
+ * Vue.js v2.5.8
  * (c) 2014-2017 Evan You
  * Released under the MIT License.
  */
@@ -4967,7 +4967,7 @@ Object.defineProperty(Vue$3.prototype, '$ssrContext', {
   }
 });
 
-Vue$3.version = '2.5.7';
+Vue$3.version = '2.5.8';
 
 /*  */
 
