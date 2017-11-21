@@ -95,6 +95,14 @@ bundleRenderer.renderToString(context, (err, html) => {
   const res: string = html;
 });
 
+bundleRenderer.renderToString().then(html => {
+  const res: string = html;
+});
+
+bundleRenderer.renderToString(context).then(html => {
+  const res: string = html;
+});
+
 bundleRenderer.renderToStream(context).on('data', chunk => {
   const html = chunk.toString();
 });
