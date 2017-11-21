@@ -446,7 +446,7 @@ describe('Directive v-for', () => {
     }).then(done)
   })
 
-  it('strings', done => {
+  it('should work with strings', done => {
     const vm = new Vue({
       data: {
         text: 'foo'
@@ -463,4 +463,21 @@ describe('Directive v-for', () => {
       expect(vm.$el.textContent).toMatch('f.o.o.b.a.r.')
     }).then(done)
   })
+
+  const supportsDeconstruct = (() => {
+    try {
+      new Function('var { foo } = bar')
+      return true
+    } catch (e) {}
+  })()
+
+  if (supportsDeconstruct) {
+    it('should support deconstruct syntax in alias position', () => {
+      const vm = new Vue({
+        data: { list: [{ foo: 'hi' }] },
+        template: '<div><div v-for="({ foo }, i) in list">{{ foo }}{{ i }}</div></div>'
+      }).$mount()
+      expect(vm.$el.textContent).toBe('hi0')
+    })
+  }
 })

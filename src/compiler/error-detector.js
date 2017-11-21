@@ -80,7 +80,7 @@ function checkIdentifier (
 ) {
   if (typeof ident === 'string') {
     try {
-      new Function(`var ${ident}`)
+      new Function(`var ${ident}=_`)
     } catch (e) {
       errors.push(`invalid ${type} "${ident}" in expression: ${text.trim()}`)
     }
