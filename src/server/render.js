@@ -252,8 +252,8 @@ function renderElement (el, isRoot, context) {
     el.data.attrs[SSR_ATTR] = 'true'
   }
 
-  if (el.functionalOptions) {
-    registerComponentForCache(el.functionalOptions, write)
+  if (el.fnOptions) {
+    registerComponentForCache(el.fnOptions, write)
   }
 
   const startTag = renderStartingTag(el, context)
