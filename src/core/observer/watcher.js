@@ -44,9 +44,13 @@ export default class Watcher {
     vm: Component,
     expOrFn: string | Function,
     cb: Function,
-    options?: Object
+    options?: ?Object,
+    isRenderWatcher?: boolean
   ) {
     this.vm = vm
+    if (isRenderWatcher) {
+      vm._watcher = this
+    }
     vm._watchers.push(this)
     // options
     if (options) {
