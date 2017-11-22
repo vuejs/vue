@@ -656,6 +656,34 @@ describe('Component keep-alive', () => {
     }).then(done)
   })
 
+  // #7105
+  it('should not destroy active instance when pruning cache', done => {
+    const Foo = {
+      template: `<div>foo</div>`,
+      destroyed: jasmine.createSpy('destroyed')
+    }
+    const vm = new Vue({
+      template: `
+        <div>
+          <keep-alive :include="include">
+            <foo/>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        include: ['foo']
+      },
+      components: { Foo }
+    }).$mount()
+    // condition: a render where a previous component is reused
+    vm.include = ['foo']
+    waitForUpdate(() => {
+      vm.include = ['']
+    }).then(() => {
+      expect(Foo.destroyed).not.toHaveBeenCalled()
+    }).then(done)
+  })
+
   if (!isIE9) {
     it('with transition-mode out-in', done => {
       let next
