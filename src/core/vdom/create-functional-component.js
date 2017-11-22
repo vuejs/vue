@@ -49,8 +49,8 @@ function FunctionalRenderContext (
     this._c = (a, b, c, d) => {
       const vnode: ?VNode = createElement(contextVm, a, b, c, d, needNormalization)
       if (vnode) {
-        vnode.functionalScopeId = options._scopeId
-        vnode.functionalContext = parent
+        vnode.fnScopeId = options._scopeId
+        vnode.fnContext = parent
       }
       return vnode
     }
@@ -91,8 +91,8 @@ export function createFunctionalComponent (
   const vnode = options.render.call(null, renderContext._c, renderContext)
 
   if (vnode instanceof VNode) {
-    vnode.functionalContext = contextVm
-    vnode.functionalOptions = options
+    vnode.fnContext = contextVm
+    vnode.fnOptions = options
     if (data.slot) {
       (vnode.data || (vnode.data = {})).slot = data.slot
     }
