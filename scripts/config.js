@@ -75,11 +75,21 @@ const builds = {
     format: 'es',
     banner
   },
-  // Runtime+compiler CommonJS build (ES Modules)
+  // Runtime+compiler ES modules build (for bundlers)
   'web-full-esm': {
     entry: resolve('web/entry-runtime-with-compiler.js'),
     dest: resolve('dist/vue.esm.js'),
     format: 'es',
+    alias: { he: './entity-decoder' },
+    banner
+  },
+  // Runtime+compiler ES modules build (for direct import in browser)
+  'web-full-esm-browser': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.esm.browser.js'),
+    format: 'es',
+    transpile: false,
+    env: 'development',
     alias: { he: './entity-decoder' },
     banner
   },
@@ -205,7 +215,6 @@ function genConfig (name) {
         __VERSION__: version
       }),
       flow(),
-      buble(),
       alias(Object.assign({}, aliases, opts.alias))
     ].concat(opts.plugins || []),
     output: {
@@ -225,6 +234,10 @@ function genConfig (name) {
     config.plugins.push(replace({
       'process.env.NODE_ENV': JSON.stringify(opts.env)
     }))
+  }
+
+  if (opts.transpile !== false) {
+    config.plugins.push(buble())
   }
 
   Object.defineProperty(config, '_name', {
