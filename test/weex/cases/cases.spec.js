@@ -1,20 +1,13 @@
-import fs from 'fs'
-import path from 'path'
 import {
+  readFile,
+  readObject,
   compileVue,
+  compileWithDeps,
   createInstance,
   getRoot,
   getEvents,
   fireEvent
 } from '../helpers'
-
-function readFile (filename) {
-  return fs.readFileSync(path.resolve(__dirname, filename), 'utf8')
-}
-
-function readObject (filename) {
-  return (new Function(`return ${readFile(filename)}`))()
-}
 
 // Create one-off render test case
 function createRenderTestCase (name) {
@@ -72,6 +65,8 @@ describe('Usage', () => {
   describe('recycle-list', () => {
     it('text node', createRenderTestCase('recycle-list/text-node'))
     it('attributes', createRenderTestCase('recycle-list/attrs'))
+    // it('class name', createRenderTestCase('recycle-list/classname'))
+    // it('inline style', createRenderTestCase('recycle-list/inline-style'))
     it('v-if', createRenderTestCase('recycle-list/v-if'))
     it('v-else', createRenderTestCase('recycle-list/v-else'))
     it('v-else-if', createRenderTestCase('recycle-list/v-else-if'))
@@ -79,6 +74,66 @@ describe('Usage', () => {
     it('v-for-iterator', createRenderTestCase('recycle-list/v-for-iterator'))
     it('v-on', createRenderTestCase('recycle-list/v-on'))
     it('v-on-inline', createRenderTestCase('recycle-list/v-on-inline'))
+
+    it('stateless component', done => {
+      compileWithDeps('recycle-list/components/stateless.vue', [{
+        name: 'banner',
+        path: 'recycle-list/components/banner.vue'
+      }]).then(code => {
+        const id = String(Date.now() * Math.random())
+        const instance = createInstance(id, code)
+        setTimeout(() => {
+          const target = readObject('recycle-list/components/stateless.vdom.js')
+          expect(getRoot(instance)).toEqual(target)
+          done()
+        }, 50)
+      }).catch(err => {
+        expect(err).toBe(null)
+        done()
+      })
+    })
+
+    // it('stateless component with props', done => {
+    //   compileWithDeps('recycle-list/components/stateless-with-props.vue', [{
+    //     name: 'poster',
+    //     path: 'recycle-list/components/poster.vue'
+    //   }]).then(code => {
+    //     const id = String(Date.now() * Math.random())
+    //     const instance = createInstance(id, code)
+    //     setTimeout(() => {
+    //       const target = readObject('recycle-list/components/stateless-with-props.vdom.js')
+    //       expect(getRoot(instance)).toEqual(target)
+    //       done()
+    //     }, 50)
+    //   }).catch(err => {
+    //     expect(err).toBe(null)
+    //     done()
+    //   })
+    // })
+
+    // it('stateful component', done => {
+    //   compileWithDeps('recycle-list/components/stateful.vue', [{
+    //     name: 'counter',
+    //     path: 'recycle-list/components/counter.vue'
+    //   }]).then(code => {
+    //     const id = String(Date.now() * Math.random())
+    //     const instance = createInstance(id, code)
+    //     setTimeout(() => {
+    //       const target = readObject('recycle-list/components/stateful.vdom.js')
+    //       expect(getRoot(instance)).toEqual(target)
+    //       const event = getEvents(instance)[0]
+    //       fireEvent(instance, event.ref, event.type, {})
+    //       setTimeout(() => {
+    //         // TODO: check render results
+    //         // expect(getRoot(instance)).toEqual(target)
+    //         done()
+    //       })
+    //     }, 50)
+    //   }).catch(err => {
+    //     expect(err).toBe(null)
+    //     done()
+    //   })
+    // })
   })
 })
 
