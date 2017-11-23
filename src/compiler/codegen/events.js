@@ -82,7 +82,6 @@ function genHandler (
     if (isMethodPath || isFunctionExpression) {
       return handler.value
     }
-    // $flow-disable-line
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, handler.value)
     }
@@ -122,7 +121,6 @@ function genHandler (
       : isFunctionExpression
         ? `(${handler.value})($event)`
         : handler.value
-    // $flow-disable-line
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, code + handlerCode)
     }
