@@ -141,7 +141,16 @@ function initData (vm: Component) {
         `Use prop default value instead.`,
         vm
       )
-    } else if (!isReserved(key)) {
+    } else if (isReserved(key)) {
+      if (process.env.NODE_ENV !== 'production') {
+        warn(
+          `Property "${key}" will not be proxied on the instance because it ` +
+          `may conflict with Vue's internal properties. You will have to access it as ` +
+          `"vm.$data.${key}". Avoid defining component properties that start with _ or $.`,
+          vm
+        )
+      }
+    } else {
       proxy(vm, `_data`, key)
     }
   }

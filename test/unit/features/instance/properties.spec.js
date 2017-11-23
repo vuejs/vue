@@ -200,4 +200,13 @@ describe('Instance properties', () => {
     vm.$listeners = {}
     expect(`$listeners is readonly`).toHaveBeenWarned()
   })
+
+  it('warn data properties that start with _ or $', () => {
+    new Vue({
+      data: { $a: 'a', _b: 'b' },
+      template: '<div></div>'
+    }).$mount()
+    expect(`Property "$a" will not be proxied on the instance`).toHaveBeenWarned()
+    expect(`Property "_b" will not be proxied on the instance`).toHaveBeenWarned()
+  })
 })
