@@ -12,10 +12,17 @@ export function checkKeyCodes (
   eventKeyCode: number,
   key: string,
   builtInAlias?: number | Array<number>,
-  eventKeyName?: string
+  eventKeyName?: string,
+  builtInName?: string | Array<string>
 ): ?boolean {
   const keyCodes = config.keyCodes[key] || builtInAlias
-  if (keyCodes) {
+  if (keyCodes === builtInAlias && eventKeyName) {
+    if (Array.isArray(builtInName)) {
+      return builtInName.indexOf(eventKeyName) === -1
+    } else {
+      return builtInName !== eventKeyName
+    }
+  } else if (keyCodes) {
     if (Array.isArray(keyCodes)) {
       return keyCodes.indexOf(eventKeyCode) === -1
     } else {
