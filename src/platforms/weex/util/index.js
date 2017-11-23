@@ -1,4 +1,5 @@
-/* globals document */
+/* @flow */
+declare var document: Object;
 
 import { makeMap } from 'shared/util'
 import { warn } from 'core/util/index'
@@ -30,11 +31,17 @@ export const isUnaryTag = makeMap(
   true
 )
 
-export function mustUseProp () { /* console.log('mustUseProp') */ }
-export function getTagNamespace () { /* console.log('getTagNamespace') */ }
-export function isUnknownElement () { /* console.log('isUnknownElement') */ }
+export function mustUseProp (tag: string, type: ?string, name: string): boolean {
+  return false
+}
 
-export function query (el, document) {
+export function getTagNamespace (tag?: string): string | void { }
+
+export function isUnknownElement (tag?: string): boolean {
+  return false
+}
+
+export function query (el: string | Element, document: Object) {
   // document is injected by weex factory wrapper
   const placeholder = document.createComment('root')
   placeholder.hasAttribute = placeholder.removeAttribute = function () {} // hack for patch
@@ -42,13 +49,32 @@ export function query (el, document) {
   return placeholder
 }
 
-export function registerHook (cid, type, hook, fn) {
+// Register the component hook to weex native render engine.
+// The hook will be triggered by native, not javascript.
+export function registerComponentHook (
+  componentId: string,
+  type: string, // hook type, could be "lifecycle" or "instance"
+  hook: string, // hook name
+  fn: Function
+) {
   if (!document || !document.taskCenter) {
     warn(`Can't find available "document" or "taskCenter".`)
     return
   }
   if (typeof document.taskCenter.registerHook === 'function') {
-    return document.taskCenter.registerHook(cid, type, hook, fn)
+    return document.taskCenter.registerHook(componentId, type, hook, fn)
   }
-  warn(`Not support to register component hook "${type}@${hook}#${cid}".`)
+  warn(`Failed to register component hook "${type}@${hook}#${componentId}".`)
+}
+
+// Updates the state of the component to weex native render engine.
+export function updateComponentData (componentId: string, newData: Object) {
+  if (!document || !document.taskCenter) {
+    warn(`Can't find available "document" or "taskCenter".`)
+    return
+  }
+  if (typeof document.taskCenter.updateData === 'function') {
+    return document.taskCenter.updateData(componentId, newData)
+  }
+  warn(`Failed to update component data (${componentId}).`)
 }
