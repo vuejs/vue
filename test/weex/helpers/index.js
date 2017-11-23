@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import * as Vue from '../../../packages/weex-vue-framework'
 import { compile } from '../../../packages/weex-template-compiler'
 import WeexRuntime from 'weex-js-runtime'
@@ -5,7 +7,15 @@ import styler from 'weex-styler'
 
 const styleRE = /<\s*style\s*\w*>([^(<\/)]*)<\/\s*style\s*>/g
 const scriptRE = /<\s*script.*>([^]*)<\/\s*script\s*>/
-const templateRE = /<\s*template\s*>([^]*)<\/\s*template\s*>/
+const templateRE = /<\s*template\s*([^>]*)>([^]*)<\/\s*template\s*>/
+
+export function readFile (filename) {
+  return fs.readFileSync(path.resolve(__dirname, '../cases/', filename), 'utf8')
+}
+
+export function readObject (filename) {
+  return (new Function(`return ${readFile(filename)}`))()
+}
 
 console.debug = () => {}
 
@@ -39,21 +49,28 @@ export function compileVue (source, componentName) {
     }
     const scriptMatch = scriptRE.exec(source)
     const script = scriptMatch ? scriptMatch[1] : ''
-    const { render, staticRenderFns } = compile(templateRE.exec(source)[1])
+    const templateMatch = templateRE.exec(source)
+    const compileOptions = {}
+    if (/\s*recyclable\=?/i.test(templateMatch[1])) {
+      compileOptions.recyclable = true
+    }
+    const res = compile(templateMatch[2], compileOptions)
 
+    const name = 'test_case_' + (Math.random() * 99999999).toFixed(0)
     const generateCode = styles => (`
-      var test_case = Object.assign({
+      var ${name} = Object.assign({
         style: ${JSON.stringify(styles)},
-        render: function () { ${render} },
-        staticRenderFns: ${parseStatic(staticRenderFns)},
+        render: function () { ${res.render} },
+        ${res['@render'] ? ('"@render": function () {' + res['@render'] + '},') : ''}
+        staticRenderFns: ${parseStatic(res.staticRenderFns)},
       }, (function(){
         var module = { exports: {} };
         ${script};
         return module.exports;
       })());
     ` + (componentName
-        ? `Vue.component('${componentName}', test_case);\n`
-        : `test_case.el = 'body';new Vue(test_case);`)
+        ? `Vue.component('${componentName}', ${name});\n`
+        : `${name}.el = 'body';new Vue(${name});`)
     )
 
     let cssText = ''
@@ -68,6 +85,20 @@ export function compileVue (source, componentName) {
       resolve(generateCode(result.jsonStyle))
     })
     resolve(generateCode({}))
+  })
+}
+
+export function compileWithDeps (entryPath, deps) {
+  return new Promise((resolve, reject) => {
+    if (Array.isArray(deps)) {
+      Promise.all(deps.map(dep => {
+        return compileVue(readFile(dep.path), dep.name).catch(reject)
+      })).then(depCodes => {
+        compileVue(readFile(entryPath)).then(entryCode => {
+          resolve(depCodes.join('\n') + entryCode)
+        }).catch(reject)
+      }).catch(reject)
+    }
   })
 }
 
