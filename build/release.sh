@@ -20,7 +20,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     npm run test:ssr
   fi
 
-  # Sauce Labs tests has a decent change of failing
+  # Sauce Labs tests has a decent chance of failing
   # so we usually manually run them before running the release script.
 
   # if [[ -z $SKIP_SAUCE ]]; then
