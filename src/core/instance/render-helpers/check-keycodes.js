@@ -16,7 +16,7 @@ export function checkKeyCodes (
   builtInName?: string | Array<string>
 ): ?boolean {
   const keyCodes = config.keyCodes[key] || builtInAlias
-  if (keyCodes === builtInAlias && eventKeyName) {
+  if (builtInAlias && keyCodes === builtInAlias && eventKeyName) {
     if (Array.isArray(builtInName)) {
       return builtInName.indexOf(eventKeyName) === -1
     } else {
