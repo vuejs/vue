@@ -54,7 +54,6 @@ export function updateListeners (
     def = cur = on[name]
     old = oldOn[name]
     event = normalizeEvent(name)
-    // $flow-disable-line
     if (__WEEX__ && isPlainObject(def)) {
       cur = def.handler
       event.params = def.params

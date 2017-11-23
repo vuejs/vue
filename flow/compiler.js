@@ -1,3 +1,6 @@
+// global flag to be compiled away
+declare var __WEEX__: boolean;
+
 declare type CompilerOptions = {
   warn?: Function; // allow customizing warning in different environments; e.g. node
   expectHTML?: boolean; // only false for non-web builds
