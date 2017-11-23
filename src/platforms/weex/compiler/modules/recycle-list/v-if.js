@@ -21,8 +21,11 @@ function getPrevMatch (el: ASTElement): any {
 export function preTransformVIf (el: ASTElement, options: CompilerOptions) {
   if (hasConditionDirective(el)) {
     let exp
-    const ifExp = getAndRemoveAttr(el, 'v-if')
-    const elseifExp = getAndRemoveAttr(el, 'v-else-if')
+    const ifExp = getAndRemoveAttr(el, 'v-if', true /* remove from attrsMap */)
+    const elseifExp = getAndRemoveAttr(el, 'v-else-if', true)
+    // don't need the value, but remove it to avoid being generated as a
+    // custom directive
+    getAndRemoveAttr(el, 'v-else', true)
     if (ifExp) {
       exp = ifExp
     } else {
@@ -41,8 +44,5 @@ export function preTransformVIf (el: ASTElement, options: CompilerOptions) {
     }
     el.attrsMap['[[match]]'] = exp
     el.attrsList.push({ name: '[[match]]', value: exp })
-    delete el.attrsMap['v-if']
-    delete el.attrsMap['v-else-if']
-    delete el.attrsMap['v-else']
   }
 }
