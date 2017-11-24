@@ -3,6 +3,14 @@
 import config from 'core/config'
 import { hyphenate } from 'shared/util'
 
+function isKeyNotMatch<T> (expect: T | Array<T>, actual: T): boolean {
+  if (Array.isArray(expect)) {
+    return expect.indexOf(actual) === -1
+  } else {
+    return expect !== actual
+  }
+}
+
 /**
  * Runtime helper for checking keyCodes from config.
  * exposed as Vue.prototype._k
@@ -16,18 +24,10 @@ export function checkKeyCodes (
   builtInName?: string | Array<string>
 ): ?boolean {
   const keyCodes = config.keyCodes[key] || builtInAlias
-  if (builtInAlias && keyCodes === builtInAlias && eventKeyName) {
-    if (Array.isArray(builtInName)) {
-      return builtInName.indexOf(eventKeyName) === -1
-    } else {
-      return builtInName !== eventKeyName
-    }
+  if (builtInName && keyCodes === builtInAlias && eventKeyName) {
+    return isKeyNotMatch(builtInName, eventKeyName)
   } else if (keyCodes) {
-    if (Array.isArray(keyCodes)) {
-      return keyCodes.indexOf(eventKeyCode) === -1
-    } else {
-      return keyCodes !== eventKeyCode
-    }
+    return isKeyNotMatch(keyCodes, eventKeyCode)
   } else if (eventKeyName) {
     return hyphenate(eventKeyName) !== key
   }
