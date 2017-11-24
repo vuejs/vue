@@ -11,6 +11,7 @@ interface Renderer {
   renderToString(vm: Vue, callback: RenderCallback): void;
   renderToString(vm: Vue, context: object, callback: RenderCallback): void;
   renderToString(vm: Vue): Promise<string>;
+  renderToString(vm: Vue, context: object): Promise<string>;
 
   renderToStream(vm: Vue, context?: object): Readable;
 }
