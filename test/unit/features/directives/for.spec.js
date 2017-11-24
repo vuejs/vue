@@ -464,20 +464,20 @@ describe('Directive v-for', () => {
     }).then(done)
   })
 
-  const supportsDeconstruct = (() => {
+  const supportsDestructuring = (() => {
     try {
       new Function('var { foo } = bar')
       return true
     } catch (e) {}
   })()
 
-  if (supportsDeconstruct) {
-    it('should support deconstruct syntax in alias position', () => {
+  if (supportsDestructuring) {
+    it('should support destructuring syntax in alias position', () => {
       const vm = new Vue({
-        data: { list: [{ foo: 'hi' }] },
-        template: '<div><div v-for="({ foo }, i) in list">{{ foo }}{{ i }}</div></div>'
+        data: { list: [{ foo: 'hi', bar: 'ho' }] },
+        template: '<div><div v-for="({ foo, bar }, i) in list">{{ foo }} {{ bar }} {{ i }}</div></div>'
       }).$mount()
-      expect(vm.$el.textContent).toBe('hi0')
+      expect(vm.$el.textContent).toBe('hi ho 0')
     })
   }
 })
