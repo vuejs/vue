@@ -173,7 +173,7 @@ export function parseHTML (html, options) {
     if (html === last) {
       options.chars && options.chars(html)
       if (process.env.NODE_ENV !== 'production' && !stack.length && options.warn) {
-        options.warn(`Mal-formatted tag at end of template: "${html}"`, { start: index })
+        options.warn(`Mal-formatted tag at end of template: "${html}"`, { start: index + html.length })
       }
       break
     }

@@ -19,10 +19,28 @@ export function parseComponent (
     template: null,
     script: null,
     styles: [],
-    customBlocks: []
+    customBlocks: [],
+    errors: []
   }
   let depth = 0
   let currentBlock: ?(SFCBlock | SFCCustomBlock) = null
+
+  let warn = msg => {
+    sfc.errors.push(msg)
+  }
+
+  if (options.outputSourceRange) {
+    warn = (msg, range) => {
+      const data: WarningMessage = { msg }
+      if (range.start != null) {
+        data.start = range.start
+      }
+      if (range.end != null) {
+        data.end = range.end
+      }
+      sfc.errors.push(data)
+    }
+  }
 
   function start (
     tag: string,
@@ -78,7 +96,10 @@ export function parseComponent (
   function end (tag: string, start: number, end: number) {
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
-      let text = deindent(content.slice(currentBlock.start, currentBlock.end))
+      let text = content.slice(currentBlock.start, currentBlock.end)
+      if (!options.outputSourceRange && !options.disableDeindent) {
+        text = deindent(text)
+      }
       // pad content so that linters and pre-processors can output correct
       // line numbers in errors and warnings
       if (currentBlock.type !== 'template' && options.pad) {
@@ -103,8 +124,10 @@ export function parseComponent (
   }
 
   parseHTML(content, {
+    warn,
     start,
-    end
+    end,
+    outputSourceRange: options.outputSourceRange
   })
 
   return sfc

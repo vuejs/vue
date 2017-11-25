@@ -126,18 +126,18 @@ describe('compile options', () => {
     expect(compiled.errors[1]).toContain('Raw expression: {{ b++++ }}')
   })
 
-  it('should output source range', () => {
+  it('should collect errors with source range', () => {
     let compiled = compile('hello', { outputSourceRange: true })
     expect(compiled.errors.length).toBe(1)
-    expect(compiled.errors[0].start).toEqual(0)
+    expect(compiled.errors[0].start).toBe(0)
     expect(compiled.errors[0].end).toBeUndefined()
     expect(compiled.errors[0].msg).toContain('root element')
 
     compiled = compile('<div v-if="a----">{{ b++++ }}</div>', { outputSourceRange: true })
     expect(compiled.errors.length).toBe(2)
-    expect(compiled.errors[0].start).toEqual(5)
-    expect(compiled.errors[0].end).toEqual(17)
-    expect(compiled.errors[1].start).toEqual(18)
-    expect(compiled.errors[1].end).toEqual(29)
+    expect(compiled.errors[0].start).toBe(5)
+    expect(compiled.errors[0].end).toBe(17)
+    expect(compiled.errors[1].start).toBe(18)
+    expect(compiled.errors[1].end).toBe(29)
   })
 })

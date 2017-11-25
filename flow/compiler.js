@@ -194,6 +194,7 @@ declare type SFCDescriptor = {
   script: ?SFCBlock;
   styles: Array<SFCBlock>;
   customBlocks: Array<SFCCustomBlock>;
+  errors: Array<string | WarningMessage>;
 }
 
 declare type SFCCustomBlock = {
