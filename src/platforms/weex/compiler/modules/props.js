@@ -22,6 +22,13 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
           el.attrsMap[realName] = el.attrsMap[attr.name]
           delete el.attrsMap[attr.name]
         }
+        const rawAttrsList = el.rawAttrsList || []
+        for (let i = rawAttrsList.length - 1; i >= 0; i--) {
+          if (rawAttrsList[i].name === attr.name) {
+            rawAttrsList[i].name = realName
+            break
+          }
+        }
         attr.name = realName
       }
     })

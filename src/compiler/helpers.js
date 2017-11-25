@@ -3,7 +3,9 @@
 import { emptyObject } from 'shared/util'
 import { parseFilters } from './parser/filter-parser'
 
-export function baseWarn (msg: string) {
+type Range = { start?: number, end?: number };
+
+export function baseWarn (msg: string, range?: Range) {
   console.error(`[Vue compiler]: ${msg}`)
 }
 
@@ -16,12 +18,12 @@ export function pluckModuleFunction<F: Function> (
     : []
 }
 
-export function addProp (el: ASTElement, name: string, value: string) {
-  (el.props || (el.props = [])).push({ name, value })
+export function addProp (el: ASTElement, name: string, value: string, range?: Range) {
+  (el.props || (el.props = [])).push(setRange({ name, value }, range))
 }
 
-export function addAttr (el: ASTElement, name: string, value: string) {
-  (el.attrs || (el.attrs = [])).push({ name, value })
+export function addAttr (el: ASTElement, name: string, value: string, range?: Range) {
+  (el.attrs || (el.attrs = [])).push(setRange({ name, value }, range))
 }
 
 export function addDirective (
@@ -30,9 +32,10 @@ export function addDirective (
   rawName: string,
   value: string,
   arg: ?string,
-  modifiers: ?ASTModifiers
+  modifiers: ?ASTModifiers,
+  range?: Range
 ) {
-  (el.directives || (el.directives = [])).push({ name, rawName, value, arg, modifiers })
+  (el.directives || (el.directives = [])).push(setRange({ name, rawName, value, arg, modifiers }, range))
 }
 
 export function addHandler (
@@ -41,7 +44,8 @@ export function addHandler (
   value: string,
   modifiers: ?ASTModifiers,
   important?: boolean,
-  warn?: Function
+  warn?: ?Function,
+  range?: Range
 ) {
   modifiers = modifiers || emptyObject
   // warn prevent and passive modifier
@@ -52,7 +56,8 @@ export function addHandler (
   ) {
     warn(
       'passive and prevent can\'t be used together. ' +
-      'Passive handler can\'t prevent default event.'
+      'Passive handler can\'t prevent default event.',
+      range
     )
   }
 
@@ -91,7 +96,7 @@ export function addHandler (
     events = el.events || (el.events = {})
   }
 
-  const newHandler: any = { value }
+  const newHandler: any = setRange({ value }, range)
   if (modifiers !== emptyObject) {
     newHandler.modifiers = modifiers
   }
@@ -105,6 +110,33 @@ export function addHandler (
   } else {
     events[name] = newHandler
   }
+}
+
+export function getRawAttr (
+  el: ASTElement,
+  name: string
+) {
+  const list = el.rawAttrsList
+  if (!list) {
+    return
+  }
+  for (let i = list.length - 1; i >= 0; i--) {
+    if (list[i].name === name) {
+      return list[i]
+    }
+  }
+}
+
+export function getRawBindingAttr (
+  el: ASTElement,
+  name: string
+) {
+  if (!el.rawAttrsList) {
+    return
+  }
+  return getRawAttr(el, ':' + name) ||
+    getRawAttr(el, 'v-bind:' + name) ||
+    getRawAttr(el, name)
 }
 
 export function getBindingAttr (
@@ -148,4 +180,19 @@ export function getAndRemoveAttr (
     delete el.attrsMap[name]
   }
   return val
+}
+
+function setRange (
+  item: any,
+  range?: { start?: number, end?: number }
+) {
+  if (range) {
+    if (range.start != null) {
+      item.start = range.start
+    }
+    if (range.end != null) {
+      item.end = range.end
+    }
+  }
+  return item
 }

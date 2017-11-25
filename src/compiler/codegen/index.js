@@ -3,7 +3,7 @@
 import { genHandlers } from './events'
 import baseDirectives from '../directives/index'
 import { camelize, no, extend } from 'shared/util'
-import { baseWarn, pluckModuleFunction } from '../helpers'
+import { baseWarn, getRawAttr, pluckModuleFunction } from '../helpers'
 
 type TransformFunction = (el: ASTElement, code: string) => string;
 type DataGenFunction = (el: ASTElement) => string;
@@ -115,7 +115,8 @@ function genOnce (el: ASTElement, state: CodegenState): string {
     }
     if (!key) {
       process.env.NODE_ENV !== 'production' && state.warn(
-        `v-once can only be used inside v-for that is keyed. `
+        `v-once can only be used inside v-for that is keyed. `,
+        getRawAttr(el, 'v-once')
       )
       return genElement(el, state)
     }
@@ -187,6 +188,7 @@ export function genFor (
       `<${el.tag} v-for="${alias} in ${exp}">: component lists rendered with ` +
       `v-for should have explicit keys. ` +
       `See https://vuejs.org/guide/list.html#key for more info.`,
+      getRawAttr(el, 'v-for'),
       true /* tip */
     )
   }
@@ -318,7 +320,10 @@ function genInlineTemplate (el: ASTElement, state: CodegenState): ?string {
   if (process.env.NODE_ENV !== 'production' && (
     el.children.length !== 1 || ast.type !== 1
   )) {
-    state.warn('Inline-template components must have exactly one child element.')
+    state.warn(
+      'Inline-template components must have exactly one child element.',
+      { start: el.start }
+    )
   }
   if (ast.type === 1) {
     const inlineRenderFns = generate(ast, state.options)
@@ -485,7 +490,7 @@ function genComponent (
   })`
 }
 
-function genProps (props: Array<{ name: string, value: string }>): string {
+function genProps (props: Array<ASTAttr>): string {
   let res = ''
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]

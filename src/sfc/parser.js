@@ -8,11 +8,6 @@ const splitRE = /\r?\n/g
 const replaceRE = /./g
 const isSpecialTag = makeMap('script,style,template', true)
 
-type Attribute = {
-  name: string,
-  value: string
-};
-
 /**
  * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
  */
@@ -31,7 +26,7 @@ export function parseComponent (
 
   function start (
     tag: string,
-    attrs: Array<Attribute>,
+    attrs: Array<ASTAttr>,
     unary: boolean,
     start: number,
     end: number
@@ -62,7 +57,7 @@ export function parseComponent (
     }
   }
 
-  function checkAttrs (block: SFCBlock, attrs: Array<Attribute>) {
+  function checkAttrs (block: SFCBlock, attrs: Array<ASTAttr>) {
     for (let i = 0; i < attrs.length; i++) {
       const attr = attrs[i]
       if (attr.name === 'lang') {
