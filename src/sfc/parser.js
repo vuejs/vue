@@ -53,6 +53,7 @@ export function parseComponent (
       currentBlock = {
         type: tag,
         content: '',
+        blockStart: start,
         start: end,
         attrs: attrs.reduce((cumulated, { name, value }) => {
           cumulated[name] = value || true
@@ -96,6 +97,7 @@ export function parseComponent (
   function end (tag: string, start: number, end: number) {
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
+      currentBlock.blockEnd = end
       let text = content.slice(currentBlock.start, currentBlock.end)
       if (!options.outputSourceRange && !options.disableDeindent) {
         text = deindent(text)

@@ -204,6 +204,8 @@ declare type SFCCustomBlock = {
   end?: number;
   src?: string;
   attrs: {[attribute:string]: string};
+  blockStart?: number;
+  blockEnd?: number;
 };
 
 declare type SFCBlock = {
@@ -215,4 +217,6 @@ declare type SFCBlock = {
   src?: string;
   scoped?: boolean;
   module?: string | boolean;
+  blockStart?: number;
+  blockEnd?: number;
 };
