@@ -125,59 +125,6 @@ function getRoot (instanceId) {
   return instance.app.$el.toJSON()
 }
 
-var jsHandlers = {
-  fireEvent: function (id) {
-    var args = [], len = arguments.length - 1;
-    while ( len-- > 0 ) args[ len ] = arguments[ len + 1 ];
-
-    return fireEvent.apply(void 0, [ instances[id] ].concat( args ))
-  },
-  callback: function (id) {
-    var args = [], len = arguments.length - 1;
-    while ( len-- > 0 ) args[ len ] = arguments[ len + 1 ];
-
-    return callback.apply(void 0, [ instances[id] ].concat( args ))
-  }
-};
-
-function fireEvent (instance, nodeId, type, e, domChanges) {
-  var el = instance.document.getRef(nodeId);
-  if (el) {
-    return instance.document.fireEvent(el, type, e, domChanges)
-  }
-  return new Error(("invalid element reference \"" + nodeId + "\""))
-}
-
-function callback (instance, callbackId, data, ifKeepAlive) {
-  var result = instance.document.taskCenter.callback(callbackId, data, ifKeepAlive);
-  instance.document.taskCenter.send('dom', { action: 'updateFinish' }, []);
-  return result
-}
-
-/**
- * Accept calls from native (event or callback).
- *
- * @param  {string} id
- * @param  {array} tasks list with `method` and `args`
- */
-function receiveTasks (id, tasks) {
-  var instance = instances[id];
-  if (instance && Array.isArray(tasks)) {
-    var results = [];
-    tasks.forEach(function (task) {
-      var handler = jsHandlers[task.method];
-      var args = [].concat( task.args );
-      /* istanbul ignore else */
-      if (typeof handler === 'function') {
-        args.unshift(id);
-        results.push(handler.apply(void 0, args));
-      }
-    });
-    return results
-  }
-  return new Error(("invalid instance id \"" + id + "\" or tasks"))
-}
-
 /**
  * Create a fresh instance of Vue for each Weex instance.
  */
@@ -309,4 +256,3 @@ exports.createInstance = createInstance;
 exports.destroyInstance = destroyInstance;
 exports.refreshInstance = refreshInstance;
 exports.getRoot = getRoot;
-exports.receiveTasks = receiveTasks;
