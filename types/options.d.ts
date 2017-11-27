@@ -32,6 +32,15 @@ export type Accessors<T> = {
 }
 
 /**
+ * This type should be used when a component has no props
+ */
+export type ThisTypedComponentOptionsWithNoProps<V extends Vue, Data, Methods, Computed, EmptyProps extends undefined> =
+  object &
+  ComponentOptions<V, Data | ((this: {} & V) => Data), Methods, Computed, EmptyProps> &
+  ThisType<CombinedVueInstance<V, Data, Methods, Computed, {}>>;
+
+
+/**
  * This type should be used when an array of strings is used for a component's `props` value.
  */
 export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, PropNames extends string> =
