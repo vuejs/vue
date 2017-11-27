@@ -196,7 +196,7 @@ Vue.component('component', {
       bind() {},
       inserted() {},
       update() {},
-      componentMounted() {},
+      componentUpdated() {},
       unbind() {}
     },
     b(el, binding, vnode, oldVnode) {
@@ -310,7 +310,10 @@ Vue.component("async-component", ((resolve, reject) => {
     resolve(Vue.component("component"));
   }, 0);
   return new Promise((resolve) => {
-    resolve({ functional: true });
+    resolve({
+      functional: true,
+      render(h: CreateElement) { return h('div') }
+    });
   })
 }));
 
