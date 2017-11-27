@@ -98,6 +98,7 @@ function setAttr (el: Element, key: string, value: any) {
           el.removeEventListener('input', blocker)
         }
         el.addEventListener('input', blocker)
+        // $flow-disable-line
         el.__ieph = true /* IE placeholder patched */
       }
       el.setAttribute(key, value)
