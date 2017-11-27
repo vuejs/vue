@@ -472,12 +472,20 @@ describe('Directive v-for', () => {
   })()
 
   if (supportsDestructuring) {
-    it('should support destructuring syntax in alias position', () => {
+    it('should support destructuring syntax in alias position (object)', () => {
       const vm = new Vue({
         data: { list: [{ foo: 'hi', bar: 'ho' }] },
         template: '<div><div v-for="({ foo, bar }, i) in list">{{ foo }} {{ bar }} {{ i }}</div></div>'
       }).$mount()
       expect(vm.$el.textContent).toBe('hi ho 0')
+    })
+
+    it('should support destructuring syntax in alias position (array)', () => {
+      const vm = new Vue({
+        data: { list: [[1, 2], [3, 4]] },
+        template: '<div><div v-for="([ foo, bar ], i) in list">{{ foo }} {{ bar }} {{ i }}</div></div>'
+      }).$mount()
+      expect(vm.$el.textContent).toBe('1 2 03 4 1')
     })
   }
 })

@@ -22,7 +22,7 @@ import {
 export const onRE = /^@|^v-on:/
 export const dirRE = /^v-|^@|^:/
 export const forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/
-export const forIteratorRE = /\((\{[^}]*\}|[^,{]*),([^,]*)(?:,([^,]*))?\)/
+export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 
 const argRE = /:(.*)$/
@@ -356,16 +356,16 @@ export function processFor (el: ASTElement) {
       return
     }
     el.for = inMatch[2].trim()
-    const alias = inMatch[1].trim()
+    const alias = inMatch[1].trim().replace(stripParensRE, '')
     const iteratorMatch = alias.match(forIteratorRE)
     if (iteratorMatch) {
-      el.alias = iteratorMatch[1].trim()
-      el.iterator1 = iteratorMatch[2].trim()
-      if (iteratorMatch[3]) {
-        el.iterator2 = iteratorMatch[3].trim()
+      el.alias = alias.replace(forIteratorRE, '')
+      el.iterator1 = iteratorMatch[1].trim()
+      if (iteratorMatch[2]) {
+        el.iterator2 = iteratorMatch[2].trim()
       }
     } else {
-      el.alias = alias.replace(stripParensRE, '')
+      el.alias = alias
     }
   }
 }
