@@ -58,12 +58,12 @@ export interface ComponentOptions<
   PropsDef=PropsDefinition<DefaultProps>> {
   data?: Data;
   props?: PropsDef;
-  propsData?: Object;
+  propsData?: object;
   computed?: Accessors<Computed>;
   methods?: Methods;
   watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any> | string>;
 
-  el?: Element | String;
+  el?: Element | string;
   template?: string;
   render?(createElement: CreateElement): VNode;
   renderError?: (h: () => VNode, err: Error) => VNode;
@@ -83,10 +83,10 @@ export interface ComponentOptions<
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
   components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> };
-  transitions?: { [key: string]: Object };
+  transitions?: { [key: string]: object };
   filters?: { [key: string]: Function };
 
-  provide?: Object | (() => Object);
+  provide?: object | (() => object);
   inject?: InjectOptions;
 
   model?: {
