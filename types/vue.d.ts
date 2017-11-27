@@ -37,7 +37,7 @@ export interface Vue {
   readonly $attrs: Record<string, string>;
   readonly $listeners: Record<string, Function | Function[]>;
 
-  $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
+  $mount(elementOrSelector?: Element | string, hydrating?: boolean): this;
   $forceUpdate(): void;
   $destroy(): void;
   $set: typeof Vue.set;
@@ -78,9 +78,9 @@ export interface VueConstructor<V extends Vue = Vue> {
 
   nextTick(callback: () => void, context?: any[]): void;
   nextTick(): Promise<void>
-  set<T>(object: Object, key: string, value: T): T;
+  set<T>(object: object, key: string, value: T): T;
   set<T>(array: T[], key: number, value: T): T;
-  delete(object: Object, key: string): void;
+  delete(object: object, key: string): void;
   delete<T>(array: T[], key: number): void;
 
   directive(
