@@ -60,6 +60,9 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     packages/vue-server-renderer/client-plugin.js \
     packages/vue-template-compiler/build.js
   git commit -m "build: build $VERSION"
+  # generate release note
+  npm run release:note
+  # tag version
   npm version $VERSION --message "build: release $VERSION"
 
   # publish
