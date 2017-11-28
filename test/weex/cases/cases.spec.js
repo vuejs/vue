@@ -21,10 +21,7 @@ function createRenderTestCase (name) {
         expect(getRoot(instance)).toEqual(target)
         done()
       }, 50)
-    }).catch(err => {
-      expect(err).toBe(null)
-      done()
-    })
+    }).catch(done.fail)
   }
 }
 
@@ -46,10 +43,7 @@ function createEventTestCase (name) {
           done()
         }, 50)
       }, 50)
-    }).catch(err => {
-      expect(err).toBe(null)
-      done()
-    })
+    }).catch(done.fail)
   }
 }
 
@@ -87,10 +81,7 @@ describe('Usage', () => {
           expect(getRoot(instance)).toEqual(target)
           done()
         }, 50)
-      }).catch(err => {
-        expect(err).toBe(null)
-        done()
-      })
+      }).catch(done.fail)
     })
 
     // it('stateless component with props', done => {
@@ -105,10 +96,7 @@ describe('Usage', () => {
     //       expect(getRoot(instance)).toEqual(target)
     //       done()
     //     }, 50)
-    //   }).catch(err => {
-    //     expect(err).toBe(null)
-    //     done()
-    //   })
+    //   }).catch(done.fail)
     // })
 
     // it('stateful component', done => {
@@ -129,10 +117,7 @@ describe('Usage', () => {
     //         done()
     //       })
     //     }, 50)
-    //   }).catch(err => {
-    //     expect(err).toBe(null)
-    //     done()
-    //   })
+    //   }).catch(done.fail)
     // })
   })
 })
