@@ -112,31 +112,13 @@ export function addHandler (
   }
 }
 
-export function getRawAttr (
-  el: ASTElement,
-  name: string
-) {
-  const list = el.rawAttrsList
-  if (!list) {
-    return
-  }
-  for (let i = list.length - 1; i >= 0; i--) {
-    if (list[i].name === name) {
-      return list[i]
-    }
-  }
-}
-
 export function getRawBindingAttr (
   el: ASTElement,
   name: string
 ) {
-  if (!el.rawAttrsList) {
-    return
-  }
-  return getRawAttr(el, ':' + name) ||
-    getRawAttr(el, 'v-bind:' + name) ||
-    getRawAttr(el, name)
+  return el.rawAttrsMap[':' + name] ||
+    el.rawAttrsMap['v-bind:' + name] ||
+    el.rawAttrsMap[name]
 }
 
 export function getBindingAttr (

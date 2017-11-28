@@ -1,7 +1,7 @@
 /* @flow */
 
 import config from 'core/config'
-import { addHandler, addProp, getRawAttr, getBindingAttr } from 'compiler/helpers'
+import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
 
 let warn
@@ -29,7 +29,7 @@ export default function model (
       warn(
         `<${el.tag} v-model="${value}" type="file">:\n` +
         `File inputs are read only. Use a v-on:change listener instead.`,
-        getRawAttr(el, 'v-model')
+        el.rawAttrsMap['v-model']
       )
     }
   }
@@ -56,7 +56,7 @@ export default function model (
       `v-model is not supported on this element type. ` +
       'If you are working with contenteditable, it\'s recommended to ' +
       'wrap a library dedicated for that purpose inside a custom component.',
-      getRawAttr(el, 'v-model')
+      el.rawAttrsMap['v-model']
     )
   }
 
@@ -139,7 +139,7 @@ function genDefaultModel (
       warn(
         `${binding}="${value}" conflicts with v-model on the same element ` +
         'because the latter already expands to a value binding internally',
-        getRawAttr(el, binding)
+        el.rawAttrsMap[binding]
       )
     }
   }

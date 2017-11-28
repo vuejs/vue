@@ -14,7 +14,6 @@ import {
   baseWarn,
   addHandler,
   addDirective,
-  getRawAttr,
   getBindingAttr,
   getAndRemoveAttr,
   getRawBindingAttr,
@@ -53,6 +52,7 @@ export function createASTElement (
     tag,
     attrsList: attrs,
     attrsMap: makeAttrsMap(attrs),
+    rawAttrsMap: {},
     parent,
     children: []
   }
@@ -128,8 +128,11 @@ export function parse (
       }
 
       if (options.outputSourceRange) {
-        element.rawAttrsList = element.attrsList.slice()
         element.start = start
+        element.rawAttrsMap = element.attrsList.reduce((cumulated, attr) => {
+          cumulated[attr.name] = attr
+          return cumulated
+        }, {})
       }
 
       if (isForbiddenTag(element) && !isServerRendering()) {
@@ -180,7 +183,7 @@ export function parse (
             warnOnce(
               'Cannot use v-for on stateful component root element because ' +
               'it renders multiple elements.',
-              getRawAttr(el, 'v-for')
+              el.rawAttrsMap['v-for']
             )
           }
         }
@@ -388,7 +391,7 @@ export function processFor (el: ASTElement) {
     if (!inMatch) {
       process.env.NODE_ENV !== 'production' && warn(
         `Invalid v-for expression: ${exp}`,
-        getRawAttr(el, 'v-for')
+        el.rawAttrsMap['v-for']
       )
       return
     }
@@ -437,7 +440,7 @@ function processIfConditions (el, parent) {
     warn(
       `v-${el.elseif ? ('else-if="' + el.elseif + '"') : 'else'} ` +
       `used on element <${el.tag}> without corresponding v-if.`,
-      getRawAttr(el, el.elseif ? 'v-else-if' : 'v-else')
+      el.rawAttrsMap[el.elseif ? 'v-else-if' : 'v-else']
     )
   }
 }
@@ -496,7 +499,7 @@ function processSlot (el) {
           `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
           `can also be used on plain elements in addition to <template> to ` +
           `denote scoped slots.`,
-          getRawAttr(el, 'scope'),
+          el.rawAttrsMap['scope'],
           true
         )
       }
@@ -508,7 +511,7 @@ function processSlot (el) {
           `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
           `(v-for takes higher priority). Use a wrapper <template> for the ` +
           `scoped slot to make it clearer.`,
-          getRawAttr(el, 'slot-scope'),
+          el.rawAttrsMap['slot-scope'],
           true
         )
       }
@@ -693,7 +696,7 @@ function checkForAliasModel (el, value) {
         `This will not be able to modify the v-for source array because ` +
         `writing to the alias is like modifying a function local variable. ` +
         `Consider using an array of objects and use v-model on an object property instead.`,
-        getRawAttr(el, 'v-model')
+        el.rawAttrsMap['v-model']
       )
     }
     _el = _el.parent

@@ -4,7 +4,6 @@ import { parseText } from 'compiler/parser/text-parser'
 import {
   getAndRemoveAttr,
   getBindingAttr,
-  getRawAttr,
   baseWarn
 } from 'compiler/helpers'
 
@@ -19,7 +18,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
         'Interpolation inside attributes has been removed. ' +
         'Use v-bind or the colon shorthand instead. For example, ' +
         'instead of <div class="{{ val }}">, use <div :class="val">.',
-        getRawAttr(el, 'class')
+        el.rawAttrsMap['class']
       )
     }
   }

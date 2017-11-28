@@ -3,7 +3,7 @@
 import { genHandlers } from './events'
 import baseDirectives from '../directives/index'
 import { camelize, no, extend } from 'shared/util'
-import { baseWarn, getRawAttr, pluckModuleFunction } from '../helpers'
+import { baseWarn, pluckModuleFunction } from '../helpers'
 
 type TransformFunction = (el: ASTElement, code: string) => string;
 type DataGenFunction = (el: ASTElement) => string;
@@ -116,7 +116,7 @@ function genOnce (el: ASTElement, state: CodegenState): string {
     if (!key) {
       process.env.NODE_ENV !== 'production' && state.warn(
         `v-once can only be used inside v-for that is keyed. `,
-        getRawAttr(el, 'v-once')
+        el.rawAttrsMap['v-once']
       )
       return genElement(el, state)
     }
@@ -188,7 +188,7 @@ export function genFor (
       `<${el.tag} v-for="${alias} in ${exp}">: component lists rendered with ` +
       `v-for should have explicit keys. ` +
       `See https://vuejs.org/guide/list.html#key for more info.`,
-      getRawAttr(el, 'v-for'),
+      el.rawAttrsMap['v-for'],
       true /* tip */
     )
   }

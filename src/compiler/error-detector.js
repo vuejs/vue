@@ -1,6 +1,5 @@
 /* @flow */
 
-import { getRawAttr } from './helpers'
 import { dirRE, onRE } from './parser/index'
 
 type Range = { start?: number, end?: number };
@@ -34,7 +33,7 @@ function checkNode (node: ASTNode, warn: Function) {
       if (dirRE.test(name)) {
         const value = node.attrsMap[name]
         if (value) {
-          const range = getRawAttr(node, name)
+          const range = node.rawAttrsMap[name]
           if (name === 'v-for') {
             checkFor(node, `v-for="${value}"`, warn, range)
           } else if (onRE.test(name)) {

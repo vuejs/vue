@@ -86,8 +86,8 @@ declare type ASTElement = {
   type: 1;
   tag: string;
   attrsList: Array<ASTAttr>;
-  rawAttrsList?: Array<ASTAttr>;
   attrsMap: { [key: string]: string | null };
+  rawAttrsMap: { [key: string]: ASTAttr };
   parent: ASTElement | void;
   children: Array<ASTNode>;
 

@@ -5,7 +5,6 @@ import { parseStyleText } from 'web/util/style'
 import {
   getAndRemoveAttr,
   getBindingAttr,
-  getRawAttr,
   baseWarn
 } from 'compiler/helpers'
 
@@ -22,7 +21,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
           'Interpolation inside attributes has been removed. ' +
           'Use v-bind or the colon shorthand instead. For example, ' +
           'instead of <div style="{{ val }}">, use <div :style="val">.',
-          getRawAttr(el, 'style')
+          el.rawAttrsMap['style']
         )
       }
     }

@@ -4,7 +4,6 @@ import { parseText } from 'compiler/parser/text-parser'
 import {
   getAndRemoveAttr,
   getBindingAttr,
-  getRawAttr,
   baseWarn
 } from 'compiler/helpers'
 
@@ -22,7 +21,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
       `class="${staticClass}": ` +
       'Interpolation inside attributes has been deprecated. ' +
       'Use v-bind or the colon shorthand instead.',
-      getRawAttr(el, 'class')
+      el.rawAttrsMap['class']
     )
   }
   if (!dynamic && classResult) {
