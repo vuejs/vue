@@ -18,10 +18,12 @@ export function pluckModuleFunction<F: Function> (
 
 export function addProp (el: ASTElement, name: string, value: string) {
   (el.props || (el.props = [])).push({ name, value })
+  el.plain = false
 }
 
 export function addAttr (el: ASTElement, name: string, value: any) {
   (el.attrs || (el.attrs = [])).push({ name, value })
+  el.plain = false
 }
 
 export function addDirective (
@@ -33,6 +35,7 @@ export function addDirective (
   modifiers: ?ASTModifiers
 ) {
   (el.directives || (el.directives = [])).push({ name, rawName, value, arg, modifiers })
+  el.plain = false
 }
 
 export function addHandler (
@@ -105,6 +108,8 @@ export function addHandler (
   } else {
     events[name] = newHandler
   }
+
+  el.plain = false
 }
 
 export function getBindingAttr (

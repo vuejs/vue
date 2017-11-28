@@ -4,6 +4,7 @@ import VNode from './vnode'
 import { resolveConstructorOptions } from 'core/instance/init'
 import { queueActivatedComponent } from 'core/observer/scheduler'
 import { createFunctionalComponent } from './create-functional-component'
+import { renderRecyclableComponentTemplate } from 'weex/runtime/recycle-list/render-component-template'
 
 import {
   warn,
@@ -144,21 +145,6 @@ export function createComponent (
 
   data = data || {}
 
-  // recycle-list optimized render function for extracting cell-slot
-  // template. This is essentially inline expanding instead of creating
-  // an actual instance.
-  // https://github.com/Hanks10100/weex-native-directive/tree/master/component
-  if (__WEEX__ && data.attrs && data.attrs['@isInRecycleList']) {
-    const altRender = Ctor.options['@render']
-    if (altRender) {
-      return altRender.call(
-        context,
-        context.$createElement,
-        data.attrs
-      )
-    }
-  }
-
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
   resolveConstructorOptions(Ctor)
@@ -206,6 +192,14 @@ export function createComponent (
     { Ctor, propsData, listeners, tag, children },
     asyncFactory
   )
+
+  // Weex specific: invoke recycle-list optimized @render function for
+  // extracting cell-slot template.
+  // https://github.com/Hanks10100/weex-native-directive/tree/master/component
+  if (__WEEX__ && data.attrs && ('@inRecycleList' in data.attrs)) {
+    return renderRecyclableComponentTemplate(vnode)
+  }
+
   return vnode
 }
 
