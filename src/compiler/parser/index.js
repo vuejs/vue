@@ -127,7 +127,7 @@ export function parse (
         element.ns = ns
       }
 
-      if (options.outputSourceRange) {
+      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
         element.start = start
         element.rawAttrsMap = element.attrsList.reduce((cumulated, attr) => {
           cumulated[attr.name] = attr
@@ -244,7 +244,7 @@ export function parse (
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
-      if (options.outputSourceRange) {
+      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
         element.end = end
       }
       endPre(element)
@@ -296,7 +296,7 @@ export function parse (
           }
         }
         if (child) {
-          if (options.outputSourceRange) {
+          if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
             child.start = start
             child.end = end
           }
@@ -310,7 +310,7 @@ export function parse (
         text,
         isComment: true
       }
-      if (options.outputSourceRange) {
+      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
         child.start = start
         child.end = end
       }

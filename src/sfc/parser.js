@@ -29,7 +29,7 @@ export function parseComponent (
     sfc.errors.push(msg)
   }
 
-  if (options.outputSourceRange) {
+  if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
     warn = (msg, range) => {
       const data: WarningMessage = { msg }
       if (range.start != null) {
@@ -99,7 +99,7 @@ export function parseComponent (
       currentBlock.end = start
       currentBlock.blockEnd = end
       let text = content.slice(currentBlock.start, currentBlock.end)
-      if (!options.outputSourceRange && !options.disableDeindent) {
+      if (!(process.env.NODE_ENV !== 'production' && options.outputSourceRange) && !options.disableDeindent) {
         text = deindent(text)
       }
       // pad content so that linters and pre-processors can output correct
