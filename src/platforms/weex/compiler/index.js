@@ -43,6 +43,8 @@ export function compile (
   // generate @render function for <recycle-list>
   if (options && generateAltRender) {
     options.recyclable = true
+    // disable static optimizations
+    options.optimize = false
     const { render } = compiler.compile(template, options)
     result['@render'] = render
   }

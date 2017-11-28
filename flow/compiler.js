@@ -19,6 +19,7 @@ declare type CompilerOptions = {
   shouldDecodeTags?: boolean;
   shouldDecodeNewlines?:  boolean;
   shouldDecodeNewlinesForHref?: boolean;
+  optimize?: boolean;
 
   // support <recycle-list> in weex
   recyclable?: boolean;

@@ -4,6 +4,8 @@ declare var document: Object;
 import { makeMap } from 'shared/util'
 import { warn } from 'core/util/index'
 
+export const RECYCLE_LIST_MARKER = '@inRecycleList'
+
 export const isReservedTag = makeMap(
   'template,script,style,element,content,slot,link,meta,svg,view,' +
   'a,div,img,image,text,span,input,switch,textarea,spinner,select,' +
