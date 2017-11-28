@@ -19,6 +19,5 @@ export function postTransformText (el: ASTElement, options: CompilerOptions) {
   if (el.children.length) {
     addAttr(el, 'value', genText(el.children[0]))
     el.children = []
-    el.plain = false
   }
 }

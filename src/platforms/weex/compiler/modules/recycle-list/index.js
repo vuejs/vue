@@ -1,5 +1,6 @@
 /* @flow */
 
+import { postTransformComponent } from './component'
 import { postTransformText } from './text'
 import { preTransformVBind } from './v-bind'
 import { preTransformVIf } from './v-if'
@@ -32,6 +33,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
 
 function postTransformNode (el: ASTElement, options: CompilerOptions) {
   if (shouldCompile(el, options)) {
+    postTransformComponent(el, options)
     // <text>: transform children text into value attr
     if (el.tag === 'text') {
       postTransformText(el, options)
