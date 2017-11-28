@@ -19,11 +19,11 @@ export function pluckModuleFunction<F: Function> (
 }
 
 export function addProp (el: ASTElement, name: string, value: string, range?: Range) {
-  (el.props || (el.props = [])).push(setRange({ name, value }, range))
+  (el.props || (el.props = [])).push(rangeSetItem({ name, value }, range))
 }
 
 export function addAttr (el: ASTElement, name: string, value: string, range?: Range) {
-  (el.attrs || (el.attrs = [])).push(setRange({ name, value }, range))
+  (el.attrs || (el.attrs = [])).push(rangeSetItem({ name, value }, range))
 }
 
 export function addDirective (
@@ -35,7 +35,7 @@ export function addDirective (
   modifiers: ?ASTModifiers,
   range?: Range
 ) {
-  (el.directives || (el.directives = [])).push(setRange({ name, rawName, value, arg, modifiers }, range))
+  (el.directives || (el.directives = [])).push(rangeSetItem({ name, rawName, value, arg, modifiers }, range))
 }
 
 export function addHandler (
@@ -96,7 +96,7 @@ export function addHandler (
     events = el.events || (el.events = {})
   }
 
-  const newHandler: any = setRange({ value }, range)
+  const newHandler: any = rangeSetItem({ value }, range)
   if (modifiers !== emptyObject) {
     newHandler.modifiers = modifiers
   }
@@ -182,7 +182,7 @@ export function getAndRemoveAttr (
   return val
 }
 
-function setRange (
+function rangeSetItem (
   item: any,
   range?: { start?: number, end?: number }
 ) {
