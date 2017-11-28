@@ -131,7 +131,6 @@ describe('compile options', () => {
     expect(compiled.errors.length).toBe(1)
     expect(compiled.errors[0].start).toBe(0)
     expect(compiled.errors[0].end).toBeUndefined()
-    expect(compiled.errors[0].msg).toContain('root element')
 
     compiled = compile('<div v-if="a----">{{ b++++ }}</div>', { outputSourceRange: true })
     expect(compiled.errors.length).toBe(2)
@@ -139,5 +138,12 @@ describe('compile options', () => {
     expect(compiled.errors[0].end).toBe(17)
     expect(compiled.errors[1].start).toBe(18)
     expect(compiled.errors[1].end).toBe(29)
+  })
+
+  it('should collect source range for binding keys', () => {
+    const compiled = compile('<div><slot v-bind:key="key" /></div>', { outputSourceRange: true })
+    expect(compiled.errors.length).toBe(1)
+    expect(compiled.errors[0].start).toBe(11)
+    expect(compiled.errors[0].end).toBe(27)
   })
 })
