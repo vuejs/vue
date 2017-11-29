@@ -1,5 +1,6 @@
 /* @flow */
 
+import type { WeexCompilerOptions } from 'weex/compiler/index'
 import { postTransformComponent } from './component'
 import { postTransformText } from './text'
 import { preTransformVBind } from './v-bind'
@@ -9,12 +10,12 @@ import { postTransformVOn } from './v-on'
 
 let currentRecycleList = null
 
-function shouldCompile (el: ASTElement, options: CompilerOptions) {
+function shouldCompile (el: ASTElement, options: WeexCompilerOptions) {
   return options.recyclable ||
     (currentRecycleList && el !== currentRecycleList)
 }
 
-function preTransformNode (el: ASTElement, options: CompilerOptions) {
+function preTransformNode (el: ASTElement, options: WeexCompilerOptions) {
   if (el.tag === 'recycle-list') {
     currentRecycleList = el
   }
@@ -25,13 +26,13 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
   }
 }
 
-function transformNode (el: ASTElement, options: CompilerOptions) {
+function transformNode (el: ASTElement, options: WeexCompilerOptions) {
   if (shouldCompile(el, options)) {
     // do nothing yet
   }
 }
 
-function postTransformNode (el: ASTElement, options: CompilerOptions) {
+function postTransformNode (el: ASTElement, options: WeexCompilerOptions) {
   if (shouldCompile(el, options)) {
     postTransformComponent(el, options)
     // <text>: transform children text into value attr

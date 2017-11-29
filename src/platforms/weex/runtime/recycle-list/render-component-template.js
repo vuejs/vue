@@ -1,17 +1,35 @@
 /* @flow */
 
+import { warn } from 'core/util/debug'
+import { handleError } from 'core/util/error'
 import { RECYCLE_LIST_MARKER } from 'weex/util/index'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
 export function isRecyclableComponent (vnode: VNodeWithData): boolean {
-  return vnode.data.attrs && (RECYCLE_LIST_MARKER in vnode.data.attrs)
+  return vnode.data.attrs
+    ? (RECYCLE_LIST_MARKER in vnode.data.attrs)
+    : false
 }
 
-export function renderRecyclableComponentTemplate (vnode: VNodeWithData): VNode {
+export function renderRecyclableComponentTemplate (vnode: MountedComponentVNode): VNode {
   // TODO:
-  // 1. adding @isComponentRoot / @componentProps to the root node
-  // 2. proper error handling
+  // adding @isComponentRoot / @componentProps to the root node
+
+  // $flow-disable-line
   delete vnode.data.attrs[RECYCLE_LIST_MARKER]
-  const instance = createComponentInstanceForVnode(vnode)
-  return instance.$options['@render'].call(instance)
+  const vm = createComponentInstanceForVnode(vnode)
+  const render = (vm.$options: any)['@render']
+  if (render) {
+    try {
+      return render.call(vm)
+    } catch (err) {
+      handleError(err, vm, `@render`)
+    }
+  } else {
+    warn(
+      `@render function not defined on component used in <recycle-list>. ` +
+      `Make sure to declare \`recyclable="true"\` on the component's template.`,
+      vm
+    )
+  }
 }
