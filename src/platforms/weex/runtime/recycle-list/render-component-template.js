@@ -12,9 +12,6 @@ export function isRecyclableComponent (vnode: VNodeWithData): boolean {
 }
 
 export function renderRecyclableComponentTemplate (vnode: MountedComponentVNode): VNode {
-  // TODO:
-  // adding @isComponentRoot / @componentProps to the root node
-
   // $flow-disable-line
   delete vnode.data.attrs[RECYCLE_LIST_MARKER]
   const vm = createComponentInstanceForVnode(vnode)

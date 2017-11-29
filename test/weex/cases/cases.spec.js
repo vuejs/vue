@@ -84,41 +84,39 @@ describe('Usage', () => {
       }).catch(done.fail)
     })
 
-    // it('stateless component with props', done => {
-    //   compileWithDeps('recycle-list/components/stateless-with-props.vue', [{
-    //     name: 'poster',
-    //     path: 'recycle-list/components/poster.vue'
-    //   }]).then(code => {
-    //     const id = String(Date.now() * Math.random())
-    //     const instance = createInstance(id, code)
-    //     setTimeout(() => {
-    //       const target = readObject('recycle-list/components/stateless-with-props.vdom.js')
-    //       expect(getRoot(instance)).toEqual(target)
-    //       done()
-    //     }, 50)
-    //   }).catch(done.fail)
-    // })
+    it('stateless component with props', done => {
+      compileWithDeps('recycle-list/components/stateless-with-props.vue', [{
+        name: 'poster',
+        path: 'recycle-list/components/poster.vue'
+      }]).then(code => {
+        const id = String(Date.now() * Math.random())
+        const instance = createInstance(id, code)
+        setTimeout(() => {
+          const target = readObject('recycle-list/components/stateless-with-props.vdom.js')
+          expect(getRoot(instance)).toEqual(target)
+          done()
+        }, 50)
+      }).catch(done.fail)
+    })
 
-    // it('stateful component', done => {
-    //   compileWithDeps('recycle-list/components/stateful.vue', [{
-    //     name: 'counter',
-    //     path: 'recycle-list/components/counter.vue'
-    //   }]).then(code => {
-    //     const id = String(Date.now() * Math.random())
-    //     const instance = createInstance(id, code)
-    //     setTimeout(() => {
-    //       const target = readObject('recycle-list/components/stateful.vdom.js')
-    //       expect(getRoot(instance)).toEqual(target)
-    //       const event = getEvents(instance)[0]
-    //       fireEvent(instance, event.ref, event.type, {})
-    //       setTimeout(() => {
-    //         // TODO: check render results
-    //         // expect(getRoot(instance)).toEqual(target)
-    //         done()
-    //       })
-    //     }, 50)
-    //   }).catch(done.fail)
-    // })
+    it('stateful component', done => {
+      compileWithDeps('recycle-list/components/stateful.vue', [{
+        name: 'counter',
+        path: 'recycle-list/components/counter.vue'
+      }]).then(code => {
+        const id = String(Date.now() * Math.random())
+        const instance = createInstance(id, code)
+        setTimeout(() => {
+          const target = readObject('recycle-list/components/stateful.vdom.js')
+          expect(getRoot(instance)).toEqual(target)
+          const event = getEvents(instance)[0]
+          fireEvent(instance, event.ref, event.type, {})
+          setTimeout(() => {
+            expect(getRoot(instance)).toEqual(target)
+            done()
+          })
+        }, 50)
+      }).catch(done.fail)
+    })
   })
 })
-

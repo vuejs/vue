@@ -1,4 +1,4 @@
-<template>
+<template recyclable="true">
   <div>
     <image class="image" :src="imageUrl"></image>
     <text class="title">{{title}}</text>
