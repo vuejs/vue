@@ -1,6 +1,5 @@
 /* @flow */
 
-import type { WeexCompilerOptions } from 'weex/compiler/index'
 import { postTransformComponent } from './component'
 import { postTransformText } from './text'
 import { preTransformVBind } from './v-bind'
