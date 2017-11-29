@@ -14,7 +14,16 @@ import {
   getTagNamespace
 } from '../util/index'
 
-export const baseOptions: CompilerOptions = {
+export type WeexCompilerOptions = CompilerOptions & {
+  // whether to compile special template for <recycle-list>
+  recyclable?: boolean;
+};
+
+export type WeexCompiledResult = CompiledResult & {
+  '@render'?: string;
+};
+
+export const baseOptions: WeexCompilerOptions = {
   modules,
   directives,
   isUnaryTag,
@@ -31,8 +40,8 @@ const compiler = createCompiler(baseOptions)
 
 export function compile (
   template: string,
-  options?: CompilerOptions
-): CompiledResult {
+  options?: WeexCompilerOptions
+): WeexCompiledResult {
   let generateAltRender = false
   if (options && options.recyclable === true) {
     generateAltRender = true
