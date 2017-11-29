@@ -114,7 +114,7 @@ function omitUseless (object) {
   if (isObject(object)) {
     delete object.ref
     for (const key in object) {
-      if (isEmptyObject(object[key]) || object[key] === undefined) {
+      if (key.charAt(0) !== '@' && (isEmptyObject(object[key]) || object[key] === undefined)) {
         delete object[key]
       }
       omitUseless(object[key])

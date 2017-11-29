@@ -13,11 +13,11 @@
     attr: { templateType: 'A' },
     children: [{
       type: 'div',
+      attr: {
+        '@isComponentRoot': true,
+        '@componentProps': {}
+      },
       // not supported yet
-      // attr: {
-      //   '@isComponentRoot': true,
-      //   '@componentProps': {}
-      // },
       // style: {
       //   height: '120px',
       //   justifyContent: 'center',
