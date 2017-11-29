@@ -14,15 +14,6 @@ import {
   getTagNamespace
 } from '../util/index'
 
-export type WeexCompilerOptions = CompilerOptions & {
-  // whether to compile special template for <recycle-list>
-  recyclable?: boolean;
-};
-
-export type WeexCompiledResult = CompiledResult & {
-  '@render'?: string;
-};
-
 export const baseOptions: WeexCompilerOptions = {
   modules,
   directives,
