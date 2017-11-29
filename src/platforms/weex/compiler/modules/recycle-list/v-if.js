@@ -1,6 +1,6 @@
 /* @flow */
 
-import { getAndRemoveAttr } from 'compiler/helpers'
+import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
 
 function hasConditionDirective (el: ASTElement): boolean {
   for (const attr in el.attrsMap) {
@@ -42,7 +42,6 @@ export function preTransformVIf (el: ASTElement, options: WeexCompilerOptions) {
         return
       }
     }
-    el.attrsMap['[[match]]'] = exp
-    el.attrsList.push({ name: '[[match]]', value: exp })
+    addRawAttr(el, '[[match]]', exp)
   }
 }
