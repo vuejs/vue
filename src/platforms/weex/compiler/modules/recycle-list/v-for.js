@@ -3,7 +3,7 @@
 import { forAliasRE, forIteratorRE, stripParensRE } from 'compiler/parser/index'
 import { getAndRemoveAttr } from 'compiler/helpers'
 
-export function preTransformVFor (el: ASTElement, options: CompilerOptions) {
+export function preTransformVFor (el: ASTElement, options: WeexCompilerOptions) {
   const exp = getAndRemoveAttr(el, 'v-for')
   if (!exp) {
     return

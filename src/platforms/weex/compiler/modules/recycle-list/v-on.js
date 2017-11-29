@@ -9,7 +9,7 @@ function parseHandlerParams (handler: ASTElementHandler) {
   }
 }
 
-export function postTransformVOn (el: ASTElement, options: CompilerOptions) {
+export function postTransformVOn (el: ASTElement, options: WeexCompilerOptions) {
   const events: ASTElementHandlers | void = el.events
   if (!events) {
     return
