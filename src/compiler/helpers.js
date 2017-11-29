@@ -26,6 +26,12 @@ export function addAttr (el: ASTElement, name: string, value: any) {
   el.plain = false
 }
 
+// add a raw attr (use this in preTransforms)
+export function addRawAttr (el: ASTElement, name: string, value: any) {
+  el.attrsMap[name] = value
+  el.attrsList.push({ name, value })
+}
+
 export function addDirective (
   el: ASTElement,
   name: string,
