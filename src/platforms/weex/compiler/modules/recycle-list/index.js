@@ -1,7 +1,7 @@
 /* @flow */
 
-import { preTransformComponent } from './component'
-import { preTransformComponentRoot } from './component-root'
+import { postTransformComponent } from './component'
+import { postTransformComponentRoot } from './component-root'
 import { postTransformText } from './text'
 import { preTransformVBind } from './v-bind'
 import { preTransformVIf } from './v-if'
@@ -20,8 +20,6 @@ function preTransformNode (el: ASTElement, options: WeexCompilerOptions) {
     currentRecycleList = el
   }
   if (shouldCompile(el, options)) {
-    preTransformComponent(el, options)
-    preTransformComponentRoot(el, options)
     preTransformVBind(el, options)
     preTransformVIf(el, options) // also v-else-if and v-else
     preTransformVFor(el, options)
@@ -36,6 +34,10 @@ function transformNode (el: ASTElement, options: WeexCompilerOptions) {
 
 function postTransformNode (el: ASTElement, options: WeexCompilerOptions) {
   if (shouldCompile(el, options)) {
+    // mark child component in parent template
+    postTransformComponent(el, options)
+    // mark root in child component template
+    postTransformComponentRoot(el, options)
     // <text>: transform children text into value attr
     if (el.tag === 'text') {
       postTransformText(el, options)
