@@ -1,7 +1,7 @@
 /* @flow */
 
 import { forAliasRE, forIteratorRE, stripParensRE } from 'compiler/parser/index'
-import { getAndRemoveAttr } from 'compiler/helpers'
+import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
 
 export function preTransformVFor (el: ASTElement, options: WeexCompilerOptions) {
   const exp = getAndRemoveAttr(el, 'v-for')
@@ -26,8 +26,7 @@ export function preTransformVFor (el: ASTElement, options: WeexCompilerOptions) 
       }
     }
     delete el.attrsMap['v-for']
-    el.attrsMap['[[repeat]]'] = desc
-    el.attrsList.push({ name: '[[repeat]]', value: desc })
+    addRawAttr(el, '[[repeat]]', desc)
   } else if (process.env.NODE_ENV !== 'production' && options.warn) {
     options.warn(`Invalid v-for expression: ${exp}`)
   }
