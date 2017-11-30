@@ -13,6 +13,13 @@ const keyCodes: { [key: string]: number | Array<number> } = {
   left: 37,
   right: 39,
   down: 40,
+  end: 35,
+  home: 36,
+  del: 46,
+  backspace: 8,
+  insert: 45,
+  pageup: 33,
+  pagedown: 34,
   'delete': [8, 46]
 }
 
