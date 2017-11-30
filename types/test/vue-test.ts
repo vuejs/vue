@@ -1,4 +1,5 @@
-import Vue = require("../index");
+import Vue, { VNode } from "../index";
+import { ComponentOptions } from "../options";
 
 class Test extends Vue {
   a: number;
@@ -13,6 +14,8 @@ class Test extends Vue {
     this.$refs;
     this.$slots;
     this.$isServer;
+    this.$ssrContext;
+    this.$vnode;
   }
 
   // test property reification
@@ -62,7 +65,14 @@ class Test extends Vue {
         vm.testMethods();
       }
     };
+    config.warnHandler = (msg, vm) => {
+      if (vm instanceof Test) {
+        vm.testProperties();
+        vm.testMethods();
+      }
+    };
     config.keyCodes = { esc: 27 };
+    config.ignoredElements = ['foo', /^ion-/];
   }
 
   static testMethods() {
@@ -82,9 +92,91 @@ class Test extends Vue {
     this.directive("", {bind() {}});
     this.filter("", (value: number) => value);
     this.component("", { data: () => ({}) });
-    this.component("", { functional: true });
+    this.component("", { functional: true, render(h) { return h("div", "hello!") } });
     this.use;
     this.mixin(Test);
     this.compile("<div>{{ message }}</div>");
   }
 }
+
+const HelloWorldComponent = Vue.extend({
+  props: ["name"],
+  data() {
+    return {
+      message: "Hello " + this.name,
+    }
+  },
+  computed: {
+    shouted(): string {
+      return this.message.toUpperCase();
+    }
+  },
+  methods: {
+    getMoreExcited() {
+      this.message += "!";
+    }
+  },
+  watch: {
+    message(a: string) {
+      console.log(`Message ${this.message} was changed!`);
+    }
+  }
+});
+
+const FunctionalHelloWorldComponent = Vue.extend({
+  functional: true,
+  props: ["name"],
+  render(createElement, ctxt) {
+    return createElement("div", "Hello " + ctxt.props.name)
+  }
+});
+
+const Parent = Vue.extend({
+  data() {
+    return { greeting: 'Hello' }
+  }
+});
+
+const Child = Parent.extend({
+  methods: {
+    foo() {
+      console.log(this.greeting.toLowerCase());
+    }
+  }
+});
+
+const GrandChild = Child.extend({
+  computed: {
+    lower(): string {
+      return this.greeting.toLowerCase();
+    }
+  }
+});
+
+new GrandChild().lower.toUpperCase();
+for (let _ in (new Test()).$options) {
+}
+declare const options: ComponentOptions<Vue>;
+Vue.extend(options);
+Vue.component('test-comp', options);
+new Vue(options);
+
+// cyclic example
+Vue.extend({
+  props: {
+    bar: {
+      type: String
+    }
+  },
+  methods: {
+    foo() {}
+  },
+  mounted () {
+    this.foo()
+  },
+  // manual annotation
+  render (h): VNode {
+    const a = this.bar
+    return h('canvas', {}, [a])
+  }
+})

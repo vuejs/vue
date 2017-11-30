@@ -1,6 +1,7 @@
 import { parse } from 'compiler/parser/index'
+import { extend } from 'shared/util'
 import { optimize } from 'compiler/optimizer'
-import { baseOptions } from 'web/compiler/index'
+import { baseOptions } from 'web/compiler/options'
 
 describe('optimizer', () => {
   it('simple', () => {
@@ -9,6 +10,19 @@ describe('optimizer', () => {
     expect(ast.static).toBe(true) // h1
     expect(ast.staticRoot).toBe(true)
     expect(ast.children[0].static).toBe(true) // span
+  })
+
+  it('simple with comment', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const ast = parse('<h1 id="section1"><span>hello world</span><!--comment--></h1>', options)
+    optimize(ast, options)
+    expect(ast.static).toBe(true) // h1
+    expect(ast.staticRoot).toBe(true)
+    expect(ast.children.length).toBe(2)
+    expect(ast.children[0].static).toBe(true) // span
+    expect(ast.children[1].static).toBe(true) // comment
   })
 
   it('skip simple nodes', () => {
@@ -55,18 +69,21 @@ describe('optimizer', () => {
   })
 
   it('v-if directive', () => {
-    const ast = parse('<h1 id="section1" v-if="show">hello world</h1>', baseOptions)
+    const ast = parse('<div id="section1" v-if="show"><p><span>hello world</span></p></div>', baseOptions)
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(true)
   })
 
   it('v-else directive', () => {
-    const ast = parse('<div><p v-if="show">hello world</p><p v-else>foo bar</p></div>', baseOptions)
+    const ast = parse('<div><p v-if="show">hello world</p><div v-else><p><span>foo bar</span></p></div></div>', baseOptions)
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(false)
-    expect(ast.children[0].ifConditions[1].block.static).toBeUndefined()
+    expect(ast.children[0].ifConditions[0].block.static).toBe(false)
+    expect(ast.children[0].ifConditions[1].block.static).toBe(false)
+    expect(ast.children[0].ifConditions[0].block.children[0].static).toBe(true)
+    expect(ast.children[0].ifConditions[1].block.children[0].static).toBe(true)
   })
 
   it('v-pre directive', () => {

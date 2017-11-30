@@ -6,13 +6,35 @@ import {
   isDef,
   isUndef,
   isTrue,
-  isObject
+  isObject,
+  hasSymbol
 } from 'core/util/index'
 
-function ensureCtor (comp, base) {
+import { createEmptyVNode } from 'core/vdom/vnode'
+
+function ensureCtor (comp: any, base) {
+  if (
+    comp.__esModule ||
+    (hasSymbol && comp[Symbol.toStringTag] === 'Module')
+  ) {
+    comp = comp.default
+  }
   return isObject(comp)
     ? base.extend(comp)
     : comp
+}
+
+export function createAsyncPlaceholder (
+  factory: Function,
+  data: ?VNodeData,
+  context: Component,
+  children: ?Array<VNode>,
+  tag: ?string
+): VNode {
+  const node = createEmptyVNode()
+  node.asyncFactory = factory
+  node.asyncMeta = { data, context, children, tag }
+  return node
 }
 
 export function resolveAsyncComponent (
@@ -97,11 +119,13 @@ export function resolveAsyncComponent (
 
         if (isDef(res.timeout)) {
           setTimeout(() => {
-            reject(
-              process.env.NODE_ENV !== 'production'
-                ? `timeout (${res.timeout}ms)`
-                : null
-            )
+            if (isUndef(factory.resolved)) {
+              reject(
+                process.env.NODE_ENV !== 'production'
+                  ? `timeout (${res.timeout}ms)`
+                  : null
+              )
+            }
           }, res.timeout)
         }
       }

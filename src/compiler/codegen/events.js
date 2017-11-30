@@ -36,23 +36,12 @@ const modifierCode: { [key: string]: string } = {
 
 export function genHandlers (
   events: ASTElementHandlers,
-  native: boolean,
+  isNative: boolean,
   warn: Function
 ): string {
-  let res = native ? 'nativeOn:{' : 'on:{'
+  let res = isNative ? 'nativeOn:{' : 'on:{'
   for (const name in events) {
-    const handler = events[name]
-    // #5330: warn click.right, since right clicks do not actually fire click events.
-    if (process.env.NODE_ENV !== 'production' &&
-        name === 'click' &&
-        handler && handler.modifiers && handler.modifiers.right
-      ) {
-      warn(
-        `Use "contextmenu" instead of "click.right" since right clicks ` +
-        `do not actually fire "click" events.`
-      )
-    }
-    res += `"${name}":${genHandler(name, handler)},`
+    res += `"${name}":${genHandler(name, events[name])},`
   }
   return res.slice(0, -1) + '}'
 }
@@ -87,6 +76,14 @@ function genHandler (
         if (keyCodes[key]) {
           keys.push(key)
         }
+      } else if (key === 'exact') {
+        const modifiers: ASTModifiers = (handler.modifiers: any)
+        genModifierCode += genGuard(
+          ['ctrl', 'shift', 'alt', 'meta']
+            .filter(keyModifier => !modifiers[keyModifier])
+            .map(keyModifier => `$event.${keyModifier}Key`)
+            .join('||')
+        )
       } else {
         keys.push(key)
       }
@@ -116,6 +113,11 @@ function genFilterCode (key: string): string {
   if (keyVal) {
     return `$event.keyCode!==${keyVal}`
   }
-  const alias = keyCodes[key]
-  return `_k($event.keyCode,${JSON.stringify(key)}${alias ? ',' + JSON.stringify(alias) : ''})`
+  const code = keyCodes[key]
+  return (
+    `_k($event.keyCode,` +
+    `${JSON.stringify(key)},` +
+    `${JSON.stringify(code)},` +
+    `$event.key)`
+  )
 }

@@ -10,7 +10,8 @@ Object.defineProperty(Vue.prototype, '$isServer', {
 
 Object.defineProperty(Vue.prototype, '$ssrContext', {
   get () {
-    return this.$vnode.ssrContext
+    /* istanbul ignore next */
+    return this.$vnode && this.$vnode.ssrContext
   }
 })
 

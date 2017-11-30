@@ -141,6 +141,50 @@ describe('create-element', () => {
     expect(vnode.children[0].children[0].ns).toBeUndefined()
   })
 
+  // #6642
+  it('render svg foreignObject component with correct namespace', () => {
+    const vm = new Vue({
+      template: `
+        <svg>
+          <test></test>
+        </svg>
+      `,
+      components: {
+        test: {
+          template: `
+          <foreignObject>
+            <p xmlns="http://www.w3.org/1999/xhtml"></p>
+          </foreignObject>
+          `
+        }
+      }
+    }).$mount()
+    const testComp = vm.$children[0]
+    expect(testComp.$vnode.ns).toBe('svg')
+    expect(testComp._vnode.tag).toBe('foreignObject')
+    expect(testComp._vnode.ns).toBe('svg')
+    expect(testComp._vnode.children[0].tag).toBe('p')
+    expect(testComp._vnode.children[0].ns).toBeUndefined()
+  })
+
+  // #6506
+  it('render SVGAElement in a component correctly', () => {
+    const vm = new Vue({
+      template: `
+        <svg>
+          <test></test>
+        </svg>
+      `,
+      components: {
+        test: { render: h => h('a') }
+      }
+    }).$mount()
+    const testComp = vm.$children[0]
+    expect(testComp.$vnode.ns).toBe('svg')
+    expect(testComp._vnode.tag).toBe('a')
+    expect(testComp._vnode.ns).toBe('svg')
+  })
+
   it('warn observed data objects', () => {
     new Vue({
       data: {
@@ -151,5 +195,51 @@ describe('create-element', () => {
       }
     }).$mount()
     expect('Avoid using observed data object as vnode data').toHaveBeenWarned()
+  })
+
+  it('warn non-primitive key', () => {
+    new Vue({
+      render (h) {
+        return h('div', { key: {}})
+      }
+    }).$mount()
+    expect('Avoid using non-primitive value as key').toHaveBeenWarned()
+  })
+
+  it('doesn\'t warn boolean key', () => {
+    new Vue({
+      render (h) {
+        return h('div', { key: true })
+      }
+    }).$mount()
+    expect('Avoid using non-primitive value as key').not.toHaveBeenWarned()
+  })
+
+  it('nested child elements should be updated correctly', done => {
+    const vm = new Vue({
+      data: { n: 1 },
+      render (h) {
+        const list = []
+        for (let i = 0; i < this.n; i++) {
+          list.push(h('span', i))
+        }
+        const input = h('input', {
+          attrs: {
+            value: 'a',
+            type: 'text'
+          }
+        })
+        return h('div', [[...list, input]])
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toContain('<span>0</span><input')
+    const el = vm.$el.querySelector('input')
+    el.value = 'b'
+    vm.n++
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toContain('<span>0</span><span>1</span><input')
+      expect(vm.$el.querySelector('input')).toBe(el)
+      expect(vm.$el.querySelector('input').value).toBe('b')
+    }).then(done)
   })
 })

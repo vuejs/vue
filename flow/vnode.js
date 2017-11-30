@@ -1,4 +1,4 @@
-declare type VNodeChildren = Array<?VNode | string | VNodeChildren> | string
+declare type VNodeChildren = Array<?VNode | string | VNodeChildren> | string;
 
 declare type VNodeComponentOptions = {
   Ctor: Class<Component>;
@@ -6,7 +6,7 @@ declare type VNodeComponentOptions = {
   listeners: ?Object;
   children: ?Array<VNode>;
   tag?: string;
-}
+};
 
 declare type MountedComponentVNode = {
   context: Component;
@@ -14,7 +14,7 @@ declare type MountedComponentVNode = {
   componentInstance: Component;
   parent: VNode;
   data: VNodeData;
-}
+};
 
 // interface for vnodes in update modules
 declare type VNodeWithData = {
@@ -27,14 +27,16 @@ declare type VNodeWithData = {
   context: Component;
   key: string | number | void;
   parent?: VNodeWithData;
+  componentOptions?: VNodeComponentOptions;
   componentInstance?: Component;
   isRootInsert: boolean;
-}
+};
 
 declare interface VNodeData {
   key?: string | number;
   slot?: string;
   ref?: string;
+  is?: string;
   pre?: boolean;
   tag?: string;
   staticClass?: string;
@@ -61,7 +63,7 @@ declare interface VNodeData {
     value: any;
     callback: Function;
   };
-}
+};
 
 declare type VNodeDirective = {
   name: string;
@@ -71,4 +73,6 @@ declare type VNodeDirective = {
   arg?: string;
   modifiers?: ASTModifiers;
   def?: Object;
-}
+};
+
+declare type ScopedSlotsData = Array<{ key: string, fn: Function } | ScopedSlotsData>;

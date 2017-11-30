@@ -68,4 +68,29 @@ describe('Options _scopeId', () => {
       expect(child.$el.hasAttribute('data-2')).toBe(true)
     }).then(done)
   })
+
+  it('should work on functional components', () => {
+    const child = {
+      functional: true,
+      _scopeId: 'child',
+      render (h) {
+        return h('div', { class: 'child' }, [
+          h('span', { class: 'child' }, 'child')
+        ])
+      }
+    }
+    const vm = new Vue({
+      _scopeId: 'parent',
+      components: { child },
+      template: '<div><child></child></div>'
+    }).$mount()
+
+    expect(vm.$el.hasAttribute('parent')).toBe(true)
+    const childEls = vm.$el.querySelectorAll('.child')
+    ;[].forEach.call(childEls, el => {
+      expect(el.hasAttribute('child')).toBe(true)
+      // functional component with scopeId will not inherit parent scopeId
+      expect(el.hasAttribute('parent')).toBe(false)
+    })
+  })
 })

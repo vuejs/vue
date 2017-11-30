@@ -6,8 +6,8 @@ module.exports = function (config) {
     reporters: ['mocha', 'coverage'],
     coverageReporter: {
       reporters: [
-        { type: 'lcov', dir: '../coverage', subdir: '.' },
-        { type: 'text-summary', dir: '../coverage', subdir: '.' }
+        { type: 'lcov', dir: '../../coverage', subdir: '.' },
+        { type: 'text-summary', dir: '../../coverage', subdir: '.' }
       ]
     },
     singleRun: true,
@@ -17,7 +17,7 @@ module.exports = function (config) {
     ])
   })
 
-  // add babel-plugin-istanbul for code intrumentation
+  // add babel-plugin-istanbul for code instrumentation
   options.webpack.module.rules[0].options = {
     plugins: [['istanbul', {
       exclude: [

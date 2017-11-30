@@ -20,3 +20,4 @@ module.name_mapper='^weex/\(.*\)$' -> '<PROJECT_ROOT>/src/platforms/weex/\1'
 module.name_mapper='^server/\(.*\)$' -> '<PROJECT_ROOT>/src/server/\1'
 module.name_mapper='^entries/\(.*\)$' -> '<PROJECT_ROOT>/src/entries/\1'
 module.name_mapper='^sfc/\(.*\)$' -> '<PROJECT_ROOT>/src/sfc/\1'
+suppress_comment= \\(.\\|\n\\)*\\$flow-disable-line

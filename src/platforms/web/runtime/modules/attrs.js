@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isIE9 } from 'core/util/env'
+import { isIE, isIE9, isEdge } from 'core/util/env'
 
 import {
   extend,
@@ -18,6 +18,10 @@ import {
 } from 'web/util/index'
 
 function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+  const opts = vnode.componentOptions
+  if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) {
+    return
+  }
   if (isUndef(oldVnode.data.attrs) && isUndef(vnode.data.attrs)) {
     return
   }
@@ -38,8 +42,9 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     }
   }
   // #4391: in IE9, setting type can reset value for input[type=radio]
+  // #6666: IE/Edge forces progress value down to 1 before setting a max
   /* istanbul ignore if */
-  if (isIE9 && attrs.value !== oldAttrs.value) {
+  if ((isIE || isEdge) && attrs.value !== oldAttrs.value) {
     setAttr(elm, 'value', attrs.value)
   }
   for (key in oldAttrs) {
@@ -60,7 +65,12 @@ function setAttr (el: Element, key: string, value: any) {
     if (isFalsyAttrValue(value)) {
       el.removeAttribute(key)
     } else {
-      el.setAttribute(key, key)
+      // technically allowfullscreen is a boolean attribute for <iframe>,
+      // but Flash expects a value of "true" when used on <embed> tag
+      value = key === 'allowfullscreen' && el.tagName === 'EMBED'
+        ? 'true'
+        : key
+      el.setAttribute(key, value)
     }
   } else if (isEnumeratedAttr(key)) {
     el.setAttribute(key, isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true')
@@ -74,6 +84,23 @@ function setAttr (el: Element, key: string, value: any) {
     if (isFalsyAttrValue(value)) {
       el.removeAttribute(key)
     } else {
+      // #7138: IE10 & 11 fires input event when setting placeholder on
+      // <textarea>... block the first input event and remove the blocker
+      // immediately.
+      /* istanbul ignore if */
+      if (
+        isIE && !isIE9 &&
+        el.tagName === 'TEXTAREA' &&
+        key === 'placeholder' && !el.__ieph
+      ) {
+        const blocker = e => {
+          e.stopImmediatePropagation()
+          el.removeEventListener('input', blocker)
+        }
+        el.addEventListener('input', blocker)
+        // $flow-disable-line
+        el.__ieph = true /* IE placeholder patched */
+      }
       el.setAttribute(key, value)
     }
   }

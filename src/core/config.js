@@ -16,7 +16,8 @@ export type Config = {
   performance: boolean;
   devtools: boolean;
   errorHandler: ?(err: Error, vm: Component, info: string) => void;
-  ignoredElements: Array<string>;
+  warnHandler: ?(msg: string, vm: Component, trace: string) => void;
+  ignoredElements: Array<string | RegExp>;
   keyCodes: { [key: string]: number | Array<number> };
 
   // platform
@@ -61,6 +62,11 @@ export default ({
    * Error handler for watcher errors
    */
   errorHandler: null,
+
+  /**
+   * Warn handler for watcher warns
+   */
+  warnHandler: null,
 
   /**
    * Ignore certain custom elements

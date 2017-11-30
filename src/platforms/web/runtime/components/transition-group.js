@@ -101,8 +101,9 @@ export default {
     children.forEach(applyTranslation)
 
     // force reflow to put everything in position
-    const body: any = document.body
-    const f: number = body.offsetHeight // eslint-disable-line
+    // assign to this to avoid being removed in tree-shaking
+    // $flow-disable-line
+    this._reflow = document.body.offsetHeight
 
     children.forEach((c: VNode) => {
       if (c.data.moved) {
@@ -127,7 +128,8 @@ export default {
       if (!hasTransition) {
         return false
       }
-      if (this._hasMove != null) {
+      /* istanbul ignore if */
+      if (this._hasMove) {
         return this._hasMove
       }
       // Detect whether an element with the move class applied has

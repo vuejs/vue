@@ -8,8 +8,10 @@ function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
   const data: VNodeData = vnode.data
   const oldData: VNodeData = oldVnode.data
-  if (!data.staticClass && !data.class &&
-      (!oldData || (!oldData.staticClass && !oldData.class))) {
+  if (!data.staticClass &&
+    !data.class &&
+    (!oldData || (!oldData.staticClass && !oldData.class))
+  ) {
     return
   }
 
@@ -34,8 +36,12 @@ function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 
   const style = getStyle(oldClassList, classList, ctx)
-  for (const key in style) {
-    el.setStyle(key, style[key])
+  if (typeof el.setStyles === 'function') {
+    el.setStyles(style)
+  } else {
+    for (const key in style) {
+      el.setStyle(key, style[key])
+    }
   }
 }
 

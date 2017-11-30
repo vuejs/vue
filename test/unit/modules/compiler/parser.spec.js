@@ -1,6 +1,6 @@
 import { parse } from 'compiler/parser/index'
 import { extend } from 'shared/util'
-import { baseOptions } from 'web/compiler/index'
+import { baseOptions } from 'web/compiler/options'
 import { isIE, isEdge } from 'core/util/env'
 
 describe('parser', () => {
@@ -283,6 +283,121 @@ describe('parser', () => {
     expect(liAst.key).toBe('item.uid')
   })
 
+  it('v-for directive destructuring', () => {
+    let ast = parse('<ul><li v-for="{ foo } in items"></li></ul>', baseOptions)
+    let liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo }')
+
+    // with paren
+    ast = parse('<ul><li v-for="({ foo }) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo }')
+
+    // multi-var destructuring
+    ast = parse('<ul><li v-for="{ foo, bar, baz } in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo, bar, baz }')
+
+    // multi-var destructuring with paren
+    ast = parse('<ul><li v-for="({ foo, bar, baz }) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo, bar, baz }')
+
+    // with index
+    ast = parse('<ul><li v-for="({ foo }, i) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo }')
+    expect(liAst.iterator1).toBe('i')
+
+    // with key + index
+    ast = parse('<ul><li v-for="({ foo }, i, j) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo }')
+    expect(liAst.iterator1).toBe('i')
+    expect(liAst.iterator2).toBe('j')
+
+    // multi-var destructuring with index
+    ast = parse('<ul><li v-for="({ foo, bar, baz }, i) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo, bar, baz }')
+    expect(liAst.iterator1).toBe('i')
+
+    // array
+    ast = parse('<ul><li v-for="[ foo ] in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo ]')
+
+    // multi-array
+    ast = parse('<ul><li v-for="[ foo, bar, baz ] in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo, bar, baz ]')
+
+    // array with paren
+    ast = parse('<ul><li v-for="([ foo ]) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo ]')
+
+    // multi-array with paren
+    ast = parse('<ul><li v-for="([ foo, bar, baz ]) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo, bar, baz ]')
+
+    // array with index
+    ast = parse('<ul><li v-for="([ foo ], i) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo ]')
+    expect(liAst.iterator1).toBe('i')
+
+    // array with key + index
+    ast = parse('<ul><li v-for="([ foo ], i, j) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo ]')
+    expect(liAst.iterator1).toBe('i')
+    expect(liAst.iterator2).toBe('j')
+
+    // multi-array with paren
+    ast = parse('<ul><li v-for="([ foo, bar, baz ]) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo, bar, baz ]')
+
+    // multi-array with index
+    ast = parse('<ul><li v-for="([ foo, bar, baz ], i) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo, bar, baz ]')
+    expect(liAst.iterator1).toBe('i')
+
+    // nested
+    ast = parse('<ul><li v-for="({ foo, bar: { baz }, qux: [ n ] }, i, j) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo, bar: { baz }, qux: [ n ] }')
+    expect(liAst.iterator1).toBe('i')
+    expect(liAst.iterator2).toBe('j')
+
+    // array nested
+    ast = parse('<ul><li v-for="([ foo, { bar }, baz ], i, j) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo, { bar }, baz ]')
+    expect(liAst.iterator1).toBe('i')
+    expect(liAst.iterator2).toBe('j')
+  })
+
   it('v-for directive invalid syntax', () => {
     parse('<ul><li v-for="item into items"></li></ul>', baseOptions)
     expect('Invalid v-for expression').toHaveBeenWarned()
@@ -395,6 +510,15 @@ describe('parser', () => {
     expect(ast.props[0].value).toBe('msg')
   })
 
+  // #6887
+  it('special case static attribute that must be props', () => {
+    const ast = parse('<video muted></video>', baseOptions)
+    expect(ast.attrs[0].name).toBe('muted')
+    expect(ast.attrs[0].value).toBe('""')
+    expect(ast.props[0].name).toBe('muted')
+    expect(ast.props[0].value).toBe('true')
+  })
+
   it('attribute with v-on', () => {
     const ast = parse('<input type="text" name="field1" :value="msg" @input="onInput">', baseOptions)
     expect(ast.events.input.value).toBe('onInput')
@@ -463,6 +587,14 @@ describe('parser', () => {
     expect(ast.props).toBeUndefined()
   })
 
+  it('use prop when prop modifier was explicitly declared', () => {
+    const ast = parse('<component is="textarea" :value.prop="val" />', baseOptions)
+    expect(ast.attrs).toBeUndefined()
+    expect(ast.props.length).toBe(1)
+    expect(ast.props[0].name).toBe('value')
+    expect(ast.props[0].value).toBe('val')
+  })
+
   it('pre/post transforms', () => {
     const options = extend({}, baseOptions)
     const spy1 = jasmine.createSpy('preTransform')
@@ -493,6 +625,21 @@ describe('parser', () => {
     const span = ast.children[1]
     expect(span.children[0].type).toBe(3)
     expect(span.children[0].text).toBe(' ')
+  })
+
+  // #5992
+  it('ignore the first newline in <pre> tag', function () {
+    const options = extend({}, baseOptions)
+    const ast = parse('<div><pre>\nabc</pre>\ndef<pre>\n\nabc</pre></div>', options)
+    const pre = ast.children[0]
+    expect(pre.children[0].type).toBe(3)
+    expect(pre.children[0].text).toBe('abc')
+    const text = ast.children[1]
+    expect(text.type).toBe(3)
+    expect(text.text).toBe('\ndef')
+    const pre2 = ast.children[2]
+    expect(pre2.children[0].type).toBe(3)
+    expect(pre2.children[0].text).toBe('\nabc')
   })
 
   it('forgivingly handle < in plain text', () => {
@@ -530,8 +677,7 @@ describe('parser', () => {
     expect(whitespace.children.length).toBe(1)
     expect(whitespace.children[0].type).toBe(3)
     // textarea is whitespace sensitive
-    expect(whitespace.children[0].text).toBe(`
-        <p>Test 1</p>
+    expect(whitespace.children[0].text).toBe(`        <p>Test 1</p>
         test2
       `)
 
@@ -547,5 +693,28 @@ describe('parser', () => {
     const options = extend({}, baseOptions)
     const ast = parse(`<script type="x/template">&gt;<foo>&lt;</script>`, options)
     expect(ast.children[0].text).toBe(`&gt;<foo>&lt;`)
+  })
+
+  it('should ignore comments', () => {
+    const options = extend({}, baseOptions)
+    const ast = parse(`<div>123<!--comment here--></div>`, options)
+    expect(ast.tag).toBe('div')
+    expect(ast.children.length).toBe(1)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('123')
+  })
+
+  it('should kept comments', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const ast = parse(`<div>123<!--comment here--></div>`, options)
+    expect(ast.tag).toBe('div')
+    expect(ast.children.length).toBe(2)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('123')
+    expect(ast.children[1].type).toBe(3) // parse comment with ASTText
+    expect(ast.children[1].isComment).toBe(true) // parse comment with ASTText
+    expect(ast.children[1].text).toBe('comment here')
   })
 })

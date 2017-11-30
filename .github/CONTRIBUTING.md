@@ -41,15 +41,17 @@ After cloning the repo, run:
 
 ``` bash
 $ npm install
+& npm run setup
 ```
 
-If you are on a Unix-like system, optionally install the Git pre-commit hook with:
+The `setup` script links two git hooks:
 
-``` bash
-$ npm run install:hooks
-```
+- `pre-commit`: runs ESLint on staged files.
+- `commit-msg`: validates commit message format (see below).
 
-This will run ESLint on changed files before each commit.
+### Committing Changes
+
+Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. If git hooks have been properly linked, commit messages will be automatically validated upon commit. It is recommended to use `npm run commit` instead of `git commit`, which provides an interactive CLI for generating proper commit messages.
 
 ### Commonly used NPM scripts
 
@@ -121,3 +123,24 @@ The default test script will do the following: lint with ESLint -> type check wi
 
   - **`shared`**: contains utilities shared across the entire codebase.
 
+  - **`types`**: contains TypeScript type definitions
+
+    - **`test`**: type definitions tests
+
+
+## Financial Contribution
+
+As a pure community-driven project without major corporate backing, we also welcome financial contributions via Patreon or OpenCollective.
+
+- [Become a backer or sponsor on Patreon](https://www.patreon.com/evanyou)
+- [Become a backer or sponsor on OpenCollective](https://opencollective.com/vuejs)
+
+### What's the difference between Patreon and OpenCollective?
+
+Funds donated via Patreon goes directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses by core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
+
+## Credits
+
+Thank you to all the people who have already contributed to vuejs!
+
+<a href="https://github.com/vuejs/vue/graphs/contributors"><img src="https://opencollective.com/vuejs/contributors.svg?width=890" /></a>

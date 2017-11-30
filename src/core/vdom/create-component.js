@@ -15,6 +15,7 @@ import {
 
 import {
   resolveAsyncComponent,
+  createAsyncPlaceholder,
   extractPropsFromVNodeData
 } from './helpers/index'
 
@@ -97,7 +98,7 @@ const hooksToMerge = Object.keys(componentVNodeHooks)
 
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
-  data?: VNodeData,
+  data: ?VNodeData,
   context: Component,
   children: ?Array<VNode>,
   tag?: string
@@ -123,20 +124,29 @@ export function createComponent (
   }
 
   // async component
+  let asyncFactory
   if (isUndef(Ctor.cid)) {
-    Ctor = resolveAsyncComponent(Ctor, baseCtor, context)
+    asyncFactory = Ctor
+    Ctor = resolveAsyncComponent(asyncFactory, baseCtor, context)
     if (Ctor === undefined) {
-      // return nothing if this is indeed an async component
-      // wait for the callback to trigger parent update.
-      return
+      // return a placeholder node for async component, which is rendered
+      // as a comment node but preserves all the raw information for the node.
+      // the information will be used for async server-rendering and hydration.
+      return createAsyncPlaceholder(
+        asyncFactory,
+        data,
+        context,
+        children,
+        tag
+      )
     }
   }
+
+  data = data || {}
 
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
   resolveConstructorOptions(Ctor)
-
-  data = data || {}
 
   // transform component v-model data into props & events
   if (isDef(data.model)) {
@@ -155,12 +165,19 @@ export function createComponent (
   // child component listeners instead of DOM listeners
   const listeners = data.on
   // replace with listeners with .native modifier
+  // so it gets processed during parent component patch.
   data.on = data.nativeOn
 
   if (isTrue(Ctor.options.abstract)) {
     // abstract components do not keep anything
-    // other than props & listeners
+    // other than props & listeners & slot
+
+    // work around flow
+    const slot = data.slot
     data = {}
+    if (slot) {
+      data.slot = slot
+    }
   }
 
   // merge component management hooks onto the placeholder node
@@ -171,7 +188,8 @@ export function createComponent (
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, context,
-    { Ctor, propsData, listeners, tag, children }
+    { Ctor, propsData, listeners, tag, children },
+    asyncFactory
   )
   return vnode
 }

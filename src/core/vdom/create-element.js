@@ -57,13 +57,28 @@ export function _createElement (
     )
     return createEmptyVNode()
   }
+  // object syntax in v-bind
+  if (isDef(data) && isDef(data.is)) {
+    tag = data.is
+  }
   if (!tag) {
     // in case of component :is set to falsy value
     return createEmptyVNode()
   }
+  // warn against non-primitive key
+  if (process.env.NODE_ENV !== 'production' &&
+    isDef(data) && isDef(data.key) && !isPrimitive(data.key)
+  ) {
+    warn(
+      'Avoid using non-primitive value as key, ' +
+      'use string/number value instead.',
+      context
+    )
+  }
   // support single function children as default scoped slot
   if (Array.isArray(children) &&
-      typeof children[0] === 'function') {
+    typeof children[0] === 'function'
+  ) {
     data = data || {}
     data.scopedSlots = { default: children[0] }
     children.length = 0
@@ -76,7 +91,7 @@ export function _createElement (
   let vnode, ns
   if (typeof tag === 'string') {
     let Ctor
-    ns = config.getTagNamespace(tag)
+    ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       vnode = new VNode(
@@ -107,17 +122,18 @@ export function _createElement (
   }
 }
 
-function applyNS (vnode, ns) {
+function applyNS (vnode, ns, force) {
   vnode.ns = ns
   if (vnode.tag === 'foreignObject') {
     // use default namespace inside foreignObject
-    return
+    ns = undefined
+    force = true
   }
   if (isDef(vnode.children)) {
     for (let i = 0, l = vnode.children.length; i < l; i++) {
       const child = vnode.children[i]
-      if (isDef(child.tag) && isUndef(child.ns)) {
-        applyNS(child, ns)
+      if (isDef(child.tag) && (isUndef(child.ns) || isTrue(force))) {
+        applyNS(child, ns, force)
       }
     }
   }

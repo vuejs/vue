@@ -272,6 +272,24 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
+  it('include (array)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive :include="['one']">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
   it('exclude (string)', done => {
     const vm = new Vue({
       template: `
@@ -295,6 +313,24 @@ describe('Component keep-alive', () => {
       template: `
         <div v-if="ok">
           <keep-alive :exclude="/^two$/">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
+  it('exclude (array)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive :exclude="['two']">
             <component :is="view"></component>
           </keep-alive>
         </div>
@@ -438,6 +474,213 @@ describe('Component keep-alive', () => {
       vm.view = 'two'
     }).then(() => {
       expect(vm.$el.textContent).toBe('two 2')
+    }).then(done)
+  })
+
+  it('max', done => {
+    const spyA = jasmine.createSpy()
+    const spyB = jasmine.createSpy()
+    const spyC = jasmine.createSpy()
+    const spyAD = jasmine.createSpy()
+    const spyBD = jasmine.createSpy()
+    const spyCD = jasmine.createSpy()
+
+    function assertCount (calls) {
+      expect([
+        spyA.calls.count(),
+        spyAD.calls.count(),
+        spyB.calls.count(),
+        spyBD.calls.count(),
+        spyC.calls.count(),
+        spyCD.calls.count()
+      ]).toEqual(calls)
+    }
+
+    const vm = new Vue({
+      template: `
+        <keep-alive max="2">
+          <component :is="n"></component>
+        </keep-alive>
+      `,
+      data: {
+        n: 'aa'
+      },
+      components: {
+        aa: {
+          template: '<div>a</div>',
+          created: spyA,
+          destroyed: spyAD
+        },
+        bb: {
+          template: '<div>bbb</div>',
+          created: spyB,
+          destroyed: spyBD
+        },
+        cc: {
+          template: '<div>ccc</div>',
+          created: spyC,
+          destroyed: spyCD
+        }
+      }
+    }).$mount()
+
+    assertCount([1, 0, 0, 0, 0, 0])
+    vm.n = 'bb'
+    waitForUpdate(() => {
+      assertCount([1, 0, 1, 0, 0, 0])
+      vm.n = 'cc'
+    }).then(() => {
+      // should prune A because max cache reached
+      assertCount([1, 1, 1, 0, 1, 0])
+      vm.n = 'bb'
+    }).then(() => {
+      // B should be reused, and made latest
+      assertCount([1, 1, 1, 0, 1, 0])
+      vm.n = 'aa'
+    }).then(() => {
+      // C should be pruned because B was used last so C is the oldest cached
+      assertCount([2, 1, 1, 0, 1, 1])
+    }).then(done)
+  })
+
+  it('should warn unknown component inside', () => {
+    new Vue({
+      template: `<keep-alive><foo/></keep-alive>`
+    }).$mount()
+    expect(`Unknown custom element: <foo>`).toHaveBeenWarned()
+  })
+
+  // #6938
+  it('should not cache anonymous component when include is specified', done => {
+    const Foo = {
+      name: 'foo',
+      template: `<div>foo</div>`,
+      created: jasmine.createSpy('foo')
+    }
+
+    const Bar = {
+      template: `<div>bar</div>`,
+      created: jasmine.createSpy('bar')
+    }
+
+    const Child = {
+      functional: true,
+      render (h, ctx) {
+        return h(ctx.props.view ? Foo : Bar)
+      }
+    }
+
+    const vm = new Vue({
+      template: `
+        <keep-alive include="foo">
+          <child :view="view"></child>
+        </keep-alive>
+      `,
+      data: {
+        view: true
+      },
+      components: { Child }
+    }).$mount()
+
+    function assert (foo, bar) {
+      expect(Foo.created.calls.count()).toBe(foo)
+      expect(Bar.created.calls.count()).toBe(bar)
+    }
+
+    expect(vm.$el.textContent).toBe('foo')
+    assert(1, 0)
+    vm.view = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('bar')
+      assert(1, 1)
+      vm.view = true
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('foo')
+      assert(1, 1)
+      vm.view = false
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('bar')
+      assert(1, 2)
+    }).then(done)
+  })
+
+  it('should cache anonymous components if include is not specified', done => {
+    const Foo = {
+      template: `<div>foo</div>`,
+      created: jasmine.createSpy('foo')
+    }
+
+    const Bar = {
+      template: `<div>bar</div>`,
+      created: jasmine.createSpy('bar')
+    }
+
+    const Child = {
+      functional: true,
+      render (h, ctx) {
+        return h(ctx.props.view ? Foo : Bar)
+      }
+    }
+
+    const vm = new Vue({
+      template: `
+        <keep-alive>
+          <child :view="view"></child>
+        </keep-alive>
+      `,
+      data: {
+        view: true
+      },
+      components: { Child }
+    }).$mount()
+
+    function assert (foo, bar) {
+      expect(Foo.created.calls.count()).toBe(foo)
+      expect(Bar.created.calls.count()).toBe(bar)
+    }
+
+    expect(vm.$el.textContent).toBe('foo')
+    assert(1, 0)
+    vm.view = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('bar')
+      assert(1, 1)
+      vm.view = true
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('foo')
+      assert(1, 1)
+      vm.view = false
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('bar')
+      assert(1, 1)
+    }).then(done)
+  })
+
+  // #7105
+  it('should not destroy active instance when pruning cache', done => {
+    const Foo = {
+      template: `<div>foo</div>`,
+      destroyed: jasmine.createSpy('destroyed')
+    }
+    const vm = new Vue({
+      template: `
+        <div>
+          <keep-alive :include="include">
+            <foo/>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        include: ['foo']
+      },
+      components: { Foo }
+    }).$mount()
+    // condition: a render where a previous component is reused
+    vm.include = ['foo']
+    waitForUpdate(() => {
+      vm.include = ['']
+    }).then(() => {
+      expect(Foo.destroyed).not.toHaveBeenCalled()
     }).then(done)
   })
 
@@ -825,6 +1068,90 @@ describe('Component keep-alive', () => {
           '<div class="test">foo</div>'
         )
       }).then(done)
+    })
+
+    it('async components with transition-mode out-in', done => {
+      const barResolve = jasmine.createSpy('bar resolved')
+      let next
+      const foo = (resolve) => {
+        setTimeout(() => {
+          resolve(one)
+          Vue.nextTick(next)
+        }, duration / 2)
+      }
+      const bar = (resolve) => {
+        setTimeout(() => {
+          resolve(two)
+          barResolve()
+        }, duration / 2)
+      }
+      components = {
+        foo,
+        bar
+      }
+      const vm = new Vue({
+        template: `<div>
+          <transition name="test" mode="out-in" @after-enter="afterEnter" @after-leave="afterLeave">
+            <keep-alive>
+              <component :is="view" class="test"></component>
+            </keep-alive>
+          </transition>
+        </div>`,
+        data: {
+          view: 'foo'
+        },
+        components,
+        methods: {
+          afterEnter () {
+            next()
+          },
+          afterLeave () {
+            next()
+          }
+        }
+      }).$mount(el)
+      expect(vm.$el.textContent).toBe('')
+      next = () => {
+        assertHookCalls(one, [1, 1, 1, 0, 0])
+        assertHookCalls(two, [0, 0, 0, 0, 0])
+        waitForUpdate(() => {
+          expect(vm.$el.innerHTML).toBe(
+            '<div class="test test-enter test-enter-active">one</div>'
+          )
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.innerHTML).toBe(
+            '<div class="test test-enter-active test-enter-to">one</div>'
+          )
+        }).thenWaitFor(_next => { next = _next }).then(() => {
+          // foo afterEnter get called
+          expect(vm.$el.innerHTML).toBe('<div class="test">one</div>')
+          vm.view = 'bar'
+        }).thenWaitFor(nextFrame).then(() => {
+          assertHookCalls(one, [1, 1, 1, 1, 0])
+          assertHookCalls(two, [0, 0, 0, 0, 0])
+          expect(vm.$el.innerHTML).toBe(
+            '<div class="test test-leave-active test-leave-to">one</div><!---->'
+          )
+        }).thenWaitFor(_next => { next = _next }).then(() => {
+          // foo afterLeave get called
+          // and bar has already been resolved before afterLeave get called
+          expect(barResolve.calls.count()).toBe(1)
+          expect(vm.$el.innerHTML).toBe('<!---->')
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.innerHTML).toBe(
+            '<div class="test test-enter test-enter-active">two</div>'
+          )
+          assertHookCalls(one, [1, 1, 1, 1, 0])
+          assertHookCalls(two, [1, 1, 1, 0, 0])
+        }).thenWaitFor(nextFrame).then(() => {
+          expect(vm.$el.innerHTML).toBe(
+            '<div class="test test-enter-active test-enter-to">two</div>'
+          )
+        }).thenWaitFor(_next => { next = _next }).then(() => {
+          // bar afterEnter get called
+          expect(vm.$el.innerHTML).toBe('<div class="test">two</div>')
+        }).then(done)
+      }
     })
   }
 })

@@ -437,7 +437,7 @@ if (!isIE9) {
         expect(enterSpy).toHaveBeenCalled()
         expect(vm.$el.innerHTML).toBe('<div class="nope-enter nope-enter-active">foo</div>')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.innerHTML).toMatch(/<div( class="")?>foo<\/div>/)
+        expect(vm.$el.innerHTML).toBe('<div>foo</div>')
       }).then(done)
     })
 
@@ -1080,6 +1080,48 @@ if (!isIE9) {
           expect(`<transition> explicit enter duration is NaN`).toHaveBeenWarned()
         }).then(done)
       })
+    })
+
+    // #6687
+    it('transition on child components with empty root node', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition mode="out-in">
+              <component class="test" :is="view"></component>
+            </transition>
+          </div>
+        `,
+        data: { view: 'one' },
+        components: {
+          'one': {
+            template: '<div v-if="false">one</div>'
+          },
+          'two': {
+            template: '<div>two</div>'
+          }
+        }
+      }).$mount(el)
+
+      // should not apply transition on initial render by default
+      expect(vm.$el.innerHTML).toBe('<!---->')
+      vm.view = 'two'
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<div class="test v-enter v-enter-active">two</div>')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.children[0].className).toBe('test')
+        vm.view = 'one'
+      }).then(() => {
+        // incoming comment node is appended instantly because it doesn't have
+        // data and therefore doesn't go through the transition module.
+        expect(vm.$el.innerHTML).toBe('<div class="test v-leave v-leave-active">two</div><!---->')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe('<!---->')
+      }).then(done)
     })
   })
 }

@@ -14,45 +14,51 @@ declare type CompilerOptions = {
   preserveWhitespace?: boolean;
   isFromDOM?: boolean;
   shouldDecodeTags?: boolean;
-  shouldDecodeNewlines?: boolean;
+  shouldDecodeNewlines?:  boolean;
+  shouldDecodeNewlinesForHref?: boolean;
+
+  // for ssr optimization compiler
+  scopeId?: string;
 
   // runtime user-configurable
   delimiters?: [string, string]; // template delimiters
-}
+
+  // allow user kept comments
+  comments?: boolean
+};
 
 declare type CompiledResult = {
   ast: ?ASTElement;
   render: string;
   staticRenderFns: Array<string>;
+  stringRenderFns?: Array<string>;
   errors?: Array<string>;
   tips?: Array<string>;
-}
-
-declare type CompiledFunctionResult = {
-  render: Function;
-  staticRenderFns: Array<Function>;
-}
+};
 
 declare type ModuleOptions = {
-  preTransformNode: (el: ASTElement) => void;
-  transformNode: (el: ASTElement) => void; // transform an element's AST node
+  // returning an ASTElement from pre/transforms replaces the element
+  preTransformNode: (el: ASTElement) => ?ASTElement;
+  transformNode: (el: ASTElement) => ?ASTElement;
+  // cannot return replacement in postTransform because tree is already finalized
   postTransformNode: (el: ASTElement) => void;
   genData: (el: ASTElement) => string; // generate extra data string for an element
   transformCode?: (el: ASTElement, code: string) => string; // further transform generated code for an element
   staticKeys?: Array<string>; // AST properties to be considered static
-}
+};
 
-declare type ASTModifiers = { [key: string]: boolean }
-declare type ASTIfConditions = Array<{ exp: ?string; block: ASTElement }>
+declare type ASTModifiers = { [key: string]: boolean };
+declare type ASTIfCondition = { exp: ?string; block: ASTElement };
+declare type ASTIfConditions = Array<ASTIfCondition>;
 
 declare type ASTElementHandler = {
   value: string;
   modifiers: ?ASTModifiers;
-}
+};
 
 declare type ASTElementHandlers = {
   [key: string]: ASTElementHandler | Array<ASTElementHandler>;
-}
+};
 
 declare type ASTDirective = {
   name: string;
@@ -60,9 +66,9 @@ declare type ASTDirective = {
   value: string;
   arg: ?string;
   modifiers: ?ASTModifiers;
-}
+};
 
-declare type ASTNode = ASTElement | ASTText | ASTExpression
+declare type ASTNode = ASTElement | ASTText | ASTExpression;
 
 declare type ASTElement = {
   type: 1;
@@ -71,6 +77,8 @@ declare type ASTElement = {
   attrsMap: { [key: string]: string | null };
   parent: ASTElement | void;
   children: Array<ASTNode>;
+
+  processed?: true;
 
   static?: boolean;
   staticRoot?: boolean;
@@ -131,23 +139,32 @@ declare type ASTElement = {
   once?: true;
   onceProcessed?: boolean;
   wrapData?: (code: string) => string;
+  wrapListeners?: (code: string) => string;
+
+  // 2.4 ssr optimization
+  ssrOptimizability?: number;
 
   // weex specific
   appendAsTree?: boolean;
-}
+};
 
 declare type ASTExpression = {
   type: 2;
   expression: string;
   text: string;
   static?: boolean;
-}
+  // 2.4 ssr optimization
+  ssrOptimizability?: number;
+};
 
 declare type ASTText = {
   type: 3;
   text: string;
   static?: boolean;
-}
+  isComment?: boolean;
+  // 2.4 ssr optimization
+  ssrOptimizability?: number;
+};
 
 // SFC-parser related declarations
 
@@ -166,7 +183,7 @@ declare type SFCCustomBlock = {
   end?: number;
   src?: string;
   attrs: {[attribute:string]: string};
-}
+};
 
 declare type SFCBlock = {
   type: string;
@@ -177,4 +194,4 @@ declare type SFCBlock = {
   src?: string;
   scoped?: boolean;
   module?: string | boolean;
-}
+};

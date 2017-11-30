@@ -65,25 +65,15 @@ var batches = [
   },
   // mobile
   {
-    sl_ios_safari_8: {
-      base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '8.4'
-    },
     sl_ios_safari_9: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      version: '9.3'
+      version: '10.3'
     },
-    sl_android_4_4: {
+    sl_android_6_0: {
       base: 'SauceLabs',
       browserName: 'android',
-      version: '4.4'
-    },
-    sl_android_5_1: {
-      base: 'SauceLabs',
-      browserName: 'android',
-      version: '5.1'
+      version: '6.0'
     }
   }
 ]
