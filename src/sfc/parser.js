@@ -1,7 +1,7 @@
 /* @flow */
 
 import deindent from 'de-indent'
-import { parseHTML } from 'compiler/parser/html-parser'
+import { parseSFC } from 'compiler/parser/html-parser'
 import { makeMap } from 'shared/util'
 
 const splitRE = /\r?\n/g
@@ -107,7 +107,7 @@ export function parseComponent (
     }
   }
 
-  parseHTML(content, {
+  parseSFC(content, {
     start,
     end
   })

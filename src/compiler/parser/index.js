@@ -1,7 +1,7 @@
 /* @flow */
 
 import he from 'he'
-import { parseHTML } from './html-parser'
+import { parseSFC } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { cached, no, camelize } from 'shared/util'
@@ -84,7 +84,7 @@ export function parse (
     }
   }
 
-  parseHTML(template, {
+  parseSFC(template, {
     warn,
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
