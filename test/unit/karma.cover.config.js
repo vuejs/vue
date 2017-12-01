@@ -22,7 +22,7 @@ module.exports = function (config) {
     plugins: [['istanbul', {
       exclude: [
         'test/',
-        'src/compiler/parser/html-parser.js',
+        'src/compiler/parser/sfc-parser.js',
         'src/core/instance/proxy.js',
         'src/sfc/deindent.js'
       ]

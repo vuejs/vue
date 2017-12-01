@@ -1,7 +1,7 @@
 /* @flow */
 
 import deindent from 'de-indent'
-import { parseSFC } from 'compiler/parser/html-parser'
+import { parseSFC } from 'compiler/parser/sfc-parser'
 import { makeMap } from 'shared/util'
 
 const splitRE = /\r?\n/g

@@ -1,7 +1,7 @@
 /* @flow */
 
 import he from 'he'
-import { parseSFC } from './html-parser'
+import { parseSFC } from './sfc-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { cached, no, camelize } from 'shared/util'
