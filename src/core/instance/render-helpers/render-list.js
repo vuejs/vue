@@ -25,13 +25,27 @@ export function renderList (
       ret[i] = render(i + 1, i)
     }
   } else if (isObject(val)) {
-    keys = Object.keys(val)
-    ret = new Array(keys.length)
-    for (i = 0, l = keys.length; i < l; i++) {
-      key = keys[i]
-      ret[i] = render(val[key], key, i)
+    keys = Object.keys(val);
+    if (keys.length === 0 && val.toString().indexOf('Iterator') > -1) {
+      ret = new Array()
+      i = 0;
+      while (true) {
+        if (typeof val.next !== 'function') {
+          break;
+        }
+        var next = val.next()
+        if (next.done) {
+          break;
+        }
+        ret.push(render(next.value, i++));
+      }
+    } else {
+      ret = new Array(keys.length);
+      for (i = 0, l = keys.length; i < l; i++) {
+        key = keys[i];
+        ret[i] = render(val[key], key, i);
+      }
     }
-  }
   if (isDef(ret)) {
     (ret: any)._isVList = true
   }
