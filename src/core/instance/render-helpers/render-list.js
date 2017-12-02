@@ -46,6 +46,7 @@ export function renderList (
         ret[i] = render(val[key], key, i);
       }
     }
+  }
   if (isDef(ret)) {
     (ret: any)._isVList = true
   }
