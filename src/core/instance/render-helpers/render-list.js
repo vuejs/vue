@@ -27,7 +27,7 @@ export function renderList (
   } else if (isObject(val)) {
     keys = Object.keys(val)
     if (keys.length === 0 && val.toString().indexOf('Iterator') > -1) {
-      ret = new Array()
+      ret = []
       i = 0
       while (true) {
         if (typeof val.next !== 'function') {
