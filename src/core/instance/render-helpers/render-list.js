@@ -33,7 +33,7 @@ export function renderList (
         if (typeof val.next !== 'function') {
           break
         }
-        let next = val.next()
+        const next = val.next()
         if (next.done) {
           break
         }
