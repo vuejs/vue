@@ -4,6 +4,7 @@ import { warn } from 'core/util/debug'
 import { handleError } from 'core/util/error'
 import { RECYCLE_LIST_MARKER } from 'weex/util/index'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
+import { resolveVirtualComponent } from './virtual-component'
 
 export function isRecyclableComponent (vnode: VNodeWithData): boolean {
   return vnode.data.attrs
@@ -14,6 +15,7 @@ export function isRecyclableComponent (vnode: VNodeWithData): boolean {
 export function renderRecyclableComponentTemplate (vnode: MountedComponentVNode): VNode {
   // $flow-disable-line
   delete vnode.data.attrs[RECYCLE_LIST_MARKER]
+  resolveVirtualComponent(vnode)
   const vm = createComponentInstanceForVnode(vnode)
   const render = (vm.$options: any)['@render']
   if (render) {

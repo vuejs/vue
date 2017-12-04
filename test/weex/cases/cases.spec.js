@@ -4,6 +4,8 @@ import {
   compileVue,
   compileWithDeps,
   createInstance,
+  addTaskHook,
+  resetTaskHook,
   getRoot,
   getEvents,
   fireEvent
@@ -19,6 +21,7 @@ function createRenderTestCase (name) {
       const instance = createInstance(id, code)
       setTimeout(() => {
         expect(getRoot(instance)).toEqual(target)
+        instance.$destroy()
         done()
       }, 50)
     }).catch(done.fail)
@@ -40,6 +43,7 @@ function createEventTestCase (name) {
         fireEvent(instance, event.ref, event.type, {})
         setTimeout(() => {
           expect(getRoot(instance)).toEqual(after)
+          instance.$destroy()
           done()
         }, 50)
       }, 50)
@@ -79,6 +83,7 @@ describe('Usage', () => {
         setTimeout(() => {
           const target = readObject('recycle-list/components/stateless.vdom.js')
           expect(getRoot(instance)).toEqual(target)
+          instance.$destroy()
           done()
         }, 50)
       }).catch(done.fail)
@@ -94,27 +99,87 @@ describe('Usage', () => {
         setTimeout(() => {
           const target = readObject('recycle-list/components/stateless-with-props.vdom.js')
           expect(getRoot(instance)).toEqual(target)
+          instance.$destroy()
+          done()
+        }, 50)
+      }).catch(done.fail)
+    })
+
+    it('multi stateless components', done => {
+      compileWithDeps('recycle-list/components/stateless-multi-components.vue', [{
+        name: 'banner',
+        path: 'recycle-list/components/banner.vue'
+      }, {
+        name: 'poster',
+        path: 'recycle-list/components/poster.vue'
+      }, {
+        name: 'footer',
+        path: 'recycle-list/components/footer.vue'
+      }]).then(code => {
+        const id = String(Date.now() * Math.random())
+        const instance = createInstance(id, code)
+        setTimeout(() => {
+          const target = readObject('recycle-list/components/stateless-multi-components.vdom.js')
+          expect(getRoot(instance)).toEqual(target)
+          instance.$destroy()
           done()
         }, 50)
       }).catch(done.fail)
     })
 
     it('stateful component', done => {
+      const tasks = []
+      addTaskHook((_, task) => tasks.push(task))
       compileWithDeps('recycle-list/components/stateful.vue', [{
         name: 'counter',
         path: 'recycle-list/components/counter.vue'
       }]).then(code => {
         const id = String(Date.now() * Math.random())
         const instance = createInstance(id, code)
+        expect(tasks.length).toEqual(7)
+        tasks.length = 0
+        instance.$triggerHook(2, 'create', ['component-1'])
+        instance.$triggerHook(2, 'create', ['component-2'])
+        instance.$triggerHook('component-1', 'attach')
+        instance.$triggerHook('component-2', 'attach')
+        expect(tasks.length).toEqual(2)
+        expect(tasks[0].method).toEqual('updateComponentData')
+        // expect(tasks[0].args).toEqual([{ count: 42 }])
+        expect(tasks[1].method).toEqual('updateComponentData')
+        // expect(tasks[1].args).toEqual([{ count: 42 }])
         setTimeout(() => {
           const target = readObject('recycle-list/components/stateful.vdom.js')
           expect(getRoot(instance)).toEqual(target)
           const event = getEvents(instance)[0]
+          tasks.length = 0
           fireEvent(instance, event.ref, event.type, {})
           setTimeout(() => {
-            expect(getRoot(instance)).toEqual(target)
+            // expect(tasks.length).toEqual(1)
+            // expect(tasks[0]).toEqual({
+            //   module: 'dom',
+            //   method: 'updateComponentData',
+            //   args: [{ count: 43 }]
+            // })
+            instance.$destroy()
+            resetTaskHook()
             done()
           })
+        }, 50)
+      }).catch(done.fail)
+    })
+
+    it('stateful component with v-model', done => {
+      compileWithDeps('recycle-list/components/stateful-v-model.vue', [{
+        name: 'editor',
+        path: 'recycle-list/components/editor.vue'
+      }]).then(code => {
+        const id = String(Date.now() * Math.random())
+        const instance = createInstance(id, code)
+        setTimeout(() => {
+          const target = readObject('recycle-list/components/stateful-v-model.vdom.js')
+          expect(getRoot(instance)).toEqual(target)
+          instance.$destroy()
+          done()
         }, 50)
       }).catch(done.fail)
     })

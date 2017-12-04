@@ -48,7 +48,7 @@ declare interface Component {
   $createElement: (tag?: string | Component, data?: Object, children?: VNodeChildren) => VNode;
 
   // private properties
-  _uid: number;
+  _uid: number | string;
   _name: string; // this only exists in dev mode
   _isVue: true;
   _self: Component;
