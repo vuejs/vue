@@ -161,6 +161,9 @@ export function createInstance (id, code, ...args) {
   const instance = context.createInstance(id, `// { "framework": "Vue" }\n${code}`, ...args)
   instance.$refresh = (data) => context.refreshInstance(id, data)
   instance.$destroy = () => context.destroyInstance(id)
+  instance.$triggerHook = (id, hook, args) => {
+    instance.document.taskCenter.triggerHook(id, 'lifecycle', hook, { args })
+  }
   return instance
 }
 
@@ -196,4 +199,22 @@ export function checkRefresh (instance, data, checker) {
       res()
     })
   })
+}
+
+export function addTaskHook (hook) {
+  global.callNative = function callNative (id, tasks) {
+    if (Array.isArray(tasks) && typeof hook === 'function') {
+      tasks.forEach(task => {
+        hook(id, {
+          module: task.module,
+          method: task.method,
+          args: Array.from(task.args)
+        })
+      })
+    }
+  }
+}
+
+export function resetTaskHook () {
+  delete global.callNative
 }
