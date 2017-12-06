@@ -107,7 +107,7 @@ describe('Options data', () => {
     expect(vm.a).toBe(1)
   })
 
-  it('should called with this', () => {
+  it('should be called with this', () => {
     const vm = new Vue({
       template: '<div><child></child></div>',
       provide: { foo: 1 },
@@ -124,7 +124,7 @@ describe('Options data', () => {
     expect(vm.$el.innerHTML).toBe('<span>foo:1</span>')
   })
 
-  it('should called with this when merged', () => {
+  it('should be called with vm as first argument when merged', () => {
     const superComponent = {
       data: ({ foo }) => ({ ext: 'ext:' + foo })
     }
