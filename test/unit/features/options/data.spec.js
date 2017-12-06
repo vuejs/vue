@@ -123,4 +123,32 @@ describe('Options data', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>foo:1</span>')
   })
+
+  it('should called with this when merged', () => {
+    const superComponent = {
+      data: ({ foo }) => ({ ext: 'ext:' + foo })
+    }
+    const mixins = [
+      {
+        data: ({ foo }) => ({ mixin1: 'm1:' + foo })
+      },
+      {
+        data: ({ foo }) => ({ mixin2: 'm2:' + foo })
+      }
+    ]
+    const vm = new Vue({
+      template: '<div><child></child></div>',
+      provide: { foo: 1 },
+      components: {
+        child: {
+          extends: superComponent,
+          mixins,
+          template: '<span>{{bar}}-{{ext}}-{{mixin1}}-{{mixin2}}</span>',
+          inject: ['foo'],
+          data: ({ foo }) => ({ bar: 'foo:' + foo })
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<span>foo:1-ext:1-m1:1-m2:1</span>')
+  })
 })
