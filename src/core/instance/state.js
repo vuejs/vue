@@ -49,7 +49,7 @@ export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
   if (opts.props) initProps(vm, opts.props)
-  if (opts.methods) initMethods(vm, opts.methods)
+  if (opts.methods && Object.keys(opts.methods).length) initMethods(vm, opts.methods)
   if (opts.data) {
     initData(vm)
   } else {
