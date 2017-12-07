@@ -18,6 +18,13 @@ type PropOptions = {
   validator: ?Function
 };
 
+const propOptionsNames = [
+  'type',
+  'default',
+  'required',
+  'validator'
+]
+
 export function validateProp (
   key: string,
   propOptions: Object,
@@ -85,6 +92,24 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
 }
 
 /**
+ * Assert whether a prop object keys are valid.
+ */
+function assertPropObject (
+  prop: Object,
+  key: string,
+  vm: ?Component
+) {
+  Object.keys(prop)
+    .filter(name => propOptionsNames.indexOf(name) === -1)
+    .forEach(name => {
+      warn(
+        'Invalid key "' + name + '" in validation rules object for prop "' + key + '".',
+        vm
+      )
+    })
+}
+
+/**
  * Assert whether a prop is valid.
  */
 function assertProp (
@@ -94,6 +119,7 @@ function assertProp (
   vm: ?Component,
   absent: boolean
 ) {
+  assertPropObject(prop, name, vm)
   if (prop.required && absent) {
     warn(
       'Missing required prop: "' + name + '"',
