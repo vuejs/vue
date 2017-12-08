@@ -102,7 +102,7 @@ export function createBundleRendererCreator (
           cb(err)
         }).then(app => {
           if (app) {
-            renderer.renderToString(app, context, (err, res) => {
+            renderer.renderToString(app, context, (err = null, res) => {
               rewriteErrorTrace(err, maps)
               cb(err, res)
             })

@@ -78,11 +78,11 @@ export function createRenderer ({
         return false
       }, cb)
       try {
-        render(component, write, context, () => {
+        render(component, write, context, (err) => {
           if (template) {
             result = templateRenderer.renderSync(result, context)
           }
-          cb(null, result)
+          cb(err, result)
         })
       } catch (e) {
         cb(e)
