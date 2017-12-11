@@ -2,7 +2,7 @@
 
 import deindent from 'de-indent'
 import { parseHTML } from 'compiler/parser/html-parser'
-import { makeMap } from 'shared/util'
+import { makeMap, extend } from 'shared/util'
 
 const splitRE = /\r?\n/g
 const replaceRE = /./g
@@ -28,6 +28,9 @@ export function parseComponent (
   }
   let depth = 0
   let currentBlock: ?(SFCBlock | SFCCustomBlock) = null
+  options = extend({
+    deindent: true
+  }, options)
 
   function start (
     tag: string,
@@ -83,7 +86,10 @@ export function parseComponent (
   function end (tag: string, start: number, end: number) {
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
-      let text = deindent(content.slice(currentBlock.start, currentBlock.end))
+      let text = content.slice(currentBlock.start, currentBlock.end)
+      if (options.deindent) {
+        text = deindent(text)
+      }
       // pad content so that linters and pre-processors can output correct
       // line numbers in errors and warnings
       if (currentBlock.type !== 'template' && options.pad) {
