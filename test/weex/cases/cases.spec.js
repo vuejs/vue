@@ -136,7 +136,7 @@ describe('Usage', () => {
       }]).then(code => {
         const id = String(Date.now() * Math.random())
         const instance = createInstance(id, code)
-        expect(tasks.length).toEqual(7)
+        expect(tasks.length).toEqual(3)
         tasks.length = 0
         instance.$triggerHook(2, 'create', ['component-1'])
         instance.$triggerHook(2, 'create', ['component-2'])
