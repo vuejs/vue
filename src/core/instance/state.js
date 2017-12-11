@@ -23,6 +23,7 @@ import {
   handleError,
   nativeWatch,
   validateProp,
+  assertPropObject,
   isPlainObject,
   isServerRendering,
   isReservedAttribute
@@ -71,6 +72,9 @@ function initProps (vm: Component, propsOptions: Object) {
   // root instance props should be converted
   observerState.shouldConvert = isRoot
   for (const key in propsOptions) {
+    if (process.env.NODE_ENV !== 'production') {
+      assertPropObject(propsOptions[key], key, vm)
+    }
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */

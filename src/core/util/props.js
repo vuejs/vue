@@ -94,7 +94,7 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
 /**
  * Assert whether a prop object keys are valid.
  */
-function assertPropObject (
+export function assertPropObject (
   prop: Object,
   key: string,
   vm: ?Component
@@ -119,7 +119,6 @@ function assertProp (
   vm: ?Component,
   absent: boolean
 ) {
-  assertPropObject(prop, name, vm)
   if (prop.required && absent) {
     warn(
       'Missing required prop: "' + name + '"',
