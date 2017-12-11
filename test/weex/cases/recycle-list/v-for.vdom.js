@@ -1,6 +1,7 @@
 ({
   type: 'recycle-list',
   attr: {
+    append: 'tree',
     listData: [
       { type: 'A' },
       { type: 'A' }
@@ -10,7 +11,7 @@
   },
   children: [{
     type: 'cell-slot',
-    attr: { templateType: 'A' },
+    attr: { append: 'tree', templateType: 'A' },
     children: [{
       type: 'div',
       attr: {

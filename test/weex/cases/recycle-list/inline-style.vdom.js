@@ -1,6 +1,7 @@
 ({
   type: 'recycle-list',
   attr: {
+    append: 'tree',
     listData: [
       { type: 'A', color: '#606060' },
       { type: 'A', color: '#E5E5E5' }
@@ -10,7 +11,7 @@
   },
   children: [{
     type: 'cell-slot',
-    attr: { templateType: 'A' },
+    attr: { append: 'tree', templateType: 'A' },
     style: {
       backgroundColor: '#FF6600'
     },

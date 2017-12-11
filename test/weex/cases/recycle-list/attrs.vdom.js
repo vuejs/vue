@@ -1,6 +1,7 @@
 ({
   type: 'recycle-list',
   attr: {
+    append: 'tree',
     listData: [
       { type: 'A', count: 1, source: 'http://whatever.com/x.png' },
       { type: 'A', count: 2, source: 'http://whatever.com/y.png' },
@@ -11,7 +12,7 @@
   },
   children: [{
     type: 'cell-slot',
-    attr: { templateType: 'A' },
+    attr: { append: 'tree', templateType: 'A' },
     children: [{
       type: 'image',
       attr: {
