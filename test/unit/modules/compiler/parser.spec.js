@@ -123,7 +123,7 @@ describe('parser', () => {
   it('not warn 3 root elements with v-if, v-else-if and v-else', () => {
     parse('<div v-if="1"></div><div v-else-if="2"></div><div v-else></div>', baseOptions)
     expect('Component template should contain exactly one root element')
-        .not.toHaveBeenWarned()
+      .not.toHaveBeenWarned()
   })
 
   it('not warn 2 root elements with v-if and v-else on separate lines', () => {
@@ -142,7 +142,7 @@ describe('parser', () => {
       <div v-else></div>
     `, baseOptions)
     expect('Component template should contain exactly one root element')
-        .not.toHaveBeenWarned()
+      .not.toHaveBeenWarned()
 
     parse(`
       <div v-if="1"></div>
@@ -152,7 +152,7 @@ describe('parser', () => {
       <div v-else></div>
     `, baseOptions)
     expect('Component template should contain exactly one root element')
-        .not.toHaveBeenWarned()
+      .not.toHaveBeenWarned()
   })
 
   it('generate correct ast for 2 root elements with v-if and v-else on separate lines', () => {
@@ -219,7 +219,7 @@ describe('parser', () => {
   it('warn 2 root elements with v-if and v-else-if with v-for on 2nd', () => {
     parse('<div v-if="1"></div><div v-else-if="2" v-for="i in [1]"></div>', baseOptions)
     expect('Cannot use v-for on stateful component root element because it renders multiple elements')
-        .toHaveBeenWarned()
+      .toHaveBeenWarned()
   })
 
   it('warn <template> as root element', () => {
