@@ -353,7 +353,7 @@ function genScopedSlot (
         ? `${el.if}?${genChildren(el, state) || 'undefined'}:undefined`
         : genChildren(el, state) || 'undefined'
       : genElement(el, state)
-  }}`
+    }}`
   return `{key:${key},fn:${fn}}`
 }
 
