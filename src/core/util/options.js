@@ -248,13 +248,24 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
  */
 function checkComponents (options: Object) {
   for (const key in options.components) {
-    const lower = key.toLowerCase()
-    if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
-      warn(
-        'Do not use built-in or reserved HTML elements as component ' +
-        'id: ' + key
-      )
-    }
+    validateComponentName(key)
+  }
+}
+
+export function validateComponentName (name: string) {
+  if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+    warn(
+      'Invalid component name: "' + name + '". Component names ' +
+      'can only contain alphanumeric characters and the hyphen, ' +
+      'and must start with a letter.'
+    )
+  }
+  const lower = name.toLowerCase()
+  if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
+    warn(
+      'Do not use built-in or reserved HTML elements as component ' +
+      'id: ' + name
+    )
   }
 }
 
