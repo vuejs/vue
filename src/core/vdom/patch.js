@@ -57,6 +57,16 @@ function sameInputType (a, b) {
   return typeA === typeB || isTextInputType(typeA) && isTextInputType(typeB)
 }
 
+function plainNodeWithComponent (a) {
+  let i
+  const { children } = a
+  if (isDef(a.componentInstance) || !isDef(children)) return false
+  for (i = 0; i < children.length; i++) {
+    if (isDef(children[i].componentInstance)) return true
+  }
+  return false
+}
+
 function createKeyToOldIdx (children, beginIdx, endIdx) {
   let i, key
   const map = {}
@@ -456,7 +466,7 @@ export function createPatchFunction (backend) {
   function findIdxInOld (node, oldCh, start, end) {
     for (let i = start; i < end; i++) {
       const c = oldCh[i]
-      if (isDef(c) && sameVnode(node, c)) return i
+      if (isDef(c) && sameVnode(node, c) && (c === node || !plainNodeWithComponent(c))) return i
     }
   }
 

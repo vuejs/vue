@@ -1,5 +1,7 @@
 import { patch } from 'web/runtime/patch'
 import VNode, { createEmptyVNode } from 'core/vdom/vnode'
+import Vue from 'vue'
+import { createComponent } from 'core/vdom/create-component'
 
 function prop (name) {
   return obj => { return obj[name] }
@@ -504,6 +506,39 @@ describe('vdom patch: children', () => {
 
     root = patch(vnode1, vnode2)
     const postPatch = root.childNodes[1]
+
+    expect(postPatch).toBe(original)
+  })
+
+  // #6659
+  it('should create a new static node instead of reusing a static node with child component', () => {
+    const parent = new Vue()
+    const componentNode = createComponent({ template: '<div>Hello</div>' }, {}, parent)
+    const parentDiv = new VNode('div', {}, [
+      componentNode
+    ])
+
+    const vnode1 = new VNode('div', {}, [
+      createEmptyVNode(),
+      new VNode('p', {}),
+      parentDiv,
+      new VNode('p', {}),
+      createEmptyVNode()
+    ])
+
+    const vnode2 = new VNode('div', {}, [
+      new VNode('div', {}),
+      new VNode('p', {}),
+      parentDiv,
+      new VNode('p', {}),
+      new VNode('div', {})
+    ])
+
+    let root = patch(null, vnode1)
+    const original = root.childNodes[2]
+
+    root = patch(vnode1, vnode2)
+    const postPatch = root.childNodes[2]
 
     expect(postPatch).toBe(original)
   })
