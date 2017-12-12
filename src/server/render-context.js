@@ -25,8 +25,8 @@ export class RenderContext {
   renderStates: Array<RenderState>;
   write: (text: string, next: Function) => void;
   renderNode: (node: VNode, isRoot: boolean, context: RenderContext) => void;
-  next: () => void;
-  done: () => void;
+  next: (err: ?Error) => void;
+  done: (err: ?Error) => void;
 
   modules: Array<(node: VNode) => ?string>;
   directives: Object;
@@ -60,10 +60,10 @@ export class RenderContext {
     this.next = this.next.bind(this)
   }
 
-  next () {
+  next (err: ?Error = null) {
     const lastState = this.renderStates[this.renderStates.length - 1]
     if (isUndef(lastState)) {
-      return this.done()
+      return this.done(err)
     }
     switch (lastState.type) {
       case 'Element':
