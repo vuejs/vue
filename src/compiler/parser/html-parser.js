@@ -9,7 +9,7 @@
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
-import { makeMap, no } from 'shared/util'
+import { makeMap, no, splitLine } from 'shared/util'
 import { isNonPhrasingTag } from 'web/compiler/util'
 
 // Regular Expressions for parsing tags and attributes
@@ -54,11 +54,30 @@ function decodeAttr (value, shouldDecodeNewlines) {
   return value.replace(re, match => decodingMap[match])
 }
 
+function resolveLineNumbers (lines, start) {
+  let l = 0
+  let cur = 0
+  for (let i = 0, len = lines.length; i < len; ++i) {
+    const { line, linefeed = '' } = lines[i]
+    if (cur + line.length < start) {
+      cur += (line.length + linefeed.length)
+      l++
+    } else {
+      break
+    }
+  }
+  return {
+    line: l,
+    column: start - cur
+  }
+}
+
 export function parseHTML (html, options) {
   const stack = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
   const canBeLeftOpenTag = options.canBeLeftOpenTag || no
+  const lines = splitLine(html)
   let index = 0
   let last, lastTag
   while (html) {
@@ -244,7 +263,7 @@ export function parseHTML (html, options) {
     }
 
     if (!unary) {
-      stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs })
+      stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs, start: match.start })
       lastTag = tagName
     }
 
@@ -281,8 +300,9 @@ export function parseHTML (html, options) {
           (i > pos || !tagName) &&
           options.warn
         ) {
+          const { line, column } = resolveLineNumbers(lines, stack[i].start)
           options.warn(
-            `tag <${stack[i].tag}> has no matching end tag.`
+            `tag <${stack[i].tag}> has no matching end tag at line ${line} column ${column}.`
           )
         }
         if (options.end) {

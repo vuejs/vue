@@ -717,4 +717,29 @@ describe('parser', () => {
     expect(ast.children[1].isComment).toBe(true) // parse comment with ASTText
     expect(ast.children[1].text).toBe('comment here')
   })
+
+  it('should warn with line and column', () => {
+    parse(`
+      <div>
+        <span>
+          123
+      </div>
+    `, baseOptions)
+    expect(`tag <span> has no matching end tag at line 2 column 8.`).toHaveBeenWarned()
+  })
+
+  it('should warn with correct match', () => {
+    parse(`
+      <div>
+        <div>
+          123
+      </div>
+    `, baseOptions)
+    expect(`tag <div> has no matching end tag at line 1 column 6.`).toHaveBeenWarned()
+  })
+
+  it('should work with different linefeed', () => {
+    parse('<div>\n  <div>\r\n    <span>\u2028      123\u2029    </span>\n  </div>\n  <li>\n</div>', baseOptions)
+    expect(`tag <li> has no matching end tag at line 6 column 2.`).toHaveBeenWarned()
+  })
 })
