@@ -1112,6 +1112,20 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  // #7223
+  it('should not double escape attribute values', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div id="a\nb"></div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div id="a\nb"></div>`)
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
