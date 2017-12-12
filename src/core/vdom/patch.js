@@ -264,7 +264,7 @@ export function createPatchFunction (backend) {
   function createChildren (vnode, children, insertedVnodeQueue) {
     if (Array.isArray(children)) {
       if (process.env.NODE_ENV !== 'production') {
-        checkChildren(children)
+        checkDuplicateKeys(children)
       }
       for (let i = 0; i < children.length; ++i) {
         createElm(children[i], insertedVnodeQueue, vnode.elm, null, true)
@@ -398,7 +398,7 @@ export function createPatchFunction (backend) {
     const canMove = !removeOnly
 
     if (process.env.NODE_ENV !== 'production') {
-      checkChildren(newCh)
+      checkDuplicateKeys(newCh)
     }
 
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
@@ -453,18 +453,19 @@ export function createPatchFunction (backend) {
     }
   }
 
-  function checkChildren (children) {
-    const cache = {}
-
+  function checkDuplicateKeys (children) {
+    const seenKeys = {}
     for (let i = 0; i < children.length; i++) {
       const vnode = children[i]
       const key = vnode.key
-
-      if (key != null) {
-        if (cache[key]) {
-          warn(`The duplicate keys: '${key}' that is causing an update error.`)
+      if (isDef(key)) {
+        if (seenKeys[key]) {
+          warn(
+            `Duplicate keys detected: '${key}'. This may cause an update error.`,
+            vnode.context
+          )
         } else {
-          cache[key] = true
+          seenKeys[key] = true
         }
       }
     }
