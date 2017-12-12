@@ -575,6 +575,25 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('should catch async component error', done => {
+    Vue.config.silent = true
+    renderToString(new Vue({
+      template: '<test-async></test-async>',
+      components: {
+        testAsync: () => Promise.resolve({
+          render () {
+            throw new Error('foo')
+          }
+        })
+      }
+    }), (err, result) => {
+      Vue.config.silent = false
+      expect(err).toBeTruthy()
+      expect(result).toBeUndefined()
+      done()
+    })
+  })
+
   it('everything together', done => {
     renderVmWithOptions({
       template: `
