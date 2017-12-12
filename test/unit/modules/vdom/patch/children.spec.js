@@ -515,7 +515,7 @@ describe('vdom patch: children', () => {
 
     const vnode = new VNode('p', {}, ['b', 'a', 'c', 'b'].map(makeNode))
     patch(null, vnode)
-    expect('The duplicate keys: \'b\' that is causing an update error.').toHaveBeenWarned()
+    expect(`Duplicate keys detected: 'b'`).toHaveBeenWarned()
   })
 
   it('should warn with duplicate keys: updateChildren', () => {
@@ -526,8 +526,8 @@ describe('vdom patch: children', () => {
     const vnode2 = new VNode('p', {}, ['b', 'a', 'c', 'b'].map(makeNode))
     const vnode3 = new VNode('p', {}, ['b', 'x', 'd', 'b'].map(makeNode))
     patch(vnode0, vnode2)
-    expect('The duplicate keys: \'b\' that is causing an update error.').toHaveBeenWarned()
+    expect(`Duplicate keys detected: 'b'`).toHaveBeenWarned()
     patch(vnode2, vnode3)
-    expect('The duplicate keys: \'b\' that is causing an update error.').toHaveBeenWarned()
+    expect(`Duplicate keys detected: 'b'`).toHaveBeenWarned()
   })
 })
