@@ -212,7 +212,7 @@ export function updateChildComponent (
   vm: Component,
   propsData: ?Object,
   listeners: ?Object,
-  parentVnode: VNode,
+  parentVnode: MountedComponentVNode,
   renderChildren: ?Array<VNode>
 ) {
   if (process.env.NODE_ENV !== 'production') {

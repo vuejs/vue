@@ -19,7 +19,7 @@ type Attribute = {
 export function parseComponent (
   content: string,
   options?: Object = {}
- ): SFCDescriptor {
+): SFCDescriptor {
   const sfc: SFCDescriptor = {
     template: null,
     script: null,
@@ -27,7 +27,7 @@ export function parseComponent (
     customBlocks: []
   }
   let depth = 0
-  let currentBlock: ?(SFCBlock | SFCCustomBlock) = null
+  let currentBlock: ?SFCBlock = null
   options = extend({
     deindent: true
   }, options)
@@ -47,7 +47,7 @@ export function parseComponent (
         attrs: attrs.reduce((cumulated, { name, value }) => {
           cumulated[name] = value || true
           return cumulated
-        }, Object.create(null))
+        }, {})
       }
       if (isSpecialTag(tag)) {
         checkAttrs(currentBlock, attrs)
@@ -101,7 +101,7 @@ export function parseComponent (
     depth--
   }
 
-  function padContent (block: SFCBlock | SFCCustomBlock, pad: true | "line" | "space") {
+  function padContent (block: SFCBlock, pad: true | "line" | "space") {
     if (pad === 'space') {
       return content.slice(0, block.start).replace(replaceRE, ' ')
     } else {

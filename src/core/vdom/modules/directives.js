@@ -86,17 +86,20 @@ function normalizeDirectives (
 ): { [key: string]: VNodeDirective } {
   const res = Object.create(null)
   if (!dirs) {
+    // $flow-disable-line
     return res
   }
   let i, dir
   for (i = 0; i < dirs.length; i++) {
     dir = dirs[i]
     if (!dir.modifiers) {
+      // $flow-disable-line
       dir.modifiers = emptyModifiers
     }
     res[getRawDirName(dir)] = dir
     dir.def = resolveAsset(vm.$options, 'directives', dir.name, true)
   }
+  // $flow-disable-line
   return res
 }
 
