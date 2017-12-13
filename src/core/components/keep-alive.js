@@ -44,7 +44,7 @@ function pruneCacheEntry (
   if (cached && (!current || cached.tag !== current.tag)) {
     cached.componentInstance.$destroy()
   }
-  cache[key] = null
+  delete cache[key]
   remove(keys, key)
 }
 
