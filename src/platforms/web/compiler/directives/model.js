@@ -73,11 +73,11 @@ function genCheckboxModel (
   const falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
   addProp(el, 'checked',
     `Array.isArray(${value})` +
-      `?_i(${value},${valueBinding})>-1` + (
-        trueValueBinding === 'true'
-          ? `:(${value})`
-          : `:_q(${value},${trueValueBinding})`
-      )
+    `?_i(${value},${valueBinding})>-1` + (
+      trueValueBinding === 'true'
+        ? `:(${value})`
+        : `:_q(${value},${trueValueBinding})`
+    )
   )
   addHandler(el, 'change',
     `var $$a=${value},` +
@@ -94,9 +94,9 @@ function genCheckboxModel (
 }
 
 function genRadioModel (
-    el: ASTElement,
-    value: string,
-    modifiers: ?ASTModifiers
+  el: ASTElement,
+  value: string,
+  modifiers: ?ASTModifiers
 ) {
   const number = modifiers && modifiers.number
   let valueBinding = getBindingAttr(el, 'value') || 'null'
@@ -106,9 +106,9 @@ function genRadioModel (
 }
 
 function genSelect (
-    el: ASTElement,
-    value: string,
-    modifiers: ?ASTModifiers
+  el: ASTElement,
+  value: string,
+  modifiers: ?ASTModifiers
 ) {
   const number = modifiers && modifiers.number
   const selectedVal = `Array.prototype.filter` +

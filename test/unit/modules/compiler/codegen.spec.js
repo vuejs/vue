@@ -104,8 +104,8 @@ describe('codegen', () => {
 
   it('generate multi v-else-if with v-else directive', () => {
     assertCodegen(
-        '<div><p v-if="show">hello</p><p v-else-if="hide">world</p><p v-else-if="3">elseif</p><p v-else>bye</p></div>',
-        `with(this){return _c('div',[(show)?_c('p',[_v("hello")]):(hide)?_c('p',[_v("world")]):(3)?_c('p',[_v("elseif")]):_c('p',[_v("bye")])])}`
+      '<div><p v-if="show">hello</p><p v-else-if="hide">world</p><p v-else-if="3">elseif</p><p v-else>bye</p></div>',
+      `with(this){return _c('div',[(show)?_c('p',[_v("hello")]):(hide)?_c('p',[_v("world")]):(3)?_c('p',[_v("elseif")]):_c('p',[_v("bye")])])}`
     )
   })
 

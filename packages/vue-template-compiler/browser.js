@@ -1439,18 +1439,18 @@ function mergeDataOrFn (
     // it has to be a function to pass previous merges.
     return function mergedDataFn () {
       return mergeData(
-        typeof childVal === 'function' ? childVal.call(this) : childVal,
-        typeof parentVal === 'function' ? parentVal.call(this) : parentVal
+        typeof childVal === 'function' ? childVal.call(this, this) : childVal,
+        typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
       )
     }
   } else {
     return function mergedInstanceDataFn () {
       // instance merge
       var instanceData = typeof childVal === 'function'
-        ? childVal.call(vm)
+        ? childVal.call(vm, vm)
         : childVal;
       var defaultData = typeof parentVal === 'function'
-        ? parentVal.call(vm)
+        ? parentVal.call(vm, vm)
         : parentVal;
       if (instanceData) {
         return mergeData(instanceData, defaultData)
@@ -1596,6 +1596,8 @@ var defaultStrat = function (parentVal, childVal) {
     ? parentVal
     : childVal
 };
+
+
 
 function assertObjectType (name, value, vm) {
   if (!isPlainObject(value)) {
@@ -2660,7 +2662,7 @@ function parseString (chr) {
 var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:/;
 var forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/;
-var forIteratorRE = /\((\{[^}]*\}|[^,{]*),([^,]*)(?:,([^,]*))?\)/;
+var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
 var stripParensRE = /^\(|\)$/g;
 
 var argRE = /:(.*)$/;
@@ -2993,16 +2995,16 @@ function processFor (el) {
       return
     }
     el.for = inMatch[2].trim();
-    var alias = inMatch[1].trim();
+    var alias = inMatch[1].trim().replace(stripParensRE, '');
     var iteratorMatch = alias.match(forIteratorRE);
     if (iteratorMatch) {
-      el.alias = iteratorMatch[1].trim();
-      el.iterator1 = iteratorMatch[2].trim();
-      if (iteratorMatch[3]) {
-        el.iterator2 = iteratorMatch[3].trim();
+      el.alias = alias.replace(forIteratorRE, '');
+      el.iterator1 = iteratorMatch[1].trim();
+      if (iteratorMatch[2]) {
+        el.iterator2 = iteratorMatch[2].trim();
       }
     } else {
-      el.alias = alias.replace(stripParensRE, '');
+      el.alias = alias;
     }
   }
 }
@@ -3921,10 +3923,10 @@ function genElement (el, state) {
 }
 
 // hoist static sub-trees out
-function genStatic (el, state, once$$1) {
+function genStatic (el, state) {
   el.staticProcessed = true;
   state.staticRenderFns.push(("with(this){return " + (genElement(el, state)) + "}"));
-  return ("_m(" + (state.staticRenderFns.length - 1) + "," + (el.staticInFor ? 'true' : 'false') + "," + (once$$1 ? 'true' : 'false') + ")")
+  return ("_m(" + (state.staticRenderFns.length - 1) + (el.staticInFor ? ',true' : '') + ")")
 }
 
 // v-once
@@ -3950,7 +3952,7 @@ function genOnce (el, state) {
     }
     return ("_o(" + (genElement(el, state)) + "," + (state.onceId++) + "," + key + ")")
   } else {
-    return genStatic(el, state, true)
+    return genStatic(el, state)
   }
 }
 
@@ -4697,7 +4699,7 @@ function genAttrSegment (name, value) {
         ? (" " + name + "=\"" + name + "\"")
         : value === '""'
           ? (" " + name)
-          : (" " + name + "=" + value)
+          : (" " + name + "=\"" + (JSON.parse(value)) + "\"")
     }
   } else {
     return {

@@ -263,6 +263,9 @@ export function createPatchFunction (backend) {
 
   function createChildren (vnode, children, insertedVnodeQueue) {
     if (Array.isArray(children)) {
+      if (process.env.NODE_ENV !== 'production') {
+        checkDuplicateKeys(children)
+      }
       for (let i = 0; i < children.length; ++i) {
         createElm(children[i], insertedVnodeQueue, vnode.elm, null, true)
       }
@@ -394,6 +397,10 @@ export function createPatchFunction (backend) {
     // during leaving transitions
     const canMove = !removeOnly
 
+    if (process.env.NODE_ENV !== 'production') {
+      checkDuplicateKeys(newCh)
+    }
+
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
       if (isUndef(oldStartVnode)) {
         oldStartVnode = oldCh[++oldStartIdx] // Vnode has been moved left
@@ -426,13 +433,6 @@ export function createPatchFunction (backend) {
           createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm)
         } else {
           vnodeToMove = oldCh[idxInOld]
-          /* istanbul ignore if */
-          if (process.env.NODE_ENV !== 'production' && !vnodeToMove) {
-            warn(
-              'It seems there are duplicate keys that is causing an update error. ' +
-              'Make sure each v-for item has a unique key.'
-            )
-          }
           if (sameVnode(vnodeToMove, newStartVnode)) {
             patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue)
             oldCh[idxInOld] = undefined
@@ -450,6 +450,24 @@ export function createPatchFunction (backend) {
       addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
     } else if (newStartIdx > newEndIdx) {
       removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
+    }
+  }
+
+  function checkDuplicateKeys (children) {
+    const seenKeys = {}
+    for (let i = 0; i < children.length; i++) {
+      const vnode = children[i]
+      const key = vnode.key
+      if (isDef(key)) {
+        if (seenKeys[key]) {
+          warn(
+            `Duplicate keys detected: '${key}'. This may cause an update error.`,
+            vnode.context
+          )
+        } else {
+          seenKeys[key] = true
+        }
+      }
     }
   }
 

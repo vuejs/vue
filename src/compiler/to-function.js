@@ -18,9 +18,7 @@ function createFunction (code, errors) {
 }
 
 export function createCompileToFunctionFn (compile: Function): Function {
-  const cache: {
-    [key: string]: CompiledFunctionResult;
-  } = Object.create(null)
+  const cache = Object.create(null)
 
   return function compileToFunctions (
     template: string,

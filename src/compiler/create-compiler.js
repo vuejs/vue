@@ -26,7 +26,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
         // merge custom directives
         if (options.directives) {
           finalOptions.directives = extend(
-            Object.create(baseOptions.directives),
+            Object.create(baseOptions.directives || null),
             options.directives
           )
         }
