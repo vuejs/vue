@@ -119,7 +119,7 @@ export function createPatchFunction (backend) {
     return (
       !inVPre &&
       !vnode.ns &&
-      !(vnode.isIgnoredElement) &&
+      !vnode.isIgnoredElement &&
       config.isUnknownElement(vnode.tag)
     )
   }
