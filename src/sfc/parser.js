@@ -99,7 +99,7 @@ export function parseComponent (
       currentBlock.end = start
       currentBlock.blockEnd = end
       let text = content.slice(currentBlock.start, currentBlock.end)
-      if (!(process.env.NODE_ENV !== 'production' && options.outputSourceRange) && !options.disableDeindent) {
+      if (process.env.NODE_ENV === 'production' || !options.outputSourceRange) {
         text = deindent(text)
       }
       // pad content so that linters and pre-processors can output correct
