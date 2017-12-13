@@ -14,6 +14,7 @@ import VNode from './vnode'
 import config from '../config'
 import { SSR_ATTR } from 'shared/constants'
 import { registerRef } from './modules/ref'
+import { traverse } from '../observer/traverse'
 import { activeInstance } from '../instance/lifecycle'
 import { isTextInputType } from 'web/util/element'
 
@@ -103,7 +104,27 @@ export function createPatchFunction (backend) {
     }
   }
 
-  let inPre = 0
+  function isIgnoredElement (vnode) {
+    return (
+      config.ignoredElements.length &&
+      config.ignoredElements.some(ignore => {
+        return isRegExp(ignore)
+          ? ignore.test(vnode.tag)
+          : ignore === vnode.tag
+      })
+    )
+  }
+
+  function isUnknownElement (vnode, inVPre) {
+    return (
+      !inVPre &&
+      !vnode.ns &&
+      !(vnode.isIgnoredElement) &&
+      config.isUnknownElement(vnode.tag)
+    )
+  }
+
+  let creatingElmInVPre = 0
   function createElm (vnode, insertedVnodeQueue, parentElm, refElm, nested) {
     vnode.isRootInsert = !nested // for transition enter check
     if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
@@ -114,26 +135,14 @@ export function createPatchFunction (backend) {
     const children = vnode.children
     const tag = vnode.tag
     if (isDef(tag)) {
+      if (isIgnoredElement(vnode)) {
+        vnode.isIgnoredElement = true
+      }
       if (process.env.NODE_ENV !== 'production') {
         if (data && data.pre) {
-          inPre++
+          creatingElmInVPre++
         }
-        if (
-          config.ignoredElements.length &&
-          config.ignoredElements.some(ignore => {
-            return isRegExp(ignore)
-              ? ignore.test(tag)
-              : ignore === tag
-          })
-        ) {
-          vnode.isIgnoredElement = true
-        }
-        if (
-          !inPre &&
-          !vnode.ns &&
-          !vnode.isIgnoredElement &&
-          config.isUnknownElement(tag)
-        ) {
+        if (isUnknownElement(vnode, creatingElmInVPre)) {
           warn(
             'Unknown custom element: <' + tag + '> - did you ' +
             'register the component correctly? For recursive components, ' +
@@ -175,7 +184,7 @@ export function createPatchFunction (backend) {
       }
 
       if (process.env.NODE_ENV !== 'production' && data && data.pre) {
-        inPre--
+        creatingElmInVPre--
       }
     } else if (isTrue(vnode.isComment)) {
       vnode.elm = nodeOps.createComment(vnode.text)
@@ -261,6 +270,9 @@ export function createPatchFunction (backend) {
 
   function createChildren (vnode, children, insertedVnodeQueue) {
     if (Array.isArray(children)) {
+      if (process.env.NODE_ENV !== 'production') {
+        checkDuplicateKeys(children)
+      }
       for (let i = 0; i < children.length; ++i) {
         createElm(children[i], insertedVnodeQueue, vnode.elm, null, true)
       }
@@ -292,7 +304,7 @@ export function createPatchFunction (backend) {
   // of going through the normal attribute patching process.
   function setScope (vnode) {
     let i
-    if (isDef(i = vnode.functionalScopeId)) {
+    if (isDef(i = vnode.fnScopeId)) {
       nodeOps.setAttribute(vnode.elm, i, '')
     } else {
       let ancestor = vnode
@@ -306,7 +318,7 @@ export function createPatchFunction (backend) {
     // for slot content they should also get the scopeId from the host instance.
     if (isDef(i = activeInstance) &&
       i !== vnode.context &&
-      i !== vnode.functionalContext &&
+      i !== vnode.fnContext &&
       isDef(i = i.$options._scopeId)
     ) {
       nodeOps.setAttribute(vnode.elm, i, '')
@@ -392,6 +404,10 @@ export function createPatchFunction (backend) {
     // during leaving transitions
     const canMove = !removeOnly
 
+    if (process.env.NODE_ENV !== 'production') {
+      checkDuplicateKeys(newCh)
+    }
+
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
       if (isUndef(oldStartVnode)) {
         oldStartVnode = oldCh[++oldStartIdx] // Vnode has been moved left
@@ -424,13 +440,6 @@ export function createPatchFunction (backend) {
           createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm)
         } else {
           vnodeToMove = oldCh[idxInOld]
-          /* istanbul ignore if */
-          if (process.env.NODE_ENV !== 'production' && !vnodeToMove) {
-            warn(
-              'It seems there are duplicate keys that is causing an update error. ' +
-              'Make sure each v-for item has a unique key.'
-            )
-          }
           if (sameVnode(vnodeToMove, newStartVnode)) {
             patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue)
             oldCh[idxInOld] = undefined
@@ -448,6 +457,24 @@ export function createPatchFunction (backend) {
       addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
     } else if (newStartIdx > newEndIdx) {
       removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
+    }
+  }
+
+  function checkDuplicateKeys (children) {
+    const seenKeys = {}
+    for (let i = 0; i < children.length; i++) {
+      const vnode = children[i]
+      const key = vnode.key
+      if (isDef(key)) {
+        if (seenKeys[key]) {
+          warn(
+            `Duplicate keys detected: '${key}'. This may cause an update error.`,
+            vnode.context
+          )
+        } else {
+          seenKeys[key] = true
+        }
+      }
     }
   }
 
@@ -530,25 +557,30 @@ export function createPatchFunction (backend) {
     }
   }
 
-  let bailed = false
+  let hydrationBailed = false
   // list of modules that can skip create hook during hydration because they
   // are already rendered on the client or has no need for initialization
-  const isRenderedModule = makeMap('attrs,style,class,staticClass,staticStyle,key')
+  // Note: style is excluded because it relies on initial clone for future
+  // deep updates (#7063).
+  const isRenderedModule = makeMap('attrs,class,staticClass,staticStyle,key')
 
   // Note: this is a browser-only function so we can assume elms are DOM nodes.
-  function hydrate (elm, vnode, insertedVnodeQueue) {
+  function hydrate (elm, vnode, insertedVnodeQueue, inVPre) {
+    let i
+    const { tag, data, children } = vnode
+    inVPre = inVPre || (data && data.pre)
+    vnode.elm = elm
+
     if (isTrue(vnode.isComment) && isDef(vnode.asyncFactory)) {
-      vnode.elm = elm
       vnode.isAsyncPlaceholder = true
       return true
     }
+    // assert node match
     if (process.env.NODE_ENV !== 'production') {
-      if (!assertNodeMatch(elm, vnode)) {
+      if (!assertNodeMatch(elm, vnode, inVPre)) {
         return false
       }
     }
-    vnode.elm = elm
-    const { tag, data, children } = vnode
     if (isDef(data)) {
       if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode, true /* hydrating */)
       if (isDef(i = vnode.componentInstance)) {
@@ -569,9 +601,9 @@ export function createPatchFunction (backend) {
               /* istanbul ignore if */
               if (process.env.NODE_ENV !== 'production' &&
                 typeof console !== 'undefined' &&
-                !bailed
+                !hydrationBailed
               ) {
-                bailed = true
+                hydrationBailed = true
                 console.warn('Parent: ', elm)
                 console.warn('server innerHTML: ', i)
                 console.warn('client innerHTML: ', elm.innerHTML)
@@ -583,7 +615,7 @@ export function createPatchFunction (backend) {
             let childrenMatch = true
             let childNode = elm.firstChild
             for (let i = 0; i < children.length; i++) {
-              if (!childNode || !hydrate(childNode, children[i], insertedVnodeQueue)) {
+              if (!childNode || !hydrate(childNode, children[i], insertedVnodeQueue, inVPre)) {
                 childrenMatch = false
                 break
               }
@@ -595,9 +627,9 @@ export function createPatchFunction (backend) {
               /* istanbul ignore if */
               if (process.env.NODE_ENV !== 'production' &&
                 typeof console !== 'undefined' &&
-                !bailed
+                !hydrationBailed
               ) {
-                bailed = true
+                hydrationBailed = true
                 console.warn('Parent: ', elm)
                 console.warn('Mismatching childNodes vs. VNodes: ', elm.childNodes, children)
               }
@@ -607,11 +639,17 @@ export function createPatchFunction (backend) {
         }
       }
       if (isDef(data)) {
+        let fullInvoke = false
         for (const key in data) {
           if (!isRenderedModule(key)) {
+            fullInvoke = true
             invokeCreateHooks(vnode, insertedVnodeQueue)
             break
           }
+        }
+        if (!fullInvoke && data['class']) {
+          // ensure collecting deps for deep class bindings for future updates
+          traverse(data['class'])
         }
       }
     } else if (elm.data !== vnode.text) {
@@ -620,10 +658,10 @@ export function createPatchFunction (backend) {
     return true
   }
 
-  function assertNodeMatch (node, vnode) {
+  function assertNodeMatch (node, vnode, inVPre) {
     if (isDef(vnode.tag)) {
-      return (
-        vnode.tag.indexOf('vue-component') === 0 ||
+      return vnode.tag.indexOf('vue-component') === 0 || (
+        !isUnknownElement(vnode, inVPre) &&
         vnode.tag.toLowerCase() === (node.tagName && node.tagName.toLowerCase())
       )
     } else {
@@ -676,9 +714,12 @@ export function createPatchFunction (backend) {
           // create an empty node and replace it
           oldVnode = emptyNodeAt(oldVnode)
         }
+
         // replacing existing element
         const oldElm = oldVnode.elm
         const parentElm = nodeOps.parentNode(oldElm)
+
+        // create new node
         createElm(
           vnode,
           insertedVnodeQueue,
@@ -689,9 +730,8 @@ export function createPatchFunction (backend) {
           nodeOps.nextSibling(oldElm)
         )
 
+        // update parent placeholder node element, recursively
         if (isDef(vnode.parent)) {
-          // component root element replaced.
-          // update parent placeholder node element, recursively
           let ancestor = vnode.parent
           const patchable = isPatchable(vnode)
           while (ancestor) {
@@ -720,6 +760,7 @@ export function createPatchFunction (backend) {
           }
         }
 
+        // destroy old node
         if (isDef(parentElm)) {
           removeVnodes(parentElm, [oldVnode], 0, 0)
         } else if (isDef(oldVnode.tag)) {

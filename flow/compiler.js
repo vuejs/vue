@@ -14,7 +14,8 @@ declare type CompilerOptions = {
   preserveWhitespace?: boolean;
   isFromDOM?: boolean;
   shouldDecodeTags?: boolean;
-  shouldDecodeNewlines?: boolean;
+  shouldDecodeNewlines?:  boolean;
+  shouldDecodeNewlinesForHref?: boolean;
 
   // for ssr optimization compiler
   scopeId?: string;
@@ -172,21 +173,13 @@ declare type SFCDescriptor = {
   template: ?SFCBlock;
   script: ?SFCBlock;
   styles: Array<SFCBlock>;
-  customBlocks: Array<SFCCustomBlock>;
-}
-
-declare type SFCCustomBlock = {
-  type: string;
-  content: string;
-  start?: number;
-  end?: number;
-  src?: string;
-  attrs: {[attribute:string]: string};
+  customBlocks: Array<SFCBlock>;
 };
 
 declare type SFCBlock = {
   type: string;
   content: string;
+  attrs: {[attribute:string]: string};
   start?: number;
   end?: number;
   lang?: string;

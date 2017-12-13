@@ -22,7 +22,8 @@ import {
 export const onRE = /^@|^v-on:/
 export const dirRE = /^v-|^@|^:/
 export const forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/
-export const forIteratorRE = /\((\{[^}]*\}|[^,]*),([^,]*)(?:,([^,]*))?\)/
+export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
+const stripParensRE = /^\(|\)$/g
 
 const argRE = /:(.*)$/
 const bindRE = /^:|^v-bind:/
@@ -107,6 +108,7 @@ export function parse (
     isUnaryTag: options.isUnaryTag,
     canBeLeftOpenTag: options.canBeLeftOpenTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
+    shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     start (tag, attrs, unary) {
       // check namespace.
@@ -354,13 +356,13 @@ export function processFor (el: ASTElement) {
       return
     }
     el.for = inMatch[2].trim()
-    const alias = inMatch[1].trim()
+    const alias = inMatch[1].trim().replace(stripParensRE, '')
     const iteratorMatch = alias.match(forIteratorRE)
     if (iteratorMatch) {
-      el.alias = iteratorMatch[1].trim()
-      el.iterator1 = iteratorMatch[2].trim()
-      if (iteratorMatch[3]) {
-        el.iterator2 = iteratorMatch[3].trim()
+      el.alias = alias.replace(forIteratorRE, '')
+      el.iterator1 = iteratorMatch[1].trim()
+      if (iteratorMatch[2]) {
+        el.iterator2 = iteratorMatch[2].trim()
       }
     } else {
       el.alias = alias
@@ -459,6 +461,15 @@ function processSlot (el) {
       }
       el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
+        warn(
+          `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
+          `(v-for takes higher priority). Use a wrapper <template> for the ` +
+          `scoped slot to make it clearer.`,
+          true
+        )
+      }
       el.slotScope = slotScope
     }
     const slotTarget = getBindingAttr(el, 'slot')
@@ -466,7 +477,7 @@ function processSlot (el) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
       // preserve slot as an attribute for native shadow DOM compat
       // only for non-scoped slots.
-      if (!el.slotScope) {
+      if (el.tag !== 'template' && !el.slotScope) {
         addAttr(el, 'slot', slotTarget)
       }
     }
@@ -555,6 +566,13 @@ function processAttrs (el) {
         }
       }
       addAttr(el, name, JSON.stringify(value))
+      // #6887 firefox doesn't update muted state if set via attribute
+      // even immediately after element creation
+      if (!el.component &&
+          name === 'muted' &&
+          platformMustUseProp(el.tag, el.attrsMap.type, name)) {
+        addProp(el, name, 'true')
+      }
     }
   }
 }

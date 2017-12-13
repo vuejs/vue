@@ -1,16 +1,19 @@
 /* @flow */
+declare var WXEnvironment: any;
 
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
 
 // Browser environment sniffing
 export const inBrowser = typeof window !== 'undefined'
+export const inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform
+export const weexPlatform = inWeex && WXEnvironment.platform.toLowerCase()
 export const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 export const isIE = UA && /msie|trident/.test(UA)
 export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
 export const isEdge = UA && UA.indexOf('edge/') > 0
-export const isAndroid = UA && UA.indexOf('android') > 0
-export const isIOS = UA && /iphone|ipad|ipod|ios/.test(UA)
+export const isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 'android')
+export const isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios')
 export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
 
 // Firefox has a "watch" function on Object.prototype...
@@ -66,7 +69,7 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
   _Set = Set
 } else {
   // a non-standard Set polyfill that only works with primitive keys.
-  _Set = class Set implements ISet {
+  _Set = class Set implements SimpleSet {
     set: Object;
     constructor () {
       this.set = Object.create(null)
@@ -83,11 +86,11 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
   }
 }
 
-interface ISet {
+interface SimpleSet {
   has(key: string | number): boolean;
   add(key: string | number): mixed;
   clear(): void;
 }
 
 export { _Set }
-export type { ISet }
+export type { SimpleSet }

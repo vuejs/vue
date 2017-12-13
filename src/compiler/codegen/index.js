@@ -89,7 +89,11 @@ export function genElement (el: ASTElement, state: CodegenState): string {
 function genStatic (el: ASTElement, state: CodegenState): string {
   el.staticProcessed = true
   state.staticRenderFns.push(`with(this){return ${genElement(el, state)}}`)
-  return `_m(${state.staticRenderFns.length - 1}${el.staticInFor ? ',true' : ''})`
+  return `_m(${
+    state.staticRenderFns.length - 1
+  }${
+    el.staticInFor ? ',true' : ''
+  })`
 }
 
 // v-once
@@ -349,7 +353,7 @@ function genScopedSlot (
         ? `${el.if}?${genChildren(el, state) || 'undefined'}:undefined`
         : genChildren(el, state) || 'undefined'
       : genElement(el, state)
-  }}`
+    }}`
   return `{key:${key},fn:${fn}}`
 }
 

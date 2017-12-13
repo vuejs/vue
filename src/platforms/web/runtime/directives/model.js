@@ -5,6 +5,7 @@
 
 import { isTextInputType } from 'web/util/element'
 import { looseEqual, looseIndexOf } from 'shared/util'
+import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { warn, isAndroid, isIE9, isIE, isEdge } from 'core/util/index'
 
 /* istanbul ignore if */
@@ -18,10 +19,17 @@ if (isIE9) {
   })
 }
 
-export default {
-  inserted (el, binding, vnode) {
+const directive = {
+  inserted (el, binding, vnode, oldVnode) {
     if (vnode.tag === 'select') {
-      setSelected(el, binding, vnode.context)
+      // #6903
+      if (oldVnode.elm && !oldVnode.elm._vOptions) {
+        mergeVNodeHook(vnode, 'postpatch', () => {
+          directive.componentUpdated(el, binding, vnode)
+        })
+      } else {
+        setSelected(el, binding, vnode.context)
+      }
       el._vOptions = [].map.call(el.options, getValue)
     } else if (vnode.tag === 'textarea' || isTextInputType(el.type)) {
       el._vModifiers = binding.modifiers
@@ -42,6 +50,7 @@ export default {
       }
     }
   },
+
   componentUpdated (el, binding, vnode) {
     if (vnode.tag === 'select') {
       setSelected(el, binding, vnode.context)
@@ -136,3 +145,5 @@ function trigger (el, type) {
   e.initEvent(type, true, true)
   el.dispatchEvent(e)
 }
+
+export default directive

@@ -1,11 +1,7 @@
 declare type InternalComponentOptions = {
   _isComponent: true;
   parent: Component;
-  propsData: ?Object;
   _parentVnode: VNode;
-  _parentListeners: ?Object;
-  _renderChildren: ?Array<VNode>;
-  _componentTag: ?string;
   _parentElm: ?Node;
   _refElm: ?Node;
   render?: Function;

@@ -25,9 +25,9 @@ export default class VNode {
   isAsyncPlaceholder: boolean;
   isIgnoredElement: boolean;
   ssrContext: Object | void;
-  functionalContext: Component | void; // real context vm for functional nodes
-  functionalOptions: ?ComponentOptions; // for SSR caching
-  functionalScopeId: ?string; // functioanl scope id support
+  fnContext: Component | void; // real context vm for functional nodes
+  fnOptions: ?ComponentOptions; // for SSR caching
+  fnScopeId: ?string; // functioanl scope id support
 
   constructor (
     tag?: string,
@@ -46,9 +46,9 @@ export default class VNode {
     this.elm = elm
     this.ns = undefined
     this.context = context
-    this.functionalContext = undefined
-    this.functionalOptions = undefined
-    this.functionalScopeId = undefined
+    this.fnContext = undefined
+    this.fnOptions = undefined
+    this.fnScopeId = undefined
     this.key = data && data.key
     this.componentOptions = componentOptions
     this.componentInstance = undefined
@@ -88,6 +88,7 @@ export function createTextVNode (val: string | number) {
 // multiple renders, cloning them avoids errors when DOM manipulations rely
 // on their elm reference.
 export function cloneVNode (vnode: VNode, deep?: boolean): VNode {
+  const componentOptions = vnode.componentOptions
   const cloned = new VNode(
     vnode.tag,
     vnode.data,
@@ -95,16 +96,24 @@ export function cloneVNode (vnode: VNode, deep?: boolean): VNode {
     vnode.text,
     vnode.elm,
     vnode.context,
-    vnode.componentOptions,
+    componentOptions,
     vnode.asyncFactory
   )
   cloned.ns = vnode.ns
   cloned.isStatic = vnode.isStatic
   cloned.key = vnode.key
   cloned.isComment = vnode.isComment
+  cloned.fnContext = vnode.fnContext
+  cloned.fnOptions = vnode.fnOptions
+  cloned.fnScopeId = vnode.fnScopeId
   cloned.isCloned = true
-  if (deep && vnode.children) {
-    cloned.children = cloneVNodes(vnode.children)
+  if (deep) {
+    if (vnode.children) {
+      cloned.children = cloneVNodes(vnode.children, true)
+    }
+    if (componentOptions && componentOptions.children) {
+      componentOptions.children = cloneVNodes(componentOptions.children, true)
+    }
   }
   return cloned
 }

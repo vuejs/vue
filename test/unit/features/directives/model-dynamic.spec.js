@@ -40,6 +40,48 @@ describe('Directive v-model dynamic input type', () => {
     assertInputWorks(vm, chain).then(done)
   })
 
+  it('with v-else', done => {
+    const data = {
+      ok: true,
+      type: null,
+      test: 'b'
+    }
+    const vm = new Vue({
+      data,
+      template: `<div v-if="ok">haha</div><input v-else :type="type" v-model="test">`
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.textContent).toBe('haha')
+
+    vm.ok = false
+    assertInputWorks(vm).then(done)
+  })
+
+  it('with v-else-if', done => {
+    const vm = new Vue({
+      data: {
+        foo: true,
+        bar: false,
+        type: null,
+        test: 'b'
+      },
+      template: `<div v-if="foo">text</div><input v-else-if="bar" :type="type" v-model="test">`
+    }).$mount()
+    document.body.appendChild(vm.$el)
+
+    const chain = waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('text')
+    }).then(() => {
+      vm.foo = false
+    }).then(() => {
+      expect(vm._vnode.isComment).toBe(true)
+    }).then(() => {
+      vm.bar = true
+    })
+
+    assertInputWorks(vm, chain).then(done)
+  })
+
   it('with v-for', done => {
     const vm = new Vue({
       data: {

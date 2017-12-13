@@ -96,23 +96,19 @@ describe('vdom patch: edge cases', () => {
       expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
       expect(vm.$el.innerHTML).toBe('<div>row</div><a>atag</a>')
       vm.swap = false
-    })
-    .then(() => {
+    }).then(() => {
       expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
       expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>')
       compVm.swap = false
-    })
-    .then(() => {
+    }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>span</span><div>row</div>')
       expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
       vm.swap = true
-    })
-    .then(() => {
+    }).then(() => {
       expect(vm.$el.innerHTML).toBe('<div>row</div><span>span</span>')
       expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
       vm.swap = true
-    })
-    .then(done)
+    }).then(done)
   })
 
   // #4530
@@ -245,5 +241,26 @@ describe('vdom patch: edge cases', () => {
     document.body.appendChild(vm.$el)
     vm.$el.children[0].click()
     expect(spy).toHaveBeenCalled()
+  })
+
+  // #7041
+  it('transition children with only deep bindings should be patched on update', done => {
+    const vm = new Vue({
+      template: `
+      <div>
+        <transition>
+          <div :style="style"></div>
+        </transition>
+      </div>
+      `,
+      data: () => ({
+        style: { color: 'red' }
+      })
+    }).$mount()
+    expect(vm.$el.children[0].style.color).toBe('red')
+    vm.style.color = 'green'
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].style.color).toBe('green')
+    }).then(done)
   })
 })
