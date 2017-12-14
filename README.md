@@ -125,8 +125,8 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
     <tr></tr>
     <tr>
       <td align="center" valign="middle">
-        <a href="http://www.frontenddevelopermeetups.com/" target="_blank">
-          <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/frontend-meetups.png">
+        <a href="https://www.frontenddeveloperlove.com/" target="_blank">
+          <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/frontend-love.png">
         </a>
       </td>
       <td align="center" valign="middle">
