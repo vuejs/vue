@@ -4,7 +4,6 @@ import config from '../config'
 import { warn } from './debug'
 import { nativeWatch } from './env'
 import { set } from '../observer/index'
-import { assertPropObject } from './props'
 
 import {
   ASSET_TYPES,
@@ -295,7 +294,7 @@ function normalizeProps (options: Object, vm: ?Component) {
       val = props[key]
       name = camelize(key)
       if (process.env.NODE_ENV !== 'production' && isPlainObject(val)) {
-        assertPropObject(name, val, vm)
+        validatePropObject(name, val, vm)
       }
       res[name] = isPlainObject(val)
         ? val
@@ -309,6 +308,26 @@ function normalizeProps (options: Object, vm: ?Component) {
     )
   }
   options.props = res
+}
+
+/**
+ * Validate whether a prop object keys are valid.
+ */
+const propOptionsRE = /^(type|default|required|validator)$/
+
+function validatePropObject (
+  propName: string,
+  prop: Object,
+  vm: ?Component
+) {
+  for (const key in prop) {
+    if (!propOptionsRE.test(key)) {
+      warn(
+        `Invalid key "${key}" in validation rules object for prop "${propName}".`,
+        vm
+      )
+    }
+  }
 }
 
 /**
