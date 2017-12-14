@@ -18,6 +18,13 @@ type PropOptions = {
   validator: ?Function
 };
 
+const propOptionsNames = [
+  'type',
+  'default',
+  'required',
+  'validator'
+]
+
 export function validateProp (
   key: string,
   propOptions: Object,
@@ -82,6 +89,24 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
   return typeof def === 'function' && getType(prop.type) !== 'Function'
     ? def.call(vm)
     : def
+}
+
+/**
+ * Assert whether a prop object keys are valid.
+ */
+export function assertPropObject (
+  propName: string,
+  prop: Object,
+  vm: ?Component
+) {
+  for (const key in prop) {
+    if (propOptionsNames.indexOf(key) === -1) {
+      warn(
+        `Invalid key "${key}" in validation rules object for prop "${propName}".`,
+        vm
+      )
+    }
+  }
 }
 
 /**
