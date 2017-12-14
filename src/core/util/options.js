@@ -260,8 +260,7 @@ export function validateComponentName (name: string) {
       'and must start with a letter.'
     )
   }
-  const lower = name.toLowerCase()
-  if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
+  if (isBuiltInTag(name) || config.isReservedTag(name)) {
     warn(
       'Do not use built-in or reserved HTML elements as component ' +
       'id: ' + name
