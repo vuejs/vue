@@ -4,6 +4,7 @@ import config from '../config'
 import { warn } from './debug'
 import { nativeWatch } from './env'
 import { set } from '../observer/index'
+import { assertPropObject } from './props'
 
 import {
   ASSET_TYPES,
@@ -285,6 +286,9 @@ function normalizeProps (options: Object, vm: ?Component) {
       res[name] = isPlainObject(val)
         ? val
         : { type: val }
+      if (process.env.NODE_ENV !== 'production') {
+        assertPropObject(res[name], name, vm)
+      }
     }
   } else if (process.env.NODE_ENV !== 'production') {
     warn(
