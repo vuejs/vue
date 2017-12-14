@@ -287,7 +287,7 @@ function normalizeProps (options: Object, vm: ?Component) {
         ? val
         : { type: val }
       if (process.env.NODE_ENV !== 'production') {
-        assertPropObject(res[name], name, vm)
+        assertPropObject(name, res[name], vm)
       }
     }
   } else if (process.env.NODE_ENV !== 'production') {

@@ -95,18 +95,18 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
  * Assert whether a prop object keys are valid.
  */
 export function assertPropObject (
+  propName: string,
   prop: Object,
-  key: string,
   vm: ?Component
 ) {
-  Object.keys(prop)
-    .filter(name => propOptionsNames.indexOf(name) === -1)
-    .forEach(name => {
+  for (const key in prop) {
+    if (propOptionsNames.indexOf(key) === -1) {
       warn(
-        'Invalid key "' + name + '" in validation rules object for prop "' + key + '".',
+        `Invalid key "${key}" in validation rules object for prop "${propName}".`,
         vm
       )
-    })
+    }
+  }
 }
 
 /**
