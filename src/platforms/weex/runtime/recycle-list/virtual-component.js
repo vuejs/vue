@@ -2,13 +2,14 @@
 
 // https://github.com/Hanks10100/weex-native-directive/tree/master/component
 
-import { mergeOptions } from 'core/util/index'
+import { mergeOptions, isPlainObject, noop } from 'core/util/index'
+import Watcher from 'core/observer/watcher'
 import { initProxy } from 'core/instance/proxy'
-import { initState } from 'core/instance/state'
+import { initState, getData } from 'core/instance/state'
 import { initRender } from 'core/instance/render'
 import { initEvents } from 'core/instance/events'
 import { initProvide, initInjections } from 'core/instance/inject'
-import { initLifecycle, mountComponent, callHook } from 'core/instance/lifecycle'
+import { initLifecycle, callHook } from 'core/instance/lifecycle'
 import { initInternalComponent, resolveConstructorOptions } from 'core/instance/init'
 import { registerComponentHook, updateComponentData } from '../../util/index'
 
@@ -55,8 +56,25 @@ function initVirtualComponent (options: Object = {}) {
   initProvide(vm) // resolve provide after data/props
   callHook(vm, 'created')
 
+  // send initial data to native
+  const data = vm.$options.data
+  const params = typeof data === 'function'
+    ? getData(data, vm)
+    : data || {}
+  if (isPlainObject(params)) {
+    updateComponentData(componentId, params)
+  }
+
   registerComponentHook(componentId, 'lifecycle', 'attach', () => {
-    mountComponent(vm)
+    callHook(vm, 'beforeMount')
+
+    const updateComponent = () => {
+      vm._update(vm._vnode, false)
+    }
+    new Watcher(vm, updateComponent, noop, null, true)
+
+    vm._isMounted = true
+    callHook(vm, 'mounted')
   })
 
   registerComponentHook(componentId, 'lifecycle', 'detach', () => {
@@ -65,25 +83,53 @@ function initVirtualComponent (options: Object = {}) {
 }
 
 // override Vue.prototype._update
-function updateVirtualComponent (vnode: VNode, hydrating?: boolean) {
-  // TODO
-  updateComponentData(this.$options.componentId, {})
+function updateVirtualComponent (vnode?: VNode) {
+  const vm: Component = this
+  const componentId = vm.$options.componentId
+  if (vm._isMounted) {
+    callHook(vm, 'beforeUpdate')
+  }
+  vm._vnode = vnode
+  if (vm._isMounted && componentId) {
+    // TODO: data should be filtered and without bindings
+    const data = Object.assign({}, vm._data)
+    updateComponentData(componentId, data, () => {
+      callHook(vm, 'updated')
+    })
+  }
 }
 
 // listening on native callback
 export function resolveVirtualComponent (vnode: MountedComponentVNode): VNode {
   const BaseCtor = vnode.componentOptions.Ctor
   const VirtualComponent = BaseCtor.extend({})
+  const cid = VirtualComponent.cid
   VirtualComponent.prototype._init = initVirtualComponent
   VirtualComponent.prototype._update = updateVirtualComponent
 
   vnode.componentOptions.Ctor = BaseCtor.extend({
     beforeCreate () {
-      registerComponentHook(VirtualComponent.cid, 'lifecycle', 'create', componentId => {
+      // const vm: Component = this
+
+      // TODO: listen on all events and dispatch them to the
+      // corresponding virtual components according to the componentId.
+      // vm._virtualComponents = {}
+      const createVirtualComponent = (componentId, propsData) => {
         // create virtual component
-        const options = { componentId }
-        return new VirtualComponent(options)
-      })
+        // const subVm =
+        new VirtualComponent({
+          componentId,
+          propsData
+        })
+        // if (vm._virtualComponents) {
+        //   vm._virtualComponents[componentId] = subVm
+        // }
+      }
+
+      registerComponentHook(cid, 'lifecycle', 'create', createVirtualComponent)
+    },
+    beforeDestroy () {
+      delete this._virtualComponents
     }
   })
 }

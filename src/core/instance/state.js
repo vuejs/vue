@@ -149,7 +149,7 @@ function initData (vm: Component) {
   observe(data, true /* asRootData */)
 }
 
-function getData (data: Function, vm: Component): any {
+export function getData (data: Function, vm: Component): any {
   try {
     return data.call(vm, vm)
   } catch (e) {

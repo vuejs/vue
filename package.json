@@ -125,7 +125,7 @@
     "typescript": "^2.6.1",
     "uglify-js": "^3.0.15",
     "webpack": "^2.6.1",
-    "weex-js-runtime": "^0.23.3",
+    "weex-js-runtime": "^0.23.5",
     "weex-styler": "^0.3.0"
   },
   "config": {
