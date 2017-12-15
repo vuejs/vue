@@ -107,8 +107,8 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
     <tr></tr>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://component.io/" target="_blank">
-          <img width="170px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/component_io.png">
+        <a href="https://anymod.com/" target="_blank">
+          <img width="170px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/anymod.png">
         </a>
       </td>
       <td align="center" valign="middle">
