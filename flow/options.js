@@ -11,6 +11,8 @@ declare type InternalComponentOptions = {
 type InjectKey = string | Symbol;
 
 declare type ComponentOptions = {
+  componentId?: string;
+
   // data
   data: Object | Function | void;
   props?: { [key: string]: PropOptions };

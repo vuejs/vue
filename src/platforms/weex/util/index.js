@@ -70,13 +70,17 @@ export function registerComponentHook (
 }
 
 // Updates the state of the component to weex native render engine.
-export function updateComponentData (componentId: string, newData: Object) {
+export function updateComponentData (
+  componentId: string,
+  newData: Object | void,
+  callback?: Function
+) {
   if (!document || !document.taskCenter) {
     warn(`Can't find available "document" or "taskCenter".`)
     return
   }
   if (typeof document.taskCenter.updateData === 'function') {
-    return document.taskCenter.updateData(componentId, newData)
+    return document.taskCenter.updateData(componentId, newData, callback)
   }
   warn(`Failed to update component data (${componentId}).`)
 }
