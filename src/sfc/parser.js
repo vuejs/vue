@@ -118,12 +118,12 @@ export function parseComponent (
 
   // set template property for backwards compat
   if (sfc.templates.length) {
-    sfc.template = sfc.templates[0]
+    sfc.template = sfc.templates[sfc.templates.length - 1]
   }
 
   // set script property for backwards compat
   if (sfc.scripts.length) {
-    sfc.script = sfc.scripts[0]
+    sfc.script = sfc.scripts[sfc.scripts.length - 1]
   }
 
   return sfc
