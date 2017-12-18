@@ -51,11 +51,6 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://deepstreamhub.com" target="_blank">
-          <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/deepstream.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://jsfiddle.net/">
           <img width="140px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
         </a>
@@ -75,14 +70,14 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
           <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
         </a>
       </td>
-    </tr>
-    <tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="https://starter.someline.com/">
           <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
         </a>
       </td>
+    </tr>
+    <tr></tr>
+    <tr>
       <td align="center" valign="middle">
         <a href="http://monterail.com/" target="_blank">
           <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
@@ -103,14 +98,14 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
           <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
         </a>
       </td>
-    </tr>
-    <tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="https://anymod.com/" target="_blank">
           <img width="170px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/anymod.png">
         </a>
       </td>
+    </tr>
+    <tr></tr>
+    <tr>
       <td align="center" valign="middle">
         <a href="https://www.xfive.co/" target="_blank">
           <img width="100px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/xfive.png">
@@ -127,8 +122,8 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://themeforest.net/item/clear-bootstrap-vuejs-admin-template/19339739?ref=jyostna&utm_source=vuejs&utm_campaign=vuejs_patreon&clickthrough_id=1113830525&redirect_back=true" target="_blank">
-          <img width="150px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejsadmin.png">
+        <a href="https://vuetifyjs.com/" target="_blank">
+          <img width="170px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuetify.png">
         </a>
       </td>
     </tr>
@@ -289,12 +284,12 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 
 <!--50 start-->
 - Wasim Khamlichi
-- errorrik
+- errorrik 
 - Alex Balashov
 - Konstantin Levinski
 - Samuel Smith
 - HARRI J SALOMAA
-- tjkoury
+- tjkoury 
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
@@ -320,13 +315,13 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Kirk Lewis
 - Karol F
 - Miljan Aleksic
-- 叶解
+- 叶解 
 - Paul Straw
 - Jake Ingman
 - Barbara Liau
 - Isaac Sant
 - Milos Stojanovic
-- 4
+- 4 
 - The Graphic Design School
 - Christian Griffith
 - Jarek Tkaczyk
@@ -342,12 +337,10 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Cheng-Wei Chien
 - Duncan J Kenzie
 - Mike Margerum
-- Cruz Eduardo Reveles Caldera
 - Guy Gavergun
-- Edithvale
+- Edithvale 
 - Intevation GmbH
 - Luiz Eduardo  Tanure Bacelar
-- Polo Rith
 - Chengzhi Yin
 - Dan Barrett
 - Zoran Knezevic
@@ -355,17 +348,14 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Pierre Vanhulst
 - Vincent Gabriel
 - Shinji Yamada
-- Michael Mazurczak
 - Chris Anderson
 - Jon Hobbs-Smith
 - Chez Tschetter
 - Akiho Nagao
 - Asaf Yishai
-- Diana Espino
 - Alexandre Madurell
 - Estebe Anthony
 - Haim Yulzari
-- Blake Camobell
 - David McGuigan
 - Jeremy Tan
 - Jim Raden
@@ -395,7 +385,6 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Cliff Hess
 - Joe Ray Gregory
 - Johnny Eshan
-- Alexander Karelas
 - Kamil Ocean
 - Orney Enrique martinez Said
 - Tom Striker
@@ -403,8 +392,9 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - RADD Creative
 - Maegan Wilson
 - Rua Cura D'ars
-- Arthur Tyukayev
 - Richard Simpson
+- Charles McKeever
+- Alok Pant
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>

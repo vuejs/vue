@@ -59,11 +59,6 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://deepstreamhub.com" target="_blank">
-          <img width="140px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/deepstream.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://jsfiddle.net/">
           <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
         </a>
@@ -88,14 +83,14 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
           <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/someline.png">
         </a>
       </td>
-    </tr>
-    <tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="http://monterail.com/" target="_blank">
           <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
         </a>
       </td>
+    </tr>
+    <tr></tr>
+    <tr>
       <td align="center" valign="middle">
         <a href="https://www.2mhost.com/" target="_blank">
           <img width="120px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/2mhost.png">
@@ -121,22 +116,22 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
           <img width="80px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/xfive.png">
         </a>
       </td>
-    </tr>
-    <tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="https://www.frontenddeveloperlove.com/" target="_blank">
           <img width="160px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/frontend-love.png">
         </a>
       </td>
+    </tr>
+    <tr></tr>
+    <tr>
       <td align="center" valign="middle">
         <a href="https://onsen.io/vue/" target="_blank">
           <img width="130px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/onsen-ui.png">
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://themeforest.net/item/clear-bootstrap-vuejs-admin-template/19339739?ref=jyostna&utm_source=vuejs.org&utm_campaign=vuejs_patreon" target="_blank">
-          <img width="150px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejsadmin.png">
+        <a href="https://vuetify.com" target="_blank">
+          <img width="130px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuetify.png">
         </a>
       </td>
     </tr>
