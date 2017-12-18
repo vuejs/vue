@@ -29,16 +29,20 @@ const argRE = /:(.*)$/
 const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
 
+const literalValueRE = /^(\{.*\}|\[.*\])$/
+
 const decodeHTMLCached = cached(he.decode)
 
 // configurable state
 export let warn: any
+let literalPropId
 let delimiters
 let transforms
 let preTransforms
 let postTransforms
 let platformIsPreTag
 let platformMustUseProp
+let platformIsReservedTag
 let platformGetTagNamespace
 
 type Attr = { name: string; value: string };
@@ -66,9 +70,11 @@ export function parse (
   options: CompilerOptions
 ): ASTElement | void {
   warn = options.warn || baseWarn
+  literalPropId = 0
 
   platformIsPreTag = options.isPreTag || no
   platformMustUseProp = options.mustUseProp || no
+  platformIsReservedTag = options.isReservedTag || no
   platformGetTagNamespace = options.getTagNamespace || no
 
   transforms = pluckModuleFunction(options.modules, 'transformNode')
@@ -528,6 +534,15 @@ function processAttrs (el) {
               genAssignmentCode(value, `$event`)
             )
           }
+        }
+        // optimize literal values in component props by wrapping them
+        // in an inline watcher to avoid unnecessary re-renders
+        if (
+          !platformIsReservedTag(el.tag) &&
+          el.tag !== 'slot' &&
+          literalValueRE.test(value.trim())
+        ) {
+          value = `_a(${literalPropId++},function(){return ${value}})`
         }
         if (isProp || (
           !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)

@@ -69,6 +69,7 @@ declare interface Component {
   _staticTrees: ?Array<VNode>; // v-once cached trees
   _hasHookEvent: boolean;
   _provided: ?Object;
+  _inlineComputed: ?{ [key: string]: Watcher }; // inline computed watchers for literal props
 
   // private methods
 
@@ -129,6 +130,8 @@ declare interface Component {
   _k: (eventKeyCode: number, key: string, builtInAlias?: number | Array<number>, eventKeyName?: string) => ?boolean;
   // resolve scoped slots
   _u: (scopedSlots: ScopedSlotsData, res?: Object) => { [key: string]: Function };
+  // create / return value from inline computed
+  _a: (id: number, getter: Function) => any;
 
   // SSR specific
   _ssrNode: Function;
