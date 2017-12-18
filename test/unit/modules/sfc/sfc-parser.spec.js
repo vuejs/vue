@@ -175,4 +175,18 @@ describe('Single File Component parser', () => {
     const res = parseComponent(`<template>hi</`)
     expect(res.template.content).toBe('hi')
   })
+
+  it('should parse multiple template blocks', () => {
+    const res = parseComponent(`<template></template>\n<template second="true"></template>`)
+
+    expect(res.templates.length).toBe(2)
+    expect(res.templates[1].attrs.second).toBe('true')
+  })
+
+  it('should parse multiple script blocks', () => {
+    const res = parseComponent(`<script></script>\n<script second="true"></script>`)
+
+    expect(res.scripts.length).toBe(2)
+    expect(res.scripts[1].attrs.second).toBe('true')
+  })
 })

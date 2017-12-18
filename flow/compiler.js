@@ -171,7 +171,9 @@ declare type ASTText = {
 // an object format describing a single-file component.
 declare type SFCDescriptor = {
   template: ?SFCBlock;
+  templates: Array<SFCBlock>;
   script: ?SFCBlock;
+  scripts: Array<SFCBlock>;
   styles: Array<SFCBlock>;
   customBlocks: Array<SFCBlock>;
 };
