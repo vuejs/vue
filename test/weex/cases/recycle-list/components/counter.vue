@@ -10,7 +10,7 @@
     props: ['start'],
     data () {
       return {
-        count: parseInt(this.start, 10) || 42
+        count: parseInt(this.start, 10) * 2 || 42
       }
     },
     methods: {

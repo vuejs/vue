@@ -36,7 +36,7 @@ describe('framework APIs', () => {
       type: 'div',
       children: [{
         type: 'text',
-        attr: { value: '{"bundleUrl":"http://example.com/","a":1,"b":2,"env":{}}' }
+        attr: { value: '{"bundleUrl":"http://example.com/","a":1,"b":2,"env":{},"bundleType":"Vue"}' }
       }]
     })
   })
@@ -170,6 +170,7 @@ describe('framework APIs', () => {
     `, { bundleUrl: 'http://whatever.com/x.js' })
     expect(JSON.parse(getRoot(instance).children[0].attr.value)).toEqual({
       bundleUrl: 'http://whatever.com/x.js',
+      bundleType: 'Vue',
       env: {
         weexVersion: '0.10.0',
         platform: 'Node.js'

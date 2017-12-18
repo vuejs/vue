@@ -70,6 +70,7 @@ declare interface Component {
   _hasHookEvent: boolean;
   _provided: ?Object;
   _inlineComputed: ?{ [key: string]: Watcher }; // inline computed watchers for literal props
+  // _virtualComponents?: { [key: string]: Component };
 
   // private methods
 
