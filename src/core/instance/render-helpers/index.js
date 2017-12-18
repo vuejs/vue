@@ -10,6 +10,7 @@ import { bindObjectProps } from './bind-object-props'
 import { renderStatic, markOnce } from './render-static'
 import { bindObjectListeners } from './bind-object-listeners'
 import { resolveScopedSlots } from './resolve-slots'
+import { createInlineComputed } from './create-inline-computed'
 
 export function installRenderHelpers (target: any) {
   target._o = markOnce
@@ -27,4 +28,5 @@ export function installRenderHelpers (target: any) {
   target._e = createEmptyVNode
   target._u = resolveScopedSlots
   target._g = bindObjectListeners
+  target._a = createInlineComputed
 }

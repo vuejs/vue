@@ -529,4 +529,38 @@ describe('Options props', () => {
     expect(`Invalid key "reqquired" in validation rules object for prop "value".`).toHaveBeenWarned()
     expect(`Invalid key "deafult" in validation rules object for prop "count".`).toHaveBeenWarned()
   })
+
+  it('should not trigger re-render on non-changed inline literals', done => {
+    const updated = jasmine.createSpy('updated')
+    const vm = new Vue({
+      data: {
+        n: 1,
+        m: 1
+      },
+      template: `
+        <div id="app">
+          {{ n }} {{ m }} <foo :a="{ n: 1 }" :b="{ n: n }"/>
+        </div>
+      `,
+      components: {
+        foo: {
+          props: ['a', 'b'],
+          updated,
+          template: `<div>{{ a.n }} {{ b.n }}</div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toContain('1 1 1 1')
+    vm.n++ // literals that actually contain changed reactive data should trigger update
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toContain('2 1 1 2')
+      expect(updated.calls.count()).toBe(1)
+    }).then(() => {
+      vm.m++ // changing data that does not affect any literals should not trigger update
+    }).then(() => {
+      expect(vm.$el.textContent).toContain('2 2 1 2')
+      expect(updated.calls.count()).toBe(1)
+    }).then(done)
+  })
 })
