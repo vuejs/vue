@@ -22,7 +22,9 @@ export function parseComponent (
 ): SFCDescriptor {
   const sfc: SFCDescriptor = {
     template: null,
+    templates: [],
     script: null,
+    scripts: [],
     styles: [],
     customBlocks: []
   }
@@ -50,8 +52,10 @@ export function parseComponent (
         checkAttrs(currentBlock, attrs)
         if (tag === 'style') {
           sfc.styles.push(currentBlock)
-        } else {
-          sfc[tag] = currentBlock
+        } else if (tag === 'script') {
+          sfc.scripts.push(currentBlock)
+        } else if (tag === 'template') {
+          sfc.templates.push(currentBlock)
         }
       } else { // custom blocks
         sfc.customBlocks.push(currentBlock)
@@ -111,6 +115,16 @@ export function parseComponent (
     start,
     end
   })
+
+  // set template property for backwards compat
+  if (sfc.templates.length) {
+    sfc.template = sfc.templates[sfc.templates.length - 1]
+  }
+
+  // set script property for backwards compat
+  if (sfc.scripts.length) {
+    sfc.script = sfc.scripts[sfc.scripts.length - 1]
+  }
 
   return sfc
 }
