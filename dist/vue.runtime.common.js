@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.5.12
+ * Vue.js v2.5.13
  * (c) 2014-2017 Evan You
  * Released under the MIT License.
  */
@@ -3275,7 +3275,6 @@ function proxy (target, sourceKey, key) {
 
 function initState (vm) {
   vm._watchers = [];
-  vm._inlineComputed = null;
   var opts = vm.$options;
   if (opts.props) { initProps(vm, opts.props); }
   if (opts.methods) { initMethods(vm, opts.methods); }
@@ -3912,32 +3911,6 @@ function bindObjectListeners (data, value) {
 
 /*  */
 
-/**
- * This runtime helper creates an inline computed property for component
- * props that contain object or array literals. The caching ensures the same
- * object/array is returned unless the value has indeed changed, thus avoiding
- * the child component to always re-render when comparing props values.
- *
- * Installed to the instance as _a, requires special handling in parser that
- * transforms the following
- *   <foo :bar="{ a: 1 }"/>
- * to:
- *   <foo :bar="_a(0, function(){return { a: 1 }})"
- */
-function createInlineComputed (id, getter) {
-  var vm = this;
-  var watchers = vm._inlineComputed || (vm._inlineComputed = {});
-  var cached$$1 = watchers[id];
-  if (cached$$1) {
-    return cached$$1.value
-  } else {
-    watchers[id] = new Watcher(vm, getter, noop, { sync: true });
-    return watchers[id].value
-  }
-}
-
-/*  */
-
 function installRenderHelpers (target) {
   target._o = markOnce;
   target._n = toNumber;
@@ -3954,7 +3927,6 @@ function installRenderHelpers (target) {
   target._e = createEmptyVNode;
   target._u = resolveScopedSlots;
   target._g = bindObjectListeners;
-  target._a = createInlineComputed;
 }
 
 /*  */
@@ -5037,7 +5009,7 @@ Object.defineProperty(Vue$3.prototype, '$ssrContext', {
   }
 });
 
-Vue$3.version = '2.5.12';
+Vue$3.version = '2.5.13';
 
 /*  */
 
