@@ -513,23 +513,6 @@ describe('Options props', () => {
     })
   })
 
-  it('should warn about misspelled keys in prop validation object', () => {
-    new Vue({
-      template: '<test></test>',
-      components: {
-        test: {
-          template: '<div></div>',
-          props: {
-            value: { reqquired: true },
-            count: { deafult: 1 }
-          }
-        }
-      }
-    }).$mount()
-    expect(`Invalid key "reqquired" in validation rules object for prop "value".`).toHaveBeenWarned()
-    expect(`Invalid key "deafult" in validation rules object for prop "count".`).toHaveBeenWarned()
-  })
-
   it('should not trigger re-render on non-changed inline literals', done => {
     const updated = jasmine.createSpy('updated')
     const vm = new Vue({

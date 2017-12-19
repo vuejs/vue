@@ -292,9 +292,6 @@ function normalizeProps (options: Object, vm: ?Component) {
     for (const key in props) {
       val = props[key]
       name = camelize(key)
-      if (process.env.NODE_ENV !== 'production' && isPlainObject(val)) {
-        validatePropObject(name, val, vm)
-      }
       res[name] = isPlainObject(val)
         ? val
         : { type: val }
@@ -307,26 +304,6 @@ function normalizeProps (options: Object, vm: ?Component) {
     )
   }
   options.props = res
-}
-
-/**
- * Validate whether a prop object keys are valid.
- */
-const propOptionsRE = /^(type|default|required|validator)$/
-
-function validatePropObject (
-  propName: string,
-  prop: Object,
-  vm: ?Component
-) {
-  for (const key in prop) {
-    if (!propOptionsRE.test(key)) {
-      warn(
-        `Invalid key "${key}" in validation rules object for prop "${propName}".`,
-        vm
-      )
-    }
-  }
 }
 
 /**
