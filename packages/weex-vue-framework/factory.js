@@ -335,6 +335,7 @@ var config = ({
   /**
    * Option merge strategies (used in core/util/options)
    */
+  // $flow-disable-line
   optionMergeStrategies: Object.create(null),
 
   /**
@@ -375,6 +376,7 @@ var config = ({
   /**
    * Custom user key aliases for v-on
    */
+  // $flow-disable-line
   keyCodes: Object.create(null),
 
   /**
@@ -809,8 +811,7 @@ var arrayMethods = Object.create(arrayProto);[
   'splice',
   'sort',
   'reverse'
-]
-.forEach(function (method) {
+].forEach(function (method) {
   // cache original method
   var original = arrayProto[method];
   def(arrayMethods, method, function mutator () {
@@ -1142,18 +1143,18 @@ function mergeDataOrFn (
     // it has to be a function to pass previous merges.
     return function mergedDataFn () {
       return mergeData(
-        typeof childVal === 'function' ? childVal.call(this) : childVal,
-        typeof parentVal === 'function' ? parentVal.call(this) : parentVal
+        typeof childVal === 'function' ? childVal.call(this, this) : childVal,
+        typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
       )
     }
   } else {
     return function mergedInstanceDataFn () {
       // instance merge
       var instanceData = typeof childVal === 'function'
-        ? childVal.call(vm)
+        ? childVal.call(vm, vm)
         : childVal;
       var defaultData = typeof parentVal === 'function'
-        ? parentVal.call(vm)
+        ? parentVal.call(vm, vm)
         : parentVal;
       if (instanceData) {
         return mergeData(instanceData, defaultData)
@@ -1305,13 +1306,23 @@ var defaultStrat = function (parentVal, childVal) {
  */
 function checkComponents (options) {
   for (var key in options.components) {
-    var lower = key.toLowerCase();
-    if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
-      warn(
-        'Do not use built-in or reserved HTML elements as component ' +
-        'id: ' + key
-      );
-    }
+    validateComponentName(key);
+  }
+}
+
+function validateComponentName (name) {
+  if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+    warn(
+      'Invalid component name: "' + name + '". Component names ' +
+      'can only contain alphanumeric characters and the hyphen, ' +
+      'and must start with a letter.'
+    );
+  }
+  if (isBuiltInTag(name) || config.isReservedTag(name)) {
+    warn(
+      'Do not use built-in or reserved HTML elements as component ' +
+      'id: ' + name
+    );
   }
 }
 
@@ -1339,6 +1350,9 @@ function normalizeProps (options, vm) {
     for (var key in props) {
       val = props[key];
       name = camelize(key);
+      if (process.env.NODE_ENV !== 'production' && isPlainObject(val)) {
+        validatePropObject(name, val, vm);
+      }
       res[name] = isPlainObject(val)
         ? val
         : { type: val };
@@ -1354,10 +1368,31 @@ function normalizeProps (options, vm) {
 }
 
 /**
+ * Validate whether a prop object keys are valid.
+ */
+var propOptionsRE = /^(type|default|required|validator)$/;
+
+function validatePropObject (
+  propName,
+  prop,
+  vm
+) {
+  for (var key in prop) {
+    if (!propOptionsRE.test(key)) {
+      warn(
+        ("Invalid key \"" + key + "\" in validation rules object for prop \"" + propName + "\"."),
+        vm
+      );
+    }
+  }
+}
+
+/**
  * Normalize all injections into Object-based format
  */
 function normalizeInject (options, vm) {
   var inject = options.inject;
+  if (!inject) { return }
   var normalized = options.inject = {};
   if (Array.isArray(inject)) {
     for (var i = 0; i < inject.length; i++) {
@@ -1370,7 +1405,7 @@ function normalizeInject (options, vm) {
         ? extend({ from: key }, val)
         : { from: val };
     }
-  } else if (process.env.NODE_ENV !== 'production' && inject) {
+  } else if (process.env.NODE_ENV !== 'production') {
     warn(
       "Invalid value for option \"inject\": expected an Array or an Object, " +
       "but got " + (toRawType(inject)) + ".",
@@ -1512,7 +1547,11 @@ function validateProp (
     observe(value);
     observerState.shouldConvert = prevShouldConvert;
   }
-  if (process.env.NODE_ENV !== 'production') {
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    // skip validation for weex recycle-list child component props
+    !(true && isObject(value) && ('@binding' in value))
+  ) {
     assertProp(prop, key, value, vm, absent);
   }
   return value
@@ -1990,6 +2029,7 @@ function updateListeners (
     def = cur = on[name];
     old = oldOn[name];
     event = normalizeEvent(name);
+    /* istanbul ignore if */
     if (true && isPlainObject(def)) {
       cur = def.handler;
       event.params = def.params;
@@ -2497,6 +2537,8 @@ function eventsMixin (Vue) {
 
 /*  */
 
+
+
 /**
  * Runtime helper for resolving raw children VNodes into a slot object.
  */
@@ -2520,10 +2562,10 @@ function resolveSlots (
     if ((child.context === context || child.fnContext === context) &&
       data && data.slot != null
     ) {
-      var name = child.data.slot;
+      var name = data.slot;
       var slot = (slots[name] || (slots[name] = []));
       if (child.tag === 'template') {
-        slot.push.apply(slot, child.children);
+        slot.push.apply(slot, child.children || []);
       } else {
         slot.push(child);
       }
@@ -3248,6 +3290,7 @@ function proxy (target, sourceKey, key) {
 
 function initState (vm) {
   vm._watchers = [];
+  vm._inlineComputed = null;
   var opts = vm.$options;
   if (opts.props) { initProps(vm, opts.props); }
   if (opts.methods) { initMethods(vm, opts.methods); }
@@ -3364,6 +3407,7 @@ function getData (data, vm) {
 var computedWatcherOptions = { lazy: true };
 
 function initComputed (vm, computed) {
+  // $flow-disable-line
   var watchers = vm._computedWatchers = Object.create(null);
   // computed properties are just getters during SSR
   var isSSR = isServerRendering();
@@ -3594,11 +3638,11 @@ function resolveInject (inject, vm) {
     // inject is :any because flow is not smart enough to figure out cached
     var result = Object.create(null);
     var keys = hasSymbol
-        ? Reflect.ownKeys(inject).filter(function (key) {
-          /* istanbul ignore next */
-          return Object.getOwnPropertyDescriptor(inject, key).enumerable
-        })
-        : Object.keys(inject);
+      ? Reflect.ownKeys(inject).filter(function (key) {
+        /* istanbul ignore next */
+        return Object.getOwnPropertyDescriptor(inject, key).enumerable
+      })
+      : Object.keys(inject);
 
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
@@ -3804,19 +3848,9 @@ function bindObjectProps (
  */
 function renderStatic (
   index,
-  isInFor,
-  isOnce
+  isInFor
 ) {
-  // render fns generated by compiler < 2.5.4 does not provide v-once
-  // information to runtime so be conservative
-  var isOldVersion = arguments.length < 3;
-  // if a static tree is generated by v-once, it is cached on the instance;
-  // otherwise it is purely static and can be cached on the shared options
-  // across all instances.
-  var renderFns = this.$options.staticRenderFns;
-  var cached = isOldVersion || isOnce
-    ? (this._staticTrees || (this._staticTrees = []))
-    : (renderFns.cached || (renderFns.cached = []));
+  var cached = this._staticTrees || (this._staticTrees = []);
   var tree = cached[index];
   // if has already-rendered static tree and not inside v-for,
   // we can reuse the same tree by doing a shallow clone.
@@ -3826,7 +3860,11 @@ function renderStatic (
       : cloneVNode(tree)
   }
   // otherwise, render a fresh tree.
-  tree = cached[index] = renderFns[index].call(this._renderProxy, null, this);
+  tree = cached[index] = this.$options.staticRenderFns[index].call(
+    this._renderProxy,
+    null,
+    this // for render fns generated for functional component templates
+  );
   markStatic(tree, ("__static__" + index), false);
   return tree
 }
@@ -3889,6 +3927,32 @@ function bindObjectListeners (data, value) {
 
 /*  */
 
+/**
+ * This runtime helper creates an inline computed property for component
+ * props that contain object or array literals. The caching ensures the same
+ * object/array is returned unless the value has indeed changed, thus avoiding
+ * the child component to always re-render when comparing props values.
+ *
+ * Installed to the instance as _a, requires special handling in parser that
+ * transforms the following
+ *   <foo :bar="{ a: 1 }"/>
+ * to:
+ *   <foo :bar="_a(0, function(){return { a: 1 }})"
+ */
+function createInlineComputed (id, getter) {
+  var vm = this;
+  var watchers = vm._inlineComputed || (vm._inlineComputed = {});
+  var cached$$1 = watchers[id];
+  if (cached$$1) {
+    return cached$$1.value
+  } else {
+    watchers[id] = new Watcher(vm, getter, noop, { sync: true });
+    return watchers[id].value
+  }
+}
+
+/*  */
+
 function installRenderHelpers (target) {
   target._o = markOnce;
   target._n = toNumber;
@@ -3905,6 +3969,7 @@ function installRenderHelpers (target) {
   target._e = createEmptyVNode;
   target._u = resolveScopedSlots;
   target._g = bindObjectListeners;
+  target._a = createInlineComputed;
 }
 
 /*  */
@@ -3999,6 +4064,201 @@ function createFunctionalComponent (
 function mergeProps (to, from) {
   for (var key in from) {
     to[camelize(key)] = from[key];
+  }
+}
+
+/*  */
+
+
+var RECYCLE_LIST_MARKER = '@inRecycleList';
+
+// Register the component hook to weex native render engine.
+// The hook will be triggered by native, not javascript.
+function registerComponentHook (
+  componentId,
+  type, // hook type, could be "lifecycle" or "instance"
+  hook, // hook name
+  fn
+) {
+  if (!document || !document.taskCenter) {
+    warn("Can't find available \"document\" or \"taskCenter\".");
+    return
+  }
+  if (typeof document.taskCenter.registerHook === 'function') {
+    return document.taskCenter.registerHook(componentId, type, hook, fn)
+  }
+  warn(("Failed to register component hook \"" + type + "@" + hook + "#" + componentId + "\"."));
+}
+
+// Updates the state of the component to weex native render engine.
+function updateComponentData (
+  componentId,
+  newData,
+  callback
+) {
+  if (!document || !document.taskCenter) {
+    warn("Can't find available \"document\" or \"taskCenter\".");
+    return
+  }
+  if (typeof document.taskCenter.updateData === 'function') {
+    return document.taskCenter.updateData(componentId, newData, callback)
+  }
+  warn(("Failed to update component data (" + componentId + ")."));
+}
+
+/*  */
+
+// https://github.com/Hanks10100/weex-native-directive/tree/master/component
+
+var uid$3 = 0;
+
+// override Vue.prototype._init
+function initVirtualComponent (options) {
+  if ( options === void 0 ) options = {};
+
+  var vm = this;
+  var componentId = options.componentId;
+
+  // virtual component uid
+  vm._uid = "virtual-component-" + (uid$3++);
+
+  // a flag to avoid this being observed
+  vm._isVue = true;
+  // merge options
+  if (options && options._isComponent) {
+    // optimize internal component instantiation
+    // since dynamic options merging is pretty slow, and none of the
+    // internal component options needs special treatment.
+    initInternalComponent(vm, options);
+  } else {
+    vm.$options = mergeOptions(
+      resolveConstructorOptions(vm.constructor),
+      options || {},
+      vm
+    );
+  }
+
+  /* istanbul ignore else */
+  if (process.env.NODE_ENV !== 'production') {
+    initProxy(vm);
+  } else {
+    vm._renderProxy = vm;
+  }
+
+  vm._self = vm;
+  initLifecycle(vm);
+  initEvents(vm);
+  initRender(vm);
+  callHook(vm, 'beforeCreate');
+  initInjections(vm); // resolve injections before data/props
+  initState(vm);
+  initProvide(vm); // resolve provide after data/props
+  callHook(vm, 'created');
+
+  // send initial data to native
+  var data = vm.$options.data;
+  var params = typeof data === 'function'
+    ? getData(data, vm)
+    : data || {};
+  if (isPlainObject(params)) {
+    updateComponentData(componentId, params);
+  }
+
+  registerComponentHook(componentId, 'lifecycle', 'attach', function () {
+    callHook(vm, 'beforeMount');
+
+    var updateComponent = function () {
+      vm._update(vm._vnode, false);
+    };
+    new Watcher(vm, updateComponent, noop, null, true);
+
+    vm._isMounted = true;
+    callHook(vm, 'mounted');
+  });
+
+  registerComponentHook(componentId, 'lifecycle', 'detach', function () {
+    vm.$destroy();
+  });
+}
+
+// override Vue.prototype._update
+function updateVirtualComponent (vnode) {
+  var vm = this;
+  var componentId = vm.$options.componentId;
+  if (vm._isMounted) {
+    callHook(vm, 'beforeUpdate');
+  }
+  vm._vnode = vnode;
+  if (vm._isMounted && componentId) {
+    // TODO: data should be filtered and without bindings
+    var data = Object.assign({}, vm._data);
+    updateComponentData(componentId, data, function () {
+      callHook(vm, 'updated');
+    });
+  }
+}
+
+// listening on native callback
+function resolveVirtualComponent (vnode) {
+  var BaseCtor = vnode.componentOptions.Ctor;
+  var VirtualComponent = BaseCtor.extend({});
+  var cid = VirtualComponent.cid;
+  VirtualComponent.prototype._init = initVirtualComponent;
+  VirtualComponent.prototype._update = updateVirtualComponent;
+
+  vnode.componentOptions.Ctor = BaseCtor.extend({
+    beforeCreate: function beforeCreate () {
+      // const vm: Component = this
+
+      // TODO: listen on all events and dispatch them to the
+      // corresponding virtual components according to the componentId.
+      // vm._virtualComponents = {}
+      var createVirtualComponent = function (componentId, propsData) {
+        // create virtual component
+        // const subVm =
+        new VirtualComponent({
+          componentId: componentId,
+          propsData: propsData
+        });
+        // if (vm._virtualComponents) {
+        //   vm._virtualComponents[componentId] = subVm
+        // }
+      };
+
+      registerComponentHook(cid, 'lifecycle', 'create', createVirtualComponent);
+    },
+    beforeDestroy: function beforeDestroy () {
+      delete this._virtualComponents;
+    }
+  });
+}
+
+/*  */
+
+function isRecyclableComponent (vnode) {
+  return vnode.data.attrs
+    ? (RECYCLE_LIST_MARKER in vnode.data.attrs)
+    : false
+}
+
+function renderRecyclableComponentTemplate (vnode) {
+  // $flow-disable-line
+  delete vnode.data.attrs[RECYCLE_LIST_MARKER];
+  resolveVirtualComponent(vnode);
+  var vm = createComponentInstanceForVnode(vnode);
+  var render = (vm.$options)['@render'];
+  if (render) {
+    try {
+      return render.call(vm)
+    } catch (err) {
+      handleError(err, vm, "@render");
+    }
+  } else {
+    warn(
+      "@render function not defined on component used in <recycle-list>. " +
+      "Make sure to declare `recyclable=\"true\"` on the component's template.",
+      vm
+    );
   }
 }
 
@@ -4122,21 +4382,6 @@ function createComponent (
 
   data = data || {};
 
-  // recycle-list optimized render function for extracting cell-slot
-  // template. This is essentially inline expanding instead of creating
-  // an actual instance.
-  // https://github.com/Hanks10100/weex-native-directive/tree/master/component
-  if (true && data.attrs && data.attrs['@isInRecycleList']) {
-    var altRender = Ctor.options['@render'];
-    if (altRender) {
-      return altRender.call(
-        context,
-        context.$createElement,
-        data.attrs
-      )
-    }
-  }
-
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
   resolveConstructorOptions(Ctor);
@@ -4184,6 +4429,15 @@ function createComponent (
     { Ctor: Ctor, propsData: propsData, listeners: listeners, tag: tag, children: children },
     asyncFactory
   );
+
+  // Weex specific: invoke recycle-list optimized @render function for
+  // extracting cell-slot template.
+  // https://github.com/Hanks10100/weex-native-directive/tree/master/component
+  /* istanbul ignore if */
+  if (true && isRecyclableComponent(vnode)) {
+    return renderRecyclableComponentTemplate(vnode)
+  }
+
   return vnode
 }
 
@@ -4193,15 +4447,10 @@ function createComponentInstanceForVnode (
   parentElm,
   refElm
 ) {
-  var vnodeComponentOptions = vnode.componentOptions;
   var options = {
     _isComponent: true,
     parent: parent,
-    propsData: vnodeComponentOptions.propsData,
-    _componentTag: vnodeComponentOptions.tag,
     _parentVnode: vnode,
-    _parentListeners: vnodeComponentOptions.listeners,
-    _renderChildren: vnodeComponentOptions.children,
     _parentElm: parentElm || null,
     _refElm: refElm || null
   };
@@ -4211,7 +4460,7 @@ function createComponentInstanceForVnode (
     options.render = inlineTemplate.render;
     options.staticRenderFns = inlineTemplate.staticRenderFns;
   }
-  return new vnodeComponentOptions.Ctor(options)
+  return new vnode.componentOptions.Ctor(options)
 }
 
 function mergeHooks (data) {
@@ -4547,14 +4796,18 @@ function initMixin (Vue) {
 function initInternalComponent (vm, options) {
   var opts = vm.$options = Object.create(vm.constructor.options);
   // doing this because it's faster than dynamic enumeration.
+  var parentVnode = options._parentVnode;
   opts.parent = options.parent;
-  opts.propsData = options.propsData;
-  opts._parentVnode = options._parentVnode;
-  opts._parentListeners = options._parentListeners;
-  opts._renderChildren = options._renderChildren;
-  opts._componentTag = options._componentTag;
+  opts._parentVnode = parentVnode;
   opts._parentElm = options._parentElm;
   opts._refElm = options._refElm;
+
+  var vnodeComponentOptions = parentVnode.componentOptions;
+  opts.propsData = vnodeComponentOptions.propsData;
+  opts._parentListeners = vnodeComponentOptions.listeners;
+  opts._renderChildren = vnodeComponentOptions.children;
+  opts._componentTag = vnodeComponentOptions.tag;
+
   if (options.render) {
     opts.render = options.render;
     opts.staticRenderFns = options.staticRenderFns;
@@ -4688,14 +4941,8 @@ function initExtend (Vue) {
     }
 
     var name = extendOptions.name || Super.options.name;
-    if (process.env.NODE_ENV !== 'production') {
-      if (!/^[a-zA-Z][\w-]*$/.test(name)) {
-        warn(
-          'Invalid component name: "' + name + '". Component names ' +
-          'can only contain alphanumeric characters and the hyphen, ' +
-          'and must start with a letter.'
-        );
-      }
+    if (process.env.NODE_ENV !== 'production' && name) {
+      validateComponentName(name);
     }
 
     var Sub = function VueComponent (options) {
@@ -4777,13 +5024,8 @@ function initAssetRegisters (Vue) {
         return this.options[type + 's'][id]
       } else {
         /* istanbul ignore if */
-        if (process.env.NODE_ENV !== 'production') {
-          if (type === 'component' && config.isReservedTag(id)) {
-            warn(
-              'Do not use built-in or reserved HTML elements as component ' +
-              'id: ' + id
-            );
-          }
+        if (process.env.NODE_ENV !== 'production' && type === 'component') {
+          validateComponentName(id);
         }
         if (type === 'component' && isPlainObject(definition)) {
           definition.name = definition.name || id;
@@ -4990,7 +5232,7 @@ Object.defineProperty(Vue$2.prototype, '$ssrContext', {
   }
 });
 
-Vue$2.version = '2.5.8';
+Vue$2.version = '2.5.11';
 
 var latestNodeId = 1;
 
@@ -5422,6 +5664,9 @@ function createPatchFunction (backend) {
 
   function createChildren (vnode, children, insertedVnodeQueue) {
     if (Array.isArray(children)) {
+      if (process.env.NODE_ENV !== 'production') {
+        checkDuplicateKeys(children);
+      }
       for (var i = 0; i < children.length; ++i) {
         createElm(children[i], insertedVnodeQueue, vnode.elm, null, true);
       }
@@ -5553,6 +5798,10 @@ function createPatchFunction (backend) {
     // during leaving transitions
     var canMove = !removeOnly;
 
+    if (process.env.NODE_ENV !== 'production') {
+      checkDuplicateKeys(newCh);
+    }
+
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
       if (isUndef(oldStartVnode)) {
         oldStartVnode = oldCh[++oldStartIdx]; // Vnode has been moved left
@@ -5585,13 +5834,6 @@ function createPatchFunction (backend) {
           createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm);
         } else {
           vnodeToMove = oldCh[idxInOld];
-          /* istanbul ignore if */
-          if (process.env.NODE_ENV !== 'production' && !vnodeToMove) {
-            warn(
-              'It seems there are duplicate keys that is causing an update error. ' +
-              'Make sure each v-for item has a unique key.'
-            );
-          }
           if (sameVnode(vnodeToMove, newStartVnode)) {
             patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue);
             oldCh[idxInOld] = undefined;
@@ -5609,6 +5851,24 @@ function createPatchFunction (backend) {
       addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);
     } else if (newStartIdx > newEndIdx) {
       removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx);
+    }
+  }
+
+  function checkDuplicateKeys (children) {
+    var seenKeys = {};
+    for (var i = 0; i < children.length; i++) {
+      var vnode = children[i];
+      var key = vnode.key;
+      if (isDef(key)) {
+        if (seenKeys[key]) {
+          warn(
+            ("Duplicate keys detected: '" + key + "'. This may cause an update error."),
+            vnode.context
+          );
+        } else {
+          seenKeys[key] = true;
+        }
+      }
     }
   }
 
@@ -5994,17 +6254,20 @@ function normalizeDirectives$1 (
 ) {
   var res = Object.create(null);
   if (!dirs) {
+    // $flow-disable-line
     return res
   }
   var i, dir;
   for (i = 0; i < dirs.length; i++) {
     dir = dirs[i];
     if (!dir.modifiers) {
+      // $flow-disable-line
       dir.modifiers = emptyModifiers;
     }
     res[getRawDirName(dir)] = dir;
     dir.def = resolveAsset(vm.$options, 'directives', dir.name, true);
   }
+  // $flow-disable-line
   return res
 }
 
@@ -6323,11 +6586,25 @@ var autoCssTransition = cached(function (name) {
   }
 });
 
-
+var hasTransition = inBrowser && !isIE9;
 // Transition property/event sniffing
 
 
 
+
+if (hasTransition) {
+  /* istanbul ignore if */
+  if (window.ontransitionend === undefined &&
+    window.onwebkittransitionend !== undefined
+  ) {
+    
+  }
+  if (window.onanimationend === undefined &&
+    window.onwebkitanimationend !== undefined
+  ) {
+    
+  }
+}
 
 // binding to window is necessary to make hot reload work in IE in strict mode
 var raf = inBrowser
@@ -6977,7 +7254,7 @@ var TransitionGroup = {
       this._vnode,
       this.kept,
       false, // hydrating
-      true // removeOnly (!important, avoids unnecessary moves)
+      true // removeOnly (!important avoids unnecessary moves)
     );
     this._vnode = this.kept;
   },
@@ -7049,7 +7326,11 @@ var platformComponents = {
   TransitionGroup: TransitionGroup
 };
 
-/* globals document */
+/*  */
+
+// These util functions are split into its own file because Rollup cannot drop
+// makeMap() due to potential side effects, so these variables end up
+// bloating the web builds.
 
 var isReservedTag$1 = makeMap(
   'template,script,style,element,content,slot,link,meta,svg,view,' +
@@ -7078,9 +7359,15 @@ var isUnaryTag = makeMap(
   true
 );
 
-function mustUseProp () { /* console.log('mustUseProp') */ }
+function mustUseProp (tag, type, name) {
+  return false
+}
 
-function isUnknownElement$1 () { /* console.log('isUnknownElement') */ }
+
+
+function isUnknownElement$1 (tag) {
+  return false
+}
 
 function query (el, document) {
   // document is injected by weex factory wrapper

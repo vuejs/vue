@@ -69,11 +69,7 @@ function createInstance (
   }, timerAPIs, env.services);
 
   appCode = "(function(global){ \n" + appCode + "\n })(Object.create(this))";
-
   callFunction(instanceVars, appCode);
-
-  // Send `createFinish` signal to native.
-  document.taskCenter.send('dom', { action: 'createFinish' }, []);
 
   return instance
 }
@@ -168,6 +164,16 @@ function createVueModuleInstance (instanceId, weex) {
         options.data = Object.assign(internalData, instance.data);
         // record instance by id
         instance.app = this;
+      }
+    },
+    mounted: function mounted () {
+      var options = this.$options;
+      // root component (vm)
+      if (options.el && weex.document) {
+        try {
+          // Send "createFinish" signal to native.
+          weex.document.taskCenter.send('dom', { action: 'createFinish' }, []);
+        } catch (e) {}
       }
     }
   });
