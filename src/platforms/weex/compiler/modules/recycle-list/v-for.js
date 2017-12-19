@@ -1,6 +1,6 @@
 /* @flow */
 
-import { forAliasRE, forIteratorRE, stripParensRE } from 'compiler/parser/index'
+import { parseFor } from 'compiler/parser/index'
 import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
 
 export function preTransformVFor (el: ASTElement, options: WeexCompilerOptions) {
@@ -8,26 +8,26 @@ export function preTransformVFor (el: ASTElement, options: WeexCompilerOptions) 
   if (!exp) {
     return
   }
-  const inMatch = exp.match(forAliasRE)
-  if (inMatch) {
-    const alias = inMatch[1].trim().replace(stripParensRE, '')
-    const desc: Object = {
-      '@expression': inMatch[2].trim(),
-      '@alias': alias
+
+  const res = parseFor(exp)
+  if (!res) {
+    if (process.env.NODE_ENV !== 'production' && options.warn) {
+      options.warn(`Invalid v-for expression: ${exp}`)
     }
-    const iteratorMatch = alias.match(forIteratorRE)
-    if (iteratorMatch) {
-      desc['@alias'] = alias.replace(forIteratorRE, '')
-      if (iteratorMatch[2]) {
-        desc['@key'] = iteratorMatch[1].trim()
-        desc['@index'] = iteratorMatch[2].trim()
-      } else {
-        desc['@index'] = iteratorMatch[1].trim()
-      }
-    }
-    delete el.attrsMap['v-for']
-    addRawAttr(el, '[[repeat]]', desc)
-  } else if (process.env.NODE_ENV !== 'production' && options.warn) {
-    options.warn(`Invalid v-for expression: ${exp}`)
+    return
   }
+
+  const desc: Object = {
+    '@expression': res.for,
+    '@alias': res.alias
+  }
+  if (res.iterator2) {
+    desc['@key'] = res.iterator1
+    desc['@index'] = res.iterator2
+  } else {
+    desc['@index'] = res.iterator1
+  }
+
+  delete el.attrsMap['v-for']
+  addRawAttr(el, '[[repeat]]', desc)
 }
