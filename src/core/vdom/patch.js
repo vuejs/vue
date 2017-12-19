@@ -270,7 +270,7 @@ export function createPatchFunction (backend) {
         createElm(children[i], insertedVnodeQueue, vnode.elm, null, true)
       }
     } else if (isPrimitive(vnode.text)) {
-      nodeOps.appendChild(vnode.elm, nodeOps.createTextNode(vnode.text))
+      nodeOps.appendChild(vnode.elm, nodeOps.createTextNode(String(vnode.text)))
     }
   }
 
