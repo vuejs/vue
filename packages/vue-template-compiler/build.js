@@ -2268,20 +2268,16 @@ var argRE = /:(.*)$/;
 var bindRE = /^:|^v-bind:/;
 var modifierRE = /\.[^.]+/g;
 
-var literalValueRE = /^(\{.*\}|\[.*\])$/;
-
 var decodeHTMLCached = cached(he.decode);
 
 // configurable state
 var warn$1;
-var literalPropId;
 var delimiters;
 var transforms;
 var preTransforms;
 var postTransforms;
 var platformIsPreTag;
 var platformMustUseProp;
-var platformIsReservedTag;
 var platformGetTagNamespace;
 
 
@@ -2309,11 +2305,9 @@ function parse (
   options
 ) {
   warn$1 = options.warn || baseWarn;
-  literalPropId = 0;
 
   platformIsPreTag = options.isPreTag || no;
   platformMustUseProp = options.mustUseProp || no;
-  platformIsReservedTag = options.isReservedTag || no;
   platformGetTagNamespace = options.getTagNamespace || no;
 
   transforms = pluckModuleFunction(options.modules, 'transformNode');
@@ -2781,15 +2775,6 @@ function processAttrs (el) {
               genAssignmentCode(value, "$event")
             );
           }
-        }
-        // optimize literal values in component props by wrapping them
-        // in an inline watcher to avoid unnecessary re-renders
-        if (
-          !platformIsReservedTag(el.tag) &&
-          el.tag !== 'slot' &&
-          literalValueRE.test(value.trim())
-        ) {
-          value = "_a(" + (literalPropId++) + ",function(){return " + value + "})";
         }
         if (isProp || (
           !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
