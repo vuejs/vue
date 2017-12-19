@@ -64,6 +64,18 @@ export interface Vue {
 export type CombinedVueInstance<Instance extends Vue, Data, Methods, Computed, Props> =  Data & Methods & Computed & Props & Instance;
 export type ExtendedVue<Instance extends Vue, Data, Methods, Computed, Props> = VueConstructor<CombinedVueInstance<Instance, Data, Methods, Computed, Props> & Vue>;
 
+export interface VueConfiguration {
+  silent: boolean;
+  optionMergeStrategies: any;
+  devtools: boolean;
+  productionTip: boolean;
+  performance: boolean;
+  errorHandler(err: Error, vm: Vue, info: string): void;
+  warnHandler(msg: string, vm: Vue, trace: string): void;
+  ignoredElements: (string | RegExp)[];
+  keyCodes: { [key: string]: number | number[] };
+}
+
 export interface VueConstructor<V extends Vue = Vue> {
   new <Data = object, Methods = object, Computed = object, PropNames extends string = never>(options?: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames>): CombinedVueInstance<V, Data, Methods, Computed, Record<PropNames, any>>;
   // ideally, the return type should just contains Props, not Record<keyof Props, any>. But TS requires Base constructors must all have the same return type.
@@ -106,17 +118,7 @@ export interface VueConstructor<V extends Vue = Vue> {
     staticRenderFns: (() => VNode)[];
   };
 
-  config: {
-    silent: boolean;
-    optionMergeStrategies: any;
-    devtools: boolean;
-    productionTip: boolean;
-    performance: boolean;
-    errorHandler(err: Error, vm: Vue, info: string): void;
-    warnHandler(msg: string, vm: Vue, trace: string): void;
-    ignoredElements: (string | RegExp)[];
-    keyCodes: { [key: string]: number | number[] };
-  }
+  config: VueConfiguration;
 }
 
 export const Vue: VueConstructor;
