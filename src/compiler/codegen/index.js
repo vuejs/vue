@@ -487,11 +487,17 @@ function genProps (props: Array<{ name: string, value: any }>): string {
   let res = ''
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
-    res += `"${prop.name}":${generateValue(prop.value)},`
+    /* istanbul ignore if */
+    if (__WEEX__) {
+      res += `"${prop.name}":${generateValue(prop.value)},`
+    } else {
+      res += `"${prop.name}":${transformSpecialNewlines(prop.value)},`
+    }
   }
   return res.slice(0, -1)
 }
 
+/* istanbul ignore next */
 function generateValue (value) {
   if (typeof value === 'string') {
     return transformSpecialNewlines(value)

@@ -12,7 +12,7 @@ import {
   isReservedTag,
   canBeLeftOpenTag,
   getTagNamespace
-} from '../util/index'
+} from '../util/element'
 
 export const baseOptions: WeexCompilerOptions = {
   modules,
