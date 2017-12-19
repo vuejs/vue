@@ -142,17 +142,9 @@ var camelize = cached(function (str) {
 /**
  * Capitalize a string.
  */
-var capitalize = cached(function (str) {
-  return str.charAt(0).toUpperCase() + str.slice(1)
-});
 
-/**
- * Hyphenate a camelCase string.
- */
-var hyphenateRE = /\B([A-Z])/g;
-var hyphenate = cached(function (str) {
-  return str.replace(hyphenateRE, '-$1').toLowerCase()
-});
+
+
 
 /**
  * Simple bind, faster than native
@@ -896,7 +888,7 @@ var isServerRendering = function () {
 };
 
 // detect devtools
-
+var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
 
 /* istanbul ignore next */
 function isNative (Ctor) {
@@ -907,29 +899,13 @@ var hasSymbol =
   typeof Symbol !== 'undefined' && isNative(Symbol) &&
   typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys);
 
-var _Set;
 /* istanbul ignore if */ // $flow-disable-line
 if (typeof Set !== 'undefined' && isNative(Set)) {
   // use native Set when available.
-  _Set = Set;
+  
 } else {
   // a non-standard Set polyfill that only works with primitive keys.
-  _Set = (function () {
-    function Set () {
-      this.set = Object.create(null);
-    }
-    Set.prototype.has = function has (key) {
-      return this.set[key] === true
-    };
-    Set.prototype.add = function add (key) {
-      this.set[key] = true;
-    };
-    Set.prototype.clear = function clear () {
-      this.set = Object.create(null);
-    };
-
-    return Set;
-  }());
+  
 }
 
 /*  */
@@ -949,10 +925,18 @@ function pluckModuleFunction (
 
 function addProp (el, name, value) {
   (el.props || (el.props = [])).push({ name: name, value: value });
+  el.plain = false;
 }
 
 function addAttr (el, name, value) {
   (el.attrs || (el.attrs = [])).push({ name: name, value: value });
+  el.plain = false;
+}
+
+// add a raw attr (use this in preTransforms)
+function addRawAttr (el, name, value) {
+  el.attrsMap[name] = value;
+  el.attrsList.push({ name: name, value: value });
 }
 
 function addDirective (
@@ -964,6 +948,7 @@ function addDirective (
   modifiers
 ) {
   (el.directives || (el.directives = [])).push({ name: name, rawName: rawName, value: value, arg: arg, modifiers: modifiers });
+  el.plain = false;
 }
 
 function addHandler (
@@ -1036,6 +1021,8 @@ function addHandler (
   } else {
     events[name] = newHandler;
   }
+
+  el.plain = false;
 }
 
 function getBindingAttr (
@@ -1086,22 +1073,27 @@ function getAndRemoveAttr (
 var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:/;
 var forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/;
-var forIteratorRE = /\((\{[^}]*\}|[^,]*),([^,]*)(?:,([^,]*))?\)/;
+var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
+var stripParensRE = /^\(|\)$/g;
 
 var argRE = /:(.*)$/;
 var bindRE = /^:|^v-bind:/;
 var modifierRE = /\.[^.]+/g;
 
+var literalValueRE = /^(\{.*\}|\[.*\])$/;
+
 var decodeHTMLCached = cached(he.decode);
 
 // configurable state
 var warn;
+var literalPropId;
 var delimiters;
 var transforms;
 var preTransforms;
 var postTransforms;
 var platformIsPreTag;
 var platformMustUseProp;
+var platformIsReservedTag;
 var platformGetTagNamespace;
 
 
@@ -1129,9 +1121,11 @@ function parse (
   options
 ) {
   warn = options.warn || baseWarn;
+  literalPropId = 0;
 
   platformIsPreTag = options.isPreTag || no;
   platformMustUseProp = options.mustUseProp || no;
+  platformIsReservedTag = options.isReservedTag || no;
   platformGetTagNamespace = options.getTagNamespace || no;
 
   transforms = pluckModuleFunction(options.modules, 'transformNode');
@@ -1411,26 +1405,34 @@ function processRef (el) {
 function processFor (el) {
   var exp;
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
-    var inMatch = exp.match(forAliasRE);
-    if (!inMatch) {
-      process.env.NODE_ENV !== 'production' && warn(
+    var res = parseFor(exp);
+    if (res) {
+      extend(el, res);
+    } else if (process.env.NODE_ENV !== 'production') {
+      warn(
         ("Invalid v-for expression: " + exp)
       );
-      return
-    }
-    el.for = inMatch[2].trim();
-    var alias = inMatch[1].trim();
-    var iteratorMatch = alias.match(forIteratorRE);
-    if (iteratorMatch) {
-      el.alias = iteratorMatch[1].trim();
-      el.iterator1 = iteratorMatch[2].trim();
-      if (iteratorMatch[3]) {
-        el.iterator2 = iteratorMatch[3].trim();
-      }
-    } else {
-      el.alias = alias;
     }
   }
+}
+
+function parseFor (exp) {
+  var inMatch = exp.match(forAliasRE);
+  if (!inMatch) { return }
+  var res = {};
+  res.for = inMatch[2].trim();
+  var alias = inMatch[1].trim().replace(stripParensRE, '');
+  var iteratorMatch = alias.match(forIteratorRE);
+  if (iteratorMatch) {
+    res.alias = alias.replace(forIteratorRE, '');
+    res.iterator1 = iteratorMatch[1].trim();
+    if (iteratorMatch[2]) {
+      res.iterator2 = iteratorMatch[2].trim();
+    }
+  } else {
+    res.alias = alias;
+  }
+  return res
 }
 
 function processIf (el) {
@@ -1591,6 +1593,15 @@ function processAttrs (el) {
               genAssignmentCode(value, "$event")
             );
           }
+        }
+        // optimize literal values in component props by wrapping them
+        // in an inline watcher to avoid unnecessary re-renders
+        if (
+          !platformIsReservedTag(el.tag) &&
+          el.tag !== 'slot' &&
+          literalValueRE.test(value.trim())
+        ) {
+          value = "_a(" + (literalPropId++) + ",function(){return " + value + "})";
         }
         if (isProp || (
           !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
@@ -1897,6 +1908,7 @@ function genHandlers (
 }
 
 // Generate handler code with binding params on Weex
+/* istanbul ignore next */
 function genWeexHandler (params, handlerCode) {
   var innerHandlerCode = handlerCode;
   var exps = params.filter(function (exp) { return simplePathRE.test(exp) && exp !== '$event'; });
@@ -1932,6 +1944,7 @@ function genHandler (
     if (isMethodPath || isFunctionExpression) {
       return handler.value
     }
+    /* istanbul ignore if */
     if (true && handler.params) {
       return genWeexHandler(handler.params, handler.value)
     }
@@ -1971,6 +1984,7 @@ function genHandler (
       : isFunctionExpression
         ? ("(" + (handler.value) + ")($event)")
         : handler.value;
+    /* istanbul ignore if */
     if (true && handler.params) {
       return genWeexHandler(handler.params, code + handlerCode)
     }
@@ -2041,6 +2055,7 @@ var config = ({
   /**
    * Option merge strategies (used in core/util/options)
    */
+  // $flow-disable-line
   optionMergeStrategies: Object.create(null),
 
   /**
@@ -2081,6 +2096,7 @@ var config = ({
   /**
    * Custom user key aliases for v-on
    */
+  // $flow-disable-line
   keyCodes: Object.create(null),
 
   /**
@@ -2328,8 +2344,7 @@ var arrayMethods = Object.create(arrayProto);[
   'splice',
   'sort',
   'reverse'
-]
-.forEach(function (method) {
+].forEach(function (method) {
   // cache original method
   var original = arrayProto[method];
   def(arrayMethods, method, function mutator () {
@@ -2640,18 +2655,18 @@ function mergeDataOrFn (
     // it has to be a function to pass previous merges.
     return function mergedDataFn () {
       return mergeData(
-        typeof childVal === 'function' ? childVal.call(this) : childVal,
-        typeof parentVal === 'function' ? parentVal.call(this) : parentVal
+        typeof childVal === 'function' ? childVal.call(this, this) : childVal,
+        typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
       )
     }
   } else {
     return function mergedInstanceDataFn () {
       // instance merge
       var instanceData = typeof childVal === 'function'
-        ? childVal.call(vm)
+        ? childVal.call(vm, vm)
         : childVal;
       var defaultData = typeof parentVal === 'function'
-        ? parentVal.call(vm)
+        ? parentVal.call(vm, vm)
         : parentVal;
       if (instanceData) {
         return mergeData(instanceData, defaultData)
@@ -2797,6 +2812,8 @@ var defaultStrat = function (parentVal, childVal) {
     ? parentVal
     : childVal
 };
+
+
 
 function assertObjectType (name, value, vm) {
   if (!isPlainObject(value)) {
@@ -2958,10 +2975,10 @@ function genElement (el, state) {
 }
 
 // hoist static sub-trees out
-function genStatic (el, state, once$$1) {
+function genStatic (el, state) {
   el.staticProcessed = true;
   state.staticRenderFns.push(("with(this){return " + (genElement(el, state)) + "}"));
-  return ("_m(" + (state.staticRenderFns.length - 1) + "," + (el.staticInFor ? 'true' : 'false') + "," + (once$$1 ? 'true' : 'false') + ")")
+  return ("_m(" + (state.staticRenderFns.length - 1) + (el.staticInFor ? ',true' : '') + ")")
 }
 
 // v-once
@@ -2987,7 +3004,7 @@ function genOnce (el, state) {
     }
     return ("_o(" + (genElement(el, state)) + "," + (state.onceId++) + "," + key + ")")
   } else {
-    return genStatic(el, state, true)
+    return genStatic(el, state)
   }
 }
 
@@ -3327,11 +3344,15 @@ function genProps (props) {
   var res = '';
   for (var i = 0; i < props.length; i++) {
     var prop = props[i];
-    res += "\"" + (prop.name) + "\":" + (generateValue(prop.value)) + ",";
+    /* istanbul ignore if */
+    {
+      res += "\"" + (prop.name) + "\":" + (generateValue(prop.value)) + ",";
+    }
   }
   return res.slice(0, -1)
 }
 
+/* istanbul ignore next */
 function generateValue (value) {
   if (typeof value === 'string') {
     return transformSpecialNewlines(value)
@@ -3574,7 +3595,7 @@ function createCompilerCreator (baseCompile) {
         // merge custom directives
         if (options.directives) {
           finalOptions.directives = extend(
-            Object.create(baseOptions.directives),
+            Object.create(baseOptions.directives || null),
             options.directives
           );
         }
@@ -3612,7 +3633,9 @@ var createCompiler = createCompilerCreator(function baseCompile (
   options
 ) {
   var ast = parse(template.trim(), options);
-  optimize(ast, options);
+  if (options.optimize !== false) {
+    optimize(ast, options);
+  }
   var code = generate(ast, options);
   return {
     ast: ast,
@@ -3790,8 +3813,12 @@ var props = {
 
 /*  */
 
+// The "unitary tag" means that the tag node and its children
+// must be sent to the native together.
+var isUnitaryTag = makeMap('cell,header,cell-slot,recycle-list', true);
+
 function preTransformNode (el, options) {
-  if (el.tag === 'cell' && !el.attrsList.some(function (item) { return item.name === 'append'; })) {
+  if (isUnitaryTag(el.tag) && !el.attrsList.some(function (item) { return item.name === 'append'; })) {
     el.attrsMap.append = 'tree';
     el.attrsList.push({ name: 'append', value: 'tree' });
   }
@@ -3812,6 +3839,45 @@ var append = {
 
 /*  */
 
+
+var RECYCLE_LIST_MARKER = '@inRecycleList';
+
+// Register the component hook to weex native render engine.
+// The hook will be triggered by native, not javascript.
+
+
+// Updates the state of the component to weex native render engine.
+
+/*  */
+
+// mark components as inside recycle-list so that we know we need to invoke
+// their special @render function instead of render in create-component.js
+function postTransformComponent (
+  el,
+  options
+) {
+  // $flow-disable-line (we know isReservedTag is there)
+  if (!options.isReservedTag(el.tag) && el.tag !== 'cell-slot') {
+    addAttr(el, RECYCLE_LIST_MARKER, 'true');
+  }
+}
+
+/*  */
+
+// mark component root nodes as
+function postTransformComponentRoot (
+  el,
+  options
+) {
+  if (!el.parent) {
+    // component root
+    addAttr(el, '@isComponentRoot', 'true');
+    addAttr(el, '@componentProps', '$props || {}');
+  }
+}
+
+/*  */
+
 function genText$1 (node) {
   var value = node.type === 3
     ? node.text
@@ -3829,7 +3895,6 @@ function postTransformText (el, options) {
   if (el.children.length) {
     addAttr(el, 'value', genText$1(el.children[0]));
     el.children = [];
-    el.plain = false;
   }
 }
 
@@ -3847,10 +3912,7 @@ function preTransformVBind (el, options) {
         '@binding': getAndRemoveAttr(el, attr)
       };
       delete el.attrsMap[attr];
-      el.attrsMap[name] = value;
-      el.attrsList.push({ name: name, value: value });
-      // addAttr(el, name, value)
-      // el.hasBindings = false
+      addRawAttr(el, name, value);
     }
   }
 }
@@ -3877,8 +3939,10 @@ function preTransformVIf (el, options) {
   if (hasConditionDirective(el)) {
     var exp;
     var ifExp = getAndRemoveAttr(el, 'v-if', true /* remove from attrsMap */);
-    var elseExp = getAndRemoveAttr(el, 'v-else', true);
     var elseifExp = getAndRemoveAttr(el, 'v-else-if', true);
+    // don't need the value, but remove it to avoid being generated as a
+    // custom directive
+    getAndRemoveAttr(el, 'v-else', true);
     if (ifExp) {
       exp = ifExp;
     } else {
@@ -3895,8 +3959,7 @@ function preTransformVIf (el, options) {
         return
       }
     }
-    el.attrsMap['[[match]]'] = exp;
-    el.attrsList.push({ name: '[[match]]', value: exp });
+    addRawAttr(el, '[[match]]', exp);
   }
 }
 
@@ -3907,28 +3970,28 @@ function preTransformVFor (el, options) {
   if (!exp) {
     return
   }
-  var inMatch = exp.match(forAliasRE);
-  if (inMatch) {
-    var alias = inMatch[1].trim();
-    var desc = {
-      '@expression': inMatch[2].trim(),
-      '@alias': alias
-    };
-    var iteratorMatch = alias.match(forIteratorRE);
-    if (iteratorMatch) {
-      desc['@alias'] = iteratorMatch[1].trim();
-      desc['@index'] = iteratorMatch[2].trim();
-      if (iteratorMatch[3]) {
-        desc['@key'] = iteratorMatch[2].trim();
-        desc['@index'] = iteratorMatch[3].trim();
-      }
+
+  var res = parseFor(exp);
+  if (!res) {
+    if (process.env.NODE_ENV !== 'production' && options.warn) {
+      options.warn(("Invalid v-for expression: " + exp));
     }
-    delete el.attrsMap['v-for'];
-    el.attrsMap['[[repeat]]'] = desc;
-    el.attrsList.push({ name: '[[repeat]]', value: desc });
-  } else if (process.env.NODE_ENV !== 'production' && options.warn) {
-    options.warn(("Invalid v-for expression: " + exp));
+    return
   }
+
+  var desc = {
+    '@expression': res.for,
+    '@alias': res.alias
+  };
+  if (res.iterator2) {
+    desc['@key'] = res.iterator1;
+    desc['@index'] = res.iterator2;
+  } else {
+    desc['@index'] = res.iterator1;
+  }
+
+  delete el.attrsMap['v-for'];
+  addRawAttr(el, '[[repeat]]', desc);
 }
 
 /*  */
@@ -3985,6 +4048,10 @@ function transformNode$3 (el, options) {
 
 function postTransformNode (el, options) {
   if (shouldCompile(el, options)) {
+    // mark child component in parent template
+    postTransformComponent(el, options);
+    // mark root in child component template
+    postTransformComponentRoot(el, options);
     // <text>: transform children text into value attr
     if (el.tag === 'text') {
       postTransformText(el, options);
@@ -4049,7 +4116,11 @@ var directives = {
   model: model
 };
 
-/* globals document */
+/*  */
+
+// These util functions are split into its own file because Rollup cannot drop
+// makeMap() due to potential side effects, so these variables end up
+// bloating the web builds.
 
 var isReservedTag = makeMap(
   'template,script,style,element,content,slot,link,meta,svg,view,' +
@@ -4078,8 +4149,11 @@ var isUnaryTag$1 = makeMap(
   true
 );
 
-function mustUseProp () { /* console.log('mustUseProp') */ }
-function getTagNamespace () { /* console.log('getTagNamespace') */ }
+function mustUseProp (tag, type, name) {
+  return false
+}
+
+function getTagNamespace (tag) { }
 
 /*  */
 
@@ -4112,6 +4186,8 @@ function compile (
   // generate @render function for <recycle-list>
   if (options && generateAltRender) {
     options.recyclable = true;
+    // disable static optimizations
+    options.optimize = false;
     var ref = compiler.compile(template, options);
     var render = ref.render;
     result['@render'] = render;
