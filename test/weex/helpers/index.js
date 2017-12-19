@@ -124,7 +124,7 @@ function omitUseless (object) {
 }
 
 export function getRoot (instance) {
-  return omitUseless(instance.document.body.toJSON())
+  return omitUseless(instance.$getRoot())
 }
 
 // Get all binding events in the instance
@@ -141,7 +141,7 @@ export function getEvents (instance) {
       node.children.forEach(recordEvent)
     }
   }
-  recordEvent(instance.document.body.toJSON())
+  recordEvent(instance.$getRoot())
   return events
 }
 
@@ -158,9 +158,14 @@ export function createInstance (id, code, ...args) {
   context.registerModules({
     timer: ['setTimeout', 'setInterval']
   })
-  const instance = context.createInstance(id, `// { "framework": "Vue" }\n${code}`, ...args)
+  const instance = context.createInstance(id, `// { "framework": "Vue" }\n${code}`, ...args) || {}
+  instance.document = context.getDocument(id)
+  instance.$getRoot = () => context.getRoot(id)
   instance.$refresh = (data) => context.refreshInstance(id, data)
-  instance.$destroy = () => context.destroyInstance(id)
+  instance.$destroy = () => {
+    delete instance.document
+    context.destroyInstance(id)
+  }
   instance.$triggerHook = (id, hook, args) => {
     instance.document.taskCenter.triggerHook(id, 'lifecycle', hook, { args })
   }
