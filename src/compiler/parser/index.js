@@ -4,8 +4,8 @@ import he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
-import { cached, no, camelize } from 'shared/util'
 import { genAssignmentCode } from '../directives/model'
+import { extend, cached, no, camelize } from 'shared/util'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
 
 import {
@@ -23,7 +23,7 @@ export const onRE = /^@|^v-on:/
 export const dirRE = /^v-|^@|^:/
 export const forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
-export const stripParensRE = /^\(|\)$/g
+const stripParensRE = /^\(|\)$/g
 
 const argRE = /:(.*)$/
 export const bindRE = /^:|^v-bind:/
@@ -355,26 +355,34 @@ function processRef (el) {
 export function processFor (el: ASTElement) {
   let exp
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
-    const inMatch = exp.match(forAliasRE)
-    if (!inMatch) {
-      process.env.NODE_ENV !== 'production' && warn(
+    const res = parseFor(exp)
+    if (res) {
+      extend(el, res)
+    } else if (process.env.NODE_ENV !== 'production') {
+      warn(
         `Invalid v-for expression: ${exp}`
       )
-      return
-    }
-    el.for = inMatch[2].trim()
-    const alias = inMatch[1].trim().replace(stripParensRE, '')
-    const iteratorMatch = alias.match(forIteratorRE)
-    if (iteratorMatch) {
-      el.alias = alias.replace(forIteratorRE, '')
-      el.iterator1 = iteratorMatch[1].trim()
-      if (iteratorMatch[2]) {
-        el.iterator2 = iteratorMatch[2].trim()
-      }
-    } else {
-      el.alias = alias
     }
   }
+}
+
+export function parseFor (exp: string): ?Object {
+  const inMatch = exp.match(forAliasRE)
+  if (!inMatch) return
+  const res = {}
+  res.for = inMatch[2].trim()
+  const alias = inMatch[1].trim().replace(stripParensRE, '')
+  const iteratorMatch = alias.match(forIteratorRE)
+  if (iteratorMatch) {
+    res.alias = alias.replace(forIteratorRE, '')
+    res.iterator1 = iteratorMatch[1].trim()
+    if (iteratorMatch[2]) {
+      res.iterator2 = iteratorMatch[2].trim()
+    }
+  } else {
+    res.alias = alias
+  }
+  return res
 }
 
 function processIf (el) {
