@@ -7,12 +7,12 @@
       { type: 'A', count: 2, source: 'http://whatever.com/y.png' },
       { type: 'A', count: 3, source: 'http://whatever.com/z.png' }
     ],
-    templateKey: 'type',
+    switch: 'type',
     alias: 'item'
   },
   children: [{
     type: 'cell-slot',
-    attr: { append: 'tree', templateType: 'A' },
+    attr: { append: 'tree', case: 'A' },
     children: [{
       type: 'image',
       attr: {

@@ -6,12 +6,12 @@
       { type: 'A', color: 'red' },
       { type: 'A', color: 'blue' }
     ],
-    templateKey: 'type',
+    switch: 'type',
     alias: 'item'
   },
   children: [{
     type: 'cell-slot',
-    attr: { append: 'tree', templateType: 'A' },
+    attr: { append: 'tree', case: 'A' },
     style: {
       backgroundColor: '#FF6600'
     },

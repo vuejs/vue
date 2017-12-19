@@ -6,12 +6,12 @@
       { type: 'A', poster: 'xx', title: 'x' },
       { type: 'A', poster: 'yy', title: 'y' }
     ],
-    templateKey: 'type',
+    switch: 'type',
     alias: 'item'
   },
   children: [{
     type: 'cell-slot',
-    attr: { append: 'tree', templateType: 'A' },
+    attr: { append: 'tree', case: 'A' },
     children: [{
       type: 'div',
       attr: {

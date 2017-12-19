@@ -6,12 +6,12 @@
       { type: 'A', dynamic: 'decimal', two: '2', four: '4' },
       { type: 'A', dynamic: 'binary', two: '10', four: '100' }
     ],
-    templateKey: 'type',
+    switch: 'type',
     alias: 'item'
   },
   children: [{
     type: 'cell-slot',
-    attr: { append: 'tree', templateType: 'A' },
+    attr: { append: 'tree', case: 'A' },
     children: [{
       type: 'text',
       attr: {

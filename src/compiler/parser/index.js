@@ -360,7 +360,14 @@ export function processFor (el: ASTElement) {
   }
 }
 
-export function parseFor (exp: string): ?Object {
+type ForParseResult = {
+  for: string;
+  alias: string;
+  iterator1?: string;
+  iterator2?: string;
+};
+
+export function parseFor (exp: string): ?ForParseResult {
   const inMatch = exp.match(forAliasRE)
   if (!inMatch) return
   const res = {}

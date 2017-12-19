@@ -7,12 +7,12 @@
       { type: 'B', poster: 'yy', title: 'y' },
       { type: 'A' }
     ],
-    templateKey: 'type',
+    switch: 'type',
     alias: 'item'
   },
   children: [{
     type: 'cell-slot',
-    attr: { append: 'tree', templateType: 'A' },
+    attr: { append: 'tree', case: 'A' },
     children: [{
       type: 'div',
       attr: {
@@ -52,7 +52,7 @@
     }]
   }, {
     type: 'cell-slot',
-    attr: { append: 'tree', templateType: 'B' },
+    attr: { append: 'tree', case: 'B' },
     children: [{
       type: 'div',
       attr: {

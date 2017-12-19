@@ -1,6 +1,6 @@
 <template>
-  <recycle-list :list-data="longList" template-key="type" alias="item">
-    <cell-slot template-type="A">
+  <recycle-list for="item in longList" switch="type">
+    <cell-slot case="A">
       <image resize="cover" :src="item.source">
       <text lines="3" v-bind:count="item.count"></text>
     </cell-slot>

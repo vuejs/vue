@@ -26,9 +26,9 @@ describe('append props', () => {
   })
 
   it('add append="tree" on <recycle-list>', () => {
-    const { render, staticRenderFns, errors } = compile(`<recycle-list><div></div></recycle-list>`)
+    const { render, staticRenderFns, errors } = compile(`<recycle-list for="item in list"><div></div></recycle-list>`)
     expect(render + staticRenderFns).toMatch(strToRegExp(`appendAsTree:true`))
-    expect(render + staticRenderFns).toMatch(strToRegExp(`attrs:{"append":"tree"}`))
+    expect(render + staticRenderFns).toMatch(strToRegExp(`attrs:{"listData":list,"alias":"item","append":"tree"}`))
     expect(errors).toEqual([])
   })
 
