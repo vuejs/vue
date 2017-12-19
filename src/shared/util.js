@@ -24,12 +24,13 @@ export function isFalse (v: any): boolean %checks {
  * Check if value is primitive
  */
 export function isPrimitive (value: any): boolean %checks {
+  const type = typeof value
   return (
-    typeof value === 'string' ||
-    typeof value === 'number' ||
+    type === 'string' ||
+    type === 'number' ||
     // $flow-disable-line
-    typeof value === 'symbol' ||
-    typeof value === 'boolean'
+    type === 'symbol' ||
+    type === 'boolean'
   )
 }
 
