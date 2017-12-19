@@ -47,6 +47,7 @@ export function genHandlers (
 }
 
 // Generate handler code with binding params on Weex
+/* istanbul ignore next */
 function genWeexHandler (params: Array<any>, handlerCode: string) {
   let innerHandlerCode = handlerCode
   const exps = params.filter(exp => simplePathRE.test(exp) && exp !== '$event')
@@ -82,6 +83,7 @@ function genHandler (
     if (isMethodPath || isFunctionExpression) {
       return handler.value
     }
+    /* istanbul ignore if */
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, handler.value)
     }
@@ -121,6 +123,7 @@ function genHandler (
       : isFunctionExpression
         ? `(${handler.value})($event)`
         : handler.value
+    /* istanbul ignore if */
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, code + handlerCode)
     }

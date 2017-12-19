@@ -11,6 +11,7 @@
  */
 
 import {
+  addRawAttr,
   getBindingAttr,
   getAndRemoveAttr
 } from 'compiler/helpers'
@@ -75,11 +76,6 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
 
 function cloneASTElement (el) {
   return createASTElement(el.tag, el.attrsList.slice(), el.parent)
-}
-
-function addRawAttr (el, name, value) {
-  el.attrsMap[name] = value
-  el.attrsList.push({ name, value })
 }
 
 export default {
