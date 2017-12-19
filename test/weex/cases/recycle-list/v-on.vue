@@ -1,6 +1,6 @@
 <template>
-  <recycle-list :list-data="longList" template-key="type" alias="item">
-    <cell-slot template-type="A">
+  <recycle-list for="item in longList" switch="type">
+    <cell-slot case="A">
       <text v-on:click="handler" @longpress="move">A</text>
       <text @touchend="move">B</text>
     </cell-slot>

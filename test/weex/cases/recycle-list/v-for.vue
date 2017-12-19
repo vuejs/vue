@@ -1,6 +1,6 @@
 <template>
-  <recycle-list :list-data="longList" template-key="type" alias="item">
-    <cell-slot template-type="A">
+  <recycle-list for="item in longList" switch="type">
+    <cell-slot case="A">
       <div v-for="panel in item.list" :key="panel.id">
         <text>{{panel.label}}</text>
       </div>

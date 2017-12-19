@@ -6,12 +6,12 @@
       { type: 'A', number: 24 },
       { type: 'A', number: 42 }
     ],
-    templateKey: 'type',
+    switch: 'type',
     alias: 'item'
   },
   children: [{
     type: 'cell-slot',
-    attr: { append: 'tree', templateType: 'A' },
+    attr: { append: 'tree', case: 'A' },
     children: [{
       type: 'div',
       attr: {

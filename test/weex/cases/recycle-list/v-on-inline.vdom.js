@@ -6,12 +6,12 @@
       { type: 'A' },
       { type: 'A' }
     ],
-    templateKey: 'type',
+    switch: 'type',
     alias: 'item'
   },
   children: [{
     type: 'cell-slot',
-    attr: { append: 'tree', templateType: 'A' },
+    attr: { append: 'tree', case: 'A' },
     children: [{
       type: 'text',
       event: ['click', {

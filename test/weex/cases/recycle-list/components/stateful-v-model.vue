@@ -1,6 +1,6 @@
 <template>
-  <recycle-list :list-data="longList" template-key="type" alias="item">
-    <cell-slot template-type="A">
+  <recycle-list for="item in longList" switch="type">
+    <cell-slot case="A">
       <editor message="No binding"></editor>
     </cell-slot>
   </recycle-list>

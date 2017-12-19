@@ -1,6 +1,6 @@
 <template>
-  <recycle-list :list-data="longList" template-key="type" alias="item">
-    <cell-slot template-type="A" style="background-color:#FF6600">
+  <recycle-list for="item in longList" switch="type">
+    <cell-slot case="A" style="background-color:#FF6600">
       <text :style="{ fontSize: '100px', color: item.color }">content</text>
     </cell-slot>
   </recycle-list>

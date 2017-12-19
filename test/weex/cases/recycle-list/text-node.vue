@@ -1,6 +1,6 @@
 <template>
-  <recycle-list :list-data="longList" template-key="type" alias="item">
-    <cell-slot template-type="A">
+  <recycle-list for="item in longList" switch="type">
+    <cell-slot case="A">
       <text>static</text>
       <text>{{item.dynamic}}</text>
       <text>one {{item.two}} three {{ item.four }} five</text>

@@ -1,11 +1,11 @@
 <template>
-  <recycle-list :list-data="longList" template-key="type" alias="item">
-    <cell-slot template-type="A">
+  <recycle-list for="item in longList" switch="type">
+    <cell-slot case="A">
       <banner></banner>
       <text>----</text>
       <footer></footer>
     </cell-slot>
-    <cell-slot template-type="B">
+    <cell-slot case="B">
       <banner></banner>
       <poster :image-url="item.poster" :title="item.title"></poster>
     </cell-slot>

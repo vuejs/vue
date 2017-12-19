@@ -1,5 +1,6 @@
 /* @flow */
 
+import { preTransformRecycleList } from './recycle-list'
 import { postTransformComponent } from './component'
 import { postTransformComponentRoot } from './component-root'
 import { postTransformText } from './text'
@@ -17,6 +18,7 @@ function shouldCompile (el: ASTElement, options: WeexCompilerOptions) {
 
 function preTransformNode (el: ASTElement, options: WeexCompilerOptions) {
   if (el.tag === 'recycle-list') {
+    preTransformRecycleList(el, options)
     currentRecycleList = el
   }
   if (shouldCompile(el, options)) {
