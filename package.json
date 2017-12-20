@@ -59,6 +59,7 @@
   "devDependencies": {
     "@types/node": "^8.0.33",
     "@types/webpack": "^3.0.13",
+    "acorn": "^5.2.1",
     "babel-core": "^6.25.0",
     "babel-eslint": "^8.0.3",
     "babel-helper-vue-jsx-merge-props": "^2.0.2",
@@ -79,6 +80,7 @@
     "cz-conventional-changelog": "^2.0.0",
     "de-indent": "^1.0.2",
     "es6-promise": "^4.1.0",
+    "escodegen": "^1.8.1",
     "eslint": "^4.13.1",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-flowtype": "^2.34.0",

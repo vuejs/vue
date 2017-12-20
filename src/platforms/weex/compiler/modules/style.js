@@ -1,6 +1,6 @@
 /* @flow */
 
-import { cached, camelize } from 'shared/util'
+import { cached, camelize, isPlainObject } from 'shared/util'
 import { parseText } from 'compiler/parser/text-parser'
 import {
   getAndRemoveAttr,
@@ -10,7 +10,7 @@ import {
 
 type StaticStyleResult = {
   dynamic: boolean,
-  styleResult: string
+  styleResult: string | Object | void
 };
 
 const normalize = cached(camelize)
@@ -27,12 +27,14 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
     )
   }
   if (!dynamic && styleResult) {
+    // $flow-disable-line
     el.staticStyle = styleResult
   }
   const styleBinding = getBindingAttr(el, 'style', false /* getStatic */)
   if (styleBinding) {
     el.styleBinding = styleBinding
   } else if (dynamic) {
+    // $flow-disable-line
     el.styleBinding = styleResult
   }
 }
@@ -53,7 +55,7 @@ function parseStaticStyle (staticStyle: ?string, options: CompilerOptions): Stat
   // "width: 200px; height: {{y}}" -> {width: 200, height: y}
   let dynamic = false
   let styleResult = ''
-  if (staticStyle) {
+  if (typeof staticStyle === 'string') {
     const styleList = staticStyle.trim().split(';').map(style => {
       const result = style.trim().split(':')
       if (result.length !== 2) {
@@ -71,6 +73,8 @@ function parseStaticStyle (staticStyle: ?string, options: CompilerOptions): Stat
     if (styleList.length) {
       styleResult = '{' + styleList.join(',') + '}'
     }
+  } else if (isPlainObject(staticStyle)) {
+    styleResult = JSON.stringify(staticStyle) || ''
   }
   return { dynamic, styleResult }
 }
