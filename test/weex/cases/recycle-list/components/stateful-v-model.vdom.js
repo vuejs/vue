@@ -41,7 +41,7 @@
         },
         attr: {
           type: 'text',
-          value: 0
+          value: 'No binding'
         }
       }]
     }]

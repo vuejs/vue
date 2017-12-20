@@ -10,7 +10,7 @@
     props: ['message'],
     data () {
       return {
-        output: this.message | ''
+        output: this.message || ''
       }
     }
   }
