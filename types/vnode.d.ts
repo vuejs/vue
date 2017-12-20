@@ -3,9 +3,7 @@ import { Vue } from "./vue";
 export type ScopedSlot = (props: any) => VNodeChildrenArrayContents | string;
 
 export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string;
-export interface VNodeChildrenArrayContents {
-  [x: number]: VNode | string | VNodeChildren;
-}
+export interface VNodeChildrenArrayContents extends Array<VNode | string | VNodeChildrenArrayContents> {}
 
 export interface VNode {
   tag?: string;
