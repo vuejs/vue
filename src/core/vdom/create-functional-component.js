@@ -3,6 +3,7 @@
 import VNode from './vnode'
 import { createElement } from './create-element'
 import { resolveInject } from '../instance/inject'
+import { normalizeChildren } from '../vdom/helpers/normalize-children'
 import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 import { installRenderHelpers } from '../instance/render-helpers/index'
 
@@ -47,8 +48,8 @@ function FunctionalRenderContext (
 
   if (options._scopeId) {
     this._c = (a, b, c, d) => {
-      const vnode: ?VNode = createElement(contextVm, a, b, c, d, needNormalization)
-      if (vnode) {
+      const vnode = createElement(contextVm, a, b, c, d, needNormalization)
+      if (vnode && !Array.isArray(vnode)) {
         vnode.fnScopeId = options._scopeId
         vnode.fnContext = parent
       }
@@ -67,7 +68,7 @@ export function createFunctionalComponent (
   data: VNodeData,
   contextVm: Component,
   children: ?Array<VNode>
-): VNode | void {
+): VNode | Array<VNode> | void {
   const options = Ctor.options
   const props = {}
   const propOptions = options.props
@@ -91,14 +92,23 @@ export function createFunctionalComponent (
   const vnode = options.render.call(null, renderContext._c, renderContext)
 
   if (vnode instanceof VNode) {
-    vnode.fnContext = contextVm
-    vnode.fnOptions = options
-    if (data.slot) {
-      (vnode.data || (vnode.data = {})).slot = data.slot
+    setFunctionalContextForVNode(vnode, data, contextVm, options)
+    return vnode
+  } else if (Array.isArray(vnode)) {
+    const vnodes = normalizeChildren(vnode) || []
+    for (let i = 0; i < vnodes.length; i++) {
+      setFunctionalContextForVNode(vnodes[i], data, contextVm, options)
     }
+    return vnodes
   }
+}
 
-  return vnode
+function setFunctionalContextForVNode (vnode, data, vm, options) {
+  vnode.fnContext = vm
+  vnode.fnOptions = options
+  if (data.slot) {
+    (vnode.data || (vnode.data = {})).slot = data.slot
+  }
 }
 
 function mergeProps (to, from) {
