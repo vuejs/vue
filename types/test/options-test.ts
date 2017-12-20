@@ -1,4 +1,4 @@
-import Vue from "../index";
+import Vue, { VNode } from "../index";
 import { AsyncComponent, ComponentOptions, FunctionalComponentOptions } from "../index";
 import { CreateElement } from "../vue";
 
@@ -274,6 +274,19 @@ Vue.component('component-with-scoped-slot', {
         ])
       }
     }
+  }
+})
+
+Vue.component('narrow-array-of-vnode-type', {
+  render (h): VNode {
+    const slot = this.$scopedSlots.default({})
+    if (typeof slot !== 'string') {
+      const first = slot[0]
+      if (!Array.isArray(first) && typeof first !== 'string') {
+        return first;
+      }
+    }
+    return h();
   }
 })
 
