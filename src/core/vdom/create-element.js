@@ -30,7 +30,7 @@ export function createElement (
   children: any,
   normalizationType: any,
   alwaysNormalize: boolean
-): VNode {
+): VNode | Array<VNode> {
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children
     children = data
@@ -48,7 +48,7 @@ export function _createElement (
   data?: VNodeData,
   children?: any,
   normalizationType?: number
-): VNode {
+): VNode | Array<VNode> {
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -117,7 +117,9 @@ export function _createElement (
     vnode = createComponent(tag, data, context, children)
   }
   if (isDef(vnode)) {
-    if (ns) applyNS(vnode, ns)
+    if (ns && !Array.isArray(vnode)) {
+      applyNS(vnode, ns)
+    }
     return vnode
   } else {
     return createEmptyVNode()
