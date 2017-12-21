@@ -301,4 +301,30 @@ describe('vdom patch: edge cases', () => {
       expect(vm.$el.children[0].style.color).toBe('green')
     }).then(done)
   })
+
+  // #7294
+  it('should cleanup component inline events on patch when no events are present', done => {
+    const log = jasmine.createSpy()
+    const vm = new Vue({
+      data: { ok: true },
+      template: `
+        <div>
+          <foo v-if="ok" @custom="log"/>
+          <foo v-else/>
+        </div>
+      `,
+      components: {
+        foo: {
+          render () {}
+        }
+      },
+      methods: { log }
+    }).$mount()
+
+    vm.ok = false
+    waitForUpdate(() => {
+      vm.$children[0].$emit('custom')
+      expect(log).not.toHaveBeenCalled()
+    }).then(done)
+  })
 })
