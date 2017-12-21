@@ -26,7 +26,7 @@ describe('vdom patch: edge cases', () => {
   })
 
   // #3533
-  // a static node (<br>) is reused in createElm, which changes its elm reference
+  // a static node is reused in createElm, which changes its elm reference
   // and is inserted into a different parent.
   // later when patching the next element a DOM insertion uses it as the
   // reference node, causing a parent mismatch.
@@ -40,11 +40,12 @@ describe('vdom patch: edge cases', () => {
           <button @click="ok = !ok">toggle</button>
           <div class="b" v-if="ok">123</div>
           <div class="c">
-            <br><p>{{ 1 }}</p>
+            <div><span/></div><p>{{ 1 }}</p>
           </div>
           <div class="d">
             <label>{{ 2 }}</label>
           </div>
+          <div class="b" v-if="ok">123</div>
         </div>
       `
     }).$mount()
@@ -55,6 +56,43 @@ describe('vdom patch: edge cases', () => {
     waitForUpdate(() => {
       expect(vm.$el.querySelector('.c').textContent).toBe('1')
       expect(vm.$el.querySelector('.d').textContent).toBe('2')
+    }).then(done)
+  })
+
+  it('should handle slot nodes being reused across render', done => {
+    const vm = new Vue({
+      template: `
+        <foo ref="foo">
+          <div>slot</div>
+        </foo>
+      `,
+      components: {
+        foo: {
+          data () {
+            return { ok: true }
+          },
+          render (h) {
+            const children = [
+              this.ok ? h('div', 'toggler ') : null,
+              h('div', [this.$slots.default, h('span', ' 1')]),
+              h('div', [h('label', ' 2')])
+            ]
+            return h('div', children)
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toContain('toggler slot 1 2')
+    vm.$refs.foo.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toContain('slot 1 2')
+      vm.$refs.foo.ok = true
+    }).then(() => {
+      expect(vm.$el.textContent).toContain('toggler slot 1 2')
+      vm.$refs.foo.ok = false
+    }).then(() => {
+      expect(vm.$el.textContent).toContain('slot 1 2')
+      vm.$refs.foo.ok = true
     }).then(done)
   })
 

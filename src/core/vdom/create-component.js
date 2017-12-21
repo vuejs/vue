@@ -40,7 +40,15 @@ const componentVNodeHooks = {
     parentElm: ?Node,
     refElm: ?Node
   ): ?boolean {
-    if (!vnode.componentInstance || vnode.componentInstance._isDestroyed) {
+    if (
+      vnode.componentInstance &&
+      !vnode.componentInstance._isDestroyed &&
+      vnode.data.keepAlive
+    ) {
+      // kept-alive components, treat as a patch
+      const mountedNode: any = vnode // work around flow
+      componentVNodeHooks.prepatch(mountedNode, mountedNode)
+    } else {
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance,
@@ -48,10 +56,6 @@ const componentVNodeHooks = {
         refElm
       )
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
-    } else if (vnode.data.keepAlive) {
-      // kept-alive components, treat as a patch
-      const mountedNode: any = vnode // work around flow
-      componentVNodeHooks.prepatch(mountedNode, mountedNode)
     }
   },
 
