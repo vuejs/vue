@@ -85,8 +85,7 @@ export function createTextVNode (val: string | number) {
 // used for static nodes and slot nodes because they may be reused across
 // multiple renders, cloning them avoids errors when DOM manipulations rely
 // on their elm reference.
-export function cloneVNode (vnode: VNode, deep?: boolean): VNode {
-  const componentOptions = vnode.componentOptions
+export function cloneVNode (vnode: VNode): VNode {
   const cloned = new VNode(
     vnode.tag,
     vnode.data,
@@ -94,7 +93,7 @@ export function cloneVNode (vnode: VNode, deep?: boolean): VNode {
     vnode.text,
     vnode.elm,
     vnode.context,
-    componentOptions,
+    vnode.componentOptions,
     vnode.asyncFactory
   )
   cloned.ns = vnode.ns
@@ -105,22 +104,5 @@ export function cloneVNode (vnode: VNode, deep?: boolean): VNode {
   cloned.fnOptions = vnode.fnOptions
   cloned.fnScopeId = vnode.fnScopeId
   cloned.isCloned = true
-  if (deep) {
-    if (vnode.children) {
-      cloned.children = cloneVNodes(vnode.children, true)
-    }
-    if (componentOptions && componentOptions.children) {
-      componentOptions.children = cloneVNodes(componentOptions.children, true)
-    }
-  }
   return cloned
-}
-
-export function cloneVNodes (vnodes: Array<VNode>, deep?: boolean): Array<VNode> {
-  const len = vnodes.length
-  const res = new Array(len)
-  for (let i = 0; i < len; i++) {
-    res[i] = cloneVNode(vnodes[i], deep)
-  }
-  return res
 }

@@ -3,12 +3,14 @@
 import config from '../config'
 import VNode, { createEmptyVNode } from './vnode'
 import { createComponent } from './create-component'
+import { traverse } from '../observer/traverse'
 
 import {
   warn,
   isDef,
   isUndef,
   isTrue,
+  isObject,
   isPrimitive,
   resolveAsset
 } from '../util/index'
@@ -116,10 +118,11 @@ export function _createElement (
     // direct component options / constructor
     vnode = createComponent(tag, data, context, children)
   }
-  if (isDef(vnode)) {
-    if (ns && !Array.isArray(vnode)) {
-      applyNS(vnode, ns)
-    }
+  if (Array.isArray(vnode)) {
+    return vnode
+  } else if (isDef(vnode)) {
+    if (isDef(ns)) applyNS(vnode, ns)
+    if (isDef(data)) registerDeepBindings(data)
     return vnode
   } else {
     return createEmptyVNode()
@@ -140,5 +143,17 @@ function applyNS (vnode, ns, force) {
         applyNS(child, ns, force)
       }
     }
+  }
+}
+
+// ref #5318
+// necessary to ensure parent re-render when deep bindings like :style and
+// :class are used on slot nodes
+function registerDeepBindings (data) {
+  if (isObject(data.style)) {
+    traverse(data.style)
+  }
+  if (isObject(data.class)) {
+    traverse(data.class)
   }
 }
