@@ -17,6 +17,7 @@ Vue.js is an MIT-licensed open source project. It's an independent project with 
 
 - [Become a backer or sponsor on Patreon](https://www.patreon.com/evanyou).
 - [Become a backer or sponsor on Open Collective](https://opencollective.com/vuejs).
+- [One-time donation via PayPal or crypto-currencies.](https://vuejs.org/support-vuejs/#One-time-Donations)
 
 #### What's the difference between Patreon and OpenCollective?
 
