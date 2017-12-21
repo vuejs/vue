@@ -26,8 +26,19 @@ import {
 function preTransformNode (el: ASTElement, options: CompilerOptions) {
   if (el.tag === 'input') {
     const map = el.attrsMap
-    if (map['v-model'] && (map['v-bind:type'] || map[':type'])) {
-      const typeBinding: any = getBindingAttr(el, 'type')
+    if (!map['v-model']) {
+      return
+    }
+
+    let typeBinding
+    if (map[':type'] || map['v-bind:type']) {
+      typeBinding = getBindingAttr(el, 'type')
+    }
+    if (!typeBinding && map['v-bind']) {
+      typeBinding = `(${map['v-bind']}).type`
+    }
+
+    if (typeBinding) {
       const ifCondition = getAndRemoveAttr(el, 'v-if', true)
       const ifConditionExtra = ifCondition ? `&&(${ifCondition})` : ``
       const hasElse = getAndRemoveAttr(el, 'v-else', true) != null
