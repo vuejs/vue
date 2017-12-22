@@ -1,4 +1,4 @@
-var alias = require('../../build/alias')
+var alias = require('../../scripts/alias')
 var webpack = require('webpack')
 
 var webpackConfig = {

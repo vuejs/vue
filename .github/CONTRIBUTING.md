@@ -75,11 +75,11 @@ The default test script will do the following: lint with ESLint -> type check wi
 
 ## Project Structure
 
-- **`build`**: contains build-related configuration files. In most cases you don't need to touch them. However, it would be helpful to familiarize yourself with the following files:
+- **`scripts`**: contains build-related scripts and configuration files. In most cases you don't need to touch them. However, it would be helpful to familiarize yourself with the following files:
 
-  - `build/alias.js`: module import aliases used across all source code and tests.
+  - `scripts/alias.js`: module import aliases used across all source code and tests.
 
-  - `build/config.js`: contains the build configurations for all files found in `dist/`. Check this file if you want to find out the entry source file for a dist file.
+  - `scripts/config.js`: contains the build configurations for all files found in `dist/`. Check this file if you want to find out the entry source file for a dist file.
 
 - **`dist`**: contains built files for distribution. Note this directory is only updated when a release happens; they do not reflect the latest changes in development branches.
 
