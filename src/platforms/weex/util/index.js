@@ -1,5 +1,5 @@
 /* @flow */
-declare var document: Object;
+declare var document: WeexDocument;
 
 import { warn } from 'core/util/index'
 
