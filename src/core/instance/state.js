@@ -134,14 +134,21 @@ function initData (vm: Component) {
           vm
         )
       }
+      if (props && hasOwn(props, key)) {
+        warn(
+          `The data property "${key}" is already declared as a prop. ` +
+          `Use prop default value instead.`,
+          vm
+        )
+      }
+      if (isReserved(key)) {
+        warn(
+          `Avoid defining data methods that start with _ or $.`,
+          vm
+        )
+      }
     }
-    if (props && hasOwn(props, key)) {
-      process.env.NODE_ENV !== 'production' && warn(
-        `The data property "${key}" is already declared as a prop. ` +
-        `Use prop default value instead.`,
-        vm
-      )
-    } else if (!isReserved(key)) {
+    if (!isReserved(key)) {
       proxy(vm, `_data`, key)
     }
   }
@@ -253,9 +260,9 @@ function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {
     if (process.env.NODE_ENV !== 'production') {
-      if (methods[key] == null) {
+      if (typeof methods[key] !== 'function') {
         warn(
-          `Method "${key}" has an undefined value in the component definition. ` +
+          `Method "${key}" is not a function in the component definition. ` +
           `Did you reference the function correctly?`,
           vm
         )
@@ -269,11 +276,12 @@ function initMethods (vm: Component, methods: Object) {
       if ((key in vm) && isReserved(key)) {
         warn(
           `Method "${key}" conflicts with an existing Vue instance method. ` +
-          `Avoid defining component methods that start with _ or $.`
+          `Avoid defining component methods that start with _ or $.`,
+          vm
         )
       }
     }
-    vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
+    vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
   }
 }
 
