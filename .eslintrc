@@ -8,6 +8,7 @@
     "plugin:flowtype/recommended"
   ],
   "globals": {
-    "__WEEX__": true
+    "__WEEX__": true,
+    "WXEnvironment": true
   }
 }
