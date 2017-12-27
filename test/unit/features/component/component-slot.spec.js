@@ -661,7 +661,7 @@ describe('Component slot', () => {
     }).then(done)
   })
 
-  // Github issue #5888
+  // GitHub issue #5888
   it('should resolve correctly slot with keep-alive', () => {
     const vm = new Vue({
       template: `
@@ -684,5 +684,144 @@ describe('Component slot', () => {
       }
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<div>default<span>foo</span></div>')
+  })
+
+  // #6372, #6915
+  it('should handle nested components in slots properly', done => {
+    const TestComponent = {
+      template: `
+        <component :is="toggleEl ? 'b' : 'i'">
+          <slot />
+        </component>
+      `,
+      data () {
+        return {
+          toggleEl: true
+        }
+      }
+    }
+
+    const vm = new Vue({
+      template: `
+        <div>
+          <test-component ref="test">
+            <div>
+              <foo/>
+            </div>
+            <bar>
+              <foo/>
+            </bar>
+          </test-component>
+        </div>
+      `,
+      components: {
+        TestComponent,
+        foo: {
+          template: `<div>foo</div>`
+        },
+        bar: {
+          template: `<div>bar<slot/></div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe(`<b><div><div>foo</div></div> <div>bar<div>foo</div></div></b>`)
+
+    vm.$refs.test.toggleEl = false
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe(`<i><div><div>foo</div></div> <div>bar<div>foo</div></div></i>`)
+    }).then(done)
+  })
+
+  it('should preserve slot attribute if not absorbed by a Vue component', () => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <div slot="foo"></div>
+        </div>
+      `
+    }).$mount()
+    expect(vm.$el.children[0].getAttribute('slot')).toBe('foo')
+  })
+
+  it('passing a slot down as named slot', () => {
+    const Bar = {
+      template: `<div class="bar"><slot name="foo"/></div>`
+    }
+
+    const Foo = {
+      components: { Bar },
+      template: `<div class="foo"><bar><slot slot="foo"/></bar></div>`
+    }
+
+    const vm = new Vue({
+      components: { Foo },
+      template: `<div><foo>hello</foo></div>`
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<div class="foo"><div class="bar">hello</div></div>')
+  })
+
+  it('fallback content for named template slot', () => {
+    const Bar = {
+      template: `<div class="bar"><slot name="foo">fallback</slot></div>`
+    }
+
+    const Foo = {
+      components: { Bar },
+      template: `<div class="foo"><bar><template slot="foo"/><slot/></template></bar></div>`
+    }
+
+    const vm = new Vue({
+      components: { Foo },
+      template: `<div><foo></foo></div>`
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<div class="foo"><div class="bar">fallback</div></div>')
+  })
+
+  // #7106
+  it('should not lose functional slot across renders', done => {
+    const One = {
+      data: () => ({
+        foo: true
+      }),
+      render (h) {
+        this.foo
+        return h('div', this.$slots.slot)
+      }
+    }
+
+    const Two = {
+      render (h) {
+        return h('span', this.$slots.slot)
+      }
+    }
+
+    const Three = {
+      functional: true,
+      render: (h, { children }) => h('span', children)
+    }
+
+    const vm = new Vue({
+      template: `
+        <div>
+          <one ref="one">
+            <two slot="slot">
+              <three slot="slot">hello</three>
+            </two>
+          </one>
+        </div>
+      `,
+      components: { One, Two, Three }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('hello')
+    // trigger re-render of <one>
+    vm.$refs.one.foo = false
+    waitForUpdate(() => {
+      // should still be there
+      expect(vm.$el.textContent).toBe('hello')
+    }).then(done)
   })
 })

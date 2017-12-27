@@ -5,7 +5,11 @@
 
 import { warn } from 'core/util/index'
 import { camelize, extend, isPrimitive } from 'shared/util'
-import { mergeVNodeHook, getFirstComponentChild } from 'core/vdom/helpers/index'
+import {
+  mergeVNodeHook,
+  isAsyncPlaceholder,
+  getFirstComponentChild
+} from 'core/vdom/helpers/index'
 
 export const transitionProps = {
   name: String,
@@ -72,17 +76,13 @@ function isSameChild (child: VNode, oldChild: VNode): boolean {
   return oldChild.key === child.key && oldChild.tag === child.tag
 }
 
-function isAsyncPlaceholder (node: VNode): boolean {
-  return node.isComment && node.asyncFactory
-}
-
 export default {
   name: 'transition',
   props: transitionProps,
   abstract: true,
 
   render (h: Function) {
-    let children: ?Array<VNode> = this.$options._renderChildren
+    let children: any = this.$slots.default
     if (!children) {
       return
     }
@@ -161,11 +161,13 @@ export default {
       oldChild &&
       oldChild.data &&
       !isSameChild(child, oldChild) &&
-      !isAsyncPlaceholder(oldChild)
+      !isAsyncPlaceholder(oldChild) &&
+      // #6687 component root is a comment node
+      !(oldChild.componentInstance && oldChild.componentInstance._vnode.isComment)
     ) {
       // replace old child transition data with fresh one
       // important for dynamic transitions!
-      const oldData: Object = oldChild && (oldChild.data.transition = extend({}, data))
+      const oldData: Object = oldChild.data.transition = extend({}, data)
       // handle transition mode
       if (mode === 'out-in') {
         // return placeholder node and queue update when leave finishes

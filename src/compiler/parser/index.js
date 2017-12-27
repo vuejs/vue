@@ -4,8 +4,8 @@ import he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
-import { cached, no, camelize } from 'shared/util'
 import { genAssignmentCode } from '../directives/model'
+import { extend, cached, no, camelize } from 'shared/util'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
 
 import {
@@ -22,16 +22,17 @@ import {
 export const onRE = /^@|^v-on:/
 export const dirRE = /^v-|^@|^:/
 export const forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/
-export const forIteratorRE = /\((\{[^}]*\}|[^,]*),([^,]*)(?:,([^,]*))?\)/
+export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
+const stripParensRE = /^\(|\)$/g
 
 const argRE = /:(.*)$/
-const bindRE = /^:|^v-bind:/
+export const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
 
 const decodeHTMLCached = cached(he.decode)
 
 // configurable state
-export let warn
+export let warn: any
 let delimiters
 let transforms
 let preTransforms
@@ -39,6 +40,23 @@ let postTransforms
 let platformIsPreTag
 let platformMustUseProp
 let platformGetTagNamespace
+
+type Attr = { name: string; value: string };
+
+export function createASTElement (
+  tag: string,
+  attrs: Array<Attr>,
+  parent: ASTElement | void
+): ASTElement {
+  return {
+    type: 1,
+    tag,
+    attrsList: attrs,
+    attrsMap: makeAttrsMap(attrs),
+    parent,
+    children: []
+  }
+}
 
 /**
  * Convert HTML string to AST.
@@ -74,13 +92,17 @@ export function parse (
     }
   }
 
-  function endPre (element) {
+  function closeElement (element) {
     // check pre state
     if (element.pre) {
       inVPre = false
     }
     if (platformIsPreTag(element.tag)) {
       inPre = false
+    }
+    // apply post-transforms
+    for (let i = 0; i < postTransforms.length; i++) {
+      postTransforms[i](element, options)
     }
   }
 
@@ -90,6 +112,7 @@ export function parse (
     isUnaryTag: options.isUnaryTag,
     canBeLeftOpenTag: options.canBeLeftOpenTag,
     shouldDecodeNewlines: options.shouldDecodeNewlines,
+    shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     start (tag, attrs, unary) {
       // check namespace.
@@ -102,14 +125,7 @@ export function parse (
         attrs = guardIESVGBug(attrs)
       }
 
-      const element: ASTElement = {
-        type: 1,
-        tag,
-        attrsList: attrs,
-        attrsMap: makeAttrsMap(attrs),
-        parent: currentParent,
-        children: []
-      }
+      let element: ASTElement = createASTElement(tag, attrs, currentParent)
       if (ns) {
         element.ns = ns
       }
@@ -125,7 +141,7 @@ export function parse (
 
       // apply pre-transforms
       for (let i = 0; i < preTransforms.length; i++) {
-        preTransforms[i](element, options)
+        element = preTransforms[i](element, options) || element
       }
 
       if (!inVPre) {
@@ -139,23 +155,13 @@ export function parse (
       }
       if (inVPre) {
         processRawAttrs(element)
-      } else {
+      } else if (!element.processed) {
+        // structural directives
         processFor(element)
         processIf(element)
         processOnce(element)
-        processKey(element)
-
-        // determine whether this is a plain element after
-        // removing structural attributes
-        element.plain = !element.key && !attrs.length
-
-        processRef(element)
-        processSlot(element)
-        processComponent(element)
-        for (let i = 0; i < transforms.length; i++) {
-          transforms[i](element, options)
-        }
-        processAttrs(element)
+        // element-scope stuff
+        processElement(element, options)
       }
 
       function checkRootConstraints (el) {
@@ -211,11 +217,7 @@ export function parse (
         currentParent = element
         stack.push(element)
       } else {
-        endPre(element)
-      }
-      // apply post-transforms
-      for (let i = 0; i < postTransforms.length; i++) {
-        postTransforms[i](element, options)
+        closeElement(element)
       }
     },
 
@@ -229,7 +231,7 @@ export function parse (
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
-      endPre(element)
+      closeElement(element)
     },
 
     chars (text: string) {
@@ -261,11 +263,12 @@ export function parse (
         // only preserve whitespace if its not right after a starting tag
         : preserveWhitespace && children.length ? ' ' : ''
       if (text) {
-        let expression
-        if (!inVPre && text !== ' ' && (expression = parseText(text, delimiters))) {
+        let res
+        if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
           children.push({
             type: 2,
-            expression,
+            expression: res.expression,
+            tokens: res.tokens,
             text
           })
         } else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
@@ -309,6 +312,22 @@ function processRawAttrs (el) {
   }
 }
 
+export function processElement (element: ASTElement, options: CompilerOptions) {
+  processKey(element)
+
+  // determine whether this is a plain element after
+  // removing structural attributes
+  element.plain = !element.key && !element.attrsList.length
+
+  processRef(element)
+  processSlot(element)
+  processComponent(element)
+  for (let i = 0; i < transforms.length; i++) {
+    element = transforms[i](element, options) || element
+  }
+  processAttrs(element)
+}
+
 function processKey (el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
@@ -327,29 +346,44 @@ function processRef (el) {
   }
 }
 
-function processFor (el) {
+export function processFor (el: ASTElement) {
   let exp
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
-    const inMatch = exp.match(forAliasRE)
-    if (!inMatch) {
-      process.env.NODE_ENV !== 'production' && warn(
+    const res = parseFor(exp)
+    if (res) {
+      extend(el, res)
+    } else if (process.env.NODE_ENV !== 'production') {
+      warn(
         `Invalid v-for expression: ${exp}`
       )
-      return
-    }
-    el.for = inMatch[2].trim()
-    const alias = inMatch[1].trim()
-    const iteratorMatch = alias.match(forIteratorRE)
-    if (iteratorMatch) {
-      el.alias = iteratorMatch[1].trim()
-      el.iterator1 = iteratorMatch[2].trim()
-      if (iteratorMatch[3]) {
-        el.iterator2 = iteratorMatch[3].trim()
-      }
-    } else {
-      el.alias = alias
     }
   }
+}
+
+type ForParseResult = {
+  for: string;
+  alias: string;
+  iterator1?: string;
+  iterator2?: string;
+};
+
+export function parseFor (exp: string): ?ForParseResult {
+  const inMatch = exp.match(forAliasRE)
+  if (!inMatch) return
+  const res = {}
+  res.for = inMatch[2].trim()
+  const alias = inMatch[1].trim().replace(stripParensRE, '')
+  const iteratorMatch = alias.match(forIteratorRE)
+  if (iteratorMatch) {
+    res.alias = alias.replace(forIteratorRE, '')
+    res.iterator1 = iteratorMatch[1].trim()
+    if (iteratorMatch[2]) {
+      res.iterator2 = iteratorMatch[2].trim()
+    }
+  } else {
+    res.alias = alias
+  }
+  return res
 }
 
 function processIf (el) {
@@ -403,7 +437,7 @@ function findPrevElement (children: Array<any>): ASTElement | void {
   }
 }
 
-function addIfCondition (el, condition) {
+export function addIfCondition (el: ASTElement, condition: ASTIfCondition) {
   if (!el.ifConditions) {
     el.ifConditions = []
   }
@@ -428,12 +462,40 @@ function processSlot (el) {
       )
     }
   } else {
+    let slotScope
+    if (el.tag === 'template') {
+      slotScope = getAndRemoveAttr(el, 'scope')
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' && slotScope) {
+        warn(
+          `the "scope" attribute for scoped slots have been deprecated and ` +
+          `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
+          `can also be used on plain elements in addition to <template> to ` +
+          `denote scoped slots.`,
+          true
+        )
+      }
+      el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
+    } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
+        warn(
+          `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
+          `(v-for takes higher priority). Use a wrapper <template> for the ` +
+          `scoped slot to make it clearer.`,
+          true
+        )
+      }
+      el.slotScope = slotScope
+    }
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
-    }
-    if (el.tag === 'template') {
-      el.slotScope = getAndRemoveAttr(el, 'scope')
+      // preserve slot as an attribute for native shadow DOM compat
+      // only for non-scoped slots.
+      if (el.tag !== 'template' && !el.slotScope) {
+        addAttr(el, 'slot', slotTarget)
+      }
     }
   }
 }
@@ -509,8 +571,8 @@ function processAttrs (el) {
     } else {
       // literal attribute
       if (process.env.NODE_ENV !== 'production') {
-        const expression = parseText(value, delimiters)
-        if (expression) {
+        const res = parseText(value, delimiters)
+        if (res) {
           warn(
             `${name}="${value}": ` +
             'Interpolation inside attributes has been removed. ' +
@@ -520,6 +582,13 @@ function processAttrs (el) {
         }
       }
       addAttr(el, name, JSON.stringify(value))
+      // #6887 firefox doesn't update muted state if set via attribute
+      // even immediately after element creation
+      if (!el.component &&
+          name === 'muted' &&
+          platformMustUseProp(el.tag, el.attrsMap.type, name)) {
+        addProp(el, name, 'true')
+      }
     }
   }
 }

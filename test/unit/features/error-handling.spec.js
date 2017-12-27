@@ -7,7 +7,7 @@ describe('Error handling', () => {
   // break parent component
   ;[
     ['data', 'data()'],
-    ['render', 'render function'],
+    ['render', 'render'],
     ['beforeCreate', 'beforeCreate hook'],
     ['created', 'created hook'],
     ['beforeMount', 'beforeMount hook'],
@@ -92,14 +92,14 @@ describe('Error handling', () => {
     }).then(done)
   })
 
-  it('config.errorHandler should capture errors', done => {
+  it('config.errorHandler should capture render errors', done => {
     const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
     const vm = createTestInstance(components.render)
 
     const args = spy.calls.argsFor(0)
     expect(args[0].toString()).toContain('Error: render') // error
     expect(args[1]).toBe(vm.$refs.child) // vm
-    expect(args[2]).toContain('render function') // description
+    expect(args[2]).toContain('render') // description
 
     assertRootInstanceActive(vm).then(() => {
       Vue.config.errorHandler = null
@@ -123,6 +123,24 @@ describe('Error handling', () => {
         done()
       })
     })
+  })
+
+  it('should recover from errors thrown in errorHandler itself', () => {
+    Vue.config.errorHandler = () => {
+      throw new Error('error in errorHandler ¯\\_(ツ)_/¯')
+    }
+    const vm = new Vue({
+      render (h) {
+        throw new Error('error in render')
+      },
+      renderError (h, err) {
+        return h('div', err.toString())
+      }
+    }).$mount()
+    expect('error in errorHandler').toHaveBeenWarned()
+    expect('error in render').toHaveBeenWarned()
+    expect(vm.$el.textContent).toContain('error in render')
+    Vue.config.errorHandler = null
   })
 })
 

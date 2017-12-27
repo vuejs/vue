@@ -3,11 +3,12 @@
 import RenderStream from './render-stream'
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
+import { createPromiseCallback } from './util'
 import TemplateRenderer from './template-renderer/index'
 import type { ClientManifest } from './template-renderer/index'
 
 export type Renderer = {
-  renderToString: (component: Component, context: any, cb: any) => void;
+  renderToString: (component: Component, context: any, cb: any) => ?Promise<string>;
   renderToStream: (component: Component, context?: Object) => stream$Readable;
 };
 
@@ -26,6 +27,7 @@ export type RenderOptions = {
   inject?: boolean;
   basedir?: string;
   shouldPreload?: Function;
+  shouldPrefetch?: Function;
   clientManifest?: ClientManifest;
   runInNewContext?: boolean | 'once';
 };
@@ -38,6 +40,7 @@ export function createRenderer ({
   inject,
   cache,
   shouldPreload,
+  shouldPrefetch,
   clientManifest
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
@@ -45,6 +48,7 @@ export function createRenderer ({
     template,
     inject,
     shouldPreload,
+    shouldPrefetch,
     clientManifest
   })
 
@@ -52,30 +56,43 @@ export function createRenderer ({
     renderToString (
       component: Component,
       context: any,
-      done: any
-    ): void {
+      cb: any
+    ): ?Promise<string> {
       if (typeof context === 'function') {
-        done = context
+        cb = context
         context = {}
       }
       if (context) {
         templateRenderer.bindRenderFns(context)
       }
+
+      // no callback, return Promise
+      let promise
+      if (!cb) {
+        ({ promise, cb } = createPromiseCallback())
+      }
+
       let result = ''
       const write = createWriteFunction(text => {
         result += text
         return false
-      }, done)
+      }, cb)
       try {
-        render(component, write, context, () => {
+        render(component, write, context, err => {
           if (template) {
             result = templateRenderer.renderSync(result, context)
           }
-          done(null, result)
+          if (err) {
+            cb(err)
+          } else {
+            cb(null, result)
+          }
         })
       } catch (e) {
-        done(e)
+        cb(e)
       }
+
+      return promise
     },
 
     renderToStream (

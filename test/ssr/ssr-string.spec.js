@@ -374,6 +374,18 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-html with null value', done => {
+    renderVmWithOptions({
+      template: '<div><div v-html="text"></div></div>',
+      data: {
+        text: null
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div></div></div>')
+      done()
+    })
+  })
+
   it('v-text', done => {
     renderVmWithOptions({
       template: '<div><div v-text="text"></div></div>',
@@ -382,6 +394,18 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain('<div data-server-rendered="true"><div>&lt;span&gt;foo&lt;/span&gt;</div></div>')
+      done()
+    })
+  })
+
+  it('v-text with null value', done => {
+    renderVmWithOptions({
+      template: '<div><div v-text="text"></div></div>',
+      data: {
+        text: null
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div></div></div>')
       done()
     })
   })
@@ -547,6 +571,25 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain('<span data-server-rendered="true" class="b">testAsync</span>')
+      done()
+    })
+  })
+
+  it('should catch async component error', done => {
+    Vue.config.silent = true
+    renderToString(new Vue({
+      template: '<test-async></test-async>',
+      components: {
+        testAsync: () => Promise.resolve({
+          render () {
+            throw new Error('foo')
+          }
+        })
+      }
+    }), (err, result) => {
+      Vue.config.silent = false
+      expect(err).toBeTruthy()
+      expect(result).toBeUndefined()
       done()
     })
   })
@@ -805,7 +848,7 @@ describe('SSR: renderToString', () => {
     expect(vm.a).toBe(func)
   })
 
-  it('should prevent xss in attribtues', done => {
+  it('should prevent xss in attributes', done => {
     renderVmWithOptions({
       data: {
         xss: '"><script>alert(1)</script>'
@@ -815,6 +858,18 @@ describe('SSR: renderToString', () => {
           <a :title="xss" :style="{ color: xss }" :class="[xss]">foo</a>
         </div>
       `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
+  it('should prevent script xss with v-bind object syntax + array value', done => {
+    renderVmWithOptions({
+      data: {
+        test: ['"><script>alert(1)</script><!--"']
+      },
+      template: `<div v-bind="{ test }"></div>`
     }, res => {
       expect(res).not.toContain(`<script>alert(1)</script>`)
       done()
@@ -892,6 +947,201 @@ describe('SSR: renderToString', () => {
       }
     }, res => {
       expect(res).toBe(`<div data-server-rendered="true"><div id="a"></div></div>`)
+      done()
+    })
+  })
+
+  it('should escape static strings', done => {
+    renderVmWithOptions({
+      template: `<div>&lt;foo&gt;</div>`
+    }, res => {
+      expect(res).toBe(`<div data-server-rendered="true">&lt;foo&gt;</div>`)
+      done()
+    })
+  })
+
+  it('should not cache computed properties', done => {
+    renderVmWithOptions({
+      template: `<div>{{ foo }}</div>`,
+      data: () => ({ bar: 1 }),
+      computed: {
+        foo () { return this.bar + 1 }
+      },
+      created () {
+        this.foo // access
+        this.bar++ // trigger change
+      }
+    }, res => {
+      expect(res).toBe(`<div data-server-rendered="true">3</div>`)
+      done()
+    })
+  })
+
+  it('return Promise', done => {
+    renderToString(new Vue({
+      template: `<div>{{ foo }}</div>`,
+      data: { foo: 'bar' }
+    })).then(res => {
+      expect(res).toBe(`<div data-server-rendered="true">bar</div>`)
+      done()
+    })
+  })
+
+  it('return Promise (error)', done => {
+    Vue.config.silent = true
+    renderToString(new Vue({
+      render () {
+        throw new Error('foobar')
+      }
+    })).catch(err => {
+      expect(err.toString()).toContain(`foobar`)
+      Vue.config.silent = false
+      done()
+    })
+  })
+
+  it('should catch template compilation error', done => {
+    renderToString(new Vue({
+      template: `<div></div><div></div>`
+    }), (err, res) => {
+      expect(err.toString()).toContain('Component template should contain exactly one root element')
+      done()
+    })
+  })
+
+  // #6907
+  it('should not optimize root if conditions', done => {
+    renderVmWithOptions({
+      data: { foo: 123 },
+      template: `<input :type="'text'" v-model="foo">`
+    }, res => {
+      expect(res).toBe(`<input type="text" data-server-rendered="true" value="123">`)
+      done()
+    })
+  })
+
+  it('render muted properly', done => {
+    renderVmWithOptions({
+      template: '<video muted></video>'
+    }, result => {
+      expect(result).toContain('<video muted="muted" data-server-rendered="true"></video>')
+      done()
+    })
+  })
+
+  it('render v-model with textarea', done => {
+    renderVmWithOptions({
+      data: { foo: 'bar' },
+      template: '<div><textarea v-model="foo"></textarea></div>'
+    }, result => {
+      expect(result).toContain('<textarea>bar</textarea>')
+      done()
+    })
+  })
+
+  it('render v-model with textarea (non-optimized)', done => {
+    renderVmWithOptions({
+      render (h) {
+        return h('textarea', {
+          domProps: {
+            value: 'foo'
+          }
+        })
+      }
+    }, result => {
+      expect(result).toContain('<textarea data-server-rendered="true">foo</textarea>')
+      done()
+    })
+  })
+
+  it('render v-model with <select> (value binding)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2,
+        options: [
+          { id: 1, label: 'one' },
+          { id: 2, label: 'two' }
+        ]
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option v-for="o in options" :value="o.id">{{ o.label }}</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option value="1">one</option>' +
+          '<option selected="selected" value="2">two</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
+
+  it('render v-model with <select> (static value)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option value="1">one</option>
+          <option value="2">two</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option value="1">one</option> ' +
+          '<option value="2" selected="selected">two</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
+
+  it('render v-model with <select> (text as value)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2,
+        options: [
+          { id: 1, label: 'one' },
+          { id: 2, label: 'two' }
+        ]
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option v-for="o in options">{{ o.id }}</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option>1</option>' +
+          '<option selected="selected">2</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
+
+  // #7223
+  it('should not double escape attribute values', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div id="a\nb"></div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div id="a\nb"></div>`)
       done()
     })
   })

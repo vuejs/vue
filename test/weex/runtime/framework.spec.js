@@ -1,38 +1,9 @@
-import * as framework from '../../../packages/weex-vue-framework'
-import { DEFAULT_ENV, Runtime, Instance } from 'weex-vdom-tester'
-import { config } from 'weex-js-runtime'
-
-import {
-  syncPromise,
-  checkRefresh
-} from '../helpers/index'
-
-let sendTasksHandler = () => {}
-const { Document, Element, Comment } = config
-function sendTasks () {
-  sendTasksHandler.apply(null, arguments)
-}
+import { getRoot, createInstance } from '../helpers/index'
 
 describe('framework APIs', () => {
-  let runtime
-
-  beforeEach(() => {
-    Document.handler = sendTasks
-    framework.init({ Document, Element, Comment, sendTasks })
-    runtime = new Runtime(framework)
-    sendTasksHandler = function () {
-      runtime.target.callNative(...arguments)
-    }
-  })
-
-  afterEach(() => {
-    delete Document.handler
-    framework.reset()
-  })
-
   it('createInstance', () => {
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         render: function (createElement) {
           return createElement('div', {}, [
@@ -42,33 +13,36 @@ describe('framework APIs', () => {
         el: "body"
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{ type: 'text', attr: { value: 'Hello' }}]
     })
   })
 
   it('createInstance with config', () => {
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         render: function (createElement) {
           return createElement('div', {}, [
-            createElement('text', { attrs: { value: JSON.stringify(this.$getConfig()) }}, [])
+            createElement('text', { attrs: { value: JSON.stringify(weex.config) }}, [])
           ])
         },
         el: "body"
       })
-    `, { bundleUrl: 'http://example.com/', a: 1, b: 2 })
-    expect(instance.getRealRoot()).toEqual({
+    `, { bundleType: 'Vue', bundleUrl: 'http://example.com/', a: 1, b: 2 })
+    expect(getRoot(instance)).toEqual({
       type: 'div',
-      children: [{ type: 'text', attr: { value: '{"bundleUrl":"http://example.com/","a":1,"b":2}' }}]
+      children: [{
+        type: 'text',
+        attr: { value: '{"bundleType":"Vue","bundleUrl":"http://example.com/","a":1,"b":2,"env":{}}' }
+      }]
     })
   })
 
   it('createInstance with external data', () => {
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         data: {
           a: 1,
@@ -82,15 +56,15 @@ describe('framework APIs', () => {
         el: "body"
       })
     `, undefined, { a: 111 })
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{ type: 'text', attr: { value: '111-2' }}]
     })
   })
 
   it('destroyInstance', (done) => {
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         data: {
           x: 'Hello'
@@ -103,32 +77,21 @@ describe('framework APIs', () => {
         el: "body"
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{ type: 'text', attr: { value: 'Hello' }}]
     })
-
-    syncPromise([
-      checkRefresh(instance, { x: 'World' }, result => {
-        expect(result).toEqual({
-          type: 'div',
-          children: [{ type: 'text', attr: { value: 'World' }}]
-        })
-        framework.destroyInstance(instance.id)
-      }),
-      checkRefresh(instance, { x: 'Weex' }, result => {
-        expect(result).toEqual({
-          type: 'div',
-          children: [{ type: 'text', attr: { value: 'World' }}]
-        })
-        done()
-      })
-    ])
+    instance.$destroy()
+    setTimeout(() => {
+      expect(instance.document).toBeUndefined()
+      expect(instance.app).toBeUndefined()
+      done()
+    }, 0)
   })
 
   it('refreshInstance', (done) => {
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         data: {
           x: 'Hello'
@@ -141,517 +104,26 @@ describe('framework APIs', () => {
         el: "body"
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{ type: 'text', attr: { value: 'Hello' }}]
     })
-
-    framework.refreshInstance(instance.id, { x: 'World' })
+    instance.$refresh({ x: 'World' })
     setTimeout(() => {
-      expect(instance.getRealRoot()).toEqual({
+      expect(getRoot(instance)).toEqual({
         type: 'div',
         children: [{ type: 'text', attr: { value: 'World' }}]
       })
-
-      framework.destroyInstance(instance.id)
-      const result = framework.refreshInstance(instance.id, { x: 'Weex' })
+      instance.$destroy()
+      const result = instance.$refresh({ x: 'World' })
       expect(result instanceof Error).toBe(true)
-      expect(result).toMatch(/refreshInstance/)
-      expect(result).toMatch(/not found/)
-
-      setTimeout(() => {
-        expect(instance.getRealRoot()).toEqual({
-          type: 'div',
-          children: [{ type: 'text', attr: { value: 'World' }}]
-        })
-        done()
-      })
-    })
-  })
-
-  it('getRoot', () => {
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
-      new Vue({
-        data: {
-          x: 'Hello'
-        },
-        render: function (createElement) {
-          return createElement('div', {}, [
-            createElement('text', { attrs: { value: this.x }}, [])
-          ])
-        },
-        el: "body"
-      })
-    `)
-
-    let root = framework.getRoot(instance.id)
-    expect(root.ref).toEqual('_root')
-    expect(root.type).toEqual('div')
-    expect(root.children.length).toEqual(1)
-    expect(root.children[0].type).toEqual('text')
-    expect(root.children[0].attr).toEqual({ value: 'Hello' })
-    framework.destroyInstance(instance.id)
-
-    root = framework.getRoot(instance.id)
-    expect(root instanceof Error).toBe(true)
-    expect(root).toMatch(/getRoot/)
-    expect(root).toMatch(/not found/)
-  })
-
-  it('receiveTasks: fireEvent', (done) => {
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
-      new Vue({
-        data: {
-          x: 'Hello'
-        },
-        methods: {
-          update: function (e) {
-            this.x = 'World'
-          }
-        },
-        render: function (createElement) {
-          return createElement('div', {}, [
-            createElement('text', { attrs: { value: this.x }, on: { click: this.update }}, [])
-          ])
-        },
-        el: "body"
-      })
-    `)
-    expect(instance.getRealRoot()).toEqual({
-      type: 'div',
-      children: [{
-        type: 'text',
-        attr: { value: 'Hello' },
-        event: ['click']
-      }]
-    })
-
-    const textRef = framework.getRoot(instance.id).children[0].ref
-    framework.receiveTasks(instance.id, [
-      { method: 'fireEvent', args: [textRef, 'click'] }
-    ])
-
-    setTimeout(() => {
-      expect(instance.getRealRoot()).toEqual({
-        type: 'div',
-        children: [{
-          type: 'text',
-          attr: { value: 'World' },
-          event: ['click']
-        }]
-      })
-
-      framework.destroyInstance(instance.id)
-      const result = framework.receiveTasks(instance.id, [
-        { method: 'fireEvent', args: [textRef, 'click'] }
-      ])
-      expect(result instanceof Error).toBe(true)
-      expect(result).toMatch(/invalid\sinstance\sid/)
-      expect(result).toMatch(instance.id)
       done()
     })
-  })
-
-  it('receiveTasks: callback', (done) => {
-    framework.registerModules({
-      foo: ['a', 'b', 'c']
-    })
-
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
-      const moduleFoo = __weex_require_module__('foo')
-      new Vue({
-        data: {
-          x: 'Hello'
-        },
-        methods: {
-          update: function (data = {}) {
-            this.x = data.value || 'World'
-          }
-        },
-        mounted: function () {
-          moduleFoo.a(data => {
-            this.update(data)
-          })
-        },
-        render: function (createElement) {
-          return createElement('div', {}, [
-            createElement('text', { attrs: { value: this.x }}, [])
-          ])
-        },
-        el: "body"
-      })
-    `)
-    expect(instance.getRealRoot()).toEqual({
-      type: 'div',
-      children: [{
-        type: 'text',
-        attr: { value: 'Hello' }
-      }]
-    })
-
-    let callbackId
-    instance.history.callNative.some(task => {
-      if (task.module === 'foo' && task.method === 'a') {
-        callbackId = task.args[0]
-        return true
-      }
-    })
-    framework.receiveTasks(instance.id, [
-      { method: 'callback', args: [callbackId, undefined, true] }
-    ])
-
-    setTimeout(() => {
-      expect(instance.getRealRoot()).toEqual({
-        type: 'div',
-        children: [{
-          type: 'text',
-          attr: { value: 'World' }
-        }]
-      })
-
-      framework.receiveTasks(instance.id, [
-        { method: 'callback', args: [callbackId, { value: 'Weex' }, true] }
-      ])
-      setTimeout(() => {
-        expect(instance.getRealRoot()).toEqual({
-          type: 'div',
-          children: [{
-            type: 'text',
-            attr: { value: 'Weex' }
-          }]
-        })
-
-        framework.receiveTasks(instance.id, [
-          { method: 'callback', args: [callbackId] }
-        ])
-        setTimeout(() => {
-          expect(instance.getRealRoot()).toEqual({
-            type: 'div',
-            children: [{
-              type: 'text',
-              attr: { value: 'World' }
-            }]
-          })
-
-          framework.destroyInstance(instance.id)
-          const result = framework.receiveTasks(instance.id, [
-            { method: 'callback', args: [callbackId] }
-          ])
-          expect(result instanceof Error).toBe(true)
-          expect(result).toMatch(/invalid\sinstance\sid/)
-          expect(result).toMatch(instance.id)
-          done()
-        })
-      })
-    })
-  })
-
-  it('registerModules', () => {
-    framework.registerModules({
-      foo: ['a', 'b', 'c'],
-      bar: [
-        { name: 'a', args: ['string'] },
-        { name: 'b', args: ['number'] },
-        { name: 'c', args: ['string', 'number'] }
-      ]
-    })
-
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
-      const moduleFoo = __weex_require_module__('foo')
-      const moduleBar = __weex_require_module__('bar')
-      const moduleBaz = __weex_require_module__('baz')
-      new Vue({
-        render: function (createElement) {
-          const value = []
-          if (typeof moduleFoo === 'object') {
-            value.push('foo')
-            value.push(Object.keys(moduleFoo))
-          }
-          if (typeof moduleBar === 'object') {
-            value.push('bar')
-            value.push(Object.keys(moduleBar))
-          }
-          if (typeof moduleBaz === 'object') {
-            value.push('baz')
-            value.push(Object.keys(moduleBaz))
-          }
-          return createElement('div', {}, [
-            createElement('text', { attrs: { value: value.toString() }}, [])
-          ])
-        },
-        mounted: function () {
-          moduleFoo.a(1, '2', true)
-          moduleBar.b(1)
-        },
-        el: "body"
-      })
-    `)
-    expect(instance.getRealRoot()).toEqual({
-      type: 'div',
-      children: [{
-        type: 'text',
-        attr: { value: 'foo,a,b,c,bar,a,b,c,baz,' }
-      }]
-    })
-
-    expect(instance.history.callNative
-      .filter(task => task.module === 'foo')
-      .map(task => `${task.method}(${task.args})`)
-    ).toEqual(['a(1,2,true)'])
-
-    expect(instance.history.callNative
-      .filter(task => task.module === 'bar')
-      .map(task => `${task.method}(${task.args})`)
-    ).toEqual(['b(1)'])
-  })
-
-  it('isRegisteredModule', () => {
-    framework.registerModules({
-      foo: ['a', 'b'],
-      bar: [
-        { name: 'x', args: ['string'] },
-        { name: 'y', args: ['number'] }
-      ]
-    })
-    expect(framework.isRegisteredModule('foo')).toBe(true)
-    expect(framework.isRegisteredModule('bar')).toBe(true)
-    expect(framework.isRegisteredModule('foo', 'a')).toBe(true)
-    expect(framework.isRegisteredModule('foo', 'b')).toBe(true)
-    expect(framework.isRegisteredModule('bar', 'x')).toBe(true)
-    expect(framework.isRegisteredModule('bar', 'y')).toBe(true)
-    expect(framework.isRegisteredModule('FOO')).toBe(false)
-    expect(framework.isRegisteredModule(' bar ')).toBe(false)
-    expect(framework.isRegisteredModule('unknown')).toBe(false)
-    expect(framework.isRegisteredModule('#}{)=}')).toBe(false)
-    expect(framework.isRegisteredModule('foo', '')).toBe(false)
-    expect(framework.isRegisteredModule('foo', 'c')).toBe(false)
-    expect(framework.isRegisteredModule('bar', 'z')).toBe(false)
-    expect(framework.isRegisteredModule('unknown', 'unknown')).toBe(false)
-  })
-
-  it('registerComponents', () => {
-    framework.registerComponents(['foo', { type: 'bar' }, 'text'])
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
-      new Vue({
-        render: function (createElement) {
-          return createElement('div', {}, [
-            createElement('text', {}, []),
-            createElement('foo', {}, []),
-            createElement('bar', {}, []),
-            createElement('baz', {}, [])
-          ])
-        },
-        el: "body"
-      })
-    `)
-    expect(instance.getRealRoot()).toEqual({
-      type: 'div',
-      children: [{ type: 'text' }, { type: 'foo' }, { type: 'bar' }, { type: 'baz' }]
-    })
-  })
-
-  it('isRegisteredComponent', () => {
-    framework.registerComponents(['foo', { type: 'bar' }, 'text'])
-    expect(framework.isRegisteredComponent('foo')).toBe(true)
-    expect(framework.isRegisteredComponent('bar')).toBe(true)
-    expect(framework.isRegisteredComponent('text')).toBe(true)
-    expect(framework.isRegisteredComponent('FOO')).toBe(false)
-    expect(framework.isRegisteredComponent(' bar ')).toBe(false)
-    expect(framework.isRegisteredComponent('<text>')).toBe(false)
-    expect(framework.isRegisteredComponent('#}{)=}')).toBe(false)
-  })
-
-  it('weex.supports', () => {
-    framework.registerComponents(['apple', { type: 'banana' }])
-    framework.registerModules({
-      cat: ['eat', 'sleep'],
-      dog: [
-        { name: 'bark', args: ['string'] }
-      ]
-    })
-    expect(framework.supports('@component/apple')).toBe(true)
-    expect(framework.supports('@component/banana')).toBe(true)
-    expect(framework.supports('@module/cat')).toBe(true)
-    expect(framework.supports('@module/cat.eat')).toBe(true)
-    expect(framework.supports('@module/cat.sleep')).toBe(true)
-    expect(framework.supports('@module/dog.bark')).toBe(true)
-    expect(framework.supports('@component/candy')).toBe(false)
-    expect(framework.supports('@module/bird')).toBe(false)
-    expect(framework.supports('@module/bird.sing')).toBe(false)
-    expect(framework.supports('@module/dog.sleep')).toBe(false)
-    expect(framework.supports('apple')).toBe(null)
-    expect(framework.supports('<banana>')).toBe(null)
-    expect(framework.supports('cat')).toBe(null)
-    expect(framework.supports('@dog')).toBe(null)
-    expect(framework.supports('@component/dog#bark')).toBe(null)
-  })
-
-  it('vm.$getConfig', () => {
-    const instance = new Instance(runtime)
-    instance.$create(`
-      new Vue({
-        render: function (createElement) {
-          return createElement('div', {}, [
-            createElement('text', { attrs: { value: JSON.stringify(this.$getConfig()) }}, [])
-          ])
-        },
-        el: "body"
-      })
-    `)
-    expect(JSON.parse(instance.getRealRoot().children[0].attr.value)).toEqual({ env: DEFAULT_ENV })
-
-    const instance2 = new Instance(runtime)
-    instance2.$create(`
-      new Vue({
-        render: function (createElement) {
-          return createElement('div', {}, [
-            createElement('text', { attrs: { value: JSON.stringify(this.$getConfig()) }}, [])
-          ])
-        },
-        el: "body"
-      })
-    `, undefined, { a: 1, b: 2 })
-    expect(JSON.parse(instance2.getRealRoot().children[0].attr.value)).toEqual({ a: 1, b: 2, env: DEFAULT_ENV })
-  })
-
-  it('Timer', (done) => {
-    const instance = new Instance(runtime)
-    instance.$create(`
-      new Vue({
-        data: {
-          x: 0,
-          y: 0
-        },
-        render: function (createElement) {
-          return createElement('div', {}, [
-            createElement('text', { attrs: { value: this.x + '-' + this.y }}, [])
-          ])
-        },
-        mounted: function () {
-          const now = Date.now()
-          let timer, timer2
-          setTimeout(() => {
-            this.x = 1
-            clearTimeout(timer)
-            clearInterval(timer2)
-            setInterval(() => {
-              this.y++
-            }, 600)
-          }, 2000)
-          timer = setTimeout(() => {
-            this.x = 3
-          }, 3000)
-          setTimeout(() => {
-            this.x = 3
-          }, 4000)
-          timer2 = setInterval(() => {
-            this.y++
-          }, 900)
-        },
-        el: "body"
-      })
-    `)
-    expect(instance.getRealRoot()).toEqual({
-      type: 'div',
-      children: [{ type: 'text', attr: { value: '0-0' }}]
-    })
-
-    setTimeout(() => {
-      expect(instance.getRealRoot().children[0].attr.value).toEqual('0-1')
-    }, 950)
-    setTimeout(() => {
-      expect(instance.getRealRoot().children[0].attr.value).toEqual('0-2')
-    }, 1850)
-    setTimeout(() => {
-      expect(instance.getRealRoot().children[0].attr.value).toEqual('1-2')
-    }, 2050)
-    setTimeout(() => {
-      expect(instance.getRealRoot().children[0].attr.value).toEqual('1-3')
-    }, 2650)
-    setTimeout(() => {
-      expect(instance.getRealRoot().children[0].attr.value).toEqual('1-4')
-    }, 3250)
-    setTimeout(() => {
-      framework.destroyInstance(instance.id)
-    }, 3500)
-    setTimeout(() => {
-      expect(instance.getRealRoot().children[0].attr.value).toEqual('1-4')
-      done()
-    }, 4100)
-  })
-
-  it('send function param', () => {
-    framework.registerModules({
-      foo: ['a']
-    })
-
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
-      const moduleFoo = __weex_require_module__('foo')
-      new Vue({
-        mounted: function () {
-          moduleFoo.a(a => a + 1)
-        },
-        render: function (createElement) {
-          return createElement('div', {}, [
-            createElement('text', { attrs: { value: 'Hello' }}, [])
-          ])
-        },
-        el: "body"
-      })
-    `)
-
-    let callbackId
-    instance.history.callNative.some(task => {
-      if (task.module === 'foo' && task.method === 'a') {
-        callbackId = task.args[0]
-        return true
-      }
-    })
-
-    expect(typeof callbackId).toEqual('string')
-  })
-
-  it('send Element param', () => {
-    framework.registerModules({
-      foo: ['a']
-    })
-
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
-      const moduleFoo = __weex_require_module__('foo')
-      new Vue({
-        mounted: function () {
-          moduleFoo.a(this.$refs.x)
-        },
-        render: function (createElement) {
-          return createElement('div', {}, [
-            createElement('text', { attrs: { value: 'Hello' }, ref: 'x' }, [])
-          ])
-        },
-        el: "body"
-      })
-    `)
-
-    let callbackId
-    instance.history.callNative.some(task => {
-      if (task.module === 'foo' && task.method === 'a') {
-        callbackId = task.args[0]
-        return true
-      }
-    })
-
-    expect(typeof callbackId).toEqual('string')
   })
 
   it('registering global assets', () => {
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       Vue.component('test', {
         render (h) {
           return h('div', 'Hello')
@@ -664,15 +136,15 @@ describe('framework APIs', () => {
         el: 'body'
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{ type: 'text', attr: { value: 'Hello' }}]
     })
   })
 
   it('adding prototype methods', () => {
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       Vue.prototype.$test = () => 'Hello'
       const Test = {
         render (h) {
@@ -686,15 +158,15 @@ describe('framework APIs', () => {
         el: 'body'
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{ type: 'text', attr: { value: 'Hello' }}]
     })
   })
 
   it('using global mixins', () => {
-    const instance = new Instance(runtime)
-    framework.createInstance(instance.id, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       Vue.mixin({
         created () {
           this.test = true
@@ -714,7 +186,7 @@ describe('framework APIs', () => {
         el: 'body'
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [{ type: 'text', attr: { value: 'Hello' }}]
     })

@@ -150,6 +150,17 @@ describe('vdom patch: hydration', () => {
     expect('not matching server-rendered content').toHaveBeenWarned()
   })
 
+  it('should warn failed hydration when component is not properly registered', () => {
+    const dom = createMockSSRDOM('<div><foo></foo></div>')
+
+    new Vue({
+      template: '<div><foo></foo></div>'
+    }).$mount(dom)
+
+    expect('not matching server-rendered content').toHaveBeenWarned()
+    expect('Unknown custom element: <foo>').toHaveBeenWarned()
+  })
+
   it('should overwrite textNodes in the correct position but with mismatching text without warning', () => {
     const dom = createMockSSRDOM('<div><span>foo</span></div>')
 
@@ -223,7 +234,7 @@ describe('vdom patch: hydration', () => {
         expect(dom.innerHTML).toBe('<span>bar</span>')
         expect(dom.querySelector('span')).toBe(span)
       }).then(done)
-    }, 10)
+    }, 50)
   })
 
   it('should hydrate async component without showing loading', done => {
@@ -296,5 +307,85 @@ describe('vdom patch: hydration', () => {
       expect(dom.innerHTML).toBe('<span>error</span>')
       done()
     }, 50)
+  })
+
+  it('should hydrate v-html with children', () => {
+    const dom = createMockSSRDOM('<span>foo</span>')
+
+    new Vue({
+      data: {
+        html: `<span>foo</span>`
+      },
+      template: `<div v-html="html">hello</div>`
+    }).$mount(dom)
+
+    expect('not matching server-rendered content').not.toHaveBeenWarned()
+  })
+
+  it('should warn mismatching v-html', () => {
+    const dom = createMockSSRDOM('<span>bar</span>')
+
+    new Vue({
+      data: {
+        html: `<span>foo</span>`
+      },
+      template: `<div v-html="html">hello</div>`
+    }).$mount(dom)
+
+    expect('not matching server-rendered content').toHaveBeenWarned()
+  })
+
+  it('should hydrate with adjacent text nodes from array children (e.g. slots)', () => {
+    const dom = createMockSSRDOM('<div>foo</div> hello')
+
+    new Vue({
+      template: `<test>hello</test>`,
+      components: {
+        test: {
+          template: `
+            <div>
+              <div>foo</div>
+              <slot/>
+            </div>
+          `
+        }
+      }
+    }).$mount(dom)
+    expect('not matching server-rendered content').not.toHaveBeenWarned()
+  })
+
+  // #7063
+  it('should properly initialize dynamic style bindings for future updates', done => {
+    const dom = createMockSSRDOM('<div style="padding-left:0px"></div>')
+
+    const vm = new Vue({
+      data: {
+        style: { paddingLeft: '0px' }
+      },
+      template: `<div><div :style="style"></div></div>`
+    }).$mount(dom)
+
+    // should update
+    vm.style.paddingLeft = '100px'
+    waitForUpdate(() => {
+      expect(dom.children[0].style.paddingLeft).toBe('100px')
+    }).then(done)
+  })
+
+  it('should properly initialize dynamic class bindings for future updates', done => {
+    const dom = createMockSSRDOM('<div class="foo bar"></div>')
+
+    const vm = new Vue({
+      data: {
+        cls: [{ foo: true }, 'bar']
+      },
+      template: `<div><div :class="cls"></div></div>`
+    }).$mount(dom)
+
+    // should update
+    vm.cls[0].foo = false
+    waitForUpdate(() => {
+      expect(dom.children[0].className).toBe('bar')
+    }).then(done)
   })
 })

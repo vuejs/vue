@@ -44,7 +44,7 @@ Vue.prototype.$mount = function (
 
 // devtools global hook
 /* istanbul ignore next */
-setTimeout(() => {
+Vue.nextTick(() => {
   if (config.devtools) {
     if (devtools) {
       devtools.emit('init', Vue)
