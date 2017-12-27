@@ -64,7 +64,7 @@ describe('Usage', () => {
     it('text node', createRenderTestCase('recycle-list/text-node'))
     it('attributes', createRenderTestCase('recycle-list/attrs'))
     // it('class name', createRenderTestCase('recycle-list/classname'))
-    // it('inline style', createRenderTestCase('recycle-list/inline-style'))
+    it('inline style', createRenderTestCase('recycle-list/inline-style'))
     it('v-if', createRenderTestCase('recycle-list/v-if'))
     it('v-else', createRenderTestCase('recycle-list/v-else'))
     it('v-else-if', createRenderTestCase('recycle-list/v-else-if'))
