@@ -74,6 +74,62 @@ describe('codegen', () => {
     )
   })
 
+  it('generate v-local directive', () => {
+    assertCodegen(
+      '<div v-local:value="some.deep.prop">{{value}}</div>',
+      `with(this){return ((function(value){return _c('div',{},[_v(_s(value))])})(some.deep.prop))}`
+    )
+  })
+
+  it('generate multi v-local directive', () => {
+    assertCodegen(
+      '<div v-local:foo="some.deep.prop" v-local:bar="other.deep.prop">{{foo}}{{bar}}</div>',
+      `with(this){return ((function(foo,bar){return _c('div',{},[_v(_s(foo)+_s(bar))])})(some.deep.prop,other.deep.prop))}`
+    )
+  })
+
+  it('generate v-local directive with v-if', () => {
+    assertCodegen(
+      '<div v-local:foo="some.deep.prop" v-if="foo.show">{{foo.value}}</div>',
+      `with(this){return ((function(foo){return (foo.show)?_c('div',{},[_v(_s(foo.value))]):_e()})(some.deep.prop))}`
+    )
+  })
+
+  it('generate v-local directive with v-for', () => {
+    assertCodegen(
+      '<div><span v-for="item in items" v-local:foo="item.deep.prop">{{foo}}</span></div>',
+      `with(this){return _c('div',_l((items),function(item){return ((function(foo){return _c('span',{},[_v(_s(foo))])})(item.deep.prop))}))}`
+    )
+  })
+
+  it('generate v-local directive with other v-local', () => {
+    assertCodegen(
+      '<div v-local:foo="some.deep.prop"><span v-local:bar="foo.deep.prop">{{bar}}</span></div>',
+      `with(this){return ((function(foo){return _c('div',{},[((function(bar){return _c('span',{},[_v(_s(bar))])})(foo.deep.prop))])})(some.deep.prop))}`
+    )
+  })
+
+  it('generate v-local directive with scoped-slot', () => {
+    assertCodegen(
+      '<foo><div v-local:baz="bar.deep.prop" slot-scope="bar">{{baz}}</div></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(bar){return ((function(baz){return _c('div',{},[_v(_s(baz))])})(bar.deep.prop))}}])})}`
+    )
+  })
+
+  it('generate v-local directive with template tag', () => {
+    assertCodegen(
+      '<div><template v-local:v="some.deep.prop"><span>{{ v }}</span></template></div>',
+      `with(this){return _c('div',[((function(v){return [_c('span',[_v(_s(v))])]})(some.deep.prop))],2)}`
+    )
+  })
+
+  it('generate v-local directive with scoped-slot and template tag', () => {
+    assertCodegen(
+      '<test><template slot="item" slot-scope="props" v-local:v="props.text"><span>{{ v }}</span></template></test>',
+      `with(this){return _c('test',{scopedSlots:_u([{key:"item",fn:function(props){return ((function(v){return [_c('span',[_v(_s(v))])]})(props.text))}}])})}`
+    )
+  })
+
   it('generate v-if directive', () => {
     assertCodegen(
       '<p v-if="show">hello</p>',
