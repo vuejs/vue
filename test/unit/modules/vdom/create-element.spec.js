@@ -141,7 +141,7 @@ describe('create-element', () => {
     expect(vnode.children[0].children[0].ns).toBeUndefined()
   })
 
-  // #6642
+  // #6642 #7330
   it('render svg foreignObject component with correct namespace', () => {
     const vm = new Vue({
       template: `
@@ -154,6 +154,7 @@ describe('create-element', () => {
           template: `
           <foreignObject>
             <p xmlns="http://www.w3.org/1999/xhtml"></p>
+            <svg></svg>
           </foreignObject>
           `
         }
@@ -165,6 +166,8 @@ describe('create-element', () => {
     expect(testComp._vnode.ns).toBe('svg')
     expect(testComp._vnode.children[0].tag).toBe('p')
     expect(testComp._vnode.children[0].ns).toBeUndefined()
+    expect(testComp._vnode.children[1].tag).toBe('svg')
+    expect(testComp._vnode.children[1].ns).toBe('svg')
   })
 
   // #6506
