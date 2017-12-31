@@ -139,10 +139,11 @@ describe('create-element', () => {
     expect(vnode.ns).toBe('svg')
     expect(vnode.children[0].ns).toBe('svg')
     expect(vnode.children[0].children[0].ns).toBeUndefined()
+    // #7330
     expect(vnode.children[0].children[1].ns).toBe('svg')
   })
 
-  // #6642 #7330
+  // #6642
   it('render svg foreignObject component with correct namespace', () => {
     const vm = new Vue({
       template: `
