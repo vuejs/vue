@@ -16,18 +16,6 @@ const keyCodes: { [key: string]: number | Array<number> } = {
   'delete': [8, 46]
 }
 
-const keyNames: { [key: string]: string | Array<string> } = {
-  esc: 'Escape',
-  tab: 'Tab',
-  enter: 'Enter',
-  space: ' ',
-  up: 'ArrowUp',
-  left: 'ArrowLeft',
-  right: 'ArrowRight',
-  down: 'ArrowDown',
-  'delete': ['Backspace', 'Delete']
-}
-
 // #4868: modifiers that prevent the execution of the listener
 // need to explicitly return null so that we can determine whether to remove
 // the listener for .once
@@ -157,7 +145,6 @@ function genFilterCode (key: string): string {
     `_k($event.keyCode,` +
     `${JSON.stringify(key)},` +
     `${JSON.stringify(code)},` +
-    `$event.key,` +
-    `${JSON.stringify(keyNames[key])})`
+    `$event.key)`
   )
 }
