@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { isIE9, isIE, isAndroid } from 'core/util/env'
+import { isIE9, isIE } from 'core/util/env'
 
 describe('Directive v-model text', () => {
   it('should update value both ways', done => {
@@ -183,7 +183,7 @@ describe('Directive v-model text', () => {
     })
   }
 
-  if (!isAndroid) {
+  if (typeof window.CompositionEvent === 'function') {
     it('compositionevents', function (done) {
       const vm = new Vue({
         data: {
@@ -291,7 +291,7 @@ describe('Directive v-model text', () => {
     expect('conflicts with v-model').not.toHaveBeenWarned()
   })
 
-  if (!isAndroid) {
+  if (!typeof window.CompositionEvent === 'function') {
     it('does not trigger extra input events with single compositionend', () => {
       const spy = jasmine.createSpy()
       const vm = new Vue({
