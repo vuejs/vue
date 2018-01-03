@@ -39,7 +39,7 @@ const directive = {
         // this also fixes the issue where some browsers e.g. iOS Chrome
         // fires "change" instead of "input" on autocomplete.
         el.addEventListener('change', onCompositionEnd)
-        if (!isAndroid) {
+        if (typeof window.CompositionEvent === 'function') {
           el.addEventListener('compositionstart', onCompositionStart)
           el.addEventListener('compositionend', onCompositionEnd)
         }
