@@ -46,8 +46,8 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         </a>
       </td>
       <td>
-        <a href="https://www.infinitynewtab.com/donate/index.html" target="_blank">
-          <img width="200px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/infinitynewtab.png">
+        <a href="https://vueschool.io/?utm_source=Vuejs.org&utm_medium=Banner&utm_campaign=Sponsored%20Banner&utm_content=V1" target="_blank">
+          <img width="200px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vueschool.png">
         </a>
       </td>
     </tr>
