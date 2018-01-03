@@ -6,16 +6,17 @@ type Constructor = {
 }
 
 // we don't support infer props in async component
-export type Component<Data=DefaultData<Vue>, Methods=DefaultMethods<Vue>, Computed=DefaultComputed, Props=DefaultProps> =
+// N.B. ComponentOptions<V> is contravariant, the default generic should be bottom type
+export type Component<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> =
   | typeof Vue
   | FunctionalComponentOptions<Props>
-  | ComponentOptions<Vue, Data, Methods, Computed, Props>
+  | ComponentOptions<never, Data, Methods, Computed, Props>
 
 interface EsModuleComponent {
   default: Component
 }
 
-export type AsyncComponent<Data=DefaultData<Vue>, Methods=DefaultMethods<Vue>, Computed=DefaultComputed, Props=DefaultProps> = (
+export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
 ) => Promise<Component | EsModuleComponent> | void;

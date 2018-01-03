@@ -1,10 +1,22 @@
 import Vue, { VNode } from "../index";
-import { AsyncComponent, ComponentOptions, FunctionalComponentOptions } from "../index";
+import { AsyncComponent, ComponentOptions, FunctionalComponentOptions, Component } from "../index";
 import { CreateElement } from "../vue";
 
-interface Component extends Vue {
+interface MyComponent extends Vue {
   a: number;
 }
+
+const option: ComponentOptions<MyComponent> = {
+  data() {
+    return {
+      a: 123
+    }
+  }
+}
+
+// contravariant generic should use never
+const anotherOption: ComponentOptions<never> = option
+const componentType: Component = option
 
 Vue.component('sub-component', {
   components: {
@@ -41,10 +53,10 @@ Vue.component('string-prop', {
 });
 
 class User {
-  private u: number
+  private u = 1
 }
 class Cat {
-  private u: number
+  private u = 1
 }
 
 Vue.component('union-prop', {
