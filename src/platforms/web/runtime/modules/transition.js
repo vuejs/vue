@@ -149,13 +149,15 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     addTransitionClass(el, startClass)
     addTransitionClass(el, activeClass)
     nextFrame(() => {
-      addTransitionClass(el, toClass)
       removeTransitionClass(el, startClass)
-      if (!cb.cancelled && !userWantsControl) {
-        if (isValidDuration(explicitEnterDuration)) {
-          setTimeout(cb, explicitEnterDuration)
-        } else {
-          whenTransitionEnds(el, type, cb)
+      if (!cb.cancelled) {
+        addTransitionClass(el, toClass)
+        if (!userWantsControl) {
+          if (isValidDuration(explicitEnterDuration)) {
+            setTimeout(cb, explicitEnterDuration)
+          } else {
+            whenTransitionEnds(el, type, cb)
+          }
         }
       }
     })
@@ -257,13 +259,15 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       addTransitionClass(el, leaveClass)
       addTransitionClass(el, leaveActiveClass)
       nextFrame(() => {
-        addTransitionClass(el, leaveToClass)
         removeTransitionClass(el, leaveClass)
-        if (!cb.cancelled && !userWantsControl) {
-          if (isValidDuration(explicitLeaveDuration)) {
-            setTimeout(cb, explicitLeaveDuration)
-          } else {
-            whenTransitionEnds(el, type, cb)
+        if (!cb.cancelled) {
+          addTransitionClass(el, leaveToClass)
+          if (!userWantsControl) {
+            if (isValidDuration(explicitLeaveDuration)) {
+              setTimeout(cb, explicitLeaveDuration)
+            } else {
+              whenTransitionEnds(el, type, cb)
+            }
           }
         }
       })
