@@ -48,6 +48,30 @@ describe('Options extends', () => {
     expect(vm.c).toBe(3)
   })
 
+  it('should work with globally registered components by string', () => {
+    Vue.component('A', {
+      data () {
+        return { a: 1 }
+      }
+    })
+    Vue.component('B', {
+      extends: 'A',
+      data () {
+        return { b: 2 }
+      }
+    })
+    const vm = new Vue({
+      extends: 'B',
+      data: {
+        c: 3
+      }
+    })
+
+    expect(vm.a).toBe(1)
+    expect(vm.b).toBe(2)
+    expect(vm.c).toBe(3)
+  })
+
   if (nativeWatch) {
     it('should work with global mixins + Object.prototype.watch', done => {
       Vue.mixin({})
