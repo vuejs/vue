@@ -40,7 +40,6 @@
     "release": "bash scripts/release.sh",
     "release:weex": "bash scripts/release-weex.sh",
     "release:note": "node scripts/gen-release-note.js",
-    "setup": "node scripts/setup.js",
     "commit": "git-cz"
   },
   "gitHooks": {
