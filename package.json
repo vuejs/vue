@@ -33,7 +33,7 @@
     "test:ssr": "npm run build:ssr && jasmine JASMINE_CONFIG_PATH=test/ssr/jasmine.json",
     "test:sauce": "npm run sauce -- 0 && npm run sauce -- 1 && npm run sauce -- 2",
     "test:types": "tsc -p ./types/test/tsconfig.json",
-    "lint": "eslint src scripts test",
+    "lint": "eslint --fix src scripts test",
     "flow": "flow check",
     "sauce": "karma start test/unit/karma.sauce.config.js",
     "bench:ssr": "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",
@@ -42,6 +42,16 @@
     "release:note": "node scripts/gen-release-note.js",
     "setup": "node scripts/setup.js",
     "commit": "git-cz"
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged",
+    "commit-msg": "node scripts/verify-commit-msg.js"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   },
   "repository": {
     "type": "git",
@@ -104,6 +114,7 @@
     "karma-sauce-launcher": "^1.1.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^2.0.3",
+    "lint-staged": "^6.0.0",
     "lodash": "^4.17.4",
     "lodash.template": "^4.4.0",
     "lodash.uniq": "^4.5.0",
@@ -128,7 +139,8 @@
     "uglify-js": "^3.0.15",
     "webpack": "^3.10.0",
     "weex-js-runtime": "^0.23.5",
-    "weex-styler": "^0.3.0"
+    "weex-styler": "^0.3.0",
+    "yorkie": "^1.0.1"
   },
   "config": {
     "commitizen": {
