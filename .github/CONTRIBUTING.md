@@ -40,18 +40,12 @@ You will need [Node.js](http://nodejs.org) **version 6+** and [Java Runtime Envi
 After cloning the repo, run:
 
 ``` bash
-$ npm install
-& npm run setup
+$ npm install # or yarn
 ```
-
-The `setup` script links two git hooks:
-
-- `pre-commit`: runs ESLint on staged files.
-- `commit-msg`: validates commit message format (see below).
 
 ### Committing Changes
 
-Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. If git hooks have been properly linked, commit messages will be automatically validated upon commit. It is recommended to use `npm run commit` instead of `git commit`, which provides an interactive CLI for generating proper commit messages.
+Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. Commit messages will be automatically validated upon commit. If you are not familiar with the commit message convention, you can use `npm run commit` instead of `git commit`, which provides an interactive CLI for generating proper commit messages.
 
 ### Commonly used NPM scripts
 
