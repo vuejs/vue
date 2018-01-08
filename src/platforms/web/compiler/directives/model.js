@@ -130,9 +130,11 @@ function genDefaultModel (
   const type = el.attrsMap.type
 
   // warn if v-bind:value conflicts with v-model
+  // except for inputs with v-bind:type
   if (process.env.NODE_ENV !== 'production') {
     const value = el.attrsMap['v-bind:value'] || el.attrsMap[':value']
-    if (value) {
+    const typeBinding = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
+    if (value && !typeBinding) {
       const binding = el.attrsMap['v-bind:value'] ? 'v-bind:value' : ':value'
       warn(
         `${binding}="${value}" conflicts with v-model on the same element ` +
