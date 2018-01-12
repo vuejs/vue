@@ -54,7 +54,7 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
     </tr><tr></tr>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://datacamp.com/careers?utm_source=vuejs&utm_medium=sidebar" target="_blank">
+        <a href="https://www.datacamp.com/careers?utm_source=vuejs&utm_medium=sidebar" target="_blank">
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/datacamp.png">
         </a>
       </td>
