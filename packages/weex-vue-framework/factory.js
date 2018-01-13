@@ -176,23 +176,6 @@ var hyphenate = cached(function (str) {
 });
 
 /**
- * Simple bind, faster than native
- */
-function bind (fn, ctx) {
-  function boundFn (a) {
-    var l = arguments.length;
-    return l
-      ? l > 1
-        ? fn.apply(ctx, arguments)
-        : fn.call(ctx, a)
-      : fn.call(ctx)
-  }
-  // record original fn length
-  boundFn._length = fn.length;
-  return boundFn
-}
-
-/**
  * Convert an Array-like object to a real Array.
  */
 function toArray (list, start) {
@@ -3519,7 +3502,7 @@ function initMethods (vm, methods) {
         );
       }
     }
-    vm[key] = methods[key] == null ? noop : bind(methods[key], vm);
+    vm[key] = methods[key] == null ? noop : methods[key].bind(vm);
   }
 }
 
