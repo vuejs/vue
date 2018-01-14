@@ -112,13 +112,15 @@ function initData (vm: Component) {
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
-  if (!isPlainObject(data)) {
-    data = {}
-    process.env.NODE_ENV !== 'production' && warn(
-      'data functions should return an object:\n' +
-      'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
-      vm
-    )
+  if (process.env.NODE_ENV !== 'production') {
+    if (!isPlainObject(data)) {
+      data = {}
+      warn(
+        'data functions should return an object:\n' +
+        'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
+        vm
+      )
+    }
   }
   // proxy data on instance
   const keys = Object.keys(data)
@@ -134,14 +136,15 @@ function initData (vm: Component) {
           vm
         )
       }
+      if (props && hasOwn(props, key)) {
+        warn(
+          `The data property "${key}" is already declared as a prop. ` +
+          `Use prop default value instead.`,
+          vm
+        )
+      }
     }
-    if (props && hasOwn(props, key)) {
-      process.env.NODE_ENV !== 'production' && warn(
-        `The data property "${key}" is already declared as a prop. ` +
-        `Use prop default value instead.`,
-        vm
-      )
-    } else if (!isReserved(key)) {
+    if (!isReserved(key)) {
       proxy(vm, `_data`, key)
     }
   }
