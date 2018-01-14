@@ -134,14 +134,15 @@ function initData (vm: Component) {
           vm
         )
       }
+      if (props && hasOwn(props, key)) {
+        warn(
+          `The data property "${key}" is already declared as a prop. ` +
+          `Use prop default value instead.`,
+          vm
+        )
+      }
     }
-    if (props && hasOwn(props, key)) {
-      process.env.NODE_ENV !== 'production' && warn(
-        `The data property "${key}" is already declared as a prop. ` +
-        `Use prop default value instead.`,
-        vm
-      )
-    } else if (!isReserved(key)) {
+    if (!isReserved(key)) {
       proxy(vm, `_data`, key)
     }
   }
