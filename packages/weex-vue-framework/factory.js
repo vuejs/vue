@@ -175,6 +175,23 @@ var hyphenate = cached(function (str) {
   return str.replace(hyphenateRE, '-$1').toLowerCase()
 });
 
+/**		
+ * Simple bind, faster than native		
+ */		
+function bind (fn, ctx) {		
+  function boundFn (a) {		
+    var l = arguments.length;		
+    return l		
+      ? l > 1		
+        ? fn.apply(ctx, arguments)		
+        : fn.call(ctx, a)		
+      : fn.call(ctx)		
+  }
+ // record original fn length		
+ boundFn._length = fn.length;		
+ return boundFn		
+}		
+ 
 /**
  * Convert an Array-like object to a real Array.
  */
