@@ -336,6 +336,96 @@ describe('Observer', () => {
     }).then(done)
   })
 
+  it('warning set/delete on null value', done => {
+    const data = { a: null }
+    const vm = new Vue({
+      template: '<div>{{a}}</div>',
+      data
+    }).$mount()
+    expect(vm.$el.outerHTML).toBe('<div></div>')
+    expect(Vue.set(data.a, 'b', 2)).toBe(undefined)
+    waitForUpdate(() => {
+      expect(vm.$el.outerHTML).toBe('<div></div>')
+      expect('Cannot add reactive property to a null/undefined value').toHaveBeenWarned()
+      Vue.delete(data.a, 'b')
+    }).then(() => {
+      expect(vm.$el.outerHTML).toBe('<div></div>')
+      expect('Cannot delete reactive property from a null/undefined value').toHaveBeenWarned()
+    }).then(done)
+  })
+
+  it('warning set/delete on undefined value', done => {
+    const data = { a: undefined }
+    const vm = new Vue({
+      template: '<div>{{a}}</div>',
+      data
+    }).$mount()
+    expect(vm.$el.outerHTML).toBe('<div></div>')
+    expect(Vue.set(data.a, 'b', 2)).toBe(undefined)
+    waitForUpdate(() => {
+      expect(vm.$el.outerHTML).toBe('<div></div>')
+      expect('Cannot add reactive property to a null/undefined value').toHaveBeenWarned()
+      Vue.delete(data.a, 'b')
+    }).then(() => {
+      expect(vm.$el.outerHTML).toBe('<div></div>')
+      expect('Cannot delete reactive property from a null/undefined value').toHaveBeenWarned()
+    }).then(done)
+  })
+
+  it('warning set/delete on String instance', done => {
+    const data = { a: 'foo' }
+    const vm = new Vue({
+      template: '<div>{{a}}</div>',
+      data
+    }).$mount()
+    expect(vm.$el.outerHTML).toBe('<div>foo</div>')
+    expect(Vue.set(data.a, 'b', 'bar')).toBe(undefined)
+    waitForUpdate(() => {
+      expect(vm.$el.outerHTML).toBe('<div>foo</div>')
+      expect('Cannot add reactive property to a String object').toHaveBeenWarned()
+      Vue.delete(data.a, 'b')
+    }).then(() => {
+      expect(vm.$el.outerHTML).toBe('<div>foo</div>')
+      expect('Cannot delete reactive property from a String object').toHaveBeenWarned()
+    }).then(done)
+  })
+
+  it('warning set/delete on Number instance', done => {
+    const data = { a: 1 }
+    const vm = new Vue({
+      template: '<div>{{a}}</div>',
+      data
+    }).$mount()
+    expect(vm.$el.outerHTML).toBe('<div>1</div>')
+    expect(Vue.set(data.a, 'b', 2)).toBe(undefined)
+    waitForUpdate(() => {
+      expect(vm.$el.outerHTML).toBe('<div>1</div>')
+      expect('Cannot add reactive property to a Number object').toHaveBeenWarned()
+      Vue.delete(data.a, 'b')
+    }).then(() => {
+      expect(vm.$el.outerHTML).toBe('<div>1</div>')
+      expect('Cannot delete reactive property from a Number object').toHaveBeenWarned()
+    }).then(done)
+  })
+
+  it('warning set/delete on Boolean instance', done => {
+    const data = { a: true }
+    const vm = new Vue({
+      template: '<div>{{a}}</div>',
+      data
+    }).$mount()
+    expect(vm.$el.outerHTML).toBe('<div>true</div>')
+    expect(Vue.set(data.a, 'b', false)).toBe(undefined)
+    waitForUpdate(() => {
+      expect(vm.$el.outerHTML).toBe('<div>true</div>')
+      expect('Cannot add reactive property to a Boolean object').toHaveBeenWarned()
+      Vue.delete(data.a, 'b')
+    }).then(() => {
+      expect(vm.$el.outerHTML).toBe('<div>true</div>')
+      expect('Cannot delete reactive property from a Boolean object').toHaveBeenWarned()
+    }).then(done)
+  })
+
   it('observing array mutation', () => {
     const arr = []
     const ob = observe(arr)

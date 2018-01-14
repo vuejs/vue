@@ -191,6 +191,19 @@ export function defineReactive (
  * already exist.
  */
 export function set (target: Array<any> | Object, key: any, val: any): any {
+  if (target === null || target === undefined) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Cannot add reactive property to a null/undefined value'
+    )
+    return undefined
+  }
+  if (target.constructor === String || target.constructor === Number ||
+      target.constructor === Boolean) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Cannot add reactive property to a ' + target.constructor.name + ' object'
+    )
+    return undefined
+  }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
@@ -221,6 +234,19 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
  * Delete a property and trigger change if necessary.
  */
 export function del (target: Array<any> | Object, key: any) {
+  if (target === null || target === undefined) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Cannot delete reactive property from a null/undefined value'
+    )
+    return undefined
+  }
+  if (target.constructor === String || target.constructor === Number ||
+      target.constructor === Boolean) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Cannot delete reactive property from a ' + target.constructor.name + ' object'
+    )
+    return undefined
+  }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1)
     return
