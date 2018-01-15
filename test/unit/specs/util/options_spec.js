@@ -112,7 +112,8 @@ describe('Util - Option merging', function () {
       props: {
         a: { required: true },
         b: Boolean,
-        c: { type: Array }
+        c: { type: Array },
+        f: [String, Number]
       }
     })
     expect(typeof res.props.a).toBe('object')
@@ -122,6 +123,9 @@ describe('Util - Option merging', function () {
     expect(typeof res.props.c).toBe('object')
     expect(res.props.c.type).toBe(Array)
     expect(res.props.d).toBe(null)
+    expect(typeof res.props.f).toBe('object')
+    expect(res.props.f.type[0]).toBe(String)
+    expect(res.props.f.type[1]).toBe(Number)
 
     // check array syntax
     res = merge({

@@ -274,7 +274,7 @@ function guardProps (options) {
     i = keys.length
     while (i--) {
       val = props[keys[i]]
-      if (typeof val === 'function') {
+      if (typeof val === 'function' || isArray(val)) {
         props[keys[i]] = { type: val }
       }
     }
