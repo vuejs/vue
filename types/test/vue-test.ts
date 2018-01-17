@@ -47,6 +47,7 @@ class Test extends Vue {
     this.$once("", () => {});
     this.$off("", () => {});
     this.$emit("", 1, 2, 3);
+    this.$notify("", 1, 2, 3);
     this.$nextTick(function() {
       this.$nextTick;
     });
