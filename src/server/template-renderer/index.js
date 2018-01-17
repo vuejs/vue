@@ -124,7 +124,7 @@ export default class TemplateRenderer {
   }
 
   renderStyles (context: Object): string {
-    return this.renderCriticalStyles(context) + this.renderStyleLinks(context)
+    return this.renderStyleLinks(context) + this.renderCriticalStyles(context)
   }
 
   renderResourceHints (context: Object): string {
