@@ -399,6 +399,38 @@ describe('Directive v-on', () => {
     Vue.config.keyCodes = Object.create(null)
   })
 
+  it('should return this for $emit', () => {
+    vm = new Vue({
+      el,
+      template: '<bar @custom="foo"></bar>',
+      methods: { foo: () => 123 },
+      components: {
+        bar: {
+          template: '<span>Hello</span>'
+        }
+      }
+    })
+    const retValue = vm.$children[0].$emit('custom', 'foo', 'bar')
+    expect(retValue).toBe(vm.$children[0])
+  })
+
+  it('should return an array for $notify', () => {
+    vm = new Vue({
+      el,
+      template: '<bar @custom="foo"></bar>',
+      methods: { foo: () => 123 },
+      components: {
+        bar: {
+          template: '<span>Hello</span>'
+        }
+      }
+    })
+    const retValue = vm.$children[0].$notify('custom', 'foo', 'bar')
+    expect(Array.isArray(retValue)).toBe(true)
+    expect(retValue.length).toBe(1)
+    expect(retValue[0]).toBe(123)
+  })
+
   it('should bind to a child component', () => {
     vm = new Vue({
       el,

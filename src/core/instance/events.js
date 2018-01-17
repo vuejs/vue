@@ -111,7 +111,7 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
-  Vue.prototype.$emit = function (event: string): Component {
+  Vue.prototype.$notify = function (event: string): Array<mixed> {
     const vm: Component = this
     if (process.env.NODE_ENV !== 'production') {
       const lowerCaseEvent = event.toLowerCase()
@@ -126,17 +126,24 @@ export function eventsMixin (Vue: Class<Component>) {
       }
     }
     let cbs = vm._events[event]
+    const retValues: Array<mixed> = []
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
       const args = toArray(arguments, 1)
+      retValues.length = cbs.length
       for (let i = 0, l = cbs.length; i < l; i++) {
         try {
-          cbs[i].apply(vm, args)
+          retValues[i] = cbs[i].apply(vm, args)
         } catch (e) {
           handleError(e, vm, `event handler for "${event}"`)
         }
       }
     }
-    return vm
+    return retValues
+  }
+
+  Vue.prototype.$emit = function (event: string): Component {
+    Vue.prototype.$notify.apply(this, arguments)
+    return this
   }
 }
