@@ -64,7 +64,7 @@ export function _createElement (
     tag = data.is
   }
   if (!tag) {
-    // in case of component :is set to falsy value
+    // in case of component :is set to false value
     return createEmptyVNode()
   }
   // warn against non-primitive key
