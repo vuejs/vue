@@ -174,7 +174,7 @@ export const hyphenate = cached((str: string): string => {
 })
 
 /**
- * Bind funciton context
+ * Bind function context
  */
 export function bind (fn: Function, ctx: Object): Function {
   if(!Function.prototype.bind) {
