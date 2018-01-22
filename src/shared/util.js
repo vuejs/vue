@@ -176,24 +176,25 @@ export const hyphenate = cached((str: string): string => {
 /**
  * Bind function context
  */
-export function bind (fn: Function, ctx: Object): Function {
-  if(!Function.prototype.bind) {
-    function boundFn (a) {
-      const l = arguments.length
-      return l
-        ? l > 1
-          ? fn.apply(ctx, arguments)
-          : fn.call(ctx, a)
-        : fn.call(ctx)
-    }
-    // record original fn length
-    boundFn._length = fn.length
-    
-    return boundFn
+function ownBind (fn: Function, ctx: Object): Function {
+  function boundFn (a) {
+    const l = arguments.length
+    return l
+      ? l > 1
+        ? fn.apply(ctx, arguments)
+        : fn.call(ctx, a)
+      : fn.call(ctx)
   }
-  
+
+  boundFn._length = fn.length
+  return boundFn
+}
+
+function nativeBind(fn: Function, ctx: Object): Function {
   return fn.bind(ctx)
 }
+
+export const bind = Function.prototype.bind ? nativeBind : ownBind
 
 /**
  * Convert an Array-like object to a real Array.
