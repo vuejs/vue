@@ -717,4 +717,10 @@ describe('parser', () => {
     expect(ast.children[1].isComment).toBe(true) // parse comment with ASTText
     expect(ast.children[1].text).toBe('comment here')
   })
+
+  it('not warn elements that you can leave open', () => {
+    parse('<div><p>one<p>two</div>', baseOptions)
+    expect(`tag <p> has no matching end tag.`)
+      .not.toHaveBeenWarned()
+  })
 })

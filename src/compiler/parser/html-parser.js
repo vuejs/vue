@@ -280,6 +280,7 @@ export function parseHTML (html, options) {
       for (let i = stack.length - 1; i >= pos; i--) {
         if (process.env.NODE_ENV !== 'production' &&
           (i > pos || !tagName) &&
+          !(expectHTML && canBeLeftOpenTag(stack[i].tag)) &&
           options.warn
         ) {
           options.warn(
