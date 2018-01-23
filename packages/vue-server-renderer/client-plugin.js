@@ -30,6 +30,48 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
 
     var allFiles = uniq(stats.assets
       .map(function (a) { return a.name; }));
+    
+    compiler.plugin('emit', function (compilation, cb) {
+    var stats = compilation.getStats().toJson();
+
+    var allFiles = uniq(stats.assets
+      .map(function (a) { return a.name; }));
+      
+      
+    compiler.plugin('emit', function (compilation, cb) {
+    var stats = compilation.getStats().toJson();
+
+    var allFiles = uniq(stats.assets
+      .map(function (a) { return a.name; }));
+      
+      
+    compiler.plugin('emit', function (compilation, cb) {
+    var stats = compilation.getStats().toJson();
+
+    var allFiles = uniq(stats.assets
+      .map(function (a) { return a.name; }));
+      
+      
+    compiler.plugin('emit', function (compilation, cb) {
+    var stats = compilation.getStats().toJson();
+
+    var allFiles = uniq(stats.assets
+      .map(function (a) { return a.name; }));
+      
+      
+    compiler.plugin('emit', function (compilation, cb) {
+    var stats = compilation.getStats().toJson();
+
+    var allFiles = uniq(stats.assets
+      .map(function (a) { return a.name; }));
+      
+      
+      
+    compiler.plugin('emit', function (compilation, cb) {
+    var stats = compilation.getStats().toJson();
+
+    var allFiles = uniq(stats.assets
+      .map(function (a) { return a.name; }));
 
     
 
