@@ -1,0 +1,11 @@
+version: "2"
+plugins:
+  eslint:
+    enabled: true
+    config:
+      extensions:
+      - .es6
+      - .js
+      - .jsx
+      - .vue
+
