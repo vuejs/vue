@@ -45,6 +45,14 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
       .map(function (a) { return a.name; }));
       
       
+     
+      
+  var VueSSRServerPlugin = function VueSSRServerPlugin (options) {
+  if ( options === void 0 ) options = {};
+ 
+  this.options = Object.assign({
+    filename: 'vue-ssr-server-bundle.json'
+      
     compiler.plugin('emit', function (compilation, cb) {
     var stats = compilation.getStats().toJson();
 
