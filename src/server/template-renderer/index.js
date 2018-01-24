@@ -14,6 +14,7 @@ type TemplateRendererOptions = {
   template: ?string;
   inject?: boolean;
   clientManifest?: ClientManifest;
+  stylesheetBeforeScript?: boolean;
   shouldPreload?: (file: string, type: string) => boolean;
   shouldPrefetch?: (file: string, type: string) => boolean;
 };
@@ -41,6 +42,7 @@ type Resource = {
 export default class TemplateRenderer {
   options: TemplateRendererOptions;
   inject: boolean;
+  stylesheetBeforeScript: boolean;
   parsedTemplate: ParsedTemplate | null;
   publicPath: string;
   clientManifest: ClientManifest;
@@ -51,6 +53,7 @@ export default class TemplateRenderer {
   constructor (options: TemplateRendererOptions) {
     this.options = options
     this.inject = options.inject !== false
+    this.stylesheetBeforeScript = options.stylesheetBeforeScript === true
     // if no template option is provided, the renderer is created
     // as a utility object for rendering assets like preload links and scripts.
     this.parsedTemplate = options.template
@@ -89,8 +92,9 @@ export default class TemplateRenderer {
       return (
         template.head(context) +
         (context.head || '') +
+        (this.stylesheetBeforeScript ? this.renderStyles(context) : '') +
         this.renderResourceHints(context) +
-        this.renderStyles(context) +
+        (this.stylesheetBeforeScript ? '' : this.renderStyles(context)) +
         template.neck(context) +
         content +
         this.renderState(context) +

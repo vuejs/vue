@@ -63,6 +63,7 @@ declare const cacheClient: { [key: string]: string };
 
 const bundleRenderer = createBundleRenderer('/path/to/vue-ssr-server-bundle.json', {
   inject: false,
+  stylesheetBeforeScript: true,
   runInNewContext: 'once',
   basedir: '/path/to/base',
 
