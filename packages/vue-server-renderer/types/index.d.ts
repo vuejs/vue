@@ -28,6 +28,7 @@ interface BundleRenderer {
 interface RendererOptions {
   template?: string;
   inject?: boolean;
+  stylesheetBeforeScript?: boolean;
   shouldPreload?: (file: string, type: string) => boolean;
   shouldPrefetch?: (file: string, type: string) => boolean;
   cache?: RenderCache;

@@ -221,6 +221,7 @@ describe('SSR: template option', () => {
 
   const expectedHTMLWithManifest = (options = {}) =>
     `<html><head>` +
+      (options.stylesBeforeScript ? `<link rel="stylesheet" href="/test.css">` : ``) +
       // used chunks should have preload
       `<link rel="preload" href="/manifest.js" as="script">` +
       `<link rel="preload" href="/main.js" as="script">` +
@@ -232,7 +233,7 @@ describe('SSR: template option', () => {
       // unused chunks should have prefetch
       (options.noPrefetch ? `` : `<link rel="prefetch" href="/1.js">`) +
       // css assets should be loaded
-      `<link rel="stylesheet" href="/test.css">` +
+      (options.stylesBeforeScript ? `` : `<link rel="stylesheet" href="/test.css">`) +
     `</head><body>` +
       `<div data-server-rendered="true"><div>async test.woff2 test.png</div></div>` +
       // state should be inlined before scripts
@@ -298,6 +299,25 @@ describe('SSR: template option', () => {
         stream.on('end', () => {
           expect(res).toContain(expectedHTMLWithManifest({
             noPrefetch: true
+          }))
+          done()
+        })
+      })
+    })
+
+    it('bundleRenderer + renderToStream + clientManifest + stylesheetBeforeScript : true', done => {
+      createRendererWithManifest('split.js', {
+        runInNewContext,
+        stylesBeforeScript: true
+      }, renderer => {
+        const stream = renderer.renderToStream({ state: { a: 1 }})
+        let res = ''
+        stream.on('data', chunk => {
+          res += chunk.toString()
+        })
+        stream.on('end', () => {
+          expect(res).toContain(expectedHTMLWithManifest({
+            stylesBeforeScript: true
           }))
           done()
         })
