@@ -44,6 +44,13 @@ describe('codegen', () => {
     )
   })
 
+  it('generate filters with no arguments', () => {
+    assertCodegen(
+      '<div>{{ d | e() }}</div>',
+      `with(this){return _c('div',[_v(_s(_f("e")(d)))])}`
+    )
+  })
+
   it('generate v-for directive', () => {
     assertCodegen(
       '<div><li v-for="item in items" :key="item.uid"></li></div>',
