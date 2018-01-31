@@ -1,3 +1,4 @@
+import config from '../config'
 import { inBrowser } from './env'
 
 export let mark
@@ -16,9 +17,11 @@ if (process.env.NODE_ENV !== 'production') {
     mark = tag => perf.mark(tag)
     measure = (name, startTag, endTag) => {
       perf.measure(name, startTag, endTag)
-      perf.clearMarks(startTag)
-      perf.clearMarks(endTag)
-      perf.clearMeasures(name)
+      if (!config.performance) {
+        perf.clearMarks(startTag)
+        perf.clearMarks(endTag)
+        perf.clearMeasures(name)
+      }
     }
   }
 }
