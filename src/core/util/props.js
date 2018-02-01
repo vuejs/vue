@@ -31,7 +31,10 @@ export function validateProp (
   if (isType(Boolean, prop.type)) {
     if (absent && !hasOwn(prop, 'default')) {
       value = false
-    } else if (!isType(String, prop.type) && (value === '' || value === hyphenate(key))) {
+    } else if (
+      (!isType(String, prop.type) || prop.type.indexOf(String) > prop.type.indexOf(Boolean)) &&
+      (value === '' || value === hyphenate(key))
+    ) {
       value = true
     }
   }
