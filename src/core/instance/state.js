@@ -150,11 +150,15 @@ function initData (vm: Component) {
 }
 
 export function getData (data: Function, vm: Component): any {
+  const prevTarget = Dep.target
+  Dep.target = null
   try {
     return data.call(vm, vm)
   } catch (e) {
     handleError(e, vm, `data()`)
     return {}
+  } finally {
+    Dep.target = prevTarget
   }
 }
 
