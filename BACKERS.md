@@ -109,6 +109,11 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         </a>
       </td>
       <td align="center" valign="middle">
+        <a href="hhttps://hackr.io/tutorials/learn-vue-js" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/hackr-io.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
         <a href="https://vuejobs.com/?ref=vuejs" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
         </a>
@@ -209,12 +214,12 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 
 <!--50 start-->
 - Wasim Khamlichi
-- errorrik
+- errorrik 
 - Alex Balashov
 - Konstantin Levinski
 - Samuel Smith
 - HARRI J SALOMAA
-- tjkoury
+- tjkoury 
 - Evan Leonardi
 <!--50 end-->
 
@@ -235,17 +240,16 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Frank Dugan III
 - Stephen Hartley
 - Wen-Tien Chang
-- Chestnut Hill
 - Kirk Lewis
 - Karol F
 - Miljan Aleksic
-- 叶解
+- 叶解 
 - Paul Straw
 - Jake Ingman
 - Barbara Liau
 - Isaac Sant
 - Milos Stojanovic
-- 4
+- 4 
 - The Graphic Design School
 - Christian Griffith
 - Jarek Tkaczyk
@@ -261,11 +265,10 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Duncan J Kenzie
 - Mike Margerum
 - Guy Gavergun
-- Edithvale
+- Edithvale 
 - Intevation GmbH
 - Luiz Eduardo  Tanure Bacelar
 - Chengzhi Yin
-- Dan Barrett
 - Zoran Knezevic
 - James Simpson
 - Pierre Vanhulst
@@ -283,21 +286,17 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Nicholas Reid
 - Tyler Scott
 - Thong Yong Jun
-- Tai Shi Lgin
 - Bryan Gruneberg
 - Roman Kuba
-- Matthew McMillion
 - Familiar Studio
 - Matias Verdier
 - Jamie McElwain
 - Vivekanandhan Natarajan
-- Alejandro Mohamad
 - Rafael Belvederese
 - Mickaël Andrieu
 - Guilherme S L de Souza
 - Rob Yedlin
 - Daniel Waghorn
-- Eric Githinji
 - Chih-Hsuan, Fan
 - Jordan Oroshiba
 - Brian Jorden

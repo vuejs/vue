@@ -117,6 +117,11 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         </a>
       </td>
       <td align="center" valign="middle">
+        <a href="hhttps://hackr.io/tutorials/learn-vue-js" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/hackr-io.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
         <a href="https://vuejobs.com/?ref=vuejs" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
         </a>
