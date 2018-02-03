@@ -78,12 +78,15 @@ export function parse (
   delimiters = options.delimiters
 
   const stack = []
-  const preserveWhitespace = options.preserveWhitespace !== false
   let root
   let currentParent
   let inVPre = false
   let inPre = false
   let warned = false
+
+  const preserveWhitespace = options.preserveWhitespace !== false
+  const trimTextWhitespace = options.trimTextWhitespace === true
+  const collapseTextWhitespace = options.collapseTextWhitespace === true
 
   function warnOnce (msg) {
     if (!warned) {
@@ -258,10 +261,27 @@ export function parse (
         return
       }
       const children = currentParent.children
-      text = inPre || text.trim()
-        ? isTextTag(currentParent) ? text : decodeHTMLCached(text)
-        // only preserve whitespace if its not right after a starting tag
-        : preserveWhitespace && children.length ? ' ' : ''
+      if (inPre || text.trim()) {
+        text = isTextTag(currentParent) ? text : decodeHTMLCached(text)
+      } else {
+        text = ''
+      }
+      // disable text optimizations within pre-elements
+      if (!inPre) {
+        if (trimTextWhitespace) {
+          text = text.trim()
+        }
+        if (collapseTextWhitespace) {
+          // replace spaces around newlines with just the newline
+          text = text.replace(/\s*\n\s*/g, '\n')
+          // collapse more than one sequential whitespace into one space
+          text = text.replace(/\s{2,}/g, ' ')
+        }
+      }
+      // only preserve whitespace if its not right after a starting tag
+      if (text === '' && preserveWhitespace && children.length) {
+        text = ' '
+      }
       if (text) {
         let res
         if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {

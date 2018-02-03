@@ -717,4 +717,19 @@ describe('parser', () => {
     expect(ast.children[1].isComment).toBe(true) // parse comment with ASTText
     expect(ast.children[1].text).toBe('comment here')
   })
+
+  it('trims and collapses whitespaces in text nodes when configured to do so', () => {
+    const html = `\t<div>\n\t\tTest 1 <br/>\n\t\t <p>\n\t\t\t Test 2\n\t\t\t Test \t \t 3 \n\t\t</p> \n\t</div>`
+    const options = extend({ preserveWhitespace: false, trimTextWhitespace: true, collapseTextWhitespace: true }, baseOptions)
+    const ast = parse(html, options)
+
+    expect(ast.tag).toBe('div')
+    expect(ast.children.length).toBe(3)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('Test 1')
+    expect(ast.children[1].tag).toBe('br')
+    expect(ast.children[2].tag).toBe('p')
+    expect(ast.children[2].children[0].type).toBe(3)
+    expect(ast.children[2].children[0].text).toBe('Test 2\nTest 3')
+  })
 })
