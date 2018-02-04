@@ -13,12 +13,12 @@ https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md#pull-request-guide
 - [ ] Code style update
 - [ ] Refactor
 - [ ] Build-related changes
-- [ ] Other, please describe:
+- [x] Other, please describe: Documentation edits for grammar and consistency
 
 **Does this PR introduce a breaking change?** (check one)
 
 - [ ] Yes
-- [ ] No
+- [x] No
 
 If yes, please describe the impact and migration path for existing applications:
 
