@@ -8,7 +8,7 @@ Vue.js is an MIT-licensed open source project. It's an independent project with 
 
 #### What's the difference between Patreon and OpenCollective?
 
-Funds donated via Patreon goes directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses by core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
+Funds donated via Patreon go directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses for core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
 
 <br><br>
 
@@ -221,12 +221,12 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 
 <!--50 start-->
 - Wasim Khamlichi
-- errorrik 
+- errorrik
 - Alex Balashov
 - Konstantin Levinski
 - Samuel Smith
 - HARRI J SALOMAA
-- tjkoury 
+- tjkoury
 - Evan Leonardi
 <!--50 end-->
 
@@ -250,13 +250,13 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Kirk Lewis
 - Karol F
 - Miljan Aleksic
-- 叶解 
+- 叶解
 - Paul Straw
 - Jake Ingman
 - Barbara Liau
 - Isaac Sant
 - Milos Stojanovic
-- 4 
+- 4
 - The Graphic Design School
 - Christian Griffith
 - Jarek Tkaczyk
@@ -272,7 +272,7 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Duncan J Kenzie
 - Mike Margerum
 - Guy Gavergun
-- Edithvale 
+- Edithvale
 - Intevation GmbH
 - Luiz Eduardo  Tanure Bacelar
 - Chengzhi Yin
