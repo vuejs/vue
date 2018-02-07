@@ -276,6 +276,23 @@ describe('Component', () => {
     expect(vm.$el.outerHTML).toBe('<ul><li>1</li><li>2</li></ul>')
   })
 
+  it('must consider the order of props when using Boolean and String types', () => {
+    const vm = new Vue({
+      template: '<test ref="test" booleanOrString stringOrBoolean />',
+      components: {
+        test: {
+          template: '<div></div>',
+          props: {
+            booleanOrString: [Boolean, String],
+            stringOrBoolean: [String, Boolean]
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$refs.test.$props.booleanOrString).toBe(true)
+    expect(vm.$refs.test.$props.stringOrBoolean).toBe('')
+  })
+
   it('should warn when using camelCased props in in-DOM template', () => {
     new Vue({
       data: {
