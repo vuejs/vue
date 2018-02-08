@@ -205,6 +205,9 @@ function childrenToSegments (el, state): Array<StringSegment> {
   if ((binding = el.attrsMap['v-text'])) {
     return [{ type: INTERPOLATION, value: `_s(${binding})` }]
   }
+  if (el.tag === 'textarea' && (binding = el.attrsMap['v-model'])) {
+    return [{ type: INTERPOLATION, value: `_s(${binding})` }]
+  }
   return el.children
     ? nodesToSegments(el.children, state)
     : []

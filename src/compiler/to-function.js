@@ -1,7 +1,7 @@
 /* @flow */
 
-import { noop } from 'shared/util'
-import { warn, tip } from 'core/util/debug'
+import { noop, extend } from 'shared/util'
+import { warn as baseWarn, tip } from 'core/util/debug'
 
 type CompiledFunctionResult = {
   render: Function;
@@ -18,16 +18,16 @@ function createFunction (code, errors) {
 }
 
 export function createCompileToFunctionFn (compile: Function): Function {
-  const cache: {
-    [key: string]: CompiledFunctionResult;
-  } = Object.create(null)
+  const cache = Object.create(null)
 
   return function compileToFunctions (
     template: string,
     options?: CompilerOptions,
     vm?: Component
   ): CompiledFunctionResult {
-    options = options || {}
+    options = extend({}, options)
+    const warn = options.warn || baseWarn
+    delete options.warn
 
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production') {

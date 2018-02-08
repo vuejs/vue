@@ -1,18 +1,18 @@
 declare type InternalComponentOptions = {
   _isComponent: true;
   parent: Component;
-  propsData: ?Object;
   _parentVnode: VNode;
-  _parentListeners: ?Object;
-  _renderChildren: ?Array<VNode>;
-  _componentTag: ?string;
   _parentElm: ?Node;
   _refElm: ?Node;
   render?: Function;
   staticRenderFns?: Array<Function>
 };
 
+type InjectKey = string | Symbol;
+
 declare type ComponentOptions = {
+  componentId?: string;
+
   // data
   data: Object | Function | void;
   props?: { [key: string]: PropOptions };
@@ -45,6 +45,7 @@ declare type ComponentOptions = {
   deactivated?: Function;
   beforeDestroy?: Function;
   destroyed?: Function;
+  errorCaptured?: () => boolean | void;
 
   // assets
   directives?: { [key: string]: Object };
@@ -54,7 +55,7 @@ declare type ComponentOptions = {
 
   // context
   provide?: { [key: string | Symbol]: any } | () => { [key: string | Symbol]: any };
-  inject?: { [key: string]: string | Symbol } | Array<string>;
+  inject?: { [key: string]: InjectKey | { from?: InjectKey, default?: any }} | Array<string>;
 
   // component v-model customization
   model?: {

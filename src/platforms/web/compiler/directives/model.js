@@ -23,13 +23,6 @@ export default function model (
   const type = el.attrsMap.type
 
   if (process.env.NODE_ENV !== 'production') {
-    const dynamicType = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
-    if (tag === 'input' && dynamicType) {
-      warn(
-        `<input :type="${dynamicType}" v-model="${value}">:\n` +
-        `v-model does not support dynamic input types. Use v-if branches instead.`
-      )
-    }
     // inputs with type="file" are read only and setting the input's
     // value will throw an error.
     if (tag === 'input' && type === 'file') {
@@ -80,13 +73,13 @@ function genCheckboxModel (
   const falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
   addProp(el, 'checked',
     `Array.isArray(${value})` +
-      `?_i(${value},${valueBinding})>-1` + (
-        trueValueBinding === 'true'
-          ? `:(${value})`
-          : `:_q(${value},${trueValueBinding})`
-      )
+    `?_i(${value},${valueBinding})>-1` + (
+      trueValueBinding === 'true'
+        ? `:(${value})`
+        : `:_q(${value},${trueValueBinding})`
+    )
   )
-  addHandler(el, CHECKBOX_RADIO_TOKEN,
+  addHandler(el, 'change',
     `var $$a=${value},` +
         '$$el=$event.target,' +
         `$$c=$$el.checked?(${trueValueBinding}):(${falseValueBinding});` +
@@ -101,21 +94,21 @@ function genCheckboxModel (
 }
 
 function genRadioModel (
-    el: ASTElement,
-    value: string,
-    modifiers: ?ASTModifiers
+  el: ASTElement,
+  value: string,
+  modifiers: ?ASTModifiers
 ) {
   const number = modifiers && modifiers.number
   let valueBinding = getBindingAttr(el, 'value') || 'null'
   valueBinding = number ? `_n(${valueBinding})` : valueBinding
   addProp(el, 'checked', `_q(${value},${valueBinding})`)
-  addHandler(el, CHECKBOX_RADIO_TOKEN, genAssignmentCode(value, valueBinding), null, true)
+  addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true)
 }
 
 function genSelect (
-    el: ASTElement,
-    value: string,
-    modifiers: ?ASTModifiers
+  el: ASTElement,
+  value: string,
+  modifiers: ?ASTModifiers
 ) {
   const number = modifiers && modifiers.number
   const selectedVal = `Array.prototype.filter` +
@@ -135,6 +128,19 @@ function genDefaultModel (
   modifiers: ?ASTModifiers
 ): ?boolean {
   const type = el.attrsMap.type
+
+  // warn if v-bind:value conflicts with v-model
+  if (process.env.NODE_ENV !== 'production') {
+    const value = el.attrsMap['v-bind:value'] || el.attrsMap[':value']
+    if (value) {
+      const binding = el.attrsMap['v-bind:value'] ? 'v-bind:value' : ':value'
+      warn(
+        `${binding}="${value}" conflicts with v-model on the same element ` +
+        'because the latter already expands to a value binding internally'
+      )
+    }
+  }
+
   const { lazy, number, trim } = modifiers || {}
   const needCompositionGuard = !lazy && type !== 'range'
   const event = lazy

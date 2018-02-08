@@ -89,7 +89,11 @@ export function genElement (el: ASTElement, state: CodegenState): string {
 function genStatic (el: ASTElement, state: CodegenState): string {
   el.staticProcessed = true
   state.staticRenderFns.push(`with(this){return ${genElement(el, state)}}`)
-  return `_m(${state.staticRenderFns.length - 1}${el.staticInFor ? ',true' : ''})`
+  return `_m(${
+    state.staticRenderFns.length - 1
+  }${
+    el.staticInFor ? ',true' : ''
+  })`
 }
 
 // v-once
@@ -239,7 +243,8 @@ export function genData (el: ASTElement, state: CodegenState): string {
     data += `${genHandlers(el.nativeEvents, true, state.warn)},`
   }
   // slot target
-  if (el.slotTarget) {
+  // only for non-scoped slots
+  if (el.slotTarget && !el.slotScope) {
     data += `slot:${el.slotTarget},`
   }
   // scoped slots
@@ -309,7 +314,7 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
 function genInlineTemplate (el: ASTElement, state: CodegenState): ?string {
   const ast = el.children[0]
   if (process.env.NODE_ENV !== 'production' && (
-    el.children.length > 1 || ast.type !== 1
+    el.children.length !== 1 || ast.type !== 1
   )) {
     state.warn('Inline-template components must have exactly one child element.')
   }
@@ -342,11 +347,14 @@ function genScopedSlot (
   if (el.for && !el.forProcessed) {
     return genForScopedSlot(key, el, state)
   }
-  return `{key:${key},fn:function(${String(el.attrsMap.scope)}){` +
+  const fn = `function(${String(el.slotScope)}){` +
     `return ${el.tag === 'template'
-      ? genChildren(el, state) || 'void 0'
+      ? el.if
+        ? `${el.if}?${genChildren(el, state) || 'undefined'}:undefined`
+        : genChildren(el, state) || 'undefined'
       : genElement(el, state)
-  }}}`
+    }}`
+  return `{key:${key},fn:${fn}}`
 }
 
 function genForScopedSlot (
@@ -475,13 +483,26 @@ function genComponent (
   })`
 }
 
-function genProps (props: Array<{ name: string, value: string }>): string {
+function genProps (props: Array<{ name: string, value: any }>): string {
   let res = ''
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
-    res += `"${prop.name}":${transformSpecialNewlines(prop.value)},`
+    /* istanbul ignore if */
+    if (__WEEX__) {
+      res += `"${prop.name}":${generateValue(prop.value)},`
+    } else {
+      res += `"${prop.name}":${transformSpecialNewlines(prop.value)},`
+    }
   }
   return res.slice(0, -1)
+}
+
+/* istanbul ignore next */
+function generateValue (value) {
+  if (typeof value === 'string') {
+    return transformSpecialNewlines(value)
+  }
+  return JSON.stringify(value)
 }
 
 // #3895, #4268

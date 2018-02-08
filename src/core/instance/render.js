@@ -3,39 +3,25 @@
 import {
   warn,
   nextTick,
-  toNumber,
-  toString,
-  looseEqual,
   emptyObject,
   handleError,
-  looseIndexOf,
   defineReactive
 } from '../util/index'
 
-import VNode, {
-  cloneVNodes,
-  createTextVNode,
-  createEmptyVNode
-} from '../vdom/vnode'
+import { createElement } from '../vdom/create-element'
+import { installRenderHelpers } from './render-helpers/index'
+import { resolveSlots } from './render-helpers/resolve-slots'
+import VNode, { createEmptyVNode } from '../vdom/vnode'
 
 import { isUpdatingChildComponent } from './lifecycle'
 
-import { createElement } from '../vdom/create-element'
-import { renderList } from './render-helpers/render-list'
-import { renderSlot } from './render-helpers/render-slot'
-import { resolveFilter } from './render-helpers/resolve-filter'
-import { checkKeyCodes } from './render-helpers/check-keycodes'
-import { bindObjectProps } from './render-helpers/bind-object-props'
-import { renderStatic, markOnce } from './render-helpers/render-static'
-import { bindObjectListeners } from './render-helpers/bind-object-listeners'
-import { resolveSlots, resolveScopedSlots } from './render-helpers/resolve-slots'
-
 export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
-  vm._staticTrees = null
-  const parentVnode = vm.$vnode = vm.$options._parentVnode // the placeholder node in parent tree
+  vm._staticTrees = null // v-once cached trees
+  const options = vm.$options
+  const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
   const renderContext = parentVnode && parentVnode.context
-  vm.$slots = resolveSlots(vm.$options._renderChildren, renderContext)
+  vm.$slots = resolveSlots(options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
@@ -55,44 +41,39 @@ export function initRender (vm: Component) {
     defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, () => {
       !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
     }, true)
-    defineReactive(vm, '$listeners', vm.$options._parentListeners || emptyObject, () => {
+    defineReactive(vm, '$listeners', options._parentListeners || emptyObject, () => {
       !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
     }, true)
   } else {
     defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, null, true)
-    defineReactive(vm, '$listeners', vm.$options._parentListeners || emptyObject, null, true)
+    defineReactive(vm, '$listeners', options._parentListeners || emptyObject, null, true)
   }
 }
 
 export function renderMixin (Vue: Class<Component>) {
+  // install runtime convenience helpers
+  installRenderHelpers(Vue.prototype)
+
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)
   }
 
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
-    const {
-      render,
-      staticRenderFns,
-      _parentVnode
-    } = vm.$options
+    const { render, _parentVnode } = vm.$options
 
-    if (vm._isMounted) {
-      // if the parent didn't update, the slot nodes will be the ones from
-      // last render. They need to be cloned to ensure "freshness" for this render.
+    // reset _rendered flag on slots for duplicate slot check
+    if (process.env.NODE_ENV !== 'production') {
       for (const key in vm.$slots) {
-        const slot = vm.$slots[key]
-        if (slot._rendered) {
-          vm.$slots[key] = cloneVNodes(slot, true /* deep */)
-        }
+        // $flow-disable-line
+        vm.$slots[key]._rendered = false
       }
     }
 
-    vm.$scopedSlots = (_parentVnode && _parentVnode.data.scopedSlots) || emptyObject
-
-    if (staticRenderFns && !vm._staticTrees) {
-      vm._staticTrees = []
+    if (_parentVnode) {
+      vm.$scopedSlots = _parentVnode.data.scopedSlots || emptyObject
     }
+
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
     vm.$vnode = _parentVnode
@@ -101,14 +82,21 @@ export function renderMixin (Vue: Class<Component>) {
     try {
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
-      handleError(e, vm, `render function`)
+      handleError(e, vm, `render`)
       // return error render result,
       // or previous vnode to prevent render error causing blank component
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
-        vnode = vm.$options.renderError
-          ? vm.$options.renderError.call(vm._renderProxy, vm.$createElement, e)
-          : vm._vnode
+        if (vm.$options.renderError) {
+          try {
+            vnode = vm.$options.renderError.call(vm._renderProxy, vm.$createElement, e)
+          } catch (e) {
+            handleError(e, vm, `renderError`)
+            vnode = vm._vnode
+          }
+        } else {
+          vnode = vm._vnode
+        }
       } else {
         vnode = vm._vnode
       }
@@ -128,23 +116,4 @@ export function renderMixin (Vue: Class<Component>) {
     vnode.parent = _parentVnode
     return vnode
   }
-
-  // internal render helpers.
-  // these are exposed on the instance prototype to reduce generated render
-  // code size.
-  Vue.prototype._o = markOnce
-  Vue.prototype._n = toNumber
-  Vue.prototype._s = toString
-  Vue.prototype._l = renderList
-  Vue.prototype._t = renderSlot
-  Vue.prototype._q = looseEqual
-  Vue.prototype._i = looseIndexOf
-  Vue.prototype._m = renderStatic
-  Vue.prototype._f = resolveFilter
-  Vue.prototype._k = checkKeyCodes
-  Vue.prototype._b = bindObjectProps
-  Vue.prototype._v = createTextVNode
-  Vue.prototype._e = createEmptyVNode
-  Vue.prototype._u = resolveScopedSlots
-  Vue.prototype._g = bindObjectListeners
 }

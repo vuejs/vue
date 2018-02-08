@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { isIE9, isAndroid } from 'core/util/env'
+import { isIE9, isIE, isAndroid } from 'core/util/env'
 
 describe('Directive v-model text', () => {
   it('should update value both ways', done => {
@@ -250,6 +250,47 @@ describe('Directive v-model text', () => {
     expect('You are binding v-model directly to a v-for iteration alias').toHaveBeenWarned()
   })
 
+  it('warn if v-model and v-bind:value conflict', () => {
+    new Vue({
+      data: {
+        test: 'foo'
+      },
+      template: '<input type="text" v-model="test" v-bind:value="test">'
+    }).$mount()
+    expect('v-bind:value="test" conflicts with v-model').toHaveBeenWarned()
+  })
+
+  it('warn if v-model and :value conflict', () => {
+    new Vue({
+      data: {
+        test: 'foo'
+      },
+      template: '<input type="text" v-model="test" :value="test">'
+    }).$mount()
+    expect(':value="test" conflicts with v-model').toHaveBeenWarned()
+  })
+
+  it('should not warn on radio, checkbox, or custom component', () => {
+    new Vue({
+      data: { test: '' },
+      components: {
+        foo: {
+          props: ['model', 'value'],
+          model: { prop: 'model', event: 'change' },
+          template: `<div/>`
+        }
+      },
+      template: `
+        <div>
+          <input type="checkbox" v-model="test" :value="test">
+          <input type="radio" v-model="test" :value="test">
+          <foo v-model="test" :value="test"/>
+        </div>
+      `
+    }).$mount()
+    expect('conflicts with v-model').not.toHaveBeenWarned()
+  })
+
   if (!isAndroid) {
     it('does not trigger extra input events with single compositionend', () => {
       const spy = jasmine.createSpy()
@@ -315,13 +356,8 @@ describe('Directive v-model text', () => {
     })
 
     // #6552
-    // Root cause: input listeners with modifiers are added as a separate
-    // DOM listener. If a change is triggered inside this listener, an update
-    // will happen before the second listener is fired! (obviously microtasks
-    // can be processed in between DOM events on the same element)
-    // This causes the domProps module to receive state that has not been
-    // updated by v-model yet (because v-model's listener has not fired yet)
-    // Solution: make sure to always fire v-model's listener first
+    // This was original introduced due to the microtask between DOM events issue
+    // but fixed after switching to MessageChannel.
     it('should not block input when another input listener with modifier is used', done => {
       const vm = new Vue({
         data: {
@@ -353,6 +389,44 @@ describe('Directive v-model text', () => {
         expect(vm.$refs.input.value).toBe('b')
         done()
       }, 16)
+    })
+
+    it('should create and make reactive non-existent properties', done => {
+      const vm = new Vue({
+        data: {
+          foo: {}
+        },
+        template: '<input v-model="foo.bar">'
+      }).$mount()
+      expect(vm.$el.value).toBe('')
+
+      vm.$el.value = 'a'
+      triggerEvent(vm.$el, 'input')
+      expect(vm.foo.bar).toBe('a')
+      vm.foo.bar = 'b'
+      waitForUpdate(() => {
+        expect(vm.$el.value).toBe('b')
+        vm.foo = {}
+      }).then(() => {
+        expect(vm.$el.value).toBe('')
+      }).then(done)
+    })
+  }
+
+  // #7138
+  if (isIE && !isIE9) {
+    it('should not fire input on initial render of textarea with placeholder in IE10/11', done => {
+      const el = document.createElement('div')
+      document.body.appendChild(el)
+      const vm = new Vue({
+        el,
+        data: { foo: null },
+        template: `<textarea v-model="foo" placeholder="bar"></textarea>`
+      })
+      setTimeout(() => {
+        expect(vm.foo).toBe(null)
+        done()
+      }, 17)
     })
   }
 })

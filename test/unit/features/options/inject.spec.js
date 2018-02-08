@@ -1,8 +1,11 @@
 import Vue from 'vue'
 import { Observer } from 'core/observer/index'
 import { isNative, isObject, hasOwn } from 'core/util/index'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options provide/inject', () => {
+  testObjectOption('inject')
+
   let injected
   const injectedComp = {
     inject: ['foo', 'bar'],
@@ -368,6 +371,65 @@ describe('Options provide/inject', () => {
     Object.defineProperty(inject, '__ob__', { enumerable: false, value: '__ob__' })
     new Vue({ parent, inject })
     expect(`Injection "__ob__" not found`).not.toHaveBeenWarned()
+  })
+
+  // Github issue #6097
+  it('should not warn when injections cannot be found but have default value', () => {
+    const vm = new Vue({})
+    new Vue({
+      parent: vm,
+      inject: {
+        foo: { default: 1 },
+        bar: { default: false },
+        baz: { default: undefined }
+      },
+      created () {
+        injected = [this.foo, this.bar, this.baz]
+      }
+    })
+    expect(injected).toEqual([1, false, undefined])
+  })
+
+  it('should support name alias and default together', () => {
+    const vm = new Vue({
+      provide: {
+        FOO: 2
+      }
+    })
+    new Vue({
+      parent: vm,
+      inject: {
+        foo: { from: 'FOO', default: 1 },
+        bar: { default: false },
+        baz: { default: undefined }
+      },
+      created () {
+        injected = [this.foo, this.bar, this.baz]
+      }
+    })
+    expect(injected).toEqual([2, false, undefined])
+  })
+
+  it('should use provided value even if inject has default', () => {
+    const vm = new Vue({
+      provide: {
+        foo: 1,
+        bar: false,
+        baz: undefined
+      }
+    })
+    new Vue({
+      parent: vm,
+      inject: {
+        foo: { default: 2 },
+        bar: { default: 2 },
+        baz: { default: 2 }
+      },
+      created () {
+        injected = [this.foo, this.bar, this.baz]
+      }
+    })
+    expect(injected).toEqual([1, false, undefined])
   })
 
   // Github issue #6008

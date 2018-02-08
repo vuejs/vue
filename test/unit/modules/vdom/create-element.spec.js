@@ -135,10 +135,38 @@ describe('create-element', () => {
   it('render svg foreignObject with correct namespace', () => {
     const vm = new Vue({})
     const h = vm.$createElement
-    const vnode = h('svg', [h('foreignObject', [h('p')])])
+    const vnode = h('svg', [h('foreignObject', [h('p'), h('svg')])])
     expect(vnode.ns).toBe('svg')
     expect(vnode.children[0].ns).toBe('svg')
     expect(vnode.children[0].children[0].ns).toBeUndefined()
+    // #7330
+    expect(vnode.children[0].children[1].ns).toBe('svg')
+  })
+
+  // #6642
+  it('render svg foreignObject component with correct namespace', () => {
+    const vm = new Vue({
+      template: `
+        <svg>
+          <test></test>
+        </svg>
+      `,
+      components: {
+        test: {
+          template: `
+          <foreignObject>
+            <p xmlns="http://www.w3.org/1999/xhtml"></p>
+          </foreignObject>
+          `
+        }
+      }
+    }).$mount()
+    const testComp = vm.$children[0]
+    expect(testComp.$vnode.ns).toBe('svg')
+    expect(testComp._vnode.tag).toBe('foreignObject')
+    expect(testComp._vnode.ns).toBe('svg')
+    expect(testComp._vnode.children[0].tag).toBe('p')
+    expect(testComp._vnode.children[0].ns).toBeUndefined()
   })
 
   // #6506
@@ -184,6 +212,15 @@ describe('create-element', () => {
     new Vue({
       render (h) {
         return h('div', { key: true })
+      }
+    }).$mount()
+    expect('Avoid using non-primitive value as key').not.toHaveBeenWarned()
+  })
+
+  it('doesn\'t warn symbol key', () => {
+    new Vue({
+      render (h) {
+        return h('div', { key: Symbol('symbol') })
       }
     }).$mount()
     expect('Avoid using non-primitive value as key').not.toHaveBeenWarned()

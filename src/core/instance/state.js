@@ -18,6 +18,7 @@ import {
   bind,
   noop,
   hasOwn,
+  hyphenate,
   isReserved,
   handleError,
   nativeWatch,
@@ -60,16 +61,6 @@ export function initState (vm: Component) {
   }
 }
 
-function checkOptionType (vm: Component, name: string) {
-  const option = vm.$options[name]
-  if (!isPlainObject(option)) {
-    warn(
-      `component option "${name}" should be an object.`,
-      vm
-    )
-  }
-}
-
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
@@ -84,9 +75,11 @@ function initProps (vm: Component, propsOptions: Object) {
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
-      if (isReservedAttribute(key) || config.isReservedAttr(key)) {
+      const hyphenatedKey = hyphenate(key)
+      if (isReservedAttribute(hyphenatedKey) ||
+          config.isReservedAttr(hyphenatedKey)) {
         warn(
-          `"${key}" is a reserved attribute and cannot be used as component prop.`,
+          `"${hyphenatedKey}" is a reserved attribute and cannot be used as component prop.`,
           vm
         )
       }
@@ -156,9 +149,9 @@ function initData (vm: Component) {
   observe(data, true /* asRootData */)
 }
 
-function getData (data: Function, vm: Component): any {
+export function getData (data: Function, vm: Component): any {
   try {
-    return data.call(vm)
+    return data.call(vm, vm)
   } catch (e) {
     handleError(e, vm, `data()`)
     return {}
@@ -168,7 +161,7 @@ function getData (data: Function, vm: Component): any {
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
-  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
+  // $flow-disable-line
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
   const isSSR = isServerRendering()
@@ -257,7 +250,6 @@ function createComputedGetter (key) {
 }
 
 function initMethods (vm: Component, methods: Object) {
-  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'methods')
   const props = vm.$options.props
   for (const key in methods) {
     if (process.env.NODE_ENV !== 'production') {
@@ -286,7 +278,6 @@ function initMethods (vm: Component, methods: Object) {
 }
 
 function initWatch (vm: Component, watch: Object) {
-  process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'watch')
   for (const key in watch) {
     const handler = watch[key]
     if (Array.isArray(handler)) {

@@ -6,8 +6,8 @@ import { mark, measure } from 'core/util/perf'
 
 import Vue from './runtime/index'
 import { query } from './util/index'
-import { shouldDecodeNewlines } from './util/compat'
 import { compileToFunctions } from './compiler/index'
+import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'
 
 const idToTemplate = cached(id => {
   const el = query(id)
@@ -64,6 +64,7 @@ Vue.prototype.$mount = function (
 
       const { render, staticRenderFns } = compileToFunctions(template, {
         shouldDecodeNewlines,
+        shouldDecodeNewlinesForHref,
         delimiters: options.delimiters,
         comments: options.comments
       }, this)
@@ -73,7 +74,7 @@ Vue.prototype.$mount = function (
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile end')
-        measure(`${this._name} compile`, 'compile', 'compile end')
+        measure(`vue ${this._name} compile`, 'compile', 'compile end')
       }
     }
   }

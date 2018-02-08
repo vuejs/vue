@@ -31,6 +31,10 @@ export function applyModelTransform (el: ASTElement, state: CodegenState) {
       const dir = el.directives[i]
       if (dir.name === 'model') {
         state.directives.model(el, dir, state.warn)
+        // remove value for textarea as its converted to text
+        if (el.tag === 'textarea' && el.props) {
+          el.props = el.props.filter(p => p.name !== 'value')
+        }
         break
       }
     }
@@ -73,7 +77,7 @@ function genAttrSegment (name: string, value: string): StringSegment {
         ? ` ${name}="${name}"`
         : value === '""'
           ? ` ${name}`
-          : ` ${name}=${value}`
+          : ` ${name}="${JSON.parse(value)}"`
     }
   } else {
     return {

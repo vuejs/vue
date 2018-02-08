@@ -23,7 +23,7 @@ export function installSSRHelpers (vm: Component) {
   while (Ctor.super) {
     Ctor = Ctor.super
   }
-  Object.assign(Ctor.prototype, {
+  extend(Ctor.prototype, {
     _ssrEscape: escape,
     _ssrNode: renderStringNode,
     _ssrList: renderStringList,

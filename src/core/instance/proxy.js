@@ -1,7 +1,7 @@
 /* not type checking this file because flow doesn't play well with Proxy */
 
 import config from 'core/config'
-import { warn, makeMap } from '../util/index'
+import { warn, makeMap, isNative } from '../util/index'
 
 let initProxy
 
@@ -16,18 +16,19 @@ if (process.env.NODE_ENV !== 'production') {
   const warnNonPresent = (target, key) => {
     warn(
       `Property or method "${key}" is not defined on the instance but ` +
-      `referenced during render. Make sure to declare reactive data ` +
-      `properties in the data option.`,
+      'referenced during render. Make sure that this property is reactive, ' +
+      'either in the data option, or for class-based components, by ' +
+      'initializing the property. ' +
+      'See: https://vuejs.org/v2/guide/reactivity.html#Declaring-Reactive-Properties.',
       target
     )
   }
 
   const hasProxy =
-    typeof Proxy !== 'undefined' &&
-    Proxy.toString().match(/native code/)
+    typeof Proxy !== 'undefined' && isNative(Proxy)
 
   if (hasProxy) {
-    const isBuiltInModifier = makeMap('stop,prevent,self,ctrl,shift,alt,meta')
+    const isBuiltInModifier = makeMap('stop,prevent,self,ctrl,shift,alt,meta,exact')
     config.keyCodes = new Proxy(config.keyCodes, {
       set (target, key, value) {
         if (isBuiltInModifier(key)) {
