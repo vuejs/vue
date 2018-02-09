@@ -12,9 +12,9 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 
 <br><br>
 
-<h2 align="center">Platinum via Patreon</h2>
+<h2 align="center">Special Sponsors</h2>
 
-<!--platinum start-->
+<!--special start-->
 <table>
   <tbody>
     <tr>
@@ -24,10 +24,26 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
+        <a href="https://www.bitsrc.io/?utm_source=vue&utm_medium=vue&utm_campaign=vue&utm_term=vue&utm_content=vue" target="_blank">
+          <img height="90px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
         <a href="https://xiaozhuanlan.com" target="_blank">
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/xiaozhuanlan.png">
         </a>
       </td>
+    </tr><tr></tr>
+  </tbody>
+</table>
+<!--special end-->
+
+<h2 align="center">Platinum via Patreon</h2>
+
+<!--platinum start-->
+<table>
+  <tbody>
+    <tr>
       <td align="center" valign="middle">
         <a href="http://tooltwist.com/" target="_blank">
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tooltwist.png">
@@ -38,8 +54,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vueschool.png">
         </a>
       </td>
-    </tr><tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="https://www.datacamp.com/careers?utm_source=vuejs&utm_medium=sidebar" target="_blank">
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/datacamp.png">
