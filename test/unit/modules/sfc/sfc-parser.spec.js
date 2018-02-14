@@ -71,17 +71,26 @@ describe('Single File Component parser', () => {
     const padLine = parseComponent(content.trim(), { pad: 'line' })
     const padSpace = parseComponent(content.trim(), { pad: 'space' })
 
+    expect(padDefault.template.content).toBe(Array(1).join('\n') + `
+        <div></div>
+      `)
     expect(padDefault.script.content).toBe(Array(3 + 1).join('//\n') + `
         export default {}
       `)
     expect(padDefault.styles[0].content).toBe(Array(6 + 1).join('\n') + `
         h1 { color: red }
       `)
+    expect(padLine.template.content).toBe(Array(1).join('\n') + `
+        <div></div>
+      `)
     expect(padLine.script.content).toBe(Array(3 + 1).join('//\n') + `
         export default {}
       `)
     expect(padLine.styles[0].content).toBe(Array(6 + 1).join('\n') + `
         h1 { color: red }
+      `)
+    expect(padSpace.template.content).toBe(`<template>`.replace(/./g, ' ') + `
+        <div></div>
       `)
     expect(padSpace.script.content).toBe(`<template>
         <div></div>
