@@ -1,7 +1,7 @@
 /* @flow */
 
-const fnExpRE = /^\s*([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
-const simplePathRE = /^\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?']|\[".*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*\s*$/
+const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
+const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
 // keyCode aliases
 const keyCodes: { [key: string]: number | Array<number> } = {
