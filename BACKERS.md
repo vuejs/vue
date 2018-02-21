@@ -25,7 +25,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       </td>
       <td align="center" valign="middle">
         <a href="https://www.bitsrc.io/?utm_source=vue&utm_medium=vue&utm_campaign=vue&utm_term=vue&utm_content=vue" target="_blank">
-          <img height="90px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit.png">
+          <img height="90px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit-wide.png">
         </a>
       </td>
       <td align="center" valign="middle">
@@ -235,12 +235,12 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 
 <!--50 start-->
 - Wasim Khamlichi
-- errorrik
+- errorrik 
 - Alex Balashov
 - Konstantin Levinski
 - Samuel Smith
 - HARRI J SALOMAA
-- tjkoury
+- tjkoury 
 - Evan Leonardi
 <!--50 end-->
 
@@ -264,13 +264,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Kirk Lewis
 - Karol F
 - Miljan Aleksic
-- 叶解
+- 叶解 
 - Paul Straw
 - Jake Ingman
 - Barbara Liau
 - Isaac Sant
 - Milos Stojanovic
-- 4
+- 4 
 - The Graphic Design School
 - Christian Griffith
 - Jarek Tkaczyk
@@ -286,7 +286,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Duncan J Kenzie
 - Mike Margerum
 - Guy Gavergun
-- Edithvale
+- Edithvale 
 - Intevation GmbH
 - Luiz Eduardo  Tanure Bacelar
 - Chengzhi Yin
