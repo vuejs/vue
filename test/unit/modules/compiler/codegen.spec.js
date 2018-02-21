@@ -428,7 +428,7 @@ describe('codegen', () => {
   it('should not treat handler with unexpected whitespace as inline statement', () => {
     assertCodegen(
       '<input @input=" onInput ">',
-      `with(this){return _c('input',{on:{"input": onInput }})}`
+      `with(this){return _c('input',{on:{"input":onInput}})}`
     )
   })
 

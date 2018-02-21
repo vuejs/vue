@@ -100,7 +100,9 @@ export function addHandler (
     events = el.events || (el.events = {})
   }
 
-  const newHandler: any = { value }
+  const newHandler: any = {
+    value: value.trim()
+  }
   if (modifiers !== emptyObject) {
     newHandler.modifiers = modifiers
   }
