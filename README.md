@@ -35,7 +35,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       </td>
       <td align="center" valign="middle">
         <a href="https://www.bitsrc.io/?utm_source=vue&utm_medium=vue&utm_campaign=vue&utm_term=vue&utm_content=vue" target="_blank">
-          <img height="90px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit.png">
+          <img height="90px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit-wide.png">
         </a>
       </td>
       <td align="center" valign="middle">
