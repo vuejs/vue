@@ -47,13 +47,13 @@ th.active .arrow {
 }
 
 .arrow.asc {
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-bottom: 4px solid #fff;
+  border: solid transparent;
+  border-width: 0 4px 4px 4px;
+  border-bottom-color: #fff;
 }
 
 .arrow.dsc {
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 4px solid #fff;
+  border: solid transparent;
+  border-width: 4px 4px 0 4px;
+  border-top-color: #fff;  
 }
