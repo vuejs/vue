@@ -1,5 +1,5 @@
 h1 {
-  font: 300 1.8em Arial;
+  font: 300 1.8em Arial, inherit;
   margin-top: 0;
 }
 a {
@@ -13,7 +13,7 @@ a {
   overflow: hidden;
   margin: 30px auto;
   position: relative;
-  font: 300 14px 'Roboto';
+  font: 300 14px 'Roboto', inherit;
   color: #fff;
   -webkit-user-select: none;
   -moz-user-select: none;
