@@ -1,6 +1,5 @@
 h1 {
-  font-weight: 300;
-  font-size: 1.8em;
+  font: 300 1.8em Arial, inherit;
   margin-top: 0;
 }
 a {
@@ -14,10 +13,8 @@ a {
   overflow: hidden;
   margin: 30px auto;
   position: relative;
-  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  font: 300 14px 'Roboto', inherit;
   color: #fff;
-  font-size: 14px;
-  font-weight: 300;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
