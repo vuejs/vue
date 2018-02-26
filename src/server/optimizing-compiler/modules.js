@@ -77,7 +77,7 @@ function genAttrSegment (name: string, value: string): StringSegment {
         ? ` ${name}="${name}"`
         : value === '""'
           ? ` ${name}`
-          : ` ${name}=${value}`
+          : ` ${name}="${JSON.parse(value)}"`
     }
   } else {
     return {

@@ -26,7 +26,7 @@ describe('vdom patch: edge cases', () => {
   })
 
   // #3533
-  // a static node (<br>) is reused in createElm, which changes its elm reference
+  // a static node is reused in createElm, which changes its elm reference
   // and is inserted into a different parent.
   // later when patching the next element a DOM insertion uses it as the
   // reference node, causing a parent mismatch.
@@ -40,11 +40,12 @@ describe('vdom patch: edge cases', () => {
           <button @click="ok = !ok">toggle</button>
           <div class="b" v-if="ok">123</div>
           <div class="c">
-            <br><p>{{ 1 }}</p>
+            <div><span/></div><p>{{ 1 }}</p>
           </div>
           <div class="d">
             <label>{{ 2 }}</label>
           </div>
+          <div class="b" v-if="ok">123</div>
         </div>
       `
     }).$mount()
@@ -55,6 +56,43 @@ describe('vdom patch: edge cases', () => {
     waitForUpdate(() => {
       expect(vm.$el.querySelector('.c').textContent).toBe('1')
       expect(vm.$el.querySelector('.d').textContent).toBe('2')
+    }).then(done)
+  })
+
+  it('should handle slot nodes being reused across render', done => {
+    const vm = new Vue({
+      template: `
+        <foo ref="foo">
+          <div>slot</div>
+        </foo>
+      `,
+      components: {
+        foo: {
+          data () {
+            return { ok: true }
+          },
+          render (h) {
+            const children = [
+              this.ok ? h('div', 'toggler ') : null,
+              h('div', [this.$slots.default, h('span', ' 1')]),
+              h('div', [h('label', ' 2')])
+            ]
+            return h('div', children)
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toContain('toggler slot 1 2')
+    vm.$refs.foo.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toContain('slot 1 2')
+      vm.$refs.foo.ok = true
+    }).then(() => {
+      expect(vm.$el.textContent).toContain('toggler slot 1 2')
+      vm.$refs.foo.ok = false
+    }).then(() => {
+      expect(vm.$el.textContent).toContain('slot 1 2')
+      vm.$refs.foo.ok = true
     }).then(done)
   })
 
@@ -96,23 +134,19 @@ describe('vdom patch: edge cases', () => {
       expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
       expect(vm.$el.innerHTML).toBe('<div>row</div><a>atag</a>')
       vm.swap = false
-    })
-    .then(() => {
+    }).then(() => {
       expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
       expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>')
       compVm.swap = false
-    })
-    .then(() => {
+    }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>span</span><div>row</div>')
       expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
       vm.swap = true
-    })
-    .then(() => {
+    }).then(() => {
       expect(vm.$el.innerHTML).toBe('<div>row</div><span>span</span>')
       expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
       vm.swap = true
-    })
-    .then(done)
+    }).then(done)
   })
 
   // #4530
@@ -245,5 +279,52 @@ describe('vdom patch: edge cases', () => {
     document.body.appendChild(vm.$el)
     vm.$el.children[0].click()
     expect(spy).toHaveBeenCalled()
+  })
+
+  // #7041
+  it('transition children with only deep bindings should be patched on update', done => {
+    const vm = new Vue({
+      template: `
+      <div>
+        <transition>
+          <div :style="style"></div>
+        </transition>
+      </div>
+      `,
+      data: () => ({
+        style: { color: 'red' }
+      })
+    }).$mount()
+    expect(vm.$el.children[0].style.color).toBe('red')
+    vm.style.color = 'green'
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].style.color).toBe('green')
+    }).then(done)
+  })
+
+  // #7294
+  it('should cleanup component inline events on patch when no events are present', done => {
+    const log = jasmine.createSpy()
+    const vm = new Vue({
+      data: { ok: true },
+      template: `
+        <div>
+          <foo v-if="ok" @custom="log"/>
+          <foo v-else/>
+        </div>
+      `,
+      components: {
+        foo: {
+          render () {}
+        }
+      },
+      methods: { log }
+    }).$mount()
+
+    vm.ok = false
+    waitForUpdate(() => {
+      vm.$children[0].$emit('custom')
+      expect(log).not.toHaveBeenCalled()
+    }).then(done)
   })
 })

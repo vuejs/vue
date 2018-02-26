@@ -575,6 +575,25 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('should catch async component error', done => {
+    Vue.config.silent = true
+    renderToString(new Vue({
+      template: '<test-async></test-async>',
+      components: {
+        testAsync: () => Promise.resolve({
+          render () {
+            throw new Error('foo')
+          }
+        })
+      }
+    }), (err, result) => {
+      Vue.config.silent = false
+      expect(err).toBeTruthy()
+      expect(result).toBeUndefined()
+      done()
+    })
+  })
+
   it('everything together', done => {
     renderVmWithOptions({
       template: `
@@ -1109,6 +1128,20 @@ describe('SSR: renderToString', () => {
           '<option selected="selected">2</option>' +
         '</select>'
       )
+      done()
+    })
+  })
+
+  // #7223
+  it('should not double escape attribute values', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div id="a\nb"></div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div id="a\nb"></div>`)
       done()
     })
   })

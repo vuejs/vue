@@ -1,5 +1,7 @@
 /* @flow */
 
+export const emptyObject = Object.freeze({})
+
 // these helpers produces better vm code in JS engines due to their
 // explicitness and function inlining
 export function isUndef (v: any): boolean %checks {
@@ -25,6 +27,8 @@ export function isPrimitive (value: any): boolean %checks {
   return (
     typeof value === 'string' ||
     typeof value === 'number' ||
+    // $flow-disable-line
+    typeof value === 'symbol' ||
     typeof value === 'boolean'
   )
 }

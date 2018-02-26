@@ -2,7 +2,7 @@
 
 import config from '../config'
 import { warn } from './debug'
-import { inBrowser } from './env'
+import { inBrowser, inWeex } from './env'
 
 export function handleError (err: Error, vm: any, info: string) {
   if (vm) {
@@ -40,7 +40,7 @@ function logError (err, vm, info) {
     warn(`Error in ${info}: "${err.toString()}"`, vm)
   }
   /* istanbul ignore else */
-  if (inBrowser && typeof console !== 'undefined') {
+  if ((inBrowser || inWeex) && typeof console !== 'undefined') {
     console.error(err)
   } else {
     throw err

@@ -22,7 +22,8 @@ const startTagOpen = new RegExp(`^<${qnameCapture}`)
 const startTagClose = /^\s*(\/?)>/
 const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
 const doctype = /^<!DOCTYPE [^>]+>/i
-const comment = /^<!--/
+// #7298: escape - to avoid being pased as HTML comment when inlined in page
+const comment = /^<!\--/
 const conditionalComment = /^<!\[/
 
 let IS_REGEX_CAPTURING_BROKEN = false
@@ -152,7 +153,7 @@ export function parseHTML (html, options) {
         endTagLength = endTag.length
         if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
           text = text
-            .replace(/<!--([\s\S]*?)-->/g, '$1')
+            .replace(/<!\--([\s\S]*?)-->/g, '$1') // #7298
             .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1')
         }
         if (shouldIgnoreFirstNewline(stackedTag, text)) {

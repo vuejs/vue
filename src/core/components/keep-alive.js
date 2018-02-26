@@ -41,7 +41,7 @@ function pruneCacheEntry (
   current?: VNode
 ) {
   const cached = cache[key]
-  if (cached && cached !== current) {
+  if (cached && (!current || cached.tag !== current.tag)) {
     cached.componentInstance.$destroy()
   }
   cache[key] = null
@@ -81,15 +81,19 @@ export default {
   },
 
   render () {
-    const vnode: VNode = getFirstComponentChild(this.$slots.default)
+    const slot = this.$slots.default
+    const vnode: VNode = getFirstComponentChild(slot)
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
       // check pattern
       const name: ?string = getComponentName(componentOptions)
-      if (name && (
-        (this.exclude && matches(this.exclude, name)) ||
-        (this.include && !matches(this.include, name))
-      )) {
+      const { include, exclude } = this
+      if (
+        // not included
+        (include && (!name || !matches(include, name))) ||
+        // excluded
+        (exclude && name && matches(exclude, name))
+      ) {
         return vnode
       }
 
@@ -115,6 +119,6 @@ export default {
 
       vnode.data.keepAlive = true
     }
-    return vnode
+    return vnode || (slot && slot[0])
   }
 }
