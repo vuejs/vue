@@ -80,7 +80,7 @@ export interface ComponentOptions<
   updated?(): void;
   activated?(): void;
   deactivated?(): void;
-  errorCaptured?(err: Error, vm: V, info: string): boolean | void;
+  errorCaptured?(err: Error, vm: Vue, info: string): boolean | void;
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
   components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> };
