@@ -119,7 +119,7 @@ function genHandler (
       code += genModifierCode
     }
     const handlerCode = isMethodPath
-      ? handler.value + '($event)'
+      ? `return ${handler.value}($event)`
       : isFunctionExpression
         ? `(${handler.value})($event)`
         : handler.value
