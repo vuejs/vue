@@ -218,19 +218,21 @@ export default class Watcher {
    * Remove self from all dependencies' subscriber list.
    */
   teardown () {
-    if (this.active) {
-      // remove self from vm's watcher list
-      // this is a somewhat expensive operation so we skip it
-      // if the vm is being destroyed.
-      if (!this.vm._isBeingDestroyed) {
-        remove(this.vm._watchers, this)
-      }
-      let i = this.deps.length
-      while (i--) {
-        this.deps[i].removeSub(this)
-      }
-      this.active = false
+    if (!this.active) {
+      return
     }
+
+    // remove self from vm's watcher list
+    // this is a somewhat expensive operation so we skip it
+    // if the vm is being destroyed.
+    if (!this.vm._isBeingDestroyed) {
+      remove(this.vm._watchers, this)
+    }
+    let i = this.deps.length
+    while (i--) {
+      this.deps[i].removeSub(this)
+    }
+    this.active = false
   }
 }
 
