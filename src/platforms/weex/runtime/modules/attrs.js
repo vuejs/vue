@@ -15,17 +15,26 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     attrs = vnode.data.attrs = extend({}, attrs)
   }
 
+  const supportBatchUpdate = typeof elm.setAttrs === 'function'
+  const batchedAttrs = {}
   for (key in attrs) {
     cur = attrs[key]
     old = oldAttrs[key]
     if (old !== cur) {
-      elm.setAttr(key, cur)
+      supportBatchUpdate
+        ? (batchedAttrs[key] = cur)
+        : elm.setAttr(key, cur)
     }
   }
   for (key in oldAttrs) {
     if (attrs[key] == null) {
-      elm.setAttr(key)
+      supportBatchUpdate
+        ? (batchedAttrs[key] = undefined)
+        : elm.setAttr(key)
     }
+  }
+  if (supportBatchUpdate) {
+    elm.setAttrs(batchedAttrs)
   }
 }
 

@@ -119,8 +119,12 @@ function enter (_, vnode) {
   beforeEnterHook && beforeEnterHook(el)
 
   if (startState) {
-    for (const key in startState) {
-      el.setStyle(key, startState[key])
+    if (typeof el.setStyles === 'function') {
+      el.setStyles(startState)
+    } else {
+      for (const key in startState) {
+        el.setStyle(key, startState[key])
+      }
     }
   }
 

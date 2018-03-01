@@ -693,13 +693,27 @@ describe('Directive v-on', () => {
     expect(prevented).toBe(true)
   })
 
-  it('should warn click.right', () => {
-    new Vue({
+  it('should transform click.right to contextmenu', () => {
+    const spy = jasmine.createSpy('click.right')
+    const vm = new Vue({
       template: `<div @click.right="foo"></div>`,
-      methods: { foo () {} }
+      methods: { foo: spy }
     }).$mount()
 
-    expect(`Use "contextmenu" instead`).toHaveBeenWarned()
+    triggerEvent(vm.$el, 'contextmenu')
+    expect(spy).toHaveBeenCalled()
+  })
+
+  it('should transform click.middle to mouseup', () => {
+    const spy = jasmine.createSpy('click.middle')
+    const vm = new Vue({
+      template: `<div @click.middle="foo"></div>`,
+      methods: { foo: spy }
+    }).$mount()
+    triggerEvent(vm.$el, 'mouseup', e => { e.button = 0 })
+    expect(spy).not.toHaveBeenCalled()
+    triggerEvent(vm.$el, 'mouseup', e => { e.button = 1 })
+    expect(spy).toHaveBeenCalled()
   })
 
   it('object syntax (no argument)', () => {
@@ -759,7 +773,7 @@ describe('Directive v-on', () => {
     const mouseup = jasmine.createSpy('mouseup')
     const mousedown = jasmine.createSpy('mousedown')
 
-    var vm = new Vue({
+    vm = new Vue({
       el,
       template: `
         <foo-button
@@ -796,6 +810,47 @@ describe('Directive v-on', () => {
     expect(click.calls.count()).toBe(1)
     expect(mouseup.calls.count()).toBe(1)
     expect(mousedown.calls.count()).toBe(1)
+  })
+
+  // #6805 (v-on="object" bind order problem)
+  it('object syntax (no argument): should fire after high-priority listeners', done => {
+    const MyCheckbox = {
+      template: '<input type="checkbox" v-model="model" v-on="$listeners">',
+      props: {
+        value: false
+      },
+      computed: {
+        model: {
+          get () {
+            return this.value
+          },
+          set (val) {
+            this.$emit('input', val)
+          }
+        }
+      }
+    }
+
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <my-checkbox v-model="check" @change="change"></my-checkbox>
+        </div>
+      `,
+      components: { MyCheckbox },
+      data: {
+        check: false
+      },
+      methods: {
+        change () {
+          expect(this.check).toBe(true)
+          done()
+        }
+      }
+    })
+
+    vm.$el.querySelector('input').click()
   })
 
   it('warn object syntax with modifier', () => {

@@ -2,18 +2,18 @@
 
 import { isDef, isObject } from 'shared/util'
 
-export function genClassForVnode (vnode: VNode): string {
+export function genClassForVnode (vnode: VNodeWithData): string {
   let data = vnode.data
   let parentNode = vnode
   let childNode = vnode
   while (isDef(childNode.componentInstance)) {
     childNode = childNode.componentInstance._vnode
-    if (childNode.data) {
+    if (childNode && childNode.data) {
       data = mergeClassData(childNode.data, data)
     }
   }
   while (isDef(parentNode = parentNode.parent)) {
-    if (parentNode.data) {
+    if (parentNode && parentNode.data) {
       data = mergeClassData(data, parentNode.data)
     }
   }
