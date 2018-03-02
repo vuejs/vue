@@ -26,8 +26,8 @@ describe('Directive v-model text', () => {
       },
       template: '<input v-model="test ">'
     }).$mount()
-    expect(vm['test ']).toBe(undefined);
-    expect(vm.test).toBe('b');
+    expect(vm['test ']).toBe(undefined)
+    expect(vm.test).toBe('b')
   })
 
   it('.lazy modifier', () => {
