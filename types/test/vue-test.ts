@@ -99,6 +99,8 @@ class Test extends Vue {
   }
 }
 
+Test.options.activated;
+
 const HelloWorldComponent = Vue.extend({
   props: ["name"],
   data() {
