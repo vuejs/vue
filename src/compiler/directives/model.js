@@ -68,8 +68,8 @@ type ModelParseResult = {
 }
 
 export function parseModel (val: string): ModelParseResult {
-  len = val.length
   val = val.trim()
+  len = val.length
 
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
     index = val.lastIndexOf('.')
