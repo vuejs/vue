@@ -19,7 +19,7 @@ describe('Directive v-model text', () => {
     }).then(done)
   })
 
-  it('should not create a new property ended with spaces when', () => {
+  it('should work with extra whitespace properties', () => {
     const vm = new Vue({
       data: {
         test: 'b'
