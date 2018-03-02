@@ -19,6 +19,16 @@ describe('Directive v-model text', () => {
     }).then(done)
   })
 
+  it('should not create a new property ended with spaces when', () => {
+    const vm = new Vue({
+      data: {
+        test: 'b'
+      },
+      template: '<input v-model="test ">'
+    }).$mount()
+    expect(vm['test ']).toBe(undefined)
+  })
+
   it('.lazy modifier', () => {
     const vm = new Vue({
       data: {
