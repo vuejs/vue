@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>V-Model test</title>
+  <!-- Delete ".min" for console warnings in development -->
+  <script src="../../dist/vue.min.js"></script>
+</head>
+
+<body>
+
+  <div id="app">
+
+    <input ref="input" v-model="obj.value " />
+
+    <p>
+      {{obj.value}}
+    </p>
+
+    <p class="extra-spaces">
+      {{obj["value "] }}
+    </p>
+
+  </div>
+
+
+  <script>
+    const vm = new Vue({
+      el: "#app",
+      data: {
+        obj:{
+          value: 'test'
+        }
+      }
+    });
+  </script>
+
+</body>
+
+</html>
