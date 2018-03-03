@@ -15,8 +15,8 @@ export function genComponentModel (
   if (trim) {
     valueExpression =
       `(typeof ${baseValueExpression} === 'string'` +
-        `? ${baseValueExpression}.trim()` +
-        `: ${baseValueExpression})`
+      `? ${baseValueExpression}.trim()` +
+      `: ${baseValueExpression})`
   }
   if (number) {
     valueExpression = `_n(${valueExpression})`
@@ -68,6 +68,7 @@ type ModelParseResult = {
 }
 
 export function parseModel (val: string): ModelParseResult {
+  val = val.trim()
   len = val.length
 
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
