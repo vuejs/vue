@@ -68,6 +68,8 @@ type ModelParseResult = {
 }
 
 export function parseModel (val: string): ModelParseResult {
+  // Fix https://github.com/vuejs/vue/pull/7730
+  // allow v-model="obj.val " (trailing whitespace)
   val = val.trim()
   len = val.length
 
