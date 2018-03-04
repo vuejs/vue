@@ -19,15 +19,19 @@ describe('Directive v-model text', () => {
     }).then(done)
   })
 
-  it('should not create a new property ended with spaces when', () => {
+  it('should work with space ended expression in v-model', () => {
     const vm = new Vue({
       data: {
-        test: 'b'
+        obj: {
+          test: 'b'
+        }
       },
-      template: '<input v-model="test ">'
+      template: '<input v-model="obj.test ">'
     }).$mount()
-    expect(vm['test ']).toBe(undefined);
-    expect(vm.test).toBe('b');
+
+    triggerEvent(vm.$el, 'input')
+    expect(vm.obj['test ']).toBe(undefined)
+    expect(vm.obj.test).toBe('b')
   })
 
   it('.lazy modifier', () => {
