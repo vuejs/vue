@@ -58,7 +58,9 @@ export function compileVue (source, componentName) {
 
     const name = 'test_case_' + (Math.random() * 99999999).toFixed(0)
     const generateCode = styles => (`
+      try { weex.document.registerStyleSheets("${name}", [${JSON.stringify(styles)}]) } catch(e) {};
       var ${name} = Object.assign({
+        _scopeId: "${name}",
         style: ${JSON.stringify(styles)},
         render: function () { ${res.render} },
         ${res['@render'] ? ('"@render": function () {' + res['@render'] + '},') : ''}
@@ -154,7 +156,7 @@ export function getEvents (instance) {
 export function fireEvent (instance, ref, type, event = {}) {
   const el = instance.document.getRef(ref)
   if (el) {
-    instance.document.fireEvent(el, type, event = {})
+    instance.document.fireEvent(el, type, event)
   }
 }
 

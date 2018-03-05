@@ -2,7 +2,7 @@ import Vue, { VNode } from "../index";
 import { ComponentOptions } from "../options";
 
 class Test extends Vue {
-  a: number;
+  a: number = 0;
 
   testProperties() {
     this.$data;
@@ -19,7 +19,7 @@ class Test extends Vue {
   }
 
   // test property reification
-  $refs: {
+  $refs!: {
     vue: Vue,
     element: HTMLInputElement,
     vues: Vue[],
