@@ -1,5 +1,6 @@
 /* @flow */
 
+import { addIfCondition } from 'compiler/parser/index'
 import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
 
 function hasConditionDirective (el: ASTElement): boolean {
@@ -11,11 +12,23 @@ function hasConditionDirective (el: ASTElement): boolean {
   return false
 }
 
-function getPrevMatch (el: ASTElement): any {
+function getPreviousConditions (el: ASTElement): Array<string> {
+  const conditions = []
   if (el.parent && el.parent.children) {
-    const prev: Object = el.parent.children[el.parent.children.length - 1]
-    return prev.attrsMap['[[match]]']
+    for (let c = 0, n = el.parent.children.length; c < n; ++c) {
+      // $flow-disable-line
+      const ifConditions = el.parent.children[c].ifConditions
+      if (ifConditions) {
+        for (let i = 0, l = ifConditions.length; i < l; ++i) {
+          const condition = ifConditions[i]
+          if (condition && condition.exp) {
+            conditions.push(condition.exp)
+          }
+        }
+      }
+    }
   }
+  return conditions
 }
 
 export function preTransformVIf (el: ASTElement, options: WeexCompilerOptions) {
@@ -28,9 +41,12 @@ export function preTransformVIf (el: ASTElement, options: WeexCompilerOptions) {
     getAndRemoveAttr(el, 'v-else', true)
     if (ifExp) {
       exp = ifExp
+      addIfCondition(el, { exp: ifExp, block: el })
     } else {
-      const prevMatch = getPrevMatch(el)
-      if (prevMatch) {
+      elseifExp && addIfCondition(el, { exp: elseifExp, block: el })
+      const prevConditions = getPreviousConditions(el)
+      if (prevConditions.length) {
+        const prevMatch = prevConditions.join(' || ')
         exp = elseifExp
           ? `!(${prevMatch}) && (${elseifExp})` // v-else-if
           : `!(${prevMatch})` // v-else
