@@ -317,12 +317,12 @@ export function createPatchFunction (backend) {
   function setScope (vnode) {
     let i
     if (isDef(i = vnode.fnScopeId)) {
-      nodeOps.setAttribute(vnode.elm, i, '')
+      nodeOps.setStyleScope(vnode.elm, i)
     } else {
       let ancestor = vnode
       while (ancestor) {
         if (isDef(i = ancestor.context) && isDef(i = i.$options._scopeId)) {
-          nodeOps.setAttribute(vnode.elm, i, '')
+          nodeOps.setStyleScope(vnode.elm, i)
         }
         ancestor = ancestor.parent
       }
@@ -333,7 +333,7 @@ export function createPatchFunction (backend) {
       i !== vnode.fnContext &&
       isDef(i = i.$options._scopeId)
     ) {
-      nodeOps.setAttribute(vnode.elm, i, '')
+      nodeOps.setStyleScope(vnode.elm, i)
     }
   }
 
