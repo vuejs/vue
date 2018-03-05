@@ -35,12 +35,16 @@ function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     classList.push.apply(classList, data.class)
   }
 
-  const style = getStyle(oldClassList, classList, ctx)
-  if (typeof el.setStyles === 'function') {
-    el.setStyles(style)
+  if (typeof el.setClassList === 'function') {
+    el.setClassList(classList)
   } else {
-    for (const key in style) {
-      el.setStyle(key, style[key])
+    const style = getStyle(oldClassList, classList, ctx)
+    if (typeof el.setStyles === 'function') {
+      el.setStyles(style)
+    } else {
+      for (const key in style) {
+        el.setStyle(key, style[key])
+      }
     }
   }
 }
