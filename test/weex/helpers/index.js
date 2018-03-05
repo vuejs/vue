@@ -117,10 +117,13 @@ function omitUseless (object) {
     delete object.ref
     for (const key in object) {
       omitUseless(object[key])
-      if (key === '@styleScope') {
+      if (key === '@styleScope' ||
+        key === '@templateId' ||
+        key === 'bindingExpression') {
         delete object[key]
       }
-      if (key.charAt(0) !== '@' && (isEmptyObject(object[key]) || object[key] === undefined)) {
+      if (key.charAt(0) !== '@' &&
+        (isEmptyObject(object[key]) || object[key] === undefined)) {
         delete object[key]
       }
     }
