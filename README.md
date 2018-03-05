@@ -147,12 +147,12 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     </tr><tr></tr>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://www.bmqb.com/jobs" target="_blank">
+        <a href="https://www.bmqb.com/jobs" target="_blank" rel="noopener noreferrer">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bmqb.png">
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://codepilot.ai" target="_blank">
+        <a href="https://codepilot.ai" target="_blank" rel="noopener noreferrer">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/codepilot.png">
         </a>
       </td>
