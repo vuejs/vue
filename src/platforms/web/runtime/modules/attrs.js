@@ -59,7 +59,9 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 }
 
 function setAttr (el: Element, key: string, value: any) {
-  if (isBooleanAttr(key)) {
+  if (el.tagName.indexOf('-') > -1) {
+    baseSetAttr(el, key, value)
+  } else if (isBooleanAttr(key)) {
     // set attribute for blank value
     // e.g. <option disabled>Select one</option>
     if (isFalsyAttrValue(value)) {
@@ -81,28 +83,32 @@ function setAttr (el: Element, key: string, value: any) {
       el.setAttributeNS(xlinkNS, key, value)
     }
   } else {
-    if (isFalsyAttrValue(value)) {
-      el.removeAttribute(key)
-    } else {
-      // #7138: IE10 & 11 fires input event when setting placeholder on
-      // <textarea>... block the first input event and remove the blocker
-      // immediately.
-      /* istanbul ignore if */
-      if (
-        isIE && !isIE9 &&
-        el.tagName === 'TEXTAREA' &&
-        key === 'placeholder' && !el.__ieph
-      ) {
-        const blocker = e => {
-          e.stopImmediatePropagation()
-          el.removeEventListener('input', blocker)
-        }
-        el.addEventListener('input', blocker)
-        // $flow-disable-line
-        el.__ieph = true /* IE placeholder patched */
+    baseSetAttr(el, key, value)
+  }
+}
+
+function baseSetAttr (el, key, value) {
+  if (isFalsyAttrValue(value)) {
+    el.removeAttribute(key)
+  } else {
+    // #7138: IE10 & 11 fires input event when setting placeholder on
+    // <textarea>... block the first input event and remove the blocker
+    // immediately.
+    /* istanbul ignore if */
+    if (
+      isIE && !isIE9 &&
+      el.tagName === 'TEXTAREA' &&
+      key === 'placeholder' && !el.__ieph
+    ) {
+      const blocker = e => {
+        e.stopImmediatePropagation()
+        el.removeEventListener('input', blocker)
       }
-      el.setAttribute(key, value)
+      el.addEventListener('input', blocker)
+      // $flow-disable-line
+      el.__ieph = true /* IE placeholder patched */
     }
+    el.setAttribute(key, value)
   }
 }
 
