@@ -289,6 +289,17 @@ describe('Directive v-model text', () => {
     expect('conflicts with v-model').not.toHaveBeenWarned()
   })
 
+  it('should not warn on input with dynamic type binding', () => {
+    new Vue({
+      data: {
+        type: 'checkbox',
+        test: 'foo'
+      },
+      template: '<input :type="type" v-model="test" :value="test">'
+    }).$mount()
+    expect('conflicts with v-model').not.toHaveBeenWarned()
+  })
+
   if (!isAndroid) {
     it('does not trigger extra input events with single compositionend', () => {
       const spy = jasmine.createSpy()
