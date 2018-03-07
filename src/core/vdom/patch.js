@@ -104,18 +104,22 @@ export function createPatchFunction (backend) {
     }
   }
 
+  function isIgnoredElement (vnode) {
+    return (
+      config.ignoredElements.length &&
+      config.ignoredElements.some(ignore => {
+        return isRegExp(ignore)
+          ? ignore.test(vnode.tag)
+          : ignore === vnode.tag
+      })
+    )
+  }
+
   function isUnknownElement (vnode, inVPre) {
     return (
       !inVPre &&
       !vnode.ns &&
-      !(
-        config.ignoredElements.length &&
-        config.ignoredElements.some(ignore => {
-          return isRegExp(ignore)
-            ? ignore.test(vnode.tag)
-            : ignore === vnode.tag
-        })
-      ) &&
+      !vnode.isIgnoredElement &&
       config.isUnknownElement(vnode.tag)
     )
   }
@@ -149,6 +153,9 @@ export function createPatchFunction (backend) {
     const children = vnode.children
     const tag = vnode.tag
     if (isDef(tag)) {
+      if (isIgnoredElement(vnode)) {
+        vnode.isIgnoredElement = true
+      }
       if (process.env.NODE_ENV !== 'production') {
         if (data && data.pre) {
           creatingElmInVPre++
