@@ -1,7 +1,6 @@
 /* @flow */
 
-import { warn } from '../util/index'
-import { hasSymbol } from 'core/util/env'
+import { warn, hasSymbol } from '../util/index'
 import { defineReactive, observerState } from '../observer/index'
 
 export function initProvide (vm: Component) {
