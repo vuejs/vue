@@ -355,4 +355,18 @@ describe('Observer', () => {
       expect(obj.__ob__ instanceof Observer).toBe(true)
     })
   })
+
+  it('should lazy invoke existing getters', () => {
+    const obj = {}
+    let called = false
+    Object.defineProperty(obj, 'getterProp', {
+      enumerable: true,
+      get: () => {
+        called = true
+        return 'some value'
+      }
+    })
+    observe(obj)
+    expect(called).toBe(false)
+  })
 })
