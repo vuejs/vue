@@ -593,4 +593,36 @@ describe('Component scoped slot', () => {
       expect(vm.$el.innerHTML).toBe('<p>hello</p>')
     }).then(done)
   })
+
+  it('passing down scoped slots with v-bind', () => {
+    const Bar = {
+      template: `
+        <div class="bar">
+          <slot name="hello" msg="hi" />
+        </div>
+      `
+    }
+
+    const Foo = {
+      components: { Bar },
+      template: `
+        <div class="foo">
+          <bar v-bind="{ scopedSlots: $scopedSlots }"></bar>
+        </div>
+      `
+    }
+
+    const vm = new Vue({
+      components: { Foo },
+      template: `
+        <foo>
+          <template slot="hello" slot-scope="props">
+            {{ props.msg + '!' }}
+          </template>
+        </foo>
+      `
+    }).$mount()
+
+    expect(vm.$el.querySelector('.bar').textContent.trim()).toBe('hi!')
+  })
 })

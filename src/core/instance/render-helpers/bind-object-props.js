@@ -34,6 +34,7 @@ export function bindObjectProps (
         if (
           key === 'class' ||
           key === 'style' ||
+          key === 'scopedSlots' ||
           isReservedAttribute(key)
         ) {
           hash = data
