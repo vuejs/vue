@@ -3,6 +3,12 @@
 const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
+const keyboardEvents = [
+  'keydown',
+  'keyup',
+  'keypress'
+]
+
 // keyCode aliases
 const keyCodes: { [key: string]: number | Array<number> } = {
   esc: 27,
@@ -29,9 +35,15 @@ const modifierCode: { [key: string]: string } = {
   shift: genGuard(`!$event.shiftKey`),
   alt: genGuard(`!$event.altKey`),
   meta: genGuard(`!$event.metaKey`),
-  left: genGuard(`'button' in $event && $event.button !== 0`),
-  middle: genGuard(`'button' in $event && $event.button !== 1`),
-  right: genGuard(`'button' in $event && $event.button !== 2`)
+  primary: genGuard(`'button' in $event && $event.button !== 0`),
+  auxiliary: genGuard(`'button' in $event && $event.button !== 1`),
+  secondary: genGuard(`'button' in $event && $event.button !== 2`)
+}
+
+const deprecatedPointerModifierAliases: { [key: string]: string } = {
+  left: 'primary',
+  middle: 'auxiliary',
+  right: 'secondary'
 }
 
 export function genHandlers (
@@ -41,7 +53,7 @@ export function genHandlers (
 ): string {
   let res = isNative ? 'nativeOn:{' : 'on:{'
   for (const name in events) {
-    res += `"${name}":${genHandler(name, events[name])},`
+    res += `"${name}":${genHandler(name, events[name], warn)},`
   }
   return res.slice(0, -1) + '}'
 }
@@ -66,14 +78,15 @@ function genWeexHandler (params: Array<any>, handlerCode: string) {
 
 function genHandler (
   name: string,
-  handler: ASTElementHandler | Array<ASTElementHandler>
+  handler: ASTElementHandler | Array<ASTElementHandler>,
+  warn: Function
 ): string {
   if (!handler) {
     return 'function(){}'
   }
 
   if (Array.isArray(handler)) {
-    return `[${handler.map(handler => genHandler(name, handler)).join(',')}]`
+    return `[${handler.map(handler => genHandler(name, handler, warn)).join(',')}]`
   }
 
   const isMethodPath = simplePathRE.test(handler.value)
@@ -93,12 +106,18 @@ function genHandler (
     let genModifierCode = ''
     const keys = []
     for (const key in handler.modifiers) {
-      if (modifierCode[key]) {
-        genModifierCode += modifierCode[key]
-        // left/right
-        if (keyCodes[key]) {
+      if (deprecatedPointerModifierAliases[key]) {
+        // left/right modifierCodes (for mouse) collide with left/right keyCodes
+        if (keyCodes[key] && keyboardEvents.indexOf(name) >= 0) {
           keys.push(key)
+        } else {
+          process.env.NODE_ENV !== 'production' && warn(
+            `Pointer modifier "${key}" is deprecated. Use "${deprecatedPointerModifierAliases[key]}" instead.`
+          )
+          genModifierCode += modifierCode[deprecatedPointerModifierAliases[key]]
         }
+      } else if (modifierCode[key]) {
+        genModifierCode += modifierCode[key]
       } else if (key === 'exact') {
         const modifiers: ASTModifiers = (handler.modifiers: any)
         genModifierCode += genGuard(
