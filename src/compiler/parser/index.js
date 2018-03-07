@@ -16,10 +16,12 @@ import {
   addDirective,
   getBindingAttr,
   getAndRemoveAttr,
-  pluckModuleFunction
+  pluckModuleFunction,
+  addLocalVariable
 } from '../helpers'
 
 export const onRE = /^@|^v-on:/
+export const localRE = /^v-local:/
 export const dirRE = /^v-|^@|^:/
 export const forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
@@ -552,6 +554,9 @@ function processAttrs (el) {
         } else {
           addAttr(el, name, value)
         }
+      } else if (localRE.test(name)) {
+        name = name.replace(localRE, '')
+        addLocalVariable(el, name, value)
       } else if (onRE.test(name)) { // v-on
         name = name.replace(onRE, '')
         addHandler(el, name, value, modifiers, false, warn)

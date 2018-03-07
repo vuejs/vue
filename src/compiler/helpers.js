@@ -32,6 +32,10 @@ export function addRawAttr (el: ASTElement, name: string, value: any) {
   el.attrsList.push({ name, value })
 }
 
+export function addLocalVariable (el: ASTElement, alias: string, value: string) {
+  (el.locals || (el.locals = [])).push({ alias, value })
+}
+
 export function addDirective (
   el: ASTElement,
   name: string,

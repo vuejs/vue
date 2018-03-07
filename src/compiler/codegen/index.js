@@ -56,6 +56,8 @@ export function genElement (el: ASTElement, state: CodegenState): string {
     return genOnce(el, state)
   } else if (el.for && !el.forProcessed) {
     return genFor(el, state)
+  } else if (el.locals && !el.localsProcessed) {
+    return genLocalVariable(el, state)
   } else if (el.if && !el.ifProcessed) {
     return genIf(el, state)
   } else if (el.tag === 'template' && !el.slotTarget) {
@@ -162,6 +164,20 @@ function genIfConditions (
         ? genOnce(el, state)
         : genElement(el, state)
   }
+}
+
+function genLocalVariable (el: ASTElement, state: CodegenState): string {
+  const locals = el.locals || []
+  const localNames: Array<string> = []
+  const localValues: Array<string> = []
+  for (let i = 0, l = locals.length; i < l; ++i) {
+    localNames.push(locals[i].alias)
+    localValues.push(locals[i].value)
+  }
+  el.localsProcessed = true
+  return `((function(${localNames.join(',')}){` +
+    `return ${genElement(el, state)}` +
+  `})(${localValues.join(',')}))`
 }
 
 export function genFor (
@@ -351,7 +367,9 @@ function genScopedSlot (
     `return ${el.tag === 'template'
       ? el.if
         ? `${el.if}?${genChildren(el, state) || 'undefined'}:undefined`
-        : genChildren(el, state) || 'undefined'
+        : el.locals && !el.localsProcessed
+          ? genLocalVariableScopeSlot(el, state)
+          : genChildren(el, state) || 'undefined'
       : genElement(el, state)
     }}`
   return `{key:${key},fn:${fn}}`
@@ -371,6 +389,24 @@ function genForScopedSlot (
     `function(${alias}${iterator1}${iterator2}){` +
       `return ${genScopedSlot(key, el, state)}` +
     '})'
+}
+
+function genLocalVariableScopeSlot (
+  el: ASTElement,
+  state: CodegenState
+): string {
+  const locals = el.locals || []
+  const localNames: Array<string> = []
+  const localValues: Array<string> = []
+  for (let i = 0, l = locals.length; i < l; ++i) {
+    localNames.push(locals[i].alias)
+    localValues.push(locals[i].value)
+  }
+
+  el.localsProcessed = true
+  return `((function(${localNames.join(',')}){` +
+    `return ${genChildren(el, state) || 'undefined'}` +
+  `})(${localValues.join(',')}))`
 }
 
 export function genChildren (

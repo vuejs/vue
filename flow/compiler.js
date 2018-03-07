@@ -114,6 +114,9 @@ declare type ASTElement = {
   else?: true;
   ifConditions?: ASTIfConditions;
 
+  locals?: Array<{ alias: string; value: string }>;
+  localsProcessed?: boolean;
+
   for?: string;
   forProcessed?: boolean;
   key?: string;
