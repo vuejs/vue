@@ -10,7 +10,7 @@ import { LIFECYCLE_HOOKS } from 'shared/constants'
 
 export type Config = {
   // user
-  optionMergeStrategies: { [key: string]: Function }; // 存放 option 中的各种属性的合并函数
+  optionMergeStrategies: { [key: string]: Function };
   silent: boolean;
   productionTip: boolean;
   performance: boolean;
@@ -35,6 +35,7 @@ export type Config = {
 export default ({
   /**
    * Option merge strategies (used in core/util/options)
+   * 存放 option 中的各种属性的合并函数
    */
   // $flow-disable-line
   optionMergeStrategies: Object.create(null),
