@@ -204,13 +204,16 @@ export function parse (
       if (currentParent && !element.forbidden) {
         if (element.elseif || element.else) {
           processIfConditions(element, currentParent)
-        } else if (element.slotScope) { // scoped slot
-          currentParent.plain = false
-          const name = element.slotTarget || '"default"'
-          ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
         } else {
-          currentParent.children.push(element)
-          element.parent = currentParent
+          if (element.slotScope) { // scoped slot
+            currentParent.plain = false
+            const name = element.slotTarget || '"default"'
+            ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
+          }
+          if (!element.slotScope || element.tag === 'slot') {
+            currentParent.children.push(element)
+            element.parent = currentParent
+          }
         }
       }
       if (!unary) {
@@ -452,7 +455,21 @@ function processOnce (el) {
 }
 
 function processSlot (el) {
+  const slotScope = getAndRemoveAttr(el, 'slot-scope')
   if (el.tag === 'slot') {
+    // normalize attribute for more comfortable future checks (any truthy string, will be eventually ignored)
+    if (slotScope || slotScope === '') {
+      if (process.env.NODE_ENV !== 'production' && slotScope !== '') {
+        warn(
+          `"slot-scope" attribute on <slot> should be used without value. ` +
+          `Combination of <slot> element with "slot-scope" attribute means ` +
+          `pass of current component's scoped slot instead of definition of new ` +
+          `one. As new template is not defined, "slot-scope" attribute ` +
+          `value is ignored and can be misleading.`
+        )
+      }
+      el.slotScope = 'x'
+    }
     el.slotName = getBindingAttr(el, 'name')
     if (process.env.NODE_ENV !== 'production' && el.key) {
       warn(
@@ -462,11 +479,10 @@ function processSlot (el) {
       )
     }
   } else {
-    let slotScope
     if (el.tag === 'template') {
-      slotScope = getAndRemoveAttr(el, 'scope')
+      const slotScopeDeprecated = getAndRemoveAttr(el, 'scope')
       /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && slotScope) {
+      if (process.env.NODE_ENV !== 'production' && slotScopeDeprecated) {
         warn(
           `the "scope" attribute for scoped slots have been deprecated and ` +
           `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
@@ -475,8 +491,8 @@ function processSlot (el) {
           true
         )
       }
-      el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
-    } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
+      el.slotScope = slotScopeDeprecated || slotScope
+    } else if (slotScope) {
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
         warn(
@@ -488,14 +504,14 @@ function processSlot (el) {
       }
       el.slotScope = slotScope
     }
-    const slotTarget = getBindingAttr(el, 'slot')
-    if (slotTarget) {
-      el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
-      // preserve slot as an attribute for native shadow DOM compat
-      // only for non-scoped slots.
-      if (el.tag !== 'template' && !el.slotScope) {
-        addAttr(el, 'slot', slotTarget)
-      }
+  }
+  const slotTarget = getBindingAttr(el, 'slot')
+  if (slotTarget) {
+    el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
+    // preserve slot as an attribute for native shadow DOM compat
+    // only for non-scoped slots.
+    if (el.tag !== 'template' && !el.slotScope) {
+      addAttr(el, 'slot', slotTarget)
     }
   }
 }

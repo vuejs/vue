@@ -594,3 +594,262 @@ describe('Component scoped slot', () => {
     }).then(done)
   })
 })
+
+describe('Component scoped slot pass', () => {
+  it('default slot pass', done => {
+    const vm = new Vue({
+      template: `
+        <test :depth="2">
+          <template slot-scope="props">
+            <span>{{ props.msg }}</span>
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          name: 'test',
+          props: ['depth'],
+          template: `
+            <div>
+              <slot :msg="depth"></slot>
+              <test v-if="depth" :depth="depth - 1">
+                <slot slot-scope></slot>
+              </test>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<span>2</span> <div><span>1</span> <div><span>0</span> <!----></div></div>')
+    done()
+  })
+
+  it('named slot pass', done => {
+    const vm = new Vue({
+      template: `
+        <test :depth="1">
+          <template slot="a" slot-scope="props">
+            <h1>{{ props.msg }}</h1>
+          </template>
+          <template slot="b" slot-scope="props">
+            <h2>{{ props.msg }}</h2>
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          name: 'test',
+          props: ['depth'],
+          template: `
+            <div>
+              <slot name="a" :msg="depth"></slot>
+              <slot name="b" msg="b"></slot>
+              <slot name="c" msg="c"></slot>
+              <test v-if="depth" :depth="depth - 1">
+                <slot name="a" slot="a" slot-scope></slot>
+                <slot name="b" slot="c" slot-scope></slot>
+              </test>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<h1>1</h1> <h2>b</h2>  <div><h1>0</h1>  <h2>c</h2> <!----></div>')
+    done()
+  })
+
+  it('dynamic target slot pass', done => {
+    const vm = new Vue({
+      data: {
+        a: 'a',
+        b: 'b'
+      },
+      template: `
+        <test ref="test" :depth="1">
+          <template :slot="a" slot-scope="props">
+            <h1>{{ props.msg }}</h1>
+          </template>
+          <template :slot="b" slot-scope="props">
+            <h2>{{ props.msg }}</h2>
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          name: 'test',
+          props: ['depth'],
+          template: `
+            <div>
+              <slot name="a" :msg="depth"></slot>
+              <slot name="b" msg="b"></slot>
+              <test v-if="depth" :depth="depth - 1">
+                <slot name="a" slot="a" slot-scope></slot>
+                <slot name="b" slot="b" slot-scope></slot>
+              </test>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<h1>1</h1> <h2>b</h2> <div><h1>0</h1> <h2>b</h2> <!----></div>')
+    vm.a = 'b'
+    vm.b = 'a'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<h2>1</h2> <h1>b</h1> <div><h2>0</h2> <h1>b</h1> <!----></div>')
+    }).then(done)
+  })
+
+  it('slot with static content pass', done => {
+    const vm = new Vue({
+      template: `
+        <test :depth="2">
+          <template>
+            <span>static content</span>
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          name: 'test',
+          props: ['depth'],
+          template: `
+            <div>
+              <slot :msg="depth"></slot>
+              <test v-if="depth" :depth="depth - 1">
+                <slot slot-scope></slot>
+              </test>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<span>static content</span> <div><span>static content</span> <div><span>static content</span> <!----></div></div>')
+    expect('Duplicate presence of slot "default"').toHaveBeenWarned()
+    done()
+  })
+
+  it('should render fallback if no slot passed', done => {
+    const vm = new Vue({
+      template: '<test :depth="2"></test>',
+      components: {
+        test: {
+          name: 'test',
+          props: ['depth'],
+          template: `
+            <div>
+              <slot :msg="depth">fallback</slot>
+              <test v-if="depth" :depth="depth - 1">
+                <slot slot-scope></slot>
+              </test>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('fallback <div>fallback <div>fallback <!----></div></div>')
+    done()
+  })
+
+  it('slot pass with v-if', done => {
+    const vm = new Vue({
+      data: {
+        ok: true
+      },
+      template: `
+        <test :depth="2">
+          <template v-if="ok" slot-scope="props">
+            <span>{{ props.msg }}</span>
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          name: 'test',
+          props: ['depth'],
+          template: `
+            <div>
+              <slot :msg="depth">fallback</slot>
+              <test v-if="depth" :depth="depth - 1">
+                <slot slot-scope></slot>
+              </test>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<span>2</span> <div><span>1</span> <div><span>0</span> <!----></div></div>')
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('fallback <div>fallback <div>fallback <!----></div></div>')
+    }).then(done)
+  })
+
+  it('slot with static content pass with v-if', done => {
+    const vm = new Vue({
+      data: {
+        ok: true
+      },
+      template: `
+        <test :depth="2">
+          <span v-if="ok">static content</span>
+        </test>
+      `,
+      components: {
+        test: {
+          name: 'test',
+          props: ['depth'],
+          template: `
+            <div>
+              <slot :msg="depth">fallback</slot>
+              <test v-if="depth" :depth="depth - 1">
+                <slot slot-scope></slot>
+              </test>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<span>static content</span> <div><span>static content</span> <div><span>static content</span> <!----></div></div>')
+    expect('Duplicate presence of slot "default"').toHaveBeenWarned()
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('fallback <div>fallback <div>fallback <!----></div></div>')
+    }).then(done)
+  })
+
+  it('should warn if slot-scope attribute has value', done => {
+    new Vue({
+      template: `
+        <test :depth="1">
+          <template slot-scope="props">
+            <span>{{ props.msg }}</span>
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          name: 'test',
+          props: ['depth'],
+          template: `
+            <div>
+              <slot :msg="depth">fallback</slot>
+              <test v-if="depth" :depth="depth - 1">
+                <slot slot-scope="ignored"></slot>
+              </test>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+
+    expect(`"slot-scope" attribute on <slot> should be used without value`).toHaveBeenWarned()
+    done()
+  })
+})

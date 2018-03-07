@@ -347,13 +347,15 @@ function genScopedSlot (
   if (el.for && !el.forProcessed) {
     return genForScopedSlot(key, el, state)
   }
-  const fn = `function(${String(el.slotScope)}){` +
-    `return ${el.tag === 'template'
-      ? el.if
-        ? `${el.if}?${genChildren(el, state) || 'undefined'}:undefined`
-        : genChildren(el, state) || 'undefined'
-      : genElement(el, state)
-    }}`
+  const fn = (el.tag === 'slot')
+    ? `$scopedSlots[${el.slotName || '"default"'}]`
+    : `function(${String(el.slotScope)}){` +
+        `return ${el.tag === 'template'
+          ? el.if
+            ? `${el.if}?${genChildren(el, state) || 'undefined'}:undefined`
+            : genChildren(el, state) || 'undefined'
+          : genElement(el, state)
+        }}`
   return `{key:${key},fn:${fn}}`
 }
 
@@ -468,7 +470,9 @@ function genSlot (el: ASTElement, state: CodegenState): string {
   if (bind) {
     res += `${attrs ? '' : ',null'},${bind}`
   }
-  return res + ')'
+  return el.slotScope
+    ? `!$scopedSlots[${slotName}]&&${res})`
+    : res + ')'
 }
 
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement
