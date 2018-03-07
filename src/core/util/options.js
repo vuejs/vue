@@ -44,6 +44,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 /**
  * Helper that recursively merges two data objects together.
+ *
+ * 合并对象方法，深度合并
  */
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
@@ -64,12 +66,15 @@ function mergeData (to: Object, from: ?Object): Object {
 
 /**
  * Data
+ *
+ * 合并 data 的实际方法
  */
 export function mergeDataOrFn (
   parentVal: any,
   childVal: any,
   vm?: Component
 ): ?Function {
+  // 在 Vue.extend 中调用该方法是没用 vm 属性的，需分开处理
   if (!vm) {
     // in a Vue.extend merge, both should be functions
     if (!childVal) {
@@ -83,6 +88,7 @@ export function mergeDataOrFn (
     // merged result of both functions... no need to
     // check if parentVal is a function here because
     // it has to be a function to pass previous merges.
+    // 返回一个方法，供组件初始化的时候调用
     return function mergedDataFn () {
       return mergeData(
         typeof childVal === 'function' ? childVal.call(this, this) : childVal,
@@ -90,6 +96,7 @@ export function mergeDataOrFn (
       )
     }
   } else {
+    // 同上，只不过当有 vue 实例时，需绑定 call 调用时的上下文环境，也就时说在 create 时可以在函数内部使用 this
     return function mergedInstanceDataFn () {
       // instance merge
       const instanceData = typeof childVal === 'function'
@@ -107,6 +114,7 @@ export function mergeDataOrFn (
   }
 }
 
+// 合并 option 下的 data 属性的方法
 strats.data = function (
   parentVal: any,
   childVal: any,
@@ -131,6 +139,7 @@ strats.data = function (
 
 /**
  * Hooks and props are merged as arrays.
+ * 将生命周期函数合并到一个数组中，由于函数未真正调用，所以并不需要设置上下文环境
  */
 function mergeHook (
   parentVal: ?Array<Function>,
@@ -155,6 +164,8 @@ LIFECYCLE_HOOKS.forEach(hook => {
  * When a vm is present (instance creation), we need to do
  * a three-way merge between constructor options, instance
  * options and parent options.
+ *
+ * 合并 components/directives/filters
  */
 function mergeAssets (
   parentVal: ?Object,
@@ -180,6 +191,13 @@ ASSET_TYPES.forEach(function (type) {
  *
  * Watchers hashes should not overwrite one
  * another, so we merge them as arrays.
+ *
+ * 合并 watch
+ *
+ * 结果
+ * {
+ *   xxx: [Function, Function...]
+ * }
  */
 strats.watch = function (
   parentVal: ?Object,
@@ -188,6 +206,7 @@ strats.watch = function (
   key: string
 ): ?Object {
   // work around Firefox's Object.prototype.watch...
+  // 由于 Firefox 下对象默认有 watch 方法，做兼容处理，nativeWatch 为 Object 自带的方法
   if (parentVal === nativeWatch) parentVal = undefined
   if (childVal === nativeWatch) childVal = undefined
   /* istanbul ignore if */
@@ -213,6 +232,7 @@ strats.watch = function (
 
 /**
  * Other object hashes.
+ * 一些其他属性的合并
  */
 strats.props =
 strats.methods =
@@ -236,6 +256,9 @@ strats.provide = mergeDataOrFn
 
 /**
  * Default strategy.
+ *
+ * 若第二个参数有值，则使用第二个，否则使用第一个
+ *
  */
 const defaultStrat = function (parentVal: any, childVal: any): any {
   return childVal === undefined
@@ -271,6 +294,16 @@ export function validateComponentName (name: string) {
 /**
  * Ensure all props option syntax are normalized into the
  * Object-based format.
+ *
+ * 最终各式化出来的结构
+ * {
+ *   xxx: {
+ *     type: ..., // 若不是使用 object 则只有这个属性
+ *     ...        // 使用 object 的还有其他属性，比如 require / default 等等
+ *   }
+ *   ...
+ * }
+ *
  */
 function normalizeProps (options: Object, vm: ?Component) {
   const props = options.props
@@ -308,6 +341,18 @@ function normalizeProps (options: Object, vm: ?Component) {
 
 /**
  * Normalize all injections into Object-based format
+ *
+ * 由于支持数组和对象，所以将 inject 转化为对象形式
+ *
+ * 最终各式化出来的结构
+ * {
+ *   xxx: {
+ *     from: ..., // 若不是使用 object 则只有这个属性，表示需要从父组件取的属性名称
+ *     ...        // 使用 object 的还有其他属性，比如 default 等等
+ *   }
+ *   ...
+ * }
+ *
  */
 function normalizeInject (options: Object, vm: ?Component) {
   const inject = options.inject
@@ -335,6 +380,19 @@ function normalizeInject (options: Object, vm: ?Component) {
 
 /**
  * Normalize raw function directives into object format.
+ *
+ * 指令有两种写法，处理成同一种写法
+ *
+ * 最终格式化出来的结果
+ * {
+ *   xxx: {
+ *     bind: Function                // 这个肯定会有，当指定被绑定的时候触发
+ *     update: Function              // 这个肯定会有，所在组件的 VNode 更新时调用
+ *     inserted: Function            // 被绑定元素插入父节点时调用
+ *     componentUpdated: Function    // 指令所在组件的 VNode 及其子 VNode 全部更新后调用
+ *     unbind: Function              // 只调用一次，指令与元素解绑时调用
+ *   }
+ * }
  */
 function normalizeDirectives (options: Object) {
   const dirs = options.directives
@@ -348,6 +406,10 @@ function normalizeDirectives (options: Object) {
   }
 }
 
+/**
+ * 用于开发环境判断某个对象是否为 Object 若不是则给出提示
+ *
+ */
 function assertObjectType (name: string, value: any, vm: ?Component) {
   if (!isPlainObject(value)) {
     warn(
@@ -371,17 +433,21 @@ export function mergeOptions (
     checkComponents(child)
   }
 
+  // 如果 child 为 Vue 类，那么直接取 child.options
   if (typeof child === 'function') {
     child = child.options
   }
 
+  // props 有两种传值方式，使用该方法处理成同一种格式
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)
+  // extends 扩展组件的方式，原组件的 option 中有的属性，扩展的方法比原组件拥有更高的优先级
   const extendsFrom = child.extends
   if (extendsFrom) {
     parent = mergeOptions(parent, extendsFrom, vm)
   }
+  // 和 extend 类似，其实最终调用的方法也是一样的，只不过 mixins 可以传多个
   if (child.mixins) {
     for (let i = 0, l = child.mixins.length; i < l; i++) {
       parent = mergeOptions(parent, child.mixins[i], vm)

@@ -10,7 +10,7 @@ import { LIFECYCLE_HOOKS } from 'shared/constants'
 
 export type Config = {
   // user
-  optionMergeStrategies: { [key: string]: Function };
+  optionMergeStrategies: { [key: string]: Function }; // 存放 option 中的各种属性的合并函数
   silent: boolean;
   productionTip: boolean;
   performance: boolean;
