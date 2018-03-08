@@ -15,6 +15,18 @@ import {
   validateProp
 } from '../util/index'
 
+function fillSSRHelpers (Context, Ctor) {
+  const proto = Context.prototype
+  const ctorProto = Ctor.prototype
+  if (ctorProto._ssrNode && !proto._ssrNode) {
+    for (const key in ctorProto) {
+      if (key.indexOf('_ssr') === 0) {
+        proto[key] = ctorProto[key]
+      }
+    }
+  }
+}
+
 function FunctionalRenderContext (
   data,
   props,
@@ -22,6 +34,7 @@ function FunctionalRenderContext (
   parent,
   Ctor
 ) {
+  fillSSRHelpers(Ctor, FunctionalRenderContext)
   const options = Ctor.options
   this.data = data
   this.props = props
