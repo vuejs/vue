@@ -269,45 +269,90 @@ describe('codegen', () => {
     )
   })
 
+  it('generate events with method call', () => {
+    assertCodegen(
+      '<input @input="onInput($event);">',
+      `with(this){return _c('input',{on:{"input":function($event){onInput($event);}}})}`
+    )
+    // empty arguments
+    assertCodegen(
+      '<input @input="onInput();">',
+      `with(this){return _c('input',{on:{"input":function($event){onInput();}}})}`
+    )
+    // without semicolon
+    assertCodegen(
+      '<input @input="onInput($event)">',
+      `with(this){return _c('input',{on:{"input":function($event){onInput($event)}}})}`
+    )
+    // multiple args
+    assertCodegen(
+      '<input @input="onInput($event, \'abc\', 5);">',
+      `with(this){return _c('input',{on:{"input":function($event){onInput($event, 'abc', 5);}}})}`
+    )
+    // expression in args
+    assertCodegen(
+      '<input @input="onInput($event, 2+2);">',
+      `with(this){return _c('input',{on:{"input":function($event){onInput($event, 2+2);}}})}`
+    )
+    // tricky symbols in args
+    assertCodegen(
+      '<input @input="onInput(\');[\'());\');">',
+      `with(this){return _c('input',{on:{"input":function($event){onInput(');[\'());');}}})}`
+    )
+  })
+
+  it('generate events with multiple statements', () => {
+    // normal function
+    assertCodegen(
+      '<input @input="onInput1();onInput2()">',
+      `with(this){return _c('input',{on:{"input":function($event){onInput1();onInput2()}}})}`
+    )
+    // function with multiple args
+    assertCodegen(
+      '<input @input="onInput1($event, \'text\');onInput2(\'text2\', $event)">',
+      `with(this){return _c('input',{on:{"input":function($event){onInput1($event, 'text');onInput2('text2', $event)}}})}`
+    )
+  })
+
   it('generate events with keycode', () => {
     assertCodegen(
       '<input @input.enter="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return onInput($event)}}})}`
     )
     // multiple keycodes (delete)
     assertCodegen(
       '<input @input.delete="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete"]))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete"]))return null;return onInput($event)}}})}`
     )
     // multiple keycodes (chained)
     assertCodegen(
       '<input @keydown.enter.delete="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter")&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete"]))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter")&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete"]))return null;return onInput($event)}}})}`
     )
     // number keycode
     assertCodegen(
       '<input @input.13="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&$event.keyCode!==13)return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&$event.keyCode!==13)return null;return onInput($event)}}})}`
     )
     // custom keycode
     assertCodegen(
       '<input @input.custom="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"custom",undefined,$event.key,undefined))return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"custom",undefined,$event.key,undefined))return null;return onInput($event)}}})}`
     )
   })
 
   it('generate events with generic modifiers', () => {
     assertCodegen(
       '<input @input.stop="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){$event.stopPropagation();onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){$event.stopPropagation();return onInput($event)}}})}`
     )
     assertCodegen(
       '<input @input.prevent="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){$event.preventDefault();onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){$event.preventDefault();return onInput($event)}}})}`
     )
     assertCodegen(
       '<input @input.self="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if($event.target !== $event.currentTarget)return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if($event.target !== $event.currentTarget)return null;return onInput($event)}}})}`
     )
   })
 
@@ -315,74 +360,74 @@ describe('codegen', () => {
   it('generate events with generic modifiers and keycode correct order', () => {
     assertCodegen(
       '<input @keydown.enter.prevent="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.preventDefault();onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.preventDefault();return onInput($event)}}})}`
     )
 
     assertCodegen(
       '<input @keydown.enter.stop="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.stopPropagation();onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.stopPropagation();return onInput($event)}}})}`
     )
   })
 
   it('generate events with mouse event modifiers', () => {
     assertCodegen(
       '<input @click.ctrl="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;onClick($event)}}})}`
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;return onClick($event)}}})}`
     )
     assertCodegen(
       '<input @click.shift="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.shiftKey)return null;onClick($event)}}})}`
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.shiftKey)return null;return onClick($event)}}})}`
     )
     assertCodegen(
       '<input @click.alt="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.altKey)return null;onClick($event)}}})}`
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.altKey)return null;return onClick($event)}}})}`
     )
     assertCodegen(
       '<input @click.meta="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.metaKey)return null;onClick($event)}}})}`
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.metaKey)return null;return onClick($event)}}})}`
     )
     assertCodegen(
       '<input @click.exact="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if($event.ctrlKey||$event.shiftKey||$event.altKey||$event.metaKey)return null;onClick($event)}}})}`
+      `with(this){return _c('input',{on:{"click":function($event){if($event.ctrlKey||$event.shiftKey||$event.altKey||$event.metaKey)return null;return onClick($event)}}})}`
     )
     assertCodegen(
       '<input @click.ctrl.exact="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;if($event.shiftKey||$event.altKey||$event.metaKey)return null;onClick($event)}}})}`
+      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;if($event.shiftKey||$event.altKey||$event.metaKey)return null;return onClick($event)}}})}`
     )
   })
 
   it('generate events with multiple modifiers', () => {
     assertCodegen(
       '<input @input.stop.prevent.self="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){$event.stopPropagation();$event.preventDefault();if($event.target !== $event.currentTarget)return null;onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){$event.stopPropagation();$event.preventDefault();if($event.target !== $event.currentTarget)return null;return onInput($event)}}})}`
     )
   })
 
   it('generate events with capture modifier', () => {
     assertCodegen(
       '<input @input.capture="onInput">',
-      `with(this){return _c('input',{on:{"!input":function($event){onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"!input":function($event){return onInput($event)}}})}`
     )
   })
 
   it('generate events with once modifier', () => {
     assertCodegen(
       '<input @input.once="onInput">',
-      `with(this){return _c('input',{on:{"~input":function($event){onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"~input":function($event){return onInput($event)}}})}`
     )
   })
 
   it('generate events with capture and once modifier', () => {
     assertCodegen(
       '<input @input.capture.once="onInput">',
-      `with(this){return _c('input',{on:{"~!input":function($event){onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"~!input":function($event){return onInput($event)}}})}`
     )
   })
 
   it('generate events with once and capture modifier', () => {
     assertCodegen(
       '<input @input.once.capture="onInput">',
-      `with(this){return _c('input',{on:{"~!input":function($event){onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"~!input":function($event){return onInput($event)}}})}`
     )
   })
 
@@ -427,7 +472,7 @@ describe('codegen', () => {
     // with modifiers
     assertCodegen(
       `<input @keyup.enter="e=>current++">`,
-      `with(this){return _c('input',{on:{"keyup":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;(e=>current++)($event)}}})}`
+      `with(this){return _c('input',{on:{"keyup":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return (e=>current++)($event)}}})}`
     )
   })
 
@@ -452,7 +497,7 @@ describe('codegen', () => {
   it('generate multiple event handlers', () => {
     assertCodegen(
       '<input @input="current++" @input.stop="onInput">',
-      `with(this){return _c('input',{on:{"input":[function($event){current++},function($event){$event.stopPropagation();onInput($event)}]}})}`
+      `with(this){return _c('input',{on:{"input":[function($event){current++},function($event){$event.stopPropagation();return onInput($event)}]}})}`
     )
   })
 
