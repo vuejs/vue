@@ -119,6 +119,7 @@ export interface RenderContext<Props=DefaultProps> {
   slots(): any;
   data: VNodeData;
   parent: Vue;
+  listeners: { [key: string]: Function | Function[] };
   injections: any
 }
 

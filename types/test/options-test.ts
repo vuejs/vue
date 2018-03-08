@@ -312,6 +312,7 @@ Vue.component('functional-component', {
     context.slots();
     context.data;
     context.parent;
+    context.listeners.click;
     return createElement("div", {}, context.children);
   }
 });
