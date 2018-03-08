@@ -9,17 +9,18 @@ describe('compile options', () => {
         <input type="text" v-model="msg" required max="8" v-validate:field1.group1.group2>
       </div>
     `, {
-        directives: {
-          validate (el, dir) {
-            if (dir.name === 'validate' && dir.arg) {
-              el.validate = {
-                field: dir.arg,
-                groups: dir.modifiers ? Object.keys(dir.modifiers) : []
-              }
+      directives: {
+        validate (el, dir) {
+          if (dir.name === 'validate' && dir.arg) {
+            el.validate = {
+              field: dir.arg,
+              groups: dir.modifiers ? Object.keys(dir.modifiers) : []
             }
           }
-        },
-        modules: [{
+        }
+      },
+      modules: [
+        {
           transformNode (el) {
             el.validators = el.validators || []
             const validators = ['required', 'min', 'max', 'pattern', 'maxlength', 'minlength']
@@ -52,15 +53,16 @@ describe('compile options', () => {
             })
             // generate code
             return `_c('validate',{props:{
-          field:${JSON.stringify(el.validate.field)},
-          groups:${JSON.stringify(el.validate.groups)},
-          validators:${JSON.stringify(el.validators)},
-          result:${JSON.stringify(result)},
-          child:${code}}
-        })`
+              field:${JSON.stringify(el.validate.field)},
+              groups:${JSON.stringify(el.validate.groups)},
+              validators:${JSON.stringify(el.validators)},
+              result:${JSON.stringify(result)},
+              child:${code}}
+            })`
           }
-        }]
-      })
+        }
+      ]
+    })
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).toEqual([])
     expect(errors).toEqual([])
