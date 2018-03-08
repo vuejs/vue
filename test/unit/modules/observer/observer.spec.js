@@ -356,6 +356,18 @@ describe('Observer', () => {
     })
   })
 
+  it('warn set/delete on non valid values', () => {
+    try {
+      setProp(null, 'foo', 1)
+    } catch (e) {}
+    expect(`Cannot set reactive property on non-object/array value`).toHaveBeenWarned()
+
+    try {
+      delProp(null, 'foo')
+    } catch (e) {}
+    expect(`Cannot delete reactive property on non-object/array value`).toHaveBeenWarned()
+  })
+
   it('should lazy invoke existing getters', () => {
     const obj = {}
     let called = false
