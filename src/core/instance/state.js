@@ -292,7 +292,7 @@ function initWatch (vm: Component, watch: Object) {
 
 function createWatcher (
   vm: Component,
-  keyOrFn: string | Function,
+  expOrFn: string | Function,
   handler: any,
   options?: Object
 ) {
@@ -303,7 +303,7 @@ function createWatcher (
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
-  return vm.$watch(keyOrFn, handler, options)
+  return vm.$watch(expOrFn, handler, options)
 }
 
 export function stateMixin (Vue: Class<Component>) {
