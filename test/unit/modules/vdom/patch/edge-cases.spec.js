@@ -327,4 +327,14 @@ describe('vdom patch: edge cases', () => {
       expect(log).not.toHaveBeenCalled()
     }).then(done)
   })
+
+  // #6864
+  it('should not special-case boolean attributes for custom elements', () => {
+    Vue.config.ignoredElements = [/^custom-/]
+    const vm = new Vue({
+      template: `<div><custom-foo selected="1"/></div>`
+    }).$mount()
+    expect(vm.$el.querySelector('custom-foo').getAttribute('selected')).toBe('1')
+    Vue.config.ignoredElements = []
+  })
 })
