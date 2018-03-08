@@ -34,7 +34,7 @@ export function createFnInvoker (fns: Function | Array<Function>): Function {
         cloned[i].apply(null, arguments)
       }
     } else {
-      // return handler return value for single handlers
+      // return handler return value for single handler
       return fns.apply(null, arguments)
     }
   }
