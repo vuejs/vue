@@ -331,6 +331,10 @@ Vue.component('functional-component-object-inject', {
   }
 })
 
+Vue.component('functional-component-check-optional', {
+  functional: true
+})
+
 Vue.component("async-component", ((resolve, reject) => {
   setTimeout(() => {
     resolve(Vue.component("component"));
