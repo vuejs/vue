@@ -174,9 +174,13 @@ export const hyphenate = cached((str: string): string => {
 })
 
 /**
- * Bind function context
+ * Simple bind polyfill for environments that do not support it... e.g.
+ * PhantomJS 1.x. Technically we don't need this anymore since native bind is
+ * now more performant in most browsers, but removing it would be breaking for
+ * code that was able to run in PhantomJS 1.x, so this must be kept for
+ * backwards compatibility.
  */
-function ownBind (fn: Function, ctx: Object): Function {
+function polyfillBind (fn: Function, ctx: Object): Function {
   function boundFn (a) {
     const l = arguments.length
     return l
@@ -190,11 +194,13 @@ function ownBind (fn: Function, ctx: Object): Function {
   return boundFn
 }
 
-function nativeBind(fn: Function, ctx: Object): Function {
+function nativeBind (fn: Function, ctx: Object): Function {
   return fn.bind(ctx)
 }
 
-export const bind = Function.prototype.bind ? nativeBind : ownBind
+export const bind = Function.prototype.bind
+  ? nativeBind
+  : polyfillBind
 
 /**
  * Convert an Array-like object to a real Array.
