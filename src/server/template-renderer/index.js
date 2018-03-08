@@ -61,6 +61,7 @@ export default class TemplateRenderer {
     if (options.clientManifest) {
       const clientManifest = this.clientManifest = options.clientManifest
       this.publicPath = clientManifest.publicPath.replace(/\/$/, '')
+
       // preload/prefetch directives
       this.preloadFiles = (clientManifest.initial || []).map(normalizeFile)
       this.prefetchFiles = (clientManifest.async || []).map(normalizeFile)
@@ -113,8 +114,9 @@ export default class TemplateRenderer {
       : []
     return (
       // render links for css files
+      // <script> to block fault in firefox
       (cssFiles.length
-        ? cssFiles.map(file => `<link rel="stylesheet" href="${this.publicPath}/${file}">`).join('')
+        ? cssFiles.map(file => `<link rel="stylesheet" href="${this.publicPath}/${file}">`).join('') + '<script> </script>'
         : '') +
       // context.styles is a getter exposed by vue-style-loader which contains
       // the inline component styles collected during SSR

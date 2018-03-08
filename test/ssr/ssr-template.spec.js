@@ -233,6 +233,8 @@ describe('SSR: template option', () => {
       (options.noPrefetch ? `` : `<link rel="prefetch" href="/1.js">`) +
       // css assets should be loaded
       `<link rel="stylesheet" href="/test.css">` +
+      // Firefox fout fix
+      `<script> </script>` +
     `</head><body>` +
       `<div data-server-rendered="true"><div>async test.woff2 test.png</div></div>` +
       // state should be inlined before scripts
