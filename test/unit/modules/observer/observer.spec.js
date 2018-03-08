@@ -355,7 +355,7 @@ describe('Observer', () => {
       expect(obj.__ob__ instanceof Observer).toBe(true)
     })
   })
-  
+
   it('warn set/delete on non valid values', () => {
     try {
       setProp(null, 'foo', 1)
@@ -366,5 +366,19 @@ describe('Observer', () => {
       delProp(null, 'foo')
     } catch (e) {}
     expect(`Cannot delete reactive property on non-object/array value`).toHaveBeenWarned()
+  })
+
+  it('should lazy invoke existing getters', () => {
+    const obj = {}
+    let called = false
+    Object.defineProperty(obj, 'getterProp', {
+      enumerable: true,
+      get: () => {
+        called = true
+        return 'some value'
+      }
+    })
+    observe(obj)
+    expect(called).toBe(false)
   })
 })

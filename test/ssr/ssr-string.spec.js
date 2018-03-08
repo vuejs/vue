@@ -1145,6 +1145,25 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('should expose ssr helpers on functional context', done => {
+    let called = false
+    renderVmWithOptions({
+      template: `<div><foo/></div>`,
+      components: {
+        foo: {
+          functional: true,
+          render (h, ctx) {
+            expect(ctx._ssrNode).toBeTruthy()
+            called = true
+          }
+        }
+      }
+    }, () => {
+      expect(called).toBe(true)
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {

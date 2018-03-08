@@ -8,6 +8,7 @@ import { preTransformVBind } from './v-bind'
 import { preTransformVIf } from './v-if'
 import { preTransformVFor } from './v-for'
 import { postTransformVOn } from './v-on'
+import { preTransformVOnce } from './v-once'
 
 let currentRecycleList = null
 
@@ -25,6 +26,7 @@ function preTransformNode (el: ASTElement, options: WeexCompilerOptions) {
     preTransformVBind(el, options)
     preTransformVIf(el, options) // also v-else-if and v-else
     preTransformVFor(el, options)
+    preTransformVOnce(el, options)
   }
 }
 

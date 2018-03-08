@@ -8,13 +8,13 @@ Vue.js is an MIT-licensed open source project. It's an independent project with 
 
 #### What's the difference between Patreon and OpenCollective?
 
-Funds donated via Patreon goes directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses by core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
+Funds donated via Patreon go directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses for core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
 
 <br><br>
 
-<h2 align="center">Platinum via Patreon</h2>
+<h2 align="center">Special Sponsors</h2>
 
-<!--platinum start-->
+<!--special start-->
 <table>
   <tbody>
     <tr>
@@ -24,10 +24,26 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         </a>
       </td>
       <td align="center" valign="middle">
+        <a href="https://www.bitsrc.io/?utm_source=vue&utm_medium=vue&utm_campaign=vue&utm_term=vue&utm_content=vue" target="_blank">
+          <img height="90px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit-wide.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
         <a href="https://xiaozhuanlan.com" target="_blank">
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/xiaozhuanlan.png">
         </a>
       </td>
+    </tr><tr></tr>
+  </tbody>
+</table>
+<!--special end-->
+
+<h2 align="center">Platinum via Patreon</h2>
+
+<!--platinum start-->
+<table>
+  <tbody>
+    <tr>
       <td align="center" valign="middle">
         <a href="http://tooltwist.com/" target="_blank">
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tooltwist.png">
@@ -38,8 +54,6 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vueschool.png">
         </a>
       </td>
-    </tr><tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="https://www.datacamp.com/careers?utm_source=vuejs&utm_medium=sidebar" target="_blank">
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/datacamp.png">
@@ -77,11 +91,6 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="http://monterail.com/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://anymod.com" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/anymod.png">
         </a>
@@ -91,13 +100,13 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/frontend-love.png">
         </a>
       </td>
-    </tr><tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="https://onsen.io/vue/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/onsen-ui.png">
         </a>
       </td>
+    </tr><tr></tr>
+    <tr>
       <td align="center" valign="middle">
         <a href="https://vuetifyjs.com" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuetify.png">
@@ -109,6 +118,16 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         </a>
       </td>
       <td align="center" valign="middle">
+        <a href="https://hackr.io/tutorials/learn-vue-js" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/hackr-io.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://icons8.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/icons8.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
         <a href="https://vuejobs.com/?ref=vuejs" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
         </a>
@@ -116,6 +135,18 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
       <td align="center" valign="middle">
         <a href="https://leanpub.com/vuejs2" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
+        </a>
+      </td>
+    </tr><tr></tr>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://www.bmqb.com/jobs" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bmqb.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://codepilot.ai" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/codepilot.png">
         </a>
       </td>
     </tr><tr></tr>
@@ -209,12 +240,12 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 
 <!--50 start-->
 - Wasim Khamlichi
-- errorrik
+- errorrik 
 - Alex Balashov
 - Konstantin Levinski
 - Samuel Smith
 - HARRI J SALOMAA
-- tjkoury
+- tjkoury 
 - Evan Leonardi
 <!--50 end-->
 
@@ -235,17 +266,16 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Frank Dugan III
 - Stephen Hartley
 - Wen-Tien Chang
-- Chestnut Hill
 - Kirk Lewis
 - Karol F
 - Miljan Aleksic
-- 叶解
+- 叶解 
 - Paul Straw
 - Jake Ingman
 - Barbara Liau
 - Isaac Sant
 - Milos Stojanovic
-- 4
+- 4 
 - The Graphic Design School
 - Christian Griffith
 - Jarek Tkaczyk
@@ -261,11 +291,10 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Duncan J Kenzie
 - Mike Margerum
 - Guy Gavergun
-- Edithvale
+- Edithvale 
 - Intevation GmbH
 - Luiz Eduardo  Tanure Bacelar
 - Chengzhi Yin
-- Dan Barrett
 - Zoran Knezevic
 - James Simpson
 - Pierre Vanhulst
@@ -283,21 +312,17 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Nicholas Reid
 - Tyler Scott
 - Thong Yong Jun
-- Tai Shi Lgin
 - Bryan Gruneberg
 - Roman Kuba
-- Matthew McMillion
 - Familiar Studio
 - Matias Verdier
 - Jamie McElwain
 - Vivekanandhan Natarajan
-- Alejandro Mohamad
 - Rafael Belvederese
 - Mickaël Andrieu
 - Guilherme S L de Souza
 - Rob Yedlin
 - Daniel Waghorn
-- Eric Githinji
 - Chih-Hsuan, Fan
 - Jordan Oroshiba
 - Brian Jorden
