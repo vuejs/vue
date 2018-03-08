@@ -15,12 +15,12 @@ import {
   validateProp
 } from '../util/index'
 
-function FunctionalRenderContext (
-  data,
-  props,
-  children,
-  parent,
-  Ctor
+export function FunctionalRenderContext (
+  data: VNodeData,
+  props: Object,
+  children: ?Array<VNode>,
+  parent: Component,
+  Ctor: Class<Component>
 ) {
   const options = Ctor.options
   this.data = data
