@@ -199,7 +199,10 @@ Vue.component('component', {
   updated() {},
   activated() {},
   deactivated() {},
-  errorCaptured() {
+  errorCaptured(err, vm, info) {
+    err.message
+    vm.$emit('error')
+    info.toUpperCase()
     return true
   },
 
