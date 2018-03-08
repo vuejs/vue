@@ -174,23 +174,6 @@ export const hyphenate = cached((str: string): string => {
 })
 
 /**
- * Simple bind, faster than native
- */
-export function bind (fn: Function, ctx: Object): Function {
-  function boundFn (a) {
-    const l: number = arguments.length
-    return l
-      ? l > 1
-        ? fn.apply(ctx, arguments)
-        : fn.call(ctx, a)
-      : fn.call(ctx)
-  }
-  // record original fn length
-  boundFn._length = fn.length
-  return boundFn
-}
-
-/**
  * Convert an Array-like object to a real Array.
  */
 export function toArray (list: any, start?: number): Array<any> {
