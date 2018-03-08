@@ -31,12 +31,13 @@ export type Accessors<T> = {
   [K in keyof T]: (() => T[K]) | ComputedOptions<T[K]>
 }
 
+type DataDef<Data, Props, V> = Data | ((this: Readonly<Props> & V) => Data)
 /**
  * This type should be used when an array of strings is used for a component's `props` value.
  */
 export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, PropNames extends string> =
   object &
-  ComponentOptions<V, Data | ((this: Readonly<Record<PropNames, any>> & V) => Data), Methods, Computed, PropNames[]> &
+  ComponentOptions<V, DataDef<Data, Record<PropNames, any>, V>, Methods, Computed, PropNames[], Record<PropNames, any>> &
   ThisType<CombinedVueInstance<V, Data, Methods, Computed, Readonly<Record<PropNames, any>>>>;
 
 /**
@@ -44,7 +45,7 @@ export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods
  */
 export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props> =
   object &
-  ComponentOptions<V, Data | ((this: Readonly<Props> & V) => Data), Methods, Computed, RecordPropsDefinition<Props>> &
+  ComponentOptions<V, DataDef<Data, Props, V>, Methods, Computed, RecordPropsDefinition<Props>, Props> &
   ThisType<CombinedVueInstance<V, Data, Methods, Computed, Readonly<Props>>>;
 
 type DefaultData<V> =  object | ((this: V) => object);
@@ -56,7 +57,8 @@ export interface ComponentOptions<
   Data=DefaultData<V>,
   Methods=DefaultMethods<V>,
   Computed=DefaultComputed,
-  PropsDef=PropsDefinition<DefaultProps>> {
+  PropsDef=PropsDefinition<DefaultProps>,
+  Props=DefaultProps> {
   data?: Data;
   props?: PropsDef;
   propsData?: object;
@@ -66,7 +68,8 @@ export interface ComponentOptions<
 
   el?: Element | string;
   template?: string;
-  render?(createElement: CreateElement): VNode;
+  // hack is for funcitonal component type inference, should not used in user code
+  render?(createElement: CreateElement, hack: RenderContext<Props>): VNode;
   renderError?: (h: () => VNode, err: Error) => VNode;
   staticRenderFns?: ((createElement: CreateElement) => VNode)[];
 
