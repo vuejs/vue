@@ -19,6 +19,21 @@ describe('Directive v-model text', () => {
     }).then(done)
   })
 
+  it('should work with space ended expression in v-model', () => {
+    const vm = new Vue({
+      data: {
+        obj: {
+          test: 'b'
+        }
+      },
+      template: '<input v-model="obj.test ">'
+    }).$mount()
+
+    triggerEvent(vm.$el, 'input')
+    expect(vm.obj['test ']).toBe(undefined)
+    expect(vm.obj.test).toBe('b')
+  })
+
   it('.lazy modifier', () => {
     const vm = new Vue({
       data: {
@@ -183,27 +198,25 @@ describe('Directive v-model text', () => {
     })
   }
 
-  if (!isAndroid) {
-    it('compositionevents', function (done) {
-      const vm = new Vue({
-        data: {
-          test: 'foo'
-        },
-        template: '<input v-model="test">'
-      }).$mount()
-      const input = vm.$el
-      triggerEvent(input, 'compositionstart')
-      input.value = 'baz'
-      // input before composition unlock should not call set
-      triggerEvent(input, 'input')
-      expect(vm.test).toBe('foo')
-      // after composition unlock it should work
-      triggerEvent(input, 'compositionend')
-      triggerEvent(input, 'input')
-      expect(vm.test).toBe('baz')
-      done()
-    })
-  }
+  it('compositionevents', function (done) {
+    const vm = new Vue({
+      data: {
+        test: 'foo'
+      },
+      template: '<input v-model="test">'
+    }).$mount()
+    const input = vm.$el
+    triggerEvent(input, 'compositionstart')
+    input.value = 'baz'
+    // input before composition unlock should not call set
+    triggerEvent(input, 'input')
+    expect(vm.test).toBe('foo')
+    // after composition unlock it should work
+    triggerEvent(input, 'compositionend')
+    triggerEvent(input, 'input')
+    expect(vm.test).toBe('baz')
+    done()
+  })
 
   it('warn invalid tag', () => {
     new Vue({
@@ -287,6 +300,17 @@ describe('Directive v-model text', () => {
           <foo v-model="test" :value="test"/>
         </div>
       `
+    }).$mount()
+    expect('conflicts with v-model').not.toHaveBeenWarned()
+  })
+
+  it('should not warn on input with dynamic type binding', () => {
+    new Vue({
+      data: {
+        type: 'checkbox',
+        test: 'foo'
+      },
+      template: '<input :type="type" v-model="test" :value="test">'
     }).$mount()
     expect('conflicts with v-model').not.toHaveBeenWarned()
   })

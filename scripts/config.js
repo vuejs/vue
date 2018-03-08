@@ -123,7 +123,7 @@ const builds = {
     format: 'cjs',
     external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
   },
-  'web-server-basic-renderer': {
+  'web-server-renderer-basic': {
     entry: resolve('web/entry-server-basic-renderer.js'),
     dest: resolve('packages/vue-server-renderer/basic.js'),
     format: 'umd',

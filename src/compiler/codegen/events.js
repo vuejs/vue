@@ -3,7 +3,7 @@
 const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
-// keyCode aliases
+// KeyboardEvent.keyCode aliases
 const keyCodes: { [key: string]: number | Array<number> } = {
   esc: 27,
   tab: 9,
@@ -14,6 +14,19 @@ const keyCodes: { [key: string]: number | Array<number> } = {
   right: 39,
   down: 40,
   'delete': [8, 46]
+}
+
+// KeyboardEvent.key aliases
+const keyNames: { [key: string]: string | Array<string> } = {
+  esc: 'Escape',
+  tab: 'Tab',
+  enter: 'Enter',
+  space: ' ',
+  up: 'ArrowUp',
+  left: 'ArrowLeft',
+  right: 'ArrowRight',
+  down: 'ArrowDown',
+  'delete': ['Backspace', 'Delete']
 }
 
 // #4868: modifiers that prevent the execution of the listener
@@ -140,11 +153,14 @@ function genFilterCode (key: string): string {
   if (keyVal) {
     return `$event.keyCode!==${keyVal}`
   }
-  const code = keyCodes[key]
+  const keyCode = keyCodes[key]
+  const keyName = keyNames[key]
   return (
     `_k($event.keyCode,` +
     `${JSON.stringify(key)},` +
-    `${JSON.stringify(code)},` +
-    `$event.key)`
+    `${JSON.stringify(keyCode)},` +
+    `$event.key,` +
+    `${JSON.stringify(keyName)}` +
+    `)`
   )
 }

@@ -27,10 +27,10 @@ export const observerState = {
 }
 
 /**
- * Observer class that are attached to each observed
- * object. Once attached, the observer converts target
+ * Observer class that is attached to each observed
+ * object. Once attached, the observer converts the target
  * object's property keys into getter/setters that
- * collect dependencies and dispatches updates.
+ * collect dependencies and dispatch updates.
  */
 export class Observer {
   value: any;
@@ -61,7 +61,7 @@ export class Observer {
   walk (obj: Object) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
-      defineReactive(obj, keys[i], obj[keys[i]])
+      defineReactive(obj, keys[i])
     }
   }
 
@@ -145,6 +145,9 @@ export function defineReactive (
 
   // cater for pre-defined getter/setters
   const getter = property && property.get
+  if (!getter && arguments.length === 2) {
+    val = obj[key]
+  }
   const setter = property && property.set
 
   let childOb = !shallow && observe(val)
@@ -191,6 +194,12 @@ export function defineReactive (
  * already exist.
  */
 export function set (target: Array<any> | Object, key: any, val: any): any {
+  if (process.env.NODE_ENV !== 'production' &&
+    !Array.isArray(target) &&
+    !isObject(target)
+  ) {
+    warn(`Cannot set reactive property on non-object/array value: ${target}`)
+  }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
@@ -221,6 +230,12 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
  * Delete a property and trigger change if necessary.
  */
 export function del (target: Array<any> | Object, key: any) {
+  if (process.env.NODE_ENV !== 'production' &&
+    !Array.isArray(target) &&
+    !isObject(target)
+  ) {
+    warn(`Cannot delete reactive property on non-object/array value: ${target}`)
+  }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1)
     return

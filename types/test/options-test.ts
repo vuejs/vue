@@ -199,7 +199,10 @@ Vue.component('component', {
   updated() {},
   activated() {},
   deactivated() {},
-  errorCaptured() {
+  errorCaptured(err, vm, info) {
+    err.message
+    vm.$emit('error')
+    info.toUpperCase()
     return true
   },
 
@@ -312,6 +315,7 @@ Vue.component('functional-component', {
     context.slots();
     context.data;
     context.parent;
+    context.listeners.click;
     return createElement("div", {}, context.children);
   }
 });
@@ -328,6 +332,10 @@ Vue.component('functional-component-object-inject', {
   render(h) {
     return h('div')
   }
+})
+
+Vue.component('functional-component-check-optional', {
+  functional: true
 })
 
 Vue.component("async-component", ((resolve, reject) => {

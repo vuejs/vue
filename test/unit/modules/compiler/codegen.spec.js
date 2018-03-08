@@ -44,6 +44,13 @@ describe('codegen', () => {
     )
   })
 
+  it('generate filters with no arguments', () => {
+    assertCodegen(
+      '<div>{{ d | e() }}</div>',
+      `with(this){return _c('div',[_v(_s(_f("e")(d)))])}`
+    )
+  })
+
   it('generate v-for directive', () => {
     assertCodegen(
       '<div><li v-for="item in items" :key="item.uid"></li></div>',
@@ -310,17 +317,17 @@ describe('codegen', () => {
   it('generate events with keycode', () => {
     assertCodegen(
       '<input @input.enter="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return onInput($event)}}})}`
     )
     // multiple keycodes (delete)
     assertCodegen(
       '<input @input.delete="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"delete",[8,46],$event.key))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete"]))return null;return onInput($event)}}})}`
     )
     // multiple keycodes (chained)
     assertCodegen(
       '<input @keydown.enter.delete="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key)&&_k($event.keyCode,"delete",[8,46],$event.key))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter")&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete"]))return null;return onInput($event)}}})}`
     )
     // number keycode
     assertCodegen(
@@ -330,7 +337,7 @@ describe('codegen', () => {
     // custom keycode
     assertCodegen(
       '<input @input.custom="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"custom",undefined,$event.key))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"custom",undefined,$event.key,undefined))return null;return onInput($event)}}})}`
     )
   })
 
@@ -353,12 +360,12 @@ describe('codegen', () => {
   it('generate events with generic modifiers and keycode correct order', () => {
     assertCodegen(
       '<input @keydown.enter.prevent="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key))return null;$event.preventDefault();return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.preventDefault();return onInput($event)}}})}`
     )
 
     assertCodegen(
       '<input @keydown.enter.stop="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key))return null;$event.stopPropagation();return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.stopPropagation();return onInput($event)}}})}`
     )
   })
 
@@ -465,7 +472,7 @@ describe('codegen', () => {
     // with modifiers
     assertCodegen(
       `<input @keyup.enter="e=>current++">`,
-      `with(this){return _c('input',{on:{"keyup":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key))return null;return (e=>current++)($event)}}})}`
+      `with(this){return _c('input',{on:{"keyup":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return (e=>current++)($event)}}})}`
     )
   })
 
