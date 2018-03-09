@@ -9,8 +9,8 @@ import {
   set,
   del,
   observe,
-  observerState,
-  defineReactive
+  defineReactive,
+  toggleObserving
 } from '../observer/index'
 
 import {
@@ -69,7 +69,9 @@ function initProps (vm: Component, propsOptions: Object) {
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
-  observerState.shouldConvert = isRoot
+  if (!isRoot) {
+    toggleObserving(false)
+  }
   for (const key in propsOptions) {
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
@@ -104,7 +106,7 @@ function initProps (vm: Component, propsOptions: Object) {
       proxy(vm, `_props`, key)
     }
   }
-  observerState.shouldConvert = true
+  toggleObserving(true)
 }
 
 function initData (vm: Component) {

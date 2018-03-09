@@ -1,7 +1,7 @@
 /* @flow */
 
 import { warn } from './debug'
-import { observe, observerState } from '../observer/index'
+import { observe, toggleObserving, shouldObserve } from '../observer/index'
 import {
   hasOwn,
   isObject,
@@ -40,10 +40,10 @@ export function validateProp (
     value = getPropDefaultValue(vm, prop, key)
     // since the default value is a fresh copy,
     // make sure to observe it.
-    const prevShouldConvert = observerState.shouldConvert
-    observerState.shouldConvert = true
+    const prevShouldObserve = shouldObserve
+    toggleObserving(true)
     observe(value)
-    observerState.shouldConvert = prevShouldConvert
+    toggleObserving(prevShouldObserve)
   }
   if (
     process.env.NODE_ENV !== 'production' &&
