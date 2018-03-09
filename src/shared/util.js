@@ -180,6 +180,8 @@ export const hyphenate = cached((str: string): string => {
  * code that was able to run in PhantomJS 1.x, so this must be kept for
  * backwards compatibility.
  */
+
+/* istanbul ignore next */
 function polyfillBind (fn: Function, ctx: Object): Function {
   function boundFn (a) {
     const l = arguments.length
