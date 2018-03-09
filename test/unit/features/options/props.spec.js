@@ -512,4 +512,21 @@ describe('Options props', () => {
       expect(`"${attr}" is a reserved attribute`).toHaveBeenWarned()
     })
   })
+
+  it('should consider order when casting [Boolean, String] multi-type props', () => {
+    const vm = new Vue({
+      template: '<test ref="test" booleanOrString stringOrBoolean />',
+      components: {
+        test: {
+          template: '<div></div>',
+          props: {
+            booleanOrString: [Boolean, String],
+            stringOrBoolean: [String, Boolean]
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$refs.test.$props.booleanOrString).toBe(true)
+    expect(vm.$refs.test.$props.stringOrBoolean).toBe('')
+  })
 })
