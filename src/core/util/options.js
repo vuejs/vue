@@ -1,6 +1,7 @@
 /* @flow */
 
 import config from '../config'
+import Vue from 'core/instance'
 import { warn } from './debug'
 import { nativeWatch } from './env'
 import { set } from '../observer/index'
@@ -17,7 +18,8 @@ import {
   toRawType,
   capitalize,
   isBuiltInTag,
-  isPlainObject
+  isPlainObject,
+  isPrimitive
 } from 'shared/util'
 
 /**
@@ -378,8 +380,11 @@ export function mergeOptions (
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)
-  const extendsFrom = child.extends
+  let extendsFrom = child.extends
   if (extendsFrom) {
+    if (isPrimitive(extendsFrom)) {
+      extendsFrom = Vue.component(extendsFrom)
+    }
     parent = mergeOptions(parent, extendsFrom, vm)
   }
   if (child.mixins) {
