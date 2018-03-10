@@ -1,5 +1,5 @@
 /* @flow */
-declare var document: WeexDocument;
+declare var document: WeexDocument
 
 import { warn } from 'core/util/index'
 
@@ -7,7 +7,7 @@ export const RECYCLE_LIST_MARKER = '@inRecycleList'
 
 // Register the component hook to weex native render engine.
 // The hook will be triggered by native, not javascript.
-export function registerComponentHook (
+export function registerComponentHook(
   componentId: string,
   type: string, // hook type, could be "lifecycle" or "instance"
   hook: string, // hook name
@@ -24,7 +24,7 @@ export function registerComponentHook (
 }
 
 // Updates the state of the component to weex native render engine.
-export function updateComponentData (
+export function updateComponentData(
   componentId: string,
   newData: Object | void,
   callback?: Function

@@ -29,10 +29,10 @@ const setProp = (el, name, val) => {
 const vendorNames = ['Webkit', 'Moz', 'ms']
 
 let emptyStyle
-const normalize = cached(function (prop) {
+const normalize = cached(function(prop) {
   emptyStyle = emptyStyle || document.createElement('div').style
   prop = camelize(prop)
-  if (prop !== 'filter' && (prop in emptyStyle)) {
+  if (prop !== 'filter' && prop in emptyStyle) {
     return prop
   }
   const capName = prop.charAt(0).toUpperCase() + prop.slice(1)
@@ -44,12 +44,15 @@ const normalize = cached(function (prop) {
   }
 })
 
-function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+function updateStyle(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const data = vnode.data
   const oldData = oldVnode.data
 
-  if (isUndef(data.staticStyle) && isUndef(data.style) &&
-    isUndef(oldData.staticStyle) && isUndef(oldData.style)
+  if (
+    isUndef(data.staticStyle) &&
+    isUndef(data.style) &&
+    isUndef(oldData.staticStyle) &&
+    isUndef(oldData.style)
   ) {
     return
   }
@@ -67,9 +70,7 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   // store normalized style under a different key for next diff
   // make sure to clone it if it's reactive, since the user likely wants
   // to mutate it.
-  vnode.data.normalizedStyle = isDef(style.__ob__)
-    ? extend({}, style)
-    : style
+  vnode.data.normalizedStyle = isDef(style.__ob__) ? extend({}, style) : style
 
   const newStyle = getStyle(vnode, true)
 

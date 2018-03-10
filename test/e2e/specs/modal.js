@@ -1,7 +1,7 @@
 module.exports = {
-  'modal': function (browser) {
+  modal: function(browser) {
     browser
-    .url('http://localhost:8080/examples/modal/')
+      .url('http://localhost:8080/examples/modal/')
       .waitForElementVisible('#app', 1000)
       .assert.elementNotPresent('.modal-mask')
       .click('#show-modal')

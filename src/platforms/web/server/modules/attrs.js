@@ -2,11 +2,7 @@
 
 import { escape } from '../util'
 
-import {
-  isDef,
-  isUndef,
-  extend
-} from 'shared/util'
+import { isDef, isUndef, extend } from 'shared/util'
 
 import {
   isBooleanAttr,
@@ -14,7 +10,7 @@ import {
   isFalsyAttrValue
 } from 'web/util/attrs'
 
-export default function renderAttrs (node: VNodeWithData): string {
+export default function renderAttrs(node: VNodeWithData): string {
   let attrs = node.data.attrs
   let res = ''
 
@@ -43,13 +39,15 @@ export default function renderAttrs (node: VNodeWithData): string {
   return res
 }
 
-export function renderAttr (key: string, value: string): string {
+export function renderAttr(key: string, value: string): string {
   if (isBooleanAttr(key)) {
     if (!isFalsyAttrValue(value)) {
       return ` ${key}="${key}"`
     }
   } else if (isEnumeratedAttr(key)) {
-    return ` ${key}="${isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true'}"`
+    return ` ${key}="${
+      isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true'
+    }"`
   } else if (!isFalsyAttrValue(value)) {
     return ` ${key}="${escape(String(value))}"`
   }

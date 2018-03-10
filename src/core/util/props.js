@@ -16,9 +16,9 @@ type PropOptions = {
   default: any,
   required: ?boolean,
   validator: ?Function
-};
+}
 
-export function validateProp (
+export function validateProp(
   key: string,
   propOptions: Object,
   propsData: Object,
@@ -54,7 +54,7 @@ export function validateProp (
   if (
     process.env.NODE_ENV !== 'production' &&
     // skip validation for weex recycle-list child component props
-    !(__WEEX__ && isObject(value) && ('@binding' in value))
+    !(__WEEX__ && isObject(value) && '@binding' in value)
   ) {
     assertProp(prop, key, value, vm, absent)
   }
@@ -64,7 +64,11 @@ export function validateProp (
 /**
  * Get the default value of a prop.
  */
-function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): any {
+function getPropDefaultValue(
+  vm: ?Component,
+  prop: PropOptions,
+  key: string
+): any {
   // no default, return undefined
   if (!hasOwn(prop, 'default')) {
     return undefined
@@ -73,15 +77,19 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
   // warn against non-factory defaults for Object & Array
   if (process.env.NODE_ENV !== 'production' && isObject(def)) {
     warn(
-      'Invalid default value for prop "' + key + '": ' +
-      'Props with type Object/Array must use a factory function ' +
-      'to return the default value.',
+      'Invalid default value for prop "' +
+        key +
+        '": ' +
+        'Props with type Object/Array must use a factory function ' +
+        'to return the default value.',
       vm
     )
   }
   // the raw prop value was also undefined from previous render,
   // return previous default value to avoid unnecessary watcher trigger
-  if (vm && vm.$options.propsData &&
+  if (
+    vm &&
+    vm.$options.propsData &&
     vm.$options.propsData[key] === undefined &&
     vm._props[key] !== undefined
   ) {
@@ -97,7 +105,7 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
 /**
  * Assert whether a prop is valid.
  */
-function assertProp (
+function assertProp(
   prop: PropOptions,
   name: string,
   value: any,
@@ -105,10 +113,7 @@ function assertProp (
   absent: boolean
 ) {
   if (prop.required && absent) {
-    warn(
-      'Missing required prop: "' + name + '"',
-      vm
-    )
+    warn('Missing required prop: "' + name + '"', vm)
     return
   }
   if (value == null && !prop.required) {
@@ -130,8 +135,8 @@ function assertProp (
   if (!valid) {
     warn(
       `Invalid prop: type check failed for prop "${name}".` +
-      ` Expected ${expectedTypes.map(capitalize).join(', ')}` +
-      `, got ${toRawType(value)}.`,
+        ` Expected ${expectedTypes.map(capitalize).join(', ')}` +
+        `, got ${toRawType(value)}.`,
       vm
     )
     return
@@ -149,9 +154,12 @@ function assertProp (
 
 const simpleCheckRE = /^(String|Number|Boolean|Function|Symbol)$/
 
-function assertType (value: any, type: Function): {
-  valid: boolean;
-  expectedType: string;
+function assertType(
+  value: any,
+  type: Function
+): {
+  valid: boolean,
+  expectedType: string
 } {
   let valid
   const expectedType = getType(type)
@@ -180,16 +188,16 @@ function assertType (value: any, type: Function): {
  * because a simple equality check will fail when running
  * across different vms / iframes.
  */
-function getType (fn) {
+function getType(fn) {
   const match = fn && fn.toString().match(/^\s*function (\w+)/)
   return match ? match[1] : ''
 }
 
-function isSameType (a, b) {
+function isSameType(a, b) {
   return getType(a) === getType(b)
 }
 
-function getTypeIndex (type, expectedTypes): number {
+function getTypeIndex(type, expectedTypes): number {
   if (!Array.isArray(expectedTypes)) {
     return isSameType(expectedTypes, type) ? 0 : -1
   }

@@ -30,9 +30,7 @@ var webpackConfig = {
 // shared config for all unit tests
 module.exports = {
   frameworks: ['jasmine'],
-  files: [
-    './index.js'
-  ],
+  files: ['./index.js'],
   preprocessors: {
     './index.js': ['webpack', 'sourcemap']
   },

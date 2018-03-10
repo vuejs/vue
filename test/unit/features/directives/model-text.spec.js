@@ -80,7 +80,7 @@ describe('Directive v-model text', () => {
     expect(vm.test).toBe('what')
   })
 
-  it('.number focus and typing', (done) => {
+  it('.number focus and typing', done => {
     const vm = new Vue({
       data: {
         test: 0,
@@ -88,8 +88,8 @@ describe('Directive v-model text', () => {
       },
       template:
         '<div>' +
-          '<input ref="input" v-model.number="test">{{ update }}' +
-          '<input ref="blur">' +
+        '<input ref="input" v-model.number="test">{{ update }}' +
+        '<input ref="blur">' +
         '</div>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -103,12 +103,14 @@ describe('Directive v-model text', () => {
       expect(vm.$refs.input.value).toBe('1.0')
       vm.$refs.blur.focus()
       vm.update++
-    }).then(() => {
-      expect(vm.$refs.input.value).toBe('1')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$refs.input.value).toBe('1')
+      })
+      .then(done)
   })
 
-  it('.trim focus and typing', (done) => {
+  it('.trim focus and typing', done => {
     const vm = new Vue({
       data: {
         test: 'abc',
@@ -116,8 +118,8 @@ describe('Directive v-model text', () => {
       },
       template:
         '<div>' +
-          '<input ref="input" v-model.trim="test" type="text">{{ update }}' +
-          '<input ref="blur"/>' +
+        '<input ref="input" v-model.trim="test" type="text">{{ update }}' +
+        '<input ref="blur"/>' +
         '</div>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -130,12 +132,14 @@ describe('Directive v-model text', () => {
       expect(vm.$refs.input.value).toBe(' abc ')
       vm.$refs.blur.focus()
       vm.update++
-    }).then(() => {
-      expect(vm.$refs.input.value).toBe('abc')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$refs.input.value).toBe('abc')
+      })
+      .then(done)
   })
 
-  it('multiple inputs', (done) => {
+  it('multiple inputs', done => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       data: {
@@ -156,15 +160,15 @@ describe('Directive v-model text', () => {
       },
       template:
         '<div>' +
-          '<div v-for="(inputGroup, idx) in inputList">' +
-            '<div>' +
-              '<span v-for="(item, index) in inputGroup.data">' +
-                '<input v-bind:name="item" type="text" v-model.number="selections[idx][index]" v-bind:id="idx+\'-\'+index"/>' +
-                '<label>{{item}}</label>' +
-              '</span>' +
-            '</div>' +
-          '</div>' +
-          '<span ref="rs">{{selections}}</span>' +
+        '<div v-for="(inputGroup, idx) in inputList">' +
+        '<div>' +
+        '<span v-for="(item, index) in inputGroup.data">' +
+        '<input v-bind:name="item" type="text" v-model.number="selections[idx][index]" v-bind:id="idx+\'-\'+index"/>' +
+        '<label>{{item}}</label>' +
+        '</span>' +
+        '</div>' +
+        '</div>' +
+        '<span ref="rs">{{selections}}</span>' +
         '</div>'
     }).$mount()
     var inputs = vm.$el.getElementsByTagName('input')
@@ -198,7 +202,7 @@ describe('Directive v-model text', () => {
     })
   }
 
-  it('compositionevents', function (done) {
+  it('compositionevents', function(done) {
     const vm = new Vue({
       data: {
         test: 'foo'
@@ -225,7 +229,9 @@ describe('Directive v-model text', () => {
       },
       template: '<div v-model="test"></div>'
     }).$mount()
-    expect('<div v-model="test">: v-model is not supported on this element type').toHaveBeenWarned()
+    expect(
+      '<div v-model="test">: v-model is not supported on this element type'
+    ).toHaveBeenWarned()
   })
 
   // #3468
@@ -237,7 +243,7 @@ describe('Directive v-model text', () => {
       },
       template: '<input v-model="a" @input="onInput">',
       methods: {
-        onInput (e) {
+        onInput(e) {
           spy(e.target.value)
         }
       }
@@ -260,7 +266,9 @@ describe('Directive v-model text', () => {
         </div>
       `
     }).$mount()
-    expect('You are binding v-model directly to a v-for iteration alias').toHaveBeenWarned()
+    expect(
+      'You are binding v-model directly to a v-for iteration alias'
+    ).toHaveBeenWarned()
   })
 
   it('warn if v-model and v-bind:value conflict', () => {
@@ -324,7 +332,7 @@ describe('Directive v-model text', () => {
         },
         template: '<input v-model="a" @input="onInput">',
         methods: {
-          onInput (e) {
+          onInput(e) {
             spy(e.target.value)
           }
         }
@@ -345,7 +353,7 @@ describe('Directive v-model text', () => {
         },
         template: '<input v-model="a" @input="onInput">',
         methods: {
-          onInput (e) {
+          onInput(e) {
             spy(e.target.value)
           }
         }
@@ -395,7 +403,7 @@ describe('Directive v-model text', () => {
           </div>
         `,
         methods: {
-          onInput (e) {
+          onInput(e) {
             this.foo = true
           }
         }
@@ -431,9 +439,11 @@ describe('Directive v-model text', () => {
       waitForUpdate(() => {
         expect(vm.$el.value).toBe('b')
         vm.foo = {}
-      }).then(() => {
-        expect(vm.$el.value).toBe('')
-      }).then(done)
+      })
+        .then(() => {
+          expect(vm.$el.value).toBe('')
+        })
+        .then(done)
     })
   }
 

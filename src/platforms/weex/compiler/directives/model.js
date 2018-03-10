@@ -3,7 +3,7 @@
 import { addHandler, addAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
 
-export default function model (
+export default function model(
   el: ASTElement,
   dir: ASTDirective,
   _warn: Function
@@ -15,7 +15,7 @@ export default function model (
   }
 }
 
-function genDefaultModel (
+function genDefaultModel(
   el: ASTElement,
   value: string,
   modifiers: ?ASTModifiers

@@ -4,11 +4,11 @@ import { noop, extend } from 'shared/util'
 import { warn as baseWarn, tip } from 'core/util/debug'
 
 type CompiledFunctionResult = {
-  render: Function;
-  staticRenderFns: Array<Function>;
-};
+  render: Function,
+  staticRenderFns: Array<Function>
+}
 
-function createFunction (code, errors) {
+function createFunction(code, errors) {
   try {
     return new Function(code)
   } catch (err) {
@@ -17,10 +17,10 @@ function createFunction (code, errors) {
   }
 }
 
-export function createCompileToFunctionFn (compile: Function): Function {
+export function createCompileToFunctionFn(compile: Function): Function {
   const cache = Object.create(null)
 
-  return function compileToFunctions (
+  return function compileToFunctions(
     template: string,
     options?: CompilerOptions,
     vm?: Component
@@ -38,10 +38,10 @@ export function createCompileToFunctionFn (compile: Function): Function {
         if (e.toString().match(/unsafe-eval|CSP/)) {
           warn(
             'It seems you are using the standalone build of Vue.js in an ' +
-            'environment with Content Security Policy that prohibits unsafe-eval. ' +
-            'The template compiler cannot work in this environment. Consider ' +
-            'relaxing the policy to allow unsafe-eval or pre-compiling your ' +
-            'templates into render functions.'
+              'environment with Content Security Policy that prohibits unsafe-eval. ' +
+              'The template compiler cannot work in this environment. Consider ' +
+              'relaxing the policy to allow unsafe-eval or pre-compiling your ' +
+              'templates into render functions.'
           )
         }
       }
@@ -63,7 +63,8 @@ export function createCompileToFunctionFn (compile: Function): Function {
       if (compiled.errors && compiled.errors.length) {
         warn(
           `Error compiling template:\n\n${template}\n\n` +
-          compiled.errors.map(e => `- ${e}`).join('\n') + '\n',
+            compiled.errors.map(e => `- ${e}`).join('\n') +
+            '\n',
           vm
         )
       }
@@ -88,7 +89,9 @@ export function createCompileToFunctionFn (compile: Function): Function {
       if ((!compiled.errors || !compiled.errors.length) && fnGenErrors.length) {
         warn(
           `Failed to generate render function:\n\n` +
-          fnGenErrors.map(({ err, code }) => `${err.toString()} in\n\n${code}\n`).join('\n'),
+            fnGenErrors
+              .map(({ err, code }) => `${err.toString()} in\n\n${code}\n`)
+              .join('\n'),
           vm
         )
       }

@@ -23,10 +23,12 @@ describe('Options props', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('baz')
       vm.$refs.child.b = 'qux'
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('qux')
-      expect('Avoid mutating a prop directly').toHaveBeenWarned()
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('qux')
+        expect('Avoid mutating a prop directly').toHaveBeenWarned()
+      })
+      .then(done)
   })
 
   it('object syntax', done => {
@@ -47,10 +49,12 @@ describe('Options props', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('baz')
       vm.$refs.child.b = 'qux'
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('qux')
-      expect('Avoid mutating a prop directly').toHaveBeenWarned()
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('qux')
+        expect('Avoid mutating a prop directly').toHaveBeenWarned()
+      })
+      .then(done)
   })
 
   it('warn mixed syntax', () => {
@@ -129,7 +133,9 @@ describe('Options props', () => {
         a: undefined
       }
     })
-    expect('Props with type Object/Array must use a factory function').toHaveBeenWarned()
+    expect(
+      'Props with type Object/Array must use a factory function'
+    ).toHaveBeenWarned()
   })
 
   it('warn missing required', () => {
@@ -137,7 +143,7 @@ describe('Options props', () => {
       template: '<test></test>',
       components: {
         test: {
-          props: { a: { required: true }},
+          props: { a: { required: true } },
           template: '<div>{{a}}</div>'
         }
       }
@@ -146,7 +152,7 @@ describe('Options props', () => {
   })
 
   describe('assertions', () => {
-    function makeInstance (value, type, validator, required) {
+    function makeInstance(value, type, validator, required) {
       return new Vue({
         template: '<test :test="val"></test>',
         data: {
@@ -230,7 +236,7 @@ describe('Options props', () => {
     }
 
     it('custom constructor', () => {
-      function Class () {}
+      function Class() {}
       makeInstance(new Class(), Class)
       expect(console.error.calls.count()).toBe(0)
       makeInstance({}, Class)
@@ -318,7 +324,7 @@ describe('Options props', () => {
       components: {
         test: {
           template: '<div></div>',
-          data: function () {
+          data: function() {
             return { a: 123 }
           },
           props: {
@@ -340,9 +346,7 @@ describe('Options props', () => {
             a: null
           },
           methods: {
-            a () {
-
-            }
+            a() {}
           }
         }
       }
@@ -370,7 +374,7 @@ describe('Options props', () => {
     expect(vm.$refs.child.propC).toBe(false)
   })
 
-  it('should respect default value of a Boolean prop', function () {
+  it('should respect default value of a Boolean prop', function() {
     const vm = new Vue({
       template: '<test></test>',
       components: {
@@ -420,7 +424,7 @@ describe('Options props', () => {
     }).then(done)
   })
 
-  it('should not warn for non-required, absent prop', function () {
+  it('should not warn for non-required, absent prop', function() {
     new Vue({
       template: '<test></test>',
       components: {
@@ -491,16 +495,21 @@ describe('Options props', () => {
     waitForUpdate(() => {
       expect(spy).not.toHaveBeenCalled()
       vm.b = {}
-    }).then(() => {
-      expect(spy.calls.count()).toBe(1)
-    }).then(() => {
-      vm.b = undefined
-    }).then(() => {
-      expect(spy.calls.count()).toBe(2)
-      vm.a++
-    }).then(() => {
-      expect(spy.calls.count()).toBe(2)
-    }).then(done)
+    })
+      .then(() => {
+        expect(spy.calls.count()).toBe(1)
+      })
+      .then(() => {
+        vm.b = undefined
+      })
+      .then(() => {
+        expect(spy.calls.count()).toBe(2)
+        vm.a++
+      })
+      .then(() => {
+        expect(spy.calls.count()).toBe(2)
+      })
+      .then(done)
   })
 
   it('warn reserved props', () => {

@@ -14,32 +14,35 @@ import { isTrue, isUndef } from 'shared/util'
 import { createWriteFunction } from './write'
 
 export default class RenderStream extends stream.Readable {
-  buffer: string;
-  render: (write: Function, done: Function) => void;
-  expectedSize: number;
-  write: Function;
-  next: Function;
-  end: Function;
-  done: boolean;
+  buffer: string
+  render: (write: Function, done: Function) => void
+  expectedSize: number
+  write: Function
+  next: Function
+  end: Function
+  done: boolean
 
-  constructor (render: Function) {
+  constructor(render: Function) {
     super()
     this.buffer = ''
     this.render = render
     this.expectedSize = 0
 
-    this.write = createWriteFunction((text, next) => {
-      const n = this.expectedSize
-      this.buffer += text
-      if (this.buffer.length >= n) {
-        this.next = next
-        this.pushBySize(n)
-        return true // we will decide when to call next
+    this.write = createWriteFunction(
+      (text, next) => {
+        const n = this.expectedSize
+        this.buffer += text
+        if (this.buffer.length >= n) {
+          this.next = next
+          this.pushBySize(n)
+          return true // we will decide when to call next
+        }
+        return false
+      },
+      err => {
+        this.emit('error', err)
       }
-      return false
-    }, err => {
-      this.emit('error', err)
-    })
+    )
 
     this.end = () => {
       // the rendering is finished; we should push out the last of the buffer.
@@ -48,13 +51,13 @@ export default class RenderStream extends stream.Readable {
     }
   }
 
-  pushBySize (n: number) {
+  pushBySize(n: number) {
     const bufferToPush = this.buffer.substring(0, n)
     this.buffer = this.buffer.substring(n)
     this.push(bufferToPush)
   }
 
-  tryRender () {
+  tryRender() {
     try {
       this.render(this.write, this.end)
     } catch (e) {
@@ -62,7 +65,7 @@ export default class RenderStream extends stream.Readable {
     }
   }
 
-  tryNext () {
+  tryNext() {
     try {
       this.next()
     } catch (e) {
@@ -70,7 +73,7 @@ export default class RenderStream extends stream.Readable {
     }
   }
 
-  _read (n: number) {
+  _read(n: number) {
     this.expectedSize = n
     // it's possible that the last chunk added bumped the buffer up to > 2 * n,
     // which means we will need to go through multiple read calls to drain it

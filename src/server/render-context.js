@@ -2,41 +2,44 @@
 
 import { isUndef } from 'shared/util'
 
-type RenderState = {
-  type: 'Element';
-  rendered: number;
-  total: number;
-  endTag: string;
-  children: Array<VNode>;
-} | {
-  type: 'Component';
-  prevActive: Component;
-} | {
-  type: 'ComponentWithCache';
-  buffer: Array<string>;
-  bufferIndex: number;
-  componentBuffer: Array<Set<Class<Component>>>;
-  key: string;
-};
+type RenderState =
+  | {
+      type: 'Element',
+      rendered: number,
+      total: number,
+      endTag: string,
+      children: Array<VNode>
+    }
+  | {
+      type: 'Component',
+      prevActive: Component
+    }
+  | {
+      type: 'ComponentWithCache',
+      buffer: Array<string>,
+      bufferIndex: number,
+      componentBuffer: Array<Set<Class<Component>>>,
+      key: string
+    }
 
 export class RenderContext {
-  userContext: ?Object;
-  activeInstance: Component;
-  renderStates: Array<RenderState>;
-  write: (text: string, next: Function) => void;
-  renderNode: (node: VNode, isRoot: boolean, context: RenderContext) => void;
-  next: () => void;
-  done: (err: ?Error) => void;
+  userContext: ?Object
+  activeInstance: Component
+  renderStates: Array<RenderState>
+  write: (text: string, next: Function) => void
+  renderNode: (node: VNode, isRoot: boolean, context: RenderContext) => void
+  next: () => void
+  done: (err: ?Error) => void
 
-  modules: Array<(node: VNode) => ?string>;
-  directives: Object;
-  isUnaryTag: (tag: string) => boolean;
+  modules: Array<(node: VNode) => ?string>
+  directives: Object
+  isUnaryTag: (tag: string) => boolean
 
-  cache: any;
-  get: ?(key: string, cb: Function) => void;
-  has: ?(key: string, cb: Function) => void;
+  cache: any
+  get: ?(key: string, cb: Function) => void
+  has: ?(key: string, cb: Function) => void
 
-  constructor (options: Object) {
+  constructor(options: Object) {
     this.userContext = options.userContext
     this.activeInstance = options.activeInstance
     this.renderStates = []
@@ -60,7 +63,7 @@ export class RenderContext {
     this.next = this.next.bind(this)
   }
 
-  next () {
+  next() {
     const lastState = this.renderStates[this.renderStates.length - 1]
     if (isUndef(lastState)) {
       return this.done()
@@ -108,7 +111,7 @@ export class RenderContext {
   }
 }
 
-function normalizeAsync (cache, method) {
+function normalizeAsync(cache, method) {
   const fn = cache[method]
   if (isUndef(fn)) {
     return

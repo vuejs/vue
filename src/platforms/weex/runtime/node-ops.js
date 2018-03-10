@@ -1,27 +1,30 @@
 /* @flow */
-declare var document: WeexDocument;
+declare var document: WeexDocument
 
 import TextNode from 'weex/runtime/text-node'
 
 export const namespaceMap = {}
 
-export function createElement (tagName: string): WeexElement {
+export function createElement(tagName: string): WeexElement {
   return document.createElement(tagName)
 }
 
-export function createElementNS (namespace: string, tagName: string): WeexElement {
+export function createElementNS(
+  namespace: string,
+  tagName: string
+): WeexElement {
   return document.createElement(namespace + ':' + tagName)
 }
 
-export function createTextNode (text: string) {
+export function createTextNode(text: string) {
   return new TextNode(text)
 }
 
-export function createComment (text: string) {
+export function createComment(text: string) {
   return document.createComment(text)
 }
 
-export function insertBefore (
+export function insertBefore(
   node: WeexElement,
   target: WeexElement,
   before: WeexElement
@@ -40,7 +43,7 @@ export function insertBefore (
   node.insertBefore(target, before)
 }
 
-export function removeChild (node: WeexElement, child: WeexElement) {
+export function removeChild(node: WeexElement, child: WeexElement) {
   if (child.nodeType === 3) {
     node.setAttr('value', '')
     return
@@ -48,7 +51,7 @@ export function removeChild (node: WeexElement, child: WeexElement) {
   node.removeChild(child)
 }
 
-export function appendChild (node: WeexElement, child: WeexElement) {
+export function appendChild(node: WeexElement, child: WeexElement) {
   if (child.nodeType === 3) {
     if (node.type === 'text') {
       node.setAttr('value', child.text)
@@ -64,28 +67,28 @@ export function appendChild (node: WeexElement, child: WeexElement) {
   node.appendChild(child)
 }
 
-export function parentNode (node: WeexElement): WeexElement | void {
+export function parentNode(node: WeexElement): WeexElement | void {
   return node.parentNode
 }
 
-export function nextSibling (node: WeexElement): WeexElement | void {
+export function nextSibling(node: WeexElement): WeexElement | void {
   return node.nextSibling
 }
 
-export function tagName (node: WeexElement): string {
+export function tagName(node: WeexElement): string {
   return node.type
 }
 
-export function setTextContent (node: WeexElement, text: string) {
+export function setTextContent(node: WeexElement, text: string) {
   if (node.parentNode) {
     node.parentNode.setAttr('value', text)
   }
 }
 
-export function setAttribute (node: WeexElement, key: string, val: any) {
+export function setAttribute(node: WeexElement, key: string, val: any) {
   node.setAttr(key, val)
 }
 
-export function setStyleScope (node: WeexElement, scopeId: string) {
+export function setStyleScope(node: WeexElement, scopeId: string) {
   node.setAttr('@styleScope', scopeId)
 }

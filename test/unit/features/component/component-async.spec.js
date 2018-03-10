@@ -6,7 +6,7 @@ describe('Component async', () => {
     const vm = new Vue({
       template: '<div><test></test></div>',
       components: {
-        test: (resolve) => {
+        test: resolve => {
           setTimeout(() => {
             resolve({
               template: '<div>hi</div>'
@@ -19,7 +19,7 @@ describe('Component async', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<!---->')
     expect(vm.$children.length).toBe(0)
-    function next () {
+    function next() {
       expect(vm.$el.innerHTML).toBe('<div>hi</div>')
       expect(vm.$children.length).toBe(1)
       done()
@@ -30,7 +30,7 @@ describe('Component async', () => {
     const vm = new Vue({
       template: '<div><test></test></div>',
       components: {
-        test: (resolve) => {
+        test: resolve => {
           setTimeout(() => {
             resolve({
               __esModule: true,
@@ -46,7 +46,7 @@ describe('Component async', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<!---->')
     expect(vm.$children.length).toBe(0)
-    function next () {
+    function next() {
       expect(vm.$el.innerHTML).toBe('<div>hi</div>')
       expect(vm.$children.length).toBe(1)
       done()
@@ -70,7 +70,7 @@ describe('Component async', () => {
     }).$mount()
     expect(vm.$el.nodeType).toBe(8)
     expect(vm.$children.length).toBe(0)
-    function next () {
+    function next() {
       expect(vm.$el.nodeType).toBe(1)
       expect(vm.$el.outerHTML).toBe('<div>hi</div>')
       expect(vm.$children.length).toBe(1)
@@ -104,7 +104,7 @@ describe('Component async', () => {
       }
     }).$mount()
     var aCalled = false
-    function step1 () {
+    function step1() {
       // ensure A is resolved only once
       expect(aCalled).toBe(false)
       aCalled = true
@@ -112,11 +112,11 @@ describe('Component async', () => {
       expect(vm.$el.textContent).toBe('A')
       vm.view = 'view-b'
     }
-    function step2 () {
+    function step2() {
       expect(vm.$el.tagName).toBe('P')
       expect(vm.$el.textContent).toBe('B')
       vm.view = 'view-a'
-      waitForUpdate(function () {
+      waitForUpdate(function() {
         expect(vm.$el.tagName).toBe('DIV')
         expect(vm.$el.textContent).toBe('A')
       }).then(done)
@@ -153,7 +153,7 @@ describe('Component async', () => {
         }
       }
     }).$mount()
-    function next () {
+    function next() {
       expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
       done()
     }
@@ -180,7 +180,7 @@ describe('Component async', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<!---->')
     expect(vm.$children.length).toBe(0)
-    function next () {
+    function next() {
       expect(vm.$el.innerHTML).toBe('<div>hi</div>')
       expect(vm.$children.length).toBe(1)
       done()
@@ -218,7 +218,7 @@ describe('Component async', () => {
         })
       }, 1)
 
-      function next () {
+      function next() {
         expect(loadingAsserted).toBe(true)
         expect(vm.$el.textContent).toBe('hi')
         done()
@@ -247,7 +247,7 @@ describe('Component async', () => {
 
       expect(vm.$el.textContent).toBe('loading')
 
-      function next () {
+      function next() {
         expect(vm.$el.textContent).toBe('hi')
         done()
       }
@@ -276,7 +276,7 @@ describe('Component async', () => {
 
       expect(vm.$el.textContent).toBe('loading')
 
-      function next () {
+      function next() {
         expect(`Failed to resolve async component`).toHaveBeenWarned()
         expect(vm.$el.textContent).toBe('error')
         done()
@@ -314,7 +314,7 @@ describe('Component async', () => {
         })
       }, 1)
 
-      function next () {
+      function next() {
         expect(vm.$el.textContent).toBe('error') // late resolve ignored
         done()
       }
@@ -352,7 +352,7 @@ describe('Component async', () => {
         components: {
           one: {
             template: `<div>one</div>`,
-            mounted () {
+            mounted() {
               resolveTwo()
             }
           },

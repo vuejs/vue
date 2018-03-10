@@ -29,7 +29,7 @@ export const baseOptions: WeexCompilerOptions = {
 
 const compiler = createCompiler(baseOptions)
 
-export function compile (
+export function compile(
   template: string,
   options?: WeexCompilerOptions
 ): WeexCompiledResult {

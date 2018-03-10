@@ -24,16 +24,20 @@ describe('Directive v-model component', () => {
       const input = vm.$el.querySelector('input')
       input.value = 'world'
       triggerEvent(input, 'input')
-    }).then(() => {
-      expect(vm.msg).toEqual('world')
-      expect(vm.$el.querySelector('p').textContent).toEqual('world')
-      vm.msg = 'changed'
-    }).then(() => {
-      expect(vm.$el.querySelector('p').textContent).toEqual('changed')
-      expect(vm.$el.querySelector('input').value).toEqual('changed')
-    }).then(() => {
-      document.body.removeChild(vm.$el)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.msg).toEqual('world')
+        expect(vm.$el.querySelector('p').textContent).toEqual('world')
+        vm.msg = 'changed'
+      })
+      .then(() => {
+        expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+        expect(vm.$el.querySelector('input').value).toEqual('changed')
+      })
+      .then(() => {
+        document.body.removeChild(vm.$el)
+      })
+      .then(done)
   })
 
   it('should work with native tags with "is"', done => {
@@ -59,16 +63,20 @@ describe('Directive v-model component', () => {
       const input = vm.$el.querySelector('input')
       input.value = 'world'
       triggerEvent(input, 'input')
-    }).then(() => {
-      expect(vm.msg).toEqual('world')
-      expect(vm.$el.querySelector('p').textContent).toEqual('world')
-      vm.msg = 'changed'
-    }).then(() => {
-      expect(vm.$el.querySelector('p').textContent).toEqual('changed')
-      expect(vm.$el.querySelector('input').value).toEqual('changed')
-    }).then(() => {
-      document.body.removeChild(vm.$el)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.msg).toEqual('world')
+        expect(vm.$el.querySelector('p').textContent).toEqual('world')
+        vm.msg = 'changed'
+      })
+      .then(() => {
+        expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+        expect(vm.$el.querySelector('input').value).toEqual('changed')
+      })
+      .then(() => {
+        document.body.removeChild(vm.$el)
+      })
+      .then(done)
   })
 
   it('should support customization via model option', done => {
@@ -102,17 +110,21 @@ describe('Directive v-model component', () => {
       const input = vm.$el.querySelector('input')
       input.value = 'world'
       triggerEvent(input, 'input')
-    }).then(() => {
-      expect(vm.msg).toEqual('world')
-      expect(vm.$el.querySelector('p').textContent).toEqual('world')
-      expect(spy).toHaveBeenCalledWith('world')
-      vm.msg = 'changed'
-    }).then(() => {
-      expect(vm.$el.querySelector('p').textContent).toEqual('changed')
-      expect(vm.$el.querySelector('input').value).toEqual('changed')
-    }).then(() => {
-      document.body.removeChild(vm.$el)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.msg).toEqual('world')
+        expect(vm.$el.querySelector('p').textContent).toEqual('world')
+        expect(spy).toHaveBeenCalledWith('world')
+        vm.msg = 'changed'
+      })
+      .then(() => {
+        expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+        expect(vm.$el.querySelector('input').value).toEqual('changed')
+      })
+      .then(() => {
+        document.body.removeChild(vm.$el)
+      })
+      .then(done)
   })
 
   it('modifier: .number', () => {

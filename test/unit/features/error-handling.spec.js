@@ -38,13 +38,14 @@ describe('Error handling', () => {
   ].forEach(([type, description]) => {
     it(`should recover from errors in ${type} hook`, done => {
       const vm = createTestInstance(components[type])
-      assertBothInstancesActive(vm).then(() => {
-        expect(`Error in ${description}`).toHaveBeenWarned()
-        expect(`Error: ${type}`).toHaveBeenWarned()
-      }).then(done)
+      assertBothInstancesActive(vm)
+        .then(() => {
+          expect(`Error in ${description}`).toHaveBeenWarned()
+          expect(`Error: ${type}`).toHaveBeenWarned()
+        })
+        .then(done)
     })
   })
-
   ;[
     ['beforeDestroy', 'beforeDestroy hook'],
     ['destroyed', 'destroyed hook'],
@@ -56,9 +57,11 @@ describe('Error handling', () => {
       waitForUpdate(() => {
         expect(`Error in ${description}`).toHaveBeenWarned()
         expect(`Error: ${type}`).toHaveBeenWarned()
-      }).thenWaitFor(next => {
-        assertRootInstanceActive(vm).end(next)
-      }).then(done)
+      })
+        .thenWaitFor(next => {
+          assertRootInstanceActive(vm).end(next)
+        })
+        .then(done)
     })
   })
 
@@ -67,7 +70,7 @@ describe('Error handling', () => {
     vm.n++
     waitForUpdate(() => {
       expect(`Error in getter for watcher`).toHaveBeenWarned()
-      function getErrorMsg () {
+      function getErrorMsg() {
         try {
           this.a.b.c
         } catch (e) {
@@ -76,9 +79,11 @@ describe('Error handling', () => {
       }
       const msg = getErrorMsg.call(vm)
       expect(msg).toHaveBeenWarned()
-    }).thenWaitFor(next => {
-      assertBothInstancesActive(vm).end(next)
-    }).then(done)
+    })
+      .thenWaitFor(next => {
+        assertBothInstancesActive(vm).end(next)
+      })
+      .then(done)
   })
 
   it('should recover from errors in user watcher callback', done => {
@@ -87,13 +92,15 @@ describe('Error handling', () => {
     waitForUpdate(() => {
       expect(`Error in callback for watcher "n"`).toHaveBeenWarned()
       expect(`Error: userWatcherCallback`).toHaveBeenWarned()
-    }).thenWaitFor(next => {
-      assertBothInstancesActive(vm).end(next)
-    }).then(done)
+    })
+      .thenWaitFor(next => {
+        assertBothInstancesActive(vm).end(next)
+      })
+      .then(done)
   })
 
   it('config.errorHandler should capture render errors', done => {
-    const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
+    const spy = (Vue.config.errorHandler = jasmine.createSpy('errorHandler'))
     const vm = createTestInstance(components.render)
 
     const args = spy.calls.argsFor(0)
@@ -101,21 +108,27 @@ describe('Error handling', () => {
     expect(args[1]).toBe(vm.$refs.child) // vm
     expect(args[2]).toContain('render') // description
 
-    assertRootInstanceActive(vm).then(() => {
-      Vue.config.errorHandler = null
-    }).then(done)
+    assertRootInstanceActive(vm)
+      .then(() => {
+        Vue.config.errorHandler = null
+      })
+      .then(done)
   })
 
   it('should capture and recover from nextTick errors', done => {
     const err1 = new Error('nextTick')
     const err2 = new Error('nextTick2')
-    const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
-    Vue.nextTick(() => { throw err1 })
+    const spy = (Vue.config.errorHandler = jasmine.createSpy('errorHandler'))
+    Vue.nextTick(() => {
+      throw err1
+    })
     Vue.nextTick(() => {
       expect(spy).toHaveBeenCalledWith(err1, undefined, 'nextTick')
 
       const vm = new Vue()
-      vm.$nextTick(() => { throw err2 })
+      vm.$nextTick(() => {
+        throw err2
+      })
       Vue.nextTick(() => {
         // should be called with correct instance info
         expect(spy).toHaveBeenCalledWith(err2, vm, 'nextTick')
@@ -130,10 +143,10 @@ describe('Error handling', () => {
       throw new Error('error in errorHandler ¯\\_(ツ)_/¯')
     }
     const vm = new Vue({
-      render (h) {
+      render(h) {
         throw new Error('error in render')
       },
-      renderError (h, err) {
+      renderError(h, err) {
         return h('div', err.toString())
       }
     }).$mount()
@@ -144,22 +157,22 @@ describe('Error handling', () => {
   })
 })
 
-function createErrorTestComponents () {
+function createErrorTestComponents() {
   const components = {}
 
   // data
   components.data = {
-    data () {
+    data() {
       throw new Error('data')
     },
-    render (h) {
+    render(h) {
       return h('div')
     }
   }
 
   // render error
   components.render = {
-    render (h) {
+    render(h) {
       throw new Error('render')
     }
   }
@@ -168,25 +181,25 @@ function createErrorTestComponents () {
   ;['create', 'mount', 'update', 'destroy'].forEach(hook => {
     // before
     const before = 'before' + hook.charAt(0).toUpperCase() + hook.slice(1)
-    const beforeComp = components[before] = {
+    const beforeComp = (components[before] = {
       props: ['n'],
-      render (h) {
+      render(h) {
         return h('div', this.n)
       }
-    }
-    beforeComp[before] = function () {
+    })
+    beforeComp[before] = function() {
       throw new Error(before)
     }
 
     // after
     const after = hook.replace(/e?$/, 'ed')
-    const afterComp = components[after] = {
+    const afterComp = (components[after] = {
       props: ['n'],
-      render (h) {
+      render(h) {
         return h('div', this.n)
       }
-    }
-    afterComp[after] = function () {
+    })
+    afterComp[after] = function() {
       throw new Error(after)
     }
   })
@@ -194,12 +207,12 @@ function createErrorTestComponents () {
   // directive hooks errors
   ;['bind', 'update', 'unbind'].forEach(hook => {
     const key = 'directive ' + hook
-    const dirComp = components[key] = {
+    const dirComp = (components[key] = {
       props: ['n'],
       template: `<div v-foo="n">{{ n }}</div>`
-    }
+    })
     const dirFoo = {}
-    dirFoo[hook] = function () {
+    dirFoo[hook] = function() {
       throw new Error(key)
     }
     dirComp.directives = {
@@ -210,14 +223,17 @@ function createErrorTestComponents () {
   // user watcher
   components.userWatcherGetter = {
     props: ['n'],
-    created () {
-      this.$watch(function () {
-        return this.n + this.a.b.c
-      }, val => {
-        console.log('user watcher fired: ' + val)
-      })
+    created() {
+      this.$watch(
+        function() {
+          return this.n + this.a.b.c
+        },
+        val => {
+          console.log('user watcher fired: ' + val)
+        }
+      )
     },
-    render (h) {
+    render(h) {
       return h('div', this.n)
     }
   }
@@ -225,24 +241,26 @@ function createErrorTestComponents () {
   components.userWatcherCallback = {
     props: ['n'],
     watch: {
-      n () {
+      n() {
         throw new Error('userWatcherCallback error')
       }
     },
-    render (h) {
+    render(h) {
       return h('div', this.n)
     }
   }
 
   // event errors
   components.event = {
-    beforeCreate () {
-      this.$on('e', () => { throw new Error('event') })
+    beforeCreate() {
+      this.$on('e', () => {
+        throw new Error('event')
+      })
     },
-    mounted () {
+    mounted() {
       this.$emit('e')
     },
-    render (h) {
+    render(h) {
       return h('div')
     }
   }
@@ -250,24 +268,22 @@ function createErrorTestComponents () {
   return components
 }
 
-function createTestInstance (Comp) {
+function createTestInstance(Comp) {
   return new Vue({
     data: {
       n: 0,
       ok: true
     },
-    render (h) {
+    render(h) {
       return h('div', [
         'n:' + this.n + '\n',
-        this.ok
-          ? h(Comp, { ref: 'child', props: { n: this.n }})
-          : null
+        this.ok ? h(Comp, { ref: 'child', props: { n: this.n } }) : null
       ])
     }
   }).$mount()
 }
 
-function assertRootInstanceActive (vm, chain) {
+function assertRootInstanceActive(vm, chain) {
   expect(vm.$el.innerHTML).toContain('n:0\n')
   vm.n++
   return waitForUpdate(() => {
@@ -275,13 +291,15 @@ function assertRootInstanceActive (vm, chain) {
   })
 }
 
-function assertBothInstancesActive (vm) {
+function assertBothInstancesActive(vm) {
   vm.n = 0
   return waitForUpdate(() => {
     expect(vm.$refs.child.$el.innerHTML).toContain('0')
   }).thenWaitFor(next => {
-    assertRootInstanceActive(vm).then(() => {
-      expect(vm.$refs.child.$el.innerHTML).toContain('1')
-    }).end(next)
+    assertRootInstanceActive(vm)
+      .then(() => {
+        expect(vm.$refs.child.$el.innerHTML).toContain('1')
+      })
+      .end(next)
   })
 }

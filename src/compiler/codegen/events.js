@@ -13,7 +13,7 @@ const keyCodes: { [key: string]: number | Array<number> } = {
   left: 37,
   right: 39,
   down: 40,
-  'delete': [8, 46]
+  delete: [8, 46]
 }
 
 // KeyboardEvent.key aliases
@@ -26,7 +26,7 @@ const keyNames: { [key: string]: string | Array<string> } = {
   left: 'ArrowLeft',
   right: 'ArrowRight',
   down: 'ArrowDown',
-  'delete': ['Backspace', 'Delete']
+  delete: ['Backspace', 'Delete']
 }
 
 // #4868: modifiers that prevent the execution of the listener
@@ -47,7 +47,7 @@ const modifierCode: { [key: string]: string } = {
   right: genGuard(`'button' in $event && $event.button !== 2`)
 }
 
-export function genHandlers (
+export function genHandlers(
   events: ASTElementHandlers,
   isNative: boolean,
   warn: Function
@@ -61,7 +61,7 @@ export function genHandlers (
 
 // Generate handler code with binding params on Weex
 /* istanbul ignore next */
-function genWeexHandler (params: Array<any>, handlerCode: string) {
+function genWeexHandler(params: Array<any>, handlerCode: string) {
   let innerHandlerCode = handlerCode
   const exps = params.filter(exp => simplePathRE.test(exp) && exp !== '$event')
   const bindings = exps.map(exp => ({ '@binding': exp }))
@@ -71,13 +71,15 @@ function genWeexHandler (params: Array<any>, handlerCode: string) {
     return key
   })
   args.push('$event')
-  return '{\n' +
+  return (
+    '{\n' +
     `handler:function(${args.join(',')}){${innerHandlerCode}},\n` +
     `params:${JSON.stringify(bindings)}\n` +
     '}'
+  )
 }
 
-function genHandler (
+function genHandler(
   name: string,
   handler: ASTElementHandler | Array<ASTElementHandler>
 ): string {
@@ -144,11 +146,13 @@ function genHandler (
   }
 }
 
-function genKeyFilter (keys: Array<string>): string {
-  return `if(!('button' in $event)&&${keys.map(genFilterCode).join('&&')})return null;`
+function genKeyFilter(keys: Array<string>): string {
+  return `if(!('button' in $event)&&${keys
+    .map(genFilterCode)
+    .join('&&')})return null;`
 }
 
-function genFilterCode (key: string): string {
+function genFilterCode(key: string): string {
   const keyVal = parseInt(key, 10)
   if (keyVal) {
     return `$event.keyCode!==${keyVal}`

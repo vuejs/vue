@@ -2,7 +2,7 @@
 
 import { warn } from 'core/util/index'
 
-export default function on (el: ASTElement, dir: ASTDirective) {
+export default function on(el: ASTElement, dir: ASTDirective) {
   if (process.env.NODE_ENV !== 'production' && dir.modifiers) {
     warn(`v-on without argument does not support modifiers.`)
   }

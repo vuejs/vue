@@ -8,16 +8,15 @@
 </template>
 
 <script>
-  module.exports = {
-    data () {
-      return {
-        longList: [
-          { type: 'A', count: 1, source: 'http://whatever.com/x.png' },
-          { type: 'A', count: 2, source: 'http://whatever.com/y.png' },
-          { type: 'A', count: 3, source: 'http://whatever.com/z.png' }
-        ]
-      }
+module.exports = {
+  data() {
+    return {
+      longList: [
+        { type: 'A', count: 1, source: 'http://whatever.com/x.png' },
+        { type: 'A', count: 2, source: 'http://whatever.com/y.png' },
+        { type: 'A', count: 3, source: 'http://whatever.com/z.png' }
+      ]
     }
   }
+}
 </script>
-

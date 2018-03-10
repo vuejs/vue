@@ -5,7 +5,7 @@ import { generate } from './codegen'
 import { optimize } from './optimizer'
 import { createCompilerCreator } from 'compiler/create-compiler'
 
-export const createCompiler = createCompilerCreator(function baseCompile (
+export const createCompiler = createCompilerCreator(function baseCompile(
   template: string,
   options: CompilerOptions
 ): CompiledResult {

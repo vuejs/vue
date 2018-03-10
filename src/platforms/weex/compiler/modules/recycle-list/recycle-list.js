@@ -12,7 +12,7 @@ import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
  * </recycle-list>
  */
 
-export function preTransformRecycleList (
+export function preTransformRecycleList(
   el: ASTElement,
   options: WeexCompilerOptions
 ) {

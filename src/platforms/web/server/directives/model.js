@@ -4,7 +4,7 @@ import { looseEqual, looseIndexOf } from 'shared/util'
 
 // this is only applied for <select v-model> because it is the only edge case
 // that must be done at runtime instead of compile time.
-export default function model (node: VNodeWithData, dir: VNodeDirective) {
+export default function model(node: VNodeWithData, dir: VNodeDirective) {
   if (!node.children) return
   const value = dir.value
   const isMultiple = node.data.attrs && node.data.attrs.multiple
@@ -13,8 +13,7 @@ export default function model (node: VNodeWithData, dir: VNodeDirective) {
     if (option.tag === 'option') {
       if (isMultiple) {
         const selected =
-          Array.isArray(value) &&
-          (looseIndexOf(value, getValue(option)) > -1)
+          Array.isArray(value) && looseIndexOf(value, getValue(option)) > -1
         if (selected) {
           setSelected(option)
         }
@@ -28,7 +27,7 @@ export default function model (node: VNodeWithData, dir: VNodeDirective) {
   }
 }
 
-function getValue (option) {
+function getValue(option) {
   const data = option.data || {}
   return (
     (data.attrs && data.attrs.value) ||
@@ -37,7 +36,7 @@ function getValue (option) {
   )
 }
 
-function setSelected (option) {
+function setSelected(option) {
   const data = option.data || (option.data = {})
   const attrs = data.attrs || (data.attrs = {})
   attrs.selected = ''

@@ -5,14 +5,14 @@
 </template>
 
 <style scoped>
-  .footer {
-    height: 80px;
-    justify-content: center;
-    background-color: #EEEEEE;
-  }
-  .copyright {
-    color: #AAAAAA;
-    font-size: 32px;
-    text-align: center;
-  }
+.footer {
+  height: 80px;
+  justify-content: center;
+  background-color: #eeeeee;
+}
+.copyright {
+  color: #aaaaaa;
+  font-size: 32px;
+  text-align: center;
+}
 </style>

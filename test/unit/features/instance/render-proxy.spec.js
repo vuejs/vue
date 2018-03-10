@@ -10,7 +10,7 @@ if (typeof Proxy !== 'undefined') {
     })
 
     it('should warn missing property in render fns without `with`', () => {
-      const render = function (h) {
+      const render = function(h) {
         return h('div', [this.a])
       }
       render._withStripped = true
@@ -22,7 +22,7 @@ if (typeof Proxy !== 'undefined') {
 
     it('should not warn for hand-written render functions', () => {
       new Vue({
-        render (h) {
+        render(h) {
           return h('div', [this.a])
         }
       }).$mount()

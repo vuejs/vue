@@ -2,13 +2,17 @@ import Vue from 'vue'
 
 describe('Global API: mixin', () => {
   let options
-  beforeEach(() => { options = Vue.options })
-  afterEach(() => { Vue.options = options })
+  beforeEach(() => {
+    options = Vue.options
+  })
+  afterEach(() => {
+    Vue.options = options
+  })
 
   it('should work', () => {
     const spy = jasmine.createSpy('global mixin')
     Vue.mixin({
-      created () {
+      created() {
         spy(this.$options.myOption)
       }
     })
@@ -22,12 +26,12 @@ describe('Global API: mixin', () => {
     const calls = []
     const Test = Vue.extend({
       name: 'test',
-      beforeCreate () {
+      beforeCreate() {
         calls.push(this.$options.myOption + ' local')
       }
     })
     Vue.mixin({
-      beforeCreate () {
+      beforeCreate() {
         calls.push(this.$options.myOption + ' global')
       }
     })
@@ -129,7 +133,7 @@ describe('Global API: mixin', () => {
   it('should work for a constructor mixin', () => {
     const spy = jasmine.createSpy('global mixin')
     const Mixin = Vue.extend({
-      created () {
+      created() {
         spy(this.$options.myOption)
       }
     })

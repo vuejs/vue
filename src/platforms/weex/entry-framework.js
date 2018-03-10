@@ -9,21 +9,21 @@ const instanceOptions: { [key: string]: WeexInstanceOption } = {}
 /**
  * Create instance context.
  */
-export function createInstanceContext (
+export function createInstanceContext(
   instanceId: string,
   runtimeContext: WeexRuntimeContext,
   data: Object = {}
 ): WeexInstanceContext {
   const weex: Weex = runtimeContext.weex
-  const instance: WeexInstanceOption = instanceOptions[instanceId] = {
+  const instance: WeexInstanceOption = (instanceOptions[instanceId] = {
     instanceId,
     config: weex.config,
     document: weex.document,
     data
-  }
+  })
 
   // Each instance has a independent `Vue` module instance
-  const Vue = instance.Vue = createVueModuleInstance(instanceId, weex)
+  const Vue = (instance.Vue = createVueModuleInstance(instanceId, weex))
 
   // DEPRECATED
   const timerAPIs = getInstanceTimer(instanceId, weex.requireModule)
@@ -37,7 +37,7 @@ export function createInstanceContext (
  * Destroy an instance with id. It will make sure all memory of
  * this instance released and no more leaks.
  */
-export function destroyInstance (instanceId: string): void {
+export function destroyInstance(instanceId: string): void {
   const instance = instanceOptions[instanceId]
   if (instance && instance.app instanceof instance.Vue) {
     try {
@@ -55,7 +55,7 @@ export function destroyInstance (instanceId: string): void {
  * It will use `Vue.set` on all keys of the new data. So it's better
  * define all possible meaningful keys when instance created.
  */
-export function refreshInstance (
+export function refreshInstance(
   instanceId: string,
   data: Object
 ): Error | void {
@@ -75,10 +75,7 @@ export function refreshInstance (
 /**
  * Create a fresh instance of Vue for each Weex instance.
  */
-function createVueModuleInstance (
-  instanceId: string,
-  weex: Weex
-): GlobalAPI {
+function createVueModuleInstance(instanceId: string, weex: Weex): GlobalAPI {
   const exports = {}
   VueFactory(exports, weex.document)
   const Vue = exports.Vue
@@ -91,9 +88,11 @@ function createVueModuleInstance (
   const isReservedTag = Vue.config.isReservedTag || (() => false)
   const isRuntimeComponent = Vue.config.isRuntimeComponent || (() => false)
   Vue.config.isReservedTag = name => {
-    return (!isRuntimeComponent(name) && weex.supports(`@component/${name}`)) ||
+    return (
+      (!isRuntimeComponent(name) && weex.supports(`@component/${name}`)) ||
       isReservedTag(name) ||
       weexRegex.test(name)
+    )
   }
   Vue.config.parsePlatformTagName = name => name.replace(weexRegex, '')
 
@@ -108,19 +107,20 @@ function createVueModuleInstance (
   // Hack `Vue` behavior to handle instance information and data
   // before root component created.
   Vue.mixin({
-    beforeCreate () {
+    beforeCreate() {
       const options = this.$options
       // root component (vm)
       if (options.el) {
         // set external data of instance
         const dataOption = options.data
-        const internalData = (typeof dataOption === 'function' ? dataOption() : dataOption) || {}
+        const internalData =
+          (typeof dataOption === 'function' ? dataOption() : dataOption) || {}
         options.data = Object.assign(internalData, instance.data)
         // record instance by id
         instance.app = this
       }
     },
-    mounted () {
+    mounted() {
       const options = this.$options
       // root component (vm)
       if (options.el && weex.document && instance.app === this) {
@@ -137,7 +137,7 @@ function createVueModuleInstance (
    * Get instance config.
    * @return {object}
    */
-  Vue.prototype.$getConfig = function () {
+  Vue.prototype.$getConfig = function() {
     if (instance.app instanceof Vue) {
       return instance.config
     }
@@ -153,15 +153,12 @@ function createVueModuleInstance (
  * framework can make sure no side effect of the callback happened after
  * an instance destroyed.
  */
-function getInstanceTimer (
-  instanceId: string,
-  moduleGetter: Function
-): Object {
+function getInstanceTimer(instanceId: string, moduleGetter: Function): Object {
   const instance = instanceOptions[instanceId]
   const timer = moduleGetter('timer')
   const timerAPIs = {
     setTimeout: (...args) => {
-      const handler = function () {
+      const handler = function() {
         args[0](...args.slice(2))
       }
 
@@ -169,17 +166,17 @@ function getInstanceTimer (
       return instance.document.taskCenter.callbackManager.lastCallbackId.toString()
     },
     setInterval: (...args) => {
-      const handler = function () {
+      const handler = function() {
         args[0](...args.slice(2))
       }
 
       timer.setInterval(handler, args[1])
       return instance.document.taskCenter.callbackManager.lastCallbackId.toString()
     },
-    clearTimeout: (n) => {
+    clearTimeout: n => {
       timer.clearTimeout(n)
     },
-    clearInterval: (n) => {
+    clearInterval: n => {
       timer.clearInterval(n)
     }
   }

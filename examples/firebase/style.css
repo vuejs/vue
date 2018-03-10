@@ -12,14 +12,15 @@ ul {
   padding: 10px;
   border-top: 1px solid #eee;
   overflow: hidden;
-  transition: all .25s ease;
+  transition: all 0.25s ease;
 }
 
 .user:last-child {
   border-bottom: 1px solid #eee;
 }
 
-.v-enter, .v-leave-to {
+.v-enter,
+.v-leave-to {
   height: 0;
   padding-top: 0;
   padding-bottom: 0;

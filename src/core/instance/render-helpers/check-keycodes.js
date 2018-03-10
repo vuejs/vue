@@ -3,7 +3,7 @@
 import config from 'core/config'
 import { hyphenate } from 'shared/util'
 
-function isKeyNotMatch<T> (expect: T | Array<T>, actual: T): boolean {
+function isKeyNotMatch<T>(expect: T | Array<T>, actual: T): boolean {
   if (Array.isArray(expect)) {
     return expect.indexOf(actual) === -1
   } else {
@@ -16,7 +16,7 @@ function isKeyNotMatch<T> (expect: T | Array<T>, actual: T): boolean {
  * exposed as Vue.prototype._k
  * passing in eventKeyName as last argument separately for backwards compat
  */
-export function checkKeyCodes (
+export function checkKeyCodes(
   eventKeyCode: number,
   key: string,
   builtInKeyCode?: number | Array<number>,

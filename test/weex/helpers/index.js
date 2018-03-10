@@ -9,27 +9,27 @@ const styleRE = /<\s*style\s*\w*>([^(<\/)]*)<\/\s*style\s*>/g
 const scriptRE = /<\s*script.*>([^]*)<\/\s*script\s*>/
 const templateRE = /<\s*template\s*([^>]*)>([^]*)<\/\s*template\s*>/
 
-export function readFile (filename) {
+export function readFile(filename) {
   return fs.readFileSync(path.resolve(__dirname, '../cases/', filename), 'utf8')
 }
 
-export function readObject (filename) {
-  return (new Function(`return ${readFile(filename)}`))()
+export function readObject(filename) {
+  return new Function(`return ${readFile(filename)}`)()
 }
 
 console.debug = () => {}
 
 // http://stackoverflow.com/a/35478115
 const matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g
-export function strToRegExp (str) {
+export function strToRegExp(str) {
   return new RegExp(str.replace(matchOperatorsRe, '\\$&'))
 }
 
-function parseStatic (fns) {
+function parseStatic(fns) {
   return '[' + fns.map(fn => `function () { ${fn} }`).join(',') + ']'
 }
 
-export function compileAndStringify (template) {
+export function compileAndStringify(template) {
   const { render, staticRenderFns } = compile(template)
   return {
     render: `function () { ${render} }`,
@@ -42,7 +42,7 @@ export function compileAndStringify (template) {
  * @param {string} source raw text of *.vue file
  * @param {string} componentName whether compile to a component
  */
-export function compileVue (source, componentName) {
+export function compileVue(source, componentName) {
   return new Promise((resolve, reject) => {
     if (!templateRE.test(source)) {
       return reject('No Template!')
@@ -57,23 +57,30 @@ export function compileVue (source, componentName) {
     const res = compile(templateMatch[2], compileOptions)
 
     const name = 'test_case_' + (Math.random() * 99999999).toFixed(0)
-    const generateCode = styles => (`
-      try { weex.document.registerStyleSheets("${name}", [${JSON.stringify(styles)}]) } catch(e) {};
+    const generateCode = styles =>
+      `
+      try { weex.document.registerStyleSheets("${name}", [${JSON.stringify(
+        styles
+      )}]) } catch(e) {};
       var ${name} = Object.assign({
         _scopeId: "${name}",
         style: ${JSON.stringify(styles)},
         render: function () { ${res.render} },
-        ${res['@render'] ? ('"@render": function () {' + res['@render'] + '},') : ''}
+        ${
+          res['@render']
+            ? '"@render": function () {' + res['@render'] + '},'
+            : ''
+        }
         staticRenderFns: ${parseStatic(res.staticRenderFns)},
       }, (function(){
         var module = { exports: {} };
         ${script};
         return module.exports;
       })());
-    ` + (componentName
+    ` +
+      (componentName
         ? `Vue.component('${componentName}', ${name});\n`
         : `${name}.el = 'body';new Vue(${name});`)
-    )
 
     let cssText = ''
     let styleMatch = null
@@ -90,40 +97,50 @@ export function compileVue (source, componentName) {
   })
 }
 
-export function compileWithDeps (entryPath, deps) {
+export function compileWithDeps(entryPath, deps) {
   return new Promise((resolve, reject) => {
     if (Array.isArray(deps)) {
-      Promise.all(deps.map(dep => {
-        return compileVue(readFile(dep.path), dep.name).catch(reject)
-      })).then(depCodes => {
-        compileVue(readFile(entryPath)).then(entryCode => {
-          resolve(depCodes.join('\n') + entryCode)
-        }).catch(reject)
-      }).catch(reject)
+      Promise.all(
+        deps.map(dep => {
+          return compileVue(readFile(dep.path), dep.name).catch(reject)
+        })
+      )
+        .then(depCodes => {
+          compileVue(readFile(entryPath))
+            .then(entryCode => {
+              resolve(depCodes.join('\n') + entryCode)
+            })
+            .catch(reject)
+        })
+        .catch(reject)
     }
   })
 }
 
-function isObject (object) {
+function isObject(object) {
   return object !== null && typeof object === 'object'
 }
 
-function isEmptyObject (object) {
+function isEmptyObject(object) {
   return isObject(object) && Object.keys(object).length < 1
 }
 
-function omitUseless (object) {
+function omitUseless(object) {
   if (isObject(object)) {
     delete object.ref
     for (const key in object) {
       omitUseless(object[key])
-      if (key === '@styleScope' ||
+      if (
+        key === '@styleScope' ||
         key === '@templateId' ||
-        key === 'bindingExpression') {
+        key === 'bindingExpression'
+      ) {
         delete object[key]
       }
-      if (key.charAt(0) !== '@' &&
-        (isEmptyObject(object[key]) || object[key] === undefined)) {
+      if (
+        key.charAt(0) !== '@' &&
+        (isEmptyObject(object[key]) || object[key] === undefined)
+      ) {
         delete object[key]
       }
     }
@@ -131,15 +148,17 @@ function omitUseless (object) {
   return object
 }
 
-export function getRoot (instance) {
+export function getRoot(instance) {
   return omitUseless(instance.$getRoot())
 }
 
 // Get all binding events in the instance
-export function getEvents (instance) {
+export function getEvents(instance) {
   const events = []
   const recordEvent = node => {
-    if (!node) { return }
+    if (!node) {
+      return
+    }
     if (Array.isArray(node.event)) {
       node.event.forEach(type => {
         events.push({ ref: node.ref, type })
@@ -153,23 +172,25 @@ export function getEvents (instance) {
   return events
 }
 
-export function fireEvent (instance, ref, type, event = {}) {
+export function fireEvent(instance, ref, type, event = {}) {
   const el = instance.document.getRef(ref)
   if (el) {
     instance.document.fireEvent(el, type, event)
   }
 }
 
-export function createInstance (id, code, ...args) {
+export function createInstance(id, code, ...args) {
   WeexRuntime.config.frameworks = { Vue }
   const context = WeexRuntime.init(WeexRuntime.config)
   context.registerModules({
     timer: ['setTimeout', 'setInterval']
   })
-  const instance = context.createInstance(id, `// { "framework": "Vue" }\n${code}`, ...args) || {}
+  const instance =
+    context.createInstance(id, `// { "framework": "Vue" }\n${code}`, ...args) ||
+    {}
   instance.document = context.getDocument(id)
   instance.$getRoot = () => context.getRoot(id)
-  instance.$refresh = (data) => context.refreshInstance(id, data)
+  instance.$refresh = data => context.refreshInstance(id, data)
   instance.$destroy = () => {
     delete instance.document
     context.destroyInstance(id)
@@ -180,23 +201,26 @@ export function createInstance (id, code, ...args) {
   return instance
 }
 
-export function compileAndExecute (template, additional = '') {
+export function compileAndExecute(template, additional = '') {
   return new Promise(resolve => {
     const id = String(Date.now() * Math.random())
     const { render, staticRenderFns } = compile(template)
-    const instance = createInstance(id, `
+    const instance = createInstance(
+      id,
+      `
       new Vue({
         el: '#whatever',
         render: function () { ${render} },
         staticRenderFns: ${parseStatic(staticRenderFns)},
         ${additional}
       })
-    `)
+    `
+    )
     setTimeout(() => resolve(instance), 10)
   })
 }
 
-export function syncPromise (arr) {
+export function syncPromise(arr) {
   let p = Promise.resolve()
   arr.forEach(item => {
     p = p.then(item)
@@ -204,18 +228,19 @@ export function syncPromise (arr) {
   return p
 }
 
-export function checkRefresh (instance, data, checker) {
-  return () => new Promise(res => {
-    instance.$refresh(data)
-    setTimeout(() => {
-      checker(getRoot(instance))
-      res()
+export function checkRefresh(instance, data, checker) {
+  return () =>
+    new Promise(res => {
+      instance.$refresh(data)
+      setTimeout(() => {
+        checker(getRoot(instance))
+        res()
+      })
     })
-  })
 }
 
-export function addTaskHook (hook) {
-  global.callNative = function callNative (id, tasks) {
+export function addTaskHook(hook) {
+  global.callNative = function callNative(id, tasks) {
     if (Array.isArray(tasks) && typeof hook === 'function') {
       tasks.forEach(task => {
         hook(id, {
@@ -228,6 +253,6 @@ export function addTaskHook (hook) {
   }
 }
 
-export function resetTaskHook () {
+export function resetTaskHook() {
   delete global.callNative
 }

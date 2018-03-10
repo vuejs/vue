@@ -7,31 +7,27 @@
 </template>
 
 <style scoped>
-  .cell {
-    background-color: #FF6600;
-  }
-  .text {
-    font-size: 100px;
-    text-align: center;
-  }
-  .red {
-    color: #FF0000;
-  }
-  .blue {
-    color: #0000FF;
-  }
+.cell {
+  background-color: #ff6600;
+}
+.text {
+  font-size: 100px;
+  text-align: center;
+}
+.red {
+  color: #ff0000;
+}
+.blue {
+  color: #0000ff;
+}
 </style>
 
 <script>
-  module.exports = {
-    data () {
-      return {
-        longList: [
-          { type: 'A', color: 'red' },
-          { type: 'A', color: 'blue' }
-        ]
-      }
+module.exports = {
+  data() {
+    return {
+      longList: [{ type: 'A', color: 'red' }, { type: 'A', color: 'blue' }]
     }
   }
+}
 </script>
-

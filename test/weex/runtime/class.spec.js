@@ -2,34 +2,41 @@ import { getRoot, fireEvent, compileAndExecute } from '../helpers/index'
 
 describe('generate class', () => {
   it('should be generated', () => {
-    compileAndExecute(`
+    compileAndExecute(
+      `
       <div>
         <text class="a b c">Hello World</text>
       </div>
-    `, `
+    `,
+      `
       style: {
         a: { fontSize: '100' },
         b: { color: '#ff0000' },
         c: { fontWeight: 'bold' }
       }
-    `).then(instance => {
+    `
+    ).then(instance => {
       expect(getRoot(instance)).toEqual({
         type: 'div',
-        children: [{
-          type: 'text',
-          classList: ['a', 'b', 'c'],
-          attr: { value: 'Hello World' }
-        }]
+        children: [
+          {
+            type: 'text',
+            classList: ['a', 'b', 'c'],
+            attr: { value: 'Hello World' }
+          }
+        ]
       })
     })
   })
 
-  it('should be updated', (done) => {
-    compileAndExecute(`
+  it('should be updated', done => {
+    compileAndExecute(
+      `
       <div @click="foo">
         <text :class="['a', x]">Hello World</text>
       </div>
-    `, `
+    `,
+      `
       data: { x: 'b' },
       style: {
         a: { fontSize: '100' },
@@ -45,38 +52,47 @@ describe('generate class', () => {
           this.x = 'd'
         }
       }
-    `).then(instance => {
-      expect(getRoot(instance)).toEqual({
-        type: 'div',
-        event: ['click'],
-        children: [{
-          type: 'text',
-          classList: ['a', 'b'],
-          attr: { value: 'Hello World' }
-        }]
+    `
+    )
+      .then(instance => {
+        expect(getRoot(instance)).toEqual({
+          type: 'div',
+          event: ['click'],
+          children: [
+            {
+              type: 'text',
+              classList: ['a', 'b'],
+              attr: { value: 'Hello World' }
+            }
+          ]
+        })
+        fireEvent(instance, '_root', 'click')
+        return instance
       })
-      fireEvent(instance, '_root', 'click')
-      return instance
-    }).then(instance => {
-      expect(getRoot(instance)).toEqual({
-        type: 'div',
-        event: ['click'],
-        children: [{
-          type: 'text',
-          classList: ['a', 'd'],
-          attr: { value: 'Hello World' }
-        }]
+      .then(instance => {
+        expect(getRoot(instance)).toEqual({
+          type: 'div',
+          event: ['click'],
+          children: [
+            {
+              type: 'text',
+              classList: ['a', 'd'],
+              attr: { value: 'Hello World' }
+            }
+          ]
+        })
+        done()
       })
-      done()
-    })
   })
 
-  it('should be applied in order', (done) => {
-    compileAndExecute(`
+  it('should be applied in order', done => {
+    compileAndExecute(
+      `
       <div @click="foo">
         <text :class="arr">Hello World</text>
       </div>
-    `, `
+    `,
+      `
       data: {
         arr: ['b', 'a']
       },
@@ -90,38 +106,47 @@ describe('generate class', () => {
           this.arr.push('c')
         }
       }
-    `).then(instance => {
-      expect(getRoot(instance)).toEqual({
-        type: 'div',
-        event: ['click'],
-        children: [{
-          type: 'text',
-          classList: ['b', 'a'],
-          attr: { value: 'Hello World' }
-        }]
+    `
+    )
+      .then(instance => {
+        expect(getRoot(instance)).toEqual({
+          type: 'div',
+          event: ['click'],
+          children: [
+            {
+              type: 'text',
+              classList: ['b', 'a'],
+              attr: { value: 'Hello World' }
+            }
+          ]
+        })
+        fireEvent(instance, '_root', 'click')
+        return instance
       })
-      fireEvent(instance, '_root', 'click')
-      return instance
-    }).then(instance => {
-      expect(getRoot(instance)).toEqual({
-        type: 'div',
-        event: ['click'],
-        children: [{
-          type: 'text',
-          classList: ['b', 'a', 'c'],
-          attr: { value: 'Hello World' }
-        }]
+      .then(instance => {
+        expect(getRoot(instance)).toEqual({
+          type: 'div',
+          event: ['click'],
+          children: [
+            {
+              type: 'text',
+              classList: ['b', 'a', 'c'],
+              attr: { value: 'Hello World' }
+            }
+          ]
+        })
+        done()
       })
-      done()
-    })
   })
 
-  it('should be cleared', (done) => {
-    compileAndExecute(`
+  it('should be cleared', done => {
+    compileAndExecute(
+      `
       <div @click="foo">
         <text :class="['a', x]">Hello World</text>
       </div>
-    `, `
+    `,
+      `
       data: { x: 'b' },
       style: {
         a: { fontSize: '100' },
@@ -133,29 +158,36 @@ describe('generate class', () => {
           this.x = 'c'
         }
       }
-    `).then(instance => {
-      expect(getRoot(instance)).toEqual({
-        type: 'div',
-        event: ['click'],
-        children: [{
-          type: 'text',
-          classList: ['a', 'b'],
-          attr: { value: 'Hello World' }
-        }]
+    `
+    )
+      .then(instance => {
+        expect(getRoot(instance)).toEqual({
+          type: 'div',
+          event: ['click'],
+          children: [
+            {
+              type: 'text',
+              classList: ['a', 'b'],
+              attr: { value: 'Hello World' }
+            }
+          ]
+        })
+        fireEvent(instance, '_root', 'click')
+        return instance
       })
-      fireEvent(instance, '_root', 'click')
-      return instance
-    }).then(instance => {
-      expect(getRoot(instance)).toEqual({
-        type: 'div',
-        event: ['click'],
-        children: [{
-          type: 'text',
-          classList: ['a', 'c'],
-          attr: { value: 'Hello World' }
-        }]
+      .then(instance => {
+        expect(getRoot(instance)).toEqual({
+          type: 'div',
+          event: ['click'],
+          children: [
+            {
+              type: 'text',
+              classList: ['a', 'c'],
+              attr: { value: 'Hello World' }
+            }
+          ]
+        })
+        done()
       })
-      done()
-    })
   })
 })

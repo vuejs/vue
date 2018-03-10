@@ -8,6 +8,6 @@ To view the results follow the run section. Note that the overall completion tim
 
 ### run
 
-``` bash
+```bash
 npm run bench:ssr
 ```

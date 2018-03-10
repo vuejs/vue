@@ -5,7 +5,7 @@ import type VNode from 'core/vdom/vnode'
 /**
  * Runtime helper for resolving raw children VNodes into a slot object.
  */
-export function resolveSlots (
+export function resolveSlots(
   children: ?Array<VNode>,
   context: ?Component
 ): { [key: string]: Array<VNode> } {
@@ -22,18 +22,20 @@ export function resolveSlots (
     }
     // named slots should only be respected if the vnode was rendered in the
     // same context.
-    if ((child.context === context || child.fnContext === context) &&
-      data && data.slot != null
+    if (
+      (child.context === context || child.fnContext === context) &&
+      data &&
+      data.slot != null
     ) {
       const name = data.slot
-      const slot = (slots[name] || (slots[name] = []))
+      const slot = slots[name] || (slots[name] = [])
       if (child.tag === 'template') {
         slot.push.apply(slot, child.children || [])
       } else {
         slot.push(child)
       }
     } else {
-      (slots.default || (slots.default = [])).push(child)
+      ;(slots.default || (slots.default = [])).push(child)
     }
   }
   // ignore slots that contains only whitespace
@@ -45,11 +47,11 @@ export function resolveSlots (
   return slots
 }
 
-function isWhitespace (node: VNode): boolean {
+function isWhitespace(node: VNode): boolean {
   return (node.isComment && !node.asyncFactory) || node.text === ' '
 }
 
-export function resolveScopedSlots (
+export function resolveScopedSlots(
   fns: ScopedSlotsData, // see flow/vnode
   res?: Object
 ): { [key: string]: Function } {

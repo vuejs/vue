@@ -28,15 +28,8 @@ Vue.options.components = platformComponents
 Vue.prototype.__patch__ = patch
 
 // wrap mount
-Vue.prototype.$mount = function (
-  el?: any,
-  hydrating?: boolean
-): Component {
-  return mountComponent(
-    this,
-    el && query(el, this.$document),
-    hydrating
-  )
+Vue.prototype.$mount = function(el?: any, hydrating?: boolean): Component {
+  return mountComponent(this, el && query(el, this.$document), hydrating)
 }
 
 export default Vue

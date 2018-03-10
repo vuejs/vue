@@ -4,13 +4,15 @@ const app = {
   name: 'app',
   props: ['id'],
   serverCacheKey: props => props.id,
-  render (h) {
+  render(h) {
     return h('div', '/test')
   }
 }
 
 export default () => {
-  return Promise.resolve(new Vue({
-    render: h => h(app, { props: { id: 1 }})
-  }))
+  return Promise.resolve(
+    new Vue({
+      render: h => h(app, { props: { id: 1 } })
+    })
+  )
 }

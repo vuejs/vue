@@ -23,7 +23,11 @@ describe('Filters', () => {
       },
       filters: {
         upper: v => v.toUpperCase(),
-        reverse: v => v.split('').reverse().join('')
+        reverse: v =>
+          v
+            .split('')
+            .reverse()
+            .join('')
       }
     }).$mount()
     expect(vm.$el.textContent).toBe('IH')
@@ -40,7 +44,11 @@ describe('Filters', () => {
       `,
       filters: {
         upper: v => v.toUpperCase(),
-        reverse: v => v.split('').reverse().join(''),
+        reverse: v =>
+          v
+            .split('')
+            .reverse()
+            .join(''),
         lower: v => v.toLowerCase()
       },
       data: {
@@ -106,7 +114,7 @@ describe('Filters', () => {
 
   it('handle division with hash values', () => {
     const vm = new Vue({
-      data: { a: { n: 20 }},
+      data: { a: { n: 20 } },
       template: `<div>{{ a['n'] / 5 | double }}</div>`,
       filters: { double: v => v * 2 }
     }).$mount()

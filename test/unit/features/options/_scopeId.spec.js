@@ -63,17 +63,19 @@ describe('Options _scopeId', () => {
     child.show = false
     waitForUpdate(() => {
       child.show = true
-    }).then(() => {
-      expect(child.$el.hasAttribute('data-1')).toBe(true)
-      expect(child.$el.hasAttribute('data-2')).toBe(true)
-    }).then(done)
+    })
+      .then(() => {
+        expect(child.$el.hasAttribute('data-1')).toBe(true)
+        expect(child.$el.hasAttribute('data-2')).toBe(true)
+      })
+      .then(done)
   })
 
   it('should work on functional components', () => {
     const child = {
       functional: true,
       _scopeId: 'child',
-      render (h) {
+      render(h) {
         return h('div', { class: 'child' }, [
           h('span', { class: 'child' }, 'child')
         ])

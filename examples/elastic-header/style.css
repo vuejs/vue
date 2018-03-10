@@ -8,7 +8,7 @@ a {
 }
 .draggable-header-view {
   background-color: #fff;
-  box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   width: 320px;
   height: 560px;
   overflow: hidden;
@@ -29,7 +29,8 @@ a {
   left: 0;
   z-index: 0;
 }
-.draggable-header-view .header, .draggable-header-view .content {
+.draggable-header-view .header,
+.draggable-header-view .content {
   position: relative;
   z-index: 1;
   padding: 30px;

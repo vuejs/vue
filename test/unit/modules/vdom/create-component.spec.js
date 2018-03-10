@@ -6,7 +6,7 @@ describe('create-component', () => {
   beforeEach(done => {
     vm = new Vue({
       template: '<p>{{msg}}</p>',
-      data () {
+      data() {
         return { msg: 'hello, my children' }
       }
     }).$mount()
@@ -17,7 +17,7 @@ describe('create-component', () => {
     const child = {
       name: 'child',
       props: ['msg'],
-      render () {}
+      render() {}
     }
     const init = jasmine.createSpy()
     const data = {
@@ -50,7 +50,7 @@ describe('create-component', () => {
       staticAttrs: { class: 'foo' }
     }
     spyOn(vm, '$forceUpdate')
-    function async (resolve, reject) {
+    function async(resolve, reject) {
       setTimeout(() => {
         resolve({
           name: 'child',
@@ -59,12 +59,12 @@ describe('create-component', () => {
         Vue.nextTick(loaded)
       }, 0)
     }
-    function go () {
+    function go() {
       vnode = createComponent(async, data, vm, vm)
       expect(vnode.isComment).toBe(true) // not to be loaded yet.
       expect(vnode.asyncFactory).toBe(async)
     }
-    function loaded () {
+    function loaded() {
       vnode = createComponent(async, data, vm, vm)
       expect(vnode.tag).toMatch(/vue-component-[0-9]+-child/)
       expect(vnode.data.staticAttrs).toEqual({ class: 'foo' })
@@ -86,20 +86,22 @@ describe('create-component', () => {
       attrs: { id: 1 }
     }
     const reason = 'failed!!'
-    function async (resolve, reject) {
+    function async(resolve, reject) {
       setTimeout(() => {
         reject(reason)
         Vue.nextTick(failed)
       }, 0)
     }
-    function go () {
+    function go() {
       vnode = createComponent(async, data, vm, vm)
       expect(vnode.isComment).toBe(true) // not to be loaded yet.
     }
-    function failed () {
+    function failed() {
       vnode = createComponent(async, data, vm, vm)
       expect(vnode.isComment).toBe(true) // failed, still a comment node
-      expect(`Failed to resolve async component: ${async}\nReason: ${reason}`).toHaveBeenWarned()
+      expect(
+        `Failed to resolve async component: ${async}\nReason: ${reason}`
+      ).toHaveBeenWarned()
       done()
     }
     go()

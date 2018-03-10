@@ -25,6 +25,8 @@ describe('Options propsData', () => {
         a: 123
       }
     })
-    expect('option "propsData" can only be used during instance creation').toHaveBeenWarned()
+    expect(
+      'option "propsData" can only be used during instance creation'
+    ).toHaveBeenWarned()
   })
 })

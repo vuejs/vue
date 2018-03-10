@@ -1,42 +1,53 @@
 {
   "name": "vue",
   "version": "2.5.14",
-  "description": "Reactive, component-oriented view layer for modern web interfaces.",
+  "description":
+    "Reactive, component-oriented view layer for modern web interfaces.",
   "main": "dist/vue.runtime.common.js",
   "module": "dist/vue.runtime.esm.js",
   "unpkg": "dist/vue.js",
   "jsdelivr": "dist/vue.js",
   "typings": "types/index.d.ts",
-  "files": [
-    "src",
-    "dist/*.js",
-    "types/*.d.ts"
-  ],
+  "files": ["src", "dist/*.js", "types/*.d.ts"],
   "scripts": {
     "dev": "rollup -w -c scripts/config.js --environment TARGET:web-full-dev",
-    "dev:cjs": "rollup -w -c scripts/config.js --environment TARGET:web-runtime-cjs",
-    "dev:esm": "rollup -w -c scripts/config.js --environment TARGET:web-runtime-esm",
+    "dev:cjs":
+      "rollup -w -c scripts/config.js --environment TARGET:web-runtime-cjs",
+    "dev:esm":
+      "rollup -w -c scripts/config.js --environment TARGET:web-runtime-esm",
     "dev:test": "karma start test/unit/karma.dev.config.js",
-    "dev:ssr": "rollup -w -c scripts/config.js --environment TARGET:web-server-renderer",
-    "dev:compiler": "rollup -w -c scripts/config.js --environment TARGET:web-compiler ",
-    "dev:weex": "rollup -w -c scripts/config.js --environment TARGET:weex-framework",
-    "dev:weex:factory": "rollup -w -c scripts/config.js --environment TARGET:weex-factory",
-    "dev:weex:compiler": "rollup -w -c scripts/config.js --environment TARGET:weex-compiler ",
+    "dev:ssr":
+      "rollup -w -c scripts/config.js --environment TARGET:web-server-renderer",
+    "dev:compiler":
+      "rollup -w -c scripts/config.js --environment TARGET:web-compiler ",
+    "dev:weex":
+      "rollup -w -c scripts/config.js --environment TARGET:weex-framework",
+    "dev:weex:factory":
+      "rollup -w -c scripts/config.js --environment TARGET:weex-factory",
+    "dev:weex:compiler":
+      "rollup -w -c scripts/config.js --environment TARGET:weex-compiler ",
     "build": "node scripts/build.js",
     "build:ssr": "npm run build -- web-runtime-cjs,web-server-renderer",
     "build:weex": "npm run build -- weex",
-    "test": "npm run lint && flow check && npm run test:types && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr && npm run test:weex",
+    "test":
+      "npm run lint && flow check && npm run test:types && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr && npm run test:weex",
     "test:unit": "karma start test/unit/karma.unit.config.js",
     "test:cover": "karma start test/unit/karma.cover.config.js",
-    "test:e2e": "npm run build -- web-full-prod,web-server-basic-renderer && node test/e2e/runner.js",
-    "test:weex": "npm run build:weex && jasmine JASMINE_CONFIG_PATH=test/weex/jasmine.json",
-    "test:ssr": "npm run build:ssr && jasmine JASMINE_CONFIG_PATH=test/ssr/jasmine.json",
-    "test:sauce": "npm run sauce -- 0 && npm run sauce -- 1 && npm run sauce -- 2",
+    "test:e2e":
+      "npm run build -- web-full-prod,web-server-basic-renderer && node test/e2e/runner.js",
+    "test:weex":
+      "npm run build:weex && jasmine JASMINE_CONFIG_PATH=test/weex/jasmine.json",
+    "test:ssr":
+      "npm run build:ssr && jasmine JASMINE_CONFIG_PATH=test/ssr/jasmine.json",
+    "test:sauce":
+      "npm run sauce -- 0 && npm run sauce -- 1 && npm run sauce -- 2",
     "test:types": "tsc -p ./types/test/tsconfig.json",
-    "lint": "eslint --fix src scripts test",
+    "lint":
+      "eslint --ext .js,.vue --fix . && prettier --list-different --write \"**/*.{js,ts,json,css,vue,md}\"",
     "flow": "flow check",
     "sauce": "karma start test/unit/karma.sauce.config.js",
-    "bench:ssr": "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",
+    "bench:ssr":
+      "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",
     "release": "bash scripts/release.sh",
     "release:weex": "bash scripts/release-weex.sh",
     "release:note": "node scripts/gen-release-note.js",
@@ -47,18 +58,16 @@
     "commit-msg": "node scripts/verify-commit-msg.js"
   },
   "lint-staged": {
-    "*.js": [
-      "eslint --fix",
-      "git add"
-    ]
+    "*.js": ["eslint --fix", "prettier --write", "git add"],
+    "*.json": ["prettier --write", "git add"],
+    "*.vue": ["eslint --fix", "prettier --write", "git add"],
+    "*.md": ["prettier --write", "git add"]
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vuejs/vue.git"
   },
-  "keywords": [
-    "vue"
-  ],
+  "keywords": ["vue"],
   "author": "Evan You",
   "license": "MIT",
   "bugs": {
@@ -91,6 +100,7 @@
     "es6-promise": "^4.1.0",
     "escodegen": "^1.8.1",
     "eslint": "^4.13.1",
+    "eslint-config-prettier": "^2.9.0",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-flowtype": "^2.34.0",
     "eslint-plugin-jasmine": "^2.8.4",
@@ -121,6 +131,7 @@
     "nightwatch": "^0.9.16",
     "nightwatch-helpers": "^1.2.0",
     "phantomjs-prebuilt": "^2.1.14",
+    "prettier": "^1.11.1",
     "resolve": "^1.3.3",
     "rollup": "^0.54.1",
     "rollup-plugin-alias": "^1.3.1",

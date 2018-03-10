@@ -29,7 +29,9 @@ describe('Single File Component parser', () => {
     expect(res.styles[0].src).toBe('./test.css')
     expect(res.styles[1].lang).toBe('stylus')
     expect(res.styles[1].scoped).toBe(true)
-    expect(res.styles[1].content.trim()).toBe('h1\n  color red\nh2\n  color green')
+    expect(res.styles[1].content.trim()).toBe(
+      'h1\n  color red\nh2\n  color green'
+    )
     expect(res.styles[2].module).toBe(true)
     expect(res.styles[3].attrs['bool-attr']).toBe(true)
     expect(res.styles[3].attrs['val-attr']).toBe('test')
@@ -52,7 +54,9 @@ describe('Single File Component parser', () => {
         <div><template v-if="ok">hi</template></div>
       </template>
     `)
-    expect(res.template.content.trim()).toBe('<div><template v-if="ok">hi</template></div>')
+    expect(res.template.content.trim()).toBe(
+      '<div><template v-if="ok">hi</template></div>'
+    )
   })
 
   it('pad content', () => {
@@ -71,21 +75,33 @@ describe('Single File Component parser', () => {
     const padLine = parseComponent(content.trim(), { pad: 'line' })
     const padSpace = parseComponent(content.trim(), { pad: 'space' })
 
-    expect(padDefault.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
-    expect(padDefault.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
-    expect(padLine.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
-    expect(padLine.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
-    expect(padSpace.script.content).toBe(`<template>
+    expect(padDefault.script.content).toBe(
+      Array(3 + 1).join('//\n') + '\nexport default {}\n'
+    )
+    expect(padDefault.styles[0].content).toBe(
+      Array(6 + 1).join('\n') + '\nh1 { color: red }\n'
+    )
+    expect(padLine.script.content).toBe(
+      Array(3 + 1).join('//\n') + '\nexport default {}\n'
+    )
+    expect(padLine.styles[0].content).toBe(
+      Array(6 + 1).join('\n') + '\nh1 { color: red }\n'
+    )
+    expect(padSpace.script.content).toBe(
+      `<template>
         <div></div>
       </template>
-      <script>`.replace(/./g, ' ') + '\nexport default {}\n')
-    expect(padSpace.styles[0].content).toBe(`<template>
+      <script>`.replace(/./g, ' ') + '\nexport default {}\n'
+    )
+    expect(padSpace.styles[0].content).toBe(
+      `<template>
         <div></div>
       </template>
       <script>
         export default {}
       </script>
-      <style>`.replace(/./g, ' ') + '\nh1 { color: red }\n')
+      <style>`.replace(/./g, ' ') + '\nh1 { color: red }\n'
+    )
   })
 
   it('should handle template blocks with lang as special text', () => {
@@ -132,17 +148,22 @@ describe('Single File Component parser', () => {
 
     const simpleExample = res.customBlocks[0]
     expect(simpleExample.type).toBe('example')
-    expect(simpleExample.content.trim()).toBe('<my-button ref="button">Hello</my-button>')
+    expect(simpleExample.content.trim()).toBe(
+      '<my-button ref="button">Hello</my-button>'
+    )
     expect(simpleExample.attrs.name).toBe('simple')
 
     const withProps = res.customBlocks[1]
     expect(withProps.type).toBe('example')
-    expect(withProps.content.trim()).toBe('<my-button color="red">Hello</my-button>')
+    expect(withProps.content.trim()).toBe(
+      '<my-button color="red">Hello</my-button>'
+    )
     expect(withProps.attrs.name).toBe('with props')
 
     const simpleTest = res.customBlocks[2]
     expect(simpleTest.type).toBe('test')
-    expect(simpleTest.content.trim()).toBe(`export default function simple (vm) {
+    expect(simpleTest.content.trim())
+      .toBe(`export default function simple (vm) {
   describe('Hello', () => {
     it('should display Hello', () => {
       this.vm.$refs.button.$el.innerText.should.equal('Hello')

@@ -1,19 +1,17 @@
 /* @flow */
 
-function getVNodeType (vnode: VNode): string {
+function getVNodeType(vnode: VNode): string {
   if (!vnode.tag) {
     return ''
   }
   return vnode.tag.replace(/vue\-component\-(\d+\-)?/, '')
 }
 
-function isSimpleSpan (vnode: VNode): boolean {
-  return vnode.children &&
-    vnode.children.length === 1 &&
-    !vnode.children[0].tag
+function isSimpleSpan(vnode: VNode): boolean {
+  return vnode.children && vnode.children.length === 1 && !vnode.children[0].tag
 }
 
-function parseStyle (vnode: VNode): Object | void {
+function parseStyle(vnode: VNode): Object | void {
   if (!vnode || !vnode.data) {
     return
   }
@@ -31,7 +29,7 @@ function parseStyle (vnode: VNode): Object | void {
   }
 }
 
-function convertVNodeChildren (children: Array<VNode>): Array<VNode> | void {
+function convertVNodeChildren(children: Array<VNode>): Array<VNode> | void {
   if (!children.length) {
     return
   }
@@ -71,7 +69,7 @@ function convertVNodeChildren (children: Array<VNode>): Array<VNode> | void {
 
 export default {
   name: 'richtext',
-  render (h: Function) {
+  render(h: Function) {
     return h('weex:richtext', {
       on: this._events,
       attrs: {

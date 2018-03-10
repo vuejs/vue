@@ -37,7 +37,7 @@ describe('Delimiters', () => {
 
   it('delimiters should only affect vm', () => {
     const Component = Vue.extend({
-      data: function () {
+      data: function() {
         return {
           b: 2
         }
@@ -64,7 +64,7 @@ describe('Delimiters', () => {
 
     const Component = Vue.extend({
       template: '<span>[[ a ]]</span>',
-      data: function () {
+      data: function() {
         return {
           a: 2
         }
@@ -92,7 +92,7 @@ describe('Delimiters', () => {
     const Component = Vue.extend({
       delimiters: ['@{{', '}}'],
       template: '<span>@{{ a }}</span>',
-      data: function () {
+      data: function() {
         return {
           a: 2
         }

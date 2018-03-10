@@ -1,40 +1,45 @@
 import { warn, extend } from 'core/util/index'
 import { transitionProps, extractTransitionData } from './transition'
 
-const props = extend({
-  tag: String,
-  moveClass: String
-}, transitionProps)
+const props = extend(
+  {
+    tag: String,
+    moveClass: String
+  },
+  transitionProps
+)
 
 delete props.mode
 
 export default {
   props,
 
-  created () {
+  created() {
     const dom = this.$requireWeexModule('dom')
-    this.getPosition = el => new Promise((resolve, reject) => {
-      dom.getComponentRect(el.ref, res => {
-        if (!res.result) {
-          reject(new Error(`failed to get rect for element: ${el.tag}`))
-        } else {
-          resolve(res.size)
-        }
+    this.getPosition = el =>
+      new Promise((resolve, reject) => {
+        dom.getComponentRect(el.ref, res => {
+          if (!res.result) {
+            reject(new Error(`failed to get rect for element: ${el.tag}`))
+          } else {
+            resolve(res.size)
+          }
+        })
       })
-    })
 
     const animation = this.$requireWeexModule('animation')
-    this.animate = (el, options) => new Promise(resolve => {
-      animation.transition(el.ref, options, resolve)
-    })
+    this.animate = (el, options) =>
+      new Promise(resolve => {
+        animation.transition(el.ref, options, resolve)
+      })
   },
 
-  render (h) {
+  render(h) {
     const tag = this.tag || this.$vnode.data.tag || 'span'
     const map = Object.create(null)
-    const prevChildren = this.prevChildren = this.children
+    const prevChildren = (this.prevChildren = this.children)
     const rawChildren = this.$slots.default || []
-    const children = this.children = []
+    const children = (this.children = [])
     const transitionData = extractTransitionData(this)
 
     for (let i = 0; i < rawChildren.length; i++) {
@@ -46,9 +51,7 @@ export default {
           ;(c.data || (c.data = {})).transition = transitionData
         } else if (process.env.NODE_ENV !== 'production') {
           const opts = c.componentOptions
-          const name = opts
-            ? (opts.Ctor.options.name || opts.tag)
-            : c.tag
+          const name = opts ? opts.Ctor.options.name || opts.tag : c.tag
           warn(`<transition-group> children must be keyed: <${name}>`)
         }
       }
@@ -75,7 +78,7 @@ export default {
     return h(tag, null, children)
   },
 
-  beforeUpdate () {
+  beforeUpdate() {
     // force removing pass
     this.__patch__(
       this._vnode,
@@ -86,10 +89,11 @@ export default {
     this._vnode = this.kept
   },
 
-  updated () {
+  updated() {
     const children = this.prevChildren
-    const moveClass = this.moveClass || ((this.name || 'v') + '-move')
-    const moveData = children.length && this.getMoveData(children[0].context, moveClass)
+    const moveClass = this.moveClass || (this.name || 'v') + '-move'
+    const moveData =
+      children.length && this.getMoveData(children[0].context, moveClass)
     if (!moveData) {
       return
     }
@@ -129,7 +133,7 @@ export default {
   },
 
   methods: {
-    getMoveData (context, moveClass) {
+    getMoveData(context, moveClass) {
       const stylesheet = context.$options.style || {}
       return stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][moveClass]
     }

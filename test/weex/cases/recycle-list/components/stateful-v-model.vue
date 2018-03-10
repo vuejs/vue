@@ -7,15 +7,12 @@
 </template>
 
 <script>
-  // require('./editor.vue')
-  module.exports = {
-    data () {
-      return {
-        longList: [
-          { type: 'A' },
-          { type: 'A' }
-        ]
-      }
+// require('./editor.vue')
+module.exports = {
+  data() {
+    return {
+      longList: [{ type: 'A' }, { type: 'A' }]
     }
   }
+}
 </script>

@@ -9,17 +9,20 @@ var red = ref.red;
 var yellow = ref.yellow;
 
 var prefix = "[vue-server-renderer-webpack-plugin]";
-var warn = exports.warn = function (msg) { return console.error(red((prefix + " " + msg + "\n"))); };
-var tip = exports.tip = function (msg) { return console.log(yellow((prefix + " " + msg + "\n"))); };
+var warn = (exports.warn = function (msg) { return console.error(red((prefix + " " + msg + "\n"))); });
+var tip = (exports.tip = function (msg) { return console.log(yellow((prefix + " " + msg + "\n"))); });
 
 var hash = require('hash-sum');
 var uniq = require('lodash.uniq');
-var VueSSRClientPlugin = function VueSSRClientPlugin (options) {
+var VueSSRClientPlugin = function VueSSRClientPlugin(options) {
   if ( options === void 0 ) options = {};
 
-  this.options = Object.assign({
-    filename: 'vue-ssr-client-manifest.json'
-  }, options);
+  this.options = Object.assign(
+    {
+      filename: 'vue-ssr-client-manifest.json'
+    },
+    options
+  );
 };
 
 VueSSRClientPlugin.prototype.apply = function apply (compiler) {
@@ -28,13 +31,14 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
   compiler.plugin('emit', function (compilation, cb) {
     var stats = compilation.getStats().toJson();
 
-    var allFiles = uniq(stats.assets
-      .map(function (a) { return a.name; }));
+    var allFiles = uniq(stats.assets.map(function (a) { return a.name; }));
 
-    var initialFiles = uniq(Object.keys(stats.entrypoints)
-      .map(function (name) { return stats.entrypoints[name].assets; })
-      .reduce(function (assets, all) { return all.concat(assets); }, [])
-      .filter(isJS));
+    var initialFiles = uniq(
+      Object.keys(stats.entrypoints)
+        .map(function (name) { return stats.entrypoints[name].assets; })
+        .reduce(function (assets, all) { return all.concat(assets); }, [])
+        .filter(isJS)
+    );
 
     var asyncFiles = allFiles
       .filter(isJS)
@@ -45,7 +49,9 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
       all: allFiles,
       initial: initialFiles,
       async: asyncFiles,
-      modules: { /* [identifier: string]: Array<index: number> */ }
+      modules: {
+        /* [identifier: string]: Array<index: number> */
+      }
     };
 
     var assetModules = stats.modules.filter(function (m) { return m.assets.length; });
@@ -58,7 +64,9 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
         if (!chunk || !chunk.files) {
           return
         }
-        var files = manifest.modules[hash(m.identifier)] = chunk.files.map(fileToIndex);
+        var files = (manifest.modules[hash(m.identifier)] = chunk.files.map(
+          fileToIndex
+        ));
         // find all asset modules associated with the same chunk
         assetModules.forEach(function (m) {
           if (m.chunks.some(function (id) { return id === cid; })) {

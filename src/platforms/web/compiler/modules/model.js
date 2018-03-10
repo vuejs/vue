@@ -10,11 +10,7 @@
  *   <input v-else :type="type" v-model="data[type]">
  */
 
-import {
-  addRawAttr,
-  getBindingAttr,
-  getAndRemoveAttr
-} from 'compiler/helpers'
+import { addRawAttr, getBindingAttr, getAndRemoveAttr } from 'compiler/helpers'
 
 import {
   processFor,
@@ -23,7 +19,7 @@ import {
   createASTElement
 } from 'compiler/parser/index'
 
-function preTransformNode (el: ASTElement, options: CompilerOptions) {
+function preTransformNode(el: ASTElement, options: CompilerOptions) {
   if (el.tag === 'input') {
     const map = el.attrsMap
     if (!map['v-model']) {
@@ -85,7 +81,7 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
   }
 }
 
-function cloneASTElement (el) {
+function cloneASTElement(el) {
   return createASTElement(el.tag, el.attrsList.slice(), el.parent)
 }
 

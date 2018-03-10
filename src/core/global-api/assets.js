@@ -3,12 +3,12 @@
 import { ASSET_TYPES } from 'shared/constants'
 import { isPlainObject, validateComponentName } from '../util/index'
 
-export function initAssetRegisters (Vue: GlobalAPI) {
+export function initAssetRegisters(Vue: GlobalAPI) {
   /**
    * Create asset registration methods.
    */
   ASSET_TYPES.forEach(type => {
-    Vue[type] = function (
+    Vue[type] = function(
       id: string,
       definition: Function | Object
     ): Function | Object | void {

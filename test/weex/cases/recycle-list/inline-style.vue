@@ -7,15 +7,14 @@
 </template>
 
 <script>
-  module.exports = {
-    data () {
-      return {
-        longList: [
-          { type: 'A', color: '#606060' },
-          { type: 'A', color: '#E5E5E5' }
-        ]
-      }
+module.exports = {
+  data() {
+    return {
+      longList: [
+        { type: 'A', color: '#606060' },
+        { type: 'A', color: '#E5E5E5' }
+      ]
     }
   }
+}
 </script>
-

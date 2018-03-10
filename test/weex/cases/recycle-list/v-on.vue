@@ -8,19 +8,15 @@
 </template>
 
 <script>
-  module.exports = {
-    data () {
-      return {
-        longList: [
-          { type: 'A' },
-          { type: 'A' }
-        ]
-      }
-    },
-    methods: {
-      handler () {},
-      move () {}
+module.exports = {
+  data() {
+    return {
+      longList: [{ type: 'A' }, { type: 'A' }]
     }
+  },
+  methods: {
+    handler() {},
+    move() {}
   }
+}
 </script>
-

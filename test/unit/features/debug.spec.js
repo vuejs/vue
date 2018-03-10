@@ -20,7 +20,9 @@ describe('Debug utilities', () => {
     expect(formatComponentName(vm, false)).toBe('<SomeThing>')
 
     vm.$options.__file = 'C:\\foo\\bar\\baz\\windows_file.vue'
-    expect(formatComponentName(vm)).toBe(`<WindowsFile> at ${vm.$options.__file}`)
+    expect(formatComponentName(vm)).toBe(
+      `<WindowsFile> at ${vm.$options.__file}`
+    )
     expect(formatComponentName(vm, false)).toBe('<WindowsFile>')
   })
 
@@ -56,7 +58,7 @@ found in
     let i = 0
     const one = {
       name: 'one',
-      render: h => i++ < 5 ? h(one) : h(two)
+      render: h => (i++ < 5 ? h(one) : h(two))
     }
     const two = {
       name: 'two',
@@ -90,7 +92,11 @@ found in
 
       warn(msg, vm)
 
-      expect(Vue.config.warnHandler).toHaveBeenCalledWith(msg, vm, jasmine.any(String))
+      expect(Vue.config.warnHandler).toHaveBeenCalledWith(
+        msg,
+        vm,
+        jasmine.any(String)
+      )
 
       Vue.config.warnHandler = null
     })

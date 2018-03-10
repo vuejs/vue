@@ -1,7 +1,7 @@
 module.exports = {
-  'async edge cases': function (browser) {
+  'async edge cases': function(browser) {
     browser
-    .url('http://localhost:8080/test/e2e/specs/async-edge-cases.html')
+      .url('http://localhost:8080/test/e2e/specs/async-edge-cases.html')
       // #4510
       .assert.containsText('#case-1', '1')
       .assert.checked('#case-1 input', false)

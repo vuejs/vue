@@ -1,13 +1,13 @@
 import Vue from 'vue'
 
-function checkPrefixedProp (prop) {
+function checkPrefixedProp(prop) {
   var el = document.createElement('div')
   var upper = prop.charAt(0).toUpperCase() + prop.slice(1)
   if (!(prop in el.style)) {
     var prefixes = ['Webkit', 'Moz', 'ms']
     var i = prefixes.length
     while (i--) {
-      if ((prefixes[i] + upper) in el.style) {
+      if (prefixes[i] + upper in el.style) {
         prop = prefixes[i] + upper
       }
     }
@@ -21,7 +21,7 @@ describe('Directive v-bind:style', () => {
   beforeEach(() => {
     vm = new Vue({
       template: '<div :style="styles"></div>',
-      data () {
+      data() {
         return {
           styles: {},
           fontSize: 16
@@ -62,9 +62,11 @@ describe('Directive v-bind:style', () => {
     vm.$el.style.color = 'red'
     waitForUpdate(() => {
       vm.styles = { color: null }
-    }).then(() => {
-      expect(vm.$el.style.color).toBe('')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.style.color).toBe('')
+      })
+      .then(done)
   })
 
   it('ignore unsupported property', done => {
@@ -115,19 +117,22 @@ describe('Directive v-bind:style', () => {
         color: 'blue',
         padding: null
       }
-    }).then(() => {
-      expect(vm.$el.style.getPropertyValue('color')).toBe('blue')
-      expect(vm.$el.style.getPropertyValue('padding')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('margin-left')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('margin-right')).toBeFalsy()
-      // handle falsy value
-      vm.styles = null
-    }).then(() => {
-      expect(vm.$el.style.getPropertyValue('color')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('padding')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('margin-left')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('margin-right')).toBeFalsy()
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.style.getPropertyValue('color')).toBe('blue')
+        expect(vm.$el.style.getPropertyValue('padding')).toBeFalsy()
+        expect(vm.$el.style.getPropertyValue('margin-left')).toBeFalsy()
+        expect(vm.$el.style.getPropertyValue('margin-right')).toBeFalsy()
+        // handle falsy value
+        vm.styles = null
+      })
+      .then(() => {
+        expect(vm.$el.style.getPropertyValue('color')).toBeFalsy()
+        expect(vm.$el.style.getPropertyValue('padding')).toBeFalsy()
+        expect(vm.$el.style.getPropertyValue('margin-left')).toBeFalsy()
+        expect(vm.$el.style.getPropertyValue('margin-right')).toBeFalsy()
+      })
+      .then(done)
   })
 
   it('array of objects', done => {
@@ -139,11 +144,13 @@ describe('Directive v-bind:style', () => {
       expect(vm.$el.style.getPropertyValue('margin-right')).toBe('20px')
       expect(vm.$el.style.getPropertyValue('padding')).toBe('10px')
       vm.styles = [{ color: 'blue' }, { padding: null }]
-    }).then(() => {
-      expect(vm.$el.style.getPropertyValue('color')).toBe('blue')
-      expect(vm.$el.style.getPropertyValue('margin-right')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('padding')).toBeFalsy()
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.style.getPropertyValue('color')).toBe('blue')
+        expect(vm.$el.style.getPropertyValue('margin-right')).toBeFalsy()
+        expect(vm.$el.style.getPropertyValue('padding')).toBeFalsy()
+      })
+      .then(done)
   })
 
   it('updates objects deeply', done => {
@@ -151,15 +158,19 @@ describe('Directive v-bind:style', () => {
     waitForUpdate(() => {
       expect(vm.$el.style.display).toBe('none')
       vm.styles.display = 'block'
-    }).then(() => {
-      expect(vm.$el.style.display).toBe('block')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.style.display).toBe('block')
+      })
+      .then(done)
   })
 
   it('background size with only one value', done => {
     vm.styles = { backgroundSize: '100%' }
     waitForUpdate(() => {
-      expect(vm.$el.style.cssText.replace(/\s/g, '')).toMatch(/background-size:100%(auto)?;/)
+      expect(vm.$el.style.cssText.replace(/\s/g, '')).toMatch(
+        /background-size:100%(auto)?;/
+      )
     }).then(done)
   })
 
@@ -187,26 +198,31 @@ describe('Directive v-bind:style', () => {
 
   it('should merge static style with binding style', () => {
     const vm = new Vue({
-      template: '<div style="background: url(https://vuejs.org/images/logo.png);color: blue" :style="test"></div>',
+      template:
+        '<div style="background: url(https://vuejs.org/images/logo.png);color: blue" :style="test"></div>',
       data: {
         test: { color: 'red', fontSize: '12px' }
       }
     }).$mount()
     const style = vm.$el.style
-    expect(style.getPropertyValue('background-image')).toMatch('https://vuejs.org/images/logo.png')
+    expect(style.getPropertyValue('background-image')).toMatch(
+      'https://vuejs.org/images/logo.png'
+    )
     expect(style.getPropertyValue('color')).toBe('red')
     expect(style.getPropertyValue('font-size')).toBe('12px')
   })
 
   it('should merge between parent and child', done => {
     const vm = new Vue({
-      template: '<child style="text-align: left;margin-right:20px" :style="test"></child>',
+      template:
+        '<child style="text-align: left;margin-right:20px" :style="test"></child>',
       data: {
         test: { color: 'red', fontSize: '12px' }
       },
       components: {
         child: {
-          template: '<div style="margin-right:10px;" :style="{marginLeft: marginLeft}"></div>',
+          template:
+            '<div style="margin-right:10px;" :style="{marginLeft: marginLeft}"></div>',
           data: () => ({ marginLeft: '16px' })
         }
       }
@@ -225,12 +241,15 @@ describe('Directive v-bind:style', () => {
     waitForUpdate(() => {
       expect(style.color).toBe('blue')
       child.marginLeft = '30px'
-    }).then(() => {
-      expect(style.marginLeft).toBe('30px')
-      child.fontSize = '30px'
-    }).then(() => {
-      expect(style.fontSize).toBe('12px')
-    }).then(done)
+    })
+      .then(() => {
+        expect(style.marginLeft).toBe('30px')
+        child.fontSize = '30px'
+      })
+      .then(() => {
+        expect(style.fontSize).toBe('12px')
+      })
+      .then(done)
   })
 
   it('should not pass to child root element', () => {
@@ -241,7 +260,8 @@ describe('Directive v-bind:style', () => {
       },
       components: {
         child: {
-          template: '<div><nested ref="nested" style="color: blue;text-align:left"></nested></div>',
+          template:
+            '<div><nested ref="nested" style="color: blue;text-align:left"></nested></div>',
           components: {
             nested: {
               template: '<div></div>'
@@ -257,7 +277,7 @@ describe('Directive v-bind:style', () => {
     expect(vm.$children[0].$refs.nested.$el.style.color).toBe('blue')
   })
 
-  it('should merge between nested components', (done) => {
+  it('should merge between nested components', done => {
     const vm = new Vue({
       template: '<child :style="test"></child>',
       data: {
@@ -268,8 +288,9 @@ describe('Directive v-bind:style', () => {
           template: '<nested style="color: blue;text-align:left"></nested>',
           components: {
             nested: {
-              template: '<div style="margin-left: 12px;" :style="nestedStyle"></div>',
-              data: () => ({ nestedStyle: { marginLeft: '30px' }})
+              template:
+                '<div style="margin-left: 12px;" :style="nestedStyle"></div>',
+              data: () => ({ nestedStyle: { marginLeft: '30px' } })
             }
           }
         }
@@ -284,25 +305,28 @@ describe('Directive v-bind:style', () => {
     vm.test.color = 'yellow'
     waitForUpdate(() => {
       child.nestedStyle.marginLeft = '60px'
-    }).then(() => {
-      expect(style.marginLeft).toBe('60px')
-      child.nestedStyle = {
-        fontSize: '14px',
-        marginLeft: '40px'
-      }
-    }).then(() => {
-      expect(style.fontSize).toBe('12px')
-      expect(style.marginLeft).toBe('40px')
-    }).then(done)
+    })
+      .then(() => {
+        expect(style.marginLeft).toBe('60px')
+        child.nestedStyle = {
+          fontSize: '14px',
+          marginLeft: '40px'
+        }
+      })
+      .then(() => {
+        expect(style.fontSize).toBe('12px')
+        expect(style.marginLeft).toBe('40px')
+      })
+      .then(done)
   })
 
-  it('should not merge for different adjacent elements', (done) => {
+  it('should not merge for different adjacent elements', done => {
     const vm = new Vue({
       template:
         '<div>' +
-          '<section style="color: blue" :style="style" v-if="!bool"></section>' +
-          '<div></div>' +
-          '<section style="margin-top: 12px" v-if="bool"></section>' +
+        '<section style="color: blue" :style="style" v-if="!bool"></section>' +
+        '<div></div>' +
+        '<section style="margin-top: 12px" v-if="bool"></section>' +
         '</div>',
       data: {
         bool: false,
@@ -316,21 +340,23 @@ describe('Directive v-bind:style', () => {
     expect(style.color).toBe('blue')
     waitForUpdate(() => {
       vm.bool = true
-    }).then(() => {
-      expect(style.color).toBe('')
-      expect(style.fontSize).toBe('')
-      expect(style.marginTop).toBe('12px')
-    }).then(done)
+    })
+      .then(() => {
+        expect(style.color).toBe('')
+        expect(style.fontSize).toBe('')
+        expect(style.marginTop).toBe('12px')
+      })
+      .then(done)
   })
 
-  it('should not merge for v-if, v-else-if and v-else elements', (done) => {
+  it('should not merge for v-if, v-else-if and v-else elements', done => {
     const vm = new Vue({
       template:
         '<div>' +
-          '<section style="color: blue" :style="style" v-if="foo"></section>' +
-          '<section style="margin-top: 12px" v-else-if="bar"></section>' +
-          '<section style="margin-bottom: 24px" v-else></section>' +
-          '<div></div>' +
+        '<section style="color: blue" :style="style" v-if="foo"></section>' +
+        '<section style="margin-top: 12px" v-else-if="bar"></section>' +
+        '<section style="margin-bottom: 24px" v-else></section>' +
+        '<div></div>' +
         '</div>',
       data: {
         foo: true,
@@ -345,17 +371,20 @@ describe('Directive v-bind:style', () => {
     expect(style.color).toBe('blue')
     waitForUpdate(() => {
       vm.foo = false
-    }).then(() => {
-      expect(style.color).toBe('')
-      expect(style.fontSize).toBe('')
-      expect(style.marginBottom).toBe('24px')
-      vm.bar = true
-    }).then(() => {
-      expect(style.color).toBe('')
-      expect(style.fontSize).toBe('')
-      expect(style.marginBottom).toBe('')
-      expect(style.marginTop).toBe('12px')
-    }).then(done)
+    })
+      .then(() => {
+        expect(style.color).toBe('')
+        expect(style.fontSize).toBe('')
+        expect(style.marginBottom).toBe('24px')
+        vm.bar = true
+      })
+      .then(() => {
+        expect(style.color).toBe('')
+        expect(style.fontSize).toBe('')
+        expect(style.marginBottom).toBe('')
+        expect(style.marginTop).toBe('12px')
+      })
+      .then(done)
   })
 
   // #5318

@@ -25,8 +25,8 @@ const normalizeEvent = cached((name: string): {
   }
 })
 
-export function createFnInvoker (fns: Function | Array<Function>): Function {
-  function invoker () {
+export function createFnInvoker(fns: Function | Array<Function>): Function {
+  function invoker() {
     const fns = invoker.fns
     if (Array.isArray(fns)) {
       const cloned = fns.slice()
@@ -42,7 +42,7 @@ export function createFnInvoker (fns: Function | Array<Function>): Function {
   return invoker
 }
 
-export function updateListeners (
+export function updateListeners(
   on: Object,
   oldOn: Object,
   add: Function,
@@ -60,15 +60,23 @@ export function updateListeners (
       event.params = def.params
     }
     if (isUndef(cur)) {
-      process.env.NODE_ENV !== 'production' && warn(
-        `Invalid handler for event "${event.name}": got ` + String(cur),
-        vm
-      )
+      process.env.NODE_ENV !== 'production' &&
+        warn(
+          `Invalid handler for event "${event.name}": got ` + String(cur),
+          vm
+        )
     } else if (isUndef(old)) {
       if (isUndef(cur.fns)) {
         cur = on[name] = createFnInvoker(cur)
       }
-      add(event.name, cur, event.once, event.capture, event.passive, event.params)
+      add(
+        event.name,
+        cur,
+        event.once,
+        event.capture,
+        event.passive,
+        event.params
+      )
     } else if (cur !== old) {
       old.fns = cur
       on[name] = old

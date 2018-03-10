@@ -5,7 +5,10 @@ import { baseOptions } from 'web/compiler/options'
 
 describe('optimizer', () => {
   it('simple', () => {
-    const ast = parse('<h1 id="section1"><span>hello world</span></h1>', baseOptions)
+    const ast = parse(
+      '<h1 id="section1"><span>hello world</span></h1>',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     expect(ast.static).toBe(true) // h1
     expect(ast.staticRoot).toBe(true)
@@ -13,10 +16,16 @@ describe('optimizer', () => {
   })
 
   it('simple with comment', () => {
-    const options = extend({
-      comments: true
-    }, baseOptions)
-    const ast = parse('<h1 id="section1"><span>hello world</span><!--comment--></h1>', options)
+    const options = extend(
+      {
+        comments: true
+      },
+      baseOptions
+    )
+    const ast = parse(
+      '<h1 id="section1"><span>hello world</span><!--comment--></h1>',
+      options
+    )
     optimize(ast, options)
     expect(ast.static).toBe(true) // h1
     expect(ast.staticRoot).toBe(true)
@@ -54,7 +63,10 @@ describe('optimizer', () => {
   })
 
   it('nested complex elements', () => {
-    const ast = parse('<ul><li>{{msg1}}</li><li>---</li><li>{{msg2}}</li></ul>', baseOptions)
+    const ast = parse(
+      '<ul><li>{{msg1}}</li><li>---</li><li>{{msg2}}</li></ul>',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     // ul
     expect(ast.static).toBe(false) // ul
@@ -69,14 +81,20 @@ describe('optimizer', () => {
   })
 
   it('v-if directive', () => {
-    const ast = parse('<div id="section1" v-if="show"><p><span>hello world</span></p></div>', baseOptions)
+    const ast = parse(
+      '<div id="section1" v-if="show"><p><span>hello world</span></p></div>',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(true)
   })
 
   it('v-else directive', () => {
-    const ast = parse('<div><p v-if="show">hello world</p><div v-else><p><span>foo bar</span></p></div></div>', baseOptions)
+    const ast = parse(
+      '<div><p v-if="show">hello world</p><div v-else><p><span>foo bar</span></p></div></div>',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(false)
@@ -87,7 +105,10 @@ describe('optimizer', () => {
   })
 
   it('v-pre directive', () => {
-    const ast = parse('<ul v-pre><li>{{msg}}</li><li>world</li></ul>', baseOptions)
+    const ast = parse(
+      '<ul v-pre><li>{{msg}}</li><li>world</li></ul>',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     expect(ast.static).toBe(true)
     expect(ast.staticRoot).toBe(true)
@@ -98,7 +119,10 @@ describe('optimizer', () => {
   })
 
   it('v-for directive', () => {
-    const ast = parse('<ul><li v-for="item in items">hello world {{$index}}</li></ul>', baseOptions)
+    const ast = parse(
+      '<ul><li v-for="item in items">hello world {{$index}}</li></ul>',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     // ul
     expect(ast.static).toBe(false)
@@ -122,7 +146,10 @@ describe('optimizer', () => {
   })
 
   it('named slot', () => {
-    const ast = parse('<div><slot name="one">hello world</slot></div>', baseOptions)
+    const ast = parse(
+      '<div><slot name="one">hello world</slot></div>',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     expect(ast.children[0].static).toBe(false) // slot
     expect(ast.children[0].children[0].static).toBe(true) // text node
@@ -142,7 +169,10 @@ describe('optimizer', () => {
   })
 
   it('component for inline-template', () => {
-    const ast = parse('<my-component inline-template><p>hello world</p><p>{{msg}}</p></my-component>', baseOptions)
+    const ast = parse(
+      '<my-component inline-template><p>hello world</p><p>{{msg}}</p></my-component>',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     // component
     expect(ast.static).toBe(false) // component
@@ -183,26 +213,38 @@ describe('optimizer', () => {
   })
 
   it('transition', () => {
-    const ast = parse('<p v-if="show" transition="expand">hello world</p>', baseOptions)
+    const ast = parse(
+      '<p v-if="show" transition="expand">hello world</p>',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(true)
   })
 
   it('v-bind directive', () => {
-    const ast = parse('<input type="text" name="field1" :value="msg">', baseOptions)
+    const ast = parse(
+      '<input type="text" name="field1" :value="msg">',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
   })
 
   it('v-on directive', () => {
-    const ast = parse('<input type="text" name="field1" :value="msg" @input="onInput">', baseOptions)
+    const ast = parse(
+      '<input type="text" name="field1" :value="msg" @input="onInput">',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
   })
 
   it('custom directive', () => {
-    const ast = parse('<form><input type="text" name="field1" :value="msg" v-validate:field1="required"></form>', baseOptions)
+    const ast = parse(
+      '<form><input type="text" name="field1" :value="msg" v-validate:field1="required"></form>',
+      baseOptions
+    )
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
     expect(ast.children[0].static).toBe(false)
@@ -221,14 +263,18 @@ describe('optimizer', () => {
   })
 
   it('mark static trees inside v-for', () => {
-    const ast = parse(`<div><div v-for="i in 10"><p><span>hi</span></p></div></div>`, baseOptions)
+    const ast = parse(
+      `<div><div v-for="i in 10"><p><span>hi</span></p></div></div>`,
+      baseOptions
+    )
     optimize(ast, baseOptions)
     expect(ast.children[0].children[0].staticRoot).toBe(true)
     expect(ast.children[0].children[0].staticInFor).toBe(true)
   })
 
   it('mark static trees inside v-for with nested v-else and v-once', () => {
-    const ast = parse(`
+    const ast = parse(
+      `
       <div v-if="1"></div>
       <div v-else-if="2">
         <div v-for="i in 10" :key="i">
@@ -243,15 +289,35 @@ describe('optimizer', () => {
           <div v-else v-once>{{ i }}</div>
         </div>
       </div>
-      `, baseOptions)
+      `,
+      baseOptions
+    )
     optimize(ast, baseOptions)
-    expect(ast.ifConditions[1].block.children[0].children[0].ifConditions[1].block.staticRoot).toBe(false)
-    expect(ast.ifConditions[1].block.children[0].children[0].ifConditions[1].block.staticInFor).toBe(true)
+    expect(
+      ast.ifConditions[1].block.children[0].children[0].ifConditions[1].block
+        .staticRoot
+    ).toBe(false)
+    expect(
+      ast.ifConditions[1].block.children[0].children[0].ifConditions[1].block
+        .staticInFor
+    ).toBe(true)
 
-    expect(ast.ifConditions[1].block.children[0].children[0].ifConditions[2].block.staticRoot).toBe(false)
-    expect(ast.ifConditions[1].block.children[0].children[0].ifConditions[2].block.staticInFor).toBe(true)
+    expect(
+      ast.ifConditions[1].block.children[0].children[0].ifConditions[2].block
+        .staticRoot
+    ).toBe(false)
+    expect(
+      ast.ifConditions[1].block.children[0].children[0].ifConditions[2].block
+        .staticInFor
+    ).toBe(true)
 
-    expect(ast.ifConditions[2].block.children[0].children[0].ifConditions[1].block.staticRoot).toBe(false)
-    expect(ast.ifConditions[2].block.children[0].children[0].ifConditions[1].block.staticInFor).toBe(true)
+    expect(
+      ast.ifConditions[2].block.children[0].children[0].ifConditions[1].block
+        .staticRoot
+    ).toBe(false)
+    expect(
+      ast.ifConditions[2].block.children[0].children[0].ifConditions[1].block
+        .staticInFor
+    ).toBe(true)
   })
 })

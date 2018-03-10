@@ -2,7 +2,7 @@
 
 import { extend } from 'shared/util'
 
-function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+function updateAttrs(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.attrs && !vnode.data.attrs) {
     return
   }
@@ -21,16 +21,12 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     cur = attrs[key]
     old = oldAttrs[key]
     if (old !== cur) {
-      supportBatchUpdate
-        ? (batchedAttrs[key] = cur)
-        : elm.setAttr(key, cur)
+      supportBatchUpdate ? (batchedAttrs[key] = cur) : elm.setAttr(key, cur)
     }
   }
   for (key in oldAttrs) {
     if (attrs[key] == null) {
-      supportBatchUpdate
-        ? (batchedAttrs[key] = undefined)
-        : elm.setAttr(key)
+      supportBatchUpdate ? (batchedAttrs[key] = undefined) : elm.setAttr(key)
     }
   }
   if (supportBatchUpdate) {

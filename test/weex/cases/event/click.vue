@@ -5,16 +5,16 @@
 </template>
 
 <script>
-  module.exports = {
-    data () {
-      return {
-        count: 42
-      }
-    },
-    methods: {
-      inc () {
-        this.count++
-      }
+module.exports = {
+  data() {
+    return {
+      count: 42
+    }
+  },
+  methods: {
+    inc() {
+      this.count++
     }
   }
+}
 </script>

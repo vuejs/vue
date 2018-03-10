@@ -15,8 +15,9 @@ describe('Options name', () => {
     })
 
     /* eslint-disable */
-    expect(`Invalid component name: "Hyper*Vue". Component names can only contain alphanumeric characters and the hyphen, and must start with a letter.`)
-      .toHaveBeenWarned()
+    expect(
+      `Invalid component name: "Hyper*Vue". Component names can only contain alphanumeric characters and the hyphen, and must start with a letter.`
+    ).toHaveBeenWarned()
     /* eslint-enable */
 
     Vue.extend({
@@ -24,8 +25,9 @@ describe('Options name', () => {
     })
 
     /* eslint-disable */
-    expect(`Invalid component name: "2Cool2BValid". Component names can only contain alphanumeric characters and the hyphen, and must start with a letter.`)
-      .toHaveBeenWarned()
+    expect(
+      `Invalid component name: "2Cool2BValid". Component names can only contain alphanumeric characters and the hyphen, and must start with a letter.`
+    ).toHaveBeenWarned()
     /* eslint-enable */
   })
 
@@ -34,7 +36,11 @@ describe('Options name', () => {
       name: 'SuperVue'
     })
 
-    expect(SuperComponent.options.components['SuperVue']).toEqual(SuperComponent)
-    expect(SuperComponent.options.components['super-component']).toEqual(SuperComponent)
+    expect(SuperComponent.options.components['SuperVue']).toEqual(
+      SuperComponent
+    )
+    expect(SuperComponent.options.components['super-component']).toEqual(
+      SuperComponent
+    )
   })
 })

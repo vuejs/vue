@@ -12,11 +12,11 @@ describe('Options lifecycle hooks', () => {
         data: {
           a: 1
         },
-        beforeCreate () {
+        beforeCreate() {
           spy()
           expect(this.a).toBeUndefined()
           this.$options.computed = {
-            b () {
+            b() {
               return this.a + 1
             }
           }
@@ -33,7 +33,7 @@ describe('Options lifecycle hooks', () => {
         data: {
           a: 1
         },
-        created () {
+        created() {
           expect(this.a).toBe(1)
           spy()
         }
@@ -45,8 +45,8 @@ describe('Options lifecycle hooks', () => {
   describe('beforeMount', () => {
     it('should not have mounted', () => {
       const vm = new Vue({
-        render () {},
-        beforeMount () {
+        render() {},
+        beforeMount() {
           spy()
           expect(this._isMounted).toBe(false)
           expect(this.$el).toBeUndefined() // due to empty mount
@@ -64,7 +64,7 @@ describe('Options lifecycle hooks', () => {
     it('should have mounted', () => {
       const vm = new Vue({
         template: '<div></div>',
-        mounted () {
+        mounted() {
           spy()
           expect(this._isMounted).toBe(true)
           expect(this.$el.tagName).toBe('DIV')
@@ -83,7 +83,7 @@ describe('Options lifecycle hooks', () => {
       new Vue({
         parent,
         template: '<div></div>',
-        mounted () {
+        mounted() {
           spy()
         }
       }).$mount()
@@ -94,20 +94,20 @@ describe('Options lifecycle hooks', () => {
       const calls = []
       new Vue({
         template: '<div><test></test></div>',
-        mounted () {
+        mounted() {
           calls.push('parent')
         },
         components: {
           test: {
             template: '<nested></nested>',
-            mounted () {
+            mounted() {
               expect(this.$el.parentNode).toBeTruthy()
               calls.push('child')
             },
             components: {
               nested: {
                 template: '<div></div>',
-                mounted () {
+                mounted() {
                   expect(this.$el.parentNode).toBeTruthy()
                   calls.push('nested')
                 }
@@ -125,7 +125,7 @@ describe('Options lifecycle hooks', () => {
       const vm = new Vue({
         template: '<div>{{ msg }}</div>',
         data: { msg: 'foo' },
-        beforeUpdate () {
+        beforeUpdate() {
           spy()
           expect(this.$el.textContent).toBe('foo')
         }
@@ -144,7 +144,7 @@ describe('Options lifecycle hooks', () => {
       const vm = new Vue({
         template: '<div>{{ msg }}</div>',
         data: { msg: 'foo' },
-        updated () {
+        updated() {
           spy()
           expect(this.$el.textContent).toBe('bar')
         }
@@ -165,13 +165,13 @@ describe('Options lifecycle hooks', () => {
         components: {
           test: {
             template: `<div><slot></slot></div>`,
-            updated () {
+            updated() {
               expect(this.$el.textContent).toBe('bar')
               calls.push('child')
             }
           }
         },
-        updated () {
+        updated() {
           expect(this.$el.textContent).toBe('bar')
           calls.push('parent')
         }
@@ -189,8 +189,8 @@ describe('Options lifecycle hooks', () => {
   describe('beforeDestroy', () => {
     it('should be called before destroy', () => {
       const vm = new Vue({
-        render () {},
-        beforeDestroy () {
+        render() {},
+        beforeDestroy() {
           spy()
           expect(this._isBeingDestroyed).toBe(false)
           expect(this._isDestroyed).toBe(false)
@@ -207,8 +207,8 @@ describe('Options lifecycle hooks', () => {
   describe('destroyed', () => {
     it('should be called after destroy', () => {
       const vm = new Vue({
-        render () {},
-        destroyed () {
+        render() {},
+        destroyed() {
           spy()
           expect(this._isBeingDestroyed).toBe(true)
           expect(this._isDestroyed).toBe(true)
@@ -227,8 +227,8 @@ describe('Options lifecycle hooks', () => {
     const mounted = jasmine.createSpy()
     const destroyed = jasmine.createSpy()
     const vm = new Vue({
-      render () {},
-      beforeCreate () {
+      render() {},
+      beforeCreate() {
         this.$on('hook:created', created)
         this.$on('hook:mounted', mounted)
         this.$on('hook:destroyed', destroyed)

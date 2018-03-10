@@ -8,16 +8,19 @@ const acorn = require('acorn') // $flow-disable-line
 const walk = require('acorn/dist/walk') // $flow-disable-line
 const escodegen = require('escodegen')
 
-export function nodeToBinding (node: Object): any {
+export function nodeToBinding(node: Object): any {
   switch (node.type) {
-    case 'Literal': return node.value
+    case 'Literal':
+      return node.value
     case 'Identifier':
     case 'UnaryExpression':
     case 'BinaryExpression':
     case 'LogicalExpression':
     case 'ConditionalExpression':
-    case 'MemberExpression': return { '@binding': escodegen.generate(node) }
-    case 'ArrayExpression': return node.elements.map(_ => nodeToBinding(_))
+    case 'MemberExpression':
+      return { '@binding': escodegen.generate(node) }
+    case 'ArrayExpression':
+      return node.elements.map(_ => nodeToBinding(_))
     case 'ObjectExpression': {
       const object = {}
       node.properties.forEach(prop => {
@@ -39,7 +42,7 @@ export function nodeToBinding (node: Object): any {
   }
 }
 
-export function generateBinding (exp: ?string): any {
+export function generateBinding(exp: ?string): any {
   if (exp && typeof exp === 'string') {
     let ast = null
     try {
@@ -51,7 +54,7 @@ export function generateBinding (exp: ?string): any {
 
     let output = ''
     walk.simple(ast, {
-      Expression (node) {
+      Expression(node) {
         output = nodeToBinding(node)
       }
     })

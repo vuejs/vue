@@ -12,7 +12,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return { msg: 'hello' }
           },
           template: `
@@ -40,7 +40,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return { msg: 'hello' }
           },
           template: `
@@ -70,7 +70,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return {
               msg: 'hello',
               obj: { msg2: 'world', msg3: '.' }
@@ -103,7 +103,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return {
               text: 'some text'
             }
@@ -129,7 +129,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return {
               foo: {
                 text: 'some text'
@@ -144,7 +144,9 @@ describe('Component scoped slot', () => {
         }
       }
     }).$mount()
-    expect('slot v-bind without argument expects an Object').not.toHaveBeenWarned()
+    expect(
+      'slot v-bind without argument expects an Object'
+    ).not.toHaveBeenWarned()
   })
 
   it('named scoped slot', done => {
@@ -158,7 +160,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return { foo: 'FOO', bar: 'BAR' }
           },
           template: `
@@ -186,7 +188,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return { foo: 'FOO', bar: 'BAR' }
           },
           template: `
@@ -210,7 +212,7 @@ describe('Component scoped slot', () => {
       template: `<test></test>`,
       components: {
         test: {
-          data () {
+          data() {
             return { msg: 'hello' }
           },
           template: `
@@ -237,7 +239,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return {
               items: ['foo', 'bar', 'baz']
             }
@@ -251,17 +253,24 @@ describe('Component scoped slot', () => {
       }
     }).$mount()
 
-    function assertOutput () {
-      expect(vm.$el.innerHTML).toBe(vm.$refs.test.items.map(item => {
-        return `<span>${item}</span>`
-      }).join(''))
+    function assertOutput() {
+      expect(vm.$el.innerHTML).toBe(
+        vm.$refs.test.items
+          .map(item => {
+            return `<span>${item}</span>`
+          })
+          .join('')
+      )
     }
 
     assertOutput()
     vm.$refs.test.items.reverse()
-    waitForUpdate(assertOutput).then(() => {
-      vm.$refs.test.items.push('qux')
-    }).then(assertOutput).then(done)
+    waitForUpdate(assertOutput)
+      .then(() => {
+        vm.$refs.test.items.push('qux')
+      })
+      .then(assertOutput)
+      .then(done)
   })
 
   it('slot inside v-for', done => {
@@ -275,7 +284,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return {
               items: ['foo', 'bar', 'baz']
             }
@@ -291,17 +300,24 @@ describe('Component scoped slot', () => {
       }
     }).$mount()
 
-    function assertOutput () {
-      expect(vm.$el.innerHTML).toBe(vm.$refs.test.items.map(item => {
-        return `<li><span>${item}</span></li>`
-      }).join(''))
+    function assertOutput() {
+      expect(vm.$el.innerHTML).toBe(
+        vm.$refs.test.items
+          .map(item => {
+            return `<li><span>${item}</span></li>`
+          })
+          .join('')
+      )
     }
 
     assertOutput()
     vm.$refs.test.items.reverse()
-    waitForUpdate(assertOutput).then(() => {
-      vm.$refs.test.items.push('qux')
-    }).then(assertOutput).then(done)
+    waitForUpdate(assertOutput)
+      .then(() => {
+        vm.$refs.test.items.push('qux')
+      })
+      .then(assertOutput)
+      .then(done)
   })
 
   it('scoped slot without scope alias', () => {
@@ -313,7 +329,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return { msg: 'hello' }
           },
           template: `
@@ -338,7 +354,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return { msg: 'hello' }
           },
           template: `
@@ -363,7 +379,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return {
               items: ['foo', 'bar', 'baz']
             }
@@ -381,7 +397,7 @@ describe('Component scoped slot', () => {
 
   it('render function usage (named, via data)', done => {
     const vm = new Vue({
-      render (h) {
+      render(h) {
         return h('test', {
           ref: 'test',
           scopedSlots: {
@@ -391,10 +407,10 @@ describe('Component scoped slot', () => {
       },
       components: {
         test: {
-          data () {
+          data() {
             return { msg: 'hello' }
           },
-          render (h) {
+          render(h) {
             return h('div', [
               this.$scopedSlots.item({
                 text: this.msg
@@ -414,20 +430,16 @@ describe('Component scoped slot', () => {
 
   it('render function usage (default, as children)', () => {
     const vm = new Vue({
-      render (h) {
-        return h('test', [
-          props => h('span', [props.msg])
-        ])
+      render(h) {
+        return h('test', [props => h('span', [props.msg])])
       },
       components: {
         test: {
-          data () {
+          data() {
             return { msg: 'hello' }
           },
-          render (h) {
-            return h('div', [
-              this.$scopedSlots.default({ msg: this.msg })
-            ])
+          render(h) {
+            return h('div', [this.$scopedSlots.default({ msg: this.msg })])
           }
         }
       }
@@ -472,20 +484,16 @@ describe('Component scoped slot', () => {
 
   it('render function usage (JSX)', () => {
     const vm = new Vue({
-      render (h) {
-        return <test>{
-          props => <span>{props.msg}</span>
-        }</test>
+      render(h) {
+        return <test>{props => <span>{props.msg}</span>}</test>
       },
       components: {
         test: {
-          data () {
+          data() {
             return { msg: 'hello' }
           },
-          render (h) {
-            return <div>
-              {this.$scopedSlots.default({ msg: this.msg })}
-            </div>
+          render(h) {
+            return <div>{this.$scopedSlots.default({ msg: this.msg })}</div>
           }
         }
       }
@@ -521,10 +529,14 @@ describe('Component scoped slot', () => {
       }
     }).$mount()
 
-    expect(vm.$el.innerHTML).toBe('<span>hello foo</span> <span>hello bar</span> <span>hello abc</span>')
+    expect(vm.$el.innerHTML).toBe(
+      '<span>hello foo</span> <span>hello bar</span> <span>hello abc</span>'
+    )
     vm.$refs.test.msg = 'world'
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML).toBe('<span>world foo</span> <span>world bar</span> <span>world abc</span>')
+      expect(vm.$el.innerHTML).toBe(
+        '<span>world foo</span> <span>world bar</span> <span>world abc</span>'
+      )
     }).then(done)
   })
 
@@ -551,10 +563,14 @@ describe('Component scoped slot', () => {
       }
     }).$mount()
 
-    expect(vm.$el.innerHTML).toBe('<span>hello foo</span> <span>hello bar</span> <span>hello abc</span>')
+    expect(vm.$el.innerHTML).toBe(
+      '<span>hello foo</span> <span>hello bar</span> <span>hello abc</span>'
+    )
     vm.$refs.test.msg = 'world'
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML).toBe('<span>world foo</span> <span>world bar</span> <span>world abc</span>')
+      expect(vm.$el.innerHTML).toBe(
+        '<span>world foo</span> <span>world bar</span> <span>world abc</span>'
+      )
     }).then(done)
   })
 
@@ -573,7 +589,7 @@ describe('Component scoped slot', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return { msg: 'hello' }
           },
           template: `

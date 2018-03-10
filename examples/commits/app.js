@@ -5,7 +5,6 @@ var apiURL = 'https://api.github.com/repos/vuejs/vue/commits?per_page=3&sha='
  */
 
 var demo = new Vue({
-
   el: '#demo',
 
   data: {
@@ -14,7 +13,7 @@ var demo = new Vue({
     commits: null
   },
 
-  created: function () {
+  created: function() {
     this.fetchData()
   },
 
@@ -23,21 +22,21 @@ var demo = new Vue({
   },
 
   filters: {
-    truncate: function (v) {
+    truncate: function(v) {
       var newline = v.indexOf('\n')
       return newline > 0 ? v.slice(0, newline) : v
     },
-    formatDate: function (v) {
+    formatDate: function(v) {
       return v.replace(/T|Z/g, ' ')
     }
   },
 
   methods: {
-    fetchData: function () {
+    fetchData: function() {
       var xhr = new XMLHttpRequest()
       var self = this
       xhr.open('GET', apiURL + self.currentBranch)
-      xhr.onload = function () {
+      xhr.onload = function() {
         self.commits = JSON.parse(xhr.responseText)
         console.log(self.commits[0].html_url)
       }

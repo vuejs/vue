@@ -1,4 +1,4 @@
-({
+;({
   type: 'recycle-list',
   attr: {
     append: 'tree',
@@ -9,21 +9,25 @@
     switch: 'type',
     alias: 'item'
   },
-  children: [{
-    type: 'cell-slot',
-    attr: { append: 'tree', case: 'A' },
-    style: {
-      backgroundColor: '#FF6600'
-    },
-    children: [{
-      type: 'text',
+  children: [
+    {
+      type: 'cell-slot',
+      attr: { append: 'tree', case: 'A' },
       style: {
-        fontSize: '100px',
-        color: { '@binding': 'item.color' }
+        backgroundColor: '#FF6600'
       },
-      attr: {
-        value: 'content'
-      }
-    }]
-  }]
+      children: [
+        {
+          type: 'text',
+          style: {
+            fontSize: '100px',
+            color: { '@binding': 'item.color' }
+          },
+          attr: {
+            value: 'content'
+          }
+        }
+      ]
+    }
+  ]
 })

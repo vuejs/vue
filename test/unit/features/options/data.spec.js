@@ -17,7 +17,7 @@ describe('Options data', () => {
 
   it('should merge data properly', () => {
     const Test = Vue.extend({
-      data () {
+      data() {
         return { a: 1 }
       }
     })
@@ -35,7 +35,7 @@ describe('Options data', () => {
     expect(vm.a).toBe(1)
     // recursively merge objects
     const WithObject = Vue.extend({
-      data () {
+      data() {
         return {
           obj: {
             a: 1
@@ -63,7 +63,7 @@ describe('Options data', () => {
 
   it('should warn non object return', () => {
     new Vue({
-      data () {}
+      data() {}
     })
     expect('data functions should return an object').toHaveBeenWarned()
   })
@@ -79,8 +79,8 @@ describe('Options data', () => {
   it('should have access to props', () => {
     const Test = {
       props: ['a'],
-      render () {},
-      data () {
+      render() {},
+      data() {
         return {
           b: this.a
         }
@@ -100,16 +100,18 @@ describe('Options data', () => {
       data: {
         msg: 'hello'
       },
-      beforeUpdate () { calls++ },
+      beforeUpdate() {
+        calls++
+      },
       components: {
         child: {
           template: `<span>{{ localMsg }}</span>`,
           props: ['msg'],
-          data () {
+          data() {
             return { localMsg: this.msg }
           },
           computed: {
-            computedMsg () {
+            computedMsg() {
               return this.msg + ' world'
             }
           }
@@ -128,11 +130,11 @@ describe('Options data', () => {
   it('should have access to methods', () => {
     const vm = new Vue({
       methods: {
-        get () {
+        get() {
           return { a: 1 }
         }
       },
-      data () {
+      data() {
         return this.get()
       }
     })
@@ -147,7 +149,7 @@ describe('Options data', () => {
         child: {
           template: '<span>{{bar}}</span>',
           inject: ['foo'],
-          data ({ foo }) {
+          data({ foo }) {
             return { bar: 'foo:' + foo }
           }
         }

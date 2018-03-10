@@ -9,7 +9,7 @@ import {
   formatComponentName
 } from 'core/util/index'
 
-export function extractPropsFromVNodeData (
+export function extractPropsFromVNodeData(
   data: VNodeData,
   Ctor: Class<Component>,
   tag?: string
@@ -28,28 +28,27 @@ export function extractPropsFromVNodeData (
       const altKey = hyphenate(key)
       if (process.env.NODE_ENV !== 'production') {
         const keyInLowerCase = key.toLowerCase()
-        if (
-          key !== keyInLowerCase &&
-          attrs && hasOwn(attrs, keyInLowerCase)
-        ) {
+        if (key !== keyInLowerCase && attrs && hasOwn(attrs, keyInLowerCase)) {
           tip(
             `Prop "${keyInLowerCase}" is passed to component ` +
-            `${formatComponentName(tag || Ctor)}, but the declared prop name is` +
-            ` "${key}". ` +
-            `Note that HTML attributes are case-insensitive and camelCased ` +
-            `props need to use their kebab-case equivalents when using in-DOM ` +
-            `templates. You should probably use "${altKey}" instead of "${key}".`
+              `${formatComponentName(
+                tag || Ctor
+              )}, but the declared prop name is` +
+              ` "${key}". ` +
+              `Note that HTML attributes are case-insensitive and camelCased ` +
+              `props need to use their kebab-case equivalents when using in-DOM ` +
+              `templates. You should probably use "${altKey}" instead of "${key}".`
           )
         }
       }
       checkProp(res, props, key, altKey, true) ||
-      checkProp(res, attrs, key, altKey, false)
+        checkProp(res, attrs, key, altKey, false)
     }
   }
   return res
 }
 
-function checkProp (
+function checkProp(
   res: Object,
   hash: ?Object,
   key: string,

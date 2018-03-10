@@ -8,9 +8,13 @@ export const isReservedAttr = makeMap('style,class')
 
 // attributes that should be using props for binding
 const acceptValue = makeMap('input,textarea,option,select,progress')
-export const mustUseProp = (tag: string, type: ?string, attr: string): boolean => {
+export const mustUseProp = (
+  tag: string,
+  type: ?string,
+  attr: string
+): boolean => {
   return (
-    (attr === 'value' && acceptValue(tag)) && type !== 'button' ||
+    (attr === 'value' && acceptValue(tag) && type !== 'button') ||
     (attr === 'selected' && tag === 'option') ||
     (attr === 'checked' && tag === 'input') ||
     (attr === 'muted' && tag === 'video')
@@ -21,11 +25,11 @@ export const isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck')
 
 export const isBooleanAttr = makeMap(
   'allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
-  'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
-  'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
-  'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
-  'required,reversed,scoped,seamless,selected,sortable,translate,' +
-  'truespeed,typemustmatch,visible'
+    'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
+    'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
+    'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
+    'required,reversed,scoped,seamless,selected,sortable,translate,' +
+    'truespeed,typemustmatch,visible'
 )
 
 export const xlinkNS = 'http://www.w3.org/1999/xlink'

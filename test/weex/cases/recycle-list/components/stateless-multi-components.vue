@@ -13,18 +13,18 @@
 </template>
 
 <script>
-  // require('./banner.vue')
-  // require('./footer.vue')
-  // require('./poster.vue')
-  module.exports = {
-    data () {
-      return {
-        longList: [
-          { type: 'A' },
-          { type: 'B', poster: 'yy', title: 'y' },
-          { type: 'A' }
-        ]
-      }
+// require('./banner.vue')
+// require('./footer.vue')
+// require('./poster.vue')
+module.exports = {
+  data() {
+    return {
+      longList: [
+        { type: 'A' },
+        { type: 'B', poster: 'yy', title: 'y' },
+        { type: 'A' }
+      ]
     }
   }
+}
 </script>

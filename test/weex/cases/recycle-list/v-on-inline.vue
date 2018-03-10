@@ -9,20 +9,16 @@
 </template>
 
 <script>
-  module.exports = {
-    data () {
-      return {
-        longList: [
-          { type: 'A' },
-          { type: 'A' }
-        ]
-      }
-    },
-    methods: {
-      hide () {},
-      toggle () {},
-      onappear () {}
+module.exports = {
+  data() {
+    return {
+      longList: [{ type: 'A' }, { type: 'A' }]
     }
+  },
+  methods: {
+    hide() {},
+    toggle() {},
+    onappear() {}
   }
+}
 </script>
-

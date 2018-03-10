@@ -12,12 +12,11 @@ import { preTransformVOnce } from './v-once'
 
 let currentRecycleList = null
 
-function shouldCompile (el: ASTElement, options: WeexCompilerOptions) {
-  return options.recyclable ||
-    (currentRecycleList && el !== currentRecycleList)
+function shouldCompile(el: ASTElement, options: WeexCompilerOptions) {
+  return options.recyclable || (currentRecycleList && el !== currentRecycleList)
 }
 
-function preTransformNode (el: ASTElement, options: WeexCompilerOptions) {
+function preTransformNode(el: ASTElement, options: WeexCompilerOptions) {
   if (el.tag === 'recycle-list') {
     preTransformRecycleList(el, options)
     currentRecycleList = el
@@ -30,13 +29,13 @@ function preTransformNode (el: ASTElement, options: WeexCompilerOptions) {
   }
 }
 
-function transformNode (el: ASTElement, options: WeexCompilerOptions) {
+function transformNode(el: ASTElement, options: WeexCompilerOptions) {
   if (shouldCompile(el, options)) {
     // do nothing yet
   }
 }
 
-function postTransformNode (el: ASTElement, options: WeexCompilerOptions) {
+function postTransformNode(el: ASTElement, options: WeexCompilerOptions) {
   if (shouldCompile(el, options)) {
     // mark child component in parent template
     postTransformComponent(el, options)

@@ -58,7 +58,7 @@ describe('Instance methods lifecycle', () => {
     })
 
     it('remove self from data observer', () => {
-      const vm = new Vue({ data: { a: 1 }})
+      const vm = new Vue({ data: { a: 1 } })
       vm.$destroy()
       expect(vm.$data.__ob__.vmCount).toBe(0)
     })
@@ -88,9 +88,11 @@ describe('Instance methods lifecycle', () => {
         // should not work because adding new property
         expect(vm.$el.textContent).toBe('')
         vm.$forceUpdate()
-      }).then(() => {
-        expect(vm.$el.textContent).toBe('foo')
-      }).then(done)
+      })
+        .then(() => {
+          expect(vm.$el.textContent).toBe('foo')
+        })
+        .then(done)
     })
   })
 
@@ -103,7 +105,7 @@ describe('Instance methods lifecycle', () => {
         }
       }).$mount()
       vm.msg = 'bar'
-      vm.$nextTick(function () {
+      vm.$nextTick(function() {
         expect(this).toBe(vm)
         expect(vm.$el.textContent).toBe('bar')
         done()

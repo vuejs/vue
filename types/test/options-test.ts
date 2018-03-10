@@ -1,9 +1,14 @@
-import Vue, { VNode } from "../index";
-import { AsyncComponent, ComponentOptions, FunctionalComponentOptions, Component } from "../index";
-import { CreateElement } from "../vue";
+import Vue, { VNode } from '../index'
+import {
+  AsyncComponent,
+  ComponentOptions,
+  FunctionalComponentOptions,
+  Component
+} from '../index'
+import { CreateElement } from '../vue'
 
 interface MyComponent extends Vue {
-  a: number;
+  a: number
 }
 
 const option: ComponentOptions<MyComponent> = {
@@ -20,10 +25,10 @@ const componentType: Component = option
 
 Vue.component('sub-component', {
   components: {
-    a: Vue.component(""),
+    a: Vue.component(''),
     b: {}
   }
-});
+})
 
 Vue.component('prop-component', {
   props: {
@@ -31,7 +36,7 @@ Vue.component('prop-component', {
     name: {
       type: String,
       default: '0',
-      required: true,
+      required: true
     }
   },
   data() {
@@ -40,7 +45,7 @@ Vue.component('prop-component', {
       capName: this.name.toUpperCase()
     }
   }
-});
+})
 
 Vue.component('string-prop', {
   props: ['size', 'name'],
@@ -50,7 +55,7 @@ Vue.component('string-prop', {
       capName: this.name.isany
     }
   }
-});
+})
 
 class User {
   private u = 1
@@ -65,19 +70,19 @@ Vue.component('union-prop', {
     object: [Cat, User],
     regex: RegExp,
     mixed: [RegExp, Array],
-    union: [User, Number] as {new(): User | Number}[] // requires annotation
+    union: [User, Number] as { new (): User | Number }[] // requires annotation
   },
   data() {
-    this.primitive;
-    this.object;
-    this.union;
-    this.regex.compile;
-    this.mixed;
+    this.primitive
+    this.object
+    this.union
+    this.regex.compile
+    this.mixed
     return {
-      fixedSize: this.union,
+      fixedSize: this.union
     }
   }
-});
+})
 
 Vue.component('component', {
   data() {
@@ -92,103 +97,107 @@ Vue.component('component', {
     name: {
       type: String,
       default: '0',
-      required: true,
+      required: true
     }
   },
   propsData: {
-    msg: "Hello"
+    msg: 'Hello'
   },
   computed: {
     aDouble(): number {
-      return this.a * 2;
+      return this.a * 2
     },
     aPlus: {
       get(): number {
-        return this.a + 1;
+        return this.a + 1
       },
       set(v: number) {
-        this.a = v - 1;
+        this.a = v - 1
       },
       cache: false
     }
   },
   methods: {
     plus() {
-      this.a++;
-      this.aDouble.toFixed();
-      this.aPlus = 1;
-      this.size.toFixed();
+      this.a++
+      this.aDouble.toFixed()
+      this.aPlus = 1
+      this.size.toFixed()
     }
   },
   watch: {
-    'a': function(val: number, oldVal: number) {
-      console.log(`new: ${val}, old: ${oldVal}`);
+    a: function(val: number, oldVal: number) {
+      console.log(`new: ${val}, old: ${oldVal}`)
     },
-    'b': 'someMethod',
-    'c': {
+    b: 'someMethod',
+    c: {
       handler(val, oldVal) {
         this.a = val
       },
       deep: true
     }
   },
-  el: "#app",
-  template: "<div>{{ message }}</div>",
+  el: '#app',
+  template: '<div>{{ message }}</div>',
   render(createElement) {
-    return createElement("div", {
-      attrs: {
-        id: "foo"
+    return createElement(
+      'div',
+      {
+        attrs: {
+          id: 'foo'
+        },
+        props: {
+          myProp: 'bar'
+        },
+        domProps: {
+          innerHTML: 'baz'
+        },
+        on: {
+          click: new Function()
+        },
+        nativeOn: {
+          click: new Function()
+        },
+        class: {
+          foo: true,
+          bar: false
+        },
+        style: {
+          color: 'red',
+          fontSize: '14px'
+        },
+        key: 'myKey',
+        ref: 'myRef'
       },
-      props: {
-        myProp: "bar"
-      },
-      domProps: {
-        innerHTML: "baz"
-      },
-      on: {
-        click: new Function
-      },
-      nativeOn: {
-        click: new Function
-      },
-      class: {
-        foo: true,
-        bar: false
-      },
-      style: {
-        color: 'red',
-        fontSize: '14px'
-      },
-      key: 'myKey',
-      ref: 'myRef'
-    }, [
-      createElement(),
-      createElement("div", "message"),
-      createElement(Vue.component("component")),
-      createElement({} as ComponentOptions<Vue>),
-      createElement({
-        functional: true,
-        render(c: CreateElement) {
-          return createElement()
-        }
-      }),
+      [
+        createElement(),
+        createElement('div', 'message'),
+        createElement(Vue.component('component')),
+        createElement({} as ComponentOptions<Vue>),
+        createElement({
+          functional: true,
+          render(c: CreateElement) {
+            return createElement()
+          }
+        }),
 
-      createElement(() => Vue.component("component")),
-      createElement(() => ( {} as ComponentOptions<Vue> )),
-      createElement((resolve, reject) => {
-        resolve({} as ComponentOptions<Vue>);
-        reject();
-      }),
+        createElement(() => Vue.component('component')),
+        createElement(() => ({} as ComponentOptions<Vue>)),
+        createElement((resolve, reject) => {
+          resolve({} as ComponentOptions<Vue>)
+          reject()
+        }),
 
-      "message",
+        'message',
 
-      [createElement("div", "message")]
-    ]);
+        [createElement('div', 'message')]
+      ]
+    )
   },
   staticRenderFns: [],
 
   beforeCreate() {
-    (this as any).a = 1;
+    ;(this as any).a = 1
   },
   created() {},
   beforeDestroy() {},
@@ -215,32 +224,32 @@ Vue.component('component', {
       unbind() {}
     },
     b(el, binding, vnode, oldVnode) {
-      el.textContent;
+      el.textContent
 
-      binding.name;
-      binding.value;
-      binding.oldValue;
-      binding.expression;
-      binding.arg;
-      binding.modifiers["modifier"];
+      binding.name
+      binding.value
+      binding.oldValue
+      binding.expression
+      binding.arg
+      binding.modifiers['modifier']
     }
   },
   components: {
-    a: Vue.component(""),
+    a: Vue.component(''),
     b: {} as ComponentOptions<Vue>
   },
   transitions: {},
   filters: {
     double(value: number) {
-      return value * 2;
+      return value * 2
     }
   },
-  parent: new Vue,
-  mixins: [Vue.component(""), ({} as ComponentOptions<Vue>)],
-  name: "Component",
+  parent: new Vue(),
+  mixins: [Vue.component(''), {} as ComponentOptions<Vue>],
+  name: 'Component',
   extends: {} as ComponentOptions<Vue>,
-  delimiters: ["${", "}"]
-});
+  delimiters: ['${', '}']
+})
 
 Vue.component('provide-inject', {
   provide: {
@@ -251,7 +260,7 @@ Vue.component('provide-inject', {
     injectBar: Symbol(),
     injectBaz: { from: 'baz' },
     injectQux: { default: 1 },
-    injectQuux: { from: 'quuz', default: () => ({ value: 1 })}
+    injectQuux: { from: 'quuz', default: () => ({ value: 1 }) }
   }
 })
 
@@ -262,7 +271,7 @@ Vue.component('provide-function', {
 })
 
 Vue.component('component-with-scoped-slot', {
-  render (h) {
+  render(h) {
     interface ScopedSlotProps {
       msg: string
     }
@@ -282,7 +291,7 @@ Vue.component('component-with-scoped-slot', {
   },
   components: {
     child: {
-      render (this: Vue, h: CreateElement) {
+      render(this: Vue, h: CreateElement) {
         return h('div', [
           this.$scopedSlots['default']({ msg: 'hi' }),
           this.$scopedSlots['item']({ msg: 'hello' })
@@ -293,15 +302,15 @@ Vue.component('component-with-scoped-slot', {
 })
 
 Vue.component('narrow-array-of-vnode-type', {
-  render (h): VNode {
+  render(h): VNode {
     const slot = this.$scopedSlots.default({})
     if (typeof slot !== 'string') {
       const first = slot[0]
       if (!Array.isArray(first) && typeof first !== 'string') {
-        return first;
+        return first
       }
     }
-    return h();
+    return h()
   }
 })
 
@@ -310,15 +319,15 @@ Vue.component('functional-component', {
   functional: true,
   inject: ['foo'],
   render(createElement, context) {
-    context.props;
-    context.children;
-    context.slots();
-    context.data;
-    context.parent;
-    context.listeners.click;
-    return createElement("div", {}, context.children);
+    context.props
+    context.children
+    context.slots()
+    context.data
+    context.parent
+    context.listeners.click
+    return createElement('div', {}, context.children)
   }
-});
+})
 
 Vue.component('functional-component-object-inject', {
   functional: true,
@@ -327,7 +336,7 @@ Vue.component('functional-component-object-inject', {
     bar: Symbol(),
     baz: { from: 'baz' },
     qux: { default: 1 },
-    quux: { from: 'quuz', default: () => ({ value: 1 })}
+    quux: { from: 'quuz', default: () => ({ value: 1 }) }
   },
   render(h) {
     return h('div')
@@ -338,16 +347,18 @@ Vue.component('functional-component-check-optional', {
   functional: true
 })
 
-Vue.component("async-component", ((resolve, reject) => {
+Vue.component('async-component', (resolve, reject) => {
   setTimeout(() => {
-    resolve(Vue.component("component"));
-  }, 0);
-  return new Promise((resolve) => {
+    resolve(Vue.component('component'))
+  }, 0)
+  return new Promise(resolve => {
     resolve({
       functional: true,
-      render(h: CreateElement) { return h('div') }
-    });
+      render(h: CreateElement) {
+        return h('div')
+      }
+    })
   })
-}));
+})
 
 Vue.component('async-es-module-component', () => import('./es-module'))

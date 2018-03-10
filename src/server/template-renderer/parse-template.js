@@ -7,12 +7,12 @@ const compileOptions = {
 }
 
 export type ParsedTemplate = {
-  head: (data: any) => string;
-  neck: (data: any) => string;
-  tail: (data: any) => string;
-};
+  head: (data: any) => string,
+  neck: (data: any) => string,
+  tail: (data: any) => string
+}
 
-export function parseTemplate (
+export function parseTemplate(
   template: string,
   contentPlaceholder?: string = '<!--vue-ssr-outlet-->'
 ): ParsedTemplate {

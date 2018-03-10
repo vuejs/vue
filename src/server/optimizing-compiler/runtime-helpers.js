@@ -12,10 +12,7 @@ import {
   simpleNormalizeChildren
 } from 'core/vdom/helpers/normalize-children'
 
-import {
-  propsToAttrMap,
-  isRenderableAttr
-} from 'web/server/util'
+import { propsToAttrMap, isRenderableAttr } from 'web/server/util'
 
 const ssrHelpers = {
   _ssrEscape: escape,
@@ -28,7 +25,7 @@ const ssrHelpers = {
   _ssrStyle: renderSSRStyle
 }
 
-export function installSSRHelpers (vm: Component) {
+export function installSSRHelpers(vm: Component) {
   if (vm._ssrNode) {
     return
   }
@@ -43,12 +40,12 @@ export function installSSRHelpers (vm: Component) {
 }
 
 class StringNode {
-  isString: boolean;
-  open: string;
-  close: ?string;
-  children: ?Array<any>;
+  isString: boolean
+  open: string
+  close: ?string
+  children: ?Array<any>
 
-  constructor (
+  constructor(
     open: string,
     close?: string,
     children?: Array<any>,
@@ -58,18 +55,17 @@ class StringNode {
     this.open = open
     this.close = close
     if (children) {
-      this.children = normalizationType === 1
-        ? simpleNormalizeChildren(children)
-        : normalizationType === 2
-          ? normalizeChildren(children)
-          : children
+      this.children =
+        normalizationType === 1
+          ? simpleNormalizeChildren(children)
+          : normalizationType === 2 ? normalizeChildren(children) : children
     } else {
       this.children = void 0
     }
   }
 }
 
-function renderStringNode (
+function renderStringNode(
   open: string,
   close?: string,
   children?: Array<any>,
@@ -78,13 +74,9 @@ function renderStringNode (
   return new StringNode(open, close, children, normalizationType)
 }
 
-function renderStringList (
+function renderStringList(
   val: any,
-  render: (
-    val: any,
-    keyOrIndex: string | number,
-    index?: number
-  ) => string
+  render: (val: any, keyOrIndex: string | number, index?: number) => string
 ): string {
   let ret = ''
   let i, l, keys, key
@@ -106,7 +98,7 @@ function renderStringList (
   return ret
 }
 
-function renderAttrs (obj: Object): string {
+function renderAttrs(obj: Object): string {
   let res = ''
   for (const key in obj) {
     res += renderAttr(key, obj[key])
@@ -114,7 +106,7 @@ function renderAttrs (obj: Object): string {
   return res
 }
 
-function renderDOMProps (obj: Object): string {
+function renderDOMProps(obj: Object): string {
   let res = ''
   for (const key in obj) {
     const attr = propsToAttrMap[key] || key.toLowerCase()
@@ -125,15 +117,12 @@ function renderDOMProps (obj: Object): string {
   return res
 }
 
-function renderSSRClass (
-  staticClass: ?string,
-  dynamic: any
-): string {
+function renderSSRClass(staticClass: ?string, dynamic: any): string {
   const res = renderClass(staticClass, dynamic)
   return res === '' ? res : ` class="${escape(res)}"`
 }
 
-function renderSSRStyle (
+function renderSSRStyle(
   staticStyle: ?Object,
   dynamic: any,
   extra: ?Object

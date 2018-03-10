@@ -5,7 +5,9 @@
   ],
   "extends": [
     "plugin:vue-libs/recommended",
-    "plugin:flowtype/recommended"
+    "plugin:flowtype/recommended",
+    "prettier",
+    "prettier/standard"
   ],
   "globals": {
     "__WEEX__": true,

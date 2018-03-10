@@ -8,15 +8,15 @@
 </template>
 
 <script>
-  // require('./poster.vue')
-  module.exports = {
-    data () {
-      return {
-        longList: [
-          { type: 'A', poster: 'xx', title: 'x' },
-          { type: 'A', poster: 'yy', title: 'y' }
-        ]
-      }
+// require('./poster.vue')
+module.exports = {
+  data() {
+    return {
+      longList: [
+        { type: 'A', poster: 'xx', title: 'x' },
+        { type: 'A', poster: 'yy', title: 'y' }
+      ]
     }
   }
+}
 </script>

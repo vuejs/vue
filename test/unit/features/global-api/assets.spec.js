@@ -5,7 +5,7 @@ describe('Global API: assets', () => {
 
   it('directive / filters', () => {
     const assets = ['directive', 'filter']
-    assets.forEach(function (type) {
+    assets.forEach(function(type) {
       const def = {}
       Test[type]('test', def)
       expect(Test.options[type + 's'].test).toBe(def)

@@ -8,14 +8,14 @@ describe('Options mixins', () => {
         c: {}
       },
       methods: {
-        a: function () {}
+        a: function() {}
       }
     }
 
     const vm = new Vue({
       mixins: [mixin],
       methods: {
-        b: function () {}
+        b: function() {}
       }
     })
 
@@ -28,9 +28,9 @@ describe('Options mixins', () => {
     const a = {}
     const b = {}
     const c = {}
-    const f1 = function () {}
-    const f2 = function () {}
-    const f3 = function () {}
+    const f1 = function() {}
+    const f2 = function() {}
+    const f3 = function() {}
     const mixinA = {
       a: 1,
       template: 'foo',
@@ -46,14 +46,17 @@ describe('Options mixins', () => {
       },
       created: f2
     }
-    const result = mergeOptions({}, {
-      directives: {
-        c: c
-      },
-      template: 'bar',
-      mixins: [mixinA, mixinB],
-      created: f3
-    })
+    const result = mergeOptions(
+      {},
+      {
+        directives: {
+          c: c
+        },
+        template: 'bar',
+        mixins: [mixinA, mixinB],
+        created: f3
+      }
+    )
     expect(result.a).toBe(1)
     expect(result.b).toBe(1)
     expect(result.directives.a).toBe(a)
@@ -66,9 +69,9 @@ describe('Options mixins', () => {
   })
 
   it('mixin methods should not override defined method', () => {
-    const f1 = function () {}
-    const f2 = function () {}
-    const f3 = function () {}
+    const f1 = function() {}
+    const f2 = function() {}
+    const f3 = function() {}
     const mixinA = {
       methods: {
         xyz: f1
@@ -79,12 +82,15 @@ describe('Options mixins', () => {
         xyz: f2
       }
     }
-    const result = mergeOptions({}, {
-      mixins: [mixinA, mixinB],
-      methods: {
-        xyz: f3
+    const result = mergeOptions(
+      {},
+      {
+        mixins: [mixinA, mixinB],
+        methods: {
+          xyz: f3
+        }
       }
-    })
+    )
     expect(result.methods.xyz).toBe(f3)
   })
 
@@ -94,14 +100,14 @@ describe('Options mixins', () => {
         c: {}
       },
       methods: {
-        a: function () {}
+        a: function() {}
       }
     })
 
     const vm = new Vue({
       mixins: [mixin],
       methods: {
-        b: function () {}
+        b: function() {}
       }
     })
 

@@ -15,7 +15,7 @@ import {
   validateProp
 } from '../util/index'
 
-export function FunctionalRenderContext (
+export function FunctionalRenderContext(
   data: VNodeData,
   props: Object,
   children: ?Array<VNode>,
@@ -56,13 +56,14 @@ export function FunctionalRenderContext (
       return vnode
     }
   } else {
-    this._c = (a, b, c, d) => createElement(contextVm, a, b, c, d, needNormalization)
+    this._c = (a, b, c, d) =>
+      createElement(contextVm, a, b, c, d, needNormalization)
   }
 }
 
 installRenderHelpers(FunctionalRenderContext.prototype)
 
-export function createFunctionalComponent (
+export function createFunctionalComponent(
   Ctor: Class<Component>,
   propsData: ?Object,
   data: VNodeData,
@@ -103,15 +104,15 @@ export function createFunctionalComponent (
   }
 }
 
-function setFunctionalContextForVNode (vnode, data, vm, options) {
+function setFunctionalContextForVNode(vnode, data, vm, options) {
   vnode.fnContext = vm
   vnode.fnOptions = options
   if (data.slot) {
-    (vnode.data || (vnode.data = {})).slot = data.slot
+    ;(vnode.data || (vnode.data = {})).slot = data.slot
   }
 }
 
-function mergeProps (to, from) {
+function mergeProps(to, from) {
   for (const key in from) {
     to[camelize(key)] = from[key]
   }

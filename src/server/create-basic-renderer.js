@@ -4,15 +4,15 @@ import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
 import type { RenderOptions } from './create-renderer'
 
-export function createBasicRenderer ({
+export function createBasicRenderer({
   modules = [],
   directives = {},
-  isUnaryTag = (() => false),
+  isUnaryTag = () => false,
   cache
 }: RenderOptions = {}) {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
 
-  return function renderToString (
+  return function renderToString(
     component: Component,
     context: any,
     done: any

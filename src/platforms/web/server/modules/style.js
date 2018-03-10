@@ -4,7 +4,7 @@ import { escape } from '../util'
 import { hyphenate } from 'shared/util'
 import { getStyle } from 'web/util/style'
 
-export function genStyle (style: Object): string {
+export function genStyle(style: Object): string {
   let styleText = ''
   for (const key in style) {
     const value = style[key]
@@ -20,7 +20,7 @@ export function genStyle (style: Object): string {
   return styleText
 }
 
-export default function renderStyle (vnode: VNodeWithData): ?string {
+export default function renderStyle(vnode: VNodeWithData): ?string {
   const styleText = genStyle(getStyle(vnode, false))
   if (styleText !== '') {
     return ` style=${JSON.stringify(escape(styleText))}`

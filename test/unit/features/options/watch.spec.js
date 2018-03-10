@@ -85,7 +85,7 @@ describe('Options watch', () => {
 
   it('with option: deep', done => {
     const vm = new Vue({
-      data: { a: { b: 1 }},
+      data: { a: { b: 1 } },
       watch: {
         a: {
           handler: spy,
@@ -100,16 +100,18 @@ describe('Options watch', () => {
     waitForUpdate(() => {
       expect(spy).toHaveBeenCalledWith(vm.a, vm.a)
       vm.a = { b: 3 }
-    }).then(() => {
-      expect(spy).toHaveBeenCalledWith(vm.a, oldA)
-    }).then(done)
+    })
+      .then(() => {
+        expect(spy).toHaveBeenCalledWith(vm.a, oldA)
+      })
+      .then(done)
   })
 
   it('correctly merges multiple extends', done => {
     var spy2 = jasmine.createSpy('A')
     var spy3 = jasmine.createSpy('B')
     var A = Vue.extend({
-      data: function () {
+      data: function() {
         return {
           a: 0,
           b: 0

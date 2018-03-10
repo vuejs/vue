@@ -17,12 +17,12 @@ describe('Options errorCaptured', () => {
     let child
     let err
     const Child = {
-      created () {
+      created() {
         child = this
         err = new Error('child')
         throw err
       },
-      render () {}
+      render() {}
     }
 
     new Vue({
@@ -38,22 +38,22 @@ describe('Options errorCaptured', () => {
   it('should be able to render the error in itself', done => {
     let child
     const Child = {
-      created () {
+      created() {
         child = this
         throw new Error('error from child')
       },
-      render () {}
+      render() {}
     }
 
     const vm = new Vue({
       data: {
         error: null
       },
-      errorCaptured (e, vm, info) {
+      errorCaptured(e, vm, info) {
         expect(vm).toBe(child)
         this.error = e.toString() + ' in ' + info
       },
-      render (h) {
+      render(h) {
         if (this.error) {
           return h('pre', this.error)
         }
@@ -73,16 +73,16 @@ describe('Options errorCaptured', () => {
     let child
     let err
     const Child = {
-      created () {
+      created() {
         child = this
         err = new Error('child')
         throw err
       },
-      render () {}
+      render() {}
     }
 
     new Vue({
-      errorCaptured (err, vm, info) {
+      errorCaptured(err, vm, info) {
         spy(err, vm, info)
         return false
       },
@@ -98,17 +98,17 @@ describe('Options errorCaptured', () => {
     let child
     let err
     const Child = {
-      created () {
+      created() {
         child = this
         err = new Error('child')
         throw err
       },
-      render () {}
+      render() {}
     }
 
     let err2
     const vm = new Vue({
-      errorCaptured () {
+      errorCaptured() {
         err2 = new Error('foo')
         throw err2
       },
@@ -123,20 +123,20 @@ describe('Options errorCaptured', () => {
     const calls = []
 
     const Child = {
-      created () {
+      created() {
         throw new Error('child')
       },
-      render () {}
+      render() {}
     }
 
     const ErrorBoundaryBase = {
-      errorCaptured () {
+      errorCaptured() {
         calls.push(1)
       }
     }
 
     const mixin = {
-      errorCaptured () {
+      errorCaptured() {
         calls.push(2)
       }
     }
@@ -144,7 +144,7 @@ describe('Options errorCaptured', () => {
     const ErrorBoundaryExtended = {
       extends: ErrorBoundaryBase,
       mixins: [mixin],
-      errorCaptured () {
+      errorCaptured() {
         calls.push(3)
       },
       render: h => h(Child)
@@ -155,7 +155,7 @@ describe('Options errorCaptured', () => {
     }
 
     new Vue({
-      errorCaptured () {
+      errorCaptured() {
         calls.push(4)
       },
       render: h => h(ErrorBoundaryExtended)
@@ -168,20 +168,20 @@ describe('Options errorCaptured', () => {
     const calls = []
 
     const Child = {
-      created () {
+      created() {
         throw new Error('child')
       },
-      render () {}
+      render() {}
     }
 
     const ErrorBoundaryBase = {
-      errorCaptured () {
+      errorCaptured() {
         calls.push(1)
       }
     }
 
     const mixin = {
-      errorCaptured () {
+      errorCaptured() {
         calls.push(2)
       }
     }
@@ -189,7 +189,7 @@ describe('Options errorCaptured', () => {
     const ErrorBoundaryExtended = {
       extends: ErrorBoundaryBase,
       mixins: [mixin],
-      errorCaptured () {
+      errorCaptured() {
         calls.push(3)
         return false
       },
@@ -201,7 +201,7 @@ describe('Options errorCaptured', () => {
     }
 
     new Vue({
-      errorCaptured () {
+      errorCaptured() {
         calls.push(4)
       },
       render: h => h(ErrorBoundaryExtended)

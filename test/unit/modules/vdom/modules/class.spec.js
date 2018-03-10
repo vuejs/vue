@@ -33,7 +33,11 @@ describe('vdom class module', () => {
 
   it('should create an element with mixed class', () => {
     const vnode = new VNode('p', {
-      class: [{ class1: false, class2: true, class3: false }, 'class4', ['class5', 'class6']]
+      class: [
+        { class1: false, class2: true, class3: false },
+        'class4',
+        ['class5', 'class6']
+      ]
     })
     const elm = patch(null, vnode)
     expect(elm).not.toHaveClass('class1')
@@ -85,7 +89,7 @@ describe('vdom class module', () => {
     const vnode1 = new VNode('p', {
       class: { class1: true, class2: false, class3: true }
     })
-    const vnode2 = new VNode('p', { class: {}})
+    const vnode2 = new VNode('p', { class: {} })
     let elm = patch(null, vnode1)
     elm = patch(vnode1, vnode2)
     expect(elm).not.toHaveClass('class1')

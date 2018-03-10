@@ -6,26 +6,20 @@ import {
   EXPRESSION
 } from './codegen'
 
-import {
-  propsToAttrMap,
-  isRenderableAttr
-} from 'web/server/util'
+import { propsToAttrMap, isRenderableAttr } from 'web/server/util'
 
-import {
-  isBooleanAttr,
-  isEnumeratedAttr
-} from 'web/util/attrs'
+import { isBooleanAttr, isEnumeratedAttr } from 'web/util/attrs'
 
 import type { StringSegment } from './codegen'
 import type { CodegenState } from 'compiler/codegen/index'
 
-type Attr = { name: string; value: string };
+type Attr = { name: string, value: string }
 
 const plainStringRE = /^"(?:[^"\\]|\\.)*"$|^'(?:[^'\\]|\\.)*'$/
 
 // let the model AST transform translate v-model into appropriate
 // props bindings
-export function applyModelTransform (el: ASTElement, state: CodegenState) {
+export function applyModelTransform(el: ASTElement, state: CodegenState) {
   if (el.directives) {
     for (let i = 0; i < el.directives.length; i++) {
       const dir = el.directives[i]
@@ -41,20 +35,19 @@ export function applyModelTransform (el: ASTElement, state: CodegenState) {
   }
 }
 
-export function genAttrSegments (
-  attrs: Array<Attr>
-): Array<StringSegment> {
+export function genAttrSegments(attrs: Array<Attr>): Array<StringSegment> {
   return attrs.map(({ name, value }) => genAttrSegment(name, value))
 }
 
-export function genDOMPropSegments (
+export function genDOMPropSegments(
   props: Array<Attr>,
   attrs: ?Array<Attr>
 ): Array<StringSegment> {
   const segments = []
   props.forEach(({ name, value }) => {
     name = propsToAttrMap[name] || name.toLowerCase()
-    if (isRenderableAttr(name) &&
+    if (
+      isRenderableAttr(name) &&
       !(attrs && attrs.some(a => a.name === name))
     ) {
       segments.push(genAttrSegment(name, value))
@@ -63,7 +56,7 @@ export function genDOMPropSegments (
   return segments
 }
 
-function genAttrSegment (name: string, value: string): StringSegment {
+function genAttrSegment(name: string, value: string): StringSegment {
   if (plainStringRE.test(value)) {
     // force double quote
     value = value.replace(/^'|'$/g, '"')
@@ -75,9 +68,7 @@ function genAttrSegment (name: string, value: string): StringSegment {
       type: RAW,
       value: isBooleanAttr(name)
         ? ` ${name}="${name}"`
-        : value === '""'
-          ? ` ${name}`
-          : ` ${name}="${JSON.parse(value)}"`
+        : value === '""' ? ` ${name}` : ` ${name}="${JSON.parse(value)}"`
     }
   } else {
     return {
@@ -87,21 +78,23 @@ function genAttrSegment (name: string, value: string): StringSegment {
   }
 }
 
-export function genClassSegments (
+export function genClassSegments(
   staticClass: ?string,
   classBinding: ?string
 ): Array<StringSegment> {
   if (staticClass && !classBinding) {
     return [{ type: RAW, value: ` class=${staticClass}` }]
   } else {
-    return [{
-      type: EXPRESSION,
-      value: `_ssrClass(${staticClass || 'null'},${classBinding || 'null'})`
-    }]
+    return [
+      {
+        type: EXPRESSION,
+        value: `_ssrClass(${staticClass || 'null'},${classBinding || 'null'})`
+      }
+    ]
   }
 }
 
-export function genStyleSegments (
+export function genStyleSegments(
   staticStyle: ?string,
   parsedStaticStyle: ?string,
   styleBinding: ?string,
@@ -110,17 +103,16 @@ export function genStyleSegments (
   if (staticStyle && !styleBinding && !vShowExpression) {
     return [{ type: RAW, value: ` style=${JSON.stringify(staticStyle)}` }]
   } else {
-    return [{
-      type: EXPRESSION,
-      value: `_ssrStyle(${
-        parsedStaticStyle || 'null'
-      },${
-        styleBinding || 'null'
-      }, ${
-        vShowExpression
-          ? `{ display: (${vShowExpression}) ? '' : 'none' }`
-          : 'null'
-      })`
-    }]
+    return [
+      {
+        type: EXPRESSION,
+        value: `_ssrStyle(${parsedStaticStyle || 'null'},${styleBinding ||
+          'null'}, ${
+          vShowExpression
+            ? `{ display: (${vShowExpression}) ? '' : 'none' }`
+            : 'null'
+        })`
+      }
+    ]
   }
 }

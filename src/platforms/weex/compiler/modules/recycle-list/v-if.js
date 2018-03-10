@@ -3,7 +3,7 @@
 import { addIfCondition } from 'compiler/parser/index'
 import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
 
-function hasConditionDirective (el: ASTElement): boolean {
+function hasConditionDirective(el: ASTElement): boolean {
   for (const attr in el.attrsMap) {
     if (/^v\-if|v\-else|v\-else\-if$/.test(attr)) {
       return true
@@ -12,7 +12,7 @@ function hasConditionDirective (el: ASTElement): boolean {
   return false
 }
 
-function getPreviousConditions (el: ASTElement): Array<string> {
+function getPreviousConditions(el: ASTElement): Array<string> {
   const conditions = []
   if (el.parent && el.parent.children) {
     for (let c = 0, n = el.parent.children.length; c < n; ++c) {
@@ -31,7 +31,7 @@ function getPreviousConditions (el: ASTElement): Array<string> {
   return conditions
 }
 
-export function preTransformVIf (el: ASTElement, options: WeexCompilerOptions) {
+export function preTransformVIf(el: ASTElement, options: WeexCompilerOptions) {
   if (hasConditionDirective(el)) {
     let exp
     const ifExp = getAndRemoveAttr(el, 'v-if', true /* remove from attrsMap */)
@@ -52,8 +52,8 @@ export function preTransformVIf (el: ASTElement, options: WeexCompilerOptions) {
           : `!(${prevMatch})` // v-else
       } else if (process.env.NODE_ENV !== 'production' && options.warn) {
         options.warn(
-          `v-${elseifExp ? ('else-if="' + elseifExp + '"') : 'else'} ` +
-          `used on element <${el.tag}> without corresponding v-if.`
+          `v-${elseifExp ? 'else-if="' + elseifExp + '"' : 'else'} ` +
+            `used on element <${el.tag}> without corresponding v-if.`
         )
         return
       }

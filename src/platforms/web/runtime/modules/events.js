@@ -3,13 +3,16 @@
 import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
 import { withMacroTask, isIE, supportsPassive } from 'core/util/index'
-import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model'
+import {
+  RANGE_TOKEN,
+  CHECKBOX_RADIO_TOKEN
+} from 'web/compiler/directives/model'
 
 // normalize v-model event tokens that can only be determined at runtime.
 // it's important to place the event as the first in the array because
 // the whole point is ensuring the v-model callback gets called before
 // user-attached handlers.
-function normalizeEvents (on) {
+function normalizeEvents(on) {
   /* istanbul ignore if */
   if (isDef(on[RANGE_TOKEN])) {
     // IE input[type=range] only supports `change` event
@@ -28,9 +31,9 @@ function normalizeEvents (on) {
 
 let target: any
 
-function createOnceHandler (handler, event, capture) {
+function createOnceHandler(handler, event, capture) {
   const _target = target // save current target element in closure
-  return function onceHandler () {
+  return function onceHandler() {
     const res = handler.apply(null, arguments)
     if (res !== null) {
       remove(event, onceHandler, capture, _target)
@@ -38,7 +41,7 @@ function createOnceHandler (handler, event, capture) {
   }
 }
 
-function add (
+function add(
   event: string,
   handler: Function,
   once: boolean,
@@ -50,26 +53,24 @@ function add (
   target.addEventListener(
     event,
     handler,
-    supportsPassive
-      ? { capture, passive }
-      : capture
+    supportsPassive ? { capture, passive } : capture
   )
 }
 
-function remove (
+function remove(
   event: string,
   handler: Function,
   capture: boolean,
   _target?: HTMLElement
 ) {
-  (_target || target).removeEventListener(
+  ;(_target || target).removeEventListener(
     event,
     handler._withTask || handler,
     capture
   )
 }
 
-function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+function updateDOMListeners(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (isUndef(oldVnode.data.on) && isUndef(vnode.data.on)) {
     return
   }

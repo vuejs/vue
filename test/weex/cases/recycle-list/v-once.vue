@@ -7,15 +7,11 @@
 </template>
 
 <script>
-  module.exports = {
-    data () {
-      return {
-        list: [
-          { type: 'A' },
-          { type: 'A' }
-        ]
-      }
+module.exports = {
+  data() {
+    return {
+      list: [{ type: 'A' }, { type: 'A' }]
     }
   }
+}
 </script>
-

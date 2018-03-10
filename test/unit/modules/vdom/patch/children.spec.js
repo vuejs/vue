@@ -1,11 +1,13 @@
 import { patch } from 'web/runtime/patch'
 import VNode, { createEmptyVNode } from 'core/vdom/vnode'
 
-function prop (name) {
-  return obj => { return obj[name] }
+function prop(name) {
+  return obj => {
+    return obj[name]
+  }
 }
 
-function map (fn, list) {
+function map(fn, list) {
   const ret = []
   for (let i = 0; i < list.length; i++) {
     ret[i] = fn(list[i])
@@ -13,7 +15,7 @@ function map (fn, list) {
   return ret
 }
 
-function spanNum (n) {
+function spanNum(n) {
   if (typeof n === 'string') {
     return new VNode('span', {}, undefined, n)
   } else {
@@ -21,7 +23,7 @@ function spanNum (n) {
   }
 }
 
-function shuffle (array) {
+function shuffle(array) {
   let currentIndex = array.length
   let temporaryValue
   let randomIndex
@@ -45,7 +47,9 @@ const tag = prop('tagName')
 describe('vdom patch: children', () => {
   let vnode0
   beforeEach(() => {
-    vnode0 = new VNode('p', { attrs: { id: '1' }}, [createTextVNode('hello world')])
+    vnode0 = new VNode('p', { attrs: { id: '1' } }, [
+      createTextVNode('hello world')
+    ])
     patch(null, vnode0)
   })
 
@@ -220,7 +224,16 @@ describe('vdom patch: children', () => {
     let elm = patch(vnode0, vnode1)
     expect(elm.children.length).toBe(8)
     elm = patch(vnode1, vnode2)
-    expect(map(inner, elm.children)).toEqual(['8', '7', '6', '5', '4', '3', '2', '1'])
+    expect(map(inner, elm.children)).toEqual([
+      '8',
+      '7',
+      '6',
+      '5',
+      '4',
+      '3',
+      '2',
+      '1'
+    ])
   })
 
   it('something', () => {
@@ -239,24 +252,41 @@ describe('vdom patch: children', () => {
     const opacities = []
     const elms = 14
     const samples = 5
-    function spanNumWithOpacity (n, o) {
-      return new VNode('span', { key: n, style: { opacity: o }}, undefined, n.toString())
+    function spanNumWithOpacity(n, o) {
+      return new VNode(
+        'span',
+        { key: n, style: { opacity: o } },
+        undefined,
+        n.toString()
+      )
     }
 
-    for (n = 0; n < elms; ++n) { arr[n] = n }
+    for (n = 0; n < elms; ++n) {
+      arr[n] = n
+    }
     for (n = 0; n < samples; ++n) {
-      const vnode1 = new VNode('span', {}, arr.map(n => {
-        return spanNumWithOpacity(n, '1')
-      }))
+      const vnode1 = new VNode(
+        'span',
+        {},
+        arr.map(n => {
+          return spanNumWithOpacity(n, '1')
+        })
+      )
       const shufArr = shuffle(arr.slice(0))
       let elm = patch(vnode0, vnode1)
       for (i = 0; i < elms; ++i) {
         expect(elm.children[i].innerHTML).toBe(i.toString())
-        opacities[i] = Math.random().toFixed(5).toString()
+        opacities[i] = Math.random()
+          .toFixed(5)
+          .toString()
       }
-      const vnode2 = new VNode('span', {}, arr.map(n => {
-        return spanNumWithOpacity(shufArr[n], opacities[n])
-      }))
+      const vnode2 = new VNode(
+        'span',
+        {},
+        arr.map(n => {
+          return spanNumWithOpacity(shufArr[n], opacities[n])
+        })
+      )
       elm = patch(vnode1, vnode2)
       for (i = 0; i < elms; ++i) {
         expect(elm.children[i].innerHTML).toBe(shufArr[i].toString())
@@ -446,7 +476,7 @@ describe('vdom patch: children', () => {
   })
 
   it('should handle static vnodes properly', () => {
-    function makeNode (text) {
+    function makeNode(text) {
       return new VNode('div', undefined, [
         new VNode(undefined, undefined, undefined, text)
       ])
@@ -467,7 +497,7 @@ describe('vdom patch: children', () => {
   })
 
   it('should handle static vnodes inside ', () => {
-    function makeNode (text) {
+    function makeNode(text) {
       return new VNode('div', undefined, [
         new VNode(undefined, undefined, undefined, text)
       ])
@@ -509,7 +539,7 @@ describe('vdom patch: children', () => {
   })
 
   it('should warn with duplicate keys: createChildren', () => {
-    function makeNode (key) {
+    function makeNode(key) {
       return new VNode('div', { key: key })
     }
 
@@ -519,7 +549,7 @@ describe('vdom patch: children', () => {
   })
 
   it('should warn with duplicate keys: updateChildren', () => {
-    function makeNode (key) {
+    function makeNode(key) {
       return new VNode('div', { key: key })
     }
 

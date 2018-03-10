@@ -28,7 +28,7 @@ describe('vdom patch: edge cases', () => {
   // exposed by #7705
   // methods and function expressions with modifiers should return result instead of undefined
   // skipped odd children[1,3, ...] because they are rendered as text nodes with undefined value
-  it('should return listener\'s result for method name and function expression with and w/o modifiers', done => {
+  it("should return listener's result for method name and function expression with and w/o modifiers", done => {
     const dummyEvt = { preventDefault: () => {} }
     new Vue({
       template: `
@@ -40,22 +40,28 @@ describe('vdom patch: edge cases', () => {
         </div>
       `,
       methods: {
-        addFive ($event, toAdd = 0) {
+        addFive($event, toAdd = 0) {
           return toAdd + 5
         }
       },
       directives: {
         test: {
-          bind (el, binding, vnode) {
+          bind(el, binding, vnode) {
             waitForUpdate(() => {
               expect(vnode.children[0].data.on.click()).toBe(5)
-            }).then(() => {
-              expect(vnode.children[2].data.on.click(dummyEvt)).toBe(5)
-            }).then(() => {
-              expect(vnode.children[4].data.on.click()).not.toBeDefined()
-            }).then(() => {
-              expect(vnode.children[6].data.on.click(dummyEvt)).not.toBeDefined()
-            }).then(done)
+            })
+              .then(() => {
+                expect(vnode.children[2].data.on.click(dummyEvt)).toBe(5)
+              })
+              .then(() => {
+                expect(vnode.children[4].data.on.click()).not.toBeDefined()
+              })
+              .then(() => {
+                expect(
+                  vnode.children[6].data.on.click(dummyEvt)
+                ).not.toBeDefined()
+              })
+              .then(done)
           }
         }
       }
@@ -67,7 +73,7 @@ describe('vdom patch: edge cases', () => {
   // and is inserted into a different parent.
   // later when patching the next element a DOM insertion uses it as the
   // reference node, causing a parent mismatch.
-  it('should handle static node edge case when it\'s reused AND used as a reference node for insertion', done => {
+  it("should handle static node edge case when it's reused AND used as a reference node for insertion", done => {
     const vm = new Vue({
       data: {
         ok: true
@@ -105,10 +111,10 @@ describe('vdom patch: edge cases', () => {
       `,
       components: {
         foo: {
-          data () {
+          data() {
             return { ok: true }
           },
-          render (h) {
+          render(h) {
             const children = [
               this.ok ? h('div', 'toggler ') : null,
               h('div', [this.$slots.default, h('span', ' 1')]),
@@ -124,22 +130,23 @@ describe('vdom patch: edge cases', () => {
     waitForUpdate(() => {
       expect(vm.$el.textContent).toContain('slot 1 2')
       vm.$refs.foo.ok = true
-    }).then(() => {
-      expect(vm.$el.textContent).toContain('toggler slot 1 2')
-      vm.$refs.foo.ok = false
-    }).then(() => {
-      expect(vm.$el.textContent).toContain('slot 1 2')
-      vm.$refs.foo.ok = true
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.textContent).toContain('toggler slot 1 2')
+        vm.$refs.foo.ok = false
+      })
+      .then(() => {
+        expect(vm.$el.textContent).toContain('slot 1 2')
+        vm.$refs.foo.ok = true
+      })
+      .then(done)
   })
 
-  it('should synchronize vm\' vnode', done => {
+  it("should synchronize vm' vnode", done => {
     const comp = {
       data: () => ({ swap: true }),
-      render (h) {
-        return this.swap
-          ? h('a', 'atag')
-          : h('span', 'span')
+      render(h) {
+        return this.swap ? h('a', 'atag') : h('span', 'span')
       }
     }
 
@@ -149,11 +156,8 @@ describe('vdom patch: edge cases', () => {
     }
 
     const vm = new Vue({
-      render (h) {
-        const children = [
-          h('wrapper'),
-          h('div', 'row')
-        ]
+      render(h) {
+        const children = [h('wrapper'), h('div', 'row')]
         if (this.swap) {
           children.reverse()
         }
@@ -171,19 +175,23 @@ describe('vdom patch: edge cases', () => {
       expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
       expect(vm.$el.innerHTML).toBe('<div>row</div><a>atag</a>')
       vm.swap = false
-    }).then(() => {
-      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
-      expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>')
-      compVm.swap = false
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>span</span><div>row</div>')
-      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
-      vm.swap = true
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<div>row</div><span>span</span>')
-      expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
-      vm.swap = true
-    }).then(done)
+    })
+      .then(() => {
+        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+        expect(vm.$el.innerHTML).toBe('<a>atag</a><div>row</div>')
+        compVm.swap = false
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>span</span><div>row</div>')
+        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+        vm.swap = true
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('<div>row</div><span>span</span>')
+        expect(compVm.$vnode.parent).toBe(wrapperVm.$vnode)
+        vm.swap = true
+      })
+      .then(done)
   })
 
   // #4530
@@ -202,9 +210,11 @@ describe('vdom patch: edge cases', () => {
     waitForUpdate(() => {
       expect(vm.$el.children[0].value).toBe('b')
       vm.ok = true
-    }).then(() => {
-      expect(vm.$el.children[0].value).toBe('a')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.children[0].value).toBe('a')
+      })
+      .then(done)
   })
 
   // #6313
@@ -226,11 +236,13 @@ describe('vdom patch: edge cases', () => {
       expect(vm.$el.children[0].value).toBe('test')
       expect(vm.$el.children[0].type).toBe('text')
       vm.show = false
-    }).then(() => {
-      expect(vm.$el.children[0]).toBe(node)
-      expect(vm.$el.children[0].value).toBe('test')
-      expect(vm.$el.children[0].type).toBe('password')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.children[0]).toBe(node)
+        expect(vm.$el.children[0].value).toBe('test')
+        expect(vm.$el.children[0].type).toBe('password')
+      })
+      .then(done)
   })
 
   it('should properly patch nested HOC when root element is replaced', done => {
@@ -242,7 +254,7 @@ describe('vdom patch: edge cases', () => {
           components: {
             bar: {
               template: `<div v-if="ok"></div><span v-else></span>`,
-              data () {
+              data() {
                 return { ok: true }
               }
             }
@@ -280,36 +292,39 @@ describe('vdom patch: edge cases', () => {
       },
       computed: {
         value: {
-          get () {
+          get() {
             return 1
           },
           set: spy
         }
       },
-      render (h) {
+      render(h) {
         const _vm = this
-        return h('div', {},
-          [h('input', {
-            directives: [{
-              name: 'model',
-              rawName: 'v-model',
-              value: (_vm.value),
-              expression: 'value'
-            }],
+        return h('div', {}, [
+          h('input', {
+            directives: [
+              {
+                name: 'model',
+                rawName: 'v-model',
+                value: _vm.value,
+                expression: 'value'
+              }
+            ],
             attrs: {
-              'type': 'radio',
-              'name': _vm.name
+              type: 'radio',
+              name: _vm.name
             },
             domProps: {
-              'value': _vm.label,
-              'checked': _vm._q(_vm.value, _vm.label)
+              value: _vm.label,
+              checked: _vm._q(_vm.value, _vm.label)
             },
             on: {
-              '__c': function ($event) {
+              __c: function($event) {
                 _vm.value = _vm.label
               }
             }
-          })])
+          })
+        ])
       }
     }).$mount()
 
@@ -352,7 +367,7 @@ describe('vdom patch: edge cases', () => {
       `,
       components: {
         foo: {
-          render () {}
+          render() {}
         }
       },
       methods: { log }
@@ -371,7 +386,9 @@ describe('vdom patch: edge cases', () => {
     const vm = new Vue({
       template: `<div><custom-foo selected="1"/></div>`
     }).$mount()
-    expect(vm.$el.querySelector('custom-foo').getAttribute('selected')).toBe('1')
+    expect(vm.$el.querySelector('custom-foo').getAttribute('selected')).toBe(
+      '1'
+    )
     Vue.config.ignoredElements = []
   })
 })

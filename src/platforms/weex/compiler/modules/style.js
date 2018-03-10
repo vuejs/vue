@@ -2,28 +2,24 @@
 
 import { cached, camelize, isPlainObject } from 'shared/util'
 import { parseText } from 'compiler/parser/text-parser'
-import {
-  getAndRemoveAttr,
-  getBindingAttr,
-  baseWarn
-} from 'compiler/helpers'
+import { getAndRemoveAttr, getBindingAttr, baseWarn } from 'compiler/helpers'
 
 type StaticStyleResult = {
   dynamic: boolean,
   styleResult: string | Object | void
-};
+}
 
 const normalize = cached(camelize)
 
-function transformNode (el: ASTElement, options: CompilerOptions) {
+function transformNode(el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticStyle = getAndRemoveAttr(el, 'style')
   const { dynamic, styleResult } = parseStaticStyle(staticStyle, options)
   if (process.env.NODE_ENV !== 'production' && dynamic) {
     warn(
       `style="${String(staticStyle)}": ` +
-      'Interpolation inside attributes has been deprecated. ' +
-      'Use v-bind or the colon shorthand instead.'
+        'Interpolation inside attributes has been deprecated. ' +
+        'Use v-bind or the colon shorthand instead.'
     )
   }
   if (!dynamic && styleResult) {
@@ -39,7 +35,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   }
 }
 
-function genData (el: ASTElement): string {
+function genData(el: ASTElement): string {
   let data = ''
   if (el.staticStyle) {
     data += `staticStyle:${el.staticStyle},`
@@ -50,26 +46,33 @@ function genData (el: ASTElement): string {
   return data
 }
 
-function parseStaticStyle (staticStyle: ?string, options: CompilerOptions): StaticStyleResult {
+function parseStaticStyle(
+  staticStyle: ?string,
+  options: CompilerOptions
+): StaticStyleResult {
   // "width: 200px; height: 200px;" -> {width: 200, height: 200}
   // "width: 200px; height: {{y}}" -> {width: 200, height: y}
   let dynamic = false
   let styleResult = ''
   if (typeof staticStyle === 'string') {
-    const styleList = staticStyle.trim().split(';').map(style => {
-      const result = style.trim().split(':')
-      if (result.length !== 2) {
-        return
-      }
-      const key = normalize(result[0].trim())
-      const value = result[1].trim()
-      const dynamicValue = parseText(value, options.delimiters)
-      if (dynamicValue) {
-        dynamic = true
-        return key + ':' + dynamicValue.expression
-      }
-      return key + ':' + JSON.stringify(value)
-    }).filter(result => result)
+    const styleList = staticStyle
+      .trim()
+      .split(';')
+      .map(style => {
+        const result = style.trim().split(':')
+        if (result.length !== 2) {
+          return
+        }
+        const key = normalize(result[0].trim())
+        const value = result[1].trim()
+        const dynamicValue = parseText(value, options.delimiters)
+        if (dynamicValue) {
+          dynamic = true
+          return key + ':' + dynamicValue.expression
+        }
+        return key + ':' + JSON.stringify(value)
+      })
+      .filter(result => result)
     if (styleList.length) {
       styleResult = '{' + styleList.join(',') + '}'
     }

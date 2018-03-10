@@ -4,9 +4,9 @@ import { extend } from 'shared/util'
 import { detectErrors } from './error-detector'
 import { createCompileToFunctionFn } from './to-function'
 
-export function createCompilerCreator (baseCompile: Function): Function {
-  return function createCompiler (baseOptions: CompilerOptions) {
-    function compile (
+export function createCompilerCreator(baseCompile: Function): Function {
+  return function createCompiler(baseOptions: CompilerOptions) {
+    function compile(
       template: string,
       options?: CompilerOptions
     ): CompiledResult {
@@ -14,14 +14,15 @@ export function createCompilerCreator (baseCompile: Function): Function {
       const errors = []
       const tips = []
       finalOptions.warn = (msg, tip) => {
-        (tip ? tips : errors).push(msg)
+        ;(tip ? tips : errors).push(msg)
       }
 
       if (options) {
         // merge custom modules
         if (options.modules) {
-          finalOptions.modules =
-            (baseOptions.modules || []).concat(options.modules)
+          finalOptions.modules = (baseOptions.modules || []).concat(
+            options.modules
+          )
         }
         // merge custom directives
         if (options.directives) {

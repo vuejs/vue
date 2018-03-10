@@ -23,22 +23,25 @@ import {
   removeTransitionClass
 } from '../transition-util'
 
-const props = extend({
-  tag: String,
-  moveClass: String
-}, transitionProps)
+const props = extend(
+  {
+    tag: String,
+    moveClass: String
+  },
+  transitionProps
+)
 
 delete props.mode
 
 export default {
   props,
 
-  render (h: Function) {
+  render(h: Function) {
     const tag: string = this.tag || this.$vnode.data.tag || 'span'
     const map: Object = Object.create(null)
-    const prevChildren: Array<VNode> = this.prevChildren = this.children
+    const prevChildren: Array<VNode> = (this.prevChildren = this.children)
     const rawChildren: Array<VNode> = this.$slots.default || []
-    const children: Array<VNode> = this.children = []
+    const children: Array<VNode> = (this.children = [])
     const transitionData: Object = extractTransitionData(this)
 
     for (let i = 0; i < rawChildren.length; i++) {
@@ -50,7 +53,9 @@ export default {
           ;(c.data || (c.data = {})).transition = transitionData
         } else if (process.env.NODE_ENV !== 'production') {
           const opts: ?VNodeComponentOptions = c.componentOptions
-          const name: string = opts ? (opts.Ctor.options.name || opts.tag || '') : c.tag
+          const name: string = opts
+            ? opts.Ctor.options.name || opts.tag || ''
+            : c.tag
           warn(`<transition-group> children must be keyed: <${name}>`)
         }
       }
@@ -76,7 +81,7 @@ export default {
     return h(tag, null, children)
   },
 
-  beforeUpdate () {
+  beforeUpdate() {
     // force removing pass
     this.__patch__(
       this._vnode,
@@ -87,9 +92,9 @@ export default {
     this._vnode = this.kept
   },
 
-  updated () {
+  updated() {
     const children: Array<VNode> = this.prevChildren
-    const moveClass: string = this.moveClass || ((this.name || 'v') + '-move')
+    const moveClass: string = this.moveClass || (this.name || 'v') + '-move'
     if (!children.length || !this.hasMove(children[0].elm, moveClass)) {
       return
     }
@@ -111,19 +116,22 @@ export default {
         var s: any = el.style
         addTransitionClass(el, moveClass)
         s.transform = s.WebkitTransform = s.transitionDuration = ''
-        el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
-          if (!e || /transform$/.test(e.propertyName)) {
-            el.removeEventListener(transitionEndEvent, cb)
-            el._moveCb = null
-            removeTransitionClass(el, moveClass)
-          }
-        })
+        el.addEventListener(
+          transitionEndEvent,
+          (el._moveCb = function cb(e) {
+            if (!e || /transform$/.test(e.propertyName)) {
+              el.removeEventListener(transitionEndEvent, cb)
+              el._moveCb = null
+              removeTransitionClass(el, moveClass)
+            }
+          })
+        )
       }
     })
   },
 
   methods: {
-    hasMove (el: any, moveClass: string): boolean {
+    hasMove(el: any, moveClass: string): boolean {
       /* istanbul ignore if */
       if (!hasTransition) {
         return false
@@ -139,7 +147,9 @@ export default {
       // is applied.
       const clone: HTMLElement = el.cloneNode()
       if (el._transitionClasses) {
-        el._transitionClasses.forEach((cls: string) => { removeClass(clone, cls) })
+        el._transitionClasses.forEach((cls: string) => {
+          removeClass(clone, cls)
+        })
       }
       addClass(clone, moveClass)
       clone.style.display = 'none'
@@ -151,7 +161,7 @@ export default {
   }
 }
 
-function callPendingCbs (c: VNode) {
+function callPendingCbs(c: VNode) {
   /* istanbul ignore if */
   if (c.elm._moveCb) {
     c.elm._moveCb()
@@ -162,11 +172,11 @@ function callPendingCbs (c: VNode) {
   }
 }
 
-function recordPosition (c: VNode) {
+function recordPosition(c: VNode) {
   c.data.newPos = c.elm.getBoundingClientRect()
 }
 
-function applyTranslation (c: VNode) {
+function applyTranslation(c: VNode) {
   const oldPos = c.data.pos
   const newPos = c.data.newPos
   const dx = oldPos.left - newPos.left

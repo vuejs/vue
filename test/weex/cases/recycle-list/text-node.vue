@@ -9,15 +9,14 @@
 </template>
 
 <script>
-  module.exports = {
-    data () {
-      return {
-        longList: [
-          { type: 'A', dynamic: 'decimal', two: '2', four: '4' },
-          { type: 'A', dynamic: 'binary', two: '10', four: '100' }
-        ]
-      }
+module.exports = {
+  data() {
+    return {
+      longList: [
+        { type: 'A', dynamic: 'decimal', two: '2', four: '4' },
+        { type: 'A', dynamic: 'binary', two: '10', four: '100' }
+      ]
     }
   }
+}
 </script>
-

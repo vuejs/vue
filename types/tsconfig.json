@@ -1,11 +1,7 @@
 {
-    "compilerOptions": {
-        "strict": true,
-        "lib": [
-            "es2015", "dom"
-        ]
-    },
-    "include": [
-        "./*.ts"
-    ]
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["es2015", "dom"]
+  },
+  "include": ["./*.ts"]
 }

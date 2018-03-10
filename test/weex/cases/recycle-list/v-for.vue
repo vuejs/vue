@@ -9,15 +9,11 @@
 </template>
 
 <script>
-  module.exports = {
-    data () {
-      return {
-        longList: [
-          { type: 'A' },
-          { type: 'A' }
-        ]
-      }
+module.exports = {
+  data() {
+    return {
+      longList: [{ type: 'A' }, { type: 'A' }]
     }
   }
+}
 </script>
-

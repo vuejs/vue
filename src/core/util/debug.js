@@ -11,25 +11,22 @@ export let formatComponentName = (noop: any)
 if (process.env.NODE_ENV !== 'production') {
   const hasConsole = typeof console !== 'undefined'
   const classifyRE = /(?:^|[-_])(\w)/g
-  const classify = str => str
-    .replace(classifyRE, c => c.toUpperCase())
-    .replace(/[-_]/g, '')
+  const classify = str =>
+    str.replace(classifyRE, c => c.toUpperCase()).replace(/[-_]/g, '')
 
   warn = (msg, vm) => {
     const trace = vm ? generateComponentTrace(vm) : ''
 
     if (config.warnHandler) {
       config.warnHandler.call(null, msg, vm, trace)
-    } else if (hasConsole && (!config.silent)) {
+    } else if (hasConsole && !config.silent) {
       console.error(`[Vue warn]: ${msg}${trace}`)
     }
   }
 
   tip = (msg, vm) => {
-    if (hasConsole && (!config.silent)) {
-      console.warn(`[Vue tip]: ${msg}` + (
-        vm ? generateComponentTrace(vm) : ''
-      ))
+    if (hasConsole && !config.silent) {
+      console.warn(`[Vue tip]: ${msg}` + (vm ? generateComponentTrace(vm) : ''))
     }
   }
 
@@ -37,11 +34,10 @@ if (process.env.NODE_ENV !== 'production') {
     if (vm.$root === vm) {
       return '<Root>'
     }
-    const options = typeof vm === 'function' && vm.cid != null
-      ? vm.options
-      : vm._isVue
-        ? vm.$options || vm.constructor.options
-        : vm || {}
+    const options =
+      typeof vm === 'function' && vm.cid != null
+        ? vm.options
+        : vm._isVue ? vm.$options || vm.constructor.options : vm || {}
     let name = options.name || options._componentTag
     const file = options.__file
     if (!name && file) {
@@ -84,15 +80,21 @@ if (process.env.NODE_ENV !== 'production') {
         tree.push(vm)
         vm = vm.$parent
       }
-      return '\n\nfound in\n\n' + tree
-        .map((vm, i) => `${
-          i === 0 ? '---> ' : repeat(' ', 5 + i * 2)
-        }${
-          Array.isArray(vm)
-            ? `${formatComponentName(vm[0])}... (${vm[1]} recursive calls)`
-            : formatComponentName(vm)
-        }`)
-        .join('\n')
+      return (
+        '\n\nfound in\n\n' +
+        tree
+          .map(
+            (vm, i) =>
+              `${i === 0 ? '---> ' : repeat(' ', 5 + i * 2)}${
+                Array.isArray(vm)
+                  ? `${formatComponentName(vm[0])}... (${
+                      vm[1]
+                    } recursive calls)`
+                  : formatComponentName(vm)
+              }`
+          )
+          .join('\n')
+      )
     } else {
       return `\n\n(found in ${formatComponentName(vm)})`
     }

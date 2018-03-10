@@ -8,15 +8,12 @@
 </template>
 
 <script>
-  // require('./counter.vue')
-  module.exports = {
-    data () {
-      return {
-        longList: [
-          { type: 'A', number: 24 },
-          { type: 'A', number: 42 }
-        ]
-      }
+// require('./counter.vue')
+module.exports = {
+  data() {
+    return {
+      longList: [{ type: 'A', number: 24 }, { type: 'A', number: 42 }]
     }
   }
+}
 </script>

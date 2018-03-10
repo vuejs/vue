@@ -64,11 +64,13 @@ describe('Observer', () => {
     Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
-      get () {
+      get() {
         getCount++
         return val
       },
-      set (v) { val = v }
+      set(v) {
+        val = v
+      }
     })
 
     const ob1 = observe(obj)
@@ -98,7 +100,9 @@ describe('Observer', () => {
     Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
-      get () { return 123 }
+      get() {
+        return 123
+      }
     })
 
     const ob1 = observe(obj)
@@ -126,10 +130,13 @@ describe('Observer', () => {
     // on object
     const obj = {}
     let val = 10
-    Object.defineProperty(obj, 'a', { // eslint-disable-line accessor-pairs
+    // eslint-disable-next-line accessor-pairs
+    Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
-      set (v) { val = v }
+      set(v) {
+        val = v
+      }
     })
 
     const ob1 = observe(obj)
@@ -182,7 +189,7 @@ describe('Observer', () => {
     // mock a watcher!
     const watcher = {
       deps: [],
-      addDep (dep) {
+      addDep(dep) {
         this.deps.push(dep)
         dep.addSub(this)
       },
@@ -218,8 +225,10 @@ describe('Observer', () => {
     Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
-      get () { return this.val },
-      set (v) {
+      get() {
+        return this.val
+      },
+      set(v) {
         this.val = v
         return this.val
       }
@@ -229,7 +238,7 @@ describe('Observer', () => {
     // mock a watcher!
     const watcher = {
       deps: [],
-      addDep: function (dep) {
+      addDep: function(dep) {
         this.deps.push(dep)
         dep.addSub(this)
       },
@@ -306,14 +315,20 @@ describe('Observer', () => {
     Vue.set(vm, 'a', 2)
     waitForUpdate(() => {
       expect(vm.$el.outerHTML).toBe('<div>2</div>')
-      expect('Avoid adding reactive properties to a Vue instance').not.toHaveBeenWarned()
+      expect(
+        'Avoid adding reactive properties to a Vue instance'
+      ).not.toHaveBeenWarned()
       Vue.delete(vm, 'a')
-    }).then(() => {
-      expect('Avoid deleting properties on a Vue instance').toHaveBeenWarned()
-      expect(vm.$el.outerHTML).toBe('<div>2</div>')
-      Vue.set(vm, 'b', 123)
-      expect('Avoid adding reactive properties to a Vue instance').toHaveBeenWarned()
-    }).then(done)
+    })
+      .then(() => {
+        expect('Avoid deleting properties on a Vue instance').toHaveBeenWarned()
+        expect(vm.$el.outerHTML).toBe('<div>2</div>')
+        Vue.set(vm, 'b', 123)
+        expect(
+          'Avoid adding reactive properties to a Vue instance'
+        ).toHaveBeenWarned()
+      })
+      .then(done)
   })
 
   it('warning set/delete on Vue instance root $data', done => {
@@ -326,14 +341,20 @@ describe('Observer', () => {
     expect(Vue.set(data, 'a', 2)).toBe(2)
     waitForUpdate(() => {
       expect(vm.$el.outerHTML).toBe('<div>2</div>')
-      expect('Avoid adding reactive properties to a Vue instance').not.toHaveBeenWarned()
+      expect(
+        'Avoid adding reactive properties to a Vue instance'
+      ).not.toHaveBeenWarned()
       Vue.delete(data, 'a')
-    }).then(() => {
-      expect('Avoid deleting properties on a Vue instance').toHaveBeenWarned()
-      expect(vm.$el.outerHTML).toBe('<div>2</div>')
-      expect(Vue.set(data, 'b', 123)).toBe(123)
-      expect('Avoid adding reactive properties to a Vue instance').toHaveBeenWarned()
-    }).then(done)
+    })
+      .then(() => {
+        expect('Avoid deleting properties on a Vue instance').toHaveBeenWarned()
+        expect(vm.$el.outerHTML).toBe('<div>2</div>')
+        expect(Vue.set(data, 'b', 123)).toBe(123)
+        expect(
+          'Avoid adding reactive properties to a Vue instance'
+        ).toHaveBeenWarned()
+      })
+      .then(done)
   })
 
   it('observing array mutation', () => {
@@ -360,12 +381,16 @@ describe('Observer', () => {
     try {
       setProp(null, 'foo', 1)
     } catch (e) {}
-    expect(`Cannot set reactive property on non-object/array value`).toHaveBeenWarned()
+    expect(
+      `Cannot set reactive property on non-object/array value`
+    ).toHaveBeenWarned()
 
     try {
       delProp(null, 'foo')
     } catch (e) {}
-    expect(`Cannot delete reactive property on non-object/array value`).toHaveBeenWarned()
+    expect(
+      `Cannot delete reactive property on non-object/array value`
+    ).toHaveBeenWarned()
   })
 
   it('should lazy invoke existing getters', () => {

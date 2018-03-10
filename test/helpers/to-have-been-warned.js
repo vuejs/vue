@@ -1,4 +1,4 @@
-function noop () {}
+function noop() {}
 
 if (typeof console === 'undefined') {
   window.console = {
@@ -12,7 +12,7 @@ console.info = noop
 
 let asserted
 
-function createCompareFn (spy) {
+function createCompareFn(spy) {
   const hasWarned = msg => {
     var count = spy.calls.count()
     var args
@@ -23,7 +23,7 @@ function createCompareFn (spy) {
       }
     }
 
-    function containsMsg (arg) {
+    function containsMsg(arg) {
       return arg.toString().indexOf(msg) > -1
     }
   }
@@ -31,9 +31,7 @@ function createCompareFn (spy) {
   return {
     compare: msg => {
       asserted = asserted.concat(msg)
-      var warned = Array.isArray(msg)
-        ? msg.some(hasWarned)
-        : hasWarned(msg)
+      var warned = Array.isArray(msg) ? msg.some(hasWarned) : hasWarned(msg)
       return {
         pass: warned,
         message: warned
@@ -56,7 +54,8 @@ beforeEach(() => {
 })
 
 afterEach(done => {
-  const warned = msg => asserted.some(assertedMsg => msg.toString().indexOf(assertedMsg) > -1)
+  const warned = msg =>
+    asserted.some(assertedMsg => msg.toString().indexOf(assertedMsg) > -1)
   let count = console.error.calls.count()
   let args
   while (count--) {

@@ -3,7 +3,7 @@
 import { parseFor } from 'compiler/parser/index'
 import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
 
-export function preTransformVFor (el: ASTElement, options: WeexCompilerOptions) {
+export function preTransformVFor(el: ASTElement, options: WeexCompilerOptions) {
   const exp = getAndRemoveAttr(el, 'v-for')
   if (!exp) {
     return

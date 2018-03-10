@@ -1,13 +1,15 @@
 module.exports = {
-  'todomvc': function (browser) {
+  todomvc: function(browser) {
     browser
-    .url('http://localhost:8080/examples/todomvc/#test')
+      .url('http://localhost:8080/examples/todomvc/#test')
       .waitForElementVisible('.todoapp', 1000)
       .assert.notVisible('.main')
       .assert.notVisible('.footer')
       .assert.count('.filters .selected', 1)
-      .assert.evaluate(function () {
-        return document.querySelector('.filters .selected').textContent === 'All'
+      .assert.evaluate(function() {
+        return (
+          document.querySelector('.filters .selected').textContent === 'All'
+        )
       })
 
     createNewItem('test')
@@ -81,23 +83,25 @@ module.exports = {
       .click('.filters li:nth-child(2) a')
       .assert.count('.todo', 1)
       .assert.count('.todo.completed', 0)
-      // add item with filter active
-      createNewItem('test')
-      .assert.count('.todo', 2)
+    // add item with filter active
+    createNewItem('test').assert.count('.todo', 2)
 
     // completed filter
-    browser.click('.filters li:nth-child(3) a')
+    browser
+      .click('.filters li:nth-child(3) a')
       .assert.count('.todo', 2)
       .assert.count('.todo.completed', 2)
 
     // filter on page load
-    browser.url('http://localhost:8080/examples/todomvc/#active')
+    browser
+      .url('http://localhost:8080/examples/todomvc/#active')
       .assert.count('.todo', 2)
       .assert.count('.todo.completed', 0)
       .assert.containsText('.todo-count strong', '2')
 
     // completed on page load
-    browser.url('http://localhost:8080/examples/todomvc/#completed')
+    browser
+      .url('http://localhost:8080/examples/todomvc/#completed')
       .assert.count('.todo', 2)
       .assert.count('.todo.completed', 2)
       .assert.containsText('.todo-count strong', '2')
@@ -153,11 +157,11 @@ module.exports = {
       .assert.count('.todo:not(.completed)', 3)
       .end()
 
-    function createNewItem (text) {
+    function createNewItem(text) {
       return browser.enterValue('.new-todo', text)
     }
 
-    function removeItemAt (n) {
+    function removeItemAt(n) {
       return browser
         .moveToElement('.todo:nth-child(' + n + ')', 10, 10)
         .click('.todo:nth-child(' + n + ') .destroy')

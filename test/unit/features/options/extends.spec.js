@@ -4,13 +4,13 @@ import { nativeWatch } from 'core/util/env'
 describe('Options extends', () => {
   it('should work on objects', () => {
     const A = {
-      data () {
+      data() {
         return { a: 1 }
       }
     }
     const B = {
       extends: A,
-      data () {
+      data() {
         return { b: 2 }
       }
     }
@@ -27,13 +27,13 @@ describe('Options extends', () => {
 
   it('should work on extended constructors', () => {
     const A = Vue.extend({
-      data () {
+      data() {
         return { a: 1 }
       }
     })
     const B = Vue.extend({
       extends: A,
-      data () {
+      data() {
         return { b: 2 }
       }
     })
@@ -54,13 +54,13 @@ describe('Options extends', () => {
 
       const spy = jasmine.createSpy('watch')
       const A = Vue.extend({
-        data: function () {
+        data: function() {
           return { a: 1 }
         },
         watch: {
           a: spy
         },
-        created: function () {
+        created: function() {
           this.a = 2
         }
       })

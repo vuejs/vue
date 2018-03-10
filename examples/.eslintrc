@@ -1,0 +1,11 @@
+{
+  "env": {
+    "browser": true
+  },
+  "globals": {
+    "Vue": true
+  },
+  "rules": {
+    "no-unused-vars": "off"
+  }
+}
