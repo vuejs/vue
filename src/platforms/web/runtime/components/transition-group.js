@@ -33,6 +33,21 @@ delete props.mode
 export default {
   props,
 
+  beforeMount () {
+    const update = this._update
+    this._update = (vnode, hydrating) => {
+      // force removing pass
+      this.__patch__(
+        this._vnode,
+        this.kept,
+        false, // hydrating
+        true // removeOnly (!important, avoids unnecessary moves)
+      )
+      this._vnode = this.kept
+      update.call(this, vnode, hydrating)
+    }
+  },
+
   render (h: Function) {
     const tag: string = this.tag || this.$vnode.data.tag || 'span'
     const map: Object = Object.create(null)
@@ -74,17 +89,6 @@ export default {
     }
 
     return h(tag, null, children)
-  },
-
-  beforeUpdate () {
-    // force removing pass
-    this.__patch__(
-      this._vnode,
-      this.kept,
-      false, // hydrating
-      true // removeOnly (!important, avoids unnecessary moves)
-    )
-    this._vnode = this.kept
   },
 
   updated () {
