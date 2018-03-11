@@ -29,10 +29,11 @@ export default class Watcher {
   id: number;
   deep: boolean;
   user: boolean;
-  lazy: boolean;
+  computed: boolean;
   sync: boolean;
   dirty: boolean;
   active: boolean;
+  dep: Dep;
   deps: Array<Dep>;
   newDeps: Array<Dep>;
   depIds: SimpleSet;
@@ -57,16 +58,16 @@ export default class Watcher {
     if (options) {
       this.deep = !!options.deep
       this.user = !!options.user
-      this.lazy = !!options.lazy
+      this.computed = !!options.computed
       this.sync = !!options.sync
       this.before = options.before
     } else {
-      this.deep = this.user = this.lazy = this.sync = false
+      this.deep = this.user = this.computed = this.sync = false
     }
     this.cb = cb
     this.id = ++uid // uid for batching
     this.active = true
-    this.dirty = this.lazy // for lazy watchers
+    this.dirty = this.computed // for computed watchers
     this.deps = []
     this.newDeps = []
     this.depIds = new Set()
@@ -89,9 +90,12 @@ export default class Watcher {
         )
       }
     }
-    this.value = this.lazy
-      ? undefined
-      : this.get()
+    if (this.computed) {
+      this.value = undefined
+      this.dep = new Dep()
+    } else {
+      this.value = this.get()
+    }
   }
 
   /**
@@ -162,8 +166,24 @@ export default class Watcher {
    */
   update () {
     /* istanbul ignore else */
-    if (this.lazy) {
-      this.dirty = true
+    if (this.computed) {
+      // A computed property watcher has two modes: lazy and activated.
+      // It initializes as lazy by default, and only becomes activated when
+      // it is depended on by at least one subscriber, which is typically
+      // another computed property or a component's render function.
+      if (this.dep.subs.length === 0) {
+        // In lazy mode, we don't want to perform computations until necessary,
+        // so we simply mark the watcher as dirty. The actual computation is
+        // performed just-in-time in this.evaluate() when the computed property
+        // is accessed.
+        this.dirty = true
+      } else {
+        // In activated mode, we want to proactively perform the computation
+        // but only notify our subscribers when the value has indeed changed.
+        this.getAndInvoke(() => {
+          this.dep.notify()
+        })
+      }
     } else if (this.sync) {
       this.run()
     } else {
@@ -177,47 +197,54 @@ export default class Watcher {
    */
   run () {
     if (this.active) {
-      const value = this.get()
-      if (
-        value !== this.value ||
-        // Deep watchers and watchers on Object/Arrays should fire even
-        // when the value is the same, because the value may
-        // have mutated.
-        isObject(value) ||
-        this.deep
-      ) {
-        // set new value
-        const oldValue = this.value
-        this.value = value
-        if (this.user) {
-          try {
-            this.cb.call(this.vm, value, oldValue)
-          } catch (e) {
-            handleError(e, this.vm, `callback for watcher "${this.expression}"`)
-          }
-        } else {
-          this.cb.call(this.vm, value, oldValue)
+      this.getAndInvoke(this.cb)
+    }
+  }
+
+  getAndInvoke (cb: Function) {
+    const value = this.get()
+    if (
+      value !== this.value ||
+      // Deep watchers and watchers on Object/Arrays should fire even
+      // when the value is the same, because the value may
+      // have mutated.
+      isObject(value) ||
+      this.deep
+    ) {
+      // set new value
+      const oldValue = this.value
+      this.value = value
+      this.dirty = false
+      if (this.user) {
+        try {
+          cb.call(this.vm, value, oldValue)
+        } catch (e) {
+          handleError(e, this.vm, `callback for watcher "${this.expression}"`)
         }
+      } else {
+        cb.call(this.vm, value, oldValue)
       }
     }
   }
 
   /**
-   * Evaluate the value of the watcher.
-   * This only gets called for lazy watchers.
+   * Evaluate and return the value of the watcher.
+   * This only gets called for computed property watchers.
    */
   evaluate () {
-    this.value = this.get()
-    this.dirty = false
+    if (this.dirty) {
+      this.value = this.get()
+      this.dirty = false
+    }
+    return this.value
   }
 
   /**
-   * Depend on all deps collected by this watcher.
+   * Depend on this watcher. Only for computed property watchers.
    */
   depend () {
-    let i = this.deps.length
-    while (i--) {
-      this.deps[i].depend()
+    if (this.dep && Dep.target) {
+      this.dep.depend()
     }
   }
 
