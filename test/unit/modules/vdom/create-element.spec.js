@@ -253,4 +253,24 @@ describe('create-element', () => {
       expect(vm.$el.querySelector('input').value).toBe('b')
     }).then(done)
   })
+
+  // #7786
+  it('creates element with vnode reference in :class or :style', () => {
+    const vm = new Vue({
+      components: {
+        foo: {
+          render (h) {
+            return h('div', {
+              class: {
+                'has-vnode': this.$vnode
+              }
+            }, 'foo')
+          }
+        }
+      },
+      render: h => h('foo')
+    }).$mount()
+    expect(vm.$el.innerHTML).toContain('foo')
+    expect(vm.$el.classList.contains('has-vnode')).toBe(true)
+  })
 })
