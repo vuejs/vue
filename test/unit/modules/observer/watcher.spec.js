@@ -144,23 +144,67 @@ describe('Watcher', () => {
     }).then(done)
   })
 
-  it('lazy mode', done => {
+  it('computed mode, lazy', done => {
+    let getterCallCount = 0
     const watcher = new Watcher(vm, function () {
+      getterCallCount++
       return this.a + this.b.d
-    }, null, { lazy: true })
-    expect(watcher.lazy).toBe(true)
+    }, null, { computed: true })
+
+    expect(getterCallCount).toBe(0)
+    expect(watcher.computed).toBe(true)
     expect(watcher.value).toBeUndefined()
     expect(watcher.dirty).toBe(true)
-    watcher.evaluate()
+    expect(watcher.dep).toBeTruthy()
+
+    const value = watcher.evaluate()
+    expect(getterCallCount).toBe(1)
+    expect(value).toBe(5)
     expect(watcher.value).toBe(5)
     expect(watcher.dirty).toBe(false)
+
+    // should not get again if not dirty
+    watcher.evaluate()
+    expect(getterCallCount).toBe(1)
+
     vm.a = 2
     waitForUpdate(() => {
+      expect(getterCallCount).toBe(1)
       expect(watcher.value).toBe(5)
       expect(watcher.dirty).toBe(true)
-      watcher.evaluate()
+
+      const value = watcher.evaluate()
+      expect(getterCallCount).toBe(2)
+      expect(value).toBe(6)
       expect(watcher.value).toBe(6)
       expect(watcher.dirty).toBe(false)
+    }).then(done)
+  })
+
+  it('computed mode, activated', done => {
+    let getterCallCount = 0
+    const watcher = new Watcher(vm, function () {
+      getterCallCount++
+      return this.a + this.b.d
+    }, null, { computed: true })
+
+    // activate by mocking a subscriber
+    const subMock = jasmine.createSpyObj('sub', ['update'])
+    watcher.dep.addSub(subMock)
+
+    const value = watcher.evaluate()
+    expect(getterCallCount).toBe(1)
+    expect(value).toBe(5)
+
+    vm.a = 2
+    waitForUpdate(() => {
+      expect(getterCallCount).toBe(2)
+      expect(subMock.update).toHaveBeenCalled()
+
+      // since already computed, calling evaluate again should not trigger
+      // getter
+      watcher.evaluate()
+      expect(getterCallCount).toBe(2)
     }).then(done)
   })
 
