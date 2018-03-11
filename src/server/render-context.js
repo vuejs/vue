@@ -67,13 +67,18 @@ export class RenderContext {
     }
     switch (lastState.type) {
       case 'Element':
+      case 'Fragment':
         const { children, total } = lastState
         const rendered = lastState.rendered++
         if (rendered < total) {
           this.renderNode(children[rendered], false, this)
         } else {
           this.renderStates.pop()
-          this.write(lastState.endTag, this.next)
+          if (lastState.endTag) {
+            this.write(lastState.endTag, this.next)
+          } else {
+            this.next()
+          }
         }
         break
       case 'Component':
