@@ -464,6 +464,26 @@ describe('Directive v-for', () => {
     }).then(done)
   })
 
+  // #7792
+  it('should work with multiline expressions', () => {
+    const vm = new Vue({
+      data: {
+        a: [1],
+        b: [2]
+      },
+      template: `
+        <div>
+          <span v-for="n in (
+            a.concat(
+              b
+            )
+          )">{{ n }}</span>
+        </div>
+      `
+    }).$mount()
+    expect(vm.$el.textContent).toBe('12')
+  })
+
   const supportsDestructuring = (() => {
     try {
       new Function('var { foo } = bar')
