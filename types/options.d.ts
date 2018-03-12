@@ -44,20 +44,10 @@ export type Accessors<T> = {
 }
 
 type DataDef<Data, Props, V> = Data | ((this: Readonly<Props> & V) => Data)
-/**
- * This type should be used when an array of strings is used for a component's `props` value.
- */
-export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, PropNames extends string> =
-  object &
-  ComponentOptions<V, DataDef<Data, Record<PropNames, any>, V>, Methods, Computed, PropNames[], Record<PropNames, any>> &
-  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Readonly<Record<PropNames, any>>>>;
 
-/**
- * This type should be used when an object mapped to `PropOptions` is used for a component's `props` value.
- */
-export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props> =
+export type ThisTypedComponentOptions<V extends Vue, Data, Methods, Computed, Props> =
   object &
-  ComponentOptions<V, DataDef<Data, Props, V>, Methods, Computed, RecordPropsDefinition<Props>, Props> &
+  ComponentOptions<V, DataDef<Data, Props, V>, Methods, Computed, PropsDefinition<Props>, Props> &
   ThisType<CombinedVueInstance<V, Data, Methods, Computed, Readonly<Props>>>;
 
 type DefaultData<V> =  object | ((this: V) => object);
