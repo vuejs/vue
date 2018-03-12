@@ -10,6 +10,7 @@ import { installRenderHelpers } from '../instance/render-helpers/index'
 import {
   isDef,
   isTrue,
+  hasOwn,
   camelize,
   emptyObject,
   validateProp
@@ -23,6 +24,21 @@ export function FunctionalRenderContext (
   Ctor: Class<Component>
 ) {
   const options = Ctor.options
+  // ensure the createElement function in functional components
+  // gets a unique context - this is necessary for correct named slot check
+  let contextVm
+  if (hasOwn(parent, '_uid')) {
+    contextVm = Object.create(parent)
+    // $flow-disable-line
+    contextVm._original = parent
+  } else {
+    contextVm = parent
+    // $flow-disable-line
+    parent = parent._original
+  }
+  const isCompiled = isTrue(options._compiled)
+  const needNormalization = !isCompiled
+
   this.data = data
   this.props = props
   this.children = children
@@ -30,12 +46,6 @@ export function FunctionalRenderContext (
   this.listeners = data.on || emptyObject
   this.injections = resolveInject(options.inject, parent)
   this.slots = () => resolveSlots(children, parent)
-
-  // ensure the createElement function in functional components
-  // gets a unique context - this is necessary for correct named slot check
-  const contextVm = Object.create(parent)
-  const isCompiled = isTrue(options._compiled)
-  const needNormalization = !isCompiled
 
   // support for compiled functional template
   if (isCompiled) {
