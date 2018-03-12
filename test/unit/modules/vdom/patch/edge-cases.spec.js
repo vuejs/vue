@@ -374,4 +374,36 @@ describe('vdom patch: edge cases', () => {
     expect(vm.$el.querySelector('custom-foo').getAttribute('selected')).toBe('1')
     Vue.config.ignoredElements = []
   })
+
+  // #7805
+  it('should not cause duplicate init when components share data object', () => {
+    const Base = {
+      render (h) {
+        return h('div', this.$options.name)
+      }
+    }
+
+    const Foo = {
+      name: 'Foo',
+      extends: Base
+    }
+
+    const Bar = {
+      name: 'Bar',
+      extends: Base
+    }
+
+    const vm = new Vue({
+      render (h) {
+        const data = { staticClass: 'text-red' }
+
+        return h('div', [
+          h(Foo, data),
+          h(Bar, data)
+        ])
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('FooBar')
+  })
 })
