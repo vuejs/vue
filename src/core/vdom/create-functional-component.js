@@ -100,6 +100,8 @@ export function createFunctionalComponent (
       setFunctionalContextForVNode(vnodes[i], data, contextVm, options)
     }
     return vnodes
+  } else {
+    return vnode
   }
 }
 
