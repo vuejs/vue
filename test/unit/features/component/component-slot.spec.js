@@ -824,4 +824,35 @@ describe('Component slot', () => {
       expect(vm.$el.textContent).toBe('hello')
     }).then(done)
   })
+
+  it('should allow passing named slots as raw children down multiple layers of functional component', () => {
+    const CompB = {
+      functional: true,
+      render (h, { slots }) {
+        return slots().foo
+      }
+    }
+
+    const CompA = {
+      functional: true,
+      render (h, { children }) {
+        return h(CompB, children)
+      }
+    }
+
+    const vm = new Vue({
+      components: {
+        CompA
+      },
+      template: `
+        <div>
+          <comp-a>
+            <span slot="foo">foo</span>
+          </comp-a>
+        </div>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('foo')
+  })
 })
