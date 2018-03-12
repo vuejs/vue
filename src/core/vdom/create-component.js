@@ -32,7 +32,7 @@ import {
   renderRecyclableComponentTemplate
 } from 'weex/runtime/recycle-list/render-component-template'
 
-// hooks to be invoked on component VNodes during patch
+// inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {
   init (
     vnode: VNodeWithData,
@@ -189,8 +189,8 @@ export function createComponent (
     }
   }
 
-  // merge component management hooks onto the placeholder node
-  mergeHooks(data)
+  // install component management hooks onto the placeholder node
+  installComponentHooks(data)
 
   // return a placeholder vnode
   const name = Ctor.options.name || tag
@@ -234,22 +234,11 @@ export function createComponentInstanceForVnode (
   return new vnode.componentOptions.Ctor(options)
 }
 
-function mergeHooks (data: VNodeData) {
-  if (!data.hook) {
-    data.hook = {}
-  }
+function installComponentHooks (data: VNodeData) {
+  const hooks = data.hook || (data.hook = {})
   for (let i = 0; i < hooksToMerge.length; i++) {
     const key = hooksToMerge[i]
-    const fromParent = data.hook[key]
-    const ours = componentVNodeHooks[key]
-    data.hook[key] = fromParent ? mergeHook(ours, fromParent) : ours
-  }
-}
-
-function mergeHook (one: Function, two: Function): Function {
-  return function (a, b, c, d) {
-    one(a, b, c, d)
-    two(a, b, c, d)
+    hooks[key] = componentVNodeHooks[key]
   }
 }
 
