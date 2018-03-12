@@ -191,7 +191,8 @@ function renderAsyncComponent (node, isRoot, context) {
       tag
     )
     if (resolvedNode) {
-      if (resolvedNode.componnetInstance) {
+      if (resolvedNode.componentOptions) {
+        // normal component
         renderComponent(resolvedNode, isRoot, context)
       } else if (!Array.isArray(resolvedNode)) {
         // single return node from functional component
