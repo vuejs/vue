@@ -3,11 +3,11 @@
 import { isUndef } from 'shared/util'
 
 type RenderState = {
-  type: 'Element';
+  type: 'Element' | 'Fragment';
   rendered: number;
   total: number;
-  endTag: string;
   children: Array<VNode>;
+  endTag?: string;
 } | {
   type: 'Component';
   prevActive: Component;
