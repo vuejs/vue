@@ -79,7 +79,7 @@ export class RenderContext {
           this.renderNode(children[rendered], false, this)
         } else {
           this.renderStates.pop()
-          if (lastState.endTag) {
+          if (lastState.type === 'Element') {
             this.write(lastState.endTag, this.next)
           } else {
             this.next()
