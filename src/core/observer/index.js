@@ -10,6 +10,8 @@ import {
   hasProto,
   isObject,
   isPlainObject,
+  isPrimitive,
+  isUndef,
   isValidArrayIndex,
   isServerRendering
 } from '../util/index'
@@ -195,10 +197,9 @@ export function defineReactive (
  */
 export function set (target: Array<any> | Object, key: any, val: any): any {
   if (process.env.NODE_ENV !== 'production' &&
-    !Array.isArray(target) &&
-    !isObject(target)
+    (isUndef(target) || isPrimitive(target))
   ) {
-    warn(`Cannot set reactive property on non-object/array value: ${target}`)
+    warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
@@ -231,10 +232,9 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
  */
 export function del (target: Array<any> | Object, key: any) {
   if (process.env.NODE_ENV !== 'production' &&
-    !Array.isArray(target) &&
-    !isObject(target)
+    (isUndef(target) || isPrimitive(target))
   ) {
-    warn(`Cannot delete reactive property on non-object/array value: ${target}`)
+    warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1)
