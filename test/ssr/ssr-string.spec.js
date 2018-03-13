@@ -267,6 +267,17 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-show directive merge with style', done => {
+    renderVmWithOptions({
+      template: '<div :style="[{lineHeight: 1}]" v-show="false"><span>inner</span></div>'
+    }, res => {
+      expect(res).toContain(
+        '<div data-server-rendered="true" style="line-height:1;display:none;"><span>inner</span></div>'
+      )
+      done()
+    })
+  })
+
   it('v-show directive not passed to child', done => {
     renderVmWithOptions({
       template: '<foo v-show="false"></foo>',
