@@ -337,8 +337,9 @@ describe('Directive v-model checkbox', () => {
       expect(vm.$el.children[1].textContent).toBe('false')
     }).then(done)
   })
-
-  it('should have type="checkbox"', () => {
+  
+  // #7811
+  it('type should not be overwritten by v-bind', () => {
     const vm = new Vue({
       data: {
         test: true
