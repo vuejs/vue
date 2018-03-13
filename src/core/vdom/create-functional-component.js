@@ -1,6 +1,6 @@
 /* @flow */
 
-import VNode from './vnode'
+import VNode, { cloneVNode } from './vnode'
 import { createElement } from './create-element'
 import { resolveInject } from '../instance/inject'
 import { normalizeChildren } from '../vdom/helpers/normalize-children'
@@ -32,6 +32,9 @@ export function FunctionalRenderContext (
     // $flow-disable-line
     contextVm._original = parent
   } else {
+    // the context vm passed in is a functional context as well.
+    // in this case we want to make sure we are able to get a hold to the
+    // real context instance.
     contextVm = parent
     // $flow-disable-line
     parent = parent._original
@@ -102,23 +105,28 @@ export function createFunctionalComponent (
   const vnode = options.render.call(null, renderContext._c, renderContext)
 
   if (vnode instanceof VNode) {
-    setFunctionalContextForVNode(vnode, data, contextVm, options)
-    return vnode
+    return cloneAndMarkFunctionalResult(vnode, data, renderContext.parent, options)
   } else if (Array.isArray(vnode)) {
     const vnodes = normalizeChildren(vnode) || []
+    const res = new Array(vnodes.length)
     for (let i = 0; i < vnodes.length; i++) {
-      setFunctionalContextForVNode(vnodes[i], data, contextVm, options)
+      res[i] = cloneAndMarkFunctionalResult(vnodes[i], data, renderContext.parent, options)
     }
-    return vnodes
+    return res
   }
 }
 
-function setFunctionalContextForVNode (vnode, data, vm, options) {
-  vnode.fnContext = vm
-  vnode.fnOptions = options
+function cloneAndMarkFunctionalResult (vnode, data, contextVm, options) {
+  // #7817 clone node before setting fnContext, otherwise if the node is reused
+  // (e.g. it was from a cached normal slot) the fnContext causes named slots
+  // that should not be matched to match.
+  const clone = cloneVNode(vnode)
+  clone.fnContext = contextVm
+  clone.fnOptions = options
   if (data.slot) {
-    (vnode.data || (vnode.data = {})).slot = data.slot
+    (clone.data || (clone.data = {})).slot = data.slot
   }
+  return clone
 }
 
 function mergeProps (to, from) {

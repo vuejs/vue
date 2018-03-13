@@ -855,4 +855,35 @@ describe('Component slot', () => {
 
     expect(vm.$el.textContent).toBe('foo')
   })
+
+  // #7817
+  it('should not match wrong named slot in functional component on re-render', done => {
+    const Functional = {
+      functional: true,
+      render: (h, ctx) => ctx.slots().default
+    }
+
+    const Stateful = {
+      data () {
+        return { ok: true }
+      },
+      render (h) {
+        this.ok // register dep
+        return h('div', [
+          h(Functional, this.$slots.named)
+        ])
+      }
+    }
+
+    const vm = new Vue({
+      template: `<stateful ref="stateful"><div slot="named">foo</div></stateful>`,
+      components: { Stateful }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('foo')
+    vm.$refs.stateful.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('foo')
+    }).then(done)
+  })
 })
