@@ -337,4 +337,14 @@ describe('Directive v-model checkbox', () => {
       expect(vm.$el.children[1].textContent).toBe('false')
     }).then(done)
   })
+
+  it('should have type="checkbox"', () => {
+    const vm = new Vue({
+      data: {
+        test: true
+      },
+      template: '<input type="checkbox" v-model="test" v-bind="$attrs">'
+    }).$mount()
+    expect(vm.$el.type).toBe('checkbox')
+  })
 })
