@@ -12,12 +12,12 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-vue-{{ .Branch }}-{{ checksum "package-lock.json" }}
+            - v1-vue-{{ .Branch }}-{{ checksum "yarn.lock" }}
             - v1-vue-{{ .Branch }}-
             - v1-vue-
       - run: npm install
       - save_cache:
-          key: v1-vue-{{ .Branch }}-{{ checksum "package-lock.json" }}
+          key: v1-vue-{{ .Branch }}-{{ checksum "yarn.lock" }}
           paths:
             - node_modules/
       - persist_to_workspace:
@@ -44,7 +44,7 @@ jobs:
          name: report coverage stats for non-PRs
          command: |
            if [[ -z $CI_PULL_REQUEST ]]; then
-             cat ./coverage/lcov.info | ./node_modules/.bin/codecov
+             ./node_modules/.bin/codecov
            fi
 
   test-e2e:

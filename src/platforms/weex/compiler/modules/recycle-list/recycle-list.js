@@ -33,6 +33,7 @@ export function preTransformRecycleList (
   }
 
   addRawAttr(el, ':list-data', res.for)
+  addRawAttr(el, 'binding-expression', res.for)
   addRawAttr(el, 'alias', res.alias)
   if (res.iterator2) {
     // (item, key, index) for object iteration

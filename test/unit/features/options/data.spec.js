@@ -93,6 +93,38 @@ describe('Options data', () => {
     expect(vm.$refs.test.b).toBe(1)
   })
 
+  it('props should not be reactive', done => {
+    let calls = 0
+    const vm = new Vue({
+      template: `<child :msg="msg"></child>`,
+      data: {
+        msg: 'hello'
+      },
+      beforeUpdate () { calls++ },
+      components: {
+        child: {
+          template: `<span>{{ localMsg }}</span>`,
+          props: ['msg'],
+          data () {
+            return { localMsg: this.msg }
+          },
+          computed: {
+            computedMsg () {
+              return this.msg + ' world'
+            }
+          }
+        }
+      }
+    }).$mount()
+    const child = vm.$children[0]
+    vm.msg = 'hi'
+    waitForUpdate(() => {
+      expect(child.localMsg).toBe('hello')
+      expect(child.computedMsg).toBe('hi world')
+      expect(calls).toBe(1)
+    }).then(done)
+  })
+
   it('should have access to methods', () => {
     const vm = new Vue({
       methods: {

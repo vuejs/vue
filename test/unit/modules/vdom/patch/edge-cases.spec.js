@@ -25,6 +25,43 @@ describe('vdom patch: edge cases', () => {
     }).then(done)
   })
 
+  // exposed by #7705
+  // methods and function expressions with modifiers should return result instead of undefined
+  // skipped odd children[1,3, ...] because they are rendered as text nodes with undefined value
+  it('should return listener\'s result for method name and function expression with and w/o modifiers', done => {
+    const dummyEvt = { preventDefault: () => {} }
+    new Vue({
+      template: `
+        <div v-test>
+          <div @click="addFive"></div>
+          <div @click.prevent="addFive"></div>
+          <div @click="addFive($event, 5)"></div>
+          <div @click.prevent="addFive($event, 5)"></div>
+        </div>
+      `,
+      methods: {
+        addFive ($event, toAdd = 0) {
+          return toAdd + 5
+        }
+      },
+      directives: {
+        test: {
+          bind (el, binding, vnode) {
+            waitForUpdate(() => {
+              expect(vnode.children[0].data.on.click()).toBe(5)
+            }).then(() => {
+              expect(vnode.children[2].data.on.click(dummyEvt)).toBe(5)
+            }).then(() => {
+              expect(vnode.children[4].data.on.click()).not.toBeDefined()
+            }).then(() => {
+              expect(vnode.children[6].data.on.click(dummyEvt)).not.toBeDefined()
+            }).then(done)
+          }
+        }
+      }
+    }).$mount()
+  })
+
   // #3533
   // a static node is reused in createElm, which changes its elm reference
   // and is inserted into a different parent.
@@ -326,5 +363,47 @@ describe('vdom patch: edge cases', () => {
       vm.$children[0].$emit('custom')
       expect(log).not.toHaveBeenCalled()
     }).then(done)
+  })
+
+  // #6864
+  it('should not special-case boolean attributes for custom elements', () => {
+    Vue.config.ignoredElements = [/^custom-/]
+    const vm = new Vue({
+      template: `<div><custom-foo selected="1"/></div>`
+    }).$mount()
+    expect(vm.$el.querySelector('custom-foo').getAttribute('selected')).toBe('1')
+    Vue.config.ignoredElements = []
+  })
+
+  // #7805
+  it('should not cause duplicate init when components share data object', () => {
+    const Base = {
+      render (h) {
+        return h('div', this.$options.name)
+      }
+    }
+
+    const Foo = {
+      name: 'Foo',
+      extends: Base
+    }
+
+    const Bar = {
+      name: 'Bar',
+      extends: Base
+    }
+
+    const vm = new Vue({
+      render (h) {
+        const data = { staticClass: 'text-red' }
+
+        return h('div', [
+          h(Foo, data),
+          h(Bar, data)
+        ])
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('FooBar')
   })
 })

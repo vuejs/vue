@@ -48,7 +48,7 @@ export default class Dep {
 Dep.target = null
 const targetStack = []
 
-export function pushTarget (_target: Watcher) {
+export function pushTarget (_target: ?Watcher) {
   if (Dep.target) targetStack.push(Dep.target)
   Dep.target = _target
 }
