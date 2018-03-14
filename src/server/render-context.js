@@ -6,7 +6,12 @@ type RenderState = {
   type: 'Element';
   rendered: number;
   total: number;
+  children: Array<VNode>;
   endTag: string;
+} | {
+  type: 'Fragment';
+  rendered: number;
+  total: number;
   children: Array<VNode>;
 } | {
   type: 'Component';
@@ -74,7 +79,7 @@ export class RenderContext {
           this.renderNode(children[rendered], false, this)
         } else {
           this.renderStates.pop()
-          if (lastState.endTag) {
+          if (lastState.type === 'Element') {
             this.write(lastState.endTag, this.next)
           } else {
             this.next()

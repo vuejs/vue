@@ -393,6 +393,35 @@ describe('Component keep-alive', () => {
     }).then(done)
   })
 
+  it('prune cache on include/exclude change + view switch', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <keep-alive :include="include">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        include: 'one,two'
+      },
+      components
+    }).$mount()
+
+    vm.view = 'two'
+    waitForUpdate(() => {
+      assertHookCalls(one, [1, 1, 1, 1, 0])
+      assertHookCalls(two, [1, 1, 1, 0, 0])
+      vm.include = 'one'
+      vm.view = 'one'
+    }).then(() => {
+      assertHookCalls(one, [1, 1, 2, 1, 0])
+      // two should be pruned
+      assertHookCalls(two, [1, 1, 1, 1, 1])
+    }).then(done)
+  })
+
   it('should not prune currently active instance', done => {
     const vm = new Vue({
       template: `
