@@ -72,6 +72,18 @@ describe('parser', () => {
     expect('Templates should only be responsible for mapping the state').toHaveBeenWarned()
   })
 
+  it('allows style element inside svg', () => {
+    const ast = parse('<svg><defs><style>error { color: red; }</style></defs></svg>', baseOptions)
+    expect(ast.tag).toBe('svg')
+    expect(ast.ns).toBe('svg')
+    expect(ast.plain).toBe(true)
+    expect(ast.children[0].tag).toBe('defs')
+    expect(ast.children[0].children[0].tag).toBe('style')
+    expect(ast.children[0].children[0].forbidden).toBeUndefined()
+    expect(ast.children[0].children[0].children[0].text).toBe('error { color: red; }')
+    expect(ast.children[0].parent).toBe(ast)
+  })
+
   it('not contain root element', () => {
     parse('hello world', baseOptions)
     expect('Component template requires a root element, rather than just text').toHaveBeenWarned()
