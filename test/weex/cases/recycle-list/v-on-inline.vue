@@ -1,9 +1,10 @@
 <template>
-  <recycle-list for="item in longList" switch="type">
+  <recycle-list for="(item, i) in longList" switch="type">
     <cell-slot case="A">
       <text v-on:click="toggle()" @longpress="toggle(item.key)"></text>
       <text @appear="onappear(item.index, 'static', item.type, $event)">Button</text>
       <text @disappear="onappear(25, 'static')">Tips</text>
+      <text @swipe="inc(i)">Inc</text>
     </cell-slot>
   </recycle-list>
 </template>
@@ -19,10 +20,9 @@
       }
     },
     methods: {
-      hide () {},
+      inc () {},
       toggle () {},
       onappear () {}
     }
   }
 </script>
-

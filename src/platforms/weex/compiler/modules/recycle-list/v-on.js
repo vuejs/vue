@@ -1,9 +1,9 @@
 /* @flow */
 
-const inlineStatementRE = /^\s*([A-Za-z_$0-9\['\."\]]+)*\s*\(\s*(([A-Za-z_$0-9\['\."\]]+)?(\s*,\s*([A-Za-z_$0-9\['\."\]]+))*)\s*\)$/
+import { functionCallRE } from 'weex/util/parser'
 
 function parseHandlerParams (handler: ASTElementHandler) {
-  const res = inlineStatementRE.exec(handler.value)
+  const res = functionCallRE.exec(handler.value)
   if (res && res[2]) {
     handler.params = res[2].split(/\s*,\s*/)
   }

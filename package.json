@@ -136,8 +136,9 @@
     "shelljs": "^0.8.1",
     "typescript": "^2.7.1",
     "uglify-js": "^3.0.15",
+    "vue-template-es2015-compiler": "^1.6.0",
     "webpack": "^3.11.0",
-    "weex-js-runtime": "^0.23.6",
+    "weex-js-runtime": "^0.23.7",
     "weex-styler": "^0.3.0",
     "yorkie": "^1.0.1"
   },

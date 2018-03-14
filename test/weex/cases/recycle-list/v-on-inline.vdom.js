@@ -6,6 +6,7 @@
       { type: 'A' },
       { type: 'A' }
     ],
+    index: 'i',
     switch: 'type',
     alias: 'item'
   },
@@ -32,6 +33,15 @@
       type: 'text',
       event: [{ type: 'disappear' }],
       attr: { value: 'Tips' }
+    }, {
+      type: 'text',
+      event: [{
+        type: 'swipe',
+        params: [
+          { '@binding': 'i' }
+        ]
+      }],
+      attr: { value: 'Inc' }
     }]
   }]
 })

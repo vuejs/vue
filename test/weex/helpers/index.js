@@ -153,10 +153,11 @@ export function getEvents (instance) {
   return events
 }
 
-export function fireEvent (instance, ref, type, event = {}) {
+export function fireEvent (instance, ref, type, event = {}, params) {
   const el = instance.document.getRef(ref)
   if (el) {
-    instance.document.fireEvent(el, type, event)
+    const _type = typeof type === 'string' ? type : type.type || ''
+    instance.document.fireEvent(el, _type, event, {}, { params })
   }
 }
 
@@ -164,8 +165,16 @@ export function createInstance (id, code, ...args) {
   WeexRuntime.config.frameworks = { Vue }
   const context = WeexRuntime.init(WeexRuntime.config)
   context.registerModules({
-    timer: ['setTimeout', 'setInterval']
+    timer: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
+    modal: ['toast', 'alert']
   })
+  context.registerComponents([{
+    type: 'recycle-list',
+    methods: [
+      'appendData', 'removeData', 'insertData',
+      'updateData', 'insertRange', 'setListData'
+    ]
+  }])
   const instance = context.createInstance(id, `// { "framework": "Vue" }\n${code}`, ...args) || {}
   instance.document = context.getDocument(id)
   instance.$getRoot = () => context.getRoot(id)
@@ -175,7 +184,7 @@ export function createInstance (id, code, ...args) {
     context.destroyInstance(id)
   }
   instance.$triggerHook = (id, hook, args) => {
-    instance.document.taskCenter.triggerHook(id, 'lifecycle', hook, { args })
+    return instance.document.taskCenter.triggerHook(id, 'lifecycle', hook, args)
   }
   return instance
 }

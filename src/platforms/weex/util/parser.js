@@ -8,6 +8,8 @@ const acorn = require('acorn') // $flow-disable-line
 const walk = require('acorn/dist/walk') // $flow-disable-line
 const escodegen = require('escodegen')
 
+export const functionCallRE = /^\s*([A-Za-z_$0-9\['\."\]]+)*\s*\(\s*(([A-Za-z_$0-9\['\."\]]+)?(\s*,\s*([A-Za-z_$0-9\['\."\]]+))*)\s*\)$/
+
 export function nodeToBinding (node: Object): any {
   switch (node.type) {
     case 'Literal': return node.value
