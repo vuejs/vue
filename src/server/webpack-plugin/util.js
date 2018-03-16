@@ -21,4 +21,21 @@ export const validate = compiler => {
   }
 }
 
+export const onEmit = (compiler, name, hook) => {
+  if (compiler.hooks) {
+    // Webpack >= 4.0.0
+    compiler.hooks.emit.tap(name,
+      (compilation) => new Promise((resolve, reject) => {
+        try {
+          hook(compilation, resolve)
+        } catch (e) {
+          reject(e)
+        }
+      }))
+  } else {
+    // Webpack < 4.0.0
+    compiler.plugin('emit', hook)
+  }
+}
+
 export { isJS, isCSS } from '../util'
