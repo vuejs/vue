@@ -17,12 +17,15 @@ import { isUpdatingChildComponent } from './lifecycle'
 
 export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
-  vm._staticTrees = null // v-once cached trees
+  vm._staticTrees = null // v-once cached trees 使用 v-once 的话只绑定数据一次，这个字段用于保存第一次生成的 dom 结构
   const options = vm.$options
   const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
-  const renderContext = parentVnode && parentVnode.context
+  const renderContext = parentVnode && parentVnode.context  // 父组件的上下文环境
+  // 处理 $slots
+  // TODO _renderChildren 该字段未知
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject
+  // 绑定 $createElement 方法，供之后调用
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
@@ -34,9 +37,11 @@ export function initRender (vm: Component) {
 
   // $attrs & $listeners are exposed for easier HOC creation.
   // they need to be reactive so that HOCs using them are always updated
+  // 获取到 parentData
   const parentData = parentVnode && parentVnode.data
 
   /* istanbul ignore else */
+  // 代理 parentData.attrs,options._parentListeners 到 vm.$attrs,$listeners 仅可读
   if (process.env.NODE_ENV !== 'production') {
     defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, () => {
       !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)

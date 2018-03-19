@@ -33,6 +33,7 @@ export function createElement (
   normalizationType: any,
   alwaysNormalize: boolean
 ): VNode | Array<VNode> {
+  // 兼容 data 没传的情况
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children
     children = data
@@ -43,7 +44,7 @@ export function createElement (
   }
   return _createElement(context, tag, data, children, normalizationType)
 }
-
+// TODO 等看到具体在哪儿用的时候回来看
 export function _createElement (
   context: Component,
   tag?: string | Class<Component> | Function | Object,

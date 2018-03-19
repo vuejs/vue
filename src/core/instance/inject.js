@@ -16,6 +16,7 @@ export function initProvide (vm: Component) {
 export function initInjections (vm: Component) {
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
+    // TODO observerState.shouldConvert 作用未知
     observerState.shouldConvert = false
     Object.keys(result).forEach(key => {
       /* istanbul ignore else */
@@ -36,6 +37,7 @@ export function initInjections (vm: Component) {
   }
 }
 
+// 用于获取所有的 inject 对应的 _provided 的值
 export function resolveInject (inject: any, vm: Component): ?Object {
   if (inject) {
     // inject is :any because flow is not smart enough to figure out cached

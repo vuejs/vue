@@ -100,6 +100,7 @@ function initProps (vm: Component, propsOptions: Object) {
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
+    // 将 props 下的属性代理到 this 下
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
@@ -273,6 +274,7 @@ function initMethods (vm: Component, methods: Object) {
         )
       }
     }
+    // 将 method 下的方法挂载到 VUE 实例上
     vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
   }
 }

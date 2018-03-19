@@ -66,7 +66,10 @@ if (process.env.NODE_ENV !== 'production') {
   initProxy = function initProxy (vm) {
     if (hasProxy) {
       // determine which proxy handler to use
+      // 开发环境下代理一些属性，避免错误使用
+      // 未在data中设置属性就使用
       const options = vm.$options
+      // TODO 之后看到设置 option.render 时，需注意 options.render._withStripped 属性
       const handlers = options.render && options.render._withStripped
         ? getHandler
         : hasHandler

@@ -23,24 +23,28 @@ export let isUpdatingChildComponent: boolean = false
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
-  // locate first non-abstract parent
   let parent = options.parent
+  // locate first non-abstract parent
+  // TODO 之后注意 option.abstract 设置的情况，先略过
+  // 将该节点放到父节点的 $children 列表中
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
     parent.$children.push(vm)
   }
-
+  // 设置父节点和根节点
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
 
+  // 初始化 $children 和 $refs 列表
   vm.$children = []
   vm.$refs = {}
 
   vm._watcher = null
   vm._inactive = null
   vm._directInactive = false
+  // 组件刚生成，以下状态为 false
   vm._isMounted = false
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
@@ -325,6 +329,7 @@ export function callHook (vm: Component, hook: string) {
       }
     }
   }
+  // 如果设置了 _hasHookEvent 则向父组件发出 hook:xxx 事件
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }

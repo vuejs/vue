@@ -45,6 +45,7 @@ export function initMixin (Vue: Class<Component>) {
       )
     }
     /* istanbul ignore else */
+    // 非生产环境代理数据，监听错误
     if (process.env.NODE_ENV !== 'production') {
       initProxy(vm)
     } else {
@@ -52,13 +53,16 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
+    // 初始化组件生命周期
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
+    // 在 beforeCreate 钩子调用前，初始化组件生命周期，时间和 render 函数
     callHook(vm, 'beforeCreate')
-    initInjections(vm) // resolve injections before data/props
-    initState(vm)
-    initProvide(vm) // resolve provide after data/props
+    initInjections(vm) // resolve injections before data/props 获取所有 inject 的值
+    initState(vm)// 初始化 data props method watcher computed
+    initProvide(vm) // resolve provide after data/props 初始化 Provide
+    // 所有的数据都已经监听好，发出 create 事件
     callHook(vm, 'created')
 
     /* istanbul ignore if */

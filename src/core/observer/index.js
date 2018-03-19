@@ -21,6 +21,9 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
  * also converted to become reactive. However when passing down props,
  * we don't want to force conversion because the value may be a nested value
  * under a frozen data structure. Converting it would defeat the optimization.
+ * 一般情况下，数据都是响应式的，但是如果是 props 的话由于在父组件里面已经监听一次了，所以没必要在子组件里监听
+ * 但如果使用的是默认值的话还是需要监听的
+ * 仅仅是根节点的需要监听
  */
 export const observerState = {
   shouldConvert: true
@@ -57,6 +60,7 @@ export class Observer {
    * Walk through each property and convert them into
    * getter/setters. This method should only be called when
    * value type is Object.
+   * 便利对象下属性，使得属性变成可监听的结构
    */
   walk (obj: Object) {
     const keys = Object.keys(obj)
@@ -128,6 +132,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 
 /**
  * Define a reactive property on an Object.
+ * shallow 用于判断是否需要当前的 key 是否需要监听 $attrs，$listeners不需要对立面的值进行进一步的监听
  */
 export function defineReactive (
   obj: Object,
@@ -165,8 +170,10 @@ export function defineReactive (
       return value
     },
     set: function reactiveSetter (newVal) {
+      // 如果对象设置过 getter 的话，使用 getter 来取值
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
+      // 如果值相同的话不做任何事
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
       }
@@ -174,6 +181,7 @@ export function defineReactive (
       if (process.env.NODE_ENV !== 'production' && customSetter) {
         customSetter()
       }
+      // 如果有自定义的 setter 则使用 给的 setter 赋值
       if (setter) {
         setter.call(obj, newVal)
       } else {
@@ -189,6 +197,7 @@ export function defineReactive (
  * Set a property on an object. Adds the new property and
  * triggers change notification if the property doesn't
  * already exist.
+ * 用于添加在非 data 中的响应属性
  */
 export function set (target: Array<any> | Object, key: any, val: any): any {
   if (Array.isArray(target) && isValidArrayIndex(key)) {
