@@ -59,6 +59,13 @@ export function genElement (el: ASTElement, state: CodegenState): string {
   } else if (el.if && !el.ifProcessed) {
     return genIf(el, state)
   } else if (el.tag === 'template' && !el.slotTarget) {
+    if (process.env.NODE_ENV !== 'production' &&
+        el.directives && el.directives.length > 0 &&
+        el.directives.find(directive => directive.name === 'show')) {
+      state.warn('v-show cannot be used on a template tag. ' +
+                 'See https://vuejs.org/v2/guide/conditional.html#v-show for more info.')
+    }
+
     return genChildren(el, state) || 'void 0'
   } else if (el.tag === 'slot') {
     return genSlot(el, state)
