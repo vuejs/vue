@@ -143,10 +143,12 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
+      // 代理 proxy 到 this 对象下
       proxy(vm, `_data`, key)
     }
   }
   // observe data
+  // 设置 data 内容的监听
   observe(data, true /* asRootData */)
 }
 
@@ -341,6 +343,7 @@ export function stateMixin (Vue: Class<Component>) {
   ): Function {
     const vm: Component = this
     if (isPlainObject(cb)) {
+      // 处理 handle 传值方式
       return createWatcher(vm, expOrFn, cb, options)
     }
     options = options || {}

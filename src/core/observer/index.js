@@ -132,7 +132,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 
 /**
  * Define a reactive property on an Object.
- * shallow 用于判断是否需要当前的 key 是否需要监听 $attrs，$listeners不需要对立面的值进行进一步的监听
+ * shallow 用于判断是否需要当前的 key 是否需要监听 $attrs，$listeners 等从祖先节点代理过来的属性不需要进行转换
  */
 export function defineReactive (
   obj: Object,

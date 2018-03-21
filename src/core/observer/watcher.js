@@ -45,6 +45,7 @@ export default class Watcher {
     expOrFn: string | Function,
     cb: Function,
     options?: ?Object,
+    // TODO 未发现该值的使用方式
     isRenderWatcher?: boolean
   ) {
     this.vm = vm
@@ -73,6 +74,7 @@ export default class Watcher {
       ? expOrFn.toString()
       : ''
     // parse expression for getter
+    // 确定取值函数，在非正式环境提示警告
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {

@@ -22,6 +22,7 @@ export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
 
 /**
  * Parse simple path.
+ * watch xxx.xxx.xxx 之类路径的获取值的方式
  */
 const bailRE = /[^\w.$]/
 export function parsePath (path: string): any {

@@ -63,6 +63,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
+    // __patch__ 在 /platforms/web/runtime/index.js 处会导入
+    // TODO 目前了解到 __patch__ 方法主要实现 dom 节点的构造，暂不深究
     if (!prevVnode) {
       // initial render
       vm.$el = vm.__patch__(
@@ -96,6 +98,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
     if (vm._watcher) {
+      // TODO _watcher 下的 update 目前还不清楚在哪里注入的
       vm._watcher.update()
     }
   }
