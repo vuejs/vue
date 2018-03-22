@@ -111,6 +111,7 @@ function initProps (vm: Component, propsOptions: Object) {
 
 function initData (vm: Component) {
   let data = vm.$options.data
+  // $options.data is guaranteed to be a function after merge
   data = vm._data = getData(data, vm)
   if (!isPlainObject(data)) {
     data = {}
