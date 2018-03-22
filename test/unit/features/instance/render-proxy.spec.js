@@ -28,5 +28,22 @@ if (typeof Proxy !== 'undefined') {
       }).$mount()
       expect(`Property or method "a" is not defined`).not.toHaveBeenWarned()
     })
+
+    it('support symbols using the `in` operator in hand-written render functions', () => {
+      const sym = Symbol()
+
+      const vm = new Vue({
+        created () {
+          this[sym] = 'foo'
+        },
+        render (h) {
+          if (sym in this) {
+            return h('div', [this[sym]])
+          }
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('foo')
+    })
   })
 }
