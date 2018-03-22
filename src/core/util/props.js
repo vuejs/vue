@@ -127,11 +127,41 @@ function assertProp (
       valid = assertedType.valid
     }
   }
+
+  function isStringOrNumber (value) {
+    return value === 'string' || value === 'number'
+  }
+
+  function invalidTypeMessage () {
+    let message = `Invalid prop: type check failed for prop "${name}".` +
+      ` Expected ${expectedTypes.map(capitalize).join(', ')}`
+    const expectedValue = styleValue(value, expectedTypes[0])
+    const receivedValue = styleValue(value, toRawType(value))
+    const expectedType = expectedTypes[0].toLowerCase()
+    const receivedType = toRawType(value)
+    // check if we need to specify expected value
+    if (expectedTypes.length === 1 && isStringOrNumber(expectedType)) {
+      message += ` with value ${expectedValue}`
+    }
+    message += `, got ${receivedType} `
+    // check if we need to specify received value
+    if (isStringOrNumber(typeof value)) {
+      message += `with value ${receivedValue}.`
+    }
+    return message
+  }
+
+  function styleValue (value, type) {
+    if (type === 'String') {
+      return `"${value}"`
+    } else {
+      return `${Number(value)}`
+    }
+  }
+
   if (!valid) {
     warn(
-      `Invalid prop: type check failed for prop "${name}".` +
-      ` Expected ${expectedTypes.map(capitalize).join(', ')}` +
-      `, got ${toRawType(value)}.`,
+      invalidTypeMessage(),
       vm
     )
     return
