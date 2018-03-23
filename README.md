@@ -161,6 +161,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/teamextension.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://jsguru.io/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsguru.png">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
