@@ -103,6 +103,7 @@ export function cloneVNode (vnode: VNode): VNode {
   cloned.fnContext = vnode.fnContext
   cloned.fnOptions = vnode.fnOptions
   cloned.fnScopeId = vnode.fnScopeId
+  cloned.asyncMeta = vnode.asyncMeta
   cloned.isCloned = true
   return cloned
 }
