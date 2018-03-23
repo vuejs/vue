@@ -238,8 +238,21 @@ function installComponentHooks (data: VNodeData) {
   const hooks = data.hook || (data.hook = {})
   for (let i = 0; i < hooksToMerge.length; i++) {
     const key = hooksToMerge[i]
-    hooks[key] = componentVNodeHooks[key]
+    const existing = hooks[key]
+    const toMerge = componentVNodeHooks[key]
+    if (existing !== toMerge && !(existing && existing._merged)) {
+      hooks[key] = existing ? mergeHook(toMerge, existing) : toMerge
+    }
   }
+}
+
+function mergeHook (f1, f2) {
+  const merged = (a, b, c, d) => {
+    f1(a, b, c, d)
+    f2(a, b, c, d)
+  }
+  merged._merged = true
+  return merged
 }
 
 // transform component v-model info (value and callback) into
