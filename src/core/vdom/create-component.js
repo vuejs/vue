@@ -236,9 +236,9 @@ function installComponentHooks (data: VNodeData) {
 }
 
 function mergeHook (f1, f2) {
-  const merged = (a, b, c, d) => {
-    f1(a, b, c, d)
-    f2(a, b, c, d)
+  const merged = (a, b) => {
+    f1(a, b)
+    f2(a, b)
   }
   merged._merged = true
   return merged
