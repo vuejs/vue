@@ -18,7 +18,8 @@ const keyCodes: { [key: string]: number | Array<number> } = {
 
 // KeyboardEvent.key aliases
 const keyNames: { [key: string]: string | Array<string> } = {
-  esc: 'Escape',
+  // #7880: IE11 and Edge use `Esc` for Escape key name.
+  esc: ['Esc', 'Escape'],
   tab: 'Tab',
   enter: 'Enter',
   space: ' ',
