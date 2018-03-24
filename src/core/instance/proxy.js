@@ -45,7 +45,7 @@ if (process.env.NODE_ENV !== 'production') {
   const hasHandler = {
     has (target, key) {
       const has = key in target
-      const isAllowed = allowedGlobals(key) || key.charAt(0) === '_'
+      const isAllowed = allowedGlobals(key) || (typeof key === 'string' && key.charAt(0) === '_')
       if (!has && !isAllowed) {
         warnNonPresent(target, key)
       }

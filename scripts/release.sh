@@ -1,8 +1,9 @@
+#!/bin/bash
 set -e
 
 if [[ -z $1 ]]; then
   echo "Enter new version: "
-  read VERSION
+  read -r VERSION
 else
   VERSION=$1
 fi
@@ -32,23 +33,24 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   VERSION=$VERSION npm run build
 
   # update packages
-  cd packages/vue-template-compiler
-  npm version $VERSION
+  # using subshells to avoid having to cd back
+  ( ( cd packages/vue-template-compiler
+  npm version "$VERSION"
   if [[ -z $RELEASE_TAG ]]; then
     npm publish
   else
-    npm publish --tag $RELEASE_TAG
+    npm publish --tag "$RELEASE_TAG"
   fi
-  cd -
+  )
 
   cd packages/vue-server-renderer
-  npm version $VERSION
+  npm version "$VERSION"
   if [[ -z $RELEASE_TAG ]]; then
     npm publish
   else
-    npm publish --tag $RELEASE_TAG
+    npm publish --tag "$RELEASE_TAG"
   fi
-  cd -
+  )
 
   # commit
   git add -A
@@ -63,14 +65,14 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   # generate release note
   npm run release:note
   # tag version
-  npm version $VERSION --message "build: release $VERSION"
+  npm version "$VERSION" --message "build: release $VERSION"
 
   # publish
-  git push origin refs/tags/v$VERSION
+  git push origin refs/tags/v"$VERSION"
   git push
   if [[ -z $RELEASE_TAG ]]; then
     npm publish
   else
-    npm publish --tag $RELEASE_TAG
+    npm publish --tag "$RELEASE_TAG"
   fi
 fi

@@ -2,8 +2,6 @@ declare type InternalComponentOptions = {
   _isComponent: true;
   parent: Component;
   _parentVnode: VNode;
-  _parentElm: ?Node;
-  _refElm: ?Node;
   render?: Function;
   staticRenderFns?: Array<Function>
 };
@@ -81,8 +79,6 @@ declare type ComponentOptions = {
   _componentTag: ?string;
   _scopeId: ?string;
   _base: Class<Component>;
-  _parentElm: ?Node;
-  _refElm: ?Node;
 };
 
 declare type PropOptions = {

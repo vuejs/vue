@@ -393,9 +393,15 @@ describe('vdom patch: edge cases', () => {
       extends: Base
     }
 
+    // sometimes we do need to tap into these internal hooks (e.g. in vue-router)
+    // so make sure it does work
+    const inlineHookSpy = jasmine.createSpy('inlineInit')
+
     const vm = new Vue({
       render (h) {
-        const data = { staticClass: 'text-red' }
+        const data = { staticClass: 'text-red', hook: {
+          init: inlineHookSpy
+        }}
 
         return h('div', [
           h(Foo, data),
@@ -405,5 +411,6 @@ describe('vdom patch: edge cases', () => {
     }).$mount()
 
     expect(vm.$el.textContent).toBe('FooBar')
+    expect(inlineHookSpy.calls.count()).toBe(2)
   })
 })
