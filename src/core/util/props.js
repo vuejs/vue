@@ -128,24 +128,20 @@ function assertProp (
     }
   }
 
-  function isStringOrNumber (value) {
-    return value === 'string' || value === 'number'
-  }
-
   function invalidTypeMessage () {
     let message = `Invalid prop: type check failed for prop "${name}".` +
       ` Expected ${expectedTypes.map(capitalize).join(', ')}`
-    const expectedValue = styleValue(value, expectedTypes[0])
-    const receivedValue = styleValue(value, toRawType(value))
-    const expectedType = expectedTypes[0].toLowerCase()
+    const expectedType = expectedTypes[0]
     const receivedType = toRawType(value)
+    const expectedValue = styleValue(value, expectedType)
+    const receivedValue = styleValue(value, receivedType)
     // check if we need to specify expected value
-    if (expectedTypes.length === 1 && isStringOrNumber(expectedType)) {
+    if (expectedTypes.length === 1 && isExplicable(expectedType) && !isBoolean(expectedType, receivedType)) {
       message += ` with value ${expectedValue}`
     }
     message += `, got ${receivedType} `
     // check if we need to specify received value
-    if (isStringOrNumber(typeof value)) {
+    if (isExplicable(receivedType)) {
       message += `with value ${receivedValue}.`
     }
     return message
@@ -154,9 +150,20 @@ function assertProp (
   function styleValue (value, type) {
     if (type === 'String') {
       return `"${value}"`
-    } else {
+    } else if (type === 'Number') {
       return `${Number(value)}`
+    } else {
+      return `${value}`
     }
+  }
+
+  function isExplicable (value) {
+    const explicitTypes = ['string', 'number', 'boolean']
+    return explicitTypes.some(elem => value.toLowerCase() === elem)
+  }
+
+  function isBoolean (...args) {
+    return args.some(elem => elem.toLowerCase() === 'boolean')
   }
 
   if (!valid) {

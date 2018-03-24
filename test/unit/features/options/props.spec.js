@@ -181,6 +181,20 @@ describe('Options props', () => {
       expect('Expected Number with value 123, got String with value "123"').toHaveBeenWarned()
     })
 
+    it('number & boolean', () => {
+      makeInstance(123, Number)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(false, Number)
+      expect('Expected Number, got Boolean with value false').toHaveBeenWarned()
+    })
+
+    it('string & boolean', () => {
+      makeInstance('hello', String)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(true, String)
+      expect('Expected String, got Boolean with value true').toHaveBeenWarned()
+    })
+
     it('boolean', () => {
       makeInstance(true, Boolean)
       expect(console.error.calls.count()).toBe(0)
