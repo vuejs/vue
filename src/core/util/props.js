@@ -128,7 +128,7 @@ function assertProp (
     }
   }
 
-  function invalidTypeMessage () {
+  function getInvalidTypeMessage () {
     let message = `Invalid prop: type check failed for prop "${name}".` +
       ` Expected ${expectedTypes.map(capitalize).join(', ')}`
     const expectedType = expectedTypes[0]
@@ -168,7 +168,7 @@ function assertProp (
 
   if (!valid) {
     warn(
-      invalidTypeMessage(),
+      getInvalidTypeMessage(),
       vm
     )
     return
