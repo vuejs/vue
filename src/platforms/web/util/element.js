@@ -33,10 +33,12 @@ export const isSVG = makeMap(
 
 export const isPreTag = (tag: ?string): boolean => tag === 'pre'
 
+// 判断是否是合法的 html 标签（包括 svg 标签）
 export const isReservedTag = (tag: string): ?boolean => {
   return isHTMLTag(tag) || isSVG(tag)
 }
 
+// 用于判断标签所处的环境
 export function getTagNamespace (tag: string): ?string {
   if (isSVG(tag)) {
     return 'svg'

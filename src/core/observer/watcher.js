@@ -42,13 +42,14 @@ export default class Watcher {
 
   constructor (
     vm: Component,
-    expOrFn: string | Function,
-    cb: Function,
-    options?: ?Object,
-    // TODO 未发现该值的使用方式
+    expOrFn: string | Function, // 需要监听的值
+    cb: Function,               // 监听回调
+    options?: ?Object,          // 对于该监听的设置
+    // TODO 用于判断是否是在render的时候的监听  ？？？
     isRenderWatcher?: boolean
   ) {
     this.vm = vm
+    // isRenderWatcher 仅仅用于这一行 ？？？
     if (isRenderWatcher) {
       vm._watcher = this
     }

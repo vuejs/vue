@@ -9,6 +9,7 @@ import { query } from './util/index'
 import { compileToFunctions } from './compiler/index'
 import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'
 
+// 缓存模板对应的 ID
 const idToTemplate = cached(id => {
   const el = query(id)
   return el && el.innerHTML

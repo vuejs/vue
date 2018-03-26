@@ -153,6 +153,7 @@ export function mountComponent (
   hydrating?: boolean
 ): Component {
   vm.$el = el
+  // 兼容处理，避免未设置模板而报错情况
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
@@ -173,6 +174,7 @@ export function mountComponent (
       }
     }
   }
+  // 触发 beforeMount
   callHook(vm, 'beforeMount')
 
   let updateComponent
@@ -203,6 +205,7 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  // TODO 这里不明白为什么要写一个 Watch 仅仅是吧 _watch 注册到 vm 上？？
   new Watcher(vm, updateComponent, noop, null, true /* isRenderWatcher */)
   hydrating = false
 
