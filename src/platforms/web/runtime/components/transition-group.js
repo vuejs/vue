@@ -16,6 +16,7 @@ import { addClass, removeClass } from '../class-util'
 import { transitionProps, extractTransitionData } from './transition'
 
 import {
+  nextFrame,
   hasTransition,
   getTransitionInfo,
   transitionEndEvent,
@@ -162,7 +163,7 @@ function callPendingCbs (c: VNode) {
   }
   /* istanbul ignore if */
   if (c.elm._enterCb) {
-    c.elm._enterCb()
+    nextFrame(c.elm._enterCb)
   }
 }
 
