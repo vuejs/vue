@@ -340,5 +340,40 @@ if (!isIE9) {
         )
       }).then(done)
     })
+
+    // GitHub issue #7879
+    it('should work with v-show like v-if', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition-group name="group">
+              <div v-show="ok" key="foo" class="test">foo</div>
+            </transition-group>
+          </div>
+        `,
+        data: { ok: false }
+      }).$mount(el)
+
+      vm.ok = true
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="test group-enter group-enter-active">foo</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="test group-enter-active group-enter-to">foo</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="test">foo</div>` +
+          `</span>`
+        )
+      }).then(done)
+    })
   })
 }
