@@ -75,6 +75,7 @@ export default {
       const kept: Array<VNode> = []
       const removed: Array<VNode> = []
       for (let i = 0; i < prevChildren.length; i++) {
+        prevChildren[i].elm.style = 'block'
         const c: VNode = prevChildren[i]
         c.data.transition = transitionData
         c.data.pos = c.elm.getBoundingClientRect()
