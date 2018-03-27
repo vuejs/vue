@@ -108,9 +108,9 @@ export default class TemplateRenderer {
   }
 
   renderStyles (context: Object): string {
-    const cssFiles = this.clientManifest
-      ? this.clientManifest.all.filter(isCSS)
-      : []
+    const initial = this.preloadFiles || []
+    const async = this.getUsedAsyncFiles(context) || []
+    const cssFiles = initial.concat(async).filter(({ file }) => isCSS(file))
     return (
       // render links for css files
       (cssFiles.length
@@ -202,10 +202,10 @@ export default class TemplateRenderer {
 
   renderScripts (context: Object): string {
     if (this.clientManifest) {
-      const initial = this.preloadFiles
-      const async = this.getUsedAsyncFiles(context)
+      const initial = this.preloadFiles.filter(({ file }) => isJS(file))
+      const async = (this.getUsedAsyncFiles(context) || []).filter(({ file }) => isJS(file))
       const needed = [initial[0]].concat(async || [], initial.slice(1))
-      return needed.filter(({ file }) => isJS(file)).map(({ file }) => {
+      return needed.map(({ file }) => {
         return `<script src="${this.publicPath}/${file}" defer></script>`
       }).join('')
     } else {
