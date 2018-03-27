@@ -1,10 +1,22 @@
-import Vue, { PropType } from "../index";
-import { AsyncComponent, ComponentOptions, FunctionalComponentOptions } from "../index";
+import Vue, { PropType, VNode } from "../index";
+import { AsyncComponent, ComponentOptions, FunctionalComponentOptions, Component } from "../index";
 import { CreateElement } from "../vue";
 
-interface Component extends Vue {
+interface MyComponent extends Vue {
   a: number;
 }
+
+const option: ComponentOptions<MyComponent> = {
+  data() {
+    return {
+      a: 123
+    }
+  }
+}
+
+// contravariant generic should use never
+const anotherOption: ComponentOptions<never> = option
+const componentType: Component = option
 
 Vue.component('sub-component', {
   components: {
@@ -41,10 +53,10 @@ Vue.component('string-prop', {
 });
 
 class User {
-  private u: number
+  private u = 1
 }
 class Cat {
-  private u: number
+  private u = 1
 }
 
 interface IUser {
@@ -203,7 +215,10 @@ Vue.component('component', {
   updated() {},
   activated() {},
   deactivated() {},
-  errorCaptured() {
+  errorCaptured(err, vm, info) {
+    err.message
+    vm.$emit('error')
+    info.toUpperCase()
     return true
   },
 
@@ -212,7 +227,7 @@ Vue.component('component', {
       bind() {},
       inserted() {},
       update() {},
-      componentMounted() {},
+      componentUpdated() {},
       unbind() {}
     },
     b(el, binding, vnode, oldVnode) {
@@ -293,6 +308,19 @@ Vue.component('component-with-scoped-slot', {
   }
 })
 
+Vue.component('narrow-array-of-vnode-type', {
+  render (h): VNode {
+    const slot = this.$scopedSlots.default({})
+    if (typeof slot !== 'string') {
+      const first = slot[0]
+      if (!Array.isArray(first) && typeof first !== 'string') {
+        return first;
+      }
+    }
+    return h();
+  }
+})
+
 Vue.component('functional-component', {
   props: ['prop'],
   functional: true,
@@ -303,6 +331,7 @@ Vue.component('functional-component', {
     context.slots();
     context.data;
     context.parent;
+    context.listeners.click;
     return createElement("div", {}, context.children);
   }
 });
@@ -321,12 +350,19 @@ Vue.component('functional-component-object-inject', {
   }
 })
 
+Vue.component('functional-component-check-optional', {
+  functional: true
+})
+
 Vue.component("async-component", ((resolve, reject) => {
   setTimeout(() => {
     resolve(Vue.component("component"));
   }, 0);
   return new Promise((resolve) => {
-    resolve({ functional: true });
+    resolve({
+      functional: true,
+      render(h: CreateElement) { return h('div') }
+    });
   })
 }));
 

@@ -1,4 +1,4 @@
-var alias = require('../../build/alias')
+var alias = require('../../scripts/alias')
 var webpack = require('webpack')
 
 var webpackConfig = {
@@ -19,7 +19,7 @@ var webpackConfig = {
       __WEEX__: false,
       'process.env': {
         NODE_ENV: '"development"',
-        TRANSITION_DURATION: 50,
+        TRANSITION_DURATION: process.env.CI ? 100 : 50,
         TRANSITION_BUFFER: 10
       }
     })

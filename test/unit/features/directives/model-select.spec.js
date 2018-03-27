@@ -546,4 +546,46 @@ describe('Directive v-model select', () => {
       expect(spy).not.toHaveBeenCalled()
     }).then(done)
   })
+
+  // #6903
+  describe('should correctly handle v-model when the vnodes are the same', () => {
+    function makeInstance (foo) {
+      return new Vue({
+        data: {
+          foo: foo,
+          options: ['b', 'c', 'd'],
+          value: 'c'
+        },
+        template:
+          '<div>' +
+            '<select v-if="foo" data-attr>' +
+              '<option selected>a</option>' +
+            '</select>' +
+            '<select v-else v-model="value">' +
+              '<option v-for="option in options" :value="option">{{ option }}</option>' +
+            '</select>' +
+          '</div>'
+      }).$mount()
+    }
+
+    it('register v-model', done => {
+      const vm = makeInstance(true)
+
+      expect(vm.$el.firstChild.selectedIndex).toBe(0)
+      vm.foo = false
+      waitForUpdate(() => {
+        expect(vm.$el.firstChild.selectedIndex).toBe(1)
+      }).then(done)
+    })
+
+    it('remove v-model', done => {
+      const vm = makeInstance(false)
+
+      expect(vm.$el.firstChild.selectedIndex).toBe(1)
+      vm.foo = true
+      waitForUpdate(() => {
+        expect(vm.$el.firstChild.selectedIndex).toBe(0)
+      }).then(done)
+    })
+  })
 })
