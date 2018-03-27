@@ -41,7 +41,7 @@ Vue.component('pagination', {
 			return this.currentPage != this.totalPages
 		},
 		indexs : function() {
-			var indexs = [], groups = this.groups, currentPage = this.currentPage, totalPages = this.totalPages;
+			var indexs = [], currentPage = this.currentPage, totalPages = this.totalPages, groups = Math.min(this.groups, totalPages);
 			var ample = (totalPages > groups ? Math.ceil((currentPage + 1) / groups) : 1);
 			var halve = Math.floor((groups - 1) / 2), left = ample > 1 ? currentPage - halve : 1, right = ample > 1 ? (function() {
 				var max = currentPage + (groups - halve - 1);
