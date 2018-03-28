@@ -19,13 +19,11 @@ Vue.component('pagination', {
 	},
 	template : [ //
 	'<ul class="y-page">',//
-	'	<li v-if="hasPrevious"><a v-on:click.stop="gotoPage(currentPage-1)">Previous</a></li>',//
 	'	<li v-for="index in indexs">',//
-	' 		<a v-if="index==null">…</a>',//
-	'		<a v-else v-on:click.stop="gotoPage(index)" v-bind:class="{\'active\':currentPage==index}">{{index}}</a>',//
+	' 		<a v-if="index[1]==null">…</a>',//
+	'		<a v-else v-on:click.stop="gotoPage(index[1])" v-bind:class="{\'active\':currentPage==index[1]}">{{index[0]}}</a>',//
 	'	</li>',//
 	'	<li><span>Page {{currentPage}} of {{totalPages}} </span></li>',//
-	'	<li v-if="hasNext"><a v-on:click.stop="gotoPage(currentPage+1)">Next</a></li>',//
 	'</ul>' ].join(''),
 	computed : {
 		currentPage : function() {
@@ -33,12 +31,6 @@ Vue.component('pagination', {
 		},
 		totalPages : function() {
 			return ((this.total < 0 || this.limit < 1) ? 0 : (((this.total - 1) / this.limit) | 0)) + 1
-		},
-		hasPrevious : function() {
-			return this.currentPage != 1
-		},
-		hasNext : function() {
-			return this.currentPage != this.totalPages
 		},
 		indexs : function() {
 			var indexs = [], currentPage = this.currentPage, totalPages = this.totalPages, groups = Math.min(this.groups, totalPages);
@@ -51,14 +43,21 @@ Vue.component('pagination', {
 			if (right - left < groups - 1) {
 				left = right - groups + 1;
 			}
+			if (currentPage != 1) {
+				indexs.push([ 'Previous', 1 ]);
+			}
 			if (left > 2) {
-				indexs.push(1, null);
+				indexs.push([ 1, 1 ], [ '…', null ]);
 			}
 			while (left <= right) {
-				indexs.push(left++);
+				indexs.push([ left, left ]);
+				left++;
 			}
 			if (totalPages > groups && totalPages > right) {
-				indexs.push(null, totalPages);
+				indexs.push([ '…', null ], [ totalPages, totalPages ]);
+			}
+			if (currentPage != totalPages) {
+				indexs.push([ 'Next', currentPage + 1 ]);
 			}
 			return indexs;
 		}
