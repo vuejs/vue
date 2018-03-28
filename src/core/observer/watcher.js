@@ -97,8 +97,10 @@ export default class Watcher {
 
   /**
    * Evaluate the getter, and re-collect dependencies.
+   * 为对应属性添加依赖，由于依赖收集必须进行一次取值，处理 deep
    */
   get () {
+    // Dep.target = this
     pushTarget(this)
     let value
     const vm = this.vm
@@ -114,6 +116,7 @@ export default class Watcher {
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
       if (this.deep) {
+        // 对其子项添加依赖
         traverse(value)
       }
       popTarget()
@@ -147,6 +150,7 @@ export default class Watcher {
         dep.removeSub(this)
       }
     }
+    // 感觉没必要这么做，还说为了内存考虑？
     let tmp = this.depIds
     this.depIds = this.newDepIds
     this.newDepIds = tmp
@@ -163,8 +167,10 @@ export default class Watcher {
    */
   update () {
     /* istanbul ignore else */
+    // TODO lazy 出现情况未知，大概是不立即更新，交由之后的脏检查处理
     if (this.lazy) {
       this.dirty = true
+      // TODO sync 出现情况未知，同步还是双向绑定待确定
     } else if (this.sync) {
       this.run()
     } else {
