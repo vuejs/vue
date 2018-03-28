@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Pagination</title>
+<script src="../../dist/vue.min.js"></script>
+<link rel="stylesheet" href="index.css">
+</head>
+<body>
+	<div id="el" style="">
+		<table class="y-grid">
+			<thead>
+				<tr>
+					<td>ID</td>
+					<td>NAME</td>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-for="record in page.records">
+					<td v-text="record.id"></td>
+					<td>{{record.name}}</td>
+				</tr>
+			</tbody>
+		</table>
+		<div is="pagination" :start="page.start" :limit="page.limit" :total="page.total" @offset="offsetStart"></div>
+	</div>
+	<script src="pagination.js"></script>
+	<script>
+		//test data
+		var pagedQuery = function() {
+			var sample = [];
+			for (var i = 0; i < 1000; i++) {
+				sample.push({
+					id : i,
+					name : 'data-' + i
+				});
+			}
+			return function(start, limit) {
+				var total = sample.length, end = Math.min(start + limit, total), records = sample.slice(start, end);
+				return {
+					start : start,
+					limit : limit,
+					total : total,
+					records : records
+				};
+			}
+		}();
+
+		var vm = new Vue({
+			el : '#el',
+			data : {
+				page : {
+					start : 0,
+					limit : 5,
+					total : 0,
+					records : []
+				}
+			},
+			methods : {
+				search : function() {
+					vm.page = pagedQuery(this.page.start, this.page.limit);
+				},
+				offsetStart : function(start) {
+					this.page.start = start;
+					this.search();
+				}
+			}
+		});
+
+		vm.search();
+	</script>
+</body>
+</html>
