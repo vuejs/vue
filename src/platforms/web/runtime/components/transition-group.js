@@ -37,15 +37,15 @@ export default {
     const update = this._update
     this._update = (vnode, hydrating) => {
       // force removing pass if removed vnodes' length > 0
-      if (this.removed.length > 0) {
+      if (this.removed && this.removed.length > 0) {
         this.__patch__(
           this._vnode,
           this.kept,
           false, // hydrating
           true // removeOnly (!important, avoids unnecessary moves)
         )
+        this._vnode = this.kept
       }
-      this._vnode = this.kept
       update.call(this, vnode, hydrating)
     }
   },
