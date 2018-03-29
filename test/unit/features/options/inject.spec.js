@@ -473,6 +473,32 @@ describe('Options provide/inject', () => {
     expect(injected).toEqual(['foo', 'bar'])
   })
 
+  it('should merge symbol provide from mixins (functions)', () => {
+    const keyA = Symbol('foo')
+    const keyB = Symbol('bar')
+
+    const mixinA = { provide: () => ({ [keyA]: 'foo' }) }
+    const mixinB = { provide: () => ({ [keyB]: 'bar' }) }
+    const child = {
+      inject: {
+        foo: keyA,
+        bar: keyB
+      },
+      template: `<span/>`,
+      created () {
+        injected = [this.foo, this.bar]
+      }
+    }
+    new Vue({
+      mixins: [mixinA, mixinB],
+      render (h) {
+        return h(child)
+      }
+    }).$mount()
+
+    expect(injected).toEqual(['foo', 'bar'])
+  })
+
   it('should merge provide from mixins (mix of objects and functions)', () => {
     const mixinA = { provide: { foo: 'foo' }}
     const mixinB = { provide: () => ({ bar: 'bar' }) }
