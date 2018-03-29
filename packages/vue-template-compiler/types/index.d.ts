@@ -12,6 +12,7 @@ interface CompiledResult {
   render: string;
   staticRenderFns: string[];
   errors: string[];
+  tips: string[];
 }
 
 interface CompiledResultFunctions {
