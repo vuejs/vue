@@ -6,6 +6,7 @@
   "unpkg": "browser.js",
   "jsdelivr": "browser.js",
   "browser": "browser.js",
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vuejs/vue.git"
