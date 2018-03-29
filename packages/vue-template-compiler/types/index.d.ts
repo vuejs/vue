@@ -33,26 +33,26 @@ type DirectiveFunction = (node: ASTElement, directiveMeta: ASTDirective) => void
 /*
  * AST Types
  */
-interface ASTModifiers {
+export interface ASTModifiers {
   [key: string]: boolean;
 }
 
-interface ASTIfCondition {
+export interface ASTIfCondition {
   exp: string | undefined;
   block: ASTElement;
 }
 
-interface ASTElementHandler {
+export interface ASTElementHandler {
   value: string;
   params?: any[];
   modifiers: ASTModifiers | undefined;
 }
 
-interface ASTElementHandlers {
+export interface ASTElementHandlers {
   [key: string]: ASTElementHandler | ASTElementHandler[];
 }
 
-interface ASTDirective {
+export interface ASTDirective {
   name: string;
   rawName: string;
   value: string;
@@ -60,9 +60,9 @@ interface ASTDirective {
   modifiers: ASTModifiers | undefined;
 }
 
-type ASTNode = ASTElement | ASTText | ASTExpression;
+export type ASTNode = ASTElement | ASTText | ASTExpression;
 
-interface ASTElement {
+export interface ASTElement {
   type: 1;
   tag: string;
   attrsList: { name: string; value: any }[];
@@ -140,7 +140,7 @@ interface ASTElement {
   appendAsTree?: boolean;
 }
 
-interface ASTExpression {
+export interface ASTExpression {
   type: 2;
   expression: string;
   text: string;
@@ -150,7 +150,7 @@ interface ASTExpression {
   ssrOptimizability?: number;
 }
 
-interface ASTText {
+export interface ASTText {
   type: 3;
   text: string;
   static?: boolean;
@@ -166,7 +166,7 @@ interface SFCParserOptions {
   pad?: true | 'line' | 'space';
 }
 
-interface SFCBlock {
+export interface SFCBlock {
   type: string;
   content: string;
   attrs: Record<string, string>;
@@ -178,7 +178,7 @@ interface SFCBlock {
   module?: string | boolean;
 }
 
-interface SFCDescriptor {
+export interface SFCDescriptor {
   template: SFCBlock | undefined;
   script: SFCBlock | undefined;
   styles: SFCBlock[];
