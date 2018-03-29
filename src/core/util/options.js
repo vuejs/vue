@@ -114,7 +114,7 @@ export function mergeDataOrFn (
   }
 }
 
-// 合并 option 下的 data 属性的方法
+// option 下的 data 属性的合并方法
 strats.data = function (
   parentVal: any,
   childVal: any,
@@ -139,6 +139,7 @@ strats.data = function (
 
 /**
  * Hooks and props are merged as arrays.
+ * 生命周期函数的合并方法
  * 将生命周期函数合并到一个数组中，由于函数未真正调用，所以并不需要设置上下文环境
  */
 function mergeHook (
@@ -165,7 +166,7 @@ LIFECYCLE_HOOKS.forEach(hook => {
  * a three-way merge between constructor options, instance
  * options and parent options.
  *
- * 合并 components/directives/filters
+ * components/directives/filters 的合并方法
  */
 function mergeAssets (
   parentVal: ?Object,
@@ -232,7 +233,7 @@ strats.watch = function (
 
 /**
  * Other object hashes.
- * 一些其他属性的合并
+ * 一些其他属性的合并方法
  */
 strats.props =
 strats.methods =
@@ -439,7 +440,7 @@ export function mergeOptions (
     child = child.options
   }
 
-  // props 有两种传值方式，使用该方法处理成同一种格式
+  // props inject directives 有多种写法，同一种格式
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)

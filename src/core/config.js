@@ -52,31 +52,37 @@ export default ({
 
   /**
    * Whether to enable devtools
+   * devtools 是否生效
    */
   devtools: process.env.NODE_ENV !== 'production',
 
   /**
    * Whether to record perf
+   * 是否开启浏览器的性能检测
    */
   performance: false,
 
   /**
    * Error handler for watcher errors
+   * 全局的错误处理函数
    */
   errorHandler: null,
 
   /**
    * Warn handler for watcher warns
+   * 在生产环境下注册一个自定义的函数警告
    */
   warnHandler: null,
 
   /**
    * Ignore certain custom elements
+   * 一些自定义的标签，比如 Web Components
    */
   ignoredElements: [],
 
   /**
    * Custom user key aliases for v-on
+   * 自定义的键位别名
    */
   // $flow-disable-line
   keyCodes: Object.create(null),

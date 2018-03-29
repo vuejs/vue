@@ -16,6 +16,7 @@ export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
     // a uid
+    // 每个 Vue 实例的 ID
     vm._uid = uid++
 
     let startTag, endTag
@@ -28,6 +29,7 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     // a flag to avoid this being observed
+    // Vue 实例对象不应该被观察，给个标记
     vm._isVue = true
     // merge options
     // TODO 之后注意 options._isComponent = true 的情况，先略过
@@ -102,6 +104,7 @@ export function initInternalComponent (vm: Component, options: InternalComponent
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   let options = Ctor.options
   // TODO 注意 Vue 类属性上出现 super = true 的情况
+  // super 情况出现在使用 Vue.extend 生成的类，也就是 Vue 的子类
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super)
     const cachedSuperOptions = Ctor.superOptions
