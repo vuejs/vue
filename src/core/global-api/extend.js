@@ -71,23 +71,27 @@ export function initExtend (Vue: GlobalAPI) {
     // keep a reference to the super options at extension time.
     // later at instantiation we can check if Super's options have
     // been updated.
+    // 保留对父类的引用，用于在实例化的使用检查父类的相关值是否改变
     Sub.superOptions = Super.options
     Sub.extendOptions = extendOptions
     Sub.sealedOptions = extend({}, Sub.options)
 
     // cache constructor
+    // 缓存当前实例，保存在 option._Ctor 中
     cachedCtors[SuperId] = Sub
     return Sub
   }
 }
 
+// 将 Comp.prototype[key] 代理到 this._props[key]
+// TODO 这段不是很理解，为什么要代理 _props，而且这个 _props 哪里来的？
 function initProps (Comp) {
   const props = Comp.options.props
   for (const key in props) {
     proxy(Comp.prototype, `_props`, key)
   }
 }
-
+// 绑定计算属性
 function initComputed (Comp) {
   const computed = Comp.options.computed
   for (const key in computed) {
