@@ -76,14 +76,16 @@ export default {
   },
 
   beforeUpdate () {
-    // force removing pass
-    this.__patch__(
+    // force removing pass if removed vnodes' length > 0
+    if (this.removed.length > 0) {
+      this.__patch__(
       this._vnode,
       this.kept,
       false, // hydrating
       true // removeOnly (!important, avoids unnecessary moves)
-    )
-    this._vnode = this.kept
+      )
+      this._vnode = this.kept
+    }
   },
 
   updated () {
