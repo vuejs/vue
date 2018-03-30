@@ -14,6 +14,7 @@ export function initEvents (vm: Component) {
   vm._hasHookEvent = false
   // init parent attached events
   // TODO 没看到 _parentListeners 之后看到回来再看
+  // 先弄清楚存储的格式，之后再看具体实现细节
   const listeners = vm.$options._parentListeners
   if (listeners) {
     updateComponentListeners(vm, listeners)

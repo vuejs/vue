@@ -29,7 +29,7 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     // a flag to avoid this being observed
-    // Vue 实例对象不应该被观察，给个标记
+    // Vue 实例对象不用被观察，给个标记
     vm._isVue = true
     // merge options
     // TODO 之后注意 options._isComponent = true 的情况，先略过
@@ -54,6 +54,7 @@ export function initMixin (Vue: Class<Component>) {
       vm._renderProxy = vm
     }
     // expose real self
+    // 保存自身
     vm._self = vm
     // 初始化组件生命周期
     initLifecycle(vm)
@@ -103,21 +104,28 @@ export function initInternalComponent (vm: Component, options: InternalComponent
 
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   let options = Ctor.options
-  // TODO 注意 Vue 类属性上出现 super = true 的情况
   // super 情况出现在使用 Vue.extend 生成的类，也就是 Vue 的子类
   if (Ctor.super) {
+    // TODO 这里仅仅考虑了一层，更多细节还得再看
     const superOptions = resolveConstructorOptions(Ctor.super)
     const cachedSuperOptions = Ctor.superOptions
     if (superOptions !== cachedSuperOptions) {
       // super option changed,
       // need to resolve new options.
+      // 父类的 option 发生变化，需要生成新的 options
       Ctor.superOptions = superOptions
       // check if there are any late-modified/attached options (#4976)
+      // TODO 这一步不是很了解
+      // 主要是 modifiedOptions 最终出来的结果是要和 Ctor.extendOptions 合并的，但是 extendOptions 一般是不会改的
+      // 但是 resolveModifiedOptions 方法出来的结果却是 Ctor.options 和 Ctor.sealedOptions 中不同的项
+      // 为什么要合并到 Ctor.extendOptions 中呢？仅仅为了方便？
       const modifiedOptions = resolveModifiedOptions(Ctor)
       // update base extend options
+      // 合并原始值和更新值
       if (modifiedOptions) {
         extend(Ctor.extendOptions, modifiedOptions)
       }
+      // 更新当前类的 options
       options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
       if (options.name) {
         options.components[options.name] = Ctor
@@ -150,6 +158,7 @@ function dedupe (latest, extended, sealed) {
     extended = Array.isArray(extended) ? extended : [extended]
     for (let i = 0; i < latest.length; i++) {
       // push original options and not sealed options to exclude duplicated options
+      // 这里取出的是在 extended 中且不在 sealed 中的项目
       if (extended.indexOf(latest[i]) >= 0 || sealed.indexOf(latest[i]) < 0) {
         res.push(latest[i])
       }

@@ -2,6 +2,7 @@ import Vue from './instance/index'
 import { initGlobalAPI } from './global-api/index'
 import { isServerRendering } from 'core/util/env'
 
+// 初始化在 Vue 类下的方法，公用方法和配置项
 initGlobalAPI(Vue)
 
 Object.defineProperty(Vue.prototype, '$isServer', {
