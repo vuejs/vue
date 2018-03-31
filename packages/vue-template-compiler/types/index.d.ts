@@ -1,3 +1,5 @@
+import Vue, { VNode } from "vue"
+
 /*
  * Template compilation options / results
  */
@@ -16,8 +18,8 @@ interface CompiledResult {
 }
 
 interface CompiledResultFunctions {
-  render: Function;
-  staticRenderFns: Function[];
+  render: (this: Vue) => VNode;
+  staticRenderFns: ((this: Vue) => VNode)[];
 }
 
 interface ModuleOptions {
