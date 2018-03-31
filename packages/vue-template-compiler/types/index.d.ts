@@ -34,6 +34,16 @@ type DirectiveFunction = (node: ASTElement, directiveMeta: ASTDirective) => void
 /*
  * AST Types
  */
+
+/**
+ * - 0: FALSE - whole sub tree un-optimizable
+ * - 1: FULL - whole sub tree optimizable
+ * - 2: SELF - self optimizable but has some un-optimizable children
+ * - 3: CHILDREN - self un-optimizable but have fully optimizable children
+ * - 4: PARTIAL - self un-optimizable with some un-optimizable children
+ */
+export type SSROptimizability = 0 | 1 | 2 | 3 | 4
+
 export interface ASTModifiers {
   [key: string]: boolean;
 }
@@ -135,7 +145,7 @@ export interface ASTElement {
   wrapListeners?: (code: string) => string;
 
   // 2.4 ssr optimization
-  ssrOptimizability?: number;
+  ssrOptimizability?: SSROptimizability;
 
   // weex specific
   appendAsTree?: boolean;
@@ -148,7 +158,7 @@ export interface ASTExpression {
   tokens: (string | Record<string, any>)[];
   static?: boolean;
   // 2.4 ssr optimization
-  ssrOptimizability?: number;
+  ssrOptimizability?: SSROptimizability;
 }
 
 export interface ASTText {
@@ -157,7 +167,7 @@ export interface ASTText {
   static?: boolean;
   isComment?: boolean;
   // 2.4 ssr optimization
-  ssrOptimizability?: number;
+  ssrOptimizability?: SSROptimizability;
 }
 
 /*
