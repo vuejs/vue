@@ -7,8 +7,7 @@ export function parseFilters (exp: string): string {
   let square = 0
   let paren = 0
   let lastFilterIndex = 0
-  let c, i, filters
-  let expression = ''
+  let c, i, expression, filters
 
   for (i = 0; i < exp.length; i++) {
     c = exp.charCodeAt(i)
@@ -21,7 +20,13 @@ export function parseFilters (exp: string): string {
       // and not inside any curlies, squares or parens.
       !curly && !square && !paren
     ) {
-      endNewExpression()
+      if (expression === undefined) {
+        // first filter, end of expression
+        lastFilterIndex = i + 1
+        expression = exp.slice(0, i).trim()
+      } else {
+        pushFilter()
+      }
     } else {
       switch (c) {
         case 0x22: case 0x27: case 0x60:          // ", ' or `
@@ -57,21 +62,16 @@ export function parseFilters (exp: string): string {
     }
   }
 
-  endNewExpression()
+  if (expression === undefined) {
+    lastFilterIndex = i + 1
+    expression = exp.slice(0, i).trim()
+  } else {
+    pushFilter()
+  }
 
   function pushFilter () {
     (filters || (filters = [])).push(exp.slice(lastFilterIndex, i).trim())
     lastFilterIndex = i + 1
-  }
-
-  function endNewExpression () {
-    if (expression === undefined) {
-      // first filter, end of expression.
-      lastFilterIndex = i + 1
-      expression = exp.slice(0, i).trim()
-    } else {
-      pushFilter()
-    }
   }
 
   if (filters) {
@@ -83,11 +83,11 @@ export function parseFilters (exp: string): string {
   return expression
 }
 
-function seek (string: string, start: number, char: number): number {
+function seek (string: string, start: number, forchar: number): number {
   let c, i
   for (i = start; i <= string.length; i++) {
     c = string.charCodeAt(i)
-    if (c === char) {
+    if (c === forchar) {
       // found position of next matching character.
       return i
     }
