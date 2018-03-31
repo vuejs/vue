@@ -18,8 +18,8 @@ interface CompiledResult {
 }
 
 interface CompiledResultFunctions {
-  render: (this: Vue) => VNode;
-  staticRenderFns: ((this: Vue) => VNode)[];
+  render: () => VNode;
+  staticRenderFns: (() => VNode)[];
 }
 
 interface ModuleOptions {
