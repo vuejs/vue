@@ -1,5 +1,17 @@
 /* @flow */
 
+const CHAR_PIPE = 0x7C
+const CHAR_DOUBLE_QUOTE = 0x22
+const CHAR_SINGLE_QUOTE = 0x27
+const CHAR_BACKTICK = 0x60
+const CHAR_PARENTHESIS_OPEN = 0x28
+const CHAR_PARENTHESIS_CLOSE = 0x29
+const CHAR_BRACKET_OPEN = 0x5B
+const CHAR_BRACKET_CLOSE = 0x5D
+const CHAR_CURLY_OPEN = 0x7B
+const CHAR_CURLY_CLOSE = 0x7D
+const CHAR_FORWARD_SLASH = 0x2f
+
 const validDivisionCharRE = /[\w).+\-_$\]]/
 
 export function parseFilters (exp: string): string {
@@ -12,11 +24,11 @@ export function parseFilters (exp: string): string {
   for (i = 0; i < exp.length; i++) {
     c = exp.charCodeAt(i)
     if (
-      // a pipe that separates filters is a
-      c === 0x7C && // pipe
+      // a pipe that separates filters is a pipe
+      c === CHAR_PIPE &&
       // but not a ||:
-      exp.charCodeAt(i + 1) !== 0x7C &&
-      exp.charCodeAt(i - 1) !== 0x7C &&
+      exp.charCodeAt(i + 1) !== CHAR_PIPE &&
+      exp.charCodeAt(i - 1) !== CHAR_PIPE &&
       // and not inside any curlies, squares or parens.
       !curly && !square && !paren
     ) {
@@ -29,18 +41,20 @@ export function parseFilters (exp: string): string {
       }
     } else {
       switch (c) {
-        case 0x22: case 0x27: case 0x60:          // ", ' or `
+        case CHAR_DOUBLE_QUOTE:
+        case CHAR_SINGLE_QUOTE:
+        case CHAR_BACKTICK:
           // find string end.
           i = seek(exp, i + 1, c); break
-        case 0x28: paren++; break                 // (
-        case 0x29: paren--; break                 // )
-        case 0x5B: square++; break                // [
-        case 0x5D: square--; break                // ]
-        case 0x7B: curly++; break                 // {
-        case 0x7D: curly--; break                 // }
+        case CHAR_PARENTHESIS_OPEN: paren++; break
+        case CHAR_PARENTHESIS_CLOSE: paren--; break
+        case CHAR_BRACKET_OPEN: square++; break
+        case CHAR_BRACKET_CLOSE: square--; break
+        case CHAR_CURLY_OPEN: curly++; break
+        case CHAR_CURLY_CLOSE: curly--; break
       }
 
-      if (c === 0x2f) { // /
+      if (c === CHAR_FORWARD_SLASH) {
         // a '/' can be a division or a regex expression.
         // they can be distinguished by what is preceding.
         let j = i - 1
@@ -56,7 +70,7 @@ export function parseFilters (exp: string): string {
         // it is a regex expression.
         if (!p || !validDivisionCharRE.test(p)) {
           // find matching '/' for end.
-          i = seek(exp, i + 1, 0x2f)
+          i = seek(exp, i + 1, CHAR_FORWARD_SLASH)
         }
       }
     }
