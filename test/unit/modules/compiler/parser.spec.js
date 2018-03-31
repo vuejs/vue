@@ -73,10 +73,12 @@ describe('parser', () => {
   })
 
   it('allow tags on shadowRoot enabled element', () => {
+    const options = extend({}, baseOptions)
+    options.hasShadowRoot = true
     // style
     const styleAst = parse(
       '<style>notError { color: red; }</style>',
-      Object.assign({}, baseOptions, { hasShadowRoot: true })
+      options
     )
     expect(styleAst.tag).toBe('style')
     expect(styleAst.plain).toBe(true)
