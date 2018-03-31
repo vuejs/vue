@@ -194,4 +194,8 @@ describe('Filters', () => {
   it('support template string', () => {
     expect(parseFilters('`a | ${b}c` | d')).toBe('_f("d")(`a | ${b}c`)')
   })
+
+  it('unterminated string', () => {
+    expect(parseFilters('a"msg\\')).toBe('a"msg\\')
+  })
 })
