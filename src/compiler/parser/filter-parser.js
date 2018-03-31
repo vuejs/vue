@@ -3,45 +3,30 @@
 const validDivisionCharRE = /[\w).+\-_$\]]/
 
 export function parseFilters (exp: string): string {
-  let inSingle = false
-  let inDouble = false
-  let inTemplateString = false
-  let inRegex = false
   let curly = 0
   let square = 0
   let paren = 0
   let lastFilterIndex = 0
-  let c, prev, i, expression, filters
+  let c, i, filters
+  let expression = ''
 
   for (i = 0; i < exp.length; i++) {
-    prev = c
     c = exp.charCodeAt(i)
-    if (inSingle) {
-      if (c === 0x27 && prev !== 0x5C) inSingle = false
-    } else if (inDouble) {
-      if (c === 0x22 && prev !== 0x5C) inDouble = false
-    } else if (inTemplateString) {
-      if (c === 0x60 && prev !== 0x5C) inTemplateString = false
-    } else if (inRegex) {
-      if (c === 0x2f && prev !== 0x5C) inRegex = false
-    } else if (
+    if (
+      // a pipe that separates filters is a
       c === 0x7C && // pipe
+      // but not a ||:
       exp.charCodeAt(i + 1) !== 0x7C &&
       exp.charCodeAt(i - 1) !== 0x7C &&
+      // and not inside any curlies, squares or parens.
       !curly && !square && !paren
     ) {
-      if (expression === undefined) {
-        // first filter, end of expression
-        lastFilterIndex = i + 1
-        expression = exp.slice(0, i).trim()
-      } else {
-        pushFilter()
-      }
+      endNewExpression()
     } else {
       switch (c) {
-        case 0x22: inDouble = true; break         // "
-        case 0x27: inSingle = true; break         // '
-        case 0x60: inTemplateString = true; break // `
+        case 0x22: case 0x27: case 0x60:          // ", ' or `
+          // find string end.
+          i = seek(exp, i + 1, c); break
         case 0x28: paren++; break                 // (
         case 0x29: paren--; break                 // )
         case 0x5B: square++; break                // [
@@ -49,7 +34,10 @@ export function parseFilters (exp: string): string {
         case 0x7B: curly++; break                 // {
         case 0x7D: curly--; break                 // }
       }
+
       if (c === 0x2f) { // /
+        // a '/' can be a division or a regex expression.
+        // they can be distinguished by what is preceding.
         let j = i - 1
         let p
         // find first non-whitespace prev char
@@ -57,22 +45,33 @@ export function parseFilters (exp: string): string {
           p = exp.charAt(j)
           if (p !== ' ') break
         }
+        // if there was no preceding character
+        // or the preceding character was not a character
+        // that is allowed to precede division
+        // it is a regex expression.
         if (!p || !validDivisionCharRE.test(p)) {
-          inRegex = true
+          // find matching '/' for end.
+          i = seek(exp, i + 1, 0x2f)
         }
       }
     }
   }
 
-  if (expression === undefined) {
-    expression = exp.slice(0, i).trim()
-  } else if (lastFilterIndex !== 0) {
-    pushFilter()
-  }
+  endNewExpression()
 
   function pushFilter () {
     (filters || (filters = [])).push(exp.slice(lastFilterIndex, i).trim())
     lastFilterIndex = i + 1
+  }
+
+  function endNewExpression () {
+    if (expression === undefined) {
+      // first filter, end of expression.
+      lastFilterIndex = i + 1
+      expression = exp.slice(0, i).trim()
+    } else {
+      pushFilter()
+    }
   }
 
   if (filters) {
@@ -82,6 +81,22 @@ export function parseFilters (exp: string): string {
   }
 
   return expression
+}
+
+function seek (string: string, start: number, char: number): number {
+  let c, i
+  for (i = start; i <= string.length; i++) {
+    c = string.charCodeAt(i)
+    if (c === char) {
+      // found position of next matching character.
+      return i
+    }
+    if (c === 0x5C) {
+      // skip next character as it is escaped.
+      i++
+    }
+  }
+  return i
 }
 
 function wrapFilter (exp: string, filter: string): string {
