@@ -72,6 +72,19 @@ describe('parser', () => {
     expect('Templates should only be responsible for mapping the state').toHaveBeenWarned()
   })
 
+  it('allow tags on shadowRoot enabled element', () => {
+    // style
+    const styleAst = parse(
+      '<style>notError { color: red; }</style>',
+      Object.assign({}, baseOptions, { hasShadowRoot: true })
+    )
+    expect(styleAst.tag).toBe('style')
+    expect(styleAst.plain).toBe(true)
+    expect(styleAst.forbidden).toBe(undefined)
+    expect(styleAst.children[0].text).toBe('notError { color: red; }')
+    expect('Templates should only be responsible for mapping the state').not.toHaveBeenWarned()
+  })
+
   it('not contain root element', () => {
     parse('hello world', baseOptions)
     expect('Component template requires a root element, rather than just text').toHaveBeenWarned()

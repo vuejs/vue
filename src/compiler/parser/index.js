@@ -130,7 +130,7 @@ export function parse (
         element.ns = ns
       }
 
-      if (isForbiddenTag(element) && !isServerRendering()) {
+      if (isForbiddenTag(element, options.hasShadowRoot) && !isServerRendering()) {
         element.forbidden = true
         process.env.NODE_ENV !== 'production' && warn(
           'Templates should only be responsible for mapping the state to the ' +
@@ -632,9 +632,9 @@ function isTextTag (el): boolean {
   return el.tag === 'script' || el.tag === 'style'
 }
 
-function isForbiddenTag (el): boolean {
+function isForbiddenTag (el, hasShadowRoot): boolean {
   return (
-    el.tag === 'style' ||
+    (el.tag === 'style' && !hasShadowRoot) ||
     (el.tag === 'script' && (
       !el.attrsMap.type ||
       el.attrsMap.type === 'text/javascript'

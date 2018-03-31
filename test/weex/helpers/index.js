@@ -71,8 +71,8 @@ export function compileVue (source, componentName) {
         return module.exports;
       })());
     ` + (componentName
-        ? `Vue.component('${componentName}', ${name});\n`
-        : `${name}.el = 'body';new Vue(${name});`)
+      ? `Vue.component('${componentName}', ${name});\n`
+      : `${name}.el = 'body';new Vue(${name});`)
     )
 
     let cssText = ''
