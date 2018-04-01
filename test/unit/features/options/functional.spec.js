@@ -78,8 +78,6 @@ describe('Options functional', () => {
   })
 
   it('should expose data.scopedSlots as scopedSlots', () => {
-    const foo = jasmine.createSpy('foo')
-    const bar = jasmine.createSpy('bar')
     const vm = new Vue({
       template: '<div><wrap><p slot-scope="a">{{ a }}</p></wrap></div>',
       components: {
