@@ -9676,7 +9676,6 @@ function isTextTag (el) {
 }
 
 function isForbiddenTag (el) {
-  console.log(el);
   return (
     el.tag === 'style' ||
     (el.tag === 'script' && (
