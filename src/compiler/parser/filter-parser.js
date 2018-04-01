@@ -57,10 +57,9 @@ export function parseFilters (exp: string): string {
       if (c === CHAR_FORWARD_SLASH) {
         // a '/' can be a division or a regex expression.
         // they can be distinguished by what is preceding.
-        let j = i - 1
         let p
         // find first non-whitespace prev char
-        for (; j >= 0; j--) {
+        for (let j = i - 1; j >= 0; j--) {
           p = exp.charAt(j)
           if (p !== ' ') break
         }
