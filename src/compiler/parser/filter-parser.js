@@ -11,6 +11,7 @@ const CHAR_BRACKET_CLOSE = 0x5D
 const CHAR_CURLY_OPEN = 0x7B
 const CHAR_CURLY_CLOSE = 0x7D
 const CHAR_FORWARD_SLASH = 0x2f
+const CHAR_BACK_SLASH = 0x5C
 
 const validDivisionCharRE = /[\w).+\-_$\]]/
 
@@ -104,7 +105,7 @@ function seek (string: string, start: number, forchar: number): number {
       // found position of next matching character.
       return i
     }
-    if (c === 0x5C) {
+    if (c === CHAR_BACK_SLASH) {
       // skip next character as it is escaped.
       i++
     }
