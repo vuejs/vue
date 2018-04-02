@@ -18,6 +18,7 @@ declare type CompilerOptions = {
   shouldDecodeTags?: boolean;
   shouldDecodeNewlines?:  boolean;
   shouldDecodeNewlinesForHref?: boolean;
+  hasShadowRoot?: boolean;
 
   // runtime user-configurable
   delimiters?: [string, string]; // template delimiters
