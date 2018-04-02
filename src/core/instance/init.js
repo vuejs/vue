@@ -33,6 +33,7 @@ export function initMixin (Vue: Class<Component>) {
     vm._isVue = true
     // merge options
     // TODO 之后注意 options._isComponent = true 的情况，先略过
+    // 除了直接使用 vue 类创建的实例，其他的感觉上基本上都为 true
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
@@ -54,7 +55,7 @@ export function initMixin (Vue: Class<Component>) {
       vm._renderProxy = vm
     }
     // expose real self
-    // 保存自身
+    // 保存自身实例
     vm._self = vm
     // 初始化组件生命周期
     initLifecycle(vm)

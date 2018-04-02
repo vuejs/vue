@@ -21,6 +21,7 @@ export function initExtend (Vue: GlobalAPI) {
     extendOptions = extendOptions || {}
     const Super = this
     const SuperId = Super.cid
+    // 缓存 extend 出来的子类
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
@@ -64,6 +65,7 @@ export function initExtend (Vue: GlobalAPI) {
       Sub[type] = Super[type]
     })
     // enable recursive self-lookup
+    // 支持循环自身引用
     if (name) {
       Sub.options.components[name] = Sub
     }
@@ -83,7 +85,7 @@ export function initExtend (Vue: GlobalAPI) {
   }
 }
 
-// 将 Comp.prototype[key] 代理到 this._props[key]
+// 将 Comp.prototype[key] 代理到 Comp._props[key]
 // TODO 这段不是很理解，为什么要代理 _props，而且这个 _props 哪里来的？
 function initProps (Comp) {
   const props = Comp.options.props

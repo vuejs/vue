@@ -20,7 +20,7 @@ export function initRender (vm: Component) {
   vm._staticTrees = null // v-once cached trees 使用 v-once 的话只绑定数据一次，这个字段用于保存第一次生成的 dom 结构
   const options = vm.$options
   const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
-  const renderContext = parentVnode && parentVnode.context  // 父组件的上下文环境
+  const renderContext = parentVnode && parentVnode.context  // 获取父节点的上下文环境
   // 处理 $slots
   // TODO _renderChildren 该字段未知
   vm.$slots = resolveSlots(options._renderChildren, renderContext)

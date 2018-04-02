@@ -48,6 +48,7 @@ Vue.prototype.$mount = function (
 }
 
 // devtools global hook
+// vue-devtools 注册
 /* istanbul ignore next */
 if (inBrowser) {
   setTimeout(() => {

@@ -87,7 +87,7 @@ Vue.prototype.$mount = function (
  * of SVG elements in IE as well.
  */
 function getOuterHTML (el: Element): string {
-  if (el.outerHTML) {
+  if (el.outerHTML) {_isComponent
     return el.outerHTML
   } else {
     const container = document.createElement('div')

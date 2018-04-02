@@ -26,7 +26,7 @@ export function initLifecycle (vm: Component) {
   let parent = options.parent
   // locate first non-abstract parent
   // TODO 之后注意 option.abstract 设置的情况，先略过
-  // 将该节点放到父节点的 $children 列表中
+  // 将该节点放到非 abstract 的父节点的 $children 列表中
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent

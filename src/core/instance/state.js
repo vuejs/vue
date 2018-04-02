@@ -37,6 +37,7 @@ const sharedPropertyDefinition = {
 
 // 将 target[key] 代理到 this[sourceKey][key] 下
 export function proxy (target: Object, sourceKey: string, key: string) {
+  // 这里的 this 为 target
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
   }
