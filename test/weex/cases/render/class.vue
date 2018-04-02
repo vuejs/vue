@@ -4,6 +4,7 @@
     <div :class="class2"></div>
     <div class="box" :class="class3"></div>
     <div class="box" :class="class4"></div>
+    <div class="box" :class="{ box5: class5 }"></div>
   </div>
 </template>
 
@@ -28,6 +29,10 @@
   .box4 {
     background-color: #AAA;
   }
+
+  .box5 {
+    background-color: #999;
+  }
 </style>
 
 <script>
@@ -43,7 +48,8 @@
         class3: ['box3'],
         class4: {
           'box4': true
-        }
+        },
+        class5: true
       }
     }
   }

@@ -12,5 +12,8 @@
   }, {
     type: 'div',
     classList: ['box', 'box4']
+  }, {
+    type: 'div',
+    classList: ['box', 'box5']
   }]
 })
