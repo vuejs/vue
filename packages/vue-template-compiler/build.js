@@ -623,15 +623,20 @@ function parseComponent (
           return cumulated
         }, {})
       };
-      if (isSpecialTag(tag)) {
-        checkAttrs(currentBlock, attrs);
-        if (tag === 'style') {
-          sfc.styles.push(currentBlock);
-        } else {
-          sfc[tag] = currentBlock;
+      /**
+        This additional condition allows us to easily customize the way blocks are parsed within webpack config.
+      */
+      if (exports.shouldBeParsed(currentBlock)) {
+        if (isSpecialTag(tag)) {
+          checkAttrs(currentBlock, attrs);
+          if (tag === 'style') {
+            sfc.styles.push(currentBlock);
+          } else {
+            sfc[tag] = currentBlock;
+          }
+        } else { // custom blocks
+          sfc.customBlocks.push(currentBlock);
         }
-      } else { // custom blocks
-        sfc.customBlocks.push(currentBlock);
       }
     }
     if (!unary) {
@@ -4834,3 +4839,7 @@ exports.compile = compile;
 exports.compileToFunctions = compileToFunctions;
 exports.ssrCompile = compile$1;
 exports.ssrCompileToFunctions = compileToFunctions$1;
+/**
+  By default all blocks are parsed.
+*/
+exports.shouldBeParsed = (currentBlock) => true;
