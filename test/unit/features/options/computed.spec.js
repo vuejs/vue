@@ -252,4 +252,28 @@ describe('Options computed', () => {
       expect(updatedSpy.calls.count()).toBe(1)
     }).then(done)
   })
+
+  it('should collect dependencies correctly when using Vue.set in the getter function', done => {
+    const vm = new Vue({
+      data: {
+        value: 1,
+        someobject: {}
+      },
+      computed: {
+        a () {
+          const result = this.value + 1
+          this.$set(this.someobject, 'somekey', 'somevalue')
+          return result
+        }
+      },
+      template: `<div>{{ a }}</div>`
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('2')
+
+    vm.value = 2
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('3')
+    }).then(done)
+  })
 })

@@ -244,8 +244,10 @@ function createComputedGetter (key) {
   return function computedGetter () {
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
+      watcher.evaluate()
       watcher.depend()
-      return watcher.evaluate()
+
+      return watcher.value
     }
   }
 }
