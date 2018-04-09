@@ -495,7 +495,7 @@ describe('parser', () => {
   })
 
   it('attribute with v-bind', () => {
-    const ast = parse('<input type="text" name="field1" :value="msg">', baseOptions)
+    const ast = parse('<input type="text" name="field1" :value="msg" :empty-msg="">', baseOptions)
     expect(ast.attrsList[0].name).toBe('type')
     expect(ast.attrsList[0].value).toBe('text')
     expect(ast.attrsList[1].name).toBe('name')
@@ -508,6 +508,7 @@ describe('parser', () => {
     expect(ast.attrs[1].value).toBe('"field1"')
     expect(ast.props[0].name).toBe('value')
     expect(ast.props[0].value).toBe('msg')
+    expect('The v-bind expression should not be empty').toHaveBeenWarned()
   })
 
   // #6887
