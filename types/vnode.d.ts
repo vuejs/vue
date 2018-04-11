@@ -59,9 +59,9 @@ export interface VNodeData {
 
 export interface VNodeDirective {
   readonly name: string;
-  readonly value: any;
-  readonly oldValue: any;
-  readonly expression: any;
-  readonly arg: string;
-  readonly modifiers: { [key: string]: boolean };
+  readonly value?: any;
+  readonly oldValue?: any;
+  readonly expression?: any;
+  readonly arg?: string;
+  readonly modifiers?: { [key: string]: boolean };
 }

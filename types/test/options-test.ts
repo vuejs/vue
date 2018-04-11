@@ -142,6 +142,10 @@ Vue.component('component', {
       props: {
         myProp: "bar"
       },
+      directives: [{
+        name: 'a',
+        value: 'foo'
+      }],
       domProps: {
         innerHTML: "baz"
       },
