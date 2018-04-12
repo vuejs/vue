@@ -1,0 +1,10 @@
+{
+  "include": [
+    "src/platforms/weex/**"
+  ],
+  "reporter": [
+    "lcov",
+    "text-summary"
+  ],
+  "temp-directory": "./coverage/.nyc_output"
+}
