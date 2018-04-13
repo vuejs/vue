@@ -30,7 +30,7 @@
     "test:cover": "karma start test/unit/karma.cover.config.js",
     "test:e2e": "npm run build -- web-full-prod,web-server-basic-renderer && node test/e2e/runner.js",
     "test:weex": "npm run build:weex && jasmine JASMINE_CONFIG_PATH=test/weex/jasmine.json",
-    "test:weex:cover": "ISTANBUL=true npm run build:weex && nyc --nycrc-path .weex.nycrc jasmine JASMINE_CONFIG_PATH=test/weex/jasmine.json",
+    "test:weex:cover": "ISTANBUL=true npm run build:weex && nyc --nycrc-path test/weex/.nycrc jasmine JASMINE_CONFIG_PATH=test/weex/jasmine.json",
     "test:ssr": "npm run build:ssr && jasmine JASMINE_CONFIG_PATH=test/ssr/jasmine.json",
     "test:sauce": "npm run sauce -- 0 && npm run sauce -- 1 && npm run sauce -- 2",
     "test:types": "tsc -p ./types/test/tsconfig.json",
