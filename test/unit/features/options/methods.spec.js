@@ -48,4 +48,13 @@ describe('Options methods', () => {
     })
     expect(`Method "_update" conflicts with an existing Vue instance method`).toHaveBeenWarned()
   })
+
+  it('should warn if method is not a function', () => {
+    new Vue({
+      methods: {
+        notAFunction: {}
+      }
+    })
+    expect(`Method "notAFunction" should be a function`).toHaveBeenWarned()
+  })
 })
