@@ -886,4 +886,34 @@ describe('Component slot', () => {
       expect(vm.$el.textContent).toBe('foo')
     }).then(done)
   })
+
+  it('should preserve reactivity', (done) => {
+    const vm = new Vue({
+      template: `<foo ref="foo">{{ value }}</foo>`,
+      data: {
+        value: 1
+      },
+      components: {
+        foo: {
+          template: `<div>content moved</div>`
+        }
+      }
+    })
+
+    const portal = new Vue({
+      parent: vm,
+      render (h) {
+        return h('span', vm.$refs.foo.$slots.default)
+      }
+    })
+
+    vm.$mount()
+    portal.$mount()
+
+    expect(portal.$el.innerHTML).toBe('1')
+    vm.value = 2
+    waitForUpdate(() => {
+      expect(portal.$el.innerHTML).toBe('2')
+    }).then(done)
+  })
 })
