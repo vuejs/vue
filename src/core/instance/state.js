@@ -273,6 +273,11 @@ function initMethods (vm: Component, methods: Object) {
           `Avoid defining component methods that start with _ or $.`
         )
       }
+      if (typeof methods[key] !== 'function') {
+        warn(
+          `Method "${key}" should be a function.`
+        )
+      }
     }
     vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
   }
