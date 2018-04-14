@@ -260,6 +260,11 @@ function initMethods (vm: Component, methods: Object) {
           `Did you reference the function correctly?`,
           vm
         )
+      } else if (typeof methods[key] !== 'function') {
+        warn(
+          `Method "${key}" should be a function.`
+        )
+        methods[key] = null
       }
       if (props && hasOwn(props, key)) {
         warn(
@@ -272,12 +277,6 @@ function initMethods (vm: Component, methods: Object) {
           `Method "${key}" conflicts with an existing Vue instance method. ` +
           `Avoid defining component methods that start with _ or $.`
         )
-      }
-      if (methods[key] != null && typeof methods[key] !== 'function') {
-        warn(
-          `Method "${key}" should be a function.`
-        )
-        break
       }
     }
     vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
