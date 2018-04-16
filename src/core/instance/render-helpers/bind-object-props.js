@@ -1,6 +1,7 @@
 /* @flow */
 
 import config from 'core/config'
+import { hyphenate } from 'shared/util'
 
 import {
   warn,
@@ -48,9 +49,11 @@ export function bindObjectProps (
 
           if (isSync) {
             const on = data.on || (data.on = {})
-            on[`update:${key}`] = function ($event) {
+            const onUpdate = function ($event) {
               value[key] = $event
             }
+            on[`update:${key}`] = onUpdate
+            on[`update:${hyphenate(key)}`] = onUpdate
           }
         }
       }

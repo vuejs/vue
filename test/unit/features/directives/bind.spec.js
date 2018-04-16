@@ -143,7 +143,7 @@ describe('Directive v-bind', () => {
     expect(vm.$el.getAttribute('viewBox')).toBe('0 0 1 1')
   })
 
-  it('.sync modifier', done => {
+  it('.sync modifier: camelCase update event', done => {
     const vm = new Vue({
       template: `<test :foo-bar.sync="bar"/>`,
       data: {
@@ -153,6 +153,27 @@ describe('Directive v-bind', () => {
         test: {
           props: ['fooBar'],
           template: `<div @click="$emit('update:fooBar', 2)">{{ fooBar }}</div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('1')
+    triggerEvent(vm.$el, 'click')
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('2')
+    }).then(done)
+  })
+
+  it('.sync modifier: kebab-case update event', done => {
+    const vm = new Vue({
+      template: `<test :foo-bar.sync="bar"/>`,
+      data: {
+        bar: 1
+      },
+      components: {
+        test: {
+          props: ['fooBar'],
+          template: `<div @click="$emit('update:foo-bar', 2)">{{ fooBar }}</div>`
         }
       }
     }).$mount()
@@ -187,7 +208,7 @@ describe('Directive v-bind', () => {
     }).then(done)
   })
 
-  it('.sync modifier with bind object', done => {
+  it('.sync modifier with bind object: camelCase update event', done => {
     const vm = new Vue({
       template: `<test v-bind.sync="test"/>`,
       data: {
@@ -202,6 +223,36 @@ describe('Directive v-bind', () => {
           methods: {
             handleUpdate () {
               this.$emit('update:fooBar', 2)
+            }
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('1')
+    triggerEvent(vm.$el, 'click')
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('2')
+      vm.test.fooBar = 3
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('3')
+    }).then(done)
+  })
+
+  it('.sync modifier with bind object: kebab-case update event', done => {
+    const vm = new Vue({
+      template: `<test v-bind.sync="test"/>`,
+      data: {
+        test: {
+          fooBar: 1
+        }
+      },
+      components: {
+        test: {
+          props: ['fooBar'],
+          template: `<div @click="handleUpdate">{{ fooBar }}</div>`,
+          methods: {
+            handleUpdate () {
+              this.$emit('update:foo-bar', 2)
             }
           }
         }
