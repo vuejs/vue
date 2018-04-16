@@ -119,6 +119,7 @@ export interface VueConstructor<V extends Vue = Vue> {
   };
 
   config: VueConfiguration;
+  options: ComponentOptions<V>;
 }
 
 export const Vue: VueConstructor;
