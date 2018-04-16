@@ -166,6 +166,16 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsguru.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="http://aaha.co/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/aaha.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.valuecoders.com" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/valuecoders.png">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
