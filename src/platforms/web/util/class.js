@@ -37,7 +37,11 @@ export function renderClass (
   dynamicClass: any
 ): string {
   if (isDef(staticClass) || isDef(dynamicClass)) {
-    return concat(staticClass, stringifyClass(dynamicClass))
+    const concatenatedClassNames = concat(staticClass, stringifyClass(dynamicClass))
+    return concatenatedClassNames
+      .split(' ')
+      .filter((item, index, array) => index === array.indexOf(item))
+      .join(' ')
   }
   /* istanbul ignore next */
   return ''

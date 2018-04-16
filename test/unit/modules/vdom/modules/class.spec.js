@@ -51,6 +51,15 @@ describe('vdom class module', () => {
     expect(elm).toHaveClass('class2')
   })
 
+  it('should remove duplicate class names', () => {
+    const vnode = new VNode('p', {
+      staticClass: 'class1',
+      class: [{ class1: true, class2: true }, 'class1', ['class2', 'class3']]
+    })
+    const elm = patch(null, vnode)
+    expect(elm.className).toBe('class1 class2 class3')
+  })
+
   it('should handle transition class', () => {
     const vnode1 = new VNode('p', {
       class: { class1: true, class2: false, class3: true }
