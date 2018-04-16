@@ -1,6 +1,6 @@
 /* @flow */
 
-import { cached, extend, toObject } from 'shared/util'
+import { cached, extend, toObject, isString } from 'shared/util'
 
 export const parseStyleText = cached(function (cssText) {
   const res = {}
@@ -30,7 +30,7 @@ export function normalizeStyleBinding (bindingStyle: any): ?Object {
   if (Array.isArray(bindingStyle)) {
     return toObject(bindingStyle)
   }
-  if (typeof bindingStyle === 'string') {
+  if (isString(bindingStyle)) {
     return parseStyleText(bindingStyle)
   }
   return bindingStyle

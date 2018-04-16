@@ -2,7 +2,7 @@
 
 import { genHandlers } from './events'
 import baseDirectives from '../directives/index'
-import { camelize, no, extend } from 'shared/util'
+import { camelize, no, extend, isString } from 'shared/util'
 import { baseWarn, pluckModuleFunction } from '../helpers'
 
 type TransformFunction = (el: ASTElement, code: string) => string;
@@ -499,7 +499,7 @@ function genProps (props: Array<{ name: string, value: any }>): string {
 
 /* istanbul ignore next */
 function generateValue (value) {
-  if (typeof value === 'string') {
+  if (isString(value)) {
     return transformSpecialNewlines(value)
   }
   return JSON.stringify(value)

@@ -4,6 +4,7 @@ import config from '../config'
 import Watcher from '../observer/watcher'
 import { pushTarget, popTarget } from '../observer/dep'
 import { isUpdatingChildComponent } from './lifecycle'
+import { isString } from 'shared/util'
 
 import {
   set,
@@ -301,7 +302,7 @@ function createWatcher (
     options = handler
     handler = handler.handler
   }
-  if (typeof handler === 'string') {
+  if (isString(handler)) {
     handler = vm[handler]
   }
   return vm.$watch(expOrFn, handler, options)

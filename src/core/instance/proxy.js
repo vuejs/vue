@@ -2,6 +2,7 @@
 
 import config from 'core/config'
 import { warn, makeMap, isNative } from '../util/index'
+import { isString } from 'shared/util'
 
 let initProxy
 
@@ -45,7 +46,7 @@ if (process.env.NODE_ENV !== 'production') {
   const hasHandler = {
     has (target, key) {
       const has = key in target
-      const isAllowed = allowedGlobals(key) || (typeof key === 'string' && key.charAt(0) === '_')
+      const isAllowed = allowedGlobals(key) || (isString(key) && key.charAt(0) === '_')
       if (!has && !isAllowed) {
         warnNonPresent(target, key)
       }
@@ -55,7 +56,7 @@ if (process.env.NODE_ENV !== 'production') {
 
   const getHandler = {
     get (target, key) {
-      if (typeof key === 'string' && !(key in target)) {
+      if (isString(key) && !(key in target)) {
         warnNonPresent(target, key)
       }
       return target[key]

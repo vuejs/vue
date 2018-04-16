@@ -4,6 +4,7 @@ import { createPromiseCallback } from '../util'
 import { createBundleRunner } from './create-bundle-runner'
 import type { Renderer, RenderOptions } from '../create-renderer'
 import { createSourceMapConsumers, rewriteErrorTrace } from './source-map-support'
+import { isString } from 'shared/util'
 
 const fs = require('fs')
 const path = require('path')
@@ -40,7 +41,7 @@ export function createBundleRendererCreator (
 
     // load bundle if given filepath
     if (
-      typeof bundle === 'string' &&
+      isString(bundle) &&
       /\.js(on)?$/.test(bundle) &&
       path.isAbsolute(bundle)
     ) {
@@ -68,7 +69,7 @@ export function createBundleRendererCreator (
       if (typeof entry !== 'string' || typeof files !== 'object') {
         throw new Error(INVALID_MSG)
       }
-    } else if (typeof bundle === 'string') {
+    } else if (isString(bundle)) {
       entry = '__vue_ssr_bundle__'
       files = { '__vue_ssr_bundle__': bundle }
       maps = {}

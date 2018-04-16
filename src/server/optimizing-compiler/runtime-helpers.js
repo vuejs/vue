@@ -1,7 +1,7 @@
 /* @flow */
 
 import { escape } from 'web/server/util'
-import { isObject, extend } from 'shared/util'
+import { isObject, extend, isString } from 'shared/util'
 import { renderAttr } from 'web/server/modules/attrs'
 import { renderClass } from 'web/util/class'
 import { genStyle } from 'web/server/modules/style'
@@ -88,7 +88,7 @@ function renderStringList (
 ): string {
   let ret = ''
   let i, l, keys, key
-  if (Array.isArray(val) || typeof val === 'string') {
+  if (Array.isArray(val) || isString(val)) {
     for (i = 0, l = val.length; i < l; i++) {
       ret += render(val[i], i)
     }

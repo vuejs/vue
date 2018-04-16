@@ -3,6 +3,7 @@
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { mark, measure } from 'core/util/perf'
+import { isString } from 'shared/util'
 
 import Vue from './runtime/index'
 import { query } from './util/index'
@@ -34,7 +35,7 @@ Vue.prototype.$mount = function (
   if (!options.render) {
     let template = options.template
     if (template) {
-      if (typeof template === 'string') {
+      if (isString(template)) {
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
           /* istanbul ignore if */

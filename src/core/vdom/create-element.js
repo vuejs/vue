@@ -4,6 +4,7 @@ import config from '../config'
 import VNode, { createEmptyVNode } from './vnode'
 import { createComponent } from './create-component'
 import { traverse } from '../observer/traverse'
+import { isString } from 'shared/util'
 
 import {
   warn,
@@ -93,7 +94,7 @@ export function _createElement (
     children = simpleNormalizeChildren(children)
   }
   let vnode, ns
-  if (typeof tag === 'string') {
+  if (isString(tag)) {
     let Ctor
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
     if (config.isReservedTag(tag)) {
