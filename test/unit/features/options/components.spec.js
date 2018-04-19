@@ -69,6 +69,15 @@ describe('Options components', () => {
     expect('Do not use built-in or reserved HTML elements as component').toHaveBeenWarned()
   })
 
+  it('should warn component names translated into native HTML elements', () => {
+    new Vue({
+      components: {
+        Div: { template: '<div></div>' }
+      }
+    })
+    expect('Do not use built-in or reserved HTML elements as component').toHaveBeenWarned()
+  })
+
   it('should warn built-in elements', () => {
     new Vue({
       components: {

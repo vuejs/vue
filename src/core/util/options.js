@@ -4,6 +4,7 @@ import config from '../config'
 import { warn } from './debug'
 import { nativeWatch } from './env'
 import { set } from '../observer/index'
+import { hyphenate } from '../../shared/util'
 
 import {
   ASSET_TYPES,
@@ -260,7 +261,8 @@ export function validateComponentName (name: string) {
       'and must start with a letter.'
     )
   }
-  if (isBuiltInTag(name) || config.isReservedTag(name)) {
+  const hyphenatedName = hyphenate(name)
+  if (isBuiltInTag(hyphenatedName) || config.isReservedTag(hyphenatedName)) {
     warn(
       'Do not use built-in or reserved HTML elements as component ' +
       'id: ' + name
