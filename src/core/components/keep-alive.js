@@ -5,10 +5,13 @@ import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
 type VNodeCache = { [key: string]: ?VNode };
 
+//根据虚拟dom配置取出控件名称
 function getComponentName (opts: ?VNodeComponentOptions): ?string {
+  //如果是控件，取出控件名。如果是普通标签，取出标签名
   return opts && (opts.Ctor.options.name || opts.tag)
 }
 
+//判断名字是否符合表达式要求
 function matches (pattern: string | RegExp | Array<string>, name: string): boolean {
   if (Array.isArray(pattern)) {
     return pattern.indexOf(name) > -1
@@ -21,6 +24,7 @@ function matches (pattern: string | RegExp | Array<string>, name: string): boole
   return false
 }
 
+//删除不匹配缓存
 function pruneCache (keepAliveInstance: any, filter: Function) {
   const { cache, keys, _vnode } = keepAliveInstance
   for (const key in cache) {
@@ -34,6 +38,7 @@ function pruneCache (keepAliveInstance: any, filter: Function) {
   }
 }
 
+//如果已经缓存的不是当前控件，销毁
 function pruneCacheEntry (
   cache: VNodeCache,
   key: string,
@@ -67,6 +72,7 @@ export default {
 
   destroyed () {
     for (const key in this.cache) {
+      //消耗缓存的所有控件
       pruneCacheEntry(this.cache, key, this.keys)
     }
   },
@@ -81,6 +87,7 @@ export default {
   },
 
   render () {
+    //如果有多个子元素，要求只有一个被渲染
     const vnode: VNode = getFirstComponentChild(this.$slots.default)
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
@@ -105,6 +112,7 @@ export default {
         remove(keys, key)
         keys.push(key)
       } else {
+        //缓存的是虚拟dom
         cache[key] = vnode
         keys.push(key)
         // prune oldest entry

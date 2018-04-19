@@ -356,6 +356,7 @@ export function mergeOptions (
   child: Object,
   vm?: Component
 ): Object {
+  //在非发布模式下，不能新建HTML或者vue的内置标签的
   if (process.env.NODE_ENV !== 'production') {
     checkComponents(child)
   }
