@@ -2,7 +2,6 @@
 
 import {
   tip,
-  toArray,
   hyphenate,
   handleError,
   formatComponentName
@@ -111,7 +110,7 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
-  Vue.prototype.$emit = function (event: string): Component {
+  Vue.prototype.$emit = function (event: string, ...args): Component {
     const vm: Component = this
     if (process.env.NODE_ENV !== 'production') {
       const lowerCaseEvent = event.toLowerCase()
@@ -125,10 +124,8 @@ export function eventsMixin (Vue: Class<Component>) {
         )
       }
     }
-    let cbs = vm._events[event]
+    const cbs = vm._events[event]
     if (cbs) {
-      cbs = cbs.length > 1 ? toArray(cbs) : cbs
-      const args = toArray(arguments, 1)
       for (let i = 0, l = cbs.length; i < l; i++) {
         try {
           cbs[i].apply(vm, args)
