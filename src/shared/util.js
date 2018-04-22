@@ -98,15 +98,11 @@ export function toNumber (val: string): number | string {
 export function makeMap (
   str: string,
   expectsLowerCase?: boolean
-): (key: string) => true | void {
-  const map = Object.create(null)
+): (key: string) => boolean {
   const list: Array<string> = str.split(',')
-  for (let i = 0; i < list.length; i++) {
-    map[list[i]] = true
-  }
   return expectsLowerCase
-    ? val => map[val.toLowerCase()]
-    : val => map[val]
+    ? val => list.includes(val.toLowerCase())
+    : val => list.includes(val)
 }
 
 /**
