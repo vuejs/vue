@@ -23,7 +23,7 @@ export default function renderAttrs (node: VNodeWithData): string {
     let parent = node.parent
     while (isDef(parent)) {
       if (isDef(parent.data) && isDef(parent.data.attrs)) {
-        attrs = extend(extend({}, attrs), parent.data.attrs)
+        attrs = extend({}, attrs, parent.data.attrs)
       }
       parent = parent.parent
     }

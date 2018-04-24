@@ -220,24 +220,20 @@ export function toArray (list: any, start?: number): Array<any> {
 /**
  * Mix properties into target object.
  */
-export function extend (to: Object, _from: ?Object): Object {
-  for (const key in _from) {
-    to[key] = _from[key]
-  }
-  return to
+export function extend (target: Object, ...sources: Array<?Object>): Object {
+  sources.forEach(source => {
+    for (const key in source) {
+      target[key] = source[key]
+    }
+  })
+  return target
 }
 
 /**
  * Merge an Array of Objects into a single Object.
  */
 export function toObject (arr: Array<any>): Object {
-  const res = {}
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i]) {
-      extend(res, arr[i])
-    }
-  }
-  return res
+  return arr.reduce((res, item) => extend(res, item), {})
 }
 
 /**

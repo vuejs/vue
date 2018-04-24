@@ -12,7 +12,7 @@ export default function renderDOMProps (node: VNodeWithData): string {
   let parent = node.parent
   while (isDef(parent)) {
     if (parent.data && parent.data.domProps) {
-      props = extend(extend({}, props), parent.data.domProps)
+      props = extend({}, props, parent.data.domProps)
     }
     parent = parent.parent
   }

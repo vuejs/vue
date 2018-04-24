@@ -22,7 +22,7 @@ export function renderSlot (
           this
         )
       }
-      props = extend(extend({}, bindObject), props)
+      props = extend({}, bindObject, props)
     }
     nodes = scopedSlotFn(props) || fallback
   } else {

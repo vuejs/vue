@@ -25,10 +25,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
         }
         // merge custom directives
         if (options.directives) {
-          finalOptions.directives = extend(
-            Object.create(baseOptions.directives || null),
-            options.directives
-          )
+          finalOptions.directives = extend({}, finalOptions.directives, options.directives)
         }
         // copy other options
         for (const key in options) {

@@ -14,7 +14,7 @@ export function createRenderer (options?: Object = {}): {
   renderToString: Function,
   renderToStream: Function
 } {
-  return _createRenderer(extend(extend({}, options), {
+  return _createRenderer(extend({}, options, {
     isUnaryTag,
     canBeLeftOpenTag,
     modules,
