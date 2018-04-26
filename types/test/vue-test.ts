@@ -171,6 +171,9 @@ Vue.extend({
   methods: {
     foo() {}
   },
+  beforeCreate() {
+    this.foo()
+  },
   mounted () {
     this.foo()
   },
