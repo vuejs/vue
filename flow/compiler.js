@@ -173,7 +173,7 @@ declare type ASTText = {
 
 // SFC-parser related declarations
 
-// an object format describing a single-file component.
+// an object format describing a single-file component
 declare type SFCDescriptor = {
   template: ?SFCBlock;
   script: ?SFCBlock;
