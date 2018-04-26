@@ -74,15 +74,15 @@ export interface ComponentOptions<
   staticRenderFns?: ((createElement: CreateElement) => VNode)[];
 
   beforeCreate?(this: V): void;
-  created?(): void;
-  beforeDestroy?(): void;
-  destroyed?(): void;
-  beforeMount?(): void;
-  mounted?(): void;
-  beforeUpdate?(): void;
-  updated?(): void;
-  activated?(): void;
-  deactivated?(): void;
+  created?(this: V): void;
+  beforeDestroy?(this: V): void;
+  destroyed?(this: V): void;
+  beforeMount?(this: V): void;
+  mounted?(this: V): void;
+  beforeUpdate?(this: V): void;
+  updated?(this: V): void;
+  activated?(this: V): void;
+  deactivated?(this: V): void;
   errorCaptured?(err: Error, vm: Vue, info: string): boolean | void;
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
