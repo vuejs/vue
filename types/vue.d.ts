@@ -86,7 +86,7 @@ export interface VueConstructor<V extends Vue = Vue> {
   extend<Data, Methods, Computed, Props>(options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props>;
   extend<PropNames extends string = never>(definition: FunctionalComponentOptions<Record<PropNames, any>, PropNames[]>): ExtendedVue<V, {}, {}, {}, Record<PropNames, any>>;
   extend<Props>(definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>>): ExtendedVue<V, {}, {}, {}, Props>;
-  extend(options?: ComponentOptions<V>): ExtendedVue<V, {}, {}, {}, {}>;
+  extend(options?: ComponentOptions<V>): ExtendedVue<V, {}, { [key: string]: (this: V, ...args: any[]) => any }, {}, {}>;
 
   nextTick(callback: () => void, context?: any[]): void;
   nextTick(): Promise<void>
