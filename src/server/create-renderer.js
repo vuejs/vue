@@ -1,14 +1,15 @@
 /* @flow */
 
-const HTMLStream = require('vue-ssr-html-stream')
-
 import RenderStream from './render-stream'
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
+import { createPromiseCallback } from './util'
+import TemplateRenderer from './template-renderer/index'
+import type { ClientManifest } from './template-renderer/index'
 
 export type Renderer = {
-  renderToString: (component: Component, cb: (err: ?Error, res: ?string) => void) => void;
-  renderToStream: (component: Component) => stream$Readable;
+  renderToString: (component: Component, context: any, cb: any) => ?Promise<string>;
+  renderToStream: (component: Component, context?: Object) => stream$Readable;
 };
 
 type RenderCache = {
@@ -18,12 +19,17 @@ type RenderCache = {
 };
 
 export type RenderOptions = {
-  modules?: Array<(vnode: VNode) => string>;
+  modules?: Array<(vnode: VNode) => ?string>;
   directives?: Object;
   isUnaryTag?: Function;
   cache?: RenderCache;
   template?: string;
+  inject?: boolean;
   basedir?: string;
+  shouldPreload?: Function;
+  shouldPrefetch?: Function;
+  clientManifest?: ClientManifest;
+  runInNewContext?: boolean | 'once';
 };
 
 export function createRenderer ({
@@ -31,52 +37,83 @@ export function createRenderer ({
   directives = {},
   isUnaryTag = (() => false),
   template,
-  cache
+  inject,
+  cache,
+  shouldPreload,
+  shouldPrefetch,
+  clientManifest
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
-  const parsedTemplate = template && HTMLStream.parseTemplate(template)
+  const templateRenderer = new TemplateRenderer({
+    template,
+    inject,
+    shouldPreload,
+    shouldPrefetch,
+    clientManifest
+  })
 
   return {
     renderToString (
       component: Component,
-      done: (err: ?Error, res: ?string) => any,
-      context?: ?Object
-    ): void {
+      context: any,
+      cb: any
+    ): ?Promise<string> {
+      if (typeof context === 'function') {
+        cb = context
+        context = {}
+      }
+      if (context) {
+        templateRenderer.bindRenderFns(context)
+      }
+
+      // no callback, return Promise
+      let promise
+      if (!cb) {
+        ({ promise, cb } = createPromiseCallback())
+      }
+
       let result = ''
       const write = createWriteFunction(text => {
         result += text
-      }, done)
+        return false
+      }, cb)
       try {
-        render(component, write, () => {
-          if (parsedTemplate) {
-            result = HTMLStream.renderTemplate(parsedTemplate, result, context)
+        render(component, write, context, err => {
+          if (template) {
+            result = templateRenderer.renderSync(result, context)
           }
-          done(null, result)
+          if (err) {
+            cb(err)
+          } else {
+            cb(null, result)
+          }
         })
       } catch (e) {
-        done(e)
+        cb(e)
       }
+
+      return promise
     },
 
     renderToStream (
       component: Component,
-      context?: ?Object
+      context?: Object
     ): stream$Readable {
+      if (context) {
+        templateRenderer.bindRenderFns(context)
+      }
       const renderStream = new RenderStream((write, done) => {
-        render(component, write, done)
+        render(component, write, context, done)
       })
-      if (!parsedTemplate) {
+      if (!template) {
         return renderStream
       } else {
-        const htmlStream = new HTMLStream({
-          template: parsedTemplate,
-          context
-        })
+        const templateStream = templateRenderer.createStream(context)
         renderStream.on('error', err => {
-          htmlStream.emit('error', err)
+          templateStream.emit('error', err)
         })
-        renderStream.pipe(htmlStream)
-        return htmlStream
+        renderStream.pipe(templateStream)
+        return templateStream
       }
     }
   }

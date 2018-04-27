@@ -24,14 +24,11 @@ export function resolveTransition (def?: string | Object): ?Object {
 const autoCssTransition: (name: string) => Object = cached(name => {
   return {
     enterClass: `${name}-enter`,
-    leaveClass: `${name}-leave`,
-    appearClass: `${name}-enter`,
     enterToClass: `${name}-enter-to`,
-    leaveToClass: `${name}-leave-to`,
-    appearToClass: `${name}-enter-to`,
     enterActiveClass: `${name}-enter-active`,
-    leaveActiveClass: `${name}-leave-active`,
-    appearActiveClass: `${name}-enter-active`
+    leaveClass: `${name}-leave`,
+    leaveToClass: `${name}-leave-to`,
+    leaveActiveClass: `${name}-leave-active`
   }
 })
 
@@ -47,21 +44,25 @@ export let animationEndEvent = 'animationend'
 if (hasTransition) {
   /* istanbul ignore if */
   if (window.ontransitionend === undefined &&
-    window.onwebkittransitionend !== undefined) {
+    window.onwebkittransitionend !== undefined
+  ) {
     transitionProp = 'WebkitTransition'
     transitionEndEvent = 'webkitTransitionEnd'
   }
   if (window.onanimationend === undefined &&
-    window.onwebkitanimationend !== undefined) {
+    window.onwebkitanimationend !== undefined
+  ) {
     animationProp = 'WebkitAnimation'
     animationEndEvent = 'webkitAnimationEnd'
   }
 }
 
 // binding to window is necessary to make hot reload work in IE in strict mode
-const raf = inBrowser && window.requestAnimationFrame
-  ? window.requestAnimationFrame.bind(window)
-  : setTimeout
+const raf = inBrowser
+  ? window.requestAnimationFrame
+    ? window.requestAnimationFrame.bind(window)
+    : setTimeout
+  : /* istanbul ignore next */ fn => fn()
 
 export function nextFrame (fn: Function) {
   raf(() => {
@@ -70,8 +71,11 @@ export function nextFrame (fn: Function) {
 }
 
 export function addTransitionClass (el: any, cls: string) {
-  (el._transitionClasses || (el._transitionClasses = [])).push(cls)
-  addClass(el, cls)
+  const transitionClasses = el._transitionClasses || (el._transitionClasses = [])
+  if (transitionClasses.indexOf(cls) < 0) {
+    transitionClasses.push(cls)
+    addClass(el, cls)
+  }
 }
 
 export function removeTransitionClass (el: any, cls: string) {
@@ -118,9 +122,9 @@ export function getTransitionInfo (el: Element, expectedType?: ?string): {
   hasTransform: boolean;
 } {
   const styles: any = window.getComputedStyle(el)
-  const transitioneDelays: Array<string> = styles[transitionProp + 'Delay'].split(', ')
+  const transitionDelays: Array<string> = styles[transitionProp + 'Delay'].split(', ')
   const transitionDurations: Array<string> = styles[transitionProp + 'Duration'].split(', ')
-  const transitionTimeout: number = getTimeout(transitioneDelays, transitionDurations)
+  const transitionTimeout: number = getTimeout(transitionDelays, transitionDurations)
   const animationDelays: Array<string> = styles[animationProp + 'Delay'].split(', ')
   const animationDurations: Array<string> = styles[animationProp + 'Duration'].split(', ')
   const animationTimeout: number = getTimeout(animationDelays, animationDurations)

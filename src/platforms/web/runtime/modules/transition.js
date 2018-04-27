@@ -1,9 +1,17 @@
 /* @flow */
 
-import { once, isObject } from 'shared/util'
 import { inBrowser, isIE9, warn } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
+
+import {
+  once,
+  isDef,
+  isUndef,
+  isObject,
+  toNumber
+} from 'shared/util'
+
 import {
   nextFrame,
   resolveTransition,
@@ -16,18 +24,18 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const el: any = vnode.elm
 
   // call leave callback now
-  if (el._leaveCb) {
+  if (isDef(el._leaveCb)) {
     el._leaveCb.cancelled = true
     el._leaveCb()
   }
 
   const data = resolveTransition(vnode.data.transition)
-  if (!data) {
+  if (isUndef(data)) {
     return
   }
 
   /* istanbul ignore if */
-  if (el._enterCb || el.nodeType !== 1) {
+  if (isDef(el._enterCb) || el.nodeType !== 1) {
     return
   }
 
@@ -68,22 +76,41 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     return
   }
 
-  const startClass = isAppear ? appearClass : enterClass
-  const activeClass = isAppear ? appearActiveClass : enterActiveClass
-  const toClass = isAppear ? appearToClass : enterToClass
+  const startClass = isAppear && appearClass
+    ? appearClass
+    : enterClass
+  const activeClass = isAppear && appearActiveClass
+    ? appearActiveClass
+    : enterActiveClass
+  const toClass = isAppear && appearToClass
+    ? appearToClass
+    : enterToClass
 
-  const beforeEnterHook = isAppear ? (beforeAppear || beforeEnter) : beforeEnter
-  const enterHook = isAppear ? (typeof appear === 'function' ? appear : enter) : enter
-  const afterEnterHook = isAppear ? (afterAppear || afterEnter) : afterEnter
-  const enterCancelledHook = isAppear ? (appearCancelled || enterCancelled) : enterCancelled
+  const beforeEnterHook = isAppear
+    ? (beforeAppear || beforeEnter)
+    : beforeEnter
+  const enterHook = isAppear
+    ? (typeof appear === 'function' ? appear : enter)
+    : enter
+  const afterEnterHook = isAppear
+    ? (afterAppear || afterEnter)
+    : afterEnter
+  const enterCancelledHook = isAppear
+    ? (appearCancelled || enterCancelled)
+    : enterCancelled
 
-  const explicitEnterDuration = isObject(duration) ? duration.enter : duration
+  const explicitEnterDuration: any = toNumber(
+    isObject(duration)
+      ? duration.enter
+      : duration
+  )
+
   if (process.env.NODE_ENV !== 'production' && explicitEnterDuration != null) {
     checkDuration(explicitEnterDuration, 'enter', vnode)
   }
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl = getHookAgumentsLength(enterHook)
+  const userWantsControl = getHookArgumentsLength(enterHook)
 
   const cb = el._enterCb = once(() => {
     if (expectsCSS) {
@@ -103,12 +130,13 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
 
   if (!vnode.data.show) {
     // remove pending leave element on enter by injecting an insert hook
-    mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', () => {
+    mergeVNodeHook(vnode, 'insert', () => {
       const parent = el.parentNode
       const pendingNode = parent && parent._pending && parent._pending[vnode.key]
       if (pendingNode &&
-          pendingNode.tag === vnode.tag &&
-          pendingNode.elm._leaveCb) {
+        pendingNode.tag === vnode.tag &&
+        pendingNode.elm._leaveCb
+      ) {
         pendingNode.elm._leaveCb()
       }
       enterHook && enterHook(el, cb)
@@ -121,13 +149,15 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     addTransitionClass(el, startClass)
     addTransitionClass(el, activeClass)
     nextFrame(() => {
-      addTransitionClass(el, toClass)
       removeTransitionClass(el, startClass)
-      if (!cb.cancelled && !userWantsControl) {
-        if (isValidDuration(explicitEnterDuration)) {
-          setTimeout(cb, explicitEnterDuration)
-        } else {
-          whenTransitionEnds(el, type, cb)
+      if (!cb.cancelled) {
+        addTransitionClass(el, toClass)
+        if (!userWantsControl) {
+          if (isValidDuration(explicitEnterDuration)) {
+            setTimeout(cb, explicitEnterDuration)
+          } else {
+            whenTransitionEnds(el, type, cb)
+          }
         }
       }
     })
@@ -147,18 +177,18 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   const el: any = vnode.elm
 
   // call enter callback now
-  if (el._enterCb) {
+  if (isDef(el._enterCb)) {
     el._enterCb.cancelled = true
     el._enterCb()
   }
 
   const data = resolveTransition(vnode.data.transition)
-  if (!data) {
+  if (isUndef(data) || el.nodeType !== 1) {
     return rm()
   }
 
   /* istanbul ignore if */
-  if (el._leaveCb || el.nodeType !== 1) {
+  if (isDef(el._leaveCb)) {
     return
   }
 
@@ -177,10 +207,15 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   } = data
 
   const expectsCSS = css !== false && !isIE9
-  const userWantsControl = getHookAgumentsLength(leave)
+  const userWantsControl = getHookArgumentsLength(leave)
 
-  const explicitLeaveDuration = isObject(duration) ? duration.leave : duration
-  if (process.env.NODE_ENV !== 'production' && explicitLeaveDuration != null) {
+  const explicitLeaveDuration: any = toNumber(
+    isObject(duration)
+      ? duration.leave
+      : duration
+  )
+
+  if (process.env.NODE_ENV !== 'production' && isDef(explicitLeaveDuration)) {
     checkDuration(explicitLeaveDuration, 'leave', vnode)
   }
 
@@ -217,20 +252,22 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     }
     // record leaving element
     if (!vnode.data.show) {
-      (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode
+      (el.parentNode._pending || (el.parentNode._pending = {}))[(vnode.key: any)] = vnode
     }
     beforeLeave && beforeLeave(el)
     if (expectsCSS) {
       addTransitionClass(el, leaveClass)
       addTransitionClass(el, leaveActiveClass)
       nextFrame(() => {
-        addTransitionClass(el, leaveToClass)
         removeTransitionClass(el, leaveClass)
-        if (!cb.cancelled && !userWantsControl) {
-          if (isValidDuration(explicitLeaveDuration)) {
-            setTimeout(cb, explicitLeaveDuration)
-          } else {
-            whenTransitionEnds(el, type, cb)
+        if (!cb.cancelled) {
+          addTransitionClass(el, leaveToClass)
+          if (!userWantsControl) {
+            if (isValidDuration(explicitLeaveDuration)) {
+              setTimeout(cb, explicitLeaveDuration)
+            } else {
+              whenTransitionEnds(el, type, cb)
+            }
           }
         }
       })
@@ -269,12 +306,14 @@ function isValidDuration (val) {
  * - a wrapped component method (check ._length)
  * - a plain function (.length)
  */
-function getHookAgumentsLength (fn: Function): boolean {
-  if (!fn) return false
+function getHookArgumentsLength (fn: Function): boolean {
+  if (isUndef(fn)) {
+    return false
+  }
   const invokerFns = fn.fns
-  if (invokerFns) {
+  if (isDef(invokerFns)) {
     // invoker
-    return getHookAgumentsLength(
+    return getHookArgumentsLength(
       Array.isArray(invokerFns)
         ? invokerFns[0]
         : invokerFns
@@ -285,7 +324,7 @@ function getHookAgumentsLength (fn: Function): boolean {
 }
 
 function _enter (_: any, vnode: VNodeWithData) {
-  if (!vnode.data.show) {
+  if (vnode.data.show !== true) {
     enter(vnode)
   }
 }
@@ -295,7 +334,7 @@ export default inBrowser ? {
   activate: _enter,
   remove (vnode: VNode, rm: Function) {
     /* istanbul ignore else */
-    if (!vnode.data.show) {
+    if (vnode.data.show !== true) {
       leave(vnode, rm)
     } else {
       rm()

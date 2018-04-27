@@ -1,26 +1,15 @@
 import {
   compileAndStringify,
-  prepareRuntime,
-  resetRuntime,
   createInstance,
+  getRoot,
   syncPromise,
   checkRefresh
 } from '../helpers/index'
 
 describe('node in render function', () => {
-  let runtime
-
-  beforeAll(() => {
-    runtime = prepareRuntime()
-  })
-
-  afterAll(() => {
-    resetRuntime()
-    runtime = null
-  })
-
   it('should be generated', () => {
-    const instance = createInstance(runtime, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         render: function (createElement) {
           return createElement('div', {}, [
@@ -30,7 +19,7 @@ describe('node in render function', () => {
         el: "body"
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
         { type: 'text', attr: { value: 'Hello' }}
@@ -39,7 +28,8 @@ describe('node in render function', () => {
   })
 
   it('should be generated with all types of text', () => {
-    const instance = createInstance(runtime, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         render: function (createElement) {
           return createElement('div', {}, [
@@ -51,7 +41,7 @@ describe('node in render function', () => {
         el: "body"
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
         { type: 'text', attr: { value: 'Hello' }},
@@ -66,7 +56,8 @@ describe('node in render function', () => {
   })
 
   it('should be generated with module diff', (done) => {
-    const instance = createInstance(runtime, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         data: {
           counter: 0
@@ -112,7 +103,7 @@ describe('node in render function', () => {
         el: "body"
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
         { type: 'text', attr: { value: 'Hello' }}
@@ -157,7 +148,8 @@ describe('node in render function', () => {
   })
 
   it('should be generated with sub components', () => {
-    const instance = createInstance(runtime, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         render: function (createElement) {
           return createElement('div', {}, [
@@ -178,7 +170,7 @@ describe('node in render function', () => {
         el: "body"
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
         { type: 'text', attr: { value: 'Hello' }},
@@ -193,7 +185,8 @@ describe('node in render function', () => {
         <text v-for="item in list" v-if="item.x">{{item.v}}</text>
       </div>
     `)
-    const instance = createInstance(runtime, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         data: {
           list: [
@@ -228,7 +221,7 @@ describe('node in render function', () => {
         el: "body"
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
         { type: 'text', attr: { value: 'Hello' }},
@@ -282,7 +275,8 @@ describe('node in render function', () => {
   })
 
   it('should be generated with node structure diff', (done) => {
-    const instance = createInstance(runtime, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         data: {
           counter: 0
@@ -334,7 +328,7 @@ describe('node in render function', () => {
         el: "body"
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
         { type: 'text', attr: { value: 'Hello' }}
@@ -401,7 +395,8 @@ describe('node in render function', () => {
   })
 
   it('should be generated with component diff', (done) => {
-    const instance = createInstance(runtime, `
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
       new Vue({
         data: {
           counter: 0
@@ -462,7 +457,7 @@ describe('node in render function', () => {
         el: "body"
       })
     `)
-    expect(instance.getRealRoot()).toEqual({
+    expect(getRoot(instance)).toEqual({
       type: 'div',
       children: [
         { type: 'text', attr: { value: '111-2' }}

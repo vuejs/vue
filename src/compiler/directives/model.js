@@ -10,17 +10,23 @@ export function genComponentModel (
 ): ?boolean {
   const { number, trim } = modifiers || {}
 
-  let valueExpression = 'value'
+  const baseValueExpression = '$$v'
+  let valueExpression = baseValueExpression
   if (trim) {
-    valueExpression = `(typeof value === 'string' ? value.trim() : value)`
+    valueExpression =
+      `(typeof ${baseValueExpression} === 'string'` +
+      `? ${baseValueExpression}.trim()` +
+      `: ${baseValueExpression})`
   }
   if (number) {
     valueExpression = `_n(${valueExpression})`
   }
+  const assignment = genAssignmentCode(value, valueExpression)
 
   el.model = {
     value: `(${value})`,
-    callback: `function (value) {${genAssignmentCode(value, valueExpression)}}`
+    expression: `"${value}"`,
+    callback: `function (${baseValueExpression}) {${assignment}}`
   }
 }
 
@@ -31,44 +37,59 @@ export function genAssignmentCode (
   value: string,
   assignment: string
 ): string {
-  const modelRs = parseModel(value)
-  if (modelRs.idx === null) {
+  const res = parseModel(value)
+  if (res.key === null) {
     return `${value}=${assignment}`
   } else {
-    return `var $$exp = ${modelRs.exp}, $$idx = ${modelRs.idx};` +
-      `if (!Array.isArray($$exp)){` +
-        `${value}=${assignment}}` +
-      `else{$$exp.splice($$idx, 1, ${assignment})}`
+    return `$set(${res.exp}, ${res.key}, ${assignment})`
   }
 }
 
 /**
- * parse directive model to do the array update transform. a[idx] = val => $$a.splice($$idx, 1, val)
+ * Parse a v-model expression into a base path and a final key segment.
+ * Handles both dot-path and possible square brackets.
  *
- * for loop possible cases:
+ * Possible cases:
  *
  * - test
- * - test[idx]
- * - test[test1[idx]]
- * - test["a"][idx]
- * - xxx.test[a[a].test1[idx]]
- * - test.xxx.a["asa"][test1[idx]]
+ * - test[key]
+ * - test[test1[key]]
+ * - test["a"][key]
+ * - xxx.test[a[a].test1[key]]
+ * - test.xxx.a["asa"][test1[key]]
  *
  */
 
 let len, str, chr, index, expressionPos, expressionEndPos
 
-export function parseModel (val: string): Object {
-  str = val
-  len = str.length
-  index = expressionPos = expressionEndPos = 0
+type ModelParseResult = {
+  exp: string,
+  key: string | null
+}
+
+export function parseModel (val: string): ModelParseResult {
+  // Fix https://github.com/vuejs/vue/pull/7730
+  // allow v-model="obj.val " (trailing whitespace)
+  val = val.trim()
+  len = val.length
 
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
-    return {
-      exp: val,
-      idx: null
+    index = val.lastIndexOf('.')
+    if (index > -1) {
+      return {
+        exp: val.slice(0, index),
+        key: '"' + val.slice(index + 1) + '"'
+      }
+    } else {
+      return {
+        exp: val,
+        key: null
+      }
     }
   }
+
+  str = val
+  index = expressionPos = expressionEndPos = 0
 
   while (!eof()) {
     chr = next()
@@ -81,8 +102,8 @@ export function parseModel (val: string): Object {
   }
 
   return {
-    exp: val.substring(0, expressionPos),
-    idx: val.substring(expressionPos + 1, expressionEndPos)
+    exp: val.slice(0, expressionPos),
+    key: val.slice(expressionPos + 1, expressionEndPos)
   }
 }
 

@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { nativeWatch } from 'core/util/env'
 
 describe('Options extends', () => {
   it('should work on objects', () => {
@@ -46,4 +47,29 @@ describe('Options extends', () => {
     expect(vm.b).toBe(2)
     expect(vm.c).toBe(3)
   })
+
+  if (nativeWatch) {
+    it('should work with global mixins + Object.prototype.watch', done => {
+      Vue.mixin({})
+
+      const spy = jasmine.createSpy('watch')
+      const A = Vue.extend({
+        data: function () {
+          return { a: 1 }
+        },
+        watch: {
+          a: spy
+        },
+        created: function () {
+          this.a = 2
+        }
+      })
+      new Vue({
+        extends: A
+      })
+      waitForUpdate(() => {
+        expect(spy).toHaveBeenCalledWith(2, 1)
+      }).then(done)
+    })
+  }
 })

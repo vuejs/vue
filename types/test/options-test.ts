@@ -1,14 +1,88 @@
-import Vue = require("../index");
-import { ComponentOptions, FunctionalComponentOptions } from "../index";
+import Vue, { VNode } from "../index";
+import { AsyncComponent, ComponentOptions, FunctionalComponentOptions, Component } from "../index";
+import { CreateElement } from "../vue";
 
-interface Component extends Vue {
+interface MyComponent extends Vue {
   a: number;
 }
+
+const option: ComponentOptions<MyComponent> = {
+  data() {
+    return {
+      a: 123
+    }
+  }
+}
+
+// contravariant generic should use never
+const anotherOption: ComponentOptions<never> = option
+const componentType: Component = option
+
+Vue.component('sub-component', {
+  components: {
+    a: Vue.component(""),
+    b: {}
+  }
+});
+
+Vue.component('prop-component', {
+  props: {
+    size: Number,
+    name: {
+      type: String,
+      default: '0',
+      required: true,
+    }
+  },
+  data() {
+    return {
+      fixedSize: this.size.toFixed(),
+      capName: this.name.toUpperCase()
+    }
+  }
+});
+
+Vue.component('string-prop', {
+  props: ['size', 'name'],
+  data() {
+    return {
+      fixedSize: this.size.whatever,
+      capName: this.name.isany
+    }
+  }
+});
+
+class User {
+  private u = 1
+}
+class Cat {
+  private u = 1
+}
+
+Vue.component('union-prop', {
+  props: {
+    primitive: [String, Number],
+    object: [Cat, User],
+    regex: RegExp,
+    mixed: [RegExp, Array],
+    union: [User, Number] as {new(): User | Number}[] // requires annotation
+  },
+  data() {
+    this.primitive;
+    this.object;
+    this.union;
+    this.regex.compile;
+    this.mixed;
+    return {
+      fixedSize: this.union,
+    }
+  }
+});
 
 Vue.component('component', {
   data() {
     this.$mount
-    this.a
+    this.size
     return {
       a: 1
     }
@@ -17,25 +91,22 @@ Vue.component('component', {
     size: Number,
     name: {
       type: String,
-      default: 0,
+      default: '0',
       required: true,
-      validator(value) {
-        return value > 0;
-      }
     }
   },
   propsData: {
     msg: "Hello"
   },
   computed: {
-    aDouble(this: Component) {
+    aDouble(): number {
       return this.a * 2;
     },
     aPlus: {
-      get(this: Component) {
+      get(): number {
         return this.a + 1;
       },
-      set(this: Component, v: number) {
+      set(v: number) {
         this.a = v - 1;
       },
       cache: false
@@ -44,6 +115,9 @@ Vue.component('component', {
   methods: {
     plus() {
       this.a++;
+      this.aDouble.toFixed();
+      this.aPlus = 1;
+      this.size.toFixed();
     }
   },
   watch: {
@@ -92,15 +166,15 @@ Vue.component('component', {
       createElement("div", "message"),
       createElement(Vue.component("component")),
       createElement({} as ComponentOptions<Vue>),
-      createElement({ functional: true }),
+      createElement({
+        functional: true,
+        render(c: CreateElement) {
+          return createElement()
+        }
+      }),
 
       createElement(() => Vue.component("component")),
       createElement(() => ( {} as ComponentOptions<Vue> )),
-      createElement(() => {
-        return new Promise((resolve) => {
-          resolve({} as ComponentOptions<Vue>);
-        })
-      }),
       createElement((resolve, reject) => {
         resolve({} as ComponentOptions<Vue>);
         reject();
@@ -114,7 +188,7 @@ Vue.component('component', {
   staticRenderFns: [],
 
   beforeCreate() {
-    this.a = 1;
+    (this as any).a = 1;
   },
   created() {},
   beforeDestroy() {},
@@ -125,13 +199,19 @@ Vue.component('component', {
   updated() {},
   activated() {},
   deactivated() {},
+  errorCaptured(err, vm, info) {
+    err.message
+    vm.$emit('error')
+    info.toUpperCase()
+    return true
+  },
 
   directives: {
     a: {
       bind() {},
       inserted() {},
       update() {},
-      componentMounted() {},
+      componentUpdated() {},
       unbind() {}
     },
     b(el, binding, vnode, oldVnode) {
@@ -160,7 +240,26 @@ Vue.component('component', {
   name: "Component",
   extends: {} as ComponentOptions<Vue>,
   delimiters: ["${", "}"]
-} as ComponentOptions<Component>);
+});
+
+Vue.component('provide-inject', {
+  provide: {
+    foo: 1
+  },
+  inject: {
+    injectFoo: 'foo',
+    injectBar: Symbol(),
+    injectBaz: { from: 'baz' },
+    injectQux: { default: 1 },
+    injectQuux: { from: 'quuz', default: () => ({ value: 1 })}
+  }
+})
+
+Vue.component('provide-function', {
+  provide: () => ({
+    foo: 1
+  })
+})
 
 Vue.component('component-with-scoped-slot', {
   render (h) {
@@ -183,34 +282,72 @@ Vue.component('component-with-scoped-slot', {
   },
   components: {
     child: {
-      render (h) {
+      render (this: Vue, h: CreateElement) {
         return h('div', [
           this.$scopedSlots['default']({ msg: 'hi' }),
           this.$scopedSlots['item']({ msg: 'hello' })
         ])
       }
-    } as ComponentOptions<Vue>
+    }
   }
-} as ComponentOptions<Vue>)
+})
+
+Vue.component('narrow-array-of-vnode-type', {
+  render (h): VNode {
+    const slot = this.$scopedSlots.default({})
+    if (typeof slot !== 'string') {
+      const first = slot[0]
+      if (!Array.isArray(first) && typeof first !== 'string') {
+        return first;
+      }
+    }
+    return h();
+  }
+})
 
 Vue.component('functional-component', {
   props: ['prop'],
   functional: true,
+  inject: ['foo'],
   render(createElement, context) {
     context.props;
     context.children;
     context.slots();
     context.data;
     context.parent;
+    context.listeners.click;
     return createElement("div", {}, context.children);
   }
-} as FunctionalComponentOptions);
+});
 
-Vue.component("async-component", (resolve, reject) => {
+Vue.component('functional-component-object-inject', {
+  functional: true,
+  inject: {
+    foo: 'foo',
+    bar: Symbol(),
+    baz: { from: 'baz' },
+    qux: { default: 1 },
+    quux: { from: 'quuz', default: () => ({ value: 1 })}
+  },
+  render(h) {
+    return h('div')
+  }
+})
+
+Vue.component('functional-component-check-optional', {
+  functional: true
+})
+
+Vue.component("async-component", ((resolve, reject) => {
   setTimeout(() => {
     resolve(Vue.component("component"));
   }, 0);
   return new Promise((resolve) => {
-    resolve({ functional: true } as FunctionalComponentOptions);
+    resolve({
+      functional: true,
+      render(h: CreateElement) { return h('div') }
+    });
   })
-});
+}));
+
+Vue.component('async-es-module-component', () => import('./es-module'))

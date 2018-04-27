@@ -1,9 +1,9 @@
 /* @flow */
 
-const fnExpRE = /^\s*([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
-const simplePathRE = /^\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?']|\[".*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*\s*$/
+const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
+const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
-// keyCode aliases
+// KeyboardEvent.keyCode aliases
 const keyCodes: { [key: string]: number | Array<number> } = {
   esc: 27,
   tab: 9,
@@ -14,6 +14,21 @@ const keyCodes: { [key: string]: number | Array<number> } = {
   right: 39,
   down: 40,
   'delete': [8, 46]
+}
+
+// KeyboardEvent.key aliases
+const keyNames: { [key: string]: string | Array<string> } = {
+  // #7880: IE11 and Edge use `Esc` for Escape key name.
+  esc: ['Esc', 'Escape'],
+  tab: 'Tab',
+  enter: 'Enter',
+  space: ' ',
+  // #7806: IE11 uses key names without `Arrow` prefix for arrow keys.
+  up: ['Up', 'ArrowUp'],
+  left: ['Left', 'ArrowLeft'],
+  right: ['Right', 'ArrowRight'],
+  down: ['Down', 'ArrowDown'],
+  'delete': ['Backspace', 'Delete']
 }
 
 // #4868: modifiers that prevent the execution of the listener
@@ -29,17 +44,39 @@ const modifierCode: { [key: string]: string } = {
   shift: genGuard(`!$event.shiftKey`),
   alt: genGuard(`!$event.altKey`),
   meta: genGuard(`!$event.metaKey`),
-  left: genGuard(`$event.button !== 0`),
-  middle: genGuard(`$event.button !== 1`),
-  right: genGuard(`$event.button !== 2`)
+  left: genGuard(`'button' in $event && $event.button !== 0`),
+  middle: genGuard(`'button' in $event && $event.button !== 1`),
+  right: genGuard(`'button' in $event && $event.button !== 2`)
 }
 
-export function genHandlers (events: ASTElementHandlers, native?: boolean): string {
-  let res = native ? 'nativeOn:{' : 'on:{'
+export function genHandlers (
+  events: ASTElementHandlers,
+  isNative: boolean,
+  warn: Function
+): string {
+  let res = isNative ? 'nativeOn:{' : 'on:{'
   for (const name in events) {
     res += `"${name}":${genHandler(name, events[name])},`
   }
   return res.slice(0, -1) + '}'
+}
+
+// Generate handler code with binding params on Weex
+/* istanbul ignore next */
+function genWeexHandler (params: Array<any>, handlerCode: string) {
+  let innerHandlerCode = handlerCode
+  const exps = params.filter(exp => simplePathRE.test(exp) && exp !== '$event')
+  const bindings = exps.map(exp => ({ '@binding': exp }))
+  const args = exps.map((exp, i) => {
+    const key = `$_${i + 1}`
+    innerHandlerCode = innerHandlerCode.replace(exp, key)
+    return key
+  })
+  args.push('$event')
+  return '{\n' +
+    `handler:function(${args.join(',')}){${innerHandlerCode}},\n` +
+    `params:${JSON.stringify(bindings)}\n` +
+    '}'
 }
 
 function genHandler (
@@ -48,34 +85,69 @@ function genHandler (
 ): string {
   if (!handler) {
     return 'function(){}'
-  } else if (Array.isArray(handler)) {
+  }
+
+  if (Array.isArray(handler)) {
     return `[${handler.map(handler => genHandler(name, handler)).join(',')}]`
-  } else if (!handler.modifiers) {
-    return fnExpRE.test(handler.value) || simplePathRE.test(handler.value)
-      ? handler.value
-      : `function($event){${handler.value}}`
+  }
+
+  const isMethodPath = simplePathRE.test(handler.value)
+  const isFunctionExpression = fnExpRE.test(handler.value)
+
+  if (!handler.modifiers) {
+    if (isMethodPath || isFunctionExpression) {
+      return handler.value
+    }
+    /* istanbul ignore if */
+    if (__WEEX__ && handler.params) {
+      return genWeexHandler(handler.params, handler.value)
+    }
+    return `function($event){${handler.value}}` // inline statement
   } else {
     let code = ''
+    let genModifierCode = ''
     const keys = []
     for (const key in handler.modifiers) {
       if (modifierCode[key]) {
-        code += modifierCode[key]
+        genModifierCode += modifierCode[key]
+        // left/right
+        if (keyCodes[key]) {
+          keys.push(key)
+        }
+      } else if (key === 'exact') {
+        const modifiers: ASTModifiers = (handler.modifiers: any)
+        genModifierCode += genGuard(
+          ['ctrl', 'shift', 'alt', 'meta']
+            .filter(keyModifier => !modifiers[keyModifier])
+            .map(keyModifier => `$event.${keyModifier}Key`)
+            .join('||')
+        )
       } else {
         keys.push(key)
       }
     }
     if (keys.length) {
-      code = genKeyFilter(keys) + code
+      code += genKeyFilter(keys)
     }
-    const handlerCode = simplePathRE.test(handler.value)
-      ? handler.value + '($event)'
-      : handler.value
+    // Make sure modifiers like prevent and stop get executed after key filtering
+    if (genModifierCode) {
+      code += genModifierCode
+    }
+    const handlerCode = isMethodPath
+      ? `return ${handler.value}($event)`
+      : isFunctionExpression
+        ? `return (${handler.value})($event)`
+        : handler.value
+    /* istanbul ignore if */
+    if (__WEEX__ && handler.params) {
+      return genWeexHandler(handler.params, code + handlerCode)
+    }
     return `function($event){${code}${handlerCode}}`
   }
 }
 
 function genKeyFilter (keys: Array<string>): string {
-  return `if(${keys.map(genFilterCode).join('&&')})return null;`
+  return `if(!('button' in $event)&&${keys.map(genFilterCode).join('&&')})return null;`
 }
 
 function genFilterCode (key: string): string {
@@ -83,6 +155,14 @@ function genFilterCode (key: string): string {
   if (keyVal) {
     return `$event.keyCode!==${keyVal}`
   }
-  const alias = keyCodes[key]
-  return `_k($event.keyCode,${JSON.stringify(key)}${alias ? ',' + JSON.stringify(alias) : ''})`
+  const keyCode = keyCodes[key]
+  const keyName = keyNames[key]
+  return (
+    `_k($event.keyCode,` +
+    `${JSON.stringify(key)},` +
+    `${JSON.stringify(keyCode)},` +
+    `$event.key,` +
+    `${JSON.stringify(keyName)}` +
+    `)`
+  )
 }

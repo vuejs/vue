@@ -56,9 +56,16 @@ describe('Options template', () => {
       template: '<div v-if="!@"><span>{{ a"" }}</span><span>{{ do + 1 }}</span></div>'
     }).$mount()
     expect('Error compiling template').toHaveBeenWarned()
-    expect('invalid expression: v-if="!@"').toHaveBeenWarned()
-    expect('invalid expression: {{ a"" }}').toHaveBeenWarned()
-    expect('avoid using JavaScript keyword as property name: "do" in expression {{ do + 1 }}').toHaveBeenWarned()
+    expect('Raw expression: v-if="!@"').toHaveBeenWarned()
+    expect('Raw expression: {{ a"" }}').toHaveBeenWarned()
+    expect('avoid using JavaScript keyword as property name: "do"').toHaveBeenWarned()
+  })
+
+  it('should not warn $ prefixed keywords', () => {
+    new Vue({
+      template: `<div @click="$delete(foo, 'bar')"></div>`
+    }).$mount()
+    expect('avoid using JavaScript keyword as property name').not.toHaveBeenWarned()
   })
 
   it('warn error in generated function (v-for)', () => {
@@ -68,6 +75,17 @@ describe('Options template', () => {
     expect('Error compiling template').toHaveBeenWarned()
     expect('invalid v-for alias "1"').toHaveBeenWarned()
     expect('invalid v-for iterator "2"').toHaveBeenWarned()
-    expect('invalid expression: v-for="(1, 2) in a----"').toHaveBeenWarned()
+    expect('Raw expression: v-for="(1, 2) in a----"').toHaveBeenWarned()
+  })
+
+  it('warn error in generated function (v-on)', () => {
+    new Vue({
+      template: `<div @click="delete('Delete')"></div>`,
+      methods: { delete: function () {} }
+    }).$mount()
+    expect('Error compiling template').toHaveBeenWarned()
+    expect(
+      `avoid using JavaScript unary operator as property name: "delete()" in expression @click="delete('Delete')"`
+    ).toHaveBeenWarned()
   })
 })

@@ -34,7 +34,7 @@ export default class Dep {
   }
 
   notify () {
-    // stablize the subscriber list first
+    // stabilize the subscriber list first
     const subs = this.subs.slice()
     for (let i = 0, l = subs.length; i < l; i++) {
       subs[i].update()
@@ -48,7 +48,7 @@ export default class Dep {
 Dep.target = null
 const targetStack = []
 
-export function pushTarget (_target: Watcher) {
+export function pushTarget (_target: ?Watcher) {
   if (Dep.target) targetStack.push(Dep.target)
   Dep.target = _target
 }

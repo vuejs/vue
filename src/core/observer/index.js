@@ -1,35 +1,38 @@
 /* @flow */
 
 import Dep from './dep'
+import VNode from '../vdom/vnode'
 import { arrayMethods } from './array'
 import {
   def,
+  warn,
+  hasOwn,
+  hasProto,
   isObject,
   isPlainObject,
-  hasProto,
-  hasOwn,
-  warn,
+  isPrimitive,
+  isUndef,
+  isValidArrayIndex,
   isServerRendering
 } from '../util/index'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
 /**
- * By default, when a reactive property is set, the new value is
- * also converted to become reactive. However when passing down props,
- * we don't want to force conversion because the value may be a nested value
- * under a frozen data structure. Converting it would defeat the optimization.
+ * In some cases we may want to disable observation inside a component's
+ * update computation.
  */
-export const observerState = {
-  shouldConvert: true,
-  isSettingProps: false
+export let shouldObserve: boolean = true
+
+export function toggleObserving (value: boolean) {
+  shouldObserve = value
 }
 
 /**
- * Observer class that are attached to each observed
- * object. Once attached, the observer converts target
+ * Observer class that is attached to each observed
+ * object. Once attached, the observer converts the target
  * object's property keys into getter/setters that
- * collect dependencies and dispatches updates.
+ * collect dependencies and dispatch updates.
  */
 export class Observer {
   value: any;
@@ -60,7 +63,7 @@ export class Observer {
   walk (obj: Object) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
-      defineReactive(obj, keys[i], obj[keys[i]])
+      defineReactive(obj, keys[i])
     }
   }
 
@@ -80,7 +83,7 @@ export class Observer {
  * Augment an target Object or Array by intercepting
  * the prototype chain using __proto__
  */
-function protoAugment (target, src: Object) {
+function protoAugment (target, src: Object, keys: any) {
   /* eslint-disable no-proto */
   target.__proto__ = src
   /* eslint-enable no-proto */
@@ -104,14 +107,14 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * or the existing observer if the value already has one.
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
-  if (!isObject(value)) {
+  if (!isObject(value) || value instanceof VNode) {
     return
   }
   let ob: Observer | void
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
-    observerState.shouldConvert &&
+    shouldObserve &&
     !isServerRendering() &&
     (Array.isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
@@ -132,7 +135,8 @@ export function defineReactive (
   obj: Object,
   key: string,
   val: any,
-  customSetter?: Function
+  customSetter?: ?Function,
+  shallow?: boolean
 ) {
   const dep = new Dep()
 
@@ -144,8 +148,11 @@ export function defineReactive (
   // cater for pre-defined getter/setters
   const getter = property && property.get
   const setter = property && property.set
+  if ((!getter || setter) && arguments.length === 2) {
+    val = obj[key]
+  }
 
-  let childOb = observe(val)
+  let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
@@ -155,9 +162,9 @@ export function defineReactive (
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
-        }
-        if (Array.isArray(value)) {
-          dependArray(value)
+          if (Array.isArray(value)) {
+            dependArray(value)
+          }
         }
       }
       return value
@@ -177,7 +184,7 @@ export function defineReactive (
       } else {
         val = newVal
       }
-      childOb = observe(newVal)
+      childOb = !shallow && observe(newVal)
       dep.notify()
     }
   })
@@ -188,27 +195,32 @@ export function defineReactive (
  * triggers change notification if the property doesn't
  * already exist.
  */
-export function set (obj: Array<any> | Object, key: any, val: any) {
-  if (Array.isArray(obj)) {
-    obj.length = Math.max(obj.length, key)
-    obj.splice(key, 1, val)
+export function set (target: Array<any> | Object, key: any, val: any): any {
+  if (process.env.NODE_ENV !== 'production' &&
+    (isUndef(target) || isPrimitive(target))
+  ) {
+    warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
+  }
+  if (Array.isArray(target) && isValidArrayIndex(key)) {
+    target.length = Math.max(target.length, key)
+    target.splice(key, 1, val)
     return val
   }
-  if (hasOwn(obj, key)) {
-    obj[key] = val
-    return
+  if (key in target && !(key in Object.prototype)) {
+    target[key] = val
+    return val
   }
-  const ob = obj.__ob__
-  if (obj._isVue || (ob && ob.vmCount)) {
+  const ob = (target: any).__ob__
+  if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
       'at runtime - declare it upfront in the data option.'
     )
-    return
+    return val
   }
   if (!ob) {
-    obj[key] = val
-    return
+    target[key] = val
+    return val
   }
   defineReactive(ob.value, key, val)
   ob.dep.notify()
@@ -218,23 +230,28 @@ export function set (obj: Array<any> | Object, key: any, val: any) {
 /**
  * Delete a property and trigger change if necessary.
  */
-export function del (obj: Array<any> | Object, key: any) {
-  if (Array.isArray(obj)) {
-    obj.splice(key, 1)
+export function del (target: Array<any> | Object, key: any) {
+  if (process.env.NODE_ENV !== 'production' &&
+    (isUndef(target) || isPrimitive(target))
+  ) {
+    warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
+  }
+  if (Array.isArray(target) && isValidArrayIndex(key)) {
+    target.splice(key, 1)
     return
   }
-  const ob = obj.__ob__
-  if (obj._isVue || (ob && ob.vmCount)) {
+  const ob = (target: any).__ob__
+  if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid deleting properties on a Vue instance or its root $data ' +
       '- just set it to null.'
     )
     return
   }
-  if (!hasOwn(obj, key)) {
+  if (!hasOwn(target, key)) {
     return
   }
-  delete obj[key]
+  delete target[key]
   if (!ob) {
     return
   }

@@ -335,8 +335,30 @@ describe('Directive v-once', () => {
       vm.ok = false // teardown component with v-once
     }).then(done) // should not throw
   })
+
+  // #6826
+  it('should render different component instances properly', done => {
+    const vm = new Vue({
+      components: {
+        foo: {
+          props: ['name'],
+          template: '<div v-once>{{ name }}</div>'
+        }
+      },
+      template: `
+        <div>
+          <foo name="a" v-once></foo>
+          <foo name="b" v-once></foo>
+        </div>
+      `
+    }).$mount()
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].innerHTML).toBe('a')
+      expect(vm.$el.children[1].innerHTML).toBe('b')
+    }).then(done)
+  })
 })
 
 function expectTextContent (vm, text) {
-  expect(vm.$el.textContent.replace(/\r?\n|\r|\s/g, '')).toBe(text)
+  expect(vm.$el.textContent.replace(/\s+/g, '')).toBe(text)
 }

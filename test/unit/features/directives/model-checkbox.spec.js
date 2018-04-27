@@ -77,6 +77,34 @@ describe('Directive v-model checkbox', () => {
     }).then(done)
   })
 
+  it('bind to Array value ignores false-value', done => {
+    const vm = new Vue({
+      data: {
+        test: ['1']
+      },
+      template: `
+        <div>
+          <input type="checkbox" v-model="test" value="1" :false-value="true">
+          <input type="checkbox" v-model="test" value="2" :false-value="true">
+        </div>
+      `
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
+    vm.$el.children[0].click()
+    expect(vm.test.length).toBe(0)
+    vm.$el.children[1].click()
+    expect(vm.test).toEqual(['2'])
+    vm.$el.children[0].click()
+    expect(vm.test).toEqual(['2', '1'])
+    vm.test = ['1']
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].checked).toBe(true)
+      expect(vm.$el.children[1].checked).toBe(false)
+    }).then(done)
+  })
+
   it('bind to Array value with value bindings', done => {
     const vm = new Vue({
       data: {
@@ -126,6 +154,34 @@ describe('Directive v-model checkbox', () => {
     expect(vm.test).toEqual([{ a: 2 }])
     vm.$el.children[0].click()
     expect(vm.test).toEqual([{ a: 2 }, { a: 1 }])
+    vm.test = [{ a: 1 }]
+    waitForUpdate(() => {
+      expect(vm.$el.children[0].checked).toBe(true)
+      expect(vm.$el.children[1].checked).toBe(false)
+    }).then(done)
+  })
+
+  it('bind to Array value with array value bindings (object loose equal)', done => {
+    const vm = new Vue({
+      data: {
+        test: [{ a: 1 }]
+      },
+      template: `
+        <div>
+          <input type="checkbox" v-model="test" :value="{ a: 1 }">
+          <input type="checkbox" v-model="test" :value="[2]">
+        </div>
+      `
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].checked).toBe(false)
+    vm.$el.children[0].click()
+    expect(vm.test.length).toBe(0)
+    vm.$el.children[1].click()
+    expect(vm.test).toEqual([[2]])
+    vm.$el.children[0].click()
+    expect(vm.test).toEqual([[2], { a: 1 }])
     vm.test = [{ a: 1 }]
     waitForUpdate(() => {
       expect(vm.$el.children[0].checked).toBe(true)
@@ -257,14 +313,39 @@ describe('Directive v-model checkbox', () => {
     }).then(done)
   })
 
-  it('warn inline checked', () => {
+  it('triggers a watcher when binding to an array value in a checkbox', done => {
     const vm = new Vue({
-      template: `<input type="checkbox" v-model="test" checked>`,
       data: {
-        test: false
-      }
+        test: {
+          thing: false,
+          arr: [true]
+        }
+      },
+      template: `
+        <div>
+          <input type="checkbox" v-model="test.arr[0]">
+          <span>{{ test.arr[0] }}</span>
+        </div>
+      `
     }).$mount()
-    expect(vm.$el.checked).toBe(false)
-    expect('inline checked attributes will be ignored when using v-model').toHaveBeenWarned()
+    document.body.appendChild(vm.$el)
+    expect(vm.$el.children[0].checked).toBe(true)
+    expect(vm.$el.children[1].textContent).toBe('true')
+    vm.$el.children[0].click()
+    expect(vm.$el.children[0].checked).toBe(false)
+    waitForUpdate(() => {
+      expect(vm.$el.children[1].textContent).toBe('false')
+    }).then(done)
+  })
+
+  // #7811
+  it('type should not be overwritten by v-bind', () => {
+    const vm = new Vue({
+      data: {
+        test: true
+      },
+      template: '<input type="checkbox" v-model="test" v-bind="$attrs">'
+    }).$mount()
+    expect(vm.$el.type).toBe('checkbox')
   })
 })

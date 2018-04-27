@@ -1,236 +1,159 @@
-import {
-  compileAndStringify,
-  prepareRuntime,
-  resetRuntime,
-  createInstance
-} from '../helpers/index'
+import { getRoot, fireEvent, compileAndExecute } from '../helpers/index'
 
 describe('generate class', () => {
-  let runtime
-
-  beforeAll(() => {
-    runtime = prepareRuntime()
-  })
-
-  afterAll(() => {
-    resetRuntime()
-    runtime = null
-  })
-
   it('should be generated', () => {
-    const { render, staticRenderFns } = compileAndStringify(`
+    compileAndExecute(`
       <div>
         <text class="a b c">Hello World</text>
       </div>
-    `)
-    const instance = createInstance(runtime, `
-      new Vue({
-        render: ${render},
-        staticRenderFns: ${staticRenderFns},
-        style: {
-          a: {
-            fontSize: '100'
-          },
-          b: {
-            color: '#ff0000'
-          },
-          c: {
-            fontWeight: 'bold'
-          }
-        },
-        el: 'body'
+    `, `
+      style: {
+        a: { fontSize: '100' },
+        b: { color: '#ff0000' },
+        c: { fontWeight: 'bold' }
+      }
+    `).then(instance => {
+      expect(getRoot(instance)).toEqual({
+        type: 'div',
+        children: [{
+          type: 'text',
+          classList: ['a', 'b', 'c'],
+          attr: { value: 'Hello World' }
+        }]
       })
-    `)
-    expect(instance.getRealRoot()).toEqual({
-      type: 'div',
-      children: [
-        { type: 'text', style: { fontSize: '100', color: '#ff0000', fontWeight: 'bold' }, attr: { value: 'Hello World' }}
-      ]
     })
   })
 
   it('should be updated', (done) => {
-    const { render, staticRenderFns } = compileAndStringify(`
-      <div>
-        <text :class="['a', x]" @click="foo">Hello World</text>
+    compileAndExecute(`
+      <div @click="foo">
+        <text :class="['a', x]">Hello World</text>
       </div>
-    `)
-    const instance = createInstance(runtime, `
-      new Vue({
-        data: {
-          x: 'b'
-        },
-        render: ${render},
-        staticRenderFns: ${staticRenderFns},
-        style: {
-          a: {
-            fontSize: '100'
-          },
-          b: {
-            color: '#ff0000'
-          },
-          c: {
-            fontWeight: 'bold'
-          },
-          d: {
-            color: '#0000ff',
-            fontWeight: 'bold'
-          }
-        },
-        methods: {
-          foo: function () {
-            this.x = 'd'
-          }
-        },
-        el: 'body'
-      })
-    `)
-    expect(instance.getRealRoot()).toEqual({
-      type: 'div',
-      children: [
-        {
-          type: 'text',
-          event: ['click'],
-          style: { fontSize: '100', color: '#ff0000' },
-          attr: { value: 'Hello World' }
+    `, `
+      data: { x: 'b' },
+      style: {
+        a: { fontSize: '100' },
+        b: { color: '#ff0000' },
+        c: { fontWeight: 'bold' },
+        d: {
+          color: '#0000ff',
+          fontWeight: 'bold'
         }
-      ]
-    })
-
-    instance.$fireEvent(instance.doc.body.children[0].ref, 'click', {})
-    setTimeout(() => {
-      expect(instance.getRealRoot()).toEqual({
+      },
+      methods: {
+        foo: function () {
+          this.x = 'd'
+        }
+      }
+    `).then(instance => {
+      expect(getRoot(instance)).toEqual({
         type: 'div',
-        children: [
-          {
-            type: 'text',
-            event: ['click'],
-            style: { fontSize: '100', color: '#0000ff', fontWeight: 'bold' },
-            attr: { value: 'Hello World' }
-          }
-        ]
+        event: ['click'],
+        children: [{
+          type: 'text',
+          classList: ['a', 'b'],
+          attr: { value: 'Hello World' }
+        }]
+      })
+      fireEvent(instance, '_root', 'click')
+      return instance
+    }).then(instance => {
+      expect(getRoot(instance)).toEqual({
+        type: 'div',
+        event: ['click'],
+        children: [{
+          type: 'text',
+          classList: ['a', 'd'],
+          attr: { value: 'Hello World' }
+        }]
       })
       done()
     })
   })
 
   it('should be applied in order', (done) => {
-    const { render, staticRenderFns } = compileAndStringify(`
-      <div>
-        <text :class="arr" @click="foo">Hello World</text>
+    compileAndExecute(`
+      <div @click="foo">
+        <text :class="arr">Hello World</text>
       </div>
-    `)
-    const instance = createInstance(runtime, `
-      new Vue({
-        data: {
-          arr: ['b', 'a']
-        },
-        render: ${render},
-        staticRenderFns: ${staticRenderFns},
-        style: {
-          a: {
-            color: '#ff0000'
-          },
-          b: {
-            color: '#00ff00'
-          },
-          c: {
-            color: '#0000ff'
-          }
-        },
-        methods: {
-          foo: function () {
-            this.arr.push('c')
-          }
-        },
-        el: 'body'
-      })
-    `)
-    expect(instance.getRealRoot()).toEqual({
-      type: 'div',
-      children: [
-        {
-          type: 'text',
-          event: ['click'],
-          style: { color: '#ff0000' },
-          attr: { value: 'Hello World' }
+    `, `
+      data: {
+        arr: ['b', 'a']
+      },
+      style: {
+        a: { color: '#ff0000' },
+        b: { color: '#00ff00' },
+        c: { color: '#0000ff' }
+      },
+      methods: {
+        foo: function () {
+          this.arr.push('c')
         }
-      ]
-    })
-
-    instance.$fireEvent(instance.doc.body.children[0].ref, 'click', {})
-    setTimeout(() => {
-      expect(instance.getRealRoot()).toEqual({
+      }
+    `).then(instance => {
+      expect(getRoot(instance)).toEqual({
         type: 'div',
-        children: [
-          {
-            type: 'text',
-            event: ['click'],
-            style: { color: '#0000ff' },
-            attr: { value: 'Hello World' }
-          }
-        ]
+        event: ['click'],
+        children: [{
+          type: 'text',
+          classList: ['b', 'a'],
+          attr: { value: 'Hello World' }
+        }]
+      })
+      fireEvent(instance, '_root', 'click')
+      return instance
+    }).then(instance => {
+      expect(getRoot(instance)).toEqual({
+        type: 'div',
+        event: ['click'],
+        children: [{
+          type: 'text',
+          classList: ['b', 'a', 'c'],
+          attr: { value: 'Hello World' }
+        }]
       })
       done()
     })
   })
 
   it('should be cleared', (done) => {
-    const { render, staticRenderFns } = compileAndStringify(`
-      <div>
-        <text :class="['a', x]" @click="foo">Hello World</text>
+    compileAndExecute(`
+      <div @click="foo">
+        <text :class="['a', x]">Hello World</text>
       </div>
-    `)
-    const instance = createInstance(runtime, `
-      new Vue({
-        data: {
-          x: 'b'
-        },
-        render: ${render},
-        staticRenderFns: ${staticRenderFns},
-        style: {
-          a: {
-            fontSize: '100'
-          },
-          b: {
-            color: '#ff0000'
-          },
-          c: {
-            fontWeight: 'bold'
-          }
-        },
-        methods: {
-          foo: function () {
-            this.x = 'c'
-          }
-        },
-        el: 'body'
-      })
-    `)
-    expect(instance.getRealRoot()).toEqual({
-      type: 'div',
-      children: [
-        {
-          type: 'text',
-          event: ['click'],
-          style: { fontSize: '100', color: '#ff0000' },
-          attr: { value: 'Hello World' }
+    `, `
+      data: { x: 'b' },
+      style: {
+        a: { fontSize: '100' },
+        b: { color: '#ff0000' },
+        c: { fontWeight: 'bold' }
+      },
+      methods: {
+        foo: function () {
+          this.x = 'c'
         }
-      ]
-    })
-
-    instance.$fireEvent(instance.doc.body.children[0].ref, 'click', {})
-    setTimeout(() => {
-      expect(instance.getRealRoot()).toEqual({
+      }
+    `).then(instance => {
+      expect(getRoot(instance)).toEqual({
         type: 'div',
-        children: [
-          {
-            type: 'text',
-            event: ['click'],
-            style: { fontSize: '100', color: '', fontWeight: 'bold' },
-            attr: { value: 'Hello World' }
-          }
-        ]
+        event: ['click'],
+        children: [{
+          type: 'text',
+          classList: ['a', 'b'],
+          attr: { value: 'Hello World' }
+        }]
+      })
+      fireEvent(instance, '_root', 'click')
+      return instance
+    }).then(instance => {
+      expect(getRoot(instance)).toEqual({
+        type: 'div',
+        event: ['click'],
+        children: [{
+          type: 'text',
+          classList: ['a', 'c'],
+          attr: { value: 'Hello World' }
+        }]
       })
       done()
     })

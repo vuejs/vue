@@ -1,16 +1,23 @@
 /* @flow */
 
-import Vue from '../instance/index'
 import config from '../config'
 import { warn } from './debug'
+import { nativeWatch } from './env'
 import { set } from '../observer/index'
+
+import {
+  ASSET_TYPES,
+  LIFECYCLE_HOOKS
+} from 'shared/constants'
+
 import {
   extend,
-  isPlainObject,
   hasOwn,
   camelize,
+  toRawType,
   capitalize,
-  isBuiltInTag
+  isBuiltInTag,
+  isPlainObject
 } from 'shared/util'
 
 /**
@@ -58,7 +65,7 @@ function mergeData (to: Object, from: ?Object): Object {
 /**
  * Data
  */
-strats.data = function (
+export function mergeDataOrFn (
   parentVal: any,
   childVal: any,
   vm?: Component
@@ -66,15 +73,6 @@ strats.data = function (
   if (!vm) {
     // in a Vue.extend merge, both should be functions
     if (!childVal) {
-      return parentVal
-    }
-    if (typeof childVal !== 'function') {
-      process.env.NODE_ENV !== 'production' && warn(
-        'The "data" option should be a function ' +
-        'that returns a per-instance value in component ' +
-        'definitions.',
-        vm
-      )
       return parentVal
     }
     if (!parentVal) {
@@ -87,19 +85,19 @@ strats.data = function (
     // it has to be a function to pass previous merges.
     return function mergedDataFn () {
       return mergeData(
-        childVal.call(this),
-        parentVal.call(this)
+        typeof childVal === 'function' ? childVal.call(this, this) : childVal,
+        typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
       )
     }
-  } else if (parentVal || childVal) {
+  } else {
     return function mergedInstanceDataFn () {
       // instance merge
       const instanceData = typeof childVal === 'function'
-        ? childVal.call(vm)
+        ? childVal.call(vm, vm)
         : childVal
       const defaultData = typeof parentVal === 'function'
-        ? parentVal.call(vm)
-        : undefined
+        ? parentVal.call(vm, vm)
+        : parentVal
       if (instanceData) {
         return mergeData(instanceData, defaultData)
       } else {
@@ -107,6 +105,28 @@ strats.data = function (
       }
     }
   }
+}
+
+strats.data = function (
+  parentVal: any,
+  childVal: any,
+  vm?: Component
+): ?Function {
+  if (!vm) {
+    if (childVal && typeof childVal !== 'function') {
+      process.env.NODE_ENV !== 'production' && warn(
+        'The "data" option should be a function ' +
+        'that returns a per-instance value in component ' +
+        'definitions.',
+        vm
+      )
+
+      return parentVal
+    }
+    return mergeDataOrFn(parentVal, childVal)
+  }
+
+  return mergeDataOrFn(parentVal, childVal, vm)
 }
 
 /**
@@ -125,7 +145,7 @@ function mergeHook (
     : parentVal
 }
 
-config._lifecycleHooks.forEach(hook => {
+LIFECYCLE_HOOKS.forEach(hook => {
   strats[hook] = mergeHook
 })
 
@@ -136,14 +156,22 @@ config._lifecycleHooks.forEach(hook => {
  * a three-way merge between constructor options, instance
  * options and parent options.
  */
-function mergeAssets (parentVal: ?Object, childVal: ?Object): Object {
+function mergeAssets (
+  parentVal: ?Object,
+  childVal: ?Object,
+  vm?: Component,
+  key: string
+): Object {
   const res = Object.create(parentVal || null)
-  return childVal
-    ? extend(res, childVal)
-    : res
+  if (childVal) {
+    process.env.NODE_ENV !== 'production' && assertObjectType(key, childVal, vm)
+    return extend(res, childVal)
+  } else {
+    return res
+  }
 }
 
-config._assetTypes.forEach(function (type) {
+ASSET_TYPES.forEach(function (type) {
   strats[type + 's'] = mergeAssets
 })
 
@@ -153,9 +181,20 @@ config._assetTypes.forEach(function (type) {
  * Watchers hashes should not overwrite one
  * another, so we merge them as arrays.
  */
-strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
+strats.watch = function (
+  parentVal: ?Object,
+  childVal: ?Object,
+  vm?: Component,
+  key: string
+): ?Object {
+  // work around Firefox's Object.prototype.watch...
+  if (parentVal === nativeWatch) parentVal = undefined
+  if (childVal === nativeWatch) childVal = undefined
   /* istanbul ignore if */
   if (!childVal) return Object.create(parentVal || null)
+  if (process.env.NODE_ENV !== 'production') {
+    assertObjectType(key, childVal, vm)
+  }
   if (!parentVal) return childVal
   const ret = {}
   extend(ret, parentVal)
@@ -167,7 +206,7 @@ strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
     }
     ret[key] = parent
       ? parent.concat(child)
-      : [child]
+      : Array.isArray(child) ? child : [child]
   }
   return ret
 }
@@ -177,14 +216,23 @@ strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
  */
 strats.props =
 strats.methods =
-strats.computed = function (parentVal: ?Object, childVal: ?Object): ?Object {
-  if (!childVal) return Object.create(parentVal || null)
+strats.inject =
+strats.computed = function (
+  parentVal: ?Object,
+  childVal: ?Object,
+  vm?: Component,
+  key: string
+): ?Object {
+  if (childVal && process.env.NODE_ENV !== 'production') {
+    assertObjectType(key, childVal, vm)
+  }
   if (!parentVal) return childVal
   const ret = Object.create(null)
   extend(ret, parentVal)
-  extend(ret, childVal)
+  if (childVal) extend(ret, childVal)
   return ret
 }
+strats.provide = mergeDataOrFn
 
 /**
  * Default strategy.
@@ -200,13 +248,23 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
  */
 function checkComponents (options: Object) {
   for (const key in options.components) {
-    const lower = key.toLowerCase()
-    if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
-      warn(
-        'Do not use built-in or reserved HTML elements as component ' +
-        'id: ' + key
-      )
-    }
+    validateComponentName(key)
+  }
+}
+
+export function validateComponentName (name: string) {
+  if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+    warn(
+      'Invalid component name: "' + name + '". Component names ' +
+      'can only contain alphanumeric characters and the hyphen, ' +
+      'and must start with a letter.'
+    )
+  }
+  if (isBuiltInTag(name) || config.isReservedTag(name)) {
+    warn(
+      'Do not use built-in or reserved HTML elements as component ' +
+      'id: ' + name
+    )
   }
 }
 
@@ -214,7 +272,7 @@ function checkComponents (options: Object) {
  * Ensure all props option syntax are normalized into the
  * Object-based format.
  */
-function normalizeProps (options: Object) {
+function normalizeProps (options: Object, vm: ?Component) {
   const props = options.props
   if (!props) return
   const res = {}
@@ -238,8 +296,41 @@ function normalizeProps (options: Object) {
         ? val
         : { type: val }
     }
+  } else if (process.env.NODE_ENV !== 'production') {
+    warn(
+      `Invalid value for option "props": expected an Array or an Object, ` +
+      `but got ${toRawType(props)}.`,
+      vm
+    )
   }
   options.props = res
+}
+
+/**
+ * Normalize all injections into Object-based format
+ */
+function normalizeInject (options: Object, vm: ?Component) {
+  const inject = options.inject
+  if (!inject) return
+  const normalized = options.inject = {}
+  if (Array.isArray(inject)) {
+    for (let i = 0; i < inject.length; i++) {
+      normalized[inject[i]] = { from: inject[i] }
+    }
+  } else if (isPlainObject(inject)) {
+    for (const key in inject) {
+      const val = inject[key]
+      normalized[key] = isPlainObject(val)
+        ? extend({ from: key }, val)
+        : { from: val }
+    }
+  } else if (process.env.NODE_ENV !== 'production') {
+    warn(
+      `Invalid value for option "inject": expected an Array or an Object, ` +
+      `but got ${toRawType(inject)}.`,
+      vm
+    )
+  }
 }
 
 /**
@@ -257,6 +348,16 @@ function normalizeDirectives (options: Object) {
   }
 }
 
+function assertObjectType (name: string, value: any, vm: ?Component) {
+  if (!isPlainObject(value)) {
+    warn(
+      `Invalid value for option "${name}": expected an Object, ` +
+      `but got ${toRawType(value)}.`,
+      vm
+    )
+  }
+}
+
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
@@ -269,21 +370,21 @@ export function mergeOptions (
   if (process.env.NODE_ENV !== 'production') {
     checkComponents(child)
   }
-  normalizeProps(child)
+
+  if (typeof child === 'function') {
+    child = child.options
+  }
+
+  normalizeProps(child, vm)
+  normalizeInject(child, vm)
   normalizeDirectives(child)
   const extendsFrom = child.extends
   if (extendsFrom) {
-    parent = typeof extendsFrom === 'function'
-      ? mergeOptions(parent, extendsFrom.options, vm)
-      : mergeOptions(parent, extendsFrom, vm)
+    parent = mergeOptions(parent, extendsFrom, vm)
   }
   if (child.mixins) {
     for (let i = 0, l = child.mixins.length; i < l; i++) {
-      let mixin = child.mixins[i]
-      if (mixin.prototype instanceof Vue) {
-        mixin = mixin.options
-      }
-      parent = mergeOptions(parent, mixin, vm)
+      parent = mergeOptions(parent, child.mixins[i], vm)
     }
   }
   const options = {}

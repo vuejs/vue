@@ -1,6 +1,10 @@
 import Vue from 'vue'
+import { hasSymbol } from 'core/util/env'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options props', () => {
+  testObjectOption('props')
+
   it('array syntax', done => {
     const vm = new Vue({
       data: {
@@ -205,6 +209,26 @@ describe('Options props', () => {
       expect('Expected Array').toHaveBeenWarned()
     })
 
+    it('primitive wrapper objects', () => {
+      /* eslint-disable no-new-wrappers */
+      makeInstance(new String('s'), String)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(new Number(1), Number)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(new Boolean(true), Boolean)
+      expect(console.error.calls.count()).toBe(0)
+      /* eslint-enable no-new-wrappers */
+    })
+
+    if (hasSymbol) {
+      it('symbol', () => {
+        makeInstance(Symbol('foo'), Symbol)
+        expect(console.error.calls.count()).toBe(0)
+        makeInstance({}, Symbol)
+        expect('Expected Symbol').toHaveBeenWarned()
+      })
+    }
+
     it('custom constructor', () => {
       function Class () {}
       makeInstance(new Class(), Class)
@@ -323,7 +347,7 @@ describe('Options props', () => {
         }
       }
     }).$mount()
-    expect(`method "a" has already been defined as a prop`).toHaveBeenWarned()
+    expect(`Method "a" has already been defined as a prop`).toHaveBeenWarned()
     expect(`Avoid mutating a prop directly`).toHaveBeenWarned()
   })
 
@@ -438,7 +462,7 @@ describe('Options props', () => {
   })
 
   // #4090
-  it('should not trigger wathcer on default value', done => {
+  it('should not trigger watcher on default value', done => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       template: `<test :value="a" :test="b"></test>`,
@@ -480,11 +504,29 @@ describe('Options props', () => {
   })
 
   it('warn reserved props', () => {
+    const specialAttrs = ['key', 'ref', 'slot', 'is', 'slot-scope']
     new Vue({
-      props: {
-        key: String
-      }
+      props: specialAttrs
     })
-    expect(`"key" is a reserved attribute`).toHaveBeenWarned()
+    specialAttrs.forEach(attr => {
+      expect(`"${attr}" is a reserved attribute`).toHaveBeenWarned()
+    })
+  })
+
+  it('should consider order when casting [Boolean, String] multi-type props', () => {
+    const vm = new Vue({
+      template: '<test ref="test" booleanOrString stringOrBoolean />',
+      components: {
+        test: {
+          template: '<div></div>',
+          props: {
+            booleanOrString: [Boolean, String],
+            stringOrBoolean: [String, Boolean]
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$refs.test.$props.booleanOrString).toBe(true)
+    expect(vm.$refs.test.$props.stringOrBoolean).toBe('')
   })
 })

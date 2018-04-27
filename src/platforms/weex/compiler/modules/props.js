@@ -4,7 +4,7 @@ import { cached, camelize } from 'shared/util'
 
 const normalize = cached(camelize)
 
-function normalizeKeyName (str: string) : string {
+function normalizeKeyName (str: string): string {
   if (str.match(/^v\-/)) {
     return str.replace(/(v-[a-z\-]+\:)([a-z\-]+)$/i, ($, directive, prop) => {
       return directive + normalize(prop)

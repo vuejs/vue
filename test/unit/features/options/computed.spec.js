@@ -1,6 +1,9 @@
 import Vue from 'vue'
+import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options computed', () => {
+  testObjectOption('computed')
+
   it('basic usage', done => {
     const vm = new Vue({
       template: '<div>{{ b }}</div>',
@@ -46,6 +49,45 @@ describe('Options computed', () => {
     }).then(() => {
       expect(vm.$el.textContent).toBe('1')
     }).then(done)
+  })
+
+  it('warn with setter and no getter', () => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <test></test>
+        </div>
+      `,
+      components: {
+        test: {
+          data () {
+            return {
+              a: 1
+            }
+          },
+          computed: {
+            b: {
+              set (v) { this.a = v }
+            }
+          },
+          template: `<div>{{a}}</div>`
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<div>1</div>')
+    expect('Getter is missing for computed property "b".').toHaveBeenWarned()
+  })
+
+  it('warn assigning to computed with no setter', () => {
+    const vm = new Vue({
+      computed: {
+        b () {
+          return 1
+        }
+      }
+    })
+    vm.b = 2
+    expect(`Computed property "b" was assigned to but it has no setter.`).toHaveBeenWarned()
   })
 
   it('watching computed', done => {
@@ -138,6 +180,76 @@ describe('Options computed', () => {
     expect(vm.c).toBe(4)
     waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('3 4')
+    }).then(done)
+  })
+
+  it('warn conflict with data', () => {
+    new Vue({
+      data: {
+        a: 1
+      },
+      computed: {
+        a: () => 2
+      }
+    })
+    expect(`computed property "a" is already defined in data`).toHaveBeenWarned()
+  })
+
+  it('warn conflict with props', () => {
+    new Vue({
+      props: ['a'],
+      propsData: { a: 1 },
+      computed: {
+        a: () => 2
+      }
+    })
+    expect(`computed property "a" is already defined as a prop`).toHaveBeenWarned()
+  })
+
+  it('rethrow computed error', () => {
+    const vm = new Vue({
+      computed: {
+        a: () => {
+          throw new Error('rethrow')
+        }
+      }
+    })
+    expect(() => vm.a).toThrowError('rethrow')
+  })
+
+  // #7767
+  it('should avoid unnecessary re-renders', done => {
+    const computedSpy = jasmine.createSpy('computed')
+    const updatedSpy = jasmine.createSpy('updated')
+    const vm = new Vue({
+      data: {
+        msg: 'bar'
+      },
+      computed: {
+        a () {
+          computedSpy()
+          return this.msg !== 'foo'
+        }
+      },
+      template: `<div>{{ a }}</div>`,
+      updated: updatedSpy
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('true')
+    expect(computedSpy.calls.count()).toBe(1)
+    expect(updatedSpy.calls.count()).toBe(0)
+
+    vm.msg = 'baz'
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('true')
+      expect(computedSpy.calls.count()).toBe(2)
+      expect(updatedSpy.calls.count()).toBe(0)
+    }).then(() => {
+      vm.msg = 'foo'
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('false')
+      expect(computedSpy.calls.count()).toBe(3)
+      expect(updatedSpy.calls.count()).toBe(1)
     }).then(done)
   })
 })

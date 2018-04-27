@@ -8,10 +8,7 @@ import { def } from '../util/index'
 const arrayProto = Array.prototype
 export const arrayMethods = Object.create(arrayProto)
 
-/**
- * Intercept mutating methods and emit events
- */
-;[
+const methodsToPatch = [
   'push',
   'pop',
   'shift',
@@ -20,24 +17,19 @@ export const arrayMethods = Object.create(arrayProto)
   'sort',
   'reverse'
 ]
-.forEach(function (method) {
+
+/**
+ * Intercept mutating methods and emit events
+ */
+methodsToPatch.forEach(function (method) {
   // cache original method
   const original = arrayProto[method]
-  def(arrayMethods, method, function mutator () {
-    // avoid leaking arguments:
-    // http://jsperf.com/closure-with-arguments
-    let i = arguments.length
-    const args = new Array(i)
-    while (i--) {
-      args[i] = arguments[i]
-    }
+  def(arrayMethods, method, function mutator (...args) {
     const result = original.apply(this, args)
     const ob = this.__ob__
     let inserted
     switch (method) {
       case 'push':
-        inserted = args
-        break
       case 'unshift':
         inserted = args
         break

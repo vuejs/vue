@@ -1,17 +1,23 @@
 /* @flow */
 
 import VNode from './vnode'
-import { createElement } from './create-element'
-import { resolveConstructorOptions } from '../instance/init'
-import { resolveSlots } from '../instance/render-helpers/resolve-slots'
+import { resolveConstructorOptions } from 'core/instance/init'
+import { queueActivatedComponent } from 'core/observer/scheduler'
+import { createFunctionalComponent } from './create-functional-component'
 
 import {
   warn,
-  isObject,
-  hasOwn,
-  hyphenate,
-  validateProp
+  isDef,
+  isUndef,
+  isTrue,
+  isObject
 } from '../util/index'
+
+import {
+  resolveAsyncComponent,
+  createAsyncPlaceholder,
+  extractPropsFromVNodeData
+} from './helpers/index'
 
 import {
   callHook,
@@ -21,25 +27,97 @@ import {
   deactivateChildComponent
 } from '../instance/lifecycle'
 
-const hooks = { init, prepatch, insert, destroy }
-const hooksToMerge = Object.keys(hooks)
+import {
+  isRecyclableComponent,
+  renderRecyclableComponentTemplate
+} from 'weex/runtime/recycle-list/render-component-template'
+
+// inline hooks to be invoked on component VNodes during patch
+const componentVNodeHooks = {
+  init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
+    if (
+      vnode.componentInstance &&
+      !vnode.componentInstance._isDestroyed &&
+      vnode.data.keepAlive
+    ) {
+      // kept-alive components, treat as a patch
+      const mountedNode: any = vnode // work around flow
+      componentVNodeHooks.prepatch(mountedNode, mountedNode)
+    } else {
+      const child = vnode.componentInstance = createComponentInstanceForVnode(
+        vnode,
+        activeInstance
+      )
+      child.$mount(hydrating ? vnode.elm : undefined, hydrating)
+    }
+  },
+
+  prepatch (oldVnode: MountedComponentVNode, vnode: MountedComponentVNode) {
+    const options = vnode.componentOptions
+    const child = vnode.componentInstance = oldVnode.componentInstance
+    updateChildComponent(
+      child,
+      options.propsData, // updated props
+      options.listeners, // updated listeners
+      vnode, // new parent vnode
+      options.children // new children
+    )
+  },
+
+  insert (vnode: MountedComponentVNode) {
+    const { context, componentInstance } = vnode
+    if (!componentInstance._isMounted) {
+      componentInstance._isMounted = true
+      callHook(componentInstance, 'mounted')
+    }
+    if (vnode.data.keepAlive) {
+      if (context._isMounted) {
+        // vue-router#1212
+        // During updates, a kept-alive component's child components may
+        // change, so directly walking the tree here may call activated hooks
+        // on incorrect children. Instead we push them into a queue which will
+        // be processed after the whole patch process ended.
+        queueActivatedComponent(componentInstance)
+      } else {
+        activateChildComponent(componentInstance, true /* direct */)
+      }
+    }
+  },
+
+  destroy (vnode: MountedComponentVNode) {
+    const { componentInstance } = vnode
+    if (!componentInstance._isDestroyed) {
+      if (!vnode.data.keepAlive) {
+        componentInstance.$destroy()
+      } else {
+        deactivateChildComponent(componentInstance, true /* direct */)
+      }
+    }
+  }
+}
+
+const hooksToMerge = Object.keys(componentVNodeHooks)
 
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
-  data?: VNodeData,
+  data: ?VNodeData,
   context: Component,
   children: ?Array<VNode>,
   tag?: string
-): VNode | void {
-  if (!Ctor) {
+): VNode | Array<VNode> | void {
+  if (isUndef(Ctor)) {
     return
   }
 
   const baseCtor = context.$options._base
+
+  // plain options object: turn it into a constructor
   if (isObject(Ctor)) {
     Ctor = baseCtor.extend(Ctor)
   }
 
+  // if at this stage it's not a constructor or an async component factory,
+  // reject.
   if (typeof Ctor !== 'function') {
     if (process.env.NODE_ENV !== 'production') {
       warn(`Invalid Component definition: ${String(Ctor)}`, context)
@@ -48,39 +126,40 @@ export function createComponent (
   }
 
   // async component
-  if (!Ctor.cid) {
-    if (Ctor.resolved) {
-      Ctor = Ctor.resolved
-    } else {
-      Ctor = resolveAsyncComponent(Ctor, baseCtor, () => {
-        // it's ok to queue this on every render because
-        // $forceUpdate is buffered by the scheduler.
-        context.$forceUpdate()
-      })
-      if (!Ctor) {
-        // return nothing if this is indeed an async component
-        // wait for the callback to trigger parent update.
-        return
-      }
+  let asyncFactory
+  if (isUndef(Ctor.cid)) {
+    asyncFactory = Ctor
+    Ctor = resolveAsyncComponent(asyncFactory, baseCtor, context)
+    if (Ctor === undefined) {
+      // return a placeholder node for async component, which is rendered
+      // as a comment node but preserves all the raw information for the node.
+      // the information will be used for async server-rendering and hydration.
+      return createAsyncPlaceholder(
+        asyncFactory,
+        data,
+        context,
+        children,
+        tag
+      )
     }
   }
+
+  data = data || {}
 
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
   resolveConstructorOptions(Ctor)
 
-  data = data || {}
-
   // transform component v-model data into props & events
-  if (data.model) {
+  if (isDef(data.model)) {
     transformModel(Ctor.options, data)
   }
 
   // extract props
-  const propsData = extractProps(data, Ctor)
+  const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
   // functional component
-  if (Ctor.options.functional) {
+  if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }
 
@@ -88,255 +167,82 @@ export function createComponent (
   // child component listeners instead of DOM listeners
   const listeners = data.on
   // replace with listeners with .native modifier
+  // so it gets processed during parent component patch.
   data.on = data.nativeOn
 
-  if (Ctor.options.abstract) {
+  if (isTrue(Ctor.options.abstract)) {
     // abstract components do not keep anything
-    // other than props & listeners
+    // other than props & listeners & slot
+
+    // work around flow
+    const slot = data.slot
     data = {}
+    if (slot) {
+      data.slot = slot
+    }
   }
 
-  // merge component management hooks onto the placeholder node
-  mergeHooks(data)
+  // install component management hooks onto the placeholder node
+  installComponentHooks(data)
 
   // return a placeholder vnode
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, context,
-    { Ctor, propsData, listeners, tag, children }
+    { Ctor, propsData, listeners, tag, children },
+    asyncFactory
   )
-  return vnode
-}
 
-function createFunctionalComponent (
-  Ctor: Class<Component>,
-  propsData: ?Object,
-  data: VNodeData,
-  context: Component,
-  children: ?Array<VNode>
-): VNode | void {
-  const props = {}
-  const propOptions = Ctor.options.props
-  if (propOptions) {
-    for (const key in propOptions) {
-      props[key] = validateProp(key, propOptions, propsData)
-    }
+  // Weex specific: invoke recycle-list optimized @render function for
+  // extracting cell-slot template.
+  // https://github.com/Hanks10100/weex-native-directive/tree/master/component
+  /* istanbul ignore if */
+  if (__WEEX__ && isRecyclableComponent(vnode)) {
+    return renderRecyclableComponentTemplate(vnode)
   }
-  // ensure the createElement function in functional components
-  // gets a unique context - this is necessary for correct named slot check
-  const _context = Object.create(context)
-  const h = (a, b, c, d) => createElement(_context, a, b, c, d, true)
-  const vnode = Ctor.options.render.call(null, h, {
-    props,
-    data,
-    parent: context,
-    children,
-    slots: () => resolveSlots(children, context)
-  })
-  if (vnode instanceof VNode) {
-    vnode.functionalContext = context
-    if (data.slot) {
-      (vnode.data || (vnode.data = {})).slot = data.slot
-    }
-  }
+
   return vnode
 }
 
 export function createComponentInstanceForVnode (
   vnode: any, // we know it's MountedComponentVNode but flow doesn't
   parent: any, // activeInstance in lifecycle state
-  parentElm?: ?Node,
-  refElm?: ?Node
 ): Component {
-  const vnodeComponentOptions = vnode.componentOptions
   const options: InternalComponentOptions = {
     _isComponent: true,
-    parent,
-    propsData: vnodeComponentOptions.propsData,
-    _componentTag: vnodeComponentOptions.tag,
     _parentVnode: vnode,
-    _parentListeners: vnodeComponentOptions.listeners,
-    _renderChildren: vnodeComponentOptions.children,
-    _parentElm: parentElm || null,
-    _refElm: refElm || null
+    parent
   }
   // check inline-template render functions
   const inlineTemplate = vnode.data.inlineTemplate
-  if (inlineTemplate) {
+  if (isDef(inlineTemplate)) {
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
-  return new vnodeComponentOptions.Ctor(options)
+  return new vnode.componentOptions.Ctor(options)
 }
 
-function init (
-  vnode: VNodeWithData,
-  hydrating: boolean,
-  parentElm: ?Node,
-  refElm: ?Node
-): ?boolean {
-  if (!vnode.componentInstance || vnode.componentInstance._isDestroyed) {
-    const child = vnode.componentInstance = createComponentInstanceForVnode(
-      vnode,
-      activeInstance,
-      parentElm,
-      refElm
-    )
-    child.$mount(hydrating ? vnode.elm : undefined, hydrating)
-  } else if (vnode.data.keepAlive) {
-    // kept-alive components, treat as a patch
-    const mountedNode: any = vnode // work around flow
-    prepatch(mountedNode, mountedNode)
-  }
-}
-
-function prepatch (
-  oldVnode: MountedComponentVNode,
-  vnode: MountedComponentVNode
-) {
-  const options = vnode.componentOptions
-  const child = vnode.componentInstance = oldVnode.componentInstance
-  updateChildComponent(
-    child,
-    options.propsData, // updated props
-    options.listeners, // updated listeners
-    vnode, // new parent vnode
-    options.children // new children
-  )
-}
-
-function insert (vnode: MountedComponentVNode) {
-  if (!vnode.componentInstance._isMounted) {
-    vnode.componentInstance._isMounted = true
-    callHook(vnode.componentInstance, 'mounted')
-  }
-  if (vnode.data.keepAlive) {
-    activateChildComponent(vnode.componentInstance, true /* direct */)
-  }
-}
-
-function destroy (vnode: MountedComponentVNode) {
-  if (!vnode.componentInstance._isDestroyed) {
-    if (!vnode.data.keepAlive) {
-      vnode.componentInstance.$destroy()
-    } else {
-      deactivateChildComponent(vnode.componentInstance, true /* direct */)
-    }
-  }
-}
-
-function resolveAsyncComponent (
-  factory: Function,
-  baseCtor: Class<Component>,
-  cb: Function
-): Class<Component> | void {
-  if (factory.requested) {
-    // pool callbacks
-    factory.pendingCallbacks.push(cb)
-  } else {
-    factory.requested = true
-    const cbs = factory.pendingCallbacks = [cb]
-    let sync = true
-
-    const resolve = (res: Object | Class<Component>) => {
-      if (isObject(res)) {
-        res = baseCtor.extend(res)
-      }
-      // cache resolved
-      factory.resolved = res
-      // invoke callbacks only if this is not a synchronous resolve
-      // (async resolves are shimmed as synchronous during SSR)
-      if (!sync) {
-        for (let i = 0, l = cbs.length; i < l; i++) {
-          cbs[i](res)
-        }
-      }
-    }
-
-    const reject = reason => {
-      process.env.NODE_ENV !== 'production' && warn(
-        `Failed to resolve async component: ${String(factory)}` +
-        (reason ? `\nReason: ${reason}` : '')
-      )
-    }
-
-    const res = factory(resolve, reject)
-
-    // handle promise
-    if (res && typeof res.then === 'function' && !factory.resolved) {
-      res.then(resolve, reject)
-    }
-
-    sync = false
-    // return in case resolved synchronously
-    return factory.resolved
-  }
-}
-
-function extractProps (data: VNodeData, Ctor: Class<Component>): ?Object {
-  // we are only extracting raw values here.
-  // validation and default values are handled in the child
-  // component itself.
-  const propOptions = Ctor.options.props
-  if (!propOptions) {
-    return
-  }
-  const res = {}
-  const { attrs, props, domProps } = data
-  if (attrs || props || domProps) {
-    for (const key in propOptions) {
-      const altKey = hyphenate(key)
-      checkProp(res, props, key, altKey, true) ||
-      checkProp(res, attrs, key, altKey) ||
-      checkProp(res, domProps, key, altKey)
-    }
-  }
-  return res
-}
-
-function checkProp (
-  res: Object,
-  hash: ?Object,
-  key: string,
-  altKey: string,
-  preserve?: boolean
-): boolean {
-  if (hash) {
-    if (hasOwn(hash, key)) {
-      res[key] = hash[key]
-      if (!preserve) {
-        delete hash[key]
-      }
-      return true
-    } else if (hasOwn(hash, altKey)) {
-      res[key] = hash[altKey]
-      if (!preserve) {
-        delete hash[altKey]
-      }
-      return true
-    }
-  }
-  return false
-}
-
-function mergeHooks (data: VNodeData) {
-  if (!data.hook) {
-    data.hook = {}
-  }
+function installComponentHooks (data: VNodeData) {
+  const hooks = data.hook || (data.hook = {})
   for (let i = 0; i < hooksToMerge.length; i++) {
     const key = hooksToMerge[i]
-    const fromParent = data.hook[key]
-    const ours = hooks[key]
-    data.hook[key] = fromParent ? mergeHook(ours, fromParent) : ours
+    const existing = hooks[key]
+    const toMerge = componentVNodeHooks[key]
+    if (existing !== toMerge && !(existing && existing._merged)) {
+      hooks[key] = existing ? mergeHook(toMerge, existing) : toMerge
+    }
   }
 }
 
-function mergeHook (one: Function, two: Function): Function {
-  return function (a, b, c, d) {
-    one(a, b, c, d)
-    two(a, b, c, d)
+function mergeHook (f1: any, f2: any): Function {
+  const merged = (a, b) => {
+    // flow complains about extra args which is why we use any
+    f1(a, b)
+    f2(a, b)
   }
+  merged._merged = true
+  return merged
 }
 
 // transform component v-model info (value and callback) into
@@ -346,7 +252,7 @@ function transformModel (options, data: any) {
   const event = (options.model && options.model.event) || 'input'
   ;(data.props || (data.props = {}))[prop] = data.model.value
   const on = data.on || (data.on = {})
-  if (on[event]) {
+  if (isDef(on[event])) {
     on[event] = [data.model.callback].concat(on[event])
   } else {
     on[event] = data.model.callback

@@ -1,9 +1,13 @@
 /* @flow */
 
-import { remove } from 'shared/util'
+import VNode from '../vnode'
 import { createFnInvoker } from './update-listeners'
+import { remove, isDef, isUndef, isTrue } from 'shared/util'
 
 export function mergeVNodeHook (def: Object, hookKey: string, hook: Function) {
+  if (def instanceof VNode) {
+    def = def.data.hook || (def.data.hook = {})
+  }
   let invoker
   const oldHook = def[hookKey]
 
@@ -14,12 +18,12 @@ export function mergeVNodeHook (def: Object, hookKey: string, hook: Function) {
     remove(invoker.fns, wrappedHook)
   }
 
-  if (!oldHook) {
+  if (isUndef(oldHook)) {
     // no existing hook
     invoker = createFnInvoker([wrappedHook])
   } else {
     /* istanbul ignore if */
-    if (oldHook.fns && oldHook.merged) {
+    if (isDef(oldHook.fns) && isTrue(oldHook.merged)) {
       // already a merged invoker
       invoker = oldHook
       invoker.fns.push(wrappedHook)

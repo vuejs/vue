@@ -6,10 +6,13 @@ describe('Error handling', () => {
   // hooks that prevents the component from rendering, but should not
   // break parent component
   ;[
-    ['render', 'render function'],
+    ['data', 'data()'],
+    ['render', 'render'],
     ['beforeCreate', 'beforeCreate hook'],
     ['created', 'created hook'],
-    ['beforeMount', 'beforeMount hook']
+    ['beforeMount', 'beforeMount hook'],
+    ['directive bind', 'directive foo bind hook'],
+    ['event', 'event handler for "e"']
   ].forEach(([type, description]) => {
     it(`should recover from errors in ${type}`, done => {
       const vm = createTestInstance(components[type])
@@ -30,7 +33,8 @@ describe('Error handling', () => {
   // error in beforeUpdate/updated should affect neither child nor parent
   ;[
     ['beforeUpdate', 'beforeUpdate hook'],
-    ['updated', 'updated hook']
+    ['updated', 'updated hook'],
+    ['directive update', 'directive foo update hook']
   ].forEach(([type, description]) => {
     it(`should recover from errors in ${type} hook`, done => {
       const vm = createTestInstance(components[type])
@@ -43,7 +47,8 @@ describe('Error handling', () => {
 
   ;[
     ['beforeDestroy', 'beforeDestroy hook'],
-    ['destroyed', 'destroyed hook']
+    ['destroyed', 'destroyed hook'],
+    ['directive unbind', 'directive foo unbind hook']
   ].forEach(([type, description]) => {
     it(`should recover from errors in ${type} hook`, done => {
       const vm = createTestInstance(components[type])
@@ -87,46 +92,70 @@ describe('Error handling', () => {
     }).then(done)
   })
 
-  it('config.errorHandler should capture errors', done => {
+  it('config.errorHandler should capture render errors', done => {
     const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
     const vm = createTestInstance(components.render)
 
     const args = spy.calls.argsFor(0)
     expect(args[0].toString()).toContain('Error: render') // error
     expect(args[1]).toBe(vm.$refs.child) // vm
-    expect(args[2]).toContain('render function') // description
+    expect(args[2]).toContain('render') // description
 
     assertRootInstanceActive(vm).then(() => {
       Vue.config.errorHandler = null
     }).then(done)
   })
 
-  it('properly format component names', () => {
-    const format = Vue.util.formatComponentName
-    const vm = new Vue()
-    expect(format(vm)).toBe('<Root>')
+  it('should capture and recover from nextTick errors', done => {
+    const err1 = new Error('nextTick')
+    const err2 = new Error('nextTick2')
+    const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
+    Vue.nextTick(() => { throw err1 })
+    Vue.nextTick(() => {
+      expect(spy).toHaveBeenCalledWith(err1, undefined, 'nextTick')
 
-    vm.$root = null
-    vm.$options.name = 'hello-there'
-    expect(format(vm)).toBe('<HelloThere>')
+      const vm = new Vue()
+      vm.$nextTick(() => { throw err2 })
+      Vue.nextTick(() => {
+        // should be called with correct instance info
+        expect(spy).toHaveBeenCalledWith(err2, vm, 'nextTick')
+        Vue.config.errorHandler = null
+        done()
+      })
+    })
+  })
 
-    vm.$options.name = null
-    vm.$options._componentTag = 'foo-bar-1'
-    expect(format(vm)).toBe('<FooBar1>')
-
-    vm.$options._componentTag = null
-    vm.$options.__file = '/foo/bar/baz/SomeThing.vue'
-    expect(format(vm)).toBe(`<SomeThing> at ${vm.$options.__file}`)
-    expect(format(vm, false)).toBe('<SomeThing>')
-
-    vm.$options.__file = 'C:\\foo\\bar\\baz\\windows_file.vue'
-    expect(format(vm)).toBe(`<WindowsFile> at ${vm.$options.__file}`)
-    expect(format(vm, false)).toBe('<WindowsFile>')
+  it('should recover from errors thrown in errorHandler itself', () => {
+    Vue.config.errorHandler = () => {
+      throw new Error('error in errorHandler ¯\\_(ツ)_/¯')
+    }
+    const vm = new Vue({
+      render (h) {
+        throw new Error('error in render')
+      },
+      renderError (h, err) {
+        return h('div', err.toString())
+      }
+    }).$mount()
+    expect('error in errorHandler').toHaveBeenWarned()
+    expect('error in render').toHaveBeenWarned()
+    expect(vm.$el.textContent).toContain('error in render')
+    Vue.config.errorHandler = null
   })
 })
 
 function createErrorTestComponents () {
   const components = {}
+
+  // data
+  components.data = {
+    data () {
+      throw new Error('data')
+    },
+    render (h) {
+      return h('div')
+    }
+  }
 
   // render error
   components.render = {
@@ -162,6 +191,22 @@ function createErrorTestComponents () {
     }
   })
 
+  // directive hooks errors
+  ;['bind', 'update', 'unbind'].forEach(hook => {
+    const key = 'directive ' + hook
+    const dirComp = components[key] = {
+      props: ['n'],
+      template: `<div v-foo="n">{{ n }}</div>`
+    }
+    const dirFoo = {}
+    dirFoo[hook] = function () {
+      throw new Error(key)
+    }
+    dirComp.directives = {
+      foo: dirFoo
+    }
+  })
+
   // user watcher
   components.userWatcherGetter = {
     props: ['n'],
@@ -186,6 +231,19 @@ function createErrorTestComponents () {
     },
     render (h) {
       return h('div', this.n)
+    }
+  }
+
+  // event errors
+  components.event = {
+    beforeCreate () {
+      this.$on('e', () => { throw new Error('event') })
+    },
+    mounted () {
+      this.$emit('e')
+    },
+    render (h) {
+      return h('div')
     }
   }
 

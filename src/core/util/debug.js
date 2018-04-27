@@ -1,8 +1,12 @@
+/* @flow */
+
 import config from '../config'
 import { noop } from 'shared/util'
 
-let warn = noop
-let formatComponentName
+export let warn = noop
+export let tip = noop
+export let generateComponentTrace = (noop: any) // work around flow check
+export let formatComponentName = (noop: any)
 
 if (process.env.NODE_ENV !== 'production') {
   const hasConsole = typeof console !== 'undefined'
@@ -12,9 +16,19 @@ if (process.env.NODE_ENV !== 'production') {
     .replace(/[-_]/g, '')
 
   warn = (msg, vm) => {
+    const trace = vm ? generateComponentTrace(vm) : ''
+
+    if (config.warnHandler) {
+      config.warnHandler.call(null, msg, vm, trace)
+    } else if (hasConsole && (!config.silent)) {
+      console.error(`[Vue warn]: ${msg}${trace}`)
+    }
+  }
+
+  tip = (msg, vm) => {
     if (hasConsole && (!config.silent)) {
-      console.error(`[Vue warn]: ${msg} ` + (
-        vm ? formatLocation(formatComponentName(vm)) : ''
+      console.warn(`[Vue tip]: ${msg}` + (
+        vm ? generateComponentTrace(vm) : ''
       ))
     }
   }
@@ -23,11 +37,13 @@ if (process.env.NODE_ENV !== 'production') {
     if (vm.$root === vm) {
       return '<Root>'
     }
-    let name = vm._isVue
-      ? vm.$options.name || vm.$options._componentTag
-      : vm.name
-
-    const file = vm._isVue && vm.$options.__file
+    const options = typeof vm === 'function' && vm.cid != null
+      ? vm.options
+      : vm._isVue
+        ? vm.$options || vm.constructor.options
+        : vm || {}
+    let name = options.name || options._componentTag
+    const file = options.__file
     if (!name && file) {
       const match = file.match(/([^/\\]+)\.vue$/)
       name = match && match[1]
@@ -39,12 +55,46 @@ if (process.env.NODE_ENV !== 'production') {
     )
   }
 
-  const formatLocation = str => {
-    if (str === `<Anonymous>`) {
-      str += ` - use the "name" option for better debugging messages.`
+  const repeat = (str, n) => {
+    let res = ''
+    while (n) {
+      if (n % 2 === 1) res += str
+      if (n > 1) str += str
+      n >>= 1
     }
-    return `\n(found in ${str})`
+    return res
+  }
+
+  generateComponentTrace = vm => {
+    if (vm._isVue && vm.$parent) {
+      const tree = []
+      let currentRecursiveSequence = 0
+      while (vm) {
+        if (tree.length > 0) {
+          const last = tree[tree.length - 1]
+          if (last.constructor === vm.constructor) {
+            currentRecursiveSequence++
+            vm = vm.$parent
+            continue
+          } else if (currentRecursiveSequence > 0) {
+            tree[tree.length - 1] = [last, currentRecursiveSequence]
+            currentRecursiveSequence = 0
+          }
+        }
+        tree.push(vm)
+        vm = vm.$parent
+      }
+      return '\n\nfound in\n\n' + tree
+        .map((vm, i) => `${
+          i === 0 ? '---> ' : repeat(' ', 5 + i * 2)
+        }${
+          Array.isArray(vm)
+            ? `${formatComponentName(vm[0])}... (${vm[1]} recursive calls)`
+            : formatComponentName(vm)
+        }`)
+        .join('\n')
+    } else {
+      return `\n\n(found in ${formatComponentName(vm)})`
+    }
   }
 }
-
-export { warn, formatComponentName }

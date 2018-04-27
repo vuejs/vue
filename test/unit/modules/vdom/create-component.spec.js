@@ -19,12 +19,10 @@ describe('create-component', () => {
       props: ['msg'],
       render () {}
     }
-    const init = jasmine.createSpy()
     const data = {
       props: { msg: 'hello world' },
       attrs: { id: 1 },
       staticAttrs: { class: 'foo' },
-      hook: { init },
       on: { notify: 'onNotify' }
     }
     const vnode = createComponent(child, data, vm, vm)
@@ -38,9 +36,6 @@ describe('create-component', () => {
     expect(vnode.elm).toBeUndefined()
     expect(vnode.ns).toBeUndefined()
     expect(vnode.context).toEqual(vm)
-
-    vnode.data.hook.init(vnode)
-    expect(init.calls.argsFor(0)[0]).toBe(vnode)
   })
 
   it('create a component when resolved with async loading', done => {
@@ -61,7 +56,8 @@ describe('create-component', () => {
     }
     function go () {
       vnode = createComponent(async, data, vm, vm)
-      expect(vnode).toBeUndefined() // not to be loaded yet.
+      expect(vnode.isComment).toBe(true) // not to be loaded yet.
+      expect(vnode.asyncFactory).toBe(async)
     }
     function loaded () {
       vnode = createComponent(async, data, vm, vm)
@@ -93,11 +89,11 @@ describe('create-component', () => {
     }
     function go () {
       vnode = createComponent(async, data, vm, vm)
-      expect(vnode).toBeUndefined() // not to be loaded yet.
+      expect(vnode.isComment).toBe(true) // not to be loaded yet.
     }
     function failed () {
       vnode = createComponent(async, data, vm, vm)
-      expect(vnode).toBeUndefined() // failed
+      expect(vnode.isComment).toBe(true) // failed, still a comment node
       expect(`Failed to resolve async component: ${async}\nReason: ${reason}`).toHaveBeenWarned()
       done()
     }

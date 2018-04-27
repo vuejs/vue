@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { warn } from 'core/util/debug'
 
 describe('Global config', () => {
   it('should warn replacing config object', () => {
@@ -10,13 +11,13 @@ describe('Global config', () => {
 
   describe('silent', () => {
     it('should be false by default', () => {
-      Vue.util.warn('foo')
+      warn('foo')
       expect('foo').toHaveBeenWarned()
     })
 
     it('should work when set to true', () => {
       Vue.config.silent = true
-      Vue.util.warn('foo')
+      warn('foo')
       expect('foo').not.toHaveBeenWarned()
       Vue.config.silent = false
     })
@@ -41,6 +42,17 @@ describe('Global config', () => {
       expect(spy.calls.count()).toBe(2)
       expect(spy).toHaveBeenCalledWith(2, 2, test)
       expect(test.$options.__test__).toBe(3)
+    })
+  })
+
+  describe('ignoredElements', () => {
+    it('should work', () => {
+      Vue.config.ignoredElements = ['foo', /^ion-/]
+      new Vue({
+        template: `<div><foo/><ion-foo/><ion-bar/></div>`
+      }).$mount()
+      expect('Unknown custom element').not.toHaveBeenWarned()
+      Vue.config.ignoredElements = []
     })
   })
 })

@@ -5,6 +5,7 @@ import { parseHTML } from 'compiler/parser/html-parser'
 import { makeMap } from 'shared/util'
 
 const splitRE = /\r?\n/g
+const replaceRE = /./g
 const isSpecialTag = makeMap('script,style,template', true)
 
 type Attribute = {
@@ -18,7 +19,7 @@ type Attribute = {
 export function parseComponent (
   content: string,
   options?: Object = {}
- ): SFCDescriptor {
+): SFCDescriptor {
   const sfc: SFCDescriptor = {
     template: null,
     script: null,
@@ -26,7 +27,7 @@ export function parseComponent (
     customBlocks: []
   }
   let depth = 0
-  let currentBlock: ?(SFCBlock | SFCCustomBlock) = null
+  let currentBlock: ?SFCBlock = null
 
   function start (
     tag: string,
@@ -43,7 +44,7 @@ export function parseComponent (
         attrs: attrs.reduce((cumulated, { name, value }) => {
           cumulated[name] = value || true
           return cumulated
-        }, Object.create(null))
+        }, {})
       }
       if (isSpecialTag(tag)) {
         checkAttrs(currentBlock, attrs)
@@ -86,7 +87,7 @@ export function parseComponent (
       // pad content so that linters and pre-processors can output correct
       // line numbers in errors and warnings
       if (currentBlock.type !== 'template' && options.pad) {
-        text = padContent(currentBlock) + text
+        text = padContent(currentBlock, options.pad) + text
       }
       currentBlock.content = text
       currentBlock = null
@@ -94,12 +95,16 @@ export function parseComponent (
     depth--
   }
 
-  function padContent (block: SFCBlock | SFCCustomBlock) {
-    const offset = content.slice(0, block.start).split(splitRE).length
-    const padChar = block.type === 'script' && !block.lang
-      ? '//\n'
-      : '\n'
-    return Array(offset).join(padChar)
+  function padContent (block: SFCBlock, pad: true | "line" | "space") {
+    if (pad === 'space') {
+      return content.slice(0, block.start).replace(replaceRE, ' ')
+    } else {
+      const offset = content.slice(0, block.start).split(splitRE).length
+      const padChar = block.type === 'script' && !block.lang
+        ? '//\n'
+        : '\n'
+      return Array(offset).join(padChar)
+    }
   }
 
   parseHTML(content, {
