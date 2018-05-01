@@ -26,7 +26,7 @@ export class CodegenState {
     this.dataGenFns = pluckModuleFunction(options.modules, 'genData')
     this.directives = extend(extend({}, baseDirectives), options.directives)
     const isReservedTag = options.isReservedTag || no
-    this.maybeComponent = (el: ASTElement) => !isReservedTag(el.tag)
+    this.maybeComponent = (el: ASTElement) => !(isReservedTag(el.tag) && !el.component)
     this.onceId = 0
     this.staticRenderFns = []
   }
