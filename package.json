@@ -12,6 +12,7 @@
     "dist/*.js",
     "types/*.d.ts"
   ],
+  "sideEffects": false,
   "scripts": {
     "dev": "rollup -w -c scripts/config.js --environment TARGET:web-full-dev",
     "dev:cjs": "rollup -w -c scripts/config.js --environment TARGET:web-runtime-cjs",
