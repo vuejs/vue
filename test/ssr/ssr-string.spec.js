@@ -1211,6 +1211,37 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  // #7859
+  it('should remove and trim newlines in class attributes', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div class="a b
+                    c d">
+        </div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div class="a b c d"></div>`)
+      done()
+    })
+  })
+
+  // #7859
+  it('should trim excess whigtespace in class attributes', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div class="a    b c      d">
+        </div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div class="a b c d"></div>`)
+      done()
+    })
+  })
+
   it('should expose ssr helpers on functional context', done => {
     let called = false
     renderVmWithOptions({
