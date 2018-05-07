@@ -6,6 +6,7 @@ import { resolveInject } from '../instance/inject'
 import { normalizeChildren } from '../vdom/helpers/normalize-children'
 import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 import { installRenderHelpers } from '../instance/render-helpers/index'
+import { extend } from 'shared/util'
 
 import {
   isDef,
@@ -19,6 +20,7 @@ import {
 export function FunctionalRenderContext (
   data: VNodeData,
   props: Object,
+  methods: Object,
   children: ?Array<VNode>,
   parent: Component,
   Ctor: Class<Component>
@@ -44,6 +46,7 @@ export function FunctionalRenderContext (
 
   this.data = data
   this.props = props
+  this.methods = methods
   this.children = children
   this.parent = parent
   this.listeners = data.on || emptyObject
@@ -94,9 +97,12 @@ export function createFunctionalComponent (
     if (isDef(data.props)) mergeProps(props, data.props)
   }
 
+  const methods = extend({}, options.methods)
+
   const renderContext = new FunctionalRenderContext(
     data,
     props,
+    methods,
     children,
     contextVm,
     Ctor

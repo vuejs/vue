@@ -242,6 +242,24 @@ describe('Options functional', () => {
     expect(vm.$el.childNodes[1].namespaceURI).toContain('svg')
   })
 
+  it('methods should work', () => {
+    const Child = {
+      functional: true,
+      methods: {
+        getTag () {
+          return 'span'
+        }
+      },
+      render: (h, ctx) => h(ctx.methods.getTag())
+    }
+    const vm = new Vue({
+      template: `<div><child/></div>`,
+      components: { Child }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<span></span>')
+  })
+
   it('should work with render fns compiled from template', done => {
     // code generated via vue-template-es2015-compiler
     var render = function (_h, _vm) {
