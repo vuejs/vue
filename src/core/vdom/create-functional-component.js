@@ -27,20 +27,20 @@ export function FunctionalRenderContext (
   const options = Ctor.options
   // ensure the createElement function in functional components
   // gets a unique context - this is necessary for correct named slot check
-  let contextVm
+  const contextVm = Object.create(parent)
   if (hasOwn(parent, '_uid')) {
-    contextVm = Object.create(parent)
     // $flow-disable-line
     contextVm._original = parent
   } else {
     // the context vm passed in is a functional context as well.
     // in this case we want to make sure we are able to get a hold to the
     // real context instance.
-    contextVm = parent
+
     // $flow-disable-line
     parent = parent._original
   }
 
+  // support functional components hash
   contextVm.$options = Object.create(contextVm.$options)
   contextVm.$options.components = extend(Object.create(contextVm.$options.components), options.components)
 
