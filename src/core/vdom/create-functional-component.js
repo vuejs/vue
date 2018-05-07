@@ -6,6 +6,7 @@ import { resolveInject } from '../instance/inject'
 import { normalizeChildren } from '../vdom/helpers/normalize-children'
 import { resolveSlots } from '../instance/render-helpers/resolve-slots'
 import { installRenderHelpers } from '../instance/render-helpers/index'
+import { extend } from 'shared/util'
 
 import {
   isDef,
@@ -39,6 +40,10 @@ export function FunctionalRenderContext (
     // $flow-disable-line
     parent = parent._original
   }
+
+  contextVm.$options = Object.create(contextVm.$options)
+  contextVm.$options.components = extend(Object.create(contextVm.$options.components), options.components)
+
   const isCompiled = isTrue(options._compiled)
   const needNormalization = !isCompiled
 
