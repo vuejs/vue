@@ -42,7 +42,7 @@ export function FunctionalRenderContext (
 
   // support functional components hash
   contextVm.$options = Object.create(contextVm.$options)
-  contextVm.$options.components = extend(Object.create(contextVm.$options.components), options.components)
+  contextVm.$options.components = extend(Object.create(contextVm.$options.components || {}), options.components)
 
   const isCompiled = isTrue(options._compiled)
   const needNormalization = !isCompiled
