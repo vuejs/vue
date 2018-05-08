@@ -250,6 +250,15 @@ describe('parser', () => {
     expect(ast.children[0].children[0].text).toBe('{{msg}}')
   })
 
+  it('v-pre directive should leave template in DOM', () => {
+    const ast = parse('<div v-pre id="message1"><template id="template1"><p>{{msg}}</p></template></div>', baseOptions)
+    expect(ast.pre).toBe(true)
+    expect(ast.attrs[0].name).toBe('id')
+    expect(ast.attrs[0].value).toBe('"message1"')
+    expect(ast.children[0].attrs[0].name).toBe('id')
+    expect(ast.children[0].attrs[0].value).toBe('"template1"')
+  })
+
   it('v-for directive basic syntax', () => {
     const ast = parse('<ul><li v-for="item in items"></li></ul>', baseOptions)
     const liAst = ast.children[0]
