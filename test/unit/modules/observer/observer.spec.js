@@ -316,6 +316,21 @@ describe('Observer', () => {
     }).then(done)
   })
 
+  it('Cannot enable reactivity on a property that is already defined', done => {
+    const vm = new Vue({
+      data: {
+        person: {
+          age: 32
+        }
+      }
+    }).$mount()
+    vm.person.job = 'Programmer'
+    Vue.set(vm.person, 'job', 'Educator')
+    waitForUpdate(() => {
+      expect(`Cannot enable reactivity on a property that is already defined`).toHaveBeenWarned()
+    }).end(done)
+  })
+
   it('warning set/delete on Vue instance root $data', done => {
     const data = { a: 1 }
     const vm = new Vue({
