@@ -318,6 +318,7 @@ describe('Observer', () => {
 
   it('Cannot enable reactivity on a property that is already defined', done => {
     const vm = new Vue({
+      template: '<div></div>',
       data: {
         person: {
           age: 32
