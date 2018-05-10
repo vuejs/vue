@@ -329,7 +329,7 @@ describe('Observer', () => {
     Vue.set(vm.person, 'job', 'Educator')
     waitForUpdate(() => {
       expect(`Cannot enable reactivity on a property that is already defined`).toHaveBeenWarned()
-    }).end(done)
+    }).then(done)
   })
 
   it('warning set/delete on Vue instance root $data', done => {
