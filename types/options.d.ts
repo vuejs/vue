@@ -113,7 +113,7 @@ export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = Pro
   props?: PropDefs;
   inject?: InjectOptions;
   functional: boolean;
-  render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode;
+  render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode | VNode[];
 }
 
 export interface RenderContext<Props=DefaultProps> {
