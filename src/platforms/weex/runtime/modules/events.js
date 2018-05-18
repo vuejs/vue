@@ -12,6 +12,7 @@ function add (
   passive?: boolean,
   params?: Array<any>
 ) {
+  /* istanbul ignore next */
   if (capture) {
     console.log('Weex do not support event in bubble phase.')
     return

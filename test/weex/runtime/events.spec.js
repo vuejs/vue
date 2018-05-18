@@ -95,4 +95,77 @@ describe('generate events', () => {
       done()
     })
   })
+
+  it('should be only fired once', (done) => {
+    compileAndExecute(`
+      <div @click.once="foo">
+        <text>{{x}}</text>
+      </div>
+    `, `
+      data: { x: 0 },
+      methods: {
+        foo: function () {
+          this.x++
+        }
+      }
+    `).then(instance => {
+      fireEvent(instance, '_root', 'click')
+      return instance
+    }).then(instance => {
+      expect(getRoot(instance)).toEqual({
+        type: 'div',
+        children: [{
+          type: 'text',
+          attr: { value: '1' }
+        }]
+      })
+      fireEvent(instance, '_root', 'click')
+      return instance
+    }).then(instance => {
+      expect(getRoot(instance)).toEqual({
+        type: 'div',
+        children: [{
+          type: 'text',
+          attr: { value: '1' }
+        }]
+      })
+      done()
+    })
+  })
+
+  // it('should be called once with arguments', (done) => {
+  //   debugger
+  //   compileAndExecute(`
+  //     <div @click.once="foo('Weex')">
+  //       <text>Hello {{x}}</text>
+  //     </div>
+  //   `, `
+  //     data: { x: 'World' },
+  //     methods: {
+  //       foo: function (x) {
+  //         this.x = x
+  //       }
+  //     }
+  //   `).then(instance => {
+  //     expect(getRoot(instance)).toEqual({
+  //       type: 'div',
+  //       event: ['click'],
+  //       children: [{
+  //         type: 'text',
+  //         attr: { value: 'Hello World' }
+  //       }]
+  //     })
+  //     fireEvent(instance, '_root', 'click')
+  //     return instance
+  //   }).then(instance => {
+  //     expect(getRoot(instance)).toEqual({
+  //       type: 'div',
+  //       children: [{
+  //         type: 'text',
+  //         attr: { value: 'Hello Weex' }
+  //       }]
+  //     })
+  //     done()
+  //   })
+  // })
 })

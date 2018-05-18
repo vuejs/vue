@@ -109,6 +109,24 @@ describe('richtext component', () => {
         }
       })
     })
+
+    it('with event', () => {
+      const compiled = compileSnippet(`
+        <richtext>
+          <span @click="onClick">event</span>
+        </richtext>
+      `, `
+        methods: {
+          onClick () {}
+        }
+      `)
+      // Because compiled.attr.value[0].events.click is a function,
+      // we have to stringify `compiled` to ignore the function
+      expect(JSON.stringify(compiled)).toEqual(
+        '{"type":"richtext","attr":{"value":[{"type":"span","attr":{"value":"event"},"events":{}}]}}'
+      )
+      expect(typeof compiled.attr.value[0].events.click).toEqual('function')
+    })
   })
 
   describe('a', () => {

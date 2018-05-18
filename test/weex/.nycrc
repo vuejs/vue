@@ -2,6 +2,13 @@
   "include": [
     "src/platforms/weex/**"
   ],
+  "exclude": [
+    "src/platforms/weex/compiler/modules/recycle-list/**",
+    "src/platforms/weex/runtime/recycle-list/**",
+    "src/platforms/weex/runtime/components/transition.js",
+    "src/platforms/weex/runtime/components/transition-group.js",
+    "src/platforms/weex/runtime/modules/transition.js"
+  ],
   "reporter": [
     "lcov",
     "text-summary"

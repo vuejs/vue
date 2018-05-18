@@ -137,6 +137,7 @@ function createVueModuleInstance (
    * Get instance config.
    * @return {object}
    */
+  /* istanbul ignore next */
   Vue.prototype.$getConfig = function () {
     if (instance.app instanceof Vue) {
       return instance.config
@@ -153,6 +154,7 @@ function createVueModuleInstance (
  * framework can make sure no side effect of the callback happened after
  * an instance destroyed.
  */
+/* istanbul ignore next */
 function getInstanceTimer (
   instanceId: string,
   moduleGetter: Function
