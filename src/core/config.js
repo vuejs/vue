@@ -28,6 +28,9 @@ export type Config = {
   getTagNamespace: (x?: string) => string | void;
   mustUseProp: (tag: string, type: ?string, name: string) => boolean;
 
+  // private
+  async: boolean;
+
   // legacy
   _lifecycleHooks: Array<string>;
 };
@@ -113,6 +116,12 @@ export default ({
    * Platform-dependent.
    */
   mustUseProp: no,
+
+  /**
+   * Perform updates asynchronously. This should never be set to false in
+   * production as it will significantly reduce performance.
+   */
+  async: true,
 
   /**
    * Exposed for legacy reasons

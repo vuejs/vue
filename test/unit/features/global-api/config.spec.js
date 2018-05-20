@@ -57,9 +57,8 @@ describe('Global config', () => {
   })
 
   describe('async', () => {
-    it('does not update synchronously when false', () => {
+    it('does not update synchronously when true', () => {
       const spy = jasmine.createSpy()
-      Vue.config.async = true
       const vm = new Vue({
         template: `<div :class="value"></div>`,
         updated: spy,
