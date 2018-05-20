@@ -55,4 +55,31 @@ describe('Global config', () => {
       Vue.config.ignoredElements = []
     })
   })
+
+  describe('async', () => {
+    it('does not update synchronously when false', () => {
+      const spy = jasmine.createSpy()
+      Vue.config.async = true
+      const vm = new Vue({
+        template: `<div :class="value"></div>`,
+        updated: spy,
+        data: { value: true }
+      }).$mount()
+      vm.value = false
+      expect(spy).not.toHaveBeenCalled()
+    })
+
+    it('updates synchronously when false', () => {
+      const spy = jasmine.createSpy()
+      Vue.config.async = false
+      const vm = new Vue({
+        template: `<div :class="value"></div>`,
+        updated: spy,
+        data: { value: true }
+      }).$mount()
+      vm.value = false
+      expect(spy).toHaveBeenCalled()
+      Vue.config.async = true
+    })
+  })
 })
