@@ -24,6 +24,16 @@ if (process.env.NODE_ENV !== 'production') {
     )
   }
 
+  const warnStartingWithDollar = (target, key) => {
+    warn(
+      `Property "${key}" must be accessed with "$data.${key}" because ` +
+      'properties starting with "$" or "_" are not proxied in the Vue instance to ' +
+      'prevent conflicts with Vue internals' +
+      'See: https://vuejs.org/v2/api/#data',
+      target
+    )
+  }
+
   const hasProxy =
     typeof Proxy !== 'undefined' && isNative(Proxy)
 
@@ -47,7 +57,8 @@ if (process.env.NODE_ENV !== 'production') {
       const has = key in target
       const isAllowed = allowedGlobals(key) || (typeof key === 'string' && key.charAt(0) === '_')
       if (!has && !isAllowed) {
-        warnNonPresent(target, key)
+        if (key in target.$data) warnStartingWithDollar(target, key)
+        else warnNonPresent(target, key)
       }
       return has || !isAllowed
     }
@@ -56,7 +67,8 @@ if (process.env.NODE_ENV !== 'production') {
   const getHandler = {
     get (target, key) {
       if (typeof key === 'string' && !(key in target)) {
-        warnNonPresent(target, key)
+        if (key in target.$data) warnStartingWithDollar(target, key)
+        else warnNonPresent(target, key)
       }
       return target[key]
     }
