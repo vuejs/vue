@@ -1,7 +1,10 @@
 /* @flow */
 
+// 定义vnode类型
 export default class VNode {
+  // 标签名
   tag: string | void;
+  // s
   data: VNodeData | void;
   children: ?Array<VNode>;
   text: string | void;
