@@ -55,7 +55,8 @@ if (process.env.NODE_ENV !== 'production') {
   const hasHandler = {
     has (target, key) {
       const has = key in target
-      const isAllowed = allowedGlobals(key) || (typeof key === 'string' && key.charAt(0) === '_')
+      const isAllowed = allowedGlobals(key) ||
+        (typeof key === 'string' && key.charAt(0) === '_' && !(key in target.$data))
       if (!has && !isAllowed) {
         if (key in target.$data) warnStartingWithDollar(target, key)
         else warnNonPresent(target, key)

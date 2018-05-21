@@ -54,6 +54,14 @@ if (typeof Proxy !== 'undefined') {
       expect(`Property "$a" must be accessed with "$data.$a"`).toHaveBeenWarned()
     })
 
+    it('should warn properties starting with _ when found', () => {
+      new Vue({
+        data: { _foo: 'foo' },
+        template: `<div>{{ _foo }}</div>`
+      }).$mount()
+      expect(`Property "_foo" must be accessed with "$data._foo"`).toHaveBeenWarned()
+    })
+
     it('should warn properties starting with $ when not found', () => {
       new Vue({
         template: `<div>{{ $a }}</div>`
