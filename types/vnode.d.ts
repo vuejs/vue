@@ -36,6 +36,7 @@ export interface VNodeData {
   slot?: string;
   scopedSlots?: { [key: string]: ScopedSlot };
   ref?: string;
+  refInFor?: string;
   tag?: string;
   staticClass?: string;
   class?: any;
