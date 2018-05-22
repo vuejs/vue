@@ -160,7 +160,8 @@ Vue.component('component', {
         fontSize: '14px'
       },
       key: 'myKey',
-      ref: 'myRef'
+      ref: 'myRef',
+      refInFor: true
     }, [
       createElement(),
       createElement("div", "message"),
