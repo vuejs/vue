@@ -375,7 +375,7 @@ export function parseFor (exp: string): ?ForParseResult {
   const alias = inMatch[1].trim().replace(stripParensRE, '')
   const iteratorMatch = alias.match(forIteratorRE)
   if (iteratorMatch) {
-    res.alias = alias.replace(forIteratorRE, '')
+    res.alias = alias.replace(forIteratorRE, '').trim()
     res.iterator1 = iteratorMatch[1].trim()
     if (iteratorMatch[2]) {
       res.iterator2 = iteratorMatch[2].trim()
