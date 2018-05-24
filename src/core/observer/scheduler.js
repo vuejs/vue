@@ -146,7 +146,7 @@ export function queueWatcher (watcher: Watcher) {
     if (!waiting) {
       waiting = true
 
-      if (process.env.NODE_ENV !== 'production' && config.async) {
+      if (process.env.NODE_ENV !== 'production' && !config.async) {
         flushSchedulerQueue()
         return
       }
