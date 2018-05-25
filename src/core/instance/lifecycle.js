@@ -98,7 +98,6 @@ export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
     if (vm._watcher) {
-      // TODO _watcher 下的 update 目前还不清楚在哪里注入的
       vm._watcher.update()
     }
   }
