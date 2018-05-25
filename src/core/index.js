@@ -8,6 +8,7 @@ initGlobalAPI(Vue)
 Object.defineProperty(Vue.prototype, '$isServer', {
   get: isServerRendering
 })
+//123123
 
 Object.defineProperty(Vue.prototype, '$ssrContext', {
   get () {
