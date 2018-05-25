@@ -13,13 +13,15 @@ export function initEvents (vm: Component) {
   vm._events = Object.create(null)
   vm._hasHookEvent = false
   // init parent attached events
+  // TODO 没看到 _parentListeners 之后看到回来再看
+  // 先弄清楚存储的格式，之后再看具体实现细节
   const listeners = vm.$options._parentListeners
   if (listeners) {
     updateComponentListeners(vm, listeners)
   }
 }
 
-let target: Component
+let target: any
 
 function add (event, fn, once) {
   if (once) {
@@ -40,12 +42,14 @@ export function updateComponentListeners (
 ) {
   target = vm
   updateListeners(listeners, oldListeners || {}, add, remove, vm)
+  target = undefined
 }
 
 export function eventsMixin (Vue: Class<Component>) {
   const hookRE = /^hook:/
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
     const vm: Component = this
+    // 处理事件名是数组的情况
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
         this.$on(event[i], fn)
@@ -75,11 +79,13 @@ export function eventsMixin (Vue: Class<Component>) {
   Vue.prototype.$off = function (event?: string | Array<string>, fn?: Function): Component {
     const vm: Component = this
     // all
+    // 清空所有事件
     if (!arguments.length) {
       vm._events = Object.create(null)
       return vm
     }
     // array of events
+    // 清空一个事件列表
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
         this.$off(event[i], fn)
@@ -87,14 +93,17 @@ export function eventsMixin (Vue: Class<Component>) {
       return vm
     }
     // specific event
+    // 若没有事件对应的函数列表则不用处理
     const cbs = vm._events[event]
     if (!cbs) {
       return vm
     }
-    if (arguments.length === 1) {
+    // 清空特定的事件
+    if (!fn) {
       vm._events[event] = null
       return vm
     }
+    // 删除某个事件对应的特定的处理函数
     if (fn) {
       // specific handler
       let cb
@@ -109,9 +118,10 @@ export function eventsMixin (Vue: Class<Component>) {
     }
     return vm
   }
-
+  // 触发事件
   Vue.prototype.$emit = function (event: string): Component {
     const vm: Component = this
+    // 事件名字不合法的话在非正式环境提示修改
     if (process.env.NODE_ENV !== 'production') {
       const lowerCaseEvent = event.toLowerCase()
       if (lowerCaseEvent !== event && vm._events[lowerCaseEvent]) {
@@ -124,6 +134,7 @@ export function eventsMixin (Vue: Class<Component>) {
         )
       }
     }
+    // 触发事件
     let cbs = vm._events[event]
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs

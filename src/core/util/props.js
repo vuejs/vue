@@ -26,6 +26,7 @@ export function validateProp (
 ): any {
   const prop = propOptions[key]
   const absent = !hasOwn(propsData, key)
+  // TODO 还不清楚 propsData 的具体作用感觉应该是缓存策略
   let value = propsData[key]
   // handle boolean props
   if (isType(Boolean, prop.type)) {
@@ -45,7 +46,11 @@ export function validateProp (
     observe(value)
     observerState.shouldConvert = prevShouldConvert
   }
-  if (process.env.NODE_ENV !== 'production') {
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    // skip validation for weex recycle-list child component props
+    !(__WEEX__ && isObject(value) && ('@binding' in value))
+  ) {
     assertProp(prop, key, value, vm, absent)
   }
   return value

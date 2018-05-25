@@ -13,7 +13,9 @@ if (process.env.NODE_ENV !== 'production') {
     perf.clearMarks &&
     perf.clearMeasures
   ) {
+    // 用于标记时间戳
     mark = tag => perf.mark(tag)
+    // 用于计算两个时间戳的时间
     measure = (name, startTag, endTag) => {
       perf.measure(name, startTag, endTag)
       perf.clearMarks(startTag)

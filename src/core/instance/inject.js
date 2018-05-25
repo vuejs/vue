@@ -14,6 +14,7 @@ export function initProvide (vm: Component) {
 }
 
 export function initInjections (vm: Component) {
+  // 获取到所有的 inject 对应的值
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
     observerState.shouldConvert = false
@@ -29,6 +30,7 @@ export function initInjections (vm: Component) {
           )
         })
       } else {
+        // 将属性代理到 this 下
         defineReactive(vm, key, result[key])
       }
     })
@@ -36,16 +38,17 @@ export function initInjections (vm: Component) {
   }
 }
 
+// 用于获取所有的 inject 对应的 _provided 的值
 export function resolveInject (inject: any, vm: Component): ?Object {
   if (inject) {
     // inject is :any because flow is not smart enough to figure out cached
     const result = Object.create(null)
     const keys = hasSymbol
-        ? Reflect.ownKeys(inject).filter(key => {
-          /* istanbul ignore next */
-          return Object.getOwnPropertyDescriptor(inject, key).enumerable
-        })
-        : Object.keys(inject)
+      ? Reflect.ownKeys(inject).filter(key => {
+        /* istanbul ignore next */
+        return Object.getOwnPropertyDescriptor(inject, key).enumerable
+      })
+      : Object.keys(inject)
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]

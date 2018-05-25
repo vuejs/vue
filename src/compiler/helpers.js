@@ -1,5 +1,6 @@
 /* @flow */
 
+import { emptyObject } from 'shared/util'
 import { parseFilters } from './parser/filter-parser'
 
 export function baseWarn (msg: string) {
@@ -17,10 +18,18 @@ export function pluckModuleFunction<F: Function> (
 
 export function addProp (el: ASTElement, name: string, value: string) {
   (el.props || (el.props = [])).push({ name, value })
+  el.plain = false
 }
 
-export function addAttr (el: ASTElement, name: string, value: string) {
+export function addAttr (el: ASTElement, name: string, value: any) {
   (el.attrs || (el.attrs = [])).push({ name, value })
+  el.plain = false
+}
+
+// add a raw attr (use this in preTransforms)
+export function addRawAttr (el: ASTElement, name: string, value: any) {
+  el.attrsMap[name] = value
+  el.attrsList.push({ name, value })
 }
 
 export function addDirective (
@@ -32,6 +41,7 @@ export function addDirective (
   modifiers: ?ASTModifiers
 ) {
   (el.directives || (el.directives = [])).push({ name, rawName, value, arg, modifiers })
+  el.plain = false
 }
 
 export function addHandler (
@@ -42,39 +52,61 @@ export function addHandler (
   important?: boolean,
   warn?: Function
 ) {
+  modifiers = modifiers || emptyObject
   // warn prevent and passive modifier
   /* istanbul ignore if */
   if (
     process.env.NODE_ENV !== 'production' && warn &&
-    modifiers && modifiers.prevent && modifiers.passive
+    modifiers.prevent && modifiers.passive
   ) {
     warn(
       'passive and prevent can\'t be used together. ' +
       'Passive handler can\'t prevent default event.'
     )
   }
+
   // check capture modifier
-  if (modifiers && modifiers.capture) {
+  if (modifiers.capture) {
     delete modifiers.capture
     name = '!' + name // mark the event as captured
   }
-  if (modifiers && modifiers.once) {
+  if (modifiers.once) {
     delete modifiers.once
     name = '~' + name // mark the event as once
   }
   /* istanbul ignore if */
-  if (modifiers && modifiers.passive) {
+  if (modifiers.passive) {
     delete modifiers.passive
     name = '&' + name // mark the event as passive
   }
+
+  // normalize click.right and click.middle since they don't actually fire
+  // this is technically browser-specific, but at least for now browsers are
+  // the only target envs that have right/middle clicks.
+  if (name === 'click') {
+    if (modifiers.right) {
+      name = 'contextmenu'
+      delete modifiers.right
+    } else if (modifiers.middle) {
+      name = 'mouseup'
+    }
+  }
+
   let events
-  if (modifiers && modifiers.native) {
+  if (modifiers.native) {
     delete modifiers.native
     events = el.nativeEvents || (el.nativeEvents = {})
   } else {
     events = el.events || (el.events = {})
   }
-  const newHandler = { value, modifiers }
+
+  const newHandler: any = {
+    value: value.trim()
+  }
+  if (modifiers !== emptyObject) {
+    newHandler.modifiers = modifiers
+  }
+
   const handlers = events[name]
   /* istanbul ignore if */
   if (Array.isArray(handlers)) {
@@ -84,6 +116,8 @@ export function addHandler (
   } else {
     events[name] = newHandler
   }
+
+  el.plain = false
 }
 
 export function getBindingAttr (

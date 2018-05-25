@@ -1,28 +1,25 @@
 /* @flow */
 
-import { cloneVNode, cloneVNodes } from 'core/vdom/vnode'
-
 /**
  * Runtime helper for rendering static trees.
  */
 export function renderStatic (
   index: number,
-  isInFor?: boolean
+  isInFor: boolean
 ): VNode | Array<VNode> {
-  // static trees can be rendered once and cached on the contructor options
-  // so every instance shares the same cached trees
-  const renderFns = this.$options.staticRenderFns
-  const cached = renderFns.cached || (renderFns.cached = [])
+  const cached = this._staticTrees || (this._staticTrees = [])
   let tree = cached[index]
   // if has already-rendered static tree and not inside v-for,
-  // we can reuse the same tree by doing a shallow clone.
+  // we can reuse the same tree.
   if (tree && !isInFor) {
-    return Array.isArray(tree)
-      ? cloneVNodes(tree)
-      : cloneVNode(tree)
+    return tree
   }
   // otherwise, render a fresh tree.
-  tree = cached[index] = renderFns[index].call(this._renderProxy, null, this)
+  tree = cached[index] = this.$options.staticRenderFns[index].call(
+    this._renderProxy,
+    null,
+    this // for render fns generated for functional component templates
+  )
   markStatic(tree, `__static__${index}`, false)
   return tree
 }

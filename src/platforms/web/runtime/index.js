@@ -20,6 +20,7 @@ import platformDirectives from './directives/index'
 import platformComponents from './components/index'
 
 // install platform specific utils
+// 注册一些平台特殊的函数，此处是 web
 Vue.config.mustUseProp = mustUseProp
 Vue.config.isReservedTag = isReservedTag
 Vue.config.isReservedAttr = isReservedAttr
@@ -27,10 +28,14 @@ Vue.config.getTagNamespace = getTagNamespace
 Vue.config.isUnknownElement = isUnknownElement
 
 // install platform runtime directives & components
+// 注册平台相关的 指令和组件
+// 指令: v-show v-model
+// 组件: transition transitionGroup
 extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function
+// 注册平台相关的 patch 函数
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
@@ -43,28 +48,36 @@ Vue.prototype.$mount = function (
 }
 
 // devtools global hook
+// vue-devtools 注册
 /* istanbul ignore next */
-Vue.nextTick(() => {
-  if (config.devtools) {
-    if (devtools) {
-      devtools.emit('init', Vue)
-    } else if (process.env.NODE_ENV !== 'production' && isChrome) {
+if (inBrowser) {
+  setTimeout(() => {
+    if (config.devtools) {
+      if (devtools) {
+        devtools.emit('init', Vue)
+      } else if (
+        process.env.NODE_ENV !== 'production' &&
+        process.env.NODE_ENV !== 'test' &&
+        isChrome
+      ) {
+        console[console.info ? 'info' : 'log'](
+          'Download the Vue Devtools extension for a better development experience:\n' +
+          'https://github.com/vuejs/vue-devtools'
+        )
+      }
+    }
+    if (process.env.NODE_ENV !== 'production' &&
+      process.env.NODE_ENV !== 'test' &&
+      config.productionTip !== false &&
+      typeof console !== 'undefined'
+    ) {
       console[console.info ? 'info' : 'log'](
-        'Download the Vue Devtools extension for a better development experience:\n' +
-        'https://github.com/vuejs/vue-devtools'
+        `You are running Vue in development mode.\n` +
+        `Make sure to turn on production mode when deploying for production.\n` +
+        `See more tips at https://vuejs.org/guide/deployment.html`
       )
     }
-  }
-  if (process.env.NODE_ENV !== 'production' &&
-    config.productionTip !== false &&
-    inBrowser && typeof console !== 'undefined'
-  ) {
-    console[console.info ? 'info' : 'log'](
-      `You are running Vue in development mode.\n` +
-      `Make sure to turn on production mode when deploying for production.\n` +
-      `See more tips at https://vuejs.org/guide/deployment.html`
-    )
-  }
-}, 0)
+  }, 0)
+}
 
 export default Vue

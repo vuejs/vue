@@ -22,6 +22,7 @@ let index = 0
 
 /**
  * Reset the scheduler's state.
+ * 重置状态
  */
 function resetSchedulerState () {
   index = queue.length = activatedChildren.length = 0
@@ -34,6 +35,7 @@ function resetSchedulerState () {
 
 /**
  * Flush both queues and run the watchers.
+ * 执行队列
  */
 function flushSchedulerQueue () {
   flushing = true
@@ -47,10 +49,15 @@ function flushSchedulerQueue () {
   //    user watchers are created before the render watcher)
   // 3. If a component is destroyed during a parent component's watcher run,
   //    its watchers can be skipped.
+  // 根据 ID 顺序的执行，原因如下
+  // 1. 组件的更新顺序是从父组件到子组件的，因为父组件都比子组件先创建
+  // 2. 一个组件自己的 watchers 是在 render watcher 之前执行的，因为自己的 watcher 比 render 先创建
+  // 3. 当一个组件的父组件运行 watcher 时，可能会被销毁，而销毁的 watchers 是不需要执行的
   queue.sort((a, b) => a.id - b.id)
 
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
+  // 当依次执行队列中的 watcher 时，不应该缓存数组长度，因为当队列执行时，可能会有 watcher 加入进来
   for (index = 0; index < queue.length; index++) {
     watcher = queue[index]
     id = watcher.id
@@ -74,6 +81,7 @@ function flushSchedulerQueue () {
   }
 
   // keep copies of post queues before resetting state
+  // 保存队列信息，供之后调用
   const activatedQueue = activatedChildren.slice()
   const updatedQueue = queue.slice()
 
@@ -133,6 +141,7 @@ export function queueWatcher (watcher: Watcher) {
     } else {
       // if already flushing, splice the watcher based on its id
       // if already past its id, it will be run next immediately.
+      // 如果队列已经在执行，则将该 watcher 添加到对应位置，因为是要按 id 的顺序执行的
       let i = queue.length - 1
       while (i > index && queue[i].id > watcher.id) {
         i--
@@ -140,6 +149,8 @@ export function queueWatcher (watcher: Watcher) {
       queue.splice(i + 1, 0, watcher)
     }
     // queue the flush
+    // 如果该队列还没有执行，就执行他
+    // TODO 考虑 nextTick 是如何实现的
     if (!waiting) {
       waiting = true
       nextTick(flushSchedulerQueue)

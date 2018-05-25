@@ -35,7 +35,9 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+// 将 target[key] 代理到 this[sourceKey][key] 下
 export function proxy (target: Object, sourceKey: string, key: string) {
+  // 这里的 this 为 target
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
   }
@@ -100,6 +102,7 @@ function initProps (vm: Component, propsOptions: Object) {
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
+    // 将 props 下的属性代理到 this 下
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
@@ -142,14 +145,16 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
+      // 代理 proxy 到 this 对象下
       proxy(vm, `_data`, key)
     }
   }
   // observe data
+  // 设置 data 内容的监听
   observe(data, true /* asRootData */)
 }
 
-function getData (data: Function, vm: Component): any {
+export function getData (data: Function, vm: Component): any {
   try {
     return data.call(vm, vm)
   } catch (e) {
@@ -161,6 +166,7 @@ function getData (data: Function, vm: Component): any {
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
+  // $flow-disable-line
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
   const isSSR = isServerRendering()
@@ -272,6 +278,7 @@ function initMethods (vm: Component, methods: Object) {
         )
       }
     }
+    // 将 method 下的方法挂载到 VUE 实例上
     vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
   }
 }
@@ -338,6 +345,7 @@ export function stateMixin (Vue: Class<Component>) {
   ): Function {
     const vm: Component = this
     if (isPlainObject(cb)) {
+      // 处理 handle 传值方式
       return createWatcher(vm, expOrFn, cb, options)
     }
     options = options || {}

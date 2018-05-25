@@ -56,12 +56,12 @@ type acceptValueElm = HTMLInputElement | HTMLSelectElement | HTMLOptionElement;
 function shouldUpdateValue (elm: acceptValueElm, checkVal: string): boolean {
   return (!elm.composing && (
     elm.tagName === 'OPTION' ||
-    isDirty(elm, checkVal) ||
-    isInputChanged(elm, checkVal)
+    isNotInFocusAndDirty(elm, checkVal) ||
+    isDirtyWithModifiers(elm, checkVal)
   ))
 }
 
-function isDirty (elm: acceptValueElm, checkVal: string): boolean {
+function isNotInFocusAndDirty (elm: acceptValueElm, checkVal: string): boolean {
   // return true when textbox (.number and .trim) loses focus and its value is
   // not equal to the updated value
   let notInFocus = true
@@ -71,14 +71,20 @@ function isDirty (elm: acceptValueElm, checkVal: string): boolean {
   return notInFocus && elm.value !== checkVal
 }
 
-function isInputChanged (elm: any, newVal: string): boolean {
+function isDirtyWithModifiers (elm: any, newVal: string): boolean {
   const value = elm.value
   const modifiers = elm._vModifiers // injected by v-model runtime
-  if (isDef(modifiers) && modifiers.number) {
-    return toNumber(value) !== toNumber(newVal)
-  }
-  if (isDef(modifiers) && modifiers.trim) {
-    return value.trim() !== newVal.trim()
+  if (isDef(modifiers)) {
+    if (modifiers.lazy) {
+      // inputs with lazy should only be updated when not in focus
+      return false
+    }
+    if (modifiers.number) {
+      return toNumber(value) !== toNumber(newVal)
+    }
+    if (modifiers.trim) {
+      return value.trim() !== newVal.trim()
+    }
   }
   return value !== newVal
 }

@@ -8,6 +8,7 @@ let uid = 0
 /**
  * A dep is an observable that can have multiple
  * directives subscribing to it.
+ * 一个拥有 update 方法的对象的集合，调用 notify 会对用数组下所有对象的 update 方法
  */
 export default class Dep {
   static target: ?Watcher;

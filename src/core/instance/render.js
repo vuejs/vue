@@ -11,17 +11,21 @@ import {
 import { createElement } from '../vdom/create-element'
 import { installRenderHelpers } from './render-helpers/index'
 import { resolveSlots } from './render-helpers/resolve-slots'
-import VNode, { cloneVNodes, createEmptyVNode } from '../vdom/vnode'
+import VNode, { createEmptyVNode } from '../vdom/vnode'
 
 import { isUpdatingChildComponent } from './lifecycle'
 
 export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
+  vm._staticTrees = null // v-once cached trees 使用 v-once 的话只绑定数据一次，这个字段用于保存第一次生成的 dom 结构
   const options = vm.$options
   const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
-  const renderContext = parentVnode && parentVnode.context
+  const renderContext = parentVnode && parentVnode.context  // 获取父节点的上下文环境
+  // 处理 $slots
+  // TODO _renderChildren 该字段未知
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject
+  // 绑定 $createElement 方法，供之后调用
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
@@ -33,9 +37,11 @@ export function initRender (vm: Component) {
 
   // $attrs & $listeners are exposed for easier HOC creation.
   // they need to be reactive so that HOCs using them are always updated
+  // 获取到 parentData
   const parentData = parentVnode && parentVnode.data
 
   /* istanbul ignore else */
+  // 代理 parentData.attrs,options._parentListeners 到 vm.$attrs,$listeners 仅可读
   if (process.env.NODE_ENV !== 'production') {
     defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, () => {
       !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
@@ -61,18 +67,17 @@ export function renderMixin (Vue: Class<Component>) {
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
 
-    if (vm._isMounted) {
-      // if the parent didn't update, the slot nodes will be the ones from
-      // last render. They need to be cloned to ensure "freshness" for this render.
+    // reset _rendered flag on slots for duplicate slot check
+    if (process.env.NODE_ENV !== 'production') {
       for (const key in vm.$slots) {
-        const slot = vm.$slots[key]
-        if (slot._rendered) {
-          vm.$slots[key] = cloneVNodes(slot, true /* deep */)
-        }
+        // $flow-disable-line
+        vm.$slots[key]._rendered = false
       }
     }
 
-    vm.$scopedSlots = (_parentVnode && _parentVnode.data.scopedSlots) || emptyObject
+    if (_parentVnode) {
+      vm.$scopedSlots = _parentVnode.data.scopedSlots || emptyObject
+    }
 
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.

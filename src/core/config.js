@@ -17,7 +17,7 @@ export type Config = {
   devtools: boolean;
   errorHandler: ?(err: Error, vm: Component, info: string) => void;
   warnHandler: ?(msg: string, vm: Component, trace: string) => void;
-  ignoredElements: Array<string>;
+  ignoredElements: Array<string | RegExp>;
   keyCodes: { [key: string]: number | Array<number> };
 
   // platform
@@ -35,7 +35,9 @@ export type Config = {
 export default ({
   /**
    * Option merge strategies (used in core/util/options)
+   * 存放 option 中的各种属性的合并函数
    */
+  // $flow-disable-line
   optionMergeStrategies: Object.create(null),
 
   /**
@@ -50,32 +52,39 @@ export default ({
 
   /**
    * Whether to enable devtools
+   * devtools 是否生效
    */
   devtools: process.env.NODE_ENV !== 'production',
 
   /**
    * Whether to record perf
+   * 是否开启浏览器的性能检测
    */
   performance: false,
 
   /**
    * Error handler for watcher errors
+   * 全局的错误处理函数
    */
   errorHandler: null,
 
   /**
    * Warn handler for watcher warns
+   * 在生产环境下注册一个自定义的函数警告
    */
   warnHandler: null,
 
   /**
    * Ignore certain custom elements
+   * 一些自定义的标签，比如 Web Components
    */
   ignoredElements: [],
 
   /**
    * Custom user key aliases for v-on
+   * 自定义的键位别名
    */
+  // $flow-disable-line
   keyCodes: Object.create(null),
 
   /**

@@ -2,6 +2,7 @@
 
 import { toArray } from '../util/index'
 
+// 注册中间件
 export function initUse (Vue: GlobalAPI) {
   Vue.use = function (plugin: Function | Object) {
     const installedPlugins = (this._installedPlugins || (this._installedPlugins = []))
@@ -10,6 +11,7 @@ export function initUse (Vue: GlobalAPI) {
     }
 
     // additional parameters
+    // 获取额外的参数，并将 Vue 类作为第一个参数传入需要注册的插件中
     const args = toArray(arguments, 1)
     args.unshift(this)
     if (typeof plugin.install === 'function') {

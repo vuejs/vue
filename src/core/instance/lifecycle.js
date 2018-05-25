@@ -23,24 +23,28 @@ export let isUpdatingChildComponent: boolean = false
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
-  // locate first non-abstract parent
   let parent = options.parent
+  // locate first non-abstract parent
+  // TODO 之后注意 option.abstract 设置的情况，先略过
+  // 将该节点放到非 abstract 的父节点的 $children 列表中
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
     parent.$children.push(vm)
   }
-
+  // 设置父节点和根节点
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
 
+  // 初始化 $children 和 $refs 列表
   vm.$children = []
   vm.$refs = {}
 
   vm._watcher = null
   vm._inactive = null
   vm._directInactive = false
+  // 组件刚生成，以下状态为 false
   vm._isMounted = false
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
@@ -59,6 +63,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
+    // __patch__ 在 /platforms/web/runtime/index.js 处会导入
+    // TODO 目前了解到 __patch__ 方法主要实现 dom 节点的构造，暂不深究
     if (!prevVnode) {
       // initial render
       vm.$el = vm.__patch__(
@@ -146,6 +152,7 @@ export function mountComponent (
   hydrating?: boolean
 ): Component {
   vm.$el = el
+  // 兼容处理，避免未设置模板而报错情况
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
@@ -166,6 +173,7 @@ export function mountComponent (
       }
     }
   }
+  // 触发 beforeMount
   callHook(vm, 'beforeMount')
 
   let updateComponent
@@ -193,7 +201,11 @@ export function mountComponent (
     }
   }
 
-  vm._watcher = new Watcher(vm, updateComponent, noop)
+  // we set this to vm._watcher inside the watcher's constructor
+  // since the watcher's initial patch may call $forceUpdate (e.g. inside child
+  // component's mounted hook), which relies on vm._watcher being already defined
+  // TODO 这里不明白为什么要写一个 Watch 仅仅是吧 _watch 注册到 vm 上？？
+  new Watcher(vm, updateComponent, noop, null, true /* isRenderWatcher */)
   hydrating = false
 
   // manually mounted instance, call mounted on self
@@ -209,7 +221,7 @@ export function updateChildComponent (
   vm: Component,
   propsData: ?Object,
   listeners: ?Object,
-  parentVnode: VNode,
+  parentVnode: MountedComponentVNode,
   renderChildren: ?Array<VNode>
 ) {
   if (process.env.NODE_ENV !== 'production') {
@@ -236,7 +248,7 @@ export function updateChildComponent (
   // update $attrs and $listeners hash
   // these are also reactive so they may trigger child update if the child
   // used them during render
-  vm.$attrs = (parentVnode.data && parentVnode.data.attrs) || emptyObject
+  vm.$attrs = parentVnode.data.attrs || emptyObject
   vm.$listeners = listeners || emptyObject
 
   // update props
@@ -254,11 +266,11 @@ export function updateChildComponent (
   }
 
   // update listeners
-  if (listeners) {
-    const oldListeners = vm.$options._parentListeners
-    vm.$options._parentListeners = listeners
-    updateComponentListeners(vm, listeners, oldListeners)
-  }
+  listeners = listeners || emptyObject
+  const oldListeners = vm.$options._parentListeners
+  vm.$options._parentListeners = listeners
+  updateComponentListeners(vm, listeners, oldListeners)
+
   // resolve slots + force update if has children
   if (hasChildren) {
     vm.$slots = resolveSlots(renderChildren, parentVnode.context)
@@ -322,6 +334,7 @@ export function callHook (vm: Component, hook: string) {
       }
     }
   }
+  // 如果设置了 _hasHookEvent 则向父组件发出 hook:xxx 事件
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }

@@ -1,8 +1,5 @@
 /* @flow */
 
-import { queueWatcher } from './scheduler'
-import Dep, { pushTarget, popTarget } from './dep'
-
 import {
   warn,
   remove,
@@ -12,7 +9,11 @@ import {
   handleError
 } from '../util/index'
 
-import type { ISet } from '../util/index'
+import { traverse } from './traverse'
+import { queueWatcher } from './scheduler'
+import Dep, { pushTarget, popTarget } from './dep'
+
+import type { SimpleSet } from '../util/index'
 
 let uid = 0
 
@@ -34,18 +35,24 @@ export default class Watcher {
   active: boolean;
   deps: Array<Dep>;
   newDeps: Array<Dep>;
-  depIds: ISet;
-  newDepIds: ISet;
+  depIds: SimpleSet;
+  newDepIds: SimpleSet;
   getter: Function;
   value: any;
 
   constructor (
     vm: Component,
-    expOrFn: string | Function,
-    cb: Function,
-    options?: Object
+    expOrFn: string | Function, // 需要监听的值
+    cb: Function,               // 监听回调
+    options?: ?Object,          // 对于该监听的设置
+    // TODO 用于判断是否是在render的时候的监听  ？？？
+    isRenderWatcher?: boolean
   ) {
     this.vm = vm
+    // isRenderWatcher 仅仅用于这一行 ？？？
+    if (isRenderWatcher) {
+      vm._watcher = this
+    }
     vm._watchers.push(this)
     // options
     if (options) {
@@ -68,6 +75,7 @@ export default class Watcher {
       ? expOrFn.toString()
       : ''
     // parse expression for getter
+    // 确定取值函数，在非正式环境提示警告
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {
@@ -89,8 +97,10 @@ export default class Watcher {
 
   /**
    * Evaluate the getter, and re-collect dependencies.
+   * 为对应属性添加依赖，由于依赖收集必须进行一次取值，处理 deep
    */
   get () {
+    // Dep.target = this
     pushTarget(this)
     let value
     const vm = this.vm
@@ -106,6 +116,7 @@ export default class Watcher {
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
       if (this.deep) {
+        // 对其子项添加依赖
         traverse(value)
       }
       popTarget()
@@ -139,6 +150,7 @@ export default class Watcher {
         dep.removeSub(this)
       }
     }
+    // 感觉没必要这么做，还说为了内存考虑？
     let tmp = this.depIds
     this.depIds = this.newDepIds
     this.newDepIds = tmp
@@ -155,8 +167,10 @@ export default class Watcher {
    */
   update () {
     /* istanbul ignore else */
+    // TODO lazy 出现情况未知，大概是不立即更新，交由之后的脏检查处理
     if (this.lazy) {
       this.dirty = true
+      // TODO sync 出现情况未知，同步还是双向绑定待确定
     } else if (this.sync) {
       this.run()
     } else {
@@ -231,39 +245,5 @@ export default class Watcher {
       }
       this.active = false
     }
-  }
-}
-
-/**
- * Recursively traverse an object to evoke all converted
- * getters, so that every nested property inside the object
- * is collected as a "deep" dependency.
- */
-const seenObjects = new Set()
-function traverse (val: any) {
-  seenObjects.clear()
-  _traverse(val, seenObjects)
-}
-
-function _traverse (val: any, seen: ISet) {
-  let i, keys
-  const isA = Array.isArray(val)
-  if ((!isA && !isObject(val)) || !Object.isExtensible(val)) {
-    return
-  }
-  if (val.__ob__) {
-    const depId = val.__ob__.dep.id
-    if (seen.has(depId)) {
-      return
-    }
-    seen.add(depId)
-  }
-  if (isA) {
-    i = val.length
-    while (i--) _traverse(val[i], seen)
-  } else {
-    keys = Object.keys(val)
-    i = keys.length
-    while (i--) _traverse(val[keys[i]], seen)
   }
 }
