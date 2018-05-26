@@ -161,21 +161,21 @@ describe('codegen', () => {
   it('generate single slot', () => {
     assertCodegen(
       '<div><slot></slot></div>',
-      `with(this){return _c('div',[_t("default")],2)}`
+      `with(this){return _c('div',[_t("default",null,null,null,false)],2)}`
     )
   })
 
   it('generate named slot', () => {
     assertCodegen(
       '<div><slot name="one"></slot></div>',
-      `with(this){return _c('div',[_t("one")],2)}`
+      `with(this){return _c('div',[_t("one",null,null,null,false)],2)}`
     )
   })
 
   it('generate slot fallback content', () => {
     assertCodegen(
       '<div><slot><div>hi</div></slot></div>',
-      `with(this){return _c('div',[_t("default",[_c('div',[_v("hi")])])],2)}`
+      `with(this){return _c('div',[_t("default",[_c('div',[_v("hi")])],null,null,false)],2)}`
     )
   })
 

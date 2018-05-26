@@ -18,6 +18,7 @@ export class CodegenState {
   maybeComponent: (el: ASTElement) => boolean;
   onceId: number;
   staticRenderFns: Array<string>;
+  slotScopeinAst: boolean;
 
   constructor (options: CompilerOptions) {
     this.options = options
@@ -29,6 +30,8 @@ export class CodegenState {
     this.maybeComponent = (el: ASTElement) => !isReservedTag(el.tag)
     this.onceId = 0
     this.staticRenderFns = []
+    // we can skip checks for slot-scope parents if we haven't seen any
+    this.slotScopeinAst = false
   }
 }
 
@@ -50,6 +53,7 @@ export function generate (
 }
 
 export function genElement (el: ASTElement, state: CodegenState): string {
+  if (el.slotScope) state.slotScopeinAst = true
   if (el.staticRoot && !el.staticProcessed) {
     return genStatic(el, state)
   } else if (el.once && !el.onceProcessed) {
@@ -456,19 +460,18 @@ export function genComment (comment: ASTText): string {
 function genSlot (el: ASTElement, state: CodegenState): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el, state)
-  let res = `_t(${slotName}${children ? `,${children}` : ''}`
   const attrs = el.attrs && `{${el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')}}`
   const bind = el.attrsMap['v-bind']
-  if ((attrs || bind) && !children) {
-    res += `,null`
+  let inScopedSlot = false
+  let ancestor = el
+  if (process.env.NODE_ENV !== 'production' && state.slotScopeinAst) {
+    while (!inScopedSlot && ancestor.parent) {
+      if (ancestor.slotScope) inScopedSlot = true
+      ancestor = ancestor.parent
+    }
   }
-  if (attrs) {
-    res += `,${attrs}`
-  }
-  if (bind) {
-    res += `${attrs ? '' : ',null'},${bind}`
-  }
-  return res + ')'
+  return `_t(${slotName},${children || 'null'},${attrs || 'null'},` +
+    `${bind || 'null'},${inScopedSlot ? 'true' : 'false'})`
 }
 
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement
