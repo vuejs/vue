@@ -4,8 +4,9 @@ import { escape } from 'web/server/util'
 import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
 import { generateComponentTrace } from 'core/util/debug'
-import { ssrCompileToFunctions } from 'web/server/compiler'
 import { installSSRHelpers } from './optimizing-compiler/runtime-helpers'
+import { baseOptions } from '../platforms/web/compiler/options'
+import { createCompiler } from '../server/optimizing-compiler/index'
 
 import { isDef, isUndef, isTrue } from 'shared/util'
 
@@ -14,7 +15,9 @@ import {
   createComponentInstanceForVnode
 } from 'core/vdom/create-component'
 
+let compile
 let warned = Object.create(null)
+
 const warnOnce = msg => {
   if (!warned[msg]) {
     warned[msg] = true
@@ -31,7 +34,7 @@ const normalizeRender = vm => {
   const { render, template, _scopeId } = vm.$options
   if (isUndef(render)) {
     if (template) {
-      const compiled = ssrCompileToFunctions(template, {
+      const compiled = compile.compileToFunctions(template, {
         scopeId: _scopeId,
         warn: onCompilationError
       }, vm)
@@ -375,6 +378,9 @@ export function createRenderFunction (
   isUnaryTag: Function,
   cache: any
 ) {
+  const options = baseOptions
+  options.isUnaryTag = isUnaryTag || baseOptions.isUnaryTag
+  compile = createCompiler(options)
   return function render (
     component: Component,
     write: (text: string, next: Function) => void,
