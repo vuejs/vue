@@ -13,6 +13,7 @@ export function registerComponentHook (
   hook: string, // hook name
   fn: Function
 ) {
+  /* istanbul ignore if */
   if (!document || !document.taskCenter) {
     warn(`Can't find available "document" or "taskCenter".`)
     return
@@ -20,6 +21,7 @@ export function registerComponentHook (
   if (typeof document.taskCenter.registerHook === 'function') {
     return document.taskCenter.registerHook(componentId, type, hook, fn)
   }
+  /* istanbul ignore next */
   warn(`Failed to register component hook "${type}@${hook}#${componentId}".`)
 }
 
@@ -29,6 +31,7 @@ export function updateComponentData (
   newData: Object | void,
   callback?: Function
 ) {
+  /* istanbul ignore if */
   if (!document || !document.taskCenter) {
     warn(`Can't find available "document" or "taskCenter".`)
     return
@@ -36,5 +39,6 @@ export function updateComponentData (
   if (typeof document.taskCenter.updateData === 'function') {
     return document.taskCenter.updateData(componentId, newData, callback)
   }
+  /* istanbul ignore next */
   warn(`Failed to update component data (${componentId}).`)
 }
