@@ -88,7 +88,6 @@ if (typeof Proxy !== 'undefined') {
         template: `<div>{{ $data.$a }}</div>`
       }).$mount()
       expect(`Property or method "$a" is not defined`).not.toHaveBeenWarned()
-      expect(`Property or method "$a" is not defined`).not.toHaveBeenWarned()
     })
   })
 }
