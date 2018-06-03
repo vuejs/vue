@@ -40,7 +40,7 @@ const normalizeRender = vm => {
       vm.$options.staticRenderFns = compiled.staticRenderFns
     } else {
       throw new Error(
-        `render function or template not defined in component: ${
+        `render function or template not defined in component (is it possible you registered a component mistakenly?): ${
           vm.$options.name || vm.$options._componentTag || 'anonymous'
         }`
       )
