@@ -28,6 +28,11 @@ import {
 const strats = config.optionMergeStrategies
 
 /**
+ *  normalize option strategies
+ */
+const normalizeStrats = config.optionNormalizeStrategies
+
+/**
  * Options with restrictions
  */
 if (process.env.NODE_ENV !== 'production') {
@@ -243,6 +248,10 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
     : childVal
 }
 
+const defaultNormalizeStrat = function (options: any, vm: ?Component): any {
+  return options
+}
+
 /**
  * Validate component names
  */
@@ -272,8 +281,40 @@ export function validateComponentName (name: string) {
  * Ensure all props option syntax are normalized into the
  * Object-based format.
  */
-function normalizeProps (options: Object, vm: ?Component) {
-  const props = options.props
+// function normalizeProps (options: Object, vm: ?Component) {
+//   const props = options.props
+//   if (!props) return
+//   const res = {}
+//   let i, val, name
+//   if (Array.isArray(props)) {
+//     i = props.length
+//     while (i--) {
+//       val = props[i]
+//       if (typeof val === 'string') {
+//         name = camelize(val)
+//         res[name] = { type: null }
+//       } else if (process.env.NODE_ENV !== 'production') {
+//         warn('props must be strings when using array syntax.')
+//       }
+//     }
+//   } else if (isPlainObject(props)) {
+//     for (const key in props) {
+//       val = props[key]
+//       name = camelize(key)
+//       res[name] = isPlainObject(val)
+//         ? val
+//         : { type: val }
+//     }
+//   } else if (process.env.NODE_ENV !== 'production') {
+//     warn(
+//       `Invalid value for option "props": expected an Array or an Object, ` +
+//       `but got ${toRawType(props)}.`,
+//       vm
+//     )
+//   }
+//   options.props = res
+// }
+function normalizeProps (props: any, vm: ?Component) {
   if (!props) return
   const res = {}
   let i, val, name
@@ -303,16 +344,40 @@ function normalizeProps (options: Object, vm: ?Component) {
       vm
     )
   }
-  options.props = res
+  return res
 }
+
+normalizeStrats.props = normalizeProps
 
 /**
  * Normalize all injections into Object-based format
  */
-function normalizeInject (options: Object, vm: ?Component) {
-  const inject = options.inject
+// function normalizeInject (options: Object, vm: ?Component) {
+//   const inject = options.inject
+//   if (!inject) return
+//   const normalized = options.inject = {}
+//   if (Array.isArray(inject)) {
+//     for (let i = 0; i < inject.length; i++) {
+//       normalized[inject[i]] = { from: inject[i] }
+//     }
+//   } else if (isPlainObject(inject)) {
+//     for (const key in inject) {
+//       const val = inject[key]
+//       normalized[key] = isPlainObject(val)
+//         ? extend({ from: key }, val)
+//         : { from: val }
+//     }
+//   } else if (process.env.NODE_ENV !== 'production') {
+//     warn(
+//       `Invalid value for option "inject": expected an Array or an Object, ` +
+//       `but got ${toRawType(inject)}.`,
+//       vm
+//     )
+//   }
+// }
+function normalizeInject (inject: any, vm: ?Component) {
   if (!inject) return
-  const normalized = options.inject = {}
+  const normalized = {}
   if (Array.isArray(inject)) {
     for (let i = 0; i < inject.length; i++) {
       normalized[inject[i]] = { from: inject[i] }
@@ -331,13 +396,27 @@ function normalizeInject (options: Object, vm: ?Component) {
       vm
     )
   }
+  return normalized
 }
+
+normalizeStrats.inject = normalizeInject
 
 /**
  * Normalize raw function directives into object format.
  */
-function normalizeDirectives (options: Object) {
-  const dirs = options.directives
+// function normalizeDirectives (options: Object) {
+//   const dirs = options.directives
+//   if (dirs) {
+//     for (const key in dirs) {
+//       const def = dirs[key]
+//       if (typeof def === 'function') {
+//         dirs[key] = { bind: def, update: def }
+//       }
+//     }
+//   }
+// }
+function normalizeDirectives (dirs: any) {
+  // const dirs = options.directives
   if (dirs) {
     for (const key in dirs) {
       const def = dirs[key]
@@ -345,8 +424,11 @@ function normalizeDirectives (options: Object) {
         dirs[key] = { bind: def, update: def }
       }
     }
+    return dirs
   }
 }
+
+normalizeStrats.directives = normalizeDirectives
 
 function assertObjectType (name: string, value: any, vm: ?Component) {
   if (!isPlainObject(value)) {
@@ -374,10 +456,14 @@ export function mergeOptions (
   if (typeof child === 'function') {
     child = child.options
   }
+  let key
+  for (key in child) {
+    normalizeField(key)
+  }
 
-  normalizeProps(child, vm)
-  normalizeInject(child, vm)
-  normalizeDirectives(child)
+  // normalizeProps(child, vm)
+  // normalizeInject(child, vm)
+  // normalizeDirectives(child)
   const extendsFrom = child.extends
   if (extendsFrom) {
     parent = mergeOptions(parent, extendsFrom, vm)
@@ -388,7 +474,7 @@ export function mergeOptions (
     }
   }
   const options = {}
-  let key
+
   for (key in parent) {
     mergeField(key)
   }
@@ -397,6 +483,12 @@ export function mergeOptions (
       mergeField(key)
     }
   }
+
+  function normalizeField (key) {
+    const strat = normalizeStrats[key] || defaultNormalizeStrat
+    child[key] = strat(child[key], vm)
+  }
+
   function mergeField (key) {
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)

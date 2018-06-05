@@ -11,6 +11,7 @@ import { LIFECYCLE_HOOKS } from 'shared/constants'
 export type Config = {
   // user
   optionMergeStrategies: { [key: string]: Function };
+  optionNormalizeStrategies: { [key: string]: Function };
   silent: boolean;
   productionTip: boolean;
   performance: boolean;
@@ -38,6 +39,12 @@ export default ({
    */
   // $flow-disable-line
   optionMergeStrategies: Object.create(null),
+
+  /**
+   * Option normalize strategies (used in core/util/options)
+   */
+  // $flow-disable-line
+  optionNormalizeStrategies: Object.create(null),
 
   /**
    * Whether to suppress warnings.
