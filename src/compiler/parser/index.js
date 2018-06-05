@@ -5,7 +5,7 @@ import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { genAssignmentCode } from '../directives/model'
-import { extend, cached, no, camelize } from 'shared/util'
+import { extend, cached, no, camelize, kebabize } from 'shared/util'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
 
 import {
@@ -512,7 +512,7 @@ function processComponent (el) {
 
 function processAttrs (el) {
   const list = el.attrsList
-  let i, l, name, rawName, value, modifiers, isProp
+  let i, l, name, rawName, value, modifiers, isProp, syncGen
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
     value = list[i].value
@@ -538,10 +538,16 @@ function processAttrs (el) {
             name = camelize(name)
           }
           if (modifiers.sync) {
+            syncGen = genAssignmentCode(value, `$event`)
+            addHandler(
+              el,
+              `update:${kebabize(name)}`,
+              syncGen
+            )
             addHandler(
               el,
               `update:${camelize(name)}`,
-              genAssignmentCode(value, `$event`)
+              syncGen
             )
           }
         }
