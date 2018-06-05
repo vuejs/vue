@@ -79,7 +79,7 @@ describe('Component async', () => {
   })
 
   it('dynamic', done => {
-    var vm = new Vue({
+    const vm = new Vue({
       template: '<component :is="view"></component>',
       data: {
         view: 'view-a'
@@ -103,7 +103,7 @@ describe('Component async', () => {
         }
       }
     }).$mount()
-    var aCalled = false
+    let aCalled = false
     function step1 () {
       // ensure A is resolved only once
       expect(aCalled).toBe(false)

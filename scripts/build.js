@@ -48,7 +48,7 @@ function buildEntry (config) {
     .then(bundle => bundle.generate(output))
     .then(({ code }) => {
       if (isProd) {
-        var minified = (banner ? banner + '\n' : '') + uglify.minify(code, {
+        const minified = (banner ? banner + '\n' : '') + uglify.minify(code, {
           output: {
             ascii_only: true
           },
