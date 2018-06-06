@@ -37,6 +37,9 @@ export function renderSlot (
         )
       }
       slotNodes._rendered = true
+      if (props && props.class) {
+        slotNodes[0].data.staticClass += ` ${props.class}`
+      }
     }
     nodes = slotNodes || fallback
   }

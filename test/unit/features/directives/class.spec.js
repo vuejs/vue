@@ -138,6 +138,29 @@ describe('Directive v-bind:class', () => {
     }).then(done)
   })
 
+  it('class merge from slot', done => {
+    const vm = new Vue({
+      template: `
+        <component1>
+          <div class="staticClass" slot="test">
+            some text
+          </div>
+        </component1>
+      `,
+      components: {
+        component1: {
+          template: `
+            <div>
+              <slot name="test" class="fromSlot"/>
+            </div>
+          `
+        }
+      }
+    }).$mount()
+    expect(vm.$el.children[0].className).toBe('staticClass fromSlot')
+    done()
+  })
+
   it('deep update', done => {
     const vm = new Vue({
       template: '<div :class="test"></div>',
