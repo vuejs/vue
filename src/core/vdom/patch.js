@@ -460,6 +460,11 @@ export function createPatchFunction (backend) {
       return
     }
 
+    // 普通节点没有text属性吗？
+    // 只有文本节点才有text属性，文本节点没有子节点
+
+    // 为什么打印出来有很多文本节点是空？
+    // 空格和换行符都是文本节点
     const elm = vnode.elm = oldVnode.elm
 
     if (isTrue(oldVnode.isAsyncPlaceholder)) {
@@ -493,12 +498,27 @@ export function createPatchFunction (backend) {
     const oldCh = oldVnode.children
     const ch = vnode.children
     if (isDef(data) && isPatchable(vnode)) {
+      // input在这里处理的
+      // if(vnode.tag === 'input') console.log('execute input here')
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef(i = data.hook) && isDef(i = i.update)) i(oldVnode, vnode)
     }
+    // input节点既没有children，也没有text
+    // if (vnode.tag === 'input') console.log(vnode.text, vnode.children)
+    // 非文本节点
     if (isUndef(vnode.text)) {
       if (isDef(oldCh) && isDef(ch)) {
-        if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
+        if (oldCh !== ch) {
+          updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
+          // 为什么这里每个dom节点都被patch，而不是只patch根节点？
+          // 每个节点都会被递归。
+
+          // 为什么input节点没有被updateChildren？
+          // 因为input节点没有children
+
+          // input节点是怎么处理呢？
+          // ...
+        }
       } else if (isDef(ch)) {
         if (isDef(oldVnode.text)) nodeOps.setTextContent(elm, '')
         addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue)
@@ -507,6 +527,7 @@ export function createPatchFunction (backend) {
       } else if (isDef(oldVnode.text)) {
         nodeOps.setTextContent(elm, '')
       }
+    // 文本节点没有子节点，所以不需要处理子节点的问题
     } else if (oldVnode.text !== vnode.text) {
       nodeOps.setTextContent(elm, vnode.text)
     }

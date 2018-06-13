@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>twoway-bind</title>
+  <style>
+    #demo {
+      font-family: 'Helvetica', Arial, sans-serif;
+    }
+    a {
+      text-decoration: none;
+      color: #f66;
+    }
+    li {
+      line-height: 1.5em;
+      margin-bottom: 20px;
+    }
+    .author, .date {
+      font-weight: bold;
+    }
+  </style>
+  <!-- Delete ".min" for console warnings in development -->
+  <script src="../../dist/vue.js"></script>
+</head>
+<body>
+<div id="demo">
+  <div>
+    <input :value="data" @change="handleChange">
+    <input :value="data" @input="handleChange">
+    <input v-model="data">
+  </div>
+</div>
+<script>
+  var demo = new Vue({
+    el: '#demo',
+    data: {
+      data: 3
+    },
+    methods: {
+      handleChange: function(event){
+        console.log(event)
+        this.data = event.target.value
+      }
+    }
+  })
+</script>
+</body>
+</html>

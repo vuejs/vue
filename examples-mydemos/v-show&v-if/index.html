@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>v-show & v-if</title>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="../../dist/vue.js"></script>
+</head>
+<body>
+
+<!--
+v-show是display: none的toggle，相当于渲染树的toggle。
+v-if是DOM的toggle。
+-->
+
+<div id="app">
+  <p v-show="false">v-show</p>
+  <p v-if="false">v-if</p>
+</div>
+
+<script type="text/javascript">
+var app = new Vue({
+  el: '#app',
+  data: {
+    true: true,
+    false: false
+  }
+})
+</script>
+</body>
+</html>

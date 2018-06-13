@@ -17,3 +17,4 @@ packages/vue-server-renderer/server-plugin.js
 packages/vue-server-renderer/client-plugin.js
 packages/vue-template-compiler/build.js
 .vscode
+.idea
