@@ -625,4 +625,75 @@ describe('Component scoped slot', () => {
 
     expect(vm.$el.querySelector('.bar').textContent.trim()).toBe('hi!')
   })
+
+  it('passing down merged scoped slots with v-bind', () => {
+    const Bar = {
+      template: `
+        <div class="bar">
+          <slot name="one" msg="1" />
+          <slot name="two" msg="2" />
+        </div>
+      `
+    }
+
+    const Ney = {
+      template: `
+        <div class="ney">
+          <slot name="three" msg="3">
+            3?
+          </slot>
+        </div>
+      `
+    }
+
+    const Foo = {
+      components: { Bar, Ney },
+      template: `
+        <div class="foo">
+          <bar v-bind="{ scopedSlots: $scopedSlots }"></bar>
+          <ney v-bind="{ scopedSlots: $scopedSlots }"></ney>
+        </div>
+      `
+    }
+
+    const vm1 = new Vue({
+      components: { Foo },
+      template: `
+        <foo>
+          <template slot="one" slot-scope="props">
+            {{ props.msg + '!' }}
+          </template>
+          <template slot="two" slot-scope="props">
+            {{ props.msg + '!!' }}
+          </template>
+        </foo>
+      `
+    }).$mount()
+
+    expect(vm1.$el.textContent.trim().replace(/\s+/g, '')).toBe('1!2!!3?')
+
+    const vm2 = new Vue({
+      components: { Foo },
+      methods: {
+        tickle (me) {
+          return me + ' tickled!'
+        }
+      },
+      template: `
+        <foo>
+          <template slot="one" slot-scope="props">
+            {{ props.msg + '!' }}
+          </template>
+          <template slot="two" slot-scope="props">
+            {{ props.msg + '!!' }}
+          </template>
+          <template slot="three" slot-scope="props">
+            {{ tickle( props.msg )}}
+          </template>
+        </foo>
+      `
+    }).$mount()
+
+    expect(vm2.$el.textContent.trim().replace(/\s+/g, '')).toBe('1!2!!3tickled!')
+  })
 })
