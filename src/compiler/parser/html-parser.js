@@ -146,16 +146,12 @@ export function parseHTML (html, options) {
         options.chars(text)
       }
     } else {
+      // We are in plaintext content elements: script/style/textarea
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
       const reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'))
       const rest = html.replace(reStackedTag, function (all, text, endTag) {
         endTagLength = endTag.length
-        if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
-          text = text
-            .replace(/<!\--([\s\S]*?)-->/g, '$1') // #7298
-            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1')
-        }
         if (shouldIgnoreFirstNewline(stackedTag, text)) {
           text = text.slice(1)
         }
