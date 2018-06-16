@@ -143,7 +143,13 @@ function initData (vm: Component) {
         `Use prop default value instead.`,
         vm
       )
-    } else if (!isReserved(key)) {
+    }
+    if (isReserved(key)) {
+      process.env.NODE_ENV !== 'production' && warn(
+        `Avoid defining the data property "${key}" that starts with _ or $ . `,
+        vm
+      )
+    } else {
       proxy(vm, `_data`, key)
     }
   }
