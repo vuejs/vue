@@ -50,6 +50,10 @@ export function generate (
 }
 
 export function genElement (el: ASTElement, state: CodegenState): string {
+  if (el.parent) {
+    el.pre = el.pre || el.parent.pre
+  }
+
   if (el.staticRoot && !el.staticProcessed) {
     return genStatic(el, state)
   } else if (el.once && !el.onceProcessed) {
@@ -68,7 +72,10 @@ export function genElement (el: ASTElement, state: CodegenState): string {
     if (el.component) {
       code = genComponent(el.component, el, state)
     } else {
-      const data = el.plain ? undefined : genData(el, state)
+      let data
+      if (!el.plain || el.pre) {
+        data = genData(el, state)
+      }
 
       const children = el.inlineTemplate ? null : genChildren(el, state, true)
       code = `_c('${el.tag}'${
