@@ -17,22 +17,29 @@ import {
   isRenderableAttr
 } from 'web/server/util'
 
+const ssrHelpers = {
+  _ssrEscape: escape,
+  _ssrNode: renderStringNode,
+  _ssrList: renderStringList,
+  _ssrAttr: renderAttr,
+  _ssrAttrs: renderAttrs,
+  _ssrDOMProps: renderDOMProps,
+  _ssrClass: renderSSRClass,
+  _ssrStyle: renderSSRStyle
+}
+
 export function installSSRHelpers (vm: Component) {
-  if (vm._ssrNode) return
-  let Ctor = vm.constructor
-  while (Ctor.super) {
-    Ctor = Ctor.super
+  if (vm._ssrNode) {
+    return
   }
-  extend(Ctor.prototype, {
-    _ssrEscape: escape,
-    _ssrNode: renderStringNode,
-    _ssrList: renderStringList,
-    _ssrAttr: renderAttr,
-    _ssrAttrs: renderAttrs,
-    _ssrDOMProps: renderDOMProps,
-    _ssrClass: renderSSRClass,
-    _ssrStyle: renderSSRStyle
-  })
+  let Vue = vm.constructor
+  while (Vue.super) {
+    Vue = Vue.super
+  }
+  extend(Vue.prototype, ssrHelpers)
+  if (Vue.FunctionalRenderContext) {
+    extend(Vue.FunctionalRenderContext.prototype, ssrHelpers)
+  }
 }
 
 class StringNode {

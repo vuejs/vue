@@ -1,6 +1,7 @@
+#!/bin/bash
 set -e
-CUR_VERSION=`node build/get-weex-version.js -c`
-NEXT_VERSION=`node build/get-weex-version.js`
+CUR_VERSION=$(node build/get-weex-version.js -c)
+NEXT_VERSION=$(node build/get-weex-version.js)
 
 echo "Current: $CUR_VERSION"
 read -p "Enter new version ($NEXT_VERSION): " -n 1 -r
@@ -20,15 +21,16 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   WEEX_VERSION=$NEXT_VERSION npm run build:weex
 
   # update package
-  cd packages/weex-vue-framework
-  npm version $NEXT_VERSION
+  # using subshells to avoid having to cd back
+  ( cd packages/weex-vue-framework
+  npm version "$NEXT_VERSION"
   npm publish
-  cd -
+  )
 
-  cd packages/weex-template-compiler
-  npm version $NEXT_VERSION
+  ( cd packages/weex-template-compiler
+  npm version "$NEXT_VERSION"
   npm publish
-  cd -
+  )
 
   # commit
   git add packages/weex*

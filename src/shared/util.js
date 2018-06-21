@@ -1,5 +1,7 @@
 /* @flow */
 
+export const emptyObject = Object.freeze({})
+
 // these helpers produces better vm code in JS engines due to their
 // explicitness and function inlining
 export function isUndef (v: any): boolean %checks {
@@ -25,6 +27,8 @@ export function isPrimitive (value: any): boolean %checks {
   return (
     typeof value === 'string' ||
     typeof value === 'number' ||
+    // $flow-disable-line
+    typeof value === 'symbol' ||
     typeof value === 'boolean'
   )
 }
@@ -170,21 +174,35 @@ export const hyphenate = cached((str: string): string => {
 })
 
 /**
- * Simple bind, faster than native
+ * Simple bind polyfill for environments that do not support it... e.g.
+ * PhantomJS 1.x. Technically we don't need this anymore since native bind is
+ * now more performant in most browsers, but removing it would be breaking for
+ * code that was able to run in PhantomJS 1.x, so this must be kept for
+ * backwards compatibility.
  */
-export function bind (fn: Function, ctx: Object): Function {
+
+/* istanbul ignore next */
+function polyfillBind (fn: Function, ctx: Object): Function {
   function boundFn (a) {
-    const l: number = arguments.length
+    const l = arguments.length
     return l
       ? l > 1
         ? fn.apply(ctx, arguments)
         : fn.call(ctx, a)
       : fn.call(ctx)
   }
-  // record original fn length
+
   boundFn._length = fn.length
   return boundFn
 }
+
+function nativeBind (fn: Function, ctx: Object): Function {
+  return fn.bind(ctx)
+}
+
+export const bind = Function.prototype.bind
+  ? nativeBind
+  : polyfillBind
 
 /**
  * Convert an Array-like object to a real Array.

@@ -779,4 +779,111 @@ describe('Component slot', () => {
 
     expect(vm.$el.innerHTML).toBe('<div class="foo"><div class="bar">fallback</div></div>')
   })
+
+  // #7106
+  it('should not lose functional slot across renders', done => {
+    const One = {
+      data: () => ({
+        foo: true
+      }),
+      render (h) {
+        this.foo
+        return h('div', this.$slots.slot)
+      }
+    }
+
+    const Two = {
+      render (h) {
+        return h('span', this.$slots.slot)
+      }
+    }
+
+    const Three = {
+      functional: true,
+      render: (h, { children }) => h('span', children)
+    }
+
+    const vm = new Vue({
+      template: `
+        <div>
+          <one ref="one">
+            <two slot="slot">
+              <three slot="slot">hello</three>
+            </two>
+          </one>
+        </div>
+      `,
+      components: { One, Two, Three }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('hello')
+    // trigger re-render of <one>
+    vm.$refs.one.foo = false
+    waitForUpdate(() => {
+      // should still be there
+      expect(vm.$el.textContent).toBe('hello')
+    }).then(done)
+  })
+
+  it('should allow passing named slots as raw children down multiple layers of functional component', () => {
+    const CompB = {
+      functional: true,
+      render (h, { slots }) {
+        return slots().foo
+      }
+    }
+
+    const CompA = {
+      functional: true,
+      render (h, { children }) {
+        return h(CompB, children)
+      }
+    }
+
+    const vm = new Vue({
+      components: {
+        CompA
+      },
+      template: `
+        <div>
+          <comp-a>
+            <span slot="foo">foo</span>
+          </comp-a>
+        </div>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('foo')
+  })
+
+  // #7817
+  it('should not match wrong named slot in functional component on re-render', done => {
+    const Functional = {
+      functional: true,
+      render: (h, ctx) => ctx.slots().default
+    }
+
+    const Stateful = {
+      data () {
+        return { ok: true }
+      },
+      render (h) {
+        this.ok // register dep
+        return h('div', [
+          h(Functional, this.$slots.named)
+        ])
+      }
+    }
+
+    const vm = new Vue({
+      template: `<stateful ref="stateful"><div slot="named">foo</div></stateful>`,
+      components: { Stateful }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('foo')
+    vm.$refs.stateful.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('foo')
+    }).then(done)
+  })
 })

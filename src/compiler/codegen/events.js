@@ -1,9 +1,9 @@
 /* @flow */
 
-const fnExpRE = /^\s*([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
-const simplePathRE = /^\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?']|\[".*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*\s*$/
+const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
+const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
-// keyCode aliases
+// KeyboardEvent.keyCode aliases
 const keyCodes: { [key: string]: number | Array<number> } = {
   esc: 27,
   tab: 9,
@@ -14,6 +14,21 @@ const keyCodes: { [key: string]: number | Array<number> } = {
   right: 39,
   down: 40,
   'delete': [8, 46]
+}
+
+// KeyboardEvent.key aliases
+const keyNames: { [key: string]: string | Array<string> } = {
+  // #7880: IE11 and Edge use `Esc` for Escape key name.
+  esc: ['Esc', 'Escape'],
+  tab: 'Tab',
+  enter: 'Enter',
+  space: ' ',
+  // #7806: IE11 uses key names without `Arrow` prefix for arrow keys.
+  up: ['Up', 'ArrowUp'],
+  left: ['Left', 'ArrowLeft'],
+  right: ['Right', 'ArrowRight'],
+  down: ['Down', 'ArrowDown'],
+  'delete': ['Backspace', 'Delete']
 }
 
 // #4868: modifiers that prevent the execution of the listener
@@ -41,20 +56,27 @@ export function genHandlers (
 ): string {
   let res = isNative ? 'nativeOn:{' : 'on:{'
   for (const name in events) {
-    const handler = events[name]
-    // #5330: warn click.right, since right clicks do not actually fire click events.
-    if (process.env.NODE_ENV !== 'production' &&
-      name === 'click' &&
-      handler && handler.modifiers && handler.modifiers.right
-    ) {
-      warn(
-        `Use "contextmenu" instead of "click.right" since right clicks ` +
-        `do not actually fire "click" events.`
-      )
-    }
-    res += `"${name}":${genHandler(name, handler)},`
+    res += `"${name}":${genHandler(name, events[name])},`
   }
   return res.slice(0, -1) + '}'
+}
+
+// Generate handler code with binding params on Weex
+/* istanbul ignore next */
+function genWeexHandler (params: Array<any>, handlerCode: string) {
+  let innerHandlerCode = handlerCode
+  const exps = params.filter(exp => simplePathRE.test(exp) && exp !== '$event')
+  const bindings = exps.map(exp => ({ '@binding': exp }))
+  const args = exps.map((exp, i) => {
+    const key = `$_${i + 1}`
+    innerHandlerCode = innerHandlerCode.replace(exp, key)
+    return key
+  })
+  args.push('$event')
+  return '{\n' +
+    `handler:function(${args.join(',')}){${innerHandlerCode}},\n` +
+    `params:${JSON.stringify(bindings)}\n` +
+    '}'
 }
 
 function genHandler (
@@ -73,9 +95,14 @@ function genHandler (
   const isFunctionExpression = fnExpRE.test(handler.value)
 
   if (!handler.modifiers) {
-    return isMethodPath || isFunctionExpression
-      ? handler.value
-      : `function($event){${handler.value}}` // inline statement
+    if (isMethodPath || isFunctionExpression) {
+      return handler.value
+    }
+    /* istanbul ignore if */
+    if (__WEEX__ && handler.params) {
+      return genWeexHandler(handler.params, handler.value)
+    }
+    return `function($event){${handler.value}}` // inline statement
   } else {
     let code = ''
     let genModifierCode = ''
@@ -107,10 +134,14 @@ function genHandler (
       code += genModifierCode
     }
     const handlerCode = isMethodPath
-      ? handler.value + '($event)'
+      ? `return ${handler.value}($event)`
       : isFunctionExpression
-        ? `(${handler.value})($event)`
+        ? `return (${handler.value})($event)`
         : handler.value
+    /* istanbul ignore if */
+    if (__WEEX__ && handler.params) {
+      return genWeexHandler(handler.params, code + handlerCode)
+    }
     return `function($event){${code}${handlerCode}}`
   }
 }
@@ -124,11 +155,14 @@ function genFilterCode (key: string): string {
   if (keyVal) {
     return `$event.keyCode!==${keyVal}`
   }
-  const code = keyCodes[key]
+  const keyCode = keyCodes[key]
+  const keyName = keyNames[key]
   return (
     `_k($event.keyCode,` +
     `${JSON.stringify(key)},` +
-    `${JSON.stringify(code)},` +
-    `$event.key)`
+    `${JSON.stringify(keyCode)},` +
+    `$event.key,` +
+    `${JSON.stringify(keyName)}` +
+    `)`
   )
 }

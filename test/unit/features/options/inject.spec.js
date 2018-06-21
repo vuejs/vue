@@ -635,4 +635,16 @@ describe('Options provide/inject', () => {
 
     expect(injected).toEqual('foo')
   })
+
+  // #7284
+  it('should not inject prototype properties', () => {
+    const vm = new Vue({
+      provide: {}
+    })
+    new Vue({
+      parent: vm,
+      inject: ['constructor']
+    })
+    expect(`Injection "constructor" not found`).toHaveBeenWarned()
+  })
 })

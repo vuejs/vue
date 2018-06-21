@@ -108,13 +108,13 @@ export default class TemplateRenderer {
   }
 
   renderStyles (context: Object): string {
-    const cssFiles = this.clientManifest
-      ? this.clientManifest.all.filter(isCSS)
-      : []
+    const initial = this.preloadFiles || []
+    const async = this.getUsedAsyncFiles(context) || []
+    const cssFiles = initial.concat(async).filter(({ file }) => isCSS(file))
     return (
       // render links for css files
       (cssFiles.length
-        ? cssFiles.map(file => `<link rel="stylesheet" href="${this.publicPath}/${file}">`).join('')
+        ? cssFiles.map(({ file }) => `<link rel="stylesheet" href="${this.publicPath}/${file}">`).join('')
         : '') +
       // context.styles is a getter exposed by vue-style-loader which contains
       // the inline component styles collected during SSR
@@ -191,22 +191,21 @@ export default class TemplateRenderer {
       contextKey = 'state',
       windowKey = '__INITIAL_STATE__'
     } = options || {}
+    const state = serialize(context[contextKey], { isJSON: true })
     const autoRemove = process.env.NODE_ENV === 'production'
       ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
       : ''
     return context[contextKey]
-      ? `<script>window.${windowKey}=${
-          serialize(context[contextKey], { isJSON: true })
-        }${autoRemove}</script>`
+      ? `<script>window.${windowKey}=${state}${autoRemove}</script>`
       : ''
   }
 
   renderScripts (context: Object): string {
     if (this.clientManifest) {
-      const initial = this.preloadFiles
-      const async = this.getUsedAsyncFiles(context)
+      const initial = this.preloadFiles.filter(({ file }) => isJS(file))
+      const async = (this.getUsedAsyncFiles(context) || []).filter(({ file }) => isJS(file))
       const needed = [initial[0]].concat(async || [], initial.slice(1))
-      return needed.filter(({ file }) => isJS(file)).map(({ file }) => {
+      return needed.map(({ file }) => {
         return `<script src="${this.publicPath}/${file}" defer></script>`
       }).join('')
     } else {
