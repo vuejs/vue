@@ -133,7 +133,7 @@ export function eventsMixin (Vue: Class<Component>) {
       for (let i = 0, l = cbs.length; i < l; i++) {
         try {
           const cbResult = cbs[i].apply(vm, args)
-          handlePromiseError(cbResult, vm, `${hook} hook`)
+          handlePromiseError(cbResult, vm, `event handler for "${event}"`)
         } catch (e) {
           handleError(e, vm, `event handler for "${event}"`)
         }
