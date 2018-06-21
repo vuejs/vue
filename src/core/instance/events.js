@@ -5,7 +5,8 @@ import {
   toArray,
   hyphenate,
   handleError,
-  formatComponentName
+  formatComponentName,
+  handlePromiseError
 } from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
 
@@ -131,7 +132,8 @@ export function eventsMixin (Vue: Class<Component>) {
       const args = toArray(arguments, 1)
       for (let i = 0, l = cbs.length; i < l; i++) {
         try {
-          cbs[i].apply(vm, args)
+          const cbResult = cbs[i].apply(vm, args)
+          handlePromiseError(cbResult, vm, `${hook} hook`)
         } catch (e) {
           handleError(e, vm, `event handler for "${event}"`)
         }
