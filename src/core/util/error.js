@@ -27,7 +27,7 @@ export function handleError (err: Error, vm: any, info: string) {
 export function handlePromiseError(value: any, vm: any, info: string) {
   // if value is promise, handle it
   if (value && typeof value.catch === 'function') {
-    value.catch(e => handleError(e, vm, `${hook} hook`))
+    value.catch(e => handleError(e, vm, info))
   }
 }
 
