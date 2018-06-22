@@ -9,11 +9,11 @@ export const inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.pl
 export const weexPlatform = inWeex && WXEnvironment.platform.toLowerCase()
 export const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 export const isIE = inBrowser && document.documentMode
-export const isIE9 = inBrowser && document.documentMode && document.documentMode === 9
+export const isIE9 = inBrowser && document.documentMode === 9
 export const isEdge = UA && UA.indexOf('edge/') > 0
 export const isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 'android')
 export const isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios')
-export const isChrome = inBrowser && window.chrome
+export const isChrome = inBrowser && window.chrome && !window.opr
 
 // Firefox has a "watch" function on Object.prototype...
 export const nativeWatch = ({}).watch
