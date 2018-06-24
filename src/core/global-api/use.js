@@ -13,7 +13,8 @@ export function initUse (Vue: GlobalAPI) {
     const args = toArray(arguments, 1)
     args.unshift(this)
     if (typeof plugin.install === 'function') {
-      plugin.install.apply(plugin, args)
+      // plugin null undefined
+      plugin.install.apply(undefined, args)
     } else if (typeof plugin === 'function') {
       plugin.apply(null, args)
     }
