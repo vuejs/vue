@@ -21,6 +21,14 @@ export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never
   reject: (reason?: any) => void
 ) => Promise<Component | EsModuleComponent> | void;
 
+export type AsyncComponentFactory<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = () => {
+  component: AsyncComponent<Data, Methods, Computed, Props>;
+  loading?: Component | EsModuleComponent;
+  error?: Component | EsModuleComponent;
+  delay?: number;
+  timeout?: number;
+}
+
 /**
  * When the `Computed` type parameter on `ComponentOptions` is inferred,
  * it should have a property with the return type of every get-accessor.
@@ -86,7 +94,7 @@ export interface ComponentOptions<
   errorCaptured?(err: Error, vm: Vue, info: string): boolean | void;
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
-  components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> };
+  components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> | AsyncComponentFactory<any, any, any, any> };
   transitions?: { [key: string]: object };
   filters?: { [key: string]: Function };
 
