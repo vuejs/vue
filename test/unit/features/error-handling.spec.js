@@ -22,7 +22,7 @@ describe('Error handling', () => {
     })
   })
 
-  // hooks that can return promise
+  // hooks that can return rejected promise
   ;[
     ['beforeCreate', 'beforeCreate hook'],
     ['created', 'created hook'],
@@ -62,7 +62,7 @@ describe('Error handling', () => {
     })
   })
 
-  // hooks that can return promise
+  // hooks that can return rejected promise
   ;[
     ['beforeUpdate', 'beforeUpdate hook'],
     ['updated', 'updated hook']
@@ -189,32 +189,33 @@ describe('Error handling', () => {
     Vue.config.errorHandler = null
   })
 
-  it('should capture and recover from v-on errors', () => {
-    const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
-    const err1 = new Error('clickbork')
-    const vm = new Vue({
-      template: '<div v-on:click="bork"></div>',
-      methods: { bork: function () { throw err1 } }
-    }).$mount()
-    triggerEvent(vm.$el, 'click')
-    expect(spy.calls.count()).toBe(1)
-    expect(spy).toHaveBeenCalledWith(err1, vm, 'v-on')
-    Vue.config.errorHandler = null
-  })
+  // event handlers that can throw errors or return rejected promise
+  ;[
+    ['single handler', '<div v-on:click="bork"></div>'],
+    ['multiple handlers', '<div v-on="{ click: [bork, function test() {}] }"></div>']
+  ].forEach(([type, template]) => {
+    it(`should recover from v-on errors for ${type} registered`, () => {
+      const vm = new Vue({
+        template,
+        methods: { bork () { throw new Error('v-on') } }
+      }).$mount()
+      triggerEvent(vm.$el, 'click')
+      expect('Error in v-on').toHaveBeenWarned()
+      expect('Error: v-on').toHaveBeenWarned()
+    })
 
-  it('should capture and recover from v-on async errors', (done) => {
-    const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
-    const err1 = new Error('clickbork')
-    const vm = new Vue({
-      template: '<div v-on:click="bork"></div>',
-      methods: { bork: function () { return new Promise(function (_resolve, reject) { reject(err1) }) } }
-    }).$mount()
-    triggerEvent(vm.$el, 'click')
-    Vue.nextTick(() => {
-      expect(spy.calls.count()).toBe(1)
-      expect(spy).toHaveBeenCalledWith(err1, vm, 'v-on async')
-      Vue.config.errorHandler = null
-      done()
+    it(`should recover from v-on async errors for ${type} registered`, (done) => {
+      const vm = new Vue({
+        template,
+        methods: { bork () {
+          return new Promise((resolve, reject) => reject(new Error('v-on async')))
+        } }
+      }).$mount()
+      triggerEvent(vm.$el, 'click')
+      waitForUpdate(() => {
+        expect('Error in v-on async').toHaveBeenWarned()
+        expect('Error: v-on async').toHaveBeenWarned()
+      }).then(done)
     })
   })
 })
