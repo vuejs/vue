@@ -188,6 +188,35 @@ describe('Error handling', () => {
     expect(vm.$el.textContent).toContain('error in render')
     Vue.config.errorHandler = null
   })
+
+  it('should capture and recover from v-on errors', () => {
+    const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
+    const err1 = new Error('clickbork')
+    const vm = new Vue({
+      template: '<div v-on:click="bork"></div>',
+      methods: { bork: function () { throw err1 } }
+    }).$mount()
+    triggerEvent(vm.$el, 'click')
+    expect(spy.calls.count()).toBe(1)
+    expect(spy).toHaveBeenCalledWith(err1, vm, 'v-on')
+    Vue.config.errorHandler = null
+  })
+
+  it('should capture and recover from v-on async errors', (done) => {
+    const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
+    const err1 = new Error('clickbork')
+    const vm = new Vue({
+      template: '<div v-on:click="bork"></div>',
+      methods: { bork: function () { return new Promise(function (_resolve, reject) { reject(err1) }) } }
+    }).$mount()
+    triggerEvent(vm.$el, 'click')
+    Vue.nextTick(() => {
+      expect(spy.calls.count()).toBe(1)
+      expect(spy).toHaveBeenCalledWith(err1, vm, 'v-on async')
+      Vue.config.errorHandler = null
+      done()
+    })
+  })
 })
 
 function createErrorTestComponents () {
