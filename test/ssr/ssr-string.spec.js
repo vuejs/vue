@@ -1228,7 +1228,7 @@ describe('SSR: renderToString', () => {
   })
 
   // #7859
-  it('should trim excess whigtespace in class attributes', done => {
+  it('should trim excess whitespace in class attributes', done => {
     renderVmWithOptions({
       template: `
       <div>
