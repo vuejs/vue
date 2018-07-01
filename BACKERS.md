@@ -15,27 +15,19 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <h2 align="center">Special Sponsors</h2>
 
 <!--special start-->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://stdlib.com" target="_blank">
-          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://www.bitsrc.io/?utm_source=vue&utm_medium=vue&utm_campaign=vue&utm_term=vue&utm_content=vue" target="_blank">
-          <img height="90px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit-wide.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://www.bmqb.com/jobs" target="_blank">
-          <img width="222px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/bmqb.png">
-        </a>
-      </td>
-    </tr><tr></tr>
-  </tbody>
-</table>
+
+<p align="center">
+  <a href="https://stdlib.com" target="_blank">
+    <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
+  </a>
+</p>
+  ,
+<p align="center">
+  <a href="https://www.bmqb.com/jobs" target="_blank">
+    <img width="220px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/bmqb.png">
+  </a>
+</p>
+  
 <!--special end-->
 
 <h2 align="center">Platinum via Patreon</h2>
@@ -44,6 +36,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <table>
   <tbody>
     <tr>
+      <td align="center" valign="middle">
+        <a href="https://www.bitsrc.io/?utm_source=vue&utm_medium=vue&utm_campaign=vue&utm_term=vue&utm_content=vue" target="_blank">
+          <img height="90px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit.png">
+        </a>
+      </td>
       <td align="center" valign="middle">
         <a href="http://tooltwist.com/" target="_blank">
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tooltwist.png">
