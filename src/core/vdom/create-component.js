@@ -247,7 +247,12 @@ function installComponentHooks (data: VNodeData) {
 function transformModel (options, data: any) {
   const prop = (options.model && options.model.prop) || 'value'
   const event = (options.model && options.model.event) || 'input'
-  ;(data.props || (data.props = {}))[prop] = data.model.value
+  // check if prop is defined, if not, attrs will be used
+  if (options.props && options.props[prop]) {
+    ;(data.props || (data.props = {}))[prop] = data.model.value
+  } else {
+    ;(data.attrs || (data.attrs = {}))[prop] = data.model.value
+  }
   const on = data.on || (data.on = {})
   if (isDef(on[event])) {
     on[event] = [data.model.callback].concat(on[event])
