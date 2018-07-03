@@ -166,6 +166,6 @@ describe('Directive v-model component', () => {
       template: '<test v-model="value" ref="test" />'
     }).$mount()
 
-    expect(vm.$refs['test'].$attrs.value).toEqual(vm.value)
+    expect(vm.$refs.test.$attrs.value).toEqual(vm.value)
   })
 })
