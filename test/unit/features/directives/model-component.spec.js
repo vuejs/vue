@@ -148,4 +148,24 @@ describe('Directive v-model component', () => {
     vm.$refs.input.$emit('input', '   foo o  ')
     expect(vm.text).toBe('foo o')
   })
+
+  it('adds value to $attrs if no prop is defined', () => {
+    const Test = {
+      render: () => {}
+    }
+
+    const vm = new Vue({
+      components: {
+        Test
+      },
+      data () {
+        return {
+          value: 'value'
+        }
+      },
+      template: '<test v-model="value" ref="test" />'
+    }).$mount()
+
+    expect(vm.$refs['test'].$attrs.value).toEqual(vm.value)
+  })
 })
