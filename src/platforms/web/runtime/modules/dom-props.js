@@ -35,6 +35,17 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       }
     }
 
+    // #4521: if a click event triggers update before the change event is
+    // dispatched on a checkbox/radio input, the input's checked state will
+    // be reset and fail to trigger another update.
+    // The root cause here is that browsers may fire microtasks in between click/change.
+    // In Chrome / Firefox, click event fires before change, thus having this problem.
+    // In Safari / Edge, the order is opposite.
+    // Note: in Edge, if you click too fast, only the click event would fire twice.
+    if (key === 'checked' && !isNotInFocusAndDirty(elm, cur)) {
+      continue
+    }
+
     if (key === 'value') {
       // store value as _value as well since
       // non-string values will be stringified
