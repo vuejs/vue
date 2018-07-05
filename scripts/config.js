@@ -8,6 +8,7 @@ const flow = require('rollup-plugin-flow-no-whitespace')
 const version = process.env.VERSION || require('../package.json').version
 const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
 
+// 作为 dist/vue.runtime.esm.js 等编译后的文件的头部
 const banner =
   '/*!\n' +
   ' * Vue.js v' + version + '\n' +
@@ -24,12 +25,13 @@ const weexFactoryPlugin = {
   }
 }
 
+// 别名
 const aliases = require('./alias')
 const resolve = p => {
   const base = p.split('/')[0]
   if (aliases[base]) {
     return path.resolve(aliases[base], p.slice(base.length + 1))
-  } else {
+  } else { // 输出用
     return path.resolve(__dirname, '../', p)
   }
 }
@@ -37,8 +39,8 @@ const resolve = p => {
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
   'web-runtime-cjs': {
-    entry: resolve('web/entry-runtime.js'),
-    dest: resolve('dist/vue.runtime.common.js'),
+    entry: resolve('web/entry-runtime.js'), // 最终映射到platforms/web/entry-runtime.js
+    dest: resolve('dist/vue.runtime.common.js'),// 最终映射到dist/vue.runtime.common.js
     format: 'cjs',
     banner
   },
@@ -170,6 +172,7 @@ const builds = {
 
 function genConfig (name) {
   const opts = builds[name]
+  // 真正的rollup 需要的配置
   const config = {
     input: opts.entry,
     external: opts.external,
@@ -209,5 +212,5 @@ if (process.env.TARGET) {
   module.exports = genConfig(process.env.TARGET)
 } else {
   exports.getBuild = genConfig
-  exports.getAllBuilds = () => Object.keys(builds).map(genConfig)
+  exports.getAllBuilds = () => Object.keys(builds).map(genConfig) // 返回映射为rollup配置的数组
 }

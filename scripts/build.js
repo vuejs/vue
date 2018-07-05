@@ -11,6 +11,7 @@ if (!fs.existsSync('dist')) {
 let builds = require('./config').getAllBuilds()
 
 // filter builds via command line arg
+// package.json里script脚本的后面的参数
 if (process.argv[2]) {
   const filters = process.argv[2].split(',')
   builds = builds.filter(b => {
@@ -69,7 +70,7 @@ function write (dest, code, zip) {
       console.log(blue(path.relative(process.cwd(), dest)) + ' ' + getSize(code) + (extra || ''))
       resolve()
     }
-
+    // 写到dist目录里
     fs.writeFile(dest, code, err => {
       if (err) return reject(err)
       if (zip) {
