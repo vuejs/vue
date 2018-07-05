@@ -19,47 +19,49 @@ describe('compile options', () => {
           }
         }
       },
-      modules: [{
-        transformNode (el) {
-          el.validators = el.validators || []
-          const validators = ['required', 'min', 'max', 'pattern', 'maxlength', 'minlength']
-          validators.forEach(name => {
-            const rule = getAndRemoveAttr(el, name)
-            if (rule !== undefined) {
-              el.validators.push({ name, rule })
+      modules: [
+        {
+          transformNode (el) {
+            el.validators = el.validators || []
+            const validators = ['required', 'min', 'max', 'pattern', 'maxlength', 'minlength']
+            validators.forEach(name => {
+              const rule = getAndRemoveAttr(el, name)
+              if (rule !== undefined) {
+                el.validators.push({ name, rule })
+              }
+            })
+          },
+          genData (el) {
+            let data = ''
+            if (el.validate) {
+              data += `validate:${JSON.stringify(el.validate)},`
             }
-          })
-        },
-        genData (el) {
-          let data = ''
-          if (el.validate) {
-            data += `validate:${JSON.stringify(el.validate)},`
+            if (el.validators) {
+              data += `validators:${JSON.stringify(el.validators)},`
+            }
+            return data
+          },
+          transformCode (el, code) {
+            // check
+            if (!el.validate || !el.validators) {
+              return code
+            }
+            // setup validation result props
+            const result = { dirty: false } // define something other prop
+            el.validators.forEach(validator => {
+              result[validator.name] = null
+            })
+            // generate code
+            return `_c('validate',{props:{
+              field:${JSON.stringify(el.validate.field)},
+              groups:${JSON.stringify(el.validate.groups)},
+              validators:${JSON.stringify(el.validators)},
+              result:${JSON.stringify(result)},
+              child:${code}}
+            })`
           }
-          if (el.validators) {
-            data += `validators:${JSON.stringify(el.validators)},`
-          }
-          return data
-        },
-        transformCode (el, code) {
-          // check
-          if (!el.validate || !el.validators) {
-            return code
-          }
-          // setup validation result props
-          const result = { dirty: false } // define something other prop
-          el.validators.forEach(validator => {
-            result[validator.name] = null
-          })
-          // generate code
-          return `_c('validate',{props:{
-            field:${JSON.stringify(el.validate.field)},
-            groups:${JSON.stringify(el.validate.groups)},
-            validators:${JSON.stringify(el.validators)},
-            result:${JSON.stringify(result)},
-            child:${code}}
-          })`
         }
-      }]
+      ]
     })
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).toEqual([])

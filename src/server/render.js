@@ -191,16 +191,27 @@ function renderAsyncComponent (node, isRoot, context) {
       tag
     )
     if (resolvedNode) {
-      renderComponent(resolvedNode, isRoot, context)
+      if (resolvedNode.componentOptions) {
+        // normal component
+        renderComponent(resolvedNode, isRoot, context)
+      } else if (!Array.isArray(resolvedNode)) {
+        // single return node from functional component
+        renderNode(resolvedNode, isRoot, context)
+      } else {
+        // multiple return nodes from functional component
+        context.renderStates.push({
+          type: 'Fragment',
+          children: resolvedNode,
+          rendered: 0,
+          total: resolvedNode.length
+        })
+        context.next()
+      }
     } else {
-      reject()
+      // invalid component, but this does not throw on the client
+      // so render empty comment node
+      context.write(`<!---->`, context.next)
     }
-  }
-
-  const reject = err => {
-    console.error(`[vue-server-renderer] error when rendering async component:\n`)
-    if (err) console.error(err.stack)
-    context.write(`<!--${node.text}-->`, context.next)
   }
 
   if (factory.resolved) {
@@ -208,6 +219,7 @@ function renderAsyncComponent (node, isRoot, context) {
     return
   }
 
+  const reject = context.done
   let res
   try {
     res = factory(resolve, reject)
@@ -235,9 +247,10 @@ function renderStringNode (el, context) {
     const children: Array<VNode> = el.children
     context.renderStates.push({
       type: 'Element',
+      children,
       rendered: 0,
       total: children.length,
-      endTag: el.close, children
+      endTag: el.close
     })
     write(el.open, next)
   }
@@ -252,8 +265,8 @@ function renderElement (el, isRoot, context) {
     el.data.attrs[SSR_ATTR] = 'true'
   }
 
-  if (el.functionalOptions) {
-    registerComponentForCache(el.functionalOptions, write)
+  if (el.fnOptions) {
+    registerComponentForCache(el.fnOptions, write)
   }
 
   const startTag = renderStartingTag(el, context)
@@ -266,9 +279,10 @@ function renderElement (el, isRoot, context) {
     const children: Array<VNode> = el.children
     context.renderStates.push({
       type: 'Element',
+      children,
       rendered: 0,
       total: children.length,
-      endTag, children
+      endTag
     })
     write(startTag, next)
   }

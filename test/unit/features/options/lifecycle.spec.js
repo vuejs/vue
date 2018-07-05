@@ -137,6 +137,21 @@ describe('Options lifecycle hooks', () => {
         expect(spy).toHaveBeenCalled()
       }).then(done)
     })
+
+    it('should be called before render and allow mutating state', done => {
+      const vm = new Vue({
+        template: '<div>{{ msg }}</div>',
+        data: { msg: 'foo' },
+        beforeUpdate () {
+          this.msg += '!'
+        }
+      }).$mount()
+      expect(vm.$el.textContent).toBe('foo')
+      vm.msg = 'bar'
+      waitForUpdate(() => {
+        expect(vm.$el.textContent).toBe('bar!')
+      }).then(done)
+    })
   })
 
   describe('updated', () => {
