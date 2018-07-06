@@ -19,10 +19,11 @@ Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+  // qifa query方法查询document.querySelector 取到dom对象
   el = el && query(el)
 
   /* istanbul ignore if */
-  // qifa document.body取到body, document.documentElement取到html
+  // qifa document.body取到body, document.documentElement取到html, 不可以挂载到body或html上，因为这是覆盖的
   if (el === document.body || el === document.documentElement) {
     process.env.NODE_ENV !== 'production' && warn(
       `Do not mount Vue to <html> or <body> - mount to normal elements instead.`
@@ -32,6 +33,7 @@ Vue.prototype.$mount = function (
 
   const options = this.$options
   // resolve template/el and convert to render function
+  // qifa 也可以手写render
   if (!options.render) {
     let template = options.template
     if (template) {
@@ -46,6 +48,7 @@ Vue.prototype.$mount = function (
             )
           }
         }
+      // qifa 如果是dom对象，比如div 的nodeType 1
       } else if (template.nodeType) {
         template = template.innerHTML
       } else {
@@ -57,6 +60,7 @@ Vue.prototype.$mount = function (
     } else if (el) {
       template = getOuterHTML(el)
     }
+    // qifa 如果拿到template字符串，就开始编译，后面再跟进去看
     if (template) {
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -79,6 +83,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  // qifa 跳到 ./runtime/index 里的 $mount方法，注意这个文件是带编译的版本的入口
   return mount.call(this, el, hydrating)
 }
 
