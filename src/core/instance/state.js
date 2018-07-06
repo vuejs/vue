@@ -111,6 +111,7 @@ function initProps (vm: Component, propsOptions: Object) {
 
 function initData (vm: Component) {
   let data = vm.$options.data
+  // qifa 组件内data 最好传 function
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
@@ -123,6 +124,8 @@ function initData (vm: Component) {
     )
   }
   // proxy data on instance
+  // qifa data与props、methods里属性名不能冲突
+  // 最后把所有data里的属性 代理到vm上，所以data里定义a1:2 在methods 可以 this.a1 取到值
   const keys = Object.keys(data)
   const props = vm.$options.props
   const methods = vm.$options.methods

@@ -35,6 +35,7 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      // qifa 所以在程序里可以通过$options.el访问到 new 里传入的el， $options.data 访问到new Vue 中传入的data
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -64,7 +65,7 @@ export function initMixin (Vue: Class<Component>) {
       mark(endTag)
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
-
+    // qifa 判断有没有传入 el ，通常是 '#app',然后挂载它
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
