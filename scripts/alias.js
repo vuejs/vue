@@ -1,7 +1,7 @@
 const path = require('path')
 
 const resolve = p => path.resolve(__dirname, '../', p)
-
+// 这里定义 所有import 的路径的别名
 module.exports = {
   vue: resolve('src/platforms/web/entry-runtime-with-compiler'),
   compiler: resolve('src/compiler'),

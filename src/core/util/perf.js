@@ -1,5 +1,5 @@
 import { inBrowser } from './env'
-
+// 导出性能打点的两个方法，利用浏览器提供的window.performance接口
 export let mark
 export let measure
 

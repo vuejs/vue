@@ -130,12 +130,13 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
   }
 }
-
+// qifa el 是dom对象
 export function mountComponent (
   vm: Component,
   el: ?Element,
   hydrating?: boolean
 ): Component {
+  // qifa 所以this.$el能取到当前组件的dom元素
   vm.$el = el
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
@@ -161,6 +162,7 @@ export function mountComponent (
 
   let updateComponent
   /* istanbul ignore if */
+  // qifa 有一些性能埋点
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
     updateComponent = () => {
       const name = vm._name
@@ -187,6 +189,7 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  // qifa 渲染 watcher 记住，在这个回调里执行 updateComponent， updateComponent方法里最重要的就是 vm._update() 和 vm._render()
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted) {

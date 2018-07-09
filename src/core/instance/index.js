@@ -13,7 +13,7 @@ function Vue (options) {
   }
   this._init(options)
 }
-
+// qifa 给prototype上扩展方法
 initMixin(Vue)
 stateMixin(Vue)
 eventsMixin(Vue)

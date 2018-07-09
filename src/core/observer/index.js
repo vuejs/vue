@@ -195,11 +195,14 @@ export function defineReactive (
  * triggers change notification if the property doesn't
  * already exist.
  */
+// qifa 向响应式对象中添加一个属性，并确保这个新属性同样是响应式的，且触发视图更新。
+// 它必须用于向响应式对象上添加新属性，因为 Vue 无法探测普通的新增属性 (比如 this.myObject.newProperty = 'hi')
 export function set (target: Array<any> | Object, key: any, val: any): any {
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
-    warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
+    warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target)}`)
+    // warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
@@ -212,10 +215,10 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   }
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Avoid adding reactive properties to a Vue instance or its root $data ' +
-      'at runtime - declare it upfront in the data option.'
-    )
+    // process.env.NODE_ENV !== 'production' && warn(
+    //   'Avoid adding reactive properties to a Vue instance or its root $data ' +
+    //   'at runtime - declare it upfront in the data option.'
+    // )
     return val
   }
   if (!ob) {
@@ -230,11 +233,12 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
 /**
  * Delete a property and trigger change if necessary.
  */
+// qifa 删除对象的属性。如果对象是响应式的，确保删除能触发更新视图。这个方法主要用于避开 Vue 不能检测到属性被删除的限制，但是你应该很少会使用它。
 export function del (target: Array<any> | Object, key: any) {
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
-    warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
+    // warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1)
@@ -242,10 +246,10 @@ export function del (target: Array<any> | Object, key: any) {
   }
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Avoid deleting properties on a Vue instance or its root $data ' +
-      '- just set it to null.'
-    )
+    // process.env.NODE_ENV !== 'production' && warn(
+    //   'Avoid deleting properties on a Vue instance or its root $data ' +
+    //   '- just set it to null.'
+    // )
     return
   }
   if (!hasOwn(target, key)) {

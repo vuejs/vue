@@ -34,6 +34,7 @@ extend(Vue.options.components, platformComponents)
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
+// qifa hydrating是服务端渲染相关的参数，正常不用传
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean

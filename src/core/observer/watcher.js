@@ -45,9 +45,9 @@ export default class Watcher {
   constructor (
     vm: Component,
     expOrFn: string | Function,
-    cb: Function,
-    options?: ?Object,
-    isRenderWatcher?: boolean
+    cb: Function, // 回调函数
+    options?: ?Object, // 可选配置选项
+    isRenderWatcher?: boolean // 是不是渲染Watch
   ) {
     this.vm = vm
     if (isRenderWatcher) {

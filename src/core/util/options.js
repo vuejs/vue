@@ -251,7 +251,7 @@ function checkComponents (options: Object) {
     validateComponentName(key)
   }
 }
-
+// qifa 验证component的 name 是否合法
 export function validateComponentName (name: string) {
   if (!/^[a-zA-Z][\w-]*$/.test(name)) {
     warn(

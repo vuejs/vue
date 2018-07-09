@@ -39,7 +39,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     mergeOptions,
     defineReactive
   }
-
+  // qifa 全局方法
   Vue.set = set
   Vue.delete = del
   Vue.nextTick = nextTick
