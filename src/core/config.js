@@ -42,6 +42,7 @@ export default ({
   /**
    * Whether to suppress warnings.
    */
+  // qifa true => 取消 Vue 所有的日志与警告
   silent: false,
 
   /**
@@ -52,6 +53,7 @@ export default ({
   /**
    * Whether to enable devtools
    */
+  // qifa 配置是否允许 vue-devtools 检查代码。开发版本默认为 true，生产版本默认为 false。生产版本设为 true 可以启用检查
   devtools: process.env.NODE_ENV !== 'production',
 
   /**
@@ -62,6 +64,10 @@ export default ({
   /**
    * Error handler for watcher errors
    */
+  // qifa 指定组件的渲染和观察期间未捕获错误的处理函数。这个处理函数被调用时，可获取错误信息和 Vue 实例。
+  // 从 2.2.0 起，这个钩子也会捕获组件生命周期钩子里的错误。同样的，当这个钩子是 undefined 时，被捕获的错误会通过 console.error 输出而避免应用崩溃。
+  // 从 2.4.0 起这个钩子也会捕获 Vue 自定义事件处理函数内部的错误了。
+  // 错误追踪服务 Sentry 和 Bugsnag 都通过此选项提供了官方支持。
   errorHandler: null,
 
   /**
@@ -77,8 +83,19 @@ export default ({
   /**
    * Custom user key aliases for v-on
    */
-  // $flow-disable-line
-  keyCodes: Object.create(null),
+  // qifa 给 v-on 自定义键位别名。
+  //  Vue.config.keyCodes = {
+  //   v: 86,
+  //   f1: 112,
+  //   // camelCase 不可用
+  //   mediaPlayPause: 179,
+  //   // 取而代之的是 kebab-case 且用双引号括起来
+  //   "media-play-pause": 179,
+  //   up: [38, 87]
+  // }
+  // <input type="text" @keyup.media-play-pause="method">
+  //   // $flow-disable-line
+  //   keyCodes: Object.create(null),
 
   /**
    * Check if a tag is reserved so that it cannot be registered as a
