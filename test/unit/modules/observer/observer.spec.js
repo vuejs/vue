@@ -189,9 +189,9 @@ describe('Observer', () => {
       update: jasmine.createSpy()
     }
     // collect dep
-    Dep.target = watcher
+    Dep.target.storage = watcher
     obj.a.b
-    Dep.target = null
+    Dep.target.storage = null
     expect(watcher.deps.length).toBe(3) // obj.a + a + a.b
     obj.a.b = 3
     expect(watcher.update.calls.count()).toBe(1)
@@ -200,10 +200,10 @@ describe('Observer', () => {
     expect(watcher.update.calls.count()).toBe(2)
     watcher.deps = []
 
-    Dep.target = watcher
+    Dep.target.storage = watcher
     obj.a.b
     obj.c
-    Dep.target = null
+    Dep.target.storage = null
     expect(watcher.deps.length).toBe(4)
     // set on the swapped object
     obj.a.b = 5
@@ -236,9 +236,9 @@ describe('Observer', () => {
       update: jasmine.createSpy()
     }
     // collect dep
-    Dep.target = watcher
+    Dep.target.storage = watcher
     expect(obj.a).toBe(2) // Make sure 'this' is preserved
-    Dep.target = null
+    Dep.target.storage = null
     obj.a = 3
     expect(obj.val).toBe(3) // make sure 'setter' was called
     obj.val = 5
