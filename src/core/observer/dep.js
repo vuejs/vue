@@ -10,7 +10,7 @@ let uid = 0
  * directives subscribing to it.
  */
 export default class Dep {
-  static target: ?Watcher;
+  static target: {storage: ?Watcher};
   id: number;
   subs: Array<Watcher>;
 
@@ -59,7 +59,7 @@ export function popTarget () {
   Dep.target.storage = targetStack.pop()
 }
 
-export function depTarget (target) {
+export function depTarget (target: {storage: ?Watcher}): {storage: ?Watcher} | void {
   if (target) {
     Dep.target = target
   } else {
