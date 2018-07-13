@@ -5222,7 +5222,7 @@ function initGlobalAPI (Vue) {
   Object.defineProperty(Vue, 'config', configDef);
 
   // exposed util methods.
-  // NOTE: these are not considered part of the public API - avoid relying on id:3
+  // NOTE: these are not considered part of the public API - avoid relying on id:3 +debt
   // them unless you are aware of the risk.
   //   
   // ----
