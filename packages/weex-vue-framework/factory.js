@@ -4205,7 +4205,12 @@ function updateVirtualComponent (vnode) {
   }
   vm._vnode = vnode;
   if (vm._isMounted && componentId) {
-    // TODO: data should be filtered and without bindings
+    // TODO: data should be filtered and without bindings id:1
+    //   
+    // ----
+    // https://github.com/imdone/vue/issues/2
+    // Evan You
+    // yyx990803@gmail.com
     var data = Object.assign({}, vm._data);
     updateComponentData(componentId, data, function () {
       callHook(vm, 'updated');
@@ -4225,9 +4230,14 @@ function resolveVirtualComponent (vnode) {
     beforeCreate: function beforeCreate () {
       // const vm: Component = this
 
-      // TODO: listen on all events and dispatch them to the
+      // TODO: listen on all events and dispatch them to the id:2
       // corresponding virtual components according to the componentId.
       // vm._virtualComponents = {}
+      //   
+      // ----
+      // https://github.com/imdone/vue/issues/3
+      // Evan You
+      // yyx990803@gmail.com
       var createVirtualComponent = function (componentId, propsData) {
         // create virtual component
         // const subVm =
@@ -5212,8 +5222,13 @@ function initGlobalAPI (Vue) {
   Object.defineProperty(Vue, 'config', configDef);
 
   // exposed util methods.
-  // NOTE: these are not considered part of the public API - avoid relying on
+  // NOTE: these are not considered part of the public API - avoid relying on +debt id:3
   // them unless you are aware of the risk.
+  //   
+  // ----
+  // https://github.com/imdone/vue/issues/4
+  // Evan You
+  // yyx990803@gmail.com
   Vue.util = {
     warn: warn,
     extend: extend,
@@ -7295,7 +7310,12 @@ var TransitionGroup = {
       prevChildren.forEach(function (c) {
         c.data.transition = transitionData;
 
-        // TODO: record before patch positions
+        // TODO: record before patch positions id:4
+        //   
+        // ----
+        // https://github.com/imdone/vue/issues/5
+        // Evan You
+        // yyx990803@gmail.com
 
         if (map[c.key]) {
           kept.push(c);
@@ -7329,8 +7349,13 @@ var TransitionGroup = {
       return
     }
 
-    // TODO: finish implementing move animations once
+    // TODO: finish implementing move animations once id:5
     // we have access to sync getComponentRect()
+    //   
+    // ----
+    // https://github.com/imdone/vue/issues/6
+    // Evan You
+    // yyx990803@gmail.com
 
     // children.forEach(callPendingCbs)
 
