@@ -101,7 +101,12 @@ export interface ComponentOptions<
   parent?: Vue;
   mixins?: (ComponentOptions<Vue> | typeof Vue)[];
   name?: string;
-  // TODO: support properly inferred 'extends'
+  // TODO: support properly inferred 'extends' id:10
+  //   
+  // ----
+  // https://github.com/imdone/vue/issues/11
+  // Herrington Darkholme
+  // HerringtonDarkholme@users.noreply.github.com
   extends?: ComponentOptions<Vue> | typeof Vue;
   delimiters?: [string, string];
   comments?: boolean;

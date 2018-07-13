@@ -60,7 +60,12 @@ export default {
       prevChildren.forEach(c => {
         c.data.transition = transitionData
 
-        // TODO: record before patch positions
+        // TODO: record before patch positions id:6
+        //   
+        // ----
+        // https://github.com/imdone/vue/issues/7
+        // Evan You
+        // yyx990803@gmail.com
 
         if (map[c.key]) {
           kept.push(c)
@@ -94,8 +99,13 @@ export default {
       return
     }
 
-    // TODO: finish implementing move animations once
+    // TODO: finish implementing move animations once id:8
     // we have access to sync getComponentRect()
+    //   
+    // ----
+    // https://github.com/imdone/vue/issues/9
+    // Evan You
+    // yyx990803@gmail.com
 
     // children.forEach(callPendingCbs)
 

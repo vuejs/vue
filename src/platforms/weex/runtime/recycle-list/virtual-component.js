@@ -91,7 +91,12 @@ function updateVirtualComponent (vnode?: VNode) {
   }
   vm._vnode = vnode
   if (vm._isMounted && componentId) {
-    // TODO: data should be filtered and without bindings
+    // TODO: data should be filtered and without bindings id:9
+    //   
+    // ----
+    // https://github.com/imdone/vue/issues/10
+    // Hanks
+    // zhanghan.me@gmail.com
     const data = Object.assign({}, vm._data)
     updateComponentData(componentId, data, () => {
       callHook(vm, 'updated')
@@ -111,9 +116,14 @@ export function resolveVirtualComponent (vnode: MountedComponentVNode): VNode {
     beforeCreate () {
       // const vm: Component = this
 
-      // TODO: listen on all events and dispatch them to the
+      // TODO: listen on all events and dispatch them to the id:11
       // corresponding virtual components according to the componentId.
       // vm._virtualComponents = {}
+      //   
+      // ----
+      // https://github.com/imdone/vue/issues/12
+      // Hanks
+      // zhanghan.me@gmail.com
       const createVirtualComponent = (componentId, propsData) => {
         // create virtual component
         // const subVm =
