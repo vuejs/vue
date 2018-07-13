@@ -85,18 +85,18 @@ export function mergeDataOrFn (
     // it has to be a function to pass previous merges.
     return function mergedDataFn () {
       return mergeData(
-        typeof childVal === 'function' ? childVal.call(this) : childVal,
-        typeof parentVal === 'function' ? parentVal.call(this) : parentVal
+        typeof childVal === 'function' ? childVal.call(this, this) : childVal,
+        typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
       )
     }
-  } else if (parentVal || childVal) {
+  } else {
     return function mergedInstanceDataFn () {
       // instance merge
       const instanceData = typeof childVal === 'function'
-        ? childVal.call(vm)
+        ? childVal.call(vm, vm)
         : childVal
       const defaultData = typeof parentVal === 'function'
-        ? parentVal.call(vm)
+        ? parentVal.call(vm, vm)
         : parentVal
       if (instanceData) {
         return mergeData(instanceData, defaultData)
@@ -123,7 +123,7 @@ strats.data = function (
 
       return parentVal
     }
-    return mergeDataOrFn.call(this, parentVal, childVal)
+    return mergeDataOrFn(parentVal, childVal)
   }
 
   return mergeDataOrFn(parentVal, childVal, vm)
@@ -248,13 +248,23 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
  */
 function checkComponents (options: Object) {
   for (const key in options.components) {
-    const lower = key.toLowerCase()
-    if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
-      warn(
-        'Do not use built-in or reserved HTML elements as component ' +
-        'id: ' + key
-      )
-    }
+    validateComponentName(key)
+  }
+}
+
+export function validateComponentName (name: string) {
+  if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+    warn(
+      'Invalid component name: "' + name + '". Component names ' +
+      'can only contain alphanumeric characters and the hyphen, ' +
+      'and must start with a letter.'
+    )
+  }
+  if (isBuiltInTag(name) || config.isReservedTag(name)) {
+    warn(
+      'Do not use built-in or reserved HTML elements as component ' +
+      'id: ' + name
+    )
   }
 }
 
@@ -301,6 +311,7 @@ function normalizeProps (options: Object, vm: ?Component) {
  */
 function normalizeInject (options: Object, vm: ?Component) {
   const inject = options.inject
+  if (!inject) return
   const normalized = options.inject = {}
   if (Array.isArray(inject)) {
     for (let i = 0; i < inject.length; i++) {
@@ -313,7 +324,7 @@ function normalizeInject (options: Object, vm: ?Component) {
         ? extend({ from: key }, val)
         : { from: val }
     }
-  } else if (process.env.NODE_ENV !== 'production' && inject) {
+  } else if (process.env.NODE_ENV !== 'production') {
     warn(
       `Invalid value for option "inject": expected an Array or an Object, ` +
       `but got ${toRawType(inject)}.`,

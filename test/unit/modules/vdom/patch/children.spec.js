@@ -507,4 +507,27 @@ describe('vdom patch: children', () => {
 
     expect(postPatch).toBe(original)
   })
+
+  it('should warn with duplicate keys: createChildren', () => {
+    function makeNode (key) {
+      return new VNode('div', { key: key })
+    }
+
+    const vnode = new VNode('p', {}, ['b', 'a', 'c', 'b'].map(makeNode))
+    patch(null, vnode)
+    expect(`Duplicate keys detected: 'b'`).toHaveBeenWarned()
+  })
+
+  it('should warn with duplicate keys: updateChildren', () => {
+    function makeNode (key) {
+      return new VNode('div', { key: key })
+    }
+
+    const vnode2 = new VNode('p', {}, ['b', 'a', 'c', 'b'].map(makeNode))
+    const vnode3 = new VNode('p', {}, ['b', 'x', 'd', 'b'].map(makeNode))
+    patch(vnode0, vnode2)
+    expect(`Duplicate keys detected: 'b'`).toHaveBeenWarned()
+    patch(vnode2, vnode3)
+    expect(`Duplicate keys detected: 'b'`).toHaveBeenWarned()
+  })
 })

@@ -123,7 +123,7 @@ describe('parser', () => {
   it('not warn 3 root elements with v-if, v-else-if and v-else', () => {
     parse('<div v-if="1"></div><div v-else-if="2"></div><div v-else></div>', baseOptions)
     expect('Component template should contain exactly one root element')
-        .not.toHaveBeenWarned()
+      .not.toHaveBeenWarned()
   })
 
   it('not warn 2 root elements with v-if and v-else on separate lines', () => {
@@ -142,7 +142,7 @@ describe('parser', () => {
       <div v-else></div>
     `, baseOptions)
     expect('Component template should contain exactly one root element')
-        .not.toHaveBeenWarned()
+      .not.toHaveBeenWarned()
 
     parse(`
       <div v-if="1"></div>
@@ -152,7 +152,7 @@ describe('parser', () => {
       <div v-else></div>
     `, baseOptions)
     expect('Component template should contain exactly one root element')
-        .not.toHaveBeenWarned()
+      .not.toHaveBeenWarned()
   })
 
   it('generate correct ast for 2 root elements with v-if and v-else on separate lines', () => {
@@ -219,7 +219,7 @@ describe('parser', () => {
   it('warn 2 root elements with v-if and v-else-if with v-for on 2nd', () => {
     parse('<div v-if="1"></div><div v-else-if="2" v-for="i in [1]"></div>', baseOptions)
     expect('Cannot use v-for on stateful component root element because it renders multiple elements')
-        .toHaveBeenWarned()
+      .toHaveBeenWarned()
   })
 
   it('warn <template> as root element', () => {
@@ -281,6 +281,121 @@ describe('parser', () => {
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
     expect(liAst.key).toBe('item.uid')
+  })
+
+  it('v-for directive destructuring', () => {
+    let ast = parse('<ul><li v-for="{ foo } in items"></li></ul>', baseOptions)
+    let liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo }')
+
+    // with paren
+    ast = parse('<ul><li v-for="({ foo }) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo }')
+
+    // multi-var destructuring
+    ast = parse('<ul><li v-for="{ foo, bar, baz } in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo, bar, baz }')
+
+    // multi-var destructuring with paren
+    ast = parse('<ul><li v-for="({ foo, bar, baz }) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo, bar, baz }')
+
+    // with index
+    ast = parse('<ul><li v-for="({ foo }, i) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo }')
+    expect(liAst.iterator1).toBe('i')
+
+    // with key + index
+    ast = parse('<ul><li v-for="({ foo }, i, j) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo }')
+    expect(liAst.iterator1).toBe('i')
+    expect(liAst.iterator2).toBe('j')
+
+    // multi-var destructuring with index
+    ast = parse('<ul><li v-for="({ foo, bar, baz }, i) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo, bar, baz }')
+    expect(liAst.iterator1).toBe('i')
+
+    // array
+    ast = parse('<ul><li v-for="[ foo ] in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo ]')
+
+    // multi-array
+    ast = parse('<ul><li v-for="[ foo, bar, baz ] in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo, bar, baz ]')
+
+    // array with paren
+    ast = parse('<ul><li v-for="([ foo ]) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo ]')
+
+    // multi-array with paren
+    ast = parse('<ul><li v-for="([ foo, bar, baz ]) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo, bar, baz ]')
+
+    // array with index
+    ast = parse('<ul><li v-for="([ foo ], i) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo ]')
+    expect(liAst.iterator1).toBe('i')
+
+    // array with key + index
+    ast = parse('<ul><li v-for="([ foo ], i, j) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo ]')
+    expect(liAst.iterator1).toBe('i')
+    expect(liAst.iterator2).toBe('j')
+
+    // multi-array with paren
+    ast = parse('<ul><li v-for="([ foo, bar, baz ]) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo, bar, baz ]')
+
+    // multi-array with index
+    ast = parse('<ul><li v-for="([ foo, bar, baz ], i) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo, bar, baz ]')
+    expect(liAst.iterator1).toBe('i')
+
+    // nested
+    ast = parse('<ul><li v-for="({ foo, bar: { baz }, qux: [ n ] }, i, j) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('{ foo, bar: { baz }, qux: [ n ] }')
+    expect(liAst.iterator1).toBe('i')
+    expect(liAst.iterator2).toBe('j')
+
+    // array nested
+    ast = parse('<ul><li v-for="([ foo, { bar }, baz ], i, j) in items"></li></ul>', baseOptions)
+    liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('[ foo, { bar }, baz ]')
+    expect(liAst.iterator1).toBe('i')
+    expect(liAst.iterator2).toBe('j')
   })
 
   it('v-for directive invalid syntax', () => {
@@ -393,6 +508,15 @@ describe('parser', () => {
     expect(ast.attrs[1].value).toBe('"field1"')
     expect(ast.props[0].name).toBe('value')
     expect(ast.props[0].value).toBe('msg')
+  })
+
+  // #6887
+  it('special case static attribute that must be props', () => {
+    const ast = parse('<video muted></video>', baseOptions)
+    expect(ast.attrs[0].name).toBe('muted')
+    expect(ast.attrs[0].value).toBe('""')
+    expect(ast.props[0].name).toBe('muted')
+    expect(ast.props[0].value).toBe('true')
   })
 
   it('attribute with v-on', () => {

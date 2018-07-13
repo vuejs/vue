@@ -1,13 +1,15 @@
 /* @flow */
 
 import { warn } from 'core/util/index'
-import { cached, isUndef } from 'shared/util'
+import { cached, isUndef, isPlainObject } from 'shared/util'
 
 const normalizeEvent = cached((name: string): {
   name: string,
   once: boolean,
   capture: boolean,
-  passive: boolean
+  passive: boolean,
+  handler?: Function,
+  params?: Array<any>
 } => {
   const passive = name.charAt(0) === '&'
   name = passive ? name.slice(1) : name
@@ -47,11 +49,16 @@ export function updateListeners (
   remove: Function,
   vm: Component
 ) {
-  let name, cur, old, event
+  let name, def, cur, old, event
   for (name in on) {
-    cur = on[name]
+    def = cur = on[name]
     old = oldOn[name]
     event = normalizeEvent(name)
+    /* istanbul ignore if */
+    if (__WEEX__ && isPlainObject(def)) {
+      cur = def.handler
+      event.params = def.params
+    }
     if (isUndef(cur)) {
       process.env.NODE_ENV !== 'production' && warn(
         `Invalid handler for event "${event.name}": got ` + String(cur),
@@ -61,7 +68,7 @@ export function updateListeners (
       if (isUndef(cur.fns)) {
         cur = on[name] = createFnInvoker(cur)
       }
-      add(event.name, cur, event.once, event.capture, event.passive)
+      add(event.name, cur, event.once, event.capture, event.passive, event.params)
     } else if (cur !== old) {
       old.fns = cur
       on[name] = old

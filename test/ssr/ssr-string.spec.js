@@ -267,6 +267,17 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-show directive merge with style', done => {
+    renderVmWithOptions({
+      template: '<div :style="[{lineHeight: 1}]" v-show="false"><span>inner</span></div>'
+    }, res => {
+      expect(res).toContain(
+        '<div data-server-rendered="true" style="line-height:1;display:none;"><span>inner</span></div>'
+      )
+      done()
+    })
+  })
+
   it('v-show directive not passed to child', done => {
     renderVmWithOptions({
       template: '<foo v-show="false"></foo>',
@@ -571,6 +582,79 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain('<span data-server-rendered="true" class="b">testAsync</span>')
+      done()
+    })
+  })
+
+  it('renders async component (functional, single node)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <test-async></test-async>
+        </div>
+      `,
+      components: {
+        testAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return h('span', { class: ['b'] }, 'testAsync')
+            }
+          }), 1)
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span class="b">testAsync</span></div>')
+      done()
+    })
+  })
+
+  it('renders async component (functional, multiple nodes)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <test-async></test-async>
+        </div>
+      `,
+      components: {
+        testAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return [
+                h('span', { class: ['a'] }, 'foo'),
+                h('span', { class: ['b'] }, 'bar')
+              ]
+            }
+          }), 1)
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true">' +
+          '<span class="a">foo</span>' +
+          '<span class="b">bar</span>' +
+        '</div>'
+      )
+      done()
+    })
+  })
+
+  it('should catch async component error', done => {
+    Vue.config.silent = true
+    renderToString(new Vue({
+      template: '<test-async></test-async>',
+      components: {
+        testAsync: () => Promise.resolve({
+          render () {
+            throw new Error('foo')
+          }
+        })
+      }
+    }), (err, result) => {
+      Vue.config.silent = false
+      expect(err).toBeTruthy()
+      expect(result).toBeUndefined()
       done()
     })
   })
@@ -986,6 +1070,162 @@ describe('SSR: renderToString', () => {
       template: `<div></div><div></div>`
     }), (err, res) => {
       expect(err.toString()).toContain('Component template should contain exactly one root element')
+      done()
+    })
+  })
+
+  // #6907
+  it('should not optimize root if conditions', done => {
+    renderVmWithOptions({
+      data: { foo: 123 },
+      template: `<input :type="'text'" v-model="foo">`
+    }, res => {
+      expect(res).toBe(`<input type="text" data-server-rendered="true" value="123">`)
+      done()
+    })
+  })
+
+  it('render muted properly', done => {
+    renderVmWithOptions({
+      template: '<video muted></video>'
+    }, result => {
+      expect(result).toContain('<video muted="muted" data-server-rendered="true"></video>')
+      done()
+    })
+  })
+
+  it('render v-model with textarea', done => {
+    renderVmWithOptions({
+      data: { foo: 'bar' },
+      template: '<div><textarea v-model="foo"></textarea></div>'
+    }, result => {
+      expect(result).toContain('<textarea>bar</textarea>')
+      done()
+    })
+  })
+
+  it('render v-model with textarea (non-optimized)', done => {
+    renderVmWithOptions({
+      render (h) {
+        return h('textarea', {
+          domProps: {
+            value: 'foo'
+          }
+        })
+      }
+    }, result => {
+      expect(result).toContain('<textarea data-server-rendered="true">foo</textarea>')
+      done()
+    })
+  })
+
+  it('render v-model with <select> (value binding)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2,
+        options: [
+          { id: 1, label: 'one' },
+          { id: 2, label: 'two' }
+        ]
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option v-for="o in options" :value="o.id">{{ o.label }}</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option value="1">one</option>' +
+          '<option selected="selected" value="2">two</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
+
+  it('render v-model with <select> (static value)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option value="1">one</option>
+          <option value="2">two</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option value="1">one</option> ' +
+          '<option value="2" selected="selected">two</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
+
+  it('render v-model with <select> (text as value)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2,
+        options: [
+          { id: 1, label: 'one' },
+          { id: 2, label: 'two' }
+        ]
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option v-for="o in options">{{ o.id }}</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option>1</option>' +
+          '<option selected="selected">2</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
+
+  // #7223
+  it('should not double escape attribute values', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div id="a\nb"></div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div id="a\nb"></div>`)
+      done()
+    })
+  })
+
+  it('should expose ssr helpers on functional context', done => {
+    let called = false
+    renderVmWithOptions({
+      template: `<div><foo/></div>`,
+      components: {
+        foo: {
+          functional: true,
+          render (h, ctx) {
+            expect(ctx._ssrNode).toBeTruthy()
+            called = true
+          }
+        }
+      }
+    }, () => {
+      expect(called).toBe(true)
       done()
     })
   })
