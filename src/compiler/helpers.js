@@ -65,6 +65,18 @@ export function addHandler (
     )
   }
 
+  // normalize click.right and click.middle since they don't actually fire
+  // this is technically browser-specific, but at least for now browsers are
+  // the only target envs that have right/middle clicks.
+  if (name === 'click') {
+    if (modifiers.right) {
+      name = 'contextmenu'
+      delete modifiers.right
+    } else if (modifiers.middle) {
+      name = 'mouseup'
+    }
+  }
+
   // check capture modifier
   if (modifiers.capture) {
     delete modifiers.capture
@@ -78,18 +90,6 @@ export function addHandler (
   if (modifiers.passive) {
     delete modifiers.passive
     name = '&' + name // mark the event as passive
-  }
-
-  // normalize click.right and click.middle since they don't actually fire
-  // this is technically browser-specific, but at least for now browsers are
-  // the only target envs that have right/middle clicks.
-  if (name === 'click') {
-    if (modifiers.right) {
-      name = 'contextmenu'
-      delete modifiers.right
-    } else if (modifiers.middle) {
-      name = 'mouseup'
-    }
   }
 
   let events
