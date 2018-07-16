@@ -181,5 +181,5 @@ function getTimeout (delays: Array<string>, durations: Array<string>): number {
 }
 
 function toMs (s: string): number {
-  return Number(s.slice(0, -1)) * 1000
+  return Number(s.slice(0, -1).replace(',', '.')) * 1000
 }
