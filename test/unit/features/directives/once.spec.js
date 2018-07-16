@@ -176,6 +176,42 @@ describe('Directive v-once', () => {
     }).then(done)
   })
 
+  it('should work inside v-for in component', done => {
+    const vm = new Vue({
+      data: {
+        comp: 'comp1',
+        list: [
+          { id: 0 }
+        ]
+      },
+      components: {
+        comp1: {
+          template: '<span>comp1</span>'
+        },
+        comp2: {
+          template: '<span>comp2</span>'
+        }
+      },
+      template: `
+        <div>
+          <div v-for="i in list" :key="i.id">
+            <component :is='comp' v-once></component>
+          </div>
+        </div>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('comp1')
+
+    vm.comp = 'comp2'
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('comp1')
+      vm.list.push({ id: 1 })
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('comp1comp2')
+    }).then(done)
+  })
+
   it('should work inside v-for with v-if', done => {
     const vm = new Vue({
       data: {
