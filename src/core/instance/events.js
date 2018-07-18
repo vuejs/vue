@@ -49,7 +49,7 @@ export function eventsMixin (Vue: Class<Component>) {
     const vm: Component = this
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
-        this.$on(event[i], fn)
+        vm.$on(event[i], fn)
       }
     } else {
       (vm._events[event] || (vm._events[event] = [])).push(fn)
@@ -83,7 +83,7 @@ export function eventsMixin (Vue: Class<Component>) {
     // array of events
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
-        this.$off(event[i], fn)
+        vm.$off(event[i], fn)
       }
       return vm
     }
