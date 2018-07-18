@@ -63,6 +63,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
     </tr><tr></tr>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://www.nativescript.org/vue?utm_source=vue-js-org&utm_medium=website&utm_campaign=nativescript-awareness" target="_blank">
+          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/nativescript.png">
+        </a>
+      </td>
+    </tr><tr></tr>
   </tbody>
 </table>
 <!--platinum end-->
