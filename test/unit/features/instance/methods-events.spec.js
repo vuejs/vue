@@ -19,9 +19,9 @@ describe('Instance methods events', () => {
   })
 
   it('$on multi event', () => {
-    vm.$on(['test1', 'test2'], function () {
+    vm.$on(['test1', 'test2'], function (...params) {
       expect(this).toBe(vm)
-      spy.apply(this, arguments)
+      spy.apply(this, params)
     })
     vm.$emit('test1', 1, 2, 3, 4)
     expect(spy.calls.count()).toBe(1)
