@@ -8,10 +8,10 @@ describe('Instance methods events', () => {
   })
 
   it('$on', () => {
-    vm.$on('test', function () {
+    vm.$on('test', function (...params) {
       // expect correct context
       expect(this).toBe(vm)
-      spy.apply(this, arguments)
+      spy.apply(this, params)
     })
     vm.$emit('test', 1, 2, 3, 4)
     expect(spy.calls.count()).toBe(1)
