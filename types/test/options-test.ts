@@ -79,6 +79,18 @@ Vue.component('union-prop', {
   }
 });
 
+Vue.component('prop-with-primitive-default', {
+  props: {
+    id: {
+      type: String,
+      default: () => String(Math.round(Math.random() * 10000000))
+    }
+  },
+  created() {
+    this.id;
+  }
+});
+
 Vue.component('component', {
   data() {
     this.$mount
