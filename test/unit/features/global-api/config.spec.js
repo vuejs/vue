@@ -80,5 +80,46 @@ describe('Global config', () => {
       expect(spy).toHaveBeenCalled()
       Vue.config.async = true
     })
+
+    it('runs watchers in correct order when false', () => {
+      Vue.config.async = false
+      const vm = new Vue({
+        template: `
+          <div id="app">
+            {{ computed }}
+          </div>`,
+        props: ['prop'],
+        propsData: {
+          'prop': []
+        },
+        data: () => ({
+          data: ''
+        }),
+        computed: {
+          computed () {
+            return this.prop.join(',')
+          }
+        },
+        watch: {
+          prop: 'execute'
+        },
+        methods: {
+          execute () {
+            this.data = this.computed
+          }
+        }
+      }).$mount()
+      expect(vm.computed).toBe('')
+      expect(vm.data).toBe('')
+
+      vm.prop = [1, 2, 3]
+      expect(vm.computed).toBe('1,2,3')
+      expect(vm.data).toBe('1,2,3')
+
+      vm.prop.push(4, 5)
+      expect(vm.computed).toBe('1,2,3,4,5')
+      expect(vm.data).toBe('1,2,3,4,5')
+      Vue.config.async = true
+    })
   })
 })
