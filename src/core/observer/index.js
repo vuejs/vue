@@ -206,7 +206,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     target.splice(key, 1, val)
     return val
   }
-  if (key in target && !(key in Object.prototype)) {
+  if (Array.isArray(target) || (key in target && !(key in Object.prototype))) {
     target[key] = val
     return val
   }
@@ -236,8 +236,12 @@ export function del (target: Array<any> | Object, key: any) {
   ) {
     warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
-  if (Array.isArray(target) && isValidArrayIndex(key)) {
-    target.splice(key, 1)
+  if (Array.isArray(target)) {
+    if (isValidArrayIndex(key)) {
+      target.splice(key, 1)
+    } else {
+      delete target[key]
+    }
     return
   }
   const ob = (target: any).__ob__

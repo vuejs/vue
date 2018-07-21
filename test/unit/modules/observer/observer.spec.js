@@ -291,10 +291,10 @@ describe('Observer', () => {
     spyOn(dep2, 'notify')
     setProp(arr2, 'b', 2)
     expect(arr2.b).toBe(2)
-    expect(dep2.notify.calls.count()).toBe(1)
+    expect(dep2.notify.calls.count()).toBe(0)
     delProp(arr2, 'b')
     expect(hasOwn(arr2, 'b')).toBe(false)
-    expect(dep2.notify.calls.count()).toBe(2)
+    expect(dep2.notify.calls.count()).toBe(0)
   })
 
   it('warning set/delete on a Vue instance', done => {
