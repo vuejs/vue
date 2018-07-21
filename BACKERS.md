@@ -393,6 +393,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Andy Foster
 - Blake Campbell
 - David Nunn
+- Handi Priyono
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
