@@ -118,8 +118,8 @@ export default ({
   mustUseProp: no,
 
   /**
-   * Perform updates asynchronously. This should never be set to false in
-   * production as it will significantly reduce performance.
+   * Perform updates asynchronously. Intended to be used by Vue Test Utils
+   * This will significantly reduce performance if set to false.
    */
   async: true,
 
