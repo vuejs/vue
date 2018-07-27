@@ -227,8 +227,8 @@ describe('SSR: template option', () => {
       `<link rel="preload" href="/0.js" as="script">` +
       `<link rel="preload" href="/test.css" as="style">` +
       // images and fonts are only preloaded when explicitly asked for
-      (options.preloadOtherAssets ? `<link rel="preload" href="/test.png" as="image">` : ``) +
       (options.preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
+      (options.preloadOtherAssets ? `<link rel="preload" href="/test.png" as="image">` : ``) +
       // unused chunks should have prefetch
       (options.noPrefetch ? `` : `<link rel="prefetch" href="/1.js">`) +
       // css assets should be loaded

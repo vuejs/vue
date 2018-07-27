@@ -12,6 +12,7 @@ export function renderSlot (
   bindObject: ?Object
 ): ?Array<VNode> {
   const scopedSlotFn = this.$scopedSlots[name]
+  let nodes
   if (scopedSlotFn) { // scoped slot
     props = props || {}
     if (bindObject) {
@@ -23,18 +24,27 @@ export function renderSlot (
       }
       props = extend(extend({}, bindObject), props)
     }
-    return scopedSlotFn(props) || fallback
+    nodes = scopedSlotFn(props) || fallback
   } else {
     const slotNodes = this.$slots[name]
     // warn duplicate slot usage
-    if (slotNodes && process.env.NODE_ENV !== 'production') {
-      slotNodes._rendered && warn(
-        `Duplicate presence of slot "${name}" found in the same render tree ` +
-        `- this will likely cause render errors.`,
-        this
-      )
+    if (slotNodes) {
+      if (process.env.NODE_ENV !== 'production' && slotNodes._rendered) {
+        warn(
+          `Duplicate presence of slot "${name}" found in the same render tree ` +
+          `- this will likely cause render errors.`,
+          this
+        )
+      }
       slotNodes._rendered = true
     }
-    return slotNodes || fallback
+    nodes = slotNodes || fallback
+  }
+
+  const target = props && props.slot
+  if (target) {
+    return this.$createElement('template', { slot: target }, nodes)
+  } else {
+    return nodes
   }
 }

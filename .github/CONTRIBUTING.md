@@ -40,18 +40,12 @@ You will need [Node.js](http://nodejs.org) **version 6+** and [Java Runtime Envi
 After cloning the repo, run:
 
 ``` bash
-$ npm install
-& npm run setup
+$ npm install # or yarn
 ```
-
-The `setup` script links two git hooks:
-
-- `pre-commit`: runs ESLint on staged files.
-- `commit-msg`: validates commit message format (see below).
 
 ### Committing Changes
 
-Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. If git hooks have been properly linked, commit messages will be automatically validated upon commit. It is recommended to use `npm run commit` instead of `git commit`, which provides an interactive CLI for generating proper commit messages.
+Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. Commit messages will be automatically validated upon commit. If you are not familiar with the commit message convention, you can use `npm run commit` instead of `git commit`, which provides an interactive CLI for generating proper commit messages.
 
 ### Commonly used NPM scripts
 
@@ -75,11 +69,11 @@ The default test script will do the following: lint with ESLint -> type check wi
 
 ## Project Structure
 
-- **`build`**: contains build-related configuration files. In most cases you don't need to touch them. However, it would be helpful to familiarize yourself with the following files:
+- **`scripts`**: contains build-related scripts and configuration files. In most cases you don't need to touch them. However, it would be helpful to familiarize yourself with the following files:
 
-  - `build/alias.js`: module import aliases used across all source code and tests.
+  - `scripts/alias.js`: module import aliases used across all source code and tests.
 
-  - `build/config.js`: contains the build configurations for all files found in `dist/`. Check this file if you want to find out the entry source file for a dist file.
+  - `scripts/config.js`: contains the build configurations for all files found in `dist/`. Check this file if you want to find out the entry source file for a dist file.
 
 - **`dist`**: contains built files for distribution. Note this directory is only updated when a release happens; they do not reflect the latest changes in development branches.
 
@@ -137,10 +131,10 @@ As a pure community-driven project without major corporate backing, we also welc
 
 ### What's the difference between Patreon and OpenCollective?
 
-Funds donated via Patreon goes directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses by core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
+Funds donated via Patreon go directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses for core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
 
 ## Credits
 
-Thank you to all the people who have already contributed to vuejs!
+Thank you to all the people who have already contributed to Vue.js!
 
 <a href="https://github.com/vuejs/vue/graphs/contributors"><img src="https://opencollective.com/vuejs/contributors.svg?width=890" /></a>

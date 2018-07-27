@@ -46,6 +46,14 @@ renderer.renderToString(app)
     throw err;
   });
 
+renderer.renderToString(app, context)
+  .then(html => {
+    const res: string = html;
+  })
+  .catch(err => {
+    throw err;
+  });
+
 renderer.renderToStream(app, context).on('data', chunk => {
   const html = chunk.toString();
 });
@@ -92,6 +100,14 @@ const bundleRenderer = createBundleRenderer('/path/to/vue-ssr-server-bundle.json
 
 bundleRenderer.renderToString(context, (err, html) => {
   if (err) throw err;
+  const res: string = html;
+});
+
+bundleRenderer.renderToString().then(html => {
+  const res: string = html;
+});
+
+bundleRenderer.renderToString(context).then(html => {
   const res: string = html;
 });
 

@@ -55,7 +55,7 @@ function walk (node: ASTNode, isRoot?: boolean) {
     if (node.ifConditions) {
       for (let i = 1, l = node.ifConditions.length; i < l; i++) {
         const block = node.ifConditions[i].block
-        walk(block)
+        walk(block, isRoot)
         check(block)
       }
     }
@@ -113,7 +113,8 @@ function isUnOptimizableTree (node: ASTNode): boolean {
   return (
     isBuiltInTag(node.tag) || // built-in (slot, component)
     !isPlatformReservedTag(node.tag) || // custom component
-    !!node.component // "is" component
+    !!node.component || // "is" component
+    isSelectWithModel(node) // <select v-model> requires runtime inspection
   )
 }
 
@@ -124,5 +125,16 @@ function hasCustomDirective (node: ASTNode): ?boolean {
     node.type === 1 &&
     node.directives &&
     node.directives.some(d => !isBuiltInDir(d.name))
+  )
+}
+
+// <select v-model> cannot be optimized because it requires a runtime check
+// to determine proper selected option
+function isSelectWithModel (node: ASTNode): boolean {
+  return (
+    node.type === 1 &&
+    node.tag === 'select' &&
+    node.directives != null &&
+    node.directives.some(d => d.name === 'model')
   )
 }

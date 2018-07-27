@@ -54,14 +54,14 @@ function _update (oldVnode, vnode) {
       }
     }
     if (isCreate) {
-      mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'insert', callInsert)
+      mergeVNodeHook(vnode, 'insert', callInsert)
     } else {
       callInsert()
     }
   }
 
   if (dirsWithPostpatch.length) {
-    mergeVNodeHook(vnode.data.hook || (vnode.data.hook = {}), 'postpatch', () => {
+    mergeVNodeHook(vnode, 'postpatch', () => {
       for (let i = 0; i < dirsWithPostpatch.length; i++) {
         callHook(dirsWithPostpatch[i], 'componentUpdated', vnode, oldVnode)
       }
@@ -86,17 +86,20 @@ function normalizeDirectives (
 ): { [key: string]: VNodeDirective } {
   const res = Object.create(null)
   if (!dirs) {
+    // $flow-disable-line
     return res
   }
   let i, dir
   for (i = 0; i < dirs.length; i++) {
     dir = dirs[i]
     if (!dir.modifiers) {
+      // $flow-disable-line
       dir.modifiers = emptyModifiers
     }
     res[getRawDirName(dir)] = dir
     dir.def = resolveAsset(vm.$options, 'directives', dir.name, true)
   }
+  // $flow-disable-line
   return res
 }
 
