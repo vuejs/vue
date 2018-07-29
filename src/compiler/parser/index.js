@@ -532,7 +532,6 @@ function processAttrs (el) {
           if (modifiers.prop) {
             isProp = true
             name = camelize(name)
-            if (name === 'innerHtml') name = 'innerHTML'
           }
           if (modifiers.camel) {
             name = camelize(name)
