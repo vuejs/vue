@@ -150,8 +150,9 @@ export function createComponent (
   // component constructor creation
   resolveConstructorOptions(Ctor)
 
-  // transform component v-model data into props & events
-  if (isDef(data.model)) {
+  // transform component v-model data into props & events.
+  // make sure to transform model only once in functional components.
+  if (isDef(data.model) && !isTrue(Ctor.options.functional)) {
     transformModel(Ctor.options, data)
   }
 
