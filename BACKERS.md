@@ -174,6 +174,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tidelift.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://webdock.io/en" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/webdock.png">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
@@ -311,10 +316,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Jake Ingman
 - Barbara Liau
 - 4 
-- The Graphic Design School
-- Christian Griffith
 - Jarek Tkaczyk
-- Andrew Davis
 - Sean MacIsaac
 - Xiaojie LI
 - David Hess
@@ -322,13 +324,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Dariusz Jastrzębski
 - Ivan Sieder
 - Matt Jones
-- Dave Chenell
 - Duncan J Kenzie
 - Mike Margerum
 - Guy Gavergun
 - Edithvale 
 - Intevation GmbH
 - Luiz Eduardo  Tanure Bacelar
+- Chengzhi Yin
 - Zoran Knezevic
 - James Simpson
 - Pascal Germain
@@ -347,7 +349,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Thong Yong Jun
 - Tai Shi Lgin
 - Bryan Gruneberg
-- Roman Kuba
 - Matias Verdier
 - Jamie McElwain
 - Vivekanandhan Natarajan
@@ -362,11 +363,9 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Brian Jorden
 - Cliff Hess
 - Joe Ray Gregory
-- Oskar Lindgren
 - RADD Creative
 - Rua Cura D'ars
 - Richard Simpson
-- Charles McKeever
 - Alok Pant
 - Sandro Das Neves
 - Jessie Hernandez
@@ -392,7 +391,22 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Tom Ootes
 - Andy Foster
 - Blake Campbell
-- David Nunn
+- Daniel da Rocha
+- Joe Cochran
+- Matt Sencenbaugh
+- The Commission Cafe, LLC.
+- Leon Seipp
+- Daniel Mattingley
+- HANDI PRIYONO
+- Zhenping WANG
+- Teon Ooi
+- Hannes Kochniß
+- Juan Bermudez
+- Seiji Komatsu
+- Alberto T. Payero Mota
+- Colt Borg
+- Luis F Rocha
+- Chris Calo
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
