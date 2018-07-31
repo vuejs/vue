@@ -2,7 +2,7 @@
 
 import { inBrowser, isIE9 } from 'core/util/index'
 import { addClass, removeClass } from './class-util'
-import { remove, extend, cached } from 'shared/util'
+import { remove, extend, cached, isString } from 'shared/util'
 
 export function resolveTransition (def?: string | Object): ?Object {
   if (!def) {
@@ -16,7 +16,7 @@ export function resolveTransition (def?: string | Object): ?Object {
     }
     extend(res, def)
     return res
-  } else if (typeof def === 'string') {
+  } else if (isString(def)) {
     return autoCssTransition(def)
   }
 }

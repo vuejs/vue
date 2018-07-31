@@ -1,6 +1,6 @@
 /* @flow */
 
-import { cached, camelize, isPlainObject } from 'shared/util'
+import { cached, camelize, isPlainObject, isString } from 'shared/util'
 import { parseText } from 'compiler/parser/text-parser'
 import {
   getAndRemoveAttr,
@@ -55,7 +55,7 @@ function parseStaticStyle (staticStyle: ?string, options: CompilerOptions): Stat
   // "width: 200px; height: {{y}}" -> {width: 200, height: y}
   let dynamic = false
   let styleResult = ''
-  if (typeof staticStyle === 'string') {
+  if (isString(staticStyle)) {
     const styleList = staticStyle.trim().split(';').map(style => {
       const result = style.trim().split(':')
       if (result.length !== 2) {

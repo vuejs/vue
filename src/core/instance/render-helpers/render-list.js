@@ -1,6 +1,7 @@
 /* @flow */
 
 import { isObject, isDef } from 'core/util/index'
+import { isString } from 'shared/util'
 
 /**
  * Runtime helper for rendering v-for lists.
@@ -14,7 +15,7 @@ export function renderList (
   ) => VNode
 ): ?Array<VNode> {
   let ret: ?Array<VNode>, i, l, keys, key
-  if (Array.isArray(val) || typeof val === 'string') {
+  if (Array.isArray(val) || isString(val)) {
     ret = new Array(val.length)
     for (i = 0, l = val.length; i < l; i++) {
       ret[i] = render(val[i], i)

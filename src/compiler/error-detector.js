@@ -1,6 +1,7 @@
 /* @flow */
 
 import { dirRE, onRE } from './parser/index'
+import { isString } from 'shared/util'
 
 // these keywords should not appear inside expressions, but operators like
 // typeof, instanceof and in are allowed
@@ -78,7 +79,7 @@ function checkIdentifier (
   text: string,
   errors: Array<string>
 ) {
-  if (typeof ident === 'string') {
+  if (isString(ident)) {
     try {
       new Function(`var ${ident}=_`)
     } catch (e) {

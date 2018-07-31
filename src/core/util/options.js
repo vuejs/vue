@@ -17,7 +17,8 @@ import {
   toRawType,
   capitalize,
   isBuiltInTag,
-  isPlainObject
+  isPlainObject,
+  isString
 } from 'shared/util'
 
 /**
@@ -281,7 +282,7 @@ function normalizeProps (options: Object, vm: ?Component) {
     i = props.length
     while (i--) {
       val = props[i]
-      if (typeof val === 'string') {
+      if (isString(val)) {
         name = camelize(val)
         res[name] = { type: null }
       } else if (process.env.NODE_ENV !== 'production') {

@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isRegExp, remove } from 'shared/util'
+import { isRegExp, remove, isString } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
 type VNodeCache = { [key: string]: ?VNode };
@@ -12,7 +12,7 @@ function getComponentName (opts: ?VNodeComponentOptions): ?string {
 function matches (pattern: string | RegExp | Array<string>, name: string): boolean {
   if (Array.isArray(pattern)) {
     return pattern.indexOf(name) > -1
-  } else if (typeof pattern === 'string') {
+  } else if (isString(pattern)) {
     return pattern.split(',').indexOf(name) > -1
   } else if (isRegExp(pattern)) {
     return pattern.test(name)

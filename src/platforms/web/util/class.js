@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isDef, isObject } from 'shared/util'
+import { isDef, isObject, isString } from 'shared/util'
 
 export function genClassForVnode (vnode: VNodeWithData): string {
   let data = vnode.data
@@ -54,7 +54,7 @@ export function stringifyClass (value: any): string {
   if (isObject(value)) {
     return stringifyObject(value)
   }
-  if (typeof value === 'string') {
+  if (isString(value)) {
     return value
   }
   /* istanbul ignore next */

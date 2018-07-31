@@ -33,6 +33,10 @@ export function isPrimitive (value: any): boolean %checks {
   )
 }
 
+export function isString (value: any): boolean %checks {
+  return typeof value === 'string'
+}
+
 /**
  * Quick object check - this is primarily used to tell
  * Objects from primitive values when we know the value
