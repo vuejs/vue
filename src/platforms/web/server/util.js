@@ -19,7 +19,7 @@ const isAttr = makeMap(
 )
 
 const unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u0020]/
-export const isSSRUnsafeAttr = name => {
+export const isSSRUnsafeAttr = (name: string): boolean => {
   return unsafeAttrCharRE.test(name)
 }
 
