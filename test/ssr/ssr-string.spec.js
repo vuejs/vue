@@ -929,6 +929,40 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('should prevent xss in attribute names', done => {
+    renderVmWithOptions({
+      data: {
+        xss: {
+          'foo="bar"></div><script>alert(1)</script>': ''
+        }
+      },
+      template: `
+        <div v-bind="xss"></div>
+      `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
+  it('should prevent xss in attribute names (optimized)', done => {
+    renderVmWithOptions({
+      data: {
+        xss: {
+          'foo="bar"></div><script>alert(1)</script>': ''
+        }
+      },
+      template: `
+        <div>
+          <a v-bind="xss">foo</a>
+        </div>
+      `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
   it('should prevent script xss with v-bind object syntax + array value', done => {
     renderVmWithOptions({
       data: {
