@@ -339,6 +339,11 @@ var isAttr = makeMap(
   'target,title,type,usemap,value,width,wrap'
 );
 
+var unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u0020]/;
+var isSSRUnsafeAttr = function (name) {
+  return unsafeAttrCharRE.test(name)
+};
+
 /* istanbul ignore next */
 var isRenderableAttr = function (name) {
   return (
@@ -429,6 +434,9 @@ function renderAttrs (node) {
   }
 
   for (var key in attrs) {
+    if (isSSRUnsafeAttr(key)) {
+      continue
+    }
     if (key === 'style') {
       // leave it to the style module
       continue
@@ -5818,6 +5826,9 @@ function renderStringList (
 function renderAttrs$1 (obj) {
   var res = '';
   for (var key in obj) {
+    if (isSSRUnsafeAttr(key)) {
+      continue
+    }
     res += renderAttr(key, obj[key]);
   }
   return res

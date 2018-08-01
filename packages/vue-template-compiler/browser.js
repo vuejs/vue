@@ -4698,6 +4698,8 @@ var isAttr = makeMap(
   'target,title,type,usemap,value,width,wrap'
 );
 
+
+
 /* istanbul ignore next */
 var isRenderableAttr = function (name) {
   return (
