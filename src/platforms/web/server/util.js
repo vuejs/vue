@@ -18,7 +18,7 @@ const isAttr = makeMap(
   'target,title,type,usemap,value,width,wrap'
 )
 
-const unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u0020]/
+const unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u0020]/ // eslint-disable-line no-control-regex
 export const isSSRUnsafeAttr = (name: string): boolean => {
   return unsafeAttrCharRE.test(name)
 }
