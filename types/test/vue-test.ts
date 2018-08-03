@@ -96,6 +96,11 @@ class Test extends Vue {
     this.use;
     this.mixin(Test);
     this.compile("<div>{{ message }}</div>");
+    this
+      .use(() => {
+        
+      })
+      .mixin({});
   }
 }
 
