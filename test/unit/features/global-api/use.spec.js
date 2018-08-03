@@ -49,4 +49,9 @@ describe('Global API: use', () => {
     expect(Vue.options.directives['plugin-test']).toBeUndefined()
     expect(Ctor2.options.directives['plugin-test']).toBe(def)
   })
+
+  // #8595
+  it('chain call', () => {
+    expect(Vue.use(() => {})).toBe(Vue)
+  })
 })
