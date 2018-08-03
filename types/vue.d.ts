@@ -98,9 +98,9 @@ export interface VueConstructor<V extends Vue = Vue> {
   component<Data, Methods, Computed, Props>(id: string, definition?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props>;
   component(id: string, definition?: ComponentOptions<V>): ExtendedVue<V, {}, {}, {}, {}>;
 
-  use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): void;
-  use(plugin: PluginObject<any> | PluginFunction<any>, ...options: any[]): void;
-  mixin(mixin: VueConstructor | ComponentOptions<Vue>): void;
+  use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): this;
+  use(plugin: PluginObject<any> | PluginFunction<any>, ...options: any[]): this;
+  mixin(mixin: VueConstructor | ComponentOptions<Vue>): this;
   compile(template: string): {
     render(createElement: typeof Vue.prototype.$createElement): VNode;
     staticRenderFns: (() => VNode)[];
