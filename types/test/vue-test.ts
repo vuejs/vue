@@ -100,6 +100,10 @@ class Test extends Vue {
       .use(() => {
         
       })
+      .use(() => {
+        
+      })
+      .mixin({})
       .mixin({});
   }
 }
