@@ -165,6 +165,6 @@ describe('Global API: mixin', () => {
 
   // #8595
   it('chain call', () => {
-    expect(Vue.mixin({}).toBe(Vue))
+    expect(Vue.mixin({})).toBe(Vue)
   })
 })
