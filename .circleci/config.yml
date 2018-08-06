@@ -99,3 +99,32 @@ workflows:
             - lint-flow-types
             - test-e2e
             - test-ssr-weex
+  weekly_regression_test:
+    triggers:
+      - schedule:
+          # At 13:00 UTC (9:00 EDT) on every Monday
+          cron: "0 13 * * 1"
+          filters:
+            branches:
+              only:
+                dev
+    jobs:
+      - install
+      - test-cover:
+          requires:
+            - install
+      - lint-flow-types:
+          requires:
+            - install
+      - test-e2e:
+          requires:
+            - install
+      - test-ssr-weex:
+          requires:
+            - install
+      - trigger-regression-test:
+          requires:
+            - test-cover
+            - lint-flow-types
+            - test-e2e
+            - test-ssr-weex
