@@ -9,7 +9,7 @@ const setProp = (el, name, val) => {
   /* istanbul ignore if */
   if (cssVarRE.test(name)) {
     el.style.setProperty(name, val)
-  } else if (name === '-webkit-background-clip') {
+  } else if (name === '-webkit-background-clip' && val === 'text') {
     // #8612 probably a webkit bug in Chrome 67
     el.setAttribute('style', (el.getAttribute('style') || '') + `${name}: ${val};`)
   } else if (importantRE.test(val)) {
