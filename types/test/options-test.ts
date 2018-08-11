@@ -185,6 +185,9 @@ Vue.component('component', {
       [createElement("div", "message")]
     ]);
   },
+  renderError(createElement, err) {
+    return createElement('pre', { style: { color: 'red' }}, err.stack)
+  },
   staticRenderFns: [],
 
   beforeCreate() {
