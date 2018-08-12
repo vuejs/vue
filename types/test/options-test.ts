@@ -307,11 +307,15 @@ Vue.component('component-with-scoped-slot', {
 Vue.component('narrow-array-of-vnode-type', {
   render (h): VNode {
     const slot = this.$scopedSlots.default({})
-    if (typeof slot !== 'string') {
+    if (Array.isArray(slot)) {
       const first = slot[0]
       if (!Array.isArray(first) && typeof first !== 'string') {
         return first;
       }
+    } else if (typeof slot === 'string') {
+      return h('div', slot.toUpperCase())
+    } else {
+      return slot
     }
     return h();
   }
