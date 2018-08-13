@@ -21,7 +21,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
   </a>
 </p>
-  
+
 <!--special end-->
 
 <h2 align="center">Platinum via Patreon</h2>
@@ -247,7 +247,12 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://i.imgur.com/hQHW6TB.png">
         </a>
       </td>
-    </tr><tr></tr>
+      <td align="center" valign="middle">
+        <a href="https://www.earthlink.ro" target="_blank">
+          <img width="148px" src="https://i.imgur.com/qX0SNa7.png">
+        </a>
+      </td>
+    </tr>
   </tbody>
 </table>
 <!--bronze end-->
@@ -289,7 +294,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 
 <!--50 start-->
 - Wasim Khamlichi
-- errorrik 
+- errorrik
 - Alex Balashov
 - Konstantin Levinski
 - Evan Leonardi
@@ -315,11 +320,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Kirk Lewis
 - Karol F
 - Miljan Aleksic
-- 叶解 
+- 叶解
 - Paul Straw
 - Jake Ingman
 - Barbara Liau
-- 4 
+- 4
 - Jarek Tkaczyk
 - Sean MacIsaac
 - Xiaojie LI
@@ -331,7 +336,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Duncan J Kenzie
 - Mike Margerum
 - Guy Gavergun
-- Edithvale 
+- Edithvale
 - Intevation GmbH
 - Luiz Eduardo  Tanure Bacelar
 - Chengzhi Yin
@@ -384,12 +389,12 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Jere Sjöroos
 - Wakana Seki
 - David Ang
-- Dom 
+- Dom
 - Ben Hong
 - David Kaplan
 - John Cleveland
 - Jaeyoung Lee
-- Amor 
+- Amor
 - Tom Ootes
 - Andy Foster
 - Blake Campbell
