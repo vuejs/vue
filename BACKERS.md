@@ -252,6 +252,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://i.imgur.com/qX0SNa7.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://polyglotengineer.com/derek.pollard" target="_blank">
+          <img width="148px" src="https://polyglotengineer.com/DP.png">
+        </a>
+      </td>
     </tr>
   </tbody>
 </table>
