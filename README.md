@@ -31,12 +31,10 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
   </a>
 </p>
-  
+
 <!--special end-->
 
-<h3 align="center">Sponsors via Patreon</h3>
-
-<h4 align="center">Platinum</h4>
+<h3 align="center">Platinum Sponsors</h3>
 
 <!--platinum start-->
 <table>
@@ -44,7 +42,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <tr>
       <td align="center" valign="middle">
         <a href="https://www.bitsrc.io/?utm_source=vue&utm_medium=vue&utm_campaign=vue&utm_term=vue&utm_content=vue" target="_blank">
-          <img height="90px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit.png">
+          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit-wide.png">
         </a>
       </td>
       <td align="center" valign="middle">
@@ -74,7 +72,27 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 </table>
 <!--platinum end-->
 
-<h4 align="center">Gold</h4>
+<h3 align="center">Platinum Sponsors (China)</h3>
+<!--special-china start-->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://www.geekbang.org/" target="_blank">
+          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/geekbang.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://gitee.com/?from=vue" target="_blank">
+          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/gitee.png">
+        </a>
+      </td>
+    </tr><tr></tr>
+  </tbody>
+</table>
+<!--special-china end-->
+
+<h3 align="center">Gold Sponsors</h4>
 
 <!--gold start-->
 <table>

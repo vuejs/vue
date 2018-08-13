@@ -32,7 +32,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <tr>
       <td align="center" valign="middle">
         <a href="https://www.bitsrc.io/?utm_source=vue&utm_medium=vue&utm_campaign=vue&utm_term=vue&utm_content=vue" target="_blank">
-          <img height="90px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit.png">
+          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit-wide.png">
         </a>
       </td>
       <td align="center" valign="middle">
@@ -292,7 +292,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - errorrik 
 - Alex Balashov
 - Konstantin Levinski
-- tjkoury 
 - Evan Leonardi
 - Ernest Sim
 - Blaise Laflamme
@@ -372,7 +371,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Rua Cura D'ars
 - Richard Simpson
 - Alok Pant
-- Sandro Das Neves
 - Jessie Hernandez
 - Eric Fong
 - Aparajita Fishman
@@ -386,7 +384,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Jere Sjöroos
 - Wakana Seki
 - David Ang
-- David Rowthorn
 - Dom 
 - Ben Hong
 - David Kaplan
@@ -396,7 +393,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Tom Ootes
 - Andy Foster
 - Blake Campbell
-- Daniel da Rocha
 - Joe Cochran
 - Matt Sencenbaugh
 - The Commission Cafe, LLC.
@@ -412,6 +408,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Colt Borg
 - Luis F Rocha
 - Chris Calo
+- Milan Zivkovic
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
