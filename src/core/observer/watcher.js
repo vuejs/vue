@@ -171,7 +171,7 @@ export default class Watcher {
       // It initializes as lazy by default, and only becomes activated when
       // it is depended on by at least one subscriber, which is typically
       // another computed property or a component's render function.
-      if (this.dep.subs.length === 0) {
+      if (Object.keys(this.dep.subs).length === 0) {
         // In lazy mode, we don't want to perform computations until necessary,
         // so we simply mark the watcher as dirty. The actual computation is
         // performed just-in-time in this.evaluate() when the computed property

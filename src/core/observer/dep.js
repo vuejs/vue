@@ -1,7 +1,6 @@
 /* @flow */
 
 import type Watcher from './watcher'
-import { remove } from '../util/index'
 
 let uid = 0
 
@@ -12,19 +11,19 @@ let uid = 0
 export default class Dep {
   static target: ?Watcher;
   id: number;
-  subs: Array<Watcher>;
+  subs: {[key: string | number]: Watcher};
 
   constructor () {
     this.id = uid++
-    this.subs = []
+    this.subs = {}
   }
 
   addSub (sub: Watcher) {
-    this.subs.push(sub)
+    this.subs[sub.id] = sub
   }
 
   removeSub (sub: Watcher) {
-    remove(this.subs, sub)
+    delete this.subs[sub.id]
   }
 
   depend () {
@@ -34,8 +33,7 @@ export default class Dep {
   }
 
   notify () {
-    // stabilize the subscriber list first
-    const subs = this.subs.slice()
+    const subs = Object.keys(this.subs).map(key => this.subs[key])
     for (let i = 0, l = subs.length; i < l; i++) {
       subs[i].update()
     }
