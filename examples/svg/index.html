@@ -19,7 +19,8 @@
           v-for="(stat, index) in stats"
           :stat="stat"
           :index="index"
-          :total="stats.length">
+          :total="stats.length"
+          :key="stat.id">
         </axis-label>
       </g>
     </script>

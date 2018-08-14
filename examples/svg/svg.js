@@ -1,11 +1,11 @@
 // The raw data to observe
 var stats = [
-  { label: 'A', value: 100 },
-  { label: 'B', value: 100 },
-  { label: 'C', value: 100 },
-  { label: 'D', value: 100 },
-  { label: 'E', value: 100 },
-  { label: 'F', value: 100 }
+  { label: 'A', value: 100, id: "f0237749-e575-4c42-bef1-a7e6867d1b62" },
+  { label: 'B', value: 100, id: "2e7096de-dbd1-4e09-8b82-afc9b6f6ccea" },
+  { label: 'C', value: 100, id: "b0533577-bd55-4be5-a3d4-819699114cf4" },
+  { label: 'D', value: 100, id: "39e3a678-2d4c-46d9-baaf-72949f599ef5" },
+  { label: 'E', value: 100, id: "59c86723-7471-445b-9ad9-f2cd20fe30a6" },
+  { label: 'F', value: 100, id: "67810472-a8e8-4f36-951a-9a11d9546d3e" }
 ]
 
 // A reusable polygon graph component
@@ -59,6 +59,12 @@ function valueToPoint (value, index, total) {
   }
 }
 
+function genId() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  )
+}
+
 // bootstrap the demo
 new Vue({
   el: '#demo',
@@ -72,7 +78,8 @@ new Vue({
       if (!this.newLabel) return
       this.stats.push({
         label: this.newLabel,
-        value: 100
+        value: 100,
+        id: genId()
       })
       this.newLabel = ''
     },
