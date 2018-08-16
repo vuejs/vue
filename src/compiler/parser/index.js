@@ -19,14 +19,14 @@ import {
   pluckModuleFunction
 } from '../helpers'
 
-export const onRE = /^@|^v-on:/
-export const dirRE = /^v-|^@|^:/
+export const onRE = /^@|^v-on:|^data-v-on:/
+export const dirRE = /^v-|^data-v-|^@|^:/
 export const forAliasRE = /([^]*?)\s+(?:in|of)\s+([^]*)/
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 
 const argRE = /:(.*)$/
-export const bindRE = /^:|^v-bind:/
+export const bindRE = /^:|^v-bind:|^data-v-bind:/
 const modifierRE = /\.[^.]+/g
 
 const decodeHTMLCached = cached(he.decode)
