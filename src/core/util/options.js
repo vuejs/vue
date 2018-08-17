@@ -4,6 +4,7 @@ import config from '../config'
 import { warn } from './debug'
 import { nativeWatch } from './env'
 import { set } from '../observer/index'
+import { pcenchars } from '../../compiler/parser/html-parser'
 
 import {
   ASSET_TYPES,
@@ -253,11 +254,10 @@ function checkComponents (options: Object) {
 }
 
 export function validateComponentName (name: string) {
-  if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+  if (!new RegExp(`^[a-zA-Z]${pcenchars}*$`).test(name)) {
     warn(
       'Invalid component name: "' + name + '". Component names ' +
-      'can only contain alphanumeric characters and the hyphen, ' +
-      'and must start with a letter.'
+      'should conform to valid custom element name in html5 specification.'
     )
   }
   if (isBuiltInTag(name) || config.isReservedTag(name)) {
