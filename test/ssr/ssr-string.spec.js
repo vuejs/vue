@@ -1245,6 +1245,20 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  // #7859
+  it('should not double escape class values', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div class="a\nb"></div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div class="a\nb"></div>`)
+      done()
+    })
+  })
+
   it('should expose ssr helpers on functional context', done => {
     let called = false
     renderVmWithOptions({
