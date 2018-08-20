@@ -92,7 +92,7 @@ export function genClassSegments (
   classBinding: ?string
 ): Array<StringSegment> {
   if (staticClass && !classBinding) {
-    return [{ type: RAW, value: ` class=${staticClass}` }]
+    return [{ type: RAW, value: ` class="${JSON.parse(staticClass)}"` }]
   } else {
     return [{
       type: EXPRESSION,
