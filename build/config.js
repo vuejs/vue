@@ -83,7 +83,7 @@ const builds = {
     format: 'es',
     transpile: false,
     minifier: 'babel',
-    env: 'development',
+    env: 'production',
     alias: { he: './entity-decoder' },
     banner
   },
