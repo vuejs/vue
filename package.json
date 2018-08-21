@@ -71,6 +71,7 @@
     "babel-preset-flow-vue": "^1.0.0",
     "buble": "^0.16.0",
     "chalk": "^1.1.3",
+    "babel-preset-minify": "^0.4.3",
     "chromedriver": "^2.30.1",
     "codecov.io": "^0.1.6",
     "commitizen": "^2.9.6",

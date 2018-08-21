@@ -66,12 +66,23 @@ const builds = {
     alias: { he: './entity-decoder' },
     banner
   },
-  // Runtime+compiler ES modules build (for direct import in browser)
-  'web-full-esm-browser': {
+  // Runtime+compiler ES modules development build (for direct import in browser)
+  'web-full-esm-browser-dev': {
     entry: resolve('web/entry-runtime-with-compiler.js'),
     dest: resolve('dist/vue.esm.browser.js'),
     format: 'es',
     transpile: false,
+    env: 'development',
+    alias: { he: './entity-decoder' },
+    banner
+  },
+  // Runtime+compiler ES modules production build (for direct import in browser)
+  'web-full-esm-browser-prod': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.esm.browser.min.js'),
+    format: 'es',
+    transpile: false,
+    minifier: 'babel',
     env: 'development',
     alias: { he: './entity-decoder' },
     banner
@@ -213,6 +224,11 @@ function genConfig (name) {
   Object.defineProperty(config, '_name', {
     enumerable: false,
     value: name
+  })
+
+  Object.defineProperty(config, '_minifier', {
+    enumerable: false,
+    value: opts.minifier
   })
 
   return config

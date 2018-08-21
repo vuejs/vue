@@ -3,6 +3,7 @@ const path = require('path')
 const zlib = require('zlib')
 const rollup = require('rollup')
 const uglify = require('uglify-js')
+const babel = require('babel-core')
 
 if (!fs.existsSync('dist')) {
   fs.mkdirSync('dist')
@@ -40,6 +41,28 @@ function build (builds) {
   next()
 }
 
+function minify (code, minifier) {
+  if (minifier === 'uglify') {
+    return uglify.minify(code, {
+      output: {
+        ascii_only: true
+      },
+      compress: {
+        pure_funcs: ['makeMap']
+      }
+    }).code
+  } else if (minifier === 'babel') {
+    return babel.transform(code, {
+      babelrc: false,
+      presets: [['minify', {
+        mangle: { topLevel: true }
+      }]]
+    }).code
+  } else {
+    return code
+  }
+}
+
 function buildEntry (config) {
   const output = config.output
   const { file, banner } = output
@@ -48,14 +71,7 @@ function buildEntry (config) {
     .then(bundle => bundle.generate(output))
     .then(({ code }) => {
       if (isProd) {
-        var minified = (banner ? banner + '\n' : '') + uglify.minify(code, {
-          output: {
-            ascii_only: true
-          },
-          compress: {
-            pure_funcs: ['makeMap']
-          }
-        }).code
+        var minified = (banner ? banner + '\n' : '') + minify(code, config._minifier || 'uglify')
         return write(file, minified, true)
       } else {
         return write(file, code)
