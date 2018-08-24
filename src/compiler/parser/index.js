@@ -5,7 +5,7 @@ import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { genAssignmentCode } from '../directives/model'
-import { extend, cached, no, camelize, kebabize } from 'shared/util'
+import { extend, cached, no, camelize, hyphenate } from 'shared/util'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
 
 import {
@@ -541,7 +541,7 @@ function processAttrs (el) {
             syncGen = genAssignmentCode(value, `$event`)
             addHandler(
               el,
-              `update:${kebabize(name)}`,
+              `update:${hyphenate(name)}`,
               syncGen
             )
             addHandler(
