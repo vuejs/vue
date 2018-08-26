@@ -103,7 +103,10 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
       const modifiedOptions = resolveModifiedOptions(Ctor)
       // update base extend options
       if (modifiedOptions) {
-        extend(Ctor.extendOptions, modifiedOptions)
+        const extendOpts = typeof Ctor.extendOptions === 'function'
+          ? Ctor.extendOptions.options
+          : Ctor.extendOptions
+        extend(extendOpts, modifiedOptions)
       }
       options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
       if (options.name) {

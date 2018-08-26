@@ -131,4 +131,17 @@ describe('Global API: extend', () => {
     expect(B.options.computed).not.toBe(A.options.computed)
     expect(A.options.computed.b).toBeUndefined()
   })
+
+  it('includes late options in final merge when super options change', () => {
+    let option
+    const A = Vue.extend({
+      template: '<div />',
+      beforeCreate () { option = this.$options.lateOption }
+    })
+    const B = Vue.extend(A)
+    B.options.lateOption = true
+    Vue.mixin({})
+    new B().$mount()
+    expect(option).toBe(true)
+  })
 })
