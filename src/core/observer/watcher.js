@@ -6,7 +6,9 @@ import {
   isObject,
   parsePath,
   _Set as Set,
-  handleError
+  handleError,
+  deepClone,
+  looseEqual
 } from '../util/index'
 
 import { traverse } from './traverse'
@@ -122,7 +124,8 @@ export default class Watcher {
       popTarget()
       this.cleanupDeps()
     }
-    return value
+    // fix if value is object oldValue Always equal value
+    return isObject(value) ? deepClone(value) : value
   }
 
   /**
@@ -204,12 +207,7 @@ export default class Watcher {
   getAndInvoke (cb: Function) {
     const value = this.get()
     if (
-      value !== this.value ||
-      // Deep watchers and watchers on Object/Arrays should fire even
-      // when the value is the same, because the value may
-      // have mutated.
-      isObject(value) ||
-      this.deep
+      !looseEqual(value, this.value) || this.deep
     ) {
       // set new value
       const oldValue = this.value
