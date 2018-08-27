@@ -159,14 +159,6 @@ export const camelize = cached((str: string): string => {
 })
 
 /**
- * Kebabize a camelCased string
- */
-const kebabizeRE = /([a-z])([A-Z])/g
-export const kebabize = cached((str: string): string => {
-  return str.replace(kebabizeRE, (m, p1, p2) => `${p1}-${p2}`).toLowerCase()
-})
-
-/**
  * Capitalize a string.
  */
 export const capitalize = cached((str: string): string => {
