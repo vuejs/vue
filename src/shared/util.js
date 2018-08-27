@@ -322,3 +322,14 @@ export function once (fn: Function): Function {
     }
   }
 }
+
+/*
+ * deep clone object or array
+ */
+export function deepClone (obj: any): any {
+  const clone = Object.assign({}, obj)
+  Object.keys(clone).forEach(
+    key => (clone[key] = typeof obj[key] === 'object' ? deepClone(obj[key]) : obj[key])
+  )
+  return Array.isArray(obj) ? (clone.length = obj.length) && Array.from(clone) : clone
+};
