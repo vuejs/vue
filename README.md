@@ -18,10 +18,11 @@ Vue.js is an MIT-licensed open source project. It's an independent project with 
 - [Become a backer or sponsor on Patreon](https://www.patreon.com/evanyou).
 - [Become a backer or sponsor on Open Collective](https://opencollective.com/vuejs).
 - [One-time donation via PayPal or crypto-currencies.](https://vuejs.org/support-vuejs/#One-time-Donations)
+- [Fund Vue.js via Boost Lab](https://boost-lab.app/vuejs/vue)
 
-#### What's the difference between Patreon and OpenCollective?
+#### What's the difference between Patreon, OpenCollective, and Boost Lab?
 
-Funds donated via Patreon go directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses for core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
+Funds donated via Patreon go directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses for core team members or sponsoring community events. Funds donated via Boost Lab are paid to the developers. When a developer's pull request gets merged, an algorithm will evaluate the pull request and transfer a portion of the repo's balance to that developer. Your name/logo will receive proper recognition and exposure by donating on all platforms.
 
 <h3 align="center">Special Sponsors</h3>
 <!--special start-->
@@ -313,7 +314,6 @@ Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/b
 Thank you to all the people who already contributed to Vue!
 
 <a href="https://github.com/vuejs/vue/graphs/contributors"><img src="https://opencollective.com/vuejs/contributors.svg?width=890" /></a>
-
 
 ## License
 
