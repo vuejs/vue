@@ -21,7 +21,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
   </a>
 </p>
-
+  
 <!--special end-->
 
 <h2 align="center">Platinum via Patreon</h2>
@@ -184,6 +184,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/syncfusion.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://kintohub.com" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/kintohub.png">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
@@ -257,7 +262,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://polyglotengineer.com/DP.png">
         </a>
       </td>
-    </tr>
+    </tr><tr></tr>
   </tbody>
 </table>
 <!--bronze end-->
