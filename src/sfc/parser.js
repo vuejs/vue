@@ -83,7 +83,10 @@ export function parseComponent (
   function end (tag: string, start: number, end: number) {
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
-      let text = deindent(content.slice(currentBlock.start, currentBlock.end))
+      let text = content.slice(currentBlock.start, currentBlock.end)
+      if (options.pad !== 'space') {
+        text = deindent(text)
+      }
       // pad content so that linters and pre-processors can output correct
       // line numbers in errors and warnings
       if (currentBlock.type !== 'template' && options.pad) {

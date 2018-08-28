@@ -78,14 +78,14 @@ describe('Single File Component parser', () => {
     expect(padSpace.script.content).toBe(`<template>
         <div></div>
       </template>
-      <script>`.replace(/./g, ' ') + '\nexport default {}\n')
+      <script>`.replace(/./g, ' ') + '\n        export default {}\n      ')
     expect(padSpace.styles[0].content).toBe(`<template>
         <div></div>
       </template>
       <script>
         export default {}
       </script>
-      <style>`.replace(/./g, ' ') + '\nh1 { color: red }\n')
+      <style>`.replace(/./g, ' ') + '\n        h1 { color: red }\n      ')
   })
 
   it('should handle template blocks with lang as special text', () => {
