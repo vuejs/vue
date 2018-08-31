@@ -6,7 +6,7 @@ import {
   del as delProp
 } from 'core/observer/index'
 import Dep from 'core/observer/dep'
-import { hasOwn } from 'core/util/index'
+import { hasOwn, Set } from 'core/util/index'
 
 describe('Observer', () => {
   it('create on non-observables', () => {
