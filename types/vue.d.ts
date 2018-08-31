@@ -21,44 +21,44 @@ export interface CreateElement {
 }
 
 export interface Vue {
-  readonly $el: HTMLElement;
-  readonly $options: ComponentOptions<Vue>;
-  readonly $parent: Vue;
-  readonly $root: Vue;
-  readonly $children: Vue[];
-  readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[] };
-  readonly $slots: { [key: string]: VNode[] };
-  readonly $scopedSlots: { [key: string]: ScopedSlot };
-  readonly $isServer: boolean;
-  readonly $data: Record<string, any>;
-  readonly $props: Record<string, any>;
-  readonly $ssrContext: any;
-  readonly $vnode: VNode;
-  readonly $attrs: Record<string, string>;
-  readonly $listeners: Record<string, Function | Function[]>;
+  readonly $el?: HTMLElement;
+  readonly $options?: ComponentOptions<Vue>;
+  readonly $parent?: Vue;
+  readonly $root?: Vue;
+  readonly $children?: Vue[];
+  readonly $refs?: { [key: string]: Vue | Element | Vue[] | Element[] };
+  readonly $slots?: { [key: string]: VNode[] };
+  readonly $scopedSlots?: { [key: string]: ScopedSlot };
+  readonly $isServer?: boolean;
+  readonly $data?: Record<string, any>;
+  readonly $props?: Record<string, any>;
+  readonly $ssrContext?: any;
+  readonly $vnode?: VNode;
+  readonly $attrs?: Record<string, string>;
+  readonly $listeners?: Record<string, Function | Function[]>;
 
-  $mount(elementOrSelector?: Element | String, hydrating?: boolean): this;
-  $forceUpdate(): void;
-  $destroy(): void;
-  $set: typeof Vue.set;
-  $delete: typeof Vue.delete;
-  $watch(
+  $mount?(elementOrSelector?: Element | String, hydrating?: boolean): this;
+  $forceUpdate?(): void;
+  $destroy?(): void;
+  $set?: typeof Vue.set;
+  $delete?: typeof Vue.delete;
+  $watch?(
     expOrFn: string,
     callback: (this: this, n: any, o: any) => void,
     options?: WatchOptions
   ): (() => void);
-  $watch<T>(
+  $watch?<T>(
     expOrFn: (this: this) => T,
     callback: (this: this, n: T, o: T) => void,
     options?: WatchOptions
   ): (() => void);
-  $on(event: string | string[], callback: Function): this;
-  $once(event: string, callback: Function): this;
-  $off(event?: string | string[], callback?: Function): this;
-  $emit(event: string, ...args: any[]): this;
-  $nextTick(callback: (this: this) => void): void;
-  $nextTick(): Promise<void>;
-  $createElement: CreateElement;
+  $on?(event: string | string[], callback: Function): this;
+  $once?(event: string, callback: Function): this;
+  $off?(event?: string | string[], callback?: Function): this;
+  $emit?(event: string, ...args: any[]): this;
+  $nextTick?(callback: (this: this) => void): void;
+  $nextTick?(): Promise<void>;
+  $createElement?: CreateElement;
 }
 
 export type CombinedVueInstance<Instance extends Vue, Data, Methods, Computed, Props> =  Data & Methods & Computed & Props & Instance;
