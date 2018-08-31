@@ -748,10 +748,10 @@ describe('SSR: renderToString', () => {
       expect(result).toContain(
         '<div data-server-rendered="true">' +
           '<span draggable="true">hello</span> ' +
-          '<span draggable="true">hello</span> ' +
-          '<span draggable="false">hello</span> ' +
-          '<span draggable="false">hello</span> ' +
-          '<span draggable="true">hello</span> ' +
+          '<span draggable="ok">hello</span> ' +
+          '<span>hello</span> ' +
+          '<span>hello</span> ' +
+          '<span draggable>hello</span> ' +
           '<span draggable="false">hello</span>' +
         '</div>'
       )

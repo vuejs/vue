@@ -52,10 +52,10 @@ describe('vdom attrs module', () => {
     expect(elm.getAttribute('disabled')).toBe('disabled')
   })
 
-  it('should set the falsy value to enumerated attr', () => {
+  it('should remove the falsy value to enumerated attr', () => {
     const vnode = new VNode('div', { attrs: { contenteditable: null }})
     const elm = patch(null, vnode)
-    expect(elm.getAttribute('contenteditable')).toBe('false')
+    expect(elm.getAttribute('contenteditable')).toBe(null)
   })
 
   it('should set the boolean string value to enumerated attr', () => {

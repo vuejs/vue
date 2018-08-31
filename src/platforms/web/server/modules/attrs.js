@@ -10,7 +10,6 @@ import {
 
 import {
   isBooleanAttr,
-  isEnumeratedAttr,
   isFalsyAttrValue
 } from 'web/util/attrs'
 
@@ -53,8 +52,6 @@ export function renderAttr (key: string, value: string): string {
     if (!isFalsyAttrValue(value)) {
       return ` ${key}="${key}"`
     }
-  } else if (isEnumeratedAttr(key)) {
-    return ` ${key}="${isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true'}"`
   } else if (!isFalsyAttrValue(value)) {
     return ` ${key}="${escape(String(value))}"`
   }

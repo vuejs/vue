@@ -13,7 +13,6 @@ import {
   xlinkNS,
   getXlinkProp,
   isBooleanAttr,
-  isEnumeratedAttr,
   isFalsyAttrValue
 } from 'web/util/index'
 
@@ -51,7 +50,7 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     if (isUndef(attrs[key])) {
       if (isXlink(key)) {
         elm.removeAttributeNS(xlinkNS, getXlinkProp(key))
-      } else if (!isEnumeratedAttr(key)) {
+      } else {
         elm.removeAttribute(key)
       }
     }
@@ -74,8 +73,6 @@ function setAttr (el: Element, key: string, value: any) {
         : key
       el.setAttribute(key, value)
     }
-  } else if (isEnumeratedAttr(key)) {
-    el.setAttribute(key, isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true')
   } else if (isXlink(key)) {
     if (isFalsyAttrValue(value)) {
       el.removeAttributeNS(xlinkNS, getXlinkProp(key))

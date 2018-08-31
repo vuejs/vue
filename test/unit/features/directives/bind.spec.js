@@ -75,16 +75,16 @@ describe('Directive v-bind', () => {
     expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
     vm.foo = 'again'
     waitForUpdate(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
+      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('again')
       vm.foo = null
     }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
+      expect(vm.$el.firstChild.getAttribute('draggable')).toBe(null)
       vm.foo = ''
     }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
+      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('')
       vm.foo = false
     }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
+      expect(vm.$el.firstChild.getAttribute('draggable')).toBe(null)
       vm.foo = 'false'
     }).then(() => {
       expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
