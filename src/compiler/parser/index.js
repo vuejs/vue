@@ -331,8 +331,19 @@ export function processElement (element: ASTElement, options: CompilerOptions) {
 function processKey (el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
-    if (process.env.NODE_ENV !== 'production' && el.tag === 'template') {
-      warn(`<template> cannot be keyed. Place the key on real elements instead.`)
+    if (process.env.NODE_ENV !== 'production') {
+      if (el.tag === 'template') {
+        warn(`<template> cannot be keyed. Place the key on real elements instead.`)
+      }
+      if (el.for) {
+        const iterator = el.iterator2 || el.iterator1
+        if (iterator && iterator === exp && el.parent.tag === 'transition-group') {
+          warn(
+            `Do not use sequential index on the child of the <transtion-group> component, ` +
+            `this may cause some rendering errors.`
+          )
+        }
+      }
     }
     el.key = exp
   }
