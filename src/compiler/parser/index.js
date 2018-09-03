@@ -337,7 +337,8 @@ function processKey (el) {
       }
       if (el.for) {
         const iterator = el.iterator2 || el.iterator1
-        if (iterator && iterator === exp && el.parent.tag === 'transition-group') {
+        const parent = el.parent
+        if (iterator && iterator === exp && parent && parent.tag === 'transition-group') {
           warn(
             `Do not use sequential index on the child of the <transtion-group> component, ` +
             `this may cause some rendering errors.`
