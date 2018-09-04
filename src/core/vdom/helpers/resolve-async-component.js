@@ -61,17 +61,18 @@ export function resolveAsyncComponent (
     const contexts = factory.contexts = [context]
     let sync = true
 
-    const forceRender = () => {
+    const forceRender = (renderCompleted: boolean) => {
       for (let i = 0, l = contexts.length; i < l; i++) {
         contexts[i].$forceUpdate()
 
-        const currContext = contexts[i]
-        const contextIdx = contexts.indexOf(currContext)
-        if (contextIdx >= 0) {
-          currContext.$nextTick(() => {
-            contexts.splice(contextIdx, 1)
-          })
+        if (!renderCompleted) {
+          continue
         }
+
+        const contextIdx = i
+        contexts[i].$nextTick(() => {
+          contexts.splice(contextIdx, 1)
+        })
       }
     }
 
@@ -81,7 +82,7 @@ export function resolveAsyncComponent (
       // invoke callbacks only if this is not a synchronous resolve
       // (async resolves are shimmed as synchronous during SSR)
       if (!sync) {
-        forceRender()
+        forceRender(true)
       }
     })
 
@@ -92,7 +93,7 @@ export function resolveAsyncComponent (
       )
       if (isDef(factory.errorComp)) {
         factory.error = true
-        forceRender()
+        forceRender(true)
       }
     })
 
@@ -119,7 +120,7 @@ export function resolveAsyncComponent (
             setTimeout(() => {
               if (isUndef(factory.resolved) && isUndef(factory.error)) {
                 factory.loading = true
-                forceRender()
+                forceRender(false)
               }
             }, res.delay || 200)
           }
