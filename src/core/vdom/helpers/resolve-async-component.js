@@ -64,6 +64,14 @@ export function resolveAsyncComponent (
     const forceRender = () => {
       for (let i = 0, l = contexts.length; i < l; i++) {
         contexts[i].$forceUpdate()
+
+        const currContext = contexts[i]
+        const contextIdx = contexts.indexOf(currContext)
+        if (contextIdx >= 0) {
+          currContext.$nextTick(() => {
+            contexts.splice(contextIdx, 1)
+          })
+        }
       }
     }
 
