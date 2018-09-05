@@ -64,15 +64,10 @@ export function resolveAsyncComponent (
     const forceRender = (renderCompleted: boolean) => {
       for (let i = 0, l = contexts.length; i < l; i++) {
         contexts[i].$forceUpdate()
+      }
 
-        if (!renderCompleted) {
-          continue
-        }
-
-        const contextIdx = i
-        contexts[i].$nextTick(() => {
-          contexts.splice(contextIdx, 1)
-        })
+      if (renderCompleted) {
+        contexts.length = 0
       }
     }
 
