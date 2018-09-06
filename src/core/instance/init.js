@@ -1,5 +1,8 @@
 /* @flow */
 
+/**
+ * 最基础的初始化
+ */
 import config from '../config'
 import { initProxy } from './proxy'
 import { initState } from './state'
@@ -10,9 +13,11 @@ import { initLifecycle, callHook } from './lifecycle'
 import { initProvide, initInjections } from './inject'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
 
+//vue实例的id的种子
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
+  // _init是vue原型上的私有方法，是vue真正的实例化方法。相当于jq的init方法
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
     // a uid
@@ -21,12 +26,14 @@ export function initMixin (Vue: Class<Component>) {
     let startTag, endTag
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+      // 在非生产环境并且启用了performance的情况下，用performance的mark获取运行时间，记录控件的创建和结束时间
       startTag = `vue-perf-start:${vm._uid}`
       endTag = `vue-perf-end:${vm._uid}`
       mark(startTag)
     }
 
     // a flag to avoid this being observed
+    // src/core/observer会用到。具体作用？？？？？？？？？？？？
     vm._isVue = true
     // merge options
     if (options && options._isComponent) {

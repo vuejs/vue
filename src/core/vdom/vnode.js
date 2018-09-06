@@ -2,31 +2,47 @@
 
 // 定义vnode类型
 export default class VNode {
-  // 标签名
+  // 前节点的标签名
   tag: string | void;
-  // s
+  // 当前节点对应的对象，包含了具体的一些数据信息，是一个VNodeData类型，可以参考VNodeData类型中的数据信息
   data: VNodeData | void;
+  // 当前节点的子节点，是一个数组
   children: ?Array<VNode>;
+  // 当前节点的文本
   text: string | void;
+  // 当前虚拟节点对应的真实dom节点
   elm: Node | void;
+  // 当前节点的名字空间
   ns: string | void;
+  // 当前节点的编译作用域
   context: Component | void; // rendered in this component's scope
+  // 节点的key属性，被当作节点的标志，用以优化
   key: string | number | void;
+  // 组件的option选项
   componentOptions: VNodeComponentOptions | void;
+  // 当前节点对应的组件的实例
   componentInstance: Component | void; // component instance
+  // 当前节点的父节点
   parent: VNode | void; // component placeholder node
 
   // strictly internal
+  // 简而言之就是是否为原生HTML或只是普通文本，innerHTML的时候为true，textContent的时候为false
   raw: boolean; // contains raw HTML? (server only)
+  // 是否为静态节点
   isStatic: boolean; // hoisted static node
+  // 是否作为跟节点插入
   isRootInsert: boolean; // necessary for enter transition check
+  // 是否为注释节点
   isComment: boolean; // empty comment placeholder?
+  // 是否为克隆节点
   isCloned: boolean; // is a cloned node?
+  // 是否有v-once指令
   isOnce: boolean; // is a v-once node?
   asyncFactory: Function | void; // async component factory function
   asyncMeta: Object | void;
   isAsyncPlaceholder: boolean;
   ssrContext: Object | void;
+  // 函数化组件作用域
   functionalContext: Component | void; // real context vm for functional nodes
   functionalOptions: ?ComponentOptions; // for SSR caching
   functionalScopeId: ?string; // functioanl scope id support
