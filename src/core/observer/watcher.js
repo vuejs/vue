@@ -6,7 +6,8 @@ import {
   isObject,
   parsePath,
   _Set as Set,
-  handleError
+  handleError,
+  noop
 } from '../util/index'
 
 import { traverse } from './traverse'
@@ -81,7 +82,7 @@ export default class Watcher {
     } else {
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
-        this.getter = function () {}
+        this.getter = noop
         process.env.NODE_ENV !== 'production' && warn(
           `Failed watching path: "${expOrFn}" ` +
           'Watcher only accepts simple dot-delimited paths. ' +
