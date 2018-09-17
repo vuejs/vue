@@ -174,6 +174,20 @@ export const hyphenate = cached((str: string): string => {
 })
 
 /**
+ * Get all variations of a identifier spelling.
+ */
+export const identifierSpellings = cached((str: string): Object => {
+  const camelized = camelize(str)
+  return {
+    raw: str,
+    hyphenated: hyphenate(str),
+    camelized: camelized,
+    PascalCase: capitalize(camelized),
+    toString: () => str
+  }
+})
+
+/**
  * Simple bind polyfill for environments that do not support it... e.g.
  * PhantomJS 1.x. Technically we don't need this anymore since native bind is
  * now more performant in most browsers, but removing it would be breaking for
