@@ -11,7 +11,7 @@ let uid = 0
  * directives subscribing to it.
  */
 export default class Dep {
-  static target: ?Watcher;
+  static target: {storage: ?Watcher};
   id: number;
   subs: Array<Watcher>;
 
@@ -29,8 +29,8 @@ export default class Dep {
   }
 
   depend () {
-    if (Dep.target) {
-      Dep.target.addDep(this)
+    if (Dep.target.storage) {
+      Dep.target.storage.addDep(this)
     }
   }
 
@@ -52,14 +52,24 @@ export default class Dep {
 // the current target watcher being evaluated.
 // this is globally unique because there could be only one
 // watcher being evaluated at any time.
-Dep.target = null
+Dep.target = {
+  storage: null
+}
 const targetStack = []
 
 export function pushTarget (_target: ?Watcher) {
-  if (Dep.target) targetStack.push(Dep.target)
-  Dep.target = _target
+  if (Dep.target.storage) targetStack.push(Dep.target.storage)
+  Dep.target.storage = _target
 }
 
 export function popTarget () {
-  Dep.target = targetStack.pop()
+  Dep.target.storage = targetStack.pop()
+}
+
+export function depTarget (target: {storage: ?Watcher}): {storage: ?Watcher} | void {
+  if (target) {
+    Dep.target = target
+  } else {
+    return Dep.target
+  }
 }

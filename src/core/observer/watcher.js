@@ -243,7 +243,7 @@ export default class Watcher {
    * Depend on this watcher. Only for computed property watchers.
    */
   depend () {
-    if (this.dep && Dep.target) {
+    if (this.dep && Dep.target.storage) {
       this.dep.depend()
     }
   }

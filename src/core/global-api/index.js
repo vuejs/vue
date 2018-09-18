@@ -6,6 +6,7 @@ import { initMixin } from './mixin'
 import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
 import { set, del } from '../observer/index'
+import { depTarget } from '../observer/dep'
 import { ASSET_TYPES } from 'shared/constants'
 import builtInComponents from '../components/index'
 
@@ -43,6 +44,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   Vue.set = set
   Vue.delete = del
   Vue.nextTick = nextTick
+  Vue.depTarget = depTarget
 
   Vue.options = Object.create(null)
   ASSET_TYPES.forEach(type => {
