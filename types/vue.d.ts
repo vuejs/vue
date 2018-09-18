@@ -21,7 +21,7 @@ export interface CreateElement {
 }
 
 export interface Vue {
-  readonly $el: HTMLElement;
+  readonly $el: Element;
   readonly $options: ComponentOptions<Vue>;
   readonly $parent: Vue;
   readonly $root: Vue;
