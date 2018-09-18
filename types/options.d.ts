@@ -133,7 +133,7 @@ export type PropValidator<T> = PropOptions<T> | Prop<T> | Prop<T>[];
 export interface PropOptions<T=any> {
   type?: Prop<T> | Prop<T>[];
   required?: boolean;
-  default?: T | null | undefined | (() => object);
+  default?: T | null | undefined | (() => T | null | undefined);
   validator?(value: T): boolean;
 }
 
