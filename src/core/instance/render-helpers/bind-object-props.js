@@ -6,7 +6,8 @@ import {
   warn,
   isObject,
   toObject,
-  isReservedAttribute
+  isReservedAttribute,
+  camelize
 } from 'core/util/index'
 
 /**
@@ -43,12 +44,13 @@ export function bindObjectProps (
             ? data.domProps || (data.domProps = {})
             : data.attrs || (data.attrs = {})
         }
-        if (!(key in hash)) {
+        const camelizedKey = camelize(key)
+        if (!(key in hash) && !(camelizedKey in hash)) {
           hash[key] = value[key]
 
           if (isSync) {
             const on = data.on || (data.on = {})
-            on[`update:${key}`] = function ($event) {
+            on[`update:${camelizedKey}`] = function ($event) {
               value[key] = $event
             }
           }
