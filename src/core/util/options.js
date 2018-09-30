@@ -379,10 +379,10 @@ export function mergeOptions (
   normalizeInject(child, vm)
   normalizeDirectives(child)
   const extendsFrom = child.extends
-  if (extendsFrom) {
+  if (extendsFrom && !child._base) {
     parent = mergeOptions(parent, extendsFrom, vm)
   }
-  if (child.mixins) {
+  if (child.mixins && !child._base) {
     for (let i = 0, l = child.mixins.length; i < l; i++) {
       parent = mergeOptions(parent, child.mixins[i], vm)
     }
