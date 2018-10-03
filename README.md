@@ -11,7 +11,7 @@
   <a href="https://saucelabs.com/u/vuejs"><img src="https://saucelabs.com/browser-matrix/vuejs.svg" alt="Sauce Test Status"></a>
 </p>
 
-<h2 align="center">Supporting Vue.js</h2>
+<h1 align="center"><b styele="color:green;">Vue</b><b>.js</b></h1>
 
 Vue.js is an MIT-licensed open source project. It's an independent project with its ongoing development made possible entirely thanks to the support by these awesome [backers](https://github.com/vuejs/vue/blob/dev/BACKERS.md). If you'd like to join them, please consider:
 
