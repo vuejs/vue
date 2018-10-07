@@ -38,11 +38,10 @@ export function genAssignmentCode (
   assignment: string
 ): string {
   const res = parseModel(value)
-  if (res.key === null) {
-    return `${value}=${assignment}`
-  } else {
-    return `$set(${res.exp}, ${res.key}, ${assignment})`
-  }
+
+  return res.key === null
+    ? `${value}=${assignment}`
+    : `$set(${res.exp}, ${res.key}, ${assignment})`
 }
 
 /**

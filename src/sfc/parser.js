@@ -98,13 +98,13 @@ export function parseComponent (
   function padContent (block: SFCBlock, pad: true | "line" | "space") {
     if (pad === 'space') {
       return content.slice(0, block.start).replace(replaceRE, ' ')
-    } else {
-      const offset = content.slice(0, block.start).split(splitRE).length
-      const padChar = block.type === 'script' && !block.lang
-        ? '//\n'
-        : '\n'
-      return Array(offset).join(padChar)
     }
+
+    const offset = content.slice(0, block.start).split(splitRE).length
+    const padChar = block.type === 'script' && !block.lang
+      ? '//\n'
+      : '\n'
+    return Array(offset).join(padChar)
   }
 
   parseHTML(content, {

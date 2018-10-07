@@ -98,11 +98,8 @@ export function mergeDataOrFn (
       const defaultData = typeof parentVal === 'function'
         ? parentVal.call(vm, vm)
         : parentVal
-      if (instanceData) {
-        return mergeData(instanceData, defaultData)
-      } else {
-        return defaultData
-      }
+
+      return instanceData ? mergeData(instanceData, defaultData) : defaultData
     }
   }
 }
