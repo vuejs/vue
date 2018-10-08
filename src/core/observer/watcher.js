@@ -146,13 +146,9 @@ export default class Watcher {
         dep.removeSub(this)
       }
     }
-    let tmp = this.depIds
-    this.depIds = this.newDepIds
-    this.newDepIds = tmp
+    [this.depIds, this.newDepIds] = [this.newDepIds, this.depIds]
     this.newDepIds.clear()
-    tmp = this.deps
-    this.deps = this.newDeps
-    this.newDeps = tmp
+    [this.deps, this.newDeps] = [this.newDeps, this.deps]
     this.newDeps.length = 0
   }
 
