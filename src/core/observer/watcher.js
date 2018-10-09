@@ -80,13 +80,21 @@ export default class Watcher {
     } else {
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
+        if (this.getter === false) {
+          process.env.NODE_ENV !== 'production' && warn(
+            `Failed watching path: "${expOrFn}" ` +
+            'Watcher only accepts simple dot-delimited paths. ' +
+            'For full control, use a function instead.',
+            vm
+          )
+        } else {
+          process.env.NODE_ENV !== 'production' && warn(
+            `Failed watching path: "${expOrFn}" ` +
+            'Vue watchers only accept alphanumeric, $, or underscore naming of properties.',
+            vm
+          )
+        }
         this.getter = function () {}
-        process.env.NODE_ENV !== 'production' && warn(
-          `Failed watching path: "${expOrFn}" ` +
-          'Watcher only accepts simple dot-delimited paths. ' +
-          'For full control, use a function instead.',
-          vm
-        )
       }
     }
     this.value = this.lazy
