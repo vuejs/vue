@@ -178,4 +178,9 @@ describe('Watcher', () => {
     new Watcher(vm, 'd.e + c', spy)
     expect('Failed watching path:').toHaveBeenWarned()
   })
+
+  it('does not support non-alphanumeric paths and throws a warns', () => {
+    new Watcher(vm, '中文', spy)
+    expect('Failed watching path:').toHaveBeenWarned()
+  })
 })
