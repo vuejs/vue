@@ -1,5 +1,8 @@
 /* @flow */
 
+/**
+ * 初始化vue原型上的事件方法
+ */
 import {
   tip,
   toArray,
@@ -10,7 +13,9 @@ import {
 import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
+  // 一个私有属性，做什么的？？？？？？？？？？？？？？？？？？？？
   vm._events = Object.create(null)
+  // 同样不知道是做什么的？？？？？？？？？？？？？？、
   vm._hasHookEvent = false
   // init parent attached events
   const listeners = vm.$options._parentListeners
@@ -42,8 +47,10 @@ export function updateComponentListeners (
   updateListeners(listeners, oldListeners || {}, add, remove, vm)
 }
 
+// 扩展vue原型的方法。定义了原型的事件方法
 export function eventsMixin (Vue: Class<Component>) {
   const hookRE = /^hook:/
+  // 注意event是事件名或者是事件名的数组
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
     const vm: Component = this
     if (Array.isArray(event)) {
@@ -51,9 +58,12 @@ export function eventsMixin (Vue: Class<Component>) {
         this.$on(event[i], fn)
       }
     } else {
+      // 把事件名保存到_events里面对应事件的函数数组里面
+      // 这种写法很短小，我在工作中经常遇到这种场景，可以借鉴这种写法。不过可读性差
       (vm._events[event] || (vm._events[event] = [])).push(fn)
       // optimize hook:event cost by using a boolean flag marked at registration
       // instead of a hash lookup
+      // 如果有事件使用hook:开头，标记一下
       if (hookRE.test(event)) {
         vm._hasHookEvent = true
       }
@@ -61,8 +71,10 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
+  // 不支持事件名是一个数组？？？？？？？？？？？？？
   Vue.prototype.$once = function (event: string, fn: Function): Component {
     const vm: Component = this
+
     function on () {
       vm.$off(event, on)
       fn.apply(vm, arguments)
@@ -75,6 +87,7 @@ export function eventsMixin (Vue: Class<Component>) {
   Vue.prototype.$off = function (event?: string | Array<string>, fn?: Function): Component {
     const vm: Component = this
     // all
+    // 如果参数
     if (!arguments.length) {
       vm._events = Object.create(null)
       return vm
@@ -87,10 +100,13 @@ export function eventsMixin (Vue: Class<Component>) {
       return vm
     }
     // specific event
+    // 根据事件名获取事件列表
     const cbs = vm._events[event]
     if (!cbs) {
       return vm
     }
+
+    // 如果只有一个参数，没有指定fn，清空事件列表
     if (arguments.length === 1) {
       vm._events[event] = null
       return vm
@@ -130,6 +146,7 @@ export function eventsMixin (Vue: Class<Component>) {
       const args = toArray(arguments, 1)
       for (let i = 0, l = cbs.length; i < l; i++) {
         try {
+          // 依次调用注册的事件回调函数
           cbs[i].apply(vm, args)
         } catch (e) {
           handleError(e, vm, `event handler for "${event}"`)

@@ -10,16 +10,19 @@ export function initExtend (Vue: GlobalAPI) {
    * cid. This enables us to create wrapped "child
    * constructors" for prototypal inheritance and cache them.
    */
+  // Vue的cid永远为0
   Vue.cid = 0
   let cid = 1
 
   /**
    * Class inheritance
    */
+  // 使用基础 Vue 构造器，创建一个“子类”。参数是一个包含组件选项的对象。代替使用new Vue创建实例，测试用例开发时候最适合使用。这相当于继承
   Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
     const Super = this
     const SuperId = Super.cid
+    // _Ctor的作用？？？？？？？？
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
@@ -36,7 +39,9 @@ export function initExtend (Vue: GlobalAPI) {
       }
     }
 
+    // 使用寄生继承，让Sub的原型使用super的对象
     const Sub = function VueComponent (options) {
+      // ？？？？？？？？？？？？？？？？？？在那定义的_this
       this._init(options)
     }
     Sub.prototype = Object.create(Super.prototype)
@@ -76,8 +81,11 @@ export function initExtend (Vue: GlobalAPI) {
     // keep a reference to the super options at extension time.
     // later at instantiation we can check if Super's options have
     // been updated.
+    // Vue的配置
     Sub.superOptions = Super.options
+    // 用户扩展配置
     Sub.extendOptions = extendOptions
+    // 克隆的Vue的配置，用于存储当前Vue配置？？？？？？？
     Sub.sealedOptions = extend({}, Sub.options)
 
     // cache constructor

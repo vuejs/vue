@@ -1,5 +1,6 @@
 /* @flow */
 
+// 一个不可修改的空对象
 export const emptyObject = Object.freeze({})
 
 /**
@@ -7,12 +8,14 @@ export const emptyObject = Object.freeze({})
  */
 export function isReserved (str: string): boolean {
   const c = (str + '').charCodeAt(0)
+  // 0x24是$  0x5F是_
   return c === 0x24 || c === 0x5F
 }
 
 /**
  * Define a property.
  */
+// Object.defineProperty的简写
 export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
   Object.defineProperty(obj, key, {
     value: val,
@@ -27,6 +30,7 @@ export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
  */
 const bailRE = /[^\w.$]/
 export function parsePath (path: string): any {
+  // 如果纯\w直接保存
   if (bailRE.test(path)) {
     return
   }

@@ -4,6 +4,7 @@ import { toArray } from '../util/index'
 
 export function initUse (Vue: GlobalAPI) {
   Vue.use = function (plugin: Function | Object) {
+    //如果已经安装了，直接返回
     const installedPlugins = (this._installedPlugins || (this._installedPlugins = []))
     if (installedPlugins.indexOf(plugin) > -1) {
       return this

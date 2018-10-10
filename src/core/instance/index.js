@@ -5,6 +5,7 @@ import { eventsMixin } from './events'
 import { lifecycleMixin } from './lifecycle'
 import { warn } from '../util/index'
 
+// 创建vue的构造函数，这是整个vueapi的入口。options为什么没有flow是类型定义？？？
 function Vue (options) {
   if (process.env.NODE_ENV !== 'production' &&
     !(this instanceof Vue)
@@ -14,6 +15,7 @@ function Vue (options) {
   this._init(options)
 }
 
+// 定义了Vue原型
 initMixin(Vue)
 stateMixin(Vue)
 eventsMixin(Vue)

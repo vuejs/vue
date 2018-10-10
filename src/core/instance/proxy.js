@@ -5,6 +5,7 @@ import { warn, makeMap } from '../util/index'
 
 let initProxy
 
+// 生产环境不能用？什么鬼？？？
 if (process.env.NODE_ENV !== 'production') {
   const allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +

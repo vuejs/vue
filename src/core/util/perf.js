@@ -3,6 +3,7 @@ import { inBrowser } from './env'
 export let mark
 export let measure
 
+// 如果在非生产模式，将性能对象performance封装起来，用于做性能标记
 if (process.env.NODE_ENV !== 'production') {
   const perf = inBrowser && window.performance
   /* istanbul ignore if */
