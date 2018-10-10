@@ -15,6 +15,7 @@ declare type InternalComponentOptions = {
 
 type InjectKey = string | Symbol;
 
+// Vue的配置
 declare type ComponentOptions = {
   // data
   data: Object | Function | void;
@@ -35,6 +36,8 @@ declare type ComponentOptions = {
   template?: string;
   render: (h: () => VNode) => VNode;
   renderError?: (h: () => VNode, err: Error) => VNode;
+
+  // 在 render 函数中编译模板字符串。只在独立构建时有效
   staticRenderFns?: Array<() => VNode>;
 
   // lifecycle
@@ -53,6 +56,7 @@ declare type ComponentOptions = {
   // assets
   directives?: { [key: string]: Object };
   components?: { [key: string]: Class<Component> };
+  // ????????????????????
   transitions?: { [key: string]: Object };
   filters?: { [key: string]: Function };
 
@@ -71,7 +75,9 @@ declare type ComponentOptions = {
   mixins?: Array<Object>;
   name?: string;
   extends?: Class<Component> | Object;
+  // 这个选项只在完整构建版本中的浏览器内编译时可用
   delimiters?: [string, string];
+  // 当设为 true 时，将会保留且渲染模板中的 HTML 注释。默认行为是舍弃它们。
   comments?: boolean;
   inheritAttrs?: boolean;
 

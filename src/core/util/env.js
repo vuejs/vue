@@ -26,7 +26,7 @@ export const isIOS = UA && /iphone|ipad|ipod|ios/.test(UA)
 export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
 
 // Firefox has a "watch" function on Object.prototype...
-// 是否有原生的watch  这东西是干嘛的？？？？？？？
+// 用一个原生的watch去实现watch语法。貌似目前只有狐火支持
 export const nativeWatch = ({}).watch
 
 // 是否支持passive，首先addEventListener不支持opts配置，则肯定不支持passive

@@ -11,6 +11,7 @@ import {
   isPlainObject
 } from 'shared/util'
 
+// 定义flow的PropOptions类型
 type PropOptions = {
   type: Function | Array<Function> | null,
   default: any,
@@ -18,6 +19,7 @@ type PropOptions = {
   validator: ?Function
 };
 
+// 验证prop传入的值是否合法
 export function validateProp (
   key: string,
   propOptions: Object,
@@ -25,13 +27,16 @@ export function validateProp (
   vm?: Component
 ): any {
   const prop = propOptions[key]
+  // 是否使用默认值
   const absent = !hasOwn(propsData, key)
   let value = propsData[key]
   // handle boolean props
+  // 对于boolean属性，如果未传入值，且未设置默认值，则自动设置false
   if (isType(Boolean, prop.type)) {
     if (absent && !hasOwn(prop, 'default')) {
       value = false
     } else if (!isType(String, prop.type) && (value === '' || value === hyphenate(key))) {
+      //  (!isType(String, prop.type) 不执行吧？？？？
       value = true
     }
   }
