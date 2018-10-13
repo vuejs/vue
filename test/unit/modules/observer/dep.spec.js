@@ -7,26 +7,32 @@ describe('Dep', () => {
     dep = new Dep()
   })
 
+  function subsLength (dep) {
+    return Object.keys(dep.subs).length
+  }
+
   describe('instance', () => {
     it('should be created with correct properties', () => {
-      expect(dep.subs.length).toBe(0)
+      expect(subsLength(dep)).toBe(0)
       expect(new Dep().id).toBe(dep.id + 1)
     })
   })
 
   describe('addSub()', () => {
     it('should add sub', () => {
-      dep.addSub(null)
-      expect(dep.subs.length).toBe(1)
-      expect(dep.subs[0]).toBe(null)
+      const dummySub = { id: 1 }
+      dep.addSub(dummySub)
+      expect(subsLength(dep)).toBe(1)
+      expect(dep.subs[dummySub.id]).toBe(dummySub)
     })
   })
 
   describe('removeSub()', () => {
     it('should remove sub', () => {
-      dep.subs.push(null)
-      dep.removeSub(null)
-      expect(dep.subs.length).toBe(0)
+      const dummySub = { id: 1 }
+      dep.subs[dummySub.id] = dummySub
+      dep.removeSub(dummySub)
+      expect(subsLength(dep)).toBe(0)
     })
   })
 
@@ -55,9 +61,10 @@ describe('Dep', () => {
 
   describe('notify()', () => {
     it('should notify subs', () => {
-      dep.subs.push(jasmine.createSpyObj('SUB', ['update']))
+      const subId = 1
+      dep.subs[subId] = jasmine.createSpyObj('SUB', ['update'])
       dep.notify()
-      expect(dep.subs[0].update).toHaveBeenCalled()
+      expect(dep.subs[subId].update).toHaveBeenCalled()
     })
   })
 })
