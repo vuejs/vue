@@ -1,7 +1,6 @@
 /* @flow */
 
 import type Watcher from './watcher'
-import { remove } from '../util/index'
 import config from '../config'
 
 let uid = 0
@@ -13,19 +12,23 @@ let uid = 0
 export default class Dep {
   static target: ?Watcher;
   id: number;
-  subs: Array<Watcher>;
+
+  // the order for accessing the watcher should be O(1)
+  // so that we avoid perf bottleneck when we teardown
+  // a watcher depends on a large size array.
+  subs: { [key: string]: Watcher };
 
   constructor () {
     this.id = uid++
-    this.subs = []
+    this.subs = {}
   }
 
   addSub (sub: Watcher) {
-    this.subs.push(sub)
+    this.subs[String(sub.id)] = sub
   }
 
   removeSub (sub: Watcher) {
-    remove(this.subs, sub)
+    delete this.subs[String(sub.id)]
   }
 
   depend () {
@@ -36,7 +39,7 @@ export default class Dep {
 
   notify () {
     // stabilize the subscriber list first
-    const subs = this.subs.slice()
+    const subs = Object.keys(this.subs).map(id => this.subs[id])
     if (process.env.NODE_ENV !== 'production' && !config.async) {
       // subs aren't sorted in scheduler if not running async
       // we need to sort them now to make sure they fire in correct
