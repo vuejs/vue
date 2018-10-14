@@ -296,8 +296,8 @@ Vue.component('component-with-scoped-slot', {
     child: {
       render (this: Vue, h: CreateElement) {
         return h('div', [
-          this.$scopedSlots['default']({ msg: 'hi' }),
-          this.$scopedSlots['item']({ msg: 'hello' })
+          this.$scopedSlots['default']!({ msg: 'hi' }),
+          this.$scopedSlots['item']!({ msg: 'hello' })
         ])
       }
     }
@@ -306,7 +306,7 @@ Vue.component('component-with-scoped-slot', {
 
 Vue.component('narrow-array-of-vnode-type', {
   render (h): VNode {
-    const slot = this.$scopedSlots.default({})
+    const slot = this.$scopedSlots.default!({})
     if (typeof slot !== 'string') {
       const first = slot[0]
       if (!Array.isArray(first) && typeof first !== 'string') {
