@@ -5,7 +5,7 @@ import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
 
 function hasConditionDirective (el: ASTElement): boolean {
   for (const attr in el.attrsMap) {
-    if (/^v\-if|v\-else|v\-else\-if$/.test(attr)) {
+    if (/^v-if|v-else|v-else-if$/.test(attr)) {
       return true
     }
   }

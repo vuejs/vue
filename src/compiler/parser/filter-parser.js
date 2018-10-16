@@ -1,6 +1,6 @@
 /* @flow */
 
-const validDivisionCharRE = /[\w).+\-_$\]]/
+const validDivisionCharRE = /[\w$)+\-.\]]/
 
 export function parseFilters (exp: string): string {
   let inSingle = false

@@ -16,7 +16,7 @@ describe('compile style', () => {
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).not.toBeUndefined()
     expect(staticRenderFns.length).toEqual(0)
-    expect(render).toMatch(/[(^style|^staticStyle)]/)
+    expect(render).toMatch(/[()S^aceilsty|]/)
     expect(errors).toEqual([])
   })
 

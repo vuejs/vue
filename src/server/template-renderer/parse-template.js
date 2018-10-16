@@ -2,8 +2,8 @@
 
 const compile = require('lodash.template')
 const compileOptions = {
-  escape: /{{([^{][\s\S]+?[^}])}}/g,
-  interpolate: /{{{([\s\S]+?)}}}/g
+  escape: /{{([^{][\S\s]+?[^}])}}/g,
+  interpolate: /{{{([\S\s]+?)}}}/g
 }
 
 export type ParsedTemplate = {

@@ -1,7 +1,7 @@
 /* @flow */
 
-const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
-const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
+const fnExpRE = /^([\w$]+|\([^)]*?\))\s*=>|^function\s*\(/
+const simplePathRE = /^[$A-Z_a-z][\w$]*(?:\.[$A-Z_a-z][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[$A-Z_a-z][\w$]*])*$/
 
 // KeyboardEvent.keyCode aliases
 const keyCodes: { [key: string]: number | Array<number> } = {

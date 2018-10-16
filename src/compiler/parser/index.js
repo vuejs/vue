@@ -22,7 +22,7 @@ import {
 export const onRE = /^@|^v-on:/
 export const dirRE = /^v-|^@|^:/
 export const forAliasRE = /([^]*?)\s+(?:in|of)\s+([^]*)/
-export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
+export const forIteratorRE = /,([^,\]}]*)(?:,([^,\]}]*))?$/
 const stripParensRE = /^\(|\)$/g
 
 const argRE = /:(.*)$/

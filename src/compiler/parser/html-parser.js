@@ -13,7 +13,7 @@ import { makeMap, no } from 'shared/util'
 import { isNonPhrasingTag } from 'web/compiler/util'
 
 // Regular Expressions for parsing tags and attributes
-const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+const attribute = /^\s*([^\s"'/<=>]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'<=>`]+)))?/
 // could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
 // but for Vue templates we can enforce a simple charset
 const ncname = '[a-zA-Z_][\\w\\-\\.]*'
@@ -21,9 +21,9 @@ const qnameCapture = `((?:${ncname}\\:)?${ncname})`
 const startTagOpen = new RegExp(`^<${qnameCapture}`)
 const startTagClose = /^\s*(\/?)>/
 const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
-const doctype = /^<!DOCTYPE [^>]+>/i
+const doctype = /^<!doctype [^>]+>/i
 // #7298: escape - to avoid being pased as HTML comment when inlined in page
-const comment = /^<!\--/
+const comment = /^<!--/
 const conditionalComment = /^<!\[/
 
 let IS_REGEX_CAPTURING_BROKEN = false
@@ -153,8 +153,8 @@ export function parseHTML (html, options) {
         endTagLength = endTag.length
         if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
           text = text
-            .replace(/<!\--([\s\S]*?)-->/g, '$1') // #7298
-            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1')
+            .replace(/<!--([\S\s]*?)-->/g, '$1') // #7298
+            .replace(/<!\[CDATA\[([\S\s]*?)]]>/g, '$1')
         }
         if (shouldIgnoreFirstNewline(stackedTag, text)) {
           text = text.slice(1)

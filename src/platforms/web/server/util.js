@@ -18,7 +18,7 @@ const isAttr = makeMap(
   'target,title,type,usemap,value,width,wrap'
 )
 
-const unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u0020]/ // eslint-disable-line no-control-regex
+const unsafeAttrCharRE = /[\u0009\u000a\u000c "'/=>]/ // eslint-disable-line no-control-regex
 export const isSSRUnsafeAttr = (name: string): boolean => {
   return unsafeAttrCharRE.test(name)
 }
@@ -48,7 +48,7 @@ const ESC = {
 }
 
 export function escape (s: string) {
-  return s.replace(/[<>"&]/g, escapeChar)
+  return s.replace(/["&<>]/g, escapeChar)
 }
 
 function escapeChar (a) {
