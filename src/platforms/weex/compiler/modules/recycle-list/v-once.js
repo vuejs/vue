@@ -4,7 +4,7 @@ import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
 
 function containVOnce (el: ASTElement): boolean {
   for (const attr in el.attrsMap) {
-    if (/^v\-once$/i.test(attr)) {
+    if (/^v-once$/i.test(attr)) {
       return true
     }
   }

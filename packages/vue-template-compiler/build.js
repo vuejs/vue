@@ -281,7 +281,7 @@ var isNonPhrasingTag = makeMap(
  */
 
 // Regular Expressions for parsing tags and attributes
-var attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
+var attribute = /^\s*([^\s"'/<=>]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'<=>`]+)))?/;
 // could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
 // but for Vue templates we can enforce a simple charset
 var ncname = '[a-zA-Z_][\\w\\-\\.]*';
@@ -289,9 +289,9 @@ var qnameCapture = "((?:" + ncname + "\\:)?" + ncname + ")";
 var startTagOpen = new RegExp(("^<" + qnameCapture));
 var startTagClose = /^\s*(\/?)>/;
 var endTag = new RegExp(("^<\\/" + qnameCapture + "[^>]*>"));
-var doctype = /^<!DOCTYPE [^>]+>/i;
+var doctype = /^<!doctype [^>]+>/i;
 // #7298: escape - to avoid being pased as HTML comment when inlined in page
-var comment = /^<!\--/;
+var comment = /^<!--/;
 var conditionalComment = /^<!\[/;
 
 var IS_REGEX_CAPTURING_BROKEN = false;
@@ -421,8 +421,8 @@ function parseHTML (html, options) {
         endTagLength = endTag.length;
         if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
           text = text
-            .replace(/<!\--([\s\S]*?)-->/g, '$1') // #7298
-            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1');
+            .replace(/<!--([\S\s]*?)-->/g, '$1') // #7298
+            .replace(/<!\[CDATA\[([\S\s]*?)]]>/g, '$1');
         }
         if (shouldIgnoreFirstNewline(stackedTag, text)) {
           text = text.slice(1);
@@ -888,6 +888,12 @@ var config = ({
   mustUseProp: no,
 
   /**
+   * Perform updates asynchronously. Intended to be used by Vue Test Utils
+   * This will significantly reduce performance if set to false.
+   */
+  async: true,
+
+  /**
    * Exposed for legacy reasons
    */
   _lifecycleHooks: LIFECYCLE_HOOKS
@@ -1018,6 +1024,12 @@ Dep.prototype.depend = function depend () {
 Dep.prototype.notify = function notify () {
   // stabilize the subscriber list first
   var subs = this.subs.slice();
+  if (process.env.NODE_ENV !== 'production' && !config.async) {
+    // subs aren't sorted in scheduler if not running async
+    // we need to sort them now to make sure they fire in correct
+    // order
+    subs.sort(function (a, b) { return a.id - b.id; });
+  }
   for (var i = 0, l = subs.length; i < l; i++) {
     subs[i].update();
   }
@@ -1742,7 +1754,7 @@ var isTextInputType = makeMap('text,number,password,search,email,tel,url');
 
 /*  */
 
-var validDivisionCharRE = /[\w).+\-_$\]]/;
+var validDivisionCharRE = /[\w$)+\-.\]]/;
 
 function parseFilters (exp) {
   var inSingle = false;
@@ -1840,8 +1852,8 @@ function wrapFilter (exp, filter) {
 
 /*  */
 
-var defaultTagRE = /\{\{((?:.|\n)+?)\}\}/g;
-var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
+var defaultTagRE = /{{([\n.]+?)}}/g;
+var regexEscapeRE = /[$()*+-./?[\\\]^{|}]/g;
 
 var buildRegex = cached(function (delimiters) {
   var open = delimiters[0].replace(regexEscapeRE, '\\$&');
@@ -2315,7 +2327,7 @@ function parseString (chr) {
 var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:/;
 var forAliasRE = /([^]*?)\s+(?:in|of)\s+([^]*)/;
-var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
+var forIteratorRE = /,([^,\]}]*)(?:,([^,\]}]*))?$/;
 var stripParensRE = /^\(|\)$/g;
 
 var argRE = /:(.*)$/;
@@ -3387,8 +3399,8 @@ function isDirectChildOfTemplateFor (node) {
 
 /*  */
 
-var fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/;
-var simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/;
+var fnExpRE = /^([\w$]+|\([^)]*?\))\s*=>|^function\s*\(/;
+var simplePathRE = /^[$A-Z_a-z][\w$]*(?:\.[$A-Z_a-z][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[$A-Z_a-z][\w$]*])*$/;
 
 // KeyboardEvent.keyCode aliases
 var keyCodes = {
@@ -4016,7 +4028,7 @@ var unaryOperatorsRE = new RegExp('\\b' + (
 ).split(',').join('\\s*\\([^\\)]*\\)|\\b') + '\\s*\\([^\\)]*\\)');
 
 // strip strings in expressions
-var stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`/g;
+var stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^\\`]|\\.)*\${|}(?:[^\\`]|\\.)*`|`(?:[^\\`]|\\.)*`/g;
 
 // detect problematic expressions in a template
 function detectErrors (ast) {
@@ -4301,6 +4313,8 @@ var isAttr = makeMap(
   'target,title,type,usemap,value,width,wrap'
 );
 
+
+
 /* istanbul ignore next */
 var isRenderableAttr = function (name) {
   return (
@@ -4324,7 +4338,7 @@ var ESC = {
 };
 
 function escape (s) {
-  return s.replace(/[<>"&]/g, escapeChar)
+  return s.replace(/["&<>]/g, escapeChar)
 }
 
 function escapeChar (a) {
@@ -4412,7 +4426,7 @@ function genClassSegments (
   classBinding
 ) {
   if (staticClass && !classBinding) {
-    return [{ type: RAW, value: (" class=" + staticClass) }]
+    return [{ type: RAW, value: (" class=\"" + (JSON.parse(staticClass)) + "\"") }]
   } else {
     return [{
       type: EXPRESSION,

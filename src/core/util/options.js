@@ -253,7 +253,7 @@ function checkComponents (options: Object) {
 }
 
 export function validateComponentName (name: string) {
-  if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+  if (!/^[A-Za-z][\w-]*$/.test(name)) {
     warn(
       'Invalid component name: "' + name + '". Component names ' +
       'can only contain alphanumeric characters and the hyphen, ' +

@@ -28,7 +28,7 @@ describe('create-element', () => {
     })
     const h = vm.$createElement
     const vnode = h('my-component', { props: { msg: vm.message }})
-    expect(vnode.tag).toMatch(/vue-component-[0-9]+/)
+    expect(vnode.tag).toMatch(/vue-component-\d+/)
     expect(vnode.componentOptions.propsData).toEqual({ msg: vm.message })
     expect(vnode.children).toBeUndefined()
     expect(vnode.text).toBeUndefined()
@@ -71,7 +71,7 @@ describe('create-element', () => {
     const vnode = h(Vue.extend({ // Component class
       props: ['msg']
     }), { props: { msg: vm.message }})
-    expect(vnode.tag).toMatch(/vue-component-[0-9]+/)
+    expect(vnode.tag).toMatch(/vue-component-\d+/)
     expect(vnode.componentOptions.propsData).toEqual({ msg: vm.message })
     expect(vnode.children).toBeUndefined()
     expect(vnode.text).toBeUndefined()

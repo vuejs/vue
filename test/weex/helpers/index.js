@@ -5,7 +5,7 @@ import { compile } from '../../../packages/weex-template-compiler'
 import WeexRuntime from 'weex-js-runtime'
 import styler from 'weex-styler'
 
-const styleRE = /<\s*style\s*\w*>([^(<\/)]*)<\/\s*style\s*>/g
+const styleRE = /<\s*style\s*\w*>([^()/<]*)<\/\s*style\s*>/g
 const scriptRE = /<\s*script.*>([^]*)<\/\s*script\s*>/
 const templateRE = /<\s*template\s*([^>]*)>([^]*)<\/\s*template\s*>/
 
@@ -20,7 +20,7 @@ export function readObject (filename) {
 console.debug = () => {}
 
 // http://stackoverflow.com/a/35478115
-const matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g
+const matchOperatorsRe = /[$()*+.?[\\\]^{|}]/g
 export function strToRegExp (str) {
   return new RegExp(str.replace(matchOperatorsRe, '\\$&'))
 }
@@ -51,7 +51,7 @@ export function compileVue (source, componentName) {
     const script = scriptMatch ? scriptMatch[1] : ''
     const templateMatch = templateRE.exec(source)
     const compileOptions = {}
-    if (/\s*recyclable\=?/i.test(templateMatch[1])) {
+    if (/\s*recyclable=?/i.test(templateMatch[1])) {
       compileOptions.recyclable = true
     }
     const res = compile(templateMatch[2], compileOptions)

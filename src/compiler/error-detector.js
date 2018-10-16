@@ -16,7 +16,7 @@ const unaryOperatorsRE = new RegExp('\\b' + (
 ).split(',').join('\\s*\\([^\\)]*\\)|\\b') + '\\s*\\([^\\)]*\\)')
 
 // strip strings in expressions
-const stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`/g
+const stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^\\`]|\\.)*\${|}(?:[^\\`]|\\.)*`|`(?:[^\\`]|\\.)*`/g
 
 // detect problematic expressions in a template
 export function detectErrors (ast: ?ASTNode): Array<string> {

@@ -4,7 +4,7 @@ function getVNodeType (vnode: VNode): string {
   if (!vnode.tag) {
     return ''
   }
-  return vnode.tag.replace(/vue\-component\-(\d+\-)?/, '')
+  return vnode.tag.replace(/vue-component-(\d+-)?/, '')
 }
 
 function isSimpleSpan (vnode: VNode): boolean {

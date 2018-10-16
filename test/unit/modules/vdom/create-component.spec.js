@@ -26,7 +26,7 @@ describe('create-component', () => {
       on: { notify: 'onNotify' }
     }
     const vnode = createComponent(child, data, vm, vm)
-    expect(vnode.tag).toMatch(/vue-component-[0-9]+-child/)
+    expect(vnode.tag).toMatch(/vue-component-\d+-child/)
     expect(vnode.data.attrs).toEqual({ id: 1 })
     expect(vnode.data.staticAttrs).toEqual({ class: 'foo' })
     expect(vnode.componentOptions.propsData).toEqual({ msg: 'hello world' })
@@ -61,7 +61,7 @@ describe('create-component', () => {
     }
     function loaded () {
       vnode = createComponent(async, data, vm, vm)
-      expect(vnode.tag).toMatch(/vue-component-[0-9]+-child/)
+      expect(vnode.tag).toMatch(/vue-component-\d+-child/)
       expect(vnode.data.staticAttrs).toEqual({ class: 'foo' })
       expect(vnode.children).toBeUndefined()
       expect(vnode.text).toBeUndefined()
