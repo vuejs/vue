@@ -437,6 +437,12 @@ var config = ({
   mustUseProp: no,
 
   /**
+   * Perform updates asynchronously. Intended to be used by Vue Test Utils
+   * This will significantly reduce performance if set to false.
+   */
+  async: true,
+
+  /**
    * Exposed for legacy reasons
    */
   _lifecycleHooks: LIFECYCLE_HOOKS
@@ -467,7 +473,7 @@ function def (obj, key, val, enumerable) {
 /**
  * Parse simple path.
  */
-var bailRE = /[^\w.$]/;
+var bailRE = /[^\w$.]/;
 function parsePath (path) {
   if (bailRE.test(path)) {
     return
@@ -695,6 +701,12 @@ Dep.prototype.depend = function depend () {
 Dep.prototype.notify = function notify () {
   // stabilize the subscriber list first
   var subs = this.subs.slice();
+  if ("development" !== 'production' && !config.async) {
+    // subs aren't sorted in scheduler if not running async
+    // we need to sort them now to make sure they fire in correct
+    // order
+    subs.sort(function (a, b) { return a.id - b.id; });
+  }
   for (var i = 0, l = subs.length; i < l; i++) {
     subs[i].update();
   }
@@ -1336,7 +1348,7 @@ function checkComponents (options) {
 }
 
 function validateComponentName (name) {
-  if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+  if (!/^[A-Za-z][\w-]*$/.test(name)) {
     warn(
       'Invalid component name: "' + name + '". Component names ' +
       'can only contain alphanumeric characters and the hyphen, ' +
@@ -1627,11 +1639,10 @@ function assertProp (
       valid = assertedType.valid;
     }
   }
+
   if (!valid) {
     warn(
-      "Invalid prop: type check failed for prop \"" + name + "\"." +
-      " Expected " + (expectedTypes.map(capitalize).join(', ')) +
-      ", got " + (toRawType(value)) + ".",
+      getInvalidTypeMessage(name, value, expectedTypes),
       vm
     );
     return
@@ -1696,6 +1707,49 @@ function getTypeIndex (type, expectedTypes) {
     }
   }
   return -1
+}
+
+function getInvalidTypeMessage (name, value, expectedTypes) {
+  var message = "Invalid prop: type check failed for prop \"" + name + "\"." +
+    " Expected " + (expectedTypes.map(capitalize).join(', '));
+  var expectedType = expectedTypes[0];
+  var receivedType = toRawType(value);
+  var expectedValue = styleValue(value, expectedType);
+  var receivedValue = styleValue(value, receivedType);
+  // check if we need to specify expected value
+  if (expectedTypes.length === 1 &&
+      isExplicable(expectedType) &&
+      !isBoolean(expectedType, receivedType)) {
+    message += " with value " + expectedValue;
+  }
+  message += ", got " + receivedType + " ";
+  // check if we need to specify received value
+  if (isExplicable(receivedType)) {
+    message += "with value " + receivedValue + ".";
+  }
+  return message
+}
+
+function styleValue (value, type) {
+  if (type === 'String') {
+    return ("\"" + value + "\"")
+  } else if (type === 'Number') {
+    return ("" + (Number(value)))
+  } else {
+    return ("" + value)
+  }
+}
+
+function isExplicable (value) {
+  var explicitTypes = ['string', 'number', 'boolean'];
+  return explicitTypes.some(function (elem) { return value.toLowerCase() === elem; })
+}
+
+function isBoolean () {
+  var args = [], len = arguments.length;
+  while ( len-- ) args[ len ] = arguments[ len ];
+
+  return args.some(function (elem) { return elem.toLowerCase() === 'boolean'; })
 }
 
 /*  */
@@ -3061,6 +3115,11 @@ function queueWatcher (watcher) {
     // queue the flush
     if (!waiting) {
       waiting = true;
+
+      if ("development" !== 'production' && !config.async) {
+        flushSchedulerQueue();
+        return
+      }
       nextTick(flushSchedulerQueue);
     }
   }
@@ -3091,16 +3150,16 @@ var Watcher = function Watcher (
   if (options) {
     this.deep = !!options.deep;
     this.user = !!options.user;
-    this.computed = !!options.computed;
+    this.lazy = !!options.lazy;
     this.sync = !!options.sync;
     this.before = options.before;
   } else {
-    this.deep = this.user = this.computed = this.sync = false;
+    this.deep = this.user = this.lazy = this.sync = false;
   }
   this.cb = cb;
   this.id = ++uid$1; // uid for batching
   this.active = true;
-  this.dirty = this.computed; // for computed watchers
+  this.dirty = this.lazy; // for lazy watchers
   this.deps = [];
   this.newDeps = [];
   this.depIds = new _Set();
@@ -3121,12 +3180,9 @@ var Watcher = function Watcher (
       );
     }
   }
-  if (this.computed) {
-    this.value = undefined;
-    this.dep = new Dep();
-  } else {
-    this.value = this.get();
-  }
+  this.value = this.lazy
+    ? undefined
+    : this.get();
 };
 
 /**
@@ -3198,27 +3254,9 @@ Watcher.prototype.cleanupDeps = function cleanupDeps () {
  * Will be called when a dependency changes.
  */
 Watcher.prototype.update = function update () {
-    var this$1 = this;
-
   /* istanbul ignore else */
-  if (this.computed) {
-    // A computed property watcher has two modes: lazy and activated.
-    // It initializes as lazy by default, and only becomes activated when
-    // it is depended on by at least one subscriber, which is typically
-    // another computed property or a component's render function.
-    if (this.dep.subs.length === 0) {
-      // In lazy mode, we don't want to perform computations until necessary,
-      // so we simply mark the watcher as dirty. The actual computation is
-      // performed just-in-time in this.evaluate() when the computed property
-      // is accessed.
-      this.dirty = true;
-    } else {
-      // In activated mode, we want to proactively perform the computation
-      // but only notify our subscribers when the value has indeed changed.
-      this.getAndInvoke(function () {
-        this$1.dep.notify();
-      });
-    }
+  if (this.lazy) {
+    this.dirty = true;
   } else if (this.sync) {
     this.run();
   } else {
@@ -3232,54 +3270,49 @@ Watcher.prototype.update = function update () {
  */
 Watcher.prototype.run = function run () {
   if (this.active) {
-    this.getAndInvoke(this.cb);
-  }
-};
-
-Watcher.prototype.getAndInvoke = function getAndInvoke (cb) {
-  var value = this.get();
-  if (
-    value !== this.value ||
-    // Deep watchers and watchers on Object/Arrays should fire even
-    // when the value is the same, because the value may
-    // have mutated.
-    isObject(value) ||
-    this.deep
-  ) {
-    // set new value
-    var oldValue = this.value;
-    this.value = value;
-    this.dirty = false;
-    if (this.user) {
-      try {
-        cb.call(this.vm, value, oldValue);
-      } catch (e) {
-        handleError(e, this.vm, ("callback for watcher \"" + (this.expression) + "\""));
+    var value = this.get();
+    if (
+      value !== this.value ||
+      // Deep watchers and watchers on Object/Arrays should fire even
+      // when the value is the same, because the value may
+      // have mutated.
+      isObject(value) ||
+      this.deep
+    ) {
+      // set new value
+      var oldValue = this.value;
+      this.value = value;
+      if (this.user) {
+        try {
+          this.cb.call(this.vm, value, oldValue);
+        } catch (e) {
+          handleError(e, this.vm, ("callback for watcher \"" + (this.expression) + "\""));
+        }
+      } else {
+        this.cb.call(this.vm, value, oldValue);
       }
-    } else {
-      cb.call(this.vm, value, oldValue);
     }
   }
 };
 
 /**
- * Evaluate and return the value of the watcher.
- * This only gets called for computed property watchers.
+ * Evaluate the value of the watcher.
+ * This only gets called for lazy watchers.
  */
 Watcher.prototype.evaluate = function evaluate () {
-  if (this.dirty) {
-    this.value = this.get();
-    this.dirty = false;
-  }
-  return this.value
+  this.value = this.get();
+  this.dirty = false;
 };
 
 /**
- * Depend on this watcher. Only for computed property watchers.
+ * Depend on all deps collected by this watcher.
  */
 Watcher.prototype.depend = function depend () {
-  if (this.dep && Dep.target) {
-    this.dep.depend();
+    var this$1 = this;
+
+  var i = this.deps.length;
+  while (i--) {
+    this$1.deps[i].depend();
   }
 };
 
@@ -3442,7 +3475,7 @@ function getData (data, vm) {
   }
 }
 
-var computedWatcherOptions = { computed: true };
+var computedWatcherOptions = { lazy: true };
 
 function initComputed (vm, computed) {
   // $flow-disable-line
@@ -3522,8 +3555,13 @@ function createComputedGetter (key) {
   return function computedGetter () {
     var watcher = this._computedWatchers && this._computedWatchers[key];
     if (watcher) {
-      watcher.depend();
-      return watcher.evaluate()
+      if (watcher.dirty) {
+        watcher.evaluate();
+      }
+      if (Dep.target) {
+        watcher.depend();
+      }
+      return watcher.value
     }
   }
 }
@@ -5671,7 +5709,7 @@ function createPatchFunction (backend) {
   function insert (parent, elm, ref$$1) {
     if (isDef(parent)) {
       if (isDef(ref$$1)) {
-        if (ref$$1.parentNode === parent) {
+        if (nodeOps.parentNode(ref$$1) === parent) {
           nodeOps.insertBefore(parent, elm, ref$$1);
         }
       } else {

@@ -339,6 +339,11 @@ var isAttr = makeMap(
   'target,title,type,usemap,value,width,wrap'
 );
 
+var unsafeAttrCharRE = /[\u0009\u000a\u000c "'/=>]/; // eslint-disable-line no-control-regex
+var isSSRUnsafeAttr = function (name) {
+  return unsafeAttrCharRE.test(name)
+};
+
 /* istanbul ignore next */
 var isRenderableAttr = function (name) {
   return (
@@ -362,7 +367,7 @@ var ESC = {
 };
 
 function escape (s) {
-  return s.replace(/[<>"&]/g, escapeChar)
+  return s.replace(/["&<>]/g, escapeChar)
 }
 
 function escapeChar (a) {
@@ -429,6 +434,9 @@ function renderAttrs (node) {
   }
 
   for (var key in attrs) {
+    if (isSSRUnsafeAttr(key)) {
+      continue
+    }
     if (key === 'style') {
       // leave it to the style module
       continue
@@ -798,6 +806,12 @@ var config = ({
   mustUseProp: no,
 
   /**
+   * Perform updates asynchronously. Intended to be used by Vue Test Utils
+   * This will significantly reduce performance if set to false.
+   */
+  async: true,
+
+  /**
    * Exposed for legacy reasons
    */
   _lifecycleHooks: LIFECYCLE_HOOKS
@@ -928,6 +942,12 @@ Dep.prototype.depend = function depend () {
 Dep.prototype.notify = function notify () {
   // stabilize the subscriber list first
   var subs = this.subs.slice();
+  if (process.env.NODE_ENV !== 'production' && !config.async) {
+    // subs aren't sorted in scheduler if not running async
+    // we need to sort them now to make sure they fire in correct
+    // order
+    subs.sort(function (a, b) { return a.id - b.id; });
+  }
   for (var i = 0, l = subs.length; i < l; i++) {
     subs[i].update();
   }
@@ -1456,7 +1476,7 @@ function checkComponents (options) {
 }
 
 function validateComponentName (name) {
-  if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+  if (!/^[A-Za-z][\w-]*$/.test(name)) {
     warn(
       'Invalid component name: "' + name + '". Component names ' +
       'can only contain alphanumeric characters and the hyphen, ' +
@@ -1751,11 +1771,10 @@ function assertProp (
       valid = assertedType.valid;
     }
   }
+
   if (!valid) {
     warn(
-      "Invalid prop: type check failed for prop \"" + name + "\"." +
-      " Expected " + (expectedTypes.map(capitalize).join(', ')) +
-      ", got " + (toRawType(value)) + ".",
+      getInvalidTypeMessage(name, value, expectedTypes),
       vm
     );
     return
@@ -1820,6 +1839,49 @@ function getTypeIndex (type, expectedTypes) {
     }
   }
   return -1
+}
+
+function getInvalidTypeMessage (name, value, expectedTypes) {
+  var message = "Invalid prop: type check failed for prop \"" + name + "\"." +
+    " Expected " + (expectedTypes.map(capitalize).join(', '));
+  var expectedType = expectedTypes[0];
+  var receivedType = toRawType(value);
+  var expectedValue = styleValue(value, expectedType);
+  var receivedValue = styleValue(value, receivedType);
+  // check if we need to specify expected value
+  if (expectedTypes.length === 1 &&
+      isExplicable(expectedType) &&
+      !isBoolean(expectedType, receivedType)) {
+    message += " with value " + expectedValue;
+  }
+  message += ", got " + receivedType + " ";
+  // check if we need to specify received value
+  if (isExplicable(receivedType)) {
+    message += "with value " + receivedValue + ".";
+  }
+  return message
+}
+
+function styleValue (value, type) {
+  if (type === 'String') {
+    return ("\"" + value + "\"")
+  } else if (type === 'Number') {
+    return ("" + (Number(value)))
+  } else {
+    return ("" + value)
+  }
+}
+
+function isExplicable (value) {
+  var explicitTypes = ['string', 'number', 'boolean'];
+  return explicitTypes.some(function (elem) { return value.toLowerCase() === elem; })
+}
+
+function isBoolean () {
+  var args = [], len = arguments.length;
+  while ( len-- ) args[ len ] = arguments[ len ];
+
+  return args.some(function (elem) { return elem.toLowerCase() === 'boolean'; })
 }
 
 /*  */
@@ -2483,7 +2545,7 @@ function normalizeAsync (cache, method) {
 
 /*  */
 
-var validDivisionCharRE = /[\w).+\-_$\]]/;
+var validDivisionCharRE = /[\w$)+\-.\]]/;
 
 function parseFilters (exp) {
   var inSingle = false;
@@ -2581,8 +2643,8 @@ function wrapFilter (exp, filter) {
 
 /*  */
 
-var defaultTagRE = /\{\{((?:.|\n)+?)\}\}/g;
-var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
+var defaultTagRE = /{{([\n.]+?)}}/g;
+var regexEscapeRE = /[$()*+-./?[\\\]^{|}]/g;
 
 var buildRegex = cached(function (delimiters) {
   var open = delimiters[0].replace(regexEscapeRE, '\\$&');
@@ -2887,7 +2949,7 @@ var style = {
  */
 
 // Regular Expressions for parsing tags and attributes
-var attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
+var attribute = /^\s*([^\s"'/<=>]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'<=>`]+)))?/;
 // could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
 // but for Vue templates we can enforce a simple charset
 var ncname = '[a-zA-Z_][\\w\\-\\.]*';
@@ -2895,9 +2957,9 @@ var qnameCapture = "((?:" + ncname + "\\:)?" + ncname + ")";
 var startTagOpen = new RegExp(("^<" + qnameCapture));
 var startTagClose = /^\s*(\/?)>/;
 var endTag = new RegExp(("^<\\/" + qnameCapture + "[^>]*>"));
-var doctype = /^<!DOCTYPE [^>]+>/i;
+var doctype = /^<!doctype [^>]+>/i;
 // #7298: escape - to avoid being pased as HTML comment when inlined in page
-var comment = /^<!\--/;
+var comment = /^<!--/;
 var conditionalComment = /^<!\[/;
 
 var IS_REGEX_CAPTURING_BROKEN = false;
@@ -3027,8 +3089,8 @@ function parseHTML (html, options) {
         endTagLength = endTag.length;
         if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
           text = text
-            .replace(/<!\--([\s\S]*?)-->/g, '$1') // #7298
-            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1');
+            .replace(/<!--([\S\s]*?)-->/g, '$1') // #7298
+            .replace(/<!\[CDATA\[([\S\s]*?)]]>/g, '$1');
         }
         if (shouldIgnoreFirstNewline(stackedTag, text)) {
           text = text.slice(1);
@@ -3341,7 +3403,7 @@ function parseString (chr) {
 var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:/;
 var forAliasRE = /([^]*?)\s+(?:in|of)\s+([^]*)/;
-var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
+var forIteratorRE = /,([^,\]}]*)(?:,([^,\]}]*))?$/;
 var stripParensRE = /^\(|\)$/g;
 
 var argRE = /:(.*)$/;
@@ -4286,8 +4348,8 @@ var baseOptions = {
 
 /*  */
 
-var fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/;
-var simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/;
+var fnExpRE = /^([\w$]+|\([^)]*?\))\s*=>|^function\s*\(/;
+var simplePathRE = /^[$A-Z_a-z][\w$]*(?:\.[$A-Z_a-z][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[$A-Z_a-z][\w$]*])*$/;
 
 // KeyboardEvent.keyCode aliases
 var keyCodes = {
@@ -4980,7 +5042,7 @@ function genClassSegments (
   classBinding
 ) {
   if (staticClass && !classBinding) {
-    return [{ type: RAW, value: (" class=" + staticClass) }]
+    return [{ type: RAW, value: (" class=\"" + (JSON.parse(staticClass)) + "\"") }]
   } else {
     return [{
       type: EXPRESSION,
@@ -5389,7 +5451,7 @@ var unaryOperatorsRE = new RegExp('\\b' + (
 ).split(',').join('\\s*\\([^\\)]*\\)|\\b') + '\\s*\\([^\\)]*\\)');
 
 // strip strings in expressions
-var stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`/g;
+var stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^\\`]|\\.)*\${|}(?:[^\\`]|\\.)*`|`(?:[^\\`]|\\.)*`/g;
 
 // detect problematic expressions in a template
 function detectErrors (ast) {
@@ -5820,6 +5882,9 @@ function renderStringList (
 function renderAttrs$1 (obj) {
   var res = '';
   for (var key in obj) {
+    if (isSSRUnsafeAttr(key)) {
+      continue
+    }
     res += renderAttr(key, obj[key]);
   }
   return res
@@ -7865,8 +7930,8 @@ var TemplateStream = (function (Transform) {
 
 var compile$1 = require('lodash.template');
 var compileOptions = {
-  escape: /{{([^{][\s\S]+?[^}])}}/g,
-  interpolate: /{{{([\s\S]+?)}}}/g
+  escape: /{{([^{][\S\s]+?[^}])}}/g,
+  interpolate: /{{{([\S\s]+?)}}}/g
 };
 
 
@@ -8022,13 +8087,21 @@ TemplateRenderer.prototype.renderSync = function renderSync (content, context) {
 TemplateRenderer.prototype.renderStyles = function renderStyles (context) {
     var this$1 = this;
 
-  var cssFiles = this.clientManifest
-    ? this.clientManifest.all.filter(isCSS)
-    : [];
+  var initial = this.preloadFiles || [];
+  var async = this.getUsedAsyncFiles(context) || [];
+  var cssFiles = initial.concat(async).filter(function (ref) {
+      var file = ref.file;
+
+      return isCSS(file);
+    });
   return (
     // render links for css files
     (cssFiles.length
-      ? cssFiles.map(function (file) { return ("<link rel=\"stylesheet\" href=\"" + (this$1.publicPath) + "/" + file + "\">"); }).join('')
+      ? cssFiles.map(function (ref) {
+          var file = ref.file;
+
+          return ("<link rel=\"stylesheet\" href=\"" + (this$1.publicPath) + "/" + file + "\">");
+    }).join('')
       : '') +
     // context.styles is a getter exposed by vue-style-loader which contains
     // the inline component styles collected during SSR
@@ -8124,14 +8197,18 @@ TemplateRenderer.prototype.renderScripts = function renderScripts (context) {
     var this$1 = this;
 
   if (this.clientManifest) {
-    var initial = this.preloadFiles;
-    var async = this.getUsedAsyncFiles(context);
-    var needed = [initial[0]].concat(async || [], initial.slice(1));
-    return needed.filter(function (ref) {
+    var initial = this.preloadFiles.filter(function (ref) {
         var file = ref.file;
 
         return isJS(file);
-      }).map(function (ref) {
+      });
+    var async = (this.getUsedAsyncFiles(context) || []).filter(function (ref) {
+        var file = ref.file;
+
+        return isJS(file);
+      });
+    var needed = [initial[0]].concat(async || [], initial.slice(1));
+    return needed.map(function (ref) {
         var file = ref.file;
 
       return ("<script src=\"" + (this$1.publicPath) + "/" + file + "\" defer></script>")
@@ -8468,7 +8545,7 @@ function rewriteTraceLine (trace, mapConsumers) {
       var source = originalPosition.source;
       var line = originalPosition.line;
       var column = originalPosition.column;
-      var mappedPosition = "(" + (source.replace(/^webpack:\/\/\//, '')) + ":" + (String(line)) + ":" + (String(column)) + ")";
+      var mappedPosition = "(" + (source.replace(/^webpack:\/{3}/, '')) + ":" + (String(line)) + ":" + (String(column)) + ")";
       return trace.replace(filenameRE, mappedPosition)
     } else {
       return trace

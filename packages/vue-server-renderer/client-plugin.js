@@ -4,6 +4,8 @@
 
 var isJS = function (file) { return /\.js(\?[^.]+)?$/.test(file); };
 
+var isCSS = function (file) { return /\.css(\?[^.]+)?$/.test(file); };
+
 var ref = require('chalk');
 var red = ref.red;
 var yellow = ref.yellow;
@@ -11,6 +13,18 @@ var yellow = ref.yellow;
 var prefix = "[vue-server-renderer-webpack-plugin]";
 var warn = exports.warn = function (msg) { return console.error(red((prefix + " " + msg + "\n"))); };
 var tip = exports.tip = function (msg) { return console.log(yellow((prefix + " " + msg + "\n"))); };
+
+
+
+var onEmit = function (compiler, name, hook) {
+  if (compiler.hooks) {
+    // Webpack >= 4.0.0
+    compiler.hooks.emit.tapAsync(name, hook);
+  } else {
+    // Webpack < 4.0.0
+    compiler.plugin('emit', hook);
+  }
+};
 
 var hash = require('hash-sum');
 var uniq = require('lodash.uniq');
@@ -25,7 +39,7 @@ var VueSSRClientPlugin = function VueSSRClientPlugin (options) {
 VueSSRClientPlugin.prototype.apply = function apply (compiler) {
     var this$1 = this;
 
-  compiler.plugin('emit', function (compilation, cb) {
+  onEmit(compiler, 'vue-client-plugin', function (compilation, cb) {
     var stats = compilation.getStats().toJson();
 
     var allFiles = uniq(stats.assets
@@ -34,10 +48,10 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
     var initialFiles = uniq(Object.keys(stats.entrypoints)
       .map(function (name) { return stats.entrypoints[name].assets; })
       .reduce(function (assets, all) { return all.concat(assets); }, [])
-      .filter(isJS));
+      .filter(function (file) { return isJS(file) || isCSS(file); }));
 
     var asyncFiles = allFiles
-      .filter(isJS)
+      .filter(function (file) { return isJS(file) || isCSS(file); })
       .filter(function (file) { return initialFiles.indexOf(file) < 0; });
 
     var manifest = {
@@ -58,7 +72,8 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
         if (!chunk || !chunk.files) {
           return
         }
-        var files = manifest.modules[hash(m.identifier)] = chunk.files.map(fileToIndex);
+        var id = m.identifier.replace(/\s\w+$/, ''); // remove appended hash
+        var files = manifest.modules[hash(id)] = chunk.files.map(fileToIndex);
         // find all asset modules associated with the same chunk
         assetModules.forEach(function (m) {
           if (m.chunks.some(function (id) { return id === cid; })) {
