@@ -55,7 +55,11 @@ function mergeData (to: Object, from: ?Object): Object {
     fromVal = from[key]
     if (!hasOwn(to, key)) {
       set(to, key, fromVal)
-    } else if (isPlainObject(toVal) && isPlainObject(fromVal)) {
+    } else if (
+      toVal !== fromVal &&
+      isPlainObject(toVal) &&
+      isPlainObject(fromVal)
+    ) {
       mergeData(toVal, fromVal)
     }
   }
