@@ -71,7 +71,7 @@ describe('Global API: extend', () => {
     expect(calls).toEqual([1, 2, 3])
   })
 
-  it('should not merge nested mixins', () => {
+  it('should not merge nested mixins created with Vue.extend', () => {
     const A = Vue.extend({
       created: () => {}
     })
