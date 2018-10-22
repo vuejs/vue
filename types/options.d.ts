@@ -160,9 +160,13 @@ export interface WatchOptionsWithHandler<T> extends WatchOptions {
   handler: WatchHandler<T>;
 }
 
+export interface DirectiveBinding extends Readonly<VNodeDirective> {
+  readonly modifiers: { [key: string]: boolean };
+}
+
 export type DirectiveFunction = (
   el: HTMLElement,
-  binding: VNodeDirective,
+  binding: DirectiveBinding,
   vnode: VNode,
   oldVnode: VNode
 ) => void;
