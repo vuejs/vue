@@ -54,12 +54,6 @@ export default class VueSSRClientPlugin {
         }
       })
 
-      // const debug = (file, obj) => {
-      //   require('fs').writeFileSync(__dirname + '/' + file, JSON.stringify(obj, null, 2))
-      // }
-      // debug('stats.json', stats)
-      // debug('client-manifest.json', manifest)
-
       const json = JSON.stringify(manifest, null, 2)
       compilation.assets[this.options.filename] = {
         source: () => json,
