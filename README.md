@@ -8,7 +8,7 @@
   <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/l/vue.svg" alt="License"></a>
   <a href="https://chat.vuejs.org/"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg" alt="Chat"></a>
   <br>
-  <a href="https://saucelabs.com/u/vuejs"><img src="https://saucelabs.com/browser-matrix/vuejs.svg" alt="Sauce Test Status"></a>
+  <a href="https://app.saucelabs.com/builds/50f8372d79f743a3b25fb6ca4851ca4c"><img src="https://app.saucelabs.com/buildstatus/vuejs" alt="Build Status"></a>
 </p>
 
 <h2 align="center">Supporting Vue.js</h2>
@@ -31,7 +31,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/codexyz.png">
   </a>
 </p>
-  
+
 <!--special end-->
 
 <h3 align="center">Platinum Sponsors</h3>
