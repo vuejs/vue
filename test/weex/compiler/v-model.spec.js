@@ -28,6 +28,15 @@ describe('compile v-model', () => {
     expect(errors).toEqual([])
   })
 
+  it('should compile with number modifier for modelable native component', () => {
+    const { render, staticRenderFns, errors } = compile(`<div><input v-model.number="x" /></div>`)
+    expect(render).not.toBeUndefined()
+    expect(render).toMatch(strToRegExp(`attrs:{"value":(x)}`))
+    expect(render).toMatch(strToRegExp(`on:{"input":function($event){x=_n($event.target.attr.value)}}`))
+    expect(staticRenderFns).toEqual([])
+    expect(errors).toEqual([])
+  })
+
   it('should compile with trim & lazy modifier', () => {
     const { render, staticRenderFns, errors } = compile(`<div><input v-model.trim.lazy="x" /><input v-model.lazy.trim="y" /></div>`)
     expect(render).not.toBeUndefined()

@@ -18,6 +18,7 @@ function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const oldClassList = makeClassList(oldData)
   const classList = makeClassList(data)
 
+  /* istanbul ignore else */
   if (typeof el.setClassList === 'function') {
     el.setClassList(classList)
   } else {
@@ -48,6 +49,7 @@ function makeClassList (data: VNodeData): Array<string> {
   return classList
 }
 
+/* istanbul ignore next */
 function getStyle (oldClassList: Array<string>, classList: Array<string>, ctx: Component): Object {
   // style is a weex-only injected object
   // compiled from <style> tags in weex files

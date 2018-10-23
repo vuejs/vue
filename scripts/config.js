@@ -3,10 +3,12 @@ const buble = require('rollup-plugin-buble')
 const alias = require('rollup-plugin-alias')
 const cjs = require('rollup-plugin-commonjs')
 const replace = require('rollup-plugin-replace')
+const istanbul = require('rollup-plugin-istanbul')
 const node = require('rollup-plugin-node-resolve')
 const flow = require('rollup-plugin-flow-no-whitespace')
 const version = process.env.VERSION || require('../package.json').version
 const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
+const istanbulInstrument = process.env.ISTANBUL
 
 const banner =
   '/*!\n' +
@@ -194,6 +196,12 @@ function genConfig (name) {
   if (opts.env) {
     config.plugins.push(replace({
       'process.env.NODE_ENV': JSON.stringify(opts.env)
+    }))
+  }
+
+  if (istanbulInstrument) {
+    config.plugins.push(istanbul({
+      exclude: ['test/**/*.js']
     }))
   }
 
