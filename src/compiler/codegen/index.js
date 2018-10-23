@@ -391,7 +391,8 @@ export function genChildren (
     ) {
       // because el may be a functional component and return an Array instead of a single root.
       // In this case, just a simple normalization is needed
-      return `${(altGenElement || genElement)(el, state)},1`
+      const normalizationType = state.maybeComponent(el) ? `,1` : ``
+      return `${(altGenElement || genElement)(el, state)}${normalizationType}`
     }
     const normalizationType = checkSkip
       ? getNormalizationType(children, state.maybeComponent)
