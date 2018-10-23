@@ -59,6 +59,9 @@ export function genElement (el: ASTElement, state: CodegenState): string {
   } else if (el.if && !el.ifProcessed) {
     return genIf(el, state)
   } else if (el.tag === 'template' && !el.slotTarget) {
+    if (process.env.NODE_ENV !== 'production') {
+      checkInvalidTemplateDirs(el, state)
+    }
     return genChildren(el, state) || 'void 0'
   } else if (el.tag === 'slot') {
     return genSlot(el, state)
@@ -308,6 +311,15 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
   }
   if (hasRuntime) {
     return res.slice(0, -1) + ']'
+  }
+}
+
+function checkInvalidTemplateDirs (el: ASTElement, state: CodegenState) {
+  if (el.directives && el.directives.length > 0) {
+    for (let i = 0; i < el.directives.length; i++) {
+      state.warn(`The directive "${el.directives[i].rawName}" cannot be used on <template> tags. ` +
+                 'Only "v-if" and "v-for" can be used on <template> tags.')
+    }
   }
 }
 
