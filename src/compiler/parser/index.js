@@ -340,8 +340,8 @@ function processKey (el) {
         const parent = el.parent
         if (iterator && iterator === exp && parent && parent.tag === 'transition-group') {
           warn(
-            `Do not use sequential index on the child of the <transtion-group> component, ` +
-            `this may cause some rendering errors.`
+            `Do not use v-for index as key on <transtion-group> children, ` +
+            `this is the same as not using keys.`
           )
         }
       }
