@@ -4,7 +4,7 @@
 // makeMap() due to potential side effects, so these variables end up
 // bloating the web builds.
 
-import { makeMap } from 'shared/util'
+import { makeMap, noop } from 'shared/util'
 
 export const isReservedTag = makeMap(
   'template,script,style,element,content,slot,link,meta,svg,view,' +
@@ -46,7 +46,7 @@ export function isUnknownElement (tag?: string): boolean {
 export function query (el: string | Element, document: Object) {
   // document is injected by weex factory wrapper
   const placeholder = document.createComment('root')
-  placeholder.hasAttribute = placeholder.removeAttribute = function () {} // hack for patch
+  placeholder.hasAttribute = placeholder.removeAttribute = noop // hack for patch
   document.documentElement.appendChild(placeholder)
   return placeholder
 }
