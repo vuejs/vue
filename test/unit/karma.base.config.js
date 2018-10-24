@@ -1,7 +1,7 @@
-var alias = require('../../scripts/alias')
-var webpack = require('webpack')
+const alias = require('../../scripts/alias')
+const webpack = require('webpack')
 
-var webpackConfig = {
+const webpackConfig = {
   mode: 'development',
   resolve: {
     alias: alias

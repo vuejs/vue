@@ -106,9 +106,9 @@ describe('Options watch', () => {
   })
 
   it('correctly merges multiple extends', done => {
-    var spy2 = jasmine.createSpy('A')
-    var spy3 = jasmine.createSpy('B')
-    var A = Vue.extend({
+    const spy2 = jasmine.createSpy('A')
+    const spy3 = jasmine.createSpy('B')
+    const A = Vue.extend({
       data: function () {
         return {
           a: 0,
@@ -120,21 +120,21 @@ describe('Options watch', () => {
       }
     })
 
-    var B = Vue.extend({
+    const B = Vue.extend({
       extends: A,
       watch: {
         a: spy2
       }
     })
 
-    var C = Vue.extend({
+    const C = Vue.extend({
       extends: B,
       watch: {
         a: spy3
       }
     })
 
-    var vm = new C()
+    const vm = new C()
     vm.a = 1
 
     waitForUpdate(() => {

@@ -89,9 +89,9 @@ describe('SSR: renderToStream', () => {
       template: `<div></div>`,
       _scopeId: '_component2'
     })
-    var stream1 = renderToStream(component1)
-    var stream2 = renderToStream(component2)
-    var res = ''
+    const stream1 = renderToStream(component1)
+    const stream2 = renderToStream(component2)
+    let res = ''
     stream1.on('data', (text) => {
       res += text.toString('utf-8').replace(/x/g, '')
     })
