@@ -533,7 +533,7 @@ function processAttrs (el) {
           value.trim().length === 0
         ) {
           warn(
-            `The value for a v-bind expression cannot be empty. Found in "${name}"`
+            `The value for a v-bind expression cannot be empty. Found in "v-bind:${name}"`
           )
         }
         if (modifiers) {
