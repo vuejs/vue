@@ -70,6 +70,7 @@ export class RenderContext {
     if (isUndef(lastState)) {
       return this.done()
     }
+    /* eslint-disable no-case-declarations */
     switch (lastState.type) {
       case 'Element':
       case 'Fragment':

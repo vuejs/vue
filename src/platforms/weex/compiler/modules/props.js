@@ -13,7 +13,7 @@ function normalizeKeyName (str: string): string {
   return normalize(str)
 }
 
-function transformNode (el: ASTElement, options: CompilerOptions) {
+function transformNode (el: ASTElement) {
   if (Array.isArray(el.attrsList)) {
     el.attrsList.forEach(attr => {
       if (attr.name && attr.name.match(/\-/)) {

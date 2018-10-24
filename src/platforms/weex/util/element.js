@@ -33,13 +33,13 @@ export const isUnaryTag = makeMap(
   true
 )
 
-export function mustUseProp (tag: string, type: ?string, name: string): boolean {
+export function mustUseProp (): boolean {
   return false
 }
 
-export function getTagNamespace (tag?: string): string | void { }
+export function getTagNamespace (): void { }
 
-export function isUnknownElement (tag?: string): boolean {
+export function isUnknownElement (): boolean {
   return false
 }
 
