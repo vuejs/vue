@@ -122,11 +122,12 @@ export function getTransitionInfo (el: Element, expectedType?: ?string): {
   hasTransform: boolean;
 } {
   const styles: any = window.getComputedStyle(el)
-  const transitionDelays: Array<string> = styles[transitionProp + 'Delay'].split(', ')
-  const transitionDurations: Array<string> = styles[transitionProp + 'Duration'].split(', ')
+  // JSDOM may return undefined for transition properties
+  const transitionDelays: Array<string> = (styles[transitionProp + 'Delay'] || '').split(', ')
+  const transitionDurations: Array<string> = (styles[transitionProp + 'Duration'] || '').split(', ')
   const transitionTimeout: number = getTimeout(transitionDelays, transitionDurations)
-  const animationDelays: Array<string> = styles[animationProp + 'Delay'].split(', ')
-  const animationDurations: Array<string> = styles[animationProp + 'Duration'].split(', ')
+  const animationDelays: Array<string> = (styles[animationProp + 'Delay'] || '').split(', ')
+  const animationDurations: Array<string> = (styles[animationProp + 'Duration'] || '').split(', ')
   const animationTimeout: number = getTimeout(animationDelays, animationDurations)
 
   let type: ?string

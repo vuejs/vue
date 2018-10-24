@@ -111,9 +111,13 @@ export interface ComponentOptions<
 export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = PropsDefinition<Props>> {
   name?: string;
   props?: PropDefs;
+  model?: {
+    prop?: string;
+    event?: string;
+  };
   inject?: InjectOptions;
   functional: boolean;
-  render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode;
+  render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode | VNode[];
 }
 
 export interface RenderContext<Props=DefaultProps> {
@@ -133,7 +137,7 @@ export type PropValidator<T> = PropOptions<T> | Prop<T> | Prop<T>[];
 export interface PropOptions<T=any> {
   type?: Prop<T> | Prop<T>[];
   required?: boolean;
-  default?: T | null | undefined | (() => object);
+  default?: T | null | undefined | (() => T | null | undefined);
   validator?(value: T): boolean;
 }
 
@@ -160,9 +164,13 @@ export interface WatchOptionsWithHandler<T> extends WatchOptions {
   handler: WatchHandler<T>;
 }
 
+export interface DirectiveBinding extends Readonly<VNodeDirective> {
+  readonly modifiers: { [key: string]: boolean };
+}
+
 export type DirectiveFunction = (
   el: HTMLElement,
-  binding: VNodeDirective,
+  binding: DirectiveBinding,
   vnode: VNode,
   oldVnode: VNode
 ) => void;
