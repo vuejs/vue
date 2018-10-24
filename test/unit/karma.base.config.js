@@ -2,6 +2,7 @@ var alias = require('../../scripts/alias')
 var webpack = require('webpack')
 
 var webpackConfig = {
+  mode: 'development',
   resolve: {
     alias: alias
   },
@@ -18,7 +19,6 @@ var webpackConfig = {
     new webpack.DefinePlugin({
       __WEEX__: false,
       'process.env': {
-        NODE_ENV: '"development"',
         TRANSITION_DURATION: process.env.CI ? 100 : 50,
         TRANSITION_BUFFER: 10
       }
