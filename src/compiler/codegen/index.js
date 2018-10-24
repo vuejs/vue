@@ -18,6 +18,7 @@ export class CodegenState {
   maybeComponent: (el: ASTElement) => boolean;
   onceId: number;
   staticRenderFns: Array<string>;
+  pre: boolean;
 
   constructor (options: CompilerOptions) {
     this.options = options
@@ -29,6 +30,7 @@ export class CodegenState {
     this.maybeComponent = (el: ASTElement) => !(isReservedTag(el.tag) && !el.component)
     this.onceId = 0
     this.staticRenderFns = []
+    this.pre = false
   }
 }
 
@@ -58,7 +60,7 @@ export function genElement (el: ASTElement, state: CodegenState): string {
     return genFor(el, state)
   } else if (el.if && !el.ifProcessed) {
     return genIf(el, state)
-  } else if (el.tag === 'template' && !el.slotTarget) {
+  } else if (el.tag === 'template' && !el.slotTarget && !state.pre) {
     return genChildren(el, state) || 'void 0'
   } else if (el.tag === 'slot') {
     return genSlot(el, state)
@@ -88,7 +90,15 @@ export function genElement (el: ASTElement, state: CodegenState): string {
 // hoist static sub-trees out
 function genStatic (el: ASTElement, state: CodegenState): string {
   el.staticProcessed = true
+  // Some elements (templates) need to behave differently inside of a v-pre
+  // node.  All pre nodes are static roots, so we can use this as a location to
+  // wrap a state change and reset it upon exiting the pre node.
+  const originalPreState = state.pre
+  if (el.pre) {
+    state.pre = el.pre
+  }
   state.staticRenderFns.push(`with(this){return ${genElement(el, state)}}`)
+  state.pre = originalPreState
   return `_m(${
     state.staticRenderFns.length - 1
   }${
