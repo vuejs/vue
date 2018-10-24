@@ -731,4 +731,10 @@ describe('parser', () => {
     expect(ast.children[1].isComment).toBe(true) // parse comment with ASTText
     expect(ast.children[1].text).toBe('comment here')
   })
+
+  // #8103
+  it('should allow CRLFs in string interpolations', () => {
+    const ast = parse(`<p>{{\r\nmsg\r\n}}</p>`, baseOptions)
+    expect(ast.children[0].expression).toBe('_s(msg)')
+  })
 })
