@@ -244,8 +244,8 @@ describe('Options functional', () => {
 
   it('should work with render fns compiled from template', done => {
     // code generated via vue-template-es2015-compiler
-    var render = function (_h, _vm) {
-      var _c = _vm._c
+    const render = function (_h, _vm) {
+      const _c = _vm._c
       return _c(
         'div',
         [
@@ -261,9 +261,9 @@ describe('Options functional', () => {
         2
       )
     }
-    var staticRenderFns = [
+    const staticRenderFns = [
       function (_h, _vm) {
-        var _c = _vm._c
+        const _c = _vm._c
         return _c('div', [_vm._v('Some '), _c('span', [_vm._v('text')])])
       }
     ]

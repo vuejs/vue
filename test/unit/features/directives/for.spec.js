@@ -330,7 +330,7 @@ describe('Directive v-for', () => {
     }).then(done)
 
     function assertMarkup () {
-      var markup = vm.list.map(function (item) {
+      const markup = vm.list.map(function (item) {
         return '<p>' + item.a + '</p><p>' + (item.a + 1) + '</p>'
       }).join('')
       expect(vm.$el.innerHTML).toBe(markup)
@@ -370,7 +370,7 @@ describe('Directive v-for', () => {
     }).then(done)
 
     function assertMarkup () {
-      var markup = vm.list.map(function (item) {
+      const markup = vm.list.map(function (item) {
         return `<p>${item.a}<span>${item.a}</span></p>`
       }).join('')
       expect(vm.$el.innerHTML).toBe(markup)
