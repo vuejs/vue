@@ -75,7 +75,7 @@ export function genElement (el: ASTElement, state: CodegenState): string {
       code = genComponent(el.component, el, state)
     } else {
       let data
-      if (!el.plain || el.pre) {
+      if (!el.plain || (el.pre && state.maybeComponent(el))) {
         data = genData(el, state)
       }
 
