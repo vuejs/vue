@@ -1,4 +1,3 @@
-import webpack from 'webpack'
 import Vue from '../../dist/vue.runtime.common.js'
 import { compileWithWebpack } from './compile-with-webpack'
 import { createRenderer } from '../../packages/vue-server-renderer'
@@ -14,11 +13,12 @@ function generateClientManifest (file, cb) {
       path: '/',
       filename: '[name].js'
     },
+    optimization: {
+      runtimeChunk: {
+        name: 'manifest'
+      }
+    },
     plugins: [
-      new webpack.optimize.CommonsChunkPlugin({
-        name: 'manifest',
-        minChunks: Infinity
-      }),
       new VueSSRClientPlugin()
     ]
   }, fs => {
@@ -227,8 +227,8 @@ describe('SSR: template option', () => {
       `<link rel="preload" href="/0.js" as="script">` +
       `<link rel="preload" href="/test.css" as="style">` +
       // images and fonts are only preloaded when explicitly asked for
-      (options.preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
       (options.preloadOtherAssets ? `<link rel="preload" href="/test.png" as="image">` : ``) +
+      (options.preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
       // unused chunks should have prefetch
       (options.noPrefetch ? `` : `<link rel="prefetch" href="/1.js">`) +
       // css assets should be loaded
