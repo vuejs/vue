@@ -528,6 +528,14 @@ function processAttrs (el) {
         name = name.replace(bindRE, '')
         value = parseFilters(value)
         isProp = false
+        if (
+          process.env.NODE_ENV !== 'production' &&
+          value.trim().length === 0
+        ) {
+          warn(
+            `The value for a v-bind expression cannot be empty. Found in "v-bind:${name}"`
+          )
+        }
         if (modifiers) {
           if (modifiers.prop) {
             isProp = true
