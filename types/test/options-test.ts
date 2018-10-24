@@ -354,6 +354,16 @@ Vue.component('functional-component-check-optional', {
   functional: true
 })
 
+Vue.component('functional-component-multi-root', {
+  functional: true,
+  render(h) {
+    return [
+      h("tr", [h("td", "foo"), h("td", "bar")]),
+      h("tr", [h("td", "lorem"), h("td", "ipsum")])
+    ]
+  }
+})
+
 Vue.component("async-component", ((resolve, reject) => {
   setTimeout(() => {
     resolve(Vue.component("component"));
