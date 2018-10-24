@@ -316,4 +316,25 @@ describe('Options functional', () => {
     triggerEvent(parent.$el.querySelector('.clickable'), 'click')
     waitForUpdate(assertMarkup).then(done)
   })
+
+  // #8468
+  it('should normalize nested arrays when use functional components with v-for', () => {
+    const Foo = {
+      functional: true,
+      props: {
+        name: {}
+      },
+      render (h, context) {
+        return [h('span', 'hi'), h('span', context.props.name)]
+      }
+    }
+    const vm = new Vue({
+      template: `<div><foo v-for="name in names" :name="name" /></div>`,
+      data: {
+        names: ['foo', 'bar']
+      },
+      components: { Foo }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<span>hi</span><span>foo</span><span>hi</span><span>bar</span>')
+  })
 })
