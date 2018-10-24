@@ -376,4 +376,24 @@ Vue.component("async-component", ((resolve, reject) => {
   })
 }));
 
+Vue.component('functional-component-v-model', {
+  props: ['foo'],
+  functional: true,
+  model: {
+    prop: 'foo',
+    event: 'change'
+  },
+  render(createElement, context) {
+    return createElement("input", {
+      on: {
+        input: new Function()
+      },
+      domProps: {
+        value: context.props.foo
+      }
+    });
+  }
+});
+
+
 Vue.component('async-es-module-component', () => import('./es-module'))

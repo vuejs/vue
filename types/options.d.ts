@@ -111,6 +111,10 @@ export interface ComponentOptions<
 export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = PropsDefinition<Props>> {
   name?: string;
   props?: PropDefs;
+  model?: {
+    prop?: string;
+    event?: string;
+  };
   inject?: InjectOptions;
   functional: boolean;
   render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode | VNode[];
