@@ -286,6 +286,8 @@ export function looseEqual (a: any, b: any): boolean {
         return a.length === b.length && a.every((e, i) => {
           return looseEqual(e, b[i])
         })
+      } else if (a instanceof Date && b instanceof Date) {
+        return a.getTime() === b.getTime()
       } else if (!isArrayA && !isArrayB) {
         const keysA = Object.keys(a)
         const keysB = Object.keys(b)

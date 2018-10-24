@@ -588,4 +588,31 @@ describe('Directive v-model select', () => {
       }).then(done)
     })
   })
+
+  // #7928
+  it('should correctly handle option with date value', done => {
+    const vm = new Vue({
+      data: {
+        dates: [
+          new Date(1520000000000),
+          new Date(1522000000000),
+          new Date(1516000000000)
+        ],
+        selectedDate: null
+      },
+      template:
+        '<div>' +
+          '<select v-model="selectedDate">' +
+            '<option v-for="(date, i) in dates" :key="i" :value="date">' +
+              '{{date}}' +
+            '</option>' +
+          '</select>' +
+        '</div>'
+    }).$mount()
+
+    vm.selectedDate = vm.dates[2]
+    waitForUpdate(() => {
+      expect(vm.$el.firstChild.selectedIndex).toBe(2)
+    }).then(done)
+  })
 })
