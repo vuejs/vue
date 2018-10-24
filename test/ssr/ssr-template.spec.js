@@ -11,6 +11,7 @@ function generateClientManifest (file, cb) {
   compileWithWebpack(file, {
     output: {
       path: '/',
+      publicPath: '/',
       filename: '[name].js'
     },
     optimization: {
