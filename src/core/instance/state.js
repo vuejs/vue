@@ -321,7 +321,7 @@ export function stateMixin (Vue: Class<Component>) {
   const propsDef = {}
   propsDef.get = function () { return this._props }
   if (process.env.NODE_ENV !== 'production') {
-    dataDef.set = function (newData: Object) {
+    dataDef.set = function () {
       warn(
         'Avoid replacing instance root $data. ' +
         'Use nested data properties instead.',

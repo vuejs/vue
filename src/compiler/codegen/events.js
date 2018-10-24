@@ -51,8 +51,7 @@ const modifierCode: { [key: string]: string } = {
 
 export function genHandlers (
   events: ASTElementHandlers,
-  isNative: boolean,
-  warn: Function
+  isNative: boolean
 ): string {
   let res = isNative ? 'nativeOn:{' : 'on:{'
   for (const name in events) {
