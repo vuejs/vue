@@ -550,7 +550,7 @@ describe('codegen', () => {
   it('generate static trees inside v-for', () => {
     assertCodegen(
       `<div><div v-for="i in 10"><p><span></span></p></div></div>`,
-      `with(this){return _c('div',_l((10),function(i){return _c('div',[_m(0,true)])}),1)}`,
+      `with(this){return _c('div',_l((10),function(i){return _c('div',[_m(0,true)])}))}`,
       [`with(this){return _c('p',[_c('span')])}`]
     )
   })
