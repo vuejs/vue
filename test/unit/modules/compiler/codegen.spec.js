@@ -524,6 +524,11 @@ describe('codegen', () => {
       '<div :is="component1"></div>',
       `with(this){return _c(component1,{tag:"div"})}`
     )
+    // maybe a component and normalize type should be 1
+    assertCodegen(
+      '<div><div is="component1"></div></div>',
+      `with(this){return _c('div',[_c("component1",{tag:"div"})],1)}`
+    )
   })
 
   it('generate component with inline-template', () => {
