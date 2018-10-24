@@ -188,6 +188,11 @@ function genConfig (name) {
       format: opts.format,
       banner: opts.banner,
       name: opts.moduleName || 'Vue'
+    },
+    onwarn: (msg, warn) => {
+      if (!/Circular/.test(msg)) {
+        warn(msg)
+      }
     }
   }
 
