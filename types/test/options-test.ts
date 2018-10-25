@@ -377,6 +377,18 @@ Vue.component("async-component", ((resolve, reject) => {
   })
 }));
 
+Vue.component("async-state-handling-component", () => ({
+  component: new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(Vue.component("component"));
+    }, 0);
+  }),
+  loading: Vue.component("component"),
+  error: Vue.component("component"),
+  delay: 400,
+  timeout: 3000
+}));
+
 Vue.component('functional-component-v-model', {
   props: ['foo'],
   functional: true,
