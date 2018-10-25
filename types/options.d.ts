@@ -16,10 +16,16 @@ interface EsModuleComponent {
   default: Component
 }
 
-export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
+export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = ((
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
-) => Promise<Component | EsModuleComponent> | void;
+) => Promise<Component | EsModuleComponent> | void) | (() => {
+  component?: Promise<Component | EsModuleComponent> | void,
+  loading?: Component | EsModuleComponent,
+  error?: Component | EsModuleComponent,
+  delay?: Number,
+  timeout?: Number
+})
 
 /**
  * When the `Computed` type parameter on `ComponentOptions` is inferred,
