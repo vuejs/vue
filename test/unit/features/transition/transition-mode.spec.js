@@ -442,6 +442,7 @@ if (!isIE9) {
     })
 
     it('transition out-in on async component (resolve after leave complete)', done => {
+      let next
       const vm = new Vue({
         template: `
           <div>
@@ -466,8 +467,6 @@ if (!isIE9) {
       }).$mount(el)
 
       expect(vm.$el.innerHTML).toBe('<div><h1>component A</h1></div>')
-
-      let next
 
       vm.ok = false
       waitForUpdate(() => {
