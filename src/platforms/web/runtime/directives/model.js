@@ -41,6 +41,9 @@ const directive = {
         // this also fixes the issue where some browsers e.g. iOS Chrome
         // fires "change" instead of "input" on autocomplete.
         el.addEventListener('change', onCompositionEnd)
+        // If user moves focus before composition ends, clear the composing flag
+        // See #
+        el.addEventListener('blur', onBlur)
         /* istanbul ignore if */
         if (isIE9) {
           el.vmodel = true
@@ -136,6 +139,12 @@ function onCompositionEnd (e) {
   if (!e.target.composing) return
   e.target.composing = false
   trigger(e.target, 'input')
+}
+
+function onBlur (e) {
+  // clear compostion flag on blur if set
+  if (!e.target.composing) return
+  e.target.composing = false
 }
 
 function trigger (el, type) {
