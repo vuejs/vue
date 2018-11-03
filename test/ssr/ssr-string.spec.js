@@ -1391,6 +1391,64 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('should merge ssrPrefetch option', done => {
+    const mixin = {
+      data: {
+        message: ''
+      },
+      ssrPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.message = 'vue.js'
+            resolve()
+          }, 1)
+        })
+      }
+    }
+    renderVmWithOptions({
+      mixins: [mixin],
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <div>{{ message }}</div>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      ssrPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
+
+  it(`should skip ssrPrefetch option that doesn't return a promise`, done => {
+    renderVmWithOptions({
+      template: `
+        <div>{{ count }}</div>
+      `,
+      data: {
+        count: 0
+      },
+      ssrPrefetch () {
+        setTimeout(() => {
+          this.count = 42
+        }, 1)
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true">0</div>')
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
