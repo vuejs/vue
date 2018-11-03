@@ -50,13 +50,18 @@ const normalizeRender = vm => {
 }
 
 function waitForSsrPrefetch (vm, resolve, reject) {
-  if (isDef(vm.$options.ssrPrefetch)) {
+  const handlers = vm.$options.ssrPrefetch
+  if (isDef(handlers)) {
     try {
-      const result = vm.$options.ssrPrefetch.call(vm, vm)
-      if (result && typeof result.then === 'function') {
-        result.then(resolve).catch(reject)
-        return
+      const promises = []
+      for (let i = 0, j = handlers.length; i < j; i++) {
+        const result = handlers[i].call(vm, vm)
+        if (result && typeof result.then === 'function') {
+          promises.push(result)
+        }
       }
+      Promise.all(promises).then(resolve).catch(reject)
+      return
     } catch (e) {
       reject(e)
     }
