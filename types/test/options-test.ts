@@ -222,6 +222,9 @@ Vue.component('component', {
     info.toUpperCase()
     return true
   },
+  ssrPrefetch () {
+    return Promise.resolve()
+  },
 
   directives: {
     a: {
