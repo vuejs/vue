@@ -1277,6 +1277,120 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('should support ssrPrefetch option', done => {
+    renderVmWithOptions({
+      template: `
+        <div>{{ count }}</div>
+      `,
+      data: {
+        count: 0
+      },
+      ssrPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true">42</div>')
+      done()
+    })
+  })
+
+  it('should support ssrPrefetch option (nested)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <nested-prefetch></nested-prefetch>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      ssrPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      },
+      components: {
+        nestedPrefetch: {
+          template: `
+            <div>{{ message }}</div>
+          `,
+          data () {
+            return {
+              message: ''
+            }
+          },
+          ssrPrefetch () {
+            return new Promise((resolve) => {
+              setTimeout(() => {
+                this.message = 'vue.js'
+                resolve()
+              }, 1)
+            })
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
+
+  it('should support ssrPrefetch option (nested async)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <nested-prefetch></nested-prefetch>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      ssrPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      },
+      components: {
+        nestedPrefetch (resolve) {
+          resolve({
+            template: `
+              <div>{{ message }}</div>
+            `,
+            data () {
+              return {
+                message: ''
+              }
+            },
+            ssrPrefetch () {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  this.message = 'vue.js'
+                  resolve()
+                }, 1)
+              })
+            }
+          })
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
