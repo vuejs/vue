@@ -18,6 +18,7 @@ let warned = Object.create(null)
 const warnOnce = msg => {
   if (!warned[msg]) {
     warned[msg] = true
+    // eslint-disable-next-line no-console
     console.warn(`\n\u001b[31m${msg}\u001b[39m\n`)
   }
 }
@@ -46,6 +47,21 @@ const normalizeRender = vm => {
       )
     }
   }
+}
+
+function waitForSsrPrefetch (vm, resolve, reject) {
+  if (isDef(vm.$options.ssrPrefetch)) {
+    try {
+      const result = vm.$options.ssrPrefetch.call(vm, vm)
+      if (result && typeof result.then === 'function') {
+        result.then(resolve).catch(reject)
+        return
+      }
+    } catch (e) {
+      reject(e)
+    }
+  }
+  resolve()
 }
 
 function renderNode (node, isRoot, context) {
@@ -165,13 +181,20 @@ function renderComponentInner (node, isRoot, context) {
     context.activeInstance
   )
   normalizeRender(child)
-  const childNode = child._render()
-  childNode.parent = node
-  context.renderStates.push({
-    type: 'Component',
-    prevActive
-  })
-  renderNode(childNode, isRoot, context)
+  
+  const resolve = () => {
+    const childNode = child._render()
+    childNode.parent = node
+    context.renderStates.push({
+      type: 'Component',
+      prevActive
+    })
+    renderNode(childNode, isRoot, context)
+  }
+
+  const reject = context.done
+
+  waitForSsrPrefetch(child, resolve, reject)
 }
 
 function renderAsyncComponent (node, isRoot, context) {
@@ -391,6 +414,10 @@ export function createRenderFunction (
     })
     installSSRHelpers(component)
     normalizeRender(component)
-    renderNode(component._render(), true, context)
+
+    const resolve = () => {
+      renderNode(component._render(), true, context)
+    }
+    waitForSsrPrefetch(component, resolve, done)
   }
 }
