@@ -1450,12 +1450,12 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('should call context.onRenderComplete', done => {
+  it('should call context.rendered', done => {
     let a = 0
     renderToString(new Vue({
       template: '<div>Hello</div>'
     }), {
-      onRenderComplete: () => {
+      rendered: () => {
         a = 42
       }
     }, (err, res) => {

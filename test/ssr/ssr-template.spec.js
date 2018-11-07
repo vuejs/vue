@@ -99,7 +99,7 @@ describe('SSR: template option', () => {
     })
   })
 
-  it('renderToString with interpolation and context.onRenderComplete', done => {
+  it('renderToString with interpolation and context.rendered', done => {
     const renderer = createRenderer({
       template: interpolateTemplate
     })
@@ -110,7 +110,7 @@ describe('SSR: template option', () => {
       head: '<meta name="viewport" content="width=device-width">',
       styles: '<style>h1 { color: red }</style>',
       state: { a: 0 },
-      onRenderComplete: context => {
+      rendered: context => {
         context.state.a = 1
       }
     }
@@ -201,7 +201,7 @@ describe('SSR: template option', () => {
     })
   })
 
-  it('renderToStream with interpolation and context.onRenderComplete', done => {
+  it('renderToStream with interpolation and context.rendered', done => {
     const renderer = createRenderer({
       template: interpolateTemplate
     })
@@ -212,7 +212,7 @@ describe('SSR: template option', () => {
       head: '<meta name="viewport" content="width=device-width">',
       styles: '<style>h1 { color: red }</style>',
       state: { a: 0 },
-      onRenderComplete: context => {
+      rendered: context => {
         context.state.a = 1
       }
     }

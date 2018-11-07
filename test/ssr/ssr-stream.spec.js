@@ -103,14 +103,14 @@ describe('SSR: renderToStream', () => {
     stream2.read(1)
   })
 
-  it('should call context.onRenderComplete', done => {
+  it('should call context.rendered', done => {
     let a = 0
     const stream = renderToStream(new Vue({
       template: `
         <div>Hello</div>
       `
     }), {
-      onRenderComplete: () => {
+      rendered: () => {
         a = 42
       }
     })

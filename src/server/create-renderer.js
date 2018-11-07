@@ -79,8 +79,8 @@ export function createRenderer ({
       }, cb)
       try {
         render(component, write, context, err => {
-          if (context && context.onRenderComplete) {
-            context.onRenderComplete(context)
+          if (context && context.rendered) {
+            context.rendered(context)
           }
           if (template) {
             result = templateRenderer.renderSync(result, context)
@@ -109,9 +109,9 @@ export function createRenderer ({
         render(component, write, context, done)
       })
       if (!template) {
-        if (context && context.onRenderComplete) {
+        if (context && context.rendered) {
           renderStream.once('beforeEnd', () => {
-            context.onRenderComplete(context)
+            context.rendered(context)
           })
         }
         return renderStream
@@ -121,9 +121,9 @@ export function createRenderer ({
           templateStream.emit('error', err)
         })
         renderStream.pipe(templateStream)
-        if (context && context.onRenderComplete) {
+        if (context && context.rendered) {
           renderStream.once('beforeEnd', () => {
-            context.onRenderComplete(context)
+            context.rendered(context)
           })
         }
         return templateStream
