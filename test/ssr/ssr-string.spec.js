@@ -1449,6 +1449,22 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('should call context.onRenderComplete', done => {
+    let a = 0
+    renderToString(new Vue({
+      template: '<div>Hello</div>'
+    }), {
+      onRenderComplete: () => {
+        a = 42
+      }
+    }, (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain('<div data-server-rendered="true">Hello</div>')
+      expect(a).toBe(42)
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
