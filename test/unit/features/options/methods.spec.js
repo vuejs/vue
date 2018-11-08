@@ -25,7 +25,7 @@ describe('Options methods', () => {
         hello: undefined
       }
     })
-    expect(`Method "hello" has an undefined value in the component definition`).toHaveBeenWarned()
+    expect('Method "hello" has an undefined value in the component definition').toHaveBeenWarned()
   })
 
   it('should warn methods conflicting with data', () => {
@@ -37,7 +37,7 @@ describe('Options methods', () => {
         foo () {}
       }
     })
-    expect(`Method "foo" has already been defined as a data property`).toHaveBeenWarned()
+    expect('Method "foo" has already been defined as a data property').toHaveBeenWarned()
   })
 
   it('should warn methods conflicting with internal methods', () => {
@@ -46,7 +46,7 @@ describe('Options methods', () => {
         _update () {}
       }
     })
-    expect(`Method "_update" conflicts with an existing Vue instance method`).toHaveBeenWarned()
+    expect('Method "_update" conflicts with an existing Vue instance method').toHaveBeenWarned()
   })
 
   it('should warn if method is not a function', () => {
@@ -55,6 +55,6 @@ describe('Options methods', () => {
         notAFunction: {}
       }
     })
-    expect(`Method "notAFunction" should be a function`).toHaveBeenWarned()
+    expect('Method "notAFunction" should be a function').toHaveBeenWarned()
   })
 })
