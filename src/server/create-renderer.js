@@ -110,8 +110,9 @@ export function createRenderer ({
       })
       if (!template) {
         if (context && context.rendered) {
+          const rendered = context.rendered
           renderStream.once('beforeEnd', () => {
-            context.rendered(context)
+            rendered(context)
           })
         }
         return renderStream
@@ -122,8 +123,9 @@ export function createRenderer ({
         })
         renderStream.pipe(templateStream)
         if (context && context.rendered) {
+          const rendered = context.rendered
           renderStream.once('beforeEnd', () => {
-            context.rendered(context)
+            rendered(context)
           })
         }
         return templateStream
