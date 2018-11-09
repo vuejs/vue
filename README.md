@@ -27,11 +27,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <!--special start-->
 
 <p align="center">
-  <a href="https://code.xyz/" target="_blank">
-    <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/codexyz.png">
+  <a href="https://stdlib.com/" target="_blank">
+    <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
   </a>
 </p>
-
+  
 <!--special end-->
 
 <h3 align="center">Platinum Sponsors</h3>
@@ -77,11 +77,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="middle">
-        <a href="https://www.geekbang.org/" target="_blank">
-          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/geekbang.png">
-        </a>
-      </td>
       <td align="center" valign="middle">
         <a href="https://gitee.com/?from=vue" target="_blank">
           <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/gitee.png">
@@ -141,11 +136,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://hackr.io/tutorials/learn-vue-js" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/hackr-io.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://icons8.com/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/icons8.png">
         </a>
@@ -156,13 +146,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://codepilot.ai" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/codepilot.png">
-        </a>
-      </td>
-    </tr><tr></tr>
-    <tr>
-      <td align="center" valign="middle">
         <a href="https://teamextension.io/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/teamextension.png">
         </a>
@@ -172,28 +155,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/aaha.png">
         </a>
       </td>
+    </tr><tr></tr>
+    <tr>
       <td align="center" valign="middle">
         <a href="https://www.valuecoders.com" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/valuecoders.png">
         </a>
       </td>
-      <td align="center" valign="middle">
-        <a href="https://www.nsoft.com/careers/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/nsoft.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://coreui.io/?utm_source=vuejs&utm_medium=logo&utm_campaign=homepage" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/coreui.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://piio.co/vuejs?ref=vuejs" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/piio.png">
-        </a>
-      </td>
-    </tr><tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="https://tidelift.com/subscription/npm/vue" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tidelift.png">
@@ -210,18 +178,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://kintohub.com" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/kintohub.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://opteo.com/vue" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/opteo.png">
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://issue.sh" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/issue-sh.png">
+        <a href="https://courses.wilderminds.com/p/vue-js-by-example" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/wilderminds.png">
         </a>
       </td>
     </tr><tr></tr>
