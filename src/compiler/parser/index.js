@@ -454,6 +454,18 @@ function processOnce (el) {
 function processSlot (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
+    // Fixes: #9038
+    if(process.env.NODE_ENV !== 'production'){
+      const slotName = el.attrsMap['name']
+      if(!dirRE.test(slotName) && parseText(slotName, delimiters)){
+        warn(
+          `name="${slotName}": ` +
+          'Interpolation inside attributes has been removed. ' +
+          'Use v-bind or the colon shorthand instead. For example, ' +
+          `instead of <slot name="{{ val }}">, use <slot :name="val">.`
+        )
+      }
+    }
     if (process.env.NODE_ENV !== 'production' && el.key) {
       warn(
         `\`key\` does not work on <slot> because slots are abstract outlets ` +
