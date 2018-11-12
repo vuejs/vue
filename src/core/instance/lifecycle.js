@@ -37,7 +37,7 @@ export function initLifecycle (vm: Component) {
   vm.$root = parent ? parent.$root : vm
 
   vm.$children = []
-  vm.$refs = {}
+  vm.$refs = Object.create(null)
 
   vm._watcher = null
   vm._inactive = null
