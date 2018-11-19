@@ -74,17 +74,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 
 <h3 align="center">Platinum Sponsors (China)</h3>
 <!--special-china start-->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://gitee.com/?from=vue" target="_blank">
-          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/gitee.png">
-        </a>
-      </td>
-    </tr><tr></tr>
-  </tbody>
-</table>
+
 <!--special-china end-->
 
 <h3 align="center">Gold Sponsors</h4>
