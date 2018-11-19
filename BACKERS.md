@@ -302,6 +302,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Ernest Sim
 - Blaise Laflamme
 - Dilettant 
+- Sean Ferguson
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
@@ -310,7 +311,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Luca Borghini
 - kazuya kawaguchi
 - Keisuke KITA
-- Jack Barham
 - Santa Cruz
 - Simon East
 - Benjamin Listwon
@@ -336,8 +336,8 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Edithvale 
 - Intevation GmbH
 - Luiz Eduardo  Tanure Bacelar
+- Chengzhi Yin
 - Zoran Knezevic
-- Pascal Germain
 - Pierre Vanhulst
 - Jon Hobbs-Smith
 - Akiho Nagao
@@ -359,7 +359,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Guilherme S L de Souza
 - Rob Yedlin
 - Daniel Waghorn
-- Eric Githinji
 - Chih-Hsuan, Fan
 - Jordan Oroshiba
 - Cliff Hess
@@ -377,7 +376,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Alexander Weiher
 - Daniel Cook
 - Shinya Katayama
-- Brendan Long
 - Jere Sjöroos
 - Wakana Seki
 - David Ang
@@ -402,7 +400,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Chris Calo
 - Milan Zivkovic
 - Christo Crampton
-- Jason Rys
 - Johnny Austin
 - Aaron Hung
 - Soichiro Isshiki
@@ -410,8 +407,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Rob Mellett
 - Abraham Arango
 - Marko Bošković
-- Chris Lind
-- Andrej 
+- Andrej Noskaj
 - Ed Linklater
 - Garion Herman
 - Chris Bemister
