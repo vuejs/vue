@@ -25,7 +25,7 @@ if (process.argv[2]) {
 
 build(builds)
 
-function build (builds) {
+const build = (builds) => {
   let built = 0
   const total = builds.length
   const next = () => {
@@ -40,7 +40,7 @@ function build (builds) {
   next()
 }
 
-function buildEntry (config) {
+const buildEntry = (config) => {
   const output = config.output
   const { file, banner } = output
   const isProd = /min\.js$/.test(file)
@@ -62,10 +62,9 @@ function buildEntry (config) {
       }
     })
 }
-
-function write (dest, code, zip) {
+const write = (dest, code, zip) => {
   return new Promise((resolve, reject) => {
-    function report (extra) {
+    const report = (extra) => {
       console.log(blue(path.relative(process.cwd(), dest)) + ' ' + getSize(code) + (extra || ''))
       resolve()
     }
@@ -84,14 +83,14 @@ function write (dest, code, zip) {
   })
 }
 
-function getSize (code) {
+const getSize = (code) => {
   return (code.length / 1024).toFixed(2) + 'kb'
 }
 
-function logError (e) {
+const logError = (e) => {
   console.log(e)
 }
 
-function blue (str) {
+const blue = (str) => {
   return '\x1b[1m\x1b[34m' + str + '\x1b[39m\x1b[22m'
 }
