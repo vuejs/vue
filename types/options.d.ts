@@ -27,8 +27,8 @@ export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never
  * Since there isn't a way to query for the return type of a function, we allow TypeScript
  * to infer from the shape of `Accessors<Computed>` and work backwards.
  */
-export type Accessors<T> = {
-  [K in keyof T]: (() => T[K]) | ComputedOptions<T[K]>
+export type Accessors<T, V = any> = {
+  [K in keyof T]: ((this: V) => T[K]) | ComputedOptions<T[K]>
 }
 
 type DataDef<Data, Props, V> = Data | ((this: Readonly<Props> & V) => Data)
@@ -62,7 +62,7 @@ export interface ComponentOptions<
   data?: Data;
   props?: PropsDef;
   propsData?: object;
-  computed?: Accessors<Computed>;
+  computed?: Accessors<Computed, V>;
   methods?: Methods;
   watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any> | string>;
 
