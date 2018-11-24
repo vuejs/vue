@@ -204,7 +204,7 @@ export function parse (
       if (currentParent && !element.forbidden) {
         if (element.elseif || element.else) {
           processIfConditions(element, currentParent)
-        } else if (element.slotScope) { // scoped slot
+        } else if (element.slotScope || element.slotScope === '') { // scoped slot
           currentParent.plain = false
           const name = element.slotTarget || '"default"'
           ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
@@ -466,7 +466,7 @@ function processSlot (el) {
     if (el.tag === 'template') {
       slotScope = getAndRemoveAttr(el, 'scope')
       /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && slotScope) {
+      if (process.env.NODE_ENV !== 'production' && (slotScope || slotScope === '')) {
         warn(
           `the "scope" attribute for scoped slots have been deprecated and ` +
           `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
@@ -476,7 +476,10 @@ function processSlot (el) {
         )
       }
       el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
-    } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
+    } else if (
+        (slotScope = getAndRemoveAttr(el, 'slot-scope')) ||
+        (slotScope = getAndRemoveAttr(el, 'slot-scope')) === ''
+      ) {
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
         warn(
