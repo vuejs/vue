@@ -558,6 +558,70 @@ describe('Component scoped slot', () => {
     }).then(done)
   })
 
+  it('renders slot multiple times with empty slot-scope', done => {
+    const vm = new Vue({
+      template: `
+        <test ref="test">
+          <template slot-scope>
+            <span>Hi</span>
+          </template>
+        </test>
+      `,
+      components: {
+        test: {
+          template: `
+            <div>
+              <slot v-for="item in items"></slot>
+            </div>
+          `,
+          data() {
+            return {
+              items: [1, 2, 3]
+            }
+          }
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<span>Hi</span><span>Hi</span><span>Hi</span>')
+    vm.$refs.test.items = [1, 2]
+    waitForUpdate(() => {
+    expect(vm.$el.innerHTML).toBe('<span>Hi</span><span>Hi</span>')
+    }).then(done)
+  })
+
+  it('renders slot multiple times with empty slot-scope (plain elements)', done => {
+    const vm = new Vue({
+      template: `
+        <test ref="test">
+          <div slot-scope>
+            <span>Hi</span>
+          </div>
+        </test>
+      `,
+      components: {
+        test: {
+          template: `
+            <div>
+              <slot v-for="item in items"></slot>
+            </div>
+          `,
+          data() {
+            return {
+              items: [1, 2, 3]
+            }
+          }
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<div><span>Hi</span></div><div><span>Hi</span></div><div><span>Hi</span></div>')
+    vm.$refs.test.items = [1, 2]
+    waitForUpdate(() => {
+    expect(vm.$el.innerHTML).toBe('<div><span>Hi</span></div><div><span>Hi</span></div>')
+    }).then(done)
+  })
+
   // #6725
   it('scoped slot with v-if', done => {
     const vm = new Vue({

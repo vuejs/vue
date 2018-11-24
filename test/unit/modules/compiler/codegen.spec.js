@@ -197,6 +197,17 @@ describe('codegen', () => {
     )
   })
 
+  it('generate scoped slot with empty string', () => {
+    assertCodegen(
+      '<foo><template slot-scope>{{ bar }}</template></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(){return [_v(_s(bar))]}}])})}`
+    )
+    assertCodegen(
+      '<foo><div slot-scope>{{ bar }}</div></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(){return _c('div',{},[_v(_s(bar))])}}])})}`
+    )
+  })
+
   it('generate named scoped slot', () => {
     assertCodegen(
       '<foo><template slot="foo" slot-scope="bar">{{ bar }}</template></foo>',
