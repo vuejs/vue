@@ -10,15 +10,11 @@ function getComponentName (opts: ?VNodeComponentOptions): ?string {
 }
 
 function matches (pattern: string | RegExp | Array<string>, name: string): boolean {
-  if (Array.isArray(pattern)) {
-    return pattern.indexOf(name) > -1
-  } else if (typeof pattern === 'string') {
-    return pattern.split(',').indexOf(name) > -1
-  } else if (isRegExp(pattern)) {
-    return pattern.test(name)
+  if (isRegExp(pattern)) {
+    return pattern.test(name);
   }
-  /* istanbul ignore next */
-  return false
+
+  return (Array.isArray(pattern) && pattern || pattern.split(',')).indexOf(name) > -1
 }
 
 function pruneCache (keepAliveInstance: any, filter: Function) {
