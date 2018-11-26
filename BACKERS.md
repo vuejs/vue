@@ -21,7 +21,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
   </a>
 </p>
-  
+
 <!--special end-->
 
 <h2 align="center">Platinum via Patreon</h2>
@@ -61,6 +61,26 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
   </tbody>
 </table>
 <!--platinum end-->
+
+<!--special-china start-->
+<h3 align="center">Platinum Sponsors (China)</h3>
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://studio.qcloud.coding.net/campaign/favorite-plugins/?utm_source=vue.js&utm_content=cs-logo" target="_blank">
+          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/cloudstudio.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="http://www.dcloud.io/?hmsr=vuejsorg&hmpl=&hmcu=&hmkw=&hmci=" target="_blank">
+          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/dcloud.gif">
+        </a>
+      </td>
+    </tr><tr></tr>
+  </tbody>
+</table>
+<!--special-china end-->
 
 <h2 align="center">Platinum via OpenCollective</h2>
 
@@ -295,13 +315,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 
 <!--50 start-->
 - Wasim Khamlichi
-- errorrik 
+- errorrik
 - Alex Balashov
 - Konstantin Levinski
 - Evan Leonardi
 - Ernest Sim
 - Blaise Laflamme
-- Dilettant 
+- Dilettant
 - Sean Ferguson
 <!--50 end-->
 
@@ -321,10 +341,10 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Kirk Lewis
 - Karol F
 - Miljan Aleksic
-- 叶解 
+- 叶解
 - Jake Ingman
 - Barbara Liau
-- 4 
+- 4
 - Jarek Tkaczyk
 - David Hess
 - Niannian Modisette
@@ -333,7 +353,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Duncan J Kenzie
 - Mike Margerum
 - Guy Gavergun
-- Edithvale 
+- Edithvale
 - Intevation GmbH
 - Luiz Eduardo  Tanure Bacelar
 - Chengzhi Yin
@@ -379,12 +399,12 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Jere Sjöroos
 - Wakana Seki
 - David Ang
-- Dom 
+- Dom
 - Ben Hong
 - David Kaplan
 - John Cleveland
 - Jaeyoung Lee
-- Amor 
+- Amor
 - Tom Ootes
 - Andy Foster
 - Blake Campbell
