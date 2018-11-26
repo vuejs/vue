@@ -31,7 +31,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
   </a>
 </p>
-  
+
 <!--special end-->
 
 <h3 align="center">Platinum Sponsors</h3>
@@ -72,9 +72,24 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 </table>
 <!--platinum end-->
 
-<h3 align="center">Platinum Sponsors (China)</h3>
 <!--special-china start-->
-
+<h3 align="center">Platinum Sponsors (China)</h3>
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://studio.qcloud.coding.net/campaign/favorite-plugins/?utm_source=vue.js&utm_content=cs-logo" target="_blank">
+          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/cloudstudio.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="http://www.dcloud.io/?hmsr=vuejsorg&hmpl=&hmcu=&hmkw=&hmci=" target="_blank">
+          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/dcloud.gif">
+        </a>
+      </td>
+    </tr><tr></tr>
+  </tbody>
+</table>
 <!--special-china end-->
 
 <h3 align="center">Gold Sponsors</h4>
