@@ -478,7 +478,7 @@ function processSlot (el) {
       el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
     } else if (
         (slotScope = getAndRemoveAttr(el, 'slot-scope')) ||
-        (slotScope = getAndRemoveAttr(el, 'slot-scope')) === ''
+        slotScope === ''
       ) {
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
