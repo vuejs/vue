@@ -5,7 +5,7 @@ import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { genAssignmentCode } from '../directives/model'
-import { extend, cached, no, camelize } from 'shared/util'
+import { extend, cached, no, camelize, hyphenate } from 'shared/util'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
 
 import {
@@ -546,10 +546,16 @@ function processAttrs (el) {
             name = camelize(name)
           }
           if (modifiers.sync) {
+            const assignmentCode = genAssignmentCode(value, `$event`)
             addHandler(
               el,
               `update:${camelize(name)}`,
-              genAssignmentCode(value, `$event`)
+              assignmentCode
+            )
+            addHandler(
+              el,
+              `update:${hyphenate(name)}`,
+              assignmentCode
             )
           }
         }
