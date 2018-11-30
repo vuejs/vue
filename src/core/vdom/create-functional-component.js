@@ -124,7 +124,7 @@ function cloneAndMarkFunctionalResult (vnode, data, contextVm, options, renderCo
   clone.fnContext = contextVm
   clone.fnOptions = options
   if (process.env.NODE_ENV !== 'production') {
-    ;(clone.devtoolsMeta = clone.devtoolsMeta || {}).renderContext = renderContext
+    (clone.devtoolsMeta = clone.devtoolsMeta || {}).renderContext = renderContext
   }
   if (data.slot) {
     (clone.data || (clone.data = {})).slot = data.slot
