@@ -224,9 +224,7 @@ export function defineComputed (
         ? createComputedGetter(key)
         : userDef.get
       : noop
-    sharedPropertyDefinition.set = userDef.set
-      ? userDef.set
-      : noop
+    sharedPropertyDefinition.set = userDef.set || noop
   }
   if (process.env.NODE_ENV !== 'production' &&
       sharedPropertyDefinition.set === noop) {
