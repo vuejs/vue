@@ -242,6 +242,17 @@ describe('parser', () => {
     expect('<template> cannot be keyed').toHaveBeenWarned()
   })
 
+  it('warn the child of the <transition-group> component has sequential index', () => {
+    parse(`
+      <div>
+        <transition-group>
+          <i v-for="(o, i) of arr" :key="i"></i>
+        </transition-group>
+      </div>
+    `, baseOptions)
+    expect('Do not use v-for index as key on <transtion-group> children').toHaveBeenWarned()
+  })
+
   it('v-pre directive', () => {
     const ast = parse('<div v-pre id="message1"><p>{{msg}}</p></div>', baseOptions)
     expect(ast.pre).toBe(true)
