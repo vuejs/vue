@@ -667,6 +667,15 @@ describe('parser', () => {
     expect(pre2.children[0].text).toBe('\nabc')
   })
 
+  it('keep first newline after unary tag in <pre>', () => {
+    const options = extend({}, baseOptions)
+    const ast = parse('<pre>abc<input>\ndef</pre>', options)
+    expect(ast.children[1].type).toBe(1)
+    expect(ast.children[1].tag).toBe('input')
+    expect(ast.children[2].type).toBe(3)
+    expect(ast.children[2].text).toBe('\ndef')
+  })
+
   it('forgivingly handle < in plain text', () => {
     const options = extend({}, baseOptions)
     const ast = parse('<p>1 < 2 < 3</p>', options)
