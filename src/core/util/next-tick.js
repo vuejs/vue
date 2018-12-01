@@ -81,9 +81,11 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 export function withMacroTask (fn: Function): Function {
   return fn._withTask || (fn._withTask = function () {
     useMacroTask = true
-    const res = fn.apply(null, arguments)
-    useMacroTask = false
-    return res
+    try {
+      return fn.apply(null, arguments)
+    } finally {
+      useMacroTask = false    
+    }
   })
 }
 
