@@ -57,8 +57,8 @@ export class Observer {
   }
 
   /**
-   * Walk through each property and convert it into a
-   * getter/setter. This method should only be called when
+   * Walk through all properties and convert them into
+   * getter/setters. This method should only be called when
    * value type is Object.
    */
   walk (obj: Object) {
