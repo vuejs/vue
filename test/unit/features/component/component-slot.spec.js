@@ -886,4 +886,47 @@ describe('Component slot', () => {
       expect(vm.$el.textContent).toBe('foo')
     }).then(done)
   })
+
+  // #8337
+  it('should not destroy the new child vm', done => {
+    const Parent = {
+      render (h) {
+        return h(this.API.tag, this.$slots.default)
+      },
+      data () {
+        return { API: { tag: 'p' }}
+      },
+      provide () {
+        return { key: this.API }
+      }
+    }
+
+    const Child = {
+      template: '<div></div>',
+      inject: { wrapper: 'key' },
+      created () {
+        this.wrapper.tag = 'div'
+      }
+    }
+
+    const vm = new Vue({
+      components: {
+        Child,
+        Parent
+      },
+      template: `
+        <parent>
+          <div>
+            <child ref="child" />
+          </div>
+        </parent>
+      `
+    }).$mount()
+
+    expect(vm.$refs.child).toBeDefined()
+
+    waitForUpdate(() => {
+      expect(vm.$refs.child).toBeDefined()
+    }).then(done)
+  })
 })
