@@ -886,4 +886,58 @@ describe('Component slot', () => {
       expect(vm.$el.textContent).toBe('foo')
     }).then(done)
   })
+
+  // #7975
+  it('should update named slot correctly when its position in the tree changed', done => {
+    const ChildComponent = {
+      template: '<b>{{ message }}</b>',
+      props: ['message']
+    }
+     let parentVm
+    const ParentComponent = {
+      template: `
+        <div>
+          <span v-if="alter">
+            <span><slot name="foo" /></span>
+          </span>
+          <span v-else>
+            <slot name="foo" />
+          </span>
+        </div>
+      `,
+      data () {
+        return {
+          alter: true
+        }
+      },
+      mounted () {
+        parentVm = this
+      }
+    }
+     const vm = new Vue({
+      template: `
+        <parent-component>
+          <span slot="foo">
+            <child-component :message="message" />
+          </span>
+        </parent-component>
+      `,
+      components: {
+        ChildComponent,
+        ParentComponent
+      },
+      data () {
+        return {
+          message: 1
+        }
+      }
+    }).$mount()
+     expect(vm.$el.firstChild.innerHTML).toBe('<span><span><b>1</b></span></span>')
+    parentVm.alter = false
+    waitForUpdate(() => {
+      vm.message = 2
+    }).then(() => {
+      expect(vm.$el.firstChild.innerHTML).toBe('<span><b>2</b></span>')
+    }).then(done)
+  })
 })
