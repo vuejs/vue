@@ -37,7 +37,7 @@ export function toggleObserving (value: boolean) {
 export class Observer {
   value: any;
   dep: Dep;
-  vmCount: number; // number of vms that has this object as root $data
+  vmCount: number; // number of vms that have this object as root $data
 
   constructor (value: any) {
     this.value = value
@@ -57,7 +57,7 @@ export class Observer {
   }
 
   /**
-   * Walk through each property and convert them into
+   * Walk through all properties and convert them into
    * getter/setters. This method should only be called when
    * value type is Object.
    */
@@ -81,7 +81,7 @@ export class Observer {
 // helpers
 
 /**
- * Augment an target Object or Array by intercepting
+ * Augment a target Object or Array by intercepting
  * the prototype chain using __proto__
  */
 function protoAugment (target, src: Object) {
@@ -91,7 +91,7 @@ function protoAugment (target, src: Object) {
 }
 
 /**
- * Augment an target Object or Array by defining
+ * Augment a target Object or Array by defining
  * hidden properties.
  */
 /* istanbul ignore next */
