@@ -27,8 +27,8 @@ export interface Vue {
   readonly $root: Vue;
   readonly $children: Vue[];
   readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[] };
-  readonly $slots: { [key: string]: VNode[] };
-  readonly $scopedSlots: { [key: string]: ScopedSlot };
+  readonly $slots: { [key: string]: VNode[] | undefined };
+  readonly $scopedSlots: { [key: string]: ScopedSlot | undefined };
   readonly $isServer: boolean;
   readonly $data: Record<string, any>;
   readonly $props: Record<string, any>;
