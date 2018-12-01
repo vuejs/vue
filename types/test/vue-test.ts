@@ -19,6 +19,7 @@ class Test extends Vue {
   }
 
   // test property reification
+  $el!: HTMLElement | SVGElement;
   $refs!: {
     vue: Vue,
     element: HTMLInputElement,
