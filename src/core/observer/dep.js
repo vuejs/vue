@@ -54,15 +54,13 @@ export default class Dep {
 // watcher being evaluated at any time.
 Dep.target = null
 const targetStack = []
-export function pushTarget (_target: ?Watcher) {
-  if (Dep.target !== null) targetStack.push(Dep.target)
-  Dep.target = _target
+
+export function pushTarget (target: ?Watcher) {
+  targetStack.push(target)
+  Dep.target = target
 }
 
 export function popTarget () {
-  if (targetStack.length) {
-    Dep.target = targetStack.pop()
-  } else {
-    Dep.target = null
-  }
+  targetStack.pop()
+  Dep.target = targetStack[targetStack.length - 1]
 }
