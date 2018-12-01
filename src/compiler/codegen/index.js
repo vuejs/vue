@@ -477,7 +477,16 @@ function genSlot (el: ASTElement, state: CodegenState): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el, state)
   let res = `_t(${slotName}${children ? `,${children}` : ''}`
-  const attrs = el.attrs && `{${el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')}}`
+  let attrs
+  if (el.attrs) {
+    attrs = `{${el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')}`
+  }
+  if (el.staticClass) {
+    attrs = attrs ? `${attrs},` : '{' + `class:${el.staticClass}`
+  }
+  if (attrs) {
+    attrs += '}'
+  }
   const bind = el.attrsMap['v-bind']
   if ((attrs || bind) && !children) {
     res += `,null`

@@ -208,6 +208,13 @@ describe('codegen', () => {
     )
   })
 
+  it('generate slot with class', () => {
+    assertCodegen(
+      '<div><slot class="class1"></slot></div>',
+      `with(this){return _c('div',[_t("default",null,{class:"class1"})],2)}`
+    )
+  })
+
   it('generate class binding', () => {
     // static
     assertCodegen(
