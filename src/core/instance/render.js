@@ -86,15 +86,11 @@ export function renderMixin (Vue: Class<Component>) {
       // return error render result,
       // or previous vnode to prevent render error causing blank component
       /* istanbul ignore else */
-      if (process.env.NODE_ENV !== 'production') {
-        if (vm.$options.renderError) {
-          try {
-            vnode = vm.$options.renderError.call(vm._renderProxy, vm.$createElement, e)
-          } catch (e) {
-            handleError(e, vm, `renderError`)
-            vnode = vm._vnode
-          }
-        } else {
+      if (process.env.NODE_ENV !== 'production' && vm.$options.renderError) {
+        try {
+          vnode = vm.$options.renderError.call(vm._renderProxy, vm.$createElement, e)
+        } catch (e) {
+          handleError(e, vm, `renderError`)
           vnode = vm._vnode
         }
       } else {
