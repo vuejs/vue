@@ -367,7 +367,7 @@ function genScopedSlot (
   const fn = `function(${String(el.slotScope)}){` +
     `return ${el.tag === 'template'
       ? el.if
-        ? `${el.if}?${genChildren(el, state) || 'undefined'}:undefined`
+        ? `(${el.if})?${genChildren(el, state) || 'undefined'}:undefined`
         : genChildren(el, state) || 'undefined'
       : genElement(el, state)
     }}`

@@ -208,6 +208,17 @@ describe('codegen', () => {
     )
   })
 
+  it('generate scoped slot with multiline v-if', () => {
+    assertCodegen(
+      '<foo><template v-if="\nshow\n" slot-scope="bar">{{ bar }}</template></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(bar){return (\nshow\n)?[_v(_s(bar))]:undefined}}])})}`
+    )
+    assertCodegen(
+      '<foo><div v-if="\nshow\n" slot="foo" slot-scope="bar">{{ bar }}</div></foo>',
+      `with(this){return _c(\'foo\',{scopedSlots:_u([{key:"foo",fn:function(bar){return (\nshow\n)?_c(\'div\',{},[_v(_s(bar))]):_e()}}])})}`
+    )
+  })
+
   it('generate class binding', () => {
     // static
     assertCodegen(
