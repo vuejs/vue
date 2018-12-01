@@ -1,5 +1,6 @@
 /* @flow */
 
+import { resolveAsset } from 'core/util/index'
 import { escape } from 'web/server/util'
 import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
@@ -324,7 +325,7 @@ function renderStartingTag (node: VNode, context) {
     if (dirs) {
       for (let i = 0; i < dirs.length; i++) {
         const name = dirs[i].name
-        const dirRenderer = directives[name]
+        const dirRenderer = resolveAsset(context, 'directives', name, true)
         if (dirRenderer && name !== 'show') {
           // directives mutate the node's data
           // which then gets rendered by modules
