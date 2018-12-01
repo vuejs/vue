@@ -83,8 +83,7 @@ export function withMacroTask (fn: Function): Function {
     useMacroTask = true
     try {
       return fn.apply(null, arguments)
-    }
-    finally {
+    } finally {
       useMacroTask = false    
     }
   })
