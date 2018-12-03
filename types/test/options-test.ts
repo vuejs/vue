@@ -1,5 +1,5 @@
 import Vue, { VNode } from "../index";
-import { AsyncComponent, ComponentOptions, FunctionalComponentOptions, Component } from "../index";
+import { ComponentOptions, Component } from "../index";
 import { CreateElement } from "../vue";
 
 interface MyComponent extends Vue {
@@ -297,6 +297,10 @@ Vue.component('component-with-scoped-slot', {
           // named scoped slot as vnode data
           item: (props: ScopedSlotProps) => [h('span', [props.msg])]
         }
+      }),
+      h('child', {
+        // Passing down all slots from parent
+        scopedSlots: this.$scopedSlots
       })
     ])
   },
@@ -315,13 +319,18 @@ Vue.component('component-with-scoped-slot', {
 Vue.component('narrow-array-of-vnode-type', {
   render (h): VNode {
     const slot = this.$scopedSlots.default!({})
-    if (typeof slot !== 'string') {
+    if (typeof slot === 'string') {
+      return h('span', slot)
+    } else if (Array.isArray(slot)) {
       const first = slot[0]
       if (!Array.isArray(first) && typeof first !== 'string') {
-        return first;
+        return first
+      } else {
+        return h()
       }
+    } else {
+      return slot
     }
-    return h();
   }
 })
 
