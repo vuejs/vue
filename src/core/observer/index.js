@@ -46,9 +46,9 @@ export class Observer {
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
       if (hasProto) {
-        protoAugment(value, arrayMethods)
+        protoAugment(value, Object.create(value.constructor.prototype))
       } else {
-        copyAugment(value, arrayMethods, arrayKeys)
+        copyAugment(value, Object.create(value.constructor.prototype), arrayKeys)
       }
       this.observeArray(value)
     } else {
