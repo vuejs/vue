@@ -8,7 +8,7 @@ import { def } from '../util/index'
 const arrayProto = Array.prototype
 export const arrayMethods = Object.create(arrayProto)
 
-const methodsToPatch = [
+export const methodsToPatch = [
   'push',
   'pop',
   'shift',
