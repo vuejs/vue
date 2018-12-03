@@ -3,9 +3,7 @@ import { Vue } from "./vue";
 export type ScopedSlot = (props: any) => VNodeChildrenArrayContents | string;
 
 export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string;
-export interface VNodeChildrenArrayContents {
-  [x: number]: VNode | string | VNodeChildren;
-}
+export interface VNodeChildrenArrayContents extends Array<VNode | string | VNodeChildrenArrayContents> {}
 
 export interface VNode {
   tag?: string;
@@ -27,8 +25,8 @@ export interface VNode {
 
 export interface VNodeComponentOptions {
   Ctor: typeof Vue;
-  propsData?: Object;
-  listeners?: Object;
+  propsData?: object;
+  listeners?: object;
   children?: VNodeChildren;
   tag?: string;
 }
@@ -42,14 +40,14 @@ export interface VNodeData {
   staticClass?: string;
   class?: any;
   staticStyle?: { [key: string]: any };
-  style?: Object[] | Object;
+  style?: object[] | object;
   props?: { [key: string]: any };
   attrs?: { [key: string]: any };
   domProps?: { [key: string]: any };
   hook?: { [key: string]: Function };
   on?: { [key: string]: Function | Function[] };
   nativeOn?: { [key: string]: Function | Function[] };
-  transition?: Object;
+  transition?: object;
   show?: boolean;
   inlineTemplate?: {
     render: Function;

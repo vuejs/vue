@@ -1,11 +1,7 @@
 declare type InternalComponentOptions = {
   _isComponent: true;
   parent: Component;
-  propsData: ?Object;
   _parentVnode: VNode;
-  _parentListeners: ?Object;
-  _renderChildren: ?Array<VNode>;
-  _componentTag: ?string;
   _parentElm: ?Node;
   _refElm: ?Node;
   render?: Function;
@@ -15,6 +11,8 @@ declare type InternalComponentOptions = {
 type InjectKey = string | Symbol;
 
 declare type ComponentOptions = {
+  componentId?: string;
+
   // data
   data: Object | Function | void;
   props?: { [key: string]: PropOptions };

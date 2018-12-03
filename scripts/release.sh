@@ -16,11 +16,11 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     npm run lint
     npm run flow
     npm run test:cover
-    npm run test:e2e
+    npm run test:e2e -- --env phantomjs
     npm run test:ssr
   fi
 
-  # Sauce Labs tests has a decent change of failing
+  # Sauce Labs tests has a decent chance of failing
   # so we usually manually run them before running the release script.
 
   # if [[ -z $SKIP_SAUCE ]]; then
@@ -60,6 +60,9 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     packages/vue-server-renderer/client-plugin.js \
     packages/vue-template-compiler/build.js
   git commit -m "build: build $VERSION"
+  # generate release note
+  npm run release:note
+  # tag version
   npm version $VERSION --message "build: release $VERSION"
 
   # publish
