@@ -46,7 +46,7 @@ export class Observer {
       const augment = hasProto
         ? protoAugment
         : copyAugment
-      augment(value, arrayMethods, arrayKeys)
+      augment(value, Object.create(value.constructor.prototype), arrayKeys)
       this.observeArray(value)
     } else {
       this.walk(value)
