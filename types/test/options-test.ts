@@ -133,16 +133,27 @@ Vue.component('component', {
     }
   },
   watch: {
-    'a': function(val: number, oldVal: number) {
-      console.log(`new: ${val}, old: ${oldVal}`);
+    a: function (val, oldVal) {
+      console.log('new: %s, old: %s', val, oldVal)
     },
-    'b': 'someMethod',
-    'c': {
-      handler(val, oldVal) {
-        this.a = val
-      },
+    b: 'someMethod',
+    c: {
+      handler: function (val, oldVal) { /* ... */ },
       deep: true
-    }
+    },
+    d: {
+      handler: function (val, oldVal) { /* ... */ },
+      immediate: true
+    },
+    e: [
+      'handle1',
+      function handle2 (val, oldVal) { /* ... */ },
+      {
+        handler: function handle3 (val, oldVal) { /* ... */ },
+        /* ... */
+      }
+    ],
+    'e.f': function (val, oldVal) { /* ... */ }
   },
   el: "#app",
   template: "<div>{{ message }}</div>",
