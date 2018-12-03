@@ -2,7 +2,7 @@
 
 import Dep from './dep'
 import VNode from '../vdom/vnode'
-import { arrayMethods } from './array'
+import { arrayMethods, methodsToPatch } from './array'
 import {
   def,
   warn,
@@ -15,8 +15,6 @@ import {
   isValidArrayIndex,
   isServerRendering
 } from '../util/index'
-
-const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
 /**
  * In some cases we may want to disable observation inside a component's
@@ -48,7 +46,12 @@ export class Observer {
       const augment = hasProto
         ? protoAugment
         : copyAugment
-      augment(value, Object.create(value.constructor.prototype), arrayKeys)
+
+      const methods = Object.create(value.constructor.prototype)
+      methodsToPatch.forEach((m) => {
+        if (methods[m]) methods[m] = arrayMethods[m]
+      })
+      augment(value, methods, Object.getOwnPropertyNames(methods))
       this.observeArray(value)
     } else {
       this.walk(value)
