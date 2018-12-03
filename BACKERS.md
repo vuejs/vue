@@ -21,7 +21,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
   </a>
 </p>
-
+  
 <!--special end-->
 
 <h2 align="center">Platinum via Patreon</h2>
@@ -194,6 +194,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/devsquad.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://www.inkloop.in/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/inkloop.png">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
@@ -315,14 +320,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 
 <!--50 start-->
 - Wasim Khamlichi
-- errorrik
+- errorrik 
 - Alex Balashov
 - Konstantin Levinski
 - Evan Leonardi
 - Ernest Sim
 - Blaise Laflamme
-- Dilettant
-- Sean Ferguson
+- Dilettant 
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
@@ -341,10 +345,10 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Kirk Lewis
 - Karol F
 - Miljan Aleksic
-- 叶解
+- 叶解 
 - Jake Ingman
 - Barbara Liau
-- 4
+- 4 
 - Jarek Tkaczyk
 - David Hess
 - Niannian Modisette
@@ -353,7 +357,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Duncan J Kenzie
 - Mike Margerum
 - Guy Gavergun
-- Edithvale
 - Intevation GmbH
 - Luiz Eduardo  Tanure Bacelar
 - Chengzhi Yin
@@ -394,20 +397,18 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Bohdan Kokotko
 - Donald Fischer
 - Alexander Weiher
-- Daniel Cook
 - Shinya Katayama
 - Jere Sjöroos
 - Wakana Seki
 - David Ang
-- Dom
+- Dom 
 - Ben Hong
 - David Kaplan
 - John Cleveland
 - Jaeyoung Lee
-- Amor
+- Amor 
 - Tom Ootes
 - Andy Foster
-- Blake Campbell
 - Joe Cochran
 - Matt Sencenbaugh
 - The Commission Cafe, LLC.
@@ -427,11 +428,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Rob Mellett
 - Abraham Arango
 - Marko Bošković
-- Andrej Noskaj
 - Ed Linklater
 - Garion Herman
 - Chris Bemister
 - Anfrew Willis
+- Carlos Adrián
+- Timothy J Bass
+- Yusuke Kawabata
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
