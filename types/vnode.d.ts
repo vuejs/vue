@@ -36,6 +36,7 @@ export interface VNodeData {
   slot?: string;
   scopedSlots?: { [key: string]: ScopedSlot };
   ref?: string;
+  refInFor?: boolean;
   tag?: string;
   staticClass?: string;
   class?: any;
@@ -58,10 +59,10 @@ export interface VNodeData {
 }
 
 export interface VNodeDirective {
-  readonly name: string;
-  readonly value: any;
-  readonly oldValue: any;
-  readonly expression: any;
-  readonly arg: string;
-  readonly modifiers: { [key: string]: boolean };
+  name: string;
+  value?: any;
+  oldValue?: any;
+  expression?: any;
+  arg?: string;
+  modifiers?: { [key: string]: boolean };
 }

@@ -80,14 +80,18 @@ export function parseComponent (
     }
   }
 
-  function end (tag: string, start: number, end: number) {
+  function end (tag: string, start: number) {
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
-      let text = deindent(content.slice(currentBlock.start, currentBlock.end))
+      let text = content.slice(currentBlock.start, currentBlock.end)
       // pad content so that linters and pre-processors can output correct
       // line numbers in errors and warnings
-      if (currentBlock.type !== 'template' && options.pad) {
+      if (options.pad) {
         text = padContent(currentBlock, options.pad) + text
+      } else {
+        // avoid to deindent if pad option is specified
+        // to retain original source position.
+        text = deindent(text)
       }
       currentBlock.content = text
       currentBlock = null

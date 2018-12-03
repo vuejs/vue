@@ -6,7 +6,7 @@ import { makeMap } from 'shared/util'
 // must be sent to the native together.
 const isUnitaryTag = makeMap('cell,header,cell-slot,recycle-list', true)
 
-function preTransformNode (el: ASTElement, options: CompilerOptions) {
+function preTransformNode (el: ASTElement) {
   if (isUnitaryTag(el.tag) && !el.attrsList.some(item => item.name === 'append')) {
     el.attrsMap.append = 'tree'
     el.attrsList.push({ name: 'append', value: 'tree' })

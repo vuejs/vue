@@ -68,9 +68,9 @@ export interface ComponentOptions<
 
   el?: Element | string;
   template?: string;
-  // hack is for funcitonal component type inference, should not used in user code
+  // hack is for functional component type inference, should not be used in user code
   render?(createElement: CreateElement, hack: RenderContext<Props>): VNode;
-  renderError?: (h: () => VNode, err: Error) => VNode;
+  renderError?(createElement: CreateElement, err: Error): VNode;
   staticRenderFns?: ((createElement: CreateElement) => VNode)[];
 
   beforeCreate?(this: V): void;
@@ -111,9 +111,13 @@ export interface ComponentOptions<
 export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = PropsDefinition<Props>> {
   name?: string;
   props?: PropDefs;
+  model?: {
+    prop?: string;
+    event?: string;
+  };
   inject?: InjectOptions;
   functional: boolean;
-  render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode;
+  render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode | VNode[];
 }
 
 export interface RenderContext<Props=DefaultProps> {
@@ -160,9 +164,13 @@ export interface WatchOptionsWithHandler<T> extends WatchOptions {
   handler: WatchHandler<T>;
 }
 
+export interface DirectiveBinding extends Readonly<VNodeDirective> {
+  readonly modifiers: { [key: string]: boolean };
+}
+
 export type DirectiveFunction = (
   el: HTMLElement,
-  binding: VNodeDirective,
+  binding: DirectiveBinding,
   vnode: VNode,
   oldVnode: VNode
 ) => void;

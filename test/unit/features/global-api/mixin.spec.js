@@ -162,4 +162,9 @@ describe('Global API: mixin', () => {
     expect(base).toHaveBeenCalled()
     expect(injected).toHaveBeenCalled()
   })
+
+  // #8595
+  it('chain call', () => {
+    expect(Vue.mixin({})).toBe(Vue)
+  })
 })

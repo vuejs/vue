@@ -187,6 +187,26 @@ describe('Directive v-bind', () => {
     }).then(done)
   })
 
+  it('bind object with explicit overrides', () => {
+    const vm = new Vue({
+      template: `<test v-bind="test" data-foo="foo" dataBar="bar"/>`,
+      components: {
+        test: {
+          template: '<div :data-foo="dataFoo" :data-bar="dataBar"></div>',
+          props: ['dataFoo', 'dataBar']
+        }
+      },
+      data: {
+        test: {
+          dataFoo: 'hi',
+          dataBar: 'bye'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.getAttribute('data-foo')).toBe('foo')
+    expect(vm.$el.getAttribute('data-bar')).toBe('bar')
+  })
+
   it('.sync modifier with bind object', done => {
     const vm = new Vue({
       template: `<test v-bind.sync="test"/>`,
