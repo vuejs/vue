@@ -195,8 +195,8 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://www.inkloop.in/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/inkloop.png">
+        <a href="https://www.inkoop.in/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/inkoop.png">
         </a>
       </td>
     </tr><tr></tr>
