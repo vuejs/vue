@@ -45,7 +45,7 @@ function makeClassList (data: VNodeData): Array<string> {
   } else if (isObject(dataClass)) {
     classList.push.apply(classList, Object.keys(dataClass).filter(className => dataClass[className]))
   } else if (typeof dataClass === 'string') {
-    classList.push.apply(classList, [dataClass])
+    classList.push.apply(classList, dataClass.trim().split(/\s+/))
   }
   return classList
 }
