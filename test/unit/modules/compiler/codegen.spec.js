@@ -631,5 +631,13 @@ describe('codegen', () => {
       { isReservedTag }
     )
   })
+
+  // #9142
+  it('should compile single v-for component inside template', () => {
+    assertCodegen(
+      `<div><template v-if="ok"><foo v-for="i in 1" :key="i"></foo></template></div>`,
+      `with(this){return _c('div',[(ok)?_l((1),function(i){return _c('foo',{key:i})}):_e()],2)}`
+    )
+  })
 })
 /* eslint-enable quotes */
