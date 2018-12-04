@@ -1,6 +1,6 @@
 import { Vue } from "./vue";
 
-export type ScopedSlot = (props: any) => VNodeChildrenArrayContents | string;
+export type ScopedSlot = (props: any) => VNodeChildrenArrayContents | VNode | string;
 
 export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string;
 export interface VNodeChildrenArrayContents extends Array<VNode | string | VNodeChildrenArrayContents> {}
@@ -34,7 +34,7 @@ export interface VNodeComponentOptions {
 export interface VNodeData {
   key?: string | number;
   slot?: string;
-  scopedSlots?: { [key: string]: ScopedSlot };
+  scopedSlots?: { [key: string]: ScopedSlot | undefined };
   ref?: string;
   refInFor?: boolean;
   tag?: string;
