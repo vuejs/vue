@@ -465,14 +465,28 @@ function processOnce (el) {
 
 function processSlot (el) {
   if (el.tag === 'slot') {
-    el.slotName = getBindingAttr(el, 'name')
-    if (process.env.NODE_ENV !== 'production' && el.key) {
-      warn(
-        `\`key\` does not work on <slot> because slots are abstract outlets ` +
-        `and can possibly expand into multiple elements. ` +
-        `Use the key on a wrapping element instead.`
-      )
+    let slotName 
+    slotName = getBindingAttr(el, 'name')
+    if (process.env.NODE_ENV !== 'production') {
+      if(el.key) {
+        warn(
+          `\`key\` does not work on <slot> because slots are abstract outlets ` +
+          `and can possibly expand into multiple elements. ` +
+          `Use the key on a wrapping element instead.`
+        )
+      }
+      if (slotName) {
+        const res = parseText(slotName, delimiters);
+        if (res) {
+          warn(
+            `name="${slotName}": ` + 
+            `Interpolation on <slot> "name" attribute has been removed. ` +
+            `Use v-bind or the colon shorthand instead.`
+          )
+        }
+      }
     }
+    el.slotName = slotName
   } else {
     let slotScope
     if (el.tag === 'template') {
@@ -502,6 +516,14 @@ function processSlot (el) {
     }
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
+      const res = parseText(slotTarget, delimiters);
+      if (process.env.NODE_ENV !== 'production' && res) {
+        warn(
+          `slot="${slotTarget}": "` +
+          `Interpolation on "slot" attribute has been removed. ` +
+          `Use v-bind or the colon shorthand instead.`
+        );
+      }
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
       // preserve slot as an attribute for native shadow DOM compat
       // only for non-scoped slots.

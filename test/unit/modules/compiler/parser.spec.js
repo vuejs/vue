@@ -476,10 +476,22 @@ describe('parser', () => {
     expect(ast.children[0].slotName).toBe('"one"')
   })
 
-  it('slot target', () => {
-    const ast = parse('<p slot="one">hello world</p>', baseOptions)
-    expect(ast.slotTarget).toBe('"one"')
+  it('slot tag name invalid syntax', () => {
+    // interpolation warning
+    parse('<div><slot name="{{error}}">hello world</slot></div>', baseOptions);
+    expect('Interpolation on <slot> "name" attribute has been removed.').toHaveBeenWarned();
   })
+
+  it("slot target", () => {
+    const ast = parse('<p slot="one">hello world</p>', baseOptions);
+    expect(ast.slotTarget).toBe('"one"');
+  });
+
+  it("slot target invalid syntax", () => {
+    // interpolation warning
+    parse('<p slot="{{error}}">hello world</p>', baseOptions);
+    expect('Interpolation on "slot" attribute has been removed.').toHaveBeenWarned();
+  });
 
   it('component properties', () => {
     const ast = parse('<my-component :msg="hello"></my-component>', baseOptions)
