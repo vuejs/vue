@@ -733,12 +733,12 @@ var config = ({
   /**
    * Show production mode tip message on boot?
    */
-  productionTip: process.env.NODE_ENV !== 'production',
+  productionTip: "development" !== 'production',
 
   /**
    * Whether to enable devtools
    */
-  devtools: process.env.NODE_ENV !== 'production',
+  devtools: "development" !== 'production',
 
   /**
    * Whether to record perf
@@ -819,7 +819,7 @@ var tip = noop;
 var generateComponentTrace = (noop); // work around flow check
 var formatComponentName = (noop);
 
-if (process.env.NODE_ENV !== 'production') {
+{
   var hasConsole = typeof console !== 'undefined';
   var classifyRE = /(?:^|[-_])(\w)/g;
   var classify = function (str) { return str
@@ -934,12 +934,6 @@ Dep.prototype.depend = function depend () {
 Dep.prototype.notify = function notify () {
   // stabilize the subscriber list first
   var subs = this.subs.slice();
-  if (process.env.NODE_ENV !== 'production' && !config.async) {
-    // subs aren't sorted in scheduler if not running async
-    // we need to sort them now to make sure they fire in correct
-    // order
-    subs.sort(function (a, b) { return a.id - b.id; });
-  }
   for (var i = 0, l = subs.length; i < l; i++) {
     subs[i].update();
   }
@@ -1165,7 +1159,7 @@ function defineReactive$$1 (
         return
       }
       /* eslint-enable no-self-compare */
-      if (process.env.NODE_ENV !== 'production' && customSetter) {
+      if (customSetter) {
         customSetter();
       }
       // #7981: for accessor properties without setter
@@ -1187,8 +1181,7 @@ function defineReactive$$1 (
  * already exist.
  */
 function set (target, key, val) {
-  if (process.env.NODE_ENV !== 'production' &&
-    (isUndef(target) || isPrimitive(target))
+  if (isUndef(target) || isPrimitive(target)
   ) {
     warn(("Cannot set reactive property on undefined, null, or primitive value: " + ((target))));
   }
@@ -1203,7 +1196,7 @@ function set (target, key, val) {
   }
   var ob = (target).__ob__;
   if (target._isVue || (ob && ob.vmCount)) {
-    process.env.NODE_ENV !== 'production' && warn(
+    warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
       'at runtime - declare it upfront in the data option.'
     );
@@ -1244,7 +1237,7 @@ var strats = config.optionMergeStrategies;
 /**
  * Options with restrictions
  */
-if (process.env.NODE_ENV !== 'production') {
+{
   strats.el = strats.propsData = function (parent, child, vm, key) {
     if (!vm) {
       warn(
@@ -1332,7 +1325,7 @@ strats.data = function (
 ) {
   if (!vm) {
     if (childVal && typeof childVal !== 'function') {
-      process.env.NODE_ENV !== 'production' && warn(
+      warn(
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
         'definitions.',
@@ -1395,7 +1388,7 @@ function mergeAssets (
 ) {
   var res = Object.create(parentVal || null);
   if (childVal) {
-    process.env.NODE_ENV !== 'production' && assertObjectType(key, childVal, vm);
+    assertObjectType(key, childVal, vm);
     return extend(res, childVal)
   } else {
     return res
@@ -1423,7 +1416,7 @@ strats.watch = function (
   if (childVal === nativeWatch) { childVal = undefined; }
   /* istanbul ignore if */
   if (!childVal) { return Object.create(parentVal || null) }
-  if (process.env.NODE_ENV !== 'production') {
+  {
     assertObjectType(key, childVal, vm);
   }
   if (!parentVal) { return childVal }
@@ -1454,7 +1447,7 @@ strats.computed = function (
   vm,
   key
 ) {
-  if (childVal && process.env.NODE_ENV !== 'production') {
+  if (childVal && "development" !== 'production') {
     assertObjectType(key, childVal, vm);
   }
   if (!parentVal) { return childVal }
@@ -1515,7 +1508,7 @@ function normalizeProps (options, vm) {
       if (typeof val === 'string') {
         name = camelize(val);
         res[name] = { type: null };
-      } else if (process.env.NODE_ENV !== 'production') {
+      } else {
         warn('props must be strings when using array syntax.');
       }
     }
@@ -1527,7 +1520,7 @@ function normalizeProps (options, vm) {
         ? val
         : { type: val };
     }
-  } else if (process.env.NODE_ENV !== 'production') {
+  } else {
     warn(
       "Invalid value for option \"props\": expected an Array or an Object, " +
       "but got " + (toRawType(props)) + ".",
@@ -1555,7 +1548,7 @@ function normalizeInject (options, vm) {
         ? extend({ from: key }, val)
         : { from: val };
     }
-  } else if (process.env.NODE_ENV !== 'production') {
+  } else {
     warn(
       "Invalid value for option \"inject\": expected an Array or an Object, " +
       "but got " + (toRawType(inject)) + ".",
@@ -1598,7 +1591,7 @@ function mergeOptions (
   child,
   vm
 ) {
-  if (process.env.NODE_ENV !== 'production') {
+  {
     checkComponents(child);
   }
 
@@ -1666,7 +1659,7 @@ function resolveAsset (
   if (hasOwn(assets, PascalCaseId)) { return assets[PascalCaseId] }
   // fallback to prototype chain
   var res = assets[id] || assets[camelizedId] || assets[PascalCaseId];
-  if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
+  if (warnMissing && !res) {
     warn(
       'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
       options
@@ -1712,11 +1705,7 @@ function validateProp (
     observe(value);
     toggleObserving(prevShouldObserve);
   }
-  if (
-    process.env.NODE_ENV !== 'production' &&
-    // skip validation for weex recycle-list child component props
-    !(false)
-  ) {
+  {
     assertProp(prop, key, value, vm, absent);
   }
   return value
@@ -1732,7 +1721,7 @@ function getPropDefaultValue (vm, prop, key) {
   }
   var def = prop.default;
   // warn against non-factory defaults for Object & Array
-  if (process.env.NODE_ENV !== 'production' && isObject(def)) {
+  if (isObject(def)) {
     warn(
       'Invalid default value for prop "' + key + '": ' +
       'Props with type Object/Array must use a factory function ' +
@@ -1928,7 +1917,7 @@ function globalHandleError (err, vm, info) {
 }
 
 function logError (err, vm, info) {
-  if (process.env.NODE_ENV !== 'production') {
+  {
     warn(("Error in " + info + ": \"" + (err.toString()) + "\""), vm);
   }
   /* istanbul ignore else */
@@ -2732,7 +2721,7 @@ function addHandler (
   // warn prevent and passive modifier
   /* istanbul ignore if */
   if (
-    process.env.NODE_ENV !== 'production' && warn &&
+    warn &&
     modifiers.prevent && modifiers.passive
   ) {
     warn(
@@ -2844,7 +2833,7 @@ function getAndRemoveAttr (
 function transformNode (el, options) {
   var warn = options.warn || baseWarn;
   var staticClass = getAndRemoveAttr(el, 'class');
-  if (process.env.NODE_ENV !== 'production' && staticClass) {
+  if (staticClass) {
     var res = parseText(staticClass, options.delimiters);
     if (res) {
       warn(
@@ -2888,7 +2877,7 @@ function transformNode$1 (el, options) {
   var staticStyle = getAndRemoveAttr(el, 'style');
   if (staticStyle) {
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production') {
+    {
       var res = parseText(staticStyle, options.delimiters);
       if (res) {
         warn(
@@ -3083,7 +3072,7 @@ function parseHTML (html, options) {
 
     if (html === last) {
       options.chars && options.chars(html);
-      if (process.env.NODE_ENV !== 'production' && !stack.length && options.warn) {
+      if (!stack.length && options.warn) {
         options.warn(("Mal-formatted tag at end of template: \"" + html + "\""));
       }
       break
@@ -3181,8 +3170,7 @@ function parseHTML (html, options) {
     if (pos >= 0) {
       // Close all the open elements, up the stack
       for (var i = stack.length - 1; i >= pos; i--) {
-        if (process.env.NODE_ENV !== 'production' &&
-          (i > pos || !tagName) &&
+        if (i > pos || !tagName &&
           options.warn
         ) {
           options.warn(
@@ -3475,7 +3463,7 @@ function parse (
 
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true;
-        process.env.NODE_ENV !== 'production' && warn$1(
+        warn$1(
           'Templates should only be responsible for mapping the state to the ' +
           'UI. Avoid placing tags with side-effects in your templates, such as ' +
           "<" + tag + ">" + ', as they will not be parsed.'
@@ -3508,7 +3496,7 @@ function parse (
       }
 
       function checkRootConstraints (el) {
-        if (process.env.NODE_ENV !== 'production') {
+        {
           if (el.tag === 'slot' || el.tag === 'template') {
             warnOnce(
               "Cannot use <" + (el.tag) + "> as component root element because it may " +
@@ -3536,7 +3524,7 @@ function parse (
             exp: element.elseif,
             block: element
           });
-        } else if (process.env.NODE_ENV !== 'production') {
+        } else {
           warnOnce(
             "Component template should contain exactly one root element. " +
             "If you are using v-if on multiple elements, " +
@@ -3579,7 +3567,7 @@ function parse (
 
     chars: function chars (text) {
       if (!currentParent) {
-        if (process.env.NODE_ENV !== 'production') {
+        {
           if (text === template) {
             warnOnce(
               'Component template requires a root element, rather than just text.'
@@ -3674,7 +3662,7 @@ function processElement (element, options) {
 function processKey (el) {
   var exp = getBindingAttr(el, 'key');
   if (exp) {
-    if (process.env.NODE_ENV !== 'production') {
+    {
       if (el.tag === 'template') {
         warn$1("<template> cannot be keyed. Place the key on real elements instead.");
       }
@@ -3707,7 +3695,7 @@ function processFor (el) {
     var res = parseFor(exp);
     if (res) {
       extend(el, res);
-    } else if (process.env.NODE_ENV !== 'production') {
+    } else {
       warn$1(
         ("Invalid v-for expression: " + exp)
       );
@@ -3762,7 +3750,7 @@ function processIfConditions (el, parent) {
       exp: el.elseif,
       block: el
     });
-  } else if (process.env.NODE_ENV !== 'production') {
+  } else {
     warn$1(
       "v-" + (el.elseif ? ('else-if="' + el.elseif + '"') : 'else') + " " +
       "used on element <" + (el.tag) + "> without corresponding v-if."
@@ -3776,7 +3764,7 @@ function findPrevElement (children) {
     if (children[i].type === 1) {
       return children[i]
     } else {
-      if (process.env.NODE_ENV !== 'production' && children[i].text !== ' ') {
+      if (children[i].text !== ' ') {
         warn$1(
           "text \"" + (children[i].text.trim()) + "\" between v-if and v-else(-if) " +
           "will be ignored."
@@ -3804,7 +3792,7 @@ function processOnce (el) {
 function processSlot (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name');
-    if (process.env.NODE_ENV !== 'production' && el.key) {
+    if (el.key) {
       warn$1(
         "`key` does not work on <slot> because slots are abstract outlets " +
         "and can possibly expand into multiple elements. " +
@@ -3816,7 +3804,7 @@ function processSlot (el) {
     if (el.tag === 'template') {
       slotScope = getAndRemoveAttr(el, 'scope');
       /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && slotScope) {
+      if (slotScope) {
         warn$1(
           "the \"scope\" attribute for scoped slots have been deprecated and " +
           "replaced by \"slot-scope\" since 2.5. The new \"slot-scope\" attribute " +
@@ -3828,7 +3816,7 @@ function processSlot (el) {
       el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope');
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
       /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
+      if (el.attrsMap['v-for']) {
         warn$1(
           "Ambiguous combined usage of slot-scope and v-for on <" + (el.tag) + "> " +
           "(v-for takes higher priority). Use a wrapper <template> for the " +
@@ -3879,7 +3867,6 @@ function processAttrs (el) {
         value = parseFilters(value);
         isProp = false;
         if (
-          process.env.NODE_ENV !== 'production' &&
           value.trim().length === 0
         ) {
           warn$1(
@@ -3922,13 +3909,13 @@ function processAttrs (el) {
           name = name.slice(0, -(arg.length + 1));
         }
         addDirective(el, name, rawName, value, arg, modifiers);
-        if (process.env.NODE_ENV !== 'production' && name === 'model') {
+        if (name === 'model') {
           checkForAliasModel(el, value);
         }
       }
     } else {
       // literal attribute
-      if (process.env.NODE_ENV !== 'production') {
+      {
         var res = parseText(value, delimiters);
         if (res) {
           warn$1(
@@ -3975,7 +3962,6 @@ function makeAttrsMap (attrs) {
   var map = {};
   for (var i = 0, l = attrs.length; i < l; i++) {
     if (
-      process.env.NODE_ENV !== 'production' &&
       map[attrs[i].name] && !isIE && !isEdge
     ) {
       warn$1('duplicate attribute: ' + attrs[i].name);
@@ -4129,7 +4115,7 @@ function model$2 (
   var tag = el.tag;
   var type = el.attrsMap.type;
 
-  if (process.env.NODE_ENV !== 'production') {
+  {
     // inputs with type="file" are read only and setting the input's
     // value will throw an error.
     if (tag === 'input' && type === 'file') {
@@ -4231,7 +4217,7 @@ function genDefaultModel (
 
   // warn if v-bind:value conflicts with v-model
   // except for inputs with v-bind:type
-  if (process.env.NODE_ENV !== 'production') {
+  {
     var value$1 = el.attrsMap['v-bind:value'] || el.attrsMap[':value'];
     var typeBinding = el.attrsMap['v-bind:type'] || el.attrsMap[':type'];
     if (value$1 && !typeBinding) {
@@ -4458,7 +4444,7 @@ function genFilterCode (key) {
 /*  */
 
 function on (el, dir) {
-  if (process.env.NODE_ENV !== 'production' && dir.modifiers) {
+  if (dir.modifiers) {
     warn("v-on without argument does not support modifiers.");
   }
   el.wrapListeners = function (code) { return ("_g(" + code + "," + (dir.value) + ")"); };
@@ -4583,7 +4569,7 @@ function genOnce (el, state) {
       parent = parent.parent;
     }
     if (!key) {
-      process.env.NODE_ENV !== 'production' && state.warn(
+      state.warn(
         "v-once can only be used inside v-for that is keyed. "
       );
       return genElement(el, state)
@@ -4642,8 +4628,7 @@ function genFor (
   var iterator1 = el.iterator1 ? ("," + (el.iterator1)) : '';
   var iterator2 = el.iterator2 ? ("," + (el.iterator2)) : '';
 
-  if (process.env.NODE_ENV !== 'production' &&
-    state.maybeComponent(el) &&
+  if (state.maybeComponent(el) &&
     el.tag !== 'slot' &&
     el.tag !== 'template' &&
     !el.key
@@ -4768,9 +4753,7 @@ function genDirectives (el, state) {
 
 function genInlineTemplate (el, state) {
   var ast = el.children[0];
-  if (process.env.NODE_ENV !== 'production' && (
-    el.children.length !== 1 || ast.type !== 1
-  )) {
+  if (el.children.length !== 1 || ast.type !== 1) {
     state.warn('Inline-template components must have exactly one child element.');
   }
   if (ast.type === 1) {
@@ -5553,7 +5536,7 @@ function createCompileToFunctionFn (compile) {
     delete options.warn;
 
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production') {
+    {
       // detect possible CSP restriction
       try {
         new Function('return 1');
@@ -5582,7 +5565,7 @@ function createCompileToFunctionFn (compile) {
     var compiled = compile(template, options);
 
     // check compilation errors/tips
-    if (process.env.NODE_ENV !== 'production') {
+    {
       if (compiled.errors && compiled.errors.length) {
         warn$$1(
           "Error compiling template:\n\n" + template + "\n\n" +
@@ -5607,7 +5590,7 @@ function createCompileToFunctionFn (compile) {
     // this should only happen if there is a bug in the compiler itself.
     // mostly for codegen development use
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production') {
+    {
       if ((!compiled.errors || !compiled.errors.length) && fnGenErrors.length) {
         warn$$1(
           "Failed to generate render function:\n\n" +
@@ -5663,7 +5646,7 @@ function createCompilerCreator (baseCompile) {
       }
 
       var compiled = baseCompile(template, finalOptions);
-      if (process.env.NODE_ENV !== 'production') {
+      {
         errors.push.apply(errors, detectErrors(compiled.ast));
       }
       compiled.errors = errors;
@@ -5912,7 +5895,7 @@ function renderSSRStyle (
 
 /* not type checking this file because flow doesn't play well with Proxy */
 
-if (process.env.NODE_ENV !== 'production') {
+{
   var allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
@@ -5976,7 +5959,7 @@ function _traverse (val, seen) {
   }
 }
 
-if (process.env.NODE_ENV !== 'production') {
+{
   var perf = inBrowser && window.performance;
   /* istanbul ignore if */
   if (
@@ -6038,7 +6021,7 @@ function updateListeners (
     old = oldOn[name];
     event = normalizeEvent(name);
     if (isUndef(cur)) {
-      process.env.NODE_ENV !== 'production' && warn(
+      warn(
         "Invalid handler for event \"" + (event.name) + "\": got " + String(cur),
         vm
       );
@@ -6085,7 +6068,7 @@ function extractPropsFromVNodeData (
   if (isDef(attrs) || isDef(props)) {
     for (var key in propOptions) {
       var altKey = hyphenate(key);
-      if (process.env.NODE_ENV !== 'production') {
+      {
         var keyInLowerCase = key.toLowerCase();
         if (
           key !== keyInLowerCase &&
@@ -6207,7 +6190,7 @@ function resolveAsyncComponent (
     });
 
     var reject = once(function (reason) {
-      process.env.NODE_ENV !== 'production' && warn(
+      warn(
         "Failed to resolve async component: " + (String(factory)) +
         (reason ? ("\nReason: " + reason) : '')
       );
@@ -6250,9 +6233,7 @@ function resolveAsyncComponent (
           setTimeout(function () {
             if (isUndef(factory.resolved)) {
               reject(
-                process.env.NODE_ENV !== 'production'
-                  ? ("timeout (" + (res.timeout) + "ms)")
-                  : null
+                "timeout (" + (res.timeout) + "ms)"
               );
             }
           }, res.timeout);
@@ -6383,7 +6364,6 @@ function updateChildComponent (
   parentVnode,
   renderChildren
 ) {
-  if (process.env.NODE_ENV !== 'production') ;
 
   // determine whether component has slot children
   // we need to do this before overwriting $options._renderChildren
@@ -6434,8 +6414,6 @@ function updateChildComponent (
     vm.$slots = resolveSlots(renderChildren, parentVnode.context);
     vm.$forceUpdate();
   }
-
-  if (process.env.NODE_ENV !== 'production') ;
 }
 
 function isInInactiveTree (vm) {
@@ -6548,7 +6526,7 @@ function _createElement (
   normalizationType
 ) {
   if (isDef(data) && isDef((data).__ob__)) {
-    process.env.NODE_ENV !== 'production' && warn(
+    warn(
       "Avoid using observed data object as vnode data: " + (JSON.stringify(data)) + "\n" +
       'Always create fresh vnode data objects in each render!',
       context
@@ -6564,8 +6542,7 @@ function _createElement (
     return createEmptyVNode()
   }
   // warn against non-primitive key
-  if (process.env.NODE_ENV !== 'production' &&
-    isDef(data) && isDef(data.key) && !isPrimitive(data.key)
+  if (isDef(data) && isDef(data.key) && !isPrimitive(data.key)
   ) {
     {
       warn(
@@ -6700,7 +6677,7 @@ function renderSlot (
   if (scopedSlotFn) { // scoped slot
     props = props || {};
     if (bindObject) {
-      if (process.env.NODE_ENV !== 'production' && !isObject(bindObject)) {
+      if (!isObject(bindObject)) {
         warn(
           'slot v-bind without argument expects an Object',
           this
@@ -6776,7 +6753,7 @@ function bindObjectProps (
 ) {
   if (value) {
     if (!isObject(value)) {
-      process.env.NODE_ENV !== 'production' && warn(
+      warn(
         'v-bind without argument expects an Object or Array value',
         this
       );
@@ -6883,7 +6860,7 @@ function markStaticNode (node, key, isOnce) {
 function bindObjectListeners (data, value) {
   if (value) {
     if (!isPlainObject(value)) {
-      process.env.NODE_ENV !== 'production' && warn(
+      warn(
         'v-on without argument expects an Object value',
         this
       );
@@ -6951,7 +6928,7 @@ function resolveInject (inject, vm) {
           result[key] = typeof provideDefault === 'function'
             ? provideDefault.call(vm)
             : provideDefault;
-        } else if (process.env.NODE_ENV !== 'production') {
+        } else {
           warn(("Injection \"" + key + "\" not found"), vm);
         }
       }
@@ -7108,7 +7085,7 @@ function cloneAndMarkFunctionalResult (vnode, data, contextVm, options, renderCo
   var clone = cloneVNode(vnode);
   clone.fnContext = contextVm;
   clone.fnOptions = options;
-  if (process.env.NODE_ENV !== 'production') {
+  {
     (clone.devtoolsMeta = clone.devtoolsMeta || {}).renderContext = renderContext;
   }
   if (data.slot) {
@@ -7219,7 +7196,7 @@ function createComponent (
   // if at this stage it's not a constructor or an async component factory,
   // reject.
   if (typeof Ctor !== 'function') {
-    if (process.env.NODE_ENV !== 'production') {
+    {
       warn(("Invalid Component definition: " + (String(Ctor))), context);
     }
     return
@@ -8125,9 +8102,7 @@ TemplateRenderer.prototype.renderState = function renderState (context, options)
     var contextKey = ref.contextKey; if ( contextKey === void 0 ) contextKey = 'state';
     var windowKey = ref.windowKey; if ( windowKey === void 0 ) windowKey = '__INITIAL_STATE__';
   var state = serialize(context[contextKey], { isJSON: true });
-  var autoRemove = process.env.NODE_ENV === 'production'
-    ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
-    : '';
+  var autoRemove = '';
   return context[contextKey]
     ? ("<script>window." + windowKey + "=" + state + autoRemove + "</script>")
     : ''
