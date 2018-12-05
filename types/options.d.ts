@@ -15,14 +15,18 @@ export type Component<Data=DefaultData<never>, Methods=DefaultMethods<never>, Co
 interface EsModuleComponent {
   default: Component
 }
+                      
+export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
+  = AsyncComponentPromise<Data, Methods, Computed, Props>
+  | AsyncComponentFactory<Data, Methods, Computed, Props>
 
-export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
+export type AsyncComponentPromise<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
 ) => Promise<Component | EsModuleComponent> | void;
 
 export type AsyncComponentFactory<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = () => {
-  component: AsyncComponent<Data, Methods, Computed, Props>;
+  component: AsyncComponentPromise<Data, Methods, Computed, Props>;
   loading?: Component | EsModuleComponent;
   error?: Component | EsModuleComponent;
   delay?: number;
@@ -94,7 +98,7 @@ export interface ComponentOptions<
   errorCaptured?(err: Error, vm: Vue, info: string): boolean | void;
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
-  components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> | AsyncComponentFactory<any, any, any, any> };
+  components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> };
   transitions?: { [key: string]: object };
   filters?: { [key: string]: Function };
 
