@@ -111,11 +111,14 @@ export default {
 
     children.forEach((c: VNode) => {
       if (c.data.moved) {
-        var el: any = c.elm
-        var s: any = el.style
+        const el: any = c.elm
+        const s: any = el.style
         addTransitionClass(el, moveClass)
         s.transform = s.WebkitTransform = s.transitionDuration = ''
         el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
+          if (e && e.target !== el) {
+            return
+          }
           if (!e || /transform$/.test(e.propertyName)) {
             el.removeEventListener(transitionEndEvent, cb)
             el._moveCb = null

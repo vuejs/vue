@@ -21,16 +21,22 @@ export function initEvents (vm: Component) {
 
 let target: any
 
-function add (event, fn, once) {
-  if (once) {
-    target.$once(event, fn)
-  } else {
-    target.$on(event, fn)
-  }
+function add (event, fn) {
+  target.$on(event, fn)
 }
 
 function remove (event, fn) {
   target.$off(event, fn)
+}
+
+function createOnceHandler (event, fn) {
+  const _target = target
+  return function onceHandler () {
+    const res = fn.apply(null, arguments)
+    if (res !== null) {
+      _target.$off(event, onceHandler)
+    }
+  }
 }
 
 export function updateComponentListeners (
@@ -39,7 +45,7 @@ export function updateComponentListeners (
   oldListeners: ?Object
 ) {
   target = vm
-  updateListeners(listeners, oldListeners || {}, add, remove, vm)
+  updateListeners(listeners, oldListeners || {}, add, remove, createOnceHandler, vm)
   target = undefined
 }
 
@@ -49,7 +55,7 @@ export function eventsMixin (Vue: Class<Component>) {
     const vm: Component = this
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
-        this.$on(event[i], fn)
+        vm.$on(event[i], fn)
       }
     } else {
       (vm._events[event] || (vm._events[event] = [])).push(fn)
@@ -83,7 +89,7 @@ export function eventsMixin (Vue: Class<Component>) {
     // array of events
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
-        this.$off(event[i], fn)
+        vm.$off(event[i], fn)
       }
       return vm
     }

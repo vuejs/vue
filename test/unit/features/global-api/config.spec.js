@@ -55,4 +55,71 @@ describe('Global config', () => {
       Vue.config.ignoredElements = []
     })
   })
+
+  describe('async', () => {
+    it('does not update synchronously when true', () => {
+      const spy = jasmine.createSpy()
+      const vm = new Vue({
+        template: `<div :class="value"></div>`,
+        updated: spy,
+        data: { value: true }
+      }).$mount()
+      vm.value = false
+      expect(spy).not.toHaveBeenCalled()
+    })
+
+    it('updates synchronously when false', () => {
+      const spy = jasmine.createSpy()
+      Vue.config.async = false
+      const vm = new Vue({
+        template: `<div :class="value"></div>`,
+        updated: spy,
+        data: { value: true }
+      }).$mount()
+      vm.value = false
+      expect(spy).toHaveBeenCalled()
+      Vue.config.async = true
+    })
+
+    it('runs watchers in correct order when false', () => {
+      Vue.config.async = false
+      const vm = new Vue({
+        template: `
+          <div id="app">
+            {{ computed }}
+          </div>`,
+        props: ['prop'],
+        propsData: {
+          'prop': []
+        },
+        data: () => ({
+          data: ''
+        }),
+        computed: {
+          computed () {
+            return this.prop.join(',')
+          }
+        },
+        watch: {
+          prop: 'execute'
+        },
+        methods: {
+          execute () {
+            this.data = this.computed
+          }
+        }
+      }).$mount()
+      expect(vm.computed).toBe('')
+      expect(vm.data).toBe('')
+
+      vm.prop = [1, 2, 3]
+      expect(vm.computed).toBe('1,2,3')
+      expect(vm.data).toBe('1,2,3')
+
+      vm.prop.push(4, 5)
+      expect(vm.computed).toBe('1,2,3,4,5')
+      expect(vm.data).toBe('1,2,3,4,5')
+      Vue.config.async = true
+    })
+  })
 })

@@ -81,7 +81,7 @@ describe('compile options', () => {
           computed: {
             valid () {
               let ret = true
-              for (let i = 0; i > this.validators.length; i++) {
+              for (let i = 0; i < this.validators.length; i++) {
                 const { name } = this.validators[i]
                 if (!this.result[name]) {
                   ret = false

@@ -929,6 +929,40 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('should prevent xss in attribute names', done => {
+    renderVmWithOptions({
+      data: {
+        xss: {
+          'foo="bar"></div><script>alert(1)</script>': ''
+        }
+      },
+      template: `
+        <div v-bind="xss"></div>
+      `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
+  it('should prevent xss in attribute names (optimized)', done => {
+    renderVmWithOptions({
+      data: {
+        xss: {
+          'foo="bar"></div><script>alert(1)</script>': ''
+        }
+      },
+      template: `
+        <div>
+          <a v-bind="xss">foo</a>
+        </div>
+      `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
   it('should prevent script xss with v-bind object syntax + array value', done => {
     renderVmWithOptions({
       data: {
@@ -1042,6 +1076,24 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  // #8977
+  it('should call computed properties with vm as first argument', done => {
+    renderToString(new Vue({
+      data: {
+        firstName: 'Evan',
+        lastName: 'You'
+      },
+      computed: {
+        fullName: ({ firstName, lastName }) => `${firstName} ${lastName}`,
+      },
+      template: '<div>{{ fullName }}</div>',
+    }), (err, result) => {
+      expect(err).toBeNull()
+      expect(result).toContain('<div data-server-rendered="true">Evan You</div>')
+      done()
+    })
+  })
+
   it('return Promise', done => {
     renderToString(new Vue({
       template: `<div>{{ foo }}</div>`,
@@ -1068,7 +1120,7 @@ describe('SSR: renderToString', () => {
   it('should catch template compilation error', done => {
     renderToString(new Vue({
       template: `<div></div><div></div>`
-    }), (err, res) => {
+    }), (err) => {
       expect(err.toString()).toContain('Component template should contain exactly one root element')
       done()
     })
@@ -1207,6 +1259,20 @@ describe('SSR: renderToString', () => {
       `
     }, result => {
       expect(result).toContain(`<div id="a\nb"></div>`)
+      done()
+    })
+  })
+
+  // #7859
+  it('should not double escape class values', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div class="a\nb"></div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div class="a\nb"></div>`)
       done()
     })
   })
