@@ -60,7 +60,10 @@ export default class TemplateRenderer {
     // extra functionality with client manifest
     if (options.clientManifest) {
       const clientManifest = this.clientManifest = options.clientManifest
-      this.publicPath = clientManifest.publicPath
+      // ensure publicPath ends with /
+      this.publicPath = clientManifest.publicPath === ''
+        ? ''
+        : clientManifest.publicPath.replace(/([^\/])$/, '$1/')
       // preload/prefetch directives
       this.preloadFiles = (clientManifest.initial || []).map(normalizeFile)
       this.prefetchFiles = (clientManifest.async || []).map(normalizeFile)
@@ -114,7 +117,7 @@ export default class TemplateRenderer {
     return (
       // render links for css files
       (cssFiles.length
-        ? cssFiles.map(({ file }) => `<link rel="stylesheet" href="${this.getPublicPath(file)}">`).join('')
+        ? cssFiles.map(({ file }) => `<link rel="stylesheet" href="${this.publicPath}${file}">`).join('')
         : '') +
       // context.styles is a getter exposed by vue-style-loader which contains
       // the inline component styles collected during SSR
@@ -153,7 +156,7 @@ export default class TemplateRenderer {
           extra = ` type="font/${extension}" crossorigin`
         }
         return `<link rel="preload" href="${
-          this.getPublicPath(file)
+          this.publicPath}${file
         }"${
           asType !== '' ? ` as="${asType}"` : ''
         }${
@@ -179,7 +182,7 @@ export default class TemplateRenderer {
         if (alreadyRendered(file)) {
           return ''
         }
-        return `<link rel="prefetch" href="${this.getPublicPath(file)}">`
+        return `<link rel="prefetch" href="${this.publicPath}${file}">`
       }).join('')
     } else {
       return ''
@@ -206,7 +209,7 @@ export default class TemplateRenderer {
       const async = (this.getUsedAsyncFiles(context) || []).filter(({ file }) => isJS(file))
       const needed = [initial[0]].concat(async || [], initial.slice(1))
       return needed.map(({ file }) => {
-        return `<script src="${this.getPublicPath(file)}" defer></script>`
+        return `<script src="${this.publicPath}${file}" defer></script>`
       }).join('')
     } else {
       return ''
@@ -227,10 +230,6 @@ export default class TemplateRenderer {
       throw new Error('createStream cannot be called without a template.')
     }
     return new TemplateStream(this, this.parsedTemplate, context || {})
-  }
-
-  getPublicPath (file: string) {
-    return path.posix.join(this.publicPath, file)
   }
 }
 
