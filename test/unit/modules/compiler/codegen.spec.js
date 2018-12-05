@@ -333,12 +333,22 @@ describe('codegen', () => {
     // multiple keycodes (delete)
     assertCodegen(
       '<input @input.delete="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete"]))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput($event)}}})}`
+    )
+    // multiple keycodes (esc)
+    assertCodegen(
+      '<input @input.esc="onInput">',
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"esc",27,$event.key,["Esc","Escape"]))return null;return onInput($event)}}})}`
+    )
+    // multiple keycodes (space)
+    assertCodegen(
+      '<input @input.space="onInput">',
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"space",32,$event.key,[" ","Spacebar"]))return null;return onInput($event)}}})}`
     )
     // multiple keycodes (chained)
     assertCodegen(
       '<input @keydown.enter.delete="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter")&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete"]))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter")&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput($event)}}})}`
     )
     // number keycode
     assertCodegen(
