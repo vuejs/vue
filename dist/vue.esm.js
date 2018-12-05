@@ -10578,9 +10578,7 @@ function genChildren (
       el$1.tag !== 'template' &&
       el$1.tag !== 'slot'
     ) {
-      // because el may be a functional component and return an Array instead of a single root.
-      // In this case, just a simple normalization is needed
-      var normalizationType = state.maybeComponent(el$1) ? ",1" : "";
+      var normalizationType = checkSkip && state.maybeComponent(el$1) ? ",1" : "";
       return ("" + ((altGenElement || genElement)(el$1, state)) + normalizationType)
     }
     var normalizationType$1 = checkSkip
