@@ -240,6 +240,8 @@ export function toObject (arr: Array<any>): Object {
   return res
 }
 
+/* eslint-disable no-unused-vars */
+
 /**
  * Perform no operation.
  * Stubbing args to make Flow happy without leaving useless transpiled code
@@ -251,6 +253,8 @@ export function noop (a?: any, b?: any, c?: any) {}
  * Always return false.
  */
 export const no = (a?: any, b?: any, c?: any) => false
+
+/* eslint-enable no-unused-vars */
 
 /**
  * Return the same value.
@@ -282,6 +286,8 @@ export function looseEqual (a: any, b: any): boolean {
         return a.length === b.length && a.every((e, i) => {
           return looseEqual(e, b[i])
         })
+      } else if (a instanceof Date && b instanceof Date) {
+        return a.getTime() === b.getTime()
       } else if (!isArrayA && !isArrayB) {
         const keysA = Object.keys(a)
         const keysB = Object.keys(b)

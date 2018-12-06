@@ -19,6 +19,7 @@ class Test extends Vue {
   }
 
   // test property reification
+  $el!: HTMLElement | SVGElement;
   $refs!: {
     vue: Vue,
     element: HTMLInputElement,
@@ -87,8 +88,10 @@ class Test extends Vue {
     this.nextTick(() => {});
     this.nextTick().then(() => {});
     this.set({}, "", "");
+    this.set({}, 1, "");
     this.set([true, false, true], 1, true);
     this.delete({}, "");
+    this.delete({}, 1);
     this.delete([true, false], 0);
     this.directive("", {bind() {}});
     this.filter("", (value: number) => value);
@@ -97,6 +100,15 @@ class Test extends Vue {
     this.use;
     this.mixin(Test);
     this.compile("<div>{{ message }}</div>");
+    this
+      .use(() => {
+        
+      })
+      .use(() => {
+        
+      })
+      .mixin({})
+      .mixin({});
   }
 }
 

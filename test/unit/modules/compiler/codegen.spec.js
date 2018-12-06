@@ -208,6 +208,17 @@ describe('codegen', () => {
     )
   })
 
+  it('generate scoped slot with multiline v-if', () => {
+    assertCodegen(
+      '<foo><template v-if="\nshow\n" slot-scope="bar">{{ bar }}</template></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(bar){return (\nshow\n)?[_v(_s(bar))]:undefined}}])})}`
+    )
+    assertCodegen(
+      '<foo><div v-if="\nshow\n" slot="foo" slot-scope="bar">{{ bar }}</div></foo>',
+      `with(this){return _c(\'foo\',{scopedSlots:_u([{key:"foo",fn:function(bar){return (\nshow\n)?_c(\'div\',{},[_v(_s(bar))]):_e()}}])})}`
+    )
+  })
+
   it('generate class binding', () => {
     // static
     assertCodegen(
@@ -322,12 +333,22 @@ describe('codegen', () => {
     // multiple keycodes (delete)
     assertCodegen(
       '<input @input.delete="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete"]))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput($event)}}})}`
+    )
+    // multiple keycodes (esc)
+    assertCodegen(
+      '<input @input.esc="onInput">',
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"esc",27,$event.key,["Esc","Escape"]))return null;return onInput($event)}}})}`
+    )
+    // multiple keycodes (space)
+    assertCodegen(
+      '<input @input.space="onInput">',
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"space",32,$event.key,[" ","Spacebar"]))return null;return onInput($event)}}})}`
     )
     // multiple keycodes (chained)
     assertCodegen(
       '<input @keydown.enter.delete="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter")&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete"]))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter")&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput($event)}}})}`
     )
     // number keycode
     assertCodegen(
@@ -524,6 +545,11 @@ describe('codegen', () => {
       '<div :is="component1"></div>',
       `with(this){return _c(component1,{tag:"div"})}`
     )
+    // maybe a component and normalize type should be 1
+    assertCodegen(
+      '<div><div is="component1"></div></div>',
+      `with(this){return _c('div',[_c("component1",{tag:"div"})],1)}`
+    )
   })
 
   it('generate component with inline-template', () => {
@@ -590,6 +616,18 @@ describe('codegen', () => {
     expect(res.render).toBe(generatedCode)
   })
 
+  // #8041
+  it('does not squash templates inside v-pre', () => {
+    const template = '<div v-pre><template><p>{{msg}}</p></template></div>'
+    const generatedCode = `with(this){return _m(0)}`
+    const renderFn = `with(this){return _c('div',{pre:true},[_c('template',[_c('p',[_v("{{msg}}")])])],2)}`
+    const ast = parse(template, baseOptions)
+    optimize(ast, baseOptions)
+    const res = generate(ast, baseOptions)
+    expect(res.render).toBe(generatedCode)
+    expect(res.staticRenderFns).toEqual([renderFn])
+  })
+
   it('not specified ast type', () => {
     const res = generate(null, baseOptions)
     expect(res.render).toBe(`with(this){return _c("div")}`)
@@ -601,6 +639,14 @@ describe('codegen', () => {
       '<p v-if="show">hello world</p>',
       `with(this){return (show)?_c('p',[_v("hello world")]):_e()}`,
       { isReservedTag }
+    )
+  })
+
+  // #9142
+  it('should compile single v-for component inside template', () => {
+    assertCodegen(
+      `<div><template v-if="ok"><foo v-for="i in 1" :key="i"></foo></template></div>`,
+      `with(this){return _c('div',[(ok)?_l((1),function(i){return _c('foo',{key:i})}):_e()],2)}`
     )
   })
 })

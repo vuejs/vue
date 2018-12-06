@@ -895,4 +895,31 @@ describe('Directive v-on', () => {
     }).$mount()
     expect(`v-on without argument expects an Object value`).toHaveBeenWarned()
   })
+
+  it('should correctly remove once listener', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <span v-if="ok" @click.once="foo">
+            a
+          </span>
+          <span v-else a="a">
+            b
+          </span>
+        </div>
+      `,
+      data: {
+        ok: true
+      },
+      methods: {
+        foo: spy
+      }
+    }).$mount()
+
+    vm.ok = false
+    waitForUpdate(() => {
+      triggerEvent(vm.$el.childNodes[0], 'click')
+      expect(spy.calls.count()).toBe(0)
+    }).then(done)
+  })
 })

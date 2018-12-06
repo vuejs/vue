@@ -252,9 +252,17 @@ function transformModel (options, data: any) {
   const event = (options.model && options.model.event) || 'input'
   ;(data.props || (data.props = {}))[prop] = data.model.value
   const on = data.on || (data.on = {})
-  if (isDef(on[event])) {
-    on[event] = [data.model.callback].concat(on[event])
+  const existing = on[event]
+  const callback = data.model.callback
+  if (isDef(existing)) {
+    if (
+      Array.isArray(existing)
+        ? existing.indexOf(callback) === -1
+        : existing !== callback
+    ) {
+      on[event] = [callback].concat(existing)
+    }
   } else {
-    on[event] = data.model.callback
+    on[event] = callback
   }
 }

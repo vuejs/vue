@@ -15,11 +15,23 @@ export type Component<Data=DefaultData<never>, Methods=DefaultMethods<never>, Co
 interface EsModuleComponent {
   default: Component
 }
+                      
+export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
+  = AsyncComponentPromise<Data, Methods, Computed, Props>
+  | AsyncComponentFactory<Data, Methods, Computed, Props>
 
-export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
+export type AsyncComponentPromise<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
 ) => Promise<Component | EsModuleComponent> | void;
+
+export type AsyncComponentFactory<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = () => {
+  component: AsyncComponentPromise<Data, Methods, Computed, Props>;
+  loading?: Component | EsModuleComponent;
+  error?: Component | EsModuleComponent;
+  delay?: number;
+  timeout?: number;
+}
 
 /**
  * When the `Computed` type parameter on `ComponentOptions` is inferred,
@@ -68,9 +80,9 @@ export interface ComponentOptions<
 
   el?: Element | string;
   template?: string;
-  // hack is for funcitonal component type inference, should not used in user code
+  // hack is for functional component type inference, should not be used in user code
   render?(createElement: CreateElement, hack: RenderContext<Props>): VNode;
-  renderError?: (h: () => VNode, err: Error) => VNode;
+  renderError?(createElement: CreateElement, err: Error): VNode;
   staticRenderFns?: ((createElement: CreateElement) => VNode)[];
 
   beforeCreate?(this: V): void;
@@ -111,9 +123,13 @@ export interface ComponentOptions<
 export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = PropsDefinition<Props>> {
   name?: string;
   props?: PropDefs;
+  model?: {
+    prop?: string;
+    event?: string;
+  };
   inject?: InjectOptions;
   functional: boolean;
-  render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode;
+  render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode | VNode[];
 }
 
 export interface RenderContext<Props=DefaultProps> {
