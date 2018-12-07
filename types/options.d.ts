@@ -104,6 +104,8 @@ export interface ComponentOptions<
 
   provide?: object | (() => object);
   inject?: InjectOptions;
+  layout?: string;
+                      
 
   model?: {
     prop?: string;
