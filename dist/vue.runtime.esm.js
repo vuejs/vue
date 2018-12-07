@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.5.18-beta.0
+ * Vue.js v2.5.18
  * (c) 2014-2018 Evan You
  * Released under the MIT License.
  */
@@ -2717,6 +2717,14 @@ function resolveScopedSlots (
 var activeInstance = null;
 var isUpdatingChildComponent = false;
 
+function setActiveInstance(vm) {
+  var prevActiveInstance = activeInstance;
+  activeInstance = vm;
+  return function () {
+    activeInstance = prevActiveInstance;
+  }
+}
+
 function initLifecycle (vm) {
   var options = vm.$options;
 
@@ -2748,8 +2756,7 @@ function lifecycleMixin (Vue) {
     var vm = this;
     var prevEl = vm.$el;
     var prevVnode = vm._vnode;
-    var prevActiveInstance = activeInstance;
-    activeInstance = vm;
+    var restoreActiveInstance = setActiveInstance(vm);
     vm._vnode = vnode;
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
@@ -2760,7 +2767,7 @@ function lifecycleMixin (Vue) {
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode);
     }
-    activeInstance = prevActiveInstance;
+    restoreActiveInstance();
     // update __vue__ reference
     if (prevEl) {
       prevEl.__vue__ = null;
@@ -5170,7 +5177,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.5.18-beta.0';
+Vue.version = '2.5.18';
 
 /*  */
 
@@ -7894,6 +7901,7 @@ var TransitionGroup = {
 
     var update = this._update;
     this._update = function (vnode, hydrating) {
+      var restoreActiveInstance = setActiveInstance(this$1);
       // force removing pass
       this$1.__patch__(
         this$1._vnode,
@@ -7902,6 +7910,7 @@ var TransitionGroup = {
         true // removeOnly (!important, avoids unnecessary moves)
       );
       this$1._vnode = this$1.kept;
+      restoreActiveInstance();
       update.call(this$1, vnode, hydrating);
     };
   },
