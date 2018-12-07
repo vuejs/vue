@@ -3687,13 +3687,15 @@
     esc: ['Esc', 'Escape'],
     tab: 'Tab',
     enter: 'Enter',
-    space: ' ',
+    // #9112: IE11 uses `Spacebar` for Space key name.
+    space: [' ', 'Spacebar'],
     // #7806: IE11 uses key names without `Arrow` prefix for arrow keys.
     up: ['Up', 'ArrowUp'],
     left: ['Left', 'ArrowLeft'],
     right: ['Right', 'ArrowRight'],
     down: ['Down', 'ArrowDown'],
-    'delete': ['Backspace', 'Delete']
+    // #9112: IE11 uses `Del` for Delete key name.
+    'delete': ['Backspace', 'Delete', 'Del']
   };
 
   // #4868: modifiers that prevent the execution of the listener
@@ -4184,9 +4186,7 @@
         el$1.tag !== 'template' &&
         el$1.tag !== 'slot'
       ) {
-        // because el may be a functional component and return an Array instead of a single root.
-        // In this case, just a simple normalization is needed
-        var normalizationType = state.maybeComponent(el$1) ? ",1" : "";
+        var normalizationType = checkSkip && state.maybeComponent(el$1) ? ",1" : "";
         return ("" + ((altGenElement || genElement)(el$1, state)) + normalizationType)
       }
       var normalizationType$1 = checkSkip

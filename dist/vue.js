@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.5.18-beta.0
+ * Vue.js v2.5.18
  * (c) 2014-2018 Evan You
  * Released under the MIT License.
  */
@@ -2724,6 +2724,14 @@
   var activeInstance = null;
   var isUpdatingChildComponent = false;
 
+  function setActiveInstance(vm) {
+    var prevActiveInstance = activeInstance;
+    activeInstance = vm;
+    return function () {
+      activeInstance = prevActiveInstance;
+    }
+  }
+
   function initLifecycle (vm) {
     var options = vm.$options;
 
@@ -2755,8 +2763,7 @@
       var vm = this;
       var prevEl = vm.$el;
       var prevVnode = vm._vnode;
-      var prevActiveInstance = activeInstance;
-      activeInstance = vm;
+      var restoreActiveInstance = setActiveInstance(vm);
       vm._vnode = vnode;
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
@@ -2767,7 +2774,7 @@
         // updates
         vm.$el = vm.__patch__(prevVnode, vnode);
       }
-      activeInstance = prevActiveInstance;
+      restoreActiveInstance();
       // update __vue__ reference
       if (prevEl) {
         prevEl.__vue__ = null;
@@ -5163,7 +5170,7 @@
     value: FunctionalRenderContext
   });
 
-  Vue.version = '2.5.18-beta.0';
+  Vue.version = '2.5.18';
 
   /*  */
 
@@ -8453,6 +8460,7 @@
 
       var update = this._update;
       this._update = function (vnode, hydrating) {
+        var restoreActiveInstance = setActiveInstance(this$1);
         // force removing pass
         this$1.__patch__(
           this$1._vnode,
@@ -8461,6 +8469,7 @@
           true // removeOnly (!important, avoids unnecessary moves)
         );
         this$1._vnode = this$1.kept;
+        restoreActiveInstance();
         update.call(this$1, vnode, hydrating);
       };
     },
@@ -10052,13 +10061,15 @@
     esc: ['Esc', 'Escape'],
     tab: 'Tab',
     enter: 'Enter',
-    space: ' ',
+    // #9112: IE11 uses `Spacebar` for Space key name.
+    space: [' ', 'Spacebar'],
     // #7806: IE11 uses key names without `Arrow` prefix for arrow keys.
     up: ['Up', 'ArrowUp'],
     left: ['Left', 'ArrowLeft'],
     right: ['Right', 'ArrowRight'],
     down: ['Down', 'ArrowDown'],
-    'delete': ['Backspace', 'Delete']
+    // #9112: IE11 uses `Del` for Delete key name.
+    'delete': ['Backspace', 'Delete', 'Del']
   };
 
   // #4868: modifiers that prevent the execution of the listener
@@ -10549,9 +10560,7 @@
         el$1.tag !== 'template' &&
         el$1.tag !== 'slot'
       ) {
-        // because el may be a functional component and return an Array instead of a single root.
-        // In this case, just a simple normalization is needed
-        var normalizationType = state.maybeComponent(el$1) ? ",1" : "";
+        var normalizationType = checkSkip && state.maybeComponent(el$1) ? ",1" : "";
         return ("" + ((altGenElement || genElement)(el$1, state)) + normalizationType)
       }
       var normalizationType$1 = checkSkip
