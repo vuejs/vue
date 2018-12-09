@@ -326,7 +326,7 @@ function renderStartingTag (node: VNode, context) {
       for (let i = 0; i < dirs.length; i++) {
         const name = dirs[i].name
         if (name !== 'show') {
-          const dirRenderer = resolveAsset(context, 'directives', name, true)
+          const dirRenderer = resolveAsset(context, 'directives', name)
           if (dirRenderer) {
             // directives mutate the node's data
             // which then gets rendered by modules
