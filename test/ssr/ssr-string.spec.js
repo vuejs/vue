@@ -794,6 +794,23 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('should resolve custom directive', done => {
+    renderToString(new Vue({
+      directives: {
+        test: {
+          bind(node) {
+            node.data.domProps = { textContent: 'test' }
+          }
+        }
+      },
+      template: '<div v-test></div>',
+    }), (err, result) => {
+      expect('Failed to resolve directive: test').not.toHaveBeenWarned()
+      expect(result).toContain('<div data-server-rendered="true">test</div>')
+      done()
+    })
+  })
+
   it('custom directives', done => {
     const renderer = createRenderer({
       directives: {
