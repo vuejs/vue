@@ -152,6 +152,43 @@ describe('Options lifecycle hooks', () => {
         expect(vm.$el.textContent).toBe('bar!')
       }).then(done)
     })
+
+    // #8076
+    it('should not be called after destroy', done => {
+      const beforeUpdated = jasmine.createSpy('beforeUpdated')
+      const destroyed = jasmine.createSpy('destroyed')
+
+      Vue.component('todo', {
+        template: '<div>{{todo.done}}</div>',
+        props: ['todo'],
+        destroyed,
+        beforeUpdated
+      })
+
+      const vm = new Vue({
+        template: `
+          <div>
+            <todo v-for="t in pendingTodos" :todo="t" :key="t.id"></todo>
+          </div>
+        `,
+        data () {
+          return {
+            todos: [{ id: 1, done: false }]
+          }
+        },
+        computed: {
+          pendingTodos () {
+            return this.todos.filter(t => !t.done)
+          }
+        }
+      }).$mount()
+
+      vm.todos[0].done = true
+      waitForUpdate(() => {
+        expect(destroyed).toHaveBeenCalled()
+        expect(beforeUpdated).not.toHaveBeenCalled()
+      }).then(done)
+    })
   })
 
   describe('updated', () => {
