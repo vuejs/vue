@@ -794,23 +794,6 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('should resolve custom directive', done => {
-    renderToString(new Vue({
-      directives: {
-        test: {
-          bind(node) {
-            node.data.domProps = { textContent: 'test' }
-          }
-        }
-      },
-      template: '<div v-test></div>',
-    }), (err, result) => {
-      expect('Failed to resolve directive: test').not.toHaveBeenWarned()
-      expect(result).toContain('<div data-server-rendered="true">test</div>')
-      done()
-    })
-  })
-
   it('custom directives', done => {
     const renderer = createRenderer({
       directives: {
@@ -839,6 +822,22 @@ describe('SSR: renderToString', () => {
     }), (err, result) => {
       expect(err).toBeNull()
       expect(result).toContain('<p data-server-rendered="true" class="my-class2 my-class1">hello world</p>')
+      done()
+    })
+  })
+
+  it('should not warn for custom directives that do not have server-side implementation', done => {
+    renderToString(new Vue({
+      directives: {
+        test: {
+          bind() {
+            // noop
+          }
+        }
+      },
+      template: '<div v-test></div>',
+    }), () => {
+      expect('Failed to resolve directive: test').not.toHaveBeenWarned()
       done()
     })
   })
