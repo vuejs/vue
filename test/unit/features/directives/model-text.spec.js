@@ -238,7 +238,7 @@ describe('Directive v-model text', () => {
       template: '<input v-model="a" @input="onInput">',
       methods: {
         onInput (e) {
-          spy(e.target.value)
+          spy(this.a)
         }
       }
     }).$mount()
