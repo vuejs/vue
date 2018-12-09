@@ -4,6 +4,7 @@ module.exports = {
     '*.spec.js'
   ],
   helpers: [
-    require.resolve('@babel/register')
+    require.resolve('@babel/register'),
+    '../helpers/to-have-been-warned.js'
   ]
 }
