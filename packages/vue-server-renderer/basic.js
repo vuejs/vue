@@ -7906,7 +7906,7 @@
         for (var i = 0; i < dirs.length; i++) {
           var name = dirs[i].name;
           if (name !== 'show') {
-            var dirRenderer = resolveAsset(context, 'directives', name, true);
+            var dirRenderer = resolveAsset(context, 'directives', name);
             if (dirRenderer) {
               // directives mutate the node's data
               // which then gets rendered by modules

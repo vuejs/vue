@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.5.18
+ * Vue.js v2.5.19
  * (c) 2014-2018 Evan You
  * Released under the MIT License.
  */
@@ -5161,7 +5161,7 @@
     value: FunctionalRenderContext
   });
 
-  Vue.version = '2.5.18';
+  Vue.version = '2.5.19';
 
   /*  */
 
@@ -5512,12 +5512,6 @@
 
   var hooks = ['create', 'activate', 'update', 'remove', 'destroy'];
 
-  function childrenIgnored (vnode) {
-    return vnode && vnode.data && vnode.data.domProps && (
-      vnode.data.domProps.innerHTML || vnode.data.domProps.textContent
-    )
-  }
-
   function sameVnode (a, b) {
     return (
       a.key === b.key && (
@@ -5525,7 +5519,6 @@
           a.tag === b.tag &&
           a.isComment === b.isComment &&
           isDef(a.data) === isDef(b.data) &&
-          !childrenIgnored(a) && !childrenIgnored(b) &&
           sameInputType(a, b)
         ) || (
           isTrue(a.isAsyncPlaceholder) &&

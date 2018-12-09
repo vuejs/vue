@@ -637,15 +637,11 @@
     function end (tag, start) {
       if (depth === 1 && currentBlock) {
         currentBlock.end = start;
-        var text = content.slice(currentBlock.start, currentBlock.end);
+        var text = deIndent(content.slice(currentBlock.start, currentBlock.end));
         // pad content so that linters and pre-processors can output correct
         // line numbers in errors and warnings
-        if (options.pad) {
+        if (currentBlock.type !== 'template' && options.pad) {
           text = padContent(currentBlock, options.pad) + text;
-        } else {
-          // avoid to deindent if pad option is specified
-          // to retain original source position.
-          text = deIndent(text);
         }
         currentBlock.content = text;
         currentBlock = null;
