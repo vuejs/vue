@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "experimentalDecorators": true,
     "lib": [
       "dom",
       "es2015"
