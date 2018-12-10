@@ -1,5 +1,5 @@
 import Vue, { VNode } from "../index";
-import { AsyncComponent, ComponentOptions, FunctionalComponentOptions, Component } from "../index";
+import { ComponentOptions, Component } from "../index";
 import { CreateElement } from "../vue";
 
 interface MyComponent extends Vue {
@@ -79,6 +79,18 @@ Vue.component('union-prop', {
   }
 });
 
+Vue.component('prop-with-primitive-default', {
+  props: {
+    id: {
+      type: String,
+      default: () => String(Math.round(Math.random() * 10000000))
+    }
+  },
+  created() {
+    this.id;
+  }
+});
+
 Vue.component('component', {
   data() {
     this.$mount
@@ -142,6 +154,10 @@ Vue.component('component', {
       props: {
         myProp: "bar"
       },
+      directives: [{
+        name: 'a',
+        value: 'foo'
+      }],
       domProps: {
         innerHTML: "baz"
       },
@@ -160,7 +176,8 @@ Vue.component('component', {
         fontSize: '14px'
       },
       key: 'myKey',
-      ref: 'myRef'
+      ref: 'myRef',
+      refInFor: true
     }, [
       createElement(),
       createElement("div", "message"),
@@ -184,6 +201,9 @@ Vue.component('component', {
 
       [createElement("div", "message")]
     ]);
+  },
+  renderError(createElement, err) {
+    return createElement('pre', { style: { color: 'red' }}, err.stack)
   },
   staticRenderFns: [],
 
@@ -277,6 +297,10 @@ Vue.component('component-with-scoped-slot', {
           // named scoped slot as vnode data
           item: (props: ScopedSlotProps) => [h('span', [props.msg])]
         }
+      }),
+      h('child', {
+        // Passing down all slots from parent
+        scopedSlots: this.$scopedSlots
       })
     ])
   },
@@ -284,8 +308,8 @@ Vue.component('component-with-scoped-slot', {
     child: {
       render (this: Vue, h: CreateElement) {
         return h('div', [
-          this.$scopedSlots['default']({ msg: 'hi' }),
-          this.$scopedSlots['item']({ msg: 'hello' })
+          this.$scopedSlots['default']!({ msg: 'hi' }),
+          this.$scopedSlots['item']!({ msg: 'hello' })
         ])
       }
     }
@@ -294,14 +318,19 @@ Vue.component('component-with-scoped-slot', {
 
 Vue.component('narrow-array-of-vnode-type', {
   render (h): VNode {
-    const slot = this.$scopedSlots.default({})
-    if (typeof slot !== 'string') {
+    const slot = this.$scopedSlots.default!({})
+    if (typeof slot === 'string') {
+      return h('span', slot)
+    } else if (Array.isArray(slot)) {
       const first = slot[0]
       if (!Array.isArray(first) && typeof first !== 'string') {
-        return first;
+        return first
+      } else {
+        return h()
       }
+    } else {
+      return slot
     }
-    return h();
   }
 })
 
@@ -338,6 +367,16 @@ Vue.component('functional-component-check-optional', {
   functional: true
 })
 
+Vue.component('functional-component-multi-root', {
+  functional: true,
+  render(h) {
+    return [
+      h("tr", [h("td", "foo"), h("td", "bar")]),
+      h("tr", [h("td", "lorem"), h("td", "ipsum")])
+    ]
+  }
+})
+
 Vue.component("async-component", ((resolve, reject) => {
   setTimeout(() => {
     resolve(Vue.component("component"));
@@ -349,5 +388,25 @@ Vue.component("async-component", ((resolve, reject) => {
     });
   })
 }));
+
+Vue.component('functional-component-v-model', {
+  props: ['foo'],
+  functional: true,
+  model: {
+    prop: 'foo',
+    event: 'change'
+  },
+  render(createElement, context) {
+    return createElement("input", {
+      on: {
+        input: new Function()
+      },
+      domProps: {
+        value: context.props.foo
+      }
+    });
+  }
+});
+
 
 Vue.component('async-es-module-component', () => import('./es-module'))

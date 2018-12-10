@@ -149,6 +149,7 @@ describe('Directive v-model component', () => {
     expect(vm.text).toBe('foo o')
   })
 
+
   it('adds value to $attrs if no prop is defined', () => {
     const Test = {
       render: () => {}
@@ -167,5 +168,61 @@ describe('Directive v-model component', () => {
     }).$mount()
 
     expect(vm.$refs.test.$attrs.value).toEqual(vm.value)
+  })
+
+  // #8436
+  it('should not double transform mode props', () => {
+    const BaseInput = {
+      props: ['value'],
+      render (h) {
+        return h('input', {
+          domProps: {
+            value: this.value
+          },
+          on: {
+            input: e => this.$emit('input', e.target.value)
+          }
+        })
+      }
+    }
+
+    const FunctionalWrapper = {
+      functional: true,
+      render (h, ctx) {
+        return h(BaseInput, ctx.data)
+      }
+    }
+
+    let triggerCount = 0
+
+    const vm = new Vue({
+      components: {
+        FunctionalWrapper
+      },
+      template: `
+        <div>
+          <functional-wrapper v-model="val"/>
+        </div>
+      `,
+      data: {
+        internalVal: ''
+      },
+      computed: {
+        val: {
+          get () {
+            return this.internalVal
+          },
+          set (val) {
+            triggerCount++
+            this.internalVal = val
+          }
+        }
+      }
+    }).$mount()
+
+    document.body.appendChild(vm.$el)
+    triggerEvent(vm.$el.querySelector('input'), 'input')
+    expect(triggerCount).toBe(1)
+    document.body.removeChild(vm.$el)
   })
 })

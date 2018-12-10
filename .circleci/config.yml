@@ -3,7 +3,7 @@ version: 2
 defaults: &defaults
   working_directory: ~/project/vue
   docker:
-    - image: circleci/node:6-browsers
+    - image: vuejs/ci
 
 jobs:
   install:
@@ -62,6 +62,16 @@ jobs:
       - run: npm run test:ssr
       - run: npm run test:weex
 
+  trigger-regression-test:
+    <<: *defaults
+    steps:
+      - run:
+          command: |
+            curl --user ${CIRCLE_TOKEN}: \
+            --data build_parameters[CIRCLE_JOB]=update \
+            --data build_parameters[VUE_REVISION]=${CIRCLE_SHA1} \
+            https://circleci.com/api/v1.1/project/github/vuejs/regression-testing/tree/master
+
 workflows:
   version: 2
   install-and-parallel-test:
@@ -79,3 +89,42 @@ workflows:
       - test-ssr-weex:
           requires:
             - install
+      - trigger-regression-test:
+          filters:
+            branches:
+              only:
+                - regression-test
+          requires:
+            - test-cover
+            - lint-flow-types
+            - test-e2e
+            - test-ssr-weex
+  weekly_regression_test:
+    triggers:
+      - schedule:
+          # At 13:00 UTC (9:00 EDT) on every Monday
+          cron: "0 13 * * 1"
+          filters:
+            branches:
+              only:
+                dev
+    jobs:
+      - install
+      - test-cover:
+          requires:
+            - install
+      - lint-flow-types:
+          requires:
+            - install
+      - test-e2e:
+          requires:
+            - install
+      - test-ssr-weex:
+          requires:
+            - install
+      - trigger-regression-test:
+          requires:
+            - test-cover
+            - lint-flow-types
+            - test-e2e
+            - test-ssr-weex

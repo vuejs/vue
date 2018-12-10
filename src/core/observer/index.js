@@ -37,7 +37,7 @@ export function toggleObserving (value: boolean) {
 export class Observer {
   value: any;
   dep: Dep;
-  vmCount: number; // number of vms that has this object as root $data
+  vmCount: number; // number of vms that have this object as root $data
 
   constructor (value: any) {
     this.value = value
@@ -45,10 +45,11 @@ export class Observer {
     this.vmCount = 0
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
-      const augment = hasProto
-        ? protoAugment
-        : copyAugment
-      augment(value, arrayMethods, arrayKeys)
+      if (hasProto) {
+        protoAugment(value, arrayMethods)
+      } else {
+        copyAugment(value, arrayMethods, arrayKeys)
+      }
       this.observeArray(value)
     } else {
       this.walk(value)
@@ -56,7 +57,7 @@ export class Observer {
   }
 
   /**
-   * Walk through each property and convert them into
+   * Walk through all properties and convert them into
    * getter/setters. This method should only be called when
    * value type is Object.
    */
@@ -80,17 +81,17 @@ export class Observer {
 // helpers
 
 /**
- * Augment an target Object or Array by intercepting
+ * Augment a target Object or Array by intercepting
  * the prototype chain using __proto__
  */
-function protoAugment (target, src: Object, keys: any) {
+function protoAugment (target, src: Object) {
   /* eslint-disable no-proto */
   target.__proto__ = src
   /* eslint-enable no-proto */
 }
 
 /**
- * Augment an target Object or Array by defining
+ * Augment a target Object or Array by defining
  * hidden properties.
  */
 /* istanbul ignore next */
@@ -147,10 +148,10 @@ export function defineReactive (
 
   // cater for pre-defined getter/setters
   const getter = property && property.get
-  if (!getter && arguments.length === 2) {
+  const setter = property && property.set
+  if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
   }
-  const setter = property && property.set
 
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
@@ -179,6 +180,8 @@ export function defineReactive (
       if (process.env.NODE_ENV !== 'production' && customSetter) {
         customSetter()
       }
+      // #7981: for accessor properties without setter
+      if (getter && !setter) return
       if (setter) {
         setter.call(obj, newVal)
       } else {

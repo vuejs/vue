@@ -167,7 +167,7 @@ describe('Directive v-model text', () => {
           '<span ref="rs">{{selections}}</span>' +
         '</div>'
     }).$mount()
-    var inputs = vm.$el.getElementsByTagName('input')
+    const inputs = vm.$el.getElementsByTagName('input')
     inputs[1].value = 'test'
     triggerEvent(inputs[1], 'input')
     waitForUpdate(() => {
