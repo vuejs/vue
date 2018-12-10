@@ -155,14 +155,14 @@ describe('Options lifecycle hooks', () => {
 
     // #8076
     it('should not be called after destroy', done => {
-      const beforeUpdated = jasmine.createSpy('beforeUpdated')
+      const beforeUpdate = jasmine.createSpy('beforeUpdate')
       const destroyed = jasmine.createSpy('destroyed')
 
       Vue.component('todo', {
         template: '<div>{{todo.done}}</div>',
         props: ['todo'],
         destroyed,
-        beforeUpdated
+        beforeUpdate
       })
 
       const vm = new Vue({
