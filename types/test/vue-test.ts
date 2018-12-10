@@ -102,10 +102,10 @@ class Test extends Vue {
     this.compile("<div>{{ message }}</div>");
     this
       .use(() => {
-        
+
       })
       .use(() => {
-        
+
       })
       .mixin({})
       .mixin({});
@@ -193,3 +193,10 @@ Vue.extend({
     return h('canvas', {}, [a])
   }
 })
+
+declare function decorate<VC extends typeof Vue>(v: VC): VC;
+
+@decorate
+class Decorated extends Vue {
+  a = 123;
+}
