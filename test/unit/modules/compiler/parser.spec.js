@@ -250,7 +250,7 @@ describe('parser', () => {
         </transition-group>
       </div>
     `, baseOptions)
-    expect('Do not use v-for index as key on <transtion-group> children').toHaveBeenWarned()
+    expect('Do not use v-for index as key on <transition-group> children').toHaveBeenWarned()
   })
 
   it('v-pre directive', () => {

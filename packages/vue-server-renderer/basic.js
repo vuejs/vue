@@ -3909,7 +3909,7 @@
           var parent = el.parent;
           if (iterator && iterator === exp && parent && parent.tag === 'transition-group') {
             warn$1(
-              "Do not use v-for index as key on <transtion-group> children, " +
+              "Do not use v-for index as key on <transition-group> children, " +
               "this is the same as not using keys."
             );
           }
