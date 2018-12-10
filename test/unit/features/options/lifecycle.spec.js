@@ -186,7 +186,7 @@ describe('Options lifecycle hooks', () => {
       vm.todos[0].done = true
       waitForUpdate(() => {
         expect(destroyed).toHaveBeenCalled()
-        expect(beforeUpdated).not.toHaveBeenCalled()
+        expect(beforeUpdate).not.toHaveBeenCalled()
       }).then(done)
     })
   })
