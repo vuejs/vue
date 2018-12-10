@@ -1,9 +1,14 @@
 import { Vue } from "./vue";
 
-export type ScopedSlot = (props: any) => VNodeChildrenArrayContents | VNode | string;
+// Scoped slots can technically return anything if used from
+// a render function, but this is "good enough" for templates
+export type ScopedSlot = (props: any) => ScopedSlotChildren;
+export type ScopedSlotChildren = ScopedSlotArrayContents | VNode | string | undefined;
+export interface ScopedSlotArrayContents extends Array<ScopedSlotChildren> {}
 
-export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string;
-export interface VNodeChildrenArrayContents extends Array<VNode | string | VNodeChildrenArrayContents> {}
+// Relaxed type compatible with $createElement
+export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string | boolean | null | undefined;
+export interface VNodeChildrenArrayContents extends Array<VNodeChildren | VNode> {}
 
 export interface VNode {
   tag?: string;
@@ -27,7 +32,7 @@ export interface VNodeComponentOptions {
   Ctor: typeof Vue;
   propsData?: object;
   listeners?: object;
-  children?: VNodeChildren;
+  children?: VNode[];
   tag?: string;
 }
 
