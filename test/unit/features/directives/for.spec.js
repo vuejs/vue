@@ -484,6 +484,29 @@ describe('Directive v-for', () => {
     expect(vm.$el.textContent).toBe('12')
   })
 
+  // #9181
+  it('components with v-for and empty list', done => {
+    const vm = new Vue({
+      template:
+        '<div attr>' +
+          '<foo v-for="item in list">{{ item }}</foo>' +
+        '</div>',
+      data: {
+        list: undefined
+      },
+      components: {
+        foo: {
+          template: '<div><slot></slot></div>'
+        },
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('')
+    vm.list = [1, 2, 3]
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
+    }).then(done)
+  })
+
   const supportsDestructuring = (() => {
     try {
       new Function('var { foo } = bar')
