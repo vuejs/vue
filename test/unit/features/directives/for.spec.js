@@ -489,7 +489,7 @@ describe('Directive v-for', () => {
     const vm = new Vue({
       template:
         '<div attr>' +
-          '<foo v-for="item in list">{{ item }}</foo>' +
+          '<foo v-for="item in list" :key="item">{{ item }}</foo>' +
         '</div>',
       data: {
         list: undefined
@@ -498,6 +498,23 @@ describe('Directive v-for', () => {
         foo: {
           template: '<div><slot></slot></div>'
         },
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('')
+    vm.list = [1, 2, 3]
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
+    }).then(done)
+  })
+
+  it('elements with v-for and empty list', done => {
+    const vm = new Vue({
+      template:
+        '<div attr>' +
+          '<div v-for="item in list">{{ item }}</div>' +
+        '</div>',
+      data: {
+        list: undefined
       }
     }).$mount()
     expect(vm.$el.innerHTML).toBe('')
