@@ -3467,7 +3467,7 @@
 
     el.model = {
       value: ("(" + value + ")"),
-      expression: ("\"" + value + "\""),
+      expression: JSON.stringify(value),
       callback: ("function (" + baseValueExpression + ") {" + assignment + "}")
     };
   }
@@ -3909,7 +3909,7 @@
           var parent = el.parent;
           if (iterator && iterator === exp && parent && parent.tag === 'transition-group') {
             warn$1(
-              "Do not use v-for index as key on <transtion-group> children, " +
+              "Do not use v-for index as key on <transition-group> children, " +
               "this is the same as not using keys."
             );
           }
@@ -5058,7 +5058,9 @@
         el$1.tag !== 'template' &&
         el$1.tag !== 'slot'
       ) {
-        var normalizationType = checkSkip && state.maybeComponent(el$1) ? ",1" : "";
+        var normalizationType = checkSkip
+          ? state.maybeComponent(el$1) ? ",1" : ",0"
+          : "";
         return ("" + ((altGenElement || genElement)(el$1, state)) + normalizationType)
       }
       var normalizationType$1 = checkSkip
@@ -6884,9 +6886,10 @@
         ret[i] = render(val[key], key, i);
       }
     }
-    if (isDef(ret)) {
-      (ret)._isVList = true;
+    if (!isDef(ret)) {
+      ret = [];
     }
+    (ret)._isVList = true;
     return ret
   }
 
