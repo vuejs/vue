@@ -186,6 +186,50 @@ describe('Component', () => {
     }).then(done)
   })
 
+  it('components with v-for and empty list', done => {
+    const vm = new Vue({
+      template:
+        '<div attr>' +
+          '<foo v-for="item in list">{{ item }}</foo>' +
+        '</div>',
+      data: {
+        list: undefined
+      },
+      components: {
+        foo: {
+          template: '<div><slot></slot></div>'
+        },
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('')
+    vm.list = [1, 2, 3]
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
+    }).then(done)
+  })
+
+  it('components with v-for and empty list, root element has no attrs', done => {
+    const vm = new Vue({
+      template:
+        '<div>' +
+          '<foo v-for="item in list">{{ item }}</foo>' +
+        '</div>',
+      data: {
+        list: undefined
+      },
+      components: {
+        foo: {
+          template: '<div><slot></slot></div>'
+        },
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('')
+    vm.list = [1, 2, 3]
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
+    }).then(done)
+  })
+
   it('dynamic elements with domProps', done => {
     const vm = new Vue({
       template: '<component :is="view" :value.prop="val"></component>',
