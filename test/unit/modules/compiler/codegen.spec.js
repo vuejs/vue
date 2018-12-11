@@ -151,6 +151,27 @@ describe('codegen', () => {
     )
   })
 
+  it('generate v-model directive', () => {
+    assertCodegen(
+      '<input v-model="test">',
+      `with(this){return _c('input',{directives:[{name:"model",rawName:"v-model",value:(test),expression:"test"}],domProps:{"value":(test)},on:{"input":function($event){if($event.target.composing)return;test=$event.target.value}}})}`
+    )
+  })
+
+  it('generate multiline v-model directive', () => {
+    assertCodegen(
+      '<input v-model="\n test \n">',
+      `with(this){return _c('input',{directives:[{name:"model",rawName:"v-model",value:(\n test \n),expression:"\\n test \\n"}],domProps:{"value":(\n test \n)},on:{"input":function($event){if($event.target.composing)return;\n test \n=$event.target.value}}})}`
+    )
+  })
+
+  it('generate multiline v-model directive on custom component', () => {
+    assertCodegen(
+      '<my-component v-model="\n test \n" />',
+      `with(this){return _c('my-component',{model:{value:(\n test \n),callback:function ($$v) {\n test \n=$$v},expression:"\\n test \\n"}})}`
+    )
+  })
+
   it('generate template tag', () => {
     assertCodegen(
       '<div><template><p>{{hello}}</p></template></div>',
