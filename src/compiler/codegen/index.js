@@ -406,7 +406,9 @@ export function genChildren (
       el.tag !== 'template' &&
       el.tag !== 'slot'
     ) {
-      const normalizationType = checkSkip && state.maybeComponent(el) ? `,1` : ``
+      const normalizationType = checkSkip
+        ? state.maybeComponent(el) ? `,1` : `,0`
+        : ``
       return `${(altGenElement || genElement)(el, state)}${normalizationType}`
     }
     const normalizationType = checkSkip
