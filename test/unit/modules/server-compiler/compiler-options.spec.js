@@ -1,7 +1,7 @@
 import { ssrCompile } from 'web/server/compiler'
 
 describe('ssrCompile options', () => {
-  it('comments', done => {
+  it('comments', () => {
     const compiled = ssrCompile(`
       <div>
         <!-- test comments -->
