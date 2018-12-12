@@ -207,7 +207,7 @@ export default class TemplateRenderer {
     if (this.clientManifest) {
       const initial = this.preloadFiles.filter(({ file }) => isJS(file))
       const async = (this.getUsedAsyncFiles(context) || []).filter(({ file }) => isJS(file))
-      const needed = [initial[0]].concat(async || [], initial.slice(1))
+      const needed = [initial[0]].concat(async, initial.slice(1))
       return needed.map(({ file }) => {
         return `<script src="${this.publicPath}${file}" defer></script>`
       }).join('')
