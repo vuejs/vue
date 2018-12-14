@@ -23,7 +23,6 @@ import {
   isDef,
   isUndef,
   isTrue,
-  isFalse,
   makeMap,
   isRegExp,
   isPrimitive
