@@ -177,7 +177,7 @@ export function createPatchFunction (backend) {
       setScope(vnode)
 
       /* istanbul ignore if */
-      if (__WEEX__ && (isUndef(data) || isFalse(data.appendAsTree))) {
+      if (__WEEX__ && (isUndef(data) || !data.appendAsTree)) {
         // in Weex, the default insertion order is parent-first.
         // List items can be optimized to use children-first insertion
         // with append="tree".
