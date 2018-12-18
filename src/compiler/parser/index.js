@@ -29,6 +29,8 @@ const argRE = /:(.*)$/
 export const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
 
+const lineBreakRE = /^[\s\r\n]*\n+[\s\r\n]*|[\s\r\n]*\n+[\s\r\n]*$/g
+
 const decodeHTMLCached = cached(he.decode)
 
 // configurable state
@@ -79,6 +81,9 @@ export function parse (
 
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
+  // with-line-break
+  const removeWhitespace = options.removeWhitespace || (preserveWhitespace ? 'none' : 'all')
+
   let root
   let currentParent
   let inVPre = false
@@ -258,11 +263,16 @@ export function parse (
         return
       }
       const children = currentParent.children
-      text = inPre || text.trim()
-        ? isTextTag(currentParent) ? text : decodeHTMLCached(text)
+      if (inPre || text.trim()) {
+        text = isTextTag(currentParent) ? text : decodeHTMLCached(text)
+      } else {
         // only preserve whitespace if its not right after a starting tag
-        : preserveWhitespace && children.length ? ' ' : ''
+        text = (removeWhitespace !== 'all') && children.length ? ' ' : ''
+      }
       if (text) {
+        if (removeWhitespace === 'with-line-break') {
+          text = text.replace(lineBreakRE, '')
+        }
         let res
         if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
           children.push({

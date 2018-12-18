@@ -7,6 +7,7 @@ declare type CompilerOptions = {
   canBeLeftOpenTag?: (tag: string) => ?boolean; // check if a tag can be left opened
   isReservedTag?: (tag: string) => ?boolean; // check if a tag is a native for the platform
   preserveWhitespace?: boolean; // preserve whitespace between elements?
+  removeWhitespace?: string; // how to deal with whitespace between elements?
   optimize?: boolean; // optimize static content?
 
   // web specific

@@ -757,4 +757,81 @@ describe('parser', () => {
     const ast = parse(`<p>{{\r\nmsg\r\n}}</p>`, baseOptions)
     expect(ast.children[0].expression).toBe('_s(msg)')
   })
+
+  it('should remove whitespaces correctly with `preserveWhitespace: false`', () => {
+    const options = extend({
+      preserveWhitespace: false
+    }, baseOptions)
+
+    const ast = parse('<p>\n  Welcome to <b>Vue.js</b> <i>world</i>.\n  Have fun!\n</p>', options)
+    expect(ast.tag).toBe('p')
+    expect(ast.children.length).toBe(4)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('\n  Welcome to ')
+    expect(ast.children[1].tag).toBe('b')
+    expect(ast.children[1].children[0].text).toBe('Vue.js')
+    expect(ast.children[2].tag).toBe('i')
+    expect(ast.children[2].children[0].text).toBe('world')
+    expect(ast.children[3].type).toBe(3)
+    expect(ast.children[3].text).toBe('.\n  Have fun!\n')
+  })
+
+  it('should remove whitespaces correctly with `removeWhitespace: \'with-line-break\'`', () => {
+    const options = extend({
+      removeWhitespace: 'with-line-break'
+    }, baseOptions)
+
+    const ast = parse('<p>\n  Welcome to <b>Vue.js</b> <i>world</i>.\n  Have fun!\n</p>', options)
+    expect(ast.tag).toBe('p')
+    expect(ast.children.length).toBe(5)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('Welcome to ')
+    expect(ast.children[1].tag).toBe('b')
+    expect(ast.children[1].children[0].text).toBe('Vue.js')
+    expect(ast.children[2].type).toBe(3)
+    expect(ast.children[2].text).toBe(' ')
+    expect(ast.children[3].tag).toBe('i')
+    expect(ast.children[3].children[0].text).toBe('world')
+    expect(ast.children[4].type).toBe(3)
+    expect(ast.children[4].text).toBe('.\n  Have fun!')
+  })
+
+  it('should remove whitespaces correctly with `removeWhitespace: \'all\'`', () => {
+    const options = extend({
+      removeWhitespace: 'all'
+    }, baseOptions)
+
+    const ast = parse('<p>\n  Welcome to <b>Vue.js</b> <i>world</i>.\n  Have fun!\n</p>', options)
+    expect(ast.tag).toBe('p')
+    expect(ast.children.length).toBe(4)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('\n  Welcome to ')
+    expect(ast.children[1].tag).toBe('b')
+    expect(ast.children[1].children[0].text).toBe('Vue.js')
+    expect(ast.children[2].tag).toBe('i')
+    expect(ast.children[2].children[0].text).toBe('world')
+    expect(ast.children[3].type).toBe(3)
+    expect(ast.children[3].text).toBe('.\n  Have fun!\n')
+  })
+
+  it('should ignore `preserveWhitespace: false` if `removeWhitespace` is specified', () => {
+    const options = extend({
+      removeWhitespace: 'with-line-break',
+      preserveWhitespace: false
+    }, baseOptions)
+
+    const ast = parse('<p>\n  Welcome to <b>Vue.js</b> <i>world</i>.\n  Have fun!\n</p>', options)
+    expect(ast.tag).toBe('p')
+    expect(ast.children.length).toBe(5)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('Welcome to ')
+    expect(ast.children[1].tag).toBe('b')
+    expect(ast.children[1].children[0].text).toBe('Vue.js')
+    expect(ast.children[2].type).toBe(3)
+    expect(ast.children[2].text).toBe(' ')
+    expect(ast.children[3].tag).toBe('i')
+    expect(ast.children[3].children[0].text).toBe('world')
+    expect(ast.children[4].type).toBe(3)
+    expect(ast.children[4].text).toBe('.\n  Have fun!')
+  })
 })
