@@ -165,8 +165,10 @@ function assertType (value: any, type: Function): {
     valid = isPlainObject(value)
   } else if (expectedType === 'Array') {
     valid = Array.isArray(value)
-  } else {
+  } else if (type.prototype instanceof Object){
     valid = value instanceof type
+  } else {
+    valid = false
   }
   return {
     valid,
