@@ -14,6 +14,8 @@ import {
   isFalsyAttrValue
 } from 'web/util/attrs'
 
+import { isSSRUnsafeAttr } from 'web/server/util'
+
 export default function renderAttrs (node: VNodeWithData): string {
   let attrs = node.data.attrs
   let res = ''
@@ -34,6 +36,9 @@ export default function renderAttrs (node: VNodeWithData): string {
   }
 
   for (const key in attrs) {
+    if (isSSRUnsafeAttr(key)) {
+      continue
+    }
     if (key === 'style') {
       // leave it to the style module
       continue

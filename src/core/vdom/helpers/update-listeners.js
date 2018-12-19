@@ -1,7 +1,13 @@
 /* @flow */
 
 import { warn } from 'core/util/index'
-import { cached, isUndef, isPlainObject } from 'shared/util'
+
+import {
+  cached,
+  isUndef,
+  isTrue,
+  isPlainObject
+} from 'shared/util'
 
 const normalizeEvent = cached((name: string): {
   name: string,
@@ -47,6 +53,7 @@ export function updateListeners (
   oldOn: Object,
   add: Function,
   remove: Function,
+  createOnceHandler: Function,
   vm: Component
 ) {
   let name, def, cur, old, event
@@ -68,7 +75,10 @@ export function updateListeners (
       if (isUndef(cur.fns)) {
         cur = on[name] = createFnInvoker(cur)
       }
-      add(event.name, cur, event.once, event.capture, event.passive, event.params)
+      if (isTrue(event.once)) {
+        cur = on[name] = createOnceHandler(event.name, cur, event.capture)
+      }
+      add(event.name, cur, event.capture, event.passive, event.params)
     } else if (cur !== old) {
       old.fns = cur
       on[name] = old

@@ -73,7 +73,7 @@ describe('Instance methods data', () => {
     })
 
     it('deep watch', done => {
-      var oldA = vm.a
+      const oldA = vm.a
       vm.$watch('a', spy, { deep: true })
       vm.a.b = 2
       waitForUpdate(() => {
@@ -85,7 +85,7 @@ describe('Instance methods data', () => {
     })
 
     it('handler option', done => {
-      var oldA = vm.a
+      const oldA = vm.a
       vm.$watch('a', {
         handler: spy,
         deep: true

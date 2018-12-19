@@ -3,10 +3,7 @@
 import { addAttr } from 'compiler/helpers'
 
 // mark component root nodes as
-export function postTransformComponentRoot (
-  el: ASTElement,
-  options: WeexCompilerOptions
-) {
+export function postTransformComponentRoot (el: ASTElement) {
   if (!el.parent) {
     // component root
     addAttr(el, '@isComponentRoot', 'true')

@@ -58,6 +58,7 @@ describe('create-component', () => {
       vnode = createComponent(async, data, vm, vm)
       expect(vnode.isComment).toBe(true) // not to be loaded yet.
       expect(vnode.asyncFactory).toBe(async)
+      expect(vnode.asyncFactory.contexts.length).toEqual(1)
     }
     function loaded () {
       vnode = createComponent(async, data, vm, vm)
@@ -68,6 +69,7 @@ describe('create-component', () => {
       expect(vnode.elm).toBeUndefined()
       expect(vnode.ns).toBeUndefined()
       expect(vnode.context).toEqual(vm)
+      expect(vnode.asyncFactory.contexts.length).toEqual(0)
       expect(vm.$forceUpdate).toHaveBeenCalled()
       done()
     }

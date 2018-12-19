@@ -19,13 +19,13 @@ describe('Options methods', () => {
     expect(vm.a).toBe(2)
   })
 
-  it('should warn undefined methods', () => {
+  it('should warn methods of not function type', () => {
     new Vue({
       methods: {
-        hello: undefined
+        hello: {}
       }
     })
-    expect(`Method "hello" has an undefined value in the component definition`).toHaveBeenWarned()
+    expect('Method "hello" has type "object" in the component definition').toHaveBeenWarned()
   })
 
   it('should warn methods conflicting with data', () => {

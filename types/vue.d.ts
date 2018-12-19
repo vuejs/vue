@@ -21,14 +21,14 @@ export interface CreateElement {
 }
 
 export interface Vue {
-  readonly $el: HTMLElement;
+  readonly $el: Element;
   readonly $options: ComponentOptions<Vue>;
   readonly $parent: Vue;
   readonly $root: Vue;
   readonly $children: Vue[];
   readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[] };
-  readonly $slots: { [key: string]: VNode[] };
-  readonly $scopedSlots: { [key: string]: ScopedSlot };
+  readonly $slots: { [key: string]: VNode[] | undefined };
+  readonly $scopedSlots: { [key: string]: ScopedSlot | undefined };
   readonly $isServer: boolean;
   readonly $data: Record<string, any>;
   readonly $props: Record<string, any>;
@@ -53,7 +53,7 @@ export interface Vue {
     options?: WatchOptions
   ): (() => void);
   $on(event: string | string[], callback: Function): this;
-  $once(event: string, callback: Function): this;
+  $once(event: string | string[], callback: Function): this;
   $off(event?: string | string[], callback?: Function): this;
   $emit(event: string, ...args: any[]): this;
   $nextTick(callback: (this: this) => void): void;
@@ -74,11 +74,12 @@ export interface VueConfiguration {
   warnHandler(msg: string, vm: Vue, trace: string): void;
   ignoredElements: (string | RegExp)[];
   keyCodes: { [key: string]: number | number[] };
+  async: boolean;
 }
 
 export interface VueConstructor<V extends Vue = Vue> {
   new <Data = object, Methods = object, Computed = object, PropNames extends string = never>(options?: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames>): CombinedVueInstance<V, Data, Methods, Computed, Record<PropNames, any>>;
-  // ideally, the return type should just contains Props, not Record<keyof Props, any>. But TS requires Base constructors must all have the same return type.
+  // ideally, the return type should just contain Props, not Record<keyof Props, any>. But TS requires to have Base constructors with the same return type.
   new <Data = object, Methods = object, Computed = object, Props = object>(options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): CombinedVueInstance<V, Data, Methods, Computed, Record<keyof Props, any>>;
   new (options?: ComponentOptions<V>): CombinedVueInstance<V, object, object, object, Record<keyof object, any>>;
 
@@ -90,9 +91,9 @@ export interface VueConstructor<V extends Vue = Vue> {
 
   nextTick(callback: () => void, context?: any[]): void;
   nextTick(): Promise<void>
-  set<T>(object: object, key: string, value: T): T;
+  set<T>(object: object, key: string | number, value: T): T;
   set<T>(array: T[], key: number, value: T): T;
-  delete(object: object, key: string): void;
+  delete(object: object, key: string | number): void;
   delete<T>(array: T[], key: number): void;
 
   directive(
@@ -110,9 +111,9 @@ export interface VueConstructor<V extends Vue = Vue> {
   component<Props>(id: string, definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>>): ExtendedVue<V, {}, {}, {}, Props>;
   component(id: string, definition?: ComponentOptions<V>): ExtendedVue<V, {}, {}, {}, {}>;
 
-  use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): void;
-  use(plugin: PluginObject<any> | PluginFunction<any>, ...options: any[]): void;
-  mixin(mixin: VueConstructor | ComponentOptions<Vue>): void;
+  use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): VueConstructor<V>;
+  use(plugin: PluginObject<any> | PluginFunction<any>, ...options: any[]): VueConstructor<V>;
+  mixin(mixin: VueConstructor | ComponentOptions<Vue>): VueConstructor<V>;
   compile(template: string): {
     render(createElement: typeof Vue.prototype.$createElement): VNode;
     staticRenderFns: (() => VNode)[];

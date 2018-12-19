@@ -5,7 +5,7 @@ const components = createErrorTestComponents()
 describe('Error handling', () => {
   // hooks that prevents the component from rendering, but should not
   // break parent component
-  ;[
+  [
     ['data', 'data()'],
     ['render', 'render'],
     ['beforeCreate', 'beforeCreate hook'],
@@ -87,6 +87,16 @@ describe('Error handling', () => {
     waitForUpdate(() => {
       expect(`Error in callback for watcher "n"`).toHaveBeenWarned()
       expect(`Error: userWatcherCallback`).toHaveBeenWarned()
+    }).thenWaitFor(next => {
+      assertBothInstancesActive(vm).end(next)
+    }).then(done)
+  })
+
+  it('should recover from errors in user immediate watcher callback', done => {
+    const vm = createTestInstance(components.userImmediateWatcherCallback)
+    waitForUpdate(() => {
+      expect(`Error in callback for immediate watcher "n"`).toHaveBeenWarned()
+      expect(`Error: userImmediateWatcherCallback error`).toHaveBeenWarned()
     }).thenWaitFor(next => {
       assertBothInstancesActive(vm).end(next)
     }).then(done)
@@ -227,6 +237,21 @@ function createErrorTestComponents () {
     watch: {
       n () {
         throw new Error('userWatcherCallback error')
+      }
+    },
+    render (h) {
+      return h('div', this.n)
+    }
+  }
+
+  components.userImmediateWatcherCallback = {
+    props: ['n'],
+    watch: {
+      n: {
+        immediate: true,
+        handler () {
+          throw new Error('userImmediateWatcherCallback error')
+        }
       }
     },
     render (h) {

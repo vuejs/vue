@@ -80,7 +80,7 @@ export function parseComponent (
     }
   }
 
-  function end (tag: string, start: number, end: number) {
+  function end (tag: string, start: number) {
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
       let text = deindent(content.slice(currentBlock.start, currentBlock.end))
