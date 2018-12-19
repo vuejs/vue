@@ -2,7 +2,7 @@
 
 import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
-import { withMacroTask, isIE, supportsPassive } from 'core/util/index'
+import { isIE, supportsPassive } from 'core/util/index'
 import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model'
 
 // normalize v-model event tokens that can only be determined at runtime.
@@ -44,7 +44,6 @@ function add (
   capture: boolean,
   passive: boolean
 ) {
-  handler = withMacroTask(handler)
   target.addEventListener(
     event,
     handler,
