@@ -15,19 +15,19 @@ module.exports = {
       .assert.checked('#case-1 input', false)
 
       // // #6566
-      // .assert.containsText('#case-2 button', 'Expand is True')
-      // .assert.containsText('.count-a', 'countA: 0')
-      // .assert.containsText('.count-b', 'countB: 0')
+      .assert.containsText('#case-2 button', 'Expand is True')
+      .assert.containsText('.count-a', 'countA: 0')
+      .assert.containsText('.count-b', 'countB: 0')
 
-      // .click('#case-2 button')
-      // .assert.containsText('#case-2 button', 'Expand is False')
-      // .assert.containsText('.count-a', 'countA: 1')
-      // .assert.containsText('.count-b', 'countB: 0')
+      .click('#case-2 button')
+      .assert.containsText('#case-2 button', 'Expand is False')
+      .assert.containsText('.count-a', 'countA: 1')
+      .assert.containsText('.count-b', 'countB: 0')
 
-      // .click('#case-2 button')
-      // .assert.containsText('#case-2 button', 'Expand is True')
-      // .assert.containsText('.count-a', 'countA: 1')
-      // .assert.containsText('.count-b', 'countB: 1')
+      .click('#case-2 button')
+      .assert.containsText('#case-2 button', 'Expand is True')
+      .assert.containsText('.count-a', 'countA: 1')
+      .assert.containsText('.count-b', 'countB: 1')
 
       .end()
   }

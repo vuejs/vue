@@ -2,7 +2,7 @@
 
 import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
-import { isIE, supportsPassive } from 'core/util/index'
+import { isIE, isPhantomJS, supportsPassive } from 'core/util/index'
 import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model'
 
 // normalize v-model event tokens that can only be determined at runtime.
@@ -38,32 +38,130 @@ function createOnceHandler (event, handler, capture) {
   }
 }
 
+const delegateRE = /^(?:click|dblclick|submit|(?:key|mouse|touch|pointer).*)$/
+const eventCounts = {}
+const attachedGlobalHandlers = {}
+
+type TargetRef = { el: Element | Document }
+
 function add (
-  event: string,
+  name: string,
   handler: Function,
   capture: boolean,
   passive: boolean
 ) {
-  target.addEventListener(
-    event,
-    handler,
-    supportsPassive
-      ? { capture, passive }
-      : capture
-  )
+  if (!capture && !passive && delegateRE.test(name)) {
+    const count = eventCounts[name]
+    let store = target.__events
+    if (!count) {
+      attachGlobalHandler(name)
+    }
+    if (!store) {
+      store = target.__events = {}
+    }
+    if (!store[name]) {
+      eventCounts[name]++
+    }
+    store[name] = handler
+  } else {
+    target.addEventListener(
+      name,
+      handler,
+      supportsPassive
+        ? { capture, passive }
+        : capture
+    )
+  }
+}
+
+function attachGlobalHandler(name: string) {
+  const handler = (attachedGlobalHandlers[name] = (e: any) => {
+    const isClick = e.type === 'click' || e.type === 'dblclick'
+    if (isClick && e.button !== 0) {
+      e.stopPropagation()
+      return false
+    }
+    const targetRef: TargetRef = { el: document }
+    dispatchEvent(e, name, isClick, targetRef)
+  })
+  document.addEventListener(name, handler)
+  eventCounts[name] = 0
+}
+
+function stopPropagation() {
+  this.cancelBubble = true
+  if (!this.immediatePropagationStopped) {
+    this.stopImmediatePropagation()
+  }
+}
+
+function dispatchEvent(
+  e: Event,
+  name: string,
+  isClick: boolean,
+  targetRef: TargetRef
+) {
+  let el: any = e.target
+  let userEvent
+  if (isPhantomJS) {
+    // in PhantomJS it throws if we try to re-define currentTarget,
+    // so instead we create a wrapped event to the user
+    userEvent = Object.create((e: any))
+    userEvent.stopPropagation = stopPropagation.bind((e: any))
+    userEvent.preventDefault = e.preventDefault.bind(e)
+  } else {
+    userEvent = e
+  }
+  Object.defineProperty(userEvent, 'currentTarget', ({
+    configurable: true,
+    get() {
+      return targetRef.el
+    }
+  }: any))
+  while (el != null) {
+    // Don't process clicks on disabled elements
+    if (isClick && el.disabled) {
+      break
+    }
+    const store = el.__events
+    if (store) {
+      const handler = store[name]
+      if (handler) {
+        targetRef.el = el
+        handler(userEvent)
+        if (e.cancelBubble) {
+          break
+        }
+      }
+    }
+    el = el.parentNode
+  }
+}
+
+function removeGlobalHandler(name: string) {
+  document.removeEventListener(name, attachedGlobalHandlers[name])
+  attachedGlobalHandlers[name] = null
 }
 
 function remove (
-  event: string,
+  name: string,
   handler: Function,
   capture: boolean,
   _target?: HTMLElement
 ) {
-  (_target || target).removeEventListener(
-    event,
-    handler._withTask || handler,
-    capture
-  )
+  const el: any = _target || target
+  if (!capture && delegateRE.test(name)) {
+    el.__events[name] = null
+    if (--eventCounts[name] === 0) {
+      removeGlobalHandler(name)
+    }
+  } else {
+    el.removeEventListener(
+      name,
+      handler._withTask || handler,
+      capture
+    )
+  }
 }
 
 function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {

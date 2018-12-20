@@ -735,10 +735,11 @@ describe('Directive v-on', () => {
 
   it('should transform click.middle to mouseup', () => {
     const spy = jasmine.createSpy('click.middle')
-    const vm = new Vue({
+    vm = new Vue({
+      el,
       template: `<div @click.middle="foo"></div>`,
       methods: { foo: spy }
-    }).$mount()
+    })
     triggerEvent(vm.$el, 'mouseup', e => { e.button = 0 })
     expect(spy).not.toHaveBeenCalled()
     triggerEvent(vm.$el, 'mouseup', e => { e.button = 1 })
