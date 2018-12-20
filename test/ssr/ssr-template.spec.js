@@ -99,6 +99,41 @@ describe('SSR: template option', () => {
     })
   })
 
+  it('renderToString with interpolation and context.rendered', done => {
+    const renderer = createRenderer({
+      template: interpolateTemplate
+    })
+
+    const context = {
+      title: '<script>hacks</script>',
+      snippet: '<div>foo</div>',
+      head: '<meta name="viewport" content="width=device-width">',
+      styles: '<style>h1 { color: red }</style>',
+      state: { a: 0 },
+      rendered: context => {
+        context.state.a = 1
+      }
+    }
+
+    renderer.renderToString(new Vue({
+      template: '<div>hi</div>'
+    }), context, (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain(
+        `<html><head>` +
+        // double mustache should be escaped
+        `<title>&lt;script&gt;hacks&lt;/script&gt;</title>` +
+        `${context.head}${context.styles}</head><body>` +
+        `<div data-server-rendered="true">hi</div>` +
+        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        // triple should be raw
+        `<div>foo</div>` +
+        `</body></html>`
+      )
+      done()
+    })
+  })
+
   it('renderToStream', done => {
     const renderer = createRenderer({
       template: defaultTemplate
@@ -140,6 +175,46 @@ describe('SSR: template option', () => {
       head: '<meta name="viewport" content="width=device-width">',
       styles: '<style>h1 { color: red }</style>',
       state: { a: 1 }
+    }
+
+    const stream = renderer.renderToStream(new Vue({
+      template: '<div>hi</div>'
+    }), context)
+
+    let res = ''
+    stream.on('data', chunk => {
+      res += chunk
+    })
+    stream.on('end', () => {
+      expect(res).toContain(
+        `<html><head>` +
+        // double mustache should be escaped
+        `<title>&lt;script&gt;hacks&lt;/script&gt;</title>` +
+        `${context.head}${context.styles}</head><body>` +
+        `<div data-server-rendered="true">hi</div>` +
+        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        // triple should be raw
+        `<div>foo</div>` +
+        `</body></html>`
+      )
+      done()
+    })
+  })
+
+  it('renderToStream with interpolation and context.rendered', done => {
+    const renderer = createRenderer({
+      template: interpolateTemplate
+    })
+
+    const context = {
+      title: '<script>hacks</script>',
+      snippet: '<div>foo</div>',
+      head: '<meta name="viewport" content="width=device-width">',
+      styles: '<style>h1 { color: red }</style>',
+      state: { a: 0 },
+      rendered: context => {
+        context.state.a = 1
+      }
     }
 
     const stream = renderer.renderToStream(new Vue({
