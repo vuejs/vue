@@ -22,6 +22,23 @@ describe('Error handling', () => {
     })
   })
 
+  // hooks that can return rejected promise
+  ;[
+    ['beforeCreate', 'beforeCreate hook'],
+    ['created', 'created hook'],
+    ['beforeMount', 'beforeMount hook'],
+    ['mounted', 'mounted hook'],
+    ['event', 'event handler for "e"']
+  ].forEach(([type, description]) => {
+    it(`should recover from promise errors in ${type}`, done => {
+      createTestInstance(components[`${type}Async`])
+      waitForUpdate(() => {
+        expect(`Error in ${description}`).toHaveBeenWarned()
+        expect(`Error: ${type}`).toHaveBeenWarned()
+      }).then(done)
+    })
+  })
+
   // error in mounted hook should affect neither child nor parent
   it('should recover from errors in mounted hook', done => {
     const vm = createTestInstance(components.mounted)
@@ -45,6 +62,20 @@ describe('Error handling', () => {
     })
   })
 
+  // hooks that can return rejected promise
+  ;[
+    ['beforeUpdate', 'beforeUpdate hook'],
+    ['updated', 'updated hook']
+  ].forEach(([type, description]) => {
+    it(`should recover from promise errors in ${type} hook`, done => {
+      const vm = createTestInstance(components[`${type}Async`])
+      assertBothInstancesActive(vm).then(() => {
+        expect(`Error in ${description}`).toHaveBeenWarned()
+        expect(`Error: ${type}`).toHaveBeenWarned()
+      }).then(done)
+    })
+  })
+
   ;[
     ['beforeDestroy', 'beforeDestroy hook'],
     ['destroyed', 'destroyed hook'],
@@ -59,6 +90,21 @@ describe('Error handling', () => {
       }).thenWaitFor(next => {
         assertRootInstanceActive(vm).end(next)
       }).then(done)
+    })
+  })
+
+  ;[
+    ['beforeDestroy', 'beforeDestroy hook'],
+    ['destroyed', 'destroyed hook']
+  ].forEach(([type, description]) => {
+    it(`should recover from promise errors in ${type} hook`, done => {
+      const vm = createTestInstance(components[`${type}Async`])
+      vm.ok = false
+      setTimeout(() => {
+        expect(`Error in ${description}`).toHaveBeenWarned()
+        expect(`Error: ${type}`).toHaveBeenWarned()
+        assertRootInstanceActive(vm).then(done)
+      })
     })
   })
 
@@ -152,6 +198,40 @@ describe('Error handling', () => {
     expect(vm.$el.textContent).toContain('error in render')
     Vue.config.errorHandler = null
   })
+
+  // event handlers that can throw errors or return rejected promise
+  ;[
+    ['single handler', '<div v-on:click="bork"></div>'],
+    ['multiple handlers', '<div v-on="{ click: [bork, function test() {}] }"></div>']
+  ].forEach(([type, template]) => {
+    it(`should recover from v-on errors for ${type} registered`, () => {
+      const vm = new Vue({
+        template,
+        methods: { bork () { throw new Error('v-on') } }
+      }).$mount()
+      document.body.appendChild(vm.$el)
+      triggerEvent(vm.$el, 'click')
+      expect('Error in v-on').toHaveBeenWarned()
+      expect('Error: v-on').toHaveBeenWarned()
+      document.body.removeChild(vm.$el)
+    })
+
+    it(`should recover from v-on async errors for ${type} registered`, (done) => {
+      const vm = new Vue({
+        template,
+        methods: { bork () {
+          return new Promise((resolve, reject) => reject(new Error('v-on async')))
+        } }
+      }).$mount()
+      document.body.appendChild(vm.$el)
+      triggerEvent(vm.$el, 'click')
+      waitForUpdate(() => {
+        expect('Error in v-on async').toHaveBeenWarned()
+        expect('Error: v-on async').toHaveBeenWarned()
+        document.body.removeChild(vm.$el)
+      }).then(done)
+    })
+  })
 })
 
 function createErrorTestComponents () {
@@ -188,6 +268,16 @@ function createErrorTestComponents () {
       throw new Error(before)
     }
 
+    const beforeCompAsync = components[`${before}Async`] = {
+      props: ['n'],
+      render (h) {
+        return h('div', this.n)
+      }
+    }
+    beforeCompAsync[before] = function () {
+      return new Promise((resolve, reject) => reject(new Error(before)))
+    }
+
     // after
     const after = hook.replace(/e?$/, 'ed')
     const afterComp = components[after] = {
@@ -198,6 +288,16 @@ function createErrorTestComponents () {
     }
     afterComp[after] = function () {
       throw new Error(after)
+    }
+
+    const afterCompAsync = components[`${after}Async`] = {
+      props: ['n'],
+      render (h) {
+        return h('div', this.n)
+      }
+    }
+    afterCompAsync[after] = function () {
+      return new Promise((resolve, reject) => reject(new Error(after)))
     }
   })
 
@@ -263,6 +363,18 @@ function createErrorTestComponents () {
   components.event = {
     beforeCreate () {
       this.$on('e', () => { throw new Error('event') })
+    },
+    mounted () {
+      this.$emit('e')
+    },
+    render (h) {
+      return h('div')
+    }
+  }
+
+  components.eventAsync = {
+    beforeCreate () {
+      this.$on('e', () => new Promise((resolve, reject) => reject(new Error('event'))))
     },
     mounted () {
       this.$emit('e')
