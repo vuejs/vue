@@ -33,7 +33,7 @@ describe('Error handling', () => {
     it(`should recover from promise errors in ${type}`, done => {
       createTestInstance(components[`${type}Async`])
       waitForUpdate(() => {
-        expect(`Error in ${description}`).toHaveBeenWarned()
+        expect(`Error in ${description} (Promise/async)`).toHaveBeenWarned()
         expect(`Error: ${type}`).toHaveBeenWarned()
       }).then(done)
     })
@@ -70,7 +70,7 @@ describe('Error handling', () => {
     it(`should recover from promise errors in ${type} hook`, done => {
       const vm = createTestInstance(components[`${type}Async`])
       assertBothInstancesActive(vm).then(() => {
-        expect(`Error in ${description}`).toHaveBeenWarned()
+        expect(`Error in ${description} (Promise/async)`).toHaveBeenWarned()
         expect(`Error: ${type}`).toHaveBeenWarned()
       }).then(done)
     })
@@ -101,7 +101,7 @@ describe('Error handling', () => {
       const vm = createTestInstance(components[`${type}Async`])
       vm.ok = false
       setTimeout(() => {
-        expect(`Error in ${description}`).toHaveBeenWarned()
+        expect(`Error in ${description} (Promise/async)`).toHaveBeenWarned()
         expect(`Error: ${type}`).toHaveBeenWarned()
         assertRootInstanceActive(vm).then(done)
       })
@@ -211,7 +211,7 @@ describe('Error handling', () => {
       }).$mount()
       document.body.appendChild(vm.$el)
       triggerEvent(vm.$el, 'click')
-      expect('Error in v-on').toHaveBeenWarned()
+      expect('Error in v-on handler').toHaveBeenWarned()
       expect('Error: v-on').toHaveBeenWarned()
       document.body.removeChild(vm.$el)
     })
@@ -226,8 +226,8 @@ describe('Error handling', () => {
       document.body.appendChild(vm.$el)
       triggerEvent(vm.$el, 'click')
       waitForUpdate(() => {
-        expect('Error in v-on async').toHaveBeenWarned()
-        expect('Error: v-on async').toHaveBeenWarned()
+        expect('Error in v-on handler (Promise/async)').toHaveBeenWarned()
+        expect('Error: v-on').toHaveBeenWarned()
         document.body.removeChild(vm.$el)
       }).then(done)
     })

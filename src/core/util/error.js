@@ -25,11 +25,23 @@ export function handleError (err: Error, vm: any, info: string) {
   globalHandleError(err, vm, info)
 }
 
-export function handlePromiseError (value: any, vm: any, info: string) {
-  // if value is promise, handle it (a promise must have a then function)
-  if (isPromise(value)) {
-    value.catch(e => handleError(e, vm, info))
+export function invokeWithErrorHandling (
+  handler: Function,
+  context: any,
+  args: null | any[],
+  vm: any,
+  info: string
+) {
+  let res
+  try {
+    res = args ? handler.apply(context, args) : handler.call(context)
+    if (isPromise(res)) {
+      res.catch(e => handleError(e, vm, info + ` (Promise/async)`))
+    }
+  } catch (e) {
+    handleError(e, vm, info)
   }
+  return res
 }
 
 function globalHandleError (err, vm, info) {
