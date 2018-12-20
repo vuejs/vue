@@ -254,7 +254,7 @@ function checkComponents (options: Object) {
 }
 
 export function validateComponentName (name: string) {
-  if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_a-zA-Z${unicodeLetters}]*$`).test(name)) {
+  if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeLetters}]*$`).test(name)) {
     warn(
       'Invalid component name: "' + name + '". Component names ' +
       'should conform to valid custom element name in html5 specification.'
