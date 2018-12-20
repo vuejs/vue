@@ -923,4 +923,28 @@ describe('Directive v-on', () => {
       expect(spy.calls.count()).toBe(0)
     }).then(done)
   })
+
+  // #7628
+  it('handler should return the return value of inline function invocation', () => {
+    let value
+    new Vue({
+      template: `<test @foo="bar()"></test>`,
+      methods: {
+        bar() {
+          return 1
+        }
+      },
+      components: {
+        test: {
+          created() {
+            value = this.$listeners.foo()
+          },
+          render(h) {
+            return h('div')
+          }
+        }
+      }
+    }).$mount()
+    expect(value).toBe(1)
+  })
 })
