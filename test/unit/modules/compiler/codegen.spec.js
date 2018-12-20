@@ -304,32 +304,32 @@ describe('codegen', () => {
   it('generate events with method call', () => {
     assertCodegen(
       '<input @input="onInput($event);">',
-      `with(this){return _c('input',{on:{"input":function($event){onInput($event);}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){return onInput($event);}}})}`
     )
     // empty arguments
     assertCodegen(
       '<input @input="onInput();">',
-      `with(this){return _c('input',{on:{"input":function($event){onInput();}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){return onInput();}}})}`
     )
     // without semicolon
     assertCodegen(
       '<input @input="onInput($event)">',
-      `with(this){return _c('input',{on:{"input":function($event){onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){return onInput($event)}}})}`
     )
     // multiple args
     assertCodegen(
       '<input @input="onInput($event, \'abc\', 5);">',
-      `with(this){return _c('input',{on:{"input":function($event){onInput($event, 'abc', 5);}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){return onInput($event, 'abc', 5);}}})}`
     )
     // expression in args
     assertCodegen(
       '<input @input="onInput($event, 2+2);">',
-      `with(this){return _c('input',{on:{"input":function($event){onInput($event, 2+2);}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){return onInput($event, 2+2);}}})}`
     )
     // tricky symbols in args
     assertCodegen(
-      '<input @input="onInput(\');[\'());\');">',
-      `with(this){return _c('input',{on:{"input":function($event){onInput(');[\'());');}}})}`
+      `<input @input="onInput(');[\\'());');">`,
+      `with(this){return _c('input',{on:{"input":function($event){onInput(');[\\'());');}}})}`
     )
   })
 

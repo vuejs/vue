@@ -49,12 +49,9 @@ describe('vdom patch: edge cases', () => {
           bind (el, binding, vnode) {
             waitForUpdate(() => {
               expect(vnode.children[0].data.on.click()).toBe(5)
-            }).then(() => {
               expect(vnode.children[2].data.on.click(dummyEvt)).toBe(5)
-            }).then(() => {
-              expect(vnode.children[4].data.on.click()).not.toBeDefined()
-            }).then(() => {
-              expect(vnode.children[6].data.on.click(dummyEvt)).not.toBeDefined()
+              expect(vnode.children[4].data.on.click()).toBe(10)
+              expect(vnode.children[6].data.on.click(dummyEvt)).toBe(10)
             }).then(done)
           }
         }
