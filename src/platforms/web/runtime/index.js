@@ -4,7 +4,7 @@ import Vue from 'core/index'
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
-import { devtools, inBrowser, isChrome } from 'core/util/index'
+import { devtools, inBrowser } from 'core/util/index'
 
 import {
   query,
@@ -51,8 +51,7 @@ if (inBrowser) {
         devtools.emit('init', Vue)
       } else if (
         process.env.NODE_ENV !== 'production' &&
-        process.env.NODE_ENV !== 'test' &&
-        isChrome
+        process.env.NODE_ENV !== 'test'
       ) {
         console[console.info ? 'info' : 'log'](
           'Download the Vue Devtools extension for a better development experience:\n' +
