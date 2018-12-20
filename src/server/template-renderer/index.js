@@ -198,8 +198,9 @@ export default class TemplateRenderer {
     const autoRemove = process.env.NODE_ENV === 'production'
       ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
       : ''
+    const nonceAttr = context.nonce ? ` nonce="${context.nonce}"` : ''
     return context[contextKey]
-      ? `<script>window.${windowKey}=${state}${autoRemove}</script>`
+      ? `<script${nonceAttr}>window.${windowKey}=${state}${autoRemove}</script>`
       : ''
   }
 

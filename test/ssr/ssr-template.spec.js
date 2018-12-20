@@ -387,5 +387,32 @@ describe('SSR: template option', () => {
         done()
       })
     })
+
+    it('renderToString + nonce', done => {
+      const interpolateTemplate = `<html><head><title>hello</title></head><body><!--vue-ssr-outlet--></body></html>`
+      const renderer = createRenderer({
+        template: interpolateTemplate
+      })
+
+      const context = {
+        state: { a: 1 },
+        nonce: '4AEemGb0xJptoIGFP3Nd'
+      }
+
+      renderer.renderToString(new Vue({
+        template: '<div>hi</div>'
+      }), context, (err, res) => {
+        expect(err).toBeNull()
+        expect(res).toContain(
+          `<html><head>` +
+          `<title>hello</title>` +
+          `</head><body>` +
+          `<div data-server-rendered="true">hi</div>` +
+          `<script nonce="4AEemGb0xJptoIGFP3Nd">window.__INITIAL_STATE__={"a":1}</script>` +
+          `</body></html>`
+        )
+        done()
+      })
+    })
   }
 })
