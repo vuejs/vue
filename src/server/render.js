@@ -114,7 +114,12 @@ function renderComponent (node, isRoot, context) {
   const registerComponent = registerComponentForCache(Ctor.options, write)
 
   if (isDef(getKey) && isDef(cache) && isDef(name)) {
-    const key = name + '::' + getKey(node.componentOptions.propsData)
+    const rawKey = getKey(node.componentOptions.propsData)
+    if (rawKey === false) {
+      renderComponentInner(node, isRoot, context)
+      return
+    }
+    const key = name + '::' + rawKey
     const { has, get } = context
     if (isDef(has)) {
       has(key, hit => {
@@ -188,7 +193,7 @@ function renderComponentInner (node, isRoot, context) {
     context.activeInstance
   )
   normalizeRender(child)
-  
+
   const resolve = () => {
     const childNode = child._render()
     childNode.parent = node
