@@ -98,7 +98,7 @@ function callUpdatedHooks (queue) {
   while (i--) {
     const watcher = queue[i]
     const vm = watcher.vm
-    if (vm._watcher === watcher && vm._isMounted) {
+    if (vm._watcher === watcher && vm._isMounted && !vm._isDestroyed) {
       callHook(vm, 'updated')
     }
   }
@@ -145,6 +145,11 @@ export function queueWatcher (watcher: Watcher) {
     // queue the flush
     if (!waiting) {
       waiting = true
+
+      if (process.env.NODE_ENV !== 'production' && !config.async) {
+        flushSchedulerQueue()
+        return
+      }
       nextTick(flushSchedulerQueue)
     }
   }

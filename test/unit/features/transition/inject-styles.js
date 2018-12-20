@@ -1,5 +1,5 @@
 function insertCSS (text) {
-  var cssEl = document.createElement('style')
+  const cssEl = document.createElement('style')
   cssEl.textContent = text.trim()
   document.head.appendChild(cssEl)
 }

@@ -140,7 +140,7 @@ describe('Component keep-alive', () => {
       components
     }).$mount()
 
-    var oneInstance = vm.$refs.one
+    const oneInstance = vm.$refs.one
     expect(vm.$el.textContent).toBe('two')
     assertHookCalls(one, [1, 1, 1, 0, 0])
     assertHookCalls(two, [1, 1, 1, 0, 0])

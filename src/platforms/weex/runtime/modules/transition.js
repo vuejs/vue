@@ -75,7 +75,7 @@ function enter (_, vnode) {
   const stylesheet = vnode.context.$options.style || {}
   const startState = stylesheet[startClass]
   const transitionProperties = (stylesheet['@TRANSITION'] && stylesheet['@TRANSITION'][activeClass]) || {}
-  const endState = getEnterTargetState(el, stylesheet, startClass, toClass, activeClass, vnode.context)
+  const endState = getEnterTargetState(el, stylesheet, startClass, toClass, activeClass)
   const needAnimation = Object.keys(endState).length > 0
 
   const cb = el._enterCb = once(() => {
@@ -229,7 +229,7 @@ function leave (vnode, rm) {
 }
 
 // determine the target animation style for an entering transition.
-function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass, vm) {
+function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass) {
   const targetState = {}
   const startState = stylesheet[startClass]
   const endState = stylesheet[endClass]
