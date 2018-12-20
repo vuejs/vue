@@ -157,10 +157,12 @@ describe('Directive v-bind', () => {
       }
     }).$mount()
 
+    document.body.appendChild(vm.$el)
     expect(vm.$el.textContent).toBe('1')
     triggerEvent(vm.$el, 'click')
     waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('2')
+      document.body.removeChild(vm.$el)
     }).then(done)
   })
 
@@ -227,6 +229,7 @@ describe('Directive v-bind', () => {
         }
       }
     }).$mount()
+    document.body.appendChild(vm.$el)
     expect(vm.$el.textContent).toBe('1')
     triggerEvent(vm.$el, 'click')
     waitForUpdate(() => {
@@ -234,6 +237,7 @@ describe('Directive v-bind', () => {
       vm.test.fooBar = 3
     }).then(() => {
       expect(vm.$el.textContent).toBe('3')
+      document.body.removeChild(vm.$el)
     }).then(done)
   })
 

@@ -542,6 +542,7 @@ describe('Component slot', () => {
       }
     }).$mount()
 
+    document.body.appendChild(vm.$el)
     expect(vm.$el.textContent).toBe('hi')
     vm.$children[0].toggle = false
     waitForUpdate(() => {
@@ -549,6 +550,8 @@ describe('Component slot', () => {
     }).then(() => {
       triggerEvent(vm.$el.querySelector('.click'), 'click')
       expect(spy).toHaveBeenCalled()
+    }).then(() => {
+      document.body.removeChild(vm.$el)
     }).then(done)
   })
 

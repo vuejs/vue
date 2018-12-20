@@ -70,11 +70,13 @@ describe('Options functional', () => {
       }
     }).$mount()
 
+    document.body.appendChild(vm.$el)
     triggerEvent(vm.$el.children[0], 'click')
     expect(foo).toHaveBeenCalled()
     expect(foo.calls.argsFor(0)[0].type).toBe('click') // should have click event
     triggerEvent(vm.$el.children[0], 'mousedown')
     expect(bar).toHaveBeenCalledWith('bar')
+    document.body.removeChild(vm.$el)
   })
 
   it('should support returning more than one root node', () => {
