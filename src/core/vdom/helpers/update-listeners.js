@@ -1,6 +1,9 @@
 /* @flow */
 
-import { warn, handleError, handlePromiseError } from 'core/util/index'
+import {
+  warn,
+  invokeWithErrorHandling
+} from 'core/util/index'
 import {
   cached,
   isUndef,
@@ -36,23 +39,11 @@ export function createFnInvoker (fns: Function | Array<Function>, vm: ?Component
     if (Array.isArray(fns)) {
       const cloned = fns.slice()
       for (let i = 0; i < cloned.length; i++) {
-        try {
-          const result = cloned[i].apply(null, arguments)
-          handlePromiseError(result, vm, 'v-on async')
-        } catch (e) {
-          handleError(e, vm, 'v-on')
-        }
+        invokeWithErrorHandling(cloned[i], null, arguments, vm, `v-on handler`)
       }
     } else {
       // return handler return value for single handlers
-      let result
-      try {
-        result = fns.apply(null, arguments)
-        handlePromiseError(result, vm, 'v-on async')
-      } catch (e) {
-        handleError(e, vm, 'v-on')
-      }
-      return result
+      return invokeWithErrorHandling(fns, null, arguments, vm, `v-on handler`)
     }
   }
   invoker.fns = fns
