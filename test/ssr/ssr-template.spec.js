@@ -489,5 +489,27 @@ describe('SSR: template option', () => {
         done()
       })
     })
+
+    it('renderToString + custom serializer', done => {
+      const expected = `{"foo":123}`
+      const renderer = createRenderer({
+        template: defaultTemplate,
+        serializer: () => expected
+      })
+
+      const context = {
+        state: { a: 1 }
+      }
+
+      renderer.renderToString(new Vue({
+        template: '<div>hi</div>'
+      }), context, (err, res) => {
+        expect(err).toBeNull()
+        expect(res).toContain(
+          `<script>window.__INITIAL_STATE__=${expected}</script>`
+        )
+        done()
+      })
+    })
   }
 })
