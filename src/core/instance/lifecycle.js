@@ -15,7 +15,8 @@ import {
   remove,
   handleError,
   emptyObject,
-  validateProp
+  validateProp,
+  handlePromiseError
 } from '../util/index'
 
 export let activeInstance: any = null
@@ -326,7 +327,8 @@ export function callHook (vm: Component, hook: string) {
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
       try {
-        handlers[i].call(vm)
+        const fnResult = handlers[i].call(vm)
+        handlePromiseError(fnResult, vm, `${hook} hook`)
       } catch (e) {
         handleError(e, vm, `${hook} hook`)
       }
