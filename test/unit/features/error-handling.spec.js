@@ -209,9 +209,11 @@ describe('Error handling', () => {
         template,
         methods: { bork () { throw new Error('v-on') } }
       }).$mount()
+      document.body.appendChild(vm.$el)
       triggerEvent(vm.$el, 'click')
       expect('Error in v-on').toHaveBeenWarned()
       expect('Error: v-on').toHaveBeenWarned()
+      document.body.removeChild(vm.$el)
     })
 
     it(`should recover from v-on async errors for ${type} registered`, (done) => {
@@ -221,10 +223,12 @@ describe('Error handling', () => {
           return new Promise((resolve, reject) => reject(new Error('v-on async')))
         } }
       }).$mount()
+      document.body.appendChild(vm.$el)
       triggerEvent(vm.$el, 'click')
       waitForUpdate(() => {
         expect('Error in v-on async').toHaveBeenWarned()
         expect('Error: v-on async').toHaveBeenWarned()
+        document.body.removeChild(vm.$el)
       }).then(done)
     })
   })
