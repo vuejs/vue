@@ -29,6 +29,7 @@ export type RenderOptions = {
   shouldPreload?: Function;
   shouldPrefetch?: Function;
   clientManifest?: ClientManifest;
+  serializer?: Function;
   runInNewContext?: boolean | 'once';
 };
 
@@ -41,7 +42,8 @@ export function createRenderer ({
   cache,
   shouldPreload,
   shouldPrefetch,
-  clientManifest
+  clientManifest,
+  serializer
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
   const templateRenderer = new TemplateRenderer({
@@ -49,7 +51,8 @@ export function createRenderer ({
     inject,
     shouldPreload,
     shouldPrefetch,
-    clientManifest
+    clientManifest,
+    serializer
   })
 
   return {
