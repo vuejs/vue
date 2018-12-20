@@ -1,6 +1,9 @@
 /* @flow */
 
 import { isDef, isUndef, extend, toNumber } from 'shared/util'
+import { isSVG } from 'web/util/index'
+
+let svgContainer
 
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (isUndef(oldVnode.data.domProps) && isUndef(vnode.data.domProps)) {
@@ -54,6 +57,17 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       const strCur = isUndef(cur) ? '' : String(cur)
       if (shouldUpdateValue(elm, strCur)) {
         elm.value = strCur
+      }
+    } else if (key === 'innerHTML' && isSVG(elm.tagName) && isUndef(elm.innerHTML)) {
+      // IE doesn't support innerHTML for SVG elements
+      svgContainer = svgContainer || document.createElement('div')
+      svgContainer.innerHTML = `<svg>${cur}</svg>`
+      const svg = svgContainer.firstChild
+      while (elm.firstChild) {
+        elm.removeChild(elm.firstChild)
+      }
+      while (svg.firstChild) {
+        elm.appendChild(svg.firstChild)
       }
     } else {
       elm[key] = cur
