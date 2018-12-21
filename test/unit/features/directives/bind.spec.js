@@ -168,20 +168,25 @@ describe('Directive v-bind', () => {
 
   it('.sync modifier with kebab case event', done => {
     const vm = new Vue({
-      template: `<test :foo-bar.sync="bar"/>`,
+      template: `<test ref="test" :foo-bar.sync="bar"/>`,
       data: {
         bar: 1
       },
       components: {
         test: {
           props: ['fooBar'],
-          template: `<div @click="$emit('update:foo-bar', 2)">{{ fooBar }}</div>`
+          template: `<div>{{ fooBar }}</div>`,
+          methods: {
+            update () {
+              this.$emit('update:foo-bar', 2)
+            }
+          }
         }
       }
     }).$mount()
 
     expect(vm.$el.textContent).toBe('1')
-    triggerEvent(vm.$el, 'click')
+    vm.$refs.test.update()
     waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('2')
     }).then(done)
