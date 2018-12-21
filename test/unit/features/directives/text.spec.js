@@ -30,6 +30,12 @@ describe('Directive v-text', () => {
       vm.a = {}
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('{}')
+      vm.a = { toString () { return 'foo' } }
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe('foo')
+      vm.a = { toJSON () { return { foo: 'bar' } } }
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe('{\n  "foo": "bar"\n}')
       vm.a = 123
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('123')

@@ -85,7 +85,7 @@ export function isPromise (val: any): boolean {
 export function toString (val: any): string {
   return val == null
     ? ''
-    : typeof val === 'object'
+    : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
       ? JSON.stringify(val, null, 2)
       : String(val)
 }
