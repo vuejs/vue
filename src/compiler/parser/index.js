@@ -341,7 +341,8 @@ function processKey (el) {
         if (iterator && iterator === exp && parent && parent.tag === 'transition-group') {
           warn(
             `Do not use v-for index as key on <transition-group> children, ` +
-            `this is the same as not using keys.`
+            `this is the same as not using keys.`,
+            true /* tip */
           )
         }
       }
