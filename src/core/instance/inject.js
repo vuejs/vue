@@ -41,14 +41,13 @@ export function resolveInject (inject: any, vm: Component): ?Object {
     // inject is :any because flow is not smart enough to figure out cached
     const result = Object.create(null)
     const keys = hasSymbol
-      ? Reflect.ownKeys(inject).filter(key => {
-        /* istanbul ignore next */
-        return Object.getOwnPropertyDescriptor(inject, key).enumerable
-      })
+      ? Reflect.ownKeys(inject)
       : Object.keys(inject)
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
+      // #6574 in case the inject object is observed...
+      if (key === '__ob__') continue
       const provideKey = inject[key].from
       let source = vm
       while (source) {
