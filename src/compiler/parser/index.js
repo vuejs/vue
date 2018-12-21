@@ -541,14 +541,16 @@ function processAttrs (el) {
             syncGen = genAssignmentCode(value, `$event`)
             addHandler(
               el,
-              `update:${hyphenate(name)}`,
-              syncGen
-            )
-            addHandler(
-              el,
               `update:${camelize(name)}`,
               syncGen
             )
+            if (hyphenate(name) !== camelize(name)) {
+              addHandler(
+                el,
+                `update:${hyphenate(name)}`,
+                syncGen
+              )
+            }
           }
         }
         if (isProp || (
