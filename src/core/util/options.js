@@ -4,6 +4,7 @@ import config from '../config'
 import { warn } from './debug'
 import { nativeWatch } from './env'
 import { set } from '../observer/index'
+import { hasSymbol } from '../util/index'
 
 import {
   ASSET_TYPES,
@@ -48,9 +49,15 @@ if (process.env.NODE_ENV !== 'production') {
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
   let key, toVal, fromVal
-  const keys = Object.keys(from)
+
+  const keys = hasSymbol
+    ? Reflect.ownKeys(from)
+    : Object.keys(from)
+
   for (let i = 0; i < keys.length; i++) {
     key = keys[i]
+    // in case the object is already observed...
+    if (key === '__ob__') continue
     toVal = to[key]
     fromVal = from[key]
     if (!hasOwn(to, key)) {
