@@ -77,7 +77,7 @@ export function isValidArrayIndex (val: any): boolean {
 export function toString (val: any): string {
   return val == null
     ? ''
-    : typeof val === 'object' && (!isPlainObject(val) || val.toString === _toString)
+    : isPlainObject(val) && val.toString === _toString
       ? JSON.stringify(val, null, 2)
       : String(val)
 }
