@@ -69,7 +69,7 @@ export function parseHTML (html, options) {
 
           if (commentEnd >= 0) {
             if (options.shouldKeepComment) {
-              options.comment(html.substring(4, commentEnd))
+              options.comment(html.substring(4, commentEnd), index, index + commentEnd + 3)
             }
             advance(commentEnd + 3)
             continue
@@ -129,16 +129,18 @@ export function parseHTML (html, options) {
           rest = html.slice(textEnd)
         }
         text = html.substring(0, textEnd)
-        advance(textEnd)
       }
 
       if (textEnd < 0) {
         text = html
-        html = ''
+      }
+
+      if (text) {
+        advance(text.length)
       }
 
       if (options.chars && text) {
-        options.chars(text)
+        options.chars(text, index - text.length, index)
       }
     } else {
       let endTagLength = 0
@@ -167,7 +169,7 @@ export function parseHTML (html, options) {
     if (html === last) {
       options.chars && options.chars(html)
       if (process.env.NODE_ENV !== 'production' && !stack.length && options.warn) {
-        options.warn(`Mal-formatted tag at end of template: "${html}"`)
+        options.warn(`Mal-formatted tag at end of template: "${html}"`, { start: index + html.length })
       }
       break
     }
@@ -192,7 +194,9 @@ export function parseHTML (html, options) {
       advance(start[0].length)
       let end, attr
       while (!(end = html.match(startTagClose)) && (attr = html.match(attribute))) {
+        attr.start = index
         advance(attr[0].length)
+        attr.end = index
         match.attrs.push(attr)
       }
       if (end) {
@@ -231,10 +235,14 @@ export function parseHTML (html, options) {
         name: args[1],
         value: decodeAttr(value, shouldDecodeNewlines)
       }
+      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+        attrs[i].start = args.start + args[0].match(/^\s*/).length
+        attrs[i].end = args.end
+      }
     }
 
     if (!unary) {
-      stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs })
+      stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs, start: match.start, end: match.end })
       lastTag = tagName
     }
 
@@ -269,7 +277,8 @@ export function parseHTML (html, options) {
           options.warn
         ) {
           options.warn(
-            `tag <${stack[i].tag}> has no matching end tag.`
+            `tag <${stack[i].tag}> has no matching end tag.`,
+            { start: stack[i].start }
           )
         }
         if (options.end) {

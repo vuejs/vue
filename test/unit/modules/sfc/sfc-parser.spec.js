@@ -202,4 +202,10 @@ describe('Single File Component parser', () => {
     const res = parseComponent(`<template>hi</`)
     expect(res.template.content).toBe('hi')
   })
+
+  it('should collect errors with source range', () => {
+    const res = parseComponent(`<template>hi</`, { outputSourceRange: true })
+    expect(res.errors.length).toBe(1)
+    expect(res.errors[0].start).toBe(0)
+  })
 })
