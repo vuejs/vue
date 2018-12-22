@@ -71,17 +71,19 @@ export function initMixin (Vue: Class<Component>) {
   }
 }
 
-function initInternalComponent (vm: Component, options: InternalComponentOptions) {
+export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
   const opts = vm.$options = Object.create(vm.constructor.options)
   // doing this because it's faster than dynamic enumeration.
+  const parentVnode = options._parentVnode
   opts.parent = options.parent
-  opts.propsData = options.propsData
-  opts._parentVnode = options._parentVnode
-  opts._parentListeners = options._parentListeners
-  opts._renderChildren = options._renderChildren
-  opts._componentTag = options._componentTag
-  opts._parentElm = options._parentElm
-  opts._refElm = options._refElm
+  opts._parentVnode = parentVnode
+
+  const vnodeComponentOptions = parentVnode.componentOptions
+  opts.propsData = vnodeComponentOptions.propsData
+  opts._parentListeners = vnodeComponentOptions.listeners
+  opts._renderChildren = vnodeComponentOptions.children
+  opts._componentTag = vnodeComponentOptions.tag
+
   if (options.render) {
     opts.render = options.render
     opts.staticRenderFns = options.staticRenderFns

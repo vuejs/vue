@@ -330,7 +330,7 @@ describe('Directive v-for', () => {
     }).then(done)
 
     function assertMarkup () {
-      var markup = vm.list.map(function (item) {
+      const markup = vm.list.map(function (item) {
         return '<p>' + item.a + '</p><p>' + (item.a + 1) + '</p>'
       }).join('')
       expect(vm.$el.innerHTML).toBe(markup)
@@ -370,7 +370,7 @@ describe('Directive v-for', () => {
     }).then(done)
 
     function assertMarkup () {
-      var markup = vm.list.map(function (item) {
+      const markup = vm.list.map(function (item) {
         return `<p>${item.a}<span>${item.a}</span></p>`
       }).join('')
       expect(vm.$el.innerHTML).toBe(markup)
@@ -464,6 +464,66 @@ describe('Directive v-for', () => {
     }).then(done)
   })
 
+  // #7792
+  it('should work with multiline expressions', () => {
+    const vm = new Vue({
+      data: {
+        a: [1],
+        b: [2]
+      },
+      template: `
+        <div>
+          <span v-for="n in (
+            a.concat(
+              b
+            )
+          )">{{ n }}</span>
+        </div>
+      `
+    }).$mount()
+    expect(vm.$el.textContent).toBe('12')
+  })
+
+  // #9181
+  it('components with v-for and empty list', done => {
+    const vm = new Vue({
+      template:
+        '<div attr>' +
+          '<foo v-for="item in list" :key="item">{{ item }}</foo>' +
+        '</div>',
+      data: {
+        list: undefined
+      },
+      components: {
+        foo: {
+          template: '<div><slot></slot></div>'
+        },
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('')
+    vm.list = [1, 2, 3]
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
+    }).then(done)
+  })
+
+  it('elements with v-for and empty list', done => {
+    const vm = new Vue({
+      template:
+        '<div attr>' +
+          '<div v-for="item in list">{{ item }}</div>' +
+        '</div>',
+      data: {
+        list: undefined
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('')
+    vm.list = [1, 2, 3]
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
+    }).then(done)
+  })
+
   const supportsDestructuring = (() => {
     try {
       new Function('var { foo } = bar')
@@ -472,12 +532,20 @@ describe('Directive v-for', () => {
   })()
 
   if (supportsDestructuring) {
-    it('should support destructuring syntax in alias position', () => {
+    it('should support destructuring syntax in alias position (object)', () => {
       const vm = new Vue({
         data: { list: [{ foo: 'hi', bar: 'ho' }] },
         template: '<div><div v-for="({ foo, bar }, i) in list">{{ foo }} {{ bar }} {{ i }}</div></div>'
       }).$mount()
       expect(vm.$el.textContent).toBe('hi ho 0')
+    })
+
+    it('should support destructuring syntax in alias position (array)', () => {
+      const vm = new Vue({
+        data: { list: [[1, 2], [3, 4]] },
+        template: '<div><div v-for="([ foo, bar ], i) in list">{{ foo }} {{ bar }} {{ i }}</div></div>'
+      }).$mount()
+      expect(vm.$el.textContent).toBe('1 2 03 4 1')
     })
   }
 })

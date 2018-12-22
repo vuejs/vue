@@ -231,6 +231,44 @@ function createAssertions (runInNewContext) {
     })
   })
 
+  it('render with cache (opt-out)', done => {
+    const cache = {}
+    const get = jasmine.createSpy('get')
+    const set = jasmine.createSpy('set')
+    const options = {
+      runInNewContext,
+      cache: {
+        // async
+        get: (key, cb) => {
+          setTimeout(() => {
+            get(key)
+            cb(cache[key])
+          }, 0)
+        },
+        set: (key, val) => {
+          set(key, val)
+          cache[key] = val
+        }
+      }
+    }
+    createRenderer('cache-opt-out.js', options, renderer => {
+      const expected = '<div data-server-rendered="true">/test</div>'
+      renderer.renderToString((err, res) => {
+        expect(err).toBeNull()
+        expect(res).toBe(expected)
+        expect(get).not.toHaveBeenCalled()
+        expect(set).not.toHaveBeenCalled()
+        renderer.renderToString((err, res) => {
+          expect(err).toBeNull()
+          expect(res).toBe(expected)
+          expect(get).not.toHaveBeenCalled()
+          expect(set).not.toHaveBeenCalled()
+          done()
+        })
+      })
+    })
+  })
+
   it('renderToString (bundle format with code split)', done => {
     createRenderer('split.js', { runInNewContext, asBundle: true }, renderer => {
       const context = { url: '/test' }

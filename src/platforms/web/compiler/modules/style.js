@@ -14,8 +14,8 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   if (staticStyle) {
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production') {
-      const expression = parseText(staticStyle, options.delimiters)
-      if (expression) {
+      const res = parseText(staticStyle, options.delimiters)
+      if (res) {
         warn(
           `style="${staticStyle}": ` +
           'Interpolation inside attributes has been removed. ' +

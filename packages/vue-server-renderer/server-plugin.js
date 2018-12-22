@@ -29,6 +29,16 @@ var validate = function (compiler) {
   }
 };
 
+var onEmit = function (compiler, name, hook) {
+  if (compiler.hooks) {
+    // Webpack >= 4.0.0
+    compiler.hooks.emit.tapAsync(name, hook);
+  } else {
+    // Webpack < 4.0.0
+    compiler.plugin('emit', hook);
+  }
+};
+
 var VueSSRServerPlugin = function VueSSRServerPlugin (options) {
   if ( options === void 0 ) options = {};
 
@@ -42,7 +52,7 @@ VueSSRServerPlugin.prototype.apply = function apply (compiler) {
 
   validate(compiler);
 
-  compiler.plugin('emit', function (compilation, cb) {
+  onEmit(compiler, 'vue-server-plugin', function (compilation, cb) {
     var stats = compilation.getStats().toJson();
     var entryName = Object.keys(stats.entrypoints)[0];
     var entryInfo = stats.entrypoints[entryName];
@@ -75,7 +85,7 @@ VueSSRServerPlugin.prototype.apply = function apply (compiler) {
     };
 
     stats.assets.forEach(function (asset) {
-      if (asset.name.match(/\.js$/)) {
+      if (isJS(asset.name)) {
         bundle.files[asset.name] = compilation.assets[asset.name].source();
       } else if (asset.name.match(/\.js\.map$/)) {
         bundle.maps[asset.name.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.name].source());

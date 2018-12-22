@@ -267,6 +267,17 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-show directive merge with style', done => {
+    renderVmWithOptions({
+      template: '<div :style="[{lineHeight: 1}]" v-show="false"><span>inner</span></div>'
+    }, res => {
+      expect(res).toContain(
+        '<div data-server-rendered="true" style="line-height:1;display:none;"><span>inner</span></div>'
+      )
+      done()
+    })
+  })
+
   it('v-show directive not passed to child', done => {
     renderVmWithOptions({
       template: '<foo v-show="false"></foo>',
@@ -575,6 +586,79 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('renders async component (functional, single node)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <test-async></test-async>
+        </div>
+      `,
+      components: {
+        testAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return h('span', { class: ['b'] }, 'testAsync')
+            }
+          }), 1)
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span class="b">testAsync</span></div>')
+      done()
+    })
+  })
+
+  it('renders async component (functional, multiple nodes)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <test-async></test-async>
+        </div>
+      `,
+      components: {
+        testAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return [
+                h('span', { class: ['a'] }, 'foo'),
+                h('span', { class: ['b'] }, 'bar')
+              ]
+            }
+          }), 1)
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true">' +
+          '<span class="a">foo</span>' +
+          '<span class="b">bar</span>' +
+        '</div>'
+      )
+      done()
+    })
+  })
+
+  it('should catch async component error', done => {
+    Vue.config.silent = true
+    renderToString(new Vue({
+      template: '<test-async></test-async>',
+      components: {
+        testAsync: () => Promise.resolve({
+          render () {
+            throw new Error('foo')
+          }
+        })
+      }
+    }), (err, result) => {
+      Vue.config.silent = false
+      expect(err).toBeTruthy()
+      expect(result).toBeUndefined()
+      done()
+    })
+  })
+
   it('everything together', done => {
     renderVmWithOptions({
       template: `
@@ -742,6 +826,22 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('should not warn for custom directives that do not have server-side implementation', done => {
+    renderToString(new Vue({
+      directives: {
+        test: {
+          bind() {
+            // noop
+          }
+        }
+      },
+      template: '<div v-test></div>',
+    }), () => {
+      expect('Failed to resolve directive: test').not.toHaveBeenWarned()
+      done()
+    })
+  })
+
   it('_scopeId', done => {
     renderVmWithOptions({
       _scopeId: '_v-parent',
@@ -837,6 +937,40 @@ describe('SSR: renderToString', () => {
       template: `
         <div>
           <a :title="xss" :style="{ color: xss }" :class="[xss]">foo</a>
+        </div>
+      `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
+  it('should prevent xss in attribute names', done => {
+    renderVmWithOptions({
+      data: {
+        xss: {
+          'foo="bar"></div><script>alert(1)</script>': ''
+        }
+      },
+      template: `
+        <div v-bind="xss"></div>
+      `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
+  it('should prevent xss in attribute names (optimized)', done => {
+    renderVmWithOptions({
+      data: {
+        xss: {
+          'foo="bar"></div><script>alert(1)</script>': ''
+        }
+      },
+      template: `
+        <div>
+          <a v-bind="xss">foo</a>
         </div>
       `
     }, res => {
@@ -958,6 +1092,24 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  // #8977
+  it('should call computed properties with vm as first argument', done => {
+    renderToString(new Vue({
+      data: {
+        firstName: 'Evan',
+        lastName: 'You'
+      },
+      computed: {
+        fullName: ({ firstName, lastName }) => `${firstName} ${lastName}`,
+      },
+      template: '<div>{{ fullName }}</div>',
+    }), (err, result) => {
+      expect(err).toBeNull()
+      expect(result).toContain('<div data-server-rendered="true">Evan You</div>')
+      done()
+    })
+  })
+
   it('return Promise', done => {
     renderToString(new Vue({
       template: `<div>{{ foo }}</div>`,
@@ -984,7 +1136,7 @@ describe('SSR: renderToString', () => {
   it('should catch template compilation error', done => {
     renderToString(new Vue({
       template: `<div></div><div></div>`
-    }), (err, res) => {
+    }), (err) => {
       expect(err.toString()).toContain('Component template should contain exactly one root element')
       done()
     })
@@ -1109,6 +1261,241 @@ describe('SSR: renderToString', () => {
           '<option selected="selected">2</option>' +
         '</select>'
       )
+      done()
+    })
+  })
+
+  // #7223
+  it('should not double escape attribute values', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div id="a\nb"></div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div id="a\nb"></div>`)
+      done()
+    })
+  })
+
+  // #7859
+  it('should not double escape class values', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div class="a\nb"></div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div class="a\nb"></div>`)
+      done()
+    })
+  })
+
+  it('should expose ssr helpers on functional context', done => {
+    let called = false
+    renderVmWithOptions({
+      template: `<div><foo/></div>`,
+      components: {
+        foo: {
+          functional: true,
+          render (h, ctx) {
+            expect(ctx._ssrNode).toBeTruthy()
+            called = true
+          }
+        }
+      }
+    }, () => {
+      expect(called).toBe(true)
+      done()
+    })
+  })
+
+  it('should support ssrPrefetch option', done => {
+    renderVmWithOptions({
+      template: `
+        <div>{{ count }}</div>
+      `,
+      data: {
+        count: 0
+      },
+      ssrPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true">42</div>')
+      done()
+    })
+  })
+
+  it('should support ssrPrefetch option (nested)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <nested-prefetch></nested-prefetch>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      ssrPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      },
+      components: {
+        nestedPrefetch: {
+          template: `
+            <div>{{ message }}</div>
+          `,
+          data () {
+            return {
+              message: ''
+            }
+          },
+          ssrPrefetch () {
+            return new Promise((resolve) => {
+              setTimeout(() => {
+                this.message = 'vue.js'
+                resolve()
+              }, 1)
+            })
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
+
+  it('should support ssrPrefetch option (nested async)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <nested-prefetch></nested-prefetch>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      ssrPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      },
+      components: {
+        nestedPrefetch (resolve) {
+          resolve({
+            template: `
+              <div>{{ message }}</div>
+            `,
+            data () {
+              return {
+                message: ''
+              }
+            },
+            ssrPrefetch () {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  this.message = 'vue.js'
+                  resolve()
+                }, 1)
+              })
+            }
+          })
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
+
+  it('should merge ssrPrefetch option', done => {
+    const mixin = {
+      data: {
+        message: ''
+      },
+      ssrPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.message = 'vue.js'
+            resolve()
+          }, 1)
+        })
+      }
+    }
+    renderVmWithOptions({
+      mixins: [mixin],
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <div>{{ message }}</div>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      ssrPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
+
+  it(`should skip ssrPrefetch option that doesn't return a promise`, done => {
+    renderVmWithOptions({
+      template: `
+        <div>{{ count }}</div>
+      `,
+      data: {
+        count: 0
+      },
+      ssrPrefetch () {
+        setTimeout(() => {
+          this.count = 42
+        }, 1)
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true">0</div>')
+      done()
+    })
+  })
+
+  it('should call context.rendered', done => {
+    let a = 0
+    renderToString(new Vue({
+      template: '<div>Hello</div>'
+    }), {
+      rendered: () => {
+        a = 42
+      }
+    }, (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain('<div data-server-rendered="true">Hello</div>')
+      expect(a).toBe(42)
       done()
     })
   })

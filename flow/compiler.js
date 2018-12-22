@@ -1,31 +1,31 @@
 declare type CompilerOptions = {
   warn?: Function; // allow customizing warning in different environments; e.g. node
-  expectHTML?: boolean; // only false for non-web builds
   modules?: Array<ModuleOptions>; // platform specific modules; e.g. style; class
-  staticKeys?: string; // a list of AST properties to be considered static; for optimization
   directives?: { [key: string]: Function }; // platform specific directives
+  staticKeys?: string; // a list of AST properties to be considered static; for optimization
   isUnaryTag?: (tag: string) => ?boolean; // check if a tag is unary for the platform
   canBeLeftOpenTag?: (tag: string) => ?boolean; // check if a tag can be left opened
   isReservedTag?: (tag: string) => ?boolean; // check if a tag is a native for the platform
+  preserveWhitespace?: boolean; // preserve whitespace between elements?
+  optimize?: boolean; // optimize static content?
+
+  // web specific
   mustUseProp?: (tag: string, type: ?string, name: string) => boolean; // check if an attribute should be bound as a property
   isPreTag?: (attr: string) => ?boolean; // check if a tag needs to preserve whitespace
   getTagNamespace?: (tag: string) => ?string; // check the namespace for a tag
-  transforms?: Array<Function>; // a list of transforms on parsed AST before codegen
-  preserveWhitespace?: boolean;
+  expectHTML?: boolean; // only false for non-web builds
   isFromDOM?: boolean;
   shouldDecodeTags?: boolean;
   shouldDecodeNewlines?:  boolean;
   shouldDecodeNewlinesForHref?: boolean;
   outputSourceRange?: boolean;
 
-  // for ssr optimization compiler
-  scopeId?: string;
-
   // runtime user-configurable
   delimiters?: [string, string]; // template delimiters
+  comments?: boolean; // preserve comments in template
 
-  // allow user kept comments
-  comments?: boolean
+  // for ssr optimization compiler
+  scopeId?: string;
 };
 
 declare type WarningMessage = {
@@ -44,9 +44,12 @@ declare type CompiledResult = {
 };
 
 declare type ModuleOptions = {
+  // transform an AST node before any attributes are processed
   // returning an ASTElement from pre/transforms replaces the element
   preTransformNode: (el: ASTElement) => ?ASTElement;
+  // transform an AST node after built-ins like v-if, v-for are processed
   transformNode: (el: ASTElement) => ?ASTElement;
+  // transform an AST node after its children have been processed
   // cannot return replacement in postTransform because tree is already finalized
   postTransformNode: (el: ASTElement) => void;
   genData: (el: ASTElement) => string; // generate extra data string for an element
@@ -57,10 +60,11 @@ declare type ModuleOptions = {
 declare type ASTModifiers = { [key: string]: boolean };
 declare type ASTIfCondition = { exp: ?string; block: ASTElement };
 declare type ASTIfConditions = Array<ASTIfCondition>;
-declare type ASTAttr = { name: string; value: string; start?: number; end?: number };
+declare type ASTAttr = { name: string; value: any; start?: number; end?: number };
 
 declare type ASTElementHandler = {
   value: string;
+  params?: Array<any>;
   modifiers: ?ASTModifiers;
   start?: number;
   end?: number;
@@ -86,7 +90,7 @@ declare type ASTElement = {
   type: 1;
   tag: string;
   attrsList: Array<ASTAttr>;
-  attrsMap: { [key: string]: string | null };
+  attrsMap: { [key: string]: any };
   rawAttrsMap: { [key: string]: ASTAttr };
   parent: ASTElement | void;
   children: Array<ASTNode>;
@@ -168,6 +172,7 @@ declare type ASTExpression = {
   type: 2;
   expression: string;
   text: string;
+  tokens: Array<string | Object>;
   static?: boolean;
   // 2.4 ssr optimization
   ssrOptimizability?: number;
@@ -188,35 +193,23 @@ declare type ASTText = {
 
 // SFC-parser related declarations
 
-// an object format describing a single-file component.
+// an object format describing a single-file component
 declare type SFCDescriptor = {
   template: ?SFCBlock;
   script: ?SFCBlock;
   styles: Array<SFCBlock>;
-  customBlocks: Array<SFCCustomBlock>;
+  customBlocks: Array<SFCBlock>;
   errors: Array<string | WarningMessage>;
 }
-
-declare type SFCCustomBlock = {
-  type: string;
-  content: string;
-  start?: number;
-  end?: number;
-  src?: string;
-  attrs: {[attribute:string]: string};
-  blockStart?: number;
-  blockEnd?: number;
-};
 
 declare type SFCBlock = {
   type: string;
   content: string;
+  attrs: {[attribute:string]: string};
   start?: number;
   end?: number;
   lang?: string;
   src?: string;
   scoped?: boolean;
   module?: string | boolean;
-  blockStart?: number;
-  blockEnd?: number;
 };

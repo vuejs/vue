@@ -1,11 +1,14 @@
 import { Vue } from "./vue";
 
-export type ScopedSlot = (props: any) => VNodeChildrenArrayContents | string;
+// Scoped slots can technically return anything if used from
+// a render function, but this is "good enough" for templates
+export type ScopedSlot = (props: any) => ScopedSlotChildren;
+export type ScopedSlotChildren = ScopedSlotArrayContents | VNode | string | undefined;
+export interface ScopedSlotArrayContents extends Array<ScopedSlotChildren> {}
 
-export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string;
-export interface VNodeChildrenArrayContents {
-  [x: number]: VNode | string | VNodeChildren;
-}
+// Relaxed type compatible with $createElement
+export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string | boolean | null | undefined;
+export interface VNodeChildrenArrayContents extends Array<VNodeChildren | VNode> {}
 
 export interface VNode {
   tag?: string;
@@ -27,29 +30,30 @@ export interface VNode {
 
 export interface VNodeComponentOptions {
   Ctor: typeof Vue;
-  propsData?: Object;
-  listeners?: Object;
-  children?: VNodeChildren;
+  propsData?: object;
+  listeners?: object;
+  children?: VNode[];
   tag?: string;
 }
 
 export interface VNodeData {
   key?: string | number;
   slot?: string;
-  scopedSlots?: { [key: string]: ScopedSlot };
+  scopedSlots?: { [key: string]: ScopedSlot | undefined };
   ref?: string;
+  refInFor?: boolean;
   tag?: string;
   staticClass?: string;
   class?: any;
   staticStyle?: { [key: string]: any };
-  style?: Object[] | Object;
+  style?: object[] | object;
   props?: { [key: string]: any };
   attrs?: { [key: string]: any };
   domProps?: { [key: string]: any };
   hook?: { [key: string]: Function };
   on?: { [key: string]: Function | Function[] };
   nativeOn?: { [key: string]: Function | Function[] };
-  transition?: Object;
+  transition?: object;
   show?: boolean;
   inlineTemplate?: {
     render: Function;
@@ -60,10 +64,10 @@ export interface VNodeData {
 }
 
 export interface VNodeDirective {
-  readonly name: string;
-  readonly value: any;
-  readonly oldValue: any;
-  readonly expression: any;
-  readonly arg: string;
-  readonly modifiers: { [key: string]: boolean };
+  name: string;
+  value?: any;
+  oldValue?: any;
+  expression?: any;
+  arg?: string;
+  modifiers?: { [key: string]: boolean };
 }

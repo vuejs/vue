@@ -14,6 +14,7 @@
 import { warn, extend } from 'core/util/index'
 import { addClass, removeClass } from '../class-util'
 import { transitionProps, extractTransitionData } from './transition'
+import { setActiveInstance } from 'core/instance/lifecycle'
 
 import {
   hasTransition,
@@ -32,6 +33,23 @@ delete props.mode
 
 export default {
   props,
+
+  beforeMount () {
+    const update = this._update
+    this._update = (vnode, hydrating) => {
+      const restoreActiveInstance = setActiveInstance(this)
+      // force removing pass
+      this.__patch__(
+        this._vnode,
+        this.kept,
+        false, // hydrating
+        true // removeOnly (!important, avoids unnecessary moves)
+      )
+      this._vnode = this.kept
+      restoreActiveInstance()
+      update.call(this, vnode, hydrating)
+    }
+  },
 
   render (h: Function) {
     const tag: string = this.tag || this.$vnode.data.tag || 'span'
@@ -76,17 +94,6 @@ export default {
     return h(tag, null, children)
   },
 
-  beforeUpdate () {
-    // force removing pass
-    this.__patch__(
-      this._vnode,
-      this.kept,
-      false, // hydrating
-      true // removeOnly (!important, avoids unnecessary moves)
-    )
-    this._vnode = this.kept
-  },
-
   updated () {
     const children: Array<VNode> = this.prevChildren
     const moveClass: string = this.moveClass || ((this.name || 'v') + '-move')
@@ -107,11 +114,14 @@ export default {
 
     children.forEach((c: VNode) => {
       if (c.data.moved) {
-        var el: any = c.elm
-        var s: any = el.style
+        const el: any = c.elm
+        const s: any = el.style
         addTransitionClass(el, moveClass)
         s.transform = s.WebkitTransform = s.transitionDuration = ''
         el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
+          if (e && e.target !== el) {
+            return
+          }
           if (!e || /transform$/.test(e.propertyName)) {
             el.removeEventListener(transitionEndEvent, cb)
             el._moveCb = null

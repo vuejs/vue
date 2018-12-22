@@ -1,7 +1,7 @@
-var base = require('./karma.base.config.js')
+const base = require('./karma.base.config.js')
 
 module.exports = function (config) {
-  var options = Object.assign(base, {
+  const options = Object.assign(base, {
     browsers: ['PhantomJS'],
     reporters: ['mocha', 'coverage'],
     coverageReporter: {
@@ -24,7 +24,8 @@ module.exports = function (config) {
         'test/',
         'src/compiler/parser/html-parser.js',
         'src/core/instance/proxy.js',
-        'src/sfc/deindent.js'
+        'src/sfc/deindent.js',
+        'src/platforms/weex/'
       ]
     }]]
   }

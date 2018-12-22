@@ -137,6 +137,58 @@ describe('Options lifecycle hooks', () => {
         expect(spy).toHaveBeenCalled()
       }).then(done)
     })
+
+    it('should be called before render and allow mutating state', done => {
+      const vm = new Vue({
+        template: '<div>{{ msg }}</div>',
+        data: { msg: 'foo' },
+        beforeUpdate () {
+          this.msg += '!'
+        }
+      }).$mount()
+      expect(vm.$el.textContent).toBe('foo')
+      vm.msg = 'bar'
+      waitForUpdate(() => {
+        expect(vm.$el.textContent).toBe('bar!')
+      }).then(done)
+    })
+
+    // #8076
+    it('should not be called after destroy', done => {
+      const beforeUpdate = jasmine.createSpy('beforeUpdate')
+      const destroyed = jasmine.createSpy('destroyed')
+
+      Vue.component('todo', {
+        template: '<div>{{todo.done}}</div>',
+        props: ['todo'],
+        destroyed,
+        beforeUpdate
+      })
+
+      const vm = new Vue({
+        template: `
+          <div>
+            <todo v-for="t in pendingTodos" :todo="t" :key="t.id"></todo>
+          </div>
+        `,
+        data () {
+          return {
+            todos: [{ id: 1, done: false }]
+          }
+        },
+        computed: {
+          pendingTodos () {
+            return this.todos.filter(t => !t.done)
+          }
+        }
+      }).$mount()
+
+      vm.todos[0].done = true
+      waitForUpdate(() => {
+        expect(destroyed).toHaveBeenCalled()
+        expect(beforeUpdate).not.toHaveBeenCalled()
+      }).then(done)
+    })
   })
 
   describe('updated', () => {
@@ -182,6 +234,43 @@ describe('Options lifecycle hooks', () => {
       expect(calls).toEqual([])
       waitForUpdate(() => {
         expect(calls).toEqual(['child', 'parent'])
+      }).then(done)
+    })
+
+    // #8076
+    it('should not be called after destroy', done => {
+      const updated = jasmine.createSpy('updated')
+      const destroyed = jasmine.createSpy('destroyed')
+
+      Vue.component('todo', {
+        template: '<div>{{todo.done}}</div>',
+        props: ['todo'],
+        destroyed,
+        updated
+      })
+
+      const vm = new Vue({
+        template: `
+          <div>
+            <todo v-for="t in pendingTodos" :todo="t" :key="t.id"></todo>
+          </div>
+        `,
+        data () {
+          return {
+            todos: [{ id: 1, done: false }]
+          }
+        },
+        computed: {
+          pendingTodos () {
+            return this.todos.filter(t => !t.done)
+          }
+        }
+      }).$mount()
+
+      vm.todos[0].done = true
+      waitForUpdate(() => {
+        expect(destroyed).toHaveBeenCalled()
+        expect(updated).not.toHaveBeenCalled()
       }).then(done)
     })
   })

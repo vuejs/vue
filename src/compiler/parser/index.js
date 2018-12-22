@@ -4,8 +4,8 @@ import he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
-import { cached, no, camelize } from 'shared/util'
 import { genAssignmentCode } from '../directives/model'
+import { extend, cached, no, camelize, hyphenate } from 'shared/util'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
 
 import {
@@ -22,12 +22,12 @@ import {
 
 export const onRE = /^@|^v-on:/
 export const dirRE = /^v-|^@|^:/
-export const forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/
-export const forIteratorRE = /\((\{[^}]*\}|[^,{]*),([^,]*)(?:,([^,]*))?\)/
+export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
+export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 
 const argRE = /:(.*)$/
-const bindRE = /^:|^v-bind:/
+export const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
 
 const decodeHTMLCached = cached(he.decode)
@@ -92,13 +92,17 @@ export function parse (
     }
   }
 
-  function endPre (element) {
+  function closeElement (element) {
     // check pre state
     if (element.pre) {
       inVPre = false
     }
     if (platformIsPreTag(element.tag)) {
       inPre = false
+    }
+    // apply post-transforms
+    for (let i = 0; i < postTransforms.length; i++) {
+      postTransforms[i](element, options)
     }
   }
 
@@ -111,7 +115,7 @@ export function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
-    start (tag, attrs, unary, start, end) {
+    start (tag, attrs, unary, start) {
       // check namespace.
       // inherit parent ns if there is one
       const ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag)
@@ -226,11 +230,7 @@ export function parse (
         currentParent = element
         stack.push(element)
       } else {
-        endPre(element)
-      }
-      // apply post-transforms
-      for (let i = 0; i < postTransforms.length; i++) {
-        postTransforms[i](element, options)
+        closeElement(element)
       }
     },
 
@@ -247,7 +247,7 @@ export function parse (
       if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
         element.end = end
       }
-      endPre(element)
+      closeElement(element)
     },
 
     chars (text: string, start: number, end: number) {
@@ -281,12 +281,13 @@ export function parse (
         // only preserve whitespace if its not right after a starting tag
         : preserveWhitespace && children.length ? ' ' : ''
       if (text) {
-        let expression
+        let res
         let child: ?ASTNode
-        if (!inVPre && text !== ' ' && (expression = parseText(text, delimiters))) {
+        if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
           child = {
             type: 2,
-            expression,
+            expression: res.expression,
+            tokens: res.tokens,
             text
           }
         } else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
@@ -366,11 +367,25 @@ export function processElement (element: ASTElement, options: CompilerOptions) {
 function processKey (el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
-    if (process.env.NODE_ENV !== 'production' && el.tag === 'template') {
-      warn(
-        `<template> cannot be keyed. Place the key on real elements instead.`,
-        getRawBindingAttr(el, 'key')
-      )
+    if (process.env.NODE_ENV !== 'production') {
+      if (el.tag === 'template') {
+        warn(
+          `<template> cannot be keyed. Place the key on real elements instead.`,
+          getRawBindingAttr(el, 'key')
+        )
+      }
+      if (el.for) {
+        const iterator = el.iterator2 || el.iterator1
+        const parent = el.parent
+        if (iterator && iterator === exp && parent && parent.tag === 'transition-group') {
+          warn(
+            `Do not use v-for index as key on <transition-group> children, ` +
+            `this is the same as not using keys.`,
+            getRawBindingAttr(el, 'key'),
+            true /* tip */
+          )
+        }
+      }
     }
     el.key = exp
   }
@@ -387,27 +402,42 @@ function processRef (el) {
 export function processFor (el: ASTElement) {
   let exp
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
-    const inMatch = exp.match(forAliasRE)
-    if (!inMatch) {
-      process.env.NODE_ENV !== 'production' && warn(
+    const res = parseFor(exp)
+    if (res) {
+      extend(el, res)
+    } else if (process.env.NODE_ENV !== 'production') {
+      warn(
         `Invalid v-for expression: ${exp}`,
         el.rawAttrsMap['v-for']
       )
-      return
-    }
-    el.for = inMatch[2].trim()
-    const alias = inMatch[1].trim()
-    const iteratorMatch = alias.match(forIteratorRE)
-    if (iteratorMatch) {
-      el.alias = iteratorMatch[1].trim()
-      el.iterator1 = iteratorMatch[2].trim()
-      if (iteratorMatch[3]) {
-        el.iterator2 = iteratorMatch[3].trim()
-      }
-    } else {
-      el.alias = alias.replace(stripParensRE, '')
     }
   }
+}
+
+type ForParseResult = {
+  for: string;
+  alias: string;
+  iterator1?: string;
+  iterator2?: string;
+};
+
+export function parseFor (exp: string): ?ForParseResult {
+  const inMatch = exp.match(forAliasRE)
+  if (!inMatch) return
+  const res = {}
+  res.for = inMatch[2].trim()
+  const alias = inMatch[1].trim().replace(stripParensRE, '')
+  const iteratorMatch = alias.match(forIteratorRE)
+  if (iteratorMatch) {
+    res.alias = alias.replace(forIteratorRE, '').trim()
+    res.iterator1 = iteratorMatch[1].trim()
+    if (iteratorMatch[2]) {
+      res.iterator2 = iteratorMatch[2].trim()
+    }
+  } else {
+    res.alias = alias
+  }
+  return res
 }
 
 function processIf (el) {
@@ -541,7 +571,7 @@ function processComponent (el) {
 
 function processAttrs (el) {
   const list = el.attrsList
-  let i, l, name, rawName, value, modifiers, isProp
+  let i, l, name, rawName, value, modifiers, isProp, syncGen
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
     value = list[i].value
@@ -557,6 +587,14 @@ function processAttrs (el) {
         name = name.replace(bindRE, '')
         value = parseFilters(value)
         isProp = false
+        if (
+          process.env.NODE_ENV !== 'production' &&
+          value.trim().length === 0
+        ) {
+          warn(
+            `The value for a v-bind expression cannot be empty. Found in "v-bind:${name}"`
+          )
+        }
         if (modifiers) {
           if (modifiers.prop) {
             isProp = true
@@ -567,9 +605,27 @@ function processAttrs (el) {
             name = camelize(name)
           }
           if (modifiers.sync) {
-            const newName = `update:${camelize(name)}`
-            const newValue = genAssignmentCode(value, `$event`)
-            addHandler(el, newName, newValue, null, false, warn, list[i])
+            syncGen = genAssignmentCode(value, `$event`)
+            addHandler(
+              el,
+              `update:${camelize(name)}`,
+              syncGen,
+              null,
+              false,
+              warn,
+              list[i]
+            )
+            if (hyphenate(name) !== camelize(name)) {
+              addHandler(
+                el,
+                `update:${hyphenate(name)}`,
+                syncGen,
+                null,
+                false,
+                warn,
+                list[i]
+              )
+            }
           }
         }
         if (isProp || (
@@ -598,8 +654,8 @@ function processAttrs (el) {
     } else {
       // literal attribute
       if (process.env.NODE_ENV !== 'production') {
-        const expression = parseText(value, delimiters)
-        if (expression) {
+        const res = parseText(value, delimiters)
+        if (res) {
           warn(
             `${name}="${value}": ` +
             'Interpolation inside attributes has been removed. ' +

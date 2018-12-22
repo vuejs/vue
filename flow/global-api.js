@@ -8,8 +8,8 @@ declare interface GlobalAPI {
   set: <T>(target: Object | Array<T>, key: string | number, value: T) => T;
   delete: <T>(target: Object| Array<T>, key: string | number) => void;
   nextTick: (fn: Function, context?: Object) => void | Promise<*>;
-  use: (plugin: Function | Object) => void;
-  mixin: (mixin: Object) => void;
+  use: (plugin: Function | Object) => GlobalAPI;
+  mixin: (mixin: Object) => GlobalAPI;
   compile: (template: string) => { render: Function, staticRenderFns: Array<Function> };
 
   directive: (id: string, def?: Function | Object) => Function | Object | void;

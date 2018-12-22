@@ -14,7 +14,7 @@ const isSpecialTag = makeMap('script,style,template', true)
 export function parseComponent (
   content: string,
   options?: Object = {}
- ): SFCDescriptor {
+): SFCDescriptor {
   const sfc: SFCDescriptor = {
     template: null,
     script: null,
@@ -23,7 +23,7 @@ export function parseComponent (
     errors: []
   }
   let depth = 0
-  let currentBlock: ?(SFCBlock | SFCCustomBlock) = null
+  let currentBlock: ?SFCBlock = null
 
   let warn = msg => {
     sfc.errors.push(msg)
@@ -53,12 +53,11 @@ export function parseComponent (
       currentBlock = {
         type: tag,
         content: '',
-        blockStart: start,
         start: end,
         attrs: attrs.reduce((cumulated, { name, value }) => {
           cumulated[name] = value || true
           return cumulated
-        }, Object.create(null))
+        }, {})
       }
       if (isSpecialTag(tag)) {
         checkAttrs(currentBlock, attrs)
@@ -94,12 +93,11 @@ export function parseComponent (
     }
   }
 
-  function end (tag: string, start: number, end: number) {
+  function end (tag: string, start: number) {
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
-      currentBlock.blockEnd = end
       let text = content.slice(currentBlock.start, currentBlock.end)
-      if (process.env.NODE_ENV === 'production' || !options.outputSourceRange) {
+      if (options.deindent !== false) {
         text = deindent(text)
       }
       // pad content so that linters and pre-processors can output correct
@@ -113,7 +111,7 @@ export function parseComponent (
     depth--
   }
 
-  function padContent (block: SFCBlock | SFCCustomBlock, pad: true | "line" | "space") {
+  function padContent (block: SFCBlock, pad: true | "line" | "space") {
     if (pad === 'space') {
       return content.slice(0, block.start).replace(replaceRE, ' ')
     } else {

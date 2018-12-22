@@ -135,10 +135,12 @@ describe('create-element', () => {
   it('render svg foreignObject with correct namespace', () => {
     const vm = new Vue({})
     const h = vm.$createElement
-    const vnode = h('svg', [h('foreignObject', [h('p')])])
+    const vnode = h('svg', [h('foreignObject', [h('p'), h('svg')])])
     expect(vnode.ns).toBe('svg')
     expect(vnode.children[0].ns).toBe('svg')
     expect(vnode.children[0].children[0].ns).toBeUndefined()
+    // #7330
+    expect(vnode.children[0].children[1].ns).toBe('svg')
   })
 
   // #6642
@@ -215,6 +217,15 @@ describe('create-element', () => {
     expect('Avoid using non-primitive value as key').not.toHaveBeenWarned()
   })
 
+  it('doesn\'t warn symbol key', () => {
+    new Vue({
+      render (h) {
+        return h('div', { key: Symbol('symbol') })
+      }
+    }).$mount()
+    expect('Avoid using non-primitive value as key').not.toHaveBeenWarned()
+  })
+
   it('nested child elements should be updated correctly', done => {
     const vm = new Vue({
       data: { n: 1 },
@@ -241,5 +252,25 @@ describe('create-element', () => {
       expect(vm.$el.querySelector('input')).toBe(el)
       expect(vm.$el.querySelector('input').value).toBe('b')
     }).then(done)
+  })
+
+  // #7786
+  it('creates element with vnode reference in :class or :style', () => {
+    const vm = new Vue({
+      components: {
+        foo: {
+          render (h) {
+            return h('div', {
+              class: {
+                'has-vnode': this.$vnode
+              }
+            }, 'foo')
+          }
+        }
+      },
+      render: h => h('foo')
+    }).$mount()
+    expect(vm.$el.innerHTML).toContain('foo')
+    expect(vm.$el.classList.contains('has-vnode')).toBe(true)
   })
 })

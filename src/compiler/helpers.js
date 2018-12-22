@@ -5,9 +5,11 @@ import { parseFilters } from './parser/filter-parser'
 
 type Range = { start?: number, end?: number };
 
+/* eslint-disable no-unused-vars */
 export function baseWarn (msg: string, range?: Range) {
   console.error(`[Vue compiler]: ${msg}`)
 }
+/* eslint-enable no-unused-vars */
 
 export function pluckModuleFunction<F: Function> (
   modules: ?Array<Object>,
@@ -20,10 +22,18 @@ export function pluckModuleFunction<F: Function> (
 
 export function addProp (el: ASTElement, name: string, value: string, range?: Range) {
   (el.props || (el.props = [])).push(rangeSetItem({ name, value }, range))
+  el.plain = false
 }
 
-export function addAttr (el: ASTElement, name: string, value: string, range?: Range) {
+export function addAttr (el: ASTElement, name: string, value: any, range?: Range) {
   (el.attrs || (el.attrs = [])).push(rangeSetItem({ name, value }, range))
+  el.plain = false
+}
+
+// add a raw attr (use this in preTransforms)
+export function addRawAttr (el: ASTElement, name: string, value: any, range?: Range) {
+  el.attrsMap[name] = value
+  el.attrsList.push(rangeSetItem({ name, value }, range))
 }
 
 export function addDirective (
@@ -36,6 +46,7 @@ export function addDirective (
   range?: Range
 ) {
   (el.directives || (el.directives = [])).push(rangeSetItem({ name, rawName, value, arg, modifiers }, range))
+  el.plain = false
 }
 
 export function addHandler (
@@ -61,6 +72,18 @@ export function addHandler (
     )
   }
 
+  // normalize click.right and click.middle since they don't actually fire
+  // this is technically browser-specific, but at least for now browsers are
+  // the only target envs that have right/middle clicks.
+  if (name === 'click') {
+    if (modifiers.right) {
+      name = 'contextmenu'
+      delete modifiers.right
+    } else if (modifiers.middle) {
+      name = 'mouseup'
+    }
+  }
+
   // check capture modifier
   if (modifiers.capture) {
     delete modifiers.capture
@@ -76,18 +99,6 @@ export function addHandler (
     name = '&' + name // mark the event as passive
   }
 
-  // normalize click.right and click.middle since they don't actually fire
-  // this is technically browser-specific, but at least for now browsers are
-  // the only target envs that have right/middle clicks.
-  if (name === 'click') {
-    if (modifiers.right) {
-      name = 'contextmenu'
-      delete modifiers.right
-    } else if (modifiers.middle) {
-      name = 'mouseup'
-    }
-  }
-
   let events
   if (modifiers.native) {
     delete modifiers.native
@@ -96,7 +107,7 @@ export function addHandler (
     events = el.events || (el.events = {})
   }
 
-  const newHandler: any = rangeSetItem({ value }, range)
+  const newHandler: any = rangeSetItem({ value: value.trim() }, range)
   if (modifiers !== emptyObject) {
     newHandler.modifiers = modifiers
   }
@@ -110,6 +121,8 @@ export function addHandler (
   } else {
     events[name] = newHandler
   }
+
+  el.plain = false
 }
 
 export function getRawBindingAttr (

@@ -29,6 +29,7 @@ export type RenderOptions = {
   shouldPreload?: Function;
   shouldPrefetch?: Function;
   clientManifest?: ClientManifest;
+  serializer?: Function;
   runInNewContext?: boolean | 'once';
 };
 
@@ -41,7 +42,8 @@ export function createRenderer ({
   cache,
   shouldPreload,
   shouldPrefetch,
-  clientManifest
+  clientManifest,
+  serializer
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
   const templateRenderer = new TemplateRenderer({
@@ -49,7 +51,8 @@ export function createRenderer ({
     inject,
     shouldPreload,
     shouldPrefetch,
-    clientManifest
+    clientManifest,
+    serializer
   })
 
   return {
@@ -78,11 +81,18 @@ export function createRenderer ({
         return false
       }, cb)
       try {
-        render(component, write, context, () => {
+        render(component, write, context, err => {
+          if (context && context.rendered) {
+            context.rendered(context)
+          }
           if (template) {
             result = templateRenderer.renderSync(result, context)
           }
-          cb(null, result)
+          if (err) {
+            cb(err)
+          } else {
+            cb(null, result)
+          }
         })
       } catch (e) {
         cb(e)
@@ -102,6 +112,12 @@ export function createRenderer ({
         render(component, write, context, done)
       })
       if (!template) {
+        if (context && context.rendered) {
+          const rendered = context.rendered
+          renderStream.once('beforeEnd', () => {
+            rendered(context)
+          })
+        }
         return renderStream
       } else {
         const templateStream = templateRenderer.createStream(context)
@@ -109,6 +125,12 @@ export function createRenderer ({
           templateStream.emit('error', err)
         })
         renderStream.pipe(templateStream)
+        if (context && context.rendered) {
+          const rendered = context.rendered
+          renderStream.once('beforeEnd', () => {
+            rendered(context)
+          })
+        }
         return templateStream
       }
     }

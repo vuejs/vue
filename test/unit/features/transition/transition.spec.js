@@ -612,6 +612,50 @@ if (!isIE9) {
       }).then(done)
     })
 
+    it('leave transition with v-show: cancelled on next frame', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition name="test">
+              <div v-show="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
+        data: { ok: true }
+      }).$mount(el)
+
+      vm.ok = false
+      waitForUpdate(() => {
+        vm.ok = true
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-enter-active test-enter-to')
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.children[0].className).toBe('test')
+      }).then(done)
+    })
+
+    it('enter transition with v-show: cancelled on next frame', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition name="test">
+              <div v-show="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
+        data: { ok: false }
+      }).$mount(el)
+
+      vm.ok = true
+      waitForUpdate(() => {
+        vm.ok = false
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-leave-active test-leave-to')
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.children[0].className).toBe('test')
+      }).then(done)
+    })
+
     it('animations', done => {
       const vm = new Vue({
         template: `
@@ -1121,6 +1165,28 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
       }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.innerHTML).toBe('<!---->')
+      }).then(done)
+    })
+
+    // #8199
+    it('should not throw error when replaced by v-html contents', (done) => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <div v-if="ok" :class="ok">
+              <transition>
+                <span>a</span>
+              </transition>
+            </div>
+            <div v-else v-html="ok"></div>
+          </div>
+        `,
+        data: { ok: true }
+      }).$mount(el)
+
+      vm.ok = false
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].innerHTML).toBe('false')
       }).then(done)
     })
   })

@@ -1,6 +1,9 @@
 window.triggerEvent = function triggerEvent (target, event, process) {
-  var e = document.createEvent('HTMLEvents')
+  const e = document.createEvent('HTMLEvents')
   e.initEvent(event, true, true)
+  if (event === 'click') {
+    e.button = 0
+  }
   if (process) process(e)
   target.dispatchEvent(e)
 }

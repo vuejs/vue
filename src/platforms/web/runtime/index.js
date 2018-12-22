@@ -4,7 +4,7 @@ import Vue from 'core/index'
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
-import { devtools, inBrowser, isChrome } from 'core/util/index'
+import { devtools, inBrowser } from 'core/util/index'
 
 import {
   query,
@@ -44,27 +44,33 @@ Vue.prototype.$mount = function (
 
 // devtools global hook
 /* istanbul ignore next */
-Vue.nextTick(() => {
-  if (config.devtools) {
-    if (devtools) {
-      devtools.emit('init', Vue)
-    } else if (process.env.NODE_ENV !== 'production' && isChrome) {
+if (inBrowser) {
+  setTimeout(() => {
+    if (config.devtools) {
+      if (devtools) {
+        devtools.emit('init', Vue)
+      } else if (
+        process.env.NODE_ENV !== 'production' &&
+        process.env.NODE_ENV !== 'test'
+      ) {
+        console[console.info ? 'info' : 'log'](
+          'Download the Vue Devtools extension for a better development experience:\n' +
+          'https://github.com/vuejs/vue-devtools'
+        )
+      }
+    }
+    if (process.env.NODE_ENV !== 'production' &&
+      process.env.NODE_ENV !== 'test' &&
+      config.productionTip !== false &&
+      typeof console !== 'undefined'
+    ) {
       console[console.info ? 'info' : 'log'](
-        'Download the Vue Devtools extension for a better development experience:\n' +
-        'https://github.com/vuejs/vue-devtools'
+        `You are running Vue in development mode.\n` +
+        `Make sure to turn on production mode when deploying for production.\n` +
+        `See more tips at https://vuejs.org/guide/deployment.html`
       )
     }
-  }
-  if (process.env.NODE_ENV !== 'production' &&
-    config.productionTip !== false &&
-    inBrowser && typeof console !== 'undefined'
-  ) {
-    console[console.info ? 'info' : 'log'](
-      `You are running Vue in development mode.\n` +
-      `Make sure to turn on production mode when deploying for production.\n` +
-      `See more tips at https://vuejs.org/guide/deployment.html`
-    )
-  }
-}, 0)
+  }, 0)
+}
 
 export default Vue

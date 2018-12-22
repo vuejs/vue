@@ -15,8 +15,8 @@ export function genComponentModel (
   if (trim) {
     valueExpression =
       `(typeof ${baseValueExpression} === 'string'` +
-        `? ${baseValueExpression}.trim()` +
-        `: ${baseValueExpression})`
+      `? ${baseValueExpression}.trim()` +
+      `: ${baseValueExpression})`
   }
   if (number) {
     valueExpression = `_n(${valueExpression})`
@@ -25,7 +25,7 @@ export function genComponentModel (
 
   el.model = {
     value: `(${value})`,
-    expression: `"${value}"`,
+    expression: JSON.stringify(value),
     callback: `function (${baseValueExpression}) {${assignment}}`
   }
 }
@@ -68,6 +68,9 @@ type ModelParseResult = {
 }
 
 export function parseModel (val: string): ModelParseResult {
+  // Fix https://github.com/vuejs/vue/pull/7730
+  // allow v-model="obj.val " (trailing whitespace)
+  val = val.trim()
   len = val.length
 
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
