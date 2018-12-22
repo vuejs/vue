@@ -553,4 +553,20 @@ describe('Options props', () => {
     expect(vm.$refs.test.$props.booleanOrString).toBe(true)
     expect(vm.$refs.test.$props.stringOrBoolean).toBe('')
   })
+
+  it('should warn when a prop type is not a constructor', () => {
+    const vm = new Vue({
+      template: '<div>{{a}}</div>',
+      props: {
+        a: {
+          type: 'String',
+          default: 'test'
+        }
+      }
+    }).$mount()
+    expect(
+      'Invalid prop type: "String" is not a constructor'
+    ).toHaveBeenWarned()
+  })
+
 })
