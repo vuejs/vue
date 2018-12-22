@@ -1,5 +1,7 @@
 /* @flow */
 
+import { isProduction } from 'shared/util'
+
 import config from '../config'
 import VNode, { createEmptyVNode } from './vnode'
 import { createComponent } from './create-component'
@@ -52,7 +54,7 @@ export function _createElement (
   normalizationType?: number
 ): VNode | Array<VNode> {
   if (isDef(data) && isDef((data: any).__ob__)) {
-    process.env.NODE_ENV !== 'production' && warn(
+    !isProduction && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
       'Always create fresh vnode data objects in each render!',
       context
@@ -68,7 +70,7 @@ export function _createElement (
     return createEmptyVNode()
   }
   // warn against non-primitive key
-  if (process.env.NODE_ENV !== 'production' &&
+  if (!isProduction &&
     isDef(data) && isDef(data.key) && !isPrimitive(data.key)
   ) {
     if (!__WEEX__ || !('@binding' in data.key)) {

@@ -3,6 +3,7 @@
 import config from '../config'
 import { warn } from './debug'
 import { inBrowser, inWeex } from './env'
+import { isProduction } from 'shared/util'
 
 export function handleError (err: Error, vm: any, info: string) {
   if (vm) {
@@ -36,7 +37,7 @@ function globalHandleError (err, vm, info) {
 }
 
 function logError (err, vm, info) {
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProduction) {
     warn(`Error in ${info}: "${err.toString()}"`, vm)
   }
   /* istanbul ignore else */

@@ -1,6 +1,6 @@
 /* @flow */
 
-import { cached, camelize, isPlainObject } from 'shared/util'
+import { cached, camelize, isPlainObject, isProduction } from 'shared/util'
 import { parseText } from 'compiler/parser/text-parser'
 import {
   getAndRemoveAttr,
@@ -19,7 +19,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticStyle = getAndRemoveAttr(el, 'style')
   const { dynamic, styleResult } = parseStaticStyle(staticStyle, options)
-  if (process.env.NODE_ENV !== 'production' && dynamic) {
+  if (!isProduction && dynamic) {
     warn(
       `style="${String(staticStyle)}": ` +
       'Interpolation inside attributes has been deprecated. ' +

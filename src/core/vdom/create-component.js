@@ -1,5 +1,7 @@
 /* @flow */
 
+import { isProduction } from 'shared/util'
+
 import VNode from './vnode'
 import { resolveConstructorOptions } from 'core/instance/init'
 import { queueActivatedComponent } from 'core/observer/scheduler'
@@ -119,7 +121,7 @@ export function createComponent (
   // if at this stage it's not a constructor or an async component factory,
   // reject.
   if (typeof Ctor !== 'function') {
-    if (process.env.NODE_ENV !== 'production') {
+    if (!isProduction) {
       warn(`Invalid Component definition: ${String(Ctor)}`, context)
     }
     return

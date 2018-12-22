@@ -2,7 +2,7 @@
 
 import Vue from 'core/index'
 import config from 'core/config'
-import { extend, noop } from 'shared/util'
+import { extend, noop, isProduction } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
 import { devtools, inBrowser, isChrome } from 'core/util/index'
 
@@ -50,7 +50,7 @@ if (inBrowser) {
       if (devtools) {
         devtools.emit('init', Vue)
       } else if (
-        process.env.NODE_ENV !== 'production' &&
+        !isProduction &&
         process.env.NODE_ENV !== 'test' &&
         isChrome
       ) {
@@ -60,7 +60,7 @@ if (inBrowser) {
         )
       }
     }
-    if (process.env.NODE_ENV !== 'production' &&
+    if (!isProduction &&
       process.env.NODE_ENV !== 'test' &&
       config.productionTip !== false &&
       typeof console !== 'undefined'

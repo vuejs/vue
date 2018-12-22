@@ -1,5 +1,7 @@
 /* @flow */
 
+import { isProduction } from 'shared/util'
+
 import VNode, { cloneVNode } from './vnode'
 import { createElement } from './create-element'
 import { resolveInject } from '../instance/inject'
@@ -123,7 +125,7 @@ function cloneAndMarkFunctionalResult (vnode, data, contextVm, options, renderCo
   const clone = cloneVNode(vnode)
   clone.fnContext = contextVm
   clone.fnOptions = options
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProduction) {
     (clone.devtoolsMeta = clone.devtoolsMeta || {}).renderContext = renderContext
   }
   if (data.slot) {

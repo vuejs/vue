@@ -1,5 +1,6 @@
 /* @flow */
 
+import { isProduction } from 'shared/util'
 import { parseText } from 'compiler/parser/text-parser'
 import {
   getAndRemoveAttr,
@@ -16,7 +17,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')
   const { dynamic, classResult } = parseStaticClass(staticClass, options)
-  if (process.env.NODE_ENV !== 'production' && dynamic && staticClass) {
+  if (!isProduction && dynamic && staticClass) {
     warn(
       `class="${staticClass}": ` +
       'Interpolation inside attributes has been deprecated. ' +

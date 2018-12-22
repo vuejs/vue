@@ -333,3 +333,8 @@ export function once (fn: Function): Function {
     }
   }
 }
+
+/**
+ * Check whether in production mode.
+ */
+export const isProduction = process.env.NODE_ENV === 'production'

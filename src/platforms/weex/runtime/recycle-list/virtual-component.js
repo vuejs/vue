@@ -2,6 +2,7 @@
 
 // https://github.com/Hanks10100/weex-native-directive/tree/master/component
 
+import { isProduction } from 'shared/util'
 import { mergeOptions, isPlainObject, noop } from 'core/util/index'
 import Watcher from 'core/observer/watcher'
 import { initProxy } from 'core/instance/proxy'
@@ -40,7 +41,7 @@ function initVirtualComponent (options: Object = {}) {
   }
 
   /* istanbul ignore else */
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProduction) {
     initProxy(vm)
   } else {
     vm._renderProxy = vm

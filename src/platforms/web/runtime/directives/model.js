@@ -4,7 +4,7 @@
  */
 
 import { isTextInputType } from 'web/util/element'
-import { looseEqual, looseIndexOf } from 'shared/util'
+import { looseEqual, looseIndexOf, isProduction } from 'shared/util'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { warn, isIE9, isIE, isEdge } from 'core/util/index'
 
@@ -86,7 +86,7 @@ function actuallySetSelected (el, binding, vm) {
   const value = binding.value
   const isMultiple = el.multiple
   if (isMultiple && !Array.isArray(value)) {
-    process.env.NODE_ENV !== 'production' && warn(
+    !isProduction && warn(
       `<select multiple v-model="${binding.expression}"> ` +
       `expects an Array value for its binding, but got ${
         Object.prototype.toString.call(value).slice(8, -1)

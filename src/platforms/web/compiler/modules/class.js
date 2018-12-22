@@ -1,5 +1,6 @@
 /* @flow */
 
+import { isProduction } from 'shared/util'
 import { parseText } from 'compiler/parser/text-parser'
 import {
   getAndRemoveAttr,
@@ -10,7 +11,7 @@ import {
 function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')
-  if (process.env.NODE_ENV !== 'production' && staticClass) {
+  if (!isProduction && staticClass) {
     const res = parseText(staticClass, options.delimiters)
     if (res) {
       warn(

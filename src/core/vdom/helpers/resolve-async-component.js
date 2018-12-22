@@ -10,6 +10,7 @@ import {
   hasSymbol
 } from 'core/util/index'
 
+import { isProduction } from 'shared/util'
 import { createEmptyVNode } from 'core/vdom/vnode'
 
 function ensureCtor (comp: any, base) {
@@ -82,7 +83,7 @@ export function resolveAsyncComponent (
     })
 
     const reject = once(reason => {
-      process.env.NODE_ENV !== 'production' && warn(
+      !isProduction && warn(
         `Failed to resolve async component: ${String(factory)}` +
         (reason ? `\nReason: ${reason}` : '')
       )
@@ -125,7 +126,7 @@ export function resolveAsyncComponent (
           setTimeout(() => {
             if (isUndef(factory.resolved)) {
               reject(
-                process.env.NODE_ENV !== 'production'
+                !isProduction
                   ? `timeout (${res.timeout}ms)`
                   : null
               )

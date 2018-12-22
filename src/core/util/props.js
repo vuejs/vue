@@ -8,7 +8,8 @@ import {
   toRawType,
   hyphenate,
   capitalize,
-  isPlainObject
+  isPlainObject,
+  isProduction
 } from 'shared/util'
 
 type PropOptions = {
@@ -52,7 +53,7 @@ export function validateProp (
     toggleObserving(prevShouldObserve)
   }
   if (
-    process.env.NODE_ENV !== 'production' &&
+    !isProduction &&
     // skip validation for weex recycle-list child component props
     !(__WEEX__ && isObject(value) && ('@binding' in value))
   ) {
@@ -71,7 +72,7 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
   }
   const def = prop.default
   // warn against non-factory defaults for Object & Array
-  if (process.env.NODE_ENV !== 'production' && isObject(def)) {
+  if (!isProduction && isObject(def)) {
     warn(
       'Invalid default value for prop "' + key + '": ' +
       'Props with type Object/Array must use a factory function ' +

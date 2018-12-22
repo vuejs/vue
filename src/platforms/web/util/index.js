@@ -1,6 +1,7 @@
 /* @flow */
 
 import { warn } from 'core/util/index'
+import { isProduction } from 'shared/util'
 
 export * from './attrs'
 export * from './class'
@@ -13,7 +14,7 @@ export function query (el: string | Element): Element {
   if (typeof el === 'string') {
     const selected = document.querySelector(el)
     if (!selected) {
-      process.env.NODE_ENV !== 'production' && warn(
+      !isProduction && warn(
         'Cannot find element: ' + el
       )
       return document.createElement('div')

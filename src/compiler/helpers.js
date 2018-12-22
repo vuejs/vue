@@ -1,7 +1,7 @@
 /* @flow */
 
-import { emptyObject } from 'shared/util'
 import { parseFilters } from './parser/filter-parser'
+import { emptyObject, isProduction } from 'shared/util'
 
 export function baseWarn (msg: string) {
   console.error(`[Vue compiler]: ${msg}`)
@@ -56,7 +56,7 @@ export function addHandler (
   // warn prevent and passive modifier
   /* istanbul ignore if */
   if (
-    process.env.NODE_ENV !== 'production' && warn &&
+    !isProduction && warn &&
     modifiers.prevent && modifiers.passive
   ) {
     warn(

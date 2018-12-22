@@ -1,5 +1,6 @@
 /* @flow */
 
+import { isProduction } from 'shared/util'
 import { parseText } from 'compiler/parser/text-parser'
 import { parseStyleText } from 'web/util/style'
 import {
@@ -13,7 +14,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   const staticStyle = getAndRemoveAttr(el, 'style')
   if (staticStyle) {
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production') {
+    if (!isProduction) {
       const res = parseText(staticStyle, options.delimiters)
       if (res) {
         warn(

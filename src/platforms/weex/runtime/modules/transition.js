@@ -1,5 +1,5 @@
 import { warn } from 'core/util/debug'
-import { extend, once, noop } from 'shared/util'
+import { extend, once, noop, isProduction } from 'shared/util'
 import { activeInstance } from 'core/instance/lifecycle'
 import { resolveTransition } from 'web/runtime/transition-util'
 
@@ -239,7 +239,7 @@ function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass)
     for (const key in startState) {
       targetState[key] = el.style[key]
       if (
-        process.env.NODE_ENV !== 'production' &&
+        !isProduction &&
         targetState[key] == null &&
         (!activeState || activeState[key] == null) &&
         (!endState || endState[key] == null)

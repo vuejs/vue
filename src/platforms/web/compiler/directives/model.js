@@ -1,6 +1,7 @@
 /* @flow */
 
 import config from 'core/config'
+import { isProduction } from 'shared/util'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
 
@@ -22,7 +23,7 @@ export default function model (
   const tag = el.tag
   const type = el.attrsMap.type
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProduction) {
     // inputs with type="file" are read only and setting the input's
     // value will throw an error.
     if (tag === 'input' && type === 'file') {
@@ -49,7 +50,7 @@ export default function model (
     genComponentModel(el, value, modifiers)
     // component v-model doesn't need extra runtime
     return false
-  } else if (process.env.NODE_ENV !== 'production') {
+  } else if (!isProduction) {
     warn(
       `<${el.tag} v-model="${value}">: ` +
       `v-model is not supported on this element type. ` +
@@ -131,7 +132,7 @@ function genDefaultModel (
 
   // warn if v-bind:value conflicts with v-model
   // except for inputs with v-bind:type
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProduction) {
     const value = el.attrsMap['v-bind:value'] || el.attrsMap[':value']
     const typeBinding = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
     if (value && !typeBinding) {

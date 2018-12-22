@@ -1,5 +1,6 @@
 /* @flow */
 
+import { isProduction } from 'shared/util'
 import { parseFor } from 'compiler/parser/index'
 import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
 
@@ -11,7 +12,7 @@ export function preTransformVFor (el: ASTElement, options: WeexCompilerOptions) 
 
   const res = parseFor(exp)
   if (!res) {
-    if (process.env.NODE_ENV !== 'production' && options.warn) {
+    if (!isProduction && options.warn) {
       options.warn(`Invalid v-for expression: ${exp}`)
     }
     return

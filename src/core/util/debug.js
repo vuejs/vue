@@ -1,14 +1,14 @@
 /* @flow */
 
 import config from '../config'
-import { noop } from 'shared/util'
+import { noop, isProduction } from 'shared/util'
 
 export let warn = noop
 export let tip = noop
 export let generateComponentTrace = (noop: any) // work around flow check
 export let formatComponentName = (noop: any)
 
-if (process.env.NODE_ENV !== 'production') {
+if (!isProduction) {
   const hasConsole = typeof console !== 'undefined'
   const classifyRE = /(?:^|[-_])(\w)/g
   const classify = str => str

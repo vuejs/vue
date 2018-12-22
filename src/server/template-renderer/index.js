@@ -3,6 +3,7 @@
 const path = require('path')
 const serialize = require('serialize-javascript')
 
+import { isProduction } from 'shared/util'
 import { isJS, isCSS } from '../util'
 import TemplateStream from './template-stream'
 import { parseTemplate } from './parse-template'
@@ -195,7 +196,7 @@ export default class TemplateRenderer {
       windowKey = '__INITIAL_STATE__'
     } = options || {}
     const state = serialize(context[contextKey], { isJSON: true })
-    const autoRemove = process.env.NODE_ENV === 'production'
+    const autoRemove = isProduction
       ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
       : ''
     return context[contextKey]

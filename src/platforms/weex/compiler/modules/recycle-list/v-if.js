@@ -1,5 +1,6 @@
 /* @flow */
 
+import { isProduction } from 'shared/util'
 import { addIfCondition } from 'compiler/parser/index'
 import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
 
@@ -50,7 +51,7 @@ export function preTransformVIf (el: ASTElement, options: WeexCompilerOptions) {
         exp = elseifExp
           ? `!(${prevMatch}) && (${elseifExp})` // v-else-if
           : `!(${prevMatch})` // v-else
-      } else if (process.env.NODE_ENV !== 'production' && options.warn) {
+      } else if (!isProduction && options.warn) {
         options.warn(
           `v-${elseifExp ? ('else-if="' + elseifExp + '"') : 'else'} ` +
           `used on element <${el.tag}> without corresponding v-if.`

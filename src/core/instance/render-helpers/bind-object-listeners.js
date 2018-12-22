@@ -1,11 +1,12 @@
 /* @flow */
 
+import { isProduction } from 'shared/util'
 import { warn, extend, isPlainObject } from 'core/util/index'
 
 export function bindObjectListeners (data: any, value: any): VNodeData {
   if (value) {
     if (!isPlainObject(value)) {
-      process.env.NODE_ENV !== 'production' && warn(
+      !isProduction && warn(
         'v-on without argument expects an Object value',
         this
       )

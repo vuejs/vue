@@ -1,11 +1,11 @@
 /* not type checking this file because flow doesn't play well with Proxy */
 
 import config from 'core/config'
-import { warn, makeMap, isNative } from '../util/index'
+import { warn, makeMap, isNative, isProduction } from '../util/index'
 
 let initProxy
 
-if (process.env.NODE_ENV !== 'production') {
+if (!isProduction) {
   const allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +

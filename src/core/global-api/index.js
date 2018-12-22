@@ -14,14 +14,15 @@ import {
   extend,
   nextTick,
   mergeOptions,
-  defineReactive
+  defineReactive,
+  isProduction
 } from '../util/index'
 
 export function initGlobalAPI (Vue: GlobalAPI) {
   // config
   const configDef = {}
   configDef.get = () => config
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProduction) {
     configDef.set = () => {
       warn(
         'Do not replace the Vue.config object, set individual fields instead.'

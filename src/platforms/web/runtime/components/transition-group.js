@@ -11,6 +11,7 @@
 // into the final desired state. This way in the second pass removed
 // nodes will remain where they should be.
 
+import { isProduction } from 'shared/util'
 import { warn, extend } from 'core/util/index'
 import { addClass, removeClass } from '../class-util'
 import { transitionProps, extractTransitionData } from './transition'
@@ -66,7 +67,7 @@ export default {
           children.push(c)
           map[c.key] = c
           ;(c.data || (c.data = {})).transition = transitionData
-        } else if (process.env.NODE_ENV !== 'production') {
+        } else if (!isProduction) {
           const opts: ?VNodeComponentOptions = c.componentOptions
           const name: string = opts ? (opts.Ctor.options.name || opts.tag || '') : c.tag
           warn(`<transition-group> children must be keyed: <${name}>`)

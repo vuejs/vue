@@ -1,5 +1,7 @@
 /* @flow */
 
+import { isProduction } from 'shared/util'
+
 import type Watcher from './watcher'
 import { remove } from '../util/index'
 import config from '../config'
@@ -37,7 +39,7 @@ export default class Dep {
   notify () {
     // stabilize the subscriber list first
     const subs = this.subs.slice()
-    if (process.env.NODE_ENV !== 'production' && !config.async) {
+    if (!isProduction && !config.async) {
       // subs aren't sorted in scheduler if not running async
       // we need to sort them now to make sure they fire in correct
       // order

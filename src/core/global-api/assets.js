@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ASSET_TYPES } from 'shared/constants'
-import { isPlainObject, validateComponentName } from '../util/index'
+import { isPlainObject, validateComponentName, isProduction } from '../util/index'
 
 export function initAssetRegisters (Vue: GlobalAPI) {
   /**
@@ -16,7 +16,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         return this.options[type + 's'][id]
       } else {
         /* istanbul ignore if */
-        if (process.env.NODE_ENV !== 'production' && type === 'component') {
+        if (!isProduction && type === 'component') {
           validateComponentName(id)
         }
         if (type === 'component' && isPlainObject(definition)) {

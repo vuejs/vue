@@ -5,8 +5,8 @@ import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { genAssignmentCode } from '../directives/model'
-import { extend, cached, no, camelize } from 'shared/util'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
+import { extend, cached, no, camelize, isProduction } from 'shared/util'
 
 import {
   addProp,
@@ -132,7 +132,7 @@ export function parse (
 
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
-        process.env.NODE_ENV !== 'production' && warn(
+        !isProduction && warn(
           'Templates should only be responsible for mapping the state to the ' +
           'UI. Avoid placing tags with side-effects in your templates, such as ' +
           `<${tag}>` + ', as they will not be parsed.'
@@ -165,7 +165,7 @@ export function parse (
       }
 
       function checkRootConstraints (el) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (!isProduction) {
           if (el.tag === 'slot' || el.tag === 'template') {
             warnOnce(
               `Cannot use <${el.tag}> as component root element because it may ` +
@@ -193,7 +193,7 @@ export function parse (
             exp: element.elseif,
             block: element
           })
-        } else if (process.env.NODE_ENV !== 'production') {
+        } else if (!isProduction) {
           warnOnce(
             `Component template should contain exactly one root element. ` +
             `If you are using v-if on multiple elements, ` +
@@ -236,7 +236,7 @@ export function parse (
 
     chars (text: string) {
       if (!currentParent) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (!isProduction) {
           if (text === template) {
             warnOnce(
               'Component template requires a root element, rather than just text.'
@@ -331,7 +331,7 @@ export function processElement (element: ASTElement, options: CompilerOptions) {
 function processKey (el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (!isProduction) {
       if (el.tag === 'template') {
         warn(`<template> cannot be keyed. Place the key on real elements instead.`)
       }
@@ -364,7 +364,7 @@ export function processFor (el: ASTElement) {
     const res = parseFor(exp)
     if (res) {
       extend(el, res)
-    } else if (process.env.NODE_ENV !== 'production') {
+    } else if (!isProduction) {
       warn(
         `Invalid v-for expression: ${exp}`
       )
@@ -424,7 +424,7 @@ function processIfConditions (el, parent) {
       exp: el.elseif,
       block: el
     })
-  } else if (process.env.NODE_ENV !== 'production') {
+  } else if (!isProduction) {
     warn(
       `v-${el.elseif ? ('else-if="' + el.elseif + '"') : 'else'} ` +
       `used on element <${el.tag}> without corresponding v-if.`
@@ -438,7 +438,7 @@ function findPrevElement (children: Array<any>): ASTElement | void {
     if (children[i].type === 1) {
       return children[i]
     } else {
-      if (process.env.NODE_ENV !== 'production' && children[i].text !== ' ') {
+      if (!isProduction && children[i].text !== ' ') {
         warn(
           `text "${children[i].text.trim()}" between v-if and v-else(-if) ` +
           `will be ignored.`
@@ -466,7 +466,7 @@ function processOnce (el) {
 function processSlot (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
-    if (process.env.NODE_ENV !== 'production' && el.key) {
+    if (!isProduction && el.key) {
       warn(
         `\`key\` does not work on <slot> because slots are abstract outlets ` +
         `and can possibly expand into multiple elements. ` +
@@ -478,7 +478,7 @@ function processSlot (el) {
     if (el.tag === 'template') {
       slotScope = getAndRemoveAttr(el, 'scope')
       /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && slotScope) {
+      if (!isProduction && slotScope) {
         warn(
           `the "scope" attribute for scoped slots have been deprecated and ` +
           `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
@@ -490,7 +490,7 @@ function processSlot (el) {
       el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
       /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
+      if (!isProduction && el.attrsMap['v-for']) {
         warn(
           `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
           `(v-for takes higher priority). Use a wrapper <template> for the ` +
@@ -541,7 +541,7 @@ function processAttrs (el) {
         value = parseFilters(value)
         isProp = false
         if (
-          process.env.NODE_ENV !== 'production' &&
+          !isProduction &&
           value.trim().length === 0
         ) {
           warn(
@@ -584,13 +584,13 @@ function processAttrs (el) {
           name = name.slice(0, -(arg.length + 1))
         }
         addDirective(el, name, rawName, value, arg, modifiers)
-        if (process.env.NODE_ENV !== 'production' && name === 'model') {
+        if (!isProduction && name === 'model') {
           checkForAliasModel(el, value)
         }
       }
     } else {
       // literal attribute
-      if (process.env.NODE_ENV !== 'production') {
+      if (!isProduction) {
         const res = parseText(value, delimiters)
         if (res) {
           warn(
@@ -637,7 +637,7 @@ function makeAttrsMap (attrs: Array<Object>): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
     if (
-      process.env.NODE_ENV !== 'production' &&
+      !isProduction &&
       map[attrs[i].name] && !isIE && !isEdge
     ) {
       warn('duplicate attribute: ' + attrs[i].name)

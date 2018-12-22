@@ -1,6 +1,7 @@
 /* @flow */
 
 import config from 'core/config'
+import { isProduction } from 'shared/util'
 
 import {
   warn,
@@ -22,7 +23,7 @@ export function bindObjectProps (
 ): VNodeData {
   if (value) {
     if (!isObject(value)) {
-      process.env.NODE_ENV !== 'production' && warn(
+      !isProduction && warn(
         'v-bind without argument expects an Object or Array value',
         this
       )

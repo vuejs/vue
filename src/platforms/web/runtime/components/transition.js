@@ -4,7 +4,7 @@
 // supports transition mode (out-in / in-out)
 
 import { warn } from 'core/util/index'
-import { camelize, extend, isPrimitive } from 'shared/util'
+import { camelize, extend, isPrimitive, isProduction } from 'shared/util'
 import {
   mergeVNodeHook,
   isAsyncPlaceholder,
@@ -99,7 +99,7 @@ export default {
     }
 
     // warn multiple elements
-    if (process.env.NODE_ENV !== 'production' && children.length > 1) {
+    if (!isProduction && children.length > 1) {
       warn(
         '<transition> can only be used on a single element. Use ' +
         '<transition-group> for lists.',
@@ -110,7 +110,7 @@ export default {
     const mode: string = this.mode
 
     // warn invalid mode
-    if (process.env.NODE_ENV !== 'production' &&
+    if (!isProduction &&
       mode && mode !== 'in-out' && mode !== 'out-in'
     ) {
       warn(

@@ -2,8 +2,8 @@
 
 import { genHandlers } from './events'
 import baseDirectives from '../directives/index'
-import { camelize, no, extend } from 'shared/util'
 import { baseWarn, pluckModuleFunction } from '../helpers'
+import { camelize, no, extend, isProduction } from 'shared/util'
 
 type TransformFunction = (el: ASTElement, code: string) => string;
 type DataGenFunction = (el: ASTElement) => string;
@@ -129,7 +129,7 @@ function genOnce (el: ASTElement, state: CodegenState): string {
       parent = parent.parent
     }
     if (!key) {
-      process.env.NODE_ENV !== 'production' && state.warn(
+      !isProduction && state.warn(
         `v-once can only be used inside v-for that is keyed. `
       )
       return genElement(el, state)
@@ -192,7 +192,7 @@ export function genFor (
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
   const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
 
-  if (process.env.NODE_ENV !== 'production' &&
+  if (!isProduction &&
     state.maybeComponent(el) &&
     el.tag !== 'slot' &&
     el.tag !== 'template' &&
@@ -330,7 +330,7 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
 
 function genInlineTemplate (el: ASTElement, state: CodegenState): ?string {
   const ast = el.children[0]
-  if (process.env.NODE_ENV !== 'production' && (
+  if (!isProduction && (
     el.children.length !== 1 || ast.type !== 1
   )) {
     state.warn('Inline-template components must have exactly one child element.')

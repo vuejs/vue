@@ -1,5 +1,6 @@
 /* @flow */
 
+import { isProduction } from 'shared/util'
 import { extend, warn, isObject } from 'core/util/index'
 
 /**
@@ -16,7 +17,7 @@ export function renderSlot (
   if (scopedSlotFn) { // scoped slot
     props = props || {}
     if (bindObject) {
-      if (process.env.NODE_ENV !== 'production' && !isObject(bindObject)) {
+      if (!isProduction && !isObject(bindObject)) {
         warn(
           'slot v-bind without argument expects an Object',
           this

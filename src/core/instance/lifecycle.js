@@ -15,7 +15,8 @@ import {
   remove,
   handleError,
   emptyObject,
-  validateProp
+  validateProp,
+  isProduction
 } from '../util/index'
 
 export let activeInstance: any = null
@@ -146,7 +147,7 @@ export function mountComponent (
   vm.$el = el
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
-    if (process.env.NODE_ENV !== 'production') {
+    if (!isProduction) {
       /* istanbul ignore if */
       if ((vm.$options.template && vm.$options.template.charAt(0) !== '#') ||
         vm.$options.el || el) {
@@ -168,7 +169,7 @@ export function mountComponent (
 
   let updateComponent
   /* istanbul ignore if */
-  if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+  if (!isProduction && config.performance && mark) {
     updateComponent = () => {
       const name = vm._name
       const id = vm._uid
@@ -219,7 +220,7 @@ export function updateChildComponent (
   parentVnode: MountedComponentVNode,
   renderChildren: ?Array<VNode>
 ) {
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProduction) {
     isUpdatingChildComponent = true
   }
 
@@ -273,7 +274,7 @@ export function updateChildComponent (
     vm.$forceUpdate()
   }
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProduction) {
     isUpdatingChildComponent = false
   }
 }
