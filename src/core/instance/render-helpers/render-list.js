@@ -26,19 +26,13 @@ export function renderList (
     }
   } else if (isObject(val)) {
     if (hasSymbol && val[Symbol.iterator]) {
-      const iterator:Iterator<any> = val[Symbol.iterator]()
       ret = []
-      i = 0
-      let next
-      do {
-        next = iterator.next()
-        if (!next.done) {
-          key = i
-          ret.push(render(next.value, key, i))
-          i++
-        }
+      const iterator: Iterator<any> = val[Symbol.iterator]()
+      let result = iterator.next()
+      while (!result.done) {
+        ret.push(render(result.value, ret.length))
+        result = iterator.next()
       }
-      while (!next.done)
     } else {
       keys = Object.keys(val)
       ret = new Array(keys.length)
