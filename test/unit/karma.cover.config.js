@@ -1,8 +1,10 @@
 const base = require('./karma.base.config.js')
 
+process.env.CHROME_BIN = require('puppeteer').executablePath()
+
 module.exports = function (config) {
   const options = Object.assign(base, {
-    browsers: ['PhantomJS'],
+    browsers: ['ChromeHeadless'],
     reporters: ['mocha', 'coverage'],
     coverageReporter: {
       reporters: [
@@ -13,7 +15,7 @@ module.exports = function (config) {
     singleRun: true,
     plugins: base.plugins.concat([
       'karma-coverage',
-      'karma-phantomjs-launcher'
+      'karma-chrome-launcher'
     ])
   })
 
