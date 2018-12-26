@@ -327,11 +327,11 @@ describe('Component slot', () => {
 
   it('warn if user directly returns array', () => {
     new Vue({
-      template: '<test><div></div></test>',
+      template: '<test><div slot="foo"></div><div slot="foo"></div></test>',
       components: {
         test: {
           render () {
-            return this.$slots.default
+            return this.$slots.foo
           }
         }
       }

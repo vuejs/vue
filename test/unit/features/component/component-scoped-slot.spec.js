@@ -395,11 +395,9 @@ describe('Component scoped slot', () => {
             return { msg: 'hello' }
           },
           render (h) {
-            return h('div', [
-              this.$scopedSlots.item({
-                text: this.msg
-              })
-            ])
+            return h('div', this.$scopedSlots.item({
+              text: this.msg
+            }))
           }
         }
       }
@@ -425,14 +423,36 @@ describe('Component scoped slot', () => {
             return { msg: 'hello' }
           },
           render (h) {
-            return h('div', [
-              this.$scopedSlots.default({ msg: this.msg })
-            ])
+            return h('div', this.$scopedSlots.default({ msg: this.msg }))
           }
         }
       }
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
+  })
+
+  it('render function usage (default, as root)', () => {
+    const vm = new Vue({
+      render (h) {
+        return h('test', [
+          props => h('span', [props.msg])
+        ])
+      },
+      components: {
+        test: {
+          data () {
+            return { msg: 'hello' }
+          },
+          render (h) {
+            const res = this.$scopedSlots.default({ msg: this.msg })
+            // all scoped slots should be normalized into arrays
+            expect(Array.isArray(res)).toBe(true)
+            return res
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.outerHTML).toBe('<span>hello</span>')
   })
 
   // #4779
