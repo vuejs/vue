@@ -11,7 +11,7 @@
 
 import { makeMap, no } from 'shared/util'
 import { isNonPhrasingTag } from 'web/compiler/util'
-import { unicodeLetters } from '../../core/util/lang'
+import { unicodeLetters } from 'core/util/lang'
 
 // Regular Expressions for parsing tags and attributes
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
