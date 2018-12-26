@@ -76,9 +76,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     const res = {}
     const fnGenErrors = []
     res.render = createFunction(compiled.render, fnGenErrors)
-    res.staticRenderFns = compiled.staticRenderFns.map(code => {
-      return createFunction(code, fnGenErrors)
-    })
+    res.staticRenderFns = compiled.staticRenderFns.map(code => createFunction(code, fnGenErrors))
 
     // check function generation errors.
     // this should only happen if there is a bug in the compiler itself.
