@@ -125,6 +125,26 @@ describe('Directive v-for', () => {
   })
 
   if (hasSymbol) {
+    it('should render native iterables (Map)', () => {
+      const vm = new Vue({
+        template: `<div><span v-for="[key, val] in list">{{key}},{{val}}</span></div>`,
+        data: {
+          list: new Map([[1, 'foo'], [2, 'bar']])
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`<span>1,foo</span><span>2,bar</span>`)
+    })
+
+    it('should render native iterables (Set)', () => {
+      const vm = new Vue({
+        template: `<div><span v-for="val in list">{{val}}</span></div>`,
+        data: {
+          list: new Set([1, 2, 3])
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`<span>1</span><span>2</span><span>3</span>`)
+    })
+
     it('should render iterable of primitive values', done => {
       const iterable = {
         models: ['a', 'b', 'c'],
