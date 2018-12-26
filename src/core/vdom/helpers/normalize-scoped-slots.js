@@ -2,7 +2,7 @@
 
 import { emptyObject } from 'core/util/index'
 
-export function normalizeScopedSlots (slots: { [key: string]: Function }) {
+export function normalizeScopedSlots (slots: { [key: string]: Function } | void): any {
   if (!slots) {
     return emptyObject
   } else if (slots._normalized) {
