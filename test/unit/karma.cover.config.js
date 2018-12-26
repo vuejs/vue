@@ -4,7 +4,13 @@ process.env.CHROME_BIN = require('puppeteer').executablePath()
 
 module.exports = function (config) {
   const options = Object.assign(base, {
-    browsers: ['ChromeHeadless'],
+    browsers: ['ChromeHeadlessCI'],
+    customLaunchers: {
+      'ChromeHeadlessCI': {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      }
+    },
     reporters: ['mocha', 'coverage'],
     coverageReporter: {
       reporters: [
