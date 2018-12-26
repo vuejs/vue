@@ -6,7 +6,8 @@ declare type CompilerOptions = {
   isUnaryTag?: (tag: string) => ?boolean; // check if a tag is unary for the platform
   canBeLeftOpenTag?: (tag: string) => ?boolean; // check if a tag can be left opened
   isReservedTag?: (tag: string) => ?boolean; // check if a tag is a native for the platform
-  preserveWhitespace?: boolean; // preserve whitespace between elements?
+  preserveWhitespace?: boolean; // preserve whitespace between elements? (Deprecated)
+  whitespace?: 'preserve' | 'condense'; // whitespace handling strategy
   optimize?: boolean; // optimize static content?
 
   // web specific

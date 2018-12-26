@@ -7,6 +7,7 @@ interface CompilerOptions {
   modules?: ModuleOptions[];
   directives?: Record<string, DirectiveFunction>;
   preserveWhitespace?: boolean;
+  whitespace?: 'preserve' | 'condense';
 }
 
 interface CompiledResult {

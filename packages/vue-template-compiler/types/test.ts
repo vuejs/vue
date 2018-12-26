@@ -10,6 +10,7 @@ import {
 // check compile options
 const compiled = compile("<div>hi</div>", {
   preserveWhitespace: false,
+  whitespace: 'condense',
   modules: [
     {
       preTransformNode: el => el,

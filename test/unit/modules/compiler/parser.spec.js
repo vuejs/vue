@@ -757,4 +757,45 @@ describe('parser', () => {
     const ast = parse(`<p>{{\r\nmsg\r\n}}</p>`, baseOptions)
     expect(ast.children[0].expression).toBe('_s(msg)')
   })
+
+  it('preserveWhitespace: false', () => {
+    const options = extend({
+      preserveWhitespace: false
+    }, baseOptions)
+
+     const ast = parse('<p>\n  Welcome to <b>Vue.js</b>    <i>world</i>  \n  <span>.\n  Have fun!\n</span></p>', options)
+    expect(ast.tag).toBe('p')
+    expect(ast.children.length).toBe(4)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('\n  Welcome to ')
+    expect(ast.children[1].tag).toBe('b')
+    expect(ast.children[1].children[0].text).toBe('Vue.js')
+    expect(ast.children[2].tag).toBe('i')
+    expect(ast.children[2].children[0].text).toBe('world')
+    expect(ast.children[3].tag).toBe('span')
+    expect(ast.children[3].children[0].text).toBe('.\n  Have fun!\n')
+  })
+
+  it(`whitespace: 'condense'`, () => {
+    const options = extend({
+      whitespace: 'condense',
+      // should be ignored when whitespace is specified
+      preserveWhitespace: false
+    }, baseOptions)
+    const ast = parse('<p>\n  Welcome to <b>Vue.js</b>    <i>world</i>  \n  <span>.\n  Have fun!\n</span></p>', options)
+    expect(ast.tag).toBe('p')
+    expect(ast.children.length).toBe(5)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe(' Welcome to ')
+    expect(ast.children[1].tag).toBe('b')
+    expect(ast.children[1].children[0].text).toBe('Vue.js')
+    expect(ast.children[2].type).toBe(3)
+    // should condense inline whitespace into single space
+    expect(ast.children[2].text).toBe(' ')
+    expect(ast.children[3].tag).toBe('i')
+    expect(ast.children[3].children[0].text).toBe('world')
+    // should have removed the whitespace node between tags that contains newlines
+    expect(ast.children[4].tag).toBe('span')
+    expect(ast.children[4].children[0].text).toBe('. Have fun! ')
+  })
 })

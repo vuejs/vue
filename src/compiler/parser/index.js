@@ -30,6 +30,9 @@ const argRE = /:(.*)$/
 export const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
 
+const lineBreakRE = /[\r\n]/
+const whitespaceRE = /\s+/g
+
 const decodeHTMLCached = cached(he.decode)
 
 // configurable state
@@ -79,6 +82,7 @@ export function parse (
 
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
+  const whitespaceOption = options.whitespace
   let root
   let currentParent
   let inVPre = false
@@ -235,11 +239,13 @@ export function parse (
     },
 
     end (tag, start, end) {
-      // remove trailing whitespace
       const element = stack[stack.length - 1]
-      const lastNode = element.children[element.children.length - 1]
-      if (lastNode && lastNode.type === 3 && lastNode.text === ' ' && !inPre) {
-        element.children.pop()
+      if (!inPre) {
+        // remove trailing whitespace node
+        const lastNode = element.children[element.children.length - 1]
+        if (lastNode && lastNode.type === 3 && lastNode.text === ' ') {
+          element.children.pop()
+        }
       }
       // pop stack
       stack.length -= 1
@@ -276,11 +282,27 @@ export function parse (
         return
       }
       const children = currentParent.children
-      text = inPre || text.trim()
-        ? isTextTag(currentParent) ? text : decodeHTMLCached(text)
-        // only preserve whitespace if its not right after a starting tag
-        : preserveWhitespace && children.length ? ' ' : ''
+      if (inPre || text.trim()) {
+        text = isTextTag(currentParent) ? text : decodeHTMLCached(text)
+      } else if (!children.length) {
+        // remove the whitespace-only node right after an opening tag
+        text = ''
+      } else if (whitespaceOption) {
+        if (whitespaceOption === 'condense') {
+          // in condense mode, remove the whitespace node if it contains
+          // line break, otherwise condense to a single space
+          text = lineBreakRE.test(text) ? '' : ' '
+        } else {
+          text = ' '
+        }
+      } else {
+        text = preserveWhitespace ? ' ' : ''
+      }
       if (text) {
+        if (whitespaceOption === 'condense') {
+          // condense consecutive whitespaces into single space
+          text = text.replace(whitespaceRE, ' ')
+        }
         let res
         let child: ?ASTNode
         if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
