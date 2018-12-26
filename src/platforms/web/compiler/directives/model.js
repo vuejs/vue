@@ -28,7 +28,8 @@ export default function model (
     if (tag === 'input' && type === 'file') {
       warn(
         `<${el.tag} v-model="${value}" type="file">:\n` +
-        `File inputs are read only. Use a v-on:change listener instead.`
+        `File inputs are read only. Use a v-on:change listener instead.`,
+        el.rawAttrsMap['v-model']
       )
     }
   }
@@ -54,7 +55,8 @@ export default function model (
       `<${el.tag} v-model="${value}">: ` +
       `v-model is not supported on this element type. ` +
       'If you are working with contenteditable, it\'s recommended to ' +
-      'wrap a library dedicated for that purpose inside a custom component.'
+      'wrap a library dedicated for that purpose inside a custom component.',
+      el.rawAttrsMap['v-model']
     )
   }
 
@@ -138,7 +140,8 @@ function genDefaultModel (
       const binding = el.attrsMap['v-bind:value'] ? 'v-bind:value' : ':value'
       warn(
         `${binding}="${value}" conflicts with v-model on the same element ` +
-        'because the latter already expands to a value binding internally'
+        'because the latter already expands to a value binding internally',
+        el.rawAttrsMap[binding]
       )
     }
   }

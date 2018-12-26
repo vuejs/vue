@@ -167,7 +167,7 @@ describe('Directive v-model text', () => {
           '<span ref="rs">{{selections}}</span>' +
         '</div>'
     }).$mount()
-    var inputs = vm.$el.getElementsByTagName('input')
+    const inputs = vm.$el.getElementsByTagName('input')
     inputs[1].value = 'test'
     triggerEvent(inputs[1], 'input')
     waitForUpdate(() => {
@@ -238,7 +238,7 @@ describe('Directive v-model text', () => {
       template: '<input v-model="a" @input="onInput">',
       methods: {
         onInput (e) {
-          spy(e.target.value)
+          spy(this.a)
         }
       }
     }).$mount()

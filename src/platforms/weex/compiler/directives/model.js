@@ -5,8 +5,7 @@ import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
 
 export default function model (
   el: ASTElement,
-  dir: ASTDirective,
-  _warn: Function
+  dir: ASTDirective
 ): ?boolean {
   if (el.tag === 'input' || el.tag === 'textarea') {
     genDefaultModel(el, dir.value, dir.modifiers)

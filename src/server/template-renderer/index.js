@@ -16,6 +16,7 @@ type TemplateRendererOptions = {
   clientManifest?: ClientManifest;
   shouldPreload?: (file: string, type: string) => boolean;
   shouldPrefetch?: (file: string, type: string) => boolean;
+  serializer?: Function;
 };
 
 export type ClientManifest = {
@@ -47,6 +48,7 @@ export default class TemplateRenderer {
   preloadFiles: Array<Resource>;
   prefetchFiles: Array<Resource>;
   mapFiles: AsyncFileMapper;
+  serialize: Function;
 
   constructor (options: TemplateRendererOptions) {
     this.options = options
@@ -57,10 +59,18 @@ export default class TemplateRenderer {
       ? parseTemplate(options.template)
       : null
 
+    // function used to serialize initial state JSON
+    this.serialize = options.serializer || (state => {
+      return serialize(state, { isJSON: true })
+    })
+
     // extra functionality with client manifest
     if (options.clientManifest) {
       const clientManifest = this.clientManifest = options.clientManifest
-      this.publicPath = clientManifest.publicPath.replace(/\/$/, '')
+      // ensure publicPath ends with /
+      this.publicPath = clientManifest.publicPath === ''
+        ? ''
+        : clientManifest.publicPath.replace(/([^\/])$/, '$1/')
       // preload/prefetch directives
       this.preloadFiles = (clientManifest.initial || []).map(normalizeFile)
       this.prefetchFiles = (clientManifest.async || []).map(normalizeFile)
@@ -114,7 +124,7 @@ export default class TemplateRenderer {
     return (
       // render links for css files
       (cssFiles.length
-        ? cssFiles.map(({ file }) => `<link rel="stylesheet" href="${this.publicPath}/${file}">`).join('')
+        ? cssFiles.map(({ file }) => `<link rel="stylesheet" href="${this.publicPath}${file}">`).join('')
         : '') +
       // context.styles is a getter exposed by vue-style-loader which contains
       // the inline component styles collected during SSR
@@ -153,7 +163,7 @@ export default class TemplateRenderer {
           extra = ` type="font/${extension}" crossorigin`
         }
         return `<link rel="preload" href="${
-          this.publicPath}/${file
+          this.publicPath}${file
         }"${
           asType !== '' ? ` as="${asType}"` : ''
         }${
@@ -179,7 +189,7 @@ export default class TemplateRenderer {
         if (alreadyRendered(file)) {
           return ''
         }
-        return `<link rel="prefetch" href="${this.publicPath}/${file}">`
+        return `<link rel="prefetch" href="${this.publicPath}${file}">`
       }).join('')
     } else {
       return ''
@@ -191,12 +201,13 @@ export default class TemplateRenderer {
       contextKey = 'state',
       windowKey = '__INITIAL_STATE__'
     } = options || {}
-    const state = serialize(context[contextKey], { isJSON: true })
+    const state = this.serialize(context[contextKey])
     const autoRemove = process.env.NODE_ENV === 'production'
       ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
       : ''
+    const nonceAttr = context.nonce ? ` nonce="${context.nonce}"` : ''
     return context[contextKey]
-      ? `<script>window.${windowKey}=${state}${autoRemove}</script>`
+      ? `<script${nonceAttr}>window.${windowKey}=${state}${autoRemove}</script>`
       : ''
   }
 
@@ -204,9 +215,9 @@ export default class TemplateRenderer {
     if (this.clientManifest) {
       const initial = this.preloadFiles.filter(({ file }) => isJS(file))
       const async = (this.getUsedAsyncFiles(context) || []).filter(({ file }) => isJS(file))
-      const needed = [initial[0]].concat(async || [], initial.slice(1))
+      const needed = [initial[0]].concat(async, initial.slice(1))
       return needed.map(({ file }) => {
-        return `<script src="${this.publicPath}/${file}" defer></script>`
+        return `<script src="${this.publicPath}${file}" defer></script>`
       }).join('')
     } else {
       return ''

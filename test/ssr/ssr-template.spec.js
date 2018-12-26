@@ -1,4 +1,3 @@
-import webpack from 'webpack'
 import Vue from '../../dist/vue.runtime.common.js'
 import { compileWithWebpack } from './compile-with-webpack'
 import { createRenderer } from '../../packages/vue-server-renderer'
@@ -12,13 +11,15 @@ function generateClientManifest (file, cb) {
   compileWithWebpack(file, {
     output: {
       path: '/',
+      publicPath: '/',
       filename: '[name].js'
     },
+    optimization: {
+      runtimeChunk: {
+        name: 'manifest'
+      }
+    },
     plugins: [
-      new webpack.optimize.CommonsChunkPlugin({
-        name: 'manifest',
-        minChunks: Infinity
-      }),
       new VueSSRClientPlugin()
     ]
   }, fs => {
@@ -77,6 +78,41 @@ describe('SSR: template option', () => {
       head: '<meta name="viewport" content="width=device-width">',
       styles: '<style>h1 { color: red }</style>',
       state: { a: 1 }
+    }
+
+    renderer.renderToString(new Vue({
+      template: '<div>hi</div>'
+    }), context, (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain(
+        `<html><head>` +
+        // double mustache should be escaped
+        `<title>&lt;script&gt;hacks&lt;/script&gt;</title>` +
+        `${context.head}${context.styles}</head><body>` +
+        `<div data-server-rendered="true">hi</div>` +
+        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        // triple should be raw
+        `<div>foo</div>` +
+        `</body></html>`
+      )
+      done()
+    })
+  })
+
+  it('renderToString with interpolation and context.rendered', done => {
+    const renderer = createRenderer({
+      template: interpolateTemplate
+    })
+
+    const context = {
+      title: '<script>hacks</script>',
+      snippet: '<div>foo</div>',
+      head: '<meta name="viewport" content="width=device-width">',
+      styles: '<style>h1 { color: red }</style>',
+      state: { a: 0 },
+      rendered: context => {
+        context.state.a = 1
+      }
     }
 
     renderer.renderToString(new Vue({
@@ -165,6 +201,46 @@ describe('SSR: template option', () => {
     })
   })
 
+  it('renderToStream with interpolation and context.rendered', done => {
+    const renderer = createRenderer({
+      template: interpolateTemplate
+    })
+
+    const context = {
+      title: '<script>hacks</script>',
+      snippet: '<div>foo</div>',
+      head: '<meta name="viewport" content="width=device-width">',
+      styles: '<style>h1 { color: red }</style>',
+      state: { a: 0 },
+      rendered: context => {
+        context.state.a = 1
+      }
+    }
+
+    const stream = renderer.renderToStream(new Vue({
+      template: '<div>hi</div>'
+    }), context)
+
+    let res = ''
+    stream.on('data', chunk => {
+      res += chunk
+    })
+    stream.on('end', () => {
+      expect(res).toContain(
+        `<html><head>` +
+        // double mustache should be escaped
+        `<title>&lt;script&gt;hacks&lt;/script&gt;</title>` +
+        `${context.head}${context.styles}</head><body>` +
+        `<div data-server-rendered="true">hi</div>` +
+        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        // triple should be raw
+        `<div>foo</div>` +
+        `</body></html>`
+      )
+      done()
+    })
+  })
+
   it('bundleRenderer + renderToString', done => {
     createBundleRenderer('app.js', {
       asBundle: true,
@@ -227,8 +303,8 @@ describe('SSR: template option', () => {
       `<link rel="preload" href="/0.js" as="script">` +
       `<link rel="preload" href="/test.css" as="style">` +
       // images and fonts are only preloaded when explicitly asked for
-      (options.preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
       (options.preloadOtherAssets ? `<link rel="preload" href="/test.png" as="image">` : ``) +
+      (options.preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
       // unused chunks should have prefetch
       (options.noPrefetch ? `` : `<link rel="prefetch" href="/1.js">`) +
       // css assets should be loaded
@@ -382,6 +458,55 @@ describe('SSR: template option', () => {
           // triple should be raw
           `<div>foo</div>` +
           `</body></html>`
+        )
+        done()
+      })
+    })
+
+    it('renderToString + nonce', done => {
+      const interpolateTemplate = `<html><head><title>hello</title></head><body><!--vue-ssr-outlet--></body></html>`
+      const renderer = createRenderer({
+        template: interpolateTemplate
+      })
+
+      const context = {
+        state: { a: 1 },
+        nonce: '4AEemGb0xJptoIGFP3Nd'
+      }
+
+      renderer.renderToString(new Vue({
+        template: '<div>hi</div>'
+      }), context, (err, res) => {
+        expect(err).toBeNull()
+        expect(res).toContain(
+          `<html><head>` +
+          `<title>hello</title>` +
+          `</head><body>` +
+          `<div data-server-rendered="true">hi</div>` +
+          `<script nonce="4AEemGb0xJptoIGFP3Nd">window.__INITIAL_STATE__={"a":1}</script>` +
+          `</body></html>`
+        )
+        done()
+      })
+    })
+
+    it('renderToString + custom serializer', done => {
+      const expected = `{"foo":123}`
+      const renderer = createRenderer({
+        template: defaultTemplate,
+        serializer: () => expected
+      })
+
+      const context = {
+        state: { a: 1 }
+      }
+
+      renderer.renderToString(new Vue({
+        template: '<div>hi</div>'
+      }), context, (err, res) => {
+        expect(err).toBeNull()
+        expect(res).toContain(
+          `<script>window.__INITIAL_STATE__=${expected}</script>`
         )
         done()
       })

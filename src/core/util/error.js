@@ -3,6 +3,7 @@
 import config from '../config'
 import { warn } from './debug'
 import { inBrowser, inWeex } from './env'
+import { isPromise } from 'shared/util'
 
 export function handleError (err: Error, vm: any, info: string) {
   if (vm) {
@@ -22,6 +23,25 @@ export function handleError (err: Error, vm: any, info: string) {
     }
   }
   globalHandleError(err, vm, info)
+}
+
+export function invokeWithErrorHandling (
+  handler: Function,
+  context: any,
+  args: null | any[],
+  vm: any,
+  info: string
+) {
+  let res
+  try {
+    res = args ? handler.apply(context, args) : handler.call(context)
+    if (isPromise(res)) {
+      res.catch(e => handleError(e, vm, info + ` (Promise/async)`))
+    }
+  } catch (e) {
+    handleError(e, vm, info)
+  }
+  return res
 }
 
 function globalHandleError (err, vm, info) {
