@@ -301,6 +301,18 @@ describe('codegen', () => {
     )
   })
 
+  it('generate events with method using `Function.prototype.bind()`', () => {
+    assertCodegen(
+      '<input @input="onInput.bind(this)">',
+      `with(this){return _c('input',{on:{"input":onInput.bind(this)}})}`
+    )
+    // with modifier
+    assertCodegen(
+      '<input @input.enter="onInput.bind(this)">',
+      `with(this){return _c('input',{on:{"input":function($event){if(!('button' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return onInput.bind(this)($event)}}})}`
+    )
+  })
+
   it('generate events with method call', () => {
     assertCodegen(
       '<input @input="onInput($event);">',
