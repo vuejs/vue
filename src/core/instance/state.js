@@ -293,7 +293,9 @@ function initWatch (vm: Component, watch: Object) {
     if (!Array.isArray(handlers)) {
       handlers = [handlers]
     }
-    handlers.forEach(handler => createWatcher(vm, key, handler))
+    for (let i = 0; i < handlers.length; i++) {
+      createWatcher(vm, key, handlers[i])
+    }
   }
 }
 function createWatcher (
