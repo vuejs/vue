@@ -98,7 +98,7 @@ describe('create-component', () => {
     expect(vnode.elm).toBeUndefined()
     expect(vnode.ns).toBeUndefined()
     expect(vnode.context).toEqual(vm)
-     expect(vm.$forceUpdate).not.toHaveBeenCalled()
+    expect(vm.$forceUpdate).not.toHaveBeenCalled()
     done()
   })
 
