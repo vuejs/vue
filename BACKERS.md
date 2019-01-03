@@ -183,20 +183,20 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://courses.wilderminds.com/p/vue-js-by-example" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/wilderminds.png">
+        <a href="https://devsquad.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/devsquad.png">
         </a>
       </td>
     </tr><tr></tr>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://devsquad.com/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/devsquad.png">
+        <a href="https://www.inkoop.in/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/inkoop.png">
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://www.inkoop.in/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/inkoop.png">
+        <a href="https://www.firesticktricks.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/firesticks.png">
         </a>
       </td>
     </tr><tr></tr>
@@ -229,6 +229,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       <td align="center" valign="middle">
         <a href="https://dopamine.bg/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/dopamine.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://gridsome.org/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/gridsome.png">
         </a>
       </td>
     </tr><tr></tr>
@@ -323,7 +328,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - errorrik 
 - Alex Balashov
 - Konstantin Levinski
-- Evan Leonardi
 - Ernest Sim
 - Blaise Laflamme
 - Dilettant 
@@ -350,7 +354,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Barbara Liau
 - 4 
 - Jarek Tkaczyk
-- David Hess
 - Niannian Modisette
 - Ivan Sieder
 - Matt Jones
@@ -359,7 +362,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Guy Gavergun
 - Intevation GmbH
 - Luiz Eduardo  Tanure Bacelar
-- Chengzhi Yin
 - Zoran Knezevic
 - Pierre Vanhulst
 - Jon Hobbs-Smith
@@ -373,7 +375,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Samuel Smith
 - Tyler Scott
 - Thong Yong Jun
-- Tai Shi Lgin
 - Matias Verdier
 - Jamie McElwain
 - Vivekanandhan Natarajan
@@ -389,7 +390,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - RADD Creative
 - Rua Cura D'ars
 - Richard Simpson
-- Alok Pant
 - Jessie Hernandez
 - Eric Fong
 - Aparajita Fishman
@@ -411,30 +411,34 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Andy Foster
 - Joe Cochran
 - Matt Sencenbaugh
-- The Commission Cafe, LLC.
 - Daniel Mattingley
 - Teon Ooi
 - Hannes Kochniß
-- Juan Bermudez
-- Alberto T. Payero Mota
 - Colt Borg
 - Chris Calo
-- Milan Zivkovic
 - Christo Crampton
 - Johnny Austin
 - Aaron Hung
 - Soichiro Isshiki
 - Tom Meagher
-- Rob Mellett
 - Abraham Arango
 - Marko Bošković
 - Ed Linklater
 - Garion Herman
 - Chris Bemister
 - Anfrew Willis
+- Shawn Wildermuth
 - Carlos Adrián
 - Timothy J Bass
 - Yusuke Kawabata
+- Nick Dandakis
+- JI CAI
+- 龙腾道 
+- Milos Stojanovic
+- Matkovsky Peter
+- shimbaco 
+- Princeyesuraj Edward
+- Kenneth Crawford
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
