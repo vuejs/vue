@@ -5,7 +5,7 @@ function assertClass (assertions, done) {
     template: '<div class="foo" :class="value"></div>',
     data: { value: '' }
   }).$mount()
-  var chain = waitForUpdate()
+  const chain = waitForUpdate()
   assertions.forEach(([value, expected], i) => {
     chain.then(() => {
       if (typeof value === 'function') {

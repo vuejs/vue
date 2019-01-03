@@ -26,6 +26,7 @@ export default class VNode {
   ssrContext: Object | void;
   fnContext: Component | void; // real context vm for functional nodes
   fnOptions: ?ComponentOptions; // for SSR caching
+  devtoolsMeta: ?Object; // used to store functional render context for devtools
   fnScopeId: ?string; // functional scope id support
 
   constructor (
@@ -89,7 +90,10 @@ export function cloneVNode (vnode: VNode): VNode {
   const cloned = new VNode(
     vnode.tag,
     vnode.data,
-    vnode.children,
+    // #7975
+    // clone children array to avoid mutating original in case of cloning
+    // a child.
+    vnode.children && vnode.children.slice(),
     vnode.text,
     vnode.elm,
     vnode.context,

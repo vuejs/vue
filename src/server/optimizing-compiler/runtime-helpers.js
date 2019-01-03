@@ -1,6 +1,6 @@
 /* @flow */
 
-import { escape } from 'web/server/util'
+import { escape, isSSRUnsafeAttr } from 'web/server/util'
 import { isObject, extend } from 'shared/util'
 import { renderAttr } from 'web/server/modules/attrs'
 import { renderClass } from 'web/util/class'
@@ -109,6 +109,9 @@ function renderStringList (
 function renderAttrs (obj: Object): string {
   let res = ''
   for (const key in obj) {
+    if (isSSRUnsafeAttr(key)) {
+      continue
+    }
     res += renderAttr(key, obj[key])
   }
   return res

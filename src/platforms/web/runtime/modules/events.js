@@ -28,7 +28,7 @@ function normalizeEvents (on) {
 
 let target: any
 
-function createOnceHandler (handler, event, capture) {
+function createOnceHandler (event, handler, capture) {
   const _target = target // save current target element in closure
   return function onceHandler () {
     const res = handler.apply(null, arguments)
@@ -41,12 +41,10 @@ function createOnceHandler (handler, event, capture) {
 function add (
   event: string,
   handler: Function,
-  once: boolean,
   capture: boolean,
   passive: boolean
 ) {
   handler = withMacroTask(handler)
-  if (once) handler = createOnceHandler(handler, event, capture)
   target.addEventListener(
     event,
     handler,
@@ -77,7 +75,7 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const oldOn = oldVnode.data.on || {}
   target = vnode.elm
   normalizeEvents(on)
-  updateListeners(on, oldOn, add, remove, vnode.context)
+  updateListeners(on, oldOn, add, remove, createOnceHandler, vnode.context)
   target = undefined
 }
 

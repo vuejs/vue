@@ -1,11 +1,11 @@
 import Vue from 'vue'
 
 function checkPrefixedProp (prop) {
-  var el = document.createElement('div')
-  var upper = prop.charAt(0).toUpperCase() + prop.slice(1)
+  const el = document.createElement('div')
+  const upper = prop.charAt(0).toUpperCase() + prop.slice(1)
   if (!(prop in el.style)) {
-    var prefixes = ['Webkit', 'Moz', 'ms']
-    var i = prefixes.length
+    const prefixes = ['Webkit', 'Moz', 'ms']
+    let i = prefixes.length
     while (i--) {
       if ((prefixes[i] + upper) in el.style) {
         prop = prefixes[i] + upper

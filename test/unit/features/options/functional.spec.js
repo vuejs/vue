@@ -244,8 +244,8 @@ describe('Options functional', () => {
 
   it('should work with render fns compiled from template', done => {
     // code generated via vue-template-es2015-compiler
-    var render = function (_h, _vm) {
-      var _c = _vm._c
+    const render = function (_h, _vm) {
+      const _c = _vm._c
       return _c(
         'div',
         [
@@ -261,9 +261,9 @@ describe('Options functional', () => {
         2
       )
     }
-    var staticRenderFns = [
+    const staticRenderFns = [
       function (_h, _vm) {
-        var _c = _vm._c
+        const _c = _vm._c
         return _c('div', [_vm._v('Some '), _c('span', [_vm._v('text')])])
       }
     ]
@@ -315,5 +315,26 @@ describe('Options functional', () => {
     assertMarkup()
     triggerEvent(parent.$el.querySelector('.clickable'), 'click')
     waitForUpdate(assertMarkup).then(done)
+  })
+
+  // #8468
+  it('should normalize nested arrays when use functional components with v-for', () => {
+    const Foo = {
+      functional: true,
+      props: {
+        name: {}
+      },
+      render (h, context) {
+        return [h('span', 'hi'), h('span', context.props.name)]
+      }
+    }
+    const vm = new Vue({
+      template: `<div><foo v-for="name in names" :name="name" /></div>`,
+      data: {
+        names: ['foo', 'bar']
+      },
+      components: { Foo }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<span>hi</span><span>foo</span><span>hi</span><span>bar</span>')
   })
 })
