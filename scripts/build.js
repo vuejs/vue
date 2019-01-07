@@ -46,7 +46,7 @@ function buildEntry (config) {
   const isProd = /(min|prod)\.js$/.test(file)
   return rollup.rollup(config)
     .then(bundle => bundle.generate(output))
-    .then(({ code }) => {
+    .then(({ output: [{ code }] }) => {
       if (isProd) {
         const minified = (banner ? banner + '\n' : '') + terser.minify(code, {
           toplevel: true,
