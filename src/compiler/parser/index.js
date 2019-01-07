@@ -97,6 +97,40 @@ export function parse (
   }
 
   function closeElement (element) {
+    if (!inVPre && !element.processed) {
+      element = processElement(element, options, currentParent)
+    }
+    // tree management
+    if (!stack.length && element !== root) {
+      // allow root elements with v-if, v-else-if and v-else
+      if (root.if && (element.elseif || element.else)) {
+        if (process.env.NODE_ENV !== 'production') {
+          checkRootConstraints(element)
+        }
+        addIfCondition(root, {
+          exp: element.elseif,
+          block: element
+        })
+      } else if (process.env.NODE_ENV !== 'production') {
+        warnOnce(
+          `Component template should contain exactly one root element. ` +
+          `If you are using v-if on multiple elements, ` +
+          `use v-else-if to chain them instead.`,
+          { start: element.start }
+        )
+      }
+    }
+    if (currentParent && !element.forbidden) {
+      if (element.elseif || element.else) {
+        processIfConditions(element, currentParent)
+      } else if (element.slotScope) { // scoped slot
+        const name = element.slotTarget || '"default"'
+        ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
+      } else {
+        currentParent.children.push(element)
+        element.parent = currentParent
+      }
+    }
     // check pre state
     if (element.pre) {
       inVPre = false
@@ -107,6 +141,23 @@ export function parse (
     // apply post-transforms
     for (let i = 0; i < postTransforms.length; i++) {
       postTransforms[i](element, options)
+    }
+  }
+
+  function checkRootConstraints (el) {
+    if (el.tag === 'slot' || el.tag === 'template') {
+      warnOnce(
+        `Cannot use <${el.tag}> as component root element because it may ` +
+        'contain multiple nodes.',
+        { start: el.start }
+      )
+    }
+    if (el.attrsMap.hasOwnProperty('v-for')) {
+      warnOnce(
+        'Cannot use v-for on stateful component root element because ' +
+        'it renders multiple elements.',
+        el.rawAttrsMap['v-for']
+      )
     }
   }
 
@@ -174,62 +225,15 @@ export function parse (
         processFor(element)
         processIf(element)
         processOnce(element)
-        // element-scope stuff
-        processElement(element, options)
       }
 
-      function checkRootConstraints (el) {
-        if (process.env.NODE_ENV !== 'production') {
-          if (el.tag === 'slot' || el.tag === 'template') {
-            warnOnce(
-              `Cannot use <${el.tag}> as component root element because it may ` +
-              'contain multiple nodes.',
-              { start: el.start }
-            )
-          }
-          if (el.attrsMap.hasOwnProperty('v-for')) {
-            warnOnce(
-              'Cannot use v-for on stateful component root element because ' +
-              'it renders multiple elements.',
-              el.rawAttrsMap['v-for']
-            )
-          }
-        }
-      }
-
-      // tree management
       if (!root) {
         root = element
-        checkRootConstraints(root)
-      } else if (!stack.length) {
-        // allow root elements with v-if, v-else-if and v-else
-        if (root.if && (element.elseif || element.else)) {
-          checkRootConstraints(element)
-          addIfCondition(root, {
-            exp: element.elseif,
-            block: element
-          })
-        } else if (process.env.NODE_ENV !== 'production') {
-          warnOnce(
-            `Component template should contain exactly one root element. ` +
-            `If you are using v-if on multiple elements, ` +
-            `use v-else-if to chain them instead.`,
-            { start: element.start }
-          )
+        if (process.env.NODE_ENV !== 'production') {
+          checkRootConstraints(root)
         }
       }
-      if (currentParent && !element.forbidden) {
-        if (element.elseif || element.else) {
-          processIfConditions(element, currentParent)
-        } else if (element.slotScope) { // scoped slot
-          currentParent.plain = false
-          const name = element.slotTarget || '"default"'
-          ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
-        } else {
-          currentParent.children.push(element)
-          element.parent = currentParent
-        }
-      }
+
       if (!unary) {
         currentParent = element
         stack.push(element)
@@ -370,20 +374,29 @@ function processRawAttrs (el) {
   }
 }
 
-export function processElement (element: ASTElement, options: CompilerOptions) {
+export function processElement (
+  element: ASTElement,
+  options: CompilerOptions,
+  parent: ASTElement | undefined
+) {
   processKey(element)
 
   // determine whether this is a plain element after
   // removing structural attributes
-  element.plain = !element.key && !element.attrsList.length
+  element.plain = (
+    !element.key &&
+    !element.scopedSlots &&
+    !element.attrsList.length
+  )
 
   processRef(element)
-  processSlot(element)
+  processSlot(element, parent)
   processComponent(element)
   for (let i = 0; i < transforms.length; i++) {
     element = transforms[i](element, options) || element
   }
   processAttrs(element)
+  return element
 }
 
 function processKey (el) {
