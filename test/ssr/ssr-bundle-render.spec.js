@@ -195,7 +195,7 @@ function createAssertions (runInNewContext) {
   })
 
   it('render with cache (nested)', done => {
-    const cache = LRU({ maxAge: Infinity })
+    const cache = new LRU({ maxAge: Infinity })
     spyOn(cache, 'get').and.callThrough()
     spyOn(cache, 'set').and.callThrough()
     const options = {
