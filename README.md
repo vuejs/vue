@@ -234,3 +234,12 @@ Thank you to all the people who already contributed to Vue!
 [MIT](http://opensource.org/licenses/MIT)
 
 Copyright (c) 2013-present, Yuxi (Evan) You
+
+### Code Visualization:
+
+Here is a cool visualization of the code evolution
+
+ [![Watch the video](https://img.youtube.com/vi/76CQDb-lmMw/0.jpg)](https://www.youtube.com/watch?v=76CQDb-lmMw)
+
+ [https://www.youtube.com/watch?v=76CQDb-lmMw](https://www.youtube.com/watch?v=76CQDb-lmMw)
+
