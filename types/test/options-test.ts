@@ -1,5 +1,5 @@
 import Vue, { VNode } from "../index";
-import { AsyncComponent, ComponentOptions, FunctionalComponentOptions, Component } from "../index";
+import { ComponentOptions, Component } from "../index";
 import { CreateElement } from "../vue";
 
 interface MyComponent extends Vue {
@@ -281,6 +281,12 @@ Vue.component('provide-function', {
   })
 })
 
+Vue.component('component-with-slot', {
+  render (h): VNode {
+    return h('div', this.$slots.default)
+  }
+})
+
 Vue.component('component-with-scoped-slot', {
   render (h) {
     interface ScopedSlotProps {
@@ -296,6 +302,16 @@ Vue.component('component-with-scoped-slot', {
         scopedSlots: {
           // named scoped slot as vnode data
           item: (props: ScopedSlotProps) => [h('span', [props.msg])]
+        }
+      }),
+      h('child', {
+        // Passing down all slots from parent
+        scopedSlots: this.$scopedSlots
+      }),
+      h('child', {
+        // Passing down single slot from parent
+        scopedSlots: {
+          default: this.$scopedSlots.default
         }
       })
     ])
@@ -315,13 +331,24 @@ Vue.component('component-with-scoped-slot', {
 Vue.component('narrow-array-of-vnode-type', {
   render (h): VNode {
     const slot = this.$scopedSlots.default!({})
-    if (typeof slot !== 'string') {
+    if (typeof slot === 'string') {
+      // <template slot-scope="data">bare string</template>
+      return h('span', slot)
+    } else if (Array.isArray(slot)) {
+      // template with multiple children
       const first = slot[0]
-      if (!Array.isArray(first) && typeof first !== 'string') {
-        return first;
+      if (!Array.isArray(first) && typeof first !== 'string' && first) {
+        return first
+      } else {
+        return h()
       }
+    } else if (slot) {
+      // <div slot-scope="data">bare VNode</div>
+      return slot
+    } else {
+      // empty template, slot === undefined
+      return h()
     }
-    return h();
   }
 })
 

@@ -637,15 +637,11 @@
     function end (tag, start) {
       if (depth === 1 && currentBlock) {
         currentBlock.end = start;
-        var text = content.slice(currentBlock.start, currentBlock.end);
+        var text = deIndent(content.slice(currentBlock.start, currentBlock.end));
         // pad content so that linters and pre-processors can output correct
         // line numbers in errors and warnings
-        if (options.pad) {
+        if (currentBlock.type !== 'template' && options.pad) {
           text = padContent(currentBlock, options.pad) + text;
-        } else {
-          // avoid to deindent if pad option is specified
-          // to retain original source position.
-          text = deIndent(text);
         }
         currentBlock.content = text;
         currentBlock = null;
@@ -2468,7 +2464,7 @@
 
     el.model = {
       value: ("(" + value + ")"),
-      expression: ("\"" + value + "\""),
+      expression: JSON.stringify(value),
       callback: ("function (" + baseValueExpression + ") {" + assignment + "}")
     };
   }
@@ -2910,7 +2906,7 @@
           var parent = el.parent;
           if (iterator && iterator === exp && parent && parent.tag === 'transition-group') {
             warn$1(
-              "Do not use v-for index as key on <transtion-group> children, " +
+              "Do not use v-for index as key on <transition-group> children, " +
               "this is the same as not using keys."
             );
           }
@@ -3687,13 +3683,15 @@
     esc: ['Esc', 'Escape'],
     tab: 'Tab',
     enter: 'Enter',
-    space: ' ',
+    // #9112: IE11 uses `Spacebar` for Space key name.
+    space: [' ', 'Spacebar'],
     // #7806: IE11 uses key names without `Arrow` prefix for arrow keys.
     up: ['Up', 'ArrowUp'],
     left: ['Left', 'ArrowLeft'],
     right: ['Right', 'ArrowRight'],
     down: ['Down', 'ArrowDown'],
-    'delete': ['Backspace', 'Delete']
+    // #9112: IE11 uses `Del` for Delete key name.
+    'delete': ['Backspace', 'Delete', 'Del']
   };
 
   // #4868: modifiers that prevent the execution of the listener
@@ -4184,9 +4182,9 @@
         el$1.tag !== 'template' &&
         el$1.tag !== 'slot'
       ) {
-        // because el may be a functional component and return an Array instead of a single root.
-        // In this case, just a simple normalization is needed
-        var normalizationType = state.maybeComponent(el$1) ? ",1" : "";
+        var normalizationType = checkSkip
+          ? state.maybeComponent(el$1) ? ",1" : ",0"
+          : "";
         return ("" + ((altGenElement || genElement)(el$1, state)) + normalizationType)
       }
       var normalizationType$1 = checkSkip

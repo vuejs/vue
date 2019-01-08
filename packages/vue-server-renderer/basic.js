@@ -3467,7 +3467,7 @@
 
     el.model = {
       value: ("(" + value + ")"),
-      expression: ("\"" + value + "\""),
+      expression: JSON.stringify(value),
       callback: ("function (" + baseValueExpression + ") {" + assignment + "}")
     };
   }
@@ -3909,7 +3909,7 @@
           var parent = el.parent;
           if (iterator && iterator === exp && parent && parent.tag === 'transition-group') {
             warn$1(
-              "Do not use v-for index as key on <transtion-group> children, " +
+              "Do not use v-for index as key on <transition-group> children, " +
               "this is the same as not using keys."
             );
           }
@@ -4559,13 +4559,15 @@
     esc: ['Esc', 'Escape'],
     tab: 'Tab',
     enter: 'Enter',
-    space: ' ',
+    // #9112: IE11 uses `Spacebar` for Space key name.
+    space: [' ', 'Spacebar'],
     // #7806: IE11 uses key names without `Arrow` prefix for arrow keys.
     up: ['Up', 'ArrowUp'],
     left: ['Left', 'ArrowLeft'],
     right: ['Right', 'ArrowRight'],
     down: ['Down', 'ArrowDown'],
-    'delete': ['Backspace', 'Delete']
+    // #9112: IE11 uses `Del` for Delete key name.
+    'delete': ['Backspace', 'Delete', 'Del']
   };
 
   // #4868: modifiers that prevent the execution of the listener
@@ -5056,9 +5058,9 @@
         el$1.tag !== 'template' &&
         el$1.tag !== 'slot'
       ) {
-        // because el may be a functional component and return an Array instead of a single root.
-        // In this case, just a simple normalization is needed
-        var normalizationType = state.maybeComponent(el$1) ? ",1" : "";
+        var normalizationType = checkSkip
+          ? state.maybeComponent(el$1) ? ",1" : ",0"
+          : "";
         return ("" + ((altGenElement || genElement)(el$1, state)) + normalizationType)
       }
       var normalizationType$1 = checkSkip
@@ -6884,9 +6886,10 @@
         ret[i] = render(val[key], key, i);
       }
     }
-    if (isDef(ret)) {
-      (ret)._isVList = true;
+    if (!isDef(ret)) {
+      ret = [];
     }
+    (ret)._isVList = true;
     return ret
   }
 
@@ -7906,7 +7909,7 @@
         for (var i = 0; i < dirs.length; i++) {
           var name = dirs[i].name;
           if (name !== 'show') {
-            var dirRenderer = resolveAsset(context, 'directives', name, true);
+            var dirRenderer = resolveAsset(context, 'directives', name);
             if (dirRenderer) {
               // directives mutate the node's data
               // which then gets rendered by modules

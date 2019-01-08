@@ -826,6 +826,22 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('should not warn for custom directives that do not have server-side implementation', done => {
+    renderToString(new Vue({
+      directives: {
+        test: {
+          bind() {
+            // noop
+          }
+        }
+      },
+      template: '<div v-test></div>',
+    }), () => {
+      expect('Failed to resolve directive: test').not.toHaveBeenWarned()
+      done()
+    })
+  })
+
   it('_scopeId', done => {
     renderVmWithOptions({
       _scopeId: '_v-parent',

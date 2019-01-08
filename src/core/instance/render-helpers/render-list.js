@@ -32,8 +32,9 @@ export function renderList (
       ret[i] = render(val[key], key, i)
     }
   }
-  if (isDef(ret)) {
-    (ret: any)._isVList = true
+  if (!isDef(ret)) {
+    ret = []
   }
+  (ret: any)._isVList = true
   return ret
 }

@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.5.18-beta.0
+ * Vue.js v2.5.21
  * (c) 2014-2018 Evan You
  * Released under the MIT License.
  */
@@ -2724,6 +2724,14 @@
   var activeInstance = null;
   var isUpdatingChildComponent = false;
 
+  function setActiveInstance(vm) {
+    var prevActiveInstance = activeInstance;
+    activeInstance = vm;
+    return function () {
+      activeInstance = prevActiveInstance;
+    }
+  }
+
   function initLifecycle (vm) {
     var options = vm.$options;
 
@@ -2755,8 +2763,7 @@
       var vm = this;
       var prevEl = vm.$el;
       var prevVnode = vm._vnode;
-      var prevActiveInstance = activeInstance;
-      activeInstance = vm;
+      var restoreActiveInstance = setActiveInstance(vm);
       vm._vnode = vnode;
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
@@ -2767,7 +2774,7 @@
         // updates
         vm.$el = vm.__patch__(prevVnode, vnode);
       }
-      activeInstance = prevActiveInstance;
+      restoreActiveInstance();
       // update __vue__ reference
       if (prevEl) {
         prevEl.__vue__ = null;
@@ -2892,7 +2899,7 @@
     // component's mounted hook), which relies on vm._watcher being already defined
     new Watcher(vm, updateComponent, noop, {
       before: function before () {
-        if (vm._isMounted) {
+        if (vm._isMounted && !vm._isDestroyed) {
           callHook(vm, 'beforeUpdate');
         }
       }
@@ -3826,9 +3833,10 @@
         ret[i] = render(val[key], key, i);
       }
     }
-    if (isDef(ret)) {
-      (ret)._isVList = true;
+    if (!isDef(ret)) {
+      ret = [];
     }
+    (ret)._isVList = true;
     return ret
   }
 
@@ -5163,7 +5171,7 @@
     value: FunctionalRenderContext
   });
 
-  Vue.version = '2.5.18-beta.0';
+  Vue.version = '2.5.21';
 
   /*  */
 
@@ -5516,12 +5524,6 @@
 
   var hooks = ['create', 'activate', 'update', 'remove', 'destroy'];
 
-  function childrenIgnored (vnode) {
-    return vnode && vnode.data && vnode.data.domProps && (
-      vnode.data.domProps.innerHTML || vnode.data.domProps.textContent
-    )
-  }
-
   function sameVnode (a, b) {
     return (
       a.key === b.key && (
@@ -5529,7 +5531,6 @@
           a.tag === b.tag &&
           a.isComment === b.isComment &&
           isDef(a.data) === isDef(b.data) &&
-          !childrenIgnored(a) && !childrenIgnored(b) &&
           sameInputType(a, b)
         ) || (
           isTrue(a.isAsyncPlaceholder) &&
@@ -6826,7 +6827,7 @@
 
     el.model = {
       value: ("(" + value + ")"),
-      expression: ("\"" + value + "\""),
+      expression: JSON.stringify(value),
       callback: ("function (" + baseValueExpression + ") {" + assignment + "}")
     };
   }
@@ -8453,6 +8454,7 @@
 
       var update = this._update;
       this._update = function (vnode, hydrating) {
+        var restoreActiveInstance = setActiveInstance(this$1);
         // force removing pass
         this$1.__patch__(
           this$1._vnode,
@@ -8461,6 +8463,7 @@
           true // removeOnly (!important, avoids unnecessary moves)
         );
         this$1._vnode = this$1.kept;
+        restoreActiveInstance();
         update.call(this$1, vnode, hydrating);
       };
     },
@@ -9439,7 +9442,7 @@
           var parent = el.parent;
           if (iterator && iterator === exp && parent && parent.tag === 'transition-group') {
             warn$2(
-              "Do not use v-for index as key on <transtion-group> children, " +
+              "Do not use v-for index as key on <transition-group> children, " +
               "this is the same as not using keys."
             );
           }
@@ -10052,13 +10055,15 @@
     esc: ['Esc', 'Escape'],
     tab: 'Tab',
     enter: 'Enter',
-    space: ' ',
+    // #9112: IE11 uses `Spacebar` for Space key name.
+    space: [' ', 'Spacebar'],
     // #7806: IE11 uses key names without `Arrow` prefix for arrow keys.
     up: ['Up', 'ArrowUp'],
     left: ['Left', 'ArrowLeft'],
     right: ['Right', 'ArrowRight'],
     down: ['Down', 'ArrowDown'],
-    'delete': ['Backspace', 'Delete']
+    // #9112: IE11 uses `Del` for Delete key name.
+    'delete': ['Backspace', 'Delete', 'Del']
   };
 
   // #4868: modifiers that prevent the execution of the listener
@@ -10549,9 +10554,9 @@
         el$1.tag !== 'template' &&
         el$1.tag !== 'slot'
       ) {
-        // because el may be a functional component and return an Array instead of a single root.
-        // In this case, just a simple normalization is needed
-        var normalizationType = state.maybeComponent(el$1) ? ",1" : "";
+        var normalizationType = checkSkip
+          ? state.maybeComponent(el$1) ? ",1" : ",0"
+          : "";
         return ("" + ((altGenElement || genElement)(el$1, state)) + normalizationType)
       }
       var normalizationType$1 = checkSkip

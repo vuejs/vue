@@ -3228,7 +3228,7 @@ function genComponentModel (
 
   el.model = {
     value: ("(" + value + ")"),
-    expression: ("\"" + value + "\""),
+    expression: JSON.stringify(value),
     callback: ("function (" + baseValueExpression + ") {" + assignment + "}")
   };
 }
@@ -3670,7 +3670,7 @@ function processKey (el) {
         var parent = el.parent;
         if (iterator && iterator === exp && parent && parent.tag === 'transition-group') {
           warn$1(
-            "Do not use v-for index as key on <transtion-group> children, " +
+            "Do not use v-for index as key on <transition-group> children, " +
             "this is the same as not using keys."
           );
         }
@@ -4322,13 +4322,15 @@ var keyNames = {
   esc: ['Esc', 'Escape'],
   tab: 'Tab',
   enter: 'Enter',
-  space: ' ',
+  // #9112: IE11 uses `Spacebar` for Space key name.
+  space: [' ', 'Spacebar'],
   // #7806: IE11 uses key names without `Arrow` prefix for arrow keys.
   up: ['Up', 'ArrowUp'],
   left: ['Left', 'ArrowLeft'],
   right: ['Right', 'ArrowRight'],
   down: ['Down', 'ArrowDown'],
-  'delete': ['Backspace', 'Delete']
+  // #9112: IE11 uses `Del` for Delete key name.
+  'delete': ['Backspace', 'Delete', 'Del']
 };
 
 // #4868: modifiers that prevent the execution of the listener
@@ -4822,9 +4824,9 @@ function genChildren (
       el$1.tag !== 'template' &&
       el$1.tag !== 'slot'
     ) {
-      // because el may be a functional component and return an Array instead of a single root.
-      // In this case, just a simple normalization is needed
-      var normalizationType = state.maybeComponent(el$1) ? ",1" : "";
+      var normalizationType = checkSkip
+        ? state.maybeComponent(el$1) ? ",1" : ",0"
+        : "";
       return ("" + ((altGenElement || genElement)(el$1, state)) + normalizationType)
     }
     var normalizationType$1 = checkSkip
@@ -6656,9 +6658,10 @@ function renderList (
       ret[i] = render(val[key], key, i);
     }
   }
-  if (isDef(ret)) {
-    (ret)._isVList = true;
+  if (!isDef(ret)) {
+    ret = [];
   }
+  (ret)._isVList = true;
   return ret
 }
 
@@ -7678,7 +7681,7 @@ function renderStartingTag (node, context) {
       for (var i = 0; i < dirs.length; i++) {
         var name = dirs[i].name;
         if (name !== 'show') {
-          var dirRenderer = resolveAsset(context, 'directives', name, true);
+          var dirRenderer = resolveAsset(context, 'directives', name);
           if (dirRenderer) {
             // directives mutate the node's data
             // which then gets rendered by modules
@@ -7972,7 +7975,10 @@ var TemplateRenderer = function TemplateRenderer (options) {
   // extra functionality with client manifest
   if (options.clientManifest) {
     var clientManifest = this.clientManifest = options.clientManifest;
-    this.publicPath = clientManifest.publicPath;
+    // ensure publicPath ends with /
+    this.publicPath = clientManifest.publicPath === ''
+      ? ''
+      : clientManifest.publicPath.replace(/([^\/])$/, '$1/');
     // preload/prefetch directives
     this.preloadFiles = (clientManifest.initial || []).map(normalizeFile);
     this.prefetchFiles = (clientManifest.async || []).map(normalizeFile);
@@ -8035,7 +8041,7 @@ TemplateRenderer.prototype.renderStyles = function renderStyles (context) {
       ? cssFiles.map(function (ref) {
           var file = ref.file;
 
-          return ("<link rel=\"stylesheet\" href=\"" + (this$1.getPublicPath(file)) + "\">");
+          return ("<link rel=\"stylesheet\" href=\"" + (this$1.publicPath) + file + "\">");
     }).join('')
       : '') +
     // context.styles is a getter exposed by vue-style-loader which contains
@@ -8081,7 +8087,7 @@ TemplateRenderer.prototype.renderPreloadLinks = function renderPreloadLinks (con
       if (asType === 'font') {
         extra = " type=\"font/" + extension + "\" crossorigin";
       }
-      return ("<link rel=\"preload\" href=\"" + (this$1.getPublicPath(file)) + "\"" + (asType !== '' ? (" as=\"" + asType + "\"") : '') + extra + ">")
+      return ("<link rel=\"preload\" href=\"" + (this$1.publicPath) + file + "\"" + (asType !== '' ? (" as=\"" + asType + "\"") : '') + extra + ">")
     }).join('')
   } else {
     return ''
@@ -8108,7 +8114,7 @@ TemplateRenderer.prototype.renderPrefetchLinks = function renderPrefetchLinks (c
       if (alreadyRendered(file)) {
         return ''
       }
-      return ("<link rel=\"prefetch\" href=\"" + (this$1.getPublicPath(file)) + "\">")
+      return ("<link rel=\"prefetch\" href=\"" + (this$1.publicPath) + file + "\">")
     }).join('')
   } else {
     return ''
@@ -8146,7 +8152,7 @@ TemplateRenderer.prototype.renderScripts = function renderScripts (context) {
     return needed.map(function (ref) {
         var file = ref.file;
 
-      return ("<script src=\"" + (this$1.getPublicPath(file)) + "\" defer></script>")
+      return ("<script src=\"" + (this$1.publicPath) + file + "\" defer></script>")
     }).join('')
   } else {
     return ''
@@ -8167,10 +8173,6 @@ TemplateRenderer.prototype.createStream = function createStream (context) {
     throw new Error('createStream cannot be called without a template.')
   }
   return new TemplateStream(this, this.parsedTemplate, context || {})
-};
-
-TemplateRenderer.prototype.getPublicPath = function getPublicPath (file) {
-  return path.posix.join(this.publicPath, file)
 };
 
 function normalizeFile (file) {

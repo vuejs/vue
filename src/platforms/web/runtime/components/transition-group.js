@@ -14,6 +14,7 @@
 import { warn, extend } from 'core/util/index'
 import { addClass, removeClass } from '../class-util'
 import { transitionProps, extractTransitionData } from './transition'
+import { setActiveInstance } from 'core/instance/lifecycle'
 
 import {
   hasTransition,
@@ -36,6 +37,7 @@ export default {
   beforeMount () {
     const update = this._update
     this._update = (vnode, hydrating) => {
+      const restoreActiveInstance = setActiveInstance(this)
       // force removing pass
       this.__patch__(
         this._vnode,
@@ -44,6 +46,7 @@ export default {
         true // removeOnly (!important, avoids unnecessary moves)
       )
       this._vnode = this.kept
+      restoreActiveInstance()
       update.call(this, vnode, hydrating)
     }
   },
