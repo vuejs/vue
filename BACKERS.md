@@ -324,121 +324,130 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <h2 align="center">Generous Backers via Patreon ($50+)</h2>
 
 <!--50 start-->
+- Jamie K
 - Wasim Khamlichi
-- errorrik 
+- errorrik
 - Alex Balashov
 - Konstantin Levinski
-- Ernest Sim
 - Blaise Laflamme
-- Dilettant 
+- Ernest Sim
+- Dilettant
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
 
 <!--10 start-->
-- Luca Borghini
-- kazuya kawaguchi
-- Keisuke KITA
-- Santa Cruz
-- Simon East
-- Benjamin Listwon
-- Lars Andreas Ness
-- Victor Tolbert
-- Stephen Hartley
-- Wen-Tien Chang
-- Kirk Lewis
-- Karol F
-- Miljan Aleksic
-- 叶解 
+- Masahiro Tanaka
+- Shawn Wildermuth
+- Samuel Smith
+- donny
 - Jake Ingman
+- kazupon
+- Keisuke Kita
+- Simon East
+- Lars Andreas Ness
+- Sean Washington
+- Luca Borghini
+- Benjamin Listwon
+- Kirk Lewis
+- Wen-Tien Chang
+- Victor Tolbert
+- Stephen Michael Hartley
+- Karol
+- Phan An
+- James J. Ye
+- Miljan Aleksic
 - Barbara Liau
-- 4 
+- Luiz
+- Matsumoto Takamasa
 - Jarek Tkaczyk
-- Niannian Modisette
-- Ivan Sieder
-- Matt Jones
-- Duncan J Kenzie
-- Mike Margerum
+- Duncan Kenzie
 - Guy Gavergun
-- Intevation GmbH
-- Luiz Eduardo  Tanure Bacelar
+- Niannian Modisette
+- Mike Margerum
+- Matt Jones
+- Bernhard E. Reiter
 - Zoran Knezevic
-- Pierre Vanhulst
 - Jon Hobbs-Smith
+- Pierre Vanhulst
+- Shinya Katayama
 - Akiho Nagao
-- Asaf Yishai
-- Estebe Anthony
 - Haim Yulzari
+- Asaf Yishai
+- Anthony Estebe
 - Jeremy Tan
 - Jim Raden
-- Fille Åström
-- Samuel Smith
-- Tyler Scott
-- Thong Yong Jun
-- Matias Verdier
+- IMGNRY
+- Tai Shi Ling
+- Yong Jun Thong
+- Tyler
 - Jamie McElwain
-- Vivekanandhan Natarajan
+- Matias Verdier
 - Rafael Belvederese
-- Mickaël Andrieu
-- Guilherme S L de Souza
-- Rob Yedlin
 - Daniel Waghorn
-- Chih-Hsuan, Fan
+- Guilherme S L de Souza
+- Mickaël Andrieu
+- Chih-Hsuan Fan
+- Vivekanandhan Natarajan
+- Rob Yedlin
 - Jordan Oroshiba
+- Joe Gregory
 - Cliff Hess
-- Joe Ray Gregory
 - RADD Creative
-- Rua Cura D'ars
 - Richard Simpson
+- Marcos Moura
+- Alok Pant
 - Jessie Hernandez
-- Eric Fong
 - Aparajita Fishman
+- Ivan Sieder
+- Eric
 - Romain Lienard
 - Bohdan Kokotko
-- Donald Fischer
-- Alexander Weiher
-- Shinya Katayama
-- Jere Sjöroos
+- Christo Crampton
 - Wakana Seki
+- Donald Fischer
+- Jere Sjöroos
+- Alexander Weiher
 - David Ang
-- Dom 
-- Ben Hong
 - David Kaplan
+- Domenico Gaudioso
 - John Cleveland
+- Ben Hong
 - Jaeyoung Lee
-- Amor 
+- Amor
 - Tom Ootes
-- Andy Foster
+- Andy
 - Joe Cochran
 - Matt Sencenbaugh
 - Daniel Mattingley
 - Teon Ooi
+- Alberto T. Payero Mota
 - Hannes Kochniß
-- Colt Borg
+- Elon Hung
 - Chris Calo
-- Christo Crampton
-- Johnny Austin
-- Aaron Hung
+- Juan Bermudez
+- Colt Borg
+- Johnny Ray Austin
 - Soichiro Isshiki
-- Tom Meagher
 - Abraham Arango
-- Marko Bošković
-- Ed Linklater
+- Tom Meagher
 - Garion Herman
-- Chris Bemister
-- Anfrew Willis
-- Shawn Wildermuth
-- Carlos Adrián
-- Timothy J Bass
-- Yusuke Kawabata
-- Nick Dandakis
-- JI CAI
-- 龙腾道 
-- Milos Stojanovic
-- Matkovsky Peter
-- shimbaco 
+- Marko Boskovic
+- Ed Linklater
+- Christopher Bemister
+- Andrew Willis
+- Tim Bass (Neo)
 - Princeyesuraj Edward
+- Carlos Adrián
+- Yusuke Kawabata
+- shimbaco
+- Peter Matkovsky
+- 极 蔡
+- alcalbg
+- Nick Dandakis
+- 龙腾道
 - Kenneth Crawford
+- Juli A Schlack
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
