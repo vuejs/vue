@@ -3,6 +3,7 @@
 import { escape } from '../util'
 import { hyphenate } from 'shared/util'
 import { getStyle } from 'web/util/style'
+import { isFalsyAttrValue } from 'web/util/attrs'
 
 export function genStyle (style: Object): string {
   let styleText = ''
@@ -11,10 +12,14 @@ export function genStyle (style: Object): string {
     const hyphenatedKey = hyphenate(key)
     if (Array.isArray(value)) {
       for (let i = 0, len = value.length; i < len; i++) {
-        styleText += `${hyphenatedKey}:${value[i]};`
+        if(!isFalsyAttrValue(value[i])){
+          styleText += `${hyphenatedKey}:${value[i]};`
+        }
       }
     } else {
-      styleText += `${hyphenatedKey}:${value};`
+      if(!isFalsyAttrValue(value)){
+        styleText += `${hyphenatedKey}:${value};`
+      }
     }
   }
   return styleText
