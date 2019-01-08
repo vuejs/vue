@@ -5,7 +5,7 @@ import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { genAssignmentCode } from '../directives/model'
-import { extend, cached, no, camelize, hyphenate } from 'shared/util'
+import { extend, cached, no, camelize, hyphenate, hasOwn } from 'shared/util'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
 
 import {
@@ -44,6 +44,7 @@ let postTransforms
 let platformIsPreTag
 let platformMustUseProp
 let platformGetTagNamespace
+let maybeComponent
 
 export function createASTElement (
   tag: string,
@@ -73,6 +74,8 @@ export function parse (
   platformIsPreTag = options.isPreTag || no
   platformMustUseProp = options.mustUseProp || no
   platformGetTagNamespace = options.getTagNamespace || no
+  const isReservedTag = options.isReservedTag || no
+  maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
 
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
@@ -98,7 +101,7 @@ export function parse (
 
   function closeElement (element) {
     if (!inVPre && !element.processed) {
-      element = processElement(element, options, currentParent)
+      element = processElement(element, options)
     }
     // tree management
     if (!stack.length && element !== root) {
@@ -152,7 +155,7 @@ export function parse (
         { start: el.start }
       )
     }
-    if (el.attrsMap.hasOwnProperty('v-for')) {
+    if (hasOwn(el.attrsMap, 'v-for')) {
       warnOnce(
         'Cannot use v-for on stateful component root element because ' +
         'it renders multiple elements.',
@@ -376,8 +379,7 @@ function processRawAttrs (el) {
 
 export function processElement (
   element: ASTElement,
-  options: CompilerOptions,
-  parent: ASTElement | undefined
+  options: CompilerOptions
 ) {
   processKey(element)
 
@@ -390,7 +392,7 @@ export function processElement (
   )
 
   processRef(element)
-  processSlot(element, parent)
+  processSlot(element)
   processComponent(element)
   for (let i = 0; i < transforms.length; i++) {
     element = transforms[i](element, options) || element
@@ -581,15 +583,82 @@ function processSlot (el) {
         )
       }
       el.slotScope = slotScope
+      if (process.env.NODE_ENV !== 'production' && nodeHas$Slot(el)) {
+        warn('Unepxected mixed usage of `slot-scope` and `$slot`.', el)
+      }
+    } else {
+      // 2.6 $slot support
+      // Context: https://github.com/vuejs/vue/issues/9180
+      // Ideally, all slots should be compiled as functions (this is what we
+      // are doing in 3.x), but for 2.x e want to preserve complete backwards
+      // compatibility, and maintain the exact same compilation output for any
+      // code that does not use the new syntax.
+
+      // recursively check component children for presence of `$slot` in all
+      // expressions until running into a nested child component.
+      if (maybeComponent(el) && childrenHas$Slot(el)) {
+        processScopedSlots(el)
+      }
     }
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
       // preserve slot as an attribute for native shadow DOM compat
       // only for non-scoped slots.
-      if (el.tag !== 'template' && !el.slotScope) {
+      if (el.tag !== 'template' && !el.slotScope && !nodeHas$Slot(el)) {
         addAttr(el, 'slot', slotTarget, getRawBindingAttr(el, 'slot'))
       }
+    }
+  }
+}
+
+function childrenHas$Slot (el): boolean {
+  return el.children ? el.children.some(nodeHas$Slot) : false
+}
+
+const $slotRE = /\$slot/
+function nodeHas$Slot (node): boolean {
+  // caching
+  if (hasOwn(node, 'has$Slot')) {
+    return (node.has$Slot: any)
+  }
+  if (node.type === 1) { // element
+    for (const key in node.attrsMap) {
+      if (dirRE.test(key) && $slotRE.test(node.attrsMap[key])) {
+        return (node.has$Slot = true)
+      }
+    }
+    return (node.has$Slot = childrenHas$Slot(node))
+  } else if (node.type === 2) { // expression
+    // TODO more robust logic for checking $slot usage
+    return (node.has$Slot = $slotRE.test(node.expression))
+  }
+  return false
+}
+
+function processScopedSlots (el) {
+  // 1. group children by slot target
+  const groups: any = {}
+  for (let i = 0; i < el.children.length; i++) {
+    const child = el.children[i]
+    const target = child.slotTarget || '"default"'
+    if (!groups[target]) {
+      groups[target] = []
+    }
+    groups[target].push(child)
+  }
+  // 2. for each slot group, check if the group contains $slot
+  for (const name in groups) {
+    const group = groups[name]
+    if (group.some(nodeHas$Slot)) {
+      // 3. if a group contains $slot, all nodes in that group gets assigned
+      // as a scoped slot to el and removed from children
+      el.plain = false
+      const slots = el.scopedSlots || (el.scopedSlots = {})
+      const slotContainer = slots[name] = createASTElement('template', [], el)
+      slotContainer.children = group
+      slotContainer.slotScope = '$slot'
+      el.children = el.children.filter(c => group.indexOf(c) === -1)
     }
   }
 }
