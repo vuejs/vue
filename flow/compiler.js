@@ -85,7 +85,7 @@ declare type ASTDirective = {
   end?: number;
 };
 
-declare type ASTNode = ASTElement | ASTText | ASTExpression;
+declare type ASTNode = ASTElement | ASTText | ASTExpression
 
 declare type ASTElement = {
   type: 1;
@@ -167,6 +167,9 @@ declare type ASTElement = {
 
   // weex specific
   appendAsTree?: boolean;
+
+  // 2.6 $slot check
+  has$Slot?: boolean
 };
 
 declare type ASTExpression = {
@@ -179,6 +182,8 @@ declare type ASTExpression = {
   ssrOptimizability?: number;
   start?: number;
   end?: number;
+  // 2.6 $slot check
+  has$Slot?: boolean
 };
 
 declare type ASTText = {
@@ -190,6 +195,8 @@ declare type ASTText = {
   ssrOptimizability?: number;
   start?: number;
   end?: number;
+  // 2.6 $slot check
+  has$Slot?: boolean
 };
 
 // SFC-parser related declarations

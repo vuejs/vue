@@ -613,4 +613,63 @@ describe('Component scoped slot', () => {
       expect(vm.$el.innerHTML).toBe('<p>hello</p>')
     }).then(done)
   })
+
+  // 2.6 $slot usage
+  describe('$slot support', () => {
+    it('should work', () => {
+      const vm = new Vue({
+        template: `<foo><div>{{$slot.foo}}</div></foo>`,
+        components: { foo: { template: `<div><slot foo="hello"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`<div>hello</div>`)
+    })
+
+    it('should work for use of $slots in attributes', () => {
+      const vm = new Vue({
+        template: `<foo><div :id="$slot.foo"></div></foo>`,
+        components: { foo: { template: `<div><slot foo="hello"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`<div id="hello"></div>`)
+    })
+
+    it('should work for root text nodes', () => {
+      const vm = new Vue({
+        template: `<foo>{{$slot.foo}}</foo>`,
+        components: { foo: { template: `<div><slot foo="hello"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`hello`)
+    })
+
+    it('should work for mix of root text nodes and elements', () => {
+      const vm = new Vue({
+        template: `<foo>hi <div>{{ $slot.foo }}</div>{{$slot.foo}}</foo>`,
+        components: { foo: { template: `<div><slot foo="hello"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`hi <div>hello</div>hello`)
+    })
+
+    it('should work for named slots', () => {
+      const vm = new Vue({
+        template: `<foo><div slot="foo">{{ $slot.foo }}</div></foo>`,
+        components: { foo: { template: `<div><slot name="foo" foo="hello"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`<div>hello</div>`)
+    })
+
+    it('should work for mixed default and named slots', () => {
+      const vm = new Vue({
+        template: `<foo>{{ $slot.foo }}<div>{{ $slot.foo }}</div><div slot="foo">{{ $slot.foo }}</div></foo>`,
+        components: { foo: { template: `<div><slot foo="default"/><slot name="foo" foo="foo"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`default<div>default</div><div>foo</div>`)
+    })
+
+    it('should work for mixed $slot and non-$slot slots', () => {
+      const vm = new Vue({
+        template: `<foo>{{ $slot.foo }}<div slot="foo">static</div><div>{{ $slot.foo }}</div></foo>`,
+        components: { foo: { template: `<div><slot foo="default"/><slot name="foo"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`default<div>default</div><div>static</div>`)
+    })
+  })
 })
