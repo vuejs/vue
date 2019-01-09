@@ -21,6 +21,7 @@ export function normalizeScopedSlots (
     }
     res._normalized = true
   }
+  // expose normal slots on scopedSlots
   if (normalSlots !== emptyObject) {
     for (const key in normalSlots) {
       res[key] = () => normalSlots[key]

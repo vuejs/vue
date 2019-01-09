@@ -48,9 +48,15 @@ export function FunctionalRenderContext (
   this.children = children
   this.parent = parent
   this.listeners = data.on || emptyObject
-  this.scopedSlots = data.scopedSlots || emptyObject
   this.injections = resolveInject(options.inject, parent)
   this.slots = () => resolveSlots(children, parent)
+
+  Object.defineProperty(this, 'scopedSlots', {
+    enumerable: true,
+    get () {
+      return normalizeScopedSlots(data.scopedSlots, this.slots())
+    }
+  })
 
   // support for compiled functional template
   if (isCompiled) {
