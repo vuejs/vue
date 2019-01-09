@@ -79,6 +79,23 @@ describe('Options functional', () => {
     document.body.removeChild(vm.$el)
   })
 
+  it('should expose data.scopedSlots as scopedSlots', () => {
+    const vm = new Vue({
+      template: '<div><wrap><p slot-scope="a">{{ a }}</p></wrap></div>',
+      components: {
+        wrap: {
+          functional: true,
+          render (h, { scopedSlots, data }) {
+            expect(data.scopedSlots).toBe(scopedSlots)
+            return data.scopedSlots.default('a')
+          }
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('a')
+  })
+
   it('should support returning more than one root node', () => {
     const vm = new Vue({
       template: `<div><test></test></div>`,
