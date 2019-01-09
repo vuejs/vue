@@ -242,6 +242,34 @@ describe('Options functional', () => {
     expect(vm.$el.childNodes[1].namespaceURI).toContain('svg')
   })
 
+  it('should accept components', () => {
+    const HelloComp = {
+      template: `<div>Hello</div>`
+    }
+
+    const WorldComp = {
+      template: `<div>World</div>`
+    }
+
+    const Child = {
+      functional: true,
+      components: {
+        HelloComp
+      },
+      render: h => [h('hello-comp'), h('world-comp')]
+    }
+
+    const vm = new Vue({
+      template: `<div><child/></div>`,
+      components: {
+        Child,
+        WorldComp
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<div>Hello</div><div>World</div>')
+  })
+
   it('should work with render fns compiled from template', done => {
     // code generated via vue-template-es2015-compiler
     const render = function (_h, _vm) {
