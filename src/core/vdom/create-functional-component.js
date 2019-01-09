@@ -48,6 +48,7 @@ export function FunctionalRenderContext (
   this.children = children
   this.parent = parent
   this.listeners = data.on || emptyObject
+  this.scopedSlots = data.scopedSlots || emptyObject
   this.injections = resolveInject(options.inject, parent)
   this.slots = () => resolveSlots(children, parent)
 
