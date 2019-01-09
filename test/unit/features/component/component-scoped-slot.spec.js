@@ -455,6 +455,24 @@ describe('Component scoped slot', () => {
     expect(vm.$el.outerHTML).toBe('<span>hello</span>')
   })
 
+  // new in 2.6, unifying all slots as functions
+  it('non-scoped slots should also be available on $scopedSlots', () => {
+    const vm = new Vue({
+      template: `<foo>before <div slot="bar">{{ $slot.msg }}</div> after</foo>`,
+      components: {
+        foo: {
+          render(h) {
+            return h('div', [
+              this.$scopedSlots.default(),
+              this.$scopedSlots.bar({ msg: 'hi' })
+            ])
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe(`before  after<div>hi</div>`)
+  })
+
   // #4779
   it('should support dynamic slot target', done => {
     const Child = {

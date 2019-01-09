@@ -57,7 +57,7 @@ export function FunctionalRenderContext (
     this.$options = options
     // pre-resolve slots for renderSlot()
     this.$slots = this.slots()
-    this.$scopedSlots = normalizeScopedSlots(data.scopedSlots)
+    this.$scopedSlots = normalizeScopedSlots(data.scopedSlots, this.$slots)
   }
 
   if (options._scopeId) {

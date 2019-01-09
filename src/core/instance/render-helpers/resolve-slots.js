@@ -1,6 +1,7 @@
 /* @flow */
 
 import type VNode from 'core/vdom/vnode'
+import { emptyObject } from 'core/util/index'
 
 /**
  * Runtime helper for resolving raw children VNodes into a slot object.
@@ -9,10 +10,10 @@ export function resolveSlots (
   children: ?Array<VNode>,
   context: ?Component
 ): { [key: string]: Array<VNode> } {
-  const slots = {}
-  if (!children) {
-    return slots
+  if (!children || !children.length) {
+    return emptyObject
   }
+  const slots = {}
   for (let i = 0, l = children.length; i < l; i++) {
     const child = children[i]
     const data = child.data

@@ -2,19 +2,31 @@
 
 import { emptyObject } from 'core/util/index'
 
-export function normalizeScopedSlots (slots: { [key: string]: Function } | void): any {
+export function normalizeScopedSlots (
+  slots: { [key: string]: Function } | void,
+  normalSlots: { [key: string]: Array<VNode> }
+): any {
+  let res
   if (!slots) {
-    return emptyObject
+    if (normalSlots === emptyObject) {
+      return emptyObject
+    }
+    res = {}
   } else if (slots._normalized) {
     return slots
   } else {
-    const res = {}
+    res = {}
     for (const key in slots) {
       res[key] = normalizeScopedSlot(slots[key])
     }
     res._normalized = true
-    return res
   }
+  if (normalSlots !== emptyObject) {
+    for (const key in normalSlots) {
+      res[key] = () => normalSlots[key]
+    }
+  }
+  return res
 }
 
 function normalizeScopedSlot(fn: Function) {
