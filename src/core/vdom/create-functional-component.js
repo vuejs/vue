@@ -51,12 +51,12 @@ export function FunctionalRenderContext (
   this.injections = resolveInject(options.inject, parent)
   this.slots = () => resolveSlots(children, parent)
 
-  Object.defineProperty(this, 'scopedSlots', {
+  Object.defineProperty(this, 'scopedSlots', ({
     enumerable: true,
     get () {
       return normalizeScopedSlots(data.scopedSlots, this.slots())
     }
-  })
+  }: any))
 
   // support for compiled functional template
   if (isCompiled) {
