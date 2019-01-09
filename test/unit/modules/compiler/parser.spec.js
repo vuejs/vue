@@ -535,6 +535,16 @@ describe('parser', () => {
     expect('The value for a v-bind expression cannot be empty. Found in "v-bind:empty-msg"').toHaveBeenWarned()
   })
 
+  it('v-bind.prop shorthand syntax', () => {
+    const ast = parse('<div .id="foo"></div>', baseOptions)
+    expect(ast.props).toEqual([{ name: 'id', value: 'foo'}])
+  })
+
+  it('v-bind.prop shorthand syntax w/ modifiers', () => {
+    const ast = parse('<div .id.mod="foo"></div>', baseOptions)
+    expect(ast.props).toEqual([{ name: 'id', value: 'foo'}])
+  })
+
   // #6887
   it('special case static attribute that must be props', () => {
     const ast = parse('<video muted></video>', baseOptions)

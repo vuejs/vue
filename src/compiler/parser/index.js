@@ -21,13 +21,14 @@ import {
 } from '../helpers'
 
 export const onRE = /^@|^v-on:/
-export const dirRE = /^v-|^@|^:/
+export const dirRE = /^v-|^@|^:|^\./
 export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 
 const argRE = /:(.*)$/
-export const bindRE = /^:|^v-bind:/
+export const bindRE = /^:|^\.|^v-bind:/
+const propBindRE = /^\./
 const modifierRE = /\.[^.]+/g
 
 const lineBreakRE = /[\r\n]/
@@ -683,8 +684,12 @@ function processAttrs (el) {
       // mark element as dynamic
       el.hasBindings = true
       // modifiers
-      modifiers = parseModifiers(name)
-      if (modifiers) {
+      modifiers = parseModifiers(name.replace(dirRE, ''))
+      // support .foo shorthand syntax for the .prop modifier
+      if (propBindRE.test(name)) {
+        (modifiers || (modifiers = {})).prop = true
+        name = `.` + name.slice(1).replace(modifierRE, '')
+      } else if (modifiers) {
         name = name.replace(modifierRE, '')
       }
       if (bindRE.test(name)) { // v-bind
