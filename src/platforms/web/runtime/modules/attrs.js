@@ -98,7 +98,7 @@ function baseSetAttr (el, key, value) {
     if (
       isIE && !isIE9 &&
       (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') &&
-      key === 'placeholder' && !el.__ieph
+      key === 'placeholder' && value !== '' && !el.__ieph
     ) {
       const blocker = e => {
         e.stopImmediatePropagation()
