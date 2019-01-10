@@ -74,6 +74,7 @@ export interface VueConfiguration {
   warnHandler(msg: string, vm: Vue, trace: string): void;
   ignoredElements: (string | RegExp)[];
   keyCodes: { [key: string]: number | number[] };
+  useEventDelegation: boolean;
   async: boolean;
 }
 
