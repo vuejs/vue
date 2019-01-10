@@ -33,6 +33,12 @@ Note the returned function code uses `with` and thus cannot be used in strict mo
 
 #### Options
 
+- `outputSourceRange` *new in 2.6*
+  - Type: `boolean`
+  - Default: `false`
+
+  Set this to true will cause the `errors` returned in the compiled result become objects in the form of `{ msg, start, end }`. The `start` and `end` properties are numbers that mark the code range of the error source in the template. This can be passed on to the `compiler.generateCodeFrame` API to generate code frame for the error.
+
 - `whitespace`
   - Type: `string`
   - Valid values: `'preserve' | 'condense'`
@@ -139,6 +145,12 @@ Same as `compiler.compileToFunction` but generates SSR-specific render function 
 ### compiler.parseComponent(file, [options])
 
 Parse a SFC (single-file component, or `*.vue` file) into a descriptor (refer to the `SFCDescriptor` type in [flow declarations](https://github.com/vuejs/vue/blob/dev/flow/compiler.js)). This is used in SFC build tools like `vue-loader` and `vueify`.
+
+---
+
+### compiler.generateCodeFrame(template, start, end)
+
+Generate a code frame that highlights the part in `template` defined by `start` and `end`. Useful for error reporting in higher-level tooling.
 
 #### Options
 
