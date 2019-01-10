@@ -689,5 +689,11 @@ describe('Component scoped slot', () => {
       }).$mount()
       expect(vm.$el.innerHTML).toBe(`default<div>default</div><div>static</div>`)
     })
+
+    it('should not break when template expression uses $slots', () => {
+      const vm = new Vue({
+        template: ``
+      })
+    })
   })
 })
