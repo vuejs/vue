@@ -15,7 +15,7 @@ export type Component<Data=DefaultData<never>, Methods=DefaultMethods<never>, Co
 interface EsModuleComponent {
   default: Component
 }
-                      
+
 export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
   = AsyncComponentPromise<Data, Methods, Computed, Props>
   | AsyncComponentFactory<Data, Methods, Computed, Props>
@@ -80,6 +80,7 @@ export interface ComponentOptions<
 
   el?: Element | string;
   template?: string;
+  store?: Object
   // hack is for functional component type inference, should not be used in user code
   render?(createElement: CreateElement, hack: RenderContext<Props>): VNode;
   renderError?(createElement: CreateElement, err: Error): VNode;
