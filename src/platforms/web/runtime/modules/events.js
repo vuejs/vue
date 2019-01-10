@@ -1,5 +1,6 @@
 /* @flow */
 
+import config from 'core/config'
 import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
 import { isIE, isPhantomJS, supportsPassive } from 'core/util/index'
@@ -50,7 +51,12 @@ function add (
   capture: boolean,
   passive: boolean
 ) {
-  if (!capture && !passive && delegateRE.test(name)) {
+  if (
+    !capture &&
+    !passive &&
+    config.useEventDelegation &&
+    delegateRE.test(name)
+  ) {
     const count = eventCounts[name]
     let store = target.__events
     if (!count) {
@@ -150,7 +156,7 @@ function remove (
   _target?: HTMLElement
 ) {
   const el: any = _target || target
-  if (!capture && delegateRE.test(name)) {
+  if (!capture && config.useEventDelegation && delegateRE.test(name)) {
     el.__events[name] = null
     if (--eventCounts[name] === 0) {
       removeGlobalHandler(name)

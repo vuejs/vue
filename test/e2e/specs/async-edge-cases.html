@@ -6,6 +6,10 @@
     <script src="../../../dist/vue.min.js"></script>
   </head>
   <body>
+    <script>
+      // this is necessary to make these cases pass
+      Vue.config.useEventDelegation = true
+    </script>
 
     <!-- #4510 click and change event on checkbox -->
     <div id="case-1">
