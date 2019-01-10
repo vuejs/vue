@@ -1,9 +1,8 @@
 /* @flow */
 
-import config from 'core/config'
 import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
-import { isIE, isPhantomJS, supportsPassive } from 'core/util/index'
+import { isIE, isChrome, supportsPassive } from 'core/util/index'
 import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model'
 
 // normalize v-model event tokens that can only be determined at runtime.
@@ -39,114 +38,34 @@ function createOnceHandler (event, handler, capture) {
   }
 }
 
-const delegateRE = /^(?:click|dblclick|submit|(?:key|mouse|touch|pointer).*)$/
-const eventCounts = {}
-const attachedGlobalHandlers = {}
-
-type TargetRef = { el: Element | Document }
-
 function add (
   name: string,
   handler: Function,
   capture: boolean,
   passive: boolean
 ) {
-  if (
-    !capture &&
-    !passive &&
-    config.useEventDelegation &&
-    delegateRE.test(name)
-  ) {
-    const count = eventCounts[name]
-    let store = target.__events
-    if (!count) {
-      attachGlobalHandler(name)
-    }
-    if (!store) {
-      store = target.__events = {}
-    }
-    if (!store[name]) {
-      eventCounts[name]++
-    }
-    store[name] = handler
-  } else {
-    target.addEventListener(
-      name,
-      handler,
-      supportsPassive
-        ? { capture, passive }
-        : capture
-    )
-  }
-}
-
-function attachGlobalHandler(name: string) {
-  const handler = (attachedGlobalHandlers[name] = (e: any) => {
-    const isClick = e.type === 'click' || e.type === 'dblclick'
-    if (isClick && e.button !== 0) {
-      e.stopPropagation()
-      return false
-    }
-    const targetRef: TargetRef = { el: document }
-    dispatchEvent(e, name, isClick, targetRef)
-  })
-  document.addEventListener(name, handler)
-  eventCounts[name] = 0
-}
-
-function stopPropagation() {
-  this.cancelBubble = true
-  if (!this.immediatePropagationStopped) {
-    this.stopImmediatePropagation()
-  }
-}
-
-function dispatchEvent(
-  e: Event,
-  name: string,
-  isClick: boolean,
-  targetRef: TargetRef
-) {
-  let el: any = e.target
-  let userEvent
-  if (isPhantomJS) {
-    // in PhantomJS it throws if we try to re-define currentTarget,
-    // so instead we create a wrapped event to the user
-    userEvent = Object.create((e: any))
-    userEvent.stopPropagation = stopPropagation.bind((e: any))
-    userEvent.preventDefault = e.preventDefault.bind(e)
-  } else {
-    userEvent = e
-  }
-  Object.defineProperty(userEvent, 'currentTarget', ({
-    configurable: true,
-    get() {
-      return targetRef.el
-    }
-  }: any))
-  while (el != null) {
-    // Don't process clicks on disabled elements
-    if (isClick && el.disabled) {
-      break
-    }
-    const store = el.__events
-    if (store) {
-      const handler = store[name]
-      if (handler) {
-        targetRef.el = el
-        handler(userEvent)
-        if (e.cancelBubble) {
-          break
-        }
+  if (isChrome) {
+    // async edge case #6566: inner click event triggers patch, event handler
+    // attached to outer element during patch, and triggered again. This only
+    // happens in Chrome as it fires microtask ticks between event propagation.
+    // the solution is simple: we save the timestamp when a handler is attached,
+    // and the handler would only fire if the event passed to it was fired
+    // AFTER it was attached.
+    const now = performance.now()
+    const original = handler
+    handler = original._wrapper = function (e) {
+      if (e.timeStamp > now) {
+        return original.apply(this, arguments)
       }
     }
-    el = el.parentNode
   }
-}
-
-function removeGlobalHandler(name: string) {
-  document.removeEventListener(name, attachedGlobalHandlers[name])
-  attachedGlobalHandlers[name] = null
+  target.addEventListener(
+    name,
+    handler,
+    supportsPassive
+      ? { capture, passive }
+      : capture
+  )
 }
 
 function remove (
@@ -155,19 +74,11 @@ function remove (
   capture: boolean,
   _target?: HTMLElement
 ) {
-  const el: any = _target || target
-  if (!capture && config.useEventDelegation && delegateRE.test(name)) {
-    el.__events[name] = null
-    if (--eventCounts[name] === 0) {
-      removeGlobalHandler(name)
-    }
-  } else {
-    el.removeEventListener(
-      name,
-      handler._withTask || handler,
-      capture
-    )
-  }
+  (_target || target).removeEventListener(
+    name,
+    handler._wrapper || handler,
+    capture
+  )
 }
 
 function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {

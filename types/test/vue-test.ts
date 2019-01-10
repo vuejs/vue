@@ -75,7 +75,6 @@ class Test extends Vue {
     config.keyCodes = { esc: 27 };
     config.ignoredElements = ['foo', /^ion-/];
     config.async = false
-    config.useEventDelegation = true
   }
 
   static testMethods() {

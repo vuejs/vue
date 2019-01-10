@@ -19,7 +19,6 @@ export type Config = {
   warnHandler: ?(msg: string, vm: Component, trace: string) => void;
   ignoredElements: Array<string | RegExp>;
   keyCodes: { [key: string]: number | Array<number> };
-  useEventDelegation: boolean;
 
   // platform
   isReservedTag: (x?: string) => boolean;
@@ -83,15 +82,6 @@ export default ({
    */
   // $flow-disable-line
   keyCodes: Object.create(null),
-
-  /**
-   * Use event delegation - this works around a few async edge cases caused by
-   * microtask / DOM event racing conditions, and should in theory save some
-   * memory.
-   *
-   * Off by default for backwards compatibility.
-   */
-  useEventDelegation: false,
 
   /**
    * Check if a tag is reserved so that it cannot be registered as a
