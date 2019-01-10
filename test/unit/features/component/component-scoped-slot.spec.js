@@ -690,10 +690,33 @@ describe('Component scoped slot', () => {
       expect(vm.$el.innerHTML).toBe(`default<div>default</div><div>static</div>`)
     })
 
+    // testing $slot detection: bracket access, using $slot alone, passing as arguments...
+    it('should work for alternative $slot usage', () => {
+      const vm = new Vue({
+        template: `<foo>{{ $slot['foo'] }}<div slot="foo">{{ $slot }}</div><div>{{ pick($slot) }}</div></foo>`,
+        methods: { pick: s => s.foo },
+        components: { foo: { template: `<div><slot foo="default"/><slot name="foo"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`default<div>default</div><div>{}</div>`)
+    })
+
+    // should not consider detection if $slot is inside longer valid identifier
     it('should not break when template expression uses $slots', () => {
       const vm = new Vue({
-        template: ``
-      })
+        data: { some$slot: 123 },
+        template: `<foo>{{ some$slot }}<div slot="foo">{{ $slots }}</div></foo>`,
+        components: {
+          foo: {
+            render(h) {
+              // should be compiled as normal slots
+              expect(this.$slots.default).toBeTruthy()
+              expect(this.$slots.foo).toBeTruthy()
+              return h('div', [this.$slots.default, this.$slots.foo])
+            }
+          }
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`123<div>{}</div>`)
     })
   })
 })
