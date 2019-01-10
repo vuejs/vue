@@ -395,7 +395,7 @@ export function mergeOptions (
   }
 
   if (typeof child === 'function') {
-    child = child.options
+    child = child.extendOptions
   }
 
   normalizeProps(child, vm)

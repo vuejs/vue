@@ -110,35 +110,31 @@ describe('Options mixins', () => {
     expect(vm.$options.directives.c).toBeDefined()
   })
 
-  it('should accept further extended constructors as mixins', () => {
-    const spy1 = jasmine.createSpy('mixinA')
-    const spy2 = jasmine.createSpy('mixinB')
-
-    const mixinA = Vue.extend({
-      created: spy1,
-      directives: {
-        c: {}
-      },
-      methods: {
-        a: function () {}
+  it('should not mix global mixined lifecycle hook twice', () => {
+    const spy = jasmine.createSpy('global mixed in lifecycle hook')
+    Vue.mixin({
+      created() {
+        spy()
       }
     })
 
-    const mixinB = mixinA.extend({
-      created: spy2
-    })
-
-    const vm = new Vue({
-      mixins: [mixinB],
+    const mixin1 = Vue.extend({
       methods: {
-        b: function () {}
+        a() {}
       }
     })
 
-    expect(spy1).toHaveBeenCalledTimes(1)
-    expect(spy2).toHaveBeenCalledTimes(1)
-    expect(vm.a).toBeDefined()
-    expect(vm.b).toBeDefined()
-    expect(vm.$options.directives.c).toBeDefined()
+    const mixin2 = Vue.extend({
+      mixins: [mixin1],
+    })
+
+    const Child = Vue.extend({
+      mixins: [mixin2],
+    })
+
+    const vm = new Child()
+
+    expect(typeof vm.$options.methods.a).toBe('function')
+    expect(spy.calls.count()).toBe(1)
   })
 })
