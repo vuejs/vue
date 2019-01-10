@@ -54,7 +54,7 @@ function add (
     const now = performance.now()
     const original = handler
     handler = original._wrapper = function (e) {
-      if (e.timeStamp > now) {
+      if (e.timeStamp >= now) {
         return original.apply(this, arguments)
       }
     }
