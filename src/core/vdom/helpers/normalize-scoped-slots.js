@@ -19,7 +19,9 @@ export function normalizeScopedSlots (
   }
   // expose normal slots on scopedSlots
   for (const key in normalSlots) {
-    res[key] = proxyNormalSlot(normalSlots, key)
+    if (!(key in res)) {
+      res[key] = proxyNormalSlot(normalSlots, key)
+    }
   }
   res._normalized = true
   return res
