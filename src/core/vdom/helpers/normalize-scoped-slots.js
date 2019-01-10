@@ -1,16 +1,11 @@
 /* @flow */
 
-import { emptyObject } from 'core/util/index'
-
 export function normalizeScopedSlots (
   slots: { [key: string]: Function } | void,
   normalSlots: { [key: string]: Array<VNode> }
 ): any {
   let res
   if (!slots) {
-    if (normalSlots === emptyObject) {
-      return emptyObject
-    }
     res = {}
   } else if (slots._normalized) {
     return slots
@@ -19,14 +14,12 @@ export function normalizeScopedSlots (
     for (const key in slots) {
       res[key] = normalizeScopedSlot(slots[key])
     }
-    res._normalized = true
   }
   // expose normal slots on scopedSlots
-  if (normalSlots !== emptyObject) {
-    for (const key in normalSlots) {
-      res[key] = () => normalSlots[key]
-    }
+  for (const key in normalSlots) {
+    res[key] = () => normalSlots[key]
   }
+  res._normalized = true
   return res
 }
 
