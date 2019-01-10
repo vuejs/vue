@@ -93,6 +93,7 @@ workflows:
           filters:
             branches:
               only:
+                - "2.6"
                 - regression-test
           requires:
             - test-cover
