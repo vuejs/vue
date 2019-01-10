@@ -617,7 +617,7 @@ function childrenHas$Slot (el): boolean {
   return el.children ? el.children.some(nodeHas$Slot) : false
 }
 
-const $slotRE = /\$slot/
+const $slotRE = /(^|[^\w_$])\$slot($|[^\w_$])/
 function nodeHas$Slot (node): boolean {
   // caching
   if (hasOwn(node, 'has$Slot')) {
