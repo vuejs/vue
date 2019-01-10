@@ -8,14 +8,25 @@ interface CompilerOptions {
   directives?: Record<string, DirectiveFunction>;
   preserveWhitespace?: boolean;
   whitespace?: 'preserve' | 'condense';
+  outputSourceRange?: any
 }
 
-interface CompiledResult {
+interface CompilerOptionsWithSourceRange extends CompilerOptions {
+  outputSourceRange: true
+}
+
+interface ErrorWithRange {
+  msg: string;
+  start: number;
+  end: number;
+}
+
+interface CompiledResult<ErrorType> {
   ast: ASTElement | undefined;
   render: string;
   staticRenderFns: string[];
-  errors: string[];
-  tips: string[];
+  errors: ErrorType[];
+  tips: ErrorType[];
 }
 
 interface CompiledResultFunctions {
@@ -204,15 +215,25 @@ export interface SFCDescriptor {
  */
 export function compile(
   template: string,
+  options: CompilerOptionsWithSourceRange
+): CompiledResult<ErrorWithRange>
+
+export function compile(
+  template: string,
   options?: CompilerOptions
-): CompiledResult;
+): CompiledResult<string>;
 
 export function compileToFunctions(template: string): CompiledResultFunctions;
 
 export function ssrCompile(
   template: string,
+  options: CompilerOptionsWithSourceRange
+): CompiledResult<ErrorWithRange>;
+
+export function ssrCompile(
+  template: string,
   options?: CompilerOptions
-): CompiledResult;
+): CompiledResult<string>;
 
 export function ssrCompileToFunctions(template: string): CompiledResultFunctions;
 
@@ -220,3 +241,9 @@ export function parseComponent(
   file: string,
   options?: SFCParserOptions
 ): SFCDescriptor;
+
+export function generateCodeFrame(
+  template: string,
+  start: number,
+  end: number
+): string;
