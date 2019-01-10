@@ -109,4 +109,32 @@ describe('Options mixins', () => {
     expect(vm.b).toBeDefined()
     expect(vm.$options.directives.c).toBeDefined()
   })
+
+  it('should not mix global mixined lifecycle hook twice', () => {
+    const spy = jasmine.createSpy('global mixed in lifecycle hook')
+    Vue.mixin({
+      created() {
+        spy()
+      }
+    })
+
+    const mixin1 = Vue.extend({
+      methods: {
+        a() {}
+      }
+    })
+
+    const mixin2 = Vue.extend({
+      mixins: [mixin1],
+    })
+
+    const Child = Vue.extend({
+      mixins: [mixin2],
+    })
+
+    const vm = new Child()
+
+    expect(typeof vm.$options.methods.a).toBe('function')
+    expect(spy.calls.count()).toBe(1)
+  })
 })
