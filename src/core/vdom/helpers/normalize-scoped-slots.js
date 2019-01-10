@@ -12,7 +12,9 @@ export function normalizeScopedSlots (
   } else {
     res = {}
     for (const key in slots) {
-      res[key] = normalizeScopedSlot(slots[key])
+      if (slots[key]) {
+        res[key] = normalizeScopedSlot(slots[key])
+      }
     }
   }
   // expose normal slots on scopedSlots
