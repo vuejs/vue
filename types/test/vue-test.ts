@@ -200,3 +200,6 @@ declare function decorate<VC extends typeof Vue>(v: VC): VC;
 class Decorated extends Vue {
   a = 123;
 }
+
+const obj = Vue.observable({ a: 1 })
+obj.a++
