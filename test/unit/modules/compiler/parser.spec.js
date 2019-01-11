@@ -757,4 +757,29 @@ describe('parser', () => {
     const ast = parse(`<p>{{\r\nmsg\r\n}}</p>`, baseOptions)
     expect(ast.children[0].expression).toBe('_s(msg)')
   })
+
+  // #9038
+  it('should warn if interpolation is used in slot name attribute', () => {
+    parse(`
+      <div class="wrapper">
+        <slot name="line-{{ index }}"></slot>
+      </div>`, baseOptions)
+
+    expect('name="line-{{ index }}": Interpolation inside attributes has been removed. ' +
+           'Use v-bind or the colon shorthand instead. ' +
+           'For example, instead of <slot name="{{ val }}">, use <slot :name="val">.')
+      .toHaveBeenWarned()
+  })
+
+  it('should not warn if interpolation is not used in slot name attribute', () => {
+    parse(`
+      <div class="wrapper">
+        <slot :name="'line-' + index"></slot>
+      </div>`, baseOptions)
+
+    expect('name="line-{{ index }}": Interpolation inside attributes has been removed. ' +
+      'Use v-bind or the colon shorthand instead. ' +
+      'For example, instead of <slot name="{{ val }}">, use <slot :name="val">.')
+      .not.toHaveBeenWarned()
+  })
 })
