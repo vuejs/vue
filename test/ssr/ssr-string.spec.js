@@ -1528,14 +1528,14 @@ describe('SSR: renderToString', () => {
       template: '<div :style="style"></div>',
       data: {
         style: {
-          opacity: 0, // opacity should display as-is
-          top: 0, // top and margin should be converted to '0px'
-          marginTop: 10
+          opacity: 0, // valid, opacity is unit-less
+          top: 0, // invalid, top requires unit
+          marginTop: '10px' // valid
         }
       }
     }, result => {
       expect(result).toContain(
-        '<div data-server-rendered="true" style="opacity:0;top:0px;margin-top:10px;"></div>'
+        '<div data-server-rendered="true" style="opacity:0;margin-top:10px;"></div>'
       )
       done()
     })
