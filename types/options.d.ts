@@ -113,6 +113,7 @@ export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = Pro
   props?: PropDefs;
   inject?: InjectOptions;
   functional: boolean;
+  components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> };
   render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode;
 }
 
