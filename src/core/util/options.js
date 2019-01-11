@@ -147,13 +147,26 @@ function mergeHook (
   parentVal: ?Array<Function>,
   childVal: ?Function | ?Array<Function>
 ): ?Array<Function> {
-  return childVal
+  const res = childVal
     ? parentVal
       ? parentVal.concat(childVal)
       : Array.isArray(childVal)
         ? childVal
         : [childVal]
     : parentVal
+  return res
+    ? dedupeHooks(res)
+    : res
+}
+
+function dedupeHooks (hooks) {
+  const res = []
+  for (let i = 0; i < hooks.length; i++) {
+    if (res.indexOf(hooks[i]) === -1) {
+      res.push(hooks[i])
+    }
+  }
+  return res
 }
 
 LIFECYCLE_HOOKS.forEach(hook => {
@@ -382,7 +395,7 @@ export function mergeOptions (
   }
 
   if (typeof child === 'function') {
-    child = child.extendOptions
+    child = child.options
   }
 
   normalizeProps(child, vm)
