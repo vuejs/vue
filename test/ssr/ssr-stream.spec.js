@@ -102,4 +102,26 @@ describe('SSR: renderToStream', () => {
     stream1.read(1)
     stream2.read(1)
   })
+
+  it('should call context.rendered', done => {
+    let a = 0
+    const stream = renderToStream(new Vue({
+      template: `
+        <div>Hello</div>
+      `
+    }), {
+      rendered: () => {
+        a = 42
+      }
+    })
+    let res = ''
+    stream.on('data', chunk => {
+      res += chunk
+    })
+    stream.on('end', () => {
+      expect(res).toContain('<div data-server-rendered="true">Hello</div>')
+      expect(a).toBe(42)
+      done()
+    })
+  })
 })

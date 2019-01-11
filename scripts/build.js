@@ -43,12 +43,13 @@ function build (builds) {
 function buildEntry (config) {
   const output = config.output
   const { file, banner } = output
-  const isProd = /min\.js$/.test(file)
+  const isProd = /(min|prod)\.js$/.test(file)
   return rollup.rollup(config)
     .then(bundle => bundle.generate(output))
-    .then(({ code }) => {
+    .then(({ output: [{ code }] }) => {
       if (isProd) {
         const minified = (banner ? banner + '\n' : '') + terser.minify(code, {
+          toplevel: true,
           output: {
             ascii_only: true
           },

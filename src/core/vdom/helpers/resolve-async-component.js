@@ -7,7 +7,8 @@ import {
   isUndef,
   isTrue,
   isObject,
-  hasSymbol
+  hasSymbol,
+  isPromise
 } from 'core/util/index'
 
 import { createEmptyVNode } from 'core/vdom/vnode'
@@ -97,12 +98,12 @@ export function resolveAsyncComponent (
     const res = factory(resolve, reject)
 
     if (isObject(res)) {
-      if (typeof res.then === 'function') {
+      if (isPromise(res)) {
         // () => Promise
         if (isUndef(factory.resolved)) {
           res.then(resolve, reject)
         }
-      } else if (isDef(res.component) && typeof res.component.then === 'function') {
+      } else if (isPromise(res.component)) {
         res.component.then(resolve, reject)
 
         if (isDef(res.error)) {

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import testObjectOption from '../../../helpers/test-object-option'
+import { finished } from 'stream';
 
 describe('Options watch', () => {
   let spy
@@ -142,5 +143,36 @@ describe('Options watch', () => {
       expect(spy2).toHaveBeenCalledWith(1, 0)
       expect(spy3).toHaveBeenCalledWith(1, 0)
     }).then(done)
+  })
+
+  it('should support watching unicode paths', done => {
+    const vm = new Vue({
+      data: {
+        数据: 1
+      },
+      watch: {
+        数据: spy
+      }
+    })
+    expect(spy).not.toHaveBeenCalled()
+    vm['数据'] = 2
+    expect(spy).not.toHaveBeenCalled()
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalledWith(2, 1)
+    }).then(done)
+  })
+
+  it('should not warn proper usage', () => {
+    const vm = new Vue({
+      data: {
+        foo: { _bar: 1 }, // element has such watchers...
+        prop1: 123
+      },
+      watch: {
+        'foo._bar': () => {},
+        prop1 () {}
+      }
+    })
+    expect(`Failed watching path`).not.toHaveBeenWarned()
   })
 })

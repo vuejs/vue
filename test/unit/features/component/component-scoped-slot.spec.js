@@ -395,11 +395,9 @@ describe('Component scoped slot', () => {
             return { msg: 'hello' }
           },
           render (h) {
-            return h('div', [
-              this.$scopedSlots.item({
-                text: this.msg
-              })
-            ])
+            return h('div', this.$scopedSlots.item({
+              text: this.msg
+            }))
           }
         }
       }
@@ -425,14 +423,54 @@ describe('Component scoped slot', () => {
             return { msg: 'hello' }
           },
           render (h) {
-            return h('div', [
-              this.$scopedSlots.default({ msg: this.msg })
-            ])
+            return h('div', this.$scopedSlots.default({ msg: this.msg }))
           }
         }
       }
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
+  })
+
+  it('render function usage (default, as root)', () => {
+    const vm = new Vue({
+      render (h) {
+        return h('test', [
+          props => h('span', [props.msg])
+        ])
+      },
+      components: {
+        test: {
+          data () {
+            return { msg: 'hello' }
+          },
+          render (h) {
+            const res = this.$scopedSlots.default({ msg: this.msg })
+            // all scoped slots should be normalized into arrays
+            expect(Array.isArray(res)).toBe(true)
+            return res
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.outerHTML).toBe('<span>hello</span>')
+  })
+
+  // new in 2.6, unifying all slots as functions
+  it('non-scoped slots should also be available on $scopedSlots', () => {
+    const vm = new Vue({
+      template: `<foo>before <div slot="bar">{{ $slot.msg }}</div> after</foo>`,
+      components: {
+        foo: {
+          render(h) {
+            return h('div', [
+              this.$scopedSlots.default(),
+              this.$scopedSlots.bar({ msg: 'hi' })
+            ])
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe(`before  after<div>hi</div>`)
   })
 
   // #4779
@@ -592,5 +630,93 @@ describe('Component scoped slot', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('<p>hello</p>')
     }).then(done)
+  })
+
+  // 2.6 $slot usage
+  describe('$slot support', () => {
+    it('should work', () => {
+      const vm = new Vue({
+        template: `<foo><div>{{$slot.foo}}</div></foo>`,
+        components: { foo: { template: `<div><slot foo="hello"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`<div>hello</div>`)
+    })
+
+    it('should work for use of $slots in attributes', () => {
+      const vm = new Vue({
+        template: `<foo><div :id="$slot.foo"></div></foo>`,
+        components: { foo: { template: `<div><slot foo="hello"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`<div id="hello"></div>`)
+    })
+
+    it('should work for root text nodes', () => {
+      const vm = new Vue({
+        template: `<foo>{{$slot.foo}}</foo>`,
+        components: { foo: { template: `<div><slot foo="hello"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`hello`)
+    })
+
+    it('should work for mix of root text nodes and elements', () => {
+      const vm = new Vue({
+        template: `<foo>hi <div>{{ $slot.foo }}</div>{{$slot.foo}}</foo>`,
+        components: { foo: { template: `<div><slot foo="hello"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`hi <div>hello</div>hello`)
+    })
+
+    it('should work for named slots', () => {
+      const vm = new Vue({
+        template: `<foo><div slot="foo">{{ $slot.foo }}</div></foo>`,
+        components: { foo: { template: `<div><slot name="foo" foo="hello"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`<div>hello</div>`)
+    })
+
+    it('should work for mixed default and named slots', () => {
+      const vm = new Vue({
+        template: `<foo>{{ $slot.foo }}<div>{{ $slot.foo }}</div><div slot="foo">{{ $slot.foo }}</div></foo>`,
+        components: { foo: { template: `<div><slot foo="default"/><slot name="foo" foo="foo"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`default<div>default</div><div>foo</div>`)
+    })
+
+    it('should work for mixed $slot and non-$slot slots', () => {
+      const vm = new Vue({
+        template: `<foo>{{ $slot.foo }}<div slot="foo">static</div><div>{{ $slot.foo }}</div></foo>`,
+        components: { foo: { template: `<div><slot foo="default"/><slot name="foo"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`default<div>default</div><div>static</div>`)
+    })
+
+    // testing $slot detection: bracket access, using $slot alone, passing as arguments...
+    it('should work for alternative $slot usage', () => {
+      const vm = new Vue({
+        template: `<foo>{{ $slot['foo'] }}<div slot="foo">{{ $slot }}</div><div>{{ pick($slot) }}</div></foo>`,
+        methods: { pick: s => s.foo },
+        components: { foo: { template: `<div><slot foo="default"/><slot name="foo"/></div>` }}
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`default<div>default</div><div>{}</div>`)
+    })
+
+    // should not consider detection if $slot is inside longer valid identifier
+    it('should not break when template expression uses $slots', () => {
+      const vm = new Vue({
+        data: { some$slot: 123 },
+        template: `<foo>{{ some$slot }}<div slot="foo">{{ $slots }}</div></foo>`,
+        components: {
+          foo: {
+            render(h) {
+              // should be compiled as normal slots
+              expect(this.$slots.default).toBeTruthy()
+              expect(this.$slots.foo).toBeTruthy()
+              return h('div', [this.$slots.default, this.$slots.foo])
+            }
+          }
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`123<div>{}</div>`)
+    })
   })
 })

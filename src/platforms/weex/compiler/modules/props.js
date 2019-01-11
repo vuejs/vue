@@ -22,6 +22,11 @@ function transformNode (el: ASTElement) {
           el.attrsMap[realName] = el.attrsMap[attr.name]
           delete el.attrsMap[attr.name]
         }
+        if (el.rawAttrsMap && el.rawAttrsMap[attr.name]) {
+          el.rawAttrsMap[realName] = el.rawAttrsMap[attr.name]
+          // $flow-disable-line
+          delete el.rawAttrsMap[attr.name]
+        }
         attr.name = realName
       }
     })

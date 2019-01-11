@@ -1,6 +1,7 @@
 /* @flow */
 
 const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
+const fnInvokeRE = /\([^)]*?\);*$/
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
 // KeyboardEvent.keyCode aliases
@@ -94,6 +95,7 @@ function genHandler (
 
   const isMethodPath = simplePathRE.test(handler.value)
   const isFunctionExpression = fnExpRE.test(handler.value)
+  const isFunctionInvocation = simplePathRE.test(handler.value.replace(fnInvokeRE, ''))
 
   if (!handler.modifiers) {
     if (isMethodPath || isFunctionExpression) {
@@ -103,7 +105,9 @@ function genHandler (
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, handler.value)
     }
-    return `function($event){${handler.value}}` // inline statement
+    return `function($event){${
+      isFunctionInvocation ? `return ${handler.value}` : handler.value
+    }}` // inline statement
   } else {
     let code = ''
     let genModifierCode = ''
@@ -138,7 +142,9 @@ function genHandler (
       ? `return ${handler.value}($event)`
       : isFunctionExpression
         ? `return (${handler.value})($event)`
-        : handler.value
+        : isFunctionInvocation
+          ? `return ${handler.value}`
+          : handler.value
     /* istanbul ignore if */
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, code + handlerCode)

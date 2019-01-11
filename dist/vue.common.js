@@ -1927,7 +1927,7 @@ function withMacroTask (fn) {
     try {
       return fn.apply(null, arguments)
     } finally {
-      useMacroTask = false;    
+      useMacroTask = false;
     }
   })
 }
@@ -11078,7 +11078,3 @@ function getOuterHTML (el) {
     return container.innerHTML
   }
 }
-
-Vue.compile = compileToFunctions;
-
-module.exports = Vue;

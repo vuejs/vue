@@ -1,4 +1,4 @@
-import Vue, { VNode } from "../index";
+import Vue, { PropType, VNode } from "../index";
 import { ComponentOptions, Component } from "../index";
 import { CreateElement } from "../vue";
 
@@ -59,20 +59,36 @@ class Cat {
   private u = 1
 }
 
+interface IUser {
+  foo: string,
+  bar: number
+}
+
+interface ICat {
+  foo: any,
+  bar: object
+}
+
 Vue.component('union-prop', {
   props: {
-    primitive: [String, Number],
-    object: [Cat, User],
-    regex: RegExp,
+    cat: Object as PropType<ICat>,
+    complexUnion: { type: [User, Number] as PropType<User | number> },
+    kittyUser: Object as PropType<ICat & IUser>,
     mixed: [RegExp, Array],
-    union: [User, Number] as {new(): User | Number}[] // requires annotation
+    object: [Cat, User],
+    primitive: [String, Number],
+    regex: RegExp,
+    union: [User, Number] as PropType<User | number>
   },
   data() {
-    this.primitive;
-    this.object;
-    this.union;
-    this.regex.compile;
+    this.cat;
+    this.complexUnion;
+    this.kittyUser;
     this.mixed;
+    this.object;
+    this.primitive;
+    this.regex.compile;
+    this.union;
     return {
       fixedSize: this.union,
     }
@@ -225,6 +241,9 @@ Vue.component('component', {
     info.toUpperCase()
     return true
   },
+  ssrPrefetch () {
+    return Promise.resolve()
+  },
 
   directives: {
     a: {
@@ -362,6 +381,7 @@ Vue.component('functional-component', {
     context.slots();
     context.data;
     context.parent;
+    context.scopedSlots;
     context.listeners.click;
     return createElement("div", {}, context.children);
   }

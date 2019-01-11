@@ -1918,7 +1918,7 @@ function withMacroTask (fn) {
     try {
       return fn.apply(null, arguments)
     } finally {
-      useMacroTask = false;    
+      useMacroTask = false;
     }
   })
 }
@@ -8103,7 +8103,3 @@ if (inBrowser) {
     }
   }, 0);
 }
-
-/*  */
-
-module.exports = Vue;

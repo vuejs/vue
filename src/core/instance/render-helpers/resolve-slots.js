@@ -9,10 +9,10 @@ export function resolveSlots (
   children: ?Array<VNode>,
   context: ?Component
 ): { [key: string]: Array<VNode> } {
-  const slots = {}
-  if (!children) {
-    return slots
+  if (!children || !children.length) {
+    return {}
   }
+  const slots = {}
   for (let i = 0, l = children.length; i < l; i++) {
     const child = children[i]
     const data = child.data
@@ -55,10 +55,11 @@ export function resolveScopedSlots (
 ): { [key: string]: Function } {
   res = res || {}
   for (let i = 0; i < fns.length; i++) {
-    if (Array.isArray(fns[i])) {
-      resolveScopedSlots(fns[i], res)
+    const slot = fns[i]
+    if (Array.isArray(slot)) {
+      resolveScopedSlots(slot, res)
     } else {
-      res[fns[i].key] = fns[i].fn
+      res[slot.key] = slot.fn
     }
   }
   return res

@@ -36,17 +36,34 @@ const resolve = p => {
 
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
-  'web-runtime-cjs': {
+  'web-runtime-cjs-dev': {
     entry: resolve('web/entry-runtime.js'),
-    dest: resolve('dist/vue.runtime.common.js'),
+    dest: resolve('dist/vue.runtime.common.dev.js'),
     format: 'cjs',
+    env: 'development',
+    banner
+  },
+  'web-runtime-cjs-prod': {
+    entry: resolve('web/entry-runtime.js'),
+    dest: resolve('dist/vue.runtime.common.prod.js'),
+    format: 'cjs',
+    env: 'production',
     banner
   },
   // Runtime+compiler CommonJS build (CommonJS)
-  'web-full-cjs': {
+  'web-full-cjs-dev': {
     entry: resolve('web/entry-runtime-with-compiler.js'),
-    dest: resolve('dist/vue.common.js'),
+    dest: resolve('dist/vue.common.dev.js'),
     format: 'cjs',
+    env: 'development',
+    alias: { he: './entity-decoder' },
+    banner
+  },
+  'web-full-cjs-prod': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.common.prod.js'),
+    format: 'cjs',
+    env: 'production',
     alias: { he: './entity-decoder' },
     banner
   },
@@ -58,11 +75,31 @@ const builds = {
     format: 'es',
     banner
   },
-  // Runtime+compiler CommonJS build (ES Modules)
+  // Runtime+compiler ES modules build (for bundlers)
   'web-full-esm': {
     entry: resolve('web/entry-runtime-with-compiler.js'),
     dest: resolve('dist/vue.esm.js'),
     format: 'es',
+    alias: { he: './entity-decoder' },
+    banner
+  },
+  // Runtime+compiler ES modules build (for direct import in browser)
+  'web-full-esm-browser-dev': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.esm.browser.js'),
+    format: 'es',
+    transpile: false,
+    env: 'development',
+    alias: { he: './entity-decoder' },
+    banner
+  },
+  // Runtime+compiler ES modules build (for direct import in browser)
+  'web-full-esm-browser-prod': {
+    entry: resolve('web/entry-runtime-with-compiler.js'),
+    dest: resolve('dist/vue.esm.browser.min.js'),
+    format: 'es',
+    transpile: false,
+    env: 'production',
     alias: { he: './entity-decoder' },
     banner
   },
@@ -117,10 +154,18 @@ const builds = {
     plugins: [node(), cjs()]
   },
   // Web server renderer (CommonJS).
-  'web-server-renderer': {
+  'web-server-renderer-dev': {
     entry: resolve('web/entry-server-renderer.js'),
-    dest: resolve('packages/vue-server-renderer/build.js'),
+    dest: resolve('packages/vue-server-renderer/build.dev.js'),
     format: 'cjs',
+    env: 'development',
+    external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
+  },
+  'web-server-renderer-prod': {
+    entry: resolve('web/entry-server-renderer.js'),
+    dest: resolve('packages/vue-server-renderer/build.prod.js'),
+    format: 'cjs',
+    env: 'production',
     external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
   },
   'web-server-renderer-basic': {
@@ -180,7 +225,6 @@ function genConfig (name) {
         __VERSION__: version
       }),
       flow(),
-      buble(),
       alias(Object.assign({}, aliases, opts.alias))
     ].concat(opts.plugins || []),
     output: {
@@ -200,6 +244,10 @@ function genConfig (name) {
     config.plugins.push(replace({
       'process.env.NODE_ENV': JSON.stringify(opts.env)
     }))
+  }
+
+  if (opts.transpile !== false) {
+    config.plugins.push(buble())
   }
 
   Object.defineProperty(config, '_name', {

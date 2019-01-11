@@ -16,6 +16,7 @@ type TemplateRendererOptions = {
   clientManifest?: ClientManifest;
   shouldPreload?: (file: string, type: string) => boolean;
   shouldPrefetch?: (file: string, type: string) => boolean;
+  serializer?: Function;
 };
 
 export type ClientManifest = {
@@ -47,6 +48,7 @@ export default class TemplateRenderer {
   preloadFiles: Array<Resource>;
   prefetchFiles: Array<Resource>;
   mapFiles: AsyncFileMapper;
+  serialize: Function;
 
   constructor (options: TemplateRendererOptions) {
     this.options = options
@@ -56,6 +58,11 @@ export default class TemplateRenderer {
     this.parsedTemplate = options.template
       ? parseTemplate(options.template)
       : null
+
+    // function used to serialize initial state JSON
+    this.serialize = options.serializer || (state => {
+      return serialize(state, { isJSON: true })
+    })
 
     // extra functionality with client manifest
     if (options.clientManifest) {
@@ -194,12 +201,13 @@ export default class TemplateRenderer {
       contextKey = 'state',
       windowKey = '__INITIAL_STATE__'
     } = options || {}
-    const state = serialize(context[contextKey], { isJSON: true })
+    const state = this.serialize(context[contextKey])
     const autoRemove = process.env.NODE_ENV === 'production'
       ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
       : ''
+    const nonceAttr = context.nonce ? ` nonce="${context.nonce}"` : ''
     return context[contextKey]
-      ? `<script>window.${windowKey}=${state}${autoRemove}</script>`
+      ? `<script${nonceAttr}>window.${windowKey}=${state}${autoRemove}</script>`
       : ''
   }
 

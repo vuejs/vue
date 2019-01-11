@@ -5,6 +5,7 @@ import { createElement } from './create-element'
 import { resolveInject } from '../instance/inject'
 import { normalizeChildren } from '../vdom/helpers/normalize-children'
 import { resolveSlots } from '../instance/render-helpers/resolve-slots'
+import { normalizeScopedSlots } from '../vdom/helpers/normalize-scoped-slots'
 import { installRenderHelpers } from '../instance/render-helpers/index'
 
 import {
@@ -50,13 +51,20 @@ export function FunctionalRenderContext (
   this.injections = resolveInject(options.inject, parent)
   this.slots = () => resolveSlots(children, parent)
 
+  Object.defineProperty(this, 'scopedSlots', ({
+    enumerable: true,
+    get () {
+      return normalizeScopedSlots(data.scopedSlots, this.slots())
+    }
+  }: any))
+
   // support for compiled functional template
   if (isCompiled) {
     // exposing $options for renderStatic()
     this.$options = options
     // pre-resolve slots for renderSlot()
     this.$slots = this.slots()
-    this.$scopedSlots = data.scopedSlots || emptyObject
+    this.$scopedSlots = normalizeScopedSlots(data.scopedSlots, this.$slots)
   }
 
   if (options._scopeId) {

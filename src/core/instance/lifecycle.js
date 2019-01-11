@@ -13,9 +13,9 @@ import {
   warn,
   noop,
   remove,
-  handleError,
   emptyObject,
-  validateProp
+  validateProp,
+  invokeWithErrorHandling
 } from '../util/index'
 
 export let activeInstance: any = null
@@ -323,13 +323,10 @@ export function callHook (vm: Component, hook: string) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
   const handlers = vm.$options[hook]
+  const info = `${hook} hook`
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
-      try {
-        handlers[i].call(vm)
-      } catch (e) {
-        handleError(e, vm, `${hook} hook`)
-      }
+      invokeWithErrorHandling(handlers[i], vm, null, vm, info)
     }
   }
   if (vm._hasHookEvent) {

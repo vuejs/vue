@@ -1,6 +1,9 @@
 /* @flow */
 
 import { isDef, isUndef, extend, toNumber } from 'shared/util'
+import { isSVG } from 'web/util/index'
+
+let svgContainer
 
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (isUndef(oldVnode.data.domProps) && isUndef(vnode.data.domProps)) {
@@ -35,6 +38,17 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       }
     }
 
+    // #4521: if a click event triggers update before the change event is
+    // dispatched on a checkbox/radio input, the input's checked state will
+    // be reset and fail to trigger another update.
+    // The root cause here is that browsers may fire microtasks in between click/change.
+    // In Chrome / Firefox, click event fires before change, thus having this problem.
+    // In Safari / Edge, the order is opposite.
+    // Note: in Edge, if you click too fast, only the click event would fire twice.
+    if (key === 'checked' && !isNotInFocusAndDirty(elm, cur)) {
+      continue
+    }
+
     if (key === 'value') {
       // store value as _value as well since
       // non-string values will be stringified
@@ -43,6 +57,17 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       const strCur = isUndef(cur) ? '' : String(cur)
       if (shouldUpdateValue(elm, strCur)) {
         elm.value = strCur
+      }
+    } else if (key === 'innerHTML' && isSVG(elm.tagName) && isUndef(elm.innerHTML)) {
+      // IE doesn't support innerHTML for SVG elements
+      svgContainer = svgContainer || document.createElement('div')
+      svgContainer.innerHTML = `<svg>${cur}</svg>`
+      const svg = svgContainer.firstChild
+      while (elm.firstChild) {
+        elm.removeChild(elm.firstChild)
+      }
+      while (svg.firstChild) {
+        elm.appendChild(svg.firstChild)
       }
     } else {
       elm[key] = cur
@@ -75,10 +100,6 @@ function isDirtyWithModifiers (elm: any, newVal: string): boolean {
   const value = elm.value
   const modifiers = elm._vModifiers // injected by v-model runtime
   if (isDef(modifiers)) {
-    if (modifiers.lazy) {
-      // inputs with lazy should only be updated when not in focus
-      return false
-    }
     if (modifiers.number) {
       return toNumber(value) !== toNumber(newVal)
     }

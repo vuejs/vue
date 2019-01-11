@@ -133,6 +133,18 @@ describe('Directive v-bind', () => {
     expect(vm.$el.getAttribute('id')).toBe(null)
   })
 
+  it('.prop modifier shorthand', () => {
+    const vm = new Vue({
+      template: '<div><span .text-content="foo"></span><span .inner-html="bar"></span></div>',
+      data: {
+        foo: 'hello',
+        bar: '<span>qux</span>'
+      }
+    }).$mount()
+    expect(vm.$el.children[0].textContent).toBe('hello')
+    expect(vm.$el.children[1].innerHTML).toBe('<span>qux</span>')
+  })
+
   it('.camel modifier', () => {
     const vm = new Vue({
       template: '<svg :view-box.camel="viewBox"></svg>',
@@ -157,8 +169,36 @@ describe('Directive v-bind', () => {
       }
     }).$mount()
 
+    document.body.appendChild(vm.$el)
     expect(vm.$el.textContent).toBe('1')
     triggerEvent(vm.$el, 'click')
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('2')
+      document.body.removeChild(vm.$el)
+    }).then(done)
+  })
+
+  it('.sync modifier with kebab case event', done => {
+    const vm = new Vue({
+      template: `<test ref="test" :foo-bar.sync="bar"/>`,
+      data: {
+        bar: 1
+      },
+      components: {
+        test: {
+          props: ['fooBar'],
+          template: `<div>{{ fooBar }}</div>`,
+          methods: {
+            update () {
+              this.$emit('update:foo-bar', 2)
+            }
+          }
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('1')
+    vm.$refs.test.update()
     waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('2')
     }).then(done)
@@ -227,6 +267,7 @@ describe('Directive v-bind', () => {
         }
       }
     }).$mount()
+    document.body.appendChild(vm.$el)
     expect(vm.$el.textContent).toBe('1')
     triggerEvent(vm.$el, 'click')
     waitForUpdate(() => {
@@ -234,6 +275,7 @@ describe('Directive v-bind', () => {
       vm.test.fooBar = 3
     }).then(() => {
       expect(vm.$el.textContent).toBe('3')
+      document.body.removeChild(vm.$el)
     }).then(done)
   })
 

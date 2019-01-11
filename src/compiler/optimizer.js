@@ -30,7 +30,7 @@ export function optimize (root: ?ASTElement, options: CompilerOptions) {
 
 function genStaticKeys (keys: string): Function {
   return makeMap(
-    'type,tag,attrsList,attrsMap,plain,parent,children,attrs' +
+    'type,tag,attrsList,attrsMap,plain,parent,children,attrs,start,end,rawAttrsMap,has$Slot' +
     (keys ? ',' + keys : '')
   )
 }
@@ -43,6 +43,7 @@ function markStatic (node: ASTNode) {
     // 2. static slot content fails for hot-reloading
     if (
       !isPlatformReservedTag(node.tag) &&
+      !node.component &&
       node.tag !== 'slot' &&
       node.attrsMap['inline-template'] == null
     ) {
