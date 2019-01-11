@@ -1499,6 +1499,47 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('invalid style value', done => {
+    renderVmWithOptions({
+      template: '<div :style="style"><p :style="style2"/></div>',
+      data: {
+        // all invalid, should not even have "style" attribute
+        style: {
+          opacity: {},
+          color: null
+        },
+        // mix of valid and invalid
+        style2: {
+          opacity: 0,
+          color: null
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true"><p style="opacity:0;"></p></div>'
+      )
+      done()
+    })
+  })
+
+  it('numeric style value', done => {
+    renderVmWithOptions({
+      template: '<div :style="style"></div>',
+      data: {
+        style: {
+          opacity: 0, // opacity should display as-is
+          top: 0, // top and margin should be converted to '0px'
+          marginTop: 10
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true" style="opacity:0;top:0px;margin-top:10px;"></div>'
+      )
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
