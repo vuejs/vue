@@ -45,6 +45,7 @@ let postTransforms
 let platformIsPreTag
 let platformMustUseProp
 let platformGetTagNamespace
+let maybeComponent
 
 export function createASTElement (
   tag: string,
@@ -74,6 +75,8 @@ export function parse (
   platformIsPreTag = options.isPreTag || no
   platformMustUseProp = options.mustUseProp || no
   platformGetTagNamespace = options.getTagNamespace || no
+  const isReservedTag = options.isReservedTag || no
+  maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
 
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
@@ -390,7 +393,8 @@ export function processElement (
   )
 
   processRef(element)
-  processSlot(element)
+  processSlotContent(element)
+  processSlotOutlet(element)
   processComponent(element)
   for (let i = 0; i < transforms.length; i++) {
     element = transforms[i](element, options) || element
@@ -542,7 +546,79 @@ function processOnce (el) {
   }
 }
 
-function processSlot (el) {
+// handle content being passed to a component as slot,
+// e.g. <template slot="xxx">, <div slot-scope="xxx">
+function processSlotContent (el) {
+  let slotScope
+  if (el.tag === 'template') {
+    slotScope = getAndRemoveAttr(el, 'scope')
+    /* istanbul ignore if */
+    if (process.env.NODE_ENV !== 'production' && slotScope) {
+      warn(
+        `the "scope" attribute for scoped slots have been deprecated and ` +
+        `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
+        `can also be used on plain elements in addition to <template> to ` +
+        `denote scoped slots.`,
+        el.rawAttrsMap['scope'],
+        true
+      )
+    }
+    el.slotScope = (
+      slotScope ||
+      getAndRemoveAttr(el, 'slot-scope') ||
+      // new in 2.6: slot-props and its shorthand works the same as slot-scope
+      // when used on <template> containers
+      getAndRemoveAttr(el, 'slot-props') ||
+      getAndRemoveAttr(el, '()')
+    )
+  } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
+    /* istanbul ignore if */
+    if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
+      warn(
+        `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
+        `(v-for takes higher priority). Use a wrapper <template> for the ` +
+        `scoped slot to make it clearer.`,
+        el.rawAttrsMap['slot-scope'],
+        true
+      )
+    }
+    el.slotScope = slotScope
+  } else {
+    // 2.6: slot-props on component, denotes default slot
+    slotScope = getAndRemoveAttr(el, 'slot-props') || getAndRemoveAttr(el, '()')
+    if (slotScope) {
+      if (process.env.NODE_ENV !== 'production' && !maybeComponent(el)) {
+        warn(
+          `slot-props cannot be used on non-component elements.`,
+          el.rawAttrsMap['slot-props'] || el.rawAttrsMap['()']
+        )
+      }
+      // add the component's children to its default slot
+      const slots = el.scopedSlots || (el.scopedSlots = {})
+      const slotContainer = slots[`"default"`] = createASTElement('template', [], el)
+      slotContainer.children = el.children
+      slotContainer.slotScope = slotScope
+      // remove children as they are returned from scopedSlots now
+      el.children = []
+      // mark el non-plain so data gets generated
+      el.plain = false
+    }
+  }
+
+  // slot="xxx"
+  const slotTarget = getBindingAttr(el, 'slot')
+  if (slotTarget) {
+    el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
+    // preserve slot as an attribute for native shadow DOM compat
+    // only for non-scoped slots.
+    if (el.tag !== 'template' && !el.slotScope) {
+      addAttr(el, 'slot', slotTarget, getRawBindingAttr(el, 'slot'))
+    }
+  }
+}
+
+// handle <slot/> outlets
+function processSlotOutlet (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
     if (process.env.NODE_ENV !== 'production' && el.key) {
@@ -552,44 +628,6 @@ function processSlot (el) {
         `Use the key on a wrapping element instead.`,
         getRawBindingAttr(el, 'key')
       )
-    }
-  } else {
-    let slotScope
-    if (el.tag === 'template') {
-      slotScope = getAndRemoveAttr(el, 'scope')
-      /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && slotScope) {
-        warn(
-          `the "scope" attribute for scoped slots have been deprecated and ` +
-          `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
-          `can also be used on plain elements in addition to <template> to ` +
-          `denote scoped slots.`,
-          el.rawAttrsMap['scope'],
-          true
-        )
-      }
-      el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
-    } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
-      /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
-        warn(
-          `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
-          `(v-for takes higher priority). Use a wrapper <template> for the ` +
-          `scoped slot to make it clearer.`,
-          el.rawAttrsMap['slot-scope'],
-          true
-        )
-      }
-      el.slotScope = slotScope
-    }
-    const slotTarget = getBindingAttr(el, 'slot')
-    if (slotTarget) {
-      el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
-      // preserve slot as an attribute for native shadow DOM compat
-      // only for non-scoped slots.
-      if (el.tag !== 'template' && !el.slotScope) {
-        addAttr(el, 'slot', slotTarget, getRawBindingAttr(el, 'slot'))
-      }
     }
   }
 }
