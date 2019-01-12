@@ -99,7 +99,7 @@ export function parse (
 
   function closeElement (element) {
     if (!inVPre && !element.processed) {
-      element = processElement(element, options, currentParent)
+      element = processElement(element, options)
     }
     // tree management
     if (!stack.length && element !== root) {
@@ -377,8 +377,7 @@ function processRawAttrs (el) {
 
 export function processElement (
   element: ASTElement,
-  options: CompilerOptions,
-  parent: ASTElement | undefined
+  options: CompilerOptions
 ) {
   processKey(element)
 
@@ -391,7 +390,7 @@ export function processElement (
   )
 
   processRef(element)
-  processSlot(element, parent)
+  processSlot(element)
   processComponent(element)
   for (let i = 0; i < transforms.length; i++) {
     element = transforms[i](element, options) || element

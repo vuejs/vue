@@ -458,7 +458,7 @@ describe('Component scoped slot', () => {
   // new in 2.6, unifying all slots as functions
   it('non-scoped slots should also be available on $scopedSlots', () => {
     const vm = new Vue({
-      template: `<foo>before <div slot="bar">{{ $slot.msg }}</div> after</foo>`,
+      template: `<foo>before <div slot="bar" slot-scope="{ msg }">{{ msg }}</div> after</foo>`,
       components: {
         foo: {
           render(h) {
