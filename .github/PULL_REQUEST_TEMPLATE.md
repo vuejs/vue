@@ -1,6 +1,6 @@
 <!--
 Please make sure to read the Pull Request Guidelines:
-https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md#pull-request-guidelines
+https://github.com/wearestar/mars/blob/develop/.github/CONTRIBUTING.md#pull-request-guidelines
 -->
 
 <!-- PULL REQUEST TEMPLATE -->
@@ -24,9 +24,9 @@ If yes, please describe the impact and migration path for existing applications:
 
 **The PR fulfills these requirements:**
 
-- [ ] It's submitted to the `dev` branch for v2.x (or to a previous version branch), _not_ the `master` branch
+- [ ] It's submitted to the `dev` branch for v1.x (or to a previous version branch), _not_ the `master` branch
 - [ ] When resolving a specific issue, it's referenced in the PR's title (e.g. `fix #xxx[,#xxx]`, where "xxx" is the issue number)
-- [ ] All tests are passing: https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md#development-setup
+- [ ] All tests are passing: https://github.com/wearestar/mars/blob/develop/.github/CONTRIBUTING.md#development-setup
 - [ ] New/updated tests are included
 
 If adding a **new feature**, the PR's description includes:
