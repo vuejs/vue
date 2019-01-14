@@ -1,6 +1,6 @@
 /* @flow */
 
-import { escape } from '../util'
+import { escape, noUnitNumericStyleProps } from '../util'
 import { hyphenate } from 'shared/util'
 import { getStyle } from 'web/util/style'
 
@@ -11,13 +11,26 @@ export function genStyle (style: Object): string {
     const hyphenatedKey = hyphenate(key)
     if (Array.isArray(value)) {
       for (let i = 0, len = value.length; i < len; i++) {
-        styleText += `${hyphenatedKey}:${value[i]};`
+        styleText += normalizeValue(hyphenatedKey, value[i])
       }
     } else {
-      styleText += `${hyphenatedKey}:${value};`
+      styleText += normalizeValue(hyphenatedKey, value)
     }
   }
   return styleText
+}
+
+function normalizeValue(key: string, value: any): string {
+  if (
+    typeof value === 'string' ||
+    (typeof value === 'number' && noUnitNumericStyleProps[key]) ||
+    value === 0
+  ) {
+    return `${key}:${value};`
+  } else {
+    // invalid values
+    return ``
+  }
 }
 
 export default function renderStyle (vnode: VNodeWithData): ?string {

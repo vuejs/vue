@@ -77,7 +77,7 @@ describe('Instance methods events', () => {
   })
 
   it('$off event + fn', () => {
-    var spy2 = jasmine.createSpy('emitter')
+    const spy2 = jasmine.createSpy('emitter')
     vm.$on('test', spy)
     vm.$on('test', spy2)
     vm.$off('test', spy)

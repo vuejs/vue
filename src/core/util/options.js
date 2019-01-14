@@ -2,8 +2,9 @@
 
 import config from '../config'
 import { warn } from './debug'
-import { nativeWatch } from './env'
 import { set } from '../observer/index'
+import { unicodeLetters } from './lang'
+import { nativeWatch, hasSymbol } from './env'
 
 import {
   ASSET_TYPES,
@@ -48,14 +49,24 @@ if (process.env.NODE_ENV !== 'production') {
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
   let key, toVal, fromVal
-  const keys = Object.keys(from)
+
+  const keys = hasSymbol
+    ? Reflect.ownKeys(from)
+    : Object.keys(from)
+
   for (let i = 0; i < keys.length; i++) {
     key = keys[i]
+    // in case the object is already observed...
+    if (key === '__ob__') continue
     toVal = to[key]
     fromVal = from[key]
     if (!hasOwn(to, key)) {
       set(to, key, fromVal)
-    } else if (isPlainObject(toVal) && isPlainObject(fromVal)) {
+    } else if (
+      toVal !== fromVal &&
+      isPlainObject(toVal) &&
+      isPlainObject(fromVal)
+    ) {
       mergeData(toVal, fromVal)
     }
   }
@@ -136,13 +147,26 @@ function mergeHook (
   parentVal: ?Array<Function>,
   childVal: ?Function | ?Array<Function>
 ): ?Array<Function> {
-  return childVal
+  const res = childVal
     ? parentVal
       ? parentVal.concat(childVal)
       : Array.isArray(childVal)
         ? childVal
         : [childVal]
     : parentVal
+  return res
+    ? dedupeHooks(res)
+    : res
+}
+
+function dedupeHooks (hooks) {
+  const res = []
+  for (let i = 0; i < hooks.length; i++) {
+    if (res.indexOf(hooks[i]) === -1) {
+      res.push(hooks[i])
+    }
+  }
+  return res
 }
 
 LIFECYCLE_HOOKS.forEach(hook => {
@@ -253,11 +277,10 @@ function checkComponents (options: Object) {
 }
 
 export function validateComponentName (name: string) {
-  if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+  if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeLetters}]*$`).test(name)) {
     warn(
       'Invalid component name: "' + name + '". Component names ' +
-      'can only contain alphanumeric characters and the hyphen, ' +
-      'and must start with a letter.'
+      'should conform to valid custom element name in html5 specification.'
     )
   }
   if (isBuiltInTag(name) || config.isReservedTag(name)) {
@@ -378,15 +401,22 @@ export function mergeOptions (
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)
-  const extendsFrom = child.extends
-  if (extendsFrom) {
-    parent = mergeOptions(parent, extendsFrom, vm)
-  }
-  if (child.mixins) {
-    for (let i = 0, l = child.mixins.length; i < l; i++) {
-      parent = mergeOptions(parent, child.mixins[i], vm)
+
+  // Apply extends and mixins on the child options,
+  // but only if it is a raw options object that isn't
+  // the result of another mergeOptions call.
+  // Only merged options has the _base property.
+  if (!child._base) {
+    if (child.extends) {
+      parent = mergeOptions(parent, child.extends, vm)
+    }
+    if (child.mixins) {
+      for (let i = 0, l = child.mixins.length; i < l; i++) {
+        parent = mergeOptions(parent, child.mixins[i], vm)
+      }
     }
   }
+
   const options = {}
   let key
   for (key in parent) {

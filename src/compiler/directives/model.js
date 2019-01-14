@@ -25,7 +25,7 @@ export function genComponentModel (
 
   el.model = {
     value: `(${value})`,
-    expression: `"${value}"`,
+    expression: JSON.stringify(value),
     callback: `function (${baseValueExpression}) {${assignment}}`
   }
 }

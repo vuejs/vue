@@ -14,7 +14,7 @@ module.exports = {
       .assert.containsText('#case-1', '3')
       .assert.checked('#case-1 input', false)
 
-      // #6566
+      // // #6566
       .assert.containsText('#case-2 button', 'Expand is True')
       .assert.containsText('.count-a', 'countA: 0')
       .assert.containsText('.count-b', 'countB: 0')
