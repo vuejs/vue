@@ -11,7 +11,7 @@ import type { ParsedTemplate } from './parse-template'
 import type { AsyncFileMapper } from './create-async-file-mapper'
 
 type TemplateRendererOptions = {
-  template: ?string;
+  template?: string | Function;
   inject?: boolean;
   clientManifest?: ClientManifest;
   shouldPreload?: (file: string, type: string) => boolean;
@@ -93,7 +93,7 @@ export default class TemplateRenderer {
   }
 
   // render synchronously given rendered app content and render context
-  async render (content: string, context: ?Object) {
+  render (content: string, context: ?Object) {
     const template = this.parsedTemplate
     if (!template) {
       throw new Error('render cannot be called without a template.')

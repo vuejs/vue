@@ -23,7 +23,7 @@ export type RenderOptions = {
   directives?: Object;
   isUnaryTag?: Function;
   cache?: RenderCache;
-  template?: string;
+  template?: string | Function;
   inject?: boolean;
   basedir?: string;
   shouldPreload?: Function;
@@ -81,12 +81,13 @@ export function createRenderer ({
         return false
       }, cb)
       try {
-        render(component, write, context, async (err) => {
+        render(component, write, context, err => {
           if (context && context.rendered) {
             context.rendered(context)
           }
           if (template) {
-            result = await templateRenderer.render(result, context)
+            new Promise(resolve => resolve(templateRenderer.render(result, context)))
+              .then(res => cb(res))
           }
           if (err) {
             cb(err)
