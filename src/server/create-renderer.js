@@ -86,7 +86,7 @@ export function createRenderer ({
             context.rendered(context)
           }
           if (template) {
-            result = templateRenderer.renderSync(result, context)
+            result = templateRenderer.render(result, context)
           }
           if (err) {
             cb(err)
