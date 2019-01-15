@@ -4,7 +4,8 @@ import {
   compileToFunctions,
   ssrCompile,
   ssrCompileToFunctions,
-  parseComponent
+  parseComponent,
+  generateCodeFrame
 } from "./";
 
 // check compile options
@@ -78,9 +79,12 @@ const vnode: VNode = compiledFns.render.call(vm);
 
 // check SFC parser
 const desc = parseComponent("<template></template>", {
-  pad: "space"
+  pad: "space",
+  deindent: false
 });
 
 const templateContent: string = desc.template!.content;
 const scriptContent: string = desc.script!.content;
 const styleContent: string = desc.styles.map(s => s.content).join("\n");
+
+const codeframe: string = generateCodeFrame(`foobar`, 0, 4)
