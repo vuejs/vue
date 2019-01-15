@@ -731,5 +731,65 @@ describe('Component scoped slot', () => {
     // run tests for both full syntax and shorthand
     runSuite('slot-props')
     runSuite('()')
+
+    it('shorthand named slots', () => {
+      const vm = new Vue({
+        template: `
+          <foo ()="foo">
+            {{ foo }}
+            <template (one)="one">
+              {{ one }}
+            </template>
+            <template (two)="two">
+              {{ two }}
+            </template>
+          </foo>
+        `,
+        components: { Foo }
+      }).$mount()
+      expect(vm.$el.innerHTML.replace(/\s+/g, ' ')).toMatch(`from foo default from foo one from foo two`)
+    })
+
+    it('shorthand without scope variable', () => {
+      const vm = new Vue({
+        template: `
+          <foo>
+            <template (one)>one</template>
+            <template (two)>two</template>
+          </foo>
+        `,
+        components: { Foo }
+      }).$mount()
+      expect(vm.$el.innerHTML.replace(/\s+/g, ' ')).toMatch(`onetwo`)
+    })
+
+    it('shorthand named slots on root', () => {
+      const vm = new Vue({
+        template: `
+          <foo (one)="one">
+            {{ one }}
+          </foo>
+        `,
+        components: { Foo }
+      }).$mount()
+      expect(vm.$el.innerHTML.replace(/\s+/g, ' ')).toMatch(`from foo one`)
+    })
+
+    it('dynamic shorthand', () => {
+      const vm = new Vue({
+        data: {
+          a: 'one',
+          b: 'two'
+        },
+        template: `
+          <foo>
+            <template :(a)="one">{{ one }} </template>
+            <template :(b)="two">{{ two }}</template>
+          </foo>
+        `,
+        components: { Foo }
+      }).$mount()
+      expect(vm.$el.innerHTML.replace(/\s+/g, ' ')).toMatch(`from foo one from foo two`)
+    })
   })
 })
