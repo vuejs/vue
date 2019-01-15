@@ -338,8 +338,12 @@ Vue.component('component-with-scoped-slot', {
   components: {
     child: {
       render (this: Vue, h: CreateElement) {
+        const defaultSlot = this.$scopedSlots['default']!({ msg: 'hi' })
+        defaultSlot && defaultSlot.forEach(vnode => {
+          vnode.tag
+        })
         return h('div', [
-          this.$scopedSlots['default']!({ msg: 'hi' }),
+          defaultSlot,
           this.$scopedSlots['item']!({ msg: 'hello' })
         ])
       }
