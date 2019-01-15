@@ -568,22 +568,24 @@ function processSlotContent (el) {
     }
     el.slotScope = (
       slotScope ||
-      getAndRemoveAttr(el, 'slot-scope') ||
+      getAndRemoveAttr(el, 'slot-scope')
+    )
+    if (process.env.NEW_SLOT_SYNTAX) {
       // new in 2.6: slot-props and its shorthand works the same as slot-scope
       // when used on <template> containers
-      getAndRemoveAttr(el, 'slot-props')
-    )
-    // 2.6 shorthand syntax
-    const shorthand = getAndRemoveAttrByRegex(el, scopedSlotShorthandRE)
-    if (shorthand) {
-      if (process.env.NODE_ENV !== 'production' && el.slotScope) {
-        warn(
-          `Unexpected mixed usage of different slot syntaxes.`,
-          el
-        )
+      el.slotScope = el.slotScope || getAndRemoveAttr(el, 'slot-props')
+      // 2.6 shorthand syntax
+      const shorthand = getAndRemoveAttrByRegex(el, scopedSlotShorthandRE)
+      if (shorthand) {
+        if (process.env.NODE_ENV !== 'production' && el.slotScope) {
+          warn(
+            `Unexpected mixed usage of different slot syntaxes.`,
+            el
+          )
+        }
+        el.slotTarget = getScopedSlotShorthandName(shorthand)
+        el.slotScope = shorthand.value
       }
-      el.slotTarget = getScopedSlotShorthandName(shorthand)
-      el.slotScope = shorthand.value
     }
   } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
     /* istanbul ignore if */
@@ -597,7 +599,7 @@ function processSlotContent (el) {
       )
     }
     el.slotScope = slotScope
-  } else {
+  } else if (process.env.NEW_SLOT_SYNTAX) {
     // 2.6: slot-props on component, denotes default slot
     slotScope = getAndRemoveAttr(el, 'slot-props')
     const shorthand = getAndRemoveAttrByRegex(el, scopedSlotShorthandRE)

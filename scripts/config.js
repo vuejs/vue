@@ -7,6 +7,7 @@ const node = require('rollup-plugin-node-resolve')
 const flow = require('rollup-plugin-flow-no-whitespace')
 const version = process.env.VERSION || require('../package.json').version
 const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
+const featureFlags = require('./feature-flags')
 
 const banner =
   '/*!\n' +
@@ -241,9 +242,13 @@ function genConfig (name) {
   }
 
   if (opts.env) {
-    config.plugins.push(replace({
+    const vars = {
       'process.env.NODE_ENV': JSON.stringify(opts.env)
-    }))
+    }
+    Object.keys(featureFlags).forEach(key => {
+      vars[`process.env.${key}`] = featureFlags[key]
+    })
+    config.plugins.push(replace(vars))
   }
 
   if (opts.transpile !== false) {
