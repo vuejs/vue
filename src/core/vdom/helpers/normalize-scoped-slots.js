@@ -1,5 +1,7 @@
 /* @flow */
 
+import { normalizeChildren } from 'core/vdom/helpers/normalize-children'
+
 export function normalizeScopedSlots (
   slots: { [key: string]: Function } | void,
   normalSlots: { [key: string]: Array<VNode> }
@@ -27,10 +29,12 @@ export function normalizeScopedSlots (
   return res
 }
 
-function normalizeScopedSlot(fn: Function) {
+function normalizeScopedSlot(fn: Function): Function {
   return scope => {
     const res = fn(scope)
-    return Array.isArray(res) ? res : res ? [res] : res
+    return res && typeof res === 'object'
+      ? [res] // single vnode
+      : normalizeChildren(res)
   }
 }
 

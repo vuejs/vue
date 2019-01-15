@@ -1,10 +1,8 @@
 import { Vue } from "./vue";
 
-// Scoped slots can technically return anything if used from
-// a render function, but this is "good enough" for templates
+// Scoped slots are guaranteed to return Array of VNodes starting in 2.6
 export type ScopedSlot = (props: any) => ScopedSlotChildren;
-export type ScopedSlotChildren = ScopedSlotArrayContents | VNode | string | undefined;
-export interface ScopedSlotArrayContents extends Array<ScopedSlotChildren> {}
+export type ScopedSlotChildren = VNode[] | undefined;
 
 // Relaxed type compatible with $createElement
 export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string | boolean | null | undefined;
