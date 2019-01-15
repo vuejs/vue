@@ -38,6 +38,7 @@ interface RendererOptions {
 
 interface BundleRendererOptions extends RendererOptions {
   clientManifest?: object;
+  serializer?: (state: object) => string;
   runInNewContext?: boolean | 'once';
   basedir?: string;
 }
