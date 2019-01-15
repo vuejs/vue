@@ -81,12 +81,12 @@ export function createRenderer ({
         return false
       }, cb)
       try {
-        render(component, write, context, err => {
+        render(component, write, context, async (err) => {
           if (context && context.rendered) {
             context.rendered(context)
           }
           if (template) {
-            result = templateRenderer.render(result, context)
+            result = await templateRenderer.render(result, context)
           }
           if (err) {
             cb(err)
