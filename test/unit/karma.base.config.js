@@ -1,4 +1,5 @@
 const alias = require('../../scripts/alias')
+const featureFlags = require('../../scripts/feature-flags')
 const webpack = require('webpack')
 
 const webpackConfig = {
@@ -20,7 +21,8 @@ const webpackConfig = {
       __WEEX__: false,
       'process.env': {
         TRANSITION_DURATION: process.env.CI ? 100 : 50,
-        TRANSITION_BUFFER: 10
+        TRANSITION_BUFFER: 10,
+        ...featureFlags
       }
     })
   ],
