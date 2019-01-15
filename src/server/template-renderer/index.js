@@ -55,9 +55,13 @@ export default class TemplateRenderer {
     this.inject = options.inject !== false
     // if no template option is provided, the renderer is created
     // as a utility object for rendering assets like preload links and scripts.
-    this.parsedTemplate = options.template
-      ? parseTemplate(options.template)
-      : null
+    
+    let template = options.template
+  
+    this.parsedTemplate = template
+      ? typeof template === 'function'
+        ? template : parseTemplate(template)
+      : null;
 
     // function used to serialize initial state JSON
     this.serialize = options.serializer || (state => {
@@ -89,12 +93,16 @@ export default class TemplateRenderer {
   }
 
   // render synchronously given rendered app content and render context
-  renderSync (content: string, context: ?Object) {
+  async render (content: string, context: ?Object) {
     const template = this.parsedTemplate
     if (!template) {
-      throw new Error('renderSync cannot be called without a template.')
+      throw new Error('render cannot be called without a template.')
     }
     context = context || {}
+
+    //if the template is a function, just call the template and return
+    if(typeof template === 'function') return template(content, context)
+
     if (this.inject) {
       return (
         template.head(context) +
