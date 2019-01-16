@@ -10,6 +10,8 @@ import { toggleObserving } from '../observer/index'
 import { pushTarget, popTarget } from '../observer/dep'
 
 import {
+  isObject,
+  isIE,
   warn,
   noop,
   remove,
@@ -55,6 +57,29 @@ export function initLifecycle (vm: Component) {
   vm._isBeingDestroyed = false
 }
 
+let releaseStack = new WeakMap()
+
+function releaseReactiveRef (data: Object) {
+  if (!isObject(data) || releaseStack.get(data)) {
+    return
+  }
+  // mark cycle reference
+  releaseStack.set(data, true)
+  if (Array.isArray(data)) {
+    data.forEach(function loopData (item) {
+      releaseReactiveRef(item)
+    })
+  } else {
+    for (let key in data) {
+      if (key === '__ob__') {
+        continue
+      }
+      // retrigger getter to release reference from watcher
+      releaseReactiveRef(data[key])
+    }
+  }
+}
+
 export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
@@ -94,7 +119,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
   }
 
-  Vue.prototype.$destroy = function () {
+  Vue.prototype.$destroy = function (force) {
     const vm: Component = this
     if (vm._isBeingDestroyed) {
       return
@@ -105,6 +130,11 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const parent = vm.$parent
     if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm)
+    }
+    // remove reference from propsData ob in IE
+    if ((force || isIE) && isObject(vm.$options.propsData)) {
+      releaseReactiveRef(vm.$options.propsData)
+      releaseStack = new WeakMap()
     }
     // teardown watchers
     if (vm._watcher) {
