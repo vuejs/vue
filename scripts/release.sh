@@ -57,10 +57,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   git add -f \
     dist/*.js \
     packages/vue-server-renderer/basic.js \
-    packages/vue-server-renderer/build.js \
+    packages/vue-server-renderer/build.dev.js \
+    packages/vue-server-renderer/build.prod.js \
     packages/vue-server-renderer/server-plugin.js \
     packages/vue-server-renderer/client-plugin.js \
-    packages/vue-template-compiler/build.js
+    packages/vue-template-compiler/build.js \
+    packages/vue-template-compiler/browser.js
   git commit -m "build: build $VERSION"
   # generate release note
   npm run release:note
