@@ -1,13 +1,13 @@
 /*!
- * Vue.js v2.5.22
+ * Vue.js v2.6.0-beta.1
  * (c) 2014-2019 Evan You
  * Released under the MIT License.
  */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global.Vue = factory());
-}(this, (function () { 'use strict';
+  (global = global || self, global.Vue = factory());
+}(this, function () { 'use strict';
 
   /*  */
 
@@ -82,13 +82,21 @@
     return n >= 0 && Math.floor(n) === n && isFinite(val)
   }
 
+  function isPromise (val) {
+    return (
+      isDef(val) &&
+      typeof val.then === 'function' &&
+      typeof val.catch === 'function'
+    )
+  }
+
   /**
    * Convert a value to a string that is actually rendered.
    */
   function toString (val) {
     return val == null
       ? ''
-      : typeof val === 'object'
+      : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
         ? JSON.stringify(val, null, 2)
         : String(val)
   }
@@ -355,7 +363,8 @@
     'destroyed',
     'activated',
     'deactivated',
-    'errorCaptured'
+    'errorCaptured',
+    'ssrPrefetch'
   ];
 
   /*  */
@@ -459,6 +468,13 @@
   /*  */
 
   /**
+   * unicode letters used for parsing html tags, component names and property paths.
+   * using https://www.w3.org/TR/html53/semantics-scripting.html#potentialcustomelementname
+   * skipping \u10000-\uEFFFF due to it freezing up PhantomJS
+   */
+  var unicodeLetters = 'a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD';
+
+  /**
    * Check if a string starts with $ or _
    */
   function isReserved (str) {
@@ -481,7 +497,7 @@
   /**
    * Parse simple path.
    */
-  var bailRE = /[^\w.$]/;
+  var bailRE = new RegExp(("[^" + unicodeLetters + ".$_\\d]"));
   function parsePath (path) {
     if (bailRE.test(path)) {
       return
@@ -512,6 +528,7 @@
   var isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 'android');
   var isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios');
   var isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge;
+  var isPhantomJS = UA && /phantomjs/.test(UA);
 
   // Firefox has a "watch" function on Object.prototype...
   var nativeWatch = ({}).watch;
@@ -1155,9 +1172,15 @@
   function mergeData (to, from) {
     if (!from) { return to }
     var key, toVal, fromVal;
-    var keys = Object.keys(from);
+
+    var keys = hasSymbol
+      ? Reflect.ownKeys(from)
+      : Object.keys(from);
+
     for (var i = 0; i < keys.length; i++) {
       key = keys[i];
+      // in case the object is already observed...
+      if (key === '__ob__') { continue }
       toVal = to[key];
       fromVal = from[key];
       if (!hasOwn(to, key)) {
@@ -1377,11 +1400,10 @@
   }
 
   function validateComponentName (name) {
-    if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+    if (!new RegExp(("^[a-zA-Z][\\-\\.0-9_" + unicodeLetters + "]*$")).test(name)) {
       warn(
         'Invalid component name: "' + name + '". Component names ' +
-        'can only contain alphanumeric characters and the hyphen, ' +
-        'and must start with a letter.'
+        'should conform to valid custom element name in html5 specification.'
       );
     }
     if (isBuiltInTag(name) || config.isReservedTag(name)) {
@@ -1464,9 +1486,9 @@
     var dirs = options.directives;
     if (dirs) {
       for (var key in dirs) {
-        var def = dirs[key];
-        if (typeof def === 'function') {
-          dirs[key] = { bind: def, update: def };
+        var def$$1 = dirs[key];
+        if (typeof def$$1 === 'function') {
+          dirs[key] = { bind: def$$1, update: def$$1 };
         }
       }
     }
@@ -1812,6 +1834,25 @@
     globalHandleError(err, vm, info);
   }
 
+  function invokeWithErrorHandling (
+    handler,
+    context,
+    args,
+    vm,
+    info
+  ) {
+    var res;
+    try {
+      res = args ? handler.apply(context, args) : handler.call(context);
+      if (isPromise(res)) {
+        res.catch(function (e) { return handleError(e, vm, info + " (Promise/async)"); });
+      }
+    } catch (e) {
+      handleError(e, vm, info);
+    }
+    return res
+  }
+
   function globalHandleError (err, vm, info) {
     if (config.errorHandler) {
       try {
@@ -1849,76 +1890,67 @@
     }
   }
 
-  // Here we have async deferring wrappers using both microtasks and (macro) tasks.
-  // In < 2.4 we used microtasks everywhere, but there are some scenarios where
-  // microtasks have too high a priority and fire in between supposedly
-  // sequential events (e.g. #4521, #6690) or even between bubbling of the same
-  // event (#6566). However, using (macro) tasks everywhere also has subtle problems
-  // when state is changed right before repaint (e.g. #6813, out-in transitions).
-  // Here we use microtask by default, but expose a way to force (macro) task when
-  // needed (e.g. in event handlers attached by v-on).
-  var microTimerFunc;
-  var macroTimerFunc;
-  var useMacroTask = false;
+  // Here we have async deferring wrappers using microtasks.
+  // In 2.5 we used (macro) tasks (in combination with microtasks).
+  // However, it has subtle problems when state is changed right before repaint
+  // (e.g. #6813, out-in transitions).
+  // Also, using (macro) tasks in event handler would cause some weird behaviors
+  // that cannot be circumvented (e.g. #7109, #7153, #7546, #7834, #8109).
+  // So we now use microtasks everywhere, again.
+  // A major drawback of this tradeoff is that there are some scenarios
+  // where microtasks have too high a priority and fire in between supposedly
+  // sequential events (e.g. #4521, #6690, which have workarounds)
+  // or even between bubbling of the same event (#6566).
+  var timerFunc;
 
-  // Determine (macro) task defer implementation.
-  // Technically setImmediate should be the ideal choice, but it's only available
-  // in IE. The only polyfill that consistently queues the callback after all DOM
-  // events triggered in the same loop is by using MessageChannel.
-  /* istanbul ignore if */
-  if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
-    macroTimerFunc = function () {
-      setImmediate(flushCallbacks);
-    };
-  } else if (typeof MessageChannel !== 'undefined' && (
-    isNative(MessageChannel) ||
-    // PhantomJS
-    MessageChannel.toString() === '[object MessageChannelConstructor]'
-  )) {
-    var channel = new MessageChannel();
-    var port = channel.port2;
-    channel.port1.onmessage = flushCallbacks;
-    macroTimerFunc = function () {
-      port.postMessage(1);
-    };
-  } else {
-    /* istanbul ignore next */
-    macroTimerFunc = function () {
-      setTimeout(flushCallbacks, 0);
-    };
-  }
-
-  // Determine microtask defer implementation.
+  // The nextTick behavior leverages the microtask queue, which can be accessed
+  // via either native Promise.then or MutationObserver.
+  // MutationObserver has wider support, however it is seriously bugged in
+  // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
+  // completely stops working after triggering a few times... so, if native
+  // Promise is available, we will use it:
   /* istanbul ignore next, $flow-disable-line */
   if (typeof Promise !== 'undefined' && isNative(Promise)) {
     var p = Promise.resolve();
-    microTimerFunc = function () {
+    timerFunc = function () {
       p.then(flushCallbacks);
-      // in problematic UIWebViews, Promise.then doesn't completely break, but
+      // In problematic UIWebViews, Promise.then doesn't completely break, but
       // it can get stuck in a weird state where callbacks are pushed into the
       // microtask queue but the queue isn't being flushed, until the browser
       // needs to do some other work, e.g. handle a timer. Therefore we can
       // "force" the microtask queue to be flushed by adding an empty timer.
       if (isIOS) { setTimeout(noop); }
     };
+  } else if (!isIE && typeof MutationObserver !== 'undefined' && (
+    isNative(MutationObserver) ||
+    // PhantomJS and iOS 7.x
+    MutationObserver.toString() === '[object MutationObserverConstructor]'
+  )) {
+    // Use MutationObserver where native Promise is not available,
+    // e.g. PhantomJS, iOS7, Android 4.4
+    // (#6466 MutationObserver is unreliable in IE11)
+    var counter = 1;
+    var observer = new MutationObserver(flushCallbacks);
+    var textNode = document.createTextNode(String(counter));
+    observer.observe(textNode, {
+      characterData: true
+    });
+    timerFunc = function () {
+      counter = (counter + 1) % 2;
+      textNode.data = String(counter);
+    };
+  } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
+    // Fallback to setImmediate.
+    // Techinically it leverages the (macro) task queue,
+    // but it is still a better choice than setTimeout.
+    timerFunc = function () {
+      setImmediate(flushCallbacks);
+    };
   } else {
-    // fallback to macro
-    microTimerFunc = macroTimerFunc;
-  }
-
-  /**
-   * Wrap a function so that if any code inside triggers state change,
-   * the changes are queued using a (macro) task instead of a microtask.
-   */
-  function withMacroTask (fn) {
-    return fn._withTask || (fn._withTask = function () {
-      useMacroTask = true;
-      try {
-        return fn.apply(null, arguments)
-      } finally {
-        useMacroTask = false;    
-      }
-    })
+    // Fallback to setTimeout.
+    timerFunc = function () {
+      setTimeout(flushCallbacks, 0);
+    };
   }
 
   function nextTick (cb, ctx) {
@@ -1936,11 +1968,7 @@
     });
     if (!pending) {
       pending = true;
-      if (useMacroTask) {
-        macroTimerFunc();
-      } else {
-        microTimerFunc();
-      }
+      timerFunc();
     }
     // $flow-disable-line
     if (!cb && typeof Promise !== 'undefined') {
@@ -2095,7 +2123,7 @@
         perf.measure(name, startTag, endTag);
         perf.clearMarks(startTag);
         perf.clearMarks(endTag);
-        perf.clearMeasures(name);
+        // perf.clearMeasures(name)
       };
     }
   }
@@ -2117,7 +2145,7 @@
     }
   });
 
-  function createFnInvoker (fns) {
+  function createFnInvoker (fns, vm) {
     function invoker () {
       var arguments$1 = arguments;
 
@@ -2125,11 +2153,11 @@
       if (Array.isArray(fns)) {
         var cloned = fns.slice();
         for (var i = 0; i < cloned.length; i++) {
-          cloned[i].apply(null, arguments$1);
+          invokeWithErrorHandling(cloned[i], null, arguments$1, vm, "v-on handler");
         }
       } else {
         // return handler return value for single handlers
-        return fns.apply(null, arguments)
+        return invokeWithErrorHandling(fns, null, arguments, vm, "v-on handler")
       }
     }
     invoker.fns = fns;
@@ -2156,7 +2184,7 @@
         );
       } else if (isUndef(old)) {
         if (isUndef(cur.fns)) {
-          cur = on[name] = createFnInvoker(cur);
+          cur = on[name] = createFnInvoker(cur, vm);
         }
         if (isTrue(event.once)) {
           cur = on[name] = createOnceHandler(event.name, cur, event.capture);
@@ -2452,12 +2480,12 @@
       var res = factory(resolve, reject);
 
       if (isObject(res)) {
-        if (typeof res.then === 'function') {
+        if (isPromise(res)) {
           // () => Promise
           if (isUndef(factory.resolved)) {
             res.then(resolve, reject);
           }
-        } else if (isDef(res.component) && typeof res.component.then === 'function') {
+        } else if (isPromise(res.component)) {
           res.component.then(resolve, reject);
 
           if (isDef(res.error)) {
@@ -2645,12 +2673,9 @@
       if (cbs) {
         cbs = cbs.length > 1 ? toArray(cbs) : cbs;
         var args = toArray(arguments, 1);
+        var info = "event handler for \"" + event + "\"";
         for (var i = 0, l = cbs.length; i < l; i++) {
-          try {
-            cbs[i].apply(vm, args);
-          } catch (e) {
-            handleError(e, vm, ("event handler for \"" + event + "\""));
-          }
+          invokeWithErrorHandling(cbs[i], vm, args, vm, info);
         }
       }
       return vm
@@ -2668,10 +2693,10 @@
     children,
     context
   ) {
-    var slots = {};
-    if (!children) {
-      return slots
+    if (!children || !children.length) {
+      return {}
     }
+    var slots = {};
     for (var i = 0, l = children.length; i < l; i++) {
       var child = children[i];
       var data = child.data;
@@ -2714,10 +2739,11 @@
   ) {
     res = res || {};
     for (var i = 0; i < fns.length; i++) {
-      if (Array.isArray(fns[i])) {
-        resolveScopedSlots(fns[i], res);
+      var slot = fns[i];
+      if (Array.isArray(slot)) {
+        resolveScopedSlots(slot, res);
       } else {
-        res[fns[i].key] = fns[i].fn;
+        res[slot.key] = slot.fn;
       }
     }
     return res
@@ -3030,13 +3056,10 @@
     // #7573 disable dep collection when invoking lifecycle hooks
     pushTarget();
     var handlers = vm.$options[hook];
+    var info = hook + " hook";
     if (handlers) {
       for (var i = 0, j = handlers.length; i < j; i++) {
-        try {
-          handlers[i].call(vm);
-        } catch (e) {
-          handleError(e, vm, (hook + " hook"));
-        }
+        invokeWithErrorHandling(handlers[i], vm, null, vm, info);
       }
     }
     if (vm._hasHookEvent) {
@@ -3777,14 +3800,13 @@
       // inject is :any because flow is not smart enough to figure out cached
       var result = Object.create(null);
       var keys = hasSymbol
-        ? Reflect.ownKeys(inject).filter(function (key) {
-          /* istanbul ignore next */
-          return Object.getOwnPropertyDescriptor(inject, key).enumerable
-        })
+        ? Reflect.ownKeys(inject)
         : Object.keys(inject);
 
       for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
+        // #6574 in case the inject object is observed...
+        if (key === '__ob__') { continue }
         var provideKey = inject[key].from;
         var source = vm;
         while (source) {
@@ -3811,6 +3833,48 @@
 
   /*  */
 
+  function normalizeScopedSlots (
+    slots,
+    normalSlots
+  ) {
+    var res;
+    if (!slots) {
+      res = {};
+    } else if (slots._normalized) {
+      return slots
+    } else {
+      res = {};
+      for (var key in slots) {
+        if (slots[key]) {
+          res[key] = normalizeScopedSlot(slots[key]);
+        }
+      }
+    }
+    // expose normal slots on scopedSlots
+    for (var key$1 in normalSlots) {
+      if (!(key$1 in res)) {
+        res[key$1] = proxyNormalSlot(normalSlots, key$1);
+      }
+    }
+    res._normalized = true;
+    return res
+  }
+
+  function normalizeScopedSlot(fn) {
+    return function (scope) {
+      var res = fn(scope);
+      return res && typeof res === 'object' && !Array.isArray(res)
+        ? [res] // single vnode
+        : normalizeChildren(res)
+    }
+  }
+
+  function proxyNormalSlot(slots, key) {
+    return function () { return slots[key]; }
+  }
+
+  /*  */
+
   /**
    * Runtime helper for rendering v-for lists.
    */
@@ -3830,11 +3894,21 @@
         ret[i] = render(i + 1, i);
       }
     } else if (isObject(val)) {
-      keys = Object.keys(val);
-      ret = new Array(keys.length);
-      for (i = 0, l = keys.length; i < l; i++) {
-        key = keys[i];
-        ret[i] = render(val[key], key, i);
+      if (hasSymbol && val[Symbol.iterator]) {
+        ret = [];
+        var iterator = val[Symbol.iterator]();
+        var result = iterator.next();
+        while (!result.done) {
+          ret.push(render(result.value, ret.length));
+          result = iterator.next();
+        }
+      } else {
+        keys = Object.keys(val);
+        ret = new Array(keys.length);
+        for (i = 0, l = keys.length; i < l; i++) {
+          key = keys[i];
+          ret[i] = render(val[key], key, i);
+        }
       }
     }
     if (!isDef(ret)) {
@@ -4115,13 +4189,20 @@
     this.injections = resolveInject(options.inject, parent);
     this.slots = function () { return resolveSlots(children, parent); };
 
+    Object.defineProperty(this, 'scopedSlots', ({
+      enumerable: true,
+      get: function get () {
+        return normalizeScopedSlots(data.scopedSlots, this.slots())
+      }
+    }));
+
     // support for compiled functional template
     if (isCompiled) {
       // exposing $options for renderStatic()
       this.$options = options;
       // pre-resolve slots for renderSlot()
       this.$slots = this.slots();
-      this.$scopedSlots = data.scopedSlots || emptyObject;
+      this.$scopedSlots = normalizeScopedSlots(data.scopedSlots, this.$slots);
     }
 
     if (options._scopeId) {
@@ -4628,7 +4709,10 @@
       var _parentVnode = ref._parentVnode;
 
       if (_parentVnode) {
-        vm.$scopedSlots = _parentVnode.data.scopedSlots || emptyObject;
+        vm.$scopedSlots = normalizeScopedSlots(
+          _parentVnode.data.scopedSlots,
+          vm.$slots
+        );
       }
 
       // set parent vnode. this allows render functions to have access
@@ -4653,6 +4737,10 @@
         } else {
           vnode = vm._vnode;
         }
+      }
+      // if the returned array contains only a single node, allow it
+      if (Array.isArray(vnode) && vnode.length === 1) {
+        vnode = vnode[0];
       }
       // return empty vnode in case the render function errored out
       if (!(vnode instanceof VNode)) {
@@ -5120,6 +5208,12 @@
     Vue.delete = del;
     Vue.nextTick = nextTick;
 
+    // 2.6 explicit observable API
+    Vue.observable = function (obj) {
+      observe(obj);
+      return obj
+    };
+
     Vue.options = Object.create(null);
     ASSET_TYPES.forEach(function (type) {
       Vue.options[type + 's'] = Object.create(null);
@@ -5155,7 +5249,7 @@
     value: FunctionalRenderContext
   });
 
-  Vue.version = '2.5.22';
+  Vue.version = '2.6.0-beta.1';
 
   /*  */
 
@@ -6569,14 +6663,28 @@
   }
 
   function add$1 (
-    event,
+    name,
     handler,
     capture,
     passive
   ) {
-    handler = withMacroTask(handler);
+    if (isChrome) {
+      // async edge case #6566: inner click event triggers patch, event handler
+      // attached to outer element during patch, and triggered again. This only
+      // happens in Chrome as it fires microtask ticks between event propagation.
+      // the solution is simple: we save the timestamp when a handler is attached,
+      // and the handler would only fire if the event passed to it was fired
+      // AFTER it was attached.
+      var now = performance.now();
+      var original = handler;
+      handler = original._wrapper = function (e) {
+        if (e.timeStamp >= now) {
+          return original.apply(this, arguments)
+        }
+      };
+    }
     target$1.addEventListener(
-      event,
+      name,
       handler,
       supportsPassive
         ? { capture: capture, passive: passive }
@@ -6585,14 +6693,14 @@
   }
 
   function remove$2 (
-    event,
+    name,
     handler,
     capture,
     _target
   ) {
     (_target || target$1).removeEventListener(
-      event,
-      handler._withTask || handler,
+      name,
+      handler._wrapper || handler,
       capture
     );
   }
@@ -6615,6 +6723,8 @@
   };
 
   /*  */
+
+  var svgContainer;
 
   function updateDOMProps (oldVnode, vnode) {
     if (isUndef(oldVnode.data.domProps) && isUndef(vnode.data.domProps)) {
@@ -6649,6 +6759,17 @@
         }
       }
 
+      // #4521: if a click event triggers update before the change event is
+      // dispatched on a checkbox/radio input, the input's checked state will
+      // be reset and fail to trigger another update.
+      // The root cause here is that browsers may fire microtasks in between click/change.
+      // In Chrome / Firefox, click event fires before change, thus having this problem.
+      // In Safari / Edge, the order is opposite.
+      // Note: in Edge, if you click too fast, only the click event would fire twice.
+      if (key === 'checked' && !isNotInFocusAndDirty(elm, cur)) {
+        continue
+      }
+
       if (key === 'value') {
         // store value as _value as well since
         // non-string values will be stringified
@@ -6657,6 +6778,17 @@
         var strCur = isUndef(cur) ? '' : String(cur);
         if (shouldUpdateValue(elm, strCur)) {
           elm.value = strCur;
+        }
+      } else if (key === 'innerHTML' && isSVG(elm.tagName) && isUndef(elm.innerHTML)) {
+        // IE doesn't support innerHTML for SVG elements
+        svgContainer = svgContainer || document.createElement('div');
+        svgContainer.innerHTML = "<svg>" + cur + "</svg>";
+        var svg = svgContainer.firstChild;
+        while (elm.firstChild) {
+          elm.removeChild(elm.firstChild);
+        }
+        while (svg.firstChild) {
+          elm.appendChild(svg.firstChild);
         }
       } else {
         elm[key] = cur;
@@ -6689,10 +6821,6 @@
     var value = elm.value;
     var modifiers = elm._vModifiers; // injected by v-model runtime
     if (isDef(modifiers)) {
-      if (modifiers.lazy) {
-        // inputs with lazy should only be updated when not in focus
-        return false
-      }
       if (modifiers.number) {
         return toNumber(value) !== toNumber(newVal)
       }
@@ -8058,9 +8186,7 @@
       if (config.devtools) {
         if (devtools) {
           devtools.emit('init', Vue);
-        } else if (
-          isChrome
-        ) {
+        } else {
           console[console.info ? 'info' : 'log'](
             'Download the Vue Devtools extension for a better development experience:\n' +
             'https://github.com/vuejs/vue-devtools'
@@ -8083,4 +8209,4 @@
 
   return Vue;
 
-})));
+}));
