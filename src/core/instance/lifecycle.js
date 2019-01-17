@@ -12,6 +12,7 @@ import { pushTarget, popTarget } from '../observer/dep'
 import {
   isObject,
   isIE,
+  isNative,
   warn,
   noop,
   remove,
@@ -57,7 +58,31 @@ export function initLifecycle (vm: Component) {
   vm._isBeingDestroyed = false
 }
 
-let releaseStack = new WeakMap()
+let _Map
+if (typeof WeakMap !== 'undefined' && isNative(WeakMap)) {
+  _Map = WeakMap
+} else {
+  // WeakMap support for lower version IE
+  _Map = (function () {
+    function WeakMap () {
+      this.keyQuene = []
+      this.valueQuene = []
+    }
+    WeakMap.prototype.set = function set (key, value) {
+      this.keyQuene.push(key)
+      this.valueQuene.push(value)
+    }
+    WeakMap.prototype.get = function get (key) {
+      let idx = this.keyQuene.indexOf(key)
+      if (~idx) {
+        return this.valueQuene[idx]
+      }
+    }
+
+    return WeakMap
+  }())
+}
+let releaseStack = new _Map()
 
 function releaseReactiveRef (data: Object) {
   if (!isObject(data) || releaseStack.get(data)) {
@@ -134,7 +159,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // remove reference from propsData ob in IE
     if ((force || isIE) && isObject(vm.$options.propsData)) {
       releaseReactiveRef(vm.$options.propsData)
-      releaseStack = new WeakMap()
+      releaseStack = new _Map()
     }
     // teardown watchers
     if (vm._watcher) {
