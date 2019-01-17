@@ -94,3 +94,46 @@ interface SimpleSet {
 
 export { _Set }
 export type { SimpleSet }
+
+let _Map
+/* istanbul ignore if */ // $flow-disable-line
+if (typeof WeakMap !== 'undefined' && isNative(WeakMap)) {
+  // use native WeakMap when available.
+  _Map = WeakMap
+} else {
+  // a non-standard WeakMap support for lower version IE
+  _Map = class WeakMap implements SimpleMap {
+    keyQuene: Array<mixed>;
+    valueQuene: Array<mixed>;
+    constructor () {
+      this.keyQuene = []
+      this.valueQuene = []
+    }
+    set (
+      key: mixed,
+      value: mixed
+    ) {
+      let idx = this.keyQuene.indexOf(key)
+      if (~idx) {
+        this.valueQuene[idx] = value
+      } else {
+        this.keyQuene.push(key)
+        this.valueQuene.push(value) 
+      }
+    }
+    get (key: mixed) {
+      let idx = this.keyQuene.indexOf(key)
+      if (~idx) {
+        return this.valueQuene[idx]
+      }
+    }
+  }
+}
+
+interface SimpleMap {
+  set(key: mixed, value: mixed): void;
+  get(key: mixed): mixed;
+}
+
+export { _Map }
+export type { SimpleMap }
