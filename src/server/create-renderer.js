@@ -23,7 +23,7 @@ export type RenderOptions = {
   directives?: Object;
   isUnaryTag?: Function;
   cache?: RenderCache;
-  template?: string | Function;
+  template?: string | (content: string, context: object) => string;
   inject?: boolean;
   basedir?: string;
   shouldPreload?: Function;
@@ -131,6 +131,8 @@ export function createRenderer ({
           })
         }
         return renderStream
+      } else if (typeof template === 'function') {
+        throw new Error(`function template is only supported in renderToString.`)
       } else {
         const templateStream = templateRenderer.createStream(context)
         renderStream.on('error', err => {
