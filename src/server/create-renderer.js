@@ -23,7 +23,7 @@ export type RenderOptions = {
   directives?: Object;
   isUnaryTag?: Function;
   cache?: RenderCache;
-  template?: string | (content: string, context: object) => string;
+  template?: string | (content: string, context: any) => string;
   inject?: boolean;
   basedir?: string;
   shouldPreload?: Function;
