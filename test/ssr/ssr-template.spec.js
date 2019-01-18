@@ -134,6 +134,68 @@ describe('SSR: template option', () => {
     })
   })
 
+  it('renderToString w/ template function', done => {
+    const renderer = createRenderer({
+      template: (content, context) => `<html><head>${context.head}</head>${content}</html>`
+    })
+
+    const context = {
+      head: '<meta name="viewport" content="width=device-width">'
+    }
+
+    renderer.renderToString(new Vue({
+      template: '<div>hi</div>'
+    }), context, (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain(`<html><head>${context.head}</head><div data-server-rendered="true">hi</div></html>`)
+      done()
+    })
+  })
+
+  it('renderToString w/ template function returning Promise', done => {
+    const renderer = createRenderer({
+      template: (content, context) => new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(`<html><head>${context.head}</head>${content}</html>`)
+        }, 0)
+      })
+    })
+
+    const context = {
+      head: '<meta name="viewport" content="width=device-width">'
+    }
+
+    renderer.renderToString(new Vue({
+      template: '<div>hi</div>'
+    }), context, (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain(`<html><head>${context.head}</head><div data-server-rendered="true">hi</div></html>`)
+      done()
+    })
+  })
+
+  it('renderToString w/ template function returning Promise w/ rejection', done => {
+    const renderer = createRenderer({
+      template: () => new Promise((resolve, reject) => {
+        setTimeout(() => {
+          reject(new Error(`foo`))
+        }, 0)
+      })
+    })
+
+    const context = {
+      head: '<meta name="viewport" content="width=device-width">'
+    }
+
+    renderer.renderToString(new Vue({
+      template: '<div>hi</div>'
+    }), context, (err, res) => {
+      expect(err.message).toBe(`foo`)
+      expect(res).toBeUndefined()
+      done()
+    })
+  })
+
   it('renderToStream', done => {
     const renderer = createRenderer({
       template: defaultTemplate
