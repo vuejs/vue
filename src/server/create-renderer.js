@@ -82,15 +82,26 @@ export function createRenderer ({
       }, cb)
       try {
         render(component, write, context, err => {
+          if (err) {
+            return cb(err)
+          }
           if (context && context.rendered) {
             context.rendered(context)
           }
           if (template) {
-            new Promise(resolve => resolve(templateRenderer.render(result, context)))
-              .then(res => cb(res))
-          }
-          if (err) {
-            cb(err)
+            try {
+              const res = templateRenderer.render(result, context)
+              if (typeof res !== 'string') {
+                // function template returning promise
+                res
+                  .then(html => cb(null, html))
+                  .catch(cb)
+              } else {
+                cb(null, res)
+              }
+            } catch (e) {
+              cb(e)
+            }
           } else {
             cb(null, result)
           }
