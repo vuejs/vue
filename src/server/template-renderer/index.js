@@ -11,7 +11,7 @@ import type { ParsedTemplate } from './parse-template'
 import type { AsyncFileMapper } from './create-async-file-mapper'
 
 type TemplateRendererOptions = {
-  template?: string | Function;
+  template?: string | (content: string, context: any) => string;
   inject?: boolean;
   clientManifest?: ClientManifest;
   shouldPreload?: (file: string, type: string) => boolean;
@@ -42,7 +42,7 @@ type Resource = {
 export default class TemplateRenderer {
   options: TemplateRendererOptions;
   inject: boolean;
-  parsedTemplate: ParsedTemplate | null;
+  parsedTemplate: ParsedTemplate | Function | null;
   publicPath: string;
   clientManifest: ClientManifest;
   preloadFiles: Array<Resource>;
@@ -58,9 +58,9 @@ export default class TemplateRenderer {
     
     const { template } = options
     this.parsedTemplate = template
-      ? typeof template === 'function'
-        ? template
-        : parseTemplate(options.template)
+      ? typeof template === 'string'
+        ? parseTemplate(template)
+        : template
       : null
 
     // function used to serialize initial state JSON
