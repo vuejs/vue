@@ -23,7 +23,7 @@ export type RenderOptions = {
   directives?: Object;
   isUnaryTag?: Function;
   cache?: RenderCache;
-  template?: string;
+  template?: string | (content: string, context: any) => string;
   inject?: boolean;
   basedir?: string;
   shouldPreload?: Function;
@@ -82,14 +82,26 @@ export function createRenderer ({
       }, cb)
       try {
         render(component, write, context, err => {
+          if (err) {
+            return cb(err)
+          }
           if (context && context.rendered) {
             context.rendered(context)
           }
           if (template) {
-            result = templateRenderer.renderSync(result, context)
-          }
-          if (err) {
-            cb(err)
+            try {
+              const res = templateRenderer.render(result, context)
+              if (typeof res !== 'string') {
+                // function template returning promise
+                res
+                  .then(html => cb(null, html))
+                  .catch(cb)
+              } else {
+                cb(null, res)
+              }
+            } catch (e) {
+              cb(e)
+            }
           } else {
             cb(null, result)
           }
@@ -119,6 +131,8 @@ export function createRenderer ({
           })
         }
         return renderStream
+      } else if (typeof template === 'function') {
+        throw new Error(`function template is only supported in renderToString.`)
       } else {
         const templateStream = templateRenderer.createStream(context)
         renderStream.on('error', err => {
