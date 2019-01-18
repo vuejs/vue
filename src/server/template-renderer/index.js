@@ -56,12 +56,12 @@ export default class TemplateRenderer {
     // if no template option is provided, the renderer is created
     // as a utility object for rendering assets like preload links and scripts.
     
-    let template = options.template
-  
+    const { template } = options
     this.parsedTemplate = template
       ? typeof template === 'function'
-        ? template : parseTemplate(template)
-      : null;
+        ? template
+        : parseTemplate(options.template)
+      : null
 
     // function used to serialize initial state JSON
     this.serialize = options.serializer || (state => {
@@ -93,15 +93,16 @@ export default class TemplateRenderer {
   }
 
   // render synchronously given rendered app content and render context
-  render (content: string, context: ?Object) {
+  render (content: string, context: ?Object): string | Promise<string> {
     const template = this.parsedTemplate
     if (!template) {
       throw new Error('render cannot be called without a template.')
     }
     context = context || {}
 
-    //if the template is a function, just call the template and return
-    if(typeof template === 'function') return template(content, context)
+    if (typeof template === 'function') {
+      return template(content, context)
+    }
 
     if (this.inject) {
       return (
