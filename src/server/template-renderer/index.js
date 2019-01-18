@@ -11,7 +11,7 @@ import type { ParsedTemplate } from './parse-template'
 import type { AsyncFileMapper } from './create-async-file-mapper'
 
 type TemplateRendererOptions = {
-  template: ?string;
+  template?: string | (content: string, context: any) => string;
   inject?: boolean;
   clientManifest?: ClientManifest;
   shouldPreload?: (file: string, type: string) => boolean;
@@ -42,7 +42,7 @@ type Resource = {
 export default class TemplateRenderer {
   options: TemplateRendererOptions;
   inject: boolean;
-  parsedTemplate: ParsedTemplate | null;
+  parsedTemplate: ParsedTemplate | Function | null;
   publicPath: string;
   clientManifest: ClientManifest;
   preloadFiles: Array<Resource>;
@@ -55,8 +55,12 @@ export default class TemplateRenderer {
     this.inject = options.inject !== false
     // if no template option is provided, the renderer is created
     // as a utility object for rendering assets like preload links and scripts.
-    this.parsedTemplate = options.template
-      ? parseTemplate(options.template)
+    
+    const { template } = options
+    this.parsedTemplate = template
+      ? typeof template === 'string'
+        ? parseTemplate(template)
+        : template
       : null
 
     // function used to serialize initial state JSON
@@ -89,12 +93,17 @@ export default class TemplateRenderer {
   }
 
   // render synchronously given rendered app content and render context
-  renderSync (content: string, context: ?Object) {
+  render (content: string, context: ?Object): string | Promise<string> {
     const template = this.parsedTemplate
     if (!template) {
-      throw new Error('renderSync cannot be called without a template.')
+      throw new Error('render cannot be called without a template.')
     }
     context = context || {}
+
+    if (typeof template === 'function') {
+      return template(content, context)
+    }
+
     if (this.inject) {
       return (
         template.head(context) +
