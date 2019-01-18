@@ -15,7 +15,7 @@ export type Component<Data=DefaultData<never>, Methods=DefaultMethods<never>, Co
 interface EsModuleComponent {
   default: Component
 }
-                      
+
 export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
   = AsyncComponentPromise<Data, Methods, Computed, Props>
   | AsyncComponentFactory<Data, Methods, Computed, Props>
@@ -96,7 +96,7 @@ export interface ComponentOptions<
   activated?(): void;
   deactivated?(): void;
   errorCaptured?(err: Error, vm: Vue, info: string): boolean | void;
-  ssrPrefetch?(this: V): Promise<void>;
+  serverPrefetch?(this: V): Promise<void>;
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
   components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> };

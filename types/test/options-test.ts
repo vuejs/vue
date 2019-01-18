@@ -241,7 +241,7 @@ Vue.component('component', {
     info.toUpperCase()
     return true
   },
-  ssrPrefetch () {
+  serverPrefetch () {
     return Promise.resolve()
   },
 
