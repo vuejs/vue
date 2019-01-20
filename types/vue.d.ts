@@ -91,9 +91,9 @@ export interface VueConstructor<V extends Vue = Vue> {
 
   nextTick(callback: () => void, context?: any[]): void;
   nextTick(): Promise<void>
-  set<T>(object: object, key: string | number, value: T): T;
+  set<U extends {}, K extends keyof U>(object: U, key: K, value: U[K]): U[K];
   set<T>(array: T[], key: number, value: T): T;
-  delete(object: object, key: string | number): void;
+  delete<U extends {}>(object: U, key: keyof U): void;
   delete<T>(array: T[], key: number): void;
 
   directive(
