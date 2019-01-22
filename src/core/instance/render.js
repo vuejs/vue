@@ -55,6 +55,17 @@ export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
   installRenderHelpers(Vue.prototype)
 
+  Object.defineProperty((Vue.prototype: Object), '$filters', ({
+    get: function () {
+      return this.$options.filters
+    },
+    set : function (){
+      warn(`$filters is readonly.`, this)
+    },
+    enumerable: true,
+    configurable: true
+  }: Object));
+
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)
   }
