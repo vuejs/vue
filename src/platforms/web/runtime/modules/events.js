@@ -2,8 +2,9 @@
 
 import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
-import { isIE, isChrome, supportsPassive } from 'core/util/index'
+import { isIE, supportsPassive, isUsingMicroTask } from 'core/util/index'
 import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model'
+import { currentFlushTimestamp } from 'core/observer/scheduler'
 
 // normalize v-model event tokens that can only be determined at runtime.
 // it's important to place the event as the first in the array because
@@ -44,17 +45,17 @@ function add (
   capture: boolean,
   passive: boolean
 ) {
-  if (isChrome) {
-    // async edge case #6566: inner click event triggers patch, event handler
-    // attached to outer element during patch, and triggered again. This only
-    // happens in Chrome as it fires microtask ticks between event propagation.
-    // the solution is simple: we save the timestamp when a handler is attached,
-    // and the handler would only fire if the event passed to it was fired
-    // AFTER it was attached.
-    const now = performance.now()
+  // async edge case #6566: inner click event triggers patch, event handler
+  // attached to outer element during patch, and triggered again. This only
+  // happens in Chrome as it fires microtask ticks between event propagation.
+  // the solution is simple: we save the timestamp when a handler is attached,
+  // and the handler would only fire if the event passed to it was fired
+  // AFTER it was attached.
+  if (isUsingMicroTask) {
+    const attachedTimestamp = currentFlushTimestamp
     const original = handler
     handler = original._wrapper = function (e) {
-      if (e.timeStamp >= now) {
+      if (e.timeStamp >= attachedTimestamp) {
         return original.apply(this, arguments)
       }
     }
