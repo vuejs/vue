@@ -657,9 +657,9 @@ describe('Component scoped slot', () => {
         }
       }
 
-      const toNamed = (syntax, name) => syntax.length === 1
-        ? syntax + name // shorthand
-        : syntax + ':' + name // full syntax
+      const toNamed = (syntax, name) => syntax[0] === '#'
+        ? `#${name}` // shorthand
+        : `${syntax}:${name}` // full syntax
 
       function runSuite(syntax) {
         it('default slot', () => {
@@ -689,7 +689,7 @@ describe('Component scoped slot', () => {
         it('default + named slots', () => {
           const vm = new Vue({
             template: `
-              <foo #="foo">
+              <foo #default="foo">
                 {{ foo }}
                 <template ${toNamed(syntax, 'one')}="one">
                   {{ one }}
@@ -729,7 +729,7 @@ describe('Component scoped slot', () => {
           const vm = new Vue({
             template: `<div ${syntax}="foo"/>`
           }).$mount()
-          expect(`v-slot cannot be used on non-component elements`).toHaveBeenWarned()
+          expect(`v-slot can only be used on components or <template>`).toHaveBeenWarned()
         })
 
         it('should warn mixed usage', () => {
@@ -743,12 +743,12 @@ describe('Component scoped slot', () => {
 
       // run tests for both full syntax and shorthand
       runSuite('v-slot')
-      runSuite('#')
+      runSuite('#default')
 
       it('shorthand named slots', () => {
         const vm = new Vue({
           template: `
-            <foo #="foo">
+            <foo #default="foo">
               {{ foo }}
               <template #one="one">
                 {{ one }}
