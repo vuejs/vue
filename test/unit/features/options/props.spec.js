@@ -311,6 +311,16 @@ describe('Options props', () => {
       makeInstance(null, true)
       expect(console.error.calls.count()).toBe(0)
     })
+
+    it('required + nullable object', () => {
+      makeInstance(null, [Object, null], null, true)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance({}, [Object, null], null, true)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(undefined, [Object, null], null, true)
+      expect('Expected Object, null').toHaveBeenWarned()
+    })
+
   })
 
   it('should work with v-bind', () => {

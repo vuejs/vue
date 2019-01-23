@@ -148,12 +148,12 @@ function assertProp (
 
 const simpleCheckRE = /^(String|Number|Boolean|Function|Symbol)$/
 
-function assertType (value: any, type: Function): {
+function assertType (value: any, type: Function | null): {
   valid: boolean;
   expectedType: string;
 } {
   let valid
-  const expectedType = getType(type)
+  const expectedType = type ? getType(type) : 'null'
   if (simpleCheckRE.test(expectedType)) {
     const t = typeof value
     valid = t === expectedType.toLowerCase()
@@ -161,6 +161,8 @@ function assertType (value: any, type: Function): {
     if (!valid && t === 'object') {
       valid = value instanceof type
     }
+  } else if (expectedType === 'null') {
+    valid = value === null
   } else if (expectedType === 'Object') {
     valid = isPlainObject(value)
   } else if (expectedType === 'Array') {
@@ -202,7 +204,7 @@ function getTypeIndex (type, expectedTypes): number {
 
 function getInvalidTypeMessage (name, value, expectedTypes) {
   let message = `Invalid prop: type check failed for prop "${name}".` +
-    ` Expected ${expectedTypes.map(capitalize).join(', ')}`
+    ` Expected ${expectedTypes.map(type => type === 'null' ? type : capitalize(type)).join(', ')}`
   const expectedType = expectedTypes[0]
   const receivedType = toRawType(value)
   const expectedValue = styleValue(value, expectedType)
