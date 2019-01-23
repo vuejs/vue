@@ -627,6 +627,13 @@ function processSlotContent (el) {
               el
             )
           }
+          if (el.scopedSlots) {
+            warn(
+              `To avoid scope ambiguity, the default slot should also use ` +
+              `<template> syntax when there are other named slots.`,
+              slotBinding
+            )
+          }
         }
         // add the component's children to its default slot
         const slots = el.scopedSlots || (el.scopedSlots = {})
