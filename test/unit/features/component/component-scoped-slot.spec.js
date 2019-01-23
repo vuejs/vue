@@ -686,11 +686,13 @@ describe('Component scoped slot', () => {
           expect(vm.$el.innerHTML.trim()).toBe(`from foo default | from bar | from baz`)
         })
 
-        it('default + named slots', () => {
+        it('named slots', () => {
           const vm = new Vue({
             template: `
-              <foo #default="foo">
-                {{ foo }}
+              <foo>
+                <template ${toNamed(syntax, 'default')}="foo">
+                  {{ foo }}
+                </template>
                 <template ${toNamed(syntax, 'one')}="one">
                   {{ one }}
                 </template>
@@ -748,8 +750,10 @@ describe('Component scoped slot', () => {
       it('shorthand named slots', () => {
         const vm = new Vue({
           template: `
-            <foo #default="foo">
-              {{ foo }}
+            <foo>
+              <template #default="foo">
+                {{ foo }}
+              </template>
               <template #one="one">
                 {{ one }}
               </template>
@@ -761,6 +765,21 @@ describe('Component scoped slot', () => {
           components: { Foo }
         }).$mount()
         expect(vm.$el.innerHTML.replace(/\s+/g, ' ')).toMatch(`from foo default from foo one from foo two`)
+      })
+
+      it('should warn mixed root-default and named slots', () => {
+        const vm = new Vue({
+          template: `
+            <foo #default="foo">
+              {{ foo }}
+              <template #one="one">
+                {{ one }}
+              </template>
+            </foo>
+          `,
+          components: { Foo }
+        }).$mount()
+        expect(`default slot should also use <template>`).toHaveBeenWarned()
       })
 
       it('shorthand without scope variable', () => {
