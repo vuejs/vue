@@ -599,14 +599,13 @@ function processSlotContent (el) {
       // v-slot on <template>
       const slotBinding = getAndRemoveAttrByRegex(el, slotRE)
       if (slotBinding) {
-        if (
-          process.env.NODE_ENV !== 'production' &&
-          (el.slotTarget || el.slotScope)
-        ) {
-          warn(
-            `Unexpected mixed usage of different slot syntaxes.`,
-            el
-          )
+        if (process.env.NODE_ENV !== 'production') {
+          if (el.slotTarget || el.slotScope) {
+            warn(
+              `Unexpected mixed usage of different slot syntaxes.`,
+              el
+            )
+          }
         }
         el.slotTarget = getSlotName(slotBinding)
         el.slotScope = slotBinding.value
@@ -618,7 +617,7 @@ function processSlotContent (el) {
         if (process.env.NODE_ENV !== 'production') {
           if (!maybeComponent(el)) {
             warn(
-              `v-slot cannot be used on non-component elements.`,
+              `v-slot can only be used on components or <template>.`,
               slotBinding
             )
           }
@@ -644,13 +643,23 @@ function processSlotContent (el) {
   }
 }
 
-function getSlotName ({ name }) {
-  name = name.replace(slotRE, '')
+function getSlotName (binding) {
+  let name = binding.name.replace(slotRE, '')
+  if (!name) {
+    if (binding.name[0] !== '#') {
+      name = 'default'
+    } else if (process.env.NODE_ENV !== 'production') {
+      warn(
+        `v-slot shorthand syntax requires a slot name.`,
+        binding
+      )
+    }
+  }
   return dynamicKeyRE.test(name)
     // dynamic [name]
     ? name.slice(1, -1)
     // static name
-    : `"${name || `default`}"`
+    : `"${name}"`
 }
 
 // handle <slot/> outlets
