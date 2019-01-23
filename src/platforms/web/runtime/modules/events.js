@@ -46,8 +46,8 @@ function add (
   passive: boolean
 ) {
   // async edge case #6566: inner click event triggers patch, event handler
-  // attached to outer element during patch, and triggered again. This only
-  // happens in Chrome as it fires microtask ticks between event propagation.
+  // attached to outer element during patch, and triggered again. This
+  // happens because browsers fire microtask ticks between event propagation.
   // the solution is simple: we save the timestamp when a handler is attached,
   // and the handler would only fire if the event passed to it was fired
   // AFTER it was attached.
