@@ -587,7 +587,7 @@ describe('codegen', () => {
     try {
       assertCodegen(
         '<my-component inline-template></my-component>',
-        ''
+        `with(this){return _c('my-component',{})}`
       )
     } catch (e) {}
     expect('Inline-template components must have exactly one child element.').toHaveBeenWarned()
