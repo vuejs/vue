@@ -45,7 +45,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     // In Chrome / Firefox, click event fires before change, thus having this problem.
     // In Safari / Edge, the order is opposite.
     // Note: in Edge, if you click too fast, only the click event would fire twice.
-    if (key === 'checked' && !isNotInFocusAndDirty(elm, cur)) {
+    if (key === 'checked' && cur === oldProps[key]) {
       continue
     }
 
