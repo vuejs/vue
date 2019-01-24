@@ -40,21 +40,18 @@ function resetSchedulerState () {
 // attached during that flush.
 export let currentFlushTimestamp = 0
 
-let getNow
-if (inBrowser) {
-  // Determine what event timestamp the browser is using. Annoyingly, the
-  // timestamp can either be hi-res ( relative to poge load) or low-res
-  // (relative to UNIX epoch), so in order to compare time we have to use the
-  // same timestamp type when saving the flush timestamp.
-  const lowResNow = Date.now()
-  const eventTimestamp = document.createEvent('Event').timeStamp
-  // the event timestamp is created after Date.now(), if it's smaller
-  // it means it's using a hi-res timestamp.
-  getNow = eventTimestamp < lowResNow
-    ? () => performance.now() // hi-res
-    : Date.now // low-res
-} else {
-  getNow = Date.now
+// Async edge case fix requires storing an event listener's attach timestamp.
+let getNow: () => number = Date.now
+
+// Determine what event timestamp the browser is using. Annoyingly, the
+// timestamp can either be hi-res ( relative to poge load) or low-res
+// (relative to UNIX epoch), so in order to compare time we have to use the
+// same timestamp type when saving the flush timestamp.
+if (inBrowser && getNow() > document.createEvent('Event').timeStamp) {
+  // if the low-res timestamp which is bigger than the event timestamp
+  // (which is evaluated AFTER) it means the event is using a hi-res timestamp,
+  // and we need to use the hi-res version for event listeners as well.
+  getNow = () => performance.now()
 }
 
 /**
