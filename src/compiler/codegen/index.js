@@ -248,11 +248,11 @@ export function genData (el: ASTElement, state: CodegenState): string {
   }
   // attributes
   if (el.attrs) {
-    data += `attrs:{${genProps(el.attrs)}},`
+    data += `attrs:${genProps(el.attrs)},`
   }
   // DOM props
   if (el.props) {
-    data += `domProps:{${genProps(el.props)}},`
+    data += `domProps:${genProps(el.props)},`
   }
   // event handlers
   if (el.events) {
@@ -509,17 +509,25 @@ function genComponent (
 }
 
 function genProps (props: Array<ASTAttr>): string {
-  let res = ''
+  let staticProps = ``
+  let dynamicProps = ``
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
-    /* istanbul ignore if */
-    if (__WEEX__) {
-      res += `"${prop.name}":${generateValue(prop.value)},`
+    const value = __WEEX__
+      ? generateValue(prop.value)
+      : transformSpecialNewlines(prop.value)
+    if (prop.dynamic) {
+      dynamicProps += `${prop.name},${value},`
     } else {
-      res += `"${prop.name}":${transformSpecialNewlines(prop.value)},`
+      staticProps += `"${prop.name}":${value},`
     }
   }
-  return res.slice(0, -1)
+  staticProps = `{${staticProps.slice(0, -1)}}`
+  if (dynamicProps) {
+    return `_d(${staticProps},[${dynamicProps.slice(0, -1)}])`
+  } else {
+    return staticProps
+  }
 }
 
 /* istanbul ignore next */

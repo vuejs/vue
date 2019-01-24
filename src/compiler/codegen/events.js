@@ -56,11 +56,24 @@ export function genHandlers (
   events: ASTElementHandlers,
   isNative: boolean
 ): string {
-  let res = isNative ? 'nativeOn:{' : 'on:{'
+  const prefix = isNative ? 'nativeOn:' : 'on:'
+  let staticHandlers = ``
+  let dynamicHandlers = ``
   for (const name in events) {
-    res += `"${name}":${genHandler(name, events[name])},`
+    const handlerCode = genHandler(events[name])
+    if (events[name].dynamic) {
+      // console.log(name, events[name])
+      dynamicHandlers += `${name},${handlerCode},`
+    } else {
+      staticHandlers += `"${name}":${handlerCode},`
+    }
   }
-  return res.slice(0, -1) + '}'
+  staticHandlers = `{${staticHandlers.slice(0, -1)}}`
+  if (dynamicHandlers) {
+    return prefix + `_d(${staticHandlers},[${dynamicHandlers.slice(0, -1)}])`
+  } else {
+    return prefix + staticHandlers
+  }
 }
 
 // Generate handler code with binding params on Weex
@@ -81,16 +94,13 @@ function genWeexHandler (params: Array<any>, handlerCode: string) {
     '}'
 }
 
-function genHandler (
-  name: string,
-  handler: ASTElementHandler | Array<ASTElementHandler>
-): string {
+function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): string {
   if (!handler) {
     return 'function(){}'
   }
 
   if (Array.isArray(handler)) {
-    return `[${handler.map(handler => genHandler(name, handler)).join(',')}]`
+    return `[${handler.map(handler => genHandler(handler)).join(',')}]`
   }
 
   const isMethodPath = simplePathRE.test(handler.value)

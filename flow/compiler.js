@@ -61,12 +61,20 @@ declare type ModuleOptions = {
 declare type ASTModifiers = { [key: string]: boolean };
 declare type ASTIfCondition = { exp: ?string; block: ASTElement };
 declare type ASTIfConditions = Array<ASTIfCondition>;
-declare type ASTAttr = { name: string; value: any; start?: number; end?: number };
+
+declare type ASTAttr = {
+  name: string;
+  value: any;
+  dynamic?: boolean;
+  start?: number;
+  end?: number
+};
 
 declare type ASTElementHandler = {
   value: string;
   params?: Array<any>;
   modifiers: ?ASTModifiers;
+  dynamic?: boolean;
   start?: number;
   end?: number;
 };
