@@ -4338,7 +4338,9 @@
 
   function genInlineTemplate (el, state) {
     var ast = el.children[0];
-    if (el.children.length !== 1 || ast.type !== 1) {
+    if (process.env.NODE_ENV !== 'production' && (
+      el.children.length !== 1 || ast.type !== 1
+    )) {
       state.warn(
         'Inline-template components must have exactly one child element.',
         { start: el.start }
