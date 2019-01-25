@@ -759,7 +759,17 @@ function processAttrs (el) {
                 )
               }
             } else {
-              // TODO handler w/ dynamic event name
+              // handler w/ dynamic event name
+              addHandler(
+                el,
+                `"update:"+(${name})`,
+                syncGen,
+                null,
+                false,
+                warn,
+                list[i],
+                true // dynamic
+              )
             }
           }
         }
