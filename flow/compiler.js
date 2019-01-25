@@ -117,6 +117,7 @@ declare type ASTElement = {
 
   text?: string;
   attrs?: Array<ASTAttr>;
+  dynamicAttrs?: Array<ASTAttr>;
   props?: Array<ASTAttr>;
   plain?: boolean;
   pre?: true;

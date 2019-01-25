@@ -26,7 +26,10 @@ export function addProp (el: ASTElement, name: string, value: string, range?: Ra
 }
 
 export function addAttr (el: ASTElement, name: string, value: any, range?: Range, dynamic?: boolean) {
-  (el.attrs || (el.attrs = [])).push(rangeSetItem({ name, value, dynamic }, range))
+  const attrs = dynamic
+    ? (el.dynamicAttrs || (el.dynamicAttrs = []))
+    : (el.attrs || (el.attrs = []))
+  attrs.push(rangeSetItem({ name, value, dynamic }, range))
   el.plain = false
 }
 

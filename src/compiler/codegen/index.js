@@ -288,6 +288,12 @@ export function genData (el: ASTElement, state: CodegenState): string {
     }
   }
   data = data.replace(/,$/, '') + '}'
+  // v-bind dynamic argument wrap
+  // v-bind with dynamic arguments must be applied using the same v-bind object
+  // merge helper so that class/style/mustUseProp attrs are handled correctly.
+  if (el.dynamicAttrs) {
+    data = `_b(${data},"${el.tag}",${genProps(el.dynamicAttrs)})`
+  }
   // v-bind data wrap
   if (el.wrapData) {
     data = el.wrapData(data)
