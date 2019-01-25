@@ -586,6 +586,7 @@ function processSlotContent (el) {
   const slotTarget = getBindingAttr(el, 'slot')
   if (slotTarget) {
     el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
+    el.slotTargetDynamic = !!(el.attrsMap[':slot'] || el.attrsMap['v-bind:slot'])
     // preserve slot as an attribute for native shadow DOM compat
     // only for non-scoped slots.
     if (el.tag !== 'template' && !el.slotScope) {
@@ -607,8 +608,10 @@ function processSlotContent (el) {
             )
           }
         }
-        el.slotTarget = getSlotName(slotBinding)
-        el.slotScope = slotBinding.value
+        const { name, dynamic } = getSlotName(slotBinding)
+        el.slotTarget = name
+        el.slotTargetDynamic = dynamic
+        el.slotScope = slotBinding.value || `_` // force it into a scoped slot for perf
       }
     } else {
       // v-slot on component, denotes default slot
@@ -637,10 +640,11 @@ function processSlotContent (el) {
         }
         // add the component's children to its default slot
         const slots = el.scopedSlots || (el.scopedSlots = {})
-        const target = getSlotName(slotBinding)
-        const slotContainer = slots[target] = createASTElement('template', [], el)
+        const { name, dynamic } = getSlotName(slotBinding)
+        const slotContainer = slots[name] = createASTElement('template', [], el)
+        slotContainer.slotTargetDynamic = dynamic
         slotContainer.children = el.children
-        slotContainer.slotScope = slotBinding.value
+        slotContainer.slotScope = slotBinding.value || `_`
         // remove children as they are returned from scopedSlots now
         el.children = []
         // mark el non-plain so data gets generated
@@ -664,9 +668,9 @@ function getSlotName (binding) {
   }
   return dynamicKeyRE.test(name)
     // dynamic [name]
-    ? name.slice(1, -1)
+    ? { name: name.slice(1, -1), dynamic: true }
     // static name
-    : `"${name}"`
+    : { name: `"${name}"`, dynamic: false }
 }
 
 // handle <slot/> outlets

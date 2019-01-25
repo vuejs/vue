@@ -229,6 +229,13 @@ describe('codegen', () => {
     )
   })
 
+  it('generate dynamic scoped slot', () => {
+    assertCodegen(
+      '<foo><template :slot="foo" slot-scope="bar">{{ bar }}</template></foo>',
+      `with(this){return _c('foo',{scopedSlots:_u([{key:foo,fn:function(bar){return [_v(_s(bar))]}}],true)})}`
+    )
+  })
+
   it('generate scoped slot with multiline v-if', () => {
     assertCodegen(
       '<foo><template v-if="\nshow\n" slot-scope="bar">{{ bar }}</template></foo>',

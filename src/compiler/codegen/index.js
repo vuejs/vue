@@ -354,11 +354,12 @@ function genScopedSlots (
   slots: { [key: string]: ASTElement },
   state: CodegenState
 ): string {
+  const hasDynamicKeys = Object.keys(slots).some(key => slots[key].slotTargetDynamic)
   return `scopedSlots:_u([${
     Object.keys(slots).map(key => {
       return genScopedSlot(key, slots[key], state)
     }).join(',')
-  }])`
+  }]${hasDynamicKeys ? `,true` : ``})`
 }
 
 function genScopedSlot (
