@@ -92,7 +92,7 @@ export function addHandler (
   } else if (modifiers.middle) {
     if (dynamic) {
       name = `(${name})==='click'?'mouseup':(${name})`
-    } else {
+    } else if (name === 'click') {
       name = 'mouseup'
     }
   }
