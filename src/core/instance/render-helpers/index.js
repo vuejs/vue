@@ -29,5 +29,5 @@ export function installRenderHelpers (target: any) {
   target._u = resolveScopedSlots
   target._g = bindObjectListeners
   target._d = bindDynamicKeys
-  target._m = prependModifier
+  target._p = prependModifier
 }

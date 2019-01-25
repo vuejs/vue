@@ -61,8 +61,7 @@ export function genHandlers (
   let dynamicHandlers = ``
   for (const name in events) {
     const handlerCode = genHandler(events[name])
-    if (events[name].dynamic) {
-      // console.log(name, events[name])
+    if (events[name] && events[name].dynamic) {
       dynamicHandlers += `${name},${handlerCode},`
     } else {
       staticHandlers += `"${name}":${handlerCode},`

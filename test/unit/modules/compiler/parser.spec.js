@@ -537,12 +537,17 @@ describe('parser', () => {
 
   it('v-bind.prop shorthand syntax', () => {
     const ast = parse('<div .id="foo"></div>', baseOptions)
-    expect(ast.props).toEqual([{ name: 'id', value: 'foo'}])
+    expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: false }])
   })
 
   it('v-bind.prop shorthand syntax w/ modifiers', () => {
     const ast = parse('<div .id.mod="foo"></div>', baseOptions)
-    expect(ast.props).toEqual([{ name: 'id', value: 'foo'}])
+    expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: false }])
+  })
+
+  it('v-bind dynamic argument', () => {
+    const ast = parse('<div .[id]="foo"></div>', baseOptions)
+    expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: true }])
   })
 
   // #6887

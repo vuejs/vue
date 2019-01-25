@@ -51,7 +51,7 @@ export function addDirective (
 
 function prependModifierMarker (symbol: string, name: string, dynamic?: boolean): string {
   return dynamic
-    ? `_m(${name},"${symbol}")`
+    ? `_p(${name},"${symbol}")`
     : symbol + name // mark the event as captured
 }
 
