@@ -40,6 +40,15 @@ function getRealChild (vnode: ?VNode): ?VNode {
   }
 }
 
+function isAttrDisabled (k: string): boolean {
+  var data: Object = this;
+  const attr = data[camelize(k)]
+  return typeof attr == "undefined" ||
+         typeof attr !== "undefined" &&
+         (typeof attr === "boolean" && attr ||
+          typeof attr === "string" && attr == "false")
+}
+
 export function extractTransitionData (comp: Component): Object {
   const data = {}
   const options: ComponentOptions = comp.$options
@@ -49,9 +58,11 @@ export function extractTransitionData (comp: Component): Object {
   }
   // events.
   // extract listeners and pass them directly to the transition methods
-  const listeners: ?Object = options._parentListeners
-  for (const key in listeners) {
-    data[camelize(key)] = listeners[key]
+  const listeners: Object = options._parentListeners || {}
+  // remove the listeners that are explicitily disabled
+  const listenerKeys: Array<string> = Object.keys(listeners).filter(isAttrDisabled, data)
+  for (let i = 0; i < listenerKeys.length; i++) {
+    data[camelize(listenerKeys[i])] = listeners[listenerKeys[i]]
   }
   return data
 }

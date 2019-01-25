@@ -769,6 +769,30 @@ if (!isIE9) {
       }).then(done)
     })
 
+    it('appear: false', done => {
+      let next
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition name="test" :appear="false" @appear="appear" >
+              <div v-if="ok" class="test">foo</div>
+            </transition>
+          </div>
+        `,
+        data: { ok: true },
+        methods: {
+          appear: (el, cb) => {
+            next = cb
+          }
+        }
+      }).$mount(el)
+
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].className).toBe('test')
+        expect(next).toBeUndefined()
+      }).then(done)
+    })
+
     it('transition on SVG elements', done => {
       const vm = new Vue({
         template: `
