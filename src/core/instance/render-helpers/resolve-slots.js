@@ -51,13 +51,14 @@ function isWhitespace (node: VNode): boolean {
 
 export function resolveScopedSlots (
   fns: ScopedSlotsData, // see flow/vnode
+  hasDynamicKeys?: boolean,
   res?: Object
-): { [key: string]: Function } {
-  res = res || {}
+): { [key: string]: Function, $stable: boolean } {
+  res = res || { $stable: !hasDynamicKeys }
   for (let i = 0; i < fns.length; i++) {
     const slot = fns[i]
     if (Array.isArray(slot)) {
-      resolveScopedSlots(slot, res)
+      resolveScopedSlots(slot, hasDynamicKeys, res)
     } else {
       res[slot.key] = slot.fn
     }

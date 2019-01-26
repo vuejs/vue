@@ -14,7 +14,7 @@ export function normalizeScopedSlots (
   } else {
     res = {}
     for (const key in slots) {
-      if (slots[key]) {
+      if (slots[key] && key[0] !== '$') {
         res[key] = normalizeScopedSlot(slots[key])
       }
     }
@@ -26,6 +26,7 @@ export function normalizeScopedSlots (
     }
   }
   res._normalized = true
+  res.$stable = slots && slots.$stable
   return res
 }
 

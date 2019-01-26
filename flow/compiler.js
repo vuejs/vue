@@ -119,6 +119,7 @@ declare type ASTElement = {
   transitionMode?: string | null;
   slotName?: ?string;
   slotTarget?: ?string;
+  slotTargetDynamic?: boolean;
   slotScope?: ?string;
   scopedSlots?: { [name: string]: ASTElement };
 
