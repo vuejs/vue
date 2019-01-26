@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.6.0-beta.1
+ * Vue.js v2.6.0-beta.2
  * (c) 2014-2019 Evan You
  * Released under the MIT License.
  */
@@ -364,7 +364,7 @@
     'activated',
     'deactivated',
     'errorCaptured',
-    'ssrPrefetch'
+    'serverPrefetch'
   ];
 
   /*  */
@@ -1878,6 +1878,8 @@
 
   /*  */
 
+  var isUsingMicroTask = false;
+
   var callbacks = [];
   var pending = false;
 
@@ -1921,6 +1923,7 @@
       // "force" the microtask queue to be flushed by adding an empty timer.
       if (isIOS) { setTimeout(noop); }
     };
+    isUsingMicroTask = true;
   } else if (!isIE && typeof MutationObserver !== 'undefined' && (
     isNative(MutationObserver) ||
     // PhantomJS and iOS 7.x
@@ -1939,6 +1942,7 @@
       counter = (counter + 1) % 2;
       textNode.data = String(counter);
     };
+    isUsingMicroTask = true;
   } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
     // Fallback to setImmediate.
     // Techinically it leverages the (macro) task queue,
@@ -2735,13 +2739,14 @@
 
   function resolveScopedSlots (
     fns, // see flow/vnode
+    hasDynamicKeys,
     res
   ) {
-    res = res || {};
+    res = res || { $stable: !hasDynamicKeys };
     for (var i = 0; i < fns.length; i++) {
       var slot = fns[i];
       if (Array.isArray(slot)) {
-        resolveScopedSlots(slot, res);
+        resolveScopedSlots(slot, hasDynamicKeys, res);
       } else {
         res[slot.key] = slot.fn;
       }
@@ -2957,12 +2962,22 @@
     }
 
     // determine whether component has slot children
-    // we need to do this before overwriting $options._renderChildren
-    var hasChildren = !!(
+    // we need to do this before overwriting $options._renderChildren.
+
+    // check if there are dynamic scopedSlots (hand-written or compiled but with
+    // dynamic slot names). Static scoped slots compiled from template has the
+    // "$stable" marker.
+    var hasDynamicScopedSlot = !!(
+      (parentVnode.data.scopedSlots && !parentVnode.data.scopedSlots.$stable) ||
+      (vm.$scopedSlots !== emptyObject && !vm.$scopedSlots.$stable)
+    );
+    // Any static slot children from the parent may have changed during parent's
+    // update. Dynamic scoped slots may also have changed. In such cases, a forced
+    // update is necessary to ensure correctness.
+    var needsForceUpdate = !!(
       renderChildren ||               // has new static slots
       vm.$options._renderChildren ||  // has old static slots
-      parentVnode.data.scopedSlots || // has new scoped slots
-      vm.$scopedSlots !== emptyObject // has old scoped slots
+      hasDynamicScopedSlot
     );
 
     vm.$options._parentVnode = parentVnode;
@@ -3001,7 +3016,7 @@
     updateComponentListeners(vm, listeners, oldListeners);
 
     // resolve slots + force update if has children
-    if (hasChildren) {
+    if (needsForceUpdate) {
       vm.$slots = resolveSlots(renderChildren, parentVnode.context);
       vm.$forceUpdate();
     }
@@ -3092,10 +3107,32 @@
     waiting = flushing = false;
   }
 
+  // Async edge case #6566 requires saving the timestamp when event listeners are
+  // attached. However, calling performance.now() has a perf overhead especially
+  // if the page has thousands of event listeners. Instead, we take a timestamp
+  // every time the scheduler flushes and use that for all event listeners
+  // attached during that flush.
+  var currentFlushTimestamp = 0;
+
+  // Async edge case fix requires storing an event listener's attach timestamp.
+  var getNow = Date.now;
+
+  // Determine what event timestamp the browser is using. Annoyingly, the
+  // timestamp can either be hi-res ( relative to poge load) or low-res
+  // (relative to UNIX epoch), so in order to compare time we have to use the
+  // same timestamp type when saving the flush timestamp.
+  if (inBrowser && getNow() > document.createEvent('Event').timeStamp) {
+    // if the low-res timestamp which is bigger than the event timestamp
+    // (which is evaluated AFTER) it means the event is using a hi-res timestamp,
+    // and we need to use the hi-res version for event listeners as well.
+    getNow = function () { return performance.now(); };
+  }
+
   /**
    * Flush both queues and run the watchers.
    */
   function flushSchedulerQueue () {
+    currentFlushTimestamp = getNow();
     flushing = true;
     var watcher, id;
 
@@ -3845,7 +3882,7 @@
     } else {
       res = {};
       for (var key in slots) {
-        if (slots[key]) {
+        if (slots[key] && key[0] !== '$') {
           res[key] = normalizeScopedSlot(slots[key]);
         }
       }
@@ -3857,6 +3894,7 @@
       }
     }
     res._normalized = true;
+    res.$stable = slots && slots.$stable;
     return res
   }
 
@@ -4135,6 +4173,31 @@
 
   /*  */
 
+  function bindDynamicKeys (baseObj, values) {
+    for (var i = 0; i < values.length; i += 2) {
+      var key = values[i];
+      if (typeof key === 'string' && key) {
+        baseObj[values[i]] = values[i + 1];
+      } else if (key !== '' && key !== null) {
+        // null is a speical value for explicitly removing a binding
+        warn(
+          ("Invalid value for dynamic directive argument (expected string or null): " + key),
+          this
+        );
+      }
+    }
+    return baseObj
+  }
+
+  // helper to dynamically append modifier runtime markers to event names.
+  // ensure only append when value is already string, otherwise it will be cast
+  // to string and cause the type check to miss.
+  function prependModifier (value, symbol) {
+    return typeof value === 'string' ? symbol + value : value
+  }
+
+  /*  */
+
   function installRenderHelpers (target) {
     target._o = markOnce;
     target._n = toNumber;
@@ -4151,6 +4214,8 @@
     target._e = createEmptyVNode;
     target._u = resolveScopedSlots;
     target._g = bindObjectListeners;
+    target._d = bindDynamicKeys;
+    target._p = prependModifier;
   }
 
   /*  */
@@ -5249,7 +5314,7 @@
     value: FunctionalRenderContext
   });
 
-  Vue.version = '2.6.0-beta.1';
+  Vue.version = '2.6.0-beta.2';
 
   /*  */
 
@@ -6391,6 +6456,7 @@
       } else {
         // existing directive, update
         dir.oldValue = oldDir.value;
+        dir.oldArg = oldDir.arg;
         callHook$1(dir, 'update', vnode, oldVnode);
         if (dir.def && dir.def.componentUpdated) {
           dirsWithPostpatch.push(dir);
@@ -6668,17 +6734,17 @@
     capture,
     passive
   ) {
-    if (isChrome) {
-      // async edge case #6566: inner click event triggers patch, event handler
-      // attached to outer element during patch, and triggered again. This only
-      // happens in Chrome as it fires microtask ticks between event propagation.
-      // the solution is simple: we save the timestamp when a handler is attached,
-      // and the handler would only fire if the event passed to it was fired
-      // AFTER it was attached.
-      var now = performance.now();
+    // async edge case #6566: inner click event triggers patch, event handler
+    // attached to outer element during patch, and triggered again. This
+    // happens because browsers fire microtask ticks between event propagation.
+    // the solution is simple: we save the timestamp when a handler is attached,
+    // and the handler would only fire if the event passed to it was fired
+    // AFTER it was attached.
+    if (isUsingMicroTask) {
+      var attachedTimestamp = currentFlushTimestamp;
       var original = handler;
       handler = original._wrapper = function (e) {
-        if (e.timeStamp >= now) {
+        if (e.timeStamp >= attachedTimestamp) {
           return original.apply(this, arguments)
         }
       };
@@ -6759,14 +6825,11 @@
         }
       }
 
-      // #4521: if a click event triggers update before the change event is
-      // dispatched on a checkbox/radio input, the input's checked state will
-      // be reset and fail to trigger another update.
-      // The root cause here is that browsers may fire microtasks in between click/change.
-      // In Chrome / Firefox, click event fires before change, thus having this problem.
-      // In Safari / Edge, the order is opposite.
-      // Note: in Edge, if you click too fast, only the click event would fire twice.
-      if (key === 'checked' && !isNotInFocusAndDirty(elm, cur)) {
+      // skip the update if old and new VDOM state is the same.
+      // the only exception is `value` where the DOM value may be temporarily
+      // out of sync with VDOM state due to focus, composition and modifiers.
+      // This also covers #4521 by skipping the unnecesarry `checked` update.
+      if (key !== 'value' && cur === oldProps[key]) {
         continue
       }
 

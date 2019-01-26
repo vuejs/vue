@@ -829,7 +829,7 @@
     'activated',
     'deactivated',
     'errorCaptured',
-    'ssrPrefetch'
+    'serverPrefetch'
   ];
 
   /*  */
@@ -1915,13 +1915,16 @@
       : []
   }
 
-  function addProp (el, name, value, range) {
-    (el.props || (el.props = [])).push(rangeSetItem({ name: name, value: value }, range));
+  function addProp (el, name, value, range, dynamic) {
+    (el.props || (el.props = [])).push(rangeSetItem({ name: name, value: value, dynamic: dynamic }, range));
     el.plain = false;
   }
 
-  function addAttr (el, name, value, range) {
-    (el.attrs || (el.attrs = [])).push(rangeSetItem({ name: name, value: value }, range));
+  function addAttr (el, name, value, range, dynamic) {
+    var attrs = dynamic
+      ? (el.dynamicAttrs || (el.dynamicAttrs = []))
+      : (el.attrs || (el.attrs = []));
+    attrs.push(rangeSetItem({ name: name, value: value, dynamic: dynamic }, range));
     el.plain = false;
   }
 
@@ -1937,11 +1940,25 @@
     rawName,
     value,
     arg,
+    isDynamicArg,
     modifiers,
     range
   ) {
-    (el.directives || (el.directives = [])).push(rangeSetItem({ name: name, rawName: rawName, value: value, arg: arg, modifiers: modifiers }, range));
+    (el.directives || (el.directives = [])).push(rangeSetItem({
+      name: name,
+      rawName: rawName,
+      value: value,
+      arg: arg,
+      isDynamicArg: isDynamicArg,
+      modifiers: modifiers
+    }, range));
     el.plain = false;
+  }
+
+  function prependModifierMarker (symbol, name, dynamic) {
+    return dynamic
+      ? ("_p(" + name + ",\"" + symbol + "\")")
+      : symbol + name // mark the event as captured
   }
 
   function addHandler (
@@ -1951,7 +1968,8 @@
     modifiers,
     important,
     warn,
-    range
+    range,
+    dynamic
   ) {
     modifiers = modifiers || emptyObject;
     // warn prevent and passive modifier
@@ -1970,11 +1988,17 @@
     // normalize click.right and click.middle since they don't actually fire
     // this is technically browser-specific, but at least for now browsers are
     // the only target envs that have right/middle clicks.
-    if (name === 'click') {
-      if (modifiers.right) {
+    if (modifiers.right) {
+      if (dynamic) {
+        name = "(" + name + ")==='click'?'contextmenu':(" + name + ")";
+      } else if (name === 'click') {
         name = 'contextmenu';
         delete modifiers.right;
-      } else if (modifiers.middle) {
+      }
+    } else if (modifiers.middle) {
+      if (dynamic) {
+        name = "(" + name + ")==='click'?'mouseup':(" + name + ")";
+      } else if (name === 'click') {
         name = 'mouseup';
       }
     }
@@ -1982,16 +2006,16 @@
     // check capture modifier
     if (modifiers.capture) {
       delete modifiers.capture;
-      name = '!' + name; // mark the event as captured
+      name = prependModifierMarker('!', name, dynamic);
     }
     if (modifiers.once) {
       delete modifiers.once;
-      name = '~' + name; // mark the event as once
+      name = prependModifierMarker('~', name, dynamic);
     }
     /* istanbul ignore if */
     if (modifiers.passive) {
       delete modifiers.passive;
-      name = '&' + name; // mark the event as passive
+      name = prependModifierMarker('&', name, dynamic);
     }
 
     var events;
@@ -2002,7 +2026,7 @@
       events = el.events || (el.events = {});
     }
 
-    var newHandler = rangeSetItem({ value: value.trim() }, range);
+    var newHandler = rangeSetItem({ value: value.trim(), dynamic: dynamic }, range);
     if (modifiers !== emptyObject) {
       newHandler.modifiers = modifiers;
     }
@@ -2070,6 +2094,20 @@
       delete el.attrsMap[name];
     }
     return val
+  }
+
+  function getAndRemoveAttrByRegex (
+    el,
+    name
+  ) {
+    var list = el.attrsList;
+    for (var i = 0, l = list.length; i < l; i++) {
+      var attr = list[i];
+      if (name.test(attr.name)) {
+        list.splice(i, 1);
+        return attr
+      }
+    }
   }
 
   function rangeSetItem (
@@ -2690,11 +2728,14 @@
   var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
   var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
   var stripParensRE = /^\(|\)$/g;
+  var dynamicArgRE = /^\[.*\]$/;
 
   var argRE = /:(.*)$/;
   var bindRE = /^:|^\.|^v-bind:/;
   var propBindRE = /^\./;
   var modifierRE = /\.[^.]+/g;
+
+  var slotRE = /^v-slot(:|$)|^#/;
 
   var lineBreakRE = /[\r\n]/;
   var whitespaceRE = /\s+/g;
@@ -2710,6 +2751,7 @@
   var platformIsPreTag;
   var platformMustUseProp;
   var platformGetTagNamespace;
+  var maybeComponent;
 
   function createASTElement (
     tag,
@@ -2740,6 +2782,7 @@
     platformMustUseProp = options.mustUseProp || no;
     platformGetTagNamespace = options.getTagNamespace || no;
     var isReservedTag = options.isReservedTag || no;
+    maybeComponent = function (el) { return !!el.component || !isReservedTag(el.tag); };
 
     transforms = pluckModuleFunction(options.modules, 'transformNode');
     preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
@@ -3221,10 +3264,7 @@
           true
         );
       }
-      el.slotScope = (
-        slotScope ||
-        getAndRemoveAttr(el, 'slot-scope')
-      );
+      el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope');
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
       /* istanbul ignore if */
       if (el.attrsMap['v-for']) {
@@ -3243,12 +3283,95 @@
     var slotTarget = getBindingAttr(el, 'slot');
     if (slotTarget) {
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget;
+      el.slotTargetDynamic = !!(el.attrsMap[':slot'] || el.attrsMap['v-bind:slot']);
       // preserve slot as an attribute for native shadow DOM compat
       // only for non-scoped slots.
       if (el.tag !== 'template' && !el.slotScope) {
         addAttr(el, 'slot', slotTarget, getRawBindingAttr(el, 'slot'));
       }
     }
+
+    // 2.6 v-slot syntax
+    {
+      if (el.tag === 'template') {
+        // v-slot on <template>
+        var slotBinding = getAndRemoveAttrByRegex(el, slotRE);
+        if (slotBinding) {
+          {
+            if (el.slotTarget || el.slotScope) {
+              warn$1(
+                "Unexpected mixed usage of different slot syntaxes.",
+                el
+              );
+            }
+          }
+          var ref = getSlotName(slotBinding);
+          var name = ref.name;
+          var dynamic = ref.dynamic;
+          el.slotTarget = name;
+          el.slotTargetDynamic = dynamic;
+          el.slotScope = slotBinding.value || "_"; // force it into a scoped slot for perf
+        }
+      } else {
+        // v-slot on component, denotes default slot
+        var slotBinding$1 = getAndRemoveAttrByRegex(el, slotRE);
+        if (slotBinding$1) {
+          {
+            if (!maybeComponent(el)) {
+              warn$1(
+                "v-slot can only be used on components or <template>.",
+                slotBinding$1
+              );
+            }
+            if (el.slotScope || el.slotTarget) {
+              warn$1(
+                "Unexpected mixed usage of different slot syntaxes.",
+                el
+              );
+            }
+            if (el.scopedSlots) {
+              warn$1(
+                "To avoid scope ambiguity, the default slot should also use " +
+                "<template> syntax when there are other named slots.",
+                slotBinding$1
+              );
+            }
+          }
+          // add the component's children to its default slot
+          var slots = el.scopedSlots || (el.scopedSlots = {});
+          var ref$1 = getSlotName(slotBinding$1);
+          var name$1 = ref$1.name;
+          var dynamic$1 = ref$1.dynamic;
+          var slotContainer = slots[name$1] = createASTElement('template', [], el);
+          slotContainer.slotTargetDynamic = dynamic$1;
+          slotContainer.children = el.children;
+          slotContainer.slotScope = slotBinding$1.value || "_";
+          // remove children as they are returned from scopedSlots now
+          el.children = [];
+          // mark el non-plain so data gets generated
+          el.plain = false;
+        }
+      }
+    }
+  }
+
+  function getSlotName (binding) {
+    var name = binding.name.replace(slotRE, '');
+    if (!name) {
+      if (binding.name[0] !== '#') {
+        name = 'default';
+      } else {
+        warn$1(
+          "v-slot shorthand syntax requires a slot name.",
+          binding
+        );
+      }
+    }
+    return dynamicArgRE.test(name)
+      // dynamic [name]
+      ? { name: name.slice(1, -1), dynamic: true }
+      // static name
+      : { name: ("\"" + name + "\""), dynamic: false }
   }
 
   // handle <slot/> outlets
@@ -3278,7 +3401,7 @@
 
   function processAttrs (el) {
     var list = el.attrsList;
-    var i, l, name, rawName, value, modifiers, isProp, syncGen;
+    var i, l, name, rawName, value, modifiers, syncGen, isDynamic;
     for (i = 0, l = list.length; i < l; i++) {
       name = rawName = list[i].name;
       value = list[i].value;
@@ -3297,7 +3420,10 @@
         if (bindRE.test(name)) { // v-bind
           name = name.replace(bindRE, '');
           value = parseFilters(value);
-          isProp = false;
+          isDynamic = dynamicArgRE.test(name);
+          if (isDynamic) {
+            name = name.slice(1, -1);
+          }
           if (
             value.trim().length === 0
           ) {
@@ -3306,57 +3432,79 @@
             );
           }
           if (modifiers) {
-            if (modifiers.prop) {
-              isProp = true;
+            if (modifiers.prop && !isDynamic) {
               name = camelize(name);
               if (name === 'innerHtml') { name = 'innerHTML'; }
             }
-            if (modifiers.camel) {
+            if (modifiers.camel && !isDynamic) {
               name = camelize(name);
             }
             if (modifiers.sync) {
               syncGen = genAssignmentCode(value, "$event");
-              addHandler(
-                el,
-                ("update:" + (camelize(name))),
-                syncGen,
-                null,
-                false,
-                warn$1,
-                list[i]
-              );
-              if (hyphenate(name) !== camelize(name)) {
+              if (!isDynamic) {
                 addHandler(
                   el,
-                  ("update:" + (hyphenate(name))),
+                  ("update:" + (camelize(name))),
                   syncGen,
                   null,
                   false,
                   warn$1,
                   list[i]
                 );
+                if (hyphenate(name) !== camelize(name)) {
+                  addHandler(
+                    el,
+                    ("update:" + (hyphenate(name))),
+                    syncGen,
+                    null,
+                    false,
+                    warn$1,
+                    list[i]
+                  );
+                }
+              } else {
+                // handler w/ dynamic event name
+                addHandler(
+                  el,
+                  ("\"update:\"+(" + name + ")"),
+                  syncGen,
+                  null,
+                  false,
+                  warn$1,
+                  list[i],
+                  true // dynamic
+                );
               }
             }
           }
-          if (isProp || (
+          if ((modifiers && modifiers.prop) || (
             !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
           )) {
-            addProp(el, name, value, list[i]);
+            addProp(el, name, value, list[i], isDynamic);
           } else {
-            addAttr(el, name, value, list[i]);
+            addAttr(el, name, value, list[i], isDynamic);
           }
         } else if (onRE.test(name)) { // v-on
           name = name.replace(onRE, '');
-          addHandler(el, name, value, modifiers, false, warn$1, list[i]);
+          isDynamic = dynamicArgRE.test(name);
+          if (isDynamic) {
+            name = name.slice(1, -1);
+          }
+          addHandler(el, name, value, modifiers, false, warn$1, list[i], isDynamic);
         } else { // normal directives
           name = name.replace(dirRE, '');
           // parse arg
           var argMatch = name.match(argRE);
           var arg = argMatch && argMatch[1];
+          isDynamic = false;
           if (arg) {
             name = name.slice(0, -(arg.length + 1));
+            if (dynamicArgRE.test(arg)) {
+              arg = arg.slice(1, -1);
+              isDynamic = true;
+            }
           }
-          addDirective(el, name, rawName, value, arg, modifiers, list[i]);
+          addDirective(el, name, rawName, value, arg, isDynamic, modifiers, list[i]);
           if (name === 'model') {
             checkForAliasModel(el, value);
           }
@@ -3934,23 +4082,32 @@
     events,
     isNative
   ) {
-    var res = isNative ? 'nativeOn:{' : 'on:{';
+    var prefix = isNative ? 'nativeOn:' : 'on:';
+    var staticHandlers = "";
+    var dynamicHandlers = "";
     for (var name in events) {
-      res += "\"" + name + "\":" + (genHandler(name, events[name])) + ",";
+      var handlerCode = genHandler(events[name]);
+      if (events[name] && events[name].dynamic) {
+        dynamicHandlers += name + "," + handlerCode + ",";
+      } else {
+        staticHandlers += "\"" + name + "\":" + handlerCode + ",";
+      }
     }
-    return res.slice(0, -1) + '}'
+    staticHandlers = "{" + (staticHandlers.slice(0, -1)) + "}";
+    if (dynamicHandlers) {
+      return prefix + "_d(" + staticHandlers + ",[" + (dynamicHandlers.slice(0, -1)) + "])"
+    } else {
+      return prefix + staticHandlers
+    }
   }
 
-  function genHandler (
-    name,
-    handler
-  ) {
+  function genHandler (handler) {
     if (!handler) {
       return 'function(){}'
     }
 
     if (Array.isArray(handler)) {
-      return ("[" + (handler.map(function (handler) { return genHandler(name, handler); }).join(',')) + "]")
+      return ("[" + (handler.map(function (handler) { return genHandler(handler); }).join(',')) + "]")
     }
 
     var isMethodPath = simplePathRE.test(handler.value);
@@ -4004,7 +4161,7 @@
   }
 
   function genKeyFilter (keys) {
-    return ("if(!('button' in $event)&&" + (keys.map(genFilterCode).join('&&')) + ")return null;")
+    return ("if(('keyCode' in $event)&&" + (keys.map(genFilterCode).join('&&')) + ")return null;")
   }
 
   function genFilterCode (key) {
@@ -4266,11 +4423,11 @@
     }
     // attributes
     if (el.attrs) {
-      data += "attrs:{" + (genProps(el.attrs)) + "},";
+      data += "attrs:" + (genProps(el.attrs)) + ",";
     }
     // DOM props
     if (el.props) {
-      data += "domProps:{" + (genProps(el.props)) + "},";
+      data += "domProps:" + (genProps(el.props)) + ",";
     }
     // event handlers
     if (el.events) {
@@ -4300,6 +4457,12 @@
       }
     }
     data = data.replace(/,$/, '') + '}';
+    // v-bind dynamic argument wrap
+    // v-bind with dynamic arguments must be applied using the same v-bind object
+    // merge helper so that class/style/mustUseProp attrs are handled correctly.
+    if (el.dynamicAttrs) {
+      data = "_b(" + data + ",\"" + (el.tag) + "\"," + (genProps(el.dynamicAttrs)) + ")";
+    }
     // v-bind data wrap
     if (el.wrapData) {
       data = el.wrapData(data);
@@ -4328,7 +4491,7 @@
       }
       if (needRuntime) {
         hasRuntime = true;
-        res += "{name:\"" + (dir.name) + "\",rawName:\"" + (dir.rawName) + "\"" + (dir.value ? (",value:(" + (dir.value) + "),expression:" + (JSON.stringify(dir.value))) : '') + (dir.arg ? (",arg:\"" + (dir.arg) + "\"") : '') + (dir.modifiers ? (",modifiers:" + (JSON.stringify(dir.modifiers))) : '') + "},";
+        res += "{name:\"" + (dir.name) + "\",rawName:\"" + (dir.rawName) + "\"" + (dir.value ? (",value:(" + (dir.value) + "),expression:" + (JSON.stringify(dir.value))) : '') + (dir.arg ? (",arg:" + (dir.isDynamicArg ? dir.arg : ("\"" + (dir.arg) + "\""))) : '') + (dir.modifiers ? (",modifiers:" + (JSON.stringify(dir.modifiers))) : '') + "},";
       }
     }
     if (hasRuntime) {
@@ -4354,9 +4517,10 @@
     slots,
     state
   ) {
+    var hasDynamicKeys = Object.keys(slots).some(function (key) { return slots[key].slotTargetDynamic; });
     return ("scopedSlots:_u([" + (Object.keys(slots).map(function (key) {
         return genScopedSlot(key, slots[key], state)
-      }).join(',')) + "])")
+      }).join(',')) + "]" + (hasDynamicKeys ? ",true" : "") + ")")
   }
 
   function genScopedSlot (
@@ -4501,15 +4665,23 @@
   }
 
   function genProps (props) {
-    var res = '';
+    var staticProps = "";
+    var dynamicProps = "";
     for (var i = 0; i < props.length; i++) {
       var prop = props[i];
-      /* istanbul ignore if */
-      {
-        res += "\"" + (prop.name) + "\":" + (transformSpecialNewlines(prop.value)) + ",";
+      var value = transformSpecialNewlines(prop.value);
+      if (prop.dynamic) {
+        dynamicProps += (prop.name) + "," + value + ",";
+      } else {
+        staticProps += "\"" + (prop.name) + "\":" + value + ",";
       }
     }
-    return res.slice(0, -1)
+    staticProps = "{" + (staticProps.slice(0, -1)) + "}";
+    if (dynamicProps) {
+      return ("_d(" + staticProps + ",[" + (dynamicProps.slice(0, -1)) + "])")
+    } else {
+      return staticProps
+    }
   }
 
   // #3895, #4268
