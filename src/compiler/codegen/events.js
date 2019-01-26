@@ -163,7 +163,7 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
 }
 
 function genKeyFilter (keys: Array<string>): string {
-  return `if(!('button' in $event)&&${keys.map(genFilterCode).join('&&')})return null;`
+  return `if(('keyCode' in $event)&&${keys.map(genFilterCode).join('&&')})return null;`
 }
 
 function genFilterCode (key: string): string {
