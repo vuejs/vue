@@ -248,11 +248,11 @@ export function genData (el: ASTElement, state: CodegenState): string {
   }
   // attributes
   if (el.attrs) {
-    data += `attrs:{${genProps(el.attrs)}},`
+    data += `attrs:${genProps(el.attrs)},`
   }
   // DOM props
   if (el.props) {
-    data += `domProps:{${genProps(el.props)}},`
+    data += `domProps:${genProps(el.props)},`
   }
   // event handlers
   if (el.events) {
@@ -288,6 +288,12 @@ export function genData (el: ASTElement, state: CodegenState): string {
     }
   }
   data = data.replace(/,$/, '') + '}'
+  // v-bind dynamic argument wrap
+  // v-bind with dynamic arguments must be applied using the same v-bind object
+  // merge helper so that class/style/mustUseProp attrs are handled correctly.
+  if (el.dynamicAttrs) {
+    data = `_b(${data},"${el.tag}",${genProps(el.dynamicAttrs)})`
+  }
   // v-bind data wrap
   if (el.wrapData) {
     data = el.wrapData(data)
@@ -319,7 +325,7 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
       res += `{name:"${dir.name}",rawName:"${dir.rawName}"${
         dir.value ? `,value:(${dir.value}),expression:${JSON.stringify(dir.value)}` : ''
       }${
-        dir.arg ? `,arg:"${dir.arg}"` : ''
+        dir.arg ? `,arg:${dir.isDynamicArg ? dir.arg : `"${dir.arg}"`}` : ''
       }${
         dir.modifiers ? `,modifiers:${JSON.stringify(dir.modifiers)}` : ''
       }},`
@@ -510,17 +516,25 @@ function genComponent (
 }
 
 function genProps (props: Array<ASTAttr>): string {
-  let res = ''
+  let staticProps = ``
+  let dynamicProps = ``
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
-    /* istanbul ignore if */
-    if (__WEEX__) {
-      res += `"${prop.name}":${generateValue(prop.value)},`
+    const value = __WEEX__
+      ? generateValue(prop.value)
+      : transformSpecialNewlines(prop.value)
+    if (prop.dynamic) {
+      dynamicProps += `${prop.name},${value},`
     } else {
-      res += `"${prop.name}":${transformSpecialNewlines(prop.value)},`
+      staticProps += `"${prop.name}":${value},`
     }
   }
-  return res.slice(0, -1)
+  staticProps = `{${staticProps.slice(0, -1)}}`
+  if (dynamicProps) {
+    return `_d(${staticProps},[${dynamicProps.slice(0, -1)}])`
+  } else {
+    return staticProps
+  }
 }
 
 /* istanbul ignore next */

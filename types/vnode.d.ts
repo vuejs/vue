@@ -67,5 +67,6 @@ export interface VNodeDirective {
   oldValue?: any;
   expression?: any;
   arg?: string;
+  oldArg?: string;
   modifiers?: { [key: string]: boolean };
 }

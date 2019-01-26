@@ -20,13 +20,16 @@ export function pluckModuleFunction<F: Function> (
     : []
 }
 
-export function addProp (el: ASTElement, name: string, value: string, range?: Range) {
-  (el.props || (el.props = [])).push(rangeSetItem({ name, value }, range))
+export function addProp (el: ASTElement, name: string, value: string, range?: Range, dynamic?: boolean) {
+  (el.props || (el.props = [])).push(rangeSetItem({ name, value, dynamic }, range))
   el.plain = false
 }
 
-export function addAttr (el: ASTElement, name: string, value: any, range?: Range) {
-  (el.attrs || (el.attrs = [])).push(rangeSetItem({ name, value }, range))
+export function addAttr (el: ASTElement, name: string, value: any, range?: Range, dynamic?: boolean) {
+  const attrs = dynamic
+    ? (el.dynamicAttrs || (el.dynamicAttrs = []))
+    : (el.attrs || (el.attrs = []))
+  attrs.push(rangeSetItem({ name, value, dynamic }, range))
   el.plain = false
 }
 
@@ -42,11 +45,25 @@ export function addDirective (
   rawName: string,
   value: string,
   arg: ?string,
+  isDynamicArg: boolean,
   modifiers: ?ASTModifiers,
   range?: Range
 ) {
-  (el.directives || (el.directives = [])).push(rangeSetItem({ name, rawName, value, arg, modifiers }, range))
+  (el.directives || (el.directives = [])).push(rangeSetItem({
+    name,
+    rawName,
+    value,
+    arg,
+    isDynamicArg,
+    modifiers
+  }, range))
   el.plain = false
+}
+
+function prependModifierMarker (symbol: string, name: string, dynamic?: boolean): string {
+  return dynamic
+    ? `_p(${name},"${symbol}")`
+    : symbol + name // mark the event as captured
 }
 
 export function addHandler (
@@ -56,7 +73,8 @@ export function addHandler (
   modifiers: ?ASTModifiers,
   important?: boolean,
   warn?: ?Function,
-  range?: Range
+  range?: Range,
+  dynamic?: boolean
 ) {
   modifiers = modifiers || emptyObject
   // warn prevent and passive modifier
@@ -75,11 +93,17 @@ export function addHandler (
   // normalize click.right and click.middle since they don't actually fire
   // this is technically browser-specific, but at least for now browsers are
   // the only target envs that have right/middle clicks.
-  if (name === 'click') {
-    if (modifiers.right) {
+  if (modifiers.right) {
+    if (dynamic) {
+      name = `(${name})==='click'?'contextmenu':(${name})`
+    } else if (name === 'click') {
       name = 'contextmenu'
       delete modifiers.right
-    } else if (modifiers.middle) {
+    }
+  } else if (modifiers.middle) {
+    if (dynamic) {
+      name = `(${name})==='click'?'mouseup':(${name})`
+    } else if (name === 'click') {
       name = 'mouseup'
     }
   }
@@ -87,16 +111,16 @@ export function addHandler (
   // check capture modifier
   if (modifiers.capture) {
     delete modifiers.capture
-    name = '!' + name // mark the event as captured
+    name = prependModifierMarker('!', name, dynamic)
   }
   if (modifiers.once) {
     delete modifiers.once
-    name = '~' + name // mark the event as once
+    name = prependModifierMarker('~', name, dynamic)
   }
   /* istanbul ignore if */
   if (modifiers.passive) {
     delete modifiers.passive
-    name = '&' + name // mark the event as passive
+    name = prependModifierMarker('&', name, dynamic)
   }
 
   let events
@@ -107,7 +131,7 @@ export function addHandler (
     events = el.events || (el.events = {})
   }
 
-  const newHandler: any = rangeSetItem({ value: value.trim() }, range)
+  const newHandler: any = rangeSetItem({ value: value.trim(), dynamic }, range)
   if (modifiers !== emptyObject) {
     newHandler.modifiers = modifiers
   }

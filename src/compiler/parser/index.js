@@ -26,7 +26,7 @@ export const dirRE = /^v-|^@|^:|^\./
 export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
-const dynamicKeyRE = /^\[.*\]$/
+const dynamicArgRE = /^\[.*\]$/
 
 const argRE = /:(.*)$/
 export const bindRE = /^:|^\.|^v-bind:/
@@ -666,7 +666,7 @@ function getSlotName (binding) {
       )
     }
   }
-  return dynamicKeyRE.test(name)
+  return dynamicArgRE.test(name)
     // dynamic [name]
     ? { name: name.slice(1, -1), dynamic: true }
     // static name
@@ -700,7 +700,7 @@ function processComponent (el) {
 
 function processAttrs (el) {
   const list = el.attrsList
-  let i, l, name, rawName, value, modifiers, isProp, syncGen
+  let i, l, name, rawName, value, modifiers, syncGen, isDynamic
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
     value = list[i].value
@@ -719,7 +719,10 @@ function processAttrs (el) {
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
         value = parseFilters(value)
-        isProp = false
+        isDynamic = dynamicArgRE.test(name)
+        if (isDynamic) {
+          name = name.slice(1, -1)
+        }
         if (
           process.env.NODE_ENV !== 'production' &&
           value.trim().length === 0
@@ -729,57 +732,79 @@ function processAttrs (el) {
           )
         }
         if (modifiers) {
-          if (modifiers.prop) {
-            isProp = true
+          if (modifiers.prop && !isDynamic) {
             name = camelize(name)
             if (name === 'innerHtml') name = 'innerHTML'
           }
-          if (modifiers.camel) {
+          if (modifiers.camel && !isDynamic) {
             name = camelize(name)
           }
           if (modifiers.sync) {
             syncGen = genAssignmentCode(value, `$event`)
-            addHandler(
-              el,
-              `update:${camelize(name)}`,
-              syncGen,
-              null,
-              false,
-              warn,
-              list[i]
-            )
-            if (hyphenate(name) !== camelize(name)) {
+            if (!isDynamic) {
               addHandler(
                 el,
-                `update:${hyphenate(name)}`,
+                `update:${camelize(name)}`,
                 syncGen,
                 null,
                 false,
                 warn,
                 list[i]
               )
+              if (hyphenate(name) !== camelize(name)) {
+                addHandler(
+                  el,
+                  `update:${hyphenate(name)}`,
+                  syncGen,
+                  null,
+                  false,
+                  warn,
+                  list[i]
+                )
+              }
+            } else {
+              // handler w/ dynamic event name
+              addHandler(
+                el,
+                `"update:"+(${name})`,
+                syncGen,
+                null,
+                false,
+                warn,
+                list[i],
+                true // dynamic
+              )
             }
           }
         }
-        if (isProp || (
+        if ((modifiers && modifiers.prop) || (
           !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
         )) {
-          addProp(el, name, value, list[i])
+          addProp(el, name, value, list[i], isDynamic)
         } else {
-          addAttr(el, name, value, list[i])
+          addAttr(el, name, value, list[i], isDynamic)
         }
       } else if (onRE.test(name)) { // v-on
         name = name.replace(onRE, '')
-        addHandler(el, name, value, modifiers, false, warn, list[i])
+        isDynamic = dynamicArgRE.test(name)
+        if (isDynamic) {
+          name = name.slice(1, -1)
+        }
+        addHandler(el, name, value, modifiers, false, warn, list[i], isDynamic)
       } else { // normal directives
         name = name.replace(dirRE, '')
         // parse arg
         const argMatch = name.match(argRE)
-        const arg = argMatch && argMatch[1]
+        let arg = argMatch && argMatch[1]
+        isDynamic = false
         if (arg) {
           name = name.slice(0, -(arg.length + 1))
+          if (dynamicArgRE.test(arg)) {
+            arg = arg.slice(1, -1)
+            isDynamic = true
+          }
         }
-        addDirective(el, name, rawName, value, arg, modifiers, list[i])
+        addDirective(el, name, rawName, value, arg, isDynamic, modifiers, list[i])
         if (process.env.NODE_ENV !== 'production' && name === 'model') {
           checkForAliasModel(el, value)
         }
