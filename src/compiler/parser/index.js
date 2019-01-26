@@ -791,11 +791,16 @@ function processAttrs (el) {
         name = name.replace(dirRE, '')
         // parse arg
         const argMatch = name.match(argRE)
-        const arg = argMatch && argMatch[1]
+        let arg = argMatch && argMatch[1]
+        isDynamic = false
         if (arg) {
           name = name.slice(0, -(arg.length + 1))
+          if (dynamicArgRE.test(arg)) {
+            arg = arg.slice(1, -1)
+            isDynamic = true
+          }
         }
-        addDirective(el, name, rawName, value, arg, modifiers, list[i])
+        addDirective(el, name, rawName, value, arg, isDynamic, modifiers, list[i])
         if (process.env.NODE_ENV !== 'production' && name === 'model') {
           checkForAliasModel(el, value)
         }

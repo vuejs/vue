@@ -45,10 +45,18 @@ export function addDirective (
   rawName: string,
   value: string,
   arg: ?string,
+  isDynamicArg: boolean,
   modifiers: ?ASTModifiers,
   range?: Range
 ) {
-  (el.directives || (el.directives = [])).push(rangeSetItem({ name, rawName, value, arg, modifiers }, range))
+  (el.directives || (el.directives = [])).push(rangeSetItem({
+    name,
+    rawName,
+    value,
+    arg,
+    isDynamicArg,
+    modifiers
+  }, range))
   el.plain = false
 }
 

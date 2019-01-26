@@ -88,6 +88,7 @@ declare type ASTDirective = {
   rawName: string;
   value: string;
   arg: ?string;
+  isDynamicArg: boolean;
   modifiers: ?ASTModifiers;
   start?: number;
   end?: number;

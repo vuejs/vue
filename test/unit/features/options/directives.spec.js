@@ -265,4 +265,26 @@ describe('Options directives', () => {
       expect(dir.unbind.calls.argsFor(0)[0]).toBe(oldEl)
     }).then(done)
   })
+
+  it('dynamic arguments', done => {
+    const vm = new Vue({
+      template: `<div v-my:[key]="1"/>`,
+      data: {
+        key: 'foo'
+      },
+      directives: {
+        my: {
+          bind(el, binding) {
+            expect(binding.arg).toBe('foo')
+          },
+          update(el, binding) {
+            expect(binding.arg).toBe('bar')
+            expect(binding.oldArg).toBe('foo')
+            done()
+          }
+        }
+      }
+    }).$mount()
+    vm.key = 'bar'
+  })
 })
