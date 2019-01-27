@@ -11,9 +11,11 @@ import {
   ThisTypedComponentOptionsWithArrayProps,
   ThisTypedComponentOptionsWithRecordProps,
   WatchOptions,
+  RequiredPropsNames
 } from "./options";
 import { VNode, VNodeData, VNodeChildren, ScopedSlot } from "./vnode";
 import { PluginFunction, PluginObject } from "./plugin";
+import { JSXElementAttributesProperty } from "./jsx";
 
 export interface CreateElement {
   (tag?: string | Component<any, any, any, any> | AsyncComponent<any, any, any, any> | (() => Component), children?: VNodeChildren): VNode;
@@ -61,8 +63,8 @@ export interface Vue {
   $createElement: CreateElement;
 }
 
-export type CombinedVueInstance<Instance extends Vue, Data, Methods, Computed, Props> =  Data & Methods & Computed & Props & Instance;
-export type ExtendedVue<Instance extends Vue, Data, Methods, Computed, Props> = VueConstructor<CombinedVueInstance<Instance, Data, Methods, Computed, Props> & Vue>;
+export type CombinedVueInstance<Instance extends Vue, Data, Methods, Computed, Props> = Data & Methods & Computed & Props & Instance;
+export type ExtendedVue<Instance extends Vue, Data, Methods, Computed, Props, RequiredPropsNames extends keyof Props> = VueConstructor<CombinedVueInstance<Instance, Data, Methods, Computed, Props> & JSXElementAttributesProperty<Props, RequiredPropsNames> & Vue>;
 
 export interface VueConfiguration {
   silent: boolean;
@@ -81,13 +83,13 @@ export interface VueConstructor<V extends Vue = Vue> {
   new <Data = object, Methods = object, Computed = object, PropNames extends string = never>(options?: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames>): CombinedVueInstance<V, Data, Methods, Computed, Record<PropNames, any>>;
   // ideally, the return type should just contain Props, not Record<keyof Props, any>. But TS requires to have Base constructors with the same return type.
   new <Data = object, Methods = object, Computed = object, Props = object>(options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): CombinedVueInstance<V, Data, Methods, Computed, Record<keyof Props, any>>;
-  new (options?: ComponentOptions<V>): CombinedVueInstance<V, object, object, object, Record<keyof object, any>>;
+  new(options?: ComponentOptions<V>): CombinedVueInstance<V, object, object, object, Record<keyof object, any>>;
 
-  extend<Data, Methods, Computed, PropNames extends string = never>(options?: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames>): ExtendedVue<V, Data, Methods, Computed, Record<PropNames, any>>;
-  extend<Data, Methods, Computed, Props>(options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props>;
-  extend<PropNames extends string = never>(definition: FunctionalComponentOptions<Record<PropNames, any>, PropNames[]>): ExtendedVue<V, {}, {}, {}, Record<PropNames, any>>;
-  extend<Props>(definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>>): ExtendedVue<V, {}, {}, {}, Props>;
-  extend(options?: ComponentOptions<V>): ExtendedVue<V, {}, {}, {}, {}>;
+  extend<Data, Methods, Computed, PropNames extends string = never>(options?: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames>): ExtendedVue<V, Data, Methods, Computed, Record<PropNames, any>, never>;
+  extend<Data, Methods, Computed, Props extends { [key: string]: any }, PropsDef>(options?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props> & { props?: PropsDef }): ExtendedVue<V, Data, Methods, Computed, Props, RequiredPropsNames<PropsDef>>;
+  extend<PropNames extends string = never>(definition: FunctionalComponentOptions<Record<PropNames, any>, PropNames[]>): ExtendedVue<V, {}, {}, {}, Record<PropNames, any>, never>;
+  extend<Props>(definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>>): ExtendedVue<V, {}, {}, {}, Props, RequiredPropsNames<RecordPropsDefinition<Props>>>;
+  extend(options?: ComponentOptions<V>): ExtendedVue<V, {}, {}, {}, {}, never>;
 
   nextTick(callback: () => void, context?: any[]): void;
   nextTick(): Promise<void>
@@ -104,12 +106,12 @@ export interface VueConstructor<V extends Vue = Vue> {
 
   component(id: string): VueConstructor;
   component<VC extends VueConstructor>(id: string, constructor: VC): VC;
-  component<Data, Methods, Computed, Props>(id: string, definition: AsyncComponent<Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props>;
-  component<Data, Methods, Computed, PropNames extends string = never>(id: string, definition?: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames>): ExtendedVue<V, Data, Methods, Computed, Record<PropNames, any>>;
-  component<Data, Methods, Computed, Props>(id: string, definition?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props>;
-  component<PropNames extends string>(id: string, definition: FunctionalComponentOptions<Record<PropNames, any>, PropNames[]>): ExtendedVue<V, {}, {}, {}, Record<PropNames, any>>;
-  component<Props>(id: string, definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>>): ExtendedVue<V, {}, {}, {}, Props>;
-  component(id: string, definition?: ComponentOptions<V>): ExtendedVue<V, {}, {}, {}, {}>;
+  component<Data, Methods, Computed, Props>(id: string, definition: AsyncComponent<Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props, never>;
+  component<Data, Methods, Computed, PropNames extends string = never>(id: string, definition?: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames>): ExtendedVue<V, Data, Methods, Computed, Record<PropNames, any>, never>;
+  component<Data, Methods, Computed, Props>(id: string, definition?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): ExtendedVue<V, Data, Methods, Computed, Props, never>;
+  component<PropNames extends string>(id: string, definition: FunctionalComponentOptions<Record<PropNames, any>, PropNames[]>): ExtendedVue<V, {}, {}, {}, Record<PropNames, any>, never>;
+  component<Props>(id: string, definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>>): ExtendedVue<V, {}, {}, {}, Props, never>;
+  component(id: string, definition?: ComponentOptions<V>): ExtendedVue<V, {}, {}, {}, {}, never>;
 
   use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): VueConstructor<V>;
   use(plugin: PluginObject<any> | PluginFunction<any>, ...options: any[]): VueConstructor<V>;
