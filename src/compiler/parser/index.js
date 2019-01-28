@@ -38,6 +38,8 @@ const slotRE = /^v-slot(:|$)|^#/
 const lineBreakRE = /[\r\n]/
 const whitespaceRE = /\s+/g
 
+const invalidAttributeRE = /[\s"'<>\/=]/
+
 const decodeHTMLCached = cached(he.decode)
 
 // configurable state
@@ -194,12 +196,26 @@ export function parse (
         element.ns = ns
       }
 
-      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
-        element.start = start
-        element.rawAttrsMap = element.attrsList.reduce((cumulated, attr) => {
-          cumulated[attr.name] = attr
-          return cumulated
-        }, {})
+      if (process.env.NODE_ENV !== 'production') {
+        if (options.outputSourceRange) {
+          element.start = start
+          element.rawAttrsMap = element.attrsList.reduce((cumulated, attr) => {
+            cumulated[attr.name] = attr
+            return cumulated
+          }, {})
+        }
+        attrs.forEach(attr => {
+          if (invalidAttributeRE.test(attr.name)) {
+            warn(
+              `Invalid dynamic argument expression: attribute names cannot contain ` +
+              `spaces, quotes, <, >, / or =.`,
+              {
+                start: attr.start + attr.name.indexOf(`[`),
+                end: attr.start + attr.name.length
+              }
+            )
+          }
+        })
       }
 
       if (isForbiddenTag(element) && !isServerRendering()) {
