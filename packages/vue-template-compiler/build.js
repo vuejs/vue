@@ -260,6 +260,7 @@ function def (obj, key, val, enumerable) {
 
 // Regular Expressions for parsing tags and attributes
 var attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
+var dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
 var ncname = "[a-zA-Z_][\\-\\.0-9_a-zA-Z" + unicodeLetters + "]*";
 var qnameCapture = "((?:" + ncname + "\\:)?" + ncname + ")";
 var startTagOpen = new RegExp(("^<" + qnameCapture));
@@ -437,7 +438,7 @@ function parseHTML (html, options) {
       };
       advance(start[0].length);
       var end, attr;
-      while (!(end = html.match(startTagClose)) && (attr = html.match(attribute))) {
+      while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
         attr.start = index;
         advance(attr[0].length);
         attr.end = index;
@@ -2360,6 +2361,8 @@ var slotRE = /^v-slot(:|$)|^#/;
 var lineBreakRE = /[\r\n]/;
 var whitespaceRE = /\s+/g;
 
+var invalidAttributeRE = /[\s"'<>\/=]/;
+
 var decodeHTMLCached = cached(he.decode);
 
 // configurable state
@@ -2516,12 +2519,26 @@ function parse (
         element.ns = ns;
       }
 
-      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
-        element.start = start$1;
-        element.rawAttrsMap = element.attrsList.reduce(function (cumulated, attr) {
-          cumulated[attr.name] = attr;
-          return cumulated
-        }, {});
+      if (process.env.NODE_ENV !== 'production') {
+        if (options.outputSourceRange) {
+          element.start = start$1;
+          element.rawAttrsMap = element.attrsList.reduce(function (cumulated, attr) {
+            cumulated[attr.name] = attr;
+            return cumulated
+          }, {});
+        }
+        attrs.forEach(function (attr) {
+          if (invalidAttributeRE.test(attr.name)) {
+            warn$1(
+              "Invalid dynamic argument expression: attribute names cannot contain " +
+              "spaces, quotes, <, >, / or =.",
+              {
+                start: attr.start + attr.name.indexOf("["),
+                end: attr.start + attr.name.length
+              }
+            );
+          }
+        });
       }
 
       if (isForbiddenTag(element) && !isServerRendering()) {
@@ -2912,7 +2929,7 @@ function processSlotContent (el) {
   }
 
   // 2.6 v-slot syntax
-  if (process.env.NEW_SLOT_SYNTAX) {
+  {
     if (el.tag === 'template') {
       // v-slot on <template>
       var slotBinding = getAndRemoveAttrByRegex(el, slotRE);
