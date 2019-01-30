@@ -360,7 +360,10 @@ function genScopedSlots (
   slots: { [key: string]: ASTElement },
   state: CodegenState
 ): string {
-  const hasDynamicKeys = Object.keys(slots).some(key => slots[key].slotTargetDynamic)
+  const hasDynamicKeys = Object.keys(slots).some(key => {
+    const slot = slots[key]
+    return slot.slotTargetDynamic || slot.if || slot.for
+  })
   return `scopedSlots:_u([${
     Object.keys(slots).map(key => {
       return genScopedSlot(key, slots[key], state)
@@ -373,17 +376,27 @@ function genScopedSlot (
   el: ASTElement,
   state: CodegenState
 ): string {
+  if (el.if && !el.ifProcessed) {
+    return genIfScopedSlot(key, el, state)
+  }
   if (el.for && !el.forProcessed) {
     return genForScopedSlot(key, el, state)
   }
   const fn = `function(${String(el.slotScope)}){` +
     `return ${el.tag === 'template'
-      ? el.if
-        ? `(${el.if})?${genChildren(el, state) || 'undefined'}:undefined`
-        : genChildren(el, state) || 'undefined'
+      ? genChildren(el, state) || 'undefined'
       : genElement(el, state)
     }}`
   return `{key:${key},fn:${fn}}`
+}
+
+function genIfScopedSlot (
+  key: string,
+  el: any,
+  state: CodegenState
+): string {
+  el.ifProcessed = true
+  return `(${el.if})?${genScopedSlot(key, el, state)}:null`
 }
 
 function genForScopedSlot (

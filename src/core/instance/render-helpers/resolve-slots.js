@@ -59,7 +59,7 @@ export function resolveScopedSlots (
     const slot = fns[i]
     if (Array.isArray(slot)) {
       resolveScopedSlots(slot, hasDynamicKeys, res)
-    } else {
+    } else if (slot) {
       res[slot.key] = slot.fn
     }
   }
