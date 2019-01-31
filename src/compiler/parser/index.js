@@ -107,6 +107,7 @@ export function parse (
   }
 
   function closeElement (element) {
+    trimEndingWhitespace(element)
     if (!inVPre && !element.processed) {
       element = processElement(element, options)
     }
@@ -133,14 +134,25 @@ export function parse (
     if (currentParent && !element.forbidden) {
       if (element.elseif || element.else) {
         processIfConditions(element, currentParent)
-      } else if (element.slotScope) { // scoped slot
-        const name = element.slotTarget || '"default"'
-        ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
       } else {
+        if (element.slotScope) {
+          // scoped slot
+          // keep it in the children list so that v-else(-if) conditions can
+          // find it as the prev node.
+          const name = element.slotTarget || '"default"'
+          ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
+        }
         currentParent.children.push(element)
         element.parent = currentParent
       }
     }
+
+    // final children cleanup
+    // filter out scoped slots
+    element.children = element.children.filter(c => !c.slotScope)
+    // remove trailing whitespace node again
+    trimEndingWhitespace(element)
+
     // check pre state
     if (element.pre) {
       inVPre = false
@@ -151,6 +163,20 @@ export function parse (
     // apply post-transforms
     for (let i = 0; i < postTransforms.length; i++) {
       postTransforms[i](element, options)
+    }
+  }
+
+  function trimEndingWhitespace (el) {
+    // remove trailing whitespace node
+    if (!inPre) {
+      let lastNode
+      while (
+        (lastNode = el.children[el.children.length - 1]) &&
+        lastNode.type === 3 &&
+        lastNode.text === ' '
+      ) {
+        el.children.pop()
+      }
     }
   }
 
@@ -268,13 +294,6 @@ export function parse (
 
     end (tag, start, end) {
       const element = stack[stack.length - 1]
-      if (!inPre) {
-        // remove trailing whitespace node
-        const lastNode = element.children[element.children.length - 1]
-        if (lastNode && lastNode.type === 3 && lastNode.text === ' ') {
-          element.children.pop()
-        }
-      }
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
@@ -658,8 +677,9 @@ function processSlotContent (el) {
         const slots = el.scopedSlots || (el.scopedSlots = {})
         const { name, dynamic } = getSlotName(slotBinding)
         const slotContainer = slots[name] = createASTElement('template', [], el)
+        slotContainer.slotTarget = name
         slotContainer.slotTargetDynamic = dynamic
-        slotContainer.children = el.children
+        slotContainer.children = el.children.filter(c => !c.slotScope)
         slotContainer.slotScope = slotBinding.value || `_`
         // remove children as they are returned from scopedSlots now
         el.children = []
