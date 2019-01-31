@@ -149,7 +149,7 @@ export function parse (
 
     // final children cleanup
     // filter out scoped slots
-    element.children = element.children.filter(c => !c.slotScope)
+    element.children = element.children.filter(c => !(c: any).slotScope)
     // remove trailing whitespace node again
     trimEndingWhitespace(element)
 
@@ -642,7 +642,7 @@ function processSlotContent (el) {
               el
             )
           }
-          if (!maybeComponent(el.parent)) {
+          if (el.parent && !maybeComponent(el.parent)) {
             warn(
               `<template v-slot> can only appear at the root level inside ` +
               `the receiving the component`,
@@ -686,7 +686,7 @@ function processSlotContent (el) {
         const slotContainer = slots[name] = createASTElement('template', [], el)
         slotContainer.slotTarget = name
         slotContainer.slotTargetDynamic = dynamic
-        slotContainer.children = el.children.filter(c => !c.slotScope)
+        slotContainer.children = el.children.filter(c => !(c: any).slotScope)
         slotContainer.slotScope = slotBinding.value || `_`
         // remove children as they are returned from scopedSlots now
         el.children = []
