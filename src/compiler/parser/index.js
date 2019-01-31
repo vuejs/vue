@@ -642,6 +642,13 @@ function processSlotContent (el) {
               el
             )
           }
+          if (!maybeComponent(el.parent)) {
+            warn(
+              `<template v-slot> can only appear at the root level inside ` +
+              `the receiving the component`,
+              el
+            )
+          }
         }
         const { name, dynamic } = getSlotName(slotBinding)
         el.slotTarget = name

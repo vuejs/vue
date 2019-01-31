@@ -845,6 +845,20 @@ describe('Component scoped slot', () => {
         expect(vm.$el.innerHTML).toBe(`b from foo two `)
       }).then(done)
     })
+
+    it('warn when v-slot used on non-root <template>', () => {
+      const vm = new Vue({
+        template: `
+          <foo>
+            <template v-if="true">
+              <template v-slot:one>foo</template>
+            </template>
+          </foo>
+        `,
+        components: { Foo }
+      }).$mount()
+      expect(`<template v-slot> can only appear at the root level`).toHaveBeenWarned()
+    })
   })
 
   // 2.6 scoped slot perf optimization
