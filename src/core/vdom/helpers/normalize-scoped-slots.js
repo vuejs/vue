@@ -26,7 +26,7 @@ export function normalizeScopedSlots (
     }
   }
   res._normalized = true
-  res.$stable = slots && slots.$stable
+  res.$stable = slots ? slots.$stable : true
   return res
 }
 
