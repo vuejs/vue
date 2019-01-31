@@ -69,25 +69,25 @@ describe('Directive v-bind', () => {
 
   it('enumerated attr', done => {
     const vm = new Vue({
-      template: '<div><span :draggable="foo">hello</span></div>',
+      template: '<div><span :contenteditable="foo">hello</span></div>',
       data: { foo: true }
     }).$mount()
-    expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
-    vm.foo = 'again'
+    expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('true')
+    vm.foo = 'plaintext-only' // allow special values
     waitForUpdate(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
+      expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('plaintext-only')
       vm.foo = null
     }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
+      expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('false')
       vm.foo = ''
     }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
+      expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('true')
       vm.foo = false
     }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
+      expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('false')
       vm.foo = 'false'
     }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
+      expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('false')
     }).then(done)
   })
 
