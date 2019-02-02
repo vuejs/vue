@@ -535,20 +535,22 @@ describe('parser', () => {
     expect('The value for a v-bind expression cannot be empty. Found in "v-bind:empty-msg"').toHaveBeenWarned()
   })
 
-  it('v-bind.prop shorthand syntax', () => {
-    const ast = parse('<div .id="foo"></div>', baseOptions)
-    expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: false }])
-  })
+  if (process.env.VBIND_PROP_SHORTHAND) {
+    it('v-bind.prop shorthand syntax', () => {
+      const ast = parse('<div .id="foo"></div>', baseOptions)
+      expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: false }])
+    })
 
-  it('v-bind.prop shorthand syntax w/ modifiers', () => {
-    const ast = parse('<div .id.mod="foo"></div>', baseOptions)
-    expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: false }])
-  })
+    it('v-bind.prop shorthand syntax w/ modifiers', () => {
+      const ast = parse('<div .id.mod="foo"></div>', baseOptions)
+      expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: false }])
+    })
 
-  it('v-bind dynamic argument', () => {
-    const ast = parse('<div .[id]="foo"></div>', baseOptions)
-    expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: true }])
-  })
+    it('v-bind.prop shorthand dynamic argument', () => {
+      const ast = parse('<div .[id]="foo"></div>', baseOptions)
+      expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: true }])
+    })
+  }
 
   // This only works for string templates.
   // In-DOM templates will be malformed before Vue can parse it.

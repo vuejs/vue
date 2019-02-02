@@ -22,7 +22,9 @@ import {
 } from '../helpers'
 
 export const onRE = /^@|^v-on:/
-export const dirRE = /^v-|^@|^:|^\./
+export const dirRE = process.env.VBIND_PROP_SHORTHAND
+  ? /^v-|^@|^:|^\./
+  : /^v-|^@|^:/
 export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
@@ -753,7 +755,7 @@ function processAttrs (el) {
       // modifiers
       modifiers = parseModifiers(name.replace(dirRE, ''))
       // support .foo shorthand syntax for the .prop modifier
-      if (propBindRE.test(name)) {
+      if (process.env.VBIND_PROP_SHORTHAND && propBindRE.test(name)) {
         (modifiers || (modifiers = {})).prop = true
         name = `.` + name.slice(1).replace(modifierRE, '')
       } else if (modifiers) {

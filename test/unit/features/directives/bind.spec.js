@@ -133,17 +133,19 @@ describe('Directive v-bind', () => {
     expect(vm.$el.getAttribute('id')).toBe(null)
   })
 
-  it('.prop modifier shorthand', () => {
-    const vm = new Vue({
-      template: '<div><span .text-content="foo"></span><span .inner-html="bar"></span></div>',
-      data: {
-        foo: 'hello',
-        bar: '<span>qux</span>'
-      }
-    }).$mount()
-    expect(vm.$el.children[0].textContent).toBe('hello')
-    expect(vm.$el.children[1].innerHTML).toBe('<span>qux</span>')
-  })
+  if (process.env.VBIND_PROP_SHORTHAND) {
+    it('.prop modifier shorthand', () => {
+      const vm = new Vue({
+        template: '<div><span .text-content="foo"></span><span .inner-html="bar"></span></div>',
+        data: {
+          foo: 'hello',
+          bar: '<span>qux</span>'
+        }
+      }).$mount()
+      expect(vm.$el.children[0].textContent).toBe('hello')
+      expect(vm.$el.children[1].innerHTML).toBe('<span>qux</span>')
+    })
+  }
 
   it('.camel modifier', () => {
     const vm = new Vue({
@@ -529,20 +531,22 @@ describe('Directive v-bind', () => {
       }).then(done)
     })
 
-    it('.prop shorthand', done => {
-      const vm = new Vue({
-        template: `<div .[key]="value"></div>`,
-        data: {
-          key: 'id',
-          value: 'hello'
-        }
-      }).$mount()
-      expect(vm.$el.id).toBe('hello')
-      vm.key = 'textContent'
-      waitForUpdate(() => {
-        expect(vm.$el.textContent).toBe('hello')
-      }).then(done)
-    })
+    if (process.env.VBIND_PROP_SHORTHAND) {
+      it('.prop shorthand', done => {
+        const vm = new Vue({
+          template: `<div .[key]="value"></div>`,
+          data: {
+            key: 'id',
+            value: 'hello'
+          }
+        }).$mount()
+        expect(vm.$el.id).toBe('hello')
+        vm.key = 'textContent'
+        waitForUpdate(() => {
+          expect(vm.$el.textContent).toBe('hello')
+        }).then(done)
+      })
+    }
 
     it('handle class and style', () => {
       const vm = new Vue({
