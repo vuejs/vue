@@ -786,6 +786,16 @@ describe('parser', () => {
     expect(ast.children[1].text).toBe('comment here')
   })
 
+  // #9407
+  it('should parse templates with comments anywhere', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const ast = parse(`<!--comment here--><div>123</div>`, options)
+    expect(ast.tag).toBe('div')
+    expect(ast.children.length).toBe(1)
+  })
+
   // #8103
   it('should allow CRLFs in string interpolations', () => {
     const ast = parse(`<p>{{\r\nmsg\r\n}}</p>`, baseOptions)
@@ -797,7 +807,7 @@ describe('parser', () => {
       preserveWhitespace: false
     }, baseOptions)
 
-     const ast = parse('<p>\n  Welcome to <b>Vue.js</b>    <i>world</i>  \n  <span>.\n  Have fun!\n</span></p>', options)
+    const ast = parse('<p>\n  Welcome to <b>Vue.js</b>    <i>world</i>  \n  <span>.\n  Have fun!\n</span></p>', options)
     expect(ast.tag).toBe('p')
     expect(ast.children.length).toBe(4)
     expect(ast.children[0].type).toBe(3)
