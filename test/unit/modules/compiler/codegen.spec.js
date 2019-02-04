@@ -591,14 +591,21 @@ describe('codegen', () => {
       '<my-component inline-template><hr><hr></my-component>',
       `with(this){return _c('my-component',{inlineTemplate:{render:function(){with(this){return _c('hr')}},staticRenderFns:[]}})}`
     )
-    try {
-      assertCodegen(
-        '<my-component inline-template></my-component>',
-        ''
-      )
-    } catch (e) {}
+    assertCodegen(
+      '<my-component inline-template></my-component>',
+      `with(this){return _c('my-component',{})}`
+    )
+    // have "is" attribute
+    assertCodegen(
+      '<div is="myComponent" inline-template><div></div></div>',
+      `with(this){return _c("myComponent",{tag:"div",inlineTemplate:{render:function(){with(this){return _c('div')}},staticRenderFns:[]}})}`
+    )
+    assertCodegen(
+      '<div is="myComponent" inline-template></div>',
+      `with(this){return _c("myComponent",{tag:"div"})}`
+    )
     expect('Inline-template components must have exactly one child element.').toHaveBeenWarned()
-    expect(console.error.calls.count()).toBe(2)
+    expect(console.error.calls.count()).toBe(3)
   })
 
   it('generate static trees inside v-for', () => {

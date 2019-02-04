@@ -346,7 +346,7 @@ function genInlineTemplate (el: ASTElement, state: CodegenState): ?string {
       { start: el.start }
     )
   }
-  if (ast.type === 1) {
+  if (ast && ast.type === 1) {
     const inlineRenderFns = generate(ast, state.options)
     return `inlineTemplate:{render:function(){${
       inlineRenderFns.render
