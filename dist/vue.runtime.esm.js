@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.6.0-beta.3
+ * Vue.js v2.6.0
  * (c) 2014-2019 Evan You
  * Released under the MIT License.
  */
@@ -2749,7 +2749,7 @@ function resolveScopedSlots (
     var slot = fns[i];
     if (Array.isArray(slot)) {
       resolveScopedSlots(slot, hasDynamicKeys, res);
-    } else {
+    } else if (slot) {
       res[slot.key] = slot.fn;
     }
   }
@@ -3903,7 +3903,7 @@ function normalizeScopedSlots (
     }
   }
   res._normalized = true;
-  res.$stable = slots && slots.$stable;
+  res.$stable = slots ? slots.$stable : true;
   return res
 }
 
@@ -5330,7 +5330,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.6.0-beta.3';
+Vue.version = '2.6.0';
 
 /*  */
 
@@ -5350,6 +5350,17 @@ var mustUseProp = function (tag, type, attr) {
 };
 
 var isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck');
+
+var isValidContentEditableValue = makeMap('events,caret,typing,plaintext-only');
+
+var convertEnumeratedValue = function (key, value) {
+  return isFalsyAttrValue(value) || value === 'false'
+    ? 'false'
+    // allow arbitrary string value for contenteditable
+    : key === 'contenteditable' && isValidContentEditableValue(value)
+      ? value
+      : 'true'
+};
 
 var isBooleanAttr = makeMap(
   'allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
@@ -6618,7 +6629,7 @@ function setAttr (el, key, value) {
       el.setAttribute(key, value);
     }
   } else if (isEnumeratedAttr(key)) {
-    el.setAttribute(key, isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true');
+    el.setAttribute(key, convertEnumeratedValue(key, value));
   } else if (isXlink(key)) {
     if (isFalsyAttrValue(value)) {
       el.removeAttributeNS(xlinkNS, getXlinkProp(key));
@@ -6996,7 +7007,7 @@ var setProp = function (el, name, val) {
   if (cssVarRE.test(name)) {
     el.style.setProperty(name, val);
   } else if (importantRE.test(val)) {
-    el.style.setProperty(name, val.replace(importantRE, ''), 'important');
+    el.style.setProperty(hyphenate(name), val.replace(importantRE, ''), 'important');
   } else {
     var normalizedName = normalize(name);
     if (Array.isArray(val)) {
