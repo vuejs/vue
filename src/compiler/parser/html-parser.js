@@ -36,10 +36,11 @@ const decodingMap = {
   '&quot;': '"',
   '&amp;': '&',
   '&#10;': '\n',
-  '&#9;': '\t'
+  '&#9;': '\t',
+  '&#39;': "'"
 }
-const encodedAttr = /&(?:lt|gt|quot|amp);/g
-const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10|#9);/g
+const encodedAttr = /&(?:lt|gt|quot|amp|#39);/g
+const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#39|#10|#9);/g
 
 // #5992
 const isIgnoreNewlineTag = makeMap('pre,textarea', true)
