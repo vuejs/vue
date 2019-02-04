@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.6.0
+ * Vue.js v2.6.1
  * (c) 2014-2019 Evan You
  * Released under the MIT License.
  */
@@ -1844,7 +1844,7 @@ function invokeWithErrorHandling (
   var res;
   try {
     res = args ? handler.apply(context, args) : handler.call(context);
-    if (isPromise(res)) {
+    if (res && !res._isVue && isPromise(res)) {
       res.catch(function (e) { return handleError(e, vm, info + " (Promise/async)"); });
     }
   } catch (e) {
@@ -4576,8 +4576,9 @@ function mergeHook$1 (f1, f2) {
 // prop and event handler respectively.
 function transformModel (options, data) {
   var prop = (options.model && options.model.prop) || 'value';
-  var event = (options.model && options.model.event) || 'input'
-  ;(data.props || (data.props = {}))[prop] = data.model.value;
+  var event = (options.model && options.model.event) || 'input';
+  var addTo = (options.props && prop in options.props) ? 'props' : 'attrs'
+  ;(data[addTo] || (data[addTo] = {}))[prop] = data.model.value;
   var on = data.on || (data.on = {});
   var existing = on[event];
   var callback = data.model.callback;
@@ -5330,7 +5331,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.6.0';
+Vue.version = '2.6.1';
 
 /*  */
 
@@ -6651,8 +6652,8 @@ function baseSetAttr (el, key, value) {
     /* istanbul ignore if */
     if (
       isIE && !isIE9 &&
-      (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') &&
-      key === 'placeholder' && !el.__ieph
+      el.tagName === 'TEXTAREA' &&
+      key === 'placeholder' && value !== '' && !el.__ieph
     ) {
       var blocker = function (e) {
         e.stopImmediatePropagation();

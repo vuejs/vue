@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.6.0
+ * Vue.js v2.6.1
  * (c) 2014-2019 Evan You
  * Released under the MIT License.
  */
@@ -1880,7 +1880,7 @@ function invokeWithErrorHandling (
   let res;
   try {
     res = args ? handler.apply(context, args) : handler.call(context);
-    if (isPromise(res)) {
+    if (res && !res._isVue && isPromise(res)) {
       res.catch(e => handleError(e, vm, info + ` (Promise/async)`));
     }
   } catch (e) {
@@ -4615,8 +4615,9 @@ function mergeHook$1 (f1, f2) {
 // prop and event handler respectively.
 function transformModel (options, data) {
   const prop = (options.model && options.model.prop) || 'value';
-  const event = (options.model && options.model.event) || 'input'
-  ;(data.props || (data.props = {}))[prop] = data.model.value;
+  const event = (options.model && options.model.event) || 'input';
+  const addTo = (options.props && prop in options.props) ? 'props' : 'attrs'
+  ;(data[addTo] || (data[addTo] = {}))[prop] = data.model.value;
   const on = data.on || (data.on = {});
   const existing = on[event];
   const callback = data.model.callback;
@@ -5352,7 +5353,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.6.0';
+Vue.version = '2.6.1';
 
 /*  */
 
@@ -6670,8 +6671,8 @@ function baseSetAttr (el, key, value) {
     /* istanbul ignore if */
     if (
       isIE && !isIE9 &&
-      (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') &&
-      key === 'placeholder' && !el.__ieph
+      el.tagName === 'TEXTAREA' &&
+      key === 'placeholder' && value !== '' && !el.__ieph
     ) {
       const blocker = e => {
         e.stopImmediatePropagation();
@@ -9140,10 +9141,11 @@ const decodingMap = {
   '&quot;': '"',
   '&amp;': '&',
   '&#10;': '\n',
-  '&#9;': '\t'
+  '&#9;': '\t',
+  '&#39;': "'"
 };
-const encodedAttr = /&(?:lt|gt|quot|amp);/g;
-const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10|#9);/g;
+const encodedAttr = /&(?:lt|gt|quot|amp|#39);/g;
+const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#39|#10|#9);/g;
 
 // #5992
 const isIgnoreNewlineTag = makeMap('pre,textarea', true);
@@ -9762,16 +9764,20 @@ function parse (
       }
     },
     comment (text, start, end) {
-      const child = {
-        type: 3,
-        text,
-        isComment: true
-      };
-      if (options.outputSourceRange) {
-        child.start = start;
-        child.end = end;
+      // adding anyting as a sibling to the root node is forbidden
+      // comments should still be allowed, but ignored
+      if (currentParent) {
+        const child = {
+          type: 3,
+          text,
+          isComment: true
+        };
+        if (options.outputSourceRange) {
+          child.start = start;
+          child.end = end;
+        }
+        currentParent.children.push(child);
       }
-      currentParent.children.push(child);
     }
   });
   return root
@@ -11104,7 +11110,7 @@ function genInlineTemplate (el, state) {
       { start: el.start }
     );
   }
-  if (ast.type === 1) {
+  if (ast && ast.type === 1) {
     const inlineRenderFns = generate(ast, state.options);
     return `inlineTemplate:{render:function(){${
       inlineRenderFns.render

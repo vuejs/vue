@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.6.0
+ * Vue.js v2.6.1
  * (c) 2014-2019 Evan You
  * Released under the MIT License.
  */
@@ -1853,7 +1853,7 @@
     var res;
     try {
       res = args ? handler.apply(context, args) : handler.call(context);
-      if (isPromise(res)) {
+      if (res && !res._isVue && isPromise(res)) {
         res.catch(function (e) { return handleError(e, vm, info + " (Promise/async)"); });
       }
     } catch (e) {
@@ -4576,8 +4576,9 @@
   // prop and event handler respectively.
   function transformModel (options, data) {
     var prop = (options.model && options.model.prop) || 'value';
-    var event = (options.model && options.model.event) || 'input'
-    ;(data.props || (data.props = {}))[prop] = data.model.value;
+    var event = (options.model && options.model.event) || 'input';
+    var addTo = (options.props && prop in options.props) ? 'props' : 'attrs'
+    ;(data[addTo] || (data[addTo] = {}))[prop] = data.model.value;
     var on = data.on || (data.on = {});
     var existing = on[event];
     var callback = data.model.callback;
@@ -5323,7 +5324,7 @@
     value: FunctionalRenderContext
   });
 
-  Vue.version = '2.6.0';
+  Vue.version = '2.6.1';
 
   /*  */
 
@@ -6644,8 +6645,8 @@
       /* istanbul ignore if */
       if (
         isIE && !isIE9 &&
-        (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') &&
-        key === 'placeholder' && !el.__ieph
+        el.tagName === 'TEXTAREA' &&
+        key === 'placeholder' && value !== '' && !el.__ieph
       ) {
         var blocker = function (e) {
           e.stopImmediatePropagation();
@@ -9125,10 +9126,11 @@
     '&quot;': '"',
     '&amp;': '&',
     '&#10;': '\n',
-    '&#9;': '\t'
+    '&#9;': '\t',
+    '&#39;': "'"
   };
-  var encodedAttr = /&(?:lt|gt|quot|amp);/g;
-  var encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10|#9);/g;
+  var encodedAttr = /&(?:lt|gt|quot|amp|#39);/g;
+  var encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#39|#10|#9);/g;
 
   // #5992
   var isIgnoreNewlineTag = makeMap('pre,textarea', true);
@@ -9747,16 +9749,20 @@
         }
       },
       comment: function comment (text, start, end) {
-        var child = {
-          type: 3,
-          text: text,
-          isComment: true
-        };
-        if (options.outputSourceRange) {
-          child.start = start;
-          child.end = end;
+        // adding anyting as a sibling to the root node is forbidden
+        // comments should still be allowed, but ignored
+        if (currentParent) {
+          var child = {
+            type: 3,
+            text: text,
+            isComment: true
+          };
+          if (options.outputSourceRange) {
+            child.start = start;
+            child.end = end;
+          }
+          currentParent.children.push(child);
         }
-        currentParent.children.push(child);
       }
     });
     return root
@@ -11051,7 +11057,7 @@
         { start: el.start }
       );
     }
-    if (ast.type === 1) {
+    if (ast && ast.type === 1) {
       var inlineRenderFns = generate(ast, state.options);
       return ("inlineTemplate:{render:function(){" + (inlineRenderFns.render) + "},staticRenderFns:[" + (inlineRenderFns.staticRenderFns.map(function (code) { return ("function(){" + code + "}"); }).join(',')) + "]}")
     }
