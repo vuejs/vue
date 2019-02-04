@@ -460,7 +460,7 @@ describe('Directive v-model text', () => {
       const vm = new Vue({
         el,
         data: { evtCount: 0 },
-        template: `<input placeholder="" @input="evtCount++"></textarea>`,
+        template: `<textarea placeholder="" @input="evtCount++"></textarea>`,
       })
       triggerEvent(vm.$el, 'input')
       setTimeout(() => {
