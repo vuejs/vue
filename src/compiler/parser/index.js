@@ -377,16 +377,20 @@ export function parse (
       }
     },
     comment (text: string, start, end) {
-      const child: ASTText = {
-        type: 3,
-        text,
-        isComment: true
+      // adding anyting as a sibling to the root node is forbidden
+      // comments should still be allowed, but ignored
+      if (currentParent) {
+        const child: ASTText = {
+          type: 3,
+          text,
+          isComment: true
+        }
+        if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+          child.start = start
+          child.end = end
+        }
+        currentParent.children.push(child)
       }
-      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
-        child.start = start
-        child.end = end
-      }
-      currentParent.children.push(child)
     }
   })
   return root
