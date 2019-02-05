@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.6.1
+ * Vue.js v2.6.2
  * (c) 2014-2019 Evan You
  * Released under the MIT License.
  */
@@ -3883,7 +3883,7 @@
       res = {};
       for (var key in slots) {
         if (slots[key] && key[0] !== '$') {
-          res[key] = normalizeScopedSlot(slots[key]);
+          res[key] = normalizeScopedSlot(normalSlots, key, slots[key]);
         }
       }
     }
@@ -3898,13 +3898,22 @@
     return res
   }
 
-  function normalizeScopedSlot(fn) {
-    return function (scope) {
+  function normalizeScopedSlot(normalSlots, key, fn) {
+    var normalized = function (scope) {
+      if ( scope === void 0 ) scope = {};
+
       var res = fn(scope);
       return res && typeof res === 'object' && !Array.isArray(res)
         ? [res] // single vnode
         : normalizeChildren(res)
+    };
+    // proxy scoped slots on normal $slots
+    if (!hasOwn(normalSlots, key)) {
+      Object.defineProperty(normalSlots, key, {
+        get: normalized
+      });
     }
+    return normalized
   }
 
   function proxyNormalSlot(slots, key) {
@@ -4567,9 +4576,8 @@
   // prop and event handler respectively.
   function transformModel (options, data) {
     var prop = (options.model && options.model.prop) || 'value';
-    var event = (options.model && options.model.event) || 'input';
-    var addTo = (options.props && prop in options.props) ? 'props' : 'attrs'
-    ;(data[addTo] || (data[addTo] = {}))[prop] = data.model.value;
+    var event = (options.model && options.model.event) || 'input'
+    ;(data.attrs || (data.attrs = {}))[prop] = data.model.value;
     var on = data.on || (data.on = {});
     var existing = on[event];
     var callback = data.model.callback;
@@ -5315,7 +5323,7 @@
     value: FunctionalRenderContext
   });
 
-  Vue.version = '2.6.1';
+  Vue.version = '2.6.2';
 
   /*  */
 

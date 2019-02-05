@@ -4210,7 +4210,8 @@ function genScopedSlot (
   el,
   state
 ) {
-  if (el.if && !el.ifProcessed) {
+  var isLegacySyntax = el.attrsMap['slot-scope'];
+  if (el.if && !el.ifProcessed && !isLegacySyntax) {
     return genIf(el, state, genScopedSlot, "null")
   }
   if (el.for && !el.forProcessed) {
@@ -4218,7 +4219,9 @@ function genScopedSlot (
   }
   var fn = "function(" + (String(el.slotScope)) + "){" +
     "return " + (el.tag === 'template'
-      ? genChildren(el, state) || 'undefined'
+      ? el.if && isLegacySyntax
+        ? ("(" + (el.if) + ")?" + (genChildren(el, state) || 'undefined') + ":undefined")
+        : genChildren(el, state) || 'undefined'
       : genElement(el, state)) + "}";
   return ("{key:" + (el.slotTarget || "\"default\"") + ",fn:" + fn + "}")
 }

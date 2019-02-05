@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.6.1
+ * Vue.js v2.6.2
  * (c) 2014-2019 Evan You
  * Released under the MIT License.
  */
@@ -3888,7 +3888,7 @@ function normalizeScopedSlots (
     res = {};
     for (var key in slots) {
       if (slots[key] && key[0] !== '$') {
-        res[key] = normalizeScopedSlot(slots[key]);
+        res[key] = normalizeScopedSlot(normalSlots, key, slots[key]);
       }
     }
   }
@@ -3903,13 +3903,22 @@ function normalizeScopedSlots (
   return res
 }
 
-function normalizeScopedSlot(fn) {
-  return function (scope) {
+function normalizeScopedSlot(normalSlots, key, fn) {
+  var normalized = function (scope) {
+    if ( scope === void 0 ) scope = {};
+
     var res = fn(scope);
     return res && typeof res === 'object' && !Array.isArray(res)
       ? [res] // single vnode
       : normalizeChildren(res)
+  };
+  // proxy scoped slots on normal $slots
+  if (!hasOwn(normalSlots, key)) {
+    Object.defineProperty(normalSlots, key, {
+      get: normalized
+    });
   }
+  return normalized
 }
 
 function proxyNormalSlot(slots, key) {
@@ -4572,9 +4581,8 @@ function mergeHook$1 (f1, f2) {
 // prop and event handler respectively.
 function transformModel (options, data) {
   var prop = (options.model && options.model.prop) || 'value';
-  var event = (options.model && options.model.event) || 'input';
-  var addTo = (options.props && prop in options.props) ? 'props' : 'attrs'
-  ;(data[addTo] || (data[addTo] = {}))[prop] = data.model.value;
+  var event = (options.model && options.model.event) || 'input'
+  ;(data.attrs || (data.attrs = {}))[prop] = data.model.value;
   var on = data.on || (data.on = {});
   var existing = on[event];
   var callback = data.model.callback;
@@ -5320,7 +5328,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.6.1';
+Vue.version = '2.6.2';
 
 /*  */
 
@@ -11076,7 +11084,8 @@ function genScopedSlot (
   el,
   state
 ) {
-  if (el.if && !el.ifProcessed) {
+  var isLegacySyntax = el.attrsMap['slot-scope'];
+  if (el.if && !el.ifProcessed && !isLegacySyntax) {
     return genIf(el, state, genScopedSlot, "null")
   }
   if (el.for && !el.forProcessed) {
@@ -11084,7 +11093,9 @@ function genScopedSlot (
   }
   var fn = "function(" + (String(el.slotScope)) + "){" +
     "return " + (el.tag === 'template'
-      ? genChildren(el, state) || 'undefined'
+      ? el.if && isLegacySyntax
+        ? ("(" + (el.if) + ")?" + (genChildren(el, state) || 'undefined') + ":undefined")
+        : genChildren(el, state) || 'undefined'
       : genElement(el, state)) + "}";
   return ("{key:" + (el.slotTarget || "\"default\"") + ",fn:" + fn + "}")
 }
