@@ -44,7 +44,7 @@ export let currentFlushTimestamp = 0
 let getNow: () => number = Date.now
 
 // Determine what event timestamp the browser is using. Annoyingly, the
-// timestamp can either be hi-res ( relative to poge load) or low-res
+// timestamp can either be hi-res (relative to page load) or low-res
 // (relative to UNIX epoch), so in order to compare time we have to use the
 // same timestamp type when saving the flush timestamp.
 if (inBrowser && getNow() > document.createEvent('Event').timeStamp) {
