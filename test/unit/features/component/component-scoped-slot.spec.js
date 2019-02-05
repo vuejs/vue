@@ -650,6 +650,25 @@ describe('Component scoped slot', () => {
     }).then(done)
   })
 
+  // #9422
+  // the behavior of the new syntax is slightly different.
+  it('scoped slot v-if using slot-scope value', () => {
+    const Child = {
+      template: '<div><slot value="foo"/></div>',
+    }
+    const vm = new Vue({
+      components: { Child },
+      template: `
+        <child>
+          <template slot-scope="{ value }" v-if="value">
+            foo {{ value }}
+          </template>
+        </child>
+      `
+    }).$mount()
+    expect(vm.$el.textContent).toMatch(`foo foo`)
+  })
+
   // 2.6 new slot syntax
   describe('v-slot syntax', () => {
     const Foo = {
