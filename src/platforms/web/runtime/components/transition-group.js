@@ -26,7 +26,14 @@ import {
 
 const props = extend({
   tag: String,
-  moveClass: String
+  moveClass: String,
+  origin: {
+    type: String,
+    default: 'viewport',
+    validator (val) {
+      return ['viewport', 'document'].indexOf(val) !== -1
+    }
+  }
 }, transitionProps)
 
 delete props.mode
@@ -80,7 +87,7 @@ export default {
       for (let i = 0; i < prevChildren.length; i++) {
         const c: VNode = prevChildren[i]
         c.data.transition = transitionData
-        c.data.pos = c.elm.getBoundingClientRect()
+        c.data.pos = this.getPosition(c)
         if (map[c.key]) {
           kept.push(c)
         } else {
@@ -104,7 +111,7 @@ export default {
     // we divide the work into three loops to avoid mixing DOM reads and writes
     // in each iteration - which helps prevent layout thrashing.
     children.forEach(callPendingCbs)
-    children.forEach(recordPosition)
+    children.forEach(this.recordPosition)
     children.forEach(applyTranslation)
 
     // force reflow to put everything in position
@@ -157,6 +164,21 @@ export default {
       const info: Object = getTransitionInfo(clone)
       this.$el.removeChild(clone)
       return (this._hasMove = info.hasTransform)
+    },
+    getPosition (c: VNode) {
+      const relativePos = c.elm.getBoundingClientRect()
+      const origin = this.origin
+      if (origin === 'document' && document.documentElement) {
+        const originPos = document.documentElement.getBoundingClientRect()
+        return {
+          top: relativePos.top - originPos.top,
+          left: relativePos.left - originPos.left
+        }
+      }
+      return relativePos
+    },
+    recordPosition (c: VNode) {
+      c.data.newPos = this.getPosition(c)
     }
   }
 }
@@ -170,10 +192,6 @@ function callPendingCbs (c: VNode) {
   if (c.elm._enterCb) {
     c.elm._enterCb()
   }
-}
-
-function recordPosition (c: VNode) {
-  c.data.newPos = c.elm.getBoundingClientRect()
 }
 
 function applyTranslation (c: VNode) {
