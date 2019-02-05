@@ -456,7 +456,7 @@ describe('Component scoped slot', () => {
   })
 
   // new in 2.6, unifying all slots as functions
-  it('non-scoped slots should also be available on $scopedSlots', () => {
+  it('non-scoped slots should also be available on this.$scopedSlots', () => {
     const vm = new Vue({
       template: `<foo>before <div slot="bar" slot-scope="scope">{{ scope.msg }}</div> after</foo>`,
       components: {
@@ -471,6 +471,24 @@ describe('Component scoped slot', () => {
       }
     }).$mount()
     expect(vm.$el.innerHTML).toBe(`before  after<div>hi</div>`)
+  })
+
+  // #9421 the other side of unification is also needed
+  // for library authors
+  it('scoped slots should also be available on this.$slots', () => {
+    const Child = {
+      render: function (h) {
+        return h(
+          'div',
+          this.$slots.content
+        )
+      }
+    }
+    const vm = new Vue({
+      template: `<child><template #content>foo</template></child>`,
+      components: { Child }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe(`foo`)
   })
 
   // #4779
