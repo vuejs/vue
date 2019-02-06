@@ -1027,4 +1027,29 @@ describe('Component scoped slot', () => {
       expect(vm.$el.textContent).toBe(`2`)
     }).then(done)
   })
+
+  it('dynamic v-bind arguments on <slot>', done => {
+    const Foo = {
+      data() {
+        return {
+          key: 'msg'
+        }
+      },
+      template: `<div><slot :[key]="'hello'"/></div>`
+    }
+
+    const vm = new Vue({
+      components: { Foo },
+      template: `
+        <foo ref="foo" v-slot="props">{{ props }}</foo>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(JSON.stringify({ msg: 'hello' }, null, 2))
+
+    vm.$refs.foo.key = 'changed'
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe(JSON.stringify({ changed: 'hello' }, null, 2))
+    }).then(done)
+  })
 })
