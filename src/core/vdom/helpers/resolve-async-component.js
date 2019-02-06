@@ -12,6 +12,7 @@ import {
 } from 'core/util/index'
 
 import { createEmptyVNode } from 'core/vdom/vnode'
+import { currentRenderingInstance } from 'core/instance/render'
 
 function ensureCtor (comp: any, base) {
   if (
@@ -40,8 +41,7 @@ export function createAsyncPlaceholder (
 
 export function resolveAsyncComponent (
   factory: Function,
-  baseCtor: Class<Component>,
-  context: Component
+  baseCtor: Class<Component>
 ): Class<Component> | void {
   if (isTrue(factory.error) && isDef(factory.errorComp)) {
     return factory.errorComp
@@ -55,20 +55,21 @@ export function resolveAsyncComponent (
     return factory.loadingComp
   }
 
-  if (isDef(factory.contexts)) {
+  const owner = currentRenderingInstance
+  if (isDef(factory.owners)) {
     // already pending
-    factory.contexts.push(context)
+    factory.owners.push(owner)
   } else {
-    const contexts = factory.contexts = [context]
+    const owners = factory.owners = [owner]
     let sync = true
 
     const forceRender = (renderCompleted: boolean) => {
-      for (let i = 0, l = contexts.length; i < l; i++) {
-        contexts[i].$forceUpdate()
+      for (let i = 0, l = owners.length; i < l; i++) {
+        (owners[i]: any).$forceUpdate()
       }
 
       if (renderCompleted) {
-        contexts.length = 0
+        owners.length = 0
       }
     }
 
@@ -80,7 +81,7 @@ export function resolveAsyncComponent (
       if (!sync) {
         forceRender(true)
       } else {
-        contexts.length = 0
+        owners.length = 0
       }
     })
 

@@ -935,4 +935,38 @@ describe('Component scoped slot', () => {
       expect(childUpdate.calls.count()).toBe(1)
     }).then(done)
   })
+
+  // #9432: async components inside a scoped slot should trigger update of the
+  // component that invoked the scoped slot, not the lexical context component.
+  it('async component inside scoped slot', done => {
+    let p
+    const vm = new Vue({
+      template: `
+        <foo>
+          <template #default>
+            <bar />
+          </template>
+        </foo>
+      `,
+      components: {
+        foo: {
+          template: `<div>foo<slot/></div>`
+        },
+        bar: resolve => {
+          setTimeout(() => {
+            resolve({
+              template: `<div>bar</div>`
+            })
+            next()
+          }, 0)
+        }
+      }
+    }).$mount()
+
+    function next () {
+      waitForUpdate(() => {
+        expect(vm.$el.textContent).toBe(`foobar`)
+      }).then(done)
+    }
+  })
 })
