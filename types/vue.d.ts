@@ -122,6 +122,7 @@ export interface VueConstructor<V extends Vue = Vue> {
   observable<T>(obj: T): T;
 
   config: VueConfiguration;
+  version: string;
 }
 
 export const Vue: VueConstructor;
