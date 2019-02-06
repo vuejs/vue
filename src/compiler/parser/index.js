@@ -44,6 +44,8 @@ const invalidAttributeRE = /[\s"'<>\/=]/
 
 const decodeHTMLCached = cached(he.decode)
 
+export const emptySlotScopeToken = `_empty_`
+
 // configurable state
 export let warn: any
 let delimiters
@@ -659,7 +661,7 @@ function processSlotContent (el) {
         const { name, dynamic } = getSlotName(slotBinding)
         el.slotTarget = name
         el.slotTargetDynamic = dynamic
-        el.slotScope = slotBinding.value || `_` // force it into a scoped slot for perf
+        el.slotScope = slotBinding.value || emptySlotScopeToken // force it into a scoped slot for perf
       }
     } else {
       // v-slot on component, denotes default slot
@@ -692,8 +694,13 @@ function processSlotContent (el) {
         const slotContainer = slots[name] = createASTElement('template', [], el)
         slotContainer.slotTarget = name
         slotContainer.slotTargetDynamic = dynamic
-        slotContainer.children = el.children.filter(c => !(c: any).slotScope)
-        slotContainer.slotScope = slotBinding.value || `_`
+        slotContainer.children = el.children.filter((c: any) => {
+          if (!c.slotScope) {
+            c.parent = slotContainer
+            return true
+          }
+        })
+        slotContainer.slotScope = slotBinding.value || emptySlotScopeToken
         // remove children as they are returned from scopedSlots now
         el.children = []
         // mark el non-plain so data gets generated

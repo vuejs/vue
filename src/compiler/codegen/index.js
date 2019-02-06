@@ -4,6 +4,7 @@ import { genHandlers } from './events'
 import baseDirectives from '../directives/index'
 import { camelize, no, extend } from 'shared/util'
 import { baseWarn, pluckModuleFunction } from '../helpers'
+import { emptySlotScopeToken } from '../parser/index'
 
 type TransformFunction = (el: ASTElement, code: string) => string;
 type DataGenFunction = (el: ASTElement) => string;
@@ -268,7 +269,7 @@ export function genData (el: ASTElement, state: CodegenState): string {
   }
   // scoped slots
   if (el.scopedSlots) {
-    data += `${genScopedSlots(el.scopedSlots, state)},`
+    data += `${genScopedSlots(el, el.scopedSlots, state)},`
   }
   // component v-model
   if (el.model) {
@@ -357,18 +358,36 @@ function genInlineTemplate (el: ASTElement, state: CodegenState): ?string {
 }
 
 function genScopedSlots (
+  el: ASTElement,
   slots: { [key: string]: ASTElement },
   state: CodegenState
 ): string {
-  const hasDynamicKeys = Object.keys(slots).some(key => {
+  // by default scoped slots are considered "stable", this allows child
+  // components with only scoped slots to skip forced updates from parent.
+  // but in some cases we have to bail-out of this optimization
+  // for example if the slot contains dynamic names, has v-if or v-for on them...
+  let needsForceUpdate = Object.keys(slots).some(key => {
     const slot = slots[key]
     return slot.slotTargetDynamic || slot.if || slot.for
   })
+  // OR when it is inside another scoped slot (the reactivity is disconnected)
+  // #9438
+  if (!needsForceUpdate) {
+    let parent = el.parent
+    while (parent) {
+      if (parent.slotScope && parent.slotScope !== emptySlotScopeToken) {
+        needsForceUpdate = true
+        break
+      }
+      parent = parent.parent
+    }
+  }
+
   return `scopedSlots:_u([${
     Object.keys(slots).map(key => {
       return genScopedSlot(slots[key], state)
     }).join(',')
-  }]${hasDynamicKeys ? `,true` : ``})`
+  }]${needsForceUpdate ? `,true` : ``})`
 }
 
 function genScopedSlot (
@@ -382,7 +401,10 @@ function genScopedSlot (
   if (el.for && !el.forProcessed) {
     return genFor(el, state, genScopedSlot)
   }
-  const fn = `function(${String(el.slotScope)}){` +
+  const slotScope = el.slotScope === emptySlotScopeToken
+    ? ``
+    : String(el.slotScope)
+  const fn = `function(${slotScope}){` +
     `return ${el.tag === 'template'
       ? el.if && isLegacySyntax
         ? `(${el.if})?${genChildren(el, state) || 'undefined'}:undefined`

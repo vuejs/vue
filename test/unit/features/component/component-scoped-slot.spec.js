@@ -992,4 +992,39 @@ describe('Component scoped slot', () => {
       expect(Child.updated).not.toHaveBeenCalled()
     }).then(done)
   })
+
+  // regression #9438
+  it('nested scoped slots update', done => {
+    const Wrapper = {
+      template: `<div><slot/></div>`
+    }
+
+    const Inner = {
+      props: ['foo'],
+      template: `<div>{{ foo }}</div>`
+    }
+
+    const Outer = {
+      data: () => ({ foo: 1 }),
+      template: `<div><slot :foo="foo" /></div>`
+    }
+
+    const vm = new Vue({
+      components: { Outer, Wrapper, Inner },
+      template: `
+        <outer ref="outer" v-slot="props">
+          <wrapper v-slot>
+            <inner :foo="props.foo"/>
+          </wrapper>
+        </outer>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(`1`)
+
+    vm.$refs.outer.foo++
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe(`2`)
+    }).then(done)
+  })
 })
