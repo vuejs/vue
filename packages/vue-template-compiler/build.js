@@ -703,6 +703,7 @@ var isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 'android'
 var isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios');
 var isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge;
 var isPhantomJS = UA && /phantomjs/.test(UA);
+var isFF = UA && UA.match(/firefox\/(\d+)/);
 
 // Firefox has a "watch" function on Object.prototype...
 var nativeWatch = ({}).watch;
@@ -2367,6 +2368,8 @@ var invalidAttributeRE = /[\s"'<>\/=]/;
 
 var decodeHTMLCached = cached(he.decode);
 
+var emptySlotScopeToken = "_empty_";
+
 // configurable state
 var warn$1;
 var delimiters;
@@ -2979,7 +2982,7 @@ function processSlotContent (el) {
         var dynamic = ref.dynamic;
         el.slotTarget = name;
         el.slotTargetDynamic = dynamic;
-        el.slotScope = slotBinding.value || "_"; // force it into a scoped slot for perf
+        el.slotScope = slotBinding.value || emptySlotScopeToken; // force it into a scoped slot for perf
       }
     } else {
       // v-slot on component, denotes default slot
@@ -3014,8 +3017,13 @@ function processSlotContent (el) {
         var slotContainer = slots[name$1] = createASTElement('template', [], el);
         slotContainer.slotTarget = name$1;
         slotContainer.slotTargetDynamic = dynamic$1;
-        slotContainer.children = el.children.filter(function (c) { return !(c).slotScope; });
-        slotContainer.slotScope = slotBinding$1.value || "_";
+        slotContainer.children = el.children.filter(function (c) {
+          if (!c.slotScope) {
+            c.parent = slotContainer;
+            return true
+          }
+        });
+        slotContainer.slotScope = slotBinding$1.value || emptySlotScopeToken;
         // remove children as they are returned from scopedSlots now
         el.children = [];
         // mark el non-plain so data gets generated
@@ -4121,7 +4129,7 @@ function genData$2 (el, state) {
   }
   // scoped slots
   if (el.scopedSlots) {
-    data += (genScopedSlots(el.scopedSlots, state)) + ",";
+    data += (genScopedSlots(el, el.scopedSlots, state)) + ",";
   }
   // component v-model
   if (el.model) {
@@ -4194,16 +4202,34 @@ function genInlineTemplate (el, state) {
 }
 
 function genScopedSlots (
+  el,
   slots,
   state
 ) {
-  var hasDynamicKeys = Object.keys(slots).some(function (key) {
+  // by default scoped slots are considered "stable", this allows child
+  // components with only scoped slots to skip forced updates from parent.
+  // but in some cases we have to bail-out of this optimization
+  // for example if the slot contains dynamic names, has v-if or v-for on them...
+  var needsForceUpdate = Object.keys(slots).some(function (key) {
     var slot = slots[key];
     return slot.slotTargetDynamic || slot.if || slot.for
   });
+  // OR when it is inside another scoped slot (the reactivity is disconnected)
+  // #9438
+  if (!needsForceUpdate) {
+    var parent = el.parent;
+    while (parent) {
+      if (parent.slotScope && parent.slotScope !== emptySlotScopeToken) {
+        needsForceUpdate = true;
+        break
+      }
+      parent = parent.parent;
+    }
+  }
+
   return ("scopedSlots:_u([" + (Object.keys(slots).map(function (key) {
       return genScopedSlot(slots[key], state)
-    }).join(',')) + "]" + (hasDynamicKeys ? ",true" : "") + ")")
+    }).join(',')) + "]" + (needsForceUpdate ? ",true" : "") + ")")
 }
 
 function genScopedSlot (
@@ -4217,7 +4243,10 @@ function genScopedSlot (
   if (el.for && !el.forProcessed) {
     return genFor(el, state, genScopedSlot)
   }
-  var fn = "function(" + (String(el.slotScope)) + "){" +
+  var slotScope = el.slotScope === emptySlotScopeToken
+    ? ""
+    : String(el.slotScope);
+  var fn = "function(" + slotScope + "){" +
     "return " + (el.tag === 'template'
       ? el.if && isLegacySyntax
         ? ("(" + (el.if) + ")?" + (genChildren(el, state) || 'undefined') + ":undefined")
@@ -4310,7 +4339,14 @@ function genSlot (el, state) {
   var slotName = el.slotName || '"default"';
   var children = genChildren(el, state);
   var res = "_t(" + slotName + (children ? ("," + children) : '');
-  var attrs = el.attrs && ("{" + (el.attrs.map(function (a) { return ((camelize(a.name)) + ":" + (a.value)); }).join(',')) + "}");
+  var attrs = el.attrs || el.dynamicAttrs
+    ? genProps((el.attrs || []).concat(el.dynamicAttrs || []).map(function (attr) { return ({
+        // slot props are camelized
+        name: camelize(attr.name),
+        value: attr.value,
+        dynamic: attr.dynamic
+      }); }))
+    : null;
   var bind$$1 = el.attrsMap['v-bind'];
   if ((attrs || bind$$1) && !children) {
     res += ",null";
