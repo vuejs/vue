@@ -1,6 +1,7 @@
 /* @flow */
 
 import { hasOwn } from 'shared/util'
+import { def } from 'core/util/lang'
 import { normalizeChildren } from 'core/vdom/helpers/normalize-children'
 
 export function normalizeScopedSlots (
@@ -26,8 +27,8 @@ export function normalizeScopedSlots (
       res[key] = proxyNormalSlot(normalSlots, key)
     }
   }
-  res._normalized = true
-  res.$stable = slots ? slots.$stable : true
+  def(res, '_normalized', true)
+  def(res, '$stable', slots ? !!slots.$stable : true)
   return res
 }
 

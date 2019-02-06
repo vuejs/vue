@@ -969,4 +969,27 @@ describe('Component scoped slot', () => {
       }).then(done)
     }
   })
+
+  // regression #9396
+  it('should not force update child with no slot content', done => {
+    const Child = {
+      updated: jasmine.createSpy(),
+      template: `<div></div>`
+    }
+
+    const parent = new Vue({
+      template: `<div>{{ count }}<child/></div>`,
+      data: {
+        count: 0
+      },
+      components: { Child }
+    }).$mount()
+
+    expect(parent.$el.textContent).toBe(`0`)
+    parent.count++
+    waitForUpdate(() => {
+      expect(parent.$el.textContent).toBe(`1`)
+      expect(Child.updated).not.toHaveBeenCalled()
+    }).then(done)
+  })
 })

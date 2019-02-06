@@ -233,6 +233,7 @@ export function updateChildComponent (
     (parentVnode.data.scopedSlots && !parentVnode.data.scopedSlots.$stable) ||
     (vm.$scopedSlots !== emptyObject && !vm.$scopedSlots.$stable)
   )
+
   // Any static slot children from the parent may have changed during parent's
   // update. Dynamic scoped slots may also have changed. In such cases, a forced
   // update is necessary to ensure correctness.
