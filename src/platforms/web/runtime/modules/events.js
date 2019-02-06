@@ -60,7 +60,12 @@ function add (
     const attachedTimestamp = currentFlushTimestamp
     const original = handler
     handler = original._wrapper = function (e) {
-      if (e.timeStamp >= attachedTimestamp) {
+      if (
+        e.timeStamp >= attachedTimestamp ||
+        // #9448 bail if event is fired in another document in a multi-page
+        // electron/nw.js app
+        e.target.ownerDocument !== document
+      ) {
         return original.apply(this, arguments)
       }
     }
