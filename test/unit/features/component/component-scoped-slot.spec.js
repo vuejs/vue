@@ -1034,4 +1034,29 @@ describe('Component scoped slot', () => {
       expect(vm.$el.textContent).toBe(JSON.stringify({ changed: 'hello' }, null, 2))
     }).then(done)
   })
+
+  // #9452
+  it('fallback for scoped slots passed multiple levels down', () => {
+    const inner = {
+      template: `<div><slot>fallback</slot></div>`
+    }
+
+    const wrapper = {
+      template: `
+        <inner>
+          <template #default>
+            <slot/>
+          </template>
+        </inner>
+      `,
+      components: { inner }
+    }
+
+    const vm = new Vue({
+      components: { wrapper, inner },
+      template: `<wrapper/>`
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(`fallback`)
+  })
 })

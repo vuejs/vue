@@ -33,10 +33,13 @@ export function normalizeScopedSlots (
 
 function normalizeScopedSlot(fn: Function): Function {
   return scope => {
-    const res = fn(scope)
-    return res && typeof res === 'object' && !Array.isArray(res)
+    let res = fn(scope)
+    res = res && typeof res === 'object' && !Array.isArray(res)
       ? [res] // single vnode
       : normalizeChildren(res)
+    return res && res.length === 0
+      ? undefined
+      : res
   }
 }
 
