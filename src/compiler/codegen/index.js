@@ -411,7 +411,9 @@ function genScopedSlot (
         : genChildren(el, state) || 'undefined'
       : genElement(el, state)
     }}`
-  return `{key:${el.slotTarget || `"default"`},fn:${fn}}`
+  // reverse proxy v-slot without scope on this.$slots
+  const reverseProxy = slotScope ? `` : `,proxy:true`
+  return `{key:${el.slotTarget || `"default"`},fn:${fn}${reverseProxy}}`
 }
 
 export function genChildren (

@@ -1059,4 +1059,33 @@ describe('Component scoped slot', () => {
 
     expect(vm.$el.textContent).toBe(`fallback`)
   })
+
+  it('should expose v-slot without scope on this.$slots', () => {
+    const vm = new Vue({
+      template: `<foo><template v-slot>hello</template></foo>`,
+      components: {
+        foo: {
+          render(h) {
+            return h('div', this.$slots.default)
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('hello')
+  })
+
+  it('should not expose legacy syntax scoped slot on this.$slots', () => {
+    const vm = new Vue({
+      template: `<foo><template slot-scope="foo">hello</template></foo>`,
+      components: {
+        foo: {
+          render(h) {
+            expect(this.$slots.default).toBeUndefined()
+            return h('div', this.$slots.default)
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('')
+  })
 })

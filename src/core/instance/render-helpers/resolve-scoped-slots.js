@@ -11,6 +11,10 @@ export function resolveScopedSlots (
     if (Array.isArray(slot)) {
       resolveScopedSlots(slot, hasDynamicKeys, res)
     } else if (slot) {
+      // marker for reverse proxying v-slot without scope on this.$slots
+      if (slot.proxy) {
+        slot.fn.proxy = true
+      }
       res[slot.key] = slot.fn
     }
   }

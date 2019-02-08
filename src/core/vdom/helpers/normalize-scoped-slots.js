@@ -16,7 +16,7 @@ export function normalizeScopedSlots (
     res = {}
     for (const key in slots) {
       if (slots[key] && key[0] !== '$') {
-        res[key] = normalizeScopedSlot(slots[key])
+        res[key] = normalizeScopedSlot(normalSlots, key, slots[key])
       }
     }
   }
@@ -31,9 +31,9 @@ export function normalizeScopedSlots (
   return res
 }
 
-function normalizeScopedSlot(fn: Function): Function {
-  return scope => {
-    let res = fn(scope)
+function normalizeScopedSlot(normalSlots, key, fn) {
+  const normalized = scope => {
+    let res = fn(scope || {})
     res = res && typeof res === 'object' && !Array.isArray(res)
       ? [res] // single vnode
       : normalizeChildren(res)
@@ -41,6 +41,17 @@ function normalizeScopedSlot(fn: Function): Function {
       ? undefined
       : res
   }
+  // this is a slot using the new v-slot syntax without scope. although it is
+  // compiled as a scoped slot, render fn users would expect it to be present
+  // on this.$slots because the usage is semantically a normal slot.
+  if (fn.proxy) {
+    Object.defineProperty(normalSlots, key, {
+      get: normalized,
+      enumerable: true,
+      configurable: true
+    })
+  }
+  return normalized
 }
 
 function proxyNormalSlot(slots, key) {
