@@ -2,16 +2,22 @@
 
 import { def } from 'core/util/lang'
 import { normalizeChildren } from 'core/vdom/helpers/normalize-children'
+import { emptyObject } from 'shared/util'
 
 export function normalizeScopedSlots (
   slots: { [key: string]: Function } | void,
-  normalSlots: { [key: string]: Array<VNode> }
+  normalSlots: { [key: string]: Array<VNode> },
+  prevSlots?: { [key: string]: Function } | void
 ): any {
   let res
   if (!slots) {
     res = {}
   } else if (slots._normalized) {
-    return slots
+    // fast path 1: child component re-render only, parent did not change
+    return slots._normalized
+  } else if (slots.$stable && prevSlots && prevSlots !== emptyObject) {
+    // fast path 2: stable scoped slots, only need to normalize once
+    return prevSlots
   } else {
     res = {}
     for (const key in slots) {
@@ -26,7 +32,9 @@ export function normalizeScopedSlots (
       res[key] = proxyNormalSlot(normalSlots, key)
     }
   }
-  def(res, '_normalized', true)
+  if (slots) {
+    (slots: any)._normalized = res
+  }
   def(res, '$stable', slots ? !!slots.$stable : true)
   return res
 }
