@@ -1088,4 +1088,19 @@ describe('Component scoped slot', () => {
     }).$mount()
     expect(vm.$el.textContent).toBe('')
   })
+
+  it('should expose v-slot without scope on ctx.slots() in functional', () => {
+    const vm = new Vue({
+      template: `<foo><template v-slot>hello</template></foo>`,
+      components: {
+        foo: {
+          functional: true,
+          render(h, ctx) {
+            return h('div', ctx.slots().default)
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('hello')
+  })
 })
