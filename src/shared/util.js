@@ -4,24 +4,37 @@ export const emptyObject = Object.freeze({})
 
 // These helpers produce better VM code in JS engines due to their
 // explicitness and function inlining.
+
+/**
+ * Check whether a value is undefined.
+ */
 export function isUndef (v: any): boolean %checks {
   return v === undefined || v === null
 }
 
+/**
+ * Check whether a value is defined.
+ */
 export function isDef (v: any): boolean %checks {
   return v !== undefined && v !== null
 }
 
+/**
+ * Check whether a value is True.
+ */
 export function isTrue (v: any): boolean %checks {
   return v === true
 }
 
+/**
+ * Check whether a value is False.
+ */
 export function isFalse (v: any): boolean %checks {
   return v === false
 }
 
 /**
- * Check if value is primitive.
+ * Check whether a value is primitive.
  */
 export function isPrimitive (value: any): boolean %checks {
   return (
@@ -34,9 +47,8 @@ export function isPrimitive (value: any): boolean %checks {
 }
 
 /**
- * Quick object check - this is primarily used to tell
- * Objects from primitive values when we know the value
- * is a JSON-compliant type.
+ * Check whether a value is an object.
+ * Used to check if a value is a JSON-compliant type.
  */
 export function isObject (obj: mixed): boolean %checks {
   return obj !== null && typeof obj === 'object'
@@ -52,25 +64,30 @@ export function toRawType (value: any): string {
 }
 
 /**
- * Strict object type check. Only returns true
- * for plain JavaScript objects.
+ * Check whether a value is a plain JavaScript object.
  */
 export function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
 }
 
+/**
+ * Check whether a value is a regular expression.
+ */
 export function isRegExp (v: any): boolean {
   return _toString.call(v) === '[object RegExp]'
 }
 
 /**
- * Check if val is a valid array index.
+ * Check whether a value is a valid array index.
  */
 export function isValidArrayIndex (val: any): boolean {
   const n = parseFloat(String(val))
   return n >= 0 && Math.floor(n) === n && isFinite(val)
 }
 
+/**
+ * Check whether a value is a promise.
+ */
 export function isPromise (val: any): boolean {
   return (
     isDef(val) &&
@@ -91,8 +108,8 @@ export function toString (val: any): string {
 }
 
 /**
- * Convert an input value to a number for persistence.
- * If the conversion fails, return original string.
+ * Convert a value to a number for persistence.
+ * If the conversion fails, return the original string.
  */
 export function toNumber (val: string): number | string {
   const n = parseFloat(val)
@@ -100,8 +117,8 @@ export function toNumber (val: string): number | string {
 }
 
 /**
- * Make a map and return a function for checking if a key
- * is in that map.
+ * Make a map and return a function for checking whether
+ * a key is in that map.
  */
 export function makeMap (
   str: string,
@@ -118,12 +135,12 @@ export function makeMap (
 }
 
 /**
- * Check if a tag is a built-in tag.
+ * Check whether a tag is a built-in tag.
  */
 export const isBuiltInTag = makeMap('slot,component', true)
 
 /**
- * Check if an attribute is a reserved attribute.
+ * Check whether an attribute is the reserved attribute.
  */
 export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is')
 
@@ -140,7 +157,7 @@ export function remove (arr: Array<any>, item: any): Array<any> | void {
 }
 
 /**
- * Check whether an object has the property.
+ * Check whether an object has a property.
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty
 export function hasOwn (obj: Object | Array<*>, key: string): boolean {
@@ -236,7 +253,7 @@ export function extend (to: Object, _from: ?Object): Object {
 }
 
 /**
- * Merge an Array of Objects into a single Object.
+ * Convert an Array of Objects into a single Object.
  */
 export function toObject (arr: Array<any>): Object {
   const res = {}
@@ -279,7 +296,7 @@ export function genStaticKeys (modules: Array<ModuleOptions>): string {
 }
 
 /**
- * Check if two values are loosely equal - that is,
+ * Check whether two values are loosely equal - that is,
  * if they are plain objects, do they have the same shape?
  */
 export function looseEqual (a: any, b: any): boolean {
