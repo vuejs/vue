@@ -143,7 +143,7 @@ export function makeMap (
 export const isBuiltInTag = makeMap('slot,component', true)
 
 /**
- * Check whether an attribute is the reserved attribute.
+ * Check whether an attribute is a reserved attribute.
  */
 export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is')
 
