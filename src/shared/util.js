@@ -1,5 +1,8 @@
 /* @flow */
 
+/**
+ * An empty object.
+ */
 export const emptyObject = Object.freeze({})
 
 // These helpers produce better VM code in JS engines due to their
@@ -199,13 +202,8 @@ export const hyphenate = cached((str: string): string => {
 })
 
 /**
- * Simple bind polyfill for environments that do not support it,
- * e.g., PhantomJS 1.x. Technically, we don't need this anymore
- * since native bind is now performant enough in most browsers.
- * But removing it would mean breaking code that was able to run in
- * PhantomJS 1.x, so this must be kept for backward compatibility.
+ * A polyfill for binding.
  */
-
 /* istanbul ignore next */
 function polyfillBind (fn: Function, ctx: Object): Function {
   function boundFn (a) {
@@ -221,10 +219,21 @@ function polyfillBind (fn: Function, ctx: Object): Function {
   return boundFn
 }
 
+/**
+ * Use native browser binding.
+ */
 function nativeBind (fn: Function, ctx: Object): Function {
   return fn.bind(ctx)
 }
 
+/**
+ * Determine whether to use a native bind or polyfill bind.
+ * Simple bind polyfill for environments that do not support it,
+ * e.g., PhantomJS 1.x. Technically, we don't need this anymore
+ * since native bind is now performant enough in most browsers.
+ * But removing it would mean breaking code that was able to run in
+ * PhantomJS 1.x, so this must be kept for backward compatibility.
+ */
 export const bind = Function.prototype.bind
   ? nativeBind
   : polyfillBind
@@ -275,7 +284,7 @@ export function toObject (arr: Array<any>): Object {
 export function noop (a?: any, b?: any, c?: any) {}
 
 /**
- * Always return false.
+ * Always return False.
  */
 export const no = (a?: any, b?: any, c?: any) => false
 
