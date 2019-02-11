@@ -1128,4 +1128,20 @@ describe('Component scoped slot', () => {
       expect(vm.$el.textContent).toBe(`baz bar`)
     }).then(done)
   })
+
+  // #9468
+  it('should support passing multiple args to scoped slot function', () => {
+    const foo = {
+      render() {
+        return this.$scopedSlots.default('foo', 'bar')
+      }
+    }
+
+    const vm = new Vue({
+      template: `<foo v-slot="foo, bar">{{ foo }} {{ bar }}</foo>`,
+      components: { foo }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('foo bar')
+  })
 })

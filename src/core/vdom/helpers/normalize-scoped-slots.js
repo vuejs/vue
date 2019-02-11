@@ -48,8 +48,8 @@ export function normalizeScopedSlots (
 }
 
 function normalizeScopedSlot(normalSlots, key, fn) {
-  const normalized = scope => {
-    let res = fn(scope || {})
+  const normalized = function () {
+    let res = arguments.length ? fn.apply(null, arguments) : fn({})
     res = res && typeof res === 'object' && !Array.isArray(res)
       ? [res] // single vnode
       : normalizeChildren(res)
