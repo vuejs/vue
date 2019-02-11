@@ -368,7 +368,12 @@ function genScopedSlots (
   // for example if the slot contains dynamic names, has v-if or v-for on them...
   let needsForceUpdate = Object.keys(slots).some(key => {
     const slot = slots[key]
-    return slot.slotTargetDynamic || slot.if || slot.for
+    return (
+      slot.slotTargetDynamic ||
+      slot.if ||
+      slot.for ||
+      containsSlotChild(slot) // is passing down slot from parent which may be dynamic
+    )
   })
   // OR when it is inside another scoped slot (the reactivity is disconnected)
   // #9438
@@ -388,6 +393,16 @@ function genScopedSlots (
       return genScopedSlot(slots[key], state)
     }).join(',')
   }]${needsForceUpdate ? `,true` : ``})`
+}
+
+function containsSlotChild (el: ASTNode): boolean {
+  if (el.type === 1) {
+    if (el.tag === 'slot') {
+      return true
+    }
+    return el.children.some(containsSlotChild)
+  }
+  return false
 }
 
 function genScopedSlot (

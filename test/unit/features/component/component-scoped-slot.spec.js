@@ -1104,7 +1104,7 @@ describe('Component scoped slot', () => {
     expect(vm.$el.textContent).toBe('hello')
   })
 
-  it('should not cache scoped slot normalzation when there are a mix of normal and scoped slots', done => {
+  it('should not cache scoped slot normalization when there are a mix of normal and scoped slots', done => {
     const foo = {
       template: `<div><slot name="foo" /> <slot name="bar" /></div>`
     }
@@ -1143,5 +1143,32 @@ describe('Component scoped slot', () => {
     }).$mount()
 
     expect(vm.$el.textContent).toBe('foo bar')
+  })
+
+  it('should not skip updates when a scoped slot contains parent <slot/> content', done => {
+    const inner = {
+      template: `<div><slot/></div>`
+    }
+
+    const wrapper = {
+      template: `<inner v-slot><slot/></inner>`,
+      components: { inner }
+    }
+
+    const vm = new Vue({
+      data() {
+        return {
+          ok: true
+        }
+      },
+      components: { wrapper },
+      template: `<wrapper><div>{{ ok ? 'foo' : 'bar' }}</div></wrapper>`
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('foo')
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('bar')
+    }).then(done)
   })
 })
