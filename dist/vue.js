@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.6.4
+ * Vue.js v2.6.5
  * (c) 2014-2019 Evan You
  * Released under the MIT License.
  */
@@ -2543,8 +2543,14 @@
     } else if (slots._normalized) {
       // fast path 1: child component re-render only, parent did not change
       return slots._normalized
-    } else if (slots.$stable && prevSlots && prevSlots !== emptyObject) {
-      // fast path 2: stable scoped slots, only need to normalize once
+    } else if (
+      slots.$stable &&
+      prevSlots &&
+      prevSlots !== emptyObject &&
+      Object.keys(normalSlots).length === 0
+    ) {
+      // fast path 2: stable scoped slots w/ no normal slots to proxy,
+      // only need to normalize once
       return prevSlots
     } else {
       res = {};
@@ -2570,8 +2576,8 @@
   }
 
   function normalizeScopedSlot(normalSlots, key, fn) {
-    var normalized = function (scope) {
-      var res = fn(scope || {});
+    var normalized = function () {
+      var res = arguments.length ? fn.apply(null, arguments) : fn({});
       res = res && typeof res === 'object' && !Array.isArray(res)
         ? [res] // single vnode
         : normalizeChildren(res);
@@ -5377,7 +5383,7 @@
     value: FunctionalRenderContext
   });
 
-  Vue.version = '2.6.4';
+  Vue.version = '2.6.5';
 
   /*  */
 
@@ -7463,9 +7469,17 @@
       var original = handler;
       handler = original._wrapper = function (e) {
         if (
+          // no bubbling, should always fire.
+          // this is just a safety net in case event.timeStamp is unreliable in
+          // certain weird environments...
+          e.target === e.currentTarget ||
+          // event is fired after handler attachment
           e.timeStamp >= attachedTimestamp ||
+          // #9462 bail for iOS 9 bug: event.timeStamp is 0 after history.pushState
+          e.timeStamp === 0 ||
           // #9448 bail if event is fired in another document in a multi-page
-          // electron/nw.js app
+          // electron/nw.js app, since event.timeStamp will be using a different
+          // starting reference
           e.target.ownerDocument !== document
         ) {
           return original.apply(this, arguments)
