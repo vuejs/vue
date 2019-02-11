@@ -1103,4 +1103,29 @@ describe('Component scoped slot', () => {
     }).$mount()
     expect(vm.$el.textContent).toBe('hello')
   })
+
+  it('should not cache scoped slot normalzation when there are a mix of normal and scoped slots', done => {
+    const foo = {
+      template: `<div><slot name="foo" /> <slot name="bar" /></div>`
+    }
+
+    const vm = new Vue({
+      data: {
+        msg: 'foo'
+      },
+      template: `
+        <foo>
+          <div slot="foo">{{ msg }}</div>
+          <template #bar><div>bar</div></template>
+        </foo>
+      `,
+      components: { foo }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(`foo bar`)
+    vm.msg = 'baz'
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe(`baz bar`)
+    }).then(done)
+  })
 })

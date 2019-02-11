@@ -15,8 +15,14 @@ export function normalizeScopedSlots (
   } else if (slots._normalized) {
     // fast path 1: child component re-render only, parent did not change
     return slots._normalized
-  } else if (slots.$stable && prevSlots && prevSlots !== emptyObject) {
-    // fast path 2: stable scoped slots, only need to normalize once
+  } else if (
+    slots.$stable &&
+    prevSlots &&
+    prevSlots !== emptyObject &&
+    Object.keys(normalSlots).length === 0
+  ) {
+    // fast path 2: stable scoped slots w/ no normal slots to proxy,
+    // only need to normalize once
     return prevSlots
   } else {
     res = {}
