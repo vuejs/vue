@@ -94,6 +94,8 @@ export function createCompileToFunctionFn (compile: Function): Function {
     res.staticRenderFns = compiled.staticRenderFns.map(code => {
       return createFunction(code, fnGenErrors)
     })
+    // #8467, always return template compile errors
+    res.errors = compiled.errors
 
     // check function generation errors.
     // this should only happen if there is a bug in the compiler itself.
