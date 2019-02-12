@@ -118,7 +118,7 @@ export interface VueConstructor<V extends Vue = Vue> {
     render(createElement: typeof Vue.prototype.$createElement): VNode;
     staticRenderFns: (() => VNode)[];
     // global compile doesn't receive option, so error would always be a string
-    errors: string[];
+    errors?: string[];
   };
 
   observable<T>(obj: T): T;
