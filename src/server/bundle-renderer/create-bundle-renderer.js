@@ -105,15 +105,15 @@ export function createBundleRendererCreator (
           rewriteErrorTrace(err, maps)
           cb(err)
         }).then(args => {
-          const { app, onRequestComplete } = getRenderArguments(args)
+          const { app, onComplete } = getRenderArguments(args)
           if (app) {
             renderer.renderToString(app, context, (err, res) => {
               rewriteErrorTrace(err, maps)
-              onRequestComplete && onRequestComplete()
+              onComplete && onComplete()
               cb(err, res)
             })
           } else {
-            onRequestComplete && onRequestComplete()
+            onComplete && onComplete()
           }
         })
 
