@@ -10,7 +10,7 @@ declare interface GlobalAPI {
   nextTick: (fn: Function, context?: Object) => void | Promise<*>;
   use: (plugin: Function | Object) => GlobalAPI;
   mixin: (mixin: Object) => GlobalAPI;
-  compile: (template: string) => { render: Function, staticRenderFns: Array<Function>, errors: Array<string> };
+  compile: (template: string) => { render: Function, staticRenderFns: Array<Function>, errors?: Array<string> };
 
   directive: (id: string, def?: Function | Object) => Function | Object | void;
   component: (id: string, def?: Class<Component> | Object) => Class<Component>;
