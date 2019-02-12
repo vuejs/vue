@@ -163,7 +163,13 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
 }
 
 function genKeyFilter (keys: Array<string>): string {
-  return `if(('keyCode' in $event)&&${keys.map(genFilterCode).join('&&')})return null;`
+  return (
+    // make sure the key filters only apply to KeyboardEvents
+    // #9441: can't use 'keyCode' in $event because Chrome autofill fires fake
+    // key events that do not have keyCode property...
+    `if(!$event.type.indexOf('key')&&` +
+    `${keys.map(genFilterCode).join('&&')})return null;`
+  )
 }
 
 function genFilterCode (key: string): string {
