@@ -138,12 +138,7 @@ describe('Error handling', () => {
         expect(`Error: ${type} error`).toHaveBeenWarned()
       }).then(done)
     })
-  })
 
-  ;[
-    ['userWatcherCallback', 'watcher'],
-    ['userImmediateWatcherCallback', 'immediate watcher']
-  ].forEach(([type, description]) => {
     it(`should recover from promise errors in user ${description} callback`, done => {
       const vm = createTestInstance(components[`${type}Async`])
       assertBothInstancesActive(vm).then(() => {
