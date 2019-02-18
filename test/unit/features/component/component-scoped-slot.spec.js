@@ -1171,4 +1171,30 @@ describe('Component scoped slot', () => {
       expect(vm.$el.textContent).toBe('bar')
     }).then(done)
   })
+
+  it('should not skip updates for v-slot inside v-for', done => {
+    const test = {
+      template: `<div><slot></slot></div>`
+    }
+
+    const vm = new Vue({
+      template: `
+      <div>
+        <div v-for="i in numbers">
+          <test v-slot>{{ i }}</test>
+        </div>
+      </div>
+      `,
+      components: { test },
+      data: {
+        numbers: [1]
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(`1`)
+    vm.numbers = [2]
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe(`2`)
+    }).then(done)
+  })
 })
