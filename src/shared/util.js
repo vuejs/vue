@@ -33,10 +33,15 @@ export function isPrimitive (value: any): boolean %checks {
   )
 }
 
+export function isDate (obj: mixed): boolean %checks {
+  return obj instanceof Date
+}
+
 /**
  * Quick object check - this is primarily used to tell
  * Objects from primitive values when we know the value
  * is a JSON-compliant type.
+ * Note object could be a complex type like array, date, etc.
  */
 export function isObject (obj: mixed): boolean %checks {
   return obj !== null && typeof obj === 'object'
@@ -283,38 +288,42 @@ export function genStaticKeys (modules: Array<ModuleOptions>): string {
  * if they are plain objects, do they have the same shape?
  */
 export function looseEqual (a: any, b: any): boolean {
-  if (a === b) return true
-  const isObjectA = isObject(a)
-  const isObjectB = isObject(b)
-  if (isObjectA && isObjectB) {
-    try {
-      const isArrayA = Array.isArray(a)
-      const isArrayB = Array.isArray(b)
-      if (isArrayA && isArrayB) {
-        return a.length === b.length && a.every((e, i) => {
-          return looseEqual(e, b[i])
-        })
-      } else if (a instanceof Date && b instanceof Date) {
-        return a.getTime() === b.getTime()
-      } else if (!isArrayA && !isArrayB) {
-        const keysA = Object.keys(a)
-        const keysB = Object.keys(b)
-        return keysA.length === keysB.length && keysA.every(key => {
-          return looseEqual(a[key], b[key])
-        })
-      } else {
-        /* istanbul ignore next */
-        return false
-      }
-    } catch (e) {
-      /* istanbul ignore next */
+  if (a === b) {
+    return true
+  }
+  let aValidType = isDate(a)
+  let bValidType = isDate(b)
+  if (aValidType || bValidType) {
+    return aValidType && bValidType ? a.getTime() === b.getTime() : false
+  }
+  aValidType = Array.isArray(a)
+  bValidType = Array.isArray(b)
+  if (aValidType || bValidType) {
+    return aValidType && bValidType
+      ? a.length === b.length && a.every((e, i) => looseEqual(e, b[i]))
+      : false
+  }
+  aValidType = isObject(a)
+  bValidType = isObject(b)
+  if (aValidType || bValidType) {
+    /* istanbul ignore if: this if will probably never be called */
+    if (!aValidType || !bValidType) {
       return false
     }
-  } else if (!isObjectA && !isObjectB) {
-    return String(a) === String(b)
-  } else {
-    return false
+    const aKeysCount = Object.keys(a).length
+    const bKeysCount = Object.keys(b).length
+    if (aKeysCount !== bKeysCount) {
+      return false
+    }
+    for (const key in a) {
+      const aHasKey = a.hasOwnProperty(key)
+      const bHasKey = b.hasOwnProperty(key)
+      if ((aHasKey && !bHasKey) || (!aHasKey && bHasKey) || !looseEqual(a[key], b[key])) {
+        return false
+      }
+    }
   }
+  return String(a) === String(b)
 }
 
 /**

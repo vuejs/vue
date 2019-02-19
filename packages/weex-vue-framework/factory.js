@@ -37,10 +37,15 @@ function isPrimitive (value) {
   )
 }
 
+function isDate(obj) {
+  return obj instanceof Date
+}
+
 /**
  * Quick object check - this is primarily used to tell
  * Objects from primitive values when we know the value
  * is a JSON-compliant type.
+ * Note object could be a complex type like array, date, etc.
  */
 function isObject (obj) {
   return obj !== null && typeof obj === 'object'
@@ -270,37 +275,43 @@ var identity = function (_) { return _; };
  * Check if two values are loosely equal - that is,
  * if they are plain objects, do they have the same shape?
  */
-function looseEqual (a, b) {
-  if (a === b) { return true }
-  var isObjectA = isObject(a);
-  var isObjectB = isObject(b);
-  if (isObjectA && isObjectB) {
-    try {
-      var isArrayA = Array.isArray(a);
-      var isArrayB = Array.isArray(b);
-      if (isArrayA && isArrayB) {
-        return a.length === b.length && a.every(function (e, i) {
-          return looseEqual(e, b[i])
-        })
-      } else if (!isArrayA && !isArrayB) {
-        var keysA = Object.keys(a);
-        var keysB = Object.keys(b);
-        return keysA.length === keysB.length && keysA.every(function (key) {
-          return looseEqual(a[key], b[key])
-        })
-      } else {
-        /* istanbul ignore next */
-        return false
-      }
-    } catch (e) {
-      /* istanbul ignore next */
+function looseEqual(a, b) {
+  if (a === b) {
+    return true
+  }
+  let aValidType = isDate(a)
+  let bValidType = isDate(b)
+  if (aValidType || bValidType) {
+    return aValidType && bValidType ? a.getTime() === b.getTime() : false
+  }
+  aValidType = Array.isArray(a)
+  bValidType = Array.isArray(b)
+  if (aValidType || bValidType) {
+    return aValidType && bValidType
+      ? a.length === b.length && a.every((e, i) => looseEqual(e, b[i]))
+      : false
+  }
+  aValidType = isObject(a)
+  bValidType = isObject(b)
+  if (aValidType || bValidType) {
+    /* istanbul ignore if: this if will probably never be called */
+    if (!aValidType || !bValidType) {
       return false
     }
-  } else if (!isObjectA && !isObjectB) {
-    return String(a) === String(b)
-  } else {
-    return false
+    const aKeysCount = Object.keys(a).length
+    const bKeysCount = Object.keys(b).length
+    if (aKeysCount !== bKeysCount) {
+      return false
+    }
+    for (const key in a) {
+      const aHasKey = a.hasOwnProperty(key)
+      const bHasKey = b.hasOwnProperty(key)
+      if ((aHasKey && !bHasKey) || (!aHasKey && bHasKey) || !looseEqual(a[key], b[key])) {
+        return false
+      }
+    }
   }
+  return String(a) === String(b)
 }
 
 function looseIndexOf (arr, val) {
@@ -502,7 +513,7 @@ if (inBrowser) {
     Object.defineProperty(opts, 'passive', ({
       get: function get () {
         /* istanbul ignore next */
-        
+
       }
     })); // https://github.com/facebook/flow/issues/285
     window.addEventListener('test-passive', null, opts);
@@ -6659,12 +6670,12 @@ if (hasTransition) {
   if (window.ontransitionend === undefined &&
     window.onwebkittransitionend !== undefined
   ) {
-    
+
   }
   if (window.onanimationend === undefined &&
     window.onwebkitanimationend !== undefined
   ) {
-    
+
   }
 }
 
