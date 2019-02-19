@@ -3,7 +3,7 @@ import { invokeWithErrorHandling } from 'core/util/error'
 
 describe('invokeWithErrorHandling', () => {
   if (typeof Promise !== 'undefined') {
-    it('nested calls do not trigger multiple errorHandler calls', done => {
+    it('should errorHandler call once when nested calls return rejected promise', done => {
       let times = 0
 
       Vue.config.errorHandler = function () {
@@ -14,7 +14,7 @@ describe('invokeWithErrorHandling', () => {
         return invokeWithErrorHandling(() => {
           return Promise.reject(new Error('fake error'))
         })
-      }).catch(() => {
+      }).then(() => {
         expect(times).toBe(1)
         done()
       })
