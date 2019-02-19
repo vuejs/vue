@@ -288,9 +288,7 @@ export function genStaticKeys (modules: Array<ModuleOptions>): string {
  * if they are plain objects, do they have the same shape?
  */
 export function looseEqual (a: any, b: any): boolean {
-  if (a === b) {
-    return true
-  }
+  if (a === b) return true
   let aValidType = isDate(a)
   let bValidType = isDate(b)
   if (aValidType || bValidType) {
