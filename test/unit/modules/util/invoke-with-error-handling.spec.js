@@ -4,18 +4,16 @@ import { invokeWithErrorHandling } from 'core/util/error'
 describe('invokeWithErrorHandling', () => {
   if (typeof Promise !== 'undefined') {
     it('should errorHandler call once when nested calls return rejected promise', done => {
-      let times = 0
-
-      Vue.config.errorHandler = function () {
-        times++
-      }
+      const originalHandler = Vue.config.errorHandler
+      const handler = Vue.config.errorHandler = jasmine.createSpy()
 
       invokeWithErrorHandling(() => {
         return invokeWithErrorHandling(() => {
           return Promise.reject(new Error('fake error'))
         })
       }).then(() => {
-        expect(times).toBe(1)
+        Vue.config.errorHandler = originalHandler
+        expect(handler.calls.count()).toBe(1)
         done()
       })
     })
