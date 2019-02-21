@@ -86,6 +86,9 @@ class Test extends Vue {
       }
     });
     this.nextTick(() => {});
+    this.nextTick(function () {
+      console.log(this.text === 'test');
+    }, { text: 'test'});
     this.nextTick().then(() => {});
     this.set({}, "", "");
     this.set({}, 1, "");

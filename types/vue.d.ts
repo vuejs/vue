@@ -89,7 +89,7 @@ export interface VueConstructor<V extends Vue = Vue> {
   extend<Props>(definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>>): ExtendedVue<V, {}, {}, {}, Props>;
   extend(options?: ComponentOptions<V>): ExtendedVue<V, {}, {}, {}, {}>;
 
-  nextTick(callback: () => void, context?: any[]): void;
+  nextTick<T>(callback: (this: T) => void, context?: T): void;
   nextTick(): Promise<void>
   set<T>(object: object, key: string | number, value: T): T;
   set<T>(array: T[], key: number, value: T): T;
