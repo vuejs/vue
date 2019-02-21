@@ -409,9 +409,9 @@ function genScopedSlots (
     .join(',')
 
   return `scopedSlots:_u([${generatedSlots}]${
-    needsForceUpdate ? `,true` : ``
+    needsForceUpdate ? `,null,true` : ``
   }${
-    !needsForceUpdate && needsKey ? `,false,${hash(generatedSlots)}` : ``
+    !needsForceUpdate && needsKey ? `,null,false,${hash(generatedSlots)}` : ``
   })`
 }
 
