@@ -1197,4 +1197,34 @@ describe('Component scoped slot', () => {
       expect(vm.$el.textContent).toBe(`2`)
     }).then(done)
   })
+
+  // #9534
+  it('should detect conditional reuse with different slot content', done => {
+    const Foo = {
+      template: `<div><slot :n="1" /></div>`
+    }
+
+    const vm = new Vue({
+      components: { Foo },
+      data: {
+        ok: true
+      },
+      template: `
+        <div>
+          <div v-if="ok">
+            <foo v-slot="{ n }">{{ n }}</foo>
+          </div>
+          <div v-if="!ok">
+            <foo v-slot="{ n }">{{ n + 1 }}</foo>
+          </div>
+        </div>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent.trim()).toBe(`1`)
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent.trim()).toBe(`2`)
+    }).then(done)
+  })
 })

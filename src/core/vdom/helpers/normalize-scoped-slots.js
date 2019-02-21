@@ -10,15 +10,18 @@ export function normalizeScopedSlots (
   prevSlots?: { [key: string]: Function } | void
 ): any {
   let res
+  const isStable = slots ? !!slots.$stable : true
+  const key = slots && slots.$key
   if (!slots) {
     res = {}
   } else if (slots._normalized) {
     // fast path 1: child component re-render only, parent did not change
     return slots._normalized
   } else if (
-    slots.$stable &&
+    isStable &&
     prevSlots &&
     prevSlots !== emptyObject &&
+    key === prevSlots.$key &&
     Object.keys(normalSlots).length === 0
   ) {
     // fast path 2: stable scoped slots w/ no normal slots to proxy,
@@ -43,7 +46,8 @@ export function normalizeScopedSlots (
   if (slots && Object.isExtensible(slots)) {
     (slots: any)._normalized = res
   }
-  def(res, '$stable', slots ? !!slots.$stable : true)
+  def(res, '$stable', isStable)
+  def(res, '$key', key)
   return res
 }
 

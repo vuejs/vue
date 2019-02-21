@@ -375,6 +375,13 @@ function genScopedSlots (
       containsSlotChild(slot) // is passing down slot from parent which may be dynamic
     )
   })
+
+  // #9534: if a component with scoped slots is inside a conditional branch,
+  // it's possible for the same component to be reused but with different
+  // compiled slot content. To avoid that, we generate a unique key based on
+  // the generated code of all the slot contents.
+  let needsKey = !!el.if
+
   // OR when it is inside another scoped slot or v-for (the reactivity may be
   // disconnected due to the intermediate scope variable)
   // #9438, #9506
@@ -390,15 +397,31 @@ function genScopedSlots (
         needsForceUpdate = true
         break
       }
+      if (parent.if) {
+        needsKey = true
+      }
       parent = parent.parent
     }
   }
 
-  return `scopedSlots:_u([${
-    Object.keys(slots).map(key => {
-      return genScopedSlot(slots[key], state)
-    }).join(',')
-  }]${needsForceUpdate ? `,true` : ``})`
+  const generatedSlots = Object.keys(slots)
+    .map(key => genScopedSlot(slots[key], state))
+    .join(',')
+
+  return `scopedSlots:_u([${generatedSlots}]${
+    needsForceUpdate ? `,true` : ``
+  }${
+    !needsForceUpdate && needsKey ? `,false,${hash(generatedSlots)}` : ``
+  })`
+}
+
+function hash(str) {
+  let hash = 5381
+  let i = str.length
+  while(i) {
+    hash = (hash * 33) ^ str.charCodeAt(--i)
+  }
+  return hash >>> 0
 }
 
 function containsSlotChild (el: ASTNode): boolean {
