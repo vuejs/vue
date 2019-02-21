@@ -38,7 +38,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       }
     }
 
-    if (key === 'value') {
+    if (key === 'value' && elm.tagName !== 'PROGRESS') {
       // store value as _value as well since
       // non-string values will be stringified
       elm._value = cur
@@ -65,7 +65,11 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       // This  #4521 by skipping the unnecesarry `checked` update.
       cur !== oldProps[key]
     ) {
-      elm[key] = cur
+      // some property updates can throw
+      // e.g. `value` on <progress> w/ non-finite value
+      try {
+        elm[key] = cur
+      } catch (e) {}
     }
   }
 }
