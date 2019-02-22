@@ -2462,6 +2462,7 @@ function eventsMixin (Vue) {
       vm.$off(event, on);
       fn.apply(vm, arguments);
     }
+    on.fn = fn;
     vm.$on(event, on);
     return vm
   };
@@ -2497,7 +2498,7 @@ function eventsMixin (Vue) {
       var i$1 = cbs.length;
       while (i$1--) {
         cb = cbs[i$1];
-        if (cb === fn) {
+        if (cb === fn || cb.fn === fn) {
           cbs.splice(i$1, 1);
           break
         }
