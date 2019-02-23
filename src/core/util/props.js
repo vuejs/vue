@@ -135,14 +135,11 @@ function assertProp (
     )
     return
   }
-  const validator = prop.validator
-  if (validator) {
-    if (!validator(value)) {
-      warn(
-        'Invalid prop: custom validator check failed for prop "' + name + '".',
-        vm
-      )
-    }
+  if (prop.validator && !prop.validator(value)) {
+    warn(
+      'Invalid prop: custom validator check failed for prop "' + name + '".',
+      vm
+    )
   }
 }
 
