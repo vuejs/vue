@@ -43,9 +43,7 @@ export default class Dep {
       // order
       subs.sort((a, b) => a.id - b.id)
     }
-    for (let i = 0, l = subs.length; i < l; i++) {
-      subs[i].update()
-    }
+    subs.forEach(watcher => watcher.update())
   }
 }
 
