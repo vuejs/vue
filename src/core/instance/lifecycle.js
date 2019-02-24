@@ -325,6 +325,7 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
     }
   }
   if (!vm._inactive) {
+    callHook(vm, 'beforeDeactivated')
     vm._inactive = true
     for (let i = 0; i < vm.$children.length; i++) {
       deactivateChildComponent(vm.$children[i])
