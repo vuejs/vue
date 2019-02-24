@@ -12,7 +12,7 @@ import {
   ThisTypedComponentOptionsWithRecordProps,
   WatchOptions,
 } from "./options";
-import { VNode, VNodeData, VNodeChildren, ScopedSlot } from "./vnode";
+import { VNode, VNodeData, VNodeChildren, ScopedSlot, NormalizedScopedSlot } from "./vnode";
 import { PluginFunction, PluginObject } from "./plugin";
 
 export interface CreateElement {
@@ -28,7 +28,7 @@ export interface Vue {
   readonly $children: Vue[];
   readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[] };
   readonly $slots: { [key: string]: VNode[] | undefined };
-  readonly $scopedSlots: { [key: string]: ScopedSlot | undefined };
+  readonly $scopedSlots: { [key: string]: NormalizedScopedSlot | undefined };
   readonly $isServer: boolean;
   readonly $data: Record<string, any>;
   readonly $props: Record<string, any>;

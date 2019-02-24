@@ -1,7 +1,8 @@
 import { Vue } from "./vue";
 
+export type ScopedSlot = (props: any) => VNode | VNode[] | string | undefined;
 // Scoped slots are guaranteed to return Array of VNodes starting in 2.6
-export type ScopedSlot = (props: any) => ScopedSlotChildren;
+export type NormalizedScopedSlot = (props: any) => ScopedSlotChildren;
 export type ScopedSlotChildren = VNode[] | undefined;
 
 // Relaxed type compatible with $createElement
