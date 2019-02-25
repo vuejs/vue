@@ -51,17 +51,26 @@ export function resolveAsyncComponent (
     return factory.resolved
   }
 
+  const owner = currentRenderingInstance
+  if (isDef(factory.owners) && factory.owners.indexOf(owner) === -1) {
+    // already pending
+    factory.owners.push(owner)
+  }
+
   if (isTrue(factory.loading) && isDef(factory.loadingComp)) {
     return factory.loadingComp
   }
 
-  const owner = currentRenderingInstance
-  if (isDef(factory.owners)) {
-    // already pending
-    factory.owners.push(owner)
-  } else {
+  if (!isDef(factory.owners)) {
     const owners = factory.owners = [owner]
     let sync = true
+
+    const removeOwner = (destroyedOwner) => {
+      const index = owners.indexOf(destroyedOwner)
+      if (index > -1) owners.splice(index, 1)
+    }
+
+    if (owner) owner.$on('hook:destroyed', () => removeOwner(owner))
 
     const forceRender = (renderCompleted: boolean) => {
       for (let i = 0, l = owners.length; i < l; i++) {
