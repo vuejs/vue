@@ -287,4 +287,28 @@ describe('Options directives', () => {
     }).$mount()
     vm.key = 'bar'
   })
+
+  it('deep object as dynamic arguments', done => {
+    const vm = new Vue({
+      template: `<div v-my:[deep.key]="1"/>`,
+      data: {
+        deep: {
+          key: 'foo'
+        }
+      },
+      directives: {
+        my: {
+          bind(el, binding) {
+            expect(binding.arg).toBe('foo')
+          },
+          update(el, binding) {
+            expect(binding.arg).toBe('bar')
+            expect(binding.oldArg).toBe('foo')
+            done()
+          }
+        }
+      }
+    }).$mount()
+    vm.deep.key = 'bar'
+  })
 })
