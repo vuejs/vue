@@ -337,4 +337,32 @@ describe('Options directives', () => {
     }).$mount()
     vm.deep.a.b = 'bar'
   })
+
+  it('deep object as dynamic arguments with modifiers', done => {
+    const vm = new Vue({
+      template: `<div v-my:[deep.a.b].x.y="1"/>`,
+      data: {
+        deep: {
+          a: {
+            b: 'foo'
+          }
+        }
+      },
+      directives: {
+        my: {
+          bind(el, binding) {
+            expect(binding.arg).toBe('foo')
+            expect(binding.modifiers.x).toBe(true)
+            expect(binding.modifiers.y).toBe(true)
+          },
+          update(el, binding) {
+            expect(binding.arg).toBe('bar')
+            expect(binding.oldArg).toBe('foo')
+            done()
+          }
+        }
+      }
+    }).$mount()
+    vm.deep.a.b = 'bar'
+  })
 })
