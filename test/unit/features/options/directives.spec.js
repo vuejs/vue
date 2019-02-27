@@ -288,12 +288,12 @@ describe('Options directives', () => {
     vm.key = 'bar'
   })
 
-  it('deep object as dynamic arguments', done => {
+  it('deep object like `deep.a` as dynamic arguments', done => {
     const vm = new Vue({
-      template: `<div v-my:[deep.key]="1"/>`,
+      template: `<div v-my:[deep.a]="1"/>`,
       data: {
         deep: {
-          key: 'foo'
+          a: 'foo'
         }
       },
       directives: {
@@ -309,6 +309,32 @@ describe('Options directives', () => {
         }
       }
     }).$mount()
-    vm.deep.key = 'bar'
+    vm.deep.a = 'bar'
+  })
+
+  it('deep object like `deep.a.b` as dynamic arguments', done => {
+    const vm = new Vue({
+      template: `<div v-my:[deep.a.b]="1"/>`,
+      data: {
+        deep: {
+          a: {
+            b: 'foo'
+          }
+        }
+      },
+      directives: {
+        my: {
+          bind(el, binding) {
+            expect(binding.arg).toBe('foo')
+          },
+          update(el, binding) {
+            expect(binding.arg).toBe('bar')
+            expect(binding.oldArg).toBe('foo')
+            done()
+          }
+        }
+      }
+    }).$mount()
+    vm.deep.a.b = 'bar'
   })
 })

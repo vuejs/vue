@@ -33,7 +33,7 @@ const dynamicArgRE = /^\[.*\]$/
 const argRE = /:(.*)$/
 export const bindRE = /^:|^\.|^v-bind:/
 const propBindRE = /^\./
-const modifierRE = /\.[^.\]]+(?=\.|$)/g
+const modifierRE = /(\.[^.\]]+)+$/g
 
 const slotRE = /^v-slot(:|$)|^#/
 
@@ -906,7 +906,7 @@ function parseModifiers (name: string): Object | void {
   const match = name.match(modifierRE)
   if (match) {
     const ret = {}
-    match.forEach(m => { ret[m.slice(1)] = true })
+    match[0].slice(1).split('.').forEach(item => ret[item] = true)
     return ret
   }
 }
