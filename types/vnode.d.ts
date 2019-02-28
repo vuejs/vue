@@ -1,6 +1,9 @@
 import { Vue } from "./vue";
 
-export type ScopedSlot = (props: any) => VNode | VNode[] | string | undefined;
+export type ScopedSlot = (props: any) => ScopedSlotReturn;
+type ScopedSlotReturnValue = VNode | string | boolean | null | undefined | ScopedSlotReturnArray;
+interface ScopedSlotReturnArray extends Array<ScopedSlotReturnValue> {}
+
 // Scoped slots are guaranteed to return Array of VNodes starting in 2.6
 export type NormalizedScopedSlot = (props: any) => ScopedSlotChildren;
 export type ScopedSlotChildren = VNode[] | undefined;
