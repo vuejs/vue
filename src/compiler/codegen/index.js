@@ -366,7 +366,7 @@ function genScopedSlots (
   // components with only scoped slots to skip forced updates from parent.
   // but in some cases we have to bail-out of this optimization
   // for example if the slot contains dynamic names, has v-if or v-for on them...
-  let needsForceUpdate = Object.keys(slots).some(key => {
+  let needsForceUpdate = el.for || Object.keys(slots).some(key => {
     const slot = slots[key]
     return (
       slot.slotTargetDynamic ||
