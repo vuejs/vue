@@ -1,6 +1,6 @@
 import { Vue } from "./vue";
 
-export type ScopedSlot = (props: any) => ScopedSlotReturn;
+export type ScopedSlot = (props: any) => ScopedSlotReturnValue;
 type ScopedSlotReturnValue = VNode | string | boolean | null | undefined | ScopedSlotReturnArray;
 interface ScopedSlotReturnArray extends Array<ScopedSlotReturnValue> {}
 
