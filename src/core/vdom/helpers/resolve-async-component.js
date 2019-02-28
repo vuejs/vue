@@ -8,7 +8,8 @@ import {
   isTrue,
   isObject,
   hasSymbol,
-  isPromise
+  isPromise,
+  remove
 } from 'core/util/index'
 
 import { createEmptyVNode } from 'core/vdom/vnode'
@@ -64,13 +65,8 @@ export function resolveAsyncComponent (
   if (!isDef(factory.owners)) {
     const owners = factory.owners = [owner]
     let sync = true
-
-    const removeOwner = (destroyedOwner) => {
-      const index = owners.indexOf(destroyedOwner)
-      if (index > -1) owners.splice(index, 1)
-    }
-
-    if (owner) owner.$on('hook:destroyed', () => removeOwner(owner))
+ 
+    ;(owner: any).$on('hook:destroyed', () => remove(owners, owner))
 
     const forceRender = (renderCompleted: boolean) => {
       for (let i = 0, l = owners.length; i < l; i++) {
