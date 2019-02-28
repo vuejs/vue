@@ -8,7 +8,8 @@ import {
   isTrue,
   isObject,
   hasSymbol,
-  isPromise
+  isPromise,
+  remove
 } from 'core/util/index'
 
 import { createEmptyVNode } from 'core/vdom/vnode'
@@ -51,17 +52,21 @@ export function resolveAsyncComponent (
     return factory.resolved
   }
 
+  const owner = currentRenderingInstance
+  if (isDef(factory.owners) && factory.owners.indexOf(owner) === -1) {
+    // already pending
+    factory.owners.push(owner)
+  }
+
   if (isTrue(factory.loading) && isDef(factory.loadingComp)) {
     return factory.loadingComp
   }
 
-  const owner = currentRenderingInstance
-  if (isDef(factory.owners)) {
-    // already pending
-    factory.owners.push(owner)
-  } else {
+  if (!isDef(factory.owners)) {
     const owners = factory.owners = [owner]
     let sync = true
+ 
+    if (owner) owner.$on('hook:destroyed', () => remove(owners, owner))
 
     const forceRender = (renderCompleted: boolean) => {
       for (let i = 0, l = owners.length; i < l; i++) {
