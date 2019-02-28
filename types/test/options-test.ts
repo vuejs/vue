@@ -323,6 +323,10 @@ Vue.component('component-with-scoped-slot', {
           item: (props: ScopedSlotProps) => [h('span', [props.msg])]
         }
       }),
+      h('child', [
+        // return single VNode (will be normalized to an array)
+        (props: ScopedSlotProps) => h('span', [props.msg])
+      ]),
       h('child', {
         // Passing down all slots from parent
         scopedSlots: this.$scopedSlots
