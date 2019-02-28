@@ -66,7 +66,7 @@ export function resolveAsyncComponent (
     const owners = factory.owners = [owner]
     let sync = true
  
-    ;(owner: any).$on('hook:destroyed', () => remove(owners, owner))
+    if (owner) owner.$on('hook:destroyed', () => remove(owners, owner))
 
     const forceRender = (renderCompleted: boolean) => {
       for (let i = 0, l = owners.length; i < l; i++) {
