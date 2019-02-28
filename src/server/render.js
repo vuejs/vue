@@ -57,7 +57,7 @@ function waitForServerPrefetch (vm, resolve, reject) {
     try {
       const promises = []
       for (let i = 0, j = handlers.length; i < j; i++) {
-        const result = handlers[i].call(vm, vm)
+        const result = handlers[i].call(vm.$ssrContext, vm, vm)
         if (result && typeof result.then === 'function') {
           promises.push(result)
         }
