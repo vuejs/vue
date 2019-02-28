@@ -1541,6 +1541,24 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('handling max stack size limit', done => {
+    const vueInstance = new Vue({
+      template: `<div class="root">
+        <child v-for="(x, i) in items" :key="i"></child>
+      </div>`,
+      components: {
+        child: {
+          template: '<div class="child"><span class="child">hi</span></div>'
+        }
+      },
+      data: {
+        items: Array(1000).fill(0)
+      }
+    })
+
+    renderToString(vueInstance, err => done(err))
+  })
 })
 
 function renderVmWithOptions (options, cb) {
