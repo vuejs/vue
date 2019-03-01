@@ -1,5 +1,5 @@
 import { Vue, CreateElement, CombinedVueInstance } from "./vue";
-import { VNode, VNodeData, VNodeDirective, ScopedSlot } from "./vnode";
+import { VNode, VNodeData, VNodeDirective, ScopedSlot, VNodeChildren } from "./vnode";
 
 type Constructor = {
   new (...args: any[]): any;
@@ -63,7 +63,7 @@ export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Method
 type DefaultData<V> =  object | ((this: V) => object);
 type DefaultProps = Record<string, any>;
 type DefaultMethods<V> =  { [key: string]: (this: V, ...args: any[]) => any };
-type DefaultComputed = { [key: string]: any };
+type DefaultComputed = { [key: string]: Function };
 export interface ComponentOptions<
   V extends Vue,
   Data=DefaultData<V>,
@@ -129,19 +129,19 @@ export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = Pro
     event?: string;
   };
   inject?: InjectOptions;
-  functional: boolean;
+  functional: true; // If the component is functional this is true :)
   render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode | VNode[];
 }
 
 export interface RenderContext<Props=DefaultProps> {
   props: Props;
   children: VNode[];
-  slots(): any;
+  slots(): VNodeChildren;
   data: VNodeData;
   parent: Vue;
   listeners: { [key: string]: Function | Function[] };
   scopedSlots: { [key: string]: ScopedSlot };
-  injections: any
+  injections: object
 }
 
 export type Prop<T> = { (): T } | { new(...args: any[]): T & object }
