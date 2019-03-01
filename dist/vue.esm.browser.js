@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.6.7
+ * Vue.js v2.6.8
  * (c) 2014-2019 Evan You
  * Released under the MIT License.
  */
@@ -475,7 +475,7 @@ var config = ({
  * using https://www.w3.org/TR/html53/semantics-scripting.html#potentialcustomelementname
  * skipping \u10000-\uEFFFF due to it freezing up PhantomJS
  */
-const unicodeLetters = 'a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD';
+const unicodeRegExp = /a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD/;
 
 /**
  * Check if a string starts with $ or _
@@ -500,7 +500,7 @@ function def (obj, key, val, enumerable) {
 /**
  * Parse simple path.
  */
-const bailRE = new RegExp(`[^${unicodeLetters}.$_\\d]`);
+const bailRE = new RegExp(`[^${unicodeRegExp.source}.$_\\d]`);
 function parsePath (path) {
   if (bailRE.test(path)) {
     return
@@ -1440,7 +1440,7 @@ function checkComponents (options) {
 }
 
 function validateComponentName (name) {
-  if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeLetters}]*$`).test(name)) {
+  if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeRegExp.source}]*$`).test(name)) {
     warn(
       'Invalid component name: "' + name + '". Component names ' +
       'should conform to valid custom element name in html5 specification.'
@@ -3631,17 +3631,21 @@ function resolveAsyncComponent (
     return factory.resolved
   }
 
+  const owner = currentRenderingInstance;
+  if (isDef(factory.owners) && factory.owners.indexOf(owner) === -1) {
+    // already pending
+    factory.owners.push(owner);
+  }
+
   if (isTrue(factory.loading) && isDef(factory.loadingComp)) {
     return factory.loadingComp
   }
 
-  const owner = currentRenderingInstance;
-  if (isDef(factory.owners)) {
-    // already pending
-    factory.owners.push(owner);
-  } else {
+  if (!isDef(factory.owners)) {
     const owners = factory.owners = [owner];
-    let sync = true;
+    let sync = true
+
+    ;(owner).$on('hook:destroyed', () => remove(owners, owner));
 
     const forceRender = (renderCompleted) => {
       for (let i = 0, l = owners.length; i < l; i++) {
@@ -5431,7 +5435,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.6.7';
+Vue.version = '2.6.8';
 
 /*  */
 
@@ -9219,7 +9223,7 @@ const isNonPhrasingTag = makeMap(
 // Regular Expressions for parsing tags and attributes
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
 const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
-const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeLetters}]*`;
+const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`;
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`;
 const startTagOpen = new RegExp(`^<${qnameCapture}`);
 const startTagClose = /^\s*(\/?)>/;
@@ -9481,7 +9485,7 @@ function parseHTML (html, options) {
         ) {
           options.warn(
             `tag <${stack[i].tag}> has no matching end tag.`,
-            { start: stack[i].start }
+            { start: stack[i].start, end: stack[i].end }
           );
         }
         if (options.end) {
@@ -9518,7 +9522,7 @@ const dynamicArgRE = /^\[.*\]$/;
 
 const argRE = /:(.*)$/;
 const bindRE = /^:|^\.|^v-bind:/;
-const modifierRE = /\.[^.]+/g;
+const modifierRE = /\.[^.\]]+(?=[^\]]*$)/g;
 
 const slotRE = /^v-slot(:|$)|^#/;
 
@@ -9695,7 +9699,7 @@ function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
-    start (tag, attrs, unary, start) {
+    start (tag, attrs, unary, start, end) {
       // check namespace.
       // inherit parent ns if there is one
       const ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag);
@@ -9714,6 +9718,7 @@ function parse (
       {
         if (options.outputSourceRange) {
           element.start = start;
+          element.end = end;
           element.rawAttrsMap = element.attrsList.reduce((cumulated, attr) => {
             cumulated[attr.name] = attr;
             return cumulated
@@ -11240,7 +11245,7 @@ function genScopedSlots (
   // components with only scoped slots to skip forced updates from parent.
   // but in some cases we have to bail-out of this optimization
   // for example if the slot contains dynamic names, has v-if or v-for on them...
-  let needsForceUpdate = Object.keys(slots).some(key => {
+  let needsForceUpdate = el.for || Object.keys(slots).some(key => {
     const slot = slots[key];
     return (
       slot.slotTargetDynamic ||
