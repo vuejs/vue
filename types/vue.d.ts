@@ -66,7 +66,7 @@ export type ExtendedVue<Instance extends Vue, Data, Methods, Computed, Props> = 
 
 export interface VueConfiguration {
   silent: boolean;
-  optionMergeStrategies: any;
+  optionMergeStrategies: { [key: string]: Function };
   devtools: boolean;
   productionTip: boolean;
   performance: boolean;
