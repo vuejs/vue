@@ -279,7 +279,7 @@ export function parseHTML (html, options) {
         ) {
           options.warn(
             `tag <${stack[i].tag}> has no matching end tag.`,
-            { start: stack[i].start }
+            { start: stack[i].start, end: stack[i].end }
           )
         }
         if (options.end) {
