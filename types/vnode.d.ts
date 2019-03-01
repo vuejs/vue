@@ -12,6 +12,8 @@ export type ScopedSlotChildren = VNode[] | undefined;
 export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string | boolean | null | undefined;
 export interface VNodeChildrenArrayContents extends Array<VNodeChildren | VNode> {}
 
+export type Key = string | number
+
 export interface VNode {
   tag?: string;
   data?: VNodeData;
@@ -20,7 +22,7 @@ export interface VNode {
   elm?: Node;
   ns?: string;
   context?: Vue;
-  key?: string | number;
+  key?: Key;
   componentOptions?: VNodeComponentOptions;
   componentInstance?: Vue;
   parent?: VNode;
@@ -39,14 +41,14 @@ export interface VNodeComponentOptions {
 }
 
 export interface VNodeData {
-  key?: string | number;
+  key?: Key;
   slot?: string;
   scopedSlots?: { [key: string]: ScopedSlot | undefined };
   ref?: string;
   refInFor?: boolean;
   tag?: string;
   staticClass?: string;
-  class?: any;
+  class?: string | { [key: string]: boolean } | any[]; // any[] for something like :class="[{ active: isActive }, errorClass]"
   staticStyle?: { [key: string]: any };
   style?: object[] | object;
   props?: { [key: string]: any };
