@@ -24,13 +24,13 @@ Hi! I'm really excited that you are interested in contributing to Vue.js. Before
 
 - Make sure `npm test` passes. (see [development setup](#development-setup))
 
-- If adding new feature:
+- If adding a new feature:
   - Add accompanying test case.
-  - Provide convincing reason to add this feature. Ideally, you should open a suggestion issue first and have it approved before working on it.
+  - Provide a convincing reason to add this feature. Ideally, you should open a suggestion issue first and have it approved before working on it.
 
 - If fixing bug:
   - If you are resolving a special issue, add `(fix #xxxx[,#xxxx])` (#xxxx is the issue id) in your PR title for a better release log, e.g. `update entities encoding/decoding (fix #3899)`.
-  - Provide detailed description of the bug in the PR. Live demo preferred.
+  - Provide a detailed description of the bug in the PR. Live demo preferred.
   - Add appropriate test coverage if applicable.
 
 ## Development Setup
@@ -59,7 +59,7 @@ $ npm run dev:test
 # build all dist files, including npm packages
 $ npm run build
 
-# run the full test suite, include linting / type checking
+# run the full test suite, include linting/type checking
 $ npm test
 ```
 
@@ -93,7 +93,7 @@ The default test script will do the following: lint with ESLint -> type check wi
 
   - **`core`**: contains universal, platform-agnostic runtime code.
 
-    The Vue 2.0 core is platform-agnostic. That is, code inside `core` is able to be run in any JavaScript environment, be it the browser, Node.js, or an embedded JavaScript runtime in native applications.
+    The Vue 2.0 core is platform-agnostic. That is, the code inside `core` is able to be run in any JavaScript environment, be it the browser, Node.js, or an embedded JavaScript runtime in native applications.
 
     - **`observer`**: contains code related to the reactivity system.
 
