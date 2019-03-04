@@ -37,7 +37,7 @@ Note the returned function code uses `with` and thus cannot be used in strict mo
   - Type: `boolean`
   - Default: `false`
 
-  Set this to true will cause the `errors` returned in the compiled result become objects in the form of `{ msg, start, end }`. The `start` and `end` properties are numbers that mark the code range of the error source in the template. This can be passed on to the `compiler.generateCodeFrame` API to generate code frame for the error.
+  Set this to true will cause the `errors` returned in the compiled result become objects in the form of `{ msg, start, end }`. The `start` and `end` properties are numbers that mark the code range of the error source in the template. This can be passed on to the `compiler.generateCodeFrame` API to generate a code frame for the error.
 
 - `whitespace`
   - Type: `string`
@@ -52,7 +52,7 @@ Note the returned function code uses `with` and thus cannot be used in strict mo
   If set to `'condense'`:
 
   - A whitespace-only text node between element tags is removed if it contains new lines. Otherwise, it is condensed into a single space.
-  - Consecutive whitespaces inside a non-whitespace-only text node is condensed into a single space.
+  - Consecutive whitespaces inside a non-whitespace-only text node are condensed into a single space.
 
   Using condense mode will result in smaller compiled code size and slightly improved performance. However, it will produce minor visual layout differences compared to plain HTML in certain cases.
 
