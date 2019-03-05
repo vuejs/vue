@@ -147,6 +147,13 @@ const FunctionalHelloWorldComponent = Vue.extend({
   }
 });
 
+const FunctionalScopedSlotsComponent = Vue.extend({
+  functional: true,
+  render(h, ctx) {
+    return ctx.scopedSlots.default && ctx.scopedSlots.default({}) || h('div', 'functional scoped slots');
+  }
+});
+
 const Parent = Vue.extend({
   data() {
     return { greeting: 'Hello' }
