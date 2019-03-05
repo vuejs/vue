@@ -1,5 +1,5 @@
 import { Vue, CreateElement, CombinedVueInstance } from "./vue";
-import { VNode, VNodeData, VNodeDirective, ScopedSlot } from "./vnode";
+import { VNode, VNodeData, VNodeDirective, NormalizedScopedSlot } from "./vnode";
 
 type Constructor = {
   new (...args: any[]): any;
@@ -140,7 +140,7 @@ export interface RenderContext<Props=DefaultProps> {
   data: VNodeData;
   parent: Vue;
   listeners: { [key: string]: Function | Function[] };
-  scopedSlots: { [key: string]: ScopedSlot };
+  scopedSlots: { [key: string]: NormalizedScopedSlot };
   injections: any
 }
 
