@@ -48,7 +48,7 @@ export interface VNodeData {
   refInFor?: boolean;
   tag?: string;
   staticClass?: string;
-  class?: string | { [key: string]: boolean } | any[]; // any[] for something like :class="[{ active: isActive }, errorClass]"
+  class?: string | { [key: string]: boolean } | (string | { [key: string]: boolean })[];
   staticStyle?: { [key: string]: any };
   style?: object[] | object;
   props?: { [key: string]: any };
