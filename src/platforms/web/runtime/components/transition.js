@@ -114,7 +114,8 @@ export default {
       mode && mode !== 'in-out' && mode !== 'out-in'
     ) {
       warn(
-        'invalid <transition> mode: ' + mode,
+        'invalid <transition> mode: ' + mode +
+        '<transition> mode should be either \'in-out\' or \'out-in\'',
         this.$parent
       )
     }
