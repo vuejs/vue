@@ -103,7 +103,7 @@
     "http-server": "^0.11.1",
     "jasmine": "^2.99.0",
     "jasmine-core": "^2.99.0",
-    "karma": "^2.0.0",
+    "karma": "^2.0.5",
     "karma-chrome-launcher": "^2.1.1",
     "karma-coverage": "^1.1.1",
     "karma-firefox-launcher": "^1.0.1",
@@ -135,7 +135,7 @@
     "selenium-server": "^2.53.1",
     "serialize-javascript": "^1.3.0",
     "shelljs": "^0.8.1",
-    "typescript": "^2.7.1",
+    "typescript": "^2.9.2",
     "uglify-js": "^3.0.15",
     "webpack": "^3.11.0",
     "weex-js-runtime": "^0.23.6",
@@ -146,5 +146,27 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "angular": "^1.7.7",
+    "babel": "^6.23.0",
+    "beautify": "0.0.8",
+    "boilerplate": "^0.6.1",
+    "bootstrap4": "0.0.1-security",
+    "bower": "^1.8.8",
+    "bower-latest": "^1.1.4",
+    "browserify": "^16.2.3",
+    "ember": "^1.0.3",
+    "ember-cli": "^3.8.1",
+    "ember-source": "^3.8.0",
+    "gulp": "^4.0.0",
+    "instant-icons": "^1.0.0",
+    "lint": "^1.1.2",
+    "prettier-eslint": "^8.8.2",
+    "prettier-eslint-plugin": "^1.1.4",
+    "python": "0.0.4",
+    "react": "^16.8.4",
+    "tslint": "^5.13.1",
+    "uglify": "^0.1.5"
   }
 }
