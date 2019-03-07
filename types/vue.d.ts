@@ -12,7 +12,7 @@ import {
   ThisTypedComponentOptionsWithRecordProps,
   WatchOptions,
 } from "./options";
-import { VNode, VNodeData, VNodeChildren, ScopedSlot, NormalizedScopedSlot } from "./vnode";
+import { VNode, VNodeData, VNodeChildren, NormalizedScopedSlot } from "./vnode";
 import { PluginFunction, PluginObject } from "./plugin";
 
 export interface CreateElement {
