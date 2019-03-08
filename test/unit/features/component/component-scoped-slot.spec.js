@@ -1264,4 +1264,17 @@ describe('Component scoped slot', () => {
       expect(vm.$el.textContent).toMatch(`Content:ok`)
     }).then(done)
   })
+
+  //#9658
+  it('fallback for scoped slot with single v-if', () => {
+    const vm = new Vue({
+      template: `<test v-slot><template v-if="false">hi</template></test>`,
+      components: {
+        Test: {
+          template: `<div><slot>fallback</slot></div>`
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toMatch('fallback')
+  })
 })
