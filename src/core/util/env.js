@@ -14,6 +14,8 @@ export const isEdge = UA && UA.indexOf('edge/') > 0
 export const isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 'android')
 export const isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios')
 export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
+export const isPhantomJS = UA && /phantomjs/.test(UA)
+export const isFF = UA && UA.match(/firefox\/(\d+)/)
 
 // Firefox has a "watch" function on Object.prototype...
 export const nativeWatch = ({}).watch
@@ -38,10 +40,10 @@ let _isServer
 export const isServerRendering = () => {
   if (_isServer === undefined) {
     /* istanbul ignore if */
-    if (!inBrowser && typeof global !== 'undefined') {
+    if (!inBrowser && !inWeex && typeof global !== 'undefined') {
       // detect presence of vue-server-renderer and avoid
       // Webpack shimming the process
-      _isServer = global['process'].env.VUE_ENV === 'server'
+      _isServer = global['process'] && global['process'].env.VUE_ENV === 'server'
     } else {
       _isServer = false
     }

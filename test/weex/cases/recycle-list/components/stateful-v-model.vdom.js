@@ -22,23 +22,14 @@
       },
       children: [{
         type: 'text',
-        style: {
-          height: '80px',
-          fontSize: '60px',
-          color: '#41B883'
-        },
+        classList: ['output'],
         attr: {
           value: { '@binding': 'output' }
         }
       }, {
         type: 'input',
         event: ['input'],
-        style: {
-          fontSize: '50px',
-          color: '#666666',
-          borderWidth: '2px',
-          borderColor: '#41B883'
-        },
+        classList: ['input'],
         attr: {
           type: 'text',
           value: 'No binding'

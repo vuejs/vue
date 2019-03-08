@@ -16,6 +16,8 @@ declare interface Component {
   static directive: (id: string, def?: Function | Object) => Function | Object | void;
   static component: (id: string, def?: Class<Component> | Object) => Class<Component>;
   static filter: (id: string, def?: Function) => Function | void;
+  // functional context constructor
+  static FunctionalRenderContext: Function;
 
   // public properties
   $el: any; // so that we can attach __vue__ to it

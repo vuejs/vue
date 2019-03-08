@@ -71,6 +71,7 @@ declare type VNodeDirective = {
   value?: any;
   oldValue?: any;
   arg?: string;
+  oldArg?: string;
   modifiers?: ASTModifiers;
   def?: Object;
 };

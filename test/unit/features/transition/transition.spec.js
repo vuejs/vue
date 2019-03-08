@@ -1167,5 +1167,27 @@ if (!isIE9) {
         expect(vm.$el.innerHTML).toBe('<!---->')
       }).then(done)
     })
+
+    // #8199
+    it('should not throw error when replaced by v-html contents', (done) => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <div v-if="ok" :class="ok">
+              <transition>
+                <span>a</span>
+              </transition>
+            </div>
+            <div v-else v-html="ok"></div>
+          </div>
+        `,
+        data: { ok: true }
+      }).$mount(el)
+
+      vm.ok = false
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].innerHTML).toBe('false')
+      }).then(done)
+    })
   })
 }

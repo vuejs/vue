@@ -18,20 +18,10 @@
         '@isComponentRoot': true,
         '@componentProps': {}
       },
-      // not supported yet
-      // style: {
-      //   height: '120px',
-      //   justifyContent: 'center',
-      //   alignItems: 'center',
-      //   backgroundColor: 'rgb(162, 217, 192)'
-      // },
+      classList: ['banner'],
       children: [{
         type: 'text',
-        // style: {
-        //   fontWeight: 'bold',
-        //   color: '#41B883',
-        //   fontSize: '60px'
-        // },
+        classList: ['title'],
         attr: {
           value: 'BANNER'
         }

@@ -9,7 +9,8 @@ import { checkKeyCodes } from './check-keycodes'
 import { bindObjectProps } from './bind-object-props'
 import { renderStatic, markOnce } from './render-static'
 import { bindObjectListeners } from './bind-object-listeners'
-import { resolveScopedSlots } from './resolve-slots'
+import { resolveScopedSlots } from './resolve-scoped-slots'
+import { bindDynamicKeys, prependModifier } from './bind-dynamic-keys'
 
 export function installRenderHelpers (target: any) {
   target._o = markOnce
@@ -27,4 +28,6 @@ export function installRenderHelpers (target: any) {
   target._e = createEmptyVNode
   target._u = resolveScopedSlots
   target._g = bindObjectListeners
+  target._d = bindDynamicKeys
+  target._p = prependModifier
 }

@@ -71,13 +71,13 @@ export default {
     }
   },
 
-  watch: {
-    include (val: string | RegExp | Array<string>) {
+  mounted () {
+    this.$watch('include', val => {
       pruneCache(this, name => matches(val, name))
-    },
-    exclude (val: string | RegExp | Array<string>) {
+    })
+    this.$watch('exclude', val => {
       pruneCache(this, name => !matches(val, name))
-    }
+    })
   },
 
   render () {

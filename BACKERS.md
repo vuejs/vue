@@ -8,9 +8,21 @@ Vue.js is an MIT-licensed open source project. It's an independent project with 
 
 #### What's the difference between Patreon and OpenCollective?
 
-Funds donated via Patreon goes directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses by core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
+Funds donated via Patreon go directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses for core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
 
 <br><br>
+
+<h2 align="center">Special Sponsors</h2>
+
+<!--special start-->
+
+<p align="center">
+  <a href="https://stdlib.com/" target="_blank">
+    <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
+  </a>
+</p>
+  
+<!--special end-->
 
 <h2 align="center">Platinum via Patreon</h2>
 
@@ -19,13 +31,13 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://stdlib.com" target="_blank">
-          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/stdlib.png">
+        <a href="https://moduscreate.com/?utm_source=Vue&utm_medium=Partnership&utm_campaign=VueShip" target="_blank">
+          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/modus.png">
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://xiaozhuanlan.com" target="_blank">
-          <img width="222px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/xiaozhuanlan.png">
+        <a href="https://www.bitsrc.io/?utm_source=vue&utm_medium=vue&utm_campaign=vue&utm_term=vue&utm_content=vue" target="_blank">
+          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bit.png">
         </a>
       </td>
       <td align="center" valign="middle">
@@ -41,14 +53,34 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
     </tr><tr></tr>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://www.datacamp.com/careers?utm_source=vuejs&utm_medium=sidebar" target="_blank">
-          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/datacamp.png">
+        <a href="https://vehikl.com/" target="_blank">
+          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vehikl.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.nativescript.org/vue?utm_source=vue-js-org&utm_medium=website&utm_campaign=nativescript-awareness" target="_blank">
+          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/nativescript.png">
         </a>
       </td>
     </tr><tr></tr>
   </tbody>
 </table>
 <!--platinum end-->
+
+<!--special-china start-->
+<h3 align="center">Platinum Sponsors (China)</h3>
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="http://www.dcloud.io/?hmsr=vuejsorg&hmpl=&hmcu=&hmkw=&hmci=" target="_blank">
+          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/dcloud.gif">
+        </a>
+      </td>
+    </tr><tr></tr>
+  </tbody>
+</table>
+<!--special-china end-->
 
 <h2 align="center">Platinum via OpenCollective</h2>
 
@@ -62,13 +94,13 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://laravel.com" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
+        <a href="https://www.vuemastery.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuemastery.png">
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://htmlburger.com" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/htmlburger.png">
+        <a href="https://laravel.com" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
         </a>
       </td>
       <td align="center" valign="middle">
@@ -77,27 +109,22 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="http://monterail.com/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/monterail.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://anymod.com" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/anymod.png">
+        <a href="https://htmlburger.com" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/html_burger.png">
         </a>
       </td>
       <td align="center" valign="middle">
         <a href="https://www.frontenddeveloperlove.com/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/frontend-love.png">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/frontend_love.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://onsen.io/vue/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/onsen_ui.png">
         </a>
       </td>
     </tr><tr></tr>
     <tr>
-      <td align="center" valign="middle">
-        <a href="https://onsen.io/vue/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/onsen-ui.png">
-        </a>
-      </td>
       <td align="center" valign="middle">
         <a href="https://vuetifyjs.com" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuetify.png">
@@ -109,13 +136,72 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
         </a>
       </td>
       <td align="center" valign="middle">
+        <a href="https://icons8.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/icons_8.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
         <a href="https://vuejobs.com/?ref=vuejs" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://leanpub.com/vuejs2" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tmvuejs2.png">
+        <a href="https://tidelift.com/subscription/npm/vue" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tidelift.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="http://www.syncfusion.com/?utm_source=vuejs&utm_medium=list&utm_campaign=vuejsjslistcy19" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/syncfusion.png">
+        </a>
+      </td>
+    </tr><tr></tr>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://opteo.com/vue" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/opteo.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://devsquad.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/devsquad.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.inkoop.in/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/inkoop.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.firesticktricks.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/firestick_tricks.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://github.com/marcus-hiles" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/marcus_hiles.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://intygrate.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/intygrate.png">
+        </a>
+      </td>
+    </tr><tr></tr>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://isleofcode.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/isle_of_code.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://yakaz.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/yakaz.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://passionatepeople.io/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/passionate_people.png">
         </a>
       </td>
     </tr><tr></tr>
@@ -141,6 +227,31 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 
 - Matt Mullenweg
 
+<!--silver start-->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://dopamine.bg/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/dopamine.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://gridsome.org/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/gridsome.png">
+        </a>
+      </td>
+    </tr><tr></tr>
+  </tbody>
+</table>
+<!--silver end-->
+
+<h4 align="center">Silver via OpenCollective</h4>
+
+<a href="https://opencollective.com/vuejs/tiers/silver-sponsors/0/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/0/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/silver-sponsors/1/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/1/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/silver-sponsors/2/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/2/avatar.svg"></a>
+
 <h2 align="center">Bronze via Patreon</h2>
 
 <!--bronze start-->
@@ -149,22 +260,22 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
     <tr>
       <td align="center" valign="middle">
         <a href="http://tighten.co/" target="_blank">
-          <img width="148px" src="http://i.imgur.com/T7fQYLT.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://alligator.io" target="_blank">
-          <img width="148px" src="https://alligator.io/images/alligator-logo.svg">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tighten_co.png">
         </a>
       </td>
       <td align="center" valign="middle">
         <a href="https://www.accelebrate.com/" target="_blank">
-          <img width="148px" src="https://www.accelebrate.com/assets/images/accelebrate_logo@2x.png">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/accelebrate.png">
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://pullstring.com" target="_blank">
-          <img width="148px" src="https://i.imgur.com/hQHW6TB.png">
+        <a href="https://polyglotengineer.com/derek.pollard" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/derek_pollard.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.earthlink.ro" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/earthlink.png">
         </a>
       </td>
     </tr><tr></tr>
@@ -208,114 +319,138 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 <h2 align="center">Generous Backers via Patreon ($50+)</h2>
 
 <!--50 start-->
+- Jamie K
 - Wasim Khamlichi
 - errorrik
 - Alex Balashov
 - Konstantin Levinski
-- Samuel Smith
-- HARRI J SALOMAA
-- tjkoury
-- Evan Leonardi
+- Blaise Laflamme
+- Ernest Sim
+- Dilettant
+- Sean Ferguson
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
 
 <!--10 start-->
-- Luca Borghini
-- kazuya kawaguchi
-- Keisuke KITA
-- Jack Barham
-- Santa Cruz
-- Tom Conlon
-- Simon East
-- Henry Zhu
-- Benjamin Listwon
-- Lars Andreas Ness
-- Victor Tolbert
-- Frank Dugan III
-- Stephen Hartley
-- Wen-Tien Chang
-- Chestnut Hill
-- Kirk Lewis
-- Karol F
-- Miljan Aleksic
-- 叶解
-- Paul Straw
+- Masahiro Tanaka
+- Shawn Wildermuth
+- Samuel Smith
+- donny
 - Jake Ingman
+- Simon East
+- kazupon
+- Lars Andreas Ness
+- Luca Borghini
+- Sean Washington
+- Benjamin Listwon
+- Keisuke Kita
+- Kirk Lewis
+- Wen-Tien Chang
+- Victor Tolbert
+- Stephen Michael Hartley
+- Karol
+- Phan An
+- Miljan Aleksic
+- James J. Ye
 - Barbara Liau
-- Isaac Sant
-- Milos Stojanovic
-- 4
-- The Graphic Design School
-- Christian Griffith
+- Luiz
+- Matsumoto Takamasa
 - Jarek Tkaczyk
-- Andrew Davis
-- Sean MacIsaac
-- Xiaojie LI
-- David Hess
-- Niannian Modisette
-- Dariusz Jastrzębski
-- Matt Jones
-- Dave Chenell
-- Cheng-Wei Chien
-- Duncan J Kenzie
+- Duncan Kenzie
 - Mike Margerum
 - Guy Gavergun
-- Edithvale
-- Intevation GmbH
-- Luiz Eduardo  Tanure Bacelar
-- Chengzhi Yin
-- Dan Barrett
-- Zoran Knezevic
-- James Simpson
+- Matt Jones
+- Niannian Modisette
+- Bernhard E. Reiter
 - Pierre Vanhulst
-- Vincent Gabriel
-- Chris Anderson
+- Zoran Knezevic
+- Chengzhi Yin
+- Shinya Katayama
 - Jon Hobbs-Smith
-- Akiho Nagao
+- Anthony Estebe
 - Asaf Yishai
-- Estebe Anthony
 - Haim Yulzari
-- David McGuigan
+- Akiho Nagao
 - Jeremy Tan
 - Jim Raden
-- Fille Åström
-- Nicholas Reid
-- Tyler Scott
-- Thong Yong Jun
-- Tai Shi Lgin
-- Bryan Gruneberg
-- Roman Kuba
-- Matthew McMillion
-- Familiar Studio
+- Tai Shi Ling
+- IMGNRY
+- Yong Jun Thong
 - Matias Verdier
-- Jamie McElwain
+- Chih-Hsuan Fan
+- Tyler
+- Daniel Waghorn
 - Vivekanandhan Natarajan
-- Alejandro Mohamad
 - Rafael Belvederese
+- Jamie McElwain
+- Cliff Hess
+- Rob Yedlin
 - Mickaël Andrieu
 - Guilherme S L de Souza
-- Rob Yedlin
-- Daniel Waghorn
-- Eric Githinji
-- Chih-Hsuan, Fan
 - Jordan Oroshiba
-- Brian Jorden
-- Cliff Hess
-- Joe Ray Gregory
-- Johnny Eshan
-- Orney Enrique martinez Said
-- Tom Striker
-- Oskar Lindgren
+- Joe Gregory
+- Marcos Moura
 - RADD Creative
-- Maegan Wilson
-- Rua Cura D'ars
 - Richard Simpson
-- Charles McKeever
 - Alok Pant
 - Jessie Hernandez
-- Eric Fong
+- Ivan Sieder
 - Aparajita Fishman
+- Eric
+- Christo Crampton
+- Romain Lienard
+- Bohdan Kokotko
+- Donald Fischer
+- Jere Sjöroos
+- David Ang
+- Alexander Weiher
+- Oskar Lindgren
+- Jaeyoung Lee
+- Wakana Seki
+- Ben Hong
+- John Cleveland
+- Tom Ootes
+- Domenico Gaudioso
+- David Kaplan
+- Amor
+- Andy
+- Hannes Kochniß
+- Juan Bermudez
+- Daniel Mattingley
+- Matt Sencenbaugh
+- Joe Cochran
+- Chris Calo
+- Colt Borg
+- Teon Ooi
+- Alberto T. Payero Mota
+- Elon Hung
+- Milan Zivkovic
+- Johnny Ray Austin
+- Tom Meagher
+- Soichiro Isshiki
+- Abraham Arango
+- Marko Boskovic
+- Garion Herman
+- Ed Linklater
+- Christopher Bemister
+- Andrew Willis
+- Princeyesuraj Edward
+- Yusuke Kawabata
+- We
+- Carlos Adrián
+- Nick Dandakis
+- shimbaco
+- 极 蔡
+- 龙腾道
+- alcalbg
+- Kenneth Crawford
+- Peter Matkovsky
+- Fabien GuySake Ungerer
+- Kevin Batdorf
+- Masato Miura
+- Fedor Indutny
+- Juli A Schlack
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>

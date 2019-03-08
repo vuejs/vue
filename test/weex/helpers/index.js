@@ -58,7 +58,9 @@ export function compileVue (source, componentName) {
 
     const name = 'test_case_' + (Math.random() * 99999999).toFixed(0)
     const generateCode = styles => (`
+      try { weex.document.registerStyleSheets("${name}", [${JSON.stringify(styles)}]) } catch(e) {};
       var ${name} = Object.assign({
+        _scopeId: "${name}",
         style: ${JSON.stringify(styles)},
         render: function () { ${res.render} },
         ${res['@render'] ? ('"@render": function () {' + res['@render'] + '},') : ''}
@@ -114,10 +116,16 @@ function omitUseless (object) {
   if (isObject(object)) {
     delete object.ref
     for (const key in object) {
-      if (key.charAt(0) !== '@' && (isEmptyObject(object[key]) || object[key] === undefined)) {
+      omitUseless(object[key])
+      if (key === '@styleScope' ||
+        key === '@templateId' ||
+        key === 'bindingExpression') {
         delete object[key]
       }
-      omitUseless(object[key])
+      if (key.charAt(0) !== '@' &&
+        (isEmptyObject(object[key]) || object[key] === undefined)) {
+        delete object[key]
+      }
     }
   }
   return object
@@ -148,7 +156,7 @@ export function getEvents (instance) {
 export function fireEvent (instance, ref, type, event = {}) {
   const el = instance.document.getRef(ref)
   if (el) {
-    instance.document.fireEvent(el, type, event = {})
+    instance.document.fireEvent(el, type, event)
   }
 }
 

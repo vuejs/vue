@@ -23,20 +23,13 @@
       },
       children: [{
         type: 'image',
-        style: {
-          width: '750px',
-          height: '1000px'
-        },
+        classList: ['image'],
         attr: {
           src: { '@binding': 'imageUrl' }
         }
       }, {
         type: 'text',
-        style: {
-          fontSize: '80px',
-          textAlign: 'center',
-          color: '#E95659'
-        },
+        classList: ['title'],
         attr: {
           value: { '@binding': 'title' }
         }

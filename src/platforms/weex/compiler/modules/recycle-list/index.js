@@ -8,6 +8,7 @@ import { preTransformVBind } from './v-bind'
 import { preTransformVIf } from './v-if'
 import { preTransformVFor } from './v-for'
 import { postTransformVOn } from './v-on'
+import { preTransformVOnce } from './v-once'
 
 let currentRecycleList = null
 
@@ -22,9 +23,10 @@ function preTransformNode (el: ASTElement, options: WeexCompilerOptions) {
     currentRecycleList = el
   }
   if (shouldCompile(el, options)) {
-    preTransformVBind(el, options)
+    preTransformVBind(el)
     preTransformVIf(el, options) // also v-else-if and v-else
     preTransformVFor(el, options)
+    preTransformVOnce(el)
   }
 }
 
@@ -39,12 +41,12 @@ function postTransformNode (el: ASTElement, options: WeexCompilerOptions) {
     // mark child component in parent template
     postTransformComponent(el, options)
     // mark root in child component template
-    postTransformComponentRoot(el, options)
+    postTransformComponentRoot(el)
     // <text>: transform children text into value attr
     if (el.tag === 'text') {
-      postTransformText(el, options)
+      postTransformText(el)
     }
-    postTransformVOn(el, options)
+    postTransformVOn(el)
   }
   if (el === currentRecycleList) {
     currentRecycleList = null

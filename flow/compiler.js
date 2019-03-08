@@ -6,7 +6,8 @@ declare type CompilerOptions = {
   isUnaryTag?: (tag: string) => ?boolean; // check if a tag is unary for the platform
   canBeLeftOpenTag?: (tag: string) => ?boolean; // check if a tag can be left opened
   isReservedTag?: (tag: string) => ?boolean; // check if a tag is a native for the platform
-  preserveWhitespace?: boolean; // preserve whitespace between elements?
+  preserveWhitespace?: boolean; // preserve whitespace between elements? (Deprecated)
+  whitespace?: 'preserve' | 'condense'; // whitespace handling strategy
   optimize?: boolean; // optimize static content?
 
   // web specific
@@ -18,6 +19,7 @@ declare type CompilerOptions = {
   shouldDecodeTags?: boolean;
   shouldDecodeNewlines?:  boolean;
   shouldDecodeNewlinesForHref?: boolean;
+  outputSourceRange?: boolean;
 
   // runtime user-configurable
   delimiters?: [string, string]; // template delimiters
@@ -27,13 +29,19 @@ declare type CompilerOptions = {
   scopeId?: string;
 };
 
+declare type WarningMessage = {
+  msg: string;
+  start?: number;
+  end?: number;
+};
+
 declare type CompiledResult = {
   ast: ?ASTElement;
   render: string;
   staticRenderFns: Array<string>;
   stringRenderFns?: Array<string>;
-  errors?: Array<string>;
-  tips?: Array<string>;
+  errors?: Array<string | WarningMessage>;
+  tips?: Array<string | WarningMessage>;
 };
 
 declare type ModuleOptions = {
@@ -54,10 +62,21 @@ declare type ASTModifiers = { [key: string]: boolean };
 declare type ASTIfCondition = { exp: ?string; block: ASTElement };
 declare type ASTIfConditions = Array<ASTIfCondition>;
 
+declare type ASTAttr = {
+  name: string;
+  value: any;
+  dynamic?: boolean;
+  start?: number;
+  end?: number
+};
+
 declare type ASTElementHandler = {
   value: string;
   params?: Array<any>;
   modifiers: ?ASTModifiers;
+  dynamic?: boolean;
+  start?: number;
+  end?: number;
 };
 
 declare type ASTElementHandlers = {
@@ -69,7 +88,10 @@ declare type ASTDirective = {
   rawName: string;
   value: string;
   arg: ?string;
+  isDynamicArg: boolean;
   modifiers: ?ASTModifiers;
+  start?: number;
+  end?: number;
 };
 
 declare type ASTNode = ASTElement | ASTText | ASTExpression;
@@ -77,10 +99,14 @@ declare type ASTNode = ASTElement | ASTText | ASTExpression;
 declare type ASTElement = {
   type: 1;
   tag: string;
-  attrsList: Array<{ name: string; value: any }>;
+  attrsList: Array<ASTAttr>;
   attrsMap: { [key: string]: any };
+  rawAttrsMap: { [key: string]: ASTAttr };
   parent: ASTElement | void;
   children: Array<ASTNode>;
+
+  start?: number;
+  end?: number;
 
   processed?: true;
 
@@ -91,8 +117,9 @@ declare type ASTElement = {
   hasBindings?: boolean;
 
   text?: string;
-  attrs?: Array<{ name: string; value: any }>;
-  props?: Array<{ name: string; value: string }>;
+  attrs?: Array<ASTAttr>;
+  dynamicAttrs?: Array<ASTAttr>;
+  props?: Array<ASTAttr>;
   plain?: boolean;
   pre?: true;
   ns?: string;
@@ -102,6 +129,7 @@ declare type ASTElement = {
   transitionMode?: string | null;
   slotName?: ?string;
   slotTarget?: ?string;
+  slotTargetDynamic?: boolean;
   slotScope?: ?string;
   scopedSlots?: { [name: string]: ASTElement };
 
@@ -160,6 +188,8 @@ declare type ASTExpression = {
   static?: boolean;
   // 2.4 ssr optimization
   ssrOptimizability?: number;
+  start?: number;
+  end?: number;
 };
 
 declare type ASTText = {
@@ -169,17 +199,20 @@ declare type ASTText = {
   isComment?: boolean;
   // 2.4 ssr optimization
   ssrOptimizability?: number;
+  start?: number;
+  end?: number;
 };
 
 // SFC-parser related declarations
 
-// an object format describing a single-file component.
+// an object format describing a single-file component
 declare type SFCDescriptor = {
   template: ?SFCBlock;
   script: ?SFCBlock;
   styles: Array<SFCBlock>;
   customBlocks: Array<SFCBlock>;
-};
+  errors: Array<string | WarningMessage>;
+}
 
 declare type SFCBlock = {
   type: string;

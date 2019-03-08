@@ -19,7 +19,7 @@ export default context => {
     // simulate router.onReady
     Foo().then(comp => {
       // resolve now to make the render sync
-      Foo.resolved = Vue.extend(comp)
+      Foo.resolved = Vue.extend(comp.default)
       resolve(vm)
     })
   })

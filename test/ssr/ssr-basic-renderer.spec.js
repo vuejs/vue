@@ -61,7 +61,7 @@ describe('SSR: basicRenderer', () => {
       created () {
         ssrContext = this.$ssrContext
       }
-    }), (err, result) => {
+    }), (err) => {
       expect(err).toBeNull()
       expect(ssrContext).toBeUndefined()
       done()

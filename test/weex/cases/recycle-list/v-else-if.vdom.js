@@ -27,7 +27,7 @@
     }, {
       type: 'image',
       attr: {
-        '[[match]]': '!(!(item.sourceA) && (item.sourceB))',
+        '[[match]]': '!(item.sourceA || item.sourceB)',
         src: { '@binding': 'item.placeholder' }
       }
     }]

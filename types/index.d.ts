@@ -2,6 +2,8 @@ import { Vue } from "./vue";
 
 export default Vue;
 
+export as namespace Vue;
+
 export {
   CreateElement,
   VueConstructor
@@ -13,6 +15,7 @@ export {
   ComponentOptions,
   FunctionalComponentOptions,
   RenderContext,
+  PropType,
   PropOptions,
   ComputedOptions,
   WatchHandler,

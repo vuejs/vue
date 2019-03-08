@@ -19,6 +19,21 @@ describe('Directive v-model text', () => {
     }).then(done)
   })
 
+  it('should work with space ended expression in v-model', () => {
+    const vm = new Vue({
+      data: {
+        obj: {
+          test: 'b'
+        }
+      },
+      template: '<input v-model="obj.test ">'
+    }).$mount()
+
+    triggerEvent(vm.$el, 'input')
+    expect(vm.obj['test ']).toBe(undefined)
+    expect(vm.obj.test).toBe('b')
+  })
+
   it('.lazy modifier', () => {
     const vm = new Vue({
       data: {
@@ -152,7 +167,7 @@ describe('Directive v-model text', () => {
           '<span ref="rs">{{selections}}</span>' +
         '</div>'
     }).$mount()
-    var inputs = vm.$el.getElementsByTagName('input')
+    const inputs = vm.$el.getElementsByTagName('input')
     inputs[1].value = 'test'
     triggerEvent(inputs[1], 'input')
     waitForUpdate(() => {
@@ -183,27 +198,25 @@ describe('Directive v-model text', () => {
     })
   }
 
-  if (!isAndroid) {
-    it('compositionevents', function (done) {
-      const vm = new Vue({
-        data: {
-          test: 'foo'
-        },
-        template: '<input v-model="test">'
-      }).$mount()
-      const input = vm.$el
-      triggerEvent(input, 'compositionstart')
-      input.value = 'baz'
-      // input before composition unlock should not call set
-      triggerEvent(input, 'input')
-      expect(vm.test).toBe('foo')
-      // after composition unlock it should work
-      triggerEvent(input, 'compositionend')
-      triggerEvent(input, 'input')
-      expect(vm.test).toBe('baz')
-      done()
-    })
-  }
+  it('compositionevents', function (done) {
+    const vm = new Vue({
+      data: {
+        test: 'foo'
+      },
+      template: '<input v-model="test">'
+    }).$mount()
+    const input = vm.$el
+    triggerEvent(input, 'compositionstart')
+    input.value = 'baz'
+    // input before composition unlock should not call set
+    triggerEvent(input, 'input')
+    expect(vm.test).toBe('foo')
+    // after composition unlock it should work
+    triggerEvent(input, 'compositionend')
+    triggerEvent(input, 'input')
+    expect(vm.test).toBe('baz')
+    done()
+  })
 
   it('warn invalid tag', () => {
     new Vue({
@@ -225,7 +238,7 @@ describe('Directive v-model text', () => {
       template: '<input v-model="a" @input="onInput">',
       methods: {
         onInput (e) {
-          spy(e.target.value)
+          spy(this.a)
         }
       }
     }).$mount()
@@ -287,6 +300,17 @@ describe('Directive v-model text', () => {
           <foo v-model="test" :value="test"/>
         </div>
       `
+    }).$mount()
+    expect('conflicts with v-model').not.toHaveBeenWarned()
+  })
+
+  it('should not warn on input with dynamic type binding', () => {
+    new Vue({
+      data: {
+        type: 'checkbox',
+        test: 'foo'
+      },
+      template: '<input :type="type" v-model="test" :value="test">'
     }).$mount()
     expect('conflicts with v-model').not.toHaveBeenWarned()
   })
@@ -413,8 +437,8 @@ describe('Directive v-model text', () => {
     })
   }
 
-  // #7138
   if (isIE && !isIE9) {
+    // #7138
     it('should not fire input on initial render of textarea with placeholder in IE10/11', done => {
       const el = document.createElement('div')
       document.body.appendChild(el)
@@ -425,6 +449,22 @@ describe('Directive v-model text', () => {
       })
       setTimeout(() => {
         expect(vm.foo).toBe(null)
+        done()
+      }, 17)
+    })
+
+    // #9042
+    it('should not block the first input event when placeholder is empty', done => {
+      const el = document.createElement('div')
+      document.body.appendChild(el)
+      const vm = new Vue({
+        el,
+        data: { evtCount: 0 },
+        template: `<textarea placeholder="" @input="evtCount++"></textarea>`,
+      })
+      triggerEvent(vm.$el, 'input')
+      setTimeout(() => {
+        expect(vm.evtCount).toBe(1)
         done()
       }, 17)
     })

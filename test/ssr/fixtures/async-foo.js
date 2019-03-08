@@ -3,7 +3,7 @@ import './test.css'
 import font from './test.woff2'
 import image from './test.png'
 
-module.exports = {
+export default {
   beforeCreate () {
     this.$vnode.ssrContext._registeredComponents.add('__MODULE_ID__')
   },

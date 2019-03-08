@@ -9,17 +9,18 @@ describe('compile options', () => {
         <input type="text" v-model="msg" required max="8" v-validate:field1.group1.group2>
       </div>
     `, {
-        directives: {
-          validate (el, dir) {
-            if (dir.name === 'validate' && dir.arg) {
-              el.validate = {
-                field: dir.arg,
-                groups: dir.modifiers ? Object.keys(dir.modifiers) : []
-              }
+      directives: {
+        validate (el, dir) {
+          if (dir.name === 'validate' && dir.arg) {
+            el.validate = {
+              field: dir.arg,
+              groups: dir.modifiers ? Object.keys(dir.modifiers) : []
             }
           }
-        },
-        modules: [{
+        }
+      },
+      modules: [
+        {
           transformNode (el) {
             el.validators = el.validators || []
             const validators = ['required', 'min', 'max', 'pattern', 'maxlength', 'minlength']
@@ -52,15 +53,16 @@ describe('compile options', () => {
             })
             // generate code
             return `_c('validate',{props:{
-          field:${JSON.stringify(el.validate.field)},
-          groups:${JSON.stringify(el.validate.groups)},
-          validators:${JSON.stringify(el.validators)},
-          result:${JSON.stringify(result)},
-          child:${code}}
-        })`
+              field:${JSON.stringify(el.validate.field)},
+              groups:${JSON.stringify(el.validate.groups)},
+              validators:${JSON.stringify(el.validators)},
+              result:${JSON.stringify(result)},
+              child:${code}}
+            })`
           }
-        }]
-      })
+        }
+      ]
+    })
     expect(render).not.toBeUndefined()
     expect(staticRenderFns).toEqual([])
     expect(errors).toEqual([])
@@ -79,7 +81,7 @@ describe('compile options', () => {
           computed: {
             valid () {
               let ret = true
-              for (let i = 0; i > this.validators.length; i++) {
+              for (let i = 0; i < this.validators.length; i++) {
                 const { name } = this.validators[i]
                 if (!this.result[name]) {
                   ret = false
@@ -124,5 +126,31 @@ describe('compile options', () => {
     expect(compiled.errors.length).toBe(2)
     expect(compiled.errors[0]).toContain('Raw expression: v-if="a----"')
     expect(compiled.errors[1]).toContain('Raw expression: {{ b++++ }}')
+  })
+
+  it('should collect errors with source range', () => {
+    let compiled = compile('hello', { outputSourceRange: true })
+    expect(compiled.errors.length).toBe(1)
+    expect(compiled.errors[0].start).toBe(0)
+    expect(compiled.errors[0].end).toBeUndefined()
+
+    compiled = compile('<div v-if="a----">{{ b++++ }}</div>', { outputSourceRange: true })
+    expect(compiled.errors.length).toBe(2)
+    expect(compiled.errors[0].start).toBe(5)
+    expect(compiled.errors[0].end).toBe(17)
+    expect(compiled.errors[1].start).toBe(18)
+    expect(compiled.errors[1].end).toBe(29)
+
+    compiled = compile('<div><span></div>', { outputSourceRange: true })
+    expect(compiled.errors.length).toBe(1)
+    expect(compiled.errors[0].start).toBe(5)
+    expect(compiled.errors[0].end).toBe(11)
+  })
+
+  it('should collect source range for binding keys', () => {
+    const compiled = compile('<div><slot v-bind:key="key" /></div>', { outputSourceRange: true })
+    expect(compiled.errors.length).toBe(1)
+    expect(compiled.errors[0].start).toBe(11)
+    expect(compiled.errors[0].end).toBe(27)
   })
 })

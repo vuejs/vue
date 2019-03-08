@@ -85,3 +85,7 @@ export function setTextContent (node: WeexElement, text: string) {
 export function setAttribute (node: WeexElement, key: string, val: any) {
   node.setAttr(key, val)
 }
+
+export function setStyleScope (node: WeexElement, scopeId: string) {
+  node.setAttr('@styleScope', scopeId)
+}

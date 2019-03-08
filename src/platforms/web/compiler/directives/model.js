@@ -28,7 +28,8 @@ export default function model (
     if (tag === 'input' && type === 'file') {
       warn(
         `<${el.tag} v-model="${value}" type="file">:\n` +
-        `File inputs are read only. Use a v-on:change listener instead.`
+        `File inputs are read only. Use a v-on:change listener instead.`,
+        el.rawAttrsMap['v-model']
       )
     }
   }
@@ -54,7 +55,8 @@ export default function model (
       `<${el.tag} v-model="${value}">: ` +
       `v-model is not supported on this element type. ` +
       'If you are working with contenteditable, it\'s recommended to ' +
-      'wrap a library dedicated for that purpose inside a custom component.'
+      'wrap a library dedicated for that purpose inside a custom component.',
+      el.rawAttrsMap['v-model']
     )
   }
 
@@ -86,8 +88,8 @@ function genCheckboxModel (
     'if(Array.isArray($$a)){' +
       `var $$v=${number ? '_n(' + valueBinding + ')' : valueBinding},` +
           '$$i=_i($$a,$$v);' +
-      `if($$el.checked){$$i<0&&(${value}=$$a.concat([$$v]))}` +
-      `else{$$i>-1&&(${value}=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}` +
+      `if($$el.checked){$$i<0&&(${genAssignmentCode(value, '$$a.concat([$$v])')})}` +
+      `else{$$i>-1&&(${genAssignmentCode(value, '$$a.slice(0,$$i).concat($$a.slice($$i+1))')})}` +
     `}else{${genAssignmentCode(value, '$$c')}}`,
     null, true
   )
@@ -130,13 +132,16 @@ function genDefaultModel (
   const type = el.attrsMap.type
 
   // warn if v-bind:value conflicts with v-model
+  // except for inputs with v-bind:type
   if (process.env.NODE_ENV !== 'production') {
     const value = el.attrsMap['v-bind:value'] || el.attrsMap[':value']
-    if (value) {
+    const typeBinding = el.attrsMap['v-bind:type'] || el.attrsMap[':type']
+    if (value && !typeBinding) {
       const binding = el.attrsMap['v-bind:value'] ? 'v-bind:value' : ':value'
       warn(
         `${binding}="${value}" conflicts with v-model on the same element ` +
-        'because the latter already expands to a value binding internally'
+        'because the latter already expands to a value binding internally',
+        el.rawAttrsMap[binding]
       )
     }
   }

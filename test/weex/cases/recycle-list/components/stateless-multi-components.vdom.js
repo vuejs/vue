@@ -19,19 +19,10 @@
         '@isComponentRoot': true,
         '@componentProps': {}
       },
-      // style: {
-      //   height: '120px',
-      //   justifyContent: 'center',
-      //   alignItems: 'center',
-      //   backgroundColor: 'rgb(162, 217, 192)'
-      // },
+      classList: ['banner'],
       children: [{
         type: 'text',
-        // style: {
-        //   fontWeight: 'bold',
-        //   color: '#41B883',
-        //   fontSize: '60px'
-        // },
+        classList: ['title'],
         attr: { value: 'BANNER' }
       }]
     }, {
@@ -43,10 +34,10 @@
         '@isComponentRoot': true,
         '@componentProps': {}
       },
-      style: { height: '80px', justifyContent: 'center', backgroundColor: '#EEEEEE' },
+      classList: ['footer'],
       children: [{
         type: 'text',
-        style: { color: '#AAAAAA', fontSize: '32px', textAlign: 'center' },
+        classList: ['copyright'],
         attr: { value: 'All rights reserved.' }
       }]
     }]
@@ -59,19 +50,10 @@
         '@isComponentRoot': true,
         '@componentProps': {}
       },
-      // style: {
-      //   height: '120px',
-      //   justifyContent: 'center',
-      //   alignItems: 'center',
-      //   backgroundColor: 'rgb(162, 217, 192)'
-      // },
+      classList: ['banner'],
       children: [{
         type: 'text',
-        // style: {
-        //   fontWeight: 'bold',
-        //   color: '#41B883',
-        //   fontSize: '60px'
-        // },
+        classList: ['title'],
         attr: { value: 'BANNER' }
       }]
     }, {
@@ -85,13 +67,13 @@
       },
       children: [{
         type: 'image',
-        style: { width: '750px', height: '1000px' },
+        classList: ['image'],
         attr: {
           src: { '@binding': 'imageUrl' }
         }
       }, {
         type: 'text',
-        style: { fontSize: '80px', textAlign: 'center', color: '#E95659' },
+        classList: ['title'],
         attr: {
           value: { '@binding': 'title' }
         }

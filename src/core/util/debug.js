@@ -41,7 +41,7 @@ if (process.env.NODE_ENV !== 'production') {
       ? vm.options
       : vm._isVue
         ? vm.$options || vm.constructor.options
-        : vm || {}
+        : vm
     let name = options.name || options._componentTag
     const file = options.__file
     if (!name && file) {

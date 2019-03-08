@@ -585,7 +585,7 @@ describe('richtext component', () => {
         }
       `)).toEqual({
         type: 'richtext',
-        style: { backgroundColor: '#FF6600', height: 200 },
+        classList: ['title'],
         attr: {
           value: [{
             type: 'span',
@@ -612,7 +612,8 @@ describe('richtext component', () => {
         }
       `)).toEqual({
         type: 'richtext',
-        style: { backgroundColor: '#FF6600', height: 200 },
+        classList: ['title'],
+        style: { backgroundColor: '#FF6600' },
         attr: {
           value: [{
             type: 'span',

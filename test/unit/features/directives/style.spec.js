@@ -1,11 +1,11 @@
 import Vue from 'vue'
 
 function checkPrefixedProp (prop) {
-  var el = document.createElement('div')
-  var upper = prop.charAt(0).toUpperCase() + prop.slice(1)
+  const el = document.createElement('div')
+  const upper = prop.charAt(0).toUpperCase() + prop.slice(1)
   if (!(prop in el.style)) {
-    var prefixes = ['Webkit', 'Moz', 'ms']
-    var i = prefixes.length
+    const prefixes = ['Webkit', 'Moz', 'ms']
+    let i = prefixes.length
     while (i--) {
       if ((prefixes[i] + upper) in el.style) {
         prop = prefixes[i] + upper
@@ -98,6 +98,13 @@ describe('Directive v-bind:style', () => {
     vm.styles = { display: 'block !important' }
     waitForUpdate(() => {
       expect(vm.$el.style.getPropertyPriority('display')).toBe('important')
+    }).then(done)
+  })
+
+  it('camelCase with !important', done => {
+    vm.styles = { zIndex: '100 !important' }
+    waitForUpdate(() => {
+      expect(vm.$el.style.getPropertyPriority('z-index')).toBe('important')
     }).then(done)
   })
 

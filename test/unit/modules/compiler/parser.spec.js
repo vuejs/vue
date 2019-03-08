@@ -242,12 +242,32 @@ describe('parser', () => {
     expect('<template> cannot be keyed').toHaveBeenWarned()
   })
 
+  it('warn the child of the <transition-group> component has sequential index', () => {
+    parse(`
+      <div>
+        <transition-group>
+          <i v-for="(o, i) of arr" :key="i"></i>
+        </transition-group>
+      </div>
+    `, baseOptions)
+    expect('Do not use v-for index as key on <transition-group> children').toHaveBeenWarned()
+  })
+
   it('v-pre directive', () => {
     const ast = parse('<div v-pre id="message1"><p>{{msg}}</p></div>', baseOptions)
     expect(ast.pre).toBe(true)
     expect(ast.attrs[0].name).toBe('id')
     expect(ast.attrs[0].value).toBe('"message1"')
     expect(ast.children[0].children[0].text).toBe('{{msg}}')
+  })
+
+  it('v-pre directive should leave template in DOM', () => {
+    const ast = parse('<div v-pre id="message1"><template id="template1"><p>{{msg}}</p></template></div>', baseOptions)
+    expect(ast.pre).toBe(true)
+    expect(ast.attrs[0].name).toBe('id')
+    expect(ast.attrs[0].value).toBe('"message1"')
+    expect(ast.children[0].attrs[0].name).toBe('id')
+    expect(ast.children[0].attrs[0].value).toBe('"template1"')
   })
 
   it('v-for directive basic syntax', () => {
@@ -510,6 +530,45 @@ describe('parser', () => {
     expect(ast.props[0].value).toBe('msg')
   })
 
+  it('empty v-bind expression', () => {
+    parse('<div :empty-msg=""></div>', baseOptions)
+    expect('The value for a v-bind expression cannot be empty. Found in "v-bind:empty-msg"').toHaveBeenWarned()
+  })
+
+  if (process.env.VBIND_PROP_SHORTHAND) {
+    it('v-bind.prop shorthand syntax', () => {
+      const ast = parse('<div .id="foo"></div>', baseOptions)
+      expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: false }])
+    })
+
+    it('v-bind.prop shorthand syntax w/ modifiers', () => {
+      const ast = parse('<div .id.mod="foo"></div>', baseOptions)
+      expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: false }])
+    })
+
+    it('v-bind.prop shorthand dynamic argument', () => {
+      const ast = parse('<div .[id]="foo"></div>', baseOptions)
+      expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: true }])
+    })
+  }
+
+  // This only works for string templates.
+  // In-DOM templates will be malformed before Vue can parse it.
+  describe('parse and warn invalid dynamic arguments', () => {
+    [
+      `<div v-bind:['foo' + bar]="baz"/>`,
+      `<div :['foo' + bar]="baz"/>`,
+      `<div @['foo' + bar]="baz"/>`,
+      `<foo #['foo' + bar]="baz"/>`,
+      `<div :['foo' + bar].some.mod="baz"/>`
+    ].forEach(template => {
+      it(template, () => {
+        const ast = parse(template, baseOptions)
+        expect(`Invalid dynamic argument expression`).toHaveBeenWarned()
+      })
+    })
+  })
+
   // #6887
   it('special case static attribute that must be props', () => {
     const ast = parse('<video muted></video>', baseOptions)
@@ -642,6 +701,15 @@ describe('parser', () => {
     expect(pre2.children[0].text).toBe('\nabc')
   })
 
+  it('keep first newline after unary tag in <pre>', () => {
+    const options = extend({}, baseOptions)
+    const ast = parse('<pre>abc<input>\ndef</pre>', options)
+    expect(ast.children[1].type).toBe(1)
+    expect(ast.children[1].tag).toBe('input')
+    expect(ast.children[2].type).toBe(3)
+    expect(ast.children[2].text).toBe('\ndef')
+  })
+
   it('forgivingly handle < in plain text', () => {
     const options = extend({}, baseOptions)
     const ast = parse('<p>1 < 2 < 3</p>', options)
@@ -716,5 +784,62 @@ describe('parser', () => {
     expect(ast.children[1].type).toBe(3) // parse comment with ASTText
     expect(ast.children[1].isComment).toBe(true) // parse comment with ASTText
     expect(ast.children[1].text).toBe('comment here')
+  })
+
+  // #9407
+  it('should parse templates with comments anywhere', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const ast = parse(`<!--comment here--><div>123</div>`, options)
+    expect(ast.tag).toBe('div')
+    expect(ast.children.length).toBe(1)
+  })
+
+  // #8103
+  it('should allow CRLFs in string interpolations', () => {
+    const ast = parse(`<p>{{\r\nmsg\r\n}}</p>`, baseOptions)
+    expect(ast.children[0].expression).toBe('_s(msg)')
+  })
+
+  it('preserveWhitespace: false', () => {
+    const options = extend({
+      preserveWhitespace: false
+    }, baseOptions)
+
+    const ast = parse('<p>\n  Welcome to <b>Vue.js</b>    <i>world</i>  \n  <span>.\n  Have fun!\n</span></p>', options)
+    expect(ast.tag).toBe('p')
+    expect(ast.children.length).toBe(4)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe('\n  Welcome to ')
+    expect(ast.children[1].tag).toBe('b')
+    expect(ast.children[1].children[0].text).toBe('Vue.js')
+    expect(ast.children[2].tag).toBe('i')
+    expect(ast.children[2].children[0].text).toBe('world')
+    expect(ast.children[3].tag).toBe('span')
+    expect(ast.children[3].children[0].text).toBe('.\n  Have fun!\n')
+  })
+
+  it(`whitespace: 'condense'`, () => {
+    const options = extend({
+      whitespace: 'condense',
+      // should be ignored when whitespace is specified
+      preserveWhitespace: false
+    }, baseOptions)
+    const ast = parse('<p>\n  Welcome to <b>Vue.js</b>    <i>world</i>  \n  <span>.\n  Have fun!\n</span></p>', options)
+    expect(ast.tag).toBe('p')
+    expect(ast.children.length).toBe(5)
+    expect(ast.children[0].type).toBe(3)
+    expect(ast.children[0].text).toBe(' Welcome to ')
+    expect(ast.children[1].tag).toBe('b')
+    expect(ast.children[1].children[0].text).toBe('Vue.js')
+    expect(ast.children[2].type).toBe(3)
+    // should condense inline whitespace into single space
+    expect(ast.children[2].text).toBe(' ')
+    expect(ast.children[3].tag).toBe('i')
+    expect(ast.children[3].children[0].text).toBe('world')
+    // should have removed the whitespace node between tags that contains newlines
+    expect(ast.children[4].tag).toBe('span')
+    expect(ast.children[4].children[0].text).toBe('. Have fun! ')
   })
 })

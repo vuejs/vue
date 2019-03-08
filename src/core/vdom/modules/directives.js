@@ -40,6 +40,7 @@ function _update (oldVnode, vnode) {
     } else {
       // existing directive, update
       dir.oldValue = oldDir.value
+      dir.oldArg = oldDir.arg
       callHook(dir, 'update', vnode, oldVnode)
       if (dir.def && dir.def.componentUpdated) {
         dirsWithPostpatch.push(dir)

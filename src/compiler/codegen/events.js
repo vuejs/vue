@@ -1,9 +1,10 @@
 /* @flow */
 
-const fnExpRE = /^\s*([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
-const simplePathRE = /^\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?']|\[".*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*\s*$/
+const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
+const fnInvokeRE = /\([^)]*?\);*$/
+const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
-// keyCode aliases
+// KeyboardEvent.keyCode aliases
 const keyCodes: { [key: string]: number | Array<number> } = {
   esc: 27,
   tab: 9,
@@ -14,6 +15,23 @@ const keyCodes: { [key: string]: number | Array<number> } = {
   right: 39,
   down: 40,
   'delete': [8, 46]
+}
+
+// KeyboardEvent.key aliases
+const keyNames: { [key: string]: string | Array<string> } = {
+  // #7880: IE11 and Edge use `Esc` for Escape key name.
+  esc: ['Esc', 'Escape'],
+  tab: 'Tab',
+  enter: 'Enter',
+  // #9112: IE11 uses `Spacebar` for Space key name.
+  space: [' ', 'Spacebar'],
+  // #7806: IE11 uses key names without `Arrow` prefix for arrow keys.
+  up: ['Up', 'ArrowUp'],
+  left: ['Left', 'ArrowLeft'],
+  right: ['Right', 'ArrowRight'],
+  down: ['Down', 'ArrowDown'],
+  // #9112: IE11 uses `Del` for Delete key name.
+  'delete': ['Backspace', 'Delete', 'Del']
 }
 
 // #4868: modifiers that prevent the execution of the listener
@@ -36,14 +54,25 @@ const modifierCode: { [key: string]: string } = {
 
 export function genHandlers (
   events: ASTElementHandlers,
-  isNative: boolean,
-  warn: Function
+  isNative: boolean
 ): string {
-  let res = isNative ? 'nativeOn:{' : 'on:{'
+  const prefix = isNative ? 'nativeOn:' : 'on:'
+  let staticHandlers = ``
+  let dynamicHandlers = ``
   for (const name in events) {
-    res += `"${name}":${genHandler(name, events[name])},`
+    const handlerCode = genHandler(events[name])
+    if (events[name] && events[name].dynamic) {
+      dynamicHandlers += `${name},${handlerCode},`
+    } else {
+      staticHandlers += `"${name}":${handlerCode},`
+    }
   }
-  return res.slice(0, -1) + '}'
+  staticHandlers = `{${staticHandlers.slice(0, -1)}}`
+  if (dynamicHandlers) {
+    return prefix + `_d(${staticHandlers},[${dynamicHandlers.slice(0, -1)}])`
+  } else {
+    return prefix + staticHandlers
+  }
 }
 
 // Generate handler code with binding params on Weex
@@ -64,20 +93,18 @@ function genWeexHandler (params: Array<any>, handlerCode: string) {
     '}'
 }
 
-function genHandler (
-  name: string,
-  handler: ASTElementHandler | Array<ASTElementHandler>
-): string {
+function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): string {
   if (!handler) {
     return 'function(){}'
   }
 
   if (Array.isArray(handler)) {
-    return `[${handler.map(handler => genHandler(name, handler)).join(',')}]`
+    return `[${handler.map(handler => genHandler(handler)).join(',')}]`
   }
 
   const isMethodPath = simplePathRE.test(handler.value)
   const isFunctionExpression = fnExpRE.test(handler.value)
+  const isFunctionInvocation = simplePathRE.test(handler.value.replace(fnInvokeRE, ''))
 
   if (!handler.modifiers) {
     if (isMethodPath || isFunctionExpression) {
@@ -87,7 +114,9 @@ function genHandler (
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, handler.value)
     }
-    return `function($event){${handler.value}}` // inline statement
+    return `function($event){${
+      isFunctionInvocation ? `return ${handler.value}` : handler.value
+    }}` // inline statement
   } else {
     let code = ''
     let genModifierCode = ''
@@ -119,10 +148,12 @@ function genHandler (
       code += genModifierCode
     }
     const handlerCode = isMethodPath
-      ? handler.value + '($event)'
+      ? `return ${handler.value}($event)`
       : isFunctionExpression
-        ? `(${handler.value})($event)`
-        : handler.value
+        ? `return (${handler.value})($event)`
+        : isFunctionInvocation
+          ? `return ${handler.value}`
+          : handler.value
     /* istanbul ignore if */
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, code + handlerCode)
@@ -132,7 +163,13 @@ function genHandler (
 }
 
 function genKeyFilter (keys: Array<string>): string {
-  return `if(!('button' in $event)&&${keys.map(genFilterCode).join('&&')})return null;`
+  return (
+    // make sure the key filters only apply to KeyboardEvents
+    // #9441: can't use 'keyCode' in $event because Chrome autofill fires fake
+    // key events that do not have keyCode property...
+    `if(!$event.type.indexOf('key')&&` +
+    `${keys.map(genFilterCode).join('&&')})return null;`
+  )
 }
 
 function genFilterCode (key: string): string {
@@ -140,11 +177,14 @@ function genFilterCode (key: string): string {
   if (keyVal) {
     return `$event.keyCode!==${keyVal}`
   }
-  const code = keyCodes[key]
+  const keyCode = keyCodes[key]
+  const keyName = keyNames[key]
   return (
     `_k($event.keyCode,` +
     `${JSON.stringify(key)},` +
-    `${JSON.stringify(code)},` +
-    `$event.key)`
+    `${JSON.stringify(keyCode)},` +
+    `$event.key,` +
+    `${JSON.stringify(keyName)}` +
+    `)`
   )
 }

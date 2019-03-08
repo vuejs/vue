@@ -355,4 +355,30 @@ describe('Observer', () => {
       expect(obj.__ob__ instanceof Observer).toBe(true)
     })
   })
+
+  it('warn set/delete on non valid values', () => {
+    try {
+      setProp(null, 'foo', 1)
+    } catch (e) {}
+    expect(`Cannot set reactive property on undefined, null, or primitive value`).toHaveBeenWarned()
+
+    try {
+      delProp(null, 'foo')
+    } catch (e) {}
+    expect(`Cannot delete reactive property on undefined, null, or primitive value`).toHaveBeenWarned()
+  })
+
+  it('should lazy invoke existing getters', () => {
+    const obj = {}
+    let called = false
+    Object.defineProperty(obj, 'getterProp', {
+      enumerable: true,
+      get: () => {
+        called = true
+        return 'some value'
+      }
+    })
+    observe(obj)
+    expect(called).toBe(false)
+  })
 })
