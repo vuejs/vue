@@ -1227,4 +1227,41 @@ describe('Component scoped slot', () => {
       expect(vm.$el.textContent.trim()).toBe(`2`)
     }).then(done)
   })
+
+  // #9644
+  it('should factor presence of normal slots into scoped slots caching', done => {
+    const Wrapper = {
+      template: `<div>
+        <p>Default:<slot/></p>
+        <p>Content:<slot name='content'/></p>
+      </div>`
+    }
+
+    const vm = new Vue({
+      data: { ok: false },
+      components: { Wrapper },
+      template: `<wrapper>
+        <p v-if='ok'>ok</p>
+        <template #content>
+          <p v-if='ok'>ok</p>
+        </template>
+      </wrapper>`
+    }).$mount()
+
+    expect(vm.$el.textContent).not.toMatch(`Default:ok`)
+    expect(vm.$el.textContent).not.toMatch(`Content:ok`)
+    vm.ok = true
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toMatch(`Default:ok`)
+      expect(vm.$el.textContent).toMatch(`Content:ok`)
+      vm.ok = false
+    }).then(() => {
+      expect(vm.$el.textContent).not.toMatch(`Default:ok`)
+      expect(vm.$el.textContent).not.toMatch(`Content:ok`)
+      vm.ok = true
+    }).then(() => {
+      expect(vm.$el.textContent).toMatch(`Default:ok`)
+      expect(vm.$el.textContent).toMatch(`Content:ok`)
+    }).then(done)
+  })
 })

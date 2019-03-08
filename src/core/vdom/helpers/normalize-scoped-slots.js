@@ -11,6 +11,7 @@ export function normalizeScopedSlots (
 ): any {
   let res
   const isStable = slots ? !!slots.$stable : true
+  const hasNormalSlots = Object.keys(normalSlots).length > 0
   const key = slots && slots.$key
   if (!slots) {
     res = {}
@@ -22,7 +23,8 @@ export function normalizeScopedSlots (
     prevSlots &&
     prevSlots !== emptyObject &&
     key === prevSlots.$key &&
-    Object.keys(normalSlots).length === 0
+    !hasNormalSlots &&
+    !prevSlots.$hasNormal
   ) {
     // fast path 2: stable scoped slots w/ no normal slots to proxy,
     // only need to normalize once
@@ -48,6 +50,7 @@ export function normalizeScopedSlots (
   }
   def(res, '$stable', isStable)
   def(res, '$key', key)
+  def(res, '$hasNormal', hasNormalSlots)
   return res
 }
 
