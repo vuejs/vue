@@ -47,10 +47,15 @@ let getNow: () => number = Date.now
 // timestamp can either be hi-res (relative to page load) or low-res
 // (relative to UNIX epoch), so in order to compare time we have to use the
 // same timestamp type when saving the flush timestamp.
-if (inBrowser && getNow() > document.createEvent('Event').timeStamp) {
-  // if the low-res timestamp which is bigger than the event timestamp
-  // (which is evaluated AFTER) it means the event is using a hi-res timestamp,
-  // and we need to use the hi-res version for event listeners as well.
+if (
+  inBrowser &&
+  window.performance &&
+  typeof performance.now === 'function' &&
+  getNow() > document.createEvent('Event').timeStamp
+) {
+  // if the event timestamp is bigger than the hi-res timestamp
+  // (which is evaluated AFTER) it means the event is using a lo-res timestamp,
+  // and we need to use the lo-res version for event listeners as well.
   getNow = () => performance.now()
 }
 
