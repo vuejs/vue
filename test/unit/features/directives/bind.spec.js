@@ -234,7 +234,7 @@ describe('Directive v-bind', () => {
       template: `<test v-bind="test" data-foo="foo" dataBar="bar"/>`,
       components: {
         test: {
-          template: '<div :data-foo="dataFoo" :data-bar="dataBar"></div>',
+          template: '<div>{{ dataFoo }} {{ dataBar }}</div>',
           props: ['dataFoo', 'dataBar']
         }
       },
@@ -245,8 +245,7 @@ describe('Directive v-bind', () => {
         }
       }
     }).$mount()
-    expect(vm.$el.getAttribute('data-foo')).toBe('foo')
-    expect(vm.$el.getAttribute('data-bar')).toBe('bar')
+    expect(vm.$el.textContent).toBe('foo bar')
   })
 
   it('.sync modifier with bind object', done => {
