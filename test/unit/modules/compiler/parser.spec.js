@@ -820,12 +820,14 @@ describe('parser', () => {
     expect(ast.children[3].children[0].text).toBe('.\n  Have fun!\n')
   })
 
+  const condenseOptions = extend({
+    whitespace: 'condense',
+    // should be ignored when whitespace is specified
+    preserveWhitespace: false
+  }, baseOptions)
+
   it(`whitespace: 'condense'`, () => {
-    const options = extend({
-      whitespace: 'condense',
-      // should be ignored when whitespace is specified
-      preserveWhitespace: false
-    }, baseOptions)
+    const options = extend({}, condenseOptions)
     const ast = parse('<p>\n  Welcome to <b>Vue.js</b>    <i>world</i>  \n  <span>.\n  Have fun!\n</span></p>', options)
     expect(ast.tag).toBe('p')
     expect(ast.children.length).toBe(5)
@@ -841,5 +843,42 @@ describe('parser', () => {
     // should have removed the whitespace node between tags that contains newlines
     expect(ast.children[4].tag).toBe('span')
     expect(ast.children[4].children[0].text).toBe('. Have fun! ')
+  })
+
+  it(`preserve whitespace in <pre> tag with whitespace: 'condense'`, function () {
+    const options = extend({}, condenseOptions)
+    const ast = parse('<pre><code>  \n<span>hi</span>\n  </code><span> </span></pre>', options)
+    const code = ast.children[0]
+    expect(code.children[0].type).toBe(3)
+    expect(code.children[0].text).toBe('  \n')
+    expect(code.children[2].type).toBe(3)
+    expect(code.children[2].text).toBe('\n  ')
+
+    const span = ast.children[1]
+    expect(span.children[0].type).toBe(3)
+    expect(span.children[0].text).toBe(' ')
+  })
+
+  it(`ignore the first newline in <pre> tag with whitespace: 'condense'`, function () {
+    const options = extend({}, condenseOptions)
+    const ast = parse('<div><pre>\nabc</pre>\ndef<pre>\n\nabc</pre></div>', options)
+    const pre = ast.children[0]
+    expect(pre.children[0].type).toBe(3)
+    expect(pre.children[0].text).toBe('abc')
+    const text = ast.children[1]
+    expect(text.type).toBe(3)
+    expect(text.text).toBe(' def')
+    const pre2 = ast.children[2]
+    expect(pre2.children[0].type).toBe(3)
+    expect(pre2.children[0].text).toBe('\nabc')
+  })
+
+  it(`keep first newline after unary tag in <pre> with whitespace: 'condense'`, () => {
+    const options = extend({}, condenseOptions)
+    const ast = parse('<pre>abc<input>\ndef</pre>', options)
+    expect(ast.children[1].type).toBe(1)
+    expect(ast.children[1].tag).toBe('input')
+    expect(ast.children[2].type).toBe(3)
+    expect(ast.children[2].text).toBe('\ndef')
   })
 })
