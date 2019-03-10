@@ -842,7 +842,7 @@ if (!isIE9) {
       }).then(done)
     })
 
-    it('transition inside child component', done => {
+    it('transition inside child component with v-if', done => {
       const vm = new Vue({
         template: `
           <div>
@@ -872,10 +872,6 @@ if (!isIE9) {
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
       }).then(() => {
-        expect(vm.$el.children[0].className).toBe('test v-enter v-enter-active')
-      }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
-      }).thenWaitFor(duration + buffer).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
