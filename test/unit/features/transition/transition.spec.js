@@ -914,6 +914,84 @@ if (!isIE9) {
       }).then(done)
     })
 
+    it('transition inside nested child component with v-if', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <foo v-if="ok" class="test"></foo>
+          </div>
+        `,
+        data: { ok: true },
+        components: {
+          foo: {
+            template: '<bar></bar>',
+            components: {
+              bar: {
+                template: '<transition><div>foo</div></transition>'
+              }
+            }
+          }
+        }
+      }).$mount(el)
+
+      // should not apply transition on initial render by default
+      expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
+      vm.ok = false
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.children.length).toBe(0)
+        vm.ok = true
+      }).then(() => {
+        expect(vm.$el.children[0].className).toBe('test')
+      }).then(done)
+    })
+
+    it('transition with appear inside nested child component with v-if', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <foo v-if="ok" class="test"></foo>
+          </div>
+        `,
+        data: { ok: true },
+        components: {
+          foo: {
+            template: '<bar></bar>',
+            components: {
+              bar: {
+                template: `
+                  <transition appear
+                    appear-class="test-appear"
+                    appear-to-class="test-appear-to"
+                    appear-active-class="test-appear-active">
+                    <div>foo</div>
+                  </transition>
+                `
+              }
+            }
+          }
+        }
+      }).$mount(el)
+
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].className).toBe('test test-appear test-appear-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-appear-active test-appear-to')
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.children[0].className).toBe('test')
+        vm.ok = false
+      }).then(() => {
+        expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.children.length).toBe(0)
+      }).then(done)
+    })
+
     it('custom transition higher-order component', done => {
       const vm = new Vue({
         template: '<div><my-transition><div v-if="ok" class="test">foo</div></my-transition></div>',
