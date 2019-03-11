@@ -51,6 +51,34 @@ describe('Options computed', () => {
     }).then(done)
   })
 
+  it('with setter has second argument', done => {
+    const vm = new Vue({
+      template: '<div>{{ b }}</div>',
+      data: {
+        a: 1
+      },
+      computed: {
+        b: {
+          get () { return this.a + 1 },
+          set (val, vm) {
+            vm.a = val - 1
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.b).toBe(2)
+    expect(vm.$el.textContent).toBe('2')
+    vm.a = 2
+    expect(vm.b).toBe(3)
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('3')
+      vm.b = 1
+      expect(vm.a).toBe(0)
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('1')
+    }).then(done)
+  })
+
   it('warn with setter and no getter', () => {
     const vm = new Vue({
       template: `
