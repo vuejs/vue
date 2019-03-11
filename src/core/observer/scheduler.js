@@ -51,7 +51,7 @@ if (
   inBrowser &&
   window.performance &&
   typeof performance.now === 'function' &&
-  getNow() > document.createEvent('Event').timeStamp
+  document.createEvent('Event').timeStamp <= performance.now()
 ) {
   // if the event timestamp is bigger than the hi-res timestamp
   // (which is evaluated AFTER) it means the event is using a lo-res timestamp,
