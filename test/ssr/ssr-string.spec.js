@@ -640,6 +640,41 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('renders nested async functional component', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <outer-async></outer-async>
+        </div>
+      `,
+      components: {
+        outerAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return h('innerAsync')
+            }
+          }), 1)
+        },
+        innerAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return h('span', { class: ['a'] }, 'inner')
+            },
+          }), 1)
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true">' +
+          '<span class="a">inner</span>' +
+        '</div>'
+      )
+      done()
+    })
+  })
+
   it('should catch async component error', done => {
     Vue.config.silent = true
     renderToString(new Vue({

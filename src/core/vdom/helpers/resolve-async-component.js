@@ -53,7 +53,7 @@ export function resolveAsyncComponent (
   }
 
   const owner = currentRenderingInstance
-  if (isDef(factory.owners) && factory.owners.indexOf(owner) === -1) {
+  if (isDef(factory.owners) && factory.owners.indexOf(owner) === -1 && owner) {
     // already pending
     factory.owners.push(owner)
   }
@@ -62,7 +62,7 @@ export function resolveAsyncComponent (
     return factory.loadingComp
   }
 
-  if (!isDef(factory.owners)) {
+  if (!isDef(factory.owners) && owner) {
     const owners = factory.owners = [owner]
     let sync = true
 
