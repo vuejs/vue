@@ -140,6 +140,11 @@ describe('compile options', () => {
     expect(compiled.errors[0].end).toBe(17)
     expect(compiled.errors[1].start).toBe(18)
     expect(compiled.errors[1].end).toBe(29)
+
+    compiled = compile('<div><span></div>', { outputSourceRange: true })
+    expect(compiled.errors.length).toBe(1)
+    expect(compiled.errors[0].start).toBe(5)
+    expect(compiled.errors[0].end).toBe(11)
   })
 
   it('should collect source range for binding keys', () => {

@@ -93,7 +93,9 @@ describe('create-component', () => {
         props: ['msg']
       })
     }
+    setCurrentRenderingInstance(vm)
     const vnode = createComponent(async, data, vm, vm)
+    setCurrentRenderingInstance(null)
     expect(vnode.asyncFactory).toBe(async)
     expect(vnode.asyncFactory.owners.length).toEqual(0)
     expect(vnode.tag).toMatch(/vue-component-[0-9]+-child/)
@@ -121,11 +123,15 @@ describe('create-component', () => {
       }, 0)
     }
     function go () {
+      setCurrentRenderingInstance(vm)
       vnode = createComponent(async, data, vm, vm)
+      setCurrentRenderingInstance(null)
       expect(vnode.isComment).toBe(true) // not to be loaded yet.
     }
     function failed () {
+      setCurrentRenderingInstance(vm)
       vnode = createComponent(async, data, vm, vm)
+      setCurrentRenderingInstance(null)
       expect(vnode.isComment).toBe(true) // failed, still a comment node
       expect(`Failed to resolve async component: ${async}\nReason: ${reason}`).toHaveBeenWarned()
       done()

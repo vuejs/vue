@@ -86,6 +86,9 @@ class Test extends Vue {
       }
     });
     this.nextTick(() => {});
+    this.nextTick(function () {
+      console.log(this.text === 'test');
+    }, { text: 'test'});
     this.nextTick().then(() => {});
     this.set({}, "", "");
     this.set({}, 1, "");
@@ -141,6 +144,13 @@ const FunctionalHelloWorldComponent = Vue.extend({
   props: ["name"],
   render(createElement, ctxt) {
     return createElement("div", "Hello " + ctxt.props.name)
+  }
+});
+
+const FunctionalScopedSlotsComponent = Vue.extend({
+  functional: true,
+  render(h, ctx) {
+    return ctx.scopedSlots.default && ctx.scopedSlots.default({}) || h('div', 'functional scoped slots');
   }
 });
 

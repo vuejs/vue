@@ -663,7 +663,7 @@
    * using https://www.w3.org/TR/html53/semantics-scripting.html#potentialcustomelementname
    * skipping \u10000-\uEFFFF due to it freezing up PhantomJS
    */
-  var unicodeLetters = 'a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD';
+  var unicodeRegExp = /a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD/;
 
   /**
    * Define a property.
@@ -1555,7 +1555,7 @@
   }
 
   function validateComponentName (name) {
-    if (!new RegExp(("^[a-zA-Z][\\-\\.0-9_" + unicodeLetters + "]*$")).test(name)) {
+    if (!new RegExp(("^[a-zA-Z][\\-\\.0-9_" + (unicodeRegExp.source) + "]*$")).test(name)) {
       warn(
         'Invalid component name: "' + name + '". Component names ' +
         'should conform to valid custom element name in html5 specification.'
@@ -1970,23 +1970,30 @@
   /*  */
 
   function handleError (err, vm, info) {
-    if (vm) {
-      var cur = vm;
-      while ((cur = cur.$parent)) {
-        var hooks = cur.$options.errorCaptured;
-        if (hooks) {
-          for (var i = 0; i < hooks.length; i++) {
-            try {
-              var capture = hooks[i].call(cur, err, vm, info) === false;
-              if (capture) { return }
-            } catch (e) {
-              globalHandleError(e, cur, 'errorCaptured hook');
+    // Deactivate deps tracking while processing error handler to avoid possible infinite rendering.
+    // See: https://github.com/vuejs/vuex/issues/1505
+    pushTarget();
+    try {
+      if (vm) {
+        var cur = vm;
+        while ((cur = cur.$parent)) {
+          var hooks = cur.$options.errorCaptured;
+          if (hooks) {
+            for (var i = 0; i < hooks.length; i++) {
+              try {
+                var capture = hooks[i].call(cur, err, vm, info) === false;
+                if (capture) { return }
+              } catch (e) {
+                globalHandleError(e, cur, 'errorCaptured hook');
+              }
             }
           }
         }
       }
+      globalHandleError(err, vm, info);
+    } finally {
+      popTarget();
     }
-    globalHandleError(err, vm, info);
   }
 
   function invokeWithErrorHandling (
@@ -2000,7 +2007,9 @@
     try {
       res = args ? handler.apply(context, args) : handler.call(context);
       if (res && !res._isVue && isPromise(res)) {
-        res.catch(function (e) { return handleError(e, vm, info + " (Promise/async)"); });
+        // issue #9511
+        // reassign to res to avoid catch triggering multiple times when nested calls
+        res = res.catch(function (e) { return handleError(e, vm, info + " (Promise/async)"); });
       }
     } catch (e) {
       handleError(e, vm, info);
@@ -2398,7 +2407,7 @@
 
   /*  */
 
-  var MAX_STACK_DEPTH = 900;
+  var MAX_STACK_DEPTH = 800;
   var noop$1 = function (_) { return _; };
 
   var defer = typeof process !== 'undefined' && process.nextTick
@@ -3357,7 +3366,7 @@
   // Regular Expressions for parsing tags and attributes
   var attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
   var dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
-  var ncname = "[a-zA-Z_][\\-\\.0-9_a-zA-Z" + unicodeLetters + "]*";
+  var ncname = "[a-zA-Z_][\\-\\.0-9_a-zA-Z" + (unicodeRegExp.source) + "]*";
   var qnameCapture = "((?:" + ncname + "\\:)?" + ncname + ")";
   var startTagOpen = new RegExp(("^<" + qnameCapture));
   var startTagClose = /^\s*(\/?)>/;
@@ -3619,7 +3628,7 @@
           ) {
             options.warn(
               ("tag <" + (stack[i].tag) + "> has no matching end tag."),
-              { start: stack[i].start }
+              { start: stack[i].start, end: stack[i].end }
             );
           }
           if (options.end) {
@@ -3804,7 +3813,7 @@
 
   var argRE = /:(.*)$/;
   var bindRE = /^:|^\.|^v-bind:/;
-  var modifierRE = /\.[^.]+/g;
+  var modifierRE = /\.[^.\]]+(?=[^\]]*$)/g;
 
   var slotRE = /^v-slot(:|$)|^#/;
 
@@ -3981,7 +3990,7 @@
       shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
       shouldKeepComment: options.comments,
       outputSourceRange: options.outputSourceRange,
-      start: function start (tag, attrs, unary, start$1) {
+      start: function start (tag, attrs, unary, start$1, end) {
         // check namespace.
         // inherit parent ns if there is one
         var ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag);
@@ -4000,6 +4009,7 @@
         {
           if (options.outputSourceRange) {
             element.start = start$1;
+            element.end = end;
             element.rawAttrsMap = element.attrsList.reduce(function (cumulated, attr) {
               cumulated[attr.name] = attr;
               return cumulated
@@ -5523,7 +5533,7 @@
     // components with only scoped slots to skip forced updates from parent.
     // but in some cases we have to bail-out of this optimization
     // for example if the slot contains dynamic names, has v-if or v-for on them...
-    var needsForceUpdate = Object.keys(slots).some(function (key) {
+    var needsForceUpdate = el.for || Object.keys(slots).some(function (key) {
       var slot = slots[key];
       return (
         slot.slotTargetDynamic ||
@@ -5532,22 +5542,49 @@
         containsSlotChild(slot) // is passing down slot from parent which may be dynamic
       )
     });
-    // OR when it is inside another scoped slot (the reactivity is disconnected)
-    // #9438
+
+    // #9534: if a component with scoped slots is inside a conditional branch,
+    // it's possible for the same component to be reused but with different
+    // compiled slot content. To avoid that, we generate a unique key based on
+    // the generated code of all the slot contents.
+    var needsKey = !!el.if;
+
+    // OR when it is inside another scoped slot or v-for (the reactivity may be
+    // disconnected due to the intermediate scope variable)
+    // #9438, #9506
+    // TODO: this can be further optimized by properly analyzing in-scope bindings
+    // and skip force updating ones that do not actually use scope variables.
     if (!needsForceUpdate) {
       var parent = el.parent;
       while (parent) {
-        if (parent.slotScope && parent.slotScope !== emptySlotScopeToken) {
+        if (
+          (parent.slotScope && parent.slotScope !== emptySlotScopeToken) ||
+          parent.for
+        ) {
           needsForceUpdate = true;
           break
+        }
+        if (parent.if) {
+          needsKey = true;
         }
         parent = parent.parent;
       }
     }
 
-    return ("scopedSlots:_u([" + (Object.keys(slots).map(function (key) {
-        return genScopedSlot(slots[key], state)
-      }).join(',')) + "]" + (needsForceUpdate ? ",true" : "") + ")")
+    var generatedSlots = Object.keys(slots)
+      .map(function (key) { return genScopedSlot(slots[key], state); })
+      .join(',');
+
+    return ("scopedSlots:_u([" + generatedSlots + "]" + (needsForceUpdate ? ",null,true" : "") + (!needsForceUpdate && needsKey ? (",null,false," + (hash(generatedSlots))) : "") + ")")
+  }
+
+  function hash(str) {
+    var hash = 5381;
+    var i = str.length;
+    while(i) {
+      hash = (hash * 33) ^ str.charCodeAt(--i);
+    }
+    return hash >>> 0
   }
 
   function containsSlotChild (el) {
@@ -6353,11 +6390,13 @@
 
   function repeat$1 (str, n) {
     var result = '';
-    while (true) { // eslint-disable-line
-      if (n & 1) { result += str; }
-      n >>>= 1;
-      if (n <= 0) { break }
-      str += str;
+    if (n > 0) {
+      while (true) { // eslint-disable-line
+        if (n & 1) { result += str; }
+        n >>>= 1;
+        if (n <= 0) { break }
+        str += str;
+      }
     }
     return result
   }
@@ -7400,14 +7439,16 @@
 
   function resolveScopedSlots (
     fns, // see flow/vnode
+    res,
+    // the following are added in 2.6
     hasDynamicKeys,
-    res
+    contentHashKey
   ) {
     res = res || { $stable: !hasDynamicKeys };
     for (var i = 0; i < fns.length; i++) {
       var slot = fns[i];
       if (Array.isArray(slot)) {
-        resolveScopedSlots(slot, hasDynamicKeys, res);
+        resolveScopedSlots(slot, res, hasDynamicKeys);
       } else if (slot) {
         // marker for reverse proxying v-slot without scope on this.$slots
         if (slot.proxy) {
@@ -7415,6 +7456,9 @@
         }
         res[slot.key] = slot.fn;
       }
+    }
+    if (contentHashKey) {
+      (res).$key = contentHashKey;
     }
     return res
   }
@@ -7525,15 +7569,18 @@
     prevSlots
   ) {
     var res;
+    var isStable = slots ? !!slots.$stable : true;
+    var key = slots && slots.$key;
     if (!slots) {
       res = {};
     } else if (slots._normalized) {
       // fast path 1: child component re-render only, parent did not change
       return slots._normalized
     } else if (
-      slots.$stable &&
+      isStable &&
       prevSlots &&
       prevSlots !== emptyObject &&
+      key === prevSlots.$key &&
       Object.keys(normalSlots).length === 0
     ) {
       // fast path 2: stable scoped slots w/ no normal slots to proxy,
@@ -7541,16 +7588,16 @@
       return prevSlots
     } else {
       res = {};
-      for (var key in slots) {
-        if (slots[key] && key[0] !== '$') {
-          res[key] = normalizeScopedSlot(normalSlots, key, slots[key]);
+      for (var key$1 in slots) {
+        if (slots[key$1] && key$1[0] !== '$') {
+          res[key$1] = normalizeScopedSlot(normalSlots, key$1, slots[key$1]);
         }
       }
     }
     // expose normal slots on scopedSlots
-    for (var key$1 in normalSlots) {
-      if (!(key$1 in res)) {
-        res[key$1] = proxyNormalSlot(normalSlots, key$1);
+    for (var key$2 in normalSlots) {
+      if (!(key$2 in res)) {
+        res[key$2] = proxyNormalSlot(normalSlots, key$2);
       }
     }
     // avoriaz seems to mock a non-extensible $scopedSlots object
@@ -7558,7 +7605,8 @@
     if (slots && Object.isExtensible(slots)) {
       (slots)._normalized = res;
     }
-    def(res, '$stable', slots ? !!slots.$stable : true);
+    def(res, '$stable', isStable);
+    def(res, '$key', key);
     return res
   }
 
@@ -7632,17 +7680,21 @@
       return factory.resolved
     }
 
+    var owner = currentRenderingInstance;
+    if (isDef(factory.owners) && factory.owners.indexOf(owner) === -1) {
+      // already pending
+      factory.owners.push(owner);
+    }
+
     if (isTrue(factory.loading) && isDef(factory.loadingComp)) {
       return factory.loadingComp
     }
 
-    var owner = currentRenderingInstance;
-    if (isDef(factory.owners)) {
-      // already pending
-      factory.owners.push(owner);
-    } else {
+    if (!isDef(factory.owners)) {
       var owners = factory.owners = [owner];
-      var sync = true;
+      var sync = true
+
+      ;(owner).$on('hook:destroyed', function () { return remove(owners, owner); });
 
       var forceRender = function (renderCompleted) {
         for (var i = 0, l = owners.length; i < l; i++) {
@@ -7782,9 +7834,12 @@
     // check if there are dynamic scopedSlots (hand-written or compiled but with
     // dynamic slot names). Static scoped slots compiled from template has the
     // "$stable" marker.
+    var newScopedSlots = parentVnode.data.scopedSlots;
+    var oldScopedSlots = vm.$scopedSlots;
     var hasDynamicScopedSlot = !!(
-      (parentVnode.data.scopedSlots && !parentVnode.data.scopedSlots.$stable) ||
-      (vm.$scopedSlots !== emptyObject && !vm.$scopedSlots.$stable)
+      (newScopedSlots && !newScopedSlots.$stable) ||
+      (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) ||
+      (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key)
     );
 
     // Any static slot children from the parent may have changed during parent's
