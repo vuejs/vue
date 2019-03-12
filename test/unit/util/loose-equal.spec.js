@@ -57,6 +57,8 @@ describe('looseEqual', () => {
     const file2 = new File([''], 'filename.txt', { type: 'text/plain', lastModified: date1 })
     const file3 = new File([''], 'filename.txt', { type: 'text/plain', lastModified: date2 })
     const file4 = new File([''], 'filename.csv', { type: 'text/csv', lastModified: date1 })
+    const file5 = new File(['abcdef'], 'filename.txt', { type: 'text/plain', lastModified: date1 })
+    const file6 = new File(['12345'], 'filename.txt', { type: 'text/plain', lastModified: date1 })
 
     // Identical file object references
     expect(looseEqual(file1, file1)).toBe(true)
@@ -66,6 +68,8 @@ describe('looseEqual', () => {
     expect(looseEqual(file1, file3)).toBe(false)
     // Two different file types
     expect(looseEqual(file1, file4)).toBe(false)
+    // Two files with same name, modified date, but different content
+    expect(looseEqual(file5, file6)).toBe(false)
   })
 
   it('compares arrays correctly', () => {
@@ -161,7 +165,7 @@ describe('looseEqual', () => {
     expect(looseEqual(obj3, arr3)).toBe(false)
   })
 
-  it('compares null and undefs correctly', () => {
+  it('compares null and undefined values correctly', () => {
     expect(looseEqual(null, null)).toBe(true)
     expect(looseEqual(undefined, undefined)).toBe(true)
     expect(looseEqual(void 0, undefined)).toBe(true)
@@ -170,5 +174,23 @@ describe('looseEqual', () => {
     expect(looseEqual(null, '')).toBe(false)
     expect(looseEqual(null, false)).toBe(false)
     expect(looseEqual(undefined, false)).toBe(false)
+  })
+
+  it('compares sparse arrays correctly', () => {
+    // The following arrays all have a length of 3
+    // But the first two are "sparse"
+    const arr1 = []
+    arr1[2] = true
+    const arr2 = []
+    arr2[2] = true
+    const arr3 = [false, false, true]
+    const arr4 = [undefined, undefined, true]
+
+    expect(looseEqual(arr1, arr2)).toBe(true)
+    expect(looseEqual(arr2, arr1)).toBe(true)
+    expect(looseEqual(arr1, arr3)).toBe(false)
+    expect(looseEqual(arr3, arr1)).toBe(false)
+    expect(looseEqual(arr1, arr4)).toBe(true)
+    expect(looseEqual(arr4, arr1)).toBe(true)
   })
 })

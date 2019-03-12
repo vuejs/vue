@@ -297,9 +297,7 @@ export function looseEqual (a: any, b: any): boolean {
   aValidType = Array.isArray(a)
   bValidType = Array.isArray(b)
   if (aValidType || bValidType) {
-    return aValidType && bValidType
-      ? a.length === b.length && a.every((e, i) => looseEqual(e, b[i]))
-      : false
+    return aValidType && bValidType ? looseCompareArrays(a, b) : false
   }
   aValidType = isObject(a)
   bValidType = isObject(b)
@@ -322,6 +320,19 @@ export function looseEqual (a: any, b: any): boolean {
     }
   }
   return String(a) === String(b)
+}
+
+/**
+ * Check if two array are loosely equal
+ * Handles when arrays are "sparse" (array.every(...) doesn't handle sparse)
+ */
+function looseCompareArrays(a, b) {
+  if (a.length !== b.length) return false
+  let equal = true
+  for (let i = 0; equal && i < a.length; i++) {
+    equal = looseEqual(a[i], b[i])
+  }
+  return equal
 }
 
 /**
