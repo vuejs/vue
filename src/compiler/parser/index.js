@@ -351,7 +351,7 @@ export function parse (
         text = preserveWhitespace ? ' ' : ''
       }
       if (text) {
-        if (whitespaceOption === 'condense') {
+        if (!inPre && whitespaceOption === 'condense') {
           // condense consecutive whitespaces into single space
           text = text.replace(whitespaceRE, ' ')
         }
