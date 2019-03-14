@@ -113,7 +113,7 @@ export default {
         keys.push(key)
         // prune oldest entry
         if (this.max && keys.length > parseInt(this.max)) {
-          pruneCacheEntry(cache, keys[0], keys, this._vnode)
+          pruneCacheEntry(cache, keys[0], keys, vnode)
         }
       }
 
