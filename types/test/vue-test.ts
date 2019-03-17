@@ -213,3 +213,28 @@ class Decorated extends Vue {
 
 const obj = Vue.observable({ a: 1 })
 obj.a++
+
+// VNodeData style tests.
+const ComponentWithStyleInVNodeData = Vue.extend({
+  render (h) {
+    const elementWithStyleAsString = h('div', {
+      style: 'background-color: red;'
+    });
+
+    const elementWithStyleAsObject = h('div', {
+      style: { backgroundColor: 'green' }
+    });
+
+    const elementWithStyleAsArrayOfObjects = h('div', {
+      style: [
+        { backgroundColor: 'blue' }
+      ]
+    });
+
+    return h('div', undefined, [
+      elementWithStyleAsString,
+      elementWithStyleAsObject,
+      elementWithStyleAsArrayOfObjects
+    ]);
+  }
+});
