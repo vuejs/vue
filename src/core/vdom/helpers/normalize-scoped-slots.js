@@ -10,8 +10,8 @@ export function normalizeScopedSlots (
   prevSlots?: { [key: string]: Function } | void
 ): any {
   let res
-  const isStable = slots ? !!slots.$stable : true
   const hasNormalSlots = Object.keys(normalSlots).length > 0
+  const isStable = slots ? !!slots.$stable : !hasNormalSlots
   const key = slots && slots.$key
   if (!slots) {
     res = {}

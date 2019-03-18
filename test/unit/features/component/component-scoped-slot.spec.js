@@ -1277,4 +1277,36 @@ describe('Component scoped slot', () => {
     }).$mount()
     expect(vm.$el.textContent).toMatch('fallback')
   })
+
+  // #9699
+  // Component only has normal slots, but is passing down $scopedSlots directly
+  // $scopedSlots should not be marked as stable in this case
+  it('render function passing $scopedSlots w/ normal slots down', done => {
+    const one = {
+      template: `<div><slot name="footer"/></div>`
+    }
+
+    const two = {
+      render(h) {
+        return h(one, {
+          scopedSlots: this.$scopedSlots
+        })
+      }
+    }
+
+    const vm = new Vue({
+      data: { count: 0 },
+      render(h) {
+        return h(two, [
+          h('span', { slot: 'footer' }, this.count)
+        ])
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toMatch(`0`)
+    vm.count++
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toMatch(`1`)
+    }).then(done)
+  })
 })
