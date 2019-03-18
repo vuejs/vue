@@ -42,7 +42,7 @@ declare interface VNodeData {
   staticClass?: string;
   class?: any;
   staticStyle?: { [key: string]: any };
-  style?: Array<Object> | Object;
+  style?: string | Array<Object> | Object;
   normalizedStyle?: Object;
   props?: { [key: string]: any };
   attrs?: { [key: string]: string };
