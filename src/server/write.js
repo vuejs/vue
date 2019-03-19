@@ -1,6 +1,6 @@
 /* @flow */
 
-const MAX_STACK_DEPTH = 900
+const MAX_STACK_DEPTH = 800
 const noop = _ => _
 
 const defer = typeof process !== 'undefined' && process.nextTick

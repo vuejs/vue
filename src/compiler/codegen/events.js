@@ -1,6 +1,7 @@
 /* @flow */
 
-const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/
+const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*(?:[\w$]+)?\s*\(/
+const fnInvokeRE = /\([^)]*?\);*$/
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
 // KeyboardEvent.keyCode aliases
@@ -55,11 +56,23 @@ export function genHandlers (
   events: ASTElementHandlers,
   isNative: boolean
 ): string {
-  let res = isNative ? 'nativeOn:{' : 'on:{'
+  const prefix = isNative ? 'nativeOn:' : 'on:'
+  let staticHandlers = ``
+  let dynamicHandlers = ``
   for (const name in events) {
-    res += `"${name}":${genHandler(name, events[name])},`
+    const handlerCode = genHandler(events[name])
+    if (events[name] && events[name].dynamic) {
+      dynamicHandlers += `${name},${handlerCode},`
+    } else {
+      staticHandlers += `"${name}":${handlerCode},`
+    }
   }
-  return res.slice(0, -1) + '}'
+  staticHandlers = `{${staticHandlers.slice(0, -1)}}`
+  if (dynamicHandlers) {
+    return prefix + `_d(${staticHandlers},[${dynamicHandlers.slice(0, -1)}])`
+  } else {
+    return prefix + staticHandlers
+  }
 }
 
 // Generate handler code with binding params on Weex
@@ -80,20 +93,18 @@ function genWeexHandler (params: Array<any>, handlerCode: string) {
     '}'
 }
 
-function genHandler (
-  name: string,
-  handler: ASTElementHandler | Array<ASTElementHandler>
-): string {
+function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): string {
   if (!handler) {
     return 'function(){}'
   }
 
   if (Array.isArray(handler)) {
-    return `[${handler.map(handler => genHandler(name, handler)).join(',')}]`
+    return `[${handler.map(handler => genHandler(handler)).join(',')}]`
   }
 
   const isMethodPath = simplePathRE.test(handler.value)
   const isFunctionExpression = fnExpRE.test(handler.value)
+  const isFunctionInvocation = simplePathRE.test(handler.value.replace(fnInvokeRE, ''))
 
   if (!handler.modifiers) {
     if (isMethodPath || isFunctionExpression) {
@@ -103,7 +114,9 @@ function genHandler (
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, handler.value)
     }
-    return `function($event){${handler.value}}` // inline statement
+    return `function($event){${
+      isFunctionInvocation ? `return ${handler.value}` : handler.value
+    }}` // inline statement
   } else {
     let code = ''
     let genModifierCode = ''
@@ -138,7 +151,9 @@ function genHandler (
       ? `return ${handler.value}($event)`
       : isFunctionExpression
         ? `return (${handler.value})($event)`
-        : handler.value
+        : isFunctionInvocation
+          ? `return ${handler.value}`
+          : handler.value
     /* istanbul ignore if */
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, code + handlerCode)
@@ -148,7 +163,13 @@ function genHandler (
 }
 
 function genKeyFilter (keys: Array<string>): string {
-  return `if(!('button' in $event)&&${keys.map(genFilterCode).join('&&')})return null;`
+  return (
+    // make sure the key filters only apply to KeyboardEvents
+    // #9441: can't use 'keyCode' in $event because Chrome autofill fires fake
+    // key events that do not have keyCode property...
+    `if(!$event.type.indexOf('key')&&` +
+    `${keys.map(genFilterCode).join('&&')})return null;`
+  )
 }
 
 function genFilterCode (key: string): string {

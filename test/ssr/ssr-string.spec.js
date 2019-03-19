@@ -640,6 +640,41 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('renders nested async functional component', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <outer-async></outer-async>
+        </div>
+      `,
+      components: {
+        outerAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return h('innerAsync')
+            }
+          }), 1)
+        },
+        innerAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return h('span', { class: ['a'] }, 'inner')
+            },
+          }), 1)
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true">' +
+          '<span class="a">inner</span>' +
+        '</div>'
+      )
+      done()
+    })
+  })
+
   it('should catch async component error', done => {
     Vue.config.silent = true
     renderToString(new Vue({
@@ -1310,6 +1345,254 @@ describe('SSR: renderToString', () => {
       expect(called).toBe(true)
       done()
     })
+  })
+
+  it('should support serverPrefetch option', done => {
+    renderVmWithOptions({
+      template: `
+        <div>{{ count }}</div>
+      `,
+      data: {
+        count: 0
+      },
+      serverPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true">42</div>')
+      done()
+    })
+  })
+
+  it('should support serverPrefetch option (nested)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <nested-prefetch></nested-prefetch>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      serverPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      },
+      components: {
+        nestedPrefetch: {
+          template: `
+            <div>{{ message }}</div>
+          `,
+          data () {
+            return {
+              message: ''
+            }
+          },
+          serverPrefetch () {
+            return new Promise((resolve) => {
+              setTimeout(() => {
+                this.message = 'vue.js'
+                resolve()
+              }, 1)
+            })
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
+
+  it('should support serverPrefetch option (nested async)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <nested-prefetch></nested-prefetch>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      serverPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      },
+      components: {
+        nestedPrefetch (resolve) {
+          resolve({
+            template: `
+              <div>{{ message }}</div>
+            `,
+            data () {
+              return {
+                message: ''
+              }
+            },
+            serverPrefetch () {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  this.message = 'vue.js'
+                  resolve()
+                }, 1)
+              })
+            }
+          })
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
+
+  it('should merge serverPrefetch option', done => {
+    const mixin = {
+      data: {
+        message: ''
+      },
+      serverPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.message = 'vue.js'
+            resolve()
+          }, 1)
+        })
+      }
+    }
+    renderVmWithOptions({
+      mixins: [mixin],
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <div>{{ message }}</div>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      serverPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
+
+  it(`should skip serverPrefetch option that doesn't return a promise`, done => {
+    renderVmWithOptions({
+      template: `
+        <div>{{ count }}</div>
+      `,
+      data: {
+        count: 0
+      },
+      serverPrefetch () {
+        setTimeout(() => {
+          this.count = 42
+        }, 1)
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true">0</div>')
+      done()
+    })
+  })
+
+  it('should call context.rendered', done => {
+    let a = 0
+    renderToString(new Vue({
+      template: '<div>Hello</div>'
+    }), {
+      rendered: () => {
+        a = 42
+      }
+    }, (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain('<div data-server-rendered="true">Hello</div>')
+      expect(a).toBe(42)
+      done()
+    })
+  })
+
+  it('invalid style value', done => {
+    renderVmWithOptions({
+      template: '<div :style="style"><p :style="style2"/></div>',
+      data: {
+        // all invalid, should not even have "style" attribute
+        style: {
+          opacity: {},
+          color: null
+        },
+        // mix of valid and invalid
+        style2: {
+          opacity: 0,
+          color: null
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true"><p style="opacity:0;"></p></div>'
+      )
+      done()
+    })
+  })
+
+  it('numeric style value', done => {
+    renderVmWithOptions({
+      template: '<div :style="style"></div>',
+      data: {
+        style: {
+          opacity: 0, // valid, opacity is unit-less
+          top: 0, // valid, top requires unit but 0 is allowed
+          left: 10, // invalid, left requires a unit
+          marginTop: '10px' // valid
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true" style="opacity:0;top:0;margin-top:10px;"></div>'
+      )
+      done()
+    })
+  })
+
+  it('handling max stack size limit', done => {
+    const vueInstance = new Vue({
+      template: `<div class="root">
+        <child v-for="(x, i) in items" :key="i"></child>
+      </div>`,
+      components: {
+        child: {
+          template: '<div class="child"><span class="child">hi</span></div>'
+        }
+      },
+      data: {
+        items: Array(1000).fill(0)
+      }
+    })
+
+    renderToString(vueInstance, err => done(err))
   })
 })
 

@@ -70,11 +70,34 @@ describe('Options functional', () => {
       }
     }).$mount()
 
+    document.body.appendChild(vm.$el)
     triggerEvent(vm.$el.children[0], 'click')
     expect(foo).toHaveBeenCalled()
     expect(foo.calls.argsFor(0)[0].type).toBe('click') // should have click event
     triggerEvent(vm.$el.children[0], 'mousedown')
     expect(bar).toHaveBeenCalledWith('bar')
+    document.body.removeChild(vm.$el)
+  })
+
+  it('should expose scopedSlots on render context', () => {
+    const vm = new Vue({
+      template: '<div><wrap>foo<p slot="p" slot-scope="a">{{ a }}</p></wrap></div>',
+      components: {
+        wrap: {
+          functional: true,
+          render (h, { scopedSlots }) {
+            return [
+              // scoped
+              scopedSlots.p('a'),
+              // normal slot content should be exposed as well
+              scopedSlots.default()
+            ]
+          }
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('afoo')
   })
 
   it('should support returning more than one root node', () => {

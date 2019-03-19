@@ -129,7 +129,7 @@ export function createComponent (
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
-    Ctor = resolveAsyncComponent(asyncFactory, baseCtor, context)
+    Ctor = resolveAsyncComponent(asyncFactory, baseCtor)
     if (Ctor === undefined) {
       // return a placeholder node for async component, which is rendered
       // as a comment node but preserves all the raw information for the node.
@@ -250,7 +250,7 @@ function mergeHook (f1: any, f2: any): Function {
 function transformModel (options, data: any) {
   const prop = (options.model && options.model.prop) || 'value'
   const event = (options.model && options.model.event) || 'input'
-  ;(data.props || (data.props = {}))[prop] = data.model.value
+  ;(data.attrs || (data.attrs = {}))[prop] = data.model.value
   const on = data.on || (data.on = {})
   const existing = on[event]
   const callback = data.model.callback

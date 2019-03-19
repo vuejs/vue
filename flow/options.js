@@ -44,6 +44,7 @@ declare type ComponentOptions = {
   beforeDestroy?: Function;
   destroyed?: Function;
   errorCaptured?: () => boolean | void;
+  serverPrefetch?: Function;
 
   // assets
   directives?: { [key: string]: Object };

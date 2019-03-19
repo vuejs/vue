@@ -1,4 +1,4 @@
-import Vue, { VNode } from "../index";
+import Vue, { PropType, VNode } from "../index";
 import { ComponentOptions, Component } from "../index";
 import { CreateElement } from "../vue";
 
@@ -59,20 +59,39 @@ class Cat {
   private u = 1
 }
 
+interface IUser {
+  foo: string,
+  bar: number
+}
+
+interface ICat {
+  foo: any,
+  bar: object
+}
+type ConfirmCallback = (confirm: boolean) => void;
+
 Vue.component('union-prop', {
   props: {
-    primitive: [String, Number],
-    object: [Cat, User],
-    regex: RegExp,
+    cat: Object as PropType<ICat>,
+    complexUnion: { type: [User, Number] as PropType<User | number> },
+    kittyUser: Object as PropType<ICat & IUser>,
+    callback: Function as PropType<ConfirmCallback>,
     mixed: [RegExp, Array],
-    union: [User, Number] as {new(): User | Number}[] // requires annotation
+    object: [Cat, User],
+    primitive: [String, Number],
+    regex: RegExp,
+    union: [User, Number] as PropType<User | number>
   },
   data() {
-    this.primitive;
-    this.object;
-    this.union;
-    this.regex.compile;
+    this.cat;
+    this.complexUnion;
+    this.kittyUser;
+    this.callback(true);
     this.mixed;
+    this.object;
+    this.primitive;
+    this.regex.compile;
+    this.union;
     return {
       fixedSize: this.union,
     }
@@ -225,6 +244,9 @@ Vue.component('component', {
     info.toUpperCase()
     return true
   },
+  serverPrefetch () {
+    return Promise.resolve()
+  },
 
   directives: {
     a: {
@@ -260,6 +282,18 @@ Vue.component('component', {
   name: "Component",
   extends: {} as ComponentOptions<Vue>,
   delimiters: ["${", "}"]
+});
+
+
+Vue.component('custom-prop-type-function', {
+  props: {
+    callback: Function as PropType<(confirm: boolean) => void>,
+  },
+  methods: {
+    confirm(){
+      this.callback(true);
+    }
+  }
 });
 
 Vue.component('provide-inject', {
@@ -304,6 +338,10 @@ Vue.component('component-with-scoped-slot', {
           item: (props: ScopedSlotProps) => [h('span', [props.msg])]
         }
       }),
+      h('child', [
+        // return single VNode (will be normalized to an array)
+        (props: ScopedSlotProps) => h('span', [props.msg])
+      ]),
       h('child', {
         // Passing down all slots from parent
         scopedSlots: this.$scopedSlots
@@ -319,8 +357,12 @@ Vue.component('component-with-scoped-slot', {
   components: {
     child: {
       render (this: Vue, h: CreateElement) {
+        const defaultSlot = this.$scopedSlots['default']!({ msg: 'hi' })
+        defaultSlot && defaultSlot.forEach(vnode => {
+          vnode.tag
+        })
         return h('div', [
-          this.$scopedSlots['default']!({ msg: 'hi' }),
+          defaultSlot,
           this.$scopedSlots['item']!({ msg: 'hello' })
         ])
       }
@@ -362,6 +404,7 @@ Vue.component('functional-component', {
     context.slots();
     context.data;
     context.parent;
+    context.scopedSlots;
     context.listeners.click;
     return createElement("div", {}, context.children);
   }

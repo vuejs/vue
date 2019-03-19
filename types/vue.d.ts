@@ -12,7 +12,7 @@ import {
   ThisTypedComponentOptionsWithRecordProps,
   WatchOptions,
 } from "./options";
-import { VNode, VNodeData, VNodeChildren, ScopedSlot } from "./vnode";
+import { VNode, VNodeData, VNodeChildren, NormalizedScopedSlot } from "./vnode";
 import { PluginFunction, PluginObject } from "./plugin";
 
 export interface CreateElement {
@@ -28,7 +28,7 @@ export interface Vue {
   readonly $children: Vue[];
   readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[] };
   readonly $slots: { [key: string]: VNode[] | undefined };
-  readonly $scopedSlots: { [key: string]: ScopedSlot | undefined };
+  readonly $scopedSlots: { [key: string]: NormalizedScopedSlot | undefined };
   readonly $isServer: boolean;
   readonly $data: Record<string, any>;
   readonly $props: Record<string, any>;
@@ -89,7 +89,7 @@ export interface VueConstructor<V extends Vue = Vue> {
   extend<Props>(definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>>): ExtendedVue<V, {}, {}, {}, Props>;
   extend(options?: ComponentOptions<V>): ExtendedVue<V, {}, {}, {}, {}>;
 
-  nextTick(callback: () => void, context?: any[]): void;
+  nextTick<T>(callback: (this: T) => void, context?: T): void;
   nextTick(): Promise<void>
   set<T>(object: object, key: string | number, value: T): T;
   set<T>(array: T[], key: number, value: T): T;
@@ -119,7 +119,10 @@ export interface VueConstructor<V extends Vue = Vue> {
     staticRenderFns: (() => VNode)[];
   };
 
+  observable<T>(obj: T): T;
+
   config: VueConfiguration;
+  version: string;
 }
 
 export const Vue: VueConstructor;

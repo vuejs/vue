@@ -226,19 +226,7 @@ describe('Observer', () => {
     })
 
     observe(obj)
-    // mock a watcher!
-    const watcher = {
-      deps: [],
-      addDep: function (dep) {
-        this.deps.push(dep)
-        dep.addSub(this)
-      },
-      update: jasmine.createSpy()
-    }
-    // collect dep
-    Dep.target = watcher
     expect(obj.a).toBe(2) // Make sure 'this' is preserved
-    Dep.target = null
     obj.a = 3
     expect(obj.val).toBe(3) // make sure 'setter' was called
     obj.val = 5

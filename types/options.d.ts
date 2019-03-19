@@ -1,5 +1,5 @@
 import { Vue, CreateElement, CombinedVueInstance } from "./vue";
-import { VNode, VNodeData, VNodeDirective } from "./vnode";
+import { VNode, VNodeData, VNodeDirective, NormalizedScopedSlot } from "./vnode";
 
 type Constructor = {
   new (...args: any[]): any;
@@ -15,7 +15,7 @@ export type Component<Data=DefaultData<never>, Methods=DefaultMethods<never>, Co
 interface EsModuleComponent {
   default: Component
 }
-                      
+
 export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
   = AsyncComponentPromise<Data, Methods, Computed, Props>
   | AsyncComponentFactory<Data, Methods, Computed, Props>
@@ -96,6 +96,7 @@ export interface ComponentOptions<
   activated?(): void;
   deactivated?(): void;
   errorCaptured?(err: Error, vm: Vue, info: string): boolean | void;
+  serverPrefetch?(this: V): Promise<void>;
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
   components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> };
@@ -139,15 +140,18 @@ export interface RenderContext<Props=DefaultProps> {
   data: VNodeData;
   parent: Vue;
   listeners: { [key: string]: Function | Function[] };
+  scopedSlots: { [key: string]: NormalizedScopedSlot };
   injections: any
 }
 
-export type Prop<T> = { (): T } | { new (...args: any[]): T & object }
+export type Prop<T> = { (): T } | { new(...args: any[]): T & object } | { new(...args: string[]): Function }
 
-export type PropValidator<T> = PropOptions<T> | Prop<T> | Prop<T>[];
+export type PropType<T> = Prop<T> | Prop<T>[];
+
+export type PropValidator<T> = PropOptions<T> | PropType<T>;
 
 export interface PropOptions<T=any> {
-  type?: Prop<T> | Prop<T>[];
+  type?: PropType<T>;
   required?: boolean;
   default?: T | null | undefined | (() => T | null | undefined);
   validator?(value: T): boolean;

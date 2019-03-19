@@ -71,13 +71,21 @@ export function isValidArrayIndex (val: any): boolean {
   return n >= 0 && Math.floor(n) === n && isFinite(val)
 }
 
+export function isPromise (val: any): boolean {
+  return (
+    isDef(val) &&
+    typeof val.then === 'function' &&
+    typeof val.catch === 'function'
+  )
+}
+
 /**
  * Convert a value to a string that is actually rendered.
  */
 export function toString (val: any): string {
   return val == null
     ? ''
-    : typeof val === 'object'
+    : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
       ? JSON.stringify(val, null, 2)
       : String(val)
 }

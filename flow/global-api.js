@@ -16,6 +16,8 @@ declare interface GlobalAPI {
   component: (id: string, def?: Class<Component> | Object) => Class<Component>;
   filter: (id: string, def?: Function) => Function | void;
 
+  observable: <T>(value: T) => T;
+
   // allow dynamic method registration
   [key: string]: any
 };

@@ -204,4 +204,30 @@ describe('Directive v-model component', () => {
     expect(triggerCount).toBe(1)
     document.body.removeChild(vm.$el)
   })
+
+  // #9330
+  it('should add value to $attrs if not defined in props', () => {
+    const TestComponent = {
+      inheritAttrs: false,
+      render (h) {
+        return h('div', this.$attrs.value)
+      }
+    }
+
+    const vm = new Vue({
+      components: {
+        TestComponent
+      },
+      template: `
+        <div>
+          <test-component v-model="val"/>
+        </div>
+      `,
+      data: {
+        val: 'foo'
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe('<div>foo</div>');
+  })
 })

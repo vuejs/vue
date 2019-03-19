@@ -20,7 +20,8 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
           `style="${staticStyle}": ` +
           'Interpolation inside attributes has been removed. ' +
           'Use v-bind or the colon shorthand instead. For example, ' +
-          'instead of <div style="{{ val }}">, use <div :style="val">.'
+          'instead of <div style="{{ val }}">, use <div :style="val">.',
+          el.rawAttrsMap['style']
         )
       }
     }

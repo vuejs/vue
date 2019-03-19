@@ -1,7 +1,9 @@
 /* @flow */
 
-import { warn } from 'core/util/index'
-
+import {
+  warn,
+  invokeWithErrorHandling
+} from 'core/util/index'
 import {
   cached,
   isUndef,
@@ -31,17 +33,17 @@ const normalizeEvent = cached((name: string): {
   }
 })
 
-export function createFnInvoker (fns: Function | Array<Function>): Function {
+export function createFnInvoker (fns: Function | Array<Function>, vm: ?Component): Function {
   function invoker () {
     const fns = invoker.fns
     if (Array.isArray(fns)) {
       const cloned = fns.slice()
       for (let i = 0; i < cloned.length; i++) {
-        cloned[i].apply(null, arguments)
+        invokeWithErrorHandling(cloned[i], null, arguments, vm, `v-on handler`)
       }
     } else {
       // return handler return value for single handlers
-      return fns.apply(null, arguments)
+      return invokeWithErrorHandling(fns, null, arguments, vm, `v-on handler`)
     }
   }
   invoker.fns = fns
@@ -73,7 +75,7 @@ export function updateListeners (
       )
     } else if (isUndef(old)) {
       if (isUndef(cur.fns)) {
-        cur = on[name] = createFnInvoker(cur)
+        cur = on[name] = createFnInvoker(cur, vm)
       }
       if (isTrue(event.once)) {
         cur = on[name] = createOnceHandler(event.name, cur, event.capture)

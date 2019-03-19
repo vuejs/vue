@@ -56,6 +56,13 @@ describe('Instance methods events', () => {
     expect(spy).toHaveBeenCalledWith(1, 2, 3)
   })
 
+  it('$off event added by $once', () => {
+    vm.$once('test', spy)
+    vm.$off('test', spy) // test off event and this event added by once
+    vm.$emit('test', 1, 2, 3)
+    expect(spy).not.toHaveBeenCalled()
+  })
+
   it('$off', () => {
     vm.$on('test1', spy)
     vm.$on('test2', spy)

@@ -11,7 +11,8 @@ import {
 import {
   isBooleanAttr,
   isEnumeratedAttr,
-  isFalsyAttrValue
+  isFalsyAttrValue,
+  convertEnumeratedValue
 } from 'web/util/attrs'
 
 import { isSSRUnsafeAttr } from 'web/server/util'
@@ -54,7 +55,7 @@ export function renderAttr (key: string, value: string): string {
       return ` ${key}="${key}"`
     }
   } else if (isEnumeratedAttr(key)) {
-    return ` ${key}="${isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true'}"`
+    return ` ${key}="${escape(convertEnumeratedValue(key, value))}"`
   } else if (!isFalsyAttrValue(value)) {
     return ` ${key}="${escape(String(value))}"`
   }

@@ -69,4 +69,3 @@ export function getStyle (vnode: VNodeWithData, checkChild: boolean): Object {
   }
   return res
 }
-
