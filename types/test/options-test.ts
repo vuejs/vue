@@ -68,12 +68,14 @@ interface ICat {
   foo: any,
   bar: object
 }
+type ConfirmCallback = (confirm: boolean) => void;
 
 Vue.component('union-prop', {
   props: {
     cat: Object as PropType<ICat>,
     complexUnion: { type: [User, Number] as PropType<User | number> },
     kittyUser: Object as PropType<ICat & IUser>,
+    callback: Function as PropType<ConfirmCallback>,
     mixed: [RegExp, Array],
     object: [Cat, User],
     primitive: [String, Number],
@@ -84,6 +86,7 @@ Vue.component('union-prop', {
     this.cat;
     this.complexUnion;
     this.kittyUser;
+    this.callback(true);
     this.mixed;
     this.object;
     this.primitive;
@@ -279,6 +282,18 @@ Vue.component('component', {
   name: "Component",
   extends: {} as ComponentOptions<Vue>,
   delimiters: ["${", "}"]
+});
+
+
+Vue.component('custom-prop-type-function', {
+  props: {
+    callback: Function as PropType<(confirm: boolean) => void>,
+  },
+  methods: {
+    confirm(){
+      this.callback(true);
+    }
+  }
 });
 
 Vue.component('provide-inject', {

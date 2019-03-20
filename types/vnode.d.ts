@@ -48,7 +48,7 @@ export interface VNodeData {
   staticClass?: string;
   class?: any;
   staticStyle?: { [key: string]: any };
-  style?: object[] | object;
+  style?: string | object[] | object;
   props?: { [key: string]: any };
   attrs?: { [key: string]: any };
   domProps?: { [key: string]: any };

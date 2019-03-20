@@ -66,8 +66,8 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   let context = activeInstance
   let transitionNode = activeInstance.$vnode
   while (transitionNode && transitionNode.parent) {
-    transitionNode = transitionNode.parent
     context = transitionNode.context
+    transitionNode = transitionNode.parent
   }
 
   const isAppear = !context._isMounted || !vnode.isRootInsert

@@ -500,6 +500,11 @@ describe('codegen', () => {
       '<input @input="function () { current++ }">',
       `with(this){return _c('input',{on:{"input":function () { current++ }}})}`
     )
+    // normal named function
+    assertCodegen(
+      '<input @input="function fn () { current++ }">',
+      `with(this){return _c('input',{on:{"input":function fn () { current++ }}})}`
+    )
     // arrow with no args
     assertCodegen(
       '<input @input="()=>current++">',

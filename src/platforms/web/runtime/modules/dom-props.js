@@ -19,10 +19,11 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 
   for (key in oldProps) {
-    if (isUndef(props[key])) {
+    if (!(key in props)) {
       elm[key] = ''
     }
   }
+
   for (key in props) {
     cur = props[key]
     // ignore children if the node has textContent or innerHTML,
