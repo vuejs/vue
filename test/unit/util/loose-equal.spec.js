@@ -1,6 +1,6 @@
 import { looseEqual } from '../../../src/shared/util'
 
-describe('looseEqual', () => {
+describe('utils/looseEqual', () => {
   it('compares booleans correctly', () => {
     expect(looseEqual(true, true)).toBe(true)
     expect(looseEqual(false, false)).toBe(true)
@@ -185,6 +185,9 @@ describe('looseEqual', () => {
     arr2[2] = true
     const arr3 = [false, false, true]
     const arr4 = [undefined, undefined, true]
+    // This one is also sparse (missing index 1)
+    const arr5 = []
+    arr5[0] = arr5[2] = true
 
     expect(looseEqual(arr1, arr2)).toBe(true)
     expect(looseEqual(arr2, arr1)).toBe(true)
@@ -192,5 +195,7 @@ describe('looseEqual', () => {
     expect(looseEqual(arr3, arr1)).toBe(false)
     expect(looseEqual(arr1, arr4)).toBe(true)
     expect(looseEqual(arr4, arr1)).toBe(true)
+    expect(looseEqual(arr1, arr5)).toBe(false)
+    expect(looseEqual(arr5, arr1)).toBe(false)
   })
 })
