@@ -307,6 +307,29 @@ describe('Directive v-on', () => {
     expect(spy.calls.count()).toBe(1)
   })
 
+  it('should support exact modifier when use all modifers', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <input ref="ctrl" @keyup.ctrl.alt.shift.meta.exact="foo">
+        </div>
+      `,
+      methods: { foo: spy }
+    })
+
+    triggerEvent(vm.$refs.ctrl, 'keyup')
+    expect(spy.calls.count()).toBe(0)
+
+    triggerEvent(vm.$refs.ctrl, 'keyup', e => {
+      e.ctrlKey = true
+      e.altKey = true
+      e.shiftKey = true
+      e.metaKey = true
+    })
+    expect(spy.calls.count()).toBe(1)
+  })
+
   it('should support number keyCode', () => {
     vm = new Vue({
       el,
