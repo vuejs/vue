@@ -130,11 +130,11 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
         }
       } else if (key === 'exact') {
         const modifiers: ASTModifiers = (handler.modifiers: any)
-        const modifiersKey = ['ctrl', 'shift', 'alt', 'meta'].filter(keyModifier => {
-          return !modifiers[keyModifier];
-        });
+        const modifiersKey = ['ctrl', 'shift', 'alt', 'meta'].filter(
+          keyModifier => !modifiers[keyModifier]
+        )
 
-        if( modifiersKey.length ){
+        if (modifiersKey.length) {
           genModifierCode += genGuard(
             modifiersKey
               .map(keyModifier => `$event.${keyModifier}Key`)
