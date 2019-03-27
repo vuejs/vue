@@ -132,6 +132,23 @@ describe('Directive v-model component', () => {
     expect(vm.text).toBe(123)
   })
 
+  it('modifier: .normalize', () => {
+    const vm = new Vue({
+      template: `<div><my-input ref="input" v-model.normalize="text"></my-input></div>`,
+      data: { text: 'foo' },
+      components: {
+        'my-input': {
+          template: '<input>'
+        }
+      }
+    }).$mount()
+    expect(vm.text).toBe('foo')
+    vm.$refs.input.$emit('input', 'b\u0061\u0308r')
+    expect(vm.text).toBe('b\u00e4r')
+    vm.$refs.input.$emit('input', 'b\u0061\u0300r')
+    expect(vm.text).toBe('b\u00e0r')
+  })
+
   it('modifier: .trim', () => {
     const vm = new Vue({
       template: `<div><my-input ref="input" v-model.trim="text"></my-input></div>`,

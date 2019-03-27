@@ -28,6 +28,15 @@ describe('compile v-model', () => {
     expect(errors).toEqual([])
   })
 
+  it('should compile with normalize modifier for modelable native component', () => {
+    const { render, staticRenderFns, errors } = compile(`<div><input v-model.normalize="x" /></div>`)
+    expect(render).not.toBeUndefined()
+    expect(render).toMatch(strToRegExp(`attrs:{"value":(x)}`))
+    expect(render).toMatch(strToRegExp(`on:{"input":function($event){x=$event.target.attr.value.normalize()}}`))
+    expect(staticRenderFns).toEqual([])
+    expect(errors).toEqual([])
+  })
+
   it('should compile with trim & lazy modifier', () => {
     const { render, staticRenderFns, errors } = compile(`<div><input v-model.trim.lazy="x" /><input v-model.lazy.trim="y" /></div>`)
     expect(render).not.toBeUndefined()

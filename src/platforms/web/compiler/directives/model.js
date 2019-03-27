@@ -146,7 +146,7 @@ function genDefaultModel (
     }
   }
 
-  const { lazy, number, trim } = modifiers || {}
+  const { lazy, normalize, number, trim } = modifiers || {}
   const needCompositionGuard = !lazy && type !== 'range'
   const event = lazy
     ? 'change'
@@ -157,6 +157,9 @@ function genDefaultModel (
   let valueExpression = '$event.target.value'
   if (trim) {
     valueExpression = `$event.target.value.trim()`
+  }
+  if (normalize) {
+    valueExpression += '.normalize()'
   }
   if (number) {
     valueExpression = `_n(${valueExpression})`

@@ -733,6 +733,7 @@ function genComponentModel (
   modifiers
 ) {
   var ref = modifiers || {};
+  var normalize = ref.normalize;
   var number = ref.number;
   var trim = ref.trim;
 
@@ -742,6 +743,12 @@ function genComponentModel (
     valueExpression =
       "(typeof " + baseValueExpression + " === 'string'" +
       "? " + baseValueExpression + ".trim()" +
+      ": " + baseValueExpression + ")";
+  }
+  if (normalize) {
+    valueExpression =
+      "(typeof " + baseValueExpression + " === 'string'" +
+      "? " + baseValueExpression + ".normalize()" +
       ": " + baseValueExpression + ")";
   }
   if (number) {

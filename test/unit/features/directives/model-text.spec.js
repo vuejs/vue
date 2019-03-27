@@ -80,6 +80,22 @@ describe('Directive v-model text', () => {
     expect(vm.test).toBe('what')
   })
 
+  it('.normalize modifier', () => {
+    const vm = new Vue({
+      data: {
+        test: 'foo'
+      },
+      template: '<input v-model.normalize="test">'
+    }).$mount()
+    expect(vm.test).toBe('foo')
+    vm.$el.value = 'b\u0061\u0308r'
+    triggerEvent(vm.$el, 'input')
+    expect(vm.test).toBe('b\u00e4r')
+    vm.$el.value = 'b\u0061\u0300r'
+    triggerEvent(vm.$el, 'input')
+    expect(vm.test).toBe('b\u00e0r')
+  })
+
   it('.number focus and typing', (done) => {
     const vm = new Vue({
       data: {

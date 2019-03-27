@@ -19,10 +19,15 @@ function genDefaultModel (
   value: string,
   modifiers: ?ASTModifiers
 ): ?boolean {
-  const { lazy, trim, number } = modifiers || {}
+  const { lazy, normalize, number, trim } = modifiers || {}
   const event = lazy ? 'change' : 'input'
 
   let valueExpression = `$event.target.attr.value${trim ? '.trim()' : ''}`
+
+  if (normalize) {
+    valueExpression += '.normalize()'
+  }
+
   if (number) {
     valueExpression = `_n(${valueExpression})`
   }

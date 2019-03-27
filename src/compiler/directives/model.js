@@ -8,7 +8,7 @@ export function genComponentModel (
   value: string,
   modifiers: ?ASTModifiers
 ): ?boolean {
-  const { number, trim } = modifiers || {}
+  const { normalize, number, trim } = modifiers || {}
 
   const baseValueExpression = '$$v'
   let valueExpression = baseValueExpression
@@ -16,6 +16,12 @@ export function genComponentModel (
     valueExpression =
       `(typeof ${baseValueExpression} === 'string'` +
       `? ${baseValueExpression}.trim()` +
+      `: ${baseValueExpression})`
+  }
+  if (normalize) {
+    valueExpression =
+      `(typeof ${baseValueExpression} === 'string'` +
+      `? ${baseValueExpression}.normalize()` +
       `: ${baseValueExpression})`
   }
   if (number) {
