@@ -215,6 +215,14 @@ Vue.component('component', {
         resolve({} as ComponentOptions<Vue>);
         reject();
       }),
+      createElement((resolve) => {
+        resolve({} as Component);
+      }),
+      createElement(() => Promise.resolve({} as Component)),
+      createElement(() => ({
+        component: Promise.resolve({} as Component),
+        delay: 200
+      })),
 
       "message",
 
@@ -438,16 +446,29 @@ Vue.component('functional-component-multi-root', {
   }
 })
 
-Vue.component("async-component", ((resolve, reject) => {
-  setTimeout(() => {
-    resolve(Vue.component("component"));
-  }, 0);
-  return new Promise((resolve) => {
-    resolve({
-      functional: true,
-      render(h: CreateElement) { return h('div') }
-    });
-  })
+Vue.component('async-component-executor', (resolve, reject) => {
+  try {
+    setTimeout(() => {
+      resolve(Vue.component('component'));
+    }, 0);
+  } catch (e) {
+    reject(e);
+  }
+});
+
+Vue.component('async-component-promise', () => {
+  return Promise.resolve({
+    functional: true,
+    render(h: CreateElement) { return h('div') }
+  });
+});
+
+Vue.component('async-component-factory', () => ({
+  component: Promise.resolve({
+    functional: true,
+    render(h: CreateElement) { return h('div') }
+  }),
+  delay: 123
 }));
 
 Vue.component('functional-component-v-model', {
