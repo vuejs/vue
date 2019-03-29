@@ -569,6 +569,22 @@ describe('parser', () => {
     })
   })
 
+  // #9781
+  it('multiple dynamic slot names without warning', () => {
+    const ast = parse(`<my-component>
+      <template #[foo]>foo</template>
+      <template #[bar]>bar</template>
+    </my-component>`, baseOptions) 
+
+    expect(`Invalid dynamic argument expression`).not.toHaveBeenWarned()
+    expect(ast.scopedSlots.foo).not.toBeUndefined()
+    expect(ast.scopedSlots.bar).not.toBeUndefined()
+    expect(ast.scopedSlots.foo.type).toBe(1)
+    expect(ast.scopedSlots.bar.type).toBe(1)
+    expect(ast.scopedSlots.foo.attrsMap['#[foo]']).toBe('')
+    expect(ast.scopedSlots.bar.attrsMap['#[bar]']).toBe('')
+  })
+
   // #6887
   it('special case static attribute that must be props', () => {
     const ast = parse('<video muted></video>', baseOptions)
