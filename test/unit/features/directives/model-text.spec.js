@@ -218,6 +218,26 @@ describe('Directive v-model text', () => {
     done()
   })
 
+  it('.eager modifier', () => {
+    const vm = new Vue({
+      data: {
+        test: 'foo'
+      },
+      template: '<input v-model.eager="test">'
+    }).$mount()
+    const input = vm.$el
+    triggerEvent(input, 'compositionstart')
+    input.value = 'baz'
+    // input before composition unlock should call set
+    triggerEvent(input, 'input')
+    expect(vm.test).toBe('baz')
+    // after composition unlock it should work
+    triggerEvent(input, 'compositionend')
+    input.value = 'bar'
+    triggerEvent(input, 'input')
+    expect(vm.test).toBe('bar')
+  })
+
   it('warn invalid tag', () => {
     new Vue({
       data: {
