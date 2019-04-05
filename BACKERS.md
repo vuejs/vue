@@ -352,114 +352,113 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Shawn Wildermuth
 - Samuel Smith
 - donny
-- Sean Washington
 - Simon East
+- Keisuke Kita
 - kazupon
+- Sean Washington
 - Lars Andreas Ness
+- Benjamin Listwon
 - Kirk Lewis
 - Stephen Michael Hartley
-- Keisuke Kita
-- Wen-Tien Chang
-- Benjamin Listwon
 - Victor Tolbert
+- Wen-Tien Chang
 - Karol
 - Phan An
-- Barbara Liau
-- Miljan Aleksic
 - James J. Ye
+- Barbara Liau
 - Luiz
-- Jarek Tkaczyk
 - Matsumoto Takamasa
-- Duncan Kenzie
-- Mike Margerum
+- Jarek Tkaczyk
 - Niannian Modisette
-- Bernhard E. Reiter
 - Matt Jones
+- Duncan Kenzie
 - Guy Gavergun
+- Shinya Katayama
+- Mike Margerum
+- Bernhard E. Reiter
+- Chengzhi Yin
 - Zoran Knezevic
 - Jon Hobbs-Smith
 - Pierre Vanhulst
-- Shinya Katayama
-- Asaf Yishai
-- Anthony Estebe
 - Akiho Nagao
 - Haim Yulzari
+- Asaf Yishai
+- Anthony Estebe
+- Jeremy Tan
 - Jim Raden
 - IMGNRY
-- Jeremy Tan
-- Tyler
-- Yong Jun Thong
 - Tai Shi Ling
-- Jamie McElwain
-- Matias Verdier
+- Yong Jun Thong
+- Tyler
 - Vivekanandhan Natarajan
-- Daniel Waghorn
-- Mickaël Andrieu
-- Chih-Hsuan Fan
+- Matias Verdier
 - Rafael Belvederese
+- Chih-Hsuan Fan
 - Guilherme S L de Souza
-- Joe Gregory
-- Cliff Hess
+- Daniel Waghorn
 - Rob Yedlin
+- Mickaël Andrieu
+- Jamie McElwain
 - Jordan Oroshiba
-- RADD Creative
-- Marcos Moura
+- Cliff Hess
+- Joe Gregory
 - Richard Simpson
+- Marcos Moura
 - Jessie Hernandez
-- Aparajita Fishman
 - Ivan Sieder
 - Eric
+- Aparajita Fishman
 - Romain Lienard
+- Bohdan Kokotko
 - Christo Crampton
 - David Ang
-- Bohdan Kokotko
 - Donald Fischer
-- Wakana Seki
-- David Kaplan
-- Domenico Gaudioso
-- Jaeyoung Lee
-- Ben Hong
 - Alexander Weiher
 - Oskar Lindgren
 - Jere Sjöroos
+- Wakana Seki
+- David Kaplan
+- Ben Hong
+- Domenico Gaudioso
+- Jaeyoung Lee
 - Andy
-- John Cleveland
-- Daniel Mattingley
 - Joe Cochran
-- Elon Hung
+- Matt Sencenbaugh
+- Juan Bermudez
+- Hannes Kochniß
+- Colt Borg
+- Alberto T. Payero Mota
+- Daniel Mattingley
 - Teon Ooi
 - Chris Calo
-- Colt Borg
-- Matt Sencenbaugh
-- Hannes Kochniß
-- Alberto T. Payero Mota
-- Juan Bermudez
+- Elon Hung
+- Soichiro Isshiki
 - Milan Zivkovic
-- Garion Herman
 - Christopher Bemister
 - Ed Linklater
+- Garion Herman
 - Marko Boskovic
-- Soichiro Isshiki
+- Rob
 - Andrew Willis
 - Yusuke Kawabata
 - Princeyesuraj Edward
 - shimbaco
-- Nick Dandakis
-- Carlos Adrián
-- Peter Matkovsky
-- 极 蔡
 - 龙腾道
-- Kenneth Crawford
-- Fedor Indutny
+- 极 蔡
+- Peter Matkovsky
+- Nick Dandakis
 - Fabien GuySake Ungerer
-- Max Fletcher
+- Fedor Indutny
 - Masato Miura
 - Nathan Mallison
+- Shapovalov Pavel
 - David McGuigan
+- Max Fletcher
 - Bill Condo
 - Kevin Batdorf
+- Ivan Buncic
 - Pierre Lebrun
-- Juli A Schlack
+- Sheree Peña
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
