@@ -210,7 +210,8 @@ function getInvalidTypeMessage (name, value, expectedTypes) {
   // check if we need to specify expected value
   if (expectedTypes.length === 1 &&
       isExplicable(expectedType) &&
-      !isBoolean(expectedType, receivedType)) {
+      !isBoolean(expectedType, receivedType) &&
+      !isSymbol(expectedType, receivedType)) {
     message += ` with value ${expectedValue}`
   }
   message += `, got ${receivedType} `
@@ -223,11 +224,11 @@ function getInvalidTypeMessage (name, value, expectedTypes) {
 
 function styleValue (value, type) {
   if (type === 'String') {
-    return `"${value}"`
+    return `"${String(value)}"`
   } else if (type === 'Number') {
-    return `${Number(value)}`
+    return `${Number(String(value))}`
   } else {
-    return `${value}`
+    return String(value)
   }
 }
 
@@ -238,4 +239,8 @@ function isExplicable (value) {
 
 function isBoolean (...args) {
   return args.some(elem => elem.toLowerCase() === 'boolean')
+}
+
+function isSymbol (...args) {
+  return args.some(elem => elem.toLowerCase() === 'symbol')
 }

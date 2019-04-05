@@ -241,6 +241,36 @@ describe('Options props', () => {
         makeInstance({}, Symbol)
         expect('Expected Symbol, got Object').toHaveBeenWarned()
       })
+
+      it('string & symbol', () => {
+        makeInstance(Symbol('foo'), String)
+        expect('Expected String, got Symbol').toHaveBeenWarned()
+      })
+
+      it('number & symbol', () => {
+        makeInstance(Symbol('foo'), Number)
+        expect('Expected Number, got Symbol').toHaveBeenWarned()
+      })
+
+      it('boolean & symbol', () => {
+        makeInstance(Symbol('foo'), Boolean)
+        expect('Expected Boolean, got Symbol').toHaveBeenWarned()
+      })
+
+      it('function & symbol', () => {
+        makeInstance(Symbol('foo'), Function)
+        expect('Expected Function, got Symbol').toHaveBeenWarned()
+      })
+
+      it('object & symbol', () => {
+        makeInstance(Symbol('foo'), Object)
+        expect('Expected Object, got Symbol').toHaveBeenWarned()
+      })
+
+      it('array & symbol', () => {
+        makeInstance(Symbol('foo'), Array)
+        expect('Expected Array, got Symbol').toHaveBeenWarned()
+      })
     }
 
     it('custom constructor', () => {
