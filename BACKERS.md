@@ -168,18 +168,8 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://www.inkoop.in/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/inkoop.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://www.firesticktricks.com/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/firestick_tricks.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://github.com/marcus-hiles" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/marcus_hiles.png">
         </a>
       </td>
       <td align="center" valign="middle">
@@ -187,16 +177,9 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/intygrate.png">
         </a>
       </td>
-    </tr><tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="https://isleofcode.com/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/isle_of_code.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://yakaz.com/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/yakaz.png">
         </a>
       </td>
       <td align="center" valign="middle">
@@ -204,6 +187,8 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/passionate_people.png">
         </a>
       </td>
+    </tr><tr></tr>
+    <tr>
       <td align="center" valign="middle">
         <a href="https://www.bestvpn.co/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bestvpn_co.png">
@@ -249,11 +234,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       <td align="center" valign="middle">
         <a href="https://dopamine.bg/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/dopamine.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://gridsome.org/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/gridsome.png">
         </a>
       </td>
     </tr><tr></tr>
