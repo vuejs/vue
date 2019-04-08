@@ -37,6 +37,12 @@ Hi! I'm really excited that you are interested in contributing to Vue.js. Before
 
 You will need [Node.js](http://nodejs.org) **version 8+** and [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/index.html) (for running Selenium server during e2e tests).
 
+If you only have npm installed on your computer but there is no yarn, run:
+
+```bash
+$ npm install -g yarn # It installs yarn
+```
+
 After cloning the repo, run:
 
 ``` bash
