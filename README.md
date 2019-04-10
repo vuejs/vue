@@ -214,6 +214,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/x_team.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://www.vpnranks.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vpnranks.png">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
