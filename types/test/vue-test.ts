@@ -24,13 +24,15 @@ class Test extends Vue {
     vue: Vue,
     element: HTMLInputElement,
     vues: Vue[],
-    elements: HTMLInputElement[]
+    elements: HTMLInputElement[],
+    maybe: Vue | undefined
   }
   testReification() {
     this.$refs.vue.$data;
     this.$refs.element.value;
     this.$refs.vues[0].$data;
     this.$refs.elements[0].value;
+    this.$refs.maybe!.$data;
   }
 
   testMethods() {
