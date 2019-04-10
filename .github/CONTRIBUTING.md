@@ -59,7 +59,7 @@ $ npm run dev:test
 # build all dist files, including npm packages
 $ npm run build
 
-# run the full test suite, include linting/type checking
+# run the full test suite, including linting/type checking
 $ npm test
 ```
 
