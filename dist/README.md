@@ -74,7 +74,7 @@ Add to your project's `package.json`:
 
 Development/production modes are hard-coded for the UMD builds: the un-minified files are for development, and the minified files are for production.
 
-CommonJS and ES Module builds are intended for bundlers, therefore we don't provide minified versions for them. You will be responsible for minifying the final bundle yourself.
+Because CommonJS and ES Module builds are intended for bundlers, we don't provide minified versions for them. You will be responsible for minifying the final bundle yourself.
 
 CommonJS and ES Module builds also preserve raw checks for `process.env.NODE_ENV` to determine the mode they should run in. You should use appropriate bundler configurations to replace these environment variables in order to control which mode Vue will run in. Replacing `process.env.NODE_ENV` with string literals also allows minifiers like UglifyJS to completely drop the development-only code blocks, reducing final file size.
 
