@@ -120,5 +120,13 @@ export default {
       vnode.data.keepAlive = true
     }
     return vnode || (slot && slot[0])
+  },
+  updated() {
+    const { cache } = this
+    for(let key in cache) {
+      if(cache[key] && cache[key].parent && (cache[key].tag != this._vnode.tag)) {
+        cache[key].parent = null
+      }
+    }
   }
 }
