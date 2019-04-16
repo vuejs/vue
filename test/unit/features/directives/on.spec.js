@@ -460,6 +460,20 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalled()
   })
 
+  it('should be able to ignore native modifier on native HTML element', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <button @click.native="foo"></button>
+      `,
+      methods: { foo: spy },
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(`You should not use the '.native' modifier on a native HTML element`).toHaveBeenWarned()
+    expect(spy.calls.count()).toBe(1)
+  })
+
   it('.once modifier should work with child components', () => {
     vm = new Vue({
       el,
