@@ -460,7 +460,7 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalled()
   })
 
-  it('should throw a warning is native modifier is used on native HTML element', () => {
+  it('should throw a warning if native modifier is used on native HTML element', () => {
     vm = new Vue({
       el,
       template: `
