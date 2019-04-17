@@ -460,7 +460,7 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalled()
   })
 
-  it('should be able to ignore native modifier on native HTML element', () => {
+  it('should throw a warning is native modifier is used on native HTML element', () => {
     vm = new Vue({
       el,
       template: `
@@ -470,8 +470,8 @@ describe('Directive v-on', () => {
     })
 
     triggerEvent(vm.$el, 'click')
-    expect(`You should not use the '.native' modifier on a native HTML element`).toHaveBeenWarned()
-    expect(spy.calls.count()).toBe(1)
+    expect(`The .native modifier for v-on is only valid on components.`).toHaveBeenWarned()
+    expect(spy.calls.count()).toBe(0)
   })
 
   it('.once modifier should work with child components', () => {
