@@ -470,7 +470,7 @@ describe('Directive v-on', () => {
     })
 
     triggerEvent(vm.$el, 'click')
-    expect(`The .native modifier for v-on is only valid on components but it was used on <${tag}>.`).toHaveBeenWarned()
+    expect(`The .native modifier for v-on is only valid on components but it was used on <button>.`).toHaveBeenWarned()
     expect(spy.calls.count()).toBe(0)
   })
 
