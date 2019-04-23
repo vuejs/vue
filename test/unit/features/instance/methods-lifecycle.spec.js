@@ -84,6 +84,35 @@ describe('Instance methods lifecycle', () => {
       expect(vm.$data.__ob__.vmCount).toBe(0)
     })
 
+    it('remove self from property closure observer', () => {
+      const spy = jasmine.createSpy('getter')
+      const vm = new Vue({
+        data: { a: { b: 'b' } },
+        template: '<test :a="a"></test>',
+        components: {
+          test: { 
+            props: { a: Object },
+            template: '<div>{{a.b}}</div>' 
+          }
+        }
+      }).$mount()
+      let propsData = vm.$children[0].$options.propsData
+      let property = Object.getOwnPropertyDescriptor(propsData.a, 'b')
+      Object.defineProperty(propsData.a, 'b', {
+        enumerable: true,
+        configurable: true,
+        get: function () {
+          spy()
+          return property.get.call(this)
+        },
+        set: function () {
+          property.set.call(this)
+        }
+      })
+      vm.$children[0].$destroy(true)
+      expect(spy.calls.count()).toBe(1)
+    })
+
     it('avoid duplicate calls', () => {
       const spy = jasmine.createSpy('destroy')
       const vm = new Vue({
