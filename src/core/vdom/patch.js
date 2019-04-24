@@ -106,6 +106,7 @@ export function createPatchFunction (backend) {
 
   function isUnknownElement (vnode, inVPre) {
     return (
+      !(typeof window !== 'undefined' && window.customElements && window.customElements.get(vnode.tag)) &&
       !inVPre &&
       !vnode.ns &&
       !(
