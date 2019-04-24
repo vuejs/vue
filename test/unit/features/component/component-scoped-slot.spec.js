@@ -760,12 +760,20 @@ describe('Component scoped slot', () => {
         expect(`Unexpected mixed usage of different slot syntaxes`).toHaveBeenWarned()
       })
 
+      it('should warn invalid parameter expression', () => {
+        new Vue({
+          template: `<foo ${syntax}="1"></foo>`,
+          components: { Foo }
+        }).$mount();
+        expect('invalid function parameter expression').toHaveBeenWarned()
+      })
+
       it('should allow destructuring props with default value', () => {
         new Vue({
           template: `<foo ${syntax}="{ foo = { bar: '1' } }"></foo>`,
-          components: { Foo, Bar }
+          components: { Foo }
         }).$mount();
-        expect('Invalid shorthand property initializer').not.toHaveBeenWarned()
+        expect('invalid function parameter expression').not.toHaveBeenWarned()
       })
     }
 
