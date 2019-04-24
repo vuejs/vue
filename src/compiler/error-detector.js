@@ -31,6 +31,7 @@ function checkNode (node: ASTNode, warn: Function) {
   if (node.type === 1) {
     for (const name in node.attrsMap) {
       if (dirRE.test(name)) {
+        if (name === 'v-slot') break;
         const value = node.attrsMap[name]
         if (value) {
           const range = node.rawAttrsMap[name]
