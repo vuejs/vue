@@ -17,7 +17,6 @@ export function traverse (val: any) {
 }
 
 function _traverse (val: any, seen: SimpleSet) {
-  let i, keys
   const isA = Array.isArray(val)
   if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode) {
     return
@@ -30,11 +29,11 @@ function _traverse (val: any, seen: SimpleSet) {
     seen.add(depId)
   }
   if (isA) {
-    i = val.length
+    let i = val.length
     while (i--) _traverse(val[i], seen)
   } else {
-    keys = Object.keys(val)
-    i = keys.length
+    const keys = Object.keys(val)
+    let i = keys.length
     while (i--) _traverse(val[keys[i]], seen)
   }
 }
