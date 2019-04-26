@@ -92,7 +92,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 </table>
 <!--special-china end-->
 
-<h3 align="center">Gold Sponsors</h4>
+<h3 align="center">Gold Sponsors</h3>
 
 <!--gold start-->
 <table>
