@@ -72,7 +72,7 @@ export class Observer {
    * Observe a list of Array items.
    */
   observeArray (items: Array<any>) {
-    for (let i = 0, l = items.length; i < l; i++) {
+    for (let i = 0; i < items.length; i++) {
       observe(items[i])
     }
   }
