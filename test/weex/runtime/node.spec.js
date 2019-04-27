@@ -52,7 +52,27 @@ describe('node in render function', () => {
   })
 
   it('should be generated with comments', () => {
-    // todo
+    const id = String(Date.now() * Math.random())
+    const instance = createInstance(id, `
+      new Vue({
+        render: function (createElement) {
+          return createElement('div', {}, [
+            '<!-- Say hello -->',
+            createElement('text', { attrs: { value: 'Hello' }}, []),
+            'World'
+          ])
+        },
+        el: "body"
+      })
+    `)
+    expect(getRoot(instance)).toEqual({
+      type: 'div',
+      children: [
+        { type: 'text', attr: { value: '<!-- Say hello -->' }},
+        { type: 'text', attr: { value: 'Hello' }},
+        { type: 'text', attr: { value: 'World' }}
+      ]
+    })
   })
 
   it('should be generated with module diff', (done) => {
