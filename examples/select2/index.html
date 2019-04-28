@@ -49,7 +49,7 @@
           // init select2
           .select2({ data: this.options })
           // emit event on change.
-          .on('change', function () {
+          .on('select2:select', function () {
             vm.$emit('input', this.value)
           })
       },
