@@ -17,6 +17,7 @@ type TemplateRendererOptions = {
   shouldPreload?: (file: string, type: string) => boolean;
   shouldPrefetch?: (file: string, type: string) => boolean;
   serializer?: Function;
+  contentPlaceholder?: string;
 };
 
 export type ClientManifest = {
@@ -55,11 +56,11 @@ export default class TemplateRenderer {
     this.inject = options.inject !== false
     // if no template option is provided, the renderer is created
     // as a utility object for rendering assets like preload links and scripts.
-    
-    const { template } = options
+
+    const { template, contentPlaceholder } = options
     this.parsedTemplate = template
       ? typeof template === 'string'
-        ? parseTemplate(template)
+        ? parseTemplate(template, contentPlaceholder)
         : template
       : null
 
