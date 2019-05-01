@@ -3,7 +3,13 @@
 import { isRegExp, remove } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
-type VNodeCache = { [key: string]: ?VNode };
+type CacheEntry = {
+  name: ?string;
+  tag: ?string;
+  componentInstance: Component;
+};
+
+type CacheEntryMap = { [key: string]: ?CacheEntry };
 
 function getComponentName (opts: ?VNodeComponentOptions): ?string {
   return opts && (opts.Ctor.options.name || opts.tag)
@@ -24,9 +30,9 @@ function matches (pattern: string | RegExp | Array<string>, name: string): boole
 function pruneCache (keepAliveInstance: any, filter: Function) {
   const { cache, keys, _vnode } = keepAliveInstance
   for (const key in cache) {
-    const cachedNode: ?VNode = cache[key]
-    if (cachedNode) {
-      const name: ?string = getComponentName(cachedNode.componentOptions)
+    const entry: ?CacheEntry = cache[key]
+    if (entry) {
+      const name: ?string = entry.name
       if (name && !filter(name)) {
         pruneCacheEntry(cache, key, keys, _vnode)
       }
@@ -35,14 +41,14 @@ function pruneCache (keepAliveInstance: any, filter: Function) {
 }
 
 function pruneCacheEntry (
-  cache: VNodeCache,
+  cache: CacheEntryMap,
   key: string,
   keys: Array<string>,
   current?: VNode
 ) {
-  const cached = cache[key]
-  if (cached && (!current || cached.tag !== current.tag)) {
-    cached.componentInstance.$destroy()
+  const entry: ?CacheEntry = cache[key]
+  if (entry && (!current || entry.tag !== current.tag)) {
+    entry.componentInstance.$destroy()
   }
   cache[key] = null
   remove(keys, key)
@@ -72,12 +78,23 @@ export default {
   },
 
   mounted () {
+    if (this.putEntry) {
+      this.putEntry()
+      this.putEntry = null
+    }
     this.$watch('include', val => {
       pruneCache(this, name => matches(val, name))
     })
     this.$watch('exclude', val => {
       pruneCache(this, name => !matches(val, name))
     })
+  },
+
+  updated () {
+    if (this.putEntry) {
+      this.putEntry()
+      this.putEntry = null
+    }
   },
 
   render () {
@@ -109,11 +126,19 @@ export default {
         remove(keys, key)
         keys.push(key)
       } else {
-        cache[key] = vnode
-        keys.push(key)
-        // prune oldest entry
-        if (this.max && keys.length > parseInt(this.max)) {
-          pruneCacheEntry(cache, keys[0], keys, this._vnode)
+        // put entry until component is instantiated
+        this.putEntry = () => {
+          const { tag, componentInstance } = vnode
+          cache[key] = {
+            name,
+            tag,
+            componentInstance
+          }
+          keys.push(key)
+          // prune oldest entry
+          if (this.max && keys.length > parseInt(this.max)) {
+            pruneCacheEntry(cache, keys[0], keys, this._vnode)
+          }
         }
       }
 
