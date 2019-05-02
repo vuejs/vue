@@ -222,6 +222,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     </tr><tr></tr>
     <tr>
       <td align="center" valign="middle">
+        <a href="https://www.bacancytechnology.com" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bacancy_technology.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
         <a href="https://blokt.com/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/blokt_cryptocurrency_news.png">
         </a>
