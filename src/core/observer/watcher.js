@@ -7,6 +7,7 @@ import {
   parsePath,
   _Set as Set,
   handleError,
+  invokeWithErrorHandling,
   noop
 } from '../util/index'
 
@@ -191,11 +192,7 @@ export default class Watcher {
         const oldValue = this.value
         this.value = value
         if (this.user) {
-          try {
-            this.cb.call(this.vm, value, oldValue)
-          } catch (e) {
-            handleError(e, this.vm, `callback for watcher "${this.expression}"`)
-          }
+          invokeWithErrorHandling(this.cb, this.vm, [value, oldValue], this.vm, ("callback for watcher \"" + (this.expression) + "\""))
         } else {
           this.cb.call(this.vm, value, oldValue)
         }

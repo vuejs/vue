@@ -138,6 +138,16 @@ describe('Error handling', () => {
     }).then(done)
   })
 
+  it('should recover from errors in user watcher from promise error', done => {
+    const vm = createTestInstance(components.userWatcherPromise)
+    vm.n++
+    setTimeout(() => {
+      expect(`Error in callback for watcher "n" (Promise/async)`).toHaveBeenWarned()
+      expect(`Error: userWatcherPromise error`).toHaveBeenWarned()
+      assertBothInstancesActive(vm).then(done)
+    })
+  })
+
   it('should recover from errors in user immediate watcher callback', done => {
     const vm = createTestInstance(components.userImmediateWatcherCallback)
     waitForUpdate(() => {
@@ -337,6 +347,18 @@ function createErrorTestComponents () {
     watch: {
       n () {
         throw new Error('userWatcherCallback error')
+      }
+    },
+    render (h) {
+      return h('div', this.n)
+    }
+  }
+
+  components.userWatcherPromise = {
+    props: ['n'],
+    watch: {
+      n () {
+        return new Promise((resolve, reject) => reject(new Error('userWatcherPromise error')))
       }
     },
     render (h) {
