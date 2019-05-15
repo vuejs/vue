@@ -1182,5 +1182,108 @@ describe('Component keep-alive', () => {
         }).then(done)
       }
     })
+
+    it('with transition-group', done => {
+      const vm = new Vue({
+        template: `<div>
+          <transition-group name="test">
+            <keep-alive key="keep-alvie-1">
+              <component :is="view" class="test"></component>
+            </keep-alive>
+          </transition-group>
+        </div>`,
+        data: {
+          view: 'one'
+        },
+        components
+      }).$mount(el)
+      expect(vm.$el.textContent).toBe('one')
+      assertHookCalls(one, [1, 1, 1, 0, 0])
+      assertHookCalls(two, [0, 0, 0, 0, 0])
+      vm.view = 'two'
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test test-leave test-leave-active">one</div><div class="test test-enter test-enter-active">two</div></span>'
+        )
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 0, 0])
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test test-leave-active test-leave-to">one</div><div class="test test-enter-active test-enter-to">two</div></span>'
+        )
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test">two</div></span>'
+        )
+      }).then(() => {
+        vm.view = 'one'
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test test-leave test-leave-active">two</div><div class="test test-enter test-enter-active">one</div></span>'
+        )
+        assertHookCalls(one, [1, 1, 2, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 1, 0])
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test test-leave-active test-leave-to">two</div><div class="test test-enter-active test-enter-to">one</div></span>'
+        )
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test">one</div></span>'
+        )
+      }).then(done)
+    })
+
+    it('with transition-group + include', done => {
+      const vm = new Vue({
+        template: `<div>
+          <transition-group name="test">
+            <keep-alive key="keep-alvie-1" include="one">
+              <component :is="view" class="test"></component>
+            </keep-alive>
+          </transition-group>
+        </div>`,
+        data: {
+          view: 'one'
+        },
+        components
+      }).$mount(el)
+      expect(vm.$el.textContent).toBe('one')
+      assertHookCalls(one, [1, 1, 1, 0, 0])
+      assertHookCalls(two, [0, 0, 0, 0, 0])
+      vm.view = 'two'
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test test-leave test-leave-active">one</div><div class="test test-enter test-enter-active">two</div></span>'
+        )
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [1, 1, 0, 0, 0])
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test test-leave-active test-leave-to">one</div><div class="test test-enter-active test-enter-to">two</div></span>'
+        )
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test">two</div></span>'
+        )
+      }).then(() => {
+        vm.view = 'one'
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test test-leave test-leave-active">two</div><div class="test test-enter test-enter-active">one</div></span>'
+        )
+        assertHookCalls(one, [1, 1, 2, 1, 0])
+        assertHookCalls(two, [1, 1, 0, 0, 1])
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test test-leave-active test-leave-to">two</div><div class="test test-enter-active test-enter-to">one</div></span>'
+        )
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+            '<span><div class="test">one</div></span>'
+        )
+      }).then(done)
+    })
+
   }
 })
