@@ -22,7 +22,7 @@ Hi! I'm really excited that you are interested in contributing to Vue.js. Before
 
 - It's OK to have multiple small commits as you work on the PR - GitHub will automatically squash it before merging.
 
-- Make sure `npm test` passes. (see [development setup](#development-setup))
+- Make sure `yarn test` passes. (see [development setup](#development-setup))
 
 - If adding a new feature:
   - Add accompanying test case.
@@ -35,7 +35,7 @@ Hi! I'm really excited that you are interested in contributing to Vue.js. Before
 
 ## Development Setup
 
-You will need [Node.js](http://nodejs.org) **version 8+**, [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/index.html) (for running Selenium server during e2e tests) and [yarn](https://yarnpkg.com/en/docs/install).
+You will need [Node.js](http://nodejs.org) **version 8+**, [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/index.html) (for running Selenium server during e2e tests) and [Yarn](https://yarnpkg.com/en/docs/install).
 
 After cloning the repo, run:
 
@@ -45,22 +45,22 @@ $ yarn # install the dependencies of the project
 
 ### Committing Changes
 
-Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. Commit messages will be automatically validated upon commit. If you are not familiar with the commit message convention, you can use `npm run commit` instead of `git commit`, which provides an interactive CLI for generating proper commit messages.
+Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. Commit messages will be automatically validated upon commit. If you are not familiar with the commit message convention, you can use `yarn commit` instead of `git commit`, which provides an interactive CLI for generating proper commit messages.
 
-### Commonly used NPM scripts
+### Commonly used Yarn scripts
 
 ``` bash
 # watch and auto re-build dist/vue.js
-$ npm run dev
+$ yarn dev
 
 # watch and auto re-run unit tests in Chrome
-$ npm run dev:test
+$ yarn dev:test
 
 # build all dist files, including npm packages
-$ npm run build
+$ yarn build
 
 # run the full test suite, including linting/type checking
-$ npm test
+$ yarn test
 ```
 
 There are some other scripts available in the `scripts` section of the `package.json` file.
