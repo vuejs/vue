@@ -350,6 +350,43 @@ describe('Component async', () => {
       }
     })
 
+    it('with error component which a prop named error + timeout', done => {
+      const vm = new Vue({
+        template: `<div><test/></div>`,
+        components: {
+          test: () => ({
+            component: new Promise((resolve, reject) => {
+              setTimeout(() => {
+                resolve({ template: '<div>hi</div>' })
+                // wait for promise resolve and then parent update
+                Promise.resolve().then(() => {
+                  Vue.nextTick(next)
+                })
+              }, 50)
+            }),
+            loading: { template: `<div>loading</div>` },
+            error: { template: `<div>{{error.message}}</div>`, props: { error: Error } },
+            delay: 0,
+            timeout: 1
+          })
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('loading')
+
+      setTimeout(() => {
+        Vue.nextTick(() => {
+          expect(`Failed to resolve async component`).toHaveBeenWarned()
+          expect(vm.$el.textContent).toBe('timeout (1ms)')
+        })
+      }, 1)
+
+      function next () {
+        expect(vm.$el.textContent).toBe('timeout (1ms)') // late resolve ignored
+        done()
+      }
+    })
+
     it('should not trigger timeout if resolved', done => {
       const vm = new Vue({
         template: `<div><test/></div>`,
