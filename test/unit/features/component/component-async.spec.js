@@ -253,7 +253,7 @@ describe('Component async', () => {
       }
     })
 
-    it('with error component + a prop named error', done => {
+    it('with error component', done => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
@@ -268,7 +268,37 @@ describe('Component async', () => {
               }, 50)
             }),
             loading: { template: `<div>loading</div>` },
-            error: { template: `<div>{{error}}</div>`, props: { error: String } },
+            error: { template: `<div>error</div>` },
+            delay: 0
+          })
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('loading')
+
+      function next () {
+        expect(`Failed to resolve async component`).toHaveBeenWarned()
+        expect(vm.$el.textContent).toBe('error')
+        done()
+      }
+    })
+
+    it('with error component which a prop named error', done => {
+      const vm = new Vue({
+        template: `<div><test/></div>`,
+        components: {
+          test: () => ({
+            component: new Promise((resolve, reject) => {
+              setTimeout(() => {
+                reject(new Error('error'))
+                // wait for promise resolve and then parent update
+                Promise.resolve().then(() => {
+                  Vue.nextTick(next)
+                })
+              }, 50)
+            }),
+            loading: { template: `<div>loading</div>` },
+            error: { template: `<div>{{error.message}}</div>`, props: { error: Error } },
             delay: 0
           })
         }
