@@ -16,7 +16,8 @@ import {
 import {
   resolveAsyncComponent,
   createAsyncPlaceholder,
-  extractPropsFromVNodeData
+  extractPropsFromVNodeData,
+  resolveAsyncComponentData
 } from './helpers/index'
 
 import {
@@ -142,6 +143,7 @@ export function createComponent (
         tag
       )
     }
+    data = resolveAsyncComponentData(asyncFactory, data)
   }
 
   data = data || {}

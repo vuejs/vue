@@ -253,14 +253,14 @@ describe('Component async', () => {
       }
     })
 
-    it('with error component', done => {
+    it('with error component + a prop named error', done => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
           test: () => ({
             component: new Promise((resolve, reject) => {
               setTimeout(() => {
-                reject()
+                reject('error')
                 // wait for promise resolve and then parent update
                 Promise.resolve().then(() => {
                   Vue.nextTick(next)
@@ -268,7 +268,7 @@ describe('Component async', () => {
               }, 50)
             }),
             loading: { template: `<div>loading</div>` },
-            error: { template: `<div>error</div>` },
+            error: { template: `<div>{{error}}</div>`, props: { error: String } },
             delay: 0
           })
         }
