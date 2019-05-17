@@ -25,6 +25,43 @@ describe('Options computed', () => {
     }).then(done)
   })
 
+  it('with not cache', done => {
+    let computedOrder = ''
+    const vm = new Vue({
+      template: '<div>{{ e }}</div>',
+      data: {
+        a: 1
+      },
+      computed: {
+        b () {
+          return this.a + 1
+        },
+        c: {
+          get () {
+            return this.b + 1
+          }
+        },
+        d: {
+          cache: true,
+          get () {
+            return this.c + 1
+          }
+        },
+        e: {
+          cache: false,
+          get () {
+            return this.a + 4
+          }
+        }
+      }
+    }).$mount()
+    expect(vm._computedWatchers.b).toBeDefined()
+    expect(vm._computedWatchers.c).toBeDefined()
+    expect(vm._computedWatchers.d).toBeDefined()
+    expect(vm._computedWatchers.e).not.toBeDefined()
+    done()
+  })
+
   it('with setter', done => {
     const vm = new Vue({
       template: '<div>{{ b }}</div>',
