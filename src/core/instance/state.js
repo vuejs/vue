@@ -175,6 +175,7 @@ function initComputed (vm: Component, computed: Object) {
   for (const key in computed) {
     const userDef = computed[key]
     const getter = typeof userDef === 'function' ? userDef : userDef.get
+    const userDefCache = typeof userDef === 'function' ? true : userDef.cache
     if (process.env.NODE_ENV !== 'production' && getter == null) {
       warn(
         `Getter is missing for computed property "${key}".`,
@@ -182,7 +183,7 @@ function initComputed (vm: Component, computed: Object) {
       )
     }
 
-    if (!isSSR) {
+    if (!isSSR && userDefCache) {
       // create internal watcher for the computed property.
       watchers[key] = new Watcher(
         vm,
