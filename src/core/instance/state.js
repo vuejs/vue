@@ -175,7 +175,7 @@ function initComputed (vm: Component, computed: Object) {
   for (const key in computed) {
     const userDef = computed[key]
     const getter = typeof userDef === 'function' ? userDef : userDef.get
-    const userDefCache = typeof userDef === 'function' ? true : userDef.cache
+    const userDefCache = typeof userDef === 'function' || userDef.cache !== false
     if (process.env.NODE_ENV !== 'production' && getter == null) {
       warn(
         `Getter is missing for computed property "${key}".`,
