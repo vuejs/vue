@@ -6,7 +6,7 @@ import { mark, measure } from '../util/perf'
 import { createEmptyVNode } from '../vdom/vnode'
 import { updateComponentListeners } from './events'
 import { resolveSlots } from './render-helpers/resolve-slots'
-import { toggleObserving } from '../observer/index'
+import { toggleObserving, toggleNotifyingSubscribers } from '../observer/index'
 import { pushTarget, popTarget } from '../observer/dep'
 
 import {
@@ -257,8 +257,13 @@ export function updateChildComponent (
   // update $attrs and $listeners hash
   // these are also reactive so they may trigger child update if the child
   // used them during render
-  vm.$attrs = parentVnode.data.attrs || emptyObject
+
+  // Disable subscribers notification in setter to avoid rerendering a child that uses $listeners
+  toggleNotifyingSubscribers(false)
   vm.$listeners = listeners || emptyObject
+  toggleNotifyingSubscribers(true)
+
+  vm.$attrs = parentVnode.data.attrs || emptyObject
 
   // update props
   if (propsData && vm.$options.props) {

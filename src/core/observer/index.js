@@ -29,6 +29,17 @@ export function toggleObserving (value: boolean) {
 }
 
 /**
+ * In some cases we may want to disable the run of all subscribers
+ * inside a component's update computation.
+ */
+export let shouldNotifySubscribers: boolean = true
+
+
+export function toggleNotifyingSubscribers (value: boolean) {
+  shouldNotifySubscribers = value
+}
+
+/**
  * Observer class that is attached to each observed
  * object. Once attached, the observer converts the target
  * object's property keys into getter/setters that
@@ -188,7 +199,7 @@ export function defineReactive (
         val = newVal
       }
       childOb = !shallow && observe(newVal)
-      dep.notify()
+      shouldNotifySubscribers && dep.notify()
     }
   })
 }
