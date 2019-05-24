@@ -109,7 +109,8 @@ export function makeMap (
 ): (key: string) => true | void {
   const map = Object.create(null)
   const list: Array<string> = str.split(',')
-  for (let i = 0; i < list.length; i++) {
+  const listLength = list.length
+  for (let i = 0; i < listLength; i++) {
     map[list[i]] = true
   }
   return expectsLowerCase
@@ -240,7 +241,8 @@ export function extend (to: Object, _from: ?Object): Object {
  */
 export function toObject (arr: Array<any>): Object {
   const res = {}
-  for (let i = 0; i < arr.length; i++) {
+  const arrLength = arr.length
+  for (let i = 0; i < arrLength; i++) {
     if (arr[i]) {
       extend(res, arr[i])
     }
@@ -323,7 +325,8 @@ export function looseEqual (a: any, b: any): boolean {
  * contain an object of the same shape), or -1 if it is not present.
  */
 export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
-  for (let i = 0; i < arr.length; i++) {
+  const arrLength = arr.length
+  for (let i = 0; i < arrLength; i++) {
     if (looseEqual(arr[i], val)) return i
   }
   return -1
