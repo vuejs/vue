@@ -118,6 +118,25 @@ Vue.component('prop-with-primitive-default', {
   }
 });
 
+// Test issue with the Array prop type
+Vue.extend({
+  props: {
+    s: String,
+    a: {type: Array},
+    b: Boolean
+  },
+  created() {
+    console.log(this.a)
+    console.log(this.s)
+    console.log(this.b)
+  },
+  mounted() {
+    console.log(this.a)
+    console.log(this.s)
+    console.log(this.b)
+  }
+})
+
 Vue.component('component', {
   data() {
     this.$mount
