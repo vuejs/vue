@@ -5,6 +5,7 @@ Hi! I'm really excited that you are interested in contributing to Vue.js. Before
 - [Code of Conduct](https://github.com/vuejs/vue/blob/dev/.github/CODE_OF_CONDUCT.md)
 - [Issue Reporting Guidelines](#issue-reporting-guidelines)
 - [Pull Request Guidelines](#pull-request-guidelines)
+- [Issue Triage](#issue-triage-)
 - [Development Setup](#development-setup)
 - [Project Structure](#project-structure)
 
@@ -32,6 +33,10 @@ Hi! I'm really excited that you are interested in contributing to Vue.js. Before
   - If you are resolving a special issue, add `(fix #xxxx[,#xxxx])` (#xxxx is the issue id) in your PR title for a better release log, e.g. `update entities encoding/decoding (fix #3899)`.
   - Provide a detailed description of the bug in the PR. Live demo preferred.
   - Add appropriate test coverage if applicable.
+
+## Issue Triage [![Open Source Helpers](https://www.codetriage.com/vuejs/vue/badges/users.svg)](https://www.codetriage.com/vuejs/vue)
+
+- You can triage issues which may include reproducing bug reports or asking for vital information, such as version numbers or reproduction instructions. If you would like to start triaging issues, one easy way to get started is to [subscribe to vue on CodeTriage](https://www.codetriage.com/vuejs/vue).
 
 ## Development Setup
 
