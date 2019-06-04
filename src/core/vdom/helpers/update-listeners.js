@@ -1,11 +1,11 @@
 /* @flow */
 
 import {
-  warn,
   invokeWithErrorHandling
 } from 'core/util/index'
 import {
   cached,
+  isDef,
   isUndef,
   isTrue,
   isPlainObject
@@ -69,10 +69,7 @@ export function updateListeners (
       event.params = def.params
     }
     if (isUndef(cur)) {
-      process.env.NODE_ENV !== 'production' && warn(
-        `Invalid handler for event "${event.name}": got ` + String(cur),
-        vm
-      )
+      continue;
     } else if (isUndef(old)) {
       if (isUndef(cur.fns)) {
         cur = on[name] = createFnInvoker(cur, vm)
@@ -87,7 +84,7 @@ export function updateListeners (
     }
   }
   for (name in oldOn) {
-    if (isUndef(on[name])) {
+    if (isDef(oldOn[name]) && isUndef(on[name])) {
       event = normalizeEvent(name)
       remove(event.name, oldOn[name], event.capture)
     }
