@@ -206,6 +206,18 @@ describe('Options computed', () => {
     expect(`computed property "a" is already defined as a prop`).toHaveBeenWarned()
   })
 
+  it('warn conflict with methods', () => {
+    new Vue({
+      computed: {
+        a: () => 2
+      },
+      methods: {
+        a: () => {}
+      }
+    })
+    expect(`computed property "a" is already defined as a method`).toHaveBeenWarned()
+  })
+
   it('rethrow computed error', () => {
     const vm = new Vue({
       computed: {

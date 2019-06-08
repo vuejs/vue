@@ -202,6 +202,8 @@ function initComputed (vm: Component, computed: Object) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
       } else if (vm.$options.props && key in vm.$options.props) {
         warn(`The computed property "${key}" is already defined as a prop.`, vm)
+      } else if (vm.$options.methods && key in vm.$options.methods) {
+        warn(`The computed property "${key}" is already defined as a method.`, vm)
       }
     }
   }
