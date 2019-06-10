@@ -76,25 +76,25 @@ export interface ComponentOptions<
   propsData?: object;
   computed?: Accessors<Computed>;
   methods?: Methods;
-  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any> | string>;
+  watch?: Record<string, WatchOptionsWithHandler<V, any> | WatchHandler<V, any> | string>;
 
   el?: Element | string;
   template?: string;
   // hack is for functional component type inference, should not be used in user code
-  render?(createElement: CreateElement, hack: RenderContext<Props>): VNode;
-  renderError?(createElement: CreateElement, err: Error): VNode;
-  staticRenderFns?: ((createElement: CreateElement) => VNode)[];
+  render?(this: V, createElement: CreateElement, hack: RenderContext<Props>): VNode;
+  renderError?(this: V, createElement: CreateElement, err: Error): VNode;
+  staticRenderFns?: ((this: V, createElement: CreateElement) => VNode)[];
 
   beforeCreate?(this: V): void;
-  created?(): void;
-  beforeDestroy?(): void;
-  destroyed?(): void;
-  beforeMount?(): void;
-  mounted?(): void;
-  beforeUpdate?(): void;
-  updated?(): void;
-  activated?(): void;
-  deactivated?(): void;
+  created?(this: V): void;
+  beforeDestroy?(this: V): void;
+  destroyed?(this: V): void;
+  beforeMount?(this: V): void;
+  mounted?(this: V): void;
+  beforeUpdate?(this: V): void;
+  updated?(this: V): void;
+  activated?(this: V): void;
+  deactivated?(this: V): void;
   errorCaptured?(err: Error, vm: Vue, info: string): boolean | void;
   serverPrefetch?(this: V): Promise<void>;
 
@@ -169,15 +169,15 @@ export interface ComputedOptions<T> {
   cache?: boolean;
 }
 
-export type WatchHandler<T> = (val: T, oldVal: T) => void;
+export type WatchHandler<V extends Vue, T> = (this: V, val: T, oldVal: T) => void;
 
 export interface WatchOptions {
   deep?: boolean;
   immediate?: boolean;
 }
 
-export interface WatchOptionsWithHandler<T> extends WatchOptions {
-  handler: WatchHandler<T>;
+export interface WatchOptionsWithHandler<V extends Vue, T> extends WatchOptions {
+  handler: WatchHandler<V, T>;
 }
 
 export interface DirectiveBinding extends Readonly<VNodeDirective> {
