@@ -673,4 +673,19 @@ describe('Options provide/inject', () => {
     })
     expect(`Injection "constructor" not found`).toHaveBeenWarned()
   })
+
+  it('should warn when inject with none-string Array', () => {
+    const obj = { a: 1 }
+    const vm = new Vue({
+      template: `<child/>`,
+      provide: {},
+      components: {
+        child: {
+          inject: [obj],
+          template: `<div>{{ 123 }}</div>`,
+        },
+      },
+    }).$mount()
+    expect(`Invalid value for option "inject": expected an Array of string`).toHaveBeenWarned()
+  })
 })
