@@ -337,18 +337,18 @@ function normalizeInject (options: Object, vm: ?Component) {
   if (!inject) return
   const normalized = options.inject = {}
   if (Array.isArray(inject)) {
-    for (let i = 0; i < inject.length; i++) {
-      if (typeof inject[i] !== 'string') {
-        if (process.env.NODE_ENV !== 'production') {
-          warn(
-            `Invalid value for option "inject": expected an Array of string, ` +
-              `but found ${toRawType(inject[i])}.`,
-            vm
-          );
-        }
-        continue;
+    let i = inject.length, val
+    while (i--) {
+      val = inject[i]
+      if (typeof val === 'string') {
+        normalized[val] = { from: val }
+      } else if (process.env.NODE_ENV !== 'production') {
+        warn(
+          `Invalid value for option "inject": expected an Array of string, ` +
+            `but found ${toRawType(val)}.`,
+          vm
+        );
       }
-      normalized[inject[i]] = { from: inject[i] }
     }
   } else if (isPlainObject(inject)) {
     for (const key in inject) {
