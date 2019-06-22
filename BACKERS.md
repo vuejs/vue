@@ -57,6 +57,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/nativescript.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://teeplusplusclth.com/" target="_blank">
+          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tee__.png">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
