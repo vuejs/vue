@@ -374,113 +374,106 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Shawn Wildermuth
 - Samuel Smith
 - donny
-- Simon East
+- Sean Washington
 - Keisuke Kita
 - kazupon
-- Sean Washington
 - Lars Andreas Ness
+- Simon East
 - Benjamin Listwon
 - Kirk Lewis
-- Stephen Michael Hartley
 - Victor Tolbert
+- Stephen Michael Hartley
 - Wen-Tien Chang
-- Karol
 - Phan An
-- James J. Ye
 - Barbara Liau
+- James J. Ye
 - Luiz
 - Matsumoto Takamasa
-- Jarek Tkaczyk
+- Shinya Katayama
 - Niannian Modisette
+- Guy Gavergun
 - Matt Jones
 - Duncan Kenzie
-- Guy Gavergun
-- Shinya Katayama
-- Mike Margerum
 - Bernhard E. Reiter
-- Chengzhi Yin
 - Zoran Knezevic
-- Jon Hobbs-Smith
+- Chengzhi Yin
 - Pierre Vanhulst
+- Jon Hobbs-Smith
 - Akiho Nagao
+- Anthony Estebe
 - Haim Yulzari
 - Asaf Yishai
-- Anthony Estebe
-- Jeremy Tan
 - Jim Raden
+- Jeremy Tan
 - IMGNRY
 - Tai Shi Ling
 - Yong Jun Thong
 - Tyler
-- Vivekanandhan Natarajan
-- Matias Verdier
 - Rafael Belvederese
 - Chih-Hsuan Fan
-- Guilherme S L de Souza
+- Jamie McElwain
+- Vivekanandhan Natarajan
 - Daniel Waghorn
+- Guilherme S L de Souza
+- Matias Verdier
 - Rob Yedlin
 - Mickaël Andrieu
-- Jamie McElwain
-- Jordan Oroshiba
 - Cliff Hess
 - Joe Gregory
-- Richard Simpson
+- Jordan Oroshiba
 - Marcos Moura
+- Richard Simpson
 - Jessie Hernandez
 - Ivan Sieder
-- Eric
 - Aparajita Fishman
+- Eric
+- Christo Crampton
 - Romain Lienard
 - Bohdan Kokotko
-- Christo Crampton
-- David Ang
-- Donald Fischer
-- Alexander Weiher
 - Oskar Lindgren
 - Jere Sjöroos
+- David Ang
+- Alexander Weiher
+- Donald Fischer
 - Wakana Seki
-- David Kaplan
-- Ben Hong
 - Domenico Gaudioso
+- David Kaplan
 - Jaeyoung Lee
+- Ben Hong
 - Andy
 - Joe Cochran
 - Matt Sencenbaugh
+- Colt Borg
 - Juan Bermudez
 - Hannes Kochniß
-- Colt Borg
 - Alberto T. Payero Mota
+- Elon Hung
 - Daniel Mattingley
 - Teon Ooi
 - Chris Calo
-- Elon Hung
 - Soichiro Isshiki
-- Milan Zivkovic
-- Christopher Bemister
-- Ed Linklater
-- Garion Herman
 - Marko Boskovic
+- Garion Herman
+- Ed Linklater
 - Rob
 - Andrew Willis
 - Yusuke Kawabata
 - Princeyesuraj Edward
-- shimbaco
 - 龙腾道
-- 极 蔡
+- Shapovalov Pavel
 - Peter Matkovsky
+- 极 蔡
 - Nick Dandakis
 - Fabien GuySake Ungerer
 - Fedor Indutny
 - Masato Miura
-- Nathan Mallison
-- Shapovalov Pavel
-- David McGuigan
-- Max Fletcher
 - Bill Condo
+- David McGuigan
+- Nathan Mallison
 - Kevin Batdorf
-- Ivan Buncic
-- Pierre Lebrun
 - Sheree Peña
+- Pierre Lebrun
+- John Thompson
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
