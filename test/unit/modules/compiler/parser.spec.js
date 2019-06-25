@@ -530,6 +530,11 @@ describe('parser', () => {
     expect(ast.props[0].value).toBe('msg')
   })
 
+  it('v-bind expression on directive', () => {
+    parse('<div :v-if="foo"></div>', baseOptions)
+    expect(`A v-bind shorthand directive was used on another Vue directive. Did you want to write 'v-if="foo"'?`).toHaveBeenWarned()
+  })
+
   it('empty v-bind expression', () => {
     parse('<div :empty-msg=""></div>', baseOptions)
     expect('The value for a v-bind expression cannot be empty. Found in "v-bind:empty-msg"').toHaveBeenWarned()

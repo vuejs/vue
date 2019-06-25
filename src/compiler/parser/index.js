@@ -30,6 +30,7 @@ export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 const dynamicArgRE = /^\[.*\]$/
 
+const colonDirRE = /^:v-/
 const argRE = /:(.*)$/
 export const bindRE = /^:|^\.|^v-bind:/
 const propBindRE = /^\./
@@ -761,6 +762,12 @@ function processAttrs (el) {
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
     value = list[i].value
+    // :v-if or similar
+    if (process.env.NODE_ENV !== 'production' && colonDirRE.test(name)) {
+      warn(
+        `A v-bind shorthand directive was used on another Vue directive. Did you want to write '${name.substr(1)}="${value}"'?`
+      )
+    }
     if (dirRE.test(name)) {
       // mark element as dynamic
       el.hasBindings = true
