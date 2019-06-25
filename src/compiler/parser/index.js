@@ -583,7 +583,7 @@ function findPrevElement (children: Array<any>): ASTElement | void {
 
 export function addIfCondition (el: ASTElement, condition: ASTIfCondition) {
   let m
-  if (m = condition.exp && condition.exp.match(assignmentInIfRE)){
+  if ((m = condition.exp && condition.exp.match(assignmentInIfRE))){
     condition.alias = m[1];
   }
   if (!el.ifConditions) {
