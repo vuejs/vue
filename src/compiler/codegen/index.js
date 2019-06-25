@@ -164,11 +164,21 @@ function genIfConditions (
 
   const condition = conditions.shift()
   if (condition.exp) {
-    return `(${condition.exp})?${
+    let ternaryExp = `(${condition.exp})?${
       genTernaryExp(condition.block)
     }:${
       genIfConditions(conditions, state, altGen, altEmpty)
-    }`
+    }`;
+    if (condition.alias) {
+      // When there is assignment in `condition.exp`
+
+      // Wrap an IIFE (Immediately Invoked Function Expression) so that the variable of `condition.alias` will be local, and therefore no warning will be thrown.
+      return `function(){var ${condition.alias}; return ${ternaryExp}}()`
+    }
+    else {
+      return ternaryExp
+    }
+
   } else {
     return `${genTernaryExp(condition.block)}`
   }
