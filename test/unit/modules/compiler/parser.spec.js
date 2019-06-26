@@ -530,7 +530,7 @@ describe('parser', () => {
     expect(ast.props[0].value).toBe('msg')
   })
 
-  it('v-bind expression on directive', () => {
+  it('warns when using v-bind shorthand on a directive', () => {
     parse('<div :v-if="foo"></div>', baseOptions)
     expect(`A v-bind shorthand directive was used on another Vue directive. Did you want to write 'v-if="foo"'?`).toHaveBeenWarned()
   })
