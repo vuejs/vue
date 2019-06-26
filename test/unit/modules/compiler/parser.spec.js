@@ -532,7 +532,7 @@ describe('parser', () => {
 
   it('warns when using v-bind shorthand on a directive', () => {
     parse('<div :v-if="foo"></div>', baseOptions)
-    expect(`A v-bind shorthand directive was used on another Vue directive. Did you want to write 'v-if="foo"'?`).toHaveBeenWarned()
+    expect(`A v-bind shorthand was used on another Vue directive. Did you mean 'v-if="foo"' instead of ':v-if'?`).toHaveBeenWarned()
   })
 
   it('empty v-bind expression', () => {

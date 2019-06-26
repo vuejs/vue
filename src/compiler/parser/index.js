@@ -765,7 +765,7 @@ function processAttrs (el) {
     // :v-if or similar
     if (process.env.NODE_ENV !== 'production' && colonDirRE.test(name)) {
       warn(
-        `A v-bind shorthand directive was used on another Vue directive. Did you want to write '${name.substr(1)}="${value}"'?`
+        `A v-bind shorthand was used on another Vue directive. Did you mean '${name.substr(1)}="${value}"' instead of '${name}'?`
       )
     }
     if (dirRE.test(name)) {
