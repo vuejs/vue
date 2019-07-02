@@ -253,6 +253,28 @@ describe('parser', () => {
     expect('Do not use v-for index as key on <transition-group> children').toHaveBeenWarned()
   })
 
+  it('warn regular slot and scoped slot have the same name', () => {
+    parse(`
+      <div>
+        <slot name="foo" :obj="obj"></slot>
+        <slot name="foo"></slot>
+      </div>
+    `, baseOptions)
+    expect('regular slot and scoped slot shouldn\'t have the same name: "foo"').toHaveBeenWarned()
+  })
+
+  it('warn nested regular slot and scoped slot have the same name', () => {
+    parse(`
+      <div>
+        <slot :obj="obj"></slot>
+        <div>
+          <slot></slot>
+        </div>
+      </div>
+    `, baseOptions)
+    expect('regular slot and scoped slot shouldn\'t have the same name: default').toHaveBeenWarned()
+  })
+
   it('v-pre directive', () => {
     const ast = parse('<div v-pre id="message1"><p>{{msg}}</p></div>', baseOptions)
     expect(ast.pre).toBe(true)

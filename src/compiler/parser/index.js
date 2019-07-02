@@ -201,6 +201,35 @@ export function parse (
     }
   }
 
+  function checkSlotConstraints (el: any, scopedSlots) {
+    scopedSlots = scopedSlots || {}
+    const children = el.children || []
+    if (!children.length) return
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i]
+      if (child.tag !== 'slot') {
+        checkSlotConstraints(child, scopedSlots)
+        continue
+      }
+      const slotName = child.slotName || 'default'
+      const isScopedSlot = (child.attrs || []).concat(child.dynamicAttrs || []).map(attr => ({
+        name: camelize(attr.name),
+        value: attr.value,
+        dynamic: attr.dynamic
+      })).length > 0
+      if (isScopedSlot) {
+        scopedSlots[slotName] = true
+        continue
+      } else if (scopedSlots[slotName]) {
+        warnOnce(
+          'regular slot and scoped slot shouldn\'t have the same name: ' + slotName,
+          { start: el.start }
+        )
+        break
+      }
+    }
+  }
+
   parseHTML(template, {
     warn,
     expectHTML: options.expectHTML,
@@ -306,6 +335,10 @@ export function parse (
         element.end = end
       }
       closeElement(element)
+      // check slot constraints
+      if (process.env.NODE_ENV !== 'production' && element === root) {
+        checkSlotConstraints(element)
+      }
     },
 
     chars (text: string, start: number, end: number) {
