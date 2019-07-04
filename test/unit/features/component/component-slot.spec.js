@@ -109,6 +109,26 @@ describe('Component slot', () => {
     expect(child.$el.children[1].textContent).toBe('slot b')
   })
 
+  it('fallback content should not be evaluated when the parent is providing it', () => {
+    const test = jasmine.createSpy('test')
+    const vm = new Vue({
+      template: '<test>slot default</test>',
+      components: {
+        test: {
+          template: '<div><slot>{{test()}}</slot></div>',
+          methods: {
+            test () {
+              test()
+              return 'test'
+            }
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('slot default')
+    expect(test).not.toHaveBeenCalled()
+  })
+
   it('selector matching multiple elements', () => {
     mount({
       childTemplate: '<div><slot name="t"></slot></div>',
