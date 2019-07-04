@@ -7,7 +7,7 @@ import { extend, warn, isObject } from 'core/util/index'
  */
 export function renderSlot (
   name: string,
-  fallback: ?Array<VNode>,
+  fallbackRender: ?() => Array<VNode>,
   props: ?Object,
   bindObject: ?Object
 ): ?Array<VNode> {
@@ -24,9 +24,9 @@ export function renderSlot (
       }
       props = extend(extend({}, bindObject), props)
     }
-    nodes = scopedSlotFn(props) || fallback
+    nodes = scopedSlotFn(props) || (fallbackRender && fallbackRender())
   } else {
-    nodes = this.$slots[name] || fallback
+    nodes = this.$slots[name] || (fallbackRender && fallbackRender())
   }
 
   const target = props && props.slot

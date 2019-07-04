@@ -196,7 +196,7 @@ describe('codegen', () => {
   it('generate slot fallback content', () => {
     assertCodegen(
       '<div><slot><div>hi</div></slot></div>',
-      `with(this){return _c('div',[_t("default",[_c('div',[_v("hi")])])],2)}`
+      `with(this){return _c('div',[_t("default",function(){return [_c('div',[_v("hi")])]})],2)}`
     )
   })
 
