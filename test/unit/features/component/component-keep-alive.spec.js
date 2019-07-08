@@ -236,7 +236,7 @@ describe('Component keep-alive', () => {
     }).then(done)
   }
 
-  it('include (string)', done => {
+  it('include (string, name)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -254,7 +254,26 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('include (regex)', done => {
+  it('include (string, key)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive include="one-key">
+            <component :key="view + '-key'" :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
+
+  it('include (regex, name)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -272,7 +291,26 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('include (array)', done => {
+  it('include (regex, key)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive :include="/^one-key$/">
+            <component :key="view + '-key'" :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
+
+  it('include (array, name)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -290,7 +328,26 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('exclude (string)', done => {
+  it('include (array, key)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive :include="['one']">
+            <component :key="view + '-key'" :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
+
+  it('exclude (string, name)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -308,7 +365,26 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('exclude (regex)', done => {
+  it('exclude (string, key)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive exclude="two-key">
+            <component :key="view + '-key'" :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
+
+  it('exclude (regex, name)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -326,7 +402,25 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('exclude (array)', done => {
+  it('exclude (regex, key)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive :exclude="/^two-key$/">
+            <component :key="view + '-key'" :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
+  it('exclude (array, name)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -343,6 +437,25 @@ describe('Component keep-alive', () => {
     }).$mount()
     sharedAssertions(vm, done)
   })
+
+  it('exclude (array, key)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive :exclude="['two-key']">
+            <component :key="view + '-key'" :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    sharedAssertions(vm, done)
+  })
+
 
   it('include + exclude', done => {
     const vm = new Vue({
