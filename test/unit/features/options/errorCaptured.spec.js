@@ -209,4 +209,148 @@ describe('Options errorCaptured', () => {
 
     expect(calls).toEqual([1, 2, 3])
   })
+
+  it('should capture error from watcher', done => {
+    const spy = jasmine.createSpy()
+
+    let child
+    let err
+    const Child = {
+      data () {
+        return {
+          foo: null
+        }
+      },
+      watch: {
+        foo () {
+          err = new Error('userWatcherCallback error')
+          throw err
+        }
+      },
+      created () {
+        child = this
+        this.foo = 'bar'
+      },
+      render () {}
+    }
+
+    new Vue({
+      errorCaptured: spy,
+      render: h => h(Child),
+    }).$mount()
+
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalledWith(err, child, 'callback for watcher "foo"')
+      expect(globalSpy).toHaveBeenCalledWith(err, child, 'callback for watcher "foo"')
+    }).then(Vue.nextTick(done))
+  })
+
+  it('should capture promise error from watcher', done => {
+    const spy = jasmine.createSpy()
+
+    let child
+    let err
+    const Child = {
+      data () {
+        return {
+          foo: null
+        }
+      },
+      watch: {
+        foo () {
+          err = new Error('userWatcherCallback error')
+          return Promise.reject(err)
+        }
+      },
+      created () {
+        child = this
+        this.foo = 'bar'
+      },
+      render () {}
+    }
+
+    new Vue({
+      errorCaptured: spy,
+      render: h => h(Child),
+    }).$mount()
+
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalledWith(err, child, 'callback for watcher "foo" (Promise/async)')
+      expect(globalSpy).toHaveBeenCalledWith(err, child, 'callback for watcher "foo" (Promise/async)')
+    }).then(Vue.nextTick(done))
+  })
+
+  it('should capture error from immediate watcher', done => {
+    const spy = jasmine.createSpy()
+
+    let child
+    let err
+    const Child = {
+      data () {
+        return {
+          foo: 'foo'
+        }
+      },
+      watch: {
+        foo: {
+          immediate: true,
+          handler () {
+            err = new Error('userImmediateWatcherCallback error')
+            throw err
+          }
+        }
+      },
+      created () {
+        child = this
+      },
+      render () {}
+    }
+
+    new Vue({
+      errorCaptured: spy,
+      render: h => h(Child)
+    }).$mount()
+
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalledWith(err, child, 'callback for immediate watcher "foo"')
+      expect(globalSpy).toHaveBeenCalledWith(err, child, 'callback for immediate watcher "foo"')
+    }).then(done)
+  })
+
+  it('should capture promise error from immediate watcher', done => {
+    const spy = jasmine.createSpy()
+
+    let child
+    let err
+    const Child = {
+      data () {
+        return {
+          foo: 'foo'
+        }
+      },
+      watch: {
+        foo: {
+          immediate: true,
+          handler () {
+            err = new Error('userImmediateWatcherCallback error')
+            return Promise.reject(err)
+          }
+        }
+      },
+      created () {
+        child = this
+      },
+      render () {}
+    }
+
+    new Vue({
+      errorCaptured: spy,
+      render: h => h(Child)
+    }).$mount()
+
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalledWith(err, child, 'callback for immediate watcher "foo" (Promise/async)')
+      expect(globalSpy).toHaveBeenCalledWith(err, child, 'callback for immediate watcher "foo" (Promise/async)')
+    }).then(done)
+  })
 })
