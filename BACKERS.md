@@ -366,10 +366,9 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Alex Balashov
 - Konstantin Levinski
 - Blaise Laflamme
-- Dilettant
 - Sean Ferguson
 - Johnny Ray Austin
-- IdealCoders
+- Daniel
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
@@ -380,105 +379,92 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Samuel Smith
 - donny
 - Sean Washington
-- Keisuke Kita
-- kazupon
 - Lars Andreas Ness
-- Simon East
+- Keisuke Kita
 - Benjamin Listwon
 - Kirk Lewis
-- Victor Tolbert
-- Stephen Michael Hartley
 - Wen-Tien Chang
+- Stephen Michael Hartley
+- Victor Tolbert
 - Phan An
-- Barbara Liau
 - James J. Ye
+- Barbara Liau
 - Luiz
 - Matsumoto Takamasa
-- Shinya Katayama
-- Niannian Modisette
-- Guy Gavergun
 - Matt Jones
 - Duncan Kenzie
+- Niannian Modisette
+- Guy Gavergun
 - Bernhard E. Reiter
 - Zoran Knezevic
-- Chengzhi Yin
-- Pierre Vanhulst
 - Jon Hobbs-Smith
-- Akiho Nagao
+- Pierre Vanhulst
 - Anthony Estebe
-- Haim Yulzari
 - Asaf Yishai
-- Jim Raden
+- Haim Yulzari
+- Akiho Nagao
 - Jeremy Tan
+- Jim Raden
 - IMGNRY
-- Tai Shi Ling
-- Yong Jun Thong
 - Tyler
-- Rafael Belvederese
-- Chih-Hsuan Fan
-- Jamie McElwain
-- Vivekanandhan Natarajan
 - Daniel Waghorn
 - Guilherme S L de Souza
-- Matias Verdier
 - Rob Yedlin
+- Rafael Belvederese
+- Vivekanandhan Natarajan
 - Mickaël Andrieu
-- Cliff Hess
 - Joe Gregory
 - Jordan Oroshiba
 - Marcos Moura
-- Richard Simpson
 - Jessie Hernandez
-- Ivan Sieder
-- Aparajita Fishman
 - Eric
+- Ivan Sieder
 - Christo Crampton
 - Romain Lienard
 - Bohdan Kokotko
-- Oskar Lindgren
-- Jere Sjöroos
-- David Ang
 - Alexander Weiher
+- Jere Sjöroos
 - Donald Fischer
 - Wakana Seki
-- Domenico Gaudioso
+- Oskar Lindgren
+- David Ang
 - David Kaplan
+- Domenico Gaudioso
 - Jaeyoung Lee
 - Ben Hong
 - Andy
-- Joe Cochran
 - Matt Sencenbaugh
-- Colt Borg
+- Joe Cochran
 - Juan Bermudez
-- Hannes Kochniß
 - Alberto T. Payero Mota
-- Elon Hung
-- Daniel Mattingley
-- Teon Ooi
+- Hannes Kochniß
 - Chris Calo
+- Daniel Mattingley
+- Elon Hung
 - Soichiro Isshiki
-- Marko Boskovic
+- Shapovalov Pavel
 - Garion Herman
 - Ed Linklater
-- Rob
 - Andrew Willis
 - Yusuke Kawabata
 - Princeyesuraj Edward
-- 龙腾道
-- Shapovalov Pavel
-- Peter Matkovsky
 - 极 蔡
+- Peter Matkovsky
 - Nick Dandakis
+- 龙腾道
+- Masato Miura
 - Fabien GuySake Ungerer
 - Fedor Indutny
-- Masato Miura
+- Kenneth Crawford
 - Bill Condo
-- David McGuigan
 - Nathan Mallison
-- Kevin Batdorf
-- Sheree Peña
 - Pierre Lebrun
 - John Thompson
+- panmenghan
+- Jan-Philipp Schmeißer
+- Martin Bastien
+- Ryan Brewer
+- Bichinger Software & Consulting
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
