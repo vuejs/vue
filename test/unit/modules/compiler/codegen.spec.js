@@ -232,25 +232,25 @@ describe('codegen', () => {
   it('generate dynamic scoped slot', () => {
     assertCodegen(
       '<foo><template :slot="foo" slot-scope="bar">{{ bar }}</template></foo>',
-      `with(this){return _c('foo',{scopedSlots:_u([{key:foo,fn:function(bar){return [_v(_s(bar))]}}],true)})}`
+      `with(this){return _c('foo',{scopedSlots:_u([{key:foo,fn:function(bar){return [_v(_s(bar))]}}],null,true)})}`
     )
   })
 
   it('generate scoped slot with multiline v-if', () => {
     assertCodegen(
       '<foo><template v-if="\nshow\n" slot-scope="bar">{{ bar }}</template></foo>',
-      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(bar){return (\nshow\n)?[_v(_s(bar))]:undefined}}],true)})}`
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(bar){return (\nshow\n)?[_v(_s(bar))]:undefined}}],null,true)})}`
     )
     assertCodegen(
       '<foo><div v-if="\nshow\n" slot="foo" slot-scope="bar">{{ bar }}</div></foo>',
-      `with(this){return _c(\'foo\',{scopedSlots:_u([{key:"foo",fn:function(bar){return (\nshow\n)?_c(\'div\',{},[_v(_s(bar))]):_e()}}],true)})}`
+      `with(this){return _c(\'foo\',{scopedSlots:_u([{key:"foo",fn:function(bar){return (\nshow\n)?_c(\'div\',{},[_v(_s(bar))]):_e()}}],null,true)})}`
     )
   })
 
   it('generate scoped slot with new slot syntax', () => {
     assertCodegen(
       '<foo><template v-if="show" #default="bar">{{ bar }}</template></foo>',
-      `with(this){return _c('foo',{scopedSlots:_u([(show)?{key:"default",fn:function(bar){return [_v(_s(bar))]}}:null],true)})}`
+      `with(this){return _c('foo',{scopedSlots:_u([(show)?{key:"default",fn:function(bar){return [_v(_s(bar))]}}:null],null,true)})}`
     )
   })
 
@@ -344,6 +344,11 @@ describe('codegen', () => {
     assertCodegen(
       `<input @input="onInput(');[\\'());');">`,
       `with(this){return _c('input',{on:{"input":function($event){onInput(');[\\'());');}}})}`
+    )
+    // function name including a `function` part (#9920)
+    assertCodegen(
+      '<input @input="functionName()">',
+      `with(this){return _c('input',{on:{"input":function($event){return functionName()}}})}`
     )
   })
 
@@ -499,6 +504,11 @@ describe('codegen', () => {
     assertCodegen(
       '<input @input="function () { current++ }">',
       `with(this){return _c('input',{on:{"input":function () { current++ }}})}`
+    )
+    // normal named function
+    assertCodegen(
+      '<input @input="function fn () { current++ }">',
+      `with(this){return _c('input',{on:{"input":function fn () { current++ }}})}`
     )
     // arrow with no args
     assertCodegen(

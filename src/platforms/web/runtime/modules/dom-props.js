@@ -19,10 +19,11 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 
   for (key in oldProps) {
-    if (isUndef(props[key])) {
+    if (!(key in props)) {
       elm[key] = ''
     }
   }
+
   for (key in props) {
     cur = props[key]
     // ignore children if the node has textContent or innerHTML,
@@ -38,15 +39,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       }
     }
 
-    // skip the update if old and new VDOM state is the same.
-    // the only exception is `value` where the DOM value may be temporarily
-    // out of sync with VDOM state due to focus, composition and modifiers.
-    // This also covers #4521 by skipping the unnecesarry `checked` update.
-    if (key !== 'value' && cur === oldProps[key]) {
-      continue
-    }
-
-    if (key === 'value') {
+    if (key === 'value' && elm.tagName !== 'PROGRESS') {
       // store value as _value as well since
       // non-string values will be stringified
       elm._value = cur
@@ -66,8 +59,18 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       while (svg.firstChild) {
         elm.appendChild(svg.firstChild)
       }
-    } else {
-      elm[key] = cur
+    } else if (
+      // skip the update if old and new VDOM state is the same.
+      // `value` is handled separately because the DOM value may be temporarily
+      // out of sync with VDOM state due to focus, composition and modifiers.
+      // This  #4521 by skipping the unnecesarry `checked` update.
+      cur !== oldProps[key]
+    ) {
+      // some property updates can throw
+      // e.g. `value` on <progress> w/ non-finite value
+      try {
+        elm[key] = cur
+      } catch (e) {}
     }
   }
 }

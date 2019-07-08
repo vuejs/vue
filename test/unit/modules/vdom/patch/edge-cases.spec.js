@@ -410,4 +410,26 @@ describe('vdom patch: edge cases', () => {
     expect(vm.$el.textContent).toBe('FooBar')
     expect(inlineHookSpy.calls.count()).toBe(2)
   })
+
+  // #9549
+  it('DOM props set throwing should not break app', done => {
+    const vm = new Vue({
+      data: {
+        n: Infinity
+      },
+      template: `
+        <div>
+          <progress :value="n"/>
+          {{ n }}
+        </div>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toMatch('Infinity')
+    vm.n = 1
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toMatch('1')
+      expect(vm.$el.textContent).not.toMatch('Infinity')
+    }).then(done)
+  })
 })

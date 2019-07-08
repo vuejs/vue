@@ -98,6 +98,12 @@ export function _createElement (
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
     if (config.isReservedTag(tag)) {
       // platform built-in elements
+      if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn)) {
+        warn(
+          `The .native modifier for v-on is only valid on components but it was used on <${tag}>.`,
+          context
+        )
+      }
       vnode = new VNode(
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context

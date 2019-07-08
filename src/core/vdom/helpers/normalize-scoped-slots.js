@@ -10,16 +10,21 @@ export function normalizeScopedSlots (
   prevSlots?: { [key: string]: Function } | void
 ): any {
   let res
+  const hasNormalSlots = Object.keys(normalSlots).length > 0
+  const isStable = slots ? !!slots.$stable : !hasNormalSlots
+  const key = slots && slots.$key
   if (!slots) {
     res = {}
   } else if (slots._normalized) {
     // fast path 1: child component re-render only, parent did not change
     return slots._normalized
   } else if (
-    slots.$stable &&
+    isStable &&
     prevSlots &&
     prevSlots !== emptyObject &&
-    Object.keys(normalSlots).length === 0
+    key === prevSlots.$key &&
+    !hasNormalSlots &&
+    !prevSlots.$hasNormal
   ) {
     // fast path 2: stable scoped slots w/ no normal slots to proxy,
     // only need to normalize once
@@ -43,7 +48,9 @@ export function normalizeScopedSlots (
   if (slots && Object.isExtensible(slots)) {
     (slots: any)._normalized = res
   }
-  def(res, '$stable', slots ? !!slots.$stable : true)
+  def(res, '$stable', isStable)
+  def(res, '$key', key)
+  def(res, '$hasNormal', hasNormalSlots)
   return res
 }
 
@@ -53,8 +60,10 @@ function normalizeScopedSlot(normalSlots, key, fn) {
     res = res && typeof res === 'object' && !Array.isArray(res)
       ? [res] // single vnode
       : normalizeChildren(res)
-    return res && res.length === 0
-      ? undefined
+    return res && (
+      res.length === 0 ||
+      (res.length === 1 && res[0].isComment) // #9658
+    ) ? undefined
       : res
   }
   // this is a slot using the new v-slot syntax without scope. although it is
