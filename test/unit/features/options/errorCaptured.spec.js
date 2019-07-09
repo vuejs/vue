@@ -267,20 +267,21 @@ describe('Options errorCaptured', () => {
       },
       created () {
         child = this
-        this.foo = 'bar'
       },
       render () {}
     }
 
     new Vue({
       errorCaptured: spy,
-      render: h => h(Child),
+      render: h => h(Child)
     }).$mount()
+
+    child.foo = 'bar'
 
     waitForUpdate(() => {
       expect(spy).toHaveBeenCalledWith(err, child, 'callback for watcher "foo"')
       expect(globalSpy).toHaveBeenCalledWith(err, child, 'callback for watcher "foo"')
-    }).then(Vue.nextTick(done))
+    }).then(done)
   })
 
   it('should capture promise error from watcher', done => {
@@ -302,20 +303,23 @@ describe('Options errorCaptured', () => {
       },
       created () {
         child = this
-        this.foo = 'bar'
       },
       render () {}
     }
 
     new Vue({
       errorCaptured: spy,
-      render: h => h(Child),
+      render: h => h(Child)
     }).$mount()
 
-    waitForUpdate(() => {
-      expect(spy).toHaveBeenCalledWith(err, child, 'callback for watcher "foo" (Promise/async)')
-      expect(globalSpy).toHaveBeenCalledWith(err, child, 'callback for watcher "foo" (Promise/async)')
-    }).then(Vue.nextTick(done))
+    child.foo = 'bar'
+
+    child.$nextTick(() => {
+      waitForUpdate(() => {
+        expect(spy).toHaveBeenCalledWith(err, child, 'callback for watcher "foo" (Promise/async)')
+        expect(globalSpy).toHaveBeenCalledWith(err, child, 'callback for watcher "foo" (Promise/async)')
+      }).then(done)
+    })
   })
 
   it('should capture error from immediate watcher', done => {
