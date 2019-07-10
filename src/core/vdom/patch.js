@@ -172,7 +172,11 @@ export function createPatchFunction (backend) {
       // `vnode.elm.style` is null.
       // fix #10248
       if (!vnode.elm.style) {
-        vnode.elm.style = Object.create(null)
+        Object.defineProperty(vnode.elm, 'style', {
+          get: function () {
+            return Object.create(null)
+          }
+        })
       }
 
       /* istanbul ignore if */
