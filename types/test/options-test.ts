@@ -477,5 +477,13 @@ Vue.component('functional-component-v-model', {
   }
 });
 
+Vue.component('async-component-factory', () => ({
+  component: import('./es-module'),
+  loading: Vue.component(''),
+  error: Vue.component(''),
+  delay: 100,
+  timeout: 200
+}))
+
 
 Vue.component('async-es-module-component', () => import('./es-module'))
