@@ -359,22 +359,21 @@ function genInlineTemplate (el: ASTElement, state: CodegenState): ?string {
 
 function genScopedSlots (
   el: ASTElement,
-  slots: { [key: string]: ASTElement },
+  slots: Array<ASTElement>,
   state: CodegenState
 ): string {
   // by default scoped slots are considered "stable", this allows child
   // components with only scoped slots to skip forced updates from parent.
   // but in some cases we have to bail-out of this optimization
   // for example if the slot contains dynamic names, has v-if or v-for on them...
-  let needsForceUpdate = el.for || Object.keys(slots).some(key => {
-    const slot = slots[key]
-    return (
+  let needsForceUpdate = el.for || slots.some(slot =>
+    (
       slot.slotTargetDynamic ||
       slot.if ||
       slot.for ||
       containsSlotChild(slot) // is passing down slot from parent which may be dynamic
     )
-  })
+  )
 
   // #9534: if a component with scoped slots is inside a conditional branch,
   // it's possible for the same component to be reused but with different
@@ -404,8 +403,8 @@ function genScopedSlots (
     }
   }
 
-  const generatedSlots = Object.keys(slots)
-    .map(key => genScopedSlot(slots[key], state))
+  const generatedSlots = slots
+    .map(slot => genScopedSlot(slot, state))
     .join(',')
 
   return `scopedSlots:_u([${generatedSlots}]${

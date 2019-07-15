@@ -131,7 +131,8 @@ declare type ASTElement = {
   slotTarget?: ?string;
   slotTargetDynamic?: boolean;
   slotScope?: ?string;
-  scopedSlots?: { [name: string]: ASTElement };
+  scopedSlots?: Array<ASTElement>;
+  scopedSlotsMap?: { [name: string]: number };
 
   ref?: string;
   refInFor?: boolean;

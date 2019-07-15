@@ -14,6 +14,7 @@ import {
   baseWarn,
   addHandler,
   addDirective,
+  addScopedSlot,
   getBindingAttr,
   getAndRemoveAttr,
   getRawBindingAttr,
@@ -143,8 +144,18 @@ export function parse (
           // scoped slot
           // keep it in the children list so that v-else(-if) conditions can
           // find it as the prev node.
-          const name = element.slotTarget || '"default"'
-          ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
+          if (
+            element.slotTargetDynamic &&
+            element.for &&
+            element.slotTarget
+          ) {
+            // #10271
+            // dynamic v-slot and v-for are used on the same element
+            // TODO: checking if dynamic slot target actually use scope variables in v-for
+            addScopedSlot(currentParent, element.slotTarget, element, true)
+          } else {
+            addScopedSlot(currentParent, element.slotTarget || '"default"', element)
+          }
         }
         currentParent.children.push(element)
         element.parent = currentParent
@@ -690,9 +701,9 @@ function processSlotContent (el) {
           }
         }
         // add the component's children to its default slot
-        const slots = el.scopedSlots || (el.scopedSlots = {})
         const { name, dynamic } = getSlotName(slotBinding)
-        const slotContainer = slots[name] = createASTElement('template', [], el)
+        const slotContainer = createASTElement('template', [], el)
+        addScopedSlot(el, name, slotContainer)
         slotContainer.slotTarget = name
         slotContainer.slotTargetDynamic = dynamic
         slotContainer.children = el.children.filter((c: any) => {
