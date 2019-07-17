@@ -59,7 +59,7 @@ declare type ModuleOptions = {
 };
 
 declare type ASTModifiers = { [key: string]: boolean };
-declare type ASTIfCondition = { exp: ?string; block: ASTElement };
+declare type ASTIfCondition = { exp: ?string; block: ASTElement, comment?: ASTText };
 declare type ASTIfConditions = Array<ASTIfCondition>;
 
 declare type ASTAttr = {
