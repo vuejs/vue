@@ -1,3 +1,6 @@
+const OFF = 0
+const ERROR = 2
+
 module.exports = {
   root: true,
   parserOptions: {
@@ -22,8 +25,8 @@ module.exports = {
     "WXEnvironment": true
   },
   rules: {
-    'no-console': process.env.NODE_ENV !== 'production' ? 0 : 2,
-    'no-useless-escape': 0,
-    'no-empty': 0
+    'no-console': process.env.NODE_ENV !== 'production' ? OFF : ERROR,
+    'no-useless-escape': OFF,
+    'no-empty': OFF
   }
 }
