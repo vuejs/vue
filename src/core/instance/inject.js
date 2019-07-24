@@ -23,7 +23,7 @@ export function initInjections (vm: Component) {
         defineReactive(vm, key, result[key], () => {
           warn(
             `Avoid mutating an injected value directly since the changes will be ` +
-            `overwritten whenever the provided component re-renders. ` +
+            `overwritten whenever the providing component re-renders. ` +
             `injection being mutated: "${key}"`,
             vm
           )
