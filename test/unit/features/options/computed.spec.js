@@ -127,29 +127,6 @@ describe('Options computed', () => {
     expect(spy.calls.count()).toBe(1)
   })
 
-  it('cache: false', () => {
-    const spy = jasmine.createSpy('cached computed')
-    const vm = new Vue({
-      data: {
-        a: 1
-      },
-      computed: {
-        b: {
-          cache: false,
-          get () {
-            spy()
-            return this.a + 1
-          }
-        }
-      }
-    })
-    expect(spy.calls.count()).toBe(0)
-    vm.b
-    expect(spy.calls.count()).toBe(1)
-    vm.b
-    expect(spy.calls.count()).toBe(2)
-  })
-
   it('as component', done => {
     const Comp = Vue.extend({
       template: `<div>{{ b }} {{ c }}</div>`,

@@ -220,7 +220,7 @@ export function defineComputed (
     sharedPropertyDefinition.set = noop
   } else {
     sharedPropertyDefinition.get = userDef.get
-      ? shouldCache && userDef.cache !== false
+      ? shouldCache
         ? createComputedGetter(key)
         : createGetterInvoker(userDef.get)
       : noop
