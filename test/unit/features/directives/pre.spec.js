@@ -45,10 +45,8 @@ describe('Directive v-pre', function () {
 
   // #10087
   it('should not compile attributes', function () {
-    Vue.component('vtest', { template: ` <div>Hello World</div>` })
     const vm = new Vue({
-      template: '<div v-pre><vtest open="hello"></vtest></div>',
-      replace: true
+      template: '<div v-pre><p open="hello">A Test</p></div>'
     })
     vm.$mount()
     expect(vm.$el.firstChild.getAttribute('open')).toBe('hello')
