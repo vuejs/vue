@@ -110,7 +110,7 @@ describe('Scheduler', () => {
     }).then(done)
   })
 
-  it('warn against infinite update loops', function (done) {
+  it('warn against infinite update loops', done => {
     let count = 0
     const job = {
       id: 1,

@@ -198,7 +198,7 @@ describe('Directive v-model text', () => {
     })
   }
 
-  it('compositionevents', function (done) {
+  it('compositionevents', done => {
     const vm = new Vue({
       data: {
         test: 'foo'

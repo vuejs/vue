@@ -1,7 +1,7 @@
 import Vue from 'vue'
 
-describe('Directive v-pre', function () {
-  it('should not compile inner content', function () {
+describe('Directive v-pre', () => {
+  it('should not compile inner content', () => {
     const vm = new Vue({
       template: `<div>
         <div v-pre>{{ a }}</div>
@@ -20,7 +20,7 @@ describe('Directive v-pre', function () {
     expect(vm.$el.lastChild.innerHTML).toBe('<component is="div"></component>')
   })
 
-  it('should not compile on root node', function () {
+  it('should not compile on root node', () => {
     const vm = new Vue({
       template: '<div v-pre>{{ a }}</div>',
       replace: true,
@@ -33,7 +33,7 @@ describe('Directive v-pre', function () {
   })
 
   // #8286
-  it('should not compile custom component tags', function () {
+  it('should not compile custom component tags', () => {
     Vue.component('vtest', { template: ` <div>Hello World</div>` })
     const vm = new Vue({
       template: '<div v-pre><vtest></vtest></div>',

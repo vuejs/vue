@@ -131,7 +131,7 @@ describe('Component slot', () => {
     expect(child.$el.innerHTML).toBe('<p>1</p> <div>foo</div> <p>2</p>')
   })
 
-  it('name should only match children', function () {
+  it('name should only match children', () => {
     mount({
       childTemplate: `
         <div>
@@ -243,7 +243,7 @@ describe('Component slot', () => {
     }).then(done)
   })
 
-  it('template slot', function () {
+  it('template slot', () => {
     const vm = new Vue({
       template: '<test><template slot="test">hello</template></test>',
       components: {

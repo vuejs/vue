@@ -672,7 +672,7 @@ describe('parser', () => {
     expect(spy2).toHaveBeenCalledWith('img')
   })
 
-  it('preserve whitespace in <pre> tag', function () {
+  it('preserve whitespace in <pre> tag', () => {
     const options = extend({}, baseOptions)
     const ast = parse('<pre><code>  \n<span>hi</span>\n  </code><span> </span></pre>', options)
     const code = ast.children[0]
@@ -687,7 +687,7 @@ describe('parser', () => {
   })
 
   // #5992
-  it('ignore the first newline in <pre> tag', function () {
+  it('ignore the first newline in <pre> tag', () => {
     const options = extend({}, baseOptions)
     const ast = parse('<div><pre>\nabc</pre>\ndef<pre>\n\nabc</pre></div>', options)
     const pre = ast.children[0]
@@ -845,7 +845,7 @@ describe('parser', () => {
     expect(ast.children[4].children[0].text).toBe('. Have fun! ')
   })
 
-  it(`preserve whitespace in <pre> tag with whitespace: 'condense'`, function () {
+  it(`preserve whitespace in <pre> tag with whitespace: 'condense'`, () => {
     const options = extend({}, condenseOptions)
     const ast = parse('<pre><code>  \n<span>hi</span>\n  </code><span> </span></pre>', options)
     const code = ast.children[0]
@@ -859,7 +859,7 @@ describe('parser', () => {
     expect(span.children[0].text).toBe(' ')
   })
 
-  it(`ignore the first newline in <pre> tag with whitespace: 'condense'`, function () {
+  it(`ignore the first newline in <pre> tag with whitespace: 'condense'`, () => {
     const options = extend({}, condenseOptions)
     const ast = parse('<div><pre>\nabc</pre>\ndef<pre>\n\nabc</pre></div>', options)
     const pre = ast.children[0]

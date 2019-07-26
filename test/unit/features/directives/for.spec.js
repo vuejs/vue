@@ -431,7 +431,7 @@ describe('Directive v-for', () => {
     }).then(done)
   })
 
-  it('check priorities: v-if before v-for', function () {
+  it('check priorities: v-if before v-for', () => {
     const vm = new Vue({
       data: {
         items: [1, 2, 3]
@@ -441,7 +441,7 @@ describe('Directive v-for', () => {
     expect(vm.$el.textContent).toBe('12')
   })
 
-  it('check priorities: v-if after v-for', function () {
+  it('check priorities: v-if after v-for', () => {
     const vm = new Vue({
       data: {
         items: [1, 2, 3]

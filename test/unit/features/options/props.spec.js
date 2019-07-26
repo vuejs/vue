@@ -384,7 +384,7 @@ describe('Options props', () => {
     expect(vm.$refs.child.propC).toBe(false)
   })
 
-  it('should respect default value of a Boolean prop', function () {
+  it('should respect default value of a Boolean prop', () => {
     const vm = new Vue({
       template: '<test></test>',
       components: {
@@ -434,7 +434,7 @@ describe('Options props', () => {
     }).then(done)
   })
 
-  it('should not warn for non-required, absent prop', function () {
+  it('should not warn for non-required, absent prop', () => {
     new Vue({
       template: '<test></test>',
       components: {
