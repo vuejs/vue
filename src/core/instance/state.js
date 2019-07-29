@@ -1,16 +1,16 @@
 /* @flow */
 
 import config from '../config'
-import Dep from '../observer/dep'
 import Watcher from '../observer/watcher'
+import Dep, { pushTarget, popTarget } from '../observer/dep'
 import { isUpdatingChildComponent } from './lifecycle'
 
 import {
   set,
   del,
   observe,
-  observerState,
-  defineReactive
+  defineReactive,
+  toggleObserving
 } from '../observer/index'
 
 import {
@@ -69,7 +69,9 @@ function initProps (vm: Component, propsOptions: Object) {
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
-  observerState.shouldConvert = isRoot
+  if (!isRoot) {
+    toggleObserving(false)
+  }
   for (const key in propsOptions) {
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
@@ -84,7 +86,7 @@ function initProps (vm: Component, propsOptions: Object) {
         )
       }
       defineReactive(props, key, value, () => {
-        if (vm.$parent && !isUpdatingChildComponent) {
+        if (!isRoot && !isUpdatingChildComponent) {
           warn(
             `Avoid mutating a prop directly since the value will be ` +
             `overwritten whenever the parent component re-renders. ` +
@@ -104,7 +106,7 @@ function initProps (vm: Component, propsOptions: Object) {
       proxy(vm, `_props`, key)
     }
   }
-  observerState.shouldConvert = true
+  toggleObserving(true)
 }
 
 function initData (vm: Component) {
@@ -149,18 +151,23 @@ function initData (vm: Component) {
   observe(data, true /* asRootData */)
 }
 
-function getData (data: Function, vm: Component): any {
+export function getData (data: Function, vm: Component): any {
+  // #7573 disable dep collection when invoking data getters
+  pushTarget()
   try {
     return data.call(vm, vm)
   } catch (e) {
     handleError(e, vm, `data()`)
     return {}
+  } finally {
+    popTarget()
   }
 }
 
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
+  // $flow-disable-line
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
   const isSSR = isServerRendering()
@@ -209,17 +216,15 @@ export function defineComputed (
   if (typeof userDef === 'function') {
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
-      : userDef
+      : createGetterInvoker(userDef)
     sharedPropertyDefinition.set = noop
   } else {
     sharedPropertyDefinition.get = userDef.get
       ? shouldCache && userDef.cache !== false
         ? createComputedGetter(key)
-        : userDef.get
+        : createGetterInvoker(userDef.get)
       : noop
-    sharedPropertyDefinition.set = userDef.set
-      ? userDef.set
-      : noop
+    sharedPropertyDefinition.set = userDef.set || noop
   }
   if (process.env.NODE_ENV !== 'production' &&
       sharedPropertyDefinition.set === noop) {
@@ -248,13 +253,19 @@ function createComputedGetter (key) {
   }
 }
 
+function createGetterInvoker(fn) {
+  return function computedGetter () {
+    return fn.call(this, this)
+  }
+}
+
 function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {
     if (process.env.NODE_ENV !== 'production') {
-      if (methods[key] == null) {
+      if (typeof methods[key] !== 'function') {
         warn(
-          `Method "${key}" has an undefined value in the component definition. ` +
+          `Method "${key}" has type "${typeof methods[key]}" in the component definition. ` +
           `Did you reference the function correctly?`,
           vm
         )
@@ -272,7 +283,7 @@ function initMethods (vm: Component, methods: Object) {
         )
       }
     }
-    vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
+    vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
   }
 }
 
@@ -291,7 +302,7 @@ function initWatch (vm: Component, watch: Object) {
 
 function createWatcher (
   vm: Component,
-  keyOrFn: string | Function,
+  expOrFn: string | Function,
   handler: any,
   options?: Object
 ) {
@@ -302,7 +313,7 @@ function createWatcher (
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
-  return vm.$watch(keyOrFn, handler, options)
+  return vm.$watch(expOrFn, handler, options)
 }
 
 export function stateMixin (Vue: Class<Component>) {
@@ -314,7 +325,7 @@ export function stateMixin (Vue: Class<Component>) {
   const propsDef = {}
   propsDef.get = function () { return this._props }
   if (process.env.NODE_ENV !== 'production') {
-    dataDef.set = function (newData: Object) {
+    dataDef.set = function () {
       warn(
         'Avoid replacing instance root $data. ' +
         'Use nested data properties instead.',
@@ -344,7 +355,11 @@ export function stateMixin (Vue: Class<Component>) {
     options.user = true
     const watcher = new Watcher(vm, expOrFn, cb, options)
     if (options.immediate) {
-      cb.call(vm, watcher.value)
+      try {
+        cb.call(vm, watcher.value)
+      } catch (error) {
+        handleError(error, vm, `callback for immediate watcher "${watcher.expression}"`)
+      }
     }
     return function unwatchFn () {
       watcher.teardown()

@@ -26,7 +26,8 @@ export default class VNode {
   ssrContext: Object | void;
   fnContext: Component | void; // real context vm for functional nodes
   fnOptions: ?ComponentOptions; // for SSR caching
-  fnScopeId: ?string; // functioanl scope id support
+  devtoolsMeta: ?Object; // used to store functional render context for devtools
+  fnScopeId: ?string; // functional scope id support
 
   constructor (
     tag?: string,
@@ -85,16 +86,18 @@ export function createTextVNode (val: string | number) {
 // used for static nodes and slot nodes because they may be reused across
 // multiple renders, cloning them avoids errors when DOM manipulations rely
 // on their elm reference.
-export function cloneVNode (vnode: VNode, deep?: boolean): VNode {
-  const componentOptions = vnode.componentOptions
+export function cloneVNode (vnode: VNode): VNode {
   const cloned = new VNode(
     vnode.tag,
     vnode.data,
-    vnode.children,
+    // #7975
+    // clone children array to avoid mutating original in case of cloning
+    // a child.
+    vnode.children && vnode.children.slice(),
     vnode.text,
     vnode.elm,
     vnode.context,
-    componentOptions,
+    vnode.componentOptions,
     vnode.asyncFactory
   )
   cloned.ns = vnode.ns
@@ -104,23 +107,7 @@ export function cloneVNode (vnode: VNode, deep?: boolean): VNode {
   cloned.fnContext = vnode.fnContext
   cloned.fnOptions = vnode.fnOptions
   cloned.fnScopeId = vnode.fnScopeId
+  cloned.asyncMeta = vnode.asyncMeta
   cloned.isCloned = true
-  if (deep) {
-    if (vnode.children) {
-      cloned.children = cloneVNodes(vnode.children, true)
-    }
-    if (componentOptions && componentOptions.children) {
-      componentOptions.children = cloneVNodes(componentOptions.children, true)
-    }
-  }
   return cloned
-}
-
-export function cloneVNodes (vnodes: Array<VNode>, deep?: boolean): Array<VNode> {
-  const len = vnodes.length
-  const res = new Array(len)
-  for (let i = 0; i < len; i++) {
-    res[i] = cloneVNode(vnodes[i], deep)
-  }
-  return res
 }

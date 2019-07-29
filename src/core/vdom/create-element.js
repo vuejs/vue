@@ -3,12 +3,14 @@
 import config from '../config'
 import VNode, { createEmptyVNode } from './vnode'
 import { createComponent } from './create-component'
+import { traverse } from '../observer/traverse'
 
 import {
   warn,
   isDef,
   isUndef,
   isTrue,
+  isObject,
   isPrimitive,
   resolveAsset
 } from '../util/index'
@@ -30,7 +32,7 @@ export function createElement (
   children: any,
   normalizationType: any,
   alwaysNormalize: boolean
-): VNode {
+): VNode | Array<VNode> {
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children
     children = data
@@ -48,7 +50,7 @@ export function _createElement (
   data?: VNodeData,
   children?: any,
   normalizationType?: number
-): VNode {
+): VNode | Array<VNode> {
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -69,11 +71,13 @@ export function _createElement (
   if (process.env.NODE_ENV !== 'production' &&
     isDef(data) && isDef(data.key) && !isPrimitive(data.key)
   ) {
-    warn(
-      'Avoid using non-primitive value as key, ' +
-      'use string/number value instead.',
-      context
-    )
+    if (!__WEEX__ || !('@binding' in data.key)) {
+      warn(
+        'Avoid using non-primitive value as key, ' +
+        'use string/number value instead.',
+        context
+      )
+    }
   }
   // support single function children as default scoped slot
   if (Array.isArray(children) &&
@@ -94,11 +98,17 @@ export function _createElement (
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
     if (config.isReservedTag(tag)) {
       // platform built-in elements
+      if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn)) {
+        warn(
+          `The .native modifier for v-on is only valid on components but it was used on <${tag}>.`,
+          context
+        )
+      }
       vnode = new VNode(
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
-    } else if (isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
+    } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
@@ -114,8 +124,11 @@ export function _createElement (
     // direct component options / constructor
     vnode = createComponent(tag, data, context, children)
   }
-  if (isDef(vnode)) {
-    if (ns) applyNS(vnode, ns)
+  if (Array.isArray(vnode)) {
+    return vnode
+  } else if (isDef(vnode)) {
+    if (isDef(ns)) applyNS(vnode, ns)
+    if (isDef(data)) registerDeepBindings(data)
     return vnode
   } else {
     return createEmptyVNode()
@@ -132,9 +145,22 @@ function applyNS (vnode, ns, force) {
   if (isDef(vnode.children)) {
     for (let i = 0, l = vnode.children.length; i < l; i++) {
       const child = vnode.children[i]
-      if (isDef(child.tag) && (isUndef(child.ns) || isTrue(force))) {
+      if (isDef(child.tag) && (
+        isUndef(child.ns) || (isTrue(force) && child.tag !== 'svg'))) {
         applyNS(child, ns, force)
       }
     }
+  }
+}
+
+// ref #5318
+// necessary to ensure parent re-render when deep bindings like :style and
+// :class are used on slot nodes
+function registerDeepBindings (data) {
+  if (isObject(data.style)) {
+    traverse(data.style)
+  }
+  if (isObject(data.class)) {
+    traverse(data.class)
   }
 }

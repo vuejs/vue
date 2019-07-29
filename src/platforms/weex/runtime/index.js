@@ -12,7 +12,7 @@ import {
   isReservedTag,
   isRuntimeComponent,
   isUnknownElement
-} from 'weex/util/index'
+} from 'weex/util/element'
 
 // install platform specific utils
 Vue.config.mustUseProp = mustUseProp

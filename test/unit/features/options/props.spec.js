@@ -171,42 +171,56 @@ describe('Options props', () => {
       makeInstance('hello', String)
       expect(console.error.calls.count()).toBe(0)
       makeInstance(123, String)
-      expect('Expected String').toHaveBeenWarned()
+      expect('Expected String with value "123", got Number with value 123').toHaveBeenWarned()
     })
 
     it('number', () => {
       makeInstance(123, Number)
       expect(console.error.calls.count()).toBe(0)
       makeInstance('123', Number)
-      expect('Expected Number').toHaveBeenWarned()
+      expect('Expected Number with value 123, got String with value "123"').toHaveBeenWarned()
+    })
+
+    it('number & boolean', () => {
+      makeInstance(123, Number)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(false, Number)
+      expect('Expected Number, got Boolean with value false').toHaveBeenWarned()
+    })
+
+    it('string & boolean', () => {
+      makeInstance('hello', String)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(true, String)
+      expect('Expected String, got Boolean with value true').toHaveBeenWarned()
     })
 
     it('boolean', () => {
       makeInstance(true, Boolean)
       expect(console.error.calls.count()).toBe(0)
       makeInstance('123', Boolean)
-      expect('Expected Boolean').toHaveBeenWarned()
+      expect('Expected Boolean, got String with value "123"').toHaveBeenWarned()
     })
 
     it('function', () => {
       makeInstance(() => {}, Function)
       expect(console.error.calls.count()).toBe(0)
       makeInstance(123, Function)
-      expect('Expected Function').toHaveBeenWarned()
+      expect('Expected Function, got Number with value 123').toHaveBeenWarned()
     })
 
     it('object', () => {
       makeInstance({}, Object)
       expect(console.error.calls.count()).toBe(0)
       makeInstance([], Object)
-      expect('Expected Object').toHaveBeenWarned()
+      expect('Expected Object, got Array').toHaveBeenWarned()
     })
 
     it('array', () => {
       makeInstance([], Array)
       expect(console.error.calls.count()).toBe(0)
       makeInstance({}, Array)
-      expect('Expected Array').toHaveBeenWarned()
+      expect('Expected Array, got Object').toHaveBeenWarned()
     })
 
     it('primitive wrapper objects', () => {
@@ -225,7 +239,7 @@ describe('Options props', () => {
         makeInstance(Symbol('foo'), Symbol)
         expect(console.error.calls.count()).toBe(0)
         makeInstance({}, Symbol)
-        expect('Expected Symbol').toHaveBeenWarned()
+        expect('Expected Symbol, got Object').toHaveBeenWarned()
       })
     }
 
@@ -257,7 +271,7 @@ describe('Options props', () => {
       makeInstance(123, Number, v => v === 234)
       expect('custom validator check failed').toHaveBeenWarned()
       makeInstance(123, String, v => v === 123)
-      expect('Expected String').toHaveBeenWarned()
+      expect('Expected String with value "123", got Number with value 123').toHaveBeenWarned()
     })
 
     it('multiple types + custom validator', () => {
@@ -511,5 +525,22 @@ describe('Options props', () => {
     specialAttrs.forEach(attr => {
       expect(`"${attr}" is a reserved attribute`).toHaveBeenWarned()
     })
+  })
+
+  it('should consider order when casting [Boolean, String] multi-type props', () => {
+    const vm = new Vue({
+      template: '<test ref="test" booleanOrString stringOrBoolean />',
+      components: {
+        test: {
+          template: '<div></div>',
+          props: {
+            booleanOrString: [Boolean, String],
+            stringOrBoolean: [String, Boolean]
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$refs.test.$props.booleanOrString).toBe(true)
+    expect(vm.$refs.test.$props.stringOrBoolean).toBe('')
   })
 })

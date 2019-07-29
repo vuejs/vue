@@ -1,10 +1,22 @@
-import Vue from "../index";
-import { AsyncComponent, ComponentOptions, FunctionalComponentOptions } from "../index";
+import Vue, { PropType, VNode } from "../index";
+import { ComponentOptions, Component } from "../index";
 import { CreateElement } from "../vue";
 
-interface Component extends Vue {
+interface MyComponent extends Vue {
   a: number;
 }
+
+const option: ComponentOptions<MyComponent> = {
+  data() {
+    return {
+      a: 123
+    }
+  }
+}
+
+// contravariant generic should use never
+const anotherOption: ComponentOptions<never> = option
+const componentType: Component = option
 
 Vue.component('sub-component', {
   components: {
@@ -41,29 +53,68 @@ Vue.component('string-prop', {
 });
 
 class User {
-  private u: number
+  private u = 1
 }
 class Cat {
-  private u: number
+  private u = 1
 }
+
+interface IUser {
+  foo: string,
+  bar: number
+}
+
+interface ICat {
+  foo: any,
+  bar: object
+}
+type ConfirmCallback = (confirm: boolean) => void;
 
 Vue.component('union-prop', {
   props: {
-    primitive: [String, Number],
-    object: [Cat, User],
-    regex: RegExp,
-    mixed: [RegExp, Array],
-    union: [User, Number] as {new(): User | Number}[] // requires annotation
+    cat: Object as PropType<ICat>,
+    complexUnion: { type: [User, Number] as PropType<User | number> },
+    kittyUser: Object as PropType<ICat & IUser>,
+    callback: Function as PropType<ConfirmCallback>,
+    union: [User, Number] as PropType<User | number>
   },
   data() {
-    this.primitive;
-    this.object;
+    this.cat;
+    this.complexUnion;
+    this.kittyUser;
+    this.callback(true);
     this.union;
-    this.regex.compile;
-    this.mixed;
     return {
       fixedSize: this.union,
     }
+  }
+});
+
+// stopped working since TS 3.4
+// Vue.component('union-prop-with-no-casting', {
+//   props: {
+//     mixed: [RegExp, Array],
+//     object: [Cat, User],
+//     primitive: [String, Number],
+//     regex: RegExp
+//   },
+//   data() {
+//     this.mixed;
+//     this.object;
+//     this.primitive;
+//     this.regex.compile;
+//   }
+// })
+
+Vue.component('prop-with-primitive-default', {
+  props: {
+    id: {
+      type: String,
+      default: () => String(Math.round(Math.random() * 10000000))
+    }
+  },
+  created() {
+    this.id;
   }
 });
 
@@ -130,6 +181,10 @@ Vue.component('component', {
       props: {
         myProp: "bar"
       },
+      directives: [{
+        name: 'a',
+        value: 'foo'
+      }],
       domProps: {
         innerHTML: "baz"
       },
@@ -148,7 +203,8 @@ Vue.component('component', {
         fontSize: '14px'
       },
       key: 'myKey',
-      ref: 'myRef'
+      ref: 'myRef',
+      refInFor: true
     }, [
       createElement(),
       createElement("div", "message"),
@@ -173,6 +229,9 @@ Vue.component('component', {
       [createElement("div", "message")]
     ]);
   },
+  renderError(createElement, err) {
+    return createElement('pre', { style: { color: 'red' }}, err.stack)
+  },
   staticRenderFns: [],
 
   beforeCreate() {
@@ -187,8 +246,14 @@ Vue.component('component', {
   updated() {},
   activated() {},
   deactivated() {},
-  errorCaptured() {
+  errorCaptured(err, vm, info) {
+    err.message
+    vm.$emit('error')
+    info.toUpperCase()
     return true
+  },
+  serverPrefetch () {
+    return Promise.resolve()
   },
 
   directives: {
@@ -227,6 +292,18 @@ Vue.component('component', {
   delimiters: ["${", "}"]
 });
 
+
+Vue.component('custom-prop-type-function', {
+  props: {
+    callback: Function as PropType<(confirm: boolean) => void>,
+  },
+  methods: {
+    confirm(){
+      this.callback(true);
+    }
+  }
+});
+
 Vue.component('provide-inject', {
   provide: {
     foo: 1
@@ -246,6 +323,12 @@ Vue.component('provide-function', {
   })
 })
 
+Vue.component('component-with-slot', {
+  render (h): VNode {
+    return h('div', this.$slots.default)
+  }
+})
+
 Vue.component('component-with-scoped-slot', {
   render (h) {
     interface ScopedSlotProps {
@@ -262,17 +345,59 @@ Vue.component('component-with-scoped-slot', {
           // named scoped slot as vnode data
           item: (props: ScopedSlotProps) => [h('span', [props.msg])]
         }
+      }),
+      h('child', [
+        // return single VNode (will be normalized to an array)
+        (props: ScopedSlotProps) => h('span', [props.msg])
+      ]),
+      h('child', {
+        // Passing down all slots from parent
+        scopedSlots: this.$scopedSlots
+      }),
+      h('child', {
+        // Passing down single slot from parent
+        scopedSlots: {
+          default: this.$scopedSlots.default
+        }
       })
     ])
   },
   components: {
     child: {
       render (this: Vue, h: CreateElement) {
+        const defaultSlot = this.$scopedSlots['default']!({ msg: 'hi' })
+        defaultSlot && defaultSlot.forEach(vnode => {
+          vnode.tag
+        })
         return h('div', [
-          this.$scopedSlots['default']({ msg: 'hi' }),
-          this.$scopedSlots['item']({ msg: 'hello' })
+          defaultSlot,
+          this.$scopedSlots['item']!({ msg: 'hello' })
         ])
       }
+    }
+  }
+})
+
+Vue.component('narrow-array-of-vnode-type', {
+  render (h): VNode {
+    const slot = this.$scopedSlots.default!({})
+    if (typeof slot === 'string') {
+      // <template slot-scope="data">bare string</template>
+      return h('span', slot)
+    } else if (Array.isArray(slot)) {
+      // template with multiple children
+      const first = slot[0]
+      if (!Array.isArray(first) && typeof first !== 'string' && first) {
+        return first
+      } else {
+        return h()
+      }
+    } else if (slot) {
+      // <div slot-scope="data">bare VNode</div>
+      return slot
+    } else {
+      // empty template, slot === undefined
+      return h()
     }
   }
 })
@@ -287,6 +412,8 @@ Vue.component('functional-component', {
     context.slots();
     context.data;
     context.parent;
+    context.scopedSlots;
+    context.listeners.click;
     return createElement("div", {}, context.children);
   }
 });
@@ -305,6 +432,20 @@ Vue.component('functional-component-object-inject', {
   }
 })
 
+Vue.component('functional-component-check-optional', {
+  functional: true
+})
+
+Vue.component('functional-component-multi-root', {
+  functional: true,
+  render(h) {
+    return [
+      h("tr", [h("td", "foo"), h("td", "bar")]),
+      h("tr", [h("td", "lorem"), h("td", "ipsum")])
+    ]
+  }
+})
+
 Vue.component("async-component", ((resolve, reject) => {
   setTimeout(() => {
     resolve(Vue.component("component"));
@@ -316,5 +457,25 @@ Vue.component("async-component", ((resolve, reject) => {
     });
   })
 }));
+
+Vue.component('functional-component-v-model', {
+  props: ['foo'],
+  functional: true,
+  model: {
+    prop: 'foo',
+    event: 'change'
+  },
+  render(createElement, context) {
+    return createElement("input", {
+      on: {
+        input: new Function()
+      },
+      domProps: {
+        value: context.props.foo
+      }
+    });
+  }
+});
+
 
 Vue.component('async-es-module-component', () => import('./es-module'))

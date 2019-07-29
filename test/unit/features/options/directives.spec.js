@@ -265,4 +265,104 @@ describe('Options directives', () => {
       expect(dir.unbind.calls.argsFor(0)[0]).toBe(oldEl)
     }).then(done)
   })
+
+  it('dynamic arguments', done => {
+    const vm = new Vue({
+      template: `<div v-my:[key]="1"/>`,
+      data: {
+        key: 'foo'
+      },
+      directives: {
+        my: {
+          bind(el, binding) {
+            expect(binding.arg).toBe('foo')
+          },
+          update(el, binding) {
+            expect(binding.arg).toBe('bar')
+            expect(binding.oldArg).toBe('foo')
+            done()
+          }
+        }
+      }
+    }).$mount()
+    vm.key = 'bar'
+  })
+
+  it('deep object like `deep.a` as dynamic arguments', done => {
+    const vm = new Vue({
+      template: `<div v-my:[deep.a]="1"/>`,
+      data: {
+        deep: {
+          a: 'foo'
+        }
+      },
+      directives: {
+        my: {
+          bind(el, binding) {
+            expect(binding.arg).toBe('foo')
+          },
+          update(el, binding) {
+            expect(binding.arg).toBe('bar')
+            expect(binding.oldArg).toBe('foo')
+            done()
+          }
+        }
+      }
+    }).$mount()
+    vm.deep.a = 'bar'
+  })
+
+  it('deep object like `deep.a.b` as dynamic arguments', done => {
+    const vm = new Vue({
+      template: `<div v-my:[deep.a.b]="1"/>`,
+      data: {
+        deep: {
+          a: {
+            b: 'foo'
+          }
+        }
+      },
+      directives: {
+        my: {
+          bind(el, binding) {
+            expect(binding.arg).toBe('foo')
+          },
+          update(el, binding) {
+            expect(binding.arg).toBe('bar')
+            expect(binding.oldArg).toBe('foo')
+            done()
+          }
+        }
+      }
+    }).$mount()
+    vm.deep.a.b = 'bar'
+  })
+
+  it('deep object as dynamic arguments with modifiers', done => {
+    const vm = new Vue({
+      template: `<div v-my:[deep.a.b].x.y="1"/>`,
+      data: {
+        deep: {
+          a: {
+            b: 'foo'
+          }
+        }
+      },
+      directives: {
+        my: {
+          bind(el, binding) {
+            expect(binding.arg).toBe('foo')
+            expect(binding.modifiers.x).toBe(true)
+            expect(binding.modifiers.y).toBe(true)
+          },
+          update(el, binding) {
+            expect(binding.arg).toBe('bar')
+            expect(binding.oldArg).toBe('foo')
+            done()
+          }
+        }
+      }
+    }).$mount()
+    vm.deep.a.b = 'bar'
+  })
 })

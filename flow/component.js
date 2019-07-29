@@ -16,6 +16,8 @@ declare interface Component {
   static directive: (id: string, def?: Function | Object) => Function | Object | void;
   static component: (id: string, def?: Class<Component> | Object) => Class<Component>;
   static filter: (id: string, def?: Function) => Function | void;
+  // functional context constructor
+  static FunctionalRenderContext: Function;
 
   // public properties
   $el: any; // so that we can attach __vue__ to it
@@ -48,7 +50,7 @@ declare interface Component {
   $createElement: (tag?: string | Component, data?: Object, children?: VNodeChildren) => VNode;
 
   // private properties
-  _uid: number;
+  _uid: number | string;
   _name: string; // this only exists in dev mode
   _isVue: true;
   _self: Component;
@@ -69,6 +71,7 @@ declare interface Component {
   _staticTrees: ?Array<VNode>; // v-once cached trees
   _hasHookEvent: boolean;
   _provided: ?Object;
+  // _virtualComponents?: { [key: string]: Component };
 
   // private methods
 

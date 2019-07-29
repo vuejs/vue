@@ -1,13 +1,7 @@
 declare type InternalComponentOptions = {
   _isComponent: true;
   parent: Component;
-  propsData: ?Object;
   _parentVnode: VNode;
-  _parentListeners: ?Object;
-  _renderChildren: ?Array<VNode>;
-  _componentTag: ?string;
-  _parentElm: ?Node;
-  _refElm: ?Node;
   render?: Function;
   staticRenderFns?: Array<Function>
 };
@@ -15,6 +9,8 @@ declare type InternalComponentOptions = {
 type InjectKey = string | Symbol;
 
 declare type ComponentOptions = {
+  componentId?: string;
+
   // data
   data: Object | Function | void;
   props?: { [key: string]: PropOptions };
@@ -48,6 +44,7 @@ declare type ComponentOptions = {
   beforeDestroy?: Function;
   destroyed?: Function;
   errorCaptured?: () => boolean | void;
+  serverPrefetch?: Function;
 
   // assets
   directives?: { [key: string]: Object };
@@ -83,8 +80,6 @@ declare type ComponentOptions = {
   _componentTag: ?string;
   _scopeId: ?string;
   _base: Class<Component>;
-  _parentElm: ?Node;
-  _refElm: ?Node;
 };
 
 declare type PropOptions = {

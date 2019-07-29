@@ -1,7 +1,7 @@
 /* @flow */
 
 import { warn } from './debug'
-import { observe, observerState } from '../observer/index'
+import { observe, toggleObserving, shouldObserve } from '../observer/index'
 import {
   hasOwn,
   isObject,
@@ -27,12 +27,18 @@ export function validateProp (
   const prop = propOptions[key]
   const absent = !hasOwn(propsData, key)
   let value = propsData[key]
-  // handle boolean props
-  if (isType(Boolean, prop.type)) {
+  // boolean casting
+  const booleanIndex = getTypeIndex(Boolean, prop.type)
+  if (booleanIndex > -1) {
     if (absent && !hasOwn(prop, 'default')) {
       value = false
-    } else if (!isType(String, prop.type) && (value === '' || value === hyphenate(key))) {
-      value = true
+    } else if (value === '' || value === hyphenate(key)) {
+      // only cast empty string / same name to boolean if
+      // boolean has higher priority
+      const stringIndex = getTypeIndex(String, prop.type)
+      if (stringIndex < 0 || booleanIndex < stringIndex) {
+        value = true
+      }
     }
   }
   // check default value
@@ -40,12 +46,16 @@ export function validateProp (
     value = getPropDefaultValue(vm, prop, key)
     // since the default value is a fresh copy,
     // make sure to observe it.
-    const prevShouldConvert = observerState.shouldConvert
-    observerState.shouldConvert = true
+    const prevShouldObserve = shouldObserve
+    toggleObserving(true)
     observe(value)
-    observerState.shouldConvert = prevShouldConvert
+    toggleObserving(prevShouldObserve)
   }
-  if (process.env.NODE_ENV !== 'production') {
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    // skip validation for weex recycle-list child component props
+    !(__WEEX__ && isObject(value) && ('@binding' in value))
+  ) {
     assertProp(prop, key, value, vm, absent)
   }
   return value
@@ -117,11 +127,10 @@ function assertProp (
       valid = assertedType.valid
     }
   }
+
   if (!valid) {
     warn(
-      `Invalid prop: type check failed for prop "${name}".` +
-      ` Expected ${expectedTypes.map(capitalize).join(', ')}` +
-      `, got ${toRawType(value)}.`,
+      getInvalidTypeMessage(name, value, expectedTypes),
       vm
     )
     return
@@ -175,15 +184,58 @@ function getType (fn) {
   return match ? match[1] : ''
 }
 
-function isType (type, fn) {
-  if (!Array.isArray(fn)) {
-    return getType(fn) === getType(type)
+function isSameType (a, b) {
+  return getType(a) === getType(b)
+}
+
+function getTypeIndex (type, expectedTypes): number {
+  if (!Array.isArray(expectedTypes)) {
+    return isSameType(expectedTypes, type) ? 0 : -1
   }
-  for (let i = 0, len = fn.length; i < len; i++) {
-    if (getType(fn[i]) === getType(type)) {
-      return true
+  for (let i = 0, len = expectedTypes.length; i < len; i++) {
+    if (isSameType(expectedTypes[i], type)) {
+      return i
     }
   }
-  /* istanbul ignore next */
-  return false
+  return -1
+}
+
+function getInvalidTypeMessage (name, value, expectedTypes) {
+  let message = `Invalid prop: type check failed for prop "${name}".` +
+    ` Expected ${expectedTypes.map(capitalize).join(', ')}`
+  const expectedType = expectedTypes[0]
+  const receivedType = toRawType(value)
+  const expectedValue = styleValue(value, expectedType)
+  const receivedValue = styleValue(value, receivedType)
+  // check if we need to specify expected value
+  if (expectedTypes.length === 1 &&
+      isExplicable(expectedType) &&
+      !isBoolean(expectedType, receivedType)) {
+    message += ` with value ${expectedValue}`
+  }
+  message += `, got ${receivedType} `
+  // check if we need to specify received value
+  if (isExplicable(receivedType)) {
+    message += `with value ${receivedValue}.`
+  }
+  return message
+}
+
+function styleValue (value, type) {
+  if (type === 'String') {
+    return `"${value}"`
+  } else if (type === 'Number') {
+    return `${Number(value)}`
+  } else {
+    return `${value}`
+  }
+}
+
+function isExplicable (value) {
+  const explicitTypes = ['string', 'number', 'boolean']
+  return explicitTypes.some(elem => value.toLowerCase() === elem)
+}
+
+function isBoolean (...args) {
+  return args.some(elem => elem.toLowerCase() === 'boolean')
 }

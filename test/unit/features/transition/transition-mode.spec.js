@@ -457,7 +457,7 @@ if (!isIE9) {
             setTimeout(() => {
               resolve({ template: '<div><h1>component B</h1></div>' })
               Vue.nextTick(next)
-            }, (duration + buffer) * 1.5)
+            }, (duration + buffer) * 1.7)
           }
         },
         data: {

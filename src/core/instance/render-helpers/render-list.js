@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isObject, isDef } from 'core/util/index'
+import { isObject, isDef, hasSymbol } from 'core/util/index'
 
 /**
  * Runtime helper for rendering v-for lists.
@@ -25,15 +25,26 @@ export function renderList (
       ret[i] = render(i + 1, i)
     }
   } else if (isObject(val)) {
-    keys = Object.keys(val)
-    ret = new Array(keys.length)
-    for (i = 0, l = keys.length; i < l; i++) {
-      key = keys[i]
-      ret[i] = render(val[key], key, i)
+    if (hasSymbol && val[Symbol.iterator]) {
+      ret = []
+      const iterator: Iterator<any> = val[Symbol.iterator]()
+      let result = iterator.next()
+      while (!result.done) {
+        ret.push(render(result.value, ret.length))
+        result = iterator.next()
+      }
+    } else {
+      keys = Object.keys(val)
+      ret = new Array(keys.length)
+      for (i = 0, l = keys.length; i < l; i++) {
+        key = keys[i]
+        ret[i] = render(val[key], key, i)
+      }
     }
   }
-  if (isDef(ret)) {
-    (ret: any)._isVList = true
+  if (!isDef(ret)) {
+    ret = []
   }
+  (ret: any)._isVList = true
   return ret
 }
