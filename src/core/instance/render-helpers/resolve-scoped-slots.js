@@ -2,14 +2,16 @@
 
 export function resolveScopedSlots (
   fns: ScopedSlotsData, // see flow/vnode
+  res?: Object,
+  // the following are added in 2.6
   hasDynamicKeys?: boolean,
-  res?: Object
+  contentHashKey?: number
 ): { [key: string]: Function, $stable: boolean } {
   res = res || { $stable: !hasDynamicKeys }
   for (let i = 0; i < fns.length; i++) {
     const slot = fns[i]
     if (Array.isArray(slot)) {
-      resolveScopedSlots(slot, hasDynamicKeys, res)
+      resolveScopedSlots(slot, res, hasDynamicKeys)
     } else if (slot) {
       // marker for reverse proxying v-slot without scope on this.$slots
       if (slot.proxy) {
@@ -17,6 +19,9 @@ export function resolveScopedSlots (
       }
       res[slot.key] = slot.fn
     }
+  }
+  if (contentHashKey) {
+    (res: any).$key = contentHashKey
   }
   return res
 }

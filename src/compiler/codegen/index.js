@@ -366,28 +366,72 @@ function genScopedSlots (
   // components with only scoped slots to skip forced updates from parent.
   // but in some cases we have to bail-out of this optimization
   // for example if the slot contains dynamic names, has v-if or v-for on them...
-  let needsForceUpdate = Object.keys(slots).some(key => {
+  let needsForceUpdate = el.for || Object.keys(slots).some(key => {
     const slot = slots[key]
-    return slot.slotTargetDynamic || slot.if || slot.for
+    return (
+      slot.slotTargetDynamic ||
+      slot.if ||
+      slot.for ||
+      containsSlotChild(slot) // is passing down slot from parent which may be dynamic
+    )
   })
-  // OR when it is inside another scoped slot (the reactivity is disconnected)
-  // #9438
+
+  // #9534: if a component with scoped slots is inside a conditional branch,
+  // it's possible for the same component to be reused but with different
+  // compiled slot content. To avoid that, we generate a unique key based on
+  // the generated code of all the slot contents.
+  let needsKey = !!el.if
+
+  // OR when it is inside another scoped slot or v-for (the reactivity may be
+  // disconnected due to the intermediate scope variable)
+  // #9438, #9506
+  // TODO: this can be further optimized by properly analyzing in-scope bindings
+  // and skip force updating ones that do not actually use scope variables.
   if (!needsForceUpdate) {
     let parent = el.parent
     while (parent) {
-      if (parent.slotScope && parent.slotScope !== emptySlotScopeToken) {
+      if (
+        (parent.slotScope && parent.slotScope !== emptySlotScopeToken) ||
+        parent.for
+      ) {
         needsForceUpdate = true
         break
+      }
+      if (parent.if) {
+        needsKey = true
       }
       parent = parent.parent
     }
   }
 
-  return `scopedSlots:_u([${
-    Object.keys(slots).map(key => {
-      return genScopedSlot(slots[key], state)
-    }).join(',')
-  }]${needsForceUpdate ? `,true` : ``})`
+  const generatedSlots = Object.keys(slots)
+    .map(key => genScopedSlot(slots[key], state))
+    .join(',')
+
+  return `scopedSlots:_u([${generatedSlots}]${
+    needsForceUpdate ? `,null,true` : ``
+  }${
+    !needsForceUpdate && needsKey ? `,null,false,${hash(generatedSlots)}` : ``
+  })`
+}
+
+function hash(str) {
+  let hash = 5381
+  let i = str.length
+  while(i) {
+    hash = (hash * 33) ^ str.charCodeAt(--i)
+  }
+  return hash >>> 0
+}
+
+function containsSlotChild (el: ASTNode): boolean {
+  if (el.type === 1) {
+    if (el.tag === 'slot') {
+      return true
+    }
+    return el.children.some(containsSlotChild)
+  }
+  return false
 }
 
 function genScopedSlot (

@@ -232,25 +232,25 @@ describe('codegen', () => {
   it('generate dynamic scoped slot', () => {
     assertCodegen(
       '<foo><template :slot="foo" slot-scope="bar">{{ bar }}</template></foo>',
-      `with(this){return _c('foo',{scopedSlots:_u([{key:foo,fn:function(bar){return [_v(_s(bar))]}}],true)})}`
+      `with(this){return _c('foo',{scopedSlots:_u([{key:foo,fn:function(bar){return [_v(_s(bar))]}}],null,true)})}`
     )
   })
 
   it('generate scoped slot with multiline v-if', () => {
     assertCodegen(
       '<foo><template v-if="\nshow\n" slot-scope="bar">{{ bar }}</template></foo>',
-      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(bar){return (\nshow\n)?[_v(_s(bar))]:undefined}}],true)})}`
+      `with(this){return _c('foo',{scopedSlots:_u([{key:"default",fn:function(bar){return (\nshow\n)?[_v(_s(bar))]:undefined}}],null,true)})}`
     )
     assertCodegen(
       '<foo><div v-if="\nshow\n" slot="foo" slot-scope="bar">{{ bar }}</div></foo>',
-      `with(this){return _c(\'foo\',{scopedSlots:_u([{key:"foo",fn:function(bar){return (\nshow\n)?_c(\'div\',{},[_v(_s(bar))]):_e()}}],true)})}`
+      `with(this){return _c(\'foo\',{scopedSlots:_u([{key:"foo",fn:function(bar){return (\nshow\n)?_c(\'div\',{},[_v(_s(bar))]):_e()}}],null,true)})}`
     )
   })
 
   it('generate scoped slot with new slot syntax', () => {
     assertCodegen(
       '<foo><template v-if="show" #default="bar">{{ bar }}</template></foo>',
-      `with(this){return _c('foo',{scopedSlots:_u([(show)?{key:"default",fn:function(bar){return [_v(_s(bar))]}}:null],true)})}`
+      `with(this){return _c('foo',{scopedSlots:_u([(show)?{key:"default",fn:function(bar){return [_v(_s(bar))]}}:null],null,true)})}`
     )
   })
 
@@ -345,6 +345,11 @@ describe('codegen', () => {
       `<input @input="onInput(');[\\'());');">`,
       `with(this){return _c('input',{on:{"input":function($event){onInput(');[\\'());');}}})}`
     )
+    // function name including a `function` part (#9920)
+    assertCodegen(
+      '<input @input="functionName()">',
+      `with(this){return _c('input',{on:{"input":function($event){return functionName()}}})}`
+    )
   })
 
   it('generate events with multiple statements', () => {
@@ -363,37 +368,37 @@ describe('codegen', () => {
   it('generate events with keycode', () => {
     assertCodegen(
       '<input @input.enter="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(('keyCode' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return onInput($event)}}})}`
     )
     // multiple keycodes (delete)
     assertCodegen(
       '<input @input.delete="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(('keyCode' in $event)&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput($event)}}})}`
     )
     // multiple keycodes (esc)
     assertCodegen(
       '<input @input.esc="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(('keyCode' in $event)&&_k($event.keyCode,"esc",27,$event.key,["Esc","Escape"]))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"esc",27,$event.key,["Esc","Escape"]))return null;return onInput($event)}}})}`
     )
     // multiple keycodes (space)
     assertCodegen(
       '<input @input.space="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(('keyCode' in $event)&&_k($event.keyCode,"space",32,$event.key,[" ","Spacebar"]))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"space",32,$event.key,[" ","Spacebar"]))return null;return onInput($event)}}})}`
     )
     // multiple keycodes (chained)
     assertCodegen(
       '<input @keydown.enter.delete="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(('keyCode' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter")&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter")&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput($event)}}})}`
     )
     // number keycode
     assertCodegen(
       '<input @input.13="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(('keyCode' in $event)&&$event.keyCode!==13)return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&$event.keyCode!==13)return null;return onInput($event)}}})}`
     )
     // custom keycode
     assertCodegen(
       '<input @input.custom="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(('keyCode' in $event)&&_k($event.keyCode,"custom",undefined,$event.key,undefined))return null;return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"custom",undefined,$event.key,undefined))return null;return onInput($event)}}})}`
     )
   })
 
@@ -416,12 +421,12 @@ describe('codegen', () => {
   it('generate events with generic modifiers and keycode correct order', () => {
     assertCodegen(
       '<input @keydown.enter.prevent="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(('keyCode' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.preventDefault();return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.preventDefault();return onInput($event)}}})}`
     )
 
     assertCodegen(
       '<input @keydown.enter.stop="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(('keyCode' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.stopPropagation();return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.stopPropagation();return onInput($event)}}})}`
     )
   })
 
@@ -500,6 +505,11 @@ describe('codegen', () => {
       '<input @input="function () { current++ }">',
       `with(this){return _c('input',{on:{"input":function () { current++ }}})}`
     )
+    // normal named function
+    assertCodegen(
+      '<input @input="function fn () { current++ }">',
+      `with(this){return _c('input',{on:{"input":function fn () { current++ }}})}`
+    )
     // arrow with no args
     assertCodegen(
       '<input @input="()=>current++">',
@@ -528,7 +538,7 @@ describe('codegen', () => {
     // with modifiers
     assertCodegen(
       `<input @keyup.enter="e=>current++">`,
-      `with(this){return _c('input',{on:{"keyup":function($event){if(('keyCode' in $event)&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return (e=>current++)($event)}}})}`
+      `with(this){return _c('input',{on:{"keyup":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return (e=>current++)($event)}}})}`
     )
   })
 

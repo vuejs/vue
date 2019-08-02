@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.6.3
+ * Vue.js v2.6.10
  * (c) 2014-2019 Evan You
  * Released under the MIT License.
  */
@@ -475,7 +475,7 @@ var config = ({
  * using https://www.w3.org/TR/html53/semantics-scripting.html#potentialcustomelementname
  * skipping \u10000-\uEFFFF due to it freezing up PhantomJS
  */
-const unicodeLetters = 'a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD';
+const unicodeRegExp = /a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD/;
 
 /**
  * Check if a string starts with $ or _
@@ -500,7 +500,7 @@ function def (obj, key, val, enumerable) {
 /**
  * Parse simple path.
  */
-const bailRE = new RegExp(`[^${unicodeLetters}.$_\\d]`);
+const bailRE = new RegExp(`[^${unicodeRegExp.source}.$_\\d]`);
 function parsePath (path) {
   if (bailRE.test(path)) {
     return
@@ -1440,7 +1440,7 @@ function checkComponents (options) {
 }
 
 function validateComponentName (name) {
-  if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeLetters}]*$`).test(name)) {
+  if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeRegExp.source}]*$`).test(name)) {
     warn(
       'Invalid component name: "' + name + '". Component names ' +
       'should conform to valid custom element name in html5 specification.'
@@ -1852,23 +1852,30 @@ function isBoolean (...args) {
 /*  */
 
 function handleError (err, vm, info) {
-  if (vm) {
-    let cur = vm;
-    while ((cur = cur.$parent)) {
-      const hooks = cur.$options.errorCaptured;
-      if (hooks) {
-        for (let i = 0; i < hooks.length; i++) {
-          try {
-            const capture = hooks[i].call(cur, err, vm, info) === false;
-            if (capture) return
-          } catch (e) {
-            globalHandleError(e, cur, 'errorCaptured hook');
+  // Deactivate deps tracking while processing error handler to avoid possible infinite rendering.
+  // See: https://github.com/vuejs/vuex/issues/1505
+  pushTarget();
+  try {
+    if (vm) {
+      let cur = vm;
+      while ((cur = cur.$parent)) {
+        const hooks = cur.$options.errorCaptured;
+        if (hooks) {
+          for (let i = 0; i < hooks.length; i++) {
+            try {
+              const capture = hooks[i].call(cur, err, vm, info) === false;
+              if (capture) return
+            } catch (e) {
+              globalHandleError(e, cur, 'errorCaptured hook');
+            }
           }
         }
       }
     }
+    globalHandleError(err, vm, info);
+  } finally {
+    popTarget();
   }
-  globalHandleError(err, vm, info);
 }
 
 function invokeWithErrorHandling (
@@ -1881,8 +1888,11 @@ function invokeWithErrorHandling (
   let res;
   try {
     res = args ? handler.apply(context, args) : handler.call(context);
-    if (res && !res._isVue && isPromise(res)) {
+    if (res && !res._isVue && isPromise(res) && !res._handled) {
       res.catch(e => handleError(e, vm, info + ` (Promise/async)`));
+      // issue #9511
+      // avoid catch triggering multiple times when nested calls
+      res._handled = true;
     }
   } catch (e) {
     handleError(e, vm, info);
@@ -1895,7 +1905,11 @@ function globalHandleError (err, vm, info) {
     try {
       return config.errorHandler.call(null, err, vm, info)
     } catch (e) {
-      logError(e, null, 'config.errorHandler');
+      // if the user intentionally throws the original error in the handler,
+      // do not log it twice
+      if (e !== err) {
+        logError(e, null, 'config.errorHandler');
+      }
     }
   }
   logError(err, vm, info);
@@ -2554,18 +2568,34 @@ function isWhitespace (node) {
 
 function normalizeScopedSlots (
   slots,
-  normalSlots
+  normalSlots,
+  prevSlots
 ) {
   let res;
+  const hasNormalSlots = Object.keys(normalSlots).length > 0;
+  const isStable = slots ? !!slots.$stable : !hasNormalSlots;
+  const key = slots && slots.$key;
   if (!slots) {
     res = {};
   } else if (slots._normalized) {
-    return slots
+    // fast path 1: child component re-render only, parent did not change
+    return slots._normalized
+  } else if (
+    isStable &&
+    prevSlots &&
+    prevSlots !== emptyObject &&
+    key === prevSlots.$key &&
+    !hasNormalSlots &&
+    !prevSlots.$hasNormal
+  ) {
+    // fast path 2: stable scoped slots w/ no normal slots to proxy,
+    // only need to normalize once
+    return prevSlots
   } else {
     res = {};
     for (const key in slots) {
       if (slots[key] && key[0] !== '$') {
-        res[key] = normalizeScopedSlot(slots[key]);
+        res[key] = normalizeScopedSlot(normalSlots, key, slots[key]);
       }
     }
   }
@@ -2575,18 +2605,40 @@ function normalizeScopedSlots (
       res[key] = proxyNormalSlot(normalSlots, key);
     }
   }
-  def(res, '_normalized', true);
-  def(res, '$stable', slots ? !!slots.$stable : true);
+  // avoriaz seems to mock a non-extensible $scopedSlots object
+  // and when that is passed down this would cause an error
+  if (slots && Object.isExtensible(slots)) {
+    (slots)._normalized = res;
+  }
+  def(res, '$stable', isStable);
+  def(res, '$key', key);
+  def(res, '$hasNormal', hasNormalSlots);
   return res
 }
 
-function normalizeScopedSlot(fn) {
-  return scope => {
-    const res = fn(scope);
-    return res && typeof res === 'object' && !Array.isArray(res)
+function normalizeScopedSlot(normalSlots, key, fn) {
+  const normalized = function () {
+    let res = arguments.length ? fn.apply(null, arguments) : fn({});
+    res = res && typeof res === 'object' && !Array.isArray(res)
       ? [res] // single vnode
-      : normalizeChildren(res)
+      : normalizeChildren(res);
+    return res && (
+      res.length === 0 ||
+      (res.length === 1 && res[0].isComment) // #9658
+    ) ? undefined
+      : res
+  };
+  // this is a slot using the new v-slot syntax without scope. although it is
+  // compiled as a scoped slot, render fn users would expect it to be present
+  // on this.$slots because the usage is semantically a normal slot.
+  if (fn.proxy) {
+    Object.defineProperty(normalSlots, key, {
+      get: normalized,
+      enumerable: true,
+      configurable: true
+    });
   }
+  return normalized
 }
 
 function proxyNormalSlot(slots, key) {
@@ -2753,12 +2805,13 @@ function bindObjectProps (
             : data.attrs || (data.attrs = {});
         }
         const camelizedKey = camelize(key);
-        if (!(key in hash) && !(camelizedKey in hash)) {
+        const hyphenatedKey = hyphenate(key);
+        if (!(camelizedKey in hash) && !(hyphenatedKey in hash)) {
           hash[key] = value[key];
 
           if (isSync) {
             const on = data.on || (data.on = {});
-            on[`update:${camelizedKey}`] = function ($event) {
+            on[`update:${key}`] = function ($event) {
               value[key] = $event;
             };
           }
@@ -2855,17 +2908,26 @@ function bindObjectListeners (data, value) {
 
 function resolveScopedSlots (
   fns, // see flow/vnode
+  res,
+  // the following are added in 2.6
   hasDynamicKeys,
-  res
+  contentHashKey
 ) {
   res = res || { $stable: !hasDynamicKeys };
   for (let i = 0; i < fns.length; i++) {
     const slot = fns[i];
     if (Array.isArray(slot)) {
-      resolveScopedSlots(slot, hasDynamicKeys, res);
+      resolveScopedSlots(slot, res, hasDynamicKeys);
     } else if (slot) {
+      // marker for reverse proxying v-slot without scope on this.$slots
+      if (slot.proxy) {
+        slot.fn.proxy = true;
+      }
       res[slot.key] = slot.fn;
     }
+  }
+  if (contentHashKey) {
+    (res).$key = contentHashKey;
   }
   return res
 }
@@ -2951,7 +3013,15 @@ function FunctionalRenderContext (
   this.parent = parent;
   this.listeners = data.on || emptyObject;
   this.injections = resolveInject(options.inject, parent);
-  this.slots = () => resolveSlots(children, parent);
+  this.slots = () => {
+    if (!this.$slots) {
+      normalizeScopedSlots(
+        data.scopedSlots,
+        this.$slots = resolveSlots(children, parent)
+      );
+    }
+    return this.$slots
+  };
 
   Object.defineProperty(this, 'scopedSlots', ({
     enumerable: true,
@@ -3474,7 +3544,8 @@ function renderMixin (Vue) {
     if (_parentVnode) {
       vm.$scopedSlots = normalizeScopedSlots(
         _parentVnode.data.scopedSlots,
-        vm.$slots
+        vm.$slots,
+        vm.$scopedSlots
       );
     }
 
@@ -3567,17 +3638,23 @@ function resolveAsyncComponent (
     return factory.resolved
   }
 
+  const owner = currentRenderingInstance;
+  if (owner && isDef(factory.owners) && factory.owners.indexOf(owner) === -1) {
+    // already pending
+    factory.owners.push(owner);
+  }
+
   if (isTrue(factory.loading) && isDef(factory.loadingComp)) {
     return factory.loadingComp
   }
 
-  const owner = currentRenderingInstance;
-  if (isDef(factory.owners)) {
-    // already pending
-    factory.owners.push(owner);
-  } else {
+  if (owner && !isDef(factory.owners)) {
     const owners = factory.owners = [owner];
     let sync = true;
+    let timerLoading = null;
+    let timerTimeout = null
+
+    ;(owner).$on('hook:destroyed', () => remove(owners, owner));
 
     const forceRender = (renderCompleted) => {
       for (let i = 0, l = owners.length; i < l; i++) {
@@ -3586,6 +3663,14 @@ function resolveAsyncComponent (
 
       if (renderCompleted) {
         owners.length = 0;
+        if (timerLoading !== null) {
+          clearTimeout(timerLoading);
+          timerLoading = null;
+        }
+        if (timerTimeout !== null) {
+          clearTimeout(timerTimeout);
+          timerTimeout = null;
+        }
       }
     };
 
@@ -3632,7 +3717,8 @@ function resolveAsyncComponent (
           if (res.delay === 0) {
             factory.loading = true;
           } else {
-            setTimeout(() => {
+            timerLoading = setTimeout(() => {
+              timerLoading = null;
               if (isUndef(factory.resolved) && isUndef(factory.error)) {
                 factory.loading = true;
                 forceRender(false);
@@ -3642,7 +3728,8 @@ function resolveAsyncComponent (
         }
 
         if (isDef(res.timeout)) {
-          setTimeout(() => {
+          timerTimeout = setTimeout(() => {
+            timerTimeout = null;
             if (isUndef(factory.resolved)) {
               reject(
                 `timeout (${res.timeout}ms)`
@@ -4030,9 +4117,12 @@ function updateChildComponent (
   // check if there are dynamic scopedSlots (hand-written or compiled but with
   // dynamic slot names). Static scoped slots compiled from template has the
   // "$stable" marker.
+  const newScopedSlots = parentVnode.data.scopedSlots;
+  const oldScopedSlots = vm.$scopedSlots;
   const hasDynamicScopedSlot = !!(
-    (parentVnode.data.scopedSlots && !parentVnode.data.scopedSlots.$stable) ||
-    (vm.$scopedSlots !== emptyObject && !vm.$scopedSlots.$stable)
+    (newScopedSlots && !newScopedSlots.$stable) ||
+    (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) ||
+    (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key)
   );
 
   // Any static slot children from the parent may have changed during parent's
@@ -4185,11 +4275,21 @@ let getNow = Date.now;
 // timestamp can either be hi-res (relative to page load) or low-res
 // (relative to UNIX epoch), so in order to compare time we have to use the
 // same timestamp type when saving the flush timestamp.
-if (inBrowser && getNow() > document.createEvent('Event').timeStamp) {
-  // if the low-res timestamp which is bigger than the event timestamp
-  // (which is evaluated AFTER) it means the event is using a hi-res timestamp,
-  // and we need to use the hi-res version for event listeners as well.
-  getNow = () => performance.now();
+// All IE versions use low-res event timestamps, and have problematic clock
+// implementations (#9632)
+if (inBrowser && !isIE) {
+  const performance = window.performance;
+  if (
+    performance &&
+    typeof performance.now === 'function' &&
+    getNow() > document.createEvent('Event').timeStamp
+  ) {
+    // if the event timestamp, although evaluated AFTER the Date.now(), is
+    // smaller than it, it means the event is using a hi-res timestamp,
+    // and we need to use the hi-res version for event listener timestamps as
+    // well.
+    getNow = () => performance.now();
+  }
 }
 
 /**
@@ -5364,7 +5464,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.6.3';
+Vue.version = '2.6.10';
 
 /*  */
 
@@ -7442,9 +7542,19 @@ function add$1 (
     const original = handler;
     handler = original._wrapper = function (e) {
       if (
+        // no bubbling, should always fire.
+        // this is just a safety net in case event.timeStamp is unreliable in
+        // certain weird environments...
+        e.target === e.currentTarget ||
+        // event is fired after handler attachment
         e.timeStamp >= attachedTimestamp ||
+        // bail for environments that have buggy event.timeStamp implementations
+        // #9462 iOS 9 bug: event.timeStamp is 0 after history.pushState
+        // #9681 QtWebEngine event.timeStamp is negative value
+        e.timeStamp <= 0 ||
         // #9448 bail if event is fired in another document in a multi-page
-        // electron/nw.js app
+        // electron/nw.js app, since event.timeStamp will be using a different
+        // starting reference
         e.target.ownerDocument !== document
       ) {
         return original.apply(this, arguments)
@@ -7508,10 +7618,11 @@ function updateDOMProps (oldVnode, vnode) {
   }
 
   for (key in oldProps) {
-    if (isUndef(props[key])) {
+    if (!(key in props)) {
       elm[key] = '';
     }
   }
+
   for (key in props) {
     cur = props[key];
     // ignore children if the node has textContent or innerHTML,
@@ -7527,15 +7638,7 @@ function updateDOMProps (oldVnode, vnode) {
       }
     }
 
-    // skip the update if old and new VDOM state is the same.
-    // the only exception is `value` where the DOM value may be temporarily
-    // out of sync with VDOM state due to focus, composition and modifiers.
-    // This also covers #4521 by skipping the unnecesarry `checked` update.
-    if (key !== 'value' && cur === oldProps[key]) {
-      continue
-    }
-
-    if (key === 'value') {
+    if (key === 'value' && elm.tagName !== 'PROGRESS') {
       // store value as _value as well since
       // non-string values will be stringified
       elm._value = cur;
@@ -7555,8 +7658,18 @@ function updateDOMProps (oldVnode, vnode) {
       while (svg.firstChild) {
         elm.appendChild(svg.firstChild);
       }
-    } else {
-      elm[key] = cur;
+    } else if (
+      // skip the update if old and new VDOM state is the same.
+      // `value` is handled separately because the DOM value may be temporarily
+      // out of sync with VDOM state due to focus, composition and modifiers.
+      // This  #4521 by skipping the unnecesarry `checked` update.
+      cur !== oldProps[key]
+    ) {
+      // some property updates can throw
+      // e.g. `value` on <progress> w/ non-finite value
+      try {
+        elm[key] = cur;
+      } catch (e) {}
     }
   }
 }
@@ -8056,8 +8169,8 @@ function enter (vnode, toggleDisplay) {
   let context = activeInstance;
   let transitionNode = activeInstance.$vnode;
   while (transitionNode && transitionNode.parent) {
-    transitionNode = transitionNode.parent;
     context = transitionNode.context;
+    transitionNode = transitionNode.parent;
   }
 
   const isAppear = !context._isMounted || !vnode.isRootInsert;
@@ -9142,7 +9255,7 @@ const isNonPhrasingTag = makeMap(
 // Regular Expressions for parsing tags and attributes
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
 const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
-const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeLetters}]*`;
+const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`;
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`;
 const startTagOpen = new RegExp(`^<${qnameCapture}`);
 const startTagClose = /^\s*(\/?)>/;
@@ -9404,7 +9517,7 @@ function parseHTML (html, options) {
         ) {
           options.warn(
             `tag <${stack[i].tag}> has no matching end tag.`,
-            { start: stack[i].start }
+            { start: stack[i].start, end: stack[i].end }
           );
         }
         if (options.end) {
@@ -9441,7 +9554,7 @@ const dynamicArgRE = /^\[.*\]$/;
 
 const argRE = /:(.*)$/;
 const bindRE = /^:|^\.|^v-bind:/;
-const modifierRE = /\.[^.]+/g;
+const modifierRE = /\.[^.\]]+(?=[^\]]*$)/g;
 
 const slotRE = /^v-slot(:|$)|^#/;
 
@@ -9618,7 +9731,7 @@ function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
-    start (tag, attrs, unary, start) {
+    start (tag, attrs, unary, start, end) {
       // check namespace.
       // inherit parent ns if there is one
       const ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag);
@@ -9637,6 +9750,7 @@ function parse (
       {
         if (options.outputSourceRange) {
           element.start = start;
+          element.end = end;
           element.rawAttrsMap = element.attrsList.reduce((cumulated, attr) => {
             cumulated[attr.name] = attr;
             return cumulated
@@ -9758,7 +9872,7 @@ function parse (
         text = preserveWhitespace ? ' ' : '';
       }
       if (text) {
-        if (whitespaceOption === 'condense') {
+        if (!inPre && whitespaceOption === 'condense') {
           // condense consecutive whitespaces into single space
           text = text.replace(whitespaceRE$1, ' ');
         }
@@ -10615,7 +10729,7 @@ function isDirectChildOfTemplateFor (node) {
 
 /*  */
 
-const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/;
+const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*(?:[\w$]+)?\s*\(/;
 const fnInvokeRE = /\([^)]*?\);*$/;
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/;
 
@@ -10752,7 +10866,13 @@ function genHandler (handler) {
 }
 
 function genKeyFilter (keys) {
-  return `if(('keyCode' in $event)&&${keys.map(genFilterCode).join('&&')})return null;`
+  return (
+    // make sure the key filters only apply to KeyboardEvents
+    // #9441: can't use 'keyCode' in $event because Chrome autofill fires fake
+    // key events that do not have keyCode property...
+    `if(!$event.type.indexOf('key')&&` +
+    `${keys.map(genFilterCode).join('&&')})return null;`
+  )
 }
 
 function genFilterCode (key) {
@@ -11157,28 +11277,72 @@ function genScopedSlots (
   // components with only scoped slots to skip forced updates from parent.
   // but in some cases we have to bail-out of this optimization
   // for example if the slot contains dynamic names, has v-if or v-for on them...
-  let needsForceUpdate = Object.keys(slots).some(key => {
+  let needsForceUpdate = el.for || Object.keys(slots).some(key => {
     const slot = slots[key];
-    return slot.slotTargetDynamic || slot.if || slot.for
+    return (
+      slot.slotTargetDynamic ||
+      slot.if ||
+      slot.for ||
+      containsSlotChild(slot) // is passing down slot from parent which may be dynamic
+    )
   });
-  // OR when it is inside another scoped slot (the reactivity is disconnected)
-  // #9438
+
+  // #9534: if a component with scoped slots is inside a conditional branch,
+  // it's possible for the same component to be reused but with different
+  // compiled slot content. To avoid that, we generate a unique key based on
+  // the generated code of all the slot contents.
+  let needsKey = !!el.if;
+
+  // OR when it is inside another scoped slot or v-for (the reactivity may be
+  // disconnected due to the intermediate scope variable)
+  // #9438, #9506
+  // TODO: this can be further optimized by properly analyzing in-scope bindings
+  // and skip force updating ones that do not actually use scope variables.
   if (!needsForceUpdate) {
     let parent = el.parent;
     while (parent) {
-      if (parent.slotScope && parent.slotScope !== emptySlotScopeToken) {
+      if (
+        (parent.slotScope && parent.slotScope !== emptySlotScopeToken) ||
+        parent.for
+      ) {
         needsForceUpdate = true;
         break
+      }
+      if (parent.if) {
+        needsKey = true;
       }
       parent = parent.parent;
     }
   }
 
-  return `scopedSlots:_u([${
-    Object.keys(slots).map(key => {
-      return genScopedSlot(slots[key], state)
-    }).join(',')
-  }]${needsForceUpdate ? `,true` : ``})`
+  const generatedSlots = Object.keys(slots)
+    .map(key => genScopedSlot(slots[key], state))
+    .join(',');
+
+  return `scopedSlots:_u([${generatedSlots}]${
+    needsForceUpdate ? `,null,true` : ``
+  }${
+    !needsForceUpdate && needsKey ? `,null,false,${hash(generatedSlots)}` : ``
+  })`
+}
+
+function hash(str) {
+  let hash = 5381;
+  let i = str.length;
+  while(i) {
+    hash = (hash * 33) ^ str.charCodeAt(--i);
+  }
+  return hash >>> 0
+}
+
+function containsSlotChild (el) {
+  if (el.type === 1) {
+    if (el.tag === 'slot') {
+      return true
+    }
+    return el.children.some(containsSlotChild)
+  }
+  return false
 }
 
 function genScopedSlot (
@@ -11202,7 +11366,9 @@ function genScopedSlot (
         : genChildren(el, state) || 'undefined'
       : genElement(el, state)
     }}`;
-  return `{key:${el.slotTarget || `"default"`},fn:${fn}}`
+  // reverse proxy v-slot without scope on this.$slots
+  const reverseProxy = slotScope ? `` : `,proxy:true`;
+  return `{key:${el.slotTarget || `"default"`},fn:${fn}${reverseProxy}}`
 }
 
 function genChildren (
@@ -11504,11 +11670,13 @@ function generateCodeFrame (
 
 function repeat (str, n) {
   let result = '';
-  while (true) { // eslint-disable-line
-    if (n & 1) result += str;
-    n >>>= 1;
-    if (n <= 0) break
-    str += str;
+  if (n > 0) {
+    while (true) { // eslint-disable-line
+      if (n & 1) result += str;
+      n >>>= 1;
+      if (n <= 0) break
+      str += str;
+    }
   }
   return result
 }
