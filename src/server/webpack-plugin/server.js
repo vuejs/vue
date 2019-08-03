@@ -1,4 +1,4 @@
-import { validate, isJS, onEmit } from './util'
+import { validate, isJS, onEmit, warn } from './util'
 
 export default class VueSSRServerPlugin {
   constructor (options = {}) {
@@ -23,7 +23,7 @@ export default class VueSSRServerPlugin {
       const entryAssets = entryInfo.assets.filter(isJS)
 
       if (entryAssets.length > 1) {
-        throw new Error(
+        warn(
           `Server-side bundle should have one single entry file. ` +
           `Avoid using CommonsChunkPlugin in the server config.`
         )
