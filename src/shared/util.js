@@ -65,10 +65,16 @@ export function isRegExp (v: any): boolean {
 
 /**
  * Check if val is a valid array index.
+ * http://www.ecma-international.org/ecma-262/6.0/index.html#sec-array-exotic-objects
  */
-export function isValidArrayIndex (val: any): boolean {
+function toUnit32(val: any): number {
+  return Math.floor(Math.abs(Number(val))) % Math.pow(2, 32)
+}
+
+export function isValidArrayIndex(val: any): boolean {
+  const numbericKey = toUnit32(val)
   const n = parseFloat(String(val))
-  return n >= 0 && Math.floor(n) === n && isFinite(val)
+  return numbericKey === n && numbericKey < (Math.pow(2, 32) - 1)
 }
 
 export function isPromise (val: any): boolean {
