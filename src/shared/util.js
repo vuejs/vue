@@ -73,8 +73,7 @@ function toUnit32(val: any): number {
 
 export function isValidArrayIndex(val: any): boolean {
   const numbericKey = toUnit32(val)
-  const n = parseFloat(String(val))
-  return numbericKey === n && numbericKey < (Math.pow(2, 32) - 1)
+  return String(numbericKey) === String(val) && numbericKey < (Math.pow(2, 32) - 1)
 }
 
 export function isPromise (val: any): boolean {
