@@ -341,43 +341,43 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Shawn Wildermuth
 - Samuel Smith
 - donny
-- Sean Washington
 - Lars Andreas Ness
+- Sean Washington
 - Keisuke Kita
 - Benjamin Listwon
 - Kirk Lewis
-- Wen-Tien Chang
 - Stephen Michael Hartley
+- Wen-Tien Chang
 - Victor Tolbert
 - Phan An
 - James J. Ye
 - Barbara Liau
 - Luiz
 - Matsumoto Takamasa
-- Matt Jones
+- Guy Gavergun
 - Duncan Kenzie
 - Niannian Modisette
-- Guy Gavergun
+- Matt Jones
 - Bernhard E. Reiter
 - Zoran Knezevic
 - Jon Hobbs-Smith
 - Pierre Vanhulst
-- Anthony Estebe
-- Asaf Yishai
 - Haim Yulzari
+- Asaf Yishai
+- Anthony Estebe
 - Akiho Nagao
 - Jeremy Tan
 - Jim Raden
 - IMGNRY
 - Tyler
-- Daniel Waghorn
 - Guilherme S L de Souza
+- Daniel Waghorn
+- Mickaël Andrieu
+- Vivekanandhan Natarajan
 - Rob Yedlin
 - Rafael Belvederese
-- Vivekanandhan Natarajan
-- Mickaël Andrieu
-- Joe Gregory
 - Jordan Oroshiba
+- Joe Gregory
 - Marcos Moura
 - Jessie Hernandez
 - Eric
@@ -385,49 +385,44 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Christo Crampton
 - Romain Lienard
 - Bohdan Kokotko
-- Alexander Weiher
-- Jere Sjöroos
 - Donald Fischer
-- Wakana Seki
 - Oskar Lindgren
+- Alexander Weiher
 - David Ang
+- Wakana Seki
+- Jere Sjöroos
+- Ben Hong
 - David Kaplan
 - Domenico Gaudioso
 - Jaeyoung Lee
-- Ben Hong
 - Andy
 - Matt Sencenbaugh
-- Joe Cochran
-- Juan Bermudez
-- Alberto T. Payero Mota
+- Shapovalov Pavel
 - Hannes Kochniß
-- Chris Calo
 - Daniel Mattingley
 - Elon Hung
+- Chris Calo
+- Juan Bermudez
 - Soichiro Isshiki
-- Shapovalov Pavel
-- Garion Herman
 - Ed Linklater
-- Andrew Willis
-- Yusuke Kawabata
+- Garion Herman
 - Princeyesuraj Edward
-- 极 蔡
+- Yusuke Kawabata
+- 龙腾道
 - Peter Matkovsky
 - Nick Dandakis
-- 龙腾道
-- Masato Miura
 - Fabien GuySake Ungerer
-- Fedor Indutny
-- Kenneth Crawford
-- Bill Condo
 - Nathan Mallison
+- Bill Condo
+- Kenneth Crawford
 - Pierre Lebrun
 - John Thompson
-- panmenghan
-- Jan-Philipp Schmeißer
 - Martin Bastien
 - Ryan Brewer
+- Merott Movahedi
 - Bichinger Software & Consulting
+- Alfonso Herrera
+- Abhay
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
