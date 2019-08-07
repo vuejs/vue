@@ -701,5 +701,30 @@ describe('codegen', () => {
       `with(this){return _c('div',[(ok)?_l((1),function(i){return _c('foo',{key:i})}):_e()],2)}`
     )
   })
+
+  it('should allow async arrow functions in event handlers', () => {
+    assertCodegen(
+      `<button @click="async () => a += await 2"></button>`,
+      `with(this){return _c('button',{on:{"click":async () => a += await 2}})}`
+    )
+    assertCodegen(
+      `<button @click="async() => a += await 2"></button>`,
+      `with(this){return _c('button',{on:{"click":async() => a += await 2}})}`
+    )
+  })
+
+  it('should allow async arrow functions with parameters in event handlers', () => {
+    assertCodegen(
+      `<button @click="async n => n += await 2"></button>`,
+      `with(this){return _c('button',{on:{"click":async n => n += await 2}})}`
+    )
+  })
+
+  it('should allow async functions in event handlers', () => {
+    assertCodegen(
+      `<button @click="async function () { a += await 2}"></button>`,
+      `with(this){return _c('button',{on:{"click":async function () { a += await 2}}})}`
+    )
+  })
 })
 /* eslint-enable quotes */
