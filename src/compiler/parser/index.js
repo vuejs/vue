@@ -698,6 +698,13 @@ function processSlotContent (el) {
         slotContainer.children = el.children.filter((c: any) => {
           if (!c.slotScope) {
             c.parent = slotContainer
+            if (c.ifConditions) {
+              // #10330
+              // update every element's parent when it is in the other condition branch
+              // so we can find correctly whether the element is inside another scoped slot when
+              // generating scoped slot's rendering code, and this will trigger force updating
+              c.ifConditions.forEach(({block}) => block.parent = slotContainer)
+            }
             return true
           }
         })

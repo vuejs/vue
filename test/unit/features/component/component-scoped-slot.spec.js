@@ -1325,4 +1325,39 @@ describe('Component scoped slot', () => {
       expect(vm.$el.textContent).toMatch(`1`)
     }).then(done)
   })
+
+  // #10330
+  it('nested v-slot should be reactive when v-slot on component itself combined with v-if/v-else', done => {
+    const Container = {
+      template: `<div><slot v-bind="n" /></div>`,
+      props: ['n']
+    }
+
+    const Nested = {
+      template: `<div><slot v-bind="m" /></div>`,
+      props: ['m']
+    }
+
+    const vm = new Vue({
+      data: {
+        n: { value: 0 }, 
+        disabled: false
+      },
+      components: { Container, Nested },
+      template: `
+        <container v-slot="n" :n="n">
+          <div v-if="disabled">Disabled</div>
+          <nested v-else v-slot="m" :m="n">
+            {{n.value}} {{m.value}}
+          </nested>
+        </container>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toMatch(`0 0`)
+    vm.n.value++
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toMatch(`1 1`)
+    }).then(done)
+  })
 })
