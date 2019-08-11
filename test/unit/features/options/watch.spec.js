@@ -106,6 +106,29 @@ describe('Options watch', () => {
     }).then(done)
   })
 
+  it('with option: deep and with reference to a Vue instance', done => {
+    const vueInstance = new Vue();
+    const vm = new Vue({
+      data: { a: { b: vueInstance }},
+      watch: {
+        a: {
+          handler: spy,
+          deep: true
+        }
+      }
+    })
+    const oldA = vm.a
+    expect(spy).not.toHaveBeenCalled()
+    vm.a.b = 2
+    expect(spy).not.toHaveBeenCalled()
+    waitForUpdate(() => {
+      expect(spy).toHaveBeenCalledWith(vm.a, vm.a)
+      vm.a = { b: 3 }
+    }).then(() => {
+      expect(spy).toHaveBeenCalledWith(vm.a, oldA)
+    }).then(done)
+  })
+
   it('correctly merges multiple extends', done => {
     const spy2 = jasmine.createSpy('A')
     const spy3 = jasmine.createSpy('B')

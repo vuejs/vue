@@ -3,6 +3,8 @@
 import { _Set as Set, isObject } from '../util/index'
 import type { SimpleSet } from '../util/index'
 import VNode from '../vdom/vnode'
+import Vue from '../instance/index'
+
 
 const seenObjects = new Set()
 
@@ -19,7 +21,7 @@ export function traverse (val: any) {
 function _traverse (val: any, seen: SimpleSet) {
   let i, keys
   const isA = Array.isArray(val)
-  if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode) {
+  if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode || val instanceof Vue) {
     return
   }
   if (val.__ob__) {
