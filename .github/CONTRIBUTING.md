@@ -117,9 +117,9 @@ The default test script will do the following: lint with ESLint -> type check wi
 
   - **`shared`**: contains utilities shared across the entire codebase.
 
-  - **`types`**: contains TypeScript type definitions
+- **`types`**: contains TypeScript type definitions
 
-    - **`test`**: contains type definitions tests
+  - **`test`**: contains type definitions tests
 
 
 ## Financial Contribution
