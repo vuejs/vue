@@ -177,7 +177,7 @@ export interface WatchOptions {
 }
 
 export interface WatchOptionsWithHandler<T> extends WatchOptions {
-  handler: WatchHandler<T>;
+  handler: WatchHandler<T> | string;
 }
 
 export interface DirectiveBinding extends Readonly<VNodeDirective> {
