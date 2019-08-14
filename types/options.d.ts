@@ -169,7 +169,7 @@ export interface ComputedOptions<T> {
   cache?: boolean;
 }
 
-export type WatchHandler<T> = (val: T, oldVal: T) => void;
+export type WatchHandler<T> = string | ((val: T, oldVal: T) => void);
 
 export interface WatchOptions {
   deep?: boolean;
@@ -177,7 +177,7 @@ export interface WatchOptions {
 }
 
 export interface WatchOptionsWithHandler<T> extends WatchOptions {
-  handler: WatchHandler<T> | string;
+  handler: WatchHandler<T>;
 }
 
 export interface DirectiveBinding extends Readonly<VNodeDirective> {
