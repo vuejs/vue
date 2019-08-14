@@ -76,7 +76,7 @@ export interface ComponentOptions<
   propsData?: object;
   computed?: Accessors<Computed>;
   methods?: Methods;
-  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any> | string>;
+  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any>>;
 
   el?: Element | string;
   template?: string;
