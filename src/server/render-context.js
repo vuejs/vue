@@ -105,7 +105,7 @@ export class RenderContext {
             this.write.caching = false
           } else {
             // parent component is also being cached,
-            // merge self into parent's result
+            // merge self into parent's result.
             buffer[bufferIndex - 1] += result.html
             const prev = componentBuffer[bufferIndex - 1]
             result.components.forEach(c => prev.add(c))
