@@ -13,7 +13,8 @@ export const mustUseProp = (tag: string, type: ?string, attr: string): boolean =
     (attr === 'value' && acceptValue(tag)) && type !== 'button' ||
     (attr === 'selected' && tag === 'option') ||
     (attr === 'checked' && tag === 'input') ||
-    (attr === 'muted' && tag === 'video')
+    (attr === 'muted' && tag === 'video') ||
+    (attr === 'muted' && tag === 'audio')
   )
 }
 
