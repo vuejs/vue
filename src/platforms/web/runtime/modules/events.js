@@ -2,7 +2,7 @@
 
 import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
-import { isIE, isFF, supportsPassive, isUsingMicroTask } from 'core/util/index'
+import { isIE, isFF, isCEP, supportsPassive, isUsingMicroTask } from 'core/util/index'
 import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model'
 import { currentFlushTimestamp } from 'core/observer/scheduler'
 
@@ -44,6 +44,14 @@ function createOnceHandler (event, handler, capture) {
 // safe to exclude.
 const useMicrotaskFix = isUsingMicroTask && !(isFF && Number(isFF[1]) <= 53)
 
+// #10366: CEP <= 9.3.x has a buggy Event.timeStamp implementation. While the
+// issue is restricted to macOS, the fix is OS-agnostic to keep behavioral
+// differences to a minimum.
+const isCEP93orEarlier = isCEP && ((maxBadMajor, maxBadMinor) => {
+  const version = JSON.parse(window.__adobe_cep__.getCurrentApiVersion())
+  return version.major <= maxBadMajor && version.minor <= maxBadMinor
+})(9, 3)
+
 function add (
   name: string,
   handler: Function,
@@ -71,6 +79,9 @@ function add (
         // #9462 iOS 9 bug: event.timeStamp is 0 after history.pushState
         // #9681 QtWebEngine event.timeStamp is negative value
         e.timeStamp <= 0 ||
+        // #10366 Adobe CEP bug: event.timeStamp is not reliable on macOS for
+        // host applications with CEP versions prior to 9.4.x.
+        isCEP93orEarlier ||
         // #9448 bail if event is fired in another document in a multi-page
         // electron/nw.js app, since event.timeStamp will be using a different
         // starting reference
