@@ -19,7 +19,7 @@ export function renderList (
     for (i = 0, l = val.length; i < l; i++) {
       ret[i] = render(val[i], i)
     }
-  } else if (typeof val === 'number') {
+  } else if (typeof val === 'number' && !isNaN(val)) {
     ret = new Array(val)
     for (i = 0; i < val; i++) {
       ret[i] = render(i + 1, i)
