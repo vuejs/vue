@@ -83,11 +83,18 @@ export function isPromise (val: any): boolean {
  * Convert a value to a string that is actually rendered.
  */
 export function toString (val: any): string {
-  return val == null
-    ? ''
-    : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
-      ? JSON.stringify(val, null, 2)
-      : String(val)
+  // TrustedTypes have been renamed to trustedTypes https://github.com/WICG/trusted-types/issues/177
+  const tt = window.trustedTypes || window.TrustedTypes;
+  // TrustedURLs are deprecated and will be removed soon: https://github.com/WICG/trusted-types/pull/204
+  if (tt && (tt.isHTML(val) || tt.isScript(val) || tt.isScriptURL(val) || (tt.isURL && tt.isURL(val)))) {
+    return val;
+  } else {
+    return val == null
+      ? ''
+      : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
+        ? JSON.stringify(val, null, 2)
+        : String(val)
+  }
 }
 
 /**

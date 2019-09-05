@@ -1,12 +1,13 @@
 /* @flow */
 
 import { inBrowser } from 'core/util/index'
+import {convertToTrustedType} from 'web/security'
 
 // check whether current browser encodes a char inside attribute values
 let div
 function getShouldDecode (href: boolean): boolean {
   div = div || document.createElement('div')
-  div.innerHTML = href ? `<a href="\n"/>` : `<div a="\n"/>`
+  div.innerHTML = convertToTrustedType(href ? `<a href="\n"/>` : `<div a="\n"/>`)
   return div.innerHTML.indexOf('&#10;') > 0
 }
 

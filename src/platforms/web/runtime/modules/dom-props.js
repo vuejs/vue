@@ -2,6 +2,7 @@
 
 import { isDef, isUndef, extend, toNumber } from 'shared/util'
 import { isSVG } from 'web/util/index'
+import {convertToTrustedType} from 'web/security'
 
 let svgContainer
 
@@ -20,6 +21,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
   for (key in oldProps) {
     if (!(key in props)) {
+      // TT_TODO: when (how) is this even called
       elm[key] = ''
     }
   }
@@ -51,7 +53,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     } else if (key === 'innerHTML' && isSVG(elm.tagName) && isUndef(elm.innerHTML)) {
       // IE doesn't support innerHTML for SVG elements
       svgContainer = svgContainer || document.createElement('div')
-      svgContainer.innerHTML = `<svg>${cur}</svg>`
+      svgContainer.innerHTML = convertToTrustedType(`<svg>${cur}</svg>`)
       const svg = svgContainer.firstChild
       while (elm.firstChild) {
         elm.removeChild(elm.firstChild)
