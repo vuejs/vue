@@ -2,7 +2,7 @@
 
 import { isDef, isUndef, extend, toNumber } from 'shared/util'
 import { isSVG } from 'web/util/index'
-import {convertToTrustedType} from 'web/security'
+import {maybeCreateDangerousSvgHTML} from 'web/security'
 
 let svgContainer
 
@@ -53,7 +53,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     } else if (key === 'innerHTML' && isSVG(elm.tagName) && isUndef(elm.innerHTML)) {
       // IE doesn't support innerHTML for SVG elements
       svgContainer = svgContainer || document.createElement('div')
-      svgContainer.innerHTML = convertToTrustedType(`<svg>${cur}</svg>`)
+      svgContainer.innerHTML = maybeCreateDangerousSvgHTML(cur)
       const svg = svgContainer.firstChild
       while (elm.firstChild) {
         elm.removeChild(elm.firstChild)

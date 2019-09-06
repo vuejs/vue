@@ -33,6 +33,9 @@ export type Config = {
 
   // legacy
   _lifecycleHooks: Array<string>;
+
+  // trusted types (https://github.com/WICG/trusted-types)
+  trustedTypesPolicyName: string;
 };
 
 export default ({
@@ -126,5 +129,11 @@ export default ({
   /**
    * Exposed for legacy reasons
    */
-  _lifecycleHooks: LIFECYCLE_HOOKS
+  _lifecycleHooks: LIFECYCLE_HOOKS,
+
+  /**
+   * Trusted Types policy name which will be used by Vue. More
+   * info about Trusted Types on https://github.com/WICG/trusted-types.
+   */
+  trustedTypesPolicyName: 'vue'
 }: Config)
