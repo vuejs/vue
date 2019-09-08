@@ -55,6 +55,33 @@ describe('Directive v-for', () => {
       expect(vm.$el.innerHTML).toBe('<span>0-x</span><span>1-y</span>')
     }).then(done)
   })
+  
+  it('should render array of primitive values with loop', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <span v-for="(item, i, loop) in list">{{i}}-{{item}}{{loop.first ? '-first' : '' }}{{loop.last ? '-last' : '' }}{{loop.odd ? '-odd' : '' }}{{loop.even ? '-even' : '' }}{{loop.remaining == 2 ? '-more-2' : '' }}</span>
+        </div>
+      `,
+      data: {
+        list: ['a', 'b', 'c']
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<span>0-a-first-even-more-2</span><span>1-b-odd</span><span>2-c-last-even</span>')
+    Vue.set(vm.list, 0, 'd')
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<span>0-d-first-even-more-2</span><span>1-b-odd</span><span>2-c-last-even</span>')
+      vm.list.push('d')
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe('<span>0-d-first-even</span><span>1-b-odd-more-2</span><span>2-c-even</span><span>3-d-last-odd</span>')
+      vm.list.splice(1, 2)
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe('<span>0-d-first-even</span><span>1-d-last-odd</span>')
+      vm.list = ['x', 'y']
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe('<span>0-x-first-even</span><span>1-y-last-odd</span>')
+    }).then(done)
+  })
 
   it('should render array of object values', done => {
     const vm = new Vue({
@@ -121,6 +148,40 @@ describe('Directive v-for', () => {
       vm.list = [{ value: 'x' }, { value: 'y' }]
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>0-x</span><span>1-y</span>')
+    }).then(done)
+  })
+
+  it('should render array of object values with loop', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <span v-for="(item, i, loop) in list">{{i}}-{{item.value}}{{loop.first ? '-first' : '' }}{{loop.last ? '-last' : '' }}{{loop.odd ? '-odd' : '' }}{{loop.even ? '-even' : '' }}{{loop.remaining == 2 ? '-more-2' : '' }}</span>
+        </div>
+      `,
+      data: {
+        list: [
+          { value: 'a' },
+          { value: 'b' },
+          { value: 'c' }
+        ]
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<span>0-a-first-even-more-2</span><span>1-b-odd</span><span>2-c-last-even</span>')
+    Vue.set(vm.list, 0, { value: 'd' })
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<span>0-d-first-even-more-2</span><span>1-b-odd</span><span>2-c-last-even</span>')
+      vm.list[0].value = 'e'
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe('<span>0-e-first-even-more-2</span><span>1-b-odd</span><span>2-c-last-even</span>')
+      vm.list.push({})
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe('<span>0-e-first-even</span><span>1-b-odd-more-2</span><span>2-c-even</span><span>3--last-odd</span>')
+      vm.list.splice(1, 2)
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe('<span>0-e-first-even</span><span>1--last-odd</span>')
+      vm.list = [{ value: 'x' }, { value: 'y' }]
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe('<span>0-x-first-even</span><span>1-y-last-odd</span>')
     }).then(done)
   })
 
@@ -236,6 +297,52 @@ describe('Directive v-for', () => {
       }).then(done)
     })
 
+    it('should render iterable of primitive values with loop', done => {
+      const iterable = {
+        models: ['a', 'b', 'c'],
+        index: 0,
+        [Symbol.iterator] () {
+          const iterator = {
+            index: 0,
+            models: this.models,
+            next () {
+              if (this.index < this.models.length) {
+                return { value: this.models[this.index++] }
+              } else {
+                return { done: true }
+              }
+            }
+          }
+          return iterator
+        }
+      }
+
+      const vm = new Vue({
+        template: `
+          <div>
+          <span v-for="(item, i, loop) in list">{{i}}-{{item}}{{loop.first ? '-first' : '' }}{{loop.last ? '-last' : '' }}{{loop.odd ? '-odd' : '' }}{{loop.even ? '-even' : '' }}{{loop.remaining == 2 ? '-more-2' : '' }}</span>
+          </div>
+        `,
+        data: {
+          list: iterable
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe('<span>0-a-first-even-more-2</span><span>1-b-odd</span><span>2-c-last-even</span>')
+      Vue.set(vm.list.models, 0, 'd')
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-d-first-even-more-2</span><span>1-b-odd</span><span>2-c-last-even</span>')
+        vm.list.models.push('d')
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-d-first-even</span><span>1-b-odd-more-2</span><span>2-c-even</span><span>3-d-last-odd</span>')
+        vm.list.models.splice(1, 2)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-d-first-even</span><span>1-d-last-odd</span>')
+        vm.list.models = ['x', 'y']
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-x-first-even</span><span>1-y-last-odd</span>')
+      }).then(done)
+    })
+
     it('should render iterable of object values', done => {
       const iterable = {
         models: [
@@ -341,6 +448,59 @@ describe('Directive v-for', () => {
         expect(vm.$el.innerHTML).toBe('<span>0-x</span><span>1-y</span>')
       }).then(done)
     })
+    
+    it('should render iterable of object values with loop', done => {
+      const iterable = {
+        models: [
+          { value: 'a' },
+          { value: 'b' },
+          { value: 'c' }
+        ],
+        index: 0,
+        [Symbol.iterator] () {
+          const iterator = {
+            index: 0,
+            models: this.models,
+            next () {
+              if (this.index < this.models.length) {
+                return { value: this.models[this.index++] }
+              } else {
+                return { done: true }
+              }
+            }
+          }
+          return iterator
+        }
+      }
+
+      const vm = new Vue({
+        template: `
+          <div>
+            <span v-for="(item, i, loop) in list">{{i}}-{{item.value}}{{loop.first ? '-first' : '' }}{{loop.last ? '-last' : '' }}{{loop.odd ? '-odd' : '' }}{{loop.even ? '-even' : '' }}{{loop.remaining == 2 ? '-more-2' : '' }}</span>
+          </div>
+        `,
+        data: {
+          list: iterable
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe('<span>0-a-first-even-more-2</span><span>1-b-odd</span><span>2-c-last-even</span>')
+      Vue.set(vm.list.models, 0, { value: 'd' })
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-d-first-even-more-2</span><span>1-b-odd</span><span>2-c-last-even</span>')
+        vm.list.models[0].value = 'e'
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-e-first-even-more-2</span><span>1-b-odd</span><span>2-c-last-even</span>')
+        vm.list.models.push({})
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-e-first-even</span><span>1-b-odd-more-2</span><span>2-c-even</span><span>3--last-odd</span>')
+        vm.list.models.splice(1, 2)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-e-first-even</span><span>1--last-odd</span>')
+        vm.list.models = [{ value: 'x' }, { value: 'y' }]
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-x-first-even</span><span>1-y-last-odd</span>')
+      }).then(done)
+    })
   }
 
   it('should render an Object', done => {
@@ -412,6 +572,30 @@ describe('Directive v-for', () => {
       Vue.delete(vm.obj, 'a')
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>1-b-0</span><span>2-c-1</span><span>4-d-2</span>')
+    }).then(done)
+  })
+
+  it('should render an Object with key and loop', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <span v-for="(val, key, i, loop) in obj">{{val}}-{{key}}-{{i}}{{loop.first ? '-first' : '' }}{{loop.last ? '-last' : '' }}{{loop.odd ? '-odd' : '' }}{{loop.even ? '-even' : '' }}{{loop.remaining == 2 ? '-more-2' : '' }}</span>
+        </div>
+      `,
+      data: {
+        obj: { a: 0, b: 1, c: 2 }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<span>0-a-0-first-even-more-2</span><span>1-b-1-odd</span><span>2-c-2-last-even</span>')
+    vm.obj.a = 3
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<span>3-a-0-first-even-more-2</span><span>1-b-1-odd</span><span>2-c-2-last-even</span>')
+      Vue.set(vm.obj, 'd', 4)
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe('<span>3-a-0-first-even</span><span>1-b-1-odd-more-2</span><span>2-c-2-even</span><span>4-d-3-last-odd</span>')
+      Vue.delete(vm.obj, 'a')
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe('<span>1-b-0-first-even-more-2</span><span>2-c-1-odd</span><span>4-d-2-last-even</span>')
     }).then(done)
   })
 
