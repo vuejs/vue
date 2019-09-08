@@ -284,15 +284,17 @@ describe('parser', () => {
     expect(liAst.alias).toBe('item')
     expect(liAst.iterator1).toBe('index')
     expect(liAst.iterator2).toBeUndefined()
+    expect(liAst.iterator3).toBeUndefined()
   })
 
   it('v-for directive iteration syntax (multiple)', () => {
-    const ast = parse('<ul><li v-for="(item, key, index) in items"></li></ul>', baseOptions)
+    const ast = parse('<ul><li v-for="(item, key, index, loop) in items"></li></ul>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
     expect(liAst.iterator1).toBe('key')
     expect(liAst.iterator2).toBe('index')
+    expect(liAst.iterator3).toBe('loop')
   })
 
   it('v-for directive key', () => {
@@ -335,12 +337,13 @@ describe('parser', () => {
     expect(liAst.iterator1).toBe('i')
 
     // with key + index
-    ast = parse('<ul><li v-for="({ foo }, i, j) in items"></li></ul>', baseOptions)
+    ast = parse('<ul><li v-for="({ foo }, i, j, l) in items"></li></ul>', baseOptions)
     liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('{ foo }')
     expect(liAst.iterator1).toBe('i')
     expect(liAst.iterator2).toBe('j')
+    expect(liAst.iterator3).toBe('l')
 
     // multi-var destructuring with index
     ast = parse('<ul><li v-for="({ foo, bar, baz }, i) in items"></li></ul>', baseOptions)
@@ -381,12 +384,13 @@ describe('parser', () => {
     expect(liAst.iterator1).toBe('i')
 
     // array with key + index
-    ast = parse('<ul><li v-for="([ foo ], i, j) in items"></li></ul>', baseOptions)
+    ast = parse('<ul><li v-for="([ foo ], i, j, l) in items"></li></ul>', baseOptions)
     liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('[ foo ]')
     expect(liAst.iterator1).toBe('i')
     expect(liAst.iterator2).toBe('j')
+    expect(liAst.iterator3).toBe('l')
 
     // multi-array with paren
     ast = parse('<ul><li v-for="([ foo, bar, baz ]) in items"></li></ul>', baseOptions)
@@ -402,20 +406,22 @@ describe('parser', () => {
     expect(liAst.iterator1).toBe('i')
 
     // nested
-    ast = parse('<ul><li v-for="({ foo, bar: { baz }, qux: [ n ] }, i, j) in items"></li></ul>', baseOptions)
+    ast = parse('<ul><li v-for="({ foo, bar: { baz }, qux: [ n ] }, i, j, l) in items"></li></ul>', baseOptions)
     liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('{ foo, bar: { baz }, qux: [ n ] }')
     expect(liAst.iterator1).toBe('i')
     expect(liAst.iterator2).toBe('j')
+    expect(liAst.iterator3).toBe('l')
 
     // array nested
-    ast = parse('<ul><li v-for="([ foo, { bar }, baz ], i, j) in items"></li></ul>', baseOptions)
+    ast = parse('<ul><li v-for="([ foo, { bar }, baz ], i, j, l) in items"></li></ul>', baseOptions)
     liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('[ foo, { bar }, baz ]')
     expect(liAst.iterator1).toBe('i')
     expect(liAst.iterator2).toBe('j')
+    expect(liAst.iterator3).toBe('l')
   })
 
   it('v-for directive invalid syntax', () => {

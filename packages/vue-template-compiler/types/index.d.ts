@@ -133,6 +133,7 @@ export interface ASTElement {
   alias?: string;
   iterator1?: string;
   iterator2?: string;
+  iterator3?: string;
 
   staticClass?: string;
   classBinding?: string;

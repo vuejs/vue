@@ -26,7 +26,7 @@ export const dirRE = process.env.VBIND_PROP_SHORTHAND
   ? /^v-|^@|^:|^\.|^#/
   : /^v-|^@|^:|^#/
 export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
-export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
+export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 const dynamicArgRE = /^\[.*\]$/
 
@@ -506,6 +506,7 @@ type ForParseResult = {
   alias: string;
   iterator1?: string;
   iterator2?: string;
+  iterator3?: string;
 };
 
 export function parseFor (exp: string): ?ForParseResult {
@@ -520,6 +521,9 @@ export function parseFor (exp: string): ?ForParseResult {
     res.iterator1 = iteratorMatch[1].trim()
     if (iteratorMatch[2]) {
       res.iterator2 = iteratorMatch[2].trim()
+    }
+    if (iteratorMatch[3]) {
+      res.iterator3 = iteratorMatch[3].trim()
     }
   } else {
     res.alias = alias
