@@ -216,7 +216,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       </td>
       <td align="center" valign="middle">
         <a href="https://fastcoding.jp/javascript/ " target="_blank">
-          <img width="148px" src="https://cn.vuejs.org/images/fastcoding_inc.svg">
+          <img width="148px" src="https://vuejs.org/images/fastcoding_inc.svg">
         </a>
       </td>
     </tr><tr></tr>
