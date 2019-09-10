@@ -1,5 +1,7 @@
 /* @flow */
 
+import { isObject } from 'shared/util'
+
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
 
@@ -16,7 +18,7 @@ export const isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform ==
 export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
 export const isPhantomJS = UA && /phantomjs/.test(UA)
 export const isFF = UA && UA.match(/firefox\/(\d+)/)
-export const isCEP = inBrowser && window.__adobe_cep__ !== undefined
+export const isCEP = inBrowser && isObject(window.__adobe_cep__)
 
 // Firefox has a "watch" function on Object.prototype...
 export const nativeWatch = ({}).watch
