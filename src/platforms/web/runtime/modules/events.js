@@ -47,10 +47,12 @@ const useMicrotaskFix = isUsingMicroTask && !(isFF && Number(isFF[1]) <= 53)
 // #10366: CEP <= 9.3.x has a buggy Event.timeStamp implementation. While the
 // issue is restricted to macOS, the fix is OS-agnostic to keep behavioral
 // differences to a minimum.
-const isCEP93orEarlier = isCEP && ((maxBadMajor, maxBadMinor) => {
+const isCEP93orEarlier = isCEP &&
+      (typeof window.__adobe_cep__.getCurrentApiVersion !== 'function' ||
+      ((maxBadMajor, maxBadMinor) => {
   const version = JSON.parse(window.__adobe_cep__.getCurrentApiVersion())
   return version.major <= maxBadMajor && version.minor <= maxBadMinor
-})(9, 3)
+})(9, 3))
 
 function add (
   name: string,
