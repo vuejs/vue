@@ -214,6 +214,30 @@ describe('Options provide/inject', () => {
 
       expect(injected).toEqual(['foo', 'bar'])
     })
+
+    it('with Symbol as keys of object inject', () => {
+      const s = Symbol()
+      const vm = new Vue({
+        template: `<child/>`,
+        provide: {
+          [s]: 123
+        },
+        components: {
+          child: {
+            inject: { [s]: s },
+            props: {
+              s: {
+                default () {
+                  return this[s]
+                }
+              }
+            },
+            template: `<div>{{ s }}</div>`
+          }
+        }
+      }).$mount()
+      expect(vm.$el.textContent).toBe('123')
+    })
   }
 
   // GitHub issue #5223

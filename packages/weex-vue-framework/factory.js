@@ -1393,7 +1393,12 @@ function normalizeInject (options, vm) {
       normalized[inject[i]] = { from: inject[i] };
     }
   } else if (isPlainObject(inject)) {
-    for (var key in inject) {
+    var keys = hasSymbol
+      ? Reflect.ownKeys(inject)
+      : Object.keys(inject)
+    var key
+    for (var i = 0; i < keys.length; i++) {
+      key = keys[i]
       var val = inject[key];
       normalized[key] = isPlainObject(val)
         ? extend({ from: key }, val)
