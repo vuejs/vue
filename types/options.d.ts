@@ -26,7 +26,7 @@ export type AsyncComponentPromise<Data=DefaultData<never>, Methods=DefaultMethod
 ) => Promise<Component | EsModuleComponent> | void;
 
 export type AsyncComponentFactory<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = () => {
-  component: AsyncComponentPromise<Data, Methods, Computed, Props>;
+  component: Promise<Component>;
   loading?: Component | EsModuleComponent;
   error?: Component | EsModuleComponent;
   delay?: number;
