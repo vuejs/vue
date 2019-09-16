@@ -79,9 +79,13 @@ export function isPromise (val: any): boolean {
   )
 }
 
+let trustedTypes = undefined
 export function getTrustedTypes() {
-  // TrustedTypes have been renamed to trustedTypes https://github.com/WICG/trusted-types/issues/177
-  return typeof window !== 'undefined' && (window.trustedTypes || window.TrustedTypes);
+  if (trustedTypes === undefined) {
+    // TrustedTypes have been renamed to trustedTypes https://github.com/WICG/trusted-types/issues/177
+    trustedTypes = typeof window !== 'undefined' ? (window.trustedTypes || window.TrustedTypes) : null;
+  }
+  return trustedTypes;
 }
 
 export function isTrustedValue(value: any): boolean {
