@@ -25,27 +25,11 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-// TODO: remove once https://github.com/WICG/trusted-types/issues/36 is resolved.
-function isApplicationUsingTrustedTypes() {
-  // This check actually checks whether Trusted Types are enforced or not.
-  // However application might still use them in report only mode.
-  // This has also a side effect that CSP violation will be triggered.
-  try {
-    document.createElement('div').innerHTML = 'string';
-    return false;
-  } catch (e) {
-    return true;
-  }
-}
-
 export function maybeCreateDangerousSvgHTML(value: any): string {
   const tt = getTrustedTypes()
 
-  if (!tt || !isApplicationUsingTrustedTypes()) return `<svg>${value}</svg>`;
-  else if (!isTrustedValue(value)) {
-    throw new Error('Expected svg innerHTML to be TrustedHTML!');
-  }
-  // flow complains that 'getOrCreatePolicy()' might return null.
+  if (!tt || !isTrustedValue(value)) return `<svg>${value}</svg>`;
+  // flow complains that 'getOrCreatePolicy()' might return null
   else return (getOrCreatePolicy(): any).createHTML(`<svg>${value}</svg>`);
 }
 

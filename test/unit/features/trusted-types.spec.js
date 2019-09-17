@@ -201,7 +201,8 @@ describe('rendering with trusted types enforced', () => {
 
       expect(() => {
         vm.$mount();
-      }).toThrowError('Expected svg innerHTML to be TrustedHTML!');
+      }).toThrow();
+      expect(errorLog).toEqual([createTTErrorMessage('innerHTML', `<svg>${unsafeHtml}</svg>`)]);
     });
 
     it('passes if payload is TrustedHTML', () => {
