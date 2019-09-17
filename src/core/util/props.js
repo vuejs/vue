@@ -233,7 +233,7 @@ function styleValue (value, type) {
 }
 
 const EXPLICABLE_TYPES = ['string', 'number', 'boolean']
-function isExplicable(value) {
+function isExplicable (value) {
   return EXPLICABLE_TYPES.some(elem => value.toLowerCase() === elem)
 }
 
