@@ -351,90 +351,88 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <!--10 start-->
 - Masahiro Tanaka
 - Shawn Wildermuth
-- Samuel Smith
-- donny
-- Lars Andreas Ness
 - Sean Washington
+- Lars Andreas Ness
 - Keisuke Kita
 - Benjamin Listwon
 - Kirk Lewis
-- Stephen Michael Hartley
 - Wen-Tien Chang
 - Victor Tolbert
+- Stephen Michael Hartley
 - Phan An
 - James J. Ye
 - Barbara Liau
-- Luiz
 - Matsumoto Takamasa
 - Guy Gavergun
-- Duncan Kenzie
-- Niannian Modisette
 - Matt Jones
+- Niannian Modisette
+- Duncan Kenzie
 - Bernhard E. Reiter
 - Zoran Knezevic
 - Jon Hobbs-Smith
 - Pierre Vanhulst
-- Haim Yulzari
 - Asaf Yishai
+- Haim Yulzari
 - Anthony Estebe
 - Akiho Nagao
-- Jeremy Tan
 - Jim Raden
+- Jeremy Tan
 - IMGNRY
 - Tyler
+- Rob Yedlin
 - Guilherme S L de Souza
-- Daniel Waghorn
 - Mickaël Andrieu
 - Vivekanandhan Natarajan
-- Rob Yedlin
-- Rafael Belvederese
-- Jordan Oroshiba
 - Joe Gregory
+- Jordan Oroshiba
 - Marcos Moura
 - Jessie Hernandez
-- Eric
 - Ivan Sieder
-- Christo Crampton
+- Eric
 - Romain Lienard
 - Bohdan Kokotko
-- Donald Fischer
+- Christo Crampton
 - Oskar Lindgren
-- Alexander Weiher
-- David Ang
 - Wakana Seki
+- Alexander Weiher
+- Donald Fischer
 - Jere Sjöroos
-- Ben Hong
+- David Ang
 - David Kaplan
-- Domenico Gaudioso
 - Jaeyoung Lee
+- Shapovalov Pavel
+- Domenico Gaudioso
 - Andy
 - Matt Sencenbaugh
-- Shapovalov Pavel
+- Chris Calo
+- Elon Hung
 - Hannes Kochniß
 - Daniel Mattingley
-- Elon Hung
-- Chris Calo
 - Juan Bermudez
 - Soichiro Isshiki
-- Ed Linklater
 - Garion Herman
+- Ed Linklater
+- Andrew Willis
 - Princeyesuraj Edward
 - Yusuke Kawabata
 - 龙腾道
-- Peter Matkovsky
 - Nick Dandakis
+- Peter Matkovsky
 - Fabien GuySake Ungerer
+- Kenneth Crawford
 - Nathan Mallison
 - Bill Condo
-- Kenneth Crawford
 - Pierre Lebrun
 - John Thompson
 - Martin Bastien
 - Ryan Brewer
-- Merott Movahedi
 - Bichinger Software & Consulting
+- Merott Movahedi
 - Alfonso Herrera
 - Abhay
+- Afif Sohaili
+- Nicolaas
+- Riki Fridrich
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
