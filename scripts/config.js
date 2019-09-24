@@ -215,12 +215,23 @@ const builds = {
 
 function genConfig (name) {
   const opts = builds[name]
+
+  const aliasEntries = []
+  for (const [find, replacement] of Object.entries({...aliases, ...opts.alias})) {
+    aliasEntries.push({
+      find,
+      replacement
+    })
+  }
+
   const config = {
     input: opts.entry,
     external: opts.external,
     plugins: [
       flow(),
-      alias(Object.assign({}, aliases, opts.alias))
+      alias({
+        entries: aliasEntries
+      })
     ].concat(opts.plugins || []),
     output: {
       file: opts.dest,
