@@ -15,7 +15,7 @@ export function generateCodeFrame (
   let count = 0
   const res = []
   for (let i = 0; i < lines.length; i++) {
-    count += lines[i].line.length + 1
+    count += lines[i].line.length + lines[i].increment
     if (count >= start) {
       for (let j = i - range; j <= i + range || end > count; j++) {
         if (j < 0) continue
