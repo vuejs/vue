@@ -103,7 +103,7 @@ describe('Global API: set/delete', () => {
 
       Vue.set(vm.data, 'bar', 123)
       expect(vm.data.bar).toBe(123)
-      expect(vm.data.hasOwnProperty('bar')).toBe(false)
+      expect(Object.prototype.hasOwnProperty.call(vm.data, 'bar')).toBe(false)
       expect(vm.data._bar).toBe(123)
     })
   })
