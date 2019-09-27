@@ -15,6 +15,9 @@ const plugin: PluginObject<Option> = {
 }
 const installer: PluginFunction<Option> = function(Vue, option) { }
 
+Vue.use(plugin);
 Vue.use(plugin, new Option);
+Vue.use(plugin, new Option, new Option);
+Vue.use(installer);
 Vue.use(installer, new Option);
 Vue.use(installer, new Option, new Option, new Option);
