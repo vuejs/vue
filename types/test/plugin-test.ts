@@ -1,4 +1,4 @@
-import Vue from "../index";
+import Vue, { VueConstructor } from "../index";
 import { PluginFunction, PluginObject } from "../index";
 
 class Option {
@@ -14,8 +14,8 @@ const plugin: PluginObject<Option> = {
   }
 }
 const installer: PluginFunction<Option> = function(Vue, option) { }
-function NoOptions( _vue: typeof Vue ){};
-function OptionalOption( _vue: typeof Vue, options?: Option) {};
+function NoOptions( _Vue: VueConstructor<Vue> ){};
+function OptionalOption( _Vue: VueConstructor<Vue>, options?: Option) {};
 
 Vue.use(plugin, new Option);
 Vue.use(installer, new Option);
