@@ -14,10 +14,13 @@ const plugin: PluginObject<Option> = {
   }
 }
 const installer: PluginFunction<Option> = function(Vue, option) { }
+function NoOptions( _vue: typeof Vue ){};
+function OptionalOption( _vue: typeof Vue, options?: Option) {};
 
-Vue.use(plugin);
 Vue.use(plugin, new Option);
-Vue.use(plugin, new Option, new Option);
-Vue.use(installer);
 Vue.use(installer, new Option);
 Vue.use(installer, new Option, new Option, new Option);
+
+Vue.use(NoOptions);
+Vue.use(OptionalOption);
+Vue.use(OptionalOption, { prefix: '', suffix: '' });
