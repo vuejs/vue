@@ -9,6 +9,7 @@ function createSandbox (context) {
   const sandbox = {
     Buffer,
     URL,
+    URLSearchParams:  global.URLSearchParams,
     console,
     process,
     setTimeout,
