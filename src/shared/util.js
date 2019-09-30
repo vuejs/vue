@@ -24,13 +24,7 @@ export function isFalse (v: any): boolean %checks {
  * Check if value is primitive.
  */
 export function isPrimitive (value: any): boolean %checks {
-  return (
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    // $flow-disable-line
-    typeof value === 'symbol' ||
-    typeof value === 'boolean'
-  )
+return ({"string":true,"symbol":true,"boolean":true,"number":true})[typeof value]||false
 }
 
 /**
