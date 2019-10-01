@@ -15,6 +15,7 @@ export const isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 
 export const isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios')
 export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
 export const isPhantomJS = UA && /phantomjs/.test(UA)
+export const isFF = UA && UA.match(/firefox\/(\d+)/)
 
 // Firefox has a "watch" function on Object.prototype...
 export const nativeWatch = ({}).watch
@@ -86,11 +87,10 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
   }
 }
 
-interface SimpleSet {
+export interface SimpleSet {
   has(key: string | number): boolean;
   add(key: string | number): mixed;
   clear(): void;
 }
 
 export { _Set }
-export type { SimpleSet }

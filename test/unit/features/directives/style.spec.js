@@ -101,6 +101,13 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
+  it('camelCase with !important', done => {
+    vm.styles = { zIndex: '100 !important' }
+    waitForUpdate(() => {
+      expect(vm.$el.style.getPropertyPriority('z-index')).toBe('important')
+    }).then(done)
+  })
+
   it('object with multiple entries', done => {
     vm.$el.style.color = 'red'
     vm.styles = {

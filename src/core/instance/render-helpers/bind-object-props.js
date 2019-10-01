@@ -7,7 +7,8 @@ import {
   isObject,
   toObject,
   isReservedAttribute,
-  camelize
+  camelize,
+  hyphenate
 } from 'core/util/index'
 
 /**
@@ -45,12 +46,13 @@ export function bindObjectProps (
             : data.attrs || (data.attrs = {})
         }
         const camelizedKey = camelize(key)
-        if (!(key in hash) && !(camelizedKey in hash)) {
+        const hyphenatedKey = hyphenate(key)
+        if (!(camelizedKey in hash) && !(hyphenatedKey in hash)) {
           hash[key] = value[key]
 
           if (isSync) {
             const on = data.on || (data.on = {})
-            on[`update:${camelizedKey}`] = function ($event) {
+            on[`update:${key}`] = function ($event) {
               value[key] = $event
             }
           }

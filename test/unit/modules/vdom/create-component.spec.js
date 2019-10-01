@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import { createComponent } from 'core/vdom/create-component'
+import { setCurrentRenderingInstance } from 'core/instance/render'
 
 describe('create-component', () => {
   let vm
@@ -55,13 +56,17 @@ describe('create-component', () => {
       }, 0)
     }
     function go () {
+      setCurrentRenderingInstance(vm)
       vnode = createComponent(async, data, vm, vm)
+      setCurrentRenderingInstance(null)
       expect(vnode.isComment).toBe(true) // not to be loaded yet.
       expect(vnode.asyncFactory).toBe(async)
-      expect(vnode.asyncFactory.contexts.length).toEqual(1)
+      expect(vnode.asyncFactory.owners.length).toEqual(1)
     }
     function loaded () {
+      setCurrentRenderingInstance(vm)
       vnode = createComponent(async, data, vm, vm)
+      setCurrentRenderingInstance(null)
       expect(vnode.tag).toMatch(/vue-component-[0-9]+-child/)
       expect(vnode.data.staticAttrs).toEqual({ class: 'foo' })
       expect(vnode.children).toBeUndefined()
@@ -69,7 +74,7 @@ describe('create-component', () => {
       expect(vnode.elm).toBeUndefined()
       expect(vnode.ns).toBeUndefined()
       expect(vnode.context).toEqual(vm)
-      expect(vnode.asyncFactory.contexts.length).toEqual(0)
+      expect(vnode.asyncFactory.owners.length).toEqual(0)
       expect(vm.$forceUpdate).toHaveBeenCalled()
       done()
     }
@@ -88,9 +93,11 @@ describe('create-component', () => {
         props: ['msg']
       })
     }
+    setCurrentRenderingInstance(vm)
     const vnode = createComponent(async, data, vm, vm)
+    setCurrentRenderingInstance(null)
     expect(vnode.asyncFactory).toBe(async)
-    expect(vnode.asyncFactory.contexts.length).toEqual(0)
+    expect(vnode.asyncFactory.owners.length).toEqual(0)
     expect(vnode.tag).toMatch(/vue-component-[0-9]+-child/)
     expect(vnode.data.staticAttrs).toEqual({ class: 'bar' })
     expect(vnode.children).toBeUndefined()
@@ -116,11 +123,15 @@ describe('create-component', () => {
       }, 0)
     }
     function go () {
+      setCurrentRenderingInstance(vm)
       vnode = createComponent(async, data, vm, vm)
+      setCurrentRenderingInstance(null)
       expect(vnode.isComment).toBe(true) // not to be loaded yet.
     }
     function failed () {
+      setCurrentRenderingInstance(vm)
       vnode = createComponent(async, data, vm, vm)
+      setCurrentRenderingInstance(null)
       expect(vnode.isComment).toBe(true) // failed, still a comment node
       expect(`Failed to resolve async component: ${async}\nReason: ${reason}`).toHaveBeenWarned()
       done()

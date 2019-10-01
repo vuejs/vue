@@ -3,7 +3,7 @@
 import config from '../config'
 import { warn } from './debug'
 import { set } from '../observer/index'
-import { unicodeLetters } from './lang'
+import { unicodeRegExp } from './lang'
 import { nativeWatch, hasSymbol } from './env'
 
 import {
@@ -277,7 +277,7 @@ function checkComponents (options: Object) {
 }
 
 export function validateComponentName (name: string) {
-  if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeLetters}]*$`).test(name)) {
+  if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeRegExp.source}]*$`).test(name)) {
     warn(
       'Invalid component name: "' + name + '". Component names ' +
       'should conform to valid custom element name in html5 specification.'

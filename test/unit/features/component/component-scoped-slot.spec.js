@@ -632,6 +632,25 @@ describe('Component scoped slot', () => {
     }).then(done)
   })
 
+  // #9422
+  // the behavior of the new syntax is slightly different.
+  it('scoped slot v-if using slot-scope value', () => {
+    const Child = {
+      template: '<div><slot value="foo"/></div>',
+    }
+    const vm = new Vue({
+      components: { Child },
+      template: `
+        <child>
+          <template slot-scope="{ value }" v-if="value">
+            foo {{ value }}
+          </template>
+        </child>
+      `
+    }).$mount()
+    expect(vm.$el.textContent).toMatch(`foo foo`)
+  })
+
   // 2.6 new slot syntax
   describe('v-slot syntax', () => {
     const Foo = {
@@ -740,6 +759,22 @@ describe('Component scoped slot', () => {
         }).$mount()
         expect(`Unexpected mixed usage of different slot syntaxes`).toHaveBeenWarned()
       })
+
+      it('should warn invalid parameter expression', () => {
+        new Vue({
+          template: `<foo ${syntax}="1"></foo>`,
+          components: { Foo }
+        }).$mount();
+        expect('invalid function parameter expression').toHaveBeenWarned()
+      })
+
+      it('should allow destructuring props with default value', () => {
+        new Vue({
+          template: `<foo ${syntax}="{ foo = { bar: '1' } }"></foo>`,
+          components: { Foo }
+        }).$mount();
+        expect('invalid function parameter expression').not.toHaveBeenWarned()
+      })
     }
 
     // run tests for both full syntax and shorthand
@@ -827,6 +862,38 @@ describe('Component scoped slot', () => {
         expect(vm.$el.innerHTML.replace(/\s+/g, ' ')).toMatch(`b from foo one a from foo two `)
       }).then(done)
     })
+
+    it('should work with v-if/v-else', done => {
+      const vm = new Vue({
+        data: { flag: true },
+        template: `
+          <foo>
+            <template v-if="flag" v-slot:one="one">a {{ one }} </template>
+            <template v-else v-slot:two="two">b {{ two }} </template>
+          </foo>
+        `,
+        components: { Foo }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`a from foo one `)
+      vm.flag = false
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(`b from foo two `)
+      }).then(done)
+    })
+
+    it('warn when v-slot used on non-root <template>', () => {
+      const vm = new Vue({
+        template: `
+          <foo>
+            <template v-if="true">
+              <template v-slot:one>foo</template>
+            </template>
+          </foo>
+        `,
+        components: { Foo }
+      }).$mount()
+      expect(`<template v-slot> can only appear at the root level`).toHaveBeenWarned()
+    })
   })
 
   // 2.6 scoped slot perf optimization
@@ -864,6 +931,398 @@ describe('Component scoped slot', () => {
       // should only trigger child update
       expect(parentUpdate.calls.count()).toBe(1)
       expect(childUpdate.calls.count()).toBe(1)
+    }).then(done)
+  })
+
+  // #9432: async components inside a scoped slot should trigger update of the
+  // component that invoked the scoped slot, not the lexical context component.
+  it('async component inside scoped slot', done => {
+    let p
+    const vm = new Vue({
+      template: `
+        <foo>
+          <template #default>
+            <bar />
+          </template>
+        </foo>
+      `,
+      components: {
+        foo: {
+          template: `<div>foo<slot/></div>`
+        },
+        bar: resolve => {
+          setTimeout(() => {
+            resolve({
+              template: `<div>bar</div>`
+            })
+            next()
+          }, 0)
+        }
+      }
+    }).$mount()
+
+    function next () {
+      waitForUpdate(() => {
+        expect(vm.$el.textContent).toBe(`foobar`)
+      }).then(done)
+    }
+  })
+
+  // regression #9396
+  it('should not force update child with no slot content', done => {
+    const Child = {
+      updated: jasmine.createSpy(),
+      template: `<div></div>`
+    }
+
+    const parent = new Vue({
+      template: `<div>{{ count }}<child/></div>`,
+      data: {
+        count: 0
+      },
+      components: { Child }
+    }).$mount()
+
+    expect(parent.$el.textContent).toBe(`0`)
+    parent.count++
+    waitForUpdate(() => {
+      expect(parent.$el.textContent).toBe(`1`)
+      expect(Child.updated).not.toHaveBeenCalled()
+    }).then(done)
+  })
+
+  // regression #9438
+  it('nested scoped slots update', done => {
+    const Wrapper = {
+      template: `<div><slot/></div>`
+    }
+
+    const Inner = {
+      props: ['foo'],
+      template: `<div>{{ foo }}</div>`
+    }
+
+    const Outer = {
+      data: () => ({ foo: 1 }),
+      template: `<div><slot :foo="foo" /></div>`
+    }
+
+    const vm = new Vue({
+      components: { Outer, Wrapper, Inner },
+      template: `
+        <outer ref="outer" v-slot="props">
+          <wrapper v-slot>
+            <inner :foo="props.foo"/>
+          </wrapper>
+        </outer>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(`1`)
+
+    vm.$refs.outer.foo++
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe(`2`)
+    }).then(done)
+  })
+
+  it('dynamic v-bind arguments on <slot>', done => {
+    const Foo = {
+      data() {
+        return {
+          key: 'msg'
+        }
+      },
+      template: `<div><slot :[key]="'hello'"/></div>`
+    }
+
+    const vm = new Vue({
+      components: { Foo },
+      template: `
+        <foo ref="foo" v-slot="props">{{ props }}</foo>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(JSON.stringify({ msg: 'hello' }, null, 2))
+
+    vm.$refs.foo.key = 'changed'
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe(JSON.stringify({ changed: 'hello' }, null, 2))
+    }).then(done)
+  })
+
+  // #9452
+  it('fallback for scoped slots passed multiple levels down', () => {
+    const inner = {
+      template: `<div><slot>fallback</slot></div>`
+    }
+
+    const wrapper = {
+      template: `
+        <inner>
+          <template #default>
+            <slot/>
+          </template>
+        </inner>
+      `,
+      components: { inner }
+    }
+
+    const vm = new Vue({
+      components: { wrapper, inner },
+      template: `<wrapper/>`
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(`fallback`)
+  })
+
+  it('should expose v-slot without scope on this.$slots', () => {
+    const vm = new Vue({
+      template: `<foo><template v-slot>hello</template></foo>`,
+      components: {
+        foo: {
+          render(h) {
+            return h('div', this.$slots.default)
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('hello')
+  })
+
+  it('should not expose legacy syntax scoped slot on this.$slots', () => {
+    const vm = new Vue({
+      template: `<foo><template slot-scope="foo">hello</template></foo>`,
+      components: {
+        foo: {
+          render(h) {
+            expect(this.$slots.default).toBeUndefined()
+            return h('div', this.$slots.default)
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('')
+  })
+
+  it('should expose v-slot without scope on ctx.slots() in functional', () => {
+    const vm = new Vue({
+      template: `<foo><template v-slot>hello</template></foo>`,
+      components: {
+        foo: {
+          functional: true,
+          render(h, ctx) {
+            return h('div', ctx.slots().default)
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('hello')
+  })
+
+  it('should not cache scoped slot normalization when there are a mix of normal and scoped slots', done => {
+    const foo = {
+      template: `<div><slot name="foo" /> <slot name="bar" /></div>`
+    }
+
+    const vm = new Vue({
+      data: {
+        msg: 'foo'
+      },
+      template: `
+        <foo>
+          <div slot="foo">{{ msg }}</div>
+          <template #bar><div>bar</div></template>
+        </foo>
+      `,
+      components: { foo }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(`foo bar`)
+    vm.msg = 'baz'
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe(`baz bar`)
+    }).then(done)
+  })
+
+  // #9468
+  it('should support passing multiple args to scoped slot function', () => {
+    const foo = {
+      render() {
+        return this.$scopedSlots.default('foo', 'bar')
+      }
+    }
+
+    const vm = new Vue({
+      template: `<foo v-slot="foo, bar">{{ foo }} {{ bar }}</foo>`,
+      components: { foo }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('foo bar')
+  })
+
+  it('should not skip updates when a scoped slot contains parent <slot/> content', done => {
+    const inner = {
+      template: `<div><slot/></div>`
+    }
+
+    const wrapper = {
+      template: `<inner v-slot><slot/></inner>`,
+      components: { inner }
+    }
+
+    const vm = new Vue({
+      data() {
+        return {
+          ok: true
+        }
+      },
+      components: { wrapper },
+      template: `<wrapper><div>{{ ok ? 'foo' : 'bar' }}</div></wrapper>`
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('foo')
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('bar')
+    }).then(done)
+  })
+
+  it('should not skip updates for v-slot inside v-for', done => {
+    const test = {
+      template: `<div><slot></slot></div>`
+    }
+
+    const vm = new Vue({
+      template: `
+      <div>
+        <div v-for="i in numbers">
+          <test v-slot>{{ i }}</test>
+        </div>
+      </div>
+      `,
+      components: { test },
+      data: {
+        numbers: [1]
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(`1`)
+    vm.numbers = [2]
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe(`2`)
+    }).then(done)
+  })
+
+  // #9534
+  it('should detect conditional reuse with different slot content', done => {
+    const Foo = {
+      template: `<div><slot :n="1" /></div>`
+    }
+
+    const vm = new Vue({
+      components: { Foo },
+      data: {
+        ok: true
+      },
+      template: `
+        <div>
+          <div v-if="ok">
+            <foo v-slot="{ n }">{{ n }}</foo>
+          </div>
+          <div v-if="!ok">
+            <foo v-slot="{ n }">{{ n + 1 }}</foo>
+          </div>
+        </div>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent.trim()).toBe(`1`)
+    vm.ok = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent.trim()).toBe(`2`)
+    }).then(done)
+  })
+
+  // #9644
+  it('should factor presence of normal slots into scoped slots caching', done => {
+    const Wrapper = {
+      template: `<div>
+        <p>Default:<slot/></p>
+        <p>Content:<slot name='content'/></p>
+      </div>`
+    }
+
+    const vm = new Vue({
+      data: { ok: false },
+      components: { Wrapper },
+      template: `<wrapper>
+        <p v-if='ok'>ok</p>
+        <template #content>
+          <p v-if='ok'>ok</p>
+        </template>
+      </wrapper>`
+    }).$mount()
+
+    expect(vm.$el.textContent).not.toMatch(`Default:ok`)
+    expect(vm.$el.textContent).not.toMatch(`Content:ok`)
+    vm.ok = true
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toMatch(`Default:ok`)
+      expect(vm.$el.textContent).toMatch(`Content:ok`)
+      vm.ok = false
+    }).then(() => {
+      expect(vm.$el.textContent).not.toMatch(`Default:ok`)
+      expect(vm.$el.textContent).not.toMatch(`Content:ok`)
+      vm.ok = true
+    }).then(() => {
+      expect(vm.$el.textContent).toMatch(`Default:ok`)
+      expect(vm.$el.textContent).toMatch(`Content:ok`)
+    }).then(done)
+  })
+
+  //#9658
+  it('fallback for scoped slot with single v-if', () => {
+    const vm = new Vue({
+      template: `<test v-slot><template v-if="false">hi</template></test>`,
+      components: {
+        Test: {
+          template: `<div><slot>fallback</slot></div>`
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toMatch('fallback')
+  })
+
+  // #9699
+  // Component only has normal slots, but is passing down $scopedSlots directly
+  // $scopedSlots should not be marked as stable in this case
+  it('render function passing $scopedSlots w/ normal slots down', done => {
+    const one = {
+      template: `<div><slot name="footer"/></div>`
+    }
+
+    const two = {
+      render(h) {
+        return h(one, {
+          scopedSlots: this.$scopedSlots
+        })
+      }
+    }
+
+    const vm = new Vue({
+      data: { count: 0 },
+      render(h) {
+        return h(two, [
+          h('span', { slot: 'footer' }, this.count)
+        ])
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toMatch(`0`)
+    vm.count++
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toMatch(`1`)
     }).then(done)
   })
 })

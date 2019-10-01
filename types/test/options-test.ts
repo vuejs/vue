@@ -68,32 +68,43 @@ interface ICat {
   foo: any,
   bar: object
 }
+type ConfirmCallback = (confirm: boolean) => void;
 
 Vue.component('union-prop', {
   props: {
     cat: Object as PropType<ICat>,
     complexUnion: { type: [User, Number] as PropType<User | number> },
     kittyUser: Object as PropType<ICat & IUser>,
-    mixed: [RegExp, Array],
-    object: [Cat, User],
-    primitive: [String, Number],
-    regex: RegExp,
+    callback: Function as PropType<ConfirmCallback>,
     union: [User, Number] as PropType<User | number>
   },
   data() {
     this.cat;
     this.complexUnion;
     this.kittyUser;
-    this.mixed;
-    this.object;
-    this.primitive;
-    this.regex.compile;
+    this.callback(true);
     this.union;
     return {
       fixedSize: this.union,
     }
   }
 });
+
+// stopped working since TS 3.4
+// Vue.component('union-prop-with-no-casting', {
+//   props: {
+//     mixed: [RegExp, Array],
+//     object: [Cat, User],
+//     primitive: [String, Number],
+//     regex: RegExp
+//   },
+//   data() {
+//     this.mixed;
+//     this.object;
+//     this.primitive;
+//     this.regex.compile;
+//   }
+// })
 
 Vue.component('prop-with-primitive-default', {
   props: {
@@ -281,6 +292,18 @@ Vue.component('component', {
   delimiters: ["${", "}"]
 });
 
+
+Vue.component('custom-prop-type-function', {
+  props: {
+    callback: Function as PropType<(confirm: boolean) => void>,
+  },
+  methods: {
+    confirm(){
+      this.callback(true);
+    }
+  }
+});
+
 Vue.component('provide-inject', {
   provide: {
     foo: 1
@@ -323,6 +346,10 @@ Vue.component('component-with-scoped-slot', {
           item: (props: ScopedSlotProps) => [h('span', [props.msg])]
         }
       }),
+      h('child', [
+        // return single VNode (will be normalized to an array)
+        (props: ScopedSlotProps) => h('span', [props.msg])
+      ]),
       h('child', {
         // Passing down all slots from parent
         scopedSlots: this.$scopedSlots

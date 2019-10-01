@@ -36,6 +36,8 @@ function checkNode (node: ASTNode, warn: Function) {
           const range = node.rawAttrsMap[name]
           if (name === 'v-for') {
             checkFor(node, `v-for="${value}"`, warn, range)
+          } else if (name === 'v-slot' || name[0] === '#') {
+            checkFunctionParameterExpression(value, `${name}="${value}"`, warn, range)
           } else if (onRE.test(name)) {
             checkEvent(value, `${name}="${value}"`, warn, range)
           } else {
@@ -55,9 +57,9 @@ function checkNode (node: ASTNode, warn: Function) {
 }
 
 function checkEvent (exp: string, text: string, warn: Function, range?: Range) {
-  const stipped = exp.replace(stripStringRE, '')
-  const keywordMatch: any = stipped.match(unaryOperatorsRE)
-  if (keywordMatch && stipped.charAt(keywordMatch.index - 1) !== '$') {
+  const stripped = exp.replace(stripStringRE, '')
+  const keywordMatch: any = stripped.match(unaryOperatorsRE)
+  if (keywordMatch && stripped.charAt(keywordMatch.index - 1) !== '$') {
     warn(
       `avoid using JavaScript unary operator as property name: ` +
       `"${keywordMatch[0]}" in expression ${text.trim()}`,
@@ -109,5 +111,18 @@ function checkExpression (exp: string, text: string, warn: Function, range?: Ran
         range
       )
     }
+  }
+}
+
+function checkFunctionParameterExpression (exp: string, text: string, warn: Function, range?: Range) {
+  try {
+    new Function(exp, '')
+  } catch (e) {
+    warn(
+      `invalid function parameter expression: ${e.message} in\n\n` +
+      `    ${exp}\n\n` +
+      `  Raw expression: ${text.trim()}\n`,
+      range
+    )
   }
 }

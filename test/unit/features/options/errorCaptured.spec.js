@@ -209,4 +209,42 @@ describe('Options errorCaptured', () => {
 
     expect(calls).toEqual([1, 2, 3])
   })
+
+  // ref: https://github.com/vuejs/vuex/issues/1505
+  it('should not add watchers to render deps if they are referred from errorCaptured callback', done => {
+    const store = new Vue({
+      data: {
+        errors: []
+      }
+    })
+
+    const Child = {
+      computed: {
+        test() {
+          throw new Error('render error')
+        }
+      },
+
+      render(h) {
+        return h('div', {
+          attrs: {
+            'data-test': this.test
+          }
+        })
+      }
+    }
+
+    new Vue({
+      errorCaptured(error) {
+        store.errors.push(error)
+      },
+      render: h => h(Child)
+    }).$mount()
+
+    // Ensure not to trigger infinite loop
+    waitForUpdate(() => {
+      expect(store.errors.length).toBe(1)
+      expect(store.errors[0]).toEqual(new Error('render error'))
+    }).then(done)
+  })
 })

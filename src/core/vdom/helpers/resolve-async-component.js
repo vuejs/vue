@@ -8,10 +8,12 @@ import {
   isTrue,
   isObject,
   hasSymbol,
-  isPromise
+  isPromise,
+  remove
 } from 'core/util/index'
 
 import { createEmptyVNode } from 'core/vdom/vnode'
+import { currentRenderingInstance } from 'core/instance/render'
 
 function ensureCtor (comp: any, base) {
   if (
@@ -40,8 +42,7 @@ export function createAsyncPlaceholder (
 
 export function resolveAsyncComponent (
   factory: Function,
-  baseCtor: Class<Component>,
-  context: Component
+  baseCtor: Class<Component>
 ): Class<Component> | void {
   if (isTrue(factory.error) && isDef(factory.errorComp)) {
     return factory.errorComp
@@ -51,24 +52,39 @@ export function resolveAsyncComponent (
     return factory.resolved
   }
 
+  const owner = currentRenderingInstance
+  if (owner && isDef(factory.owners) && factory.owners.indexOf(owner) === -1) {
+    // already pending
+    factory.owners.push(owner)
+  }
+
   if (isTrue(factory.loading) && isDef(factory.loadingComp)) {
     return factory.loadingComp
   }
 
-  if (isDef(factory.contexts)) {
-    // already pending
-    factory.contexts.push(context)
-  } else {
-    const contexts = factory.contexts = [context]
+  if (owner && !isDef(factory.owners)) {
+    const owners = factory.owners = [owner]
     let sync = true
+    let timerLoading = null
+    let timerTimeout = null
+
+    ;(owner: any).$on('hook:destroyed', () => remove(owners, owner))
 
     const forceRender = (renderCompleted: boolean) => {
-      for (let i = 0, l = contexts.length; i < l; i++) {
-        contexts[i].$forceUpdate()
+      for (let i = 0, l = owners.length; i < l; i++) {
+        (owners[i]: any).$forceUpdate()
       }
 
       if (renderCompleted) {
-        contexts.length = 0
+        owners.length = 0
+        if (timerLoading !== null) {
+          clearTimeout(timerLoading)
+          timerLoading = null
+        }
+        if (timerTimeout !== null) {
+          clearTimeout(timerTimeout)
+          timerTimeout = null
+        }
       }
     }
 
@@ -80,7 +96,7 @@ export function resolveAsyncComponent (
       if (!sync) {
         forceRender(true)
       } else {
-        contexts.length = 0
+        owners.length = 0
       }
     })
 
@@ -115,7 +131,8 @@ export function resolveAsyncComponent (
           if (res.delay === 0) {
             factory.loading = true
           } else {
-            setTimeout(() => {
+            timerLoading = setTimeout(() => {
+              timerLoading = null
               if (isUndef(factory.resolved) && isUndef(factory.error)) {
                 factory.loading = true
                 forceRender(false)
@@ -125,7 +142,8 @@ export function resolveAsyncComponent (
         }
 
         if (isDef(res.timeout)) {
-          setTimeout(() => {
+          timerTimeout = setTimeout(() => {
+            timerTimeout = null
             if (isUndef(factory.resolved)) {
               reject(
                 process.env.NODE_ENV !== 'production'

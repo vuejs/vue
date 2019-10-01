@@ -49,7 +49,15 @@ export function FunctionalRenderContext (
   this.parent = parent
   this.listeners = data.on || emptyObject
   this.injections = resolveInject(options.inject, parent)
-  this.slots = () => resolveSlots(children, parent)
+  this.slots = () => {
+    if (!this.$slots) {
+      normalizeScopedSlots(
+        data.scopedSlots,
+        this.$slots = resolveSlots(children, parent)
+      )
+    }
+    return this.$slots
+  }
 
   Object.defineProperty(this, 'scopedSlots', ({
     enumerable: true,

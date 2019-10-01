@@ -2,6 +2,42 @@ import Vue from 'vue'
 import { Promise } from 'es6-promise'
 
 describe('Component async', () => {
+
+  const oldSetTimeout = window.setTimeout;
+  const oldClearTimeout = window.clearTimeout;
+
+  // will contain pending timeouts set during the test iteration
+  // will contain the id of the timeout as the key, and the the millisecond timeout as the value
+  // this helps to identify the timeout that is still pending
+  let timeoutsPending = {};
+
+  beforeEach(function () {
+    // reset the timeouts for this iteration
+    timeoutsPending = {};
+
+    window.setTimeout = function(func, delay) {
+      let id = oldSetTimeout(function() {
+        delete timeoutsPending[id];
+        func();
+      }, delay);
+      timeoutsPending[id] = delay;
+      return id
+    };
+
+    window.clearTimeout = function(id) {
+      oldClearTimeout(id);
+      delete timeoutsPending[id];
+    };
+  })
+
+  afterEach(function () {
+    window.setTimeout = oldSetTimeout;
+    window.clearTimeout = oldClearTimeout;
+    // after the test is complete no timeouts that have been set up during the test should still be active
+    // compare stringified JSON for better error message containing ID and millisecond timeout
+    expect(JSON.stringify(timeoutsPending)).toEqual(JSON.stringify({}))
+  })
+
   it('normal', done => {
     const vm = new Vue({
       template: '<div><test></test></div>',
@@ -341,6 +377,34 @@ describe('Component async', () => {
         expect(`Failed to resolve async component`).not.toHaveBeenWarned()
         done()
       }, 50)
+    })
+
+    it('should not have running timeout/loading if resolved', done => {
+      const vm = new Vue({
+        template: `<div><test/></div>`,
+        components: {
+          test: () => ({
+            component: new Promise((resolve, reject) => {
+              setTimeout(() => {
+                resolve({ template: '<div>hi</div>' })
+                Promise.resolve().then(() => {
+                  Vue.nextTick(next)
+                })
+              }, 10)
+            }),
+            loading: { template: `<div>loading</div>` },
+            delay: 30,
+            error: { template: `<div>error</div>` },
+            timeout: 40
+          })
+        }
+      }).$mount()
+
+      function next () {
+        expect(vm.$el.textContent).toBe('hi')
+        // the afterEach() will ensure that the timeouts for delay and timeout have been cleared
+        done()
+      }
     })
 
     // #7107

@@ -2,7 +2,7 @@
 
 import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
-import { isIE, supportsPassive, isUsingMicroTask } from 'core/util/index'
+import { isIE, isFF, supportsPassive, isUsingMicroTask } from 'core/util/index'
 import { RANGE_TOKEN, CHECKBOX_RADIO_TOKEN } from 'web/compiler/directives/model'
 import { currentFlushTimestamp } from 'core/observer/scheduler'
 
@@ -39,6 +39,11 @@ function createOnceHandler (event, handler, capture) {
   }
 }
 
+// #9446: Firefox <= 53 (in particular, ESR 52) has incorrect Event.timeStamp
+// implementation and does not fire microtasks in between event propagation, so
+// safe to exclude.
+const useMicrotaskFix = isUsingMicroTask && !(isFF && Number(isFF[1]) <= 53)
+
 function add (
   name: string,
   handler: Function,
@@ -51,11 +56,26 @@ function add (
   // the solution is simple: we save the timestamp when a handler is attached,
   // and the handler would only fire if the event passed to it was fired
   // AFTER it was attached.
-  if (isUsingMicroTask) {
+  if (useMicrotaskFix) {
     const attachedTimestamp = currentFlushTimestamp
     const original = handler
     handler = original._wrapper = function (e) {
-      if (e.timeStamp >= attachedTimestamp) {
+      if (
+        // no bubbling, should always fire.
+        // this is just a safety net in case event.timeStamp is unreliable in
+        // certain weird environments...
+        e.target === e.currentTarget ||
+        // event is fired after handler attachment
+        e.timeStamp >= attachedTimestamp ||
+        // bail for environments that have buggy event.timeStamp implementations
+        // #9462 iOS 9 bug: event.timeStamp is 0 after history.pushState
+        // #9681 QtWebEngine event.timeStamp is negative value
+        e.timeStamp <= 0 ||
+        // #9448 bail if event is fired in another document in a multi-page
+        // electron/nw.js app, since event.timeStamp will be using a different
+        // starting reference
+        e.target.ownerDocument !== document
+      ) {
         return original.apply(this, arguments)
       }
     }
