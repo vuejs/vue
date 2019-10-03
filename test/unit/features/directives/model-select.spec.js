@@ -231,7 +231,32 @@ describe('Directive v-model select', () => {
       expect(spy.calls.count()).toBe(0)
     }).then(done)
   })
-
+  
+  it('should work with select when selected option is removed', (done) => {
+    const spy = jasmine.createSpy()
+    const vm = new Vue({
+      data: {
+        id: 2,
+        list: [1, 2, 3]
+      },
+      template:
+        '<div>' +
+          '<select @change="test" v-model="id">' +
+            '<option v-for="item in list" :value="item">{{item}}</option>' +
+          '</select>' +
+        '</div>',
+      methods: {
+        test: spy
+      }
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.list = [4, 5]
+    waitForUpdate(() => {
+      expect(spy.calls.count()).toBe(1)
+      expect(vm.id).toBe(undefined)
+    }).then(done)
+  })
+  
   if (!hasMultiSelectBug()) {
     it('multiple', done => {
       const vm = new Vue({

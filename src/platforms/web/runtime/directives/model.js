@@ -63,7 +63,7 @@ const directive = {
         // no matching option found for at least one value
         const needReset = el.multiple
           ? binding.value.some(v => hasNoMatchingOption(v, curOptions))
-          : binding.value !== binding.oldValue && hasNoMatchingOption(binding.value, curOptions)
+          : binding.value !== el.value && hasNoMatchingOption(binding.value, curOptions)
         if (needReset) {
           trigger(el, 'change')
         }
