@@ -252,7 +252,9 @@ describe('vdom patch: children', () => {
       let elm = patch(vnode0, vnode1)
       for (i = 0; i < elms; ++i) {
         expect(elm.children[i].innerHTML).toBe(i.toString())
-        opacities[i] = Math.random().toFixed(5).toString()
+        
+        // Values in the range 1e-05 to 9e-05 cause this test to fail
+        opacities[i] = Math.random().toFixed(4).toString()
       }
       const vnode2 = new VNode('span', {}, arr.map(n => {
         return spanNumWithOpacity(shufArr[n], opacities[n])
@@ -260,7 +262,7 @@ describe('vdom patch: children', () => {
       elm = patch(vnode1, vnode2)
       for (i = 0; i < elms; ++i) {
         expect(elm.children[i].innerHTML).toBe(shufArr[i].toString())
-        expect(opacities[i].indexOf(elm.children[i].style.opacity)).toBe(0)
+        expect(opacities[i]).toContain(elm.children[i].style.opacity)
       }
     }
   })
