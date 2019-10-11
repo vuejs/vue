@@ -100,21 +100,20 @@ export function mergeDataOrFn (
         typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
       )
     }
-  } else {
-    return function mergedInstanceDataFn () {
-      // instance merge
-      const instanceData = typeof childVal === 'function'
-        ? childVal.call(vm, vm)
-        : childVal
-      const defaultData = typeof parentVal === 'function'
-        ? parentVal.call(vm, vm)
-        : parentVal
-      if (instanceData) {
-        return mergeData(instanceData, defaultData)
-      } else {
-        return defaultData
-      }
+  }
+  return function mergedInstanceDataFn () {
+    // instance merge
+    const instanceData = typeof childVal === 'function'
+      ? childVal.call(vm, vm)
+      : childVal
+    const defaultData = typeof parentVal === 'function'
+      ? parentVal.call(vm, vm)
+      : parentVal
+    if (instanceData) {
+      return mergeData(instanceData, defaultData)
     }
+
+    return defaultData
   }
 }
 
@@ -187,12 +186,13 @@ function mergeAssets (
   key: string
 ): Object {
   const res = Object.create(parentVal || null)
+
   if (childVal) {
     process.env.NODE_ENV !== 'production' && assertObjectType(key, childVal, vm)
     return extend(res, childVal)
-  } else {
-    return res
   }
+
+  return res
 }
 
 ASSET_TYPES.forEach(function (type) {
