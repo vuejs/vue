@@ -15,6 +15,7 @@ import { warn, extend } from 'core/util/index'
 import { addClass, removeClass } from '../class-util'
 import { transitionProps, extractTransitionData } from './transition'
 import { setActiveInstance } from 'core/instance/lifecycle'
+import { isObject } from 'shared/util'
 
 import {
   hasTransition,
@@ -117,7 +118,9 @@ export default {
         const el: any = c.elm
         const s: any = el.style
         addTransitionClass(el, moveClass)
-        s.transform = s.WebkitTransform = s.transitionDuration = ''
+        s.transform = s.WebkitTransform = ''
+        const duration = isObject(c.data.transition.duration) ? c.data.transition.duration.move : c.data.transition.duration
+        s.transitionDuration = duration ? `${duration}ms` : ''
         el.addEventListener(transitionEndEvent, el._moveCb = function cb (e) {
           if (e && e.target !== el) {
             return
