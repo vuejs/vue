@@ -1,6 +1,8 @@
 /* @flow */
 
-const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/
+const arrowExpRE = /^([\w$_]+|\([^)]*?\))\s*=>/
+const funcExpRE =  /^function(?:\s+[\w$]+)?\s*\(/
+const fnExpRE = new RegExp(`${arrowExpRE.source}|${funcExpRE.source}`)
 const fnInvokeRE = /\([^)]*?\);*$/
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
@@ -104,6 +106,7 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
 
   const isMethodPath = simplePathRE.test(handler.value)
   const isFunctionExpression = fnExpRE.test(handler.value)
+  const isArrow = arrowExpRE.test(handler.value)
   const isFunctionInvocation = simplePathRE.test(handler.value.replace(fnInvokeRE, ''))
 
   if (!handler.modifiers) {
@@ -114,7 +117,7 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, handler.value)
     }
-    return `function($event){${
+    return `${isArrow ? 'function($event)' : '($event)=>'}{${
       isFunctionInvocation ? `return ${handler.value}` : handler.value
     }}` // inline statement
   } else {
@@ -158,7 +161,7 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, code + handlerCode)
     }
-    return `function($event){${code}${handlerCode}}`
+    return `${isArrow ? 'function($event)' : '($event)=>'}{${code}${handlerCode}}`
   }
 }
 
