@@ -43,6 +43,10 @@ th.active .arrow {
   width: 0;
   height: 0;
   margin-left: 5px;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=66)";
+  filter: alpha(opacity=66);
+  -moz-opacity: 0.66;
+  -khtml-opacity: 0.66;
   opacity: 0.66;
 }
 
