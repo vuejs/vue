@@ -62,9 +62,14 @@ export class Observer {
    * value type is Object.
    */
   walk (obj: Object) {
-    const keys = Object.keys(obj).concat(Object.getOwnPropertySymbols(obj))
+    const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
-      defineReactive(obj, keys[i])
+      defineReactive(obj, keys[i]);
+    }
+
+    const symbolKeys = Object.getOwnPropertySymbols(obj)
+    for (let i = 0; i < symbolKeys.length; i++) {
+      defineReactive(obj, symbolKeys[i]);
     }
   }
 
