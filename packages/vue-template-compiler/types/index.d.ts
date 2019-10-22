@@ -35,10 +35,10 @@ interface CompiledResultFunctions {
 }
 
 interface ModuleOptions {
-  preTransformNode: (el: ASTElement) => ASTElement | undefined;
-  transformNode: (el: ASTElement) => ASTElement | undefined;
-  postTransformNode: (el: ASTElement) => void;
-  genData: (el: ASTElement) => string;
+  preTransformNode?: (el: ASTElement) => ASTElement | undefined;
+  transformNode?: (el: ASTElement) => ASTElement | undefined;
+  postTransformNode?: (el: ASTElement) => void;
+  genData?: (el: ASTElement) => string;
   transformCode?: (el: ASTElement, code: string) => string;
   staticKeys?: string[];
 }
