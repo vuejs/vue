@@ -1,8 +1,7 @@
 import { Vue } from "./vue";
+import "./umd";
 
 export default Vue;
-
-export as namespace Vue;
 
 export {
   CreateElement,

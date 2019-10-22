@@ -345,6 +345,11 @@ describe('codegen', () => {
       `<input @input="onInput(');[\\'());');">`,
       `with(this){return _c('input',{on:{"input":function($event){onInput(');[\\'());');}}})}`
     )
+    // function name including a `function` part (#9920)
+    assertCodegen(
+      '<input @input="functionName()">',
+      `with(this){return _c('input',{on:{"input":function($event){return functionName()}}})}`
+    )
   })
 
   it('generate events with multiple statements', () => {

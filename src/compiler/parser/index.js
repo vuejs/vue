@@ -23,8 +23,8 @@ import {
 
 export const onRE = /^@|^v-on:/
 export const dirRE = process.env.VBIND_PROP_SHORTHAND
-  ? /^v-|^@|^:|^\./
-  : /^v-|^@|^:/
+  ? /^v-|^@|^:|^\.|^#/
+  : /^v-|^@|^:|^#/
 export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
@@ -654,7 +654,7 @@ function processSlotContent (el) {
           if (el.parent && !maybeComponent(el.parent)) {
             warn(
               `<template v-slot> can only appear at the root level inside ` +
-              `the receiving the component`,
+              `the receiving component`,
               el
             )
           }
