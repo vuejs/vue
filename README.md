@@ -35,6 +35,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <!--special end-->
 
 <h3 align="center">Platinum Sponsors</h3>
+<h4 aline="center">Let's Enjoy.</h4>
 
 <!--platinum start-->
 <table>
