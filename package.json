@@ -83,7 +83,7 @@
     "babel-plugin-istanbul": "^5.1.0",
     "babel-plugin-transform-vue-jsx": "^4.0.1",
     "babel-preset-flow-vue": "^1.0.0",
-    "buble": "^0.19.3",
+    "buble": "^0.19.8",
     "chalk": "^2.3.0",
     "chromedriver": "^2.45.0",
     "codecov": "^3.0.0",
