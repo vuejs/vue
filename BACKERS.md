@@ -320,6 +320,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/philip_john_basile.gif">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://writersperhour.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/writers_per_hour.jpg">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
