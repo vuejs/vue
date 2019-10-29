@@ -59,9 +59,6 @@ function markStatic (node: ASTNode) {
       for (let i = 1, l = node.ifConditions.length; i < l; i++) {
         const block = node.ifConditions[i].block
         markStatic(block)
-        if (!block.static) {
-          node.static = false
-        }
       }
     }
   }
