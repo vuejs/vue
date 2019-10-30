@@ -144,7 +144,7 @@ export interface RenderContext<Props=DefaultProps> {
   injections: any
 }
 
-export type Prop<T> = { (): T } | { new(...args: any[]): T & object } | { new(...args: string[]): Function }
+export type Prop<T> = { (): T } | { new(...args: never[]): T & object } | { new(...args: string[]): Function }
 
 export type PropType<T> = Prop<T> | Prop<T>[];
 
