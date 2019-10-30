@@ -90,21 +90,20 @@ Vue.component('union-prop', {
   }
 });
 
-// stopped working since TS 3.4
-// Vue.component('union-prop-with-no-casting', {
-//   props: {
-//     mixed: [RegExp, Array],
-//     object: [Cat, User],
-//     primitive: [String, Number],
-//     regex: RegExp
-//   },
-//   data() {
-//     this.mixed;
-//     this.object;
-//     this.primitive;
-//     this.regex.compile;
-//   }
-// })
+Vue.component('union-prop-with-no-casting', {
+  props: {
+    mixed: [RegExp, Array],
+    object: [Cat, User],
+    primitive: [String, Number],
+    regex: RegExp
+  },
+  data() {
+    this.mixed;
+    this.object;
+    this.primitive;
+    this.regex.compile;
+  }
+})
 
 Vue.component('prop-with-primitive-default', {
   props: {
@@ -113,7 +112,7 @@ Vue.component('prop-with-primitive-default', {
       default: () => String(Math.round(Math.random() * 10000000))
     }
   },
-  created() {
+  created(): void {
     this.id;
   }
 });
@@ -152,7 +151,7 @@ Vue.component('component', {
     }
   },
   methods: {
-    plus() {
+    plus(): void {
       this.a++;
       this.aDouble.toFixed();
       this.aPlus = 1;
