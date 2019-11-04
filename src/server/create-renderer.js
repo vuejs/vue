@@ -28,6 +28,7 @@ export type RenderOptions = {
   basedir?: string;
   shouldPreload?: Function;
   shouldPrefetch?: Function;
+  shouldRenderAsyncScripts?: boolean;
   clientManifest?: ClientManifest;
   serializer?: Function;
   runInNewContext?: boolean | 'once';
@@ -42,6 +43,7 @@ export function createRenderer ({
   cache,
   shouldPreload,
   shouldPrefetch,
+  shouldRenderAsyncScripts,
   clientManifest,
   serializer
 }: RenderOptions = {}): Renderer {
@@ -51,6 +53,7 @@ export function createRenderer ({
     inject,
     shouldPreload,
     shouldPrefetch,
+    shouldRenderAsyncScripts,
     clientManifest,
     serializer
   })
