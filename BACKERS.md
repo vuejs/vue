@@ -230,6 +230,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
+        <a href="https://thepiratebayproxylist.se" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/piratebayproxy.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
         <a href="https://www.programmers.io" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/programmers_io.png">
         </a>
