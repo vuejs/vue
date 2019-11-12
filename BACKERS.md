@@ -374,6 +374,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Sean Ferguson
 - Johnny Ray Austin
 - Daniel
+- Manuel Guzman
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
@@ -382,9 +383,9 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Masahiro Tanaka
 - Shawn Wildermuth
 - Sean Washington
+- Lars Andreas Ness
 - Benjamin Listwon
 - Keisuke Kita
-- Lars Andreas Ness
 - Kirk Lewis
 - Victor Tolbert
 - Wen-Tien Chang
@@ -396,74 +397,75 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Matsumoto Takamasa
 - Matt Jones
 - Niannian Modisette
-- Duncan Kenzie
 - Guy Gavergun
 - Bernhard E. Reiter
 - Zoran Knezevic
-- Jon Hobbs-Smith
 - Pierre Vanhulst
-- Asaf Yishai
-- Haim Yulzari
+- Jon Hobbs-Smith
 - Akiho Nagao
+- Haim Yulzari
 - Anthony Estebe
+- Asaf Yishai
 - Jim Raden
 - Jeremy Tan
 - IMGNRY
 - Tyler
-- Guilherme S L de Souza
 - Mickaël Andrieu
 - Vivekanandhan Natarajan
-- Rob Yedlin
+- Guilherme S L de Souza
 - Joe Gregory
 - Jordan Oroshiba
 - Marcos Moura
 - Jessie Hernandez
-- Eric
-- Ivan Sieder
-- Romain Lienard
 - username
+- Ivan Sieder
+- Eric
+- Romain Lienard
 - Bohdan Kokotko
-- Wakana Seki
-- Alexander Weiher
+- Christo Crampton
 - David Ang
 - Donald Fischer
-- Oskar Lindgren
 - Jere Sjöroos
-- Domenico Gaudioso
+- Wakana Seki
+- Alexander Weiher
+- Philip John Basile
+- Oskar Lindgren
 - Jaeyoung Lee
 - David Kaplan
+- Domenico Gaudioso
 - Andy
 - Matt Sencenbaugh
 - Juan Bermudez
-- Hannes Kochniß
-- Elon Hung
-- Daniel Mattingley
 - Chris Calo
+- Elon Hung
+- Hannes Kochniß
 - Soichiro Isshiki
-- Ed Linklater
 - Garion Herman
+- Ed Linklater
 - Andrew Willis
-- Princeyesuraj Edward
 - Yusuke Kawabata
-- 龙腾道
-- Nick Dandakis
+- Princeyesuraj Edward
 - Peter Matkovsky
+- Nick Dandakis
+- 龙腾道
 - Fabien GuySake Ungerer
-- Kenneth Crawford
 - Nathan Mallison
+- Kenneth Crawford
 - Bill Condo
 - Pierre Lebrun
-- John Thompson
 - Ryan Brewer
 - Martin Bastien
 - Alfonso Herrera
 - Bichinger Software & Consulting
-- Abhay
-- Nicolaas
 - Riki Fridrich
+- Nicolaas
 - Afif Sohaili
+- darkbluewalrus
 - Diana Bergholz
 - Tomasz Kleszczewski
+- Allan McKernan
+- Parham
+- 琚致远
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
