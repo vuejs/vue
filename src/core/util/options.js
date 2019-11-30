@@ -144,12 +144,14 @@ strats.data = function (
  * Hooks and props are merged as arrays.
  */
 function mergeHook (
-  parentVal: ?Array<Function>,
+  parentVal: ?Function | ?Array<Function>,
   childVal: ?Function | ?Array<Function>
 ): ?Array<Function> {
   const res = childVal
     ? parentVal
-      ? parentVal.concat(childVal)
+      ? Array.isArray(parentVal)
+        ? parentVal.concat(childVal)
+        : [parentVal].concat(childVal)
       : Array.isArray(childVal)
         ? childVal
         : [childVal]
