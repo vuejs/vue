@@ -1,3 +1,4 @@
+const rollupPluginJsonParse = require('rollup-plugin-json-parse');
 const path = require('path')
 const buble = require('rollup-plugin-buble')
 const alias = require('rollup-plugin-alias')
@@ -220,7 +221,8 @@ function genConfig (name) {
     external: opts.external,
     plugins: [
       flow(),
-      alias(Object.assign({}, aliases, opts.alias))
+      alias(Object.assign({}, aliases, opts.alias)),
+      rollupPluginJsonParse()
     ].concat(opts.plugins || []),
     output: {
       file: opts.dest,
