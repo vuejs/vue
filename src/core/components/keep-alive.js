@@ -45,7 +45,7 @@ function pruneCacheEntry (
   current?: VNode
 ) {
   const cached = cache[key]
-  if (cached && (!current || cached.tag !== current.tag)) {
+  if (cached && (!current || cached.tag !== current.tag || cached.key !== current.key)) {
     cached.componentInstance.$destroy()
   }
   cache[key] = null
