@@ -240,13 +240,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
     </tr><tr></tr>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://watchcartoononline.best/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/watchcartoononline.png">
-        </a>
-      </td>
-    </tr><tr></tr>
   </tbody>
 </table>
 <!--gold end-->
@@ -273,11 +266,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="middle">
-        <a href="https://dopamine.bg/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/dopamine.png">
-        </a>
-      </td>
       <td align="center" valign="middle">
         <a href="https://roadster.com" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/roadster.png">
@@ -313,16 +301,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       <td align="center" valign="middle">
         <a href="https://www.earthlink.ro" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/earthlink.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://twitter.com/philipjbasile" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/philip_john_basile.gif">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://writersperhour.com/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/writers_per_hour.jpg">
         </a>
       </td>
     </tr><tr></tr>
