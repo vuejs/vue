@@ -13,3 +13,7 @@ trim_trailing_whitespace = true
 [*.md]
 insert_final_newline = false
 trim_trailing_whitespace = false
+
+# Don't wrap lines for Git commit messages
+[COMMIT_EDITMSG]
+max_line_length = 0
