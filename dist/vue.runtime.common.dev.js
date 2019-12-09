@@ -1956,7 +1956,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   isUsingMicroTask = true;
 } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
   // Fallback to setImmediate.
-  // Technically it leverages the (macro) task queue,
+  // Techinically it leverages the (macro) task queue,
   // but it is still a better choice than setTimeout.
   timerFunc = function () {
     setImmediate(flushCallbacks);
@@ -2022,7 +2022,7 @@ var initProxy;
     warn(
       "Property \"" + key + "\" must be accessed with \"$data." + key + "\" because " +
       'properties starting with "$" or "_" are not proxied in the Vue instance to ' +
-      'prevent conflicts with Vue internals. ' +
+      'prevent conflicts with Vue internals' +
       'See: https://vuejs.org/v2/api/#data',
       target
     );
@@ -2905,7 +2905,7 @@ function bindDynamicKeys (baseObj, values) {
     if (typeof key === 'string' && key) {
       baseObj[values[i]] = values[i + 1];
     } else if (key !== '' && key !== null) {
-      // null is a special value for explicitly removing a binding
+      // null is a speical value for explicitly removing a binding
       warn(
         ("Invalid value for dynamic directive argument (expected string or null): " + key),
         this
@@ -3400,12 +3400,6 @@ function _createElement (
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag);
     if (config.isReservedTag(tag)) {
       // platform built-in elements
-      if (isDef(data) && isDef(data.nativeOn)) {
-        warn(
-          ("The .native modifier for v-on is only valid on components but it was used on <" + tag + ">."),
-          context
-        );
-      }
       vnode = new VNode(
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
@@ -3531,7 +3525,7 @@ function renderMixin (Vue) {
     // render self
     var vnode;
     try {
-      // There's no need to maintain a stack because all render fns are called
+      // There's no need to maintain a stack becaues all render fns are called
       // separately from one another. Nested component's render fns are called
       // when parent component is patched.
       currentRenderingInstance = vm;
@@ -6101,7 +6095,7 @@ function createPatchFunction (backend) {
     }
   }
 
-  function removeVnodes (vnodes, startIdx, endIdx) {
+  function removeVnodes (parentElm, vnodes, startIdx, endIdx) {
     for (; startIdx <= endIdx; ++startIdx) {
       var ch = vnodes[startIdx];
       if (isDef(ch)) {
@@ -6212,7 +6206,7 @@ function createPatchFunction (backend) {
       refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm;
       addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);
     } else if (newStartIdx > newEndIdx) {
-      removeVnodes(oldCh, oldStartIdx, oldEndIdx);
+      removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx);
     }
   }
 
@@ -6304,7 +6298,7 @@ function createPatchFunction (backend) {
         if (isDef(oldVnode.text)) { nodeOps.setTextContent(elm, ''); }
         addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue);
       } else if (isDef(oldCh)) {
-        removeVnodes(oldCh, 0, oldCh.length - 1);
+        removeVnodes(elm, oldCh, 0, oldCh.length - 1);
       } else if (isDef(oldVnode.text)) {
         nodeOps.setTextContent(elm, '');
       }
@@ -6533,7 +6527,7 @@ function createPatchFunction (backend) {
 
         // destroy old node
         if (isDef(parentElm)) {
-          removeVnodes([oldVnode], 0, 0);
+          removeVnodes(parentElm, [oldVnode], 0, 0);
         } else if (isDef(oldVnode.tag)) {
           invokeDestroyHook(oldVnode);
         }
