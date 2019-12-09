@@ -8859,7 +8859,7 @@ var TemplateRenderer = function TemplateRenderer (options) {
   this.inject = options.inject !== false;
   // if no template option is provided, the renderer is created
   // as a utility object for rendering assets like preload links and scripts.
-    
+
   var template = options.template;
   this.parsedTemplate = template
     ? typeof template === 'string'
