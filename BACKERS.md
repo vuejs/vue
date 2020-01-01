@@ -360,79 +360,80 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Masahiro Tanaka
 - Shawn Wildermuth
 - Sean Washington
-- Keisuke Kita
 - Lars Andreas Ness
+- Keisuke Kita
 - Benjamin Listwon
 - Kirk Lewis
-- Victor Tolbert
 - Wen-Tien Chang
 - Stephen Michael Hartley
+- Victor Tolbert
 - Luiz
 - Barbara Liau
 - James J. Ye
 - Matsumoto Takamasa
 - Guy Gavergun
-- Niannian Modisette
 - Matt Jones
+- Niannian Modisette
 - Bernhard E. Reiter
+- Pierre Vanhulst
 - Zoran Knezevic
 - Jon Hobbs-Smith
-- Pierre Vanhulst
-- Anthony Estebe
 - Asaf Yishai
+- Anthony Estebe
 - Haim Yulzari
 - Akiho Nagao
-- Jim Raden
 - Jeremy Tan
+- Jim Raden
 - IMGNRY
 - Tyler
-- Guilherme S L de Souza
 - Vivekanandhan Natarajan
+- Guilherme S L de Souza
 - Mickaël Andrieu
-- username
 - Jordan Oroshiba
 - Joe Gregory
+- username
 - Marcos Moura
 - Jessie Hernandez
-- Eric
-- Christo Crampton
-- Bohdan Kokotko
 - Romain Lienard
-- Oskar Lindgren
+- Christo Crampton
+- Eric
+- Donald Fischer
+- Bohdan Kokotko
 - Jere Sjöroos
+- Oskar Lindgren
+- Alexander Weiher
 - David Ang
 - Wakana Seki
-- Alexander Weiher
-- Donald Fischer
-- Jaeyoung Lee
 - David Kaplan
+- Jaeyoung Lee
 - Andy
 - Matt Sencenbaugh
 - Juan Bermudez
 - Hannes Kochniß
-- Daniel Mattingley
 - Elon Hung
+- Daniel Mattingley
 - Chris Calo
 - Soichiro Isshiki
-- Ed Linklater
 - Garion Herman
+- Ed Linklater
+- Andrew Willis
 - Yusuke Kawabata
 - Princeyesuraj Edward
-- Nick Dandakis
 - 龙腾道
 - Peter Matkovsky
+- Nick Dandakis
 - Fabien GuySake Ungerer
+- Nathan Mallison
 - Kenneth Crawford
 - Bill Condo
-- Nathan Mallison
 - Pierre Lebrun
-- Ryan Brewer
 - Martin Bastien
 - Alfonso Herrera
 - Bichinger Software & Consulting
-- Riki Fridrich
+- Ryan Brewer
 - Nicolaas
 - Afif Sohaili
+- Riki Fridrich
 - Tomasz Kleszczewski
 - Diana Bergholz
 - darkbluewalrus
@@ -441,6 +442,9 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - 琚致远
 - Roy Segall
 - Ronni Lin
+- DrevanTonder
+- tfox
+- Jan Kuku
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
