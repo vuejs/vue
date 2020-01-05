@@ -359,60 +359,58 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <!--10 start-->
 - Masahiro Tanaka
 - Shawn Wildermuth
-- Sean Washington
-- Lars Andreas Ness
 - Keisuke Kita
 - Benjamin Listwon
+- Lars Andreas Ness
 - Kirk Lewis
-- Wen-Tien Chang
-- Stephen Michael Hartley
 - Victor Tolbert
+- Stephen Michael Hartley
+- Wen-Tien Chang
 - Luiz
 - Barbara Liau
 - James J. Ye
 - Matsumoto Takamasa
-- Guy Gavergun
 - Matt Jones
+- Guy Gavergun
 - Niannian Modisette
 - Bernhard E. Reiter
-- Pierre Vanhulst
 - Zoran Knezevic
 - Jon Hobbs-Smith
+- Pierre Vanhulst
 - Asaf Yishai
-- Anthony Estebe
 - Haim Yulzari
+- Anthony Estebe
 - Akiho Nagao
-- Jeremy Tan
 - Jim Raden
+- Jeremy Tan
 - IMGNRY
 - Tyler
-- Vivekanandhan Natarajan
-- Guilherme S L de Souza
-- Mickaël Andrieu
-- Jordan Oroshiba
-- Joe Gregory
 - username
+- Mickaël Andrieu
+- Guilherme S L de Souza
+- Joe Gregory
+- Jordan Oroshiba
 - Marcos Moura
 - Jessie Hernandez
-- Romain Lienard
-- Christo Crampton
 - Eric
-- Donald Fischer
 - Bohdan Kokotko
-- Jere Sjöroos
-- Oskar Lindgren
-- Alexander Weiher
+- Christo Crampton
+- Romain Lienard
 - David Ang
+- Oskar Lindgren
+- Donald Fischer
 - Wakana Seki
+- Alexander Weiher
+- Jere Sjöroos
 - David Kaplan
 - Jaeyoung Lee
 - Andy
 - Matt Sencenbaugh
-- Juan Bermudez
-- Hannes Kochniß
 - Elon Hung
-- Daniel Mattingley
 - Chris Calo
+- Hannes Kochniß
+- Daniel Mattingley
+- Juan Bermudez
 - Soichiro Isshiki
 - Garion Herman
 - Ed Linklater
@@ -424,16 +422,15 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Nick Dandakis
 - Fabien GuySake Ungerer
 - Nathan Mallison
-- Kenneth Crawford
 - Bill Condo
 - Pierre Lebrun
+- Ryan Brewer
 - Martin Bastien
 - Alfonso Herrera
 - Bichinger Software & Consulting
-- Ryan Brewer
+- Riki Fridrich
 - Nicolaas
 - Afif Sohaili
-- Riki Fridrich
 - Tomasz Kleszczewski
 - Diana Bergholz
 - darkbluewalrus
@@ -444,7 +441,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Ronni Lin
 - DrevanTonder
 - tfox
-- Jan Kuku
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
