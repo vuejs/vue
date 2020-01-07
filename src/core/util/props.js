@@ -174,13 +174,15 @@ function assertType (value: any, type: Function): {
   }
 }
 
+const functionTypeCheckRE = /^\s*function (\w+)/
+
 /**
  * Use function string name to check built-in types,
  * because a simple equality check will fail when running
  * across different vms / iframes.
  */
 function getType (fn) {
-  const match = fn && fn.toString().match(/^\s*function (\w+)/)
+  const match = fn && fn.toString().match(functionTypeCheckRE)
   return match ? match[1] : ''
 }
 
