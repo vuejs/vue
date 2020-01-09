@@ -8288,7 +8288,9 @@ function waitForServerPrefetch (vm, resolve, reject) {
 }
 
 function renderNode (node, isRoot, context) {
-  if (node.isString) {
+  if (!node) {
+    return;
+  } else if (node.isString) {
     renderStringNode$1(node, context);
   } else if (isDef(node.componentOptions)) {
     renderComponent(node, isRoot, context);
