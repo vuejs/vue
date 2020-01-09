@@ -44,7 +44,7 @@ const normalize = cached(function (prop) {
   }
 })
 
-function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData, creating = false) {
+function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData, creating: boolean = false) {
   const data = vnode.data
   const oldData = oldVnode.data
 
@@ -92,6 +92,6 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData, creating = 
 }
 
 export default {
-  create: (oldVNode, vnode) => updateStyle(oldVNode, vnode, true),
+  create: (oldVNode: VNodeWithData, vnode: VNodeWithData) => updateStyle(oldVNode, vnode, true),
   update: updateStyle
 }
