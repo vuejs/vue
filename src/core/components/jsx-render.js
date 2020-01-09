@@ -8,7 +8,7 @@ export default {
       }
     }
   },
-  render(h) {
+  render() {
     return typeof this.renderContent == 'function' ? this.renderContent() : this.renderContent
   }
 }
