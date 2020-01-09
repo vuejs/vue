@@ -1,5 +1,3 @@
-/* @flow */
-
 export default {
   name: 'jsx-render',
   props: {
