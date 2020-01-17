@@ -28,7 +28,7 @@ export function createRenderer (file, options, cb) {
       ? JSON.parse(fs.readFileSync('/vue-ssr-server-bundle.json', 'utf-8'))
       : fs.readFileSync('/bundle.js', 'utf-8')
     const renderer = createBundleRenderer(bundle, options)
-    cb(renderer)
+    cb(renderer, options)
   })
 }
 
