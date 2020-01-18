@@ -70,7 +70,7 @@ describe('vdom patch: hydration', () => {
     expect(node0.children[0].id).toBe('bar')
   })
 
-  it('should warn message that virtual DOM tree is not matching when hydrate element', () => {
+  it('should warn message that virtual DOM tree does not match when element is hydrated', () => {
     function createServerRenderedDOM () {
       const root = document.createElement('div')
       root.setAttribute(SSR_ATTR, 'true')
@@ -91,7 +91,7 @@ describe('vdom patch: hydration', () => {
       ])
     ])
     patch(node0, vnode1)
-    expect('The client-side rendered virtual DOM tree is not matching').toHaveBeenWarned()
+    expect('The client-side rendered virtual DOM tree does not match').toHaveBeenWarned()
   })
 
   // component hydration is better off with a more e2e approach
@@ -118,7 +118,7 @@ describe('vdom patch: hydration', () => {
     })
 
     expect(() => { vm.$mount(dom) }).not.toThrow()
-    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect('not match server-rendered content').not.toHaveBeenWarned()
     expect(vm.$el).toBe(dom)
     expect(vm.$children[0].$el).toBe(originalNode2)
     expect(vm.$el.children[0]).toBe(originalNode1)
@@ -147,7 +147,7 @@ describe('vdom patch: hydration', () => {
       }
     }).$mount(dom)
 
-    expect('not matching server-rendered content').toHaveBeenWarned()
+    expect('not match server-rendered content').toHaveBeenWarned()
   })
 
   it('should warn failed hydration when component is not properly registered', () => {
@@ -157,7 +157,7 @@ describe('vdom patch: hydration', () => {
       template: '<div><foo></foo></div>'
     }).$mount(dom)
 
-    expect('not matching server-rendered content').toHaveBeenWarned()
+    expect('not match server-rendered content').toHaveBeenWarned()
     expect('Unknown custom element: <foo>').toHaveBeenWarned()
   })
 
@@ -176,7 +176,7 @@ describe('vdom patch: hydration', () => {
       }
     }).$mount(dom)
 
-    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect('not match server-rendered content').not.toHaveBeenWarned()
     expect(dom.querySelector('span').textContent).toBe('qux')
   })
 
@@ -196,7 +196,7 @@ describe('vdom patch: hydration', () => {
       }
     }).$mount(dom)
 
-    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect('not match server-rendered content').not.toHaveBeenWarned()
     expect(span).toBe(vm.$el.querySelector('span'))
     expect(vm.$el.innerHTML).toBe('<div><span>qux</span></div>')
 
@@ -222,7 +222,7 @@ describe('vdom patch: hydration', () => {
       components: { Foo }
     }).$mount(dom)
 
-    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect('not match server-rendered content').not.toHaveBeenWarned()
     expect(dom.innerHTML).toBe('<span>foo</span>')
     expect(vm.$refs.foo).toBeUndefined()
 
@@ -261,7 +261,7 @@ describe('vdom patch: hydration', () => {
       components: { Foo }
     }).$mount(dom)
 
-    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect('not match server-rendered content').not.toHaveBeenWarned()
     expect(dom.innerHTML).toBe('<span>foo</span>')
     expect(vm.$refs.foo).toBeUndefined()
 
@@ -299,7 +299,7 @@ describe('vdom patch: hydration', () => {
       components: { Foo }
     }).$mount(dom)
 
-    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect('not match server-rendered content').not.toHaveBeenWarned()
     expect(dom.innerHTML).toBe('<span>foo</span>')
 
     setTimeout(() => {
@@ -319,7 +319,7 @@ describe('vdom patch: hydration', () => {
       template: `<div v-html="html">hello</div>`
     }).$mount(dom)
 
-    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect('not match server-rendered content').not.toHaveBeenWarned()
   })
 
   it('should warn mismatching v-html', () => {
@@ -332,7 +332,7 @@ describe('vdom patch: hydration', () => {
       template: `<div v-html="html">hello</div>`
     }).$mount(dom)
 
-    expect('not matching server-rendered content').toHaveBeenWarned()
+    expect('not match server-rendered content').toHaveBeenWarned()
   })
 
   it('should hydrate with adjacent text nodes from array children (e.g. slots)', () => {
@@ -351,7 +351,7 @@ describe('vdom patch: hydration', () => {
         }
       }
     }).$mount(dom)
-    expect('not matching server-rendered content').not.toHaveBeenWarned()
+    expect('not match server-rendered content').not.toHaveBeenWarned()
   })
 
   // #7063
