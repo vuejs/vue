@@ -75,11 +75,7 @@ export function parseFilters (exp: string): string {
     lastFilterIndex = i + 1
   }
 
-  if (filters) {
-    for (i = 0; i < filters.length; i++) {
-      expression = wrapFilter(expression, filters[i])
-    }
-  }
+  if (filters) filters.reduce((pre, cur) => wrapFilter(pre, cur), expression)
 
   return expression
 }
