@@ -1,6 +1,6 @@
 /*!
  * Vue.js v2.6.11
- * (c) 2014-2019 Evan You
+ * (c) 2014-2020 Evan You
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -5020,7 +5020,6 @@
     var parentVnode = options._parentVnode;
     opts.parent = options.parent;
     opts._parentVnode = parentVnode;
-
     var vnodeComponentOptions = parentVnode.componentOptions;
     opts.propsData = vnodeComponentOptions.propsData;
     opts._parentListeners = vnodeComponentOptions.listeners;
@@ -5075,14 +5074,21 @@
     ) {
       warn('Vue is a constructor and should be called with the `new` keyword');
     }
+    debugger
     this._init(options);
+    debugger
   }
 
   initMixin(Vue);
+  debugger
   stateMixin(Vue);
+  debugger
   eventsMixin(Vue);
+  debugger
   lifecycleMixin(Vue);
+  debugger
   renderMixin(Vue);
+  debugger
 
   /*  */
 

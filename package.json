@@ -98,7 +98,7 @@
     "eslint-plugin-flowtype": "^2.34.0",
     "eslint-plugin-jasmine": "^2.8.4",
     "file-loader": "^3.0.1",
-    "flow-bin": "^0.61.0",
+    "flow-bin": "^0.115.0",
     "hash-sum": "^1.0.2",
     "he": "^1.1.1",
     "http-server": "^0.11.1",
