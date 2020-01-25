@@ -46,6 +46,7 @@ declare interface Component {
   $once: (event: string, fn: Function) => Component;
   $off: (event?: string | Array<string>, fn?: Function) => Component;
   $emit: (event: string, ...args: Array<mixed>) => Component;
+  $emitP: (event: string, ...args: Array<mixed>) => Promise<*>;
   $nextTick: (fn: Function) => void | Promise<*>;
   $createElement: (tag?: string | Component, data?: Object, children?: VNodeChildren) => VNode;
 

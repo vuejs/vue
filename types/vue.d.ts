@@ -56,6 +56,7 @@ export interface Vue {
   $once(event: string | string[], callback: Function): this;
   $off(event?: string | string[], callback?: Function): this;
   $emit(event: string, ...args: any[]): this;
+  $emitP(event: string, ...args: any[]): Promise<void>;
   $nextTick(callback: (this: this) => void): void;
   $nextTick(): Promise<void>;
   $createElement: CreateElement;
