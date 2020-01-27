@@ -474,6 +474,20 @@ describe('Directive v-on', () => {
     expect(spy.calls.count()).toBe(0)
   })
 
+  it('should not throw a warning if native modifier is used on a dynamic component', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <component is="div" @click.native="foo('native')" @click="foo('regular')"/>
+      `,
+      methods: { foo: spy },
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(`The .native modifier for v-on is only valid on components but it was used on <div>.`).not.toHaveBeenWarned()
+    expect(spy.calls.allArgs()).toEqual([['regular']]); // Regular @click should work for dynamic components resolved to native HTML elements.
+  })
+
   it('.once modifier should work with child components', () => {
     vm = new Vue({
       el,
