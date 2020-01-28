@@ -85,7 +85,7 @@ function setAttr (el: Element, key: string, value: any) {
       el.setAttributeNS(xlinkNS, key, value)
     }
   } else if (!key) {
-    console.warn('key is invalid')
+    console.error(("[Vue warn]: " + 'Assignment key in element is invalid. ' + el));
   } else {
     baseSetAttr(el, key, value)
   }
