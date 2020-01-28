@@ -464,6 +464,21 @@ describe('Directive v-bind', () => {
       expect(vm.attrs.value).toBe('keyInvalid')
     })
 
+    it('keyReserved', () => {
+      const vm = new Vue({
+        
+        template: `<div><div v-for="reservedWord in reservedWords" :key="reservedWord.name">{{ reservedWord.name }}</div></div>`,
+        data: {
+          reservedWords: [
+            {
+              name: 'constructor'
+            }
+          ]
+        }
+      }).$mount()
+      expect(vm.$el.lastChild.textContent).toBe('constructor')
+    })
+
     it('ref', () => {
       const vm = makeInstance({
         attr: 'ref',

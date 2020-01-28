@@ -25,7 +25,8 @@ import {
   isTrue,
   makeMap,
   isRegExp,
-  isPrimitive
+  isPrimitive,
+  isReservedWord
 } from '../util/index'
 
 export const emptyNode = new VNode('', {}, [])
@@ -478,7 +479,7 @@ export function createPatchFunction (backend) {
     for (let i = 0; i < children.length; i++) {
       const vnode = children[i]
       const key = vnode.key
-      if (isDef(key)) {
+      if (isDef(key) && !isReservedWord(key)) {
         if (seenKeys[key]) {
           warn(
             `Duplicate keys detected: '${key}'. This may cause an update error.`,
