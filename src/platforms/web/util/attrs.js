@@ -45,6 +45,10 @@ export const isXlink = (name: string): boolean => {
   return name.charAt(5) === ':' && name.slice(0, 5) === 'xlink'
 }
 
+export const isEmpty = (name: string): boolean => {
+  return name.trim() === '';
+}
+
 export const getXlinkProp = (name: string): string => {
   return isXlink(name) ? name.slice(6, name.length) : ''
 }
