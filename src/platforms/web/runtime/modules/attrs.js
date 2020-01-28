@@ -10,7 +10,6 @@ import {
 
 import {
   isXlink,
-  isEmpty,
   xlinkNS,
   getXlinkProp,
   isBooleanAttr,
@@ -19,7 +18,7 @@ import {
   convertEnumeratedValue
 } from 'web/util/index'
 
-function updateAttrs(oldVnode: VNodeWithData, vnode: VNodeWithData) {
+function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const opts = vnode.componentOptions
   if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) {
     return
@@ -60,7 +59,7 @@ function updateAttrs(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 }
 
-function setAttr(el: Element, key: string, value: any) {
+function setAttr (el: Element, key: string, value: any) {
 
   if (el.tagName.indexOf('-') > -1) {
     baseSetAttr(el, key, value)
@@ -85,16 +84,14 @@ function setAttr(el: Element, key: string, value: any) {
     } else {
       el.setAttributeNS(xlinkNS, key, value)
     }
-  } else if (isEmpty(key)) {
-    throw new Error(
-      'declaration element must have a valid key. Element ' + el.tagName
-    )
+  } else if (!key) {
+    console.warn('key is invalid')
   } else {
     baseSetAttr(el, key, value)
   }
 }
 
-function baseSetAttr(el, key, value) {
+function baseSetAttr (el, key, value) {
   if (isFalsyAttrValue(value)) {
     el.removeAttribute(key)
   } else {

@@ -445,6 +445,25 @@ describe('Directive v-bind', () => {
       expect(vm._vnode.children[0].key).toBe('test')
     })
 
+    it('keyInvalid', () => {
+      const vm = new Vue({
+        components: {
+          'c': {
+            props: ['value'],
+            template: `<div>{{value}}</div>`
+          }
+        },
+        template: `<c v-bind='attrs'></c>`,
+        data: {
+          attrs: {
+            key: '',
+            value: 'keyInvalid'
+          }
+        }
+      }).$mount()
+      expect(vm.attrs.value).toBe('keyInvalid')
+    })
+
     it('ref', () => {
       const vm = makeInstance({
         attr: 'ref',
