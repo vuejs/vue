@@ -13,7 +13,7 @@ const prohibitedKeywordRE = new RegExp('\\b' + (
 ).split(',').join('\\b|\\b') + '\\b')
 
 // these unary operators should not be used as property/method names
-const unaryOperatorsRE = new RegExp('\\b' + (
+const unaryOperatorsRE = new RegExp('(?<!(\\$.+\.))\\b' + (
   'delete,typeof,void'
 ).split(',').join('\\s*\\([^\\)]*\\)|\\b') + '\\s*\\([^\\)]*\\)')
 
