@@ -55,7 +55,7 @@ export default class TemplateRenderer {
     this.inject = options.inject !== false
     // if no template option is provided, the renderer is created
     // as a utility object for rendering assets like preload links and scripts.
-    
+
     const { template } = options
     this.parsedTemplate = template
       ? typeof template === 'string'
@@ -156,10 +156,14 @@ export default class TemplateRenderer {
 
   renderPreloadLinks (context: Object): string {
     const files = this.getPreloadFiles(context)
-    const shouldPreload = this.options.shouldPreload
     if (files.length) {
-      return files.map(({ file, extension, fileWithoutQuery, asType }) => {
-        let extra = ''
+      const { getPreloadLinkAttrs, shouldPreload } = this.options
+      const hasAttrsFn = typeof getPreloadLinkAttrs === 'function'
+      return files.map(ref => {
+        if(hasAttrsFn) {
+          ref = getPreloadLinkAttrs(ref)
+        }
+        const { file, extension, fileWithoutQuery, asType, attrs } = ref
         // by default, we only preload scripts or css
         if (!shouldPreload && asType !== 'script' && asType !== 'style') {
           return ''
@@ -168,6 +172,9 @@ export default class TemplateRenderer {
         if (shouldPreload && !shouldPreload(fileWithoutQuery, asType)) {
           return ''
         }
+
+        let extra = attrs || ''
+
         if (asType === 'font') {
           extra = ` type="font/${extension}" crossorigin`
         }
@@ -185,20 +192,26 @@ export default class TemplateRenderer {
   }
 
   renderPrefetchLinks (context: Object): string {
-    const shouldPrefetch = this.options.shouldPrefetch
+    const { getPrefetchLinkAttrs, shouldPrefetch } = this.options
     if (this.prefetchFiles) {
       const usedAsyncFiles = this.getUsedAsyncFiles(context)
       const alreadyRendered = file => {
         return usedAsyncFiles && usedAsyncFiles.some(f => f.file === file)
       }
-      return this.prefetchFiles.map(({ file, fileWithoutQuery, asType }) => {
+      const hasAttrsFn = typeof getPrefetchLinkAttrs === 'function'
+      return this.prefetchFiles.map(ref => {
+        if(hasAttrsFn) {
+          ref = getPrefetchLinkAttrs(ref)
+        }
+        const { file, fileWithoutQuery, asType } = ref
         if (shouldPrefetch && !shouldPrefetch(fileWithoutQuery, asType)) {
           return ''
         }
         if (alreadyRendered(file)) {
           return ''
         }
-        return `<link rel="prefetch" href="${this.publicPath}${file}">`
+        const { attrs='rel="prefetch"' } = ref
+        return `<link ${attrs} href="${this.publicPath}${file}">`
       }).join('')
     } else {
       return ''
@@ -225,8 +238,14 @@ export default class TemplateRenderer {
       const initial = this.preloadFiles.filter(({ file }) => isJS(file))
       const async = (this.getUsedAsyncFiles(context) || []).filter(({ file }) => isJS(file))
       const needed = [initial[0]].concat(async, initial.slice(1))
-      return needed.map(({ file }) => {
-        return `<script src="${this.publicPath}${file}" defer></script>`
+      const { getScriptAttrs } = this.options
+      const hasAttrsFn = typeof getScriptAttrs === 'function'
+      return needed.map((ref) => {
+        if(hasAttrsFn) {
+          ref = getScriptAttrs(ref)
+        }
+        const { file, attrs = 'defer' } = ref
+        return `<script src="${this.publicPath}${file}" ${attrs}></script>`
       }).join('')
     } else {
       return ''
