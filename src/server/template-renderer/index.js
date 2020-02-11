@@ -14,6 +14,9 @@ type TemplateRendererOptions = {
   template?: string | (content: string, context: any) => string;
   inject?: boolean;
   clientManifest?: ClientManifest;
+  getPrefetchLinkAttrs?: (ref: Resource) => Resource;
+  getPreloadLinkAttrs?: (ref: Resource) => Resource;
+  getScriptAttrs?: (ref: Resource) => Resource;
   shouldPreload?: (file: string, type: string) => boolean;
   shouldPrefetch?: (file: string, type: string) => boolean;
   serializer?: Function;
@@ -37,6 +40,7 @@ type Resource = {
   extension: string;
   fileWithoutQuery: string;
   asType: string;
+  attrs?: string;
 };
 
 export default class TemplateRenderer {
@@ -158,9 +162,8 @@ export default class TemplateRenderer {
     const files = this.getPreloadFiles(context)
     if (files.length) {
       const { getPreloadLinkAttrs, shouldPreload } = this.options
-      const hasAttrsFn = typeof getPreloadLinkAttrs === 'function'
       return files.map(ref => {
-        if(hasAttrsFn) {
+        if(typeof getPreloadLinkAttrs === 'function') {
           ref = getPreloadLinkAttrs(ref)
         }
         const { file, extension, fileWithoutQuery, asType, attrs } = ref
@@ -198,9 +201,8 @@ export default class TemplateRenderer {
       const alreadyRendered = file => {
         return usedAsyncFiles && usedAsyncFiles.some(f => f.file === file)
       }
-      const hasAttrsFn = typeof getPrefetchLinkAttrs === 'function'
       return this.prefetchFiles.map(ref => {
-        if(hasAttrsFn) {
+        if(typeof getPrefetchLinkAttrs === 'function') {
           ref = getPrefetchLinkAttrs(ref)
         }
         const { file, fileWithoutQuery, asType } = ref
@@ -239,9 +241,8 @@ export default class TemplateRenderer {
       const async = (this.getUsedAsyncFiles(context) || []).filter(({ file }) => isJS(file))
       const needed = [initial[0]].concat(async, initial.slice(1))
       const { getScriptAttrs } = this.options
-      const hasAttrsFn = typeof getScriptAttrs === 'function'
       return needed.map((ref) => {
-        if(hasAttrsFn) {
+        if(typeof getScriptAttrs === 'function') {
           ref = getScriptAttrs(ref)
         }
         const { file, attrs = 'defer' } = ref
