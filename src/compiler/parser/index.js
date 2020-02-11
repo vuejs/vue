@@ -192,7 +192,7 @@ export function parse (
         { start: el.start }
       )
     }
-    if (el.attrsMap.hasOwnProperty('v-for')) {
+    if (Object.prototype.hasOwnProperty.call(el.attrsMap, 'v-for')) {
       warnOnce(
         'Cannot use v-for on stateful component root element because ' +
         'it renders multiple elements.',

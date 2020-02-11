@@ -62,7 +62,7 @@ function getStyle (oldClassList: Array<string>, classList: Array<string>, ctx: C
   oldClassList.forEach(name => {
     const style = stylesheet[name]
     for (const key in style) {
-      if (!result.hasOwnProperty(key)) {
+      if (!Object.prototype.hasOwnProperty.call(result, key)) {
         result[key] = ''
       }
     }
