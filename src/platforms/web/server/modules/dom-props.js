@@ -27,7 +27,7 @@ export default function renderDOMProps (node: VNodeWithData): string {
       setText(node, props[key], true)
     } else if (key === 'textContent') {
       setText(node, props[key], false)
-    } else if (key === 'value' && node.tag === 'textarea') {
+    } else if (props[key] && key === 'value' && node.tag === 'textarea') {
       setText(node, props[key], false)
     } else {
       // $flow-disable-line (WTF?)

@@ -1222,6 +1222,26 @@ describe('SSR: renderToString', () => {
     })
   })
 
+    // SSR: textarea domProps keeps falsy values #10803
+    it('falsy domProps value', done => {
+      renderVmWithOptions({
+        render(h) {
+          return h('div', [
+            h('textarea', {
+              domProps: {
+                value: null
+              }
+            })
+          ])
+        }
+      }, result => {
+        expect(result).toContain(
+          '<div data-server-rendered="true"><textarea></textarea></div>'
+        )
+        done()
+      })
+    })
+
   it('render v-model with <select> (value binding)', done => {
     renderVmWithOptions({
       data: {
