@@ -98,7 +98,7 @@ export function eventsMixin (Vue: Class<Component>) {
     if (!cbs) {
       return vm
     }
-    if (!fn) {
+    if (!fn && vm !== vm.$root) {
       vm._events[event] = null
       return vm
     }
