@@ -160,13 +160,7 @@ function mergeHook (
 }
 
 function dedupeHooks (hooks) {
-  const res = []
-  for (let i = 0; i < hooks.length; i++) {
-    if (res.indexOf(hooks[i]) === -1) {
-      res.push(hooks[i])
-    }
-  }
-  return res
+  return [...new Set(hooks)]
 }
 
 LIFECYCLE_HOOKS.forEach(hook => {
