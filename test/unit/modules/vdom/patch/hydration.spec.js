@@ -388,4 +388,18 @@ describe('vdom patch: hydration', () => {
       expect(dom.children[0].className).toBe('bar')
     }).then(done)
   })
+
+  // #11109
+  it('should not warn failed hydration when there are some empty text vnode in children', () => {
+    const dom = createMockSSRDOM('<div class="bar"><span>bar</span></div>')
+
+    new Vue({
+      data: {
+        a: ''
+      },
+      template: `<div><div class="bar"><span>bar</span>{{a}}</div></div>`
+    }).$mount(dom)
+
+    expect('not matching server-rendered content').not.toHaveBeenWarned()
+  })
 })

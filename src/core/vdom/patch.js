@@ -23,6 +23,7 @@ import {
   isDef,
   isUndef,
   isTrue,
+  isFalse,
   makeMap,
   isRegExp,
   isPrimitive
@@ -643,7 +644,12 @@ export function createPatchFunction (backend) {
             let childrenMatch = true
             let childNode = elm.firstChild
             for (let i = 0; i < children.length; i++) {
-              if (!childNode || !hydrate(childNode, children[i], insertedVnodeQueue, inVPre)) {
+              const child = children[i]
+              // ignore empty text vnode
+              if (isUndef(child.tag) && isFalse(child.isComment) && child.text === '') {
+                continue
+              }
+              if (!childNode || !hydrate(childNode, child, insertedVnodeQueue, inVPre)) {
                 childrenMatch = false
                 break
               }
