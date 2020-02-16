@@ -390,7 +390,7 @@ describe('vdom patch: hydration', () => {
   })
 
   // #11109
-  it('should not warn failed hydration when there are some empty text vnode in children', () => {
+  it('should not fail hydration with empty text vnodes children', () => {
     const dom = createMockSSRDOM('<div class="bar"><span>bar</span></div>')
 
     new Vue({
