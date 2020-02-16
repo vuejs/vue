@@ -645,8 +645,9 @@ export function createPatchFunction (backend) {
             let childNode = elm.firstChild
             for (let i = 0; i < children.length; i++) {
               const child = children[i]
-              // ignore empty text vnode
+              // ignore empty text vnode but create a empty textNode for next patch
               if (isUndef(child.tag) && isFalse(child.isComment) && child.text === '') {
+                createElm(child, insertedVnodeQueue, elm, childNode)
                 continue
               }
               if (!childNode || !hydrate(childNode, child, insertedVnodeQueue, inVPre)) {
