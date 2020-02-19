@@ -2,7 +2,7 @@
 
 import VNode from 'core/vdom/vnode'
 import { renderAttr } from './attrs'
-import { isDef, isUndef, extend } from 'shared/util'
+import { isDef, isUndef, extend, toString } from 'shared/util'
 import { propsToAttrMap, isRenderableAttr } from '../util'
 
 export default function renderDOMProps (node: VNodeWithData): string {
@@ -27,8 +27,8 @@ export default function renderDOMProps (node: VNodeWithData): string {
       setText(node, props[key], true)
     } else if (key === 'textContent') {
       setText(node, props[key], false)
-    } else if (key === 'value' && node.tag === 'textarea' && isDef(props[key])) {
-      setText(node, props[key], false)
+    } else if (key === 'value' && node.tag === 'textarea') {
+      setText(node, toString(props[key]), false)
     } else {
       // $flow-disable-line (WTF?)
       const attr = propsToAttrMap[key] || key.toLowerCase()
