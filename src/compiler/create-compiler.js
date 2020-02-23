@@ -21,7 +21,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
       if (options) {
         if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
           // $flow-disable-line
-          const leadingSpaceLength = template.match(/^\s*/)[0].length
+          const leadingSpaceLength = template.match(/^[ \f\t\r\n]*/)[0].length
 
           warn = (msg, range, tip) => {
             const data: WarningMessage = { msg }
