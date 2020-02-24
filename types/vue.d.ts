@@ -37,7 +37,7 @@ export interface Vue {
   readonly $attrs: Record<string, string>;
   readonly $listeners: Record<string, Function | Function[]>;
 
-  $mount(elementOrSelector?: Element | string, hydrating?: boolean): this;
+  $mount(elementOrSelector?: Element | Comment | string, hydrating?: boolean): this;
   $forceUpdate(): void;
   $destroy(): void;
   $set: typeof Vue.set;
