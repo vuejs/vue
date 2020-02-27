@@ -74,8 +74,7 @@ declare interface Component {
   // _virtualComponents?: { [key: string]: Component };
 
   // private methods
-  _bigInt: Function; // BigInt support
-  
+
   // lifecycle
   _init: Function;
   _mount: (el?: Element | void, hydrating?: boolean) => Component;

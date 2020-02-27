@@ -11,7 +11,6 @@ import {
 import { createElement } from '../vdom/create-element'
 import { installRenderHelpers } from './render-helpers/index'
 import { resolveSlots } from './render-helpers/resolve-slots'
-import { getBigintFunc } from './render-helpers/bigint-helper'
 import { normalizeScopedSlots } from '../vdom/helpers/normalize-scoped-slots'
 import VNode, { createEmptyVNode } from '../vdom/vnode'
 
@@ -33,8 +32,7 @@ export function initRender (vm: Component) {
   // normalization is always applied for the public version, used in
   // user-written render functions.
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
-  // load BigInt function on vm instance
-  vm._bigInt = getBigintFunc()
+
   // $attrs & $listeners are exposed for easier HOC creation.
   // they need to be reactive so that HOCs using them are always updated
   const parentData = parentVnode && parentVnode.data

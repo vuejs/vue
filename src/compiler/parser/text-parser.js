@@ -2,7 +2,6 @@
 
 import { cached } from 'shared/util'
 import { parseFilters } from './filter-parser'
-import { parseBigint } from './bigint-parser'
 
 const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g
 const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
@@ -37,10 +36,8 @@ export function parseText (
       rawTokens.push(tokenValue = text.slice(lastIndex, index))
       tokens.push(JSON.stringify(tokenValue))
     }
-    // tag token and parse BigInt
-    let exp = parseFilters(match[1].trim())
-    exp = parseBigint(exp)
-
+    // tag token
+    const exp = parseFilters(match[1].trim())
     tokens.push(`_s(${exp})`)
     rawTokens.push({ '@binding': exp })
     lastIndex = index + match[0].length
