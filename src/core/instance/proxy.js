@@ -6,11 +6,16 @@ import { warn, makeMap, isNative } from '../util/index'
 let initProxy
 
 if (process.env.NODE_ENV !== 'production') {
+  const supportBigInt = 
+    (typeof window !== 'undefined' && typeof window.BigInt === 'function') ||
+    (typeof global !== 'undefined' && typeof global.BigInt === 'function')
+
   const allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
     'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
-    'require' // for Webpack/Browserify
+    'require,' + // for Webpack/Browserify
+    (supportBigInt ? 'BigInt' : '') // for BigInt support issue #11126
   )
 
   const warnNonPresent = (target, key) => {
