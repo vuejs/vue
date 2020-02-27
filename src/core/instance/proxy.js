@@ -9,7 +9,7 @@ if (process.env.NODE_ENV !== 'production') {
   const allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
-    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
+    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,BigInt,' +
     'require' // for Webpack/Browserify
   )
 
@@ -54,6 +54,7 @@ if (process.env.NODE_ENV !== 'production') {
 
   const hasHandler = {
     has (target, key) {
+      console.log(target, key)
       const has = key in target
       const isAllowed = allowedGlobals(key) ||
         (typeof key === 'string' && key.charAt(0) === '_' && !(key in target.$data))
