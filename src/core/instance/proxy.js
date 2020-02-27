@@ -9,9 +9,8 @@ if (process.env.NODE_ENV !== 'production') {
   const allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
-    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
-    'require,' + // for Webpack/Browserify
-    'BigInt' // for BigInt support issue #11126
+    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,BigInt,' +
+    'require' // for Webpack/Browserify
   )
 
   const warnNonPresent = (target, key) => {
