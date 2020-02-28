@@ -8848,7 +8848,7 @@ function mapIdToFile (id, clientManifest) {
     fileIndices.forEach(function (index) {
       var file = clientManifest.all[index];
       // only include async files or non-js, non-css assets
-      if (clientManifest.async.indexOf(file) > -1 || !(/\.(js|css)($|\?)/.test(file))) {
+      if (clientManifest.async.indexOf(file) > -1 || (file && !(/\.(js|css)($|\?)/.test(file)))) {
         files.push(file);
       }
     });
