@@ -37,8 +37,9 @@
     <!-- demo root element -->
     <div id="demo">
       <form id="search">
-        Search <input name="query" v-model="searchQuery">
+        Search <input name="query" v-model="searchQuery" autocomplete="off">
       </form>
+      <br>
       <demo-grid
         :data="gridData"
         :columns="gridColumns"
