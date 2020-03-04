@@ -104,7 +104,9 @@ export default {
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')
         : vnode.key
       if (cache[key]) {
-        vnode.componentInstance = cache[key].componentInstance
+        const { _isDestroyed } = cache[key].componentInstance
+        if (_isDestroyed) cache[key] = vnode
+        else vnode.componentInstance = cache[key].componentInstance
         // make current key freshest
         remove(keys, key)
         keys.push(key)

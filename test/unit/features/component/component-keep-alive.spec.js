@@ -713,6 +713,35 @@ describe('Component keep-alive', () => {
     }).then(done)
   })
 
+  it('should not cache destroyed instance', done => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <keep-alive include="one,two">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: { view: 'one' },
+      components
+    }).$mount()
+    vm.view='two' 
+    waitForUpdate(()=>{ vm.view='one' })
+    .then(()=>{ vm.view ='two' })
+    .then(()=>{ vm.view='one' })
+    .then(()=>{ assertHookCalls(one, [1, 1, 3, 2, 0]) })
+    .then(()=>{ vm.view='two' })
+    .then(()=>{ vm.$children[0].$destroy() })
+    .then(()=>{ vm.view='one' })
+    .then(()=>{ vm.view='two' })
+    .then(()=>{ vm.view='one' }) 
+    .then(()=>{ 
+      assertHookCalls(one, [2, 2, 5, 4, 1])
+      expect(vm.$children.length).toBe(2) 
+    })
+    .then(done)
+  })
+
   if (!isIE9) {
     it('with transition-mode out-in', done => {
       let next
