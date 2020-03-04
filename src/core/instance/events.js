@@ -74,7 +74,6 @@ export function eventsMixin (Vue: Class<Component>) {
       vm.$off(event, on)
       fn.apply(vm, arguments)
     }
-    on.fn = fn
     vm.$on(event, on)
     return vm
   }
@@ -107,7 +106,7 @@ export function eventsMixin (Vue: Class<Component>) {
     let i = cbs.length
     while (i--) {
       cb = cbs[i]
-      if (cb === fn || cb.fn === fn) {
+      if (cb === fn) {
         cbs.splice(i, 1)
         break
       }
