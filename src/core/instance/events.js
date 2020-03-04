@@ -74,8 +74,7 @@ export function eventsMixin (Vue: Class<Component>) {
       vm.$off(event, on)
       fn.apply(vm, arguments)
     }
-    on.fn = fn
-    
+    on.fn = () => {}
     vm.$on(event, on)
     return vm
   }
