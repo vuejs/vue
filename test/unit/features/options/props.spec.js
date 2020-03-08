@@ -242,6 +242,16 @@ describe('Options props', () => {
         expect('Expected Symbol, got Object').toHaveBeenWarned()
       })
     }
+	
+    if (typeof BigInt !== 'undefined') {
+      /* global BigInt */
+      it('bigint', () => {
+        makeInstance(BigInt(100), BigInt)
+        expect(console.error.calls.count()).toBe(0)
+        makeInstance({}, BigInt)
+        expect('Expected BigInt, got Object').toHaveBeenWarned()
+      })
+    }
 
     it('custom constructor', () => {
       function Class () {}
