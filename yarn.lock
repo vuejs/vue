@@ -658,6 +658,11 @@
     log-update "^2.3.0"
     strip-ansi "^3.0.1"
 
+"@ls-lint/ls-lint@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@ls-lint/ls-lint/-/ls-lint-1.5.0.tgz#1858fdcacec2050f190bb7f649ba8d45dd819aa5"
+  integrity sha512-lXju/aJNAbauX8h67ScSVhIfPKtXxM/sq3YOjH/oWErYlrcpe5ZzFIaWkPPhzo8qkICHlH4Rq+TBBzEazXZpmA==
+
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@samverschueren/stream-to-observable/-/stream-to-observable-0.3.0.tgz#ecdf48d532c58ea477acfcab80348424f8d0662f"

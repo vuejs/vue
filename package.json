@@ -26,7 +26,7 @@
     "build": "node scripts/build.js",
     "build:ssr": "npm run build -- web-runtime-cjs,web-server-renderer",
     "build:weex": "npm run build -- weex",
-    "test": "npm run lint && flow check && npm run test:types && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr && npm run test:weex",
+    "test": "npm run lint && npm run ls-lint && flow check && npm run test:types && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr && npm run test:weex",
     "test:unit": "karma start test/unit/karma.unit.config.js",
     "test:cover": "karma start test/unit/karma.cover.config.js",
     "test:e2e": "npm run build -- web-full-prod,web-server-basic-renderer && node test/e2e/runner.js",
@@ -35,6 +35,7 @@
     "test:sauce": "npm run sauce -- 0 && npm run sauce -- 1 && npm run sauce -- 2",
     "test:types": "tsc -p ./types/test/tsconfig.json",
     "lint": "eslint src scripts test",
+    "ls-lint": "npx @ls-lint/ls-lint",
     "flow": "flow check",
     "sauce": "karma start test/unit/karma.sauce.config.js",
     "bench:ssr": "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",
@@ -140,7 +141,8 @@
     "webpack": "~4.28.4",
     "weex-js-runtime": "^0.23.6",
     "weex-styler": "^0.3.0",
-    "yorkie": "^2.0.0"
+    "yorkie": "^2.0.0",
+    "@ls-lint/ls-lint": "^1.5.0"
   },
   "config": {
     "commitizen": {

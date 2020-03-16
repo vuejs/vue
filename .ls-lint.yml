@@ -1,0 +1,29 @@
+ls:
+  .dir: regex:[a-z0-9\-]+
+  .js: kebab-case
+  .css: kebab-case
+  .html: kebab-case
+  .json: kebab-case
+  .ts: kebab-case
+  .sh: kebab-case
+  .dev.js: kebab-case
+  .prod.js: kebab-case
+  .d.ts: kebab-case
+  .vdom.js: kebab-case
+  .spec.js: kebab-case
+
+  dist:
+    .js: point.case
+
+  benchmarks/ssr:
+    .js: camelCase
+
+ignore:
+  - test
+  - benchmarks/dbmon/ENV.js
+  - .babelrc.js
+  - .eslintrc.js
+  - .github
+  - .circleci
+  - .git
+  - node_modules

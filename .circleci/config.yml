@@ -31,6 +31,7 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run: npm run lint
+      - run: npm run ls-lint
       - run: npm run flow
       - run: npm run test:types
 
