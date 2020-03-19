@@ -192,6 +192,30 @@ function renderComponentInner (node, isRoot, context) {
     node,
     context.activeInstance
   )
+
+  if (isDef(node.data)) {
+    // check directives
+    const dirs = node.data.directives;
+    if (dirs) {
+      for (let i = 0; i < dirs.length; i++) {
+        const name = dirs[i].name;
+        if (name !== 'show') {
+          const dirRenderer = resolveAsset(context, 'directives', name);
+          if (dirRenderer) {
+            // directives mutate the node's data
+            // which then gets rendered by modules
+            dirRenderer(node, dirs[i]);
+          }
+        }
+      }
+    }
+    // v-show directive needs to be merged from parent to child
+    const vshowDirectiveInfo = getVShowDirectiveInfo(node);
+    if (vshowDirectiveInfo) {
+      context.directives.show(node, vshowDirectiveInfo);
+    }
+  }
+
   normalizeRender(child)
 
   const resolve = () => {
