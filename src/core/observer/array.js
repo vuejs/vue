@@ -15,7 +15,9 @@ const methodsToPatch = [
   'unshift',
   'splice',
   'sort',
-  'reverse'
+  'reverse',
+  'fill',
+  'copyWithin'
 ]
 
 /**
@@ -36,6 +38,8 @@ methodsToPatch.forEach(function (method) {
       case 'splice':
         inserted = args.slice(2)
         break
+      case 'fill':
+        inserted = [args[0]]
     }
     if (inserted) ob.observeArray(inserted)
     // notify change
