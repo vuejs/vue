@@ -105,6 +105,34 @@ Vue.component('union-prop-with-no-casting', {
   }
 })
 
+Vue.component('union-prop-with-no-casting-and-computed-return-this', {
+  props: {
+    mixed: [RegExp, Array],
+    object: [Cat, User],
+    primitive: [String, Number],
+    regex: RegExp
+  },
+  data() {
+    this.mixed;
+    this.object;
+    this.primitive;
+    this.regex.compile;
+  },
+  computed: {
+    returnThis () {
+      this
+      return this.mixed
+    }
+  },
+  methods: {
+    hello() {
+      console.log(this.mixed);
+      console.log(this.returnThis)
+      return 0
+    }
+  },
+})
+
 Vue.component('prop-with-primitive-default', {
   props: {
     id: {
