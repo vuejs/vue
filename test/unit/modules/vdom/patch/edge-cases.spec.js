@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { patch } from 'web/runtime/patch'
 
 describe('vdom patch: edge cases', () => {
   // exposed by #3406
@@ -431,5 +432,26 @@ describe('vdom patch: edge cases', () => {
       expect(vm.$el.textContent).toMatch('1')
       expect(vm.$el.textContent).not.toMatch('Infinity')
     }).then(done)
+  })
+
+  // #11171
+  it("should replace functional element scope attribute", () => {
+    const vm = new Vue({
+      components: {
+        foo: {
+          functional: true,
+          _scopeId: "foo",
+          render (h) {
+            return h('div')
+          }
+        }
+      }
+    })
+    const h = vm.$createElement
+    const vnode = h('foo')
+    const oldVnode = h("div")
+    patch(null, oldVnode)
+    let elm = patch(oldVnode, vnode)
+    expect(elm.hasAttribute("foo")).toBe(true)
   })
 })
