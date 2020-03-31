@@ -4,6 +4,7 @@ import RenderStream from './render-stream'
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
 import { createPromiseCallback } from './util'
+import { isPromise } from '../shared/util'
 import TemplateRenderer from './template-renderer/index'
 import type { ClientManifest } from './template-renderer/index'
 
@@ -32,6 +33,14 @@ export type RenderOptions = {
   serializer?: Function;
   runInNewContext?: boolean | 'once';
 };
+
+function runRenderedCallback(context) {
+  if (!context || !context.rendered) {
+    return Promise.resolve();
+  }
+  const result = context.rendered(context);
+  return isPromise(result) ? result : Promise.resolve();
+}
 
 export function createRenderer ({
   modules = [],
@@ -85,26 +94,25 @@ export function createRenderer ({
           if (err) {
             return cb(err)
           }
-          if (context && context.rendered) {
-            context.rendered(context)
-          }
-          if (template) {
-            try {
-              const res = templateRenderer.render(result, context)
-              if (typeof res !== 'string') {
-                // function template returning promise
-                res
-                  .then(html => cb(null, html))
-                  .catch(cb)
-              } else {
-                cb(null, res)
+          runRenderedCallback(context).then(() => {
+            if (template) {
+              try {
+                const res = templateRenderer.render(result, context)
+                if (typeof res !== 'string') {
+                  // function template returning promise
+                  res
+                    .then(html => cb(null, html))
+                    .catch(cb)
+                } else {
+                  cb(null, res)
+                }
+              } catch (e) {
+                cb(e)
               }
-            } catch (e) {
-              cb(e)
+            } else {
+              cb(null, result)
             }
-          } else {
-            cb(null, result)
-          }
+          })
         })
       } catch (e) {
         cb(e)

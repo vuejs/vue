@@ -84,6 +84,38 @@ function createAssertions (runInNewContext) {
     })
   })
 
+  it('renderToString calls context.rendered', done => {
+    createRenderer('app.js', { runInNewContext }, renderer => {
+      const rendered = jasmine.createSpy();
+      const context = { url: '/test', rendered }
+      renderer.renderToString(context, () => {
+        expect(rendered).toHaveBeenCalledWith(context)
+        expect(rendered).toHaveBeenCalledTimes(1)
+        done()
+      })
+    })
+  })
+
+  it('renderToString waits if context.rendered returns a promise', done => {
+    createRenderer('app.js', { runInNewContext }, renderer => {
+      const rendered = (context) => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            context.msg = 'Hello from context.rendered'
+            resolve()
+          }, 1000)
+        })
+      }
+      const context = { url: '/test', rendered }
+      renderer.renderToString(context, (err, res) => {
+        expect(err).toBeNull()
+        expect(res).toBe('<div data-server-rendered="true">/test</div>')
+        expect(context.msg).toBe('Hello from context.rendered')
+        done()
+      })
+    })
+  })
+
   it('renderToStream catch error', done => {
     createRenderer('error.js', { runInNewContext }, renderer => {
       const stream = renderer.renderToStream()
