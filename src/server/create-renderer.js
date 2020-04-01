@@ -34,11 +34,11 @@ export type RenderOptions = {
   runInNewContext?: boolean | 'once';
 };
 
-function runRenderedCallback(context) {
+function runRenderedCallback(context, component) {
   if (!context || !context.rendered) {
     return Promise.resolve();
   }
-  const result = context.rendered(context);
+  const result = context.rendered(context, component);
   return isPromise(result) ? result : Promise.resolve();
 }
 
@@ -94,7 +94,7 @@ export function createRenderer ({
           if (err) {
             return cb(err)
           }
-          runRenderedCallback(context).then(() => {
+          runRenderedCallback(context, component).then(() => {
             if (template) {
               try {
                 const res = templateRenderer.render(result, context)

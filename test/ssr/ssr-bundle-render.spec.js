@@ -89,7 +89,8 @@ function createAssertions (runInNewContext) {
       const rendered = jasmine.createSpy();
       const context = { url: '/test', rendered }
       renderer.renderToString(context, () => {
-        expect(rendered).toHaveBeenCalledWith(context)
+        expect(rendered).toHaveBeenCalledWith(context, jasmine.any(Object))
+        expect(rendered.calls.mostRecent().args[1].constructor.name).toBe("Vue")
         expect(rendered).toHaveBeenCalledTimes(1)
         done()
       })
