@@ -2,6 +2,7 @@
 
 import Dep from './dep'
 import VNode from '../vdom/vnode'
+import Watcher from './watcher'
 import { arrayMethods } from './array'
 import {
   def,
@@ -139,6 +140,11 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // avoid stack overflow when observe watcher
+  if (obj instanceof Watcher) {
+    return
+  }
+
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
