@@ -379,6 +379,7 @@ export function parse (
         }
       }
     },
+
     comment (text: string, start, end) {
       // adding anyting as a sibling to the root node is forbidden
       // comments should still be allowed, but ignored
