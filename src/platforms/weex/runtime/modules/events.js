@@ -7,10 +7,8 @@ let target: any
 function createOnceHandler (event, handler, capture) {
   const _target = target // save current target element in closure
   return function onceHandler () {
-    const res = handler.apply(null, arguments)
-    if (res !== null) {
-      remove(event, onceHandler, capture, _target)
-    }
+    handler.apply(null, arguments)
+    remove(event, onceHandler, capture, _target)
   }
 }
 

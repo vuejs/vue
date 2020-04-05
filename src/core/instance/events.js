@@ -32,10 +32,8 @@ function remove (event, fn) {
 function createOnceHandler (event, fn) {
   const _target = target
   return function onceHandler () {
-    const res = fn.apply(null, arguments)
-    if (res !== null) {
-      _target.$off(event, onceHandler)
-    }
+    fn.apply(null, arguments)
+    _target.$off(event, onceHandler)
   }
 }
 
