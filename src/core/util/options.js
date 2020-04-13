@@ -336,13 +336,19 @@ function normalizeInject (options: Object, vm: ?Component) {
   const inject = options.inject
   if (!inject) return
   const normalized = options.inject = {}
+  let val;
   if (Array.isArray(inject)) {
     for (let i = 0; i < inject.length; i++) {
-      normalized[inject[i]] = { from: inject[i] }
+      val = inject[i]
+      if (typeof val === 'string') {
+        normalized[val] = { from: val }
+      } else if (process.env.NODE_ENV !== 'production') {
+        warn('inject must be strings when using array syntax.')
+      }
     }
   } else if (isPlainObject(inject)) {
     for (const key in inject) {
-      const val = inject[key]
+      val = inject[key]
       normalized[key] = isPlainObject(val)
         ? extend({ from: key }, val)
         : { from: val }
