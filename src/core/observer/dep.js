@@ -1,5 +1,5 @@
 /* @flow */
-
+//  依赖管理
 import type Watcher from './watcher'
 import { remove } from '../util/index'
 
@@ -8,6 +8,7 @@ let uid = 0
 /**
  * A dep is an observable that can have multiple
  * directives subscribing to it.
+ * 发布订阅---可以用eventbus来理解
  */
 export default class Dep {
   static target: ?Watcher;
@@ -35,7 +36,7 @@ export default class Dep {
 
   notify () {
     // stabilize the subscriber list first
-    const subs = this.subs.slice()
+    const subs = this.subs.slice() // sub里每个都是watcher
     for (let i = 0, l = subs.length; i < l; i++) {
       subs[i].update()
     }

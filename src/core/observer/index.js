@@ -100,9 +100,9 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
 }
 
 /**
- * Attempt to create an observer instance for a value,
- * returns the new observer if successfully observed,
- * or the existing observer if the value already has one.
+*尝试为一个值创建一个观察者实例，
+*如果观察成功，返回新的观察者，
+*或现有的观察者，如果值已经有一个。
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
@@ -118,6 +118,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
+    // 仙剑监听器
     ob = new Observer(value)
   }
   if (asRootData && ob) {
@@ -127,7 +128,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 }
 
 /**
- * Define a reactive property on an Object.
+ * 在对象上定义反应性属性。
  */
 export function defineReactive (
   obj: Object,
@@ -154,7 +155,7 @@ export function defineReactive (
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
-        dep.depend()
+        dep.depend() // 收集依赖，dep累收集
         if (childOb) {
           childOb.dep.depend()
           if (Array.isArray(value)) {
@@ -180,15 +181,16 @@ export function defineReactive (
         val = newVal
       }
       childOb = !shallow && observe(newVal)
+      //dep的实例更新
       dep.notify()
     }
   })
 }
 
 /**
- * Set a property on an object. Adds the new property and
- * triggers change notification if the property doesn't
- * already exist.
+ * 设置对象的属性。添加新属性和
+*  如果属性没有更改，则触发更改通知
+*  已经存在。
  */
 export function set (target: Array<any> | Object, key: any, val: any): any {
   if (Array.isArray(target) && isValidArrayIndex(key)) {
@@ -202,10 +204,6 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   }
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Avoid adding reactive properties to a Vue instance or its root $data ' +
-      'at runtime - declare it upfront in the data option.'
-    )
     return val
   }
   if (!ob) {
@@ -218,7 +216,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
 }
 
 /**
- * Delete a property and trigger change if necessary.
+ * 删除属性并在必要时触发更改。
  */
 export function del (target: Array<any> | Object, key: any) {
   if (Array.isArray(target) && isValidArrayIndex(key)) {
@@ -227,10 +225,6 @@ export function del (target: Array<any> | Object, key: any) {
   }
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Avoid deleting properties on a Vue instance or its root $data ' +
-      '- just set it to null.'
-    )
     return
   }
   if (!hasOwn(target, key)) {
@@ -244,8 +238,8 @@ export function del (target: Array<any> | Object, key: any) {
 }
 
 /**
- * Collect dependencies on array elements when the array is touched, since
- * we cannot intercept array element access like property getters.
+ * 当数组被触摸时，收集数组元素的依赖项，因为
+ * 我们不能拦截数组元素访问像属性getter。
  */
 function dependArray (value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {
