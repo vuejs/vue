@@ -5899,7 +5899,7 @@ function createPatchFunction (backend) {
   }
 
   function emptyNodeAt (elm) {
-    return (typeof nodeOps.tagName(elm) == "string") ? new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm) : new VNode("", {}, [], undefined, elm)
+    return new VNode((typeof nodeOps.tagName(elm) == "string") ? nodeOps.tagName(elm).toLowerCase() : "", {}, [], undefined, elm)
   }
 
   function createRmCb (childElm, listeners) {
