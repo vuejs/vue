@@ -74,7 +74,7 @@ function genCheckboxModel (
   const trueValueBinding = getBindingAttr(el, 'true-value') || 'true'
   const falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
   addProp(el, 'checked',
-    `Array.isArray(${value})` +
+    `[].constructor.isArray(${value})` +
     `?_i(${value},${valueBinding})>-1` + (
       trueValueBinding === 'true'
         ? `:(${value})`
@@ -85,7 +85,7 @@ function genCheckboxModel (
     `var $$a=${value},` +
         '$$el=$event.target,' +
         `$$c=$$el.checked?(${trueValueBinding}):(${falseValueBinding});` +
-    'if(Array.isArray($$a)){' +
+    'if([].constructor.isArray($$a)){' +
       `var $$v=${number ? '_n(' + valueBinding + ')' : valueBinding},` +
           '$$i=_i($$a,$$v);' +
       `if($$el.checked){$$i<0&&(${genAssignmentCode(value, '$$a.concat([$$v])')})}` +
@@ -113,7 +113,7 @@ function genSelect (
   modifiers: ?ASTModifiers
 ) {
   const number = modifiers && modifiers.number
-  const selectedVal = `Array.prototype.filter` +
+  const selectedVal = `[].filter` +
     `.call($event.target.options,function(o){return o.selected})` +
     `.map(function(o){var val = "_value" in o ? o._value : o.value;` +
     `return ${number ? '_n(val)' : 'val'}})`
