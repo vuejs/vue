@@ -157,6 +157,17 @@ function applyNS(vnode, ns, force?: boolean) {
       }
     }
   }
+
+  // #11315
+  if (isObject(vnode.componentOptions) && isDef(vnode.componentOptions.children)) {
+    for (var i = 0, l = vnode.componentOptions.children.length; i < l; i++) {
+      var child = vnode.componentOptions.children[i]
+      if (isDef(child.tag) && (
+        isUndef(child.ns) || (isTrue(force) && child.tag !== 'svg'))) {
+        applyNS(child, ns, force)
+      }
+    }
+  }
 }
 
 // ref #5318
