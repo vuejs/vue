@@ -29,8 +29,8 @@ declare namespace Vue {
   export type DirectiveOptions = V.DirectiveOptions;
 
   // plugin.d.ts
-  export type PluginFunction<T> = V.PluginFunction<T>;
-  export type PluginObject<T> = V.PluginObject<T>;
+  export type PluginFunction = V.PluginFunction;
+  export type PluginObject = V.PluginObject;
 
   // vnode.d.ts
   export type VNodeChildren = V.VNodeChildren;
