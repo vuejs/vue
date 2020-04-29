@@ -13,7 +13,7 @@ import {
   WatchOptions,
 } from "./options";
 import { VNode, VNodeData, VNodeChildren, NormalizedScopedSlot } from "./vnode";
-import { PluginFunction, PluginObject } from "./plugin";
+import { PluginFunction, PluginObject, RestParams } from "./plugin";
 
 export interface CreateElement {
   (tag?: string | Component<any, any, any, any> | AsyncComponent<any, any, any, any> | (() => Component), children?: VNodeChildren): VNode;
@@ -111,7 +111,7 @@ export interface VueConstructor<V extends Vue = Vue> {
   component<Props>(id: string, definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>>): ExtendedVue<V, {}, {}, {}, Props>;
   component(id: string, definition?: ComponentOptions<V>): ExtendedVue<V, {}, {}, {}, {}>;
 
-  use<T = any>(plugin: PluginObject<T> | PluginFunction<T>, option?: T, ...rest: any[]): VueConstructor<V>;
+  use<T extends PluginObject | PluginFunction>(plugin: T, ...rest: RestParams<T>): VueConstructor<V>;
   mixin(mixin: VueConstructor | ComponentOptions<Vue>): VueConstructor<V>;
   compile(template: string): {
     render(createElement: typeof Vue.prototype.$createElement): VNode;
