@@ -31,11 +31,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://vueschool.io/?utm_source=Vuejs.org&utm_medium=Banner&utm_campaign=Sponsored%20Banner&utm_content=V1" target="_blank">
-          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vueschool.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://vehikl.com/" target="_blank">
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vehikl.png">
         </a>
@@ -50,8 +45,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/passionate_people.png">
         </a>
       </td>
-    </tr><tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="https://www.storyblok.com" target="_blank">
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/storyblok.png">
@@ -187,11 +180,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       <td align="center" valign="middle">
         <a href="http://www.pullrequest.com" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/pullrequest.svg?sanitize=true">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://unicorn.io/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/unicorn_io.png">
         </a>
       </td>
       <td align="center" valign="middle">
