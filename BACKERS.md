@@ -329,7 +329,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Konstantin Levinski
 - Sean Ferguson
 - Johnny Ray Austin
-- Manuel Guzman
+- Peter Imburg
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
@@ -337,86 +337,83 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <!--10 start-->
 - Masahiro Tanaka
 - Shawn Wildermuth
-- Keisuke Kita
 - Lars Andreas Ness
+- Keisuke Kita
 - Benjamin Listwon
 - Kirk Lewis
+- Stephen Michael Hartley
 - Victor Tolbert
 - Wen-Tien Chang
-- Stephen Michael Hartley
 - Luiz 
 - James J. Ye
 - Barbara Liau
 - Matsumoto Takamasa
-- Guy Gavergun
-- Matt Jones
-- Niannian Modisette
-- Bernhard E. Reiter
-- Asaf Yishai
 - username 
+- Niannian Modisette
+- Matt Jones
+- Asaf Yishai
+- Guy Gavergun
+- Bernhard E. Reiter
 - Zoran Knezevic
 - Jon Hobbs-Smith
 - Pierre Vanhulst
-- Akiho Nagao
 - Anthony Estebe
 - Haim Yulzari
+- Akiho Nagao
 - Jim Raden
-- Jeremy Tan
 - IMGNRY 
-- Tyler 
 - Guilherme S L de Souza
-- Vivekanandhan Natarajan
 - Joe Gregory
 - Jordan Oroshiba
 - Marcos Moura
 - Jessie Hernandez
 - Eric 
 - Bohdan Kokotko
-- Oskar Lindgren
 - Jere Sjöroos
 - Donald Fischer
-- Alexander Weiher
-- Wakana Seki
 - David Ang
+- Wakana Seki
+- Oskar Lindgren
 - Jaeyoung Lee
 - David Kaplan
 - Andy 
 - Philip John Basile
 - Matt Sencenbaugh
+- Chris Calo
 - Juan Bermudez
 - Elon Hung
-- Chris Calo
-- Daniel Mattingley
 - Hannes Kochniß
+- Daniel Mattingley
 - Soichiro Isshiki
-- Andrew Willis
 - Yusuke Kawabata
-- Nick Dandakis
-- Peter Matkovsky
 - 龙腾道 
+- Peter Matkovsky
+- Nick Dandakis
 - Fabien GuySake Ungerer
 - Bill Condo
 - Pierre Lebrun
-- Ryan Brewer
 - Martin Bastien
+- Ryan Brewer
 - Alfonso Herrera
 - Bichinger Software & Consulting
 - Afif Sohaili
 - Nicolaas 
 - Riki Fridrich
-- Tomasz Kleszczewski
 - 琚致远 
 - Diana Bergholz
-- Parham 
 - Allan McKernan
+- Tomasz Kleszczewski
+- Parham Saidi
 - Roy Segall
 - Ronni Lin
 - Thomas Wiedemann
-- lucien144 
 - Nobuhide Esaki
+- lucien144 
 - Santi Sanchez Canals
-- Zeth Odderskov
 - Evgeny Zislis
+- Zeth Odderskov
+- Oswaldo Freitas
+- Kirill Tyurin
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
