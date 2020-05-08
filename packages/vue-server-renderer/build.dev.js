@@ -6590,7 +6590,7 @@ function renderSSRStyle (
   var allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
-    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
+    'Math,Number,BigInt,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
     'require' // for Webpack/Browserify
   );
 
