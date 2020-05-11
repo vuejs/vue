@@ -188,6 +188,32 @@ describe('Options provide/inject', () => {
       }).$mount()
       expect(vm.$el.textContent).toBe('123')
     })
+
+    it('should merge symbol provide from mixins (functions)', () => {
+      const keyA = Symbol('foo')
+      const keyB = Symbol('bar')
+
+      const mixinA = { provide: () => ({ [keyA]: 'foo' }) }
+      const mixinB = { provide: () => ({ [keyB]: 'bar' }) }
+      const child = {
+        inject: {
+          foo: keyA,
+          bar: keyB
+        },
+        template: `<span/>`,
+        created () {
+          injected = [this.foo, this.bar]
+        }
+      }
+      new Vue({
+        mixins: [mixinA, mixinB],
+        render (h) {
+          return h(child)
+        }
+      }).$mount()
+
+      expect(injected).toEqual(['foo', 'bar'])
+    })
   }
 
   // GitHub issue #5223

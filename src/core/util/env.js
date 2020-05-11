@@ -14,6 +14,8 @@ export const isEdge = UA && UA.indexOf('edge/') > 0
 export const isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 'android')
 export const isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios')
 export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
+export const isPhantomJS = UA && /phantomjs/.test(UA)
+export const isFF = UA && UA.match(/firefox\/(\d+)/)
 
 // Firefox has a "watch" function on Object.prototype...
 export const nativeWatch = ({}).watch
@@ -41,7 +43,7 @@ export const isServerRendering = () => {
     if (!inBrowser && !inWeex && typeof global !== 'undefined') {
       // detect presence of vue-server-renderer and avoid
       // Webpack shimming the process
-      _isServer = global['process'].env.VUE_ENV === 'server'
+      _isServer = global['process'] && global['process'].env.VUE_ENV === 'server'
     } else {
       _isServer = false
     }
@@ -85,11 +87,10 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
   }
 }
 
-interface SimpleSet {
+export interface SimpleSet {
   has(key: string | number): boolean;
   add(key: string | number): mixed;
   clear(): void;
 }
 
 export { _Set }
-export type { SimpleSet }

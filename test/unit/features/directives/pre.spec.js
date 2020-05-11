@@ -7,7 +7,7 @@ describe('Directive v-pre', function () {
         <div v-pre>{{ a }}</div>
         <div>{{ a }}</div>
         <div v-pre>
-          <component></component>
+          <component is="div"></component>
         </div>
       </div>`,
       data: {
@@ -17,7 +17,7 @@ describe('Directive v-pre', function () {
     vm.$mount()
     expect(vm.$el.firstChild.textContent).toBe('{{ a }}')
     expect(vm.$el.children[1].textContent).toBe('123')
-    expect(vm.$el.lastChild.innerHTML).toBe('<component></component>')
+    expect(vm.$el.lastChild.innerHTML).toBe('<component is="div"></component>')
   })
 
   it('should not compile on root node', function () {
@@ -30,5 +30,16 @@ describe('Directive v-pre', function () {
     })
     vm.$mount()
     expect(vm.$el.firstChild.textContent).toBe('{{ a }}')
+  })
+
+  // #8286
+  it('should not compile custom component tags', function () {
+    Vue.component('vtest', { template: ` <div>Hello World</div>` })
+    const vm = new Vue({
+      template: '<div v-pre><vtest></vtest></div>',
+      replace: true
+    })
+    vm.$mount()
+    expect(vm.$el.firstChild.tagName).toBe('VTEST')
   })
 })

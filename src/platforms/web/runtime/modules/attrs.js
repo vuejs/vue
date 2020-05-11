@@ -14,7 +14,8 @@ import {
   getXlinkProp,
   isBooleanAttr,
   isEnumeratedAttr,
-  isFalsyAttrValue
+  isFalsyAttrValue,
+  convertEnumeratedValue
 } from 'web/util/index'
 
 function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
@@ -75,7 +76,7 @@ function setAttr (el: Element, key: string, value: any) {
       el.setAttribute(key, value)
     }
   } else if (isEnumeratedAttr(key)) {
-    el.setAttribute(key, isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true')
+    el.setAttribute(key, convertEnumeratedValue(key, value))
   } else if (isXlink(key)) {
     if (isFalsyAttrValue(value)) {
       el.removeAttributeNS(xlinkNS, getXlinkProp(key))
@@ -98,7 +99,7 @@ function baseSetAttr (el, key, value) {
     if (
       isIE && !isIE9 &&
       el.tagName === 'TEXTAREA' &&
-      key === 'placeholder' && !el.__ieph
+      key === 'placeholder' && value !== '' && !el.__ieph
     ) {
       const blocker = e => {
         e.stopImmediatePropagation()

@@ -8,7 +8,7 @@ export const parseStyleText = cached(function (cssText) {
   const propertyDelimiter = /:(.+)/
   cssText.split(listDelimiter).forEach(function (item) {
     if (item) {
-      var tmp = item.split(propertyDelimiter)
+      const tmp = item.split(propertyDelimiter)
       tmp.length > 1 && (res[tmp[0].trim()] = tmp[1].trim())
     }
   })
@@ -69,4 +69,3 @@ export function getStyle (vnode: VNodeWithData, checkChild: boolean): Object {
   }
   return res
 }
-

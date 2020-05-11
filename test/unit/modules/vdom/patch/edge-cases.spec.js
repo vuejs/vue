@@ -49,12 +49,9 @@ describe('vdom patch: edge cases', () => {
           bind (el, binding, vnode) {
             waitForUpdate(() => {
               expect(vnode.children[0].data.on.click()).toBe(5)
-            }).then(() => {
               expect(vnode.children[2].data.on.click(dummyEvt)).toBe(5)
-            }).then(() => {
-              expect(vnode.children[4].data.on.click()).not.toBeDefined()
-            }).then(() => {
-              expect(vnode.children[6].data.on.click(dummyEvt)).not.toBeDefined()
+              expect(vnode.children[4].data.on.click()).toBe(10)
+              expect(vnode.children[6].data.on.click(dummyEvt)).toBe(10)
             }).then(done)
           }
         }
@@ -393,9 +390,15 @@ describe('vdom patch: edge cases', () => {
       extends: Base
     }
 
+    // sometimes we do need to tap into these internal hooks (e.g. in vue-router)
+    // so make sure it does work
+    const inlineHookSpy = jasmine.createSpy('inlineInit')
+
     const vm = new Vue({
       render (h) {
-        const data = { staticClass: 'text-red' }
+        const data = { staticClass: 'text-red', hook: {
+          init: inlineHookSpy
+        }}
 
         return h('div', [
           h(Foo, data),
@@ -405,5 +408,28 @@ describe('vdom patch: edge cases', () => {
     }).$mount()
 
     expect(vm.$el.textContent).toBe('FooBar')
+    expect(inlineHookSpy.calls.count()).toBe(2)
+  })
+
+  // #9549
+  it('DOM props set throwing should not break app', done => {
+    const vm = new Vue({
+      data: {
+        n: Infinity
+      },
+      template: `
+        <div>
+          <progress :value="n"/>
+          {{ n }}
+        </div>
+      `
+    }).$mount()
+
+    expect(vm.$el.textContent).toMatch('Infinity')
+    vm.n = 1
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toMatch('1')
+      expect(vm.$el.textContent).not.toMatch('Infinity')
+    }).then(done)
   })
 })

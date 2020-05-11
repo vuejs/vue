@@ -2,8 +2,8 @@
 
 export const emptyObject = Object.freeze({})
 
-// these helpers produces better vm code in JS engines due to their
-// explicitness and function inlining
+// These helpers produce better VM code in JS engines due to their
+// explicitness and function inlining.
 export function isUndef (v: any): boolean %checks {
   return v === undefined || v === null
 }
@@ -21,7 +21,7 @@ export function isFalse (v: any): boolean %checks {
 }
 
 /**
- * Check if value is primitive
+ * Check if value is primitive.
  */
 export function isPrimitive (value: any): boolean %checks {
   return (
@@ -43,7 +43,7 @@ export function isObject (obj: mixed): boolean %checks {
 }
 
 /**
- * Get the raw type string of a value e.g. [object Object]
+ * Get the raw type string of a value, e.g., [object Object].
  */
 const _toString = Object.prototype.toString
 
@@ -71,19 +71,27 @@ export function isValidArrayIndex (val: any): boolean {
   return n >= 0 && Math.floor(n) === n && isFinite(val)
 }
 
+export function isPromise (val: any): boolean {
+  return (
+    isDef(val) &&
+    typeof val.then === 'function' &&
+    typeof val.catch === 'function'
+  )
+}
+
 /**
  * Convert a value to a string that is actually rendered.
  */
 export function toString (val: any): string {
   return val == null
     ? ''
-    : typeof val === 'object'
+    : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
       ? JSON.stringify(val, null, 2)
       : String(val)
 }
 
 /**
- * Convert a input value to a number for persistence.
+ * Convert an input value to a number for persistence.
  * If the conversion fails, return original string.
  */
 export function toNumber (val: string): number | string {
@@ -115,12 +123,12 @@ export function makeMap (
 export const isBuiltInTag = makeMap('slot,component', true)
 
 /**
- * Check if a attribute is a reserved attribute.
+ * Check if an attribute is a reserved attribute.
  */
 export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is')
 
 /**
- * Remove an item from an array
+ * Remove an item from an array.
  */
 export function remove (arr: Array<any>, item: any): Array<any> | void {
   if (arr.length) {
@@ -132,7 +140,7 @@ export function remove (arr: Array<any>, item: any): Array<any> | void {
 }
 
 /**
- * Check whether the object has the property.
+ * Check whether an object has the property.
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty
 export function hasOwn (obj: Object | Array<*>, key: string): boolean {
@@ -174,11 +182,11 @@ export const hyphenate = cached((str: string): string => {
 })
 
 /**
- * Simple bind polyfill for environments that do not support it... e.g.
- * PhantomJS 1.x. Technically we don't need this anymore since native bind is
- * now more performant in most browsers, but removing it would be breaking for
- * code that was able to run in PhantomJS 1.x, so this must be kept for
- * backwards compatibility.
+ * Simple bind polyfill for environments that do not support it,
+ * e.g., PhantomJS 1.x. Technically, we don't need this anymore
+ * since native bind is now performant enough in most browsers.
+ * But removing it would mean breaking code that was able to run in
+ * PhantomJS 1.x, so this must be kept for backward compatibility.
  */
 
 /* istanbul ignore next */
@@ -240,10 +248,12 @@ export function toObject (arr: Array<any>): Object {
   return res
 }
 
+/* eslint-disable no-unused-vars */
+
 /**
  * Perform no operation.
  * Stubbing args to make Flow happy without leaving useless transpiled code
- * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/)
+ * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/).
  */
 export function noop (a?: any, b?: any, c?: any) {}
 
@@ -252,13 +262,15 @@ export function noop (a?: any, b?: any, c?: any) {}
  */
 export const no = (a?: any, b?: any, c?: any) => false
 
+/* eslint-enable no-unused-vars */
+
 /**
- * Return same value
+ * Return the same value.
  */
 export const identity = (_: any) => _
 
 /**
- * Generate a static keys string from compiler modules.
+ * Generate a string containing static keys from compiler modules.
  */
 export function genStaticKeys (modules: Array<ModuleOptions>): string {
   return modules.reduce((keys, m) => {
@@ -282,6 +294,8 @@ export function looseEqual (a: any, b: any): boolean {
         return a.length === b.length && a.every((e, i) => {
           return looseEqual(e, b[i])
         })
+      } else if (a instanceof Date && b instanceof Date) {
+        return a.getTime() === b.getTime()
       } else if (!isArrayA && !isArrayB) {
         const keysA = Object.keys(a)
         const keysB = Object.keys(b)
@@ -303,6 +317,11 @@ export function looseEqual (a: any, b: any): boolean {
   }
 }
 
+/**
+ * Return the first index at which a loosely equal value can be
+ * found in the array (if value is a plain object, the array must
+ * contain an object of the same shape), or -1 if it is not present.
+ */
 export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
   for (let i = 0; i < arr.length; i++) {
     if (looseEqual(arr[i], val)) return i

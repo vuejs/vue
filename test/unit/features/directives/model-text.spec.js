@@ -167,7 +167,7 @@ describe('Directive v-model text', () => {
           '<span ref="rs">{{selections}}</span>' +
         '</div>'
     }).$mount()
-    var inputs = vm.$el.getElementsByTagName('input')
+    const inputs = vm.$el.getElementsByTagName('input')
     inputs[1].value = 'test'
     triggerEvent(inputs[1], 'input')
     waitForUpdate(() => {
@@ -238,7 +238,7 @@ describe('Directive v-model text', () => {
       template: '<input v-model="a" @input="onInput">',
       methods: {
         onInput (e) {
-          spy(e.target.value)
+          spy(this.a)
         }
       }
     }).$mount()
@@ -437,8 +437,8 @@ describe('Directive v-model text', () => {
     })
   }
 
-  // #7138
   if (isIE && !isIE9) {
+    // #7138
     it('should not fire input on initial render of textarea with placeholder in IE10/11', done => {
       const el = document.createElement('div')
       document.body.appendChild(el)
@@ -449,6 +449,22 @@ describe('Directive v-model text', () => {
       })
       setTimeout(() => {
         expect(vm.foo).toBe(null)
+        done()
+      }, 17)
+    })
+
+    // #9042
+    it('should not block the first input event when placeholder is empty', done => {
+      const el = document.createElement('div')
+      document.body.appendChild(el)
+      const vm = new Vue({
+        el,
+        data: { evtCount: 0 },
+        template: `<textarea placeholder="" @input="evtCount++"></textarea>`,
+      })
+      triggerEvent(vm.$el, 'input')
+      setTimeout(() => {
+        expect(vm.evtCount).toBe(1)
         done()
       }, 17)
     })

@@ -54,6 +54,7 @@ function createEventTestCase (name) {
 describe('Usage', () => {
   describe('render', () => {
     it('sample', createRenderTestCase('render/sample'))
+    it('class', createRenderTestCase('render/class'))
   })
 
   describe('event', () => {

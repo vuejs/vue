@@ -1,6 +1,9 @@
 /* @flow */
 
 import { isDef, isUndef, extend, toNumber } from 'shared/util'
+import { isSVG } from 'web/util/index'
+
+let svgContainer
 
 function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (isUndef(oldVnode.data.domProps) && isUndef(vnode.data.domProps)) {
@@ -16,10 +19,11 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 
   for (key in oldProps) {
-    if (isUndef(props[key])) {
+    if (!(key in props)) {
       elm[key] = ''
     }
   }
+
   for (key in props) {
     cur = props[key]
     // ignore children if the node has textContent or innerHTML,
@@ -35,7 +39,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       }
     }
 
-    if (key === 'value') {
+    if (key === 'value' && elm.tagName !== 'PROGRESS') {
       // store value as _value as well since
       // non-string values will be stringified
       elm._value = cur
@@ -44,8 +48,29 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       if (shouldUpdateValue(elm, strCur)) {
         elm.value = strCur
       }
-    } else {
-      elm[key] = cur
+    } else if (key === 'innerHTML' && isSVG(elm.tagName) && isUndef(elm.innerHTML)) {
+      // IE doesn't support innerHTML for SVG elements
+      svgContainer = svgContainer || document.createElement('div')
+      svgContainer.innerHTML = `<svg>${cur}</svg>`
+      const svg = svgContainer.firstChild
+      while (elm.firstChild) {
+        elm.removeChild(elm.firstChild)
+      }
+      while (svg.firstChild) {
+        elm.appendChild(svg.firstChild)
+      }
+    } else if (
+      // skip the update if old and new VDOM state is the same.
+      // `value` is handled separately because the DOM value may be temporarily
+      // out of sync with VDOM state due to focus, composition and modifiers.
+      // This  #4521 by skipping the unnecessary `checked` update.
+      cur !== oldProps[key]
+    ) {
+      // some property updates can throw
+      // e.g. `value` on <progress> w/ non-finite value
+      try {
+        elm[key] = cur
+      } catch (e) {}
     }
   }
 }
@@ -75,10 +100,6 @@ function isDirtyWithModifiers (elm: any, newVal: string): boolean {
   const value = elm.value
   const modifiers = elm._vModifiers // injected by v-model runtime
   if (isDef(modifiers)) {
-    if (modifiers.lazy) {
-      // inputs with lazy should only be updated when not in focus
-      return false
-    }
     if (modifiers.number) {
       return toNumber(value) !== toNumber(newVal)
     }

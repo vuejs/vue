@@ -1,9 +1,16 @@
 import { Vue } from "./vue";
 
-export type ScopedSlot = (props: any) => VNodeChildrenArrayContents | string;
+export type ScopedSlot = (props: any) => ScopedSlotReturnValue;
+type ScopedSlotReturnValue = VNode | string | boolean | null | undefined | ScopedSlotReturnArray;
+interface ScopedSlotReturnArray extends Array<ScopedSlotReturnValue> {}
 
-export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string;
-export interface VNodeChildrenArrayContents extends Array<VNode | string | VNodeChildrenArrayContents> {}
+// Scoped slots are guaranteed to return Array of VNodes starting in 2.6
+export type NormalizedScopedSlot = (props: any) => ScopedSlotChildren;
+export type ScopedSlotChildren = VNode[] | undefined;
+
+// Relaxed type compatible with $createElement
+export type VNodeChildren = VNodeChildrenArrayContents | [ScopedSlot] | string | boolean | null | undefined;
+export interface VNodeChildrenArrayContents extends Array<VNodeChildren | VNode> {}
 
 export interface VNode {
   tag?: string;
@@ -27,20 +34,21 @@ export interface VNodeComponentOptions {
   Ctor: typeof Vue;
   propsData?: object;
   listeners?: object;
-  children?: VNodeChildren;
+  children?: VNode[];
   tag?: string;
 }
 
 export interface VNodeData {
   key?: string | number;
   slot?: string;
-  scopedSlots?: { [key: string]: ScopedSlot };
+  scopedSlots?: { [key: string]: ScopedSlot | undefined };
   ref?: string;
+  refInFor?: boolean;
   tag?: string;
   staticClass?: string;
   class?: any;
   staticStyle?: { [key: string]: any };
-  style?: object[] | object;
+  style?: string | object[] | object;
   props?: { [key: string]: any };
   attrs?: { [key: string]: any };
   domProps?: { [key: string]: any };
@@ -58,10 +66,11 @@ export interface VNodeData {
 }
 
 export interface VNodeDirective {
-  readonly name: string;
-  readonly value: any;
-  readonly oldValue: any;
-  readonly expression: any;
-  readonly arg: string;
-  readonly modifiers: { [key: string]: boolean };
+  name: string;
+  value?: any;
+  oldValue?: any;
+  expression?: any;
+  arg?: string;
+  oldArg?: string;
+  modifiers?: { [key: string]: boolean };
 }

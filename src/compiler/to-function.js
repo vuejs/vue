@@ -2,6 +2,7 @@
 
 import { noop, extend } from 'shared/util'
 import { warn as baseWarn, tip } from 'core/util/debug'
+import { generateCodeFrame } from './codeframe'
 
 type CompiledFunctionResult = {
   render: Function;
@@ -61,14 +62,28 @@ export function createCompileToFunctionFn (compile: Function): Function {
     // check compilation errors/tips
     if (process.env.NODE_ENV !== 'production') {
       if (compiled.errors && compiled.errors.length) {
-        warn(
-          `Error compiling template:\n\n${template}\n\n` +
-          compiled.errors.map(e => `- ${e}`).join('\n') + '\n',
-          vm
-        )
+        if (options.outputSourceRange) {
+          compiled.errors.forEach(e => {
+            warn(
+              `Error compiling template:\n\n${e.msg}\n\n` +
+              generateCodeFrame(template, e.start, e.end),
+              vm
+            )
+          })
+        } else {
+          warn(
+            `Error compiling template:\n\n${template}\n\n` +
+            compiled.errors.map(e => `- ${e}`).join('\n') + '\n',
+            vm
+          )
+        }
       }
       if (compiled.tips && compiled.tips.length) {
-        compiled.tips.forEach(msg => tip(msg, vm))
+        if (options.outputSourceRange) {
+          compiled.tips.forEach(e => tip(e.msg, vm))
+        } else {
+          compiled.tips.forEach(msg => tip(msg, vm))
+        }
       }
     }
 

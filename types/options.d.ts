@@ -1,5 +1,5 @@
 import { Vue, CreateElement, CombinedVueInstance } from "./vue";
-import { VNode, VNodeData, VNodeDirective } from "./vnode";
+import { VNode, VNodeData, VNodeDirective, NormalizedScopedSlot } from "./vnode";
 
 type Constructor = {
   new (...args: any[]): any;
@@ -16,10 +16,22 @@ interface EsModuleComponent {
   default: Component
 }
 
-export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
+export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
+  = AsyncComponentPromise<Data, Methods, Computed, Props>
+  | AsyncComponentFactory<Data, Methods, Computed, Props>
+
+export type AsyncComponentPromise<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
 ) => Promise<Component | EsModuleComponent> | void;
+
+export type AsyncComponentFactory<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = () => {
+  component: AsyncComponentPromise<Data, Methods, Computed, Props>;
+  loading?: Component | EsModuleComponent;
+  error?: Component | EsModuleComponent;
+  delay?: number;
+  timeout?: number;
+}
 
 /**
  * When the `Computed` type parameter on `ComponentOptions` is inferred,
@@ -68,9 +80,9 @@ export interface ComponentOptions<
 
   el?: Element | string;
   template?: string;
-  // hack is for funcitonal component type inference, should not used in user code
+  // hack is for functional component type inference, should not be used in user code
   render?(createElement: CreateElement, hack: RenderContext<Props>): VNode;
-  renderError?: (h: () => VNode, err: Error) => VNode;
+  renderError?(createElement: CreateElement, err: Error): VNode;
   staticRenderFns?: ((createElement: CreateElement) => VNode)[];
 
   beforeCreate?(this: V): void;
@@ -84,6 +96,7 @@ export interface ComponentOptions<
   activated?(): void;
   deactivated?(): void;
   errorCaptured?(err: Error, vm: Vue, info: string): boolean | void;
+  serverPrefetch?(this: V): Promise<void>;
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
   components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> };
@@ -111,9 +124,13 @@ export interface ComponentOptions<
 export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = PropsDefinition<Props>> {
   name?: string;
   props?: PropDefs;
+  model?: {
+    prop?: string;
+    event?: string;
+  };
   inject?: InjectOptions;
   functional: boolean;
-  render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode;
+  render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode | VNode[];
 }
 
 export interface RenderContext<Props=DefaultProps> {
@@ -123,17 +140,20 @@ export interface RenderContext<Props=DefaultProps> {
   data: VNodeData;
   parent: Vue;
   listeners: { [key: string]: Function | Function[] };
+  scopedSlots: { [key: string]: NormalizedScopedSlot };
   injections: any
 }
 
-export type Prop<T> = { (): T } | { new (...args: any[]): T & object }
+export type Prop<T> = { (): T } | { new(...args: never[]): T & object } | { new(...args: string[]): Function }
 
-export type PropValidator<T> = PropOptions<T> | Prop<T> | Prop<T>[];
+export type PropType<T> = Prop<T> | Prop<T>[];
+
+export type PropValidator<T> = PropOptions<T> | PropType<T>;
 
 export interface PropOptions<T=any> {
-  type?: Prop<T> | Prop<T>[];
+  type?: PropType<T>;
   required?: boolean;
-  default?: T | null | undefined | (() => object);
+  default?: T | null | undefined | (() => T | null | undefined);
   validator?(value: T): boolean;
 }
 
@@ -160,9 +180,13 @@ export interface WatchOptionsWithHandler<T> extends WatchOptions {
   handler: WatchHandler<T>;
 }
 
+export interface DirectiveBinding extends Readonly<VNodeDirective> {
+  readonly modifiers: { [key: string]: boolean };
+}
+
 export type DirectiveFunction = (
   el: HTMLElement,
-  binding: VNodeDirective,
+  binding: DirectiveBinding,
   vnode: VNode,
   oldVnode: VNode
 ) => void;

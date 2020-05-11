@@ -1,7 +1,7 @@
-var coreVersion = require('../package.json').version
-var weexVersion = require('../packages/weex-vue-framework/package.json').version
-var weexBaseVersion = weexVersion.match(/^[\d.]+/)[0]
-var weexSubVersion = Number(weexVersion.match(/-weex\.(\d+)$/)[1])
+const coreVersion = require('../package.json').version
+const weexVersion = require('../packages/weex-vue-framework/package.json').version
+let weexBaseVersion = weexVersion.match(/^[\d.]+/)[0]
+let weexSubVersion = Number(weexVersion.match(/-weex\.(\d+)$/)[1])
 
 if (weexBaseVersion === coreVersion) {
   // same core version, increment sub version

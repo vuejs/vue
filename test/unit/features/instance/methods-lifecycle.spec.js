@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import Dep from 'core/observer/dep'
 
 describe('Instance methods lifecycle', () => {
   describe('$mount', () => {
@@ -31,6 +32,26 @@ describe('Instance methods lifecycle', () => {
       }).$mount('#mount-test')
       expect(vm.$el.tagName).toBe('DIV')
       expect(vm.$el.textContent).toBe('hi')
+    })
+
+    it('Dep.target should be undefined in lifecycle', () => {
+      const vm = new Vue({
+        template: '<div><my-component></my-component></div>',
+        components: {
+          myComponent: {
+            template: '<div>hi</div>',
+            mounted () {
+              const _msg = this.msg
+              expect(Dep.target).toBe(undefined)
+            },
+            computed: {
+              msg () {
+                return 1
+              }
+            }
+          }
+        }
+      }).$mount()
     })
   })
 
