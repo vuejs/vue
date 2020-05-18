@@ -55,7 +55,7 @@ export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
 /* istanbul ignore next */
 export function isNative (Ctor: any): boolean {
-  return typeof Ctor === 'function' && Ctor.toString() === 'function() { [native code] }';
+  return typeof Ctor === 'function' && /^\s*function\s*(\b[a-z$_][a-z0-9$_]*\b)*\s*\((|([a-z$_][a-z0-9$_]*)(\s*,[a-z$_][a-z0-9$_]*)*)\)\s*{\s*\[native code\]\s*}\s*$/i.test(Ctor.toString());
 }
 
 export const hasSymbol =
