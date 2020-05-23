@@ -88,4 +88,13 @@ describe('Options template', () => {
       `avoid using JavaScript unary operator as property name: "delete()" in expression @click="delete('Delete')"`
     ).toHaveBeenWarned()
   })
+
+  it('should not warn dot prefixed keywords', () => {
+    Vue.prototype.$http = { delete: () => {} };
+    new Vue({
+      template: `<div @click="$http.delete('/endpoint')"></div>`
+    }).$mount();
+    expect("Error compiling template").not.toHaveBeenWarned();
+    delete Vue.prototype.$http;
+  })
 })
