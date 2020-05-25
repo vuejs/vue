@@ -261,7 +261,7 @@ function createGetterInvoker(fn) {
 
 function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
-  for (const key in methods) {
+  Reflect.ownKeys(methods).forEach(key => {
     if (process.env.NODE_ENV !== 'production') {
       if (typeof methods[key] !== 'function') {
         warn(
@@ -284,7 +284,7 @@ function initMethods (vm: Component, methods: Object) {
       }
     }
     vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
-  }
+  })
 }
 
 function initWatch (vm: Component, watch: Object) {
