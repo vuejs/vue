@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js </title>
+    <!-- Delete ".min" for console warnings in development -->
+    <script src="../../dist/vue.js"></script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <!-- app -->
+    <div id="app">
+      <a  :data-log_code="query"  >123123213</a>
+
+    </div>
+
+    <script>
+
+
+      // start app
+      new Vue({
+        el: '#app',
+        data: {
+
+        },
+        computed:{
+          query(){
+            const temp = "',location='javascript:alert\\x281\\x29','"
+            return temp
+          }
+        }
+      })
+    </script>
+  </body>
+</html>
