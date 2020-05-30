@@ -57,6 +57,7 @@ export interface VNodeData {
   nativeOn?: { [key: string]: Function | Function[] };
   transition?: object;
   show?: boolean;
+  is?: string;
   inlineTemplate?: {
     render: Function;
     staticRenderFns: Function[];
