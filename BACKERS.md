@@ -190,11 +190,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://unicorn.io/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/unicorn_io.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://www.vuescreencasts.com/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/happy_programmer_llc.png">
         </a>
@@ -244,6 +239,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       <td align="center" valign="middle">
         <a href="https://www.inkoop.io" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/inkoop.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.thecasinodb.com" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/isolutions_uk_limited.png">
         </a>
       </td>
     </tr><tr></tr>
