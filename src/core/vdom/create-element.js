@@ -74,7 +74,7 @@ export function _createElement (
     if (!__WEEX__ || !('@binding' in data.key)) {
       warn(
         'Avoid using non-primitive value as key, ' +
-        'use string/number value instead.',
+        'use string/number/symbol/boolean value instead.',
         context
       )
     }
