@@ -29,7 +29,8 @@ export function isPrimitive (value: any): boolean %checks {
     typeof value === 'number' ||
     // $flow-disable-line
     typeof value === 'symbol' ||
-    typeof value === 'boolean'
+    typeof value === 'boolean' || 
+    typeof value === 'bigint'
   )
 }
 
