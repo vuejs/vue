@@ -164,7 +164,7 @@ export function getData (data: Function, vm: Component): any {
   }
 }
 
-const computedWatcherOptions = { lazy: true }
+const computedWatcherOptions = { lazy: true, user: true }
 
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line

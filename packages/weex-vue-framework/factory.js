@@ -4946,7 +4946,7 @@ function getData (data, vm) {
   }
 }
 
-var computedWatcherOptions = { lazy: true };
+var computedWatcherOptions = { lazy: true, , user: true };
 
 function initComputed (vm, computed) {
   // $flow-disable-line
