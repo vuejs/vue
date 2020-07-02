@@ -68,7 +68,7 @@ export default {
   updated () {
     // Update the parent of the cached vnode to the latest
     for (let key in this.cache) {
-      this.cache[key].parent = this.$vnode
+      if (this.cache[key]) this.cache[key].parent = this.$vnode
     }
   },
 
