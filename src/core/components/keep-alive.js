@@ -65,6 +65,13 @@ export default {
     this.keys = []
   },
 
+  updated () {
+    // Update the parent of the cached vnode to the latest
+    for (let key in this.cache) {
+      this.cache[key].parent = this.$vnode
+    }
+  },
+
   destroyed () {
     for (const key in this.cache) {
       pruneCacheEntry(this.cache, key, this.keys)
@@ -105,6 +112,8 @@ export default {
         : vnode.key
       if (cache[key]) {
         vnode.componentInstance = cache[key].componentInstance
+        // update cached vnode
+        cache[key] = vnode
         // make current key freshest
         remove(keys, key)
         keys.push(key)
