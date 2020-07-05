@@ -334,7 +334,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Konstantin Levinski
 - Sean Ferguson
 - Johnny Ray Austin
-- Manuel Guzman
+- Peter Imburg
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
@@ -350,78 +350,70 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Wen-Tien Chang
 - Stephen Michael Hartley
 - Luiz 
-- James J. Ye
+- username 
 - Barbara Liau
+- James J. Ye
 - Matsumoto Takamasa
-- Guy Gavergun
+- Asaf Yishai
 - Matt Jones
 - Niannian Modisette
+- Guy Gavergun
 - Bernhard E. Reiter
-- Asaf Yishai
-- username 
 - Zoran Knezevic
-- Jon Hobbs-Smith
 - Pierre Vanhulst
-- Akiho Nagao
+- Jon Hobbs-Smith
 - Anthony Estebe
 - Haim Yulzari
 - Jim Raden
-- Jeremy Tan
 - IMGNRY 
-- Tyler 
 - Guilherme S L de Souza
-- Vivekanandhan Natarajan
-- Joe Gregory
 - Jordan Oroshiba
+- Joe Gregory
 - Marcos Moura
-- Jessie Hernandez
 - Eric 
-- Bohdan Kokotko
-- Oskar Lindgren
-- Jere Sjöroos
 - Donald Fischer
-- Alexander Weiher
+- Oskar Lindgren
 - Wakana Seki
 - David Ang
+- Jere Sjöroos
 - Jaeyoung Lee
 - David Kaplan
-- Andy 
 - Philip John Basile
 - Matt Sencenbaugh
-- Juan Bermudez
-- Elon Hung
 - Chris Calo
-- Daniel Mattingley
+- Juan Bermudez
 - Hannes Kochniß
+- Daniel Mattingley
+- Elon Hung
 - Soichiro Isshiki
 - Andrew Willis
 - Yusuke Kawabata
 - Nick Dandakis
 - Peter Matkovsky
 - 龙腾道 
-- Fabien GuySake Ungerer
-- Bill Condo
 - Pierre Lebrun
-- Ryan Brewer
 - Martin Bastien
-- Alfonso Herrera
+- Ryan Brewer
 - Bichinger Software & Consulting
+- Alfonso Herrera
 - Afif Sohaili
-- Nicolaas 
 - Riki Fridrich
-- Tomasz Kleszczewski
-- 琚致远 
 - Diana Bergholz
-- Parham 
+- 琚致远 
+- Parham Saidi
 - Allan McKernan
 - Roy Segall
-- Ronni Lin
-- Thomas Wiedemann
+- Abhay 
 - lucien144 
 - Nobuhide Esaki
+- Thomas Wiedemann
 - Santi Sanchez Canals
 - Zeth Odderskov
 - Evgeny Zislis
+- Kirill Tyurin
+- Sunny Yuen
+- Jules 
+- wickedwei 
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
