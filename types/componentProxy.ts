@@ -7,10 +7,11 @@ import {
   ComponentOptionsMixin,
   OptionTypesType,
   OptionTypesKeys,
+  WatchOptions,
 } from "./componentOptions";
 import { EmitsOptions, EmitFn } from "./componentEmits";
 import { UnionToIntersection } from "./typeUtils";
-import { VNode, WatchOptions } from "./umd";
+import { VNode, NormalizedScopedSlot } from "./vnode";
 
 // type nextTick  nextTick<T>(callback: (this: T) => void, context?: T): void;
 // nextTick(): Promise<void>
@@ -129,6 +130,24 @@ export type ComponentPublicInstance<
   nextTick<T>(callback: (this: T) => void, context?: T): void;
   nextTick(): Promise<void>;
   $watch: typeof instanceWatch;
+
+
+  // readonly $el: Element;
+  // readonly $options: ComponentOptions<Vue>;
+  // readonly $parent: Vue;
+  // readonly $root: Vue;
+  // readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[] };
+  // readonly $slots: { [key: string]: VNode[] | undefined };
+  // readonly $data: Record<string, any>;
+  // readonly $props: Record<string, any>;
+  // readonly $attrs: Record<string, string>;
+
+  readonly $children: Vue[];
+  readonly $scopedSlots: { [key: string]: NormalizedScopedSlot | undefined };
+  readonly $isServer: boolean;
+  readonly $ssrContext: any;
+  readonly $vnode: VNode;
+  readonly $listeners: Record<string, Function | Function[]>;
 } & P &
   D &
   ExtractComputedReturns<C> &

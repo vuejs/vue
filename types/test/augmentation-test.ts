@@ -23,20 +23,23 @@ declare module "../options" {
 
 const vm = new Vue({
   props: ["bar"],
-  data: {
-    a: true
-  },
+  // data: {
+  //   a: true
+  // },
+  data: () => ({
+    a: true,
+  }),
   foo: "foo",
   methods: {
     foo() {
       this.a = false;
-    }
+    },
   },
   computed: {
     BAR(): string {
       return this.bar.toUpperCase();
-    }
-  }
+    },
+  },
 });
 
 vm.$instanceProperty;

@@ -3,31 +3,42 @@ import "./umd";
 
 export default Vue;
 
-export {
-  CreateElement,
-  VueConstructor
-} from "./vue";
+export { VueConstructor } from "./vue";
+
+export { CreateElement } from "./h";
 
 export {
-  Component,
-  AsyncComponent,
-  ComponentOptions,
-  FunctionalComponentOptions,
   RenderContext,
-  PropType,
-  PropOptions,
   ComputedOptions,
-  WatchHandler,
   WatchOptions,
-  WatchOptionsWithHandler,
-  DirectiveFunction,
-  DirectiveOptions
-} from "./options";
+} from "./componentOptions";
+
+export { PropType } from "./componentProps";
 
 export {
-  PluginFunction,
-  PluginObject
-} from "./plugin";
+  PublicAPIComponent,
+  ClassComponent,
+  Component,
+  ComponentOptions,
+  FunctionalComponent,
+} from "./component";
+// export {
+//   Component,
+//   AsyncComponent,
+//   ComponentOptions,
+//   FunctionalComponentOptions,
+//   RenderContext,
+//   PropType,
+//   PropOptions,
+//   ComputedOptions,
+//   WatchHandler,
+//   WatchOptions,
+//   WatchOptionsWithHandler,
+//   DirectiveFunction,
+//   DirectiveOptions
+// } from "./options";
+
+export { PluginFunction, PluginObject } from "./plugin";
 
 export {
   VNodeChildren,
@@ -35,5 +46,5 @@ export {
   VNode,
   VNodeComponentOptions,
   VNodeData,
-  VNodeDirective
+  VNodeDirective,
 } from "./vnode";

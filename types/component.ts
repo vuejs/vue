@@ -11,7 +11,7 @@ import { Directive } from "./directives";
 import { ComponentOptions } from "./componentOptions";
 import { EmitsOptions, ObjectEmitsOptions, EmitFn } from "./componentEmits";
 import { InjectOptions, RenderContext } from "./options";
-import { CreateElement } from "./vue";
+import { CreateElement } from "./h";
 
 export type Data = { [key: string]: unknown };
 

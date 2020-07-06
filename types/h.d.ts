@@ -81,3 +81,8 @@ export declare function h<P>(
   props?: (RawProps & P) | ({} extends P ? null : never),
   children?: RawChildren //| RawSlots
 ): VNode;
+
+
+
+type hType = typeof h;
+export interface CreateElement extends hType {}

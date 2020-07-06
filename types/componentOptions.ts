@@ -16,8 +16,20 @@ import {
   CreateComponentPublicInstance,
   ComponentPublicInstance,
 } from "./componentProxy";
-import { VNodeChild } from "./vnode";
+import { VNodeChild, VNode, VNodeData, NormalizedScopedSlot } from "./vnode";
 import { Directive } from "./directives";
+import { CreateElement } from "./h";
+
+export interface RenderContext<Props = {}> {
+  props: Props;
+  children: VNode[];
+  slots(): any;
+  data: VNodeData;
+  parent: Vue;
+  listeners: { [key: string]: Function | Function[] };
+  scopedSlots: { [key: string]: NormalizedScopedSlot };
+  injections: any;
+}
 
 /**
  * Interface for declaring custom options.
@@ -37,6 +49,8 @@ import { Directive } from "./directives";
  */
 export interface ComponentCustomOptions {}
 
+export interface ComponentOptions {}
+
 export type RenderFunction = () => VNodeChild;
 
 export interface ComponentOptionsBase<
@@ -51,58 +65,18 @@ export interface ComponentOptionsBase<
 >
   extends LegacyOptions<Props, D, C, M, Mixin, Extends>,
     ComponentInternalOptions,
-    ComponentCustomOptions {
+    ComponentCustomOptions,
+    ComponentOptions {
   name?: string;
   template?: string | object; // can be a direct DOM node
-  // Note: we are intentionally using the signature-less `Function` type here
-  // since any type with signature will cause the whole inference to fail when
-  // the return expression contains reference to `this`.
-  // Luckily `render()` doesn't need any arguments nor does it care about return
-  // type.
-  render?: Function;
+
+  // hack is for functional component type inference, should not be used in user code
+  render?(createElement: CreateElement, hack: RenderContext<Props>): VNode;
+
   components?: Record<string, PublicAPIComponent>;
   directives?: Record<string, Directive>;
   inheritAttrs?: boolean;
   emits?: E | EE[];
-
-  // Internal ------------------------------------------------------------------
-
-  /**
-   * SSR only. This is produced by compiler-ssr and attached in compiler-sfc
-   * not user facing, so the typing is lax and for test only.
-   *
-   * @internal
-   */
-  ssrRender?: (
-    ctx: any,
-    push: (item: any) => void,
-    parentInstance: ComponentInternalInstance,
-    attrs?: Data
-  ) => void;
-
-  /**
-   * marker for AsyncComponentWrapper
-   * @internal
-   */
-  __asyncLoader?: () => Promise<Component>;
-  /**
-   * cache for merged $options
-   * @internal
-   */
-  __merged?: ComponentOptions;
-
-  // Type differentiators ------------------------------------------------------
-
-  // Note these are internal but need to be exposed in d.ts for type inference
-  // to work!
-
-  // type-only differentiator to separate OptionWithoutProps from a constructor
-  // type returned by defineComponent() or FunctionalComponent
-  call?: (this: unknown, ...args: unknown[]) => never;
-  // type-only differentiators for built-in Vnode types
-  __isFragment?: never;
-  __isTeleport?: never;
-  __isSuspense?: never;
 }
 
 export type ComponentOptionsWithoutProps<
@@ -131,7 +105,6 @@ export type ComponentOptionsWithoutProps<
 
 export type ComponentOptionsWithArrayProps<
   PropNames extends string = string,
-  RawBindings = {},
   D = {},
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
@@ -158,10 +131,10 @@ export type ComponentOptionsWithObjectProps<
   props: PropsOptions;
 } & ThisType<CreateComponentPublicInstance<Props, D, C, M, Mixin, Extends, E>>;
 
-export type ComponentOptions =
-  | ComponentOptionsWithoutProps<any, any, any, any, any>
-  | ComponentOptionsWithObjectProps<any, any, any, any, any>
-  | ComponentOptionsWithArrayProps<any, any, any, any, any>;
+// export type ComponentOptions =
+//   | ComponentOptionsWithoutProps<any, any, any, any, any>
+//   | ComponentOptionsWithObjectProps<any, any, any, any, any>
+//   | ComponentOptionsWithArrayProps<any, any, any, any, any>;
 
 export type ComponentOptionsMixin = ComponentOptionsBase<
   any,
@@ -226,7 +199,7 @@ type ComponentInjectOptions =
       string | symbol | { from: string | symbol; default?: unknown }
     >;
 
-interface LegacyOptions<
+export interface LegacyOptions<
   Props,
   D,
   C extends ComputedOptions,

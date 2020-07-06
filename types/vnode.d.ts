@@ -27,6 +27,10 @@ export interface VNodeChildrenArrayContents
 
 export type VNodeChild = VNodeChildAtom | VNodeChildrenArrayContents;
 
+export type VNodeProps = {
+  [key: string]: any;
+};
+
 type VNodeChildAtom =
   | VNode
   | string
