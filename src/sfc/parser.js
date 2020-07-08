@@ -93,7 +93,7 @@ export function parseComponent (
     }
   }
 
-  function end (tag: string, start: number) {
+  function end (start: number) {
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
       let text = content.slice(currentBlock.start, currentBlock.end)

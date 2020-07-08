@@ -297,7 +297,7 @@ export function parse (
       }
     },
 
-    end (tag, start, end) {
+    end (start, end) {
       const element = stack[stack.length - 1]
       // pop stack
       stack.length -= 1
