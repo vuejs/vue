@@ -99,7 +99,8 @@ function createAssertions (runInNewContext) {
       const stream = renderer.renderToStream()
       stream.on('error', err => {
         expect(err.message).toBe('foo')
-        done()
+        
+	done()
       })
     })
   })

@@ -10,7 +10,7 @@ declare type CompilerOptions = {
   mustUseProp?: (tag: string, type: ?string, name: string) => boolean; // check if an attribute should be bound as a property
   isPreTag?: (attr: string) => ?boolean; // check if a tag needs to preserve whitespace
   getTagNamespace?: (tag: string) => ?string; // check the namespace for a tag
-  transforms?: Array<Function>; // a list of transforms on parsed AST before codegen
+  transforms?: Array<Function>; //list of transforms on parsed AST before codegen
   preserveWhitespace?: boolean;
   isFromDOM?: boolean;
   shouldDecodeTags?: boolean;
