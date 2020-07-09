@@ -1,7 +1,7 @@
 /* @flow */
 
 /**
- * Cross-platform code generation for component v-model
+ * Cross-platform Code generation for component v-model
  */
 export function genComponentModel (
   el: ASTElement,
