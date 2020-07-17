@@ -62,8 +62,11 @@ export class Observer {
    * value type is Object.
    */
   walk (obj: Object) {
-    const keys = Object.keys(obj)
+    let keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
+      if(keys[i] == ''){
+        warn(`Objects should not contain empty keys cannot bind to value`)
+      }
       defineReactive(obj, keys[i])
     }
   }
