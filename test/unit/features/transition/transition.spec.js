@@ -446,7 +446,7 @@ if (!isIE9) {
       const vm = new Vue({
         template: `
           <div>
-            <transition name="test" @enter-cancelled="enterCancelled">
+            <transition name="test" @enter-canceled="enterCancelled">
               <div v-if="ok" class="test">foo</div>
             </transition>
           </div>
@@ -583,7 +583,7 @@ if (!isIE9) {
       const vm = new Vue({
         template: `
           <div>
-            <transition name="test" @leave-cancelled="leaveCancelled">
+            <transition name="test" @leave-canceled="leaveCancelled">
               <div v-show="ok" class="test">foo</div>
             </transition>
           </div>
@@ -612,7 +612,7 @@ if (!isIE9) {
       }).then(done)
     })
 
-    it('leave transition with v-show: cancelled on next frame', done => {
+    it('leave transition with v-show: canceled on next frame', done => {
       const vm = new Vue({
         template: `
           <div>
@@ -634,7 +634,7 @@ if (!isIE9) {
       }).then(done)
     })
 
-    it('enter transition with v-show: cancelled on next frame', done => {
+    it('enter transition with v-show: canceled on next frame', done => {
       const vm = new Vue({
         template: `
           <div>

@@ -1708,8 +1708,8 @@ function mergeOptions (
     }
   }
   function mergeField (key) {
-    var strat = strats[key] || defaultStrat;
-    options[key] = strat(parent[key], child[key], vm, key);
+    var start = strats[key] || defaultStrat;
+    options[key] = start(parent[key], child[key], vm, key);
   }
   return options
 }

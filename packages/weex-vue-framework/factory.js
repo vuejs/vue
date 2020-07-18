@@ -1545,8 +1545,8 @@ function mergeOptions (
     }
   }
   function mergeField (key) {
-    var strat = strats[key] || defaultStrat;
-    options[key] = strat(parent[key], child[key], vm, key);
+    var start = strats[key] || defaultStrat;
+    options[key] = start(parent[key], child[key], vm, key);
   }
   return options
 }
@@ -7227,7 +7227,7 @@ function leave (vnode, rm) {
 
   function performLeave () {
     var animation = vnode.context.$requireWeexModule('animation');
-    // the delayed leave may have already been cancelled
+    // the delayed leave may have already been canceled
     if (cb.cancelled) {
       return
     }
@@ -7281,7 +7281,7 @@ function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass)
           "transition property \"" + key + "\" is declared in enter starting class (." + startClass + "), " +
           "but not declared anywhere in enter ending class (." + endClass + "), " +
           "enter active cass (." + activeClass + ") or the element's default styling. " +
-          "Note in Weex, CSS properties need explicit values to be transitionable."
+          "Note in Weex, CSS properties need explicit values to be transitional."
         );
       }
     }

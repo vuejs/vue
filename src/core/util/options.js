@@ -428,8 +428,8 @@ export function mergeOptions (
     }
   }
   function mergeField (key) {
-    const strat = strats[key] || defaultStrat
-    options[key] = strat(parent[key], child[key], vm, key)
+    const start = strats[key] || defaultStrat
+    options[key] = start(parent[key], child[key], vm, key)
   }
   return options
 }

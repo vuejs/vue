@@ -246,7 +246,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   }
 
   function performLeave () {
-    // the delayed leave may have already been cancelled
+    // the delayed leave may have already been canceled
     if (cb.cancelled) {
       return
     }
