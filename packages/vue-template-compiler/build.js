@@ -3714,7 +3714,20 @@ function isDirectChildOfTemplateFor (node) {
 
 var fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/;
 var fnInvokeRE = /\([^)]*?\);*$/;
-var simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/;
+var variableRegExpSource = /[A-Za-z_$\u0100-\uffff][\w$\u0100-\uffff]*/.source;
+var simplePathRE = new RegExp([
+  '^',
+  variableRegExpSource,
+  '(?:',
+  [
+    '\\.' + variableRegExpSource,
+    /\['[^']*?']/.source,
+    /\["[^"]*?"]/.source,
+    /\[\d+]/.source,
+    '\\[' + variableRegExpSource + ']',
+  ].join('|'),
+  ')*$'
+].join(''));
 
 // KeyboardEvent.keyCode aliases
 var keyCodes = {
