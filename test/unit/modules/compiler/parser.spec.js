@@ -881,4 +881,10 @@ describe('parser', () => {
     expect(ast.children[2].type).toBe(3)
     expect(ast.children[2].text).toBe('\ndef')
   })
+
+  it(`should decode &nbsp; in the value of attribute`, () => {
+    const options = extend({}, baseOptions)
+    const ast = parse('<input value="white&nbsp;space" />', options)
+    expect(ast.attrsList[0].value).toBe('white space')
+  })
 })

@@ -31,6 +31,7 @@ export const isPlainTextElement = makeMap('script,style,textarea', true)
 const reCache = {}
 
 const decodingMap = {
+  '&nbsp;': ' ',
   '&lt;': '<',
   '&gt;': '>',
   '&quot;': '"',
@@ -39,8 +40,8 @@ const decodingMap = {
   '&#9;': '\t',
   '&#39;': "'"
 }
-const encodedAttr = /&(?:lt|gt|quot|amp|#39);/g
-const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#39|#10|#9);/g
+const encodedAttr = /&(?:lt|gt|quot|amp|#39|nbsp);/g
+const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#39|nbsp|#10|#9);/g
 
 // #5992
 const isIgnoreNewlineTag = makeMap('pre,textarea', true)
