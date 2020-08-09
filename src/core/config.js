@@ -77,6 +77,17 @@ export default ({
    */
   ignoredElements: [],
 
+
+  /**
+   * part hydrate attr name
+   */
+  noHydrateAttr: '_noHydrate',
+
+  /**
+   * optimized hydrate
+   */
+  optimizeHydrateMode: true,
+
   /**
    * Custom user key aliases for v-on
    */

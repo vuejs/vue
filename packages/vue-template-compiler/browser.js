@@ -2,7 +2,7 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = global || self, factory(global.VueTemplateCompiler = {}));
-}(this, function (exports) { 'use strict';
+}(this, (function (exports) { 'use strict';
 
   var splitRE = /\r?\n/g;
   var emptyRE = /^\s*$/;
@@ -183,37 +183,6 @@
   });
 
   /**
-   * Simple bind polyfill for environments that do not support it,
-   * e.g., PhantomJS 1.x. Technically, we don't need this anymore
-   * since native bind is now performant enough in most browsers.
-   * But removing it would mean breaking code that was able to run in
-   * PhantomJS 1.x, so this must be kept for backward compatibility.
-   */
-
-  /* istanbul ignore next */
-  function polyfillBind (fn, ctx) {
-    function boundFn (a) {
-      var l = arguments.length;
-      return l
-        ? l > 1
-          ? fn.apply(ctx, arguments)
-          : fn.call(ctx, a)
-        : fn.call(ctx)
-    }
-
-    boundFn._length = fn.length;
-    return boundFn
-  }
-
-  function nativeBind (fn, ctx) {
-    return fn.bind(ctx)
-  }
-
-  var bind = Function.prototype.bind
-    ? nativeBind
-    : polyfillBind;
-
-  /**
    * Mix properties into target object.
    */
   function extend (to, _from) {
@@ -342,8 +311,8 @@
   function parseHTML (html, options) {
     var stack = [];
     var expectHTML = options.expectHTML;
-    var isUnaryTag$$1 = options.isUnaryTag || no;
-    var canBeLeftOpenTag$$1 = options.canBeLeftOpenTag || no;
+    var isUnaryTag = options.isUnaryTag || no;
+    var canBeLeftOpenTag = options.canBeLeftOpenTag || no;
     var index = 0;
     var last, lastTag;
     while (html) {
@@ -457,7 +426,7 @@
 
       if (html === last) {
         options.chars && options.chars(html);
-        if (!stack.length && options.warn) {
+        if ( !stack.length && options.warn) {
           options.warn(("Mal-formatted tag at end of template: \"" + html + "\""), { start: index + html.length });
         }
         break
@@ -505,12 +474,12 @@
         if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
           parseEndTag(lastTag);
         }
-        if (canBeLeftOpenTag$$1(tagName) && lastTag === tagName) {
+        if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
           parseEndTag(tagName);
         }
       }
 
-      var unary = isUnaryTag$$1(tagName) || !!unarySlash;
+      var unary = isUnaryTag(tagName) || !!unarySlash;
 
       var l = match.attrs.length;
       var attrs = new Array(l);
@@ -524,7 +493,7 @@
           name: args[1],
           value: decodeAttr(value, shouldDecodeNewlines)
         };
-        if (options.outputSourceRange) {
+        if ( options.outputSourceRange) {
           attrs[i].start = args.start + args[0].match(/^\s*/).length;
           attrs[i].end = args.end;
         }
@@ -561,7 +530,8 @@
       if (pos >= 0) {
         // Close all the open elements, up the stack
         for (var i = stack.length - 1; i >= pos; i--) {
-          if (i > pos || !tagName &&
+          if (
+            (i > pos || !tagName) &&
             options.warn
           ) {
             options.warn(
@@ -621,7 +591,7 @@
       sfc.errors.push(msg);
     };
 
-    if (options.outputSourceRange) {
+    if ( options.outputSourceRange) {
       warn = function (msg, range) {
         var data = { msg: msg };
         if (range.start != null) {
@@ -749,11 +719,15 @@
 
   // Firefox has a "watch" function on Object.prototype...
   var nativeWatch = ({}).watch;
+
+  var supportsPassive = false;
   if (inBrowser) {
     try {
       var opts = {};
       Object.defineProperty(opts, 'passive', ({
         get: function get () {
+          /* istanbul ignore next */
+          supportsPassive = true;
         }
       })); // https://github.com/facebook/flow/issues/285
       window.addEventListener('test-passive', null, opts);
@@ -777,9 +751,6 @@
     return _isServer
   };
 
-  // detect devtools
-  var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
-
   /* istanbul ignore next */
   function isNative (Ctor) {
     return typeof Ctor === 'function' && /native code/.test(Ctor.toString())
@@ -788,31 +759,8 @@
   var hasSymbol =
     typeof Symbol !== 'undefined' && isNative(Symbol) &&
     typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys);
-
-  var _Set;
   /* istanbul ignore if */ // $flow-disable-line
-  if (typeof Set !== 'undefined' && isNative(Set)) {
-    // use native Set when available.
-    _Set = Set;
-  } else {
-    // a non-standard Set polyfill that only works with primitive keys.
-    _Set = /*@__PURE__*/(function () {
-      function Set () {
-        this.set = Object.create(null);
-      }
-      Set.prototype.has = function has (key) {
-        return this.set[key] === true
-      };
-      Set.prototype.add = function add (key) {
-        this.set[key] = true;
-      };
-      Set.prototype.clear = function clear () {
-        this.set = Object.create(null);
-      };
-
-      return Set;
-    }());
-  }
+  if (typeof Set !== 'undefined' && isNative(Set)) ;
 
   var ASSET_TYPES = [
     'component',
@@ -880,6 +828,17 @@
      * Ignore certain custom elements
      */
     ignoredElements: [],
+
+
+    /**
+     * part hydrate attr name
+     */
+    noHydrateAttr: '_noHydrate',
+
+    /**
+     * optimized hydrate
+     */
+    optimizeHydrateMode: true,
 
     /**
      * Custom user key aliases for v-on
@@ -950,7 +909,9 @@
     warn = function (msg, vm) {
       var trace = vm ? generateComponentTrace(vm) : '';
 
-      if (hasConsole && (!config.silent)) {
+      if (config.warnHandler) {
+        config.warnHandler.call(null, msg, vm, trace);
+      } else if (hasConsole && (!config.silent)) {
         console.error(("[Vue warn]: " + msg + trace));
       }
     };
@@ -1055,6 +1016,12 @@
   Dep.prototype.notify = function notify () {
     // stabilize the subscriber list first
     var subs = this.subs.slice();
+    if ( !config.async) {
+      // subs aren't sorted in scheduler if not running async
+      // we need to sort them now to make sure they fire in correct
+      // order
+      subs.sort(function (a, b) { return a.id - b.id; });
+    }
     for (var i = 0, l = subs.length; i < l; i++) {
       subs[i].update();
     }
@@ -1164,12 +1131,6 @@
   var arrayKeys = Object.getOwnPropertyNames(arrayMethods);
 
   /**
-   * In some cases we may want to disable observation inside a component's
-   * update computation.
-   */
-  var shouldObserve = true;
-
-  /**
    * Observer class that is attached to each observed
    * object. Once attached, the observer converts the target
    * object's property keys into getter/setters that
@@ -1200,7 +1161,7 @@
   Observer.prototype.walk = function walk (obj) {
     var keys = Object.keys(obj);
     for (var i = 0; i < keys.length; i++) {
-      defineReactive$$1(obj, keys[i]);
+      defineReactive(obj, keys[i]);
     }
   };
 
@@ -1250,7 +1211,7 @@
     if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
       ob = value.__ob__;
     } else if (
-      shouldObserve &&
+      
       !isServerRendering() &&
       (Array.isArray(value) || isPlainObject(value)) &&
       Object.isExtensible(value) &&
@@ -1267,7 +1228,7 @@
   /**
    * Define a reactive property on an Object.
    */
-  function defineReactive$$1 (
+  function defineReactive (
     obj,
     key,
     val,
@@ -1312,7 +1273,7 @@
           return
         }
         /* eslint-enable no-self-compare */
-        if (customSetter) {
+        if ( customSetter) {
           customSetter();
         }
         // #7981: for accessor properties without setter
@@ -1334,7 +1295,8 @@
    * already exist.
    */
   function set (target, key, val) {
-    if (isUndef(target) || isPrimitive(target)
+    if (
+      (isUndef(target) || isPrimitive(target))
     ) {
       warn(("Cannot set reactive property on undefined, null, or primitive value: " + ((target))));
     }
@@ -1349,7 +1311,7 @@
     }
     var ob = (target).__ob__;
     if (target._isVue || (ob && ob.vmCount)) {
-      warn(
+       warn(
         'Avoid adding reactive properties to a Vue instance or its root $data ' +
         'at runtime - declare it upfront in the data option.'
       );
@@ -1359,7 +1321,7 @@
       target[key] = val;
       return val
     }
-    defineReactive$$1(ob.value, key, val);
+    defineReactive(ob.value, key, val);
     ob.dep.notify();
     return val
   }
@@ -1484,7 +1446,7 @@
   ) {
     if (!vm) {
       if (childVal && typeof childVal !== 'function') {
-        warn(
+         warn(
           'The "data" option should be a function ' +
           'that returns a per-instance value in component ' +
           'definitions.',
@@ -1547,7 +1509,7 @@
   ) {
     var res = Object.create(parentVal || null);
     if (childVal) {
-      assertObjectType(key, childVal, vm);
+       assertObjectType(key, childVal, vm);
       return extend(res, childVal)
     } else {
       return res
@@ -1638,10 +1600,6 @@
 
   /*  */
 
-  /*  */
-
-  /*  */
-
   var callbacks = [];
 
   function flushCallbacks () {
@@ -1677,8 +1635,6 @@
 
   /*  */
 
-  /*  */
-
   // these are reserved for web because they are directly compiled away
   // during template compilation
   var isReservedAttr = makeMap('style,class');
@@ -1706,8 +1662,6 @@
     'required,reversed,scoped,seamless,selected,sortable,translate,' +
     'truespeed,typemustmatch,visible'
   );
-
-  /*  */
 
   /*  */
 
@@ -1752,8 +1706,6 @@
   }
 
   var isTextInputType = makeMap('text,number,password,search,email,tel,url');
-
-  /*  */
 
   /*  */
 
@@ -1980,7 +1932,7 @@
     // warn prevent and passive modifier
     /* istanbul ignore if */
     if (
-      warn &&
+       warn &&
       modifiers.prevent && modifiers.passive
     ) {
       warn(
@@ -2135,7 +2087,7 @@
   function transformNode (el, options) {
     var warn = options.warn || baseWarn;
     var staticClass = getAndRemoveAttr(el, 'class');
-    if (staticClass) {
+    if ( staticClass) {
       var res = parseText(staticClass, options.delimiters);
       if (res) {
         warn(
@@ -2233,7 +2185,7 @@
     genData: genData$1
   };
 
-  var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+  var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
   function createCommonjsModule(fn, module) {
   	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -2243,10 +2195,10 @@
   (function(root) {
 
   	// Detect free variables `exports`.
-  	var freeExports = exports;
+  	var freeExports =  exports;
 
   	// Detect free variable `module`.
-  	var freeModule = module &&
+  	var freeModule =  module &&
   		module.exports == freeExports && module;
 
   	// Detect free variable `global`, from Node.js or Browserified code,
@@ -2729,7 +2681,7 @@
   /*  */
 
   var onRE = /^@|^v-on:/;
-  var dirRE = /^v-|^@|^:|^#/;
+  var dirRE =  /^v-|^@|^:|^#/;
   var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
   var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
   var stripParensRE = /^\(|\)$/g;
@@ -2955,7 +2907,7 @@
 
         if (isForbiddenTag(element) && !isServerRendering()) {
           element.forbidden = true;
-          warn$1(
+           warn$1(
             'Templates should only be responsible for mapping the state to the ' +
             'UI. Avoid placing tags with side-effects in your templates, such as ' +
             "<" + tag + ">" + ', as they will not be parsed.',
@@ -3006,7 +2958,7 @@
         // pop stack
         stack.length -= 1;
         currentParent = stack[stack.length - 1];
-        if (options.outputSourceRange) {
+        if ( options.outputSourceRange) {
           element.end = end$1;
         }
         closeElement(element);
@@ -3075,7 +3027,7 @@
             };
           }
           if (child) {
-            if (options.outputSourceRange) {
+            if ( options.outputSourceRange) {
               child.start = start;
               child.end = end;
             }
@@ -3092,7 +3044,7 @@
             text: text,
             isComment: true
           };
-          if (options.outputSourceRange) {
+          if ( options.outputSourceRange) {
             child.start = start;
             child.end = end;
           }
@@ -3267,7 +3219,7 @@
       if (children[i].type === 1) {
         return children[i]
       } else {
-        if (children[i].text !== ' ') {
+        if ( children[i].text !== ' ') {
           warn$1(
             "text \"" + (children[i].text.trim()) + "\" between v-if and v-else(-if) " +
             "will be ignored.",
@@ -3287,8 +3239,8 @@
   }
 
   function processOnce (el) {
-    var once$$1 = getAndRemoveAttr(el, 'v-once');
-    if (once$$1 != null) {
+    var once = getAndRemoveAttr(el, 'v-once');
+    if (once != null) {
       el.once = true;
     }
   }
@@ -3300,7 +3252,7 @@
     if (el.tag === 'template') {
       slotScope = getAndRemoveAttr(el, 'scope');
       /* istanbul ignore if */
-      if (slotScope) {
+      if ( slotScope) {
         warn$1(
           "the \"scope\" attribute for scoped slots have been deprecated and " +
           "replaced by \"slot-scope\" since 2.5. The new \"slot-scope\" attribute " +
@@ -3313,7 +3265,7 @@
       el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope');
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
       /* istanbul ignore if */
-      if (el.attrsMap['v-for']) {
+      if ( el.attrsMap['v-for']) {
         warn$1(
           "Ambiguous combined usage of slot-scope and v-for on <" + (el.tag) + "> " +
           "(v-for takes higher priority). Use a wrapper <template> for the " +
@@ -3437,7 +3389,7 @@
   function processSlotOutlet (el) {
     if (el.tag === 'slot') {
       el.slotName = getBindingAttr(el, 'name');
-      if (el.key) {
+      if ( el.key) {
         warn$1(
           "`key` does not work on <slot> because slots are abstract outlets " +
           "and can possibly expand into multiple elements. " +
@@ -3481,6 +3433,7 @@
             name = name.slice(1, -1);
           }
           if (
+            
             value.trim().length === 0
           ) {
             warn$1(
@@ -3561,7 +3514,7 @@
             }
           }
           addDirective(el, name, rawName, value, arg, isDynamic, modifiers, list[i]);
-          if (name === 'model') {
+          if ( name === 'model') {
             checkForAliasModel(el, value);
           }
         }
@@ -3615,6 +3568,7 @@
     var map = {};
     for (var i = 0, l = attrs.length; i < l; i++) {
       if (
+        
         map[attrs[i].name] && !isIE && !isEdge
       ) {
         warn$1('duplicate attribute: ' + attrs[i].name, attrs[i]);
@@ -3793,10 +3747,18 @@
       genRadioModel(el, value, modifiers);
     } else if (tag === 'input' || tag === 'textarea') {
       genDefaultModel(el, value, modifiers);
-    } else {
+    } else if (!config.isReservedTag(tag)) {
       genComponentModel(el, value, modifiers);
       // component v-model doesn't need extra runtime
       return false
+    } else {
+      warn$2(
+        "<" + (el.tag) + " v-model=\"" + value + "\">: " +
+        "v-model is not supported on this element type. " +
+        'If you are working with contenteditable, it\'s recommended to ' +
+        'wrap a library dedicated for that purpose inside a custom component.',
+        el.rawAttrsMap['v-model']
+      );
     }
 
     // ensure runtime directive metadata
@@ -4246,7 +4208,7 @@
   /*  */
 
   function on (el, dir) {
-    if (dir.modifiers) {
+    if ( dir.modifiers) {
       warn("v-on without argument does not support modifiers.");
     }
     el.wrapListeners = function (code) { return ("_g(" + code + "," + (dir.value) + ")"); };
@@ -4254,7 +4216,7 @@
 
   /*  */
 
-  function bind$1 (el, dir) {
+  function bind (el, dir) {
     el.wrapData = function (code) {
       return ("_b(" + code + ",'" + (el.tag) + "'," + (dir.value) + "," + (dir.modifiers && dir.modifiers.prop ? 'true' : 'false') + (dir.modifiers && dir.modifiers.sync ? ',true' : '') + ")")
     };
@@ -4264,7 +4226,7 @@
 
   var baseDirectives = {
     on: on,
-    bind: bind$1,
+    bind: bind,
     cloak: noop
   };
 
@@ -4371,7 +4333,7 @@
         parent = parent.parent;
       }
       if (!key) {
-        state.warn(
+         state.warn(
           "v-once can only be used inside v-for that is keyed. ",
           el.rawAttrsMap['v-once']
         );
@@ -4431,7 +4393,8 @@
     var iterator1 = el.iterator1 ? ("," + (el.iterator1)) : '';
     var iterator2 = el.iterator2 ? ("," + (el.iterator2)) : '';
 
-    if (state.maybeComponent(el) &&
+    if (
+      state.maybeComponent(el) &&
       el.tag !== 'slot' &&
       el.tag !== 'template' &&
       !el.key
@@ -4563,7 +4526,9 @@
 
   function genInlineTemplate (el, state) {
     var ast = el.children[0];
-    if (el.children.length !== 1 || ast.type !== 1) {
+    if ( (
+      el.children.length !== 1 || ast.type !== 1
+    )) {
       state.warn(
         'Inline-template components must have exactly one child element.',
         { start: el.start }
@@ -4765,15 +4730,15 @@
           dynamic: attr.dynamic
         }); }))
       : null;
-    var bind$$1 = el.attrsMap['v-bind'];
-    if ((attrs || bind$$1) && !children) {
+    var bind = el.attrsMap['v-bind'];
+    if ((attrs || bind) && !children) {
       res += ",null";
     }
     if (attrs) {
       res += "," + attrs;
     }
-    if (bind$$1) {
-      res += (attrs ? '' : ',null') + "," + bind$$1;
+    if (bind) {
+      res += (attrs ? '' : ',null') + "," + bind;
     }
     return res + ')'
   }
@@ -4793,7 +4758,7 @@
     var dynamicProps = "";
     for (var i = 0; i < props.length; i++) {
       var prop = props[i];
-      var value = transformSpecialNewlines(prop.value);
+      var value =  transformSpecialNewlines(prop.value);
       if (prop.dynamic) {
         dynamicProps += (prop.name) + "," + value + ",";
       } else {
@@ -5018,7 +4983,7 @@
       vm
     ) {
       options = extend({}, options);
-      var warn$$1 = options.warn || warn;
+      var warn$1 = options.warn || warn;
       delete options.warn;
 
       /* istanbul ignore if */
@@ -5028,7 +4993,7 @@
           new Function('return 1');
         } catch (e) {
           if (e.toString().match(/unsafe-eval|CSP/)) {
-            warn$$1(
+            warn$1(
               'It seems you are using the standalone build of Vue.js in an ' +
               'environment with Content Security Policy that prohibits unsafe-eval. ' +
               'The template compiler cannot work in this environment. Consider ' +
@@ -5055,14 +5020,14 @@
         if (compiled.errors && compiled.errors.length) {
           if (options.outputSourceRange) {
             compiled.errors.forEach(function (e) {
-              warn$$1(
+              warn$1(
                 "Error compiling template:\n\n" + (e.msg) + "\n\n" +
                 generateCodeFrame(template, e.start, e.end),
                 vm
               );
             });
           } else {
-            warn$$1(
+            warn$1(
               "Error compiling template:\n\n" + template + "\n\n" +
               compiled.errors.map(function (e) { return ("- " + e); }).join('\n') + '\n',
               vm
@@ -5092,7 +5057,7 @@
       /* istanbul ignore if */
       {
         if ((!compiled.errors || !compiled.errors.length) && fnGenErrors.length) {
-          warn$$1(
+          warn$1(
             "Failed to generate render function:\n\n" +
             fnGenErrors.map(function (ref) {
               var err = ref.err;
@@ -5126,7 +5091,7 @@
         };
 
         if (options) {
-          if (options.outputSourceRange) {
+          if ( options.outputSourceRange) {
             // $flow-disable-line
             var leadingSpaceLength = template.match(/^\s*/)[0].length;
 
@@ -5750,15 +5715,13 @@
   var compile$1 = ref$1.compile;
   var compileToFunctions$1 = ref$1.compileToFunctions;
 
-  /*  */
-
-  exports.parseComponent = parseComponent;
   exports.compile = compile;
   exports.compileToFunctions = compileToFunctions;
+  exports.generateCodeFrame = generateCodeFrame;
+  exports.parseComponent = parseComponent;
   exports.ssrCompile = compile$1;
   exports.ssrCompileToFunctions = compileToFunctions$1;
-  exports.generateCodeFrame = generateCodeFrame;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
