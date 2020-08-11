@@ -2,6 +2,7 @@ import { parse } from 'compiler/parser/index'
 import { extend } from 'shared/util'
 import { baseOptions } from 'web/compiler/options'
 import { isIE, isEdge } from 'core/util/env'
+import Vue from 'vue'
 
 describe('parser', () => {
   it('simple element', () => {
@@ -880,5 +881,39 @@ describe('parser', () => {
     expect(ast.children[1].tag).toBe('input')
     expect(ast.children[2].type).toBe(3)
     expect(ast.children[2].text).toBe('\ndef')
+  })
+
+  it(`HTML entities in the value of attribute should be decoded`, () => {
+    const options = extend({}, baseOptions)
+    const ast = parse('<input value="white&nbsp;space,single-&#39;-quote,double-&quot;-quote,an-&amp;-ampersand,less-&lt;-than,great-&gt;-than,line-&#10;-break,tab-&#9;-space" />', options)
+    expect(ast.attrsList[0].value).toBe('white space,single-' + "'" + '-quote,double-' + '"' + '-quote,an-&-ampersand,less-<-than,great->-than,line-\n-break,tab-\t-space')
+  })
+
+  it(`HTML entities in template should be decoded`, () => {
+    const vm = new Vue({
+      template: '<test></test>',
+      components: {
+        test: {
+          template: '<input value="&#102;&#111;&#111;">'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.value).toBe('foo')
+  })
+
+  it(`HTML entities in the value of props should be decoded`, () => {
+    const vm = new Vue({
+      template: '<test name="-&nbsp;-"></test>',
+      components: {
+        test: {
+          template: '<div>{{ name }}</div>',
+          props: {
+            name: String,
+          },
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('-&nbsp;-')
+    expect(vm.$el.innerText).toBe('- -')
   })
 })
