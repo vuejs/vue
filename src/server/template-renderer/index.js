@@ -17,6 +17,8 @@ type TemplateRendererOptions = {
   shouldPreload?: (file: string, type: string) => boolean;
   shouldPrefetch?: (file: string, type: string) => boolean;
   serializer?: Function;
+  integrity?: boolean;
+  crossorigin?: string;
 };
 
 export type ClientManifest = {
@@ -49,13 +51,22 @@ export default class TemplateRenderer {
   prefetchFiles: Array<Resource>;
   mapFiles: AsyncFileMapper;
   serialize: Function;
+  integrity: boolean;
+  crossorigin: boolean | string;
 
   constructor (options: TemplateRendererOptions) {
     this.options = options
     this.inject = options.inject !== false
+    this.integrity = options.integrity === true
+    this.crossorigin = ['', 'anonymous', 'use-credentials'].includes(options.crossorigin) ? options.crossorigin : false
+
+    if (options.crossorigin !== undefined && this.crossorigin === false) {
+      throw new Error("crossorigin option must be one of '', 'anonymous', or 'use-credentials'")
+    }
+
     // if no template option is provided, the renderer is created
     // as a utility object for rendering assets like preload links and scripts.
-    
+
     const { template } = options
     this.parsedTemplate = template
       ? typeof template === 'string'
@@ -80,6 +91,8 @@ export default class TemplateRenderer {
       this.prefetchFiles = (clientManifest.async || []).map(normalizeFile)
       // initial async chunk mapping
       this.mapFiles = createMapper(clientManifest)
+    } else if (this.integrity) {
+      throw new Error('integrity option only works if clientManifest supplied')
     }
   }
 
@@ -133,8 +146,11 @@ export default class TemplateRenderer {
     return (
       // render links for css files
       (cssFiles.length
-        ? cssFiles.map(({ file }) => `<link rel="stylesheet" href="${this.publicPath}${file}">`).join('')
-        : '') +
+        ? cssFiles.map(({ file }) => {
+          const crossoriginAttr = this.crossorigin !== false ? ` crossorigin="${this.crossorigin}"` : ''
+          const integrityAttr = this.integrity ? ` integrity="${this.clientManifest.integrity[file]}"` : ''
+          return `<link${crossoriginAttr}${integrityAttr} rel="stylesheet" href="${this.publicPath}${file}">`
+        }).join('') : '') +
       // context.styles is a getter exposed by vue-style-loader which contains
       // the inline component styles collected during SSR
       (context.styles || '')
@@ -168,8 +184,13 @@ export default class TemplateRenderer {
         if (shouldPreload && !shouldPreload(fileWithoutQuery, asType)) {
           return ''
         }
+        let crossorigin = this.crossorigin
         if (asType === 'font') {
-          extra = ` type="font/${extension}" crossorigin`
+          extra = ` type="font/${extension}"`
+          crossorigin = crossorigin || ''
+        }
+        if (crossorigin !== false) {
+          extra += ` crossorigin="${crossorigin}"`
         }
         return `<link rel="preload" href="${
           this.publicPath}${file
@@ -198,7 +219,8 @@ export default class TemplateRenderer {
         if (alreadyRendered(file)) {
           return ''
         }
-        return `<link rel="prefetch" href="${this.publicPath}${file}">`
+        const crossoriginAttr = this.crossorigin !== false ? ` crossorigin="${this.crossorigin}"` : ''
+        return `<link rel="prefetch" href="${this.publicPath}${file}"${crossoriginAttr}>`
       }).join('')
     } else {
       return ''
@@ -226,7 +248,9 @@ export default class TemplateRenderer {
       const async = (this.getUsedAsyncFiles(context) || []).filter(({ file }) => isJS(file))
       const needed = [initial[0]].concat(async, initial.slice(1))
       return needed.map(({ file }) => {
-        return `<script src="${this.publicPath}${file}" defer></script>`
+        const crossoriginAttr = this.crossorigin !== false ? ` crossorigin="${this.crossorigin}"` : ''
+        const integrityAttr = this.integrity ? ` integrity="${this.clientManifest.integrity[file]}"` : ''
+        return `<script${crossoriginAttr}${integrityAttr} src="${this.publicPath}${file}" defer></script>`
       }).join('')
     } else {
       return ''

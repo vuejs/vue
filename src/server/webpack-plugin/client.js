@@ -1,4 +1,5 @@
 const hash = require('hash-sum')
+const ssri = require('ssri')
 const uniq = require('lodash.uniq')
 import { isJS, isCSS, onEmit } from './util'
 
@@ -25,12 +26,24 @@ export default class VueSSRClientPlugin {
         .filter((file) => isJS(file) || isCSS(file))
         .filter(file => initialFiles.indexOf(file) < 0)
 
+      const integrityHashes = allFiles.reduce((hashes, filename) => {
+        const asset = compilation.assets[filename]
+        const src = asset.source()
+        const integrity = ssri.fromData(src, {
+          algorithms: ['sha384']
+        })
+
+        hashes[filename] = integrity.toString()
+        return hashes
+      }, {})
+
       const manifest = {
         publicPath: stats.publicPath,
         all: allFiles,
         initial: initialFiles,
         async: asyncFiles,
-        modules: { /* [identifier: string]: Array<index: number> */ }
+        modules: { /* [identifier: string]: Array<index: number> */ },
+        integrity: integrityHashes
       }
 
       const assetModules = stats.modules.filter(m => m.assets.length)
