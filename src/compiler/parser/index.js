@@ -1,12 +1,12 @@
 /* @flow */
 
-import he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { genAssignmentCode } from '../directives/model'
-import { extend, cached, no, camelize, hyphenate } from 'shared/util'
+import { extend, no, camelize, hyphenate } from 'shared/util'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
+import decodeHTML from './html-decoder'
 
 import {
   addProp,
@@ -41,8 +41,6 @@ const lineBreakRE = /[\r\n]/
 const whitespaceRE = /[ \f\t\r\n]+/g
 
 const invalidAttributeRE = /[\s"'<>\/=]/
-
-const decodeHTMLCached = cached(he.decode)
 
 export const emptySlotScopeToken = `_empty_`
 
@@ -210,8 +208,6 @@ export function parse (
     expectHTML: options.expectHTML,
     isUnaryTag: options.isUnaryTag,
     canBeLeftOpenTag: options.canBeLeftOpenTag,
-    shouldDecodeNewlines: options.shouldDecodeNewlines,
-    shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
     start (tag, attrs, unary, start, end) {
@@ -339,7 +335,7 @@ export function parse (
       }
       const children = currentParent.children
       if (inPre || text.trim()) {
-        text = isTextTag(currentParent) ? text : decodeHTMLCached(text)
+        text = isTextTag(currentParent) ? text : decodeHTML(text)
       } else if (!children.length) {
         // remove the whitespace-only node right after an opening tag
         text = ''
