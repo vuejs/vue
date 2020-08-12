@@ -133,7 +133,7 @@
     "rollup-plugin-node-resolve": "^4.0.0",
     "rollup-plugin-replace": "^2.0.0",
     "selenium-server": "^2.53.1",
-    "serialize-javascript": "^2.1.2",
+    "serialize-javascript": "^3.1.0",
     "shelljs": "^0.8.1",
     "terser": "^3.10.2",
     "typescript": "^3.6.4",
