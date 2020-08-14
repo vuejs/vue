@@ -197,6 +197,7 @@ export interface DirectiveOptions {
   update?: DirectiveFunction;
   componentUpdated?: DirectiveFunction;
   unbind?: DirectiveFunction;
+  [index: string]: DirectiveFunction | undefined,
 }
 
 export type InjectKey = string | symbol;
