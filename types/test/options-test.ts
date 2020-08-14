@@ -483,7 +483,7 @@ Vue.component('async-es-module-component', () => import('./es-module'))
 const indexEntries: Array<string> = ["bind", "inserted"];
 const directiveOptions: DirectiveOptions = {};
 const directiveFunction: DirectiveFunction = () => {};
-for (let index in indexEntries){
+for (let index of indexEntries){
   directiveOptions[index] = directiveFunction;
 }
 Vue.directive("index-definition", directiveOptions)
