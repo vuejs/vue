@@ -1,5 +1,6 @@
-import Vue, { DirectiveOptions, DirectiveFunction, PropType, VNode } from "../index";
+import Vue, { PropType, VNode } from "../index";
 import { ComponentOptions, Component } from "../index";
+import { DirectiveOptions, DirectiveFunction } from "../index";
 import { CreateElement } from "../vue";
 
 interface MyComponent extends Vue {
