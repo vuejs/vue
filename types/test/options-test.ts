@@ -1,4 +1,4 @@
-import Vue, { PropType, VNode } from "../index";
+import Vue, { DirectiveOptions, DirectiveFunction, PropType, VNode } from "../index";
 import { ComponentOptions, Component } from "../index";
 import { CreateElement } from "../vue";
 
@@ -478,3 +478,11 @@ Vue.component('functional-component-v-model', {
 
 
 Vue.component('async-es-module-component', () => import('./es-module'))
+
+const indexEntries: Array<string> = ["bind", "inserted"];
+const directiveOptions: DirectiveOptions = {};
+const directiveFunction: DirectiveFunction = () => {};
+for (let index in indexEntries){
+  directiveOptions[index] = directiveFunction;
+}
+Vue.directive("index-definition", directiveOptions)
