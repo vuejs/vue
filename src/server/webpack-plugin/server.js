@@ -47,9 +47,10 @@ export default class VueSSRServerPlugin {
           bundle.files[asset.name] = compilation.assets[asset.name].source()
         } else if (asset.name.match(/\.js\.map$/)) {
           bundle.maps[asset.name.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.name].source())
+        } else {
+          // do not emit anything else for server
+          delete compilation.assets[asset.name]
         }
-        // do not emit anything else for server
-        delete compilation.assets[asset.name]
       })
 
       const json = JSON.stringify(bundle, null, 2)
