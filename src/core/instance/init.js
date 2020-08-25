@@ -31,6 +31,7 @@ export function initMixin (Vue: Class<Component>) {
     // 如果是 Vue实例 不需要被observe (响应式处理)
     vm._isVue = true
     // merge options
+    // 合并用户传入的options 和 初始化的options
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
@@ -51,6 +52,8 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
+    // 初始化函数
+    初始化和
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
