@@ -163,7 +163,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://www.bestvpn.co/" target="_blank">
+        <a href="https://vpn-review.com/netflix-vpn" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bestvpn_co.png">
         </a>
       </td>
@@ -202,6 +202,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       <td align="center" valign="middle">
         <a href="http://moovweb.com/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/moovweb.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://vpn-review.com/netflix-vpn" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vpn_review.png">
         </a>
       </td>
     </tr><tr></tr>
