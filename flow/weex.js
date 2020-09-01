@@ -28,7 +28,7 @@ declare type WeexEnvironment = {
   appName: string; // mobile app name or browser name
   appVersion: string;
 
-  // informations of current running device
+  // information about current running device
   deviceModel: string; // phone device model
   deviceWidth: number;
   deviceHeight: number;

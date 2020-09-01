@@ -7,7 +7,7 @@ import {
   PropsDefinition
 } from "./options";
 
-// Expose some types for backword compatibility...
+// Expose some types for backward compatibility...
 declare namespace Vue {
   // vue.d.ts
   export type CreateElement = V.CreateElement;

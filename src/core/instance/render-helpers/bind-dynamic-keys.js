@@ -3,7 +3,7 @@
 // helper to process dynamic keys for dynamic arguments in v-bind and v-on.
 // For example, the following template:
 //
-// <div id="foo" :[key]="value">
+// <div id="app" :[key]="value">
 //
 // compiles to the following:
 //

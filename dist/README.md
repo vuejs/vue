@@ -9,7 +9,7 @@
 
 ### Terms
 
-- **Full**: builds that contains both the compiler and the runtime.
+- **Full**: builds that contain both the compiler and the runtime.
 
 - **Compiler**: code that is responsible for compiling template strings into JavaScript render functions.
 
@@ -90,9 +90,7 @@ module.exports = {
   plugins: [
     // ...
     new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: JSON.stringify('production')
-      }
+      'process.env.NODE_ENV': JSON.stringify('production')
     })
   ]
 }
