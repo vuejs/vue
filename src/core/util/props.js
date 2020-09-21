@@ -205,18 +205,19 @@ function getInvalidTypeMessage (name, value, expectedTypes) {
     ` Expected ${expectedTypes.map(capitalize).join(', ')}`
   const expectedType = expectedTypes[0]
   const receivedType = toRawType(value)
-  const expectedValue = styleValue(value, expectedType)
-  const receivedValue = styleValue(value, receivedType)
   // check if we need to specify expected value
-  if (expectedTypes.length === 1 &&
-      isExplicable(expectedType) &&
-      !isBoolean(expectedType, receivedType)) {
-    message += ` with value ${expectedValue}`
+  if (
+    expectedTypes.length === 1 &&
+    isExplicable(expectedType) &&
+    isExplicable(typeof value) &&
+    !isBoolean(expectedType, receivedType)
+  ) {
+    message += ` with value ${styleValue(value, expectedType)}`
   }
   message += `, got ${receivedType} `
   // check if we need to specify received value
   if (isExplicable(receivedType)) {
-    message += `with value ${receivedValue}.`
+    message += `with value ${styleValue(value, receivedType)}.`
   }
   return message
 }
@@ -231,9 +232,9 @@ function styleValue (value, type) {
   }
 }
 
+const EXPLICABLE_TYPES = ['string', 'number', 'boolean']
 function isExplicable (value) {
-  const explicitTypes = ['string', 'number', 'boolean']
-  return explicitTypes.some(elem => value.toLowerCase() === elem)
+  return EXPLICABLE_TYPES.some(elem => value.toLowerCase() === elem)
 }
 
 function isBoolean (...args) {
