@@ -76,7 +76,7 @@ export interface ComponentOptions<
   propsData?: object;
   computed?: Accessors<Computed>;
   methods?: Methods;
-  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any> | string>;
+  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any>>;
 
   el?: Element | string;
   template?: string;
@@ -169,7 +169,7 @@ export interface ComputedOptions<T> {
   cache?: boolean;
 }
 
-export type WatchHandler<T> = (val: T, oldVal: T) => void;
+export type WatchHandler<T> = string | ((val: T, oldVal: T) => void);
 
 export interface WatchOptions {
   deep?: boolean;
