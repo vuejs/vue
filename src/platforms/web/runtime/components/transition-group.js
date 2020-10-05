@@ -80,7 +80,7 @@ export default {
       for (let i = 0; i < prevChildren.length; i++) {
         const c: VNode = prevChildren[i]
         c.data.transition = transitionData
-        c.data.pos = c.elm.getBoundingClientRect()
+        c.data.pos = getOffsetPosition(c.elm)
         if (map[c.key]) {
           kept.push(c)
         } else {
@@ -173,7 +173,7 @@ function callPendingCbs (c: VNode) {
 }
 
 function recordPosition (c: VNode) {
-  c.data.newPos = c.elm.getBoundingClientRect()
+  c.data.newPos = getOffsetPosition(c.elm)
 }
 
 function applyTranslation (c: VNode) {
@@ -186,5 +186,12 @@ function applyTranslation (c: VNode) {
     const s = c.elm.style
     s.transform = s.WebkitTransform = `translate(${dx}px,${dy}px)`
     s.transitionDuration = '0s'
+  }
+}
+
+function getOffsetPosition (el) {
+  return {
+    left: el.offsetLeft,
+    top: el.offsetTop
   }
 }
