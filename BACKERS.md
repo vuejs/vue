@@ -215,6 +215,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
     </tr><tr></tr>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://www.vpsserver.com" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vpsserver_com.png">
+        </a>
+      </td>
+    </tr><tr></tr>
   </tbody>
 </table>
 <!--gold end-->
