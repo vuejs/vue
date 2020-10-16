@@ -16,7 +16,7 @@ Here are some links you may find helpful:
 
 Get help from other Vue.js users:
 
-* [Vue.js official forum](http://forum.vuejs.org)
+* [Vue.js official forum](https://forum.vuejs.org)
 * [Vue.js on Twitter](https://twitter.com/vuejs)
 * [Vue.js on Gitter](https://gitter.im/vuejs/vue)
 
@@ -24,4 +24,4 @@ _If you have other helpful links to share, or find any of the links above no lon
 
 ## Credit
 
-This TodoMVC application was created by [Evan You](http://evanyou.me).
+This TodoMVC application was created by [Evan You](https://evanyou.me).
