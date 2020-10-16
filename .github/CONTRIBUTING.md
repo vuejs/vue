@@ -35,7 +35,7 @@ Hi! I'm really excited that you are interested in contributing to Vue.js. Before
 
 ## Development Setup
 
-You will need [Node.js](http://nodejs.org) **version 8+**, [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/index.html) (for running Selenium server during e2e tests) and [yarn](https://yarnpkg.com/en/docs/install).
+You will need [Node.js](https://nodejs.org) **version 8+**, [Java Runtime Environment](https://www.oracle.com/technetwork/java/javase/downloads/index.html) (for running Selenium server during e2e tests) and [yarn](https://yarnpkg.com/en/docs/install).
 
 After cloning the repo, run:
 
@@ -83,7 +83,7 @@ The default test script will do the following: lint with ESLint -> type check wi
 
 - **`packages`**: contains `vue-server-renderer` and `vue-template-compiler`, which are distributed as separate NPM packages. They are automatically generated from the source code and always have the same version with the main `vue` package.
 
-- **`test`**: contains all tests. The unit tests are written with [Jasmine](http://jasmine.github.io/2.3/introduction.html) and run with [Karma](http://karma-runner.github.io/0.13/index.html). The e2e tests are written for and run with [Nightwatch.js](http://nightwatchjs.org/).
+- **`test`**: contains all tests. The unit tests are written with [Jasmine](https://jasmine.github.io/2.3/introduction.html) and run with [Karma](https://karma-runner.github.io/0.13/index.html). The e2e tests are written for and run with [Nightwatch.js](https://nightwatchjs.org/).
 
 - **`src`**: contains the source code. The codebase is written in ES2015 with [Flow](https://flowtype.org/) type annotations.
 
