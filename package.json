@@ -10,7 +10,8 @@
   "files": [
     "src",
     "dist/*.js",
-    "types/*.d.ts"
+    "types/*.d.ts",
+    "!.DS_Store"
   ],
   "sideEffects": false,
   "scripts": {
