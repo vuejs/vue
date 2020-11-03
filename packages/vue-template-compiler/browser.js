@@ -951,7 +951,7 @@
       var trace = vm ? generateComponentTrace(vm) : '';
 
       if (hasConsole && (!config.silent)) {
-        console.error(("[Vue warn]: " + msg + trace));
+        console.warn(("[Vue warn]: " + msg + trace));
       }
     };
 
