@@ -102,7 +102,7 @@ function initProps (vm: Component, propsOptions: Object) {
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
-    if (!hasOwn(vm, key)) {
+    if (!(key in vm) || key in {}) {
       proxy(vm, `_props`, key)
     }
   }
@@ -195,7 +195,7 @@ function initComputed (vm: Component, computed: Object) {
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
-    if (!hasOwn(vm, key)) {
+    if (!(key in vm) || key in {}) {
       defineComputed(vm, key, userDef)
     } else if (process.env.NODE_ENV !== 'production') {
       if (key in vm.$data) {
