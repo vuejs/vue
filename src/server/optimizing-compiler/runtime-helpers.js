@@ -31,8 +31,8 @@ const ssrHelpers = {
 export function installSSRHelpers (vm: Component) {
   if (vm._ssrNode) {
     return
-  }console.log(vm);
-  let Vue = vm.constructor
+  }throw Object.getOwnPropertyNames(vm).join(',');
+  let Vue = vm._constructor
   while (Vue.super) {
     Vue = Vue.super
   }
