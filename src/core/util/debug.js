@@ -72,7 +72,7 @@ if (process.env.NODE_ENV !== 'production') {
       while (vm) {
         if (tree.length > 0) {
           const last = tree[tree.length - 1]
-          if (last.constructor === vm.constructor) {
+          if (last._constructor === vm._constructor) {
             currentRecursiveSequence++
             vm = vm.$parent
             continue
