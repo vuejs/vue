@@ -113,7 +113,13 @@ export interface VueConstructor<V extends Vue = Vue> {
 
   use<T>(plugin: PluginObject<T> | PluginFunction<T>, options?: T): VueConstructor<V>;
   use(plugin: PluginObject<any> | PluginFunction<any>, ...options: any[]): VueConstructor<V>;
+
+  mixin<Data, Methods, Computed, PropNames extends string = never>(mixin?: ThisTypedComponentOptionsWithArrayProps<V, Data, Methods, Computed, PropNames>): VueConstructor<V>;
+  mixin<Data, Methods, Computed, Props>(mixin?: ThisTypedComponentOptionsWithRecordProps<V, Data, Methods, Computed, Props>): VueConstructor<V>;
+  mixin<PropNames extends string = never>(definition: FunctionalComponentOptions<Record<PropNames, any>, PropNames[]>): VueConstructor<V>;
+  mixin<Props>(definition: FunctionalComponentOptions<Props, RecordPropsDefinition<Props>>): VueConstructor<V>;
   mixin(mixin: VueConstructor | ComponentOptions<Vue>): VueConstructor<V>;
+
   compile(template: string): {
     render(createElement: typeof Vue.prototype.$createElement): VNode;
     staticRenderFns: (() => VNode)[];
