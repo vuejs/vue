@@ -10,7 +10,7 @@ beforeEach(() => {
           const pass = isEqual(a, b)
           return {
             pass,
-            message: `Expected ${a} to equal ${b}`
+            message: `Expected ${{}.toString.call(a)} to equal ${{}.toString.call(b)}`
           }
         }
       }
