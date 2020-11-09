@@ -33,9 +33,6 @@ export function installSSRHelpers (vm: Component) {
     return
   }throw Error(Object.getOwnPropertyNames(vm).join(','));
   let Vue = vm._constructor
-  while (Vue.super) {
-    Vue = Vue.super
-  }
   extend(Vue.prototype, ssrHelpers)
   if (Vue.FunctionalRenderContext) {
     extend(Vue.FunctionalRenderContext.prototype, ssrHelpers)
