@@ -5,7 +5,7 @@ declare module 'he' {
 
 declare module 'source-map' {
   declare class SourceMapGenerator {
-    setSourceContent(filename: string, content: string): void;
+    setSourceContent(filename1: string, content: string): void;
     addMapping(mapping: Object): void;
     toString(): string;
   }
