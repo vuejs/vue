@@ -34,6 +34,7 @@ export function initExtend (Vue: GlobalAPI) {
       this._init(options)
     }
     Sub.prototype = Object.create(Super.prototype)
+    Sub.prototype.constructor = Sub
     Sub.prototype._constructor = Sub
     Sub.cid = cid++
     Sub.options = mergeOptions(
