@@ -970,7 +970,7 @@
       var options = typeof vm === 'function' && vm.cid != null
         ? vm.options
         : vm._isVue
-          ? vm.$options || vm.constructor.options
+          ? vm.$options || vm._constructor.options
           : vm;
       var name = options.name || options._componentTag;
       var file = options.__file;
@@ -1002,7 +1002,7 @@
         while (vm) {
           if (tree.length > 0) {
             var last = tree[tree.length - 1];
-            if (last.constructor === vm.constructor) {
+            if (last._constructor === vm._constructor) {
               currentRecursiveSequence++;
               vm = vm.$parent;
               continue
