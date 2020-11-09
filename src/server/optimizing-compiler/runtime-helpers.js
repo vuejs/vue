@@ -32,7 +32,7 @@ export function installSSRHelpers (vm: Component) {
   if (vm._ssrNode) {
     return
   }
-  let Vue = vm._constructor || vm.constructor || function () { throw Error(Object.getPropertyNames(vm).join(',')) }()
+  let Vue = vm._constructor || function () { throw Error(Object.getPropertyNames(vm).join(',')) }()
   while (Vue.super) {
     Vue = Vue.super
   }
