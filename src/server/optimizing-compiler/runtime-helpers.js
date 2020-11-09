@@ -32,9 +32,9 @@ export function installSSRHelpers (vm: Component) {
   if (vm._ssrNode) {
     return
   }
-  let Vue_ = vm._constructor
-  while (Vue_.super) {
-    Vue = Vue_.super
+  let Vue = vm._constructor
+  while (Vue.super) {
+    Vue = Vue.super
   }
   extend(Vue.prototype, ssrHelpers)
   if (Vue.FunctionalRenderContext) {
