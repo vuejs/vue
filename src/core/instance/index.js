@@ -16,7 +16,6 @@ function Vue (options) {
 
 Vue.prototype = Object.create(null)
 Vue.prototype.constructor = Vue
-Vue.prototype._constructor = Vue
 
 initMixin(Vue)
 stateMixin(Vue)
