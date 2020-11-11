@@ -1,6 +1,6 @@
 {
   "name": "vue",
-  "version": "2.6.12.14",
+  "version": "2.6.12.14.15",
   "description": "Reactive, component-oriented view layer for modern web interfaces.",
   "main": "dist/vue.runtime.common.js",
   "module": "dist/vue.runtime.esm.js",
