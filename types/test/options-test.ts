@@ -168,6 +168,10 @@ Vue.component('component', {
         this.a = val
       },
       deep: true
+    },
+    d: {
+      handler: 'someMethod',
+      immediate: true
     }
   },
   el: "#app",

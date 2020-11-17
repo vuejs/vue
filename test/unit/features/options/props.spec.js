@@ -241,6 +241,16 @@ describe('Options props', () => {
         makeInstance({}, Symbol)
         expect('Expected Symbol, got Object').toHaveBeenWarned()
       })
+
+      it('warns when expected an explicable type but Symbol was provided', () => {
+        makeInstance(Symbol('foo'), String)
+        expect('Expected String, got Symbol').toHaveBeenWarned()
+      })
+
+      it('warns when expected an explicable type but Symbol was provided', () => {
+        makeInstance(Symbol('foo'), [String, Number])
+        expect('Expected String, Number, got Symbol').toHaveBeenWarned()
+      })
     }
 
     it('custom constructor', () => {

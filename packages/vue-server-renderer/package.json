@@ -1,6 +1,6 @@
 {
   "name": "vue-server-renderer",
-  "version": "2.6.11",
+  "version": "2.6.12",
   "description": "server renderer for Vue 2.0",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -25,7 +25,7 @@
     "lodash.template": "^4.5.0",
     "lodash.uniq": "^4.5.0",
     "resolve": "^1.2.0",
-    "serialize-javascript": "^2.1.2",
+    "serialize-javascript": "^3.1.0",
     "source-map": "0.5.6"
   },
   "devDependencies": {

@@ -280,7 +280,7 @@ describe('Directive v-on', () => {
     expect(spy.calls.count()).toBe(1)
   })
 
-  it('should support system modifers with exact', () => {
+  it('should support system modifiers with exact', () => {
     vm = new Vue({
       el,
       template: `
@@ -405,7 +405,7 @@ describe('Directive v-on', () => {
     Vue.config.keyCodes = Object.create(null)
   })
 
-  it('should override build-in keyCode', () => {
+  it('should override built-in keyCode', () => {
     Vue.config.keyCodes.up = [1, 87]
     vm = new Vue({
       el,
@@ -420,7 +420,7 @@ describe('Directive v-on', () => {
       e.keyCode = 1
     })
     expect(spy).toHaveBeenCalledTimes(2)
-    // should not affect build-in down keycode
+    // should not affect built-in down keycode
     triggerEvent(vm.$el, 'keyup', e => {
       e.keyCode = 40
     })
