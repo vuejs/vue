@@ -21,12 +21,12 @@ export interface CreateElement {
 }
 
 export interface Vue {
-  readonly $el: Element;
+  readonly $el: HTMLElement;
   readonly $options: ComponentOptions<Vue>;
   readonly $parent: Vue;
   readonly $root: Vue;
   readonly $children: Vue[];
-  readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[] };
+  readonly $refs: { [key: string]: Vue | HTMLElement | Vue[] | HTMLElement[] };
   readonly $slots: { [key: string]: VNode[] | undefined };
   readonly $scopedSlots: { [key: string]: NormalizedScopedSlot | undefined };
   readonly $isServer: boolean;
@@ -37,7 +37,7 @@ export interface Vue {
   readonly $attrs: Record<string, string>;
   readonly $listeners: Record<string, Function | Function[]>;
 
-  $mount(elementOrSelector?: Element | string, hydrating?: boolean): this;
+  $mount(elementOrSelector?: HTMLElement | string, hydrating?: boolean): this;
   $forceUpdate(): void;
   $destroy(): void;
   $set: typeof Vue.set;
