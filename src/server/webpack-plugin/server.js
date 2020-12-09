@@ -20,7 +20,21 @@ export default class VueSSRServerPlugin {
         return cb()
       }
 
-      const entryAssets = entryInfo.assets.filter(isJS)
+      const entryAssets = entryInfo.assets
+        .map(function (file) {
+          if (typeof file === "string") {
+            return file;
+          }
+
+          if (
+            Object.prototype.toString.call(file) === "[object Object]" &&
+            file.name
+          ) {
+            return file.name;
+          }
+
+          throw new Error(`file structure is not correct: ${file}`);
+        }).filter(isJS)
 
       if (entryAssets.length > 1) {
         throw new Error(
