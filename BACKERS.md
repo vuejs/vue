@@ -221,6 +221,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vpsserver_com.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://aussiecasinohex.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/aussiecasinohex.svg?sanitize=true">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
@@ -264,8 +269,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="teamextension.io" target="_blank">
+        <a href="https://teamextension.io" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/team_extension_north_america_inc.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://freebets.us" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/free_bets_us.png">
         </a>
       </td>
     </tr><tr></tr>
@@ -303,6 +313,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       <td align="center" valign="middle">
         <a href="https://www.webucator.com" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/webucator.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://memberful.com/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/memberful.png">
         </a>
       </td>
     </tr><tr></tr>
