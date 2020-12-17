@@ -168,7 +168,7 @@ describe('codegen', () => {
   it('generate multiline v-model directive on custom component', () => {
     assertCodegen(
       '<my-component v-model="\n test \n" />',
-      `with(this){return _c('my-component',{model:{value:(\n test \n),callback:function ($$v) {\n test \n=$$v},expression:"\\n test \\n"}})}`
+      `with(this){return _c('my-component',{model:{value:(\n test \n),callback:function ($$v) {\n test \n=$$v},expression:"\\n test \\n",event:'input'}})}`
     )
   })
 

@@ -279,6 +279,8 @@ export function genData (el: ASTElement, state: CodegenState): string {
       el.model.callback
     },expression:${
       el.model.expression
+    },event:${
+      el.model.event
     }},`
   }
   // inline-template
