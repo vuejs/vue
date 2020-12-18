@@ -279,10 +279,15 @@ export function genData (el: ASTElement, state: CodegenState): string {
       el.model.callback
     },expression:${
       el.model.expression
-    },event:${
-      el.model.event
-    }},`
+    }`
+
+    if (el.model.lazy) {
+      data += `,lazy:true`
+    }
+
+    data += '}'
   }
+
   // inline-template
   if (el.inlineTemplate) {
     const inlineTemplate = genInlineTemplate(el, state)

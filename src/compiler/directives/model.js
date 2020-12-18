@@ -26,7 +26,7 @@ export function genComponentModel (
   el.model = {
     value: `(${value})`,
     expression: JSON.stringify(value),
-    event: lazy ? `'change'` : `'input'`,
+    lazy: !!lazy,
     callback: `function (${baseValueExpression}) {${assignment}}`
   }
 }

@@ -163,7 +163,7 @@ declare type ASTElement = {
     value: string;
     callback: string;
     expression: string;
-    event: string;
+    lazy: boolean;
   };
 
   directives?: Array<ASTDirective>;
