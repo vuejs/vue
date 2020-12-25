@@ -34,22 +34,22 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
   # update packages
   # using subshells to avoid having to cd back
-  ( ( cd packages/vue-template-compiler
-  npm version "$VERSION"
-  if [[ -z $RELEASE_TAG ]]; then
-    npm publish
-  else
-    npm publish --tag "$RELEASE_TAG"
-  fi
+  ( cd packages/vue-template-compiler
+    npm version "$VERSION"
+    if [[ -z $RELEASE_TAG ]]; then
+      npm publish
+    else
+      npm publish --tag "$RELEASE_TAG"
+    fi
   )
 
-  cd packages/vue-server-renderer
-  npm version "$VERSION"
-  if [[ -z $RELEASE_TAG ]]; then
-    npm publish
-  else
-    npm publish --tag "$RELEASE_TAG"
-  fi
+  ( cd packages/vue-server-renderer
+    npm version "$VERSION"
+    if [[ -z $RELEASE_TAG ]]; then
+      npm publish
+    else
+      npm publish --tag "$RELEASE_TAG"
+    fi
   )
 
   # commit
