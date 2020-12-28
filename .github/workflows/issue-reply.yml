@@ -1,0 +1,27 @@
+name: Issue reply
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  reply-help:
+    runs-on: ubuntu-latest
+    steps:
+      - name: help wanted
+        if: github.event.label.name == 'help wanted' || github.event.label.name == 'contribution welcome'
+        uses: actions-cool/issues-helper@v1
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: Hello @${{ github.event.issue.user.login }}. We totally like your proposal/feedback, welcome to send us a Pull Request for it. Please fill the Pull Request Template, provide changelog/documentation/test cases if needed and make sure all CI passed, we will review it soon. We appreciate your effort in advance and looking forward to your contribution!
+
+      - name: need repo
+        if: github.event.label.name == 'need repro'
+        uses: actions-cool/issues-helper@v1
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: Hello @${{ github.event.issue.user.login }}. We cannot pinpoint the problem, please provide a link to a [JSFiddle](https://jsfiddle.net/chrisvfritz/50wL7mdz/), [JSBin](https://jsbin.com) or [CodePen](https://codepen.io). If it requires a build setup, you can use [CodeSandbox](https://codesandbox.io/s/vue) or provide a GitHub repo. Thanks!
