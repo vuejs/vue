@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  
+</head>
+<body>
+  <h1 id="app"></h1>
+</body>
+<!-- <script src="../../dist/vue.js"></script> -->
+<script src="../../dist/vue.runtime.js"></script>
+<script>
+  // 运行时版本不能编译模板  只能使用render函数
+  // let vm = new Vue({
+  //   el: '#app',
+  //   template: '<h1>{{ msg }}</h1>',
+  //   data: {
+  //     msg: 'Hello World'
+  //   }
+  // })
+  let vm = new Vue({
+  el: '#app',
+  // template: '<h1>{{ msg }}</h1>',
+  render (h) {
+    return h('h1', this.msg)
+  },
+  data: {
+    msg: 'Hello World'
+  }
+})
+
+</script>
+</html>

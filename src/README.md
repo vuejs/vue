@@ -16,7 +16,7 @@
 - compiler 
   - 编译器
   ```txt
-    将模板转换成reader函数 reader创建虚拟DOM 
+    将模板转换成render函数 render创建虚拟DOM 
   ```
 
 - core

@@ -1,9 +1,17 @@
 ## Explanation of Build Files
 
+
+- 完整版`包含编译器和运行时版本`
+- 编译器`用来将模板字符串转化成js 渲染函数的代码  体积大 效率低`
+- 运行时`用来创建Vue实例 渲染并处理虚拟DOM   体积小  效率高  基本上就是去除编译器的代码`
+- UMD`UMD版本通用的模块版本 可以直接挂载到window对象上使用  就像是直接用script引入的Vue一样 `
+- CommonJs`cjs commonjs 打包规范 配合老版本打包工具  webpack `
+- ES Module`ES6  可以被静态分析 所以可以利用这一点  让打包工具进行 'tree-shaking' 将无用的代码排除`
+
 | | UMD | CommonJS | ES Module |
 | --- | --- | --- | --- |
-| **Full** | vue.js | vue.common.js | vue.esm.js |
-| **Runtime-only** | vue.runtime.js | vue.runtime.common.js | vue.runtime.esm.js |
+| **Full 完整版(包含编译器)** | vue.js | vue.common.js | vue.esm.js |
+| **Runtime-only 运行时(不包含编译器)** | vue.runtime.js | vue.runtime.common.js | vue.runtime.esm.js |
 | **Full (production)** | vue.min.js | | |
 | **Runtime-only (production)** | vue.runtime.min.js | | |
 
