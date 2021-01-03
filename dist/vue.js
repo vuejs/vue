@@ -1,6 +1,6 @@
 /*!
  * Vue.js v2.6.11
- * (c) 2014-2019 Evan You
+ * (c) 2014-2021 Evan You
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -4958,6 +4958,7 @@
   var uid$3 = 0;
 
   function initMixin (Vue) {
+    // 给Vue 实例增加 _init方法
     Vue.prototype._init = function (options) {
       var vm = this;
       // a uid
@@ -4972,8 +4973,10 @@
       }
 
       // a flag to avoid this being observed
+      // 如果是 Vue实例 不需要被observe (响应式处理)
       vm._isVue = true;
       // merge options
+      // 合并用户传入的options 和 初始化的options
       if (options && options._isComponent) {
         // optimize internal component instantiation
         // since dynamic options merging is pretty slow, and none of the
@@ -7649,7 +7652,7 @@
         // skip the update if old and new VDOM state is the same.
         // `value` is handled separately because the DOM value may be temporarily
         // out of sync with VDOM state due to focus, composition and modifiers.
-        // This  #4521 by skipping the unnecesarry `checked` update.
+        // This  #4521 by skipping the unnecessary `checked` update.
         cur !== oldProps[key]
       ) {
         // some property updates can throw
@@ -9894,7 +9897,7 @@
         }
       },
       comment: function comment (text, start, end) {
-        // adding anyting as a sibling to the root node is forbidden
+        // adding anything as a sibling to the root node is forbidden
         // comments should still be allowed, but ignored
         if (currentParent) {
           var child = {
@@ -11963,3 +11966,4 @@
   return Vue;
 
 }));
+//# sourceMappingURL=vue.js.map
