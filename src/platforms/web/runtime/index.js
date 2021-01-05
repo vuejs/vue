@@ -18,7 +18,7 @@ import {
 import { patch } from './patch'
 import platformDirectives from './directives/index'
 import platformComponents from './components/index'
-
+// 给Vue添加一些要是用的方法   判断的各种方法
 // install platform specific utils
 Vue.config.mustUseProp = mustUseProp
 Vue.config.isReservedTag = isReservedTag
@@ -27,10 +27,24 @@ Vue.config.getTagNamespace = getTagNamespace
 Vue.config.isUnknownElement = isUnknownElement
 
 // install platform runtime directives & components
+// 通过extend注册了一些全局的指令和组件
+// extend 这个方法是将第二个参数  拷贝到第一个参数中
+
+/**
+ * 下面就是全局注册的指令和组件
+*/
+
+// 注册指令
 extend(Vue.options.directives, platformDirectives)
+// 注册组件
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function
+
+// __patch__ 函数将虚拟DOM 转换成真实的DOM  
+// 判断是否是浏览器环境  
+// 如果是直接返回patch函数  
+// 如果不是直接返回noop  noop是个空函数
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
@@ -39,9 +53,11 @@ Vue.prototype.$mount = function (
   hydrating?: boolean
 ): Component {
   el = el && inBrowser ? query(el) : undefined
+  // mountComponent 渲染DOM
   return mountComponent(this, el, hydrating)
 }
 
+// devtools  调试相关的代码
 // devtools global hook
 /* istanbul ignore next */
 if (inBrowser) {

@@ -1,5 +1,6 @@
 /* @flow */
 
+// 将template转换成render函数  这个版本就是加上编译的版本
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { mark, measure } from 'core/util/perf'
@@ -13,7 +14,7 @@ const idToTemplate = cached(id => {
   const el = query(id)
   return el && el.innerHTML
 })
-
+// 重写mount方法
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (
   el?: string | Element,
@@ -31,11 +32,17 @@ Vue.prototype.$mount = function (
 
   const options = this.$options
   // resolve template/el and convert to render function
+  // 把模板转换成render函数
   if (!options.render) {
+    // 如果没有render函数就把模板编译成render函数
     let template = options.template
+    // 如果模板存在
     if (template) {
+      // 且模板是字符串
       if (typeof template === 'string') {
-        if (template.charAt(0) === '#') {
+        // 如果模板是ID选择器
+        if (template.charAt(0) === '#') {、
+          // 获取对应DOM的innerHTML
           template = idToTemplate(template)
           /* istanbul ignore if */
           if (process.env.NODE_ENV !== 'production' && !template) {
@@ -46,6 +53,7 @@ Vue.prototype.$mount = function (
           }
         }
       } else if (template.nodeType) {
+        // 如果模板是元素 则获取当前模板的元素的innerHTML
         template = template.innerHTML
       } else {
         if (process.env.NODE_ENV !== 'production') {
@@ -79,6 +87,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  // 调用mount方法 渲染DOM
   return mount.call(this, el, hydrating)
 }
 
@@ -96,6 +105,7 @@ function getOuterHTML (el: Element): string {
   }
 }
 
+// 最后给Vue 增加了一个compile方法   (编译器)
 Vue.compile = compileToFunctions
 
 export default Vue

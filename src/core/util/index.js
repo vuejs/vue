@@ -1,5 +1,6 @@
 /* @flow */
 
+// 前面没有  ./  / 就是src目录下的
 export * from 'shared/util'
 export * from './lang'
 export * from './env'

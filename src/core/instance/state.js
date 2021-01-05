@@ -324,6 +324,7 @@ export function stateMixin (Vue: Class<Component>) {
   dataDef.get = function () { return this._data }
   const propsDef = {}
   propsDef.get = function () { return this._props }
+  // 如果不是生产环境则不能修改 $data $props这些属性
   if (process.env.NODE_ENV !== 'production') {
     dataDef.set = function () {
       warn(
@@ -336,6 +337,8 @@ export function stateMixin (Vue: Class<Component>) {
       warn(`$props is readonly.`, this)
     }
   }
+
+  // 给Vue原型增加
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
