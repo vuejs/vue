@@ -283,6 +283,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/free_bets_us.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://betting.bet" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/betting_bet.png">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
