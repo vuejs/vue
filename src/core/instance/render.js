@@ -17,20 +17,28 @@ import VNode, { createEmptyVNode } from '../vdom/vnode'
 import { isUpdatingChildComponent } from './lifecycle'
 
 export function initRender (vm: Component) {
+  // 初始化一些私有属性
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
+  // 获取options
   const options = vm.$options
   const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
   const renderContext = parentVnode && parentVnode.context
+  // 绑定插槽相关的属性
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
   // internal version is used by render functions compiled from templates
+  // 将 createElement 绑定到vm实例上 私有函数
+  // 也就是将render函数绑定到vm实例上
+  // 这里的  createElement  是编译的时候把转换成render函数调用的
   vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
   // normalization is always applied for the public version, used in
   // user-written render functions.
+  // 将 createElement 绑定到vm实例上 公共方法
+  // 使我们手动传入render函数执行的
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
 
   // $attrs & $listeners are exposed for easier HOC creation.
@@ -39,6 +47,7 @@ export function initRender (vm: Component) {
 
   /* istanbul ignore else */
   if (process.env.NODE_ENV !== 'production') {
+    // 初始化 $attrs 和 $listeners  定义响应式数据
     defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, () => {
       !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
     }, true)
@@ -62,6 +71,7 @@ export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
   installRenderHelpers(Vue.prototype)
 
+  // 给Vue实例绑定$nextTick方法
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)
   }
@@ -104,6 +114,7 @@ export function renderMixin (Vue: Class<Component>) {
       } else {
         vnode = vm._vnode
       }
+      // finally 不管有无异常都执行
     } finally {
       currentRenderingInstance = null
     }

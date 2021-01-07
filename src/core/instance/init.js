@@ -53,15 +53,26 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
-    // 初始化函数
-    初始化和
+    // 初始化函数 给 Vue实例成员初始化
+    // 初始化生命周期相关的钩子函数
     initLifecycle(vm)
+    // 初始化一些事件
     initEvents(vm)
+    // 初始化render函数
+    // $slots  $scopedSlots  _c  $createElement  $attrs  $listeners
     initRender(vm)
+    // 触发生命周期函数  beforeCreate
     callHook(vm, 'beforeCreate')
+    // 实现依赖注入 inject
     initInjections(vm) // resolve injections before data/props
+
+    // 初始化了 props methods data computed watch
+    // 并将对应属性设置成响应式挂载到 vm 实例
     initState(vm)
+
+     // 实现依赖注入 provide
     initProvide(vm) // resolve provide after data/props
+    // 触发生命周期函数  beforeCreate
     callHook(vm, 'created')
 
     /* istanbul ignore if */
@@ -71,6 +82,7 @@ export function initMixin (Vue: Class<Component>) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
+    //  调用 $mount 挂载整个页面
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }

@@ -13,6 +13,7 @@ export function initEvents (vm: Component) {
   vm._events = Object.create(null)
   vm._hasHookEvent = false
   // init parent attached events
+  // 获取父组件绑定在子组件上的事件
   const listeners = vm.$options._parentListeners
   if (listeners) {
     updateComponentListeners(vm, listeners)
@@ -52,13 +53,18 @@ export function updateComponentListeners (
 export function eventsMixin (Vue: Class<Component>) {
   const hookRE = /^hook:/
   // 四个方法
+
+  // $on
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
     const vm: Component = this
+    // 先判断传入的event是否是数组  可能传入多个事件
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
+        // 循环将事件和事件处理函数绑定到vm._event
         vm.$on(event[i], fn)
       }
     } else {
+      // 如果不是数组 则先判断vm._event中是否存在当前事件 如果存在则将事件处理函数push到_event对应的事件处理函数数组中 如果不是则创建一个空数组 并push进去
       (vm._events[event] || (vm._events[event] = [])).push(fn)
       // optimize hook:event cost by using a boolean flag marked at registration
       // instead of a hash lookup
@@ -68,7 +74,7 @@ export function eventsMixin (Vue: Class<Component>) {
     }
     return vm
   }
-
+   // $once
   Vue.prototype.$once = function (event: string, fn: Function): Component {
     const vm: Component = this
     function on () {
@@ -79,7 +85,7 @@ export function eventsMixin (Vue: Class<Component>) {
     vm.$on(event, on)
     return vm
   }
-
+   // $off
   Vue.prototype.$off = function (event?: string | Array<string>, fn?: Function): Component {
     const vm: Component = this
     // all
@@ -115,7 +121,7 @@ export function eventsMixin (Vue: Class<Component>) {
     }
     return vm
   }
-
+   // $emit
   Vue.prototype.$emit = function (event: string): Component {
     const vm: Component = this
     if (process.env.NODE_ENV !== 'production') {
