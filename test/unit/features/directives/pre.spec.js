@@ -42,4 +42,13 @@ describe('Directive v-pre', function () {
     vm.$mount()
     expect(vm.$el.firstChild.tagName).toBe('VTEST')
   })
+
+  // #10087
+  it('should not compile attributes', function () {
+    const vm = new Vue({
+      template: '<div v-pre><p open="hello">A Test</p></div>'
+    })
+    vm.$mount()
+    expect(vm.$el.firstChild.getAttribute('open')).toBe('hello')
+  })
 })
