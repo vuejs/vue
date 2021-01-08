@@ -61,8 +61,7 @@ function normalizeScopedSlot(normalSlots, key, fn) {
       ? [res] // single vnode
       : normalizeChildren(res)
     return res && (
-      res.length === 0 ||
-      (res.length === 1 && res[0].isComment) // #9658
+      res.every(r => r.isComment) // #9658, #11856
     ) ? undefined
       : res
   }

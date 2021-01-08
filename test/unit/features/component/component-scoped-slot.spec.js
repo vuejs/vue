@@ -1294,6 +1294,19 @@ describe('Component scoped slot', () => {
     expect(vm.$el.textContent).toMatch('fallback')
   })
 
+  //#11856
+  it('fallback for scoped slot with multiple v-if', () => {
+    const vm = new Vue({
+      template: `<test><template v-if="0 === 1">hi</template><template v-if="1 === 0">hi2</template></test>`,
+      components: {
+        Test: {
+          template: `<div><slot>fallback</slot></div>`
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toEqual('fallback')
+  })
+
   // #9699
   // Component only has normal slots, but is passing down $scopedSlots directly
   // $scopedSlots should not be marked as stable in this case
