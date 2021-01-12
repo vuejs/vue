@@ -9,8 +9,15 @@ export const validate = compiler => {
     warn('webpack config `target` should be "node".')
   }
 
-  if (compiler.options.output && compiler.options.output.libraryTarget !== 'commonjs2') {
-    warn('webpack config `output.libraryTarget` should be "commonjs2".')
+  if (compiler.options.output) {
+    // Webpack < 5.0.0
+    if (compiler.options.output.libraryTarget && compiler.options.output.libraryTarget !== 'commonjs2') {
+      warn('webpack config `output.libraryTarget` should be "commonjs2".')
+    }
+    // Webpack >= 5.0.0
+    else if (compiler.options.output.library && compiler.options.output.library.type !== 'commonjs2') {
+      warn('webpack config `output.libraryTarget` should be "commonjs2".')
+    }
   }
 
   if (!compiler.options.externals) {

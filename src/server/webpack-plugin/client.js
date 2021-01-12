@@ -1,6 +1,7 @@
 const hash = require('hash-sum')
 const uniq = require('lodash.uniq')
 import { isJS, isCSS, onEmit } from './util'
+import { isObject } from 'shared/util'
 
 export default class VueSSRClientPlugin {
   constructor (options = {}) {
@@ -19,6 +20,13 @@ export default class VueSSRClientPlugin {
       const initialFiles = uniq(Object.keys(stats.entrypoints)
         .map(name => stats.entrypoints[name].assets)
         .reduce((assets, all) => all.concat(assets), [])
+        .map(file => {
+          if (isObject(file) && file.name) {
+            return file.name;
+          } else {
+            return file;
+          }
+        })
         .filter((file) => isJS(file) || isCSS(file)))
 
       const asyncFiles = allFiles

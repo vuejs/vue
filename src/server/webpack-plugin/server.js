@@ -1,4 +1,5 @@
 import { validate, isJS, onEmit } from './util'
+import { isObject } from 'shared/util'
 
 export default class VueSSRServerPlugin {
   constructor (options = {}) {
@@ -20,7 +21,14 @@ export default class VueSSRServerPlugin {
         return cb()
       }
 
-      const entryAssets = entryInfo.assets.filter(isJS)
+      const entryAssets = entryInfo.assets
+        .map(file => {
+          if ( isObject(file) && file.name) {
+            return file.name;
+          } else {
+            return file;
+          }
+        }).filter(isJS)
 
       if (entryAssets.length > 1) {
         throw new Error(
@@ -45,6 +53,9 @@ export default class VueSSRServerPlugin {
       stats.assets.forEach(asset => {
         if (isJS(asset.name)) {
           bundle.files[asset.name] = compilation.assets[asset.name].source()
+          if (asset.info && asset.info.related && asset.info.related.sourceMap) {
+            bundle.maps[asset.info.related.sourceMap.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.info.related.sourceMap].source());
+          }
         } else if (asset.name.match(/\.js\.map$/)) {
           bundle.maps[asset.name.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.name].source())
         }
