@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="./dist/vue.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="" id="app"></div>
+    <script>
+      function debounce(fn, delay) {
+        var delay = delay || 200
+        var timer
+        return function () {
+          var th = this
+          var args = arguments
+          if (timer) {
+            clearTimeout(timer)
+          }
+          timer = setTimeout(function () {
+            timer = null
+            fn.apply(th, args)
+          }, delay)
+        }
+      }
+      function throttle(fn, interval) {
+        var last
+        var timer
+        var interval = interval || 200
+        return function () {
+          var th = this
+          var args = arguments
+          var now = +new Date()
+          if (last && now - last < interval) {
+            clearTimeout(timer)
+            timer = setTimeout(function () {
+              last = now
+              fn.apply(th, args)
+            }, interval)
+          } else {
+            last = now
+            fn.apply(th, args)
+          }
+        }
+      }
+      new Vue({
+        template: `
+       <button @click="test2"> test </button>
+      `,
+        methods: {
+          log() {
+            console.error('list', this.list)
+          },
+          test() {
+            this.list = ['1']
+          },
+          test2: throttle(function () {
+            this.log()
+          }, 1000),
+        },
+
+        data() {
+          return {
+            list: [2, 3, 4],
+          }
+        },
+        watch: {
+          list: {
+            handler(n, o) {
+              console.error(n, o)
+            },
+            deep: true,
+          },
+        },
+      }).$mount('#app')
+    </script>
+  </body>
+</html>
