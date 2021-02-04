@@ -417,6 +417,7 @@ export function createPatchFunction (backend) {
     // during leaving transitions
     const canMove = !removeOnly
 
+    debugger
     if (process.env.NODE_ENV !== 'production') {
       checkDuplicateKeys(newCh)
     }
@@ -506,6 +507,7 @@ export function createPatchFunction (backend) {
     index,
     removeOnly
   ) {
+    debugger
     if (oldVnode === vnode) {
       return
     }
@@ -698,7 +700,9 @@ export function createPatchFunction (backend) {
   }
 
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
+    debugger
     if (isUndef(vnode)) {
+      /*vnode不存在则直接调用销毁钩子*/
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
       return
     }
@@ -707,13 +711,16 @@ export function createPatchFunction (backend) {
     const insertedVnodeQueue = []
 
     if (isUndef(oldVnode)) {
+      // root 
       // empty mount (likely as component), create new root element
       isInitialPatch = true
       createElm(vnode, insertedVnodeQueue)
     } else {
+        /*标记旧的VNode是否有nodeType*/
       const isRealElement = isDef(oldVnode.nodeType)
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
+        // 是同一个节点  直接替换
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
       } else {
         if (isRealElement) {
@@ -790,6 +797,7 @@ export function createPatchFunction (backend) {
 
         // destroy old node
         if (isDef(parentElm)) {
+           // 替换root 根节点
           removeVnodes([oldVnode], 0, 0)
         } else if (isDef(oldVnode.tag)) {
           invokeDestroyHook(oldVnode)

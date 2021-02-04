@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="./dist/vue.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="" id="app"></div>
+    <script>
+      new Vue({
+        template: `
+
+        <div>
+          <button @click="test2"> test </button>
+            <ul>
+              <li v-for="item in list" :key="item">
+                {{item}}
+              </li>
+            </ul>
+          </div>
+   
+
+
+       `,
+        methods: {
+        },
+
+        data() {
+          return {
+            list: [2, 3, 4],
+          }
+        },
+        methods: {
+          test2() {
+            this.list = [2,3,5]
+
+            console.error(0)
+            
+          }
+        },
+      }).$mount('#app')
+    </script>
+  </body>
+</html>

@@ -3940,6 +3940,7 @@
         // initial render
         vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
       } else {
+        debugger
         // updates
         vm.$el = vm.__patch__(prevVnode, vnode);
       }
@@ -4059,6 +4060,7 @@
       };
     } else {
       updateComponent = function () {
+        debugger
         vm._update(vm._render(), hydrating);
       };
     }
@@ -6174,6 +6176,7 @@
       // during leaving transitions
       var canMove = !removeOnly;
 
+      debugger
       {
         checkDuplicateKeys(newCh);
       }
@@ -6263,6 +6266,7 @@
       index,
       removeOnly
     ) {
+      debugger
       if (oldVnode === vnode) {
         return
       }
@@ -6457,7 +6461,9 @@
     }
 
     return function patch (oldVnode, vnode, hydrating, removeOnly) {
+      debugger
       if (isUndef(vnode)) {
+        /*vnode不存在则直接调用销毁钩子*/
         if (isDef(oldVnode)) { invokeDestroyHook(oldVnode); }
         return
       }
@@ -6466,13 +6472,16 @@
       var insertedVnodeQueue = [];
 
       if (isUndef(oldVnode)) {
+        // root 
         // empty mount (likely as component), create new root element
         isInitialPatch = true;
         createElm(vnode, insertedVnodeQueue);
       } else {
+          /*标记旧的VNode是否有nodeType*/
         var isRealElement = isDef(oldVnode.nodeType);
         if (!isRealElement && sameVnode(oldVnode, vnode)) {
           // patch existing root node
+          // 是同一个节点  直接替换
           patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly);
         } else {
           if (isRealElement) {
@@ -6549,6 +6558,7 @@
 
           // destroy old node
           if (isDef(parentElm)) {
+             // 替换root 根节点
             removeVnodes([oldVnode], 0, 0);
           } else if (isDef(oldVnode.tag)) {
             invokeDestroyHook(oldVnode);
