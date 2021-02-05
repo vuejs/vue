@@ -1,5 +1,9 @@
 ## _update() ==>   __patch__()  ==> patch()  ==> patchVnode()  ==> updateChildren()
 
+###  Vnode 
+
+![pre](.\pre.png)
+
 ### patch
 ```js
  return function patch (oldVnode, vnode, hydrating, removeOnly) {

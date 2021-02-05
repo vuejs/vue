@@ -11,31 +11,22 @@
     <script>
       new Vue({
         template: `
-
         <div>
-          <button @click="test2"> test </button>
-            <ul>
-              <li v-for="item in list" :key="item">
-                {{item}}
-              </li>
-            </ul>
-          </div>
-   
-
-
-       `,
+          <div @click="test2"> test </div>
+           <p v-for="item in list" :key="item">{{item}}</p>
+        </div>
+            `,
         methods: {
         },
 
         data() {
           return {
-            list: [2, 3, 4],
+            list: [2],
           }
         },
         methods: {
           test2() {
-            this.list = [2,3,5]
-
+            this.list = [3]
             console.error(0)
             
           }
