@@ -3940,7 +3940,7 @@
         // initial render
         vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
       } else {
-        debugger
+        // debugger
         // updates
         vm.$el = vm.__patch__(prevVnode, vnode);
       }
@@ -4060,7 +4060,7 @@
       };
     } else {
       updateComponent = function () {
-        debugger
+        // debugger
         vm._update(vm._render(), hydrating);
       };
     }
@@ -6176,7 +6176,7 @@
       // during leaving transitions
       var canMove = !removeOnly;
 
-      debugger
+      // debugger
       {
         checkDuplicateKeys(newCh);
       }
@@ -6194,7 +6194,7 @@
           patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx);
           oldEndVnode = oldCh[--oldEndIdx];
           newEndVnode = newCh[--newEndIdx];
-        } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
+        } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right SO real dom move right 
           patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx);
           canMove && nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm));
           oldStartVnode = oldCh[++oldStartIdx];
@@ -6205,20 +6205,35 @@
           oldEndVnode = oldCh[--oldEndIdx];
           newStartVnode = newCh[++newStartIdx];
         } else {
-          if (isUndef(oldKeyToIdx)) { oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx); }
-          idxInOld = isDef(newStartVnode.key)
-            ? oldKeyToIdx[newStartVnode.key]
-            : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx);
-          if (isUndef(idxInOld)) { // New element
+
+          // <li v-for ="item in [1,2,3]" :key="item"> {{ item }}
+
+
+          if (isUndef(oldKeyToIdx)) { oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx); }  //    old    {  1: 0  ,  2:1  , 3:2} 
+
+          idxInOld = isDef(newStartVnode.key)  // has key   3 
+            ? oldKeyToIdx[newStartVnode.key]  
+            : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx);  
+            
+
+          if (isUndef(idxInOld)) { 
+            // New element
+            //  [2]
+            //  [3]
             createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx);
-          } else {
-            vnodeToMove = oldCh[idxInOld];
+          } else {   
+            // different index
+            //  [5,2,3,6],
+            //  [4,3,2,1]
+            vnodeToMove = oldCh[idxInOld];  
             if (sameVnode(vnodeToMove, newStartVnode)) {
               patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue, newCh, newStartIdx);
               oldCh[idxInOld] = undefined;
               canMove && nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm);
-            } else {
+            } else {  
               // same key but different element. treat as new element
+              //   old  li  key =3 
+              //   now   div key = 3 
               createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx);
             }
           }
@@ -6226,10 +6241,11 @@
         }
       }
       if (oldStartIdx > oldEndIdx) {
+         //  [1，2]
+         //  [4,2,1,3]
         refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm;
         addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);
       } else if (newStartIdx > newEndIdx) {
-        debugger
         removeVnodes(oldCh, oldStartIdx, oldEndIdx);
       }
     }
@@ -6267,7 +6283,7 @@
       index,
       removeOnly
     ) {
-      debugger
+      //  Same memory address 
       if (oldVnode === vnode) {
         return
       }
@@ -6311,23 +6327,26 @@
       var ch = vnode.children;
       if (isDef(data) && isPatchable(vnode)) {
         for (i = 0; i < cbs.update.length; ++i) { cbs.update[i](oldVnode, vnode); }
-        if (isDef(i = data.hook) && isDef(i = i.update)) { i(oldVnode, vnode); }
+        if (isDef(i = data.hook) && isDef(i = i.update)){
+          i(oldVnode, vnode);
+        }
       }
-      if (isUndef(vnode.text)) {
-        if (isDef(oldCh) && isDef(ch)) {
+      if (isUndef(vnode.text)) {     // no text
+        if (isDef(oldCh) && isDef(ch)) {  // both has children    dps   || true  && true 
           if (oldCh !== ch) { updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly); }
-        } else if (isDef(ch)) {
+        } else if (isDef(ch)) {       // node has child                                   
           {
             checkDuplicateKeys(ch);
           }
-          if (isDef(oldVnode.text)) { nodeOps.setTextContent(elm, ''); }
-          addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue);
-        } else if (isDef(oldCh)) {
-          removeVnodes(oldCh, 0, oldCh.length - 1);
+          if (isDef(oldVnode.text)) { nodeOps.setTextContent(elm, ''); }           // if old has text  ,we set it as ''
+          addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue);      // add Vnode children node
+        } else if (isDef(oldCh)) {   //oldVnode  has children and delete it
+          removeVnodes(oldCh, 0, oldCh.length - 1);  
         } else if (isDef(oldVnode.text)) {
-          nodeOps.setTextContent(elm, '');
+          nodeOps.setTextContent(elm, '');   // TODO 566
         }
       } else if (oldVnode.text !== vnode.text) {
+        // Replace content
         nodeOps.setTextContent(elm, vnode.text);
       }
       if (isDef(data)) {
@@ -6462,7 +6481,7 @@
     }
 
     return function patch (oldVnode, vnode, hydrating, removeOnly) {
-      debugger
+      // debugger
       if (isUndef(vnode)) {
         /*vnode不存在则直接调用销毁钩子*/
         if (isDef(oldVnode)) { invokeDestroyHook(oldVnode); }
@@ -6482,7 +6501,7 @@
         var isRealElement = isDef(oldVnode.nodeType);
         if (!isRealElement && sameVnode(oldVnode, vnode)) {
           // patch existing root node
-          // 是同一个节点  直接替换
+          // 是同一个节点  直接修补
           patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly);
         } else {
           if (isRealElement) {

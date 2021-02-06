@@ -68,7 +68,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       // initial render
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
-      debugger
+      // debugger
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
@@ -188,7 +188,7 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
-      debugger
+      // debugger
       vm._update(vm._render(), hydrating)
     }
   }
