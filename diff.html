@@ -12,24 +12,21 @@
       new Vue({
         template: `
         <div>
-          <div @click="test2"> test </div>
-           <p v-for="item in list" :key="item">{{item}}</p>
+          <p v-for="item in list "  :key="item"> {{ item }}</p>
+          
         </div>
             `,
-        methods: {
-        },
+        methods: {},
 
         data() {
           return {
-            list: [5,2,3,6],
+            list: [1, 2, 3, 4, 5],
           }
         },
-        methods: {
-          test2() {
-            this.list = [4,3,2,1]
-            console.error(0)
-            
-          }
+        mounted() {
+          setTimeout(() => {
+            this.list = [6, 3, 5, 7, 2]
+          }, 2000)
         },
       }).$mount('#app')
     </script>
