@@ -8,6 +8,10 @@ export function isUndef (v: any): boolean %checks {
   return v === undefined || v === null
 }
 
+export function isNumNegZero (v: any): boolean %checks {
+  return !isNaN(v) && Object.is(Number(v), -0)
+}
+
 export function isDef (v: any): boolean %checks {
   return v !== undefined && v !== null
 }
