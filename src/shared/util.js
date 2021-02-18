@@ -9,7 +9,7 @@ export function isUndef (v: any): boolean %checks {
 }
 
 export function isNumNegZero (v: any): boolean %checks {
-  return !isNaN(v) && 1/Number(v) === -Infinity
+  return 1/v === -Infinity
 }
 
 export function isDef (v: any): boolean %checks {
