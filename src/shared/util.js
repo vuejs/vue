@@ -8,10 +8,6 @@ export function isUndef (v: any): boolean %checks {
   return v === undefined || v === null
 }
 
-export function isNumNegZero (v: any): boolean %checks {
-  return 1/v === -Infinity
-}
-
 export function isDef (v: any): boolean %checks {
   return v !== undefined && v !== null
 }
@@ -100,7 +96,7 @@ export function toString (val: any): string {
  * If the conversion fails, return original string.
  */
 export function toNumber (val: string): number | string {
-  const n = isNumNegZero(val) ? '-0' : parseFloat(val)
+  const n = 1 / val === -Infinity ? '-0' : parseFloat(val)
   return isNaN(n) ? val : n
 }
 
