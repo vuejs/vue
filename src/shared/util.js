@@ -96,7 +96,7 @@ export function toString (val: any): string {
  * If the conversion fails, return original string.
  */
 export function toNumber (val: string): number | string {
-  const n = 1 / val === -Infinity ? '-0' : parseFloat(val)
+  const n = 1 / Number(val) === -Infinity ? '-0' : parseFloat(val)
   return isNaN(n) ? val : n
 }
 
