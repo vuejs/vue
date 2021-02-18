@@ -96,6 +96,7 @@ export function toString (val: any): string {
 
 /**
  * Convert an input value to a number for persistence.
+ * Check for special case of signed zero.
  * If the conversion fails, return original string.
  */
 export function toNumber (val: string): number | string {
