@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isDef, isUndef, extend, toNumber, isNumNegZero } from 'shared/util'
+import { isDef, isUndef, extend, toNumber } from 'shared/util'
 import { isSVG } from 'web/util/index'
 
 let svgContainer
@@ -44,7 +44,7 @@ function updateDOMProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       // non-string values will be stringified
       elm._value = cur
       // avoid resetting cursor position when value is the same
-      const strCur = isNumNegZero(cur) ? '-0' : isUndef(cur) ? '' : String(cur)
+      const strCur = isUndef(cur) ? '' : String(cur)
       if (shouldUpdateValue(elm, strCur)) {
         elm.value = strCur
       }
