@@ -25,7 +25,7 @@ export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never
   = AsyncComponentPromise<Data, Methods, Computed, Props>
   | AsyncComponentFactory<Data, Methods, Computed, Props>
 
-export type AsyncComponentPromise<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props = DefaultProps> = (
+export type AsyncComponentPromise<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
 ) => Promise<
@@ -47,7 +47,7 @@ export type AsyncComponentFactory<
   error?: Component | EsModuleComponent;
   delay?: number;
   timeout?: number;
-};
+}
 
 /**
  * When the `Computed` type parameter on `ComponentOptions` is inferred,
