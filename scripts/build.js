@@ -45,10 +45,9 @@ function buildEntry (config) {
   return rollup.rollup(config)
     .then(bundle => bundle.generate(output))
     .then(({ output: [{ code, map }] }) => {
-      const hasMap = !!map
-      const filename = file.split('/').pop()
-      let tasks = [() => write(file, code, true)]
-      if (hasMap) {
+      const tasks = [() => write(file, code, true)]
+      if (map) {
+        const filename = file.split('/').pop()
         code = code + `\n//# sourceMappingURL=${filename}.map`
         tasks.push(() => write(`${file}.map`, JSON.stringify(map)))
       }
