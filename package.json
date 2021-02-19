@@ -136,7 +136,6 @@
     "selenium-server": "^2.53.1",
     "serialize-javascript": "^3.1.0",
     "shelljs": "^0.8.1",
-    "terser": "^3.10.2",
     "typescript": "^3.6.4",
     "webpack": "~4.28.4",
     "weex-js-runtime": "^0.23.6",
