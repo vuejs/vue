@@ -33,12 +33,7 @@ export type AsyncComponentPromise<Data=DefaultData<never>, Methods=DefaultMethod
   | EsModuleComponent<Data, Methods, Computed, Props>
 > | void;
 
-export type AsyncComponentFactory<
-  Data = DefaultData<never>,
-  Methods = DefaultMethods<never>,
-  Computed = DefaultComputed,
-  Props = DefaultProps
-> = () => {
+export type AsyncComponentFactory<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = () => {
   component: Promise<
     | Component<Data, Methods, Computed, Props>
     | EsModuleComponent<Data, Methods, Computed, Props>
