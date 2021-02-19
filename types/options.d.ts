@@ -12,14 +12,10 @@ export type Component<Data=DefaultData<never>, Methods=DefaultMethods<never>, Co
   | FunctionalComponentOptions<Props>
   | ComponentOptions<never, Data, Methods, Computed, Props>
 
-interface EsModuleComponent<
-  Data = DefaultData<never>,
-  Methods = DefaultMethods<never>,
-  Computed = DefaultComputed,
-  Props = DefaultProps
-> {
-  default: Component<Data, Methods, Computed, Props>;
-}
+type EsModule<T> = T | { default: T }
+
+type ImportedComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
+  = EsModule<Component<Data, Methods, Computed, Props>>
 
 export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
   = AsyncComponentPromise<Data, Methods, Computed, Props>
@@ -28,18 +24,12 @@ export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never
 export type AsyncComponentPromise<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
-) => Promise<
-  | Component<Data, Methods, Computed, Props>
-  | EsModuleComponent<Data, Methods, Computed, Props>
-> | void;
+) => Promise<ImportedComponent<Data, Methods, Computed, Props>> | void;
 
 export type AsyncComponentFactory<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = () => {
-  component: Promise<
-    | Component<Data, Methods, Computed, Props>
-    | EsModuleComponent<Data, Methods, Computed, Props>
-  >;
-  loading?: Component | EsModuleComponent;
-  error?: Component | EsModuleComponent;
+  component: Promise<ImportedComponent<Data, Methods, Computed, Props>>;
+  loading?: ImportedComponent;
+  error?: ImportedComponent;
   delay?: number;
   timeout?: number;
 }
