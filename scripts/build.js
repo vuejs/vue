@@ -2,7 +2,6 @@ const fs = require('fs')
 const path = require('path')
 const zlib = require('zlib')
 const rollup = require('rollup')
-const terser = require('terser')
 
 if (!fs.existsSync('dist')) {
   fs.mkdirSync('dist')
@@ -42,25 +41,18 @@ function build (builds) {
 
 function buildEntry (config) {
   const output = config.output
-  const { file, banner } = output
-  const isProd = /(min|prod)\.js$/.test(file)
+  const { file } = output
   return rollup.rollup(config)
     .then(bundle => bundle.generate(output))
-    .then(({ output: [{ code }] }) => {
-      if (isProd) {
-        const minified = (banner ? banner + '\n' : '') + terser.minify(code, {
-          toplevel: true,
-          output: {
-            ascii_only: true
-          },
-          compress: {
-            pure_funcs: ['makeMap']
-          }
-        }).code
-        return write(file, minified, true)
-      } else {
-        return write(file, code)
+    .then(({ output: [{ code, map }] }) => {
+      const hasMap = !!map
+      const filename = file.split('/').pop()
+      let tasks = [() => write(file, code, true)]
+      if (hasMap) {
+        code = code + `\n//# sourceMappingURL=${filename}.map`
+        tasks.push(() => write(`${file}.map`, JSON.stringify(map)))
       }
+      return Promise.all(tasks.map(t => t()))
     })
 }
 

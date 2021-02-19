@@ -8,6 +8,7 @@ const flow = require('rollup-plugin-flow-no-whitespace')
 const version = process.env.VERSION || require('../package.json').version
 const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
 const featureFlags = require('./feature-flags')
+const { terser } = require("rollup-plugin-terser")
 
 const banner =
   '/*!\n' +
@@ -215,17 +216,28 @@ const builds = {
 
 function genConfig (name) {
   const opts = builds[name]
+  const isProd = /(min|prod)\.js$/.test(opts.dest)
   const config = {
     input: opts.entry,
     external: opts.external,
     plugins: [
       flow(),
-      alias(Object.assign({}, aliases, opts.alias))
-    ].concat(opts.plugins || []),
+      alias(Object.assign({}, aliases, opts.alias)),
+      isProd && terser({
+        toplevel: true,
+        output: {
+          ascii_only: true
+        },
+        compress: {
+          pure_funcs: ['makeMap']
+        },
+      }),
+    ].concat(opts.plugins || []).filter(Boolean),
     output: {
       file: opts.dest,
       format: opts.format,
       banner: opts.banner,
+      sourcemap: isProd,
       name: opts.moduleName || 'Vue'
     },
     onwarn: (msg, warn) => {
