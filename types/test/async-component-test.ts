@@ -40,22 +40,5 @@ const e: AsyncComponent = () => ({
   })
 })
 
-Vue.component("async-compponent1", () => ({
-  component: new Promise<Component>((res, rej) => {
-    res({
-      template: ""
-    })
-  })
-}))
-
-Vue.component(
-  "async-compponent2",
-  () =>
-    new Promise<{ default: Component }>((res, rej) => {
-      res({
-        default: {
-          template: ""
-        }
-      })
-    })
-)
+// Test that Vue.component accepts any AsyncComponent
+Vue.component("async-compponent1", a)
