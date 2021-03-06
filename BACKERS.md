@@ -483,6 +483,7 @@ Funds donated via Patreon goes directly to support Evan You's full-time work on 
 - Kamil Ocean
 - Orney Enrique Martinez Said
 - Tom Striker
+- Kaori Hata
 
 <h2 align="center">Backers via OpenCollective</h2>
 
