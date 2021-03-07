@@ -13,7 +13,9 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
+  // 在原型上添加_init方法
   Vue.prototype._init = function (options?: Object) {
+    // vm指向Vue这个构造函数的实例化对象
     const vm: Component = this
     // a uid
     vm._uid = uid++
@@ -27,12 +29,18 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     // a flag to avoid this being observed
+    // 避免被观察的标志
     vm._isVue = true
     // merge options
+    // 合并配置项
     if (options && options._isComponent) {
       // optimize internal component instantiation
+      // 优化内部组件实例化
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
+      // 因为动态选项合并非常慢，而且没有任何内部组件选项需要特殊处理
+
+      // 初始化内部组件？
       initInternalComponent(vm, options)
     } else {
       vm.$options = mergeOptions(
@@ -43,19 +51,26 @@ export function initMixin (Vue: Class<Component>) {
     }
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
+      // 使用Proxy方法代理vm对象，然后再重新赋值给vm
       initProxy(vm)
     } else {
       vm._renderProxy = vm
     }
     // expose real self
     vm._self = vm
+    // 初始化生命周期？
     initLifecycle(vm)
+    // 初始化事件？
     initEvents(vm)
+    // 初始化render函数？
     initRender(vm)
+    // beforeCreate钩子函数？
     callHook(vm, 'beforeCreate')
     initInjections(vm) // resolve injections before data/props
+    // 数据observe？
     initState(vm)
     initProvide(vm) // resolve provide after data/props
+    // created 钩子函数？
     callHook(vm, 'created')
 
     /* istanbul ignore if */

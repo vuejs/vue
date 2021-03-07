@@ -1,15 +1,22 @@
-/* global Vue */
-
-var apiURL = 'https://api.github.com/repos/vuejs/vue/commits?per_page=3&sha='
-
-/**
- * Actual demo
- */
-const vm = new Vue({
-
-  el: '#demo',
-
-  data: {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="../../dist/vue.js"></script>
+</head>
+<body>
+  <div id="app">
+    <p>KYZ天下第一</p>
+  </div>
+</body>
+<script type="text/javascript">
+  var apiURL = 'https://api.github.com/repos/vuejs/vue/commits?per_page=3&sha='
+  new Vue({
+    el: '#app',
+    data: {
     branches: ['master', 'dev'],
     currentBranch: 'master',
     commits: null
@@ -40,8 +47,8 @@ const vm = new Vue({
       // navigator.userAgent.indexOf('PhantomJS')是判断是否在PhantomJS环境中
       if (navigator.userAgent.indexOf('PhantomJS') > -1) {
         // use mocks in e2e to avoid dependency on network / authentication
+        // 在e2e中使用mock以避免依赖于网络/身份验证
         setTimeout(function () {
-          // 在e2e中使用mock以避免依赖于网络/身份验证
           self.commits = window.MOCKS[self.currentBranch]
         }, 0)
       } else {
@@ -55,5 +62,6 @@ const vm = new Vue({
       }
     }
   }
-})
-console.log(vm)
+  })
+</script>
+</html>
