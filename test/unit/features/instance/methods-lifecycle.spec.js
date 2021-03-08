@@ -53,6 +53,31 @@ describe('Instance methods lifecycle', () => {
         }
       }).$mount()
     })
+
+    it('Dep.target should be undefined during invocation of child immediate watcher', () => {
+      let calls = 0;
+      new Vue({
+        template: '<div><my-component></my-component></div>',
+        components: {
+          myComponent: {
+            template: '<div>hi</div>',
+            data() {
+              return { a: 123 }
+            },
+            watch: {
+              a: {
+                handler() {
+                  ++calls
+                  expect(Dep.target).toBe(undefined)
+                },
+                immediate: true
+              }
+            }
+          }
+        }
+      }).$mount()
+      expect(calls).toBe(1)
+    })
   })
 
   describe('$destroy', () => {
