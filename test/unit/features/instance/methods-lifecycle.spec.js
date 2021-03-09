@@ -54,15 +54,17 @@ describe('Instance methods lifecycle', () => {
       }).$mount()
     })
 
-    it('Dep.target should be undefined during invocation of child immediate watcher', () => {
-      let calls = 0;
+    it('Dep.target should be undefined during invocation of child immediate watcher', done => {
+      let calls = 0, childData
+      const parentUpdate = jasmine.createSpy()
       new Vue({
         template: '<div><my-component></my-component></div>',
+        updated: parentUpdate,
         components: {
           myComponent: {
-            template: '<div>hi</div>',
+            template: '<div>{{ a }}</div>',
             data() {
-              return { a: 123 }
+              return childData = { a: 123 }
             },
             watch: {
               a: {
@@ -77,6 +79,10 @@ describe('Instance methods lifecycle', () => {
         }
       }).$mount()
       expect(calls).toBe(1)
+      childData.a++
+      waitForUpdate(() => {
+        expect(parentUpdate.calls.count()).toBe(0)
+      }).then(done)
     })
   })
 
