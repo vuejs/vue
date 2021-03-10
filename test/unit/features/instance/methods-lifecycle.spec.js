@@ -81,7 +81,7 @@ describe('Instance methods lifecycle', () => {
       expect(calls).toBe(1)
       childData.a++
       waitForUpdate(() => {
-        expect(parentUpdate.calls.count()).toBe(0)
+        expect(parentUpdate).not.toHaveBeenCalled()
       }).then(done)
     })
   })
