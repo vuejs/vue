@@ -71,7 +71,7 @@ describe('Instance methods lifecycle', () => {
               anything: {
                 handler() {
                   ++calls
-                  expect(Dep.target).toBe(undefined)
+                  this.a
                 },
                 immediate: true
               }
