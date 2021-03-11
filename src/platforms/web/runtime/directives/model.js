@@ -139,7 +139,7 @@ function onCompositionEnd (e) {
 }
 
 function trigger (el, type) {
-  var e = new Event(type, {
+  const e = new Event(type, {
     bubbles: true,
     cancelable: true
   });
