@@ -13,6 +13,7 @@ import {
 
 const normalizeEvent = cached((name: string): {
   name: string,
+  plain: boolean,
   once: boolean,
   capture: boolean,
   passive: boolean,
@@ -25,8 +26,10 @@ const normalizeEvent = cached((name: string): {
   name = once ? name.slice(1) : name
   const capture = name.charAt(0) === '!'
   name = capture ? name.slice(1) : name
+  const plain = !(passive || once || capture)
   return {
     name,
+    plain,
     once,
     capture,
     passive
@@ -50,6 +53,11 @@ export function createFnInvoker (fns: Function | Array<Function>, vm: ?Component
   return invoker
 }
 
+// #6552, #11925
+function prioritizePlainEvents (a, b) {
+  return a.plain ? -1 : b.plain ? 1 : 0
+}
+
 export function updateListeners (
   on: Object,
   oldOn: Object,
@@ -59,6 +67,8 @@ export function updateListeners (
   vm: Component
 ) {
   let name, def, cur, old, event
+  const toAdd = []
+  let hasModifier = false
   for (name in on) {
     def = cur = on[name]
     old = oldOn[name]
@@ -68,6 +78,7 @@ export function updateListeners (
       cur = def.handler
       event.params = def.params
     }
+    if (!event.plain) hasModifier = true
     if (isUndef(cur)) {
       process.env.NODE_ENV !== 'production' && warn(
         `Invalid handler for event "${event.name}": got ` + String(cur),
@@ -80,10 +91,18 @@ export function updateListeners (
       if (isTrue(event.once)) {
         cur = on[name] = createOnceHandler(event.name, cur, event.capture)
       }
-      add(event.name, cur, event.capture, event.passive, event.params)
+      event.handler = cur
+      toAdd.push(event)
     } else if (cur !== old) {
       old.fns = cur
       on[name] = old
+    }
+  }
+  if (toAdd.length) {
+    if (hasModifier) toAdd.sort(prioritizePlainEvents)
+    for (let i = 0; i < toAdd.length; i++) {
+      const event = toAdd[i]
+      add(event.name, event.handler, event.capture, event.passive, event.params)
     }
   }
   for (name in oldOn) {

@@ -380,37 +380,68 @@ describe('Directive v-model text', () => {
     })
 
     // #6552
-    // This was original introduced due to the microtask between DOM events issue
-    // but fixed after switching to MessageChannel.
+    // Root cause: input listeners with modifiers are added as a separate
+    // DOM listener. If a change is triggered inside this listener, an update
+    // will happen before the second listener is fired! (obviously microtasks
+    // can be processed in between DOM events on the same element)
+    // This causes the domProps module to receive state that has not been
+    // updated by v-model yet (because v-model's listener has not fired yet)
+    // Solution: make sure to always fire v-model's listener first
+    // #11925
+    // After fix #11925, input event should trigger an update after two listener,
+    // not after the first listener, before the second listener.
+    // So we should also test whether the v-model listener is triggered
+    // before the listener with once modifier by the variable vModelTriggerBeforeOnce.
     it('should not block input when another input listener with modifier is used', done => {
+      let vModelTriggerBeforeOnce = false
+      const captureInputValue = 'b'
+      const onceInputValue = 'x'
       const vm = new Vue({
         data: {
           a: 'a',
-          foo: false
+          foo: false,
+          b: 'b',
+          bar: false,
         },
         template: `
-          <div>
-            <input ref="input" v-model="a" @input.capture="onInput">{{ a }}
-            <div v-if="foo">foo</div>
-          </div>
-        `,
+      <div>
+        <input ref="input" v-model="a" @input.capture="onInput">{{ a }}
+        <div v-if="foo">foo</div>
+        <input ref="onceInput" v-model="b" @input.once="onInputBar">{{ b }}
+        <div v-if="bar">bar</div>
+      </div>
+    `,
         methods: {
           onInput (e) {
             this.foo = true
+          },
+          onInputBar (e) {
+            vModelTriggerBeforeOnce = this.b === onceInputValue
+            this.bar = true
           }
         }
       }).$mount()
 
       document.body.appendChild(vm.$el)
       vm.$refs.input.focus()
-      vm.$refs.input.value = 'b'
+      vm.$refs.input.value = captureInputValue
       triggerEvent(vm.$refs.input, 'input')
+
+      vm.$refs.onceInput.focus()
+      vm.$refs.onceInput.value = onceInputValue
+      triggerEvent(vm.$refs.onceInput, 'input')
 
       // not using wait for update here because there will be two update cycles
       // one caused by onInput in the first listener
       setTimeout(() => {
-        expect(vm.a).toBe('b')
-        expect(vm.$refs.input.value).toBe('b')
+        expect(vm.a).toBe(captureInputValue)
+        expect(vm.foo).toBe(true)
+        expect(vm.$refs.input.value).toBe(captureInputValue)
+
+        expect(vm.b).toBe(onceInputValue)
+        expect(vm.bar).toBe(true)
+        expect(vm.$refs.onceInput.value).toBe(onceInputValue)
+        expect(vModelTriggerBeforeOnce).toBe(true)
         done()
       }, 16)
     })
