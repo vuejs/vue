@@ -76,7 +76,7 @@ function add (
         // starting reference
         e.target.ownerDocument !== document
       ) {
-        return original.apply(this, arguments)
+        return original.apply(this, [...arguments, this])
       }
     }
   }

@@ -3,6 +3,7 @@
 const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/
 const fnInvokeRE = /\([^)]*?\);*$/
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
+const baseEvArgs = '$event, $el'
 
 // KeyboardEvent.keyCode aliases
 const keyCodes: { [key: string]: number | Array<number> } = {
@@ -114,7 +115,7 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, handler.value)
     }
-    return `function($event){${
+    return `function(${baseEvArgs}){${
       isFunctionInvocation ? `return ${handler.value}` : handler.value
     }}` // inline statement
   } else {
@@ -158,7 +159,7 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, code + handlerCode)
     }
-    return `function($event){${code}${handlerCode}}`
+    return `function(${baseEvArgs}){${code}${handlerCode}}`
   }
 }
 
