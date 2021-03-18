@@ -4,6 +4,7 @@ import { generate } from 'compiler/codegen'
 import { isObject, extend } from 'shared/util'
 import { isReservedTag } from 'web/util/index'
 import { baseOptions } from 'web/compiler/options'
+const baseEvArgs = '$event,$el'
 
 function assertCodegen (template, generatedCode, ...args) {
   let staticRenderFnCodes = []
@@ -154,14 +155,14 @@ describe('codegen', () => {
   it('generate v-model directive', () => {
     assertCodegen(
       '<input v-model="test">',
-      `with(this){return _c('input',{directives:[{name:"model",rawName:"v-model",value:(test),expression:"test"}],domProps:{"value":(test)},on:{"input":function($event){if($event.target.composing)return;test=$event.target.value}}})}`
+      `with(this){return _c('input',{directives:[{name:"model",rawName:"v-model",value:(test),expression:"test"}],domProps:{"value":(test)},on:{"input":function(${baseEvArgs}){if($event.target.composing)return;test=$event.target.value}}})}`
     )
   })
 
   it('generate multiline v-model directive', () => {
     assertCodegen(
       '<input v-model="\n test \n">',
-      `with(this){return _c('input',{directives:[{name:"model",rawName:"v-model",value:(\n test \n),expression:"\\n test \\n"}],domProps:{"value":(\n test \n)},on:{"input":function($event){if($event.target.composing)return;\n test \n=$event.target.value}}})}`
+      `with(this){return _c('input',{directives:[{name:"model",rawName:"v-model",value:(\n test \n),expression:"\\n test \\n"}],domProps:{"value":(\n test \n)},on:{"input":function(${baseEvArgs}){if($event.target.composing)return;\n test \n=$event.target.value}}})}`
     )
   })
 
@@ -318,37 +319,37 @@ describe('codegen', () => {
   it('generate events with method call', () => {
     assertCodegen(
       '<input @input="onInput($event);">',
-      `with(this){return _c('input',{on:{"input":function($event){return onInput($event);}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){return onInput($event);}}})}`
     )
     // empty arguments
     assertCodegen(
       '<input @input="onInput();">',
-      `with(this){return _c('input',{on:{"input":function($event){return onInput();}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){return onInput();}}})}`
     )
     // without semicolon
     assertCodegen(
       '<input @input="onInput($event)">',
-      `with(this){return _c('input',{on:{"input":function($event){return onInput($event)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){return onInput($event)}}})}`
     )
     // multiple args
     assertCodegen(
       '<input @input="onInput($event, \'abc\', 5);">',
-      `with(this){return _c('input',{on:{"input":function($event){return onInput($event, 'abc', 5);}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){return onInput($event, 'abc', 5);}}})}`
     )
     // expression in args
     assertCodegen(
       '<input @input="onInput($event, 2+2);">',
-      `with(this){return _c('input',{on:{"input":function($event){return onInput($event, 2+2);}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){return onInput($event, 2+2);}}})}`
     )
     // tricky symbols in args
     assertCodegen(
       `<input @input="onInput(');[\\'());');">`,
-      `with(this){return _c('input',{on:{"input":function($event){onInput(');[\\'());');}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){onInput(');[\\'());');}}})}`
     )
     // function name including a `function` part (#9920)
     assertCodegen(
       '<input @input="functionName()">',
-      `with(this){return _c('input',{on:{"input":function($event){return functionName()}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){return functionName()}}})}`
     )
   })
 
@@ -356,64 +357,64 @@ describe('codegen', () => {
     // normal function
     assertCodegen(
       '<input @input="onInput1();onInput2()">',
-      `with(this){return _c('input',{on:{"input":function($event){onInput1();onInput2()}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){onInput1();onInput2()}}})}`
     )
     // function with multiple args
     assertCodegen(
       '<input @input="onInput1($event, \'text\');onInput2(\'text2\', $event)">',
-      `with(this){return _c('input',{on:{"input":function($event){onInput1($event, 'text');onInput2('text2', $event)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){onInput1($event, 'text');onInput2('text2', $event)}}})}`
     )
   })
 
   it('generate events with keycode', () => {
     assertCodegen(
       '<input @input.enter="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return onInput.apply(null, arguments)}}})}`
     )
     // multiple keycodes (delete)
     assertCodegen(
       '<input @input.delete="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){if(!$event.type.indexOf('key')&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput.apply(null, arguments)}}})}`
     )
     // multiple keycodes (esc)
     assertCodegen(
       '<input @input.esc="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"esc",27,$event.key,["Esc","Escape"]))return null;return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){if(!$event.type.indexOf('key')&&_k($event.keyCode,"esc",27,$event.key,["Esc","Escape"]))return null;return onInput.apply(null, arguments)}}})}`
     )
     // multiple keycodes (space)
     assertCodegen(
       '<input @input.space="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"space",32,$event.key,[" ","Spacebar"]))return null;return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){if(!$event.type.indexOf('key')&&_k($event.keyCode,"space",32,$event.key,[" ","Spacebar"]))return null;return onInput.apply(null, arguments)}}})}`
     )
     // multiple keycodes (chained)
     assertCodegen(
       '<input @keydown.enter.delete="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter")&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function(${baseEvArgs}){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter")&&_k($event.keyCode,"delete",[8,46],$event.key,["Backspace","Delete","Del"]))return null;return onInput.apply(null, arguments)}}})}`
     )
     // number keycode
     assertCodegen(
       '<input @input.13="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&$event.keyCode!==13)return null;return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){if(!$event.type.indexOf('key')&&$event.keyCode!==13)return null;return onInput.apply(null, arguments)}}})}`
     )
     // custom keycode
     assertCodegen(
       '<input @input.custom="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"custom",undefined,$event.key,undefined))return null;return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){if(!$event.type.indexOf('key')&&_k($event.keyCode,"custom",undefined,$event.key,undefined))return null;return onInput.apply(null, arguments)}}})}`
     )
   })
 
   it('generate events with generic modifiers', () => {
     assertCodegen(
       '<input @input.stop="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){$event.stopPropagation();return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){$event.stopPropagation();return onInput.apply(null, arguments)}}})}`
     )
     assertCodegen(
       '<input @input.prevent="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){$event.preventDefault();return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){$event.preventDefault();return onInput.apply(null, arguments)}}})}`
     )
     assertCodegen(
       '<input @input.self="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){if($event.target !== $event.currentTarget)return null;return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){if($event.target !== $event.currentTarget)return null;return onInput.apply(null, arguments)}}})}`
     )
   })
 
@@ -421,81 +422,81 @@ describe('codegen', () => {
   it('generate events with generic modifiers and keycode correct order', () => {
     assertCodegen(
       '<input @keydown.enter.prevent="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.preventDefault();return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function(${baseEvArgs}){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.preventDefault();return onInput.apply(null, arguments)}}})}`
     )
 
     assertCodegen(
       '<input @keydown.enter.stop="onInput">',
-      `with(this){return _c('input',{on:{"keydown":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.stopPropagation();return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"keydown":function(${baseEvArgs}){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;$event.stopPropagation();return onInput.apply(null, arguments)}}})}`
     )
   })
 
   it('generate events with mouse event modifiers', () => {
     assertCodegen(
       '<input @click.ctrl="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;return onClick.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"click":function(${baseEvArgs}){if(!$event.ctrlKey)return null;return onClick.apply(null, arguments)}}})}`
     )
     assertCodegen(
       '<input @click.shift="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.shiftKey)return null;return onClick.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"click":function(${baseEvArgs}){if(!$event.shiftKey)return null;return onClick.apply(null, arguments)}}})}`
     )
     assertCodegen(
       '<input @click.alt="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.altKey)return null;return onClick.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"click":function(${baseEvArgs}){if(!$event.altKey)return null;return onClick.apply(null, arguments)}}})}`
     )
     assertCodegen(
       '<input @click.meta="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.metaKey)return null;return onClick.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"click":function(${baseEvArgs}){if(!$event.metaKey)return null;return onClick.apply(null, arguments)}}})}`
     )
     assertCodegen(
       '<input @click.exact="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if($event.ctrlKey||$event.shiftKey||$event.altKey||$event.metaKey)return null;return onClick.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"click":function(${baseEvArgs}){if($event.ctrlKey||$event.shiftKey||$event.altKey||$event.metaKey)return null;return onClick.apply(null, arguments)}}})}`
     )
     assertCodegen(
       '<input @click.ctrl.exact="onClick">',
-      `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;if($event.shiftKey||$event.altKey||$event.metaKey)return null;return onClick.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"click":function(${baseEvArgs}){if(!$event.ctrlKey)return null;if($event.shiftKey||$event.altKey||$event.metaKey)return null;return onClick.apply(null, arguments)}}})}`
     )
   })
 
   it('generate events with multiple modifiers', () => {
     assertCodegen(
       '<input @input.stop.prevent.self="onInput">',
-      `with(this){return _c('input',{on:{"input":function($event){$event.stopPropagation();$event.preventDefault();if($event.target !== $event.currentTarget)return null;return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){$event.stopPropagation();$event.preventDefault();if($event.target !== $event.currentTarget)return null;return onInput.apply(null, arguments)}}})}`
     )
   })
 
   it('generate events with capture modifier', () => {
     assertCodegen(
       '<input @input.capture="onInput">',
-      `with(this){return _c('input',{on:{"!input":function($event){return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"!input":function(${baseEvArgs}){return onInput.apply(null, arguments)}}})}`
     )
   })
 
   it('generate events with once modifier', () => {
     assertCodegen(
       '<input @input.once="onInput">',
-      `with(this){return _c('input',{on:{"~input":function($event){return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"~input":function(${baseEvArgs}){return onInput.apply(null, arguments)}}})}`
     )
   })
 
   it('generate events with capture and once modifier', () => {
     assertCodegen(
       '<input @input.capture.once="onInput">',
-      `with(this){return _c('input',{on:{"~!input":function($event){return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"~!input":function(${baseEvArgs}){return onInput.apply(null, arguments)}}})}`
     )
   })
 
   it('generate events with once and capture modifier', () => {
     assertCodegen(
       '<input @input.once.capture="onInput">',
-      `with(this){return _c('input',{on:{"~!input":function($event){return onInput.apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"~!input":function(${baseEvArgs}){return onInput.apply(null, arguments)}}})}`
     )
   })
 
   it('generate events with inline statement', () => {
     assertCodegen(
       '<input @input="current++">',
-      `with(this){return _c('input',{on:{"input":function($event){current++}}})}`
+      `with(this){return _c('input',{on:{"input":function(${baseEvArgs}){current++}}})}`
     )
   })
 
@@ -538,7 +539,7 @@ describe('codegen', () => {
     // with modifiers
     assertCodegen(
       `<input @keyup.enter="e=>current++">`,
-      `with(this){return _c('input',{on:{"keyup":function($event){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return (e=>current++).apply(null, arguments)}}})}`
+      `with(this){return _c('input',{on:{"keyup":function(${baseEvArgs}){if(!$event.type.indexOf('key')&&_k($event.keyCode,"enter",13,$event.key,"Enter"))return null;return (e=>current++).apply(null, arguments)}}})}`
     )
   })
 
@@ -563,7 +564,7 @@ describe('codegen', () => {
   it('generate multiple event handlers', () => {
     assertCodegen(
       '<input @input="current++" @input.stop="onInput">',
-      `with(this){return _c('input',{on:{"input":[function($event){current++},function($event){$event.stopPropagation();return onInput.apply(null, arguments)}]}})}`
+      `with(this){return _c('input',{on:{"input":[function(${baseEvArgs}){current++},function(${baseEvArgs}){$event.stopPropagation();return onInput.apply(null, arguments)}]}})}`
     )
   })
 
