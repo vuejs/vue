@@ -61,7 +61,7 @@ function normalizeScopedSlot(normalSlots, key, fn) {
     res = res && typeof res === 'object' && !Array.isArray(res)
       ? [res] // single vnode
       : normalizeChildren(res)
-    let vnode: VNode = res && res[0]
+    let vnode: VNode = res && res.length === 1 && res[0]
     return res && (
       !vnode ||
       (vnode.isComment && !isAsyncPlaceholder(vnode)) // #9658, #10391
