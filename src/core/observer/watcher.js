@@ -184,8 +184,7 @@ export default class Watcher {
         // Deep watchers and watchers on Object/Arrays should fire even
         // when the value is the same, because the value may
         // have mutated.
-        isObject(value) ||
-        this.deep
+        (isObject(value) && this.deep)
       ) {
         // set new value
         const oldValue = this.value
