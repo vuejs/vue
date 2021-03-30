@@ -128,7 +128,7 @@ function assertProp (
     }
   }
 
-  const haveExpectedTypes = expectedTypes.filter(t => t).length;
+  const haveExpectedTypes = expectedTypes.some(t => t)
   if (!valid && haveExpectedTypes) {
     warn(
       getInvalidTypeMessage(name, value, expectedTypes),
