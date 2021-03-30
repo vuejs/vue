@@ -147,7 +147,7 @@ function assertProp (
   }
 }
 
-const simpleCheckRE = /^(String|Number|Boolean|Function|Symbol)$/
+const simpleCheckRE = /^(String|Number|Boolean|Function|Symbol|BigInt)$/
 
 function assertType (value: any, type: Function, vm: ?Component): {
   valid: boolean;
