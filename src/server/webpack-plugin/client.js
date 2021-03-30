@@ -22,9 +22,9 @@ export default class VueSSRClientPlugin {
         .reduce((assets, all) => all.concat(assets), [])
         .map(file => {
           if (isObject(file) && file.name) {
-            return file.name;
+            return file.name
           } else {
-            return file;
+            return file
           }
         })
         .filter((file) => isJS(file) || isCSS(file)))

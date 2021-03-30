@@ -24,9 +24,9 @@ export default class VueSSRServerPlugin {
       const entryAssets = entryInfo.assets
         .map(file => {
           if ( isObject(file) && file.name) {
-            return file.name;
+            return file.name
           } else {
-            return file;
+            return file
           }
         }).filter(isJS)
 
@@ -54,7 +54,7 @@ export default class VueSSRServerPlugin {
         if (isJS(asset.name)) {
           bundle.files[asset.name] = compilation.assets[asset.name].source()
           if (asset.info && asset.info.related && asset.info.related.sourceMap) {
-            bundle.maps[asset.info.related.sourceMap.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.info.related.sourceMap].source());
+            bundle.maps[asset.info.related.sourceMap.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.info.related.sourceMap].source())
           }
         } else if (asset.name.match(/\.js\.map$/)) {
           bundle.maps[asset.name.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.name].source())
