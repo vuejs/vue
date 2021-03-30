@@ -426,4 +426,17 @@ describe('Component', () => {
       vm.$destroy()
     }).then(done)
   })
+
+  it('render vnode with <script> tag as root element', () => {
+    const vm = new Vue({
+      template: '<scriptTest></scriptTest>',
+      components: {
+        scriptTest: {
+          template: '<script>console.log(1)</script>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.nodeName).toBe('#comment')
+    expect('Templates should only be responsible for mapping the state').toHaveBeenWarned()
+  })
 })

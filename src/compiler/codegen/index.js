@@ -45,7 +45,8 @@ export function generate (
   options: CompilerOptions
 ): CodegenResult {
   const state = new CodegenState(options)
-  const code = ast ? genElement(ast, state) : '_c("div")'
+  // fix #11483, Root level <script> tags should not be rendered.
+  const code = ast ? (ast.tag === 'script' ? 'null' : genElement(ast, state)) : '_c("div")'
   return {
     render: `with(this){return ${code}}`,
     staticRenderFns: state.staticRenderFns
