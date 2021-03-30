@@ -38,7 +38,7 @@ const modifierRE = /\.[^.\]]+(?=[^\]]*$)/g
 const slotRE = /^v-slot(:|$)|^#/
 
 const lineBreakRE = /[\r\n]/
-const whitespaceRE = /\s+/g
+const whitespaceRE = /[ \f\t\r\n]+/g
 
 const invalidAttributeRE = /[\s"'<>\/=]/
 

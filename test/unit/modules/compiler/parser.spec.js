@@ -865,6 +865,14 @@ describe('parser', () => {
     expect(ast.children[4].children[0].text).toBe('. Have fun! ')
   })
 
+  it(`maintains &nbsp; with whitespace: 'condense'`, () => {
+    const options = extend({}, condenseOptions)
+    const ast = parse('<span>&nbsp;</span>', options)
+    const code = ast.children[0]
+    expect(code.type).toBe(3)
+    expect(code.text).toBe('\xA0')
+  })
+
   it(`preserve whitespace in <pre> tag with whitespace: 'condense'`, function () {
     const options = extend({}, condenseOptions)
     const ast = parse('<pre><code>  \n<span>hi</span>\n  </code><span> </span></pre>', options)
