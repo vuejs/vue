@@ -403,92 +403,93 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <h2 align="center">Generous Backers via Patreon ($50+)</h2>
 
 <!--50 start-->
-- Wasim Khamlichi
-- errorrik 
+- Yoshitaka M
+- Peter Imburg
 - Sean Ferguson
 - Johnny Ray Austin
-- Peter Imburg
+- errorrik 
+- Wasim Khamlichi
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
 
 <!--10 start-->
-- Masahiro Tanaka
+- Sara McVey
+- Роман Латкин
+- Alex Riviere
+- Thomas Sittig
+- WhereJuly
+- Fontis 
+- Jack 
+- Nick Carr
+- Artur Bańka
+- Traversy Media
+- Pierre Baron
+- Donghai Gai
+- Aleksander Figiel
+- Faizal Andyka
+- wickedwei 
+- Sunny Yuen
+- Jules 
+- Zeth Odderskov
+- Santi Sanchez Canals
+- Thomas Wiedemann
+- Nobuhide Esaki
+- Roy Segall
+- Allan McKernan
+- 琚致远 
+- Diana Bergholz
+- Riki Fridrich
+- Alfonso Herrera
+- Bichinger Software & Consulting
+- username
+- Pierre Lebrun
+- Peter Matkovsky
+- 龙腾道 
+- Nick Dandakis
+- Yusuke Kawabata
 - Shawn Wildermuth
-- Keisuke Kita
-- Benjamin Listwon
-- Lars Andreas Ness
-- Kirk Lewis
-- Wen-Tien Chang
-- Stephen Michael Hartley
-- Victor Tolbert
-- username 
-- Luiz 
-- James J. Ye
-- Barbara Liau
-- Asaf Yishai
-- Matsumoto Takamasa
-- Guy Gavergun
-- Matt Jones
-- Niannian Modisette
-- Bernhard E. Reiter
-- Zoran Knezevic
-- Jon Hobbs-Smith
-- Pierre Vanhulst
-- Haim Yulzari
-- Anthony Estebe
-- Jim Raden
-- IMGNRY 
-- Guilherme S L de Souza
-- Tyler 
-- Jordan Oroshiba
-- Joe Gregory
-- Marcos Moura
-- Eric 
-- Jere Sjöroos
-- Wakana Seki
-- Donald Fischer
-- David Ang
-- Oskar Lindgren
-- Jaeyoung Lee
-- David Kaplan
-- Philip John Basile
-- Matt Sencenbaugh
+- Andrew Willis
+- Elon Hung
 - Chris Calo
 - Juan Bermudez
 - Hannes Kochniß
 - Daniel Mattingley
-- Elon Hung
-- Andrew Willis
-- Yusuke Kawabata
-- 龙腾道 
-- Peter Matkovsky
-- Nick Dandakis
-- Pierre Lebrun
-- Ryan Brewer
-- Bichinger Software & Consulting
-- Alfonso Herrera
-- Afif Sohaili
-- Riki Fridrich
-- Diana Bergholz
-- 琚致远 
-- Parham Saidi
-- Allan McKernan
-- Roy Segall
-- Abhay 
-- Nobuhide Esaki
-- Thomas Wiedemann
-- Santi Sanchez Canals
-- lucien144 
-- Evgeny Zislis
-- Zeth Odderskov
-- Kirill Tyurin
-- Jules 
-- Sunny Yuen
-- wickedwei 
-- Dennis Zanetti
-- Faizal Andyka
-- Aleksander Figiel
+- Matt Sencenbaugh
+- Jaeyoung Lee
+- David Kaplan
+- David Ang
+- Wakana Seki
+- Jere Sjöroos
+- Donald Fischer
+- Eric 
+- Marcos Moura
+- tyler madsen
+- Joe Gregory
+- Masahiro Tanaka
+- Guilherme S L de Souza
+- Tyler 
+- IMGNRY 
+- Jim Raden
+- Haim Yulzari
+- Anthony Estebe
+- Asaf Yishai
+- Jon Hobbs-Smith
+- Pierre Vanhulst
+- Zoran Knezevic
+- Luiz 
+- Bernhard E. Reiter
+- Guy Gavergun
+- Matt Jones
+- Niannian Modisette
+- Matsumoto Takamasa
+- Barbara Liau
+- Wen-Tien Chang
+- Stephen Michael Hartley
+- Victor Tolbert
+- Lars Andreas Ness
+- Benjamin Listwon
+- Keisuke Kita
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
