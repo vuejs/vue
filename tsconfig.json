@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "sourceMap": false,
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "noUnusedLocals": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "removeComments": false,
+    "jsx": "preserve",
+    "lib": ["esnext", "dom"],
+    "types": ["jest", "puppeteer", "node"],
+    "rootDir": ".",
+    "paths": {
+      "compiler/*": ["src/compiler/*"],
+      "core/*": ["src/core/*"],
+      "platforms/*": ["src/platforms/*"],
+      "server/*": ["src/server/*"],
+      "sfc/*": ["src/sfc/*"],
+      "shared/*": ["src/shared/*"],
+
+      "web/*": ["src/platforms/web/*"],
+      "weex/*": ["src/platforms/weex/*"]
+    }
+  },
+  "include": [
+    "typescript",
+    "src",
+    // "packages/runtime-dom/types/jsx.d.ts",
+    // "packages/*/__tests__",
+    "test-dts"
+  ],
+
+  "exclude": ["flow"]
+}
