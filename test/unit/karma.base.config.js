@@ -4,17 +4,23 @@ const webpack = require('webpack')
 
 const webpackConfig = {
   mode: 'development',
-  resolve: {
-    alias: alias
-  },
   module: {
     rules: [
       {
         test: /\.js$/,
         loader: 'babel-loader',
         exclude: /node_modules/
-      }
+      },
+      {
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        loader: 'ts-loader',
+      },
     ]
+  },
+  resolve: {
+    alias: alias,
+    extensions: ['.tsx', '.ts', '.js'],
   },
   plugins: [
     new webpack.DefinePlugin({

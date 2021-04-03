@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "dist",
-    "sourceMap": false,
+    "sourceMap": true,
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
@@ -17,18 +17,19 @@
     "removeComments": false,
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
-    "types": ["node"],
+    "types": ["node", "jasmine"],
     "rootDir": ".",
     "paths": {
       "compiler/*": ["src/compiler/*"],
       "core/*": ["src/core/*"],
-      "platforms/*": ["src/platforms/*"],
       "server/*": ["src/server/*"],
       "sfc/*": ["src/sfc/*"],
       "shared/*": ["src/shared/*"],
 
       "web/*": ["src/platforms/web/*"],
-      "weex/*": ["src/platforms/weex/*"]
+      "weex/*": ["src/platforms/weex/*"],
+
+      "vue": ["src/platforms/web/entry-runtime-with-compiler"]
     }
   },
   "include": [
@@ -37,8 +38,8 @@
     // "packages/*/__tests__",
     "test-dts",
 
-
     "typescript",
+    "test"
     // "src/global.d.ts"
   ],
 
