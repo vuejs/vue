@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@vue/composition-api": ["../dist"]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": true,
+    "baseUrl": ".",
+    "paths": {
+      "@vue/composition-api": ["../src"]
+    }
+  },
+  "exclude": ["../test"],
+  "include": ["../src", "./*.ts"]
+}
