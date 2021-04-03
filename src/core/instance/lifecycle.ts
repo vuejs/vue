@@ -17,8 +17,8 @@ import {
   validateProp,
   invokeWithErrorHandling,
 } from '../util/index'
-import { Component } from 'typescript/component'
-import { MountedComponentVNode } from 'typescript/vnode'
+import type { Component } from 'typescript/component'
+import type { MountedComponentVNode } from 'typescript/vnode'
 
 export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false

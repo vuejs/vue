@@ -27,7 +27,7 @@ import {
   isServerRendering,
   isReservedAttribute,
 } from '../util/index'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 
 const sharedPropertyDefinition = {
   enumerable: true,

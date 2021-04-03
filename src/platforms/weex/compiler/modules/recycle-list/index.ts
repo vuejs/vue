@@ -9,7 +9,7 @@ import { preTransformVIf } from './v-if'
 import { preTransformVFor } from './v-for'
 import { postTransformVOn } from './v-on'
 import { preTransformVOnce } from './v-once'
-import { WeexCompilerOptions } from 'typescript/weex'
+import type { WeexCompilerOptions } from 'typescript/weex'
 
 let currentRecycleList: null | ASTElement = null
 

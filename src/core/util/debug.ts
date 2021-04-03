@@ -2,7 +2,7 @@
 
 import config from '../config'
 import { noop } from 'shared/util'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 
 export let warn = noop
 export let tip = noop

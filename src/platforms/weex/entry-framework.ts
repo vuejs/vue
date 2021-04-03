@@ -1,7 +1,7 @@
 /* @flow */
 
 import { GlobalAPI } from 'typescript/global-api'
-import {
+import type {
   Weex,
   WeexInstanceContext,
   WeexInstanceOption,

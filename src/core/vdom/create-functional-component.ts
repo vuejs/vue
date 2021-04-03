@@ -16,8 +16,8 @@ import {
   emptyObject,
   validateProp,
 } from '../util/index'
-import { Component } from 'typescript/component'
-import { VNodeData } from 'typescript/vnode'
+import type { Component } from 'typescript/component'
+import type { VNodeData } from 'typescript/vnode'
 
 export function FunctionalRenderContext(
   data: VNodeData,

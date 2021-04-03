@@ -10,7 +10,7 @@ import {
   camelize,
   hyphenate,
 } from 'core/util/index'
-import { VNodeData } from 'typescript/vnode'
+import type { VNodeData } from 'typescript/vnode'
 
 /**
  * Runtime helper for merging v-bind="object" into a VNode's data.

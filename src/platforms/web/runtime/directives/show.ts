@@ -1,7 +1,7 @@
 /* @flow */
 
 import VNode from 'core/vdom/vnode'
-import { VNodeDirective, VNodeWithData } from 'typescript/vnode'
+import type { VNodeDirective, VNodeWithData } from 'typescript/vnode'
 import { enter, leave } from '../modules/transition'
 
 // recursively search for possible transition defined inside the component root

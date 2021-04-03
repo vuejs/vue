@@ -25,13 +25,13 @@ import {
   isRecyclableComponent,
   renderRecyclableComponentTemplate,
 } from 'weex/runtime/recycle-list/render-component-template'
-import {
+import type {
   MountedComponentVNode,
   VNodeData,
   VNodeWithData,
 } from 'typescript/vnode'
-import { Component } from 'typescript/component'
-import { InternalComponentOptions } from 'typescript/options'
+import type { Component } from 'typescript/component'
+import type { InternalComponentOptions } from 'typescript/options'
 
 // inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {

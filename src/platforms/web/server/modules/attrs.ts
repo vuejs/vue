@@ -12,7 +12,7 @@ import {
 } from 'web/util/attrs'
 
 import { isSSRUnsafeAttr } from 'web/server/util'
-import { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'typescript/vnode'
 
 export default function renderAttrs(node: VNodeWithData): string {
   let attrs = node.data.attrs

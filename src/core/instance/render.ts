@@ -15,7 +15,7 @@ import { normalizeScopedSlots } from '../vdom/helpers/normalize-scoped-slots'
 import VNode, { createEmptyVNode } from '../vdom/vnode'
 
 import { isUpdatingChildComponent } from './lifecycle'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 
 export function initRender(vm: Component) {
   vm._vnode = null // the root of the child tree

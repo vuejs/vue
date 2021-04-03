@@ -15,8 +15,8 @@ import {
   createComponentInstanceForVnode,
 } from 'core/vdom/create-component'
 import VNode from 'core/vdom/vnode'
-import { VNodeDirective } from 'typescript/vnode'
-import { Component } from 'typescript/component'
+import type { VNodeDirective } from 'typescript/vnode'
+import type { Component } from 'typescript/component'
 
 let warned = Object.create(null)
 const warnOnce = (msg) => {

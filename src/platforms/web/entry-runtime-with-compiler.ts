@@ -1,5 +1,4 @@
 /* @flow */
-
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { mark, measure } from 'core/util/perf'
@@ -11,7 +10,8 @@ import {
   shouldDecodeNewlines,
   shouldDecodeNewlinesForHref,
 } from './util/compat'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
+import type { GlobalAPI } from 'typescript/global-api'
 
 const idToTemplate = cached((id) => {
   const el = query(id)
@@ -108,4 +108,4 @@ function getOuterHTML(el: Element): string {
 
 Vue.compile = compileToFunctions
 
-export default Vue
+export default Vue as GlobalAPI

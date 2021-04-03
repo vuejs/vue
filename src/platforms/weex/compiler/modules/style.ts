@@ -14,7 +14,7 @@ const normalize = cached(camelize)
 function transformNode(el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticStyle = getAndRemoveAttr(el, 'style')
-  const { dynamic, styleResult } = parseStaticStyle(staticStyle, options)
+  const { dynamic, styleResult } = parseStaticStyle(staticStyle!, options)
   if (process.env.NODE_ENV !== 'production' && dynamic) {
     warn(
       `style="${String(staticStyle)}": ` +

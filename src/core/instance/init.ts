@@ -9,8 +9,8 @@ import { mark, measure } from '../util/perf'
 import { initLifecycle, callHook } from './lifecycle'
 import { initProvide, initInjections } from './inject'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
-import { Component } from 'typescript/component'
-import { InternalComponentOptions } from 'typescript/options'
+import type { Component } from 'typescript/component'
+import type { InternalComponentOptions } from 'typescript/options'
 
 let uid = 0
 

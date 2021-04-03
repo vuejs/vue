@@ -5,7 +5,7 @@ import config from '../config'
 import { callHook, activateChildComponent } from '../instance/lifecycle'
 
 import { warn, nextTick, devtools, inBrowser, isIE } from '../util/index'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 
 export const MAX_UPDATE_COUNT = 100
 

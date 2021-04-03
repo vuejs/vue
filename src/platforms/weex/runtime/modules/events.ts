@@ -1,7 +1,7 @@
 /* @flow */
 
 import { updateListeners } from 'core/vdom/helpers/update-listeners'
-import { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'typescript/vnode'
 
 let target: any
 

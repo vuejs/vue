@@ -1,7 +1,7 @@
 /* @flow */
 
 import { ASSET_TYPES } from 'shared/constants'
-import { GlobalAPI } from 'typescript/global-api'
+import type { GlobalAPI } from 'typescript/global-api'
 import { isPlainObject, validateComponentName } from '../util/index'
 
 export function initAssetRegisters(Vue: GlobalAPI) {

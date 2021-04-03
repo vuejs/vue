@@ -3,7 +3,7 @@
 import { no, noop, identity } from 'shared/util'
 
 import { LIFECYCLE_HOOKS } from 'shared/constants'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 
 export type Config = {
   // user

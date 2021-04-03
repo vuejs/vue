@@ -15,7 +15,7 @@ import { queueWatcher } from './scheduler'
 import Dep, { pushTarget, popTarget } from './dep'
 
 import type { SimpleSet } from '../util/index'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 
 let uid = 0
 

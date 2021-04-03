@@ -3,8 +3,8 @@
 import { emptyNode } from 'core/vdom/patch'
 import { resolveAsset, handleError } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
-import { VNodeDirective, VNodeWithData } from 'typescript/vnode'
-import { Component } from 'typescript/component'
+import type { VNodeDirective, VNodeWithData } from 'typescript/vnode'
+import type { Component } from 'typescript/component'
 
 export default {
   create: updateDirectives,

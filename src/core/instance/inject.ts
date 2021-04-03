@@ -3,7 +3,7 @@
 import { hasOwn } from 'shared/util'
 import { warn, hasSymbol } from '../util/index'
 import { defineReactive, toggleObserving } from '../observer/index'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 
 export function initProvide(vm: Component) {
   const provide = vm.$options.provide

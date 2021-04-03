@@ -1,7 +1,7 @@
 /* @flow */
 
 import { isDef, isUndef, extend, toNumber } from 'shared/util'
-import { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'typescript/vnode'
 import { isSVG } from 'web/util/index'
 
 let svgContainer

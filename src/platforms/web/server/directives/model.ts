@@ -1,7 +1,7 @@
 /* @flow */
 
 import { looseEqual, looseIndexOf } from 'shared/util'
-import { VNodeDirective, VNodeWithData } from 'typescript/vnode'
+import type { VNodeDirective, VNodeWithData } from 'typescript/vnode'
 
 // this is only applied for <select v-model> because it is the only edge case
 // that must be done at runtime instead of compile time.

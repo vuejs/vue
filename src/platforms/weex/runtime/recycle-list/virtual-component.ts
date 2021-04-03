@@ -15,9 +15,9 @@ import {
   resolveConstructorOptions,
 } from 'core/instance/init'
 import { registerComponentHook, updateComponentData } from '../../util/index'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 import VNode from 'core/vdom/vnode'
-import { MountedComponentVNode } from 'typescript/vnode'
+import type { MountedComponentVNode } from 'typescript/vnode'
 
 let uid = 0
 

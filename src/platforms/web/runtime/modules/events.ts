@@ -8,7 +8,7 @@ import {
   CHECKBOX_RADIO_TOKEN,
 } from 'web/compiler/directives/model'
 import { currentFlushTimestamp } from 'core/observer/scheduler'
-import { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'typescript/vnode'
 
 // normalize v-model event tokens that can only be determined at runtime.
 // it's important to place the event as the first in the array because

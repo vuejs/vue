@@ -1,7 +1,7 @@
 /* @flow */
 declare var document: WeexDocument
 
-import { WeexDocument, WeexElement } from 'typescript/weex'
+import type { WeexDocument, WeexElement } from 'typescript/weex'
 import TextNode from 'weex/runtime/text-node'
 
 export const namespaceMap = {}

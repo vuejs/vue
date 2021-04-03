@@ -11,7 +11,7 @@ import {
   getFirstComponentChild,
 } from 'core/vdom/helpers/index'
 import VNode from 'core/vdom/vnode'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 
 export const transitionProps = {
   name: String,

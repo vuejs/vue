@@ -9,7 +9,7 @@ import {
   isUndef,
   hyphenate,
 } from 'shared/util'
-import { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'typescript/vnode'
 
 const cssVarRE = /^--/
 const importantRE = /\s*!important$/

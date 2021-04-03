@@ -5,7 +5,7 @@ import { renderMixin } from './render'
 import { eventsMixin } from './events'
 import { lifecycleMixin } from './lifecycle'
 import { warn } from '../util/index'
-import { GlobalAPI } from 'typescript/global-api'
+import type { GlobalAPI } from 'typescript/global-api'
 
 function Vue(options) {
   if (process.env.NODE_ENV !== 'production' && !(this instanceof Vue)) {

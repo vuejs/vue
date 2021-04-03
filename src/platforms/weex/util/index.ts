@@ -2,7 +2,7 @@
 declare var document: WeexDocument
 
 import { warn } from 'core/util/index'
-import { WeexDocument } from 'typescript/weex'
+import type { WeexDocument } from 'typescript/weex'
 
 export const RECYCLE_LIST_MARKER = '@inRecycleList'
 

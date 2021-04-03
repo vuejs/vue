@@ -1,7 +1,7 @@
 /* @flow */
 
 import { extend } from 'shared/util'
-import { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'typescript/vnode'
 
 function updateAttrs(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.attrs && !vnode.data.attrs) {

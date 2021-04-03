@@ -1,7 +1,7 @@
 /* @flow */
 
 import { isDef, isUndef } from 'shared/util'
-import { VNodeData } from 'typescript/vnode'
+import type { VNodeData } from 'typescript/vnode'
 
 import { concat, stringifyClass, genClassForVnode } from 'web/util/index'
 

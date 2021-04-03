@@ -1,6 +1,6 @@
-import { Component } from 'typescript/component'
-import { ComponentOptions } from 'typescript/options'
-import { VNodeComponentOptions, VNodeData } from 'typescript/vnode'
+import type { Component } from 'typescript/component'
+import type { ComponentOptions } from 'typescript/options'
+import type { VNodeComponentOptions, VNodeData } from 'typescript/vnode'
 
 export default class VNode {
   tag: string | void

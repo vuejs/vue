@@ -1,8 +1,8 @@
 /* @flow */
 
 import { ASSET_TYPES } from 'shared/constants'
-import { Component } from 'typescript/component'
-import { GlobalAPI } from 'typescript/global-api'
+import type { Component } from 'typescript/component'
+import type { GlobalAPI } from 'typescript/global-api'
 import { defineComputed, proxy } from '../instance/state'
 import { extend, mergeOptions, validateComponentName } from '../util/index'
 

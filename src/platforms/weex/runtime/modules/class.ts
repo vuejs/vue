@@ -1,8 +1,8 @@
 /* @flow */
 
 import { extend, isObject } from 'shared/util'
-import { Component } from 'typescript/component'
-import { VNodeData, VNodeWithData } from 'typescript/vnode'
+import type { Component } from 'typescript/component'
+import type { VNodeData, VNodeWithData } from 'typescript/vnode'
 
 function updateClass(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const el = vnode.elm

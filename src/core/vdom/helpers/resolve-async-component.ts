@@ -14,8 +14,8 @@ import {
 
 import VNode, { createEmptyVNode } from 'core/vdom/vnode'
 import { currentRenderingInstance } from 'core/instance/render'
-import { VNodeData } from 'typescript/vnode'
-import { Component } from 'typescript/component'
+import type { VNodeData } from 'typescript/vnode'
+import type { Component } from 'typescript/component'
 
 function ensureCtor(comp: any, base) {
   if (comp.__esModule || (hasSymbol && comp[Symbol.toStringTag] === 'Module')) {

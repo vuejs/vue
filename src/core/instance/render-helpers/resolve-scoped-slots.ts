@@ -1,4 +1,4 @@
-import { ScopedSlotsData } from 'typescript/vnode'
+import type { ScopedSlotsData } from 'typescript/vnode'
 
 export function resolveScopedSlots(
   fns: ScopedSlotsData,

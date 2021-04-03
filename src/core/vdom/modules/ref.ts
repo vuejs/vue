@@ -1,7 +1,7 @@
 /* @flow */
 
 import { remove, isDef } from 'shared/util'
-import { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'typescript/vnode'
 
 export default {
   create(_: any, vnode: VNodeWithData) {

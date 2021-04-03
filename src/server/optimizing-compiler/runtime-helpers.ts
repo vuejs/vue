@@ -13,7 +13,7 @@ import {
 } from 'core/vdom/helpers/normalize-children'
 
 import { propsToAttrMap, isRenderableAttr } from 'web/server/util'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 
 const ssrHelpers = {
   _ssrEscape: escape,

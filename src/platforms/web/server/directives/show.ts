@@ -1,6 +1,6 @@
 /* @flow */
 
-import { VNodeDirective, VNodeWithData } from 'typescript/vnode'
+import type { VNodeDirective, VNodeWithData } from 'typescript/vnode'
 
 export default function show(node: VNodeWithData, dir: VNodeDirective) {
   if (!dir.value) {

@@ -16,7 +16,7 @@ import {
 import { patch } from './patch'
 import platformDirectives from './directives/index'
 import platformComponents from './components/index'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 
 // install platform specific utils
 Vue.config.mustUseProp = mustUseProp

@@ -3,7 +3,7 @@
 import { isRegExp, remove } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 import VNode from 'core/vdom/vnode'
-import { VNodeComponentOptions, VNodeData } from 'typescript/vnode'
+import type { VNodeComponentOptions, VNodeData } from 'typescript/vnode'
 
 type VNodeCache = { [key: string]: VNode | null }
 

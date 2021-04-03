@@ -3,7 +3,7 @@
 import { noop, extend } from 'shared/util'
 import { warn as baseWarn, tip } from 'core/util/debug'
 import { generateCodeFrame } from './codeframe'
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 
 type CompiledFunctionResult = {
   render: Function

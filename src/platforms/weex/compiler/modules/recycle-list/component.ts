@@ -1,7 +1,7 @@
 /* @flow */
 
 import { addAttr } from 'compiler/helpers'
-import { WeexCompilerOptions } from 'typescript/weex'
+import type { WeexCompilerOptions } from 'typescript/weex'
 import { RECYCLE_LIST_MARKER } from 'weex/util/index'
 
 // mark components as inside recycle-list so that we know we need to invoke

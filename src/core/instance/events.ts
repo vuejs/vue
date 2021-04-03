@@ -1,6 +1,6 @@
 /* @flow */
 
-import { Component } from 'typescript/component'
+import type { Component } from 'typescript/component'
 import {
   tip,
   toArray,

@@ -5,7 +5,7 @@ import { handleError } from 'core/util/error'
 import { RECYCLE_LIST_MARKER } from 'weex/util/index'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 import { resolveVirtualComponent } from './virtual-component'
-import { MountedComponentVNode, VNodeWithData } from 'typescript/vnode'
+import type { MountedComponentVNode, VNodeWithData } from 'typescript/vnode'
 import VNode from 'core/vdom/vnode'
 
 export function isRecyclableComponent(vnode: VNodeWithData | VNode): boolean {

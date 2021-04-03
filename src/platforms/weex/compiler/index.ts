@@ -13,7 +13,7 @@ import {
   canBeLeftOpenTag,
   getTagNamespace,
 } from '../util/element'
-import { WeexCompiledResult, WeexCompilerOptions } from 'typescript/weex'
+import type { WeexCompiledResult, WeexCompilerOptions } from 'typescript/weex'
 
 export const baseOptions: WeexCompilerOptions = {
   modules,

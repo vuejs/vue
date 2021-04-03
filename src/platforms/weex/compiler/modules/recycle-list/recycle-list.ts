@@ -2,7 +2,7 @@
 
 import { parseFor } from 'compiler/parser/index'
 import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
-import { WeexCompilerOptions } from 'typescript/weex'
+import type { WeexCompilerOptions } from 'typescript/weex'
 
 /**
  * Map the following syntax to corresponding attrs:

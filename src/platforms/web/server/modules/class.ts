@@ -2,7 +2,7 @@
 
 import { escape } from '../util'
 import { genClassForVnode } from 'web/util/index'
-import { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'typescript/vnode'
 
 export default function renderClass(node: VNodeWithData): string | undefined {
   const classList = genClassForVnode(node)
