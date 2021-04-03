@@ -2,6 +2,7 @@ import { Config } from "../src/core/config";
 import { Component } from "./component";
 
 declare interface GlobalAPI {
+  (options: any): void;
   cid: number;
   options: Record<string, any>;
   config: Config;

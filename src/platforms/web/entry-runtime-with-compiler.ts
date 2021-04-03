@@ -106,7 +106,6 @@ function getOuterHTML(el: Element): string {
   }
 }
 
-// @ts-expect-error
 Vue.compile = compileToFunctions
 
 export default Vue

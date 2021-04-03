@@ -17,7 +17,7 @@
     "removeComments": false,
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
-    "types": ["jest", "puppeteer", "node"],
+    "types": ["node"],
     "rootDir": ".",
     "paths": {
       "compiler/*": ["src/compiler/*"],
@@ -32,11 +32,14 @@
     }
   },
   "include": [
-    "typescript",
     "src",
     // "packages/runtime-dom/types/jsx.d.ts",
     // "packages/*/__tests__",
-    "test-dts"
+    "test-dts",
+
+
+    "typescript",
+    // "src/global.d.ts"
   ],
 
   "exclude": ["flow"]

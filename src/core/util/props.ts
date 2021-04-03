@@ -11,7 +11,6 @@ import {
   isPlainObject,
 } from 'shared/util'
 import { Component } from 'typescript/component'
-import { __WEEX__ } from 'typescript/weex'
 
 type PropOptions = {
   type: Function | Array<Function> | null

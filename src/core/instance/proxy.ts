@@ -41,7 +41,7 @@ if (process.env.NODE_ENV !== 'production') {
       'stop,prevent,self,ctrl,shift,alt,meta,exact'
     )
     config.keyCodes = new Proxy(config.keyCodes, {
-      set(target, key, value) {
+      set(target, key: string, value) {
         if (isBuiltInModifier(key)) {
           warn(
             `Avoid overwriting built-in modifier in config.keyCodes: .${key}`

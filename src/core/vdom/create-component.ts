@@ -31,7 +31,6 @@ import {
   VNodeWithData,
 } from 'typescript/vnode'
 import { Component } from 'typescript/component'
-import { __WEEX__ } from 'typescript/weex'
 import { InternalComponentOptions } from 'typescript/options'
 
 // inline hooks to be invoked on component VNodes during patch

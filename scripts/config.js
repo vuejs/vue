@@ -4,7 +4,8 @@ const alias = require('rollup-plugin-alias')
 const cjs = require('rollup-plugin-commonjs')
 const replace = require('rollup-plugin-replace')
 const node = require('rollup-plugin-node-resolve')
-const flow = require('rollup-plugin-flow-no-whitespace')
+const ts = require('rollup-plugin-typescript2')
+
 const version = process.env.VERSION || require('../package.json').version
 const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
 const featureFlags = require('./feature-flags')
@@ -38,14 +39,14 @@ const resolve = p => {
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
   'web-runtime-cjs-dev': {
-    entry: resolve('web/entry-runtime.js'),
+    entry: resolve('web/entry-runtime.ts'),
     dest: resolve('dist/vue.runtime.common.dev.js'),
     format: 'cjs',
     env: 'development',
     banner
   },
   'web-runtime-cjs-prod': {
-    entry: resolve('web/entry-runtime.js'),
+    entry: resolve('web/entry-runtime.ts'),
     dest: resolve('dist/vue.runtime.common.prod.js'),
     format: 'cjs',
     env: 'production',
@@ -53,7 +54,7 @@ const builds = {
   },
   // Runtime+compiler CommonJS build (CommonJS)
   'web-full-cjs-dev': {
-    entry: resolve('web/entry-runtime-with-compiler.js'),
+    entry: resolve('web/entry-runtime-with-compiler.ts'),
     dest: resolve('dist/vue.common.dev.js'),
     format: 'cjs',
     env: 'development',
@@ -61,7 +62,7 @@ const builds = {
     banner
   },
   'web-full-cjs-prod': {
-    entry: resolve('web/entry-runtime-with-compiler.js'),
+    entry: resolve('web/entry-runtime-with-compiler.ts'),
     dest: resolve('dist/vue.common.prod.js'),
     format: 'cjs',
     env: 'production',
@@ -70,14 +71,14 @@ const builds = {
   },
   // Runtime only ES modules build (for bundlers)
   'web-runtime-esm': {
-    entry: resolve('web/entry-runtime.js'),
+    entry: resolve('web/entry-runtime.ts'),
     dest: resolve('dist/vue.runtime.esm.js'),
     format: 'es',
     banner
   },
   // Runtime+compiler ES modules build (for bundlers)
   'web-full-esm': {
-    entry: resolve('web/entry-runtime-with-compiler.js'),
+    entry: resolve('web/entry-runtime-with-compiler.ts'),
     dest: resolve('dist/vue.esm.js'),
     format: 'es',
     alias: { he: './entity-decoder' },
@@ -85,7 +86,7 @@ const builds = {
   },
   // Runtime+compiler ES modules build (for direct import in browser)
   'web-full-esm-browser-dev': {
-    entry: resolve('web/entry-runtime-with-compiler.js'),
+    entry: resolve('web/entry-runtime-with-compiler.ts'),
     dest: resolve('dist/vue.esm.browser.js'),
     format: 'es',
     transpile: false,
@@ -95,7 +96,7 @@ const builds = {
   },
   // Runtime+compiler ES modules build (for direct import in browser)
   'web-full-esm-browser-prod': {
-    entry: resolve('web/entry-runtime-with-compiler.js'),
+    entry: resolve('web/entry-runtime-with-compiler.ts'),
     dest: resolve('dist/vue.esm.browser.min.js'),
     format: 'es',
     transpile: false,
@@ -105,7 +106,7 @@ const builds = {
   },
   // runtime-only build (Browser)
   'web-runtime-dev': {
-    entry: resolve('web/entry-runtime.js'),
+    entry: resolve('web/entry-runtime.ts'),
     dest: resolve('dist/vue.runtime.js'),
     format: 'umd',
     env: 'development',
@@ -113,7 +114,7 @@ const builds = {
   },
   // runtime-only production build (Browser)
   'web-runtime-prod': {
-    entry: resolve('web/entry-runtime.js'),
+    entry: resolve('web/entry-runtime.ts'),
     dest: resolve('dist/vue.runtime.min.js'),
     format: 'umd',
     env: 'production',
@@ -121,7 +122,7 @@ const builds = {
   },
   // Runtime+compiler development build (Browser)
   'web-full-dev': {
-    entry: resolve('web/entry-runtime-with-compiler.js'),
+    entry: resolve('web/entry-runtime-with-compiler.ts'),
     dest: resolve('dist/vue.js'),
     format: 'umd',
     env: 'development',
@@ -130,7 +131,7 @@ const builds = {
   },
   // Runtime+compiler production build  (Browser)
   'web-full-prod': {
-    entry: resolve('web/entry-runtime-with-compiler.js'),
+    entry: resolve('web/entry-runtime-with-compiler.ts'),
     dest: resolve('dist/vue.min.js'),
     format: 'umd',
     env: 'production',
@@ -139,14 +140,14 @@ const builds = {
   },
   // Web compiler (CommonJS).
   'web-compiler': {
-    entry: resolve('web/entry-compiler.js'),
+    entry: resolve('web/entry-compiler.ts'),
     dest: resolve('packages/vue-template-compiler/build.js'),
     format: 'cjs',
     external: Object.keys(require('../packages/vue-template-compiler/package.json').dependencies)
   },
   // Web compiler (UMD for in-browser use).
   'web-compiler-browser': {
-    entry: resolve('web/entry-compiler.js'),
+    entry: resolve('web/entry-compiler.ts'),
     dest: resolve('packages/vue-template-compiler/browser.js'),
     format: 'umd',
     env: 'development',
@@ -155,21 +156,21 @@ const builds = {
   },
   // Web server renderer (CommonJS).
   'web-server-renderer-dev': {
-    entry: resolve('web/entry-server-renderer.js'),
+    entry: resolve('web/entry-server-renderer.ts'),
     dest: resolve('packages/vue-server-renderer/build.dev.js'),
     format: 'cjs',
     env: 'development',
     external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
   },
   'web-server-renderer-prod': {
-    entry: resolve('web/entry-server-renderer.js'),
+    entry: resolve('web/entry-server-renderer.ts'),
     dest: resolve('packages/vue-server-renderer/build.prod.js'),
     format: 'cjs',
     env: 'production',
     external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
   },
   'web-server-renderer-basic': {
-    entry: resolve('web/entry-server-basic-renderer.js'),
+    entry: resolve('web/entry-server-basic-renderer.ts'),
     dest: resolve('packages/vue-server-renderer/basic.js'),
     format: 'umd',
     env: 'development',
@@ -177,13 +178,13 @@ const builds = {
     plugins: [node(), cjs()]
   },
   'web-server-renderer-webpack-server-plugin': {
-    entry: resolve('server/webpack-plugin/server.js'),
+    entry: resolve('server/webpack-plugin/server.ts'),
     dest: resolve('packages/vue-server-renderer/server-plugin.js'),
     format: 'cjs',
     external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
   },
   'web-server-renderer-webpack-client-plugin': {
-    entry: resolve('server/webpack-plugin/client.js'),
+    entry: resolve('server/webpack-plugin/client.ts'),
     dest: resolve('packages/vue-server-renderer/client-plugin.js'),
     format: 'cjs',
     external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
@@ -191,7 +192,7 @@ const builds = {
   // Weex runtime factory
   'weex-factory': {
     weex: true,
-    entry: resolve('weex/entry-runtime-factory.js'),
+    entry: resolve('weex/entry-runtime-factory.ts'),
     dest: resolve('packages/weex-vue-framework/factory.js'),
     format: 'cjs',
     plugins: [weexFactoryPlugin]
@@ -199,14 +200,14 @@ const builds = {
   // Weex runtime framework (CommonJS).
   'weex-framework': {
     weex: true,
-    entry: resolve('weex/entry-framework.js'),
+    entry: resolve('weex/entry-framework.ts'),
     dest: resolve('packages/weex-vue-framework/index.js'),
     format: 'cjs'
   },
   // Weex compiler (CommonJS). Used by Weex's Webpack loader.
   'weex-compiler': {
     weex: true,
-    entry: resolve('weex/entry-compiler.js'),
+    entry: resolve('weex/entry-compiler.ts'),
     dest: resolve('packages/weex-template-compiler/build.js'),
     format: 'cjs',
     external: Object.keys(require('../packages/weex-template-compiler/package.json').dependencies)
@@ -215,11 +216,25 @@ const builds = {
 
 function genConfig (name) {
   const opts = builds[name]
+
+  // console.log('__dir', __dirname)
   const config = {
     input: opts.entry,
     external: opts.external,
     plugins: [
-      flow(),
+      // flow(),
+      ts({
+        tsconfig: path.resolve(__dirname, '../', 'tsconfig.json'),
+        cacheRoot: path.resolve(__dirname, '../','node_modules/.rts2_cache'),
+        tsconfigOverride: {
+          // compilerOptions: {
+          //   sourceMap: output.sourcemap,
+          //   declaration: shouldEmitDeclarations,
+          //   declarationMap: shouldEmitDeclarations
+          // },
+          exclude: ['tests', 'test-dts']
+        }
+      }),
       alias(Object.assign({}, aliases, opts.alias))
     ].concat(opts.plugins || []),
     output: {

@@ -10,8 +10,8 @@ export const isReservedAttr = makeMap('style,class')
 const acceptValue = makeMap('input,textarea,option,select,progress')
 export const mustUseProp = (
   tag: string,
-  type: string | null,
-  attr: string
+  type?: string | null,
+  attr?: string
 ): boolean => {
   return (
     (attr === 'value' && acceptValue(tag) && type !== 'button') ||

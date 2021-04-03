@@ -7,27 +7,27 @@ import { ScopedSlotsData, VNodeChildren, VNodeData } from "./vnode";
 declare class Component {
   // constructor information
   static cid: number;
-  static options: Object;
+  static options: Record<string, any>;
   // extend
-  static extend: (options: Object) => Function;
-  static superOptions: Object;
-  static extendOptions: Object;
-  static sealedOptions: Object;
+  static extend: (options: Record<string, any>) => Function;
+  static superOptions: Record<string, any>;
+  static extendOptions: Record<string, any>;
+  static sealedOptions: Record<string, any>;
   static super: Component;
   // assets
   static directive: (
     id: string,
-    def?: Function | Object
-  ) => Function | Object | void;
-  static component: (id: string, def?: Component | Object) => Component;
+    def?: Function | Record<string, any>
+  ) => Function | Record<string, any> | void;
+  static component: (id: string, def?: Component | Record<string, any>) => Component;
   static filter: (id: string, def?: Function) => Function | void;
   // functional context constructor
   static FunctionalRenderContext: Function;
 
   // public properties
   $el: any; // so that we can attach __vue__ to it
-  $data: Object;
-  $props: Object;
+  $data: Record<string, any>;
+  $props: Record<string, any>;
   $options: ComponentOptions;
   $parent: Component | undefined;
   $root: Component;
@@ -46,12 +46,12 @@ declare class Component {
   $mount: (el?: Element | string, hydrating?: boolean) => Component;
   $forceUpdate: () => void;
   $destroy: () => void;
-  $set: <T>(target: Object | Array<T>, key: string | number, val: T) => T;
-  $delete: <T>(target: Object | Array<T>, key: string | number) => void;
+  $set: <T>(target: Record<string, any> | Array<T>, key: string | number, val: T) => T;
+  $delete: <T>(target: Record<string, any> | Array<T>, key: string | number) => void;
   $watch: (
     expOrFn: string | Function,
     cb: Function,
-    options?: Object
+    options?: Record<string, any>
   ) => Function;
   $on: (event: string | Array<string>, fn: Function) => Component;
   $once: (event: string, fn: Function) => Component;
@@ -60,7 +60,7 @@ declare class Component {
   $nextTick: (fn: Function) => void | Promise<any>;
   $createElement: (
     tag?: string | Component,
-    data?: Object,
+    data?: Record<string, any>,
     children?: VNodeChildren
   ) => VNode;
 
@@ -74,18 +74,18 @@ declare class Component {
   _watcher: Watcher;
   _watchers: Array<Watcher>;
   _computedWatchers: { [key: string]: Watcher };
-  _data: Object;
-  _props: Object;
+  _data: Record<string, any>;
+  _props: Record<string, any>;
   _events: Record<string, any>;
   _inactive: boolean | null;
   _directInactive: boolean;
   _isMounted: boolean;
   _isDestroyed: boolean;
   _isBeingDestroyed: boolean;
-  _vnode?: VNode; // self root node
-  _staticTrees?: Array<VNode>; // v-once cached trees
+  _vnode?: VNode | null; // self root node
+  _staticTrees?: Array<VNode> | null; // v-once cached trees
   _hasHookEvent: boolean;
-  _provided?: Object;
+  _provided?: Record<string, any>;
   // _virtualComponents?: { [key: string]: Component };
 
   // private methods
@@ -145,7 +145,7 @@ declare class Component {
   _t: (
     name: string,
     fallback?: Array<VNode>,
-    props?: Object
+    props?: Record<string, any>
   ) => Array<VNode> | null;
   // apply v-bind object
   _b: (
@@ -167,7 +167,7 @@ declare class Component {
   // resolve scoped slots
   _u: (
     scopedSlots: ScopedSlotsData,
-    res?: Object
+    res?: Record<string, any>
   ) => { [key: string]: Function };
 
   // SSR specific

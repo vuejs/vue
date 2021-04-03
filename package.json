@@ -132,6 +132,7 @@
     "rollup-plugin-flow-no-whitespace": "^1.0.0",
     "rollup-plugin-node-resolve": "^4.0.0",
     "rollup-plugin-replace": "^2.0.0",
+    "rollup-plugin-typescript2": "^0.30.0",
     "selenium-server": "^2.53.1",
     "serialize-javascript": "^3.1.0",
     "shelljs": "^0.8.1",

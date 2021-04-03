@@ -18,7 +18,6 @@ import {
 import { normalizeChildren, simpleNormalizeChildren } from './helpers/index'
 import { Component } from 'typescript/component'
 import { VNodeData } from 'typescript/vnode'
-import { __WEEX__ } from 'typescript/weex'
 
 const SIMPLE_NORMALIZE = 1
 const ALWAYS_NORMALIZE = 2

@@ -4,6 +4,7 @@ import VNode from 'core/vdom/vnode'
 import { renderAttr } from './attrs'
 import { isDef, isUndef, extend, toString } from 'shared/util'
 import { propsToAttrMap, isRenderableAttr } from '../util'
+import { VNodeWithData } from 'typescript/vnode'
 
 export default function renderDOMProps(node: VNodeWithData): string {
   let props = node.data.domProps

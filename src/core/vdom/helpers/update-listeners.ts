@@ -1,7 +1,6 @@
 import { warn, invokeWithErrorHandling } from 'core/util/index'
 import { cached, isUndef, isTrue, isPlainObject } from 'shared/util'
 import { Component } from 'typescript/component'
-import { __WEEX__ } from 'typescript/weex'
 
 const normalizeEvent = cached((name: string): {
   name: string

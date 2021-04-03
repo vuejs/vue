@@ -2,7 +2,7 @@ import { Component } from "./component";
 import { GlobalAPI } from "./global-api";
 
 // global flag to be compiled away
-declare var __WEEX__: boolean;
+declare const __WEEX__: boolean;
 
 // global object in Weex
 declare var WXEnvironment: WeexEnvironment;

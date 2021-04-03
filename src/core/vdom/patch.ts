@@ -27,7 +27,6 @@ import {
   isRegExp,
   isPrimitive,
 } from '../util/index'
-import { __WEEX__ } from 'typescript/weex'
 
 export const emptyNode = new VNode('', {}, [])
 

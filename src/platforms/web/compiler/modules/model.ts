@@ -66,7 +66,7 @@ function preTransformNode(el: ASTElement, options: CompilerOptions) {
       addRawAttr(branch2, ':type', typeBinding)
       processElement(branch2, options)
       addIfCondition(branch0, {
-        exp: ifCondition,
+        exp: ifCondition!,
         block: branch2,
       })
 

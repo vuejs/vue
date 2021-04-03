@@ -134,7 +134,7 @@ export function defineReactive(
   obj: object,
   key: string,
   val?: any,
-  customSetter?: Function,
+  customSetter?: Function | null,
   shallow?: boolean
 ) {
   const dep = new Dep()

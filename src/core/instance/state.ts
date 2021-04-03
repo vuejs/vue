@@ -27,6 +27,7 @@ import {
   isServerRendering,
   isReservedAttribute,
 } from '../util/index'
+import { Component } from 'typescript/component'
 
 const sharedPropertyDefinition = {
   enumerable: true,
@@ -66,7 +67,7 @@ function initProps(vm: Component, propsOptions: Object) {
   const props = (vm._props = {})
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
-  const keys = (vm.$options._propKeys = [])
+  const keys: string[] = (vm.$options._propKeys = [])
   const isRoot = !vm.$parent
   // root instance props should be converted
   if (!isRoot) {
@@ -112,7 +113,7 @@ function initProps(vm: Component, propsOptions: Object) {
 }
 
 function initData(vm: Component) {
-  let data = vm.$options.data
+  let data: any = vm.$options.data
   data = vm._data = typeof data === 'function' ? getData(data, vm) : data || {}
   if (!isPlainObject(data)) {
     data = {}
@@ -206,7 +207,7 @@ function initComputed(vm: Component, computed: Object) {
 export function defineComputed(
   target: any,
   key: string,
-  userDef: Object | Function
+  userDef: Record<string, any> | Function
 ) {
   const shouldCache = !isServerRendering()
   if (typeof userDef === 'function') {
@@ -313,15 +314,15 @@ function createWatcher(
   return vm.$watch(expOrFn, handler, options)
 }
 
-export function stateMixin(Vue: Class<Component>) {
+export function stateMixin(Vue: Component) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.
-  const dataDef = {}
+  const dataDef:any = {}
   dataDef.get = function () {
     return this._data
   }
-  const propsDef = {}
+  const propsDef: any = {}
   propsDef.get = function () {
     return this._props
   }
@@ -346,7 +347,7 @@ export function stateMixin(Vue: Class<Component>) {
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
-    options?: Object
+    options?: Record<string,any>
   ): Function {
     const vm: Component = this
     if (isPlainObject(cb)) {

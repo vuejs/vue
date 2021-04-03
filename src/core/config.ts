@@ -18,12 +18,12 @@ export type Config = {
   keyCodes: { [key: string]: number | Array<number> }
 
   // platform
-  isReservedTag: (x?: string) => boolean
-  isReservedAttr: (x?: string) => boolean
+  isReservedTag: (x: string) => boolean | undefined
+  isReservedAttr: (x: string) => true | undefined
   parsePlatformTagName: (x: string) => string
-  isUnknownElement: (x?: string) => boolean
-  getTagNamespace: (x?: string) => string | void
-  mustUseProp: (tag: string, type?: string, name?: string) => boolean
+  isUnknownElement: (x: string) => boolean
+  getTagNamespace: (x: string) => string | undefined
+  mustUseProp: (tag: string, type?: string | null, name?: string) => boolean
 
   // private
   async: boolean

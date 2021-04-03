@@ -120,15 +120,13 @@ export function lifecycleMixin(Vue: Component) {
     }
     // remove reference from data ob
     // frozen object may not have observer.
-    //@ts-expect-error internal usage
     if (vm._data.__ob__) {
-      //@ts-expect-error internal usage
       vm._data.__ob__.vmCount--
     }
     // call the last hook...
     vm._isDestroyed = true
     // invoke destroy hooks on current rendered tree
-    vm.__patch__(vm._vnode, null)
+    vm.__patch__(vm._vnode!, null)
     // fire destroyed hook
     callHook(vm, 'destroyed')
     // turn off all instance listeners.
@@ -147,7 +145,7 @@ export function lifecycleMixin(Vue: Component) {
 
 export function mountComponent(
   vm: Component,
-  el: Element | null,
+  el: Element | null | undefined,
   hydrating?: boolean
 ): Component {
   vm.$el = el

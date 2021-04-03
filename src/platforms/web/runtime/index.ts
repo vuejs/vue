@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 import Vue from 'core/index'
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
@@ -18,6 +16,7 @@ import {
 import { patch } from './patch'
 import platformDirectives from './directives/index'
 import platformComponents from './components/index'
+import { Component } from 'typescript/component'
 
 // install platform specific utils
 Vue.config.mustUseProp = mustUseProp
@@ -53,6 +52,7 @@ if (inBrowser) {
         process.env.NODE_ENV !== 'production' &&
         process.env.NODE_ENV !== 'test'
       ) {
+        // @ts-expect-error
         console[console.info ? 'info' : 'log'](
           'Download the Vue Devtools extension for a better development experience:\n' +
             'https://github.com/vuejs/vue-devtools'
@@ -65,6 +65,7 @@ if (inBrowser) {
       config.productionTip !== false &&
       typeof console !== 'undefined'
     ) {
+      // @ts-expect-error
       console[console.info ? 'info' : 'log'](
         `You are running Vue in development mode.\n` +
           `Make sure to turn on production mode when deploying for production.\n` +

@@ -161,9 +161,7 @@ function cloneAndMarkFunctionalResult(
   clone.fnContext = contextVm
   clone.fnOptions = options
   if (process.env.NODE_ENV !== 'production') {
-    ;(clone.devtoolsMeta =
-      // @ts-expect-error
-      clone.devtoolsMeta || {}).renderContext = renderContext
+    ;(clone.devtoolsMeta = clone.devtoolsMeta || {} as any).renderContext = renderContext
   }
   if (data.slot) {
     ;(clone.data || (clone.data = {})).slot = data.slot
