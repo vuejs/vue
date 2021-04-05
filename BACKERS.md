@@ -408,7 +408,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 
 <!--10 start-->
 - Sara McVey
-- Роман Латкин
+- Keisuke Kita
 - Alex Riviere
 - Thomas Sittig
 - WhereJuly
@@ -444,7 +444,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Shawn Wildermuth
 - Andrew Willis
 - Elon Hung
-- Chris Calo
+- Роман Латкин
 - Juan Bermudez
 - Hannes Kochniß
 - Daniel Mattingley
@@ -456,11 +456,9 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Jere Sjöroos
 - Donald Fischer
 - Eric 
-- Marcos Moura
 - tyler madsen
 - Joe Gregory
 - Masahiro Tanaka
-- Guilherme S L de Souza
 - Tyler 
 - IMGNRY 
 - Jim Raden
@@ -482,7 +480,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Victor Tolbert
 - Lars Andreas Ness
 - Benjamin Listwon
-- Keisuke Kita
+- Chris Calo
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
