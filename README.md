@@ -361,6 +361,9 @@ Thank you to all the people who already contributed to Vue!
 
 <a href="https://github.com/vuejs/vue/graphs/contributors"><img src="https://opencollective.com/vuejs/contributors.svg?width=890" /></a>
 
+## Contributor Over Time
+
+![image](https://user-images.githubusercontent.com/2106987/113529769-ee73ec00-95f6-11eb-86bc-f2a9f52d644b.png)
 
 ## License
 
