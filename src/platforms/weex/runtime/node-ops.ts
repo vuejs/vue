@@ -1,4 +1,4 @@
-declare var document: WeexDocument
+declare let document: WeexDocument
 
 import type { WeexDocument, WeexElement } from 'typescript/weex'
 import TextNode from 'weex/runtime/text-node'

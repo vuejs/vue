@@ -19,4 +19,4 @@ declare type WeexEnvironment = {
   dpr?: number;
   rem?: number;
 };
-declare var WXEnvironment: WeexEnvironment;
+declare let WXEnvironment: WeexEnvironment;

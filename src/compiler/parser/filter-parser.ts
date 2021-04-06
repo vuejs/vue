@@ -91,7 +91,7 @@ export function parseFilters(exp: string): string {
   }
 
   function pushFilter() {
-    ;(filters || (filters = [])).push(exp.slice(lastFilterIndex, i).trim())
+    (filters || (filters = [])).push(exp.slice(lastFilterIndex, i).trim())
     lastFilterIndex = i + 1
   }
 

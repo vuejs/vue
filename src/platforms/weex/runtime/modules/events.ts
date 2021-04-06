@@ -29,7 +29,7 @@ function add(
 }
 
 function remove(event: string, handler: any, capture: any, _target?: any) {
-  ;(_target || target).removeEvent(event)
+  (_target || target).removeEvent(event)
 }
 
 function updateDOMListeners(oldVnode: VNodeWithData, vnode: VNodeWithData) {

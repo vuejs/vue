@@ -97,7 +97,7 @@ function remove(
   capture: boolean,
   _target?: HTMLElement
 ) {
-  ;(_target || target).removeEventListener(
+  (_target || target).removeEventListener(
     name,
     //@ts-expect-error
     handler._wrapper || handler,

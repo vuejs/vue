@@ -35,7 +35,7 @@ export function resolveSlots(
         slot.push(child)
       }
     } else {
-      ;(slots.default || (slots.default = [])).push(child)
+      (slots.default || (slots.default = [])).push(child)
     }
   }
   // ignore slots that contains only whitespace

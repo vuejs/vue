@@ -1,4 +1,4 @@
-declare var document: WeexDocument
+declare let document: WeexDocument
 
 import { warn } from 'core/util/index'
 import type { WeexDocument } from 'typescript/weex'

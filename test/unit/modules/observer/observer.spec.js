@@ -221,6 +221,7 @@ describe('Observer', () => {
       get () { return this.val },
       set (v) {
         this.val = v
+        // eslint-disable-next-line no-setter-return
         return this.val
       }
     })

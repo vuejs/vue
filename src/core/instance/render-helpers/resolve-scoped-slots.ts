@@ -23,7 +23,7 @@ export function resolveScopedSlots(
     }
   }
   if (contentHashKey) {
-    ;(res as any).$key = contentHashKey
+    (res as any).$key = contentHashKey
   }
   return res as any
 }

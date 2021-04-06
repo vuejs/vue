@@ -242,7 +242,7 @@ export function leave(vnode: VNodeWithData, rm: Function) {
     }
     // record leaving element
     if (!vnode.data.show && el.parentNode) {
-      ;(el.parentNode._pending || (el.parentNode._pending = {}))[
+      (el.parentNode._pending || (el.parentNode._pending = {}))[
         vnode.key!
       ] = vnode
     }

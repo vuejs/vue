@@ -24,7 +24,7 @@ export function addProp(
   range?: Range,
   dynamic?: boolean
 ) {
-  ;(el.props || (el.props = [])).push(
+  (el.props || (el.props = [])).push(
     rangeSetItem({ name, value, dynamic }, range)
   )
   el.plain = false
@@ -65,7 +65,7 @@ export function addDirective(
   modifiers?: ASTModifiers,
   range?: Range
 ) {
-  ;(el.directives || (el.directives = [])).push(
+  (el.directives || (el.directives = [])).push(
     rangeSetItem(
       {
         name,

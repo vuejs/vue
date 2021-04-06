@@ -224,7 +224,7 @@ function leave(vnode, rm) {
     }
     // record leaving element
     if (!vnode.data.show) {
-      ;(el.parentNode._pending || (el.parentNode._pending = {}))[
+      (el.parentNode._pending || (el.parentNode._pending = {}))[
         vnode.key
       ] = vnode
     }

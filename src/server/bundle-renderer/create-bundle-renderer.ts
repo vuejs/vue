@@ -97,7 +97,7 @@ export function createBundleRendererCreator(
 
         let promise
         if (!cb) {
-          ;({ promise, cb } = createPromiseCallback())
+          ({ promise, cb } = createPromiseCallback())
         }
 
         run(context)

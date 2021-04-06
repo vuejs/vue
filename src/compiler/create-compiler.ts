@@ -14,7 +14,7 @@ export function createCompilerCreator(baseCompile: Function): Function {
       const tips: WarningMessage[] = []
 
       let warn = (msg, range, tip) => {
-        ;(tip ? tips : errors).push(msg)
+        (tip ? tips : errors).push(msg)
       }
 
       if (options) {
@@ -35,7 +35,7 @@ export function createCompilerCreator(baseCompile: Function): Function {
                 data.end = range.end + leadingSpaceLength
               }
             }
-            ;(tip ? tips : errors).push(data)
+            (tip ? tips : errors).push(data)
           }
         }
         // merge custom modules

@@ -80,7 +80,7 @@ export function createRenderer({
       // no callback, return Promise
       let promise
       if (!cb) {
-        ;({ promise, cb } = createPromiseCallback())
+        ({ promise, cb } = createPromiseCallback())
       }
 
       let result = ''
