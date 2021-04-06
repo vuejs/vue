@@ -1757,6 +1757,7 @@ function logError(err, vm, info) {
     }
 }
 
+/* globals MutationObserver */
 var callbacks = [];
 function flushCallbacks() {
     var copies = callbacks.slice(0);
@@ -2138,6 +2139,13 @@ function createWriteFunction(write, onError) {
     return cachedWrite;
 }
 
+/**
+ * Original RenderStream implementation by Sasha Aickin (@aickin)
+ * Licensed under the Apache License, Version 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Modified by Evan You (@yyx990803)
+ */
 var RenderStream = /** @class */ (function (_super) {
     __extends(RenderStream, _super);
     function RenderStream(render) {
@@ -3921,6 +3929,15 @@ function checkForAliasModel(el, value) {
     }
 }
 
+/**
+ * Expand input[v-model] with dynamic type bindings into v-if-else chains
+ * Turn this:
+ *   <input v-model="data[type]" :type="type">
+ * into this:
+ *   <input v-if="type === 'checkbox'" type="checkbox" v-model="data[type]">
+ *   <input v-else-if="type === 'radio'" type="radio" v-model="data[type]">
+ *   <input v-else :type="type" v-model="data[type]">
+ */
 function preTransformNode(el, options) {
     if (el.tag === 'input') {
         var map = el.attrsMap;
@@ -4872,6 +4889,15 @@ function genStyleSegments(staticStyle, parsedStaticStyle, styleBinding, vShowExp
     }
 }
 
+/**
+ * In SSR, the vdom tree is generated only once and never patched, so
+ * we can optimize most element / trees into plain string render functions.
+ * The SSR optimizer walks the AST tree to detect optimizable elements and trees.
+ *
+ * The criteria for SSR optimizability is quite a bit looser than static tree
+ * detection (which is designed for client re-render). In SSR we bail only for
+ * components/slots/custom directives.
+ */
 // optimizability constants
 var optimizability = {
     FALSE: 0,
@@ -4989,6 +5015,7 @@ function isSelectWithModel(node) {
         node.directives.some(function (d) { return d.name === 'model'; }));
 }
 
+// The SSR codegen is essentially extending the default codegen to handle
 // segment types
 var RAW = 0;
 var INTERPOLATION = 1;
@@ -6230,6 +6257,7 @@ hasDynamicKeys, contentHashKey) {
     return res;
 }
 
+// helper to process dynamic keys for dynamic arguments in v-bind and v-on.
 function bindDynamicKeys(baseObj, values) {
     for (var i = 0; i < values.length; i += 2) {
         var key = values[i];
@@ -7445,6 +7473,11 @@ function parseTemplate(template, contentPlaceholder) {
     };
 }
 
+/**
+ * Creates a mapper that maps components used during a server-side render
+ * to async chunk files in the client-side build, so that we can inline them
+ * directly in the rendered HTML to avoid waterfall requests.
+ */
 function createMapper(clientManifest) {
     var map = createMap(clientManifest);
     // map server-side moduleIds to client-side files

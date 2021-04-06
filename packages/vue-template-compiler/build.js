@@ -8,7 +8,6 @@ function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'defau
 
 var deindent__default = /*#__PURE__*/_interopDefaultLegacy(deindent);
 
-/* @flow */
 var emptyObject = Object.freeze({});
 // These helpers produce better VM code in JS engines due to their
 // explicitness and function inlining.
@@ -152,7 +151,6 @@ function genStaticKeys$1(modules) {
         .join(',');
 }
 
-/* @flow */
 var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
     'link,meta,param,source,track,wbr');
 // Elements that you can, intentionally, leave open
@@ -166,7 +164,6 @@ var isNonPhrasingTag = makeMap('address,article,aside,base,blockquote,body,capti
     'optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,' +
     'title,tr,track');
 
-/* @flow */
 /**
  * unicode letters used for parsing html tags, component names and property paths.
  * using https://www.w3.org/TR/html53/semantics-scripting.html#potentialcustomelementname
@@ -474,7 +471,6 @@ function parseHTML(html, options) {
     }
 }
 
-/* @flow */
 var splitRE = /\r?\n/g;
 var replaceRE = /./g;
 var isSpecialTag = makeMap('script,style,template', true);
@@ -591,7 +587,6 @@ function parseComponent(content, options) {
     return sfc;
 }
 
-/* @flow */
 // can we use __proto__?
 var hasProto = '__proto__' in {};
 // Browser environment sniffing
@@ -690,7 +685,6 @@ var LIFECYCLE_HOOKS = [
     'errorCaptured',
     'serverPrefetch' ];
 
-/* @flow */
 var config = {
     /**
      * Option merge strategies (used in core/util/options)
@@ -769,7 +763,6 @@ var config = {
     _lifecycleHooks: LIFECYCLE_HOOKS,
 };
 
-/* @flow */
 var warn$2 = noop;
 var tip = noop;
 var generateComponentTrace; // work around flow check
@@ -1183,7 +1176,6 @@ function dependArray(value) {
     }
 }
 
-/* @flow */
 /**
  * Option overwriting strategies are functions that handle
  * how to merge a parent option value and a child option
@@ -1394,7 +1386,7 @@ function assertObjectType(name, value, vm) {
     }
 }
 
-/* @flow */
+/* globals MutationObserver */
 var callbacks = [];
 function flushCallbacks() {
     var copies = callbacks.slice(0);
@@ -1429,7 +1421,6 @@ else if (!isIE &&
 else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) ;
 else ;
 
-/* @flow */
 // these are reserved for web because they are directly compiled away
 // during template compilation
 makeMap('style,class');
@@ -1450,7 +1441,6 @@ var isBooleanAttr = makeMap('allowfullscreen,async,autofocus,autoplay,checked,co
     'required,reversed,scoped,seamless,selected,sortable,' +
     'truespeed,typemustmatch,visible');
 
-/* @flow */
 var isHTMLTag = makeMap('html,body,base,head,link,meta,style,title,' +
     'address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' +
     'div,dd,dl,dt,figcaption,figure,picture,hr,img,li,main,ol,p,pre,ul,' +
@@ -1483,7 +1473,6 @@ function getTagNamespace(tag) {
 }
 makeMap('text,number,password,search,email,tel,url');
 
-/* @flow */
 var validDivisionCharRE = /[\w).+\-_$\]]/;
 function parseFilters(exp) {
     var inSingle = false;
@@ -1607,7 +1596,6 @@ function wrapFilter(exp, filter) {
     }
 }
 
-/* @flow */
 var defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g;
 var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
 var buildRegex = cached(function (delimiters) {
@@ -1648,7 +1636,6 @@ function parseText(text, delimiters) {
     };
 }
 
-/* @flow */
 /* eslint-disable no-unused-vars */
 function baseWarn(msg, range) {
     console.error("[Vue compiler]: " + msg);
@@ -1816,7 +1803,6 @@ function rangeSetItem(item, range) {
     return item;
 }
 
-/* @flow */
 function transformNode$1(el, options) {
     var warn = options.warn || baseWarn;
     var staticClass = getAndRemoveAttr(el, 'class');
@@ -1853,7 +1839,6 @@ var klass = {
     genData: genData$2,
 };
 
-/* @flow */
 var parseStyleText = cached(function (cssText) {
     var res = {};
     var listDelimiter = /;(?![^(]*\))/g;
@@ -1867,7 +1852,6 @@ var parseStyleText = cached(function (cssText) {
     return res;
 });
 
-/* @flow */
 function transformNode(el, options) {
     var warn = options.warn || baseWarn;
     var staticStyle = getAndRemoveAttr(el, 'style');
@@ -1905,7 +1889,6 @@ var style = {
     genData: genData$1,
 };
 
-/* @flow */
 /**
  * Cross-platform code generation for component v-model
  */
@@ -2031,7 +2014,6 @@ function parseString(chr) {
     }
 }
 
-/* @flow */
 var he = require('he');
 var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:|^#/;
@@ -2835,7 +2817,15 @@ function checkForAliasModel(el, value) {
     }
 }
 
-/* @flow */
+/**
+ * Expand input[v-model] with dynamic type bindings into v-if-else chains
+ * Turn this:
+ *   <input v-model="data[type]" :type="type">
+ * into this:
+ *   <input v-if="type === 'checkbox'" type="checkbox" v-model="data[type]">
+ *   <input v-else-if="type === 'radio'" type="radio" v-model="data[type]">
+ *   <input v-else :type="type" v-model="data[type]">
+ */
 function preTransformNode(el, options) {
     if (el.tag === 'input') {
         var map = el.attrsMap;
@@ -2903,7 +2893,6 @@ var model$1 = {
 
 var modules = [klass, style, model$1];
 
-/* @flow */
 var warn;
 // in some cases, the event used has to be determined at runtime
 // so we used some reserved tokens during compile.
@@ -3019,14 +3008,12 @@ function genDefaultModel(el, value, modifiers) {
     }
 }
 
-/* @flow */
 function text(el, dir) {
     if (dir.value) {
         addProp(el, 'textContent', "_s(" + dir.value + ")", dir);
     }
 }
 
-/* @flow */
 function html(el, dir) {
     if (dir.value) {
         addProp(el, 'innerHTML', "_s(" + dir.value + ")", dir);
@@ -3039,7 +3026,6 @@ var directives = {
     html: html,
 };
 
-/* @flow */
 var baseOptions = {
     expectHTML: true,
     modules: modules,
@@ -3054,7 +3040,6 @@ var baseOptions = {
     staticKeys: genStaticKeys$1(modules),
 };
 
-/* @flow */
 var isStaticKey;
 var isPlatformReservedTag$1;
 var genStaticKeysCached = cached(genStaticKeys);
@@ -3172,7 +3157,6 @@ function isDirectChildOfTemplateFor(node) {
     return false;
 }
 
-/* @flow */
 var fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/;
 var fnInvokeRE = /\([^)]*?\);*$/;
 var simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/;
@@ -3324,7 +3308,6 @@ function genFilterCode(key) {
         ")");
 }
 
-/* @flow */
 function on(el, dir) {
     if (process.env.NODE_ENV !== 'production' && dir.modifiers) {
         warn$2("v-on without argument does not support modifiers.");
@@ -3332,21 +3315,18 @@ function on(el, dir) {
     el.wrapListeners = function (code) { return "_g(" + code + "," + dir.value + ")"; };
 }
 
-/* @flow */
 function bind(el, dir) {
     el.wrapData = function (code) {
         return "_b(" + code + ",'" + el.tag + "'," + dir.value + "," + (dir.modifiers && dir.modifiers.prop ? 'true' : 'false') + (dir.modifiers && dir.modifiers.sync ? ',true' : '') + ")";
     };
 }
 
-/* @flow */
 var baseDirectives = {
     on: on,
     bind: bind,
     cloak: noop,
 };
 
-/* @flow */
 var CodegenState = /** @class */ (function () {
     function CodegenState(options) {
         this.options = options;
@@ -3830,7 +3810,6 @@ function transformSpecialNewlines(text) {
     return text.replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 }
 
-/* @flow */
 // these keywords should not appear inside expressions, but operators like
 // typeof, instanceof and in are allowed
 var prohibitedKeywordRE = new RegExp('\\b' +
@@ -3939,7 +3918,6 @@ function checkFunctionParameterExpression(exp, text, warn, range) {
     }
 }
 
-/* @flow */
 var range = 2;
 function generateCodeFrame(source, start, end) {
     if (start === void 0) { start = 0; }
@@ -3990,7 +3968,6 @@ function repeat(str, n) {
     return result;
 }
 
-/* @flow */
 function createFunction(code, errors) {
     try {
         return new Function(code);
@@ -4081,7 +4058,6 @@ function createCompileToFunctionFn(compile) {
     };
 }
 
-/* @flow */
 function createCompilerCreator(baseCompile) {
     return function createCompiler(baseOptions) {
         function compile(template, options) {
@@ -4140,7 +4116,6 @@ function createCompilerCreator(baseCompile) {
     };
 }
 
-/* @flow */
 // `createCompilerCreator` allows creating compilers that use alternative
 // parser/optimizer/codegen, e.g the SSR optimizing compiler.
 // Here we just export a default compiler using the default parts.
@@ -4157,10 +4132,8 @@ var createCompiler$1 = createCompilerCreator(function baseCompile(template, opti
     };
 });
 
-/* @flow */
 var _a$1 = createCompiler$1(baseOptions), compile$1 = _a$1.compile, compileToFunctions$1 = _a$1.compileToFunctions;
 
-/* @flow */
 var isAttr = makeMap('accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' +
     'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' +
     'checked,cite,class,code,codebase,color,cols,colspan,content,' +
@@ -4197,7 +4170,6 @@ function escapeChar(a) {
     return ESC[a] || a;
 }
 
-/* @flow */
 var plainStringRE = /^"(?:[^"\\]|\\.)*"$|^'(?:[^'\\]|\\.)*'$/;
 // let the model AST transform translate v-model into appropriate
 // props bindings
@@ -4285,7 +4257,15 @@ function genStyleSegments(staticStyle, parsedStaticStyle, styleBinding, vShowExp
     }
 }
 
-/* @flow */
+/**
+ * In SSR, the vdom tree is generated only once and never patched, so
+ * we can optimize most element / trees into plain string render functions.
+ * The SSR optimizer walks the AST tree to detect optimizable elements and trees.
+ *
+ * The criteria for SSR optimizability is quite a bit looser than static tree
+ * detection (which is designed for client re-render). In SSR we bail only for
+ * components/slots/custom directives.
+ */
 // optimizability constants
 var optimizability = {
     FALSE: 0,
@@ -4403,7 +4383,7 @@ function isSelectWithModel(node) {
         node.directives.some(function (d) { return d.name === 'model'; }));
 }
 
-/* @flow */
+// The SSR codegen is essentially extending the default codegen to handle
 // segment types
 var RAW = 0;
 var INTERPOLATION = 1;
@@ -4598,7 +4578,6 @@ function flattenSegments(segments) {
     return mergedSegments.join('+');
 }
 
-/* @flow */
 var createCompiler = createCompilerCreator(function baseCompile(template, options) {
     var ast = parse(template.trim(), options);
     optimize(ast, options);
@@ -4610,7 +4589,6 @@ var createCompiler = createCompilerCreator(function baseCompile(template, option
     };
 });
 
-/* @flow */
 var _a = createCompiler(baseOptions), compile = _a.compile, compileToFunctions = _a.compileToFunctions;
 
 exports.compile = compile$1;

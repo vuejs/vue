@@ -1671,6 +1671,7 @@ function logError(err, vm, info) {
     }
 }
 
+/* globals MutationObserver */
 var isUsingMicroTask = false;
 var callbacks = [];
 var pending = false;
@@ -2562,6 +2563,7 @@ hasDynamicKeys, contentHashKey) {
     return res;
 }
 
+// helper to process dynamic keys for dynamic arguments in v-bind and v-on.
 function bindDynamicKeys(baseObj, values) {
     for (var i = 0; i < values.length; i += 2) {
         var key = values[i];
@@ -4565,7 +4567,6 @@ function initAssetRegisters(Vue) {
     });
 }
 
-// @ts-nocheck
 function getComponentName(opts) {
     return opts && (opts.Ctor.options.name || opts.tag);
 }
@@ -4597,6 +4598,7 @@ function pruneCache(keepAliveInstance, filter) {
 function pruneCacheEntry(cache, key, keys, current) {
     var cached = cache[key];
     if (cached && (!current || cached.tag !== current.tag)) {
+        //@ts-expect-error has void type
         cached.componentInstance.$destroy();
     }
     cache[key] = null;
@@ -7019,6 +7021,7 @@ var platformDirectives = {
     show: show,
 };
 
+// Provides transition support for a single element/component.
 var transitionProps = {
     name: String,
     appear: Boolean,
@@ -7399,6 +7402,5 @@ if (inBrowser) {
         }
     }, 0);
 }
-
 
 module.exports = Vue;

@@ -1,6 +1,5 @@
 'use strict';
 
-/* @flow */
 var isJS = function (file) { return /\.js(\?[^.]+)?$/.test(file); };
 var isCSS = function (file) { return /\.css(\?[^.]+)?$/.test(file); };
 

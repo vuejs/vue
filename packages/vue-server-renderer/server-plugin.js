@@ -1,6 +1,5 @@
 'use strict';
 
-/* @flow */
 var isJS = function (file) { return /\.js(\?[^.]+)?$/.test(file); };
 
 var _a = require('chalk'), red = _a.red, yellow = _a.yellow;

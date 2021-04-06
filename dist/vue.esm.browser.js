@@ -3,7 +3,6 @@
  * (c) 2014-2021 Evan You
  * Released under the MIT License.
  */
-/* @flow */
 var emptyObject = Object.freeze({});
 // These helpers produce better VM code in JS engines due to their
 // explicitness and function inlining.
@@ -325,7 +324,6 @@ var LIFECYCLE_HOOKS = [
     'serverPrefetch',
 ];
 
-/* @flow */
 var config = {
     /**
      * Option merge strategies (used in core/util/options)
@@ -404,7 +402,6 @@ var config = {
     _lifecycleHooks: LIFECYCLE_HOOKS,
 };
 
-/* @flow */
 /**
  * unicode letters used for parsing html tags, component names and property paths.
  * using https://www.w3.org/TR/html53/semantics-scripting.html#potentialcustomelementname
@@ -448,7 +445,6 @@ function parsePath(path) {
     };
 }
 
-/* @flow */
 // can we use __proto__?
 var hasProto = '__proto__' in {};
 // Browser environment sniffing
@@ -539,7 +535,6 @@ else {
     }());
 }
 
-/* @flow */
 var warn$2 = noop;
 var tip = noop;
 var generateComponentTrace; // work around flow check
@@ -1031,7 +1026,6 @@ function dependArray(value) {
     }
 }
 
-/* @flow */
 /**
  * Option overwriting strategies are functions that handle
  * how to merge a parent option value and a child option
@@ -1410,7 +1404,6 @@ function resolveAsset(options, type, id, warnMissing) {
     return res;
 }
 
-/* @flow */
 function validateProp(key, propOptions, propsData, vm) {
     var prop = propOptions[key];
     var absent = !hasOwn(propsData, key);
@@ -1684,7 +1677,7 @@ function logError(err, vm, info) {
     }
 }
 
-/* @flow */
+/* globals MutationObserver */
 var isUsingMicroTask = false;
 var callbacks = [];
 var pending = false;
@@ -1887,7 +1880,6 @@ var initProxy;
     };
 }
 
-/* @flow */
 var seenObjects = new _Set();
 /**
  * Recursively traverse an object to evoke all converted
@@ -1988,7 +1980,6 @@ function updateListeners(on, oldOn, add, remove, createOnceHandler, vm) {
     }
 }
 
-/* @flow */
 function mergeVNodeHook(def, hookKey, hook) {
     if (def instanceof VNode) {
         def = def.data.hook || (def.data.hook = {});
@@ -2021,7 +2012,6 @@ function mergeVNodeHook(def, hookKey, hook) {
     def[hookKey] = invoker;
 }
 
-/* @flow */
 function extractPropsFromVNodeData(data, Ctor, tag) {
     // we are only extracting raw values here.
     // validation and default values are handled in the child
@@ -2074,7 +2064,6 @@ function checkProp(res, hash, key, altKey, preserve) {
     return false;
 }
 
-/* @flow */
 // The template compiler attempts to minimize the need for normalization by
 // statically analyzing the template at compile time.
 //
@@ -2161,7 +2150,6 @@ function normalizeArrayChildren(children, nestedIndex) {
     return res;
 }
 
-/* @flow */
 function initProvide(vm) {
     var provide = vm.$options.provide;
     if (provide) {
@@ -2227,7 +2215,6 @@ function resolveInject(inject, vm) {
     }
 }
 
-/* @flow */
 /**
  * Runtime helper for resolving raw children VNodes into a slot object.
  */
@@ -2273,7 +2260,6 @@ function isWhitespace(node) {
     return (node.isComment && !node.asyncFactory) || node.text === ' ';
 }
 
-/* @flow */
 function normalizeScopedSlots(slots, normalSlots, prevSlots) {
     var res;
     var hasNormalSlots = Object.keys(normalSlots).length > 0;
@@ -2426,7 +2412,6 @@ function resolveFilter(id) {
     return resolveAsset(this.$options, 'filters', id, true) || identity;
 }
 
-/* @flow */
 function isKeyNotMatch(expect, actual) {
     if (Array.isArray(expect)) {
         return expect.indexOf(actual) === -1;
@@ -2453,7 +2438,6 @@ function checkKeyCodes(eventKeyCode, key, builtInKeyCode, eventKeyName, builtInK
     }
 }
 
-/* @flow */
 /**
  * Runtime helper for merging v-bind="object" into a VNode's data.
  */
@@ -2541,7 +2525,6 @@ function markStaticNode(node, key, isOnce) {
     node.isOnce = isOnce;
 }
 
-/* @flow */
 function bindObjectListeners(data, value) {
     if (value) {
         if (!isPlainObject(value)) {
@@ -2584,7 +2567,7 @@ hasDynamicKeys, contentHashKey) {
     return res;
 }
 
-/* @flow */
+// helper to process dynamic keys for dynamic arguments in v-bind and v-on.
 function bindDynamicKeys(baseObj, values) {
     for (var i = 0; i < values.length; i += 2) {
         var key = values[i];
@@ -2606,7 +2589,6 @@ function prependModifier(value, symbol) {
     return typeof value === 'string' ? symbol + value : value;
 }
 
-/* @flow */
 function installRenderHelpers(target) {
     target._o = markOnce;
     target._n = toNumber;
@@ -2627,7 +2609,6 @@ function installRenderHelpers(target) {
     target._p = prependModifier;
 }
 
-/* @flow */
 function FunctionalRenderContext(data, props, children, parent, Ctor) {
     var _this = this;
     var options = Ctor.options;
@@ -2742,7 +2723,6 @@ function mergeProps(to, from) {
     }
 }
 
-/* @flow */
 // inline hooks to be invoked on component VNodes during patch
 var componentVNodeHooks = {
     init: function (vnode, hydrating) {
@@ -2936,7 +2916,6 @@ function transformModel(options, data) {
     }
 }
 
-/* @flow */
 var SIMPLE_NORMALIZE = 1;
 var ALWAYS_NORMALIZE = 2;
 // wrapper function for providing a more flexible interface
@@ -3059,7 +3038,6 @@ function registerDeepBindings(data) {
     }
 }
 
-/* @flow */
 function initRender(vm) {
     vm._vnode = null; // the root of the child tree
     vm._staticTrees = null; // v-once cached trees
@@ -3155,7 +3133,6 @@ function renderMixin(Vue) {
     };
 }
 
-/* @flow */
 function ensureCtor(comp, base) {
     if (comp.__esModule || (hasSymbol && comp[Symbol.toStringTag] === 'Module')) {
         comp = comp.default;
@@ -3272,13 +3249,11 @@ function resolveAsyncComponent(factory, baseCtor) {
     }
 }
 
-/* @flow */
 function isAsyncPlaceholder(node) {
     // @ts-expect-error not really boolean type
     return node.isComment && node.asyncFactory;
 }
 
-/* @flow */
 function getFirstComponentChild(children) {
     if (Array.isArray(children)) {
         for (var i = 0; i < children.length; i++) {
@@ -3290,7 +3265,6 @@ function getFirstComponentChild(children) {
     }
 }
 
-/* @flow */
 function initEvents(vm) {
     vm._events = Object.create(null);
     vm._hasHookEvent = false;
@@ -3410,7 +3384,6 @@ function eventsMixin(Vue) {
     };
 }
 
-/* @flow */
 var activeInstance = null;
 var isUpdatingChildComponent = false;
 function setActiveInstance(vm) {
@@ -3707,7 +3680,6 @@ function callHook$1(vm, hook) {
     popTarget();
 }
 
-/* @flow */
 var MAX_UPDATE_COUNT = 100;
 var queue = [];
 var activatedChildren = [];
@@ -3863,7 +3835,6 @@ function queueWatcher(watcher) {
     }
 }
 
-/* @flow */
 var uid$1 = 0;
 /**
  * A watcher parses an expression, collects dependencies,
@@ -4059,7 +4030,6 @@ var Watcher = /** @class */ (function () {
     return Watcher;
 }());
 
-/* @flow */
 var sharedPropertyDefinition = {
     enumerable: true,
     configurable: true,
@@ -4346,7 +4316,6 @@ function stateMixin(Vue) {
     };
 }
 
-/* @flow */
 var uid = 0;
 function initMixin$1(Vue) {
     Vue.prototype._init = function (options) {
@@ -4468,7 +4437,6 @@ lifecycleMixin(Vue);
 //@ts-ignore
 renderMixin(Vue);
 
-/* @flow */
 function initUse(Vue) {
     Vue.use = function (plugin) {
         var installedPlugins = this._installedPlugins || (this._installedPlugins = []);
@@ -4489,7 +4457,6 @@ function initUse(Vue) {
     };
 }
 
-/* @flow */
 function initMixin(Vue) {
     Vue.mixin = function (mixin) {
         this.options = mergeOptions(this.options, mixin);
@@ -4497,7 +4464,6 @@ function initMixin(Vue) {
     };
 }
 
-/* @flow */
 function initExtend(Vue) {
     /**
      * Each instance constructor, including Vue, has a unique
@@ -4575,7 +4541,6 @@ function initComputed(Comp) {
     }
 }
 
-/* @flow */
 function initAssetRegisters(Vue) {
     /**
      * Create asset registration methods.
@@ -4606,7 +4571,6 @@ function initAssetRegisters(Vue) {
     });
 }
 
-// @ts-nocheck
 function getComponentName(opts) {
     return opts && (opts.Ctor.options.name || opts.tag);
 }
@@ -4638,6 +4602,7 @@ function pruneCache(keepAliveInstance, filter) {
 function pruneCacheEntry(cache, key, keys, current) {
     var cached = cache[key];
     if (cached && (!current || cached.tag !== current.tag)) {
+        //@ts-expect-error has void type
         cached.componentInstance.$destroy();
     }
     cache[key] = null;
@@ -4717,7 +4682,6 @@ var builtInComponents = {
     KeepAlive: KeepAlive,
 };
 
-/* @flow */
 function initGlobalAPI(Vue) {
     // config
     var configDef = {};
@@ -4775,7 +4739,6 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
 });
 Vue.version = '2.6.12';
 
-/* @flow */
 // these are reserved for web because they are directly compiled away
 // during template compilation
 var isReservedAttr = makeMap('style,class');
@@ -4814,7 +4777,6 @@ var isFalsyAttrValue = function (val) {
     return val == null || val === false;
 };
 
-/* @flow */
 function genClassForVnode(vnode) {
     var data = vnode.data;
     var parentNode = vnode;
@@ -4885,7 +4847,6 @@ function stringifyObject(value) {
     return res;
 }
 
-/* @flow */
 var namespaceMap = {
     svg: 'http://www.w3.org/2000/svg',
     math: 'http://www.w3.org/1998/Math/MathML',
@@ -4947,7 +4908,6 @@ function isUnknownElement(tag) {
 }
 var isTextInputType = makeMap('text,number,password,search,email,tel,url');
 
-/* @flow */
 /**
  * Query an element selector if it's not an element already.
  */
@@ -4965,7 +4925,6 @@ function query(el) {
     }
 }
 
-/* @flow */
 function createElement(tagName, vnode) {
     var elm = document.createElement(tagName);
     if (tagName !== 'select') {
@@ -5029,7 +4988,6 @@ var nodeOps = /*#__PURE__*/Object.freeze({
   setStyleScope: setStyleScope
 });
 
-/* @flow */
 var ref = {
     create: function (_, vnode) {
         registerRef(vnode);
@@ -5810,7 +5768,6 @@ function createPatchFunction(backend) {
     };
 }
 
-/* @flow */
 var directives$1 = {
     create: updateDirectives,
     update: updateDirectives,
@@ -5918,7 +5875,6 @@ function callHook(dir, hook, vnode, oldVnode, isDestroy) {
 
 var baseModules = [ref, directives$1];
 
-/* @flow */
 function updateAttrs(oldVnode, vnode) {
     var opts = vnode.componentOptions;
     if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) {
@@ -6022,7 +5978,6 @@ var attrs = {
     update: updateAttrs,
 };
 
-/* @flow */
 function updateClass(oldVnode, vnode) {
     var el = vnode.elm;
     var data = vnode.data;
@@ -6050,7 +6005,6 @@ var klass$1 = {
     update: updateClass,
 };
 
-/* @flow */
 var validDivisionCharRE = /[\w).+\-_$\]]/;
 function parseFilters(exp) {
     var inSingle = false;
@@ -6174,7 +6128,6 @@ function wrapFilter(exp, filter) {
     }
 }
 
-/* @flow */
 /* eslint-disable no-unused-vars */
 function baseWarn(msg, range) {
     console.error("[Vue compiler]: " + msg);
@@ -6341,7 +6294,6 @@ function rangeSetItem(item, range) {
     return item;
 }
 
-/* @flow */
 /**
  * Cross-platform code generation for component v-model
  */
@@ -6467,7 +6419,6 @@ function parseString(chr) {
     }
 }
 
-/* @flow */
 var warn$1;
 // in some cases, the event used has to be determined at runtime
 // so we used some reserved tokens during compile.
@@ -6590,7 +6541,6 @@ function genDefaultModel(el, value, modifiers) {
     }
 }
 
-/* @flow */
 // normalize v-model event tokens that can only be determined at runtime.
 // it's important to place the event as the first in the array because
 // the whole point is ensuring the v-model callback gets called before
@@ -6679,7 +6629,6 @@ var events = {
     update: updateDOMListeners,
 };
 
-/* @flow */
 var svgContainer;
 function updateDOMProps(oldVnode, vnode) {
     if (isUndef(oldVnode.data.domProps) && isUndef(vnode.data.domProps)) {
@@ -6791,7 +6740,6 @@ var domProps = {
     update: updateDOMProps,
 };
 
-/* @flow */
 var parseStyleText = cached(function (cssText) {
     var res = {};
     var listDelimiter = /;(?![^(]*\))/g;
@@ -6851,7 +6799,6 @@ function getStyle(vnode, checkChild) {
     return res;
 }
 
-/* @flow */
 var cssVarRE = /^--/;
 var importantRE = /\s*!important$/;
 var setProp = function (el, name, val) {
@@ -6932,7 +6879,6 @@ var style$1 = {
     update: updateStyle,
 };
 
-/* @flow */
 var whitespaceRE$1 = /\s+/;
 /**
  * Add class with compatibility for SVG since classList is not supported on
@@ -7162,7 +7108,6 @@ function toMs(s) {
     return Number(s.slice(0, -1).replace(',', '.')) * 1000;
 }
 
-/* @flow */
 function enter(vnode, toggleDisplay) {
     var el = vnode.elm;
     // call leave callback now
@@ -7415,7 +7360,6 @@ var transition = inBrowser
 
 var platformModules = [attrs, klass$1, events, domProps, style$1, transition];
 
-/* @flow */
 // the directive module should be applied last, after all
 // built-in modules have been applied.
 var modules$1 = platformModules.concat(baseModules);
@@ -7553,7 +7497,6 @@ function trigger(el, type) {
     el.dispatchEvent(e);
 }
 
-/* @flow */
 // recursively search for possible transition defined inside the component root
 function locateNode(vnode) {
     // @ts-expect-error
@@ -7614,7 +7557,7 @@ var platformDirectives = {
     show: show,
 };
 
-/* @flow */
+// Provides transition support for a single element/component.
 var transitionProps = {
     name: String,
     appear: Boolean,
@@ -7996,7 +7939,6 @@ if (inBrowser) {
     }, 0);
 }
 
-/* @flow */
 var defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g;
 var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
 var buildRegex = cached(function (delimiters) {
@@ -8037,7 +7979,6 @@ function parseText(text, delimiters) {
     };
 }
 
-/* @flow */
 function transformNode$1(el, options) {
     var warn = options.warn || baseWarn;
     var staticClass = getAndRemoveAttr(el, 'class');
@@ -8074,7 +8015,6 @@ var klass = {
     genData: genData$2,
 };
 
-/* @flow */
 function transformNode(el, options) {
     var warn = options.warn || baseWarn;
     var staticStyle = getAndRemoveAttr(el, 'style');
@@ -8112,7 +8052,6 @@ var style = {
     genData: genData$1,
 };
 
-/* @flow */
 var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
     'link,meta,param,source,track,wbr');
 // Elements that you can, intentionally, leave open
@@ -8413,7 +8352,6 @@ function parseHTML(html, options) {
     }
 }
 
-/* @flow */
 var he = require('he');
 var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:|^#/;
@@ -9212,7 +9150,15 @@ function checkForAliasModel(el, value) {
     }
 }
 
-/* @flow */
+/**
+ * Expand input[v-model] with dynamic type bindings into v-if-else chains
+ * Turn this:
+ *   <input v-model="data[type]" :type="type">
+ * into this:
+ *   <input v-if="type === 'checkbox'" type="checkbox" v-model="data[type]">
+ *   <input v-else-if="type === 'radio'" type="radio" v-model="data[type]">
+ *   <input v-else :type="type" v-model="data[type]">
+ */
 function preTransformNode(el, options) {
     if (el.tag === 'input') {
         var map = el.attrsMap;
@@ -9280,14 +9226,12 @@ var model = {
 
 var modules = [klass, style, model];
 
-/* @flow */
 function text(el, dir) {
     if (dir.value) {
         addProp(el, 'textContent', "_s(" + dir.value + ")", dir);
     }
 }
 
-/* @flow */
 function html(el, dir) {
     if (dir.value) {
         addProp(el, 'innerHTML', "_s(" + dir.value + ")", dir);
@@ -9300,7 +9244,6 @@ var directives = {
     html: html,
 };
 
-/* @flow */
 var baseOptions = {
     expectHTML: true,
     modules: modules,
@@ -9315,7 +9258,6 @@ var baseOptions = {
     staticKeys: genStaticKeys$1(modules),
 };
 
-/* @flow */
 var isStaticKey;
 var isPlatformReservedTag;
 var genStaticKeysCached = cached(genStaticKeys);
@@ -9433,7 +9375,6 @@ function isDirectChildOfTemplateFor(node) {
     return false;
 }
 
-/* @flow */
 var fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/;
 var fnInvokeRE = /\([^)]*?\);*$/;
 var simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/;
@@ -9585,7 +9526,6 @@ function genFilterCode(key) {
         ")");
 }
 
-/* @flow */
 function on(el, dir) {
     if (dir.modifiers) {
         warn$2("v-on without argument does not support modifiers.");
@@ -9593,21 +9533,18 @@ function on(el, dir) {
     el.wrapListeners = function (code) { return "_g(" + code + "," + dir.value + ")"; };
 }
 
-/* @flow */
 function bind(el, dir) {
     el.wrapData = function (code) {
         return "_b(" + code + ",'" + el.tag + "'," + dir.value + "," + (dir.modifiers && dir.modifiers.prop ? 'true' : 'false') + (dir.modifiers && dir.modifiers.sync ? ',true' : '') + ")";
     };
 }
 
-/* @flow */
 var baseDirectives = {
     on: on,
     bind: bind,
     cloak: noop,
 };
 
-/* @flow */
 var CodegenState = /** @class */ (function () {
     function CodegenState(options) {
         this.options = options;
@@ -10088,7 +10025,6 @@ function transformSpecialNewlines(text) {
     return text.replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 }
 
-/* @flow */
 // these keywords should not appear inside expressions, but operators like
 // typeof, instanceof and in are allowed
 var prohibitedKeywordRE = new RegExp('\\b' +
@@ -10197,7 +10133,6 @@ function checkFunctionParameterExpression(exp, text, warn, range) {
     }
 }
 
-/* @flow */
 var range = 2;
 function generateCodeFrame(source, start, end) {
     if (start === void 0) { start = 0; }
@@ -10248,7 +10183,6 @@ function repeat(str, n) {
     return result;
 }
 
-/* @flow */
 function createFunction(code, errors) {
     try {
         return new Function(code);
@@ -10339,7 +10273,6 @@ function createCompileToFunctionFn(compile) {
     };
 }
 
-/* @flow */
 function createCompilerCreator(baseCompile) {
     return function createCompiler(baseOptions) {
         function compile(template, options) {
@@ -10397,7 +10330,6 @@ function createCompilerCreator(baseCompile) {
     };
 }
 
-/* @flow */
 // `createCompilerCreator` allows creating compilers that use alternative
 // parser/optimizer/codegen, e.g the SSR optimizing compiler.
 // Here we just export a default compiler using the default parts.
@@ -10414,10 +10346,8 @@ var createCompiler = createCompilerCreator(function baseCompile(template, option
     };
 });
 
-/* @flow */
 var _a = createCompiler(baseOptions), compileToFunctions = _a.compileToFunctions;
 
-/* @flow */
 // check whether current browser encodes a char inside attribute values
 var div;
 function getShouldDecode(href) {
@@ -10432,7 +10362,6 @@ var shouldDecodeNewlinesForHref = inBrowser
     ? getShouldDecode(true)
     : false;
 
-/* @flow */
 var idToTemplate = cached(function (id) {
     var el = query(id);
     return el && el.innerHTML;

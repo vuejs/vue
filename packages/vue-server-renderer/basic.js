@@ -4,7 +4,6 @@
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.renderVueComponentToString = factory());
 }(this, (function () { 'use strict';
 
-  /* @flow */
   var emptyObject = Object.freeze({});
   // These helpers produce better VM code in JS engines due to their
   // explicitness and function inlining.
@@ -257,7 +256,6 @@
       return -1;
   }
 
-  /* @flow */
   var isAttr = makeMap('accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' +
       'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' +
       'checked,cite,class,code,codebase,color,cols,colspan,content,' +
@@ -342,7 +340,6 @@
       'stroke-width': true,
   };
 
-  /* @flow */
   // these are reserved for web because they are directly compiled away
   // during template compilation
   makeMap('style,class');
@@ -374,7 +371,6 @@
       return val == null || val === false;
   };
 
-  /* @flow */
   function renderAttrs$1(node) {
       var attrs = node.data.attrs;
       var res = '';
@@ -494,7 +490,6 @@
       return cloned;
   }
 
-  /* @flow */
   function renderDOMProps$1(node) {
       var props = node.data.domProps;
       var res = '';
@@ -537,7 +532,6 @@
       node.children = [child];
   }
 
-  /* @flow */
   /**
    * unicode letters used for parsing html tags, component names and property paths.
    * using https://www.w3.org/TR/html53/semantics-scripting.html#potentialcustomelementname
@@ -556,7 +550,6 @@
       });
   }
 
-  /* @flow */
   // can we use __proto__?
   var hasProto = '__proto__' in {};
   // Browser environment sniffing
@@ -660,7 +653,6 @@
       'errorCaptured',
       'serverPrefetch' ];
 
-  /* @flow */
   var config = {
       /**
        * Option merge strategies (used in core/util/options)
@@ -739,7 +731,6 @@
       _lifecycleHooks: LIFECYCLE_HOOKS,
   };
 
-  /* @flow */
   var warn$2 = noop$1;
   var tip = noop$1;
   var generateComponentTrace; // work around flow check
@@ -1125,7 +1116,6 @@
       }
   }
 
-  /* @flow */
   /**
    * Option overwriting strategies are functions that handle
    * how to merge a parent option value and a child option
@@ -1504,7 +1494,6 @@
       return res;
   }
 
-  /* @flow */
   function validateProp(key, propOptions, propsData, vm) {
       var prop = propOptions[key];
       var absent = !hasOwn(propsData, key);
@@ -1768,7 +1757,7 @@
       }
   }
 
-  /* @flow */
+  /* globals MutationObserver */
   var callbacks = [];
   function flushCallbacks() {
       var copies = callbacks.slice(0);
@@ -1803,7 +1792,6 @@
   else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) ;
   else ;
 
-  /* @flow */
   function genClassForVnode(vnode) {
       var data = vnode.data;
       var parentNode = vnode;
@@ -1874,7 +1862,6 @@
       return res;
   }
 
-  /* @flow */
   var isHTMLTag = makeMap('html,body,base,head,link,meta,style,title,' +
       'address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' +
       'div,dd,dl,dt,figcaption,figure,picture,hr,img,li,main,ol,p,pre,ul,' +
@@ -1907,7 +1894,6 @@
   }
   makeMap('text,number,password,search,email,tel,url');
 
-  /* @flow */
   function renderClass(node) {
       var classList = genClassForVnode(node);
       if (classList !== '') {
@@ -1915,7 +1901,6 @@
       }
   }
 
-  /* @flow */
   var parseStyleText = cached(function (cssText) {
       var res = {};
       var listDelimiter = /;(?![^(]*\))/g;
@@ -1975,7 +1960,6 @@
       return res;
   }
 
-  /* @flow */
   function genStyle(style) {
       var styleText = '';
       for (var key in style) {
@@ -2012,7 +1996,6 @@
 
   var modules$1 = [renderAttrs$1, renderDOMProps$1, renderClass, renderStyle];
 
-  /* @flow */
   function show(node, dir) {
       if (!dir.value) {
           var style = node.data.style || (node.data.style = {});
@@ -2025,7 +2008,6 @@
       }
   }
 
-  /* @flow */
   // this is only applied for <select v-model> because it is the only edge case
   // that must be done at runtime instead of compile time.
   function model$2(node, dir) {
@@ -2068,7 +2050,6 @@
       model: model$2,
   };
 
-  /* @flow */
   var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
       'link,meta,param,source,track,wbr');
   // Elements that you can, intentionally, leave open
@@ -2082,7 +2063,6 @@
       'optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,' +
       'title,tr,track');
 
-  /* @flow */
   var MAX_STACK_DEPTH = 800;
   var noop = function (_) { return _; };
   var defer = typeof process !== 'undefined' && process.nextTick
@@ -2128,7 +2108,6 @@
       return cachedWrite;
   }
 
-  /* @flow */
   var RenderContext = /** @class */ (function () {
       function RenderContext(options) {
           this.userContext = options.userContext;
@@ -2226,7 +2205,6 @@
       }
   }
 
-  /* @flow */
   var validDivisionCharRE = /[\w).+\-_$\]]/;
   function parseFilters(exp) {
       var inSingle = false;
@@ -2350,7 +2328,6 @@
       }
   }
 
-  /* @flow */
   var defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g;
   var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
   var buildRegex = cached(function (delimiters) {
@@ -2391,7 +2368,6 @@
       };
   }
 
-  /* @flow */
   /* eslint-disable no-unused-vars */
   function baseWarn(msg, range) {
       console.error("[Vue compiler]: " + msg);
@@ -2558,7 +2534,6 @@
       return item;
   }
 
-  /* @flow */
   function transformNode$1(el, options) {
       var warn = options.warn || baseWarn;
       var staticClass = getAndRemoveAttr(el, 'class');
@@ -2595,7 +2570,6 @@
       genData: genData$2,
   };
 
-  /* @flow */
   function transformNode(el, options) {
       var warn = options.warn || baseWarn;
       var staticStyle = getAndRemoveAttr(el, 'style');
@@ -2920,7 +2894,6 @@
       }
   }
 
-  /* @flow */
   /**
    * Cross-platform code generation for component v-model
    */
@@ -3046,7 +3019,6 @@
       }
   }
 
-  /* @flow */
   var he = require('he');
   var onRE = /^@|^v-on:/;
   var dirRE = /^v-|^@|^:|^#/;
@@ -3845,7 +3817,15 @@
       }
   }
 
-  /* @flow */
+  /**
+   * Expand input[v-model] with dynamic type bindings into v-if-else chains
+   * Turn this:
+   *   <input v-model="data[type]" :type="type">
+   * into this:
+   *   <input v-if="type === 'checkbox'" type="checkbox" v-model="data[type]">
+   *   <input v-else-if="type === 'radio'" type="radio" v-model="data[type]">
+   *   <input v-else :type="type" v-model="data[type]">
+   */
   function preTransformNode(el, options) {
       if (el.tag === 'input') {
           var map = el.attrsMap;
@@ -3913,7 +3893,6 @@
 
   var modules = [klass, style, model$1];
 
-  /* @flow */
   var warn;
   // in some cases, the event used has to be determined at runtime
   // so we used some reserved tokens during compile.
@@ -4029,14 +4008,12 @@
       }
   }
 
-  /* @flow */
   function text(el, dir) {
       if (dir.value) {
           addProp(el, 'textContent', "_s(" + dir.value + ")", dir);
       }
   }
 
-  /* @flow */
   function html(el, dir) {
       if (dir.value) {
           addProp(el, 'innerHTML', "_s(" + dir.value + ")", dir);
@@ -4049,7 +4026,6 @@
       html: html,
   };
 
-  /* @flow */
   var baseOptions = {
       expectHTML: true,
       modules: modules,
@@ -4064,7 +4040,6 @@
       staticKeys: genStaticKeys(modules),
   };
 
-  /* @flow */
   var fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/;
   var fnInvokeRE = /\([^)]*?\);*$/;
   var simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/;
@@ -4216,7 +4191,6 @@
           ")");
   }
 
-  /* @flow */
   function on(el, dir) {
       if (dir.modifiers) {
           warn$2("v-on without argument does not support modifiers.");
@@ -4224,21 +4198,18 @@
       el.wrapListeners = function (code) { return "_g(" + code + "," + dir.value + ")"; };
   }
 
-  /* @flow */
   function bind(el, dir) {
       el.wrapData = function (code) {
           return "_b(" + code + ",'" + el.tag + "'," + dir.value + "," + (dir.modifiers && dir.modifiers.prop ? 'true' : 'false') + (dir.modifiers && dir.modifiers.sync ? ',true' : '') + ")";
       };
   }
 
-  /* @flow */
   var baseDirectives = {
       on: on,
       bind: bind,
       cloak: noop$1,
   };
 
-  /* @flow */
   var CodegenState = /** @class */ (function () {
       function CodegenState(options) {
           this.options = options;
@@ -4719,7 +4690,6 @@
       return text.replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
   }
 
-  /* @flow */
   var plainStringRE = /^"(?:[^"\\]|\\.)*"$|^'(?:[^'\\]|\\.)*'$/;
   // let the model AST transform translate v-model into appropriate
   // props bindings
@@ -4807,7 +4777,15 @@
       }
   }
 
-  /* @flow */
+  /**
+   * In SSR, the vdom tree is generated only once and never patched, so
+   * we can optimize most element / trees into plain string render functions.
+   * The SSR optimizer walks the AST tree to detect optimizable elements and trees.
+   *
+   * The criteria for SSR optimizability is quite a bit looser than static tree
+   * detection (which is designed for client re-render). In SSR we bail only for
+   * components/slots/custom directives.
+   */
   // optimizability constants
   var optimizability = {
       FALSE: 0,
@@ -4925,7 +4903,7 @@
           node.directives.some(function (d) { return d.name === 'model'; }));
   }
 
-  /* @flow */
+  // The SSR codegen is essentially extending the default codegen to handle
   // segment types
   var RAW = 0;
   var INTERPOLATION = 1;
@@ -5120,7 +5098,6 @@
       return mergedSegments.join('+');
   }
 
-  /* @flow */
   // these keywords should not appear inside expressions, but operators like
   // typeof, instanceof and in are allowed
   var prohibitedKeywordRE = new RegExp('\\b' +
@@ -5229,7 +5206,6 @@
       }
   }
 
-  /* @flow */
   var range = 2;
   function generateCodeFrame(source, start, end) {
       if (start === void 0) { start = 0; }
@@ -5280,7 +5256,6 @@
       return result;
   }
 
-  /* @flow */
   function createFunction(code, errors) {
       try {
           return new Function(code);
@@ -5371,7 +5346,6 @@
       };
   }
 
-  /* @flow */
   function createCompilerCreator(baseCompile) {
       return function createCompiler(baseOptions) {
           function compile(template, options) {
@@ -5429,7 +5403,6 @@
       };
   }
 
-  /* @flow */
   var createCompiler = createCompilerCreator(function baseCompile(template, options) {
       var ast = parse(template.trim(), options);
       optimize(ast, options);
@@ -5441,10 +5414,8 @@
       };
   });
 
-  /* @flow */
   var _a = createCompiler(baseOptions), compileToFunctions = _a.compileToFunctions;
 
-  /* @flow */
   // The template compiler attempts to minimize the need for normalization by
   // statically analyzing the template at compile time.
   //
@@ -5531,7 +5502,6 @@
       return res;
   }
 
-  /* @flow */
   var ssrHelpers = {
       _ssrEscape: escape,
       _ssrNode: renderStringNode$1,
@@ -5664,7 +5634,6 @@
       }
   }
 
-  /* @flow */
   var seenObjects = new _Set();
   /**
    * Recursively traverse an object to evoke all converted
@@ -5777,7 +5746,6 @@
       }
   }
 
-  /* @flow */
   function extractPropsFromVNodeData(data, Ctor, tag) {
       // we are only extracting raw values here.
       // validation and default values are handled in the child
@@ -5830,7 +5798,6 @@
       return false;
   }
 
-  /* @flow */
   var SIMPLE_NORMALIZE = 1;
   var ALWAYS_NORMALIZE = 2;
   // wrapper function for providing a more flexible interface
@@ -6023,7 +5990,6 @@
       return resolveAsset(this.$options, 'filters', id, true) || identity;
   }
 
-  /* @flow */
   function isKeyNotMatch(expect, actual) {
       if (Array.isArray(expect)) {
           return expect.indexOf(actual) === -1;
@@ -6050,7 +6016,6 @@
       }
   }
 
-  /* @flow */
   /**
    * Runtime helper for merging v-bind="object" into a VNode's data.
    */
@@ -6138,7 +6103,6 @@
       node.isOnce = isOnce;
   }
 
-  /* @flow */
   function bindObjectListeners(data, value) {
       if (value) {
           if (!isPlainObject(value)) {
@@ -6181,7 +6145,7 @@
       return res;
   }
 
-  /* @flow */
+  // helper to process dynamic keys for dynamic arguments in v-bind and v-on.
   function bindDynamicKeys(baseObj, values) {
       for (var i = 0; i < values.length; i += 2) {
           var key = values[i];
@@ -6203,7 +6167,6 @@
       return typeof value === 'string' ? symbol + value : value;
   }
 
-  /* @flow */
   function installRenderHelpers(target) {
       target._o = markOnce;
       target._n = toNumber;
@@ -6224,7 +6187,6 @@
       target._p = prependModifier;
   }
 
-  /* @flow */
   /**
    * Runtime helper for resolving raw children VNodes into a slot object.
    */
@@ -6270,7 +6232,6 @@
       return (node.isComment && !node.asyncFactory) || node.text === ' ';
   }
 
-  /* @flow */
   function normalizeScopedSlots(slots, normalSlots, prevSlots) {
       var res;
       var hasNormalSlots = Object.keys(normalSlots).length > 0;
@@ -6344,7 +6305,6 @@
       return function () { return slots[key]; };
   }
 
-  /* @flow */
   function createAsyncPlaceholder(factory, data, context, children, tag) {
       var node = createEmptyVNode();
       node.asyncFactory = factory;
@@ -6363,7 +6323,6 @@
       }
   }
 
-  /* @flow */
   var target;
   function add(event, fn) {
       target.$on(event, fn);
@@ -6386,7 +6345,6 @@
       target = undefined;
   }
 
-  /* @flow */
   var activeInstance = null;
   function updateChildComponent(vm, propsData, listeners, parentVnode, renderChildren) {
       // determine whether component has slot children
@@ -6502,7 +6460,6 @@
       popTarget();
   }
 
-  /* @flow */
   // Async edge case fix requires storing an event listener's attach timestamp.
   var getNow = Date.now;
   // Determine what event timestamp the browser is using. Annoyingly, the
@@ -6533,7 +6490,6 @@
       vm._inactive = false;
   }
 
-  /* @flow */
   function resolveInject(inject, vm) {
       if (inject) {
           // inject is :any because flow is not smart enough to figure out cached
@@ -6572,7 +6528,6 @@
       }
   }
 
-  /* @flow */
   function resolveConstructorOptions(Ctor) {
       var options = Ctor.options;
       if (Ctor.super) {
@@ -6610,7 +6565,6 @@
       return modified;
   }
 
-  /* @flow */
   function FunctionalRenderContext(data, props, children, parent, Ctor) {
       var _this = this;
       var options = Ctor.options;
@@ -6725,7 +6679,6 @@
       }
   }
 
-  /* @flow */
   // inline hooks to be invoked on component VNodes during patch
   var componentVNodeHooks = {
       init: function (vnode, hydrating) {
@@ -6919,7 +6872,6 @@
       }
   }
 
-  /* @flow */
   var warned = Object.create(null);
   var warnOnce = function (msg) {
       if (!warned[msg]) {
@@ -7305,7 +7257,6 @@
       };
   }
 
-  /* @flow */
   function createBasicRenderer(_a) {
       var _b = _a === void 0 ? {} : _a, _c = _b.modules, modules = _c === void 0 ? [] : _c, _d = _b.directives, directives = _d === void 0 ? {} : _d, _e = _b.isUnaryTag, isUnaryTag = _e === void 0 ? function () { return false; } : _e, cache = _b.cache;
       var render = createRenderFunction(modules, directives, isUnaryTag, cache);
@@ -7331,7 +7282,6 @@
       };
   }
 
-  /* @flow */
   var entryServerBasicRenderer = createBasicRenderer({
       // @ts-expect-error
       modules: modules$1,

@@ -9,7 +9,6 @@
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Vue = factory());
 }(this, (function () { 'use strict';
 
-  /* @flow */
   var emptyObject = Object.freeze({});
   // These helpers produce better VM code in JS engines due to their
   // explicitness and function inlining.
@@ -320,7 +319,6 @@
       'errorCaptured',
       'serverPrefetch' ];
 
-  /* @flow */
   var config = {
       /**
        * Option merge strategies (used in core/util/options)
@@ -399,7 +397,6 @@
       _lifecycleHooks: LIFECYCLE_HOOKS,
   };
 
-  /* @flow */
   /**
    * unicode letters used for parsing html tags, component names and property paths.
    * using https://www.w3.org/TR/html53/semantics-scripting.html#potentialcustomelementname
@@ -443,7 +440,6 @@
       };
   }
 
-  /* @flow */
   // can we use __proto__?
   var hasProto = '__proto__' in {};
   // Browser environment sniffing
@@ -534,7 +530,6 @@
       }());
   }
 
-  /* @flow */
   var warn = noop;
   var tip = noop;
   var generateComponentTrace; // work around flow check
@@ -1027,7 +1022,6 @@
       }
   }
 
-  /* @flow */
   /**
    * Option overwriting strategies are functions that handle
    * how to merge a parent option value and a child option
@@ -1406,7 +1400,6 @@
       return res;
   }
 
-  /* @flow */
   function validateProp(key, propOptions, propsData, vm) {
       var prop = propOptions[key];
       var absent = !hasOwn(propsData, key);
@@ -1682,7 +1675,7 @@
       }
   }
 
-  /* @flow */
+  /* globals MutationObserver */
   var isUsingMicroTask = false;
   var callbacks = [];
   var pending = false;
@@ -1865,7 +1858,6 @@
       };
   }
 
-  /* @flow */
   var seenObjects = new _Set();
   /**
    * Recursively traverse an object to evoke all converted
@@ -1988,7 +1980,6 @@
       }
   }
 
-  /* @flow */
   function mergeVNodeHook(def, hookKey, hook) {
       if (def instanceof VNode) {
           def = def.data.hook || (def.data.hook = {});
@@ -2021,7 +2012,6 @@
       def[hookKey] = invoker;
   }
 
-  /* @flow */
   function extractPropsFromVNodeData(data, Ctor, tag) {
       // we are only extracting raw values here.
       // validation and default values are handled in the child
@@ -2074,7 +2064,6 @@
       return false;
   }
 
-  /* @flow */
   // The template compiler attempts to minimize the need for normalization by
   // statically analyzing the template at compile time.
   //
@@ -2161,7 +2150,6 @@
       return res;
   }
 
-  /* @flow */
   function initProvide(vm) {
       var provide = vm.$options.provide;
       if (provide) {
@@ -2227,7 +2215,6 @@
       }
   }
 
-  /* @flow */
   /**
    * Runtime helper for resolving raw children VNodes into a slot object.
    */
@@ -2273,7 +2260,6 @@
       return (node.isComment && !node.asyncFactory) || node.text === ' ';
   }
 
-  /* @flow */
   function normalizeScopedSlots(slots, normalSlots, prevSlots) {
       var res;
       var hasNormalSlots = Object.keys(normalSlots).length > 0;
@@ -2426,7 +2412,6 @@
       return resolveAsset(this.$options, 'filters', id, true) || identity;
   }
 
-  /* @flow */
   function isKeyNotMatch(expect, actual) {
       if (Array.isArray(expect)) {
           return expect.indexOf(actual) === -1;
@@ -2453,7 +2438,6 @@
       }
   }
 
-  /* @flow */
   /**
    * Runtime helper for merging v-bind="object" into a VNode's data.
    */
@@ -2541,7 +2525,6 @@
       node.isOnce = isOnce;
   }
 
-  /* @flow */
   function bindObjectListeners(data, value) {
       if (value) {
           if (!isPlainObject(value)) {
@@ -2584,7 +2567,7 @@
       return res;
   }
 
-  /* @flow */
+  // helper to process dynamic keys for dynamic arguments in v-bind and v-on.
   function bindDynamicKeys(baseObj, values) {
       for (var i = 0; i < values.length; i += 2) {
           var key = values[i];
@@ -2606,7 +2589,6 @@
       return typeof value === 'string' ? symbol + value : value;
   }
 
-  /* @flow */
   function installRenderHelpers(target) {
       target._o = markOnce;
       target._n = toNumber;
@@ -2627,7 +2609,6 @@
       target._p = prependModifier;
   }
 
-  /* @flow */
   function FunctionalRenderContext(data, props, children, parent, Ctor) {
       var _this = this;
       var options = Ctor.options;
@@ -2742,7 +2723,6 @@
       }
   }
 
-  /* @flow */
   // inline hooks to be invoked on component VNodes during patch
   var componentVNodeHooks = {
       init: function (vnode, hydrating) {
@@ -2936,7 +2916,6 @@
       }
   }
 
-  /* @flow */
   var SIMPLE_NORMALIZE = 1;
   var ALWAYS_NORMALIZE = 2;
   // wrapper function for providing a more flexible interface
@@ -3059,7 +3038,6 @@
       }
   }
 
-  /* @flow */
   function initRender(vm) {
       vm._vnode = null; // the root of the child tree
       vm._staticTrees = null; // v-once cached trees
@@ -3155,7 +3133,6 @@
       };
   }
 
-  /* @flow */
   function ensureCtor(comp, base) {
       if (comp.__esModule || (hasSymbol && comp[Symbol.toStringTag] === 'Module')) {
           comp = comp.default;
@@ -3272,13 +3249,11 @@
       }
   }
 
-  /* @flow */
   function isAsyncPlaceholder(node) {
       // @ts-expect-error not really boolean type
       return node.isComment && node.asyncFactory;
   }
 
-  /* @flow */
   function getFirstComponentChild(children) {
       if (Array.isArray(children)) {
           for (var i = 0; i < children.length; i++) {
@@ -3290,7 +3265,6 @@
       }
   }
 
-  /* @flow */
   function initEvents(vm) {
       vm._events = Object.create(null);
       vm._hasHookEvent = false;
@@ -3410,7 +3384,6 @@
       };
   }
 
-  /* @flow */
   var activeInstance = null;
   var isUpdatingChildComponent = false;
   function setActiveInstance(vm) {
@@ -3707,7 +3680,6 @@
       popTarget();
   }
 
-  /* @flow */
   var MAX_UPDATE_COUNT = 100;
   var queue = [];
   var activatedChildren = [];
@@ -3863,7 +3835,6 @@
       }
   }
 
-  /* @flow */
   var uid$1 = 0;
   /**
    * A watcher parses an expression, collects dependencies,
@@ -4059,7 +4030,6 @@
       return Watcher;
   }());
 
-  /* @flow */
   var sharedPropertyDefinition = {
       enumerable: true,
       configurable: true,
@@ -4346,7 +4316,6 @@
       };
   }
 
-  /* @flow */
   var uid = 0;
   function initMixin$1(Vue) {
       Vue.prototype._init = function (options) {
@@ -4468,7 +4437,6 @@
   //@ts-ignore
   renderMixin(Vue);
 
-  /* @flow */
   function initUse(Vue) {
       Vue.use = function (plugin) {
           var installedPlugins = this._installedPlugins || (this._installedPlugins = []);
@@ -4489,7 +4457,6 @@
       };
   }
 
-  /* @flow */
   function initMixin(Vue) {
       Vue.mixin = function (mixin) {
           this.options = mergeOptions(this.options, mixin);
@@ -4497,7 +4464,6 @@
       };
   }
 
-  /* @flow */
   function initExtend(Vue) {
       /**
        * Each instance constructor, including Vue, has a unique
@@ -4575,7 +4541,6 @@
       }
   }
 
-  /* @flow */
   function initAssetRegisters(Vue) {
       /**
        * Create asset registration methods.
@@ -4606,7 +4571,6 @@
       });
   }
 
-  // @ts-nocheck
   function getComponentName(opts) {
       return opts && (opts.Ctor.options.name || opts.tag);
   }
@@ -4638,6 +4602,7 @@
   function pruneCacheEntry(cache, key, keys, current) {
       var cached = cache[key];
       if (cached && (!current || cached.tag !== current.tag)) {
+          //@ts-expect-error has void type
           cached.componentInstance.$destroy();
       }
       cache[key] = null;
@@ -4717,7 +4682,6 @@
       KeepAlive: KeepAlive,
   };
 
-  /* @flow */
   function initGlobalAPI(Vue) {
       // config
       var configDef = {};
@@ -4775,7 +4739,6 @@
   });
   Vue.version = '2.6.12';
 
-  /* @flow */
   // these are reserved for web because they are directly compiled away
   // during template compilation
   var isReservedAttr = makeMap('style,class');
@@ -4814,7 +4777,6 @@
       return val == null || val === false;
   };
 
-  /* @flow */
   function genClassForVnode(vnode) {
       var data = vnode.data;
       var parentNode = vnode;
@@ -4885,7 +4847,6 @@
       return res;
   }
 
-  /* @flow */
   var namespaceMap = {
       svg: 'http://www.w3.org/2000/svg',
       math: 'http://www.w3.org/1998/Math/MathML',
@@ -4946,7 +4907,6 @@
   }
   var isTextInputType = makeMap('text,number,password,search,email,tel,url');
 
-  /* @flow */
   /**
    * Query an element selector if it's not an element already.
    */
@@ -4964,7 +4924,6 @@
       }
   }
 
-  /* @flow */
   function createElement(tagName, vnode) {
       var elm = document.createElement(tagName);
       if (tagName !== 'select') {
@@ -5028,7 +4987,6 @@
     setStyleScope: setStyleScope
   });
 
-  /* @flow */
   var ref = {
       create: function (_, vnode) {
           registerRef(vnode);
@@ -5809,7 +5767,6 @@
       };
   }
 
-  /* @flow */
   var directives = {
       create: updateDirectives,
       update: updateDirectives,
@@ -5917,7 +5874,6 @@
 
   var baseModules = [ref, directives];
 
-  /* @flow */
   function updateAttrs(oldVnode, vnode) {
       var opts = vnode.componentOptions;
       if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) {
@@ -6021,7 +5977,6 @@
       update: updateAttrs,
   };
 
-  /* @flow */
   function updateClass(oldVnode, vnode) {
       var el = vnode.elm;
       var data = vnode.data;
@@ -6049,13 +6004,11 @@
       update: updateClass,
   };
 
-  /* @flow */
   // in some cases, the event used has to be determined at runtime
   // so we used some reserved tokens during compile.
   var RANGE_TOKEN = '__r';
   var CHECKBOX_RADIO_TOKEN = '__c';
 
-  /* @flow */
   // normalize v-model event tokens that can only be determined at runtime.
   // it's important to place the event as the first in the array because
   // the whole point is ensuring the v-model callback gets called before
@@ -6144,7 +6097,6 @@
       update: updateDOMListeners,
   };
 
-  /* @flow */
   var svgContainer;
   function updateDOMProps(oldVnode, vnode) {
       if (isUndef(oldVnode.data.domProps) && isUndef(vnode.data.domProps)) {
@@ -6256,7 +6208,6 @@
       update: updateDOMProps,
   };
 
-  /* @flow */
   var parseStyleText = cached(function (cssText) {
       var res = {};
       var listDelimiter = /;(?![^(]*\))/g;
@@ -6316,7 +6267,6 @@
       return res;
   }
 
-  /* @flow */
   var cssVarRE = /^--/;
   var importantRE = /\s*!important$/;
   var setProp = function (el, name, val) {
@@ -6397,7 +6347,6 @@
       update: updateStyle,
   };
 
-  /* @flow */
   var whitespaceRE = /\s+/;
   /**
    * Add class with compatibility for SVG since classList is not supported on
@@ -6627,7 +6576,6 @@
       return Number(s.slice(0, -1).replace(',', '.')) * 1000;
   }
 
-  /* @flow */
   function enter(vnode, toggleDisplay) {
       var el = vnode.elm;
       // call leave callback now
@@ -6880,7 +6828,6 @@
 
   var platformModules = [attrs, klass, events, domProps, style, transition];
 
-  /* @flow */
   // the directive module should be applied last, after all
   // built-in modules have been applied.
   var modules = platformModules.concat(baseModules);
@@ -7018,7 +6965,6 @@
       el.dispatchEvent(e);
   }
 
-  /* @flow */
   // recursively search for possible transition defined inside the component root
   function locateNode(vnode) {
       // @ts-expect-error
@@ -7079,7 +7025,7 @@
       show: show,
   };
 
-  /* @flow */
+  // Provides transition support for a single element/component.
   var transitionProps = {
       name: String,
       appear: Boolean,
@@ -7460,8 +7406,6 @@
           }
       }, 0);
   }
-
-  /* @flow */
 
   return Vue;
 
