@@ -1,4 +1,3 @@
-/* @flow */
 
 import { escape, noUnitNumericStyleProps } from '../util'
 import { hyphenate } from 'shared/util'

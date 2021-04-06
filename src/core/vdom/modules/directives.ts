@@ -1,4 +1,3 @@
-/* @flow */
 
 import { emptyNode } from 'core/vdom/patch'
 import { resolveAsset, handleError } from 'core/util/index'

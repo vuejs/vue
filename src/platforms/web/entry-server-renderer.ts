@@ -1,4 +1,3 @@
-/* @flow */
 
 process.env.VUE_ENV = 'server'
 

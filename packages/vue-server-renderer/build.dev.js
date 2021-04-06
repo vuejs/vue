@@ -4,7 +4,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var stream = require('stream');
 
-/* @flow */
 var emptyObject = Object.freeze({});
 // These helpers produce better VM code in JS engines due to their
 // explicitness and function inlining.
@@ -257,7 +256,6 @@ function looseIndexOf(arr, val) {
     return -1;
 }
 
-/* @flow */
 var isAttr = makeMap('accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' +
     'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' +
     'checked,cite,class,code,codebase,color,cols,colspan,content,' +
@@ -342,7 +340,6 @@ var noUnitNumericStyleProps = {
     'stroke-width': true,
 };
 
-/* @flow */
 // these are reserved for web because they are directly compiled away
 // during template compilation
 makeMap('style,class');
@@ -374,7 +371,6 @@ var isFalsyAttrValue = function (val) {
     return val == null || val === false;
 };
 
-/* @flow */
 function renderAttrs$1(node) {
     var attrs = node.data.attrs;
     var res = '';
@@ -494,7 +490,6 @@ function cloneVNode(vnode) {
     return cloned;
 }
 
-/* @flow */
 function renderDOMProps$1(node) {
     var props = node.data.domProps;
     var res = '';
@@ -537,7 +532,6 @@ function setText(node, text, raw) {
     node.children = [child];
 }
 
-/* @flow */
 /**
  * unicode letters used for parsing html tags, component names and property paths.
  * using https://www.w3.org/TR/html53/semantics-scripting.html#potentialcustomelementname
@@ -556,7 +550,6 @@ function def(obj, key, val, enumerable) {
     });
 }
 
-/* @flow */
 // can we use __proto__?
 var hasProto = '__proto__' in {};
 // Browser environment sniffing
@@ -660,7 +653,6 @@ var LIFECYCLE_HOOKS = [
     'errorCaptured',
     'serverPrefetch' ];
 
-/* @flow */
 var config = {
     /**
      * Option merge strategies (used in core/util/options)
@@ -739,7 +731,6 @@ var config = {
     _lifecycleHooks: LIFECYCLE_HOOKS,
 };
 
-/* @flow */
 var warn$2 = noop$1;
 var tip = noop$1;
 var generateComponentTrace; // work around flow check
@@ -1125,7 +1116,6 @@ function dependArray(value) {
     }
 }
 
-/* @flow */
 /**
  * Option overwriting strategies are functions that handle
  * how to merge a parent option value and a child option
@@ -1504,7 +1494,6 @@ function resolveAsset(options, type, id, warnMissing) {
     return res;
 }
 
-/* @flow */
 function validateProp(key, propOptions, propsData, vm) {
     var prop = propOptions[key];
     var absent = !hasOwn(propsData, key);
@@ -1768,7 +1757,6 @@ function logError(err, vm, info) {
     }
 }
 
-/* @flow */
 var callbacks = [];
 function flushCallbacks() {
     var copies = callbacks.slice(0);
@@ -1803,7 +1791,6 @@ else if (!isIE &&
 else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) ;
 else ;
 
-/* @flow */
 function genClassForVnode(vnode) {
     var data = vnode.data;
     var parentNode = vnode;
@@ -1874,7 +1861,6 @@ function stringifyObject(value) {
     return res;
 }
 
-/* @flow */
 var isHTMLTag = makeMap('html,body,base,head,link,meta,style,title,' +
     'address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' +
     'div,dd,dl,dt,figcaption,figure,picture,hr,img,li,main,ol,p,pre,ul,' +
@@ -1907,7 +1893,6 @@ function getTagNamespace(tag) {
 }
 makeMap('text,number,password,search,email,tel,url');
 
-/* @flow */
 function renderClass(node) {
     var classList = genClassForVnode(node);
     if (classList !== '') {
@@ -1915,7 +1900,6 @@ function renderClass(node) {
     }
 }
 
-/* @flow */
 var parseStyleText = cached(function (cssText) {
     var res = {};
     var listDelimiter = /;(?![^(]*\))/g;
@@ -1975,7 +1959,6 @@ function getStyle(vnode, checkChild) {
     return res;
 }
 
-/* @flow */
 function genStyle(style) {
     var styleText = '';
     for (var key in style) {
@@ -2012,7 +1995,6 @@ function renderStyle(vnode) {
 
 var modules$1 = [renderAttrs$1, renderDOMProps$1, renderClass, renderStyle];
 
-/* @flow */
 function show(node, dir) {
     if (!dir.value) {
         var style = node.data.style || (node.data.style = {});
@@ -2025,7 +2007,6 @@ function show(node, dir) {
     }
 }
 
-/* @flow */
 // this is only applied for <select v-model> because it is the only edge case
 // that must be done at runtime instead of compile time.
 function model$2(node, dir) {
@@ -2068,7 +2049,6 @@ var baseDirectives$1 = {
     model: model$2,
 };
 
-/* @flow */
 var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
     'link,meta,param,source,track,wbr');
 // Elements that you can, intentionally, leave open
@@ -2113,7 +2093,6 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-/* @flow */
 var MAX_STACK_DEPTH = 800;
 var noop = function (_) { return _; };
 var defer = typeof process !== 'undefined' && process.nextTick
@@ -2159,7 +2138,6 @@ function createWriteFunction(write, onError) {
     return cachedWrite;
 }
 
-/* @flow */
 var RenderStream = /** @class */ (function (_super) {
     __extends(RenderStream, _super);
     function RenderStream(render) {
@@ -2234,7 +2212,6 @@ var RenderStream = /** @class */ (function (_super) {
     return RenderStream;
 }(stream.Readable));
 
-/* @flow */
 var RenderContext = /** @class */ (function () {
     function RenderContext(options) {
         this.userContext = options.userContext;
@@ -2332,7 +2309,6 @@ function normalizeAsync(cache, method) {
     }
 }
 
-/* @flow */
 var validDivisionCharRE = /[\w).+\-_$\]]/;
 function parseFilters(exp) {
     var inSingle = false;
@@ -2456,7 +2432,6 @@ function wrapFilter(exp, filter) {
     }
 }
 
-/* @flow */
 var defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g;
 var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
 var buildRegex = cached(function (delimiters) {
@@ -2497,7 +2472,6 @@ function parseText(text, delimiters) {
     };
 }
 
-/* @flow */
 /* eslint-disable no-unused-vars */
 function baseWarn(msg, range) {
     console.error("[Vue compiler]: " + msg);
@@ -2664,7 +2638,6 @@ function rangeSetItem(item, range) {
     return item;
 }
 
-/* @flow */
 function transformNode$1(el, options) {
     var warn = options.warn || baseWarn;
     var staticClass = getAndRemoveAttr(el, 'class');
@@ -2701,7 +2674,6 @@ var klass = {
     genData: genData$2,
 };
 
-/* @flow */
 function transformNode(el, options) {
     var warn = options.warn || baseWarn;
     var staticStyle = getAndRemoveAttr(el, 'style');
@@ -3026,7 +2998,6 @@ function parseHTML(html, options) {
     }
 }
 
-/* @flow */
 /**
  * Cross-platform code generation for component v-model
  */
@@ -3152,7 +3123,6 @@ function parseString(chr) {
     }
 }
 
-/* @flow */
 var he = require('he');
 var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:|^#/;
@@ -3951,7 +3921,6 @@ function checkForAliasModel(el, value) {
     }
 }
 
-/* @flow */
 function preTransformNode(el, options) {
     if (el.tag === 'input') {
         var map = el.attrsMap;
@@ -4019,7 +3988,6 @@ var model$1 = {
 
 var modules = [klass, style, model$1];
 
-/* @flow */
 var warn;
 // in some cases, the event used has to be determined at runtime
 // so we used some reserved tokens during compile.
@@ -4135,14 +4103,12 @@ function genDefaultModel(el, value, modifiers) {
     }
 }
 
-/* @flow */
 function text(el, dir) {
     if (dir.value) {
         addProp(el, 'textContent', "_s(" + dir.value + ")", dir);
     }
 }
 
-/* @flow */
 function html(el, dir) {
     if (dir.value) {
         addProp(el, 'innerHTML', "_s(" + dir.value + ")", dir);
@@ -4155,7 +4121,6 @@ var directives = {
     html: html,
 };
 
-/* @flow */
 var baseOptions = {
     expectHTML: true,
     modules: modules,
@@ -4170,7 +4135,6 @@ var baseOptions = {
     staticKeys: genStaticKeys(modules),
 };
 
-/* @flow */
 var fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/;
 var fnInvokeRE = /\([^)]*?\);*$/;
 var simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/;
@@ -4322,7 +4286,6 @@ function genFilterCode(key) {
         ")");
 }
 
-/* @flow */
 function on(el, dir) {
     if (dir.modifiers) {
         warn$2("v-on without argument does not support modifiers.");
@@ -4330,21 +4293,18 @@ function on(el, dir) {
     el.wrapListeners = function (code) { return "_g(" + code + "," + dir.value + ")"; };
 }
 
-/* @flow */
 function bind(el, dir) {
     el.wrapData = function (code) {
         return "_b(" + code + ",'" + el.tag + "'," + dir.value + "," + (dir.modifiers && dir.modifiers.prop ? 'true' : 'false') + (dir.modifiers && dir.modifiers.sync ? ',true' : '') + ")";
     };
 }
 
-/* @flow */
 var baseDirectives = {
     on: on,
     bind: bind,
     cloak: noop$1,
 };
 
-/* @flow */
 var CodegenState = /** @class */ (function () {
     function CodegenState(options) {
         this.options = options;
@@ -4825,7 +4785,6 @@ function transformSpecialNewlines(text) {
     return text.replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 }
 
-/* @flow */
 var plainStringRE = /^"(?:[^"\\]|\\.)*"$|^'(?:[^'\\]|\\.)*'$/;
 // let the model AST transform translate v-model into appropriate
 // props bindings
@@ -4913,7 +4872,6 @@ function genStyleSegments(staticStyle, parsedStaticStyle, styleBinding, vShowExp
     }
 }
 
-/* @flow */
 // optimizability constants
 var optimizability = {
     FALSE: 0,
@@ -5031,7 +4989,6 @@ function isSelectWithModel(node) {
         node.directives.some(function (d) { return d.name === 'model'; }));
 }
 
-/* @flow */
 // segment types
 var RAW = 0;
 var INTERPOLATION = 1;
@@ -5226,7 +5183,6 @@ function flattenSegments(segments) {
     return mergedSegments.join('+');
 }
 
-/* @flow */
 // these keywords should not appear inside expressions, but operators like
 // typeof, instanceof and in are allowed
 var prohibitedKeywordRE = new RegExp('\\b' +
@@ -5335,7 +5291,6 @@ function checkFunctionParameterExpression(exp, text, warn, range) {
     }
 }
 
-/* @flow */
 var range = 2;
 function generateCodeFrame(source, start, end) {
     if (start === void 0) { start = 0; }
@@ -5386,7 +5341,6 @@ function repeat(str, n) {
     return result;
 }
 
-/* @flow */
 function createFunction(code, errors) {
     try {
         return new Function(code);
@@ -5477,7 +5431,6 @@ function createCompileToFunctionFn(compile) {
     };
 }
 
-/* @flow */
 function createCompilerCreator(baseCompile) {
     return function createCompiler(baseOptions) {
         function compile(template, options) {
@@ -5535,7 +5488,6 @@ function createCompilerCreator(baseCompile) {
     };
 }
 
-/* @flow */
 var createCompiler = createCompilerCreator(function baseCompile(template, options) {
     var ast = parse(template.trim(), options);
     optimize(ast, options);
@@ -5547,10 +5499,8 @@ var createCompiler = createCompilerCreator(function baseCompile(template, option
     };
 });
 
-/* @flow */
 var _a = createCompiler(baseOptions), compileToFunctions = _a.compileToFunctions;
 
-/* @flow */
 // The template compiler attempts to minimize the need for normalization by
 // statically analyzing the template at compile time.
 //
@@ -5637,7 +5587,6 @@ function normalizeArrayChildren(children, nestedIndex) {
     return res;
 }
 
-/* @flow */
 var ssrHelpers = {
     _ssrEscape: escape,
     _ssrNode: renderStringNode$1,
@@ -5770,7 +5719,6 @@ function renderSSRStyle(staticStyle, dynamic, extra) {
     }
 }
 
-/* @flow */
 var seenObjects = new _Set();
 /**
  * Recursively traverse an object to evoke all converted
@@ -5883,7 +5831,6 @@ function updateListeners(on, oldOn, add, remove, createOnceHandler, vm) {
     }
 }
 
-/* @flow */
 function extractPropsFromVNodeData(data, Ctor, tag) {
     // we are only extracting raw values here.
     // validation and default values are handled in the child
@@ -5936,7 +5883,6 @@ function checkProp(res, hash, key, altKey, preserve) {
     return false;
 }
 
-/* @flow */
 var SIMPLE_NORMALIZE = 1;
 var ALWAYS_NORMALIZE = 2;
 // wrapper function for providing a more flexible interface
@@ -6129,7 +6075,6 @@ function resolveFilter(id) {
     return resolveAsset(this.$options, 'filters', id, true) || identity;
 }
 
-/* @flow */
 function isKeyNotMatch(expect, actual) {
     if (Array.isArray(expect)) {
         return expect.indexOf(actual) === -1;
@@ -6156,7 +6101,6 @@ function checkKeyCodes(eventKeyCode, key, builtInKeyCode, eventKeyName, builtInK
     }
 }
 
-/* @flow */
 /**
  * Runtime helper for merging v-bind="object" into a VNode's data.
  */
@@ -6244,7 +6188,6 @@ function markStaticNode(node, key, isOnce) {
     node.isOnce = isOnce;
 }
 
-/* @flow */
 function bindObjectListeners(data, value) {
     if (value) {
         if (!isPlainObject(value)) {
@@ -6287,7 +6230,6 @@ hasDynamicKeys, contentHashKey) {
     return res;
 }
 
-/* @flow */
 function bindDynamicKeys(baseObj, values) {
     for (var i = 0; i < values.length; i += 2) {
         var key = values[i];
@@ -6309,7 +6251,6 @@ function prependModifier(value, symbol) {
     return typeof value === 'string' ? symbol + value : value;
 }
 
-/* @flow */
 function installRenderHelpers(target) {
     target._o = markOnce;
     target._n = toNumber;
@@ -6330,7 +6271,6 @@ function installRenderHelpers(target) {
     target._p = prependModifier;
 }
 
-/* @flow */
 /**
  * Runtime helper for resolving raw children VNodes into a slot object.
  */
@@ -6376,7 +6316,6 @@ function isWhitespace(node) {
     return (node.isComment && !node.asyncFactory) || node.text === ' ';
 }
 
-/* @flow */
 function normalizeScopedSlots(slots, normalSlots, prevSlots) {
     var res;
     var hasNormalSlots = Object.keys(normalSlots).length > 0;
@@ -6450,7 +6389,6 @@ function proxyNormalSlot(slots, key) {
     return function () { return slots[key]; };
 }
 
-/* @flow */
 function createAsyncPlaceholder(factory, data, context, children, tag) {
     var node = createEmptyVNode();
     node.asyncFactory = factory;
@@ -6469,7 +6407,6 @@ function resolveAsyncComponent(factory, baseCtor) {
     }
 }
 
-/* @flow */
 var target;
 function add(event, fn) {
     target.$on(event, fn);
@@ -6492,7 +6429,6 @@ function updateComponentListeners(vm, listeners, oldListeners) {
     target = undefined;
 }
 
-/* @flow */
 var activeInstance = null;
 function updateChildComponent(vm, propsData, listeners, parentVnode, renderChildren) {
     // determine whether component has slot children
@@ -6608,7 +6544,6 @@ function callHook(vm, hook) {
     popTarget();
 }
 
-/* @flow */
 // Async edge case fix requires storing an event listener's attach timestamp.
 var getNow = Date.now;
 // Determine what event timestamp the browser is using. Annoyingly, the
@@ -6639,7 +6574,6 @@ function queueActivatedComponent(vm) {
     vm._inactive = false;
 }
 
-/* @flow */
 function resolveInject(inject, vm) {
     if (inject) {
         // inject is :any because flow is not smart enough to figure out cached
@@ -6678,7 +6612,6 @@ function resolveInject(inject, vm) {
     }
 }
 
-/* @flow */
 function resolveConstructorOptions(Ctor) {
     var options = Ctor.options;
     if (Ctor.super) {
@@ -6716,7 +6649,6 @@ function resolveModifiedOptions(Ctor) {
     return modified;
 }
 
-/* @flow */
 function FunctionalRenderContext(data, props, children, parent, Ctor) {
     var _this = this;
     var options = Ctor.options;
@@ -6831,7 +6763,6 @@ function mergeProps(to, from) {
     }
 }
 
-/* @flow */
 // inline hooks to be invoked on component VNodes during patch
 var componentVNodeHooks = {
     init: function (vnode, hydrating) {
@@ -7025,7 +6956,6 @@ function transformModel(options, data) {
     }
 }
 
-/* @flow */
 var warned = Object.create(null);
 var warnOnce = function (msg) {
     if (!warned[msg]) {
@@ -7411,7 +7341,6 @@ function createRenderFunction(modules, directives, isUnaryTag, cache) {
     };
 }
 
-/* @flow */
 var isJS = function (file) { return /\.js(\?[^.]+)?$/.test(file); };
 var isCSS = function (file) { return /\.css(\?[^.]+)?$/.test(file); };
 function createPromiseCallback() {
@@ -7428,7 +7357,6 @@ function createPromiseCallback() {
     return { promise: promise, cb: cb };
 }
 
-/* @flow */
 var TemplateStream = /** @class */ (function (_super) {
     __extends(TemplateStream, _super);
     function TemplateStream(renderer, template, context) {
@@ -7489,7 +7417,6 @@ var TemplateStream = /** @class */ (function (_super) {
     return TemplateStream;
 }(stream.Transform));
 
-/* @flow */
 var compile = require('lodash.template');
 var compileOptions = {
     escape: /{{([^{][\s\S]+?[^}])}}/g,
@@ -7518,7 +7445,6 @@ function parseTemplate(template, contentPlaceholder) {
     };
 }
 
-/* @flow */
 function createMapper(clientManifest) {
     var map = createMap(clientManifest);
     // map server-side moduleIds to client-side files
@@ -7559,7 +7485,6 @@ function mapIdToFile(id, clientManifest) {
     return files;
 }
 
-/* @flow */
 var path$2 = require('path');
 var serialize = require('serialize-javascript');
 var TemplateRenderer = /** @class */ (function () {
@@ -7798,7 +7723,6 @@ function getPreloadType(ext) {
     }
 }
 
-/* @flow */
 function createRenderer$1(_a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.modules, modules = _c === void 0 ? [] : _c, _d = _b.directives, directives = _d === void 0 ? {} : _d, _e = _b.isUnaryTag, isUnaryTag = _e === void 0 ? function () { return false; } : _e, template = _b.template, inject = _b.inject, cache = _b.cache, shouldPreload = _b.shouldPreload, shouldPrefetch = _b.shouldPrefetch, clientManifest = _b.clientManifest, serializer = _b.serializer;
     var render = createRenderFunction(modules, directives, isUnaryTag, cache);
@@ -8061,7 +7985,6 @@ function createBundleRunner(entry, files, basedir, runInNewContext) {
     }
 }
 
-/* @flow */
 var SourceMapConsumer = require('source-map').SourceMapConsumer;
 var filenameRE = /\(([^)]+\.js):(\d+):(\d+)\)$/;
 function createSourceMapConsumers(rawMaps) {
@@ -8103,7 +8026,6 @@ function rewriteTraceLine(trace, mapConsumers) {
     }
 }
 
-/* @flow */
 var fs = require('fs');
 var path = require('path');
 var PassThrough = require('stream').PassThrough;
@@ -8220,7 +8142,6 @@ function createBundleRendererCreator(createRenderer) {
     };
 }
 
-/* @flow */
 process.env.VUE_ENV = 'server';
 function createRenderer(options) {
     if (options === void 0) { options = {}; }

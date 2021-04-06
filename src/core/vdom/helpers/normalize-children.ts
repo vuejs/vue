@@ -1,4 +1,3 @@
-/* @flow */
 
 import VNode, { createTextVNode } from 'core/vdom/vnode'
 import { isFalse, isTrue, isDef, isUndef, isPrimitive } from 'shared/util'

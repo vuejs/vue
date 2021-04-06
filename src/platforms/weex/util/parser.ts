@@ -1,4 +1,3 @@
-/* @flow */
 
 // import { warn } from 'core/util/index'
 

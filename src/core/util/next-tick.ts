@@ -1,4 +1,3 @@
-/* @flow */
 /* globals MutationObserver */
 
 import { noop } from 'shared/util'

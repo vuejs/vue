@@ -1,4 +1,3 @@
-/* @flow */
 
 import { genHandlers } from './events'
 import baseDirectives from '../directives/index'

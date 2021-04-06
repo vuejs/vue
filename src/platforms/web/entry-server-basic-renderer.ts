@@ -1,4 +1,3 @@
-/* @flow */
 
 import modules from './server/modules/index'
 import directives from './server/directives/index'

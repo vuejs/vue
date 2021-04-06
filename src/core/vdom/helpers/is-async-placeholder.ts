@@ -1,4 +1,3 @@
-/* @flow */
 
 import VNode from '../vnode'
 

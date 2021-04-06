@@ -1,4 +1,3 @@
-/* @flow */
 
 /**
  * Cross-platform code generation for component v-model

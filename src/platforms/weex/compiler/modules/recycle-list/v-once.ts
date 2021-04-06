@@ -1,4 +1,3 @@
-/* @flow */
 
 import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
 

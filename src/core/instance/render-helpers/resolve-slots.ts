@@ -1,4 +1,3 @@
-/* @flow */
 
 import type VNode from 'core/vdom/vnode'
 import type { Component } from 'typescript/component'

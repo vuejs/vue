@@ -1,4 +1,3 @@
-/* @flow */
 
 /**
  * Creates a mapper that maps components used during a server-side render

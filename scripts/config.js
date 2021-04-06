@@ -5,7 +5,7 @@ const cjs = require('@rollup/plugin-commonjs')
 const replace = require('@rollup/plugin-replace')
 const node = require('@rollup/plugin-node-resolve').nodeResolve
 const ts = require('rollup-plugin-typescript2')
-const babel = require('@rollup/plugin-babel').babel
+// const babel = require('@rollup/plugin-babel').babel
 
 const version = process.env.VERSION || require('../package.json').version
 const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version

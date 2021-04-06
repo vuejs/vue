@@ -1,4 +1,3 @@
-/* @flow */
 
 /**
  * Expand input[v-model] with dynamic type bindings into v-if-else chains

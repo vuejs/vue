@@ -1,4 +1,3 @@
-/* @flow */
 
 export default function bind(el: ASTElement, dir: ASTDirective) {
   el.wrapData = (code: string) => {

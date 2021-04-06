@@ -1,4 +1,3 @@
-/* @flow */
 
 import { escape, isSSRUnsafeAttr } from 'web/server/util'
 import { isObject, extend } from 'shared/util'

@@ -1,4 +1,3 @@
-/* @flow */
 
 // const Transform = require("stream").Transform;
 import type TemplateRenderer from './index'

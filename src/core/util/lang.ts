@@ -1,4 +1,3 @@
-/* @flow */
 
 /**
  * unicode letters used for parsing html tags, component names and property paths.

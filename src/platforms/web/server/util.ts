@@ -1,4 +1,3 @@
-/* @flow */
 
 import { makeMap } from 'shared/util'
 

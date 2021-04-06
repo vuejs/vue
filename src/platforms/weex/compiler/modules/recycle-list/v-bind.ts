@@ -1,4 +1,3 @@
-/* @flow */
 
 import { camelize } from 'shared/util'
 import { generateBinding } from 'weex/util/parser'

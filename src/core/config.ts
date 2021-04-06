@@ -1,4 +1,3 @@
-/* @flow */
 
 import { no, noop, identity } from 'shared/util'
 

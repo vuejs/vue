@@ -1,4 +1,3 @@
-/* @flow */
 
 import { escape } from '../util'
 import { genClassForVnode } from 'web/util/index'

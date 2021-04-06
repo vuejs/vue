@@ -1,4 +1,3 @@
-/* @flow */
 
 import { isDef, isUndef } from 'shared/util'
 import type { VNodeData } from 'typescript/vnode'

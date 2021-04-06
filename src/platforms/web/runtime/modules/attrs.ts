@@ -1,4 +1,3 @@
-/* @flow */
 
 import { isIE, isIE9, isEdge } from 'core/util/env'
 

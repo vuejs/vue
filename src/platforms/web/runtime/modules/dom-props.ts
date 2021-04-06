@@ -1,4 +1,3 @@
-/* @flow */
 
 import { isDef, isUndef, extend, toNumber } from 'shared/util'
 import type { VNodeWithData } from 'typescript/vnode'

@@ -1,4 +1,3 @@
-/* @flow */
 
 import config from '../config'
 import VNode, { createEmptyVNode } from './vnode'

@@ -1,4 +1,3 @@
-/* @flow */
 
 const compile = require('lodash.template')
 const compileOptions = {

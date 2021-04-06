@@ -1,4 +1,3 @@
-/* @flow */
 
 import { def } from 'core/util/lang'
 import { normalizeChildren } from 'core/vdom/helpers/normalize-children'

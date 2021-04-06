@@ -1,4 +1,3 @@
-/* @flow */
 
 import { addHandler, addAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'

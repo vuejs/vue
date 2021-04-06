@@ -1,4 +1,3 @@
-/* @flow */
 
 // The SSR codegen is essentially extending the default codegen to handle
 // SSR-optimizable nodes and turn them into string render fns. In cases where

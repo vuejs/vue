@@ -1,4 +1,3 @@
-/* @flow */
 
 export const isJS = (file: string): boolean => /\.js(\?[^.]+)?$/.test(file)
 

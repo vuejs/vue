@@ -1,4 +1,3 @@
-/* @flow */
 
 import { preTransformRecycleList } from './recycle-list'
 import { postTransformComponent } from './component'

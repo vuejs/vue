@@ -1,4 +1,3 @@
-/* @flow */
 
 const validDivisionCharRE = /[\w).+\-_$\]]/
 

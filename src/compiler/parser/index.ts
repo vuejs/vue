@@ -1,4 +1,3 @@
-/* @flow */
 
 const he = require('he')
 // import * as he from 'he'

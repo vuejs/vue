@@ -1,4 +1,3 @@
-/* @flow */
 
 import type { VNodeDirective, VNodeWithData } from 'typescript/vnode'
 

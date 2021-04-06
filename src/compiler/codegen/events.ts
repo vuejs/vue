@@ -1,4 +1,3 @@
-/* @flow */
 
 const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/
 const fnInvokeRE = /\([^)]*?\);*$/

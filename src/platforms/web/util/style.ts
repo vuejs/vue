@@ -1,4 +1,3 @@
-/* @flow */
 
 import VNode from 'core/vdom/vnode'
 import { cached, extend, toObject } from 'shared/util'

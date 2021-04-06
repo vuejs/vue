@@ -1,4 +1,3 @@
-/* @flow */
 
 const SourceMapConsumer = require('source-map').SourceMapConsumer
 

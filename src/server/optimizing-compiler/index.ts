@@ -1,4 +1,3 @@
-/* @flow */
 
 import { parse } from 'compiler/parser/index'
 import { generate } from './codegen'

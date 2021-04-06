@@ -1,4 +1,3 @@
-/* @flow */
 
 /**
  * Original RenderStream implementation by Sasha Aickin (@aickin)

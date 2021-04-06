@@ -1,4 +1,3 @@
-/* @flow */
 
 import { hasOwn } from 'shared/util'
 import { warn, hasSymbol } from '../util/index'

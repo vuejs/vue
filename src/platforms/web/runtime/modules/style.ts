@@ -1,4 +1,3 @@
-/* @flow */
 
 import { getStyle, normalizeStyleBinding } from 'web/util/style'
 import {

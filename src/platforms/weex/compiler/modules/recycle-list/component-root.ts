@@ -1,4 +1,3 @@
-/* @flow */
 
 import { addAttr } from 'compiler/helpers'
 

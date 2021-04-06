@@ -1,4 +1,3 @@
-/* @flow */
 
 import { parseFor } from 'compiler/parser/index'
 import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'

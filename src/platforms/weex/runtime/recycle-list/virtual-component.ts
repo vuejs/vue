@@ -1,4 +1,3 @@
-/* @flow */
 
 // https://github.com/Hanks10100/weex-native-directive/tree/master/component
 

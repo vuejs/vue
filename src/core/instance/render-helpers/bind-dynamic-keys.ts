@@ -1,4 +1,3 @@
-/* @flow */
 
 // helper to process dynamic keys for dynamic arguments in v-bind and v-on.
 // For example, the following template:

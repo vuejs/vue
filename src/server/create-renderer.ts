@@ -1,4 +1,3 @@
-/* @flow */
 
 import RenderStream from './render-stream'
 import { createWriteFunction } from './write'

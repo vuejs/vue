@@ -1,4 +1,3 @@
-/* @flow */
 
 // Provides transition support for a single element/component.
 // supports transition mode (out-in / in-out)

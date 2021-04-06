@@ -1,4 +1,3 @@
-/* @flow */
 
 import { cached } from 'shared/util'
 import { parseFilters } from './filter-parser'

@@ -1,4 +1,3 @@
-/* @flow */
 
 import { inBrowser, isIE9, warn } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'

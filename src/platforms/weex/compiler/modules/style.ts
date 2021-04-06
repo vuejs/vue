@@ -1,4 +1,3 @@
-/* @flow */
 
 import { cached, camelize, isPlainObject } from 'shared/util'
 import { parseText } from 'compiler/parser/text-parser'

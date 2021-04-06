@@ -1,4 +1,3 @@
-/* @flow */
 
 import { extend } from 'shared/util'
 import { detectErrors } from './error-detector'

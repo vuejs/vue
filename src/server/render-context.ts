@@ -1,4 +1,3 @@
-/* @flow */
 
 import VNode from 'core/vdom/vnode'
 import { isUndef } from 'shared/util'

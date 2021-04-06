@@ -1,4 +1,3 @@
-/* @flow */
 declare var document: WeexDocument
 
 import { warn } from 'core/util/index'

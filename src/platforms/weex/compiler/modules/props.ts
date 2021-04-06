@@ -1,4 +1,3 @@
-/* @flow */
 
 import { cached, camelize } from 'shared/util'
 

@@ -1,4 +1,3 @@
-/* @flow */
 
 import type { Component } from 'typescript/component'
 import {

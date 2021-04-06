@@ -1,4 +1,3 @@
-/* @flow */
 
 import { dirRE, onRE } from './parser/index'
 

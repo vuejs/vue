@@ -1,4 +1,3 @@
-/* @flow */
 declare var document: WeexDocument
 
 import type { WeexDocument, WeexElement } from 'typescript/weex'

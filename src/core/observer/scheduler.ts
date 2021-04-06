@@ -1,4 +1,3 @@
-/* @flow */
 
 import type Watcher from './watcher'
 import config from '../config'

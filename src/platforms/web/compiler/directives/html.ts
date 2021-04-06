@@ -1,4 +1,3 @@
-/* @flow */
 
 import { addProp } from 'compiler/helpers'
 

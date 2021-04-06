@@ -1,4 +1,3 @@
-/* @flow */
 
 import VNode, { cloneVNode } from './vnode'
 import { createElement } from './create-element'

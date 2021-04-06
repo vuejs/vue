@@ -1,4 +1,3 @@
-/* @flow */
 
 import { emptyObject } from 'shared/util'
 import { parseFilters } from './parser/filter-parser'

@@ -1,4 +1,3 @@
-/* @flow */
 
 import { GlobalAPI } from 'typescript/global-api'
 import type {

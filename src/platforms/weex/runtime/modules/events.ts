@@ -1,4 +1,3 @@
-/* @flow */
 
 import { updateListeners } from 'core/vdom/helpers/update-listeners'
 import type { VNodeWithData } from 'typescript/vnode'

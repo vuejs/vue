@@ -1,4 +1,3 @@
-/* @flow */
 
 const range = 2
 

@@ -1,4 +1,3 @@
-/* @flow */
 
 const MAX_STACK_DEPTH = 800
 const noop = (_) => _

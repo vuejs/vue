@@ -1,4 +1,3 @@
-/* @flow */
 
 import { extend } from 'shared/util'
 import type { VNodeWithData } from 'typescript/vnode'

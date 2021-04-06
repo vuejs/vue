@@ -1,4 +1,3 @@
-/* @flow */
 
 import { genStaticKeys } from 'shared/util'
 import { createCompiler } from 'compiler/index'

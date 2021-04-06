@@ -1,4 +1,3 @@
-/* @flow */
 
 import { makeMap, isBuiltInTag, cached, no } from 'shared/util'
 

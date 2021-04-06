@@ -1,4 +1,3 @@
-/* @flow */
 
 const path = require('path')
 const serialize = require('serialize-javascript')

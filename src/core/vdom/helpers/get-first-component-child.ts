@@ -1,4 +1,3 @@
-/* @flow */
 
 import { isDef } from 'shared/util'
 import VNode from '../vnode'

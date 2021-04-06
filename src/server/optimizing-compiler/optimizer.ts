@@ -1,4 +1,3 @@
-/* @flow */
 
 /**
  * In SSR, the vdom tree is generated only once and never patched, so

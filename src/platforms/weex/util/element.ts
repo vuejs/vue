@@ -1,4 +1,3 @@
-/* @flow */
 
 // These util functions are split into its own file because Rollup cannot drop
 // makeMap() due to potential side effects, so these variables end up

@@ -1,4 +1,3 @@
-/* @flow */
 
 export * from './merge-hook'
 export * from './extract-props'

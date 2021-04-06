@@ -1,4 +1,3 @@
-/* @flow */
 
 import { extend, isObject } from 'shared/util'
 import type { Component } from 'typescript/component'

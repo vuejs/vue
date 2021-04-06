@@ -1,4 +1,3 @@
-/* @flow */
 
 import config from '../config'
 import { noop } from 'shared/util'

@@ -1,4 +1,3 @@
-/* @flow */
 
 import { escape } from '../util'
 

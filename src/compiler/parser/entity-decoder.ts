@@ -1,4 +1,3 @@
-/* @flow */
 
 let decoder
 

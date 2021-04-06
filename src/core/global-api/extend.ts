@@ -1,4 +1,3 @@
-/* @flow */
 
 import { ASSET_TYPES } from 'shared/constants'
 import type { Component } from 'typescript/component'

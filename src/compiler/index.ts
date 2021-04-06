@@ -1,4 +1,3 @@
-/* @flow */
 
 import { parse } from './parser/index'
 import { optimize } from './optimizer'

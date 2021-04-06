@@ -1,4 +1,3 @@
-/* @flow */
 
 import { createPromiseCallback } from '../util'
 import { createBundleRunner } from './create-bundle-runner'

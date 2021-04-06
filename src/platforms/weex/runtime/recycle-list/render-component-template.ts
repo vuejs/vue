@@ -1,4 +1,3 @@
-/* @flow */
 
 import { warn } from 'core/util/debug'
 import { handleError } from 'core/util/error'
