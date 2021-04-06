@@ -1,10 +1,11 @@
 const path = require('path')
-const buble = require('rollup-plugin-buble')
-const alias = require('rollup-plugin-alias')
-const cjs = require('rollup-plugin-commonjs')
-const replace = require('rollup-plugin-replace')
-const node = require('rollup-plugin-node-resolve')
+const buble = require('@rollup/plugin-buble')
+const alias = require('@rollup/plugin-alias')
+const cjs = require('@rollup/plugin-commonjs')
+const replace = require('@rollup/plugin-replace')
+const node = require('@rollup/plugin-node-resolve').nodeResolve
 const ts = require('rollup-plugin-typescript2')
+const babel = require('@rollup/plugin-babel').babel
 
 const version = process.env.VERSION || require('../package.json').version
 const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
@@ -232,16 +233,20 @@ function genConfig (name) {
           //   declaration: shouldEmitDeclarations,
           //   declarationMap: shouldEmitDeclarations
           // },
-          exclude: ['tests', 'test-dts']
+          exclude: ['test', 'test-dts']
         }
       }),
+      // babel({
+      //   extensions: ['.js', '.jsx', '.ts', '.tsx']
+      // }),
       alias(Object.assign({}, aliases, opts.alias))
     ].concat(opts.plugins || []),
     output: {
       file: opts.dest,
       format: opts.format,
       banner: opts.banner,
-      name: opts.moduleName || 'Vue'
+      name: opts.moduleName || 'Vue',
+      exports: 'auto'
     },
     onwarn: (msg, warn) => {
       if (!/Circular/.test(msg)) {
@@ -264,6 +269,8 @@ function genConfig (name) {
   if (opts.env) {
     vars['process.env.NODE_ENV'] = JSON.stringify(opts.env)
   }
+
+  vars.preventAssignment = true
   config.plugins.push(replace(vars))
 
   if (opts.transpile !== false) {

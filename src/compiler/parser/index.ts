@@ -1,6 +1,7 @@
 /* @flow */
 
-import * as he from 'he'
+const he = require('he')
+// import * as he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
@@ -337,7 +338,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
       }
       const children = currentParent.children
       if (inPre || text.trim()) {
-        text = isTextTag(currentParent) ? text : decodeHTMLCached(text)
+        text = isTextTag(currentParent) ? text : decodeHTMLCached(text) as string
       } else if (!children.length) {
         // remove the whitespace-only node right after an opening tag
         text = ''
