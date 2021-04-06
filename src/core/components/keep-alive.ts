@@ -1,9 +1,7 @@
-// @ts-nocheck
-
 import { isRegExp, remove } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 import VNode from 'core/vdom/vnode'
-import type { VNodeComponentOptions, VNodeData } from 'typescript/vnode'
+import type { VNodeComponentOptions } from 'typescript/vnode'
 
 type VNodeCache = { [key: string]: VNode | null }
 
@@ -47,6 +45,7 @@ function pruneCacheEntry(
 ) {
   const cached = cache[key]
   if (cached && (!current || cached.tag !== current.tag)) {
+    //@ts-expect-error has void type
     cached.componentInstance.$destroy()
   }
   cache[key] = null
@@ -88,12 +87,12 @@ export default {
 
   render() {
     const slot = this.$slots.default
-    const vnode: VNode = getFirstComponentChild(slot)
-    const componentOptions: ?VNodeComponentOptions =
+    const vnode = getFirstComponentChild(slot)
+    const componentOptions =
       vnode && vnode.componentOptions
     if (componentOptions) {
       // check pattern
-      const name: ?string = getComponentName(componentOptions)
+      const name = getComponentName(componentOptions)
       const { include, exclude } = this
       if (
         // not included
@@ -105,15 +104,15 @@ export default {
       }
 
       const { cache, keys } = this
-      const key: ?string =
-        vnode.key == null
+      const key =
+        vnode!.key == null
           ? // same constructor may get registered as different local components
             // so cid alone is not enough (#3269)
             componentOptions.Ctor.cid +
             (componentOptions.tag ? `::${componentOptions.tag}` : '')
-          : vnode.key
+          : vnode!.key
       if (cache[key]) {
-        vnode.componentInstance = cache[key].componentInstance
+        vnode!.componentInstance = cache[key].componentInstance
         // make current key freshest
         remove(keys, key)
         keys.push(key)
@@ -126,7 +125,7 @@ export default {
         }
       }
 
-      vnode.data.keepAlive = true
+      vnode!.data!.keepAlive = true
     }
     return vnode || (slot && slot[0])
   },
