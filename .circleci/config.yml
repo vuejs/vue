@@ -25,13 +25,13 @@ jobs:
           paths:
             - vue
 
-  lint-flow-types:
+  lint-ts-types:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/project
       - run: npm run lint
-      - run: npm run flow
+      - run: npm run ts-check
       - run: npm run test:types
 
   test-cover:
@@ -80,7 +80,7 @@ workflows:
       - test-cover:
           requires:
             - install
-      - lint-flow-types:
+      - lint-ts-types:
           requires:
             - install
       - test-e2e:
@@ -97,7 +97,7 @@ workflows:
                 - regression-test
           requires:
             - test-cover
-            - lint-flow-types
+            - lint-ts-types
             - test-e2e
             - test-ssr-weex
   weekly_regression_test:
@@ -114,7 +114,7 @@ workflows:
       - test-cover:
           requires:
             - install
-      - lint-flow-types:
+      - lint-ts-types:
           requires:
             - install
       - test-e2e:
@@ -126,6 +126,6 @@ workflows:
       - trigger-regression-test:
           requires:
             - test-cover
-            - lint-flow-types
+            - lint-ts-types
             - test-e2e
             - test-ssr-weex

@@ -36,6 +36,7 @@
     "test:types": "tsc -p ./types/test/tsconfig.json",
     "lint": "eslint src scripts test",
     "flow": "flow check",
+    "ts-check": "tsc --noEmit",
     "sauce": "karma start test/unit/karma.sauce.config.js",
     "bench:ssr": "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",
     "release": "bash scripts/release.sh",
