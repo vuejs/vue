@@ -31,7 +31,7 @@
       "vue": ["src/platforms/web/entry-runtime-with-compiler"]
     }
   },
-  "include": ["src", "test-dts", "typescript", "test"],
+  "include": ["src", "test-dts", "typescript"],
 
-  "exclude": ["flow", "node_modules", "packages"]
+  "exclude": ["flow", "node_modules", "packages", "types"]
 }
