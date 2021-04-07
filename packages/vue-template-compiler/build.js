@@ -3,10 +3,12 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var deindent = require('de-indent');
+var he = require('he');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 var deindent__default = /*#__PURE__*/_interopDefaultLegacy(deindent);
+var he__default = /*#__PURE__*/_interopDefaultLegacy(he);
 
 var emptyObject = Object.freeze({});
 // These helpers produce better VM code in JS engines due to their
@@ -151,11 +153,11 @@ function genStaticKeys$1(modules) {
         .join(',');
 }
 
-var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
+makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
     'link,meta,param,source,track,wbr');
 // Elements that you can, intentionally, leave open
 // (and which close themselves)
-var canBeLeftOpenTag = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source');
+makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source');
 // HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
 // Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
 var isNonPhrasingTag = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' +
@@ -1432,9 +1434,9 @@ var mustUseProp = function (tag, type, attr) {
         (attr === 'checked' && tag === 'input') ||
         (attr === 'muted' && tag === 'video'));
 };
-var isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck');
+makeMap('contenteditable,draggable,spellcheck');
 makeMap('events,caret,typing,plaintext-only');
-var isBooleanAttr = makeMap('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
+makeMap('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
     'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
     'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
     'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
@@ -2014,7 +2016,7 @@ function parseString(chr) {
     }
 }
 
-var he = require('he');
+// const he = require('he')
 var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:|^#/;
 var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
@@ -2028,7 +2030,7 @@ var slotRE = /^v-slot(:|$)|^#/;
 var lineBreakRE = /[\r\n]/;
 var whitespaceRE = /[ \f\t\r\n]+/g;
 var invalidAttributeRE = /[\s"'<>\/=]/;
-var decodeHTMLCached = cached(he.decode);
+var decodeHTMLCached = cached(he__default['default'].decode);
 var emptySlotScopeToken = "_empty_";
 // configurable state
 var warn$1;
@@ -3026,6 +3028,19 @@ var directives = {
     html: html,
 };
 
+var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
+    'link,meta,param,source,track,wbr');
+// Elements that you can, intentionally, leave open
+// (and which close themselves)
+var canBeLeftOpenTag = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source');
+// HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
+// Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
+makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' +
+    'details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,' +
+    'h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,' +
+    'optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,' +
+    'title,tr,track');
+
 var baseOptions = {
     expectHTML: true,
     modules: modules,
@@ -3955,6 +3970,7 @@ function generateCodeFrame(source, start, end) {
 function repeat(str, n) {
     var result = '';
     if (n > 0) {
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             // eslint-disable-line
             if (n & 1)
@@ -4169,6 +4185,20 @@ function escape(s) {
 function escapeChar(a) {
     return ESC[a] || a;
 }
+
+// these are reserved for web because they are directly compiled away
+// during template compilation
+makeMap('style,class');
+// attributes that should be using props for binding
+makeMap('input,textarea,option,select,progress');
+var isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck');
+makeMap('events,caret,typing,plaintext-only');
+var isBooleanAttr = makeMap('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
+    'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
+    'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
+    'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
+    'required,reversed,scoped,seamless,selected,sortable,' +
+    'truespeed,typemustmatch,visible');
 
 var plainStringRE = /^"(?:[^"\\]|\\.)*"$|^'(?:[^'\\]|\\.)*'$/;
 // let the model AST transform translate v-model into appropriate

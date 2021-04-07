@@ -4749,9 +4749,9 @@ Vue.version = '2.6.12';
 // during template compilation
 var isReservedAttr = makeMap('style,class');
 // attributes that should be using props for binding
-var acceptValue = makeMap('input,textarea,option,select,progress');
-var mustUseProp = function (tag, type, attr) {
-    return ((attr === 'value' && acceptValue(tag) && type !== 'button') ||
+var acceptValue$1 = makeMap('input,textarea,option,select,progress');
+var mustUseProp$1 = function (tag, type, attr) {
+    return ((attr === 'value' && acceptValue$1(tag) && type !== 'button') ||
         (attr === 'selected' && tag === 'option') ||
         (attr === 'checked' && tag === 'input') ||
         (attr === 'muted' && tag === 'video'));
@@ -4857,7 +4857,7 @@ var namespaceMap = {
     svg: 'http://www.w3.org/2000/svg',
     math: 'http://www.w3.org/1998/Math/MathML',
 };
-var isHTMLTag = makeMap('html,body,base,head,link,meta,style,title,' +
+var isHTMLTag$1 = makeMap('html,body,base,head,link,meta,style,title,' +
     'address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' +
     'div,dd,dl,dt,figcaption,figure,picture,hr,img,li,main,ol,p,pre,ul,' +
     'a,b,abbr,bdi,bdo,br,cite,code,data,dfn,em,i,kbd,mark,q,rp,rt,rtc,ruby,' +
@@ -4870,15 +4870,14 @@ var isHTMLTag = makeMap('html,body,base,head,link,meta,style,title,' +
     'content,element,shadow,template,blockquote,iframe,tfoot');
 // this map is intentionally selective, only covering SVG elements that may
 // contain child elements.
-var isSVG = makeMap('svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,font-face,' +
+var isSVG$1 = makeMap('svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,font-face,' +
     'foreignobject,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' +
     'polygon,polyline,rect,switch,symbol,text,textpath,tspan,use,view', true);
-var isPreTag = function (tag) { return tag === 'pre'; };
-var isReservedTag = function (tag) {
-    return isHTMLTag(tag) || isSVG(tag);
+var isReservedTag$1 = function (tag) {
+    return isHTMLTag$1(tag) || isSVG$1(tag);
 };
-function getTagNamespace(tag) {
-    if (isSVG(tag)) {
+function getTagNamespace$1(tag) {
+    if (isSVG$1(tag)) {
         return 'svg';
     }
     // basic support for MathML
@@ -4893,7 +4892,7 @@ function isUnknownElement(tag) {
     if (!inBrowser) {
         return true;
     }
-    if (isReservedTag(tag)) {
+    if (isReservedTag$1(tag)) {
         return false;
     }
     tag = tag.toLowerCase();
@@ -4917,7 +4916,7 @@ var isTextInputType = makeMap('text,number,password,search,email,tel,url');
 /**
  * Query an element selector if it's not an element already.
  */
-function query(el) {
+function query$1(el) {
     if (typeof el === 'string') {
         var selected = document.querySelector(el);
         if (!selected) {
@@ -6425,127 +6424,10 @@ function parseString(chr) {
     }
 }
 
-var warn$1;
 // in some cases, the event used has to be determined at runtime
 // so we used some reserved tokens during compile.
-var RANGE_TOKEN = '__r';
+var RANGE_TOKEN$1 = '__r';
 var CHECKBOX_RADIO_TOKEN = '__c';
-function model$1(el, dir, _warn) {
-    warn$1 = _warn;
-    var value = dir.value;
-    var modifiers = dir.modifiers;
-    var tag = el.tag;
-    var type = el.attrsMap.type;
-    {
-        // inputs with type="file" are read only and setting the input's
-        // value will throw an error.
-        if (tag === 'input' && type === 'file') {
-            warn$1("<" + el.tag + " v-model=\"" + value + "\" type=\"file\">:\n" +
-                "File inputs are read only. Use a v-on:change listener instead.", el.rawAttrsMap['v-model']);
-        }
-    }
-    if (el.component) {
-        genComponentModel(el, value, modifiers);
-        // component v-model doesn't need extra runtime
-        return false;
-    }
-    else if (tag === 'select') {
-        genSelect(el, value, modifiers);
-    }
-    else if (tag === 'input' && type === 'checkbox') {
-        genCheckboxModel(el, value, modifiers);
-    }
-    else if (tag === 'input' && type === 'radio') {
-        genRadioModel(el, value, modifiers);
-    }
-    else if (tag === 'input' || tag === 'textarea') {
-        genDefaultModel(el, value, modifiers);
-    }
-    else if (!config.isReservedTag(tag)) {
-        genComponentModel(el, value, modifiers);
-        // component v-model doesn't need extra runtime
-        return false;
-    }
-    else {
-        warn$1("<" + el.tag + " v-model=\"" + value + "\">: " +
-            "v-model is not supported on this element type. " +
-            "If you are working with contenteditable, it's recommended to " +
-            'wrap a library dedicated for that purpose inside a custom component.', el.rawAttrsMap['v-model']);
-    }
-    // ensure runtime directive metadata
-    return true;
-}
-function genCheckboxModel(el, value, modifiers) {
-    var number = modifiers && modifiers.number;
-    var valueBinding = getBindingAttr(el, 'value') || 'null';
-    var trueValueBinding = getBindingAttr(el, 'true-value') || 'true';
-    var falseValueBinding = getBindingAttr(el, 'false-value') || 'false';
-    addProp(el, 'checked', "Array.isArray(" + value + ")" +
-        ("?_i(" + value + "," + valueBinding + ")>-1") +
-        (trueValueBinding === 'true'
-            ? ":(" + value + ")"
-            : ":_q(" + value + "," + trueValueBinding + ")"));
-    addHandler(el, 'change', "var $$a=" + value + "," +
-        '$$el=$event.target,' +
-        ("$$c=$$el.checked?(" + trueValueBinding + "):(" + falseValueBinding + ");") +
-        'if(Array.isArray($$a)){' +
-        ("var $$v=" + (number ? '_n(' + valueBinding + ')' : valueBinding) + ",") +
-        '$$i=_i($$a,$$v);' +
-        ("if($$el.checked){$$i<0&&(" + genAssignmentCode(value, '$$a.concat([$$v])') + ")}") +
-        ("else{$$i>-1&&(" + genAssignmentCode(value, '$$a.slice(0,$$i).concat($$a.slice($$i+1))') + ")}") +
-        ("}else{" + genAssignmentCode(value, '$$c') + "}"), null, true);
-}
-function genRadioModel(el, value, modifiers) {
-    var number = modifiers && modifiers.number;
-    var valueBinding = getBindingAttr(el, 'value') || 'null';
-    valueBinding = number ? "_n(" + valueBinding + ")" : valueBinding;
-    addProp(el, 'checked', "_q(" + value + "," + valueBinding + ")");
-    addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true);
-}
-function genSelect(el, value, modifiers) {
-    var number = modifiers && modifiers.number;
-    var selectedVal = "Array.prototype.filter" +
-        ".call($event.target.options,function(o){return o.selected})" +
-        ".map(function(o){var val = \"_value\" in o ? o._value : o.value;" +
-        ("return " + (number ? '_n(val)' : 'val') + "})");
-    var assignment = '$event.target.multiple ? $$selectedVal : $$selectedVal[0]';
-    var code = "var $$selectedVal = " + selectedVal + ";";
-    code = code + " " + genAssignmentCode(value, assignment);
-    addHandler(el, 'change', code, null, true);
-}
-function genDefaultModel(el, value, modifiers) {
-    var type = el.attrsMap.type;
-    // warn if v-bind:value conflicts with v-model
-    // except for inputs with v-bind:type
-    {
-        var value_1 = el.attrsMap['v-bind:value'] || el.attrsMap[':value'];
-        var typeBinding = el.attrsMap['v-bind:type'] || el.attrsMap[':type'];
-        if (value_1 && !typeBinding) {
-            var binding = el.attrsMap['v-bind:value'] ? 'v-bind:value' : ':value';
-            warn$1(binding + "=\"" + value_1 + "\" conflicts with v-model on the same element " +
-                'because the latter already expands to a value binding internally', el.rawAttrsMap[binding]);
-        }
-    }
-    var _a = modifiers || {}, lazy = _a.lazy, number = _a.number, trim = _a.trim;
-    var needCompositionGuard = !lazy && type !== 'range';
-    var event = lazy ? 'change' : type === 'range' ? RANGE_TOKEN : 'input';
-    var valueExpression = '$event.target.value';
-    if (trim) {
-        valueExpression = "$event.target.value.trim()";
-    }
-    if (number) {
-        valueExpression = "_n(" + valueExpression + ")";
-    }
-    var code = genAssignmentCode(value, valueExpression);
-    if (needCompositionGuard) {
-        code = "if($event.target.composing)return;" + code;
-    }
-    addProp(el, 'value', "(" + value + ")");
-    addHandler(el, event, code, null, true);
-    if (trim || number) {
-        addHandler(el, 'blur', '$forceUpdate()');
-    }
-}
 
 // normalize v-model event tokens that can only be determined at runtime.
 // it's important to place the event as the first in the array because
@@ -6553,11 +6435,11 @@ function genDefaultModel(el, value, modifiers) {
 // user-attached handlers.
 function normalizeEvents(on) {
     /* istanbul ignore if */
-    if (isDef(on[RANGE_TOKEN])) {
+    if (isDef(on[RANGE_TOKEN$1])) {
         // IE input[type=range] only supports `change` event
         var event_1 = isIE ? 'change' : 'input';
-        on[event_1] = [].concat(on[RANGE_TOKEN], on[event_1] || []);
-        delete on[RANGE_TOKEN];
+        on[event_1] = [].concat(on[RANGE_TOKEN$1], on[event_1] || []);
+        delete on[RANGE_TOKEN$1];
     }
     // This was originally intended to fix #4521 but no longer necessary
     // after 2.5. Keeping it for backwards compat with generated code from < 2.4
@@ -6680,7 +6562,7 @@ function updateDOMProps(oldVnode, vnode) {
             }
         }
         else if (key === 'innerHTML' &&
-            isSVG(elm.tagName) &&
+            isSVG$1(elm.tagName) &&
             isUndef(elm.innerHTML)) {
             // IE doesn't support innerHTML for SVG elements
             svgContainer = svgContainer || document.createElement('div');
@@ -6884,6 +6766,624 @@ var style$1 = {
     create: updateStyle,
     update: updateStyle,
 };
+
+var whitespaceRE$2 = /\s+/;
+/**
+ * Add class with compatibility for SVG since classList is not supported on
+ * SVG elements in IE
+ */
+function addClass$1(el, cls) {
+    /* istanbul ignore if */
+    if (!cls || !(cls = cls.trim())) {
+        return;
+    }
+    /* istanbul ignore else */
+    if (el.classList) {
+        if (cls.indexOf(' ') > -1) {
+            cls.split(whitespaceRE$2).forEach(function (c) { return el.classList.add(c); });
+        }
+        else {
+            el.classList.add(cls);
+        }
+    }
+    else {
+        var cur = " " + (el.getAttribute('class') || '') + " ";
+        if (cur.indexOf(' ' + cls + ' ') < 0) {
+            el.setAttribute('class', (cur + cls).trim());
+        }
+    }
+}
+/**
+ * Remove class with compatibility for SVG since classList is not supported on
+ * SVG elements in IE
+ */
+function removeClass$1(el, cls) {
+    /* istanbul ignore if */
+    if (!cls || !(cls = cls.trim())) {
+        return;
+    }
+    /* istanbul ignore else */
+    if (el.classList) {
+        if (cls.indexOf(' ') > -1) {
+            cls.split(whitespaceRE$2).forEach(function (c) { return el.classList.remove(c); });
+        }
+        else {
+            el.classList.remove(cls);
+        }
+        if (!el.classList.length) {
+            el.removeAttribute('class');
+        }
+    }
+    else {
+        var cur = " " + (el.getAttribute('class') || '') + " ";
+        var tar = ' ' + cls + ' ';
+        while (cur.indexOf(tar) >= 0) {
+            cur = cur.replace(tar, ' ');
+        }
+        cur = cur.trim();
+        if (cur) {
+            el.setAttribute('class', cur);
+        }
+        else {
+            el.removeAttribute('class');
+        }
+    }
+}
+
+function resolveTransition$1(def) {
+    if (!def) {
+        return;
+    }
+    /* istanbul ignore else */
+    if (typeof def === 'object') {
+        var res = {};
+        if (def.css !== false) {
+            extend(res, autoCssTransition$1(def.name || 'v'));
+        }
+        extend(res, def);
+        return res;
+    }
+    else if (typeof def === 'string') {
+        return autoCssTransition$1(def);
+    }
+}
+var autoCssTransition$1 = cached(function (name) {
+    return {
+        enterClass: name + "-enter",
+        enterToClass: name + "-enter-to",
+        enterActiveClass: name + "-enter-active",
+        leaveClass: name + "-leave",
+        leaveToClass: name + "-leave-to",
+        leaveActiveClass: name + "-leave-active",
+    };
+});
+var hasTransition$1 = inBrowser && !isIE9;
+var TRANSITION$1 = 'transition';
+var ANIMATION$1 = 'animation';
+// Transition property/event sniffing
+var transitionProp$1 = 'transition';
+var transitionEndEvent$1 = 'transitionend';
+var animationProp$1 = 'animation';
+var animationEndEvent$1 = 'animationend';
+if (hasTransition$1) {
+    /* istanbul ignore if */
+    if (window.ontransitionend === undefined &&
+        // @ts-expect-error
+        window.onwebkittransitionend !== undefined) {
+        transitionProp$1 = 'WebkitTransition';
+        transitionEndEvent$1 = 'webkitTransitionEnd';
+    }
+    if (window.onanimationend === undefined &&
+        // @ts-expect-error
+        window.onwebkitanimationend !== undefined) {
+        animationProp$1 = 'WebkitAnimation';
+        animationEndEvent$1 = 'webkitAnimationEnd';
+    }
+}
+// binding to window is necessary to make hot reload work in IE in strict mode
+var raf$1 = inBrowser
+    ? window.requestAnimationFrame
+        ? window.requestAnimationFrame.bind(window)
+        : setTimeout
+    : /* istanbul ignore next */ function (fn) { return fn(); };
+function nextFrame$1(fn) {
+    raf$1(function () {
+        // @ts-expect-error
+        raf$1(fn);
+    });
+}
+function addTransitionClass$1(el, cls) {
+    var transitionClasses = el._transitionClasses || (el._transitionClasses = []);
+    if (transitionClasses.indexOf(cls) < 0) {
+        transitionClasses.push(cls);
+        addClass$1(el, cls);
+    }
+}
+function removeTransitionClass$1(el, cls) {
+    if (el._transitionClasses) {
+        remove$2(el._transitionClasses, cls);
+    }
+    removeClass$1(el, cls);
+}
+function whenTransitionEnds$1(el, expectedType, cb) {
+    var _a = getTransitionInfo$1(el, expectedType), type = _a.type, timeout = _a.timeout, propCount = _a.propCount;
+    if (!type)
+        { return cb(); }
+    var event = type === TRANSITION$1 ? transitionEndEvent$1 : animationEndEvent$1;
+    var ended = 0;
+    var end = function () {
+        el.removeEventListener(event, onEnd);
+        cb();
+    };
+    var onEnd = function (e) {
+        if (e.target === el) {
+            if (++ended >= propCount) {
+                end();
+            }
+        }
+    };
+    setTimeout(function () {
+        if (ended < propCount) {
+            end();
+        }
+    }, timeout + 1);
+    el.addEventListener(event, onEnd);
+}
+var transformRE$1 = /\b(transform|all)(,|$)/;
+function getTransitionInfo$1(el, expectedType) {
+    var styles = window.getComputedStyle(el);
+    // JSDOM may return undefined for transition properties
+    var transitionDelays = (styles[transitionProp$1 + 'Delay'] || '').split(', ');
+    var transitionDurations = (styles[transitionProp$1 + 'Duration'] || '').split(', ');
+    var transitionTimeout = getTimeout$1(transitionDelays, transitionDurations);
+    var animationDelays = (styles[animationProp$1 + 'Delay'] || '').split(', ');
+    var animationDurations = (styles[animationProp$1 + 'Duration'] || '').split(', ');
+    var animationTimeout = getTimeout$1(animationDelays, animationDurations);
+    var type;
+    var timeout = 0;
+    var propCount = 0;
+    /* istanbul ignore if */
+    if (expectedType === TRANSITION$1) {
+        if (transitionTimeout > 0) {
+            type = TRANSITION$1;
+            timeout = transitionTimeout;
+            propCount = transitionDurations.length;
+        }
+    }
+    else if (expectedType === ANIMATION$1) {
+        if (animationTimeout > 0) {
+            type = ANIMATION$1;
+            timeout = animationTimeout;
+            propCount = animationDurations.length;
+        }
+    }
+    else {
+        timeout = Math.max(transitionTimeout, animationTimeout);
+        type =
+            timeout > 0
+                ? transitionTimeout > animationTimeout
+                    ? TRANSITION$1
+                    : ANIMATION$1
+                : null;
+        propCount = type
+            ? type === TRANSITION$1
+                ? transitionDurations.length
+                : animationDurations.length
+            : 0;
+    }
+    var hasTransform = type === TRANSITION$1 && transformRE$1.test(styles[transitionProp$1 + 'Property']);
+    return {
+        type: type,
+        timeout: timeout,
+        propCount: propCount,
+        hasTransform: hasTransform,
+    };
+}
+function getTimeout$1(delays, durations) {
+    /* istanbul ignore next */
+    while (delays.length < durations.length) {
+        delays = delays.concat(delays);
+    }
+    return Math.max.apply(null, durations.map(function (d, i) {
+        return toMs$1(d) + toMs$1(delays[i]);
+    }));
+}
+// Old versions of Chromium (below 61.0.3163.100) formats floating pointer numbers
+// in a locale-dependent way, using a comma instead of a dot.
+// If comma is not replaced with a dot, the input will be rounded down (i.e. acting
+// as a floor function) causing unexpected behaviors
+function toMs$1(s) {
+    return Number(s.slice(0, -1).replace(',', '.')) * 1000;
+}
+
+function enter$1(vnode, toggleDisplay) {
+    var el = vnode.elm;
+    // call leave callback now
+    if (isDef(el._leaveCb)) {
+        el._leaveCb.cancelled = true;
+        el._leaveCb();
+    }
+    var data = resolveTransition$1(vnode.data.transition);
+    if (isUndef(data)) {
+        return;
+    }
+    /* istanbul ignore if */
+    if (isDef(el._enterCb) || el.nodeType !== 1) {
+        return;
+    }
+    var css = data.css, type = data.type, enterClass = data.enterClass, enterToClass = data.enterToClass, enterActiveClass = data.enterActiveClass, appearClass = data.appearClass, appearToClass = data.appearToClass, appearActiveClass = data.appearActiveClass, beforeEnter = data.beforeEnter, enter = data.enter, afterEnter = data.afterEnter, enterCancelled = data.enterCancelled, beforeAppear = data.beforeAppear, appear = data.appear, afterAppear = data.afterAppear, appearCancelled = data.appearCancelled, duration = data.duration;
+    // activeInstance will always be the <transition> component managing this
+    // transition. One edge case to check is when the <transition> is placed
+    // as the root node of a child component. In that case we need to check
+    // <transition>'s parent for appear check.
+    var context = activeInstance;
+    var transitionNode = activeInstance.$vnode;
+    while (transitionNode && transitionNode.parent) {
+        context = transitionNode.context;
+        transitionNode = transitionNode.parent;
+    }
+    var isAppear = !context._isMounted || !vnode.isRootInsert;
+    if (isAppear && !appear && appear !== '') {
+        return;
+    }
+    var startClass = isAppear && appearClass ? appearClass : enterClass;
+    var activeClass = isAppear && appearActiveClass ? appearActiveClass : enterActiveClass;
+    var toClass = isAppear && appearToClass ? appearToClass : enterToClass;
+    var beforeEnterHook = isAppear ? beforeAppear || beforeEnter : beforeEnter;
+    var enterHook = isAppear
+        ? typeof appear === 'function'
+            ? appear
+            : enter
+        : enter;
+    var afterEnterHook = isAppear ? afterAppear || afterEnter : afterEnter;
+    var enterCancelledHook = isAppear
+        ? appearCancelled || enterCancelled
+        : enterCancelled;
+    var explicitEnterDuration = toNumber(isObject(duration) ? duration.enter : duration);
+    if (explicitEnterDuration != null) {
+        checkDuration$1(explicitEnterDuration, 'enter', vnode);
+    }
+    var expectsCSS = css !== false && !isIE9;
+    var userWantsControl = getHookArgumentsLength$1(enterHook);
+    var cb = (el._enterCb = once(function () {
+        if (expectsCSS) {
+            removeTransitionClass$1(el, toClass);
+            removeTransitionClass$1(el, activeClass);
+        }
+        // @ts-expect-error
+        if (cb.cancelled) {
+            if (expectsCSS) {
+                removeTransitionClass$1(el, startClass);
+            }
+            enterCancelledHook && enterCancelledHook(el);
+        }
+        else {
+            afterEnterHook && afterEnterHook(el);
+        }
+        el._enterCb = null;
+    }));
+    if (!vnode.data.show) {
+        // remove pending leave element on enter by injecting an insert hook
+        mergeVNodeHook(vnode, 'insert', function () {
+            var parent = el.parentNode;
+            var pendingNode = parent && parent._pending && parent._pending[vnode.key];
+            if (pendingNode &&
+                pendingNode.tag === vnode.tag &&
+                pendingNode.elm._leaveCb) {
+                pendingNode.elm._leaveCb();
+            }
+            enterHook && enterHook(el, cb);
+        });
+    }
+    // start enter transition
+    beforeEnterHook && beforeEnterHook(el);
+    if (expectsCSS) {
+        addTransitionClass$1(el, startClass);
+        addTransitionClass$1(el, activeClass);
+        nextFrame$1(function () {
+            removeTransitionClass$1(el, startClass);
+            // @ts-expect-error
+            if (!cb.cancelled) {
+                addTransitionClass$1(el, toClass);
+                if (!userWantsControl) {
+                    if (isValidDuration$1(explicitEnterDuration)) {
+                        setTimeout(cb, explicitEnterDuration);
+                    }
+                    else {
+                        whenTransitionEnds$1(el, type, cb);
+                    }
+                }
+            }
+        });
+    }
+    if (vnode.data.show) {
+        toggleDisplay && toggleDisplay();
+        enterHook && enterHook(el, cb);
+    }
+    if (!expectsCSS && !userWantsControl) {
+        cb();
+    }
+}
+function leave$1(vnode, rm) {
+    var el = vnode.elm;
+    // call enter callback now
+    if (isDef(el._enterCb)) {
+        el._enterCb.cancelled = true;
+        el._enterCb();
+    }
+    var data = resolveTransition$1(vnode.data.transition);
+    if (isUndef(data) || el.nodeType !== 1) {
+        return rm();
+    }
+    /* istanbul ignore if */
+    if (isDef(el._leaveCb)) {
+        return;
+    }
+    var css = data.css, type = data.type, leaveClass = data.leaveClass, leaveToClass = data.leaveToClass, leaveActiveClass = data.leaveActiveClass, beforeLeave = data.beforeLeave, leave = data.leave, afterLeave = data.afterLeave, leaveCancelled = data.leaveCancelled, delayLeave = data.delayLeave, duration = data.duration;
+    var expectsCSS = css !== false && !isIE9;
+    var userWantsControl = getHookArgumentsLength$1(leave);
+    var explicitLeaveDuration = toNumber(isObject(duration) ? duration.leave : duration);
+    if (isDef(explicitLeaveDuration)) {
+        checkDuration$1(explicitLeaveDuration, 'leave', vnode);
+    }
+    var cb = (el._leaveCb = once(function () {
+        if (el.parentNode && el.parentNode._pending) {
+            el.parentNode._pending[vnode.key] = null;
+        }
+        if (expectsCSS) {
+            removeTransitionClass$1(el, leaveToClass);
+            removeTransitionClass$1(el, leaveActiveClass);
+        }
+        // @ts-expect-error
+        if (cb.cancelled) {
+            if (expectsCSS) {
+                removeTransitionClass$1(el, leaveClass);
+            }
+            leaveCancelled && leaveCancelled(el);
+        }
+        else {
+            rm();
+            afterLeave && afterLeave(el);
+        }
+        el._leaveCb = null;
+    }));
+    if (delayLeave) {
+        delayLeave(performLeave);
+    }
+    else {
+        performLeave();
+    }
+    function performLeave() {
+        // the delayed leave may have already been cancelled
+        // @ts-expect-error
+        if (cb.cancelled) {
+            return;
+        }
+        // record leaving element
+        if (!vnode.data.show && el.parentNode) {
+            (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode;
+        }
+        beforeLeave && beforeLeave(el);
+        if (expectsCSS) {
+            addTransitionClass$1(el, leaveClass);
+            addTransitionClass$1(el, leaveActiveClass);
+            nextFrame$1(function () {
+                removeTransitionClass$1(el, leaveClass);
+                // @ts-expect-error
+                if (!cb.cancelled) {
+                    addTransitionClass$1(el, leaveToClass);
+                    if (!userWantsControl) {
+                        if (isValidDuration$1(explicitLeaveDuration)) {
+                            setTimeout(cb, explicitLeaveDuration);
+                        }
+                        else {
+                            whenTransitionEnds$1(el, type, cb);
+                        }
+                    }
+                }
+            });
+        }
+        leave && leave(el, cb);
+        if (!expectsCSS && !userWantsControl) {
+            cb();
+        }
+    }
+}
+// only used in dev mode
+function checkDuration$1(val, name, vnode) {
+    if (typeof val !== 'number') {
+        warn$2("<transition> explicit " + name + " duration is not a valid number - " +
+            ("got " + JSON.stringify(val) + "."), vnode.context);
+    }
+    else if (isNaN(val)) {
+        warn$2("<transition> explicit " + name + " duration is NaN - " +
+            'the duration expression might be incorrect.', vnode.context);
+    }
+}
+function isValidDuration$1(val) {
+    return typeof val === 'number' && !isNaN(val);
+}
+/**
+ * Normalize a transition hook's argument length. The hook may be:
+ * - a merged hook (invoker) with the original in .fns
+ * - a wrapped component method (check ._length)
+ * - a plain function (.length)
+ */
+function getHookArgumentsLength$1(fn) {
+    if (isUndef(fn)) {
+        return false;
+    }
+    // @ts-expect-error
+    var invokerFns = fn.fns;
+    if (isDef(invokerFns)) {
+        // invoker
+        return getHookArgumentsLength$1(Array.isArray(invokerFns) ? invokerFns[0] : invokerFns);
+    }
+    else {
+        // @ts-expect-error
+        return (fn._length || fn.length) > 1;
+    }
+}
+function _enter(_, vnode) {
+    if (vnode.data.show !== true) {
+        enter$1(vnode);
+    }
+}
+var transition = inBrowser
+    ? {
+        create: _enter,
+        activate: _enter,
+        remove: function (vnode, rm) {
+            /* istanbul ignore else */
+            if (vnode.data.show !== true) {
+                // @ts-expect-error
+                leave$1(vnode, rm);
+            }
+            else {
+                rm();
+            }
+        },
+    }
+    : {};
+
+var platformModules = [attrs, klass$1, events, domProps, style$1, transition];
+
+// the directive module should be applied last, after all
+// built-in modules have been applied.
+var modules$1 = platformModules.concat(baseModules);
+var patch = createPatchFunction({ nodeOps: nodeOps, modules: modules$1 });
+
+/**
+ * Not type checking this file because flow doesn't like attaching
+ * properties to Elements.
+ */
+/* istanbul ignore if */
+if (isIE9) {
+    // http://www.matts411.com/post/internet-explorer-9-oninput/
+    document.addEventListener('selectionchange', function () {
+        var el = document.activeElement;
+        // @ts-expect-error
+        if (el && el.vmodel) {
+            trigger(el, 'input');
+        }
+    });
+}
+var directive = {
+    inserted: function (el, binding, vnode, oldVnode) {
+        if (vnode.tag === 'select') {
+            // #6903
+            if (oldVnode.elm && !oldVnode.elm._vOptions) {
+                mergeVNodeHook(vnode, 'postpatch', function () {
+                    directive.componentUpdated(el, binding, vnode);
+                });
+            }
+            else {
+                setSelected(el, binding, vnode.context);
+            }
+            el._vOptions = [].map.call(el.options, getValue);
+        }
+        else if (vnode.tag === 'textarea' || isTextInputType(el.type)) {
+            el._vModifiers = binding.modifiers;
+            if (!binding.modifiers.lazy) {
+                el.addEventListener('compositionstart', onCompositionStart);
+                el.addEventListener('compositionend', onCompositionEnd);
+                // Safari < 10.2 & UIWebView doesn't fire compositionend when
+                // switching focus before confirming composition choice
+                // this also fixes the issue where some browsers e.g. iOS Chrome
+                // fires "change" instead of "input" on autocomplete.
+                el.addEventListener('change', onCompositionEnd);
+                /* istanbul ignore if */
+                if (isIE9) {
+                    el.vmodel = true;
+                }
+            }
+        }
+    },
+    componentUpdated: function (el, binding, vnode) {
+        if (vnode.tag === 'select') {
+            setSelected(el, binding, vnode.context);
+            // in case the options rendered by v-for have changed,
+            // it's possible that the value is out-of-sync with the rendered options.
+            // detect such cases and filter out values that no longer has a matching
+            // option in the DOM.
+            var prevOptions_1 = el._vOptions;
+            var curOptions_1 = (el._vOptions = [].map.call(el.options, getValue));
+            if (curOptions_1.some(function (o, i) { return !looseEqual(o, prevOptions_1[i]); })) {
+                // trigger change event if
+                // no matching option found for at least one value
+                var needReset = el.multiple
+                    ? binding.value.some(function (v) { return hasNoMatchingOption(v, curOptions_1); })
+                    : binding.value !== binding.oldValue &&
+                        hasNoMatchingOption(binding.value, curOptions_1);
+                if (needReset) {
+                    trigger(el, 'change');
+                }
+            }
+        }
+    },
+};
+function setSelected(el, binding, vm) {
+    actuallySetSelected(el, binding, vm);
+    /* istanbul ignore if */
+    if (isIE || isEdge) {
+        setTimeout(function () {
+            actuallySetSelected(el, binding, vm);
+        }, 0);
+    }
+}
+function actuallySetSelected(el, binding, vm) {
+    var value = binding.value;
+    var isMultiple = el.multiple;
+    if (isMultiple && !Array.isArray(value)) {
+        warn$2("<select multiple v-model=\"" + binding.expression + "\"> " +
+                ("expects an Array value for its binding, but got " + Object.prototype.toString
+                    .call(value)
+                    .slice(8, -1)), vm);
+        return;
+    }
+    var selected, option;
+    for (var i = 0, l = el.options.length; i < l; i++) {
+        option = el.options[i];
+        if (isMultiple) {
+            selected = looseIndexOf(value, getValue(option)) > -1;
+            if (option.selected !== selected) {
+                option.selected = selected;
+            }
+        }
+        else {
+            if (looseEqual(getValue(option), value)) {
+                if (el.selectedIndex !== i) {
+                    el.selectedIndex = i;
+                }
+                return;
+            }
+        }
+    }
+    if (!isMultiple) {
+        el.selectedIndex = -1;
+    }
+}
+function hasNoMatchingOption(value, options) {
+    return options.every(function (o) { return !looseEqual(o, value); });
+}
+function getValue(option) {
+    return '_value' in option ? option._value : option.value;
+}
+function onCompositionStart(e) {
+    e.target.composing = true;
+}
+function onCompositionEnd(e) {
+    // prevent triggering an input event for no reason
+    if (!e.target.composing)
+        { return; }
+    e.target.composing = false;
+    trigger(e.target, 'input');
+}
+function trigger(el, type) {
+    var e = document.createEvent('HTMLEvents');
+    e.initEvent(type, true, true);
+    el.dispatchEvent(e);
+}
 
 var whitespaceRE$1 = /\s+/;
 /**
@@ -7342,166 +7842,6 @@ function getHookArgumentsLength(fn) {
         return (fn._length || fn.length) > 1;
     }
 }
-function _enter(_, vnode) {
-    if (vnode.data.show !== true) {
-        enter(vnode);
-    }
-}
-var transition = inBrowser
-    ? {
-        create: _enter,
-        activate: _enter,
-        remove: function (vnode, rm) {
-            /* istanbul ignore else */
-            if (vnode.data.show !== true) {
-                // @ts-expect-error
-                leave(vnode, rm);
-            }
-            else {
-                rm();
-            }
-        },
-    }
-    : {};
-
-var platformModules = [attrs, klass$1, events, domProps, style$1, transition];
-
-// the directive module should be applied last, after all
-// built-in modules have been applied.
-var modules$1 = platformModules.concat(baseModules);
-var patch = createPatchFunction({ nodeOps: nodeOps, modules: modules$1 });
-
-/**
- * Not type checking this file because flow doesn't like attaching
- * properties to Elements.
- */
-/* istanbul ignore if */
-if (isIE9) {
-    // http://www.matts411.com/post/internet-explorer-9-oninput/
-    document.addEventListener('selectionchange', function () {
-        var el = document.activeElement;
-        // @ts-expect-error
-        if (el && el.vmodel) {
-            trigger(el, 'input');
-        }
-    });
-}
-var directive = {
-    inserted: function (el, binding, vnode, oldVnode) {
-        if (vnode.tag === 'select') {
-            // #6903
-            if (oldVnode.elm && !oldVnode.elm._vOptions) {
-                mergeVNodeHook(vnode, 'postpatch', function () {
-                    directive.componentUpdated(el, binding, vnode);
-                });
-            }
-            else {
-                setSelected(el, binding, vnode.context);
-            }
-            el._vOptions = [].map.call(el.options, getValue);
-        }
-        else if (vnode.tag === 'textarea' || isTextInputType(el.type)) {
-            el._vModifiers = binding.modifiers;
-            if (!binding.modifiers.lazy) {
-                el.addEventListener('compositionstart', onCompositionStart);
-                el.addEventListener('compositionend', onCompositionEnd);
-                // Safari < 10.2 & UIWebView doesn't fire compositionend when
-                // switching focus before confirming composition choice
-                // this also fixes the issue where some browsers e.g. iOS Chrome
-                // fires "change" instead of "input" on autocomplete.
-                el.addEventListener('change', onCompositionEnd);
-                /* istanbul ignore if */
-                if (isIE9) {
-                    el.vmodel = true;
-                }
-            }
-        }
-    },
-    componentUpdated: function (el, binding, vnode) {
-        if (vnode.tag === 'select') {
-            setSelected(el, binding, vnode.context);
-            // in case the options rendered by v-for have changed,
-            // it's possible that the value is out-of-sync with the rendered options.
-            // detect such cases and filter out values that no longer has a matching
-            // option in the DOM.
-            var prevOptions_1 = el._vOptions;
-            var curOptions_1 = (el._vOptions = [].map.call(el.options, getValue));
-            if (curOptions_1.some(function (o, i) { return !looseEqual(o, prevOptions_1[i]); })) {
-                // trigger change event if
-                // no matching option found for at least one value
-                var needReset = el.multiple
-                    ? binding.value.some(function (v) { return hasNoMatchingOption(v, curOptions_1); })
-                    : binding.value !== binding.oldValue &&
-                        hasNoMatchingOption(binding.value, curOptions_1);
-                if (needReset) {
-                    trigger(el, 'change');
-                }
-            }
-        }
-    },
-};
-function setSelected(el, binding, vm) {
-    actuallySetSelected(el, binding, vm);
-    /* istanbul ignore if */
-    if (isIE || isEdge) {
-        setTimeout(function () {
-            actuallySetSelected(el, binding, vm);
-        }, 0);
-    }
-}
-function actuallySetSelected(el, binding, vm) {
-    var value = binding.value;
-    var isMultiple = el.multiple;
-    if (isMultiple && !Array.isArray(value)) {
-        warn$2("<select multiple v-model=\"" + binding.expression + "\"> " +
-                ("expects an Array value for its binding, but got " + Object.prototype.toString
-                    .call(value)
-                    .slice(8, -1)), vm);
-        return;
-    }
-    var selected, option;
-    for (var i = 0, l = el.options.length; i < l; i++) {
-        option = el.options[i];
-        if (isMultiple) {
-            selected = looseIndexOf(value, getValue(option)) > -1;
-            if (option.selected !== selected) {
-                option.selected = selected;
-            }
-        }
-        else {
-            if (looseEqual(getValue(option), value)) {
-                if (el.selectedIndex !== i) {
-                    el.selectedIndex = i;
-                }
-                return;
-            }
-        }
-    }
-    if (!isMultiple) {
-        el.selectedIndex = -1;
-    }
-}
-function hasNoMatchingOption(value, options) {
-    return options.every(function (o) { return !looseEqual(o, value); });
-}
-function getValue(option) {
-    return '_value' in option ? option._value : option.value;
-}
-function onCompositionStart(e) {
-    e.target.composing = true;
-}
-function onCompositionEnd(e) {
-    // prevent triggering an input event for no reason
-    if (!e.target.composing)
-        { return; }
-    e.target.composing = false;
-    trigger(e.target, 'input');
-}
-function trigger(el, type) {
-    var e = document.createEvent('HTMLEvents');
-    e.initEvent(type, true, true);
-    el.dispatchEvent(e);
-}
 
 // recursively search for possible transition defined inside the component root
 function locateNode(vnode) {
@@ -7906,10 +8246,10 @@ var platformComponents = {
 };
 
 // install platform specific utils
-Vue.config.mustUseProp = mustUseProp;
-Vue.config.isReservedTag = isReservedTag;
+Vue.config.mustUseProp = mustUseProp$1;
+Vue.config.isReservedTag = isReservedTag$1;
 Vue.config.isReservedAttr = isReservedAttr;
-Vue.config.getTagNamespace = getTagNamespace;
+Vue.config.getTagNamespace = getTagNamespace$1;
 Vue.config.isUnknownElement = isUnknownElement;
 // install platform runtime directives & components
 extend(Vue.options.directives, platformDirectives);
@@ -7918,7 +8258,7 @@ extend(Vue.options.components, platformComponents);
 Vue.prototype.__patch__ = inBrowser ? patch : noop;
 // public mount method
 Vue.prototype.$mount = function (el, hydrating) {
-    el = el && inBrowser ? query(el) : undefined;
+    el = el && inBrowser ? query$1(el) : undefined;
     return mountComponent(this, el, hydrating);
 };
 // devtools global hook
@@ -7943,6 +8283,75 @@ if (inBrowser) {
                 "See more tips at https://vuejs.org/guide/deployment.html");
         }
     }, 0);
+}
+
+// these are reserved for web because they are directly compiled away
+// during template compilation
+makeMap('style,class');
+// attributes that should be using props for binding
+var acceptValue = makeMap('input,textarea,option,select,progress');
+var mustUseProp = function (tag, type, attr) {
+    return ((attr === 'value' && acceptValue(tag) && type !== 'button') ||
+        (attr === 'selected' && tag === 'option') ||
+        (attr === 'checked' && tag === 'input') ||
+        (attr === 'muted' && tag === 'video'));
+};
+makeMap('contenteditable,draggable,spellcheck');
+makeMap('events,caret,typing,plaintext-only');
+makeMap('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
+    'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
+    'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
+    'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
+    'required,reversed,scoped,seamless,selected,sortable,' +
+    'truespeed,typemustmatch,visible');
+
+var isHTMLTag = makeMap('html,body,base,head,link,meta,style,title,' +
+    'address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' +
+    'div,dd,dl,dt,figcaption,figure,picture,hr,img,li,main,ol,p,pre,ul,' +
+    'a,b,abbr,bdi,bdo,br,cite,code,data,dfn,em,i,kbd,mark,q,rp,rt,rtc,ruby,' +
+    's,samp,small,span,strong,sub,sup,time,u,var,wbr,area,audio,map,track,video,' +
+    'embed,object,param,source,canvas,script,noscript,del,ins,' +
+    'caption,col,colgroup,table,thead,tbody,td,th,tr,' +
+    'button,datalist,fieldset,form,input,label,legend,meter,optgroup,option,' +
+    'output,progress,select,textarea,' +
+    'details,dialog,menu,menuitem,summary,' +
+    'content,element,shadow,template,blockquote,iframe,tfoot');
+// this map is intentionally selective, only covering SVG elements that may
+// contain child elements.
+var isSVG = makeMap('svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,font-face,' +
+    'foreignobject,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' +
+    'polygon,polyline,rect,switch,symbol,text,textpath,tspan,use,view', true);
+var isPreTag = function (tag) { return tag === 'pre'; };
+var isReservedTag = function (tag) {
+    return isHTMLTag(tag) || isSVG(tag);
+};
+function getTagNamespace(tag) {
+    if (isSVG(tag)) {
+        return 'svg';
+    }
+    // basic support for MathML
+    // note it doesn't support other MathML elements being component roots
+    if (tag === 'math') {
+        return 'math';
+    }
+}
+makeMap('text,number,password,search,email,tel,url');
+
+/**
+ * Query an element selector if it's not an element already.
+ */
+function query(el) {
+    if (typeof el === 'string') {
+        var selected = document.querySelector(el);
+        if (!selected) {
+            warn$2('Cannot find element: ' + el);
+            return document.createElement('div');
+        }
+        return selected;
+    }
+    else {
+        return el;
+    }
 }
 
 var defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g;
@@ -8058,11 +8467,20 @@ var style = {
     genData: genData$1,
 };
 
-var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
+var decoder;
+var he = {
+    decode: function (html) {
+        decoder = decoder || document.createElement('div');
+        decoder.innerHTML = html;
+        return decoder.textContent;
+    },
+};
+
+makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
     'link,meta,param,source,track,wbr');
 // Elements that you can, intentionally, leave open
 // (and which close themselves)
-var canBeLeftOpenTag = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source');
+makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source');
 // HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
 // Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
 var isNonPhrasingTag = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' +
@@ -8358,7 +8776,7 @@ function parseHTML(html, options) {
     }
 }
 
-var he = require('he');
+// const he = require('he')
 var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:|^#/;
 var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
@@ -8375,7 +8793,7 @@ var invalidAttributeRE = /[\s"'<>\/=]/;
 var decodeHTMLCached = cached(he.decode);
 var emptySlotScopeToken = "_empty_";
 // configurable state
-var warn;
+var warn$1;
 var delimiters;
 var transforms;
 var preTransforms;
@@ -8399,7 +8817,7 @@ function createASTElement(tag, attrs, parent) {
  * Convert HTML string to AST.
  */
 function parse(template, options) {
-    warn = options.warn || baseWarn;
+    warn$1 = options.warn || baseWarn;
     platformIsPreTag = options.isPreTag || no;
     platformMustUseProp = options.mustUseProp || no;
     platformGetTagNamespace = options.getTagNamespace || no;
@@ -8420,7 +8838,7 @@ function parse(template, options) {
     function warnOnce(msg, range) {
         if (!warned) {
             warned = true;
-            warn(msg, range);
+            warn$1(msg, range);
         }
     }
     function closeElement(element) {
@@ -8501,7 +8919,7 @@ function parse(template, options) {
         }
     }
     parseHTML(template, {
-        warn: warn,
+        warn: warn$1,
         expectHTML: options.expectHTML,
         isUnaryTag: options.isUnaryTag,
         canBeLeftOpenTag: options.canBeLeftOpenTag,
@@ -8533,7 +8951,7 @@ function parse(template, options) {
                 }
                 attrs.forEach(function (attr) {
                     if (invalidAttributeRE.test(attr.name)) {
-                        warn("Invalid dynamic argument expression: attribute names cannot contain " +
+                        warn$1("Invalid dynamic argument expression: attribute names cannot contain " +
                             "spaces, quotes, <, >, / or =.", {
                             start: attr.start + attr.name.indexOf("["),
                             end: attr.start + attr.name.length,
@@ -8543,7 +8961,7 @@ function parse(template, options) {
             }
             if (isForbiddenTag(element) && !isServerRendering()) {
                 element.forbidden = true;
-                warn('Templates should only be responsible for mapping the state to the ' +
+                warn$1('Templates should only be responsible for mapping the state to the ' +
                         'UI. Avoid placing tags with side-effects in your templates, such as ' +
                         ("<" + tag + ">") +
                         ', as they will not be parsed.', { start: element.start });
@@ -8734,7 +9152,7 @@ function processKey(el) {
     if (exp) {
         {
             if (el.tag === 'template') {
-                warn("<template> cannot be keyed. Place the key on real elements instead.", getRawBindingAttr(el, 'key'));
+                warn$1("<template> cannot be keyed. Place the key on real elements instead.", getRawBindingAttr(el, 'key'));
             }
             if (el.for) {
                 var iterator = el.iterator2 || el.iterator1;
@@ -8743,7 +9161,7 @@ function processKey(el) {
                     iterator === exp &&
                     parent_1 &&
                     parent_1.tag === 'transition-group') {
-                    warn("Do not use v-for index as key on <transition-group> children, " +
+                    warn$1("Do not use v-for index as key on <transition-group> children, " +
                         "this is the same as not using keys.", getRawBindingAttr(el, 'key'), true /* tip */);
                 }
             }
@@ -8766,7 +9184,7 @@ function processFor(el) {
             extend(el, res);
         }
         else {
-            warn("Invalid v-for expression: " + exp, el.rawAttrsMap['v-for']);
+            warn$1("Invalid v-for expression: " + exp, el.rawAttrsMap['v-for']);
         }
     }
 }
@@ -8818,7 +9236,7 @@ function processIfConditions(el, parent) {
         });
     }
     else {
-        warn("v-" + (el.elseif ? 'else-if="' + el.elseif + '"' : 'else') + " " +
+        warn$1("v-" + (el.elseif ? 'else-if="' + el.elseif + '"' : 'else') + " " +
             ("used on element <" + el.tag + "> without corresponding v-if."), el.rawAttrsMap[el.elseif ? 'v-else-if' : 'v-else']);
     }
 }
@@ -8830,7 +9248,7 @@ function findPrevElement(children) {
         }
         else {
             if (children[i].text !== ' ') {
-                warn("text \"" + children[i].text.trim() + "\" between v-if and v-else(-if) " +
+                warn$1("text \"" + children[i].text.trim() + "\" between v-if and v-else(-if) " +
                     "will be ignored.", children[i]);
             }
             children.pop();
@@ -8857,7 +9275,7 @@ function processSlotContent(el) {
         slotScope = getAndRemoveAttr(el, 'scope');
         /* istanbul ignore if */
         if (slotScope) {
-            warn("the \"scope\" attribute for scoped slots have been deprecated and " +
+            warn$1("the \"scope\" attribute for scoped slots have been deprecated and " +
                 "replaced by \"slot-scope\" since 2.5. The new \"slot-scope\" attribute " +
                 "can also be used on plain elements in addition to <template> to " +
                 "denote scoped slots.", el.rawAttrsMap['scope'], true);
@@ -8867,7 +9285,7 @@ function processSlotContent(el) {
     else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
         /* istanbul ignore if */
         if (el.attrsMap['v-for']) {
-            warn("Ambiguous combined usage of slot-scope and v-for on <" + el.tag + "> " +
+            warn$1("Ambiguous combined usage of slot-scope and v-for on <" + el.tag + "> " +
                 "(v-for takes higher priority). Use a wrapper <template> for the " +
                 "scoped slot to make it clearer.", el.rawAttrsMap['slot-scope'], true);
         }
@@ -8892,10 +9310,10 @@ function processSlotContent(el) {
             if (slotBinding) {
                 {
                     if (el.slotTarget || el.slotScope) {
-                        warn("Unexpected mixed usage of different slot syntaxes.", el);
+                        warn$1("Unexpected mixed usage of different slot syntaxes.", el);
                     }
                     if (el.parent && !maybeComponent(el.parent)) {
-                        warn("<template v-slot> can only appear at the root level inside " +
+                        warn$1("<template v-slot> can only appear at the root level inside " +
                             "the receiving component", el);
                     }
                 }
@@ -8911,13 +9329,13 @@ function processSlotContent(el) {
             if (slotBinding) {
                 {
                     if (!maybeComponent(el)) {
-                        warn("v-slot can only be used on components or <template>.", slotBinding);
+                        warn$1("v-slot can only be used on components or <template>.", slotBinding);
                     }
                     if (el.slotScope || el.slotTarget) {
-                        warn("Unexpected mixed usage of different slot syntaxes.", el);
+                        warn$1("Unexpected mixed usage of different slot syntaxes.", el);
                     }
                     if (el.scopedSlots) {
-                        warn("To avoid scope ambiguity, the default slot should also use " +
+                        warn$1("To avoid scope ambiguity, the default slot should also use " +
                             "<template> syntax when there are other named slots.", slotBinding);
                     }
                 }
@@ -8949,7 +9367,7 @@ function getSlotName(binding) {
             name = 'default';
         }
         else {
-            warn("v-slot shorthand syntax requires a slot name.", binding);
+            warn$1("v-slot shorthand syntax requires a slot name.", binding);
         }
     }
     return dynamicArgRE.test(name)
@@ -8963,7 +9381,7 @@ function processSlotOutlet(el) {
     if (el.tag === 'slot') {
         el.slotName = getBindingAttr(el, 'name');
         if (el.key) {
-            warn("`key` does not work on <slot> because slots are abstract outlets " +
+            warn$1("`key` does not work on <slot> because slots are abstract outlets " +
                 "and can possibly expand into multiple elements. " +
                 "Use the key on a wrapping element instead.", getRawBindingAttr(el, 'key'));
         }
@@ -9002,7 +9420,7 @@ function processAttrs(el) {
                     name = name.slice(1, -1);
                 }
                 if (value.trim().length === 0) {
-                    warn("The value for a v-bind expression cannot be empty. Found in \"v-bind:" + name + "\"");
+                    warn$1("The value for a v-bind expression cannot be empty. Found in \"v-bind:" + name + "\"");
                 }
                 if (modifiers) {
                     if (modifiers.prop && !isDynamic) {
@@ -9016,14 +9434,14 @@ function processAttrs(el) {
                     if (modifiers.sync) {
                         syncGen = genAssignmentCode(value, "$event");
                         if (!isDynamic) {
-                            addHandler(el, "update:" + camelize(name), syncGen, null, false, warn, list[i]);
+                            addHandler(el, "update:" + camelize(name), syncGen, null, false, warn$1, list[i]);
                             if (hyphenate(name) !== camelize(name)) {
-                                addHandler(el, "update:" + hyphenate(name), syncGen, null, false, warn, list[i]);
+                                addHandler(el, "update:" + hyphenate(name), syncGen, null, false, warn$1, list[i]);
                             }
                         }
                         else {
                             // handler w/ dynamic event name
-                            addHandler(el, "\"update:\"+(" + name + ")", syncGen, null, false, warn, list[i], true // dynamic
+                            addHandler(el, "\"update:\"+(" + name + ")", syncGen, null, false, warn$1, list[i], true // dynamic
                             );
                         }
                     }
@@ -9043,7 +9461,7 @@ function processAttrs(el) {
                 if (isDynamic) {
                     name = name.slice(1, -1);
                 }
-                addHandler(el, name, value, modifiers, false, warn, list[i], isDynamic);
+                addHandler(el, name, value, modifiers, false, warn$1, list[i], isDynamic);
             }
             else {
                 // normal directives
@@ -9070,7 +9488,7 @@ function processAttrs(el) {
             {
                 var res = parseText(value, delimiters);
                 if (res) {
-                    warn(name + "=\"" + value + "\": " +
+                    warn$1(name + "=\"" + value + "\": " +
                         'Interpolation inside attributes has been removed. ' +
                         'Use v-bind or the colon shorthand instead. For example, ' +
                         'instead of <div id="{{ val }}">, use <div :id="val">.', list[i]);
@@ -9113,7 +9531,7 @@ function makeAttrsMap(attrs) {
         if (map[attrs[i].name] &&
             !isIE &&
             !isEdge) {
-            warn('duplicate attribute: ' + attrs[i].name, attrs[i]);
+            warn$1('duplicate attribute: ' + attrs[i].name, attrs[i]);
         }
         map[attrs[i].name] = attrs[i].value;
     }
@@ -9146,7 +9564,7 @@ function checkForAliasModel(el, value) {
     var _el = el;
     while (_el) {
         if (_el.for && _el.alias === value) {
-            warn("<" + el.tag + " v-model=\"" + value + "\">: " +
+            warn$1("<" + el.tag + " v-model=\"" + value + "\">: " +
                 "You are binding v-model directly to a v-for iteration alias. " +
                 "This will not be able to modify the v-for source array because " +
                 "writing to the alias is like modifying a function local variable. " +
@@ -9226,11 +9644,132 @@ function preTransformNode(el, options) {
 function cloneASTElement(el) {
     return createASTElement(el.tag, el.attrsList.slice(), el.parent);
 }
-var model = {
+var model$1 = {
     preTransformNode: preTransformNode,
 };
 
-var modules = [klass, style, model];
+var modules = [klass, style, model$1];
+
+var warn;
+// in some cases, the event used has to be determined at runtime
+// so we used some reserved tokens during compile.
+var RANGE_TOKEN = '__r';
+function model(el, dir, _warn) {
+    warn = _warn;
+    var value = dir.value;
+    var modifiers = dir.modifiers;
+    var tag = el.tag;
+    var type = el.attrsMap.type;
+    {
+        // inputs with type="file" are read only and setting the input's
+        // value will throw an error.
+        if (tag === 'input' && type === 'file') {
+            warn("<" + el.tag + " v-model=\"" + value + "\" type=\"file\">:\n" +
+                "File inputs are read only. Use a v-on:change listener instead.", el.rawAttrsMap['v-model']);
+        }
+    }
+    if (el.component) {
+        genComponentModel(el, value, modifiers);
+        // component v-model doesn't need extra runtime
+        return false;
+    }
+    else if (tag === 'select') {
+        genSelect(el, value, modifiers);
+    }
+    else if (tag === 'input' && type === 'checkbox') {
+        genCheckboxModel(el, value, modifiers);
+    }
+    else if (tag === 'input' && type === 'radio') {
+        genRadioModel(el, value, modifiers);
+    }
+    else if (tag === 'input' || tag === 'textarea') {
+        genDefaultModel(el, value, modifiers);
+    }
+    else if (!config.isReservedTag(tag)) {
+        genComponentModel(el, value, modifiers);
+        // component v-model doesn't need extra runtime
+        return false;
+    }
+    else {
+        warn("<" + el.tag + " v-model=\"" + value + "\">: " +
+            "v-model is not supported on this element type. " +
+            "If you are working with contenteditable, it's recommended to " +
+            'wrap a library dedicated for that purpose inside a custom component.', el.rawAttrsMap['v-model']);
+    }
+    // ensure runtime directive metadata
+    return true;
+}
+function genCheckboxModel(el, value, modifiers) {
+    var number = modifiers && modifiers.number;
+    var valueBinding = getBindingAttr(el, 'value') || 'null';
+    var trueValueBinding = getBindingAttr(el, 'true-value') || 'true';
+    var falseValueBinding = getBindingAttr(el, 'false-value') || 'false';
+    addProp(el, 'checked', "Array.isArray(" + value + ")" +
+        ("?_i(" + value + "," + valueBinding + ")>-1") +
+        (trueValueBinding === 'true'
+            ? ":(" + value + ")"
+            : ":_q(" + value + "," + trueValueBinding + ")"));
+    addHandler(el, 'change', "var $$a=" + value + "," +
+        '$$el=$event.target,' +
+        ("$$c=$$el.checked?(" + trueValueBinding + "):(" + falseValueBinding + ");") +
+        'if(Array.isArray($$a)){' +
+        ("var $$v=" + (number ? '_n(' + valueBinding + ')' : valueBinding) + ",") +
+        '$$i=_i($$a,$$v);' +
+        ("if($$el.checked){$$i<0&&(" + genAssignmentCode(value, '$$a.concat([$$v])') + ")}") +
+        ("else{$$i>-1&&(" + genAssignmentCode(value, '$$a.slice(0,$$i).concat($$a.slice($$i+1))') + ")}") +
+        ("}else{" + genAssignmentCode(value, '$$c') + "}"), null, true);
+}
+function genRadioModel(el, value, modifiers) {
+    var number = modifiers && modifiers.number;
+    var valueBinding = getBindingAttr(el, 'value') || 'null';
+    valueBinding = number ? "_n(" + valueBinding + ")" : valueBinding;
+    addProp(el, 'checked', "_q(" + value + "," + valueBinding + ")");
+    addHandler(el, 'change', genAssignmentCode(value, valueBinding), null, true);
+}
+function genSelect(el, value, modifiers) {
+    var number = modifiers && modifiers.number;
+    var selectedVal = "Array.prototype.filter" +
+        ".call($event.target.options,function(o){return o.selected})" +
+        ".map(function(o){var val = \"_value\" in o ? o._value : o.value;" +
+        ("return " + (number ? '_n(val)' : 'val') + "})");
+    var assignment = '$event.target.multiple ? $$selectedVal : $$selectedVal[0]';
+    var code = "var $$selectedVal = " + selectedVal + ";";
+    code = code + " " + genAssignmentCode(value, assignment);
+    addHandler(el, 'change', code, null, true);
+}
+function genDefaultModel(el, value, modifiers) {
+    var type = el.attrsMap.type;
+    // warn if v-bind:value conflicts with v-model
+    // except for inputs with v-bind:type
+    {
+        var value_1 = el.attrsMap['v-bind:value'] || el.attrsMap[':value'];
+        var typeBinding = el.attrsMap['v-bind:type'] || el.attrsMap[':type'];
+        if (value_1 && !typeBinding) {
+            var binding = el.attrsMap['v-bind:value'] ? 'v-bind:value' : ':value';
+            warn(binding + "=\"" + value_1 + "\" conflicts with v-model on the same element " +
+                'because the latter already expands to a value binding internally', el.rawAttrsMap[binding]);
+        }
+    }
+    var _a = modifiers || {}, lazy = _a.lazy, number = _a.number, trim = _a.trim;
+    var needCompositionGuard = !lazy && type !== 'range';
+    var event = lazy ? 'change' : type === 'range' ? RANGE_TOKEN : 'input';
+    var valueExpression = '$event.target.value';
+    if (trim) {
+        valueExpression = "$event.target.value.trim()";
+    }
+    if (number) {
+        valueExpression = "_n(" + valueExpression + ")";
+    }
+    var code = genAssignmentCode(value, valueExpression);
+    if (needCompositionGuard) {
+        code = "if($event.target.composing)return;" + code;
+    }
+    addProp(el, 'value', "(" + value + ")");
+    addHandler(el, event, code, null, true);
+    if (trim || number) {
+        addHandler(el, 'blur', '$forceUpdate()');
+    }
+}
 
 function text(el, dir) {
     if (dir.value) {
@@ -9245,10 +9784,23 @@ function html(el, dir) {
 }
 
 var directives = {
-    model: model$1,
+    model: model,
     text: text,
     html: html,
 };
+
+var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
+    'link,meta,param,source,track,wbr');
+// Elements that you can, intentionally, leave open
+// (and which close themselves)
+var canBeLeftOpenTag = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source');
+// HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
+// Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
+makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' +
+    'details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,' +
+    'h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,' +
+    'optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,' +
+    'title,tr,track');
 
 var baseOptions = {
     expectHTML: true,
@@ -10176,6 +10728,7 @@ function generateCodeFrame(source, start, end) {
 function repeat(str, n) {
     var result = '';
     if (n > 0) {
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             // eslint-disable-line
             if (n & 1)

@@ -219,10 +219,14 @@ function genConfig (name) {
   const opts = builds[name]
 
   // console.log('__dir', __dirname)
+  // console.log('doing alisas', Object.assign({}, aliases, opts.alias))
   const config = {
     input: opts.entry,
     external: opts.external,
     plugins: [
+      alias({
+        entries: Object.assign({}, aliases, opts.alias)
+      }),
       // flow(),
       ts({
         tsconfig: path.resolve(__dirname, '../', 'tsconfig.json'),
@@ -239,7 +243,6 @@ function genConfig (name) {
       // babel({
       //   extensions: ['.js', '.jsx', '.ts', '.tsx']
       // }),
-      alias(Object.assign({}, aliases, opts.alias))
     ].concat(opts.plugins || []),
     output: {
       file: opts.dest,
@@ -254,6 +257,8 @@ function genConfig (name) {
       }
     }
   }
+
+  // console.log('pluging', config.plugins)
 
   // built-in vars
   const vars = {

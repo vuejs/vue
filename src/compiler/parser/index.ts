@@ -1,6 +1,6 @@
 
-const he = require('he')
-// import * as he from 'he'
+// const he = require('he')
+import he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'

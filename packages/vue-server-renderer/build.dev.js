@@ -3,6 +3,11 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var stream = require('stream');
+var he = require('he');
+
+function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+
+var he__default = /*#__PURE__*/_interopDefaultLegacy(he);
 
 var emptyObject = Object.freeze({});
 // These helpers produce better VM code in JS engines due to their
@@ -256,6 +261,117 @@ function looseIndexOf(arr, val) {
     return -1;
 }
 
+var isAttr$1 = makeMap('accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' +
+    'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' +
+    'checked,cite,class,code,codebase,color,cols,colspan,content,' +
+    'contenteditable,contextmenu,controls,coords,data,datetime,default,' +
+    'defer,dir,dirname,disabled,download,draggable,dropzone,enctype,for,' +
+    'form,formaction,headers,height,hidden,high,href,hreflang,http-equiv,' +
+    'icon,id,ismap,itemprop,keytype,kind,label,lang,language,list,loop,low,' +
+    'manifest,max,maxlength,media,method,GET,POST,min,multiple,email,file,' +
+    'muted,name,novalidate,open,optimum,pattern,ping,placeholder,poster,' +
+    'preload,radiogroup,readonly,rel,required,reversed,rows,rowspan,sandbox,' +
+    'scope,scoped,seamless,selected,shape,size,type,text,password,sizes,span,' +
+    'spellcheck,src,srcdoc,srclang,srcset,start,step,style,summary,tabindex,' +
+    'target,title,usemap,value,width,wrap');
+/* istanbul ignore next */
+var isRenderableAttr$1 = function (name) {
+    return (isAttr$1(name) || name.indexOf('data-') === 0 || name.indexOf('aria-') === 0);
+};
+var propsToAttrMap$1 = {
+    acceptCharset: 'accept-charset',
+    className: 'class',
+    htmlFor: 'for',
+    httpEquiv: 'http-equiv',
+};
+var ESC$1 = {
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    '&': '&amp;',
+};
+function escape$1(s) {
+    return s.replace(/[<>"&]/g, escapeChar$1);
+}
+function escapeChar$1(a) {
+    return ESC$1[a] || a;
+}
+var noUnitNumericStyleProps$1 = {
+    'animation-iteration-count': true,
+    'border-image-outset': true,
+    'border-image-slice': true,
+    'border-image-width': true,
+    'box-flex': true,
+    'box-flex-group': true,
+    'box-ordinal-group': true,
+    'column-count': true,
+    columns: true,
+    flex: true,
+    'flex-grow': true,
+    'flex-positive': true,
+    'flex-shrink': true,
+    'flex-negative': true,
+    'flex-order': true,
+    'grid-row': true,
+    'grid-row-end': true,
+    'grid-row-span': true,
+    'grid-row-start': true,
+    'grid-column': true,
+    'grid-column-end': true,
+    'grid-column-span': true,
+    'grid-column-start': true,
+    'font-weight': true,
+    'line-clamp': true,
+    'line-height': true,
+    opacity: true,
+    order: true,
+    orphans: true,
+    'tab-size': true,
+    widows: true,
+    'z-index': true,
+    zoom: true,
+    // SVG
+    'fill-opacity': true,
+    'flood-opacity': true,
+    'stop-opacity': true,
+    'stroke-dasharray': true,
+    'stroke-dashoffset': true,
+    'stroke-miterlimit': true,
+    'stroke-opacity': true,
+    'stroke-width': true,
+};
+
+// these are reserved for web because they are directly compiled away
+// during template compilation
+makeMap('style,class');
+// attributes that should be using props for binding
+var acceptValue = makeMap('input,textarea,option,select,progress');
+var mustUseProp = function (tag, type, attr) {
+    return ((attr === 'value' && acceptValue(tag) && type !== 'button') ||
+        (attr === 'selected' && tag === 'option') ||
+        (attr === 'checked' && tag === 'input') ||
+        (attr === 'muted' && tag === 'video'));
+};
+var isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck');
+var isValidContentEditableValue = makeMap('events,caret,typing,plaintext-only');
+var convertEnumeratedValue = function (key, value) {
+    return isFalsyAttrValue(value) || value === 'false'
+        ? 'false'
+        : // allow arbitrary string value for contenteditable
+            key === 'contenteditable' && isValidContentEditableValue(value)
+                ? value
+                : 'true';
+};
+var isBooleanAttr = makeMap('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
+    'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
+    'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
+    'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
+    'required,reversed,scoped,seamless,selected,sortable,' +
+    'truespeed,typemustmatch,visible');
+var isFalsyAttrValue = function (val) {
+    return val == null || val === false;
+};
+
 var isAttr = makeMap('accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' +
     'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' +
     'checked,cite,class,code,codebase,color,cols,colspan,content,' +
@@ -340,37 +456,6 @@ var noUnitNumericStyleProps = {
     'stroke-width': true,
 };
 
-// these are reserved for web because they are directly compiled away
-// during template compilation
-makeMap('style,class');
-// attributes that should be using props for binding
-var acceptValue = makeMap('input,textarea,option,select,progress');
-var mustUseProp = function (tag, type, attr) {
-    return ((attr === 'value' && acceptValue(tag) && type !== 'button') ||
-        (attr === 'selected' && tag === 'option') ||
-        (attr === 'checked' && tag === 'input') ||
-        (attr === 'muted' && tag === 'video'));
-};
-var isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck');
-var isValidContentEditableValue = makeMap('events,caret,typing,plaintext-only');
-var convertEnumeratedValue = function (key, value) {
-    return isFalsyAttrValue(value) || value === 'false'
-        ? 'false'
-        : // allow arbitrary string value for contenteditable
-            key === 'contenteditable' && isValidContentEditableValue(value)
-                ? value
-                : 'true';
-};
-var isBooleanAttr = makeMap('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
-    'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
-    'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
-    'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
-    'required,reversed,scoped,seamless,selected,sortable,' +
-    'truespeed,typemustmatch,visible');
-var isFalsyAttrValue = function (val) {
-    return val == null || val === false;
-};
-
 function renderAttrs$1(node) {
     var attrs = node.data.attrs;
     var res = '';
@@ -400,21 +485,21 @@ function renderAttrs$1(node) {
             // leave it to the style module
             continue;
         }
-        res += renderAttr(key, attrs[key]);
+        res += renderAttr$1(key, attrs[key]);
     }
     return res;
 }
-function renderAttr(key, value) {
+function renderAttr$1(key, value) {
     if (isBooleanAttr(key)) {
         if (!isFalsyAttrValue(value)) {
             return " " + key + "=\"" + key + "\"";
         }
     }
     else if (isEnumeratedAttr(key)) {
-        return " " + key + "=\"" + escape(convertEnumeratedValue(key, value)) + "\"";
+        return " " + key + "=\"" + escape$1(convertEnumeratedValue(key, value)) + "\"";
     }
     else if (!isFalsyAttrValue(value)) {
-        return " " + key + "=\"" + escape(String(value)) + "\"";
+        return " " + key + "=\"" + escape$1(String(value)) + "\"";
     }
     return '';
 }
@@ -516,11 +601,11 @@ function renderDOMProps$1(node) {
         }
         else {
             // $flow-disable-line (WTF?)
-            var attr = propsToAttrMap[key] || key.toLowerCase();
-            if (isRenderableAttr(attr) &&
+            var attr = propsToAttrMap$1[key] || key.toLowerCase();
+            if (isRenderableAttr$1(attr) &&
                 // avoid rendering double-bound props/attrs twice
                 !(isDef(attrs) && isDef(attrs[attr]))) {
-                res += renderAttr(attr, props[key]);
+                res += renderAttr$1(attr, props[key]);
             }
         }
     }
@@ -1897,7 +1982,7 @@ makeMap('text,number,password,search,email,tel,url');
 function renderClass(node) {
     var classList = genClassForVnode(node);
     if (classList !== '') {
-        return " class=\"" + escape(classList) + "\"";
+        return " class=\"" + escape$1(classList) + "\"";
     }
 }
 
@@ -1960,25 +2045,25 @@ function getStyle(vnode, checkChild) {
     return res;
 }
 
-function genStyle(style) {
+function genStyle$1(style) {
     var styleText = '';
     for (var key in style) {
         var value = style[key];
         var hyphenatedKey = hyphenate(key);
         if (Array.isArray(value)) {
             for (var i = 0, len = value.length; i < len; i++) {
-                styleText += normalizeValue(hyphenatedKey, value[i]);
+                styleText += normalizeValue$1(hyphenatedKey, value[i]);
             }
         }
         else {
-            styleText += normalizeValue(hyphenatedKey, value);
+            styleText += normalizeValue$1(hyphenatedKey, value);
         }
     }
     return styleText;
 }
-function normalizeValue(key, value) {
+function normalizeValue$1(key, value) {
     if (typeof value === 'string' ||
-        (typeof value === 'number' && noUnitNumericStyleProps[key]) ||
+        (typeof value === 'number' && noUnitNumericStyleProps$1[key]) ||
         value === 0) {
         return key + ":" + value + ";";
     }
@@ -1988,9 +2073,9 @@ function normalizeValue(key, value) {
     }
 }
 function renderStyle(vnode) {
-    var styleText = genStyle(getStyle(vnode, false));
+    var styleText = genStyle$1(getStyle(vnode, false));
     if (styleText !== '') {
-        return " style=" + JSON.stringify(escape(styleText));
+        return " style=" + JSON.stringify(escape$1(styleText));
     }
 }
 
@@ -2050,14 +2135,14 @@ var baseDirectives$1 = {
     model: model$2,
 };
 
-var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
+var isUnaryTag$1 = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
     'link,meta,param,source,track,wbr');
 // Elements that you can, intentionally, leave open
 // (and which close themselves)
-var canBeLeftOpenTag = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source');
+var canBeLeftOpenTag$1 = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source');
 // HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
 // Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
-var isNonPhrasingTag = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' +
+makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' +
     'details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,' +
     'h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,' +
     'optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,' +
@@ -2719,6 +2804,19 @@ var style = {
     genData: genData$1,
 };
 
+var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
+    'link,meta,param,source,track,wbr');
+// Elements that you can, intentionally, leave open
+// (and which close themselves)
+var canBeLeftOpenTag = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source');
+// HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
+// Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
+var isNonPhrasingTag = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,' +
+    'details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,' +
+    'h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,' +
+    'optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,' +
+    'title,tr,track');
+
 /**
  * Not type-checking this file because it's mostly vendor code.
  */
@@ -3131,7 +3229,7 @@ function parseString(chr) {
     }
 }
 
-var he = require('he');
+// const he = require('he')
 var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:|^#/;
 var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
@@ -3145,7 +3243,7 @@ var slotRE = /^v-slot(:|$)|^#/;
 var lineBreakRE = /[\r\n]/;
 var whitespaceRE = /[ \f\t\r\n]+/g;
 var invalidAttributeRE = /[\s"'<>\/=]/;
-var decodeHTMLCached = cached(he.decode);
+var decodeHTMLCached = cached(he__default['default'].decode);
 var emptySlotScopeToken = "_empty_";
 // configurable state
 var warn$1;
@@ -5355,6 +5453,7 @@ function generateCodeFrame(source, start, end) {
 function repeat(str, n) {
     var result = '';
     if (n > 0) {
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             // eslint-disable-line
             if (n & 1)
@@ -5527,6 +5626,49 @@ var createCompiler = createCompilerCreator(function baseCompile(template, option
 });
 
 var _a = createCompiler(baseOptions), compileToFunctions = _a.compileToFunctions;
+
+function renderAttr(key, value) {
+    if (isBooleanAttr(key)) {
+        if (!isFalsyAttrValue(value)) {
+            return " " + key + "=\"" + key + "\"";
+        }
+    }
+    else if (isEnumeratedAttr(key)) {
+        return " " + key + "=\"" + escape(convertEnumeratedValue(key, value)) + "\"";
+    }
+    else if (!isFalsyAttrValue(value)) {
+        return " " + key + "=\"" + escape(String(value)) + "\"";
+    }
+    return '';
+}
+
+function genStyle(style) {
+    var styleText = '';
+    for (var key in style) {
+        var value = style[key];
+        var hyphenatedKey = hyphenate(key);
+        if (Array.isArray(value)) {
+            for (var i = 0, len = value.length; i < len; i++) {
+                styleText += normalizeValue(hyphenatedKey, value[i]);
+            }
+        }
+        else {
+            styleText += normalizeValue(hyphenatedKey, value);
+        }
+    }
+    return styleText;
+}
+function normalizeValue(key, value) {
+    if (typeof value === 'string' ||
+        (typeof value === 'number' && noUnitNumericStyleProps[key]) ||
+        value === 0) {
+        return key + ":" + value + ";";
+    }
+    else {
+        // invalid values
+        return "";
+    }
+}
 
 // The template compiler attempts to minimize the need for normalization by
 // statically analyzing the template at compile time.
@@ -8179,8 +8321,8 @@ process.env.VUE_ENV = 'server';
 function createRenderer(options) {
     if (options === void 0) { options = {}; }
     return createRenderer$1(extend(extend({}, options), {
-        isUnaryTag: isUnaryTag,
-        canBeLeftOpenTag: canBeLeftOpenTag,
+        isUnaryTag: isUnaryTag$1,
+        canBeLeftOpenTag: canBeLeftOpenTag$1,
         modules: modules$1,
         // user can provide server-side implementations for custom directives
         // when creating the renderer.
