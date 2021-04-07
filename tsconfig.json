@@ -17,7 +17,7 @@
     "removeComments": false,
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
-    "types": ["node", "jasmine"],
+    "types": ["node"],
     "paths": {
       "compiler/*": ["src/compiler/*"],
       "core/*": ["src/core/*"],
@@ -31,7 +31,7 @@
       "vue": ["src/platforms/web/entry-runtime-with-compiler"]
     }
   },
-  "include": ["src", "test-dts", "typescript"],
+  "include": ["src", "test-dts", "typescript", "types"],
 
   "exclude": ["flow", "node_modules", "packages", "types"]
 }

@@ -81,8 +81,6 @@
     "@rollup/plugin-commonjs": "^18.0.0",
     "@rollup/plugin-node-resolve": "^11.2.1",
     "@rollup/plugin-replace": "^2.4.2",
-    "@types/jasmine": "^3.6.9",
-    "@types/mocha": "^8.2.2",
     "@types/node": "^12.12.0",
     "@types/webpack": "^4.4.22",
     "@typescript-eslint/eslint-plugin": "^4.21.0",
