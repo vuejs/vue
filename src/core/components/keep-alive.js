@@ -3,7 +3,7 @@
 import { isRegExp, remove } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
-type VNodeCache = { [key: string]: ?VNode };
+type VNodeCache = { [key: string]: ?VNode }
 
 function getComponentName (opts: ?VNodeComponentOptions): ?string {
   return opts && (opts.Ctor.options.name || opts.tag)
