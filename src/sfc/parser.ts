@@ -98,7 +98,6 @@ export function parseComponent(
       currentBlock.end = start
       let text = content.slice(currentBlock.start, currentBlock.end)
       if (options.deindent !== false) {
-        //@ts-expect-error
         text = deindent(text)
       }
       // pad content so that linters and pre-processors can output correct

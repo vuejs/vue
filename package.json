@@ -154,5 +154,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "@types/he": "^1.1.1"
   }
 }

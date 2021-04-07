@@ -1,5 +1,4 @@
 
-// const he = require('he')
 import he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
