@@ -1594,6 +1594,50 @@ describe('SSR: renderToString', () => {
 
     renderToString(vueInstance, err => done(err))
   })
+
+  it('undefined v-model with textarea', done => {
+    renderVmWithOptions({
+      render (h) {
+        return h('div', [
+          h('textarea', {
+            domProps: {
+              value: null
+            }
+          })
+        ])
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true"><textarea></textarea></div>'
+      )
+      done()
+    })
+  })
+
+  it('Options inheritAttrs in parent component', done => {
+    const childComponent = {
+      template: `<div>{{ someProp }}</div>`,
+      props: {
+        someProp: {}
+      },
+    }
+    const parentComponent = {
+      template: `<childComponent v-bind="$attrs" />`,
+      components: { childComponent },
+      inheritAttrs: false
+    }
+    renderVmWithOptions({
+      template: `
+        <div>
+          <parentComponent some-prop="some-val" />
+        </div>
+        `,
+      components: { parentComponent }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div>some-val</div></div>')
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {

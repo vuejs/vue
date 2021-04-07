@@ -90,21 +90,20 @@ Vue.component('union-prop', {
   }
 });
 
-// stopped working since TS 3.4
-// Vue.component('union-prop-with-no-casting', {
-//   props: {
-//     mixed: [RegExp, Array],
-//     object: [Cat, User],
-//     primitive: [String, Number],
-//     regex: RegExp
-//   },
-//   data() {
-//     this.mixed;
-//     this.object;
-//     this.primitive;
-//     this.regex.compile;
-//   }
-// })
+Vue.component('union-prop-with-no-casting', {
+  props: {
+    mixed: [RegExp, Array],
+    object: [Cat, User],
+    primitive: [String, Number],
+    regex: RegExp
+  },
+  data() {
+    this.mixed;
+    this.object;
+    this.primitive;
+    this.regex.compile;
+  }
+})
 
 Vue.component('prop-with-primitive-default', {
   props: {
@@ -113,7 +112,7 @@ Vue.component('prop-with-primitive-default', {
       default: () => String(Math.round(Math.random() * 10000000))
     }
   },
-  created() {
+  created(): void {
     this.id;
   }
 });
@@ -152,7 +151,7 @@ Vue.component('component', {
     }
   },
   methods: {
-    plus() {
+    plus(): void {
       this.a++;
       this.aDouble.toFixed();
       this.aPlus = 1;
@@ -169,6 +168,10 @@ Vue.component('component', {
         this.a = val
       },
       deep: true
+    },
+    d: {
+      handler: 'someMethod',
+      immediate: true
     }
   },
   el: "#app",
@@ -479,3 +482,20 @@ Vue.component('functional-component-v-model', {
 
 
 Vue.component('async-es-module-component', () => import('./es-module'))
+
+Vue.component('directive-expression-optional-string', {
+  render(createElement) {
+    return createElement("div", {
+      directives: [
+        {
+          name: 'has-expression',
+          value: 2,
+          expression: '1 + 1',
+        }, {
+          name: 'no-expression',
+          value: 'foo',
+        },
+      ],
+    })
+  }
+});

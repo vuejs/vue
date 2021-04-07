@@ -76,7 +76,7 @@ export interface ComponentOptions<
   propsData?: object;
   computed?: Accessors<Computed>;
   methods?: Methods;
-  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any> | string>;
+  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any>>;
 
   el?: Element | string;
   template?: string;
@@ -144,7 +144,7 @@ export interface RenderContext<Props=DefaultProps> {
   injections: any
 }
 
-export type Prop<T> = { (): T } | { new(...args: any[]): T & object } | { new(...args: string[]): Function }
+export type Prop<T> = { (): T } | { new(...args: never[]): T & object } | { new(...args: string[]): Function }
 
 export type PropType<T> = Prop<T> | Prop<T>[];
 
@@ -169,7 +169,7 @@ export interface ComputedOptions<T> {
   cache?: boolean;
 }
 
-export type WatchHandler<T> = (val: T, oldVal: T) => void;
+export type WatchHandler<T> = string | ((val: T, oldVal: T) => void);
 
 export interface WatchOptions {
   deep?: boolean;

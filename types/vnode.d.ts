@@ -20,7 +20,7 @@ export interface VNode {
   elm?: Node;
   ns?: string;
   context?: Vue;
-  key?: string | number;
+  key?: string | number | symbol | boolean;
   componentOptions?: VNodeComponentOptions;
   componentInstance?: Vue;
   parent?: VNode;
@@ -69,7 +69,7 @@ export interface VNodeDirective {
   name: string;
   value?: any;
   oldValue?: any;
-  expression?: any;
+  expression?: string;
   arg?: string;
   oldArg?: string;
   modifiers?: { [key: string]: boolean };

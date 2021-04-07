@@ -357,7 +357,9 @@ export function stateMixin (Vue: Class<Component>) {
     const watcher = new Watcher(vm, expOrFn, cb, options)
     if (options.immediate) {
       const info = `callback for immediate watcher "${watcher.expression}"`
+      pushTarget()
       invokeWithErrorHandling(cb, vm, [watcher.value], vm, info)
+      popTarget()
     }
     return function unwatchFn () {
       watcher.teardown()
