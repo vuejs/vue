@@ -909,4 +909,20 @@ describe('parser', () => {
     expect(ast.children[2].type).toBe(3)
     expect(ast.children[2].text).toBe('\ndef')
   })
+
+  // #10152
+  it('not warn when scoped slot used inside of dynamic component on regular element', () => {
+    parse(`
+      <div>
+        <div is="customComp" v-slot="slotProps"></div>
+        <div :is="'customComp'" v-slot="slotProps"></div>
+        <div v-bind:is="'customComp'" v-slot="slotProps"></div>
+      </div>
+    `, baseOptions)
+    expect('v-slot can only be used on components or <template>').not.toHaveBeenWarned()
+
+    parse(`<div is="customComp"><template v-slot="slotProps"></template></div>`, baseOptions)
+    expect(`<template v-slot> can only appear at the root level inside the receiving the component`)
+      .not.toHaveBeenWarned()
+  })
 })
