@@ -10,7 +10,7 @@
 // nodes will remain where they should be.
 
 import { warn, extend } from 'core/util/index'
-import { addClass, removeClass } from '../class-util'
+import { addClass, removeClass } from 'web/runtime/class-util'
 import { transitionProps, extractTransitionData } from './transition'
 import { setActiveInstance } from 'core/instance/lifecycle'
 
@@ -20,7 +20,7 @@ import {
   transitionEndEvent,
   addTransitionClass,
   removeTransitionClass,
-} from '../transition-util'
+} from 'web/runtime/transition-util'
 import VNode from 'core/vdom/vnode'
 
 const props = extend(

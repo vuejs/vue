@@ -1,5 +1,5 @@
 import { inBrowser, isIE9 } from 'core/util/index'
-import { addClass, removeClass } from './class-util'
+import { addClass, removeClass } from 'web/runtime/class-util'
 import { remove, extend, cached } from 'shared/util'
 
 export function resolveTransition(

@@ -5,13 +5,13 @@ import { activeInstance } from 'core/instance/lifecycle'
 
 import { once, isDef, isUndef, isObject, toNumber } from 'shared/util'
 
-import {
+import { 
   nextFrame,
   resolveTransition,
   whenTransitionEnds,
   addTransitionClass,
-  removeTransitionClass,
-} from '../transition-util'
+  removeTransitionClass } from 'web/runtime/transition-util'
+
 import type { VNodeWithData } from 'typescript/vnode'
 import VNode from 'core/vdom/vnode'
 
