@@ -29,9 +29,7 @@ declare module 'lru-cache' {
 }
 
 declare module 'de-indent' {
-  var exports: {
-    (input: string): string
-  }
+  export default function deindent (input: string): string
 }
 
 declare module 'serialize-javascript' {
