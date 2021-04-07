@@ -46,17 +46,18 @@ function buildEntry (config) {
   const isProd = /(min|prod)\.js$/.test(file)
   return rollup.rollup(config)
     .then(bundle => bundle.generate(output))
-    .then(({ output: [{ code }] }) => {
+    .then(async ({ output: [{ code }] }) => {
       if (isProd) {
-        const minified = (banner ? banner + '\n' : '') + terser.minify(code, {
+        const {code: minifiedCode} =  await terser.minify(code, {
           toplevel: true,
-          output: {
-            ascii_only: true
-          },
           compress: {
-            pure_funcs: ['makeMap']
+            pure_funcs: ['makeMap'],
+          },
+          format: {
+            ascii_only: true,
           }
-        }).code
+        });
+        const minified = (banner ? banner + '\n' : '') + minifiedCode
         return write(file, minified, true)
       } else {
         return write(file, code)

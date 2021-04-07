@@ -5,7 +5,6 @@ const cjs = require('@rollup/plugin-commonjs')
 const replace = require('@rollup/plugin-replace')
 const node = require('@rollup/plugin-node-resolve').nodeResolve
 const ts = require('rollup-plugin-typescript2')
-// const babel = require('@rollup/plugin-babel').babel
 
 const version = process.env.VERSION || require('../package.json').version
 const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
@@ -219,7 +218,6 @@ function genConfig (name) {
   const opts = builds[name]
 
   // console.log('__dir', __dirname)
-  // console.log('doing alisas', Object.assign({}, aliases, opts.alias))
   const config = {
     input: opts.entry,
     external: opts.external,
@@ -227,22 +225,13 @@ function genConfig (name) {
       alias({
         entries: Object.assign({}, aliases, opts.alias)
       }),
-      // flow(),
       ts({
         tsconfig: path.resolve(__dirname, '../', 'tsconfig.json'),
         cacheRoot: path.resolve(__dirname, '../','node_modules/.rts2_cache'),
         tsconfigOverride: {
-          // compilerOptions: {
-          //   sourceMap: output.sourcemap,
-          //   declaration: shouldEmitDeclarations,
-          //   declarationMap: shouldEmitDeclarations
-          // },
           exclude: ['test', 'test-dts']
         }
       }),
-      // babel({
-      //   extensions: ['.js', '.jsx', '.ts', '.tsx']
-      // }),
     ].concat(opts.plugins || []),
     output: {
       file: opts.dest,

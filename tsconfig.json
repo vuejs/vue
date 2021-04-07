@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "outDir": "dist",
     "sourceMap": true,
-    "target": "ES5",
+    "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "node",
     "allowJs": true,
@@ -31,7 +31,7 @@
       "vue": ["src/platforms/web/entry-runtime-with-compiler"]
     }
   },
-  "include": ["src", "test-dts", "typescript", "types"],
+  "include": ["src", "test-dts", "typescript"],
 
   "exclude": ["flow", "node_modules", "packages", "types"]
 }
