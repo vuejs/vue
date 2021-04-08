@@ -1325,4 +1325,19 @@ describe('Component scoped slot', () => {
       expect(vm.$el.textContent).toMatch(`1`)
     }).then(done)
   })
+
+  // vm.$scopedSlots shoud not empty in beforeMount, see issue #11714
+  it('$scopedSlots shoud not empty in beforeMount', () => {
+    const vm = new Vue({
+      template: `<foo>Slot content</foo>`,
+      components: {
+        foo: {
+          template: `<div><slot></slot></div>`,
+          beforeMount () {
+            expect(Object.keys(this.$scopedSlots).length).not.toBe(0)
+          }
+        }
+      }
+    }).$mount()
+  })
 })
