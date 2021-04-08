@@ -1325,4 +1325,32 @@ describe('Component scoped slot', () => {
       expect(vm.$el.textContent).toMatch(`1`)
     }).then(done)
   })
+
+  // #10271
+  it('should work when dynamic slot name used in v-for', () => {
+    const Foo = {
+      template: `
+        <div>
+          <slot name="a" />
+          <slot name="b" />
+          <slot name="c" />
+        </div>
+      `
+    }
+    const vm = new Vue({
+      data: {
+        item: 'c'
+      },
+      template: `
+        <foo>
+          <template v-slot:[item] v-for="item in ['a']">A {{ item }}</template>
+          <template v-slot:[item] v-for="item in ['b']">B {{ item }}</template>
+          <template v-slot:[item]>C {{ item }}</template>
+        </foo>
+      `,
+      components: { Foo }
+    }).$mount()
+
+    expect(vm.$el.textContent.trim()).toBe('A a B b C c')
+  })
 })

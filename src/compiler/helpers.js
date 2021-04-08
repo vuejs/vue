@@ -229,3 +229,27 @@ function rangeSetItem (
   }
   return item
 }
+
+export function addScopedSlot (
+  target: ASTElement,
+  name: string,
+  slot: ASTElement,
+  append?: boolean
+) {
+  const scopedSlots = target.scopedSlots || (target.scopedSlots = [])
+  if (append) {
+    // don't check the name of the scoped slot
+    // for example, dynamic v-slot and v-for are used on the same element
+    scopedSlots.push(slot)
+  } else {
+    // $flow-disable-line
+    const scopedSlotsMap = target.scopedSlotsMap || (target.scopedSlotsMap = Object.create(null))
+    const i = scopedSlotsMap[name]
+    if (i >= 0) {
+      // overwrite it if already has same name scoped slot
+      scopedSlots[i] = slot
+    } else {
+      scopedSlotsMap[name] = scopedSlots.push(slot) - 1
+    }
+  }
+}
