@@ -9,16 +9,20 @@ function getComponentName (opts: ?VNodeComponentOptions): ?string {
   return opts && (opts.Ctor.options.name || opts.tag)
 }
 
-function matches (pattern: string | RegExp | Array<string>, name: string): boolean {
-  if (Array.isArray(pattern)) {
-    return pattern.indexOf(name) > -1
-  } else if (typeof pattern === 'string') {
-    return pattern.split(',').indexOf(name) > -1
-  } else if (isRegExp(pattern)) {
-    return pattern.test(name)
+function matches (pattern: string | RegExp | Array<string>, key: ?string, name: string): boolean {
+  function matchesValue(value: string) {
+    if (Array.isArray(pattern)) {
+      return pattern.indexOf(value) > -1
+    } else if (typeof pattern === 'string') {
+      return pattern.split(',').indexOf(value) > -1
+    } else if (isRegExp(pattern)) {
+      return pattern.test(value)
+    }
+    /* istanbul ignore next */
+    return false
   }
-  /* istanbul ignore next */
-  return false
+
+  return (key && matchesValue(key)) || matchesValue(name);
 }
 
 function pruneCache (keepAliveInstance: any, filter: Function) {
@@ -27,7 +31,7 @@ function pruneCache (keepAliveInstance: any, filter: Function) {
     const cachedNode: ?VNode = cache[key]
     if (cachedNode) {
       const name: ?string = getComponentName(cachedNode.componentOptions)
-      if (name && !filter(name)) {
+      if (name && !filter(key, name)) {
         pruneCacheEntry(cache, key, keys, _vnode)
       }
     }
@@ -41,7 +45,7 @@ function pruneCacheEntry (
   current?: VNode
 ) {
   const cached = cache[key]
-  if (cached && (!current || cached.tag !== current.tag)) {
+  if (cached && (!current || cached.tag !== current.tag || cached.key !== current.key)) {
     cached.componentInstance.$destroy()
   }
   cache[key] = null
@@ -73,10 +77,10 @@ export default {
 
   mounted () {
     this.$watch('include', val => {
-      pruneCache(this, name => matches(val, name))
+      pruneCache(this, (key, name) => matches(val, key, name))
     })
     this.$watch('exclude', val => {
-      pruneCache(this, name => !matches(val, name))
+      pruneCache(this, (key, name) => !matches(val, key, name))
     })
   },
 
@@ -87,22 +91,25 @@ export default {
     if (componentOptions) {
       // check pattern
       const name: ?string = getComponentName(componentOptions)
-      const { include, exclude } = this
-      if (
-        // not included
-        (include && (!name || !matches(include, name))) ||
-        // excluded
-        (exclude && name && matches(exclude, name))
-      ) {
-        return vnode
-      }
 
-      const { cache, keys } = this
       const key: ?string = vnode.key == null
         // same constructor may get registered as different local components
         // so cid alone is not enough (#3269)
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')
         : vnode.key
+
+      const { include, exclude } = this
+      if (
+        // not included
+        (include && (!name || !matches(include, key, name))) ||
+        // excluded
+        (exclude && name && matches(exclude, key, name))
+      ) {
+        return vnode
+      }
+
+      const { cache, keys } = this
+
       if (cache[key]) {
         vnode.componentInstance = cache[key].componentInstance
         // make current key freshest
