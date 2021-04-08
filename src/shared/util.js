@@ -74,8 +74,8 @@ export function isValidArrayIndex (val: any): boolean {
 export function isPromise (val: any): boolean {
   return (
     isDef(val) &&
-    typeof val.then === 'function' &&
-    typeof val.catch === 'function'
+    val instanceof Promise ||
+    Promise.prototype.isPrototypeOf(val)
   )
 }
 
