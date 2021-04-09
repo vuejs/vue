@@ -1613,6 +1613,31 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('Options inheritAttrs in parent component', done => {
+    const childComponent = {
+      template: `<div>{{ someProp }}</div>`,
+      props: {
+        someProp: {}
+      },
+    }
+    const parentComponent = {
+      template: `<childComponent v-bind="$attrs" />`,
+      components: { childComponent },
+      inheritAttrs: false
+    }
+    renderVmWithOptions({
+      template: `
+        <div>
+          <parentComponent some-prop="some-val" />
+        </div>
+        `,
+      components: { parentComponent }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div>some-val</div></div>')
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {

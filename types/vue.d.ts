@@ -121,6 +121,10 @@ export interface VueConstructor<V extends Vue = Vue> {
 
   observable<T>(obj: T): T;
 
+  util: {
+    warn(msg: string, vm?: InstanceType<VueConstructor>): void;
+  };
+
   config: VueConfiguration;
   version: string;
 }

@@ -25,6 +25,10 @@ export default function renderAttrs (node: VNodeWithData): string {
   if (isUndef(opts) || opts.Ctor.options.inheritAttrs !== false) {
     let parent = node.parent
     while (isDef(parent)) {
+      // Stop fallthrough in case parent has inheritAttrs option set to false
+      if (parent.componentOptions && parent.componentOptions.Ctor.options.inheritAttrs === false) {
+        break;
+      }
       if (isDef(parent.data) && isDef(parent.data.attrs)) {
         attrs = extend(extend({}, attrs), parent.data.attrs)
       }
