@@ -86,4 +86,4 @@ function cloneASTElement(el) {
 
 export default {
   preTransformNode,
-}
+} as ModuleOptions

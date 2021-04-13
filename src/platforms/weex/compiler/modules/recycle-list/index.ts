@@ -56,4 +56,4 @@ export default {
   preTransformNode,
   transformNode,
   postTransformNode,
-}
+} as ModuleOptions

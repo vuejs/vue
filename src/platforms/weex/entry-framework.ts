@@ -1,5 +1,5 @@
 
-import { GlobalAPI } from 'typescript/global-api'
+import type { GlobalAPI } from 'typescript/global-api'
 import type {
   Weex,
   WeexInstanceContext,
@@ -8,7 +8,6 @@ import type {
 } from 'typescript/weex'
 
 // this will be preserved during build
-// $flow-disable-line
 const VueFactory = require('./factory')
 
 const instanceOptions: { [key: string]: WeexInstanceOption } = {}

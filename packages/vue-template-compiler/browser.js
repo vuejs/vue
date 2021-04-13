@@ -591,7 +591,6 @@
               currentBlock.end = start;
               var text = content.slice(currentBlock.start, currentBlock.end);
               if (options.deindent !== false) {
-                  //@ts-expect-error
                   text = deIndent(text);
               }
               // pad content so that linters and pre-processors can output correct
@@ -2354,7 +2353,6 @@
       }
   }
 
-  // const he = require('he')
   var onRE = /^@|^v-on:/;
   var dirRE = /^v-|^@|^:|^#/;
   var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;

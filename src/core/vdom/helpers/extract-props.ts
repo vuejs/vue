@@ -33,7 +33,7 @@ export function extractPropsFromVNodeData(
           tip(
             `Prop "${keyInLowerCase}" is passed to component ` +
               `${formatComponentName(
-                // @ts-ignore
+                // @ts-expect-error tag is string
                 tag || Ctor
               )}, but the declared prop name is` +
               ` "${key}". ` +

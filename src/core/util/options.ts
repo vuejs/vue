@@ -102,9 +102,7 @@ export function mergeDataOrFn(
     // it has to be a function to pass previous merges.
     return function mergedDataFn() {
       return mergeData(
-        // @ts-ignore
         typeof childVal === 'function' ? childVal.call(this, this) : childVal,
-        // @ts-ignore
         typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
       )
     }

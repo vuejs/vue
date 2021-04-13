@@ -35,13 +35,10 @@ if (process.env.NODE_ENV !== 'production') {
       return '<Root>'
     }
     const options =
-      // @ts-ignore
-      typeof vm === 'function' && vm.cid != null
-        ? // @ts-ignore
-          vm.options
+      typeof vm === 'function' && (vm as any).cid != null
+        ? (vm as any).options
         : vm._isVue
-        ? // @ts-ignore
-          vm.$options || vm.constructor.options
+        ? vm.$options || (vm.constructor as any).options
         : vm
     let name = options.name || options._componentTag
     const file = options.__file
@@ -67,8 +64,7 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
   generateComponentTrace = (vm: Component | undefined) => {
-    // @ts-ignore
-    if (vm._isVue && vm.$parent) {
+    if ((vm as any)._isVue && vm!.$parent) {
       const tree: any[] = []
       let currentRecursiveSequence = 0
       while (vm) {

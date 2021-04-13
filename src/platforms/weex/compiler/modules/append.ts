@@ -26,4 +26,4 @@ export default {
   staticKeys: ['appendAsTree'],
   preTransformNode,
   genData,
-}
+} as ModuleOptions

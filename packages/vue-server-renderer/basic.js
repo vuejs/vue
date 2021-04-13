@@ -3431,7 +3431,6 @@
       }
   }
 
-  // const he = require('he')
   var onRE = /^@|^v-on:/;
   var dirRE = /^v-|^@|^:|^#/;
   var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;

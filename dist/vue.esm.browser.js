@@ -6727,624 +6727,6 @@ var style$1 = {
     update: updateStyle,
 };
 
-const whitespaceRE$2 = /\s+/;
-/**
- * Add class with compatibility for SVG since classList is not supported on
- * SVG elements in IE
- */
-function addClass$1(el, cls) {
-    /* istanbul ignore if */
-    if (!cls || !(cls = cls.trim())) {
-        return;
-    }
-    /* istanbul ignore else */
-    if (el.classList) {
-        if (cls.indexOf(' ') > -1) {
-            cls.split(whitespaceRE$2).forEach((c) => el.classList.add(c));
-        }
-        else {
-            el.classList.add(cls);
-        }
-    }
-    else {
-        const cur = ` ${el.getAttribute('class') || ''} `;
-        if (cur.indexOf(' ' + cls + ' ') < 0) {
-            el.setAttribute('class', (cur + cls).trim());
-        }
-    }
-}
-/**
- * Remove class with compatibility for SVG since classList is not supported on
- * SVG elements in IE
- */
-function removeClass$1(el, cls) {
-    /* istanbul ignore if */
-    if (!cls || !(cls = cls.trim())) {
-        return;
-    }
-    /* istanbul ignore else */
-    if (el.classList) {
-        if (cls.indexOf(' ') > -1) {
-            cls.split(whitespaceRE$2).forEach((c) => el.classList.remove(c));
-        }
-        else {
-            el.classList.remove(cls);
-        }
-        if (!el.classList.length) {
-            el.removeAttribute('class');
-        }
-    }
-    else {
-        let cur = ` ${el.getAttribute('class') || ''} `;
-        const tar = ' ' + cls + ' ';
-        while (cur.indexOf(tar) >= 0) {
-            cur = cur.replace(tar, ' ');
-        }
-        cur = cur.trim();
-        if (cur) {
-            el.setAttribute('class', cur);
-        }
-        else {
-            el.removeAttribute('class');
-        }
-    }
-}
-
-function resolveTransition$1(def) {
-    if (!def) {
-        return;
-    }
-    /* istanbul ignore else */
-    if (typeof def === 'object') {
-        const res = {};
-        if (def.css !== false) {
-            extend(res, autoCssTransition$1(def.name || 'v'));
-        }
-        extend(res, def);
-        return res;
-    }
-    else if (typeof def === 'string') {
-        return autoCssTransition$1(def);
-    }
-}
-const autoCssTransition$1 = cached((name) => {
-    return {
-        enterClass: `${name}-enter`,
-        enterToClass: `${name}-enter-to`,
-        enterActiveClass: `${name}-enter-active`,
-        leaveClass: `${name}-leave`,
-        leaveToClass: `${name}-leave-to`,
-        leaveActiveClass: `${name}-leave-active`,
-    };
-});
-const hasTransition$1 = inBrowser && !isIE9;
-const TRANSITION$1 = 'transition';
-const ANIMATION$1 = 'animation';
-// Transition property/event sniffing
-let transitionProp$1 = 'transition';
-let transitionEndEvent$1 = 'transitionend';
-let animationProp$1 = 'animation';
-let animationEndEvent$1 = 'animationend';
-if (hasTransition$1) {
-    /* istanbul ignore if */
-    if (window.ontransitionend === undefined &&
-        // @ts-expect-error
-        window.onwebkittransitionend !== undefined) {
-        transitionProp$1 = 'WebkitTransition';
-        transitionEndEvent$1 = 'webkitTransitionEnd';
-    }
-    if (window.onanimationend === undefined &&
-        // @ts-expect-error
-        window.onwebkitanimationend !== undefined) {
-        animationProp$1 = 'WebkitAnimation';
-        animationEndEvent$1 = 'webkitAnimationEnd';
-    }
-}
-// binding to window is necessary to make hot reload work in IE in strict mode
-const raf$1 = inBrowser
-    ? window.requestAnimationFrame
-        ? window.requestAnimationFrame.bind(window)
-        : setTimeout
-    : /* istanbul ignore next */ (fn) => fn();
-function nextFrame$1(fn) {
-    raf$1(() => {
-        // @ts-expect-error
-        raf$1(fn);
-    });
-}
-function addTransitionClass$1(el, cls) {
-    const transitionClasses = el._transitionClasses || (el._transitionClasses = []);
-    if (transitionClasses.indexOf(cls) < 0) {
-        transitionClasses.push(cls);
-        addClass$1(el, cls);
-    }
-}
-function removeTransitionClass$1(el, cls) {
-    if (el._transitionClasses) {
-        remove$2(el._transitionClasses, cls);
-    }
-    removeClass$1(el, cls);
-}
-function whenTransitionEnds$1(el, expectedType, cb) {
-    const { type, timeout, propCount } = getTransitionInfo$1(el, expectedType);
-    if (!type)
-        return cb();
-    const event = type === TRANSITION$1 ? transitionEndEvent$1 : animationEndEvent$1;
-    let ended = 0;
-    const end = () => {
-        el.removeEventListener(event, onEnd);
-        cb();
-    };
-    const onEnd = (e) => {
-        if (e.target === el) {
-            if (++ended >= propCount) {
-                end();
-            }
-        }
-    };
-    setTimeout(() => {
-        if (ended < propCount) {
-            end();
-        }
-    }, timeout + 1);
-    el.addEventListener(event, onEnd);
-}
-const transformRE$1 = /\b(transform|all)(,|$)/;
-function getTransitionInfo$1(el, expectedType) {
-    const styles = window.getComputedStyle(el);
-    // JSDOM may return undefined for transition properties
-    const transitionDelays = (styles[transitionProp$1 + 'Delay'] || '').split(', ');
-    const transitionDurations = (styles[transitionProp$1 + 'Duration'] || '').split(', ');
-    const transitionTimeout = getTimeout$1(transitionDelays, transitionDurations);
-    const animationDelays = (styles[animationProp$1 + 'Delay'] || '').split(', ');
-    const animationDurations = (styles[animationProp$1 + 'Duration'] || '').split(', ');
-    const animationTimeout = getTimeout$1(animationDelays, animationDurations);
-    let type;
-    let timeout = 0;
-    let propCount = 0;
-    /* istanbul ignore if */
-    if (expectedType === TRANSITION$1) {
-        if (transitionTimeout > 0) {
-            type = TRANSITION$1;
-            timeout = transitionTimeout;
-            propCount = transitionDurations.length;
-        }
-    }
-    else if (expectedType === ANIMATION$1) {
-        if (animationTimeout > 0) {
-            type = ANIMATION$1;
-            timeout = animationTimeout;
-            propCount = animationDurations.length;
-        }
-    }
-    else {
-        timeout = Math.max(transitionTimeout, animationTimeout);
-        type =
-            timeout > 0
-                ? transitionTimeout > animationTimeout
-                    ? TRANSITION$1
-                    : ANIMATION$1
-                : null;
-        propCount = type
-            ? type === TRANSITION$1
-                ? transitionDurations.length
-                : animationDurations.length
-            : 0;
-    }
-    const hasTransform = type === TRANSITION$1 && transformRE$1.test(styles[transitionProp$1 + 'Property']);
-    return {
-        type,
-        timeout,
-        propCount,
-        hasTransform,
-    };
-}
-function getTimeout$1(delays, durations) {
-    /* istanbul ignore next */
-    while (delays.length < durations.length) {
-        delays = delays.concat(delays);
-    }
-    return Math.max.apply(null, durations.map((d, i) => {
-        return toMs$1(d) + toMs$1(delays[i]);
-    }));
-}
-// Old versions of Chromium (below 61.0.3163.100) formats floating pointer numbers
-// in a locale-dependent way, using a comma instead of a dot.
-// If comma is not replaced with a dot, the input will be rounded down (i.e. acting
-// as a floor function) causing unexpected behaviors
-function toMs$1(s) {
-    return Number(s.slice(0, -1).replace(',', '.')) * 1000;
-}
-
-function enter$1(vnode, toggleDisplay) {
-    const el = vnode.elm;
-    // call leave callback now
-    if (isDef(el._leaveCb)) {
-        el._leaveCb.cancelled = true;
-        el._leaveCb();
-    }
-    const data = resolveTransition$1(vnode.data.transition);
-    if (isUndef(data)) {
-        return;
-    }
-    /* istanbul ignore if */
-    if (isDef(el._enterCb) || el.nodeType !== 1) {
-        return;
-    }
-    const { css, type, enterClass, enterToClass, enterActiveClass, appearClass, appearToClass, appearActiveClass, beforeEnter, enter, afterEnter, enterCancelled, beforeAppear, appear, afterAppear, appearCancelled, duration, } = data;
-    // activeInstance will always be the <transition> component managing this
-    // transition. One edge case to check is when the <transition> is placed
-    // as the root node of a child component. In that case we need to check
-    // <transition>'s parent for appear check.
-    let context = activeInstance;
-    let transitionNode = activeInstance.$vnode;
-    while (transitionNode && transitionNode.parent) {
-        context = transitionNode.context;
-        transitionNode = transitionNode.parent;
-    }
-    const isAppear = !context._isMounted || !vnode.isRootInsert;
-    if (isAppear && !appear && appear !== '') {
-        return;
-    }
-    const startClass = isAppear && appearClass ? appearClass : enterClass;
-    const activeClass = isAppear && appearActiveClass ? appearActiveClass : enterActiveClass;
-    const toClass = isAppear && appearToClass ? appearToClass : enterToClass;
-    const beforeEnterHook = isAppear ? beforeAppear || beforeEnter : beforeEnter;
-    const enterHook = isAppear
-        ? typeof appear === 'function'
-            ? appear
-            : enter
-        : enter;
-    const afterEnterHook = isAppear ? afterAppear || afterEnter : afterEnter;
-    const enterCancelledHook = isAppear
-        ? appearCancelled || enterCancelled
-        : enterCancelled;
-    const explicitEnterDuration = toNumber(isObject(duration) ? duration.enter : duration);
-    if (explicitEnterDuration != null) {
-        checkDuration$1(explicitEnterDuration, 'enter', vnode);
-    }
-    const expectsCSS = css !== false && !isIE9;
-    const userWantsControl = getHookArgumentsLength$1(enterHook);
-    const cb = (el._enterCb = once(() => {
-        if (expectsCSS) {
-            removeTransitionClass$1(el, toClass);
-            removeTransitionClass$1(el, activeClass);
-        }
-        // @ts-expect-error
-        if (cb.cancelled) {
-            if (expectsCSS) {
-                removeTransitionClass$1(el, startClass);
-            }
-            enterCancelledHook && enterCancelledHook(el);
-        }
-        else {
-            afterEnterHook && afterEnterHook(el);
-        }
-        el._enterCb = null;
-    }));
-    if (!vnode.data.show) {
-        // remove pending leave element on enter by injecting an insert hook
-        mergeVNodeHook(vnode, 'insert', () => {
-            const parent = el.parentNode;
-            const pendingNode = parent && parent._pending && parent._pending[vnode.key];
-            if (pendingNode &&
-                pendingNode.tag === vnode.tag &&
-                pendingNode.elm._leaveCb) {
-                pendingNode.elm._leaveCb();
-            }
-            enterHook && enterHook(el, cb);
-        });
-    }
-    // start enter transition
-    beforeEnterHook && beforeEnterHook(el);
-    if (expectsCSS) {
-        addTransitionClass$1(el, startClass);
-        addTransitionClass$1(el, activeClass);
-        nextFrame$1(() => {
-            removeTransitionClass$1(el, startClass);
-            // @ts-expect-error
-            if (!cb.cancelled) {
-                addTransitionClass$1(el, toClass);
-                if (!userWantsControl) {
-                    if (isValidDuration$1(explicitEnterDuration)) {
-                        setTimeout(cb, explicitEnterDuration);
-                    }
-                    else {
-                        whenTransitionEnds$1(el, type, cb);
-                    }
-                }
-            }
-        });
-    }
-    if (vnode.data.show) {
-        toggleDisplay && toggleDisplay();
-        enterHook && enterHook(el, cb);
-    }
-    if (!expectsCSS && !userWantsControl) {
-        cb();
-    }
-}
-function leave$1(vnode, rm) {
-    const el = vnode.elm;
-    // call enter callback now
-    if (isDef(el._enterCb)) {
-        el._enterCb.cancelled = true;
-        el._enterCb();
-    }
-    const data = resolveTransition$1(vnode.data.transition);
-    if (isUndef(data) || el.nodeType !== 1) {
-        return rm();
-    }
-    /* istanbul ignore if */
-    if (isDef(el._leaveCb)) {
-        return;
-    }
-    const { css, type, leaveClass, leaveToClass, leaveActiveClass, beforeLeave, leave, afterLeave, leaveCancelled, delayLeave, duration, } = data;
-    const expectsCSS = css !== false && !isIE9;
-    const userWantsControl = getHookArgumentsLength$1(leave);
-    const explicitLeaveDuration = toNumber(isObject(duration) ? duration.leave : duration);
-    if (isDef(explicitLeaveDuration)) {
-        checkDuration$1(explicitLeaveDuration, 'leave', vnode);
-    }
-    const cb = (el._leaveCb = once(() => {
-        if (el.parentNode && el.parentNode._pending) {
-            el.parentNode._pending[vnode.key] = null;
-        }
-        if (expectsCSS) {
-            removeTransitionClass$1(el, leaveToClass);
-            removeTransitionClass$1(el, leaveActiveClass);
-        }
-        // @ts-expect-error
-        if (cb.cancelled) {
-            if (expectsCSS) {
-                removeTransitionClass$1(el, leaveClass);
-            }
-            leaveCancelled && leaveCancelled(el);
-        }
-        else {
-            rm();
-            afterLeave && afterLeave(el);
-        }
-        el._leaveCb = null;
-    }));
-    if (delayLeave) {
-        delayLeave(performLeave);
-    }
-    else {
-        performLeave();
-    }
-    function performLeave() {
-        // the delayed leave may have already been cancelled
-        // @ts-expect-error
-        if (cb.cancelled) {
-            return;
-        }
-        // record leaving element
-        if (!vnode.data.show && el.parentNode) {
-            (el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key] = vnode;
-        }
-        beforeLeave && beforeLeave(el);
-        if (expectsCSS) {
-            addTransitionClass$1(el, leaveClass);
-            addTransitionClass$1(el, leaveActiveClass);
-            nextFrame$1(() => {
-                removeTransitionClass$1(el, leaveClass);
-                // @ts-expect-error
-                if (!cb.cancelled) {
-                    addTransitionClass$1(el, leaveToClass);
-                    if (!userWantsControl) {
-                        if (isValidDuration$1(explicitLeaveDuration)) {
-                            setTimeout(cb, explicitLeaveDuration);
-                        }
-                        else {
-                            whenTransitionEnds$1(el, type, cb);
-                        }
-                    }
-                }
-            });
-        }
-        leave && leave(el, cb);
-        if (!expectsCSS && !userWantsControl) {
-            cb();
-        }
-    }
-}
-// only used in dev mode
-function checkDuration$1(val, name, vnode) {
-    if (typeof val !== 'number') {
-        warn$2(`<transition> explicit ${name} duration is not a valid number - ` +
-            `got ${JSON.stringify(val)}.`, vnode.context);
-    }
-    else if (isNaN(val)) {
-        warn$2(`<transition> explicit ${name} duration is NaN - ` +
-            'the duration expression might be incorrect.', vnode.context);
-    }
-}
-function isValidDuration$1(val) {
-    return typeof val === 'number' && !isNaN(val);
-}
-/**
- * Normalize a transition hook's argument length. The hook may be:
- * - a merged hook (invoker) with the original in .fns
- * - a wrapped component method (check ._length)
- * - a plain function (.length)
- */
-function getHookArgumentsLength$1(fn) {
-    if (isUndef(fn)) {
-        return false;
-    }
-    // @ts-expect-error
-    const invokerFns = fn.fns;
-    if (isDef(invokerFns)) {
-        // invoker
-        return getHookArgumentsLength$1(Array.isArray(invokerFns) ? invokerFns[0] : invokerFns);
-    }
-    else {
-        // @ts-expect-error
-        return (fn._length || fn.length) > 1;
-    }
-}
-function _enter(_, vnode) {
-    if (vnode.data.show !== true) {
-        enter$1(vnode);
-    }
-}
-var transition = inBrowser
-    ? {
-        create: _enter,
-        activate: _enter,
-        remove(vnode, rm) {
-            /* istanbul ignore else */
-            if (vnode.data.show !== true) {
-                // @ts-expect-error
-                leave$1(vnode, rm);
-            }
-            else {
-                rm();
-            }
-        },
-    }
-    : {};
-
-var platformModules = [attrs, klass$1, events, domProps, style$1, transition];
-
-// the directive module should be applied last, after all
-// built-in modules have been applied.
-const modules$1 = platformModules.concat(baseModules);
-const patch = createPatchFunction({ nodeOps, modules: modules$1 });
-
-/**
- * Not type checking this file because flow doesn't like attaching
- * properties to Elements.
- */
-/* istanbul ignore if */
-if (isIE9) {
-    // http://www.matts411.com/post/internet-explorer-9-oninput/
-    document.addEventListener('selectionchange', () => {
-        const el = document.activeElement;
-        // @ts-expect-error
-        if (el && el.vmodel) {
-            trigger(el, 'input');
-        }
-    });
-}
-const directive = {
-    inserted(el, binding, vnode, oldVnode) {
-        if (vnode.tag === 'select') {
-            // #6903
-            if (oldVnode.elm && !oldVnode.elm._vOptions) {
-                mergeVNodeHook(vnode, 'postpatch', () => {
-                    directive.componentUpdated(el, binding, vnode);
-                });
-            }
-            else {
-                setSelected(el, binding, vnode.context);
-            }
-            el._vOptions = [].map.call(el.options, getValue);
-        }
-        else if (vnode.tag === 'textarea' || isTextInputType(el.type)) {
-            el._vModifiers = binding.modifiers;
-            if (!binding.modifiers.lazy) {
-                el.addEventListener('compositionstart', onCompositionStart);
-                el.addEventListener('compositionend', onCompositionEnd);
-                // Safari < 10.2 & UIWebView doesn't fire compositionend when
-                // switching focus before confirming composition choice
-                // this also fixes the issue where some browsers e.g. iOS Chrome
-                // fires "change" instead of "input" on autocomplete.
-                el.addEventListener('change', onCompositionEnd);
-                /* istanbul ignore if */
-                if (isIE9) {
-                    el.vmodel = true;
-                }
-            }
-        }
-    },
-    componentUpdated(el, binding, vnode) {
-        if (vnode.tag === 'select') {
-            setSelected(el, binding, vnode.context);
-            // in case the options rendered by v-for have changed,
-            // it's possible that the value is out-of-sync with the rendered options.
-            // detect such cases and filter out values that no longer has a matching
-            // option in the DOM.
-            const prevOptions = el._vOptions;
-            const curOptions = (el._vOptions = [].map.call(el.options, getValue));
-            if (curOptions.some((o, i) => !looseEqual(o, prevOptions[i]))) {
-                // trigger change event if
-                // no matching option found for at least one value
-                const needReset = el.multiple
-                    ? binding.value.some((v) => hasNoMatchingOption(v, curOptions))
-                    : binding.value !== binding.oldValue &&
-                        hasNoMatchingOption(binding.value, curOptions);
-                if (needReset) {
-                    trigger(el, 'change');
-                }
-            }
-        }
-    },
-};
-function setSelected(el, binding, vm) {
-    actuallySetSelected(el, binding, vm);
-    /* istanbul ignore if */
-    if (isIE || isEdge) {
-        setTimeout(() => {
-            actuallySetSelected(el, binding, vm);
-        }, 0);
-    }
-}
-function actuallySetSelected(el, binding, vm) {
-    const value = binding.value;
-    const isMultiple = el.multiple;
-    if (isMultiple && !Array.isArray(value)) {
-        warn$2(`<select multiple v-model="${binding.expression}"> ` +
-                `expects an Array value for its binding, but got ${Object.prototype.toString
-                    .call(value)
-                    .slice(8, -1)}`, vm);
-        return;
-    }
-    let selected, option;
-    for (let i = 0, l = el.options.length; i < l; i++) {
-        option = el.options[i];
-        if (isMultiple) {
-            selected = looseIndexOf(value, getValue(option)) > -1;
-            if (option.selected !== selected) {
-                option.selected = selected;
-            }
-        }
-        else {
-            if (looseEqual(getValue(option), value)) {
-                if (el.selectedIndex !== i) {
-                    el.selectedIndex = i;
-                }
-                return;
-            }
-        }
-    }
-    if (!isMultiple) {
-        el.selectedIndex = -1;
-    }
-}
-function hasNoMatchingOption(value, options) {
-    return options.every((o) => !looseEqual(o, value));
-}
-function getValue(option) {
-    return '_value' in option ? option._value : option.value;
-}
-function onCompositionStart(e) {
-    e.target.composing = true;
-}
-function onCompositionEnd(e) {
-    // prevent triggering an input event for no reason
-    if (!e.target.composing)
-        return;
-    e.target.composing = false;
-    trigger(e.target, 'input');
-}
-function trigger(el, type) {
-    const e = document.createEvent('HTMLEvents');
-    e.initEvent(type, true, true);
-    el.dispatchEvent(e);
-}
-
 const whitespaceRE$1 = /\s+/;
 /**
  * Add class with compatibility for SVG since classList is not supported on
@@ -7801,6 +7183,166 @@ function getHookArgumentsLength(fn) {
         // @ts-expect-error
         return (fn._length || fn.length) > 1;
     }
+}
+function _enter(_, vnode) {
+    if (vnode.data.show !== true) {
+        enter(vnode);
+    }
+}
+var transition = inBrowser
+    ? {
+        create: _enter,
+        activate: _enter,
+        remove(vnode, rm) {
+            /* istanbul ignore else */
+            if (vnode.data.show !== true) {
+                // @ts-expect-error
+                leave(vnode, rm);
+            }
+            else {
+                rm();
+            }
+        },
+    }
+    : {};
+
+var platformModules = [attrs, klass$1, events, domProps, style$1, transition];
+
+// the directive module should be applied last, after all
+// built-in modules have been applied.
+const modules$1 = platformModules.concat(baseModules);
+const patch = createPatchFunction({ nodeOps, modules: modules$1 });
+
+/**
+ * Not type checking this file because flow doesn't like attaching
+ * properties to Elements.
+ */
+/* istanbul ignore if */
+if (isIE9) {
+    // http://www.matts411.com/post/internet-explorer-9-oninput/
+    document.addEventListener('selectionchange', () => {
+        const el = document.activeElement;
+        // @ts-expect-error
+        if (el && el.vmodel) {
+            trigger(el, 'input');
+        }
+    });
+}
+const directive = {
+    inserted(el, binding, vnode, oldVnode) {
+        if (vnode.tag === 'select') {
+            // #6903
+            if (oldVnode.elm && !oldVnode.elm._vOptions) {
+                mergeVNodeHook(vnode, 'postpatch', () => {
+                    directive.componentUpdated(el, binding, vnode);
+                });
+            }
+            else {
+                setSelected(el, binding, vnode.context);
+            }
+            el._vOptions = [].map.call(el.options, getValue);
+        }
+        else if (vnode.tag === 'textarea' || isTextInputType(el.type)) {
+            el._vModifiers = binding.modifiers;
+            if (!binding.modifiers.lazy) {
+                el.addEventListener('compositionstart', onCompositionStart);
+                el.addEventListener('compositionend', onCompositionEnd);
+                // Safari < 10.2 & UIWebView doesn't fire compositionend when
+                // switching focus before confirming composition choice
+                // this also fixes the issue where some browsers e.g. iOS Chrome
+                // fires "change" instead of "input" on autocomplete.
+                el.addEventListener('change', onCompositionEnd);
+                /* istanbul ignore if */
+                if (isIE9) {
+                    el.vmodel = true;
+                }
+            }
+        }
+    },
+    componentUpdated(el, binding, vnode) {
+        if (vnode.tag === 'select') {
+            setSelected(el, binding, vnode.context);
+            // in case the options rendered by v-for have changed,
+            // it's possible that the value is out-of-sync with the rendered options.
+            // detect such cases and filter out values that no longer has a matching
+            // option in the DOM.
+            const prevOptions = el._vOptions;
+            const curOptions = (el._vOptions = [].map.call(el.options, getValue));
+            if (curOptions.some((o, i) => !looseEqual(o, prevOptions[i]))) {
+                // trigger change event if
+                // no matching option found for at least one value
+                const needReset = el.multiple
+                    ? binding.value.some((v) => hasNoMatchingOption(v, curOptions))
+                    : binding.value !== binding.oldValue &&
+                        hasNoMatchingOption(binding.value, curOptions);
+                if (needReset) {
+                    trigger(el, 'change');
+                }
+            }
+        }
+    },
+};
+function setSelected(el, binding, vm) {
+    actuallySetSelected(el, binding, vm);
+    /* istanbul ignore if */
+    if (isIE || isEdge) {
+        setTimeout(() => {
+            actuallySetSelected(el, binding, vm);
+        }, 0);
+    }
+}
+function actuallySetSelected(el, binding, vm) {
+    const value = binding.value;
+    const isMultiple = el.multiple;
+    if (isMultiple && !Array.isArray(value)) {
+        warn$2(`<select multiple v-model="${binding.expression}"> ` +
+                `expects an Array value for its binding, but got ${Object.prototype.toString
+                    .call(value)
+                    .slice(8, -1)}`, vm);
+        return;
+    }
+    let selected, option;
+    for (let i = 0, l = el.options.length; i < l; i++) {
+        option = el.options[i];
+        if (isMultiple) {
+            selected = looseIndexOf(value, getValue(option)) > -1;
+            if (option.selected !== selected) {
+                option.selected = selected;
+            }
+        }
+        else {
+            if (looseEqual(getValue(option), value)) {
+                if (el.selectedIndex !== i) {
+                    el.selectedIndex = i;
+                }
+                return;
+            }
+        }
+    }
+    if (!isMultiple) {
+        el.selectedIndex = -1;
+    }
+}
+function hasNoMatchingOption(value, options) {
+    return options.every((o) => !looseEqual(o, value));
+}
+function getValue(option) {
+    return '_value' in option ? option._value : option.value;
+}
+function onCompositionStart(e) {
+    e.target.composing = true;
+}
+function onCompositionEnd(e) {
+    // prevent triggering an input event for no reason
+    if (!e.target.composing)
+        return;
+    e.target.composing = false;
+    trigger(e.target, 'input');
+}
+function trigger(el, type) {
+    const e = document.createEvent('HTMLEvents');
+    e.initEvent(type, true, true);
+    el.dispatchEvent(e);
 }
 
 // recursively search for possible transition defined inside the component root
@@ -8725,7 +8267,6 @@ function parseHTML(html, options) {
     }
 }
 
-// const he = require('he')
 const onRE = /^@|^v-on:/;
 const dirRE = /^v-|^@|^:|^#/;
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;

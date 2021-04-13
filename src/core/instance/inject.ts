@@ -69,8 +69,7 @@ export function resolveInject(
               ? provideDefault.call(vm)
               : provideDefault
         } else if (process.env.NODE_ENV !== 'production') {
-          // @ts-ignore
-          warn(`Injection "${key}" not found`, vm)
+          warn(`Injection "${key as string}" not found`, vm)
         }
       }
     }

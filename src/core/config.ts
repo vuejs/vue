@@ -4,7 +4,7 @@ import { no, noop, identity } from 'shared/util'
 import { LIFECYCLE_HOOKS } from 'shared/constants'
 import type { Component } from 'typescript/component'
 
-export type Config = {
+export interface Config {
   // user
   optionMergeStrategies: { [key: string]: Function }
   silent: boolean

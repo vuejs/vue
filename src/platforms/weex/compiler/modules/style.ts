@@ -5,7 +5,7 @@ import { getAndRemoveAttr, getBindingAttr, baseWarn } from 'compiler/helpers'
 
 type StaticStyleResult = {
   dynamic: boolean
-  styleResult: string | Record<string, any> | void
+  styleResult: string 
 }
 
 const normalize = cached(camelize)
@@ -23,14 +23,12 @@ function transformNode(el: ASTElement, options: CompilerOptions) {
     )
   }
   if (!dynamic && styleResult) {
-    // @ts-ignore
     el.staticStyle = styleResult
   }
   const styleBinding = getBindingAttr(el, 'style', false /* getStatic */)
   if (styleBinding) {
     el.styleBinding = styleBinding
   } else if (dynamic) {
-    // @ts-ignore
     el.styleBinding = styleResult
   }
 }
@@ -86,4 +84,4 @@ export default {
   staticKeys: ['staticStyle'],
   transformNode,
   genData,
-}
+} as ModuleOptions

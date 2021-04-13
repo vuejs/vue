@@ -4,11 +4,7 @@ export const hasProto = '__proto__' in {}
 
 // Browser environment sniffing
 export const inBrowser = typeof window !== 'undefined'
-// @ts-ignore
-export const inWeex =
-  // @ts-ignore
-  typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform
-// @ts-ignore
+export const inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform
 export const weexPlatform = inWeex && WXEnvironment.platform.toLowerCase()
 export const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 export const isIE = UA && /msie|trident/.test(UA)
@@ -23,7 +19,7 @@ export const isPhantomJS = UA && /phantomjs/.test(UA)
 export const isFF = UA && UA.match(/firefox\/(\d+)/)
 
 // Firefox has a "watch" function on Object.prototype...
-// @ts-ignore
+// @ts-expect-error firebox support
 export const nativeWatch = {}.watch
 
 export let supportsPassive = false
@@ -36,8 +32,7 @@ if (inBrowser) {
         supportsPassive = true
       },
     } as object) // https://github.com/facebook/flow/issues/285
-    // @ts-ignore
-    window.addEventListener('test-passive', null, opts)
+    window.addEventListener('test-passive', null as any, opts)
   } catch (e) {}
 }
 
@@ -60,7 +55,6 @@ export const isServerRendering = () => {
 }
 
 // detect devtools
-// @ts-ignore TODO decalre this types
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
 /* istanbul ignore next */

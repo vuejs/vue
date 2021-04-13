@@ -33,4 +33,4 @@ function transformNode(el: ASTElement) {
 }
 export default {
   transformNode,
-}
+} as ModuleOptions

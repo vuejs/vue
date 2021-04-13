@@ -8,12 +8,12 @@ declare type VNodeChildren =
 declare type VNodeComponentOptions = {
   Ctor: Component;
   propsData?: Object;
-  listeners?: Object;
+  listeners?: Record<string, Function | Function[]>;
   children?: Array<VNode>;
   tag?: string;
 };
 
-declare type MountedComponentVNode = {
+declare type MountedComponentVNode = VNode & {
   context: Component;
   componentOptions: VNodeComponentOptions;
   componentInstance: Component;
@@ -22,7 +22,7 @@ declare type MountedComponentVNode = {
 };
 
 // interface for vnodes in update modules
-declare type VNodeWithData = {
+declare type VNodeWithData = VNode & {
   tag: string;
   data: VNodeData;
   children: Array<VNode>;
@@ -36,6 +36,22 @@ declare type VNodeWithData = {
   componentInstance?: Component;
   isRootInsert: boolean;
 };
+
+// // interface for vnodes in update modules
+// declare type VNodeWithData = {
+//   tag: string;
+//   data: VNodeData;
+//   children: Array<VNode>;
+//   text: void;
+//   elm: any;
+//   ns: string | void;
+//   context: Component;
+//   key: string | number | undefined;
+//   parent?: VNodeWithData;
+//   componentOptions?: VNodeComponentOptions;
+//   componentInstance?: Component;
+//   isRootInsert: boolean;
+// };
 
 declare interface VNodeData {
   key?: string | number;
@@ -68,6 +84,8 @@ declare interface VNodeData {
     value: any;
     callback: Function;
   };
+
+  [key: string]: any;
 }
 
 declare type VNodeDirective = {

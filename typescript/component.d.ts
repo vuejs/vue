@@ -1,8 +1,9 @@
-import type { Config } from "../src/core/config";
 import type VNode from "../src/core/vdom/vnode";
 import type Watcher from "../src/core/observer/watcher";
 import { ComponentOptions } from "./options";
 import { ScopedSlotsData, VNodeChildren, VNodeData } from "./vnode";
+
+// TODO this should be using the same as /component/
 
 declare class Component {
   // constructor information
@@ -19,7 +20,10 @@ declare class Component {
     id: string,
     def?: Function | Record<string, any>
   ) => Function | Record<string, any> | void;
-  static component: (id: string, def?: Component | Record<string, any>) => Component;
+  static component: (
+    id: string,
+    def?: Component | Record<string, any>
+  ) => Component;
   static filter: (id: string, def?: Function) => Function | void;
   // functional context constructor
   static FunctionalRenderContext: Function;
@@ -39,15 +43,22 @@ declare class Component {
   $scopedSlots: { [key: string]: () => VNodeChildren };
   $vnode: VNode; // the placeholder node for the component in parent's render tree
   $attrs: { [key: string]: string };
-  $listeners: { [key: string]: Function | Array<Function> };
+  $listeners: Record<string, Function | Array<Function>>;
   $isServer: boolean;
 
   // public methods
   $mount: (el?: Element | string, hydrating?: boolean) => Component;
   $forceUpdate: () => void;
   $destroy: () => void;
-  $set: <T>(target: Record<string, any> | Array<T>, key: string | number, val: T) => T;
-  $delete: <T>(target: Record<string, any> | Array<T>, key: string | number) => void;
+  $set: <T>(
+    target: Record<string, any> | Array<T>,
+    key: string | number,
+    val: T
+  ) => T;
+  $delete: <T>(
+    target: Record<string, any> | Array<T>,
+    key: string | number
+  ) => void;
   $watch: (
     expOrFn: string | Function,
     cb: Function,
@@ -71,7 +82,7 @@ declare class Component {
   _self: Component;
   _renderProxy: Component;
   _renderContext?: Component;
-  _watcher: Watcher;
+  _watcher: Watcher | null;
   _watchers: Array<Watcher>;
   _computedWatchers: { [key: string]: Watcher };
   _data: Record<string, any>;

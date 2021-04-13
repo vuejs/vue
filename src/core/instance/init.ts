@@ -76,8 +76,7 @@ export function initInternalComponent(
   vm: Component,
   options: InternalComponentOptions
 ) {
-  // @ts-ignore
-  const opts = (vm.$options = Object.create(vm.constructor.options))
+  const opts = (vm.$options = Object.create((vm.constructor as any).options))
   // doing this because it's faster than dynamic enumeration.
   const parentVnode = options._parentVnode
   opts.parent = options.parent

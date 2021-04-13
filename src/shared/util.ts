@@ -1,5 +1,5 @@
 
-export const emptyObject = Object.freeze({})
+export const emptyObject: Record<string, any> = Object.freeze({})
 
 // These helpers produce better VM code in JS engines due to their
 // explicitness and function inlining.
@@ -97,6 +97,7 @@ export function toNumber(val: string): number | string {
   const n = parseFloat(val)
   return isNaN(n) ? val : n
 }
+
 
 /**
  * Make a map and return a function for checking if a key

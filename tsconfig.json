@@ -8,8 +8,10 @@
     "moduleResolution": "node",
     "allowJs": true,
     "strict": true,
+    
     "noImplicitAny": false,
     "noImplicitThis": false,
+
     "noUnusedLocals": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
@@ -21,6 +23,7 @@
     "paths": {
       "compiler/*": ["src/compiler/*"],
       "core/*": ["src/core/*"],
+
       "server/*": ["src/server/*"],
       "sfc/*": ["src/sfc/*"],
       "shared/*": ["src/shared/*"],

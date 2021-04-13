@@ -78,6 +78,9 @@ declare type ComponentOptions = {
   comments?: boolean;
   inheritAttrs?: boolean;
 
+  // Class API
+  abstract?: any
+
   // private
   _isComponent?: true;
   _propKeys?: Array<string>;

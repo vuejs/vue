@@ -120,8 +120,7 @@ function assertProp(
     return
   }
   let type = prop.type
-  // @ts-ignore
-  let valid = !type || type === true
+  let valid = !type || (type as any) === true
   const expectedTypes: string[] = []
   if (type) {
     if (!Array.isArray(type)) {

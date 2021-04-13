@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 import Vue from 'core/index'
 import { patch } from 'weex/runtime/patch'
 import { mountComponent } from 'core/instance/lifecycle'
@@ -13,6 +11,8 @@ import {
   isRuntimeComponent,
   isUnknownElement,
 } from 'weex/util/element'
+
+import { Component} from 'typescript/component'
 
 // install platform specific utils
 Vue.config.mustUseProp = mustUseProp

@@ -24,9 +24,8 @@ export const baseOptions: WeexCompilerOptions = {
   getTagNamespace,
   preserveWhitespace: false,
   recyclable: false,
-  // @ts-ignore
   staticKeys: genStaticKeys(modules),
-} as any
+}
 
 const compiler = createCompiler(baseOptions)
 
