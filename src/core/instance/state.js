@@ -25,7 +25,8 @@ import {
   validateProp,
   isPlainObject,
   isServerRendering,
-  isReservedAttribute
+  isReservedAttribute,
+  invokeWithErrorHandling
 } from '../util/index'
 
 const sharedPropertyDefinition = {
@@ -357,12 +358,9 @@ export function stateMixin (Vue: Class<Component>) {
     options.user = true
     const watcher = new Watcher(vm, expOrFn, cb, options)
     if (options.immediate) {
+      const info = `callback for immediate watcher "${watcher.expression}"`
       pushTarget()
-      try {
-        cb.call(vm, watcher.value)
-      } catch (error) {
-        handleError(error, vm, `callback for immediate watcher "${watcher.expression}"`)
-      }
+      invokeWithErrorHandling(cb, vm, [watcher.value], vm, info)
       popTarget()
     }
     return function unwatchFn () {
