@@ -66,6 +66,26 @@ export default {
     max: [String, Number]
   },
 
+  methods: {
+    cacheVNode() {
+      const { cache, keys, vnodeToCache, keyToCache } = this
+      if (vnodeToCache) {
+        const { tag, componentInstance, componentOptions } = vnodeToCache
+        cache[keyToCache] = {
+          name: getComponentName(componentOptions),
+          tag,
+          componentInstance,
+        }
+        keys.push(keyToCache)
+        // prune oldest entry
+        if (this.max && keys.length > parseInt(this.max)) {
+          pruneCacheEntry(cache, keys[0], keys, this._vnode)
+        }
+        this.vnodeToCache = null
+      }
+    }
+  },
+
   created () {
     this.cache = Object.create(null)
     this.keys = []
@@ -78,10 +98,7 @@ export default {
   },
 
   mounted () {
-    if (this.putEntry) {
-      this.putEntry()
-      this.putEntry = null
-    }
+    this.cacheVNode()
     this.$watch('include', val => {
       pruneCache(this, name => matches(val, name))
     })
@@ -91,10 +108,7 @@ export default {
   },
 
   updated () {
-    if (this.putEntry) {
-      this.putEntry()
-      this.putEntry = null
-    }
+    this.cacheVNode()
   },
 
   render () {
@@ -126,20 +140,9 @@ export default {
         remove(keys, key)
         keys.push(key)
       } else {
-        // put entry until component is instantiated
-        this.putEntry = () => {
-          const { tag, componentInstance } = vnode
-          cache[key] = {
-            name,
-            tag,
-            componentInstance
-          }
-          keys.push(key)
-          // prune oldest entry
-          if (this.max && keys.length > parseInt(this.max)) {
-            pruneCacheEntry(cache, keys[0], keys, this._vnode)
-          }
-        }
+        // delay setting the cache until update
+        this.vnodeToCache = vnode
+        this.keyToCache = key
       }
 
       vnode.data.keepAlive = true
