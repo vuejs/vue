@@ -1325,4 +1325,28 @@ describe('Component scoped slot', () => {
       expect(vm.$el.textContent).toMatch(`1`)
     }).then(done)
   })
+
+  // #11652
+  it('should update when swtching between two components with slot and without slot', done => {
+    const Child = {
+      template: `<div><slot/></div>`
+    }
+
+    const parent = new Vue({
+      template: `<div>
+        <child v-if="flag"><template #default>foo</template></child>
+        <child v-else></child>
+      </div>`,
+      data: {
+        flag: true
+      },
+      components: { Child }
+    }).$mount()
+
+    expect(parent.$el.textContent).toMatch(`foo`)
+    parent.flag=false
+    waitForUpdate(()=>{
+      expect(parent.$el.textContent).toMatch(``)
+    }).then(done)
+  })
 })
