@@ -547,7 +547,7 @@ export function genComment (comment: ASTText): string {
 function genSlot (el: ASTElement, state: CodegenState): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el, state)
-  let res = `_t(${slotName}${children ? `,${children}` : ''}`
+  let res = `_t(${slotName}${children ? `,function(){return ${children}}` : ''}`
   const attrs = el.attrs || el.dynamicAttrs
     ? genProps((el.attrs || []).concat(el.dynamicAttrs || []).map(attr => ({
         // slot props are camelized
