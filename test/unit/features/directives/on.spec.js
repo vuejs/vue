@@ -976,6 +976,17 @@ describe('Directive v-on', () => {
     expect(value).toBe(1)
   })
 
+  it('should not execute callback if modifiers are present', () => {
+    vm = new Vue({
+      el,
+      template: '<input @keyup.?="foo">',
+      methods: { foo: spy }
+    })
+    // simulating autocomplete event (Event object with type keyup but without keyCode)
+    triggerEvent(vm.$el, 'keyup')
+    expect(spy.calls.count()).toBe(0)
+  })
+
   describe('dynamic arguments', () => {
     it('basic', done => {
       const spy = jasmine.createSpy()
