@@ -572,6 +572,73 @@ describe('Component keep-alive', () => {
     }).then(done)
   })
 
+  it('max=1', done => {
+    const spyA = jasmine.createSpy()
+    const spyB = jasmine.createSpy()
+    const spyC = jasmine.createSpy()
+    const spyAD = jasmine.createSpy()
+    const spyBD = jasmine.createSpy()
+    const spyCD = jasmine.createSpy()
+
+    function assertCount (calls) {
+      expect([
+        spyA.calls.count(),
+        spyAD.calls.count(),
+        spyB.calls.count(),
+        spyBD.calls.count(),
+        spyC.calls.count(),
+        spyCD.calls.count()
+      ]).toEqual(calls)
+    }
+
+    const vm = new Vue({
+      template: `
+        <keep-alive max="1">
+          <component :is="n"></component>
+        </keep-alive>
+      `,
+      data: {
+        n: 'aa'
+      },
+      components: {
+        aa: {
+          template: '<div>a</div>',
+          created: spyA,
+          destroyed: spyAD
+        },
+        bb: {
+          template: '<div>bbb</div>',
+          created: spyB,
+          destroyed: spyBD
+        },
+        cc: {
+          template: '<div>ccc</div>',
+          created: spyC,
+          destroyed: spyCD
+        }
+      }
+    }).$mount()
+
+    assertCount([1, 0, 0, 0, 0, 0])
+    vm.n = 'bb'
+    waitForUpdate(() => {
+      // should prune A because max cache reached
+      assertCount([1, 1, 1, 0, 0, 0])
+      vm.n = 'cc'
+    }).then(() => {
+      // should prune B because max cache reached
+      assertCount([1, 1, 1, 1, 1, 0])
+      vm.n = 'bb'
+    }).then(() => {
+      // B is recreated
+      assertCount([1, 1, 2, 1, 1, 1])
+      vm.n = 'aa'
+    }).then(() => {
+      // B is destroyed and A recreated
+      assertCount([2, 1, 2, 2, 1, 1])
+    }).then(done)
+  })
+
   it('should warn unknown component inside', () => {
     new Vue({
       template: `<keep-alive><foo/></keep-alive>`
