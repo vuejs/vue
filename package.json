@@ -85,7 +85,7 @@
     "babel-preset-flow-vue": "^1.0.0",
     "buble": "^0.19.3",
     "chalk": "^2.3.0",
-    "chromedriver": "^2.45.0",
+    "chromedriver": "^90.0",
     "codecov": "^3.0.0",
     "commitizen": "^2.9.6",
     "conventional-changelog": "^1.1.3",
