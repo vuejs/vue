@@ -209,7 +209,8 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     target.splice(key, 1, val)
     return val
   }
-  if (key in target && !(key in Object.prototype)) {
+  const property = Object.getOwnPropertyDescriptor(target, key)
+  if (key in target && !(key in Object.prototype) && (property && property.get)) {
     target[key] = val
     return val
   }
