@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { cloneDeep } from '../../../../src/shared/util'
 
 describe('Instance methods data', () => {
   it('$set/$delete', done => {
@@ -76,29 +77,31 @@ describe('Instance methods data', () => {
     })
 
     it('deep watch', done => {
-      const oldA = vm.a
+      let cloneOldA = cloneDeep(vm.a)
       vm.$watch('a', spy, { deep: true })
       vm.a.b = 2
       waitForUpdate(() => {
-        expect(spy).toHaveBeenCalledWith(oldA, oldA)
+        expect(spy).toHaveBeenCalledWith(vm.a, cloneOldA)
+        cloneOldA = cloneDeep(vm.a)
         vm.a = { b: 3 }
       }).then(() => {
-        expect(spy).toHaveBeenCalledWith(vm.a, oldA)
+        expect(spy).toHaveBeenCalledWith(vm.a, cloneOldA)
       }).then(done)
     })
 
     it('handler option', done => {
-      const oldA = vm.a
+      let cloneOldA = cloneDeep(vm.a)
       vm.$watch('a', {
         handler: spy,
         deep: true
       })
       vm.a.b = 2
       waitForUpdate(() => {
-        expect(spy).toHaveBeenCalledWith(oldA, oldA)
+        expect(spy).toHaveBeenCalledWith(vm.a, cloneOldA)
+        cloneOldA = cloneDeep(vm.a)
         vm.a = { b: 3 }
       }).then(() => {
-        expect(spy).toHaveBeenCalledWith(vm.a, oldA)
+        expect(spy).toHaveBeenCalledWith(vm.a, cloneOldA)
       }).then(done)
     })
 

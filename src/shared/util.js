@@ -341,3 +341,20 @@ export function once (fn: Function): Function {
     }
   }
 }
+
+/**
+ * DeepClone a object for watch's oldValue
+ */
+export function cloneDeep(obj: any): any {
+  if (!isObject(obj)) return obj
+  // Avoid circular references and duplicate copies
+  obj._uid_ = 1
+  let newObj = obj instanceof Array ? [] : {}
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key) && key !== '_uid_') {
+      newObj[key] = typeof obj[key] === 'object' && !obj[key]._uid_ ? cloneDeep(obj[key]) : obj[key]
+    }
+  }
+  delete obj._uid_
+  return newObj
+}

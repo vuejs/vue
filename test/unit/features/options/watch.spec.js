@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import testObjectOption from '../../../helpers/test-object-option'
+import { cloneDeep } from '../../../../src/shared/util'
 import { finished } from 'stream';
 
 describe('Options watch', () => {
@@ -94,15 +95,16 @@ describe('Options watch', () => {
         }
       }
     })
-    const oldA = vm.a
+    let cloneOldA = cloneDeep(vm.a)
     expect(spy).not.toHaveBeenCalled()
     vm.a.b = 2
     expect(spy).not.toHaveBeenCalled()
     waitForUpdate(() => {
-      expect(spy).toHaveBeenCalledWith(vm.a, vm.a)
+      expect(spy).toHaveBeenCalledWith(vm.a, cloneOldA)
+      cloneOldA = cloneDeep(vm.a)
       vm.a = { b: 3 }
     }).then(() => {
-      expect(spy).toHaveBeenCalledWith(vm.a, oldA)
+      expect(spy).toHaveBeenCalledWith(vm.a, cloneOldA)
     }).then(done)
   })
 

@@ -8,7 +8,8 @@ import {
   _Set as Set,
   handleError,
   invokeWithErrorHandling,
-  noop
+  noop,
+  cloneDeep
 } from '../util/index'
 
 import { traverse } from './traverse'
@@ -93,7 +94,7 @@ export default class Watcher {
     }
     this.value = this.lazy
       ? undefined
-      : this.get()
+      : cloneDeep(this.get())
   }
 
   /**
@@ -190,7 +191,9 @@ export default class Watcher {
       ) {
         // set new value
         const oldValue = this.value
-        this.value = value
+        // Clone object as watch's oldValue
+        // prevent new and old from being the same reference
+        this.value = cloneDeep(value)
         if (this.user) {
           const info = `callback for watcher "${this.expression}"`
           invokeWithErrorHandling(this.cb, this.vm, [value, oldValue], this.vm, info)

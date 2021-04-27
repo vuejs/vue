@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Watcher from 'core/observer/watcher'
+import { cloneDeep } from '../../../../src/shared/util'
 
 describe('Watcher', () => {
   let vm, spy
@@ -74,55 +75,60 @@ describe('Watcher', () => {
   })
 
   it('deep watch', done => {
-    let oldB
+    let cloneOldB = cloneDeep(vm.b)
     new Watcher(vm, 'b', spy, {
       deep: true
     })
     vm.b.c = { d: 4 }
     waitForUpdate(() => {
-      expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
-      oldB = vm.b
+      expect(spy).toHaveBeenCalledWith(vm.b, cloneOldB)
+      cloneOldB = cloneDeep(vm.b)
       vm.b = { c: [{ a: 1 }] }
     }).then(() => {
-      expect(spy).toHaveBeenCalledWith(vm.b, oldB)
+      expect(spy).toHaveBeenCalledWith(vm.b, cloneOldB)
       expect(spy.calls.count()).toBe(2)
+      cloneOldB = cloneDeep(vm.b)
       vm.b.c[0].a = 2
     }).then(() => {
-      expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
+      expect(spy).toHaveBeenCalledWith(vm.b, cloneOldB)
       expect(spy.calls.count()).toBe(3)
     }).then(done)
   })
 
   it('deep watch $data', done => {
+    let cloneOldData = cloneDeep(vm.$data)
     new Watcher(vm, '$data', spy, {
       deep: true
     })
     vm.b.c = 3
     waitForUpdate(() => {
-      expect(spy).toHaveBeenCalledWith(vm.$data, vm.$data)
+      expect(spy).toHaveBeenCalledWith(vm.$data, cloneOldData)
     }).then(done)
   })
 
   it('deep watch with circular references', done => {
+    let cloneOldB = cloneDeep(vm.b)
     new Watcher(vm, 'b', spy, {
       deep: true
     })
     Vue.set(vm.b, '_', vm.b)
     waitForUpdate(() => {
-      expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
+      expect(spy).toHaveBeenCalledWith(vm.b, cloneOldB)
       expect(spy.calls.count()).toBe(1)
+      cloneOldB = cloneDeep(vm.b)
       vm.b._.c = 1
     }).then(() => {
-      expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
+      expect(spy).toHaveBeenCalledWith(vm.b, cloneOldB)
       expect(spy.calls.count()).toBe(2)
     }).then(done)
   })
 
   it('fire change for prop addition/deletion in non-deep mode', done => {
+    let cloneOldB = cloneDeep(vm.b)
     new Watcher(vm, 'b', spy)
     Vue.set(vm.b, 'e', 123)
     waitForUpdate(() => {
-      expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
+      expect(spy).toHaveBeenCalledWith(vm.b, cloneOldB)
       expect(spy.calls.count()).toBe(1)
       Vue.delete(vm.b, 'e')
     }).then(() => {
