@@ -439,4 +439,23 @@ describe('Component', () => {
     expect(vm.$el.nodeName).toBe('#comment')
     expect('Templates should only be responsible for mapping the state').toHaveBeenWarned()
   })
+
+  it('render vnode when nextSibling removed', () => {
+    const container = document.createElement('div')
+    container.innerHTML = `<div id="app-nextsibling-removed"></div><span id="loading">loading...</span>`
+    document.body.appendChild(container)
+    
+    const App = {
+      template: '<p>App</p>',
+      created() {
+        const del = document.querySelector('#loading')
+        del.parentNode.removeChild(del)
+      }
+    }
+    new Vue({
+      render: h => h(App),
+    }).$mount('#app-nextsibling-removed')
+
+    expect(container.innerHTML).toBe('<p>App</p>')
+  })
 })
