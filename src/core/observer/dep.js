@@ -35,7 +35,7 @@ export default class Dep {
   }
 
   notify () {
-    // stabilize the subscriber list first
+    // stabilize the subscriber list first by creating a shallow copy using Array.slice 
     const subs = this.subs.slice()
     if (process.env.NODE_ENV !== 'production' && !config.async) {
       // subs aren't sorted in scheduler if not running async
