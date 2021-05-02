@@ -31,8 +31,5 @@
   "devDependencies": {
     "vue": "file:../.."
   },
-  "peerDependencies": {
-    "webpack": "*"
-  },
   "homepage": "https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#readme"
 }
