@@ -330,6 +330,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <a href="https://opencollective.com/vuejs/tiers/silver-sponsors/0/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/0/avatar.svg"></a>
 <a href="https://opencollective.com/vuejs/tiers/silver-sponsors/1/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/1/avatar.svg"></a>
 <a href="https://opencollective.com/vuejs/tiers/silver-sponsors/2/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/2/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/silver-sponsors/3/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/3/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/silver-sponsors/4/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/4/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/silver-sponsors/5/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/5/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/silver-sponsors/6/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/6/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/silver-sponsors/7/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/7/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/silver-sponsors/8/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/8/avatar.svg"></a>
+<a href="https://opencollective.com/vuejs/tiers/silver-sponsors/9/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/silver-sponsors/9/avatar.svg"></a>
 
 <h2 align="center">Bronze via Patreon</h2>
 
