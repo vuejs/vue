@@ -418,7 +418,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Yoshitaka M
 - Peter Imburg
 - Sean Ferguson
-- Johnny Ray Austin
 - errorrik 
 - Wasim Khamlichi
 <!--50 end-->
@@ -426,10 +425,9 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <h2 align="center">Backers via Patreon</h2>
 
 <!--10 start-->
-- Sara McVey
+- Meinhard Dam
 - Keisuke Kita
 - Alex Riviere
-- Thomas Sittig
 - WhereJuly
 - Fontis 
 - Jack 
@@ -439,7 +437,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Pierre Baron
 - Donghai Gai
 - Aleksander Figiel
-- Faizal Andyka
 - wickedwei 
 - Sunny Yuen
 - Jules 
@@ -449,7 +446,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Nobuhide Esaki
 - Roy Segall
 - Allan McKernan
-- 琚致远 
 - Diana Bergholz
 - Riki Fridrich
 - Alfonso Herrera
@@ -469,7 +465,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Daniel Mattingley
 - Matt Sencenbaugh
 - Jaeyoung Lee
-- David Kaplan
 - David Ang
 - Wakana Seki
 - Jere Sjöroos
@@ -482,7 +477,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - IMGNRY 
 - Jim Raden
 - Haim Yulzari
-- Anthony Estebe
 - Asaf Yishai
 - Jon Hobbs-Smith
 - Pierre Vanhulst
@@ -495,7 +489,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Matsumoto Takamasa
 - Barbara Liau
 - Wen-Tien Chang
-- Stephen Michael Hartley
+- Stephen Hartley
 - Victor Tolbert
 - Lars Andreas Ness
 - Benjamin Listwon
