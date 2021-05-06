@@ -45,7 +45,7 @@ $ yarn # install the dependencies of the project
 
 ### Committing Changes
 
-Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. Commit messages will be automatically validated upon commit.Use `git commit` to commit the messages.
+Commit messages should follow the [commit message convention](./COMMIT_CONVENTION.md) so that changelogs can be automatically generated. Commit messages will be automatically validated upon commit. Use `git commit` to commit the messages.
 
 ### Commonly used NPM scripts
 
