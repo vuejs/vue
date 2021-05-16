@@ -865,6 +865,14 @@ describe('parser', () => {
     expect(ast.children[4].children[0].text).toBe('. Have fun! ')
   })
 
+  it(`maintains &nbsp; with whitespace: 'condense'`, () => {
+    const options = extend({}, condenseOptions)
+    const ast = parse('<span>&nbsp;</span>', options)
+    const code = ast.children[0]
+    expect(code.type).toBe(3)
+    expect(code.text).toBe('\xA0')
+  })
+
   it(`preserve whitespace in <pre> tag with whitespace: 'condense'`, function () {
     const options = extend({}, condenseOptions)
     const ast = parse('<pre><code>  \n<span>hi</span>\n  </code><span> </span></pre>', options)
@@ -900,5 +908,21 @@ describe('parser', () => {
     expect(ast.children[1].tag).toBe('input')
     expect(ast.children[2].type).toBe(3)
     expect(ast.children[2].text).toBe('\ndef')
+  })
+
+  // #10152
+  it('not warn when scoped slot used inside of dynamic component on regular element', () => {
+    parse(`
+      <div>
+        <div is="customComp" v-slot="slotProps"></div>
+        <div :is="'customComp'" v-slot="slotProps"></div>
+        <div v-bind:is="'customComp'" v-slot="slotProps"></div>
+      </div>
+    `, baseOptions)
+    expect('v-slot can only be used on components or <template>').not.toHaveBeenWarned()
+
+    parse(`<div is="customComp"><template v-slot="slotProps"></template></div>`, baseOptions)
+    expect(`<template v-slot> can only appear at the root level inside the receiving the component`)
+      .not.toHaveBeenWarned()
   })
 })

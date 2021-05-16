@@ -482,3 +482,20 @@ Vue.component('functional-component-v-model', {
 
 
 Vue.component('async-es-module-component', () => import('./es-module'))
+
+Vue.component('directive-expression-optional-string', {
+  render(createElement) {
+    return createElement("div", {
+      directives: [
+        {
+          name: 'has-expression',
+          value: 2,
+          expression: '1 + 1',
+        }, {
+          name: 'no-expression',
+          value: 'foo',
+        },
+      ],
+    })
+  }
+});

@@ -26,7 +26,7 @@ export interface Vue {
   readonly $parent: Vue;
   readonly $root: Vue;
   readonly $children: Vue[];
-  readonly $refs: { [key: string]: Vue | Element | Vue[] | Element[] };
+  readonly $refs: { [key: string]: Vue | Element | (Vue | Element)[] | undefined };
   readonly $slots: { [key: string]: VNode[] | undefined };
   readonly $scopedSlots: { [key: string]: NormalizedScopedSlot | undefined };
   readonly $isServer: boolean;
@@ -120,6 +120,10 @@ export interface VueConstructor<V extends Vue = Vue> {
   };
 
   observable<T>(obj: T): T;
+
+  util: {
+    warn(msg: string, vm?: InstanceType<VueConstructor>): void;
+  };
 
   config: VueConfiguration;
   version: string;
