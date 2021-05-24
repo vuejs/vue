@@ -36,7 +36,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       try {
         new Function('return 1')
       } catch (e) {
-        if (e.toString().match(/unsafe-eval|CSP/)) {
+        if (/unsafe-eval|CSP/.test(e.toString())) {
           warn(
             'It seems you are using the standalone build of Vue.js in an ' +
             'environment with Content Security Policy that prohibits unsafe-eval. ' +
