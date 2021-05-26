@@ -144,6 +144,7 @@ export default {
             remove(keys, key);
             keys.push(key);
         } else {
+            cache[key].componentInstance.$destroy();
             cache[key] = vnode;
         }
       } else {
