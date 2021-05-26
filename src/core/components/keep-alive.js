@@ -115,6 +115,9 @@ export default {
     const slot = this.$slots.default
     const vnode: VNode = getFirstComponentChild(slot)
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
+    if (vnode) {
+      vnode._cid = componentOptions.Ctor.cid;
+    }
     if (componentOptions) {
       // check pattern
       const name: ?string = getComponentName(componentOptions)
@@ -135,10 +138,14 @@ export default {
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')
         : vnode.key
       if (cache[key]) {
-        vnode.componentInstance = cache[key].componentInstance
-        // make current key freshest
-        remove(keys, key)
-        keys.push(key)
+        if (vnode._cid === cache[key]._cid) {
+            vnode.componentInstance = cache[key].componentInstance;
+            // make current key freshest
+            remove(keys, key);
+            keys.push(key);
+        } else {
+            cache[key] = vnode;
+        }
       } else {
         // delay setting the cache until update
         this.vnodeToCache = vnode
