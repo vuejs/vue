@@ -292,6 +292,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <a href="https://opencollective.com/vuejs/tiers/gold-sponsors/2/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/gold-sponsors/2/avatar.svg?sanitize=true" height="60px"></a>
 <a href="https://opencollective.com/vuejs/tiers/gold-sponsors/3/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/gold-sponsors/3/avatar.svg?sanitize=true" height="60px"></a>
 <a href="https://opencollective.com/vuejs/tiers/gold-sponsors/4/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/gold-sponsors/4/avatar.svg?sanitize=true" height="60px"></a>
+<a href="https://opencollective.com/vuejs/tiers/gold-sponsors/5/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/gold-sponsors/5/avatar.svg?sanitize=true" height="60px"></a>
+<a href="https://opencollective.com/vuejs/tiers/gold-sponsors/6/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/gold-sponsors/6/avatar.svg?sanitize=true" height="60px"></a>
+<a href="https://opencollective.com/vuejs/tiers/gold-sponsors/7/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/gold-sponsors/7/avatar.svg?sanitize=true" height="60px"></a>
+<a href="https://opencollective.com/vuejs/tiers/gold-sponsors/8/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/gold-sponsors/8/avatar.svg?sanitize=true" height="60px"></a>
+<a href="https://opencollective.com/vuejs/tiers/gold-sponsors/9/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/gold-sponsors/9/avatar.svg?sanitize=true" height="60px"></a><a href="https://opencollective.com/vuejs/tiers/gold-sponsors/10/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/vuejs/tiers/gold-sponsors/10/avatar.svg?sanitize=true" height="60px"></a>
 
 ---
 
