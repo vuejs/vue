@@ -19,6 +19,20 @@ export default class VueSSRClientPlugin {
       const initialFiles = uniq(Object.keys(stats.entrypoints)
         .map(name => stats.entrypoints[name].assets)
         .reduce((assets, all) => all.concat(assets), [])
+        .map(function (file) {
+          if (typeof file === "string") {
+            return file;
+          }
+
+          if (
+            Object.prototype.toString.call(file) === "[object Object]" &&
+            file.name
+          ) {
+            return file.name;
+          }
+
+          throw new Error(`file structure is not correct: ${file}`);
+        })
         .filter((file) => isJS(file) || isCSS(file)))
 
       const asyncFiles = allFiles

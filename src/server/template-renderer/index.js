@@ -55,7 +55,7 @@ export default class TemplateRenderer {
     this.inject = options.inject !== false
     // if no template option is provided, the renderer is created
     // as a utility object for rendering assets like preload links and scripts.
-    
+
     const { template } = options
     this.parsedTemplate = template
       ? typeof template === 'string'
@@ -224,7 +224,7 @@ export default class TemplateRenderer {
     if (this.clientManifest) {
       const initial = this.preloadFiles.filter(({ file }) => isJS(file))
       const async = (this.getUsedAsyncFiles(context) || []).filter(({ file }) => isJS(file))
-      const needed = [initial[0]].concat(async, initial.slice(1))
+      const needed = [].concat(initial[0] ? [initial[0]] : [], async, initial.slice(1));
       return needed.map(({ file }) => {
         return `<script src="${this.publicPath}${file}" defer></script>`
       }).join('')
