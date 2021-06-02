@@ -694,6 +694,34 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  // #11963, #10391
+  it('renders async children passed in slots', done => {
+    const Parent = {
+      template: `<div><slot name="child"/></div>`
+    }
+    const Child = {
+      template: `<p>child</p>`
+    }
+    renderVmWithOptions({
+      template: `
+      <Parent>
+        <template #child>
+          <Child/>
+        </template>
+      </Parent>
+      `,
+      components: {
+        Parent,
+        Child: () => Promise.resolve(Child)
+      }
+    }, result => {
+      expect(result).toContain(
+        `<div data-server-rendered="true"><p>child</p></div>`
+      )
+      done()
+    })
+  })
+
   it('everything together', done => {
     renderVmWithOptions({
       template: `
