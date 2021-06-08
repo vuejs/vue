@@ -187,9 +187,26 @@ const functionTypeCheckRE = /^\s*function (\w+)/
  * because a simple equality check will fail when running
  * across different vms / iframes.
  */
-function getType (fn) {
+function getTypeName (fn) {
   const match = fn && fn.toString().match(functionTypeCheckRE)
   return match ? match[1] : ''
+}
+
+/**
+ * Build a cache for known types.
+ * We could build it dynamically, but since array are sometime requested,
+ * it fill up the cache for nothing.
+ * Type list is taken from https://vuejs.org/v2/guide/components-props.html#Type-Checks
+ */
+const TYPE_CACHE = new Map(
+  [String, Number, Boolean, Array, Object, Date, Function, Symbol, null, undefined].map(fn => [fn, getTypeName(fn)]))
+
+function getType (fn) {
+  const cached = TYPE_CACHE.get(fn)
+  if (cached !== undefined) {
+    return cached
+  }
+  return getTypeName(fn)
 }
 
 function isSameType (a, b) {
