@@ -165,22 +165,15 @@ export default class Watcher {
   update () {
     /* istanbul ignore else */
     if (this.computed) {
-      // A computed property watcher has two modes: lazy and activated.
-      // It initializes as lazy by default, and only becomes activated when
-      // it is depended on by at least one subscriber, which is typically
-      // another computed property or a component's render function.
-      if (this.dep.subs.length === 0) {
-        // In lazy mode, we don't want to perform computations until necessary,
-        // so we simply mark the watcher as dirty. The actual computation is
-        // performed just-in-time in this.evaluate() when the computed property
-        // is accessed.
+      // Set the computed property watcher in lazy mode
+      if (!this.dirty) {
         this.dirty = true
-      } else {
-        // In activated mode, we want to proactively perform the computation
-        // but only notify our subscribers when the value has indeed changed.
-        this.getAndInvoke(() => {
-          this.dep.notify()
-        })
+
+        // The computed property watcher perform the computation asynchronously
+        // when it is depended on by at least one subscriber
+        if (this.dep.subs.length > 0) {
+          queueWatcher(this)
+        }
       }
     } else if (this.sync) {
       this.run()
@@ -195,7 +188,7 @@ export default class Watcher {
    */
   run () {
     if (this.active) {
-      this.getAndInvoke(this.cb)
+      this.getAndInvoke(this.computed ? () => this.dep.notify() : this.cb)
     }
   }
 
