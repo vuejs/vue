@@ -115,10 +115,11 @@ export default {
     const slot = this.$slots.default
     const vnode: VNode = getFirstComponentChild(slot)
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
-    if (vnode) {
-      vnode._cid = componentOptions.Ctor.cid;
-    }
+
     if (componentOptions) {
+      if (componentOptions.Ctor) {
+        vnode._cid = componentOptions.Ctor.cid;
+      }
       // check pattern
       const name: ?string = getComponentName(componentOptions)
       const { include, exclude } = this
