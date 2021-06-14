@@ -14,7 +14,8 @@ import {
   getXlinkProp,
   isBooleanAttr,
   isEnumeratedAttr,
-  isFalsyAttrValue
+  isFalsyAttrValue,
+  convertEnumeratedValue
 } from 'web/util/index'
 
 function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
@@ -38,7 +39,7 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     cur = attrs[key]
     old = oldAttrs[key]
     if (old !== cur) {
-      setAttr(elm, key, cur)
+      setAttr(elm, key, cur, vnode.data.pre)
     }
   }
   // #4391: in IE9, setting type can reset value for input[type=radio]
@@ -58,8 +59,8 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 }
 
-function setAttr (el: Element, key: string, value: any) {
-  if (el.tagName.indexOf('-') > -1) {
+function setAttr (el: Element, key: string, value: any, isInPre: any) {
+  if (isInPre || el.tagName.indexOf('-') > -1) {
     baseSetAttr(el, key, value)
   } else if (isBooleanAttr(key)) {
     // set attribute for blank value
@@ -75,7 +76,7 @@ function setAttr (el: Element, key: string, value: any) {
       el.setAttribute(key, value)
     }
   } else if (isEnumeratedAttr(key)) {
-    el.setAttribute(key, isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true')
+    el.setAttribute(key, convertEnumeratedValue(key, value))
   } else if (isXlink(key)) {
     if (isFalsyAttrValue(value)) {
       el.removeAttributeNS(xlinkNS, getXlinkProp(key))
@@ -97,8 +98,8 @@ function baseSetAttr (el, key, value) {
     /* istanbul ignore if */
     if (
       isIE && !isIE9 &&
-      (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') &&
-      key === 'placeholder' && !el.__ieph
+      el.tagName === 'TEXTAREA' &&
+      key === 'placeholder' && value !== '' && !el.__ieph
     ) {
       const blocker = e => {
         e.stopImmediatePropagation()

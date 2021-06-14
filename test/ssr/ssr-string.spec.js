@@ -640,6 +640,41 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('renders nested async functional component', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <outer-async></outer-async>
+        </div>
+      `,
+      components: {
+        outerAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return h('innerAsync')
+            }
+          }), 1)
+        },
+        innerAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return h('span', { class: ['a'] }, 'inner')
+            },
+          }), 1)
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true">' +
+          '<span class="a">inner</span>' +
+        '</div>'
+      )
+      done()
+    })
+  })
+
   it('should catch async component error', done => {
     Vue.config.silent = true
     renderToString(new Vue({
@@ -655,6 +690,34 @@ describe('SSR: renderToString', () => {
       Vue.config.silent = false
       expect(err).toBeTruthy()
       expect(result).toBeUndefined()
+      done()
+    })
+  })
+
+  // #11963, #10391
+  it('renders async children passed in slots', done => {
+    const Parent = {
+      template: `<div><slot name="child"/></div>`
+    }
+    const Child = {
+      template: `<p>child</p>`
+    }
+    renderVmWithOptions({
+      template: `
+      <Parent>
+        <template #child>
+          <Child/>
+        </template>
+      </Parent>
+      `,
+      components: {
+        Parent,
+        Child: () => Promise.resolve(Child)
+      }
+    }, result => {
+      expect(result).toContain(
+        `<div data-server-rendered="true"><p>child</p></div>`
+      )
       done()
     })
   })
@@ -1538,6 +1601,68 @@ describe('SSR: renderToString', () => {
       expect(result).toContain(
         '<div data-server-rendered="true" style="opacity:0;top:0;margin-top:10px;"></div>'
       )
+      done()
+    })
+  })
+
+  it('handling max stack size limit', done => {
+    const vueInstance = new Vue({
+      template: `<div class="root">
+        <child v-for="(x, i) in items" :key="i"></child>
+      </div>`,
+      components: {
+        child: {
+          template: '<div class="child"><span class="child">hi</span></div>'
+        }
+      },
+      data: {
+        items: Array(1000).fill(0)
+      }
+    })
+
+    renderToString(vueInstance, err => done(err))
+  })
+
+  it('undefined v-model with textarea', done => {
+    renderVmWithOptions({
+      render (h) {
+        return h('div', [
+          h('textarea', {
+            domProps: {
+              value: null
+            }
+          })
+        ])
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true"><textarea></textarea></div>'
+      )
+      done()
+    })
+  })
+
+  it('Options inheritAttrs in parent component', done => {
+    const childComponent = {
+      template: `<div>{{ someProp }}</div>`,
+      props: {
+        someProp: {}
+      },
+    }
+    const parentComponent = {
+      template: `<childComponent v-bind="$attrs" />`,
+      components: { childComponent },
+      inheritAttrs: false
+    }
+    renderVmWithOptions({
+      template: `
+        <div>
+          <parentComponent some-prop="some-val" />
+        </div>
+        `,
+      components: { parentComponent }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div>some-val</div></div>')
       done()
     })
   })

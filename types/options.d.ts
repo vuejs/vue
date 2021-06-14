@@ -1,5 +1,5 @@
 import { Vue, CreateElement, CombinedVueInstance } from "./vue";
-import { VNode, VNodeData, VNodeDirective, ScopedSlot } from "./vnode";
+import { VNode, VNodeData, VNodeDirective, NormalizedScopedSlot } from "./vnode";
 
 type Constructor = {
   new (...args: any[]): any;
@@ -12,9 +12,10 @@ export type Component<Data=DefaultData<never>, Methods=DefaultMethods<never>, Co
   | FunctionalComponentOptions<Props>
   | ComponentOptions<never, Data, Methods, Computed, Props>
 
-interface EsModuleComponent {
-  default: Component
-}
+type EsModule<T> = T | { default: T }
+
+type ImportedComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
+  = EsModule<Component<Data, Methods, Computed, Props>>
 
 export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
   = AsyncComponentPromise<Data, Methods, Computed, Props>
@@ -23,12 +24,12 @@ export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never
 export type AsyncComponentPromise<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
-) => Promise<Component | EsModuleComponent> | void;
+) => Promise<ImportedComponent<Data, Methods, Computed, Props>> | void;
 
 export type AsyncComponentFactory<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = () => {
-  component: AsyncComponentPromise<Data, Methods, Computed, Props>;
-  loading?: Component | EsModuleComponent;
-  error?: Component | EsModuleComponent;
+  component: Promise<ImportedComponent<Data, Methods, Computed, Props>>;
+  loading?: ImportedComponent;
+  error?: ImportedComponent;
   delay?: number;
   timeout?: number;
 }
@@ -76,7 +77,7 @@ export interface ComponentOptions<
   propsData?: object;
   computed?: Accessors<Computed>;
   methods?: Methods;
-  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any> | string>;
+  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any>>;
 
   el?: Element | string;
   template?: string;
@@ -140,11 +141,11 @@ export interface RenderContext<Props=DefaultProps> {
   data: VNodeData;
   parent: Vue;
   listeners: { [key: string]: Function | Function[] };
-  scopedSlots: { [key: string]: ScopedSlot };
+  scopedSlots: { [key: string]: NormalizedScopedSlot };
   injections: any
 }
 
-export type Prop<T> = { (): T } | { new(...args: any[]): T & object }
+export type Prop<T> = { (): T } | { new(...args: never[]): T & object } | { new(...args: string[]): Function }
 
 export type PropType<T> = Prop<T> | Prop<T>[];
 
@@ -169,7 +170,7 @@ export interface ComputedOptions<T> {
   cache?: boolean;
 }
 
-export type WatchHandler<T> = (val: T, oldVal: T) => void;
+export type WatchHandler<T> = string | ((val: T, oldVal: T) => void);
 
 export interface WatchOptions {
   deep?: boolean;

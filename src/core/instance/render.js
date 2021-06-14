@@ -51,6 +51,13 @@ export function initRender (vm: Component) {
   }
 }
 
+export let currentRenderingInstance: Component | null = null
+
+// for testing only
+export function setCurrentRenderingInstance (vm: Component) {
+  currentRenderingInstance = vm
+}
+
 export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
   installRenderHelpers(Vue.prototype)
@@ -66,7 +73,8 @@ export function renderMixin (Vue: Class<Component>) {
     if (_parentVnode) {
       vm.$scopedSlots = normalizeScopedSlots(
         _parentVnode.data.scopedSlots,
-        vm.$slots
+        vm.$slots,
+        vm.$scopedSlots
       )
     }
 
@@ -76,6 +84,10 @@ export function renderMixin (Vue: Class<Component>) {
     // render self
     let vnode
     try {
+      // There's no need to maintain a stack because all render fns are called
+      // separately from one another. Nested component's render fns are called
+      // when parent component is patched.
+      currentRenderingInstance = vm
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
       handleError(e, vm, `render`)
@@ -92,6 +104,8 @@ export function renderMixin (Vue: Class<Component>) {
       } else {
         vnode = vm._vnode
       }
+    } finally {
+      currentRenderingInstance = null
     }
     // if the returned array contains only a single node, allow it
     if (Array.isArray(vnode) && vnode.length === 1) {

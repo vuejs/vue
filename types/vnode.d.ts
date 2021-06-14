@@ -1,7 +1,11 @@
 import { Vue } from "./vue";
 
+export type ScopedSlot = (props: any) => ScopedSlotReturnValue;
+type ScopedSlotReturnValue = VNode | string | boolean | null | undefined | ScopedSlotReturnArray;
+interface ScopedSlotReturnArray extends Array<ScopedSlotReturnValue> {}
+
 // Scoped slots are guaranteed to return Array of VNodes starting in 2.6
-export type ScopedSlot = (props: any) => ScopedSlotChildren;
+export type NormalizedScopedSlot = (props: any) => ScopedSlotChildren;
 export type ScopedSlotChildren = VNode[] | undefined;
 
 // Relaxed type compatible with $createElement
@@ -16,7 +20,7 @@ export interface VNode {
   elm?: Node;
   ns?: string;
   context?: Vue;
-  key?: string | number;
+  key?: string | number | symbol | boolean;
   componentOptions?: VNodeComponentOptions;
   componentInstance?: Vue;
   parent?: VNode;
@@ -44,7 +48,7 @@ export interface VNodeData {
   staticClass?: string;
   class?: any;
   staticStyle?: { [key: string]: any };
-  style?: object[] | object;
+  style?: string | object[] | object;
   props?: { [key: string]: any };
   attrs?: { [key: string]: any };
   domProps?: { [key: string]: any };
@@ -65,7 +69,8 @@ export interface VNodeDirective {
   name: string;
   value?: any;
   oldValue?: any;
-  expression?: any;
+  expression?: string;
   arg?: string;
+  oldArg?: string;
   modifiers?: { [key: string]: boolean };
 }

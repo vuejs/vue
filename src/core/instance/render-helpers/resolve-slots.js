@@ -48,19 +48,3 @@ export function resolveSlots (
 function isWhitespace (node: VNode): boolean {
   return (node.isComment && !node.asyncFactory) || node.text === ' '
 }
-
-export function resolveScopedSlots (
-  fns: ScopedSlotsData, // see flow/vnode
-  res?: Object
-): { [key: string]: Function } {
-  res = res || {}
-  for (let i = 0; i < fns.length; i++) {
-    const slot = fns[i]
-    if (Array.isArray(slot)) {
-      resolveScopedSlots(slot, res)
-    } else {
-      res[slot.key] = slot.fn
-    }
-  }
-  return res
-}

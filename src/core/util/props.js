@@ -122,13 +122,14 @@ function assertProp (
       type = [type]
     }
     for (let i = 0; i < type.length && !valid; i++) {
-      const assertedType = assertType(value, type[i])
+      const assertedType = assertType(value, type[i], vm)
       expectedTypes.push(assertedType.expectedType || '')
       valid = assertedType.valid
     }
   }
 
-  if (!valid) {
+  const haveExpectedTypes = expectedTypes.some(t => t)
+  if (!valid && haveExpectedTypes) {
     warn(
       getInvalidTypeMessage(name, value, expectedTypes),
       vm
@@ -146,9 +147,9 @@ function assertProp (
   }
 }
 
-const simpleCheckRE = /^(String|Number|Boolean|Function|Symbol)$/
+const simpleCheckRE = /^(String|Number|Boolean|Function|Symbol|BigInt)$/
 
-function assertType (value: any, type: Function | null): {
+function assertType (value: any, type: Function | null, vm: ?Component): {
   valid: boolean;
   expectedType: string;
 } {
@@ -168,7 +169,12 @@ function assertType (value: any, type: Function | null): {
   } else if (expectedType === 'Array') {
     valid = Array.isArray(value)
   } else {
-    valid = value instanceof type
+    try {
+      valid = value instanceof type
+    } catch (e) {
+      warn('Invalid prop type: "' + String(type) + '" is not a constructor', vm);
+      valid = false;
+    }
   }
   return {
     valid,
@@ -176,13 +182,15 @@ function assertType (value: any, type: Function | null): {
   }
 }
 
+const functionTypeCheckRE = /^\s*function (\w+)/
+
 /**
  * Use function string name to check built-in types,
  * because a simple equality check will fail when running
  * across different vms / iframes.
  */
 function getType (fn) {
-  const match = fn && fn.toString().match(/^\s*function (\w+)/)
+  const match = fn && fn.toString().match(functionTypeCheckRE)
   return match ? match[1] : ''
 }
 
@@ -207,18 +215,19 @@ function getInvalidTypeMessage (name, value, expectedTypes) {
     ` Expected ${expectedTypes.map(type => type === 'null' ? type : capitalize(type)).join(', ')}`
   const expectedType = expectedTypes[0]
   const receivedType = toRawType(value)
-  const expectedValue = styleValue(value, expectedType)
-  const receivedValue = styleValue(value, receivedType)
   // check if we need to specify expected value
-  if (expectedTypes.length === 1 &&
-      isExplicable(expectedType) &&
-      !isBoolean(expectedType, receivedType)) {
-    message += ` with value ${expectedValue}`
+  if (
+    expectedTypes.length === 1 &&
+    isExplicable(expectedType) &&
+    isExplicable(typeof value) &&
+    !isBoolean(expectedType, receivedType)
+  ) {
+    message += ` with value ${styleValue(value, expectedType)}`
   }
   message += `, got ${receivedType} `
   // check if we need to specify received value
   if (isExplicable(receivedType)) {
-    message += `with value ${receivedValue}.`
+    message += `with value ${styleValue(value, receivedType)}.`
   }
   return message
 }
@@ -233,9 +242,9 @@ function styleValue (value, type) {
   }
 }
 
+const EXPLICABLE_TYPES = ['string', 'number', 'boolean']
 function isExplicable (value) {
-  const explicitTypes = ['string', 'number', 'boolean']
-  return explicitTypes.some(elem => value.toLowerCase() === elem)
+  return EXPLICABLE_TYPES.some(elem => value.toLowerCase() === elem)
 }
 
 function isBoolean (...args) {

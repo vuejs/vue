@@ -61,12 +61,20 @@ declare type ModuleOptions = {
 declare type ASTModifiers = { [key: string]: boolean };
 declare type ASTIfCondition = { exp: ?string; block: ASTElement };
 declare type ASTIfConditions = Array<ASTIfCondition>;
-declare type ASTAttr = { name: string; value: any; start?: number; end?: number };
+
+declare type ASTAttr = {
+  name: string;
+  value: any;
+  dynamic?: boolean;
+  start?: number;
+  end?: number
+};
 
 declare type ASTElementHandler = {
   value: string;
   params?: Array<any>;
   modifiers: ?ASTModifiers;
+  dynamic?: boolean;
   start?: number;
   end?: number;
 };
@@ -80,6 +88,7 @@ declare type ASTDirective = {
   rawName: string;
   value: string;
   arg: ?string;
+  isDynamicArg: boolean;
   modifiers: ?ASTModifiers;
   start?: number;
   end?: number;
@@ -109,6 +118,7 @@ declare type ASTElement = {
 
   text?: string;
   attrs?: Array<ASTAttr>;
+  dynamicAttrs?: Array<ASTAttr>;
   props?: Array<ASTAttr>;
   plain?: boolean;
   pre?: true;
@@ -119,6 +129,7 @@ declare type ASTElement = {
   transitionMode?: string | null;
   slotName?: ?string;
   slotTarget?: ?string;
+  slotTargetDynamic?: boolean;
   slotScope?: ?string;
   scopedSlots?: { [name: string]: ASTElement };
 

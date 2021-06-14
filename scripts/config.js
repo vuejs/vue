@@ -68,8 +68,7 @@ const builds = {
     alias: { he: './entity-decoder' },
     banner
   },
-  // Runtime only (ES Modules). Used by bundlers that support ES Modules,
-  // e.g. Rollup & Webpack 2
+  // Runtime only ES modules build (for bundlers)
   'web-runtime-esm': {
     entry: resolve('web/entry-runtime.js'),
     dest: resolve('dist/vue.runtime.esm.js'),
@@ -220,11 +219,6 @@ function genConfig (name) {
     input: opts.entry,
     external: opts.external,
     plugins: [
-      replace({
-        __WEEX__: !!opts.weex,
-        __WEEX_VERSION__: weexVersion,
-        __VERSION__: version
-      }),
       flow(),
       alias(Object.assign({}, aliases, opts.alias))
     ].concat(opts.plugins || []),
@@ -241,15 +235,21 @@ function genConfig (name) {
     }
   }
 
-  if (opts.env) {
-    const vars = {
-      'process.env.NODE_ENV': JSON.stringify(opts.env)
-    }
-    Object.keys(featureFlags).forEach(key => {
-      vars[`process.env.${key}`] = featureFlags[key]
-    })
-    config.plugins.push(replace(vars))
+  // built-in vars
+  const vars = {
+    __WEEX__: !!opts.weex,
+    __WEEX_VERSION__: weexVersion,
+    __VERSION__: version
   }
+  // feature flags
+  Object.keys(featureFlags).forEach(key => {
+    vars[`process.env.${key}`] = featureFlags[key]
+  })
+  // build-specific env
+  if (opts.env) {
+    vars['process.env.NODE_ENV'] = JSON.stringify(opts.env)
+  }
+  config.plugins.push(replace(vars))
 
   if (opts.transpile !== false) {
     config.plugins.push(buble())

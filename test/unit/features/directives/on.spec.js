@@ -280,7 +280,7 @@ describe('Directive v-on', () => {
     expect(spy.calls.count()).toBe(1)
   })
 
-  it('should support system modifers with exact', () => {
+  it('should support system modifiers with exact', () => {
     vm = new Vue({
       el,
       template: `
@@ -405,7 +405,7 @@ describe('Directive v-on', () => {
     Vue.config.keyCodes = Object.create(null)
   })
 
-  it('should override build-in keyCode', () => {
+  it('should override built-in keyCode', () => {
     Vue.config.keyCodes.up = [1, 87]
     vm = new Vue({
       el,
@@ -420,7 +420,7 @@ describe('Directive v-on', () => {
       e.keyCode = 1
     })
     expect(spy).toHaveBeenCalledTimes(2)
-    // should not affect build-in down keycode
+    // should not affect built-in down keycode
     triggerEvent(vm.$el, 'keyup', e => {
       e.keyCode = 40
     })
@@ -458,6 +458,34 @@ describe('Directive v-on', () => {
     expect(spy).not.toHaveBeenCalled()
     triggerEvent(vm.$children[0].$el, 'click')
     expect(spy).toHaveBeenCalled()
+  })
+
+  it('should throw a warning if native modifier is used on native HTML element', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <button @click.native="foo"></button>
+      `,
+      methods: { foo: spy },
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(`The .native modifier for v-on is only valid on components but it was used on <button>.`).toHaveBeenWarned()
+    expect(spy.calls.count()).toBe(0)
+  })
+
+  it('should not throw a warning if native modifier is used on a dynamic component', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <component is="div" @click.native="foo('native')" @click="foo('regular')"/>
+      `,
+      methods: { foo: spy },
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(`The .native modifier for v-on is only valid on components but it was used on <div>.`).not.toHaveBeenWarned()
+    expect(spy.calls.allArgs()).toEqual([['regular']]); // Regular @click should work for dynamic components resolved to native HTML elements.
   })
 
   it('.once modifier should work with child components', () => {
@@ -946,5 +974,133 @@ describe('Directive v-on', () => {
       }
     }).$mount()
     expect(value).toBe(1)
+  })
+
+  it('should not execute callback if modifiers are present', () => {
+    vm = new Vue({
+      el,
+      template: '<input @keyup.?="foo">',
+      methods: { foo: spy }
+    })
+    // simulating autocomplete event (Event object with type keyup but without keyCode)
+    triggerEvent(vm.$el, 'keyup')
+    expect(spy.calls.count()).toBe(0)
+  })
+
+  describe('dynamic arguments', () => {
+    it('basic', done => {
+      const spy = jasmine.createSpy()
+      const vm = new Vue({
+        template: `<div v-on:[key]="spy"></div>`,
+        data: {
+          key: 'click'
+        },
+        methods: {
+          spy
+        }
+      }).$mount()
+      triggerEvent(vm.$el, 'click')
+      expect(spy.calls.count()).toBe(1)
+      vm.key = 'mouseup'
+      waitForUpdate(() => {
+        triggerEvent(vm.$el, 'click')
+        expect(spy.calls.count()).toBe(1)
+        triggerEvent(vm.$el, 'mouseup')
+        expect(spy.calls.count()).toBe(2)
+        // explicit null value
+        vm.key = null
+      }).then(() => {
+        triggerEvent(vm.$el, 'click')
+        expect(spy.calls.count()).toBe(2)
+        triggerEvent(vm.$el, 'mouseup')
+        expect(spy.calls.count()).toBe(2)
+      }).then(done)
+    })
+
+    it('shorthand', done => {
+      const spy = jasmine.createSpy()
+      const vm = new Vue({
+        template: `<div @[key]="spy"></div>`,
+        data: {
+          key: 'click'
+        },
+        methods: {
+          spy
+        }
+      }).$mount()
+      triggerEvent(vm.$el, 'click')
+      expect(spy.calls.count()).toBe(1)
+      vm.key = 'mouseup'
+      waitForUpdate(() => {
+        triggerEvent(vm.$el, 'click')
+        expect(spy.calls.count()).toBe(1)
+        triggerEvent(vm.$el, 'mouseup')
+        expect(spy.calls.count()).toBe(2)
+      }).then(done)
+    })
+
+    it('with .middle modifier', () => {
+      const spy = jasmine.createSpy()
+      const vm = new Vue({
+        template: `<div @[key].middle="spy"></div>`,
+        data: {
+          key: 'click'
+        },
+        methods: {
+          spy
+        }
+      }).$mount()
+      triggerEvent(vm.$el, 'mouseup', e => { e.button = 0 })
+      expect(spy).not.toHaveBeenCalled()
+      triggerEvent(vm.$el, 'mouseup', e => { e.button = 1 })
+      expect(spy).toHaveBeenCalled()
+    })
+
+    it('with .right modifier', () => {
+      const spy = jasmine.createSpy()
+      const vm = new Vue({
+        template: `<div @[key].right="spy"></div>`,
+        data: {
+          key: 'click'
+        },
+        methods: {
+          spy
+        }
+      }).$mount()
+      triggerEvent(vm.$el, 'contextmenu')
+      expect(spy).toHaveBeenCalled()
+    })
+
+    it('with .capture modifier', () => {
+      const callOrder = []
+      const vm = new Vue({
+        template: `
+          <div @[key].capture="foo">
+            <div @[key]="bar"></div>
+          </div>
+        `,
+        data: {
+          key: 'click'
+        },
+        methods: {
+          foo () { callOrder.push(1) },
+          bar () { callOrder.push(2) }
+        }
+      }).$mount()
+      triggerEvent(vm.$el.firstChild, 'click')
+      expect(callOrder.toString()).toBe('1,2')
+    })
+
+    it('with .once modifier', () => {
+      const vm = new Vue({
+        template: `<div @[key].once="foo"></div>`,
+        data: { key: 'click' },
+        methods: { foo: spy }
+      }).$mount()
+      triggerEvent(vm.$el, 'click')
+      expect(spy.calls.count()).toBe(1)
+      triggerEvent(vm.$el, 'click')
+      expect(spy.calls.count()).toBe(1) // should no longer trigger
+    })
   })
 })

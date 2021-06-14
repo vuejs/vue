@@ -535,14 +535,58 @@ describe('parser', () => {
     expect('The value for a v-bind expression cannot be empty. Found in "v-bind:empty-msg"').toHaveBeenWarned()
   })
 
-  it('v-bind.prop shorthand syntax', () => {
-    const ast = parse('<div .id="foo"></div>', baseOptions)
-    expect(ast.props).toEqual([{ name: 'id', value: 'foo'}])
+  if (process.env.VBIND_PROP_SHORTHAND) {
+    it('v-bind.prop shorthand syntax', () => {
+      const ast = parse('<div .id="foo"></div>', baseOptions)
+      expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: false }])
+    })
+
+    it('v-bind.prop shorthand syntax w/ modifiers', () => {
+      const ast = parse('<div .id.mod="foo"></div>', baseOptions)
+      expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: false }])
+    })
+
+    it('v-bind.prop shorthand dynamic argument', () => {
+      const ast = parse('<div .[id]="foo"></div>', baseOptions)
+      expect(ast.props).toEqual([{ name: 'id', value: 'foo', dynamic: true }])
+    })
+  }
+
+  // This only works for string templates.
+  // In-DOM templates will be malformed before Vue can parse it.
+  describe('parse and warn invalid dynamic arguments', () => {
+    [
+      `<div v-bind:['foo' + bar]="baz"/>`,
+      `<div :['foo' + bar]="baz"/>`,
+      `<div @['foo' + bar]="baz"/>`,
+      `<foo #['foo' + bar]="baz"/>`,
+      `<div :['foo' + bar].some.mod="baz"/>`
+    ].forEach(template => {
+      it(template, () => {
+        const ast = parse(template, baseOptions)
+        expect(`Invalid dynamic argument expression`).toHaveBeenWarned()
+      })
+    })
   })
 
-  it('v-bind.prop shorthand syntax w/ modifiers', () => {
-    const ast = parse('<div .id.mod="foo"></div>', baseOptions)
-    expect(ast.props).toEqual([{ name: 'id', value: 'foo'}])
+  // #9781
+  it('multiple dynamic slot names without warning', () => {
+    const ast = parse(`<my-component>
+      <template #[foo]>foo</template>
+      <template #[data]="scope">scope</template>
+      <template #[bar]>bar</template>
+    </my-component>`, baseOptions)
+
+    expect(`Invalid dynamic argument expression`).not.toHaveBeenWarned()
+    expect(ast.scopedSlots.foo).not.toBeUndefined()
+    expect(ast.scopedSlots.data).not.toBeUndefined()
+    expect(ast.scopedSlots.bar).not.toBeUndefined()
+    expect(ast.scopedSlots.foo.type).toBe(1)
+    expect(ast.scopedSlots.data.type).toBe(1)
+    expect(ast.scopedSlots.bar.type).toBe(1)
+    expect(ast.scopedSlots.foo.attrsMap['#[foo]']).toBe('')
+    expect(ast.scopedSlots.bar.attrsMap['#[bar]']).toBe('')
+    expect(ast.scopedSlots.data.attrsMap['#[data]']).toBe('scope')
   })
 
   // #6887
@@ -762,6 +806,16 @@ describe('parser', () => {
     expect(ast.children[1].text).toBe('comment here')
   })
 
+  // #9407
+  it('should parse templates with comments anywhere', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const ast = parse(`<!--comment here--><div>123</div>`, options)
+    expect(ast.tag).toBe('div')
+    expect(ast.children.length).toBe(1)
+  })
+
   // #8103
   it('should allow CRLFs in string interpolations', () => {
     const ast = parse(`<p>{{\r\nmsg\r\n}}</p>`, baseOptions)
@@ -773,7 +827,7 @@ describe('parser', () => {
       preserveWhitespace: false
     }, baseOptions)
 
-     const ast = parse('<p>\n  Welcome to <b>Vue.js</b>    <i>world</i>  \n  <span>.\n  Have fun!\n</span></p>', options)
+    const ast = parse('<p>\n  Welcome to <b>Vue.js</b>    <i>world</i>  \n  <span>.\n  Have fun!\n</span></p>', options)
     expect(ast.tag).toBe('p')
     expect(ast.children.length).toBe(4)
     expect(ast.children[0].type).toBe(3)
@@ -786,12 +840,14 @@ describe('parser', () => {
     expect(ast.children[3].children[0].text).toBe('.\n  Have fun!\n')
   })
 
+  const condenseOptions = extend({
+    whitespace: 'condense',
+    // should be ignored when whitespace is specified
+    preserveWhitespace: false
+  }, baseOptions)
+
   it(`whitespace: 'condense'`, () => {
-    const options = extend({
-      whitespace: 'condense',
-      // should be ignored when whitespace is specified
-      preserveWhitespace: false
-    }, baseOptions)
+    const options = extend({}, condenseOptions)
     const ast = parse('<p>\n  Welcome to <b>Vue.js</b>    <i>world</i>  \n  <span>.\n  Have fun!\n</span></p>', options)
     expect(ast.tag).toBe('p')
     expect(ast.children.length).toBe(5)
@@ -807,5 +863,66 @@ describe('parser', () => {
     // should have removed the whitespace node between tags that contains newlines
     expect(ast.children[4].tag).toBe('span')
     expect(ast.children[4].children[0].text).toBe('. Have fun! ')
+  })
+
+  it(`maintains &nbsp; with whitespace: 'condense'`, () => {
+    const options = extend({}, condenseOptions)
+    const ast = parse('<span>&nbsp;</span>', options)
+    const code = ast.children[0]
+    expect(code.type).toBe(3)
+    expect(code.text).toBe('\xA0')
+  })
+
+  it(`preserve whitespace in <pre> tag with whitespace: 'condense'`, function () {
+    const options = extend({}, condenseOptions)
+    const ast = parse('<pre><code>  \n<span>hi</span>\n  </code><span> </span></pre>', options)
+    const code = ast.children[0]
+    expect(code.children[0].type).toBe(3)
+    expect(code.children[0].text).toBe('  \n')
+    expect(code.children[2].type).toBe(3)
+    expect(code.children[2].text).toBe('\n  ')
+
+    const span = ast.children[1]
+    expect(span.children[0].type).toBe(3)
+    expect(span.children[0].text).toBe(' ')
+  })
+
+  it(`ignore the first newline in <pre> tag with whitespace: 'condense'`, function () {
+    const options = extend({}, condenseOptions)
+    const ast = parse('<div><pre>\nabc</pre>\ndef<pre>\n\nabc</pre></div>', options)
+    const pre = ast.children[0]
+    expect(pre.children[0].type).toBe(3)
+    expect(pre.children[0].text).toBe('abc')
+    const text = ast.children[1]
+    expect(text.type).toBe(3)
+    expect(text.text).toBe(' def')
+    const pre2 = ast.children[2]
+    expect(pre2.children[0].type).toBe(3)
+    expect(pre2.children[0].text).toBe('\nabc')
+  })
+
+  it(`keep first newline after unary tag in <pre> with whitespace: 'condense'`, () => {
+    const options = extend({}, condenseOptions)
+    const ast = parse('<pre>abc<input>\ndef</pre>', options)
+    expect(ast.children[1].type).toBe(1)
+    expect(ast.children[1].tag).toBe('input')
+    expect(ast.children[2].type).toBe(3)
+    expect(ast.children[2].text).toBe('\ndef')
+  })
+
+  // #10152
+  it('not warn when scoped slot used inside of dynamic component on regular element', () => {
+    parse(`
+      <div>
+        <div is="customComp" v-slot="slotProps"></div>
+        <div :is="'customComp'" v-slot="slotProps"></div>
+        <div v-bind:is="'customComp'" v-slot="slotProps"></div>
+      </div>
+    `, baseOptions)
+    expect('v-slot can only be used on components or <template>').not.toHaveBeenWarned()
+
+    parse(`<div is="customComp"><template v-slot="slotProps"></template></div>`, baseOptions)
+    expect(`<template v-slot> can only appear at the root level inside the receiving the component`)
+      .not.toHaveBeenWarned()
   })
 })

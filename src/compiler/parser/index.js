@@ -22,23 +22,29 @@ import {
 } from '../helpers'
 
 export const onRE = /^@|^v-on:/
-export const dirRE = /^v-|^@|^:|^\./
+export const dirRE = process.env.VBIND_PROP_SHORTHAND
+  ? /^v-|^@|^:|^\.|^#/
+  : /^v-|^@|^:|^#/
 export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
-const dynamicKeyRE = /^\[.*\]$/
+const dynamicArgRE = /^\[.*\]$/
 
 const argRE = /:(.*)$/
 export const bindRE = /^:|^\.|^v-bind:/
 const propBindRE = /^\./
-const modifierRE = /\.[^.]+/g
+const modifierRE = /\.[^.\]]+(?=[^\]]*$)/g
 
 const slotRE = /^v-slot(:|$)|^#/
 
 const lineBreakRE = /[\r\n]/
-const whitespaceRE = /\s+/g
+const whitespaceRE = /[ \f\t\r\n]+/g
+
+const invalidAttributeRE = /[\s"'<>\/=]/
 
 const decodeHTMLCached = cached(he.decode)
+
+export const emptySlotScopeToken = `_empty_`
 
 // configurable state
 export let warn: any
@@ -80,8 +86,12 @@ export function parse (
   platformMustUseProp = options.mustUseProp || no
   platformGetTagNamespace = options.getTagNamespace || no
   const isReservedTag = options.isReservedTag || no
-  maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
-
+  maybeComponent = (el: ASTElement) => !!(
+    el.component ||
+    el.attrsMap[':is'] ||
+    el.attrsMap['v-bind:is'] ||
+    !(el.attrsMap.is ? isReservedTag(el.attrsMap.is) : isReservedTag(el.tag))
+  )
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
@@ -105,6 +115,7 @@ export function parse (
   }
 
   function closeElement (element) {
+    trimEndingWhitespace(element)
     if (!inVPre && !element.processed) {
       element = processElement(element, options)
     }
@@ -131,14 +142,25 @@ export function parse (
     if (currentParent && !element.forbidden) {
       if (element.elseif || element.else) {
         processIfConditions(element, currentParent)
-      } else if (element.slotScope) { // scoped slot
-        const name = element.slotTarget || '"default"'
-        ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
       } else {
+        if (element.slotScope) {
+          // scoped slot
+          // keep it in the children list so that v-else(-if) conditions can
+          // find it as the prev node.
+          const name = element.slotTarget || '"default"'
+          ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
+        }
         currentParent.children.push(element)
         element.parent = currentParent
       }
     }
+
+    // final children cleanup
+    // filter out scoped slots
+    element.children = element.children.filter(c => !(c: any).slotScope)
+    // remove trailing whitespace node again
+    trimEndingWhitespace(element)
+
     // check pre state
     if (element.pre) {
       inVPre = false
@@ -149,6 +171,20 @@ export function parse (
     // apply post-transforms
     for (let i = 0; i < postTransforms.length; i++) {
       postTransforms[i](element, options)
+    }
+  }
+
+  function trimEndingWhitespace (el) {
+    // remove trailing whitespace node
+    if (!inPre) {
+      let lastNode
+      while (
+        (lastNode = el.children[el.children.length - 1]) &&
+        lastNode.type === 3 &&
+        lastNode.text === ' '
+      ) {
+        el.children.pop()
+      }
     }
   }
 
@@ -178,7 +214,7 @@ export function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
-    start (tag, attrs, unary, start) {
+    start (tag, attrs, unary, start, end) {
       // check namespace.
       // inherit parent ns if there is one
       const ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag)
@@ -194,12 +230,27 @@ export function parse (
         element.ns = ns
       }
 
-      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
-        element.start = start
-        element.rawAttrsMap = element.attrsList.reduce((cumulated, attr) => {
-          cumulated[attr.name] = attr
-          return cumulated
-        }, {})
+      if (process.env.NODE_ENV !== 'production') {
+        if (options.outputSourceRange) {
+          element.start = start
+          element.end = end
+          element.rawAttrsMap = element.attrsList.reduce((cumulated, attr) => {
+            cumulated[attr.name] = attr
+            return cumulated
+          }, {})
+        }
+        attrs.forEach(attr => {
+          if (invalidAttributeRE.test(attr.name)) {
+            warn(
+              `Invalid dynamic argument expression: attribute names cannot contain ` +
+              `spaces, quotes, <, >, / or =.`,
+              {
+                start: attr.start + attr.name.indexOf(`[`),
+                end: attr.start + attr.name.length
+              }
+            )
+          }
+        })
       }
 
       if (isForbiddenTag(element) && !isServerRendering()) {
@@ -252,13 +303,6 @@ export function parse (
 
     end (tag, start, end) {
       const element = stack[stack.length - 1]
-      if (!inPre) {
-        // remove trailing whitespace node
-        const lastNode = element.children[element.children.length - 1]
-        if (lastNode && lastNode.type === 3 && lastNode.text === ' ') {
-          element.children.pop()
-        }
-      }
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
@@ -311,7 +355,7 @@ export function parse (
         text = preserveWhitespace ? ' ' : ''
       }
       if (text) {
-        if (whitespaceOption === 'condense') {
+        if (!inPre && whitespaceOption === 'condense') {
           // condense consecutive whitespaces into single space
           text = text.replace(whitespaceRE, ' ')
         }
@@ -340,16 +384,20 @@ export function parse (
       }
     },
     comment (text: string, start, end) {
-      const child: ASTText = {
-        type: 3,
-        text,
-        isComment: true
+      // adding anything as a sibling to the root node is forbidden
+      // comments should still be allowed, but ignored
+      if (currentParent) {
+        const child: ASTText = {
+          type: 3,
+          text,
+          isComment: true
+        }
+        if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+          child.start = start
+          child.end = end
+        }
+        currentParent.children.push(child)
       }
-      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
-        child.start = start
-        child.end = end
-      }
-      currentParent.children.push(child)
     }
   })
   return root
@@ -586,6 +634,7 @@ function processSlotContent (el) {
   const slotTarget = getBindingAttr(el, 'slot')
   if (slotTarget) {
     el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
+    el.slotTargetDynamic = !!(el.attrsMap[':slot'] || el.attrsMap['v-bind:slot'])
     // preserve slot as an attribute for native shadow DOM compat
     // only for non-scoped slots.
     if (el.tag !== 'template' && !el.slotScope) {
@@ -606,9 +655,18 @@ function processSlotContent (el) {
               el
             )
           }
+          if (el.parent && !maybeComponent(el.parent)) {
+            warn(
+              `<template v-slot> can only appear at the root level inside ` +
+              `the receiving component`,
+              el
+            )
+          }
         }
-        el.slotTarget = getSlotName(slotBinding)
-        el.slotScope = slotBinding.value
+        const { name, dynamic } = getSlotName(slotBinding)
+        el.slotTarget = name
+        el.slotTargetDynamic = dynamic
+        el.slotScope = slotBinding.value || emptySlotScopeToken // force it into a scoped slot for perf
       }
     } else {
       // v-slot on component, denotes default slot
@@ -627,13 +685,27 @@ function processSlotContent (el) {
               el
             )
           }
+          if (el.scopedSlots) {
+            warn(
+              `To avoid scope ambiguity, the default slot should also use ` +
+              `<template> syntax when there are other named slots.`,
+              slotBinding
+            )
+          }
         }
         // add the component's children to its default slot
         const slots = el.scopedSlots || (el.scopedSlots = {})
-        const target = getSlotName(slotBinding)
-        const slotContainer = slots[target] = createASTElement('template', [], el)
-        slotContainer.children = el.children
-        slotContainer.slotScope = slotBinding.value
+        const { name, dynamic } = getSlotName(slotBinding)
+        const slotContainer = slots[name] = createASTElement('template', [], el)
+        slotContainer.slotTarget = name
+        slotContainer.slotTargetDynamic = dynamic
+        slotContainer.children = el.children.filter((c: any) => {
+          if (!c.slotScope) {
+            c.parent = slotContainer
+            return true
+          }
+        })
+        slotContainer.slotScope = slotBinding.value || emptySlotScopeToken
         // remove children as they are returned from scopedSlots now
         el.children = []
         // mark el non-plain so data gets generated
@@ -655,11 +727,11 @@ function getSlotName (binding) {
       )
     }
   }
-  return dynamicKeyRE.test(name)
+  return dynamicArgRE.test(name)
     // dynamic [name]
-    ? name.slice(1, -1)
+    ? { name: name.slice(1, -1), dynamic: true }
     // static name
-    : `"${name}"`
+    : { name: `"${name}"`, dynamic: false }
 }
 
 // handle <slot/> outlets
@@ -689,7 +761,7 @@ function processComponent (el) {
 
 function processAttrs (el) {
   const list = el.attrsList
-  let i, l, name, rawName, value, modifiers, isProp, syncGen
+  let i, l, name, rawName, value, modifiers, syncGen, isDynamic
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
     value = list[i].value
@@ -699,7 +771,7 @@ function processAttrs (el) {
       // modifiers
       modifiers = parseModifiers(name.replace(dirRE, ''))
       // support .foo shorthand syntax for the .prop modifier
-      if (propBindRE.test(name)) {
+      if (process.env.VBIND_PROP_SHORTHAND && propBindRE.test(name)) {
         (modifiers || (modifiers = {})).prop = true
         name = `.` + name.slice(1).replace(modifierRE, '')
       } else if (modifiers) {
@@ -708,7 +780,10 @@ function processAttrs (el) {
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
         value = parseFilters(value)
-        isProp = false
+        isDynamic = dynamicArgRE.test(name)
+        if (isDynamic) {
+          name = name.slice(1, -1)
+        }
         if (
           process.env.NODE_ENV !== 'production' &&
           value.trim().length === 0
@@ -718,57 +793,79 @@ function processAttrs (el) {
           )
         }
         if (modifiers) {
-          if (modifiers.prop) {
-            isProp = true
+          if (modifiers.prop && !isDynamic) {
             name = camelize(name)
             if (name === 'innerHtml') name = 'innerHTML'
           }
-          if (modifiers.camel) {
+          if (modifiers.camel && !isDynamic) {
             name = camelize(name)
           }
           if (modifiers.sync) {
             syncGen = genAssignmentCode(value, `$event`)
-            addHandler(
-              el,
-              `update:${camelize(name)}`,
-              syncGen,
-              null,
-              false,
-              warn,
-              list[i]
-            )
-            if (hyphenate(name) !== camelize(name)) {
+            if (!isDynamic) {
               addHandler(
                 el,
-                `update:${hyphenate(name)}`,
+                `update:${camelize(name)}`,
                 syncGen,
                 null,
                 false,
                 warn,
                 list[i]
               )
+              if (hyphenate(name) !== camelize(name)) {
+                addHandler(
+                  el,
+                  `update:${hyphenate(name)}`,
+                  syncGen,
+                  null,
+                  false,
+                  warn,
+                  list[i]
+                )
+              }
+            } else {
+              // handler w/ dynamic event name
+              addHandler(
+                el,
+                `"update:"+(${name})`,
+                syncGen,
+                null,
+                false,
+                warn,
+                list[i],
+                true // dynamic
+              )
             }
           }
         }
-        if (isProp || (
+        if ((modifiers && modifiers.prop) || (
           !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
         )) {
-          addProp(el, name, value, list[i])
+          addProp(el, name, value, list[i], isDynamic)
         } else {
-          addAttr(el, name, value, list[i])
+          addAttr(el, name, value, list[i], isDynamic)
         }
       } else if (onRE.test(name)) { // v-on
         name = name.replace(onRE, '')
-        addHandler(el, name, value, modifiers, false, warn, list[i])
+        isDynamic = dynamicArgRE.test(name)
+        if (isDynamic) {
+          name = name.slice(1, -1)
+        }
+        addHandler(el, name, value, modifiers, false, warn, list[i], isDynamic)
       } else { // normal directives
         name = name.replace(dirRE, '')
         // parse arg
         const argMatch = name.match(argRE)
-        const arg = argMatch && argMatch[1]
+        let arg = argMatch && argMatch[1]
+        isDynamic = false
         if (arg) {
           name = name.slice(0, -(arg.length + 1))
+          if (dynamicArgRE.test(arg)) {
+            arg = arg.slice(1, -1)
+            isDynamic = true
+          }
         }
-        addDirective(el, name, rawName, value, arg, modifiers, list[i])
+        addDirective(el, name, rawName, value, arg, isDynamic, modifiers, list[i])
         if (process.env.NODE_ENV !== 'production' && name === 'model') {
           checkForAliasModel(el, value)
         }
