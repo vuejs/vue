@@ -440,6 +440,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Pierre Baron
 - Donghai Gai
 - Aleksander Figiel
+- Dennis Zanetti
 - wickedwei 
 - Sunny Yuen
 - Jules 
@@ -467,6 +468,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Matt Sencenbaugh
 - Jaeyoung Lee
 - David Kaplan
+- David Ang
 - Wakana Seki
 - Jere Sjöroos
 - Donald Fischer
