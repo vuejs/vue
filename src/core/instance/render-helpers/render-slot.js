@@ -24,13 +24,11 @@ export function renderSlot (
     }
     nodes =
       scopedSlotFn(props) ||
-      (fallbackRender &&
-        (Array.isArray(fallbackRender) ? fallbackRender : fallbackRender()))
+      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender)
   } else {
     nodes =
       this.$slots[name] ||
-      (fallbackRender &&
-        (Array.isArray(fallbackRender) ? fallbackRender : fallbackRender()))
+      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender)
   }
 
   const target = props && props.slot

@@ -986,4 +986,18 @@ describe('Component slot', () => {
       expect(vm.$el.firstChild.innerHTML).toBe('<span><b>2</b></span>')
     }).then(done)
   })
+
+  // #12102
+  it('v-if inside scoped slot', () => {
+    const vm = new Vue({
+      template: `<test><template #custom><span v-if="false">a</span><span>b</span></template></test>`,
+      components: {
+        test: {
+          template: `<div><slot name="custom"/></div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe(`<!----><span>b</span>`)
+  })
 })

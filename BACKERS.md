@@ -131,11 +131,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     </tr><tr></tr>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://vuejobs.com/?ref=vuejs" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vuejobs.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://tidelift.com/subscription/npm/vue" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/tidelift.png">
         </a>
@@ -160,13 +155,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/vpnranks.png">
         </a>
       </td>
-    </tr><tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="https://www.bacancytechnology.com/hire-vuejs-developer" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bacancy_technology.png">
         </a>
       </td>
+    </tr><tr></tr>
+    <tr>
       <td align="center" valign="middle">
         <a href="https://www.bestvpn.co/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/bestvpn_co.png">
@@ -190,6 +185,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       <td align="center" valign="middle">
         <a href="https://usave.co.uk/utilities/broadband" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/usave.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://storekit.com" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/storekit.png">
         </a>
       </td>
     </tr><tr></tr>
@@ -426,10 +426,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <h2 align="center">Backers via Patreon</h2>
 
 <!--10 start-->
-- Sara McVey
+- Jeffrey Rennie
 - Keisuke Kita
+- Sara McVey
+- Роман Латкин
 - Alex Riviere
-- Thomas Sittig
 - WhereJuly
 - Fontis 
 - Jack 
@@ -439,17 +440,15 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Pierre Baron
 - Donghai Gai
 - Aleksander Figiel
-- Faizal Andyka
+- Dennis Zanetti
 - wickedwei 
 - Sunny Yuen
 - Jules 
 - Zeth Odderskov
-- Santi Sanchez Canals
 - Thomas Wiedemann
 - Nobuhide Esaki
 - Roy Segall
 - Allan McKernan
-- 琚致远 
 - Diana Bergholz
 - Riki Fridrich
 - Alfonso Herrera
@@ -462,10 +461,9 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Yusuke Kawabata
 - Shawn Wildermuth
 - Andrew Willis
-- Elon Hung
-- Роман Латкин
+- Meinhard Dam
+- Princeyesuraj Edward
 - Juan Bermudez
-- Hannes Kochniß
 - Daniel Mattingley
 - Matt Sencenbaugh
 - Jaeyoung Lee
@@ -482,7 +480,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - IMGNRY 
 - Jim Raden
 - Haim Yulzari
-- Anthony Estebe
 - Asaf Yishai
 - Jon Hobbs-Smith
 - Pierre Vanhulst
@@ -495,11 +492,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Matsumoto Takamasa
 - Barbara Liau
 - Wen-Tien Chang
-- Stephen Michael Hartley
+- Stephen Hartley
 - Victor Tolbert
 - Lars Andreas Ness
 - Benjamin Listwon
-- Chris Calo
+- Elon Hung
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
