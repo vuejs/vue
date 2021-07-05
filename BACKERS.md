@@ -10,7 +10,7 @@ Vue.js is an MIT-licensed open source project. It's an independent project with 
 #### What's the difference between Patreon and OpenCollective?
 
 Funds donated via Patreon go directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses for core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
-
+ggggg
 <br><br>
 
 <h2 align="center">Special Sponsors</h2>
