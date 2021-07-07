@@ -417,7 +417,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <!--50 start-->
 - Yoshitaka M
 - Peter Imburg
-- Sean Ferguson
 - Johnny Ray Austin
 - errorrik 
 - Wasim Khamlichi
@@ -431,7 +430,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Sara McVey
 - Роман Латкин
 - Alex Riviere
-- WhereJuly
 - Fontis 
 - Jack 
 - Nick Carr
@@ -460,10 +458,8 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Nick Dandakis
 - Yusuke Kawabata
 - Shawn Wildermuth
-- Andrew Willis
+- Elon Hung
 - Meinhard Dam
-- Princeyesuraj Edward
-- Juan Bermudez
 - Daniel Mattingley
 - Matt Sencenbaugh
 - Jaeyoung Lee
@@ -496,7 +492,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Victor Tolbert
 - Lars Andreas Ness
 - Benjamin Listwon
-- Elon Hung
+- Juan Bermudez
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
