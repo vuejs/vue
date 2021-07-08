@@ -176,9 +176,17 @@ export function createComponent (
 
     // work around flow
     const slot = data.slot
+    // keep key. eg.
+    // <transition-group>
+    //    <keep-alive key="key"></keep-alive>
+    // </transition-group>
+    const key = data.key
     data = {}
     if (slot) {
       data.slot = slot
+    }
+    if(key){
+      data.key = key
     }
   }
 

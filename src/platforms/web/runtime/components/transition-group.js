@@ -13,7 +13,7 @@
 
 import { warn, extend } from 'core/util/index'
 import { addClass, removeClass } from '../class-util'
-import { transitionProps, extractTransitionData } from './transition'
+import {transitionProps, extractTransitionData, getRealChild} from './transition'
 import { setActiveInstance } from 'core/instance/lifecycle'
 
 import {
@@ -65,7 +65,9 @@ export default {
         if (c.key != null && String(c.key).indexOf('__vlist') !== 0) {
           children.push(c)
           map[c.key] = c
-          ;(c.data || (c.data = {})).transition = transitionData
+          // support keep-alive child
+          const child: VNode = getRealChild(c)
+          ;(child.data || (child.data = {})).transition = transitionData
         } else if (process.env.NODE_ENV !== 'production') {
           const opts: ?VNodeComponentOptions = c.componentOptions
           const name: string = opts ? (opts.Ctor.options.name || opts.tag || '') : c.tag
@@ -79,7 +81,8 @@ export default {
       const removed: Array<VNode> = []
       for (let i = 0; i < prevChildren.length; i++) {
         const c: VNode = prevChildren[i]
-        c.data.transition = transitionData
+        const child: VNode = getRealChild(c)
+        child.data.transition = transitionData
         c.data.pos = c.elm.getBoundingClientRect()
         if (map[c.key]) {
           kept.push(c)
