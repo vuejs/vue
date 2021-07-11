@@ -38,3 +38,5 @@ export function renderSlot (
     return nodes
   }
 }
+
+renderSlot.delay = true;
