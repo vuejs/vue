@@ -369,4 +369,13 @@ describe('Observer', () => {
     observe(obj)
     expect(called).toBe(false)
   })
+
+   it('should trigger notify when using set to change value of array length', () => {
+    const arr = [];
+    const ob = observe(arr);
+    const dep = ob.dep;
+    spyOn(dep, "notify");
+    Vue.set(arr, "length", 2);
+    expect(dep.notify.calls.count()).toBe(1);
+  });
 })

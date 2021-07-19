@@ -204,10 +204,17 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
-  if (Array.isArray(target) && isValidArrayIndex(key)) {
-    target.length = Math.max(target.length, key)
-    target.splice(key, 1, val)
-    return val
+  if (Array.isArray(target)) {
+     if (isValidArrayIndex(key)) {
+      target.length = Math.max(target.length, key)
+      target.splice(key, 1, val)
+      return val
+    } else if (key === "length" && (val: any) !== target.length) {
+      const ob = (target: any).__ob__
+      target.length = val
+      ob.dep.notify()
+      return val
+    }
   }
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
