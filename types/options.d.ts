@@ -1,25 +1,38 @@
 import { Vue, CreateElement, CombinedVueInstance } from "./vue";
-import { VNode, VNodeData, VNodeDirective } from "./vnode";
+import { VNode, VNodeData, VNodeDirective, NormalizedScopedSlot } from "./vnode";
 
 type Constructor = {
   new (...args: any[]): any;
 }
 
 // we don't support infer props in async component
-export type Component<Data=DefaultData<Vue>, Methods=DefaultMethods<Vue>, Computed=DefaultComputed, Props=DefaultProps> =
+// N.B. ComponentOptions<V> is contravariant, the default generic should be bottom type
+export type Component<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> =
   | typeof Vue
   | FunctionalComponentOptions<Props>
-  | ThisTypedComponentOptionsWithArrayProps<Vue, Data, Methods, Computed, keyof Props>
-  | ThisTypedComponentOptionsWithRecordProps<Vue, Data, Methods, Computed, Props>;
+  | ComponentOptions<never, Data, Methods, Computed, Props>
 
-interface EsModuleComponent {
-  default: Component
-}
+type EsModule<T> = T | { default: T }
 
-export type AsyncComponent<Data=DefaultData<Vue>, Methods=DefaultMethods<Vue>, Computed=DefaultComputed, Props=DefaultProps> = (
+type ImportedComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
+  = EsModule<Component<Data, Methods, Computed, Props>>
+
+export type AsyncComponent<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps>
+  = AsyncComponentPromise<Data, Methods, Computed, Props>
+  | AsyncComponentFactory<Data, Methods, Computed, Props>
+
+export type AsyncComponentPromise<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = (
   resolve: (component: Component<Data, Methods, Computed, Props>) => void,
   reject: (reason?: any) => void
-) => Promise<Component | EsModuleComponent> | void;
+) => Promise<ImportedComponent<Data, Methods, Computed, Props>> | void;
+
+export type AsyncComponentFactory<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = () => {
+  component: Promise<ImportedComponent<Data, Methods, Computed, Props>>;
+  loading?: ImportedComponent;
+  error?: ImportedComponent;
+  delay?: number;
+  timeout?: number;
+}
 
 /**
  * When the `Computed` type parameter on `ComponentOptions` is inferred,
@@ -31,12 +44,13 @@ export type Accessors<T> = {
   [K in keyof T]: (() => T[K]) | ComputedOptions<T[K]>
 }
 
+type DataDef<Data, Props, V> = Data | ((this: Readonly<Props> & V) => Data)
 /**
  * This type should be used when an array of strings is used for a component's `props` value.
  */
 export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, PropNames extends string> =
   object &
-  ComponentOptions<V, Data | ((this: Readonly<Record<PropNames, any>> & V) => Data), Methods, Computed, PropNames[]> &
+  ComponentOptions<V, DataDef<Data, Record<PropNames, any>, V>, Methods, Computed, PropNames[], Record<PropNames, any>> &
   ThisType<CombinedVueInstance<V, Data, Methods, Computed, Readonly<Record<PropNames, any>>>>;
 
 /**
@@ -44,7 +58,7 @@ export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods
  */
 export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props> =
   object &
-  ComponentOptions<V, Data | ((this: Readonly<Props> & V) => Data), Methods, Computed, RecordPropsDefinition<Props>> &
+  ComponentOptions<V, DataDef<Data, Props, V>, Methods, Computed, RecordPropsDefinition<Props>, Props> &
   ThisType<CombinedVueInstance<V, Data, Methods, Computed, Readonly<Props>>>;
 
 type DefaultData<V> =  object | ((this: V) => object);
@@ -56,18 +70,20 @@ export interface ComponentOptions<
   Data=DefaultData<V>,
   Methods=DefaultMethods<V>,
   Computed=DefaultComputed,
-  PropsDef=PropsDefinition<DefaultProps>> {
+  PropsDef=PropsDefinition<DefaultProps>,
+  Props=DefaultProps> {
   data?: Data;
   props?: PropsDef;
-  propsData?: Object;
+  propsData?: object;
   computed?: Accessors<Computed>;
   methods?: Methods;
-  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any> | string>;
+  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any>>;
 
-  el?: Element | String;
+  el?: Element | string;
   template?: string;
-  render?(createElement: CreateElement): VNode;
-  renderError?: (h: () => VNode, err: Error) => VNode;
+  // hack is for functional component type inference, should not be used in user code
+  render?(createElement: CreateElement, hack: RenderContext<Props>): VNode;
+  renderError?(createElement: CreateElement, err: Error): VNode;
   staticRenderFns?: ((createElement: CreateElement) => VNode)[];
 
   beforeCreate?(this: V): void;
@@ -80,14 +96,15 @@ export interface ComponentOptions<
   updated?(): void;
   activated?(): void;
   deactivated?(): void;
-  errorCaptured?(): boolean | void;
+  errorCaptured?(err: Error, vm: Vue, info: string): boolean | void;
+  serverPrefetch?(this: V): Promise<void>;
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions };
   components?: { [key: string]: Component<any, any, any, any> | AsyncComponent<any, any, any, any> };
-  transitions?: { [key: string]: Object };
+  transitions?: { [key: string]: object };
   filters?: { [key: string]: Function };
 
-  provide?: Object | (() => Object);
+  provide?: object | (() => object);
   inject?: InjectOptions;
 
   model?: {
@@ -108,9 +125,13 @@ export interface ComponentOptions<
 export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = PropsDefinition<Props>> {
   name?: string;
   props?: PropDefs;
+  model?: {
+    prop?: string;
+    event?: string;
+  };
   inject?: InjectOptions;
   functional: boolean;
-  render(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode;
+  render?(this: undefined, createElement: CreateElement, context: RenderContext<Props>): VNode | VNode[];
 }
 
 export interface RenderContext<Props=DefaultProps> {
@@ -119,17 +140,21 @@ export interface RenderContext<Props=DefaultProps> {
   slots(): any;
   data: VNodeData;
   parent: Vue;
+  listeners: { [key: string]: Function | Function[] };
+  scopedSlots: { [key: string]: NormalizedScopedSlot };
   injections: any
 }
 
-export type Prop<T> = { (): T } | { new (...args: any[]): T & object }
+export type Prop<T> = { (): T } | { new(...args: never[]): T & object } | { new(...args: string[]): Function }
 
-export type PropValidator<T> = PropOptions<T> | Prop<T> | Prop<T>[];
+export type PropType<T> = Prop<T> | Prop<T>[];
+
+export type PropValidator<T> = PropOptions<T> | PropType<T>;
 
 export interface PropOptions<T=any> {
-  type?: Prop<T> | Prop<T>[];
+  type?: PropType<T>;
   required?: boolean;
-  default?: T | null | undefined | (() => object);
+  default?: T | null | undefined | (() => T | null | undefined);
   validator?(value: T): boolean;
 }
 
@@ -145,7 +170,7 @@ export interface ComputedOptions<T> {
   cache?: boolean;
 }
 
-export type WatchHandler<T> = (val: T, oldVal: T) => void;
+export type WatchHandler<T> = string | ((val: T, oldVal: T) => void);
 
 export interface WatchOptions {
   deep?: boolean;
@@ -156,9 +181,13 @@ export interface WatchOptionsWithHandler<T> extends WatchOptions {
   handler: WatchHandler<T>;
 }
 
+export interface DirectiveBinding extends Readonly<VNodeDirective> {
+  readonly modifiers: { [key: string]: boolean };
+}
+
 export type DirectiveFunction = (
   el: HTMLElement,
-  binding: VNodeDirective,
+  binding: DirectiveBinding,
   vnode: VNode,
   oldVnode: VNode
 ) => void;

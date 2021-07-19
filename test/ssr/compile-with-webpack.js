@@ -4,6 +4,7 @@ import MemoryFS from 'memory-fs'
 
 export function compileWithWebpack (file, extraConfig, cb) {
   const config = Object.assign({
+    mode: 'development',
     entry: path.resolve(__dirname, 'fixtures', file),
     module: {
       rules: [

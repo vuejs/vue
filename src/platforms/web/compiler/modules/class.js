@@ -11,13 +11,14 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')
   if (process.env.NODE_ENV !== 'production' && staticClass) {
-    const expression = parseText(staticClass, options.delimiters)
-    if (expression) {
+    const res = parseText(staticClass, options.delimiters)
+    if (res) {
       warn(
         `class="${staticClass}": ` +
         'Interpolation inside attributes has been removed. ' +
         'Use v-bind or the colon shorthand instead. For example, ' +
-        'instead of <div class="{{ val }}">, use <div :class="val">.'
+        'instead of <div class="{{ val }}">, use <div :class="val">.',
+        el.rawAttrsMap['class']
       )
     }
   }

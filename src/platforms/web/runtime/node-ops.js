@@ -54,6 +54,6 @@ export function setTextContent (node: Node, text: string) {
   node.textContent = text
 }
 
-export function setAttribute (node: Element, key: string, val: string) {
-  node.setAttribute(key, val)
+export function setStyleScope (node: Element, scopeId: string) {
+  node.setAttribute(scopeId, '')
 }
