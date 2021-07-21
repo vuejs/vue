@@ -127,6 +127,26 @@ describe('Error handling', () => {
     }).then(done)
   })
 
+  it('should caught asynchronous errors in user watcher getter', done => {
+    Vue.config.errorHandler = (err) => {
+      throw new Error(err)
+    }
+    const vm = createTestInstance(components.userWatcherAsyncErrorGetter)
+    waitForUpdate(() => {
+      expect(`${vm.n}`).toHaveBeenWarned()
+      Vue.config.errorHandler = null
+    }).then(done)
+  })
+
+  it('should caught synchronization errors in user watcher getter', () => {
+    Vue.config.errorHandler = (err) => {
+      throw new Error(err)
+    }
+    const vm = createTestInstance(components.userWatcherSyncErrorGetter)
+    expect(`${vm.n}`).toHaveBeenWarned()
+    Vue.config.errorHandler = null
+  })
+
   ;[
     ['userWatcherCallback', 'watcher'],
     ['userImmediateWatcherCallback', 'immediate watcher']
@@ -326,6 +346,42 @@ function createErrorTestComponents () {
       }, val => {
         console.log('user watcher fired: ' + val)
       })
+    },
+    render (h) {
+      return h('div', this.n)
+    }
+  }
+
+  // user watcher async Error
+  components.userWatcherAsyncErrorGetter = {
+    props: ['n'],
+    created () {
+      this.$watch(
+        () => Promise.reject(new Error(`${this.n}`)),
+        () => {},
+        {
+          immediate: true
+        }
+      )
+    },
+    render (h) {
+      return h('div', this.n)
+    }
+  }
+
+  // user watcher sync Error
+  components.userWatcherSyncErrorGetter = {
+    props: ['n'],
+    created () {
+      this.$watch(
+        () => {
+          throw new Error(`${this.n}`)
+        },
+        () => {},
+        {
+          immediate: true
+        }
+      )
     },
     render (h) {
       return h('div', this.n)

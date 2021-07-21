@@ -8,7 +8,8 @@ import {
   _Set as Set,
   handleError,
   invokeWithErrorHandling,
-  noop
+  noop,
+  isPromise
 } from '../util/index'
 
 import { traverse } from './traverse'
@@ -105,6 +106,16 @@ export default class Watcher {
     const vm = this.vm
     try {
       value = this.getter.call(vm, vm)
+      if (value && !value._isVue && isPromise(value) && !value._handled) {
+        value.catch((e) => {
+          if (this.user) {
+            handleError(e, vm, `getter for watcher "${this.expression}"`)
+          } else {
+            throw e
+          }
+        })
+        value._handled = true
+      }
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)
