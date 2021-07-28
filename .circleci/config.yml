@@ -2,7 +2,7 @@ version: 2
 
 defaults: &defaults
   working_directory: ~/project/vue
-  docker:
+  docker:khkh
     - image: vuejs/ci
 
 jobs:
