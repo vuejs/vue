@@ -432,13 +432,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <!--10 start-->
 - Jeffrey Rennie
 - Keisuke Kita
-- Sara McVey
 - Роман Латкин
 - Alex Riviere
 - Fontis 
 - Jack 
 - Nick Carr
-- Artur Bańka
 - Traversy Media
 - Pierre Baron
 - Donghai Gai
@@ -463,7 +461,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Nick Dandakis
 - Yusuke Kawabata
 - Shawn Wildermuth
-- Elon Hung
 - Meinhard Dam
 - Daniel Mattingley
 - Matt Sencenbaugh
@@ -478,14 +475,12 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Joe Gregory
 - Masahiro Tanaka
 - Tyler 
-- IMGNRY 
 - Jim Raden
 - Haim Yulzari
 - Asaf Yishai
 - Jon Hobbs-Smith
 - Pierre Vanhulst
 - Zoran Knezevic
-- Luiz 
 - Bernhard E. Reiter
 - Guy Gavergun
 - Matt Jones
@@ -497,7 +492,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Victor Tolbert
 - Lars Andreas Ness
 - Benjamin Listwon
-- Juan Bermudez
+- Elon Hung
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
