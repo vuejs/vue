@@ -205,6 +205,9 @@ function childrenToSegments (el, state): Array<StringSegment> {
   if ((binding = el.attrsMap['v-text'])) {
     return [{ type: INTERPOLATION, value: `_s(${binding})` }]
   }
+  if (el.tag === 'textarea' && (binding = el.attrsMap['v-model'])) {
+    return [{ type: INTERPOLATION, value: `_s(${binding})` }]
+  }
   return el.children
     ? nodesToSegments(el.children, state)
     : []
@@ -222,7 +225,11 @@ function nodesToSegments (
     } else if (c.type === 2) {
       segments.push({ type: INTERPOLATION, value: c.expression })
     } else if (c.type === 3) {
-      segments.push({ type: RAW, value: escape(c.text) })
+      let text = escape(c.text)
+      if (c.isComment) {
+        text = '<!--' + text + '-->'
+      }
+      segments.push({ type: RAW, value: text })
     }
   }
   return segments

@@ -7,34 +7,34 @@ import { extend, warn, isObject } from 'core/util/index'
  */
 export function renderSlot (
   name: string,
-  fallback: ?Array<VNode>,
+  fallbackRender: ?((() => Array<VNode>) | Array<VNode>),
   props: ?Object,
   bindObject: ?Object
 ): ?Array<VNode> {
   const scopedSlotFn = this.$scopedSlots[name]
-  if (scopedSlotFn) { // scoped slot
+  let nodes
+  if (scopedSlotFn) {
+    // scoped slot
     props = props || {}
     if (bindObject) {
       if (process.env.NODE_ENV !== 'production' && !isObject(bindObject)) {
-        warn(
-          'slot v-bind without argument expects an Object',
-          this
-        )
+        warn('slot v-bind without argument expects an Object', this)
       }
       props = extend(extend({}, bindObject), props)
     }
-    return scopedSlotFn(props) || fallback
+    nodes =
+      scopedSlotFn(props) ||
+      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender)
   } else {
-    const slotNodes = this.$slots[name]
-    // warn duplicate slot usage
-    if (slotNodes && process.env.NODE_ENV !== 'production') {
-      slotNodes._rendered && warn(
-        `Duplicate presence of slot "${name}" found in the same render tree ` +
-        `- this will likely cause render errors.`,
-        this
-      )
-      slotNodes._rendered = true
-    }
-    return slotNodes || fallback
+    nodes =
+      this.$slots[name] ||
+      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender)
+  }
+
+  const target = props && props.slot
+  if (target) {
+    return this.$createElement('template', { slot: target }, nodes)
+  } else {
+    return nodes
   }
 }

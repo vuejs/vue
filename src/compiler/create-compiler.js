@@ -13,11 +13,29 @@ export function createCompilerCreator (baseCompile: Function): Function {
       const finalOptions = Object.create(baseOptions)
       const errors = []
       const tips = []
-      finalOptions.warn = (msg, tip) => {
+
+      let warn = (msg, range, tip) => {
         (tip ? tips : errors).push(msg)
       }
 
       if (options) {
+        if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+          // $flow-disable-line
+          const leadingSpaceLength = template.match(/^\s*/)[0].length
+
+          warn = (msg, range, tip) => {
+            const data: WarningMessage = { msg }
+            if (range) {
+              if (range.start != null) {
+                data.start = range.start + leadingSpaceLength
+              }
+              if (range.end != null) {
+                data.end = range.end + leadingSpaceLength
+              }
+            }
+            (tip ? tips : errors).push(data)
+          }
+        }
         // merge custom modules
         if (options.modules) {
           finalOptions.modules =
@@ -26,7 +44,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
         // merge custom directives
         if (options.directives) {
           finalOptions.directives = extend(
-            Object.create(baseOptions.directives),
+            Object.create(baseOptions.directives || null),
             options.directives
           )
         }
@@ -38,9 +56,11 @@ export function createCompilerCreator (baseCompile: Function): Function {
         }
       }
 
-      const compiled = baseCompile(template, finalOptions)
+      finalOptions.warn = warn
+
+      const compiled = baseCompile(template.trim(), finalOptions)
       if (process.env.NODE_ENV !== 'production') {
-        errors.push.apply(errors, detectErrors(compiled.ast))
+        detectErrors(compiled.ast, warn)
       }
       compiled.errors = errors
       compiled.tips = tips

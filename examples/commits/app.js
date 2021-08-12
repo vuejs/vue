@@ -1,10 +1,12 @@
+/* global Vue */
+
 var apiURL = 'https://api.github.com/repos/vuejs/vue/commits?per_page=3&sha='
 
 /**
  * Actual demo
  */
 
-var demo = new Vue({
+new Vue({
 
   el: '#demo',
 
@@ -34,14 +36,21 @@ var demo = new Vue({
 
   methods: {
     fetchData: function () {
-      var xhr = new XMLHttpRequest()
       var self = this
-      xhr.open('GET', apiURL + self.currentBranch)
-      xhr.onload = function () {
-        self.commits = JSON.parse(xhr.responseText)
-        console.log(self.commits[0].html_url)
+      if (navigator.userAgent.indexOf('PhantomJS') > -1) {
+        // use mocks in e2e to avoid dependency on network / authentication
+        setTimeout(function () {
+          self.commits = window.MOCKS[self.currentBranch]
+        }, 0)
+      } else {
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET', apiURL + self.currentBranch)
+        xhr.onload = function () {
+          self.commits = JSON.parse(xhr.responseText)
+          console.log(self.commits[0].html_url)
+        }
+        xhr.send()
       }
-      xhr.send()
     }
   }
 })

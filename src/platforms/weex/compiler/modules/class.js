@@ -20,7 +20,8 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
     warn(
       `class="${staticClass}": ` +
       'Interpolation inside attributes has been deprecated. ' +
-      'Use v-bind or the colon shorthand instead.'
+      'Use v-bind or the colon shorthand instead.',
+      el.rawAttrsMap['class']
     )
   }
   if (!dynamic && classResult) {
@@ -55,7 +56,7 @@ function parseStaticClass (staticClass: ?string, options: CompilerOptions): Stat
       const result = parseText(name, options.delimiters)
       if (result) {
         dynamic = true
-        return result
+        return result.expression
       }
       return JSON.stringify(name)
     })

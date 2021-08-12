@@ -63,8 +63,8 @@ module.exports = {
       .assert.count('.item > ul', 5)
       .assert.containsText('#demo ul > .item:nth-child(1)', '[-]')
       .assert.evaluate(function () {
-        var firstItem = document.querySelector('#demo ul > .item:nth-child(1)')
-        var ul = firstItem.querySelector('ul')
+        const firstItem = document.querySelector('#demo ul > .item:nth-child(1)')
+        const ul = firstItem.querySelector('ul')
         return ul.children.length === 2
       })
       .end()
