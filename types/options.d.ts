@@ -41,7 +41,7 @@ export type AsyncComponentFactory<Data=DefaultData<never>, Methods=DefaultMethod
  * to infer from the shape of `Accessors<Computed>` and work backwards.
  */
 export type Accessors<T> = {
-  [K in keyof T]: (() => T[K]) | ComputedOptions<T[K]>
+  [K in keyof T]: ((vm: Vue) => T[K]) | ComputedOptions<T[K]>
 }
 
 type DataDef<Data, Props, V> = Data | ((this: Readonly<Props> & V) => Data)
