@@ -31,7 +31,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/autocode.svg?sanitize=true">
   </a>
 </p>
-  
+
 <!--special end-->
 
 <h3 align="center">Platinum Sponsors</h3>
@@ -362,7 +362,7 @@ To check out [live examples](https://vuejs.org/v2/examples/) and docs, visit [vu
 
 ## Questions
 
-For questions and support please use [the official forum](https://forum.vuejs.org) or [community chat](https://chat.vuejs.org/). The issue list of this repo is **exclusively** for bug reports and feature requests.
+For questions and support, please use [the official forum](https://forum.vuejs.org) or [community chat](https://chat.vuejs.org/). The issue list of this repo is **exclusively** for bug reports and feature requests.
 
 ## Issues
 

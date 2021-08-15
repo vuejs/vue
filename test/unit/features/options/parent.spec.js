@@ -11,7 +11,7 @@ describe('Options parent', () => {
       render () {}
     }).$mount()
 
-    // this option is straight-forward
+    // this option is straightforward
     // it should register 'parent' as a $parent for 'child'
     // and push 'child' to $children array on 'parent'
     expect(child.$options.parent).toBeDefined()
