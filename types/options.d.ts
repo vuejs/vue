@@ -96,6 +96,8 @@ export interface ComponentOptions<
   updated?(): void;
   activated?(): void;
   deactivated?(): void;
+  beforeUnmount?(): void;
+  unmounted?(): void;
   errorCaptured?(err: Error, vm: Vue, info: string): boolean | void;
   serverPrefetch?(this: V): Promise<void>;
 
