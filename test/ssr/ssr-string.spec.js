@@ -1351,7 +1351,7 @@ describe('SSR: renderToString', () => {
       </div>
       `
     }, result => {
-      expect(result).toContain(`<div class="a\nb"></div>`)
+      expect(result).toContain(`<div class="a b"></div>`)
       done()
     })
   })
