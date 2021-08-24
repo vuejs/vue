@@ -82,6 +82,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/dcloud.gif">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://authing.cn/welcome?from=vuejs" target="_blank">
+          <img width="177px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/authing.png">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
@@ -437,31 +442,33 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <h2 align="center">Generous Backers via Patreon ($50+)</h2>
 
 <!--50 start-->
+
 - Yoshitaka M
 - Peter Imburg
 - Johnny Ray Austin
-- errorrik 
+- errorrik
 - Wasim Khamlichi
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
 
 <!--10 start-->
+
 - Jeffrey Rennie
 - Keisuke Kita
 - Роман Латкин
 - Alex Riviere
-- Fontis 
-- Jack 
+- Fontis
+- Jack
 - Nick Carr
 - Traversy Media
 - Pierre Baron
 - Donghai Gai
 - Aleksander Figiel
 - Dennis Zanetti
-- wickedwei 
+- wickedwei
 - Sunny Yuen
-- Jules 
+- Jules
 - Zeth Odderskov
 - Thomas Wiedemann
 - Nobuhide Esaki
@@ -474,7 +481,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - username
 - Pierre Lebrun
 - Peter Matkovsky
-- 龙腾道 
+- 龙腾道
 - Nick Dandakis
 - Yusuke Kawabata
 - Shawn Wildermuth
@@ -487,11 +494,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Wakana Seki
 - Jere Sjöroos
 - Donald Fischer
-- Eric 
+- Eric
 - tyler madsen
 - Joe Gregory
 - Masahiro Tanaka
-- Tyler 
+- Tyler
 - Jim Raden
 - Haim Yulzari
 - Asaf Yishai

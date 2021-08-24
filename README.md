@@ -92,6 +92,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/dcloud.gif">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://authing.cn/welcome?from=vuejs" target="_blank">
+          <img width="177px" src="https://raw.githubusercontent.com/vuejs/cn.vuejs.org/master/themes/vue/source/images/authing.png">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
