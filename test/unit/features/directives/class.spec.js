@@ -166,7 +166,7 @@ describe('Directive v-bind:class', () => {
   it('corrects whitespace in staticClass merge in a component', done => {
     const vm = new Vue({
       template: `
-        <component1 class="staticClass" :class="componentClass1">
+        <component1 class="\n\t staticClass \t\n" :class="componentClass1">
         </component1>
       `,
       data: {
@@ -174,7 +174,7 @@ describe('Directive v-bind:class', () => {
       },
       components: {
         component1: {
-          template: '<div class="test"></div>'
+          template: '<div class="\n\t test \t\n"></div>'
         },
       }
     }).$mount()
