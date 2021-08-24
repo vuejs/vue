@@ -63,7 +63,9 @@ function compileModule (files, basedir, runInNewContext) {
         return require(file)
       }
     }
-    compiledWrapper.call(m.exports, m.exports, r, m)
+
+    const _filename = '/' + filename;
+    compiledWrapper.call(m.exports, m.exports, r, m, _filename, path.dirname(_filename));
 
     const res = Object.prototype.hasOwnProperty.call(m.exports, 'default')
       ? m.exports.default
