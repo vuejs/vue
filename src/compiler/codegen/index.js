@@ -377,11 +377,11 @@ function genScopedSlots (
     )
   })
 
-  // #9534: if a component with scoped slots is inside a conditional branch,
+  // #9534, #12223: if a component with scoped slots is inside a conditional branch,
   // it's possible for the same component to be reused but with different
   // compiled slot content. To avoid that, we generate a unique key based on
   // the generated code of all the slot contents.
-  let needsKey = !!el.if
+  let needsKey = !!(el.if || el.elseif)
 
   // OR when it is inside another scoped slot or v-for (the reactivity may be
   // disconnected due to the intermediate scope variable)
