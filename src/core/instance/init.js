@@ -66,6 +66,7 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     if (vm.$options.el) {
+      // vue 挂载 vm
       vm.$mount(vm.$options.el)
     }
   }

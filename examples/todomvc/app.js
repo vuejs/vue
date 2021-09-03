@@ -33,7 +33,6 @@ var filters = {
     })
   }
 }
-
 // app Vue instance
 var app = new Vue({
   // app initial state

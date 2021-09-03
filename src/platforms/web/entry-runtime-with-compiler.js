@@ -14,6 +14,8 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
+// 首先缓存了原型上的$mount方法 然后再重新定义改方法，原型上的$mount方法是在`src/platform/web/runtime/index.js`中定义的，
+// 之所以这么设计是为了复用
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (
   el?: string | Element,
@@ -22,6 +24,7 @@ Vue.prototype.$mount = function (
   el = el && query(el)
 
   /* istanbul ignore if */
+  // 对了做了限制 不能挂载到html body这样的根节点上
   if (el === document.body || el === document.documentElement) {
     process.env.NODE_ENV !== 'production' && warn(
       `Do not mount Vue to <html> or <body> - mount to normal elements instead.`
@@ -56,6 +59,7 @@ Vue.prototype.$mount = function (
     } else if (el) {
       template = getOuterHTML(el)
     }
+    // 如果没有render方法，把得到的template转换成render(⭐)
     if (template) {
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -79,6 +83,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  // 最后再调用原型上的 $mount方法挂载
   return mount.call(this, el, hydrating)
 }
 

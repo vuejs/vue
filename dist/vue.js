@@ -952,7 +952,6 @@
    * Observe a list of Array items.
    */
   Observer.prototype.observeArray = function observeArray (items) {
-    debugger
     for (var i = 0, l = items.length; i < l; i++) {
       observe(items[i]);
     }
@@ -4025,6 +4024,7 @@
     };
   }
 
+  // 这个方法的核心就是先实例化渲染一个Watcher, 在它的回调函数中会调用updateComponent方法
   function mountComponent (
     vm,
     el,
@@ -4053,6 +4053,7 @@
     }
     callHook(vm, 'beforeMount');
 
+    // updateComponent方法中，先生成了虚拟DOM vnode，最终调用了vm._update，更新DOM
     var updateComponent;
     /* istanbul ignore if */
     if ( config.performance && mark) {
@@ -4063,12 +4064,12 @@
         var endTag = "vue-perf-end:" + id;
 
         mark(startTag);
-        var vnode = vm._render();
+        var vnode = vm._render(); // 核心方法(⭐)
         mark(endTag);
         measure(("vue " + name + " render"), startTag, endTag);
 
         mark(startTag);
-        vm._update(vnode, hydrating);
+        vm._update(vnode, hydrating);  // 核心方法(⭐)
         mark(endTag);
         measure(("vue " + name + " patch"), startTag, endTag);
       };
@@ -4081,6 +4082,7 @@
     // we set this to vm._watcher inside the watcher's constructor
     // since the watcher's initial patch may call $forceUpdate (e.g. inside child
     // component's mounted hook), which relies on vm._watcher being already defined
+    // Watcher在这里起到两个作用，一个是初始化的时候回执行回调函数，另一个是当vm实例中监测的数据发生变化的时候执行回调函数。
     new Watcher(vm, updateComponent, noop, {
       before: function before () {
         if (vm._isMounted && !vm._isDestroyed) {
@@ -4092,8 +4094,8 @@
 
     // manually mounted instance, call mounted on self
     // mounted is called for render-created child components in its inserted hook
-    if (vm.$vnode == null) {
-      vm._isMounted = true;
+    if (vm.$vnode == null) { // vm.$vnode表示Vue实例的父虚拟Node，所以它为null表示当前是根Vue的实例
+      vm._isMounted = true; // 设置_isMounted为true，表示这个实例已经挂载了，同时执行mounted钩子函数
       callHook(vm, 'mounted');
     }
     return vm
@@ -5020,6 +5022,7 @@
       }
 
       if (vm.$options.el) {
+        // vue 挂载 vm
         vm.$mount(vm.$options.el);
       }
     };
@@ -9082,6 +9085,12 @@
   Vue.prototype.__patch__ = inBrowser ? patch : noop;
 
   // public mount method
+  /**
+   * 
+   * @param {*} el 表示挂载的元素，可以是字符串，也可以是dom对象，如果是字符串在浏览器环境下会调用query方法转化成DOM对象
+   * @param {*} hydrating 这个参数是和服务端渲染相关，在浏览器环境下我们不需要传入第二个参数
+   * @returns $mount实际上是去调用了mountComponent方法 在`src/core/instance/lifecycle.js`中
+   */ 
   Vue.prototype.$mount = function (
     el,
     hydrating
@@ -11931,6 +11940,8 @@
     return el && el.innerHTML
   });
 
+  // 首先缓存了原型上的$mount方法 然后再重新定义改方法，原型上的$mount方法是在`src/platform/web/runtime/index.js`中定义的，
+  // 之所以这么设计是为了复用
   var mount = Vue.prototype.$mount;
   Vue.prototype.$mount = function (
     el,
@@ -11939,6 +11950,7 @@
     el = el && query(el);
 
     /* istanbul ignore if */
+    // 对了做了限制 不能挂载到html body这样的根节点上
     if (el === document.body || el === document.documentElement) {
        warn(
         "Do not mount Vue to <html> or <body> - mount to normal elements instead."
@@ -11973,6 +11985,7 @@
       } else if (el) {
         template = getOuterHTML(el);
       }
+      // 如果没有render方法，把得到的template转换成render(⭐)
       if (template) {
         /* istanbul ignore if */
         if ( config.performance && mark) {
@@ -11998,6 +12011,7 @@
         }
       }
     }
+    // 最后再调用原型上的 $mount方法挂载
     return mount.call(this, el, hydrating)
   };
 

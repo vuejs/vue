@@ -72,7 +72,6 @@ export class Observer {
    * Observe a list of Array items.
    */
   observeArray (items: Array<any>) {
-    debugger
     for (let i = 0, l = items.length; i < l; i++) {
       observe(items[i])
     }
