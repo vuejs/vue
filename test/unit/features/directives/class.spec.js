@@ -155,7 +155,7 @@ describe('Directive v-bind:class', () => {
   // css static classes should only contain a single space in between,
   // as all the text inside of classes is shipped as a JS string
   // and this could lead to useless spacing in static classes
-  it('corrects whitespace in staticClass', done => {
+  it('condenses whitespace in staticClass', done => {
     const vm = new Vue({
       template: '<div class=" test1\ntest2\ttest3 test4   test5 \n \n \ntest6\t"></div>',
     }).$mount()
@@ -163,7 +163,7 @@ describe('Directive v-bind:class', () => {
     done()
   })
 
-  it('corrects whitespace in staticClass merge in a component', done => {
+  it('condenses whitespace in staticClass merge in a component', done => {
     const vm = new Vue({
       template: `
         <component1 class="\n\t staticClass \t\n" :class="componentClass1">
