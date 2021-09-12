@@ -293,7 +293,7 @@ function looseEqual (a, b) {
         })
       } else if (a instanceof Date && b instanceof Date) {
         return a.getTime() === b.getTime()
-      } else if (!isArrayA && !isArrayB) {
+      } else if (!(isArrayA || isArrayB)) {
         var keysA = Object.keys(a);
         var keysB = Object.keys(b);
         return keysA.length === keysB.length && keysA.every(function (key) {
@@ -307,7 +307,7 @@ function looseEqual (a, b) {
       /* istanbul ignore next */
       return false
     }
-  } else if (!isObjectA && !isObjectB) {
+  } else if (!(isObjectA || isObjectB)) {
     return String(a) === String(b)
   } else {
     return false
@@ -545,7 +545,7 @@ var _isServer;
 var isServerRendering = function () {
   if (_isServer === undefined) {
     /* istanbul ignore if */
-    if (!inBrowser && !inWeex && typeof global !== 'undefined') {
+    if (!(inBrowser || inWeex) && typeof global !== 'undefined') {
       // detect presence of vue-server-renderer and avoid
       // Webpack shimming the process
       _isServer = global['process'] && global['process'].env.VUE_ENV === 'server';
@@ -2048,7 +2048,7 @@ if (process.env.NODE_ENV !== 'production') {
       var has = key in target;
       var isAllowed = allowedGlobals(key) ||
         (typeof key === 'string' && key.charAt(0) === '_' && !(key in target.$data));
-      if (!has && !isAllowed) {
+      if (!(has || isAllowed)) {
         if (key in target.$data) { warnReservedPrefix(target, key); }
         else { warnNonPresent(target, key); }
       }
@@ -2097,7 +2097,7 @@ function traverse (val) {
 function _traverse (val, seen) {
   var i, keys;
   var isA = Array.isArray(val);
-  if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode) {
+  if ((!(isA || isObject(val))) || Object.isFrozen(val) || val instanceof VNode) {
     return
   }
   if (val.__ob__) {
@@ -4866,7 +4866,7 @@ function initProps (vm, propsOptions) {
         );
       }
       defineReactive$$1(props, key, value, function () {
-        if (!isRoot && !isUpdatingChildComponent) {
+        if (!(isRoot || isUpdatingChildComponent)) {
           warn(
             "Avoid mutating a prop directly since the value will be " +
             "overwritten whenever the parent component re-renders. " +
@@ -7163,7 +7163,7 @@ function enter (_, vnode) {
     }
   }
 
-  if (!needAnimation && !userWantsControl) {
+  if (!(needAnimation || userWantsControl)) {
     cb();
   }
 }
@@ -7255,7 +7255,7 @@ function leave (vnode, rm) {
     }
 
     leave && leave(el, cb);
-    if (!endState && !userWantsControl) {
+    if (!(endState || userWantsControl)) {
       cb();
     }
   }

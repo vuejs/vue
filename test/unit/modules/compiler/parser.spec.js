@@ -639,7 +639,7 @@ describe('parser', () => {
     expect('Interpolation inside attributes has been removed').toHaveBeenWarned()
   })
 
-  if (!isIE && !isEdge) {
+  if (!(isIE || isEdge)) {
     it('duplicate attribute', () => {
       parse('<p class="class1" class="class1">hello world</p>', baseOptions)
       expect('duplicate attribute').toHaveBeenWarned()

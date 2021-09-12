@@ -28,7 +28,7 @@ export function parseFilters (exp: string): string {
       c === 0x7C && // pipe
       exp.charCodeAt(i + 1) !== 0x7C &&
       exp.charCodeAt(i - 1) !== 0x7C &&
-      !curly && !square && !paren
+      !(curly || square || paren)
     ) {
       if (expression === undefined) {
         // first filter, end of expression

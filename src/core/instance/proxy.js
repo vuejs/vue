@@ -57,7 +57,7 @@ if (process.env.NODE_ENV !== 'production') {
       const has = key in target
       const isAllowed = allowedGlobals(key) ||
         (typeof key === 'string' && key.charAt(0) === '_' && !(key in target.$data))
-      if (!has && !isAllowed) {
+      if (!(has || isAllowed)) {
         if (key in target.$data) warnReservedPrefix(target, key)
         else warnNonPresent(target, key)
       }

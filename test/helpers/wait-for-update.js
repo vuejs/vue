@@ -29,7 +29,7 @@ window.waitForUpdate = initialCb => {
           done.fail(e)
         }
       }
-      if (!hasError && !job.wait) {
+      if (!(hasError || job.wait)) {
         if (queue.length) {
           Vue.nextTick(shift)
         }
@@ -40,7 +40,7 @@ window.waitForUpdate = initialCb => {
   }
 
   Vue.nextTick(() => {
-    if (!queue.length || (!end && !queue[queue.length - 1].fail)) {
+    if (!queue.length || (!(end || queue[queue.length - 1].fail))) {
       throw new Error('waitForUpdate chain is missing .then(done)')
     }
     shift()

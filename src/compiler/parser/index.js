@@ -116,7 +116,7 @@ export function parse (
 
   function closeElement (element) {
     trimEndingWhitespace(element)
-    if (!inVPre && !element.processed) {
+    if (!(inVPre || element.processed)) {
       element = processElement(element, options)
     }
     // tree management
@@ -921,7 +921,7 @@ function makeAttrsMap (attrs: Array<Object>): Object {
   for (let i = 0, l = attrs.length; i < l; i++) {
     if (
       process.env.NODE_ENV !== 'production' &&
-      map[attrs[i].name] && !isIE && !isEdge
+      map[attrs[i].name] && !(isIE || isEdge)
     ) {
       warn('duplicate attribute: ' + attrs[i].name, attrs[i])
     }

@@ -128,7 +128,7 @@ function enter (_, vnode) {
     }
   }
 
-  if (!needAnimation && !userWantsControl) {
+  if (!(needAnimation || userWantsControl)) {
     cb()
   }
 }
@@ -222,7 +222,7 @@ function leave (vnode, rm) {
     }
 
     leave && leave(el, cb)
-    if (!endState && !userWantsControl) {
+    if (!(endState || userWantsControl)) {
       cb()
     }
   }

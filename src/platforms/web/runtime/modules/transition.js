@@ -168,7 +168,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
     enterHook && enterHook(el, cb)
   }
 
-  if (!expectsCSS && !userWantsControl) {
+  if (!(expectsCSS || userWantsControl)) {
     cb()
   }
 }
@@ -273,7 +273,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       })
     }
     leave && leave(el, cb)
-    if (!expectsCSS && !userWantsControl) {
+    if (!(expectsCSS || userWantsControl)) {
       cb()
     }
   }

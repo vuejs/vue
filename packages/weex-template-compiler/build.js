@@ -579,7 +579,7 @@ function parseFilters (exp) {
       c === 0x7C && // pipe
       exp.charCodeAt(i + 1) !== 0x7C &&
       exp.charCodeAt(i - 1) !== 0x7C &&
-      !curly && !square && !paren
+      !(curly || square || paren)
     ) {
       if (expression === undefined) {
         // first filter, end of expression
@@ -881,7 +881,7 @@ var _isServer;
 var isServerRendering = function () {
   if (_isServer === undefined) {
     /* istanbul ignore if */
-    if (!inBrowser && !inWeex && typeof global !== 'undefined') {
+    if (!(inBrowser || inWeex) && typeof global !== 'undefined') {
       // detect presence of vue-server-renderer and avoid
       // Webpack shimming the process
       _isServer = global['process'] && global['process'].env.VUE_ENV === 'server';
@@ -1248,7 +1248,7 @@ function parse (
 
   function closeElement (element) {
     trimEndingWhitespace(element);
-    if (!inVPre && !element.processed) {
+    if (!(inVPre || element.processed)) {
       element = processElement(element, options);
     }
     // tree management
@@ -2049,7 +2049,7 @@ function makeAttrsMap (attrs) {
   for (var i = 0, l = attrs.length; i < l; i++) {
     if (
       process.env.NODE_ENV !== 'production' &&
-      map[attrs[i].name] && !isIE && !isEdge
+      map[attrs[i].name] && !(isIE || isEdge)
     ) {
       warn('duplicate attribute: ' + attrs[i].name, attrs[i]);
     }

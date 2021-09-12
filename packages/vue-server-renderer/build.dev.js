@@ -287,7 +287,7 @@ function looseEqual (a, b) {
         })
       } else if (a instanceof Date && b instanceof Date) {
         return a.getTime() === b.getTime()
-      } else if (!isArrayA && !isArrayB) {
+      } else if (!(isArrayA || isArrayB)) {
         var keysA = Object.keys(a);
         var keysB = Object.keys(b);
         return keysA.length === keysB.length && keysA.every(function (key) {
@@ -301,7 +301,7 @@ function looseEqual (a, b) {
       /* istanbul ignore next */
       return false
     }
-  } else if (!isObjectA && !isObjectB) {
+  } else if (!(isObjectA || isObjectB)) {
     return String(a) === String(b)
   } else {
     return false
@@ -721,7 +721,7 @@ var _isServer;
 var isServerRendering = function () {
   if (_isServer === undefined) {
     /* istanbul ignore if */
-    if (!inBrowser && !inWeex && typeof global !== 'undefined') {
+    if (!(inBrowser || inWeex) && typeof global !== 'undefined') {
       // detect presence of vue-server-renderer and avoid
       // Webpack shimming the process
       _isServer = global['process'] && global['process'].env.VUE_ENV === 'server';
@@ -2690,7 +2690,7 @@ function parseFilters (exp) {
       c === 0x7C && // pipe
       exp.charCodeAt(i + 1) !== 0x7C &&
       exp.charCodeAt(i - 1) !== 0x7C &&
-      !curly && !square && !paren
+      !(curly || square || paren)
     ) {
       if (expression === undefined) {
         // first filter, end of expression
@@ -3660,7 +3660,7 @@ function parse (
 
   function closeElement (element) {
     trimEndingWhitespace(element);
-    if (!inVPre && !element.processed) {
+    if (!(inVPre || element.processed)) {
       element = processElement(element, options);
     }
     // tree management
@@ -4459,7 +4459,7 @@ function makeAttrsMap (attrs) {
   var map = {};
   for (var i = 0, l = attrs.length; i < l; i++) {
     if (
-      map[attrs[i].name] && !isIE && !isEdge
+      map[attrs[i].name] && !(isIE || isEdge)
     ) {
       warn$1('duplicate attribute: ' + attrs[i].name, attrs[i]);
     }
@@ -5632,7 +5632,7 @@ function genStyleSegments (
   styleBinding,
   vShowExpression
 ) {
-  if (staticStyle && !styleBinding && !vShowExpression) {
+  if (staticStyle && !(styleBinding || vShowExpression)) {
     return [{ type: RAW, value: (" style=" + (JSON.stringify(staticStyle))) }]
   } else {
     return [{
@@ -6648,7 +6648,7 @@ function traverse (val) {
 function _traverse (val, seen) {
   var i, keys;
   var isA = Array.isArray(val);
-  if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode) {
+  if ((!(isA || isObject)(val)) || Object.isFrozen(val) || val instanceof VNode) {
     return
   }
   if (val.__ob__) {

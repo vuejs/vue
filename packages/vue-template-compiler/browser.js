@@ -766,7 +766,7 @@
   var isServerRendering = function () {
     if (_isServer === undefined) {
       /* istanbul ignore if */
-      if (!inBrowser && !inWeex && typeof global !== 'undefined') {
+      if (!(inBrowser || inWeex) && typeof global !== 'undefined') {
         // detect presence of vue-server-renderer and avoid
         // Webpack shimming the process
         _isServer = global['process'] && global['process'].env.VUE_ENV === 'server';
@@ -1785,7 +1785,7 @@
         c === 0x7C && // pipe
         exp.charCodeAt(i + 1) !== 0x7C &&
         exp.charCodeAt(i - 1) !== 0x7C &&
-        !curly && !square && !paren
+        !(curly || square || paren)
       ) {
         if (expression === undefined) {
           // first filter, end of expression
@@ -2820,7 +2820,7 @@
 
     function closeElement (element) {
       trimEndingWhitespace(element);
-      if (!inVPre && !element.processed) {
+      if (!(inVPre || element.processed)) {
         element = processElement(element, options);
       }
       // tree management
@@ -3619,7 +3619,7 @@
     var map = {};
     for (var i = 0, l = attrs.length; i < l; i++) {
       if (
-        map[attrs[i].name] && !isIE && !isEdge
+        map[attrs[i].name] && !(isIE || isEdge)
       ) {
         warn$1('duplicate attribute: ' + attrs[i].name, attrs[i]);
       }
@@ -5361,7 +5361,7 @@
     styleBinding,
     vShowExpression
   ) {
-    if (staticStyle && !styleBinding && !vShowExpression) {
+    if (staticStyle && !(styleBinding || vShowExpression)) {
       return [{ type: RAW, value: (" style=" + (JSON.stringify(staticStyle))) }]
     } else {
       return [{
