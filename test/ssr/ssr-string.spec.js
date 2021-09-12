@@ -1666,6 +1666,20 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('should not warn for Date prop when it comes from another context', done => {
+    const date = VM.runInNewContext('new Date()')
+    new Vue({
+      props: {
+        date: Date,
+      },
+      propsData: {
+        date
+      }
+    })
+    expect('Invalid prop: type check failed for prop "date". Expected Date, got Date').not.toHaveBeenWarned()
+    done()
+  })
 })
 
 function renderVmWithOptions (options, cb) {
