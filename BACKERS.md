@@ -458,7 +458,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 
 <!--10 start-->
 - Felix Mok
-- Jeffrey Rennie
+- Keisuke Kita
 - Meinhard Dam
 - Роман Латкин
 - Alex Riviere
@@ -488,7 +488,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Peter Matkovsky
 - 龙腾道 
 - Nick Dandakis
-- Yusuke Kawabata
+- Jeffrey Rennie
 - Shawn Wildermuth
 - Elon Hung
 - Juan Bermudez
@@ -519,7 +519,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Wen-Tien Chang
 - Stephen Hartley
 - Victor Tolbert
-- Keisuke Kita
+- Yusuke Kawabata
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
