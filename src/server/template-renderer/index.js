@@ -207,6 +207,7 @@ export default class TemplateRenderer {
 
   renderState (context: Object, options?: Object): string {
     const {
+      plainStorage = null,
       contextKey = 'state',
       windowKey = '__INITIAL_STATE__'
     } = options || {}
@@ -215,6 +216,11 @@ export default class TemplateRenderer {
       ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
       : ''
     const nonceAttr = context.nonce ? ` nonce="${context.nonce}"` : ''
+    if(plainStorage) {
+      return context[contextKey]
+      ? `<script${nonceAttr} id="${plainStorage}" type="application/json">${state}${autoRemove}</script>`
+      : ''
+    }
     return context[contextKey]
       ? `<script${nonceAttr}>window.${windowKey}=${state}${autoRemove}</script>`
       : ''

@@ -462,6 +462,26 @@ describe('SSR: template option', () => {
       })
     })
 
+    it('bundleRenderer + renderToString + clientManifest + inject: false + plainState', done => {
+      createRendererWithManifest('split.js', {
+        runInNewContext,
+        template: `<html>` +
+          `<head>{{{ renderResourceHints() }}}{{{ renderStyles() }}}</head>` +
+          `<body><!--vue-ssr-outlet-->{{{ renderState({ plainStorage: 'foo', contextKey: 'foo' }) }}}{{{ renderScripts() }}}</body>` +
+        `</html>`,
+        inject: false
+      }, renderer => {
+        const context = { foo: { a: 1 }}
+        renderer.renderToString(context, (err, res) => {
+          expect(err).toBeNull()
+          expect(res).toContain(
+            `<script id="foo" type="application/json">${context}</script>`
+          )
+          done()
+        })
+      })
+    })
+
     it('bundleRenderer + renderToString + clientManifest + no template', done => {
       createRendererWithManifest('split.js', {
         runInNewContext,
