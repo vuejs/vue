@@ -1327,7 +1327,7 @@ describe('Component scoped slot', () => {
   })
 
   // #11652
-  it('should update when swtching between two components with slot and without slot', done => {
+  it('should update when switching between two components with slot and without slot', done => {
     const Child = {
       template: `<div><slot/></div>`
     }
