@@ -2,10 +2,10 @@
 // and hash-based routing in ~150 lines.
 
 // localStorage persistence
-var STORAGE_KEY = 'todos-vuejs-2.0'
-var todoStorage = {
+const STORAGE_KEY = 'todos-vuejs-2.0'
+const todoStorage = {
   fetch: function () {
-    var todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    const todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
     todos.forEach(function (todo, index) {
       todo.id = index
     })
@@ -18,7 +18,7 @@ var todoStorage = {
 }
 
 // visibility filters
-var filters = {
+const filters = {
   all: function (todos) {
     return todos
   },
@@ -35,7 +35,7 @@ var filters = {
 }
 
 // app Vue instance
-var app = new Vue({
+new Vue({
   // app initial state
   data: {
     todos: todoStorage.fetch(),
@@ -85,7 +85,7 @@ var app = new Vue({
   // note there's no DOM manipulation here at all.
   methods: {
     addTodo: function () {
-      var value = this.newTodo && this.newTodo.trim()
+      const value = this.newTodo && this.newTodo.trim()
       if (!value) {
         return
       }
@@ -141,7 +141,7 @@ var app = new Vue({
 
 // handle routing
 function onHashChange () {
-  var visibility = window.location.hash.replace(/#\/?/, '')
+  const visibility = window.location.hash.replace(/#\/?/, '')
   if (filters[visibility]) {
     app.visibility = visibility
   } else {

@@ -8,7 +8,7 @@ Vue.component('demo-grid', {
     filterKey: String
   },
   data: function () {
-    var sortOrders = {}
+    const sortOrders = {}
     this.columns.forEach(function (key) {
       sortOrders[key] = 1
     })
@@ -19,10 +19,10 @@ Vue.component('demo-grid', {
   },
   computed: {
     filteredData: function () {
-      var sortKey = this.sortKey
-      var filterKey = this.filterKey && this.filterKey.toLowerCase()
-      var order = this.sortOrders[sortKey] || 1
-      var data = this.data
+      const sortKey = this.sortKey
+      const filterKey = this.filterKey && this.filterKey.toLowerCase()
+      const order = this.sortOrders[sortKey] || 1
+      let data = this.data
       if (filterKey) {
         data = data.filter(function (row) {
           return Object.keys(row).some(function (key) {
@@ -54,7 +54,7 @@ Vue.component('demo-grid', {
 })
 
 // bootstrap the demo
-var demo = new Vue({
+new Vue({
   el: '#demo',
   data: {
     searchQuery: '',

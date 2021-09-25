@@ -1,5 +1,5 @@
 // demo data
-var data = {
+const data = {
   name: 'My Tree',
   children: [
     { name: 'hello' },
@@ -67,7 +67,7 @@ Vue.component('item', {
 })
 
 // boot up the demo
-var demo = new Vue({
+new Vue({
   el: '#demo',
   data: {
     treeData: data

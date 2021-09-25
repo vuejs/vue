@@ -1,5 +1,5 @@
 // The raw data to observe
-var stats = [
+const stats = [
   { label: 'A', value: 100 },
   { label: 'B', value: 100 },
   { label: 'C', value: 100 },
@@ -15,9 +15,9 @@ Vue.component('polygraph', {
   computed: {
     // a computed property for the polygon's points
     points: function () {
-      var total = this.stats.length
+      const total = this.stats.length
       return this.stats.map(function (stat, i) {
-        var point = valueToPoint(stat.value, i, total)
+        const point = valueToPoint(stat.value, i, total)
         return point.x + ',' + point.y
       }).join(' ')
     }
@@ -46,13 +46,13 @@ Vue.component('polygraph', {
 
 // math helper...
 function valueToPoint (value, index, total) {
-  var x     = 0
-  var y     = -value * 0.8
-  var angle = Math.PI * 2 / total * index
-  var cos   = Math.cos(angle)
-  var sin   = Math.sin(angle)
-  var tx    = x * cos - y * sin + 100
-  var ty    = x * sin + y * cos + 100
+  const x     = 0
+  const y     = -value * 0.8
+  const angle = Math.PI * 2 / total * index
+  const cos   = Math.cos(angle)
+  const sin   = Math.sin(angle)
+  const tx    = x * cos - y * sin + 100
+  const ty    = x * sin + y * cos + 100
   return {
     x: tx,
     y: ty

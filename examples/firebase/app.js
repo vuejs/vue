@@ -1,17 +1,17 @@
-var emailRE = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+const emailRE = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
 // Setup Firebase
-var config = {
+const config = {
   apiKey: "AIzaSyAi_yuJciPXLFr_PYPeU3eTvtXf8jbJ8zw",
   authDomain: "vue-demo-537e6.firebaseapp.com",
   databaseURL: "https://vue-demo-537e6.firebaseio.com"
 }
 firebase.initializeApp(config)
 
-var usersRef = firebase.database().ref('users')
+const usersRef = firebase.database().ref('users')
 
 // create Vue app
-var app = new Vue({
+new Vue({
   // element to mount to
   el: '#app',
   // initial data
@@ -35,7 +35,7 @@ var app = new Vue({
       }
     },
     isValid: function () {
-      var validation = this.validation
+      const validation = this.validation
       return Object.keys(validation).every(function (key) {
         return validation[key]
       })
