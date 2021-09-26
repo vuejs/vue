@@ -158,7 +158,7 @@ export function defineReactive (
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
-      childOb = = !shallow && observe(val)
+      childOb = !shallow && observe(val)
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
         dep.depend()
