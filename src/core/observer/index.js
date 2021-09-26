@@ -153,11 +153,12 @@ export function defineReactive (
     val = obj[key]
   }
 
-  let childOb = !shallow && observe(val)
+  let childOb 
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
+      childOb = = !shallow && observe(val)
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
         dep.depend()
