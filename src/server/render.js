@@ -14,6 +14,7 @@ import {
   createComponent,
   createComponentInstanceForVnode
 } from 'core/vdom/create-component'
+import { hasSymbol } from 'core/util/env'
 
 let warned = Object.create(null)
 const warnOnce = msg => {
@@ -209,11 +210,16 @@ function renderComponentInner (node, isRoot, context) {
   waitForServerPrefetch(child, resolve, reject)
 }
 
+
+
 function renderAsyncComponent (node, isRoot, context) {
   const factory = node.asyncFactory
 
   const resolve = comp => {
-    if (comp.__esModule && comp.default) {
+    if (
+      comp.__esModule ||
+      (hasSymbol && comp[Symbol.toStringTag] === 'Module')
+    ) {
       comp = comp.default
     }
     const { data, children, tag } = node.asyncMeta

@@ -62,7 +62,7 @@ describe('Component async', () => {
     }
   })
 
-  it('resolve ES module default', done => {
+  it('resolve ES module default __esModule hint', done => {
     const vm = new Vue({
       template: '<div><test></test></div>',
       components: {
@@ -70,6 +70,34 @@ describe('Component async', () => {
           setTimeout(() => {
             resolve({
               __esModule: true,
+              default: {
+                template: '<div>hi</div>'
+              }
+            })
+            // wait for parent update
+            Vue.nextTick(next)
+          }, 0)
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<!---->')
+    expect(vm.$children.length).toBe(0)
+    function next () {
+      expect(vm.$el.innerHTML).toBe('<div>hi</div>')
+      expect(vm.$children.length).toBe(1)
+      done()
+    }
+  })
+
+
+  it('resolve ES module default Symbol.toStringTag hint', done => {
+    const vm = new Vue({
+      template: '<div><test></test></div>',
+      components: {
+        test: (resolve) => {
+          setTimeout(() => {
+            resolve({
+              [Symbol.toStringTag]: 'Module',
               default: {
                 template: '<div>hi</div>'
               }
