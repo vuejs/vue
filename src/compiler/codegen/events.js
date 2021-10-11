@@ -133,7 +133,7 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
         const condition = ['ctrl', 'shift', 'alt', 'meta']
             .filter(keyModifier => !modifiers[keyModifier])
             .map(keyModifier => `$event.${keyModifier}Key`)
-            .join('||');
+            .join('||')
         if (condition) genModifierCode += genGuard(condition)
       } else {
         keys.push(key)
