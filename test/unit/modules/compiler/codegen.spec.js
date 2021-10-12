@@ -430,6 +430,14 @@ describe('codegen', () => {
     )
   })
 
+  // GitHub Issues #12319
+  it('generate events with ctrl shift alt meta exact modifiers are applied together', () => {
+    assertCodegen(
+      '<button @keydown.ctrl.shift.alt.meta.exact="onClick">Click</button>',
+      `with(this){return _c('button',{on:{"keydown":function($event){if(!$event.ctrlKey)return null;if(!$event.shiftKey)return null;if(!$event.altKey)return null;if(!$event.metaKey)return null;return onClick.apply(null, arguments)}}},[_v("Click")])}`
+    )
+  })
+
   it('generate events with mouse event modifiers', () => {
     assertCodegen(
       '<input @click.ctrl="onClick">',
