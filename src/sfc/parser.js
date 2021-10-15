@@ -8,30 +8,43 @@ const splitRE = /\r?\n/g
 const replaceRE = /./g
 const isSpecialTag = makeMap('script,style,template', true)
 
-type Attribute = {
-  name: string,
-  value: string
-};
-
 /**
  * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
  */
 export function parseComponent (
   content: string,
   options?: Object = {}
- ): SFCDescriptor {
+): SFCDescriptor {
   const sfc: SFCDescriptor = {
     template: null,
     script: null,
     styles: [],
-    customBlocks: []
+    customBlocks: [],
+    errors: []
   }
   let depth = 0
-  let currentBlock: ?(SFCBlock | SFCCustomBlock) = null
+  let currentBlock: ?SFCBlock = null
+
+  let warn = msg => {
+    sfc.errors.push(msg)
+  }
+
+  if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+    warn = (msg, range) => {
+      const data: WarningMessage = { msg }
+      if (range.start != null) {
+        data.start = range.start
+      }
+      if (range.end != null) {
+        data.end = range.end
+      }
+      sfc.errors.push(data)
+    }
+  }
 
   function start (
     tag: string,
-    attrs: Array<Attribute>,
+    attrs: Array<ASTAttr>,
     unary: boolean,
     start: number,
     end: number
@@ -44,7 +57,7 @@ export function parseComponent (
         attrs: attrs.reduce((cumulated, { name, value }) => {
           cumulated[name] = value || true
           return cumulated
-        }, Object.create(null))
+        }, {})
       }
       if (isSpecialTag(tag)) {
         checkAttrs(currentBlock, attrs)
@@ -62,7 +75,7 @@ export function parseComponent (
     }
   }
 
-  function checkAttrs (block: SFCBlock, attrs: Array<Attribute>) {
+  function checkAttrs (block: SFCBlock, attrs: Array<ASTAttr>) {
     for (let i = 0; i < attrs.length; i++) {
       const attr = attrs[i]
       if (attr.name === 'lang') {
@@ -80,10 +93,13 @@ export function parseComponent (
     }
   }
 
-  function end (tag: string, start: number, end: number) {
+  function end (tag: string, start: number) {
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
-      let text = deindent(content.slice(currentBlock.start, currentBlock.end))
+      let text = content.slice(currentBlock.start, currentBlock.end)
+      if (options.deindent !== false) {
+        text = deindent(text)
+      }
       // pad content so that linters and pre-processors can output correct
       // line numbers in errors and warnings
       if (currentBlock.type !== 'template' && options.pad) {
@@ -95,7 +111,7 @@ export function parseComponent (
     depth--
   }
 
-  function padContent (block: SFCBlock | SFCCustomBlock, pad: true | "line" | "space") {
+  function padContent (block: SFCBlock, pad: true | "line" | "space") {
     if (pad === 'space') {
       return content.slice(0, block.start).replace(replaceRE, ' ')
     } else {
@@ -108,8 +124,10 @@ export function parseComponent (
   }
 
   parseHTML(content, {
+    warn,
     start,
-    end
+    end,
+    outputSourceRange: options.outputSourceRange
   })
 
   return sfc

@@ -2,7 +2,7 @@ import Vue, { VNode } from "../index";
 import { ComponentOptions } from "../options";
 
 class Test extends Vue {
-  a: number;
+  a: number = 0;
 
   testProperties() {
     this.$data;
@@ -19,7 +19,8 @@ class Test extends Vue {
   }
 
   // test property reification
-  $refs: {
+  $el!: HTMLElement | SVGElement;
+  $refs!: {
     vue: Vue,
     element: HTMLInputElement,
     vues: Vue[],
@@ -72,6 +73,8 @@ class Test extends Vue {
       }
     };
     config.keyCodes = { esc: 27 };
+    config.ignoredElements = ['foo', /^ion-/];
+    config.async = false
   }
 
   static testMethods() {
@@ -83,10 +86,15 @@ class Test extends Vue {
       }
     });
     this.nextTick(() => {});
+    this.nextTick(function () {
+      console.log(this.text === 'test');
+    }, { text: 'test'});
     this.nextTick().then(() => {});
     this.set({}, "", "");
+    this.set({}, 1, "");
     this.set([true, false, true], 1, true);
     this.delete({}, "");
+    this.delete({}, 1);
     this.delete([true, false], 0);
     this.directive("", {bind() {}});
     this.filter("", (value: number) => value);
@@ -95,6 +103,15 @@ class Test extends Vue {
     this.use;
     this.mixin(Test);
     this.compile("<div>{{ message }}</div>");
+    this
+      .use(() => {
+
+      })
+      .use(() => {
+
+      })
+      .mixin({})
+      .mixin({});
   }
 }
 
@@ -127,6 +144,13 @@ const FunctionalHelloWorldComponent = Vue.extend({
   props: ["name"],
   render(createElement, ctxt) {
     return createElement("div", "Hello " + ctxt.props.name)
+  }
+});
+
+const FunctionalScopedSlotsComponent = Vue.extend({
+  functional: true,
+  render(h, ctx) {
+    return ctx.scopedSlots.default && ctx.scopedSlots.default({}) || h('div', 'functional scoped slots');
   }
 });
 
@@ -179,3 +203,38 @@ Vue.extend({
     return h('canvas', {}, [a])
   }
 })
+
+declare function decorate<VC extends typeof Vue>(v: VC): VC;
+
+@decorate
+class Decorated extends Vue {
+  a = 123;
+}
+
+const obj = Vue.observable({ a: 1 })
+obj.a++
+
+// VNodeData style tests.
+const ComponentWithStyleInVNodeData = Vue.extend({
+  render (h) {
+    const elementWithStyleAsString = h('div', {
+      style: 'background-color: red;'
+    });
+
+    const elementWithStyleAsObject = h('div', {
+      style: { backgroundColor: 'green' }
+    });
+
+    const elementWithStyleAsArrayOfObjects = h('div', {
+      style: [
+        { backgroundColor: 'blue' }
+      ]
+    });
+
+    return h('div', undefined, [
+      elementWithStyleAsString,
+      elementWithStyleAsObject,
+      elementWithStyleAsArrayOfObjects
+    ]);
+  }
+});

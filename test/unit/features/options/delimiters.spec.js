@@ -82,7 +82,7 @@ describe('Delimiters', () => {
     }).$mount()
 
     expect(vm.$el.textContent).toEqual('1 - 2')
-      // restore default options
+    // restore default options
     delete Vue.options.delimiters
   })
 
@@ -110,7 +110,7 @@ describe('Delimiters', () => {
     }).$mount()
 
     expect(vm.$el.textContent).toEqual('1 - 2')
-      // restore default options
+    // restore default options
     delete Vue.options.delimiters
   })
 })

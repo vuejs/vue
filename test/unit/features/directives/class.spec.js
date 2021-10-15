@@ -5,7 +5,7 @@ function assertClass (assertions, done) {
     template: '<div class="foo" :class="value"></div>',
     data: { value: '' }
   }).$mount()
-  var chain = waitForUpdate()
+  const chain = waitForUpdate()
   assertions.forEach(([value, expected], i) => {
     chain.then(() => {
       if (typeof value === 'function') {
@@ -149,6 +149,39 @@ describe('Directive v-bind:class', () => {
     vm.test.b = true
     waitForUpdate(() => {
       expect(vm.$el.className).toBe('a b')
+    }).then(done)
+  })
+
+  // css static classes should only contain a single space in between,
+  // as all the text inside of classes is shipped as a JS string
+  // and this could lead to useless spacing in static classes
+  it('condenses whitespace in staticClass', done => {
+    const vm = new Vue({
+      template: '<div class=" test1\ntest2\ttest3 test4   test5 \n \n \ntest6\t"></div>',
+    }).$mount()
+    expect(vm.$el.className).toBe('test1 test2 test3 test4 test5 test6')
+    done()
+  })
+
+  it('condenses whitespace in staticClass merge in a component', done => {
+    const vm = new Vue({
+      template: `
+        <component1 class="\n\t staticClass \t\n" :class="componentClass1">
+        </component1>
+      `,
+      data: {
+        componentClass1: 'componentClass1',
+      },
+      components: {
+        component1: {
+          template: '<div class="\n\t test \t\n"></div>'
+        },
+      }
+    }).$mount()
+    expect(vm.$el.className).toBe('test staticClass componentClass1')
+    vm.componentClass1 = 'c1'
+    waitForUpdate(() => {
+      expect(vm.$el.className).toBe('test staticClass c1')
     }).then(done)
   })
 

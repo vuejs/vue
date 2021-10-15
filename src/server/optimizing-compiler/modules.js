@@ -19,8 +19,6 @@ import {
 import type { StringSegment } from './codegen'
 import type { CodegenState } from 'compiler/codegen/index'
 
-type Attr = { name: string; value: string };
-
 const plainStringRE = /^"(?:[^"\\]|\\.)*"$|^'(?:[^'\\]|\\.)*'$/
 
 // let the model AST transform translate v-model into appropriate
@@ -31,6 +29,10 @@ export function applyModelTransform (el: ASTElement, state: CodegenState) {
       const dir = el.directives[i]
       if (dir.name === 'model') {
         state.directives.model(el, dir, state.warn)
+        // remove value for textarea as its converted to text
+        if (el.tag === 'textarea' && el.props) {
+          el.props = el.props.filter(p => p.name !== 'value')
+        }
         break
       }
     }
@@ -38,14 +40,14 @@ export function applyModelTransform (el: ASTElement, state: CodegenState) {
 }
 
 export function genAttrSegments (
-  attrs: Array<Attr>
+  attrs: Array<ASTAttr>
 ): Array<StringSegment> {
   return attrs.map(({ name, value }) => genAttrSegment(name, value))
 }
 
 export function genDOMPropSegments (
-  props: Array<Attr>,
-  attrs: ?Array<Attr>
+  props: Array<ASTAttr>,
+  attrs: ?Array<ASTAttr>
 ): Array<StringSegment> {
   const segments = []
   props.forEach(({ name, value }) => {
@@ -73,7 +75,7 @@ function genAttrSegment (name: string, value: string): StringSegment {
         ? ` ${name}="${name}"`
         : value === '""'
           ? ` ${name}`
-          : ` ${name}=${value}`
+          : ` ${name}="${JSON.parse(value)}"`
     }
   } else {
     return {
@@ -88,7 +90,7 @@ export function genClassSegments (
   classBinding: ?string
 ): Array<StringSegment> {
   if (staticClass && !classBinding) {
-    return [{ type: RAW, value: ` class=${staticClass}` }]
+    return [{ type: RAW, value: ` class="${JSON.parse(staticClass)}"` }]
   } else {
     return [{
       type: EXPRESSION,

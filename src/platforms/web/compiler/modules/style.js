@@ -14,13 +14,14 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   if (staticStyle) {
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production') {
-      const expression = parseText(staticStyle, options.delimiters)
-      if (expression) {
+      const res = parseText(staticStyle, options.delimiters)
+      if (res) {
         warn(
           `style="${staticStyle}": ` +
           'Interpolation inside attributes has been removed. ' +
           'Use v-bind or the colon shorthand instead. For example, ' +
-          'instead of <div style="{{ val }}">, use <div :style="val">.'
+          'instead of <div style="{{ val }}">, use <div :style="val">.',
+          el.rawAttrsMap['style']
         )
       }
     }
