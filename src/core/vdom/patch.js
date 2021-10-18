@@ -446,7 +446,7 @@ export function createPatchFunction (backend) {
         newStartVnode = newCh[++newStartIdx]
       } else {
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
-        idxInOld = isDef(newStartVnode.key)
+        idxInOld = isDef(newStartVnode.key) && isDef(oldCh[oldKeyToIdx[newStartVnode.key]])
           ? oldKeyToIdx[newStartVnode.key]
           : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx)
         if (isUndef(idxInOld)) { // New element
