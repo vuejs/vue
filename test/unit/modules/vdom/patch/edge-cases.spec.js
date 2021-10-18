@@ -2,6 +2,29 @@ import Vue from 'vue'
 import { SSR_ATTR } from 'shared/constants'
 
 describe('vdom patch: edge cases', () => {
+  // exposed by #12327
+  // when new vnodes has same key, patch will error by read the `key` property of undefined
+  it('should handle vnodes with same key', done => {
+    const vm = new Vue({
+      data: {
+        ok: true,
+        keys: [1, 2, 2, 3]
+      },
+      template: `
+        <div>
+          <div v-for="(key, i) of keys" :key="key">
+            {{i}}
+          </div>
+        </div>
+      `
+    }).$mount()
+    expect(vm.$el.textContent).toBe('0123')
+    vm.keys = [4, 2, 2]
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('012')
+    }).then(done)
+  })
+
   // exposed by #3406
   // When a static vnode is inside v-for, it's possible for the same vnode
   // to be used in multiple places, and its element will be replaced. This
