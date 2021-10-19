@@ -1668,6 +1668,24 @@ describe('SSR: renderToString', () => {
   })
 })
 
+it('only static style and not v-show ', done => {
+  renderVmWithOptions({
+    template: `    <div
+    style="
+    margin-top:
+    0px;width: 24px;
+    height: 16px;
+    vertical-align: text-bottom;
+    fill: #bfbfc3;"
+  ></div>`,
+  }, result => {
+    expect(result).toContain(
+      '<div data-server-rendered="true" style="width:24px;height:16px;vertical-align:text-bottom;fill:#bfbfc3;"></div>'
+    )
+    done()
+  })
+})
+
 function renderVmWithOptions (options, cb) {
   renderToString(new Vue(options), (err, res) => {
     expect(err).toBeNull()
