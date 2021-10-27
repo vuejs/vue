@@ -315,6 +315,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/lendio.png">
         </a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://flowdash.com/?utm_source=vue&utm_medium=sponsor&utm_campaign=open-source" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/flowdash.png">
+        </a>
+      </td>
     </tr><tr></tr>
   </tbody>
 </table>
