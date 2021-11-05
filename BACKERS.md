@@ -486,16 +486,14 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <!--50 start-->
 - Yoshitaka M
 - Peter Imburg
-- Johnny Ray Austin
 - Wasim Khamlichi
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
 
 <!--10 start-->
-- Kevin López Brante
+- Theo Ephraim
 - Keisuke Kita
-- Mok Wang Quan
 - Jeffrey Rennie
 - Meinhard Dam
 - Роман Латкин
@@ -522,12 +520,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Riki Fridrich
 - Alfonso Herrera
 - Bichinger Software & Consulting
-- username
 - Pierre Lebrun
 - Peter Matkovsky
 - 龙腾道 
-- Theo Ephraim
-- Yusuke Kawabata
+- Nick Dandakis
+- Mok Wang Quan
 - Shawn Wildermuth
 - Elon Hung
 - Juan Bermudez
@@ -558,7 +555,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Wen-Tien Chang
 - Stephen Hartley
 - Victor Tolbert
-- Nick Dandakis
+- Yusuke Kawabata
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
