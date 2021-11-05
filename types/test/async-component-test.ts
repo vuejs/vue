@@ -7,7 +7,6 @@ const a: AsyncComponent = () => ({
 })
 
 const b: AsyncComponent = () => ({
-  // @ts-expect-error component has to be a Promise that resolves to a component
   component: () =>
     new Promise<Component>((res, rej) => {
       res({ template: "" })

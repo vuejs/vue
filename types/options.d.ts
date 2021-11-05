@@ -27,7 +27,7 @@ export type AsyncComponentPromise<Data=DefaultData<never>, Methods=DefaultMethod
 ) => Promise<ImportedComponent<Data, Methods, Computed, Props>> | void;
 
 export type AsyncComponentFactory<Data=DefaultData<never>, Methods=DefaultMethods<never>, Computed=DefaultComputed, Props=DefaultProps> = () => {
-  component: Promise<ImportedComponent<Data, Methods, Computed, Props>>;
+  component: Promise<ImportedComponent<Data, Methods, Computed, Props>> | (() => Promise<ImportedComponent<Data, Methods, Computed, Props>>);
   loading?: ImportedComponent;
   error?: ImportedComponent;
   delay?: number;
