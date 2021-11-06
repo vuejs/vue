@@ -22,7 +22,7 @@ export function createInstanceContext (
     data
   }
 
-  // Each instance has a independent `Vue` module instance
+  // Each instance has an independent `Vue` module instance
   const Vue = instance.Vue = createVueModuleInstance(instanceId, weex)
 
   // DEPRECATED

@@ -28,7 +28,7 @@ function createInstanceContext (
     data: data
   };
 
-  // Each instance has a independent `Vue` module instance
+  // Each instance has an independent `Vue` module instance
   var Vue = instance.Vue = createVueModuleInstance(instanceId, weex);
 
   // DEPRECATED
