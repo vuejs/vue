@@ -7,7 +7,7 @@ describe('Component async', () => {
   const oldClearTimeout = window.clearTimeout;
 
   // will contain pending timeouts set during the test iteration
-  // will contain the id of the timeout as the key, and the the millisecond timeout as the value
+  // will contain the id of the timeout as the key, and the millisecond timeout as the value
   // this helps to identify the timeout that is still pending
   let timeoutsPending = {};
 

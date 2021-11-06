@@ -31,7 +31,7 @@ describe('Directive v-on', () => {
     expect(event.type).toBe('click')
   })
 
-  it('should bind event to a inline statement', () => {
+  it('should bind event to an inline statement', () => {
     vm = new Vue({
       el,
       template: '<div v-on:click="foo(1,2,3,$event)"></div>',
