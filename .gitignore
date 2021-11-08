@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 *.log
+*.bak
 explorations
 TODOs.md
 dist/*.gz
