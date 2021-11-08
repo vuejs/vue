@@ -67,11 +67,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/nuxt.png">
         </a>
       </td>
-      <td align="center" valign="middle">
-        <a href="https://www.daskeyboard.com/?utm_source=vuejs&utm_medium=sponsorship" target="_blank">
-          <img width="222px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/das_keyboard.png">
-        </a>
-      </td>
     </tr><tr></tr>
   </tbody>
 </table>
@@ -318,6 +313,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       <td align="center" valign="middle">
         <a href="https://flowdash.com/?utm_source=vue&utm_medium=sponsor&utm_campaign=open-source" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/flowdash.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.fenetre.nl/english/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/fen_tre_online_solutions.png">
         </a>
       </td>
     </tr><tr></tr>
