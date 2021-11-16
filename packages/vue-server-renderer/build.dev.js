@@ -5314,7 +5314,7 @@ function genScopedSlots (
 
   // #9534: if a component with scoped slots is inside a conditional branch,
   // it's possible for the same component to be reused but with different
-  // compiled slot content. To avoid that, we generate a unique key based on
+  // compiled slot content. To avoid that, we generate an unique key based on
   // the generated code of all the slot contents.
   var needsKey = !!el.if;
 
@@ -7169,7 +7169,7 @@ function renderStatic (
 
 /**
  * Runtime helper for v-once.
- * Effectively it means marking the node as static with a unique key.
+ * Effectively it means marking the node as static with an unique key.
  */
 function markOnce (
   tree,
@@ -7891,7 +7891,7 @@ function FunctionalRenderContext (
 
   var options = Ctor.options;
   // ensure the createElement function in functional components
-  // gets a unique context - this is necessary for correct named slot check
+  // gets an unique context - this is necessary for correct named slot check
   var contextVm;
   if (hasOwn(parent, '_uid')) {
     contextVm = Object.create(parent);
@@ -8406,7 +8406,7 @@ function renderComponent (node, isRoot, context) {
     if (isDef(getKey) && isUndef(name)) {
       warnOnce(
         "[vue-server-renderer] Components that implement \"serverCacheKey\" " +
-        "must also define a unique \"name\" option."
+        "must also define an unique \"name\" option."
       );
     }
     renderComponentInner(node, isRoot, context);
@@ -8906,7 +8906,7 @@ var TemplateRenderer = function TemplateRenderer (options) {
   this.options = options;
   this.inject = options.inject !== false;
   // if no template option is provided, the renderer is created
-  // as a utility object for rendering assets like preload links and scripts.
+  // as an utility object for rendering assets like preload links and scripts.
     
   var template = options.template;
   this.parsedTemplate = template
