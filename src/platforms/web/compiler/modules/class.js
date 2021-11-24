@@ -23,7 +23,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
     }
   }
   if (staticClass) {
-    el.staticClass = JSON.stringify(staticClass)
+    el.staticClass = JSON.stringify(staticClass.replace(/\s+/g, ' ').trim())
   }
   const classBinding = getBindingAttr(el, 'class', false /* getStatic */)
   if (classBinding) {

@@ -3,6 +3,7 @@
 import { def } from 'core/util/lang'
 import { normalizeChildren } from 'core/vdom/helpers/normalize-children'
 import { emptyObject } from 'shared/util'
+import { isAsyncPlaceholder } from './is-async-placeholder'
 
 export function normalizeScopedSlots (
   slots: { [key: string]: Function } | void,
@@ -60,8 +61,10 @@ function normalizeScopedSlot(normalSlots, key, fn) {
     res = res && typeof res === 'object' && !Array.isArray(res)
       ? [res] // single vnode
       : normalizeChildren(res)
+    let vnode: ?VNode = res && res[0]
     return res && (
-      res.every(r => r.isComment) // #9658, #11856
+      !vnode ||
+      (res.every(r => r.isComment) && !isAsyncPlaceholder(vnode)) // #9658, #10391, #11856
     ) ? undefined
       : res
   }

@@ -1,6 +1,6 @@
 const hash = require('hash-sum')
 const uniq = require('lodash.uniq')
-import { isJS, isCSS, onEmit } from './util'
+import { isJS, isCSS, getAssetName, onEmit, stripModuleIdHash } from './util'
 
 export default class VueSSRClientPlugin {
   constructor (options = {}) {
@@ -10,7 +10,8 @@ export default class VueSSRClientPlugin {
   }
 
   apply (compiler) {
-    onEmit(compiler, 'vue-client-plugin', (compilation, cb) => {
+    const stage = 'PROCESS_ASSETS_STAGE_ADDITIONAL'
+    onEmit(compiler, 'vue-client-plugin', stage, (compilation, cb) => {
       const stats = compilation.getStats().toJson()
 
       const allFiles = uniq(stats.assets
@@ -19,6 +20,7 @@ export default class VueSSRClientPlugin {
       const initialFiles = uniq(Object.keys(stats.entrypoints)
         .map(name => stats.entrypoints[name].assets)
         .reduce((assets, all) => all.concat(assets), [])
+        .map(getAssetName)
         .filter((file) => isJS(file) || isCSS(file)))
 
       const asyncFiles = allFiles
@@ -34,7 +36,7 @@ export default class VueSSRClientPlugin {
       }
 
       const assetModules = stats.modules.filter(m => m.assets.length)
-      const fileToIndex = file => manifest.all.indexOf(file)
+      const fileToIndex = asset => manifest.all.indexOf(getAssetName(asset))
       stats.modules.forEach(m => {
         // ignore modules duplicated in multiple chunks
         if (m.chunks.length === 1) {
@@ -43,7 +45,7 @@ export default class VueSSRClientPlugin {
           if (!chunk || !chunk.files) {
             return
           }
-          const id = m.identifier.replace(/\s\w+$/, '') // remove appended hash
+          const id = stripModuleIdHash(m.identifier)
           const files = manifest.modules[hash(id)] = chunk.files.map(fileToIndex)
           // find all asset modules associated with the same chunk
           assetModules.forEach(m => {

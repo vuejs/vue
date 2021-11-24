@@ -1,6 +1,6 @@
 {
   "name": "vue-template-compiler",
-  "version": "2.6.12",
+  "version": "2.6.14",
   "description": "template compiler for Vue 2.0",
   "main": "index.js",
   "unpkg": "browser.js",
