@@ -34,6 +34,7 @@ function checkNode (node: ASTNode, warn: Function) {
         const value = node.attrsMap[name]
         if (value) {
           const range = node.rawAttrsMap[name]
+          checkForThisUsage(name, value, warn, range)
           if (name === 'v-for') {
             checkFor(node, `v-for="${value}"`, warn, range)
           } else if (name === 'v-slot' || name[0] === '#') {
@@ -124,5 +125,14 @@ function checkFunctionParameterExpression (exp: string, text: string, warn: Func
       `  Raw expression: ${text.trim()}\n`,
       range
     )
+  }
+}
+
+function checkForThisUsage(name, value, warn, range){
+  if (value.indexOf('this.')!==-1) {
+    warn(
+      "`this` detected in template" + " " + name,
+      range
+    );
   }
 }
