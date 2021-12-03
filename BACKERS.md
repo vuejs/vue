@@ -21,7 +21,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <img width="260px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/hbuilder.png">
   </a>
 </p>
-  
+
 <!--special end-->
 
 <h2 align="center">Platinum via Patreon</h2>
@@ -79,7 +79,12 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
     <tr>
       <td align="center" valign="middle">
         <a href="http://www.dcloud.io/?hmsr=vuejsorg&hmpl=&hmcu=&hmkw=&hmci=" target="_blank">
-          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/dcloud.gif">
+          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/hbuilder.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://authing.cn/welcome?from=vuejs" target="_blank">
+          <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/authing.svg">
         </a>
       </td>
     </tr><tr></tr>
@@ -506,16 +511,16 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Роман Латкин
 - Alex Riviere
 - WhereJuly
-- Fontis 
-- Jack 
+- Fontis
+- Jack
 - Artur Bańka
 - Traversy Media
 - Pierre Baron
 - Donghai Gai
 - Aleksander Figiel
-- wickedwei 
+- wickedwei
 - Sunny Yuen
-- Jules 
+- Jules
 - Zeth Odderskov
 - Thomas Wiedemann
 - Nobuhide Esaki
@@ -529,7 +534,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Bichinger Software & Consulting
 - Pierre Lebrun
 - Peter Matkovsky
-- 龙腾道 
+- 龙腾道
 - Nick Dandakis
 - Mok Wang Quan
 - Shawn Wildermuth
@@ -543,11 +548,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Wakana Seki
 - Jere Sjöroos
 - Donald Fischer
-- Eric 
+- Eric
 - tyler madsen
 - Joe Gregory
 - Masahiro Tanaka
-- Tyler 
+- Tyler
 - Jim Raden
 - Haim Yulzari
 - Asaf Yishai
