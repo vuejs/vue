@@ -498,45 +498,45 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <!--50 start-->
 - Yoshitaka M
 - Peter Imburg
+- Johnny Ray Austin
 - Wasim Khamlichi
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
 
 <!--10 start-->
-- Theo Ephraim
+- Santiago Arizti
 - Keisuke Kita
+- Theo Ephraim
+- Mok Wang Quan
 - Jeffrey Rennie
 - Meinhard Dam
 - Роман Латкин
 - Alex Riviere
 - WhereJuly
-- Fontis
-- Jack
+- Fontis 
+- Jack 
 - Artur Bańka
-- Traversy Media
 - Pierre Baron
 - Donghai Gai
 - Aleksander Figiel
-- wickedwei
+- wickedwei 
 - Sunny Yuen
-- Jules
+- Jules 
 - Zeth Odderskov
 - Thomas Wiedemann
 - Nobuhide Esaki
 - Nat Dunn
-- Roy Segall
 - Allan McKernan
 - Diana Bergholz
-- Philip John Basile
 - Riki Fridrich
 - Alfonso Herrera
 - Bichinger Software & Consulting
 - Pierre Lebrun
 - Peter Matkovsky
-- 龙腾道
+- 龙腾道 
 - Nick Dandakis
-- Mok Wang Quan
+- Sven Güntner
 - Shawn Wildermuth
 - Elon Hung
 - Juan Bermudez
@@ -548,11 +548,11 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Wakana Seki
 - Jere Sjöroos
 - Donald Fischer
-- Eric
+- Eric 
 - tyler madsen
 - Joe Gregory
 - Masahiro Tanaka
-- Tyler
+- Tyler 
 - Jim Raden
 - Haim Yulzari
 - Asaf Yishai
