@@ -83,7 +83,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://authing.cn/welcome?from=vuejs" target="_blank">
+        <a href="https://www.authing.cn/welcome?utm_source=Vuejs&utm_medium=CPT&utm_campaign=GitHub&utm_term=readme" target="_blank">
           <img width="177px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/authing.svg">
         </a>
       </td>
@@ -496,6 +496,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <h2 align="center">Generous Backers via Patreon ($50+)</h2>
 
 <!--50 start-->
+
 - Yoshitaka M
 - Peter Imburg
 - Wasim Khamlichi
@@ -504,6 +505,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <h2 align="center">Backers via Patreon</h2>
 
 <!--10 start-->
+
 - Theo Ephraim
 - Keisuke Kita
 - Jeffrey Rennie
