@@ -205,3 +205,15 @@ export type InjectKey = string | symbol;
 export type InjectOptions = {
   [key: string]: InjectKey | { from?: InjectKey, default?: any }
 } | string[];
+
+export type HookEvents =
+  'hook:beforeCreate' |
+  'hook:created' |
+  'hook:beforeDestroy' |
+  'hook:destroyed' |
+  'hook:beforeMount' |
+  'hook:mounted' |
+  'hook:beforeUpdate' |
+  'hook:updated' |
+  'hook:activated' |
+  'hook:deactivated';

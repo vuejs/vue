@@ -11,6 +11,7 @@ import {
   ThisTypedComponentOptionsWithArrayProps,
   ThisTypedComponentOptionsWithRecordProps,
   WatchOptions,
+  HookEvents
 } from "./options";
 import { VNode, VNodeData, VNodeChildren, NormalizedScopedSlot } from "./vnode";
 import { PluginFunction, PluginObject } from "./plugin";
@@ -55,6 +56,9 @@ export interface Vue {
   $on(event: string | string[], callback: Function): this;
   $once(event: string | string[], callback: Function): this;
   $off(event?: string | string[], callback?: Function): this;
+  $on(event: HookEvents | HookEvents[], callback: Function): this;
+  $once(event: HookEvents | HookEvents[], callback: Function): this;
+  $off(event?: HookEvents | HookEvents[], callback?: Function): this;
   $emit(event: string, ...args: any[]): this;
   $nextTick(callback: (this: this) => void): void;
   $nextTick(): Promise<void>;
