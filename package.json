@@ -86,7 +86,6 @@
     "buble": "^0.19.3",
     "chalk": "^2.3.0",
     "chromedriver": "^2.45.0",
-    "codecov": "^3.0.0",
     "commitizen": "^2.9.6",
     "conventional-changelog": "^1.1.3",
     "cross-spawn": "^6.0.5",
