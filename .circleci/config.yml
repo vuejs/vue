@@ -1,4 +1,7 @@
-version: 2
+version: 2.1
+
+orbs:
+  codecov: codecov/codecov@3.2.2
 
 defaults: &defaults
   working_directory: ~/project/vue
@@ -40,12 +43,7 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run: npm run test:cover
-      - run:
-         name: report coverage stats for non-PRs
-         command: |
-           if [[ -z $CI_PULL_REQUEST ]]; then
-             ./node_modules/.bin/codecov
-           fi
+      - codecov/upload
 
   test-e2e:
     <<: *defaults
