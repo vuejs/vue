@@ -501,65 +501,63 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <h2 align="center">Generous Backers via Patreon ($50+)</h2>
 
 <!--50 start-->
-
 - Yoshitaka M
 - Peter Imburg
+- Johnny Ray Austin
 - Wasim Khamlichi
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
 
 <!--10 start-->
-
-- Theo Ephraim
+- Dave Mount
 - Keisuke Kita
+- Santiago Arizti
+- Sven Güntner
+- Theo Ephraim
+- Mok Wang Quan
 - Jeffrey Rennie
 - Meinhard Dam
 - Роман Латкин
 - Alex Riviere
 - WhereJuly
-- Fontis
-- Jack
-- Artur Bańka
-- Traversy Media
+- Fontis 
+- Jack 
 - Pierre Baron
 - Donghai Gai
 - Aleksander Figiel
-- wickedwei
+- wickedwei 
 - Sunny Yuen
-- Jules
+- Jules 
 - Zeth Odderskov
 - Thomas Wiedemann
 - Nobuhide Esaki
 - Nat Dunn
-- Roy Segall
 - Allan McKernan
 - Diana Bergholz
-- Philip John Basile
 - Riki Fridrich
 - Alfonso Herrera
 - Bichinger Software & Consulting
 - Pierre Lebrun
 - Peter Matkovsky
-- 龙腾道
-- Nick Dandakis
-- Mok Wang Quan
+- 龙腾道 
+- Rodolfo Cavallari
+- Yusuke Kawabata
 - Shawn Wildermuth
 - Elon Hung
 - Juan Bermudez
 - Daniel Mattingley
-- Matt Sencenbaugh
 - Jaeyoung Lee
 - David Kaplan
 - David Ang
 - Wakana Seki
 - Jere Sjöroos
 - Donald Fischer
-- Eric
+- Eric 
 - tyler madsen
 - Joe Gregory
 - Masahiro Tanaka
-- Tyler
+- Tyler 
 - Jim Raden
 - Haim Yulzari
 - Asaf Yishai
@@ -574,7 +572,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Wen-Tien Chang
 - Stephen Hartley
 - Victor Tolbert
-- Yusuke Kawabata
+- Nick Dandakis
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
