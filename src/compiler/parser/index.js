@@ -720,15 +720,16 @@ function processSlotContent (el) {
   // FIXME maybeComponent() is not smart enough to ensure this is in fact a component.
   //  Due to this, we end up by using slots in plain HTML tags, which is completely wrong.
   //  NOTE: this only happends when the tag is not lowercase, as it's not detected as a reserved tag.
-  if(maybeComponent(el) && el.children) {
+  if(!el.slotScope && !el.slotTarget && el.children && maybeComponent(el)) {
     const implicitDefaultSlotChildren = el.children.filter((c: any) => !c.slotScope)
 
     if(implicitDefaultSlotChildren.length) {
       // TODO add necessary checks and warnings
       // add the component's children to its default slot
       const slots = el.scopedSlots || (el.scopedSlots = {})
-      const slotContainer = slots.default = createASTElement('template', [], el)
-      slotContainer.slotTarget = '"default"'
+      const name = '"default"'
+      const slotContainer = slots[name] = createASTElement('template', [], el)
+      slotContainer.slotTarget = name
       slotContainer.slotTargetDynamic = false
       implicitDefaultSlotChildren.forEach((c: any) => c.parent = slotContainer)
       slotContainer.children = implicitDefaultSlotChildren

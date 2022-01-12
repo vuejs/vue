@@ -45,19 +45,6 @@ describe('parser', () => {
     expect(ast.children[0].parent).toBe(ast)
   })
 
-  it('camelCase element', () => {
-    const ast = parse('<MyComponent><p>hello world</p></MyComponent>', baseOptions)
-    expect(ast.tag).toBe('MyComponent')
-    expect(ast.plain).toBe(false)
-    expect(ast.children.length).toBe(0)
-    expect(ast.scopedSlots.default.tag).toBe('template')
-    expect(ast.scopedSlots.default.parent).toBe(ast)
-    expect(ast.scopedSlots.default.children[0].tag).toBe('p')
-    expect(ast.scopedSlots.default.children[0].plain).toBe(true)
-    expect(ast.scopedSlots.default.children[0].children[0].text).toBe('hello world')
-    expect(ast.scopedSlots.default.children[0].parent).toBe(ast.scopedSlots.default)
-  })
-
   it('forbidden element', () => {
     // style
     const styleAst = parse('<style>error { color: red; }</style>', baseOptions)
@@ -927,5 +914,83 @@ describe('parser', () => {
     parse(`<div is="customComp"><template v-slot="slotProps"></template></div>`, baseOptions)
     expect(`<template v-slot> can only appear at the root level inside the receiving the component`)
       .not.toHaveBeenWarned()
+  })
+
+  it('explicit slot with old syntax', () => {
+    const ast = parse('<MyComponent v-slot="default"><p>hello world</p></MyComponent>', baseOptions)
+    const defaultSlot = ast.scopedSlots['"default"']
+
+    expect(ast.tag).toBe('MyComponent')
+    expect(ast.plain).toBe(false)
+    expect(ast.children.length).toBe(0)
+
+    expect(defaultSlot.tag).toBe('template')
+    expect(defaultSlot.parent).toBe(ast)
+    expect(defaultSlot.children[0].tag).toBe('p')
+    expect(defaultSlot.children[0].plain).toBe(true)
+    expect(defaultSlot.children[0].children[0].text).toBe('hello world')
+    expect(defaultSlot.children[0].parent).toBe(defaultSlot)
+  })
+
+  it('explicit slot with new syntax', () => {
+    const ast = parse('<MyComponent #default><p>hello world</p></MyComponent>', baseOptions)
+    const defaultSlot = ast.scopedSlots['"default"']
+
+    expect(ast.tag).toBe('MyComponent')
+    expect(ast.plain).toBe(false)
+    expect(ast.children.length).toBe(0)
+
+    expect(defaultSlot.tag).toBe('template')
+    expect(defaultSlot.parent).toBe(ast)
+    expect(defaultSlot.children[0].tag).toBe('p')
+    expect(defaultSlot.children[0].plain).toBe(true)
+    expect(defaultSlot.children[0].children[0].text).toBe('hello world')
+    expect(defaultSlot.children[0].parent).toBe(defaultSlot)
+  })
+
+  // #12232
+  it('implicit default slot', () => {
+    const ast = parse('<MyComponent><p>hello world</p></MyComponent>', baseOptions)
+    const defaultSlot = ast.scopedSlots['"default"']
+
+    expect(ast.tag).toBe('MyComponent')
+    expect(ast.plain).toBe(false)
+    expect(ast.children.length).toBe(0)
+
+    expect(defaultSlot.tag).toBe('template')
+    expect(defaultSlot.parent).toBe(ast)
+    expect(defaultSlot.children[0].tag).toBe('p')
+    expect(defaultSlot.children[0].plain).toBe(true)
+    expect(defaultSlot.children[0].children[0].text).toBe('hello world')
+    expect(defaultSlot.children[0].parent).toBe(defaultSlot)
+  })
+
+  it('implicit default slot along other slots', () => {
+    const ast = parse('<MyComponent><p>hello</p><div>world</div><template #other><p>other contents</p></template></MyComponent>', baseOptions)
+    const defaultSlot = ast.scopedSlots['"default"']
+    const otherSlot = ast.scopedSlots['"other"']
+
+    expect(ast.tag).toBe('MyComponent')
+    expect(ast.plain).toBe(false)
+    expect(ast.children.length).toBe(0)
+
+    expect(defaultSlot.tag).toBe('template')
+    expect(defaultSlot.parent).toBe(ast)
+    expect(defaultSlot.children[0].tag).toBe('p')
+    expect(defaultSlot.children[0].plain).toBe(true)
+    expect(defaultSlot.children[0].children[0].text).toBe('hello')
+    expect(defaultSlot.children[0].parent).toBe(defaultSlot)
+
+    expect(defaultSlot.children[1].tag).toBe('div')
+    expect(defaultSlot.children[1].plain).toBe(true)
+    expect(defaultSlot.children[1].children[0].text).toBe('world')
+    expect(defaultSlot.children[1].parent).toBe(defaultSlot)
+
+    expect(otherSlot.tag).toBe('template')
+    expect(otherSlot.parent).toBe(ast)
+    expect(otherSlot.children[0].tag).toBe('p')
+    expect(otherSlot.children[0].plain).toBe(true)
+    expect(otherSlot.children[0].children[0].text).toBe('other contents')
+    expect(otherSlot.children[0].parent).toBe(otherSlot)
   })
 })
