@@ -714,17 +714,10 @@ function processSlotContent (el) {
     }
   }
 
-  // FIXME check those children are not templates with slots (with all the different syntaxes...)
-  //  Maybe we are lucky and the compiler has already processed those nodes, so we can check their "slotTarget" property
-  // implicit default slot
-  // FIXME maybeComponent() is not smart enough to ensure this is in fact a component.
-  //  Due to this, we end up by using slots in plain HTML tags, which is completely wrong.
-  //  NOTE: this only happends when the tag is not lowercase, as it's not detected as a reserved tag.
   if(!el.slotScope && !el.slotTarget && el.children && maybeComponent(el)) {
     const implicitDefaultSlotChildren = el.children.filter((c: any) => !c.slotScope)
 
     if(implicitDefaultSlotChildren.length) {
-      // TODO add necessary checks and warnings
       // add the component's children to its default slot
       const slots = el.scopedSlots || (el.scopedSlots = {})
       const name = '"default"'
@@ -736,7 +729,6 @@ function processSlotContent (el) {
       slotContainer.slotScope = emptySlotScopeToken
       // remove children as they are returned from scopedSlots now
       el.children = []
-      // TODO review this
       // mark el non-plain as it has a scoped slot
       el.plain = false
     }
