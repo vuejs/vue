@@ -46,6 +46,15 @@ const decodeHTMLCached = cached(he.decode)
 
 export const emptySlotScopeToken = `_empty_`
 
+const vueBuiltinComponents = [
+  'transition',
+  'Transition',
+  'transition-group',
+  'TransitionGroup',
+  'keep-alive',
+  'KeepAlive'
+]
+
 // configurable state
 export let warn: any
 let delimiters
@@ -714,7 +723,7 @@ function processSlotContent (el) {
     }
   }
 
-  if(!el.slotScope && !el.slotTarget && el.children && maybeComponent(el)) {
+  if(isCandidateForImplicitDefaultSlot(el)) {
     const implicitDefaultSlotChildren = el.children.filter((c: any) => !c.slotScope)
 
     if(implicitDefaultSlotChildren.length) {
@@ -752,6 +761,15 @@ function getSlotName (binding) {
     ? { name: name.slice(1, -1), dynamic: true }
     // static name
     : { name: `"${name}"`, dynamic: false }
+}
+
+function isCandidateForImplicitDefaultSlot(el) {
+  return !el.slotScope
+    && !el.slotTarget
+    && el.children
+    && el.children.length > 0
+    && maybeComponent(el)
+    && !vueBuiltinComponents.includes(el.tag);
 }
 
 // handle <slot/> outlets
