@@ -48,11 +48,14 @@ describe('parser', () => {
   it('camelCase element', () => {
     const ast = parse('<MyComponent><p>hello world</p></MyComponent>', baseOptions)
     expect(ast.tag).toBe('MyComponent')
-    expect(ast.plain).toBe(true)
-    expect(ast.children[0].tag).toBe('p')
-    expect(ast.children[0].plain).toBe(true)
-    expect(ast.children[0].children[0].text).toBe('hello world')
-    expect(ast.children[0].parent).toBe(ast)
+    expect(ast.plain).toBe(false)
+    expect(ast.children.length).toBe(0)
+    expect(ast.scopedSlots.default.tag).toBe('template')
+    expect(ast.scopedSlots.default.parent).toBe(ast)
+    expect(ast.scopedSlots.default.children[0].tag).toBe('p')
+    expect(ast.scopedSlots.default.children[0].plain).toBe(true)
+    expect(ast.scopedSlots.default.children[0].children[0].text).toBe('hello world')
+    expect(ast.scopedSlots.default.children[0].parent).toBe(ast.scopedSlots.default)
   })
 
   it('forbidden element', () => {
