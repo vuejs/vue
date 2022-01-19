@@ -65,6 +65,7 @@ export function createRenderer ({
         cb = context
         context = {}
       }
+      context._registeredComponents = new Set();
       if (context) {
         templateRenderer.bindRenderFns(context)
       }
