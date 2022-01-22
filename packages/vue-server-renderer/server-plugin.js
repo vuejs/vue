@@ -7,13 +7,11 @@ var isJS = function (file) { return /\.js(\?[^.]+)?$/.test(file); };
 var ref = require('chalk');
 var red = ref.red;
 var yellow = ref.yellow;
-var webpack = require('webpack');
 
 var prefix = "[vue-server-renderer-webpack-plugin]";
 var warn = exports.warn = function (msg) { return console.error(red((prefix + " " + msg + "\n"))); };
 var tip = exports.tip = function (msg) { return console.log(yellow((prefix + " " + msg + "\n"))); };
 
-var isWebpack5 = !!(webpack.version && webpack.version[0] > 4);
 
 var validate = function (compiler) {
   if (compiler.options.target !== 'node') {
@@ -41,6 +39,7 @@ var validate = function (compiler) {
 };
 
 var onEmit = function (compiler, name, stageName, hook) {
+  const isWebpack5 = !!compiler.webpack
   if (isWebpack5) {
     // Webpack >= 5.0.0
     compiler.hooks.compilation.tap(name, function (compilation) {
@@ -48,7 +47,7 @@ var onEmit = function (compiler, name, stageName, hook) {
         // Ignore child compilers
         return
       }
-      var stage = webpack.Compilation[stageName];
+      var stage = compiler.webpack.Compilation[stageName];
       compilation.hooks.processAssets.tapAsync({ name: name, stage: stage }, function (assets, cb) {
         hook(compilation, cb);
       });
