@@ -1,11 +1,8 @@
 const { red, yellow } = require('chalk')
-const webpack = require('webpack')
 
 const prefix = `[vue-server-renderer-webpack-plugin]`
 const warn = exports.warn = msg => console.error(red(`${prefix} ${msg}\n`))
 const tip = exports.tip = msg => console.log(yellow(`${prefix} ${msg}\n`))
-
-const isWebpack5 = !!(webpack.version && webpack.version[0] > 4)
 
 export const validate = compiler => {
   if (compiler.options.target !== 'node') {
@@ -31,16 +28,18 @@ export const validate = compiler => {
     )
   }
 }
-
+function isWebpack5(compiler){
+  return !!compiler.webpack;
+}
 export const onEmit = (compiler, name, stageName, hook) => {
-  if (isWebpack5) {
+  if (isWebpack5(compiler)) {
     // Webpack >= 5.0.0
     compiler.hooks.compilation.tap(name, compilation => {
       if (compilation.compiler !== compiler) {
         // Ignore child compilers
         return
       }
-      const stage = webpack.Compilation[stageName]
+      const stage = compiler.webpack.Compilation[stageName]
       compilation.hooks.processAssets.tapAsync({ name, stage }, (assets, cb) => {
         hook(compilation, cb)
       })
@@ -54,8 +53,8 @@ export const onEmit = (compiler, name, stageName, hook) => {
   }
 }
 
-export const stripModuleIdHash = id => {
-  if (isWebpack5) {
+export const stripModuleIdHash = (id,compiler) => {
+  if (isWebpack5(compiler)) {
     // Webpack >= 5.0.0
     return id.replace(/\|\w+$/, '')
   }
