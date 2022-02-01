@@ -41,7 +41,7 @@ describe('vdom patch: element', () => {
     expect(elm.innerHTML).toBe('hello world')
   })
 
-  it('should create create an elements which having span and text content', () => {
+  it('should create an elements which having span and text content', () => {
     const vnode = new VNode('div', {}, [
       new VNode('span'),
       createTextVNode('hello world')

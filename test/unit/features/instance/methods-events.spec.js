@@ -41,12 +41,26 @@ describe('Instance methods events', () => {
     expect(spy.calls.count()).toBe(1)
   })
 
+  it('$off multi event without callback', () => {
+    vm.$on(['test1', 'test2'], spy)
+    vm.$off(['test1', 'test2'])
+    vm.$emit('test1')
+    expect(spy).not.toHaveBeenCalled()
+  })
+
   it('$once', () => {
     vm.$once('test', spy)
     vm.$emit('test', 1, 2, 3)
     vm.$emit('test', 2, 3, 4)
     expect(spy.calls.count()).toBe(1)
     expect(spy).toHaveBeenCalledWith(1, 2, 3)
+  })
+
+  it('$off event added by $once', () => {
+    vm.$once('test', spy)
+    vm.$off('test', spy) // test off event and this event added by once
+    vm.$emit('test', 1, 2, 3)
+    expect(spy).not.toHaveBeenCalled()
   })
 
   it('$off', () => {
@@ -70,7 +84,7 @@ describe('Instance methods events', () => {
   })
 
   it('$off event + fn', () => {
-    var spy2 = jasmine.createSpy('emitter')
+    const spy2 = jasmine.createSpy('emitter')
     vm.$on('test', spy)
     vm.$on('test', spy2)
     vm.$off('test', spy)

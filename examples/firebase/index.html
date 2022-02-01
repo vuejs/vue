@@ -21,8 +21,8 @@
         </li>
       </ul>
       <form id="form" v-on:submit.prevent="addUser">
-        <input v-model="newUser.name">
-        <input v-model="newUser.email">
+        <input v-model="newUser.name" placeholder="Add Name">
+        <input v-model="newUser.email" placeholder="Add Email">
         <input type="submit" value="Add User">
       </form>
       <ul class="errors">

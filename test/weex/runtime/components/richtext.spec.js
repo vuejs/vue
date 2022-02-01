@@ -199,7 +199,7 @@ describe('richtext component', () => {
         attr: {
           value: [{
             type: 'image',
-            style: { width: 150, height: 150 },
+            style: { width: '150px', height: '150px' },
             attr: { src: 'path/to/profile.png' }
           }]
         }
@@ -293,11 +293,11 @@ describe('richtext component', () => {
         attr: {
           value: [{
             type: 'span',
-            style: { fontSize: 16, color: '#FF6600' },
+            style: { fontSize: '16px', color: '#FF6600' },
             attr: { value: 'ABCD' }
           }, {
             type: 'image',
-            style: { width: 33.33, height: 66.67 },
+            style: { width: '33.33px', height: '66.67px' },
             attr: { src: 'path/to/A.png' }
           }]
         }
@@ -471,7 +471,7 @@ describe('richtext component', () => {
         attr: {
           value: [{
             type: 'span',
-            style: { fontSize: 32, color: '#F6F660' },
+            style: { fontSize: '32px', color: '#F6F660' },
             attr: { value: 'ABCD' }
           }, {
             type: 'span',
@@ -543,7 +543,7 @@ describe('richtext component', () => {
         attr: {
           value: [{
             type: 'span',
-            style: { fontSize: 24, color: '#ABCDEF' },
+            style: { fontSize: '24px', color: '#ABCDEF' },
             attr: { value: 'ABCD' }
           }, {
             type: 'span',
@@ -585,7 +585,7 @@ describe('richtext component', () => {
         }
       `)).toEqual({
         type: 'richtext',
-        style: { backgroundColor: '#FF6600', height: 200 },
+        classList: ['title'],
         attr: {
           value: [{
             type: 'span',
@@ -612,7 +612,8 @@ describe('richtext component', () => {
         }
       `)).toEqual({
         type: 'richtext',
-        style: { backgroundColor: '#FF6600', height: 200 },
+        classList: ['title'],
+        style: { backgroundColor: '#FF6600' },
         attr: {
           value: [{
             type: 'span',

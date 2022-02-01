@@ -1,25 +1,22 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "experimentalDecorators": true,
     "lib": [
       "dom",
       "es2015"
     ],
     "module": "commonjs",
     "strict": true,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "vue": ["../index.d.ts"]
+    }
   },
-  "files": [
-    "../index.d.ts",
-    "../options.d.ts",
-    "../plugin.d.ts",
-    "../vnode.d.ts",
-    "../vue.d.ts",
-    "options-test.ts",
-    "plugin-test.ts",
-    "vue-test.ts",
-    "augmentation-test.ts",
-    "ssr-test.ts"
+  "include": [
+    "../*.d.ts",
+    "*.ts"
   ],
   "compileOnSave": false
 }

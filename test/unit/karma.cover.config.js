@@ -1,8 +1,16 @@
-var base = require('./karma.base.config.js')
+const base = require('./karma.base.config.js')
+
+process.env.CHROME_BIN = require('puppeteer').executablePath()
 
 module.exports = function (config) {
-  var options = Object.assign(base, {
-    browsers: ['PhantomJS'],
+  const options = Object.assign(base, {
+    browsers: ['ChromeHeadlessCI'],
+    customLaunchers: {
+      'ChromeHeadlessCI': {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      }
+    },
     reporters: ['mocha', 'coverage'],
     coverageReporter: {
       reporters: [
@@ -13,7 +21,7 @@ module.exports = function (config) {
     singleRun: true,
     plugins: base.plugins.concat([
       'karma-coverage',
-      'karma-phantomjs-launcher'
+      'karma-chrome-launcher'
     ])
   })
 
@@ -24,7 +32,8 @@ module.exports = function (config) {
         'test/',
         'src/compiler/parser/html-parser.js',
         'src/core/instance/proxy.js',
-        'src/sfc/deindent.js'
+        'src/sfc/deindent.js',
+        'src/platforms/weex/'
       ]
     }]]
   }
