@@ -122,7 +122,7 @@ function assertProp (
       type = [type]
     }
     for (let i = 0; i < type.length && !valid; i++) {
-      const assertedType = assertType(value, type[i], vm)
+      const assertedType = assertType(value, type[i], name, vm)
       expectedTypes.push(assertedType.expectedType || '')
       valid = assertedType.valid
     }
@@ -149,7 +149,7 @@ function assertProp (
 
 const simpleCheckRE = /^(String|Number|Boolean|Function|Symbol|BigInt)$/
 
-function assertType (value: any, type: Function, vm: ?Component): {
+function assertType (value: any, type: Function, name: string, vm: ?Component): {
   valid: boolean;
   expectedType: string;
 } {
@@ -170,7 +170,7 @@ function assertType (value: any, type: Function, vm: ?Component): {
     try {
       valid = value instanceof type
     } catch (e) {
-      warn('Invalid prop type: "' + String(type) + '" is not a constructor', vm);
+      warn(`Invalid prop "${name}" type: "${String(type)}" is not a constructor`, vm);
       valid = false;
     }
   }
