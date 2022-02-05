@@ -505,13 +505,17 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Peter Imburg
 - Johnny Ray Austin
 - Wasim Khamlichi
+- Hayden Bickerton
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
 
 <!--10 start-->
+- Anun
+- Victor Tolbert
+- Shawn Bird
 - Dave Mount
-- Keisuke Kita
+- Rodolfo Cavallari
 - Santiago Arizti
 - Sven Güntner
 - Theo Ephraim
@@ -523,6 +527,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - WhereJuly
 - Fontis 
 - Jack 
+- Artur Bańka
 - Pierre Baron
 - Donghai Gai
 - Aleksander Figiel
@@ -539,9 +544,9 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Alfonso Herrera
 - Bichinger Software & Consulting
 - Pierre Lebrun
-- Peter Matkovsky
+- James Macon
 - 龙腾道 
-- Rodolfo Cavallari
+- Nick Dandakis
 - Yusuke Kawabata
 - Shawn Wildermuth
 - Elon Hung
@@ -571,8 +576,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Barbara Liau
 - Wen-Tien Chang
 - Stephen Hartley
-- Victor Tolbert
-- Nick Dandakis
+- Peter Matkovsky
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
