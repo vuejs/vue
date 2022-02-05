@@ -161,7 +161,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="http://en.shopware.com/" target="_blank">
+        <a href="https://en.shopware.com/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/shopware_ag.png">
         </a>
       </td>
@@ -321,7 +321,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="http://www.lendio.com" target="_blank">
+        <a href="https://www.lendio.com" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/lendio.png">
         </a>
       </td>
