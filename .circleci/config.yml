@@ -43,18 +43,20 @@ jobs:
       - run:
           name: report coverage stats for non-PRs
           command: |
-            # Download, verify, and run the Codecov uploader
-            # https://docs.codecov.com/docs/codecov-uploader
-            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import # One-time step
-            curl -Os https://uploader.codecov.io/latest/linux/codecov
-            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
-            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+            if [[ -z $CI_PULL_REQUEST ]]; then
+              # Download, verify, and run the Codecov uploader
+              # https://docs.codecov.com/docs/codecov-uploader
+              curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import # One-time step
+              curl -Os https://uploader.codecov.io/latest/linux/codecov
+              curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+              curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
 
-            gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
-            shasum -a 256 -c codecov.SHA256SUM
-            chmod +x codecov
+              gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+              shasum -a 256 -c codecov.SHA256SUM
+              chmod +x codecov
 
-            ./codecov
+              ./codecov
+            fi
 
   test-e2e:
     <<: *defaults
