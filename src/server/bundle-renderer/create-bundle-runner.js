@@ -8,6 +8,7 @@ const NativeModule = require('module')
 function createSandbox (context) {
   const sandbox = {
     Buffer,
+    URL,
     console,
     process,
     setTimeout,
@@ -63,7 +64,7 @@ function compileModule (files, basedir, runInNewContext) {
         return require(file)
       }
     }
-    compiledWrapper.call(m.exports, m.exports, r, m)
+    compiledWrapper.call(m.exports, m.exports, r, m, "", "")
 
     const res = Object.prototype.hasOwnProperty.call(m.exports, 'default')
       ? m.exports.default

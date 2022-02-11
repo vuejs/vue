@@ -43,7 +43,7 @@ function isPrimitive (value) {
 
 /**
  * Quick object check - this is primarily used to tell
- * Objects from primitive values when we know the value
+ * objects from primitive values when we know the value
  * is a JSON-compliant type.
  */
 function isObject (obj) {
@@ -3053,7 +3053,7 @@ function transformNode (el, options) {
     }
   }
   if (staticClass) {
-    el.staticClass = JSON.stringify(staticClass);
+    el.staticClass = JSON.stringify(staticClass.replace(/\s+/g, ' ').trim());
   }
   var classBinding = getBindingAttr(el, 'class', false /* getStatic */);
   if (classBinding) {
@@ -9291,6 +9291,7 @@ var NativeModule = require('module');
 function createSandbox (context) {
   var sandbox = {
     Buffer: Buffer,
+    URL: URL,
     console: console,
     process: process,
     setTimeout: setTimeout,
@@ -9348,7 +9349,7 @@ function compileModule (files, basedir, runInNewContext) {
         return require(file)
       }
     };
-    compiledWrapper.call(m.exports, m.exports, r, m);
+    compiledWrapper.call(m.exports, m.exports, r, m, "", "");
 
     var res = Object.prototype.hasOwnProperty.call(m.exports, 'default')
       ? m.exports.default
