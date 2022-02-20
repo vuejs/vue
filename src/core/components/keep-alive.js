@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isRegExp, remove } from 'shared/util'
+import { isRegExp, remove, isDef } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
 type CacheEntry = {
@@ -78,7 +78,7 @@ export default {
         }
         keys.push(keyToCache)
         // prune oldest entry
-        if (this.max && keys.length > parseInt(this.max)) {
+        if (isDef(this.max) && keys.length > parseInt(this.max)) {
           pruneCacheEntry(cache, keys[0], keys, this._vnode)
         }
         this.vnodeToCache = null
