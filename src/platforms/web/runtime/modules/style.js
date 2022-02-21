@@ -1,7 +1,7 @@
 /* @flow */
 
 import { getStyle, normalizeStyleBinding } from 'web/util/style'
-import { cached, camelize, extend, isDef, isUndef } from 'shared/util'
+import { cached, camelize, extend, isDef, isUndef, hyphenate } from 'shared/util'
 
 const cssVarRE = /^--/
 const importantRE = /\s*!important$/
@@ -10,7 +10,7 @@ const setProp = (el, name, val) => {
   if (cssVarRE.test(name)) {
     el.style.setProperty(name, val)
   } else if (importantRE.test(val)) {
-    el.style.setProperty(name, val.replace(importantRE, ''), 'important')
+    el.style.setProperty(hyphenate(name), val.replace(importantRE, ''), 'important')
   } else {
     const normalizedName = normalize(name)
     if (Array.isArray(val)) {

@@ -149,15 +149,15 @@ describe('Instance properties', () => {
   // #6263
   it('$attrs should not be undefined when no props passed in', () => {
     const vm = new Vue({
-      template: `<foo/>`,
+      template: `<foo ref="foo" />`,
       data: { foo: 'foo' },
       components: {
         foo: {
-          template: `<div>{{ this.foo }}</div>`
+          template: `<div>foo</div>`
         }
       }
     }).$mount()
-    expect(vm.$attrs).toBeDefined()
+    expect(vm.$refs.foo.$attrs).toBeDefined()
   })
 
   it('warn mutating $attrs', () => {

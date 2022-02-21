@@ -1,6 +1,6 @@
 /* @flow */
 
-import { extend } from 'shared/util'
+import { extend, isObject } from 'shared/util'
 
 function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const el = vnode.elm
@@ -15,30 +15,39 @@ function updateClass (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     return
   }
 
-  const oldClassList = []
-  // unlike web, weex vnode staticClass is an Array
-  const oldStaticClass: any = oldData.staticClass
-  if (oldStaticClass) {
-    oldClassList.push.apply(oldClassList, oldStaticClass)
-  }
-  if (oldData.class) {
-    oldClassList.push.apply(oldClassList, oldData.class)
-  }
+  const oldClassList = makeClassList(oldData)
+  const classList = makeClassList(data)
 
+  if (typeof el.setClassList === 'function') {
+    el.setClassList(classList)
+  } else {
+    const style = getStyle(oldClassList, classList, ctx)
+    if (typeof el.setStyles === 'function') {
+      el.setStyles(style)
+    } else {
+      for (const key in style) {
+        el.setStyle(key, style[key])
+      }
+    }
+  }
+}
+
+function makeClassList (data: VNodeData): Array<string> {
   const classList = []
   // unlike web, weex vnode staticClass is an Array
   const staticClass: any = data.staticClass
+  const dataClass = data.class
   if (staticClass) {
     classList.push.apply(classList, staticClass)
   }
-  if (data.class) {
-    classList.push.apply(classList, data.class)
+  if (Array.isArray(dataClass)) {
+    classList.push.apply(classList, dataClass)
+  } else if (isObject(dataClass)) {
+    classList.push.apply(classList, Object.keys(dataClass).filter(className => dataClass[className]))
+  } else if (typeof dataClass === 'string') {
+    classList.push.apply(classList, dataClass.trim().split(/\s+/))
   }
-
-  const style = getStyle(oldClassList, classList, ctx)
-  for (const key in style) {
-    el.setStyle(key, style[key])
-  }
+  return classList
 }
 
 function getStyle (oldClassList: Array<string>, classList: Array<string>, ctx: Component): Object {

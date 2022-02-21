@@ -1,178 +1,89 @@
+/* @flow */
+
 // this will be preserved during build
+// $flow-disable-line
 const VueFactory = require('./factory')
 
-const instances = {}
+const instanceOptions: { [key: string]: WeexInstanceOption } = {}
 
 /**
- * Prepare framework config.
- * Nothing need to do actually, just an interface provided to weex runtime.
+ * Create instance context.
  */
-export function init () {}
-
-/**
- * Reset framework config and clear all registrations.
- */
-export function reset () {
-  clear(instances)
-}
-
-/**
- * Delete all keys of an object.
- * @param {object} obj
- */
-function clear (obj) {
-  for (const key in obj) {
-    delete obj[key]
-  }
-}
-
-/**
- * Create an instance with id, code, config and external data.
- * @param {string} instanceId
- * @param {string} appCode
- * @param {object} config
- * @param {object} data
- * @param {object} env { info, config, services }
- */
-export function createInstance (
-  instanceId,
-  appCode = '',
-  config = {},
-  data,
-  env = {}
-) {
-  const weex = env.weex
-  const document = weex.document
-  const instance = instances[instanceId] = {
-    instanceId, config, data,
-    document
+export function createInstanceContext (
+  instanceId: string,
+  runtimeContext: WeexRuntimeContext,
+  data: Object = {}
+): WeexInstanceContext {
+  const weex: Weex = runtimeContext.weex
+  const instance: WeexInstanceOption = instanceOptions[instanceId] = {
+    instanceId,
+    config: weex.config,
+    document: weex.document,
+    data
   }
 
-  const timerAPIs = getInstanceTimer(instanceId, weex.requireModule)
-
-  // Each instance has a independent `Vue` module instance
+  // Each instance has an independent `Vue` module instance
   const Vue = instance.Vue = createVueModuleInstance(instanceId, weex)
 
-  // The function which create a closure the JS Bundle will run in.
-  // It will declare some instance variables like `Vue`, HTML5 Timer APIs etc.
-  const instanceVars = Object.assign({
-    Vue,
-    weex
-  }, timerAPIs, env.services)
+  // DEPRECATED
+  const timerAPIs = getInstanceTimer(instanceId, weex.requireModule)
 
-  appCode = `(function(global){ \n${appCode}\n })(Object.create(this))`
-
-  callFunction(instanceVars, appCode)
-
-  // Send `createFinish` signal to native.
-  document.taskCenter.send('dom', { action: 'createFinish' }, [])
-
-  return instance
+  const instanceContext = Object.assign({ Vue }, timerAPIs)
+  Object.freeze(instanceContext)
+  return instanceContext
 }
 
 /**
  * Destroy an instance with id. It will make sure all memory of
  * this instance released and no more leaks.
- * @param {string} instanceId
  */
-export function destroyInstance (instanceId) {
-  const instance = instances[instanceId]
+export function destroyInstance (instanceId: string): void {
+  const instance = instanceOptions[instanceId]
   if (instance && instance.app instanceof instance.Vue) {
-    instance.document.destroy()
-    instance.app.$destroy()
+    try {
+      instance.app.$destroy()
+      instance.document.destroy()
+    } catch (e) {}
     delete instance.document
     delete instance.app
   }
-  delete instances[instanceId]
+  delete instanceOptions[instanceId]
 }
 
 /**
  * Refresh an instance with id and new top-level component data.
  * It will use `Vue.set` on all keys of the new data. So it's better
  * define all possible meaningful keys when instance created.
- * @param {string} instanceId
- * @param {object} data
  */
-export function refreshInstance (instanceId, data) {
-  const instance = instances[instanceId]
+export function refreshInstance (
+  instanceId: string,
+  data: Object
+): Error | void {
+  const instance = instanceOptions[instanceId]
   if (!instance || !(instance.app instanceof instance.Vue)) {
     return new Error(`refreshInstance: instance ${instanceId} not found!`)
   }
-  for (const key in data) {
-    instance.Vue.set(instance.app, key, data[key])
+  if (instance.Vue && instance.Vue.set) {
+    for (const key in data) {
+      instance.Vue.set(instance.app, key, data[key])
+    }
   }
   // Finally `refreshFinish` signal needed.
   instance.document.taskCenter.send('dom', { action: 'refreshFinish' }, [])
 }
 
 /**
- * Get the JSON object of the root element.
- * @param {string} instanceId
- */
-export function getRoot (instanceId) {
-  const instance = instances[instanceId]
-  if (!instance || !(instance.app instanceof instance.Vue)) {
-    return new Error(`getRoot: instance ${instanceId} not found!`)
-  }
-  return instance.app.$el.toJSON()
-}
-
-const jsHandlers = {
-  fireEvent: (id, ...args) => {
-    return fireEvent(instances[id], ...args)
-  },
-  callback: (id, ...args) => {
-    return callback(instances[id], ...args)
-  }
-}
-
-function fireEvent (instance, nodeId, type, e, domChanges) {
-  const el = instance.document.getRef(nodeId)
-  if (el) {
-    return instance.document.fireEvent(el, type, e, domChanges)
-  }
-  return new Error(`invalid element reference "${nodeId}"`)
-}
-
-function callback (instance, callbackId, data, ifKeepAlive) {
-  const result = instance.document.taskCenter.callback(callbackId, data, ifKeepAlive)
-  instance.document.taskCenter.send('dom', { action: 'updateFinish' }, [])
-  return result
-}
-
-/**
- * Accept calls from native (event or callback).
- *
- * @param  {string} id
- * @param  {array} tasks list with `method` and `args`
- */
-export function receiveTasks (id, tasks) {
-  const instance = instances[id]
-  if (instance && Array.isArray(tasks)) {
-    const results = []
-    tasks.forEach((task) => {
-      const handler = jsHandlers[task.method]
-      const args = [...task.args]
-      /* istanbul ignore else */
-      if (typeof handler === 'function') {
-        args.unshift(id)
-        results.push(handler(...args))
-      }
-    })
-    return results
-  }
-  return new Error(`invalid instance id "${id}" or tasks`)
-}
-
-/**
  * Create a fresh instance of Vue for each Weex instance.
  */
-function createVueModuleInstance (instanceId, weex) {
+function createVueModuleInstance (
+  instanceId: string,
+  weex: Weex
+): GlobalAPI {
   const exports = {}
   VueFactory(exports, weex.document)
   const Vue = exports.Vue
 
-  const instance = instances[instanceId]
+  const instance = instanceOptions[instanceId]
 
   // patch reserved tag detection to account for dynamically registered
   // components
@@ -208,6 +119,16 @@ function createVueModuleInstance (instanceId, weex) {
         // record instance by id
         instance.app = this
       }
+    },
+    mounted () {
+      const options = this.$options
+      // root component (vm)
+      if (options.el && weex.document && instance.app === this) {
+        try {
+          // Send "createFinish" signal to native.
+          weex.document.taskCenter.send('dom', { action: 'createFinish' }, [])
+        } catch (e) {}
+      }
     }
   })
 
@@ -226,16 +147,17 @@ function createVueModuleInstance (instanceId, weex) {
 }
 
 /**
+ * DEPRECATED
  * Generate HTML5 Timer APIs. An important point is that the callback
  * will be converted into callback id when sent to native. So the
  * framework can make sure no side effect of the callback happened after
  * an instance destroyed.
- * @param  {[type]} instanceId   [description]
- * @param  {[type]} moduleGetter [description]
- * @return {[type]}              [description]
  */
-function getInstanceTimer (instanceId, moduleGetter) {
-  const instance = instances[instanceId]
+function getInstanceTimer (
+  instanceId: string,
+  moduleGetter: Function
+): Object {
+  const instance = instanceOptions[instanceId]
   const timer = moduleGetter('timer')
   const timerAPIs = {
     setTimeout: (...args) => {
@@ -262,23 +184,4 @@ function getInstanceTimer (instanceId, moduleGetter) {
     }
   }
   return timerAPIs
-}
-
-/**
- * Call a new function body with some global objects.
- * @param  {object} globalObjects
- * @param  {string} code
- * @return {any}
- */
-function callFunction (globalObjects, body) {
-  const globalKeys = []
-  const globalValues = []
-  for (const key in globalObjects) {
-    globalKeys.push(key)
-    globalValues.push(globalObjects[key])
-  }
-  globalKeys.push(body)
-
-  const result = new Function(...globalKeys)
-  return result(...globalValues)
 }

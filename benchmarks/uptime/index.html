@@ -38,7 +38,7 @@
       .days {
         display: flex;
         flex-direction: row;
-        flex-flow: wrap;
+        flex-wrap: wrap;
       }
 
       .uptime-day {
@@ -82,7 +82,7 @@
     </div>
     <script src="../../dist/vue.min.js"></script>
     <script>
-      // functional components are prefect for small, presentational components
+      // functional components are perfect for small, presentational components
       // and they are much more efficient than stateful ones.
       Vue.component('uptime-day', {
         props: ['day'],
