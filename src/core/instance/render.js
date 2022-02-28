@@ -24,14 +24,17 @@ export function initRender (vm: Component) {
   const renderContext = parentVnode && parentVnode.context
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject
+
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
   // internal version is used by render functions compiled from templates
+  // vm._c 方法，它是被模板编译成的 render 函数使用
   vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
+
   // normalization is always applied for the public version, used in
   // user-written render functions.
-  // render 函数中的 createElement 方法就是 vm.$createElement 方法
+  // vm.$createElement 是用户手写 render 方法时使用的
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
 
   // $attrs & $listeners are exposed for easier HOC creation.
@@ -67,7 +70,11 @@ export function renderMixin (Vue: Class<Component>) {
     return nextTick(fn, this)
   }
 
-  /** 把实例渲染成虚拟Node */
+  /**
+   * 把实例渲染成虚拟Node
+   * @returns VNode: 定义在 src/core/vdom/vnode.js
+   * @private
+   */
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
     const { render, _parentVnode } = vm.$options  // 如果vm实例属性中有定义render方法，从中获取

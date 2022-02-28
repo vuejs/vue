@@ -1,5 +1,12 @@
+/**
+ * 虚拟Node类
+ * @description：VNode 是对真实 DOM 的一种抽象描述它的核心定义无非就几个关键属性，标签名、数据、子节点、键值等，
+ * 其它属性都是用来扩展 VNode 的灵活性以及实现一些特殊 feature 的。由于 VNode 只是用来映射到真实 DOM 的渲染，
+ * 不需要包含操作 DOM 的方法，因此它是非常轻量和简单的。
+ * Virtual DOM 除了它的数据结构的定义，映射到真实的 DOM 实际上要经历 VNode 的 create、diff、patch 等过程，
+ * 其中 createElement 方法定义在 src/core/vdom/create-element.js；
+ */
 /* @flow */
-
 export default class VNode {
   tag: string | void;
   data: VNodeData | void;
@@ -13,7 +20,7 @@ export default class VNode {
   componentInstance: Component | void; // component instance
   parent: VNode | void; // component placeholder node
 
-  // strictly internal
+  // strictly internal：一些特殊的 feature，使得VNode的控制更灵活
   raw: boolean; // contains raw HTML? (server only)
   isStatic: boolean; // hoisted static node
   isRootInsert: boolean; // necessary for enter transition check

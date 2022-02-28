@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+<!--  <script src="../platforms/web/entry-runtime-with-compiler.js"></script>-->
+  <script src="../../dist/vue.js"></script>
+</head>
+
+<body>
+<div id="app">
+  <h1>{{msg}}</h1>
+</div>
+<script>
+  var app = new Vue({
+    el: '#app',
+    data() {
+      return {
+        msg: '测试用例'
+      }
+    }
+  });
+</script>
+</body>
+</html>
