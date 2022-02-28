@@ -138,6 +138,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+/** 最终实际挂载vue组件的方法 */
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -186,14 +187,19 @@ export function mountComponent (
       measure(`vue ${name} patch`, startTag, endTag)
     }
   } else {
+    // 先调用 vm._render() 方法生成虚拟DOM，然后调用 vm._update() 更新DOM
     updateComponent = () => {
-      vm._update(vm._render(), hydrating)
+      vm._update(vm._render(), hydrating) // vm._render()方法定义在 src/core/instance/render.js
     }
   }
 
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  // 创建渲染Watcher，回调函数中调用 updateComponent 方法
+  // 这里的Watcher起到两个作用：
+  // 1、初始化时执行一次回调函数，即updateComponent()；
+  // 2、当vm实例中的监测数据发生变化时，会执行updateComponent回调函数。
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {
@@ -205,9 +211,10 @@ export function mountComponent (
 
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
+  // 注意这里的vm.$vnode 表示当前的Vue实例的父虚拟Node，为null表示当前是根Vue的实例
   if (vm.$vnode == null) {
-    vm._isMounted = true
-    callHook(vm, 'mounted')
+    vm._isMounted = true  // 判断为根节点时，设置vm._isMounted为true，表示这个实例已经挂载了
+    callHook(vm, 'mounted')   // 挂载的同时执行mounted钩子函数
   }
   return vm
 }

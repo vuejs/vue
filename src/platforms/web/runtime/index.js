@@ -34,12 +34,13 @@ extend(Vue.options.components, platformComponents)
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
+/** 公共mount方法 */
 Vue.prototype.$mount = function (
-  el?: string | Element,
-  hydrating?: boolean
+  el?: string | Element,  // 挂载的元素，可以是字符串，也可以是 DOM
+  hydrating?: boolean     // 跟服务端渲染相关，浏览器环境不需要传
 ): Component {
   el = el && inBrowser ? query(el) : undefined
-  return mountComponent(this, el, hydrating)
+  return mountComponent(this, el, hydrating)  // mountComponent方法定义在 src/core/instance/lifecycle.js
 }
 
 // devtools global hook
