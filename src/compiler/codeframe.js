@@ -8,6 +8,11 @@ export function generateCodeFrame (
   end: number = source.length
 ): string {
   const lines = source.split(/\r?\n/)
+  
+  if (end === source.length) {
+    end = lines.join('\n').length
+  }
+  
   let count = 0
   const res = []
   for (let i = 0; i < lines.length; i++) {
