@@ -104,7 +104,7 @@
     "http-server": "^0.12.3",
     "jasmine": "^2.99.0",
     "jasmine-core": "^2.99.0",
-    "karma": "^3.1.1",
+    "karma": "^6.3.16",
     "karma-chrome-launcher": "^2.1.1",
     "karma-coverage": "^1.1.1",
     "karma-firefox-launcher": "^1.0.1",
