@@ -6,7 +6,12 @@ type RenderState = {
   type: 'Element';
   rendered: number;
   total: number;
+  children: Array<VNode>;
   endTag: string;
+} | {
+  type: 'Fragment';
+  rendered: number;
+  total: number;
   children: Array<VNode>;
 } | {
   type: 'Component';
@@ -26,7 +31,7 @@ export class RenderContext {
   write: (text: string, next: Function) => void;
   renderNode: (node: VNode, isRoot: boolean, context: RenderContext) => void;
   next: () => void;
-  done: () => void;
+  done: (err: ?Error) => void;
 
   modules: Array<(node: VNode) => ?string>;
   directives: Object;
@@ -61,49 +66,54 @@ export class RenderContext {
   }
 
   next () {
-    const lastState = this.renderStates[this.renderStates.length - 1]
-    if (isUndef(lastState)) {
-      return this.done()
-    }
-    switch (lastState.type) {
-      case 'Element':
-        const { children, total } = lastState
-        const rendered = lastState.rendered++
-        if (rendered < total) {
-          this.renderNode(children[rendered], false, this)
-        } else {
+    // eslint-disable-next-line
+    while (true) {
+      const lastState = this.renderStates[this.renderStates.length - 1]
+      if (isUndef(lastState)) {
+        return this.done()
+      }
+      /* eslint-disable no-case-declarations */
+      switch (lastState.type) {
+        case 'Element':
+        case 'Fragment':
+          const { children, total } = lastState
+          const rendered = lastState.rendered++
+          if (rendered < total) {
+            return this.renderNode(children[rendered], false, this)
+          } else {
+            this.renderStates.pop()
+            if (lastState.type === 'Element') {
+              return this.write(lastState.endTag, this.next)
+            }
+          }
+          break
+        case 'Component':
           this.renderStates.pop()
-          this.write(lastState.endTag, this.next)
-        }
-        break
-      case 'Component':
-        this.renderStates.pop()
-        this.activeInstance = lastState.prevActive
-        this.next()
-        break
-      case 'ComponentWithCache':
-        this.renderStates.pop()
-        const { buffer, bufferIndex, componentBuffer, key } = lastState
-        const result = {
-          html: buffer[bufferIndex],
-          components: componentBuffer[bufferIndex]
-        }
-        this.cache.set(key, result)
-        if (bufferIndex === 0) {
-          // this is a top-level cached component,
-          // exit caching mode.
-          this.write.caching = false
-        } else {
-          // parent component is also being cached,
-          // merge self into parent's result
-          buffer[bufferIndex - 1] += result.html
-          const prev = componentBuffer[bufferIndex - 1]
-          result.components.forEach(c => prev.add(c))
-        }
-        buffer.length = bufferIndex
-        componentBuffer.length = bufferIndex
-        this.next()
-        break
+          this.activeInstance = lastState.prevActive
+          break
+        case 'ComponentWithCache':
+          this.renderStates.pop()
+          const { buffer, bufferIndex, componentBuffer, key } = lastState
+          const result = {
+            html: buffer[bufferIndex],
+            components: componentBuffer[bufferIndex]
+          }
+          this.cache.set(key, result)
+          if (bufferIndex === 0) {
+            // this is a top-level cached component,
+            // exit caching mode.
+            this.write.caching = false
+          } else {
+            // parent component is also being cached,
+            // merge self into parent's result
+            buffer[bufferIndex - 1] += result.html
+            const prev = componentBuffer[bufferIndex - 1]
+            result.components.forEach(c => prev.add(c))
+          }
+          buffer.length = bufferIndex
+          componentBuffer.length = bufferIndex
+          break
+      }
     }
   }
 }

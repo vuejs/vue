@@ -1,9 +1,11 @@
 import { Vue } from "./vue";
+import "./umd";
 
 export default Vue;
 
 export {
-  CreateElement
+  CreateElement,
+  VueConstructor
 } from "./vue";
 
 export {
@@ -12,6 +14,7 @@ export {
   ComponentOptions,
   FunctionalComponentOptions,
   RenderContext,
+  PropType,
   PropOptions,
   ComputedOptions,
   WatchHandler,

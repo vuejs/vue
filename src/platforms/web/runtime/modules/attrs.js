@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isIE9, isEdge } from 'core/util/env'
+import { isIE, isIE9, isEdge } from 'core/util/env'
 
 import {
   extend,
@@ -14,7 +14,8 @@ import {
   getXlinkProp,
   isBooleanAttr,
   isEnumeratedAttr,
-  isFalsyAttrValue
+  isFalsyAttrValue,
+  convertEnumeratedValue
 } from 'web/util/index'
 
 function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
@@ -38,13 +39,13 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     cur = attrs[key]
     old = oldAttrs[key]
     if (old !== cur) {
-      setAttr(elm, key, cur)
+      setAttr(elm, key, cur, vnode.data.pre)
     }
   }
   // #4391: in IE9, setting type can reset value for input[type=radio]
   // #6666: IE/Edge forces progress value down to 1 before setting a max
   /* istanbul ignore if */
-  if ((isIE9 || isEdge) && attrs.value !== oldAttrs.value) {
+  if ((isIE || isEdge) && attrs.value !== oldAttrs.value) {
     setAttr(elm, 'value', attrs.value)
   }
   for (key in oldAttrs) {
@@ -58,8 +59,10 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
 }
 
-function setAttr (el: Element, key: string, value: any) {
-  if (isBooleanAttr(key)) {
+function setAttr (el: Element, key: string, value: any, isInPre: any) {
+  if (isInPre || el.tagName.indexOf('-') > -1) {
+    baseSetAttr(el, key, value)
+  } else if (isBooleanAttr(key)) {
     // set attribute for blank value
     // e.g. <option disabled>Select one</option>
     if (isFalsyAttrValue(value)) {
@@ -73,7 +76,7 @@ function setAttr (el: Element, key: string, value: any) {
       el.setAttribute(key, value)
     }
   } else if (isEnumeratedAttr(key)) {
-    el.setAttribute(key, isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true')
+    el.setAttribute(key, convertEnumeratedValue(key, value))
   } else if (isXlink(key)) {
     if (isFalsyAttrValue(value)) {
       el.removeAttributeNS(xlinkNS, getXlinkProp(key))
@@ -81,11 +84,32 @@ function setAttr (el: Element, key: string, value: any) {
       el.setAttributeNS(xlinkNS, key, value)
     }
   } else {
-    if (isFalsyAttrValue(value)) {
-      el.removeAttribute(key)
-    } else {
-      el.setAttribute(key, value)
+    baseSetAttr(el, key, value)
+  }
+}
+
+function baseSetAttr (el, key, value) {
+  if (isFalsyAttrValue(value)) {
+    el.removeAttribute(key)
+  } else {
+    // #7138: IE10 & 11 fires input event when setting placeholder on
+    // <textarea>... block the first input event and remove the blocker
+    // immediately.
+    /* istanbul ignore if */
+    if (
+      isIE && !isIE9 &&
+      el.tagName === 'TEXTAREA' &&
+      key === 'placeholder' && value !== '' && !el.__ieph
+    ) {
+      const blocker = e => {
+        e.stopImmediatePropagation()
+        el.removeEventListener('input', blocker)
+      }
+      el.addEventListener('input', blocker)
+      // $flow-disable-line
+      el.__ieph = true /* IE placeholder patched */
     }
+    el.setAttribute(key, value)
   }
 }
 

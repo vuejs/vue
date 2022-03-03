@@ -19,12 +19,23 @@ export const mustUseProp = (tag: string, type: ?string, attr: string): boolean =
 
 export const isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck')
 
+const isValidContentEditableValue = makeMap('events,caret,typing,plaintext-only')
+
+export const convertEnumeratedValue = (key: string, value: any) => {
+  return isFalsyAttrValue(value) || value === 'false'
+    ? 'false'
+    // allow arbitrary string value for contenteditable
+    : key === 'contenteditable' && isValidContentEditableValue(value)
+      ? value
+      : 'true'
+}
+
 export const isBooleanAttr = makeMap(
   'allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
   'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
   'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
   'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
-  'required,reversed,scoped,seamless,selected,sortable,translate,' +
+  'required,reversed,scoped,seamless,selected,sortable,' +
   'truespeed,typemustmatch,visible'
 )
 

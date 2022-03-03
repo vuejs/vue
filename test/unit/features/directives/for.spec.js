@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { hasSymbol } from 'core/util/env'
 
 describe('Directive v-for', () => {
   it('should render array of primitive values', done => {
@@ -122,6 +123,225 @@ describe('Directive v-for', () => {
       expect(vm.$el.innerHTML).toBe('<span>0-x</span><span>1-y</span>')
     }).then(done)
   })
+
+  if (hasSymbol) {
+    it('should render native iterables (Map)', () => {
+      const vm = new Vue({
+        template: `<div><span v-for="[key, val] in list">{{key}},{{val}}</span></div>`,
+        data: {
+          list: new Map([[1, 'foo'], [2, 'bar']])
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`<span>1,foo</span><span>2,bar</span>`)
+    })
+
+    it('should render native iterables (Set)', () => {
+      const vm = new Vue({
+        template: `<div><span v-for="val in list">{{val}}</span></div>`,
+        data: {
+          list: new Set([1, 2, 3])
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe(`<span>1</span><span>2</span><span>3</span>`)
+    })
+
+    it('should render iterable of primitive values', done => {
+      const iterable = {
+        models: ['a', 'b', 'c'],
+        index: 0,
+        [Symbol.iterator] () {
+          const iterator = {
+            index: 0,
+            models: this.models,
+            next () {
+              if (this.index < this.models.length) {
+                return { value: this.models[this.index++] }
+              } else {
+                return { done: true }
+              }
+            }
+          }
+          return iterator
+        }
+      }
+      const vm = new Vue({
+        template: `
+          <div>
+            <span v-for="item in list">{{item}}</span>
+          </div>
+        `,
+        data: {
+          list: iterable
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe('<span>a</span><span>b</span><span>c</span>')
+      Vue.set(vm.list.models, 0, 'd')
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<span>d</span><span>b</span><span>c</span>')
+        vm.list.models.push('d')
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>d</span><span>b</span><span>c</span><span>d</span>')
+        vm.list.models.splice(1, 2)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>d</span><span>d</span>')
+        vm.list.models = ['x', 'y']
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>x</span><span>y</span>')
+      }).then(done)
+    })
+
+    it('should render iterable of primitive values with index', done => {
+      const iterable = {
+        models: ['a', 'b', 'c'],
+        index: 0,
+        [Symbol.iterator] () {
+          const iterator = {
+            index: 0,
+            models: this.models,
+            next () {
+              if (this.index < this.models.length) {
+                return { value: this.models[this.index++] }
+              } else {
+                return { done: true }
+              }
+            }
+          }
+          return iterator
+        }
+      }
+
+      const vm = new Vue({
+        template: `
+          <div>
+            <span v-for="(item, i) in list">{{i}}-{{item}}</span>
+          </div>
+        `,
+        data: {
+          list: iterable
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe('<span>0-a</span><span>1-b</span><span>2-c</span>')
+      Vue.set(vm.list.models, 0, 'd')
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-d</span><span>1-b</span><span>2-c</span>')
+        vm.list.models.push('d')
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-d</span><span>1-b</span><span>2-c</span><span>3-d</span>')
+        vm.list.models.splice(1, 2)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-d</span><span>1-d</span>')
+        vm.list.models = ['x', 'y']
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-x</span><span>1-y</span>')
+      }).then(done)
+    })
+
+    it('should render iterable of object values', done => {
+      const iterable = {
+        models: [
+          { value: 'a' },
+          { value: 'b' },
+          { value: 'c' }
+        ],
+        index: 0,
+        [Symbol.iterator] () {
+          const iterator = {
+            index: 0,
+            models: this.models,
+            next () {
+              if (this.index < this.models.length) {
+                return { value: this.models[this.index++] }
+              } else {
+                return { done: true }
+              }
+            }
+          }
+          return iterator
+        }
+      }
+
+      const vm = new Vue({
+        template: `
+          <div>
+            <span v-for="item in list">{{item.value}}</span>
+          </div>
+        `,
+        data: {
+          list: iterable
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe('<span>a</span><span>b</span><span>c</span>')
+      Vue.set(vm.list.models, 0, { value: 'd' })
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<span>d</span><span>b</span><span>c</span>')
+        vm.list.models[0].value = 'e'
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>e</span><span>b</span><span>c</span>')
+        vm.list.models.push({})
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>e</span><span>b</span><span>c</span><span></span>')
+        vm.list.models.splice(1, 2)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>e</span><span></span>')
+        vm.list.models = [{ value: 'x' }, { value: 'y' }]
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>x</span><span>y</span>')
+      }).then(done)
+    })
+
+    it('should render iterable of object values with index', done => {
+      const iterable = {
+        models: [
+          { value: 'a' },
+          { value: 'b' },
+          { value: 'c' }
+        ],
+        index: 0,
+        [Symbol.iterator] () {
+          const iterator = {
+            index: 0,
+            models: this.models,
+            next () {
+              if (this.index < this.models.length) {
+                return { value: this.models[this.index++] }
+              } else {
+                return { done: true }
+              }
+            }
+          }
+          return iterator
+        }
+      }
+
+      const vm = new Vue({
+        template: `
+          <div>
+            <span v-for="(item, i) in list">{{i}}-{{item.value}}</span>
+          </div>
+        `,
+        data: {
+          list: iterable
+        }
+      }).$mount()
+      expect(vm.$el.innerHTML).toBe('<span>0-a</span><span>1-b</span><span>2-c</span>')
+      Vue.set(vm.list.models, 0, { value: 'd' })
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-d</span><span>1-b</span><span>2-c</span>')
+        vm.list.models[0].value = 'e'
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-e</span><span>1-b</span><span>2-c</span>')
+        vm.list.models.push({})
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-e</span><span>1-b</span><span>2-c</span><span>3-</span>')
+        vm.list.models.splice(1, 2)
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-e</span><span>1-</span>')
+        vm.list.models = [{ value: 'x' }, { value: 'y' }]
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('<span>0-x</span><span>1-y</span>')
+      }).then(done)
+    })
+  }
 
   it('should render an Object', done => {
     const vm = new Vue({
@@ -330,7 +550,7 @@ describe('Directive v-for', () => {
     }).then(done)
 
     function assertMarkup () {
-      var markup = vm.list.map(function (item) {
+      const markup = vm.list.map(function (item) {
         return '<p>' + item.a + '</p><p>' + (item.a + 1) + '</p>'
       }).join('')
       expect(vm.$el.innerHTML).toBe(markup)
@@ -370,7 +590,7 @@ describe('Directive v-for', () => {
     }).then(done)
 
     function assertMarkup () {
-      var markup = vm.list.map(function (item) {
+      const markup = vm.list.map(function (item) {
         return `<p>${item.a}<span>${item.a}</span></p>`
       }).join('')
       expect(vm.$el.innerHTML).toBe(markup)
@@ -446,7 +666,7 @@ describe('Directive v-for', () => {
     }).then(done)
   })
 
-  it('strings', done => {
+  it('should work with strings', done => {
     const vm = new Vue({
       data: {
         text: 'foo'
@@ -463,4 +683,89 @@ describe('Directive v-for', () => {
       expect(vm.$el.textContent).toMatch('f.o.o.b.a.r.')
     }).then(done)
   })
+
+  // #7792
+  it('should work with multiline expressions', () => {
+    const vm = new Vue({
+      data: {
+        a: [1],
+        b: [2]
+      },
+      template: `
+        <div>
+          <span v-for="n in (
+            a.concat(
+              b
+            )
+          )">{{ n }}</span>
+        </div>
+      `
+    }).$mount()
+    expect(vm.$el.textContent).toBe('12')
+  })
+
+  // #9181
+  it('components with v-for and empty list', done => {
+    const vm = new Vue({
+      template:
+        '<div attr>' +
+          '<foo v-for="item in list" :key="item">{{ item }}</foo>' +
+        '</div>',
+      data: {
+        list: undefined
+      },
+      components: {
+        foo: {
+          template: '<div><slot></slot></div>'
+        },
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('')
+    vm.list = [1, 2, 3]
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
+    }).then(done)
+  })
+
+  it('elements with v-for and empty list', done => {
+    const vm = new Vue({
+      template:
+        '<div attr>' +
+          '<div v-for="item in list">{{ item }}</div>' +
+        '</div>',
+      data: {
+        list: undefined
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('')
+    vm.list = [1, 2, 3]
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
+    }).then(done)
+  })
+
+  const supportsDestructuring = (() => {
+    try {
+      new Function('var { foo } = bar')
+      return true
+    } catch (e) {}
+  })()
+
+  if (supportsDestructuring) {
+    it('should support destructuring syntax in alias position (object)', () => {
+      const vm = new Vue({
+        data: { list: [{ foo: 'hi', bar: 'ho' }] },
+        template: '<div><div v-for="({ foo, bar }, i) in list">{{ foo }} {{ bar }} {{ i }}</div></div>'
+      }).$mount()
+      expect(vm.$el.textContent).toBe('hi ho 0')
+    })
+
+    it('should support destructuring syntax in alias position (array)', () => {
+      const vm = new Vue({
+        data: { list: [[1, 2], [3, 4]] },
+        template: '<div><div v-for="([ foo, bar ], i) in list">{{ foo }} {{ bar }} {{ i }}</div></div>'
+      }).$mount()
+      expect(vm.$el.textContent).toBe('1 2 03 4 1')
+    })
+  }
 })

@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import Dep from 'core/observer/dep'
 
 describe('Instance methods lifecycle', () => {
   describe('$mount', () => {
@@ -31,6 +32,58 @@ describe('Instance methods lifecycle', () => {
       }).$mount('#mount-test')
       expect(vm.$el.tagName).toBe('DIV')
       expect(vm.$el.textContent).toBe('hi')
+    })
+
+    it('Dep.target should be undefined in lifecycle', () => {
+      const vm = new Vue({
+        template: '<div><my-component></my-component></div>',
+        components: {
+          myComponent: {
+            template: '<div>hi</div>',
+            mounted () {
+              const _msg = this.msg
+              expect(Dep.target).toBe(undefined)
+            },
+            computed: {
+              msg () {
+                return 1
+              }
+            }
+          }
+        }
+      }).$mount()
+    })
+
+    it('Dep.target should be undefined during invocation of child immediate watcher', done => {
+      let calls = 0
+      const childData = { a: 1 }
+      const parentUpdate = jasmine.createSpy()
+      new Vue({
+        template: '<div><my-component></my-component></div>',
+        updated: parentUpdate,
+        components: {
+          myComponent: {
+            template: '<div>{{ a }}</div>',
+            data() {
+              return childData
+            },
+            watch: {
+              anything: {
+                handler() {
+                  ++calls
+                  this.a
+                },
+                immediate: true
+              }
+            }
+          }
+        }
+      }).$mount()
+      expect(calls).toBe(1)
+      childData.a++
+      waitForUpdate(() => {
+        expect(parentUpdate).not.toHaveBeenCalled()
+      }).then(done)
     })
   })
 

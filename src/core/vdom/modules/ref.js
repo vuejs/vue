@@ -1,6 +1,6 @@
 /* @flow */
 
-import { remove } from 'shared/util'
+import { remove, isDef } from 'shared/util'
 
 export default {
   create (_: any, vnode: VNodeWithData) {
@@ -19,7 +19,7 @@ export default {
 
 export function registerRef (vnode: VNodeWithData, isRemoval: ?boolean) {
   const key = vnode.data.ref
-  if (!key) return
+  if (!isDef(key)) return
 
   const vm = vnode.context
   const ref = vnode.componentInstance || vnode.elm

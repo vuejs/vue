@@ -1,5 +1,5 @@
-var webpack = require('webpack')
-var base = require('./karma.base.config.js')
+const webpack = require('webpack')
+const base = require('./karma.base.config.js')
 
 base.webpack.plugins = [
   new webpack.DefinePlugin({
@@ -19,7 +19,7 @@ base.webpack.plugins = [
  * smaller batches.
  */
 
-var batches = [
+const batches = [
   // the cool kids
   {
     sl_chrome: {
@@ -79,7 +79,7 @@ var batches = [
 ]
 
 module.exports = function (config) {
-  var batch = batches[process.argv[4] || 0]
+  const batch = batches[process.argv[4] || 0]
 
   config.set(Object.assign(base, {
     singleRun: true,

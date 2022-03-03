@@ -4,9 +4,9 @@ import { looseEqual } from 'shared/util'
 // Android 4.4 Chrome 30 has the bug that a multi-select option cannot be
 // deselected by setting its "selected" prop via JavaScript.
 function hasMultiSelectBug () {
-  var s = document.createElement('select')
+  const s = document.createElement('select')
   s.setAttribute('multiple', '')
-  var o = document.createElement('option')
+  const o = document.createElement('option')
   s.appendChild(o)
   o.selected = true
   o.selected = false
@@ -18,8 +18,8 @@ function hasMultiSelectBug () {
  * we have to manually loop through the options
  */
 function updateSelect (el, value) {
-  var options = el.options
-  var i = options.length
+  const options = el.options
+  let i = options.length
   while (i--) {
     if (looseEqual(getValue(options[i]), value)) {
       options[i].selected = true
@@ -245,7 +245,7 @@ describe('Directive v-model select', () => {
             '<option>c</option>' +
           '</select>'
       }).$mount()
-      var opts = vm.$el.options
+      const opts = vm.$el.options
       expect(opts[0].selected).toBe(false)
       expect(opts[1].selected).toBe(true)
       expect(opts[2].selected).toBe(false)
@@ -272,7 +272,7 @@ describe('Directive v-model select', () => {
             '<option v-for="o in opts">{{ o }}</option>' +
           '</select>'
       }).$mount()
-      var opts = vm.$el.options
+      const opts = vm.$el.options
       expect(opts[0].selected).toBe(false)
       expect(opts[1].selected).toBe(true)
       expect(opts[2].selected).toBe(false)
@@ -345,7 +345,7 @@ describe('Directive v-model select', () => {
         '<option selected>c</option>' +
       '</select>'
     }).$mount()
-    var opts = vm.$el.options
+    const opts = vm.$el.options
     expect(opts[0].selected).toBe(true)
     expect(opts[1].selected).toBe(true)
     expect(opts[2].selected).toBe(true)
@@ -379,8 +379,8 @@ describe('Directive v-model select', () => {
         '</div>'
     }).$mount()
     document.body.appendChild(vm.$el)
-    var selects = vm.$el.getElementsByTagName('select')
-    var select0 = selects[0]
+    const selects = vm.$el.getElementsByTagName('select')
+    const select0 = selects[0]
     select0.options[0].selected = true
     triggerEvent(select0, 'change')
     waitForUpdate(() => {
@@ -421,7 +421,7 @@ describe('Directive v-model select', () => {
           '<option value="true">c</option>' +
         '</select>'
     }).$mount()
-    var opts = vm.$el.options
+    const opts = vm.$el.options
     expect(opts[0].selected).toBe(false)
     expect(opts[1].selected).toBe(true)
     expect(opts[2].selected).toBe(false)
@@ -544,6 +544,75 @@ describe('Directive v-model select', () => {
     vm.options = ['1', '2']
     waitForUpdate(() => {
       expect(spy).not.toHaveBeenCalled()
+    }).then(done)
+  })
+
+  // #6903
+  describe('should correctly handle v-model when the vnodes are the same', () => {
+    function makeInstance (foo) {
+      return new Vue({
+        data: {
+          foo: foo,
+          options: ['b', 'c', 'd'],
+          value: 'c'
+        },
+        template:
+          '<div>' +
+            '<select v-if="foo" data-attr>' +
+              '<option selected>a</option>' +
+            '</select>' +
+            '<select v-else v-model="value">' +
+              '<option v-for="option in options" :value="option">{{ option }}</option>' +
+            '</select>' +
+          '</div>'
+      }).$mount()
+    }
+
+    it('register v-model', done => {
+      const vm = makeInstance(true)
+
+      expect(vm.$el.firstChild.selectedIndex).toBe(0)
+      vm.foo = false
+      waitForUpdate(() => {
+        expect(vm.$el.firstChild.selectedIndex).toBe(1)
+      }).then(done)
+    })
+
+    it('remove v-model', done => {
+      const vm = makeInstance(false)
+
+      expect(vm.$el.firstChild.selectedIndex).toBe(1)
+      vm.foo = true
+      waitForUpdate(() => {
+        expect(vm.$el.firstChild.selectedIndex).toBe(0)
+      }).then(done)
+    })
+  })
+
+  // #7928
+  it('should correctly handle option with date value', done => {
+    const vm = new Vue({
+      data: {
+        dates: [
+          new Date(1520000000000),
+          new Date(1522000000000),
+          new Date(1516000000000)
+        ],
+        selectedDate: null
+      },
+      template:
+        '<div>' +
+          '<select v-model="selectedDate">' +
+            '<option v-for="(date, i) in dates" :key="i" :value="date">' +
+              '{{date}}' +
+            '</option>' +
+          '</select>' +
+        '</div>'
+    }).$mount()
+
+    vm.selectedDate = vm.dates[2]
+    waitForUpdate(() => {
+      expect(vm.$el.firstChild.selectedIndex).toBe(2)
     }).then(done)
   })
 })

@@ -1,7 +1,7 @@
 [ignore]
 .*/node_modules/.*
 .*/test/.*
-.*/build/.*
+.*/scripts/.*
 .*/examples/.*
 .*/benchmarks/.*
 
