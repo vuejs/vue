@@ -6,7 +6,6 @@
     <script src="../../../dist/vue.min.js"></script>
   </head>
   <body>
-
     <!-- #4510 click and change event on checkbox -->
     <div id="case-1">
       <div @click="num++">
@@ -26,7 +25,7 @@
 
     <!-- #6566 click event bubbling -->
     <div id="case-2">
-      <div v-if="expand">
+      <div class="panel" v-if="expand">
         <button @click="expand = false, countA++">Expand is True</button>
       </div>
       <div class="header" v-if="!expand" @click="expand = true, countB++">

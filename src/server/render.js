@@ -3,6 +3,7 @@
 import { escape } from 'web/server/util'
 import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
+import { resolveAsset } from 'core/util/options'
 import { generateComponentTrace } from 'core/util/debug'
 import { ssrCompileToFunctions } from 'web/server/compiler'
 import { installSSRHelpers } from './optimizing-compiler/runtime-helpers'
@@ -18,6 +19,7 @@ let warned = Object.create(null)
 const warnOnce = msg => {
   if (!warned[msg]) {
     warned[msg] = true
+    // eslint-disable-next-line no-console
     console.warn(`\n\u001b[31m${msg}\u001b[39m\n`)
   }
 }
@@ -46,6 +48,27 @@ const normalizeRender = vm => {
       )
     }
   }
+}
+
+function waitForServerPrefetch (vm, resolve, reject) {
+  let handlers = vm.$options.serverPrefetch
+  if (isDef(handlers)) {
+    if (!Array.isArray(handlers)) handlers = [handlers]
+    try {
+      const promises = []
+      for (let i = 0, j = handlers.length; i < j; i++) {
+        const result = handlers[i].call(vm, vm)
+        if (result && typeof result.then === 'function') {
+          promises.push(result)
+        }
+      }
+      Promise.all(promises).then(resolve).catch(reject)
+      return
+    } catch (e) {
+      reject(e)
+    }
+  }
+  resolve()
 }
 
 function renderNode (node, isRoot, context) {
@@ -91,7 +114,12 @@ function renderComponent (node, isRoot, context) {
   const registerComponent = registerComponentForCache(Ctor.options, write)
 
   if (isDef(getKey) && isDef(cache) && isDef(name)) {
-    const key = name + '::' + getKey(node.componentOptions.propsData)
+    const rawKey = getKey(node.componentOptions.propsData)
+    if (rawKey === false) {
+      renderComponentInner(node, isRoot, context)
+      return
+    }
+    const key = name + '::' + rawKey
     const { has, get } = context
     if (isDef(has)) {
       has(key, hit => {
@@ -165,13 +193,20 @@ function renderComponentInner (node, isRoot, context) {
     context.activeInstance
   )
   normalizeRender(child)
-  const childNode = child._render()
-  childNode.parent = node
-  context.renderStates.push({
-    type: 'Component',
-    prevActive
-  })
-  renderNode(childNode, isRoot, context)
+
+  const resolve = () => {
+    const childNode = child._render()
+    childNode.parent = node
+    context.renderStates.push({
+      type: 'Component',
+      prevActive
+    })
+    renderNode(childNode, isRoot, context)
+  }
+
+  const reject = context.done
+
+  waitForServerPrefetch(child, resolve, reject)
 }
 
 function renderAsyncComponent (node, isRoot, context) {
@@ -191,16 +226,27 @@ function renderAsyncComponent (node, isRoot, context) {
       tag
     )
     if (resolvedNode) {
-      renderComponent(resolvedNode, isRoot, context)
+      if (resolvedNode.componentOptions) {
+        // normal component
+        renderComponent(resolvedNode, isRoot, context)
+      } else if (!Array.isArray(resolvedNode)) {
+        // single return node from functional component
+        renderNode(resolvedNode, isRoot, context)
+      } else {
+        // multiple return nodes from functional component
+        context.renderStates.push({
+          type: 'Fragment',
+          children: resolvedNode,
+          rendered: 0,
+          total: resolvedNode.length
+        })
+        context.next()
+      }
     } else {
-      reject()
+      // invalid component, but this does not throw on the client
+      // so render empty comment node
+      context.write(`<!---->`, context.next)
     }
-  }
-
-  const reject = err => {
-    console.error(`[vue-server-renderer] error when rendering async component:\n`)
-    if (err) console.error(err.stack)
-    context.write(`<!--${node.text}-->`, context.next)
   }
 
   if (factory.resolved) {
@@ -208,6 +254,7 @@ function renderAsyncComponent (node, isRoot, context) {
     return
   }
 
+  const reject = context.done
   let res
   try {
     res = factory(resolve, reject)
@@ -235,9 +282,10 @@ function renderStringNode (el, context) {
     const children: Array<VNode> = el.children
     context.renderStates.push({
       type: 'Element',
+      children,
       rendered: 0,
       total: children.length,
-      endTag: el.close, children
+      endTag: el.close
     })
     write(el.open, next)
   }
@@ -252,8 +300,8 @@ function renderElement (el, isRoot, context) {
     el.data.attrs[SSR_ATTR] = 'true'
   }
 
-  if (el.functionalOptions) {
-    registerComponentForCache(el.functionalOptions, write)
+  if (el.fnOptions) {
+    registerComponentForCache(el.fnOptions, write)
   }
 
   const startTag = renderStartingTag(el, context)
@@ -266,9 +314,10 @@ function renderElement (el, isRoot, context) {
     const children: Array<VNode> = el.children
     context.renderStates.push({
       type: 'Element',
+      children,
       rendered: 0,
       total: children.length,
-      endTag, children
+      endTag
     })
     write(startTag, next)
   }
@@ -310,11 +359,13 @@ function renderStartingTag (node: VNode, context) {
     if (dirs) {
       for (let i = 0; i < dirs.length; i++) {
         const name = dirs[i].name
-        const dirRenderer = directives[name]
-        if (dirRenderer && name !== 'show') {
-          // directives mutate the node's data
-          // which then gets rendered by modules
-          dirRenderer(node, dirs[i])
+        if (name !== 'show') {
+          const dirRenderer = resolveAsset(context, 'directives', name)
+          if (dirRenderer) {
+            // directives mutate the node's data
+            // which then gets rendered by modules
+            dirRenderer(node, dirs[i])
+          }
         }
       }
     }
@@ -377,6 +428,10 @@ export function createRenderFunction (
     })
     installSSRHelpers(component)
     normalizeRender(component)
-    renderNode(component._render(), true, context)
+
+    const resolve = () => {
+      renderNode(component._render(), true, context)
+    }
+    waitForServerPrefetch(component, resolve, done)
   }
 }

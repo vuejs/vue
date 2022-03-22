@@ -12,8 +12,8 @@ module.exports = {
       .assert.count('button', 7)
       .assert.count('input[type="range"]', 6)
       .assert.evaluate(function () {
-        var points = stats.map(function (stat, i) {
-        var point = valueToPoint(stat.value, i, 6)
+        const points = stats.map(function (stat, i) {
+        const point = valueToPoint(stat.value, i, 6)
           return point.x + ',' + point.y
         }).join(' ')
         return document.querySelector('polygon').attributes[0].value === points
@@ -24,8 +24,8 @@ module.exports = {
       .assert.count('button', 6)
       .assert.count('input[type="range"]', 5)
       .assert.evaluate(function () {
-        var points = stats.map(function (stat, i) {
-        var point = valueToPoint(stat.value, i, 5)
+        const points = stats.map(function (stat, i) {
+        const point = valueToPoint(stat.value, i, 5)
           return point.x + ',' + point.y
         }).join(' ')
         return document.querySelector('polygon').attributes[0].value === points
@@ -37,8 +37,8 @@ module.exports = {
       .assert.count('button', 7)
       .assert.count('input[type="range"]', 6)
       .assert.evaluate(function () {
-        var points = stats.map(function (stat, i) {
-        var point = valueToPoint(stat.value, i, 6)
+        const points = stats.map(function (stat, i) {
+        const point = valueToPoint(stat.value, i, 6)
           return point.x + ',' + point.y
         }).join(' ')
         return document.querySelector('polygon').attributes[0].value === points

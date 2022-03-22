@@ -106,10 +106,10 @@ describe('Component', () => {
       expect(vm.$el.outerHTML).toBe('<div view="view-b">bar b</div>')
       vm.view = ''
     })
-    .then(() => {
-      expect(vm.$el.nodeType).toBe(8)
-      expect(vm.$el.data).toBe('')
-    }).then(done)
+      .then(() => {
+        expect(vm.$el.nodeType).toBe(8)
+        expect(vm.$el.data).toBe('')
+      }).then(done)
   })
 
   it('dynamic with props', done => {
@@ -134,8 +134,7 @@ describe('Component', () => {
     waitForUpdate(() => {
       expect(vm.$el.outerHTML).toBe('<div>bar view-b</div>')
       vm.view = ''
-    })
-    .then(() => {
+    }).then(() => {
       expect(vm.$el.nodeType).toBe(8)
       expect(vm.$el.data).toBe('')
     }).then(done)
@@ -166,7 +165,7 @@ describe('Component', () => {
     const vm = new Vue({
       template:
         '<div>' +
-          '<component v-for="c in comps" :key="c.type" :is="c.type"></component>' +
+          '<component v-for="(c, i) in comps" :key="i" :is="c.type"></component>' +
         '</div>',
       data: {
         comps: [{ type: 'one' }, { type: 'two' }]
@@ -426,5 +425,18 @@ describe('Component', () => {
       expect(target.outerHTML).toBe('<div></div>')
       vm.$destroy()
     }).then(done)
+  })
+
+  it('render vnode with <script> tag as root element', () => {
+    const vm = new Vue({
+      template: '<scriptTest></scriptTest>',
+      components: {
+        scriptTest: {
+          template: '<script>console.log(1)</script>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.nodeName).toBe('#comment')
+    expect('Templates should only be responsible for mapping the state').toHaveBeenWarned()
   })
 })

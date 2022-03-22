@@ -1,7 +1,7 @@
 /* @flow */
 
 import { warn } from './debug'
-import { observe, observerState } from '../observer/index'
+import { observe, toggleObserving, shouldObserve } from '../observer/index'
 import {
   hasOwn,
   isObject,
@@ -27,12 +27,18 @@ export function validateProp (
   const prop = propOptions[key]
   const absent = !hasOwn(propsData, key)
   let value = propsData[key]
-  // handle boolean props
-  if (isType(Boolean, prop.type)) {
+  // boolean casting
+  const booleanIndex = getTypeIndex(Boolean, prop.type)
+  if (booleanIndex > -1) {
     if (absent && !hasOwn(prop, 'default')) {
       value = false
-    } else if (!isType(String, prop.type) && (value === '' || value === hyphenate(key))) {
-      value = true
+    } else if (value === '' || value === hyphenate(key)) {
+      // only cast empty string / same name to boolean if
+      // boolean has higher priority
+      const stringIndex = getTypeIndex(String, prop.type)
+      if (stringIndex < 0 || booleanIndex < stringIndex) {
+        value = true
+      }
     }
   }
   // check default value
@@ -40,12 +46,16 @@ export function validateProp (
     value = getPropDefaultValue(vm, prop, key)
     // since the default value is a fresh copy,
     // make sure to observe it.
-    const prevShouldConvert = observerState.shouldConvert
-    observerState.shouldConvert = true
+    const prevShouldObserve = shouldObserve
+    toggleObserving(true)
     observe(value)
-    observerState.shouldConvert = prevShouldConvert
+    toggleObserving(prevShouldObserve)
   }
-  if (process.env.NODE_ENV !== 'production') {
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    // skip validation for weex recycle-list child component props
+    !(__WEEX__ && isObject(value) && ('@binding' in value))
+  ) {
     assertProp(prop, key, value, vm, absent)
   }
   return value
@@ -112,16 +122,16 @@ function assertProp (
       type = [type]
     }
     for (let i = 0; i < type.length && !valid; i++) {
-      const assertedType = assertType(value, type[i])
+      const assertedType = assertType(value, type[i], vm)
       expectedTypes.push(assertedType.expectedType || '')
       valid = assertedType.valid
     }
   }
-  if (!valid) {
+
+  const haveExpectedTypes = expectedTypes.some(t => t)
+  if (!valid && haveExpectedTypes) {
     warn(
-      `Invalid prop: type check failed for prop "${name}".` +
-      ` Expected ${expectedTypes.map(capitalize).join(', ')}` +
-      `, got ${toRawType(value)}.`,
+      getInvalidTypeMessage(name, value, expectedTypes),
       vm
     )
     return
@@ -137,9 +147,9 @@ function assertProp (
   }
 }
 
-const simpleCheckRE = /^(String|Number|Boolean|Function|Symbol)$/
+const simpleCheckRE = /^(String|Number|Boolean|Function|Symbol|BigInt)$/
 
-function assertType (value: any, type: Function): {
+function assertType (value: any, type: Function, vm: ?Component): {
   valid: boolean;
   expectedType: string;
 } {
@@ -157,7 +167,12 @@ function assertType (value: any, type: Function): {
   } else if (expectedType === 'Array') {
     valid = Array.isArray(value)
   } else {
-    valid = value instanceof type
+    try {
+      valid = value instanceof type
+    } catch (e) {
+      warn('Invalid prop type: "' + String(type) + '" is not a constructor', vm);
+      valid = false;
+    }
   }
   return {
     valid,
@@ -165,25 +180,71 @@ function assertType (value: any, type: Function): {
   }
 }
 
+const functionTypeCheckRE = /^\s*function (\w+)/
+
 /**
  * Use function string name to check built-in types,
  * because a simple equality check will fail when running
  * across different vms / iframes.
  */
 function getType (fn) {
-  const match = fn && fn.toString().match(/^\s*function (\w+)/)
+  const match = fn && fn.toString().match(functionTypeCheckRE)
   return match ? match[1] : ''
 }
 
-function isType (type, fn) {
-  if (!Array.isArray(fn)) {
-    return getType(fn) === getType(type)
+function isSameType (a, b) {
+  return getType(a) === getType(b)
+}
+
+function getTypeIndex (type, expectedTypes): number {
+  if (!Array.isArray(expectedTypes)) {
+    return isSameType(expectedTypes, type) ? 0 : -1
   }
-  for (let i = 0, len = fn.length; i < len; i++) {
-    if (getType(fn[i]) === getType(type)) {
-      return true
+  for (let i = 0, len = expectedTypes.length; i < len; i++) {
+    if (isSameType(expectedTypes[i], type)) {
+      return i
     }
   }
-  /* istanbul ignore next */
-  return false
+  return -1
+}
+
+function getInvalidTypeMessage (name, value, expectedTypes) {
+  let message = `Invalid prop: type check failed for prop "${name}".` +
+    ` Expected ${expectedTypes.map(capitalize).join(', ')}`
+  const expectedType = expectedTypes[0]
+  const receivedType = toRawType(value)
+  // check if we need to specify expected value
+  if (
+    expectedTypes.length === 1 &&
+    isExplicable(expectedType) &&
+    isExplicable(typeof value) &&
+    !isBoolean(expectedType, receivedType)
+  ) {
+    message += ` with value ${styleValue(value, expectedType)}`
+  }
+  message += `, got ${receivedType} `
+  // check if we need to specify received value
+  if (isExplicable(receivedType)) {
+    message += `with value ${styleValue(value, receivedType)}.`
+  }
+  return message
+}
+
+function styleValue (value, type) {
+  if (type === 'String') {
+    return `"${value}"`
+  } else if (type === 'Number') {
+    return `${Number(value)}`
+  } else {
+    return `${value}`
+  }
+}
+
+const EXPLICABLE_TYPES = ['string', 'number', 'boolean']
+function isExplicable (value) {
+  return EXPLICABLE_TYPES.some(elem => value.toLowerCase() === elem)
+}
+
+function isBoolean (...args) {
+  return args.some(elem => elem.toLowerCase() === 'boolean')
 }

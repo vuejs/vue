@@ -1,6 +1,6 @@
 /* @flow */
 
-import { cached, camelize } from 'shared/util'
+import { cached, camelize, isPlainObject } from 'shared/util'
 import { parseText } from 'compiler/parser/text-parser'
 import {
   getAndRemoveAttr,
@@ -10,7 +10,7 @@ import {
 
 type StaticStyleResult = {
   dynamic: boolean,
-  styleResult: string
+  styleResult: string | Object | void
 };
 
 const normalize = cached(camelize)
@@ -23,16 +23,19 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
     warn(
       `style="${String(staticStyle)}": ` +
       'Interpolation inside attributes has been deprecated. ' +
-      'Use v-bind or the colon shorthand instead.'
+      'Use v-bind or the colon shorthand instead.',
+      el.rawAttrsMap['style']
     )
   }
   if (!dynamic && styleResult) {
+    // $flow-disable-line
     el.staticStyle = styleResult
   }
   const styleBinding = getBindingAttr(el, 'style', false /* getStatic */)
   if (styleBinding) {
     el.styleBinding = styleBinding
   } else if (dynamic) {
+    // $flow-disable-line
     el.styleBinding = styleResult
   }
 }
@@ -53,7 +56,7 @@ function parseStaticStyle (staticStyle: ?string, options: CompilerOptions): Stat
   // "width: 200px; height: {{y}}" -> {width: 200, height: y}
   let dynamic = false
   let styleResult = ''
-  if (staticStyle) {
+  if (typeof staticStyle === 'string') {
     const styleList = staticStyle.trim().split(';').map(style => {
       const result = style.trim().split(':')
       if (result.length !== 2) {
@@ -64,13 +67,15 @@ function parseStaticStyle (staticStyle: ?string, options: CompilerOptions): Stat
       const dynamicValue = parseText(value, options.delimiters)
       if (dynamicValue) {
         dynamic = true
-        return key + ':' + dynamicValue
+        return key + ':' + dynamicValue.expression
       }
       return key + ':' + JSON.stringify(value)
     }).filter(result => result)
     if (styleList.length) {
       styleResult = '{' + styleList.join(',') + '}'
     }
+  } else if (isPlainObject(staticStyle)) {
+    styleResult = JSON.stringify(staticStyle) || ''
   }
   return { dynamic, styleResult }
 }

@@ -11,6 +11,7 @@ interface Renderer {
   renderToString(vm: Vue, callback: RenderCallback): void;
   renderToString(vm: Vue, context: object, callback: RenderCallback): void;
   renderToString(vm: Vue): Promise<string>;
+  renderToString(vm: Vue, context: object): Promise<string>;
 
   renderToStream(vm: Vue, context?: object): Readable;
 }
@@ -18,6 +19,8 @@ interface Renderer {
 interface BundleRenderer {
   renderToString(callback: RenderCallback): void;
   renderToString(context: object, callback: RenderCallback): void;
+  renderToString(): Promise<string>;
+  renderToString(context: object): Promise<string>;
 
   renderToStream(context?: object): Readable;
 }
@@ -35,6 +38,7 @@ interface RendererOptions {
 
 interface BundleRendererOptions extends RendererOptions {
   clientManifest?: object;
+  serializer?: (state: object) => string;
   runInNewContext?: boolean | 'once';
   basedir?: string;
 }

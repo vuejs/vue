@@ -11,10 +11,17 @@ function createStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
   const elm = vnode.elm
   const staticStyle = vnode.data.staticStyle
+  const supportBatchUpdate = typeof elm.setStyles === 'function'
+  const batchedStyles = {}
   for (const name in staticStyle) {
     if (staticStyle[name]) {
-      elm.setStyle(normalize(name), staticStyle[name])
+      supportBatchUpdate
+        ? (batchedStyles[normalize(name)] = staticStyle[name])
+        : elm.setStyle(normalize(name), staticStyle[name])
     }
+  }
+  if (supportBatchUpdate) {
+    elm.setStyles(batchedStyles)
   }
   updateStyle(oldVnode, vnode)
 }
@@ -41,20 +48,29 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     style = vnode.data.style = extend({}, style)
   }
 
+  const supportBatchUpdate = typeof elm.setStyles === 'function'
+  const batchedStyles = {}
   for (name in oldStyle) {
     if (!style[name]) {
-      elm.setStyle(normalize(name), '')
+      supportBatchUpdate
+        ? (batchedStyles[normalize(name)] = '')
+        : elm.setStyle(normalize(name), '')
     }
   }
   for (name in style) {
     cur = style[name]
-    elm.setStyle(normalize(name), cur)
+    supportBatchUpdate
+      ? (batchedStyles[normalize(name)] = cur)
+      : elm.setStyle(normalize(name), cur)
+  }
+  if (supportBatchUpdate) {
+    elm.setStyles(batchedStyles)
   }
 }
 
 function toObject (arr) {
   const res = {}
-  for (var i = 0; i < arr.length; i++) {
+  for (let i = 0; i < arr.length; i++) {
     if (arr[i]) {
       extend(res, arr[i])
     }

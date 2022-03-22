@@ -267,6 +267,17 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-show directive merge with style', done => {
+    renderVmWithOptions({
+      template: '<div :style="[{lineHeight: 1}]" v-show="false"><span>inner</span></div>'
+    }, res => {
+      expect(res).toContain(
+        '<div data-server-rendered="true" style="line-height:1;display:none;"><span>inner</span></div>'
+      )
+      done()
+    })
+  })
+
   it('v-show directive not passed to child', done => {
     renderVmWithOptions({
       template: '<foo v-show="false"></foo>',
@@ -575,6 +586,142 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('renders async component (functional, single node)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <test-async></test-async>
+        </div>
+      `,
+      components: {
+        testAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return h('span', { class: ['b'] }, 'testAsync')
+            }
+          }), 1)
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span class="b">testAsync</span></div>')
+      done()
+    })
+  })
+
+  it('renders async component (functional, multiple nodes)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <test-async></test-async>
+        </div>
+      `,
+      components: {
+        testAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return [
+                h('span', { class: ['a'] }, 'foo'),
+                h('span', { class: ['b'] }, 'bar')
+              ]
+            }
+          }), 1)
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true">' +
+          '<span class="a">foo</span>' +
+          '<span class="b">bar</span>' +
+        '</div>'
+      )
+      done()
+    })
+  })
+
+  it('renders nested async functional component', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <outer-async></outer-async>
+        </div>
+      `,
+      components: {
+        outerAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return h('innerAsync')
+            }
+          }), 1)
+        },
+        innerAsync (resolve) {
+          setTimeout(() => resolve({
+            functional: true,
+            render (h) {
+              return h('span', { class: ['a'] }, 'inner')
+            },
+          }), 1)
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true">' +
+          '<span class="a">inner</span>' +
+        '</div>'
+      )
+      done()
+    })
+  })
+
+  it('should catch async component error', done => {
+    Vue.config.silent = true
+    renderToString(new Vue({
+      template: '<test-async></test-async>',
+      components: {
+        testAsync: () => Promise.resolve({
+          render () {
+            throw new Error('foo')
+          }
+        })
+      }
+    }), (err, result) => {
+      Vue.config.silent = false
+      expect(err).toBeTruthy()
+      expect(result).toBeUndefined()
+      done()
+    })
+  })
+
+  // #11963, #10391
+  it('renders async children passed in slots', done => {
+    const Parent = {
+      template: `<div><slot name="child"/></div>`
+    }
+    const Child = {
+      template: `<p>child</p>`
+    }
+    renderVmWithOptions({
+      template: `
+      <Parent>
+        <template #child>
+          <Child/>
+        </template>
+      </Parent>
+      `,
+      components: {
+        Parent,
+        Child: () => Promise.resolve(Child)
+      }
+    }, result => {
+      expect(result).toContain(
+        `<div data-server-rendered="true"><p>child</p></div>`
+      )
+      done()
+    })
+  })
+
   it('everything together', done => {
     renderVmWithOptions({
       template: `
@@ -742,6 +889,22 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('should not warn for custom directives that do not have server-side implementation', done => {
+    renderToString(new Vue({
+      directives: {
+        test: {
+          bind() {
+            // noop
+          }
+        }
+      },
+      template: '<div v-test></div>',
+    }), () => {
+      expect('Failed to resolve directive: test').not.toHaveBeenWarned()
+      done()
+    })
+  })
+
   it('_scopeId', done => {
     renderVmWithOptions({
       _scopeId: '_v-parent',
@@ -837,6 +1000,40 @@ describe('SSR: renderToString', () => {
       template: `
         <div>
           <a :title="xss" :style="{ color: xss }" :class="[xss]">foo</a>
+        </div>
+      `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
+  it('should prevent xss in attribute names', done => {
+    renderVmWithOptions({
+      data: {
+        xss: {
+          'foo="bar"></div><script>alert(1)</script>': ''
+        }
+      },
+      template: `
+        <div v-bind="xss"></div>
+      `
+    }, res => {
+      expect(res).not.toContain(`<script>alert(1)</script>`)
+      done()
+    })
+  })
+
+  it('should prevent xss in attribute names (optimized)', done => {
+    renderVmWithOptions({
+      data: {
+        xss: {
+          'foo="bar"></div><script>alert(1)</script>': ''
+        }
+      },
+      template: `
+        <div>
+          <a v-bind="xss">foo</a>
         </div>
       `
     }, res => {
@@ -958,6 +1155,24 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  // #8977
+  it('should call computed properties with vm as first argument', done => {
+    renderToString(new Vue({
+      data: {
+        firstName: 'Evan',
+        lastName: 'You'
+      },
+      computed: {
+        fullName: ({ firstName, lastName }) => `${firstName} ${lastName}`,
+      },
+      template: '<div>{{ fullName }}</div>',
+    }), (err, result) => {
+      expect(err).toBeNull()
+      expect(result).toContain('<div data-server-rendered="true">Evan You</div>')
+      done()
+    })
+  })
+
   it('return Promise', done => {
     renderToString(new Vue({
       template: `<div>{{ foo }}</div>`,
@@ -984,8 +1199,470 @@ describe('SSR: renderToString', () => {
   it('should catch template compilation error', done => {
     renderToString(new Vue({
       template: `<div></div><div></div>`
-    }), (err, res) => {
+    }), (err) => {
       expect(err.toString()).toContain('Component template should contain exactly one root element')
+      done()
+    })
+  })
+
+  // #6907
+  it('should not optimize root if conditions', done => {
+    renderVmWithOptions({
+      data: { foo: 123 },
+      template: `<input :type="'text'" v-model="foo">`
+    }, res => {
+      expect(res).toBe(`<input type="text" data-server-rendered="true" value="123">`)
+      done()
+    })
+  })
+
+  it('render muted properly', done => {
+    renderVmWithOptions({
+      template: '<video muted></video>'
+    }, result => {
+      expect(result).toContain('<video muted="muted" data-server-rendered="true"></video>')
+      done()
+    })
+  })
+
+  it('render v-model with textarea', done => {
+    renderVmWithOptions({
+      data: { foo: 'bar' },
+      template: '<div><textarea v-model="foo"></textarea></div>'
+    }, result => {
+      expect(result).toContain('<textarea>bar</textarea>')
+      done()
+    })
+  })
+
+  it('render v-model with textarea (non-optimized)', done => {
+    renderVmWithOptions({
+      render (h) {
+        return h('textarea', {
+          domProps: {
+            value: 'foo'
+          }
+        })
+      }
+    }, result => {
+      expect(result).toContain('<textarea data-server-rendered="true">foo</textarea>')
+      done()
+    })
+  })
+
+  it('render v-model with <select> (value binding)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2,
+        options: [
+          { id: 1, label: 'one' },
+          { id: 2, label: 'two' }
+        ]
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option v-for="o in options" :value="o.id">{{ o.label }}</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option value="1">one</option>' +
+          '<option selected="selected" value="2">two</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
+
+  it('render v-model with <select> (static value)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option value="1">one</option>
+          <option value="2">two</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option value="1">one</option> ' +
+          '<option value="2" selected="selected">two</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
+
+  it('render v-model with <select> (text as value)', done => {
+    renderVmWithOptions({
+      data: {
+        selected: 2,
+        options: [
+          { id: 1, label: 'one' },
+          { id: 2, label: 'two' }
+        ]
+      },
+      template: `
+      <div>
+        <select v-model="selected">
+          <option v-for="o in options">{{ o.id }}</option>
+        </select>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(
+        '<select>' +
+          '<option>1</option>' +
+          '<option selected="selected">2</option>' +
+        '</select>'
+      )
+      done()
+    })
+  })
+
+  // #7223
+  it('should not double escape attribute values', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div id="a\nb"></div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div id="a\nb"></div>`)
+      done()
+    })
+  })
+
+  // #7859
+  it('should not double escape class values', done => {
+    renderVmWithOptions({
+      template: `
+      <div>
+        <div class="a\nb"></div>
+      </div>
+      `
+    }, result => {
+      expect(result).toContain(`<div class="a b"></div>`)
+      done()
+    })
+  })
+
+  it('should expose ssr helpers on functional context', done => {
+    let called = false
+    renderVmWithOptions({
+      template: `<div><foo/></div>`,
+      components: {
+        foo: {
+          functional: true,
+          render (h, ctx) {
+            expect(ctx._ssrNode).toBeTruthy()
+            called = true
+          }
+        }
+      }
+    }, () => {
+      expect(called).toBe(true)
+      done()
+    })
+  })
+
+  it('should support serverPrefetch option', done => {
+    renderVmWithOptions({
+      template: `
+        <div>{{ count }}</div>
+      `,
+      data: {
+        count: 0
+      },
+      serverPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true">42</div>')
+      done()
+    })
+  })
+
+  it('should support serverPrefetch option (nested)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <nested-prefetch></nested-prefetch>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      serverPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      },
+      components: {
+        nestedPrefetch: {
+          template: `
+            <div>{{ message }}</div>
+          `,
+          data () {
+            return {
+              message: ''
+            }
+          },
+          serverPrefetch () {
+            return new Promise((resolve) => {
+              setTimeout(() => {
+                this.message = 'vue.js'
+                resolve()
+              }, 1)
+            })
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
+
+  it('should support serverPrefetch option (nested async)', done => {
+    renderVmWithOptions({
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <nested-prefetch></nested-prefetch>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      serverPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      },
+      components: {
+        nestedPrefetch (resolve) {
+          resolve({
+            template: `
+              <div>{{ message }}</div>
+            `,
+            data () {
+              return {
+                message: ''
+              }
+            },
+            serverPrefetch () {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  this.message = 'vue.js'
+                  resolve()
+                }, 1)
+              })
+            }
+          })
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
+
+  it('should merge serverPrefetch option', done => {
+    const mixin = {
+      data: {
+        message: ''
+      },
+      serverPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.message = 'vue.js'
+            resolve()
+          }, 1)
+        })
+      }
+    }
+    renderVmWithOptions({
+      mixins: [mixin],
+      template: `
+        <div>
+          <span>{{ count }}</span>
+          <div>{{ message }}</div>
+        </div>
+      `,
+      data: {
+        count: 0
+      },
+      serverPrefetch () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.count = 42
+            resolve()
+          }, 1)
+        })
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><span>42</span> <div>vue.js</div></div>')
+      done()
+    })
+  })
+
+  it(`should skip serverPrefetch option that doesn't return a promise`, done => {
+    renderVmWithOptions({
+      template: `
+        <div>{{ count }}</div>
+      `,
+      data: {
+        count: 0
+      },
+      serverPrefetch () {
+        setTimeout(() => {
+          this.count = 42
+        }, 1)
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true">0</div>')
+      done()
+    })
+  })
+
+  it('should call context.rendered', done => {
+    let a = 0
+    renderToString(new Vue({
+      template: '<div>Hello</div>'
+    }), {
+      rendered: () => {
+        a = 42
+      }
+    }, (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain('<div data-server-rendered="true">Hello</div>')
+      expect(a).toBe(42)
+      done()
+    })
+  })
+
+  it('invalid style value', done => {
+    renderVmWithOptions({
+      template: '<div :style="style"><p :style="style2"/></div>',
+      data: {
+        // all invalid, should not even have "style" attribute
+        style: {
+          opacity: {},
+          color: null
+        },
+        // mix of valid and invalid
+        style2: {
+          opacity: 0,
+          color: null
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true"><p style="opacity:0;"></p></div>'
+      )
+      done()
+    })
+  })
+
+  it('numeric style value', done => {
+    renderVmWithOptions({
+      template: '<div :style="style"></div>',
+      data: {
+        style: {
+          opacity: 0, // valid, opacity is unit-less
+          top: 0, // valid, top requires unit but 0 is allowed
+          left: 10, // invalid, left requires a unit
+          marginTop: '10px' // valid
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true" style="opacity:0;top:0;margin-top:10px;"></div>'
+      )
+      done()
+    })
+  })
+
+  it('handling max stack size limit', done => {
+    const vueInstance = new Vue({
+      template: `<div class="root">
+        <child v-for="(x, i) in items" :key="i"></child>
+      </div>`,
+      components: {
+        child: {
+          template: '<div class="child"><span class="child">hi</span></div>'
+        }
+      },
+      data: {
+        items: Array(1000).fill(0)
+      }
+    })
+
+    renderToString(vueInstance, err => done(err))
+  })
+
+  it('undefined v-model with textarea', done => {
+    renderVmWithOptions({
+      render (h) {
+        return h('div', [
+          h('textarea', {
+            domProps: {
+              value: null
+            }
+          })
+        ])
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div data-server-rendered="true"><textarea></textarea></div>'
+      )
+      done()
+    })
+  })
+
+  it('Options inheritAttrs in parent component', done => {
+    const childComponent = {
+      template: `<div>{{ someProp }}</div>`,
+      props: {
+        someProp: {}
+      },
+    }
+    const parentComponent = {
+      template: `<childComponent v-bind="$attrs" />`,
+      components: { childComponent },
+      inheritAttrs: false
+    }
+    renderVmWithOptions({
+      template: `
+        <div>
+          <parentComponent some-prop="some-val" />
+        </div>
+        `,
+      components: { parentComponent }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div>some-val</div></div>')
       done()
     })
   })
