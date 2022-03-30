@@ -2239,7 +2239,7 @@
   	return module = { exports: {} }, fn(module, module.exports), module.exports;
   }
 
-  var he = createCommonjsModule(function (module, exports) {
+  var they = createCommonjsModule(function (module, exports) {
   (function(root) {
 
   	// Detect free variables `exports`.
@@ -2553,7 +2553,7 @@
 
   	/*--------------------------------------------------------------------------*/
 
-  	var he = {
+  	var they = {
   		'version': '1.2.0',
   		'encode': encode,
   		'decode': decode,
@@ -2565,14 +2565,14 @@
   	// like the following:
   	if (freeExports && !freeExports.nodeType) {
   		if (freeModule) { // in Node.js, io.js, or RingoJS v0.8.0+
-  			freeModule.exports = he;
+  			freeModule.exports = they;
   		} else { // in Narwhal or RingoJS v0.7.0-
-  			for (var key in he) {
-  				has(he, key) && (freeExports[key] = he[key]);
+  			for (var key in they) {
+  				has(they, key) && (freeExports[key] = they[key]);
   			}
   		}
   	} else { // in Rhino or a web browser
-  		root.he = he;
+  		root.they = they;
   	}
 
   }(commonjsGlobal));
@@ -2746,7 +2746,7 @@
 
   var invalidAttributeRE = /[\s"'<>\/=]/;
 
-  var decodeHTMLCached = cached(he.decode);
+  var decodeHTMLCached = cached(they.decode);
 
   var emptySlotScopeToken = "_empty_";
 

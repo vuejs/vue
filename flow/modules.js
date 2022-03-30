@@ -1,4 +1,4 @@
-declare module 'he' {
+declare module 'they' {
   declare function escape(html: string): string;
   declare function decode(html: string): string;
 }

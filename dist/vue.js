@@ -9254,7 +9254,7 @@
 
   var decoder;
 
-  var he = {
+  var they = {
     decode: function decode (html) {
       decoder = decoder || document.createElement('div');
       decoder.innerHTML = html;
@@ -9600,7 +9600,7 @@
 
   var invalidAttributeRE = /[\s"'<>\/=]/;
 
-  var decodeHTMLCached = cached(he.decode);
+  var decodeHTMLCached = cached(they.decode);
 
   var emptySlotScopeToken = "_empty_";
 

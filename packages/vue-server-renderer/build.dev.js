@@ -4,7 +4,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var he = _interopDefault(require('he'));
+var they = _interopDefault(require('they'));
 
 /*  */
 
@@ -3586,7 +3586,7 @@ var whitespaceRE = /[ \f\t\r\n]+/g;
 
 var invalidAttributeRE = /[\s"'<>\/=]/;
 
-var decodeHTMLCached = cached(he.decode);
+var decodeHTMLCached = cached(they.decode);
 
 var emptySlotScopeToken = "_empty_";
 

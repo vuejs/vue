@@ -9261,7 +9261,7 @@ var style$1 = {
 
 let decoder;
 
-var he = {
+var they = {
   decode (html) {
     decoder = decoder || document.createElement('div');
     decoder.innerHTML = html;
@@ -9607,7 +9607,7 @@ const whitespaceRE$1 = /[ \f\t\r\n]+/g;
 
 const invalidAttributeRE = /[\s"'<>\/=]/;
 
-const decodeHTMLCached = cached(he.decode);
+const decodeHTMLCached = cached(they.decode);
 
 const emptySlotScopeToken = `_empty_`;
 

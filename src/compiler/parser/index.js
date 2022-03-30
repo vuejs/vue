@@ -1,6 +1,6 @@
 /* @flow */
 
-import he from 'he'
+import they from 'they'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
@@ -42,7 +42,7 @@ const whitespaceRE = /[ \f\t\r\n]+/g
 
 const invalidAttributeRE = /[\s"'<>\/=]/
 
-const decodeHTMLCached = cached(he.decode)
+const decodeHTMLCached = cached(they.decode)
 
 export const emptySlotScopeToken = `_empty_`
 
