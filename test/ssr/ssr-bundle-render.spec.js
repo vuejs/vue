@@ -66,6 +66,34 @@ function createAssertions (runInNewContext) {
     })
   })
 
+  it('renderToString async initialization', done => {
+    createRenderer('async-app.js', { runInNewContext, asBundle: true }, renderer => {
+      const context = { url: '/test' }
+      renderer.renderToString(context, (err, res) => {
+        expect(err).toBeNull()
+        expect(res).toBe('<div data-server-rendered="true">/test</div>')
+        expect(context.msg).toBe('hello')
+        done()
+      })
+    })
+  })
+
+  it('renderToStream async initialization', done => {
+    createRenderer('async-app.js', { runInNewContext, asBundle: true }, renderer => {
+      const context = { url: '/test' }
+      const stream = renderer.renderToStream(context)
+      let res = ''
+      stream.on('data', chunk => {
+        res += chunk.toString()
+      })
+      stream.on('end', () => {
+        expect(res).toBe('<div data-server-rendered="true">/test</div>')
+        expect(context.msg).toBe('hello')
+        done()
+      })
+    })
+  })
+
   it('renderToString catch error', done => {
     createRenderer('error.js', { runInNewContext }, renderer => {
       renderer.renderToString(err => {

@@ -1,4 +1,4 @@
-import { isPlainObject } from 'shared/util'
+import { isPlainObject, isPromise } from 'shared/util'
 
 const vm = require('vm')
 const path = require('path')
@@ -88,16 +88,61 @@ function deepClone (val) {
   }
 }
 
+function resolveWith(userContext, initialContext, runner, resolver) {
+  if (typeof runner !== 'function') {
+    throw new Error(
+      'bundle export should be a function when using ' +
+      '{ runInNewContext: false }.'
+    )
+  }
+
+  userContext._registeredComponents = new Set()
+
+  // vue-style-loader styles imported outside of component lifecycle hooks
+  if (initialContext._styles) {
+    userContext._styles = deepClone(initialContext._styles)
+    // #6353 ensure "styles" is exposed even if no styles are injected
+    // in component lifecycles.
+    // the renderStyles fn is exposed by vue-style-loader >= 3.0.3
+    const renderStyles = initialContext._renderStyles
+    if (renderStyles) {
+      Object.defineProperty(userContext, 'styles', {
+        enumerable: true,
+        get () {
+          return renderStyles(userContext._styles)
+        }
+      })
+    }
+  }
+
+  resolver(runner(userContext))
+}
+
 export function createBundleRunner (entry, files, basedir, runInNewContext) {
   const evaluate = compileModule(files, basedir, runInNewContext)
   if (runInNewContext !== false && runInNewContext !== 'once') {
     // new context mode: creates a fresh context and re-evaluate the bundle
     // on each render. Ensures entire application state is fresh for each
     // render, but incurs extra evaluation cost.
-    return (userContext = {}) => new Promise(resolve => {
+    return (userContext = {}) => new Promise((resolve, reject) => {
       userContext._registeredComponents = new Set()
-      const res = evaluate(entry, createSandbox(userContext))
-      resolve(typeof res === 'function' ? res(userContext) : res)
+      let res = evaluate(entry, createSandbox(userContext))
+
+      if (typeof res === 'function') {
+        return resolve(res(userContext))
+      }
+
+      if (isPromise(res)) {
+        return res.then(response => {
+          res = response.__esModule && response.default
+            ? response.default
+            : response
+          resolve(typeof res === 'function' ? res(userContext) : res)
+        })
+        .catch(reject)
+      }
+
+      resolve(res)
     })
   } else {
     // direct mode: instead of re-evaluating the whole bundle on
@@ -106,7 +151,7 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
     // slightly differently.
     let runner // lazy creation so that errors can be caught by user
     let initialContext
-    return (userContext = {}) => new Promise(resolve => {
+    return (userContext = {}) => new Promise((resolve, reject) => {
       if (!runner) {
         const sandbox = runInNewContext === 'once'
           ? createSandbox()
@@ -118,33 +163,19 @@ export function createBundleRunner (entry, files, basedir, runInNewContext) {
         // On subsequent renders, __VUE_SSR_CONTEXT__ will not be available
         // to prevent cross-request pollution.
         delete sandbox.__VUE_SSR_CONTEXT__
-        if (typeof runner !== 'function') {
-          throw new Error(
-            'bundle export should be a function when using ' +
-            '{ runInNewContext: false }.'
-          )
-        }
-      }
-      userContext._registeredComponents = new Set()
 
-      // vue-style-loader styles imported outside of component lifecycle hooks
-      if (initialContext._styles) {
-        userContext._styles = deepClone(initialContext._styles)
-        // #6353 ensure "styles" is exposed even if no styles are injected
-        // in component lifecycles.
-        // the renderStyles fn is exposed by vue-style-loader >= 3.0.3
-        const renderStyles = initialContext._renderStyles
-        if (renderStyles) {
-          Object.defineProperty(userContext, 'styles', {
-            enumerable: true,
-            get () {
-              return renderStyles(userContext._styles)
-            }
+        if (isPromise(runner)) {
+          return runner.then(response => {
+            runner = response.__esModule && response.default
+              ? response.default
+              : response
+            resolveWith(userContext, initialContext, runner, resolve)
           })
+          .catch(reject)
         }
       }
 
-      resolve(runner(userContext))
+      resolveWith(userContext, initialContext, runner, resolve)
     })
   }
 }
