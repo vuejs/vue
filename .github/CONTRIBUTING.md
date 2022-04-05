@@ -68,7 +68,33 @@ There are some other scripts available in the `scripts` section of the `package.
 The default test script will do the following: lint with ESLint -> type check with Flow -> unit tests with coverage -> e2e tests. **Please make sure to have this pass successfully before submitting a PR.** Although the same tests will be run against your PR on the CI server, it is better to have it working locally.
 
 ## Project Structure
+    .
+    ├── scripts      
+    │   ├── alias.js
+    │   └── config.js
+    ├── dist
+    │   └── README.md
+    ├── flow
+    ├── packages
+    ├── test
+    └── src
+        ├── compiler
+        ├── core
+        │   ├── observer
+        │   ├── vdom
+        │   ├── instance
+        │   ├── global-api
+        │   └── components
+        ├── server
+        ├── platforms
+        ├── sfc
+        ├── shared
+        └── types
+            └── test
 
+
+            
+            
 - **`scripts`**: contains build-related scripts and configuration files. Usually, you don't need to touch them. However, it would be helpful to familiarize yourself with the following files:
 
   - `scripts/alias.js`: module import aliases used across all source code and tests.
