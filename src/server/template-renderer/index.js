@@ -9,7 +9,7 @@ import { parseTemplate } from './parse-template'
 import { createMapper } from './create-async-file-mapper'
 import type { ParsedTemplate } from './parse-template'
 import type { AsyncFileMapper } from './create-async-file-mapper'
-import { isNotProduction, isProduction } from '../../core/util/node_env'
+import { isProduction } from '../../core/util/node_env'
 
 type TemplateRendererOptions = {
   template?: string | (content: string, context: any) => string;
