@@ -7,6 +7,7 @@ import {
 } from 'shared/util'
 
 import { LIFECYCLE_HOOKS } from 'shared/constants'
+import { isNotProduction } from './util/node_env';
 
 export type Config = {
   // user
@@ -50,12 +51,12 @@ export default ({
   /**
    * Show production mode tip message on boot?
    */
-  productionTip: process.env.NODE_ENV !== 'production',
+  productionTip: isNotProduction,
 
   /**
    * Whether to enable devtools
    */
-  devtools: process.env.NODE_ENV !== 'production',
+  devtools: isNotProduction,
 
   /**
    * Whether to record perf

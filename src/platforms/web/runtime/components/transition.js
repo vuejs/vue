@@ -10,6 +10,7 @@ import {
   isAsyncPlaceholder,
   getFirstComponentChild
 } from 'core/vdom/helpers/index'
+import { isNotProduction } from '../../../../core/util/node_env'
 
 export const transitionProps = {
   name: String,
@@ -99,7 +100,7 @@ export default {
     }
 
     // warn multiple elements
-    if (process.env.NODE_ENV !== 'production' && children.length > 1) {
+    if (isNotProduction && children.length > 1) {
       warn(
         '<transition> can only be used on a single element. Use ' +
         '<transition-group> for lists.',
@@ -110,7 +111,7 @@ export default {
     const mode: string = this.mode
 
     // warn invalid mode
-    if (process.env.NODE_ENV !== 'production' &&
+    if (isNotProduction &&
       mode && mode !== 'in-out' && mode !== 'out-in'
     ) {
       warn(

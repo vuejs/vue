@@ -1,9 +1,10 @@
 import { inBrowser } from './env'
+import { isNotProduction } from './node_env'
 
 export let mark
 export let measure
 
-if (process.env.NODE_ENV !== 'production') {
+if (isNotProduction) {
   const perf = inBrowser && window.performance
   /* istanbul ignore if */
   if (

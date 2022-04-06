@@ -11,6 +11,7 @@ import {
   inBrowser,
   isIE
 } from '../util/index'
+import { isNotProduction } from '../util/node_env'
 
 export const MAX_UPDATE_COUNT = 100
 
@@ -28,7 +29,7 @@ let index = 0
 function resetSchedulerState () {
   index = queue.length = activatedChildren.length = 0
   has = {}
-  if (process.env.NODE_ENV !== 'production') {
+  if (isNotProduction) {
     circular = {}
   }
   waiting = flushing = false
@@ -94,7 +95,7 @@ function flushSchedulerQueue () {
     has[id] = null
     watcher.run()
     // in dev build, check and stop circular updates.
-    if (process.env.NODE_ENV !== 'production' && has[id] != null) {
+    if (isNotProduction && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > MAX_UPDATE_COUNT) {
         warn(
@@ -180,7 +181,7 @@ export function queueWatcher (watcher: Watcher) {
     if (!waiting) {
       waiting = true
 
-      if (process.env.NODE_ENV !== 'production' && !config.async) {
+      if (isNotProduction && !config.async) {
         flushSchedulerQueue()
         return
       }

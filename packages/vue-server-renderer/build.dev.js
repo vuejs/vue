@@ -43,7 +43,7 @@ function isPrimitive (value) {
 
 /**
  * Quick object check - this is primarily used to tell
- * Objects from primitive values when we know the value
+ * objects from primitive values when we know the value
  * is a JSON-compliant type.
  */
 function isObject (obj) {
@@ -792,6 +792,9 @@ var LIFECYCLE_HOOKS = [
   'serverPrefetch'
 ];
 
+var isProduction = "development" === 'production';
+var isNotProduction = !isProduction;
+
 /*  */
 
 
@@ -811,12 +814,12 @@ var config = ({
   /**
    * Show production mode tip message on boot?
    */
-  productionTip: "development" !== 'production',
+  productionTip: isNotProduction,
 
   /**
    * Whether to enable devtools
    */
-  devtools: "development" !== 'production',
+  devtools: isNotProduction,
 
   /**
    * Whether to record perf
@@ -897,7 +900,7 @@ var tip = noop;
 var generateComponentTrace = (noop); // work around flow check
 var formatComponentName = (noop);
 
-{
+if (isNotProduction) {
   var hasConsole = typeof console !== 'undefined';
   var classifyRE = /(?:^|[-_])(\w)/g;
   var classify = function (str) { return str
@@ -1315,7 +1318,7 @@ var strats = config.optionMergeStrategies;
 /**
  * Options with restrictions
  */
-{
+if (isNotProduction) {
   strats.el = strats.propsData = function (parent, child, vm, key) {
     if (!vm) {
       warn(
@@ -1409,7 +1412,7 @@ strats.data = function (
 ) {
   if (!vm) {
     if (childVal && typeof childVal !== 'function') {
-      warn(
+      isNotProduction && warn(
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
         'definitions.',
@@ -1472,7 +1475,7 @@ function mergeAssets (
 ) {
   var res = Object.create(parentVal || null);
   if (childVal) {
-    assertObjectType(key, childVal, vm);
+    isNotProduction && assertObjectType(key, childVal, vm);
     return extend(res, childVal)
   } else {
     return res
@@ -1500,7 +1503,7 @@ strats.watch = function (
   if (childVal === nativeWatch) { childVal = undefined; }
   /* istanbul ignore if */
   if (!childVal) { return Object.create(parentVal || null) }
-  {
+  if (isNotProduction) {
     assertObjectType(key, childVal, vm);
   }
   if (!parentVal) { return childVal }
@@ -1531,7 +1534,7 @@ strats.computed = function (
   vm,
   key
 ) {
-  if (childVal && "development" !== 'production') {
+  if (childVal && isNotProduction) {
     assertObjectType(key, childVal, vm);
   }
   if (!parentVal) { return childVal }
@@ -1591,7 +1594,7 @@ function normalizeProps (options, vm) {
       if (typeof val === 'string') {
         name = camelize(val);
         res[name] = { type: null };
-      } else {
+      } else if (isNotProduction) {
         warn('props must be strings when using array syntax.');
       }
     }
@@ -1603,7 +1606,7 @@ function normalizeProps (options, vm) {
         ? val
         : { type: val };
     }
-  } else {
+  } else if (isNotProduction) {
     warn(
       "Invalid value for option \"props\": expected an Array or an Object, " +
       "but got " + (toRawType(props)) + ".",
@@ -1631,7 +1634,7 @@ function normalizeInject (options, vm) {
         ? extend({ from: key }, val)
         : { from: val };
     }
-  } else {
+  } else if (isNotProduction) {
     warn(
       "Invalid value for option \"inject\": expected an Array or an Object, " +
       "but got " + (toRawType(inject)) + ".",
@@ -1674,7 +1677,7 @@ function mergeOptions (
   child,
   vm
 ) {
-  {
+  if (isNotProduction) {
     checkComponents(child);
   }
 
@@ -1742,7 +1745,7 @@ function resolveAsset (
   if (hasOwn(assets, PascalCaseId)) { return assets[PascalCaseId] }
   // fallback to prototype chain
   var res = assets[id] || assets[camelizedId] || assets[PascalCaseId];
-  if (warnMissing && !res) {
+  if (isNotProduction && warnMissing && !res) {
     warn(
       'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
       options
@@ -3053,7 +3056,7 @@ function transformNode (el, options) {
     }
   }
   if (staticClass) {
-    el.staticClass = JSON.stringify(staticClass);
+    el.staticClass = JSON.stringify(staticClass.replace(/\s+/g, ' ').trim());
   }
   var classBinding = getBindingAttr(el, 'class', false /* getStatic */);
   if (classBinding) {
@@ -8115,7 +8118,7 @@ function createComponent (
   // if at this stage it's not a constructor or an async component factory,
   // reject.
   if (typeof Ctor !== 'function') {
-    {
+    if (isNotProduction) {
       warn(("Invalid Component definition: " + (String(Ctor))), context);
     }
     return
@@ -8900,8 +8903,6 @@ var serialize = require('serialize-javascript');
 
 
 
-
-
 var TemplateRenderer = function TemplateRenderer (options) {
   this.options = options;
   this.inject = options.inject !== false;
@@ -9079,7 +9080,7 @@ TemplateRenderer.prototype.renderState = function renderState (context, options)
     var contextKey = ref.contextKey; if ( contextKey === void 0 ) contextKey = 'state';
     var windowKey = ref.windowKey; if ( windowKey === void 0 ) windowKey = '__INITIAL_STATE__';
   var state = this.serialize(context[contextKey]);
-  var autoRemove = '';
+  var autoRemove ='';
   var nonceAttr = context.nonce ? (" nonce=\"" + (context.nonce) + "\"") : '';
   return context[contextKey]
     ? ("<script" + nonceAttr + ">window." + windowKey + "=" + state + autoRemove + "</script>")

@@ -9,6 +9,7 @@ import { parseTemplate } from './parse-template'
 import { createMapper } from './create-async-file-mapper'
 import type { ParsedTemplate } from './parse-template'
 import type { AsyncFileMapper } from './create-async-file-mapper'
+import { isNotProduction, isProduction } from '../../core/util/node_env'
 
 type TemplateRendererOptions = {
   template?: string | (content: string, context: any) => string;
@@ -211,7 +212,7 @@ export default class TemplateRenderer {
       windowKey = '__INITIAL_STATE__'
     } = options || {}
     const state = this.serialize(context[contextKey])
-    const autoRemove = process.env.NODE_ENV === 'production'
+    const autoRemove =isProduction
       ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
       : ''
     const nonceAttr = context.nonce ? ` nonce="${context.nonce}"` : ''

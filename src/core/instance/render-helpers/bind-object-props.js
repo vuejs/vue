@@ -10,6 +10,7 @@ import {
   camelize,
   hyphenate
 } from 'core/util/index'
+import { isNotProduction } from '../../util/node_env'
 
 /**
  * Runtime helper for merging v-bind="object" into a VNode's data.
@@ -23,7 +24,7 @@ export function bindObjectProps (
 ): VNodeData {
   if (value) {
     if (!isObject(value)) {
-      process.env.NODE_ENV !== 'production' && warn(
+      isNotProduction && warn(
         'v-bind without argument expects an Object or Array value',
         this
       )

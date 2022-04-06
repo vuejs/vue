@@ -2,6 +2,7 @@
 
 import { parseFor } from 'compiler/parser/index'
 import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
+import { isNotProduction } from '../../../../../core/util/node_env'
 
 export function preTransformVFor (el: ASTElement, options: WeexCompilerOptions) {
   const exp = getAndRemoveAttr(el, 'v-for')
@@ -11,7 +12,7 @@ export function preTransformVFor (el: ASTElement, options: WeexCompilerOptions) 
 
   const res = parseFor(exp)
   if (!res) {
-    if (process.env.NODE_ENV !== 'production' && options.warn) {
+    if (isNotProduction && options.warn) {
       options.warn(`Invalid v-for expression: ${exp}`)
     }
     return

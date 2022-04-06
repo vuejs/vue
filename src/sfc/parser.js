@@ -3,6 +3,7 @@
 import deindent from 'de-indent'
 import { parseHTML } from 'compiler/parser/html-parser'
 import { makeMap } from 'shared/util'
+import { isNotProduction } from '../core/util/node_env'
 
 const splitRE = /\r?\n/g
 const replaceRE = /./g
@@ -29,7 +30,7 @@ export function parseComponent (
     sfc.errors.push(msg)
   }
 
-  if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+  if (isNotProduction&& options.outputSourceRange) {
     warn = (msg, range) => {
       const data: WarningMessage = { msg }
       if (range.start != null) {

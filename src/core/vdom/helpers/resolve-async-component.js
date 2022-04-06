@@ -14,6 +14,7 @@ import {
 
 import { createEmptyVNode } from 'core/vdom/vnode'
 import { currentRenderingInstance } from 'core/instance/render'
+import { isNotProduction } from '../../util/node_env'
 
 function ensureCtor (comp: any, base) {
   if (
@@ -101,7 +102,7 @@ export function resolveAsyncComponent (
     })
 
     const reject = once(reason => {
-      process.env.NODE_ENV !== 'production' && warn(
+      isNotProduction && warn(
         `Failed to resolve async component: ${String(factory)}` +
         (reason ? `\nReason: ${reason}` : '')
       )
@@ -146,7 +147,7 @@ export function resolveAsyncComponent (
             timerTimeout = null
             if (isUndef(factory.resolved)) {
               reject(
-                process.env.NODE_ENV !== 'production'
+                isNotProduction
                   ? `timeout (${res.timeout}ms)`
                   : null
               )

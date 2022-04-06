@@ -1,6 +1,7 @@
 /* @flow */
 
 import { extend } from 'shared/util'
+import { isNotProduction } from '../core/util/node_env'
 import { detectErrors } from './error-detector'
 import { createCompileToFunctionFn } from './to-function'
 
@@ -19,7 +20,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
       }
 
       if (options) {
-        if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+        if (isNotProduction && options.outputSourceRange) {
           // $flow-disable-line
           const leadingSpaceLength = template.match(/^\s*/)[0].length
 
@@ -59,7 +60,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
       finalOptions.warn = warn
 
       const compiled = baseCompile(template.trim(), finalOptions)
-      if (process.env.NODE_ENV !== 'production') {
+      if (isNotProduction) {
         detectErrors(compiled.ast, warn)
       }
       compiled.errors = errors

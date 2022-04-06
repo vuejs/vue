@@ -41,7 +41,7 @@
 
   /**
    * Quick object check - this is primarily used to tell
-   * Objects from primitive values when we know the value
+   * objects from primitive values when we know the value
    * is a JSON-compliant type.
    */
   function isObject (obj) {
@@ -790,6 +790,9 @@
     'serverPrefetch'
   ];
 
+  var isProduction = "development" === 'production';
+  var isNotProduction = !isProduction;
+
   /*  */
 
 
@@ -809,12 +812,12 @@
     /**
      * Show production mode tip message on boot?
      */
-    productionTip: "development" !== 'production',
+    productionTip: isNotProduction,
 
     /**
      * Whether to enable devtools
      */
-    devtools: "development" !== 'production',
+    devtools: isNotProduction,
 
     /**
      * Whether to record perf
@@ -895,7 +898,7 @@
   var generateComponentTrace = (noop); // work around flow check
   var formatComponentName = (noop);
 
-  {
+  if (isNotProduction) {
     var hasConsole = typeof console !== 'undefined';
     var classifyRE = /(?:^|[-_])(\w)/g;
     var classify = function (str) { return str
@@ -1313,7 +1316,7 @@
   /**
    * Options with restrictions
    */
-  {
+  if (isNotProduction) {
     strats.el = strats.propsData = function (parent, child, vm, key) {
       if (!vm) {
         warn(
@@ -1407,7 +1410,7 @@
   ) {
     if (!vm) {
       if (childVal && typeof childVal !== 'function') {
-        warn(
+        isNotProduction && warn(
           'The "data" option should be a function ' +
           'that returns a per-instance value in component ' +
           'definitions.',
@@ -1470,7 +1473,7 @@
   ) {
     var res = Object.create(parentVal || null);
     if (childVal) {
-      assertObjectType(key, childVal, vm);
+      isNotProduction && assertObjectType(key, childVal, vm);
       return extend(res, childVal)
     } else {
       return res
@@ -1498,7 +1501,7 @@
     if (childVal === nativeWatch) { childVal = undefined; }
     /* istanbul ignore if */
     if (!childVal) { return Object.create(parentVal || null) }
-    {
+    if (isNotProduction) {
       assertObjectType(key, childVal, vm);
     }
     if (!parentVal) { return childVal }
@@ -1529,7 +1532,7 @@
     vm,
     key
   ) {
-    if (childVal && "development" !== 'production') {
+    if (childVal && isNotProduction) {
       assertObjectType(key, childVal, vm);
     }
     if (!parentVal) { return childVal }
@@ -1589,7 +1592,7 @@
         if (typeof val === 'string') {
           name = camelize(val);
           res[name] = { type: null };
-        } else {
+        } else if (isNotProduction) {
           warn('props must be strings when using array syntax.');
         }
       }
@@ -1601,7 +1604,7 @@
           ? val
           : { type: val };
       }
-    } else {
+    } else if (isNotProduction) {
       warn(
         "Invalid value for option \"props\": expected an Array or an Object, " +
         "but got " + (toRawType(props)) + ".",
@@ -1629,7 +1632,7 @@
           ? extend({ from: key }, val)
           : { from: val };
       }
-    } else {
+    } else if (isNotProduction) {
       warn(
         "Invalid value for option \"inject\": expected an Array or an Object, " +
         "but got " + (toRawType(inject)) + ".",
@@ -1672,7 +1675,7 @@
     child,
     vm
   ) {
-    {
+    if (isNotProduction) {
       checkComponents(child);
     }
 
@@ -1740,7 +1743,7 @@
     if (hasOwn(assets, PascalCaseId)) { return assets[PascalCaseId] }
     // fallback to prototype chain
     var res = assets[id] || assets[camelizedId] || assets[PascalCaseId];
-    if (warnMissing && !res) {
+    if (isNotProduction && warnMissing && !res) {
       warn(
         'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
         options
@@ -2036,7 +2039,7 @@
   }
 
   function logError (err, vm, info) {
-    {
+    if (isNotProduction) {
       warn(("Error in " + info + ": \"" + (err.toString()) + "\""), vm);
     }
     /* istanbul ignore else */
@@ -2958,7 +2961,7 @@
       }
     }
     if (staticClass) {
-      el.staticClass = JSON.stringify(staticClass);
+      el.staticClass = JSON.stringify(staticClass.replace(/\s+/g, ' ').trim());
     }
     var classBinding = getBindingAttr(el, 'class', false /* getStatic */);
     if (classBinding) {
@@ -3917,14 +3920,14 @@
       if (!stack.length && element !== root) {
         // allow root elements with v-if, v-else-if and v-else
         if (root.if && (element.elseif || element.else)) {
-          {
+          if (isNotProduction) {
             checkRootConstraints(element);
           }
           addIfCondition(root, {
             exp: element.elseif,
             block: element
           });
-        } else {
+        } else if (isNotProduction) {
           warnOnce(
             "Component template should contain exactly one root element. " +
             "If you are using v-if on multiple elements, " +
@@ -4024,7 +4027,7 @@
           element.ns = ns;
         }
 
-        {
+        if (isNotProduction) {
           if (options.outputSourceRange) {
             element.start = start$1;
             element.end = end;
@@ -4049,7 +4052,7 @@
 
         if (isForbiddenTag(element) && !isServerRendering()) {
           element.forbidden = true;
-          warn$1(
+          isNotProduction && warn$1(
             'Templates should only be responsible for mapping the state to the ' +
             'UI. Avoid placing tags with side-effects in your templates, such as ' +
             "<" + tag + ">" + ', as they will not be parsed.',
@@ -4082,7 +4085,7 @@
 
         if (!root) {
           root = element;
-          {
+          if (isNotProduction) {
             checkRootConstraints(root);
           }
         }
@@ -4100,7 +4103,7 @@
         // pop stack
         stack.length -= 1;
         currentParent = stack[stack.length - 1];
-        if (options.outputSourceRange) {
+        if (isNotProduction && options.outputSourceRange) {
           element.end = end$1;
         }
         closeElement(element);
@@ -4108,7 +4111,7 @@
 
       chars: function chars (text, start, end) {
         if (!currentParent) {
-          {
+          if (isNotProduction) {
             if (text === template) {
               warnOnce(
                 'Component template requires a root element, rather than just text.',
@@ -4169,7 +4172,7 @@
             };
           }
           if (child) {
-            if (options.outputSourceRange) {
+            if (isNotProduction && options.outputSourceRange) {
               child.start = start;
               child.end = end;
             }
@@ -4186,7 +4189,7 @@
             text: text,
             isComment: true
           };
-          if (options.outputSourceRange) {
+          if (isNotProduction && options.outputSourceRange) {
             child.start = start;
             child.end = end;
           }
@@ -4252,7 +4255,7 @@
   function processKey (el) {
     var exp = getBindingAttr(el, 'key');
     if (exp) {
-      {
+      if (isNotProduction) {
         if (el.tag === 'template') {
           warn$1(
             "<template> cannot be keyed. Place the key on real elements instead.",
@@ -4290,7 +4293,7 @@
       var res = parseFor(exp);
       if (res) {
         extend(el, res);
-      } else {
+      } else if (isNotProduction) {
         warn$1(
           ("Invalid v-for expression: " + exp),
           el.rawAttrsMap['v-for']
@@ -4346,7 +4349,7 @@
         exp: el.elseif,
         block: el
       });
-    } else {
+    } else if (isNotProduction) {
       warn$1(
         "v-" + (el.elseif ? ('else-if="' + el.elseif + '"') : 'else') + " " +
         "used on element <" + (el.tag) + "> without corresponding v-if.",
@@ -4361,7 +4364,7 @@
       if (children[i].type === 1) {
         return children[i]
       } else {
-        if (children[i].text !== ' ') {
+        if (isNotProduction && children[i].text !== ' ') {
           warn$1(
             "text \"" + (children[i].text.trim()) + "\" between v-if and v-else(-if) " +
             "will be ignored.",
@@ -4394,7 +4397,7 @@
     if (el.tag === 'template') {
       slotScope = getAndRemoveAttr(el, 'scope');
       /* istanbul ignore if */
-      if (slotScope) {
+      if (isNotProduction && slotScope) {
         warn$1(
           "the \"scope\" attribute for scoped slots have been deprecated and " +
           "replaced by \"slot-scope\" since 2.5. The new \"slot-scope\" attribute " +
@@ -4407,7 +4410,7 @@
       el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope');
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
       /* istanbul ignore if */
-      if (el.attrsMap['v-for']) {
+      if (isNotProduction && el.attrsMap['v-for']) {
         warn$1(
           "Ambiguous combined usage of slot-scope and v-for on <" + (el.tag) + "> " +
           "(v-for takes higher priority). Use a wrapper <template> for the " +
@@ -4437,7 +4440,7 @@
         // v-slot on <template>
         var slotBinding = getAndRemoveAttrByRegex(el, slotRE);
         if (slotBinding) {
-          {
+          if (isNotProduction) {
             if (el.slotTarget || el.slotScope) {
               warn$1(
                 "Unexpected mixed usage of different slot syntaxes.",
@@ -4463,7 +4466,7 @@
         // v-slot on component, denotes default slot
         var slotBinding$1 = getAndRemoveAttrByRegex(el, slotRE);
         if (slotBinding$1) {
-          {
+          if (isNotProduction) {
             if (!maybeComponent(el)) {
               warn$1(
                 "v-slot can only be used on components or <template>.",
@@ -4513,7 +4516,7 @@
     if (!name) {
       if (binding.name[0] !== '#') {
         name = 'default';
-      } else {
+      } else if (isNotProduction) {
         warn$1(
           "v-slot shorthand syntax requires a slot name.",
           binding
@@ -4531,7 +4534,7 @@
   function processSlotOutlet (el) {
     if (el.tag === 'slot') {
       el.slotName = getBindingAttr(el, 'name');
-      if (el.key) {
+      if (isNotProduction && el.key) {
         warn$1(
           "`key` does not work on <slot> because slots are abstract outlets " +
           "and can possibly expand into multiple elements. " +
@@ -4575,6 +4578,7 @@
             name = name.slice(1, -1);
           }
           if (
+            isNotProduction &&
             value.trim().length === 0
           ) {
             warn$1(
@@ -4655,13 +4659,13 @@
             }
           }
           addDirective(el, name, rawName, value, arg, isDynamic, modifiers, list[i]);
-          if (name === 'model') {
+          if (isNotProduction && name === 'model') {
             checkForAliasModel(el, value);
           }
         }
       } else {
         // literal attribute
-        {
+        if (isNotProduction) {
           var res = parseText(value, delimiters);
           if (res) {
             warn$1(
@@ -4709,6 +4713,7 @@
     var map = {};
     for (var i = 0, l = attrs.length; i < l; i++) {
       if (
+        isNotProduction &&
         map[attrs[i].name] && !isIE && !isEdge
       ) {
         warn$1('duplicate attribute: ' + attrs[i].name, attrs[i]);
@@ -5339,7 +5344,7 @@
         parent = parent.parent;
       }
       if (!key) {
-        state.warn(
+        isNotProduction && state.warn(
           "v-once can only be used inside v-for that is keyed. ",
           el.rawAttrsMap['v-once']
         );
@@ -5399,7 +5404,8 @@
     var iterator1 = el.iterator1 ? ("," + (el.iterator1)) : '';
     var iterator2 = el.iterator2 ? ("," + (el.iterator2)) : '';
 
-    if (state.maybeComponent(el) &&
+    if (isNotProduction &&
+      state.maybeComponent(el) &&
       el.tag !== 'slot' &&
       el.tag !== 'template' &&
       !el.key
@@ -5531,7 +5537,9 @@
 
   function genInlineTemplate (el, state) {
     var ast = el.children[0];
-    if (el.children.length !== 1 || ast.type !== 1) {
+    if (isNotProduction && (
+      el.children.length !== 1 || ast.type !== 1
+    )) {
       state.warn(
         'Inline-template components must have exactly one child element.',
         { start: el.start }
@@ -6565,7 +6573,7 @@
         };
 
         if (options) {
-          if (options.outputSourceRange) {
+          if (isNotProduction && options.outputSourceRange) {
             // $flow-disable-line
             var leadingSpaceLength = template.match(/^\s*/)[0].length;
 
@@ -6605,7 +6613,7 @@
         finalOptions.warn = warn;
 
         var compiled = baseCompile(template.trim(), finalOptions);
-        {
+        if (isNotProduction) {
           detectErrors(compiled.ast, warn);
         }
         compiled.errors = errors;
@@ -8365,7 +8373,7 @@
     // if at this stage it's not a constructor or an async component factory,
     // reject.
     if (typeof Ctor !== 'function') {
-      {
+      if (isNotProduction) {
         warn(("Invalid Component definition: " + (String(Ctor))), context);
       }
       return

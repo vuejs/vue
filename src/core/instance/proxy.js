@@ -2,10 +2,11 @@
 
 import config from 'core/config'
 import { warn, makeMap, isNative } from '../util/index'
+import { isNotProduction } from '../util/node_env'
 
 let initProxy
 
-if (process.env.NODE_ENV !== 'production') {
+if (isNotProduction) {
   const allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +

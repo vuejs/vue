@@ -1,6 +1,7 @@
 /* @flow */
 
 import { extend, warn, isObject } from 'core/util/index'
+import { isNotProduction } from '../../util/node_env'
 
 /**
  * Runtime helper for rendering <slot>
@@ -17,7 +18,7 @@ export function renderSlot (
     // scoped slot
     props = props || {}
     if (bindObject) {
-      if (process.env.NODE_ENV !== 'production' && !isObject(bindObject)) {
+      if (isNotProduction && !isObject(bindObject)) {
         warn('slot v-bind without argument expects an Object', this)
       }
       props = extend(extend({}, bindObject), props)

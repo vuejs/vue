@@ -31,6 +31,7 @@ import {
   isRecyclableComponent,
   renderRecyclableComponentTemplate
 } from 'weex/runtime/recycle-list/render-component-template'
+import { isNotProduction } from '../util/node_env'
 
 // inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {
@@ -119,7 +120,7 @@ export function createComponent (
   // if at this stage it's not a constructor or an async component factory,
   // reject.
   if (typeof Ctor !== 'function') {
-    if (process.env.NODE_ENV !== 'production') {
+    if (isNotProduction) {
       warn(`Invalid Component definition: ${String(Ctor)}`, context)
     }
     return

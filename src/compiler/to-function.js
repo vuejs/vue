@@ -3,6 +3,7 @@
 import { noop, extend } from 'shared/util'
 import { warn as baseWarn, tip } from 'core/util/debug'
 import { generateCodeFrame } from './codeframe'
+import { isNotProduction } from '../core/util/node_env';
 
 type CompiledFunctionResult = {
   render: Function;
@@ -31,7 +32,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     delete options.warn
 
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production') {
+    if (isNotProduction) {
       // detect possible CSP restriction
       try {
         new Function('return 1')
@@ -60,7 +61,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     const compiled = compile(template, options)
 
     // check compilation errors/tips
-    if (process.env.NODE_ENV !== 'production') {
+    if (isNotProduction) {
       if (compiled.errors && compiled.errors.length) {
         if (options.outputSourceRange) {
           compiled.errors.forEach(e => {
@@ -99,7 +100,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     // this should only happen if there is a bug in the compiler itself.
     // mostly for codegen development use
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production') {
+    if (isNotProduction) {
       if ((!compiled.errors || !compiled.errors.length) && fnGenErrors.length) {
         warn(
           `Failed to generate render function:\n\n` +

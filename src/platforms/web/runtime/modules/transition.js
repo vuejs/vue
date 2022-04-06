@@ -19,6 +19,7 @@ import {
   addTransitionClass,
   removeTransitionClass
 } from '../transition-util'
+import { isNotProduction } from '../../../../core/util/node_env'
 
 export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
   const el: any = vnode.elm
@@ -105,7 +106,7 @@ export function enter (vnode: VNodeWithData, toggleDisplay: ?() => void) {
       : duration
   )
 
-  if (process.env.NODE_ENV !== 'production' && explicitEnterDuration != null) {
+  if (isNotProduction && explicitEnterDuration != null) {
     checkDuration(explicitEnterDuration, 'enter', vnode)
   }
 
@@ -215,7 +216,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       : duration
   )
 
-  if (process.env.NODE_ENV !== 'production' && isDef(explicitLeaveDuration)) {
+  if (isNotProduction && isDef(explicitLeaveDuration)) {
     checkDuration(explicitLeaveDuration, 'leave', vnode)
   }
 

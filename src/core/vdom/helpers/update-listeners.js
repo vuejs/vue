@@ -10,6 +10,7 @@ import {
   isTrue,
   isPlainObject
 } from 'shared/util'
+import { isNotProduction } from '../../util/node_env'
 
 const normalizeEvent = cached((name: string): {
   name: string,
@@ -69,7 +70,7 @@ export function updateListeners (
       event.params = def.params
     }
     if (isUndef(cur)) {
-      process.env.NODE_ENV !== 'production' && warn(
+      isNotProduction && warn(
         `Invalid handler for event "${event.name}": got ` + String(cur),
         vm
       )

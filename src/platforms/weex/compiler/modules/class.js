@@ -6,6 +6,7 @@ import {
   getBindingAttr,
   baseWarn
 } from 'compiler/helpers'
+import { isNotProduction } from '../../../../core/util/node_env';
 
 type StaticClassResult = {
   dynamic: boolean,
@@ -16,7 +17,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')
   const { dynamic, classResult } = parseStaticClass(staticClass, options)
-  if (process.env.NODE_ENV !== 'production' && dynamic && staticClass) {
+  if (isNotProduction && dynamic && staticClass) {
     warn(
       `class="${staticClass}": ` +
       'Interpolation inside attributes has been deprecated. ' +

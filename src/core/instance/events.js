@@ -7,6 +7,7 @@ import {
   formatComponentName,
   invokeWithErrorHandling
 } from '../util/index'
+import { isNotProduction } from '../util/node_env'
 import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
@@ -117,7 +118,7 @@ export function eventsMixin (Vue: Class<Component>) {
 
   Vue.prototype.$emit = function (event: string): Component {
     const vm: Component = this
-    if (process.env.NODE_ENV !== 'production') {
+    if (isNotProduction) {
       const lowerCaseEvent = event.toLowerCase()
       if (lowerCaseEvent !== event && vm._events[lowerCaseEvent]) {
         tip(

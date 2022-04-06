@@ -1,6 +1,7 @@
 /* @flow */
 
 import { emptyObject } from 'shared/util'
+import { isNotProduction } from '../core/util/node_env';
 import { parseFilters } from './parser/filter-parser'
 
 type Range = { start?: number, end?: number };
@@ -80,7 +81,7 @@ export function addHandler (
   // warn prevent and passive modifier
   /* istanbul ignore if */
   if (
-    process.env.NODE_ENV !== 'production' && warn &&
+    isNotProduction && warn &&
     modifiers.prevent && modifiers.passive
   ) {
     warn(

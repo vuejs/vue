@@ -16,6 +16,7 @@ import { queueWatcher } from './scheduler'
 import Dep, { pushTarget, popTarget } from './dep'
 
 import type { SimpleSet } from '../util/index'
+import { isNotProduction } from '../util/node_env'
 
 let uid = 0
 
@@ -73,7 +74,7 @@ export default class Watcher {
     this.newDeps = []
     this.depIds = new Set()
     this.newDepIds = new Set()
-    this.expression = process.env.NODE_ENV !== 'production'
+    this.expression = isNotProduction
       ? expOrFn.toString()
       : ''
     // parse expression for getter
@@ -83,7 +84,7 @@ export default class Watcher {
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = noop
-        process.env.NODE_ENV !== 'production' && warn(
+        isNotProduction && warn(
           `Failed watching path: "${expOrFn}" ` +
           'Watcher only accepts simple dot-delimited paths. ' +
           'For full control, use a function instead.',

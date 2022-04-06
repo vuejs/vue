@@ -16,6 +16,7 @@ import {
   emptyObject,
   validateProp
 } from '../util/index'
+import { isNotProduction } from '../util/node_env'
 
 export function FunctionalRenderContext (
   data: VNodeData,
@@ -139,7 +140,7 @@ function cloneAndMarkFunctionalResult (vnode, data, contextVm, options, renderCo
   const clone = cloneVNode(vnode)
   clone.fnContext = contextVm
   clone.fnOptions = options
-  if (process.env.NODE_ENV !== 'production') {
+  if (isNotProduction) {
     (clone.devtoolsMeta = clone.devtoolsMeta || {}).renderContext = renderContext
   }
   if (data.slot) {

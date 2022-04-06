@@ -5,6 +5,7 @@ import { warn } from './debug'
 import { inBrowser, inWeex } from './env'
 import { isPromise } from 'shared/util'
 import { pushTarget, popTarget } from '../observer/dep'
+import { isNotProduction } from './node_env'
 
 export function handleError (err: Error, vm: any, info: string) {
   // Deactivate deps tracking while processing error handler to avoid possible infinite rendering.
@@ -71,7 +72,7 @@ function globalHandleError (err, vm, info) {
 }
 
 function logError (err, vm, info) {
-  if (process.env.NODE_ENV !== 'production') {
+  if (isNotProduction) {
     warn(`Error in ${info}: "${err.toString()}"`, vm)
   }
   /* istanbul ignore else */

@@ -3,6 +3,7 @@
 import { ASSET_TYPES } from 'shared/constants'
 import { defineComputed, proxy } from '../instance/state'
 import { extend, mergeOptions, validateComponentName } from '../util/index'
+import { isNotProduction } from '../util/node_env'
 
 export function initExtend (Vue: GlobalAPI) {
   /**
@@ -26,7 +27,7 @@ export function initExtend (Vue: GlobalAPI) {
     }
 
     const name = extendOptions.name || Super.options.name
-    if (process.env.NODE_ENV !== 'production' && name) {
+    if (isNotProduction && name) {
       validateComponentName(name)
     }
 

@@ -6,11 +6,12 @@ import {
   getBindingAttr,
   baseWarn
 } from 'compiler/helpers'
+import { isNotProduction } from '../../../../core/util/node_env'
 
 function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')
-  if (process.env.NODE_ENV !== 'production' && staticClass) {
+  if (isNotProduction && staticClass) {
     const res = parseText(staticClass, options.delimiters)
     if (res) {
       warn(

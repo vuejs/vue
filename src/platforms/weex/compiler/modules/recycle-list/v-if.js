@@ -2,6 +2,7 @@
 
 import { addIfCondition } from 'compiler/parser/index'
 import { getAndRemoveAttr, addRawAttr } from 'compiler/helpers'
+import { isNotProduction } from '../../../../../core/util/node_env'
 
 function hasConditionDirective (el: ASTElement): boolean {
   for (const attr in el.attrsMap) {
@@ -50,7 +51,7 @@ export function preTransformVIf (el: ASTElement, options: WeexCompilerOptions) {
         exp = elseifExp
           ? `!(${prevMatch}) && (${elseifExp})` // v-else-if
           : `!(${prevMatch})` // v-else
-      } else if (process.env.NODE_ENV !== 'production' && options.warn) {
+      } else if (isNotProduction && options.warn) {
         options.warn(
           `v-${elseifExp ? ('else-if="' + elseifExp + '"') : 'else'} ` +
           `used on element <${el.tag}> without corresponding v-if.`

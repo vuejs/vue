@@ -4,9 +4,10 @@ import { renderMixin } from './render'
 import { eventsMixin } from './events'
 import { lifecycleMixin } from './lifecycle'
 import { warn } from '../util/index'
+import { isNotProduction } from '../util/node_env'
 
 function Vue (options) {
-  if (process.env.NODE_ENV !== 'production' &&
+  if (isNotProduction &&
     !(this instanceof Vue)
   ) {
     warn('Vue is a constructor and should be called with the `new` keyword')

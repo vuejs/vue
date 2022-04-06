@@ -17,12 +17,13 @@ import {
   mergeOptions,
   defineReactive
 } from '../util/index'
+import { isNotProduction } from '../util/node_env'
 
 export function initGlobalAPI (Vue: GlobalAPI) {
   // config
   const configDef = {}
   configDef.get = () => config
-  if (process.env.NODE_ENV !== 'production') {
+  if (isNotProduction) {
     configDef.set = () => {
       warn(
         'Do not replace the Vue.config object, set individual fields instead.'

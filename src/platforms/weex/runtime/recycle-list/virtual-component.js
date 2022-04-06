@@ -12,6 +12,7 @@ import { initProvide, initInjections } from 'core/instance/inject'
 import { initLifecycle, callHook } from 'core/instance/lifecycle'
 import { initInternalComponent, resolveConstructorOptions } from 'core/instance/init'
 import { registerComponentHook, updateComponentData } from '../../util/index'
+import { isNotProduction } from '../../../../core/util/node_env'
 
 let uid = 0
 
@@ -40,7 +41,7 @@ function initVirtualComponent (options: Object = {}) {
   }
 
   /* istanbul ignore else */
-  if (process.env.NODE_ENV !== 'production') {
+  if (isNotProduction) {
     initProxy(vm)
   } else {
     vm._renderProxy = vm

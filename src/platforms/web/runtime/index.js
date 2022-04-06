@@ -18,6 +18,7 @@ import {
 import { patch } from './patch'
 import platformDirectives from './directives/index'
 import platformComponents from './components/index'
+import { isNotProduction } from '../../../core/util/node_env'
 
 // install platform specific utils
 Vue.config.mustUseProp = mustUseProp
@@ -50,7 +51,7 @@ if (inBrowser) {
       if (devtools) {
         devtools.emit('init', Vue)
       } else if (
-        process.env.NODE_ENV !== 'production' &&
+        isNotProduction &&
         process.env.NODE_ENV !== 'test'
       ) {
         console[console.info ? 'info' : 'log'](
@@ -59,7 +60,7 @@ if (inBrowser) {
         )
       }
     }
-    if (process.env.NODE_ENV !== 'production' &&
+    if (isNotProduction &&
       process.env.NODE_ENV !== 'test' &&
       config.productionTip !== false &&
       typeof console !== 'undefined'
