@@ -37,19 +37,40 @@ const keyNames: { [key: string]: string | Array<string> } = {
 // #4868: modifiers that prevent the execution of the listener
 // need to explicitly return null so that we can determine whether to remove
 // the listener for .once
-const genGuard = condition => `if(${condition})return null;`
 
 const modifierCode: { [key: string]: string } = {
-  stop: '$event.stopPropagation();',
-  prevent: '$event.preventDefault();',
-  self: genGuard(`$event.target !== $event.currentTarget`),
-  ctrl: genGuard(`!$event.ctrlKey`),
-  shift: genGuard(`!$event.shiftKey`),
-  alt: genGuard(`!$event.altKey`),
-  meta: genGuard(`!$event.metaKey`),
-  left: genGuard(`'button' in $event && $event.button !== 0`),
-  middle: genGuard(`'button' in $event && $event.button !== 1`),
-  right: genGuard(`'button' in $event && $event.button !== 2`)
+  // stop and prevent return undefined
+  stop: '$event.stopPropagation()',
+  prevent: '$event.preventDefault()',
+  self: `$event.target !== $event.currentTarget`,
+  ctrl: `!$event.ctrlKey`,
+  shift: `!$event.shiftKey`,
+  alt: `!$event.altKey`,
+  meta: `!$event.metaKey`,
+  left: `('button' in $event && $event.button !== 0)`,
+  middle: `('button' in $event && $event.button !== 1)`,
+  right: `('button' in $event && $event.button !== 2)`
+}
+
+class modifierCodeMerger {
+  modifierCodeList: Array<string>;
+
+  constructor () {
+    this.modifierCodeList = []
+  }
+
+  pushCode (modifierCode: string) {
+    this.modifierCodeList.push(modifierCode)
+  }
+
+  unshiftCode (modifierCode: string) {
+    this.modifierCodeList.unshift(modifierCode)
+  }
+
+  getMergeCode (): string {
+    let code = this.modifierCodeList.join('||');
+    return code ? `(${code})` : `''`;
+  }
 }
 
 export function genHandlers (
@@ -118,47 +139,40 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
       isFunctionInvocation ? `return ${handler.value}` : handler.value
     }}` // inline statement
   } else {
-    let code = ''
-    let genModifierCode = ''
     const keys = []
+    const codeMerger=new modifierCodeMerger();
     for (const key in handler.modifiers) {
       if (modifierCode[key]) {
-        genModifierCode += modifierCode[key]
+        codeMerger.pushCode(modifierCode[key]);
         // left/right
         if (keyCodes[key]) {
           keys.push(key)
         }
       } else if (key === 'exact') {
-        const modifiers: ASTModifiers = (handler.modifiers: any)
-        genModifierCode += genGuard(
-          ['ctrl', 'shift', 'alt', 'meta']
-            .filter(keyModifier => !modifiers[keyModifier])
-            .map(keyModifier => `$event.${keyModifier}Key`)
-            .join('||')
-        )
+        const modifiers: ASTModifiers = (handler.modifiers: any);
+        ['ctrl', 'shift', 'alt', 'meta']
+          .forEach(keyModifier => modifiers[keyModifier] || codeMerger.pushCode(`$event.${keyModifier}Key`));
       } else {
         keys.push(key)
       }
     }
     if (keys.length) {
-      code += genKeyFilter(keys)
-    }
-    // Make sure modifiers like prevent and stop get executed after key filtering
-    if (genModifierCode) {
-      code += genModifierCode
+      // Make sure modifiers like prevent and stop get executed after key filtering
+      codeMerger.unshiftCode(genKeyFilter(keys))
     }
     const handlerCode = isMethodPath
-      ? `return ${handler.value}.apply(null, arguments)`
+      ? `${handler.value}.apply(null, arguments)`
       : isFunctionExpression
-        ? `return (${handler.value}).apply(null, arguments)`
+        ? `(${handler.value}).apply(null, arguments)`
         : isFunctionInvocation
-          ? `return ${handler.value}`
-          : handler.value
+          ? `${handler.value}`
+          : handler.value;
+    const code = `return ${codeMerger.getMergeCode()}?null:${handlerCode}`;
     /* istanbul ignore if */
     if (__WEEX__ && handler.params) {
-      return genWeexHandler(handler.params, code + handlerCode)
+      return genWeexHandler(handler.params, code)
     }
-    return `function($event){${code}${handlerCode}}`
+    return `function($event){${code}}`
   }
 }
 
@@ -167,8 +181,8 @@ function genKeyFilter (keys: Array<string>): string {
     // make sure the key filters only apply to KeyboardEvents
     // #9441: can't use 'keyCode' in $event because Chrome autofill fires fake
     // key events that do not have keyCode property...
-    `if(!$event.type.indexOf('key')&&` +
-    `${keys.map(genFilterCode).join('&&')})return null;`
+    `(!$event.type.indexOf('key')&&` +
+    `${keys.map(genFilterCode).join('&&')})`
   )
 }
 
