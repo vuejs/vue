@@ -167,7 +167,7 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
         : isFunctionInvocation
           ? `${handler.value}`
           : handler.value;
-    const code = `return ${codeMerger.getMergeCode()}?null:${handlerCode}`;
+    const code = `return ${codeMerger.getMergeCode()}?null:${handlerCode === '' ? undefined : handlerCode}`;
     /* istanbul ignore if */
     if (__WEEX__ && handler.params) {
       return genWeexHandler(handler.params, code)
