@@ -131,21 +131,21 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
   if (Array.isArray(handler)) {
     return `[${handler.map(handler => genHandler(handler)).join(',')}]`
   }
-
-  const isMethodPath = simplePathRE.test(handler.value)
-  const isFunctionExpression = fnExpRE.test(handler.value)
-  const isFunctionInvocation = simplePathRE.test(handler.value.replace(fnInvokeRE, ''))
+  const { value: handlerValue, params: handlerParams } = handler
+  const isMethodPath = simplePathRE.test(handlerValue)
+  const isFunctionExpression = fnExpRE.test(handlerValue)
+  const isFunctionInvocation = simplePathRE.test(handlerValue.replace(fnInvokeRE, ''))
 
   if (!handler.modifiers) {
     if (isMethodPath || isFunctionExpression) {
-      return handler.value
+      return handlerValue
     }
     /* istanbul ignore if */
-    if (__WEEX__ && handler.params) {
-      return genWeexHandler(handler.params, handler.value)
+    if (__WEEX__ && handlerParams) {
+      return genWeexHandler(handlerParams, handlerValue)
     }
     return `function($event){${
-      isFunctionInvocation ? `return ${handler.value}` : handler.value
+      isFunctionInvocation ? `return ${handlerValue}` : handlerValue
     }}` // inline statement
   } else {
     const keys = []
@@ -174,12 +174,12 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
       codeMerger.unshiftCode(genKeyFilter(keys))
     }
     const handlerCode = isMethodPath
-      ? `${handler.value}.apply(null, arguments)`
+      ? `${handlerValue}.apply(null, arguments)`
       : isFunctionExpression
-        ? `(${handler.value}).apply(null, arguments)`
+        ? `(${handlerValue}).apply(null, arguments)`
         : isFunctionInvocation
-          ? `${handler.value}`
-          : handler.value;
+          ? `${handlerValue}`
+          : handlerValue;
     let code = '';
     let guardCode = codeMerger.getMergeCode();
     if (handlerCode !== '') {
@@ -195,8 +195,8 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
       code += guardCode
     }
     /* istanbul ignore if */
-    if (__WEEX__ && handler.params) {
-      return genWeexHandler(handler.params, code)
+    if (__WEEX__ && handlerParams) {
+      return genWeexHandler(handlerParams, code)
     }
     return `function($event){${code}}`
   }
