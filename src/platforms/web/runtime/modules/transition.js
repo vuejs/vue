@@ -267,7 +267,7 @@ export function leave(vnode: VNodeWithData, rm: Function) {
 }
 
 // only used in dev mode
-export function checkDuration(val, name, vnode) {
+export function checkDuration(val: number, name: string, vnode: VNode) {
   if (typeof val !== "number") {
     warn(
       `<${vnode.parent.componentOptions.tag}> explicit ${name} duration is not a valid number - ` +

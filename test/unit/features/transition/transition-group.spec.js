@@ -352,19 +352,19 @@ if (!isIE9) {
           </div>
         `,
         data: {
-          items: ["1", "2", "3"],
+          items: ["a", "b", "c"],
         },
       }).$mount(el);
 
-      vm.items.push("4", "5");
+      vm.items.push("d", "e");
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
-            ["1", "2", "3"]
+            ["a", "b", "c"]
               .map((i) => `<div class="test">${i}</div>`)
               .join("") +
-            `<div class="test v-enter v-enter-active">4</div>` +
-            `<div class="test v-enter v-enter-active">5</div>` +
+            `<div class="test v-enter v-enter-active">d</div>` +
+            `<div class="test v-enter v-enter-active">e</div>` +
             `</span>`
         );
       })
@@ -372,11 +372,11 @@ if (!isIE9) {
         .then(() => {
           expect(vm.$el.innerHTML).toBe(
             `<span>` +
-              ["1", "2", "3"]
+              ["a", "b", "c"]
                 .map((i) => `<div class="test">${i}</div>`)
                 .join("") +
-              `<div class="test v-enter-active v-enter-to">4</div>` +
-              `<div class="test v-enter-active v-enter-to">5</div>` +
+              `<div class="test v-enter-active v-enter-to">d</div>` +
+              `<div class="test v-enter-active v-enter-to">e</div>` +
               `</span>`
           );
         })
@@ -401,17 +401,17 @@ if (!isIE9) {
           </div>
         `,
         data: {
-          items: ["1", "2", "3"],
+          items: ["a", "b", "c"],
         },
       }).$mount(el);
 
-      vm.items = ["2"];
+      vm.items = ["b"];
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
-            `<div class="test v-leave v-leave-active">1</div>` +
-            `<div class="test">2</div>` +
-            `<div class="test v-leave v-leave-active">3</div>` +
+            `<div class="test v-leave v-leave-active">a</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test v-leave v-leave-active">c</div>` +
             `</span>`
         );
       })
@@ -419,9 +419,9 @@ if (!isIE9) {
         .then(() => {
           expect(vm.$el.innerHTML).toBe(
             `<span>` +
-              `<div class="test v-leave-active v-leave-to">1</div>` +
-              `<div class="test">2</div>` +
-              `<div class="test v-leave-active v-leave-to">3</div>` +
+              `<div class="test v-leave-active v-leave-to">a</div>` +
+              `<div class="test">b</div>` +
+              `<div class="test v-leave-active v-leave-to">c</div>` +
               `</span>`
           );
         })
@@ -446,18 +446,18 @@ if (!isIE9) {
           </div>
         `,
         data: {
-          items: ["1", "2", "3"],
+          items: ["a", "b", "c"],
         },
       }).$mount(el);
 
-      vm.items = ["2", "3", "4"];
+      vm.items = ["b", "c", "d"];
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
-            `<div class="test v-leave v-leave-active">1</div>` +
-            `<div class="test">2</div>` +
-            `<div class="test">3</div>` +
-            `<div class="test v-enter v-enter-active">4</div>` +
+            `<div class="test v-leave v-leave-active">a</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test">c</div>` +
+            `<div class="test v-enter v-enter-active">d</div>` +
             `</span>`
         );
       })
@@ -465,10 +465,10 @@ if (!isIE9) {
         .then(() => {
           expect(vm.$el.innerHTML).toBe(
             `<span>` +
-              `<div class="test v-leave-active v-leave-to">1</div>` +
-              `<div class="test">2</div>` +
-              `<div class="test">3</div>` +
-              `<div class="test v-enter-active v-enter-to">4</div>` +
+              `<div class="test v-leave-active v-leave-to">a</div>` +
+              `<div class="test">b</div>` +
+              `<div class="test">c</div>` +
+              `<div class="test v-enter-active v-enter-to">d</div>` +
               `</span>`
           );
         })
@@ -493,18 +493,18 @@ if (!isIE9) {
           </div>
         `,
         data: {
-          items: ["1", "2", "3"],
+          items: ["a", "b", "c"],
         },
       }).$mount(el);
 
-      vm.items = ["4", "2", "1"];
+      vm.items = ["d", "b", "a"];
       waitForUpdate(() => {
         expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
           `<span>` +
-            `<div class="test group-enter group-enter-active">4</div>` +
-            `<div class="test">2</div>` +
-            `<div class="test group-move" style="transition-duration: ${explicitDuration}ms;">1</div>` +
-            `<div class="test group-leave group-leave-active group-move" style="transition-duration: ${explicitDuration}ms;">3</div>` +
+            `<div class="test group-enter group-enter-active">d</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test group-move" style="transition-duration: ${explicitDuration}ms;">a</div>` +
+            `<div class="test group-leave group-leave-active group-move" style="transition-duration: ${explicitDuration}ms;">c</div>` +
             `</span>`
         );
       })
@@ -512,10 +512,10 @@ if (!isIE9) {
         .then(() => {
           expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
             `<span>` +
-              `<div class="test group-enter-active group-enter-to">4</div>` +
-              `<div class="test">2</div>` +
-              `<div class="test group-move" style="transition-duration: ${explicitDuration}ms;">1</div>` +
-              `<div class="test group-leave-active group-move group-leave-to" style="transition-duration: ${explicitDuration}ms;">3</div>` +
+              `<div class="test group-enter-active group-enter-to">d</div>` +
+              `<div class="test">b</div>` +
+              `<div class="test group-move" style="transition-duration: ${explicitDuration}ms;">a</div>` +
+              `<div class="test group-leave-active group-move group-leave-to" style="transition-duration: ${explicitDuration}ms;">c</div>` +
               `</span>`
           );
         })
@@ -523,9 +523,9 @@ if (!isIE9) {
         .then(() => {
           expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
             `<span>` +
-              `<div class="test">4</div>` +
-              `<div class="test">2</div>` +
-              `<div class="test" style="transition-duration: ${explicitDuration}ms;">1</div>` +
+              `<div class="test">d</div>` +
+              `<div class="test">b</div>` +
+              `<div class="test" style="transition-duration: ${explicitDuration}ms;">a</div>` +
               `</span>`
           );
         })
