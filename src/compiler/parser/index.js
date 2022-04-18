@@ -208,41 +208,6 @@ export function parse(
     }
   }
 
-  // Check element's properties
-  // and give necessary warnings
-  function checkVComponentConstraints(el) {
-    if (el.tag === "template") {
-      // if (el.children.length > 1) {
-      //   warnOnce(
-      //     "Template element cannot have multiple root nodes. " +
-      //       "Use nested components instead.",
-      //     { start: el.start }
-      //   );
-      // }
-      // if (el.attrsMap.hasOwnProperty("v-for")) {
-      //   warnOnce(
-      //     "Cannot use v-for on template element because " +
-      //       "it renders multiple elements.",
-      //     el.rawAttrsMap["v-for"]
-      //   );
-      // }
-      // if (el.attrsMap.hasOwnProperty("v-if")) {
-      //   warnOnce(
-      //     "Cannot use v-if on template element because " +
-      //       "it renders multiple elements.",
-      //     el.rawAttrsMap["v-if"]
-      //   );
-      // }
-      if (el.attrsMap.hasOwnProperty("v-show")) {
-        warnOnce(
-          "Cannot use v-show on template element because " +
-            "it renders multiple elements.",
-          el.rawAttrsMap["v-show"]
-        );
-      }
-    }
-  }
-
   parseHTML(template, {
     warn,
     expectHTML: options.expectHTML,
@@ -339,11 +304,6 @@ export function parse(
         stack.push(element);
       } else {
         closeElement(element);
-      }
-
-      // Check for v-component constraints in production stage
-      if (process.env.NODE_ENV !== "production") {
-        checkVComponentConstraints(element);
       }
     },
 
