@@ -342,7 +342,7 @@ if (!isIE9) {
         .then(done);
     });
 
-    it("explicit enters duration in transition-group", (done) => {
+    it("explicit enter duration", (done) => {
       const vm = new Vue({
         template: `
           <div>
@@ -391,7 +391,7 @@ if (!isIE9) {
         .then(done);
     });
 
-    it("explicit leaves duration in transition-group", (done) => {
+    it("explicit leave duration", (done) => {
       const vm = new Vue({
         template: `
           <div>
@@ -436,7 +436,7 @@ if (!isIE9) {
         .then(done);
     });
 
-    it("explicit enters then leaves duration in transition-group", (done) => {
+    it("explicit enter + leave duration", (done) => {
       const vm = new Vue({
         template: `
           <div>
@@ -483,7 +483,7 @@ if (!isIE9) {
         .then(done);
     });
 
-    it("explicit moves duration in transition-group", (done) => {
+    it("explicit move duration", (done) => {
       const vm = new Vue({
         template: `
           <div>
