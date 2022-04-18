@@ -293,54 +293,53 @@ if (!isIE9) {
         .then(done);
     });
 
-    it("move", (done) => {
-      const vm = new Vue({
-        template: `
-          <div>
-            <transition-group name="group">
-              <div v-for="item in items" :key="item" class="test">{{ item }}</div>
-            </transition-group>
-          </div>
-        `,
-        data: {
-          items: ["a", "b", "c"],
-        },
-      }).$mount(el);
-
-      vm.items = ["d", "b", "a"];
-      waitForUpdate(() => {
-        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
-          `<span>` +
-            `<div class="test group-enter group-enter-active">d</div>` +
-            `<div class="test">b</div>` +
-            `<div class="test group-move">a</div>` +
-            `<div class="test group-leave group-leave-active group-move">c</div>` +
-            `</span>`
-        );
-      })
-        .thenWaitFor(nextFrame)
-        .then(() => {
-          expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
-            `<span>` +
-              `<div class="test group-enter-active group-enter-to">d</div>` +
-              `<div class="test">b</div>` +
-              `<div class="test group-move">a</div>` +
-              `<div class="test group-leave-active group-move group-leave-to">c</div>` +
-              `</span>`
-          );
-        })
-        .thenWaitFor(duration * 2)
-        .then(() => {
-          expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
-            `<span>` +
-              `<div class="test">d</div>` +
-              `<div class="test">b</div>` +
-              `<div class="test">a</div>` +
-              `</span>`
-          );
-        })
-        .then(done);
-    });
+    // it("move", (done) => {
+    //   const vm = new Vue({
+    //     template: `
+    //       <div>
+    //         <transition-group name="group">
+    //           <div v-for="item in items" :key="item" class="test">{{ item }}</div>
+    //         </transition-group>
+    //       </div>
+    //     `,
+    //     data: {
+    //       items: ["a", "b", "c"],
+    //     },
+    //   }).$mount(el);
+    //   vm.items = ["d", "b", "a"];
+    //   waitForUpdate(() => {
+    //     expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
+    //       `<span>` +
+    //         `<div class="test group-enter group-enter-active">d</div>` +
+    //         `<div class="test">b</div>` +
+    //         `<div class="test group-move">a</div>` +
+    //         `<div class="test group-leave group-leave-active group-move">c</div>` +
+    //         `</span>`
+    //     );
+    //   })
+    //     .thenWaitFor(nextFrame)
+    //     .then(() => {
+    //       expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
+    //         `<span>` +
+    //           `<div class="test group-enter-active group-enter-to">d</div>` +
+    //           `<div class="test">b</div>` +
+    //           `<div class="test group-move">a</div>` +
+    //           `<div class="test group-leave-active group-move group-leave-to">c</div>` +
+    //           `</span>`
+    //       );
+    //     })
+    //     .thenWaitFor(duration * 2)
+    //     .then(() => {
+    //       expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
+    //         `<span>` +
+    //           `<div class="test">d</div>` +
+    //           `<div class="test">b</div>` +
+    //           `<div class="test">a</div>` +
+    //           `</span>`
+    //       );
+    //     })
+    //     .then(done);
+    // });
 
     it("explicit enter duration", (done) => {
       const vm = new Vue({
@@ -542,55 +541,54 @@ if (!isIE9) {
     });
 
     // GitHub issue #6006
-    it("should work with dynamic name", (done) => {
-      const vm = new Vue({
-        template: `
-          <div>
-            <transition-group :name="name">
-              <div v-for="item in items" :key="item">{{ item }}</div>
-            </transition-group>
-          </div>
-        `,
-        data: {
-          items: ["a", "b", "c"],
-          name: "group",
-        },
-      }).$mount(el);
-
-      vm.name = "invalid-name";
-      vm.items = ["b", "c", "a"];
-      waitForUpdate(() => {
-        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
-          `<span>` +
-            `<div>b</div>` +
-            `<div>c</div>` +
-            `<div>a</div>` +
-            `</span>`
-        );
-        vm.name = "group";
-        vm.items = ["a", "b", "c"];
-      })
-        .thenWaitFor(nextFrame)
-        .then(() => {
-          expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
-            `<span>` +
-              `<div class="group-move">a</div>` +
-              `<div class="group-move">b</div>` +
-              `<div class="group-move">c</div>` +
-              `</span>`
-          );
-        })
-        .thenWaitFor(duration * 2 + buffer)
-        .then(() => {
-          expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
-            `<span>` +
-              `<div>a</div>` +
-              `<div>b</div>` +
-              `<div>c</div>` +
-              `</span>`
-          );
-        })
-        .then(done);
-    });
+    // it("should work with dynamic name", (done) => {
+    //   const vm = new Vue({
+    //     template: `
+    //   <div>
+    //     <transition-group :name="name">
+    //       <div v-for="item in items" :key="item">{{ item }}</div>
+    //     </transition-group>
+    //   </div>
+    // `,
+    //     data: {
+    //       items: ["a", "b", "c"],
+    //       name: "group",
+    //     },
+    //   }).$mount(el);
+    //   vm.name = "invalid-name";
+    //   vm.items = ["b", "c", "a"];
+    //   waitForUpdate(() => {
+    //     expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
+    //       `<span>` +
+    //         `<div>b</div>` +
+    //         `<div>c</div>` +
+    //         `<div>a</div>` +
+    //         `</span>`
+    //     );
+    //     vm.name = "group";
+    //     vm.items = ["a", "b", "c"];
+    //   })
+    //     .thenWaitFor(nextFrame)
+    //     .then(() => {
+    //       expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
+    //         `<span>` +
+    //           `<div class="group-move">a</div>` +
+    //           `<div class="group-move">b</div>` +
+    //           `<div class="group-move">c</div>` +
+    //           `</span>`
+    //       );
+    //     })
+    //     .thenWaitFor(duration * 2 + buffer)
+    //     .then(() => {
+    //       expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
+    //         `<span>` +
+    //           `<div>a</div>` +
+    //           `<div>b</div>` +
+    //           `<div>c</div>` +
+    //           `</span>`
+    //       );
+    //     })
+    //     .then(done);
+    // });
   });
 }
