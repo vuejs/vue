@@ -208,6 +208,8 @@ export function parse(
     }
   }
 
+  // Check element's properties
+  // and give necessary warnings
   function checkVComponentConstraints(el) {
     if (el.tag === "template") {
       if (el.children.length > 1) {
@@ -339,6 +341,7 @@ export function parse(
         closeElement(element);
       }
 
+      // Check for v-component constraints in production stage
       if (process.env.NODE_ENV !== "production") {
         checkVComponentConstraints(element);
       }
