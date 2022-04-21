@@ -3,7 +3,13 @@
 import { isRegExp, remove } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 
-type VNodeCache = { [key: string]: ?VNode };
+type CacheEntry = {
+  name: ?string;
+  tag: ?string;
+  componentInstance: Component;
+};
+
+type CacheEntryMap = { [key: string]: ?CacheEntry };
 
 function getComponentName (opts: ?VNodeComponentOptions): ?string {
   return opts && (opts.Ctor.options.name || opts.tag)
@@ -24,9 +30,9 @@ function matches (pattern: string | RegExp | Array<string>, name: string): boole
 function pruneCache (keepAliveInstance: any, filter: Function) {
   const { cache, keys, _vnode } = keepAliveInstance
   for (const key in cache) {
-    const cachedNode: ?VNode = cache[key]
-    if (cachedNode) {
-      const name: ?string = getComponentName(cachedNode.componentOptions)
+    const entry: ?CacheEntry = cache[key]
+    if (entry) {
+      const name: ?string = entry.name
       if (name && !filter(name)) {
         pruneCacheEntry(cache, key, keys, _vnode)
       }
@@ -35,14 +41,14 @@ function pruneCache (keepAliveInstance: any, filter: Function) {
 }
 
 function pruneCacheEntry (
-  cache: VNodeCache,
+  cache: CacheEntryMap,
   key: string,
   keys: Array<string>,
   current?: VNode
 ) {
-  const cached = cache[key]
-  if (cached && cached !== current) {
-    cached.componentInstance.$destroy()
+  const entry: ?CacheEntry = cache[key]
+  if (entry && (!current || entry.tag !== current.tag)) {
+    entry.componentInstance.$destroy()
   }
   cache[key] = null
   remove(keys, key)
@@ -60,6 +66,26 @@ export default {
     max: [String, Number]
   },
 
+  methods: {
+    cacheVNode() {
+      const { cache, keys, vnodeToCache, keyToCache } = this
+      if (vnodeToCache) {
+        const { tag, componentInstance, componentOptions } = vnodeToCache
+        cache[keyToCache] = {
+          name: getComponentName(componentOptions),
+          tag,
+          componentInstance,
+        }
+        keys.push(keyToCache)
+        // prune oldest entry
+        if (this.max && keys.length > parseInt(this.max)) {
+          pruneCacheEntry(cache, keys[0], keys, this._vnode)
+        }
+        this.vnodeToCache = null
+      }
+    }
+  },
+
   created () {
     this.cache = Object.create(null)
     this.keys = []
@@ -71,25 +97,34 @@ export default {
     }
   },
 
-  watch: {
-    include (val: string | RegExp | Array<string>) {
+  mounted () {
+    this.cacheVNode()
+    this.$watch('include', val => {
       pruneCache(this, name => matches(val, name))
-    },
-    exclude (val: string | RegExp | Array<string>) {
+    })
+    this.$watch('exclude', val => {
       pruneCache(this, name => !matches(val, name))
-    }
+    })
+  },
+
+  updated () {
+    this.cacheVNode()
   },
 
   render () {
-    const vnode: VNode = getFirstComponentChild(this.$slots.default)
+    const slot = this.$slots.default
+    const vnode: VNode = getFirstComponentChild(slot)
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
       // check pattern
       const name: ?string = getComponentName(componentOptions)
-      if (name && (
-        (this.include && !matches(this.include, name)) ||
-        (this.exclude && matches(this.exclude, name))
-      )) {
+      const { include, exclude } = this
+      if (
+        // not included
+        (include && (!name || !matches(include, name))) ||
+        // excluded
+        (exclude && name && matches(exclude, name))
+      ) {
         return vnode
       }
 
@@ -105,16 +140,13 @@ export default {
         remove(keys, key)
         keys.push(key)
       } else {
-        cache[key] = vnode
-        keys.push(key)
-        // prune oldest entry
-        if (this.max && keys.length > parseInt(this.max)) {
-          pruneCacheEntry(cache, keys[0], keys, this._vnode)
-        }
+        // delay setting the cache until update
+        this.vnodeToCache = vnode
+        this.keyToCache = key
       }
 
       vnode.data.keepAlive = true
     }
-    return vnode
+    return vnode || (slot && slot[0])
   }
 }

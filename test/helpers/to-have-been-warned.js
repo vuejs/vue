@@ -14,8 +14,8 @@ let asserted
 
 function createCompareFn (spy) {
   const hasWarned = msg => {
-    var count = spy.calls.count()
-    var args
+    let count = spy.calls.count()
+    let args
     while (count--) {
       args = spy.calls.argsFor(count)
       if (args.some(containsMsg)) {
@@ -31,7 +31,7 @@ function createCompareFn (spy) {
   return {
     compare: msg => {
       asserted = asserted.concat(msg)
-      var warned = Array.isArray(msg)
+      const warned = Array.isArray(msg)
         ? msg.some(hasWarned)
         : hasWarned(msg)
       return {

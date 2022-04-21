@@ -14,7 +14,7 @@ describe('Global API: set/delete', () => {
       }).then(done)
     })
 
-    it('should update a observing object', done => {
+    it('should update an observing object', done => {
       const vm = new Vue({
         template: '<div>{{foo.x}}</div>',
         data: { foo: { x: 1 }}
@@ -26,7 +26,7 @@ describe('Global API: set/delete', () => {
       }).then(done)
     })
 
-    it('should update a observing array', done => {
+    it('should update an observing array', done => {
       const vm = new Vue({
         template: '<div><div v-for="v,k in list">{{k}}-{{v}}</div></div>',
         data: { list: ['a', 'b', 'c'] }
@@ -79,6 +79,32 @@ describe('Global API: set/delete', () => {
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('<p>D</p><p>B</p><p>C</p>')
       }).then(done)
+    })
+
+    // #6845
+    it('should not overwrite properties on prototype chain', () => {
+      class Model {
+        constructor () {
+          this._bar = null
+        }
+        get bar () {
+          return this._bar
+        }
+        set bar (newvalue) {
+          this._bar = newvalue
+        }
+      }
+
+      const vm = new Vue({
+        data: {
+          data: new Model()
+        }
+      })
+
+      Vue.set(vm.data, 'bar', 123)
+      expect(vm.data.bar).toBe(123)
+      expect(vm.data.hasOwnProperty('bar')).toBe(false)
+      expect(vm.data._bar).toBe(123)
     })
   })
 
