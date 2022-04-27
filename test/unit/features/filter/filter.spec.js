@@ -194,4 +194,11 @@ describe('Filters', () => {
   it('support template string', () => {
     expect(parseFilters('`a | ${b}c` | d')).toBe('_f("d")(`a | ${b}c`)')
   })
+
+  it('bigint support', () => {
+    const vm = new Vue({
+      template: `<div>{{ BigInt(BigInt(10000000)) + BigInt(2000000000n) * 3000000n }}</div>`
+    }).$mount()
+    expect(vm.$el.textContent).toBe('6000000010000000')
+  })
 })

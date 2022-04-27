@@ -241,6 +241,26 @@ describe('Options props', () => {
         makeInstance({}, Symbol)
         expect('Expected Symbol, got Object').toHaveBeenWarned()
       })
+
+      it('warns when expected an explicable type but Symbol was provided', () => {
+        makeInstance(Symbol('foo'), String)
+        expect('Expected String, got Symbol').toHaveBeenWarned()
+      })
+
+      it('warns when expected an explicable type but Symbol was provided', () => {
+        makeInstance(Symbol('foo'), [String, Number])
+        expect('Expected String, Number, got Symbol').toHaveBeenWarned()
+      })
+    }
+	
+    if (typeof BigInt !== 'undefined') {
+      /* global BigInt */
+      it('bigint', () => {
+        makeInstance(BigInt(100), BigInt)
+        expect(console.error.calls.count()).toBe(0)
+        makeInstance({}, BigInt)
+        expect('Expected BigInt, got Object').toHaveBeenWarned()
+      })
     }
 
     it('custom constructor', () => {
@@ -543,4 +563,20 @@ describe('Options props', () => {
     expect(vm.$refs.test.$props.booleanOrString).toBe(true)
     expect(vm.$refs.test.$props.stringOrBoolean).toBe('')
   })
+
+  it('should warn when a prop type is not a constructor', () => {
+    const vm = new Vue({
+      template: '<div>{{a}}</div>',
+      props: {
+        a: {
+          type: 'String',
+          default: 'test'
+        }
+      }
+    }).$mount()
+    expect(
+      'Invalid prop type: "String" is not a constructor'
+    ).toHaveBeenWarned()
+  })
+
 })

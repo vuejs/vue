@@ -206,8 +206,10 @@ export function createComponent (
 }
 
 export function createComponentInstanceForVnode (
-  vnode: any, // we know it's MountedComponentVNode but flow doesn't
-  parent: any, // activeInstance in lifecycle state
+  // we know it's MountedComponentVNode but flow doesn't
+  vnode: any,
+  // activeInstance in lifecycle state
+  parent: any
 ): Component {
   const options: InternalComponentOptions = {
     _isComponent: true,

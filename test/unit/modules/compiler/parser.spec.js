@@ -569,6 +569,26 @@ describe('parser', () => {
     })
   })
 
+  // #9781
+  it('multiple dynamic slot names without warning', () => {
+    const ast = parse(`<my-component>
+      <template #[foo]>foo</template>
+      <template #[data]="scope">scope</template>
+      <template #[bar]>bar</template>
+    </my-component>`, baseOptions)
+
+    expect(`Invalid dynamic argument expression`).not.toHaveBeenWarned()
+    expect(ast.scopedSlots.foo).not.toBeUndefined()
+    expect(ast.scopedSlots.data).not.toBeUndefined()
+    expect(ast.scopedSlots.bar).not.toBeUndefined()
+    expect(ast.scopedSlots.foo.type).toBe(1)
+    expect(ast.scopedSlots.data.type).toBe(1)
+    expect(ast.scopedSlots.bar.type).toBe(1)
+    expect(ast.scopedSlots.foo.attrsMap['#[foo]']).toBe('')
+    expect(ast.scopedSlots.bar.attrsMap['#[bar]']).toBe('')
+    expect(ast.scopedSlots.data.attrsMap['#[data]']).toBe('scope')
+  })
+
   // #6887
   it('special case static attribute that must be props', () => {
     const ast = parse('<video muted></video>', baseOptions)
@@ -845,6 +865,14 @@ describe('parser', () => {
     expect(ast.children[4].children[0].text).toBe('. Have fun! ')
   })
 
+  it(`maintains &nbsp; with whitespace: 'condense'`, () => {
+    const options = extend({}, condenseOptions)
+    const ast = parse('<span>&nbsp;</span>', options)
+    const code = ast.children[0]
+    expect(code.type).toBe(3)
+    expect(code.text).toBe('\xA0')
+  })
+
   it(`preserve whitespace in <pre> tag with whitespace: 'condense'`, function () {
     const options = extend({}, condenseOptions)
     const ast = parse('<pre><code>  \n<span>hi</span>\n  </code><span> </span></pre>', options)
@@ -880,5 +908,21 @@ describe('parser', () => {
     expect(ast.children[1].tag).toBe('input')
     expect(ast.children[2].type).toBe(3)
     expect(ast.children[2].text).toBe('\ndef')
+  })
+
+  // #10152
+  it('not warn when scoped slot used inside of dynamic component on regular element', () => {
+    parse(`
+      <div>
+        <div is="customComp" v-slot="slotProps"></div>
+        <div :is="'customComp'" v-slot="slotProps"></div>
+        <div v-bind:is="'customComp'" v-slot="slotProps"></div>
+      </div>
+    `, baseOptions)
+    expect('v-slot can only be used on components or <template>').not.toHaveBeenWarned()
+
+    parse(`<div is="customComp"><template v-slot="slotProps"></template></div>`, baseOptions)
+    expect(`<template v-slot> can only appear at the root level inside the receiving the component`)
+      .not.toHaveBeenWarned()
   })
 })
