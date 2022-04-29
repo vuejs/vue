@@ -25,11 +25,11 @@ export function createInstanceContext(
     instanceId,
     config: weex.config,
     document: weex.document,
-    data,
-  })
+    data
+  }
 
-  // Each instance has a independent `Vue` module instance
-  const Vue = (instance.Vue = createVueModuleInstance(instanceId, weex))
+  // Each instance has an independent `Vue` module instance
+  const Vue = instance.Vue = createVueModuleInstance(instanceId, weex)
 
   // DEPRECATED
   const timerAPIs = getInstanceTimer(instanceId, weex.requireModule)

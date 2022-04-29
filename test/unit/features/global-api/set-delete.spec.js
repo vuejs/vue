@@ -14,7 +14,7 @@ describe('Global API: set/delete', () => {
       }).then(done)
     })
 
-    it('should update a observing object', done => {
+    it('should update an observing object', done => {
       const vm = new Vue({
         template: '<div>{{foo.x}}</div>',
         data: { foo: { x: 1 }}
@@ -26,7 +26,7 @@ describe('Global API: set/delete', () => {
       }).then(done)
     })
 
-    it('should update a observing array', done => {
+    it('should update an observing array', done => {
       const vm = new Vue({
         template: '<div><div v-for="v,k in list">{{k}}-{{v}}</div></div>',
         data: { list: ['a', 'b', 'c'] }

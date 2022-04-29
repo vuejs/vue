@@ -13,7 +13,7 @@ export default class VNode {
   key: string | number | undefined;
   componentOptions?: VNodeComponentOptions;
   componentInstance?: Component; // component instance
-  parent: VNode | undefined; // component placeholder node
+  parent: VNode | undefined | null; // component placeholder node
 
   // strictly internal
   raw: boolean; // contains raw HTML? (server only)

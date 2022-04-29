@@ -127,25 +127,25 @@ describe('Error handling', () => {
     }).then(done)
   })
 
-  it('should recover from errors in user watcher callback', done => {
-    const vm = createTestInstance(components.userWatcherCallback)
-    vm.n++
-    waitForUpdate(() => {
-      expect(`Error in callback for watcher "n"`).toHaveBeenWarned()
-      expect(`Error: userWatcherCallback`).toHaveBeenWarned()
-    }).thenWaitFor(next => {
-      assertBothInstancesActive(vm).end(next)
-    }).then(done)
-  })
+  ;[
+    ['userWatcherCallback', 'watcher'],
+    ['userImmediateWatcherCallback', 'immediate watcher']
+  ].forEach(([type, description]) => {
+    it(`should recover from errors in user ${description} callback`, done => {
+      const vm = createTestInstance(components[type])
+      assertBothInstancesActive(vm).then(() => {
+        expect(`Error in callback for ${description} "n"`).toHaveBeenWarned()
+        expect(`Error: ${type} error`).toHaveBeenWarned()
+      }).then(done)
+    })
 
-  it('should recover from errors in user immediate watcher callback', done => {
-    const vm = createTestInstance(components.userImmediateWatcherCallback)
-    waitForUpdate(() => {
-      expect(`Error in callback for immediate watcher "n"`).toHaveBeenWarned()
-      expect(`Error: userImmediateWatcherCallback error`).toHaveBeenWarned()
-    }).thenWaitFor(next => {
-      assertBothInstancesActive(vm).end(next)
-    }).then(done)
+    it(`should recover from promise errors in user ${description} callback`, done => {
+      const vm = createTestInstance(components[`${type}Async`])
+      assertBothInstancesActive(vm).then(() => {
+        expect(`Error in callback for ${description} "n" (Promise/async)`).toHaveBeenWarned()
+        expect(`Error: ${type} error`).toHaveBeenWarned()
+      }).then(done)
+    })
   })
 
   it('config.errorHandler should capture render errors', done => {
@@ -351,6 +351,33 @@ function createErrorTestComponents () {
         immediate: true,
         handler () {
           throw new Error('userImmediateWatcherCallback error')
+        }
+      }
+    },
+    render (h) {
+      return h('div', this.n)
+    }
+  }
+
+  components.userWatcherCallbackAsync = {
+    props: ['n'],
+    watch: {
+      n () {
+        return Promise.reject(new Error('userWatcherCallback error'))
+      }
+    },
+    render (h) {
+      return h('div', this.n)
+    }
+  }
+
+  components.userImmediateWatcherCallbackAsync = {
+    props: ['n'],
+    watch: {
+      n: {
+        immediate: true,
+        handler () {
+          return Promise.reject(new Error('userImmediateWatcherCallback error'))
         }
       }
     },

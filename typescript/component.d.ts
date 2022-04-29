@@ -110,7 +110,7 @@ declare class Component {
   _render: () => VNode;
 
   __patch__: (
-    a: Element | VNode | void,
+    a: Element | VNode | void | null,
     b: VNode | null,
     hydrating?: boolean,
     removeOnly?: boolean,

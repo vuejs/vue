@@ -572,6 +572,73 @@ describe('Component keep-alive', () => {
     }).then(done)
   })
 
+  it('max=1', done => {
+    const spyA = jasmine.createSpy()
+    const spyB = jasmine.createSpy()
+    const spyC = jasmine.createSpy()
+    const spyAD = jasmine.createSpy()
+    const spyBD = jasmine.createSpy()
+    const spyCD = jasmine.createSpy()
+
+    function assertCount (calls) {
+      expect([
+        spyA.calls.count(),
+        spyAD.calls.count(),
+        spyB.calls.count(),
+        spyBD.calls.count(),
+        spyC.calls.count(),
+        spyCD.calls.count()
+      ]).toEqual(calls)
+    }
+
+    const vm = new Vue({
+      template: `
+        <keep-alive max="1">
+          <component :is="n"></component>
+        </keep-alive>
+      `,
+      data: {
+        n: 'aa'
+      },
+      components: {
+        aa: {
+          template: '<div>a</div>',
+          created: spyA,
+          destroyed: spyAD
+        },
+        bb: {
+          template: '<div>bbb</div>',
+          created: spyB,
+          destroyed: spyBD
+        },
+        cc: {
+          template: '<div>ccc</div>',
+          created: spyC,
+          destroyed: spyCD
+        }
+      }
+    }).$mount()
+
+    assertCount([1, 0, 0, 0, 0, 0])
+    vm.n = 'bb'
+    waitForUpdate(() => {
+      // should prune A because max cache reached
+      assertCount([1, 1, 1, 0, 0, 0])
+      vm.n = 'cc'
+    }).then(() => {
+      // should prune B because max cache reached
+      assertCount([1, 1, 1, 1, 1, 0])
+      vm.n = 'bb'
+    }).then(() => {
+      // B is recreated
+      assertCount([1, 1, 2, 1, 1, 1])
+      vm.n = 'aa'
+    }).then(() => {
+      // B is destroyed and A recreated
+      assertCount([2, 1, 2, 2, 1, 1])
+    }).then(done)
+  })
+
   it('should warn unknown component inside', () => {
     new Vue({
       template: `<keep-alive><foo/></keep-alive>`
@@ -1181,6 +1248,38 @@ describe('Component keep-alive', () => {
           expect(vm.$el.innerHTML).toBe('<div class="test">two</div>')
         }).then(done)
       }
+    })
+
+    // #10083
+    it('should not attach event handler repeatedly', done => {
+      const vm = new Vue({
+        template: `
+          <keep-alive>
+            <btn v-if="showBtn" @click.native="add" />
+          </keep-alive>
+        `,
+        data: { showBtn: true, n: 0 },
+        methods: {
+          add () {
+            this.n++
+          }
+        },
+        components: {
+          btn: { template: '<button>add 1</button>' }
+        }
+      }).$mount()
+
+      const btn = vm.$el
+      expect(vm.n).toBe(0)
+      btn.click()
+      expect(vm.n).toBe(1)
+      vm.showBtn = false
+      waitForUpdate(() => {
+        vm.showBtn = true
+      }).then(() => {
+        btn.click()
+        expect(vm.n).toBe(2)
+      }).then(done)
     })
   }
 })

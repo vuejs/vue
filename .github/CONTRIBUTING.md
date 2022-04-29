@@ -124,15 +124,7 @@ The default test script will do the following: lint with ESLint -> type check wi
 
 ## Financial Contribution
 
-As a pure community-driven project without major corporate backing, we also welcome financial contributions via Patreon and OpenCollective.
-
-- [Become a backer or sponsor on Patreon](https://www.patreon.com/evanyou)
-- [Become a backer or sponsor on OpenCollective](https://opencollective.com/vuejs)
-- [One-time donation via PayPal or crypto-currencies](https://vuejs.org/support-vuejs/#One-time-Donations)
-
-### What's the difference between Patreon and OpenCollective funding?
-
-Funds donated via Patreon go directly to support Evan You's full-time work on Vue.js. Funds donated via OpenCollective are managed with transparent expenses and will be used for compensating work and expenses for core team members or sponsoring community events. Your name/logo will receive proper recognition and exposure by donating on either platform.
+As a pure community-driven project without major corporate backing, we also welcome financial contributions via GitHub Sponsors and OpenCollective. Please consult the [Sponsor Page](https://vuejs.org/sponsor/) for more details.
 
 ## Credits
 
