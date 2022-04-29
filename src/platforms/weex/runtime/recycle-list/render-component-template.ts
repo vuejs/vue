@@ -22,7 +22,7 @@ export function renderRecyclableComponentTemplate(
   if (render) {
     try {
       return render.call(vm)
-    } catch (err) {
+    } catch (err:any) {
       handleError(err, vm, `@render`)
     }
   } else {

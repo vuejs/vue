@@ -6,7 +6,8 @@ import {
   parsePath,
   _Set as Set,
   handleError,
-  noop,
+  invokeWithErrorHandling,
+  noop
 } from '../util/index'
 
 import { traverse } from './traverse'
@@ -78,8 +79,9 @@ export default class Watcher {
     this.newDeps = []
     this.depIds = new Set()
     this.newDepIds = new Set()
-    this.expression =
-      process.env.NODE_ENV !== 'production' ? expOrFn.toString() : ''
+    this.expression = process.env.NODE_ENV !== 'production'
+      ? expOrFn.toString()
+      : ''
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
@@ -87,16 +89,17 @@ export default class Watcher {
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = noop
-        process.env.NODE_ENV !== 'production' &&
-          warn(
-            `Failed watching path: "${expOrFn}" ` +
-              'Watcher only accepts simple dot-delimited paths. ' +
-              'For full control, use a function instead.',
-            vm
-          )
+        process.env.NODE_ENV !== 'production' && warn(
+          `Failed watching path: "${expOrFn}" ` +
+          'Watcher only accepts simple dot-delimited paths. ' +
+          'For full control, use a function instead.',
+          vm
+        )
       }
     }
-    this.value = this.lazy ? undefined : this.get()
+    this.value = this.lazy
+      ? undefined
+      : this.get()
   }
 
   /**
@@ -108,7 +111,7 @@ export default class Watcher {
     const vm = this.vm
     try {
       value = this.getter.call(vm, vm)
-    } catch (e) {
+    } catch (e: any) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)
       } else {
@@ -195,11 +198,8 @@ export default class Watcher {
         const oldValue = this.value
         this.value = value
         if (this.user) {
-          try {
-            this.cb.call(this.vm, value, oldValue)
-          } catch (e) {
-            handleError(e, this.vm, `callback for watcher "${this.expression}"`)
-          }
+          const info = `callback for watcher "${this.expression}"`
+          invokeWithErrorHandling(this.cb, this.vm, [value, oldValue], this.vm, info)
         } else {
           this.cb.call(this.vm, value, oldValue)
         }

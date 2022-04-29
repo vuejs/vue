@@ -115,7 +115,7 @@ export function renderMixin(Vue: Component) {
       // when parent component is patched.
       currentRenderingInstance = vm
       vnode = render.call(vm._renderProxy, vm.$createElement)
-    } catch (e) {
+    } catch (e: any) {
       handleError(e, vm, `render`)
       // return error render result,
       // or previous vnode to prevent render error causing blank component
@@ -127,7 +127,7 @@ export function renderMixin(Vue: Component) {
             vm.$createElement,
             e
           )
-        } catch (e) {
+        } catch (e:any) {
           handleError(e, vm, `renderError`)
           vnode = vm._vnode
         }

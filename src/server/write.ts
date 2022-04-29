@@ -34,7 +34,7 @@ export function createWriteFunction(
         defer(() => {
           try {
             next()
-          } catch (e) {
+          } catch (e: any) {
             onError(e)
           }
         })

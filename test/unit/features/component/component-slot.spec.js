@@ -109,6 +109,47 @@ describe('Component slot', () => {
     expect(child.$el.children[1].textContent).toBe('slot b')
   })
 
+ it('it should work with previous versions of the templates', () => {
+   const Test = {
+      render() {
+        var _vm = this;
+        var _h = _vm.$createElement;
+        var _c = _vm._self._c || vm._h;
+        return _c('div', [_vm._t("default", [_c('p', [_vm._v("slot default")])])], 2)
+      }
+    }
+    let vm = new Vue({
+      template: `<test/>`,
+      components: { Test }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('slot default')
+    vm = new Vue({
+      template: `<test>custom content</test>`,
+      components: { Test }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('custom content')
+  })
+
+  it('fallback content should not be evaluated when the parent is providing it', () => {
+    const test = jasmine.createSpy('test')
+    const vm = new Vue({
+      template: '<test>slot default</test>',
+      components: {
+        test: {
+          template: '<div><slot>{{test()}}</slot></div>',
+          methods: {
+            test () {
+              test()
+              return 'test'
+            }
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.textContent).toBe('slot default')
+    expect(test).not.toHaveBeenCalled()
+  })
+
   it('selector matching multiple elements', () => {
     mount({
       childTemplate: '<div><slot name="t"></slot></div>',
@@ -944,5 +985,19 @@ describe('Component slot', () => {
     }).then(() => {
       expect(vm.$el.firstChild.innerHTML).toBe('<span><b>2</b></span>')
     }).then(done)
+  })
+
+  // #12102
+  it('v-if inside scoped slot', () => {
+    const vm = new Vue({
+      template: `<test><template #custom><span v-if="false">a</span><span>b</span></template></test>`,
+      components: {
+        test: {
+          template: `<div><slot name="custom"/></div>`
+        }
+      }
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toBe(`<!----><span>b</span>`)
   })
 })

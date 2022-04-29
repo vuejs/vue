@@ -33,7 +33,7 @@ if (inBrowser) {
       },
     } as object) // https://github.com/facebook/flow/issues/285
     window.addEventListener('test-passive', null as any, opts)
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 // this needs to be lazy-evaled because vue may be required before
@@ -75,10 +75,8 @@ let _Set // $flow-disable-line
 } else {
   // a non-standard Set polyfill that only works with primitive keys.
   _Set = class Set implements SimpleSet {
-    set: Object
-    constructor() {
-      this.set = Object.create(null)
-    }
+    set: Record<string, boolean> = Object.create(null)
+
     has(key: string | number) {
       return this.set[key] === true
     }

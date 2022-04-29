@@ -31,7 +31,7 @@ describe('Directive v-on', () => {
     expect(event.type).toBe('click')
   })
 
-  it('should bind event to a inline statement', () => {
+  it('should bind event to an inline statement', () => {
     vm = new Vue({
       el,
       template: '<div v-on:click="foo(1,2,3,$event)"></div>',
@@ -218,7 +218,7 @@ describe('Directive v-on', () => {
   })
 
   // ctrl, shift, alt, meta
-  it('should support system modifers', () => {
+  it('should support system modifiers', () => {
     vm = new Vue({
       el,
       template: `
@@ -974,6 +974,17 @@ describe('Directive v-on', () => {
       }
     }).$mount()
     expect(value).toBe(1)
+  })
+
+  it('should not execute callback if modifiers are present', () => {
+    vm = new Vue({
+      el,
+      template: '<input @keyup.?="foo">',
+      methods: { foo: spy }
+    })
+    // simulating autocomplete event (Event object with type keyup but without keyCode)
+    triggerEvent(vm.$el, 'keyup')
+    expect(spy.calls.count()).toBe(0)
   })
 
   describe('dynamic arguments', () => {

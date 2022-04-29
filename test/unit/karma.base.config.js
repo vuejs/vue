@@ -32,7 +32,7 @@ const webpackConfig = {
       }
     })
   ],
-  devtool: '#inline-source-map'
+  devtool: 'inline-source-map'
 }
 
 // shared config for all unit tests

@@ -18,7 +18,7 @@ export function handleError(err: Error, vm: any, info: string) {
             try {
               const capture = hooks[i].call(cur, err, vm, info) === false
               if (capture) return
-            } catch (e) {
+            } catch (e: any) {
               globalHandleError(e, cur, 'errorCaptured hook')
             }
           }
@@ -47,7 +47,7 @@ export function invokeWithErrorHandling(
       // avoid catch triggering multiple times when nested calls
       res._handled = true
     }
-  } catch (e) {
+  } catch (e: any) {
     handleError(e, vm, info)
   }
   return res
@@ -57,7 +57,7 @@ function globalHandleError(err, vm, info) {
   if (config.errorHandler) {
     try {
       return config.errorHandler.call(null, err, vm, info)
-    } catch (e) {
+    } catch (e: any) {
       // if the user intentionally throws the original error in the handler,
       // do not log it twice
       if (e !== err) {

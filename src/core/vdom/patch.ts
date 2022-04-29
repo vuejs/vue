@@ -35,13 +35,17 @@ const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 function sameVnode(a, b) {
   return (
     a.key === b.key &&
-    ((a.tag === b.tag &&
-      a.isComment === b.isComment &&
-      isDef(a.data) === isDef(b.data) &&
-      sameInputType(a, b)) ||
-      (isTrue(a.isAsyncPlaceholder) &&
-        a.asyncFactory === b.asyncFactory &&
-        isUndef(b.asyncFactory.error)))
+    a.asyncFactory === b.asyncFactory && (
+      (
+        a.tag === b.tag &&
+        a.isComment === b.isComment &&
+        isDef(a.data) === isDef(b.data) &&
+        sameInputType(a, b)
+      ) || (
+        isTrue(a.isAsyncPlaceholder) &&
+        isUndef(b.asyncFactory.error)
+      )
+    )
   )
 }
 

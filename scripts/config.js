@@ -267,9 +267,9 @@ function genConfig (name) {
   vars.preventAssignment = true
   config.plugins.push(replace(vars))
 
-  if (opts.transpile !== false) {
-    config.plugins.push(buble())
-  }
+  // if (opts.transpile !== false) {
+  //   config.plugins.push(buble())
+  // }
 
   Object.defineProperty(config, '_name', {
     enumerable: false,

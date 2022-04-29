@@ -7,6 +7,7 @@ import {
   CHECKBOX_RADIO_TOKEN,
 } from 'web/compiler/directives/model'
 import { currentFlushTimestamp } from 'core/observer/scheduler'
+import { emptyNode } from 'core/vdom/patch'
 import type { VNodeWithData } from 'typescript/vnode'
 
 // normalize v-model event tokens that can only be determined at runtime.
@@ -62,7 +63,7 @@ function add(
   if (useMicrotaskFix) {
     const attachedTimestamp = currentFlushTimestamp
     const original = handler
-    //@ts-expect-error
+    //@ts-expect-error 
     handler = original._wrapper = function (e) {
       if (
         // no bubbling, should always fire.
@@ -111,7 +112,9 @@ function updateDOMListeners(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
   const on = vnode.data.on || {}
   const oldOn = oldVnode.data.on || {}
-  target = vnode.elm
+  // vnode is empty when removing all listeners,
+  // and use old vnode dom element
+  target = vnode.elm || oldVnode.elm
   normalizeEvents(on)
   updateListeners(on, oldOn, add, remove, createOnceHandler, vnode.context)
   target = undefined
@@ -120,4 +123,6 @@ function updateDOMListeners(oldVnode: VNodeWithData, vnode: VNodeWithData) {
 export default {
   create: updateDOMListeners,
   update: updateDOMListeners,
+  // @ts-expect-error emptyNode has actually data
+  destroy: (vnode: VNodeWithData) => updateDOMListeners(vnode, emptyNode)
 }

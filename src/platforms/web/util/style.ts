@@ -62,6 +62,7 @@ export function getStyle(vnode: VNodeWithData, checkChild: boolean): Object {
   }
 
   let parentNode: VNodeWithData | VNode | undefined = vnode
+  // @ts-expect-error parentNode.parent not VNodeWithData
   while ((parentNode = parentNode.parent)) {
     if (parentNode.data && (styleData = normalizeStyleData(parentNode.data))) {
       extend(res, styleData)

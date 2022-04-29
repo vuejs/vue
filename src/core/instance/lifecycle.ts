@@ -6,6 +6,8 @@ import { updateComponentListeners } from "./events";
 import { resolveSlots } from "./render-helpers/resolve-slots";
 import { toggleObserving } from "../observer/index";
 import { pushTarget, popTarget } from "../observer/dep";
+import type { Component } from "../../../typescript/component";
+import type { MountedComponentVNode } from "../../../typescript/vnode";
 
 import {
   warn,
@@ -15,8 +17,6 @@ import {
   validateProp,
   invokeWithErrorHandling,
 } from "../util/index";
-import type { Component } from "typescript/component";
-import type { MountedComponentVNode } from "typescript/vnode";
 
 export let activeInstance: any = null;
 export let isUpdatingChildComponent: boolean = false;
@@ -30,7 +30,7 @@ export function setActiveInstance(vm: Component) {
 }
 
 export function initLifecycle(vm: Component) {
-  const options: any = vm.$options;
+  const options = vm.$options;
 
   // locate first non-abstract parent
   let parent = options.parent;
@@ -122,7 +122,7 @@ export function lifecycleMixin(Vue: Component) {
     // call the last hook...
     vm._isDestroyed = true;
     // invoke destroy hooks on current rendered tree
-    vm.__patch__(vm._vnode!, null);
+    vm.__patch__(vm._vnode, null);
     // fire destroyed hook
     callHook(vm, "destroyed");
     // turn off all instance listeners.
@@ -133,7 +133,6 @@ export function lifecycleMixin(Vue: Component) {
     }
     // release circular reference (#6759)
     if (vm.$vnode) {
-      // @ts-expect-error null is not undefined
       vm.$vnode.parent = null;
     }
   };
@@ -240,12 +239,13 @@ export function updateChildComponent(
   // check if there are dynamic scopedSlots (hand-written or compiled but with
   // dynamic slot names). Static scoped slots compiled from template has the
   // "$stable" marker.
-  const newScopedSlots = parentVnode!.data.scopedSlots;
+  const newScopedSlots = parentVnode.data.scopedSlots;
   const oldScopedSlots = vm.$scopedSlots;
   const hasDynamicScopedSlot = !!(
     (newScopedSlots && !newScopedSlots.$stable) ||
     (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) ||
-    (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key)
+    (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key) ||
+    (!newScopedSlots && vm.$scopedSlots.$key)
   );
 
   // Any static slot children from the parent may have changed during parent's
@@ -258,7 +258,6 @@ export function updateChildComponent(
   );
 
   vm.$options._parentVnode = parentVnode;
-
   vm.$vnode = parentVnode; // update vm's placeholder node without re-render
 
   if (vm._vnode) {
@@ -270,7 +269,7 @@ export function updateChildComponent(
   // update $attrs and $listeners hash
   // these are also reactive so they may trigger child update if the child
   // used them during render
-  vm.$attrs = parentVnode!.data.attrs || emptyObject;
+  vm.$attrs = parentVnode.data.attrs || emptyObject;
   vm.$listeners = listeners || emptyObject;
 
   // update props
@@ -296,7 +295,7 @@ export function updateChildComponent(
 
   // resolve slots + force update if has children
   if (needsForceUpdate) {
-    vm.$slots = resolveSlots(renderChildren, parentVnode!.context);
+    vm.$slots = resolveSlots(renderChildren, parentVnode.context);
     vm.$forceUpdate();
   }
 

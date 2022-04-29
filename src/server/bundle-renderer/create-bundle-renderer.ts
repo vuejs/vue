@@ -54,7 +54,7 @@ export function createBundleRendererCreator(
           try {
             // @ts-expect-error
             bundle = JSON.parse(bundle)
-          } catch (e) {
+          } catch (e: any) {
             throw new Error(`Invalid JSON bundle file: ${bundle}`)
           }
         }
