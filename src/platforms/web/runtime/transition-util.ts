@@ -45,7 +45,6 @@ if (hasTransition) {
   /* istanbul ignore if */
   if (
     window.ontransitionend === undefined &&
-    // @ts-expect-error
     window.onwebkittransitionend !== undefined
   ) {
     transitionProp = 'WebkitTransition'
@@ -53,7 +52,6 @@ if (hasTransition) {
   }
   if (
     window.onanimationend === undefined &&
-    // @ts-expect-error
     window.onwebkitanimationend !== undefined
   ) {
     animationProp = 'WebkitAnimation'

@@ -92,6 +92,7 @@ export function nextTick(cb?: Function, ctx?: Object) {
       try {
         cb.call(ctx)
       } catch (e) {
+        // @ts-expect-error should it be any?
         handleError(e, ctx, 'nextTick')
       }
     } else if (_resolve) {

@@ -48,6 +48,7 @@ export function invokeWithErrorHandling(
       res._handled = true
     }
   } catch (e) {
+    // @ts-expect-error should it be any?
     handleError(e, vm, info)
   }
   return res
@@ -57,7 +58,7 @@ function globalHandleError(err, vm, info) {
   if (config.errorHandler) {
     try {
       return config.errorHandler.call(null, err, vm, info)
-    } catch (e) {
+    } catch (e: any) {
       // if the user intentionally throws the original error in the handler,
       // do not log it twice
       if (e !== err) {

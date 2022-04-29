@@ -113,6 +113,7 @@ export default class Watcher {
       value = this.getter.call(vm, vm)
     } catch (e) {
       if (this.user) {
+        // @ts-expect-error e is unknown, should we cast or any?
         handleError(e, vm, `getter for watcher "${this.expression}"`)
       } else {
         throw e

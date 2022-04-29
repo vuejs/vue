@@ -35,7 +35,7 @@ export function createCompileToFunctionFn(compile: Function): Function {
       // detect possible CSP restriction
       try {
         new Function('return 1')
-      } catch (e) {
+      } catch (e:any) {
         if (e.toString().match(/unsafe-eval|CSP/)) {
           warn(
             'It seems you are using the standalone build of Vue.js in an ' +

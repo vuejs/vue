@@ -26,7 +26,7 @@ export function createInstanceContext(
     config: weex.config,
     document: weex.document,
     data
-  }
+  })
 
   // Each instance has an independent `Vue` module instance
   const Vue = instance.Vue = createVueModuleInstance(instanceId, weex)

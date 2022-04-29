@@ -75,10 +75,8 @@ let _Set // $flow-disable-line
 } else {
   // a non-standard Set polyfill that only works with primitive keys.
   _Set = class Set implements SimpleSet {
-    set: Object
-    constructor() {
-      this.set = Object.create(null)
-    }
+    set: Record<string, boolean> = Object.create(null)
+
     has(key: string | number) {
       return this.set[key] === true
     }

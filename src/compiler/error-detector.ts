@@ -117,7 +117,7 @@ function checkExpression(
 ) {
   try {
     new Function(`return ${exp}`)
-  } catch (e) {
+  } catch (e:any) {
     const keywordMatch = exp
       .replace(stripStringRE, '')
       .match(prohibitedKeywordRE)
@@ -146,7 +146,7 @@ function checkFunctionParameterExpression(
 ) {
   try {
     new Function(exp, '')
-  } catch (e) {
+  } catch (e:any) {
     warn(
       `invalid function parameter expression: ${e.message} in\n\n` +
         `    ${exp}\n\n` +
