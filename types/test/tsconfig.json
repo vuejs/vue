@@ -1,10 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es5zdfasdfasdf",
     "experimentalDecorators": true,
     "lib": [
       "dom",
       "es2015"
+    ],
+    "types": [
+      "jasmine",
+      "@types/karma",
+      "webpack-env"
     ],
     "module": "commonjs",
     "strict": true,

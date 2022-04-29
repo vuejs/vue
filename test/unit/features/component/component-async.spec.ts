@@ -16,7 +16,7 @@ describe('Component async', () => {
     timeoutsPending = {};
 
     window.setTimeout = function(func, delay) {
-      let id = oldSetTimeout(function() {
+      const id = oldSetTimeout(function() {
         delete timeoutsPending[id];
         func();
       }, delay);

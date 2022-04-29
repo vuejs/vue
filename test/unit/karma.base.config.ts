@@ -39,10 +39,10 @@ const webpackConfig = {
 module.exports = {
   frameworks: ['jasmine'],
   files: [
-    './index.js'
+    './index.ts'
   ],
   preprocessors: {
-    './index.js': ['webpack', 'sourcemap']
+    './index.ts': ['webpack', 'sourcemap']
   },
   webpack: webpackConfig,
   webpackMiddleware: {
@@ -52,6 +52,7 @@ module.exports = {
     'karma-jasmine',
     'karma-mocha-reporter',
     'karma-sourcemap-loader',
-    'karma-webpack'
+    'karma-webpack',
+    'karma-typescript'
   ]
 }

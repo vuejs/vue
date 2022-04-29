@@ -1,5 +1,5 @@
 const webpack = require('webpack')
-const base = require('./karma.base.config.js')
+const base = require('./karma.base.config.ts')
 
 base.webpack.plugins = [
   new webpack.DefinePlugin({

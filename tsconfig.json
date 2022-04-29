@@ -19,7 +19,12 @@
     "removeComments": false,
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
-    "types": ["node"],
+    "types": [
+      "node",
+      "karma",
+      "jasmine",
+      "webpack-env"
+    ],
     "paths": {
       "compiler/*": ["src/compiler/*"],
       "core/*": ["src/core/*"],

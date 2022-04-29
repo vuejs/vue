@@ -1,6 +1,7 @@
 function noop () {}
 
 if (typeof console === 'undefined') {
+  // @ts-expect-error
   window.console = {
     warn: noop,
     error: noop

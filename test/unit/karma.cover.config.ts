@@ -1,4 +1,4 @@
-const base = require('./karma.base.config.js')
+const base = require('./karma.base.config.ts')
 
 process.env.CHROME_BIN = require('puppeteer').executablePath()
 

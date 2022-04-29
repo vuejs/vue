@@ -1,4 +1,4 @@
-const base = require('./karma.base.config.js')
+const base = require('./karma.base.config.ts')
 
 module.exports = function (config) {
   config.set(Object.assign(base, {

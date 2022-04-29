@@ -508,28 +508,28 @@ describe('Component scoped slot', () => {
     }).then(done)
   })
 
-  it('render function usage (JSX)', () => {
-    const vm = new Vue({
-      render (h) {
-        return <test>{
-          props => <span>{props.msg}</span>
-        }</test>
-      },
-      components: {
-        test: {
-          data () {
-            return { msg: 'hello' }
-          },
-          render (h) {
-            return <div>
-              {this.$scopedSlots.default({ msg: this.msg })}
-            </div>
-          }
-        }
-      }
-    }).$mount()
-    expect(vm.$el.innerHTML).toBe('<span>hello</span>')
-  })
+  // it('render function usage (JSX)', () => {
+  //   const vm = new Vue({
+  //     render (h) {
+  //       return (<test>{
+  //         props => <span>{props.msg}</span>
+  //       }</test>)
+  //     },
+  //     components: {
+  //       test: {
+  //         data () {
+  //           return { msg: 'hello' }
+  //         },
+  //         render (h) {
+  //           return <div>
+  //             {this.$scopedSlots.default({ msg: this.msg })}
+  //           </div>
+  //         }
+  //       }
+  //     }
+  //   }).$mount()
+  //   expect(vm.$el.innerHTML).toBe('<span>hello</span>')
+  // })
 
   // #5615
   it('scoped slot with v-for', done => {

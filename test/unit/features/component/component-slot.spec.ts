@@ -112,9 +112,9 @@ describe('Component slot', () => {
  it('it should work with previous versions of the templates', () => {
    const Test = {
       render() {
-        var _vm = this;
-        var _h = _vm.$createElement;
-        var _c = _vm._self._c || vm._h;
+        const _vm = this;
+        const _h = _vm.$createElement;
+        const _c = _vm._self._c || vm._h;
         return _c('div', [_vm._t("default", [_c('p', [_vm._v("slot default")])])], 2)
       }
     }
