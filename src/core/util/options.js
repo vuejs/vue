@@ -2,8 +2,9 @@
 
 import config from '../config'
 import { warn } from './debug'
-import { nativeWatch } from './env'
 import { set } from '../observer/index'
+import { unicodeRegExp } from './lang'
+import { nativeWatch, hasSymbol } from './env'
 
 import {
   ASSET_TYPES,
@@ -48,14 +49,24 @@ if (process.env.NODE_ENV !== 'production') {
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
   let key, toVal, fromVal
-  const keys = Object.keys(from)
+
+  const keys = hasSymbol
+    ? Reflect.ownKeys(from)
+    : Object.keys(from)
+
   for (let i = 0; i < keys.length; i++) {
     key = keys[i]
+    // in case the object is already observed...
+    if (key === '__ob__') continue
     toVal = to[key]
     fromVal = from[key]
     if (!hasOwn(to, key)) {
       set(to, key, fromVal)
-    } else if (isPlainObject(toVal) && isPlainObject(fromVal)) {
+    } else if (
+      toVal !== fromVal &&
+      isPlainObject(toVal) &&
+      isPlainObject(fromVal)
+    ) {
       mergeData(toVal, fromVal)
     }
   }
@@ -85,18 +96,18 @@ export function mergeDataOrFn (
     // it has to be a function to pass previous merges.
     return function mergedDataFn () {
       return mergeData(
-        typeof childVal === 'function' ? childVal.call(this) : childVal,
-        typeof parentVal === 'function' ? parentVal.call(this) : parentVal
+        typeof childVal === 'function' ? childVal.call(this, this) : childVal,
+        typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
       )
     }
-  } else if (parentVal || childVal) {
+  } else {
     return function mergedInstanceDataFn () {
       // instance merge
       const instanceData = typeof childVal === 'function'
-        ? childVal.call(vm)
+        ? childVal.call(vm, vm)
         : childVal
       const defaultData = typeof parentVal === 'function'
-        ? parentVal.call(vm)
+        ? parentVal.call(vm, vm)
         : parentVal
       if (instanceData) {
         return mergeData(instanceData, defaultData)
@@ -123,7 +134,7 @@ strats.data = function (
 
       return parentVal
     }
-    return mergeDataOrFn.call(this, parentVal, childVal)
+    return mergeDataOrFn(parentVal, childVal)
   }
 
   return mergeDataOrFn(parentVal, childVal, vm)
@@ -136,13 +147,26 @@ function mergeHook (
   parentVal: ?Array<Function>,
   childVal: ?Function | ?Array<Function>
 ): ?Array<Function> {
-  return childVal
+  const res = childVal
     ? parentVal
       ? parentVal.concat(childVal)
       : Array.isArray(childVal)
         ? childVal
         : [childVal]
     : parentVal
+  return res
+    ? dedupeHooks(res)
+    : res
+}
+
+function dedupeHooks (hooks) {
+  const res = []
+  for (let i = 0; i < hooks.length; i++) {
+    if (res.indexOf(hooks[i]) === -1) {
+      res.push(hooks[i])
+    }
+  }
+  return res
 }
 
 LIFECYCLE_HOOKS.forEach(hook => {
@@ -248,13 +272,22 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
  */
 function checkComponents (options: Object) {
   for (const key in options.components) {
-    const lower = key.toLowerCase()
-    if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
-      warn(
-        'Do not use built-in or reserved HTML elements as component ' +
-        'id: ' + key
-      )
-    }
+    validateComponentName(key)
+  }
+}
+
+export function validateComponentName (name: string) {
+  if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeRegExp.source}]*$`).test(name)) {
+    warn(
+      'Invalid component name: "' + name + '". Component names ' +
+      'should conform to valid custom element name in html5 specification.'
+    )
+  }
+  if (isBuiltInTag(name) || config.isReservedTag(name)) {
+    warn(
+      'Do not use built-in or reserved HTML elements as component ' +
+      'id: ' + name
+    )
   }
 }
 
@@ -286,7 +319,7 @@ function normalizeProps (options: Object, vm: ?Component) {
         ? val
         : { type: val }
     }
-  } else if (process.env.NODE_ENV !== 'production' && props) {
+  } else if (process.env.NODE_ENV !== 'production') {
     warn(
       `Invalid value for option "props": expected an Array or an Object, ` +
       `but got ${toRawType(props)}.`,
@@ -301,6 +334,7 @@ function normalizeProps (options: Object, vm: ?Component) {
  */
 function normalizeInject (options: Object, vm: ?Component) {
   const inject = options.inject
+  if (!inject) return
   const normalized = options.inject = {}
   if (Array.isArray(inject)) {
     for (let i = 0; i < inject.length; i++) {
@@ -313,7 +347,7 @@ function normalizeInject (options: Object, vm: ?Component) {
         ? extend({ from: key }, val)
         : { from: val }
     }
-  } else if (process.env.NODE_ENV !== 'production' && inject) {
+  } else if (process.env.NODE_ENV !== 'production') {
     warn(
       `Invalid value for option "inject": expected an Array or an Object, ` +
       `but got ${toRawType(inject)}.`,
@@ -367,15 +401,22 @@ export function mergeOptions (
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)
-  const extendsFrom = child.extends
-  if (extendsFrom) {
-    parent = mergeOptions(parent, extendsFrom, vm)
-  }
-  if (child.mixins) {
-    for (let i = 0, l = child.mixins.length; i < l; i++) {
-      parent = mergeOptions(parent, child.mixins[i], vm)
+
+  // Apply extends and mixins on the child options,
+  // but only if it is a raw options object that isn't
+  // the result of another mergeOptions call.
+  // Only merged options has the _base property.
+  if (!child._base) {
+    if (child.extends) {
+      parent = mergeOptions(parent, child.extends, vm)
+    }
+    if (child.mixins) {
+      for (let i = 0, l = child.mixins.length; i < l; i++) {
+        parent = mergeOptions(parent, child.mixins[i], vm)
+      }
     }
   }
+
   const options = {}
   let key
   for (key in parent) {

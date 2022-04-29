@@ -226,19 +226,7 @@ describe('Observer', () => {
     })
 
     observe(obj)
-    // mock a watcher!
-    const watcher = {
-      deps: [],
-      addDep: function (dep) {
-        this.deps.push(dep)
-        dep.addSub(this)
-      },
-      update: jasmine.createSpy()
-    }
-    // collect dep
-    Dep.target = watcher
     expect(obj.a).toBe(2) // Make sure 'this' is preserved
-    Dep.target = null
     obj.a = 3
     expect(obj.val).toBe(3) // make sure 'setter' was called
     obj.val = 5
@@ -354,5 +342,31 @@ describe('Observer', () => {
     objs.forEach(obj => {
       expect(obj.__ob__ instanceof Observer).toBe(true)
     })
+  })
+
+  it('warn set/delete on non valid values', () => {
+    try {
+      setProp(null, 'foo', 1)
+    } catch (e) {}
+    expect(`Cannot set reactive property on undefined, null, or primitive value`).toHaveBeenWarned()
+
+    try {
+      delProp(null, 'foo')
+    } catch (e) {}
+    expect(`Cannot delete reactive property on undefined, null, or primitive value`).toHaveBeenWarned()
+  })
+
+  it('should lazy invoke existing getters', () => {
+    const obj = {}
+    let called = false
+    Object.defineProperty(obj, 'getterProp', {
+      enumerable: true,
+      get: () => {
+        called = true
+        return 'some value'
+      }
+    })
+    observe(obj)
+    expect(called).toBe(false)
   })
 })

@@ -52,7 +52,7 @@ describe('SSR: basicRenderer', () => {
   })
 
   // #5941
-  it('should work peoperly when accessing $ssrContext in root component', done => {
+  it('should work properly when accessing $ssrContext in root component', done => {
     let ssrContext
     renderToString(new Vue({
       template: `
@@ -61,7 +61,7 @@ describe('SSR: basicRenderer', () => {
       created () {
         ssrContext = this.$ssrContext
       }
-    }), (err, result) => {
+    }), (err) => {
       expect(err).toBeNull()
       expect(ssrContext).toBeUndefined()
       done()

@@ -41,7 +41,7 @@ describe('Debug utilities', () => {
     }).$mount()
 
     expect(
-`Failed to mount component: template or render function not defined.
+      `Failed to mount component: template or render function not defined.
 
 found in
 
@@ -70,7 +70,7 @@ found in
     }).$mount()
 
     expect(
-`Failed to mount component: template or render function not defined.
+      `Failed to mount component: template or render function not defined.
 
 found in
 

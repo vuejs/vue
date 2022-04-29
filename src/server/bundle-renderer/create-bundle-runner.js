@@ -51,7 +51,7 @@ function compileModule (files, basedir, runInNewContext) {
       : script.runInNewContext(sandbox)
     const m = { exports: {}}
     const r = file => {
-      file = path.join('.', file)
+      file = path.posix.join('.', file)
       if (files[file]) {
         return evaluateModule(file, sandbox, evaluatedFiles)
       } else if (basedir) {

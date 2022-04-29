@@ -1,13 +1,23 @@
 /* @flow */
 
-import { warn } from 'core/util/index'
-import { cached, isUndef } from 'shared/util'
+import {
+  warn,
+  invokeWithErrorHandling
+} from 'core/util/index'
+import {
+  cached,
+  isUndef,
+  isTrue,
+  isPlainObject
+} from 'shared/util'
 
 const normalizeEvent = cached((name: string): {
   name: string,
   once: boolean,
   capture: boolean,
-  passive: boolean
+  passive: boolean,
+  handler?: Function,
+  params?: Array<any>
 } => {
   const passive = name.charAt(0) === '&'
   name = passive ? name.slice(1) : name
@@ -23,17 +33,17 @@ const normalizeEvent = cached((name: string): {
   }
 })
 
-export function createFnInvoker (fns: Function | Array<Function>): Function {
+export function createFnInvoker (fns: Function | Array<Function>, vm: ?Component): Function {
   function invoker () {
     const fns = invoker.fns
     if (Array.isArray(fns)) {
       const cloned = fns.slice()
       for (let i = 0; i < cloned.length; i++) {
-        cloned[i].apply(null, arguments)
+        invokeWithErrorHandling(cloned[i], null, arguments, vm, `v-on handler`)
       }
     } else {
       // return handler return value for single handlers
-      return fns.apply(null, arguments)
+      return invokeWithErrorHandling(fns, null, arguments, vm, `v-on handler`)
     }
   }
   invoker.fns = fns
@@ -45,13 +55,19 @@ export function updateListeners (
   oldOn: Object,
   add: Function,
   remove: Function,
+  createOnceHandler: Function,
   vm: Component
 ) {
-  let name, cur, old, event
+  let name, def, cur, old, event
   for (name in on) {
-    cur = on[name]
+    def = cur = on[name]
     old = oldOn[name]
     event = normalizeEvent(name)
+    /* istanbul ignore if */
+    if (__WEEX__ && isPlainObject(def)) {
+      cur = def.handler
+      event.params = def.params
+    }
     if (isUndef(cur)) {
       process.env.NODE_ENV !== 'production' && warn(
         `Invalid handler for event "${event.name}": got ` + String(cur),
@@ -59,9 +75,12 @@ export function updateListeners (
       )
     } else if (isUndef(old)) {
       if (isUndef(cur.fns)) {
-        cur = on[name] = createFnInvoker(cur)
+        cur = on[name] = createFnInvoker(cur, vm)
       }
-      add(event.name, cur, event.once, event.capture, event.passive)
+      if (isTrue(event.once)) {
+        cur = on[name] = createOnceHandler(event.name, cur, event.capture)
+      }
+      add(event.name, cur, event.capture, event.passive, event.params)
     } else if (cur !== old) {
       old.fns = cur
       on[name] = old
