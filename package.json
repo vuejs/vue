@@ -26,7 +26,7 @@
     "build": "node scripts/build.js",
     "build:ssr": "npm run build -- web-runtime-cjs,web-server-renderer",
     "build:weex": "npm run build -- weex",
-    "test": "npm run lint && flow check && npm run test:types && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr && npm run test:weex",
+    "test": "npm run lint && npm run ts-check && npm run test:types && npm run test:cover && npm run test:e2e -- --env phantomjs && npm run test:ssr && npm run test:weex",
     "test:unit": "karma start test/unit/karma.unit.config.js",
     "test:cover": "karma start test/unit/karma.cover.config.js",
     "test:e2e": "npm run build -- web-full-prod,web-server-basic-renderer && node test/e2e/runner.js",
@@ -35,7 +35,6 @@
     "test:sauce": "npm run sauce -- 0 && npm run sauce -- 1 && npm run sauce -- 2",
     "test:types": "tsc -p ./types/test/tsconfig.json",
     "lint": "eslint src scripts test",
-    "flow": "flow check",
     "ts-check": "tsc --noEmit",
     "sauce": "karma start test/unit/karma.sauce.config.js",
     "bench:ssr": "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",
@@ -80,6 +79,7 @@
     "@rollup/plugin-commonjs": "^22.0.0",
     "@rollup/plugin-node-resolve": "^13.2.1",
     "@rollup/plugin-replace": "^4.0.0",
+    "@types/he": "^1.1.2",
     "@types/node": "^17.0.30",
     "@types/webpack": "^5.28.0",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
@@ -107,7 +107,6 @@
     "eslint-plugin-flowtype": "^8.0.3",
     "eslint-plugin-jasmine": "^4.1.3",
     "file-loader": "^6.2.0",
-    "flow-bin": "^0.176.3",
     "hash-sum": "^2.0.0",
     "he": "^1.1.1",
     "http-server": "^14.1.0",
@@ -124,6 +123,7 @@
     "karma-safari-launcher": "^1.0.0",
     "karma-sauce-launcher": "^4.3.6",
     "karma-sourcemap-loader": "^0.3.8",
+    "karma-typescript": "^5.5.3",
     "karma-webpack": "^5.0.0",
     "lint-staged": "^12.4.1",
     "lodash": "^4.17.21",
@@ -140,6 +140,7 @@
     "selenium-server": "^3.141.59",
     "serialize-javascript": "^6.0.0",
     "shelljs": "^0.8.5",
+    "stream-browserify": "^3.0.0",
     "terser": "^5.13.1",
     "ts-loader": "^9.2.9",
     "ts-node": "^10.7.0",
@@ -154,8 +155,5 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  },
-  "dependencies": {
-    "@types/he": "^1.1.2"
   }
 }

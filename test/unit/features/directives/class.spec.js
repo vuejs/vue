@@ -15,9 +15,10 @@ function assertClass (assertions, done) {
       }
     }).then(() => {
       expect(vm.$el.className).toBe(expected)
-      if (i >= assertions.length - 1) {
-        done()
-      }
+      // NOTE THIS WAS MAKING 
+      // if (i >= assertions.length - 1) {
+      //   done()
+      // }
     })
   })
   chain.then(done)

@@ -13,7 +13,7 @@ export function createRenderer (file, options, cb) {
 
   compileWithWebpack(file, {
     target: 'node',
-    devtool: asBundle ? '#source-map' : false,
+    devtool: asBundle ? 'source-map' : false,
     output: {
       path: '/',
       filename: 'bundle.js',

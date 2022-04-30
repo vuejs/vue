@@ -21,6 +21,9 @@ const webpackConfig = {
   resolve: {
     alias: alias,
     extensions: ['.tsx', '.ts', '.js'],
+    fallback: {
+      'stream': require.resolve("stream-browserify")
+    }
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -32,17 +35,19 @@ const webpackConfig = {
       }
     })
   ],
-  devtool: '#inline-source-map'
+  devtool: 'inline-source-map'
 }
 
 // shared config for all unit tests
 module.exports = {
-  frameworks: ['jasmine'],
+  frameworks: ['jasmine', 'webpack', 'karma-typescript'],
   files: [
-    './index.js'
+    './index.js',
+    "src/**/*.ts" // *.tsx for React Jsx
   ],
   preprocessors: {
-    './index.js': ['webpack', 'sourcemap']
+    './index.js': ['webpack', 'sourcemap'],
+    "**/*.ts": ["karma-typescript", 'webpack', 'sourcemap'] // *.tsx for React Jsx
   },
   webpack: webpackConfig,
   webpackMiddleware: {
@@ -52,6 +57,7 @@ module.exports = {
     'karma-jasmine',
     'karma-mocha-reporter',
     'karma-sourcemap-loader',
-    'karma-webpack'
+    'karma-webpack',
+    'karma-typescript'
   ]
 }

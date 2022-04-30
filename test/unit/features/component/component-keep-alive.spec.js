@@ -1111,7 +1111,7 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>'
         )
-      }).then(done).then(done)
+      }).then(done)
     })
 
     // #4339

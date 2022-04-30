@@ -11,7 +11,7 @@ module.exports = function (config) {
         flags: ['--no-sandbox']
       }
     },
-    reporters: ['mocha', 'coverage'],
+    reporters: ['mocha', 'coverage', 'karma-typescript'],
     coverageReporter: {
       reporters: [
         { type: 'lcov', dir: '../../coverage', subdir: '.' },
