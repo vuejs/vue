@@ -51,8 +51,12 @@ beforeEach(() => {
   spyOn(console, 'warn')
   spyOn(console, 'error')
   jasmine.addMatchers({
-    toHaveBeenWarned: () => createCompareFn(console.error),
-    toHaveBeenTipped: () => createCompareFn(console.warn)
+    toHaveBeenWarned: () => 
+      // @ts-ignore
+      createCompareFn(console.error),
+    toHaveBeenTipped: () => 
+      // @ts-ignore
+      createCompareFn(console.warn)
   })
 })
 

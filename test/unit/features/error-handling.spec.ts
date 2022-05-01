@@ -32,7 +32,7 @@ describe('Error handling', () => {
   ].forEach(([type, description]) => {
     it(`should recover from promise errors in ${type}`, done => {
       createTestInstance(components[`${type}Async`])
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(`Error in ${description} (Promise/async)`).toHaveBeenWarned()
         expect(`Error: ${type}`).toHaveBeenWarned()
       }).then(done)
@@ -84,7 +84,7 @@ describe('Error handling', () => {
     it(`should recover from errors in ${type} hook`, done => {
       const vm = createTestInstance(components[type])
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(`Error in ${description}`).toHaveBeenWarned()
         expect(`Error: ${type}`).toHaveBeenWarned()
       }).thenWaitFor(next => {
@@ -111,12 +111,12 @@ describe('Error handling', () => {
   it('should recover from errors in user watcher getter', done => {
     const vm = createTestInstance(components.userWatcherGetter)
     vm.n++
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(`Error in getter for watcher`).toHaveBeenWarned()
       function getErrorMsg () {
         try {
           this.a.b.c
-        } catch (e) {
+        } catch (e: any) {
           return e.toString()
         }
       }
@@ -158,6 +158,7 @@ describe('Error handling', () => {
     expect(args[2]).toContain('render') // description
 
     assertRootInstanceActive(vm).then(() => {
+      // @ts-expect-error
       Vue.config.errorHandler = null
     }).then(done)
   })
@@ -210,7 +211,7 @@ describe('Error handling', () => {
         methods: { bork () { throw new Error('v-on') } }
       }).$mount()
       document.body.appendChild(vm.$el)
-      triggerEvent(vm.$el, 'click')
+      global.triggerEvent(vm.$el, 'click')
       expect('Error in v-on handler').toHaveBeenWarned()
       expect('Error: v-on').toHaveBeenWarned()
       document.body.removeChild(vm.$el)
@@ -224,8 +225,8 @@ describe('Error handling', () => {
         } }
       }).$mount()
       document.body.appendChild(vm.$el)
-      triggerEvent(vm.$el, 'click')
-      waitForUpdate(() => {
+      global.triggerEvent(vm.$el, 'click')
+      global.waitForUpdate(() => {
         expect('Error in v-on handler (Promise/async)').toHaveBeenWarned()
         expect('Error: v-on').toHaveBeenWarned()
         document.body.removeChild(vm.$el)
@@ -235,7 +236,7 @@ describe('Error handling', () => {
 })
 
 function createErrorTestComponents () {
-  const components = {}
+  const components: any = {}
 
   // data
   components.data = {
@@ -431,17 +432,17 @@ function createTestInstance (Comp) {
   }).$mount()
 }
 
-function assertRootInstanceActive (vm, chain) {
+function assertRootInstanceActive (vm) {
   expect(vm.$el.innerHTML).toContain('n:0\n')
   vm.n++
-  return waitForUpdate(() => {
+  return global.waitForUpdate(() => {
     expect(vm.$el.innerHTML).toContain('n:1\n')
   })
 }
 
 function assertBothInstancesActive (vm) {
   vm.n = 0
-  return waitForUpdate(() => {
+  return global.waitForUpdate(() => {
     expect(vm.$refs.child.$el.innerHTML).toContain('0')
   }).thenWaitFor(next => {
     assertRootInstanceActive(vm).then(() => {

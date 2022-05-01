@@ -75,6 +75,7 @@
     "@babel/plugin-syntax-jsx": "^7.16.7",
     "@babel/plugin-transform-flow-strip-types": "^7.16.7",
     "@babel/preset-env": "^7.17.10",
+    "@babel/preset-typescript": "^7.16.7",
     "@babel/register": "^7.17.7",
     "@rollup/plugin-alias": "^3.1.9",
     "@rollup/plugin-buble": "^0.21.3",

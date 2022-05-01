@@ -4,7 +4,7 @@ describe('Options render', () => {
   it('basic usage', () => {
     const vm = new Vue({
       render (h) {
-        const children = []
+        const children: any[] = []
         for (let i = 0; i < this.items.length; i++) {
           children.push(h('li', { staticClass: 'task' }, [this.items[i].name]))
         }

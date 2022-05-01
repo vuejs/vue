@@ -91,7 +91,7 @@ describe('Options lifecycle hooks', () => {
     })
 
     it('should mount child parent in correct order', () => {
-      const calls = []
+      const calls: any[] = []
       new Vue({
         template: '<div><test></test></div>',
         mounted () {
@@ -210,7 +210,7 @@ describe('Options lifecycle hooks', () => {
     })
 
     it('should be called after children are updated', done => {
-      const calls = []
+      const calls: any[] = []
       const vm = new Vue({
         template: '<div><test ref="child">{{ msg }}</test></div>',
         data: { msg: 'foo' },

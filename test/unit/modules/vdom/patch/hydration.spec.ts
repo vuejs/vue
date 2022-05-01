@@ -18,7 +18,7 @@ describe('vdom patch: hydration', () => {
   })
 
   it('should hydrate elements when server-rendered DOM tree is same as virtual DOM tree', () => {
-    const result = []
+    const result: any[] = []
     function init (vnode) { result.push(vnode) }
     function createServerRenderedDOM () {
       const root = document.createElement('div')

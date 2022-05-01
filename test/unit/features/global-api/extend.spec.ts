@@ -52,7 +52,7 @@ describe('Global API: extend', () => {
   })
 
   it('should merge lifecycle hooks', () => {
-    const calls = []
+    const calls: any[] = []
     const A = Vue.extend({
       created () {
         calls.push(1)

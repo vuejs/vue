@@ -218,7 +218,7 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.textContent).toBe('12')
     vm.a = 2
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('22')
       vm.show = false
     }).then(() => {
@@ -255,7 +255,7 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<div><p>foo</p></div>')
     vm.msg = 'bar'
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('<div><p>bar</p></div>')
     }).then(done)
   })
@@ -275,7 +275,7 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<p>hi</p>')
     vm.ok = false
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('fallback')
       vm.ok = true
       vm.msg = 'bye'
@@ -475,14 +475,14 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.textContent).toBe('foo1')
     vm.$children[0].a = 2
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('foo2')
     }).then(done)
   })
 
   // #3437
   it('should correctly re-create components in slot', done => {
-    const calls = []
+    const calls: any[] = []
     const vm = new Vue({
       template: `
         <comp ref="child">
@@ -512,7 +512,7 @@ describe('Component slot', () => {
 
     expect(calls).toEqual([1])
     vm.$refs.child.ok = false
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(calls).toEqual([1, 2])
       vm.$refs.child.ok = true
     }).then(() => {
@@ -550,7 +550,7 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe(`<div>1</div> <div>1</div> <pre><div>1</div></pre>`)
     vm.n++
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe(`<div>2</div> <div>2</div> <pre><div>2</div></pre>`)
       vm.n++
     }).then(() => {
@@ -586,10 +586,10 @@ describe('Component slot', () => {
     document.body.appendChild(vm.$el)
     expect(vm.$el.textContent).toBe('hi')
     vm.$children[0].toggle = false
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       vm.$children[0].toggle = true
     }).then(() => {
-      triggerEvent(vm.$el.querySelector('.click'), 'click')
+      global.triggerEvent(vm.$el.querySelector('.click'), 'click')
       expect(spy).toHaveBeenCalled()
     }).then(() => {
       document.body.removeChild(vm.$el)

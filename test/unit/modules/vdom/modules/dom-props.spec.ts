@@ -80,7 +80,7 @@ describe('vdom domProps module', () => {
 
     expect(vm.$el.id).toBe('foo')
     vm.props.id = 'bar'
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.id).toBe('bar')
       vm.props = { id: 'baz' }
     }).then(() => {

@@ -326,7 +326,7 @@ describe('Observer', () => {
   })
 
   it('observing array mutation', () => {
-    const arr = []
+    const arr: any[] = []
     const ob = observe(arr)
     const dep = ob.dep
     spyOn(dep, 'notify')

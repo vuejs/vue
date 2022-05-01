@@ -137,7 +137,7 @@ export function getRoot (instance) {
 
 // Get all binding events in the instance
 export function getEvents (instance) {
-  const events = []
+  const events: any[] = []
   const recordEvent = node => {
     if (!node) { return }
     if (Array.isArray(node.event)) {

@@ -103,7 +103,7 @@ describe('Directive v-on', () => {
   })
 
   it('should support capture', () => {
-    const callOrder = []
+    const callOrder: any[] = []
     vm = new Vue({
       el,
       template: `
@@ -159,7 +159,7 @@ describe('Directive v-on', () => {
   })
 
   it('should support capture and once', () => {
-    const callOrder = []
+    const callOrder: any[] = []
     vm = new Vue({
       el,
       template: `
@@ -1072,7 +1072,7 @@ describe('Directive v-on', () => {
     })
 
     it('with .capture modifier', () => {
-      const callOrder = []
+      const callOrder: any[] = []
       const vm = new Vue({
         template: `
           <div @[key].capture="foo">

@@ -8,7 +8,7 @@ describe('vdom events module', () => {
 
     const elm = patch(null, vnode)
     document.body.appendChild(elm)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(1)
   })
 
@@ -20,7 +20,7 @@ describe('vdom events module', () => {
     const elm = patch(null, vnode1)
     patch(vnode1, vnode2)
     document.body.appendChild(elm)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(1)
   })
 
@@ -32,12 +32,12 @@ describe('vdom events module', () => {
 
     const elm = patch(null, vnode1)
     document.body.appendChild(elm)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(1)
     expect(click2.calls.count()).toBe(0)
 
     patch(vnode1, vnode2)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(1)
     expect(click2.calls.count()).toBe(1)
   })
@@ -48,7 +48,7 @@ describe('vdom events module', () => {
 
     const elm = patch(null, vnode)
     document.body.appendChild(elm)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(2)
   })
 
@@ -60,12 +60,12 @@ describe('vdom events module', () => {
 
     const elm = patch(null, vnode1)
     document.body.appendChild(elm)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(1)
     expect(click2.calls.count()).toBe(1)
 
     patch(vnode1, vnode2)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(2)
     expect(click2.calls.count()).toBe(1)
   })
@@ -77,11 +77,11 @@ describe('vdom events module', () => {
 
     const elm = patch(null, vnode1)
     document.body.appendChild(elm)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(1)
 
     patch(vnode1, vnode2)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(1)
   })
 
@@ -92,11 +92,11 @@ describe('vdom events module', () => {
 
     const elm = patch(null, vnode1)
     document.body.appendChild(elm)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(2)
 
     patch(vnode1, vnode2)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(2)
   })
 
@@ -112,22 +112,22 @@ describe('vdom events module', () => {
 
     const elm = patch(null, vnode0)
     document.body.appendChild(elm)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(1)
     expect(click2.calls.count()).toBe(0)
 
     patch(vnode0, vnode1)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(2)
     expect(click2.calls.count()).toBe(1)
 
     patch(vnode1, vnode2)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(3)
     expect(click2.calls.count()).toBe(1)
 
     patch(vnode2, vnode3)
-    triggerEvent(elm, 'click')
+    global.triggerEvent(elm, 'click')
     expect(click.calls.count()).toBe(3)
     expect(click2.calls.count()).toBe(2)
     expect(click3.calls.count()).toBe(1)

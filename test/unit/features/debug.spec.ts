@@ -83,7 +83,7 @@ found in
 
   describe('warn', () => {
     const msg = 'message'
-    const vm = new Vue()
+    const vm = new Vue('div')
 
     it('calls warnHandler if warnHandler is set', () => {
       Vue.config.warnHandler = jasmine.createSpy()
@@ -92,6 +92,7 @@ found in
 
       expect(Vue.config.warnHandler).toHaveBeenCalledWith(msg, vm, jasmine.any(String))
 
+      // @ts-expect-error
       Vue.config.warnHandler = null
     })
 

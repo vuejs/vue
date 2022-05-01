@@ -6,7 +6,7 @@ function prop (name) {
 }
 
 function map (fn, list) {
-  const ret = []
+  const ret: any[] = []
   for (let i = 0; i < list.length; i++) {
     ret[i] = fn(list[i])
   }
@@ -235,8 +235,8 @@ describe('vdom patch: children', () => {
   it('should handle random shuffle', () => {
     let n
     let i
-    const arr = []
-    const opacities = []
+    const arr: any[] = []
+    const opacities: any[] = []
     const elms = 14
     const samples = 5
     function spanNumWithOpacity (n, o) {

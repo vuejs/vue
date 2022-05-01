@@ -12,7 +12,7 @@ import Vue from 'vue'
 //   // more assertions...
 // })
 // .then(done)
-window.waitForUpdate = initialCb => {
+globalThis.waitForUpdate = initialCb => {
   let end
   const queue = initialCb ? [initialCb] : []
 
@@ -21,7 +21,7 @@ window.waitForUpdate = initialCb => {
     if (queue.length) {
       let hasError = false
       try {
-        job.wait ? job(shift) : job()
+        job.wait ? job(shift) : (job ? job() : null)
       } catch (e) {
         hasError = true
         const done = queue[queue.length - 1]
@@ -29,7 +29,7 @@ window.waitForUpdate = initialCb => {
           done.fail(e)
         }
       }
-      if (!hasError && !job.wait) {
+      if (!hasError && !job?.wait) {
         if (queue.length) {
           Vue.nextTick(shift)
         }
@@ -40,7 +40,7 @@ window.waitForUpdate = initialCb => {
   }
 
   Vue.nextTick(() => {
-    if (!queue.length || (!end && !queue[queue.length - 1].fail)) {
+    if (!queue.length || (!end && !queue[queue.length - 1]?.fail)) {
       throw new Error('waitForUpdate chain is missing .then(done)')
     }
     shift()

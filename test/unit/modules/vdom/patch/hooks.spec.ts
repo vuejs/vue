@@ -5,7 +5,7 @@ import * as nodeOps from 'web/runtime/node-ops'
 import platformModules from 'web/runtime/modules/index'
 import VNode from 'core/vdom/vnode'
 
-const modules = baseModules.concat(platformModules)
+const modules = baseModules.concat(platformModules) as any[]
 
 describe('vdom patch: hooks', () => {
   let vnode0
@@ -15,7 +15,7 @@ describe('vdom patch: hooks', () => {
   })
 
   it('should call `insert` listener after both parents, siblings and children have been inserted', () => {
-    const result = []
+    const result: any[] = []
     function insert (vnode) {
       expect(vnode.elm.children.length).toBe(2)
       expect(vnode.elm.parentNode.children.length).toBe(3)
@@ -34,7 +34,7 @@ describe('vdom patch: hooks', () => {
   })
 
   it('should call `prepatch` listener', () => {
-    const result = []
+    const result: any[] = []
     function prepatch (oldVnode, newVnode) {
       expect(oldVnode).toEqual(vnode1.children[1])
       expect(newVnode).toEqual(vnode2.children[1])
@@ -60,8 +60,8 @@ describe('vdom patch: hooks', () => {
   })
 
   it('should call `postpatch` after `prepatch` listener', () => {
-    const pre = []
-    const post = []
+    const pre: any[] = []
+    const post: any[] = []
     function prepatch (oldVnode, newVnode) {
       pre.push(pre)
     }
@@ -90,8 +90,8 @@ describe('vdom patch: hooks', () => {
   })
 
   it('should call `update` listener', () => {
-    const result1 = []
-    const result2 = []
+    const result1: any[] = []
+    const result2: any[] = []
     function cb (result, oldVnode, newVnode) {
       if (result.length > 1) {
         expect(result[result.length - 1]).toEqual(oldVnode)
@@ -119,7 +119,7 @@ describe('vdom patch: hooks', () => {
   })
 
   it('should call `remove` listener', () => {
-    const result = []
+    const result: any[] = []
     function remove (vnode, rm) {
       const parent = vnode.elm.parentNode
       expect(vnode.elm.children.length).toBe(2)
@@ -159,6 +159,7 @@ describe('vdom patch: hooks', () => {
     let rm1, rm2, rm3
     const patch1 = createPatchFunction({
       nodeOps,
+      // @ts-ignore - TODO dtw
       modules: modules.concat([
         { remove (_, rm) { rm1 = rm } },
         { remove (_, rm) { rm2 = rm } }
@@ -181,7 +182,7 @@ describe('vdom patch: hooks', () => {
   })
 
   it('should invoke the remove hook on replaced root', () => {
-    const result = []
+    const result: any[] = []
     const parent = nodeOps.createElement('div')
     vnode0 = nodeOps.createElement('div')
     parent.appendChild(vnode0)
@@ -203,7 +204,7 @@ describe('vdom patch: hooks', () => {
   })
 
   it('should invoke global `destroy` hook for all removed children', () => {
-    const result = []
+    const result: any[] = []
     function destroy (vnode) { result.push(vnode) }
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}, undefined, 'first sibling'),
@@ -301,7 +302,7 @@ describe('vdom patch: hooks', () => {
   })
 
   it('should call `create` listener before inserted into parent but after children', () => {
-    const result = []
+    const result: any[] = []
     function create (empty, vnode) {
       expect(vnode.elm.children.length).toBe(2)
       expect(vnode.elm.parentNode).toBe(null)

@@ -54,7 +54,7 @@ describe('Scheduler', () => {
   })
 
   it('call user watchers before component re-render', done => {
-    const calls = []
+    const calls: any[] = []
     const vm = new Vue({
       data: {
         a: 1
@@ -75,7 +75,7 @@ describe('Scheduler', () => {
 
   it('call user watcher triggered by component re-render immediately', done => {
     // this happens when a component re-render updates the props of a child
-    const calls = []
+    const calls: any[] = []
     const vm = new Vue({
       data: {
         a: 1
@@ -127,7 +127,7 @@ describe('Scheduler', () => {
   })
 
   it('should call newly pushed watcher after current watcher is done', done => {
-    const callOrder = []
+    const callOrder: any[] = []
     queueWatcher({
       id: 1,
       user: true,

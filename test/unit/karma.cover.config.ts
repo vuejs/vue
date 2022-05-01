@@ -2,7 +2,7 @@ const base = require('./karma.base.config.ts')
 
 process.env.CHROME_BIN = require('puppeteer').executablePath()
 
-module.exports = function (config) {
+module.exports = function (config: any) {
   const options = Object.assign(base, {
     browsers: ['ChromeHeadlessCI'],
     customLaunchers: {
@@ -30,9 +30,9 @@ module.exports = function (config) {
     plugins: [['istanbul', {
       exclude: [
         'test/',
-        'src/compiler/parser/html-parser.js',
-        'src/core/instance/proxy.js',
-        'src/sfc/deindent.js',
+        'src/compiler/parser/html-parser.ts',
+        'src/core/instance/proxy.ts',
+        'src/sfc/deindent.ts',
         'src/platforms/weex/'
       ]
     }]]

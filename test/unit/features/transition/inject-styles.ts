@@ -4,8 +4,8 @@ function insertCSS (text) {
   document.head.appendChild(cssEl)
 }
 
-const duration = process.env.TRANSITION_DURATION || 50
-const buffer = process.env.TRANSITION_BUFFER || 10
+const duration = parseInt(process.env.TRANSITION_DURATION || '50')
+const buffer = parseInt(process.env.TRANSITION_BUFFER || '10')
 let injected = false
 
 export default function injectStyles () {

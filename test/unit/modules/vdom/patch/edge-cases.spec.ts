@@ -48,7 +48,7 @@ describe('vdom patch: edge cases', () => {
       directives: {
         test: {
           bind (el, binding, vnode) {
-            waitForUpdate(() => {
+            global.waitForUpdate(() => {
               expect(vnode.children[0].data.on.click()).toBe(5)
               expect(vnode.children[2].data.on.click(dummyEvt)).toBe(5)
               expect(vnode.children[4].data.on.click()).toBe(10)

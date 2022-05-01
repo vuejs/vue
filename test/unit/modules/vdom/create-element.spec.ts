@@ -230,7 +230,7 @@ describe('create-element', () => {
     const vm = new Vue({
       data: { n: 1 },
       render (h) {
-        const list = []
+        const list: any[] = []
         for (let i = 0; i < this.n; i++) {
           list.push(h('span', i))
         }

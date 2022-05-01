@@ -55,7 +55,7 @@ describe('Instance properties', () => {
   })
 
   it('$parent', () => {
-    const calls = []
+    const calls: any[] = []
     const makeOption = name => ({
       name,
       template: `<div><slot></slot></div>`,

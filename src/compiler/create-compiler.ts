@@ -13,7 +13,7 @@ export function createCompilerCreator(baseCompile: Function): Function {
       const errors: WarningMessage[] = []
       const tips: WarningMessage[] = []
 
-      let warn = (msg, range, tip) => {
+      let warn = (msg: WarningMessage, range: { start: number, end: number }, tip: string) => {
         (tip ? tips : errors).push(msg)
       }
 
@@ -25,7 +25,7 @@ export function createCompilerCreator(baseCompile: Function): Function {
           // $flow-disable-line
           const leadingSpaceLength = template.match(/^\s*/)![0].length
 
-          warn = (msg, range, tip) => {
+          warn = (msg: WarningMessage, range: { start: number, end: number }, tip: string) => {
             const data: WarningMessage = { msg }
             if (range) {
               if (range.start != null) {
@@ -54,7 +54,7 @@ export function createCompilerCreator(baseCompile: Function): Function {
         // copy other options
         for (const key in options) {
           if (key !== 'modules' && key !== 'directives') {
-            finalOptions[key] = options[key]
+            finalOptions[key] = options[key as keyof CompilerOptions]
           }
         }
       }

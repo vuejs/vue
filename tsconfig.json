@@ -6,9 +6,9 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "node",
-    "allowJs": true,
     "strict": true,
     
+    "allowJs": true,
     "noImplicitAny": false,
     "noImplicitThis": false,
 
@@ -20,8 +20,6 @@
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
     "types": [
-      "node",
-      "karma",
       "jasmine",
       "webpack-env"
     ],

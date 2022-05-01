@@ -5,7 +5,7 @@ import { nextFrame } from 'web/runtime/transition-util'
 
 if (!isIE9) {
   describe('Transition basic', () => {
-    const { duration, buffer } = injectStyles()
+    const { duration, buffer } = injectStyles() as { duration: number, buffer: number }
     const explicitDuration = duration * 2
 
     let el
@@ -23,7 +23,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
@@ -48,7 +48,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active test-leave-to')
@@ -85,7 +85,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test bye byebye active more')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test byebye active more bye-to')
@@ -119,7 +119,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active test-leave-to')
@@ -165,7 +165,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test bye byebye active')
         expect(leave).toHaveBeenCalled()
       }).thenWaitFor(nextFrame).then(() => {
@@ -233,7 +233,7 @@ if (!isIE9) {
 
       let _el = vm.$el.children[0]
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(beforeLeaveSpy).toHaveBeenCalledWith(_el)
         expect(onLeaveSpy).toHaveBeenCalledWith(_el)
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
@@ -318,7 +318,7 @@ if (!isIE9) {
 
       let _el = vm.$el.children[0]
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(beforeLeaveSpy).toHaveBeenCalledWith(_el)
         expect(onLeaveSpy).toHaveBeenCalledWith(_el)
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
@@ -362,7 +362,7 @@ if (!isIE9) {
         }
       }).$mount(el)
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active test-leave-to')
@@ -404,7 +404,7 @@ if (!isIE9) {
       }).$mount(el)
 
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(leaveSpy).toHaveBeenCalled()
         expect(vm.$el.innerHTML).toBe('<!---->')
         vm.ok = true
@@ -427,7 +427,7 @@ if (!isIE9) {
       }).$mount(el)
 
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(leaveSpy).toHaveBeenCalled()
         expect(vm.$el.innerHTML).toBe('<div class="nope-leave nope-leave-active">foo</div><!---->')
       }).thenWaitFor(nextFrame).then(() => {
@@ -459,7 +459,7 @@ if (!isIE9) {
 
       expect(vm.$el.innerHTML).toBe('<!---->')
       vm.ok = true
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter test-enter-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter-active test-enter-to')
@@ -493,7 +493,7 @@ if (!isIE9) {
 
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
       }).thenWaitFor(duration / 2).then(() => {
         vm.ok = true
@@ -525,7 +525,7 @@ if (!isIE9) {
       expect(vm.$el.children[0].style.display).toBe('')
       expect(vm.$el.children[0].className).toBe('test')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active test-leave-to')
@@ -561,7 +561,7 @@ if (!isIE9) {
       expect(vm.$el.textContent).toBe('foo')
       expect(vm.$el.children[0].style.display).toBe('')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active test-leave-to')
@@ -596,7 +596,7 @@ if (!isIE9) {
 
       expect(vm.$el.children[0].style.display).toBe('')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active test-leave-to')
@@ -625,7 +625,7 @@ if (!isIE9) {
       }).$mount(el)
 
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         vm.ok = true
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter-active test-enter-to')
@@ -647,7 +647,7 @@ if (!isIE9) {
       }).$mount(el)
 
       vm.ok = true
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         vm.ok = false
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active test-leave-to')
@@ -671,7 +671,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div>foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test-anim-leave test-anim-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test-anim-leave-active test-anim-leave-to')
@@ -702,7 +702,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-anim-long-leave test-anim-long-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-anim-long-leave-active test-anim-long-leave-to')
@@ -739,7 +739,7 @@ if (!isIE9) {
         data: { ok: true }
       }).$mount(el)
 
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-appear test-appear-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-appear-active test-appear-to')
@@ -760,7 +760,7 @@ if (!isIE9) {
         data: { ok: true }
       }).$mount(el)
 
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter test-enter-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter-active test-enter-to')
@@ -784,7 +784,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-leave v-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-leave-active v-leave-to')
@@ -826,7 +826,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
@@ -864,7 +864,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
@@ -898,7 +898,7 @@ if (!isIE9) {
         }
       }).$mount(el)
 
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-appear test-appear-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-appear-active test-appear-to')
@@ -937,7 +937,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
@@ -976,7 +976,7 @@ if (!isIE9) {
         }
       }).$mount(el)
 
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-appear test-appear-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-appear-active test-appear-to')
@@ -1010,7 +1010,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave test-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active test-leave-to')
@@ -1048,7 +1048,7 @@ if (!isIE9) {
 
         vm.ok = false
 
-        waitForUpdate(() => {
+        global.waitForUpdate(() => {
           expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
         }).thenWaitFor(nextFrame).then(() => {
           expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
@@ -1078,7 +1078,7 @@ if (!isIE9) {
 
         vm.ok = false
 
-        waitForUpdate(() => {
+        global.waitForUpdate(() => {
           expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
         }).thenWaitFor(nextFrame).then(() => {
           expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
@@ -1108,7 +1108,7 @@ if (!isIE9) {
 
         vm.ok = false
 
-        waitForUpdate(() => {
+        global.waitForUpdate(() => {
           expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
         }).thenWaitFor(nextFrame).then(() => {
           expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
@@ -1141,7 +1141,7 @@ if (!isIE9) {
 
         vm.ok = false
 
-        waitForUpdate(() => {
+        global.waitForUpdate(() => {
           expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
         }).thenWaitFor(nextFrame).then(() => {
           expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
@@ -1180,7 +1180,7 @@ if (!isIE9) {
 
         vm.ok = false
 
-        waitForUpdate(() => {
+        global.waitForUpdate(() => {
           expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
         }).thenWaitFor(nextFrame).then(() => {
           expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')
@@ -1228,7 +1228,7 @@ if (!isIE9) {
         }).$mount(el)
 
         vm.ok = false
-        waitForUpdate(() => {
+        global.waitForUpdate(() => {
           expect(`<transition> explicit leave duration is not a valid number - got "foo"`).toHaveBeenWarned()
         }).thenWaitFor(duration + buffer).then(() => {
           vm.ok = true
@@ -1262,7 +1262,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<!---->')
       vm.view = 'two'
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('<div class="test v-enter v-enter-active">two</div>')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-enter-active v-enter-to')
@@ -1297,7 +1297,7 @@ if (!isIE9) {
       }).$mount(el)
 
       vm.ok = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.children[0].innerHTML).toBe('false')
       }).then(done)
     })

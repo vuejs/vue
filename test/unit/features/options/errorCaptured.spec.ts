@@ -120,7 +120,7 @@ describe('Options errorCaptured', () => {
   })
 
   it('should work across multiple parents, mixins and extends', () => {
-    const calls = []
+    const calls: any[] = []
 
     const Child = {
       created () {
@@ -165,7 +165,7 @@ describe('Options errorCaptured', () => {
   })
 
   it('should work across multiple parents, mixins and extends with return false', () => {
-    const calls = []
+    const calls: any[] = []
 
     const Child = {
       created () {

@@ -130,7 +130,7 @@ describe('Usage', () => {
     })
 
     it('stateful component', done => {
-      const tasks = []
+      const tasks: any[] = []
       addTaskHook((_, task) => tasks.push(task))
       compileWithDeps('recycle-list/components/stateful.vue', [{
         name: 'counter',

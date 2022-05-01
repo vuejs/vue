@@ -60,7 +60,7 @@ describe('Component keep-alive', () => {
     assertHookCalls(one, [1, 1, 1, 0, 0])
     assertHookCalls(two, [0, 0, 0, 0, 0])
     vm.view = 'two'
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('two')
       assertHookCalls(one, [1, 1, 1, 1, 0])
       assertHookCalls(two, [1, 1, 1, 0, 0])
@@ -104,7 +104,7 @@ describe('Component keep-alive', () => {
     assertHookCalls(one, [1, 1, 1, 0, 0])
     assertHookCalls(two, [1, 1, 1, 0, 0])
     vm.ok = false
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('')
       assertHookCalls(one, [1, 1, 1, 1, 0])
       assertHookCalls(two, [1, 1, 1, 1, 0])
@@ -145,7 +145,7 @@ describe('Component keep-alive', () => {
     assertHookCalls(one, [1, 1, 1, 0, 0])
     assertHookCalls(two, [1, 1, 1, 0, 0])
     vm.ok = false
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('')
       assertHookCalls(one, [1, 1, 1, 1, 0])
       assertHookCalls(two, [1, 1, 1, 1, 0])
@@ -214,7 +214,7 @@ describe('Component keep-alive', () => {
     assertHookCalls(one, [1, 1, 1, 0, 0])
     assertHookCalls(two, [0, 0, 0, 0, 0])
     vm.view = 'two'
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('two')
       assertHookCalls(one, [1, 1, 1, 1, 0])
       assertHookCalls(two, [1, 1, 0, 0, 0])
@@ -379,7 +379,7 @@ describe('Component keep-alive', () => {
     }).$mount()
 
     vm.view = 'two'
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       assertHookCalls(one, [1, 1, 1, 1, 0])
       assertHookCalls(two, [1, 1, 1, 0, 0])
       vm.include = 'two'
@@ -410,7 +410,7 @@ describe('Component keep-alive', () => {
     }).$mount()
 
     vm.view = 'two'
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       assertHookCalls(one, [1, 1, 1, 1, 0])
       assertHookCalls(two, [1, 1, 1, 0, 0])
       vm.include = 'one'
@@ -439,7 +439,7 @@ describe('Component keep-alive', () => {
     }).$mount()
 
     vm.include = 'two'
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       assertHookCalls(one, [1, 1, 1, 0, 0])
       assertHookCalls(two, [0, 0, 0, 0, 0])
       vm.view = 'two'
@@ -468,7 +468,7 @@ describe('Component keep-alive', () => {
     assertHookCalls(two, [1, 1, 1, 0, 0])
 
     vm.ok = false
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       assertHookCalls(one, [1, 1, 1, 1, 1])
       assertHookCalls(two, [1, 1, 1, 1, 1])
     }).then(done)
@@ -498,7 +498,7 @@ describe('Component keep-alive', () => {
 
     expect(vm.$el.textContent).toBe('one 1')
     vm.n++
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('one 2')
       vm.view = 'two'
     }).then(() => {
@@ -555,7 +555,7 @@ describe('Component keep-alive', () => {
 
     assertCount([1, 0, 0, 0, 0, 0])
     vm.n = 'bb'
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       assertCount([1, 0, 1, 0, 0, 0])
       vm.n = 'cc'
     }).then(() => {
@@ -621,7 +621,7 @@ describe('Component keep-alive', () => {
 
     assertCount([1, 0, 0, 0, 0, 0])
     vm.n = 'bb'
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       // should prune A because max cache reached
       assertCount([1, 1, 1, 0, 0, 0])
       vm.n = 'cc'
@@ -686,7 +686,7 @@ describe('Component keep-alive', () => {
     expect(vm.$el.textContent).toBe('foo')
     assert(1, 0)
     vm.view = false
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('bar')
       assert(1, 1)
       vm.view = true
@@ -738,7 +738,7 @@ describe('Component keep-alive', () => {
     expect(vm.$el.textContent).toBe('foo')
     assert(1, 0)
     vm.view = false
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('bar')
       assert(1, 1)
       vm.view = true
@@ -773,7 +773,7 @@ describe('Component keep-alive', () => {
     }).$mount()
     // condition: a render where a previous component is reused
     vm.include = ['foo']
-    waitForUpdate(() => {
+    global.waitForUpdate(() => {
       vm.include = ['']
     }).then(() => {
       expect(Foo.destroyed).not.toHaveBeenCalled()
@@ -805,7 +805,7 @@ describe('Component keep-alive', () => {
       assertHookCalls(one, [1, 1, 1, 0, 0])
       assertHookCalls(two, [0, 0, 0, 0, 0])
       vm.view = 'two'
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-leave test-leave-active">one</div><!---->'
         )
@@ -890,7 +890,7 @@ describe('Component keep-alive', () => {
       assertHookCalls(one, [1, 1, 1, 0, 0])
       assertHookCalls(two, [0, 0, 0, 0, 0])
       vm.view = 'two'
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-leave test-leave-active">one</div><!---->'
         )
@@ -975,7 +975,7 @@ describe('Component keep-alive', () => {
       assertHookCalls(one, [1, 1, 1, 0, 0])
       assertHookCalls(two, [0, 0, 0, 0, 0])
       vm.view = 'two'
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
           '<div class="test test-enter test-enter-active">two</div>'
@@ -1066,7 +1066,7 @@ describe('Component keep-alive', () => {
       }).$mount(el)
       expect(vm.$el.textContent).toBe('one')
       vm.view = 'two'
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
           '<div class="test test-enter test-enter-active">two</div>'
@@ -1134,7 +1134,7 @@ describe('Component keep-alive', () => {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.view = 'bar'
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test v-leave v-leave-active">foo</div>' +
           '<div class="test test-enter test-enter-active">bar</div>'
@@ -1210,7 +1210,7 @@ describe('Component keep-alive', () => {
       next = () => {
         assertHookCalls(one, [1, 1, 1, 0, 0])
         assertHookCalls(two, [0, 0, 0, 0, 0])
-        waitForUpdate(() => {
+        global.waitForUpdate(() => {
           expect(vm.$el.innerHTML).toBe(
             '<div class="test test-enter test-enter-active">one</div>'
           )
@@ -1274,7 +1274,7 @@ describe('Component keep-alive', () => {
       btn.click()
       expect(vm.n).toBe(1)
       vm.showBtn = false
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         vm.showBtn = true
       }).then(() => {
         btn.click()

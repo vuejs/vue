@@ -15,7 +15,8 @@ describe('Component async', () => {
     // reset the timeouts for this iteration
     timeoutsPending = {};
 
-    window.setTimeout = function(func, delay) {
+    // @ts-expect-error
+    global.setTimeout = function(func, delay) {
       const id = oldSetTimeout(function() {
         delete timeoutsPending[id];
         func();
@@ -152,7 +153,7 @@ describe('Component async', () => {
       expect(vm.$el.tagName).toBe('P')
       expect(vm.$el.textContent).toBe('B')
       vm.view = 'view-a'
-      waitForUpdate(function () {
+      global.waitForUpdate(function () {
         expect(vm.$el.tagName).toBe('DIV')
         expect(vm.$el.textContent).toBe('A')
       }).then(done)
@@ -431,7 +432,7 @@ describe('Component async', () => {
       }).$mount()
 
       expect(vm.$el.textContent).toBe('one ')
-      waitForUpdate(() => {
+      global.waitForUpdate(() => {
         expect(vm.$el.textContent).toBe('one two')
       }).then(done)
     })

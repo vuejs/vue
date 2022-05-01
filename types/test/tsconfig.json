@@ -1,15 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es5zdfasdfasdf",
+    "target": "es5",
     "experimentalDecorators": true,
     "lib": [
       "dom",
       "es2015"
-    ],
-    "types": [
-      "jasmine",
-      "@types/karma",
-      "webpack-env"
     ],
     "module": "commonjs",
     "strict": true,
@@ -17,7 +12,7 @@
     "baseUrl": ".",
     "paths": {
       "vue": ["../index.d.ts"]
-    }
+    },
   },
   "include": [
     "../*.d.ts",
