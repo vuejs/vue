@@ -253,7 +253,7 @@ if (!isIE9) {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>'
         )
-      }).then(done).then(done)
+      }).then(done)
     })
 
     it('normal elements with different keys, simultaneous', done => {

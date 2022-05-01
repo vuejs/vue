@@ -21,6 +21,9 @@ const webpackConfig = {
   resolve: {
     alias: alias,
     extensions: ['.tsx', '.ts', '.js'],
+    fallback: {
+      'stream': require.resolve("stream-browserify")
+    }
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -37,12 +40,14 @@ const webpackConfig = {
 
 // shared config for all unit tests
 module.exports = {
-  frameworks: ['jasmine'],
+  frameworks: ['jasmine', 'webpack', 'karma-typescript'],
   files: [
-    './index.ts'
+    './index.ts',
+    "../../src/**/*.ts" // *.tsx for React Jsx
   ],
   preprocessors: {
-    './index.ts': ['webpack', 'sourcemap']
+    './index.ts': ['webpack', 'sourcemap'],
+    "**/*.ts": ["karma-typescript", 'webpack', 'sourcemap'] // *.tsx for React Jsx
   },
   webpack: webpackConfig,
   webpackMiddleware: {
