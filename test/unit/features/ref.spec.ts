@@ -1,7 +1,19 @@
 import Vue from 'vue'
 
 describe('ref', () => {
-  const components = {
+  
+  type TestShape = { 
+    id: string,
+    template: string,
+    data?: any
+    components?: any
+  }
+  type ComponentShape = {
+    test: TestShape,
+    test2: TestShape,
+    test3: TestShape,
+  }
+  const components: ComponentShape = {
     test: {
       id: 'test',
       template: '<div>test</div>'

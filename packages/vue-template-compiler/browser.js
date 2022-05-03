@@ -4415,7 +4415,7 @@
 	                    // $flow-disable-line
 	                    const leadingSpaceLength = template.match(/^\s*/)[0].length;
 	                    warn = (msg, range, tip) => {
-	                        const data = { msg };
+	                        const data = typeof (msg) === 'string' ? { msg } : msg;
 	                        if (range) {
 	                            if (range.start != null) {
 	                                data.start = range.start + leadingSpaceLength;

@@ -1,4 +1,8 @@
-/* globals stats, valueToPoint */
+/* globals */
+
+declare const stats: any
+declare const valueToPoint: Function
+
 module.exports = {
   'svg': function (browser) {
     browser
@@ -16,7 +20,7 @@ module.exports = {
         const point = valueToPoint(stat.value, i, 6)
           return point.x + ',' + point.y
         }).join(' ')
-        return document.querySelector('polygon').attributes[0].value === points
+        return document.querySelector('polygon')!.attributes[0].value === points
       })
       .click('button.remove')
       .assert.count('text', 5)
@@ -28,7 +32,7 @@ module.exports = {
         const point = valueToPoint(stat.value, i, 5)
           return point.x + ',' + point.y
         }).join(' ')
-        return document.querySelector('polygon').attributes[0].value === points
+        return document.querySelector('polygon')!.attributes[0].value === points
       })
       .setValue('input[name="newlabel"]', 'foo')
       .click('#add > button')

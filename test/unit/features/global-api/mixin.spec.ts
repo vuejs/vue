@@ -20,7 +20,7 @@ describe('Global API: mixin', () => {
 
   it('should work for constructors created before mixin is applied', () => {
     const calls: any[] = []
-    const Test = Vue.extend({
+    const Test: Vue = Vue.extend({
       name: 'test',
       beforeCreate () {
         calls.push(this.$options.myOption + ' local')

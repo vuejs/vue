@@ -2,6 +2,10 @@ declare function waitForUpdate(
   cb: Function
 ): any;
 
+declare function createTextVNode(
+  arg?: any
+): any;
+
 declare namespace jasmine {
   interface Matchers<T> {
     toHaveBeenWarned(): void;
@@ -13,6 +17,3 @@ declare namespace jasmine {
     toHaveBeenTipped(): void;
   }
 }
-
-// @ts-ignore
-declare let global: typeof globalThis;

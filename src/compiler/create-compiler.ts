@@ -25,8 +25,8 @@ export function createCompilerCreator(baseCompile: Function): Function {
           // $flow-disable-line
           const leadingSpaceLength = template.match(/^\s*/)![0].length
 
-          warn = (msg: WarningMessage, range: { start: number, end: number }, tip: string) => {
-            const data: WarningMessage = { msg }
+          warn = (msg: WarningMessage | string, range: { start: number, end: number }, tip: string) => {
+            const data: WarningMessage = typeof(msg) === 'string' ? { msg } : msg
             if (range) {
               if (range.start != null) {
                 data.start = range.start + leadingSpaceLength

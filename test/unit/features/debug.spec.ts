@@ -3,7 +3,7 @@ import { formatComponentName, warn } from 'core/util/debug'
 
 describe('Debug utilities', () => {
   it('properly format component names', () => {
-    const vm = new Vue()
+    const vm = new Vue('div')
     expect(formatComponentName(vm)).toBe('<Root>')
 
     vm.$root = null

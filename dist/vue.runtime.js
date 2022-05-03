@@ -1630,7 +1630,6 @@
           }
       }
       catch (e) {
-          // @ts-expect-error should it be any?
           handleError(e, vm, info);
       }
       return res;
@@ -1750,7 +1749,6 @@
                   cb.call(ctx);
               }
               catch (e) {
-                  // @ts-expect-error should it be any?
                   handleError(e, ctx, 'nextTick');
               }
           }
@@ -3901,7 +3899,6 @@
           }
           catch (e) {
               if (this.user) {
-                  // @ts-expect-error e is unknown, should we cast or any?
                   handleError(e, vm, `getter for watcher "${this.expression}"`);
               }
               else {
@@ -5881,7 +5878,6 @@
               fn(vnode.elm, dir, vnode, oldVnode, isDestroy);
           }
           catch (e) {
-              // @ts-expect-error should it be any?
               handleError(e, vnode.context, `directive ${dir.name} ${hook} hook`);
           }
       }

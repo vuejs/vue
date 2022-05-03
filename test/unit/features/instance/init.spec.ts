@@ -2,11 +2,11 @@ import Vue from 'vue'
 
 describe('Initialization', () => {
   it('without new', () => {
-    try { Vue() } catch (e) {}
+    try { Vue('div') } catch (e) {}
     expect('Vue is a constructor and should be called with the `new` keyword').toHaveBeenWarned()
   })
 
   it('with new', () => {
-    expect(new Vue() instanceof Vue).toBe(true)
+    expect(new Vue('div') instanceof Vue).toBe(true)
   })
 })

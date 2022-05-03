@@ -22,7 +22,7 @@ describe('Options renderError', () => {
     vm.ok = false
     waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('Error: no')
-      Vue.config.errorHandler = null
+      Vue.config.errorHandler = undefined
     }).then(done)
   })
 

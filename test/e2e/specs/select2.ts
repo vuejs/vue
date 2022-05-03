@@ -1,4 +1,5 @@
-/* globals vm */
+declare const vm: any 
+
 module.exports = {
   'select2': function (browser) {
     browser

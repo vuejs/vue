@@ -1731,7 +1731,6 @@ function invokeWithErrorHandling(handler, context, args, vm, info) {
         }
     }
     catch (e) {
-        // @ts-expect-error should it be any?
         handleError(e, vm, info);
     }
     return res;
@@ -5444,7 +5443,7 @@ function createCompilerCreator(baseCompile) {
                     // $flow-disable-line
                     const leadingSpaceLength = template.match(/^\s*/)[0].length;
                     warn = (msg, range, tip) => {
-                        const data = { msg };
+                        const data = typeof (msg) === 'string' ? { msg } : msg;
                         if (range) {
                             if (range.start != null) {
                                 data.start = range.start + leadingSpaceLength;

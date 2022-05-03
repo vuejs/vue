@@ -12,7 +12,8 @@ import Vue from 'vue'
 //   // more assertions...
 // })
 // .then(done)
-globalThis.waitForUpdate = initialCb => {
+// @ts-expect-error
+window.waitForUpdate = initialCb => {
   let end
   const queue = initialCb ? [initialCb] : []
 
@@ -21,7 +22,7 @@ globalThis.waitForUpdate = initialCb => {
     if (queue.length) {
       let hasError = false
       try {
-        job.wait ? job(shift) : (job ? job() : null)
+        job.wait ? job(shift) : job()
       } catch (e) {
         hasError = true
         const done = queue[queue.length - 1]

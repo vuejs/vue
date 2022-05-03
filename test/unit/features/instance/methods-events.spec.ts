@@ -3,7 +3,7 @@ import Vue from 'vue'
 describe('Instance methods events', () => {
   let vm, spy
   beforeEach(() => {
-    vm = new Vue()
+    vm = new Vue('div')
     spy = jasmine.createSpy('emitter')
   })
 

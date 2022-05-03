@@ -20,6 +20,7 @@
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
     "types": [
+      "node",
       "jasmine",
       "webpack-env"
     ],
@@ -37,7 +38,7 @@
       "vue": ["src/platforms/web/entry-runtime-with-compiler"]
     }
   },
-  "include": ["src", "test-dts", "typescript"],
+  "include": ["src", "test-dts", "typescript", "test"],
 
   "exclude": ["flow", "node_modules", "packages", "types"]
 }

@@ -14,7 +14,9 @@ const webpackConfig = {
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
-        loader: 'ts-loader',
+        // loader: 'ts-loader',
+        // loader: 'babel-loader!ts-loader',
+        use: ['babel-loader', 'ts-loader']
       },
     ]
   },
@@ -42,11 +44,11 @@ const webpackConfig = {
 module.exports = {
   frameworks: ['jasmine', 'webpack', 'karma-typescript'],
   files: [
-    './index.ts',
+    './index.js',
     "../../src/**/*.ts" // *.tsx for React Jsx
   ],
   preprocessors: {
-    './index.ts': ['webpack', 'sourcemap'],
+    './index.js': ['webpack', 'sourcemap'],
     "**/*.ts": ["karma-typescript", 'webpack', 'sourcemap'] // *.tsx for React Jsx
   },
   webpack: webpackConfig,
@@ -59,5 +61,52 @@ module.exports = {
     'karma-sourcemap-loader',
     'karma-webpack',
     'karma-typescript'
-  ]
+  ],
+  karmaTypescriptConfig: {
+  //   "compilerOptions": {
+  //     "baseUrl": ".",
+  //     "outDir": "dist",
+  //     "sourceMap": true,
+  //     "target": "ESNext",
+  //     "module": "ESNext",
+  //     "moduleResolution": "node",
+  //     "strict": true,
+      
+  //     "allowJs": true,
+  //     "noImplicitAny": false,
+  //     "noImplicitThis": false,
+  
+  //     "noUnusedLocals": true,
+  //     "experimentalDecorators": true,
+  //     "resolveJsonModule": true,
+  //     "esModuleInterop": true,
+  //     "removeComments": false,
+  //     "jsx": "preserve",
+  //     "lib": ["esnext", "dom"],
+  //     "types": [
+  //       "node",
+  //       "jasmine",
+  //       "webpack-env"
+  //     ],
+  //     "paths": {
+  //       "compiler/*": ["../../src/compiler/*"],
+  //       "core/*": ["../../src/core/*"],
+  
+  //       "server/*": ["../../src/server/*"],
+  //       "sfc/*": ["../../src/sfc/*"],
+  //       "shared/*": ["../../src/shared/*"],
+  
+  //       "web/*": ["../../src/platforms/web/*"],
+  //       "weex/*": ["../../src/platforms/weex/*"],
+  
+  //       "vue": ["../../src/platforms/web/entry-runtime-with-compiler"]
+  //     }
+  //   },
+    "include": ["./global.d.ts"],
+  
+  //   "exclude": ["flow", "node_modules", "packages", "types"]
+  // //   bundlerOptions: {
+  // //     transforms: [require("karma-typescript-es6-transform")()]
+  // //   }
+  }
 }

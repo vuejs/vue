@@ -381,7 +381,7 @@ describe('Component', () => {
       vm.a = { b: 234 }
     }).then(() => {
       expect(vm.$el.textContent).toBe('234') // should be able to recover
-      Vue.config.errorHandler = null
+      Vue.config.errorHandler = undefined
     }).then(done)
   })
 

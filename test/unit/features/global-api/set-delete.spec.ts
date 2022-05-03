@@ -84,6 +84,7 @@ describe('Global API: set/delete', () => {
     // #6845
     it('should not overwrite properties on prototype chain', () => {
       class Model {
+        _bar?: string
         constructor () {
           this._bar = null
         }
@@ -161,7 +162,7 @@ describe('Global API: set/delete', () => {
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('<p>A</p>')
         /* eslint-disable no-new-wrappers */
-        Vue.delete(vm.lists, new Number(0))
+        Vue.delete(vm.lists, new Number(0) as number)
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('')
       }).then(done)

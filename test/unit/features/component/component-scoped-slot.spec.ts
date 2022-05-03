@@ -882,6 +882,7 @@ describe('Component scoped slot', () => {
     })
 
     it('warn when v-slot used on non-root <template>', () => {
+      // @ts-ignore unused
       const vm = new Vue({
         template: `
           <foo>

@@ -6,6 +6,11 @@
       "dom",
       "es2015"
     ],
+    "types": [
+      "node",
+      "jasmine",
+      "webpack-env"
+    ],
     "module": "commonjs",
     "strict": true,
     "noEmit": true,
@@ -15,7 +20,7 @@
     },
   },
   "include": [
-    "../*.d.ts",
+    "./*.d.ts",
     "*.ts"
   ],
   "compileOnSave": false

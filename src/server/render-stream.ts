@@ -64,7 +64,7 @@ export default class RenderStream extends Readable {
   tryRender() {
     try {
       this.render(this.write, this.end)
-    } catch (e: any) {
+    } catch (e) {
       this.emit('error', e)
     }
   }
@@ -72,7 +72,7 @@ export default class RenderStream extends Readable {
   tryNext() {
     try {
       this.next()
-    } catch (e: any) {
+    } catch (e) {
       this.emit('error', e)
     }
   }

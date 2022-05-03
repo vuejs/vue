@@ -158,8 +158,7 @@ describe('Error handling', () => {
     expect(args[2]).toContain('render') // description
 
     assertRootInstanceActive(vm).then(() => {
-      // @ts-expect-error
-      Vue.config.errorHandler = null
+      Vue.config.errorHandler = undefined
     }).then(done)
   })
 
@@ -171,12 +170,12 @@ describe('Error handling', () => {
     Vue.nextTick(() => {
       expect(spy).toHaveBeenCalledWith(err1, undefined, 'nextTick')
 
-      const vm = new Vue()
+      const vm = new Vue('div')
       vm.$nextTick(() => { throw err2 })
       Vue.nextTick(() => {
         // should be called with correct instance info
         expect(spy).toHaveBeenCalledWith(err2, vm, 'nextTick')
-        Vue.config.errorHandler = null
+        Vue.config.errorHandler = undefined
         done()
       })
     })
@@ -197,7 +196,7 @@ describe('Error handling', () => {
     expect('error in errorHandler').toHaveBeenWarned()
     expect('error in render').toHaveBeenWarned()
     expect(vm.$el.textContent).toContain('error in render')
-    Vue.config.errorHandler = null
+    Vue.config.errorHandler = undefined
   })
 
   // event handlers that can throw errors or return rejected promise
@@ -305,7 +304,7 @@ function createErrorTestComponents () {
   // directive hooks errors
   ;['bind', 'update', 'unbind'].forEach(hook => {
     const key = 'directive ' + hook
-    const dirComp = components[key] = {
+    const dirComp: any = components[key] = {
       props: ['n'],
       template: `<div v-foo="n">{{ n }}</div>`
     }

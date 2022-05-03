@@ -1641,7 +1641,6 @@ function invokeWithErrorHandling(handler, context, args, vm, info) {
         }
     }
     catch (e) {
-        // @ts-expect-error should it be any?
         handleError(e, vm, info);
     }
     return res;
@@ -1761,7 +1760,6 @@ function nextTick(cb, ctx) {
                 cb.call(ctx);
             }
             catch (e) {
-                // @ts-expect-error should it be any?
                 handleError(e, ctx, 'nextTick');
             }
         }
@@ -3929,7 +3927,6 @@ class Watcher {
         }
         catch (e) {
             if (this.user) {
-                // @ts-expect-error e is unknown, should we cast or any?
                 handleError(e, vm, `getter for watcher "${this.expression}"`);
             }
             else {
@@ -5922,7 +5919,6 @@ function callHook(dir, hook, vnode, oldVnode, isDestroy) {
             fn(vnode.elm, dir, vnode, oldVnode, isDestroy);
         }
         catch (e) {
-            // @ts-expect-error should it be any?
             handleError(e, vnode.context, `directive ${dir.name} ${hook} hook`);
         }
     }
@@ -10346,7 +10342,7 @@ function createCompilerCreator(baseCompile) {
                     // $flow-disable-line
                     const leadingSpaceLength = template.match(/^\s*/)[0].length;
                     warn = (msg, range, tip) => {
-                        const data = { msg };
+                        const data = typeof (msg) === 'string' ? { msg } : msg;
                         if (range) {
                             if (range.start != null) {
                                 data.start = range.start + leadingSpaceLength;

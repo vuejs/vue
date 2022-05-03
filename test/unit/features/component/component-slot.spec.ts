@@ -113,7 +113,7 @@ describe('Component slot', () => {
    const Test = {
       render() {
         const _vm = this;
-        const _h = _vm.$createElement;
+        // const _h = _vm.$createElement;
         const _c = _vm._self._c || vm._h;
         return _c('div', [_vm._t("default", [_c('p', [_vm._v("slot default")])])], 2)
       }

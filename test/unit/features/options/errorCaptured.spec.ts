@@ -8,7 +8,7 @@ describe('Options errorCaptured', () => {
   })
 
   afterEach(() => {
-    Vue.config.errorHandler = null
+    Vue.config.errorHandler = undefined
   })
 
   it('should capture error from child component', () => {

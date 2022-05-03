@@ -22,7 +22,7 @@
   resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.17.10.tgz#711dc726a492dfc8be8220028b1b92482362baab"
   integrity sha512-GZt/TCsG70Ms19gfZO1tM4CVnXsPgEPBCpJu+Qz3L0LUDsY5nZqFZglIoPC1kIYOtNBZlrnFT+klg12vFGZXrw==
 
-"@babel/core@^7.12.3", "@babel/core@^7.17.10", "@babel/core@^7.7.5":
+"@babel/core@^7.11.1", "@babel/core@^7.12.3", "@babel/core@^7.17.10", "@babel/core@^7.7.5":
   version "7.17.10"
   resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.17.10.tgz#74ef0fbf56b7dfc3f198fc2d927f4f03e12f4b05"
   integrity sha512-liKoppandF3ZcBnIYFjfSDHZLKdLHGJRkoWtG8zQyGJBQfIYobpnVGI5+pLBNtS6psFLDzyq8+h5HiVljW9PNA==
@@ -795,7 +795,7 @@
     "@babel/helper-create-regexp-features-plugin" "^7.16.7"
     "@babel/helper-plugin-utils" "^7.16.7"
 
-"@babel/preset-env@^7.17.10":
+"@babel/preset-env@^7.11.0", "@babel/preset-env@^7.17.10":
   version "7.17.10"
   resolved "https://registry.yarnpkg.com/@babel/preset-env/-/preset-env-7.17.10.tgz#a81b093669e3eb6541bb81a23173c5963c5de69c"
   integrity sha512-YNgyBHZQpeoBSRBg0xixsZzfT58Ze1iZrajvv0lJc70qDDGuGfonEnMGfWeSY0mQ3JTuCWFbMkzFRVafOyJx4g==
@@ -913,7 +913,7 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@babel/template@^7.16.7":
+"@babel/template@7", "@babel/template@^7.16.7":
   version "7.16.7"
   resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.16.7.tgz#8d126c8701fde4d66b264b3eba3d96f07666d155"
   integrity sha512-I8j/x8kHUrbYRTUxXrrMbfCa7jxkE7tZre39x3kjr9hvI82cK1FfqLygotcWN5kdPGWcLdWMHpSBavse5tWw3w==
@@ -1161,14 +1161,14 @@
     resolve "^1.17.0"
 
 "@rollup/plugin-node-resolve@^13.2.1":
-  version "13.2.1"
-  resolved "https://registry.yarnpkg.com/@rollup/plugin-node-resolve/-/plugin-node-resolve-13.2.1.tgz#cdee815cf02c180ff0a42536ca67a8f67e299f84"
-  integrity sha512-btX7kzGvp1JwShQI9V6IM841YKNPYjKCvUbNrQ2EcVYbULtUd/GH6wZ/qdqH13j9pOHBER+EZXNN2L8RSJhVRA==
+  version "13.3.0"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-node-resolve/-/plugin-node-resolve-13.3.0.tgz#da1c5c5ce8316cef96a2f823d111c1e4e498801c"
+  integrity sha512-Lus8rbUo1eEcnS4yTFKLZrVumLPY+YayBdWXgFSHYhTT2iJbMhoaaBL3xl5NCdeRytErGr8tZ0L71BMRmnlwSw==
   dependencies:
     "@rollup/pluginutils" "^3.1.0"
     "@types/resolve" "1.17.1"
-    builtin-modules "^3.1.0"
     deepmerge "^4.2.2"
+    is-builtin-module "^3.1.0"
     is-module "^1.0.0"
     resolve "^1.19.0"
 
@@ -2139,6 +2139,13 @@ babel-plugin-transform-flow-strip-types@^6.8.0:
     babel-plugin-syntax-flow "^6.18.0"
     babel-runtime "^6.22.0"
 
+babel-plugin-transform-require-context@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/babel-plugin-transform-require-context/-/babel-plugin-transform-require-context-0.1.1.tgz#319b545ca83080b5062776b46cc9b8b346fea9a6"
+  integrity sha512-4ceqYOtzgmq4/QsB8dP7pUrUOCjY/jrRYdt7YkIOWHxtGDQbcf6YZDyLCiPQf6KsEIcIbSQiTRXOsbLiuJfgNQ==
+  dependencies:
+    "@babel/template" "7"
+
 babel-plugin-transform-vue-jsx@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/babel-plugin-transform-vue-jsx/-/babel-plugin-transform-vue-jsx-4.0.1.tgz#2c8bddce87a6ef09eaa59869ff1bfbeeafc5f88d"
@@ -2502,7 +2509,7 @@ buffer@^5.2.1, buffer@^5.4.3, buffer@^5.5.0:
     base64-js "^1.3.1"
     ieee754 "^1.1.13"
 
-builtin-modules@^3.1.0:
+builtin-modules@^3.0.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/builtin-modules/-/builtin-modules-3.2.0.tgz#45d5db99e7ee5e6bc4f362e008bf917ab5049887"
   integrity sha512-lGzLKcioL90C7wMczpkY0n/oART3MbBa8R9OFGE1rJxoVI86u4WAGfEk8Wjv10eKSyTHVGkSo3bvBylCEtk7LA==
@@ -2594,9 +2601,9 @@ camelcase@^6.0.0, camelcase@^6.2.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001332:
-  version "1.0.30001334"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001334.tgz#892e9965b35285033fc2b8a8eff499fe02f13d8b"
-  integrity sha512-kbaCEBRRVSoeNs74sCuq92MJyGrMtjWVfhltoHUCW4t4pXFvGjUBrfo47weBRViHkiV3eBYyIsfl956NtHGazw==
+  version "1.0.30001335"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001335.tgz#899254a0b70579e5a957c32dced79f0727c61f2a"
+  integrity sha512-ddP1Tgm7z2iIxu6QTtbZUv6HJxSaV/PZeSrWFZtbY4JZ69tOeNhBCl3HyRQgeNZKE5AOn1kpV7fhljigy0Ty3w==
 
 capital-case@^1.0.4:
   version "1.0.4"
@@ -3821,11 +3828,6 @@ elliptic@^6.5.3:
     inherits "^2.0.4"
     minimalistic-assert "^1.0.1"
     minimalistic-crypto-utils "^1.0.1"
-
-emitter-component@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/emitter-component/-/emitter-component-1.1.1.tgz#065e2dbed6959bf470679edabeaf7981d1003ab6"
-  integrity sha1-Bl4tvtaVm/RwZ57avq95gdEAOrY=
 
 emoji-regex@^8.0.0:
   version "8.0.0"
@@ -5367,6 +5369,13 @@ is-boolean-object@^1.1.0:
     call-bind "^1.0.2"
     has-tostringtag "^1.0.0"
 
+is-builtin-module@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/is-builtin-module/-/is-builtin-module-3.1.0.tgz#6fdb24313b1c03b75f8b9711c0feb8c30b903b00"
+  integrity sha512-OV7JjAgOTfAFJmHZLvpSTb4qi0nIILDV1gWPYDnDJUTNFM5aGlRAhk4QcT8i7TuAleeEV5Fdkqn3t4mS+Q11fg==
+  dependencies:
+    builtin-modules "^3.0.0"
+
 is-callable@^1.1.4, is-callable@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/is-callable/-/is-callable-1.2.4.tgz#47301d58dd0259407865547853df6d61fe471945"
@@ -5944,6 +5953,18 @@ karma-sourcemap-loader@^0.3.8:
   integrity sha512-zorxyAakYZuBcHRJE+vbrK2o2JXLFWK8VVjiT/6P+ltLBUGUvqTEkUiQ119MGdOrK7mrmxXHZF1/pfT6GgIZ6g==
   dependencies:
     graceful-fs "^4.1.2"
+
+karma-typescript-es6-transform@^5.5.3:
+  version "5.5.3"
+  resolved "https://registry.yarnpkg.com/karma-typescript-es6-transform/-/karma-typescript-es6-transform-5.5.3.tgz#5396da512c20b69d49e3e362a41f250342da5c03"
+  integrity sha512-vB1Cv8z9yxyR2KQuvks5soNKASyS2RPApdMsB3Ad55RqFJeag9G+xyGIwxOdyCHtgOwa4yn1rngMwaN7WBQTbQ==
+  dependencies:
+    "@babel/core" "^7.11.1"
+    "@babel/preset-env" "^7.11.0"
+    acorn "^8.1.0"
+    acorn-walk "^8.0.2"
+    log4js "^6.3.0"
+    magic-string "^0.25.7"
 
 karma-typescript@^5.5.3:
   version "5.5.3"
@@ -8489,13 +8510,6 @@ stream-http@^3.1.0:
     inherits "^2.0.4"
     readable-stream "^3.6.0"
     xtend "^4.0.2"
-
-stream@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/stream/-/stream-0.0.2.tgz#7f5363f057f6592c5595f00bc80a27f5cec1f0ef"
-  integrity sha1-f1Nj8Ff2WSxVlfALyAon9c7B8O8=
-  dependencies:
-    emitter-component "^1.1.1"
 
 streamroller@^3.0.8:
   version "3.0.8"
