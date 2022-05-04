@@ -314,7 +314,7 @@ export function looseEqual(a: any, b: any): boolean {
         /* istanbul ignore next */
         return false
       }
-    } catch (e) {
+    } catch (e: any) {
       /* istanbul ignore next */
       return false
     }

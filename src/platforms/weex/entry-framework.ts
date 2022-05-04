@@ -50,7 +50,7 @@ export function destroyInstance(instanceId: string): void {
     try {
       instance.app!.$destroy()
       instance.document.destroy()
-    } catch (e) {}
+    } catch (e: any) {}
     //@ts-expect-error
     delete instance.document
     delete instance.app
@@ -137,7 +137,7 @@ function createVueModuleInstance(instanceId: string, weex: Weex): GlobalAPI {
         try {
           // Send "createFinish" signal to native.
           weex.document.taskCenter.send('dom', { action: 'createFinish' }, [])
-        } catch (e) {}
+        } catch (e: any) {}
       }
     },
   })

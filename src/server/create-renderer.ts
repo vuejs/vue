@@ -106,14 +106,14 @@ export function createRenderer({
               } else {
                 cb(null, res)
               }
-            } catch (e) {
+            } catch (e: any) {
               cb(e)
             }
           } else {
             cb(null, result)
           }
         })
-      } catch (e) {
+      } catch (e: any) {
         cb(e)
       }
 

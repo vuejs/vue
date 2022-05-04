@@ -37,7 +37,7 @@ export function generateCodeFrame(
   return res.join('\n')
 }
 
-function repeat(str, n) {
+function repeat(str: string, n: number) {
   let result = ''
   if (n > 0) {
     // eslint-disable-next-line no-constant-condition

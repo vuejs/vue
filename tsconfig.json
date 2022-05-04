@@ -6,9 +6,9 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "node",
-    "allowJs": true,
     "strict": true,
     
+    "allowJs": true,
     "noImplicitAny": false,
     "noImplicitThis": false,
 
@@ -19,7 +19,11 @@
     "removeComments": false,
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
-    "types": ["node"],
+    "types": [
+      "node",
+      "jasmine",
+      "webpack-env"
+    ],
     "paths": {
       "compiler/*": ["src/compiler/*"],
       "core/*": ["src/core/*"],
@@ -34,7 +38,7 @@
       "vue": ["src/platforms/web/entry-runtime-with-compiler"]
     }
   },
-  "include": ["src", "test-dts", "typescript"],
+  "include": ["src", "test-dts", "typescript", "test"],
 
   "exclude": ["flow", "node_modules", "packages", "types"]
 }

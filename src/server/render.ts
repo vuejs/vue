@@ -70,7 +70,7 @@ function waitForServerPrefetch(vm, resolve, reject) {
       }
       Promise.all(promises).then(resolve).catch(reject)
       return
-    } catch (e) {
+    } catch (e: any) {
       reject(e)
     }
   }
@@ -264,7 +264,7 @@ function renderAsyncComponent(node, isRoot, context) {
   let res
   try {
     res = factory(resolve, reject)
-  } catch (e) {
+  } catch (e: any) {
     reject(e)
   }
   if (res) {

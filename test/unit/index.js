@@ -1,3 +1,4 @@
+// NOTE: do not convert this to typescript (or karma will be unhappy)
 require('es6-promise/auto')
 
 // import all helpers

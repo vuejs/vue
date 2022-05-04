@@ -74,7 +74,7 @@ function updateDOMProps(oldVnode: VNodeWithData, vnode: VNodeWithData) {
       // e.g. `value` on <progress> w/ non-finite value
       try {
         elm[key] = cur
-      } catch (e) {}
+      } catch (e: any) {}
     }
   }
 }
@@ -100,7 +100,7 @@ function isNotInFocusAndDirty(elm: acceptValueElm, checkVal: string): boolean {
   // work around IE bug when accessing document.activeElement in an iframe
   try {
     notInFocus = document.activeElement !== elm
-  } catch (e) {}
+  } catch (e: any) {}
   return notInFocus && elm.value !== checkVal
 }
 

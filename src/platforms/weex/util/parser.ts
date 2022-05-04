@@ -44,7 +44,7 @@ export function generateBinding(exp?: string): any {
     let ast: acorn.Node| null = null;
     try {
       ast = acorn.parse(`(${exp})`, {ecmaVersion: 5});
-    } catch (e) {
+    } catch (e: any) {
       // warn(`Failed to parse the expression: "${exp}"`)
       return "";
     }

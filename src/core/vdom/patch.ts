@@ -830,7 +830,7 @@ export function createPatchFunction(backend) {
     }
 
     let isInitialPatch = false
-    const insertedVnodeQueue = []
+    const insertedVnodeQueue: any[] = []
 
     if (isUndef(oldVnode)) {
       // empty mount (likely as component), create new root element

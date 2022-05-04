@@ -12,7 +12,7 @@ type CompiledFunctionResult = {
 function createFunction(code, errors) {
   try {
     return new Function(code)
-  } catch (err) {
+  } catch (err: any) {
     errors.push({ err, code })
     return noop
   }
@@ -90,7 +90,7 @@ export function createCompileToFunctionFn(compile: Function): Function {
 
     // turn code into functions
     const res: any = {}
-    const fnGenErrors = []
+    const fnGenErrors: any[] = []
     res.render = createFunction(compiled.render, fnGenErrors)
     res.staticRenderFns = compiled.staticRenderFns.map((code) => {
       return createFunction(code, fnGenErrors)

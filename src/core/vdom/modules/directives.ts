@@ -120,8 +120,7 @@ function callHook(dir, hook, vnode, oldVnode, isDestroy?: any) {
   if (fn) {
     try {
       fn(vnode.elm, dir, vnode, oldVnode, isDestroy)
-    } catch (e) {
-     // @ts-expect-error should it be any?
+    } catch (e: any) {
       handleError(e, vnode.context, `directive ${dir.name} ${hook} hook`)
     }
   }

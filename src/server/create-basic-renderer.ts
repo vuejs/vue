@@ -31,7 +31,7 @@ export function createBasicRenderer({
       render(component, write, context, () => {
         done(null, result)
       })
-    } catch (e) {
+    } catch (e: any) {
       done(e)
     }
   }

@@ -33,7 +33,7 @@ if (inBrowser) {
       },
     } as object) // https://github.com/facebook/flow/issues/285
     window.addEventListener('test-passive', null as any, opts)
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 // this needs to be lazy-evaled because vue may be required before

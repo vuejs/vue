@@ -175,7 +175,7 @@ function assertType(
   } else {
     try {
       valid = value instanceof type
-    } catch (e) {
+    } catch (e: any) {
       warn('Invalid prop type: "' + String(type) + '" is not a constructor', vm)
       valid = false
     }
