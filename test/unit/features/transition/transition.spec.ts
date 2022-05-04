@@ -23,7 +23,7 @@ if (!isIE9) {
       // should not apply transition on initial render by default
       expect(vm.$el.innerHTML).toBe('<div class="test">foo</div>')
       vm.ok = false
-      global.waitForUpdate(() => {
+      waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave v-leave-active')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave-active v-leave-to')

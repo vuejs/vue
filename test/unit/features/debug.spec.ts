@@ -3,7 +3,8 @@ import { formatComponentName, warn } from 'core/util/debug'
 
 describe('Debug utilities', () => {
   it('properly format component names', () => {
-    const vm = new Vue('div')
+    // @ts-expect-error
+    const vm = new Vue()
     expect(formatComponentName(vm)).toBe('<Root>')
 
     vm.$root = null
@@ -83,7 +84,8 @@ found in
 
   describe('warn', () => {
     const msg = 'message'
-    const vm = new Vue('div')
+    // @ts-expect-error
+    const vm = new Vue()
 
     it('calls warnHandler if warnHandler is set', () => {
       Vue.config.warnHandler = jasmine.createSpy()

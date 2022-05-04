@@ -33,7 +33,8 @@ describe('Options render', () => {
   })
 
   it('should warn non `render` option and non `template` option', () => {
-    new Vue('div').$mount()
+    // @ts-expect-error
+    new Vue().$mount()
     expect('Failed to mount component: template or render function not defined.').toHaveBeenWarned()
   })
 })

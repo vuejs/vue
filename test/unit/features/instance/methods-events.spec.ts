@@ -3,7 +3,8 @@ import Vue from 'vue'
 describe('Instance methods events', () => {
   let vm, spy
   beforeEach(() => {
-    vm = new Vue('div')
+    // @ts-expect-error
+    const vm = new Vue()
     spy = jasmine.createSpy('emitter')
   })
 

@@ -3,9 +3,6 @@ import webpack from 'webpack'
 import MemoryFS from 'memory-fs'
 
 export function compileWithWebpack (file, extraConfig, cb) {
-  if( process.env.FOOBAR !== 'blah') {
-    throw new Error('die')
-  }
   const config = Object.assign({
     mode: 'development',
     entry: path.resolve(__dirname, 'fixtures', file),

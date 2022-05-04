@@ -52,10 +52,10 @@ beforeEach(() => {
   spyOn(console, 'error')
   jasmine.addMatchers({
     toHaveBeenWarned: () => 
-      // @ts-ignore
+      // @ts-expect-error
       createCompareFn(console.error),
     toHaveBeenTipped: () => 
-      // @ts-ignore
+      // @ts-expect-error
       createCompareFn(console.warn)
   })
 })

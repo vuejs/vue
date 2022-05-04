@@ -170,7 +170,8 @@ describe('Error handling', () => {
     Vue.nextTick(() => {
       expect(spy).toHaveBeenCalledWith(err1, undefined, 'nextTick')
 
-      const vm = new Vue('div')
+      // @ts-expect-error
+      const vm = new Vue()
       vm.$nextTick(() => { throw err2 })
       Vue.nextTick(() => {
         // should be called with correct instance info

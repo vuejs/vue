@@ -161,7 +161,8 @@ describe('Instance properties', () => {
   })
 
   it('warn mutating $attrs', () => {
-    const vm = new Vue('div')
+    // @ts-expect-error
+    const vm = new Vue()
     vm.$attrs = {}
     expect(`$attrs is readonly`).toHaveBeenWarned()
   })
@@ -196,7 +197,8 @@ describe('Instance properties', () => {
   })
 
   it('warn mutating $listeners', () => {
-    const vm = new Vue('div')
+    // @ts-expect-error
+    const vm = new Vue()
     vm.$listeners = {}
     expect(`$listeners is readonly`).toHaveBeenWarned()
   })

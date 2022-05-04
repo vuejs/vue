@@ -14,7 +14,8 @@ describe('Observer', () => {
     const ob1 = observe(1)
     expect(ob1).toBeUndefined()
     // avoid vue instance
-    const ob2 = observe(new Vue('div'))
+    // @ts-expect-error
+    const ob2 = observe(new Vue())
     expect(ob2).toBeUndefined()
     // avoid frozen objects
     const ob3 = observe(Object.freeze({}))
