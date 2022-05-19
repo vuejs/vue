@@ -32,7 +32,7 @@ describe('Error handling', () => {
   ].forEach(([type, description]) => {
     it(`should recover from promise errors in ${type}`, done => {
       createTestInstance(components[`${type}Async`])
-      global.waitForUpdate(() => {
+      waitForUpdate(() => {
         expect(`Error in ${description} (Promise/async)`).toHaveBeenWarned()
         expect(`Error: ${type}`).toHaveBeenWarned()
       }).then(done)
@@ -84,7 +84,7 @@ describe('Error handling', () => {
     it(`should recover from errors in ${type} hook`, done => {
       const vm = createTestInstance(components[type])
       vm.ok = false
-      global.waitForUpdate(() => {
+      waitForUpdate(() => {
         expect(`Error in ${description}`).toHaveBeenWarned()
         expect(`Error: ${type}`).toHaveBeenWarned()
       }).thenWaitFor(next => {
@@ -111,7 +111,7 @@ describe('Error handling', () => {
   it('should recover from errors in user watcher getter', done => {
     const vm = createTestInstance(components.userWatcherGetter)
     vm.n++
-    global.waitForUpdate(() => {
+    waitForUpdate(() => {
       expect(`Error in getter for watcher`).toHaveBeenWarned()
       function getErrorMsg () {
         try {
@@ -226,7 +226,7 @@ describe('Error handling', () => {
       }).$mount()
       document.body.appendChild(vm.$el)
       global.triggerEvent(vm.$el, 'click')
-      global.waitForUpdate(() => {
+      waitForUpdate(() => {
         expect('Error in v-on handler (Promise/async)').toHaveBeenWarned()
         expect('Error: v-on').toHaveBeenWarned()
         document.body.removeChild(vm.$el)
@@ -435,14 +435,14 @@ function createTestInstance (Comp) {
 function assertRootInstanceActive (vm) {
   expect(vm.$el.innerHTML).toContain('n:0\n')
   vm.n++
-  return global.waitForUpdate(() => {
+  return waitForUpdate(() => {
     expect(vm.$el.innerHTML).toContain('n:1\n')
   })
 }
 
 function assertBothInstancesActive (vm) {
   vm.n = 0
-  return global.waitForUpdate(() => {
+  return waitForUpdate(() => {
     expect(vm.$refs.child.$el.innerHTML).toContain('0')
   }).thenWaitFor(next => {
     assertRootInstanceActive(vm).then(() => {

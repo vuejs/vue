@@ -218,7 +218,7 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.textContent).toBe('12')
     vm.a = 2
-    global.waitForUpdate(() => {
+    waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('22')
       vm.show = false
     }).then(() => {
@@ -255,7 +255,7 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<div><p>foo</p></div>')
     vm.msg = 'bar'
-    global.waitForUpdate(() => {
+    waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('<div><p>bar</p></div>')
     }).then(done)
   })
@@ -275,7 +275,7 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<p>hi</p>')
     vm.ok = false
-    global.waitForUpdate(() => {
+    waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('fallback')
       vm.ok = true
       vm.msg = 'bye'
@@ -475,7 +475,7 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.textContent).toBe('foo1')
     vm.$children[0].a = 2
-    global.waitForUpdate(() => {
+    waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('foo2')
     }).then(done)
   })
@@ -512,7 +512,7 @@ describe('Component slot', () => {
 
     expect(calls).toEqual([1])
     vm.$refs.child.ok = false
-    global.waitForUpdate(() => {
+    waitForUpdate(() => {
       expect(calls).toEqual([1, 2])
       vm.$refs.child.ok = true
     }).then(() => {
@@ -550,7 +550,7 @@ describe('Component slot', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe(`<div>1</div> <div>1</div> <pre><div>1</div></pre>`)
     vm.n++
-    global.waitForUpdate(() => {
+    waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe(`<div>2</div> <div>2</div> <pre><div>2</div></pre>`)
       vm.n++
     }).then(() => {
@@ -586,7 +586,7 @@ describe('Component slot', () => {
     document.body.appendChild(vm.$el)
     expect(vm.$el.textContent).toBe('hi')
     vm.$children[0].toggle = false
-    global.waitForUpdate(() => {
+    waitForUpdate(() => {
       vm.$children[0].toggle = true
     }).then(() => {
       global.triggerEvent(vm.$el.querySelector('.click'), 'click')
