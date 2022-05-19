@@ -1,5 +1,4 @@
 const path = require('path')
-const buble = require('@rollup/plugin-buble')
 const alias = require('@rollup/plugin-alias')
 const cjs = require('@rollup/plugin-commonjs')
 const replace = require('@rollup/plugin-replace')
@@ -7,7 +6,9 @@ const node = require('@rollup/plugin-node-resolve').nodeResolve
 const ts = require('rollup-plugin-typescript2')
 
 const version = process.env.VERSION || require('../package.json').version
-const weexVersion = process.env.WEEX_VERSION || require('../packages/weex-vue-framework/package.json').version
+const weexVersion =
+  process.env.WEEX_VERSION ||
+  require('../packages/weex-vue-framework/package.json').version
 const featureFlags = require('./feature-flags')
 
 const banner =
@@ -18,16 +19,16 @@ const banner =
   ' */'
 
 const weexFactoryPlugin = {
-  intro () {
+  intro() {
     return 'module.exports = function weexFactory (exports, document) {'
   },
-  outro () {
+  outro() {
     return '}'
   }
 }
 
 const aliases = require('./alias')
-const resolve = p => {
+const resolve = (p) => {
   const base = p.split('/')[0]
   if (aliases[base]) {
     return path.resolve(aliases[base], p.slice(base.length + 1))
@@ -143,7 +144,9 @@ const builds = {
     entry: resolve('web/entry-compiler.ts'),
     dest: resolve('packages/vue-template-compiler/build.js'),
     format: 'cjs',
-    external: Object.keys(require('../packages/vue-template-compiler/package.json').dependencies)
+    external: Object.keys(
+      require('../packages/vue-template-compiler/package.json').dependencies
+    )
   },
   // Web compiler (UMD for in-browser use).
   'web-compiler-browser': {
@@ -160,14 +163,18 @@ const builds = {
     dest: resolve('packages/vue-server-renderer/build.dev.js'),
     format: 'cjs',
     env: 'development',
-    external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
+    external: Object.keys(
+      require('../packages/vue-server-renderer/package.json').dependencies
+    )
   },
   'web-server-renderer-prod': {
     entry: resolve('web/entry-server-renderer.ts'),
     dest: resolve('packages/vue-server-renderer/build.prod.js'),
     format: 'cjs',
     env: 'production',
-    external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
+    external: Object.keys(
+      require('../packages/vue-server-renderer/package.json').dependencies
+    )
   },
   'web-server-renderer-basic': {
     entry: resolve('web/entry-server-basic-renderer.ts'),
@@ -181,13 +188,17 @@ const builds = {
     entry: resolve('server/webpack-plugin/server.ts'),
     dest: resolve('packages/vue-server-renderer/server-plugin.js'),
     format: 'cjs',
-    external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
+    external: Object.keys(
+      require('../packages/vue-server-renderer/package.json').dependencies
+    )
   },
   'web-server-renderer-webpack-client-plugin': {
     entry: resolve('server/webpack-plugin/client.ts'),
     dest: resolve('packages/vue-server-renderer/client-plugin.js'),
     format: 'cjs',
-    external: Object.keys(require('../packages/vue-server-renderer/package.json').dependencies)
+    external: Object.keys(
+      require('../packages/vue-server-renderer/package.json').dependencies
+    )
   },
   // Weex runtime factory
   'weex-factory': {
@@ -210,11 +221,13 @@ const builds = {
     entry: resolve('weex/entry-compiler.ts'),
     dest: resolve('packages/weex-template-compiler/build.js'),
     format: 'cjs',
-    external: Object.keys(require('../packages/weex-template-compiler/package.json').dependencies)
+    external: Object.keys(
+      require('../packages/weex-template-compiler/package.json').dependencies
+    )
   }
 }
 
-function genConfig (name) {
+function genConfig(name) {
   const opts = builds[name]
 
   // console.log('__dir', __dirname)
@@ -227,11 +240,14 @@ function genConfig (name) {
       }),
       ts({
         tsconfig: path.resolve(__dirname, '../', 'tsconfig.json'),
-        cacheRoot: path.resolve(__dirname, '../','node_modules/.rts2_cache'),
+        cacheRoot: path.resolve(__dirname, '../', 'node_modules/.rts2_cache'),
         tsconfigOverride: {
+          compilerOptions: {
+            target: opts.transpile === false ? 'esnext' : 'es5'
+          },
           exclude: ['test', 'test-dts']
         }
-      }),
+      })
     ].concat(opts.plugins || []),
     output: {
       file: opts.dest,
@@ -256,7 +272,7 @@ function genConfig (name) {
     __VERSION__: version
   }
   // feature flags
-  Object.keys(featureFlags).forEach(key => {
+  Object.keys(featureFlags).forEach((key) => {
     vars[`process.env.${key}`] = featureFlags[key]
   })
   // build-specific env
@@ -266,10 +282,6 @@ function genConfig (name) {
 
   vars.preventAssignment = true
   config.plugins.push(replace(vars))
-
-  // if (opts.transpile !== false) {
-  //   config.plugins.push(buble())
-  // }
 
   Object.defineProperty(config, '_name', {
     enumerable: false,

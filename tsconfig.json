@@ -3,11 +3,11 @@
     "baseUrl": ".",
     "outDir": "dist",
     "sourceMap": true,
-    "target": "ESNext",
+    "target": "es5",
     "module": "ESNext",
     "moduleResolution": "node",
     "strict": true,
-    
+
     "allowJs": true,
     "noImplicitAny": false,
     "noImplicitThis": false,
