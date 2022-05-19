@@ -89,6 +89,7 @@
     "hash-sum": "^2.0.0",
     "he": "^1.2.0",
     "http-server": "^14.1.0",
+    "jsdom": "^19.0.0",
     "lint-staged": "^12.4.1",
     "lodash": "^4.17.21",
     "lodash.template": "^4.4.0",

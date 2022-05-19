@@ -47,15 +47,15 @@ describe('Dep', () => {
     })
 
     it('should add itself to target', () => {
-      Dep.target = jasmine.createSpyObj('TARGET', ['addDep'])
+      Dep.target = { addDep: vi.fn() } as any
       dep.depend()
-      expect(Dep.target.addDep).toHaveBeenCalledWith(dep)
+      expect(Dep.target!.addDep).toHaveBeenCalledWith(dep)
     })
   })
 
   describe('notify()', () => {
     it('should notify subs', () => {
-      dep.subs.push(jasmine.createSpyObj('SUB', ['update']))
+      dep.subs.push({ update: vi.fn() })
       dep.notify()
       expect(dep.subs[0].update).toHaveBeenCalled()
     })

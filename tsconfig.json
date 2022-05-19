@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "outDir": "dist",
     "sourceMap": true,
-    "target": "es5",
+    "target": "esnext",
     "module": "ESNext",
     "moduleResolution": "node",
     "strict": true,
@@ -19,7 +19,7 @@
     "removeComments": false,
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
-    "types": ["node"],
+    "types": ["node", "vitest/globals"],
     "paths": {
       "compiler/*": ["src/compiler/*"],
       "core/*": ["src/core/*"],
