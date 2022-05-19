@@ -1,5 +1,3 @@
-/* @flow */
-
 import { isRegExp, remove } from "shared/util";
 import { getFirstComponentChild } from "core/vdom/helpers/index";
 import type VNode from "core/vdom/vnode";
