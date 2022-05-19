@@ -21,6 +21,10 @@ describe('Component async', () => {
   beforeAll(function () {
     // @ts-expect-error
     global.setTimeout = function (func, delay) {
+      if (delay >= 1000) {
+        // skip vitest internal timeouts
+        return
+      }
       const id = oldSetTimeout(function () {
         delete timeoutsPending[id]
         func()
