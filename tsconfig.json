@@ -19,11 +19,7 @@
     "removeComments": false,
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
-    "types": [
-      "node",
-      "jasmine",
-      "webpack-env"
-    ],
+    "types": ["node"],
     "paths": {
       "compiler/*": ["src/compiler/*"],
       "core/*": ["src/core/*"],
@@ -40,5 +36,5 @@
   },
   "include": ["src", "test-dts", "typescript", "test"],
 
-  "exclude": ["flow", "node_modules", "packages", "types"]
+  "exclude": ["node_modules", "packages", "types"]
 }
