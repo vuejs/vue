@@ -177,9 +177,9 @@ if (!isIE9) {
 
     it('events', done => {
       let next
-      const beforeEnterSpy = jasmine.createSpy()
-      const afterEnterSpy = jasmine.createSpy()
-      const afterLeaveSpy = jasmine.createSpy()
+      const beforeEnterSpy = vi.fn()
+      const afterEnterSpy = vi.fn()
+      const afterLeaveSpy = vi.fn()
       const vm = new Vue({
         template: `
           <div>
@@ -219,7 +219,7 @@ if (!isIE9) {
             `<div class="test v-enter v-enter-active">d</div>` +
           `</span>`
         )
-        expect(beforeEnterSpy.calls.count()).toBe(1)
+        expect(beforeEnterSpy.mock.calls.length).toBe(1)
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
@@ -229,7 +229,7 @@ if (!isIE9) {
             `<div class="test">d</div>` +
           `</span>`
         )
-        expect(afterEnterSpy.calls.count()).toBe(1)
+        expect(afterEnterSpy.mock.calls.length).toBe(1)
         vm.items.shift()
       }).thenWaitFor(_next => { next = _next }).then(() => {
         expect(vm.$el.innerHTML).toBe(
@@ -239,7 +239,7 @@ if (!isIE9) {
             `<div class="test">d</div>` +
           `</span>`
         )
-        expect(afterLeaveSpy.calls.count()).toBe(1)
+        expect(afterLeaveSpy.mock.calls.length).toBe(1)
       }).then(done)
     })
 

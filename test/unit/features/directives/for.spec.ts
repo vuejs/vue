@@ -627,7 +627,7 @@ describe('Directive v-for', () => {
 
   it('should warn component v-for without keys', () => {
     const warn = console.warn
-    console.warn = jasmine.createSpy()
+    console.warn = vi.fn()
     new Vue({
       template: `<div><test v-for="i in 3"></test></div>`,
       components: {

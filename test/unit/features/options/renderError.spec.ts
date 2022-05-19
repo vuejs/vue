@@ -27,7 +27,7 @@ describe('Options renderError', () => {
   })
 
   it('should pass on errors in renderError to global handler', () => {
-    const spy = Vue.config.errorHandler = jasmine.createSpy()
+    const spy = Vue.config.errorHandler = vi.fn()
     const err = new Error('renderError')
     const vm = new Vue({
       render () {

@@ -72,7 +72,7 @@ describe('Directive v-model component', () => {
   })
 
   it('should support customization via model option', done => {
-    const spy = jasmine.createSpy('update')
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         msg: 'hello'

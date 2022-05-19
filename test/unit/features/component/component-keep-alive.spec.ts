@@ -9,19 +9,19 @@ describe('Component keep-alive', () => {
   beforeEach(() => {
     one = {
       template: '<div>one</div>',
-      created: jasmine.createSpy('one created'),
-      mounted: jasmine.createSpy('one mounted'),
-      activated: jasmine.createSpy('one activated'),
-      deactivated: jasmine.createSpy('one deactivated'),
-      destroyed: jasmine.createSpy('one destroyed')
+      created: vi.fn(),
+      mounted: vi.fn(),
+      activated: vi.fn(),
+      deactivated: vi.fn(),
+      destroyed: vi.fn()
     }
     two = {
       template: '<div>two</div>',
-      created: jasmine.createSpy('two created'),
-      mounted: jasmine.createSpy('two mounted'),
-      activated: jasmine.createSpy('two activated'),
-      deactivated: jasmine.createSpy('two deactivated'),
-      destroyed: jasmine.createSpy('two destroyed')
+      created: vi.fn(),
+      mounted: vi.fn(),
+      activated: vi.fn(),
+      deactivated: vi.fn(),
+      destroyed: vi.fn()
     }
     components = {
       one,
@@ -33,11 +33,11 @@ describe('Component keep-alive', () => {
 
   function assertHookCalls (component, callCounts) {
     expect([
-      component.created.calls.count(),
-      component.mounted.calls.count(),
-      component.activated.calls.count(),
-      component.deactivated.calls.count(),
-      component.destroyed.calls.count()
+      component.created.mock.calls.length,
+      component.mounted.mock.calls.length,
+      component.activated.mock.calls.length,
+      component.deactivated.mock.calls.length,
+      component.destroyed.mock.calls.length
     ]).toEqual(callCounts)
   }
 
@@ -507,21 +507,21 @@ describe('Component keep-alive', () => {
   })
 
   it('max', done => {
-    const spyA = jasmine.createSpy()
-    const spyB = jasmine.createSpy()
-    const spyC = jasmine.createSpy()
-    const spyAD = jasmine.createSpy()
-    const spyBD = jasmine.createSpy()
-    const spyCD = jasmine.createSpy()
+    const spyA = vi.fn()
+    const spyB = vi.fn()
+    const spyC = vi.fn()
+    const spyAD = vi.fn()
+    const spyBD = vi.fn()
+    const spyCD = vi.fn()
 
     function assertCount (calls) {
       expect([
-        spyA.calls.count(),
-        spyAD.calls.count(),
-        spyB.calls.count(),
-        spyBD.calls.count(),
-        spyC.calls.count(),
-        spyCD.calls.count()
+        spyA.mock.calls.length,
+        spyAD.mock.calls.length,
+        spyB.mock.calls.length,
+        spyBD.mock.calls.length,
+        spyC.mock.calls.length,
+        spyCD.mock.calls.length
       ]).toEqual(calls)
     }
 
@@ -573,21 +573,21 @@ describe('Component keep-alive', () => {
   })
 
   it('max=1', done => {
-    const spyA = jasmine.createSpy()
-    const spyB = jasmine.createSpy()
-    const spyC = jasmine.createSpy()
-    const spyAD = jasmine.createSpy()
-    const spyBD = jasmine.createSpy()
-    const spyCD = jasmine.createSpy()
+    const spyA = vi.fn()
+    const spyB = vi.fn()
+    const spyC = vi.fn()
+    const spyAD = vi.fn()
+    const spyBD = vi.fn()
+    const spyCD = vi.fn()
 
     function assertCount (calls) {
       expect([
-        spyA.calls.count(),
-        spyAD.calls.count(),
-        spyB.calls.count(),
-        spyBD.calls.count(),
-        spyC.calls.count(),
-        spyCD.calls.count()
+        spyA.mock.calls.length,
+        spyAD.mock.calls.length,
+        spyB.mock.calls.length,
+        spyBD.mock.calls.length,
+        spyC.mock.calls.length,
+        spyCD.mock.calls.length
       ]).toEqual(calls)
     }
 
@@ -651,12 +651,12 @@ describe('Component keep-alive', () => {
     const Foo = {
       name: 'foo',
       template: `<div>foo</div>`,
-      created: jasmine.createSpy('foo')
+      created: vi.fn()
     }
 
     const Bar = {
       template: `<div>bar</div>`,
-      created: jasmine.createSpy('bar')
+      created: vi.fn()
     }
 
     const Child = {
@@ -679,8 +679,8 @@ describe('Component keep-alive', () => {
     }).$mount()
 
     function assert (foo, bar) {
-      expect(Foo.created.calls.count()).toBe(foo)
-      expect(Bar.created.calls.count()).toBe(bar)
+      expect(Foo.created.mock.calls.length).toBe(foo)
+      expect(Bar.created.mock.calls.length).toBe(bar)
     }
 
     expect(vm.$el.textContent).toBe('foo')
@@ -703,12 +703,12 @@ describe('Component keep-alive', () => {
   it('should cache anonymous components if include is not specified', done => {
     const Foo = {
       template: `<div>foo</div>`,
-      created: jasmine.createSpy('foo')
+      created: vi.fn()
     }
 
     const Bar = {
       template: `<div>bar</div>`,
-      created: jasmine.createSpy('bar')
+      created: vi.fn()
     }
 
     const Child = {
@@ -731,8 +731,8 @@ describe('Component keep-alive', () => {
     }).$mount()
 
     function assert (foo, bar) {
-      expect(Foo.created.calls.count()).toBe(foo)
-      expect(Bar.created.calls.count()).toBe(bar)
+      expect(Foo.created.mock.calls.length).toBe(foo)
+      expect(Bar.created.mock.calls.length).toBe(bar)
     }
 
     expect(vm.$el.textContent).toBe('foo')
@@ -756,7 +756,7 @@ describe('Component keep-alive', () => {
   it('should not destroy active instance when pruning cache', done => {
     const Foo = {
       template: `<div>foo</div>`,
-      destroyed: jasmine.createSpy('destroyed')
+      destroyed: vi.fn()
     }
     const vm = new Vue({
       template: `
@@ -1167,7 +1167,7 @@ describe('Component keep-alive', () => {
     })
 
     it('async components with transition-mode out-in', done => {
-      const barResolve = jasmine.createSpy('bar resolved')
+      const barResolve = vi.fn()
       let next
       const foo = (resolve) => {
         setTimeout(() => {
@@ -1231,7 +1231,7 @@ describe('Component keep-alive', () => {
         }).thenWaitFor(_next => { next = _next }).then(() => {
           // foo afterLeave get called
           // and bar has already been resolved before afterLeave get called
-          expect(barResolve.calls.count()).toBe(1)
+          expect(barResolve.mock.calls.length).toBe(1)
           expect(vm.$el.innerHTML).toBe('<!---->')
         }).thenWaitFor(nextFrame).then(() => {
           expect(vm.$el.innerHTML).toBe(

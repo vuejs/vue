@@ -187,7 +187,7 @@ describe('Observer', () => {
         this.deps.push(dep)
         dep.addSub(this)
       },
-      update: jasmine.createSpy()
+      update: vi.fn()
     }
     // collect dep
     Dep.target = watcher
@@ -195,10 +195,10 @@ describe('Observer', () => {
     Dep.target = null
     expect(watcher.deps.length).toBe(3) // obj.a + a + a.b
     obj.a.b = 3
-    expect(watcher.update.calls.count()).toBe(1)
+    expect(watcher.update.mock.calls.length).toBe(1)
     // swap object
     obj.a = { b: 4 }
-    expect(watcher.update.calls.count()).toBe(2)
+    expect(watcher.update.mock.calls.length).toBe(2)
     watcher.deps = []
 
     Dep.target = watcher
@@ -208,10 +208,10 @@ describe('Observer', () => {
     expect(watcher.deps.length).toBe(4)
     // set on the swapped object
     obj.a.b = 5
-    expect(watcher.update.calls.count()).toBe(3)
+    expect(watcher.update.mock.calls.length).toBe(3)
     // should not trigger on NaN -> NaN set
     obj.c = NaN
-    expect(watcher.update.calls.count()).toBe(3)
+    expect(watcher.update.mock.calls.length).toBe(3)
   })
 
   it('observing object prop change on defined property', () => {
@@ -242,22 +242,22 @@ describe('Observer', () => {
     spyOn(dep1, 'notify')
     setProp(obj1, 'b', 2)
     expect(obj1.b).toBe(2)
-    expect(dep1.notify.calls.count()).toBe(1)
+    expect(dep1.notify.mock.calls.length).toBe(1)
     delProp(obj1, 'a')
     expect(hasOwn(obj1, 'a')).toBe(false)
-    expect(dep1.notify.calls.count()).toBe(2)
+    expect(dep1.notify.mock.calls.length).toBe(2)
     // set existing key, should be a plain set and not
     // trigger own ob's notify
     setProp(obj1, 'b', 3)
     expect(obj1.b).toBe(3)
-    expect(dep1.notify.calls.count()).toBe(2)
+    expect(dep1.notify.mock.calls.length).toBe(2)
     // set non-existing key
     setProp(obj1, 'c', 1)
     expect(obj1.c).toBe(1)
-    expect(dep1.notify.calls.count()).toBe(3)
+    expect(dep1.notify.mock.calls.length).toBe(3)
     // should ignore deleting non-existing key
     delProp(obj1, 'a')
-    expect(dep1.notify.calls.count()).toBe(3)
+    expect(dep1.notify.mock.calls.length).toBe(3)
     // should work on non-observed objects
     const obj2 = { a: 1 }
     delProp(obj2, 'a')
@@ -270,10 +270,10 @@ describe('Observer', () => {
     spyOn(dep3, 'notify')
     setProp(obj3, 'b', 2)
     expect(obj3.b).toBe(2)
-    expect(dep3.notify.calls.count()).toBe(1)
+    expect(dep3.notify.mock.calls.length).toBe(1)
     delProp(obj3, 'a')
     expect(hasOwn(obj3, 'a')).toBe(false)
-    expect(dep3.notify.calls.count()).toBe(2)
+    expect(dep3.notify.mock.calls.length).toBe(2)
     // set and delete non-numeric key on array
     const arr2 = ['a']
     const ob2 = observe(arr2)
@@ -281,10 +281,10 @@ describe('Observer', () => {
     spyOn(dep2, 'notify')
     setProp(arr2, 'b', 2)
     expect(arr2.b).toBe(2)
-    expect(dep2.notify.calls.count()).toBe(1)
+    expect(dep2.notify.mock.calls.length).toBe(1)
     delProp(arr2, 'b')
     expect(hasOwn(arr2, 'b')).toBe(false)
-    expect(dep2.notify.calls.count()).toBe(2)
+    expect(dep2.notify.mock.calls.length).toBe(2)
   })
 
   it('warning set/delete on a Vue instance', done => {
@@ -339,7 +339,7 @@ describe('Observer', () => {
     arr.splice(0, 0, objs[2])
     arr.sort()
     arr.reverse()
-    expect(dep.notify.calls.count()).toBe(7)
+    expect(dep.notify.mock.calls.length).toBe(7)
     // inserted elements should be observed
     objs.forEach(obj => {
       expect(obj.__ob__ instanceof Observer).toBe(true)

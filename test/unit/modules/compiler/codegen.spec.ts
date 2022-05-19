@@ -622,7 +622,7 @@ describe('codegen', () => {
       `with(this){return _c("myComponent",{tag:"div"})}`
     )
     expect('Inline-template components must have exactly one child element.').toHaveBeenWarned()
-    expect(console.error.calls.count()).toBe(3)
+    expect(console.error.mock.calls.length).toBe(3)
   })
 
   it('generate static trees inside v-for', () => {

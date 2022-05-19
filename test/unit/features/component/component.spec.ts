@@ -360,7 +360,7 @@ describe('Component', () => {
   })
 
   it('catch component render error and preserve previous vnode', done => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
     Vue.config.errorHandler = spy
     const vm = new Vue({
       data: {

@@ -676,8 +676,8 @@ describe('parser', () => {
 
   it('pre/post transforms', () => {
     const options = extend({}, baseOptions)
-    const spy1 = jasmine.createSpy('preTransform')
-    const spy2 = jasmine.createSpy('postTransform')
+    const spy1 = vi.fn()
+    const spy2 = vi.fn()
     options.modules = options.modules.concat([{
       preTransformNode (el) {
         spy1(el.tag)

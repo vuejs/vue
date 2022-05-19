@@ -168,8 +168,8 @@ describe('Instance properties', () => {
   })
 
   it('$listeners', done => {
-    const spyA = jasmine.createSpy('A')
-    const spyB = jasmine.createSpy('B')
+    const spyA = vi.fn()
+    const spyB = vi.fn()
     const vm = new Vue({
       template: `<foo @click="foo"/>`,
       data: { foo: spyA },
@@ -184,14 +184,14 @@ describe('Instance properties', () => {
     document.body.appendChild(vm.$el)
 
     triggerEvent(vm.$el, 'click')
-    expect(spyA.calls.count()).toBe(1)
-    expect(spyB.calls.count()).toBe(0)
+    expect(spyA.mock.calls.length).toBe(1)
+    expect(spyB.mock.calls.length).toBe(0)
 
     vm.foo = spyB
     waitForUpdate(() => {
       triggerEvent(vm.$el, 'click')
-      expect(spyA.calls.count()).toBe(1)
-      expect(spyB.calls.count()).toBe(1)
+      expect(spyA.mock.calls.length).toBe(1)
+      expect(spyB.mock.calls.length).toBe(1)
       document.body.removeChild(vm.$el)
     }).then(done)
   })

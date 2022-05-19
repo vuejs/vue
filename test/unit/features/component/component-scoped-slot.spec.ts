@@ -899,8 +899,8 @@ describe('Component scoped slot', () => {
 
   // 2.6 scoped slot perf optimization
   it('should have accurate tracking for scoped slots', done => {
-    const parentUpdate = jasmine.createSpy()
-    const childUpdate = jasmine.createSpy()
+    const parentUpdate = vi.fn()
+    const childUpdate = vi.fn()
     const vm = new Vue({
       template: `
         <div>{{ parentCount }}<foo #default>{{ childCount }}</foo></div>
@@ -923,15 +923,15 @@ describe('Component scoped slot', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toMatch(`1<div>0</div>`)
       // should only trigger parent update
-      expect(parentUpdate.calls.count()).toBe(1)
-      expect(childUpdate.calls.count()).toBe(0)
+      expect(parentUpdate.mock.calls.length).toBe(1)
+      expect(childUpdate.mock.calls.length).toBe(0)
 
       vm.childCount++
     }).then(() => {
       expect(vm.$el.innerHTML).toMatch(`1<div>1</div>`)
       // should only trigger child update
-      expect(parentUpdate.calls.count()).toBe(1)
-      expect(childUpdate.calls.count()).toBe(1)
+      expect(parentUpdate.mock.calls.length).toBe(1)
+      expect(childUpdate.mock.calls.length).toBe(1)
     }).then(done)
   })
 
@@ -972,7 +972,7 @@ describe('Component scoped slot', () => {
   // regression #9396
   it('should not force update child with no slot content', done => {
     const Child = {
-      updated: jasmine.createSpy(),
+      updated: vi.fn(),
       template: `<div></div>`
     }
 

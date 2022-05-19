@@ -5,9 +5,9 @@ import VNode from 'core/vdom/vnode'
 describe('vdom directive module', () => {
   it('should work', () => {
     const directive1 = {
-      bind: jasmine.createSpy('bind'),
-      update: jasmine.createSpy('update'),
-      unbind: jasmine.createSpy('unbind')
+      bind: vi.fn(),
+      update: vi.fn(),
+      unbind: vi.fn()
     }
     const vm = new Vue({ directives: { directive1 }})
     // create

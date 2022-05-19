@@ -16,7 +16,7 @@ describe('Watcher', () => {
         msg: 'yo'
       }
     }).$mount()
-    spy = jasmine.createSpy('watcher')
+    spy = vi.fn()
   })
 
   it('path', done => {
@@ -44,7 +44,7 @@ describe('Watcher', () => {
     waitForUpdate(() => {
       expect(watcher1.value).toBe(123)
       expect(watcher2.value).toBeUndefined()
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
       expect(spy).toHaveBeenCalledWith(123, undefined)
     }).then(done)
   })
@@ -85,11 +85,11 @@ describe('Watcher', () => {
       vm.b = { c: [{ a: 1 }] }
     }).then(() => {
       expect(spy).toHaveBeenCalledWith(vm.b, oldB)
-      expect(spy.calls.count()).toBe(2)
+      expect(spy.mock.calls.length).toBe(2)
       vm.b.c[0].a = 2
     }).then(() => {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
-      expect(spy.calls.count()).toBe(3)
+      expect(spy.mock.calls.length).toBe(3)
     }).then(done)
   })
 
@@ -110,11 +110,11 @@ describe('Watcher', () => {
     Vue.set(vm.b, '_', vm.b)
     waitForUpdate(() => {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
       vm.b._.c = 1
     }).then(() => {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
-      expect(spy.calls.count()).toBe(2)
+      expect(spy.mock.calls.length).toBe(2)
     }).then(done)
   })
 
@@ -123,10 +123,10 @@ describe('Watcher', () => {
     Vue.set(vm.b, 'e', 123)
     waitForUpdate(() => {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
       Vue.delete(vm.b, 'e')
     }).then(() => {
-      expect(spy.calls.count()).toBe(2)
+      expect(spy.mock.calls.length).toBe(2)
     }).then(done)
   })
 

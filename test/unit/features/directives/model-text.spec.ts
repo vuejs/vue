@@ -136,7 +136,7 @@ describe('Directive v-model text', () => {
   })
 
   it('multiple inputs', (done) => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         selections: [[1, 2, 3], [4, 5]],
@@ -230,7 +230,7 @@ describe('Directive v-model text', () => {
 
   // #3468
   it('should have higher priority than user v-on events', () => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         a: 'a'
@@ -317,7 +317,7 @@ describe('Directive v-model text', () => {
 
   if (!isAndroid) {
     it('does not trigger extra input events with single compositionend', () => {
-      const spy = jasmine.createSpy()
+      const spy = vi.fn()
       const vm = new Vue({
         data: {
           a: 'a'
@@ -329,16 +329,16 @@ describe('Directive v-model text', () => {
           }
         }
       }).$mount()
-      expect(spy.calls.count()).toBe(0)
+      expect(spy.mock.calls.length).toBe(0)
       vm.$el.value = 'b'
       triggerEvent(vm.$el, 'input')
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
       triggerEvent(vm.$el, 'compositionend')
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
     })
 
     it('triggers extra input on compositionstart + end', () => {
-      const spy = jasmine.createSpy()
+      const spy = vi.fn()
       const vm = new Vue({
         data: {
           a: 'a'
@@ -350,13 +350,13 @@ describe('Directive v-model text', () => {
           }
         }
       }).$mount()
-      expect(spy.calls.count()).toBe(0)
+      expect(spy.mock.calls.length).toBe(0)
       vm.$el.value = 'b'
       triggerEvent(vm.$el, 'input')
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
       triggerEvent(vm.$el, 'compositionstart')
       triggerEvent(vm.$el, 'compositionend')
-      expect(spy.calls.count()).toBe(2)
+      expect(spy.mock.calls.length).toBe(2)
     })
 
     // #4392

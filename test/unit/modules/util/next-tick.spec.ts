@@ -23,7 +23,7 @@ describe('nextTick', () => {
     })
 
     it('returned Promise should resolve correctly vs callback', done => {
-      const spy = jasmine.createSpy()
+      const spy = vi.fn()
       nextTick(spy)
       nextTick().then(() => {
         expect(spy).toHaveBeenCalled()

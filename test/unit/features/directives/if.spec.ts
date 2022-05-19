@@ -243,8 +243,8 @@ describe('Directive v-if', () => {
   })
 
   it('should maintain stable list to avoid unnecessary patches', done => {
-    const created = jasmine.createSpy()
-    const destroyed = jasmine.createSpy()
+    const created = vi.fn()
+    const destroyed = vi.fn()
     const vm = new Vue({
       data: {
         ok: true
@@ -266,10 +266,10 @@ describe('Directive v-if', () => {
       }
     }).$mount()
 
-    expect(created.calls.count()).toBe(1)
+    expect(created.mock.calls.length).toBe(1)
     vm.ok = false
     waitForUpdate(() => {
-      expect(created.calls.count()).toBe(1)
+      expect(created.mock.calls.length).toBe(1)
       expect(destroyed).not.toHaveBeenCalled()
     }).then(done)
   })

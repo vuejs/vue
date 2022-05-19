@@ -6,7 +6,7 @@ describe('Directive v-on', () => {
 
   beforeEach(() => {
     vm = null
-    spy = jasmine.createSpy()
+    spy = vi.fn()
     el = document.createElement('div')
     document.body.appendChild(el)
   })
@@ -24,7 +24,7 @@ describe('Directive v-on', () => {
       methods: { foo: spy }
     })
     triggerEvent(vm.$el, 'click')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
 
     const args = spy.calls.allArgs()
     const event = args[0] && args[0][0] || {}
@@ -38,7 +38,7 @@ describe('Directive v-on', () => {
       methods: { foo: spy }
     })
     triggerEvent(vm.$el, 'click')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
 
     const args = spy.calls.allArgs()
     const firstArgs = args[0]
@@ -50,7 +50,7 @@ describe('Directive v-on', () => {
   })
 
   it('should support inline function expression', () => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
     vm = new Vue({
       el,
       template: `<div class="test" @click="function (e) { log(e.target.className) }"></div>`,
@@ -69,7 +69,7 @@ describe('Directive v-on', () => {
       methods: { foo: spy }
     })
     triggerEvent(vm.$el, 'click')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
   })
 
   it('should support stop propagation', () => {
@@ -130,9 +130,9 @@ describe('Directive v-on', () => {
       methods: { foo: spy }
     })
     triggerEvent(vm.$el, 'click')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     triggerEvent(vm.$el, 'click')
-    expect(spy.calls.count()).toBe(1) // should no longer trigger
+    expect(spy.mock.calls.length).toBe(1) // should no longer trigger
   })
 
   // #4655
@@ -148,14 +148,14 @@ describe('Directive v-on', () => {
       methods: { foo: spy }
     })
     triggerEvent(vm.$refs.one, 'click')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     triggerEvent(vm.$refs.one, 'click')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     triggerEvent(vm.$refs.two, 'click')
-    expect(spy.calls.count()).toBe(2)
+    expect(spy.mock.calls.length).toBe(2)
     triggerEvent(vm.$refs.one, 'click')
     triggerEvent(vm.$refs.two, 'click')
-    expect(spy.calls.count()).toBe(2)
+    expect(spy.mock.calls.length).toBe(2)
   })
 
   it('should support capture and once', () => {
@@ -190,7 +190,7 @@ describe('Directive v-on', () => {
     triggerEvent(vm.$el, 'click')
     expect(spy).toHaveBeenCalled()
     triggerEvent(vm.$el, 'click')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
   })
 
   it('should support keyCode', () => {
@@ -233,24 +233,24 @@ describe('Directive v-on', () => {
     })
 
     triggerEvent(vm.$refs.ctrl, 'keyup')
-    expect(spy.calls.count()).toBe(0)
+    expect(spy.mock.calls.length).toBe(0)
     triggerEvent(vm.$refs.ctrl, 'keyup', e => { e.ctrlKey = true })
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
 
     triggerEvent(vm.$refs.shift, 'keyup')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     triggerEvent(vm.$refs.shift, 'keyup', e => { e.shiftKey = true })
-    expect(spy.calls.count()).toBe(2)
+    expect(spy.mock.calls.length).toBe(2)
 
     triggerEvent(vm.$refs.alt, 'keyup')
-    expect(spy.calls.count()).toBe(2)
+    expect(spy.mock.calls.length).toBe(2)
     triggerEvent(vm.$refs.alt, 'keyup', e => { e.altKey = true })
-    expect(spy.calls.count()).toBe(3)
+    expect(spy.mock.calls.length).toBe(3)
 
     triggerEvent(vm.$refs.meta, 'keyup')
-    expect(spy.calls.count()).toBe(3)
+    expect(spy.mock.calls.length).toBe(3)
     triggerEvent(vm.$refs.meta, 'keyup', e => { e.metaKey = true })
-    expect(spy.calls.count()).toBe(4)
+    expect(spy.mock.calls.length).toBe(4)
   })
 
   it('should support exact modifier', () => {
@@ -265,19 +265,19 @@ describe('Directive v-on', () => {
     })
 
     triggerEvent(vm.$refs.ctrl, 'keyup')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
 
     triggerEvent(vm.$refs.ctrl, 'keyup', e => {
       e.ctrlKey = true
     })
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
 
     // should not trigger if has other system modifiers
     triggerEvent(vm.$refs.ctrl, 'keyup', e => {
       e.ctrlKey = true
       e.altKey = true
     })
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
   })
 
   it('should support system modifiers with exact', () => {
@@ -292,19 +292,19 @@ describe('Directive v-on', () => {
     })
 
     triggerEvent(vm.$refs.ctrl, 'keyup')
-    expect(spy.calls.count()).toBe(0)
+    expect(spy.mock.calls.length).toBe(0)
 
     triggerEvent(vm.$refs.ctrl, 'keyup', e => {
       e.ctrlKey = true
     })
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
 
     // should not trigger if has other system modifiers
     triggerEvent(vm.$refs.ctrl, 'keyup', e => {
       e.ctrlKey = true
       e.altKey = true
     })
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
   })
 
   it('should support number keyCode', () => {
@@ -323,9 +323,9 @@ describe('Directive v-on', () => {
     const left = 0
     const middle = 1
     const right = 2
-    const spyLeft = jasmine.createSpy()
-    const spyMiddle = jasmine.createSpy()
-    const spyRight = jasmine.createSpy()
+    const spyLeft = vi.fn()
+    const spyMiddle = vi.fn()
+    const spyRight = vi.fn()
 
     vm = new Vue({
       el,
@@ -378,17 +378,17 @@ describe('Directive v-on', () => {
     })
 
     triggerEvent(vm.$refs.enter, 'keyup', e => { e.key = 'Enter' })
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     triggerEvent(vm.$refs.space, 'keyup', e => { e.key = ' ' })
-    expect(spy.calls.count()).toBe(2)
+    expect(spy.mock.calls.length).toBe(2)
     triggerEvent(vm.$refs.esc, 'keyup', e => { e.key = 'Escape' })
-    expect(spy.calls.count()).toBe(3)
+    expect(spy.mock.calls.length).toBe(3)
     triggerEvent(vm.$refs.left, 'keyup', e => { e.key = 'ArrowLeft' })
-    expect(spy.calls.count()).toBe(4)
+    expect(spy.mock.calls.length).toBe(4)
     triggerEvent(vm.$refs.delete, 'keyup', e => { e.key = 'Backspace' })
-    expect(spy.calls.count()).toBe(5)
+    expect(spy.mock.calls.length).toBe(5)
     triggerEvent(vm.$refs.delete, 'keyup', e => { e.key = 'Delete' })
-    expect(spy.calls.count()).toBe(6)
+    expect(spy.mock.calls.length).toBe(6)
   })
 
   it('should support custom keyCode', () => {
@@ -471,7 +471,7 @@ describe('Directive v-on', () => {
 
     triggerEvent(vm.$el, 'click')
     expect(`The .native modifier for v-on is only valid on components but it was used on <button>.`).toHaveBeenWarned()
-    expect(spy.calls.count()).toBe(0)
+    expect(spy.mock.calls.length).toBe(0)
   })
 
   it('should not throw a warning if native modifier is used on a dynamic component', () => {
@@ -500,13 +500,13 @@ describe('Directive v-on', () => {
       }
     })
     vm.$children[0].$emit('custom')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     vm.$children[0].$emit('custom')
-    expect(spy.calls.count()).toBe(1) // should not be called again
+    expect(spy.mock.calls.length).toBe(1) // should not be called again
   })
 
   it('remove listener', done => {
-    const spy2 = jasmine.createSpy('remove listener')
+    const spy2 = vi.fn()
     vm = new Vue({
       el,
       methods: { foo: spy, bar: spy2 },
@@ -520,19 +520,19 @@ describe('Directive v-on', () => {
       }
     })
     triggerEvent(vm.$el, 'click')
-    expect(spy.calls.count()).toBe(1)
-    expect(spy2.calls.count()).toBe(0)
+    expect(spy.mock.calls.length).toBe(1)
+    expect(spy2.mock.calls.length).toBe(0)
     vm.ok = false
     waitForUpdate(() => {
       triggerEvent(vm.$el, 'click')
-      expect(spy.calls.count()).toBe(1) // should no longer trigger
+      expect(spy.mock.calls.length).toBe(1) // should no longer trigger
       triggerEvent(vm.$el, 'input')
-      expect(spy2.calls.count()).toBe(1)
+      expect(spy2.mock.calls.length).toBe(1)
     }).then(done)
   })
 
   it('remove capturing listener', done => {
-    const spy2 = jasmine.createSpy('remove listener')
+    const spy2 = vi.fn()
     vm = new Vue({
       el,
       methods: { foo: spy, bar: spy2, stopped (ev) { ev.stopPropagation() } },
@@ -546,19 +546,19 @@ describe('Directive v-on', () => {
       }
     })
     triggerEvent(vm.$el.firstChild, 'click')
-    expect(spy.calls.count()).toBe(1)
-    expect(spy2.calls.count()).toBe(0)
+    expect(spy.mock.calls.length).toBe(1)
+    expect(spy2.mock.calls.length).toBe(0)
     vm.ok = false
     waitForUpdate(() => {
       triggerEvent(vm.$el.firstChild, 'click')
-      expect(spy.calls.count()).toBe(1) // should no longer trigger
+      expect(spy.mock.calls.length).toBe(1) // should no longer trigger
       triggerEvent(vm.$el, 'mouseOver')
-      expect(spy2.calls.count()).toBe(1)
+      expect(spy2.mock.calls.length).toBe(1)
     }).then(done)
   })
 
   it('remove once listener', done => {
-    const spy2 = jasmine.createSpy('remove listener')
+    const spy2 = vi.fn()
     vm = new Vue({
       el,
       methods: { foo: spy, bar: spy2 },
@@ -572,21 +572,21 @@ describe('Directive v-on', () => {
       }
     })
     triggerEvent(vm.$el, 'click')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     triggerEvent(vm.$el, 'click')
-    expect(spy.calls.count()).toBe(1) // should no longer trigger
-    expect(spy2.calls.count()).toBe(0)
+    expect(spy.mock.calls.length).toBe(1) // should no longer trigger
+    expect(spy2.mock.calls.length).toBe(0)
     vm.ok = false
     waitForUpdate(() => {
       triggerEvent(vm.$el, 'click')
-      expect(spy.calls.count()).toBe(1) // should no longer trigger
+      expect(spy.mock.calls.length).toBe(1) // should no longer trigger
       triggerEvent(vm.$el, 'input')
-      expect(spy2.calls.count()).toBe(1)
+      expect(spy2.mock.calls.length).toBe(1)
     }).then(done)
   })
 
   it('remove capturing and once listener', done => {
-    const spy2 = jasmine.createSpy('remove listener')
+    const spy2 = vi.fn()
     vm = new Vue({
       el,
       methods: { foo: spy, bar: spy2, stopped (ev) { ev.stopPropagation() } },
@@ -600,21 +600,21 @@ describe('Directive v-on', () => {
       }
     })
     triggerEvent(vm.$el.firstChild, 'click')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     triggerEvent(vm.$el.firstChild, 'click')
-    expect(spy.calls.count()).toBe(1) // should no longer trigger
-    expect(spy2.calls.count()).toBe(0)
+    expect(spy.mock.calls.length).toBe(1) // should no longer trigger
+    expect(spy2.mock.calls.length).toBe(0)
     vm.ok = false
     waitForUpdate(() => {
       triggerEvent(vm.$el.firstChild, 'click')
-      expect(spy.calls.count()).toBe(1) // should no longer trigger
+      expect(spy.mock.calls.length).toBe(1) // should no longer trigger
       triggerEvent(vm.$el, 'mouseOver')
-      expect(spy2.calls.count()).toBe(1)
+      expect(spy2.mock.calls.length).toBe(1)
     }).then(done)
   })
 
   it('remove listener on child component', done => {
-    const spy2 = jasmine.createSpy('remove listener')
+    const spy2 = vi.fn()
     vm = new Vue({
       el,
       methods: { foo: spy, bar: spy2 },
@@ -633,14 +633,14 @@ describe('Directive v-on', () => {
       }
     })
     vm.$children[0].$emit('foo')
-    expect(spy.calls.count()).toBe(1)
-    expect(spy2.calls.count()).toBe(0)
+    expect(spy.mock.calls.length).toBe(1)
+    expect(spy2.mock.calls.length).toBe(0)
     vm.ok = false
     waitForUpdate(() => {
       vm.$children[0].$emit('foo')
-      expect(spy.calls.count()).toBe(1) // should no longer trigger
+      expect(spy.mock.calls.length).toBe(1) // should no longer trigger
       vm.$children[0].$emit('bar')
-      expect(spy2.calls.count()).toBe(1)
+      expect(spy2.mock.calls.length).toBe(1)
     }).then(done)
   })
 
@@ -658,10 +658,10 @@ describe('Directive v-on', () => {
 
   // Github Issue #5046
   it('should support keyboard modifier for direction keys', () => {
-    const spyLeft = jasmine.createSpy()
-    const spyRight = jasmine.createSpy()
-    const spyUp = jasmine.createSpy()
-    const spyDown = jasmine.createSpy()
+    const spyLeft = vi.fn()
+    const spyRight = vi.fn()
+    const spyUp = vi.fn()
+    const spyDown = vi.fn()
     vm = new Vue({
       el,
       template: `
@@ -691,10 +691,10 @@ describe('Directive v-on', () => {
     triggerEvent(vm.$refs.down, 'keydown', e => { e.keyCode = 40 })
     triggerEvent(vm.$refs.down, 'keydown', e => { e.keyCode = 39 })
 
-    expect(spyLeft.calls.count()).toBe(1)
-    expect(spyRight.calls.count()).toBe(1)
-    expect(spyUp.calls.count()).toBe(1)
-    expect(spyDown.calls.count()).toBe(1)
+    expect(spyLeft.mock.calls.length).toBe(1)
+    expect(spyRight.mock.calls.length).toBe(1)
+    expect(spyUp.mock.calls.length).toBe(1)
+    expect(spyDown.mock.calls.length).toBe(1)
   })
 
   // This test case should only run when the test browser supports passive.
@@ -751,7 +751,7 @@ describe('Directive v-on', () => {
   })
 
   it('should transform click.right to contextmenu', () => {
-    const spy = jasmine.createSpy('click.right')
+    const spy = vi.fn()
     const vm = new Vue({
       template: `<div @click.right="foo"></div>`,
       methods: { foo: spy }
@@ -762,7 +762,7 @@ describe('Directive v-on', () => {
   })
 
   it('should transform click.middle to mouseup', () => {
-    const spy = jasmine.createSpy('click.middle')
+    const spy = vi.fn()
     vm = new Vue({
       el,
       template: `<div @click.middle="foo"></div>`,
@@ -775,8 +775,8 @@ describe('Directive v-on', () => {
   })
 
   it('object syntax (no argument)', () => {
-    const click = jasmine.createSpy('click')
-    const mouseup = jasmine.createSpy('mouseup')
+    const click = vi.fn()
+    const mouseup = vi.fn()
     vm = new Vue({
       el,
       template: `<button v-on="listeners">foo</button>`,
@@ -789,18 +789,18 @@ describe('Directive v-on', () => {
     })
 
     triggerEvent(vm.$el, 'click')
-    expect(click.calls.count()).toBe(1)
-    expect(mouseup.calls.count()).toBe(0)
+    expect(click.mock.calls.length).toBe(1)
+    expect(mouseup.mock.calls.length).toBe(0)
 
     triggerEvent(vm.$el, 'mouseup')
-    expect(click.calls.count()).toBe(1)
-    expect(mouseup.calls.count()).toBe(1)
+    expect(click.mock.calls.length).toBe(1)
+    expect(mouseup.mock.calls.length).toBe(1)
   })
 
   it('object syntax (no argument, mixed with normal listeners)', () => {
-    const click1 = jasmine.createSpy('click1')
-    const click2 = jasmine.createSpy('click2')
-    const mouseup = jasmine.createSpy('mouseup')
+    const click1 = vi.fn()
+    const click2 = vi.fn()
+    const mouseup = vi.fn()
     vm = new Vue({
       el,
       template: `<button v-on="listeners" @click="click2">foo</button>`,
@@ -816,20 +816,20 @@ describe('Directive v-on', () => {
     })
 
     triggerEvent(vm.$el, 'click')
-    expect(click1.calls.count()).toBe(1)
-    expect(click2.calls.count()).toBe(1)
-    expect(mouseup.calls.count()).toBe(0)
+    expect(click1.mock.calls.length).toBe(1)
+    expect(click2.mock.calls.length).toBe(1)
+    expect(mouseup.mock.calls.length).toBe(0)
 
     triggerEvent(vm.$el, 'mouseup')
-    expect(click1.calls.count()).toBe(1)
-    expect(click2.calls.count()).toBe(1)
-    expect(mouseup.calls.count()).toBe(1)
+    expect(click1.mock.calls.length).toBe(1)
+    expect(click2.mock.calls.length).toBe(1)
+    expect(mouseup.mock.calls.length).toBe(1)
   })
 
   it('object syntax (usage in HOC, mixed with native listeners)', () => {
-    const click = jasmine.createSpy('click')
-    const mouseup = jasmine.createSpy('mouseup')
-    const mousedown = jasmine.createSpy('mousedown')
+    const click = vi.fn()
+    const mouseup = vi.fn()
+    const mousedown = vi.fn()
 
     vm = new Vue({
       el,
@@ -855,19 +855,19 @@ describe('Directive v-on', () => {
     })
 
     triggerEvent(vm.$el, 'click')
-    expect(click.calls.count()).toBe(1)
-    expect(mouseup.calls.count()).toBe(0)
-    expect(mousedown.calls.count()).toBe(0)
+    expect(click.mock.calls.length).toBe(1)
+    expect(mouseup.mock.calls.length).toBe(0)
+    expect(mousedown.mock.calls.length).toBe(0)
 
     triggerEvent(vm.$el, 'mouseup')
-    expect(click.calls.count()).toBe(1)
-    expect(mouseup.calls.count()).toBe(1)
-    expect(mousedown.calls.count()).toBe(0)
+    expect(click.mock.calls.length).toBe(1)
+    expect(mouseup.mock.calls.length).toBe(1)
+    expect(mousedown.mock.calls.length).toBe(0)
 
     triggerEvent(vm.$el, 'mousedown')
-    expect(click.calls.count()).toBe(1)
-    expect(mouseup.calls.count()).toBe(1)
-    expect(mousedown.calls.count()).toBe(1)
+    expect(click.mock.calls.length).toBe(1)
+    expect(mouseup.mock.calls.length).toBe(1)
+    expect(mousedown.mock.calls.length).toBe(1)
   })
 
   // #6805 (v-on="object" bind order problem)
@@ -948,7 +948,7 @@ describe('Directive v-on', () => {
     vm.ok = false
     waitForUpdate(() => {
       triggerEvent(vm.$el.childNodes[0], 'click')
-      expect(spy.calls.count()).toBe(0)
+      expect(spy.mock.calls.length).toBe(0)
     }).then(done)
   })
 
@@ -984,12 +984,12 @@ describe('Directive v-on', () => {
     })
     // simulating autocomplete event (Event object with type keyup but without keyCode)
     triggerEvent(vm.$el, 'keyup')
-    expect(spy.calls.count()).toBe(0)
+    expect(spy.mock.calls.length).toBe(0)
   })
 
   describe('dynamic arguments', () => {
     it('basic', done => {
-      const spy = jasmine.createSpy()
+      const spy = vi.fn()
       const vm = new Vue({
         template: `<div v-on:[key]="spy"></div>`,
         data: {
@@ -1000,25 +1000,25 @@ describe('Directive v-on', () => {
         }
       }).$mount()
       triggerEvent(vm.$el, 'click')
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
       vm.key = 'mouseup'
       waitForUpdate(() => {
         triggerEvent(vm.$el, 'click')
-        expect(spy.calls.count()).toBe(1)
+        expect(spy.mock.calls.length).toBe(1)
         triggerEvent(vm.$el, 'mouseup')
-        expect(spy.calls.count()).toBe(2)
+        expect(spy.mock.calls.length).toBe(2)
         // explicit null value
         vm.key = null
       }).then(() => {
         triggerEvent(vm.$el, 'click')
-        expect(spy.calls.count()).toBe(2)
+        expect(spy.mock.calls.length).toBe(2)
         triggerEvent(vm.$el, 'mouseup')
-        expect(spy.calls.count()).toBe(2)
+        expect(spy.mock.calls.length).toBe(2)
       }).then(done)
     })
 
     it('shorthand', done => {
-      const spy = jasmine.createSpy()
+      const spy = vi.fn()
       const vm = new Vue({
         template: `<div @[key]="spy"></div>`,
         data: {
@@ -1029,18 +1029,18 @@ describe('Directive v-on', () => {
         }
       }).$mount()
       triggerEvent(vm.$el, 'click')
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
       vm.key = 'mouseup'
       waitForUpdate(() => {
         triggerEvent(vm.$el, 'click')
-        expect(spy.calls.count()).toBe(1)
+        expect(spy.mock.calls.length).toBe(1)
         triggerEvent(vm.$el, 'mouseup')
-        expect(spy.calls.count()).toBe(2)
+        expect(spy.mock.calls.length).toBe(2)
       }).then(done)
     })
 
     it('with .middle modifier', () => {
-      const spy = jasmine.createSpy()
+      const spy = vi.fn()
       const vm = new Vue({
         template: `<div @[key].middle="spy"></div>`,
         data: {
@@ -1057,7 +1057,7 @@ describe('Directive v-on', () => {
     })
 
     it('with .right modifier', () => {
-      const spy = jasmine.createSpy()
+      const spy = vi.fn()
       const vm = new Vue({
         template: `<div @[key].right="spy"></div>`,
         data: {
@@ -1098,9 +1098,9 @@ describe('Directive v-on', () => {
         methods: { foo: spy }
       }).$mount()
       triggerEvent(vm.$el, 'click')
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
       triggerEvent(vm.$el, 'click')
-      expect(spy.calls.count()).toBe(1) // should no longer trigger
+      expect(spy.mock.calls.length).toBe(1) // should no longer trigger
     })
   })
 })

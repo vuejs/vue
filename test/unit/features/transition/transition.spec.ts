@@ -137,8 +137,8 @@ if (!isIE9) {
     })
 
     it('inline transition object', done => {
-      const enter = jasmine.createSpy('enter')
-      const leave = jasmine.createSpy('leave')
+      const enter = vi.fn()
+      const leave = vi.fn()
       const vm = new Vue({
         render (h) {
           return h('div', null, [
@@ -184,12 +184,12 @@ if (!isIE9) {
     })
 
     it('transition events', done => {
-      const onLeaveSpy = jasmine.createSpy('leave')
-      const onEnterSpy = jasmine.createSpy('enter')
-      const beforeLeaveSpy = jasmine.createSpy('beforeLeave')
-      const beforeEnterSpy = jasmine.createSpy('beforeEnter')
-      const afterLeaveSpy = jasmine.createSpy('afterLeave')
-      const afterEnterSpy = jasmine.createSpy('afterEnter')
+      const onLeaveSpy = vi.fn()
+      const onEnterSpy = vi.fn()
+      const beforeLeaveSpy = vi.fn()
+      const beforeEnterSpy = vi.fn()
+      const afterLeaveSpy = vi.fn()
+      const afterEnterSpy = vi.fn()
 
       const vm = new Vue({
         template: `
@@ -259,12 +259,12 @@ if (!isIE9) {
     })
 
     it('transition events (v-show)', done => {
-      const onLeaveSpy = jasmine.createSpy('leave')
-      const onEnterSpy = jasmine.createSpy('enter')
-      const beforeLeaveSpy = jasmine.createSpy('beforeLeave')
-      const beforeEnterSpy = jasmine.createSpy('beforeEnter')
-      const afterLeaveSpy = jasmine.createSpy('afterLeave')
-      const afterEnterSpy = jasmine.createSpy('afterEnter')
+      const onLeaveSpy = vi.fn()
+      const onEnterSpy = vi.fn()
+      const beforeLeaveSpy = vi.fn()
+      const beforeEnterSpy = vi.fn()
+      const afterLeaveSpy = vi.fn()
+      const afterEnterSpy = vi.fn()
 
       const vm = new Vue({
         template: `
@@ -386,8 +386,8 @@ if (!isIE9) {
     })
 
     it('css: false', done => {
-      const enterSpy = jasmine.createSpy('enter')
-      const leaveSpy = jasmine.createSpy('leave')
+      const enterSpy = vi.fn()
+      const leaveSpy = vi.fn()
       const vm = new Vue({
         template: `
           <div>
@@ -415,8 +415,8 @@ if (!isIE9) {
     })
 
     it('no transition detected', done => {
-      const enterSpy = jasmine.createSpy('enter')
-      const leaveSpy = jasmine.createSpy('leave')
+      const enterSpy = vi.fn()
+      const leaveSpy = vi.fn()
       const vm = new Vue({
         template: '<div><transition name="nope" @enter="enter" @leave="leave"><div v-if="ok">foo</div></transition></div>',
         data: { ok: true },
@@ -442,7 +442,7 @@ if (!isIE9) {
     })
 
     it('enterCancelled', done => {
-      const spy = jasmine.createSpy('enterCancelled')
+      const spy = vi.fn()
       const vm = new Vue({
         template: `
           <div>
@@ -476,7 +476,7 @@ if (!isIE9) {
     })
 
     it('should remove stale leaving elements', done => {
-      const spy = jasmine.createSpy('afterLeave')
+      const spy = vi.fn()
       const vm = new Vue({
         template: `
           <div>
@@ -579,7 +579,7 @@ if (!isIE9) {
     })
 
     it('leaveCancelled (v-show only)', done => {
-      const spy = jasmine.createSpy('leaveCancelled')
+      const spy = vi.fn()
       const vm = new Vue({
         template: `
           <div>

@@ -21,7 +21,7 @@ describe('Instance methods data', () => {
   describe('$watch', () => {
     let vm, spy
     beforeEach(() => {
-      spy = jasmine.createSpy('watch')
+      spy = vi.fn()
       vm = new Vue({
         data: {
           a: {
@@ -41,18 +41,18 @@ describe('Instance methods data', () => {
       vm.$watch('a.b', spy)
       vm.a.b = 2
       waitForUpdate(() => {
-        expect(spy.calls.count()).toBe(1)
+        expect(spy.mock.calls.length).toBe(1)
         expect(spy).toHaveBeenCalledWith(2, 1)
         vm.a = { b: 3 }
       }).then(() => {
-        expect(spy.calls.count()).toBe(2)
+        expect(spy.mock.calls.length).toBe(2)
         expect(spy).toHaveBeenCalledWith(3, 2)
       }).then(done)
     })
 
     it('immediate', () => {
       vm.$watch('a.b', spy, { immediate: true })
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
       expect(spy).toHaveBeenCalledWith(1)
     })
 
@@ -61,7 +61,7 @@ describe('Instance methods data', () => {
       unwatch()
       vm.a.b = 2
       waitForUpdate(() => {
-        expect(spy.calls.count()).toBe(0)
+        expect(spy.mock.calls.length).toBe(0)
       }).then(done)
     })
 
@@ -107,7 +107,7 @@ describe('Instance methods data', () => {
         handler: 'foo',
         immediate: true
       })
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
       expect(spy).toHaveBeenCalledWith(1)
     })
 
@@ -116,7 +116,7 @@ describe('Instance methods data', () => {
         handler: 'foo',
         immediate: true
       })
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
       expect(spy).toHaveBeenCalledWith('ok')
     })
 

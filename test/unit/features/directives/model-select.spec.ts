@@ -207,7 +207,7 @@ describe('Directive v-model select', () => {
   })
 
   it('should work with select which has no default selected options', (done) => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         id: 4,
@@ -228,7 +228,7 @@ describe('Directive v-model select', () => {
     document.body.appendChild(vm.$el)
     vm.testChange = 10
     waitForUpdate(() => {
-      expect(spy.calls.count()).toBe(0)
+      expect(spy.mock.calls.length).toBe(0)
     }).then(done)
   })
 
@@ -296,7 +296,7 @@ describe('Directive v-model select', () => {
   }
 
   it('should work with multiple binding', (done) => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         isMultiple: true,
@@ -352,7 +352,7 @@ describe('Directive v-model select', () => {
   })
 
   it('multiple selects', (done) => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         selections: ['', ''],
@@ -520,7 +520,7 @@ describe('Directive v-model select', () => {
 
   // #6193
   it('should not trigger change event when matching option can be found for each value', done => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         options: ['1']

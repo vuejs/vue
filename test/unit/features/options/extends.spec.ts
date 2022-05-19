@@ -52,7 +52,7 @@ describe('Options extends', () => {
     it('should work with global mixins + Object.prototype.watch', done => {
       Vue.mixin({})
 
-      const spy = jasmine.createSpy('watch')
+      const spy = vi.fn()
       const A = Vue.extend({
         data: function () {
           return { a: 1 }

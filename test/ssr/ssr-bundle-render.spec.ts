@@ -106,8 +106,8 @@ function createAssertions (runInNewContext) {
 
   it('render with cache (get/set)', done => {
     const cache = {}
-    const get = jasmine.createSpy('get')
-    const set = jasmine.createSpy('set')
+    const get = vi.fn()
+    const set = vi.fn()
     const options = {
       runInNewContext,
       cache: {
@@ -138,8 +138,8 @@ function createAssertions (runInNewContext) {
         renderer.renderToString((err, res) => {
           expect(err).toBeNull()
           expect(res).toBe(expected)
-          expect(get.calls.count()).toBe(2)
-          expect(set.calls.count()).toBe(1)
+          expect(get.mock.calls.length).toBe(2)
+          expect(set.mock.calls.length).toBe(1)
           done()
         })
       })
@@ -148,9 +148,9 @@ function createAssertions (runInNewContext) {
 
   it('render with cache (get/set/has)', done => {
     const cache = {}
-    const has = jasmine.createSpy('has')
-    const get = jasmine.createSpy('get')
-    const set = jasmine.createSpy('set')
+    const has = vi.fn()
+    const get = vi.fn()
+    const set = vi.fn()
     const options = {
       runInNewContext,
       cache: {
@@ -185,9 +185,9 @@ function createAssertions (runInNewContext) {
         renderer.renderToString((err, res) => {
           expect(err).toBeNull()
           expect(res).toBe(expected)
-          expect(has.calls.count()).toBe(2)
-          expect(get.calls.count()).toBe(1)
-          expect(set.calls.count()).toBe(1)
+          expect(has.mock.calls.length).toBe(2)
+          expect(get.mock.calls.length).toBe(1)
+          expect(set.mock.calls.length).toBe(1)
           done()
         })
       })
@@ -210,10 +210,10 @@ function createAssertions (runInNewContext) {
       renderer.renderToString(context1, (err, res) => {
         expect(err).toBeNull()
         expect(res).toBe(expected)
-        expect(cache.set.calls.count()).toBe(3) // 3 nested components cached
+        expect(cache.set.mock.calls.length).toBe(3) // 3 nested components cached
         const cached = cache.get(key)
         expect(cached.html).toBe(expected)
-        expect(cache.get.calls.count()).toBe(1)
+        expect(cache.get.mock.calls.length).toBe(1)
 
         // assert component usage registration for nested children
         expect(context1.registered).toEqual(['app', 'child', 'grandchild'])
@@ -221,8 +221,8 @@ function createAssertions (runInNewContext) {
         renderer.renderToString(context2, (err, res) => {
           expect(err).toBeNull()
           expect(res).toBe(expected)
-          expect(cache.set.calls.count()).toBe(3) // no new cache sets
-          expect(cache.get.calls.count()).toBe(2) // 1 get for root
+          expect(cache.set.mock.calls.length).toBe(3) // no new cache sets
+          expect(cache.get.mock.calls.length).toBe(2) // 1 get for root
 
           expect(context2.registered).toEqual(['app', 'child', 'grandchild'])
           done()
@@ -233,8 +233,8 @@ function createAssertions (runInNewContext) {
 
   it('render with cache (opt-out)', done => {
     const cache = {}
-    const get = jasmine.createSpy('get')
-    const set = jasmine.createSpy('set')
+    const get = vi.fn()
+    const set = vi.fn()
     const options = {
       runInNewContext,
       cache: {

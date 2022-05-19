@@ -51,8 +51,8 @@ describe('Options functional', () => {
   })
 
   it('should expose data.on as listeners', () => {
-    const foo = jasmine.createSpy('foo')
-    const bar = jasmine.createSpy('bar')
+    const foo = vi.fn()
+    const bar = vi.fn()
     const vm = new Vue({
       template: '<div><wrap @click="foo" @test="bar"/></div>',
       methods: { foo, bar },
@@ -134,7 +134,7 @@ describe('Options functional', () => {
   })
 
   it('should let vnode raw data pass through', done => {
-    const onValid = jasmine.createSpy('valid')
+    const onValid = vi.fn()
     const vm = new Vue({
       data: { msg: 'hello' },
       template: `<div>

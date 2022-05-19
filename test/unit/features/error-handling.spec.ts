@@ -149,7 +149,7 @@ describe('Error handling', () => {
   })
 
   it('config.errorHandler should capture render errors', done => {
-    const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
+    const spy = Vue.config.errorHandler = vi.fn()
     const vm = createTestInstance(components.render)
 
     const args = spy.calls.argsFor(0)
@@ -165,7 +165,7 @@ describe('Error handling', () => {
   it('should capture and recover from nextTick errors', done => {
     const err1 = new Error('nextTick')
     const err2 = new Error('nextTick2')
-    const spy = Vue.config.errorHandler = jasmine.createSpy('errorHandler')
+    const spy = Vue.config.errorHandler = vi.fn()
     Vue.nextTick(() => { throw err1 })
     Vue.nextTick(() => {
       expect(spy).toHaveBeenCalledWith(err1, undefined, 'nextTick')

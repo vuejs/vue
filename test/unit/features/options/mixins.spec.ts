@@ -111,8 +111,8 @@ describe('Options mixins', () => {
   })
 
   it('should accept further extended constructors as mixins', () => {
-    const spy1 = jasmine.createSpy('mixinA')
-    const spy2 = jasmine.createSpy('mixinB')
+    const spy1 = vi.fn()
+    const spy2 = vi.fn()
 
     const mixinA = Vue.extend({
       created: spy1,

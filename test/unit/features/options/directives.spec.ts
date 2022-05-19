@@ -2,11 +2,11 @@ import Vue from 'vue'
 
 describe('Options directives', () => {
   it('basic usage', done => {
-    const bindSpy = jasmine.createSpy('bind')
-    const insertedSpy = jasmine.createSpy('inserted')
-    const updateSpy = jasmine.createSpy('update')
-    const componentUpdatedSpy = jasmine.createSpy('componentUpdated')
-    const unbindSpy = jasmine.createSpy('unbind')
+    const bindSpy = vi.fn()
+    const insertedSpy = vi.fn()
+    const updateSpy = vi.fn()
+    const componentUpdatedSpy = vi.fn()
+    const unbindSpy = vi.fn()
 
     const assertContext = (el, binding, vnode) => {
       expect(vnode.context).toBe(vm)
@@ -75,7 +75,7 @@ describe('Options directives', () => {
       expect(unbindSpy).not.toHaveBeenCalled()
       vm.msg = 'bye'
     }).then(() => {
-      expect(componentUpdatedSpy.calls.count()).toBe(2)
+      expect(componentUpdatedSpy.mock.calls.length).toBe(2)
       vm.ok = false
     }).then(() => {
       expect(unbindSpy).toHaveBeenCalled()
@@ -83,7 +83,7 @@ describe('Options directives', () => {
   })
 
   it('function shorthand', done => {
-    const spy = jasmine.createSpy('directive')
+    const spy = vi.fn()
     const vm = new Vue({
       template: '<div v-test:arg.hello="a"></div>',
       data: { a: 'foo' },
@@ -105,7 +105,7 @@ describe('Options directives', () => {
   })
 
   it('function shorthand (global)', done => {
-    const spy = jasmine.createSpy('directive')
+    const spy = vi.fn()
     Vue.directive('test', function (el, binding, vnode) {
       expect(vnode.context).toBe(vm)
       expect(binding.arg).toBe('arg')
@@ -153,7 +153,7 @@ describe('Options directives', () => {
 
   it('should properly handle same node with different directive sets', done => {
     const spies = {}
-    const createSpy = name => (spies[name] = jasmine.createSpy(name))
+    const createSpy = name => (spies[name] = vi.fn())
     const vm = new Vue({
       data: {
         ok: true,
@@ -183,41 +183,41 @@ describe('Options directives', () => {
       }
     }).$mount()
 
-    expect(spies.bind1.calls.count()).toBe(2)
-    expect(spies.inserted1.calls.count()).toBe(2)
-    expect(spies.bind2.calls.count()).toBe(0)
-    expect(spies.inserted2.calls.count()).toBe(0)
+    expect(spies.bind1.mock.calls.length).toBe(2)
+    expect(spies.inserted1.mock.calls.length).toBe(2)
+    expect(spies.bind2.mock.calls.length).toBe(0)
+    expect(spies.inserted2.mock.calls.length).toBe(0)
 
     vm.ok = false
     waitForUpdate(() => {
       // v-test with modifier should be updated
-      expect(spies.update1.calls.count()).toBe(1)
-      expect(spies.componentUpdated1.calls.count()).toBe(1)
+      expect(spies.update1.mock.calls.length).toBe(1)
+      expect(spies.componentUpdated1.mock.calls.length).toBe(1)
 
       // v-test without modifier should be unbound
-      expect(spies.unbind1.calls.count()).toBe(1)
+      expect(spies.unbind1.mock.calls.length).toBe(1)
 
       // v-test2 should be bound
-      expect(spies.bind2.calls.count()).toBe(1)
-      expect(spies.inserted2.calls.count()).toBe(1)
+      expect(spies.bind2.mock.calls.length).toBe(1)
+      expect(spies.inserted2.mock.calls.length).toBe(1)
 
       vm.ok = true
     }).then(() => {
       // v-test without modifier should be bound again
-      expect(spies.bind1.calls.count()).toBe(3)
-      expect(spies.inserted1.calls.count()).toBe(3)
+      expect(spies.bind1.mock.calls.length).toBe(3)
+      expect(spies.inserted1.mock.calls.length).toBe(3)
 
       // v-test2 should be unbound
-      expect(spies.unbind2.calls.count()).toBe(1)
+      expect(spies.unbind2.mock.calls.length).toBe(1)
 
       // v-test with modifier should be updated again
-      expect(spies.update1.calls.count()).toBe(2)
-      expect(spies.componentUpdated1.calls.count()).toBe(2)
+      expect(spies.update1.mock.calls.length).toBe(2)
+      expect(spies.componentUpdated1.mock.calls.length).toBe(2)
 
       vm.val = 234
     }).then(() => {
-      expect(spies.update1.calls.count()).toBe(4)
-      expect(spies.componentUpdated1.calls.count()).toBe(4)
+      expect(spies.update1.mock.calls.length).toBe(4)
+      expect(spies.componentUpdated1.mock.calls.length).toBe(4)
     }).then(done)
   })
 
@@ -231,9 +231,9 @@ describe('Options directives', () => {
   // #6513
   it('should invoke unbind & inserted on inner component root element change', done => {
     const dir = {
-      bind: jasmine.createSpy('bind'),
-      inserted: jasmine.createSpy('inserted'),
-      unbind: jasmine.createSpy('unbind')
+      bind: vi.fn(),
+      inserted: vi.fn(),
+      unbind: vi.fn()
     }
 
     const Child = {
@@ -248,20 +248,20 @@ describe('Options directives', () => {
     }).$mount()
 
     const oldEl = vm.$el
-    expect(dir.bind.calls.count()).toBe(1)
+    expect(dir.bind.mock.calls.length).toBe(1)
     expect(dir.bind.calls.argsFor(0)[0]).toBe(oldEl)
-    expect(dir.inserted.calls.count()).toBe(1)
+    expect(dir.inserted.mock.calls.length).toBe(1)
     expect(dir.inserted.calls.argsFor(0)[0]).toBe(oldEl)
     expect(dir.unbind).not.toHaveBeenCalled()
 
     vm.$refs.child.ok = false
     waitForUpdate(() => {
       expect(vm.$el.tagName).toBe('SPAN')
-      expect(dir.bind.calls.count()).toBe(2)
+      expect(dir.bind.mock.calls.length).toBe(2)
       expect(dir.bind.calls.argsFor(1)[0]).toBe(vm.$el)
-      expect(dir.inserted.calls.count()).toBe(2)
+      expect(dir.inserted.mock.calls.length).toBe(2)
       expect(dir.inserted.calls.argsFor(1)[0]).toBe(vm.$el)
-      expect(dir.unbind.calls.count()).toBe(1)
+      expect(dir.unbind.mock.calls.length).toBe(1)
       expect(dir.unbind.calls.argsFor(0)[0]).toBe(oldEl)
     }).then(done)
   })

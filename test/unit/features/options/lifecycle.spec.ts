@@ -3,7 +3,7 @@ import Vue from 'vue'
 describe('Options lifecycle hooks', () => {
   let spy
   beforeEach(() => {
-    spy = jasmine.createSpy('hook')
+    spy = vi.fn()
   })
 
   describe('beforeCreate', () => {
@@ -156,8 +156,8 @@ describe('Options lifecycle hooks', () => {
 
     // #8076
     it('should not be called after destroy', done => {
-      const beforeUpdate = jasmine.createSpy('beforeUpdate')
-      const destroyed = jasmine.createSpy('destroyed')
+      const beforeUpdate = vi.fn()
+      const destroyed = vi.fn()
 
       Vue.component('todo', {
         template: '<div>{{todo.done}}</div>',
@@ -240,8 +240,8 @@ describe('Options lifecycle hooks', () => {
 
     // #8076
     it('should not be called after destroy', done => {
-      const updated = jasmine.createSpy('updated')
-      const destroyed = jasmine.createSpy('destroyed')
+      const updated = vi.fn()
+      const destroyed = vi.fn()
 
       Vue.component('todo', {
         template: '<div>{{todo.done}}</div>',
@@ -290,7 +290,7 @@ describe('Options lifecycle hooks', () => {
       vm.$destroy()
       vm.$destroy()
       expect(spy).toHaveBeenCalled()
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
     })
   })
 
@@ -308,14 +308,14 @@ describe('Options lifecycle hooks', () => {
       vm.$destroy()
       vm.$destroy()
       expect(spy).toHaveBeenCalled()
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
     })
   })
 
   it('should emit hook events', () => {
-    const created = jasmine.createSpy()
-    const mounted = jasmine.createSpy()
-    const destroyed = jasmine.createSpy()
+    const created = vi.fn()
+    const mounted = vi.fn()
+    const destroyed = vi.fn()
     const vm = new Vue({
       render () {},
       beforeCreate () {

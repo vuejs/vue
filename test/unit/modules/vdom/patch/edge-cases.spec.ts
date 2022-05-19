@@ -270,7 +270,7 @@ describe('vdom patch: edge cases', () => {
 
   // #6803
   it('backwards compat with checkbox code generated before 2.4', () => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         label: 'foobar',
@@ -339,7 +339,7 @@ describe('vdom patch: edge cases', () => {
 
   // #7294
   it('should cleanup component inline events on patch when no events are present', done => {
-    const log = jasmine.createSpy()
+    const log = vi.fn()
     const vm = new Vue({
       data: { ok: true },
       template: `
@@ -393,7 +393,7 @@ describe('vdom patch: edge cases', () => {
 
     // sometimes we do need to tap into these internal hooks (e.g. in vue-router)
     // so make sure it does work
-    const inlineHookSpy = jasmine.createSpy('inlineInit')
+    const inlineHookSpy = vi.fn()
 
     const vm = new Vue({
       render (h) {
@@ -409,7 +409,7 @@ describe('vdom patch: edge cases', () => {
     }).$mount()
 
     expect(vm.$el.textContent).toBe('FooBar')
-    expect(inlineHookSpy.calls.count()).toBe(2)
+    expect(inlineHookSpy.mock.calls.length).toBe(2)
   })
 
   // #9549

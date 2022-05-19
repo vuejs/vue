@@ -86,7 +86,7 @@ describe('Directive v-model radio', () => {
   })
 
   it('multiple radios ', (done) => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         selections: ['a', '1'],

@@ -5,7 +5,7 @@ describe('Instance methods events', () => {
   beforeEach(() => {
     // @ts-expect-error
     const vm = new Vue()
-    spy = jasmine.createSpy('emitter')
+    spy = vi.fn()
   })
 
   it('$on', () => {
@@ -15,7 +15,7 @@ describe('Instance methods events', () => {
       spy.apply(this, arguments)
     })
     vm.$emit('test', 1, 2, 3, 4)
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     expect(spy).toHaveBeenCalledWith(1, 2, 3, 4)
   })
 
@@ -25,10 +25,10 @@ describe('Instance methods events', () => {
       spy.apply(this, arguments)
     })
     vm.$emit('test1', 1, 2, 3, 4)
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     expect(spy).toHaveBeenCalledWith(1, 2, 3, 4)
     vm.$emit('test2', 5, 6, 7, 8)
-    expect(spy.calls.count()).toBe(2)
+    expect(spy.mock.calls.length).toBe(2)
     expect(spy).toHaveBeenCalledWith(5, 6, 7, 8)
   })
 
@@ -39,7 +39,7 @@ describe('Instance methods events', () => {
     vm.$emit('test2')
     expect(spy).not.toHaveBeenCalled()
     vm.$emit('test3', 1, 2, 3, 4)
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
   })
 
   it('$off multi event without callback', () => {
@@ -53,7 +53,7 @@ describe('Instance methods events', () => {
     vm.$once('test', spy)
     vm.$emit('test', 1, 2, 3)
     vm.$emit('test', 2, 3, 4)
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     expect(spy).toHaveBeenCalledWith(1, 2, 3)
   })
 
@@ -80,18 +80,18 @@ describe('Instance methods events', () => {
     vm.$off('test1') // test off something that's already off
     vm.$emit('test1', 1)
     vm.$emit('test2', 2)
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     expect(spy).toHaveBeenCalledWith(2)
   })
 
   it('$off event + fn', () => {
-    const spy2 = jasmine.createSpy('emitter')
+    const spy2 = vi.fn()
     vm.$on('test', spy)
     vm.$on('test', spy2)
     vm.$off('test', spy)
     vm.$emit('test', 1, 2, 3)
     expect(spy).not.toHaveBeenCalled()
-    expect(spy2.calls.count()).toBe(1)
+    expect(spy2.mock.calls.length).toBe(1)
     expect(spy2).toHaveBeenCalledWith(1, 2, 3)
   })
 })

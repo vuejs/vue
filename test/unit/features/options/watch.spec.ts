@@ -5,7 +5,7 @@ import { finished } from 'stream';
 describe('Options watch', () => {
   let spy
   beforeEach(() => {
-    spy = jasmine.createSpy('watch')
+    spy = vi.fn()
   })
 
   testObjectOption('watch')
@@ -48,7 +48,7 @@ describe('Options watch', () => {
   })
 
   it('multiple cbs (after option merge)', done => {
-    const spy1 = jasmine.createSpy('watch')
+    const spy1 = vi.fn()
     const Test = Vue.extend({
       watch: {
         a: spy1
@@ -107,8 +107,8 @@ describe('Options watch', () => {
   })
 
   it('correctly merges multiple extends', done => {
-    const spy2 = jasmine.createSpy('A')
-    const spy3 = jasmine.createSpy('B')
+    const spy2 = vi.fn()
+    const spy3 = vi.fn()
     const A = Vue.extend({
       data: function () {
         return {

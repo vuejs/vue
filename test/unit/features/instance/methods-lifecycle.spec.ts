@@ -57,7 +57,7 @@ describe('Instance methods lifecycle', () => {
     it('Dep.target should be undefined during invocation of child immediate watcher', done => {
       let calls = 0
       const childData = { a: 1 }
-      const parentUpdate = jasmine.createSpy()
+      const parentUpdate = vi.fn()
       new Vue({
         template: '<div><my-component></my-component></div>',
         updated: parentUpdate,
@@ -117,13 +117,13 @@ describe('Instance methods lifecycle', () => {
     })
 
     it('avoid duplicate calls', () => {
-      const spy = jasmine.createSpy('destroy')
+      const spy = vi.fn()
       const vm = new Vue({
         beforeDestroy: spy
       })
       vm.$destroy()
       vm.$destroy()
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
     })
   })
 

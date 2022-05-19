@@ -91,7 +91,7 @@ describe('Options computed', () => {
   })
 
   it('watching computed', done => {
-    const spy = jasmine.createSpy('watch computed')
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         a: 1
@@ -108,7 +108,7 @@ describe('Options computed', () => {
   })
 
   it('caching', () => {
-    const spy = jasmine.createSpy('cached computed')
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         a: 1
@@ -120,15 +120,15 @@ describe('Options computed', () => {
         }
       }
     })
-    expect(spy.calls.count()).toBe(0)
+    expect(spy.mock.calls.length).toBe(0)
     vm.b
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     vm.b
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
   })
 
   it('cache: false', () => {
-    const spy = jasmine.createSpy('cached computed')
+    const spy = vi.fn()
     const vm = new Vue({
       data: {
         a: 1
@@ -143,11 +143,11 @@ describe('Options computed', () => {
         }
       }
     })
-    expect(spy.calls.count()).toBe(0)
+    expect(spy.mock.calls.length).toBe(0)
     vm.b
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
     vm.b
-    expect(spy.calls.count()).toBe(2)
+    expect(spy.mock.calls.length).toBe(2)
   })
 
   it('as component', done => {

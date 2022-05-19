@@ -6,7 +6,7 @@ describe('Global API: mixin', () => {
   afterEach(() => { Vue.options = options })
 
   it('should work', () => {
-    const spy = jasmine.createSpy('global mixin')
+    const spy = vi.fn()
     Vue.mixin({
       created () {
         spy(this.$options.myOption)
@@ -87,7 +87,7 @@ describe('Global API: mixin', () => {
 
   // #4976
   it('should not drop late-attached custom options on existing constructors', () => {
-    const baseSpy = jasmine.createSpy('base')
+    const baseSpy = vi.fn()
     const Base = Vue.extend({
       beforeCreate: baseSpy
     })
@@ -100,11 +100,11 @@ describe('Global API: mixin', () => {
       $style: () => 123
     }
 
-    const spy = jasmine.createSpy('late attached')
+    const spy = vi.fn()
     Test.options.beforeCreate = Test.options.beforeCreate.concat(spy)
 
     // Update super constructor's options
-    const mixinSpy = jasmine.createSpy('mixin')
+    const mixinSpy = vi.fn()
     Vue.mixin({
       beforeCreate: mixinSpy
     })
@@ -114,9 +114,9 @@ describe('Global API: mixin', () => {
       template: '<div>{{ $style }}</div>'
     }).$mount()
 
-    expect(spy.calls.count()).toBe(1)
-    expect(baseSpy.calls.count()).toBe(1)
-    expect(mixinSpy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
+    expect(baseSpy.mock.calls.length).toBe(1)
+    expect(mixinSpy.mock.calls.length).toBe(1)
     expect(vm.$el.textContent).toBe('123')
     expect(vm.$style).toBe(123)
 
@@ -127,7 +127,7 @@ describe('Global API: mixin', () => {
 
   // vue-class-component#83
   it('should work for a constructor mixin', () => {
-    const spy = jasmine.createSpy('global mixin')
+    const spy = vi.fn()
     const Mixin = Vue.extend({
       created () {
         spy(this.$options.myOption)
@@ -144,13 +144,13 @@ describe('Global API: mixin', () => {
 
   // vue-class-component#87
   it('should not drop original lifecycle hooks', () => {
-    const base = jasmine.createSpy('base')
+    const base = vi.fn()
 
     const Base = Vue.extend({
       beforeCreate: base
     })
 
-    const injected = jasmine.createSpy('injected')
+    const injected = vi.fn()
 
     // inject a function
     Base.options.beforeCreate = Base.options.beforeCreate.concat(injected)
@@ -170,7 +170,7 @@ describe('Global API: mixin', () => {
 
   // #9198
   it('should not mix global mixin lifecycle hook twice', () => {
-    const spy = jasmine.createSpy('global mixed in lifecycle hook')
+    const spy = vi.fn()
     Vue.mixin({
       created: spy
     })
@@ -192,6 +192,6 @@ describe('Global API: mixin', () => {
     const vm = new Child()
 
     expect(typeof vm.$options.methods.a).toBe('function')
-    expect(spy.calls.count()).toBe(1)
+    expect(spy.mock.calls.length).toBe(1)
   })
 })

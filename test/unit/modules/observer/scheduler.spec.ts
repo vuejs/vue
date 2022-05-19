@@ -12,7 +12,7 @@ function queueWatcher (watcher) {
 describe('Scheduler', () => {
   let spy
   beforeEach(() => {
-    spy = jasmine.createSpy('scheduler')
+    spy = vi.fn()
   })
 
   it('queueWatcher', done => {
@@ -20,7 +20,7 @@ describe('Scheduler', () => {
       run: spy
     })
     waitForUpdate(() => {
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
     }).then(done)
   })
 
@@ -34,7 +34,7 @@ describe('Scheduler', () => {
       run: spy
     })
     waitForUpdate(() => {
-      expect(spy.calls.count()).toBe(1)
+      expect(spy.mock.calls.length).toBe(1)
     }).then(done)
   })
 
@@ -49,7 +49,7 @@ describe('Scheduler', () => {
       run () { queueWatcher(job) }
     })
     waitForUpdate(() => {
-      expect(spy.calls.count()).toBe(2)
+      expect(spy.mock.calls.length).toBe(2)
     }).then(done)
   })
 

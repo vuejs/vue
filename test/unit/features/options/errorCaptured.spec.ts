@@ -4,7 +4,7 @@ describe('Options errorCaptured', () => {
   let globalSpy
 
   beforeEach(() => {
-    globalSpy = Vue.config.errorHandler = jasmine.createSpy()
+    globalSpy = Vue.config.errorHandler = vi.fn()
   })
 
   afterEach(() => {
@@ -12,7 +12,7 @@ describe('Options errorCaptured', () => {
   })
 
   it('should capture error from child component', () => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
 
     let child
     let err
@@ -68,7 +68,7 @@ describe('Options errorCaptured', () => {
   })
 
   it('should not propagate to global handler when returning true', () => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
 
     let child
     let err
@@ -249,7 +249,7 @@ describe('Options errorCaptured', () => {
   })
 
   it('should capture error from watcher', done => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
 
     let child
     let err
@@ -285,7 +285,7 @@ describe('Options errorCaptured', () => {
   })
 
   it('should capture promise error from watcher', done => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
 
     let child
     let err
@@ -323,7 +323,7 @@ describe('Options errorCaptured', () => {
   })
 
   it('should capture error from immediate watcher', done => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
 
     let child
     let err
@@ -360,7 +360,7 @@ describe('Options errorCaptured', () => {
   })
 
   it('should capture promise error from immediate watcher', done => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
 
     let child
     let err

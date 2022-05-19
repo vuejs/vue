@@ -131,7 +131,7 @@ describe('Component slot', () => {
   })
 
   it('fallback content should not be evaluated when the parent is providing it', () => {
-    const test = jasmine.createSpy('test')
+    const test = vi.fn()
     const vm = new Vue({
       template: '<test>slot default</test>',
       components: {
@@ -567,7 +567,7 @@ describe('Component slot', () => {
 
   // #3518
   it('events should not break when slot is toggled by v-if', done => {
-    const spy = jasmine.createSpy()
+    const spy = vi.fn()
     const vm = new Vue({
       template: `<test><div class="click" @click="test">hi</div></test>`,
       methods: {

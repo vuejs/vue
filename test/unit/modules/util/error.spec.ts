@@ -5,8 +5,8 @@ describe('invokeWithErrorHandling', () => {
   if (typeof Promise !== 'undefined') {
     it('should errorHandler call once when nested calls return rejected promise', done => {
       const originalHandler = Vue.config.errorHandler
-      const handler = Vue.config.errorHandler = jasmine.createSpy()
-      const userCatch = jasmine.createSpy()
+      const handler = Vue.config.errorHandler = vi.fn()
+      const userCatch = vi.fn()
       const err = new Error('fake error')
 
       invokeWithErrorHandling(() => {
@@ -15,7 +15,7 @@ describe('invokeWithErrorHandling', () => {
         })
       }).catch(userCatch).then(() => {
         Vue.config.errorHandler = originalHandler
-        expect(handler.calls.count()).toBe(1)
+        expect(handler.mock.calls.length).toBe(1)
         expect(userCatch).toHaveBeenCalledWith(err)
         done()
       })

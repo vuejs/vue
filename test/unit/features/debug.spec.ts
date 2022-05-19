@@ -88,7 +88,7 @@ found in
     const vm = new Vue()
 
     it('calls warnHandler if warnHandler is set', () => {
-      Vue.config.warnHandler = jasmine.createSpy()
+      Vue.config.warnHandler = vi.fn()
 
       warn(msg, vm)
 
