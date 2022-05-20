@@ -7,7 +7,7 @@ module.exports = {
       .assert.notVisible('.footer')
       .assert.count('.filters .selected', 1)
       .assert.evaluate(function () {
-        return document.querySelector('.filters .selected').textContent === 'All'
+        return document.querySelector('.filters .selected')!.textContent === 'All'
       })
 
     createNewItem('test')

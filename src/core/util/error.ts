@@ -1,6 +1,6 @@
 import config from '../config'
 import { warn } from './debug'
-import { inBrowser, inWeex } from './env'
+import { inBrowser } from './env'
 import { isPromise } from 'shared/util'
 import { pushTarget, popTarget } from '../observer/dep'
 
@@ -73,11 +73,7 @@ function logError(err, vm, info) {
     warn(`Error in ${info}: "${err.toString()}"`, vm)
   }
   /* istanbul ignore else */
-  if (
-    (inBrowser || inWeex) &&
-    typeof console !== 'undefined' &&
-    !__SSR_TEST__
-  ) {
+  if (inBrowser && typeof console !== 'undefined' && !__SSR_TEST__) {
     console.error(err)
   } else {
     throw err

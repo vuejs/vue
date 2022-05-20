@@ -19,19 +19,19 @@
     "removeComments": false,
     "jsx": "preserve",
     "lib": ["esnext", "dom"],
-    "types": ["node"],
+    "types": ["node", "vitest/globals"],
     "paths": {
-      "compiler/*": ["src/compiler/*"],
-      "core/*": ["src/core/*"],
+      "compiler/*": ["../src/compiler/*"],
+      "core/*": ["../src/core/*"],
 
-      "server/*": ["src/server/*"],
-      "sfc/*": ["src/sfc/*"],
-      "shared/*": ["src/shared/*"],
+      "server/*": ["../src/server/*"],
+      "sfc/*": ["../src/sfc/*"],
+      "shared/*": ["../src/shared/*"],
 
-      "web/*": ["src/platforms/web/*"],
+      "web/*": ["../src/platforms/web/*"],
 
-      "vue": ["src/platforms/web/entry-runtime-with-compiler"]
+      "vue": ["../src/platforms/web/entry-runtime-with-compiler"]
     }
   },
-  "include": ["src", "typescript"],
+  "include": ["../src", "../typescript", "."]
 }

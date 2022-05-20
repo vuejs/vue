@@ -4,10 +4,14 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "strict": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "vue": ["../../../types/index.d.ts"]
+    }
   },
   "compileOnSave": false,
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "../../../types"
   ]
 }

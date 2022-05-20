@@ -1,0 +1,71 @@
+name: 'ci'
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - main
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+
+      - name: Set node version to 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      - name: Run unit tests
+        run: pnpm run test:unit
+
+  # e2e-test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+
+  #     - name: Install pnpm
+  #       uses: pnpm/action-setup@v2
+
+  #     - name: Set node version to 16
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: 16
+  #         cache: 'pnpm'
+
+  #     - run: pnpm install
+
+  #     - name: Run e2e tests
+  #       run: pnpm run test:e2e
+
+  lint-and-test-dts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+
+      - name: Set node version to 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      - name: Run srouce type check
+        run: pnpm run ts-check
+
+      - name: Run eslint
+        run: pnpm run lint
+
+      - name: Run type declaration tests
+        run: pnpm run test:types

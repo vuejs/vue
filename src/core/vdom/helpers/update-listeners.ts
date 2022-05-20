@@ -64,9 +64,9 @@ export function updateListeners(
   createOnceHandler: Function,
   vm: Component
 ) {
-  let name, def, cur, old, event
+  let name, cur, old, event
   for (name in on) {
-    def = cur = on[name]
+    cur = on[name]
     old = oldOn[name]
     event = normalizeEvent(name)
     if (isUndef(cur)) {
