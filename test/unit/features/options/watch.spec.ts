@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import testObjectOption from '../../../helpers/test-object-option'
-import { finished } from 'stream';
 
 describe('Options watch', () => {
   let spy
@@ -163,7 +162,7 @@ describe('Options watch', () => {
   })
 
   it('should not warn proper usage', () => {
-    const vm = new Vue({
+    new Vue({
       data: {
         foo: { _bar: 1 }, // element has such watchers...
         prop1: 123

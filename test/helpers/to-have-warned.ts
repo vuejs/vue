@@ -3,7 +3,9 @@ import { SpyInstance } from 'vitest'
 expect.extend({
   toHaveBeenWarned(received: string) {
     asserted.add(received)
-    const passed = warn.mock.calls.some((args) => args[0].includes(received))
+    const passed = warn.mock.calls.some((args) =>
+      String(args[0]).includes(received)
+    )
     if (passed) {
       return {
         pass: true,
@@ -102,7 +104,7 @@ afterEach(() => {
     .map((args) => args[0])
     .filter((received) => {
       return !assertedArray.some((assertedMsg) => {
-        return received.includes(assertedMsg)
+        return String(received).includes(assertedMsg)
       })
     })
   warn.mockRestore()

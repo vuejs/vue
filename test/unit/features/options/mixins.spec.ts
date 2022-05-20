@@ -56,12 +56,12 @@ describe('Options mixins', () => {
     })
     expect(result.a).toBe(1)
     expect(result.b).toBe(1)
-    expect(result.directives.a).toBe(a)
-    expect(result.directives.b).toBe(b)
-    expect(result.directives.c).toBe(c)
-    expect(result.created[0]).toBe(f1)
-    expect(result.created[1]).toBe(f2)
-    expect(result.created[2]).toBe(f3)
+    expect(result.directives?.a).toBe(a)
+    expect(result.directives?.b).toBe(b)
+    expect(result.directives?.c).toBe(c)
+    expect(result.created?.[0]).toBe(f1)
+    expect(result.created?.[1]).toBe(f2)
+    expect(result.created?.[2]).toBe(f3)
     expect(result.template).toBe('bar')
   })
 
@@ -85,7 +85,7 @@ describe('Options mixins', () => {
         xyz: f3
       }
     })
-    expect(result.methods.xyz).toBe(f3)
+    expect(result.methods?.xyz).toBe(f3)
   })
 
   it('should accept constructors as mixins', () => {

@@ -152,7 +152,7 @@ describe('Error handling', () => {
     const spy = Vue.config.errorHandler = vi.fn()
     const vm = createTestInstance(components.render)
 
-    const args = spy.calls.argsFor(0)
+    const args = spy.mock.calls[0]
     expect(args[0].toString()).toContain('Error: render') // error
     expect(args[1]).toBe(vm.$refs.child) // vm
     expect(args[2]).toContain('render') // description
@@ -170,7 +170,6 @@ describe('Error handling', () => {
     Vue.nextTick(() => {
       expect(spy).toHaveBeenCalledWith(err1, undefined, 'nextTick')
 
-      // @ts-expect-error
       const vm = new Vue()
       vm.$nextTick(() => { throw err2 })
       Vue.nextTick(() => {

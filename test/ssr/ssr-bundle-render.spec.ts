@@ -131,7 +131,7 @@ function createAssertions (runInNewContext) {
         expect(err).toBeNull()
         expect(res).toBe(expected)
         expect(get).toHaveBeenCalledWith(key)
-        const setArgs = set.calls.argsFor(0)
+        const setArgs = set.mock.calls[0]
         expect(setArgs[0]).toBe(key)
         expect(setArgs[1].html).toBe(expected)
         expect(cache[key].html).toBe(expected)
@@ -178,7 +178,7 @@ function createAssertions (runInNewContext) {
         expect(res).toBe(expected)
         expect(has).toHaveBeenCalledWith(key)
         expect(get).not.toHaveBeenCalled()
-        const setArgs = set.calls.argsFor(0)
+        const setArgs = set.mock.calls[0]
         expect(setArgs[0]).toBe(key)
         expect(setArgs[1].html).toBe(expected)
         expect(cache[key].html).toBe(expected)

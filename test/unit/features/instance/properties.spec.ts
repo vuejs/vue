@@ -27,8 +27,8 @@ describe('Instance properties', () => {
         b () {}
       }
     })
-    expect(typeof vm.$options.methods.a).toBe('function')
-    expect(typeof vm.$options.methods.b).toBe('function')
+    expect(typeof vm.$options.methods?.a).toBe('function')
+    expect(typeof vm.$options.methods?.b).toBe('function')
   })
 
   it('$root/$children', done => {
@@ -161,7 +161,6 @@ describe('Instance properties', () => {
   })
 
   it('warn mutating $attrs', () => {
-    // @ts-expect-error
     const vm = new Vue()
     vm.$attrs = {}
     expect(`$attrs is readonly`).toHaveBeenWarned()
@@ -197,7 +196,6 @@ describe('Instance properties', () => {
   })
 
   it('warn mutating $listeners', () => {
-    // @ts-expect-error
     const vm = new Vue()
     vm.$listeners = {}
     expect(`$listeners is readonly`).toHaveBeenWarned()

@@ -78,8 +78,7 @@ describe('Options lifecycle hooks', () => {
 
     // #3898
     it('should call for manually mounted instance with parent', () => {
-      // @ts-expect-error
-      const vm = new Vue()
+      const parent = new Vue()
       expect(spy).not.toHaveBeenCalled()
       new Vue({
         parent,

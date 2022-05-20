@@ -35,13 +35,13 @@ describe('Instance methods lifecycle', () => {
     })
 
     it('Dep.target should be undefined in lifecycle', () => {
-      const vm = new Vue({
+      new Vue({
         template: '<div><my-component></my-component></div>',
         components: {
           myComponent: {
             template: '<div>hi</div>',
             mounted () {
-              const _msg = this.msg
+              this.msg
               expect(Dep.target).toBe(undefined)
             },
             computed: {

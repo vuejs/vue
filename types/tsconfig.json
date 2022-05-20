@@ -2,26 +2,16 @@
   "compilerOptions": {
     "target": "es5",
     "experimentalDecorators": true,
-    "lib": [
-      "dom",
-      "es2015"
-    ],
-    "types": [
-      "node",
-      "jasmine",
-      "webpack-env"
-    ],
+    "lib": ["dom", "es2015"],
+    "types": ["node"],
     "module": "commonjs",
     "strict": true,
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "vue": ["../index.d.ts"]
-    },
+    }
   },
-  "include": [
-    "./*.d.ts",
-    "*.ts"
-  ],
+  "include": ["./*.d.ts", "*.ts"],
   "compileOnSave": false
 }

@@ -1,3 +1,4 @@
+import { SpyInstanceFn } from 'vitest'
 import Vue from 'vue'
 
 describe('Options directives', () => {
@@ -152,7 +153,7 @@ describe('Options directives', () => {
   })
 
   it('should properly handle same node with different directive sets', done => {
-    const spies = {}
+    const spies: Record<string, SpyInstanceFn> = {}
     const createSpy = name => (spies[name] = vi.fn())
     const vm = new Vue({
       data: {
@@ -249,20 +250,20 @@ describe('Options directives', () => {
 
     const oldEl = vm.$el
     expect(dir.bind.mock.calls.length).toBe(1)
-    expect(dir.bind.calls.argsFor(0)[0]).toBe(oldEl)
+    expect(dir.bind.mock.calls[0][0]).toBe(oldEl)
     expect(dir.inserted.mock.calls.length).toBe(1)
-    expect(dir.inserted.calls.argsFor(0)[0]).toBe(oldEl)
+    expect(dir.inserted.mock.calls[0][0]).toBe(oldEl)
     expect(dir.unbind).not.toHaveBeenCalled()
 
     vm.$refs.child.ok = false
     waitForUpdate(() => {
       expect(vm.$el.tagName).toBe('SPAN')
       expect(dir.bind.mock.calls.length).toBe(2)
-      expect(dir.bind.calls.argsFor(1)[0]).toBe(vm.$el)
+      expect(dir.bind.mock.calls[1][0]).toBe(vm.$el)
       expect(dir.inserted.mock.calls.length).toBe(2)
-      expect(dir.inserted.calls.argsFor(1)[0]).toBe(vm.$el)
+      expect(dir.inserted.mock.calls[1][0]).toBe(vm.$el)
       expect(dir.unbind.mock.calls.length).toBe(1)
-      expect(dir.unbind.calls.argsFor(0)[0]).toBe(oldEl)
+      expect(dir.unbind.mock.calls[0][0]).toBe(oldEl)
     }).then(done)
   })
 

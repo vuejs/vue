@@ -16,7 +16,7 @@ describe('Options data', () => {
   })
 
   it('should merge data properly', () => {
-    const Test: Vue = Vue.extend({
+    const Test = Vue.extend({
       data () {
         return { a: 1 }
       }

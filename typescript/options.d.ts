@@ -12,6 +12,8 @@ declare type InternalComponentOptions = {
 type InjectKey = string | Symbol;
 
 declare type ComponentOptions = {
+  [key: string]: any
+
   componentId?: string;
 
   // data

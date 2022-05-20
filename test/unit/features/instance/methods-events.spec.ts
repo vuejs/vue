@@ -3,8 +3,7 @@ import Vue from 'vue'
 describe('Instance methods events', () => {
   let vm, spy
   beforeEach(() => {
-    // @ts-expect-error
-    const vm = new Vue()
+    vm = new Vue({})
     spy = vi.fn()
   })
 
