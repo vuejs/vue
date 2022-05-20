@@ -1,4 +1,3 @@
-
 import RenderStream from './render-stream'
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
@@ -29,7 +28,9 @@ export type RenderOptions = {
   directives?: Object
   isUnaryTag?: Function
   cache?: RenderCache
-  template?: string | ((content: string, context: any) => string)
+  template?:
+    | string
+    | ((content: string, context: any) => string | Promise<string>)
   inject?: boolean
   basedir?: string
   shouldPreload?: Function
@@ -49,7 +50,7 @@ export function createRenderer({
   shouldPreload,
   shouldPrefetch,
   clientManifest,
-  serializer,
+  serializer
 }: RenderOptions = {}): Renderer {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
   const templateRenderer = new TemplateRenderer({
@@ -60,7 +61,7 @@ export function createRenderer({
     // @ts-expect-error
     shouldPrefetch,
     clientManifest,
-    serializer,
+    serializer
   })
 
   return {
@@ -80,7 +81,7 @@ export function createRenderer({
       // no callback, return Promise
       let promise
       if (!cb) {
-        ({ promise, cb } = createPromiseCallback())
+        ;({ promise, cb } = createPromiseCallback())
       }
 
       let result = ''
@@ -158,6 +159,6 @@ export function createRenderer({
         }
         return templateStream
       }
-    },
+    }
   }
 }

@@ -1,112 +1,95 @@
+// @vitest-environment node
+
 import LRU from 'lru-cache'
-import { compileWithWebpack } from './compile-with-webpack'
-import { createBundleRenderer } from 'web/entry-server-renderer'
-import VueSSRServerPlugin from 'server/webpack-plugin/server'
+import { createWebpackBundleRenderer } from './compile-with-webpack'
 
-;(global as any).__SSR_TEST__ = true
-
-export function createRenderer (file, options, cb) {
-  if (typeof options === 'function') {
-    cb = options
-    options = undefined
-  }
-  const asBundle = !!(options && options.asBundle)
-  if (options) delete options.asBundle
-
-  compileWithWebpack(file, {
-    target: 'node',
-    devtool: asBundle ? 'source-map' : false,
-    output: {
-      path: '/',
-      filename: 'bundle.js',
-      libraryTarget: 'commonjs2'
-    },
-    externals: [require.resolve('../../dist/vue.runtime.common.js')],
-    plugins: asBundle
-      ? [new VueSSRServerPlugin()]
-      : []
-  }, fs => {
-    const bundle = asBundle
-      ? JSON.parse(fs.readFileSync('/vue-ssr-server-bundle.json', 'utf-8'))
-      : fs.readFileSync('/bundle.js', 'utf-8')
-    const renderer = createBundleRenderer(bundle, options)
-    cb(renderer)
-  })
-}
-
-describe.skip('SSR: bundle renderer', () => {
+describe('SSR: bundle renderer', () => {
   createAssertions(true)
   createAssertions(false)
 })
 
-function createAssertions (runInNewContext) {
-  it('renderToString', done => {
-    createRenderer('app.js', { runInNewContext }, renderer => {
-      const context = { url: '/test' }
-      renderer.renderToString(context, (err, res) => {
-        expect(err).toBeNull()
-        expect(res).toBe('<div data-server-rendered="true">/test</div>')
-        expect(context.msg).toBe('hello')
-        done()
-      })
+function createAssertions(runInNewContext) {
+  it('renderToString', async () => {
+    const renderer = await createWebpackBundleRenderer('app.js', {
+      runInNewContext
     })
+    const context: any = { url: '/test' }
+    const res = await renderer.renderToString(context)
+    expect(res).toBe('<div data-server-rendered="true">/test</div>')
+    expect(context.msg).toBe('hello')
   })
 
-  it('renderToStream', done => {
-    createRenderer('app.js', { runInNewContext }, renderer => {
-      const context = { url: '/test' }
+  it('renderToStream', async () => {
+    const renderer = await createWebpackBundleRenderer('app.js', {
+      runInNewContext
+    })
+    const context: any = { url: '/test' }
+
+    const res = await new Promise((resolve, reject) => {
       const stream = renderer.renderToStream(context)
       let res = ''
-      stream.on('data', chunk => {
+      stream.on('data', (chunk) => {
         res += chunk.toString()
       })
+      stream.on('error', reject)
       stream.on('end', () => {
-        expect(res).toBe('<div data-server-rendered="true">/test</div>')
-        expect(context.msg).toBe('hello')
-        done()
+        resolve(res)
       })
     })
+
+    expect(res).toBe('<div data-server-rendered="true">/test</div>')
+    expect(context.msg).toBe('hello')
   })
 
-  it('renderToString catch error', done => {
-    createRenderer('error.js', { runInNewContext }, renderer => {
-      renderer.renderToString(err => {
-        expect(err.message).toBe('foo')
-        done()
-      })
+  it('renderToString catch error', async () => {
+    const renderer = await createWebpackBundleRenderer('error.js', {
+      runInNewContext
     })
+    try {
+      await renderer.renderToString()
+    } catch (err: any) {
+      expect(err.message).toBe('foo')
+    }
   })
 
-  it('renderToString catch Promise rejection', done => {
-    createRenderer('promise-rejection.js', { runInNewContext }, renderer => {
-      renderer.renderToString(err => {
-        expect(err.message).toBe('foo')
-        done()
-      })
+  it('renderToString catch Promise rejection', async () => {
+    const renderer = await createWebpackBundleRenderer('promise-rejection.js', {
+      runInNewContext
     })
+    try {
+      await renderer.renderToString()
+    } catch (err: any) {
+      expect(err.message).toBe('foo')
+    }
   })
 
-  it('renderToStream catch error', done => {
-    createRenderer('error.js', { runInNewContext }, renderer => {
+  it('renderToStream catch error', async () => {
+    const renderer = await createWebpackBundleRenderer('error.js', {
+      runInNewContext
+    })
+
+    const err = await new Promise<Error>((resolve) => {
       const stream = renderer.renderToStream()
-      stream.on('error', err => {
-        expect(err.message).toBe('foo')
-        done()
-      })
+      stream.on('error', resolve)
     })
+
+    expect(err.message).toBe('foo')
   })
 
-  it('renderToStream catch Promise rejection', done => {
-    createRenderer('promise-rejection.js', { runInNewContext }, renderer => {
+  it('renderToStream catch Promise rejection', async () => {
+    const renderer = await createWebpackBundleRenderer('promise-rejection.js', {
+      runInNewContext
+    })
+
+    const err = await new Promise<Error>((resolve) => {
       const stream = renderer.renderToStream()
-      stream.on('error', err => {
-        expect(err.message).toBe('foo')
-        done()
-      })
+      stream.on('error', resolve)
     })
+
+    expect(err.message).toBe('foo')
   })
 
-  it('render with cache (get/set)', done => {
+  it('render with cache (get/set)', async () => {
     const cache = {}
     const get = vi.fn()
     const set = vi.fn()
@@ -126,29 +109,25 @@ function createAssertions (runInNewContext) {
         }
       }
     }
-    createRenderer('cache.js', options, renderer => {
-      const expected = '<div data-server-rendered="true">/test</div>'
-      const key = 'app::1'
-      renderer.renderToString((err, res) => {
-        expect(err).toBeNull()
-        expect(res).toBe(expected)
-        expect(get).toHaveBeenCalledWith(key)
-        const setArgs = set.mock.calls[0]
-        expect(setArgs[0]).toBe(key)
-        expect(setArgs[1].html).toBe(expected)
-        expect(cache[key].html).toBe(expected)
-        renderer.renderToString((err, res) => {
-          expect(err).toBeNull()
-          expect(res).toBe(expected)
-          expect(get.mock.calls.length).toBe(2)
-          expect(set.mock.calls.length).toBe(1)
-          done()
-        })
-      })
-    })
+    const renderer = await createWebpackBundleRenderer('cache.js', options)
+    const expected = '<div data-server-rendered="true">/test</div>'
+    const key = 'app::1'
+    const res = await renderer.renderToString()
+
+    expect(res).toBe(expected)
+    expect(get).toHaveBeenCalledWith(key)
+    const setArgs = set.mock.calls[0]
+    expect(setArgs[0]).toBe(key)
+    expect(setArgs[1].html).toBe(expected)
+    expect(cache[key].html).toBe(expected)
+
+    const res2 = await renderer.renderToString()
+    expect(res2).toBe(expected)
+    expect(get.mock.calls.length).toBe(2)
+    expect(set.mock.calls.length).toBe(1)
   })
 
-  it('render with cache (get/set/has)', done => {
+  it('render with cache (get/set/has)', async () => {
     const cache = {}
     const has = vi.fn()
     const get = vi.fn()
@@ -162,7 +141,7 @@ function createAssertions (runInNewContext) {
           cb(!!cache[key])
         },
         // sync
-        get: key => {
+        get: (key) => {
           get(key)
           return cache[key]
         },
@@ -172,68 +151,60 @@ function createAssertions (runInNewContext) {
         }
       }
     }
-    createRenderer('cache.js', options, renderer => {
-      const expected = '<div data-server-rendered="true">/test</div>'
-      const key = 'app::1'
-      renderer.renderToString((err, res) => {
-        expect(err).toBeNull()
-        expect(res).toBe(expected)
-        expect(has).toHaveBeenCalledWith(key)
-        expect(get).not.toHaveBeenCalled()
-        const setArgs = set.mock.calls[0]
-        expect(setArgs[0]).toBe(key)
-        expect(setArgs[1].html).toBe(expected)
-        expect(cache[key].html).toBe(expected)
-        renderer.renderToString((err, res) => {
-          expect(err).toBeNull()
-          expect(res).toBe(expected)
-          expect(has.mock.calls.length).toBe(2)
-          expect(get.mock.calls.length).toBe(1)
-          expect(set.mock.calls.length).toBe(1)
-          done()
-        })
-      })
-    })
+    const renderer = await createWebpackBundleRenderer('cache.js', options)
+    const expected = '<div data-server-rendered="true">/test</div>'
+    const key = 'app::1'
+    const res = await renderer.renderToString()
+    expect(res).toBe(expected)
+    expect(has).toHaveBeenCalledWith(key)
+    expect(get).not.toHaveBeenCalled()
+    const setArgs = set.mock.calls[0]
+    expect(setArgs[0]).toBe(key)
+    expect(setArgs[1].html).toBe(expected)
+    expect(cache[key].html).toBe(expected)
+
+    const res2 = await renderer.renderToString()
+    expect(res2).toBe(expected)
+    expect(has.mock.calls.length).toBe(2)
+    expect(get.mock.calls.length).toBe(1)
+    expect(set.mock.calls.length).toBe(1)
   })
 
-  it('render with cache (nested)', done => {
-    const cache = new LRU({ maxAge: Infinity })
-    spyOn(cache, 'get').and.callThrough()
-    spyOn(cache, 'set').and.callThrough()
+  it('render with cache (nested)', async () => {
+    const cache = new LRU({ ttl: 65535 }) as any
+    vi.spyOn(cache, 'get')
+    vi.spyOn(cache, 'set')
     const options = {
       cache,
       runInNewContext
     }
-    createRenderer('nested-cache.js', options, renderer => {
-      const expected = '<div data-server-rendered="true">/test</div>'
-      const key = 'app::1'
-      const context1 = { registered: [] }
-      const context2 = { registered: [] }
-      renderer.renderToString(context1, (err, res) => {
-        expect(err).toBeNull()
-        expect(res).toBe(expected)
-        expect(cache.set.mock.calls.length).toBe(3) // 3 nested components cached
-        const cached = cache.get(key)
-        expect(cached.html).toBe(expected)
-        expect(cache.get.mock.calls.length).toBe(1)
+    const renderer = await createWebpackBundleRenderer(
+      'nested-cache.js',
+      options
+    )
+    const expected = '<div data-server-rendered="true">/test</div>'
+    const key = 'app::1'
+    const context1 = { registered: [] }
+    const context2 = { registered: [] }
+    const res = await renderer.renderToString(context1)
+    expect(res).toBe(expected)
+    expect(cache.set.mock.calls.length).toBe(3) // 3 nested components cached
+    const cached = cache.get(key)
+    expect(cached.html).toBe(expected)
+    expect(cache.get.mock.calls.length).toBe(1)
 
-        // assert component usage registration for nested children
-        expect(context1.registered).toEqual(['app', 'child', 'grandchild'])
+    // assert component usage registration for nested children
+    expect(context1.registered).toEqual(['app', 'child', 'grandchild'])
 
-        renderer.renderToString(context2, (err, res) => {
-          expect(err).toBeNull()
-          expect(res).toBe(expected)
-          expect(cache.set.mock.calls.length).toBe(3) // no new cache sets
-          expect(cache.get.mock.calls.length).toBe(2) // 1 get for root
+    const res2 = await renderer.renderToString(context2)
+    expect(res2).toBe(expected)
+    expect(cache.set.mock.calls.length).toBe(3) // no new cache sets
+    expect(cache.get.mock.calls.length).toBe(2) // 1 get for root
 
-          expect(context2.registered).toEqual(['app', 'child', 'grandchild'])
-          done()
-        })
-      })
-    })
+    expect(context2.registered).toEqual(['app', 'child', 'grandchild'])
   })
 
-  it('render with cache (opt-out)', done => {
+  it('render with cache (opt-out)', async () => {
     const cache = {}
     const get = vi.fn()
     const set = vi.fn()
@@ -253,97 +224,103 @@ function createAssertions (runInNewContext) {
         }
       }
     }
-    createRenderer('cache-opt-out.js', options, renderer => {
-      const expected = '<div data-server-rendered="true">/test</div>'
-      renderer.renderToString((err, res) => {
-        expect(err).toBeNull()
-        expect(res).toBe(expected)
-        expect(get).not.toHaveBeenCalled()
-        expect(set).not.toHaveBeenCalled()
-        renderer.renderToString((err, res) => {
-          expect(err).toBeNull()
-          expect(res).toBe(expected)
-          expect(get).not.toHaveBeenCalled()
-          expect(set).not.toHaveBeenCalled()
-          done()
-        })
-      })
-    })
+    const renderer = await createWebpackBundleRenderer(
+      'cache-opt-out.js',
+      options
+    )
+    const expected = '<div data-server-rendered="true">/test</div>'
+    const res = await renderer.renderToString()
+    expect(res).toBe(expected)
+    expect(get).not.toHaveBeenCalled()
+    expect(set).not.toHaveBeenCalled()
+    const res2 = await renderer.renderToString()
+    expect(res2).toBe(expected)
+    expect(get).not.toHaveBeenCalled()
+    expect(set).not.toHaveBeenCalled()
   })
 
-  it('renderToString (bundle format with code split)', done => {
-    createRenderer('split.js', { runInNewContext, asBundle: true }, renderer => {
-      const context = { url: '/test' }
-      renderer.renderToString(context, (err, res) => {
-        expect(err).toBeNull()
-        expect(res).toBe('<div data-server-rendered="true">/test<div>async test.woff2 test.png</div></div>')
-        done()
-      })
+  it('renderToString (bundle format with code split)', async () => {
+    const renderer = await createWebpackBundleRenderer('split.js', {
+      runInNewContext,
+      asBundle: true
     })
+    const context = { url: '/test' }
+    const res = await renderer.renderToString(context)
+    expect(res).toBe(
+      '<div data-server-rendered="true">/test<div>async test.woff2 test.png</div></div>'
+    )
   })
 
-  it('renderToStream (bundle format with code split)', done => {
-    createRenderer('split.js', { runInNewContext, asBundle: true }, renderer => {
-      const context = { url: '/test' }
+  it('renderToStream (bundle format with code split)', async () => {
+    const renderer = await createWebpackBundleRenderer('split.js', {
+      runInNewContext,
+      asBundle: true
+    })
+    const context = { url: '/test' }
+
+    const res = await new Promise((resolve, reject) => {
       const stream = renderer.renderToStream(context)
       let res = ''
-      stream.on('data', chunk => {
+      stream.on('data', (chunk) => {
         res += chunk.toString()
       })
+      stream.on('error', reject)
       stream.on('end', () => {
-        expect(res).toBe('<div data-server-rendered="true">/test<div>async test.woff2 test.png</div></div>')
-        done()
+        resolve(res)
       })
     })
+
+    expect(res).toBe(
+      '<div data-server-rendered="true">/test<div>async test.woff2 test.png</div></div>'
+    )
   })
 
-  it('renderToString catch error (bundle format with source map)', done => {
-    createRenderer('error.js', { runInNewContext, asBundle: true }, renderer => {
-      renderer.renderToString(err => {
-        expect(err.stack).toContain('test/ssr/fixtures/error.js:1:6')
-        expect(err.message).toBe('foo')
-        done()
-      })
+  it('renderToString catch error (bundle format with source map)', async () => {
+    const renderer = await createWebpackBundleRenderer('error.js', {
+      runInNewContext,
+      asBundle: true
     })
+
+    try {
+      await renderer.renderToString()
+    } catch (err: any) {
+      expect(err.stack).toContain('test/ssr/fixtures/error.js:1:0')
+      expect(err.message).toBe('foo')
+    }
   })
 
-  it('renderToString catch error (bundle format with source map)', done => {
-    createRenderer('error.js', { runInNewContext, asBundle: true }, renderer => {
+  it('renderToStream catch error (bundle format with source map)', async () => {
+    const renderer = await createWebpackBundleRenderer('error.js', {
+      runInNewContext,
+      asBundle: true
+    })
+
+    const err = await new Promise<Error>((resolve) => {
       const stream = renderer.renderToStream()
-      stream.on('error', err => {
-        expect(err.stack).toContain('test/ssr/fixtures/error.js:1:6')
-        expect(err.message).toBe('foo')
-        done()
-      })
+      stream.on('error', resolve)
     })
+
+    expect(err.stack).toContain('test/ssr/fixtures/error.js:1:0')
+    expect(err.message).toBe('foo')
   })
 
-  it('renderToString return Promise', done => {
-    createRenderer('app.js', { runInNewContext }, renderer => {
-      const context = { url: '/test' }
-      renderer.renderToString(context).then(res => {
-        expect(res).toBe('<div data-server-rendered="true">/test</div>')
-        expect(context.msg).toBe('hello')
-        done()
-      })
+  it('renderToString w/ callback', async () => {
+    const renderer = await createWebpackBundleRenderer('app.js', {
+      runInNewContext
     })
+    const context: any = { url: '/test' }
+    const res = await new Promise((r) =>
+      renderer.renderToString(context, (_err, res) => r(res))
+    )
+    expect(res).toBe('<div data-server-rendered="true">/test</div>')
+    expect(context.msg).toBe('hello')
   })
 
-  it('renderToString return Promise (error)', done => {
-    createRenderer('error.js', { runInNewContext }, renderer => {
-      renderer.renderToString().catch(err => {
-        expect(err.message).toBe('foo')
-        done()
-      })
+  it('renderToString error handling w/ callback', async () => {
+    const renderer = await createWebpackBundleRenderer('error.js', {
+      runInNewContext
     })
-  })
-
-  it('renderToString return Promise (Promise rejection)', done => {
-    createRenderer('promise-rejection.js', { runInNewContext }, renderer => {
-      renderer.renderToString().catch(err => {
-        expect(err.message).toBe('foo')
-        done()
-      })
-    })
+    const err = await new Promise<Error>((r) => renderer.renderToString(r))
+    expect(err.message).toBe('foo')
   })
 }

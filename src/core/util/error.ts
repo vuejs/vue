@@ -73,7 +73,7 @@ function logError(err, vm, info) {
     warn(`Error in ${info}: "${err.toString()}"`, vm)
   }
   /* istanbul ignore else */
-  if (inBrowser && typeof console !== 'undefined' && !__SSR_TEST__) {
+  if (inBrowser && typeof console !== 'undefined') {
     console.error(err)
   } else {
     throw err

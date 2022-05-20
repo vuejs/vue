@@ -1,4 +1,3 @@
-
 const path = require('path')
 const serialize = require('serialize-javascript')
 
@@ -10,7 +9,9 @@ import type { ParsedTemplate } from './parse-template'
 import type { AsyncFileMapper } from './create-async-file-mapper'
 
 type TemplateRendererOptions = {
-  template?: string | ((content: string, context: any) => string)
+  template?:
+    | string
+    | ((content: string, context: any) => string | Promise<string>)
   inject?: boolean
   clientManifest?: ClientManifest
   shouldPreload?: (file: string, type: string) => boolean
@@ -286,7 +287,7 @@ function normalizeFile(file: string): Resource {
     file,
     extension,
     fileWithoutQuery: withoutQuery,
-    asType: getPreloadType(extension),
+    asType: getPreloadType(extension)
   }
 }
 

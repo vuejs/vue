@@ -1,5 +1,3 @@
-declare const __SSR_TEST__: boolean;
-
 interface Window {
   __VUE_DEVTOOLS_GLOBAL_HOOK__: DevtoolsHook;
 }

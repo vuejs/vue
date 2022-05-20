@@ -1,16 +1,19 @@
+// @vitest-environment node
+
 import Vue from 'vue'
-import { compileWithWebpack } from './compile-with-webpack'
+import {
+  compileWithWebpack,
+  createWebpackBundleRenderer
+} from './compile-with-webpack'
 import { createRenderer } from 'web/entry-server-renderer'
 import VueSSRClientPlugin from 'server/webpack-plugin/client'
-import { createRenderer as createBundleRenderer } from './ssr-bundle-render.spec.js'
-
-;(global as any).__SSR_TEST__ = true
+import { RenderOptions } from '../../src/server/create-renderer'
 
 const defaultTemplate = `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
 const interpolateTemplate = `<html><head><title>{{ title }}</title></head><body><!--vue-ssr-outlet-->{{{ snippet }}}</body></html>`
 
-function generateClientManifest (file, cb) {
-  compileWithWebpack(file, {
+async function generateClientManifest(file: string) {
+  const fs = await compileWithWebpack(file, {
     output: {
       path: '/',
       publicPath: '/',
@@ -21,30 +24,31 @@ function generateClientManifest (file, cb) {
         name: 'manifest'
       }
     },
-    plugins: [
-      new VueSSRClientPlugin()
-    ]
-  }, fs => {
-    cb(JSON.parse(fs.readFileSync('/vue-ssr-client-manifest.json', 'utf-8')))
+    plugins: [new VueSSRClientPlugin()]
   })
+  return JSON.parse(fs.readFileSync('/vue-ssr-client-manifest.json', 'utf-8'))
 }
 
-function createRendererWithManifest (file, options, cb) {
-  if (typeof options === 'function') {
-    cb = options
-    options = null
-  }
-  generateClientManifest(file, clientManifest => {
-    createBundleRenderer(file, Object.assign({
-      asBundle: true,
-      template: defaultTemplate,
-      clientManifest
-    }, options), cb)
-  })
+async function createRendererWithManifest(
+  file: string,
+  options?: RenderOptions
+) {
+  const clientManifest = await generateClientManifest(file)
+  return createWebpackBundleRenderer(
+    file,
+    Object.assign(
+      {
+        asBundle: true,
+        template: defaultTemplate,
+        clientManifest
+      },
+      options
+    )
+  )
 }
 
-describe.skip('SSR: template option', () => {
-  it('renderToString', done => {
+describe('SSR: template option', () => {
+  it('renderToString', async () => {
     const renderer = createRenderer({
       template: defaultTemplate
     })
@@ -55,21 +59,22 @@ describe.skip('SSR: template option', () => {
       state: { a: 1 }
     }
 
-    renderer.renderToString(new Vue({
-      template: '<div>hi</div>'
-    }), context, (err, res) => {
-      expect(err).toBeNull()
-      expect(res).toContain(
-        `<html><head>${context.head}${context.styles}</head><body>` +
+    const res = await renderer.renderToString(
+      new Vue({
+        template: '<div>hi</div>'
+      }),
+      context
+    )
+
+    expect(res).toContain(
+      `<html><head>${context.head}${context.styles}</head><body>` +
         `<div data-server-rendered="true">hi</div>` +
         `<script>window.__INITIAL_STATE__={"a":1}</script>` +
         `</body></html>`
-      )
-      done()
-    })
+    )
   })
 
-  it('renderToString with interpolation', done => {
+  it('renderToString with interpolation', async () => {
     const renderer = createRenderer({
       template: interpolateTemplate
     })
@@ -82,12 +87,15 @@ describe.skip('SSR: template option', () => {
       state: { a: 1 }
     }
 
-    renderer.renderToString(new Vue({
-      template: '<div>hi</div>'
-    }), context, (err, res) => {
-      expect(err).toBeNull()
-      expect(res).toContain(
-        `<html><head>` +
+    const res = await renderer.renderToString(
+      new Vue({
+        template: '<div>hi</div>'
+      }),
+      context
+    )
+
+    expect(res).toContain(
+      `<html><head>` +
         // double mustache should be escaped
         `<title>&lt;script&gt;hacks&lt;/script&gt;</title>` +
         `${context.head}${context.styles}</head><body>` +
@@ -96,12 +104,10 @@ describe.skip('SSR: template option', () => {
         // triple should be raw
         `<div>foo</div>` +
         `</body></html>`
-      )
-      done()
-    })
+    )
   })
 
-  it('renderToString with interpolation and context.rendered', done => {
+  it('renderToString with interpolation and context.rendered', async () => {
     const renderer = createRenderer({
       template: interpolateTemplate
     })
@@ -112,17 +118,19 @@ describe.skip('SSR: template option', () => {
       head: '<meta name="viewport" content="width=device-width">',
       styles: '<style>h1 { color: red }</style>',
       state: { a: 0 },
-      rendered: context => {
+      rendered: (context) => {
         context.state.a = 1
       }
     }
 
-    renderer.renderToString(new Vue({
-      template: '<div>hi</div>'
-    }), context, (err, res) => {
-      expect(err).toBeNull()
-      expect(res).toContain(
-        `<html><head>` +
+    const res = await renderer.renderToString(
+      new Vue({
+        template: '<div>hi</div>'
+      }),
+      context
+    )
+    expect(res).toContain(
+      `<html><head>` +
         // double mustache should be escaped
         `<title>&lt;script&gt;hacks&lt;/script&gt;</title>` +
         `${context.head}${context.styles}</head><body>` +
@@ -131,74 +139,84 @@ describe.skip('SSR: template option', () => {
         // triple should be raw
         `<div>foo</div>` +
         `</body></html>`
+    )
+  })
+
+  it('renderToString w/ template function', async () => {
+    const renderer = createRenderer({
+      template: (content, context) =>
+        `<html><head>${context.head}</head>${content}</html>`
+    })
+
+    const context = {
+      head: '<meta name="viewport" content="width=device-width">'
+    }
+
+    const res = await renderer.renderToString(
+      new Vue({
+        template: '<div>hi</div>'
+      }),
+      context
+    )
+
+    expect(res).toContain(
+      `<html><head>${context.head}</head><div data-server-rendered="true">hi</div></html>`
+    )
+  })
+
+  it('renderToString w/ template function returning Promise', async () => {
+    const renderer = createRenderer({
+      template: (content, context) =>
+        new Promise<string>((resolve) => {
+          setTimeout(() => {
+            resolve(`<html><head>${context.head}</head>${content}</html>`)
+          }, 0)
+        })
+    })
+
+    const context = {
+      head: '<meta name="viewport" content="width=device-width">'
+    }
+
+    const res = await renderer.renderToString(
+      new Vue({
+        template: '<div>hi</div>'
+      }),
+      context
+    )
+
+    expect(res).toContain(
+      `<html><head>${context.head}</head><div data-server-rendered="true">hi</div></html>`
+    )
+  })
+
+  it('renderToString w/ template function returning Promise w/ rejection', async () => {
+    const renderer = createRenderer({
+      template: () =>
+        new Promise((resolve, reject) => {
+          setTimeout(() => {
+            reject(new Error(`foo`))
+          }, 0)
+        })
+    })
+
+    const context = {
+      head: '<meta name="viewport" content="width=device-width">'
+    }
+
+    try {
+      await renderer.renderToString(
+        new Vue({
+          template: '<div>hi</div>'
+        }),
+        context
       )
-      done()
-    })
-  })
-
-  it('renderToString w/ template function', done => {
-    const renderer = createRenderer({
-      template: (content, context) => `<html><head>${context.head}</head>${content}</html>`
-    })
-
-    const context = {
-      head: '<meta name="viewport" content="width=device-width">'
-    }
-
-    renderer.renderToString(new Vue({
-      template: '<div>hi</div>'
-    }), context, (err, res) => {
-      expect(err).toBeNull()
-      expect(res).toContain(`<html><head>${context.head}</head><div data-server-rendered="true">hi</div></html>`)
-      done()
-    })
-  })
-
-  it('renderToString w/ template function returning Promise', done => {
-    const renderer = createRenderer({
-      template: (content, context) => new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(`<html><head>${context.head}</head>${content}</html>`)
-        }, 0)
-      })
-    })
-
-    const context = {
-      head: '<meta name="viewport" content="width=device-width">'
-    }
-
-    renderer.renderToString(new Vue({
-      template: '<div>hi</div>'
-    }), context, (err, res) => {
-      expect(err).toBeNull()
-      expect(res).toContain(`<html><head>${context.head}</head><div data-server-rendered="true">hi</div></html>`)
-      done()
-    })
-  })
-
-  it('renderToString w/ template function returning Promise w/ rejection', done => {
-    const renderer = createRenderer({
-      template: () => new Promise((resolve, reject) => {
-        setTimeout(() => {
-          reject(new Error(`foo`))
-        }, 0)
-      })
-    })
-
-    const context = {
-      head: '<meta name="viewport" content="width=device-width">'
-    }
-
-    renderer.renderToString(new Vue({
-      template: '<div>hi</div>'
-    }), context, (err, res) => {
+    } catch (err: any) {
       expect(err.message).toBe(`foo`)
-      expect(res).toBeUndefined()
-      done()
-    })
+    }
   })
 
-  it('renderToStream', done => {
+  it('renderToStream', async () => {
     const renderer = createRenderer({
       template: defaultTemplate
     })
@@ -209,26 +227,33 @@ describe.skip('SSR: template option', () => {
       state: { a: 1 }
     }
 
-    const stream = renderer.renderToStream(new Vue({
-      template: '<div>hi</div>'
-    }), context)
+    const res = await new Promise((resolve, reject) => {
+      const stream = renderer.renderToStream(
+        new Vue({
+          template: '<div>hi</div>'
+        }),
+        context
+      )
 
-    let res = ''
-    stream.on('data', chunk => {
-      res += chunk
+      let res = ''
+      stream.on('data', (chunk) => {
+        res += chunk
+      })
+      stream.on('error', reject)
+      stream.on('end', () => {
+        resolve(res)
+      })
     })
-    stream.on('end', () => {
-      expect(res).toContain(
-        `<html><head>${context.head}${context.styles}</head><body>` +
+
+    expect(res).toContain(
+      `<html><head>${context.head}${context.styles}</head><body>` +
         `<div data-server-rendered="true">hi</div>` +
         `<script>window.__INITIAL_STATE__={"a":1}</script>` +
         `</body></html>`
-      )
-      done()
-    })
+    )
   })
 
-  it('renderToStream with interpolation', done => {
+  it('renderToStream with interpolation', async () => {
     const renderer = createRenderer({
       template: interpolateTemplate
     })
@@ -241,17 +266,26 @@ describe.skip('SSR: template option', () => {
       state: { a: 1 }
     }
 
-    const stream = renderer.renderToStream(new Vue({
-      template: '<div>hi</div>'
-    }), context)
+    const res = await new Promise((resolve, reject) => {
+      const stream = renderer.renderToStream(
+        new Vue({
+          template: '<div>hi</div>'
+        }),
+        context
+      )
 
-    let res = ''
-    stream.on('data', chunk => {
-      res += chunk
+      let res = ''
+      stream.on('data', (chunk) => {
+        res += chunk
+      })
+      stream.on('error', reject)
+      stream.on('end', () => {
+        resolve(res)
+      })
     })
-    stream.on('end', () => {
-      expect(res).toContain(
-        `<html><head>` +
+
+    expect(res).toContain(
+      `<html><head>` +
         // double mustache should be escaped
         `<title>&lt;script&gt;hacks&lt;/script&gt;</title>` +
         `${context.head}${context.styles}</head><body>` +
@@ -260,12 +294,10 @@ describe.skip('SSR: template option', () => {
         // triple should be raw
         `<div>foo</div>` +
         `</body></html>`
-      )
-      done()
-    })
+    )
   })
 
-  it('renderToStream with interpolation and context.rendered', done => {
+  it('renderToStream with interpolation and context.rendered', async () => {
     const renderer = createRenderer({
       template: interpolateTemplate
     })
@@ -276,22 +308,31 @@ describe.skip('SSR: template option', () => {
       head: '<meta name="viewport" content="width=device-width">',
       styles: '<style>h1 { color: red }</style>',
       state: { a: 0 },
-      rendered: context => {
+      rendered: (context) => {
         context.state.a = 1
       }
     }
 
-    const stream = renderer.renderToStream(new Vue({
-      template: '<div>hi</div>'
-    }), context)
+    const res = await new Promise((resolve, reject) => {
+      const stream = renderer.renderToStream(
+        new Vue({
+          template: '<div>hi</div>'
+        }),
+        context
+      )
 
-    let res = ''
-    stream.on('data', chunk => {
-      res += chunk
+      let res = ''
+      stream.on('data', (chunk) => {
+        res += chunk
+      })
+      stream.on('error', reject)
+      stream.on('end', () => {
+        resolve(res)
+      })
     })
-    stream.on('end', () => {
-      expect(res).toContain(
-        `<html><head>` +
+
+    expect(res).toContain(
+      `<html><head>` +
         // double mustache should be escaped
         `<title>&lt;script&gt;hacks&lt;/script&gt;</title>` +
         `${context.head}${context.styles}</head><body>` +
@@ -300,201 +341,211 @@ describe.skip('SSR: template option', () => {
         // triple should be raw
         `<div>foo</div>` +
         `</body></html>`
-      )
-      done()
-    })
+    )
   })
 
-  it('bundleRenderer + renderToString', done => {
-    createBundleRenderer('app.js', {
+  it('bundleRenderer + renderToString', async () => {
+    const renderer = await createWebpackBundleRenderer('app.js', {
       asBundle: true,
       template: defaultTemplate
-    }, renderer => {
-      const context = {
-        head: '<meta name="viewport" content="width=device-width">',
-        styles: '<style>h1 { color: red }</style>',
-        state: { a: 1 },
-        url: '/test'
-      }
-      renderer.renderToString(context, (err, res) => {
-        expect(err).toBeNull()
-        expect(res).toContain(
-          `<html><head>${context.head}${context.styles}</head><body>` +
-          `<div data-server-rendered="true">/test</div>` +
-          `<script>window.__INITIAL_STATE__={"a":1}</script>` +
-          `</body></html>`
-        )
-        expect(context.msg).toBe('hello')
-        done()
-      })
     })
+    const context: any = {
+      head: '<meta name="viewport" content="width=device-width">',
+      styles: '<style>h1 { color: red }</style>',
+      state: { a: 1 },
+      url: '/test'
+    }
+    const res = await renderer.renderToString(context)
+    expect(res).toContain(
+      `<html><head>${context.head}${context.styles}</head><body>` +
+        `<div data-server-rendered="true">/test</div>` +
+        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        `</body></html>`
+    )
+    expect(context.msg).toBe('hello')
   })
 
-  it('bundleRenderer + renderToStream', done => {
-    createBundleRenderer('app.js', {
+  it('bundleRenderer + renderToStream', async () => {
+    const renderer = await createWebpackBundleRenderer('app.js', {
       asBundle: true,
       template: defaultTemplate
-    }, renderer => {
-      const context = {
-        head: '<meta name="viewport" content="width=device-width">',
-        styles: '<style>h1 { color: red }</style>',
-        state: { a: 1 },
-        url: '/test'
-      }
+    })
+    const context: any = {
+      head: '<meta name="viewport" content="width=device-width">',
+      styles: '<style>h1 { color: red }</style>',
+      state: { a: 1 },
+      url: '/test'
+    }
+
+    const res = await new Promise((resolve) => {
       const stream = renderer.renderToStream(context)
       let res = ''
-      stream.on('data', chunk => {
+      stream.on('data', (chunk) => {
         res += chunk.toString()
       })
       stream.on('end', () => {
-        expect(res).toContain(
-          `<html><head>${context.head}${context.styles}</head><body>` +
-          `<div data-server-rendered="true">/test</div>` +
-          `<script>window.__INITIAL_STATE__={"a":1}</script>` +
-          `</body></html>`
-        )
-        expect(context.msg).toBe('hello')
-        done()
+        resolve(res)
       })
     })
+
+    expect(res).toContain(
+      `<html><head>${context.head}${context.styles}</head><body>` +
+        `<div data-server-rendered="true">/test</div>` +
+        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        `</body></html>`
+    )
+    expect(context.msg).toBe('hello')
   })
 
-  const expectedHTMLWithManifest = (options = {}) =>
+  const expectedHTMLWithManifest = (options: any = {}) =>
     `<html><head>` +
-      // used chunks should have preload
-      `<link rel="preload" href="/manifest.js" as="script">` +
-      `<link rel="preload" href="/main.js" as="script">` +
-      `<link rel="preload" href="/0.js" as="script">` +
-      `<link rel="preload" href="/test.css" as="style">` +
-      // images and fonts are only preloaded when explicitly asked for
-      (options.preloadOtherAssets ? `<link rel="preload" href="/test.png" as="image">` : ``) +
-      (options.preloadOtherAssets ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>` : ``) +
-      // unused chunks should have prefetch
-      (options.noPrefetch ? `` : `<link rel="prefetch" href="/1.js">`) +
-      // css assets should be loaded
-      `<link rel="stylesheet" href="/test.css">` +
+    // used chunks should have preload
+    `<link rel="preload" href="/manifest.js" as="script">` +
+    `<link rel="preload" href="/main.js" as="script">` +
+    `<link rel="preload" href="/0.js" as="script">` +
+    `<link rel="preload" href="/test.css" as="style">` +
+    // images and fonts are only preloaded when explicitly asked for
+    (options.preloadOtherAssets
+      ? `<link rel="preload" href="/test.png" as="image">`
+      : ``) +
+    (options.preloadOtherAssets
+      ? `<link rel="preload" href="/test.woff2" as="font" type="font/woff2" crossorigin>`
+      : ``) +
+    // unused chunks should have prefetch
+    (options.noPrefetch ? `` : `<link rel="prefetch" href="/1.js">`) +
+    // css assets should be loaded
+    `<link rel="stylesheet" href="/test.css">` +
     `</head><body>` +
-      `<div data-server-rendered="true"><div>async test.woff2 test.png</div></div>` +
-      // state should be inlined before scripts
-      `<script>window.${options.stateKey || '__INITIAL_STATE__'}={"a":1}</script>` +
-      // manifest chunk should be first
-      `<script src="/manifest.js" defer></script>` +
-      // async chunks should be before main chunk
-      `<script src="/0.js" defer></script>` +
-      `<script src="/main.js" defer></script>` +
+    `<div data-server-rendered="true"><div>async test.woff2 test.png</div></div>` +
+    // state should be inlined before scripts
+    `<script>window.${
+      options.stateKey || '__INITIAL_STATE__'
+    }={"a":1}</script>` +
+    // manifest chunk should be first
+    `<script src="/manifest.js" defer></script>` +
+    // async chunks should be before main chunk
+    `<script src="/0.js" defer></script>` +
+    `<script src="/main.js" defer></script>` +
     `</body></html>`
 
   createClientManifestAssertions(true)
   createClientManifestAssertions(false)
 
-  function createClientManifestAssertions (runInNewContext) {
-    it('bundleRenderer + renderToString + clientManifest ()', done => {
-      createRendererWithManifest('split.js', { runInNewContext }, renderer => {
-        renderer.renderToString({ state: { a: 1 }}, (err, res) => {
-          expect(err).toBeNull()
-          expect(res).toContain(expectedHTMLWithManifest())
-          done()
-        })
+  function createClientManifestAssertions(runInNewContext) {
+    it('bundleRenderer + renderToString + clientManifest ()', async () => {
+      const renderer = await createRendererWithManifest('split.js', {
+        runInNewContext
       })
+      const res = await renderer.renderToString({ state: { a: 1 } })
+      expect(res).toContain(expectedHTMLWithManifest())
     })
 
-    it('bundleRenderer + renderToStream + clientManifest + shouldPreload', done => {
-      createRendererWithManifest('split.js', {
+    it('bundleRenderer + renderToStream + clientManifest + shouldPreload', async () => {
+      const renderer = await createRendererWithManifest('split.js', {
         runInNewContext,
         shouldPreload: (file, type) => {
-          if (type === 'image' || type === 'script' || type === 'font' || type === 'style') {
+          if (
+            type === 'image' ||
+            type === 'script' ||
+            type === 'font' ||
+            type === 'style'
+          ) {
             return true
           }
         }
-      }, renderer => {
-        const stream = renderer.renderToStream({ state: { a: 1 }})
+      })
+      const res = await new Promise((resolve) => {
+        const stream = renderer.renderToStream({ state: { a: 1 } })
         let res = ''
-        stream.on('data', chunk => {
+        stream.on('data', (chunk) => {
           res += chunk.toString()
         })
         stream.on('end', () => {
-          expect(res).toContain(expectedHTMLWithManifest({
-            preloadOtherAssets: true
-          }))
-          done()
+          resolve(res)
         })
       })
+
+      expect(res).toContain(
+        expectedHTMLWithManifest({
+          preloadOtherAssets: true
+        })
+      )
     })
 
-    it('bundleRenderer + renderToStream + clientManifest + shouldPrefetch', done => {
-      createRendererWithManifest('split.js', {
+    it('bundleRenderer + renderToStream + clientManifest + shouldPrefetch', async () => {
+      const renderer = await createRendererWithManifest('split.js', {
         runInNewContext,
         shouldPrefetch: (file, type) => {
           if (type === 'script') {
             return false
           }
         }
-      }, renderer => {
-        const stream = renderer.renderToStream({ state: { a: 1 }})
+      })
+
+      const res = await new Promise((resolve) => {
+        const stream = renderer.renderToStream({ state: { a: 1 } })
         let res = ''
-        stream.on('data', chunk => {
+        stream.on('data', (chunk) => {
           res += chunk.toString()
         })
         stream.on('end', () => {
-          expect(res).toContain(expectedHTMLWithManifest({
-            noPrefetch: true
-          }))
-          done()
+          resolve(res)
         })
       })
+
+      expect(res).toContain(
+        expectedHTMLWithManifest({
+          noPrefetch: true
+        })
+      )
     })
 
-    it('bundleRenderer + renderToString + clientManifest + inject: false', done => {
-      createRendererWithManifest('split.js', {
+    it('bundleRenderer + renderToString + clientManifest + inject: false', async () => {
+      const renderer = await createRendererWithManifest('split.js', {
         runInNewContext,
-        template: `<html>` +
+        template:
+          `<html>` +
           `<head>{{{ renderResourceHints() }}}{{{ renderStyles() }}}</head>` +
           `<body><!--vue-ssr-outlet-->{{{ renderState({ windowKey: '__FOO__', contextKey: 'foo' }) }}}{{{ renderScripts() }}}</body>` +
-        `</html>`,
+          `</html>`,
         inject: false
-      }, renderer => {
-        const context = { foo: { a: 1 }}
-        renderer.renderToString(context, (err, res) => {
-          expect(err).toBeNull()
-          expect(res).toContain(expectedHTMLWithManifest({
-            stateKey: '__FOO__'
-          }))
-          done()
-        })
       })
+      const context = { foo: { a: 1 } }
+      const res = await renderer.renderToString(context)
+      expect(res).toContain(
+        expectedHTMLWithManifest({
+          stateKey: '__FOO__'
+        })
+      )
     })
 
-    it('bundleRenderer + renderToString + clientManifest + no template', done => {
-      createRendererWithManifest('split.js', {
+    it('bundleRenderer + renderToString + clientManifest + no template', async () => {
+      const renderer = await createRendererWithManifest('split.js', {
         runInNewContext,
-        template: null
-      }, renderer => {
-        const context = { foo: { a: 1 }}
-        renderer.renderToString(context, (err, res) => {
-          expect(err).toBeNull()
-
-          const customOutput =
-            `<html><head>${
-              context.renderResourceHints() +
-              context.renderStyles()
-            }</head><body>${
-              res +
-              context.renderState({
-                windowKey: '__FOO__',
-                contextKey: 'foo'
-              }) +
-              context.renderScripts()
-            }</body></html>`
-
-          expect(customOutput).toContain(expectedHTMLWithManifest({
-            stateKey: '__FOO__'
-          }))
-          done()
-        })
+        template: null as any
       })
+      const context: any = { foo: { a: 1 } }
+      const res = await renderer.renderToString(context)
+
+      const customOutput = `<html><head>${
+        context.renderResourceHints() + context.renderStyles()
+      }</head><body>${
+        res +
+        context.renderState({
+          windowKey: '__FOO__',
+          contextKey: 'foo'
+        }) +
+        context.renderScripts()
+      }</body></html>`
+
+      expect(customOutput).toContain(
+        expectedHTMLWithManifest({
+          stateKey: '__FOO__'
+        })
+      )
     })
 
-    it('whitespace insensitive interpolation', done => {
+    it('whitespace insensitive interpolation', async () => {
       const interpolateTemplate = `<html><head><title>{{title}}</title></head><body><!--vue-ssr-outlet-->{{{snippet}}}</body></html>`
       const renderer = createRenderer({
         template: interpolateTemplate
@@ -508,12 +559,14 @@ describe.skip('SSR: template option', () => {
         state: { a: 1 }
       }
 
-      renderer.renderToString(new Vue({
-        template: '<div>hi</div>'
-      }), context, (err, res) => {
-        expect(err).toBeNull()
-        expect(res).toContain(
-          `<html><head>` +
+      const res = await renderer.renderToString(
+        new Vue({
+          template: '<div>hi</div>'
+        }),
+        context
+      )
+      expect(res).toContain(
+        `<html><head>` +
           // double mustache should be escaped
           `<title>&lt;script&gt;hacks&lt;/script&gt;</title>` +
           `${context.head}${context.styles}</head><body>` +
@@ -522,12 +575,10 @@ describe.skip('SSR: template option', () => {
           // triple should be raw
           `<div>foo</div>` +
           `</body></html>`
-        )
-        done()
-      })
+      )
     })
 
-    it('renderToString + nonce', done => {
+    it('renderToString + nonce', async () => {
       const interpolateTemplate = `<html><head><title>hello</title></head><body><!--vue-ssr-outlet--></body></html>`
       const renderer = createRenderer({
         template: interpolateTemplate
@@ -538,23 +589,23 @@ describe.skip('SSR: template option', () => {
         nonce: '4AEemGb0xJptoIGFP3Nd'
       }
 
-      renderer.renderToString(new Vue({
-        template: '<div>hi</div>'
-      }), context, (err, res) => {
-        expect(err).toBeNull()
-        expect(res).toContain(
-          `<html><head>` +
+      const res = await renderer.renderToString(
+        new Vue({
+          template: '<div>hi</div>'
+        }),
+        context
+      )
+      expect(res).toContain(
+        `<html><head>` +
           `<title>hello</title>` +
           `</head><body>` +
           `<div data-server-rendered="true">hi</div>` +
           `<script nonce="4AEemGb0xJptoIGFP3Nd">window.__INITIAL_STATE__={"a":1}</script>` +
           `</body></html>`
-        )
-        done()
-      })
+      )
     })
 
-    it('renderToString + custom serializer', done => {
+    it('renderToString + custom serializer', async () => {
       const expected = `{"foo":123}`
       const renderer = createRenderer({
         template: defaultTemplate,
@@ -565,15 +616,15 @@ describe.skip('SSR: template option', () => {
         state: { a: 1 }
       }
 
-      renderer.renderToString(new Vue({
-        template: '<div>hi</div>'
-      }), context, (err, res) => {
-        expect(err).toBeNull()
-        expect(res).toContain(
-          `<script>window.__INITIAL_STATE__=${expected}</script>`
-        )
-        done()
-      })
+      const res = await renderer.renderToString(
+        new Vue({
+          template: '<div>hi</div>'
+        }),
+        context
+      )
+      expect(res).toContain(
+        `<script>window.__INITIAL_STATE__=${expected}</script>`
+      )
     })
   }
 })

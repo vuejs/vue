@@ -1,5 +1,3 @@
-;(global as any).__SSR_TEST__ = false
-
 process.env.NEW_SLOT_SYNTAX = 'true'
 
 import './helpers/shim-done'

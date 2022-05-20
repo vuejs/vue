@@ -1,9 +1,9 @@
+// @vitest-environment node
+
 import Vue from 'vue'
 import VM from 'vm'
 import { createRenderer } from 'web/entry-server-renderer'
 const { renderToString } = createRenderer()
-
-;(global as any).__SSR_TEST__ = true
 
 describe('SSR: renderToString', () => {
   it('static attributes', done => {

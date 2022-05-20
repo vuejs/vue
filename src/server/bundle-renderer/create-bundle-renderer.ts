@@ -1,10 +1,9 @@
-
 import { createPromiseCallback } from '../util'
 import { createBundleRunner } from './create-bundle-runner'
 import type { Renderer, RenderOptions } from '../create-renderer'
 import {
   createSourceMapConsumers,
-  rewriteErrorTrace,
+  rewriteErrorTrace
 } from './source-map-support'
 
 const fs = require('fs')
@@ -89,7 +88,7 @@ export function createBundleRendererCreator(
     )
 
     return {
-      renderToString: (context: Object | undefined, cb: any) => {
+      renderToString: (context?: Object | undefined, cb?: any) => {
         if (typeof context === 'function') {
           cb = context
           context = {}
@@ -97,7 +96,7 @@ export function createBundleRendererCreator(
 
         let promise
         if (!cb) {
-          ({ promise, cb } = createPromiseCallback())
+          ;({ promise, cb } = createPromiseCallback())
         }
 
         run(context)
@@ -154,7 +153,7 @@ export function createBundleRendererCreator(
           })
 
         return res
-      },
+      }
     }
   }
 }

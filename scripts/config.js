@@ -236,8 +236,7 @@ function genConfig(name) {
 
   // built-in vars
   const vars = {
-    __VERSION__: version,
-    __SSR_TEST__: false
+    __VERSION__: version
   }
   // feature flags
   Object.keys(featureFlags).forEach((key) => {

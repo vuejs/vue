@@ -23,7 +23,8 @@
     "build": "node scripts/build.js",
     "build:ssr": "npm run build -- web-runtime-cjs,web-server-renderer",
     "test": "npm run lint && npm run ts-check && npm run test:types && npm run test:unit && npm run test:e2e",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run test/unit",
+    "test:ssr": "vitest run test/ssr",
     "test:e2e": "npm run build -- web-full-prod,web-server-basic-renderer && node test/e2e/runner.ts",
     "test:types": "tsc -p ./types/tsconfig.json",
     "lint": "eslint src scripts test",
@@ -75,7 +76,7 @@
     "de-indent": "^1.0.2",
     "escodegen": "^2.0.0",
     "eslint": "^8.14.0",
-    "file-loader": "^6.2.0",
+    "file-loader": "^3.0.1",
     "fsevents": "2.3.2",
     "hash-sum": "^2.0.0",
     "he": "^1.2.0",
@@ -99,7 +100,7 @@
     "tslib": "^2.4.0",
     "typescript": "^4.6.4",
     "vitest": "^0.12.6",
-    "webpack": "^5.72.1",
+    "webpack": "^4.46.0",
     "yorkie": "^2.0.0"
   },
   "config": {

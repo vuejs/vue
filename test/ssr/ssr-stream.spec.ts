@@ -1,8 +1,8 @@
+// @vitest-environment node
+
 import Vue from 'vue'
 import { createRenderer } from 'web/entry-server-renderer'
 const { renderToStream } = createRenderer()
-
-;(global as any).__SSR_TEST__ = true
 
 describe('SSR: renderToStream', () => {
   it('should render to a stream', done => {

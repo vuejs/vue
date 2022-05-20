@@ -26,6 +26,25 @@ jobs:
       - name: Run unit tests
         run: pnpm run test:unit
 
+  ssr-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+
+      - name: Set node version to 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      - name: Run SSR tests
+        run: pnpm run test:ssr
+
   # e2e-test:
   #   runs-on: ubuntu-latest
   #   steps:

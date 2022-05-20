@@ -1,7 +1,7 @@
+// @vitest-environment node
+
 import Vue from 'vue'
 import renderToString from 'web/entry-server-basic-renderer'
-
-;(global as any).__SSR_TEST__ = true
 
 describe('SSR: basicRenderer', () => {
   it('should work', done => {
