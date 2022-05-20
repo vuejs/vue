@@ -13,16 +13,21 @@ import Vue from 'vue'
 // })
 // .then(done)
 
-window.waitForUpdate = initialCb => {
-  let end
-  const queue = initialCb ? [initialCb] : []
+interface Job extends Function {
+  wait?: boolean
+  fail?: (e: any) => void
+}
 
-  function shift () {
+global.waitForUpdate = (initialCb: Job) => {
+  let end
+  const queue: Job[] = initialCb ? [initialCb] : []
+
+  function shift() {
     const job = queue.shift()
     if (queue.length) {
       let hasError = false
       try {
-        job.wait ? job(shift) : job()
+        job!.wait ? job!(shift) : job!()
       } catch (e) {
         hasError = true
         const done = queue[queue.length - 1]
@@ -48,7 +53,7 @@ window.waitForUpdate = initialCb => {
   })
 
   const chainer = {
-    then: nextCb => {
+    then: (nextCb) => {
       queue.push(nextCb)
       return chainer
     },
@@ -60,7 +65,7 @@ window.waitForUpdate = initialCb => {
       queue.push(wait)
       return chainer
     },
-    end: endFn => {
+    end: (endFn) => {
       queue.push(endFn)
       end = endFn
     }
@@ -69,6 +74,6 @@ window.waitForUpdate = initialCb => {
   return chainer
 }
 
-function timeout (n) {
-  return next => setTimeout(next, n)
+function timeout(n) {
+  return (next) => setTimeout(next, n)
 }

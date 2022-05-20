@@ -1,14 +1,5 @@
 import Vue from 'vue'
 
-function wait(): [() => void, Promise<void>] {
-  let done
-  const p = new Promise<void>((resolve, reject) => {
-    done = resolve
-    done.fail = reject
-  })
-  return [done, p]
-}
-
 describe('Component async', () => {
   const oldSetTimeout = setTimeout
   const oldClearTimeout = clearTimeout
@@ -55,7 +46,7 @@ describe('Component async', () => {
     expect(JSON.stringify(timeoutsPending)).toEqual(JSON.stringify({}))
   })
 
-  it('normal', () => {
+  it('normal', (done) => {
     const vm = new Vue({
       template: '<div><test></test></div>',
       components: {
@@ -73,16 +64,14 @@ describe('Component async', () => {
     expect(vm.$el.innerHTML).toBe('<!---->')
     expect(vm.$children.length).toBe(0)
 
-    const [done, p] = wait()
     function next() {
       expect(vm.$el.innerHTML).toBe('<div>hi</div>')
       expect(vm.$children.length).toBe(1)
       done()
     }
-    return p
   })
 
-  it('resolve ES module default', () => {
+  it('resolve ES module default', (done) => {
     const vm = new Vue({
       template: '<div><test></test></div>',
       components: {
@@ -103,16 +92,14 @@ describe('Component async', () => {
     expect(vm.$el.innerHTML).toBe('<!---->')
     expect(vm.$children.length).toBe(0)
 
-    const [done, p] = wait()
     function next() {
       expect(vm.$el.innerHTML).toBe('<div>hi</div>')
       expect(vm.$children.length).toBe(1)
       done()
     }
-    return p
   })
 
-  it('as root', () => {
+  it('as root', (done) => {
     const vm = new Vue({
       template: '<test></test>',
       components: {
@@ -130,17 +117,15 @@ describe('Component async', () => {
     expect(vm.$el.nodeType).toBe(8)
     expect(vm.$children.length).toBe(0)
 
-    const [done, p] = wait()
     function next() {
       expect(vm.$el.nodeType).toBe(1)
       expect(vm.$el.outerHTML).toBe('<div>hi</div>')
       expect(vm.$children.length).toBe(1)
       done()
     }
-    return p
   })
 
-  it('dynamic', () => {
+  it('dynamic', (done) => {
     const vm = new Vue({
       template: '<component :is="view"></component>',
       data: {
@@ -174,7 +159,7 @@ describe('Component async', () => {
       expect(vm.$el.textContent).toBe('A')
       vm.view = 'view-b'
     }
-    const [done, p] = wait()
+
     function step2() {
       expect(vm.$el.tagName).toBe('P')
       expect(vm.$el.textContent).toBe('B')
@@ -185,7 +170,6 @@ describe('Component async', () => {
         expect(vm.$el.textContent).toBe('A')
       }).then(done)
     }
-    return p
   })
 
   it('warn reject', () => {
@@ -200,7 +184,7 @@ describe('Component async', () => {
     expect('Reason: nooooo').toHaveBeenWarned()
   })
 
-  it('with v-for', () => {
+  it('with v-for', (done) => {
     const vm = new Vue({
       template: '<div><test v-for="n in list" :key="n" :n="n"></test></div>',
       data: {
@@ -218,15 +202,14 @@ describe('Component async', () => {
         }
       }
     }).$mount()
-    const [done, p] = wait()
+
     function next() {
       expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
       done()
     }
-    return p
   })
 
-  it('returning Promise', () => {
+  it('returning Promise', (done) => {
     const vm = new Vue({
       template: '<div><test></test></div>',
       components: {
@@ -248,17 +231,15 @@ describe('Component async', () => {
     expect(vm.$el.innerHTML).toBe('<!---->')
     expect(vm.$children.length).toBe(0)
 
-    const [done, p] = wait()
     function next() {
       expect(vm.$el.innerHTML).toBe('<div>hi</div>')
       expect(vm.$children.length).toBe(1)
       done()
     }
-    return p
   })
 
   describe('loading/error/timeout', () => {
-    it('with loading component', () => {
+    it('with loading component', (done) => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
@@ -288,16 +269,14 @@ describe('Component async', () => {
         })
       }, 1)
 
-      const [done, p] = wait()
       function next() {
         expect(loadingAsserted).toBe(true)
         expect(vm.$el.textContent).toBe('hi')
         done()
       }
-      return p
     })
 
-    it('with loading component (0 delay)', () => {
+    it('with loading component (0 delay)', (done) => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
@@ -319,15 +298,13 @@ describe('Component async', () => {
 
       expect(vm.$el.textContent).toBe('loading')
 
-      const [done, p] = wait()
       function next() {
         expect(vm.$el.textContent).toBe('hi')
         done()
       }
-      return p
     })
 
-    it('with error component', () => {
+    it('with error component', (done) => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
@@ -350,16 +327,14 @@ describe('Component async', () => {
 
       expect(vm.$el.textContent).toBe('loading')
 
-      const [done, p] = wait()
       function next() {
         expect(`Failed to resolve async component`).toHaveBeenWarned()
         expect(vm.$el.textContent).toBe('error')
         done()
       }
-      return p
     })
 
-    it('with error component + timeout', () => {
+    it('with error component + timeout', (done) => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
@@ -390,15 +365,13 @@ describe('Component async', () => {
         })
       }, 1)
 
-      const [done, p] = wait()
       function next() {
         expect(vm.$el.textContent).toBe('error') // late resolve ignored
         done()
       }
-      return p
     })
 
-    it('should not trigger timeout if resolved', () => {
+    it('should not trigger timeout if resolved', (done) => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
@@ -414,16 +387,14 @@ describe('Component async', () => {
         }
       }).$mount()
 
-      const [done, p] = wait()
       setTimeout(() => {
         expect(vm.$el.textContent).toBe('hi')
         expect(`Failed to resolve async component`).not.toHaveBeenWarned()
         done()
       }, 50)
-      return p
     })
 
-    it('should not have running timeout/loading if resolved', () => {
+    it('should not have running timeout/loading if resolved', (done) => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
@@ -444,17 +415,15 @@ describe('Component async', () => {
         }
       }).$mount()
 
-      const [done, p] = wait()
       function next() {
         expect(vm.$el.textContent).toBe('hi')
         // the afterEach() will ensure that the timeouts for delay and timeout have been cleared
         done()
       }
-      return p
     })
 
     // #7107
-    it(`should work when resolving sync in sibling component's mounted hook`, () => {
+    it(`should work when resolving sync in sibling component's mounted hook`, (done) => {
       let resolveTwo
 
       const vm = new Vue({
@@ -478,11 +447,9 @@ describe('Component async', () => {
 
       expect(vm.$el.textContent).toBe('one ')
 
-      const [done, p] = wait()
       waitForUpdate(() => {
         expect(vm.$el.textContent).toBe('one two')
       }).then(done)
-      return p
     })
   })
 })
