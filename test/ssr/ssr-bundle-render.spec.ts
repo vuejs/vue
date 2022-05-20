@@ -1,7 +1,7 @@
 import LRU from 'lru-cache'
 import { compileWithWebpack } from './compile-with-webpack'
-import { createBundleRenderer } from '../../packages/vue-server-renderer'
-import VueSSRServerPlugin from '../../packages/vue-server-renderer/server-plugin'
+import { createBundleRenderer } from 'web/entry-server-renderer'
+import VueSSRServerPlugin from 'server/webpack-plugin/server'
 
 ;(global as any).__SSR_TEST__ = true
 

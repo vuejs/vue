@@ -1,7 +1,7 @@
-import Vue from '../../dist/vue.runtime.common.js'
+import Vue from 'vue'
 import { compileWithWebpack } from './compile-with-webpack'
-import { createRenderer } from '../../packages/vue-server-renderer'
-import VueSSRClientPlugin from '../../packages/vue-server-renderer/client-plugin'
+import { createRenderer } from 'web/entry-server-renderer'
+import VueSSRClientPlugin from 'server/webpack-plugin/client'
 import { createRenderer as createBundleRenderer } from './ssr-bundle-render.spec.js'
 
 ;(global as any).__SSR_TEST__ = true
