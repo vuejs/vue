@@ -12,7 +12,6 @@ export default defineConfig({
       sfc: resolve('src/sfc'),
       shared: resolve('src/shared'),
       web: resolve('src/platforms/web'),
-      weex: resolve('src/platforms/weex'),
       vue: resolve('src/platforms/web/entry-runtime-with-compiler')
     }
   },

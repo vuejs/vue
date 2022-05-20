@@ -1,7 +1,7 @@
-
 const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/
 const fnInvokeRE = /\([^)]*?\);*$/
-const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
+const simplePathRE =
+  /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
 // KeyboardEvent.keyCode aliases
 const keyCodes: { [key: string]: number | Array<number> } = {
@@ -13,7 +13,7 @@ const keyCodes: { [key: string]: number | Array<number> } = {
   left: 37,
   right: 39,
   down: 40,
-  delete: [8, 46],
+  delete: [8, 46]
 }
 
 // KeyboardEvent.key aliases
@@ -30,7 +30,7 @@ const keyNames: { [key: string]: string | Array<string> } = {
   right: ['Right', 'ArrowRight'],
   down: ['Down', 'ArrowDown'],
   // #9112: IE11 uses `Del` for Delete key name.
-  delete: ['Backspace', 'Delete', 'Del'],
+  delete: ['Backspace', 'Delete', 'Del']
 }
 
 // #4868: modifiers that prevent the execution of the listener
@@ -48,7 +48,7 @@ const modifierCode: { [key: string]: string } = {
   meta: genGuard(`!$event.metaKey`),
   left: genGuard(`'button' in $event && $event.button !== 0`),
   middle: genGuard(`'button' in $event && $event.button !== 1`),
-  right: genGuard(`'button' in $event && $event.button !== 2`),
+  right: genGuard(`'button' in $event && $event.button !== 2`)
 }
 
 export function genHandlers(
@@ -75,28 +75,6 @@ export function genHandlers(
   }
 }
 
-// Generate handler code with binding params on Weex
-/* istanbul ignore next */
-function genWeexHandler(params: Array<any>, handlerCode: string) {
-  let innerHandlerCode = handlerCode
-  const exps = params.filter(
-    (exp) => simplePathRE.test(exp) && exp !== '$event'
-  )
-  const bindings = exps.map((exp) => ({ '@binding': exp }))
-  const args = exps.map((exp, i) => {
-    const key = `$_${i + 1}`
-    innerHandlerCode = innerHandlerCode.replace(exp, key)
-    return key
-  })
-  args.push('$event')
-  return (
-    '{\n' +
-    `handler:function(${args.join(',')}){${innerHandlerCode}},\n` +
-    `params:${JSON.stringify(bindings)}\n` +
-    '}'
-  )
-}
-
 function genHandler(
   handler: ASTElementHandler | Array<ASTElementHandler>
 ): string {
@@ -117,10 +95,6 @@ function genHandler(
   if (!handler.modifiers) {
     if (isMethodPath || isFunctionExpression) {
       return handler.value
-    }
-    /* istanbul ignore if */
-    if (__WEEX__ && handler.params) {
-      return genWeexHandler(handler.params, handler.value)
     }
     return `function($event){${
       isFunctionInvocation ? `return ${handler.value}` : handler.value
@@ -162,10 +136,6 @@ function genHandler(
       : isFunctionInvocation
       ? `return ${handler.value}`
       : handler.value
-    /* istanbul ignore if */
-    if (__WEEX__ && handler.params) {
-      return genWeexHandler(handler.params, code + handlerCode)
-    }
     return `function($event){${code}${handlerCode}}`
   }
 }

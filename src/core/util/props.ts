@@ -1,4 +1,3 @@
-
 import { warn } from './debug'
 import { observe, toggleObserving, shouldObserve } from '../observer/index'
 import {
@@ -7,7 +6,7 @@ import {
   toRawType,
   hyphenate,
   capitalize,
-  isPlainObject,
+  isPlainObject
 } from 'shared/util'
 import type { Component } from 'typescript/component'
 
@@ -51,11 +50,7 @@ export function validateProp(
     observe(value)
     toggleObserving(prevShouldObserve)
   }
-  if (
-    process.env.NODE_ENV !== 'production' &&
-    // skip validation for weex recycle-list child component props
-    !(__WEEX__ && isObject(value) && '@binding' in value)
-  ) {
+  if (process.env.NODE_ENV !== 'production') {
     assertProp(prop, key, value, vm, absent)
   }
   return value
@@ -182,7 +177,7 @@ function assertType(
   }
   return {
     valid,
-    expectedType,
+    expectedType
   }
 }
 

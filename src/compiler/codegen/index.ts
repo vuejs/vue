@@ -1,4 +1,3 @@
-
 import { genHandlers } from './events'
 import baseDirectives from '../directives/index'
 import { camelize, no, extend } from 'shared/util'
@@ -58,7 +57,7 @@ export function generate(
     : '_c("div")'
   return {
     render: `with(this){return ${code}}`,
-    staticRenderFns: state.staticRenderFns,
+    staticRenderFns: state.staticRenderFns
   }
 }
 
@@ -561,14 +560,17 @@ function genSlot(el: ASTElement, state: CodegenState): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el, state)
   let res = `_t(${slotName}${children ? `,function(){return ${children}}` : ''}`
-  const attrs = el.attrs || el.dynamicAttrs
-    ? genProps((el.attrs || []).concat(el.dynamicAttrs || []).map(attr => ({
-        // slot props are camelized
-        name: camelize(attr.name),
-        value: attr.value,
-        dynamic: attr.dynamic
-      })))
-    : null
+  const attrs =
+    el.attrs || el.dynamicAttrs
+      ? genProps(
+          (el.attrs || []).concat(el.dynamicAttrs || []).map((attr) => ({
+            // slot props are camelized
+            name: camelize(attr.name),
+            value: attr.value,
+            dynamic: attr.dynamic
+          }))
+        )
+      : null
   const bind = el.attrsMap['v-bind']
   if ((attrs || bind) && !children) {
     res += `,null`
@@ -599,9 +601,7 @@ function genProps(props: Array<ASTAttr>): string {
   let dynamicProps = ``
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
-    const value = __WEEX__
-      ? generateValue(prop.value)
-      : transformSpecialNewlines(prop.value)
+    const value = transformSpecialNewlines(prop.value)
     if (prop.dynamic) {
       dynamicProps += `${prop.name},${value},`
     } else {
@@ -614,14 +614,6 @@ function genProps(props: Array<ASTAttr>): string {
   } else {
     return staticProps
   }
-}
-
-/* istanbul ignore next */
-function generateValue(value) {
-  if (typeof value === 'string') {
-    return transformSpecialNewlines(value)
-  }
-  return JSON.stringify(value)
 }
 
 // #3895, #4268

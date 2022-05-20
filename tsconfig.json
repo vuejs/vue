@@ -29,7 +29,6 @@
       "shared/*": ["src/shared/*"],
 
       "web/*": ["src/platforms/web/*"],
-      "weex/*": ["src/platforms/weex/*"],
 
       "vue": ["src/platforms/web/entry-runtime-with-compiler"]
     }

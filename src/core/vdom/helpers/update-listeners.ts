@@ -1,5 +1,5 @@
 import { warn, invokeWithErrorHandling } from 'core/util/index'
-import { cached, isUndef, isTrue, isPlainObject } from 'shared/util'
+import { cached, isUndef, isTrue } from 'shared/util'
 import type { Component } from 'typescript/component'
 
 const normalizeEvent = cached((name: string): {
@@ -69,11 +69,6 @@ export function updateListeners(
     def = cur = on[name]
     old = oldOn[name]
     event = normalizeEvent(name)
-    /* istanbul ignore if */
-    if (__WEEX__ && isPlainObject(def)) {
-      cur = def.handler
-      event.params = def.params
-    }
     if (isUndef(cur)) {
       process.env.NODE_ENV !== 'production' &&
         warn(

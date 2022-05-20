@@ -160,9 +160,6 @@ export interface ASTElement {
 
   // 2.4 ssr optimization
   ssrOptimizability?: SSROptimizability;
-
-  // weex specific
-  appendAsTree?: boolean;
 }
 
 export interface ASTExpression {

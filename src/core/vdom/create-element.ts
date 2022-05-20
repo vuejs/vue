@@ -1,4 +1,3 @@
-
 import config from '../config'
 import VNode, { createEmptyVNode } from './vnode'
 import { createComponent } from './create-component'
@@ -11,7 +10,7 @@ import {
   isTrue,
   isObject,
   isPrimitive,
-  resolveAsset,
+  resolveAsset
 } from '../util/index'
 
 import { normalizeChildren, simpleNormalizeChildren } from './helpers/index'
@@ -74,14 +73,11 @@ export function _createElement(
     isDef(data.key) &&
     !isPrimitive(data.key)
   ) {
-    // @ts-expect-error
-    if (!__WEEX__ || !('@binding' in data.key)) {
-      warn(
-        'Avoid using non-primitive value as key, ' +
-          'use string/number value instead.',
-        context
-      )
-    }
+    warn(
+      'Avoid using non-primitive value as key, ' +
+        'use string/number value instead.',
+      context
+    )
   }
   // support single function children as default scoped slot
   if (Array.isArray(children) && typeof children[0] === 'function') {

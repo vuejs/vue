@@ -175,9 +175,6 @@ declare type ASTElement = {
 
   // 2.4 ssr optimization
   ssrOptimizability?: number;
-
-  // weex specific
-  appendAsTree?: boolean;
 };
 
 declare type ASTExpression = {
