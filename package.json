@@ -25,7 +25,7 @@
     "test": "npm run lint && npm run ts-check && npm run test:types && npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run test/unit",
     "test:ssr": "npm run build:ssr && vitest run test/ssr",
-    "test:e2e": "npm run build -- web-full-prod,web-server-basic-renderer && vitest run test/e2e",
+    "test:e2e": "npm run build -- web-full-prod,web-server-renderer-basic && vitest run test/e2e",
     "test:types": "tsc -p ./types/tsconfig.json",
     "lint": "eslint src scripts test",
     "ts-check": "tsc -p tsconfig.json --noEmit",
