@@ -746,14 +746,14 @@ describe('Component scoped slot', () => {
       })
 
       it('should warn v-slot usage on non-component elements', () => {
-        const vm = new Vue({
+        new Vue({
           template: `<div ${syntax}="foo"/>`
         }).$mount()
         expect(`v-slot can only be used on components or <template>`).toHaveBeenWarned()
       })
 
       it('should warn mixed usage', () => {
-        const vm = new Vue({
+        new Vue({
           template: `<foo><bar slot="one" slot-scope="bar" ${syntax}="bar"></bar></foo>`,
           components: { Foo, Bar }
         }).$mount()
@@ -802,7 +802,7 @@ describe('Component scoped slot', () => {
     })
 
     it('should warn mixed root-default and named slots', () => {
-      const vm = new Vue({
+      new Vue({
         template: `
           <foo #default="foo">
             {{ foo }}
@@ -938,7 +938,6 @@ describe('Component scoped slot', () => {
   // #9432: async components inside a scoped slot should trigger update of the
   // component that invoked the scoped slot, not the lexical context component.
   it('async component inside scoped slot', done => {
-    let p
     const vm = new Vue({
       template: `
         <foo>

@@ -62,15 +62,37 @@ expect.extend({
           `expected "${received}" to have been warned ${n} times but got ${found}.`
       }
     }
+  },
+
+  toHaveBeenTipped(received: string) {
+    const passed = tip.mock.calls.some((args) => args[0].includes(received))
+    if (passed) {
+      return {
+        pass: true,
+        message: () => `expected "${received}" not to have been tipped.`
+      }
+    } else {
+      const msgs = warn.mock.calls.map((args) => args[0]).join('\n - ')
+      return {
+        pass: false,
+        message: () =>
+          `expected "${received}" to have been tipped` +
+          (msgs.length
+            ? `.\n\nActual messages:\n\n - ${msgs}`
+            : ` but no tip was recorded.`)
+      }
+    }
   }
 })
 
 let warn: SpyInstance
+let tip: SpyInstance
 const asserted: Set<string> = new Set()
 
 beforeEach(() => {
   asserted.clear()
   warn = vi.spyOn(console, 'error')
+  tip = vi.spyOn(console, 'warn').mockImplementation(() => {})
   warn.mockImplementation(() => {})
 })
 

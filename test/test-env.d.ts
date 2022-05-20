@@ -20,6 +20,7 @@ declare namespace jest {
     toHaveBeenWarned(): R
     toHaveBeenWarnedLast(): R
     toHaveBeenWarnedTimes(n: number): R
+    toHaveBeenTipped(): R
     toHaveClass(cls: string): R
   }
 }
