@@ -14,8 +14,8 @@ export function createBasicRenderer({
 
   return function renderToString(
     component: Component,
-    context: any,
-    done: any
+    context?: any,
+    done?: any
   ): void {
     if (typeof context === 'function') {
       done = context

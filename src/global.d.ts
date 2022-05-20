@@ -1,4 +1,5 @@
 declare const __WEEX__: boolean;
+declare const __SSR_TEST__: boolean;
 declare type WeexEnvironment = {
   platform: string; // could be "Web", "iOS", "Android"
   weexVersion: string; // the version of WeexSDK

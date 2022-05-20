@@ -269,7 +269,8 @@ function genConfig(name) {
   const vars = {
     __WEEX__: !!opts.weex,
     __WEEX_VERSION__: weexVersion,
-    __VERSION__: version
+    __VERSION__: version,
+    __SSR_TEST__: false
   }
   // feature flags
   Object.keys(featureFlags).forEach((key) => {

@@ -12,8 +12,8 @@ import { Readable } from 'stream'
 export type Renderer = {
   renderToString: (
     component: Component,
-    context: any,
-    cb: any
+    context?: any,
+    cb?: any
   ) => Promise<string> | undefined
   renderToStream: (component: Component, context?: Object) => Readable
 }
@@ -66,8 +66,8 @@ export function createRenderer({
   return {
     renderToString(
       component: Component,
-      context: any,
-      cb: any
+      context?: any,
+      cb?: any
     ): Promise<string> {
       if (typeof context === 'function') {
         cb = context

@@ -9,10 +9,6 @@ export function compileWithWebpack (file, extraConfig, cb) {
     module: {
       rules: [
         {
-          test: /\.js$/,
-          loader: 'babel-loader'
-        },
-        {
           test: /async-.*\.js$/,
           loader: require.resolve('./async-loader')
         },

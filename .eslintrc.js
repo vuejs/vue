@@ -18,7 +18,7 @@ module.exports = {
     "plugin:@typescript-eslint/eslint-recommended",
   ],
   globals: {
-    __WEEX__: true,
+    __TEST__: true,
     WXEnvironment: true,
   },
   rules: {
@@ -34,5 +34,6 @@ module.exports = {
     "no-console": process.env.NODE_ENV !== "production" ? 0 : 2,
     "no-useless-escape": 0,
     "no-empty": 0,
+    "no-extra-semi": 0
   },
 };

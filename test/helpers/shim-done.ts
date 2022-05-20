@@ -10,24 +10,27 @@ const wait = (): [() => void, Promise<void>] => {
   return [done, p]
 }
 
-;(global as any).it = (global as any).test = (
-  desc: string,
-  fn?: any,
-  timeout?: number
-) => {
-  if (fn && fn.length > 0) {
-    _test(
-      desc,
-      () => {
-        const [done, p] = wait()
-        fn(done)
-        return p
-      },
-      timeout
-    )
-  } else {
-    _test(desc, fn, timeout)
-  }
-}
+const shimmed =
+  ((global as any).it =
+  (global as any).test =
+    (desc: string, fn?: any, timeout?: number) => {
+      if (fn && fn.length > 0) {
+        _test(
+          desc,
+          () => {
+            const [done, p] = wait()
+            fn(done)
+            return p
+          },
+          timeout
+        )
+      } else {
+        _test(desc, fn, timeout)
+      }
+    })
+
+;['skip', 'only', 'todo', 'concurrent'].forEach(key => {
+  shimmed[key] = _test[key]
+})
 
 export {}

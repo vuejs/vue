@@ -1,7 +1,9 @@
-import Vue from '../../dist/vue.runtime.common.js'
+import Vue from 'vue'
 import VM from 'vm'
-import { createRenderer } from '../../packages/vue-server-renderer'
+import { createRenderer } from 'web/entry-server-renderer'
 const { renderToString } = createRenderer()
+
+;(global as any).__SSR_TEST__ = true
 
 describe('SSR: renderToString', () => {
   it('static attributes', done => {
@@ -676,7 +678,6 @@ describe('SSR: renderToString', () => {
   })
 
   it('should catch async component error', done => {
-    Vue.config.silent = true
     renderToString(new Vue({
       template: '<test-async></test-async>',
       components: {
@@ -687,9 +688,9 @@ describe('SSR: renderToString', () => {
         })
       }
     }), (err, result) => {
-      Vue.config.silent = false
       expect(err).toBeTruthy()
       expect(result).toBeUndefined()
+      expect('foo').toHaveBeenWarned()
       done()
     })
   })
@@ -963,14 +964,13 @@ describe('SSR: renderToString', () => {
   })
 
   it('should catch error', done => {
-    Vue.config.silent = true
     renderToString(new Vue({
       render () {
         throw new Error('oops')
       }
     }), err => {
       expect(err instanceof Error).toBe(true)
-      Vue.config.silent = false
+      expect(`oops`).toHaveBeenWarned()
       done()
     })
   })
@@ -1173,26 +1173,23 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('return Promise', done => {
-    renderToString(new Vue({
+  it('return Promise', async () => {
+    await renderToString(new Vue({
       template: `<div>{{ foo }}</div>`,
       data: { foo: 'bar' }
-    })).then(res => {
+    }))!.then(res => {
       expect(res).toBe(`<div data-server-rendered="true">bar</div>`)
-      done()
     })
   })
 
-  it('return Promise (error)', done => {
-    Vue.config.silent = true
-    renderToString(new Vue({
+  it('return Promise (error)', async () => {
+    await renderToString(new Vue({
       render () {
         throw new Error('foobar')
       }
-    })).catch(err => {
+    }))!.catch(err => {
+      expect('foobar').toHaveBeenWarned()
       expect(err.toString()).toContain(`foobar`)
-      Vue.config.silent = false
-      done()
     })
   })
 
@@ -1384,7 +1381,7 @@ describe('SSR: renderToString', () => {
         count: 0
       },
       serverPrefetch () {
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
           setTimeout(() => {
             this.count = 42
             resolve()
@@ -1409,7 +1406,7 @@ describe('SSR: renderToString', () => {
         count: 0
       },
       serverPrefetch () {
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
           setTimeout(() => {
             this.count = 42
             resolve()
@@ -1427,7 +1424,7 @@ describe('SSR: renderToString', () => {
             }
           },
           serverPrefetch () {
-            return new Promise((resolve) => {
+            return new Promise<void>((resolve) => {
               setTimeout(() => {
                 this.message = 'vue.js'
                 resolve()
@@ -1454,7 +1451,7 @@ describe('SSR: renderToString', () => {
         count: 0
       },
       serverPrefetch () {
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
           setTimeout(() => {
             this.count = 42
             resolve()
@@ -1473,7 +1470,7 @@ describe('SSR: renderToString', () => {
               }
             },
             serverPrefetch () {
-              return new Promise((resolve) => {
+              return new Promise<void>((resolve) => {
                 setTimeout(() => {
                   this.message = 'vue.js'
                   resolve()
@@ -1495,7 +1492,7 @@ describe('SSR: renderToString', () => {
         message: ''
       },
       serverPrefetch () {
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
           setTimeout(() => {
             this.message = 'vue.js'
             resolve()
@@ -1515,7 +1512,7 @@ describe('SSR: renderToString', () => {
         count: 0
       },
       serverPrefetch () {
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
           setTimeout(() => {
             this.count = 42
             resolve()

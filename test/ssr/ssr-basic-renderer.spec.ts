@@ -1,5 +1,7 @@
-import Vue from '../../dist/vue.runtime.common.js'
-import renderToString from '../../packages/vue-server-renderer/basic'
+import Vue from 'vue'
+import renderToString from 'web/entry-server-basic-renderer'
+
+;(global as any).__SSR_TEST__ = true
 
 describe('SSR: basicRenderer', () => {
   it('should work', done => {
