@@ -1,6 +1,6 @@
 interface Chainer {
   then(next: Function): this
-  thenWaitFor(n: number): this
+  thenWaitFor(n: number | Function): this
   end(endFn: Function): void
 }
 
