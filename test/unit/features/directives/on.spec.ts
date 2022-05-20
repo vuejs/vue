@@ -1,8 +1,9 @@
 import Vue from 'vue'
 import { supportsPassive } from 'core/util/env'
+import { SpyInstanceFn } from 'vitest'
 
 describe('Directive v-on', () => {
-  let vm, spy, el
+  let vm, spy: SpyInstanceFn, el: HTMLElement
 
   beforeEach(() => {
     vm = null
@@ -26,7 +27,7 @@ describe('Directive v-on', () => {
     triggerEvent(vm.$el, 'click')
     expect(spy.mock.calls.length).toBe(1)
 
-    const args = spy.calls.allArgs()
+    const args = spy.mock.calls
     const event = args[0] && args[0][0] || {}
     expect(event.type).toBe('click')
   })
@@ -40,7 +41,7 @@ describe('Directive v-on', () => {
     triggerEvent(vm.$el, 'click')
     expect(spy.mock.calls.length).toBe(1)
 
-    const args = spy.calls.allArgs()
+    const args = spy.mock.calls
     const firstArgs = args[0]
     expect(firstArgs.length).toBe(4)
     expect(firstArgs[0]).toBe(1)
@@ -485,7 +486,7 @@ describe('Directive v-on', () => {
 
     triggerEvent(vm.$el, 'click')
     expect(`The .native modifier for v-on is only valid on components but it was used on <div>.`).not.toHaveBeenWarned()
-    expect(spy.calls.allArgs()).toEqual([['regular']]); // Regular @click should work for dynamic components resolved to native HTML elements.
+    expect(spy.mock.calls).toEqual([['regular']]); // Regular @click should work for dynamic components resolved to native HTML elements.
   })
 
   it('.once modifier should work with child components', () => {

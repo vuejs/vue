@@ -11,7 +11,7 @@ declare function createTextVNode(arg?: string): any
 declare function triggerEvent(
   target: Element,
   event: string,
-  process?: (e: Event) => void
+  process?: (e: any) => void
 ): void
 
 // vitest extends jest namespace so we can just extend jest.Matchers

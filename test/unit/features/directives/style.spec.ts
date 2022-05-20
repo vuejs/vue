@@ -1,13 +1,13 @@
 import Vue from 'vue'
 
-function checkPrefixedProp (prop) {
+function checkPrefixedProp(prop) {
   const el = document.createElement('div')
   const upper = prop.charAt(0).toUpperCase() + prop.slice(1)
   if (!(prop in el.style)) {
     const prefixes = ['Webkit', 'Moz', 'ms']
     let i = prefixes.length
     while (i--) {
-      if ((prefixes[i] + upper) in el.style) {
+      if (prefixes[i] + upper in el.style) {
         prop = prefixes[i] + upper
       }
     }
@@ -21,7 +21,7 @@ describe('Directive v-bind:style', () => {
   beforeEach(() => {
     vm = new Vue({
       template: '<div :style="styles"></div>',
-      data () {
+      data() {
         return {
           styles: {},
           fontSize: 16
@@ -30,51 +30,53 @@ describe('Directive v-bind:style', () => {
     }).$mount()
   })
 
-  it('string', done => {
+  it('string', (done) => {
     vm.styles = 'color:red;'
     waitForUpdate(() => {
       expect(vm.$el.style.cssText.replace(/\s/g, '')).toBe('color:red;')
     }).then(done)
   })
 
-  it('falsy number', done => {
+  it('falsy number', (done) => {
     vm.styles = { opacity: 0 }
     waitForUpdate(() => {
       expect(vm.$el.style.opacity).toBe('0')
     }).then(done)
   })
 
-  it('plain object', done => {
+  it('plain object', (done) => {
     vm.styles = { color: 'red' }
     waitForUpdate(() => {
       expect(vm.$el.style.cssText.replace(/\s/g, '')).toBe('color:red;')
     }).then(done)
   })
 
-  it('camelCase', done => {
+  it('camelCase', (done) => {
     vm.styles = { marginRight: '10px' }
     waitForUpdate(() => {
       expect(vm.$el.style.marginRight).toBe('10px')
     }).then(done)
   })
 
-  it('remove if falsy value', done => {
+  it('remove if falsy value', (done) => {
     vm.$el.style.color = 'red'
     waitForUpdate(() => {
       vm.styles = { color: null }
-    }).then(() => {
-      expect(vm.$el.style.color).toBe('')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.style.color).toBe('')
+      })
+      .then(done)
   })
 
-  it('ignore unsupported property', done => {
+  it('ignore unsupported property', (done) => {
     vm.styles = { foo: 'bar' }
     waitForUpdate(() => {
       expect(vm.$el.style.foo).not.toBe('bar')
     }).then(done)
   })
 
-  it('auto prefix', done => {
+  it('auto prefix', (done) => {
     const prop = checkPrefixedProp('transform')
     const val = 'scale(0.5)'
     vm.styles = { transform: val }
@@ -83,10 +85,10 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
-  it('auto-prefixed style value as array', done => {
+  it('auto-prefixed style value as array', (done) => {
     vm.styles = { display: ['-webkit-box', '-ms-flexbox', 'flex'] }
     const testEl = document.createElement('div')
-    vm.styles.display.forEach(value => {
+    vm.styles.display.forEach((value) => {
       testEl.style.display = value
     })
     waitForUpdate(() => {
@@ -94,83 +96,91 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
-  it('!important', done => {
+  it('!important', (done) => {
     vm.styles = { display: 'block !important' }
     waitForUpdate(() => {
       expect(vm.$el.style.getPropertyPriority('display')).toBe('important')
     }).then(done)
   })
 
-  it('camelCase with !important', done => {
+  it('camelCase with !important', (done) => {
     vm.styles = { zIndex: '100 !important' }
     waitForUpdate(() => {
       expect(vm.$el.style.getPropertyPriority('z-index')).toBe('important')
     }).then(done)
   })
 
-  it('object with multiple entries', done => {
+  it('object with multiple entries', (done) => {
     vm.$el.style.color = 'red'
     vm.styles = {
-      marginLeft: '10px',
-      marginRight: '15px'
+      fontSize: '10px'
     }
     waitForUpdate(() => {
-      expect(vm.$el.style.getPropertyValue('color')).toBe('red')
-      expect(vm.$el.style.getPropertyValue('margin-left')).toBe('10px')
-      expect(vm.$el.style.getPropertyValue('margin-right')).toBe('15px')
+      expect(vm.$el.style.color).toBe('red')
+      expect(vm.$el.style.fontSize).toBe('10px')
+      expect(vm.$el.style.getPropertyValue('font-size')).toBe('10px')
       vm.styles = {
         color: 'blue',
         padding: null
       }
-    }).then(() => {
-      expect(vm.$el.style.getPropertyValue('color')).toBe('blue')
-      expect(vm.$el.style.getPropertyValue('padding')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('margin-left')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('margin-right')).toBeFalsy()
-      // handle falsy value
-      vm.styles = null
-    }).then(() => {
-      expect(vm.$el.style.getPropertyValue('color')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('padding')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('margin-left')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('margin-right')).toBeFalsy()
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.style.color).toBe('blue')
+        expect(vm.$el.style.padding).toBeFalsy()
+        expect(vm.$el.style.fontSize).toBeFalsy()
+        expect(vm.$el.style.getPropertyValue('font-size')).toBeFalsy()
+        // handle falsy value
+        vm.styles = null
+      })
+      .then(() => {
+        expect(vm.$el.style.color).toBeFalsy()
+        expect(vm.$el.style.padding).toBeFalsy()
+        expect(vm.$el.style.fontSize).toBeFalsy()
+        expect(vm.$el.style.getPropertyValue('font-size')).toBeFalsy()
+      })
+      .then(done)
   })
 
-  it('array of objects', done => {
+  it('array of objects', (done) => {
     vm.$el.style.padding = '10px'
-    vm.styles = [{ color: 'red' }, { marginRight: '20px' }]
+    vm.styles = [{ color: 'red' }, { fontSize: '20px' }]
 
     waitForUpdate(() => {
-      expect(vm.$el.style.getPropertyValue('color')).toBe('red')
-      expect(vm.$el.style.getPropertyValue('margin-right')).toBe('20px')
-      expect(vm.$el.style.getPropertyValue('padding')).toBe('10px')
+      expect(vm.$el.style.color).toBe('red')
+      expect(vm.$el.style.fontSize).toBe('20px')
+      expect(vm.$el.style.padding).toBe('10px')
       vm.styles = [{ color: 'blue' }, { padding: null }]
-    }).then(() => {
-      expect(vm.$el.style.getPropertyValue('color')).toBe('blue')
-      expect(vm.$el.style.getPropertyValue('margin-right')).toBeFalsy()
-      expect(vm.$el.style.getPropertyValue('padding')).toBeFalsy()
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.style.color).toBe('blue')
+        expect(vm.$el.style.fontSize).toBeFalsy()
+        expect(vm.$el.style.padding).toBeFalsy()
+      })
+      .then(done)
   })
 
-  it('updates objects deeply', done => {
+  it('updates objects deeply', (done) => {
     vm.styles = { display: 'none' }
     waitForUpdate(() => {
       expect(vm.$el.style.display).toBe('none')
       vm.styles.display = 'block'
-    }).then(() => {
-      expect(vm.$el.style.display).toBe('block')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.style.display).toBe('block')
+      })
+      .then(done)
   })
 
-  it('background size with only one value', done => {
+  it('background size with only one value', (done) => {
     vm.styles = { backgroundSize: '100%' }
     waitForUpdate(() => {
-      expect(vm.$el.style.cssText.replace(/\s/g, '')).toMatch(/background-size:100%(auto)?;/)
+      expect(vm.$el.style.cssText.replace(/\s/g, '')).toMatch(
+        /background-size:100%(auto)?;/
+      )
     }).then(done)
   })
 
-  it('should work with interpolation', done => {
+  it('should work with interpolation', (done) => {
     vm.styles = { fontSize: `${vm.fontSize}px` }
     waitForUpdate(() => {
       expect(vm.$el.style.fontSize).toBe('16px')
@@ -184,7 +194,7 @@ describe('Directive v-bind:style', () => {
   }
 
   if (supportCssVariable()) {
-    it('CSS variables', done => {
+    it('CSS variables', (done) => {
       vm.styles = { '--color': 'red' }
       waitForUpdate(() => {
         expect(vm.$el.style.getPropertyValue('--color')).toBe('red')
@@ -194,26 +204,29 @@ describe('Directive v-bind:style', () => {
 
   it('should merge static style with binding style', () => {
     const vm = new Vue({
-      template: '<div style="background: url(https://vuejs.org/images/logo.png);color: blue" :style="test"></div>',
+      template:
+        '<div style="background: url(https://vuejs.org/images/logo.png);color: blue" :style="test"></div>',
       data: {
         test: { color: 'red', fontSize: '12px' }
       }
     }).$mount()
     const style = vm.$el.style
-    expect(style.getPropertyValue('background-image')).toMatch('https://vuejs.org/images/logo.png')
-    expect(style.getPropertyValue('color')).toBe('red')
-    expect(style.getPropertyValue('font-size')).toBe('12px')
+    expect(style.backgroundImage).toMatch('https://vuejs.org/images/logo.png')
+    expect(style.color).toBe('red')
+    expect(style.fontSize).toBe('12px')
   })
 
-  it('should merge between parent and child', done => {
+  it('should merge between parent and child', (done) => {
     const vm = new Vue({
-      template: '<child style="text-align: left;margin-right:20px" :style="test"></child>',
+      template:
+        '<child style="text-align: left;margin-right:20px" :style="test"></child>',
       data: {
         test: { color: 'red', fontSize: '12px' }
       },
       components: {
         child: {
-          template: '<div style="margin-right:10px;" :style="{marginLeft: marginLeft}"></div>',
+          template:
+            '<div style="margin-right:10px;" :style="{marginLeft: marginLeft}"></div>',
           data: () => ({ marginLeft: '16px' })
         }
       }
@@ -232,12 +245,15 @@ describe('Directive v-bind:style', () => {
     waitForUpdate(() => {
       expect(style.color).toBe('blue')
       child.marginLeft = '30px'
-    }).then(() => {
-      expect(style.marginLeft).toBe('30px')
-      child.fontSize = '30px'
-    }).then(() => {
-      expect(style.fontSize).toBe('12px')
-    }).then(done)
+    })
+      .then(() => {
+        expect(style.marginLeft).toBe('30px')
+        child.fontSize = '30px'
+      })
+      .then(() => {
+        expect(style.fontSize).toBe('12px')
+      })
+      .then(done)
   })
 
   it('should not pass to child root element', () => {
@@ -248,7 +264,8 @@ describe('Directive v-bind:style', () => {
       },
       components: {
         child: {
-          template: '<div><nested ref="nested" style="color: blue;text-align:left"></nested></div>',
+          template:
+            '<div><nested ref="nested" style="color: blue;text-align:left"></nested></div>',
           components: {
             nested: {
               template: '<div></div>'
@@ -275,8 +292,9 @@ describe('Directive v-bind:style', () => {
           template: '<nested style="color: blue;text-align:left"></nested>',
           components: {
             nested: {
-              template: '<div style="margin-left: 12px;" :style="nestedStyle"></div>',
-              data: () => ({ nestedStyle: { marginLeft: '30px' }})
+              template:
+                '<div style="margin-left: 12px;" :style="nestedStyle"></div>',
+              data: () => ({ nestedStyle: { marginLeft: '30px' } })
             }
           }
         }
@@ -291,25 +309,28 @@ describe('Directive v-bind:style', () => {
     vm.test.color = 'yellow'
     waitForUpdate(() => {
       child.nestedStyle.marginLeft = '60px'
-    }).then(() => {
-      expect(style.marginLeft).toBe('60px')
-      child.nestedStyle = {
-        fontSize: '14px',
-        marginLeft: '40px'
-      }
-    }).then(() => {
-      expect(style.fontSize).toBe('12px')
-      expect(style.marginLeft).toBe('40px')
-    }).then(done)
+    })
+      .then(() => {
+        expect(style.marginLeft).toBe('60px')
+        child.nestedStyle = {
+          fontSize: '14px',
+          marginLeft: '40px'
+        }
+      })
+      .then(() => {
+        expect(style.fontSize).toBe('12px')
+        expect(style.marginLeft).toBe('40px')
+      })
+      .then(done)
   })
 
   it('should not merge for different adjacent elements', (done) => {
     const vm = new Vue({
       template:
         '<div>' +
-          '<section style="color: blue" :style="style" v-if="!bool"></section>' +
-          '<div></div>' +
-          '<section style="margin-top: 12px" v-if="bool"></section>' +
+        '<section style="color: blue" :style="style" v-if="!bool"></section>' +
+        '<div></div>' +
+        '<section style="margin-top: 12px" v-if="bool"></section>' +
         '</div>',
       data: {
         bool: false,
@@ -323,21 +344,23 @@ describe('Directive v-bind:style', () => {
     expect(style.color).toBe('blue')
     waitForUpdate(() => {
       vm.bool = true
-    }).then(() => {
-      expect(style.color).toBe('')
-      expect(style.fontSize).toBe('')
-      expect(style.marginTop).toBe('12px')
-    }).then(done)
+    })
+      .then(() => {
+        expect(style.color).toBe('')
+        expect(style.fontSize).toBe('')
+        expect(style.marginTop).toBe('12px')
+      })
+      .then(done)
   })
 
   it('should not merge for v-if, v-else-if and v-else elements', (done) => {
     const vm = new Vue({
       template:
         '<div>' +
-          '<section style="color: blue" :style="style" v-if="foo"></section>' +
-          '<section style="margin-top: 12px" v-else-if="bar"></section>' +
-          '<section style="margin-bottom: 24px" v-else></section>' +
-          '<div></div>' +
+        '<section style="color: blue" :style="style" v-if="foo"></section>' +
+        '<section style="margin: 12px" v-else-if="bar"></section>' +
+        '<section style="padding: 24px" v-else></section>' +
+        '<div></div>' +
         '</div>',
       data: {
         foo: true,
@@ -352,21 +375,24 @@ describe('Directive v-bind:style', () => {
     expect(style.color).toBe('blue')
     waitForUpdate(() => {
       vm.foo = false
-    }).then(() => {
-      expect(style.color).toBe('')
-      expect(style.fontSize).toBe('')
-      expect(style.marginBottom).toBe('24px')
-      vm.bar = true
-    }).then(() => {
-      expect(style.color).toBe('')
-      expect(style.fontSize).toBe('')
-      expect(style.marginBottom).toBe('')
-      expect(style.marginTop).toBe('12px')
-    }).then(done)
+    })
+      .then(() => {
+        expect(style.color).toBe('')
+        expect(style.fontSize).toBe('')
+        expect(style.padding).toBe('24px')
+        vm.bar = true
+      })
+      .then(() => {
+        expect(style.color).toBe('')
+        expect(style.fontSize).toBe('')
+        expect(style.padding).toBe('')
+        expect(style.margin).toBe('12px')
+      })
+      .then(done)
   })
 
   // #5318
-  it('should work for elements passed down as a slot', done => {
+  it('should work for elements passed down as a slot', (done) => {
     const vm = new Vue({
       template: `<test><div :style="style"/></test>`,
       data: {
