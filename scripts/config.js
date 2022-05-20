@@ -151,18 +151,24 @@ const builds = {
     dest: resolve('packages/vue-server-renderer/build.dev.js'),
     format: 'cjs',
     env: 'development',
-    external: Object.keys(
-      require('../packages/vue-server-renderer/package.json').dependencies
-    )
+    external: [
+      'stream',
+      ...Object.keys(
+        require('../packages/vue-server-renderer/package.json').dependencies
+      )
+    ]
   },
   'web-server-renderer-prod': {
     entry: resolve('web/entry-server-renderer.ts'),
     dest: resolve('packages/vue-server-renderer/build.prod.js'),
     format: 'cjs',
     env: 'production',
-    external: Object.keys(
-      require('../packages/vue-server-renderer/package.json').dependencies
-    )
+    external: [
+      'stream',
+      ...Object.keys(
+        require('../packages/vue-server-renderer/package.json').dependencies
+      )
+    ]
   },
   'web-server-renderer-basic': {
     entry: resolve('web/entry-server-basic-renderer.ts'),
