@@ -2,6 +2,7 @@ import type VNode from '../src/core/vdom/vnode'
 import type Watcher from '../src/core/observer/watcher'
 import { ComponentOptions } from './options'
 import { ScopedSlotsData, VNodeChildren, VNodeData } from './vnode'
+import { GlobalAPI } from './global-api'
 
 // TODO this should be using the same as /component/
 
@@ -11,23 +12,19 @@ export declare class Component {
   static cid: number
   static options: Record<string, any>
   // extend
-  static extend: (options: Record<string, any>) => typeof Component
+  static extend: GlobalAPI['extend']
   static superOptions: Record<string, any>
   static extendOptions: Record<string, any>
   static sealedOptions: Record<string, any>
   static super: Component
   // assets
-  static directive: (
-    id: string,
-    def?: Function | Record<string, any>
-  ) => Function | Record<string, any> | void
-  static component: (
-    id: string,
-    def?: Component | Record<string, any>
-  ) => Component
-  static filter: (id: string, def?: Function) => Function | void
+  static directive: GlobalAPI['directive']
+  static component: GlobalAPI['component']
+  static filter: GlobalAPI['filter']
   // functional context constructor
   static FunctionalRenderContext: Function
+  static mixin: GlobalAPI['mixin']
+  static use: GlobalAPI['use']
 
   // public properties
   $el: any // so that we can attach __vue__ to it

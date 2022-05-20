@@ -17,7 +17,7 @@ export function initExtend(Vue: GlobalAPI) {
   /**
    * Class inheritance
    */
-  Vue.extend = function (extendOptions: any): Component {
+  Vue.extend = function (extendOptions: any): typeof Component {
     extendOptions = extendOptions || {}
     const Super = this
     const SuperId = Super.cid
@@ -33,7 +33,7 @@ export function initExtend(Vue: GlobalAPI) {
 
     const Sub = (function VueComponent(this: any, options: any) {
       this._init(options)
-    } as unknown) as Component
+    } as unknown) as typeof Component
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
     Sub.cid = cid++
@@ -78,14 +78,14 @@ export function initExtend(Vue: GlobalAPI) {
   }
 }
 
-function initProps(Comp: Component) {
+function initProps(Comp: typeof Component) {
   const props = Comp.options.props
   for (const key in props) {
     proxy(Comp.prototype, `_props`, key)
   }
 }
 
-function initComputed(Comp: Component) {
+function initComputed(Comp: typeof Component) {
   const computed = Comp.options.computed
   for (const key in computed) {
     defineComputed(Comp.prototype, key, computed[key])
