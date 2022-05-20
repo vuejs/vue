@@ -24,7 +24,7 @@
     "build:ssr": "npm run build -- web-runtime-cjs,web-server-renderer",
     "test": "npm run lint && npm run ts-check && npm run test:types && npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run test/unit",
-    "test:ssr": "vitest run test/ssr",
+    "test:ssr": "npm run build:ssr && vitest run test/ssr",
     "test:e2e": "npm run build -- web-full-prod,web-server-basic-renderer && node test/e2e/runner.ts",
     "test:types": "tsc -p ./types/tsconfig.json",
     "lint": "eslint src scripts test",
