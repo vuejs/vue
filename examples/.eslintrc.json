@@ -1,0 +1,6 @@
+{
+  "globals": {
+    "Vue": true,
+    "firebase": true
+  }
+}

@@ -2,7 +2,7 @@ name: 'ci'
 on:
   push:
     branches:
-      - '**'
+      - main
   pull_request:
     branches:
       - main
@@ -45,24 +45,24 @@ jobs:
       - name: Run SSR tests
         run: pnpm run test:ssr
 
-  # e2e-test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
+  e2e-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Install pnpm
-  #       uses: pnpm/action-setup@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
 
-  #     - name: Set node version to 16
-  #       uses: actions/setup-node@v2
-  #       with:
-  #         node-version: 16
-  #         cache: 'pnpm'
+      - name: Set node version to 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: 'pnpm'
 
-  #     - run: pnpm install
+      - run: pnpm install
 
-  #     - name: Run e2e tests
-  #       run: pnpm run test:e2e
+      - name: Run e2e tests
+        run: pnpm run test:e2e
 
   lint-and-test-dts:
     runs-on: ubuntu-latest
