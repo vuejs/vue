@@ -4,14 +4,14 @@ import { setCurrentRenderingInstance } from 'core/instance/render'
 
 describe('create-component', () => {
   let vm
-  beforeEach(done => {
+  beforeEach(() => {
     vm = new Vue({
       template: '<p>{{msg}}</p>',
       data () {
         return { msg: 'hello, my children' }
       }
     }).$mount()
-    Vue.nextTick(done)
+    return new Promise(r => Vue.nextTick(r))
   })
 
   it('create a component basically', () => {
@@ -45,7 +45,7 @@ describe('create-component', () => {
       props: {},
       staticAttrs: { class: 'foo' }
     }
-    spyOn(vm, '$forceUpdate')
+    vi.spyOn(vm, '$forceUpdate')
     function async (resolve, reject) {
       setTimeout(() => {
         resolve({
@@ -86,7 +86,7 @@ describe('create-component', () => {
       props: {},
       staticAttrs: { class: 'bar' }
     }
-    spyOn(vm, '$forceUpdate')
+    vi.spyOn(vm, '$forceUpdate')
     function async (resolve, reject) {
       resolve({
         name: 'child',

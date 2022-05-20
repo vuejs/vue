@@ -24,7 +24,7 @@ describe('Single File Component parser', () => {
         <style>nested should be ignored</style>
       </div>
     `)
-    expect(res.template.content.trim()).toBe('<div>hi</div>')
+    expect(res.template!.content.trim()).toBe('<div>hi</div>')
     expect(res.styles.length).toBe(4)
     expect(res.styles[0].src).toBe('./test.css')
     expect(res.styles[1].lang).toBe('stylus')
@@ -33,7 +33,7 @@ describe('Single File Component parser', () => {
     expect(res.styles[2].module).toBe(true)
     expect(res.styles[3].attrs['bool-attr']).toBe(true)
     expect(res.styles[3].attrs['val-attr']).toBe('test')
-    expect(res.script.content.trim()).toBe('export default {}')
+    expect(res.script!.content.trim()).toBe('export default {}')
   })
 
   it('should parse template with closed input', () => {
@@ -43,7 +43,7 @@ describe('Single File Component parser', () => {
       </template>
     `)
 
-    expect(res.template.content.trim()).toBe('<input type="text"/>')
+    expect(res.template!.content.trim()).toBe('<input type="text"/>')
   })
 
   it('should handle nested template', () => {
@@ -52,7 +52,7 @@ describe('Single File Component parser', () => {
         <div><template v-if="ok">hi</template></div>
       </template>
     `)
-    expect(res.template.content.trim()).toBe('<div><template v-if="ok">hi</template></div>')
+    expect(res.template!.content.trim()).toBe('<div><template v-if="ok">hi</template></div>')
   })
 
   it('deindent content', () => {
@@ -71,14 +71,14 @@ describe('Single File Component parser', () => {
     const deindentEnabled = parseComponent(content.trim(), { pad: false, deindent: true })
     const deindentDisabled = parseComponent(content.trim(), { pad: false, deindent: false })
 
-    expect(deindentDefault.template.content).toBe('\n<div></div>\n')
-    expect(deindentDefault.script.content).toBe('\nexport default {}\n')
+    expect(deindentDefault.template!.content).toBe('\n<div></div>\n')
+    expect(deindentDefault.script!.content).toBe('\nexport default {}\n')
     expect(deindentDefault.styles[0].content).toBe('\nh1 { color: red }\n')
-    expect(deindentEnabled.template.content).toBe('\n<div></div>\n')
-    expect(deindentEnabled.script.content).toBe('\nexport default {}\n')
+    expect(deindentEnabled.template!.content).toBe('\n<div></div>\n')
+    expect(deindentEnabled.script!.content).toBe('\nexport default {}\n')
     expect(deindentEnabled.styles[0].content).toBe('\nh1 { color: red }\n')
-    expect(deindentDisabled.template.content).toBe('\n        <div></div>\n      ')
-    expect(deindentDisabled.script.content).toBe('\n        export default {}\n      ')
+    expect(deindentDisabled.template!.content).toBe('\n        <div></div>\n      ')
+    expect(deindentDisabled.script!.content).toBe('\n        export default {}\n      ')
     expect(deindentDisabled.styles[0].content).toBe('\n        h1 { color: red }\n      ')
   })
 
@@ -98,11 +98,11 @@ describe('Single File Component parser', () => {
     const padLine = parseComponent(content.trim(), { pad: 'line' })
     const padSpace = parseComponent(content.trim(), { pad: 'space' })
 
-    expect(padDefault.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
+    expect(padDefault.script!.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
     expect(padDefault.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
-    expect(padLine.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
+    expect(padLine.script!.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
     expect(padLine.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
-    expect(padSpace.script.content).toBe(`<template>
+    expect(padSpace.script!.content).toBe(`<template>
         <div></div>
       </template>
       <script>`.replace(/./g, ' ') + '\nexport default {}\n')
@@ -122,7 +122,7 @@ describe('Single File Component parser', () => {
           h1(v-if='1 < 2') hello
       </template>
     `)
-    expect(res.template.content.trim()).toBe(`div\n  h1(v-if='1 < 2') hello`)
+    expect(res.template!.content.trim()).toBe(`div\n  h1(v-if='1 < 2') hello`)
   })
 
   it('should handle component contains "<" only', () => {
@@ -131,7 +131,7 @@ describe('Single File Component parser', () => {
         <span><</span>
       </template>
     `)
-    expect(res.template.content.trim()).toBe(`<span><</span>`)
+    expect(res.template!.content.trim()).toBe(`<span><</span>`)
   })
 
   it('should handle custom blocks without parsing them', () => {
@@ -195,17 +195,17 @@ describe('Single File Component parser', () => {
       </template>
     </div>`
     const res = parseComponent(`<template>${raw}</template>`)
-    expect(res.template.content.trim()).toBe(raw)
+    expect(res.template!.content.trim()).toBe(raw)
   })
 
   it('should not hang on trailing text', () => {
     const res = parseComponent(`<template>hi</`)
-    expect(res.template.content).toBe('hi')
+    expect(res.template!.content).toBe('hi')
   })
 
   it('should collect errors with source range', () => {
     const res = parseComponent(`<template>hi</`, { outputSourceRange: true })
     expect(res.errors.length).toBe(1)
-    expect(res.errors[0].start).toBe(0)
+    expect((res.errors[0] as WarningMessage).start).toBe(0)
   })
 })

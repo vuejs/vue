@@ -23,11 +23,11 @@ describe('Observer', () => {
 
   it('create on object', () => {
     // on object
-    const obj = {
+    const obj: any = {
       a: {},
       b: {}
     }
-    const ob1 = observe(obj)
+    const ob1 = observe(obj)!
     expect(ob1 instanceof Observer).toBe(true)
     expect(ob1.value).toBe(obj)
     expect(obj.__ob__).toBe(ob1)
@@ -35,16 +35,16 @@ describe('Observer', () => {
     expect(obj.a.__ob__ instanceof Observer).toBe(true)
     expect(obj.b.__ob__ instanceof Observer).toBe(true)
     // should return existing ob on already observed objects
-    const ob2 = observe(obj)
+    const ob2 = observe(obj)!
     expect(ob2).toBe(ob1)
   })
 
   it('create on null', () => {
     // on null
-    const obj = Object.create(null)
+    const obj: any =Object.create(null)
     obj.a = {}
     obj.b = {}
-    const ob1 = observe(obj)
+    const ob1 = observe(obj)!
     expect(ob1 instanceof Observer).toBe(true)
     expect(ob1.value).toBe(obj)
     expect(obj.__ob__).toBe(ob1)
@@ -52,13 +52,13 @@ describe('Observer', () => {
     expect(obj.a.__ob__ instanceof Observer).toBe(true)
     expect(obj.b.__ob__ instanceof Observer).toBe(true)
     // should return existing ob on already observed objects
-    const ob2 = observe(obj)
+    const ob2 = observe(obj)!
     expect(ob2).toBe(ob1)
   })
 
   it('create on already observed object', () => {
     // on object
-    const obj = {}
+    const obj: any = {}
     let val = 0
     let getCount = 0
     Object.defineProperty(obj, 'a', {
@@ -71,7 +71,7 @@ describe('Observer', () => {
       set (v) { val = v }
     })
 
-    const ob1 = observe(obj)
+    const ob1 = observe(obj)!
     expect(ob1 instanceof Observer).toBe(true)
     expect(ob1.value).toBe(obj)
     expect(obj.__ob__).toBe(ob1)
@@ -84,7 +84,7 @@ describe('Observer', () => {
     expect(getCount).toBe(2)
 
     // should return existing ob on already observed objects
-    const ob2 = observe(obj)
+    const ob2 = observe(obj)!
     expect(ob2).toBe(ob1)
 
     // should call underlying setter
@@ -94,14 +94,14 @@ describe('Observer', () => {
 
   it('create on property with only getter', () => {
     // on object
-    const obj = {}
+    const obj: any = {}
     Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
       get () { return 123 }
     })
 
-    const ob1 = observe(obj)
+    const ob1 = observe(obj)!
     expect(ob1 instanceof Observer).toBe(true)
     expect(ob1.value).toBe(obj)
     expect(obj.__ob__).toBe(ob1)
@@ -110,7 +110,7 @@ describe('Observer', () => {
     expect(obj.a).toBe(123)
 
     // should return existing ob on already observed objects
-    const ob2 = observe(obj)
+    const ob2 = observe(obj)!
     expect(ob2).toBe(ob1)
 
     // since there is no setter, you shouldn't be able to write to it
@@ -124,7 +124,7 @@ describe('Observer', () => {
 
   it('create on property with only setter', () => {
     // on object
-    const obj = {}
+    const obj: any ={}
     let val = 10
     Object.defineProperty(obj, 'a', { // eslint-disable-line accessor-pairs
       configurable: true,
@@ -132,7 +132,7 @@ describe('Observer', () => {
       set (v) { val = v }
     })
 
-    const ob1 = observe(obj)
+    const ob1 = observe(obj)!
     expect(ob1 instanceof Observer).toBe(true)
     expect(ob1.value).toBe(obj)
     expect(obj.__ob__).toBe(ob1)
@@ -141,7 +141,7 @@ describe('Observer', () => {
     expect(obj.a).toBe(undefined)
 
     // should return existing ob on already observed objects
-    const ob2 = observe(obj)
+    const ob2 = observe(obj)!
     expect(ob2).toBe(ob1)
 
     // writes should call the set function
@@ -151,14 +151,14 @@ describe('Observer', () => {
 
   it('create on property which is marked not configurable', () => {
     // on object
-    const obj = {}
+    const obj: any ={}
     Object.defineProperty(obj, 'a', {
       configurable: false,
       enumerable: true,
-      val: 10
+      value: 10
     })
 
-    const ob1 = observe(obj)
+    const ob1 = observe(obj)!
     expect(ob1 instanceof Observer).toBe(true)
     expect(ob1.value).toBe(obj)
     expect(obj.__ob__).toBe(ob1)
@@ -166,8 +166,8 @@ describe('Observer', () => {
 
   it('create on array', () => {
     // on object
-    const arr = [{}, {}]
-    const ob1 = observe(arr)
+    const arr: any = [{}, {}]
+    const ob1 = observe(arr)!
     expect(ob1 instanceof Observer).toBe(true)
     expect(ob1.value).toBe(arr)
     expect(arr.__ob__).toBe(ob1)
@@ -177,10 +177,10 @@ describe('Observer', () => {
   })
 
   it('observing object prop change', () => {
-    const obj = { a: { b: 2 }, c: NaN }
-    observe(obj)
+    const obj: any ={ a: { b: 2 }, c: NaN }
+    observe(obj)!
     // mock a watcher!
-    const watcher = {
+    const watcher: any = {
       deps: [],
       addDep (dep) {
         this.deps.push(dep)
@@ -214,7 +214,7 @@ describe('Observer', () => {
   })
 
   it('observing object prop change on defined property', () => {
-    const obj = { val: 2 }
+    const obj: any ={ val: 2 }
     Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
@@ -226,7 +226,7 @@ describe('Observer', () => {
       }
     })
 
-    observe(obj)
+    observe(obj)!
     expect(obj.a).toBe(2) // Make sure 'this' is preserved
     obj.a = 3
     expect(obj.val).toBe(3) // make sure 'setter' was called
@@ -235,10 +235,10 @@ describe('Observer', () => {
   })
 
   it('observing set/delete', () => {
-    const obj1 = { a: 1 }
-    const ob1 = observe(obj1)
+    const obj1: any = { a: 1 }
+    const ob1 = observe(obj1) as any
     const dep1 = ob1.dep
-    spyOn(dep1, 'notify')
+    vi.spyOn(dep1, 'notify')
     setProp(obj1, 'b', 2)
     expect(obj1.b).toBe(2)
     expect(dep1.notify.mock.calls.length).toBe(1)
@@ -262,11 +262,11 @@ describe('Observer', () => {
     delProp(obj2, 'a')
     expect(hasOwn(obj2, 'a')).toBe(false)
     // should work on Object.create(null)
-    const obj3 = Object.create(null)
+    const obj3: any = Object.create(null)
     obj3.a = 1
-    const ob3 = observe(obj3)
+    const ob3 = observe(obj3) as any
     const dep3 = ob3.dep
-    spyOn(dep3, 'notify')
+    vi.spyOn(dep3, 'notify')
     setProp(obj3, 'b', 2)
     expect(obj3.b).toBe(2)
     expect(dep3.notify.mock.calls.length).toBe(1)
@@ -274,10 +274,10 @@ describe('Observer', () => {
     expect(hasOwn(obj3, 'a')).toBe(false)
     expect(dep3.notify.mock.calls.length).toBe(2)
     // set and delete non-numeric key on array
-    const arr2 = ['a']
-    const ob2 = observe(arr2)
+    const arr2: any = ['a']
+    const ob2 = observe(arr2) as any
     const dep2 = ob2.dep
-    spyOn(dep2, 'notify')
+    vi.spyOn(dep2, 'notify')
     setProp(arr2, 'b', 2)
     expect(arr2.b).toBe(2)
     expect(dep2.notify.mock.calls.length).toBe(1)
@@ -327,9 +327,9 @@ describe('Observer', () => {
 
   it('observing array mutation', () => {
     const arr: any[] = []
-    const ob = observe(arr)
+    const ob = observe(arr) as any
     const dep = ob.dep
-    spyOn(dep, 'notify')
+    vi.spyOn(dep, 'notify')
     const objs = [{}, {}, {}]
     arr.push(objs[0])
     arr.pop()
@@ -340,25 +340,27 @@ describe('Observer', () => {
     arr.reverse()
     expect(dep.notify.mock.calls.length).toBe(7)
     // inserted elements should be observed
-    objs.forEach(obj => {
+    objs.forEach((obj: any) => {
       expect(obj.__ob__ instanceof Observer).toBe(true)
     })
   })
 
   it('warn set/delete on non valid values', () => {
     try {
+      // @ts-expect-error
       setProp(null, 'foo', 1)
     } catch (e) {}
     expect(`Cannot set reactive property on undefined, null, or primitive value`).toHaveBeenWarned()
 
     try {
+      // @ts-expect-error
       delProp(null, 'foo')
     } catch (e) {}
     expect(`Cannot delete reactive property on undefined, null, or primitive value`).toHaveBeenWarned()
   })
 
   it('should lazy invoke existing getters', () => {
-    const obj = {}
+    const obj: any ={}
     let called = false
     Object.defineProperty(obj, 'getterProp', {
       enumerable: true,
@@ -367,7 +369,7 @@ describe('Observer', () => {
         return 'some value'
       }
     })
-    observe(obj)
+    observe(obj)!
     expect(called).toBe(false)
   })
 })
