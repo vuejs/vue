@@ -212,7 +212,9 @@ function genConfig(name) {
         cacheRoot: path.resolve(__dirname, '../', 'node_modules/.rts2_cache'),
         tsconfigOverride: {
           compilerOptions: {
-            target: opts.transpile === false ? 'esnext' : 'es5'
+            // if targeting browser, target es5
+            // if targeting node, es2017 means Node 8
+            target: opts.transpile === false ? 'es2017' : 'es5'
           },
           exclude: ['test', 'test-dts']
         }
