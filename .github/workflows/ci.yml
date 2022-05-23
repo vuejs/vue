@@ -63,6 +63,8 @@ jobs:
 
       - name: Run e2e tests
         run: pnpm run test:e2e
+
+      - name: Run transition tests
         run: pnpm run test:transition
 
   lint-and-test-dts:
