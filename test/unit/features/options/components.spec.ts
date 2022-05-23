@@ -66,7 +66,9 @@ describe('Options components', () => {
         div: { template: '<div></div>' }
       }
     })
-    expect('Do not use built-in or reserved HTML elements as component').toHaveBeenWarned()
+    expect(
+      'Do not use built-in or reserved HTML elements as component'
+    ).toHaveBeenWarned()
   })
 
   it('should warn built-in elements', () => {
@@ -75,7 +77,9 @@ describe('Options components', () => {
         component: { template: '<div></div>' }
       }
     })
-    expect('Do not use built-in or reserved HTML elements as component').toHaveBeenWarned()
+    expect(
+      'Do not use built-in or reserved HTML elements as component'
+    ).toHaveBeenWarned()
   })
 
   // the HTMLUnknownElement check doesn't work in Android 4.2

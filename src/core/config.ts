@@ -1,4 +1,3 @@
-
 import { no, noop, identity } from 'shared/util'
 
 import { LIFECYCLE_HOOKS } from 'shared/constants'
@@ -31,7 +30,7 @@ export interface Config {
   _lifecycleHooks: Array<string>
 }
 
-export default ({
+export default {
   /**
    * Option merge strategies (used in core/util/options)
    */
@@ -122,5 +121,5 @@ export default ({
   /**
    * Exposed for legacy reasons
    */
-  _lifecycleHooks: LIFECYCLE_HOOKS,
-} as unknown) as Config
+  _lifecycleHooks: LIFECYCLE_HOOKS
+} as unknown as Config

@@ -64,7 +64,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   const observer = new MutationObserver(flushCallbacks)
   const textNode = document.createTextNode(String(counter))
   observer.observe(textNode, {
-    characterData: true,
+    characterData: true
   })
   timerFunc = () => {
     counter = (counter + 1) % 2
@@ -104,7 +104,7 @@ export function nextTick(cb?: Function, ctx?: Object) {
   }
   // $flow-disable-line
   if (!cb && typeof Promise !== 'undefined') {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       _resolve = resolve
     })
   }

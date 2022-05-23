@@ -1,11 +1,10 @@
-
 import type { Component } from 'typescript/component'
 import {
   tip,
   toArray,
   hyphenate,
   formatComponentName,
-  invokeWithErrorHandling,
+  invokeWithErrorHandling
 } from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
 
@@ -68,7 +67,7 @@ export function eventsMixin(Vue: Component) {
         vm.$on(event[i], fn)
       }
     } else {
-      (vm._events[event] || (vm._events[event] = [])).push(fn)
+      ;(vm._events[event] || (vm._events[event] = [])).push(fn)
       // optimize hook:event cost by using a boolean flag marked at registration
       // instead of a hash lookup
       if (hookRE.test(event)) {

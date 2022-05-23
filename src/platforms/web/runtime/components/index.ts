@@ -3,5 +3,5 @@ import TransitionGroup from './transition-group'
 
 export default {
   Transition,
-  TransitionGroup,
+  TransitionGroup
 }

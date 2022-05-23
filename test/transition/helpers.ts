@@ -18,7 +18,7 @@ console.info = noop
 let asserted
 
 function createCompareFn(spy) {
-  const hasWarned = (msg) => {
+  const hasWarned = msg => {
     let count = spy.calls.count()
     let args
     while (count--) {
@@ -34,7 +34,7 @@ function createCompareFn(spy) {
   }
 
   return {
-    compare: (msg) => {
+    compare: msg => {
       asserted = asserted.concat(msg)
       const warned = Array.isArray(msg) ? msg.some(hasWarned) : hasWarned(msg)
       return {
@@ -60,9 +60,9 @@ beforeEach(() => {
   })
 })
 
-afterEach((done) => {
-  const warned = (msg) =>
-    asserted.some((assertedMsg) => msg.toString().indexOf(assertedMsg) > -1)
+afterEach(done => {
+  const warned = msg =>
+    asserted.some(assertedMsg => msg.toString().indexOf(assertedMsg) > -1)
   // @ts-ignore
   let count = console.error.calls.count()
   let args

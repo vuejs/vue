@@ -1,4 +1,3 @@
-
 import { ASSET_TYPES } from 'shared/constants'
 import type { GlobalAPI } from 'typescript/global-api'
 import { isPlainObject, validateComponentName } from '../util/index'
@@ -7,7 +6,7 @@ export function initAssetRegisters(Vue: GlobalAPI) {
   /**
    * Create asset registration methods.
    */
-  ASSET_TYPES.forEach((type) => {
+  ASSET_TYPES.forEach(type => {
     // @ts-expect-error function is not exact same type
     Vue[type] = function (
       id: string,

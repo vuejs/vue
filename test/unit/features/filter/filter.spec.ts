@@ -106,7 +106,7 @@ describe('Filters', () => {
 
   it('handle division with hash values', () => {
     const vm = new Vue({
-      data: { a: { n: 20 }},
+      data: { a: { n: 20 } },
       template: `<div>{{ a['n'] / 5 | double }}</div>`,
       filters: { double: v => v * 2 }
     }).$mount()

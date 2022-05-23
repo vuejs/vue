@@ -1,4 +1,3 @@
-
 import type Watcher from './watcher'
 import config from '../config'
 import { callHook, activateChildComponent } from '../instance/lifecycle'

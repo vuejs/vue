@@ -1,4 +1,3 @@
-
 import config from '../config'
 import { initProxy } from './proxy'
 import { initState } from './state'

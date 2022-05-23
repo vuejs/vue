@@ -1,4 +1,3 @@
-
 import { baseOptions } from './options'
 import { createCompiler } from 'compiler/index'
 

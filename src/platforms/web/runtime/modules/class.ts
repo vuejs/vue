@@ -1,4 +1,3 @@
-
 import { isDef, isUndef } from 'shared/util'
 import type { VNodeData } from 'typescript/vnode'
 
@@ -34,5 +33,5 @@ function updateClass(oldVnode: any, vnode: any) {
 
 export default {
   create: updateClass,
-  update: updateClass,
+  update: updateClass
 }

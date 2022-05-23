@@ -11,7 +11,7 @@ describe('Options computed', () => {
         a: 1
       },
       computed: {
-        b () {
+        b() {
           return this.a + 1
         }
       }
@@ -33,8 +33,12 @@ describe('Options computed', () => {
       },
       computed: {
         b: {
-          get () { return this.a + 1 },
-          set (v) { this.a = v - 1 }
+          get() {
+            return this.a + 1
+          },
+          set(v) {
+            this.a = v - 1
+          }
         }
       }
     }).$mount()
@@ -46,9 +50,11 @@ describe('Options computed', () => {
       expect(vm.$el.textContent).toBe('3')
       vm.b = 1
       expect(vm.a).toBe(0)
-    }).then(() => {
-      expect(vm.$el.textContent).toBe('1')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.textContent).toBe('1')
+      })
+      .then(done)
   })
 
   it('warn with setter and no getter', () => {
@@ -60,14 +66,16 @@ describe('Options computed', () => {
       `,
       components: {
         test: {
-          data () {
+          data() {
             return {
               a: 1
             }
           },
           computed: {
             b: {
-              set (v) { this.a = v }
+              set(v) {
+                this.a = v
+              }
             }
           },
           template: `<div>{{a}}</div>`
@@ -81,13 +89,15 @@ describe('Options computed', () => {
   it('warn assigning to computed with no setter', () => {
     const vm = new Vue({
       computed: {
-        b () {
+        b() {
           return 1
         }
       }
     })
     vm.b = 2
-    expect(`Computed property "b" was assigned to but it has no setter.`).toHaveBeenWarned()
+    expect(
+      `Computed property "b" was assigned to but it has no setter.`
+    ).toHaveBeenWarned()
   })
 
   it('watching computed', done => {
@@ -97,7 +107,9 @@ describe('Options computed', () => {
         a: 1
       },
       computed: {
-        b () { return this.a + 1 }
+        b() {
+          return this.a + 1
+        }
       }
     })
     vm.$watch('b', spy)
@@ -114,7 +126,7 @@ describe('Options computed', () => {
         a: 1
       },
       computed: {
-        b () {
+        b() {
           spy()
           return this.a + 1
         }
@@ -136,7 +148,7 @@ describe('Options computed', () => {
       computed: {
         b: {
           cache: false,
-          get () {
+          get() {
             spy()
             return this.a + 1
           }
@@ -153,12 +165,12 @@ describe('Options computed', () => {
   it('as component', done => {
     const Comp = Vue.extend({
       template: `<div>{{ b }} {{ c }}</div>`,
-      data () {
+      data() {
         return { a: 1 }
       },
       computed: {
         // defined on prototype
-        b () {
+        b() {
           return this.a + 1
         }
       }
@@ -167,7 +179,7 @@ describe('Options computed', () => {
     const vm = new Comp({
       computed: {
         // defined at instantiation
-        c () {
+        c() {
           return this.b + 1
         }
       }
@@ -192,7 +204,9 @@ describe('Options computed', () => {
         a: () => 2
       }
     })
-    expect(`computed property "a" is already defined in data`).toHaveBeenWarned()
+    expect(
+      `computed property "a" is already defined in data`
+    ).toHaveBeenWarned()
   })
 
   it('warn conflict with props', () => {
@@ -203,7 +217,9 @@ describe('Options computed', () => {
         a: () => 2
       }
     })
-    expect(`computed property "a" is already defined as a prop`).toHaveBeenWarned()
+    expect(
+      `computed property "a" is already defined as a prop`
+    ).toHaveBeenWarned()
   })
 
   it('warn conflict with methods', () => {
@@ -215,7 +231,9 @@ describe('Options computed', () => {
         a: () => {}
       }
     })
-    expect(`computed property "a" is already defined as a method`).toHaveBeenWarned()
+    expect(
+      `computed property "a" is already defined as a method`
+    ).toHaveBeenWarned()
   })
 
   it('rethrow computed error', () => {

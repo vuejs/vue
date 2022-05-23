@@ -90,13 +90,13 @@ describe('Global config', () => {
           </div>`,
         props: ['prop'],
         propsData: {
-          'prop': []
+          prop: []
         },
         data: () => ({
           data: ''
         }),
         computed: {
-          computed () {
+          computed() {
             return this.prop.join(',')
           }
         },
@@ -104,7 +104,7 @@ describe('Global config', () => {
           prop: 'execute'
         },
         methods: {
-          execute () {
+          execute() {
             this.data = this.computed
           }
         }

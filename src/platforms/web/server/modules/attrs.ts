@@ -1,4 +1,3 @@
-
 import { escape } from '../util'
 
 import { isDef, isUndef, extend } from 'shared/util'
@@ -7,7 +6,7 @@ import {
   isBooleanAttr,
   isEnumeratedAttr,
   isFalsyAttrValue,
-  convertEnumeratedValue,
+  convertEnumeratedValue
 } from 'web/util/attrs'
 
 import { isSSRUnsafeAttr } from 'web/server/util'

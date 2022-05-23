@@ -1,4 +1,3 @@
-
 import VNode from 'core/vdom/vnode'
 import { cached, extend, toObject } from 'shared/util'
 import type { VNodeData, VNodeWithData } from 'typescript/vnode'

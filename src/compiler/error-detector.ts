@@ -1,4 +1,3 @@
-
 import { dirRE, onRE } from './parser/index'
 
 type Range = { start?: number; end?: number }
@@ -25,7 +24,8 @@ const unaryOperatorsRE = new RegExp(
 )
 
 // strip strings in expressions
-const stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`/g
+const stripStringRE =
+  /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`/g
 
 // detect problematic expressions in a template
 export function detectErrors(ast: ASTNode | undefined, warn: Function) {
@@ -117,7 +117,7 @@ function checkExpression(
 ) {
   try {
     new Function(`return ${exp}`)
-  } catch (e:any) {
+  } catch (e: any) {
     const keywordMatch = exp
       .replace(stripStringRE, '')
       .match(prohibitedKeywordRE)
@@ -146,7 +146,7 @@ function checkFunctionParameterExpression(
 ) {
   try {
     new Function(exp, '')
-  } catch (e:any) {
+  } catch (e: any) {
     warn(
       `invalid function parameter expression: ${e.message} in\n\n` +
         `    ${exp}\n\n` +

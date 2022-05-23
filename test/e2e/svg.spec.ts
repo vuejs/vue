@@ -21,7 +21,7 @@ describe('e2e: svg', () => {
   async function assertPolygon(total: number) {
     expect(
       await page().evaluate(
-        (total) => {
+        total => {
           const points = stats
             .map((stat, i) => {
               const point = valueToPoint(stat.value, i, total)
@@ -40,7 +40,7 @@ describe('e2e: svg', () => {
   // assert the position of each label is correct
   async function assertLabels(total: number) {
     const positions = await page().evaluate(
-      (total) => {
+      total => {
         return stats.map((stat, i) => {
           const point = valueToPoint(+stat.value + 10, i, total)
           return [point.x, point.y]
@@ -51,7 +51,7 @@ describe('e2e: svg', () => {
     for (let i = 0; i < total; i++) {
       const textPosition = await page().$eval(
         `text:nth-child(${i + 3})`,
-        (node) => [+node.attributes[0].value, +node.attributes[1].value]
+        node => [+node.attributes[0].value, +node.attributes[1].value]
       )
       expect(textPosition).toEqual(positions[i])
     }
@@ -60,7 +60,7 @@ describe('e2e: svg', () => {
   // assert each value of stats is correct
   async function assertStats(expected: number[]) {
     const statsValue = await page().evaluate(() => {
-      return stats.map((stat) => +stat.value)
+      return stats.map(stat => +stat.value)
     })
     expect(statsValue).toEqual(expected)
   }

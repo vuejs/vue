@@ -53,19 +53,24 @@ describe('Options template', () => {
 
   it('warn error in generated function', () => {
     new Vue({
-      template: '<div v-if="!@"><span>{{ a"" }}</span><span>{{ do + 1 }}</span></div>'
+      template:
+        '<div v-if="!@"><span>{{ a"" }}</span><span>{{ do + 1 }}</span></div>'
     }).$mount()
     expect('Error compiling template').toHaveBeenWarned()
     expect('Raw expression: v-if="!@"').toHaveBeenWarned()
     expect('Raw expression: {{ a"" }}').toHaveBeenWarned()
-    expect('avoid using JavaScript keyword as property name: "do"').toHaveBeenWarned()
+    expect(
+      'avoid using JavaScript keyword as property name: "do"'
+    ).toHaveBeenWarned()
   })
 
   it('should not warn $ prefixed keywords', () => {
     new Vue({
       template: `<div @click="$delete(foo, 'bar')"></div>`
     }).$mount()
-    expect('avoid using JavaScript keyword as property name').not.toHaveBeenWarned()
+    expect(
+      'avoid using JavaScript keyword as property name'
+    ).not.toHaveBeenWarned()
   })
 
   it('warn error in generated function (v-for)', () => {

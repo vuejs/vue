@@ -1,4 +1,3 @@
-
 import { ASSET_TYPES } from 'shared/constants'
 import type { Component } from 'typescript/component'
 import type { GlobalAPI } from 'typescript/global-api'
@@ -31,9 +30,9 @@ export function initExtend(Vue: GlobalAPI) {
       validateComponentName(name)
     }
 
-    const Sub = (function VueComponent(this: any, options: any) {
+    const Sub = function VueComponent(this: any, options: any) {
       this._init(options)
-    } as unknown) as typeof Component
+    } as unknown as typeof Component
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
     Sub.cid = cid++

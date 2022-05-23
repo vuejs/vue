@@ -1,11 +1,10 @@
-
 import {
   tip,
   hasOwn,
   isDef,
   isUndef,
   hyphenate,
-  formatComponentName,
+  formatComponentName
 } from 'core/util/index'
 import type { Component } from 'typescript/component'
 import type { VNodeData } from 'typescript/vnode'

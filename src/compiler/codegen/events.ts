@@ -36,7 +36,7 @@ const keyNames: { [key: string]: string | Array<string> } = {
 // #4868: modifiers that prevent the execution of the listener
 // need to explicitly return null so that we can determine whether to remove
 // the listener for .once
-const genGuard = (condition) => `if(${condition})return null;`
+const genGuard = condition => `if(${condition})return null;`
 
 const modifierCode: { [key: string]: string } = {
   stop: '$event.stopPropagation();',
@@ -83,7 +83,7 @@ function genHandler(
   }
 
   if (Array.isArray(handler)) {
-    return `[${handler.map((handler) => genHandler(handler)).join(',')}]`
+    return `[${handler.map(handler => genHandler(handler)).join(',')}]`
   }
 
   const isMethodPath = simplePathRE.test(handler.value)
@@ -114,8 +114,8 @@ function genHandler(
         const modifiers = handler.modifiers
         genModifierCode += genGuard(
           ['ctrl', 'shift', 'alt', 'meta']
-            .filter((keyModifier) => !modifiers[keyModifier])
-            .map((keyModifier) => `$event.${keyModifier}Key`)
+            .filter(keyModifier => !modifiers[keyModifier])
+            .map(keyModifier => `$event.${keyModifier}Key`)
             .join('||')
         )
       } else {

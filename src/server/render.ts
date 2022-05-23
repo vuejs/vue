@@ -1,4 +1,3 @@
-
 import { escape } from 'web/server/util'
 import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
@@ -11,14 +10,14 @@ import { isDef, isUndef, isTrue } from 'shared/util'
 
 import {
   createComponent,
-  createComponentInstanceForVnode,
+  createComponentInstanceForVnode
 } from 'core/vdom/create-component'
 import VNode from 'core/vdom/vnode'
 import type { VNodeDirective } from 'typescript/vnode'
 import type { Component } from 'typescript/component'
 
 let warned = Object.create(null)
-const warnOnce = (msg) => {
+const warnOnce = msg => {
   if (!warned[msg]) {
     warned[msg] = true
     // eslint-disable-next-line no-console
@@ -31,7 +30,7 @@ const onCompilationError = (err, vm) => {
   throw new Error(`\n\u001b[31m${err}${trace}\u001b[39m\n`)
 }
 
-const normalizeRender = (vm) => {
+const normalizeRender = vm => {
   const { render, template, _scopeId } = vm.$options
   if (isUndef(render)) {
     if (template) {
@@ -39,7 +38,7 @@ const normalizeRender = (vm) => {
         template,
         {
           scopeId: _scopeId,
-          warn: onCompilationError,
+          warn: onCompilationError
         },
         vm
       )
@@ -128,13 +127,13 @@ function renderComponent(node, isRoot, context) {
     const key = name + '::' + rawKey
     const { has, get } = context
     if (isDef(has)) {
-      has(key, (hit) => {
+      has(key, hit => {
         if (hit === true && isDef(get)) {
-          get(key, (res) => {
+          get(key, res => {
             if (isDef(registerComponent)) {
               registerComponent(userContext)
             }
-            res.components.forEach((register) => register(userContext))
+            res.components.forEach(register => register(userContext))
             write(res.html, next)
           })
         } else {
@@ -142,12 +141,12 @@ function renderComponent(node, isRoot, context) {
         }
       })
     } else if (isDef(get)) {
-      get(key, (res) => {
+      get(key, res => {
         if (isDef(res)) {
           if (isDef(registerComponent)) {
             registerComponent(userContext)
           }
-          res.components.forEach((register) => register(userContext))
+          res.components.forEach(register => register(userContext))
           write(res.html, next)
         } else {
           renderComponentWithCache(node, isRoot, key, context)
@@ -185,7 +184,7 @@ function renderComponentWithCache(node, isRoot, key, context) {
     key,
     buffer,
     bufferIndex,
-    componentBuffer,
+    componentBuffer
   })
   renderComponentInner(node, isRoot, context)
 }
@@ -205,7 +204,7 @@ function renderComponentInner(node, isRoot, context) {
     childNode.parent = node
     context.renderStates.push({
       type: 'Component',
-      prevActive,
+      prevActive
     })
     renderNode(childNode, isRoot, context)
   }
@@ -218,7 +217,7 @@ function renderComponentInner(node, isRoot, context) {
 function renderAsyncComponent(node, isRoot, context) {
   const factory = node.asyncFactory
 
-  const resolve = (comp) => {
+  const resolve = comp => {
     if (comp.__esModule && comp.default) {
       comp = comp.default
     }
@@ -244,7 +243,7 @@ function renderAsyncComponent(node, isRoot, context) {
           type: 'Fragment',
           children: resolvedNode,
           rendered: 0,
-          total: resolvedNode.length,
+          total: resolvedNode.length
         })
         context.next()
       }
@@ -291,7 +290,7 @@ function renderStringNode(el, context) {
       children,
       rendered: 0,
       total: children.length,
-      endTag: el.close,
+      endTag: el.close
     })
     write(el.open, next)
   }
@@ -323,7 +322,7 @@ function renderElement(el, isRoot, context) {
       children,
       rendered: 0,
       total: children.length,
-      endTag,
+      endTag
     })
     write(startTag, next)
   }
@@ -342,7 +341,7 @@ function getVShowDirectiveInfo(node: VNode): VNodeDirective | undefined {
 
   while (isDef(node)) {
     if (node.data && node.data.directives) {
-      tmp = node.data.directives.find((dir) => dir.name === 'show')
+      tmp = node.data.directives.find(dir => dir.name === 'show')
       if (tmp) {
         dir = tmp
       }
@@ -439,7 +438,7 @@ export function createRenderFunction(
       isUnaryTag,
       modules,
       directives,
-      cache,
+      cache
     })
     installSSRHelpers(component)
     normalizeRender(component)

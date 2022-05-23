@@ -6,8 +6,9 @@ const { renderToStream } = createRenderer()
 
 describe('SSR: renderToStream', () => {
   it('should render to a stream', done => {
-    const stream = renderToStream(new Vue({
-      template: `
+    const stream = renderToStream(
+      new Vue({
+        template: `
         <div>
           <p class="hi">yoyo</p>
           <div id="ho" :class="[testClass, { red: isRed }]"></div>
@@ -17,36 +18,43 @@ describe('SSR: renderToStream', () => {
           <c-comp></c-comp>
         </div>
       `,
-      data: {
-        test: 'hi',
-        isRed: true,
-        testClass: 'a'
-      },
-      components: {
-        bComp (resolve) {
-          return resolve({
-            render (h) {
-              return h('test-async-2')
-            },
-            components: {
-              testAsync2 (resolve) {
-                return resolve({
-                  created () { this.$parent.$parent.testClass = 'b' },
-                  render (h) {
-                    return h('div', { class: [this.$parent.$parent.testClass] }, 'test')
-                  }
-                })
-              }
-            }
-          })
+        data: {
+          test: 'hi',
+          isRed: true,
+          testClass: 'a'
         },
-        cComp: {
-          render (h) {
-            return h('div', { class: [this.$parent.testClass] }, 'test')
+        components: {
+          bComp(resolve) {
+            return resolve({
+              render(h) {
+                return h('test-async-2')
+              },
+              components: {
+                testAsync2(resolve) {
+                  return resolve({
+                    created() {
+                      this.$parent.$parent.testClass = 'b'
+                    },
+                    render(h) {
+                      return h(
+                        'div',
+                        { class: [this.$parent.$parent.testClass] },
+                        'test'
+                      )
+                    }
+                  })
+                }
+              }
+            })
+          },
+          cComp: {
+            render(h) {
+              return h('div', { class: [this.$parent.testClass] }, 'test')
+            }
           }
         }
-      }
-    }))
+      })
+    )
     let res = ''
     stream.on('data', chunk => {
       res += chunk
@@ -60,18 +68,20 @@ describe('SSR: renderToStream', () => {
           '<input value="hi"> ' +
           '<div class="b">test</div> ' +
           '<div class="b">test</div>' +
-        '</div>'
+          '</div>'
       )
       done()
     })
   })
 
   it('should catch error', done => {
-    const stream = renderToStream(new Vue({
-      render () {
-        throw new Error('oops')
-      }
-    }))
+    const stream = renderToStream(
+      new Vue({
+        render() {
+          throw new Error('oops')
+        }
+      })
+    )
     stream.on('error', err => {
       expect(err.toString()).toMatch(/oops/)
       expect(`oops`).toHaveBeenWarned()
@@ -81,7 +91,7 @@ describe('SSR: renderToStream', () => {
   })
 
   it('should not mingle two components', done => {
-    const padding = (new Array(20000)).join('x')
+    const padding = new Array(20000).join('x')
     const component1 = new Vue({
       template: `<div>${padding}<div></div></div>`,
       _scopeId: '_component1'
@@ -93,7 +103,7 @@ describe('SSR: renderToStream', () => {
     const stream1 = renderToStream(component1)
     const stream2 = renderToStream(component2)
     let res = ''
-    stream1.on('data', (text) => {
+    stream1.on('data', text => {
       res += text.toString('utf-8').replace(/x/g, '')
     })
     stream1.on('end', () => {
@@ -106,15 +116,18 @@ describe('SSR: renderToStream', () => {
 
   it('should call context.rendered', done => {
     let a = 0
-    const stream = renderToStream(new Vue({
-      template: `
+    const stream = renderToStream(
+      new Vue({
+        template: `
         <div>Hello</div>
       `
-    }), {
-      rendered: () => {
-        a = 42
+      }),
+      {
+        rendered: () => {
+          a = 42
+        }
       }
-    })
+    )
     let res = ''
     stream.on('data', chunk => {
       res += chunk

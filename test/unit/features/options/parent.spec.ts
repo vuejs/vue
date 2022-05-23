@@ -3,12 +3,12 @@ import Vue from 'vue'
 describe('Options parent', () => {
   it('should work', () => {
     const parent = new Vue({
-      render () {}
+      render() {}
     }).$mount()
 
     const child = new Vue({
       parent: parent,
-      render () {}
+      render() {}
     }).$mount()
 
     // this option is straight-forward

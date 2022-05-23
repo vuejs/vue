@@ -1,4 +1,3 @@
-
 import { parse } from 'compiler/parser/index'
 import { generate } from './codegen'
 import { optimize } from './optimizer'
@@ -14,6 +13,6 @@ export const createCompiler = createCompilerCreator(function baseCompile(
   return {
     ast,
     render: code.render,
-    staticRenderFns: code.staticRenderFns,
+    staticRenderFns: code.staticRenderFns
   }
 })

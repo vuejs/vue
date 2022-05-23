@@ -13,7 +13,7 @@ if (process.env.NODE_ENV !== 'production') {
     perf.clearMarks &&
     perf.clearMeasures
   ) {
-    mark = (tag) => perf.mark(tag)
+    mark = tag => perf.mark(tag)
     measure = (name, startTag, endTag) => {
       perf.measure(name, startTag, endTag)
       perf.clearMarks(startTag)

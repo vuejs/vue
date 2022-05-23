@@ -63,7 +63,7 @@ const directive = {
         // trigger change event if
         // no matching option found for at least one value
         const needReset = el.multiple
-          ? binding.value.some((v) => hasNoMatchingOption(v, curOptions))
+          ? binding.value.some(v => hasNoMatchingOption(v, curOptions))
           : binding.value !== binding.oldValue &&
             hasNoMatchingOption(binding.value, curOptions)
         if (needReset) {
@@ -71,7 +71,7 @@ const directive = {
         }
       }
     }
-  },
+  }
 }
 
 function setSelected(el, binding, vm) {
@@ -121,7 +121,7 @@ function actuallySetSelected(el, binding, vm) {
 }
 
 function hasNoMatchingOption(value, options) {
-  return options.every((o) => !looseEqual(o, value))
+  return options.every(o => !looseEqual(o, value))
 }
 
 function getValue(option) {

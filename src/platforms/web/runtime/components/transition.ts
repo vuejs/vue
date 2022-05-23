@@ -1,4 +1,3 @@
-
 // Provides transition support for a single element/component.
 // supports transition mode (out-in / in-out)
 
@@ -7,7 +6,7 @@ import { camelize, extend, isPrimitive } from 'shared/util'
 import {
   mergeVNodeHook,
   isAsyncPlaceholder,
-  getFirstComponentChild,
+  getFirstComponentChild
 } from 'core/vdom/helpers/index'
 import VNode from 'core/vdom/vnode'
 import type { Component } from 'typescript/component'
@@ -27,7 +26,7 @@ export const transitionProps = {
   appearClass: String,
   appearActiveClass: String,
   appearToClass: String,
-  duration: [Number, String, Object],
+  duration: [Number, String, Object]
 }
 
 // in case the child is also an abstract component, e.g. <keep-alive>
@@ -61,7 +60,7 @@ function placeholder(h: Function, rawChild: VNode): VNode | undefined {
   // @ts-expect-error
   if (/\d-keep-alive$/.test(rawChild.tag)) {
     return h('keep-alive', {
-      props: rawChild.componentOptions!.propsData,
+      props: rawChild.componentOptions!.propsData
     })
   }
 }
@@ -80,7 +79,7 @@ function isSameChild(child: VNode, oldChild: VNode): boolean {
 
 const isNotTextNode = (c: VNode) => c.tag || isAsyncPlaceholder(c)
 
-const isVShowDirective = (d) => d.name === 'show'
+const isVShowDirective = d => d.name === 'show'
 
 export default {
   name: 'transition',
@@ -156,9 +155,8 @@ export default {
           : id + child.key
         : child.key
 
-    const data: Object = ((
-      child.data || (child.data = {})
-    ).transition = extractTransitionData(this))
+    const data: Object = ((child.data || (child.data = {})).transition =
+      extractTransitionData(this))
     const oldRawChild: VNode = this._vnode
     const oldChild = getRealChild(oldRawChild)
 
@@ -201,12 +199,12 @@ export default {
         }
         mergeVNodeHook(data, 'afterEnter', performLeave)
         mergeVNodeHook(data, 'enterCancelled', performLeave)
-        mergeVNodeHook(oldData, 'delayLeave', (leave) => {
+        mergeVNodeHook(oldData, 'delayLeave', leave => {
           delayedLeave = leave
         })
       }
     }
 
     return rawChild
-  },
+  }
 }

@@ -1,4 +1,3 @@
-
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
 import type { RenderOptions } from './create-renderer'
@@ -8,7 +7,7 @@ export function createBasicRenderer({
   modules = [],
   directives = {},
   isUnaryTag = () => false,
-  cache,
+  cache
 }: RenderOptions = {}) {
   const render = createRenderFunction(modules, directives, isUnaryTag, cache)
 
@@ -22,7 +21,7 @@ export function createBasicRenderer({
       context = {}
     }
     let result = ''
-    const write = createWriteFunction((text) => {
+    const write = createWriteFunction(text => {
       result += text
       return false
     }, done)

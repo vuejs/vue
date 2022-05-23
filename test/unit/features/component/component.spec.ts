@@ -6,7 +6,7 @@ describe('Component', () => {
       template: '<test></test>',
       components: {
         test: {
-          data () {
+          data() {
             return { a: 123 }
           },
           template: '<span>{{a}}</span>'
@@ -22,14 +22,16 @@ describe('Component', () => {
       template: '<div><table><tbody><test></test></tbody></table></div>',
       components: {
         test: {
-          data () {
+          data() {
             return { a: 123 }
           },
           template: '<tr><td>{{a}}</td></tr>'
         }
       }
     }).$mount()
-    expect(vm.$el.innerHTML).toBe('<table><tbody><tr><td>123</td></tr></tbody></table>')
+    expect(vm.$el.innerHTML).toBe(
+      '<table><tbody><tr><td>123</td></tr></tbody></table>'
+    )
   })
 
   it('"is" attribute', () => {
@@ -37,14 +39,16 @@ describe('Component', () => {
       template: '<div><table><tbody><tr is="test"></tr></tbody></table></div>',
       components: {
         test: {
-          data () {
+          data() {
             return { a: 123 }
           },
           template: '<tr><td>{{a}}</td></tr>'
         }
       }
     }).$mount()
-    expect(vm.$el.innerHTML).toBe('<table><tbody><tr><td>123</td></tr></tbody></table>')
+    expect(vm.$el.innerHTML).toBe(
+      '<table><tbody><tr><td>123</td></tr></tbody></table>'
+    )
   })
 
   it('inline-template', () => {
@@ -55,7 +59,7 @@ describe('Component', () => {
       },
       components: {
         test: {
-          data () {
+          data() {
             return { a: 'child' }
           }
         }
@@ -69,14 +73,16 @@ describe('Component', () => {
       template: '<test></test>',
       components: {
         test: {
-          data () {
+          data() {
             return { a: 123, b: 234 }
           },
           template: '<p>{{a}}</p><p>{{b}}</p>'
         }
       }
     }).$mount()
-    expect('Component template should contain exactly one root element').toHaveBeenWarned()
+    expect(
+      'Component template should contain exactly one root element'
+    ).toHaveBeenWarned()
   })
 
   it('dynamic', done => {
@@ -88,13 +94,13 @@ describe('Component', () => {
       components: {
         'view-a': {
           template: '<div>foo {{view}}</div>',
-          data () {
+          data() {
             return { view: 'a' }
           }
         },
         'view-b': {
           template: '<div>bar {{view}}</div>',
-          data () {
+          data() {
             return { view: 'b' }
           }
         }
@@ -109,7 +115,8 @@ describe('Component', () => {
       .then(() => {
         expect(vm.$el.nodeType).toBe(8)
         expect(vm.$el.data).toBe('')
-      }).then(done)
+      })
+      .then(done)
   })
 
   it('dynamic with props', done => {
@@ -134,18 +141,20 @@ describe('Component', () => {
     waitForUpdate(() => {
       expect(vm.$el.outerHTML).toBe('<div>bar view-b</div>')
       vm.view = ''
-    }).then(() => {
-      expect(vm.$el.nodeType).toBe(8)
-      expect(vm.$el.data).toBe('')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.nodeType).toBe(8)
+        expect(vm.$el.data).toBe('')
+      })
+      .then(done)
   })
 
   it(':is using raw component constructor', () => {
     const vm = new Vue({
       template:
         '<div>' +
-          '<component :is="$options.components.test"></component>' +
-          '<component :is="$options.components.async"></component>' +
+        '<component :is="$options.components.test"></component>' +
+        '<component :is="$options.components.async"></component>' +
         '</div>',
       components: {
         test: {
@@ -165,7 +174,7 @@ describe('Component', () => {
     const vm = new Vue({
       template:
         '<div>' +
-          '<component v-for="(c, i) in comps" :key="i" :is="c.type"></component>' +
+        '<component v-for="(c, i) in comps" :key="i" :is="c.type"></component>' +
         '</div>',
       data: {
         comps: [{ type: 'one' }, { type: 'two' }]
@@ -215,7 +224,7 @@ describe('Component', () => {
       components: {
         test: {
           template: '<div><slot></slot> {{message}}</div>',
-          data () {
+          data() {
             return {
               message: 'world'
             }
@@ -243,7 +252,7 @@ describe('Component', () => {
       components: {
         test: {
           template: '<div><slot></slot> {{message}}</div>',
-          data () {
+          data() {
             return {
               message: 'world'
             }
@@ -284,7 +293,8 @@ describe('Component', () => {
       template: '<test :somecollection="list"></test>', // <-- simulate lowercased template
       components: {
         test: {
-          template: '<ul><li v-for="item in someCollection">{{item.a}}</li></ul>',
+          template:
+            '<ul><li v-for="item in someCollection">{{item.a}}</li></ul>',
           props: ['someCollection']
         }
       }
@@ -300,7 +310,7 @@ describe('Component', () => {
       components: {
         test: {
           template: '<div></div>',
-          created () {
+          created() {
             this.$emit('fooBar')
           }
         }
@@ -327,10 +337,10 @@ describe('Component', () => {
       template: '<test id="foo" :class="color"></test>',
       components: {
         test: {
-          data () {
+          data() {
             return { tag: 'div' }
           },
-          render (h) {
+          render(h) {
             return h(this.tag, { class: 'test' }, 'hi')
           }
         }
@@ -347,16 +357,19 @@ describe('Component', () => {
       expect(vm.$el.id).toBe('foo')
       expect(vm.$el.className).toBe('test green')
       vm.$children[0].tag = 'p'
-    }).then(() => {
-      expect(vm.$el.tagName).toBe('P')
-      expect(vm.$el.id).toBe('foo')
-      expect(vm.$el.className).toBe('test green')
-      vm.color = 'red'
-    }).then(() => {
-      expect(vm.$el.tagName).toBe('P')
-      expect(vm.$el.id).toBe('foo')
-      expect(vm.$el.className).toBe('test red')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.tagName).toBe('P')
+        expect(vm.$el.id).toBe('foo')
+        expect(vm.$el.className).toBe('test green')
+        vm.color = 'red'
+      })
+      .then(() => {
+        expect(vm.$el.tagName).toBe('P')
+        expect(vm.$el.id).toBe('foo')
+        expect(vm.$el.className).toBe('test red')
+      })
+      .then(done)
   })
 
   it('catch component render error and preserve previous vnode', done => {
@@ -368,7 +381,7 @@ describe('Component', () => {
           b: 123
         }
       },
-      render (h) {
+      render(h) {
         return h('div', [this.a.b])
       }
     }).$mount()
@@ -379,10 +392,12 @@ describe('Component', () => {
       expect(spy).toHaveBeenCalled()
       expect(vm.$el.textContent).toBe('123') // should preserve rendered DOM
       vm.a = { b: 234 }
-    }).then(() => {
-      expect(vm.$el.textContent).toBe('234') // should be able to recover
-      Vue.config.errorHandler = undefined
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.textContent).toBe('234') // should be able to recover
+        Vue.config.errorHandler = undefined
+      })
+      .then(done)
   })
 
   it('relocates node without error', done => {
@@ -392,13 +407,13 @@ describe('Component', () => {
     document.body.appendChild(target)
 
     const Test = {
-      render (h) {
+      render(h) {
         return h('div', { class: 'test' }, this.$slots.default)
       },
-      mounted () {
+      mounted() {
         target.appendChild(this.$el)
       },
-      beforeDestroy () {
+      beforeDestroy() {
         const parent = this.$el.parentNode
         if (parent) {
           parent.removeChild(this.$el)
@@ -406,7 +421,7 @@ describe('Component', () => {
       }
     }
     const vm = new Vue({
-      data () {
+      data() {
         return {
           view: true
         }
@@ -437,6 +452,8 @@ describe('Component', () => {
       }
     }).$mount()
     expect(vm.$el.nodeName).toBe('#comment')
-    expect('Templates should only be responsible for mapping the state').toHaveBeenWarned()
+    expect(
+      'Templates should only be responsible for mapping the state'
+    ).toHaveBeenWarned()
   })
 })

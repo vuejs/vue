@@ -29,8 +29,8 @@ describe('Options el', () => {
     el.innerHTML = '<span>{{message}}</span>'
     const vm = new Vue({
       el,
-      render (h) {
-        return h('p', { staticAttrs: { id: 'app' }}, [
+      render(h) {
+        return h('p', { staticAttrs: { id: 'app' } }, [
           h('span', {}, [this.message])
         ])
       },
@@ -44,8 +44,8 @@ describe('Options el', () => {
     const parent = document.createElement('div')
     parent.innerHTML =
       '<svg>' +
-        '<text :x="x" :y="y" :fill="color">{{ text }}</text>' +
-        '<g><clipPath><foo></foo></clipPath></g>' +
+      '<text :x="x" :y="y" :fill="color">{{ text }}</text>' +
+      '<g><clipPath><foo></foo></clipPath></g>' +
       '</svg>'
     const vm = new Vue({
       el: parent.childNodes[0],
@@ -63,13 +63,16 @@ describe('Options el', () => {
     expect(vm.$el.childNodes[0].textContent).toBe(vm.text)
     // nested, non-explicitly listed SVG elements
     expect(vm.$el.childNodes[1].childNodes[0].namespaceURI).toContain('svg')
-    expect(vm.$el.childNodes[1].childNodes[0].childNodes[0].namespaceURI).toContain('svg')
+    expect(
+      vm.$el.childNodes[1].childNodes[0].childNodes[0].namespaceURI
+    ).toContain('svg')
   })
 
   // https://w3c.github.io/DOM-Parsing/#dfn-serializing-an-attribute-value
   it('properly decode attribute values when parsing templates from DOM', () => {
     const el = document.createElement('div')
-    el.innerHTML = '<a href="/a?foo=bar&baz=qux" name="<abc>" single=\'"hi"\'></a>'
+    el.innerHTML =
+      '<a href="/a?foo=bar&baz=qux" name="<abc>" single=\'"hi"\'></a>'
     const vm = new Vue({ el })
     expect(vm.$el.children[0].getAttribute('href')).toBe('/a?foo=bar&baz=qux')
     expect(vm.$el.children[0].getAttribute('name')).toBe('<abc>')

@@ -1,4 +1,3 @@
-
 import config from '../config'
 import { noop } from 'shared/util'
 import type { Component } from 'typescript/component'
@@ -11,8 +10,8 @@ export let formatComponentName: (vm: Component, includeFile?: false) => string
 if (process.env.NODE_ENV !== 'production') {
   const hasConsole = typeof console !== 'undefined'
   const classifyRE = /(?:^|[-_])(\w)/g
-  const classify = (str) =>
-    str.replace(classifyRE, (c) => c.toUpperCase()).replace(/[-_]/g, '')
+  const classify = str =>
+    str.replace(classifyRE, c => c.toUpperCase()).replace(/[-_]/g, '')
 
   warn = (msg, vm) => {
     const trace = vm ? generateComponentTrace(vm) : ''

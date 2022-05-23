@@ -5,7 +5,7 @@ export default class VueSSRServerPlugin {
     //@ts-expect-error
     this.options = Object.assign(
       {
-        filename: 'vue-ssr-server-bundle.json',
+        filename: 'vue-ssr-server-bundle.json'
       },
       options
     )
@@ -25,9 +25,7 @@ export default class VueSSRServerPlugin {
         return cb()
       }
 
-      const entryAssets = entryInfo.assets
-        .map(getAssetName)
-        .filter(isJS)
+      const entryAssets = entryInfo.assets.map(getAssetName).filter(isJS)
 
       if (entryAssets.length > 1) {
         throw new Error(
@@ -46,14 +44,16 @@ export default class VueSSRServerPlugin {
       const bundle = {
         entry,
         files: {},
-        maps: {},
+        maps: {}
       }
 
       Object.keys(compilation.assets).forEach(name => {
         if (isJS(name)) {
           bundle.files[name] = compilation.assets[name].source()
         } else if (name.match(/\.js\.map$/)) {
-          bundle.maps[name.replace(/\.map$/, '')] = JSON.parse(compilation.assets[name].source())
+          bundle.maps[name.replace(/\.map$/, '')] = JSON.parse(
+            compilation.assets[name].source()
+          )
         }
         // do not emit anything else for server
         delete compilation.assets[name]
@@ -65,7 +65,7 @@ export default class VueSSRServerPlugin {
 
       compilation.assets[filename] = {
         source: () => json,
-        size: () => json.length,
+        size: () => json.length
       }
 
       cb()

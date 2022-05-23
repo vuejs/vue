@@ -30,35 +30,35 @@ describe('Directive v-bind:style', () => {
     }).$mount()
   })
 
-  it('string', (done) => {
+  it('string', done => {
     vm.styles = 'color:red;'
     waitForUpdate(() => {
       expect(vm.$el.style.cssText.replace(/\s/g, '')).toBe('color:red;')
     }).then(done)
   })
 
-  it('falsy number', (done) => {
+  it('falsy number', done => {
     vm.styles = { opacity: 0 }
     waitForUpdate(() => {
       expect(vm.$el.style.opacity).toBe('0')
     }).then(done)
   })
 
-  it('plain object', (done) => {
+  it('plain object', done => {
     vm.styles = { color: 'red' }
     waitForUpdate(() => {
       expect(vm.$el.style.cssText.replace(/\s/g, '')).toBe('color:red;')
     }).then(done)
   })
 
-  it('camelCase', (done) => {
+  it('camelCase', done => {
     vm.styles = { marginRight: '10px' }
     waitForUpdate(() => {
       expect(vm.$el.style.marginRight).toBe('10px')
     }).then(done)
   })
 
-  it('remove if falsy value', (done) => {
+  it('remove if falsy value', done => {
     vm.$el.style.color = 'red'
     waitForUpdate(() => {
       vm.styles = { color: null }
@@ -69,14 +69,14 @@ describe('Directive v-bind:style', () => {
       .then(done)
   })
 
-  it('ignore unsupported property', (done) => {
+  it('ignore unsupported property', done => {
     vm.styles = { foo: 'bar' }
     waitForUpdate(() => {
       expect(vm.$el.style.foo).not.toBe('bar')
     }).then(done)
   })
 
-  it('auto prefix', (done) => {
+  it('auto prefix', done => {
     const prop = checkPrefixedProp('transform')
     const val = 'scale(0.5)'
     vm.styles = { transform: val }
@@ -85,10 +85,10 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
-  it('auto-prefixed style value as array', (done) => {
+  it('auto-prefixed style value as array', done => {
     vm.styles = { display: ['-webkit-box', '-ms-flexbox', 'flex'] }
     const testEl = document.createElement('div')
-    vm.styles.display.forEach((value) => {
+    vm.styles.display.forEach(value => {
       testEl.style.display = value
     })
     waitForUpdate(() => {
@@ -96,21 +96,21 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
-  it('!important', (done) => {
+  it('!important', done => {
     vm.styles = { display: 'block !important' }
     waitForUpdate(() => {
       expect(vm.$el.style.getPropertyPriority('display')).toBe('important')
     }).then(done)
   })
 
-  it('camelCase with !important', (done) => {
+  it('camelCase with !important', done => {
     vm.styles = { zIndex: '100 !important' }
     waitForUpdate(() => {
       expect(vm.$el.style.getPropertyPriority('z-index')).toBe('important')
     }).then(done)
   })
 
-  it('object with multiple entries', (done) => {
+  it('object with multiple entries', done => {
     vm.$el.style.color = 'red'
     vm.styles = {
       fontSize: '10px'
@@ -141,7 +141,7 @@ describe('Directive v-bind:style', () => {
       .then(done)
   })
 
-  it('array of objects', (done) => {
+  it('array of objects', done => {
     vm.$el.style.padding = '10px'
     vm.styles = [{ color: 'red' }, { fontSize: '20px' }]
 
@@ -159,7 +159,7 @@ describe('Directive v-bind:style', () => {
       .then(done)
   })
 
-  it('updates objects deeply', (done) => {
+  it('updates objects deeply', done => {
     vm.styles = { display: 'none' }
     waitForUpdate(() => {
       expect(vm.$el.style.display).toBe('none')
@@ -171,7 +171,7 @@ describe('Directive v-bind:style', () => {
       .then(done)
   })
 
-  it('background size with only one value', (done) => {
+  it('background size with only one value', done => {
     vm.styles = { backgroundSize: '100%' }
     waitForUpdate(() => {
       expect(vm.$el.style.cssText.replace(/\s/g, '')).toMatch(
@@ -180,7 +180,7 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
-  it('should work with interpolation', (done) => {
+  it('should work with interpolation', done => {
     vm.styles = { fontSize: `${vm.fontSize}px` }
     waitForUpdate(() => {
       expect(vm.$el.style.fontSize).toBe('16px')
@@ -194,7 +194,7 @@ describe('Directive v-bind:style', () => {
   }
 
   if (supportCssVariable()) {
-    it('CSS variables', (done) => {
+    it('CSS variables', done => {
       vm.styles = { '--color': 'red' }
       waitForUpdate(() => {
         expect(vm.$el.style.getPropertyValue('--color')).toBe('red')
@@ -216,7 +216,7 @@ describe('Directive v-bind:style', () => {
     expect(style.fontSize).toBe('12px')
   })
 
-  it('should merge between parent and child', (done) => {
+  it('should merge between parent and child', done => {
     const vm = new Vue({
       template:
         '<child style="text-align: left;margin-right:20px" :style="test"></child>',
@@ -281,7 +281,7 @@ describe('Directive v-bind:style', () => {
     expect(vm.$children[0].$refs.nested.$el.style.color).toBe('blue')
   })
 
-  it('should merge between nested components', (done) => {
+  it('should merge between nested components', done => {
     const vm = new Vue({
       template: '<child :style="test"></child>',
       data: {
@@ -324,7 +324,7 @@ describe('Directive v-bind:style', () => {
       .then(done)
   })
 
-  it('should not merge for different adjacent elements', (done) => {
+  it('should not merge for different adjacent elements', done => {
     const vm = new Vue({
       template:
         '<div>' +
@@ -353,7 +353,7 @@ describe('Directive v-bind:style', () => {
       .then(done)
   })
 
-  it('should not merge for v-if, v-else-if and v-else elements', (done) => {
+  it('should not merge for v-if, v-else-if and v-else elements', done => {
     const vm = new Vue({
       template:
         '<div>' +
@@ -392,7 +392,7 @@ describe('Directive v-bind:style', () => {
   })
 
   // #5318
-  it('should work for elements passed down as a slot', (done) => {
+  it('should work for elements passed down as a slot', done => {
     const vm = new Vue({
       template: `<test><div :style="style"/></test>`,
       data: {

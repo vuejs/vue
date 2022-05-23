@@ -1,4 +1,3 @@
-
 /**
  * In SSR, the vdom tree is generated only once and never patched, so
  * we can optimize most element / trees into plain string render functions.
@@ -17,7 +16,7 @@ export const optimizability = {
   FULL: 1, // whole sub tree optimizable
   SELF: 2, // self optimizable but has some un-optimizable children
   CHILDREN: 3, // self un-optimizable but have fully optimizable children
-  PARTIAL: 4, // self un-optimizable with some un-optimizable children
+  PARTIAL: 4 // self un-optimizable with some un-optimizable children
 }
 
 let isPlatformReservedTag
@@ -35,7 +34,7 @@ function walk(node: ASTNode, isRoot?: boolean) {
   }
   // root node or nodes with custom directives should always be a VNode
   const selfUnoptimizable = isRoot || hasCustomDirective(node)
-  const check = (child) => {
+  const check = child => {
     if (child.ssrOptimizability !== optimizability.FULL) {
       node.ssrOptimizability = selfUnoptimizable
         ? optimizability.PARTIAL
@@ -86,7 +85,7 @@ function optimizeSiblings(el) {
         attrsMap: {},
         rawAttrsMap: {},
         children: currentOptimizableGroup,
-        ssrOptimizability: optimizability.FULL,
+        ssrOptimizability: optimizability.FULL
       })
     }
     currentOptimizableGroup = []
@@ -125,7 +124,7 @@ const isBuiltInDir = makeMap('text,html,show,on,bind,model,pre,cloak,once')
 function hasCustomDirective(node: ASTNode): boolean {
   return (node.type === 1 &&
     node.directives &&
-    node.directives.some((d) => !isBuiltInDir(d.name))) as any
+    node.directives.some(d => !isBuiltInDir(d.name))) as any
 }
 
 // <select v-model> cannot be optimized because it requires a runtime check
@@ -135,6 +134,6 @@ function isSelectWithModel(node: ASTNode): boolean {
     node.type === 1 &&
     node.tag === 'select' &&
     node.directives != null &&
-    node.directives.some((d) => d.name === 'model')
+    node.directives.some(d => d.name === 'model')
   )
 }

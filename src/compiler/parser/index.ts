@@ -1,4 +1,3 @@
-
 import he from 'he'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
@@ -17,7 +16,7 @@ import {
   getAndRemoveAttr,
   getRawBindingAttr,
   pluckModuleFunction,
-  getAndRemoveAttrByRegex,
+  getAndRemoveAttrByRegex
 } from '../helpers'
 
 export const onRE = /^@|^v-on:/
@@ -68,7 +67,7 @@ export function createASTElement(
     attrsMap: makeAttrsMap(attrs),
     rawAttrsMap: {},
     parent,
-    children: [],
+    children: []
   }
 }
 
@@ -82,12 +81,13 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
   platformMustUseProp = options.mustUseProp || no
   platformGetTagNamespace = options.getTagNamespace || no
   const isReservedTag = options.isReservedTag || no
-  maybeComponent = (el: ASTElement) => !!(
-    el.component ||
-    el.attrsMap[':is'] ||
-    el.attrsMap['v-bind:is'] ||
-    !(el.attrsMap.is ? isReservedTag(el.attrsMap.is) : isReservedTag(el.tag))
-  )
+  maybeComponent = (el: ASTElement) =>
+    !!(
+      el.component ||
+      el.attrsMap[':is'] ||
+      el.attrsMap['v-bind:is'] ||
+      !(el.attrsMap.is ? isReservedTag(el.attrsMap.is) : isReservedTag(el.tag))
+    )
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
@@ -124,7 +124,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
         }
         addIfCondition(root, {
           exp: element.elseif,
-          block: element,
+          block: element
         })
       } else if (process.env.NODE_ENV !== 'production') {
         warnOnce(
@@ -155,7 +155,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
 
     // final children cleanup
     // filter out scoped slots
-    element.children = element.children.filter((c) => !c.slotScope)
+    element.children = element.children.filter(c => !c.slotScope)
     // remove trailing whitespace node again
     trimEndingWhitespace(element)
 
@@ -238,14 +238,14 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
             return cumulated
           }, {})
         }
-        attrs.forEach((attr) => {
+        attrs.forEach(attr => {
           if (invalidAttributeRE.test(attr.name)) {
             warn(
               `Invalid dynamic argument expression: attribute names cannot contain ` +
                 `spaces, quotes, <, >, / or =.`,
               {
                 start: attr.start + attr.name.indexOf(`[`),
-                end: attr.start + attr.name.length,
+                end: attr.start + attr.name.length
               }
             )
           }
@@ -323,7 +323,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
             )
           } else if ((text = text.trim())) {
             warnOnce(`text "${text}" outside root element will be ignored.`, {
-              start,
+              start
             })
           }
         }
@@ -340,7 +340,9 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
       }
       const children = currentParent.children
       if (inPre || text.trim()) {
-        text = isTextTag(currentParent) ? text : decodeHTMLCached(text) as string
+        text = isTextTag(currentParent)
+          ? text
+          : (decodeHTMLCached(text) as string)
       } else if (!children.length) {
         // remove the whitespace-only node right after an opening tag
         text = ''
@@ -367,7 +369,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
             type: 2,
             expression: res.expression,
             tokens: res.tokens,
-            text,
+            text
           }
         } else if (
           text !== ' ' ||
@@ -376,7 +378,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
         ) {
           child = {
             type: 3,
-            text,
+            text
           }
         }
         if (child) {
@@ -398,7 +400,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
         const child: ASTText = {
           type: 3,
           text,
-          isComment: true,
+          isComment: true
         }
         if (
           process.env.NODE_ENV !== 'production' &&
@@ -409,7 +411,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
         }
         currentParent.children.push(child)
       }
-    },
+    }
   })
   return root
 }
@@ -428,7 +430,7 @@ function processRawAttrs(el) {
     for (let i = 0; i < len; i++) {
       attrs[i] = {
         name: list[i].name,
-        value: JSON.stringify(list[i].value),
+        value: JSON.stringify(list[i].value)
       }
       if (list[i].start != null) {
         attrs[i].start = list[i].start
@@ -544,7 +546,7 @@ function processIf(el) {
     el.if = exp
     addIfCondition(el, {
       exp: exp,
-      block: el,
+      block: el
     })
   } else {
     if (getAndRemoveAttr(el, 'v-else') != null) {
@@ -562,7 +564,7 @@ function processIfConditions(el, parent) {
   if (prev && prev.if) {
     addIfCondition(prev, {
       exp: el.elseif,
-      block: el,
+      block: el
     })
   } else if (process.env.NODE_ENV !== 'production') {
     warn(
@@ -776,7 +778,7 @@ function processAttrs(el) {
       modifiers = parseModifiers(name.replace(dirRE, ''))
       // support .foo shorthand syntax for the .prop modifier
       if (process.env.VBIND_PROP_SHORTHAND && propBindRE.test(name)) {
-        (modifiers || (modifiers = {})).prop = true
+        ;(modifiers || (modifiers = {})).prop = true
         name = `.` + name.slice(1).replace(modifierRE, '')
       } else if (modifiers) {
         name = name.replace(modifierRE, '')
@@ -930,7 +932,7 @@ function parseModifiers(name: string): Object | void {
   const match = name.match(modifierRE)
   if (match) {
     const ret = {}
-    match.forEach((m) => {
+    match.forEach(m => {
       ret[m.slice(1)] = true
     })
     return ret

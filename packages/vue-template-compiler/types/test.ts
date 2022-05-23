@@ -1,4 +1,4 @@
-import Vue, { VNode } from "vue";
+import Vue, { VNode } from 'vue'
 import {
   compile,
   compileToFunctions,
@@ -6,10 +6,10 @@ import {
   ssrCompileToFunctions,
   parseComponent,
   generateCodeFrame
-} from "./";
+} from './'
 
 // check compile options
-const compiled = compile("<div>hi</div>", {
+const compiled = compile('<div>hi</div>', {
   outputSourceRange: true,
   preserveWhitespace: false,
   whitespace: 'condense',
@@ -18,24 +18,24 @@ const compiled = compile("<div>hi</div>", {
       preTransformNode: el => el,
       transformNode: el => el,
       postTransformNode: el => {
-        el.tag = "p";
+        el.tag = 'p'
       },
       genData: el => el.tag,
       transformCode: (el, code) => code,
-      staticKeys: ["test"]
+      staticKeys: ['test']
     }
   ],
   directives: {
     test: (node, directiveMeta) => {
-      node.tag;
-      directiveMeta.value;
+      node.tag
+      directiveMeta.value
     }
   }
-});
+})
 
 // can be passed to function constructor
-new Function(compiled.render);
-compiled.staticRenderFns.map(fn => new Function(fn));
+new Function(compiled.render)
+compiled.staticRenderFns.map(fn => new Function(fn))
 
 // with outputSourceRange: true
 // errors should be objects with range
@@ -61,30 +61,30 @@ errors3.forEach(e => {
   console.log(e.length)
 })
 
-const compiledFns = compileToFunctions("<div>hi</div>");
+const compiledFns = compileToFunctions('<div>hi</div>')
 
 // can be passed to component render / staticRenderFns options
 const vm = new Vue({
   data() {
     return {
-      test: "Test"
-    };
+      test: 'Test'
+    }
   },
   render: compiledFns.render,
   staticRenderFns: compiledFns.staticRenderFns
-});
+})
 
 // can be called with component instance
-const vnode: VNode = compiledFns.render.call(vm);
+const vnode: VNode = compiledFns.render.call(vm)
 
 // check SFC parser
-const desc = parseComponent("<template></template>", {
-  pad: "space",
+const desc = parseComponent('<template></template>', {
+  pad: 'space',
   deindent: false
-});
+})
 
-const templateContent: string = desc.template!.content;
-const scriptContent: string = desc.script!.content;
-const styleContent: string = desc.styles.map(s => s.content).join("\n");
+const templateContent: string = desc.template!.content
+const scriptContent: string = desc.script!.content
+const styleContent: string = desc.styles.map(s => s.content).join('\n')
 
 const codeframe: string = generateCodeFrame(`foobar`, 0, 4)

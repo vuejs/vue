@@ -1,4 +1,3 @@
-
 import VNode from 'core/vdom/vnode'
 import { namespaceMap } from 'web/util/index'
 

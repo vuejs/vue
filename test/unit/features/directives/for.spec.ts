@@ -2,7 +2,7 @@ import Vue from 'vue'
 import { hasSymbol } from 'core/util/env'
 
 describe('Directive v-for', () => {
-  it('should render array of primitive values', (done) => {
+  it('should render array of primitive values', done => {
     const vm = new Vue({
       template: `
         <div>
@@ -37,7 +37,7 @@ describe('Directive v-for', () => {
       .then(done)
   })
 
-  it('should render array of primitive values with index', (done) => {
+  it('should render array of primitive values with index', done => {
     const vm = new Vue({
       template: `
         <div>
@@ -74,7 +74,7 @@ describe('Directive v-for', () => {
       .then(done)
   })
 
-  it('should render array of object values', (done) => {
+  it('should render array of object values', done => {
     const vm = new Vue({
       template: `
         <div>
@@ -115,7 +115,7 @@ describe('Directive v-for', () => {
       .then(done)
   })
 
-  it('should render array of object values with index', (done) => {
+  it('should render array of object values with index', done => {
     const vm = new Vue({
       template: `
         <div>
@@ -184,7 +184,7 @@ describe('Directive v-for', () => {
       )
     })
 
-    it('should render iterable of primitive values', (done) => {
+    it('should render iterable of primitive values', done => {
       const iterable = {
         models: ['a', 'b', 'c'],
         index: 0,
@@ -239,7 +239,7 @@ describe('Directive v-for', () => {
         .then(done)
     })
 
-    it('should render iterable of primitive values with index', (done) => {
+    it('should render iterable of primitive values with index', done => {
       const iterable = {
         models: ['a', 'b', 'c'],
         index: 0,
@@ -295,7 +295,7 @@ describe('Directive v-for', () => {
         .then(done)
     })
 
-    it('should render iterable of object values', (done) => {
+    it('should render iterable of object values', done => {
       const iterable = {
         models: [{ value: 'a' }, { value: 'b' }, { value: 'c' }],
         index: 0,
@@ -357,7 +357,7 @@ describe('Directive v-for', () => {
         .then(done)
     })
 
-    it('should render iterable of object values with index', (done) => {
+    it('should render iterable of object values with index', done => {
       const iterable = {
         models: [{ value: 'a' }, { value: 'b' }, { value: 'c' }],
         index: 0,
@@ -420,7 +420,7 @@ describe('Directive v-for', () => {
     })
   }
 
-  it('should render an Object', (done) => {
+  it('should render an Object', done => {
     const vm = new Vue({
       template: `
         <div>
@@ -453,7 +453,7 @@ describe('Directive v-for', () => {
       .then(done)
   })
 
-  it('should render an Object with key', (done) => {
+  it('should render an Object with key', done => {
     const vm = new Vue({
       template: `
         <div>
@@ -488,7 +488,7 @@ describe('Directive v-for', () => {
       .then(done)
   })
 
-  it('should render an Object with key and index', (done) => {
+  it('should render an Object with key and index', done => {
     const vm = new Vue({
       template: `
         <div>
@@ -523,7 +523,7 @@ describe('Directive v-for', () => {
       .then(done)
   })
 
-  it('should render each key of data', (done) => {
+  it('should render each key of data', done => {
     const vm = new Vue({
       template: `
         <div>
@@ -572,7 +572,7 @@ describe('Directive v-for', () => {
     expect(vm.$el.textContent).toBe('123')
   })
 
-  it('without key', (done) => {
+  it('without key', done => {
     const vm = new Vue({
       data: {
         items: [
@@ -593,7 +593,7 @@ describe('Directive v-for', () => {
     }).then(done)
   })
 
-  it('with key', (done) => {
+  it('with key', done => {
     const vm = new Vue({
       data: {
         items: [
@@ -637,7 +637,7 @@ describe('Directive v-for', () => {
     )
   })
 
-  it('template v-for', (done) => {
+  it('template v-for', done => {
     const vm = new Vue({
       data: {
         list: [{ a: 1 }, { a: 2 }, { a: 3 }]
@@ -672,7 +672,7 @@ describe('Directive v-for', () => {
     }
   })
 
-  it('component v-for', (done) => {
+  it('component v-for', done => {
     const vm = new Vue({
       data: {
         list: [{ a: 1 }, { a: 2 }, { a: 3 }]
@@ -712,7 +712,7 @@ describe('Directive v-for', () => {
     }
   })
 
-  it('dynamic component v-for', (done) => {
+  it('dynamic component v-for', done => {
     const vm = new Vue({
       data: {
         list: [{ type: 'one' }, { type: 'two' }]
@@ -751,7 +751,7 @@ describe('Directive v-for', () => {
     ).toHaveBeenTipped()
   })
 
-  it('multi nested array reactivity', (done) => {
+  it('multi nested array reactivity', done => {
     const vm = new Vue({
       data: {
         list: [[['foo']]]
@@ -775,7 +775,7 @@ describe('Directive v-for', () => {
     }).then(done)
   })
 
-  it('should work with strings', (done) => {
+  it('should work with strings', done => {
     const vm = new Vue({
       data: {
         text: 'foo'
@@ -814,7 +814,7 @@ describe('Directive v-for', () => {
   })
 
   // #9181
-  it('components with v-for and empty list', (done) => {
+  it('components with v-for and empty list', done => {
     const vm = new Vue({
       template:
         '<div attr>' +
@@ -836,7 +836,7 @@ describe('Directive v-for', () => {
     }).then(done)
   })
 
-  it('elements with v-for and empty list', (done) => {
+  it('elements with v-for and empty list', done => {
     const vm = new Vue({
       template:
         '<div attr>' + '<div v-for="item in list">{{ item }}</div>' + '</div>',

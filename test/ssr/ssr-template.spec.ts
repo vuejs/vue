@@ -118,7 +118,7 @@ describe('SSR: template option', () => {
       head: '<meta name="viewport" content="width=device-width">',
       styles: '<style>h1 { color: red }</style>',
       state: { a: 0 },
-      rendered: (context) => {
+      rendered: context => {
         context.state.a = 1
       }
     }
@@ -167,7 +167,7 @@ describe('SSR: template option', () => {
   it('renderToString w/ template function returning Promise', async () => {
     const renderer = createRenderer({
       template: (content, context) =>
-        new Promise<string>((resolve) => {
+        new Promise<string>(resolve => {
           setTimeout(() => {
             resolve(`<html><head>${context.head}</head>${content}</html>`)
           }, 0)
@@ -236,7 +236,7 @@ describe('SSR: template option', () => {
       )
 
       let res = ''
-      stream.on('data', (chunk) => {
+      stream.on('data', chunk => {
         res += chunk
       })
       stream.on('error', reject)
@@ -275,7 +275,7 @@ describe('SSR: template option', () => {
       )
 
       let res = ''
-      stream.on('data', (chunk) => {
+      stream.on('data', chunk => {
         res += chunk
       })
       stream.on('error', reject)
@@ -308,7 +308,7 @@ describe('SSR: template option', () => {
       head: '<meta name="viewport" content="width=device-width">',
       styles: '<style>h1 { color: red }</style>',
       state: { a: 0 },
-      rendered: (context) => {
+      rendered: context => {
         context.state.a = 1
       }
     }
@@ -322,7 +322,7 @@ describe('SSR: template option', () => {
       )
 
       let res = ''
-      stream.on('data', (chunk) => {
+      stream.on('data', chunk => {
         res += chunk
       })
       stream.on('error', reject)
@@ -377,10 +377,10 @@ describe('SSR: template option', () => {
       url: '/test'
     }
 
-    const res = await new Promise((resolve) => {
+    const res = await new Promise(resolve => {
       const stream = renderer.renderToStream(context)
       let res = ''
-      stream.on('data', (chunk) => {
+      stream.on('data', chunk => {
         res += chunk.toString()
       })
       stream.on('end', () => {
@@ -454,10 +454,10 @@ describe('SSR: template option', () => {
           }
         }
       })
-      const res = await new Promise((resolve) => {
+      const res = await new Promise(resolve => {
         const stream = renderer.renderToStream({ state: { a: 1 } })
         let res = ''
-        stream.on('data', (chunk) => {
+        stream.on('data', chunk => {
           res += chunk.toString()
         })
         stream.on('end', () => {
@@ -482,10 +482,10 @@ describe('SSR: template option', () => {
         }
       })
 
-      const res = await new Promise((resolve) => {
+      const res = await new Promise(resolve => {
         const stream = renderer.renderToStream({ state: { a: 1 } })
         let res = ''
-        stream.on('data', (chunk) => {
+        stream.on('data', chunk => {
           res += chunk.toString()
         })
         stream.on('end', () => {

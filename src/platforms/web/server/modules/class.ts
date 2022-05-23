@@ -1,4 +1,3 @@
-
 import { escape } from '../util'
 import { genClassForVnode } from 'web/util/index'
 import type { VNodeWithData } from 'typescript/vnode'

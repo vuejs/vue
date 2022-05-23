@@ -2,13 +2,17 @@ import Vue from 'vue'
 
 describe('Global API: mixin', () => {
   let options
-  beforeEach(() => { options = Vue.options })
-  afterEach(() => { Vue.options = options })
+  beforeEach(() => {
+    options = Vue.options
+  })
+  afterEach(() => {
+    Vue.options = options
+  })
 
   it('should work', () => {
     const spy = vi.fn()
     Vue.mixin({
-      created () {
+      created() {
         spy(this.$options.myOption)
       }
     })
@@ -22,12 +26,12 @@ describe('Global API: mixin', () => {
     const calls: any[] = []
     const Test: Vue = Vue.extend({
       name: 'test',
-      beforeCreate () {
+      beforeCreate() {
         calls.push(this.$options.myOption + ' local')
       }
     })
     Vue.mixin({
-      beforeCreate () {
+      beforeCreate() {
         calls.push(this.$options.myOption + ' global')
       }
     })
@@ -129,7 +133,7 @@ describe('Global API: mixin', () => {
   it('should work for a constructor mixin', () => {
     const spy = vi.fn()
     const Mixin = Vue.extend({
-      created () {
+      created() {
         spy(this.$options.myOption)
       }
     })
@@ -186,7 +190,7 @@ describe('Global API: mixin', () => {
     })
 
     const Child = Vue.extend({
-      mixins: [mixin2],
+      mixins: [mixin2]
     })
 
     const vm = new Child()

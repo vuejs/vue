@@ -25,7 +25,7 @@ import {
   isTrue,
   makeMap,
   isRegExp,
-  isPrimitive,
+  isPrimitive
 } from '../util/index'
 
 export const emptyNode = new VNode('', {}, [])
@@ -35,17 +35,12 @@ const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 function sameVnode(a, b) {
   return (
     a.key === b.key &&
-    a.asyncFactory === b.asyncFactory && (
-      (
-        a.tag === b.tag &&
-        a.isComment === b.isComment &&
-        isDef(a.data) === isDef(b.data) &&
-        sameInputType(a, b)
-      ) || (
-        isTrue(a.isAsyncPlaceholder) &&
-        isUndef(b.asyncFactory.error)
-      )
-    )
+    a.asyncFactory === b.asyncFactory &&
+    ((a.tag === b.tag &&
+      a.isComment === b.isComment &&
+      isDef(a.data) === isDef(b.data) &&
+      sameInputType(a, b)) ||
+      (isTrue(a.isAsyncPlaceholder) && isUndef(b.asyncFactory.error)))
   )
 }
 
@@ -110,7 +105,7 @@ export function createPatchFunction(backend) {
       !vnode.ns &&
       !(
         config.ignoredElements.length &&
-        config.ignoredElements.some((ignore) => {
+        config.ignoredElements.some(ignore => {
           return isRegExp(ignore)
             ? ignore.test(vnode.tag)
             : ignore === vnode.tag

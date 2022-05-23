@@ -51,7 +51,7 @@ if (process.env.NODE_ENV !== 'production') {
           target[key] = value
           return true
         }
-      },
+      }
     })
   }
 
@@ -68,7 +68,7 @@ if (process.env.NODE_ENV !== 'production') {
         else warnNonPresent(target, key)
       }
       return has || !isAllowed
-    },
+    }
   }
 
   const getHandler = {
@@ -78,7 +78,7 @@ if (process.env.NODE_ENV !== 'production') {
         else warnNonPresent(target, key)
       }
       return target[key]
-    },
+    }
   }
 
   initProxy = function initProxy(vm) {

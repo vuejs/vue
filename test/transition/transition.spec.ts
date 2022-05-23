@@ -14,7 +14,7 @@ describe('Transition basic', () => {
     document.body.appendChild(el)
   })
 
-  it('basic transition', (done) => {
+  it('basic transition', done => {
     const vm = new Vue({
       template:
         '<div><transition><div v-if="ok" class="test">foo</div></transition></div>',
@@ -54,7 +54,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('named transition', (done) => {
+  it('named transition', done => {
     const vm = new Vue({
       template:
         '<div><transition name="test"><div v-if="ok" class="test">foo</div></transition></div>',
@@ -98,7 +98,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('custom transition classes', (done) => {
+  it('custom transition classes', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -147,7 +147,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('dynamic transition', (done) => {
+  it('dynamic transition', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -200,7 +200,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('inline transition object', (done) => {
+  it('inline transition object', done => {
     const enter = jasmine.createSpy()
     const leave = jasmine.createSpy()
     const vm = new Vue({
@@ -261,7 +261,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition events', (done) => {
+  it('transition events', done => {
     const onLeaveSpy = jasmine.createSpy()
     const onEnterSpy = jasmine.createSpy()
     const beforeLeaveSpy = jasmine.createSpy()
@@ -286,23 +286,23 @@ describe('Transition basic', () => {
         `,
       data: { ok: true },
       methods: {
-        beforeLeave: (el) => {
+        beforeLeave: el => {
           expect(el).toBe(vm.$el.children[0])
           expect(el.className).toBe('test')
           beforeLeaveSpy(el)
         },
-        leave: (el) => onLeaveSpy(el),
-        afterLeave: (el) => afterLeaveSpy(el),
-        beforeEnter: (el) => {
+        leave: el => onLeaveSpy(el),
+        afterLeave: el => afterLeaveSpy(el),
+        beforeEnter: el => {
           expect(vm.$el.contains(el)).toBe(false)
           expect(el.className).toBe('test')
           beforeEnterSpy(el)
         },
-        enter: (el) => {
+        enter: el => {
           expect(vm.$el.contains(el)).toBe(true)
           onEnterSpy(el)
         },
-        afterEnter: (el) => afterEnterSpy(el)
+        afterEnter: el => afterEnterSpy(el)
       }
     }).$mount(el)
 
@@ -354,7 +354,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition events (v-show)', (done) => {
+  it('transition events (v-show)', done => {
     const onLeaveSpy = jasmine.createSpy()
     const onEnterSpy = jasmine.createSpy()
     const beforeLeaveSpy = jasmine.createSpy()
@@ -379,30 +379,30 @@ describe('Transition basic', () => {
         `,
       data: { ok: true },
       methods: {
-        beforeLeave: (el) => {
+        beforeLeave: el => {
           expect(el.style.display).toBe('')
           expect(el).toBe(vm.$el.children[0])
           expect(el.className).toBe('test')
           beforeLeaveSpy(el)
         },
-        leave: (el) => {
+        leave: el => {
           expect(el.style.display).toBe('')
           onLeaveSpy(el)
         },
-        afterLeave: (el) => {
+        afterLeave: el => {
           expect(el.style.display).toBe('none')
           afterLeaveSpy(el)
         },
-        beforeEnter: (el) => {
+        beforeEnter: el => {
           expect(el.className).toBe('test')
           expect(el.style.display).toBe('none')
           beforeEnterSpy(el)
         },
-        enter: (el) => {
+        enter: el => {
           expect(el.style.display).toBe('')
           onEnterSpy(el)
         },
-        afterEnter: (el) => {
+        afterEnter: el => {
           expect(el.style.display).toBe('')
           afterEnterSpy(el)
         }
@@ -457,7 +457,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('explicit user callback in JavaScript hooks', (done) => {
+  it('explicit user callback in JavaScript hooks', done => {
     let next
     const vm = new Vue({
       template: `<div>
@@ -522,7 +522,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('css: false', (done) => {
+  it('css: false', done => {
     const enterSpy = jasmine.createSpy()
     const leaveSpy = jasmine.createSpy()
     const vm = new Vue({
@@ -553,7 +553,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('no transition detected', (done) => {
+  it('no transition detected', done => {
     const enterSpy = jasmine.createSpy()
     const leaveSpy = jasmine.createSpy()
     const vm = new Vue({
@@ -591,7 +591,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('enterCancelled', (done) => {
+  it('enterCancelled', done => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       template: `
@@ -643,7 +643,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('should remove stale leaving elements', (done) => {
+  it('should remove stale leaving elements', done => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       template: `
@@ -690,7 +690,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition with v-show', (done) => {
+  it('transition with v-show', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -742,7 +742,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition with v-show, inside child component', (done) => {
+  it('transition with v-show, inside child component', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -796,7 +796,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('leaveCancelled (v-show only)', (done) => {
+  it('leaveCancelled (v-show only)', done => {
     const spy = jasmine.createSpy()
     const vm = new Vue({
       template: `
@@ -848,7 +848,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('leave transition with v-show: cancelled on next frame', (done) => {
+  it('leave transition with v-show: cancelled on next frame', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -877,7 +877,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('enter transition with v-show: cancelled on next frame', (done) => {
+  it('enter transition with v-show: cancelled on next frame', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -906,7 +906,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('animations', (done) => {
+  it('animations', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -955,7 +955,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('explicit transition type', (done) => {
+  it('explicit transition type', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -1017,7 +1017,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition on appear', (done) => {
+  it('transition on appear', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -1051,7 +1051,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition on appear with v-show', (done) => {
+  it('transition on appear with v-show', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -1081,7 +1081,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition on SVG elements', (done) => {
+  it('transition on SVG elements', done => {
     const vm = new Vue({
       template: `
           <svg>
@@ -1132,7 +1132,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition on child components', (done) => {
+  it('transition on child components', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -1186,7 +1186,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition inside child component with v-if', (done) => {
+  it('transition inside child component with v-if', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -1228,7 +1228,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition with appear inside child component with v-if', (done) => {
+  it('transition with appear inside child component with v-if', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -1282,7 +1282,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition inside nested child component with v-if', (done) => {
+  it('transition inside nested child component with v-if', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -1325,7 +1325,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('transition with appear inside nested child component with v-if', (done) => {
+  it('transition with appear inside nested child component with v-if', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -1384,7 +1384,7 @@ describe('Transition basic', () => {
       .then(done)
   })
 
-  it('custom transition higher-order component', (done) => {
+  it('custom transition higher-order component', done => {
     const vm = new Vue({
       template:
         '<div><my-transition><div v-if="ok" class="test">foo</div></my-transition></div>',
@@ -1447,7 +1447,7 @@ describe('Transition basic', () => {
   })
 
   describe('explicit durations -', () => {
-    it('single value', (done) => {
+    it('single value', done => {
       const vm = new Vue({
         template: `
             <div>
@@ -1493,7 +1493,7 @@ describe('Transition basic', () => {
         .then(done)
     })
 
-    it('enter and auto leave', (done) => {
+    it('enter and auto leave', done => {
       const vm = new Vue({
         template: `
             <div>
@@ -1539,7 +1539,7 @@ describe('Transition basic', () => {
         .then(done)
     })
 
-    it('leave and auto enter', (done) => {
+    it('leave and auto enter', done => {
       const vm = new Vue({
         template: `
             <div>
@@ -1585,7 +1585,7 @@ describe('Transition basic', () => {
         .then(done)
     })
 
-    it('separate enter and leave', (done) => {
+    it('separate enter and leave', done => {
       const enter = explicitDuration
       const leave = explicitDuration * 2
 
@@ -1634,7 +1634,7 @@ describe('Transition basic', () => {
         .then(done)
     })
 
-    it('enter and leave + duration change', (done) => {
+    it('enter and leave + duration change', done => {
       const enter1 = explicitDuration * 2
       const enter2 = explicitDuration
       const leave1 = explicitDuration * 0.5
@@ -1725,7 +1725,7 @@ describe('Transition basic', () => {
         .then(done)
     }, 10000)
 
-    it('warn invalid durations', (done) => {
+    it('warn invalid durations', done => {
       const vm = new Vue({
         template: `
             <div>
@@ -1759,7 +1759,7 @@ describe('Transition basic', () => {
   })
 
   // #6687
-  it('transition on child components with empty root node', (done) => {
+  it('transition on child components with empty root node', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -1819,7 +1819,7 @@ describe('Transition basic', () => {
   })
 
   // #8199
-  it('should not throw error when replaced by v-html contents', (done) => {
+  it('should not throw error when replaced by v-html contents', done => {
     const vm = new Vue({
       template: `
           <div>

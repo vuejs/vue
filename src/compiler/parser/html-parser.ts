@@ -14,8 +14,10 @@ import { isNonPhrasingTag } from 'web/compiler/util'
 import { unicodeRegExp } from 'core/util/lang'
 
 // Regular Expressions for parsing tags and attributes
-const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
-const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+?\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+const attribute =
+  /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+const dynamicArgAttribute =
+  /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+?\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
 const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`
 const startTagOpen = new RegExp(`^<${qnameCapture}`)
@@ -37,7 +39,7 @@ const decodingMap = {
   '&amp;': '&',
   '&#10;': '\n',
   '&#9;': '\t',
-  '&#39;': "'",
+  '&#39;': "'"
 }
 const encodedAttr = /&(?:lt|gt|quot|amp|#39);/g
 const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#39|#10|#9);/g
@@ -49,7 +51,7 @@ const shouldIgnoreFirstNewline = (tag, html) =>
 
 function decodeAttr(value, shouldDecodeNewlines) {
   const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
-  return value.replace(re, (match) => decodingMap[match])
+  return value.replace(re, match => decodingMap[match])
 }
 
 export function parseHTML(html, options) {
@@ -185,7 +187,7 @@ export function parseHTML(html, options) {
         options.warn
       ) {
         options.warn(`Mal-formatted tag at end of template: "${html}"`, {
-          start: index + html.length,
+          start: index + html.length
         })
       }
       break
@@ -206,7 +208,7 @@ export function parseHTML(html, options) {
       const match: any = {
         tagName: start[1],
         attrs: [],
-        start: index,
+        start: index
       }
       advance(start[0].length)
       let end, attr
@@ -254,7 +256,7 @@ export function parseHTML(html, options) {
           : options.shouldDecodeNewlines
       attrs[i] = {
         name: args[1],
-        value: decodeAttr(value, shouldDecodeNewlines),
+        value: decodeAttr(value, shouldDecodeNewlines)
       }
       if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
         attrs[i].start = args.start + args[0].match(/^\s*/).length
@@ -268,7 +270,7 @@ export function parseHTML(html, options) {
         lowerCasedTag: tagName.toLowerCase(),
         attrs: attrs,
         start: match.start,
-        end: match.end,
+        end: match.end
       })
       lastTag = tagName
     }
@@ -306,7 +308,7 @@ export function parseHTML(html, options) {
         ) {
           options.warn(`tag <${stack[i].tag}> has no matching end tag.`, {
             start: stack[i].start,
-            end: stack[i].end,
+            end: stack[i].end
           })
         }
         if (options.end) {

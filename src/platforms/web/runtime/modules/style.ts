@@ -1,4 +1,3 @@
-
 import { getStyle, normalizeStyleBinding } from 'web/util/style'
 import {
   cached,
@@ -6,7 +5,7 @@ import {
   extend,
   isDef,
   isUndef,
-  hyphenate,
+  hyphenate
 } from 'shared/util'
 import type { VNodeWithData } from 'typescript/vnode'
 
@@ -101,5 +100,5 @@ function updateStyle(oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
 export default {
   create: updateStyle,
-  update: updateStyle,
+  update: updateStyle
 }

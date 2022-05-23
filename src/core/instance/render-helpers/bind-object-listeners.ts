@@ -1,4 +1,3 @@
-
 import { warn, extend, isPlainObject } from 'core/util/index'
 import type { VNodeData } from 'typescript/vnode'
 

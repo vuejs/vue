@@ -85,13 +85,13 @@ export function createRenderer({
       }
 
       let result = ''
-      const write = createWriteFunction((text) => {
+      const write = createWriteFunction(text => {
         result += text
         return false
       }, cb)
       try {
         // @ts-expect-error TODO improve
-        render(component, write, context, (err) => {
+        render(component, write, context, err => {
           if (err) {
             return cb(err)
           }
@@ -103,7 +103,7 @@ export function createRenderer({
               const res = templateRenderer.render(result, context)
               if (typeof res !== 'string') {
                 // function template returning promise
-                res.then((html) => cb(null, html)).catch(cb)
+                res.then(html => cb(null, html)).catch(cb)
               } else {
                 cb(null, res)
               }
@@ -145,7 +145,7 @@ export function createRenderer({
         )
       } else {
         const templateStream = templateRenderer.createStream(context)
-        renderStream.on('error', (err) => {
+        renderStream.on('error', err => {
           templateStream.emit('error', err)
         })
         renderStream.pipe(templateStream)

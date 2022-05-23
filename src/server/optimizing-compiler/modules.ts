@@ -1,8 +1,7 @@
-
 import {
   RAW,
   // INTERPOLATION,
-  EXPRESSION,
+  EXPRESSION
 } from './codegen'
 
 import { propsToAttrMap, isRenderableAttr } from 'web/server/util'
@@ -24,7 +23,7 @@ export function applyModelTransform(el: ASTElement, state: CodegenState) {
         state.directives.model(el, dir, state.warn)
         // remove value for textarea as its converted to text
         if (el.tag === 'textarea' && el.props) {
-          el.props = el.props.filter((p) => p.name !== 'value')
+          el.props = el.props.filter(p => p.name !== 'value')
         }
         break
       }
@@ -45,7 +44,7 @@ export function genDOMPropSegments(
     name = propsToAttrMap[name] || name.toLowerCase()
     if (
       isRenderableAttr(name) &&
-      !(attrs && attrs.some((a) => a.name === name))
+      !(attrs && attrs.some(a => a.name === name))
     ) {
       segments.push(genAttrSegment(name, value))
     }
@@ -67,12 +66,12 @@ function genAttrSegment(name: string, value: string): StringSegment {
         ? ` ${name}="${name}"`
         : value === '""'
         ? ` ${name}`
-        : ` ${name}="${JSON.parse(value)}"`,
+        : ` ${name}="${JSON.parse(value)}"`
     }
   } else {
     return {
       type: EXPRESSION,
-      value: `_ssrAttr(${JSON.stringify(name)},${value})`,
+      value: `_ssrAttr(${JSON.stringify(name)},${value})`
     }
   }
 }
@@ -87,8 +86,8 @@ export function genClassSegments(
     return [
       {
         type: EXPRESSION,
-        value: `_ssrClass(${staticClass || 'null'},${classBinding || 'null'})`,
-      },
+        value: `_ssrClass(${staticClass || 'null'},${classBinding || 'null'})`
+      }
     ]
   }
 }
@@ -111,8 +110,8 @@ export function genStyleSegments(
           vShowExpression
             ? `{ display: (${vShowExpression}) ? '' : 'none' }`
             : 'null'
-        })`,
-      },
+        })`
+      }
     ]
   }
 }

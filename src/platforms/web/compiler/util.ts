@@ -1,4 +1,3 @@
-
 import { makeMap } from 'shared/util'
 
 export const isUnaryTag = makeMap(

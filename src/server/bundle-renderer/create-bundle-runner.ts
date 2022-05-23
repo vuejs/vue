@@ -16,7 +16,7 @@ function createSandbox(context?: any) {
     clearTimeout,
     clearInterval,
     clearImmediate,
-    __VUE_SSR_CONTEXT__: context,
+    __VUE_SSR_CONTEXT__: context
   }
 
   // @ts-expect-error
@@ -36,7 +36,7 @@ function compileModule(files, basedir, runInNewContext) {
     const wrapper = NativeModule.wrap(code)
     const script = new vm.Script(wrapper, {
       filename,
-      displayErrors: true,
+      displayErrors: true
     })
     compiledScripts[filename] = script
     return script
@@ -53,7 +53,7 @@ function compileModule(files, basedir, runInNewContext) {
         ? script.runInThisContext()
         : script.runInNewContext(sandbox)
     const m = { exports: {} }
-    const r = (file) => {
+    const r = file => {
       file = path.posix.join('.', file)
       if (files[file]) {
         return evaluateModule(file, sandbox, evaluatedFiles)
@@ -97,7 +97,7 @@ export function createBundleRunner(entry, files, basedir, runInNewContext) {
     // on each render. Ensures entire application state is fresh for each
     // render, but incurs extra evaluation cost.
     return (userContext = {}) =>
-      new Promise((resolve) => {
+      new Promise(resolve => {
         // @ts-expect-error
         userContext._registeredComponents = new Set()
         const res = evaluate(entry, createSandbox(userContext))
@@ -111,7 +111,7 @@ export function createBundleRunner(entry, files, basedir, runInNewContext) {
     let runner // lazy creation so that errors can be caught by user
     let initialContext
     return (userContext = {}) =>
-      new Promise((resolve) => {
+      new Promise(resolve => {
         if (!runner) {
           const sandbox = runInNewContext === 'once' ? createSandbox() : global
           // the initial context is only used for collecting possible non-component
@@ -147,7 +147,7 @@ export function createBundleRunner(entry, files, basedir, runInNewContext) {
               get() {
                 // @ts-expect-error
                 return renderStyles(userContext._styles)
-              },
+              }
             })
           }
         }

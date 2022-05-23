@@ -1,4 +1,3 @@
-
 import { isDef } from 'shared/util'
 import VNode from '../vnode'
 import { isAsyncPlaceholder } from './is-async-placeholder'

@@ -1,10 +1,9 @@
-
 import {
   warn,
   nextTick,
   emptyObject,
   handleError,
-  defineReactive,
+  defineReactive
 } from '../util/index'
 
 import { createElement } from '../vdom/create-element'
@@ -21,7 +20,7 @@ export function initRender(vm: Component) {
   vm._staticTrees = null // v-once cached trees
   const options = vm.$options
   const parentVnode = (vm.$vnode = options._parentVnode!) // the placeholder node in parent tree
-  const renderContext  = parentVnode && parentVnode.context as Component
+  const renderContext = parentVnode && (parentVnode.context as Component)
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject
   // bind the createElement fn to this instance
@@ -127,7 +126,7 @@ export function renderMixin(Vue: Component) {
             vm.$createElement,
             e
           )
-        } catch (e:any) {
+        } catch (e: any) {
           handleError(e, vm, `renderError`)
           vnode = vm._vnode
         }

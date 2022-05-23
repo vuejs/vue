@@ -1,11 +1,10 @@
-
 const SourceMapConsumer = require('source-map').SourceMapConsumer
 
 const filenameRE = /\(([^)]+\.js):(\d+):(\d+)\)$/
 
 export function createSourceMapConsumers(rawMaps: Object) {
   const maps = {}
-  Object.keys(rawMaps).forEach((file) => {
+  Object.keys(rawMaps).forEach(file => {
     maps[file] = new SourceMapConsumer(rawMaps[file])
   })
   return maps
@@ -20,7 +19,7 @@ export function rewriteErrorTrace(
   if (e && typeof e.stack === 'string') {
     e.stack = e.stack
       .split('\n')
-      .map((line) => {
+      .map(line => {
         return rewriteTraceLine(line, mapConsumers)
       })
       .join('\n')
@@ -38,7 +37,7 @@ function rewriteTraceLine(
   if (m != null && map) {
     const originalPosition = map.originalPositionFor({
       line: Number(m[2]),
-      column: Number(m[3]),
+      column: Number(m[3])
     })
     if (originalPosition.source != null) {
       const { source, line, column } = originalPosition

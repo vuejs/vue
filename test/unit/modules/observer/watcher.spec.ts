@@ -27,10 +27,12 @@ describe('Watcher', () => {
       expect(watcher.value).toBe(3)
       expect(spy).toHaveBeenCalledWith(3, 2)
       vm.b = { c: 4 } // swapping the object
-    }).then(() => {
-      expect(watcher.value).toBe(4)
-      expect(spy).toHaveBeenCalledWith(4, 3)
-    }).then(done)
+    })
+      .then(() => {
+        expect(watcher.value).toBe(4)
+        expect(spy).toHaveBeenCalledWith(4, 3)
+      })
+      .then(done)
   })
 
   it('non-existent path, set later', done => {
@@ -67,10 +69,12 @@ describe('Watcher', () => {
       expect(watcher.value).toBe(3)
       expect(spy).toHaveBeenCalledWith(3, 2)
       vm.$data.b.c = 4
-    }).then(() => {
-      expect(watcher.value).toBe(4)
-      expect(spy).toHaveBeenCalledWith(4, 3)
-    }).then(done)
+    })
+      .then(() => {
+        expect(watcher.value).toBe(4)
+        expect(spy).toHaveBeenCalledWith(4, 3)
+      })
+      .then(done)
   })
 
   it('deep watch', done => {
@@ -83,14 +87,17 @@ describe('Watcher', () => {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
       oldB = vm.b
       vm.b = { c: [{ a: 1 }] }
-    }).then(() => {
-      expect(spy).toHaveBeenCalledWith(vm.b, oldB)
-      expect(spy.mock.calls.length).toBe(2)
-      vm.b.c[0].a = 2
-    }).then(() => {
-      expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
-      expect(spy.mock.calls.length).toBe(3)
-    }).then(done)
+    })
+      .then(() => {
+        expect(spy).toHaveBeenCalledWith(vm.b, oldB)
+        expect(spy.mock.calls.length).toBe(2)
+        vm.b.c[0].a = 2
+      })
+      .then(() => {
+        expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
+        expect(spy.mock.calls.length).toBe(3)
+      })
+      .then(done)
   })
 
   it('deep watch $data', done => {
@@ -112,10 +119,12 @@ describe('Watcher', () => {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
       expect(spy.mock.calls.length).toBe(1)
       vm.b._.c = 1
-    }).then(() => {
-      expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
-      expect(spy.mock.calls.length).toBe(2)
-    }).then(done)
+    })
+      .then(() => {
+        expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
+        expect(spy.mock.calls.length).toBe(2)
+      })
+      .then(done)
   })
 
   it('fire change for prop addition/deletion in non-deep mode', done => {
@@ -125,29 +134,42 @@ describe('Watcher', () => {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
       expect(spy.mock.calls.length).toBe(1)
       Vue.delete(vm.b, 'e')
-    }).then(() => {
-      expect(spy.mock.calls.length).toBe(2)
-    }).then(done)
+    })
+      .then(() => {
+        expect(spy.mock.calls.length).toBe(2)
+      })
+      .then(done)
   })
 
   it('watch function', done => {
-    const watcher = new Watcher(vm, function () {
-      return this.a + this.b.d
-    }, spy)
+    const watcher = new Watcher(
+      vm,
+      function () {
+        return this.a + this.b.d
+      },
+      spy
+    )
     expect(watcher.value).toBe(5)
     vm.a = 2
     waitForUpdate(() => {
       expect(spy).toHaveBeenCalledWith(6, 5)
       vm.b = { d: 2 }
-    }).then(() => {
-      expect(spy).toHaveBeenCalledWith(4, 6)
-    }).then(done)
+    })
+      .then(() => {
+        expect(spy).toHaveBeenCalledWith(4, 6)
+      })
+      .then(done)
   })
 
   it('lazy mode', done => {
-    const watcher = new Watcher(vm, function () {
-      return this.a + this.b.d
-    }, null, { lazy: true })
+    const watcher = new Watcher(
+      vm,
+      function () {
+        return this.a + this.b.d
+      },
+      null,
+      { lazy: true }
+    )
     expect(watcher.lazy).toBe(true)
     expect(watcher.value).toBeUndefined()
     expect(watcher.dirty).toBe(true)

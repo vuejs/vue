@@ -37,7 +37,7 @@ export function compileWithWebpack(
   compiler.outputFileSystem = fs
 
   return new Promise<MemoryFS>((resolve, reject) => {
-    compiler.run((err) => {
+    compiler.run(err => {
       if (err) {
         reject(err)
       } else {

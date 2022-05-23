@@ -1,16 +1,16 @@
-
 import { inBrowser, isIE9, warn } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
 
 import { once, isDef, isUndef, isObject, toNumber } from 'shared/util'
 
-import { 
+import {
   nextFrame,
   resolveTransition,
   whenTransitionEnds,
   addTransitionClass,
-  removeTransitionClass } from 'web/runtime/transition-util'
+  removeTransitionClass
+} from 'web/runtime/transition-util'
 
 import type { VNodeWithData } from 'typescript/vnode'
 import VNode from 'core/vdom/vnode'
@@ -51,7 +51,7 @@ export function enter(vnode: VNodeWithData, toggleDisplay?: () => void) {
     appear,
     afterAppear,
     appearCancelled,
-    duration,
+    duration
   } = data
 
   // activeInstance will always be the <transition> component managing this
@@ -193,7 +193,7 @@ export function leave(vnode: VNodeWithData, rm: Function) {
     afterLeave,
     leaveCancelled,
     delayLeave,
-    duration,
+    duration
   } = data
 
   const expectsCSS = css !== false && !isIE9
@@ -242,9 +242,8 @@ export function leave(vnode: VNodeWithData, rm: Function) {
     }
     // record leaving element
     if (!vnode.data.show && el.parentNode) {
-      (el.parentNode._pending || (el.parentNode._pending = {}))[
-        vnode.key!
-      ] = vnode
+      ;(el.parentNode._pending || (el.parentNode._pending = {}))[vnode.key!] =
+        vnode
     }
     beforeLeave && beforeLeave(el)
     if (expectsCSS) {
@@ -334,6 +333,6 @@ export default inBrowser
         } else {
           rm()
         }
-      },
+      }
     }
   : {}

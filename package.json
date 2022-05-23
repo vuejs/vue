@@ -28,7 +28,7 @@
     "test:e2e": "npm run build -- web-full-prod,web-server-renderer-basic && vitest run test/e2e",
     "test:transition": "karma start test/transition/karma.conf.js",
     "test:types": "tsc -p ./types/tsconfig.json",
-    "lint": "eslint src scripts test",
+    "format": "prettier --write --parser typescript \"(src|test|packages)/**/*.ts\"",
     "ts-check": "tsc -p tsconfig.json --noEmit",
     "ts-check:test": "tsc -p test/tsconfig.json --noEmit",
     "bench:ssr": "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",
@@ -42,7 +42,10 @@
   },
   "lint-staged": {
     "*.js": [
-      "eslint --fix"
+      "prettier --write"
+    ],
+    "*.ts": [
+      "prettier --parser=typescript --write"
     ]
   },
   "repository": {
@@ -65,8 +68,6 @@
     "@rollup/plugin-replace": "^4.0.0",
     "@types/he": "^1.1.2",
     "@types/node": "^17.0.30",
-    "@typescript-eslint/eslint-plugin": "^5.21.0",
-    "@typescript-eslint/parser": "^5.21.0",
     "acorn": "^8.7.1",
     "acorn-walk": "^8.2.0",
     "chalk": "^4.0.0",
@@ -77,7 +78,6 @@
     "de-indent": "^1.0.2",
     "esbuild": "^0.14.39",
     "escodegen": "^2.0.0",
-    "eslint": "^8.14.0",
     "file-loader": "^3.0.1",
     "hash-sum": "^2.0.0",
     "he": "^1.2.0",
@@ -95,6 +95,7 @@
     "lru-cache": "^7.8.1",
     "marked": "^3.0.8",
     "memory-fs": "^0.5.0",
+    "prettier": "^2.6.2",
     "puppeteer": "^14.1.1",
     "resolve": "^1.22.0",
     "rollup": "^2.70.2",

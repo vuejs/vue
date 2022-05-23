@@ -11,7 +11,7 @@ import {
   isPrimitive,
   isUndef,
   isValidArrayIndex,
-  isServerRendering,
+  isServerRendering
 } from '../util/index'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
@@ -187,7 +187,7 @@ export function defineReactive(
       }
       childOb = !shallow && observe(newVal)
       dep.notify()
-    },
+    }
   })
 }
 
@@ -196,7 +196,11 @@ export function defineReactive(
  * triggers change notification if the property doesn't
  * already exist.
  */
-export function set(target: Array<any> | Record<string,any>, key: any, val: any): any {
+export function set(
+  target: Array<any> | Record<string, any>,
+  key: any,
+  val: any
+): any {
   if (
     process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))

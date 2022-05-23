@@ -1,4 +1,3 @@
-
 import VNode from 'core/vdom/vnode'
 import { isDef, isObject } from 'shared/util'
 import type { VNodeData, VNodeWithData } from 'typescript/vnode'
@@ -31,7 +30,7 @@ function mergeClassData(
 } {
   return {
     staticClass: concat(child.staticClass, parent.staticClass),
-    class: isDef(child.class) ? [child.class, parent.class] : parent.class,
+    class: isDef(child.class) ? [child.class, parent.class] : parent.class
   }
 }
 

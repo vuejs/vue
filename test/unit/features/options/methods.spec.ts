@@ -10,7 +10,7 @@ describe('Options methods', () => {
         a: 1
       },
       methods: {
-        plus () {
+        plus() {
           this.a++
         }
       }
@@ -25,7 +25,9 @@ describe('Options methods', () => {
         hello: {}
       }
     })
-    expect('Method "hello" has type "object" in the component definition').toHaveBeenWarned()
+    expect(
+      'Method "hello" has type "object" in the component definition'
+    ).toHaveBeenWarned()
   })
 
   it('should warn methods conflicting with data', () => {
@@ -34,18 +36,22 @@ describe('Options methods', () => {
         foo: 1
       },
       methods: {
-        foo () {}
+        foo() {}
       }
     })
-    expect(`Method "foo" has already been defined as a data property`).toHaveBeenWarned()
+    expect(
+      `Method "foo" has already been defined as a data property`
+    ).toHaveBeenWarned()
   })
 
   it('should warn methods conflicting with internal methods', () => {
     new Vue({
       methods: {
-        _update () {}
+        _update() {}
       }
     })
-    expect(`Method "_update" conflicts with an existing Vue instance method`).toHaveBeenWarned()
+    expect(
+      `Method "_update" conflicts with an existing Vue instance method`
+    ).toHaveBeenWarned()
   })
 })

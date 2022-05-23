@@ -10,13 +10,17 @@ describe('Global API: observable', () => {
       render(h) {
         return h('div', [
           h('span', state.count),
-          h('button', {
-            on: {
-              click: () => {
-                state.count++
+          h(
+            'button',
+            {
+              on: {
+                click: () => {
+                  state.count++
+                }
               }
-            }
-          }, '+')
+            },
+            '+'
+          )
         ])
       }
     }).$mount()

@@ -1,12 +1,11 @@
-
 const MAX_STACK_DEPTH = 800
-const noop = (_) => _
+const noop = _ => _
 
 const defer =
   typeof process !== 'undefined' && process.nextTick
     ? process.nextTick
     : typeof Promise !== 'undefined'
-    ? (fn) => Promise.resolve().then(fn)
+    ? fn => Promise.resolve().then(fn)
     : typeof setTimeout !== 'undefined'
     ? setTimeout
     : noop

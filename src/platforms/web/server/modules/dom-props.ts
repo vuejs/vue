@@ -1,4 +1,3 @@
-
 import VNode from 'core/vdom/vnode'
 import { renderAttr } from './attrs'
 import { isDef, isUndef, extend, toString } from 'shared/util'

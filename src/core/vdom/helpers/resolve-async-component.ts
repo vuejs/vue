@@ -1,4 +1,3 @@
-
 import {
   warn,
   once,
@@ -8,7 +7,7 @@ import {
   isObject,
   hasSymbol,
   isPromise,
-  remove,
+  remove
 } from 'core/util/index'
 
 import VNode, { createEmptyVNode } from 'core/vdom/vnode'
@@ -96,7 +95,7 @@ export function resolveAsyncComponent(
       }
     })
 
-    const reject = once((reason) => {
+    const reject = once(reason => {
       process.env.NODE_ENV !== 'production' &&
         warn(
           `Failed to resolve async component: ${String(factory)}` +

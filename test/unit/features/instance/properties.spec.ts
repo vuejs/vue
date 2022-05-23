@@ -19,12 +19,12 @@ describe('Instance properties', () => {
   it('$options', () => {
     const A = Vue.extend({
       methods: {
-        a () {}
+        a() {}
       }
     })
     const vm = new A({
       methods: {
-        b () {}
+        b() {}
       }
     })
     expect(typeof vm.$options.methods?.a).toBe('function')
@@ -48,10 +48,12 @@ describe('Instance properties', () => {
     waitForUpdate(() => {
       expect(vm.$children.length).toBe(0)
       vm.ok = true
-    }).then(() => {
-      expect(vm.$children.length).toBe(1)
-      expect(vm.$children[0].$root).toBe(vm)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$children.length).toBe(1)
+        expect(vm.$children[0].$root).toBe(vm)
+      })
+      .then(done)
   })
 
   it('$parent', () => {
@@ -59,7 +61,7 @@ describe('Instance properties', () => {
     const makeOption = name => ({
       name,
       template: `<div><slot></slot></div>`,
-      created () {
+      created() {
         calls.push(`${name}:${this.$parent.$options.name}`)
       }
     })
@@ -77,7 +79,12 @@ describe('Instance properties', () => {
         next: makeOption('next')
       }
     }).$mount()
-    expect(calls).toEqual(['outer:undefined', 'middle:outer', 'inner:middle', 'next:undefined'])
+    expect(calls).toEqual([
+      'outer:undefined',
+      'middle:outer',
+      'inner:middle',
+      'next:undefined'
+    ])
   })
 
   it('$props', done => {
@@ -102,19 +109,22 @@ describe('Instance properties', () => {
     expect(vm.$props.msg).toBe('bar')
     waitForUpdate(() => {
       expect(vm.$el.textContent).toContain('bar bar')
-    }).then(() => {
-      vm.$props.msg = 'baz'
-      expect(vm.msg).toBe('baz')
-    }).then(() => {
-      expect(vm.$el.textContent).toContain('baz baz')
-    }).then(done)
+    })
+      .then(() => {
+        vm.$props.msg = 'baz'
+        expect(vm.msg).toBe('baz')
+      })
+      .then(() => {
+        expect(vm.$el.textContent).toContain('baz baz')
+      })
+      .then(done)
   })
 
   it('warn mutating $props', () => {
     const Comp = {
       props: ['msg'],
-      render () {},
-      mounted () {
+      render() {},
+      mounted() {
         expect(this.$props.msg).toBe('foo')
         this.$props.msg = 'bar'
       }

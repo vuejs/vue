@@ -1,4 +1,3 @@
-
 import config from 'core/config'
 
 import {
@@ -7,7 +6,7 @@ import {
   toObject,
   isReservedAttribute,
   camelize,
-  hyphenate,
+  hyphenate
 } from 'core/util/index'
 import type { VNodeData } from 'typescript/vnode'
 

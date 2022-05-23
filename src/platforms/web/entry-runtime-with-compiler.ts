@@ -7,12 +7,12 @@ import { query } from './util/index'
 import { compileToFunctions } from './compiler/index'
 import {
   shouldDecodeNewlines,
-  shouldDecodeNewlinesForHref,
+  shouldDecodeNewlinesForHref
 } from './util/compat'
 import type { Component } from 'typescript/component'
 import type { GlobalAPI } from 'typescript/global-api'
 
-const idToTemplate = cached((id) => {
+const idToTemplate = cached(id => {
   const el = query(id)
   return el && el.innerHTML
 })
@@ -74,7 +74,7 @@ Vue.prototype.$mount = function (
           shouldDecodeNewlines,
           shouldDecodeNewlinesForHref,
           delimiters: options.delimiters,
-          comments: options.comments,
+          comments: options.comments
         },
         this
       )

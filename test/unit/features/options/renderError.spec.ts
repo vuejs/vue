@@ -7,14 +7,14 @@ describe('Options renderError', () => {
       data: {
         ok: true
       },
-      render (h) {
+      render(h) {
         if (this.ok) {
           return h('div', 'ok')
         } else {
           throw new Error('no')
         }
       },
-      renderError (h, err) {
+      renderError(h, err) {
         return h('div', err.toString())
       }
     }).$mount()
@@ -27,13 +27,13 @@ describe('Options renderError', () => {
   })
 
   it('should pass on errors in renderError to global handler', () => {
-    const spy = Vue.config.errorHandler = vi.fn()
+    const spy = (Vue.config.errorHandler = vi.fn())
     const err = new Error('renderError')
     const vm = new Vue({
-      render () {
+      render() {
         throw new Error('render')
       },
-      renderError () {
+      renderError() {
         throw err
       }
     }).$mount()

@@ -1,4 +1,3 @@
-
 import config from '../config'
 import { initUse } from './use'
 import { initMixin } from './mixin'
@@ -14,7 +13,7 @@ import {
   extend,
   nextTick,
   mergeOptions,
-  defineReactive,
+  defineReactive
 } from '../util/index'
 import type { GlobalAPI } from 'typescript/global-api'
 
@@ -38,7 +37,7 @@ export function initGlobalAPI(Vue: GlobalAPI) {
     warn,
     extend,
     mergeOptions,
-    defineReactive,
+    defineReactive
   }
 
   Vue.set = set
@@ -52,7 +51,7 @@ export function initGlobalAPI(Vue: GlobalAPI) {
   }
 
   Vue.options = Object.create(null)
-  ASSET_TYPES.forEach((type) => {
+  ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
   })
 

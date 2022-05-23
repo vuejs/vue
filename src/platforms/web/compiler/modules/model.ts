@@ -1,4 +1,3 @@
-
 /**
  * Expand input[v-model] with dynamic type bindings into v-if-else chains
  * Turn this:
@@ -15,7 +14,7 @@ import {
   processFor,
   processElement,
   addIfCondition,
-  createASTElement,
+  createASTElement
 } from 'compiler/parser/index'
 
 function preTransformNode(el: ASTElement, options: CompilerOptions) {
@@ -48,7 +47,7 @@ function preTransformNode(el: ASTElement, options: CompilerOptions) {
       branch0.if = `(${typeBinding})==='checkbox'` + ifConditionExtra
       addIfCondition(branch0, {
         exp: branch0.if,
-        block: branch0,
+        block: branch0
       })
       // 2. add radio else-if condition
       const branch1 = cloneASTElement(el)
@@ -57,7 +56,7 @@ function preTransformNode(el: ASTElement, options: CompilerOptions) {
       processElement(branch1, options)
       addIfCondition(branch0, {
         exp: `(${typeBinding})==='radio'` + ifConditionExtra,
-        block: branch1,
+        block: branch1
       })
       // 3. other
       const branch2 = cloneASTElement(el)
@@ -66,7 +65,7 @@ function preTransformNode(el: ASTElement, options: CompilerOptions) {
       processElement(branch2, options)
       addIfCondition(branch0, {
         exp: ifCondition!,
-        block: branch2,
+        block: branch2
       })
 
       if (hasElse) {
@@ -85,5 +84,5 @@ function cloneASTElement(el) {
 }
 
 export default {
-  preTransformNode,
+  preTransformNode
 } as ModuleOptions

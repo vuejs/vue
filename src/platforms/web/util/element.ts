@@ -1,10 +1,9 @@
-
 import { inBrowser } from 'core/util/env'
 import { makeMap } from 'shared/util'
 
 export const namespaceMap = {
   svg: 'http://www.w3.org/2000/svg',
-  math: 'http://www.w3.org/1998/Math/MathML',
+  math: 'http://www.w3.org/1998/Math/MathML'
 }
 
 export const isHTMLTag = makeMap(

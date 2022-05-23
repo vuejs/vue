@@ -20,7 +20,9 @@ describe('Debug utilities', () => {
     expect(formatComponentName(vm, false)).toBe('<SomeThing>')
 
     vm.$options.__file = 'C:\\foo\\bar\\baz\\windows_file.vue'
-    expect(formatComponentName(vm)).toBe(`<WindowsFile> at ${vm.$options.__file}`)
+    expect(formatComponentName(vm)).toBe(
+      `<WindowsFile> at ${vm.$options.__file}`
+    )
     expect(formatComponentName(vm, false)).toBe('<WindowsFile>')
   })
 
@@ -56,7 +58,7 @@ found in
     let i = 0
     const one = {
       name: 'one',
-      render: h => i++ < 5 ? h(one) : h(two)
+      render: h => (i++ < 5 ? h(one) : h(two))
     }
     const two = {
       name: 'two',
@@ -86,7 +88,7 @@ found in
     const vm = new Vue()
 
     it('calls warnHandler if warnHandler is set', () => {
-      const spy = Vue.config.warnHandler = vi.fn()
+      const spy = (Vue.config.warnHandler = vi.fn())
 
       warn(msg, vm)
 

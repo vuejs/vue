@@ -1,4 +1,3 @@
-
 export const emptyObject: Record<string, any> = Object.freeze({})
 
 // These helpers produce better VM code in JS engines due to their
@@ -98,7 +97,6 @@ export function toNumber(val: string): number | string {
   return isNaN(n) ? val : n
 }
 
-
 /**
  * Make a map and return a function for checking if a key
  * is in that map.
@@ -112,7 +110,7 @@ export function makeMap(
   for (let i = 0; i < list.length; i++) {
     map[list[i]] = true
   }
-  return expectsLowerCase ? (val) => map[val.toLowerCase()] : (val) => map[val]
+  return expectsLowerCase ? val => map[val.toLowerCase()] : val => map[val]
 }
 
 /**
@@ -306,7 +304,7 @@ export function looseEqual(a: any, b: any): boolean {
         const keysB = Object.keys(b)
         return (
           keysA.length === keysB.length &&
-          keysA.every((key) => {
+          keysA.every(key => {
             return looseEqual(a[key], b[key])
           })
         )

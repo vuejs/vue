@@ -1,4 +1,3 @@
-
 process.env.VUE_ENV = 'server'
 
 import { extend } from 'shared/util'
@@ -9,7 +8,7 @@ import { isUnaryTag, canBeLeftOpenTag } from './compiler/util'
 import {
   createRenderer as _createRenderer,
   Renderer,
-  RenderOptions,
+  RenderOptions
 } from 'server/create-renderer'
 import { createBundleRendererCreator } from 'server/bundle-renderer/create-bundle-renderer'
 
@@ -23,7 +22,7 @@ export function createRenderer(
       modules,
       // user can provide server-side implementations for custom directives
       // when creating the renderer.
-      directives: extend(baseDirectives, options.directives),
+      directives: extend(baseDirectives, options.directives)
     })
   )
 }

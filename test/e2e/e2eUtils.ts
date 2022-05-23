@@ -1,7 +1,10 @@
 import path from 'path'
 import puppeteer from 'puppeteer'
 
-export function getExampleUrl(name: string, apiType: 'classic' | 'composition') {
+export function getExampleUrl(
+  name: string,
+  apiType: 'classic' | 'composition'
+) {
   return `file://${path.resolve(
     __dirname,
     `../../examples/${apiType}/${name}/index.html`
@@ -15,7 +18,7 @@ const puppeteerOptions = process.env.CI
   : { headless: !process.env.DEBUG }
 
 const maxTries = 30
-export const timeout = (n: number) => new Promise((r) => setTimeout(r, n))
+export const timeout = (n: number) => new Promise(r => setTimeout(r, n))
 
 export async function expectByPolling(
   poll: () => Promise<any>,
@@ -47,7 +50,7 @@ export function setupPuppeteer() {
       localStorage.clear()
     })
 
-    page.on('console', (e) => {
+    page.on('console', e => {
       if (e.type() === 'error') {
         const err = e.args()[0]
         console.error(
@@ -75,18 +78,15 @@ export function setupPuppeteer() {
   }
 
   async function text(selector: string) {
-    return await page.$eval(selector, (node) => node.textContent)
+    return await page.$eval(selector, node => node.textContent)
   }
 
   async function value(selector: string) {
-    return await page.$eval(
-      selector,
-      (node) => (node as HTMLInputElement).value
-    )
+    return await page.$eval(selector, node => (node as HTMLInputElement).value)
   }
 
   async function html(selector: string) {
-    return await page.$eval(selector, (node) => node.innerHTML)
+    return await page.$eval(selector, node => node.innerHTML)
   }
 
   async function classList(selector: string) {
@@ -98,7 +98,7 @@ export function setupPuppeteer() {
   }
 
   async function isVisible(selector: string) {
-    const display = await page.$eval(selector, (node) => {
+    const display = await page.$eval(selector, node => {
       return window.getComputedStyle(node).display
     })
     return display !== 'none'
@@ -107,12 +107,12 @@ export function setupPuppeteer() {
   async function isChecked(selector: string) {
     return await page.$eval(
       selector,
-      (node) => (node as HTMLInputElement).checked
+      node => (node as HTMLInputElement).checked
     )
   }
 
   async function isFocused(selector: string) {
-    return await page.$eval(selector, (node) => node === document.activeElement)
+    return await page.$eval(selector, node => node === document.activeElement)
   }
 
   async function setValue(selector: string, value: string) {
@@ -128,13 +128,13 @@ export function setupPuppeteer() {
 
   async function typeValue(selector: string, value: string) {
     const el = (await page.$(selector))!
-    await el.evaluate((node) => ((node as HTMLInputElement).value = ''))
+    await el.evaluate(node => ((node as HTMLInputElement).value = ''))
     await el.type(value)
   }
 
   async function enterValue(selector: string, value: string) {
     const el = (await page.$(selector))!
-    await el.evaluate((node) => ((node as HTMLInputElement).value = ''))
+    await el.evaluate(node => ((node as HTMLInputElement).value = ''))
     await el.type(value)
     await el.press('Enter')
   }
@@ -142,13 +142,13 @@ export function setupPuppeteer() {
   async function clearValue(selector: string) {
     return await page.$eval(
       selector,
-      (node) => ((node as HTMLInputElement).value = '')
+      node => ((node as HTMLInputElement).value = '')
     )
   }
 
   function timeout(time: number) {
-    return page.evaluate((time) => {
-      return new Promise((r) => {
+    return page.evaluate(time => {
+      return new Promise(r => {
         setTimeout(r, time)
       })
     }, time)
@@ -156,7 +156,7 @@ export function setupPuppeteer() {
 
   function nextFrame() {
     return page.evaluate(() => {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         requestAnimationFrame(() => {
           requestAnimationFrame(resolve)
         })

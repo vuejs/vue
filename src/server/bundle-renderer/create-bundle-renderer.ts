@@ -100,11 +100,11 @@ export function createBundleRendererCreator(
         }
 
         run(context)
-          .catch((err) => {
+          .catch(err => {
             rewriteErrorTrace(err, maps)
             cb(err)
           })
-          .then((app) => {
+          .then(app => {
             if (app) {
               //@ts-expect-error
               renderer.renderToString(app, context, (err, res) => {
@@ -120,7 +120,7 @@ export function createBundleRendererCreator(
       renderToStream: (context?: Object) => {
         const res = new PassThrough()
         run(context)
-          .catch((err) => {
+          .catch(err => {
             rewriteErrorTrace(err, maps)
             // avoid emitting synchronously before user can
             // attach error listener
@@ -128,12 +128,12 @@ export function createBundleRendererCreator(
               res.emit('error', err)
             })
           })
-          .then((app) => {
+          .then(app => {
             if (app) {
               //@ts-expect-error
               const renderStream = renderer.renderToStream(app, context)
 
-              renderStream.on('error', (err) => {
+              renderStream.on('error', err => {
                 rewriteErrorTrace(err, maps)
                 res.emit('error', err)
               })

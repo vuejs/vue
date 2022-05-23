@@ -15,8 +15,7 @@ describe('Options name', () => {
     })
 
     /* eslint-disable */
-    expect(`Invalid component name: "Hyper*Vue".`)
-      .toHaveBeenWarned()
+    expect(`Invalid component name: "Hyper*Vue".`).toHaveBeenWarned()
     /* eslint-enable */
 
     Vue.extend({
@@ -24,8 +23,7 @@ describe('Options name', () => {
     })
 
     /* eslint-disable */
-    expect(`Invalid component name: "2Cool2BValid".`)
-      .toHaveBeenWarned()
+    expect(`Invalid component name: "2Cool2BValid".`).toHaveBeenWarned()
     /* eslint-enable */
   })
 
@@ -34,8 +32,12 @@ describe('Options name', () => {
       name: 'SuperVue'
     })!
 
-    expect(SuperComponent.options.components['SuperVue']).toEqual(SuperComponent)
-    expect(SuperComponent.options.components['super-component']).toEqual(SuperComponent)
+    expect(SuperComponent.options.components['SuperVue']).toEqual(
+      SuperComponent
+    )
+    expect(SuperComponent.options.components['super-component']).toEqual(
+      SuperComponent
+    )
   })
 
   it('should allow all potential custom element name for component name including non-alphanumeric characters', () => {

@@ -1,4 +1,3 @@
-
 /**
  * Creates a mapper that maps components used during a server-side render
  * to async chunk files in the client-side build, so that we can inline them
@@ -28,7 +27,7 @@ export function createMapper(clientManifest: ClientManifest): AsyncFileMapper {
 
 function createMap(clientManifest) {
   const map = new Map()
-  Object.keys(clientManifest.modules).forEach((id) => {
+  Object.keys(clientManifest.modules).forEach(id => {
     map.set(id, mapIdToFile(id, clientManifest))
   })
   return map
@@ -38,7 +37,7 @@ function mapIdToFile(id, clientManifest) {
   const files: string[] = []
   const fileIndices = clientManifest.modules[id]
   if (fileIndices) {
-    fileIndices.forEach((index) => {
+    fileIndices.forEach(index => {
       const file = clientManifest.all[index]
       // only include async files or non-js, non-css assets
       if (

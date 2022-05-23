@@ -1,4 +1,3 @@
-
 import type { GlobalAPI } from 'typescript/global-api'
 import { mergeOptions } from '../util/index'
 

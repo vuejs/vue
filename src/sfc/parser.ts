@@ -1,4 +1,3 @@
-
 import deindent from 'de-indent'
 import { parseHTML } from 'compiler/parser/html-parser'
 import { makeMap } from 'shared/util'
@@ -19,12 +18,12 @@ export function parseComponent(
     script: null,
     styles: [],
     customBlocks: [],
-    errors: [],
+    errors: []
   }
   let depth = 0
   let currentBlock: SFCBlock | null = null
 
-  let warn: any = (msg) => {
+  let warn: any = msg => {
     sfc.errors.push(msg)
   }
 
@@ -56,7 +55,7 @@ export function parseComponent(
         attrs: attrs.reduce((cumulated, { name, value }) => {
           cumulated[name] = value || true
           return cumulated
-        }, {}),
+        }, {})
       }
       if (isSpecialTag(tag)) {
         checkAttrs(currentBlock, attrs)
@@ -125,7 +124,7 @@ export function parseComponent(
     warn,
     start,
     end,
-    outputSourceRange: options.outputSourceRange,
+    outputSourceRange: options.outputSourceRange
   })
 
   return sfc

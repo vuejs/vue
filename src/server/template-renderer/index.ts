@@ -71,7 +71,7 @@ export default class TemplateRenderer {
     // function used to serialize initial state JSON
     this.serialize =
       options.serializer ||
-      ((state) => {
+      (state => {
         return serialize(state, { isJSON: true })
       })
 
@@ -93,7 +93,7 @@ export default class TemplateRenderer {
 
   bindRenderFns(context: Record<string, any>) {
     const renderer: any = this
-    ;['ResourceHints', 'State', 'Scripts', 'Styles'].forEach((type) => {
+    ;['ResourceHints', 'State', 'Scripts', 'Styles'].forEach(type => {
       context[`render${type}`] = renderer[`render${type}`].bind(
         renderer,
         context
@@ -205,8 +205,8 @@ export default class TemplateRenderer {
     const shouldPrefetch = this.options.shouldPrefetch
     if (this.prefetchFiles) {
       const usedAsyncFiles = this.getUsedAsyncFiles(context)
-      const alreadyRendered = (file) => {
-        return usedAsyncFiles && usedAsyncFiles.some((f) => f.file === file)
+      const alreadyRendered = file => {
+        return usedAsyncFiles && usedAsyncFiles.some(f => f.file === file)
       }
       return this.prefetchFiles
         .map(({ file, fileWithoutQuery, asType }) => {

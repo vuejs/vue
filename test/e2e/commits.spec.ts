@@ -8,7 +8,7 @@ describe('e2e: commits', () => {
   async function testCommits(apiType: 'classic' | 'composition') {
     // intercept and mock the response to avoid hitting the actual API
     await page().setRequestInterception(true)
-    page().on('request', (req) => {
+    page().on('request', req => {
       const match = req.url().match(/&sha=(.*)$/)
       if (!match) {
         req.continue()

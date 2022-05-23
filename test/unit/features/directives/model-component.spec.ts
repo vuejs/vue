@@ -24,16 +24,20 @@ describe('Directive v-model component', () => {
       const input = vm.$el.querySelector('input')
       input.value = 'world'
       triggerEvent(input, 'input')
-    }).then(() => {
-      expect(vm.msg).toEqual('world')
-      expect(vm.$el.querySelector('p').textContent).toEqual('world')
-      vm.msg = 'changed'
-    }).then(() => {
-      expect(vm.$el.querySelector('p').textContent).toEqual('changed')
-      expect(vm.$el.querySelector('input').value).toEqual('changed')
-    }).then(() => {
-      document.body.removeChild(vm.$el)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.msg).toEqual('world')
+        expect(vm.$el.querySelector('p').textContent).toEqual('world')
+        vm.msg = 'changed'
+      })
+      .then(() => {
+        expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+        expect(vm.$el.querySelector('input').value).toEqual('changed')
+      })
+      .then(() => {
+        document.body.removeChild(vm.$el)
+      })
+      .then(done)
   })
 
   it('should work with native tags with "is"', done => {
@@ -59,16 +63,20 @@ describe('Directive v-model component', () => {
       const input = vm.$el.querySelector('input')
       input.value = 'world'
       triggerEvent(input, 'input')
-    }).then(() => {
-      expect(vm.msg).toEqual('world')
-      expect(vm.$el.querySelector('p').textContent).toEqual('world')
-      vm.msg = 'changed'
-    }).then(() => {
-      expect(vm.$el.querySelector('p').textContent).toEqual('changed')
-      expect(vm.$el.querySelector('input').value).toEqual('changed')
-    }).then(() => {
-      document.body.removeChild(vm.$el)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.msg).toEqual('world')
+        expect(vm.$el.querySelector('p').textContent).toEqual('world')
+        vm.msg = 'changed'
+      })
+      .then(() => {
+        expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+        expect(vm.$el.querySelector('input').value).toEqual('changed')
+      })
+      .then(() => {
+        document.body.removeChild(vm.$el)
+      })
+      .then(done)
   })
 
   it('should support customization via model option', done => {
@@ -102,17 +110,21 @@ describe('Directive v-model component', () => {
       const input = vm.$el.querySelector('input')
       input.value = 'world'
       triggerEvent(input, 'input')
-    }).then(() => {
-      expect(vm.msg).toEqual('world')
-      expect(vm.$el.querySelector('p').textContent).toEqual('world')
-      expect(spy).toHaveBeenCalledWith('world')
-      vm.msg = 'changed'
-    }).then(() => {
-      expect(vm.$el.querySelector('p').textContent).toEqual('changed')
-      expect(vm.$el.querySelector('input').value).toEqual('changed')
-    }).then(() => {
-      document.body.removeChild(vm.$el)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.msg).toEqual('world')
+        expect(vm.$el.querySelector('p').textContent).toEqual('world')
+        expect(spy).toHaveBeenCalledWith('world')
+        vm.msg = 'changed'
+      })
+      .then(() => {
+        expect(vm.$el.querySelector('p').textContent).toEqual('changed')
+        expect(vm.$el.querySelector('input').value).toEqual('changed')
+      })
+      .then(() => {
+        document.body.removeChild(vm.$el)
+      })
+      .then(done)
   })
 
   it('modifier: .number', () => {
@@ -153,7 +165,7 @@ describe('Directive v-model component', () => {
   it('should not double transform mode props', () => {
     const BaseInput = {
       props: ['value'],
-      render (h) {
+      render(h) {
         return h('input', {
           domProps: {
             value: this.value
@@ -167,7 +179,7 @@ describe('Directive v-model component', () => {
 
     const FunctionalWrapper = {
       functional: true,
-      render (h, ctx) {
+      render(h, ctx) {
         return h(BaseInput, ctx.data)
       }
     }
@@ -188,10 +200,10 @@ describe('Directive v-model component', () => {
       },
       computed: {
         val: {
-          get () {
+          get() {
             return this.internalVal
           },
-          set (val) {
+          set(val) {
             triggerCount++
             this.internalVal = val
           }
@@ -209,7 +221,7 @@ describe('Directive v-model component', () => {
   it('should add value to $attrs if not defined in props', () => {
     const TestComponent = {
       inheritAttrs: false,
-      render (h) {
+      render(h) {
         return h('div', this.$attrs.value)
       }
     }
@@ -228,6 +240,6 @@ describe('Directive v-model component', () => {
       }
     }).$mount()
 
-    expect(vm.$el.innerHTML).toBe('<div>foo</div>');
+    expect(vm.$el.innerHTML).toBe('<div>foo</div>')
   })
 })

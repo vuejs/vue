@@ -40,7 +40,7 @@ describe('Transition w/ KeepAlive', () => {
     ]).toEqual(callCounts)
   }
 
-  it('with transition-mode out-in', (done) => {
+  it('with transition-mode out-in', done => {
     let next
     const vm = new Vue({
       template: `<div>
@@ -77,7 +77,7 @@ describe('Transition w/ KeepAlive', () => {
           '<div class="test test-leave-active test-leave-to">one</div><!---->'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -119,7 +119,7 @@ describe('Transition w/ KeepAlive', () => {
           '<div class="test test-leave-active test-leave-to">two</div><!---->'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -148,7 +148,7 @@ describe('Transition w/ KeepAlive', () => {
       .then(done)
   })
 
-  it('with transition-mode out-in + include', (done) => {
+  it('with transition-mode out-in + include', done => {
     let next
     const vm = new Vue({
       template: `<div>
@@ -185,7 +185,7 @@ describe('Transition w/ KeepAlive', () => {
           '<div class="test test-leave-active test-leave-to">one</div><!---->'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -227,7 +227,7 @@ describe('Transition w/ KeepAlive', () => {
           '<div class="test test-leave-active test-leave-to">two</div><!---->'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -256,7 +256,7 @@ describe('Transition w/ KeepAlive', () => {
       .then(done)
   })
 
-  it('with transition-mode in-out', (done) => {
+  it('with transition-mode in-out', done => {
     let next
     const vm = new Vue({
       template: `<div>
@@ -295,7 +295,7 @@ describe('Transition w/ KeepAlive', () => {
             '<div class="test test-enter-active test-enter-to">two</div>'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -340,7 +340,7 @@ describe('Transition w/ KeepAlive', () => {
             '<div class="test test-enter-active test-enter-to">one</div>'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -370,7 +370,7 @@ describe('Transition w/ KeepAlive', () => {
       .then(done)
   })
 
-  it('dynamic components, in-out with early cancel', (done) => {
+  it('dynamic components, in-out with early cancel', done => {
     let next
     const vm = new Vue({
       template: `<div>
@@ -422,7 +422,7 @@ describe('Transition w/ KeepAlive', () => {
             '<div class="test test-enter-active test-enter-to">one</div>'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -451,7 +451,7 @@ describe('Transition w/ KeepAlive', () => {
   })
 
   // #4339
-  it('component with inner transition', (done) => {
+  it('component with inner transition', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -513,16 +513,16 @@ describe('Transition w/ KeepAlive', () => {
       .then(done)
   })
 
-  it('async components with transition-mode out-in', (done) => {
+  it('async components with transition-mode out-in', done => {
     const barResolve = jasmine.createSpy()
     let next
-    const foo = (resolve) => {
+    const foo = resolve => {
       setTimeout(() => {
         resolve(one)
         Vue.nextTick(next)
       }, duration / 2)
     }
-    const bar = (resolve) => {
+    const bar = resolve => {
       setTimeout(() => {
         resolve(two)
         barResolve()
@@ -568,7 +568,7 @@ describe('Transition w/ KeepAlive', () => {
             '<div class="test test-enter-active test-enter-to">one</div>'
           )
         })
-        .thenWaitFor((_next) => {
+        .thenWaitFor(_next => {
           next = _next
         })
         .then(() => {
@@ -584,7 +584,7 @@ describe('Transition w/ KeepAlive', () => {
             '<div class="test test-leave-active test-leave-to">one</div><!---->'
           )
         })
-        .thenWaitFor((_next) => {
+        .thenWaitFor(_next => {
           next = _next
         })
         .then(() => {
@@ -607,7 +607,7 @@ describe('Transition w/ KeepAlive', () => {
             '<div class="test test-enter-active test-enter-to">two</div>'
           )
         })
-        .thenWaitFor((_next) => {
+        .thenWaitFor(_next => {
           next = _next
         })
         .then(() => {
@@ -619,7 +619,7 @@ describe('Transition w/ KeepAlive', () => {
   })
 
   // #10083
-  it('should not attach event handler repeatedly', (done) => {
+  it('should not attach event handler repeatedly', done => {
     const vm = new Vue({
       template: `
           <keep-alive>

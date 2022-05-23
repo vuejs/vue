@@ -22,7 +22,7 @@ if (typeof Proxy !== 'undefined') {
 
     it('should not warn for hand-written render functions', () => {
       new Vue({
-        render (h) {
+        render(h) {
           return h('div', [this.a])
         }
       }).$mount()
@@ -33,10 +33,10 @@ if (typeof Proxy !== 'undefined') {
       const sym = Symbol()
 
       const vm = new Vue({
-        created () {
+        created() {
           this[sym] = 'foo'
         },
-        render (h) {
+        render(h) {
           if (sym in this) {
             return h('div', [this[sym]])
           }
@@ -51,7 +51,9 @@ if (typeof Proxy !== 'undefined') {
         data: { $a: 'foo' },
         template: `<div>{{ $a }}</div>`
       }).$mount()
-      expect(`Property "$a" must be accessed with "$data.$a"`).toHaveBeenWarned()
+      expect(
+        `Property "$a" must be accessed with "$data.$a"`
+      ).toHaveBeenWarned()
     })
 
     it('should warn properties starting with _ when found', () => {
@@ -59,7 +61,9 @@ if (typeof Proxy !== 'undefined') {
         data: { _foo: 'foo' },
         template: `<div>{{ _foo }}</div>`
       }).$mount()
-      expect(`Property "_foo" must be accessed with "$data._foo"`).toHaveBeenWarned()
+      expect(
+        `Property "_foo" must be accessed with "$data._foo"`
+      ).toHaveBeenWarned()
     })
 
     it('should warn properties starting with $ when not found', () => {
@@ -67,7 +71,9 @@ if (typeof Proxy !== 'undefined') {
         template: `<div>{{ $a }}</div>`
       }).$mount()
       expect(`Property or method "$a" is not defined`).toHaveBeenWarned()
-      expect(`Property "$a" must be accessed with "$data.$a"`).not.toHaveBeenWarned()
+      expect(
+        `Property "$a" must be accessed with "$data.$a"`
+      ).not.toHaveBeenWarned()
     })
 
     it('should warn properties starting with $ when not found (with stripped)', () => {
@@ -79,7 +85,9 @@ if (typeof Proxy !== 'undefined') {
         data: { $a: 'foo' },
         render
       }).$mount()
-      expect(`Property "$a" must be accessed with "$data.$a"`).toHaveBeenWarned()
+      expect(
+        `Property "$a" must be accessed with "$data.$a"`
+      ).toHaveBeenWarned()
     })
 
     it('should not warn properties starting with $ when using $data to access', () => {

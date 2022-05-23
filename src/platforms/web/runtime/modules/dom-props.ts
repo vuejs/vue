@@ -1,4 +1,3 @@
-
 import { isDef, isUndef, extend, toNumber } from 'shared/util'
 import type { VNodeWithData } from 'typescript/vnode'
 import { isSVG } from 'web/util/index'
@@ -120,5 +119,5 @@ function isDirtyWithModifiers(elm: any, newVal: string): boolean {
 
 export default {
   create: updateDOMProps,
-  update: updateDOMProps,
+  update: updateDOMProps
 }

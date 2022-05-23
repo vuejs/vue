@@ -23,10 +23,12 @@ describe('Options props', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('baz')
       vm.$refs.child.b = 'qux'
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('qux')
-      expect('Avoid mutating a prop directly').toHaveBeenWarned()
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('qux')
+        expect('Avoid mutating a prop directly').toHaveBeenWarned()
+      })
+      .then(done)
   })
 
   it('object syntax', done => {
@@ -47,10 +49,12 @@ describe('Options props', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('baz')
       vm.$refs.child.b = 'qux'
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('qux')
-      expect('Avoid mutating a prop directly').toHaveBeenWarned()
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('qux')
+        expect('Avoid mutating a prop directly').toHaveBeenWarned()
+      })
+      .then(done)
   })
 
   it('warn mixed syntax', () => {
@@ -129,7 +133,9 @@ describe('Options props', () => {
         a: undefined
       }
     })
-    expect('Props with type Object/Array must use a factory function').toHaveBeenWarned()
+    expect(
+      'Props with type Object/Array must use a factory function'
+    ).toHaveBeenWarned()
   })
 
   it('warn missing required', () => {
@@ -137,7 +143,7 @@ describe('Options props', () => {
       template: '<test></test>',
       components: {
         test: {
-          props: { a: { required: true }},
+          props: { a: { required: true } },
           template: '<div>{{a}}</div>'
         }
       }
@@ -146,7 +152,7 @@ describe('Options props', () => {
   })
 
   describe('assertions', () => {
-    function makeInstance (value, type, validator?, required?) {
+    function makeInstance(value, type, validator?, required?) {
       return new Vue({
         template: '<test :test="val"></test>',
         data: {
@@ -171,14 +177,18 @@ describe('Options props', () => {
       makeInstance('hello', String)
       expect((console.error as any).mock.calls.length).toBe(0)
       makeInstance(123, String)
-      expect('Expected String with value "123", got Number with value 123').toHaveBeenWarned()
+      expect(
+        'Expected String with value "123", got Number with value 123'
+      ).toHaveBeenWarned()
     })
 
     it('number', () => {
       makeInstance(123, Number)
       expect((console.error as any).mock.calls.length).toBe(0)
       makeInstance('123', Number)
-      expect('Expected Number with value 123, got String with value "123"').toHaveBeenWarned()
+      expect(
+        'Expected Number with value 123, got String with value "123"'
+      ).toHaveBeenWarned()
     })
 
     it('number & boolean', () => {
@@ -264,7 +274,7 @@ describe('Options props', () => {
     }
 
     it('custom constructor', () => {
-      function Class () {}
+      function Class() {}
       makeInstance(new Class(), Class)
       expect((console.error as any).mock.calls.length).toBe(0)
       makeInstance({}, Class)
@@ -291,7 +301,9 @@ describe('Options props', () => {
       makeInstance(123, Number, v => v === 234)
       expect('custom validator check failed').toHaveBeenWarned()
       makeInstance(123, String, v => v === 123)
-      expect('Expected String with value "123", got Number with value 123').toHaveBeenWarned()
+      expect(
+        'Expected String with value "123", got Number with value 123'
+      ).toHaveBeenWarned()
     })
 
     it('multiple types + custom validator', () => {
@@ -374,9 +386,7 @@ describe('Options props', () => {
             a: null
           },
           methods: {
-            a () {
-
-            }
+            a() {}
           }
         }
       }
@@ -525,16 +535,21 @@ describe('Options props', () => {
     waitForUpdate(() => {
       expect(spy).not.toHaveBeenCalled()
       vm.b = {}
-    }).then(() => {
-      expect(spy.mock.calls.length).toBe(1)
-    }).then(() => {
-      vm.b = undefined
-    }).then(() => {
-      expect(spy.mock.calls.length).toBe(2)
-      vm.a++
-    }).then(() => {
-      expect(spy.mock.calls.length).toBe(2)
-    }).then(done)
+    })
+      .then(() => {
+        expect(spy.mock.calls.length).toBe(1)
+      })
+      .then(() => {
+        vm.b = undefined
+      })
+      .then(() => {
+        expect(spy.mock.calls.length).toBe(2)
+        vm.a++
+      })
+      .then(() => {
+        expect(spy.mock.calls.length).toBe(2)
+      })
+      .then(done)
   })
 
   it('warn reserved props', () => {
@@ -578,5 +593,4 @@ describe('Options props', () => {
       'Invalid prop type: "String" is not a constructor'
     ).toHaveBeenWarned()
   })
-
 })

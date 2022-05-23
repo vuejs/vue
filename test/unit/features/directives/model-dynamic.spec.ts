@@ -26,16 +26,19 @@ describe('Directive v-model dynamic input type', () => {
     }).$mount()
     document.body.appendChild(vm.$el)
 
-    const chain = assertInputWorks(vm).then(() => {
-      vm.ok = false
-    }).then(() => {
-      expect(vm.$el.textContent).toBe('haha')
-    }).then(() => {
-      // reset
-      vm.ok = true
-      vm.type = null
-      vm.test = 'b'
-    })
+    const chain = assertInputWorks(vm)
+      .then(() => {
+        vm.ok = false
+      })
+      .then(() => {
+        expect(vm.$el.textContent).toBe('haha')
+      })
+      .then(() => {
+        // reset
+        vm.ok = true
+        vm.type = null
+        vm.test = 'b'
+      })
 
     assertInputWorks(vm, chain).then(done)
   })
@@ -71,13 +74,16 @@ describe('Directive v-model dynamic input type', () => {
 
     const chain = waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('text')
-    }).then(() => {
-      vm.foo = false
-    }).then(() => {
-      expect(vm._vnode.isComment).toBe(true)
-    }).then(() => {
-      vm.bar = true
     })
+      .then(() => {
+        vm.foo = false
+      })
+      .then(() => {
+        expect(vm._vnode.isComment).toBe(true)
+      })
+      .then(() => {
+        vm.bar = true
+      })
 
     assertInputWorks(vm, chain).then(done)
   })
@@ -135,7 +141,10 @@ describe('Directive v-model dynamic input type', () => {
           text: 'foo',
           checkbox: true
         },
-        inputs: [{ id: 'one', type: 'text' }, { id: 'two', type: 'checkbox' }]
+        inputs: [
+          { id: 'one', type: 'text' },
+          { id: 'two', type: 'checkbox' }
+        ]
       },
       template: `<div>
         <input v-for="i in inputs" v-bind="i" v-model="data[i.type]">
@@ -179,40 +188,47 @@ describe('Directive v-model dynamic input type', () => {
   })
 })
 
-function assertInputWorks (vm, type, chain) {
+function assertInputWorks(vm, type, chain) {
   if (typeof type !== 'string') {
     if (!chain) chain = type
     type = 'type'
   }
   if (!chain) chain = waitForUpdate()
-  chain.then(() => {
-    expect(vm.$el.value).toBe('b')
-    vm.test = 'a'
-  }).then(() => {
-    expect(vm.$el.value).toBe('a')
-    vm.$el.value = 'c'
-    triggerEvent(vm.$el, 'input')
-    expect(vm.test).toBe('c')
-  }).then(() => {
-    // change it to password
-    vm[type] = 'password'
-    vm.test = 'b'
-  }).then(() => {
-    expect(vm.$el.type).toBe('password')
-    expect(vm.$el.value).toBe('b')
-    vm.$el.value = 'c'
-    triggerEvent(vm.$el, 'input')
-    expect(vm.test).toBe('c')
-  }).then(() => {
-    // change it to checkbox...
-    vm[type] = 'checkbox'
-  }).then(() => {
-    expect(vm.$el.type).toBe('checkbox')
-    expect(vm.$el.checked).toBe(true)
-  }).then(() => {
-    vm.$el.click()
-    expect(vm.$el.checked).toBe(false)
-    expect(vm.test).toBe(false)
-  })
+  chain
+    .then(() => {
+      expect(vm.$el.value).toBe('b')
+      vm.test = 'a'
+    })
+    .then(() => {
+      expect(vm.$el.value).toBe('a')
+      vm.$el.value = 'c'
+      triggerEvent(vm.$el, 'input')
+      expect(vm.test).toBe('c')
+    })
+    .then(() => {
+      // change it to password
+      vm[type] = 'password'
+      vm.test = 'b'
+    })
+    .then(() => {
+      expect(vm.$el.type).toBe('password')
+      expect(vm.$el.value).toBe('b')
+      vm.$el.value = 'c'
+      triggerEvent(vm.$el, 'input')
+      expect(vm.test).toBe('c')
+    })
+    .then(() => {
+      // change it to checkbox...
+      vm[type] = 'checkbox'
+    })
+    .then(() => {
+      expect(vm.$el.type).toBe('checkbox')
+      expect(vm.$el.checked).toBe(true)
+    })
+    .then(() => {
+      vm.$el.click()
+      expect(vm.$el.checked).toBe(false)
+      expect(vm.test).toBe(false)
+    })
   return chain
 }

@@ -1,5 +1,6 @@
 import { parseStyleText } from 'web/util/style'
-const base64ImgUrl = 'url("data:image/webp;base64,UklGRkoAAABXRUJQVlA4WAoAAAAQAAAAAAAAAAAAQUxQSAwAAAARBxAR/Q9ERP8DAABWUDggGAAAABQBAJ0BKgEAAQAAAP4AAA3AAP7mtQAAAA==")'
+const base64ImgUrl =
+  'url("data:image/webp;base64,UklGRkoAAABXRUJQVlA4WAoAAAAQAAAAAAAAAAAAQUxQSAwAAAARBxAR/Q9ERP8DAABWUDggGAAAABQBAJ0BKgEAAQAAAP4AAA3AAP7mtQAAAA==")'
 const logoUrl = 'url(https://vuejs.org/images/logo.png)'
 
 it('should parse normal static style', () => {

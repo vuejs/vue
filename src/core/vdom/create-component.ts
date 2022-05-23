@@ -1,4 +1,3 @@
-
 import VNode from './vnode'
 import { resolveConstructorOptions } from 'core/instance/init'
 import { queueActivatedComponent } from 'core/observer/scheduler'
@@ -9,7 +8,7 @@ import { warn, isDef, isUndef, isTrue, isObject } from '../util/index'
 import {
   resolveAsyncComponent,
   createAsyncPlaceholder,
-  extractPropsFromVNodeData,
+  extractPropsFromVNodeData
 } from './helpers/index'
 
 import {
@@ -17,13 +16,13 @@ import {
   activeInstance,
   updateChildComponent,
   activateChildComponent,
-  deactivateChildComponent,
+  deactivateChildComponent
 } from '../instance/lifecycle'
 
 import type {
   MountedComponentVNode,
   VNodeData,
-  VNodeWithData,
+  VNodeWithData
 } from 'typescript/vnode'
 import type { Component } from 'typescript/component'
 import type { InternalComponentOptions } from 'typescript/options'
@@ -89,7 +88,7 @@ const componentVNodeHooks = {
         deactivateChildComponent(componentInstance, true /* direct */)
       }
     }
-  },
+  }
 }
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
@@ -214,7 +213,7 @@ export function createComponentInstanceForVnode(
   const options: InternalComponentOptions = {
     _isComponent: true,
     _parentVnode: vnode,
-    parent,
+    parent
   }
   // check inline-template render functions
   const inlineTemplate = vnode.data.inlineTemplate

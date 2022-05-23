@@ -1,4 +1,3 @@
-
 const range = 2
 
 export function generateCodeFrame(

@@ -27,7 +27,7 @@ describe('create-element', () => {
       }
     })
     const h = vm.$createElement
-    const vnode = h('my-component', { props: { msg: vm.message }})
+    const vnode = h('my-component', { props: { msg: vm.message } })
     expect(vnode.tag).toMatch(/vue-component-[0-9]+/)
     expect(vnode.componentOptions.propsData).toEqual({ msg: vm.message })
     expect(vnode.children).toBeUndefined()
@@ -68,9 +68,13 @@ describe('create-element', () => {
       data: { msg: 'hello world' }
     })
     const h = vm.$createElement
-    const vnode = h(Vue.extend({ // Component class
-      props: ['msg']
-    }), { props: { msg: vm.message }})
+    const vnode = h(
+      Vue.extend({
+        // Component class
+        props: ['msg']
+      }),
+      { props: { msg: vm.message } }
+    )
     expect(vnode.tag).toMatch(/vue-component-[0-9]+/)
     expect(vnode.componentOptions.propsData).toEqual({ msg: vm.message })
     expect(vnode.children).toBeUndefined()
@@ -192,7 +196,7 @@ describe('create-element', () => {
       data: {
         data: {}
       },
-      render (h) {
+      render(h) {
         return h('div', this.data)
       }
     }).$mount()
@@ -201,25 +205,25 @@ describe('create-element', () => {
 
   it('warn non-primitive key', () => {
     new Vue({
-      render (h) {
-        return h('div', { key: {}})
+      render(h) {
+        return h('div', { key: {} })
       }
     }).$mount()
     expect('Avoid using non-primitive value as key').toHaveBeenWarned()
   })
 
-  it('doesn\'t warn boolean key', () => {
+  it("doesn't warn boolean key", () => {
     new Vue({
-      render (h) {
+      render(h) {
         return h('div', { key: true })
       }
     }).$mount()
     expect('Avoid using non-primitive value as key').not.toHaveBeenWarned()
   })
 
-  it('doesn\'t warn symbol key', () => {
+  it("doesn't warn symbol key", () => {
     new Vue({
-      render (h) {
+      render(h) {
         return h('div', { key: Symbol('symbol') })
       }
     }).$mount()
@@ -229,7 +233,7 @@ describe('create-element', () => {
   it('nested child elements should be updated correctly', done => {
     const vm = new Vue({
       data: { n: 1 },
-      render (h) {
+      render(h) {
         const list: any[] = []
         for (let i = 0; i < this.n; i++) {
           list.push(h('span', i))
@@ -259,12 +263,16 @@ describe('create-element', () => {
     const vm = new Vue({
       components: {
         foo: {
-          render (h) {
-            return h('div', {
-              class: {
-                'has-vnode': this.$vnode
-              }
-            }, 'foo')
+          render(h) {
+            return h(
+              'div',
+              {
+                class: {
+                  'has-vnode': this.$vnode
+                }
+              },
+              'foo'
+            )
           }
         }
       },

@@ -2,8 +2,8 @@ const { red, yellow } = require('chalk')
 const webpack = require('webpack')
 
 const prefix = `[vue-server-renderer-webpack-plugin]`
-const warn = exports.warn = msg => console.error(red(`${prefix} ${msg}\n`))
-const tip = exports.tip = msg => console.log(yellow(`${prefix} ${msg}\n`))
+const warn = (exports.warn = msg => console.error(red(`${prefix} ${msg}\n`)))
+const tip = (exports.tip = msg => console.log(yellow(`${prefix} ${msg}\n`)))
 
 const isWebpack5 = !!(webpack.version && webpack.version[0] > 4)
 
@@ -27,7 +27,7 @@ export const validate = compiler => {
   if (!compiler.options.externals) {
     tip(
       'It is recommended to externalize dependencies in the server build for ' +
-      'better build performance.'
+        'better build performance.'
     )
   }
 }
@@ -41,9 +41,12 @@ export const onEmit = (compiler, name, stageName, hook) => {
         return
       }
       const stage = webpack.Compilation[stageName]
-      compilation.hooks.processAssets.tapAsync({ name, stage }, (assets, cb) => {
-        hook(compilation, cb)
-      })
+      compilation.hooks.processAssets.tapAsync(
+        { name, stage },
+        (assets, cb) => {
+          hook(compilation, cb)
+        }
+      )
     })
   } else if (compiler.hooks) {
     // Webpack >= 4.0.0

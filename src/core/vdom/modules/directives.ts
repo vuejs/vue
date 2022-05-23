@@ -1,4 +1,3 @@
-
 import { emptyNode } from 'core/vdom/patch'
 import { resolveAsset, handleError } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
@@ -11,7 +10,7 @@ export default {
   destroy: function unbindDirectives(vnode: VNodeWithData) {
     // @ts-expect-error emptyNode is not VNodeWithData
     updateDirectives(vnode, emptyNode)
-  },
+  }
 }
 
 function updateDirectives(oldVnode: VNodeWithData, vnode: VNodeWithData) {

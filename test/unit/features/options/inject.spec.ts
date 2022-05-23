@@ -9,8 +9,8 @@ describe('Options provide/inject', () => {
   let injected
   const injectedComp = {
     inject: ['foo', 'bar'],
-    render () {},
-    created () {
+    render() {},
+    created() {
       injected = [this.foo, this.bar]
     }
   }
@@ -69,7 +69,7 @@ describe('Options provide/inject', () => {
         a: 1,
         b: false
       },
-      provide () {
+      provide() {
         return {
           foo: this.a,
           bar: this.b
@@ -94,8 +94,8 @@ describe('Options provide/inject', () => {
         baz: 'foo',
         qux: 'bar'
       },
-      render () {},
-      created () {
+      render() {},
+      created() {
         injected = [this.baz, this.qux]
       }
     }
@@ -129,14 +129,14 @@ describe('Options provide/inject', () => {
     const child = new Vue({
       parent: vm,
       inject: ['foo'],
-      data () {
+      data() {
         return {
           bar: this.foo + 1
         }
       },
       props: {
         baz: {
-          default () {
+          default() {
             return this.foo + 2
           }
         }
@@ -160,7 +160,7 @@ describe('Options provide/inject', () => {
         child: {
           functional: true,
           inject: ['foo', 'bar'],
-          render (h, context) {
+          render(h, context) {
             const { injections } = context
             injected = [injections.foo, injections.bar]
           }
@@ -201,13 +201,13 @@ describe('Options provide/inject', () => {
           bar: keyB
         },
         template: `<span/>`,
-        created () {
+        created() {
           injected = [this.foo, this.bar]
         }
       }
       new Vue({
         mixins: [mixinA, mixinB],
-        render (h) {
+        render(h) {
           return h(child)
         }
       }).$mount()
@@ -220,12 +220,12 @@ describe('Options provide/inject', () => {
   it('should work with reactive array', done => {
     const vm = new Vue({
       template: `<div><child></child></div>`,
-      data () {
+      data() {
         return {
           foo: []
         }
       },
-      provide () {
+      provide() {
         return {
           foo: this.foo
         }
@@ -259,7 +259,7 @@ describe('Options provide/inject', () => {
     const child = parent.extend({
       template: `<span/>`,
       inject: ['bar'],
-      created () {
+      created() {
         injected = [this.foo, this.bar]
       }
     })
@@ -280,18 +280,18 @@ describe('Options provide/inject', () => {
   })
 
   it('should merge from mixins properly (objects)', () => {
-    const mixinA = { inject: { foo: 'foo' }}
-    const mixinB = { inject: { bar: 'bar' }}
+    const mixinA = { inject: { foo: 'foo' } }
+    const mixinB = { inject: { bar: 'bar' } }
     const child = {
       mixins: [mixinA, mixinB],
       template: `<span/>`,
-      created () {
+      created() {
         injected = [this.foo, this.bar]
       }
     }
     new Vue({
       provide: { foo: 'foo', bar: 'bar', baz: 'baz' },
-      render (h) {
+      render(h) {
         return h(child)
       }
     }).$mount()
@@ -306,13 +306,13 @@ describe('Options provide/inject', () => {
       mixins: [mixinA, mixinB],
       inject: ['baz'],
       template: `<span/>`,
-      created () {
+      created() {
         injected = [this.foo, this.bar, this.baz]
       }
     }
     new Vue({
       provide: { foo: 'foo', bar: 'bar', baz: 'baz' },
-      render (h) {
+      render(h) {
         return h(child)
       }
     }).$mount()
@@ -321,19 +321,19 @@ describe('Options provide/inject', () => {
   })
 
   it('should merge from mixins properly (mix of objects and arrays)', () => {
-    const mixinA = { inject: { foo: 'foo' }}
+    const mixinA = { inject: { foo: 'foo' } }
     const mixinB = { inject: ['bar'] }
     const child = {
       mixins: [mixinA, mixinB],
       inject: { qux: 'baz' },
       template: `<span/>`,
-      created () {
+      created() {
         injected = [this.foo, this.bar, this.qux]
       }
     }
     new Vue({
       provide: { foo: 'foo', bar: 'bar', baz: 'baz' },
-      render (h) {
+      render(h) {
         return h(child)
       }
     }).$mount()
@@ -358,8 +358,9 @@ describe('Options provide/inject', () => {
     child.foo = 2
     expect(
       `Avoid mutating an injected value directly since the changes will be ` +
-      `overwritten whenever the provided component re-renders. ` +
-      `injection being mutated: "${key}"`).toHaveBeenWarned()
+        `overwritten whenever the provided component re-renders. ` +
+        `injection being mutated: "${key}"`
+    ).toHaveBeenWarned()
   })
 
   it('should warn when injections cannot be found', () => {
@@ -367,7 +368,7 @@ describe('Options provide/inject', () => {
     new Vue({
       parent: vm,
       inject: ['foo', 'bar'],
-      created () {}
+      created() {}
     })
     expect(`Injection "foo" not found`).toHaveBeenWarned()
     expect(`Injection "bar" not found`).toHaveBeenWarned()
@@ -384,7 +385,7 @@ describe('Options provide/inject', () => {
     new Vue({
       parent: vm,
       inject: ['foo', 'bar', 'baz'],
-      created () {}
+      created() {}
     })
     expect(`Injection "foo" not found`).not.toHaveBeenWarned()
     expect(`Injection "bar" not found`).not.toHaveBeenWarned()
@@ -392,9 +393,12 @@ describe('Options provide/inject', () => {
   })
 
   it('should not warn when injection key which is not provided is not enumerable', () => {
-    const parent = new Vue({ provide: { foo: 1 }})
+    const parent = new Vue({ provide: { foo: 1 } })
     const inject = { foo: 'foo' }
-    Object.defineProperty(inject, '__ob__', { enumerable: false, value: '__ob__' })
+    Object.defineProperty(inject, '__ob__', {
+      enumerable: false,
+      value: '__ob__'
+    })
     new Vue({ parent, inject })
     expect(`Injection "__ob__" not found`).not.toHaveBeenWarned()
   })
@@ -409,7 +413,7 @@ describe('Options provide/inject', () => {
         bar: { default: false },
         baz: { default: undefined }
       },
-      created () {
+      created() {
         injected = [this.foo, this.bar, this.baz]
       }
     })
@@ -429,7 +433,7 @@ describe('Options provide/inject', () => {
         bar: { default: false },
         baz: { default: undefined }
       },
-      created () {
+      created() {
         injected = [this.foo, this.bar, this.baz]
       }
     })
@@ -451,7 +455,7 @@ describe('Options provide/inject', () => {
         bar: { default: 2 },
         baz: { default: 2 }
       },
-      created () {
+      created() {
         injected = [this.foo, this.bar, this.baz]
       }
     })
@@ -460,18 +464,18 @@ describe('Options provide/inject', () => {
 
   // Github issue #6008
   it('should merge provide from mixins (objects)', () => {
-    const mixinA = { provide: { foo: 'foo' }}
-    const mixinB = { provide: { bar: 'bar' }}
+    const mixinA = { provide: { foo: 'foo' } }
+    const mixinB = { provide: { bar: 'bar' } }
     const child = {
       inject: ['foo', 'bar'],
       template: `<span/>`,
-      created () {
+      created() {
         injected = [this.foo, this.bar]
       }
     }
     new Vue({
       mixins: [mixinA, mixinB],
-      render (h) {
+      render(h) {
         return h(child)
       }
     }).$mount()
@@ -485,13 +489,13 @@ describe('Options provide/inject', () => {
     const child = {
       inject: ['foo', 'bar'],
       template: `<span/>`,
-      created () {
+      created() {
         injected = [this.foo, this.bar]
       }
     }
     new Vue({
       mixins: [mixinA, mixinB],
-      render (h) {
+      render(h) {
         return h(child)
       }
     }).$mount()
@@ -500,20 +504,20 @@ describe('Options provide/inject', () => {
   })
 
   it('should merge provide from mixins (mix of objects and functions)', () => {
-    const mixinA = { provide: { foo: 'foo' }}
+    const mixinA = { provide: { foo: 'foo' } }
     const mixinB = { provide: () => ({ bar: 'bar' }) }
-    const mixinC = { provide: { baz: 'baz' }}
+    const mixinC = { provide: { baz: 'baz' } }
     const mixinD = { provide: () => ({ bam: 'bam' }) }
     const child = {
       inject: ['foo', 'bar', 'baz', 'bam'],
       template: `<span/>`,
-      created () {
+      created() {
         injected = [this.foo, this.bar, this.baz, this.bam]
       }
     }
     new Vue({
       mixins: [mixinA, mixinB, mixinC, mixinD],
-      render (h) {
+      render(h) {
         return h(child)
       }
     }).$mount()
@@ -522,18 +526,18 @@ describe('Options provide/inject', () => {
   })
 
   it('should merge provide from mixins and override existing keys', () => {
-    const mixinA = { provide: { foo: 'foo' }}
-    const mixinB = { provide: { foo: 'bar' }}
+    const mixinA = { provide: { foo: 'foo' } }
+    const mixinB = { provide: { foo: 'bar' } }
     const child = {
       inject: ['foo'],
       template: `<span/>`,
-      created () {
+      created() {
         injected = [this.foo]
       }
     }
     new Vue({
       mixins: [mixinA, mixinB],
-      render (h) {
+      render(h) {
         return h(child)
       }
     }).$mount()
@@ -546,14 +550,14 @@ describe('Options provide/inject', () => {
     const child = {
       inject: ['foo', 'bar'],
       template: `<span/>`,
-      created () {
+      created() {
         injected = [this.foo, this.bar]
       }
     }
     const Ctor = Vue.extend({
       mixins: [mixinA],
       provide: { bar: 'bar' },
-      render (h) {
+      render(h) {
         return h(child)
       }
     })
@@ -565,7 +569,7 @@ describe('Options provide/inject', () => {
 
   // #5913
   it('should keep the reactive with provide', () => {
-    function isObserver (obj) {
+    function isObserver(obj) {
       if (isObject(obj)) {
         return hasOwn(obj, '__ob__') && obj.__ob__ instanceof Observer
       }
@@ -574,14 +578,14 @@ describe('Options provide/inject', () => {
 
     const vm = new Vue({
       template: `<div><child ref='child'></child></div>`,
-      data () {
+      data() {
         return {
           foo: {},
           $foo: {},
           foo1: []
         }
       },
-      provide () {
+      provide() {
         return {
           foo: this.foo,
           $foo: this.$foo,
@@ -621,20 +625,20 @@ describe('Options provide/inject', () => {
 
     const Child = {
       inject: ['foo', 'bar'],
-      render (h) {
+      render(h) {
         return h('div', [`foo: ${this.foo}, `, `bar: ${this.bar}`])
       }
     }
 
     const Parent = {
       mixins: [ProvideFooMixin, ProvideBarMixin],
-      render (h) {
+      render(h) {
         return h(Child)
       }
     }
 
     const vm = new Vue({
-      render (h) {
+      render(h) {
         return h(Parent)
       }
     }).$mount()
@@ -646,13 +650,13 @@ describe('Options provide/inject', () => {
     const child = {
       inject: ['foo'],
       template: `<span/>`,
-      created () {
+      created() {
         injected = this.foo
       }
     }
     const Ctor = Vue.extend({
       provide: { foo: 'foo' },
-      render (h) {
+      render(h) {
         return h(child)
       }
     })

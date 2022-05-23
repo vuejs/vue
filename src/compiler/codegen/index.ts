@@ -359,7 +359,7 @@ function genInlineTemplate(
     return `inlineTemplate:{render:function(){${
       inlineRenderFns.render
     }},staticRenderFns:[${inlineRenderFns.staticRenderFns
-      .map((code) => `function(){${code}}`)
+      .map(code => `function(){${code}}`)
       .join(',')}]}`
   }
 }
@@ -375,7 +375,7 @@ function genScopedSlots(
   // for example if the slot contains dynamic names, has v-if or v-for on them...
   let needsForceUpdate =
     el.for ||
-    Object.keys(slots).some((key) => {
+    Object.keys(slots).some(key => {
       const slot = slots[key]
       return (
         slot.slotTargetDynamic || slot.if || slot.for || containsSlotChild(slot) // is passing down slot from parent which may be dynamic
@@ -411,7 +411,7 @@ function genScopedSlots(
   }
 
   const generatedSlots = Object.keys(slots)
-    .map((key) => genScopedSlot(slots[key], state))
+    .map(key => genScopedSlot(slots[key], state))
     .join(',')
 
   return `scopedSlots:_u([${generatedSlots}]${
@@ -492,7 +492,7 @@ export function genChildren(
       ? getNormalizationType(children, state.maybeComponent)
       : 0
     const gen = altGenNode || genNode
-    return `[${children.map((c) => gen(c, state)).join(',')}]${
+    return `[${children.map(c => gen(c, state)).join(',')}]${
       normalizationType ? `,${normalizationType}` : ''
     }`
   }
@@ -515,14 +515,14 @@ function getNormalizationType(
     if (
       needsNormalization(el) ||
       (el.ifConditions &&
-        el.ifConditions.some((c) => needsNormalization(c.block)))
+        el.ifConditions.some(c => needsNormalization(c.block)))
     ) {
       res = 2
       break
     }
     if (
       maybeComponent(el) ||
-      (el.ifConditions && el.ifConditions.some((c) => maybeComponent(c.block)))
+      (el.ifConditions && el.ifConditions.some(c => maybeComponent(c.block)))
     ) {
       res = 1
     }
@@ -563,7 +563,7 @@ function genSlot(el: ASTElement, state: CodegenState): string {
   const attrs =
     el.attrs || el.dynamicAttrs
       ? genProps(
-          (el.attrs || []).concat(el.dynamicAttrs || []).map((attr) => ({
+          (el.attrs || []).concat(el.dynamicAttrs || []).map(attr => ({
             // slot props are camelized
             name: camelize(attr.name),
             value: attr.value,

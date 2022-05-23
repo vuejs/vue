@@ -1,4 +1,3 @@
-
 // const Transform = require("stream").Transform;
 import type TemplateRenderer from './index'
 import type { ParsedTemplate } from './parse-template'

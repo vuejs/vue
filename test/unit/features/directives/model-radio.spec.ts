@@ -24,9 +24,11 @@ describe('Directive v-model radio', () => {
       expect(vm.$el.children[0].checked).toBe(true)
       expect(vm.$el.children[1].checked).toBe(false)
       expect(vm.test).toBe('1')
-    }).then(() => {
-      document.body.removeChild(vm.$el)
-    }).then(done)
+    })
+      .then(() => {
+        document.body.removeChild(vm.$el)
+      })
+      .then(done)
   })
 
   it('should respect value bindings', done => {
@@ -52,9 +54,11 @@ describe('Directive v-model radio', () => {
       expect(vm.$el.children[0].checked).toBe(true)
       expect(vm.$el.children[1].checked).toBe(false)
       expect(vm.test).toBe(1)
-    }).then(() => {
-      document.body.removeChild(vm.$el)
-    }).then(done)
+    })
+      .then(() => {
+        document.body.removeChild(vm.$el)
+      })
+      .then(done)
   })
 
   it('should respect value bindings (object loose equal)', done => {
@@ -80,12 +84,14 @@ describe('Directive v-model radio', () => {
       expect(vm.$el.children[0].checked).toBe(true)
       expect(vm.$el.children[1].checked).toBe(false)
       expect(vm.test).toEqual({ a: 1 })
-    }).then(() => {
-      document.body.removeChild(vm.$el)
-    }).then(done)
+    })
+      .then(() => {
+        document.body.removeChild(vm.$el)
+      })
+      .then(done)
   })
 
-  it('multiple radios ', (done) => {
+  it('multiple radios ', done => {
     const spy = vi.fn()
     const vm = new Vue({
       data: {
@@ -106,14 +112,14 @@ describe('Directive v-model radio', () => {
       },
       template:
         '<div>' +
-          '<div v-for="(radioGroup, idx) in radioList">' +
-            '<div>' +
-              '<span v-for="(item, index) in radioGroup.data">' +
-                '<input :name="radioGroup.name" type="radio" :value="item" v-model="selections[idx]" :id="idx"/>' +
-                '<label>{{item}}</label>' +
-              '</span>' +
-            '</div>' +
-          '</div>' +
+        '<div v-for="(radioGroup, idx) in radioList">' +
+        '<div>' +
+        '<span v-for="(item, index) in radioGroup.data">' +
+        '<input :name="radioGroup.name" type="radio" :value="item" v-model="selections[idx]" :id="idx"/>' +
+        '<label>{{item}}</label>' +
+        '</span>' +
+        '</div>' +
+        '</div>' +
         '</div>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -146,18 +152,18 @@ describe('Directive v-model radio', () => {
     expect(vm.test).toBe(2)
   })
 
-  it('should respect different primitive type value', (done) => {
+  it('should respect different primitive type value', done => {
     const vm = new Vue({
       data: {
         test: 1
       },
       template:
         '<div>' +
-          '<input type="radio" value="" v-model="test" name="test">' +
-          '<input type="radio" value="0" v-model="test" name="test">' +
-          '<input type="radio" value="1" v-model="test" name="test">' +
-          '<input type="radio" value="false" v-model="test" name="test">' +
-          '<input type="radio" value="true" v-model="test" name="test">' +
+        '<input type="radio" value="" v-model="test" name="test">' +
+        '<input type="radio" value="0" v-model="test" name="test">' +
+        '<input type="radio" value="1" v-model="test" name="test">' +
+        '<input type="radio" value="false" v-model="test" name="test">' +
+        '<input type="radio" value="true" v-model="test" name="test">' +
         '</div>'
     }).$mount()
     const radioboxInput = vm.$el.children
@@ -174,31 +180,35 @@ describe('Directive v-model radio', () => {
       expect(radioboxInput[3].checked).toBe(false)
       expect(radioboxInput[4].checked).toBe(false)
       vm.test = ''
-    }).then(() => {
-      expect(radioboxInput[0].checked).toBe(true)
-      expect(radioboxInput[1].checked).toBe(false)
-      expect(radioboxInput[2].checked).toBe(false)
-      expect(radioboxInput[3].checked).toBe(false)
-      expect(radioboxInput[4].checked).toBe(false)
-      vm.test = false
-    }).then(() => {
-      expect(radioboxInput[0].checked).toBe(false)
-      expect(radioboxInput[1].checked).toBe(false)
-      expect(radioboxInput[2].checked).toBe(false)
-      expect(radioboxInput[3].checked).toBe(true)
-      expect(radioboxInput[4].checked).toBe(false)
-      vm.test = true
-    }).then(() => {
-      expect(radioboxInput[0].checked).toBe(false)
-      expect(radioboxInput[1].checked).toBe(false)
-      expect(radioboxInput[2].checked).toBe(false)
-      expect(radioboxInput[3].checked).toBe(false)
-      expect(radioboxInput[4].checked).toBe(true)
-    }).then(done)
+    })
+      .then(() => {
+        expect(radioboxInput[0].checked).toBe(true)
+        expect(radioboxInput[1].checked).toBe(false)
+        expect(radioboxInput[2].checked).toBe(false)
+        expect(radioboxInput[3].checked).toBe(false)
+        expect(radioboxInput[4].checked).toBe(false)
+        vm.test = false
+      })
+      .then(() => {
+        expect(radioboxInput[0].checked).toBe(false)
+        expect(radioboxInput[1].checked).toBe(false)
+        expect(radioboxInput[2].checked).toBe(false)
+        expect(radioboxInput[3].checked).toBe(true)
+        expect(radioboxInput[4].checked).toBe(false)
+        vm.test = true
+      })
+      .then(() => {
+        expect(radioboxInput[0].checked).toBe(false)
+        expect(radioboxInput[1].checked).toBe(false)
+        expect(radioboxInput[2].checked).toBe(false)
+        expect(radioboxInput[3].checked).toBe(false)
+        expect(radioboxInput[4].checked).toBe(true)
+      })
+      .then(done)
   })
 
   // #4521
-  it('should work with click event', (done) => {
+  it('should work with click event', done => {
     const vm = new Vue({
       data: {
         num: 1,
@@ -206,8 +216,8 @@ describe('Directive v-model radio', () => {
       },
       template:
         '<div @click="add">' +
-          'click {{ num }}<input name="test" type="radio" value="1" v-model="checked"/>' +
-          '<input name="test" type="radio" value="2" v-model="checked"/>' +
+        'click {{ num }}<input name="test" type="radio" value="1" v-model="checked"/>' +
+        '<input name="test" type="radio" value="2" v-model="checked"/>' +
         '</div>',
       methods: {
         add: function () {
@@ -223,19 +233,22 @@ describe('Directive v-model radio', () => {
       expect(radios[1].checked).toBe(false)
       expect(vm.num).toBe(2)
       radios[0].click()
-    }).then(() => {
-      expect(radios[0].checked).toBe(true)
-      expect(radios[1].checked).toBe(false)
-      expect(vm.num).toBe(3)
-      radios[1].click()
-    }).then(() => {
-      expect(radios[0].checked).toBe(false)
-      expect(radios[1].checked).toBe(true)
-      expect(vm.num).toBe(4)
-    }).then(done)
+    })
+      .then(() => {
+        expect(radios[0].checked).toBe(true)
+        expect(radios[1].checked).toBe(false)
+        expect(vm.num).toBe(3)
+        radios[1].click()
+      })
+      .then(() => {
+        expect(radios[0].checked).toBe(false)
+        expect(radios[1].checked).toBe(true)
+        expect(vm.num).toBe(4)
+      })
+      .then(done)
   })
 
-  it('should get updated with model when in focus', (done) => {
+  it('should get updated with model when in focus', done => {
     const vm = new Vue({
       data: {
         a: '2'
@@ -247,8 +260,10 @@ describe('Directive v-model radio', () => {
     waitForUpdate(() => {
       expect(vm.$el.checked).toBe(true)
       vm.a = 2
-    }).then(() => {
-      expect(vm.$el.checked).toBe(false)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.checked).toBe(false)
+      })
+      .then(done)
   })
 })

@@ -46,14 +46,17 @@ describe('Options mixins', () => {
       },
       created: f2
     }
-    const result = mergeOptions({}, {
-      directives: {
-        c: c
-      },
-      template: 'bar',
-      mixins: [mixinA, mixinB],
-      created: f3
-    })
+    const result = mergeOptions(
+      {},
+      {
+        directives: {
+          c: c
+        },
+        template: 'bar',
+        mixins: [mixinA, mixinB],
+        created: f3
+      }
+    )
     expect(result.a).toBe(1)
     expect(result.b).toBe(1)
     expect(result.directives?.a).toBe(a)
@@ -79,12 +82,15 @@ describe('Options mixins', () => {
         xyz: f2
       }
     }
-    const result = mergeOptions({}, {
-      mixins: [mixinA, mixinB],
-      methods: {
-        xyz: f3
+    const result = mergeOptions(
+      {},
+      {
+        mixins: [mixinA, mixinB],
+        methods: {
+          xyz: f3
+        }
       }
-    })
+    )
     expect(result.methods?.xyz).toBe(f3)
   })
 

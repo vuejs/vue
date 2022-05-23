@@ -1,10 +1,9 @@
-
 import { isDef, isUndef } from 'shared/util'
 import { updateListeners } from 'core/vdom/helpers/index'
 import { isIE, isFF, supportsPassive, isUsingMicroTask } from 'core/util/index'
 import {
   RANGE_TOKEN,
-  CHECKBOX_RADIO_TOKEN,
+  CHECKBOX_RADIO_TOKEN
 } from 'web/compiler/directives/model'
 import { currentFlushTimestamp } from 'core/observer/scheduler'
 import { emptyNode } from 'core/vdom/patch'
@@ -63,7 +62,7 @@ function add(
   if (useMicrotaskFix) {
     const attachedTimestamp = currentFlushTimestamp
     const original = handler
-    //@ts-expect-error 
+    //@ts-expect-error
     handler = original._wrapper = function (e) {
       if (
         // no bubbling, should always fire.
@@ -98,7 +97,7 @@ function remove(
   capture: boolean,
   _target?: HTMLElement
 ) {
-  (_target || target).removeEventListener(
+  ;(_target || target).removeEventListener(
     name,
     //@ts-expect-error
     handler._wrapper || handler,

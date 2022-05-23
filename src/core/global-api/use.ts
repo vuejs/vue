@@ -1,4 +1,3 @@
-
 import type { GlobalAPI } from 'typescript/global-api'
 import { toArray } from '../util/index'
 

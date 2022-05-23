@@ -10,7 +10,7 @@ describe('Options functional', () => {
         wrap: {
           functional: true,
           props: ['msg'],
-          render (h, { props, children }) {
+          render(h, { props, children }) {
             return h('div', null, [props.msg, ' '].concat(children))
           }
         }
@@ -26,14 +26,14 @@ describe('Options functional', () => {
   it('should expose all props when not declared', done => {
     const fn = {
       functional: true,
-      render (h, { props }) {
+      render(h, { props }) {
         return h('div', `${props.msg} ${props.kebabMsg}`)
       }
     }
 
     const vm = new Vue({
       data: { test: 'foo' },
-      render (h) {
+      render(h) {
         return h('div', [
           h(fn, {
             props: { msg: this.test },
@@ -59,7 +59,7 @@ describe('Options functional', () => {
       components: {
         wrap: {
           functional: true,
-          render (h, { listeners }) {
+          render(h, { listeners }) {
             return h('div', {
               on: {
                 click: [listeners.click, () => listeners.test('bar')]
@@ -81,11 +81,12 @@ describe('Options functional', () => {
 
   it('should expose scopedSlots on render context', () => {
     const vm = new Vue({
-      template: '<div><wrap>foo<p slot="p" slot-scope="a">{{ a }}</p></wrap></div>',
+      template:
+        '<div><wrap>foo<p slot="p" slot-scope="a">{{ a }}</p></wrap></div>',
       components: {
         wrap: {
           functional: true,
-          render (h, { scopedSlots }) {
+          render(h, { scopedSlots }) {
             return [
               // scoped
               scopedSlots.p('a'),
@@ -106,7 +107,7 @@ describe('Options functional', () => {
       components: {
         test: {
           functional: true,
-          render (h) {
+          render(h) {
             return [h('span', 'foo'), h('span', 'bar')]
           }
         }
@@ -118,12 +119,13 @@ describe('Options functional', () => {
   it('should support slots', () => {
     const vm = new Vue({
       data: { test: 'foo' },
-      template: '<div><wrap><div slot="a">foo</div><div slot="b">bar</div></wrap></div>',
+      template:
+        '<div><wrap><div slot="a">foo</div><div slot="b">bar</div></wrap></div>',
       components: {
         wrap: {
           functional: true,
           props: ['msg'],
-          render (h, { slots }) {
+          render(h, { slots }) {
             slots = slots()
             return h('div', null, [slots.b, slots.a])
           }
@@ -146,31 +148,31 @@ describe('Options functional', () => {
         validate: {
           functional: true,
           props: ['field'],
-          render (h, { props, children, data: { on }}) {
+          render(h, { props, children, data: { on } }) {
             props.child = children[0]
             return h('validate-control', { props, on })
           }
         },
         'validate-control': {
           props: ['field', 'child'],
-          render () {
+          render() {
             return this.child
           },
-          mounted () {
+          mounted() {
             this.$el.addEventListener('input', this.onInput)
           },
-          destroyed () {
+          destroyed() {
             this.$el.removeEventListener('input', this.onInput)
           },
           methods: {
-            onInput (e) {
+            onInput(e) {
               const value = e.target.value
               if (this.validate(value)) {
                 this.$emit('valid', this)
               }
             },
             // something validation logic here
-            validate (val) {
+            validate(val) {
               return val.length > 0
             }
           }
@@ -184,18 +186,21 @@ describe('Options functional', () => {
     waitForUpdate(() => {
       input.value = 'foo'
       triggerEvent(input, 'input')
-    }).then(() => {
-      expect(onValid).toHaveBeenCalled()
-    }).then(() => {
-      document.body.removeChild(vm.$el)
-      vm.$destroy()
-    }).then(done)
+    })
+      .then(() => {
+        expect(onValid).toHaveBeenCalled()
+      })
+      .then(() => {
+        document.body.removeChild(vm.$el)
+        vm.$destroy()
+      })
+      .then(done)
   })
 
   it('create empty vnode when render return null', () => {
     const child = {
       functional: true,
-      render () {
+      render() {
         return null
       }
     }
@@ -213,7 +218,7 @@ describe('Options functional', () => {
   it('should normalize top-level arrays', () => {
     const Foo = {
       functional: true,
-      render (h) {
+      render(h) {
         return [h('span', 'hi'), null]
       }
     }
@@ -231,11 +236,7 @@ describe('Options functional', () => {
 
     const Bar = {
       functional: true,
-      render: h => ([
-        h('div', 'one'),
-        h('div', 'two'),
-        h(Baz)
-      ])
+      render: h => [h('div', 'one'), h('div', 'two'), h(Baz)]
     }
 
     const Baz = {
@@ -248,13 +249,15 @@ describe('Options functional', () => {
       components: { Foo, Bar }
     }).$mount()
 
-    expect(vm.$el.innerHTML).toBe('<div>one</div><div>two</div><div>three</div>')
+    expect(vm.$el.innerHTML).toBe(
+      '<div>one</div><div>two</div><div>three</div>'
+    )
   })
 
   it('should apply namespace when returning arrays', () => {
     const Child = {
       functional: true,
-      render: h => ([h('foo'), h('bar')])
+      render: h => [h('foo'), h('bar')]
     }
     const vm = new Vue({
       template: `<svg><child/></svg>`,
@@ -277,9 +280,11 @@ describe('Options functional', () => {
           _vm._t('slot2'),
           _vm._t('scoped', null, { msg: _vm.props.msg }),
           _vm._m(0),
-          _c('div', { staticClass: 'clickable', on: { click: _vm.parent.fn }}, [
-            _vm._v('click me')
-          ])
+          _c(
+            'div',
+            { staticClass: 'clickable', on: { click: _vm.parent.fn } },
+            [_vm._v('click me')]
+          )
         ],
         2
       )
@@ -315,13 +320,13 @@ describe('Options functional', () => {
       </div>
       `,
       methods: {
-        fn () {
+        fn() {
           this.msg = 'bye'
         }
       }
     }).$mount()
 
-    function assertMarkup () {
+    function assertMarkup() {
       expect(parent.$el.innerHTML).toBe(
         `<div>` +
           `<h2 class="red">${parent.msg}</h2>` +
@@ -331,7 +336,7 @@ describe('Options functional', () => {
           // static
           `<div>Some <span>text</span></div>` +
           `<div class="clickable">click me</div>` +
-        `</div>`
+          `</div>`
       )
     }
 
@@ -347,7 +352,7 @@ describe('Options functional', () => {
       props: {
         name: {}
       },
-      render (h, context) {
+      render(h, context) {
         return [h('span', 'hi'), h('span', context.props.name)]
       }
     }
@@ -358,6 +363,8 @@ describe('Options functional', () => {
       },
       components: { Foo }
     }).$mount()
-    expect(vm.$el.innerHTML).toBe('<span>hi</span><span>foo</span><span>hi</span><span>bar</span>')
+    expect(vm.$el.innerHTML).toBe(
+      '<span>hi</span><span>foo</span><span>hi</span><span>bar</span>'
+    )
   })
 })

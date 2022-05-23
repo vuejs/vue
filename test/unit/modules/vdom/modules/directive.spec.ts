@@ -9,24 +9,48 @@ describe('vdom directive module', () => {
       update: vi.fn(),
       unbind: vi.fn()
     }
-    const vm = new Vue({ directives: { directive1 }})
+    const vm = new Vue({ directives: { directive1 } })
     // create
     const vnode1 = new VNode('div', {}, [
-      new VNode('p', {
-        directives: [{
-          name: 'directive1', value: 'hello', arg: 'arg1', modifiers: { modifier1: true }
-        }]
-      }, undefined, 'hello world', undefined, vm)
+      new VNode(
+        'p',
+        {
+          directives: [
+            {
+              name: 'directive1',
+              value: 'hello',
+              arg: 'arg1',
+              modifiers: { modifier1: true }
+            }
+          ]
+        },
+        undefined,
+        'hello world',
+        undefined,
+        vm
+      )
     ])
     patch(null, vnode1)
     expect(directive1.bind).toHaveBeenCalled()
     // update
     const vnode2 = new VNode('div', {}, [
-      new VNode('p', {
-        directives: [{
-          name: 'directive1', value: 'world', arg: 'arg1', modifiers: { modifier1: true }
-        }]
-      }, undefined, 'hello world', undefined, vm)
+      new VNode(
+        'p',
+        {
+          directives: [
+            {
+              name: 'directive1',
+              value: 'world',
+              arg: 'arg1',
+              modifiers: { modifier1: true }
+            }
+          ]
+        },
+        undefined,
+        'hello world',
+        undefined,
+        vm
+      )
     ])
     patch(vnode1, vnode2)
     expect(directive1.update).toHaveBeenCalled()

@@ -30,20 +30,20 @@ describe('Transition group', () => {
     if (!appear) {
       expect(vm.$el.innerHTML).toBe(
         `<span>` +
-          vm.items.map((i) => `<div class="test">${i}</div>`).join('') +
+          vm.items.map(i => `<div class="test">${i}</div>`).join('') +
           `</span>`
       )
     }
     return vm
   }
 
-  it('enter', (done) => {
+  it('enter', done => {
     const vm = createBasicVM()
     vm.items.push('d', 'e')
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe(
         `<span>` +
-          ['a', 'b', 'c'].map((i) => `<div class="test">${i}</div>`).join('') +
+          ['a', 'b', 'c'].map(i => `<div class="test">${i}</div>`).join('') +
           `<div class="test v-enter v-enter-active">d</div>` +
           `<div class="test v-enter v-enter-active">e</div>` +
           `</span>`
@@ -53,9 +53,7 @@ describe('Transition group', () => {
       .then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
-            ['a', 'b', 'c']
-              .map((i) => `<div class="test">${i}</div>`)
-              .join('') +
+            ['a', 'b', 'c'].map(i => `<div class="test">${i}</div>`).join('') +
             `<div class="test v-enter-active v-enter-to">d</div>` +
             `<div class="test v-enter-active v-enter-to">e</div>` +
             `</span>`
@@ -65,14 +63,14 @@ describe('Transition group', () => {
       .then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
-            vm.items.map((i) => `<div class="test">${i}</div>`).join('') +
+            vm.items.map(i => `<div class="test">${i}</div>`).join('') +
             `</span>`
         )
       })
       .then(done)
   })
 
-  it('leave', (done) => {
+  it('leave', done => {
     const vm = createBasicVM()
     vm.items = ['b']
     waitForUpdate(() => {
@@ -98,14 +96,14 @@ describe('Transition group', () => {
       .then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
-            vm.items.map((i) => `<div class="test">${i}</div>`).join('') +
+            vm.items.map(i => `<div class="test">${i}</div>`).join('') +
             `</span>`
         )
       })
       .then(done)
   })
 
-  it('enter + leave', (done) => {
+  it('enter + leave', done => {
     const vm = createBasicVM()
     vm.items = ['b', 'c', 'd']
     waitForUpdate(() => {
@@ -133,14 +131,14 @@ describe('Transition group', () => {
       .then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
-            vm.items.map((i) => `<div class="test">${i}</div>`).join('') +
+            vm.items.map(i => `<div class="test">${i}</div>`).join('') +
             `</span>`
         )
       })
       .then(done)
   })
 
-  it('use with "is" attribute', (done) => {
+  it('use with "is" attribute', done => {
     const vm = createBasicVM(true)
     vm.items = ['b', 'c', 'd']
     waitForUpdate(() => {
@@ -168,20 +166,20 @@ describe('Transition group', () => {
       .then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
-            vm.items.map((i) => `<div class="test">${i}</div>`).join('') +
+            vm.items.map(i => `<div class="test">${i}</div>`).join('') +
             `</span>`
         )
       })
       .then(done)
   })
 
-  it('appear', (done) => {
+  it('appear', done => {
     const vm = createBasicVM(false, true /* appear */)
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe(
         `<span>` +
           vm.items
-            .map((i) => `<div class="test v-enter v-enter-active">${i}</div>`)
+            .map(i => `<div class="test v-enter v-enter-active">${i}</div>`)
             .join('') +
           `</span>`
       )
@@ -192,7 +190,7 @@ describe('Transition group', () => {
           `<span>` +
             vm.items
               .map(
-                (i) => `<div class="test v-enter-active v-enter-to">${i}</div>`
+                i => `<div class="test v-enter-active v-enter-to">${i}</div>`
               )
               .join('') +
             `</span>`
@@ -202,14 +200,14 @@ describe('Transition group', () => {
       .then(() => {
         expect(vm.$el.innerHTML).toBe(
           `<span>` +
-            vm.items.map((i) => `<div class="test">${i}</div>`).join('') +
+            vm.items.map(i => `<div class="test">${i}</div>`).join('') +
             `</span>`
         )
       })
       .then(done)
   })
 
-  it('events', (done) => {
+  it('events', done => {
     let next
     const beforeEnterSpy = jasmine.createSpy()
     const afterEnterSpy = jasmine.createSpy()
@@ -255,7 +253,7 @@ describe('Transition group', () => {
       )
       expect(beforeEnterSpy.calls.count()).toBe(1)
     })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -270,7 +268,7 @@ describe('Transition group', () => {
         expect(afterEnterSpy.calls.count()).toBe(1)
         vm.items.shift()
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -286,7 +284,7 @@ describe('Transition group', () => {
       .then(done)
   })
 
-  it('move', (done) => {
+  it('move', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -345,7 +343,7 @@ describe('Transition group', () => {
   })
 
   // GitHub issue #6006
-  it('should work with dynamic name', (done) => {
+  it('should work with dynamic name', done => {
     const vm = new Vue({
       template: `
           <div>

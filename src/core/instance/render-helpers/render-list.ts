@@ -44,6 +44,6 @@ export function renderList(
   if (!isDef(ret)) {
     ret = []
   }
-  (ret as any)._isVList = true
+  ;(ret as any)._isVList = true
   return ret
 }

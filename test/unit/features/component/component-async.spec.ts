@@ -46,11 +46,11 @@ describe('Component async', () => {
     expect(JSON.stringify(timeoutsPending)).toEqual(JSON.stringify({}))
   })
 
-  it('normal', (done) => {
+  it('normal', done => {
     const vm = new Vue({
       template: '<div><test></test></div>',
       components: {
-        test: (resolve) => {
+        test: resolve => {
           setTimeout(() => {
             resolve({
               template: '<div>hi</div>'
@@ -71,11 +71,11 @@ describe('Component async', () => {
     }
   })
 
-  it('resolve ES module default', (done) => {
+  it('resolve ES module default', done => {
     const vm = new Vue({
       template: '<div><test></test></div>',
       components: {
-        test: (resolve) => {
+        test: resolve => {
           setTimeout(() => {
             resolve({
               __esModule: true,
@@ -99,11 +99,11 @@ describe('Component async', () => {
     }
   })
 
-  it('as root', (done) => {
+  it('as root', done => {
     const vm = new Vue({
       template: '<test></test>',
       components: {
-        test: (resolve) => {
+        test: resolve => {
           setTimeout(() => {
             resolve({
               template: '<div>hi</div>'
@@ -125,14 +125,14 @@ describe('Component async', () => {
     }
   })
 
-  it('dynamic', (done) => {
+  it('dynamic', done => {
     const vm = new Vue({
       template: '<component :is="view"></component>',
       data: {
         view: 'view-a'
       },
       components: {
-        'view-a': (resolve) => {
+        'view-a': resolve => {
           setTimeout(() => {
             resolve({
               template: '<div>A</div>'
@@ -140,7 +140,7 @@ describe('Component async', () => {
             Vue.nextTick(step1)
           }, 0)
         },
-        'view-b': (resolve) => {
+        'view-b': resolve => {
           setTimeout(() => {
             resolve({
               template: '<p>B</p>'
@@ -184,14 +184,14 @@ describe('Component async', () => {
     expect('Reason: nooooo').toHaveBeenWarned()
   })
 
-  it('with v-for', (done) => {
+  it('with v-for', done => {
     const vm = new Vue({
       template: '<div><test v-for="n in list" :key="n" :n="n"></test></div>',
       data: {
         list: [1, 2, 3]
       },
       components: {
-        test: (resolve) => {
+        test: resolve => {
           setTimeout(() => {
             resolve({
               props: ['n'],
@@ -209,12 +209,12 @@ describe('Component async', () => {
     }
   })
 
-  it('returning Promise', (done) => {
+  it('returning Promise', done => {
     const vm = new Vue({
       template: '<div><test></test></div>',
       components: {
         test: () => {
-          return new Promise((resolve) => {
+          return new Promise(resolve => {
             setTimeout(() => {
               resolve({
                 template: '<div>hi</div>'
@@ -239,12 +239,12 @@ describe('Component async', () => {
   })
 
   describe('loading/error/timeout', () => {
-    it('with loading component', (done) => {
+    it('with loading component', done => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
           test: () => ({
-            component: new Promise((resolve) => {
+            component: new Promise(resolve => {
               setTimeout(() => {
                 resolve({ template: '<div>hi</div>' })
                 // wait for promise resolve and then parent update
@@ -276,12 +276,12 @@ describe('Component async', () => {
       }
     })
 
-    it('with loading component (0 delay)', (done) => {
+    it('with loading component (0 delay)', done => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
           test: () => ({
-            component: new Promise((resolve) => {
+            component: new Promise(resolve => {
               setTimeout(() => {
                 resolve({ template: '<div>hi</div>' })
                 // wait for promise resolve and then parent update
@@ -304,7 +304,7 @@ describe('Component async', () => {
       }
     })
 
-    it('with error component', (done) => {
+    it('with error component', done => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
@@ -334,7 +334,7 @@ describe('Component async', () => {
       }
     })
 
-    it('with error component + timeout', (done) => {
+    it('with error component + timeout', done => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
@@ -371,7 +371,7 @@ describe('Component async', () => {
       }
     })
 
-    it('should not trigger timeout if resolved', (done) => {
+    it('should not trigger timeout if resolved', done => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
@@ -394,7 +394,7 @@ describe('Component async', () => {
       }, 50)
     })
 
-    it('should not have running timeout/loading if resolved', (done) => {
+    it('should not have running timeout/loading if resolved', done => {
       const vm = new Vue({
         template: `<div><test/></div>`,
         components: {
@@ -423,7 +423,7 @@ describe('Component async', () => {
     })
 
     // #7107
-    it(`should work when resolving sync in sibling component's mounted hook`, (done) => {
+    it(`should work when resolving sync in sibling component's mounted hook`, done => {
       let resolveTwo
 
       const vm = new Vue({
@@ -435,7 +435,7 @@ describe('Component async', () => {
               resolveTwo()
             }
           },
-          two: (resolve) => {
+          two: resolve => {
             resolveTwo = () => {
               resolve({
                 template: `<div>two</div>`

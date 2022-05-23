@@ -40,12 +40,12 @@ describe('Instance methods lifecycle', () => {
         components: {
           myComponent: {
             template: '<div>hi</div>',
-            mounted () {
+            mounted() {
               this.msg
               expect(Dep.target).toBe(undefined)
             },
             computed: {
-              msg () {
+              msg() {
                 return 1
               }
             }
@@ -111,7 +111,7 @@ describe('Instance methods lifecycle', () => {
     })
 
     it('remove self from data observer', () => {
-      const vm = new Vue({ data: { a: 1 }})
+      const vm = new Vue({ data: { a: 1 } })
       vm.$destroy()
       expect(vm.$data.__ob__.vmCount).toBe(0)
     })
@@ -141,9 +141,11 @@ describe('Instance methods lifecycle', () => {
         // should not work because adding new property
         expect(vm.$el.textContent).toBe('')
         vm.$forceUpdate()
-      }).then(() => {
-        expect(vm.$el.textContent).toBe('foo')
-      }).then(done)
+      })
+        .then(() => {
+          expect(vm.$el.textContent).toBe('foo')
+        })
+        .then(done)
     })
   })
 

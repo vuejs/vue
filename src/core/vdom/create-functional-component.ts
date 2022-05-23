@@ -1,4 +1,3 @@
-
 import VNode, { cloneVNode } from './vnode'
 import { createElement } from './create-element'
 import { resolveInject } from '../instance/inject'
@@ -13,7 +12,7 @@ import {
   hasOwn,
   camelize,
   emptyObject,
-  validateProp,
+  validateProp
 } from '../util/index'
 import type { Component } from 'typescript/component'
 import type { VNodeData } from 'typescript/vnode'
@@ -64,7 +63,7 @@ export function FunctionalRenderContext(
     enumerable: true,
     get() {
       return normalizeScopedSlots(data.scopedSlots, this.slots())
-    },
+    }
   } as any)
 
   // support for compiled functional template
@@ -160,10 +159,11 @@ function cloneAndMarkFunctionalResult(
   clone.fnContext = contextVm
   clone.fnOptions = options
   if (process.env.NODE_ENV !== 'production') {
-    (clone.devtoolsMeta = clone.devtoolsMeta || {} as any).renderContext = renderContext
+    ;(clone.devtoolsMeta = clone.devtoolsMeta || ({} as any)).renderContext =
+      renderContext
   }
   if (data.slot) {
-    (clone.data || (clone.data = {})).slot = data.slot
+    ;(clone.data || (clone.data = {})).slot = data.slot
   }
   return clone
 }

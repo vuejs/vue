@@ -1,4 +1,3 @@
-
 const whitespaceRE = /\s+/
 
 /**
@@ -14,7 +13,7 @@ export function addClass(el: HTMLElement, cls?: string) {
   /* istanbul ignore else */
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
-      cls.split(whitespaceRE).forEach((c) => el.classList.add(c))
+      cls.split(whitespaceRE).forEach(c => el.classList.add(c))
     } else {
       el.classList.add(cls)
     }
@@ -39,7 +38,7 @@ export function removeClass(el: HTMLElement, cls?: string) {
   /* istanbul ignore else */
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
-      cls.split(whitespaceRE).forEach((c) => el.classList.remove(c))
+      cls.split(whitespaceRE).forEach(c => el.classList.remove(c))
     } else {
       el.classList.remove(cls)
     }

@@ -1,17 +1,16 @@
 import Vue from 'vue'
 
 describe('ref', () => {
-  
-  type TestShape = { 
-    id: string,
-    template: string,
+  type TestShape = {
+    id: string
+    template: string
     data?: any
     components?: any
   }
   type ComponentShape = {
-    test: TestShape,
-    test2: TestShape,
-    test3: TestShape,
+    test: TestShape
+    test2: TestShape
+    test3: TestShape
   }
   const components: ComponentShape = {
     test: {
@@ -67,10 +66,8 @@ describe('ref', () => {
   it('should work as a hyperscript prop', () => {
     const vm = new Vue({
       components,
-      render (h) {
-        return h('div', null, [
-          h('test', { ref: 'test' })
-        ])
+      render(h) {
+        return h('div', null, [h('test', { ref: 'test' })])
       }
     })
     vm.$mount()
@@ -102,9 +99,11 @@ describe('ref', () => {
     waitForUpdate(() => {
       expect(vm.$refs.test.$options.id).toBe('test2')
       vm.test = ''
-    }).then(() => {
-      expect(vm.$refs.test).toBeUndefined()
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$refs.test).toBeUndefined()
+      })
+      .then(done)
   })
 
   it('should register as Array when used with v-for', done => {
@@ -122,14 +121,18 @@ describe('ref', () => {
     // updating
     vm.items.push(4)
     waitForUpdate(assertRefs)
-      .then(() => { vm.items = [] })
+      .then(() => {
+        vm.items = []
+      })
       .then(assertRefs)
       .then(done)
 
-    function assertRefs () {
+    function assertRefs() {
       expect(Array.isArray(vm.$refs.list)).toBe(true)
       expect(vm.$refs.list.length).toBe(vm.items.length)
-      expect(vm.$refs.list.every((item, i) => item.textContent === String(i + 1))).toBe(true)
+      expect(
+        vm.$refs.list.every((item, i) => item.textContent === String(i + 1))
+      ).toBe(true)
     }
   })
 
@@ -154,14 +157,18 @@ describe('ref', () => {
     // updating
     vm.items.push(4)
     waitForUpdate(assertRefs)
-      .then(() => { vm.items = [] })
+      .then(() => {
+        vm.items = []
+      })
       .then(assertRefs)
       .then(done)
 
-    function assertRefs () {
+    function assertRefs() {
       expect(Array.isArray(vm.$refs.list)).toBe(true)
       expect(vm.$refs.list.length).toBe(vm.items.length)
-      expect(vm.$refs.list.every((comp, i) => comp.$el.textContent === String(i + 1))).toBe(true)
+      expect(
+        vm.$refs.list.every((comp, i) => comp.$el.textContent === String(i + 1))
+      ).toBe(true)
     }
   })
 
@@ -169,7 +176,7 @@ describe('ref', () => {
     components.test3 = {
       id: 'test3',
       template: `<test1 v-if="!normal"></test1><div v-else>test3</div>`,
-      data () {
+      data() {
         return { normal: false }
       },
       components: { test1: components.test }
@@ -200,16 +207,20 @@ describe('ref', () => {
     vm.$refs.children[1].normal = true
     testContent = true
     waitForUpdate(assertRefs)
-      .then(() => { vm.items.push('test') })
+      .then(() => {
+        vm.items.push('test')
+      })
       .then(assertRefs)
       .then(done)
 
-    function assertRefs () {
+    function assertRefs() {
       expect(Array.isArray(vm.$refs.children)).toBe(true)
       expect(vm.$refs.children.length).toBe(vm.items.length)
       if (testContent) {
         expect(
-          vm.$refs.children.every((comp, i) => comp.$el.textContent === vm.items[i])
+          vm.$refs.children.every(
+            (comp, i) => comp.$el.textContent === vm.items[i]
+          )
         ).toBe(true)
       }
     }
@@ -221,7 +232,7 @@ describe('ref', () => {
       components: {
         child: {
           template: '<div v-if="show"></div>',
-          data () {
+          data() {
             return { show: false }
           }
         }
@@ -232,8 +243,10 @@ describe('ref', () => {
     waitForUpdate(() => {
       expect(vm.$refs.test).toBe(vm.$children[0])
       vm.$refs.test.show = false
-    }).then(() => {
-      expect(vm.$refs.test).toBe(vm.$children[0])
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$refs.test).toBe(vm.$children[0])
+      })
+      .then(done)
   })
 })

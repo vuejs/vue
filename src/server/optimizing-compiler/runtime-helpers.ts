@@ -1,4 +1,3 @@
-
 import { escape, isSSRUnsafeAttr } from 'web/server/util'
 import { isObject, extend } from 'shared/util'
 import { renderAttr } from 'web/server/modules/attrs'
@@ -8,7 +7,7 @@ import { normalizeStyleBinding } from 'web/util/style'
 
 import {
   normalizeChildren,
-  simpleNormalizeChildren,
+  simpleNormalizeChildren
 } from 'core/vdom/helpers/normalize-children'
 
 import { propsToAttrMap, isRenderableAttr } from 'web/server/util'
@@ -22,7 +21,7 @@ const ssrHelpers = {
   _ssrAttrs: renderAttrs,
   _ssrDOMProps: renderDOMProps,
   _ssrClass: renderSSRClass,
-  _ssrStyle: renderSSRStyle,
+  _ssrStyle: renderSSRStyle
 }
 
 export function installSSRHelpers(vm: Component) {

@@ -1,5 +1,5 @@
 interface Window {
-  __VUE_DEVTOOLS_GLOBAL_HOOK__: DevtoolsHook;
+  __VUE_DEVTOOLS_GLOBAL_HOOK__: DevtoolsHook
 }
 
 // from https://github.com/vuejs/vue-devtools/blob/bc719c95a744614f5c3693460b64dc21dfa339a8/packages/app-backend-api/src/global-hook.ts#L3

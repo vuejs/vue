@@ -1,4 +1,3 @@
-
 import { extend } from 'shared/util'
 import { detectErrors } from './error-detector'
 import { createCompileToFunctionFn } from './to-function'
@@ -13,8 +12,12 @@ export function createCompilerCreator(baseCompile: Function): Function {
       const errors: WarningMessage[] = []
       const tips: WarningMessage[] = []
 
-      let warn = (msg: WarningMessage, range: { start: number, end: number }, tip: string) => {
-        (tip ? tips : errors).push(msg)
+      let warn = (
+        msg: WarningMessage,
+        range: { start: number; end: number },
+        tip: string
+      ) => {
+        ;(tip ? tips : errors).push(msg)
       }
 
       if (options) {
@@ -25,8 +28,12 @@ export function createCompilerCreator(baseCompile: Function): Function {
           // $flow-disable-line
           const leadingSpaceLength = template.match(/^\s*/)![0].length
 
-          warn = (msg: WarningMessage | string, range: { start: number, end: number }, tip: string) => {
-            const data: WarningMessage = typeof(msg) === 'string' ? { msg } : msg
+          warn = (
+            msg: WarningMessage | string,
+            range: { start: number; end: number },
+            tip: string
+          ) => {
+            const data: WarningMessage = typeof msg === 'string' ? { msg } : msg
             if (range) {
               if (range.start != null) {
                 data.start = range.start + leadingSpaceLength
@@ -35,7 +42,7 @@ export function createCompilerCreator(baseCompile: Function): Function {
                 data.end = range.end + leadingSpaceLength
               }
             }
-            (tip ? tips : errors).push(data)
+            ;(tip ? tips : errors).push(data)
           }
         }
         // merge custom modules
@@ -72,7 +79,7 @@ export function createCompilerCreator(baseCompile: Function): Function {
 
     return {
       compile,
-      compileToFunctions: createCompileToFunctionFn(compile),
+      compileToFunctions: createCompileToFunctionFn(compile)
     }
   }
 }

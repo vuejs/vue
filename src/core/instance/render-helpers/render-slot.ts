@@ -1,5 +1,5 @@
-import { extend, warn, isObject } from "core/util/index";
-import VNode from "core/vdom/vnode";
+import { extend, warn, isObject } from 'core/util/index'
+import VNode from 'core/vdom/vnode'
 
 /**
  * Runtime helper for rendering <slot>
@@ -10,34 +10,30 @@ export function renderSlot(
   props: Record<string, any> | null,
   bindObject: object | null
 ): Array<VNode> | null {
-  const scopedSlotFn = this.$scopedSlots[name];
-  let nodes;
+  const scopedSlotFn = this.$scopedSlots[name]
+  let nodes
   if (scopedSlotFn) {
     // scoped slot
-    props = props || {};
+    props = props || {}
     if (bindObject) {
-      if (process.env.NODE_ENV !== "production" && !isObject(bindObject)) {
-        warn("slot v-bind without argument expects an Object", this);
+      if (process.env.NODE_ENV !== 'production' && !isObject(bindObject)) {
+        warn('slot v-bind without argument expects an Object', this)
       }
-      props = extend(extend({}, bindObject), props);
+      props = extend(extend({}, bindObject), props)
     }
     nodes =
       scopedSlotFn(props) ||
-      (typeof fallbackRender === "function"
-        ? fallbackRender()
-        : fallbackRender);
+      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender)
   } else {
     nodes =
       this.$slots[name] ||
-      (typeof fallbackRender === "function"
-        ? fallbackRender()
-        : fallbackRender);
+      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender)
   }
 
-  const target = props && props.slot;
+  const target = props && props.slot
   if (target) {
-    return this.$createElement("template", { slot: target }, nodes);
+    return this.$createElement('template', { slot: target }, nodes)
   } else {
-    return nodes;
+    return nodes
   }
 }

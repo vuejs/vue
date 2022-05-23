@@ -1,4 +1,3 @@
-
 import VNode from '../vnode'
 
 export function isAsyncPlaceholder(node: VNode): boolean {

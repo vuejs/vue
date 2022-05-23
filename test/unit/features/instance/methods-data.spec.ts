@@ -13,9 +13,11 @@ describe('Instance methods data', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('hello')
       vm.$delete(vm.a, 'msg')
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('')
+      })
+      .then(done)
   })
 
   describe('$watch', () => {
@@ -44,10 +46,12 @@ describe('Instance methods data', () => {
         expect(spy.mock.calls.length).toBe(1)
         expect(spy).toHaveBeenCalledWith(2, 1)
         vm.a = { b: 3 }
-      }).then(() => {
-        expect(spy.mock.calls.length).toBe(2)
-        expect(spy).toHaveBeenCalledWith(3, 2)
-      }).then(done)
+      })
+        .then(() => {
+          expect(spy.mock.calls.length).toBe(2)
+          expect(spy).toHaveBeenCalledWith(3, 2)
+        })
+        .then(done)
     })
 
     it('immediate', () => {
@@ -82,9 +86,11 @@ describe('Instance methods data', () => {
       waitForUpdate(() => {
         expect(spy).toHaveBeenCalledWith(oldA, oldA)
         vm.a = { b: 3 }
-      }).then(() => {
-        expect(spy).toHaveBeenCalledWith(vm.a, oldA)
-      }).then(done)
+      })
+        .then(() => {
+          expect(spy).toHaveBeenCalledWith(vm.a, oldA)
+        })
+        .then(done)
     })
 
     it('handler option', done => {
@@ -97,9 +103,11 @@ describe('Instance methods data', () => {
       waitForUpdate(() => {
         expect(spy).toHaveBeenCalledWith(oldA, oldA)
         vm.a = { b: 3 }
-      }).then(() => {
-        expect(spy).toHaveBeenCalledWith(vm.a, oldA)
-      }).then(done)
+      })
+        .then(() => {
+          expect(spy).toHaveBeenCalledWith(vm.a, oldA)
+        })
+        .then(done)
     })
 
     it('handler option in string', () => {
@@ -122,7 +130,9 @@ describe('Instance methods data', () => {
 
     it('warn expression', () => {
       vm.$watch('a + b', spy)
-      expect('Watcher only accepts simple dot-delimited paths').toHaveBeenWarned()
+      expect(
+        'Watcher only accepts simple dot-delimited paths'
+      ).toHaveBeenWarned()
     })
   })
 })

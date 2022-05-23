@@ -11,18 +11,23 @@ describe('Directive v-bind', () => {
     waitForUpdate(() => {
       expect(vm.$el.firstChild.getAttribute('test')).toBe('again')
       vm.foo = null
-    }).then(() => {
-      expect(vm.$el.firstChild.hasAttribute('test')).toBe(false)
-      vm.foo = false
-    }).then(() => {
-      expect(vm.$el.firstChild.hasAttribute('test')).toBe(false)
-      vm.foo = true
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('test')).toBe('true')
-      vm.foo = 0
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('test')).toBe('0')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.firstChild.hasAttribute('test')).toBe(false)
+        vm.foo = false
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.hasAttribute('test')).toBe(false)
+        vm.foo = true
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('test')).toBe('true')
+        vm.foo = 0
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('test')).toBe('0')
+      })
+      .then(done)
   })
 
   it('should set property for input value', done => {
@@ -59,12 +64,17 @@ describe('Directive v-bind', () => {
     waitForUpdate(() => {
       expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe('again')
       vm.foo = null
-    }).then(() => {
-      expect(vm.$el.firstChild.hasAttributeNS(xlinkNS, 'special')).toBe(false)
-      vm.foo = true
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe('true')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.firstChild.hasAttributeNS(xlinkNS, 'special')).toBe(false)
+        vm.foo = true
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe(
+          'true'
+        )
+      })
+      .then(done)
   })
 
   it('enumerated attr', done => {
@@ -75,20 +85,27 @@ describe('Directive v-bind', () => {
     expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('true')
     vm.foo = 'plaintext-only' // allow special values
     waitForUpdate(() => {
-      expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('plaintext-only')
+      expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe(
+        'plaintext-only'
+      )
       vm.foo = null
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('false')
-      vm.foo = ''
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('true')
-      vm.foo = false
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('false')
-      vm.foo = 'false'
-    }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('false')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('false')
+        vm.foo = ''
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('true')
+        vm.foo = false
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('false')
+        vm.foo = 'false'
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.getAttribute('contenteditable')).toBe('false')
+      })
+      .then(done)
   })
 
   it('boolean attr', done => {
@@ -101,17 +118,21 @@ describe('Directive v-bind', () => {
     waitForUpdate(() => {
       expect(vm.$el.firstChild.getAttribute('disabled')).toBe('disabled')
       vm.foo = null
-    }).then(() => {
-      expect(vm.$el.firstChild.hasAttribute('disabled')).toBe(false)
-      vm.foo = ''
-    }).then(() => {
-      expect(vm.$el.firstChild.hasAttribute('disabled')).toBe(true)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.firstChild.hasAttribute('disabled')).toBe(false)
+        vm.foo = ''
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.hasAttribute('disabled')).toBe(true)
+      })
+      .then(done)
   })
 
   it('.prop modifier', () => {
     const vm = new Vue({
-      template: '<div><span v-bind:text-content.prop="foo"></span><span :inner-html.prop="bar"></span></div>',
+      template:
+        '<div><span v-bind:text-content.prop="foo"></span><span :inner-html.prop="bar"></span></div>',
       data: {
         foo: 'hello',
         bar: '<span>qux</span>'
@@ -136,7 +157,8 @@ describe('Directive v-bind', () => {
   if (process.env.VBIND_PROP_SHORTHAND) {
     it('.prop modifier shorthand', () => {
       const vm = new Vue({
-        template: '<div><span .text-content="foo"></span><span .inner-html="bar"></span></div>',
+        template:
+          '<div><span .text-content="foo"></span><span .inner-html="bar"></span></div>',
         data: {
           foo: 'hello',
           bar: '<span>qux</span>'
@@ -191,7 +213,7 @@ describe('Directive v-bind', () => {
           props: ['fooBar'],
           template: `<div>{{ fooBar }}</div>`,
           methods: {
-            update () {
+            update() {
               this.$emit('update:foo-bar', 2)
             }
           }
@@ -261,7 +283,7 @@ describe('Directive v-bind', () => {
           props: ['fooBar'],
           template: `<div @click="handleUpdate">{{ fooBar }}</div>`,
           methods: {
-            handleUpdate () {
+            handleUpdate() {
               this.$emit('update:fooBar', 2)
             }
           }
@@ -274,10 +296,12 @@ describe('Directive v-bind', () => {
     waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('2')
       vm.test.fooBar = 3
-    }).then(() => {
-      expect(vm.$el.textContent).toBe('3')
-      document.body.removeChild(vm.$el)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.textContent).toBe('3')
+        document.body.removeChild(vm.$el)
+      })
+      .then(done)
   })
 
   it('bind object with overwrite', done => {
@@ -357,10 +381,7 @@ describe('Directive v-bind', () => {
     const vm = new Vue({
       template: '<input v-bind="test">',
       data: {
-        test: [
-          { id: 'test', class: 'ok' },
-          { value: 'hello' }
-        ]
+        test: [{ id: 'test', class: 'ok' }, { value: 'hello' }]
       }
     }).$mount()
     expect(vm.$el.getAttribute('id')).toBe('test')
@@ -382,7 +403,9 @@ describe('Directive v-bind', () => {
         test: 1
       }
     }).$mount()
-    expect('v-bind without argument expects an Object or Array value').toHaveBeenWarned()
+    expect(
+      'v-bind without argument expects an Object or Array value'
+    ).toHaveBeenWarned()
   })
 
   it('set value for option element', () => {
@@ -420,7 +443,7 @@ describe('Directive v-bind', () => {
   })
 
   describe('bind object with special attribute', () => {
-    function makeInstance (options) {
+    function makeInstance(options) {
       return new Vue({
         template: `<div>${options.parentTemp}</div>`,
         data: {
@@ -491,13 +514,18 @@ describe('Directive v-bind', () => {
         expect(vm.$el.className).toBe('hello')
         // explicit null value
         vm.key = null
-      }).then(() => {
-        expect(vm.$el.className).toBe('')
-        expect(vm.$el.id).toBe('')
-        vm.key = undefined
-      }).then(() => {
-        expect(`Invalid value for dynamic directive argument`).toHaveBeenWarned()
-      }).then(done)
+      })
+        .then(() => {
+          expect(vm.$el.className).toBe('')
+          expect(vm.$el.id).toBe('')
+          vm.key = undefined
+        })
+        .then(() => {
+          expect(
+            `Invalid value for dynamic directive argument`
+          ).toHaveBeenWarned()
+        })
+        .then(done)
     })
 
     it('shorthand', done => {

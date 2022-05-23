@@ -1,19 +1,19 @@
-import { isRegExp, remove } from "shared/util";
-import { getFirstComponentChild } from "core/vdom/helpers/index";
-import type VNode from "core/vdom/vnode";
-import type { VNodeComponentOptions } from "typescript/vnode";
-import type { Component } from "typescript/component";
+import { isRegExp, remove } from 'shared/util'
+import { getFirstComponentChild } from 'core/vdom/helpers/index'
+import type VNode from 'core/vdom/vnode'
+import type { VNodeComponentOptions } from 'typescript/vnode'
+import type { Component } from 'typescript/component'
 
 type CacheEntry = {
-  name?: string;
-  tag?: string;
-  componentInstance?: Component;
-};
+  name?: string
+  tag?: string
+  componentInstance?: Component
+}
 
-type CacheEntryMap = Record<string, CacheEntry | null>;
+type CacheEntryMap = Record<string, CacheEntry | null>
 
 function getComponentName(opts?: VNodeComponentOptions): string | null {
-  return opts && (opts.Ctor.options.name || opts.tag);
+  return opts && (opts.Ctor.options.name || opts.tag)
 }
 
 function matches(
@@ -21,27 +21,27 @@ function matches(
   name: string
 ): boolean {
   if (Array.isArray(pattern)) {
-    return pattern.indexOf(name) > -1;
-  } else if (typeof pattern === "string") {
-    return pattern.split(",").indexOf(name) > -1;
+    return pattern.indexOf(name) > -1
+  } else if (typeof pattern === 'string') {
+    return pattern.split(',').indexOf(name) > -1
   } else if (isRegExp(pattern)) {
-    return pattern.test(name);
+    return pattern.test(name)
   }
   /* istanbul ignore next */
-  return false;
+  return false
 }
 
 function pruneCache(
   keepAliveInstance: { cache: CacheEntryMap; keys: string[]; _vnode: VNode },
   filter: Function
 ) {
-  const { cache, keys, _vnode } = keepAliveInstance;
+  const { cache, keys, _vnode } = keepAliveInstance
   for (const key in cache) {
-    const entry = cache[key];
+    const entry = cache[key]
     if (entry) {
-      const name = entry.name;
+      const name = entry.name
       if (name && !filter(name)) {
-        pruneCacheEntry(cache, key, keys, _vnode);
+        pruneCacheEntry(cache, key, keys, _vnode)
       }
     }
   }
@@ -53,112 +53,112 @@ function pruneCacheEntry(
   keys: Array<string>,
   current?: VNode
 ) {
-  const entry = cache[key];
+  const entry = cache[key]
   if (entry && (!current || entry.tag !== current.tag)) {
     // @ts-expect-error can be undefined
-    entry.componentInstance.$destroy();
+    entry.componentInstance.$destroy()
   }
-  cache[key] = null;
-  remove(keys, key);
+  cache[key] = null
+  remove(keys, key)
 }
 
-const patternTypes: Array<Function> = [String, RegExp, Array];
+const patternTypes: Array<Function> = [String, RegExp, Array]
 
 // TODO defineComponent
 export default {
-  name: "keep-alive",
+  name: 'keep-alive',
   abstract: true,
 
   props: {
     include: patternTypes,
     exclude: patternTypes,
-    max: [String, Number],
+    max: [String, Number]
   },
 
   methods: {
     cacheVNode() {
-      const { cache, keys, vnodeToCache, keyToCache } = this;
+      const { cache, keys, vnodeToCache, keyToCache } = this
       if (vnodeToCache) {
-        const { tag, componentInstance, componentOptions } = vnodeToCache;
+        const { tag, componentInstance, componentOptions } = vnodeToCache
         cache[keyToCache] = {
           name: getComponentName(componentOptions),
           tag,
-          componentInstance,
-        };
-        keys.push(keyToCache);
+          componentInstance
+        }
+        keys.push(keyToCache)
         // prune oldest entry
         if (this.max && keys.length > parseInt(this.max)) {
-          pruneCacheEntry(cache, keys[0], keys, this._vnode);
+          pruneCacheEntry(cache, keys[0], keys, this._vnode)
         }
-        this.vnodeToCache = null;
+        this.vnodeToCache = null
       }
-    },
+    }
   },
 
   created() {
-    this.cache = Object.create(null);
-    this.keys = [];
+    this.cache = Object.create(null)
+    this.keys = []
   },
 
   destroyed() {
     for (const key in this.cache) {
-      pruneCacheEntry(this.cache, key, this.keys);
+      pruneCacheEntry(this.cache, key, this.keys)
     }
   },
 
   mounted() {
-    this.cacheVNode();
-    this.$watch("include", (val) => {
-      pruneCache(this, (name) => matches(val, name));
-    });
-    this.$watch("exclude", (val) => {
-      pruneCache(this, (name) => !matches(val, name));
-    });
+    this.cacheVNode()
+    this.$watch('include', val => {
+      pruneCache(this, name => matches(val, name))
+    })
+    this.$watch('exclude', val => {
+      pruneCache(this, name => !matches(val, name))
+    })
   },
 
   updated() {
-    this.cacheVNode();
+    this.cacheVNode()
   },
 
   render() {
-    const slot = this.$slots.default;
-    const vnode = getFirstComponentChild(slot);
-    const componentOptions = vnode && vnode.componentOptions;
+    const slot = this.$slots.default
+    const vnode = getFirstComponentChild(slot)
+    const componentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
       // check pattern
-      const name = getComponentName(componentOptions);
-      const { include, exclude } = this;
+      const name = getComponentName(componentOptions)
+      const { include, exclude } = this
       if (
         // not included
         (include && (!name || !matches(include, name))) ||
         // excluded
         (exclude && name && matches(exclude, name))
       ) {
-        return vnode;
+        return vnode
       }
 
-      const { cache, keys } = this;
+      const { cache, keys } = this
       const key =
         vnode.key == null
           ? // same constructor may get registered as different local components
             // so cid alone is not enough (#3269)
             componentOptions.Ctor.cid +
-            (componentOptions.tag ? `::${componentOptions.tag}` : "")
-          : vnode.key;
+            (componentOptions.tag ? `::${componentOptions.tag}` : '')
+          : vnode.key
       if (cache[key]) {
-        vnode.componentInstance = cache[key].componentInstance;
+        vnode.componentInstance = cache[key].componentInstance
         // make current key freshest
-        remove(keys, key);
-        keys.push(key);
+        remove(keys, key)
+        keys.push(key)
       } else {
         // delay setting the cache until update
-        this.vnodeToCache = vnode;
-        this.keyToCache = key;
+        this.vnodeToCache = vnode
+        this.keyToCache = key
       }
 
       // @ts-expect-error can vnode.data can be undefined
-      vnode.data.keepAlive = true;
+      vnode.data.keepAlive = true
     }
-    return vnode || (slot && slot[0]);
-  },
-};
+    return vnode || (slot && slot[0])
+  }
+}

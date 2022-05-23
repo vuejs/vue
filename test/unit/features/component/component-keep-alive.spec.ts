@@ -37,7 +37,7 @@ describe('Component keep-alive', () => {
     ]).toEqual(callCounts)
   }
 
-  it('should work', (done) => {
+  it('should work', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -82,7 +82,7 @@ describe('Component keep-alive', () => {
       .then(done)
   })
 
-  it('should invoke hooks on the entire sub tree', (done) => {
+  it('should invoke hooks on the entire sub tree', done => {
     one.template = '<two/>'
     one.components = { two }
 
@@ -124,7 +124,7 @@ describe('Component keep-alive', () => {
       .then(done)
   })
 
-  it('should handle nested keep-alive hooks properly', (done) => {
+  it('should handle nested keep-alive hooks properly', done => {
     one.template = '<keep-alive><two v-if="ok" /></keep-alive>'
     one.data = () => ({ ok: true })
     one.components = { two }
@@ -262,7 +262,7 @@ describe('Component keep-alive', () => {
       .then(done)
   }
 
-  it('include (string)', (done) => {
+  it('include (string)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -280,7 +280,7 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('include (regex)', (done) => {
+  it('include (regex)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -298,7 +298,7 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('include (array)', (done) => {
+  it('include (array)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -316,7 +316,7 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('exclude (string)', (done) => {
+  it('exclude (string)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -334,7 +334,7 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('exclude (regex)', (done) => {
+  it('exclude (regex)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -352,7 +352,7 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('exclude (array)', (done) => {
+  it('exclude (array)', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -370,7 +370,7 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('include + exclude', (done) => {
+  it('include + exclude', done => {
     const vm = new Vue({
       template: `
         <div v-if="ok">
@@ -388,7 +388,7 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
-  it('prune cache on include/exclude change', (done) => {
+  it('prune cache on include/exclude change', done => {
     const vm = new Vue({
       template: `
         <div>
@@ -422,7 +422,7 @@ describe('Component keep-alive', () => {
       .then(done)
   })
 
-  it('prune cache on include/exclude change + view switch', (done) => {
+  it('prune cache on include/exclude change + view switch', done => {
     const vm = new Vue({
       template: `
         <div>
@@ -453,7 +453,7 @@ describe('Component keep-alive', () => {
       .then(done)
   })
 
-  it('should not prune currently active instance', (done) => {
+  it('should not prune currently active instance', done => {
     const vm = new Vue({
       template: `
         <div>
@@ -483,7 +483,7 @@ describe('Component keep-alive', () => {
   })
 
   // #3882
-  it('deeply nested keep-alive should be destroyed properly', (done) => {
+  it('deeply nested keep-alive should be destroyed properly', done => {
     one.template = `<div><keep-alive><two></two></keep-alive></div>`
     one.components = { two }
     const vm = new Vue({
@@ -508,7 +508,7 @@ describe('Component keep-alive', () => {
   })
 
   // #4237
-  it('should update latest props/listeners for a re-activated component', (done) => {
+  it('should update latest props/listeners for a re-activated component', done => {
     const one = {
       props: ['prop'],
       template: `<div>one {{ prop }}</div>`
@@ -541,7 +541,7 @@ describe('Component keep-alive', () => {
       .then(done)
   })
 
-  it('max', (done) => {
+  it('max', done => {
     const spyA = vi.fn()
     const spyB = vi.fn()
     const spyC = vi.fn()
@@ -611,7 +611,7 @@ describe('Component keep-alive', () => {
       .then(done)
   })
 
-  it('max=1', (done) => {
+  it('max=1', done => {
     const spyA = vi.fn()
     const spyB = vi.fn()
     const spyC = vi.fn()
@@ -690,7 +690,7 @@ describe('Component keep-alive', () => {
   })
 
   // #6938
-  it('should not cache anonymous component when include is specified', (done) => {
+  it('should not cache anonymous component when include is specified', done => {
     const Foo = {
       name: 'foo',
       template: `<div>foo</div>`,
@@ -746,7 +746,7 @@ describe('Component keep-alive', () => {
       .then(done)
   })
 
-  it('should cache anonymous components if include is not specified', (done) => {
+  it('should cache anonymous components if include is not specified', done => {
     const Foo = {
       template: `<div>foo</div>`,
       created: vi.fn()
@@ -802,7 +802,7 @@ describe('Component keep-alive', () => {
   })
 
   // #7105
-  it('should not destroy active instance when pruning cache', (done) => {
+  it('should not destroy active instance when pruning cache', done => {
     const Foo = {
       template: `<div>foo</div>`,
       destroyed: vi.fn()

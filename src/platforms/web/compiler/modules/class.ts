@@ -1,4 +1,3 @@
-
 import { parseText } from 'compiler/parser/text-parser'
 import { getAndRemoveAttr, getBindingAttr, baseWarn } from 'compiler/helpers'
 
@@ -40,5 +39,5 @@ function genData(el: ASTElement): string {
 export default {
   staticKeys: ['staticClass'],
   transformNode,
-  genData,
+  genData
 } as ModuleOptions

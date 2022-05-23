@@ -1,4 +1,3 @@
-
 import { makeMap } from 'shared/util'
 
 const isAttr = makeMap(
@@ -34,14 +33,14 @@ export const propsToAttrMap = {
   acceptCharset: 'accept-charset',
   className: 'class',
   htmlFor: 'for',
-  httpEquiv: 'http-equiv',
+  httpEquiv: 'http-equiv'
 }
 
 const ESC = {
   '<': '&lt;',
   '>': '&gt;',
   '"': '&quot;',
-  '&': '&amp;',
+  '&': '&amp;'
 }
 
 export function escape(s: string) {
@@ -94,5 +93,5 @@ export const noUnitNumericStyleProps = {
   'stroke-dashoffset': true,
   'stroke-miterlimit': true,
   'stroke-opacity': true,
-  'stroke-width': true,
+  'stroke-width': true
 }

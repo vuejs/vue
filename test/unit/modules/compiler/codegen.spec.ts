@@ -5,7 +5,7 @@ import { isObject, extend } from 'shared/util'
 import { isReservedTag } from 'web/util/index'
 import { baseOptions } from 'web/compiler/options'
 
-function assertCodegen (template, generatedCode, ...args) {
+function assertCodegen(template, generatedCode, ...args) {
   let staticRenderFnCodes = []
   let generateOptions = baseOptions
   let proc = null
@@ -258,7 +258,7 @@ describe('codegen', () => {
     // static
     assertCodegen(
       '<p class="class1">hello world</p>',
-      `with(this){return _c('p',{staticClass:"class1"},[_v("hello world")])}`,
+      `with(this){return _c('p',{staticClass:"class1"},[_v("hello world")])}`
     )
     // dynamic
     assertCodegen(
@@ -360,7 +360,7 @@ describe('codegen', () => {
     )
     // function with multiple args
     assertCodegen(
-      '<input @input="onInput1($event, \'text\');onInput2(\'text2\', $event)">',
+      "<input @input=\"onInput1($event, 'text');onInput2('text2', $event)\">",
       `with(this){return _c('input',{on:{"input":function($event){onInput1($event, 'text');onInput2('text2', $event)}}})}`
     )
   })
@@ -621,7 +621,9 @@ describe('codegen', () => {
       '<div is="myComponent" inline-template></div>',
       `with(this){return _c("myComponent",{tag:"div"})}`
     )
-    expect('Inline-template components must have exactly one child element.').toHaveBeenWarned()
+    expect(
+      'Inline-template components must have exactly one child element.'
+    ).toHaveBeenWarned()
     expect(console.error.mock.calls.length).toBe(3)
   })
 
@@ -642,9 +644,12 @@ describe('codegen', () => {
   })
 
   it('generate component with comment', () => {
-    const options = extend({
-      comments: true
-    }, baseOptions)
+    const options = extend(
+      {
+        comments: true
+      },
+      baseOptions
+    )
     const template = '<div><!--comment--></div>'
     const generatedCode = `with(this){return _c('div',[_e("comment")])}`
 
@@ -656,10 +661,13 @@ describe('codegen', () => {
 
   // #6150
   it('generate comments with special characters', () => {
-    const options = extend({
-      comments: true
-    }, baseOptions)
-    const template = '<div><!--\n\'comment\'\n--></div>'
+    const options = extend(
+      {
+        comments: true
+      },
+      baseOptions
+    )
+    const template = "<div><!--\n'comment'\n--></div>"
     const generatedCode = `with(this){return _c('div',[_e("\\n'comment'\\n")])}`
 
     const ast = parse(template, options)

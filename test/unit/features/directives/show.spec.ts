@@ -27,32 +27,41 @@ describe('Directive v-show', () => {
     waitForUpdate(() => {
       expect(vm.$el.firstChild.style.display).toBe('none')
       vm.foo = {}
-    }).then(() => {
-      expect(vm.$el.firstChild.style.display).toBe('')
-      vm.foo = 0
-    }).then(() => {
-      expect(vm.$el.firstChild.style.display).toBe('none')
-      vm.foo = []
-    }).then(() => {
-      expect(vm.$el.firstChild.style.display).toBe('')
-      vm.foo = null
-    }).then(() => {
-      expect(vm.$el.firstChild.style.display).toBe('none')
-      vm.foo = '0'
-    }).then(() => {
-      expect(vm.$el.firstChild.style.display).toBe('')
-      vm.foo = undefined
-    }).then(() => {
-      expect(vm.$el.firstChild.style.display).toBe('none')
-      vm.foo = 1
-    }).then(() => {
-      expect(vm.$el.firstChild.style.display).toBe('')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.firstChild.style.display).toBe('')
+        vm.foo = 0
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.style.display).toBe('none')
+        vm.foo = []
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.style.display).toBe('')
+        vm.foo = null
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.style.display).toBe('none')
+        vm.foo = '0'
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.style.display).toBe('')
+        vm.foo = undefined
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.style.display).toBe('none')
+        vm.foo = 1
+      })
+      .then(() => {
+        expect(vm.$el.firstChild.style.display).toBe('')
+      })
+      .then(done)
   })
 
   it('should respect display value in style attribute', done => {
     const vm = new Vue({
-      template: '<div><span v-show="foo" style="display:block">hello</span></div>',
+      template:
+        '<div><span v-show="foo" style="display:block">hello</span></div>',
       data: { foo: true }
     }).$mount()
     expect(vm.$el.firstChild.style.display).toBe('block')
@@ -60,9 +69,11 @@ describe('Directive v-show', () => {
     waitForUpdate(() => {
       expect(vm.$el.firstChild.style.display).toBe('none')
       vm.foo = true
-    }).then(() => {
-      expect(vm.$el.firstChild.style.display).toBe('block')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.firstChild.style.display).toBe('block')
+      })
+      .then(done)
   })
 
   it('should support unbind when reused', done => {
@@ -77,8 +88,10 @@ describe('Directive v-show', () => {
     waitForUpdate(() => {
       expect(vm.$el.firstChild.style.display).toBe('')
       vm.tester = true
-    }).then(() => {
-      expect(vm.$el.firstChild.style.display).toBe('none')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.firstChild.style.display).toBe('none')
+      })
+      .then(done)
   })
 })

@@ -5,5 +5,5 @@ import html from './html'
 export default {
   model,
   text,
-  html,
+  html
 }

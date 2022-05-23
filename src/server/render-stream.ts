@@ -1,4 +1,3 @@
-
 /**
  * Original RenderStream implementation by Sasha Aickin (@aickin)
  * Licensed under the Apache License, Version 2.0
@@ -42,7 +41,7 @@ export default class RenderStream extends Readable {
         }
         return false
       },
-      (err) => {
+      err => {
         this.emit('error', err)
       }
     )

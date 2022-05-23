@@ -14,7 +14,7 @@ describe('Transition mode', () => {
     document.body.appendChild(el)
   })
 
-  it('dynamic components, simultaneous', (done) => {
+  it('dynamic components, simultaneous', done => {
     const vm = new Vue({
       template: `<div>
           <transition>
@@ -47,7 +47,7 @@ describe('Transition mode', () => {
       .then(done)
   })
 
-  it('dynamic components, out-in', (done) => {
+  it('dynamic components, out-in', done => {
     let next
     const vm = new Vue({
       template: `<div>
@@ -77,7 +77,7 @@ describe('Transition mode', () => {
           '<div class="test test-leave-active test-leave-to">one</div><!---->'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -103,7 +103,7 @@ describe('Transition mode', () => {
   })
 
   // #3440
-  it('dynamic components, out-in (with extra re-render)', (done) => {
+  it('dynamic components, out-in (with extra re-render)', done => {
     let next
     const vm = new Vue({
       template: `<div>
@@ -136,7 +136,7 @@ describe('Transition mode', () => {
         // this should not cause the incoming element to enter early
         vm.$forceUpdate()
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -161,7 +161,7 @@ describe('Transition mode', () => {
       .then(done)
   })
 
-  it('dynamic components, in-out', (done) => {
+  it('dynamic components, in-out', done => {
     let next
     const vm = new Vue({
       template: `<div>
@@ -193,7 +193,7 @@ describe('Transition mode', () => {
             '<div class="test test-enter-active test-enter-to">two</div>'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -221,7 +221,7 @@ describe('Transition mode', () => {
       .then(done)
   })
 
-  it('dynamic components, in-out with early cancel', (done) => {
+  it('dynamic components, in-out with early cancel', done => {
     let next
     const vm = new Vue({
       template: `<div>
@@ -271,7 +271,7 @@ describe('Transition mode', () => {
             '<div class="test test-enter-active test-enter-to">one</div>'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -299,7 +299,7 @@ describe('Transition mode', () => {
       .then(done)
   })
 
-  it('normal elements with different keys, simultaneous', (done) => {
+  it('normal elements with different keys, simultaneous', done => {
     const vm = new Vue({
       template: `<div>
           <transition>
@@ -331,7 +331,7 @@ describe('Transition mode', () => {
       .then(done)
   })
 
-  it('normal elements with different keys, out-in', (done) => {
+  it('normal elements with different keys, out-in', done => {
     let next
     const vm = new Vue({
       template: `<div>
@@ -360,7 +360,7 @@ describe('Transition mode', () => {
           '<div class="test test-leave-active test-leave-to">one</div><!---->'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -385,7 +385,7 @@ describe('Transition mode', () => {
       .then(done)
   })
 
-  it('normal elements with different keys, in-out', (done) => {
+  it('normal elements with different keys, in-out', done => {
     let next
     const vm = new Vue({
       template: `<div>
@@ -416,7 +416,7 @@ describe('Transition mode', () => {
             '<div class="test test-enter-active test-enter-to">two</div>'
         )
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -444,7 +444,7 @@ describe('Transition mode', () => {
       .then(done)
   })
 
-  it('transition out-in on async component (resolve before leave complete)', (done) => {
+  it('transition out-in on async component (resolve before leave complete)', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -455,13 +455,13 @@ describe('Transition mode', () => {
           </div>
         `,
       components: {
-        componentA: (resolve) => {
+        componentA: resolve => {
           setTimeout(() => {
             resolve({ template: '<div><h1>component A</h1></div>' })
             next1()
           }, duration / 2)
         },
-        componentB: (resolve) => {
+        componentB: resolve => {
           setTimeout(() => {
             resolve({ template: '<div><h1>component B</h1></div>' })
           }, duration / 2)
@@ -522,7 +522,7 @@ describe('Transition mode', () => {
     }
   })
 
-  it('transition out-in on async component (resolve after leave complete)', (done) => {
+  it('transition out-in on async component (resolve after leave complete)', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -534,7 +534,7 @@ describe('Transition mode', () => {
         `,
       components: {
         componentA: { template: '<div><h1>component A</h1></div>' },
-        componentB: (resolve) => {
+        componentB: resolve => {
           setTimeout(() => {
             resolve({ template: '<div><h1>component B</h1></div>' })
             Vue.nextTick(next)
@@ -569,7 +569,7 @@ describe('Transition mode', () => {
         expect(vm.$el.children.length).toBe(0)
         expect(vm.$el.innerHTML).toBe('<!---->')
       })
-      .thenWaitFor((_next) => {
+      .thenWaitFor(_next => {
         next = _next
       })
       .then(() => {
@@ -594,7 +594,7 @@ describe('Transition mode', () => {
       .then(done)
   })
 
-  it('transition in-out on async component', (done) => {
+  it('transition in-out on async component', done => {
     const vm = new Vue({
       template: `
           <div>
@@ -605,13 +605,13 @@ describe('Transition mode', () => {
           </div>
         `,
       components: {
-        componentA: (resolve) => {
+        componentA: resolve => {
           setTimeout(() => {
             resolve({ template: '<div><h1>component A</h1></div>' })
             next1()
           }, duration / 2)
         },
-        componentB: (resolve) => {
+        componentB: resolve => {
           setTimeout(() => {
             resolve({ template: '<div><h1>component B</h1></div>' })
             next2()

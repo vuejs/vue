@@ -25,35 +25,54 @@ describe('Directive v-text', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('false')
       vm.a = []
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('[]')
-      vm.a = {}
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('{}')
-      vm.a = { toString () { return 'foo' } }
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('foo')
-      vm.a = { toJSON () { return { foo: 'bar' } } }
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('{\n  "foo": "bar"\n}')
-      vm.a = 123
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('123')
-      vm.a = 0
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('0')
-      vm.a = ' '
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe(' ')
-      vm.a = '    '
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('    ')
-      vm.a = null
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('')
-      vm.a = undefined
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('')
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('[]')
+        vm.a = {}
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('{}')
+        vm.a = {
+          toString() {
+            return 'foo'
+          }
+        }
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('foo')
+        vm.a = {
+          toJSON() {
+            return { foo: 'bar' }
+          }
+        }
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('{\n  "foo": "bar"\n}')
+        vm.a = 123
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('123')
+        vm.a = 0
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('0')
+        vm.a = ' '
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe(' ')
+        vm.a = '    '
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('    ')
+        vm.a = null
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('')
+        vm.a = undefined
+      })
+      .then(() => {
+        expect(vm.$el.innerHTML).toBe('')
+      })
+      .then(done)
   })
 })

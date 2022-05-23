@@ -1,4 +1,3 @@
-
 // The SSR codegen is essentially extending the default codegen to handle
 // SSR-optimizable nodes and turn them into string render fns. In cases where
 // a node is not optimizable it simply falls back to the default codegen.
@@ -10,7 +9,7 @@ import {
   genText,
   genElement,
   genChildren,
-  CodegenState,
+  CodegenState
 } from 'compiler/codegen/index'
 
 import {
@@ -18,7 +17,7 @@ import {
   genDOMPropSegments,
   genClassSegments,
   genStyleSegments,
-  applyModelTransform,
+  applyModelTransform
 } from './modules'
 
 import { escape } from 'web/server/util'
@@ -43,7 +42,7 @@ export function generate(
   const code = ast ? genSSRElement(ast, state) : '_c("div")'
   return {
     render: `with(this){return ${code}}`,
-    staticRenderFns: state.staticRenderFns,
+    staticRenderFns: state.staticRenderFns
   }
 }
 
@@ -123,16 +122,16 @@ function elementToSegments(el, state): Array<StringSegment> {
     return [
       {
         type: EXPRESSION,
-        value: genFor(el, state, elementToString, '_ssrList'),
-      },
+        value: genFor(el, state, elementToString, '_ssrList')
+      }
     ]
   } else if (el.if && !el.ifProcessed) {
     el.ifProcessed = true
     return [
       {
         type: EXPRESSION,
-        value: genIf(el, state, elementToString, '"<!---->"'),
-      },
+        value: genIf(el, state, elementToString, '"<!---->"')
+      }
     ]
   } else if (el.tag === 'template') {
     return childrenToSegments(el, state)

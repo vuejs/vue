@@ -28,7 +28,7 @@ function createAssertions(runInNewContext) {
     const res = await new Promise((resolve, reject) => {
       const stream = renderer.renderToStream(context)
       let res = ''
-      stream.on('data', (chunk) => {
+      stream.on('data', chunk => {
         res += chunk.toString()
       })
       stream.on('error', reject)
@@ -68,7 +68,7 @@ function createAssertions(runInNewContext) {
       runInNewContext
     })
 
-    const err = await new Promise<Error>((resolve) => {
+    const err = await new Promise<Error>(resolve => {
       const stream = renderer.renderToStream()
       stream.on('error', resolve)
     })
@@ -81,7 +81,7 @@ function createAssertions(runInNewContext) {
       runInNewContext
     })
 
-    const err = await new Promise<Error>((resolve) => {
+    const err = await new Promise<Error>(resolve => {
       const stream = renderer.renderToStream()
       stream.on('error', resolve)
     })
@@ -141,7 +141,7 @@ function createAssertions(runInNewContext) {
           cb(!!cache[key])
         },
         // sync
-        get: (key) => {
+        get: key => {
           get(key)
           return cache[key]
         },
@@ -261,7 +261,7 @@ function createAssertions(runInNewContext) {
     const res = await new Promise((resolve, reject) => {
       const stream = renderer.renderToStream(context)
       let res = ''
-      stream.on('data', (chunk) => {
+      stream.on('data', chunk => {
         res += chunk.toString()
       })
       stream.on('error', reject)
@@ -295,7 +295,7 @@ function createAssertions(runInNewContext) {
       asBundle: true
     })
 
-    const err = await new Promise<Error>((resolve) => {
+    const err = await new Promise<Error>(resolve => {
       const stream = renderer.renderToStream()
       stream.on('error', resolve)
     })
@@ -309,7 +309,7 @@ function createAssertions(runInNewContext) {
       runInNewContext
     })
     const context: any = { url: '/test' }
-    const res = await new Promise((r) =>
+    const res = await new Promise(r =>
       renderer.renderToString(context, (_err, res) => r(res))
     )
     expect(res).toBe('<div data-server-rendered="true">/test</div>')
@@ -320,7 +320,7 @@ function createAssertions(runInNewContext) {
     const renderer = await createWebpackBundleRenderer('error.js', {
       runInNewContext
     })
-    const err = await new Promise<Error>((r) => renderer.renderToString(r))
+    const err = await new Promise<Error>(r => renderer.renderToString(r))
     expect(err.message).toBe('foo')
   })
 }

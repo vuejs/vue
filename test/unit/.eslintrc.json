@@ -1,7 +1,0 @@
-{
-  "globals": {
-    "waitForUpdate": true,
-    "triggerEvent": true,
-    "createTextVNode": true
-  }
-}

@@ -1,4 +1,3 @@
-
 import config from 'core/config'
 import { hyphenate } from 'shared/util'
 

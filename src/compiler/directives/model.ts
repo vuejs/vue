@@ -1,4 +1,3 @@
-
 /**
  * Cross-platform code generation for component v-model
  */
@@ -25,7 +24,7 @@ export function genComponentModel(
   el.model = {
     value: `(${value})`,
     expression: JSON.stringify(value),
-    callback: `function (${baseValueExpression}) {${assignment}}`,
+    callback: `function (${baseValueExpression}) {${assignment}}`
   }
 }
 
@@ -74,12 +73,12 @@ export function parseModel(val: string): ModelParseResult {
     if (index > -1) {
       return {
         exp: val.slice(0, index),
-        key: '"' + val.slice(index + 1) + '"',
+        key: '"' + val.slice(index + 1) + '"'
       }
     } else {
       return {
         exp: val,
-        key: null,
+        key: null
       }
     }
   }
@@ -99,7 +98,7 @@ export function parseModel(val: string): ModelParseResult {
 
   return {
     exp: val.slice(0, expressionPos),
-    key: val.slice(expressionPos + 1, expressionEndPos),
+    key: val.slice(expressionPos + 1, expressionEndPos)
   }
 }
 

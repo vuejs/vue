@@ -1,4 +1,3 @@
-
 import { noop, extend } from 'shared/util'
 import { warn as baseWarn, tip } from 'core/util/debug'
 import { generateCodeFrame } from './codeframe'
@@ -35,7 +34,7 @@ export function createCompileToFunctionFn(compile: Function): Function {
       // detect possible CSP restriction
       try {
         new Function('return 1')
-      } catch (e:any) {
+      } catch (e: any) {
         if (e.toString().match(/unsafe-eval|CSP/)) {
           warn(
             'It seems you are using the standalone build of Vue.js in an ' +
@@ -63,7 +62,7 @@ export function createCompileToFunctionFn(compile: Function): Function {
     if (process.env.NODE_ENV !== 'production') {
       if (compiled.errors && compiled.errors.length) {
         if (options.outputSourceRange) {
-          compiled.errors.forEach((e) => {
+          compiled.errors.forEach(e => {
             warn(
               `Error compiling template:\n\n${e.msg}\n\n` +
                 generateCodeFrame(template, e.start, e.end),
@@ -73,7 +72,7 @@ export function createCompileToFunctionFn(compile: Function): Function {
         } else {
           warn(
             `Error compiling template:\n\n${template}\n\n` +
-              compiled.errors.map((e) => `- ${e}`).join('\n') +
+              compiled.errors.map(e => `- ${e}`).join('\n') +
               '\n',
             vm
           )
@@ -81,9 +80,9 @@ export function createCompileToFunctionFn(compile: Function): Function {
       }
       if (compiled.tips && compiled.tips.length) {
         if (options.outputSourceRange) {
-          compiled.tips.forEach((e) => tip(e.msg, vm))
+          compiled.tips.forEach(e => tip(e.msg, vm))
         } else {
-          compiled.tips.forEach((msg) => tip(msg, vm))
+          compiled.tips.forEach(msg => tip(msg, vm))
         }
       }
     }
@@ -92,7 +91,7 @@ export function createCompileToFunctionFn(compile: Function): Function {
     const res: any = {}
     const fnGenErrors: any[] = []
     res.render = createFunction(compiled.render, fnGenErrors)
-    res.staticRenderFns = compiled.staticRenderFns.map((code) => {
+    res.staticRenderFns = compiled.staticRenderFns.map(code => {
       return createFunction(code, fnGenErrors)
     })
 

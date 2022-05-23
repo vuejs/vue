@@ -3,7 +3,7 @@ import { looseEqual } from 'shared/util'
 
 // Android 4.4 Chrome 30 has the bug that a multi-select option cannot be
 // deselected by setting its "selected" prop via JavaScript.
-function hasMultiSelectBug () {
+function hasMultiSelectBug() {
   const s = document.createElement('select')
   s.setAttribute('multiple', '')
   const o = document.createElement('option')
@@ -17,7 +17,7 @@ function hasMultiSelectBug () {
  * setting <select>'s value in IE9 doesn't work
  * we have to manually loop through the options
  */
-function updateSelect (el, value) {
+function updateSelect(el, value) {
   const options = el.options
   let i = options.length
   while (i--) {
@@ -28,10 +28,8 @@ function updateSelect (el, value) {
   }
 }
 
-function getValue (option) {
-  return '_value' in option
-    ? option._value
-    : option.value || option.text
+function getValue(option) {
+  return '_value' in option ? option._value : option.value || option.text
 }
 
 describe('Directive v-model select', () => {
@@ -42,9 +40,9 @@ describe('Directive v-model select', () => {
       },
       template:
         '<select v-model="test">' +
-          '<option>a</option>' +
-          '<option>b</option>' +
-          '<option>c</option>' +
+        '<option>a</option>' +
+        '<option>b</option>' +
+        '<option>c</option>' +
         '</select>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -68,9 +66,9 @@ describe('Directive v-model select', () => {
       },
       template:
         '<select v-model="test">' +
-          '<option value="1">a</option>' +
-          '<option :value="2">b</option>' +
-          '<option :value="3">c</option>' +
+        '<option value="1">a</option>' +
+        '<option :value="2">b</option>' +
+        '<option :value="3">c</option>' +
         '</select>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -98,9 +96,9 @@ describe('Directive v-model select', () => {
       },
       template:
         '<select v-model="test">' +
-          '<option value="1">a</option>' +
-          '<option :value="{ a: 2 }">b</option>' +
-          '<option :value="{ a: 3 }">c</option>' +
+        '<option value="1">a</option>' +
+        '<option :value="{ a: 2 }">b</option>' +
+        '<option :value="{ a: 3 }">c</option>' +
         '</select>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -126,9 +124,9 @@ describe('Directive v-model select', () => {
       },
       template:
         '<select v-model="test">' +
-          '<option value="1">a</option>' +
-          '<option :value="[{ a: 2 }]">b</option>' +
-          '<option :value="[{ a: 3 }]">c</option>' +
+        '<option value="1">a</option>' +
+        '<option :value="[{ a: 2 }]">b</option>' +
+        '<option :value="[{ a: 3 }]">c</option>' +
         '</select>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -155,7 +153,7 @@ describe('Directive v-model select', () => {
       },
       template:
         '<select v-model="test">' +
-          '<option v-for="o in opts">{{ o }}</option>' +
+        '<option v-for="o in opts">{{ o }}</option>' +
         '</select>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -171,10 +169,12 @@ describe('Directive v-model select', () => {
       expect(vm.test).toBe('a')
       // update v-for opts
       vm.opts = ['d', 'a']
-    }).then(() => {
-      expect(vm.$el.childNodes[0].selected).toBe(false)
-      expect(vm.$el.childNodes[1].selected).toBe(true)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.childNodes[0].selected).toBe(false)
+        expect(vm.$el.childNodes[1].selected).toBe(true)
+      })
+      .then(done)
   })
 
   it('should work with v-for & value bindings', done => {
@@ -185,7 +185,7 @@ describe('Directive v-model select', () => {
       },
       template:
         '<select v-model="test">' +
-          '<option v-for="o in opts" :value="o">option {{ o }}</option>' +
+        '<option v-for="o in opts" :value="o">option {{ o }}</option>' +
         '</select>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -200,13 +200,15 @@ describe('Directive v-model select', () => {
       expect(vm.test).toBe(1)
       // update v-for opts
       vm.opts = [0, 1]
-    }).then(() => {
-      expect(vm.$el.childNodes[0].selected).toBe(false)
-      expect(vm.$el.childNodes[1].selected).toBe(true)
-    }).then(done)
+    })
+      .then(() => {
+        expect(vm.$el.childNodes[0].selected).toBe(false)
+        expect(vm.$el.childNodes[1].selected).toBe(true)
+      })
+      .then(done)
   })
 
-  it('should work with select which has no default selected options', (done) => {
+  it('should work with select which has no default selected options', done => {
     const spy = vi.fn()
     const vm = new Vue({
       data: {
@@ -216,10 +218,10 @@ describe('Directive v-model select', () => {
       },
       template:
         '<div>' +
-          '<select @change="test" v-model="id">' +
-            '<option v-for="item in list" :value="item">{{item}}</option>' +
-          '</select>' +
-          '{{testChange}}' +
+        '<select @change="test" v-model="id">' +
+        '<option v-for="item in list" :value="item">{{item}}</option>' +
+        '</select>' +
+        '{{testChange}}' +
         '</div>',
       methods: {
         test: spy
@@ -240,9 +242,9 @@ describe('Directive v-model select', () => {
         },
         template:
           '<select v-model="test" multiple>' +
-            '<option>a</option>' +
-            '<option>b</option>' +
-            '<option>c</option>' +
+          '<option>a</option>' +
+          '<option>b</option>' +
+          '<option>c</option>' +
           '</select>'
       }).$mount()
       const opts = vm.$el.options
@@ -269,7 +271,7 @@ describe('Directive v-model select', () => {
         },
         template:
           '<select v-model="test" multiple>' +
-            '<option v-for="o in opts">{{ o }}</option>' +
+          '<option v-for="o in opts">{{ o }}</option>' +
           '</select>'
       }).$mount()
       const opts = vm.$el.options
@@ -287,15 +289,17 @@ describe('Directive v-model select', () => {
         expect(vm.test).toEqual(['b', 'c'])
         // update v-for opts
         vm.opts = ['c', 'd']
-      }).then(() => {
-        expect(opts[0].selected).toBe(true)
-        expect(opts[1].selected).toBe(false)
-        expect(vm.test).toEqual(['c']) // should remove 'd' which no longer has a matching option
-      }).then(done)
+      })
+        .then(() => {
+          expect(opts[0].selected).toBe(true)
+          expect(opts[1].selected).toBe(false)
+          expect(vm.test).toEqual(['c']) // should remove 'd' which no longer has a matching option
+        })
+        .then(done)
     })
   }
 
-  it('should work with multiple binding', (done) => {
+  it('should work with multiple binding', done => {
     const spy = vi.fn()
     const vm = new Vue({
       data: {
@@ -304,8 +308,8 @@ describe('Directive v-model select', () => {
       },
       template:
         '<select v-model="selections" :multiple="isMultiple">' +
-          '<option value="1">item 1</option>' +
-          '<option value="2">item 2</option>' +
+        '<option value="1">item 1</option>' +
+        '<option value="2">item 2</option>' +
         '</select>',
       watch: {
         selections: spy
@@ -320,14 +324,14 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
-  it('should not have multiple attr with falsy values except \'\'', () => {
+  it("should not have multiple attr with falsy values except ''", () => {
     const vm = new Vue({
       template:
         '<div>' +
-          '<select id="undefined" :multiple="undefined"></select>' +
-          '<select id="null" :multiple="null"></select>' +
-          '<select id="false" :multiple="false"></select>' +
-          '<select id="string" :multiple="\'\'"></select>' +
+        '<select id="undefined" :multiple="undefined"></select>' +
+        '<select id="null" :multiple="null"></select>' +
+        '<select id="false" :multiple="false"></select>' +
+        '<select id="string" :multiple="\'\'"></select>' +
         '</div>'
     }).$mount()
     expect(vm.$el.querySelector('#undefined').multiple).toEqual(false)
@@ -339,11 +343,11 @@ describe('Directive v-model select', () => {
   it('multiple with static template', () => {
     const vm = new Vue({
       template:
-      '<select multiple>' +
+        '<select multiple>' +
         '<option selected>a</option>' +
         '<option selected>b</option>' +
         '<option selected>c</option>' +
-      '</select>'
+        '</select>'
     }).$mount()
     const opts = vm.$el.options
     expect(opts[0].selected).toBe(true)
@@ -351,7 +355,7 @@ describe('Directive v-model select', () => {
     expect(opts[2].selected).toBe(true)
   })
 
-  it('multiple selects', (done) => {
+  it('multiple selects', done => {
     const spy = vi.fn()
     const vm = new Vue({
       data: {
@@ -372,10 +376,10 @@ describe('Directive v-model select', () => {
       },
       template:
         '<div>' +
-          '<select v-for="(item, index) in selectBoxes" v-model="selections[index]">' +
-            '<option v-for="element in item" v-bind:value="element.value" v-text="element.text"></option>' +
-          '</select>' +
-          '<span ref="rs">{{selections}}</span>' +
+        '<select v-for="(item, index) in selectBoxes" v-model="selections[index]">' +
+        '<option v-for="element in item" v-bind:value="element.value" v-text="element.text"></option>' +
+        '</select>' +
+        '<span ref="rs">{{selections}}</span>' +
         '</div>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -396,9 +400,9 @@ describe('Directive v-model select', () => {
       },
       template:
         '<select v-model.number="test">' +
-          '<option value="1">a</option>' +
-          '<option :value="2">b</option>' +
-          '<option :value="3">c</option>' +
+        '<option value="1">a</option>' +
+        '<option :value="2">b</option>' +
+        '<option :value="3">c</option>' +
         '</select>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -407,18 +411,18 @@ describe('Directive v-model select', () => {
     expect(vm.test).toBe(1)
   })
 
-  it('should respect different primitive type value', (done) => {
+  it('should respect different primitive type value', done => {
     const vm = new Vue({
       data: {
         test: 0
       },
       template:
         '<select v-model.number="test">' +
-          '<option value="">a</option>' +
-          '<option value="0">b</option>' +
-          '<option value="1">c</option>' +
-          '<option value="false">c</option>' +
-          '<option value="true">c</option>' +
+        '<option value="">a</option>' +
+        '<option value="0">b</option>' +
+        '<option value="1">c</option>' +
+        '<option value="false">c</option>' +
+        '<option value="true">c</option>' +
         '</select>'
     }).$mount()
     const opts = vm.$el.options
@@ -435,27 +439,31 @@ describe('Directive v-model select', () => {
       expect(opts[3].selected).toBe(false)
       expect(opts[4].selected).toBe(false)
       vm.test = ''
-    }).then(() => {
-      expect(opts[0].selected).toBe(true)
-      expect(opts[1].selected).toBe(false)
-      expect(opts[2].selected).toBe(false)
-      expect(opts[3].selected).toBe(false)
-      expect(opts[4].selected).toBe(false)
-      vm.test = false
-    }).then(() => {
-      expect(opts[0].selected).toBe(false)
-      expect(opts[1].selected).toBe(false)
-      expect(opts[2].selected).toBe(false)
-      expect(opts[3].selected).toBe(true)
-      expect(opts[4].selected).toBe(false)
-      vm.test = true
-    }).then(() => {
-      expect(opts[0].selected).toBe(false)
-      expect(opts[1].selected).toBe(false)
-      expect(opts[2].selected).toBe(false)
-      expect(opts[3].selected).toBe(false)
-      expect(opts[4].selected).toBe(true)
-    }).then(done)
+    })
+      .then(() => {
+        expect(opts[0].selected).toBe(true)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(false)
+        expect(opts[3].selected).toBe(false)
+        expect(opts[4].selected).toBe(false)
+        vm.test = false
+      })
+      .then(() => {
+        expect(opts[0].selected).toBe(false)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(false)
+        expect(opts[3].selected).toBe(true)
+        expect(opts[4].selected).toBe(false)
+        vm.test = true
+      })
+      .then(() => {
+        expect(opts[0].selected).toBe(false)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(false)
+        expect(opts[3].selected).toBe(false)
+        expect(opts[4].selected).toBe(true)
+      })
+      .then(done)
   })
 
   it('should warn multiple with non-Array value', done => {
@@ -463,13 +471,13 @@ describe('Directive v-model select', () => {
       data: {
         test: 'meh'
       },
-      template:
-        '<select v-model="test" multiple></select>'
+      template: '<select v-model="test" multiple></select>'
     }).$mount()
     // IE warns on a setTimeout as well
     setTimeout(() => {
-      expect('<select multiple v-model="test"> expects an Array value for its binding, but got String')
-        .toHaveBeenWarned()
+      expect(
+        '<select multiple v-model="test"> expects an Array value for its binding, but got String'
+      ).toHaveBeenWarned()
       done()
     }, 0)
   })
@@ -485,9 +493,9 @@ describe('Directive v-model select', () => {
       },
       template:
         '<select v-model="test">' +
-          '<option :value="circular">a</option>' +
-          '<option>b</option>' +
-          '<option>c</option>' +
+        '<option :value="circular">a</option>' +
+        '<option>b</option>' +
+        '<option>c</option>' +
         '</select>'
     }).$mount()
     document.body.appendChild(vm.$el)
@@ -506,10 +514,7 @@ describe('Directive v-model select', () => {
       data: {
         test: '1'
       },
-      template:
-        '<select v-model="test">' +
-          '<option>a</option>' +
-        '</select>'
+      template: '<select v-model="test">' + '<option>a</option>' + '</select>'
     }).$mount()
 
     vm.test = '2'
@@ -527,17 +532,17 @@ describe('Directive v-model select', () => {
       },
       computed: {
         test: {
-          get () {
+          get() {
             return '1'
           },
-          set () {
+          set() {
             spy()
           }
         }
       },
       template:
         '<select v-model="test">' +
-          '<option :key="opt" v-for="opt in options" :value="opt">{{ opt }}</option>' +
+        '<option :key="opt" v-for="opt in options" :value="opt">{{ opt }}</option>' +
         '</select>'
     }).$mount()
 
@@ -549,7 +554,7 @@ describe('Directive v-model select', () => {
 
   // #6903
   describe('should correctly handle v-model when the vnodes are the same', () => {
-    function makeInstance (foo) {
+    function makeInstance(foo) {
       return new Vue({
         data: {
           foo: foo,
@@ -558,12 +563,12 @@ describe('Directive v-model select', () => {
         },
         template:
           '<div>' +
-            '<select v-if="foo" data-attr>' +
-              '<option selected>a</option>' +
-            '</select>' +
-            '<select v-else v-model="value">' +
-              '<option v-for="option in options" :value="option">{{ option }}</option>' +
-            '</select>' +
+          '<select v-if="foo" data-attr>' +
+          '<option selected>a</option>' +
+          '</select>' +
+          '<select v-else v-model="value">' +
+          '<option v-for="option in options" :value="option">{{ option }}</option>' +
+          '</select>' +
           '</div>'
       }).$mount()
     }
@@ -602,11 +607,11 @@ describe('Directive v-model select', () => {
       },
       template:
         '<div>' +
-          '<select v-model="selectedDate">' +
-            '<option v-for="(date, i) in dates" :key="i" :value="date">' +
-              '{{date}}' +
-            '</option>' +
-          '</select>' +
+        '<select v-model="selectedDate">' +
+        '<option v-for="(date, i) in dates" :key="i" :value="date">' +
+        '{{date}}' +
+        '</option>' +
+        '</select>' +
         '</div>'
     }).$mount()
 

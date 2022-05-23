@@ -1,4 +1,3 @@
-
 import { isIE, isIE9, isEdge } from 'core/util/env'
 
 import { extend, isDef, isUndef } from 'shared/util'
@@ -11,7 +10,7 @@ import {
   isBooleanAttr,
   isEnumeratedAttr,
   isFalsyAttrValue,
-  convertEnumeratedValue,
+  convertEnumeratedValue
 } from 'web/util/index'
 
 function updateAttrs(oldVnode: VNodeWithData, vnode: VNodeWithData) {
@@ -98,7 +97,7 @@ function baseSetAttr(el, key, value) {
       value !== '' &&
       !el.__ieph
     ) {
-      const blocker = (e) => {
+      const blocker = e => {
         e.stopImmediatePropagation()
         el.removeEventListener('input', blocker)
       }
@@ -112,5 +111,5 @@ function baseSetAttr(el, key, value) {
 
 export default {
   create: updateAttrs,
-  update: updateAttrs,
+  update: updateAttrs
 }

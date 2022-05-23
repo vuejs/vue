@@ -1,4 +1,3 @@
-
 import config from '../config'
 import { warn } from './debug'
 import { set } from '../observer/index'
@@ -14,7 +13,7 @@ import {
   toRawType,
   capitalize,
   isBuiltInTag,
-  isPlainObject,
+  isPlainObject
 } from 'shared/util'
 import type { Component } from 'typescript/component'
 import type { ComponentOptions } from 'typescript/options'
@@ -172,7 +171,7 @@ function dedupeHooks(hooks: any) {
   return res
 }
 
-LIFECYCLE_HOOKS.forEach((hook) => {
+LIFECYCLE_HOOKS.forEach(hook => {
   strats[hook] = mergeHook
 })
 
@@ -245,21 +244,25 @@ strats.watch = function (
 /**
  * Other object hashes.
  */
-strats.props = strats.methods = strats.inject = strats.computed = function (
-  parentVal: Object | null,
-  childVal: Object | null,
-  vm: Component | null,
-  key: string
-): Object | null {
-  if (childVal && process.env.NODE_ENV !== 'production') {
-    assertObjectType(key, childVal, vm)
-  }
-  if (!parentVal) return childVal
-  const ret = Object.create(null)
-  extend(ret, parentVal)
-  if (childVal) extend(ret, childVal)
-  return ret
-}
+strats.props =
+  strats.methods =
+  strats.inject =
+  strats.computed =
+    function (
+      parentVal: Object | null,
+      childVal: Object | null,
+      vm: Component | null,
+      key: string
+    ): Object | null {
+      if (childVal && process.env.NODE_ENV !== 'production') {
+        assertObjectType(key, childVal, vm)
+      }
+      if (!parentVal) return childVal
+      const ret = Object.create(null)
+      extend(ret, parentVal)
+      if (childVal) extend(ret, childVal)
+      return ret
+    }
 strats.provide = mergeDataOrFn
 
 /**

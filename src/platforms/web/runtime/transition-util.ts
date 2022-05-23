@@ -21,14 +21,14 @@ export function resolveTransition(
   }
 }
 
-const autoCssTransition: (name: string) => Object = cached((name) => {
+const autoCssTransition: (name: string) => Object = cached(name => {
   return {
     enterClass: `${name}-enter`,
     enterToClass: `${name}-enter-to`,
     enterActiveClass: `${name}-enter-active`,
     leaveClass: `${name}-leave`,
     leaveToClass: `${name}-leave-to`,
-    leaveActiveClass: `${name}-leave-active`,
+    leaveActiveClass: `${name}-leave-active`
   }
 })
 
@@ -64,7 +64,7 @@ const raf = inBrowser
   ? window.requestAnimationFrame
     ? window.requestAnimationFrame.bind(window)
     : setTimeout
-  : /* istanbul ignore next */ (fn) => fn()
+  : /* istanbul ignore next */ fn => fn()
 
 export function nextFrame(fn: Function) {
   raf(() => {
@@ -103,7 +103,7 @@ export function whenTransitionEnds(
     el.removeEventListener(event, onEnd)
     cb()
   }
-  const onEnd = (e) => {
+  const onEnd = e => {
     if (e.target === el) {
       if (++ended >= propCount) {
         end()
@@ -188,7 +188,7 @@ export function getTransitionInfo(
     type,
     timeout,
     propCount,
-    hasTransform,
+    hasTransform
   }
 }
 

@@ -1,4 +1,3 @@
-
 import { looseEqual, looseIndexOf } from 'shared/util'
 import type { VNodeDirective, VNodeWithData } from 'typescript/vnode'
 

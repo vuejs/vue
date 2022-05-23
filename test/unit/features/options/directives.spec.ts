@@ -16,7 +16,8 @@ describe('Options directives', () => {
     }
 
     const vm = new Vue({
-      template: '<div class="hi"><div v-if="ok" v-test:arg.hello="a">{{ msg }}</div></div>',
+      template:
+        '<div class="hi"><div v-if="ok" v-test:arg.hello="a">{{ msg }}</div></div>',
       data: {
         msg: 'hi',
         a: 'foo',
@@ -24,7 +25,7 @@ describe('Options directives', () => {
       },
       directives: {
         test: {
-          bind (el, binding, vnode) {
+          bind(el, binding, vnode) {
             bindSpy()
             assertContext(el, binding, vnode)
             expect(binding.value).toBe('foo')
@@ -32,7 +33,7 @@ describe('Options directives', () => {
             expect(binding.oldValue).toBeUndefined()
             expect(el.parentNode).toBeNull()
           },
-          inserted (el, binding, vnode) {
+          inserted(el, binding, vnode) {
             insertedSpy()
             assertContext(el, binding, vnode)
             expect(binding.value).toBe('foo')
@@ -40,7 +41,7 @@ describe('Options directives', () => {
             expect(binding.oldValue).toBeUndefined()
             expect(el.parentNode.className).toBe('hi')
           },
-          update (el, binding, vnode, oldVnode) {
+          update(el, binding, vnode, oldVnode) {
             updateSpy()
             assertContext(el, binding, vnode)
             expect(el).toBe(vm.$el.children[0])
@@ -51,11 +52,11 @@ describe('Options directives', () => {
               expect(binding.oldValue).toBe('foo')
             }
           },
-          componentUpdated (el, binding, vnode) {
+          componentUpdated(el, binding, vnode) {
             componentUpdatedSpy()
             assertContext(el, binding, vnode)
           },
-          unbind (el, binding, vnode) {
+          unbind(el, binding, vnode) {
             unbindSpy()
             assertContext(el, binding, vnode)
           }
@@ -75,12 +76,15 @@ describe('Options directives', () => {
       expect(componentUpdatedSpy).toHaveBeenCalled()
       expect(unbindSpy).not.toHaveBeenCalled()
       vm.msg = 'bye'
-    }).then(() => {
-      expect(componentUpdatedSpy.mock.calls.length).toBe(2)
-      vm.ok = false
-    }).then(() => {
-      expect(unbindSpy).toHaveBeenCalled()
-    }).then(done)
+    })
+      .then(() => {
+        expect(componentUpdatedSpy.mock.calls.length).toBe(2)
+        vm.ok = false
+      })
+      .then(() => {
+        expect(unbindSpy).toHaveBeenCalled()
+      })
+      .then(done)
   })
 
   it('function shorthand', done => {
@@ -89,7 +93,7 @@ describe('Options directives', () => {
       template: '<div v-test:arg.hello="a"></div>',
       data: { a: 'foo' },
       directives: {
-        test (el, binding, vnode) {
+        test(el, binding, vnode) {
           expect(vnode.context).toBe(vm)
           expect(binding.arg).toBe('arg')
           expect(binding.modifiers).toEqual({ hello: true })
@@ -139,8 +143,12 @@ describe('Options directives', () => {
       `,
       directives: {
         test: {
-          bind: el => { el.id = 'a' },
-          unbind: el => { el.id = '' }
+          bind: el => {
+            el.id = 'a'
+          },
+          unbind: el => {
+            el.id = ''
+          }
         }
       }
     }).$mount()
@@ -203,23 +211,26 @@ describe('Options directives', () => {
       expect(spies.inserted2.mock.calls.length).toBe(1)
 
       vm.ok = true
-    }).then(() => {
-      // v-test without modifier should be bound again
-      expect(spies.bind1.mock.calls.length).toBe(3)
-      expect(spies.inserted1.mock.calls.length).toBe(3)
+    })
+      .then(() => {
+        // v-test without modifier should be bound again
+        expect(spies.bind1.mock.calls.length).toBe(3)
+        expect(spies.inserted1.mock.calls.length).toBe(3)
 
-      // v-test2 should be unbound
-      expect(spies.unbind2.mock.calls.length).toBe(1)
+        // v-test2 should be unbound
+        expect(spies.unbind2.mock.calls.length).toBe(1)
 
-      // v-test with modifier should be updated again
-      expect(spies.update1.mock.calls.length).toBe(2)
-      expect(spies.componentUpdated1.mock.calls.length).toBe(2)
+        // v-test with modifier should be updated again
+        expect(spies.update1.mock.calls.length).toBe(2)
+        expect(spies.componentUpdated1.mock.calls.length).toBe(2)
 
-      vm.val = 234
-    }).then(() => {
-      expect(spies.update1.mock.calls.length).toBe(4)
-      expect(spies.componentUpdated1.mock.calls.length).toBe(4)
-    }).then(done)
+        vm.val = 234
+      })
+      .then(() => {
+        expect(spies.update1.mock.calls.length).toBe(4)
+        expect(spies.componentUpdated1.mock.calls.length).toBe(4)
+      })
+      .then(done)
   })
 
   it('warn non-existent', () => {

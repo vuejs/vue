@@ -7,7 +7,7 @@ describe('create-component', () => {
   beforeEach(() => {
     vm = new Vue({
       template: '<p>{{msg}}</p>',
-      data () {
+      data() {
         return { msg: 'hello, my children' }
       }
     }).$mount()
@@ -18,7 +18,7 @@ describe('create-component', () => {
     const child = {
       name: 'child',
       props: ['msg'],
-      render () {}
+      render() {}
     }
     const data = {
       props: { msg: 'hello world' },
@@ -46,7 +46,7 @@ describe('create-component', () => {
       staticAttrs: { class: 'foo' }
     }
     vi.spyOn(vm, '$forceUpdate')
-    function async (resolve, reject) {
+    function async(resolve, reject) {
       setTimeout(() => {
         resolve({
           name: 'child',
@@ -55,7 +55,7 @@ describe('create-component', () => {
         Vue.nextTick(loaded)
       }, 0)
     }
-    function go () {
+    function go() {
       setCurrentRenderingInstance(vm)
       vnode = createComponent(async, data, vm, vm)
       setCurrentRenderingInstance(null)
@@ -63,7 +63,7 @@ describe('create-component', () => {
       expect(vnode.asyncFactory).toBe(async)
       expect(vnode.asyncFactory.owners.length).toEqual(1)
     }
-    function loaded () {
+    function loaded() {
       setCurrentRenderingInstance(vm)
       vnode = createComponent(async, data, vm, vm)
       setCurrentRenderingInstance(null)
@@ -87,7 +87,7 @@ describe('create-component', () => {
       staticAttrs: { class: 'bar' }
     }
     vi.spyOn(vm, '$forceUpdate')
-    function async (resolve, reject) {
+    function async(resolve, reject) {
       resolve({
         name: 'child',
         props: ['msg']
@@ -116,24 +116,26 @@ describe('create-component', () => {
       attrs: { id: 1 }
     }
     const reason = 'failed!!'
-    function async (resolve, reject) {
+    function async(resolve, reject) {
       setTimeout(() => {
         reject(reason)
         Vue.nextTick(failed)
       }, 0)
     }
-    function go () {
+    function go() {
       setCurrentRenderingInstance(vm)
       vnode = createComponent(async, data, vm, vm)
       setCurrentRenderingInstance(null)
       expect(vnode.isComment).toBe(true) // not to be loaded yet.
     }
-    function failed () {
+    function failed() {
       setCurrentRenderingInstance(vm)
       vnode = createComponent(async, data, vm, vm)
       setCurrentRenderingInstance(null)
       expect(vnode.isComment).toBe(true) // failed, still a comment node
-      expect(`Failed to resolve async component: ${async}\nReason: ${reason}`).toHaveBeenWarned()
+      expect(
+        `Failed to resolve async component: ${async}\nReason: ${reason}`
+      ).toHaveBeenWarned()
       done()
     }
     go()

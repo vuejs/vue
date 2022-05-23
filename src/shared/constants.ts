@@ -14,5 +14,5 @@ export const LIFECYCLE_HOOKS = [
   'activated',
   'deactivated',
   'errorCaptured',
-  'serverPrefetch',
+  'serverPrefetch'
 ] as const

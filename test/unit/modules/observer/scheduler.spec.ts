@@ -4,7 +4,7 @@ import {
   queueWatcher as _queueWatcher
 } from 'core/observer/scheduler'
 
-function queueWatcher (watcher) {
+function queueWatcher(watcher) {
   watcher.vm = {} // mock vm
   _queueWatcher(watcher)
 }
@@ -46,7 +46,9 @@ describe('Scheduler', () => {
     queueWatcher(job)
     queueWatcher({
       id: 2,
-      run () { queueWatcher(job) }
+      run() {
+        queueWatcher(job)
+      }
     })
     waitForUpdate(() => {
       expect(spy.mock.calls.length).toBe(2)
@@ -61,9 +63,11 @@ describe('Scheduler', () => {
       },
       template: '<div>{{ a }}</div>',
       watch: {
-        a () { calls.push(1) }
+        a() {
+          calls.push(1)
+        }
       },
-      beforeUpdate () {
+      beforeUpdate() {
         calls.push(2)
       }
     }).$mount()
@@ -81,11 +85,11 @@ describe('Scheduler', () => {
         a: 1
       },
       watch: {
-        a () {
+        a() {
           calls.push(1)
         }
       },
-      beforeUpdate () {
+      beforeUpdate() {
         calls.push(2)
       },
       template: '<div><test :a="a"></test></div>',
@@ -94,11 +98,11 @@ describe('Scheduler', () => {
           props: ['a'],
           template: '<div>{{ a }}</div>',
           watch: {
-            a () {
+            a() {
               calls.push(3)
             }
           },
-          beforeUpdate () {
+          beforeUpdate() {
             calls.push(4)
           }
         }
@@ -114,7 +118,7 @@ describe('Scheduler', () => {
     let count = 0
     const job = {
       id: 1,
-      run () {
+      run() {
         count++
         queueWatcher(job)
       }
@@ -131,11 +135,11 @@ describe('Scheduler', () => {
     queueWatcher({
       id: 1,
       user: true,
-      run () {
+      run() {
         callOrder.push(1)
         queueWatcher({
           id: 2,
-          run () {
+          run() {
             callOrder.push(3)
           }
         })
@@ -162,7 +166,7 @@ describe('Scheduler', () => {
         child: {
           template: `<div>{{foo}}</div>`,
           props: ['foo'],
-          updated () {
+          updated() {
             this.$emit('change')
           }
         }

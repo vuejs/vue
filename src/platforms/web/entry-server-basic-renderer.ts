@@ -1,4 +1,3 @@
-
 import modules from './server/modules/index'
 import directives from './server/directives/index'
 import { isUnaryTag, canBeLeftOpenTag } from './compiler/util'
@@ -9,5 +8,5 @@ export default createBasicRenderer({
   modules,
   directives,
   isUnaryTag,
-  canBeLeftOpenTag,
+  canBeLeftOpenTag
 })

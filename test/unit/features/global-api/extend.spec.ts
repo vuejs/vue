@@ -54,17 +54,17 @@ describe('Global API: extend', () => {
   it('should merge lifecycle hooks', () => {
     const calls: any[] = []
     const A = Vue.extend({
-      created () {
+      created() {
         calls.push(1)
       }
     })
     const B = A.extend({
-      created () {
+      created() {
         calls.push(2)
       }
     })
     new B({
-      created () {
+      created() {
         calls.push(3)
       }
     })
@@ -93,18 +93,24 @@ describe('Global API: extend', () => {
   it('should merge methods', () => {
     const A = Vue.extend({
       methods: {
-        a () { return this.n }
+        a() {
+          return this.n
+        }
       }
     })
     const B = A.extend({
       methods: {
-        b () { return this.n + 1 }
+        b() {
+          return this.n + 1
+        }
       }
     })
     const b = new B({
       data: { n: 0 },
       methods: {
-        c () { return this.n + 2 }
+        c() {
+          return this.n + 2
+        }
       }
     })
     expect(b.a()).toBe(0)
@@ -144,7 +150,7 @@ describe('Global API: extend', () => {
 
   // #4767
   it('extended options should use different identify from parent', () => {
-    const A = Vue.extend({ computed: {}})
+    const A = Vue.extend({ computed: {} })
     const B = A.extend()
     B.options.computed.b = () => 'foo'
     expect(B.options.computed).not.toBe(A.options.computed)

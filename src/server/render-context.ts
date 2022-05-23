@@ -1,4 +1,3 @@
-
 import VNode from 'core/vdom/vnode'
 import { isUndef } from 'shared/util'
 import { Component } from 'typescript/component'
@@ -104,7 +103,7 @@ export class RenderContext {
           const { buffer, bufferIndex, componentBuffer, key } = lastState
           const result = {
             html: buffer[bufferIndex],
-            components: componentBuffer[bufferIndex],
+            components: componentBuffer[bufferIndex]
           }
           this.cache.set(key, result)
           if (bufferIndex === 0) {
@@ -117,7 +116,7 @@ export class RenderContext {
             // merge self into parent's result
             buffer[bufferIndex - 1] += result.html
             const prev = componentBuffer[bufferIndex - 1]
-            result.components.forEach((c) => prev.add(c))
+            result.components.forEach(c => prev.add(c))
           }
           buffer.length = bufferIndex
           componentBuffer.length = bufferIndex

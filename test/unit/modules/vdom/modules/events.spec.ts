@@ -4,7 +4,7 @@ import VNode from 'core/vdom/vnode'
 describe('vdom events module', () => {
   it('should attach event handler to element', () => {
     const click = vi.fn()
-    const vnode = new VNode('a', { on: { click }})
+    const vnode = new VNode('a', { on: { click } })
 
     const elm = patch(null, vnode)
     document.body.appendChild(elm)
@@ -14,8 +14,8 @@ describe('vdom events module', () => {
 
   it('should not duplicate the same listener', () => {
     const click = vi.fn()
-    const vnode1 = new VNode('a', { on: { click }})
-    const vnode2 = new VNode('a', { on: { click }})
+    const vnode1 = new VNode('a', { on: { click } })
+    const vnode2 = new VNode('a', { on: { click } })
 
     const elm = patch(null, vnode1)
     patch(vnode1, vnode2)
@@ -27,8 +27,8 @@ describe('vdom events module', () => {
   it('should update different listener', () => {
     const click = vi.fn()
     const click2 = vi.fn()
-    const vnode1 = new VNode('a', { on: { click }})
-    const vnode2 = new VNode('a', { on: { click: click2 }})
+    const vnode1 = new VNode('a', { on: { click } })
+    const vnode2 = new VNode('a', { on: { click: click2 } })
 
     const elm = patch(null, vnode1)
     document.body.appendChild(elm)
@@ -44,7 +44,7 @@ describe('vdom events module', () => {
 
   it('should attach Array of multiple handlers', () => {
     const click = vi.fn()
-    const vnode = new VNode('a', { on: { click: [click, click] }})
+    const vnode = new VNode('a', { on: { click: [click, click] } })
 
     const elm = patch(null, vnode)
     document.body.appendChild(elm)
@@ -55,8 +55,8 @@ describe('vdom events module', () => {
   it('should update Array of multiple handlers', () => {
     const click = vi.fn()
     const click2 = vi.fn()
-    const vnode1 = new VNode('a', { on: { click: [click, click2] }})
-    const vnode2 = new VNode('a', { on: { click: [click] }})
+    const vnode1 = new VNode('a', { on: { click: [click, click2] } })
+    const vnode2 = new VNode('a', { on: { click: [click] } })
 
     const elm = patch(null, vnode1)
     document.body.appendChild(elm)
@@ -72,7 +72,7 @@ describe('vdom events module', () => {
 
   it('should remove handlers that are no longer present', () => {
     const click = vi.fn()
-    const vnode1 = new VNode('a', { on: { click }})
+    const vnode1 = new VNode('a', { on: { click } })
     const vnode2 = new VNode('a', {})
 
     const elm = patch(null, vnode1)
@@ -87,7 +87,7 @@ describe('vdom events module', () => {
 
   it('should remove Array handlers that are no longer present', () => {
     const click = vi.fn()
-    const vnode1 = new VNode('a', { on: { click: [click, click] }})
+    const vnode1 = new VNode('a', { on: { click: [click, click] } })
     const vnode2 = new VNode('a', {})
 
     const elm = patch(null, vnode1)
@@ -105,10 +105,10 @@ describe('vdom events module', () => {
     const click = vi.fn()
     const click2 = vi.fn()
     const click3 = vi.fn()
-    const vnode0 = new VNode('a', { on: { click: click }})
-    const vnode1 = new VNode('a', { on: { click: [click, click2] }})
-    const vnode2 = new VNode('a', { on: { click: click }})
-    const vnode3 = new VNode('a', { on: { click: [click2, click3] }})
+    const vnode0 = new VNode('a', { on: { click: click } })
+    const vnode1 = new VNode('a', { on: { click: [click, click2] } })
+    const vnode2 = new VNode('a', { on: { click: click } })
+    const vnode3 = new VNode('a', { on: { click: [click2, click3] } })
 
     const elm = patch(null, vnode0)
     document.body.appendChild(elm)
