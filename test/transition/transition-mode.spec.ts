@@ -1,8 +1,7 @@
 import Vue from 'vue'
-import injectStyles from './inject-styles'
-import { nextFrame } from 'web/runtime/transition-util'
+import { injectStyles, waitForUpdate, nextFrame } from './helpers'
 
-describe.skip('Transition mode', () => {
+describe('Transition mode', () => {
   const { duration, buffer } = injectStyles()
   const components = {
     one: { template: '<div>one</div>' },
@@ -667,7 +666,7 @@ describe.skip('Transition mode', () => {
           expect(vm.$el.children[0].className).toMatch('test-anim-leave-active')
           expect(vm.$el.children[1].className).toBe('')
         })
-        .thenWaitFor(duration + buffer)
+        .thenWaitFor(duration + buffer * 2)
         .then(() => {
           expect(vm.$el.children.length).toBe(1)
           expect(vm.$el.textContent).toBe('component B')

@@ -1,8 +1,7 @@
 import Vue from 'vue'
-import injectStyles from './inject-styles'
-import { nextFrame } from 'web/runtime/transition-util'
+import { injectStyles, waitForUpdate, nextFrame } from './helpers'
 
-describe.skip('Transition group', () => {
+describe('Transition group', () => {
   const { duration, buffer } = injectStyles()
 
   let el
@@ -212,9 +211,9 @@ describe.skip('Transition group', () => {
 
   it('events', (done) => {
     let next
-    const beforeEnterSpy = vi.fn()
-    const afterEnterSpy = vi.fn()
-    const afterLeaveSpy = vi.fn()
+    const beforeEnterSpy = jasmine.createSpy()
+    const afterEnterSpy = jasmine.createSpy()
+    const afterLeaveSpy = jasmine.createSpy()
     const vm = new Vue({
       template: `
           <div>
@@ -254,7 +253,7 @@ describe.skip('Transition group', () => {
           `<div class="test v-enter v-enter-active">d</div>` +
           `</span>`
       )
-      expect(beforeEnterSpy.mock.calls.length).toBe(1)
+      expect(beforeEnterSpy.calls.count()).toBe(1)
     })
       .thenWaitFor((_next) => {
         next = _next
@@ -268,7 +267,7 @@ describe.skip('Transition group', () => {
             `<div class="test">d</div>` +
             `</span>`
         )
-        expect(afterEnterSpy.mock.calls.length).toBe(1)
+        expect(afterEnterSpy.calls.count()).toBe(1)
         vm.items.shift()
       })
       .thenWaitFor((_next) => {
@@ -282,7 +281,7 @@ describe.skip('Transition group', () => {
             `<div class="test">d</div>` +
             `</span>`
         )
-        expect(afterLeaveSpy.mock.calls.length).toBe(1)
+        expect(afterLeaveSpy.calls.count()).toBe(1)
       })
       .then(done)
   })

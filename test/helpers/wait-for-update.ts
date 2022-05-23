@@ -18,7 +18,7 @@ interface Job extends Function {
   fail?: (e: any) => void
 }
 
-global.waitForUpdate = (initialCb: Job) => {
+const waitForUpdate = (initialCb: Job) => {
   let end
   const queue: Job[] = initialCb ? [initialCb] : []
 
@@ -77,3 +77,5 @@ global.waitForUpdate = (initialCb: Job) => {
 function timeout(n) {
   return (next) => setTimeout(next, n)
 }
+
+export { waitForUpdate }

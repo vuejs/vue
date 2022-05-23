@@ -63,6 +63,7 @@ jobs:
 
       - name: Run e2e tests
         run: pnpm run test:e2e
+        run: pnpm run test:transition
 
   lint-and-test-dts:
     runs-on: ubuntu-latest

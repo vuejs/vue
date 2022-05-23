@@ -1,27 +1,26 @@
 import Vue from 'vue'
-import injectStyles from './inject-styles'
-import { nextFrame } from 'web/runtime/transition-util'
+import { injectStyles, waitForUpdate, nextFrame } from './helpers'
 
-describe.skip('Transition w/ KeepAlive', () => {
+describe('Transition w/ KeepAlive', () => {
   const { duration, buffer } = injectStyles()
 
   let components, one, two, el
   beforeEach(() => {
     one = {
       template: '<div>one</div>',
-      created: vi.fn(),
-      mounted: vi.fn(),
-      activated: vi.fn(),
-      deactivated: vi.fn(),
-      destroyed: vi.fn()
+      created: jasmine.createSpy(),
+      mounted: jasmine.createSpy(),
+      activated: jasmine.createSpy(),
+      deactivated: jasmine.createSpy(),
+      destroyed: jasmine.createSpy()
     }
     two = {
       template: '<div>two</div>',
-      created: vi.fn(),
-      mounted: vi.fn(),
-      activated: vi.fn(),
-      deactivated: vi.fn(),
-      destroyed: vi.fn()
+      created: jasmine.createSpy(),
+      mounted: jasmine.createSpy(),
+      activated: jasmine.createSpy(),
+      deactivated: jasmine.createSpy(),
+      destroyed: jasmine.createSpy()
     }
     components = {
       one,
@@ -33,11 +32,11 @@ describe.skip('Transition w/ KeepAlive', () => {
 
   function assertHookCalls(component, callCounts) {
     expect([
-      component.created.mock.calls.length,
-      component.mounted.mock.calls.length,
-      component.activated.mock.calls.length,
-      component.deactivated.mock.calls.length,
-      component.destroyed.mock.calls.length
+      component.created.calls.count(),
+      component.mounted.calls.count(),
+      component.activated.calls.count(),
+      component.deactivated.calls.count(),
+      component.destroyed.calls.count()
     ]).toEqual(callCounts)
   }
 
@@ -515,7 +514,7 @@ describe.skip('Transition w/ KeepAlive', () => {
   })
 
   it('async components with transition-mode out-in', (done) => {
-    const barResolve = vi.fn()
+    const barResolve = jasmine.createSpy()
     let next
     const foo = (resolve) => {
       setTimeout(() => {
@@ -591,7 +590,7 @@ describe.skip('Transition w/ KeepAlive', () => {
         .then(() => {
           // foo afterLeave get called
           // and bar has already been resolved before afterLeave get called
-          expect(barResolve.mock.calls.length).toBe(1)
+          expect(barResolve.calls.count()).toBe(1)
           expect(vm.$el.innerHTML).toBe('<!---->')
         })
         .thenWaitFor(nextFrame)

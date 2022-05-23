@@ -1,5 +1,5 @@
 import VNode from 'core/vdom/vnode'
 
-global.createTextVNode = function (text) {
+export function createTextVNode(text) {
   return new VNode(undefined, undefined, undefined, text)
 }

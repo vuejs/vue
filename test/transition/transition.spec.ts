@@ -1,8 +1,7 @@
 import Vue from 'vue'
-import injectStyles from './inject-styles'
-import { nextFrame } from 'web/runtime/transition-util'
+import { injectStyles, waitForUpdate, nextFrame } from './helpers'
 
-describe.skip('Transition basic', () => {
+describe('Transition basic', () => {
   const { duration, buffer } = injectStyles() as {
     duration: number
     buffer: number
@@ -202,8 +201,8 @@ describe.skip('Transition basic', () => {
   })
 
   it('inline transition object', (done) => {
-    const enter = vi.fn()
-    const leave = vi.fn()
+    const enter = jasmine.createSpy()
+    const leave = jasmine.createSpy()
     const vm = new Vue({
       render(h) {
         return h('div', null, [
@@ -263,12 +262,12 @@ describe.skip('Transition basic', () => {
   })
 
   it('transition events', (done) => {
-    const onLeaveSpy = vi.fn()
-    const onEnterSpy = vi.fn()
-    const beforeLeaveSpy = vi.fn()
-    const beforeEnterSpy = vi.fn()
-    const afterLeaveSpy = vi.fn()
-    const afterEnterSpy = vi.fn()
+    const onLeaveSpy = jasmine.createSpy()
+    const onEnterSpy = jasmine.createSpy()
+    const beforeLeaveSpy = jasmine.createSpy()
+    const beforeEnterSpy = jasmine.createSpy()
+    const afterLeaveSpy = jasmine.createSpy()
+    const afterEnterSpy = jasmine.createSpy()
 
     const vm = new Vue({
       template: `
@@ -356,12 +355,12 @@ describe.skip('Transition basic', () => {
   })
 
   it('transition events (v-show)', (done) => {
-    const onLeaveSpy = vi.fn()
-    const onEnterSpy = vi.fn()
-    const beforeLeaveSpy = vi.fn()
-    const beforeEnterSpy = vi.fn()
-    const afterLeaveSpy = vi.fn()
-    const afterEnterSpy = vi.fn()
+    const onLeaveSpy = jasmine.createSpy()
+    const onEnterSpy = jasmine.createSpy()
+    const beforeLeaveSpy = jasmine.createSpy()
+    const beforeEnterSpy = jasmine.createSpy()
+    const afterLeaveSpy = jasmine.createSpy()
+    const afterEnterSpy = jasmine.createSpy()
 
     const vm = new Vue({
       template: `
@@ -524,8 +523,8 @@ describe.skip('Transition basic', () => {
   })
 
   it('css: false', (done) => {
-    const enterSpy = vi.fn()
-    const leaveSpy = vi.fn()
+    const enterSpy = jasmine.createSpy()
+    const leaveSpy = jasmine.createSpy()
     const vm = new Vue({
       template: `
           <div>
@@ -555,8 +554,8 @@ describe.skip('Transition basic', () => {
   })
 
   it('no transition detected', (done) => {
-    const enterSpy = vi.fn()
-    const leaveSpy = vi.fn()
+    const enterSpy = jasmine.createSpy()
+    const leaveSpy = jasmine.createSpy()
     const vm = new Vue({
       template:
         '<div><transition name="nope" @enter="enter" @leave="leave"><div v-if="ok">foo</div></transition></div>',
@@ -593,7 +592,7 @@ describe.skip('Transition basic', () => {
   })
 
   it('enterCancelled', (done) => {
-    const spy = vi.fn()
+    const spy = jasmine.createSpy()
     const vm = new Vue({
       template: `
           <div>
@@ -645,7 +644,7 @@ describe.skip('Transition basic', () => {
   })
 
   it('should remove stale leaving elements', (done) => {
-    const spy = vi.fn()
+    const spy = jasmine.createSpy()
     const vm = new Vue({
       template: `
           <div>
@@ -798,7 +797,7 @@ describe.skip('Transition basic', () => {
   })
 
   it('leaveCancelled (v-show only)', (done) => {
-    const spy = vi.fn()
+    const spy = jasmine.createSpy()
     const vm = new Vue({
       template: `
           <div>

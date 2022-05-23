@@ -1,4 +1,4 @@
-global.triggerEvent = function triggerEvent (target, event, process) {
+export function triggerEvent (target, event, process) {
   const e = document.createEvent('HTMLEvents')
   e.initEvent(event, true, true)
   if (event === 'click') {

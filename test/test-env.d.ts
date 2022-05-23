@@ -24,3 +24,13 @@ declare namespace jest {
     toHaveClass(cls: string): R
   }
 }
+
+declare const jasmine: {
+  createSpy: (id?: string) => {
+    (...args: any[]): any
+    calls: {
+      count(): number
+    }
+  }
+  addMatchers(matchers: any): void
+}
