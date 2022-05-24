@@ -29,6 +29,7 @@
       "shared/*": ["src/shared/*"],
 
       "web/*": ["src/platforms/web/*"],
+      "vca/*": ["src/composition-api/*"],
 
       "vue": ["src/platforms/web/entry-runtime-with-compiler"]
     }

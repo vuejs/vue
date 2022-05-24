@@ -12,6 +12,7 @@ export default defineConfig({
       sfc: resolve('src/sfc'),
       shared: resolve('src/shared'),
       web: resolve('src/platforms/web'),
+      vca: resolve('src/composition-api'),
       vue: resolve('src/platforms/web/entry-runtime-with-compiler')
     }
   },
