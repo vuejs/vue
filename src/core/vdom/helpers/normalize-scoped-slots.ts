@@ -1,6 +1,6 @@
 import { def } from 'core/util/lang'
 import { normalizeChildren } from 'core/vdom/helpers/normalize-children'
-import { emptyObject } from 'shared/util'
+import { emptyObject, isArray } from 'shared/util'
 import { isAsyncPlaceholder } from './is-async-placeholder'
 import type VNode from '../vnode'
 
@@ -58,7 +58,7 @@ function normalizeScopedSlot(normalSlots, key, fn) {
   const normalized = function () {
     let res = arguments.length ? fn.apply(null, arguments) : fn({})
     res =
-      res && typeof res === 'object' && !Array.isArray(res)
+      res && typeof res === 'object' && !isArray(res)
         ? [res] // single vnode
         : normalizeChildren(res)
     const vnode: VNode | null = res && res[0]

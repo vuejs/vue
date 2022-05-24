@@ -1,4 +1,5 @@
 import VNode from 'core/vdom/vnode'
+import { isArray } from 'core/util'
 
 /**
  * Runtime helper for rendering static trees.
@@ -38,7 +39,7 @@ export function markOnce(
 }
 
 function markStatic(tree: VNode | Array<VNode>, key: string, isOnce: boolean) {
-  if (Array.isArray(tree)) {
+  if (isArray(tree)) {
     for (let i = 0; i < tree.length; i++) {
       if (tree[i] && typeof tree[i] !== 'string') {
         markStaticNode(tree[i], `${key}_${i}`, isOnce)

@@ -2,6 +2,7 @@ import { warn } from './debug'
 import { observe, toggleObserving, shouldObserve } from '../observer/index'
 import {
   hasOwn,
+  isArray,
   isObject,
   toRawType,
   hyphenate,
@@ -118,7 +119,7 @@ function assertProp(
   let valid = !type || (type as any) === true
   const expectedTypes: string[] = []
   if (type) {
-    if (!Array.isArray(type)) {
+    if (!isArray(type)) {
       type = [type]
     }
     for (let i = 0; i < type.length && !valid; i++) {
@@ -166,7 +167,7 @@ function assertType(
   } else if (expectedType === 'Object') {
     valid = isPlainObject(value)
   } else if (expectedType === 'Array') {
-    valid = Array.isArray(value)
+    valid = isArray(value)
   } else {
     try {
       valid = value instanceof type
@@ -198,7 +199,7 @@ function isSameType(a, b) {
 }
 
 function getTypeIndex(type, expectedTypes): number {
-  if (!Array.isArray(expectedTypes)) {
+  if (!isArray(expectedTypes)) {
     return isSameType(expectedTypes, type) ? 0 : -1
   }
   for (let i = 0, len = expectedTypes.length; i < len; i++) {

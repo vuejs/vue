@@ -11,7 +11,7 @@ import {
 
 import { traverse } from './traverse'
 import { queueWatcher } from './scheduler'
-import Dep, { pushTarget, popTarget } from './dep'
+import Dep, { pushTarget, popTarget, DepTarget } from './dep'
 
 import type { SimpleSet } from '../util/index'
 import type { Component } from 'typescript/component'
@@ -23,8 +23,8 @@ let uid = 0
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
  */
-export default class Watcher {
-  vm: Component
+export default class Watcher implements DepTarget {
+  vm: Component | null
   expression: string
   cb: Function
   id: number
@@ -39,11 +39,12 @@ export default class Watcher {
   depIds: SimpleSet
   newDepIds: SimpleSet
   before?: Function
+  scheduler?: Function
   getter: Function
   value: any
 
   constructor(
-    vm: Component,
+    vm: Component | null,
     expOrFn: string | Function,
     cb: Function,
     options?: {
@@ -52,14 +53,16 @@ export default class Watcher {
       lazy?: boolean
       sync?: boolean
       before?: Function
+      scheduler?: Function
     } | null,
     isRenderWatcher?: boolean
   ) {
-    this.vm = vm
-    if (isRenderWatcher) {
-      vm._watcher = this
+    if ((this.vm = vm)) {
+      if (isRenderWatcher) {
+        vm._watcher = this
+      }
+      vm._watchers.push(this)
     }
-    vm._watchers.push(this)
     // options
     if (options) {
       this.deep = !!options.deep
@@ -67,6 +70,7 @@ export default class Watcher {
       this.lazy = !!options.lazy
       this.sync = !!options.sync
       this.before = options.before
+      this.scheduler = options.scheduler
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }
@@ -170,6 +174,8 @@ export default class Watcher {
       this.dirty = true
     } else if (this.sync) {
       this.run()
+    } else if (this.scheduler) {
+      this.scheduler()
     } else {
       queueWatcher(this)
     }
@@ -236,7 +242,7 @@ export default class Watcher {
       // remove self from vm's watcher list
       // this is a somewhat expensive operation so we skip it
       // if the vm is being destroyed.
-      if (!this.vm._isBeingDestroyed) {
+      if (this.vm && !this.vm._isBeingDestroyed) {
         remove(this.vm._watchers, this)
       }
       let i = this.deps.length

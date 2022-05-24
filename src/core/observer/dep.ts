@@ -1,28 +1,33 @@
-import type Watcher from './watcher'
 import { remove } from '../util/index'
 import config from '../config'
 
 let uid = 0
+
+export interface DepTarget {
+  id: number
+  addDep(dep: Dep): void
+  update(): void
+}
 
 /**
  * A dep is an observable that can have multiple
  * directives subscribing to it.
  */
 export default class Dep {
-  static target?: Watcher | null
+  static target?: DepTarget | null
   id: number
-  subs: Array<Watcher>
+  subs: Array<DepTarget>
 
   constructor() {
     this.id = uid++
     this.subs = []
   }
 
-  addSub(sub: Watcher) {
+  addSub(sub: DepTarget) {
     this.subs.push(sub)
   }
 
-  removeSub(sub: Watcher) {
+  removeSub(sub: DepTarget) {
     remove(this.subs, sub)
   }
 
@@ -51,9 +56,9 @@ export default class Dep {
 // This is globally unique because only one watcher
 // can be evaluated at a time.
 Dep.target = null
-const targetStack: Array<Watcher | null | undefined> = []
+const targetStack: Array<DepTarget | null | undefined> = []
 
-export function pushTarget(target?: Watcher | null) {
+export function pushTarget(target?: DepTarget | null) {
   targetStack.push(target)
   Dep.target = target
 }

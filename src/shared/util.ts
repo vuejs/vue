@@ -1,5 +1,7 @@
 export const emptyObject: Record<string, any> = Object.freeze({})
 
+export const isArray = Array.isArray
+
 // These helpers produce better VM code in JS engines due to their
 // explicitness and function inlining.
 export function isUndef(v: any): v is undefined | null {

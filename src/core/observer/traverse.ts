@@ -1,4 +1,4 @@
-import { _Set as Set, isObject } from '../util/index'
+import { _Set as Set, isObject, isArray } from '../util/index'
 import type { SimpleSet } from '../util/index'
 import VNode from '../vdom/vnode'
 
@@ -16,7 +16,7 @@ export function traverse(val: any) {
 
 function _traverse(val: any, seen: SimpleSet) {
   let i, keys
-  const isA = Array.isArray(val)
+  const isA = isArray(val)
   if (
     (!isA && !isObject(val)) ||
     Object.isFrozen(val) ||

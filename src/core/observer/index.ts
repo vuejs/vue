@@ -5,6 +5,7 @@ import {
   def,
   warn,
   hasOwn,
+  isArray,
   hasProto,
   isObject,
   isPlainObject,
@@ -42,7 +43,7 @@ export class Observer {
     this.dep = new Dep()
     this.vmCount = 0
     def(value, '__ob__', this)
-    if (Array.isArray(value)) {
+    if (isArray(value)) {
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
@@ -115,7 +116,7 @@ export function observe(value: any, asRootData?: boolean): Observer | void {
   } else if (
     shouldObserve &&
     !isServerRendering() &&
-    (Array.isArray(value) || isPlainObject(value)) &&
+    (isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
     !value._isVue
   ) {
@@ -161,7 +162,7 @@ export function defineReactive(
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
-          if (Array.isArray(value)) {
+          if (isArray(value)) {
             dependArray(value)
           }
         }
@@ -206,7 +207,7 @@ export function set(
       `Cannot set reactive property on undefined, null, or primitive value: ${target}`
     )
   }
-  if (Array.isArray(target) && isValidArrayIndex(key)) {
+  if (isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
     return val
@@ -242,7 +243,7 @@ export function del(target: Array<any> | Object, key: any) {
       `Cannot delete reactive property on undefined, null, or primitive value: ${target}`
     )
   }
-  if (Array.isArray(target) && isValidArrayIndex(key)) {
+  if (isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1)
     return
   }
@@ -273,7 +274,7 @@ function dependArray(value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {
     e = value[i]
     e && e.__ob__ && e.__ob__.dep.depend()
-    if (Array.isArray(e)) {
+    if (isArray(e)) {
       dependArray(e)
     }
   }

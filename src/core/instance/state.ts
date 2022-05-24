@@ -16,6 +16,7 @@ import {
   bind,
   noop,
   hasOwn,
+  isArray,
   hyphenate,
   isReserved,
   handleError,
@@ -289,7 +290,7 @@ function initMethods(vm: Component, methods: Object) {
 function initWatch(vm: Component, watch: Object) {
   for (const key in watch) {
     const handler = watch[key]
-    if (Array.isArray(handler)) {
+    if (isArray(handler)) {
       for (let i = 0; i < handler.length; i++) {
         createWatcher(vm, key, handler[i])
       }

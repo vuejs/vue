@@ -1,4 +1,4 @@
-import { isObject, isDef, hasSymbol } from 'core/util/index'
+import { isObject, isDef, hasSymbol, isArray } from 'core/util/index'
 import VNode from 'core/vdom/vnode'
 
 /**
@@ -13,7 +13,7 @@ export function renderList(
     l,
     keys,
     key
-  if (Array.isArray(val) || typeof val === 'string') {
+  if (isArray(val) || typeof val === 'string') {
     ret = new Array(val.length)
     for (i = 0, l = val.length; i < l; i++) {
       ret[i] = render(val[i], i)

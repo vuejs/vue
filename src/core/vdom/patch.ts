@@ -23,6 +23,7 @@ import {
   isDef,
   isUndef,
   isTrue,
+  isArray,
   makeMap,
   isRegExp,
   isPrimitive
@@ -261,7 +262,7 @@ export function createPatchFunction(backend) {
   }
 
   function createChildren(vnode, children, insertedVnodeQueue) {
-    if (Array.isArray(children)) {
+    if (isArray(children)) {
       if (__DEV__) {
         checkDuplicateKeys(children)
       }

@@ -7,6 +7,7 @@ import {
   warn,
   isDef,
   isUndef,
+  isArray,
   isTrue,
   isObject,
   isPrimitive,
@@ -30,7 +31,7 @@ export function createElement(
   normalizationType: any,
   alwaysNormalize: boolean
 ): VNode | Array<VNode> {
-  if (Array.isArray(data) || isPrimitive(data)) {
+  if (isArray(data) || isPrimitive(data)) {
     normalizationType = children
     children = data
     data = undefined
@@ -75,7 +76,7 @@ export function _createElement(
     )
   }
   // support single function children as default scoped slot
-  if (Array.isArray(children) && typeof children[0] === 'function') {
+  if (isArray(children) && typeof children[0] === 'function') {
     data = data || {}
     data.scopedSlots = { default: children[0] }
     children.length = 0
@@ -126,7 +127,7 @@ export function _createElement(
     // direct component options / constructor
     vnode = createComponent(tag, data, context, children)
   }
-  if (Array.isArray(vnode)) {
+  if (isArray(vnode)) {
     return vnode
   } else if (isDef(vnode)) {
     if (isDef(ns)) applyNS(vnode, ns)

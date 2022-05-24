@@ -1,5 +1,5 @@
 import config from '../config'
-import { noop } from 'shared/util'
+import { noop, isArray } from 'shared/util'
 import type { Component } from 'typescript/component'
 
 export let warn = noop
@@ -14,6 +14,7 @@ if (__DEV__) {
     str.replace(classifyRE, c => c.toUpperCase()).replace(/[-_]/g, '')
 
   warn = (msg, vm) => {
+    // TODO get current instance
     const trace = vm ? generateComponentTrace(vm) : ''
 
     if (config.warnHandler) {
@@ -87,7 +88,7 @@ if (__DEV__) {
           .map(
             (vm, i) =>
               `${i === 0 ? '---> ' : repeat(' ', 5 + i * 2)}${
-                Array.isArray(vm)
+                isArray(vm)
                   ? `${formatComponentName(vm[0])}... (${
                       vm[1]
                     } recursive calls)`

@@ -3,7 +3,8 @@ import {
   nextTick,
   emptyObject,
   handleError,
-  defineReactive
+  defineReactive,
+  isArray
 } from '../util/index'
 
 import { createElement } from '../vdom/create-element'
@@ -137,12 +138,12 @@ export function renderMixin(Vue: Component) {
       currentRenderingInstance = null
     }
     // if the returned array contains only a single node, allow it
-    if (Array.isArray(vnode) && vnode.length === 1) {
+    if (isArray(vnode) && vnode.length === 1) {
       vnode = vnode[0]
     }
     // return empty vnode in case the render function errored out
     if (!(vnode instanceof VNode)) {
-      if (__DEV__ && Array.isArray(vnode)) {
+      if (__DEV__ && isArray(vnode)) {
         warn(
           'Multiple root nodes returned from render function. Render function ' +
             'should return a single root node.',

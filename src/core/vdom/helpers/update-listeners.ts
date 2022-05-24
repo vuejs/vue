@@ -1,5 +1,5 @@
 import { warn, invokeWithErrorHandling } from 'core/util/index'
-import { cached, isUndef, isTrue } from 'shared/util'
+import { cached, isUndef, isTrue, isArray } from 'shared/util'
 import type { Component } from 'typescript/component'
 
 const normalizeEvent = cached(
@@ -34,7 +34,7 @@ export function createFnInvoker(
 ): Function {
   function invoker() {
     const fns = invoker.fns
-    if (Array.isArray(fns)) {
+    if (isArray(fns)) {
       const cloned = fns.slice()
       for (let i = 0; i < cloned.length; i++) {
         invokeWithErrorHandling(

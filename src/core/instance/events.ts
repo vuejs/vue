@@ -2,6 +2,7 @@ import type { Component } from 'typescript/component'
 import {
   tip,
   toArray,
+  isArray,
   hyphenate,
   formatComponentName,
   invokeWithErrorHandling
@@ -62,7 +63,7 @@ export function eventsMixin(Vue: Component) {
     fn: Function
   ): Component {
     const vm: Component = this
-    if (Array.isArray(event)) {
+    if (isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
         vm.$on(event[i], fn)
       }
@@ -99,7 +100,7 @@ export function eventsMixin(Vue: Component) {
       return vm
     }
     // array of events
-    if (Array.isArray(event)) {
+    if (isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
         vm.$off(event[i], fn)
       }

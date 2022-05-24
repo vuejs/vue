@@ -1,4 +1,4 @@
-import { remove, isDef } from 'shared/util'
+import { remove, isDef, isArray } from 'shared/util'
 import type { VNodeWithData } from 'typescript/vnode'
 
 export default {
@@ -25,14 +25,14 @@ export function registerRef(vnode: VNodeWithData, isRemoval?: boolean) {
   const refs = vm.$refs
   const obj = refs[key]
   if (isRemoval) {
-    if (Array.isArray(obj)) {
+    if (isArray(obj)) {
       remove(obj, ref)
     } else if (obj === ref) {
       refs[key] = undefined
     }
   } else {
     if (vnode.data.refInFor) {
-      if (!Array.isArray(obj)) {
+      if (!isArray(obj)) {
         refs[key] = [ref]
       } else if (obj.indexOf(ref) < 0) {
         obj.push(ref)

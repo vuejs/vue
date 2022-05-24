@@ -1,4 +1,4 @@
-import { isRegExp, remove } from 'shared/util'
+import { isRegExp, isArray, remove } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 import type VNode from 'core/vdom/vnode'
 import type { VNodeComponentOptions } from 'typescript/vnode'
@@ -20,7 +20,7 @@ function matches(
   pattern: string | RegExp | Array<string>,
   name: string
 ): boolean {
-  if (Array.isArray(pattern)) {
+  if (isArray(pattern)) {
     return pattern.indexOf(name) > -1
   } else if (typeof pattern === 'string') {
     return pattern.split(',').indexOf(name) > -1

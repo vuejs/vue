@@ -1,5 +1,12 @@
 import VNode, { createTextVNode } from 'core/vdom/vnode'
-import { isFalse, isTrue, isDef, isUndef, isPrimitive } from 'shared/util'
+import {
+  isFalse,
+  isTrue,
+  isArray,
+  isDef,
+  isUndef,
+  isPrimitive
+} from 'shared/util'
 
 // The template compiler attempts to minimize the need for normalization by
 // statically analyzing the template at compile time.
@@ -15,7 +22,7 @@ import { isFalse, isTrue, isDef, isUndef, isPrimitive } from 'shared/util'
 // because functional components already normalize their own children.
 export function simpleNormalizeChildren(children: any) {
   for (let i = 0; i < children.length; i++) {
-    if (Array.isArray(children[i])) {
+    if (isArray(children[i])) {
       return Array.prototype.concat.apply([], children)
     }
   }
@@ -29,7 +36,7 @@ export function simpleNormalizeChildren(children: any) {
 export function normalizeChildren(children: any): Array<VNode> | undefined {
   return isPrimitive(children)
     ? [createTextVNode(children)]
-    : Array.isArray(children)
+    : isArray(children)
     ? normalizeArrayChildren(children)
     : undefined
 }
@@ -50,7 +57,7 @@ function normalizeArrayChildren(
     lastIndex = res.length - 1
     last = res[lastIndex]
     //  nested
-    if (Array.isArray(c)) {
+    if (isArray(c)) {
       if (c.length > 0) {
         c = normalizeArrayChildren(c, `${nestedIndex || ''}_${i}`)
         // merge adjacent text nodes

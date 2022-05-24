@@ -1,8 +1,8 @@
 import config from 'core/config'
-import { hyphenate } from 'shared/util'
+import { hyphenate, isArray } from 'shared/util'
 
 function isKeyNotMatch<T>(expect: T | Array<T>, actual: T): boolean {
-  if (Array.isArray(expect)) {
+  if (isArray(expect)) {
     return expect.indexOf(actual) === -1
   } else {
     return expect !== actual

@@ -10,6 +10,7 @@ import {
   isDef,
   isTrue,
   hasOwn,
+  isArray,
   camelize,
   emptyObject,
   validateProp
@@ -78,7 +79,7 @@ export function FunctionalRenderContext(
   if (options._scopeId) {
     this._c = (a, b, c, d) => {
       const vnode = createElement(contextVm, a, b, c, d, needNormalization)
-      if (vnode && !Array.isArray(vnode)) {
+      if (vnode && !isArray(vnode)) {
         vnode.fnScopeId = options._scopeId
         vnode.fnContext = parent
       }
@@ -129,7 +130,7 @@ export function createFunctionalComponent(
       options,
       renderContext
     )
-  } else if (Array.isArray(vnode)) {
+  } else if (isArray(vnode)) {
     const vnodes = normalizeChildren(vnode) || []
     const res = new Array(vnodes.length)
     for (let i = 0; i < vnodes.length; i++) {
