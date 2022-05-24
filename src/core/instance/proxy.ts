@@ -5,7 +5,7 @@ import { warn, makeMap, isNative } from '../util/index'
 
 let initProxy
 
-if (process.env.NODE_ENV !== 'production') {
+if (__DEV__) {
   const allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
       'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +

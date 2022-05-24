@@ -144,7 +144,7 @@ export function createPatchFunction(backend) {
     const children = vnode.children
     const tag = vnode.tag
     if (isDef(tag)) {
-      if (process.env.NODE_ENV !== 'production') {
+      if (__DEV__) {
         if (data && data.pre) {
           creatingElmInVPre++
         }
@@ -171,7 +171,7 @@ export function createPatchFunction(backend) {
       }
       insert(parentElm, vnode.elm, refElm)
 
-      if (process.env.NODE_ENV !== 'production' && data && data.pre) {
+      if (__DEV__ && data && data.pre) {
         creatingElmInVPre--
       }
     } else if (isTrue(vnode.isComment)) {
@@ -262,7 +262,7 @@ export function createPatchFunction(backend) {
 
   function createChildren(vnode, children, insertedVnodeQueue) {
     if (Array.isArray(children)) {
-      if (process.env.NODE_ENV !== 'production') {
+      if (__DEV__) {
         checkDuplicateKeys(children)
       }
       for (let i = 0; i < children.length; ++i) {
@@ -431,7 +431,7 @@ export function createPatchFunction(backend) {
     // during leaving transitions
     const canMove = !removeOnly
 
-    if (process.env.NODE_ENV !== 'production') {
+    if (__DEV__) {
       checkDuplicateKeys(newCh)
     }
 
@@ -639,7 +639,7 @@ export function createPatchFunction(backend) {
         if (oldCh !== ch)
           updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
       } else if (isDef(ch)) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (__DEV__) {
           checkDuplicateKeys(ch)
         }
         if (isDef(oldVnode.text)) nodeOps.setTextContent(elm, '')
@@ -688,7 +688,7 @@ export function createPatchFunction(backend) {
       return true
     }
     // assert node match
-    if (process.env.NODE_ENV !== 'production') {
+    if (__DEV__) {
       if (!assertNodeMatch(elm, vnode, inVPre)) {
         return false
       }
@@ -717,7 +717,7 @@ export function createPatchFunction(backend) {
             if (i !== elm.innerHTML) {
               /* istanbul ignore if */
               if (
-                process.env.NODE_ENV !== 'production' &&
+                __DEV__ &&
                 typeof console !== 'undefined' &&
                 !hydrationBailed
               ) {
@@ -747,7 +747,7 @@ export function createPatchFunction(backend) {
             if (!childrenMatch || childNode) {
               /* istanbul ignore if */
               if (
-                process.env.NODE_ENV !== 'production' &&
+                __DEV__ &&
                 typeof console !== 'undefined' &&
                 !hydrationBailed
               ) {
@@ -828,7 +828,7 @@ export function createPatchFunction(backend) {
             if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
               invokeInsertHook(vnode, insertedVnodeQueue, true)
               return oldVnode
-            } else if (process.env.NODE_ENV !== 'production') {
+            } else if (__DEV__) {
               warn(
                 'The client-side rendered virtual DOM tree is not matching ' +
                   'server-rendered content. This is likely caused by incorrect ' +

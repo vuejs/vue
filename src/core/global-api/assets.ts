@@ -16,7 +16,7 @@ export function initAssetRegisters(Vue: GlobalAPI) {
         return this.options[type + 's'][id]
       } else {
         /* istanbul ignore if */
-        if (process.env.NODE_ENV !== 'production' && type === 'component') {
+        if (__DEV__ && type === 'component') {
           validateComponentName(id)
         }
         if (type === 'component' && isPlainObject(definition)) {

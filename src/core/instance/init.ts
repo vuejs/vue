@@ -20,7 +20,7 @@ export function initMixin(Vue: Component) {
 
     let startTag, endTag
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+    if (__DEV__ && config.performance && mark) {
       startTag = `vue-perf-start:${vm._uid}`
       endTag = `vue-perf-end:${vm._uid}`
       mark(startTag)
@@ -42,7 +42,7 @@ export function initMixin(Vue: Component) {
       )
     }
     /* istanbul ignore else */
-    if (process.env.NODE_ENV !== 'production') {
+    if (__DEV__) {
       initProxy(vm)
     } else {
       vm._renderProxy = vm
@@ -59,7 +59,7 @@ export function initMixin(Vue: Component) {
     callHook(vm, 'created')
 
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+    if (__DEV__ && config.performance && mark) {
       vm._name = formatComponentName(vm, false)
       mark(endTag)
       measure(`vue ${vm._name} init`, startTag, endTag)

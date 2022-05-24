@@ -7,7 +7,7 @@ import { warn } from '../util/index'
 import type { GlobalAPI } from 'typescript/global-api'
 
 function Vue(options) {
-  if (process.env.NODE_ENV !== 'production' && !(this instanceof Vue)) {
+  if (__DEV__ && !(this instanceof Vue)) {
     warn('Vue is a constructor and should be called with the `new` keyword')
   }
   this._init(options)

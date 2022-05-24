@@ -158,7 +158,7 @@ function cloneAndMarkFunctionalResult(
   const clone = cloneVNode(vnode)
   clone.fnContext = contextVm
   clone.fnOptions = options
-  if (process.env.NODE_ENV !== 'production') {
+  if (__DEV__) {
     ;(clone.devtoolsMeta = clone.devtoolsMeta || ({} as any)).renderContext =
       renderContext
   }

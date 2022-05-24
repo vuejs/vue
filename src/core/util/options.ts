@@ -28,7 +28,7 @@ const strats = config.optionMergeStrategies
 /**
  * Options with restrictions
  */
-if (process.env.NODE_ENV !== 'production') {
+if (__DEV__) {
   strats.el = strats.propsData = function (
     parent: any,
     child: any,
@@ -128,7 +128,7 @@ strats.data = function (
 ): Function | null {
   if (!vm) {
     if (childVal && typeof childVal !== 'function') {
-      process.env.NODE_ENV !== 'production' &&
+      __DEV__ &&
         warn(
           'The "data" option should be a function ' +
             'that returns a per-instance value in component ' +
@@ -190,7 +190,7 @@ function mergeAssets(
 ): Object {
   const res = Object.create(parentVal || null)
   if (childVal) {
-    process.env.NODE_ENV !== 'production' && assertObjectType(key, childVal, vm)
+    __DEV__ && assertObjectType(key, childVal, vm)
     return extend(res, childVal)
   } else {
     return res
@@ -220,7 +220,7 @@ strats.watch = function (
   if (childVal === nativeWatch) childVal = undefined
   /* istanbul ignore if */
   if (!childVal) return Object.create(parentVal || null)
-  if (process.env.NODE_ENV !== 'production') {
+  if (__DEV__) {
     assertObjectType(key, childVal, vm)
   }
   if (!parentVal) return childVal
@@ -254,7 +254,7 @@ strats.props =
       vm: Component | null,
       key: string
     ): Object | null {
-      if (childVal && process.env.NODE_ENV !== 'production') {
+      if (childVal && __DEV__) {
         assertObjectType(key, childVal, vm)
       }
       if (!parentVal) return childVal
@@ -317,7 +317,7 @@ function normalizeProps(options: Record<string, any>, vm?: Component | null) {
       if (typeof val === 'string') {
         name = camelize(val)
         res[name] = { type: null }
-      } else if (process.env.NODE_ENV !== 'production') {
+      } else if (__DEV__) {
         warn('props must be strings when using array syntax.')
       }
     }
@@ -327,7 +327,7 @@ function normalizeProps(options: Record<string, any>, vm?: Component | null) {
       name = camelize(key)
       res[name] = isPlainObject(val) ? val : { type: val }
     }
-  } else if (process.env.NODE_ENV !== 'production') {
+  } else if (__DEV__) {
     warn(
       `Invalid value for option "props": expected an Array or an Object, ` +
         `but got ${toRawType(props)}.`,
@@ -355,7 +355,7 @@ function normalizeInject(options: Record<string, any>, vm?: Component | null) {
         ? extend({ from: key }, val)
         : { from: val }
     }
-  } else if (process.env.NODE_ENV !== 'production') {
+  } else if (__DEV__) {
     warn(
       `Invalid value for option "inject": expected an Array or an Object, ` +
         `but got ${toRawType(inject)}.`,
@@ -398,7 +398,7 @@ export function mergeOptions(
   child: Record<string, any>,
   vm?: Component | null
 ): ComponentOptions {
-  if (process.env.NODE_ENV !== 'production') {
+  if (__DEV__) {
     checkComponents(child)
   }
 
@@ -467,7 +467,7 @@ export function resolveAsset(
   if (hasOwn(assets, PascalCaseId)) return assets[PascalCaseId]
   // fallback to prototype chain
   const res = assets[id] || assets[camelizedId] || assets[PascalCaseId]
-  if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
+  if (__DEV__ && warnMissing && !res) {
     warn('Failed to resolve ' + type.slice(0, -1) + ': ' + id, options)
   }
   return res

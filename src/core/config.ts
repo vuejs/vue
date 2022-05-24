@@ -45,12 +45,12 @@ export default {
   /**
    * Show production mode tip message on boot?
    */
-  productionTip: process.env.NODE_ENV !== 'production',
+  productionTip: __DEV__,
 
   /**
    * Whether to enable devtools
    */
-  devtools: process.env.NODE_ENV !== 'production',
+  devtools: __DEV__,
 
   /**
    * Whether to record perf

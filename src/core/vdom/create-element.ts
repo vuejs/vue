@@ -49,7 +49,7 @@ export function _createElement(
   normalizationType?: number
 ): VNode | Array<VNode> {
   if (isDef(data) && isDef((data as any).__ob__)) {
-    process.env.NODE_ENV !== 'production' &&
+    __DEV__ &&
       warn(
         `Avoid using observed data object as vnode data: ${JSON.stringify(
           data
@@ -67,12 +67,7 @@ export function _createElement(
     return createEmptyVNode()
   }
   // warn against non-primitive key
-  if (
-    process.env.NODE_ENV !== 'production' &&
-    isDef(data) &&
-    isDef(data.key) &&
-    !isPrimitive(data.key)
-  ) {
+  if (__DEV__ && isDef(data) && isDef(data.key) && !isPrimitive(data.key)) {
     warn(
       'Avoid using non-primitive value as key, ' +
         'use string/number value instead.',
@@ -97,7 +92,7 @@ export function _createElement(
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       if (
-        process.env.NODE_ENV !== 'production' &&
+        __DEV__ &&
         isDef(data) &&
         isDef(data.nativeOn) &&
         data.tag !== 'component'

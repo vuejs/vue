@@ -74,7 +74,7 @@ export function updateListeners(
     old = oldOn[name]
     event = normalizeEvent(name)
     if (isUndef(cur)) {
-      process.env.NODE_ENV !== 'production' &&
+      __DEV__ &&
         warn(
           `Invalid handler for event "${event.name}": got ` + String(cur),
           vm

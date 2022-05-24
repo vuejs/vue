@@ -78,8 +78,7 @@ export default class Watcher {
     this.newDeps = []
     this.depIds = new Set()
     this.newDepIds = new Set()
-    this.expression =
-      process.env.NODE_ENV !== 'production' ? expOrFn.toString() : ''
+    this.expression = __DEV__ ? expOrFn.toString() : ''
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
@@ -87,7 +86,7 @@ export default class Watcher {
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = noop
-        process.env.NODE_ENV !== 'production' &&
+        __DEV__ &&
           warn(
             `Failed watching path: "${expOrFn}" ` +
               'Watcher only accepts simple dot-delimited paths. ' +

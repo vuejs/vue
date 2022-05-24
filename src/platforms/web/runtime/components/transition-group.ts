@@ -69,7 +69,7 @@ export default {
           children.push(c)
           map[c.key] = c
           ;(c.data || (c.data = {})).transition = transitionData
-        } else if (process.env.NODE_ENV !== 'production') {
+        } else if (__DEV__) {
           const opts = c.componentOptions
           const name: string = opts
             ? opts.Ctor.options.name || opts.tag || ''

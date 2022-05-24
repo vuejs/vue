@@ -50,7 +50,7 @@ export function validateProp(
     observe(value)
     toggleObserving(prevShouldObserve)
   }
-  if (process.env.NODE_ENV !== 'production') {
+  if (__DEV__) {
     assertProp(prop, key, value, vm, absent)
   }
   return value
@@ -70,7 +70,7 @@ function getPropDefaultValue(
   }
   const def = prop.default
   // warn against non-factory defaults for Object & Array
-  if (process.env.NODE_ENV !== 'production' && isObject(def)) {
+  if (__DEV__ && isObject(def)) {
     warn(
       'Invalid default value for prop "' +
         key +

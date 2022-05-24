@@ -147,7 +147,7 @@ export function mountComponent(
   if (!vm.$options.render) {
     // @ts-expect-error invalid type
     vm.$options.render = createEmptyVNode
-    if (process.env.NODE_ENV !== 'production') {
+    if (__DEV__) {
       /* istanbul ignore if */
       if (
         (vm.$options.template && vm.$options.template.charAt(0) !== '#') ||
@@ -172,7 +172,7 @@ export function mountComponent(
 
   let updateComponent
   /* istanbul ignore if */
-  if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+  if (__DEV__ && config.performance && mark) {
     updateComponent = () => {
       const name = vm._name
       const id = vm._uid
@@ -229,7 +229,7 @@ export function updateChildComponent(
   parentVnode: MountedComponentVNode,
   renderChildren?: Array<VNode> | null
 ) {
-  if (process.env.NODE_ENV !== 'production') {
+  if (__DEV__) {
     isUpdatingChildComponent = true
   }
 
@@ -299,7 +299,7 @@ export function updateChildComponent(
     vm.$forceUpdate()
   }
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (__DEV__) {
     isUpdatingChildComponent = false
   }
 }

@@ -27,7 +27,7 @@ export function parseComponent(
     sfc.errors.push(msg)
   }
 
-  if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+  if (__DEV__ && options.outputSourceRange) {
     warn = (msg, range) => {
       const data: WarningMessage = { msg }
       if (range.start != null) {

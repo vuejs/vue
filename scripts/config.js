@@ -16,7 +16,7 @@ const banner =
   ' */'
 
 const aliases = require('./alias')
-const resolve = (p) => {
+const resolve = p => {
   const base = p.split('/')[0]
   if (aliases[base]) {
     return path.resolve(aliases[base], p.slice(base.length + 1))
@@ -241,12 +241,13 @@ function genConfig(name) {
     __VERSION__: version
   }
   // feature flags
-  Object.keys(featureFlags).forEach((key) => {
+  Object.keys(featureFlags).forEach(key => {
     vars[`process.env.${key}`] = featureFlags[key]
   })
   // build-specific env
   if (opts.env) {
     vars['process.env.NODE_ENV'] = JSON.stringify(opts.env)
+    vars.__DEV__ = opts.env !== 'production'
   }
 
   vars.preventAssignment = true

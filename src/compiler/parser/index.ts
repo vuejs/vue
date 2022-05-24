@@ -119,14 +119,14 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
     if (!stack.length && element !== root) {
       // allow root elements with v-if, v-else-if and v-else
       if (root.if && (element.elseif || element.else)) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (__DEV__) {
           checkRootConstraints(element)
         }
         addIfCondition(root, {
           exp: element.elseif,
           block: element
         })
-      } else if (process.env.NODE_ENV !== 'production') {
+      } else if (__DEV__) {
         warnOnce(
           `Component template should contain exactly one root element. ` +
             `If you are using v-if on multiple elements, ` +
@@ -229,7 +229,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
         element.ns = ns
       }
 
-      if (process.env.NODE_ENV !== 'production') {
+      if (__DEV__) {
         if (options.outputSourceRange) {
           element.start = start
           element.end = end
@@ -254,7 +254,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
 
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
-        process.env.NODE_ENV !== 'production' &&
+        __DEV__ &&
           warn(
             'Templates should only be responsible for mapping the state to the ' +
               'UI. Avoid placing tags with side-effects in your templates, such as ' +
@@ -289,7 +289,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
 
       if (!root) {
         root = element
-        if (process.env.NODE_ENV !== 'production') {
+        if (__DEV__) {
           checkRootConstraints(root)
         }
       }
@@ -307,7 +307,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
-      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+      if (__DEV__ && options.outputSourceRange) {
         element.end = end
       }
       closeElement(element)
@@ -315,7 +315,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
 
     chars(text: string, start: number, end: number) {
       if (!currentParent) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (__DEV__) {
           if (text === template) {
             warnOnce(
               'Component template requires a root element, rather than just text.',
@@ -382,10 +382,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
           }
         }
         if (child) {
-          if (
-            process.env.NODE_ENV !== 'production' &&
-            options.outputSourceRange
-          ) {
+          if (__DEV__ && options.outputSourceRange) {
             child.start = start
             child.end = end
           }
@@ -402,10 +399,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
           text,
           isComment: true
         }
-        if (
-          process.env.NODE_ENV !== 'production' &&
-          options.outputSourceRange
-        ) {
+        if (__DEV__ && options.outputSourceRange) {
           child.start = start
           child.end = end
         }
@@ -465,7 +459,7 @@ export function processElement(element: ASTElement, options: CompilerOptions) {
 function processKey(el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (__DEV__) {
       if (el.tag === 'template') {
         warn(
           `<template> cannot be keyed. Place the key on real elements instead.`,
@@ -508,7 +502,7 @@ export function processFor(el: ASTElement) {
     const res = parseFor(exp)
     if (res) {
       extend(el, res)
-    } else if (process.env.NODE_ENV !== 'production') {
+    } else if (__DEV__) {
       warn(`Invalid v-for expression: ${exp}`, el.rawAttrsMap['v-for'])
     }
   }
@@ -566,7 +560,7 @@ function processIfConditions(el, parent) {
       exp: el.elseif,
       block: el
     })
-  } else if (process.env.NODE_ENV !== 'production') {
+  } else if (__DEV__) {
     warn(
       `v-${el.elseif ? 'else-if="' + el.elseif + '"' : 'else'} ` +
         `used on element <${el.tag}> without corresponding v-if.`,
@@ -581,7 +575,7 @@ function findPrevElement(children: Array<any>): ASTElement | void {
     if (children[i].type === 1) {
       return children[i]
     } else {
-      if (process.env.NODE_ENV !== 'production' && children[i].text !== ' ') {
+      if (__DEV__ && children[i].text !== ' ') {
         warn(
           `text "${children[i].text.trim()}" between v-if and v-else(-if) ` +
             `will be ignored.`,
@@ -614,7 +608,7 @@ function processSlotContent(el) {
   if (el.tag === 'template') {
     slotScope = getAndRemoveAttr(el, 'scope')
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' && slotScope) {
+    if (__DEV__ && slotScope) {
       warn(
         `the "scope" attribute for scoped slots have been deprecated and ` +
           `replaced by "slot-scope" since 2.5. The new "slot-scope" attribute ` +
@@ -627,7 +621,7 @@ function processSlotContent(el) {
     el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
   } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
+    if (__DEV__ && el.attrsMap['v-for']) {
       warn(
         `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
           `(v-for takes higher priority). Use a wrapper <template> for the ` +
@@ -659,7 +653,7 @@ function processSlotContent(el) {
       // v-slot on <template>
       const slotBinding = getAndRemoveAttrByRegex(el, slotRE)
       if (slotBinding) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (__DEV__) {
           if (el.slotTarget || el.slotScope) {
             warn(`Unexpected mixed usage of different slot syntaxes.`, el)
           }
@@ -680,7 +674,7 @@ function processSlotContent(el) {
       // v-slot on component, denotes default slot
       const slotBinding = getAndRemoveAttrByRegex(el, slotRE)
       if (slotBinding) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (__DEV__) {
           if (!maybeComponent(el)) {
             warn(
               `v-slot can only be used on components or <template>.`,
@@ -729,7 +723,7 @@ function getSlotName(binding) {
   if (!name) {
     if (binding.name[0] !== '#') {
       name = 'default'
-    } else if (process.env.NODE_ENV !== 'production') {
+    } else if (__DEV__) {
       warn(`v-slot shorthand syntax requires a slot name.`, binding)
     }
   }
@@ -744,7 +738,7 @@ function getSlotName(binding) {
 function processSlotOutlet(el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
-    if (process.env.NODE_ENV !== 'production' && el.key) {
+    if (__DEV__ && el.key) {
       warn(
         `\`key\` does not work on <slot> because slots are abstract outlets ` +
           `and can possibly expand into multiple elements. ` +
@@ -791,10 +785,7 @@ function processAttrs(el) {
         if (isDynamic) {
           name = name.slice(1, -1)
         }
-        if (
-          process.env.NODE_ENV !== 'production' &&
-          value.trim().length === 0
-        ) {
+        if (__DEV__ && value.trim().length === 0) {
           warn(
             `The value for a v-bind expression cannot be empty. Found in "v-bind:${name}"`
           )
@@ -885,13 +876,13 @@ function processAttrs(el) {
           modifiers,
           list[i]
         )
-        if (process.env.NODE_ENV !== 'production' && name === 'model') {
+        if (__DEV__ && name === 'model') {
           checkForAliasModel(el, value)
         }
       }
     } else {
       // literal attribute
-      if (process.env.NODE_ENV !== 'production') {
+      if (__DEV__) {
         const res = parseText(value, delimiters)
         if (res) {
           warn(
@@ -942,12 +933,7 @@ function parseModifiers(name: string): Object | void {
 function makeAttrsMap(attrs: Array<Record<string, any>>): Record<string, any> {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
-    if (
-      process.env.NODE_ENV !== 'production' &&
-      map[attrs[i].name] &&
-      !isIE &&
-      !isEdge
-    ) {
+    if (__DEV__ && map[attrs[i].name] && !isIE && !isEdge) {
       warn('duplicate attribute: ' + attrs[i].name, attrs[i])
     }
     map[attrs[i].name] = attrs[i].value

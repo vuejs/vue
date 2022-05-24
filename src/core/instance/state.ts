@@ -76,7 +76,7 @@ function initProps(vm: Component, propsOptions: Object) {
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
-    if (process.env.NODE_ENV !== 'production') {
+    if (__DEV__) {
       const hyphenatedKey = hyphenate(key)
       if (
         isReservedAttribute(hyphenatedKey) ||
@@ -116,7 +116,7 @@ function initData(vm: Component) {
   data = vm._data = typeof data === 'function' ? getData(data, vm) : data || {}
   if (!isPlainObject(data)) {
     data = {}
-    process.env.NODE_ENV !== 'production' &&
+    __DEV__ &&
       warn(
         'data functions should return an object:\n' +
           'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
@@ -130,13 +130,13 @@ function initData(vm: Component) {
   let i = keys.length
   while (i--) {
     const key = keys[i]
-    if (process.env.NODE_ENV !== 'production') {
+    if (__DEV__) {
       if (methods && hasOwn(methods, key)) {
         warn(`Method "${key}" has already been defined as a data property.`, vm)
       }
     }
     if (props && hasOwn(props, key)) {
-      process.env.NODE_ENV !== 'production' &&
+      __DEV__ &&
         warn(
           `The data property "${key}" is already declared as a prop. ` +
             `Use prop default value instead.`,
@@ -174,7 +174,7 @@ function initComputed(vm: Component, computed: Object) {
   for (const key in computed) {
     const userDef = computed[key]
     const getter = typeof userDef === 'function' ? userDef : userDef.get
-    if (process.env.NODE_ENV !== 'production' && getter == null) {
+    if (__DEV__ && getter == null) {
       warn(`Getter is missing for computed property "${key}".`, vm)
     }
 
@@ -193,7 +193,7 @@ function initComputed(vm: Component, computed: Object) {
     // at instantiation here.
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
-    } else if (process.env.NODE_ENV !== 'production') {
+    } else if (__DEV__) {
       if (key in vm.$data) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
       } else if (vm.$options.props && key in vm.$options.props) {
@@ -227,10 +227,7 @@ export function defineComputed(
       : noop
     sharedPropertyDefinition.set = userDef.set || noop
   }
-  if (
-    process.env.NODE_ENV !== 'production' &&
-    sharedPropertyDefinition.set === noop
-  ) {
+  if (__DEV__ && sharedPropertyDefinition.set === noop) {
     sharedPropertyDefinition.set = function () {
       warn(
         `Computed property "${key}" was assigned to but it has no setter.`,
@@ -265,7 +262,7 @@ function createGetterInvoker(fn) {
 function initMethods(vm: Component, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (__DEV__) {
       if (typeof methods[key] !== 'function') {
         warn(
           `Method "${key}" has type "${typeof methods[
@@ -330,7 +327,7 @@ export function stateMixin(Vue: Component) {
   propsDef.get = function () {
     return this._props
   }
-  if (process.env.NODE_ENV !== 'production') {
+  if (__DEV__) {
     dataDef.set = function () {
       warn(
         'Avoid replacing instance root $data. ' +

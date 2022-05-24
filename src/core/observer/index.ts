@@ -175,7 +175,7 @@ export function defineReactive(
         return
       }
       /* eslint-enable no-self-compare */
-      if (process.env.NODE_ENV !== 'production' && customSetter) {
+      if (__DEV__ && customSetter) {
         customSetter()
       }
       // #7981: for accessor properties without setter
@@ -201,10 +201,7 @@ export function set(
   key: any,
   val: any
 ): any {
-  if (
-    process.env.NODE_ENV !== 'production' &&
-    (isUndef(target) || isPrimitive(target))
-  ) {
+  if (__DEV__ && (isUndef(target) || isPrimitive(target))) {
     warn(
       `Cannot set reactive property on undefined, null, or primitive value: ${target}`
     )
@@ -220,7 +217,7 @@ export function set(
   }
   const ob = (target as any).__ob__
   if ((target as any)._isVue || (ob && ob.vmCount)) {
-    process.env.NODE_ENV !== 'production' &&
+    __DEV__ &&
       warn(
         'Avoid adding reactive properties to a Vue instance or its root $data ' +
           'at runtime - declare it upfront in the data option.'
@@ -240,10 +237,7 @@ export function set(
  * Delete a property and trigger change if necessary.
  */
 export function del(target: Array<any> | Object, key: any) {
-  if (
-    process.env.NODE_ENV !== 'production' &&
-    (isUndef(target) || isPrimitive(target))
-  ) {
+  if (__DEV__ && (isUndef(target) || isPrimitive(target))) {
     warn(
       `Cannot delete reactive property on undefined, null, or primitive value: ${target}`
     )
@@ -254,7 +248,7 @@ export function del(target: Array<any> | Object, key: any) {
   }
   const ob = (target as any).__ob__
   if ((target as any)._isVue || (ob && ob.vmCount)) {
-    process.env.NODE_ENV !== 'production' &&
+    __DEV__ &&
       warn(
         'Avoid deleting properties on a Vue instance or its root $data ' +
           '- just set it to null.'

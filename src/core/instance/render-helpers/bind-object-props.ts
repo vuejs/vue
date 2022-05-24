@@ -22,7 +22,7 @@ export function bindObjectProps(
 ): VNodeData {
   if (value) {
     if (!isObject(value)) {
-      process.env.NODE_ENV !== 'production' &&
+      __DEV__ &&
         warn('v-bind without argument expects an Object or Array value', this)
     } else {
       if (Array.isArray(value)) {

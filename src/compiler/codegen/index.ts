@@ -137,7 +137,7 @@ function genOnce(el: ASTElement, state: CodegenState): string {
       parent = parent.parent
     }
     if (!key) {
-      process.env.NODE_ENV !== 'production' &&
+      __DEV__ &&
         state.warn(
           `v-once can only be used inside v-for that is keyed. `,
           el.rawAttrsMap['v-once']
@@ -201,7 +201,7 @@ export function genFor(
   const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
 
   if (
-    process.env.NODE_ENV !== 'production' &&
+    __DEV__ &&
     state.maybeComponent(el) &&
     el.tag !== 'slot' &&
     el.tag !== 'template' &&
@@ -345,10 +345,7 @@ function genInlineTemplate(
   state: CodegenState
 ): string | undefined {
   const ast = el.children[0]
-  if (
-    process.env.NODE_ENV !== 'production' &&
-    (el.children.length !== 1 || ast.type !== 1)
-  ) {
+  if (__DEV__ && (el.children.length !== 1 || ast.type !== 1)) {
     state.warn(
       'Inline-template components must have exactly one child element.',
       { start: el.start }

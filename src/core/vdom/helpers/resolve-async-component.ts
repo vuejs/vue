@@ -96,7 +96,7 @@ export function resolveAsyncComponent(
     })
 
     const reject = once(reason => {
-      process.env.NODE_ENV !== 'production' &&
+      __DEV__ &&
         warn(
           `Failed to resolve async component: ${String(factory)}` +
             (reason ? `\nReason: ${reason}` : '')
@@ -143,11 +143,7 @@ export function resolveAsyncComponent(
           timerTimeout = setTimeout(() => {
             timerTimeout = null
             if (isUndef(factory.resolved)) {
-              reject(
-                process.env.NODE_ENV !== 'production'
-                  ? `timeout (${res.timeout}ms)`
-                  : null
-              )
+              reject(__DEV__ ? `timeout (${res.timeout}ms)` : null)
             }
           }, res.timeout)
         }

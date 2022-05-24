@@ -15,6 +15,9 @@ export default defineConfig({
       vue: resolve('src/platforms/web/entry-runtime-with-compiler')
     }
   },
+  define: {
+    __DEV__: true
+  },
   test: {
     globals: true,
     environment: 'jsdom',

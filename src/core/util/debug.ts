@@ -7,7 +7,7 @@ export let tip = noop
 export let generateComponentTrace: (vm: Component) => string // work around flow check
 export let formatComponentName: (vm: Component, includeFile?: false) => string
 
-if (process.env.NODE_ENV !== 'production') {
+if (__DEV__) {
   const hasConsole = typeof console !== 'undefined'
   const classifyRE = /(?:^|[-_])(\w)/g
   const classify = str =>

@@ -231,10 +231,9 @@ export default class TemplateRenderer {
     const { contextKey = 'state', windowKey = '__INITIAL_STATE__' } =
       options || {}
     const state = this.serialize(context[contextKey])
-    const autoRemove =
-      process.env.NODE_ENV === 'production'
-        ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
-        : ''
+    const autoRemove = __DEV__
+      ? ''
+      : ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
     const nonceAttr = context.nonce ? ` nonce="${context.nonce}"` : ''
     return context[contextKey]
       ? `<script${nonceAttr}>window.${windowKey}=${state}${autoRemove}</script>`
