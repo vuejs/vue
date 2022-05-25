@@ -67,7 +67,7 @@ jobs:
       - name: Run transition tests
         run: pnpm run test:transition
 
-  lint-and-test-dts:
+  type-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -85,9 +85,6 @@ jobs:
 
       - name: Run srouce type check
         run: pnpm run ts-check
-
-      - name: Run eslint
-        run: pnpm run lint
 
       - name: Run type declaration tests
         run: pnpm run test:types
