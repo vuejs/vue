@@ -1,6 +1,8 @@
 import { defineReactive } from 'core/observer/index'
-import type { ShallowReactiveMarker } from './reactive'
+import { isReactive, ShallowReactiveMarker } from './reactive'
 import type { IfAny } from 'typescript/utils'
+import Dep from 'core/observer/dep'
+import { warn, isArray } from 'core/util'
 
 declare const RefSymbol: unique symbol
 export declare const RawSymbol: unique symbol
@@ -13,6 +15,10 @@ export interface Ref<T = any> {
    * autocomplete, so we use a private Symbol instead.
    */
   [RefSymbol]: true
+  /**
+   * @private
+   */
+  dep: Dep
 }
 
 export function isRef<T>(r: Ref<T> | unknown): r is Ref<T>
@@ -46,13 +52,13 @@ function createRef(rawValue: unknown, shallow: boolean) {
   if (isRef(rawValue)) {
     return rawValue
   }
-  const ref = { __v_isRef: true }
-  defineReactive(ref, 'value', rawValue, null, shallow)
+  const ref: any = { __v_isRef: true, __v_isShallow: shallow }
+  ref.dep = defineReactive(ref, 'value', rawValue, null, shallow)
   return ref
 }
 
 export function triggerRef(ref: Ref) {
-  // TODO triggerRefValue(ref, __DEV__ ? ref.value : void 0)
+  ref.dep.notify()
 }
 
 export function unref<T>(ref: T | Ref<T>): T {
@@ -67,22 +73,93 @@ export type CustomRefFactory<T> = (
   set: (value: T) => void
 }
 
-export function customRef() {
-  // TODO
+class CustomRefImpl<T> {
+  public dep?: Dep = undefined
+
+  private readonly _get: ReturnType<CustomRefFactory<T>>['get']
+  private readonly _set: ReturnType<CustomRefFactory<T>>['set']
+
+  public readonly __v_isRef = true
+
+  constructor(factory: CustomRefFactory<T>) {
+    const dep = new Dep()
+    const { get, set } = factory(
+      () => dep.depend(),
+      () => dep.notify()
+    )
+    this._get = get
+    this._set = set
+  }
+
+  get value() {
+    return this._get()
+  }
+
+  set value(newVal) {
+    this._set(newVal)
+  }
+}
+
+export function customRef<T>(factory: CustomRefFactory<T>): Ref<T> {
+  return new CustomRefImpl(factory) as any
 }
 
 export type ToRefs<T = any> = {
   [K in keyof T]: ToRef<T[K]>
 }
 
-export function toRefs() {
-  // TODO
+export function toRefs<T extends object>(object: T): ToRefs<T> {
+  if (__DEV__ && !isReactive(object)) {
+    warn(`toRefs() expects a reactive object but received a plain one.`)
+  }
+  const ret: any = isArray(object) ? new Array(object.length) : {}
+  for (const key in object) {
+    ret[key] = toRef(object, key)
+  }
+  return ret
+}
+
+class ObjectRefImpl<T extends object, K extends keyof T> {
+  public readonly __v_isRef = true
+
+  constructor(
+    private readonly _object: T,
+    private readonly _key: K,
+    private readonly _defaultValue?: T[K]
+  ) {}
+
+  get value() {
+    const val = this._object[this._key]
+    return val === undefined ? (this._defaultValue as T[K]) : val
+  }
+
+  set value(newVal) {
+    this._object[this._key] = newVal
+  }
 }
 
 export type ToRef<T> = IfAny<T, Ref<T>, [T] extends [Ref] ? T : Ref<T>>
 
-export function toRef() {
-  // TODO
+export function toRef<T extends object, K extends keyof T>(
+  object: T,
+  key: K
+): ToRef<T[K]>
+
+export function toRef<T extends object, K extends keyof T>(
+  object: T,
+  key: K,
+  defaultValue: T[K]
+): ToRef<Exclude<T[K], undefined>>
+
+export function toRef<T extends object, K extends keyof T>(
+  object: T,
+  key: K,
+  defaultValue?: T[K]
+): ToRef<T[K]> {
+  const val = object[key]
+  return isRef(val)
+    ? val
+    : (new ObjectRefImpl(object, key, defaultValue) as any)
 }
 
 /**

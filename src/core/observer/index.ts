@@ -12,8 +12,10 @@ import {
   isPrimitive,
   isUndef,
   isValidArrayIndex,
-  isServerRendering
+  isServerRendering,
+  hasChanged
 } from '../util/index'
+import { isRef } from '../../composition-api'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
@@ -107,7 +109,7 @@ function copyAugment(target: Object, src: Object, keys: Array<string>) {
  * or the existing observer if the value already has one.
  */
 export function observe(value: any, asRootData?: boolean): Observer | void {
-  if (!isObject(value) || value instanceof VNode) {
+  if (!isObject(value) || isRef(value) || value instanceof VNode) {
     return
   }
   let ob: Observer | void
@@ -167,22 +169,23 @@ export function defineReactive(
           }
         }
       }
-      return value
+      return isRef(value) ? value.value : value
     },
     set: function reactiveSetter(newVal) {
       const value = getter ? getter.call(obj) : val
-      /* eslint-disable no-self-compare */
-      if (newVal === value || (newVal !== newVal && value !== value)) {
+      if (!hasChanged(value, newVal)) {
         return
       }
-      /* eslint-enable no-self-compare */
       if (__DEV__ && customSetter) {
         customSetter()
       }
-      // #7981: for accessor properties without setter
-      if (getter && !setter) return
       if (setter) {
         setter.call(obj, newVal)
+      } else if (getter) {
+        // #7981: for accessor properties without setter
+        return
+      } else if (isRef(value) && !isRef(newVal)) {
+        value.value = newVal
       } else {
         val = newVal
       }
@@ -190,6 +193,8 @@ export function defineReactive(
       dep.notify()
     }
   })
+
+  return dep
 }
 
 /**
