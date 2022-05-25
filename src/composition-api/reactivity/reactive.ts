@@ -1,5 +1,6 @@
 import { observe, Observer } from 'core/observer'
-import { Ref, UnwrapRefSimple } from './ref'
+import { def, isPrimitive, warn } from 'core/util'
+import type { Ref, UnwrapRefSimple, RawSymbol } from './ref'
 
 export const enum ReactiveFlags {
   SKIP = '__v_skip',
@@ -25,7 +26,10 @@ export function reactive<T extends object>(target: T): UnwrapNestedRefs<T>
 export function reactive(target: object) {
   // if trying to observe a readonly proxy, return the readonly version.
   if (!isReadonly(target)) {
-    observe(target)
+    const ob = observe(target)
+    if (__DEV__ && !ob && (target == null || isPrimitive(target))) {
+      warn(`value cannot be made reactive: ${String(target)}`)
+    }
   }
   return target
 }
@@ -41,4 +45,16 @@ export function isShallow(value: unknown): boolean {
 export function isReadonly(value: unknown): boolean {
   // TODO
   return !!(value && (value as Target).__v_isReadonly)
+}
+
+export function toRaw<T>(observed: T): T {
+  // TODO for readonly
+  return observed
+}
+
+export function markRaw<T extends object>(
+  value: T
+): T & { [RawSymbol]?: true } {
+  def(value, ReactiveFlags.SKIP, true)
+  return value
 }

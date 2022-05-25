@@ -18,3 +18,7 @@ export interface WritableComputedOptions<T> {
   get: ComputedGetter<T>
   set: ComputedSetter<T>
 }
+
+export function computed() {
+  // TODO
+}

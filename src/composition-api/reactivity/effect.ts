@@ -52,3 +52,6 @@ export class ReactiveEffect<T = any> {
     this.active = false
   }
 }
+
+// since we are not exposing this in Vue 2, it's used only for internal testing.
+export const effect = (fn: () => any) => new ReactiveEffect(fn)

@@ -9,10 +9,8 @@ import {
   customRef,
   Ref
 } from 'vca/reactivity/ref'
-import { ReactiveEffect } from 'vca/reactivity/effect'
+import { effect } from 'vca/reactivity/effect'
 import { isReactive, isShallow, reactive } from 'vca/reactivity/reactive'
-
-const effect = (fn: () => any) => new ReactiveEffect(fn)
 
 describe('reactivity/ref', () => {
   it('should hold a value', () => {
@@ -117,7 +115,7 @@ describe('reactivity/ref', () => {
     expect((arr[1] as Ref).value).toBe(3)
   })
 
-  // Vue 2 does not observe array properties
+  // @discrepancy Vue 2 does not observe array properties
   // it('should unwrap ref types as props of arrays', () => {
   //   const arr = [ref(0)]
   //   const symbolKey = Symbol('')

@@ -1,5 +1,5 @@
 import { defineReactive } from 'core/observer/index'
-import { isReactive, ShallowReactiveMarker } from './reactive'
+import { isReactive, type ShallowReactiveMarker } from './reactive'
 import type { IfAny } from 'typescript/utils'
 import Dep from 'core/observer/dep'
 import { warn, isArray } from 'core/util'

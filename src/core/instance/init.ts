@@ -26,8 +26,11 @@ export function initMixin(Vue: Component) {
       mark(startTag)
     }
 
-    // a flag to avoid this being observed
+    // a flag to mark this as a Vue instance without having to do instanceof
+    // check
     vm._isVue = true
+    // avoid instances from being observed
+    vm.__v_skip = true
     // merge options
     if (options && options._isComponent) {
       // optimize internal component instantiation

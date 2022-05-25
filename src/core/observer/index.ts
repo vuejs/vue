@@ -120,7 +120,7 @@ export function observe(value: any, asRootData?: boolean): Observer | void {
     !isServerRendering() &&
     (isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
-    !value._isVue
+    !value.__v_skip
   ) {
     ob = new Observer(value)
   }
