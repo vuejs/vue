@@ -2,6 +2,7 @@ const featureFlags = require('../../scripts/feature-flags')
 process.env.CHROME_BIN = require('puppeteer').executablePath()
 
 const define = {
+  __DEV__: true,
   'process.env.CI': !!process.env.CI
 }
 
