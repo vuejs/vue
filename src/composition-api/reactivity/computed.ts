@@ -13,7 +13,7 @@ export interface ComputedRef<T = any> extends WritableComputedRef<T> {
 }
 
 export interface WritableComputedRef<T> extends Ref<T> {
-  readonly effect: { stop(): void }
+  readonly effect: Watcher
 }
 
 export type ComputedGetter<T> = (...args: any[]) => T
@@ -53,54 +53,31 @@ export function computed<T>(
     setter = getterOrOptions.set
   }
 
-  return new ComputedRefImpl(
-    getter,
-    setter,
-    onlyGetter,
-    isServerRendering()
-  ) as any
-}
+  const watcher = isServerRendering()
+    ? null
+    : new Watcher(currentInstance, getter, noop, { lazy: true })
 
-class ComputedRefImpl<T> {
-  public dep?: Dep = undefined
-
-  public readonly __v_isRef = true
-  public readonly effect
-
-  private _watcher: Watcher | null
-
-  constructor(
-    private _getter: ComputedGetter<T>,
-    private readonly _setter: ComputedSetter<T>,
-    public readonly __v_isReadonly: boolean,
-    isSSR: boolean
-  ) {
-    const watcher = (this._watcher = isSSR
-      ? null
-      : new Watcher(currentInstance, _getter, noop, { lazy: true }))
-    this.effect = {
-      stop() {
-        watcher && watcher.teardown()
+  return {
+    __v_isRef: true,
+    __v_isReadonly: onlyGetter,
+    // some libs rely on the presence effect for checking computed refs
+    // from normal refs, but the implementation doesn't matter
+    effect: watcher,
+    get value() {
+      if (watcher) {
+        if (watcher.dirty) {
+          watcher.evaluate()
+        }
+        if (Dep.target) {
+          watcher.depend()
+        }
+        return watcher.value
+      } else {
+        return getter()
       }
+    },
+    set value(newVal) {
+      setter(newVal)
     }
-  }
-
-  get value() {
-    const watcher = this._watcher
-    if (watcher) {
-      if (watcher.dirty) {
-        watcher.evaluate()
-      }
-      if (Dep.target) {
-        watcher.depend()
-      }
-      return watcher.value
-    } else {
-      return this._getter()
-    }
-  }
-
-  set value(newValue: T) {
-    this._setter(newValue)
-  }
+  } as any
 }

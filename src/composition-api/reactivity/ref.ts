@@ -76,33 +76,21 @@ export type CustomRefFactory<T> = (
   set: (value: T) => void
 }
 
-class CustomRefImpl<T> {
-  public dep = new Dep()
-  private readonly _get: ReturnType<CustomRefFactory<T>>['get']
-  private readonly _set: ReturnType<CustomRefFactory<T>>['set']
-
-  public readonly __v_isRef = true
-
-  constructor(factory: CustomRefFactory<T>) {
-    const { get, set } = factory(
-      () => this.dep.depend(),
-      () => this.dep.notify()
-    )
-    this._get = get
-    this._set = set
-  }
-
-  get value() {
-    return this._get()
-  }
-
-  set value(newVal) {
-    this._set(newVal)
-  }
-}
-
 export function customRef<T>(factory: CustomRefFactory<T>): Ref<T> {
-  return new CustomRefImpl(factory) as any
+  const dep = new Dep()
+  const { get, set } = factory(
+    () => dep.depend(),
+    () => dep.notify()
+  )
+  return {
+    __v_isRef: true,
+    get value() {
+      return get()
+    },
+    set value(newVal) {
+      set(newVal)
+    }
+  } as any
 }
 
 export type ToRefs<T = any> = {
@@ -118,25 +106,6 @@ export function toRefs<T extends object>(object: T): ToRefs<T> {
     ret[key] = toRef(object, key)
   }
   return ret
-}
-
-class ObjectRefImpl<T extends object, K extends keyof T> {
-  public readonly __v_isRef = true
-
-  constructor(
-    private readonly _object: T,
-    private readonly _key: K,
-    private readonly _defaultValue?: T[K]
-  ) {}
-
-  get value() {
-    const val = this._object[this._key]
-    return val === undefined ? (this._defaultValue as T[K]) : val
-  }
-
-  set value(newVal) {
-    this._object[this._key] = newVal
-  }
 }
 
 export type ToRef<T> = IfAny<T, Ref<T>, [T] extends [Ref] ? T : Ref<T>>
@@ -158,9 +127,19 @@ export function toRef<T extends object, K extends keyof T>(
   defaultValue?: T[K]
 ): ToRef<T[K]> {
   const val = object[key]
-  return isRef(val)
-    ? val
-    : (new ObjectRefImpl(object, key, defaultValue) as any)
+  if (isRef(val)) {
+    return val as any
+  }
+  return {
+    __v_isRef: true,
+    get value() {
+      const val = object[key]
+      return val === undefined ? (defaultValue as T[K]) : val
+    },
+    set value(newVal) {
+      object[key] = newVal
+    }
+  } as any
 }
 
 /**

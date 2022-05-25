@@ -131,7 +131,7 @@ describe('reactivity/computed', () => {
     expect(dummy).toBe(undefined)
     value.foo = 1
     expect(dummy).toBe(1)
-    cValue.effect.stop()
+    cValue.effect.teardown()
     value.foo = 2
     expect(dummy).toBe(1)
   })
@@ -221,7 +221,7 @@ describe('reactivity/computed', () => {
 
   it('should expose value when stopped', () => {
     const x = computed(() => 1)
-    x.effect.stop()
+    x.effect.teardown()
     expect(x.value).toBe(1)
   })
 
