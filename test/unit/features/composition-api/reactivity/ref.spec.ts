@@ -7,10 +7,12 @@ import {
   toRef,
   toRefs,
   customRef,
-  Ref
-} from 'vca/reactivity/ref'
+  Ref,
+  isReactive,
+  isShallow,
+  reactive
+} from 'vca/index'
 import { effect } from 'vca/reactivity/effect'
-import { isReactive, isShallow, reactive } from 'vca/reactivity/reactive'
 
 describe('reactivity/ref', () => {
   it('should hold a value', () => {

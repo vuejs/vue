@@ -18,7 +18,7 @@ export interface Ref<T = any> {
   /**
    * @private
    */
-  dep: Dep
+  dep?: Dep
 }
 
 export function isRef<T>(r: Ref<T> | unknown): r is Ref<T>
@@ -58,7 +58,10 @@ function createRef(rawValue: unknown, shallow: boolean) {
 }
 
 export function triggerRef(ref: Ref) {
-  ref.dep.notify()
+  if (__DEV__ && !ref.dep) {
+    warn(`received object is not a triggerable ref.`)
+  }
+  ref.dep && ref.dep.notify()
 }
 
 export function unref<T>(ref: T | Ref<T>): T {
@@ -74,18 +77,16 @@ export type CustomRefFactory<T> = (
 }
 
 class CustomRefImpl<T> {
-  public dep?: Dep = undefined
-
+  public dep = new Dep()
   private readonly _get: ReturnType<CustomRefFactory<T>>['get']
   private readonly _set: ReturnType<CustomRefFactory<T>>['set']
 
   public readonly __v_isRef = true
 
   constructor(factory: CustomRefFactory<T>) {
-    const dep = new Dep()
     const { get, set } = factory(
-      () => dep.depend(),
-      () => dep.notify()
+      () => this.dep.depend(),
+      () => this.dep.notify()
     )
     this._get = get
     this._set = set

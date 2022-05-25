@@ -49,7 +49,7 @@ export interface WatchOptionsBase extends DebuggerOptions {
   flush?: 'pre' | 'post' | 'sync'
 }
 
-interface DebuggerOptions {
+export interface DebuggerOptions {
   onTrack?: (event: DebuggerEvent) => void
   onTrigger?: (event: DebuggerEvent) => void
 }

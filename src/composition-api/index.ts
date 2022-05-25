@@ -26,8 +26,8 @@ export {
   // isProxy,
   // shallowReactive,
   // shallowReadonly,
-  // markRaw,
-  // toRaw,
+  markRaw,
+  toRaw,
   ReactiveFlags,
   // DeepReadonly,
   // ShallowReactive,
@@ -35,8 +35,18 @@ export {
 } from './reactivity/reactive'
 
 export {
+  computed,
+  ComputedRef,
+  WritableComputedRef,
+  WritableComputedOptions,
+  ComputedGetter,
+  ComputedSetter
+} from './reactivity/computed'
+
+export {
   watch,
   watchEffect,
   watchPostEffect,
-  watchSyncEffect
+  watchSyncEffect,
+  DebuggerEvent
 } from './apiWatch'

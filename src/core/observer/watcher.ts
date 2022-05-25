@@ -6,7 +6,8 @@ import {
   _Set as Set,
   handleError,
   invokeWithErrorHandling,
-  noop
+  noop,
+  bind
 } from '../util/index'
 
 import { traverse } from './traverse'
@@ -70,7 +71,10 @@ export default class Watcher implements DepTarget {
       this.lazy = !!options.lazy
       this.sync = !!options.sync
       this.before = options.before
-      this.scheduler = options.scheduler
+      if ((this.scheduler = options.scheduler)) {
+        // @ts-ignore
+        this.run = bind(this.run, this)
+      }
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }
@@ -175,7 +179,7 @@ export default class Watcher implements DepTarget {
     } else if (this.sync) {
       this.run()
     } else if (this.scheduler) {
-      this.scheduler()
+      this.scheduler(this.run)
     } else {
       queueWatcher(this)
     }

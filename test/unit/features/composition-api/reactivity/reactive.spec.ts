@@ -1,8 +1,14 @@
-import { ref, isRef } from 'vca/reactivity/ref'
-import { reactive, isReactive, toRaw, markRaw } from 'vca/reactivity/reactive'
-import { effect } from 'vca/reactivity/effect'
+import {
+  ref,
+  isRef,
+  reactive,
+  isReactive,
+  toRaw,
+  markRaw,
+  computed
+} from 'vca/index'
 import { set } from 'core/observer'
-// TODO import { computed } from 'vca/reactivity/computed'
+import { effect } from 'vca/reactivity/effect'
 
 describe('reactivity/reactive', () => {
   test('Object', () => {
@@ -186,22 +192,21 @@ describe('reactivity/reactive', () => {
     expect(isRef(observedObjectRef)).toBe(true)
   })
 
-  // TODO
-  // test('should unwrap computed refs', () => {
-  //   // readonly
-  //   const a = computed(() => 1)
-  //   // writable
-  //   const b = computed({
-  //     get: () => 1,
-  //     set: () => {}
-  //   })
-  //   const obj = reactive({ a, b })
-  //   // check type
-  //   obj.a + 1
-  //   obj.b + 1
-  //   expect(typeof obj.a).toBe(`number`)
-  //   expect(typeof obj.b).toBe(`number`)
-  // })
+  test('should unwrap computed refs', () => {
+    // readonly
+    const a = computed(() => 1)
+    // writable
+    const b = computed({
+      get: () => 1,
+      set: () => {}
+    })
+    const obj = reactive({ a, b })
+    // check type
+    obj.a + 1
+    obj.b + 1
+    expect(typeof obj.a).toBe(`number`)
+    expect(typeof obj.b).toBe(`number`)
+  })
 
   test('should allow setting property from a ref to another ref', () => {
     const foo = ref(0)

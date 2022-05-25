@@ -30,12 +30,12 @@ export class ReactiveEffect<T = any> {
 
   constructor(
     public fn: () => T,
-    public scheduler?: EffectScheduler // TODO scope?: EffectScope
+    scheduler?: EffectScheduler // TODO scope?: EffectScope
   ) {
     // TODO recordEffectScope(this, scope)
     // TODO debug options
     this._watcher = new Watcher(currentInstance, fn, noop, {
-      // force cb trigger
+      // always force trigger update if has scheduler
       deep: true,
       sync: !scheduler,
       scheduler
@@ -54,4 +54,5 @@ export class ReactiveEffect<T = any> {
 }
 
 // since we are not exposing this in Vue 2, it's used only for internal testing.
-export const effect = (fn: () => any) => new ReactiveEffect(fn)
+export const effect = (fn: () => any, scheduler?: any) =>
+  new ReactiveEffect(fn, scheduler)

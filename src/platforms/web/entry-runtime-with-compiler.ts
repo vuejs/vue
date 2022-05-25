@@ -4,4 +4,7 @@ import { extend } from 'shared/util'
 
 extend(Vue, vca)
 
+import { effect } from 'vca/reactivity/effect'
+Vue.effect = effect
+
 export default Vue
