@@ -1,4 +1,4 @@
-import Vue from './entry-runtime-with-compiler'
+import Vue from './runtime-with-compiler'
 
 export default Vue
 
