@@ -1,7 +1,6 @@
 import { isRef, Ref } from './reactivity/ref'
 import { ComputedRef } from './reactivity/computed'
 import { isReactive, isShallow } from './reactivity/reactive'
-import { TrackOpTypes, TriggerOpTypes } from './reactivity/operations'
 import {
   warn,
   noop,
@@ -14,7 +13,11 @@ import {
 } from 'core/util'
 import { currentInstance } from './currentInstance'
 import { traverse } from 'core/observer/traverse'
-import { EffectScheduler, ReactiveEffect } from './reactivity/effect'
+import {
+  EffectScheduler,
+  ReactiveEffect,
+  DebuggerEvent
+} from './reactivity/effect'
 
 const WATCHER = `watcher`
 const WATCHER_CB = `${WATCHER} callback`
@@ -52,19 +55,6 @@ export interface WatchOptionsBase extends DebuggerOptions {
 export interface DebuggerOptions {
   onTrack?: (event: DebuggerEvent) => void
   onTrigger?: (event: DebuggerEvent) => void
-}
-
-export type DebuggerEvent = {
-  // TODO effect: ReactiveEffect
-} & DebuggerEventExtraInfo
-
-export type DebuggerEventExtraInfo = {
-  target: object
-  type: TrackOpTypes | TriggerOpTypes
-  key: any
-  newValue?: any
-  oldValue?: any
-  oldTarget?: Map<any, any> | Set<any>
 }
 
 export interface WatchOptions<Immediate = boolean> extends WatchOptionsBase {

@@ -47,6 +47,5 @@ export {
   watch,
   watchEffect,
   watchPostEffect,
-  watchSyncEffect,
-  DebuggerEvent
+  watchSyncEffect
 } from './apiWatch'
