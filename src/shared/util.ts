@@ -71,7 +71,7 @@ export function isValidArrayIndex(val: any): boolean {
   return n >= 0 && Math.floor(n) === n && isFinite(val)
 }
 
-export function isPromise(val: any): boolean {
+export function isPromise(val: any): val is Promise<any> {
   return (
     isDef(val) &&
     typeof val.then === 'function' &&
@@ -340,14 +340,14 @@ export function looseIndexOf(arr: Array<unknown>, val: unknown): number {
 /**
  * Ensure a function is called only once.
  */
-export function once(fn: Function): Function {
+export function once<T extends (...args: any[]) => any>(fn: T): T {
   let called = false
   return function () {
     if (!called) {
       called = true
-      fn.apply(this, arguments)
+      fn.apply(this, arguments as any)
     }
-  }
+  } as any
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is#polyfill

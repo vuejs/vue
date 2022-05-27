@@ -2,7 +2,7 @@ import VNode from '../src/core/vdom/vnode'
 import { Component } from './component'
 
 declare type VNodeChildren =
-  | Array<null | VNode | string | VNodeChildren>
+  | Array<null | VNode | string | number | VNodeChildren>
   | string
 
 declare type VNodeComponentOptions = {

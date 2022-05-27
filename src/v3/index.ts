@@ -61,3 +61,6 @@ export { TrackOpTypes, TriggerOpTypes } from './reactivity/operations'
 
 export { h } from './h'
 export { getCurrentInstance } from './currentInstance'
+export { useSlots, useAttrs } from './apiSetup'
+
+export * from './apiLifecycle'

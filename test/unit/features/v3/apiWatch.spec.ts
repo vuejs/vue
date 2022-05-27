@@ -7,14 +7,15 @@ import {
   reactive,
   computed,
   ref,
-  DebuggerEvent,
-  TrackOpTypes,
-  TriggerOpTypes,
+  // DebuggerEvent,
+  // TrackOpTypes,
+  // TriggerOpTypes,
   triggerRef,
   shallowRef,
   Ref,
   h,
-  getCurrentInstance
+  getCurrentInstance,
+  onMounted
   // effectScope
 } from 'v3'
 import { nextTick } from 'core/util'
@@ -600,11 +601,11 @@ describe('api: watch', () => {
   // #1852
   it('flush: post watcher should fire after template refs updated', async () => {
     const toggle = ref(false)
-    let dom: TestElement | null = null
+    let dom: HTMLElement | null = null
 
     const App = {
       setup() {
-        const domRef = ref<TestElement | null>(null)
+        const domRef = ref<any>(null)
 
         watch(
           toggle,
@@ -625,7 +626,7 @@ describe('api: watch', () => {
 
     toggle.value = true
     await nextTick()
-    expect(dom!.tag).toBe('p')
+    expect(dom!.tagName).toBe('P')
   })
 
   it('deep', async () => {
@@ -924,7 +925,7 @@ describe('api: watch', () => {
 
   // TODO
   // https://github.com/vuejs/core/issues/2381
-  test.skip('$watch should always register its effects with its own instance', async () => {
+  test('$watch should always register its effects with its own instance', async () => {
     let instance: Component | null
     let _show: Ref<boolean>
 

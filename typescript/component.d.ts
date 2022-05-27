@@ -38,7 +38,7 @@ export declare class Component {
     [key: string]: Component | Element | Array<Component | Element> | undefined
   }
   $slots: { [key: string]: Array<VNode> }
-  $scopedSlots: { [key: string]: () => VNodeChildren }
+  $scopedSlots: { [key: string]: () => VNode[] | undefined }
   $vnode: VNode // the placeholder node for the component in parent's render tree
   $attrs: { [key: string]: string }
   $listeners: Record<string, Function | Array<Function>>
@@ -96,6 +96,11 @@ export declare class Component {
   _hasHookEvent: boolean
   _provided?: Record<string, any>
   // _virtualComponents?: { [key: string]: Component };
+
+  // @v3
+  _setupState?: Record<string, any>
+  _attrsProxy?: Record<string, any>
+  _slotsProxy?: Record<string, () => VNode[]>
 
   // private methods
 

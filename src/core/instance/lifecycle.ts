@@ -17,6 +17,8 @@ import {
   validateProp,
   invokeWithErrorHandling
 } from '../util/index'
+import { currentInstance, setCurrentInstance } from 'v3/currentInstance'
+import { syncObject } from 'v3/apiSetup'
 
 export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false
@@ -270,6 +272,10 @@ export function updateChildComponent(
   // these are also reactive so they may trigger child update if the child
   // used them during render
   vm.$attrs = parentVnode.data.attrs || emptyObject
+  if (vm._attrsProxy) {
+    syncObject(vm._attrsProxy, vm.$attrs)
+  }
+
   vm.$listeners = listeners || emptyObject
 
   // update props
@@ -348,6 +354,8 @@ export function deactivateChildComponent(vm: Component, direct?: boolean) {
 export function callHook(vm: Component, hook: string) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
+  const prev = currentInstance
+  setCurrentInstance(vm)
   const handlers = vm.$options[hook]
   const info = `${hook} hook`
   if (handlers) {
@@ -358,5 +366,6 @@ export function callHook(vm: Component, hook: string) {
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }
+  setCurrentInstance(prev)
   popTarget()
 }

@@ -148,7 +148,7 @@ strats.data = function (
 /**
  * Hooks and props are merged as arrays.
  */
-function mergeHook(
+export function mergeLifecycleHook(
   parentVal: Array<Function> | null,
   childVal: Function | Array<Function> | null
 ): Array<Function> | null {
@@ -173,7 +173,7 @@ function dedupeHooks(hooks: any) {
 }
 
 LIFECYCLE_HOOKS.forEach(hook => {
-  strats[hook] = mergeHook
+  strats[hook] = mergeLifecycleHook
 })
 
 /**

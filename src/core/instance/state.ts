@@ -2,6 +2,7 @@ import config from '../config'
 import Watcher from '../observer/watcher'
 import Dep, { pushTarget, popTarget } from '../observer/dep'
 import { isUpdatingChildComponent } from './lifecycle'
+import { initSetup } from 'v3/apiSetup'
 
 import {
   set,
@@ -50,6 +51,10 @@ export function initState(vm: Component) {
   vm._watchers = []
   const opts = vm.$options
   if (opts.props) initProps(vm, opts.props)
+
+  // Composition API
+  initSetup(vm)
+
   if (opts.methods) initMethods(vm, opts.methods)
   if (opts.data) {
     initData(vm)

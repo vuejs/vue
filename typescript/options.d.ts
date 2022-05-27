@@ -13,14 +13,13 @@ type InjectKey = string | Symbol
 
 declare interface SetupContext {
   attrs: Record<string, any>
-  slots: Record<string, (() => VNode[]) | undefined>
+  slots: Record<string, () => VNode[]>
   emit: (event: string, ...args: any[]) => any
-  expose: (exposed?: Record<string, any>) => void
 }
 
 declare type ComponentOptions = {
   // v3
-  setup(props: Record<string, any>, ctx: SetupContext): any
+  setup?: (props: Record<string, any>, ctx: SetupContext) => unknown
 
   [key: string]: any
 

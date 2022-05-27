@@ -41,11 +41,11 @@ export function invokeWithErrorHandling(
   let res
   try {
     res = args ? handler.apply(context, args) : handler.call(context)
-    if (res && !res._isVue && isPromise(res) && !res._handled) {
+    if (res && !res._isVue && isPromise(res) && !(res as any)._handled) {
       res.catch(e => handleError(e, vm, info + ` (Promise/async)`))
       // issue #9511
       // avoid catch triggering multiple times when nested calls
-      res._handled = true
+      ;(res as any)._handled = true
     }
   } catch (e: any) {
     handleError(e, vm, info)

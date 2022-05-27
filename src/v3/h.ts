@@ -1,20 +1,11 @@
 import { createElement } from '../core/vdom/create-element'
-import VNode from 'core/vdom/vnode'
-import { VNodeData, VNodeChildren } from 'typescript/vnode'
 import { currentInstance } from './currentInstance'
 import { warn } from 'core/util'
 
 /**
- * @private this function needs manual type declaration because it relies
+ * @private this function needs manual public type declaration because it relies
  * on previously manually authored types from Vue 2
  */
-export function h(type: any, children?: VNodeChildren): VNode
-export function h(
-  type: any,
-  props?: VNodeData | null,
-  children?: VNodeChildren
-): VNode
-
 export function h(type: any, props?: any, children?: any) {
   if (!currentInstance) {
     __DEV__ &&

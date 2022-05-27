@@ -16,6 +16,6 @@ export function getCurrentInstance(): { proxy: Component } | null {
 /**
  * @private
  */
-export function setCurrentInstance(vm: Component | null) {
+export function setCurrentInstance(vm: Component | null = null) {
   currentInstance = vm
 }
