@@ -81,7 +81,7 @@ export function computed<T>(
   } as any
 
   def(ref, RefFlag, true)
-  def(ref, ReactiveFlags.IS_READONLY, true)
+  def(ref, ReactiveFlags.IS_READONLY, onlyGetter)
 
   return ref
 }

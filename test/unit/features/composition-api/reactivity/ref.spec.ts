@@ -341,7 +341,7 @@ describe('reactivity/ref', () => {
   })
 
   test('toRefs reactive array', () => {
-    const arr = reactive(['a', 'b', 'c'])
+    const { arr } = reactive({ arr: ['a', 'b', 'c'] })
     const refs = toRefs(arr)
 
     expect(Array.isArray(refs)).toBe(true)

@@ -33,10 +33,15 @@ export type DeepReadonly<T> = T extends Builtin
   : Readonly<T>
 
 const rawToReadonlyFlag = `__v_rawToReadonly`
+const rawToShallowReadonlyFlag = `__v_rawToShallowReadonly`
 
 export function readonly<T extends object>(
   target: T
 ): DeepReadonly<UnwrapNestedRefs<T>> {
+  return createReadonly(target, false)
+}
+
+function createReadonly(target: any, shallow: boolean) {
   if (!isPlainObject(target)) {
     if (__DEV__) {
       if (isArray(target)) {
@@ -58,13 +63,14 @@ export function readonly<T extends object>(
   }
 
   // already has a readonly proxy
-  const existingProxy = target[rawToReadonlyFlag]
+  const existingFlag = shallow ? rawToShallowReadonlyFlag : rawToReadonlyFlag
+  const existingProxy = target[existingFlag]
   if (existingProxy) {
     return existingProxy
   }
 
   const proxy = {}
-  def(target, rawToReadonlyFlag, proxy)
+  def(target, existingFlag, proxy)
 
   def(proxy, ReactiveFlags.IS_READONLY, true)
   def(proxy, ReactiveFlags.RAW, target)
@@ -72,25 +78,30 @@ export function readonly<T extends object>(
   if (isRef(target)) {
     def(proxy, RefFlag, true)
   }
-  if (isShallow(target)) {
+  if (shallow || isShallow(target)) {
     def(proxy, ReactiveFlags.IS_SHALLOW, true)
   }
 
   const keys = Object.keys(target)
   for (let i = 0; i < keys.length; i++) {
-    defineReadonlyProperty(proxy, target, keys[i])
+    defineReadonlyProperty(proxy, target, keys[i], shallow)
   }
 
   return proxy as any
 }
 
-function defineReadonlyProperty(proxy: any, target: any, key: string) {
+function defineReadonlyProperty(
+  proxy: any,
+  target: any,
+  key: string,
+  shallow: boolean
+) {
   Object.defineProperty(proxy, key, {
     enumerable: true,
     configurable: true,
     get() {
       const val = target[key]
-      return isPlainObject(val) ? readonly(val) : val
+      return shallow || !isPlainObject(val) ? val : readonly(val)
     },
     set() {
       __DEV__ &&
@@ -106,5 +117,5 @@ function defineReadonlyProperty(proxy: any, target: any, key: string) {
  * This is used for creating the props proxy object for stateful components.
  */
 export function shallowReadonly<T extends object>(target: T): Readonly<T> {
-  return target as any
+  return createReadonly(target, true)
 }

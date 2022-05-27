@@ -54,7 +54,7 @@ export function initState(vm: Component) {
   if (opts.data) {
     initData(vm)
   } else {
-    observe((vm._data = {}), true /* asRootData */)
+    observe((vm._data = {}))!.vmCount++
   }
   if (opts.computed) initComputed(vm, opts.computed)
   if (opts.watch && opts.watch !== nativeWatch) {
@@ -148,7 +148,7 @@ function initData(vm: Component) {
     }
   }
   // observe data
-  observe(data, true /* asRootData */)
+  observe(data)!.vmCount++
 }
 
 export function getData(data: Function, vm: Component): any {

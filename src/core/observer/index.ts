@@ -36,12 +36,11 @@ export function toggleObserving(value: boolean) {
  * collect dependencies and dispatch updates.
  */
 export class Observer {
-  value: any
   dep: Dep
   vmCount: number // number of vms that have this object as root $data
 
-  constructor(value: any) {
-    this.value = value
+  constructor(public value: any, public shallow = false) {
+    // this.value = value
     this.dep = new Dep()
     this.vmCount = 0
     def(value, '__ob__', this)
@@ -51,9 +50,11 @@ export class Observer {
       } else {
         copyAugment(value, arrayMethods, arrayKeys)
       }
-      this.observeArray(value)
+      if (!shallow) {
+        this.observeArray(value)
+      }
     } else {
-      this.walk(value)
+      this.walk(value, shallow)
     }
   }
 
@@ -62,10 +63,11 @@ export class Observer {
    * getter/setters. This method should only be called when
    * value type is Object.
    */
-  walk(obj: object) {
+  walk(obj: object, shallow: boolean) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
-      defineReactive(obj, keys[i])
+      const key = keys[i]
+      defineReactive(obj, key, obj[key], undefined, shallow)
     }
   }
 
@@ -108,7 +110,7 @@ function copyAugment(target: Object, src: Object, keys: Array<string>) {
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
  */
-export function observe(value: any, asRootData?: boolean): Observer | void {
+export function observe(value: any, shallow?: boolean): Observer | void {
   if (!isObject(value) || isRef(value) || value instanceof VNode) {
     return
   }
@@ -122,10 +124,7 @@ export function observe(value: any, asRootData?: boolean): Observer | void {
     Object.isExtensible(value) &&
     !value.__v_skip
   ) {
-    ob = new Observer(value)
-  }
-  if (asRootData && ob) {
-    ob.vmCount++
+    ob = new Observer(value, shallow)
   }
   return ob
 }

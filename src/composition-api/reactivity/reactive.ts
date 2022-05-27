@@ -1,5 +1,5 @@
 import { observe, Observer } from 'core/observer'
-import { def, isPrimitive, warn, toRawType } from 'core/util'
+import { def, isArray, isPrimitive, warn, toRawType } from 'core/util'
 import type { Ref, UnwrapRefSimple, RawSymbol } from './ref'
 
 export const enum ReactiveFlags {
@@ -22,20 +22,7 @@ export type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRefSimple<T>
 
 export function reactive<T extends object>(target: T): UnwrapNestedRefs<T>
 export function reactive(target: object) {
-  // if trying to observe a readonly proxy, return the readonly version.
-  if (!isReadonly(target)) {
-    const ob = observe(target)
-    if (__DEV__ && !ob) {
-      if (target == null || isPrimitive(target)) {
-        warn(`value cannot be made reactive: ${String(target)}`)
-      }
-      if (isCollectionType(target)) {
-        warn(
-          `Vue 2 does not support reactive collection types such as Map or Set.`
-        )
-      }
-    }
-  }
+  makeReactive(target, false)
   return target
 }
 
@@ -51,8 +38,47 @@ export type ShallowReactive<T> = T & { [ShallowReactiveMarker]?: true }
 export function shallowReactive<T extends object>(
   target: T
 ): ShallowReactive<T> {
-  // TODO
+  makeReactive(target, true)
+  def(target, ReactiveFlags.IS_SHALLOW, true)
   return target
+}
+
+function makeReactive(target: any, shallow: boolean) {
+  // if trying to observe a readonly proxy, return the readonly version.
+  if (!isReadonly(target)) {
+    if (__DEV__) {
+      if (isArray(target)) {
+        warn(
+          `Avoid using Array as root value for ${
+            shallow ? `shallowReactive()` : `reactive()`
+          } as it cannot be tracked in watch() or watchEffect(). Use ${
+            shallow ? `shallowRef()` : `ref()`
+          } instead. This is a Vue-2-only limitation.`
+        )
+      }
+      const existingOb = target && target.__ob__
+      if (existingOb && existingOb.shallow !== shallow) {
+        warn(
+          `Target is already a ${
+            existingOb.shallow ? `` : `non-`
+          }shallow reactive object, and cannot be converted to ${
+            shallow ? `` : `non-`
+          }shallow.`
+        )
+      }
+    }
+    const ob = observe(target, shallow)
+    if (__DEV__ && !ob) {
+      if (target == null || isPrimitive(target)) {
+        warn(`value cannot be made reactive: ${String(target)}`)
+      }
+      if (isCollectionType(target)) {
+        warn(
+          `Vue 2 does not support reactive collection types such as Map or Set.`
+        )
+      }
+    }
+  }
 }
 
 export function isReactive(value: unknown): boolean {
