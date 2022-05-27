@@ -19,14 +19,18 @@ export type DebuggerEventExtraInfo = {
 }
 
 export class ReactiveEffect<T = any> {
+  // TODO
   onStop?: () => void
   // dev only
   onTrack?: (event: DebuggerEvent) => void
   // dev only
   onTrigger?: (event: DebuggerEvent) => void
 
-  public active = true
-  private _watcher: Watcher
+  active = true
+  /**
+   * @private
+   */
+  _watcher: Watcher
 
   constructor(
     public fn: () => T,

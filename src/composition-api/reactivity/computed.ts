@@ -1,9 +1,10 @@
-import { isServerRendering, noop, warn } from 'core/util'
-import { Ref } from './ref'
+import { isServerRendering, noop, warn, def } from 'core/util'
+import { Ref, RefFlag } from './ref'
 import Watcher from 'core/observer/watcher'
 import Dep from 'core/observer/dep'
 import { currentInstance } from '../currentInstance'
 import { DebuggerOptions } from '../apiWatch'
+import { ReactiveFlags } from './reactive'
 
 declare const ComputedRefSymbol: unique symbol
 
@@ -57,9 +58,7 @@ export function computed<T>(
     ? null
     : new Watcher(currentInstance, getter, noop, { lazy: true })
 
-  return {
-    __v_isRef: true,
-    __v_isReadonly: onlyGetter,
+  const ref = {
     // some libs rely on the presence effect for checking computed refs
     // from normal refs, but the implementation doesn't matter
     effect: watcher,
@@ -80,4 +79,9 @@ export function computed<T>(
       setter(newVal)
     }
   } as any
+
+  def(ref, RefFlag, true)
+  def(ref, ReactiveFlags.IS_READONLY, true)
+
+  return ref
 }

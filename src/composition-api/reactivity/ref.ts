@@ -1,11 +1,17 @@
 import { defineReactive } from 'core/observer/index'
-import { isReactive, type ShallowReactiveMarker } from './reactive'
+import {
+  isReactive,
+  ReactiveFlags,
+  type ShallowReactiveMarker
+} from './reactive'
 import type { IfAny } from 'typescript/utils'
 import Dep from 'core/observer/dep'
-import { warn, isArray } from 'core/util'
+import { warn, isArray, def } from 'core/util'
 
 declare const RefSymbol: unique symbol
 export declare const RawSymbol: unique symbol
+
+export const RefFlag = `__v_isRef`
 
 export interface Ref<T = any> {
   value: T
@@ -19,11 +25,15 @@ export interface Ref<T = any> {
    * @private
    */
   dep?: Dep
+  /**
+   * @private
+   */
+  [RefFlag]: true
 }
 
 export function isRef<T>(r: Ref<T> | unknown): r is Ref<T>
 export function isRef(r: any): r is Ref {
-  return !!(r && r.__v_isRef === true)
+  return !!(r && (r as Ref).__v_isRef === true)
 }
 
 export function ref<T extends object>(
@@ -52,7 +62,9 @@ function createRef(rawValue: unknown, shallow: boolean) {
   if (isRef(rawValue)) {
     return rawValue
   }
-  const ref: any = { __v_isRef: true, __v_isShallow: shallow }
+  const ref: any = {}
+  def(ref, RefFlag, true)
+  def(ref, ReactiveFlags.IS_SHALLOW, true)
   ref.dep = defineReactive(ref, 'value', rawValue, null, shallow)
   return ref
 }
@@ -82,8 +94,7 @@ export function customRef<T>(factory: CustomRefFactory<T>): Ref<T> {
     () => dep.depend(),
     () => dep.notify()
   )
-  return {
-    __v_isRef: true,
+  const ref = {
     get value() {
       return get()
     },
@@ -91,6 +102,8 @@ export function customRef<T>(factory: CustomRefFactory<T>): Ref<T> {
       set(newVal)
     }
   } as any
+  def(ref, RefFlag, true)
+  return ref
 }
 
 export type ToRefs<T = any> = {
@@ -130,8 +143,7 @@ export function toRef<T extends object, K extends keyof T>(
   if (isRef(val)) {
     return val as any
   }
-  return {
-    __v_isRef: true,
+  const ref = {
     get value() {
       const val = object[key]
       return val === undefined ? (defaultValue as T[K]) : val
@@ -140,6 +152,8 @@ export function toRef<T extends object, K extends keyof T>(
       object[key] = newVal
     }
   } as any
+  def(ref, RefFlag, true)
+  return ref
 }
 
 /**

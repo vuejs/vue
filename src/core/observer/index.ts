@@ -15,7 +15,7 @@ import {
   isServerRendering,
   hasChanged
 } from '../util/index'
-import { isRef } from '../../composition-api'
+import { isReadonly, isRef } from '../../composition-api'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
@@ -212,6 +212,10 @@ export function set(
       `Cannot set reactive property on undefined, null, or primitive value: ${target}`
     )
   }
+  if (isReadonly(target)) {
+    __DEV__ && warn(`Set operation on key "${key}" failed: target is readonly.`)
+    return
+  }
   if (isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
@@ -259,6 +263,11 @@ export function del(target: Array<any> | Object, key: any) {
         'Avoid deleting properties on a Vue instance or its root $data ' +
           '- just set it to null.'
       )
+    return
+  }
+  if (isReadonly(target)) {
+    __DEV__ &&
+      warn(`Delete operation on key "${key}" failed: target is readonly.`)
     return
   }
   if (!hasOwn(target, key)) {

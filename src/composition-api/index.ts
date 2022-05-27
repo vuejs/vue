@@ -19,20 +19,19 @@ export {
 
 export {
   reactive,
-  // readonly,
   isReactive,
   isReadonly,
   isShallow,
-  // isProxy,
-  // shallowReactive,
-  // shallowReadonly,
+  isProxy,
+  shallowReactive,
   markRaw,
   toRaw,
   ReactiveFlags,
-  // DeepReadonly,
-  // ShallowReactive,
+  ShallowReactive,
   UnwrapNestedRefs
 } from './reactivity/reactive'
+
+export { readonly, shallowReadonly, DeepReadonly } from './reactivity/readonly'
 
 export {
   computed,
