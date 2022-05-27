@@ -1,6 +1,6 @@
 import { ASSET_TYPES } from 'shared/constants'
 import type { GlobalAPI } from 'typescript/global-api'
-import { isPlainObject, validateComponentName } from '../util/index'
+import { isFunction, isPlainObject, validateComponentName } from '../util/index'
 
 export function initAssetRegisters(Vue: GlobalAPI) {
   /**
@@ -24,7 +24,7 @@ export function initAssetRegisters(Vue: GlobalAPI) {
           definition.name = definition.name || id
           definition = this.options._base.extend(definition)
         }
-        if (type === 'directive' && typeof definition === 'function') {
+        if (type === 'directive' && isFunction(definition)) {
           definition = { bind: definition, update: definition }
         }
         this.options[type + 's'][id] = definition

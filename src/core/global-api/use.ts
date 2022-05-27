@@ -1,5 +1,5 @@
 import type { GlobalAPI } from 'typescript/global-api'
-import { toArray } from '../util/index'
+import { toArray, isFunction } from '../util/index'
 
 export function initUse(Vue: GlobalAPI) {
   Vue.use = function (plugin: Function | any) {
@@ -12,9 +12,9 @@ export function initUse(Vue: GlobalAPI) {
     // additional parameters
     const args = toArray(arguments, 1)
     args.unshift(this)
-    if (typeof plugin.install === 'function') {
+    if (isFunction(plugin.install)) {
       plugin.install.apply(plugin, args)
-    } else if (typeof plugin === 'function') {
+    } else if (isFunction(plugin)) {
       plugin.apply(null, args)
     }
     installedPlugins.push(plugin)

@@ -1,4 +1,4 @@
-import { isServerRendering, noop, warn, def } from 'core/util'
+import { isServerRendering, noop, warn, def, isFunction } from 'core/util'
 import { Ref, RefFlag } from './ref'
 import Watcher from 'core/observer/watcher'
 import Dep from 'core/observer/dep'
@@ -41,7 +41,7 @@ export function computed<T>(
   let getter: ComputedGetter<T>
   let setter: ComputedSetter<T>
 
-  const onlyGetter = typeof getterOrOptions === 'function'
+  const onlyGetter = isFunction(getterOrOptions)
   if (onlyGetter) {
     getter = getterOrOptions
     setter = __DEV__

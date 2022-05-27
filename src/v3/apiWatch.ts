@@ -5,6 +5,7 @@ import {
   warn,
   noop,
   isArray,
+  isFunction,
   emptyObject,
   remove,
   hasChanged,
@@ -210,13 +211,13 @@ function doWatch(
           return s.value
         } else if (isReactive(s)) {
           return traverse(s)
-        } else if (typeof s === 'function') {
+        } else if (isFunction(s)) {
           return call(s, WATCHER_GETTER)
         } else {
           __DEV__ && warnInvalidSource(s)
         }
       })
-  } else if (typeof source === 'function') {
+  } else if (isFunction(source)) {
     if (cb) {
       // getter with cb
       getter = () => call(source as Function, WATCHER_GETTER)

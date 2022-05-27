@@ -7,7 +7,8 @@ import {
   handleError,
   invokeWithErrorHandling,
   noop,
-  bind
+  bind,
+  isFunction
 } from '../util/index'
 
 import { traverse } from './traverse'
@@ -46,7 +47,7 @@ export default class Watcher implements DepTarget {
 
   constructor(
     vm: Component | null,
-    expOrFn: string | Function,
+    expOrFn: string | (() => any),
     cb: Function,
     options?: {
       deep?: boolean
@@ -88,7 +89,7 @@ export default class Watcher implements DepTarget {
     this.newDepIds = new Set()
     this.expression = __DEV__ ? expOrFn.toString() : ''
     // parse expression for getter
-    if (typeof expOrFn === 'function') {
+    if (isFunction(expOrFn)) {
       this.getter = expOrFn
     } else {
       this.getter = parsePath(expOrFn)

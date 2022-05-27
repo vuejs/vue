@@ -2,7 +2,14 @@ import { inBrowser, isIE9, warn } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
 import { activeInstance } from 'core/instance/lifecycle'
 
-import { once, isDef, isUndef, isObject, toNumber } from 'shared/util'
+import {
+  once,
+  isDef,
+  isUndef,
+  isObject,
+  toNumber,
+  isFunction
+} from 'shared/util'
 
 import {
   nextFrame,
@@ -77,11 +84,7 @@ export function enter(vnode: VNodeWithData, toggleDisplay?: () => void) {
   const toClass = isAppear && appearToClass ? appearToClass : enterToClass
 
   const beforeEnterHook = isAppear ? beforeAppear || beforeEnter : beforeEnter
-  const enterHook = isAppear
-    ? typeof appear === 'function'
-      ? appear
-      : enter
-    : enter
+  const enterHook = isAppear ? (isFunction(appear) ? appear : enter) : enter
   const afterEnterHook = isAppear ? afterAppear || afterEnter : afterEnter
   const enterCancelledHook = isAppear
     ? appearCancelled || enterCancelled

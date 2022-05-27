@@ -4,6 +4,7 @@ import {
   hasOwn,
   isArray,
   isObject,
+  isFunction,
   toRawType,
   hyphenate,
   capitalize,
@@ -93,7 +94,7 @@ function getPropDefaultValue(
   }
   // call factory function for non-Function types
   // a value is Function if its prototype is function even across different execution context
-  return typeof def === 'function' && getType(prop.type) !== 'Function'
+  return isFunction(def) && getType(prop.type) !== 'Function'
     ? def.call(vm)
     : def
 }

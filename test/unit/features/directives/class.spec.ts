@@ -9,7 +9,7 @@ function assertClass(assertions, done) {
   assertions.forEach(([value, expected], i) => {
     chain
       .then(() => {
-        if (typeof value === 'function') {
+        if (isFunction(value)) {
           value(vm.value)
         } else {
           vm.value = value

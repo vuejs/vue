@@ -1,4 +1,4 @@
-import { extend, warn, isObject } from 'core/util/index'
+import { extend, warn, isObject, isFunction } from 'core/util/index'
 import VNode from 'core/vdom/vnode'
 
 /**
@@ -23,11 +23,11 @@ export function renderSlot(
     }
     nodes =
       scopedSlotFn(props) ||
-      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender)
+      (isFunction(fallbackRender) ? fallbackRender() : fallbackRender)
   } else {
     nodes =
       this.$slots[name] ||
-      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender)
+      (isFunction(fallbackRender) ? fallbackRender() : fallbackRender)
   }
 
   const target = props && props.slot

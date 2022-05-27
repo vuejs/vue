@@ -2,7 +2,7 @@ import { Component } from 'typescript/component'
 import type { SetupContext } from 'typescript/options'
 import { invokeWithErrorHandling, isReserved, warn } from '../core/util'
 import VNode from '../core/vdom/vnode'
-import { bind, isObject } from '../shared/util'
+import { bind, isFunction, isObject } from '../shared/util'
 import { currentInstance, setCurrentInstance } from './currentInstance'
 import { isRef } from './reactivity/ref'
 
@@ -30,7 +30,7 @@ export function initSetup(vm: Component) {
     )
     setCurrentInstance()
 
-    if (typeof setupResult === 'function') {
+    if (isFunction(setupResult)) {
       // render function
       // @ts-ignore
       options.render = setupResult

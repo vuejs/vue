@@ -1,5 +1,5 @@
 import config from '../config'
-import { noop, isArray } from 'shared/util'
+import { noop, isArray, isFunction } from 'shared/util'
 import type { Component } from 'typescript/component'
 import { currentInstance } from 'v3/currentInstance'
 
@@ -36,7 +36,7 @@ if (__DEV__) {
       return '<Root>'
     }
     const options =
-      typeof vm === 'function' && (vm as any).cid != null
+      isFunction(vm) && (vm as any).cid != null
         ? (vm as any).options
         : vm._isVue
         ? vm.$options || (vm.constructor as any).options

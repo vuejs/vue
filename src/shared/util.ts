@@ -33,6 +33,10 @@ export function isPrimitive(value: any): boolean {
   )
 }
 
+export function isFunction(value: any): value is (...args: any[]) => any {
+  return typeof value === 'function'
+}
+
 /**
  * Quick object check - this is primarily used to tell
  * objects from primitive values when we know the value

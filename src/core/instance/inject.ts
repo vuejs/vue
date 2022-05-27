@@ -1,16 +1,12 @@
 import { hasOwn } from 'shared/util'
-import { warn, hasSymbol } from '../util/index'
+import { warn, hasSymbol, isFunction } from '../util/index'
 import { defineReactive, toggleObserving } from '../observer/index'
 import type { Component } from 'typescript/component'
 
 export function initProvide(vm: Component) {
   const provide = vm.$options.provide
   if (provide) {
-    vm._provided =
-      typeof provide === 'function'
-        ? // @ts-expect-error typing not correct
-          provide.call(vm)
-        : provide
+    vm._provided = isFunction(provide) ? provide.call(vm) : provide
   }
 }
 
@@ -63,10 +59,9 @@ export function resolveInject(
       if (!source) {
         if ('default' in inject[key]) {
           const provideDefault = inject[key].default
-          result[key] =
-            typeof provideDefault === 'function'
-              ? provideDefault.call(vm)
-              : provideDefault
+          result[key] = isFunction(provideDefault)
+            ? provideDefault.call(vm)
+            : provideDefault
         } else if (__DEV__) {
           warn(`Injection "${key as string}" not found`, vm)
         }

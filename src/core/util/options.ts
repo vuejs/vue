@@ -3,7 +3,7 @@ import { warn } from './debug'
 import { set } from '../observer/index'
 import { unicodeRegExp } from './lang'
 import { nativeWatch, hasSymbol } from './env'
-import { isArray } from 'shared/util'
+import { isArray, isFunction } from 'shared/util'
 
 import { ASSET_TYPES, LIFECYCLE_HOOKS } from 'shared/constants'
 
@@ -102,17 +102,19 @@ export function mergeDataOrFn(
     // it has to be a function to pass previous merges.
     return function mergedDataFn() {
       return mergeData(
-        typeof childVal === 'function' ? childVal.call(this, this) : childVal,
-        typeof parentVal === 'function' ? parentVal.call(this, this) : parentVal
+        isFunction(childVal) ? childVal.call(this, this) : childVal,
+        isFunction(parentVal) ? parentVal.call(this, this) : parentVal
       )
     }
   } else {
     return function mergedInstanceDataFn() {
       // instance merge
-      const instanceData =
-        typeof childVal === 'function' ? childVal.call(vm, vm) : childVal
-      const defaultData =
-        typeof parentVal === 'function' ? parentVal.call(vm, vm) : parentVal
+      const instanceData = isFunction(childVal)
+        ? childVal.call(vm, vm)
+        : childVal
+      const defaultData = isFunction(parentVal)
+        ? parentVal.call(vm, vm)
+        : parentVal
       if (instanceData) {
         return mergeData(instanceData, defaultData)
       } else {
@@ -369,7 +371,7 @@ function normalizeDirectives(options: Record<string, any>) {
   if (dirs) {
     for (const key in dirs) {
       const def = dirs[key]
-      if (typeof def === 'function') {
+      if (isFunction(def)) {
         dirs[key] = { bind: def, update: def }
       }
     }
@@ -399,7 +401,7 @@ export function mergeOptions(
     checkComponents(child)
   }
 
-  if (typeof child === 'function') {
+  if (isFunction(child)) {
     // @ts-expect-error
     child = child.options
   }

@@ -16,7 +16,7 @@ function assertCodegen(template, generatedCode, ...args) {
       staticRenderFnCodes = arg
     } else if (isObject(arg)) {
       generateOptions = arg
-    } else if (typeof arg === 'function') {
+    } else if (isFunction(arg)) {
       proc = arg
     }
   }

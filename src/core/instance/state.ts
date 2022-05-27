@@ -26,7 +26,8 @@ import {
   isPlainObject,
   isServerRendering,
   isReservedAttribute,
-  invokeWithErrorHandling
+  invokeWithErrorHandling,
+  isFunction
 } from '../util/index'
 import type { Component } from '../../../typescript/component'
 
@@ -119,7 +120,7 @@ function initProps(vm: Component, propsOptions: Object) {
 
 function initData(vm: Component) {
   let data: any = vm.$options.data
-  data = vm._data = typeof data === 'function' ? getData(data, vm) : data || {}
+  data = vm._data = isFunction(data) ? getData(data, vm) : data || {}
   if (!isPlainObject(data)) {
     data = {}
     __DEV__ &&
@@ -179,7 +180,7 @@ function initComputed(vm: Component, computed: Object) {
 
   for (const key in computed) {
     const userDef = computed[key]
-    const getter = typeof userDef === 'function' ? userDef : userDef.get
+    const getter = isFunction(userDef) ? userDef : userDef.get
     if (__DEV__ && getter == null) {
       warn(`Getter is missing for computed property "${key}".`, vm)
     }
@@ -217,10 +218,10 @@ function initComputed(vm: Component, computed: Object) {
 export function defineComputed(
   target: any,
   key: string,
-  userDef: Record<string, any> | Function
+  userDef: Record<string, any> | (() => any)
 ) {
   const shouldCache = !isServerRendering()
-  if (typeof userDef === 'function') {
+  if (isFunction(userDef)) {
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
       : createGetterInvoker(userDef)
@@ -352,7 +353,7 @@ export function stateMixin(Vue: Component) {
   Vue.prototype.$delete = del
 
   Vue.prototype.$watch = function (
-    expOrFn: string | Function,
+    expOrFn: string | (() => any),
     cb: any,
     options?: Record<string, any>
   ): Function {
