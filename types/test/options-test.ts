@@ -1,9 +1,9 @@
-import Vue, { PropType, VNode } from "../index";
-import { ComponentOptions, Component } from "../index";
-import { CreateElement } from "../vue";
+import Vue, { PropType, VNode } from '../index'
+import { ComponentOptions, Component } from '../index'
+import { CreateElement } from '../vue'
 
 interface MyComponent extends Vue {
-  a: number;
+  a: number
 }
 
 const option: ComponentOptions<MyComponent> = {
@@ -20,10 +20,10 @@ const componentType: Component = option
 
 Vue.component('sub-component', {
   components: {
-    a: Vue.component(""),
+    a: Vue.component(''),
     b: {}
   }
-});
+})
 
 Vue.component('prop-component', {
   props: {
@@ -31,7 +31,7 @@ Vue.component('prop-component', {
     name: {
       type: String,
       default: '0',
-      required: true,
+      required: true
     }
   },
   data() {
@@ -40,7 +40,7 @@ Vue.component('prop-component', {
       capName: this.name.toUpperCase()
     }
   }
-});
+})
 
 Vue.component('string-prop', {
   props: ['size', 'name'],
@@ -50,7 +50,7 @@ Vue.component('string-prop', {
       capName: this.name.isany
     }
   }
-});
+})
 
 class User {
   private u = 1
@@ -60,15 +60,15 @@ class Cat {
 }
 
 interface IUser {
-  foo: string,
+  foo: string
   bar: number
 }
 
 interface ICat {
-  foo: any,
+  foo: any
   bar: object
 }
-type ConfirmCallback = (confirm: boolean) => void;
+type ConfirmCallback = (confirm: boolean) => void
 
 Vue.component('union-prop', {
   props: {
@@ -79,16 +79,16 @@ Vue.component('union-prop', {
     union: [User, Number] as PropType<User | number>
   },
   data() {
-    this.cat;
-    this.complexUnion;
-    this.kittyUser;
-    this.callback(true);
-    this.union;
+    this.cat
+    this.complexUnion
+    this.kittyUser
+    this.callback(true)
+    this.union
     return {
-      fixedSize: this.union,
+      fixedSize: this.union
     }
   }
-});
+})
 
 Vue.component('union-prop-with-no-casting', {
   props: {
@@ -98,10 +98,10 @@ Vue.component('union-prop-with-no-casting', {
     regex: RegExp
   },
   data() {
-    this.mixed;
-    this.object;
-    this.primitive;
-    this.regex.compile;
+    this.mixed
+    this.object
+    this.primitive
+    this.regex.compile
   }
 })
 
@@ -113,9 +113,9 @@ Vue.component('prop-with-primitive-default', {
     }
   },
   created(): void {
-    this.id;
+    this.id
   }
-});
+})
 
 Vue.component('component', {
   data() {
@@ -130,40 +130,40 @@ Vue.component('component', {
     name: {
       type: String,
       default: '0',
-      required: true,
+      required: true
     }
   },
   propsData: {
-    msg: "Hello"
+    msg: 'Hello'
   },
   computed: {
     aDouble(): number {
-      return this.a * 2;
+      return this.a * 2
     },
     aPlus: {
       get(): number {
-        return this.a + 1;
+        return this.a + 1
       },
       set(v: number) {
-        this.a = v - 1;
+        this.a = v - 1
       },
       cache: false
     }
   },
   methods: {
     plus(): void {
-      this.a++;
-      this.aDouble.toFixed();
-      this.aPlus = 1;
-      this.size.toFixed();
+      this.a++
+      this.aDouble.toFixed()
+      this.aPlus = 1
+      this.size.toFixed()
     }
   },
   watch: {
-    'a': function(val: number, oldVal: number) {
-      console.log(`new: ${val}, old: ${oldVal}`);
+    a: function (val: number, oldVal: number) {
+      console.log(`new: ${val}, old: ${oldVal}`)
     },
-    'b': 'someMethod',
-    'c': {
+    b: 'someMethod',
+    c: {
       handler(val, oldVal) {
         this.a = val
       },
@@ -174,71 +174,77 @@ Vue.component('component', {
       immediate: true
     }
   },
-  el: "#app",
-  template: "<div>{{ message }}</div>",
+  el: '#app',
+  template: '<div>{{ message }}</div>',
   render(createElement) {
-    return createElement("div", {
-      attrs: {
-        id: "foo"
+    return createElement(
+      'div',
+      {
+        attrs: {
+          id: 'foo'
+        },
+        props: {
+          myProp: 'bar'
+        },
+        directives: [
+          {
+            name: 'a',
+            value: 'foo'
+          }
+        ],
+        domProps: {
+          innerHTML: 'baz'
+        },
+        on: {
+          click: new Function()
+        },
+        nativeOn: {
+          click: new Function()
+        },
+        class: {
+          foo: true,
+          bar: false
+        },
+        style: {
+          color: 'red',
+          fontSize: '14px'
+        },
+        key: 'myKey',
+        ref: 'myRef',
+        refInFor: true
       },
-      props: {
-        myProp: "bar"
-      },
-      directives: [{
-        name: 'a',
-        value: 'foo'
-      }],
-      domProps: {
-        innerHTML: "baz"
-      },
-      on: {
-        click: new Function
-      },
-      nativeOn: {
-        click: new Function
-      },
-      class: {
-        foo: true,
-        bar: false
-      },
-      style: {
-        color: 'red',
-        fontSize: '14px'
-      },
-      key: 'myKey',
-      ref: 'myRef',
-      refInFor: true
-    }, [
-      createElement(),
-      createElement("div", "message"),
-      createElement(Vue.component("component")),
-      createElement({} as ComponentOptions<Vue>),
-      createElement({
-        functional: true,
-        render(c: CreateElement) {
-          return createElement()
-        }
-      }),
+      [
+        createElement(),
+        createElement('div', 'message'),
+        createElement(Vue.component('component')),
+        createElement({} as ComponentOptions<Vue>),
+        createElement({
+          functional: true,
+          render(c: CreateElement) {
+            return createElement()
+          }
+        }),
 
-      createElement(() => Vue.component("component")),
-      createElement(() => ( {} as ComponentOptions<Vue> )),
-      createElement((resolve, reject) => {
-        resolve({} as ComponentOptions<Vue>);
-        reject();
-      }),
+        createElement(() => Vue.component('component')),
+        createElement(() => ({} as ComponentOptions<Vue>)),
+        createElement((resolve, reject) => {
+          resolve({} as ComponentOptions<Vue>)
+          reject()
+        }),
 
-      "message",
+        'message',
 
-      [createElement("div", "message")]
-    ]);
+        [createElement('div', 'message')]
+      ]
+    )
   },
   renderError(createElement, err) {
-    return createElement('pre', { style: { color: 'red' }}, err.stack)
+    return createElement('pre', { style: { color: 'red' } }, err.stack)
   },
   staticRenderFns: [],
 
   beforeCreate() {
-    (this as any).a = 1;
+    ;(this as any).a = 1
   },
   created() {},
   beforeDestroy() {},
@@ -255,7 +261,7 @@ Vue.component('component', {
     info.toUpperCase()
     return true
   },
-  serverPrefetch () {
+  serverPrefetch() {
     return Promise.resolve()
   },
 
@@ -268,44 +274,43 @@ Vue.component('component', {
       unbind() {}
     },
     b(el, binding, vnode, oldVnode) {
-      el.textContent;
+      el.textContent
 
-      binding.name;
-      binding.value;
-      binding.oldValue;
-      binding.expression;
-      binding.arg;
-      binding.modifiers["modifier"];
+      binding.name
+      binding.value
+      binding.oldValue
+      binding.expression
+      binding.arg
+      binding.modifiers['modifier']
     }
   },
   components: {
-    a: Vue.component(""),
+    a: Vue.component(''),
     b: {} as ComponentOptions<Vue>
   },
   transitions: {},
   filters: {
     double(value: number) {
-      return value * 2;
+      return value * 2
     }
   },
-  parent: new Vue,
-  mixins: [Vue.component(""), ({} as ComponentOptions<Vue>)],
-  name: "Component",
+  parent: new Vue(),
+  mixins: [Vue.component(''), {} as ComponentOptions<Vue>],
+  name: 'Component',
   extends: {} as ComponentOptions<Vue>,
-  delimiters: ["${", "}"]
-});
-
+  delimiters: ['${', '}']
+})
 
 Vue.component('custom-prop-type-function', {
   props: {
-    callback: Function as PropType<(confirm: boolean) => void>,
+    callback: Function as PropType<(confirm: boolean) => void>
   },
   methods: {
-    confirm(){
-      this.callback(true);
+    confirm() {
+      this.callback(true)
     }
   }
-});
+})
 
 Vue.component('provide-inject', {
   provide: {
@@ -316,7 +321,7 @@ Vue.component('provide-inject', {
     injectBar: Symbol(),
     injectBaz: { from: 'baz' },
     injectQux: { default: 1 },
-    injectQuux: { from: 'quuz', default: () => ({ value: 1 })}
+    injectQuux: { from: 'quuz', default: () => ({ value: 1 }) }
   }
 })
 
@@ -327,13 +332,13 @@ Vue.component('provide-function', {
 })
 
 Vue.component('component-with-slot', {
-  render (h): VNode {
+  render(h): VNode {
     return h('div', this.$slots.default)
   }
 })
 
 Vue.component('component-with-scoped-slot', {
-  render (h) {
+  render(h) {
     interface ScopedSlotProps {
       msg: string
     }
@@ -367,11 +372,12 @@ Vue.component('component-with-scoped-slot', {
   },
   components: {
     child: {
-      render (this: Vue, h: CreateElement) {
+      render(this: Vue, h: CreateElement) {
         const defaultSlot = this.$scopedSlots['default']!({ msg: 'hi' })
-        defaultSlot && defaultSlot.forEach(vnode => {
-          vnode.tag
-        })
+        defaultSlot &&
+          defaultSlot.forEach(vnode => {
+            vnode.tag
+          })
         return h('div', [
           defaultSlot,
           this.$scopedSlots['item']!({ msg: 'hello' })
@@ -382,7 +388,7 @@ Vue.component('component-with-scoped-slot', {
 })
 
 Vue.component('narrow-array-of-vnode-type', {
-  render (h): VNode {
+  render(h): VNode {
     const slot = this.$scopedSlots.default!({})
     if (typeof slot === 'string') {
       // <template slot-scope="data">bare string</template>
@@ -410,16 +416,16 @@ Vue.component('functional-component', {
   functional: true,
   inject: ['foo'],
   render(createElement, context) {
-    context.props;
-    context.children;
-    context.slots();
-    context.data;
-    context.parent;
-    context.scopedSlots;
-    context.listeners.click;
-    return createElement("div", {}, context.children);
+    context.props
+    context.children
+    context.slots()
+    context.data
+    context.parent
+    context.scopedSlots
+    context.listeners.click
+    return createElement('div', {}, context.children)
   }
-});
+})
 
 Vue.component('functional-component-object-inject', {
   functional: true,
@@ -428,7 +434,7 @@ Vue.component('functional-component-object-inject', {
     bar: Symbol(),
     baz: { from: 'baz' },
     qux: { default: 1 },
-    quux: { from: 'quuz', default: () => ({ value: 1 })}
+    quux: { from: 'quuz', default: () => ({ value: 1 }) }
   },
   render(h) {
     return h('div')
@@ -443,23 +449,25 @@ Vue.component('functional-component-multi-root', {
   functional: true,
   render(h) {
     return [
-      h("tr", [h("td", "foo"), h("td", "bar")]),
-      h("tr", [h("td", "lorem"), h("td", "ipsum")])
+      h('tr', [h('td', 'foo'), h('td', 'bar')]),
+      h('tr', [h('td', 'lorem'), h('td', 'ipsum')])
     ]
   }
 })
 
-Vue.component("async-component", ((resolve, reject) => {
+Vue.component('async-component', (resolve, reject) => {
   setTimeout(() => {
-    resolve(Vue.component("component"));
-  }, 0);
-  return new Promise((resolve) => {
+    resolve(Vue.component('component'))
+  }, 0)
+  return new Promise(resolve => {
     resolve({
       functional: true,
-      render(h: CreateElement) { return h('div') }
-    });
+      render(h: CreateElement) {
+        return h('div')
+      }
+    })
   })
-}));
+})
 
 Vue.component('functional-component-v-model', {
   props: ['foo'],
@@ -469,33 +477,33 @@ Vue.component('functional-component-v-model', {
     event: 'change'
   },
   render(createElement, context) {
-    return createElement("input", {
+    return createElement('input', {
       on: {
         input: new Function()
       },
       domProps: {
         value: context.props.foo
       }
-    });
+    })
   }
-});
-
+})
 
 Vue.component('async-es-module-component', () => import('./es-module'))
 
 Vue.component('directive-expression-optional-string', {
   render(createElement) {
-    return createElement("div", {
+    return createElement('div', {
       directives: [
         {
           name: 'has-expression',
           value: 2,
-          expression: '1 + 1',
-        }, {
-          name: 'no-expression',
-          value: 'foo',
+          expression: '1 + 1'
         },
-      ],
+        {
+          name: 'no-expression',
+          value: 'foo'
+        }
+      ]
     })
   }
-});
+})

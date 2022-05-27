@@ -1,12 +1,9 @@
-import { Vue } from "./vue";
-import "./umd";
+import { Vue } from './vue'
+import './umd'
 
-export default Vue;
+export default Vue
 
-export {
-  CreateElement,
-  VueConstructor
-} from "./vue";
+export { CreateElement, VueConstructor } from './vue'
 
 export {
   Component,
@@ -22,12 +19,9 @@ export {
   WatchOptionsWithHandler,
   DirectiveFunction,
   DirectiveOptions
-} from "./options";
+} from './options'
 
-export {
-  PluginFunction,
-  PluginObject
-} from "./plugin";
+export { PluginFunction, PluginObject } from './plugin'
 
 export {
   VNodeChildren,
@@ -36,4 +30,6 @@ export {
   VNodeComponentOptions,
   VNodeData,
   VNodeDirective
-} from "./vnode";
+} from './vnode'
+
+export { h, getCurrentInstance } from './v3'
