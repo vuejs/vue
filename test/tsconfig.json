@@ -23,14 +23,13 @@
     "paths": {
       "compiler/*": ["../src/compiler/*"],
       "core/*": ["../src/core/*"],
-
       "server/*": ["../src/server/*"],
       "sfc/*": ["../src/sfc/*"],
       "shared/*": ["../src/shared/*"],
-
       "web/*": ["../src/platforms/web/*"],
-      "vca/*": ["../src/composition-api/*"],
-
+      "v3": ["../src/v3/index"],
+      "v3/*": ["../src/v3/*"],
+      "typescript/*": ["../typescript/*"],
       "vue": ["../src/platforms/web/entry-runtime-with-compiler"]
     }
   },

@@ -1,14 +1,6 @@
-import {
-  ref,
-  isRef,
-  reactive,
-  isReactive,
-  toRaw,
-  markRaw,
-  computed
-} from 'vca/index'
+import { ref, isRef, reactive, isReactive, toRaw, markRaw, computed } from 'v3'
 import { set } from 'core/observer'
-import { effect } from 'vca/reactivity/effect'
+import { effect } from 'v3/reactivity/effect'
 
 describe('reactivity/reactive', () => {
   test('Object', () => {

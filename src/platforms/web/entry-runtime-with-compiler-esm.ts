@@ -2,4 +2,4 @@ import Vue from './runtime-with-compiler'
 
 export default Vue
 
-export * from 'vca/index'
+export * from 'v3'

@@ -11,8 +11,8 @@ import {
   isReactive,
   isShallow,
   reactive
-} from 'vca/index'
-import { effect } from 'vca/reactivity/effect'
+} from 'v3'
+import { effect } from 'v3/reactivity/effect'
 
 describe('reactivity/ref', () => {
   it('should hold a value', () => {

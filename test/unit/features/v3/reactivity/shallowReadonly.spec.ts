@@ -1,4 +1,4 @@
-import { isReactive, shallowReadonly, readonly, isReadonly } from 'vca/index'
+import { isReactive, shallowReadonly, readonly, isReadonly } from 'v3'
 
 describe('reactivity/shallowReadonly', () => {
   test('should be readonly', () => {

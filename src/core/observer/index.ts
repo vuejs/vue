@@ -15,7 +15,7 @@ import {
   isServerRendering,
   hasChanged
 } from '../util/index'
-import { isReadonly, isRef } from '../../composition-api'
+import { isReadonly, isRef } from '../../v3'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 

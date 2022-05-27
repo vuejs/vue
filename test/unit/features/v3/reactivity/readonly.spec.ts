@@ -7,8 +7,8 @@ import {
   markRaw,
   ref,
   isProxy
-} from 'vca/index'
-import { effect } from 'vca/reactivity/effect'
+} from 'v3'
+import { effect } from 'v3/reactivity/effect'
 import { set, del } from 'core/observer'
 
 /**

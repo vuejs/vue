@@ -28,7 +28,7 @@
     "test:e2e": "npm run build -- web-full-prod,web-server-renderer-basic && vitest run test/e2e",
     "test:transition": "karma start test/transition/karma.conf.js",
     "test:types": "tsc -p ./types/tsconfig.json",
-    "format": "prettier --write --parser typescript \"(src|test|packages)/**/*.ts\"",
+    "format": "prettier --write --parser typescript \"(src|test|packages|types)/**/*.ts\"",
     "ts-check": "tsc -p tsconfig.json --noEmit",
     "ts-check:test": "tsc -p test/tsconfig.json --noEmit",
     "bench:ssr": "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",

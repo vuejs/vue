@@ -1,6 +1,7 @@
 import config from '../config'
 import { noop, isArray } from 'shared/util'
 import type { Component } from 'typescript/component'
+import { currentInstance } from 'v3/currentInstance'
 
 export let warn = noop
 export let tip = noop
@@ -13,7 +14,7 @@ if (__DEV__) {
   const classify = str =>
     str.replace(classifyRE, c => c.toUpperCase()).replace(/[-_]/g, '')
 
-  warn = (msg, vm) => {
+  warn = (msg, vm = currentInstance) => {
     // TODO get current instance
     const trace = vm ? generateComponentTrace(vm) : ''
 

@@ -46,5 +46,18 @@ export {
   watch,
   watchEffect,
   watchPostEffect,
-  watchSyncEffect
+  watchSyncEffect,
+  WatchEffect,
+  WatchOptions,
+  WatchOptionsBase,
+  WatchCallback,
+  WatchSource,
+  WatchStopHandle,
+  DebuggerOptions
 } from './apiWatch'
+
+export { DebuggerEvent } from './reactivity/effect'
+export { TrackOpTypes, TriggerOpTypes } from './reactivity/operations'
+
+export { h } from './h'
+export { getCurrentInstance } from './currentInstance'

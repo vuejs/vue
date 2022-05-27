@@ -4,7 +4,7 @@ import {
   reactive,
   shallowReactive,
   shallowReadonly
-} from 'vca/index'
+} from 'v3'
 
 describe('shallowReactive', () => {
   test('should not make non-reactive properties reactive', () => {

@@ -6,10 +6,10 @@ import {
   // toRaw,
   WritableComputedRef
   // DebuggerEvent
-} from 'vca/index'
-import { effect } from 'vca/reactivity/effect'
+} from 'v3'
+import { effect } from 'v3/reactivity/effect'
 import { nextTick } from 'core/util'
-// import { TrackOpTypes, TriggerOpTypes } from 'vca/reactivity/operations'
+// import { TrackOpTypes, TriggerOpTypes } from 'v3/reactivity/operations'
 
 describe('reactivity/computed', () => {
   it('should return updated value', () => {
