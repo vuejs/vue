@@ -11,3 +11,5 @@ import { createTextVNode } from './helpers/vdom'
 global.waitForUpdate = waitForUpdate
 global.triggerEvent = triggerEvent
 global.createTextVNode = createTextVNode
+
+//como es
