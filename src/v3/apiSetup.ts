@@ -1,8 +1,8 @@
 import { Component } from 'typescript/component'
 import type { SetupContext } from 'typescript/options'
-import { invokeWithErrorHandling, isReserved, warn } from '../core/util'
+import { def, invokeWithErrorHandling, isReserved, warn } from '../core/util'
 import VNode from '../core/vdom/vnode'
-import { bind, isFunction, isObject } from '../shared/util'
+import { bind, emptyObject, isFunction, isObject } from '../shared/util'
 import { currentInstance, setCurrentInstance } from './currentInstance'
 import { isRef } from './reactivity/ref'
 
@@ -75,19 +75,55 @@ function proxySetupProperty(
 
 function initAttrsProxy(vm: Component) {
   if (!vm._attrsProxy) {
-    syncObject((vm._attrsProxy = {}), vm.$attrs)
+    const proxy = (vm._attrsProxy = {})
+    def(proxy, '_v_attr_proxy', true)
+    syncSetupAttrs(proxy, vm.$attrs, emptyObject, vm)
   }
   return vm._attrsProxy
 }
 
+export function syncSetupAttrs(
+  to: any,
+  from: any,
+  prev: any,
+  instance: Component
+) {
+  let changed = false
+  for (const key in from) {
+    if (!(key in to)) {
+      changed = true
+      defineProxyAttr(to, key, instance)
+    } else if (from[key] !== prev[key]) {
+      changed = true
+    }
+  }
+  for (const key in to) {
+    if (!(key in from)) {
+      changed = true
+      delete to[key]
+    }
+  }
+  return changed
+}
+
+function defineProxyAttr(proxy: any, key: string, instance: Component) {
+  Object.defineProperty(proxy, key, {
+    enumerable: true,
+    configurable: true,
+    get() {
+      return instance.$attrs[key]
+    }
+  })
+}
+
 function initSlotsProxy(vm: Component) {
   if (!vm._slotsProxy) {
-    syncObject((vm._slotsProxy = {}), vm.$scopedSlots)
+    syncSetupSlots((vm._slotsProxy = {}), vm.$scopedSlots)
   }
   return vm._slotsProxy
 }
 
-export function syncObject(to: any, from: any) {
+export function syncSetupSlots(to: any, from: any) {
   for (const key in from) {
     to[key] = from[key]
   }

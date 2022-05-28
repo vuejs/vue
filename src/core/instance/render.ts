@@ -16,7 +16,7 @@ import VNode, { createEmptyVNode } from '../vdom/vnode'
 import { isUpdatingChildComponent } from './lifecycle'
 import type { Component } from 'typescript/component'
 import { setCurrentInstance } from 'v3/currentInstance'
-import { syncObject } from 'v3/apiSetup'
+import { syncSetupSlots } from 'v3/apiSetup'
 
 export function initRender(vm: Component) {
   vm._vnode = null // the root of the child tree
@@ -97,73 +97,70 @@ export function renderMixin(Vue: Component) {
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
-    setCurrentInstance(vm)
 
-    try {
-      if (_parentVnode) {
-        vm.$scopedSlots = normalizeScopedSlots(
-          _parentVnode.data!.scopedSlots,
-          vm.$slots,
-          vm.$scopedSlots
-        )
-        if (vm._slotsProxy) {
-          syncObject(vm._slotsProxy, vm.$scopedSlots)
-        }
+    if (_parentVnode) {
+      vm.$scopedSlots = normalizeScopedSlots(
+        _parentVnode.data!.scopedSlots,
+        vm.$slots,
+        vm.$scopedSlots
+      )
+      if (vm._slotsProxy) {
+        syncSetupSlots(vm._slotsProxy, vm.$scopedSlots)
       }
+    }
 
-      // set parent vnode. this allows render functions to have access
-      // to the data on the placeholder node.
-      vm.$vnode = _parentVnode!
-      // render self
-      let vnode
-      try {
-        // There's no need to maintain a stack because all render fns are called
-        // separately from one another. Nested component's render fns are called
-        // when parent component is patched.
-        currentRenderingInstance = vm
-        vnode = render.call(vm._renderProxy, vm.$createElement)
-      } catch (e: any) {
-        handleError(e, vm, `render`)
-        // return error render result,
-        // or previous vnode to prevent render error causing blank component
-        /* istanbul ignore else */
-        if (__DEV__ && vm.$options.renderError) {
-          try {
-            vnode = vm.$options.renderError.call(
-              vm._renderProxy,
-              vm.$createElement,
-              e
-            )
-          } catch (e: any) {
-            handleError(e, vm, `renderError`)
-            vnode = vm._vnode
-          }
-        } else {
+    // set parent vnode. this allows render functions to have access
+    // to the data on the placeholder node.
+    vm.$vnode = _parentVnode!
+    // render self
+    let vnode
+    try {
+      // There's no need to maintain a stack because all render fns are called
+      // separately from one another. Nested component's render fns are called
+      // when parent component is patched.
+      setCurrentInstance(vm)
+      currentRenderingInstance = vm
+      vnode = render.call(vm._renderProxy, vm.$createElement)
+    } catch (e: any) {
+      handleError(e, vm, `render`)
+      // return error render result,
+      // or previous vnode to prevent render error causing blank component
+      /* istanbul ignore else */
+      if (__DEV__ && vm.$options.renderError) {
+        try {
+          vnode = vm.$options.renderError.call(
+            vm._renderProxy,
+            vm.$createElement,
+            e
+          )
+        } catch (e: any) {
+          handleError(e, vm, `renderError`)
           vnode = vm._vnode
         }
-      } finally {
-        currentRenderingInstance = null
+      } else {
+        vnode = vm._vnode
       }
-      // if the returned array contains only a single node, allow it
-      if (isArray(vnode) && vnode.length === 1) {
-        vnode = vnode[0]
-      }
-      // return empty vnode in case the render function errored out
-      if (!(vnode instanceof VNode)) {
-        if (__DEV__ && isArray(vnode)) {
-          warn(
-            'Multiple root nodes returned from render function. Render function ' +
-              'should return a single root node.',
-            vm
-          )
-        }
-        vnode = createEmptyVNode()
-      }
-      // set parent
-      vnode.parent = _parentVnode
-      return vnode
     } finally {
+      currentRenderingInstance = null
       setCurrentInstance()
     }
+    // if the returned array contains only a single node, allow it
+    if (isArray(vnode) && vnode.length === 1) {
+      vnode = vnode[0]
+    }
+    // return empty vnode in case the render function errored out
+    if (!(vnode instanceof VNode)) {
+      if (__DEV__ && isArray(vnode)) {
+        warn(
+          'Multiple root nodes returned from render function. Render function ' +
+            'should return a single root node.',
+          vm
+        )
+      }
+      vnode = createEmptyVNode()
+    }
+    // set parent
+    vnode.parent = _parentVnode
+    return vnode
   }
 }

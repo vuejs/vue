@@ -1,6 +1,6 @@
 import { isIE, isIE9, isEdge } from 'core/util/env'
 
-import { extend, isDef, isUndef } from 'shared/util'
+import { extend, isDef, isUndef, isTrue } from 'shared/util'
 import type { VNodeWithData } from 'typescript/vnode'
 
 import {
@@ -26,7 +26,7 @@ function updateAttrs(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const oldAttrs = oldVnode.data.attrs || {}
   let attrs: any = vnode.data.attrs || {}
   // clone observed objects, as the user probably wants to mutate it
-  if (isDef(attrs.__ob__)) {
+  if (isDef(attrs.__ob__) || isTrue(attrs._v_attr_proxy)) {
     attrs = vnode.data.attrs = extend({}, attrs)
   }
 

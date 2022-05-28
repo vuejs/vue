@@ -18,7 +18,7 @@ import {
   invokeWithErrorHandling
 } from '../util/index'
 import { currentInstance, setCurrentInstance } from 'v3/currentInstance'
-import { syncObject } from 'v3/apiSetup'
+import { syncSetupAttrs } from 'v3/apiSetup'
 
 export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false
@@ -253,12 +253,13 @@ export function updateChildComponent(
   // Any static slot children from the parent may have changed during parent's
   // update. Dynamic scoped slots may also have changed. In such cases, a forced
   // update is necessary to ensure correctness.
-  const needsForceUpdate = !!(
+  let needsForceUpdate = !!(
     renderChildren || // has new static slots
     vm.$options._renderChildren || // has old static slots
     hasDynamicScopedSlot
   )
 
+  const prevVNode = vm.$vnode
   vm.$options._parentVnode = parentVnode
   vm.$vnode = parentVnode // update vm's placeholder node without re-render
 
@@ -271,10 +272,22 @@ export function updateChildComponent(
   // update $attrs and $listeners hash
   // these are also reactive so they may trigger child update if the child
   // used them during render
-  vm.$attrs = parentVnode.data.attrs || emptyObject
+  const attrs = parentVnode.data.attrs || emptyObject
   if (vm._attrsProxy) {
-    syncObject(vm._attrsProxy, vm.$attrs)
+    // force update if attrs are accessed and has changed since it may be
+    // passed to a child component.
+    if (
+      syncSetupAttrs(
+        vm._attrsProxy,
+        attrs,
+        (prevVNode.data && prevVNode.data.attrs) || emptyObject,
+        vm
+      )
+    ) {
+      needsForceUpdate = true
+    }
   }
+  vm.$attrs = attrs
 
   vm.$listeners = listeners || emptyObject
 

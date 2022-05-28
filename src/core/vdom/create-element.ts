@@ -11,7 +11,8 @@ import {
   isTrue,
   isObject,
   isPrimitive,
-  resolveAsset
+  resolveAsset,
+  isFunction
 } from '../util/index'
 
 import { normalizeChildren, simpleNormalizeChildren } from './helpers/index'
@@ -76,7 +77,7 @@ export function _createElement(
     )
   }
   // support single function children as default scoped slot
-  if (isArray(children) && typeof children[0] === 'function') {
+  if (isArray(children) && isFunction(children[0])) {
     data = data || {}
     data.scopedSlots = { default: children[0] }
     children.length = 0

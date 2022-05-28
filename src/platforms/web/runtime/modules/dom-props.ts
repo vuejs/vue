@@ -1,4 +1,4 @@
-import { isDef, isUndef, extend, toNumber } from 'shared/util'
+import { isDef, isUndef, extend, toNumber, isTrue } from 'shared/util'
 import type { VNodeWithData } from 'typescript/vnode'
 import { isSVG } from 'web/util/index'
 
@@ -13,7 +13,7 @@ function updateDOMProps(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const oldProps = oldVnode.data.domProps || {}
   let props = vnode.data.domProps || {}
   // clone observed objects, as the user probably wants to mutate it
-  if (isDef(props.__ob__)) {
+  if (isDef(props.__ob__) || isTrue(props._v_attr_proxy)) {
     props = vnode.data.domProps = extend({}, props)
   }
 
