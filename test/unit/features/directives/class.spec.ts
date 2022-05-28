@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { isFunction } from 'core/util'
 
 function assertClass(assertions, done) {
   const vm = new Vue({
