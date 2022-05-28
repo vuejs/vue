@@ -7,19 +7,13 @@ import {
   reactive,
   computed,
   ref,
-  // DebuggerEvent,
-  // TrackOpTypes,
-  // TriggerOpTypes,
   triggerRef,
   shallowRef,
-  Ref,
   h,
-  getCurrentInstance,
   onMounted
-  // effectScope
 } from 'v3'
 import { nextTick } from 'core/util'
-import { Component } from 'typescript/component'
+import { set } from 'core/observer'
 
 // reference: https://vue-composition-api-rfc.netlify.com/api.html#watch
 
@@ -73,7 +67,7 @@ describe('api: watch', () => {
   })
 
   it('watching single source: array', async () => {
-    const array = reactive([] as number[])
+    const array = reactive({ a: [] as number[] }).a
     const spy = vi.fn()
     watch(array, spy)
     array.push(1)
@@ -302,8 +296,9 @@ describe('api: watch', () => {
       callCount++
       // on mount, the watcher callback should be called before DOM render
       // on update, should be called before the count is updated
-      const expectedDOM = callCount === 1 ? `` : `${count - 1}`
-      result1 = root.innerHTML === expectedDOM
+      const expectedDOM =
+        callCount === 1 ? `<div></div>` : `<div>${count - 1}</div>`
+      result1 = container.innerHTML === expectedDOM
 
       // in a pre-flush callback, all state should have been updated
       const expectedState = callCount - 1
@@ -315,10 +310,12 @@ describe('api: watch', () => {
         watchEffect(() => {
           assertion(count.value, count2.value)
         })
-        return () => count.value
+        return () => h('div', count.value)
       }
     }
+    const container = document.createElement('div')
     const root = document.createElement('div')
+    container.appendChild(root)
     new Vue(Comp).$mount(root)
     expect(assertion).toHaveBeenCalledTimes(1)
     expect(result1).toBe(true)
@@ -337,7 +334,7 @@ describe('api: watch', () => {
     const count = ref(0)
     let result
     const assertion = vi.fn(count => {
-      result = root.innerHTML === `${count}`
+      result = container.innerHTML === `<div>${count}</div>`
     })
 
     const Comp = {
@@ -348,10 +345,12 @@ describe('api: watch', () => {
           },
           { flush: 'post' }
         )
-        return () => count.value
+        return () => h('div', count.value)
       }
     }
+    const container = document.createElement('div')
     const root = document.createElement('div')
+    container.appendChild(root)
     new Vue(Comp).$mount(root)
     expect(assertion).toHaveBeenCalledTimes(1)
     expect(result).toBe(true)
@@ -366,7 +365,7 @@ describe('api: watch', () => {
     const count = ref(0)
     let result
     const assertion = vi.fn(count => {
-      result = root.innerHTML === `${count}`
+      result = container.innerHTML === `<div>${count}</div>`
     })
 
     const Comp = {
@@ -374,10 +373,12 @@ describe('api: watch', () => {
         watchPostEffect(() => {
           assertion(count.value)
         })
-        return () => count.value
+        return () => h('div', count.value)
       }
     }
+    const container = document.createElement('div')
     const root = document.createElement('div')
+    container.appendChild(root)
     new Vue(Comp).$mount(root)
     expect(assertion).toHaveBeenCalledTimes(1)
     expect(result).toBe(true)
@@ -399,8 +400,9 @@ describe('api: watch', () => {
       callCount++
       // on mount, the watcher callback should be called before DOM render
       // on update, should be called before the count is updated
-      const expectedDOM = callCount === 1 ? `` : `${count - 1}`
-      result1 = root.innerHTML === expectedDOM
+      const expectedDOM =
+        callCount === 1 ? `<div></div>` : `<div>${count - 1}</div>`
+      result1 = container.innerHTML === expectedDOM
 
       // in a sync callback, state mutation on the next line should not have
       // executed yet on the 2nd call, but will be on the 3rd call.
@@ -418,10 +420,12 @@ describe('api: watch', () => {
             flush: 'sync'
           }
         )
-        return () => count.value
+        return () => h('div', count.value)
       }
     }
+    const container = document.createElement('div')
     const root = document.createElement('div')
+    container.appendChild(root)
     new Vue(Comp).$mount(root)
     expect(assertion).toHaveBeenCalledTimes(1)
     expect(result1).toBe(true)
@@ -446,8 +450,9 @@ describe('api: watch', () => {
       callCount++
       // on mount, the watcher callback should be called before DOM render
       // on update, should be called before the count is updated
-      const expectedDOM = callCount === 1 ? `` : `${count - 1}`
-      result1 = root.innerHTML === expectedDOM
+      const expectedDOM =
+        callCount === 1 ? `<div></div>` : `<div>${count - 1}</div>`
+      result1 = container.innerHTML === expectedDOM
 
       // in a sync callback, state mutation on the next line should not have
       // executed yet on the 2nd call, but will be on the 3rd call.
@@ -460,10 +465,12 @@ describe('api: watch', () => {
         watchSyncEffect(() => {
           assertion(count.value)
         })
-        return () => count.value
+        return () => h('div', count.value)
       }
     }
+    const container = document.createElement('div')
     const root = document.createElement('div')
+    container.appendChild(root)
     new Vue(Comp).$mount(root)
     expect(assertion).toHaveBeenCalledTimes(1)
     expect(result1).toBe(true)
@@ -491,7 +498,7 @@ describe('api: watch', () => {
         return toggle.value ? h(Comp) : null
       }
     }
-    new Vue(App).$mount(document.createElement('div'))
+    new Vue(App).$mount()
     expect(cb).not.toHaveBeenCalled()
     toggle.value = false
     await nextTick()
@@ -512,14 +519,14 @@ describe('api: watch', () => {
         return toggle.value ? h(Comp) : null
       }
     }
-    new Vue(App).$mount(document.createElement('div'))
+    new Vue(App).$mount()
     expect(cb).not.toHaveBeenCalled()
     toggle.value = false
     await nextTick()
     expect(cb).toHaveBeenCalledTimes(1)
   })
 
-  // #1763
+  // vuejs/core#1763
   it('flush: pre watcher watching props should fire before child update', async () => {
     const a = ref(0)
     const b = ref(0)
@@ -538,7 +545,7 @@ describe('api: watch', () => {
           { flush: 'pre' }
         )
 
-        // #1777 chained pre-watcher
+        // vuejs/core#1777 chained pre-watcher
         watch(
           c,
           () => {
@@ -559,7 +566,7 @@ describe('api: watch', () => {
       }
     }
 
-    new Vue(App).$mount(document.createElement('div'))
+    new Vue(App).$mount()
     expect(calls).toEqual(['render'])
 
     // both props are updated
@@ -571,7 +578,7 @@ describe('api: watch', () => {
     expect(calls).toEqual(['render', 'watcher 1', 'watcher 2', 'render'])
   })
 
-  // #5721
+  // vuejs/core#5721
   it('flush: pre triggered in component setup should be buffered and called before mounted', () => {
     const count = ref(0)
     const calls: string[] = []
@@ -594,12 +601,13 @@ describe('api: watch', () => {
         count.value++
       }
     }
-    new Vue(App).$mount(document.createElement('div'))
+    new Vue(App).$mount()
     expect(calls).toMatchObject(['watch 3', 'mounted'])
   })
 
-  // #1852
-  it('flush: post watcher should fire after template refs updated', async () => {
+  // TODO
+  // vuejs/core#1852
+  it.skip('flush: post watcher should fire after template refs updated', async () => {
     const toggle = ref(false)
     let dom: HTMLElement | null = null
 
@@ -621,7 +629,7 @@ describe('api: watch', () => {
       }
     }
 
-    new Vue(App).$mount(document.createElement('div'))
+    new Vue(App).$mount()
     expect(dom).toBe(null)
 
     toggle.value = true
@@ -634,12 +642,12 @@ describe('api: watch', () => {
       nested: {
         count: ref(0)
       },
-      array: [1, 2, 3],
-      map: new Map([
-        ['a', 1],
-        ['b', 2]
-      ]),
-      set: new Set([1, 2, 3])
+      array: [1, 2, 3]
+      // map: new Map([
+      //   ['a', 1],
+      //   ['b', 2]
+      // ]),
+      // set: new Set([1, 2, 3])
     })
 
     let dummy
@@ -648,9 +656,9 @@ describe('api: watch', () => {
       state => {
         dummy = [
           state.nested.count,
-          state.array[0],
-          state.map.get('a'),
-          state.set.has(1)
+          state.array[0]
+          // state.map.get('a'),
+          // state.set.has(1)
         ]
       },
       { deep: true }
@@ -658,34 +666,34 @@ describe('api: watch', () => {
 
     state.nested.count++
     await nextTick()
-    expect(dummy).toEqual([1, 1, 1, true])
+    expect(dummy).toEqual([1, 1])
 
     // nested array mutation
-    state.array[0] = 2
+    set(state.array, 0, 2)
     await nextTick()
-    expect(dummy).toEqual([1, 2, 1, true])
+    expect(dummy).toEqual([1, 2])
 
     // nested map mutation
-    state.map.set('a', 2)
-    await nextTick()
-    expect(dummy).toEqual([1, 2, 2, true])
+    // state.map.set('a', 2)
+    // await nextTick()
+    // expect(dummy).toEqual([1, 2, 2, true])
 
     // nested set mutation
-    state.set.delete(1)
-    await nextTick()
-    expect(dummy).toEqual([1, 2, 2, false])
+    // state.set.delete(1)
+    // await nextTick()
+    // expect(dummy).toEqual([1, 2, 2, false])
   })
 
   it('watching deep ref', async () => {
     const count = ref(0)
     const double = computed(() => count.value * 2)
-    const state = reactive([count, double])
+    const state = reactive({ count, double })
 
     let dummy
     watch(
       () => state,
       state => {
-        dummy = [state[0].value, state[1].value]
+        dummy = [state.count, state.double]
       },
       { deep: true }
     )
@@ -897,7 +905,7 @@ describe('api: watch', () => {
     expect(spy).toHaveBeenCalledTimes(1)
   })
 
-  // #2125
+  // vuejs/core#2125
   test('watchEffect should not recursively trigger itself', async () => {
     const spy = vi.fn()
     const price = ref(10)
@@ -910,7 +918,7 @@ describe('api: watch', () => {
     expect(spy).toHaveBeenCalledTimes(1)
   })
 
-  // #2231
+  // vuejs/core#2231
   test('computed refs should not trigger watch if value has no change', async () => {
     const spy = vi.fn()
     const source = ref(0)
@@ -921,59 +929,6 @@ describe('api: watch', () => {
     source.value++
     await nextTick()
     expect(spy).toHaveBeenCalledTimes(1)
-  })
-
-  // TODO
-  // https://github.com/vuejs/core/issues/2381
-  test('$watch should always register its effects with its own instance', async () => {
-    let instance: Component | null
-    let _show: Ref<boolean>
-
-    const Child = {
-      render: () => h('div'),
-      mounted() {
-        instance = getCurrentInstance()!.proxy
-      },
-      unmounted() {}
-    }
-
-    const Comp = {
-      setup() {
-        const comp = ref<Component | undefined>()
-        const show = ref(true)
-        _show = show
-        return { comp, show }
-      },
-      render() {
-        return this.show
-          ? h(Child, {
-              ref: vm => void (this.comp = vm as Component)
-            })
-          : null
-      },
-      mounted() {
-        // this call runs while Comp is currentInstance, but
-        // the effect for this `$watch` should nontheless be registered with Child
-        this.comp!.$watch(
-          () => this.show,
-          () => void 0
-        )
-      }
-    }
-
-    new Vue(Comp).$mount(document.createElement('div'))
-
-    expect(instance!).toBeDefined()
-    expect(instance!.scope.effects).toBeInstanceOf(Array)
-    // includes the component's own render effect AND the watcher effect
-    expect(instance!.scope.effects.length).toBe(2)
-
-    _show!.value = false
-
-    await nextTick()
-    await nextTick()
-
-    expect(instance!.scope.effects[0].active).toBe(false)
   })
 
   test('this.$watch should pass `this.proxy` to watch source as the first argument ', () => {
@@ -1011,17 +966,19 @@ describe('api: watch', () => {
     expect(source.mock.calls[0]).toMatchObject([])
   })
 
-  // #2728
+  // vuejs/core#2728
   test('pre watcher callbacks should not track dependencies', async () => {
     const a = ref(0)
     const b = ref(0)
     const updated = vi.fn()
+    const cb = vi.fn()
 
     const Child = {
       props: ['a'],
       updated,
       watch: {
         a() {
+          cb()
           b.value
         }
       },
@@ -1032,7 +989,7 @@ describe('api: watch', () => {
 
     const Parent = {
       render() {
-        return h(Child, { a: a.value })
+        return h(Child, { props: { a: a.value } })
       }
     }
 
@@ -1042,11 +999,13 @@ describe('api: watch', () => {
     a.value++
     await nextTick()
     expect(updated).toHaveBeenCalledTimes(1)
+    expect(cb).toHaveBeenCalledTimes(1)
 
     b.value++
     await nextTick()
     // should not track b as dependency of Child
     expect(updated).toHaveBeenCalledTimes(1)
+    expect(cb).toHaveBeenCalledTimes(1)
   })
 
   test('watching keypath', async () => {
@@ -1102,26 +1061,26 @@ describe('api: watch', () => {
     expect(count).toBe(0)
   })
 
-  // #4158
+  // vuejs/core#4158
   // TODO
-  test.skip('watch should not register in owner component if created inside detached scope', () => {
-    let instance: Component
-    const Comp = {
-      setup() {
-        instance = getCurrentInstance()!.proxy
-        effectScope(true).run(() => {
-          watch(
-            () => 1,
-            () => {}
-          )
-        })
-        return () => ''
-      }
-    }
-    const root = document.createElement('div')
-    new Vue(Comp).$mount(root)
-    // should not record watcher in detached scope and only the instance's
-    // own update effect
-    expect(instance!.scope.effects.length).toBe(1)
-  })
+  // test.skip('watch should not register in owner component if created inside detached scope', () => {
+  //   let instance: Component
+  //   const Comp = {
+  //     setup() {
+  //       instance = getCurrentInstance()!.proxy
+  //       effectScope(true).run(() => {
+  //         watch(
+  //           () => 1,
+  //           () => {}
+  //         )
+  //       })
+  //       return () => ''
+  //     }
+  //   }
+  //   const root = document.createElement('div')
+  //   new Vue(Comp).$mount(root)
+  //   // should not record watcher in detached scope and only the instance's
+  //   // own update effect
+  //   expect(instance!.scope.effects.length).toBe(1)
+  // })
 })

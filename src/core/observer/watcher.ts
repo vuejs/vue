@@ -7,7 +7,6 @@ import {
   handleError,
   invokeWithErrorHandling,
   noop,
-  bind,
   isFunction
 } from '../util/index'
 
@@ -26,7 +25,7 @@ let uid = 0
  * This is used for both the $watch() api and directives.
  */
 export default class Watcher implements DepTarget {
-  vm: Component | null
+  vm?: Component | null
   expression: string
   cb: Function
   id: number
@@ -41,7 +40,8 @@ export default class Watcher implements DepTarget {
   depIds: SimpleSet
   newDepIds: SimpleSet
   before?: Function
-  scheduler?: Function
+  onStop?: Function
+  noRecurse?: boolean
   getter: Function
   value: any
 
@@ -72,10 +72,6 @@ export default class Watcher implements DepTarget {
       this.lazy = !!options.lazy
       this.sync = !!options.sync
       this.before = options.before
-      if ((this.scheduler = options.scheduler)) {
-        // @ts-ignore
-        this.run = bind(this.run, this)
-      }
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }
@@ -179,8 +175,6 @@ export default class Watcher implements DepTarget {
       this.dirty = true
     } else if (this.sync) {
       this.run()
-    } else if (this.scheduler) {
-      this.scheduler(this.run)
     } else {
       queueWatcher(this)
     }
@@ -255,6 +249,9 @@ export default class Watcher implements DepTarget {
         this.deps[i].removeSub(this)
       }
       this.active = false
+      if (this.onStop) {
+        this.onStop()
+      }
     }
   }
 }

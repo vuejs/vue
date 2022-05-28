@@ -1,5 +1,6 @@
 import type Watcher from './watcher'
 import config from '../config'
+import Dep from './dep'
 import { callHook, activateChildComponent } from '../instance/lifecycle'
 
 import { warn, nextTick, devtools, inBrowser, isIE } from '../util/index'
@@ -119,12 +120,12 @@ function flushSchedulerQueue() {
   }
 }
 
-function callUpdatedHooks(queue) {
+function callUpdatedHooks(queue: Watcher[]) {
   let i = queue.length
   while (i--) {
     const watcher = queue[i]
     const vm = watcher.vm
-    if (vm._watcher === watcher && vm._isMounted && !vm._isDestroyed) {
+    if (vm && vm._watcher === watcher && vm._isMounted && !vm._isDestroyed) {
       callHook(vm, 'updated')
     }
   }
@@ -155,28 +156,34 @@ function callActivatedHooks(queue) {
  */
 export function queueWatcher(watcher: Watcher) {
   const id = watcher.id
-  if (has[id] == null) {
-    has[id] = true
-    if (!flushing) {
-      queue.push(watcher)
-    } else {
-      // if already flushing, splice the watcher based on its id
-      // if already past its id, it will be run next immediately.
-      let i = queue.length - 1
-      while (i > index && queue[i].id > watcher.id) {
-        i--
-      }
-      queue.splice(i + 1, 0, watcher)
-    }
-    // queue the flush
-    if (!waiting) {
-      waiting = true
+  if (has[id] != null) {
+    return
+  }
 
-      if (__DEV__ && !config.async) {
-        flushSchedulerQueue()
-        return
-      }
-      nextTick(flushSchedulerQueue)
+  if (watcher === Dep.target && watcher.noRecurse) {
+    return
+  }
+
+  has[id] = true
+  if (!flushing) {
+    queue.push(watcher)
+  } else {
+    // if already flushing, splice the watcher based on its id
+    // if already past its id, it will be run next immediately.
+    let i = queue.length - 1
+    while (i > index && queue[i].id > watcher.id) {
+      i--
     }
+    queue.splice(i + 1, 0, watcher)
+  }
+  // queue the flush
+  if (!waiting) {
+    waiting = true
+
+    if (__DEV__ && !config.async) {
+      flushSchedulerQueue()
+      return
+    }
+    nextTick(flushSchedulerQueue)
   }
 }

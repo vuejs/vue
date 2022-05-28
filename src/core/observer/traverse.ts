@@ -12,6 +12,7 @@ const seenObjects = new Set()
 export function traverse(val: any) {
   _traverse(val, seenObjects)
   seenObjects.clear()
+  return val
 }
 
 function _traverse(val: any, seen: SimpleSet) {

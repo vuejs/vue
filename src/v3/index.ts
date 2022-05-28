@@ -53,10 +53,10 @@ export {
   WatchCallback,
   WatchSource,
   WatchStopHandle,
-  DebuggerOptions
+  DebuggerOptions,
+  DebuggerEvent
 } from './apiWatch'
 
-export { DebuggerEvent } from './reactivity/effect'
 export { TrackOpTypes, TriggerOpTypes } from './reactivity/operations'
 
 export { h } from './h'

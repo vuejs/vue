@@ -7,18 +7,15 @@ import {
   isArray,
   isFunction,
   emptyObject,
-  remove,
   hasChanged,
   isServerRendering,
   invokeWithErrorHandling
 } from 'core/util'
 import { currentInstance } from './currentInstance'
 import { traverse } from 'core/observer/traverse'
-import {
-  EffectScheduler,
-  ReactiveEffect,
-  DebuggerEvent
-} from './reactivity/effect'
+import Watcher from '../core/observer/watcher'
+import { queueWatcher } from '../core/observer/scheduler'
+import { TrackOpTypes, TriggerOpTypes } from './reactivity/operations'
 
 const WATCHER = `watcher`
 const WATCHER_CB = `${WATCHER} callback`
@@ -56,6 +53,19 @@ export interface WatchOptionsBase extends DebuggerOptions {
 export interface DebuggerOptions {
   onTrack?: (event: DebuggerEvent) => void
   onTrigger?: (event: DebuggerEvent) => void
+}
+
+export type DebuggerEvent = {
+  watcher: Watcher
+} & DebuggerEventExtraInfo
+
+export type DebuggerEventExtraInfo = {
+  target: object
+  type: TrackOpTypes | TriggerOpTypes
+  key: any
+  newValue?: any
+  oldValue?: any
+  oldTarget?: Map<any, any> | Set<any>
 }
 
 export interface WatchOptions<Immediate = boolean> extends WatchOptionsBase {
@@ -162,7 +172,13 @@ export function watch<T = any, Immediate extends Readonly<boolean> = false>(
 function doWatch(
   source: WatchSource | WatchSource[] | WatchEffect | object,
   cb: WatchCallback | null,
-  { immediate, deep, flush, onTrack, onTrigger }: WatchOptions = emptyObject
+  {
+    immediate,
+    deep,
+    flush = 'pre',
+    onTrack,
+    onTrigger
+  }: WatchOptions = emptyObject
 ): WatchStopHandle {
   if (__DEV__ && !cb) {
     if (immediate !== undefined) {
@@ -200,7 +216,12 @@ function doWatch(
     getter = () => source.value
     forceTrigger = isShallow(source)
   } else if (isReactive(source)) {
-    getter = () => source
+    getter = isArray(source)
+      ? () => {
+          ;(source as any).__ob__.dep.depend()
+          return source
+        }
+      : () => source
     deep = true
   } else if (isArray(source)) {
     isMultiSource = true
@@ -245,7 +266,7 @@ function doWatch(
 
   let cleanup: () => void
   let onCleanup: OnCleanup = (fn: () => void) => {
-    cleanup = effect.onStop = () => {
+    cleanup = watcher.onStop = () => {
       call(fn, WATCHER_CLEANUP)
     }
   }
@@ -267,14 +288,23 @@ function doWatch(
     return noop
   }
 
+  const watcher = new Watcher(currentInstance, getter, noop, {
+    lazy: true
+  })
+  watcher.noRecurse = !cb
+
   let oldValue = isMultiSource ? [] : INITIAL_WATCHER_VALUE
-  const job = () => {
-    if (!effect.active) {
+  // overwrite default run
+  watcher.run = () => {
+    if (
+      !watcher.active &&
+      !(flush === 'pre' && instance && instance._isBeingDestroyed)
+    ) {
       return
     }
     if (cb) {
       // watch(source, cb)
-      const newValue = effect.run()
+      const newValue = watcher.get()
       if (
         deep ||
         forceTrigger ||
@@ -298,52 +328,51 @@ function doWatch(
       }
     } else {
       // watchEffect
-      effect.run()
+      watcher.get()
     }
   }
 
-  let scheduler: EffectScheduler
   if (flush === 'sync') {
-    scheduler = job as any // the scheduler function gets called directly
+    watcher.update = watcher.run
   } else if (flush === 'post') {
-    scheduler = () => queuePostRenderEffect(job)
+    watcher.id = Infinity
+    watcher.update = () => queueWatcher(watcher)
   } else {
-    // default: 'pre'
-    scheduler = () => queuePreFlushCb(job)
+    // pre
+    watcher.update = () => {
+      if (!instance || instance._isMounted) {
+        queueWatcher(watcher)
+      } else {
+        const buffer = instance._preWatchers || (instance._preWatchers = [])
+        if (buffer.indexOf(watcher) < 0) buffer.push(watcher)
+      }
+    }
   }
 
-  const effect = new ReactiveEffect(getter, scheduler)
-
-  if (__DEV__) {
-    effect.onTrack = onTrack
-    effect.onTrigger = onTrigger
-  }
+  // TODO
+  // if (__DEV__) {
+  //   effect.onTrack = onTrack
+  //   effect.onTrigger = onTrigger
+  // }
 
   // initial run
   if (cb) {
     if (immediate) {
-      job()
+      watcher.run()
     } else {
-      oldValue = effect.run()
+      oldValue = watcher.get()
     }
-  } else if (flush === 'post') {
-    queuePostRenderEffect(effect.run.bind(effect))
+  } else if (flush === 'post' && instance) {
+    instance.$once('hook:mounted', () => watcher.get())
   } else {
-    effect.run()
+    watcher.get()
   }
 
   return () => {
-    effect.stop()
-    if (instance && instance.scope) {
-      remove(instance.scope.effects!, effect)
-    }
+    watcher.teardown()
+    // TODO
+    // if (instance && instance.scope) {
+    //   remove(instance.scope.effects!, effect)
+    // }
   }
-}
-
-function queuePostRenderEffect(fn: Function) {
-  // TODO
-}
-
-function queuePreFlushCb(fn: Function) {
-  // TODO
 }

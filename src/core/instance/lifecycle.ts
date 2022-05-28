@@ -218,6 +218,12 @@ export function mountComponent(
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
+    const preWatchers = vm._preWatchers
+    if (preWatchers) {
+      for (let i = 0; i < preWatchers.length; i++) {
+        preWatchers[i].run()
+      }
+    }
     vm._isMounted = true
     callHook(vm, 'mounted')
   }

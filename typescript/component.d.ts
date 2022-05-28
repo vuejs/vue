@@ -101,6 +101,7 @@ export declare class Component {
   _setupState?: Record<string, any>
   _attrsProxy?: Record<string, any>
   _slotsProxy?: Record<string, () => VNode[]>
+  _preWatchers?: Watcher[]
 
   // private methods
 
