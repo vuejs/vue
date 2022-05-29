@@ -189,6 +189,8 @@ export interface ComponentOptions<
   deactivated?(): void
   errorCaptured?(err: Error, vm: Vue, info: string): boolean | void
   serverPrefetch?(this: V): Promise<void>
+  renderTracked?(e: DebuggerEvent): void
+  renderTriggerd?(e: DebuggerEvent): void
 
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions }
   components?: {
@@ -314,3 +316,24 @@ export type InjectOptions =
       [key: string]: InjectKey | { from?: InjectKey; default?: any }
     }
   | string[]
+
+export type DebuggerEvent = {
+  target: object
+  type: TrackOpTypes | TriggerOpTypes
+  key?: any
+  newValue?: any
+  oldValue?: any
+  oldTarget?: Map<any, any> | Set<any>
+}
+
+export const enum TrackOpTypes {
+  GET = 'get',
+  TOUCH = 'touch'
+}
+
+export const enum TriggerOpTypes {
+  SET = 'set',
+  ADD = 'add',
+  DELETE = 'delete',
+  ARRAY_MUTATION = 'array mutation'
+}

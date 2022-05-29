@@ -1,4 +1,5 @@
 import VNode from '../src/core/vdom/vnode'
+import { DebuggerEvent } from '../src/v3'
 import { Component } from './component'
 
 declare type InternalComponentOptions = {
@@ -61,6 +62,8 @@ declare type ComponentOptions = {
   destroyed?: Function
   errorCaptured?: () => boolean | void
   serverPrefetch?: Function
+  renderTracked?(e: DebuggerEvent): void
+  renderTriggerd?(e: DebuggerEvent): void
 
   // assets
   directives?: { [key: string]: object }

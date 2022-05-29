@@ -12,7 +12,13 @@ import {
 
 import { traverse } from './traverse'
 import { queueWatcher } from './scheduler'
-import Dep, { pushTarget, popTarget, DepTarget, DebuggerEvent } from './dep'
+import Dep, {
+  pushTarget,
+  popTarget,
+  DepTarget,
+  DebuggerEvent,
+  DebuggerOptions
+} from './dep'
 
 import type { SimpleSet } from '../util/index'
 import type { Component } from 'typescript/component'
@@ -22,6 +28,14 @@ import {
 } from '../../v3/reactivity/effectScope'
 
 let uid = 0
+
+export interface WatcherOptions extends DebuggerOptions {
+  deep?: boolean
+  user?: boolean
+  lazy?: boolean
+  sync?: boolean
+  before?: Function
+}
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -57,14 +71,7 @@ export default class Watcher implements DepTarget {
     vm: Component | null,
     expOrFn: string | (() => any),
     cb: Function,
-    options?: {
-      deep?: boolean
-      user?: boolean
-      lazy?: boolean
-      sync?: boolean
-      before?: Function
-      scheduler?: Function
-    } | null,
+    options?: WatcherOptions | null,
     isRenderWatcher?: boolean
   ) {
     recordEffectScope(this, activeEffectScope || (vm ? vm._scope : undefined))
@@ -80,6 +87,10 @@ export default class Watcher implements DepTarget {
       this.lazy = !!options.lazy
       this.sync = !!options.sync
       this.before = options.before
+      if (__DEV__) {
+        this.onTrack = options.onTrack
+        this.onTrigger = options.onTrigger
+      }
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }

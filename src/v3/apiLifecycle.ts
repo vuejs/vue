@@ -1,9 +1,12 @@
+import { DebuggerEvent } from '.'
 import { Component } from '../../typescript/component'
 import { mergeLifecycleHook, warn } from '../core/util'
 import { currentInstance } from './currentInstance'
 
-function createLifeCycle(hookName: string) {
-  return (fn: () => void, target: Component | null = currentInstance) => {
+function createLifeCycle<T extends (...args: any[]) => any = () => void>(
+  hookName: string
+) {
+  return (fn: T, target: Component | null = currentInstance) => {
     if (!target) {
       __DEV__ &&
         warn(
@@ -43,3 +46,8 @@ export const onErrorCaptured = createLifeCycle('errorCaptured')
 export const onActivated = createLifeCycle('activated')
 export const onDeactivated = createLifeCycle('deactivated')
 export const onServerPrefetch = createLifeCycle('serverPrefetch')
+
+export const onRenderTracked =
+  createLifeCycle<(e: DebuggerEvent) => any>('renderTracked')
+export const onRenderTriggered =
+  createLifeCycle<(e: DebuggerEvent) => any>('renderTriggered')

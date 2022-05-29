@@ -4,10 +4,16 @@ import {
   onBeforeMount,
   onMounted,
   ref,
+  reactive,
   onBeforeUpdate,
   onUpdated,
   onBeforeUnmount,
-  onUnmounted
+  onUnmounted,
+  onRenderTracked,
+  onRenderTriggered,
+  DebuggerEvent,
+  TrackOpTypes,
+  TriggerOpTypes
 } from 'v3'
 import { nextTick } from 'core/util'
 
@@ -280,5 +286,75 @@ describe('api: lifecycle hooks', () => {
       'mid onUnmounted',
       'root onUnmounted'
     ])
+  })
+
+  it('onRenderTracked', () => {
+    const events: DebuggerEvent[] = []
+    const onTrack = vi.fn((e: DebuggerEvent) => {
+      events.push(e)
+    })
+    const obj = reactive({ foo: 1, bar: 2 })
+
+    const Comp = {
+      setup() {
+        onRenderTracked(onTrack)
+        return () => h('div', [obj.foo + obj.bar])
+      }
+    }
+
+    new Vue(Comp).$mount()
+    expect(onTrack).toHaveBeenCalledTimes(2)
+    expect(events).toMatchObject([
+      {
+        target: obj,
+        type: TrackOpTypes.GET,
+        key: 'foo'
+      },
+      {
+        target: obj,
+        type: TrackOpTypes.GET,
+        key: 'bar'
+      }
+    ])
+  })
+
+  it('onRenderTriggered', async () => {
+    const events: DebuggerEvent[] = []
+    const onTrigger = vi.fn((e: DebuggerEvent) => {
+      events.push(e)
+    })
+    const obj = reactive<{
+      foo: number
+      bar: number
+    }>({ foo: 1, bar: 2 })
+
+    const Comp = {
+      setup() {
+        onRenderTriggered(onTrigger)
+        return () => h('div', [obj.foo + obj.bar])
+      }
+    }
+
+    new Vue(Comp).$mount()
+
+    obj.foo++
+    await nextTick()
+    expect(onTrigger).toHaveBeenCalledTimes(1)
+    expect(events[0]).toMatchObject({
+      type: TriggerOpTypes.SET,
+      key: 'foo',
+      oldValue: 1,
+      newValue: 2
+    })
+
+    obj.bar++
+    await nextTick()
+    expect(onTrigger).toHaveBeenCalledTimes(2)
+    expect(events[1]).toMatchObject({
+      type: TriggerOpTypes.SET,
+      key: 'bar',
+      oldValue: 2,
+      newValue: 3
+    })
   })
 })

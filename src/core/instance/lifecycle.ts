@@ -1,5 +1,5 @@
 import config from '../config'
-import Watcher from '../observer/watcher'
+import Watcher, { WatcherOptions } from '../observer/watcher'
 import { mark, measure } from '../util/perf'
 import VNode, { createEmptyVNode } from '../vdom/vnode'
 import { updateComponentListeners } from './events'
@@ -192,6 +192,19 @@ export function mountComponent(
     }
   }
 
+  const watcherOptions: WatcherOptions = {
+    before() {
+      if (vm._isMounted && !vm._isDestroyed) {
+        callHook(vm, 'beforeUpdate')
+      }
+    }
+  }
+
+  if (__DEV__) {
+    watcherOptions.onTrack = e => callHook(vm, 'renderTracked', [e])
+    watcherOptions.onTrigger = e => callHook(vm, 'renderTriggered', [e])
+  }
+
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
@@ -199,13 +212,7 @@ export function mountComponent(
     vm,
     updateComponent,
     noop,
-    {
-      before() {
-        if (vm._isMounted && !vm._isDestroyed) {
-          callHook(vm, 'beforeUpdate')
-        }
-      }
-    },
+    watcherOptions,
     true /* isRenderWatcher */
   )
   hydrating = false
@@ -365,7 +372,7 @@ export function deactivateChildComponent(vm: Component, direct?: boolean) {
   }
 }
 
-export function callHook(vm: Component, hook: string) {
+export function callHook(vm: Component, hook: string, args?: any[]) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
   const prev = currentInstance
@@ -374,7 +381,7 @@ export function callHook(vm: Component, hook: string) {
   const info = `${hook} hook`
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
-      invokeWithErrorHandling(handlers[i], vm, null, vm, info)
+      invokeWithErrorHandling(handlers[i], vm, args || null, vm, info)
     }
   }
   if (vm._hasHookEvent) {
