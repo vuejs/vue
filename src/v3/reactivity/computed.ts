@@ -1,10 +1,10 @@
 import { isServerRendering, noop, warn, def, isFunction } from 'core/util'
 import { Ref, RefFlag } from './ref'
 import Watcher from 'core/observer/watcher'
-import Dep from 'core/observer/dep'
+import Dep, { DebuggerOptions } from 'core/observer/dep'
 import { currentInstance } from '../currentInstance'
-import { DebuggerOptions } from '../apiWatch'
 import { ReactiveFlags } from './reactive'
+import { TrackOpTypes } from './operations'
 
 declare const ComputedRefSymbol: unique symbol
 
@@ -35,7 +35,6 @@ export function computed<T>(
 ): WritableComputedRef<T>
 export function computed<T>(
   getterOrOptions: ComputedGetter<T> | WritableComputedOptions<T>,
-  // TODO debug options
   debugOptions?: DebuggerOptions
 ) {
   let getter: ComputedGetter<T>
@@ -58,6 +57,11 @@ export function computed<T>(
     ? null
     : new Watcher(currentInstance, getter, noop, { lazy: true })
 
+  if (__DEV__ && watcher && debugOptions) {
+    watcher.onTrack = debugOptions.onTrack
+    watcher.onTrigger = debugOptions.onTrigger
+  }
+
   const ref = {
     // some libs rely on the presence effect for checking computed refs
     // from normal refs, but the implementation doesn't matter
@@ -68,6 +72,14 @@ export function computed<T>(
           watcher.evaluate()
         }
         if (Dep.target) {
+          if (__DEV__ && Dep.target.onTrack) {
+            Dep.target.onTrack({
+              effect: Dep.target,
+              target: ref,
+              type: TrackOpTypes.GET,
+              key: 'value'
+            })
+          }
           watcher.depend()
         }
         return watcher.value

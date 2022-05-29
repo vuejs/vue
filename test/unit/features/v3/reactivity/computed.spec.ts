@@ -3,9 +3,9 @@ import {
   reactive,
   ref,
   isReadonly,
-  // toRaw,
-  WritableComputedRef
-  // DebuggerEvent
+  WritableComputedRef,
+  DebuggerEvent,
+  TrackOpTypes
 } from 'v3'
 import { effect } from 'v3/reactivity/effect'
 import { nextTick } from 'core/util'
@@ -225,39 +225,32 @@ describe('reactivity/computed', () => {
     expect(x.value).toBe(1)
   })
 
-  // TODO
-  // it('debug: onTrack', () => {
-  //   let events: DebuggerEvent[] = []
-  //   const onTrack = vi.fn((e: DebuggerEvent) => {
-  //     events.push(e)
-  //   })
-  //   const obj = reactive({ foo: 1, bar: 2 })
-  //   const c = computed(() => (obj.foo, 'bar' in obj, Object.keys(obj)), {
-  //     onTrack
-  //   })
-  //   expect(c.value).toEqual(['foo', 'bar'])
-  //   expect(onTrack).toHaveBeenCalledTimes(3)
-  //   expect(events).toEqual([
-  //     {
-  //       effect: c.effect,
-  //       target: toRaw(obj),
-  //       type: TrackOpTypes.GET,
-  //       key: 'foo'
-  //     },
-  //     {
-  //       effect: c.effect,
-  //       target: toRaw(obj),
-  //       type: TrackOpTypes.HAS,
-  //       key: 'bar'
-  //     },
-  //     {
-  //       effect: c.effect,
-  //       target: toRaw(obj),
-  //       type: TrackOpTypes.ITERATE,
-  //       key: ITERATE_KEY
-  //     }
-  //   ])
-  // })
+  it('debug: onTrack', () => {
+    let events: DebuggerEvent[] = []
+    const onTrack = vi.fn((e: DebuggerEvent) => {
+      events.push(e)
+    })
+    const obj = reactive({ foo: 1, bar: 2 })
+    const c = computed(() => obj.foo + obj.bar, {
+      onTrack
+    })
+    expect(c.value).toEqual(3)
+    expect(onTrack).toHaveBeenCalledTimes(2)
+    expect(events).toEqual([
+      {
+        effect: c.effect,
+        target: obj,
+        type: TrackOpTypes.GET,
+        key: 'foo'
+      },
+      {
+        effect: c.effect,
+        target: obj,
+        type: TrackOpTypes.GET,
+        key: 'bar'
+      }
+    ])
+  })
 
   // TODO
   // it('debug: onTrigger', () => {

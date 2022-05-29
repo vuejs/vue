@@ -15,7 +15,7 @@ import { currentInstance } from './currentInstance'
 import { traverse } from 'core/observer/traverse'
 import Watcher from '../core/observer/watcher'
 import { queueWatcher } from '../core/observer/scheduler'
-import { TrackOpTypes, TriggerOpTypes } from './reactivity/operations'
+import { DebuggerOptions } from '../core/observer/dep'
 
 const WATCHER = `watcher`
 const WATCHER_CB = `${WATCHER} callback`
@@ -48,24 +48,6 @@ type OnCleanup = (cleanupFn: () => void) => void
 
 export interface WatchOptionsBase extends DebuggerOptions {
   flush?: 'pre' | 'post' | 'sync'
-}
-
-export interface DebuggerOptions {
-  onTrack?: (event: DebuggerEvent) => void
-  onTrigger?: (event: DebuggerEvent) => void
-}
-
-export type DebuggerEvent = {
-  watcher: Watcher
-} & DebuggerEventExtraInfo
-
-export type DebuggerEventExtraInfo = {
-  target: object
-  type: TrackOpTypes | TriggerOpTypes
-  key: any
-  newValue?: any
-  oldValue?: any
-  oldTarget?: Map<any, any> | Set<any>
 }
 
 export interface WatchOptions<Immediate = boolean> extends WatchOptionsBase {
@@ -349,11 +331,10 @@ function doWatch(
     }
   }
 
-  // TODO
-  // if (__DEV__) {
-  //   effect.onTrack = onTrack
-  //   effect.onTrigger = onTrigger
-  // }
+  if (__DEV__) {
+    watcher.onTrack = onTrack
+    watcher.onTrigger = onTrigger
+  }
 
   // initial run
   if (cb) {
@@ -370,9 +351,5 @@ function doWatch(
 
   return () => {
     watcher.teardown()
-    // TODO
-    // if (instance && instance.scope) {
-    //   remove(instance.scope.effects!, effect)
-    // }
   }
 }

@@ -12,7 +12,7 @@ import {
 
 import { traverse } from './traverse'
 import { queueWatcher } from './scheduler'
-import Dep, { pushTarget, popTarget, DepTarget } from './dep'
+import Dep, { pushTarget, popTarget, DepTarget, DebuggerEvent } from './dep'
 
 import type { SimpleSet } from '../util/index'
 import type { Component } from 'typescript/component'
@@ -48,6 +48,10 @@ export default class Watcher implements DepTarget {
   noRecurse?: boolean
   getter: Function
   value: any
+
+  // dev only
+  onTrack?: ((event: DebuggerEvent) => void) | undefined
+  onTrigger?: ((event: DebuggerEvent) => void) | undefined
 
   constructor(
     vm: Component | null,

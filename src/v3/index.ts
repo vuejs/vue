@@ -52,9 +52,7 @@ export {
   WatchOptionsBase,
   WatchCallback,
   WatchSource,
-  WatchStopHandle,
-  DebuggerOptions,
-  DebuggerEvent
+  WatchStopHandle
 } from './apiWatch'
 
 export {
@@ -64,6 +62,11 @@ export {
   getCurrentScope
 } from './reactivity/effectScope'
 
+export {
+  DebuggerOptions,
+  DebuggerEvent,
+  DebuggerEventExtraInfo
+} from 'core/observer/dep'
 export { TrackOpTypes, TriggerOpTypes } from './reactivity/operations'
 
 export { h } from './h'

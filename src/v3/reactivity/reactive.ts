@@ -93,7 +93,6 @@ export function isShallow(value: unknown): boolean {
 }
 
 export function isReadonly(value: unknown): boolean {
-  // TODO
   return !!(value && (value as Target).__v_isReadonly)
 }
 

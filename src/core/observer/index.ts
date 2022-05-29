@@ -15,7 +15,7 @@ import {
   isServerRendering,
   hasChanged
 } from '../util/index'
-import { isReadonly, isRef } from '../../v3'
+import { isReadonly, isRef, TrackOpTypes } from '../../v3'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
@@ -165,7 +165,15 @@ export function defineReactive(
     get: function reactiveGetter() {
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
-        dep.depend()
+        if (__DEV__) {
+          dep.depend({
+            target: obj,
+            type: TrackOpTypes.GET,
+            key
+          })
+        } else {
+          dep.depend()
+        }
         if (childOb) {
           childOb.dep.depend()
           if (isArray(value)) {
@@ -291,7 +299,9 @@ export function del(target: Array<any> | Object, key: any) {
 function dependArray(value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {
     e = value[i]
-    e && e.__ob__ && e.__ob__.dep.depend()
+    if (e && e.__ob__) {
+      e.__ob__.dep.depend()
+    }
     if (isArray(e)) {
       dependArray(e)
     }

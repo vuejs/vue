@@ -30,6 +30,7 @@ import {
   isFunction
 } from '../util/index'
 import type { Component } from 'typescript/component'
+import { TrackOpTypes } from '../../v3'
 
 const sharedPropertyDefinition = {
   enumerable: true,
@@ -254,6 +255,14 @@ function createComputedGetter(key) {
         watcher.evaluate()
       }
       if (Dep.target) {
+        if (__DEV__ && Dep.target.onTrack) {
+          Dep.target.onTrack({
+            effect: Dep.target,
+            target: this,
+            type: TrackOpTypes.GET,
+            key
+          })
+        }
         watcher.depend()
       }
       return watcher.value

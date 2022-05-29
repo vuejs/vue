@@ -12,7 +12,10 @@ import {
   h,
   onMounted,
   getCurrentInstance,
-  effectScope
+  effectScope,
+  TrackOpTypes,
+  TriggerOpTypes,
+  DebuggerEvent
 } from 'v3'
 import { nextTick } from 'core/util'
 import { set } from 'core/observer'
@@ -777,41 +780,43 @@ describe('api: watch', () => {
     expect(`"deep" option is only respected`).toHaveBeenWarned()
   })
 
-  // TODO
-  // it('onTrack', async () => {
-  //   const events: DebuggerEvent[] = []
-  //   let dummy
-  //   const onTrack = vi.fn((e: DebuggerEvent) => {
-  //     events.push(e)
-  //   })
-  //   const obj = reactive({ foo: 1, bar: 2 })
-  //   watchEffect(
-  //     () => {
-  //       dummy = [obj.foo, 'bar' in obj, Object.keys(obj)]
-  //     },
-  //     { onTrack }
-  //   )
-  //   await nextTick()
-  //   expect(dummy).toEqual([1, true, ['foo', 'bar']])
-  //   expect(onTrack).toHaveBeenCalledTimes(3)
-  //   expect(events).toMatchObject([
-  //     {
-  //       target: obj,
-  //       type: TrackOpTypes.GET,
-  //       key: 'foo'
-  //     },
-  //     {
-  //       target: obj,
-  //       type: TrackOpTypes.HAS,
-  //       key: 'bar'
-  //     },
-  //     {
-  //       target: obj,
-  //       type: TrackOpTypes.ITERATE,
-  //       key: ITERATE_KEY
-  //     }
-  //   ])
-  // })
+  it('onTrack', async () => {
+    const events: DebuggerEvent[] = []
+    let dummy
+    const onTrack = vi.fn((e: DebuggerEvent) => {
+      events.push(e)
+    })
+    const obj = reactive({ foo: 1 })
+    const r = ref(2)
+    const c = computed(() => r.value + 1)
+    // TODO computed & ref
+    watchEffect(
+      () => {
+        dummy = obj.foo + r.value + c.value
+      },
+      { onTrack }
+    )
+    await nextTick()
+    expect(dummy).toEqual(6)
+    expect(onTrack).toHaveBeenCalledTimes(3)
+    expect(events).toMatchObject([
+      {
+        target: obj,
+        type: TrackOpTypes.GET,
+        key: 'foo'
+      },
+      {
+        target: r,
+        type: TrackOpTypes.GET,
+        key: 'value'
+      },
+      {
+        target: c,
+        type: TrackOpTypes.GET,
+        key: 'value'
+      }
+    ])
+  })
 
   // it('onTrigger', async () => {
   //   const events: DebuggerEvent[] = []

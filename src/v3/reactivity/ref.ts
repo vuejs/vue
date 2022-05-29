@@ -7,6 +7,7 @@ import {
 import type { IfAny } from 'typescript/utils'
 import Dep from 'core/observer/dep'
 import { warn, isArray, def } from 'core/util'
+import { TrackOpTypes } from './operations'
 
 declare const RefSymbol: unique symbol
 export declare const RawSymbol: unique symbol
@@ -91,8 +92,20 @@ export type CustomRefFactory<T> = (
 export function customRef<T>(factory: CustomRefFactory<T>): Ref<T> {
   const dep = new Dep()
   const { get, set } = factory(
-    () => dep.depend(),
-    () => dep.notify()
+    () => {
+      if (__DEV__) {
+        dep.depend({
+          target: ref,
+          type: TrackOpTypes.GET,
+          key: 'value'
+        })
+      } else {
+        dep.depend()
+      }
+    },
+    () => {
+      dep.notify()
+    }
   )
   const ref = {
     get value() {

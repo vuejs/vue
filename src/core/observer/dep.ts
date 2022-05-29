@@ -1,12 +1,31 @@
 import { remove } from '../util/index'
 import config from '../config'
+import { TrackOpTypes, TriggerOpTypes } from 'v3'
 
 let uid = 0
 
-export interface DepTarget {
+export interface DepTarget extends DebuggerOptions {
   id: number
   addDep(dep: Dep): void
   update(): void
+}
+
+export interface DebuggerOptions {
+  onTrack?: (event: DebuggerEvent) => void
+  onTrigger?: (event: DebuggerEvent) => void
+}
+
+export type DebuggerEvent = {
+  effect: DepTarget
+} & DebuggerEventExtraInfo
+
+export type DebuggerEventExtraInfo = {
+  target: object
+  type: TrackOpTypes | TriggerOpTypes
+  key?: any
+  newValue?: any
+  oldValue?: any
+  oldTarget?: Map<any, any> | Set<any>
 }
 
 /**
@@ -31,13 +50,19 @@ export default class Dep {
     remove(this.subs, sub)
   }
 
-  depend() {
+  depend(info?: DebuggerEventExtraInfo) {
     if (Dep.target) {
       Dep.target.addDep(this)
+      if (__DEV__ && info && Dep.target.onTrack) {
+        Dep.target.onTrack({
+          effect: Dep.target,
+          ...info
+        })
+      }
     }
   }
 
-  notify() {
+  notify(info?: DebuggerEventExtraInfo) {
     // stabilize the subscriber list first
     const subs = this.subs.slice()
     if (__DEV__ && !config.async) {
@@ -47,6 +72,14 @@ export default class Dep {
       subs.sort((a, b) => a.id - b.id)
     }
     for (let i = 0, l = subs.length; i < l; i++) {
+      if (__DEV__ && info) {
+        const sub = subs[i]
+        sub.onTrigger &&
+          sub.onTrigger({
+            effect: subs[i],
+            ...info
+          })
+      }
       subs[i].update()
     }
   }
