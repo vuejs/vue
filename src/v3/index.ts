@@ -69,6 +69,8 @@ export {
 } from 'core/observer/dep'
 export { TrackOpTypes, TriggerOpTypes } from './reactivity/operations'
 
+export { provide, inject, InjectionKey } from './apiInject'
+
 export { h } from './h'
 export { getCurrentInstance } from './currentInstance'
 export { useSlots, useAttrs } from './apiSetup'

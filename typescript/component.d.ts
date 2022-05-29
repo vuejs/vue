@@ -99,7 +99,7 @@ export declare class Component {
   _vnode?: VNode | null // self root node
   _staticTrees?: Array<VNode> | null // v-once cached trees
   _hasHookEvent: boolean
-  _provided?: Record<string, any>
+  _provided: Record<string, any>
   // _virtualComponents?: { [key: string]: Component };
 
   // @v3

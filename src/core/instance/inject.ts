@@ -1,12 +1,21 @@
-import { hasOwn } from 'shared/util'
 import { warn, hasSymbol, isFunction } from '../util/index'
 import { defineReactive, toggleObserving } from '../observer/index'
 import type { Component } from 'typescript/component'
+import { provide } from 'v3/apiInject'
+import { setCurrentInstance } from '../../v3/currentInstance'
 
 export function initProvide(vm: Component) {
-  const provide = vm.$options.provide
-  if (provide) {
-    vm._provided = isFunction(provide) ? provide.call(vm) : provide
+  const provideOption = vm.$options.provide
+  if (provideOption) {
+    const provided = isFunction(provideOption)
+      ? provideOption.call(vm)
+      : provideOption
+    const keys = hasSymbol ? Reflect.ownKeys(provided) : Object.keys(provided)
+    setCurrentInstance(vm)
+    for (let i = 0; i < keys.length; i++) {
+      provide(keys[i], provided[keys[i]])
+    }
+    setCurrentInstance()
   }
 }
 
@@ -47,24 +56,15 @@ export function resolveInject(
       // #6574 in case the inject object is observed...
       if (key === '__ob__') continue
       const provideKey = inject[key].from
-      let source = vm
-      while (source) {
-        if (source._provided && hasOwn(source._provided, provideKey)) {
-          result[key] = source._provided[provideKey]
-          break
-        }
-        // @ts-expect-error
-        source = source.$parent
-      }
-      if (!source) {
-        if ('default' in inject[key]) {
-          const provideDefault = inject[key].default
-          result[key] = isFunction(provideDefault)
-            ? provideDefault.call(vm)
-            : provideDefault
-        } else if (__DEV__) {
-          warn(`Injection "${key as string}" not found`, vm)
-        }
+      if (provideKey in vm._provided) {
+        result[key] = vm._provided[provideKey]
+      } else if ('default' in inject[key]) {
+        const provideDefault = inject[key].default
+        result[key] = isFunction(provideDefault)
+          ? provideDefault.call(vm)
+          : provideDefault
+      } else if (__DEV__) {
+        warn(`Injection "${key as string}" not found`, vm)
       }
     }
     return result
