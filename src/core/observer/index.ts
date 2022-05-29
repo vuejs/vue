@@ -15,7 +15,7 @@ import {
   isServerRendering,
   hasChanged
 } from '../util/index'
-import { isReadonly, isRef, TrackOpTypes } from '../../v3'
+import { isReadonly, isRef, TrackOpTypes, TriggerOpTypes } from '../../v3'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
@@ -198,11 +198,22 @@ export function defineReactive(
         return
       } else if (isRef(value) && !isRef(newVal)) {
         value.value = newVal
+        return
       } else {
         val = newVal
       }
       childOb = !shallow && observe(newVal)
-      dep.notify()
+      if (__DEV__) {
+        dep.notify({
+          type: TriggerOpTypes.SET,
+          target: obj,
+          key,
+          newValue: newVal,
+          oldValue: value
+        })
+      } else {
+        dep.notify()
+      }
     }
   })
 
@@ -251,7 +262,17 @@ export function set(
     return val
   }
   defineReactive(ob.value, key, val)
-  ob.dep.notify()
+  if (__DEV__) {
+    ob.dep.notify({
+      type: TriggerOpTypes.ADD,
+      target: target,
+      key,
+      newValue: val,
+      oldValue: undefined
+    })
+  } else {
+    ob.dep.notify()
+  }
   return val
 }
 
@@ -289,7 +310,15 @@ export function del(target: Array<any> | Object, key: any) {
   if (!ob) {
     return
   }
-  ob.dep.notify()
+  if (__DEV__) {
+    ob.dep.notify({
+      type: TriggerOpTypes.DELETE,
+      target: target,
+      key
+    })
+  } else {
+    ob.dep.notify()
+  }
 }
 
 /**

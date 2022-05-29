@@ -7,7 +7,7 @@ import {
 import type { IfAny } from 'typescript/utils'
 import Dep from 'core/observer/dep'
 import { warn, isArray, def } from 'core/util'
-import { TrackOpTypes } from './operations'
+import { TrackOpTypes, TriggerOpTypes } from './operations'
 
 declare const RefSymbol: unique symbol
 export declare const RawSymbol: unique symbol
@@ -74,7 +74,16 @@ export function triggerRef(ref: Ref) {
   if (__DEV__ && !ref.dep) {
     warn(`received object is not a triggerable ref.`)
   }
-  ref.dep && ref.dep.notify()
+  if (__DEV__) {
+    ref.dep &&
+      ref.dep.notify({
+        type: TriggerOpTypes.SET,
+        target: ref,
+        key: 'value'
+      })
+  } else {
+    ref.dep && ref.dep.notify()
+  }
 }
 
 export function unref<T>(ref: T | Ref<T>): T {
@@ -104,7 +113,15 @@ export function customRef<T>(factory: CustomRefFactory<T>): Ref<T> {
       }
     },
     () => {
-      dep.notify()
+      if (__DEV__) {
+        dep.notify({
+          target: ref,
+          type: TriggerOpTypes.SET,
+          key: 'value'
+        })
+      } else {
+        dep.notify()
+      }
     }
   )
   const ref = {

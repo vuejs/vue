@@ -46,7 +46,10 @@ export declare class Component {
   $isServer: boolean
 
   // public methods
-  $mount: (el?: Element | string, hydrating?: boolean) => Component
+  $mount: (
+    el?: Element | string,
+    hydrating?: boolean
+  ) => Component & { [key: string]: any }
   $forceUpdate: () => void
   $destroy: () => void
   $set: <T>(

@@ -5,11 +5,12 @@ import {
   isReadonly,
   WritableComputedRef,
   DebuggerEvent,
-  TrackOpTypes
+  TrackOpTypes,
+  TriggerOpTypes
 } from 'v3'
 import { effect } from 'v3/reactivity/effect'
 import { nextTick } from 'core/util'
-// import { TrackOpTypes, TriggerOpTypes } from 'v3/reactivity/operations'
+import { set, del } from 'core/observer/index'
 
 describe('reactivity/computed', () => {
   it('should return updated value', () => {
@@ -252,40 +253,49 @@ describe('reactivity/computed', () => {
     ])
   })
 
-  // TODO
-  // it('debug: onTrigger', () => {
-  //   let events: DebuggerEvent[] = []
-  //   const onTrigger = vi.fn((e: DebuggerEvent) => {
-  //     events.push(e)
-  //   })
-  //   const obj = reactive({ foo: 1 })
-  //   const c = computed(() => obj.foo, { onTrigger })
+  it('debug: onTrigger', () => {
+    let events: DebuggerEvent[] = []
+    const onTrigger = vi.fn((e: DebuggerEvent) => {
+      events.push(e)
+    })
+    const obj = reactive({ foo: 1, bar: { baz: 2 } })
+    const c = computed(() => obj.foo + (obj.bar.baz || 0), { onTrigger })
 
-  //   // computed won't trigger compute until accessed
-  //   c.value
+    // computed won't trigger compute until accessed
+    c.value
 
-  //   obj.foo++
-  //   expect(c.value).toBe(2)
-  //   expect(onTrigger).toHaveBeenCalledTimes(1)
-  //   expect(events[0]).toEqual({
-  //     effect: c.effect,
-  //     target: toRaw(obj),
-  //     type: TriggerOpTypes.SET,
-  //     key: 'foo',
-  //     oldValue: 1,
-  //     newValue: 2
-  //   })
+    obj.foo++
+    expect(c.value).toBe(4)
+    expect(onTrigger).toHaveBeenCalledTimes(1)
+    expect(events[0]).toEqual({
+      effect: c.effect,
+      target: obj,
+      type: TriggerOpTypes.SET,
+      key: 'foo',
+      oldValue: 1,
+      newValue: 2
+    })
 
-  //   // @ts-ignore
-  //   delete obj.foo
-  //   expect(c.value).toBeUndefined()
-  //   expect(onTrigger).toHaveBeenCalledTimes(2)
-  //   expect(events[1]).toEqual({
-  //     effect: c.effect,
-  //     target: toRaw(obj),
-  //     type: TriggerOpTypes.DELETE,
-  //     key: 'foo',
-  //     oldValue: 2
-  //   })
-  // })
+    del(obj.bar, 'baz')
+    expect(c.value).toBe(2)
+    expect(onTrigger).toHaveBeenCalledTimes(2)
+    expect(events[1]).toEqual({
+      effect: c.effect,
+      target: obj.bar,
+      type: TriggerOpTypes.DELETE,
+      key: 'baz'
+    })
+
+    set(obj.bar, 'baz', 1)
+    expect(c.value).toBe(3)
+    expect(onTrigger).toHaveBeenCalledTimes(3)
+    expect(events[2]).toEqual({
+      effect: c.effect,
+      target: obj.bar,
+      type: TriggerOpTypes.ADD,
+      key: 'baz',
+      oldValue: undefined,
+      newValue: 1
+    })
+  })
 })

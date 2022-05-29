@@ -789,7 +789,6 @@ describe('api: watch', () => {
     const obj = reactive({ foo: 1 })
     const r = ref(2)
     const c = computed(() => r.value + 1)
-    // TODO computed & ref
     watchEffect(
       () => {
         dummy = obj.foo + r.value + c.value
@@ -818,43 +817,59 @@ describe('api: watch', () => {
     ])
   })
 
-  // it('onTrigger', async () => {
-  //   const events: DebuggerEvent[] = []
-  //   let dummy
-  //   const onTrigger = vi.fn((e: DebuggerEvent) => {
-  //     events.push(e)
-  //   })
-  //   const obj = reactive<{ foo?: number }>({ foo: 1 })
-  //   watchEffect(
-  //     () => {
-  //       dummy = obj.foo
-  //     },
-  //     { onTrigger }
-  //   )
-  //   await nextTick()
-  //   expect(dummy).toBe(1)
+  it('onTrigger', async () => {
+    const events: DebuggerEvent[] = []
+    let dummy
+    const onTrigger = vi.fn((e: DebuggerEvent) => {
+      events.push(e)
+    })
+    const obj = reactive<{
+      foo: number
+      bar: any[]
+      baz: { qux?: number }
+    }>({ foo: 1, bar: [], baz: {} })
 
-  //   obj.foo!++
-  //   await nextTick()
-  //   expect(dummy).toBe(2)
-  //   expect(onTrigger).toHaveBeenCalledTimes(1)
-  //   expect(events[0]).toMatchObject({
-  //     type: TriggerOpTypes.SET,
-  //     key: 'foo',
-  //     oldValue: 1,
-  //     newValue: 2
-  //   })
+    watchEffect(
+      () => {
+        dummy = obj.foo + (obj.bar[0] || 0) + (obj.baz.qux || 0)
+      },
+      { onTrigger }
+    )
+    await nextTick()
+    expect(dummy).toBe(1)
 
-  //   delete obj.foo
-  //   await nextTick()
-  //   expect(dummy).toBeUndefined()
-  //   expect(onTrigger).toHaveBeenCalledTimes(2)
-  //   expect(events[1]).toMatchObject({
-  //     type: TriggerOpTypes.DELETE,
-  //     key: 'foo',
-  //     oldValue: 2
-  //   })
-  // })
+    obj.foo++
+    await nextTick()
+    expect(dummy).toBe(2)
+    expect(onTrigger).toHaveBeenCalledTimes(1)
+    expect(events[0]).toMatchObject({
+      type: TriggerOpTypes.SET,
+      key: 'foo',
+      target: obj,
+      oldValue: 1,
+      newValue: 2
+    })
+
+    obj.bar.push(1)
+    await nextTick()
+    expect(dummy).toBe(3)
+    expect(onTrigger).toHaveBeenCalledTimes(2)
+    expect(events[1]).toMatchObject({
+      type: TriggerOpTypes.ARRAY_MUTATION,
+      target: obj.bar,
+      key: 'push'
+    })
+
+    set(obj.baz, 'qux', 1)
+    await nextTick()
+    expect(dummy).toBe(4)
+    expect(onTrigger).toHaveBeenCalledTimes(3)
+    expect(events[2]).toMatchObject({
+      type: TriggerOpTypes.ADD,
+      target: obj.baz,
+      key: 'qux'
+    })
+  })
 
   it('should work sync', () => {
     const v = ref(1)

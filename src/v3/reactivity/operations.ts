@@ -9,5 +9,6 @@ export const enum TrackOpTypes {
 export const enum TriggerOpTypes {
   SET = 'set',
   ADD = 'add',
-  DELETE = 'delete'
+  DELETE = 'delete',
+  ARRAY_MUTATION = 'array mutation'
 }
