@@ -16,6 +16,10 @@ import Dep, { pushTarget, popTarget, DepTarget } from './dep'
 
 import type { SimpleSet } from '../util/index'
 import type { Component } from 'typescript/component'
+import {
+  activeEffectScope,
+  recordEffectScope
+} from '../../v3/reactivity/effectScope'
 
 let uid = 0
 
@@ -59,11 +63,11 @@ export default class Watcher implements DepTarget {
     } | null,
     isRenderWatcher?: boolean
   ) {
+    recordEffectScope(this, activeEffectScope || (vm ? vm._scope : undefined))
     if ((this.vm = vm)) {
       if (isRenderWatcher) {
         vm._watcher = this
       }
-      vm._watchers.push(this)
     }
     // options
     if (options) {
@@ -237,13 +241,10 @@ export default class Watcher implements DepTarget {
    * Remove self from all dependencies' subscriber list.
    */
   teardown() {
+    if (this.vm && !this.vm._isBeingDestroyed) {
+      remove(this.vm._scope.effects, this)
+    }
     if (this.active) {
-      // remove self from vm's watcher list
-      // this is a somewhat expensive operation so we skip it
-      // if the vm is being destroyed.
-      if (this.vm && !this.vm._isBeingDestroyed) {
-        remove(this.vm._watchers, this)
-      }
       let i = this.deps.length
       while (i--) {
         this.deps[i].removeSub(this)

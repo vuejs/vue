@@ -245,7 +245,7 @@ function doWatch(
     } else {
       // no cb -> simple effect
       getter = () => {
-        if (instance && instance.isUnmounted) {
+        if (instance && instance._isDestroyed) {
           return
         }
         if (cleanup) {

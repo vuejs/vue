@@ -1,5 +1,6 @@
 import { Config } from '../src/core/config'
 import { Component } from './component'
+import { ComponentOptions } from './options'
 
 declare interface GlobalAPI {
   // new(options?: any): Component
@@ -9,7 +10,7 @@ declare interface GlobalAPI {
   config: Config
   util: Object
 
-  extend: (options: Object) => typeof Component
+  extend: (options: typeof Component | ComponentOptions) => typeof Component
   set: <T>(target: Object | Array<T>, key: string | number, value: T) => T
   delete: <T>(target: Object | Array<T>, key: string | number) => void
   nextTick: (fn: Function, context?: Object) => void | Promise<any>

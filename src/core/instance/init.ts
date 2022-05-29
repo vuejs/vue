@@ -9,10 +9,11 @@ import { initProvide, initInjections } from './inject'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
 import type { Component } from 'typescript/component'
 import type { InternalComponentOptions } from 'typescript/options'
+import { EffectScope } from 'v3'
 
 let uid = 0
 
-export function initMixin(Vue: Component) {
+export function initMixin(Vue: typeof Component) {
   Vue.prototype._init = function (options?: Record<string, any>) {
     const vm: Component = this
     // a uid
@@ -31,6 +32,8 @@ export function initMixin(Vue: Component) {
     vm._isVue = true
     // avoid instances from being observed
     vm.__v_skip = true
+    // effect scope
+    vm._scope = new EffectScope(true /* detached */)
     // merge options
     if (options && options._isComponent) {
       // optimize internal component instantiation
@@ -96,7 +99,7 @@ export function initInternalComponent(
   }
 }
 
-export function resolveConstructorOptions(Ctor: Component) {
+export function resolveConstructorOptions(Ctor: typeof Component) {
   let options = Ctor.options
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super)
@@ -120,7 +123,9 @@ export function resolveConstructorOptions(Ctor: Component) {
   return options
 }
 
-function resolveModifiedOptions(Ctor: Component): Record<string, any> | null {
+function resolveModifiedOptions(
+  Ctor: typeof Component
+): Record<string, any> | null {
   let modified
   const latest = Ctor.options
   const sealed = Ctor.sealedOptions

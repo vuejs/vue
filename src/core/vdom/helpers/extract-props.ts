@@ -11,7 +11,7 @@ import type { VNodeData } from 'typescript/vnode'
 
 export function extractPropsFromVNodeData(
   data: VNodeData,
-  Ctor: Component,
+  Ctor: typeof Component,
   tag?: string
 ): object | undefined {
   // we are only extracting raw values here.

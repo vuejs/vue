@@ -57,10 +57,18 @@ export {
   DebuggerEvent
 } from './apiWatch'
 
+export {
+  EffectScope,
+  effectScope,
+  onScopeDispose,
+  getCurrentScope
+} from './reactivity/effectScope'
+
 export { TrackOpTypes, TriggerOpTypes } from './reactivity/operations'
 
 export { h } from './h'
 export { getCurrentInstance } from './currentInstance'
 export { useSlots, useAttrs } from './apiSetup'
+export { nextTick } from 'core/util'
 
 export * from './apiLifecycle'

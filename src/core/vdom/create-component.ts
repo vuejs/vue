@@ -26,7 +26,10 @@ import type {
   VNodeWithData
 } from 'typescript/vnode'
 import type { Component } from 'typescript/component'
-import type { InternalComponentOptions } from 'typescript/options'
+import type {
+  ComponentOptions,
+  InternalComponentOptions
+} from 'typescript/options'
 
 // inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {
@@ -95,7 +98,7 @@ const componentVNodeHooks = {
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
 export function createComponent(
-  Ctor: Component | Function | Object | void,
+  Ctor: typeof Component | Function | ComponentOptions | void,
   data: VNodeData | undefined,
   context: Component,
   children?: Array<VNode>,
@@ -109,7 +112,7 @@ export function createComponent(
 
   // plain options object: turn it into a constructor
   if (isObject(Ctor)) {
-    Ctor = baseCtor.extend(Ctor)
+    Ctor = baseCtor.extend(Ctor as typeof Component)
   }
 
   // if at this stage it's not a constructor or an async component factory,
@@ -139,7 +142,7 @@ export function createComponent(
 
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
-  resolveConstructorOptions(Ctor as Component)
+  resolveConstructorOptions(Ctor as typeof Component)
 
   // transform component v-model data into props & events
   if (isDef(data.model)) {
@@ -155,7 +158,7 @@ export function createComponent(
   // @ts-expect-error
   if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(
-      Ctor as Component,
+      Ctor as typeof Component,
       propsData,
       data,
       context,

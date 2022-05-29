@@ -10,10 +10,13 @@ import {
   triggerRef,
   shallowRef,
   h,
-  onMounted
+  onMounted,
+  getCurrentInstance,
+  effectScope
 } from 'v3'
 import { nextTick } from 'core/util'
 import { set } from 'core/observer'
+import { Component } from 'typescript/component'
 
 // reference: https://vue-composition-api-rfc.netlify.com/api.html#watch
 
@@ -1008,35 +1011,6 @@ describe('api: watch', () => {
     expect(cb).toHaveBeenCalledTimes(1)
   })
 
-  test('watching keypath', async () => {
-    const spy = vi.fn()
-    const Comp = {
-      render() {},
-      data() {
-        return {
-          a: {
-            b: 1
-          }
-        }
-      },
-      watch: {
-        'a.b': spy
-      },
-      created(this: any) {
-        this.$watch('a.b', spy)
-      },
-      mounted(this: any) {
-        this.a.b++
-      }
-    }
-
-    const root = document.createElement('div')
-    new Vue(Comp).$mount(root)
-
-    await nextTick()
-    expect(spy).toHaveBeenCalledTimes(2)
-  })
-
   it('watching sources: ref<any[]>', async () => {
     const foo = ref([1])
     const spy = vi.fn()
@@ -1062,25 +1036,24 @@ describe('api: watch', () => {
   })
 
   // vuejs/core#4158
-  // TODO
-  // test.skip('watch should not register in owner component if created inside detached scope', () => {
-  //   let instance: Component
-  //   const Comp = {
-  //     setup() {
-  //       instance = getCurrentInstance()!.proxy
-  //       effectScope(true).run(() => {
-  //         watch(
-  //           () => 1,
-  //           () => {}
-  //         )
-  //       })
-  //       return () => ''
-  //     }
-  //   }
-  //   const root = document.createElement('div')
-  //   new Vue(Comp).$mount(root)
-  //   // should not record watcher in detached scope and only the instance's
-  //   // own update effect
-  //   expect(instance!.scope.effects.length).toBe(1)
-  // })
+  test('watch should not register in owner component if created inside detached scope', () => {
+    let instance: Component
+    const Comp = {
+      setup() {
+        instance = getCurrentInstance()!.proxy
+        effectScope(true).run(() => {
+          watch(
+            () => 1,
+            () => {}
+          )
+        })
+        return () => ''
+      }
+    }
+    const root = document.createElement('div')
+    new Vue(Comp).$mount(root)
+    // should not record watcher in detached scope and only the instance's
+    // own update effect
+    expect(instance!._scope.effects.length).toBe(1)
+  })
 })

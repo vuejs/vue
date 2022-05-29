@@ -107,7 +107,7 @@ describe('Instance methods lifecycle', () => {
       vm.$watch('a', () => {})
       vm.$destroy()
       expect(vm._watcher.active).toBe(false)
-      expect(vm._watchers.every(w => !w.active)).toBe(true)
+      expect(vm._scope.effects.every(w => !w.active)).toBe(true)
     })
 
     it('remove self from data observer', () => {

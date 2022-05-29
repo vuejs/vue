@@ -17,5 +17,7 @@ export function getCurrentInstance(): { proxy: Component } | null {
  * @private
  */
 export function setCurrentInstance(vm: Component | null = null) {
+  if (!vm) currentInstance && currentInstance._scope.off()
   currentInstance = vm
+  vm && vm._scope.on()
 }

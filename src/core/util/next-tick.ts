@@ -85,7 +85,9 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   }
 }
 
-export function nextTick(cb?: Function, ctx?: Object) {
+export function nextTick(): Promise<void>
+export function nextTick(cb: (...args: any[]) => any, ctx?: object): void
+export function nextTick(cb?: (...args: any[]) => any, ctx?: object) {
   let _resolve
   callbacks.push(() => {
     if (cb) {

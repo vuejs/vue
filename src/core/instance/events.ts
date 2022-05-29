@@ -56,7 +56,7 @@ export function updateComponentListeners(
   target = undefined
 }
 
-export function eventsMixin(Vue: Component) {
+export function eventsMixin(Vue: typeof Component) {
   const hookRE = /^hook:/
   Vue.prototype.$on = function (
     event: string | Array<string>,

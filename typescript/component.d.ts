@@ -1,8 +1,9 @@
 import type VNode from '../src/core/vdom/vnode'
 import type Watcher from '../src/core/observer/watcher'
-import { ComponentOptions } from './options'
+import { ComponentOptions, SetupContext } from './options'
 import { ScopedSlotsData, VNodeChildren, VNodeData } from './vnode'
 import { GlobalAPI } from './global-api'
+import { EffectScope } from 'v3'
 
 // TODO this should be using the same as /component/
 
@@ -16,7 +17,7 @@ export declare class Component {
   static superOptions: Record<string, any>
   static extendOptions: Record<string, any>
   static sealedOptions: Record<string, any>
-  static super: Component
+  static super: typeof Component
   // assets
   static directive: GlobalAPI['directive']
   static component: GlobalAPI['component']
@@ -58,7 +59,7 @@ export declare class Component {
     key: string | number
   ) => void
   $watch: (
-    expOrFn: string | Function,
+    expOrFn: string | (() => any),
     cb: Function,
     options?: Record<string, any>
   ) => Function
@@ -66,7 +67,7 @@ export declare class Component {
   $once: (event: string, fn: Function) => Component
   $off: (event?: string | Array<string>, fn?: Function) => Component
   $emit: (event: string, ...args: Array<any>) => Component
-  $nextTick: (fn: Function) => void | Promise<any>
+  $nextTick: (fn: (...args: any[]) => any) => void | Promise<any>
   $createElement: (
     tag?: string | Component,
     data?: Record<string, any>,
@@ -77,11 +78,12 @@ export declare class Component {
   _uid: number | string
   _name: string // this only exists in dev mode
   _isVue: true
+  __v_skip: true
   _self: Component
   _renderProxy: Component
   _renderContext?: Component
   _watcher: Watcher | null
-  _watchers: Array<Watcher>
+  _scope: EffectScope
   _computedWatchers: { [key: string]: Watcher }
   _data: Record<string, any>
   _props: Record<string, any>
@@ -99,6 +101,7 @@ export declare class Component {
 
   // @v3
   _setupState?: Record<string, any>
+  _setupContext?: SetupContext
   _attrsProxy?: Record<string, any>
   _slotsProxy?: Record<string, () => VNode[]>
   _preWatchers?: Watcher[]
@@ -193,8 +196,8 @@ export declare class Component {
   _ssrAttrs: Function
   _ssrDOMProps: Function
   _ssrClass: Function
-  _ssrStyle: Function;
+  _ssrStyle: Function
 
   // allow dynamic method registration
-  [key: string]: any
+  // [key: string]: any
 }

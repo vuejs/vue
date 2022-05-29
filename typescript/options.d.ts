@@ -100,7 +100,7 @@ declare type ComponentOptions = {
   _renderChildren?: Array<VNode> | null
   _componentTag: string | null
   _scopeId: string | null
-  _base: Component
+  _base: typeof Component
 }
 
 declare type PropOptions = {

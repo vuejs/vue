@@ -57,7 +57,7 @@ export function initLifecycle(vm: Component) {
   vm._isBeingDestroyed = false
 }
 
-export function lifecycleMixin(Vue: Component) {
+export function lifecycleMixin(Vue: typeof Component) {
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
@@ -108,14 +108,9 @@ export function lifecycleMixin(Vue: Component) {
     if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm)
     }
-    // teardown watchers
-    if (vm._watcher) {
-      vm._watcher.teardown()
-    }
-    let i = vm._watchers.length
-    while (i--) {
-      vm._watchers[i].teardown()
-    }
+    // teardown scope. this includes both the render watcher and other
+    // watchers created
+    vm._scope.stop()
     // remove reference from data ob
     // frozen object may not have observer.
     if (vm._data.__ob__) {

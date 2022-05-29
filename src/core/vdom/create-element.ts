@@ -126,7 +126,7 @@ export function _createElement(
     }
   } else {
     // direct component options / constructor
-    vnode = createComponent(tag, data, context, children)
+    vnode = createComponent(tag as any, data, context, children)
   }
   if (isArray(vnode)) {
     return vnode

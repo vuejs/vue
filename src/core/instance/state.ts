@@ -29,7 +29,7 @@ import {
   invokeWithErrorHandling,
   isFunction
 } from '../util/index'
-import type { Component } from '../../../typescript/component'
+import type { Component } from 'typescript/component'
 
 const sharedPropertyDefinition = {
   enumerable: true,
@@ -49,7 +49,6 @@ export function proxy(target: Object, sourceKey: string, key: string) {
 }
 
 export function initState(vm: Component) {
-  vm._watchers = []
   const opts = vm.$options
   if (opts.props) initProps(vm, opts.props)
 
@@ -310,7 +309,7 @@ function initWatch(vm: Component, watch: Object) {
 
 function createWatcher(
   vm: Component,
-  expOrFn: string | Function,
+  expOrFn: string | (() => any),
   handler: any,
   options?: Object
 ) {
@@ -324,7 +323,7 @@ function createWatcher(
   return vm.$watch(expOrFn, handler, options)
 }
 
-export function stateMixin(Vue: Component) {
+export function stateMixin(Vue: typeof Component) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.

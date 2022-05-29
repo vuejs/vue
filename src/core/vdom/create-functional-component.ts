@@ -23,7 +23,7 @@ export function FunctionalRenderContext(
   props: Object,
   children: Array<VNode> | undefined,
   parent: Component,
-  Ctor: Component
+  Ctor: typeof Component
 ) {
   const options = Ctor.options
   // ensure the createElement function in functional components
@@ -31,14 +31,13 @@ export function FunctionalRenderContext(
   let contextVm
   if (hasOwn(parent, '_uid')) {
     contextVm = Object.create(parent)
-    // $flow-disable-line
     contextVm._original = parent
   } else {
     // the context vm passed in is a functional context as well.
     // in this case we want to make sure we are able to get a hold to the
     // real context instance.
     contextVm = parent
-    // $flow-disable-line
+    // @ts-ignore
     parent = parent._original
   }
   const isCompiled = isTrue(options._compiled)
@@ -94,7 +93,7 @@ export function FunctionalRenderContext(
 installRenderHelpers(FunctionalRenderContext.prototype)
 
 export function createFunctionalComponent(
-  Ctor: Component,
+  Ctor: typeof Component,
   propsData: Object | undefined,
   data: VNodeData,
   contextVm: Component,

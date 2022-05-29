@@ -6,7 +6,7 @@ declare type VNodeChildren =
   | string
 
 declare type VNodeComponentOptions = {
-  Ctor: Component
+  Ctor: typeof Component
   propsData?: Object
   listeners?: Record<string, Function | Function[]>
   children?: Array<VNode>

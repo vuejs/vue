@@ -10,15 +10,7 @@ export function initSetup(vm: Component) {
   const options = vm.$options
   const setup = options.setup
   if (setup) {
-    const ctx = {
-      get attrs() {
-        return initAttrsProxy(vm)
-      },
-      get slots() {
-        return initSlotsProxy(vm)
-      },
-      emit: bind(vm.$emit, vm) as any
-    }
+    const ctx = (vm._setupContext = createSetupContext(vm))
 
     setCurrentInstance(vm)
     const setupResult = invokeWithErrorHandling(
@@ -71,6 +63,18 @@ function proxySetupProperty(
     get: unwrap ? () => raw.value : () => setupResult[key],
     set: unwrap ? v => (raw.value = v) : v => (setupResult[key] = v)
   })
+}
+
+function createSetupContext(vm: Component) {
+  return {
+    get attrs() {
+      return initAttrsProxy(vm)
+    },
+    get slots() {
+      return initSlotsProxy(vm)
+    },
+    emit: bind(vm.$emit, vm) as any
+  }
 }
 
 function initAttrsProxy(vm: Component) {
@@ -146,5 +150,6 @@ function getContext(): SetupContext {
   if (__DEV__ && !currentInstance) {
     warn(`useContext() called without active instance.`)
   }
-  return currentInstance!.setupContext
+  const vm = currentInstance!
+  return vm._setupContext || (vm._setupContext = createSetupContext(vm))
 }

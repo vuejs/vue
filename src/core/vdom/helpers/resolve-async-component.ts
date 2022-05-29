@@ -37,8 +37,8 @@ export function createAsyncPlaceholder(
 
 export function resolveAsyncComponent(
   factory: { (...args: any[]): any; [keye: string]: any },
-  baseCtor: Component
-): Component | void {
+  baseCtor: typeof Component
+): typeof Component | void {
   if (isTrue(factory.error) && isDef(factory.errorComp)) {
     return factory.errorComp
   }
