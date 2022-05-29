@@ -13,7 +13,7 @@
 import VNode, { cloneVNode } from './vnode'
 import config from '../config'
 import { SSR_ATTR } from 'shared/constants'
-import { registerRef } from './modules/ref'
+import { registerRef } from './modules/template-ref'
 import { traverse } from '../observer/traverse'
 import { activeInstance } from '../instance/lifecycle'
 import { isTextInputType } from 'web/util/element'
