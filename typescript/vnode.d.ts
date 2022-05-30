@@ -1,4 +1,5 @@
 import VNode from '../src/core/vdom/vnode'
+import { Ref } from '../src/v3'
 import { Component } from './component'
 
 declare type VNodeChildren =
@@ -56,7 +57,7 @@ declare type VNodeWithData = VNode & {
 declare interface VNodeData {
   key?: string | number
   slot?: string
-  ref?: string
+  ref?: string | Ref | ((el: any) => void)
   is?: string
   pre?: boolean
   tag?: string

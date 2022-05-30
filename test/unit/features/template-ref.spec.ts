@@ -58,7 +58,7 @@ describe('ref', () => {
     expect(vm.$refs.foo).toBe(vm.$el)
     vm.value = 'bar'
     waitForUpdate(() => {
-      expect(vm.$refs.foo).toBeUndefined()
+      expect(vm.$refs.foo).toBe(null)
       expect(vm.$refs.bar).toBe(vm.$el)
     }).then(done)
   })
@@ -101,7 +101,7 @@ describe('ref', () => {
       vm.test = ''
     })
       .then(() => {
-        expect(vm.$refs.test).toBeUndefined()
+        expect(vm.$refs.test).toBe(null)
       })
       .then(done)
   })

@@ -1,5 +1,15 @@
-import { remove, isDef, isArray } from 'shared/util'
+import {
+  remove,
+  isDef,
+  hasOwn,
+  isArray,
+  isFunction,
+  invokeWithErrorHandling,
+  warn
+} from 'core/util'
 import type { VNodeWithData } from 'typescript/vnode'
+import { Component } from 'typescript/component'
+import { isRef } from 'v3'
 
 export default {
   create(_: any, vnode: VNodeWithData) {
@@ -17,28 +27,66 @@ export default {
 }
 
 export function registerRef(vnode: VNodeWithData, isRemoval?: boolean) {
-  const key = vnode.data.ref
-  if (!isDef(key)) return
+  const ref = vnode.data.ref
+  if (!isDef(ref)) return
 
   const vm = vnode.context
-  const ref = vnode.componentInstance || vnode.elm
+  const refValue = vnode.componentInstance || vnode.elm
+  const value = isRemoval ? null : refValue
+
+  if (isFunction(ref)) {
+    invokeWithErrorHandling(ref, vm, [value], vm, `template ref function`)
+    return
+  }
+
+  const setupRefKey = vnode.data.ref_key
+  const isFor = vnode.data.refInFor
+  const _isString = typeof ref === 'string' || typeof ref === 'number'
+  const _isRef = isRef(ref)
   const refs = vm.$refs
-  const obj = refs[key]
-  if (isRemoval) {
-    if (isArray(obj)) {
-      remove(obj, ref)
-    } else if (obj === ref) {
-      refs[key] = undefined
-    }
-  } else {
-    if (vnode.data.refInFor) {
-      if (!isArray(obj)) {
-        refs[key] = [ref]
-      } else if (obj.indexOf(ref) < 0) {
-        obj.push(ref)
+
+  if (_isString || _isRef) {
+    if (isFor) {
+      const existing = _isString ? refs[ref] : ref.value
+      if (isRemoval) {
+        isArray(existing) && remove(existing, refValue)
+      } else {
+        if (!isArray(existing)) {
+          if (_isString) {
+            refs[ref] = [refValue]
+            setSetupRef(vm, ref, refs[ref])
+          } else {
+            ref.value = [refValue]
+            if (setupRefKey) refs[setupRefKey] = ref.value as any
+          }
+        } else if (!existing.includes(refValue)) {
+          existing.push(refValue)
+        }
       }
+    } else if (_isString) {
+      if (isRemoval && refs[ref] !== refValue) {
+        return
+      }
+      refs[ref] = value
+      setSetupRef(vm, ref, value)
+    } else if (_isRef) {
+      if (isRemoval && ref.value !== refValue) {
+        return
+      }
+      ref.value = value
+      if (setupRefKey) refs[setupRefKey] = value
+    } else if (__DEV__) {
+      warn(`Invalid template ref type: ${typeof ref}`)
+    }
+  }
+}
+
+function setSetupRef({ _setupState }: Component, key: string, val: any) {
+  if (_setupState && hasOwn(_setupState, key)) {
+    if (isRef(_setupState[key])) {
+      _setupState[key].value = val
     } else {
-      refs[key] = ref
+      _setupState[key] = val
     }
   }
 }

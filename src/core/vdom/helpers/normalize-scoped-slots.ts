@@ -3,13 +3,16 @@ import { normalizeChildren } from 'core/vdom/helpers/normalize-children'
 import { emptyObject, isArray } from 'shared/util'
 import { isAsyncPlaceholder } from './is-async-placeholder'
 import type VNode from '../vnode'
+import { Component } from 'typescript/component'
+import { currentInstance, setCurrentInstance } from 'v3/currentInstance'
 
 export function normalizeScopedSlots(
+  ownerVm: Component,
   slots: { [key: string]: Function } | void,
-  normalSlots: { [key: string]: Array<VNode> },
-  prevSlots?: { [key: string]: Function } | void
+  normalSlots: { [key: string]: VNode[] }
 ): any {
   let res
+  const prevSlots = ownerVm.$scopedSlots
   const hasNormalSlots = Object.keys(normalSlots).length > 0
   const isStable = slots ? !!slots.$stable : !hasNormalSlots
   const key = slots && slots.$key
@@ -33,7 +36,7 @@ export function normalizeScopedSlots(
     res = {}
     for (const key in slots) {
       if (slots[key] && key[0] !== '$') {
-        res[key] = normalizeScopedSlot(normalSlots, key, slots[key])
+        res[key] = normalizeScopedSlot(ownerVm, normalSlots, key, slots[key])
       }
     }
   }
@@ -54,14 +57,17 @@ export function normalizeScopedSlots(
   return res
 }
 
-function normalizeScopedSlot(normalSlots, key, fn) {
+function normalizeScopedSlot(vm, normalSlots, key, fn) {
   const normalized = function () {
+    const cur = currentInstance
+    setCurrentInstance(vm)
     let res = arguments.length ? fn.apply(null, arguments) : fn({})
     res =
       res && typeof res === 'object' && !isArray(res)
         ? [res] // single vnode
         : normalizeChildren(res)
     const vnode: VNode | null = res && res[0]
+    setCurrentInstance(cur)
     return res &&
       (!vnode ||
         (res.length === 1 && vnode.isComment && !isAsyncPlaceholder(vnode))) // #9658, #10391

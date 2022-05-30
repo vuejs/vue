@@ -164,7 +164,7 @@ describe('api: setup context', () => {
     const id = ref('foo')
 
     const Child = {
-      setup(props: any, { slots }: any) {
+      setup(_props: any, { slots }: any) {
         return () => h('div', [...slots.foo(), ...slots.bar()])
       }
     }

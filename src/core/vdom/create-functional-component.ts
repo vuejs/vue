@@ -52,6 +52,7 @@ export function FunctionalRenderContext(
   this.slots = () => {
     if (!this.$slots) {
       normalizeScopedSlots(
+        parent,
         data.scopedSlots,
         (this.$slots = resolveSlots(children, parent))
       )
@@ -62,7 +63,7 @@ export function FunctionalRenderContext(
   Object.defineProperty(this, 'scopedSlots', {
     enumerable: true,
     get() {
-      return normalizeScopedSlots(data.scopedSlots, this.slots())
+      return normalizeScopedSlots(parent, data.scopedSlots, this.slots())
     }
   } as any)
 
@@ -72,7 +73,11 @@ export function FunctionalRenderContext(
     this.$options = options
     // pre-resolve slots for renderSlot()
     this.$slots = this.slots()
-    this.$scopedSlots = normalizeScopedSlots(data.scopedSlots, this.$slots)
+    this.$scopedSlots = normalizeScopedSlots(
+      parent,
+      data.scopedSlots,
+      this.$slots
+    )
   }
 
   if (options._scopeId) {
