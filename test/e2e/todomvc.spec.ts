@@ -172,11 +172,11 @@ describe('e2e: todomvc', () => {
     E2E_TIMEOUT
   )
 
-  // test(
-  //   'composition',
-  //   async () => {
-  //     await testTodomvc('composition')
-  //   },
-  //   E2E_TIMEOUT
-  // )
+  test(
+    'composition',
+    async () => {
+      await testTodomvc('composition')
+    },
+    E2E_TIMEOUT
+  )
 })

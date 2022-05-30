@@ -98,11 +98,11 @@ describe('e2e: tree', () => {
     E2E_TIMEOUT
   )
 
-  // test(
-  //   'composition',
-  //   async () => {
-  //     await testTree('composition')
-  //   },
-  //   E2E_TIMEOUT
-  // )
+  test(
+    'composition',
+    async () => {
+      await testTree('composition')
+    },
+    E2E_TIMEOUT
+  )
 })

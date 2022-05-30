@@ -1,6 +1,6 @@
 import { setupPuppeteer, getExampleUrl, E2E_TIMEOUT } from './e2eUtils'
 
-declare const stats: {
+declare const globalStats: {
   label: string
   value: number
 }[]
@@ -22,7 +22,7 @@ describe('e2e: svg', () => {
     expect(
       await page().evaluate(
         total => {
-          const points = stats
+          const points = globalStats
             .map((stat, i) => {
               const point = valueToPoint(stat.value, i, total)
               return point.x + ',' + point.y
@@ -41,7 +41,7 @@ describe('e2e: svg', () => {
   async function assertLabels(total: number) {
     const positions = await page().evaluate(
       total => {
-        return stats.map((stat, i) => {
+        return globalStats.map((stat, i) => {
           const point = valueToPoint(+stat.value + 10, i, total)
           return [point.x, point.y]
         })
@@ -60,7 +60,7 @@ describe('e2e: svg', () => {
   // assert each value of stats is correct
   async function assertStats(expected: number[]) {
     const statsValue = await page().evaluate(() => {
-      return stats.map(stat => +stat.value)
+      return globalStats.map(stat => +stat.value)
     })
     expect(statsValue).toEqual(expected)
   }
@@ -141,11 +141,11 @@ describe('e2e: svg', () => {
     E2E_TIMEOUT
   )
 
-  // test(
-  //   'composition',
-  //   async () => {
-  //     await testSvg('composition')
-  //   },
-  //   E2E_TIMEOUT
-  // )
+  test(
+    'composition',
+    async () => {
+      await testSvg('composition')
+    },
+    E2E_TIMEOUT
+  )
 })

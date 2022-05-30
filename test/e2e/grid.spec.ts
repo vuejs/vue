@@ -105,11 +105,11 @@ describe('e2e: grid', () => {
     E2E_TIMEOUT
   )
 
-  // test(
-  //   'composition',
-  //   async () => {
-  //     await testGrid('composition')
-  //   },
-  //   E2E_TIMEOUT
-  // )
+  test(
+    'composition',
+    async () => {
+      await testGrid('composition')
+    },
+    E2E_TIMEOUT
+  )
 })

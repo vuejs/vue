@@ -52,11 +52,11 @@ describe('e2e: commits', () => {
     E2E_TIMEOUT
   )
 
-  // test(
-  //   'composition',
-  //   async () => {
-  //     await testCommits('composition')
-  //   },
-  //   E2E_TIMEOUT
-  // )
+  test(
+    'composition',
+    async () => {
+      await testCommits('composition')
+    },
+    E2E_TIMEOUT
+  )
 })

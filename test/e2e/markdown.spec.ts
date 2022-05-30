@@ -36,11 +36,11 @@ describe('e2e: markdown', () => {
     E2E_TIMEOUT
   )
 
-  // test(
-  //   'composition',
-  //   async () => {
-  //     await testMarkdown('composition')
-  //   },
-  //   E2E_TIMEOUT
-  // )
+  test(
+    'composition',
+    async () => {
+      await testMarkdown('composition')
+    },
+    E2E_TIMEOUT
+  )
 })

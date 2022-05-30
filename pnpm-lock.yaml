@@ -32,7 +32,7 @@ specifiers:
   lodash.template: ^4.4.0
   lodash.uniq: ^4.5.0
   lru-cache: ^7.8.1
-  marked: ^3.0.8
+  marked: ^4.0.6
   memory-fs: ^0.5.0
   prettier: ^2.6.2
   puppeteer: ^14.1.1
@@ -83,7 +83,7 @@ devDependencies:
   lodash.template: 4.5.0
   lodash.uniq: 4.5.0
   lru-cache: 7.10.1
-  marked: 3.0.8
+  marked: 4.0.16
   memory-fs: 0.5.0
   prettier: 2.6.2
   puppeteer: 14.1.1
@@ -3747,8 +3747,8 @@ packages:
       object-visit: 1.0.1
     dev: true
 
-  /marked/3.0.8:
-    resolution: {integrity: sha512-0gVrAjo5m0VZSJb4rpL59K1unJAMb/hm8HRXqasD8VeC8m91ytDPMritgFSlKonfdt+rRYYpP/JfLxgIX8yoSw==}
+  /marked/4.0.16:
+    resolution: {integrity: sha512-wahonIQ5Jnyatt2fn8KqF/nIqZM8mh3oRu2+l5EANGMhu6RFjiSG52QNE2eWzFMI94HqYSgN184NurgNG6CztA==}
     engines: {node: '>= 12'}
     hasBin: true
     dev: true

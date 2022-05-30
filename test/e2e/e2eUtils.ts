@@ -5,9 +5,10 @@ export function getExampleUrl(
   name: string,
   apiType: 'classic' | 'composition'
 ) {
+  const file = apiType === 'composition' ? `${name}.html` : `${name}/index.html`
   return `file://${path.resolve(
     __dirname,
-    `../../examples/${apiType}/${name}/index.html`
+    `../../examples/${apiType}/${file}`
   )}`
 }
 
