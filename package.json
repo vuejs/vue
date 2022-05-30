@@ -23,7 +23,7 @@
     "build": "node scripts/build.js",
     "build:ssr": "npm run build -- web-runtime-cjs,web-server-renderer",
     "build:types": "rimraf temp && tsc --declaration --emitDeclarationOnly --outDir temp && api-extractor run",
-    "test": "npm run lint && npm run ts-check && npm run test:types && npm run test:unit && npm run test:e2e",
+    "test": "npm run ts-check && npm run test:types && npm run test:unit && npm run test:e2e && npm run test:ssr",
     "test:unit": "vitest run test/unit",
     "test:ssr": "npm run build:ssr && vitest run test/ssr",
     "test:e2e": "npm run build -- web-full-prod,web-server-renderer-basic && vitest run test/e2e",
