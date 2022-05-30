@@ -15,7 +15,7 @@ import { currentInstance } from './currentInstance'
 import { traverse } from 'core/observer/traverse'
 import Watcher from '../core/observer/watcher'
 import { queueWatcher } from '../core/observer/scheduler'
-import { DebuggerOptions } from '../core/observer/dep'
+import { DebuggerOptions } from './debug'
 
 const WATCHER = `watcher`
 const WATCHER_CB = `${WATCHER} callback`

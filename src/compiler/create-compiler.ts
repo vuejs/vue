@@ -1,4 +1,9 @@
 import { extend } from 'shared/util'
+import {
+  CompilerOptions,
+  CompiledResult,
+  WarningMessage
+} from 'typescript/compiler'
 import { detectErrors } from './error-detector'
 import { createCompileToFunctionFn } from './to-function'
 

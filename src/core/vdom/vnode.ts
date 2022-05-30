@@ -2,6 +2,9 @@ import type { Component } from 'typescript/component'
 import type { ComponentOptions } from 'typescript/options'
 import type { VNodeComponentOptions, VNodeData } from 'typescript/vnode'
 
+/**
+ * @internal
+ */
 export default class VNode {
   tag?: string
   data: VNodeData | undefined

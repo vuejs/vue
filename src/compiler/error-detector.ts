@@ -1,3 +1,4 @@
+import { ASTElement, ASTNode } from 'typescript/compiler'
 import { dirRE, onRE } from './parser/index'
 
 type Range = { start?: number; end?: number }

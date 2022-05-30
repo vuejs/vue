@@ -3,6 +3,9 @@ import { no, noop, identity } from 'shared/util'
 import { LIFECYCLE_HOOKS } from 'shared/constants'
 import type { Component } from 'typescript/component'
 
+/**
+ * @internal
+ */
 export interface Config {
   // user
   optionMergeStrategies: { [key: string]: Function }

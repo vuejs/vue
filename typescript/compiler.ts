@@ -1,4 +1,4 @@
-declare type CompilerOptions = {
+export type CompilerOptions = {
   warn?: Function // allow customizing warning in different environments; e.g. node
   modules?: Array<ModuleOptions> // platform specific modules; e.g. style; class
   directives?: { [key: string]: Function } // platform specific directives
@@ -29,13 +29,13 @@ declare type CompilerOptions = {
   scopeId?: string
 }
 
-declare type WarningMessage = {
+export type WarningMessage = {
   msg: string
   start?: number
   end?: number
 }
 
-declare type CompiledResult = {
+export type CompiledResult = {
   ast: ASTElement | null
   render: string
   staticRenderFns: Array<string>
@@ -44,7 +44,7 @@ declare type CompiledResult = {
   tips?: Array<string | WarningMessage>
 }
 
-declare type ModuleOptions = {
+export type ModuleOptions = {
   // transform an AST node before any attributes are processed
   // returning an ASTElement from pre/transforms replaces the element
   preTransformNode: (el: ASTElement) => ASTElement | null
@@ -58,11 +58,11 @@ declare type ModuleOptions = {
   staticKeys?: Array<string> // AST properties to be considered static
 }
 
-declare type ASTModifiers = { [key: string]: boolean }
-declare type ASTIfCondition = { exp: string | null; block: ASTElement }
-declare type ASTIfConditions = Array<ASTIfCondition>
+export type ASTModifiers = { [key: string]: boolean }
+export type ASTIfCondition = { exp: string | null; block: ASTElement }
+export type ASTIfConditions = Array<ASTIfCondition>
 
-declare type ASTAttr = {
+export type ASTAttr = {
   name: string
   value: any
   dynamic?: boolean
@@ -70,7 +70,7 @@ declare type ASTAttr = {
   end?: number
 }
 
-declare type ASTElementHandler = {
+export type ASTElementHandler = {
   value: string
   params?: Array<any>
   modifiers: ASTModifiers | null
@@ -79,11 +79,11 @@ declare type ASTElementHandler = {
   end?: number
 }
 
-declare type ASTElementHandlers = {
+export type ASTElementHandlers = {
   [key: string]: ASTElementHandler | Array<ASTElementHandler>
 }
 
-declare type ASTDirective = {
+export type ASTDirective = {
   name: string
   rawName: string
   value: string
@@ -94,9 +94,9 @@ declare type ASTDirective = {
   end?: number
 }
 
-declare type ASTNode = ASTElement | ASTText | ASTExpression
+export type ASTNode = ASTElement | ASTText | ASTExpression
 
-declare type ASTElement = {
+export type ASTElement = {
   type: 1
   tag: string
   attrsList: Array<ASTAttr>
@@ -177,7 +177,7 @@ declare type ASTElement = {
   ssrOptimizability?: number
 }
 
-declare type ASTExpression = {
+export type ASTExpression = {
   type: 2
   expression: string
   text: string
@@ -189,7 +189,7 @@ declare type ASTExpression = {
   end?: number
 }
 
-declare type ASTText = {
+export type ASTText = {
   type: 3
   text: string
   static?: boolean
@@ -203,7 +203,7 @@ declare type ASTText = {
 // SFC-parser related declarations
 
 // an object format describing a single-file component
-declare type SFCDescriptor = {
+export type SFCDescriptor = {
   template: SFCBlock | null
   script: SFCBlock | null
   styles: Array<SFCBlock>
@@ -211,7 +211,7 @@ declare type SFCDescriptor = {
   errors: Array<string | WarningMessage>
 }
 
-declare type SFCBlock = {
+export type SFCBlock = {
   type: string
   content: string
   attrs: { [attribute: string]: string }

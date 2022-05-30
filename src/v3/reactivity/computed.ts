@@ -1,10 +1,11 @@
 import { isServerRendering, noop, warn, def, isFunction } from 'core/util'
 import { Ref, RefFlag } from './ref'
 import Watcher from 'core/observer/watcher'
-import Dep, { DebuggerOptions } from 'core/observer/dep'
+import Dep from 'core/observer/dep'
 import { currentInstance } from '../currentInstance'
 import { ReactiveFlags } from './reactive'
 import { TrackOpTypes } from './operations'
+import { DebuggerOptions } from '../debug'
 
 declare const ComputedRefSymbol: unique symbol
 
@@ -14,7 +15,7 @@ export interface ComputedRef<T = any> extends WritableComputedRef<T> {
 }
 
 export interface WritableComputedRef<T> extends Ref<T> {
-  readonly effect: Watcher
+  readonly effect: any /* Watcher */
 }
 
 export type ComputedGetter<T> = (...args: any[]) => T

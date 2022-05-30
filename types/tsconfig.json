@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "esnext",
     "experimentalDecorators": true,
-    "lib": ["dom", "es2015"],
+    "lib": ["dom", "esnext"],
     "types": ["node"],
-    "module": "commonjs",
+    "module": "esnext",
     "strict": true,
     "noEmit": true,
     "baseUrl": ".",

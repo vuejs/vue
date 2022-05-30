@@ -12,6 +12,9 @@ import { TrackOpTypes, TriggerOpTypes } from './operations'
 declare const RefSymbol: unique symbol
 export declare const RawSymbol: unique symbol
 
+/**
+ * @internal
+ */
 export const RefFlag = `__v_isRef`
 
 export interface Ref<T = any> {
@@ -23,11 +26,11 @@ export interface Ref<T = any> {
    */
   [RefSymbol]: true
   /**
-   * @private
+   * @internal
    */
   dep?: Dep
   /**
-   * @private
+   * @internal
    */
   [RefFlag]: true
 }
@@ -203,7 +206,9 @@ export function toRef<T extends object, K extends keyof T>(
  * augmentations in its generated d.ts, so we have to manually append them
  * to the final generated d.ts in our build process.
  */
-export interface RefUnwrapBailTypes {}
+export interface RefUnwrapBailTypes {
+  runtimeDOMBailTypes: Node | Window
+}
 
 export type ShallowUnwrapRef<T> = {
   [K in keyof T]: T[K] extends Ref<infer V>

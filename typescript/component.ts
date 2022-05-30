@@ -3,10 +3,13 @@ import type Watcher from '../src/core/observer/watcher'
 import { ComponentOptions, SetupContext } from './options'
 import { ScopedSlotsData, VNodeChildren, VNodeData } from './vnode'
 import { GlobalAPI } from './global-api'
-import { EffectScope } from 'v3'
+import { EffectScope } from 'v3/reactivity/effectScope'
 
 // TODO this should be using the same as /component/
 
+/**
+ * @internal
+ */
 export declare class Component {
   constructor(options?: any)
   // constructor information

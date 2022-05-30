@@ -23,6 +23,7 @@ import {
 import { escape } from 'web/server/util'
 import { optimizability } from './optimizer'
 import type { CodegenResult } from 'compiler/codegen/index'
+import { ASTElement, ASTNode, CompilerOptions } from 'typescript/compiler'
 
 export type StringSegment = {
   type: number

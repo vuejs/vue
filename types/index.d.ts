@@ -32,4 +32,5 @@ export {
   VNodeDirective
 } from './vnode'
 
-export { h, getCurrentInstance } from './v3'
+export * from './v3'
+export * from './v3-generated'

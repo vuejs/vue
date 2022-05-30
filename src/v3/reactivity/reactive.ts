@@ -113,7 +113,7 @@ export function markRaw<T extends object>(
 }
 
 /**
- * @private
+ * @internal
  */
 export function isCollectionType(value: unknown): boolean {
   const type = toRawType(value)

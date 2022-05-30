@@ -1,4 +1,5 @@
 import { warn } from 'core/util/index'
+import { ASTDirective, ASTElement } from 'typescript/compiler'
 
 export default function on(el: ASTElement, dir: ASTDirective) {
   if (__DEV__ && dir.modifiers) {

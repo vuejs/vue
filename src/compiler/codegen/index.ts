@@ -3,6 +3,16 @@ import baseDirectives from '../directives/index'
 import { camelize, no, extend } from 'shared/util'
 import { baseWarn, pluckModuleFunction } from '../helpers'
 import { emptySlotScopeToken } from '../parser/index'
+import {
+  ASTAttr,
+  ASTDirective,
+  ASTElement,
+  ASTExpression,
+  ASTIfConditions,
+  ASTNode,
+  ASTText,
+  CompilerOptions
+} from 'typescript/compiler'
 
 type TransformFunction = (el: ASTElement, code: string) => string
 type DataGenFunction = (el: ASTElement) => string

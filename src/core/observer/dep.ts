@@ -1,36 +1,22 @@
 import { remove } from '../util/index'
 import config from '../config'
-import { TrackOpTypes, TriggerOpTypes } from 'v3'
+import { DebuggerOptions, DebuggerEventExtraInfo } from 'v3'
 
 let uid = 0
 
+/**
+ * @internal
+ */
 export interface DepTarget extends DebuggerOptions {
   id: number
   addDep(dep: Dep): void
   update(): void
 }
 
-export interface DebuggerOptions {
-  onTrack?: (event: DebuggerEvent) => void
-  onTrigger?: (event: DebuggerEvent) => void
-}
-
-export type DebuggerEvent = {
-  effect: DepTarget
-} & DebuggerEventExtraInfo
-
-export type DebuggerEventExtraInfo = {
-  target: object
-  type: TrackOpTypes | TriggerOpTypes
-  key?: any
-  newValue?: any
-  oldValue?: any
-  oldTarget?: Map<any, any> | Set<any>
-}
-
 /**
  * A dep is an observable that can have multiple
  * directives subscribing to it.
+ * @internal
  */
 export default class Dep {
   static target?: DepTarget | null

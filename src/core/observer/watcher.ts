@@ -12,23 +12,18 @@ import {
 
 import { traverse } from './traverse'
 import { queueWatcher } from './scheduler'
-import Dep, {
-  pushTarget,
-  popTarget,
-  DepTarget,
-  DebuggerEvent,
-  DebuggerOptions
-} from './dep'
+import Dep, { pushTarget, popTarget, DepTarget } from './dep'
+import { DebuggerEvent, DebuggerOptions } from 'v3/debug'
 
 import type { SimpleSet } from '../util/index'
 import type { Component } from 'typescript/component'
-import {
-  activeEffectScope,
-  recordEffectScope
-} from '../../v3/reactivity/effectScope'
+import { activeEffectScope, recordEffectScope } from 'v3/reactivity/effectScope'
 
 let uid = 0
 
+/**
+ * @internal
+ */
 export interface WatcherOptions extends DebuggerOptions {
   deep?: boolean
   user?: boolean
@@ -41,6 +36,7 @@ export interface WatcherOptions extends DebuggerOptions {
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
+ * @internal
  */
 export default class Watcher implements DepTarget {
   vm?: Component | null

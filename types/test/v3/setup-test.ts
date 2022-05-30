@@ -1,4 +1,4 @@
-import Vue from '../index'
+import Vue from '../../index'
 
 // object props
 Vue.extend({
@@ -28,8 +28,5 @@ Vue.extend({
     }
     ctx.emit('foo')
     ctx.slots.default && ctx.slots.default()
-    ctx.expose({
-      foo: 123
-    })
   }
 })

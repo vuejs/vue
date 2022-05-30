@@ -2,7 +2,7 @@ import VNode from '../src/core/vdom/vnode'
 import { DebuggerEvent } from '../src/v3'
 import { Component } from './component'
 
-declare type InternalComponentOptions = {
+export type InternalComponentOptions = {
   _isComponent: true
   parent: Component
   _parentVnode: VNode
@@ -12,13 +12,19 @@ declare type InternalComponentOptions = {
 
 type InjectKey = string | Symbol
 
-declare interface SetupContext {
+/**
+ * @internal
+ */
+export interface SetupContext {
   attrs: Record<string, any>
   slots: Record<string, () => VNode[]>
   emit: (event: string, ...args: any[]) => any
 }
 
-declare type ComponentOptions = {
+/**
+ * @internal
+ */
+export type ComponentOptions = {
   // v3
   setup?: (props: Record<string, any>, ctx: SetupContext) => unknown
 
@@ -106,7 +112,7 @@ declare type ComponentOptions = {
   _base: typeof Component
 }
 
-declare type PropOptions = {
+export type PropOptions = {
   type: Function | Array<Function> | null
   default: any
   required: boolean | null

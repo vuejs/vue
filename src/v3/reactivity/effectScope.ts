@@ -106,6 +106,9 @@ export function effectScope(detached?: boolean) {
   return new EffectScope(detached)
 }
 
+/**
+ * @internal
+ */
 export function recordEffectScope(
   effect: Watcher,
   scope: EffectScope | undefined = activeEffectScope

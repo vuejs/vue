@@ -19,6 +19,15 @@ import {
   getAndRemoveAttrByRegex
 } from '../helpers'
 
+import {
+  ASTAttr,
+  ASTElement,
+  ASTIfCondition,
+  ASTNode,
+  ASTText,
+  CompilerOptions
+} from 'typescript/compiler'
+
 export const onRE = /^@|^v-on:/
 export const dirRE = process.env.VBIND_PROP_SHORTHAND
   ? /^v-|^@|^:|^\.|^#/

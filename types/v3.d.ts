@@ -10,3 +10,7 @@ export interface SetupContext {
 export function getCurrentInstance(): { proxy: Vue } | null
 
 export const h: CreateElement
+
+export function useAttrs(): SetupContext['attrs']
+
+export function useSlots(): SetupContext['slots']

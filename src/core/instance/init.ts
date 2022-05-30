@@ -9,7 +9,7 @@ import { initProvide, initInjections } from './inject'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
 import type { Component } from 'typescript/component'
 import type { InternalComponentOptions } from 'typescript/options'
-import { EffectScope } from 'v3'
+import { EffectScope } from 'v3/reactivity/effectScope'
 
 let uid = 0
 

@@ -138,10 +138,16 @@ export function syncSetupSlots(to: any, from: any) {
   }
 }
 
+/**
+ * @internal use manual type def
+ */
 export function useSlots(): SetupContext['slots'] {
   return getContext().slots
 }
 
+/**
+ * @internal use manual type def
+ */
 export function useAttrs(): SetupContext['attrs'] {
   return getContext().attrs
 }

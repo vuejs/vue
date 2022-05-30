@@ -1,12 +1,12 @@
-import { DebuggerEvent } from '.'
-import { Component } from '../../typescript/component'
+import { DebuggerEvent } from './debug'
+import { Component } from 'typescript/component'
 import { mergeLifecycleHook, warn } from '../core/util'
 import { currentInstance } from './currentInstance'
 
 function createLifeCycle<T extends (...args: any[]) => any = () => void>(
   hookName: string
 ) {
-  return (fn: T, target: Component | null = currentInstance) => {
+  return (fn: T, target: any = currentInstance) => {
     if (!target) {
       __DEV__ &&
         warn(

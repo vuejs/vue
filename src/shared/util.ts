@@ -276,7 +276,9 @@ export const identity = (_: any) => _
 /**
  * Generate a string containing static keys from compiler modules.
  */
-export function genStaticKeys(modules: Array<ModuleOptions>): string {
+export function genStaticKeys(
+  modules: Array<{ staticKeys?: string[] } /* ModuleOptions */>
+): string {
   return modules
     .reduce((keys, m) => {
       return keys.concat(m.staticKeys || [])

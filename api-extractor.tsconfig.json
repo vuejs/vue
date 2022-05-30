@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./temp",
+    "outDir": "dist",
+    "sourceMap": true,
+    "target": "esnext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+
+    "allowJs": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+
+    "noUnusedLocals": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "removeComments": false,
+    "jsx": "preserve",
+    "lib": ["esnext", "dom"],
+    "paths": {
+      "compiler/*": ["src/compiler/*"],
+      "core/*": ["src/core/*"],
+      "server/*": ["src/server/*"],
+      "sfc/*": ["src/sfc/*"],
+      "shared/*": ["src/shared/*"],
+      "web/*": ["src/platforms/web/*"],
+      "v3": ["src/v3/index"],
+      "v3/*": ["src/v3/*"],
+      "vue": ["src/platforms/web/entry-runtime-with-compiler"]
+    }
+  },
+  "include": ["src", "typescript"]
+}

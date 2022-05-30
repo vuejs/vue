@@ -62,11 +62,8 @@ export {
   getCurrentScope
 } from './reactivity/effectScope'
 
-export {
-  DebuggerOptions,
-  DebuggerEvent,
-  DebuggerEventExtraInfo
-} from 'core/observer/dep'
+export { DebuggerOptions, DebuggerEvent, DebuggerEventExtraInfo } from './debug'
+
 export { TrackOpTypes, TriggerOpTypes } from './reactivity/operations'
 
 export { provide, inject, InjectionKey } from './apiInject'
@@ -74,6 +71,6 @@ export { provide, inject, InjectionKey } from './apiInject'
 export { h } from './h'
 export { getCurrentInstance } from './currentInstance'
 export { useSlots, useAttrs } from './apiSetup'
-export { nextTick } from 'core/util'
+export { nextTick } from 'core/util/next-tick'
 
 export * from './apiLifecycle'

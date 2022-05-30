@@ -1,12 +1,19 @@
 import VNode from '../src/core/vdom/vnode'
 import { Ref } from '../src/v3'
 import { Component } from './component'
+import { ASTModifiers } from './compiler'
 
-declare type VNodeChildren =
+/**
+ * @internal
+ */
+export type VNodeChildren =
   | Array<null | VNode | string | number | VNodeChildren>
   | string
 
-declare type VNodeComponentOptions = {
+/**
+ * @internal
+ */
+export type VNodeComponentOptions = {
   Ctor: typeof Component
   propsData?: Object
   listeners?: Record<string, Function | Function[]>
@@ -14,7 +21,10 @@ declare type VNodeComponentOptions = {
   tag?: string
 }
 
-declare type MountedComponentVNode = VNode & {
+/**
+ * @internal
+ */
+export type MountedComponentVNode = VNode & {
   context: Component
   componentOptions: VNodeComponentOptions
   componentInstance: Component
@@ -22,8 +32,11 @@ declare type MountedComponentVNode = VNode & {
   data: VNodeData
 }
 
+/**
+ * @internal
+ */
 // interface for vnodes in update modules
-declare type VNodeWithData = VNode & {
+export type VNodeWithData = VNode & {
   tag: string
   data: VNodeData
   children: Array<VNode>
@@ -39,7 +52,7 @@ declare type VNodeWithData = VNode & {
 }
 
 // // interface for vnodes in update modules
-// declare type VNodeWithData = {
+// export type VNodeWithData = {
 //   tag: string;
 //   data: VNodeData;
 //   children: Array<VNode>;
@@ -54,7 +67,10 @@ declare type VNodeWithData = VNode & {
 //   isRootInsert: boolean;
 // };
 
-declare interface VNodeData {
+/**
+ * @internal
+ */
+export interface VNodeData {
   key?: string | number
   slot?: string
   ref?: string | Ref | ((el: any) => void)
@@ -89,7 +105,10 @@ declare interface VNodeData {
   [key: string]: any
 }
 
-declare type VNodeDirective = {
+/**
+ * @internal
+ */
+export type VNodeDirective = {
   name: string
   rawName: string
   value?: any
@@ -100,6 +119,9 @@ declare type VNodeDirective = {
   def?: Object
 }
 
-declare type ScopedSlotsData = Array<
+/**
+ * @internal
+ */
+export type ScopedSlotsData = Array<
   { key: string; fn: Function } | ScopedSlotsData
 >

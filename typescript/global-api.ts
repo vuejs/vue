@@ -1,7 +1,10 @@
 import { Config } from '../src/core/config'
 import { Component } from './component'
 
-declare interface GlobalAPI {
+/**
+ * @internal
+ */
+export interface GlobalAPI {
   // new(options?: any): Component
   (options?: any): void
   cid: number

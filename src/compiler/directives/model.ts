@@ -1,3 +1,5 @@
+import { ASTElement, ASTModifiers } from 'typescript/compiler'
+
 /**
  * Cross-platform code generation for component v-model
  */

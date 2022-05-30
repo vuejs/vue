@@ -2,6 +2,7 @@ import { noop, extend } from 'shared/util'
 import { warn as baseWarn, tip } from 'core/util/debug'
 import { generateCodeFrame } from './codeframe'
 import type { Component } from 'typescript/component'
+import { CompilerOptions } from 'typescript/compiler'
 
 type CompiledFunctionResult = {
   render: Function

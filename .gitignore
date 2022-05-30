@@ -3,14 +3,7 @@ node_modules
 *.log
 explorations
 TODOs.md
-dist/*.gz
-dist/*.map
-dist/vue.common.min.js
-test/e2e/reports
-test/e2e/screenshots
-coverage
 RELEASE_NOTE*.md
-dist/*.js
 packages/vue-server-renderer/basic.js
 packages/vue-server-renderer/build.dev.js
 packages/vue-server-renderer/build.prod.js
@@ -20,3 +13,5 @@ packages/vue-template-compiler/build.js
 packages/vue-template-compiler/browser.js
 .vscode
 dist
+temp
+types/v3-generated.d.ts

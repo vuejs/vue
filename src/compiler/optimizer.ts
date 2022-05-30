@@ -1,4 +1,5 @@
 import { makeMap, isBuiltInTag, cached, no } from 'shared/util'
+import { ASTElement, CompilerOptions, ASTNode } from 'typescript/compiler'
 
 let isStaticKey
 let isPlatformReservedTag

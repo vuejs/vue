@@ -1,3 +1,5 @@
+import { ASTElementHandler, ASTElementHandlers } from 'typescript/compiler'
+
 const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/
 const fnInvokeRE = /\([^)]*?\);*$/
 const simplePathRE =

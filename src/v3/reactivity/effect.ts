@@ -5,7 +5,7 @@ import { currentInstance } from '../currentInstance'
 // export type EffectScheduler = (...args: any[]) => any
 
 /**
- * @private since we are not exposing this in Vue 2, it's used only for
+ * @internal since we are not exposing this in Vue 2, it's used only for
  * internal testing.
  */
 export function effect(fn: () => any, scheduler?: (cb: any) => void) {

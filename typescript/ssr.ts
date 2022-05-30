@@ -1,14 +1,14 @@
 import VNode from '../src/core/vdom/vnode'
 import { Component } from './component'
 
-declare type ComponentWithCacheContext = {
+export type ComponentWithCacheContext = {
   type: 'ComponentWithCache'
   bufferIndex: number
   buffer: Array<string>
   key: string
 }
 
-declare type ElementContext = {
+export type ElementContext = {
   type: 'Element'
   children: Array<VNode>
   rendered: number
@@ -16,12 +16,12 @@ declare type ElementContext = {
   total: number
 }
 
-declare type ComponentContext = {
+export type ComponentContext = {
   type: 'Component'
   prevActive: Component
 }
 
-declare type RenderState =
+export type RenderState =
   | ComponentContext
   | ComponentWithCacheContext
   | ElementContext
