@@ -9,8 +9,8 @@ packages/server-renderer/build.dev.js
 packages/server-renderer/build.prod.js
 packages/server-renderer/server-plugin.js
 packages/server-renderer/client-plugin.js
-packages/compiler-sfc/build.js
-packages/compiler-sfc/browser.js
+packages/template-compiler/build.js
+packages/template-compiler/browser.js
 .vscode
 dist
 temp
