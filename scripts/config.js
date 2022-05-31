@@ -233,7 +233,8 @@ function genConfig(name) {
       format: opts.format,
       banner: opts.banner,
       name: opts.moduleName || 'Vue',
-      exports: 'auto'
+      exports: 'auto',
+      sourcemap: true
     },
     onwarn: (msg, warn) => {
       if (!/Circular/.test(msg)) {
