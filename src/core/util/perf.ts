@@ -8,9 +8,13 @@ if (__DEV__) {
   /* istanbul ignore if */
   if (
     perf &&
+    // @ts-ignore
     perf.mark &&
+    // @ts-ignore
     perf.measure &&
+    // @ts-ignore
     perf.clearMarks &&
+    // @ts-ignore
     perf.clearMeasures
   ) {
     mark = tag => perf.mark(tag)
