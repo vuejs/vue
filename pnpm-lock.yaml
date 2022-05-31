@@ -11,6 +11,7 @@ importers:
       '@rollup/plugin-replace': ^4.0.0
       '@types/he': ^1.1.2
       '@types/node': ^17.0.30
+      '@vue/compiler-sfc': workspace:*
       chalk: ^4.0.0
       commitizen: ^4.2.4
       conventional-changelog: ^3.1.25
@@ -42,6 +43,8 @@ importers:
       typescript: ^4.6.4
       vitest: ^0.12.6
       yorkie: ^2.0.0
+    dependencies:
+      '@vue/compiler-sfc': link:packages/compiler-sfc
     devDependencies:
       '@microsoft/api-extractor': 7.24.2
       '@rollup/plugin-alias': 3.1.9_rollup@2.75.3
@@ -6798,4 +6801,6 @@ packages:
     resolution: {directory: '', type: directory}
     name: vue
     version: 2.6.14
+    dependencies:
+      '@vue/compiler-sfc': link:packages/compiler-sfc
     dev: true
