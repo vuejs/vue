@@ -4,7 +4,7 @@ import {
   EXPRESSION
 } from './codegen'
 
-import { propsToAttrMap, isRenderableAttr } from 'web/server/util'
+import { propsToAttrMap, isRenderableAttr } from '../util'
 
 import { isBooleanAttr, isEnumeratedAttr } from 'web/util/attrs'
 

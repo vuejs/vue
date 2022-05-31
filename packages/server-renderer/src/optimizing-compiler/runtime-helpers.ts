@@ -1,8 +1,13 @@
-import { escape, isSSRUnsafeAttr } from 'web/server/util'
+import {
+  escape,
+  isSSRUnsafeAttr,
+  propsToAttrMap,
+  isRenderableAttr
+} from '../util'
 import { isObject, extend } from 'shared/util'
-import { renderAttr } from 'web/server/modules/attrs'
+import { renderAttr } from '../modules/attrs'
 import { renderClass } from 'web/util/class'
-import { genStyle } from 'web/server/modules/style'
+import { genStyle } from '../modules/style'
 import { normalizeStyleBinding } from 'web/util/style'
 
 import {
@@ -10,7 +15,6 @@ import {
   simpleNormalizeChildren
 } from 'core/vdom/helpers/normalize-children'
 
-import { propsToAttrMap, isRenderableAttr } from 'web/server/util'
 import type { Component } from 'types/component'
 
 const ssrHelpers = {

@@ -5,7 +5,7 @@ import {
   compileWithWebpack,
   createWebpackBundleRenderer
 } from './compile-with-webpack'
-import { createRenderer } from 'web/entry-server-renderer'
+import { createRenderer } from 'server/index'
 import VueSSRClientPlugin from 'server/webpack-plugin/client'
 import { RenderOptions } from 'server/create-renderer'
 

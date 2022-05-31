@@ -2,7 +2,7 @@ import path from 'path'
 import webpack from 'webpack'
 import MemoryFS from 'memory-fs'
 import { RenderOptions } from 'server/create-renderer'
-import { createBundleRenderer } from 'web/entry-server-renderer'
+import { createBundleRenderer } from 'server/index'
 import VueSSRServerPlugin from 'server/webpack-plugin/server'
 
 export function compileWithWebpack(

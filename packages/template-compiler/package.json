@@ -7,6 +7,10 @@
   "jsdelivr": "browser.js",
   "browser": "browser.js",
   "types": "types/index.d.ts",
+  "files": [
+    "types/*.d.ts",
+    "*.js"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vuejs/vue.git"

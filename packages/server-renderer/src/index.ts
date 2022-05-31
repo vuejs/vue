@@ -1,9 +1,9 @@
 process.env.VUE_ENV = 'server'
 
 import { extend } from 'shared/util'
-import modules from './server/modules/index'
-import baseDirectives from './server/directives/index'
-import { isUnaryTag, canBeLeftOpenTag } from './compiler/util'
+import modules from './modules/index'
+import baseDirectives from './directives/index'
+import { isUnaryTag, canBeLeftOpenTag } from 'web/compiler/util'
 
 import {
   createRenderer as _createRenderer,

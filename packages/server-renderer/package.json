@@ -14,7 +14,7 @@
     "ssr"
   ],
   "files": [
-    "types",
+    "types/*.d.ts",
     "*.js",
     "*.d.ts"
   ],

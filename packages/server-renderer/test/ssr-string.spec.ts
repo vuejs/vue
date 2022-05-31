@@ -2,7 +2,7 @@
 
 import Vue from 'vue'
 import VM from 'vm'
-import { createRenderer } from 'web/entry-server-renderer'
+import { createRenderer } from 'server/index'
 const { renderToString } = createRenderer()
 
 describe('SSR: renderToString', () => {

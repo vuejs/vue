@@ -147,7 +147,7 @@ const builds = {
   },
   // Web server renderer (CommonJS).
   'server-renderer-dev': {
-    entry: resolve('web/entry-server-renderer.ts'),
+    entry: resolve('packages/server-renderer/src/index.ts'),
     dest: resolve('packages/server-renderer/build.dev.js'),
     format: 'cjs',
     env: 'development',
@@ -159,7 +159,7 @@ const builds = {
     ]
   },
   'server-renderer-prod': {
-    entry: resolve('web/entry-server-renderer.ts'),
+    entry: resolve('server/index.ts'),
     dest: resolve('packages/server-renderer/build.prod.js'),
     format: 'cjs',
     env: 'production',
@@ -171,7 +171,7 @@ const builds = {
     ]
   },
   'server-renderer-basic': {
-    entry: resolve('web/entry-server-basic-renderer.ts'),
+    entry: resolve('server/index-basic.ts'),
     dest: resolve('packages/server-renderer/basic.js'),
     format: 'umd',
     env: 'development',

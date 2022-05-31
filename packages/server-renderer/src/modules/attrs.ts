@@ -9,7 +9,7 @@ import {
   convertEnumeratedValue
 } from 'web/util/attrs'
 
-import { isSSRUnsafeAttr } from 'web/server/util'
+import { isSSRUnsafeAttr } from '../util'
 import type { VNodeWithData } from 'types/vnode'
 
 export default function renderAttrs(node: VNodeWithData): string {

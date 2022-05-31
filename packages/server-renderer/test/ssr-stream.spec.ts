@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import Vue from 'vue'
-import { createRenderer } from 'web/entry-server-renderer'
+import { createRenderer } from 'server/index'
 const { renderToStream } = createRenderer()
 
 describe('SSR: renderToStream', () => {

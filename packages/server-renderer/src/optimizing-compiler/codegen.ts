@@ -20,7 +20,7 @@ import {
   applyModelTransform
 } from './modules'
 
-import { escape } from 'web/server/util'
+import { escape } from '../util'
 import { optimizability } from './optimizer'
 import type { CodegenResult } from 'compiler/codegen/index'
 import { ASTElement, ASTNode, CompilerOptions } from 'types/compiler'

@@ -1,9 +1,9 @@
-import { escape } from 'web/server/util'
+import { escape } from './util'
 import { SSR_ATTR } from 'shared/constants'
 import { RenderContext } from './render-context'
 import { resolveAsset } from 'core/util/options'
 import { generateComponentTrace } from 'core/util/debug'
-import { ssrCompileToFunctions } from 'web/server/compiler'
+import { ssrCompileToFunctions } from './compiler'
 import { installSSRHelpers } from './optimizing-compiler/runtime-helpers'
 
 import { isDef, isUndef, isTrue } from 'shared/util'
