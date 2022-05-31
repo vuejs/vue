@@ -1,4 +1,4 @@
-import { ssrCompile } from 'web/server/compiler'
+import { ssrCompile } from 'server/compiler'
 
 describe('ssrCompile options', () => {
   it('comments', () => {
