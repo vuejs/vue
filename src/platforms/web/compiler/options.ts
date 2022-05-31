@@ -9,7 +9,7 @@ import modules from './modules/index'
 import directives from './directives/index'
 import { genStaticKeys } from 'shared/util'
 import { isUnaryTag, canBeLeftOpenTag } from './util'
-import { CompilerOptions } from 'typescript/compiler'
+import { CompilerOptions } from 'types/compiler'
 
 export const baseOptions: CompilerOptions = {
   expectHTML: true,

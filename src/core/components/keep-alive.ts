@@ -1,8 +1,8 @@
 import { isRegExp, isArray, remove } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 import type VNode from 'core/vdom/vnode'
-import type { VNodeComponentOptions } from 'typescript/vnode'
-import type { Component } from 'typescript/component'
+import type { VNodeComponentOptions } from 'types/vnode'
+import type { Component } from 'types/component'
 
 type CacheEntry = {
   name?: string

@@ -2,7 +2,7 @@ import { parse } from 'compiler/parser/index'
 import { generate } from './codegen'
 import { optimize } from './optimizer'
 import { createCompilerCreator } from 'compiler/create-compiler'
-import { CompiledResult, CompilerOptions } from 'typescript/compiler'
+import { CompiledResult, CompilerOptions } from 'types/compiler'
 
 export const createCompiler = createCompilerCreator(function baseCompile(
   template: string,

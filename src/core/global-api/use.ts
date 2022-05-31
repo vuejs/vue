@@ -1,4 +1,4 @@
-import type { GlobalAPI } from 'typescript/global-api'
+import type { GlobalAPI } from 'types/global-api'
 import { toArray, isFunction } from '../util/index'
 
 export function initUse(Vue: GlobalAPI) {

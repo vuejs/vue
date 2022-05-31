@@ -9,8 +9,8 @@ import {
   shouldDecodeNewlines,
   shouldDecodeNewlinesForHref
 } from './util/compat'
-import type { Component } from 'typescript/component'
-import type { GlobalAPI } from 'typescript/global-api'
+import type { Component } from 'types/component'
+import type { GlobalAPI } from 'types/global-api'
 
 const idToTemplate = cached(id => {
   const el = query(id)

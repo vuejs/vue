@@ -1,4 +1,4 @@
-import VNode from '../src/core/vdom/vnode'
+import VNode from 'core/vdom/vnode'
 import { Component } from './component'
 
 export type ComponentWithCacheContext = {

@@ -1,6 +1,6 @@
 import VNode from 'core/vdom/vnode'
 import { cached, extend, toObject } from 'shared/util'
-import type { VNodeData, VNodeWithData } from 'typescript/vnode'
+import type { VNodeData, VNodeWithData } from 'types/vnode'
 
 export const parseStyleText = cached(function (cssText) {
   const res = {}

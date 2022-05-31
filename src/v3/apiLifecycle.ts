@@ -1,5 +1,5 @@
 import { DebuggerEvent } from './debug'
-import { Component } from 'typescript/component'
+import { Component } from 'types/component'
 import { mergeLifecycleHook, warn } from '../core/util'
 import { currentInstance } from './currentInstance'
 

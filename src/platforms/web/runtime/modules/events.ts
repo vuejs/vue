@@ -7,7 +7,7 @@ import {
 } from 'web/compiler/directives/model'
 import { currentFlushTimestamp } from 'core/observer/scheduler'
 import { emptyNode } from 'core/vdom/patch'
-import type { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'types/vnode'
 
 // normalize v-model event tokens that can only be determined at runtime.
 // it's important to place the event as the first in the array because

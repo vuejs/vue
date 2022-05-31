@@ -1,5 +1,5 @@
 import VNode from 'core/vdom/vnode'
-import type { VNodeDirective, VNodeWithData } from 'typescript/vnode'
+import type { VNodeDirective, VNodeWithData } from 'types/vnode'
 import { enter, leave } from 'web/runtime/modules/transition'
 
 // recursively search for possible transition defined inside the component root

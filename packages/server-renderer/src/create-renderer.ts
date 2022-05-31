@@ -4,7 +4,7 @@ import { createRenderFunction } from './render'
 import { createPromiseCallback } from './util'
 import TemplateRenderer from './template-renderer/index'
 import type { ClientManifest } from './template-renderer/index'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 import VNode from 'core/vdom/vnode'
 import { Readable } from 'stream'
 

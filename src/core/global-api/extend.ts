@@ -1,6 +1,6 @@
 import { ASSET_TYPES } from 'shared/constants'
-import type { Component } from 'typescript/component'
-import type { GlobalAPI } from 'typescript/global-api'
+import type { Component } from 'types/component'
+import type { GlobalAPI } from 'types/global-api'
 import { defineComputed, proxy } from '../instance/state'
 import { extend, mergeOptions, validateComponentName } from '../util/index'
 

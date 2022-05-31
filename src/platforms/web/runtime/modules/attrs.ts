@@ -1,7 +1,7 @@
 import { isIE, isIE9, isEdge } from 'core/util/env'
 
 import { extend, isDef, isUndef, isTrue } from 'shared/util'
-import type { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'types/vnode'
 
 import {
   isXlink,

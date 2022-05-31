@@ -1,5 +1,5 @@
 import { emptyObject } from 'shared/util'
-import { ASTElement, ASTModifiers } from 'typescript/compiler'
+import { ASTElement, ASTModifiers } from 'types/compiler'
 import { parseFilters } from './parser/filter-parser'
 
 type Range = { start?: number; end?: number }

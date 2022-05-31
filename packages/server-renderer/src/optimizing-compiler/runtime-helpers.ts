@@ -11,7 +11,7 @@ import {
 } from 'core/vdom/helpers/normalize-children'
 
 import { propsToAttrMap, isRenderableAttr } from 'web/server/util'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 
 const ssrHelpers = {
   _ssrEscape: escape,

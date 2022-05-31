@@ -15,7 +15,7 @@ import {
   mergeOptions,
   defineReactive
 } from '../util/index'
-import type { GlobalAPI } from 'typescript/global-api'
+import type { GlobalAPI } from 'types/global-api'
 
 export function initGlobalAPI(Vue: GlobalAPI) {
   // config

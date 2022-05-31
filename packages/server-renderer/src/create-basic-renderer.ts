@@ -1,7 +1,7 @@
 import { createWriteFunction } from './write'
 import { createRenderFunction } from './render'
 import type { RenderOptions } from './create-renderer'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 
 export function createBasicRenderer({
   modules = [],

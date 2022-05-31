@@ -6,7 +6,7 @@ import {
   SFCBlock,
   SFCDescriptor,
   WarningMessage
-} from 'typescript/compiler'
+} from 'types/compiler'
 
 const splitRE = /\r?\n/g
 const replaceRE = /./g

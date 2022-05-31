@@ -1,4 +1,4 @@
-import { ASTElementHandler, ASTElementHandlers } from 'typescript/compiler'
+import { ASTElementHandler, ASTElementHandlers } from 'types/compiler'
 
 const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/
 const fnInvokeRE = /\([^)]*?\);*$/

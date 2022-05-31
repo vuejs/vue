@@ -10,7 +10,7 @@ import {
   capitalize,
   isPlainObject
 } from 'shared/util'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 
 type PropOptions = {
   type: Function | Array<Function> | null

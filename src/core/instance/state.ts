@@ -29,7 +29,7 @@ import {
   invokeWithErrorHandling,
   isFunction
 } from '../util/index'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 import { TrackOpTypes } from '../../v3'
 
 const sharedPropertyDefinition = {

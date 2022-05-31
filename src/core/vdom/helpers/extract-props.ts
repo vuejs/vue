@@ -6,8 +6,8 @@ import {
   hyphenate,
   formatComponentName
 } from 'core/util/index'
-import type { Component } from 'typescript/component'
-import type { VNodeData } from 'typescript/vnode'
+import type { Component } from 'types/component'
+import type { VNodeData } from 'types/vnode'
 
 export function extractPropsFromVNodeData(
   data: VNodeData,

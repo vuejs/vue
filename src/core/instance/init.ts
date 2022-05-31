@@ -7,8 +7,8 @@ import { mark, measure } from '../util/perf'
 import { initLifecycle, callHook } from './lifecycle'
 import { initProvide, initInjections } from './inject'
 import { extend, mergeOptions, formatComponentName } from '../util/index'
-import type { Component } from 'typescript/component'
-import type { InternalComponentOptions } from 'typescript/options'
+import type { Component } from 'types/component'
+import type { InternalComponentOptions } from 'types/options'
 import { EffectScope } from 'v3/reactivity/effectScope'
 
 let uid = 0

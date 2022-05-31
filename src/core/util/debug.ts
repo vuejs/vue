@@ -1,6 +1,6 @@
 import config from '../config'
 import { noop, isArray, isFunction } from 'shared/util'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 import { currentInstance } from 'v3/currentInstance'
 
 export let warn = noop

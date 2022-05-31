@@ -1,7 +1,7 @@
 import config from 'core/config'
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 import { genComponentModel, genAssignmentCode } from 'compiler/directives/model'
-import { ASTDirective, ASTElement, ASTModifiers } from 'typescript/compiler'
+import { ASTDirective, ASTElement, ASTModifiers } from 'types/compiler'
 
 let warn
 

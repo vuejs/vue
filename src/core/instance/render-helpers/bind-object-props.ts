@@ -9,7 +9,7 @@ import {
   hyphenate,
   isArray
 } from 'core/util/index'
-import type { VNodeData } from 'typescript/vnode'
+import type { VNodeData } from 'types/vnode'
 
 /**
  * Runtime helper for merging v-bind="object" into a VNode's data.

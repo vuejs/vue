@@ -9,7 +9,7 @@ import {
   getFirstComponentChild
 } from 'core/vdom/helpers/index'
 import VNode from 'core/vdom/vnode'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 
 export const transitionProps = {
   name: String,

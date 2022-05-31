@@ -12,7 +12,7 @@ import {
   ASTNode,
   ASTText,
   CompilerOptions
-} from 'typescript/compiler'
+} from 'types/compiler'
 
 type TransformFunction = (el: ASTElement, code: string) => string
 type DataGenFunction = (el: ASTElement) => string

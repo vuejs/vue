@@ -10,7 +10,7 @@ import { isBooleanAttr, isEnumeratedAttr } from 'web/util/attrs'
 
 import type { StringSegment } from './codegen'
 import type { CodegenState } from 'compiler/codegen/index'
-import { ASTAttr, ASTElement } from 'typescript/compiler'
+import { ASTAttr, ASTElement } from 'types/compiler'
 
 const plainStringRE = /^"(?:[^"\\]|\\.)*"$|^'(?:[^'\\]|\\.)*'$/
 

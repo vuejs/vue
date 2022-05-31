@@ -1,6 +1,6 @@
 import { warn, hasSymbol, isFunction } from '../util/index'
 import { defineReactive, toggleObserving } from '../observer/index'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 import { provide } from 'v3/apiInject'
 import { setCurrentInstance } from '../../v3/currentInstance'
 

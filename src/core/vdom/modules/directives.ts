@@ -1,8 +1,8 @@
 import { emptyNode } from 'core/vdom/patch'
 import { resolveAsset, handleError } from 'core/util/index'
 import { mergeVNodeHook } from 'core/vdom/helpers/index'
-import type { VNodeDirective, VNodeWithData } from 'typescript/vnode'
-import type { Component } from 'typescript/component'
+import type { VNodeDirective, VNodeWithData } from 'types/vnode'
+import type { Component } from 'types/component'
 
 export default {
   create: updateDirectives,

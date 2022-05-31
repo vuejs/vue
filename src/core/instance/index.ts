@@ -4,7 +4,7 @@ import { renderMixin } from './render'
 import { eventsMixin } from './events'
 import { lifecycleMixin } from './lifecycle'
 import { warn } from '../util/index'
-import type { GlobalAPI } from 'typescript/global-api'
+import type { GlobalAPI } from 'types/global-api'
 
 function Vue(options) {
   if (__DEV__ && !(this instanceof Vue)) {

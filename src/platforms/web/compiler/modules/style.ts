@@ -1,7 +1,7 @@
 import { parseText } from 'compiler/parser/text-parser'
 import { parseStyleText } from 'web/util/style'
 import { getAndRemoveAttr, getBindingAttr, baseWarn } from 'compiler/helpers'
-import { ASTElement, CompilerOptions, ModuleOptions } from 'typescript/compiler'
+import { ASTElement, CompilerOptions, ModuleOptions } from 'types/compiler'
 
 function transformNode(el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn

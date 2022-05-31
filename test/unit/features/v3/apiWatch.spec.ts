@@ -19,7 +19,7 @@ import {
 } from 'v3'
 import { nextTick } from 'core/util'
 import { set } from 'core/observer'
-import { Component } from 'typescript/component'
+import { Component } from 'types/component'
 
 // reference: https://vue-composition-api-rfc.netlify.com/api.html#watch
 

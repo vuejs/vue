@@ -16,7 +16,7 @@ import {
   addIfCondition,
   createASTElement
 } from 'compiler/parser/index'
-import { ASTElement, CompilerOptions, ModuleOptions } from 'typescript/compiler'
+import { ASTElement, CompilerOptions, ModuleOptions } from 'types/compiler'
 
 function preTransformNode(el: ASTElement, options: CompilerOptions) {
   if (el.tag === 'input') {

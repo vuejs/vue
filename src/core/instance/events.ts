@@ -1,4 +1,4 @@
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 import {
   tip,
   toArray,

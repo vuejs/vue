@@ -1,6 +1,6 @@
 import VNode from 'core/vdom/vnode'
 import { isUndef } from 'shared/util'
-import { Component } from 'typescript/component'
+import { Component } from 'types/component'
 
 type RenderState =
   | {

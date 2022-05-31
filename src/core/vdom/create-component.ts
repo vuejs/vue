@@ -24,12 +24,9 @@ import type {
   MountedComponentVNode,
   VNodeData,
   VNodeWithData
-} from 'typescript/vnode'
-import type { Component } from 'typescript/component'
-import type {
-  ComponentOptions,
-  InternalComponentOptions
-} from 'typescript/options'
+} from 'types/vnode'
+import type { Component } from 'types/component'
+import type { ComponentOptions, InternalComponentOptions } from 'types/options'
 
 // inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {

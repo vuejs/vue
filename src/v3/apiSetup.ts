@@ -1,5 +1,5 @@
-import { Component } from 'typescript/component'
-import type { SetupContext } from 'typescript/options'
+import { Component } from 'types/component'
+import type { SetupContext } from 'types/options'
 import { def, invokeWithErrorHandling, isReserved, warn } from '../core/util'
 import VNode from '../core/vdom/vnode'
 import { bind, emptyObject, isFunction, isObject } from '../shared/util'

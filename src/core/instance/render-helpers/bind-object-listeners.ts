@@ -1,5 +1,5 @@
 import { warn, extend, isPlainObject } from 'core/util/index'
-import type { VNodeData } from 'typescript/vnode'
+import type { VNodeData } from 'types/vnode'
 
 export function bindObjectListeners(data: any, value: any): VNodeData {
   if (value) {

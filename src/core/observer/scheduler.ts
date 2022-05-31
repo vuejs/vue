@@ -4,7 +4,7 @@ import Dep from './dep'
 import { callHook, activateChildComponent } from '../instance/lifecycle'
 
 import { warn, nextTick, devtools, inBrowser, isIE } from '../util/index'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 
 export const MAX_UPDATE_COUNT = 100
 

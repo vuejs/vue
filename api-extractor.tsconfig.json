@@ -28,8 +28,9 @@
       "web/*": ["src/platforms/web/*"],
       "v3": ["src/v3/index"],
       "v3/*": ["src/v3/*"],
+      "types/*": ["src/types/*"],
       "vue": ["src/platforms/web/entry-runtime-with-compiler"]
     }
   },
-  "include": ["src", "typescript"]
+  "include": ["src"]
 }

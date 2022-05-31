@@ -6,8 +6,8 @@ import { updateComponentListeners } from './events'
 import { resolveSlots } from './render-helpers/resolve-slots'
 import { toggleObserving } from '../observer/index'
 import { pushTarget, popTarget } from '../observer/dep'
-import type { Component } from '../../../typescript/component'
-import type { MountedComponentVNode } from '../../../typescript/vnode'
+import type { Component } from 'types/component'
+import type { MountedComponentVNode } from 'types/vnode'
 
 import {
   warn,

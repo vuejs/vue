@@ -4,7 +4,7 @@ import {
   ReactiveFlags,
   type ShallowReactiveMarker
 } from './reactive'
-import type { IfAny } from 'typescript/utils'
+import type { IfAny } from 'types/utils'
 import Dep from 'core/observer/dep'
 import { warn, isArray, def } from 'core/util'
 import { TrackOpTypes, TriggerOpTypes } from './operations'

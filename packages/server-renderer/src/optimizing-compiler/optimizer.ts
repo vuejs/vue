@@ -9,7 +9,7 @@
  */
 
 import { no, makeMap, isBuiltInTag } from 'shared/util'
-import { ASTElement, ASTNode, CompilerOptions } from 'typescript/compiler'
+import { ASTElement, ASTNode, CompilerOptions } from 'types/compiler'
 
 // optimizability constants
 export const optimizability = {

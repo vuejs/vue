@@ -1,4 +1,4 @@
-import { Component } from 'typescript/component'
+import { Component } from 'types/component'
 
 export let currentInstance: Component | null = null
 

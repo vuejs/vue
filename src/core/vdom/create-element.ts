@@ -16,8 +16,8 @@ import {
 } from '../util/index'
 
 import { normalizeChildren, simpleNormalizeChildren } from './helpers/index'
-import type { Component } from 'typescript/component'
-import type { VNodeData } from 'typescript/vnode'
+import type { Component } from 'types/component'
+import type { VNodeData } from 'types/vnode'
 
 const SIMPLE_NORMALIZE = 1
 const ALWAYS_NORMALIZE = 2

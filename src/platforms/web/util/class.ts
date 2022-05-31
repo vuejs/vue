@@ -1,6 +1,6 @@
 import VNode from 'core/vdom/vnode'
 import { isDef, isObject } from 'shared/util'
-import type { VNodeData, VNodeWithData } from 'typescript/vnode'
+import type { VNodeData, VNodeWithData } from 'types/vnode'
 
 export function genClassForVnode(vnode: VNodeWithData): string {
   let data = vnode.data

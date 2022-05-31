@@ -1,7 +1,7 @@
 import { escape, noUnitNumericStyleProps } from '../util'
 import { hyphenate } from 'shared/util'
 import { getStyle } from 'web/util/style'
-import type { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'types/vnode'
 
 export function genStyle(style: Object): string {
   let styleText = ''

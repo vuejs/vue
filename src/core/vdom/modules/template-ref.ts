@@ -7,8 +7,8 @@ import {
   invokeWithErrorHandling,
   warn
 } from 'core/util'
-import type { VNodeWithData } from 'typescript/vnode'
-import { Component } from 'typescript/component'
+import type { VNodeWithData } from 'types/vnode'
+import { Component } from 'types/component'
 import { isRef } from 'v3'
 
 export default {
@@ -81,8 +81,12 @@ export function registerRef(vnode: VNodeWithData, isRemoval?: boolean) {
   }
 }
 
-function setSetupRef({ _setupState }: Component, key: string, val: any) {
-  if (_setupState && hasOwn(_setupState, key)) {
+function setSetupRef(
+  { _setupState }: Component,
+  key: string | number,
+  val: any
+) {
+  if (_setupState && hasOwn(_setupState, key as string)) {
     if (isRef(_setupState[key])) {
       _setupState[key].value = val
     } else {

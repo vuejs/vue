@@ -1,5 +1,5 @@
-import type VNode from '../src/core/vdom/vnode'
-import type Watcher from '../src/core/observer/watcher'
+import type VNode from 'core/vdom/vnode'
+import type Watcher from 'core/observer/watcher'
 import { ComponentOptions, SetupContext } from './options'
 import { ScopedSlotsData, VNodeChildren, VNodeData } from './vnode'
 import { GlobalAPI } from './global-api'

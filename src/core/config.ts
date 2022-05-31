@@ -1,7 +1,7 @@
 import { no, noop, identity } from 'shared/util'
 
 import { LIFECYCLE_HOOKS } from 'shared/constants'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 
 /**
  * @internal

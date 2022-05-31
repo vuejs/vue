@@ -1,4 +1,4 @@
-import type { GlobalAPI } from 'typescript/global-api'
+import type { GlobalAPI } from 'types/global-api'
 import { mergeOptions } from '../util/index'
 
 export function initMixin(Vue: GlobalAPI) {

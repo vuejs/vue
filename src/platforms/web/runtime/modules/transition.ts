@@ -19,7 +19,7 @@ import {
   removeTransitionClass
 } from 'web/runtime/transition-util'
 
-import type { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'types/vnode'
 import VNode from 'core/vdom/vnode'
 
 export function enter(vnode: VNodeWithData, toggleDisplay?: () => void) {

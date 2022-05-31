@@ -1,6 +1,6 @@
 import { warn, invokeWithErrorHandling } from 'core/util/index'
 import { cached, isUndef, isTrue, isArray } from 'shared/util'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 
 const normalizeEvent = cached(
   (

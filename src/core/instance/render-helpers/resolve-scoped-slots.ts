@@ -1,4 +1,4 @@
-import type { ScopedSlotsData } from 'typescript/vnode'
+import type { ScopedSlotsData } from 'types/vnode'
 import { isArray } from 'core/util'
 
 export function resolveScopedSlots(

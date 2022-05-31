@@ -3,7 +3,7 @@ import { normalizeChildren } from 'core/vdom/helpers/normalize-children'
 import { emptyObject, isArray } from 'shared/util'
 import { isAsyncPlaceholder } from './is-async-placeholder'
 import type VNode from '../vnode'
-import { Component } from 'typescript/component'
+import { Component } from 'types/component'
 import { currentInstance, setCurrentInstance } from 'v3/currentInstance'
 
 export function normalizeScopedSlots(

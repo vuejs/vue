@@ -1,5 +1,5 @@
-import VNode from '../src/core/vdom/vnode'
-import { Ref } from '../src/v3'
+import VNode from 'core/vdom/vnode'
+import { Ref } from 'v3'
 import { Component } from './component'
 import { ASTModifiers } from './compiler'
 

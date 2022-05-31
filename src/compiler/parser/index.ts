@@ -26,7 +26,7 @@ import {
   ASTNode,
   ASTText,
   CompilerOptions
-} from 'typescript/compiler'
+} from 'types/compiler'
 
 export const onRE = /^@|^v-on:/
 export const dirRE = process.env.VBIND_PROP_SHORTHAND

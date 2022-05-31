@@ -1,4 +1,4 @@
-import type { VNodeDirective, VNodeWithData } from 'typescript/vnode'
+import type { VNodeDirective, VNodeWithData } from 'types/vnode'
 
 export default function show(node: VNodeWithData, dir: VNodeDirective) {
   if (!dir.value) {

@@ -2,7 +2,7 @@ import { parse } from './parser/index'
 import { optimize } from './optimizer'
 import { generate } from './codegen/index'
 import { createCompilerCreator } from './create-compiler'
-import { CompilerOptions, CompiledResult } from 'typescript/compiler'
+import { CompilerOptions, CompiledResult } from 'types/compiler'
 
 // `createCompilerCreator` allows creating compilers that use alternative
 // parser/optimizer/codegen, e.g the SSR optimizing compiler.

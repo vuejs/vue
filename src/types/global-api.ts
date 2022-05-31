@@ -1,4 +1,4 @@
-import { Config } from '../src/core/config'
+import { Config } from 'core/config'
 import { Component } from './component'
 
 /**

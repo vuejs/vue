@@ -1,5 +1,5 @@
 import { isDef, isUndef, extend, toNumber, isTrue } from 'shared/util'
-import type { VNodeWithData } from 'typescript/vnode'
+import type { VNodeWithData } from 'types/vnode'
 import { isSVG } from 'web/util/index'
 
 let svgContainer

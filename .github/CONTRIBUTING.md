@@ -83,11 +83,9 @@ The default test script will do the following: lint with ESLint -> type check wi
 
   See [dist/README.md](https://github.com/vuejs/vue/blob/dev/dist/README.md) for more details on dist files.
 
-- **`types`**: contains public types published to npm. These were hand-authored before we moved the codebase from Flow to TypeScript. To ensure backwards compatibility, we keep using these manually authored types.
+- **`types`**: contains public types published to npm (note the types shipped here could be different from `src/types`). These were hand-authored before we moved the codebase from Flow to TypeScript. To ensure backwards compatibility, we keep using these manually authored types.
 
   Types for new features added in 2.7 (Composition API) are auto-generated from source code as `types/v3-generated.d.ts` and re-exported from `types/index.d.ts`.
-
-- **`typescript`**: contains type declarations added when we ported the codebase from Flow to TypeScript. These types should be considered internal - they care less about type inference for end-user scenarios and prioritize working with internal source code.
 
 - **`packages`**:
 
@@ -128,6 +126,8 @@ The default test script will do the following: lint with ESLint -> type check wi
   - **`sfc`**: contains single-file component (`*.vue` files) parsing logic. This is used in the `vue-template-compiler` package.
 
   - **`shared`**: contains utilities shared across the entire codebase.
+
+  - **`types`**: contains type declarations added when we ported the codebase from Flow to TypeScript. These types should be considered internal - they care less about type inference for end-user scenarios and prioritize working with internal source code.
 
 ## Financial Contribution
 

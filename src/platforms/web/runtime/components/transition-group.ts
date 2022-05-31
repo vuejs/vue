@@ -22,7 +22,7 @@ import {
   removeTransitionClass
 } from 'web/runtime/transition-util'
 import VNode from 'core/vdom/vnode'
-import { VNodeWithData } from 'typescript/vnode'
+import { VNodeWithData } from 'types/vnode'
 
 const props = extend(
   {

@@ -16,8 +16,8 @@ import {
   isBuiltInTag,
   isPlainObject
 } from 'shared/util'
-import type { Component } from 'typescript/component'
-import type { ComponentOptions } from 'typescript/options'
+import type { Component } from 'types/component'
+import type { ComponentOptions } from 'types/options'
 
 /**
  * Option overwriting strategies are functions that handle

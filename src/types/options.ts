@@ -1,5 +1,5 @@
-import VNode from '../src/core/vdom/vnode'
-import { DebuggerEvent } from '../src/v3'
+import VNode from 'core/vdom/vnode'
+import { DebuggerEvent } from 'v3'
 import { Component } from './component'
 
 export type InternalComponentOptions = {

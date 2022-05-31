@@ -1,5 +1,5 @@
 import type VNode from 'core/vdom/vnode'
-import type { Component } from 'typescript/component'
+import type { Component } from 'types/component'
 
 /**
  * Runtime helper for resolving raw children VNodes into a slot object.
