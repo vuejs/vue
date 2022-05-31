@@ -19,10 +19,10 @@ export function initProvide(vm: Component) {
   }
 }
 
-export function initInjections(vm: Component) {
+export function initInjections(vm: Component) { // 注入所有的数据依赖
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
-    toggleObserving(false)
+    toggleObserving(false) // todo:
     Object.keys(result).forEach(key => {
       /* istanbul ignore else */
       if (__DEV__) {
@@ -45,7 +45,7 @@ export function initInjections(vm: Component) {
 export function resolveInject(
   inject: any,
   vm: Component
-): Record<string, any> | undefined | null {
+): Record<string, any> | undefined | null { // 统一处理inject的数据，跳过__ob__，从provide拿到值，可以指定key，也可以从根节点拿到值
   if (inject) {
     // inject is :any because flow is not smart enough to figure out cached
     const result = Object.create(null)

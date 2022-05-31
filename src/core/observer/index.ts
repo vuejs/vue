@@ -45,9 +45,9 @@ export class Observer {
     // this.value = value
     this.dep = new Dep()
     this.vmCount = 0
-    def(value, '__ob__', this)
+    def(value, '__ob__', this) // 挂载到__ob__对象上
     if (isArray(value)) {
-      if (hasProto) {
+      if (hasProto) { // todo：
         protoAugment(value, arrayMethods)
       } else {
         copyAugment(value, arrayMethods, arrayKeys)
@@ -65,7 +65,7 @@ export class Observer {
    * getter/setters. This method should only be called when
    * value type is Object.
    */
-  walk(obj: object, shallow: boolean) {
+  walk(obj: object, shallow: boolean) { // 将所有的值定义为响应式
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
@@ -113,11 +113,11 @@ function copyAugment(target: Object, src: Object, keys: Array<string>) {
  * or the existing observer if the value already has one.
  */
 export function observe(value: any, shallow?: boolean): Observer | void {
-  if (!isObject(value) || isRef(value) || value instanceof VNode) {
+  if (!isObject(value) || isRef(value) || value instanceof VNode) { // 不为对象，引用，是VNode的实例
     return
   }
   let ob: Observer | void
-  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) { // 如果已经闯创建Observer，直接返回这个对象
     ob = value.__ob__
   } else if (
     shouldObserve &&
@@ -125,7 +125,7 @@ export function observe(value: any, shallow?: boolean): Observer | void {
     (isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
     !value.__v_skip
-  ) {
+  ) { // observer标识打开，为非ssr，并且是数组，或者对象，并且对象可扩展
     ob = new Observer(value, shallow)
   }
   return ob
@@ -154,12 +154,12 @@ export function defineReactive(
   if (
     (!getter || setter) &&
     (val === NO_INIITIAL_VALUE || arguments.length === 2)
-  ) {
-    val = obj[key]
+  ) { // todo:不清楚条件表达什么意思
+    val = obj[key] // 替换掉初始值
   }
 
   let childOb = !shallow && observe(val)
-  Object.defineProperty(obj, key, {
+  Object.defineProperty(obj, key, { // 通过Object.defineProperty对属性值进行双向绑定数据
     enumerable: true,
     configurable: true,
     get: function reactiveGetter() {
@@ -181,7 +181,7 @@ export function defineReactive(
           }
         }
       }
-      return isRef(value) ? value.value : value
+      return isRef(value) ? value.value : value // 自动解构
     },
     set: function reactiveSetter(newVal) {
       const value = getter ? getter.call(obj) : val

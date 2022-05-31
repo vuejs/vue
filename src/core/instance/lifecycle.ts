@@ -31,12 +31,12 @@ export function setActiveInstance(vm: Component) {
   }
 }
 
-export function initLifecycle(vm: Component) {
+export function initLifecycle(vm: Component) { // 初始化生命周期
   const options = vm.$options
 
   // locate first non-abstract parent
   let parent = options.parent
-  if (parent && !options.abstract) {
+  if (parent && !options.abstract) { // todo:
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
@@ -44,12 +44,12 @@ export function initLifecycle(vm: Component) {
   }
 
   vm.$parent = parent
-  vm.$root = parent ? parent.$root : vm
+  vm.$root = parent ? parent.$root : vm // 根节点
 
-  vm.$children = []
-  vm.$refs = {}
+  vm.$children = [] // 孩子节点
+  vm.$refs = {} // 所有的引用
 
-  vm._provided = parent ? parent._provided : Object.create(null)
+  vm._provided = parent ? parent._provided : Object.create(null) // 所有的provide
   vm._watcher = null
   vm._inactive = null
   vm._directInactive = false
@@ -373,7 +373,7 @@ export function deactivateChildComponent(vm: Component, direct?: boolean) {
   }
 }
 
-export function callHook(vm: Component, hook: string, args?: any[]) {
+export function callHook(vm: Component, hook: string, args?: any[]) { // 调用所有的生命周期函数，在里面会取消双向绑定
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
   const prev = currentInstance

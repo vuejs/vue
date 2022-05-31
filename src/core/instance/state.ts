@@ -32,14 +32,14 @@ import {
 import type { Component } from 'types/component'
 import { TrackOpTypes } from '../../v3'
 
-const sharedPropertyDefinition = {
+const sharedPropertyDefinition = { // 共享属性对象，作用还不知道
   enumerable: true,
   configurable: true,
   get: noop,
   set: noop
 }
 
-export function proxy(target: Object, sourceKey: string, key: string) {
+export function proxy(target: Object, sourceKey: string, key: string) { // 通过Object.defineProperty对属性进行劫持
   sharedPropertyDefinition.get = function proxyGetter() {
     return this[sourceKey][key]
   }
@@ -69,7 +69,7 @@ export function initState(vm: Component) {
   }
 }
 
-function initProps(vm: Component, propsOptions: Object) {
+function initProps(vm: Component, propsOptions: Object) { // 初始化props，
   const propsData = vm.$options.propsData || {}
   const props = (vm._props = {})
   // cache prop keys so that future props updates can iterate using Array
@@ -119,7 +119,7 @@ function initProps(vm: Component, propsOptions: Object) {
   toggleObserving(true)
 }
 
-function initData(vm: Component) {
+function initData(vm: Component) { // 初始化data，可以传入对象或者函数
   let data: any = vm.$options.data
   data = vm._data = isFunction(data) ? getData(data, vm) : data || {}
   if (!isPlainObject(data)) {
@@ -138,7 +138,7 @@ function initData(vm: Component) {
   let i = keys.length
   while (i--) {
     const key = keys[i]
-    if (__DEV__) {
+    if (__DEV__) { // 防止data中的key和methods，props中的key冲突
       if (methods && hasOwn(methods, key)) {
         warn(`Method "${key}" has already been defined as a data property.`, vm)
       }
@@ -150,7 +150,7 @@ function initData(vm: Component) {
             `Use prop default value instead.`,
           vm
         )
-    } else if (!isReserved(key)) {
+    } else if (!isReserved(key)) { // 如果不是保留字
       proxy(vm, `_data`, key)
     }
   }
@@ -174,7 +174,7 @@ export function getData(data: Function, vm: Component): any {
 
 const computedWatcherOptions = { lazy: true }
 
-function initComputed(vm: Component, computed: Object) {
+function initComputed(vm: Component, computed: Object) { // 初始化computed
   // $flow-disable-line
   const watchers = (vm._computedWatchers = Object.create(null))
   // computed properties are just getters during SSR
@@ -276,7 +276,7 @@ function createGetterInvoker(fn) {
   }
 }
 
-function initMethods(vm: Component, methods: Object) {
+function initMethods(vm: Component, methods: Object) { // 绑定methods到vm上
   const props = vm.$options.props
   for (const key in methods) {
     if (__DEV__) {

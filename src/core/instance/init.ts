@@ -39,9 +39,9 @@ export function initMixin(Vue: typeof Component) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
-      initInternalComponent(vm, options as any)
+      initInternalComponent(vm, options as any) // todo
     } else {
-      vm.$options = mergeOptions(
+      vm.$options = mergeOptions( // 合并初始化option
         resolveConstructorOptions(vm.constructor as any),
         options || {},
         vm
@@ -49,7 +49,7 @@ export function initMixin(Vue: typeof Component) {
     }
     /* istanbul ignore else */
     if (__DEV__) {
-      initProxy(vm)
+      initProxy(vm) // 和警告相关的提示
     } else {
       vm._renderProxy = vm
     }
