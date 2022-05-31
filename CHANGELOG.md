@@ -1,3 +1,17 @@
+# [2.7.0-alpha.1](https://github.com/vuejs/vue/compare/v2.6.14...v2.7.0-alpha.1) (2022-05-31)
+
+
+### Bug Fixes
+
+* **v-on:** add removing all dom event listeners when vnode destroyed ([#10085](https://github.com/vuejs/vue/issues/10085)) ([3d29ba8](https://github.com/vuejs/vue/commit/3d29ba863b89fd90dabd0856c0507eacdf5fef22))
+
+
+### Features
+
+* **compiler:** condenses staticClass whitespace (fix [#12113](https://github.com/vuejs/vue/issues/12113)) ([#12195](https://github.com/vuejs/vue/issues/12195)) ([515467a](https://github.com/vuejs/vue/commit/515467a618479792abedf01a7b1dcef2ac2a17ed))
+
+
+
 ## [2.6.14](https://github.com/vuejs/vue/compare/v2.6.13...v2.6.14) (2021-06-07)
 
 
