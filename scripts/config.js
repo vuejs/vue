@@ -27,14 +27,14 @@ const resolve = p => {
 
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
-  'web-runtime-cjs-dev': {
+  'runtime-cjs-dev': {
     entry: resolve('web/entry-runtime.ts'),
     dest: resolve('dist/vue.runtime.common.dev.js'),
     format: 'cjs',
     env: 'development',
     banner
   },
-  'web-runtime-cjs-prod': {
+  'runtime-cjs-prod': {
     entry: resolve('web/entry-runtime.ts'),
     dest: resolve('dist/vue.runtime.common.prod.js'),
     format: 'cjs',
@@ -42,7 +42,7 @@ const builds = {
     banner
   },
   // Runtime+compiler CommonJS build (CommonJS)
-  'web-full-cjs-dev': {
+  'full-cjs-dev': {
     entry: resolve('web/entry-runtime-with-compiler.ts'),
     dest: resolve('dist/vue.common.dev.js'),
     format: 'cjs',
@@ -50,7 +50,7 @@ const builds = {
     alias: { he: './entity-decoder' },
     banner
   },
-  'web-full-cjs-prod': {
+  'full-cjs-prod': {
     entry: resolve('web/entry-runtime-with-compiler.ts'),
     dest: resolve('dist/vue.common.prod.js'),
     format: 'cjs',
@@ -59,14 +59,14 @@ const builds = {
     banner
   },
   // Runtime only ES modules build (for bundlers)
-  'web-runtime-esm': {
+  'runtime-esm': {
     entry: resolve('web/entry-runtime-esm.ts'),
     dest: resolve('dist/vue.runtime.esm.js'),
     format: 'es',
     banner
   },
   // Runtime+compiler ES modules build (for bundlers)
-  'web-full-esm': {
+  'full-esm': {
     entry: resolve('web/entry-runtime-with-compiler-esm.ts'),
     dest: resolve('dist/vue.esm.js'),
     format: 'es',
@@ -74,7 +74,7 @@ const builds = {
     banner
   },
   // Runtime+compiler ES modules build (for direct import in browser)
-  'web-full-esm-browser-dev': {
+  'full-esm-browser-dev': {
     entry: resolve('web/entry-runtime-with-compiler-esm.ts'),
     dest: resolve('dist/vue.esm.browser.js'),
     format: 'es',
@@ -84,7 +84,7 @@ const builds = {
     banner
   },
   // Runtime+compiler ES modules build (for direct import in browser)
-  'web-full-esm-browser-prod': {
+  'full-esm-browser-prod': {
     entry: resolve('web/entry-runtime-with-compiler-esm.ts'),
     dest: resolve('dist/vue.esm.browser.min.js'),
     format: 'es',
@@ -94,7 +94,7 @@ const builds = {
     banner
   },
   // runtime-only build (Browser)
-  'web-runtime-dev': {
+  'runtime-dev': {
     entry: resolve('web/entry-runtime.ts'),
     dest: resolve('dist/vue.runtime.js'),
     format: 'umd',
@@ -102,7 +102,7 @@ const builds = {
     banner
   },
   // runtime-only production build (Browser)
-  'web-runtime-prod': {
+  'runtime-prod': {
     entry: resolve('web/entry-runtime.ts'),
     dest: resolve('dist/vue.runtime.min.js'),
     format: 'umd',
@@ -110,7 +110,7 @@ const builds = {
     banner
   },
   // Runtime+compiler development build (Browser)
-  'web-full-dev': {
+  'full-dev': {
     entry: resolve('web/entry-runtime-with-compiler.ts'),
     dest: resolve('dist/vue.js'),
     format: 'umd',
@@ -119,7 +119,7 @@ const builds = {
     banner
   },
   // Runtime+compiler production build  (Browser)
-  'web-full-prod': {
+  'full-prod': {
     entry: resolve('web/entry-runtime-with-compiler.ts'),
     dest: resolve('dist/vue.min.js'),
     format: 'umd',
@@ -128,70 +128,78 @@ const builds = {
     banner
   },
   // Web compiler (CommonJS).
-  'web-compiler': {
+  compiler: {
     entry: resolve('web/entry-compiler.ts'),
-    dest: resolve('packages/vue-template-compiler/build.js'),
+    dest: resolve('packages/template-compiler/build.js'),
     format: 'cjs',
     external: Object.keys(
-      require('../packages/vue-template-compiler/package.json').dependencies
+      require('../packages/template-compiler/package.json').dependencies
     )
   },
   // Web compiler (UMD for in-browser use).
-  'web-compiler-browser': {
+  'compiler-browser': {
     entry: resolve('web/entry-compiler.ts'),
-    dest: resolve('packages/vue-template-compiler/browser.js'),
+    dest: resolve('packages/template-compiler/browser.js'),
     format: 'umd',
     env: 'development',
     moduleName: 'VueTemplateCompiler',
     plugins: [node(), cjs()]
   },
   // Web server renderer (CommonJS).
-  'web-server-renderer-dev': {
+  'server-renderer-dev': {
     entry: resolve('web/entry-server-renderer.ts'),
-    dest: resolve('packages/vue-server-renderer/build.dev.js'),
+    dest: resolve('packages/server-renderer/build.dev.js'),
     format: 'cjs',
     env: 'development',
     external: [
       'stream',
       ...Object.keys(
-        require('../packages/vue-server-renderer/package.json').dependencies
+        require('../packages/server-renderer/package.json').dependencies
       )
     ]
   },
-  'web-server-renderer-prod': {
+  'server-renderer-prod': {
     entry: resolve('web/entry-server-renderer.ts'),
-    dest: resolve('packages/vue-server-renderer/build.prod.js'),
+    dest: resolve('packages/server-renderer/build.prod.js'),
     format: 'cjs',
     env: 'production',
     external: [
       'stream',
       ...Object.keys(
-        require('../packages/vue-server-renderer/package.json').dependencies
+        require('../packages/server-renderer/package.json').dependencies
       )
     ]
   },
-  'web-server-renderer-basic': {
+  'server-renderer-basic': {
     entry: resolve('web/entry-server-basic-renderer.ts'),
-    dest: resolve('packages/vue-server-renderer/basic.js'),
+    dest: resolve('packages/server-renderer/basic.js'),
     format: 'umd',
     env: 'development',
     moduleName: 'renderVueComponentToString',
     plugins: [node(), cjs()]
   },
-  'web-server-renderer-webpack-server-plugin': {
+  'server-renderer-webpack-server-plugin': {
     entry: resolve('server/webpack-plugin/server.ts'),
-    dest: resolve('packages/vue-server-renderer/server-plugin.js'),
+    dest: resolve('packages/server-renderer/server-plugin.js'),
     format: 'cjs',
     external: Object.keys(
-      require('../packages/vue-server-renderer/package.json').dependencies
+      require('../packages/server-renderer/package.json').dependencies
     )
   },
-  'web-server-renderer-webpack-client-plugin': {
+  'server-renderer-webpack-client-plugin': {
     entry: resolve('server/webpack-plugin/client.ts'),
-    dest: resolve('packages/vue-server-renderer/client-plugin.js'),
+    dest: resolve('packages/server-renderer/client-plugin.js'),
     format: 'cjs',
     external: Object.keys(
-      require('../packages/vue-server-renderer/package.json').dependencies
+      require('../packages/server-renderer/package.json').dependencies
+    )
+  },
+  'compiler-sfc': {
+    entry: resolve('web/entry-compiler-sfc.ts'),
+    dest: resolve('packages/compiler-sfc/dist/compiler-sfc.js'),
+    format: 'cjs',
+    external: Object.keys(
+      require('../packages/compiler-sfc/package.json').dependencies
     )
   }
 }

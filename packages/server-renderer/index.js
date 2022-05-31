@@ -7,9 +7,15 @@ var packageVersion = require('./package.json').version
 if (vueVersion && vueVersion !== packageVersion) {
   throw new Error(
     '\n\nVue packages version mismatch:\n\n' +
-    '- vue@' + vueVersion + '\n' +
-    '- ' + packageName + '@' + packageVersion + '\n\n' +
-    'This may cause things to work incorrectly. Make sure to use the same version for both.\n'
+      '- vue@' +
+      vueVersion +
+      '\n' +
+      '- ' +
+      packageName +
+      '@' +
+      packageVersion +
+      '\n\n' +
+      'This may cause things to work incorrectly. Make sure to use the same version for both.\n'
   )
 }
 

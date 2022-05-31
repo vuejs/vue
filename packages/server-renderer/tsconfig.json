@@ -21,17 +21,17 @@
     "lib": ["esnext", "dom"],
     "types": ["node", "vitest/globals"],
     "paths": {
-      "compiler/*": ["../src/compiler/*"],
-      "core/*": ["../src/core/*"],
-      "server/*": ["../packages/server-renderer/src/*"],
-      "sfc/*": ["../src/sfc/*"],
-      "shared/*": ["../src/shared/*"],
-      "web/*": ["../src/platforms/web/*"],
-      "v3": ["../src/v3/index"],
-      "v3/*": ["../src/v3/*"],
-      "typescript/*": ["../typescript/*"],
-      "vue": ["../src/platforms/web/entry-runtime-with-compiler"]
+      "compiler/*": ["../../src/compiler/*"],
+      "core/*": ["../../src/core/*"],
+      "server/*": ["./src/*"],
+      "sfc/*": ["../../src/sfc/*"],
+      "shared/*": ["../../src/shared/*"],
+      "web/*": ["../../src/platforms/web/*"],
+      "v3": ["../../src/v3/index"],
+      "v3/*": ["../../src/v3/*"],
+      "typescript/*": ["../../typescript/*"],
+      "vue": ["../../src/platforms/web/entry-runtime-with-compiler"]
     }
   },
-  "include": ["../src", "../typescript", "."]
+  "include": ["../../src", "../../typescript", "../../test/test-env.d.ts", "."]
 }

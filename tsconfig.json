@@ -23,7 +23,7 @@
     "paths": {
       "compiler/*": ["src/compiler/*"],
       "core/*": ["src/core/*"],
-      "server/*": ["src/server/*"],
+      "server/*": ["packages/server-renderer/src/*"],
       "sfc/*": ["src/sfc/*"],
       "shared/*": ["src/shared/*"],
       "web/*": ["src/platforms/web/*"],
@@ -32,5 +32,5 @@
       "vue": ["src/platforms/web/entry-runtime-with-compiler"]
     }
   },
-  "include": ["src", "typescript"],
+  "include": ["src", "typescript", "packages/server-renderer/server"],
 }

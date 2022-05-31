@@ -1,8 +1,8 @@
 module.exports = {
-  beforeCreate () {
+  beforeCreate() {
     this.$vnode.ssrContext._registeredComponents.add('__MODULE_ID__')
   },
-  render (h) {
+  render(h) {
     return h('div', 'async bar')
   }
 }

@@ -8,6 +8,6 @@ module.exports = {
   core: resolve('src/core'),
   shared: resolve('src/shared'),
   web: resolve('src/platforms/web'),
-  server: resolve('src/server'),
+  server: resolve('packages/server-renderer/src'),
   sfc: resolve('src/sfc')
 }

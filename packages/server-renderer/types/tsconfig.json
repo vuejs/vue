@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "node",
     "strict": true,
     "noEmit": true,
@@ -9,9 +9,5 @@
       "vue": ["../../../types/index.d.ts"]
     }
   },
-  "compileOnSave": false,
-  "include": [
-    "**/*.ts",
-    "../../../types"
-  ]
+  "include": ["**/*.ts", "../../../types"]
 }

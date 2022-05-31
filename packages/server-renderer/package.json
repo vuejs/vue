@@ -13,6 +13,11 @@
     "server",
     "ssr"
   ],
+  "files": [
+    "types",
+    "*.js",
+    "*.d.ts"
+  ],
   "author": "Evan You",
   "license": "MIT",
   "bugs": {
@@ -29,7 +34,10 @@
     "source-map": "0.5.6"
   },
   "devDependencies": {
-    "vue": "file:../.."
+    "memory-fs": "^0.5.0",
+    "vue": "file:../..",
+    "webpack": "^4.46.0",
+    "file-loader": "^3.0.1"
   },
   "homepage": "https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#readme"
 }

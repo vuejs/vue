@@ -1,0 +1,28 @@
+{
+  "name": "@vue/compiler-sfc",
+  "version": "2.6.14",
+  "description": "compiler-sfc for Vue 2",
+  "main": "dist/compiler-sfc.js",
+  "types": "dist/compiler-sfc.d.ts",
+  "files": ["dist"],
+  "dependencies": {
+    "@babel/parser": "^7.16.4",
+    "source-map": "^0.6.1",
+    "postcss": "^8.1.10"
+  },
+  "devDependencies": {
+    "@types/estree": "^0.0.48",
+    "@babel/types": "^7.16.0",
+    "@types/lru-cache": "^5.1.0",
+    "estree-walker": "^2.0.2",
+    "magic-string": "^0.25.7",
+    "pug": "^3.0.1",
+    "sass": "^1.26.9",
+    "@vue/consolidate": "^0.17.3",
+    "hash-sum": "^2.0.0",
+    "lru-cache": "^5.1.1",
+    "merge-source-map": "^1.1.0",
+    "postcss-modules": "^4.0.0",
+    "postcss-selector-parser": "^6.0.4"
+  }
+}

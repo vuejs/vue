@@ -1,4 +1,4 @@
-import Vue, { VNode } from 'vue'
+import { VNode } from 'vue'
 
 /*
  * Template compilation options / results

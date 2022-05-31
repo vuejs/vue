@@ -1,7 +1,7 @@
 import path from 'path'
 import webpack from 'webpack'
 import MemoryFS from 'memory-fs'
-import { RenderOptions } from '../../src/server/create-renderer'
+import { RenderOptions } from 'server/create-renderer'
 import { createBundleRenderer } from 'web/entry-server-renderer'
 import VueSSRServerPlugin from 'server/webpack-plugin/server'
 
@@ -20,7 +20,7 @@ export function compileWithWebpack(
         },
         {
           test: /\.(png|woff2|css)$/,
-          loader: 'file-loader',
+          loader: require.resolve('file-loader'),
           options: {
             name: '[name].[ext]'
           }
@@ -62,7 +62,7 @@ export async function createWebpackBundleRenderer(
       filename: 'bundle.js',
       libraryTarget: 'commonjs2'
     },
-    externals: [require.resolve('../../dist/vue.runtime.common.js')],
+    externals: [require.resolve('../../../dist/vue.runtime.common.js')],
     plugins: asBundle ? [new VueSSRServerPlugin()] : []
   })
 

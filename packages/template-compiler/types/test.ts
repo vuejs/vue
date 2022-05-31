@@ -6,7 +6,7 @@ import {
   ssrCompileToFunctions,
   parseComponent,
   generateCodeFrame
-} from './'
+} from '.'
 
 // check compile options
 const compiled = compile('<div>hi</div>', {

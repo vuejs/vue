@@ -8,7 +8,7 @@ export default defineConfig({
     alias: {
       compiler: resolve('src/compiler'),
       core: resolve('src/core'),
-      server: resolve('src/server'),
+      server: resolve('packages/server-renderer/src'),
       sfc: resolve('src/sfc'),
       shared: resolve('src/shared'),
       web: resolve('src/platforms/web'),

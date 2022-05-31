@@ -7,7 +7,7 @@ import {
 } from './compile-with-webpack'
 import { createRenderer } from 'web/entry-server-renderer'
 import VueSSRClientPlugin from 'server/webpack-plugin/client'
-import { RenderOptions } from '../../src/server/create-renderer'
+import { RenderOptions } from 'server/create-renderer'
 
 const defaultTemplate = `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
 const interpolateTemplate = `<html><head><title>{{ title }}</title></head><body><!--vue-ssr-outlet-->{{{ snippet }}}</body></html>`

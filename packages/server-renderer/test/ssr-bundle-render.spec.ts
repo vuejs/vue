@@ -1,6 +1,5 @@
 // @vitest-environment node
 
-import LRU from 'lru-cache'
 import { createWebpackBundleRenderer } from './compile-with-webpack'
 
 describe('SSR: bundle renderer', () => {
@@ -171,7 +170,7 @@ function createAssertions(runInNewContext) {
   })
 
   it('render with cache (nested)', async () => {
-    const cache = new LRU({ ttl: 65535 }) as any
+    const cache = new Map() as any
     vi.spyOn(cache, 'get')
     vi.spyOn(cache, 'set')
     const options = {
@@ -284,7 +283,7 @@ function createAssertions(runInNewContext) {
     try {
       await renderer.renderToString()
     } catch (err: any) {
-      expect(err.stack).toContain('test/ssr/fixtures/error.js:1:0')
+      expect(err.stack).toContain('server-renderer/test/fixtures/error.js:1:0')
       expect(err.message).toBe('foo')
     }
   })
@@ -300,7 +299,7 @@ function createAssertions(runInNewContext) {
       stream.on('error', resolve)
     })
 
-    expect(err.stack).toContain('test/ssr/fixtures/error.js:1:0')
+    expect(err.stack).toContain('server-renderer/test/fixtures/error.js:1:0')
     expect(err.message).toBe('foo')
   })
 
