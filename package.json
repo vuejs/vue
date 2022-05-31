@@ -35,9 +35,8 @@
     "ts-check": "tsc -p tsconfig.json --noEmit",
     "ts-check:test": "tsc -p test/tsconfig.json --noEmit",
     "bench:ssr": "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",
-    "release": "bash scripts/release.sh",
-    "release:note": "node scripts/gen-release-note.js",
-    "commit": "git-cz"
+    "release": "node scripts/release.js",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
   },
   "gitHooks": {
     "pre-commit": "lint-staged",
@@ -76,13 +75,13 @@
     "@types/he": "^1.1.2",
     "@types/node": "^17.0.30",
     "chalk": "^4.0.0",
-    "commitizen": "^4.2.4",
-    "conventional-changelog": "^3.1.25",
+    "conventional-changelog-cli": "^2.2.2",
     "cross-spawn": "^7.0.3",
-    "cz-conventional-changelog": "^3.3.0",
-    "esbuild": "^0.14.39",
-    "he": "^1.2.0",
     "de-indent": "^1.0.2",
+    "enquirer": "^2.3.6",
+    "esbuild": "^0.14.39",
+    "execa": "^4.0.0",
+    "he": "^1.2.0",
     "jasmine-core": "^4.1.1",
     "jsdom": "^19.0.0",
     "karma": "^6.3.20",
@@ -93,11 +92,13 @@
     "lint-staged": "^12.4.1",
     "lodash": "^4.17.21",
     "marked": "^4.0.6",
+    "minimist": "^1.2.6",
     "prettier": "^2.6.2",
     "puppeteer": "^14.1.1",
     "rimraf": "^3.0.2",
     "rollup": "^2.70.2",
     "rollup-plugin-typescript2": "^0.31.2",
+    "semver": "^7.3.7",
     "shelljs": "^0.8.5",
     "terser": "^5.13.1",
     "todomvc-app-css": "^2.4.2",
@@ -106,10 +107,5 @@
     "typescript": "^4.6.4",
     "vitest": "^0.12.6",
     "yorkie": "^2.0.0"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   }
 }
