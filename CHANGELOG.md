@@ -1,3 +1,13 @@
+# [2.7.0-alpha.2](https://github.com/vuejs/vue/compare/v2.7.0-alpha.1...v2.7.0-alpha.2) (2022-06-01)
+
+
+### Features
+
+* add exports field + mjs build ([d317237](https://github.com/vuejs/vue/commit/d3172377e0c2df9e84244ede6fc9a091344e6f1c))
+* expose set/del as named exports ([5673363](https://github.com/vuejs/vue/commit/5673363eda9e6082a9ff0300b8c4e79c9388891b))
+
+
+
 # [2.7.0-alpha.1](https://github.com/vuejs/vue/compare/v2.6.14...v2.7.0-alpha.1) (2022-05-31)
 
 This release includes full [Composition API](https://vuejs.org/guide/extras/composition-api-faq.html) support, including:
