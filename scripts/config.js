@@ -65,6 +65,13 @@ const builds = {
     format: 'es',
     banner
   },
+  // Runtime only ES modules build (for Node)
+  'runtime-mjs': {
+    entry: resolve('web/entry-runtime-esm.ts'),
+    dest: resolve('dist/vue.runtime.mjs'),
+    format: 'es',
+    banner
+  },
   // Runtime+compiler ES modules build (for bundlers)
   'full-esm': {
     entry: resolve('web/entry-runtime-with-compiler-esm.ts'),

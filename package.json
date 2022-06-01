@@ -15,6 +15,22 @@
     "compiler-sfc",
     "packages/compiler-sfc"
   ],
+  "exports": {
+    ".": {
+      "import": {
+        "node": "./dist/vue.runtime.mjs",
+        "default": "./dist/vue.runtime.esm.js"
+      },
+      "require": "./dist/vue.runtime.common.js",
+      "types": "./types/index.d.ts"
+    },
+    "./compiler-sfc": {
+      "import": "./compiler-sfc/index.mjs",
+      "require": "./compiler-sfc/index.js"
+    },
+    "./dist/*": "./dist/*",
+    "./types/*": "./types/*"
+  },
   "sideEffects": false,
   "scripts": {
     "dev": "rollup -w -c scripts/config.js --environment TARGET:full-dev",
