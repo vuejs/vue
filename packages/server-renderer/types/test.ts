@@ -1,12 +1,9 @@
-import Vue, { VNode, VNodeDirective } from '../index'
-import VueSSRClientPlugin = require('../../packages/vue-server-renderer/client-plugin')
-import VueSSRServerPlugin = require('../../packages/vue-server-renderer/server-plugin')
-import webpack = require('webpack')
+import Vue, { VNode, VNodeDirective } from '../../../types/index'
+import VueSSRClientPlugin from '../client-plugin'
+import VueSSRServerPlugin from '../server-plugin'
+import webpack from 'webpack'
 import { readFileSync } from 'fs'
-import {
-  createRenderer,
-  createBundleRenderer
-} from '../../packages/vue-server-renderer'
+import { createRenderer, createBundleRenderer } from '.'
 
 function createApp(context: any) {
   return new Vue({

@@ -1,4 +1,4 @@
-import Vue, { defineComponent } from '../../index'
+import Vue, { defineComponent, PropType } from '../../index'
 
 // object props
 Vue.extend({
@@ -76,5 +76,20 @@ defineComponent({
       // @ts-expect-error
       this.$emit('bar')
     }
+  }
+})
+
+defineComponent({
+  props: {
+    foo: null as any as PropType<{ a: number }>
+  },
+  data() {
+    this.foo?.a
+  },
+  setup(props) {
+    const res = props.foo?.a.toFixed(2)
+    // @ts-expect-error
+    res.charAt(1)
+    res?.charAt(1)
   }
 })

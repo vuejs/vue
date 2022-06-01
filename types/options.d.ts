@@ -250,9 +250,21 @@ export interface RenderContext<Props = DefaultProps> {
   injections: any
 }
 
-import { PropOptions, PropType } from './v3-component-props'
+export type Prop<T> =
+  | { (): T }
+  | { new (...args: never[]): T & object }
+  | { new (...args: string[]): Function }
+
+export type PropType<T> = Prop<T> | Prop<T>[]
 
 export type PropValidator<T> = PropOptions<T> | PropType<T>
+
+export interface PropOptions<T = any> {
+  type?: PropType<T>
+  required?: boolean
+  default?: T | null | undefined | (() => T | null | undefined)
+  validator?(value: unknown): boolean
+}
 
 export type RecordPropsDefinition<T> = {
   [K in keyof T]: PropValidator<T[K]>

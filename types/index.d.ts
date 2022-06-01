@@ -11,8 +11,8 @@ export {
   ComponentOptions,
   FunctionalComponentOptions,
   RenderContext,
-  // PropType,
-  // PropOptions,
+  PropType,
+  PropOptions,
   ComputedOptions,
   WatchHandler,
   WatchOptions,
@@ -52,8 +52,8 @@ export {
   ComponentRenderProxy
 } from './v3-component-proxy'
 export {
-  PropType,
-  PropOptions,
+  // PropType,
+  // PropOptions,
   ExtractPropTypes,
   ExtractDefaultPropTypes
 } from './v3-component-props'

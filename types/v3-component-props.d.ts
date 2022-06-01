@@ -22,8 +22,8 @@ export interface PropOptions<T = any, D = T> {
 export type PropType<T> = PropConstructor<T> | PropConstructor<T>[]
 
 type PropConstructor<T> =
-  | { new (...args: any[]): T & object }
   | { (): T }
+  | { new (...args: never[]): T & object }
   | { new (...args: string[]): Function }
 
 type RequiredKeys<T> = {
