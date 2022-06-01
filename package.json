@@ -11,6 +11,7 @@
   "files": [
     "src",
     "dist/*.js",
+    "dist/*.mjs",
     "types/*.d.ts",
     "compiler-sfc",
     "packages/compiler-sfc"
