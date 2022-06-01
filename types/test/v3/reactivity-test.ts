@@ -11,7 +11,9 @@ import {
   shallowReactive,
   readonly,
   markRaw,
-  shallowReadonly
+  shallowReadonly,
+  set,
+  del
 } from '../../index'
 import { describe, expectType } from '../utils'
 
@@ -370,4 +372,16 @@ describe('shallowReadonly ref unwrap', () => {
   r.count = 2
   expectType<Ref>(r.count.n)
   r.count.n.value = 123
+})
+
+describe('set/del', () => {
+  set({}, 1, 'hi')
+  set([], 1, 'bye')
+  del({}, 'foo')
+  del([], 1)
+
+  // @ts-expect-error
+  set({}, 1)
+  // @ts-expect-error
+  del([], 'fse', 123)
 })

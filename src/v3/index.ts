@@ -72,5 +72,6 @@ export { h } from './h'
 export { getCurrentInstance } from './currentInstance'
 export { useSlots, useAttrs } from './apiSetup'
 export { nextTick } from 'core/util/next-tick'
+export { set, del } from 'core/observer'
 
 export * from './apiLifecycle'

@@ -225,8 +225,10 @@ export function defineReactive(
  * triggers change notification if the property doesn't
  * already exist.
  */
+export function set<T>(array: T[], key: number, value: T): T
+export function set<T>(object: object, key: string | number, value: T): T
 export function set(
-  target: Array<any> | Record<string, any>,
+  target: any[] | Record<string, any>,
   key: any,
   val: any
 ): any {
@@ -279,7 +281,9 @@ export function set(
 /**
  * Delete a property and trigger change if necessary.
  */
-export function del(target: Array<any> | Object, key: any) {
+export function del<T>(array: T[], key: number): void
+export function del(object: object, key: string | number): void
+export function del(target: any[] | object, key: any) {
   if (__DEV__ && (isUndef(target) || isPrimitive(target))) {
     warn(
       `Cannot delete reactive property on undefined, null, or primitive value: ${target}`
