@@ -1,3 +1,12 @@
+# [2.7.0-alpha.4](https://github.com/vuejs/vue/compare/v2.7.0-alpha.3...v2.7.0-alpha.4) (2022-06-01)
+
+
+### Bug Fixes
+
+* guard against non-object provide value ([c319cc7](https://github.com/vuejs/vue/commit/c319cc7a74a790414c33db74ad9f1070851de76b))
+
+
+
 # [2.7.0-alpha.3](https://github.com/vuejs/vue/compare/v2.7.0-alpha.2...v2.7.0-alpha.3) (2022-06-01)
 
 
