@@ -1,10 +1,18 @@
 import { Component } from 'types/component'
-import type { SetupContext } from 'types/options'
 import { def, invokeWithErrorHandling, isReserved, warn } from '../core/util'
 import VNode from '../core/vdom/vnode'
 import { bind, emptyObject, isFunction, isObject } from '../shared/util'
 import { currentInstance, setCurrentInstance } from './currentInstance'
 import { isRef } from './reactivity/ref'
+
+/**
+ * @internal
+ */
+export interface SetupContext {
+  attrs: Record<string, any>
+  slots: Record<string, () => VNode[]>
+  emit: (event: string, ...args: any[]) => any
+}
 
 export function initSetup(vm: Component) {
   const options = vm.$options

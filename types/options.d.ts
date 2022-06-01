@@ -1,6 +1,7 @@
 import { Vue, CreateElement, CombinedVueInstance } from './vue'
 import { VNode, VNodeData, VNodeDirective, NormalizedScopedSlot } from './vnode'
-import { SetupContext } from './v3'
+import { SetupContext } from './v3-setup-context'
+import { DebuggerEvent } from './v3-generated'
 
 type Constructor = {
   new (...args: any[]): any
@@ -249,21 +250,9 @@ export interface RenderContext<Props = DefaultProps> {
   injections: any
 }
 
-export type Prop<T> =
-  | { (): T }
-  | { new (...args: never[]): T & object }
-  | { new (...args: string[]): Function }
-
-export type PropType<T> = Prop<T> | Prop<T>[]
+import { PropOptions, PropType } from './v3-component-props'
 
 export type PropValidator<T> = PropOptions<T> | PropType<T>
-
-export interface PropOptions<T = any> {
-  type?: PropType<T>
-  required?: boolean
-  default?: T | null | undefined | (() => T | null | undefined)
-  validator?(value: T): boolean
-}
 
 export type RecordPropsDefinition<T> = {
   [K in keyof T]: PropValidator<T[K]>
@@ -316,24 +305,3 @@ export type InjectOptions =
       [key: string]: InjectKey | { from?: InjectKey; default?: any }
     }
   | string[]
-
-export type DebuggerEvent = {
-  target: object
-  type: TrackOpTypes | TriggerOpTypes
-  key?: any
-  newValue?: any
-  oldValue?: any
-  oldTarget?: Map<any, any> | Set<any>
-}
-
-export const enum TrackOpTypes {
-  GET = 'get',
-  TOUCH = 'touch'
-}
-
-export const enum TriggerOpTypes {
-  SET = 'set',
-  ADD = 'add',
-  DELETE = 'delete',
-  ARRAY_MUTATION = 'array mutation'
-}

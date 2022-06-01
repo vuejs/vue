@@ -12,6 +12,6 @@
       "vue": ["../index.d.ts"]
     }
   },
-  "include": ["./*.d.ts", "*.ts"],
+  "include": ["."],
   "compileOnSave": false
 }

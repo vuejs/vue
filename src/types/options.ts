@@ -1,5 +1,6 @@
 import VNode from 'core/vdom/vnode'
-import { DebuggerEvent } from 'v3'
+import { DebuggerEvent } from 'v3/debug'
+import { SetupContext } from 'v3/apiSetup'
 import { Component } from './component'
 
 export type InternalComponentOptions = {
@@ -11,15 +12,6 @@ export type InternalComponentOptions = {
 }
 
 type InjectKey = string | Symbol
-
-/**
- * @internal
- */
-export interface SetupContext {
-  attrs: Record<string, any>
-  slots: Record<string, () => VNode[]>
-  emit: (event: string, ...args: any[]) => any
-}
 
 /**
  * @internal

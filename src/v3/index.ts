@@ -74,4 +74,11 @@ export { useSlots, useAttrs } from './apiSetup'
 export { nextTick } from 'core/util/next-tick'
 export { set, del } from 'core/observer'
 
+/**
+ * @internal type is manually declared in <root>/types/v3-define-component.d.ts
+ */
+export function defineComponent(options: any) {
+  return options
+}
+
 export * from './apiLifecycle'

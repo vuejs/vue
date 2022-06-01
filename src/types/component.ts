@@ -1,6 +1,7 @@
 import type VNode from 'core/vdom/vnode'
 import type Watcher from 'core/observer/watcher'
-import { ComponentOptions, SetupContext } from './options'
+import { ComponentOptions } from './options'
+import { SetupContext } from 'v3/apiSetup'
 import { ScopedSlotsData, VNodeChildren, VNodeData } from './vnode'
 import { GlobalAPI } from './global-api'
 import { EffectScope } from 'v3/reactivity/effectScope'
