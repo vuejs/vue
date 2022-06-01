@@ -1,3 +1,7 @@
+# [2.7.0-alpha.3](https://github.com/vuejs/vue/compare/v2.7.0-alpha.2...v2.7.0-alpha.3) (2022-06-01)
+
+
+
 # [2.7.0-alpha.2](https://github.com/vuejs/vue/compare/v2.7.0-alpha.1...v2.7.0-alpha.2) (2022-06-01)
 
 
