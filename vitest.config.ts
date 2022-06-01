@@ -9,7 +9,7 @@ export default defineConfig({
       compiler: resolve('src/compiler'),
       core: resolve('src/core'),
       server: resolve('packages/server-renderer/src'),
-      sfc: resolve('src/sfc'),
+      sfc: resolve('packages/compiler-sfc/src'),
       shared: resolve('src/shared'),
       web: resolve('src/platforms/web'),
       v3: resolve('src/v3'),
