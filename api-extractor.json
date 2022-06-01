@@ -11,6 +11,7 @@
 
   "dtsRollup": {
     "enabled": true,
+    "untrimmedFilePath": "",
     "publicTrimmedFilePath": "./types/v3-generated.d.ts"
   },
 
