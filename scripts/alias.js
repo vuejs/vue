@@ -9,5 +9,5 @@ module.exports = {
   shared: resolve('src/shared'),
   web: resolve('src/platforms/web'),
   server: resolve('packages/server-renderer/src'),
-  sfc: resolve('src/sfc')
+  sfc: resolve('packages/compiler-sfc/src')
 }
