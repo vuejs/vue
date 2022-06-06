@@ -1,3 +1,12 @@
+# [2.7.0-alpha.5](https://github.com/vuejs/vue/compare/v2.7.0-alpha.4...v2.7.0-alpha.5) (2022-06-06)
+
+
+### Bug Fixes
+
+* fix scopedSlots regression ([4f2a04e](https://github.com/vuejs/vue/commit/4f2a04e6a8e1fc71080eed49fd4059d6a53afc1c))
+
+
+
 # [2.7.0-alpha.4](https://github.com/vuejs/vue/compare/v2.7.0-alpha.3...v2.7.0-alpha.4) (2022-06-01)
 
 
