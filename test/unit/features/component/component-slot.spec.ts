@@ -1044,4 +1044,33 @@ describe('Component slot', () => {
 
     expect(vm.$el.innerHTML).toBe(`<!----><span>b</span>`)
   })
+
+  // regression 2.7.0-alpha.4
+  it('passing scoped slots through nested parent chain', () => {
+    const Foo = {
+      template: `
+        <div><slot>foo default</slot></div>
+      `
+    }
+
+    const Bar = {
+      components: { Foo },
+      template: `<Foo><slot name="bar"/></Foo>`
+    }
+
+    const App = {
+      components: { Bar },
+      template: `<Bar>
+        <template #bar>
+          <span>App content for Bar#bar</span>
+        </template>
+      </Bar>`
+    }
+
+    const vm = new Vue({
+      render: h => h(App)
+    }).$mount()
+
+    expect(vm.$el.innerHTML).toMatch(`App content for Bar#bar`)
+  })
 })

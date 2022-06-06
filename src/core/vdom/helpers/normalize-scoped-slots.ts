@@ -8,35 +8,40 @@ import { currentInstance, setCurrentInstance } from 'v3/currentInstance'
 
 export function normalizeScopedSlots(
   ownerVm: Component,
-  slots: { [key: string]: Function } | void,
-  normalSlots: { [key: string]: VNode[] }
+  scopedSlots: { [key: string]: Function } | undefined,
+  normalSlots: { [key: string]: VNode[] },
+  prevScopedSlots?: { [key: string]: Function }
 ): any {
   let res
-  const prevSlots = ownerVm.$scopedSlots
   const hasNormalSlots = Object.keys(normalSlots).length > 0
-  const isStable = slots ? !!slots.$stable : !hasNormalSlots
-  const key = slots && slots.$key
-  if (!slots) {
+  const isStable = scopedSlots ? !!scopedSlots.$stable : !hasNormalSlots
+  const key = scopedSlots && scopedSlots.$key
+  if (!scopedSlots) {
     res = {}
-  } else if (slots._normalized) {
+  } else if (scopedSlots._normalized) {
     // fast path 1: child component re-render only, parent did not change
-    return slots._normalized
+    return scopedSlots._normalized
   } else if (
     isStable &&
-    prevSlots &&
-    prevSlots !== emptyObject &&
-    key === prevSlots.$key &&
+    prevScopedSlots &&
+    prevScopedSlots !== emptyObject &&
+    key === prevScopedSlots.$key &&
     !hasNormalSlots &&
-    !prevSlots.$hasNormal
+    !prevScopedSlots.$hasNormal
   ) {
     // fast path 2: stable scoped slots w/ no normal slots to proxy,
     // only need to normalize once
-    return prevSlots
+    return prevScopedSlots
   } else {
     res = {}
-    for (const key in slots) {
-      if (slots[key] && key[0] !== '$') {
-        res[key] = normalizeScopedSlot(ownerVm, normalSlots, key, slots[key])
+    for (const key in scopedSlots) {
+      if (scopedSlots[key] && key[0] !== '$') {
+        res[key] = normalizeScopedSlot(
+          ownerVm,
+          normalSlots,
+          key,
+          scopedSlots[key]
+        )
       }
     }
   }
@@ -48,8 +53,8 @@ export function normalizeScopedSlots(
   }
   // avoriaz seems to mock a non-extensible $scopedSlots object
   // and when that is passed down this would cause an error
-  if (slots && Object.isExtensible(slots)) {
-    slots._normalized = res
+  if (scopedSlots && Object.isExtensible(scopedSlots)) {
+    scopedSlots._normalized = res
   }
   def(res, '$stable', isStable)
   def(res, '$key', key)

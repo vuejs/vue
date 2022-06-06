@@ -102,7 +102,8 @@ export function renderMixin(Vue: typeof Component) {
       vm.$scopedSlots = normalizeScopedSlots(
         vm.$parent!,
         _parentVnode.data!.scopedSlots,
-        vm.$slots
+        vm.$slots,
+        vm.$scopedSlots
       )
       if (vm._slotsProxy) {
         syncSetupSlots(vm._slotsProxy, vm.$scopedSlots)
