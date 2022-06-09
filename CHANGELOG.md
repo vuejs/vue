@@ -1,5 +1,8 @@
 # [2.7.0-alpha.6](https://github.com/vuejs/vue/compare/v2.7.0-alpha.5...v2.7.0-alpha.6) (2022-06-09)
 
+### Features
+
+* Add JSX types for Volar integration. No longer requires `@vue/runtime-dom` for component props validation in templates.
 
 
 # [2.7.0-alpha.5](https://github.com/vuejs/vue/compare/v2.7.0-alpha.4...v2.7.0-alpha.5) (2022-06-06)
