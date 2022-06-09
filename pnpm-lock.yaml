@@ -15,6 +15,7 @@ importers:
       chalk: ^4.0.0
       conventional-changelog-cli: ^2.2.2
       cross-spawn: ^7.0.3
+      csstype: ^3.1.0
       de-indent: ^1.0.2
       enquirer: ^2.3.6
       esbuild: ^0.14.39
@@ -47,6 +48,7 @@ importers:
       yorkie: ^2.0.0
     dependencies:
       '@vue/compiler-sfc': link:packages/compiler-sfc
+      csstype: 3.1.0
     devDependencies:
       '@microsoft/api-extractor': 7.24.2
       '@rollup/plugin-alias': 3.1.9_rollup@2.75.3
@@ -1764,6 +1766,9 @@ packages:
     dependencies:
       cssom: 0.3.8
     dev: true
+
+  /csstype/3.1.0:
+    resolution: {integrity: sha512-uX1KG+x9h5hIJsaKR9xHUeUraxf8IODOwq9JLNPq6BwB04a/xgpq3rcx47l5BZu5zBPlgD342tdke3Hom/nJRA==}
 
   /custom-event/1.0.1:
     resolution: {integrity: sha512-GAj5FOq0Hd+RsCGVJxZuKaIDXDf3h6GQoNEjFgbLLI/trgtavwUbSnZ5pVfg27DVCaWjIohryS0JFwIJyT2cMg==}
@@ -6415,7 +6420,8 @@ packages:
   'file:':
     resolution: {directory: '', type: directory}
     name: vue
-    version: 2.7.0-alpha.3
+    version: 2.7.0-alpha.5
     dependencies:
       '@vue/compiler-sfc': link:packages/compiler-sfc
+      csstype: 3.1.0
     dev: true

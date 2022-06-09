@@ -81,7 +81,8 @@
   },
   "homepage": "https://github.com/vuejs/vue#readme",
   "dependencies": {
-    "@vue/compiler-sfc": "workspace:*"
+    "@vue/compiler-sfc": "workspace:*",
+    "csstype": "^3.1.0"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.24.2",

@@ -5,6 +5,8 @@
     "lib": ["dom", "esnext"],
     "types": ["node"],
     "module": "esnext",
+    "moduleResolution": "node",
+    "jsx": "preserve",
     "strict": true,
     "noEmit": true,
     "baseUrl": ".",

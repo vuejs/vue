@@ -1,5 +1,6 @@
 import { Vue } from './vue'
 import './umd'
+import './jsx'
 
 export default Vue
 
