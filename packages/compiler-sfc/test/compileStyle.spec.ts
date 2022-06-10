@@ -1,7 +1,7 @@
 import { parse } from '../src/parse'
 import { compileStyle, compileStyleAsync } from '../src/compileStyle'
 
-test.only('preprocess less', () => {
+test('preprocess less', () => {
   const style = parse({
     source:
       '<style lang="less">\n' +

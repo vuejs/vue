@@ -10,7 +10,7 @@ import assetUrlsModule, {
 import srcsetModule from './templateCompilerModules/srcset'
 import consolidate from '@vue/consolidate'
 import * as _compiler from 'web/entry-compiler'
-import transpile from 'vue-template-es2015-compiler'
+import { stripWith } from './stripWith'
 
 export interface TemplateCompileOptions {
   source: string
@@ -26,6 +26,7 @@ export interface TemplateCompileOptions {
   isFunctional?: boolean
   optimizeSSR?: boolean
   prettify?: boolean
+  isTS?: boolean
 }
 
 export interface TemplateCompileResult {
@@ -108,7 +109,8 @@ function actuallyCompile(
     isProduction = process.env.NODE_ENV === 'production',
     isFunctional = false,
     optimizeSSR = false,
-    prettify = true
+    prettify = true,
+    isTS = false
   } = options
 
   const compile =
@@ -142,25 +144,20 @@ function actuallyCompile(
       errors
     }
   } else {
-    // TODO better transpile
-    const finalTranspileOptions = Object.assign({}, transpileOptions, {
-      transforms: Object.assign({}, transpileOptions.transforms, {
-        stripWithFunctional: isFunctional
-      })
-    })
-
-    const toFunction = (code: string): string => {
-      return `function (${isFunctional ? `_h,_vm` : ``}) {${code}}`
-    }
-
     // transpile code with vue-template-es2015-compiler, which is a forked
     // version of Buble that applies ES2015 transforms + stripping `with` usage
     let code =
-      transpile(
-        `var __render__ = ${toFunction(render)}\n` +
-          `var __staticRenderFns__ = [${staticRenderFns.map(toFunction)}]`,
-        finalTranspileOptions
-      ) + `\n`
+      `var __render__ = ${stripWith(
+        render,
+        `render`,
+        isFunctional,
+        isTS,
+        transpileOptions
+      )}\n` +
+      `var __staticRenderFns__ = [${staticRenderFns.map(code =>
+        stripWith(code, ``, isFunctional, isTS, transpileOptions)
+      )}]` +
+      `\n`
 
     // #23 we use __render__ to avoid `render` not being prefixed by the
     // transpiler when stripping with, but revert it back to `render` to

@@ -115,7 +115,7 @@ test('warn missing preprocessor', () => {
   expect(result.errors.length).toBe(1)
 })
 
-test.only('transform assetUrls', () => {
+test('transform assetUrls', () => {
   const source = `
 <div>
   <img src="./logo.png">
