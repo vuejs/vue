@@ -30,7 +30,7 @@ test('preprocess scss', () => {
   const style = parse({
     source:
       '<style lang="scss">\n' +
-      '$red: rgb(255, 0, 0);\n' +
+      '$red: red;\n' +
       '.color { color: $red; }\n' +
       '</style>\n',
     filename: 'example.vue',
@@ -46,7 +46,7 @@ test('preprocess scss', () => {
   })
 
   expect(result.errors.length).toBe(0)
-  expect(result.code).toEqual(expect.stringContaining('color: red;'))
+  expect(result.code).toMatch('color: red;')
   expect(result.map).toBeTruthy()
 })
 
@@ -54,7 +54,7 @@ test('preprocess sass', () => {
   const style = parse({
     source:
       '<style lang="sass">\n' +
-      '$red: rgb(255, 0, 0)\n' +
+      '$red: red\n' +
       '.color\n' +
       '   color: $red\n' +
       '</style>\n',
@@ -71,7 +71,7 @@ test('preprocess sass', () => {
   })
 
   expect(result.errors.length).toBe(0)
-  expect(result.code).toEqual(expect.stringContaining('color: red;'))
+  expect(result.code).toMatch('color: red;')
   expect(result.map).toBeTruthy()
 })
 
