@@ -1,8 +1,4 @@
-import {
-  VueTemplateCompiler,
-  VueTemplateCompilerOptions,
-  ErrorWithRange
-} from './types'
+import { VueTemplateCompiler, VueTemplateCompilerOptions } from './types'
 import assetUrlsModule, {
   AssetURLOptions,
   TransformAssetUrlsOptions
@@ -11,6 +7,7 @@ import srcsetModule from './templateCompilerModules/srcset'
 import consolidate from '@vue/consolidate'
 import * as _compiler from 'web/entry-compiler'
 import { stripWith } from './stripWith'
+import { WarningMessage } from 'types/compiler'
 
 export interface TemplateCompileOptions {
   source: string
@@ -33,8 +30,8 @@ export interface TemplateCompileResult {
   ast: Object | undefined
   code: string
   source: string
-  tips: (string | ErrorWithRange)[]
-  errors: (string | ErrorWithRange)[]
+  tips: (string | WarningMessage)[]
+  errors: (string | WarningMessage)[]
 }
 
 export function compileTemplate(

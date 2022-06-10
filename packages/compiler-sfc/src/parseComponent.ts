@@ -2,7 +2,8 @@ import deindent from 'de-indent'
 import { parseHTML } from 'compiler/parser/html-parser'
 import { makeMap } from 'shared/util'
 import { ASTAttr, WarningMessage } from 'types/compiler'
-import { RawSourceMap } from './types'
+import { BindingMetadata, RawSourceMap } from './types'
+import { hmrShouldReload, ImportBinding } from './compileScript'
 
 const splitRE = /\r?\n/g
 const replaceRE = /./g
@@ -24,12 +25,39 @@ export interface SFCBlock extends SFCCustomBlock {
   module?: string | boolean
 }
 
+export interface SFCScriptBlock extends SFCBlock {
+  type: 'script'
+  setup?: string | boolean
+  bindings?: BindingMetadata
+  imports?: Record<string, ImportBinding>
+  /**
+   * import('\@babel/types').Statement
+   */
+  scriptAst?: any[]
+  /**
+   * import('\@babel/types').Statement
+   */
+  scriptSetupAst?: any[]
+}
+
 export interface SFCDescriptor {
+  source: string
   template: SFCBlock | null
-  script: SFCBlock | null
+  script: SFCScriptBlock | null
+  scriptSetup: SFCScriptBlock | null
   styles: SFCBlock[]
   customBlocks: SFCCustomBlock[]
   errors: WarningMessage[]
+
+  /**
+   * compare with an existing descriptor to determine whether HMR should perform
+   * a reload vs. re-render.
+   *
+   * Note: this comparison assumes the prev/next script are already identical,
+   * and only checks the special case where <script setup lang="ts"> unused import
+   * pruning result changes due to template changes.
+   */
+  shouldForceReload: (prevImports: Record<string, ImportBinding>) => boolean
 }
 
 export interface VueTemplateCompilerParseOptions {
@@ -46,11 +74,14 @@ export function parseComponent(
   options: VueTemplateCompilerParseOptions = {}
 ): SFCDescriptor {
   const sfc: SFCDescriptor = {
+    source: content,
     template: null,
     script: null,
+    scriptSetup: null, // TODO
     styles: [],
     customBlocks: [],
-    errors: []
+    errors: [],
+    shouldForceReload: prevImports => hmrShouldReload(prevImports, sfc)
   }
   let depth = 0
   let currentBlock: SFCBlock | null = null

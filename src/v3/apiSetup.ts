@@ -46,6 +46,8 @@ export function initSetup(vm: Component) {
       for (const key in setupResult) {
         if (!isReserved(key)) {
           proxySetupProperty(vm, setupResult, key)
+        } else if (__DEV__) {
+          warn(`Avoid using variables that start with _ or $ in setup().`)
         }
       }
     } else if (__DEV__ && setupResult !== undefined) {
