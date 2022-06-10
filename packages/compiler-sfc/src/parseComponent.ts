@@ -1,23 +1,49 @@
 import deindent from 'de-indent'
 import { parseHTML } from 'compiler/parser/html-parser'
 import { makeMap } from 'shared/util'
-import {
-  ASTAttr,
-  SFCBlock,
-  SFCDescriptor,
-  WarningMessage
-} from 'types/compiler'
+import { ASTAttr, WarningMessage } from 'types/compiler'
+import { RawSourceMap } from './types'
 
 const splitRE = /\r?\n/g
 const replaceRE = /./g
 const isSpecialTag = makeMap('script,style,template', true)
+
+export interface SFCCustomBlock {
+  type: string
+  content: string
+  attrs: { [key: string]: string | true }
+  start: number
+  end?: number
+  map?: RawSourceMap
+}
+
+export interface SFCBlock extends SFCCustomBlock {
+  lang?: string
+  src?: string
+  scoped?: boolean
+  module?: string | boolean
+}
+
+export interface SFCDescriptor {
+  template: SFCBlock | null
+  script: SFCBlock | null
+  styles: SFCBlock[]
+  customBlocks: SFCCustomBlock[]
+  errors: WarningMessage[]
+}
+
+export interface VueTemplateCompilerParseOptions {
+  pad?: 'line' | 'space' | boolean
+  deindent?: boolean
+  outputSourceRange?: boolean
+}
 
 /**
  * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
  */
 export function parseComponent(
   content: string,
-  options: Record<string, any> = {}
+  options: VueTemplateCompilerParseOptions = {}
 ): SFCDescriptor {
   const sfc: SFCDescriptor = {
     template: null,
@@ -48,7 +74,7 @@ export function parseComponent(
 
   function start(
     tag: string,
-    attrs: Array<ASTAttr>,
+    attrs: ASTAttr[],
     unary: boolean,
     start: number,
     end: number
@@ -80,7 +106,7 @@ export function parseComponent(
     }
   }
 
-  function checkAttrs(block: SFCBlock, attrs: Array<ASTAttr>) {
+  function checkAttrs(block: SFCBlock, attrs: ASTAttr[]) {
     for (let i = 0; i < attrs.length; i++) {
       const attr = attrs[i]
       if (attr.name === 'lang') {

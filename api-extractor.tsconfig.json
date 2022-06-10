@@ -3,6 +3,5 @@
   "compilerOptions": {
     "baseUrl": "./temp",
     "types": []
-  },
-  "include": ["src"]
+  }
 }

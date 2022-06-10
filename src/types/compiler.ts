@@ -199,26 +199,3 @@ export type ASTText = {
   start?: number
   end?: number
 }
-
-// SFC-parser related declarations
-
-// an object format describing a single-file component
-export type SFCDescriptor = {
-  template: SFCBlock | null
-  script: SFCBlock | null
-  styles: Array<SFCBlock>
-  customBlocks: Array<SFCBlock>
-  errors: Array<string | WarningMessage>
-}
-
-export type SFCBlock = {
-  type: string
-  content: string
-  attrs: { [attribute: string]: string }
-  start?: number
-  end?: number
-  lang?: string
-  src?: string
-  scoped?: boolean
-  module?: string | boolean
-}

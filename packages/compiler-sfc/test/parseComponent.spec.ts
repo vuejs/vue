@@ -1,4 +1,5 @@
-import { parseComponent } from 'sfc/parser'
+import { WarningMessage } from 'types/compiler'
+import { parseComponent } from '../src/parseComponent'
 
 describe('Single File Component parser', () => {
   it('should parse', () => {

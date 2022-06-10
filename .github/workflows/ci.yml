@@ -26,7 +26,7 @@ jobs:
       - name: Run unit tests
         run: pnpm run test:unit
 
-  ssr-test:
+  ssr-sfc-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -44,6 +44,9 @@ jobs:
 
       - name: Run SSR tests
         run: pnpm run test:ssr
+
+      - name: Run compiler-sfc tests
+        run: pnpm run test:sfc
 
   e2e-test:
     runs-on: ubuntu-latest

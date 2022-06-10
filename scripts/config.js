@@ -25,6 +25,12 @@ const resolve = p => {
   }
 }
 
+// we are bundling forked consolidate.js in compiler-sfc which dynamically
+// requires a ton of template engines which should be ignored.
+const consolidatePath = require.resolve('@vue/consolidate/package.json', {
+  paths: [path.resolve(__dirname, '../packages/compiler-sfc')]
+})
+
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
   'runtime-cjs-dev': {
@@ -202,12 +208,27 @@ const builds = {
     )
   },
   'compiler-sfc': {
-    entry: resolve('web/entry-compiler-sfc.ts'),
+    entry: resolve('packages/compiler-sfc/src/index.ts'),
     dest: resolve('packages/compiler-sfc/dist/compiler-sfc.js'),
     format: 'cjs',
     external: Object.keys(
       require('../packages/compiler-sfc/package.json').dependencies
-    )
+    ),
+    plugins: [
+      node({ preferBuiltins: true }),
+      cjs({
+        ignore: [
+          ...Object.keys(require(consolidatePath).devDependencies),
+          'vm',
+          'crypto',
+          'react-dom/server',
+          'teacup/lib/express',
+          'arc-templates/dist/es5',
+          'then-pug',
+          'then-jade'
+        ]
+      })
+    ]
   }
 }
 

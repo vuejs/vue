@@ -24,7 +24,7 @@
     "url": "https://github.com/vuejs/vue/issues"
   },
   "dependencies": {
-    "chalk": "^4.0.0",
+    "chalk": "^4.1.2",
     "hash-sum": "^2.0.0",
     "he": "^1.2.0",
     "lodash.template": "^4.5.0",
