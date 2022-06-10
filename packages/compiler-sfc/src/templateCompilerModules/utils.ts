@@ -2,16 +2,6 @@ import { TransformAssetUrlsOptions } from './assetUrl'
 import { UrlWithStringQuery, parse as uriParse } from 'url'
 import path from 'path'
 
-export interface Attr {
-  name: string
-  value: string
-}
-
-export interface ASTNode {
-  tag: string
-  attrs: Attr[]
-}
-
 export function urlToRequire(
   url: string,
   transformAssetUrlsOption: TransformAssetUrlsOptions = {}

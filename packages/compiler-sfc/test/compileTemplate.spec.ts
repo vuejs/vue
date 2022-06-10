@@ -4,7 +4,6 @@ import { compileTemplate } from '../src/compileTemplate'
 import Vue from 'vue'
 
 function mockRender(code: string, mocks: Record<string, any> = {}) {
-  console.log(code)
   const fn = new Function(
     `require`,
     `${code}; return { render, staticRenderFns }`

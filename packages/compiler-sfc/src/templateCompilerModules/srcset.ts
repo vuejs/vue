@@ -1,7 +1,8 @@
 // vue compiler module for transforming `img:srcset` to a number of `require`s
 
-import { urlToRequire, ASTNode } from './utils'
+import { urlToRequire } from './utils'
 import { TransformAssetUrlsOptions } from './assetUrl'
+import { ASTNode } from 'types/compiler'
 
 interface ImageCandidate {
   require: string
@@ -21,9 +22,11 @@ function transform(
   node: ASTNode,
   transformAssetUrlsOptions?: TransformAssetUrlsOptions
 ) {
-  const tags = ['img', 'source']
+  if (node.type !== 1 || !node.attrs) {
+    return
+  }
 
-  if (tags.indexOf(node.tag) !== -1 && node.attrs) {
+  if (node.tag === 'img' || node.tag === 'source') {
     node.attrs.forEach(attr => {
       if (attr.name === 'srcset') {
         // same logic as in transform-require.js

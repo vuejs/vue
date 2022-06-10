@@ -1,6 +1,7 @@
 // vue compiler module for transforming `<tag>:<attribute>` to `require`
 
-import { urlToRequire, ASTNode, Attr } from './utils'
+import { urlToRequire } from './utils'
+import { ASTNode, ASTAttr } from 'types/compiler'
 
 export interface AssetURLOptions {
   [name: string]: string | string[]
@@ -43,16 +44,19 @@ function transform(
   options: AssetURLOptions,
   transformAssetUrlsOption?: TransformAssetUrlsOptions
 ) {
+  if (node.type !== 1 || !node.attrs) return
   for (const tag in options) {
-    if ((tag === '*' || node.tag === tag) && node.attrs) {
+    if (tag === '*' || node.tag === tag) {
       const attributes = options[tag]
       if (typeof attributes === 'string') {
-        node.attrs.some(attr =>
+        node.attrs!.some(attr =>
           rewrite(attr, attributes, transformAssetUrlsOption)
         )
       } else if (Array.isArray(attributes)) {
         attributes.forEach(item =>
-          node.attrs.some(attr => rewrite(attr, item, transformAssetUrlsOption))
+          node.attrs!.some(attr =>
+            rewrite(attr, item, transformAssetUrlsOption)
+          )
         )
       }
     }
@@ -60,7 +64,7 @@ function transform(
 }
 
 function rewrite(
-  attr: Attr,
+  attr: ASTAttr,
   name: string,
   transformAssetUrlsOption?: TransformAssetUrlsOptions
 ) {
