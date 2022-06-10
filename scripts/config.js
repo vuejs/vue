@@ -211,6 +211,7 @@ const builds = {
     entry: resolve('packages/compiler-sfc/src/index.ts'),
     dest: resolve('packages/compiler-sfc/dist/compiler-sfc.js'),
     format: 'cjs',
+    transpile: false,
     external: Object.keys(
       require('../packages/compiler-sfc/package.json').dependencies
     ),
