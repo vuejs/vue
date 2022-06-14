@@ -3,7 +3,8 @@ import { parseComponent } from '../src/parseComponent'
 
 describe('Single File Component parser', () => {
   it('should parse', () => {
-    const res = parseComponent(`
+    const res = parseComponent(
+      `
       <template>
         <div>hi</div>
       </template>
@@ -24,7 +25,9 @@ describe('Single File Component parser', () => {
       <div>
         <style>nested should be ignored</style>
       </div>
-    `)
+    `,
+      { deindent: true }
+    )
     expect(res.template!.content.trim()).toBe('<div>hi</div>')
     expect(res.styles.length).toBe(4)
     expect(res.styles[0].src).toBe('./test.css')
@@ -72,7 +75,10 @@ describe('Single File Component parser', () => {
         h1 { color: red }
       </style>
     `
-    const deindentDefault = parseComponent(content.trim(), { pad: false })
+    const deindentDefault = parseComponent(content.trim(), {
+      pad: false,
+      deindent: true
+    })
     const deindentEnabled = parseComponent(content.trim(), {
       pad: false,
       deindent: true
@@ -111,9 +117,18 @@ describe('Single File Component parser', () => {
         h1 { color: red }
       </style>
 `
-    const padDefault = parseComponent(content.trim(), { pad: true })
-    const padLine = parseComponent(content.trim(), { pad: 'line' })
-    const padSpace = parseComponent(content.trim(), { pad: 'space' })
+    const padDefault = parseComponent(content.trim(), {
+      pad: true,
+      deindent: true
+    })
+    const padLine = parseComponent(content.trim(), {
+      pad: 'line',
+      deindent: true
+    })
+    const padSpace = parseComponent(content.trim(), {
+      pad: 'space',
+      deindent: true
+    })
 
     expect(padDefault.script!.content).toBe(
       Array(3 + 1).join('//\n') + '\nexport default {}\n'
@@ -145,12 +160,15 @@ describe('Single File Component parser', () => {
   })
 
   it('should handle template blocks with lang as special text', () => {
-    const res = parseComponent(`
+    const res = parseComponent(
+      `
       <template lang="pug">
         div
           h1(v-if='1 < 2') hello
       </template>
-    `)
+    `,
+      { deindent: true }
+    )
     expect(res.template!.content.trim()).toBe(`div\n  h1(v-if='1 < 2') hello`)
   })
 
@@ -164,7 +182,8 @@ describe('Single File Component parser', () => {
   })
 
   it('should handle custom blocks without parsing them', () => {
-    const res = parseComponent(`
+    const res = parseComponent(
+      `
       <template>
         <div></div>
       </template>
@@ -183,7 +202,9 @@ describe('Single File Component parser', () => {
         }))
       }
       </test>
-    `)
+    `,
+      { deindent: true }
+    )
     expect(res.customBlocks.length).toBe(3)
 
     const simpleExample = res.customBlocks[0]

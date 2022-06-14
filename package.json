@@ -87,6 +87,7 @@
     "csstype": "^3.1.0"
   },
   "devDependencies": {
+    "@babel/parser": "^7.18.4",
     "@microsoft/api-extractor": "^7.25.0",
     "@rollup/plugin-alias": "^3.1.9",
     "@rollup/plugin-commonjs": "^22.0.0",
@@ -109,10 +110,10 @@
     "karma-esbuild": "^2.2.4",
     "karma-jasmine": "^5.0.1",
     "lint-staged": "^12.5.0",
-    "postcss": "^8.4.14",
     "lodash": "^4.17.21",
     "marked": "^4.0.16",
     "minimist": "^1.2.6",
+    "postcss": "^8.4.14",
     "prettier": "^2.6.2",
     "puppeteer": "^14.3.0",
     "rimraf": "^3.0.2",

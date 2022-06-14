@@ -4,6 +4,7 @@ importers:
 
   .:
     specifiers:
+      '@babel/parser': ^7.18.4
       '@microsoft/api-extractor': ^7.25.0
       '@rollup/plugin-alias': ^3.1.9
       '@rollup/plugin-commonjs': ^22.0.0
@@ -50,6 +51,7 @@ importers:
       '@vue/compiler-sfc': link:packages/compiler-sfc
       csstype: 3.1.0
     devDependencies:
+      '@babel/parser': 7.18.4
       '@microsoft/api-extractor': 7.25.0
       '@rollup/plugin-alias': 3.1.9_rollup@2.75.6
       '@rollup/plugin-commonjs': 22.0.0_rollup@2.75.6

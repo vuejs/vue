@@ -56,8 +56,8 @@ export interface SFCDescriptor {
    * a reload vs. re-render.
    *
    * Note: this comparison assumes the prev/next script are already identical,
-   * and only checks the special case where <script setup lang="ts"> unused import
-   * pruning result changes due to template changes.
+   * and only checks the special case where `<script setup lang="ts">` unused
+   * import pruning result changes due to template changes.
    */
   shouldForceReload: (prevImports: Record<string, ImportBinding>) => boolean
 }
