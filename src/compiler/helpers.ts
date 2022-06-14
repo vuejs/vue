@@ -13,8 +13,8 @@ export function baseWarn(msg: string, range?: Range) {
 export function pluckModuleFunction<T, K extends keyof T>(
   modules: Array<T> | undefined,
   key: K
-): Array<T[K]> {
-  return modules ? modules.map(m => m[key]).filter(_ => _) : []
+): Array<Exclude<T[K], undefined>> {
+  return modules ? (modules.map(m => m[key]).filter(_ => _) as any) : []
 }
 
 export function addProp(

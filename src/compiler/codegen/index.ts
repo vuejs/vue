@@ -36,7 +36,6 @@ export class CodegenState {
   constructor(options: CompilerOptions) {
     this.options = options
     this.warn = options.warn || baseWarn
-    //@ts-expect-error `this.transforms ` is a different type than `options.modules.transformCode`
     this.transforms = pluckModuleFunction(options.modules, 'transformCode')
     this.dataGenFns = pluckModuleFunction(options.modules, 'genData')
     this.directives = extend(extend({}, baseDirectives), options.directives)

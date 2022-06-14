@@ -9,6 +9,8 @@ import {
 import hash from 'hash-sum'
 import LRU from 'lru-cache'
 
+export const DEFAULT_FILENAME = 'anonymous.vue'
+
 const cache = new LRU<string, SFCDescriptor>(100)
 
 const splitRE = /\r?\n/g
@@ -26,9 +28,9 @@ export interface ParseOptions {
 export function parse(options: ParseOptions): SFCDescriptor {
   const {
     source,
-    filename = '',
+    filename = DEFAULT_FILENAME,
     compiler,
-    compilerParseOptions = { pad: 'line' } as VueTemplateCompilerParseOptions,
+    compilerParseOptions = { pad: false } as VueTemplateCompilerParseOptions,
     sourceRoot = '',
     needMap = true
   } = options
@@ -48,6 +50,8 @@ export function parse(options: ParseOptions): SFCDescriptor {
     // use built-in compiler
     output = parseComponent(source, compilerParseOptions)
   }
+
+  output.filename = filename
 
   if (needMap) {
     if (output.script && !output.script.src) {
@@ -73,6 +77,7 @@ export function parse(options: ParseOptions): SFCDescriptor {
       })
     }
   }
+
   cache.set(cacheKey, output)
   return output
 }

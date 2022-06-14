@@ -10,7 +10,9 @@ import {
   ParserPlugin
 } from '@babel/parser'
 import { generateCodeFrame } from 'compiler/codeframe'
-import { camelize, capitalize, makeMap } from 'shared/util'
+import { camelize, capitalize, isBuiltInTag, makeMap } from 'shared/util'
+import { parseHTML } from 'compiler/parser/html-parser'
+import { baseOptions as webCompilerOptions } from 'web/compiler/options'
 import {
   Node,
   Declaration,
@@ -37,6 +39,10 @@ import {
 import { walk } from 'estree-walker'
 import { RawSourceMap } from 'source-map'
 import { warnOnce } from './warn'
+import { isReservedTag } from 'web/util'
+import { dirRE } from 'compiler/parser'
+import { parseText } from 'compiler/parser/text-parser'
+import { DEFAULT_FILENAME } from './parse'
 
 // Special compiler macros
 const DEFINE_PROPS = 'defineProps'
@@ -52,7 +58,6 @@ const isBuiltInDir = makeMap(
 )
 
 export interface SFCScriptCompileOptions {
-  filename: string
   /**
    * Production mode. Used to determine whether to generate hashed CSS variables
    */
@@ -82,10 +87,9 @@ export interface ImportBinding {
  */
 export function compileScript(
   sfc: SFCDescriptor,
-  options: SFCScriptCompileOptions
+  options: SFCScriptCompileOptions = {}
 ): SFCScriptBlock {
-  let { script, scriptSetup, source } = sfc
-  const { filename } = options
+  let { filename, script, scriptSetup, source } = sfc
   const isProd = !!options.isProd
   const genSourceMap = options.sourceMap !== false
   let refBindings: string[] | undefined
@@ -201,10 +205,10 @@ export function compileScript(
 
   // magic-string state
   const s = new MagicString(source)
-  const startOffset = scriptSetup.loc.start.offset
-  const endOffset = scriptSetup.loc.end.offset
-  const scriptStartOffset = script && script.loc.start.offset
-  const scriptEndOffset = script && script.loc.end.offset
+  const startOffset = scriptSetup.start
+  const endOffset = scriptSetup.end
+  const scriptStartOffset = script && script.start
+  const scriptEndOffset = script && script.end
 
   function helper(key: string): string {
     helperImports.add(key)
@@ -1211,7 +1215,7 @@ export function compileScript(
 
   // 11. finalize default export
   let runtimeOptions = ``
-  if (!hasDefaultExportName && filename) {
+  if (!hasDefaultExportName && filename && filename !== DEFAULT_FILENAME) {
     const match = filename.match(/([^/\\]+)\.\w+$/)
     if (match) {
       runtimeOptions += `\n  __name: '${match[1]}',`
@@ -1828,44 +1832,39 @@ function getObjectOrArrayExpressionKeys(value: Node): string[] {
 const templateUsageCheckCache = new LRU<string, string>(512)
 
 function resolveTemplateUsageCheckString(sfc: SFCDescriptor) {
-  const { content, ast } = sfc.template!
+  const { content } = sfc.template!
   const cached = templateUsageCheckCache.get(content)
   if (cached) {
     return cached
   }
 
   let code = ''
-  transform(createRoot([ast]), {
-    nodeTransforms: [
-      node => {
-        if (node.type === NodeTypes.ELEMENT) {
-          if (
-            !parserOptions.isNativeTag!(node.tag) &&
-            !parserOptions.isBuiltInComponent!(node.tag)
-          ) {
-            code += `,${camelize(node.tag)},${capitalize(camelize(node.tag))}`
+
+  parseHTML(content, {
+    ...webCompilerOptions,
+    start(tag, attrs) {
+      if (!isBuiltInTag(tag) && !isReservedTag(tag)) {
+        code += `,${camelize(tag)},${capitalize(camelize(tag))}`
+      }
+      for (let i = 0; i < attrs.length; i++) {
+        const { name, value } = attrs[i]
+        if (dirRE.test(name)) {
+          const baseName = name.replace(dirRE, '')
+          if (!isBuiltInDir(baseName)) {
+            code += `,v${capitalize(camelize(baseName))}`
           }
-          for (let i = 0; i < node.props.length; i++) {
-            const prop = node.props[i]
-            if (prop.type === NodeTypes.DIRECTIVE) {
-              if (!isBuiltInDir(prop.name)) {
-                code += `,v${capitalize(camelize(prop.name))}`
-              }
-              if (prop.exp) {
-                code += `,${processExp(
-                  (prop.exp as SimpleExpressionNode).content,
-                  prop.name
-                )}`
-              }
-            }
+          if (value) {
+            code += `,${processExp(value, baseName)}`
           }
-        } else if (node.type === NodeTypes.INTERPOLATION) {
-          code += `,${processExp(
-            (node.content as SimpleExpressionNode).content
-          )}`
         }
       }
-    ]
+    },
+    chars(text) {
+      const res = parseText(text)
+      if (res) {
+        code += `,${processExp(res.expression)}`
+      }
+    }
   })
 
   code += ';'

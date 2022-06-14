@@ -4,6 +4,7 @@ import { makeMap } from 'shared/util'
 import { ASTAttr, WarningMessage } from 'types/compiler'
 import { BindingMetadata, RawSourceMap } from './types'
 import { hmrShouldReload, ImportBinding } from './compileScript'
+import { DEFAULT_FILENAME } from './parse'
 
 const splitRE = /\r?\n/g
 const replaceRE = /./g
@@ -42,6 +43,7 @@ export interface SFCScriptBlock extends SFCBlock {
 
 export interface SFCDescriptor {
   source: string
+  filename: string
   template: SFCBlock | null
   script: SFCScriptBlock | null
   scriptSetup: SFCScriptBlock | null
@@ -70,11 +72,12 @@ export interface VueTemplateCompilerParseOptions {
  * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
  */
 export function parseComponent(
-  content: string,
+  source: string,
   options: VueTemplateCompilerParseOptions = {}
 ): SFCDescriptor {
   const sfc: SFCDescriptor = {
-    source: content,
+    source,
+    filename: DEFAULT_FILENAME,
     template: null,
     script: null,
     scriptSetup: null, // TODO
@@ -167,8 +170,8 @@ export function parseComponent(
   function end(tag: string, start: number) {
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
-      let text = content.slice(currentBlock.start, currentBlock.end)
-      if (options.deindent !== false) {
+      let text = source.slice(currentBlock.start, currentBlock.end)
+      if (options.deindent) {
         text = deindent(text)
       }
       // pad content so that linters and pre-processors can output correct
@@ -184,15 +187,15 @@ export function parseComponent(
 
   function padContent(block: SFCBlock, pad: true | 'line' | 'space') {
     if (pad === 'space') {
-      return content.slice(0, block.start).replace(replaceRE, ' ')
+      return source.slice(0, block.start).replace(replaceRE, ' ')
     } else {
-      const offset = content.slice(0, block.start).split(splitRE).length
+      const offset = source.slice(0, block.start).split(splitRE).length
       const padChar = block.type === 'script' && !block.lang ? '//\n' : '\n'
       return Array(offset).join(padChar)
     }
   }
 
-  parseHTML(content, {
+  parseHTML(source, {
     warn,
     start,
     end,
