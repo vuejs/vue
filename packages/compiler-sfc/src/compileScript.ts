@@ -57,7 +57,7 @@ const isBuiltInDir = makeMap(
   `once,memo,if,for,else,else-if,slot,text,html,on,bind,model,show,cloak,is`
 )
 
-export interface SFCScriptCompileOptions {
+export interface ScriptCompileOptions {
   /**
    * Production mode. Used to determine whether to generate hashed CSS variables
    */
@@ -87,7 +87,7 @@ export interface ImportBinding {
  */
 export function compileScript(
   sfc: SFCDescriptor,
-  options: SFCScriptCompileOptions = {}
+  options: ScriptCompileOptions = {}
 ): SFCScriptBlock {
   let { filename, script, scriptSetup, source } = sfc
   const isProd = !!options.isProd

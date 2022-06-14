@@ -1,11 +1,11 @@
 import { BindingTypes } from '../src/types'
 import { parse, ParseOptions } from '../src/parse'
 import { parse as babelParse } from '@babel/parser'
-import { compileScript, SFCScriptCompileOptions } from '../src/compileScript'
+import { compileScript, ScriptCompileOptions } from '../src/compileScript'
 
 function compile(
   source: string,
-  options?: Partial<SFCScriptCompileOptions>,
+  options?: Partial<ScriptCompileOptions>,
   parseOptions?: Partial<ParseOptions>
 ) {
   const sfc = parse({

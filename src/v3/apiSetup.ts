@@ -83,7 +83,10 @@ function createSetupContext(vm: Component) {
     get slots() {
       return initSlotsProxy(vm)
     },
-    emit: bind(vm.$emit, vm) as any
+    emit: bind(vm.$emit, vm) as any,
+    expose() {
+      // TODO
+    }
   }
 }
 
