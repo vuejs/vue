@@ -1,6 +1,10 @@
 # [2.7.0-alpha.8](https://github.com/vuejs/vue/compare/v2.7.0-alpha.7...v2.7.0-alpha.8) (2022-06-14)
 
+### Features
 
+- Basic `<script setup>` support. Requires `vue-loader@^15.10.0-beta.1`.
+  - Component resolution doesn't work yet
+  - Types for `defineXXX` macros not supported yet
 
 # [2.7.0-alpha.7](https://github.com/vuejs/vue/compare/v2.7.0-alpha.6...v2.7.0-alpha.7) (2022-06-14)
 
