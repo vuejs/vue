@@ -12,6 +12,7 @@
 import { makeMap, no } from 'shared/util'
 import { isNonPhrasingTag } from 'web/compiler/util'
 import { unicodeRegExp } from 'core/util/lang'
+import { ASTAttr, CompilerOptions } from 'types/compiler'
 
 // Regular Expressions for parsing tags and attributes
 const attribute =
@@ -54,7 +55,20 @@ function decodeAttr(value, shouldDecodeNewlines) {
   return value.replace(re, match => decodingMap[match])
 }
 
-export function parseHTML(html, options) {
+export interface HTMLParserOptions extends CompilerOptions {
+  start?: (
+    tag: string,
+    attrs: ASTAttr[],
+    unary: boolean,
+    start: number,
+    end: number
+  ) => void
+  end?: (tag: string, start: number, end: number) => void
+  chars?: (text: string, start?: number, end?: number) => void
+  comment?: (content: string, start: number, end: number) => void
+}
+
+export function parseHTML(html, options: HTMLParserOptions) {
   const stack: any[] = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
@@ -72,7 +86,7 @@ export function parseHTML(html, options) {
           const commentEnd = html.indexOf('-->')
 
           if (commentEnd >= 0) {
-            if (options.shouldKeepComment) {
+            if (options.shouldKeepComment && options.comment) {
               options.comment(
                 html.substring(4, commentEnd),
                 index,
@@ -242,7 +256,7 @@ export function parseHTML(html, options) {
     const unary = isUnaryTag(tagName) || !!unarySlash
 
     const l = match.attrs.length
-    const attrs = new Array(l)
+    const attrs: ASTAttr[] = new Array(l)
     for (let i = 0; i < l; i++) {
       const args = match.attrs[i]
       const value = args[3] || args[4] || args[5] || ''

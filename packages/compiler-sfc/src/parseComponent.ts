@@ -14,7 +14,7 @@ export interface SFCCustomBlock {
   content: string
   attrs: { [key: string]: string | true }
   start: number
-  end?: number
+  end: number
   map?: RawSourceMap
 }
 
@@ -115,6 +115,7 @@ export function parseComponent(
         type: tag,
         content: '',
         start: end,
+        end: 0, // will be set on tag close
         attrs: attrs.reduce((cumulated, { name, value }) => {
           cumulated[name] = value || true
           return cumulated
@@ -122,7 +123,15 @@ export function parseComponent(
       }
       if (isSpecialTag(tag)) {
         checkAttrs(currentBlock, attrs)
-        if (tag === 'style') {
+        if (tag === 'script') {
+          const block = currentBlock as SFCScriptBlock
+          if (block.attrs.setup) {
+            block.setup = currentBlock.attrs.setup
+            sfc.scriptSetup = block
+          } else {
+            sfc.script = block
+          }
+        } else if (tag === 'style') {
           sfc.styles.push(currentBlock)
         } else {
           sfc[tag] = currentBlock

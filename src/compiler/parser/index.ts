@@ -252,10 +252,12 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
             warn(
               `Invalid dynamic argument expression: attribute names cannot contain ` +
                 `spaces, quotes, <, >, / or =.`,
-              {
-                start: attr.start + attr.name.indexOf(`[`),
-                end: attr.start + attr.name.length
-              }
+              options.outputSourceRange
+                ? {
+                    start: attr.start! + attr.name.indexOf(`[`),
+                    end: attr.start! + attr.name.length
+                  }
+                : undefined
             )
           }
         })
@@ -322,7 +324,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
       closeElement(element)
     },
 
-    chars(text: string, start: number, end: number) {
+    chars(text: string, start?: number, end?: number) {
       if (!currentParent) {
         if (__DEV__) {
           if (text === template) {
