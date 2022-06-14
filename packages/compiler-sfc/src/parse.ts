@@ -3,13 +3,13 @@ import { RawSourceMap, VueTemplateCompiler } from './types'
 import {
   parseComponent,
   VueTemplateCompilerParseOptions,
-  SFCDescriptor
+  SFCDescriptor,
+  DEFAULT_FILENAME
 } from './parseComponent'
 
 import hash from 'hash-sum'
 import LRU from 'lru-cache'
-
-export const DEFAULT_FILENAME = 'anonymous.vue'
+import { hmrShouldReload } from './compileScript'
 
 const cache = new LRU<string, SFCDescriptor>(100)
 
@@ -52,6 +52,8 @@ export function parse(options: ParseOptions): SFCDescriptor {
   }
 
   output.filename = filename
+  output.shouldForceReload = prevImports =>
+    hmrShouldReload(prevImports, output!)
 
   if (needMap) {
     if (output.script && !output.script.src) {

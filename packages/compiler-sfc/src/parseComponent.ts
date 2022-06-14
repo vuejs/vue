@@ -3,8 +3,9 @@ import { parseHTML } from 'compiler/parser/html-parser'
 import { makeMap } from 'shared/util'
 import { ASTAttr, WarningMessage } from 'types/compiler'
 import { BindingMetadata, RawSourceMap } from './types'
-import { hmrShouldReload, ImportBinding } from './compileScript'
-import { DEFAULT_FILENAME } from './parse'
+import type { ImportBinding } from './compileScript'
+
+export const DEFAULT_FILENAME = 'anonymous.vue'
 
 const splitRE = /\r?\n/g
 const replaceRE = /./g
@@ -84,7 +85,7 @@ export function parseComponent(
     styles: [],
     customBlocks: [],
     errors: [],
-    shouldForceReload: prevImports => hmrShouldReload(prevImports, sfc)
+    shouldForceReload: null as any // attached in parse() by compiler-sfc
   }
   let depth = 0
   let currentBlock: SFCBlock | null = null

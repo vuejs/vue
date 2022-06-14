@@ -42,7 +42,7 @@ import { warnOnce } from './warn'
 import { isReservedTag } from 'web/util'
 import { dirRE } from 'compiler/parser'
 import { parseText } from 'compiler/parser/text-parser'
-import { DEFAULT_FILENAME } from './parse'
+import { DEFAULT_FILENAME } from './parseComponent'
 
 // Special compiler macros
 const DEFINE_PROPS = 'defineProps'

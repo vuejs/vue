@@ -211,7 +211,6 @@ const builds = {
     entry: resolve('packages/compiler-sfc/src/index.ts'),
     dest: resolve('packages/compiler-sfc/dist/compiler-sfc.js'),
     format: 'cjs',
-    transpile: false,
     external: Object.keys(
       require('../packages/compiler-sfc/package.json').dependencies
     ),
@@ -251,7 +250,10 @@ function genConfig(name) {
           compilerOptions: {
             // if targeting browser, target es5
             // if targeting node, es2017 means Node 8
-            target: opts.transpile === false ? 'es2017' : 'es5'
+            target:
+              opts.transpile === false || opts.format === 'cjs'
+                ? 'es2017'
+                : 'es5'
           },
           exclude: ['test', 'test-dts']
         }
