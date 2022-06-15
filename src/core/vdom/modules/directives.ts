@@ -102,7 +102,10 @@ function normalizeDirectives(
       dir.modifiers = emptyModifiers
     }
     res[getRawDirName(dir)] = dir
-    dir.def = resolveAsset(vm.$options, 'directives', dir.name, true)
+    if (vm._setupState && vm._setupState.__sfc) {
+      dir.def = resolveAsset(vm, '_setupState', 'v-' + dir.name)
+    }
+    dir.def = dir.def || resolveAsset(vm.$options, 'directives', dir.name, true)
   }
   // $flow-disable-line
   return res

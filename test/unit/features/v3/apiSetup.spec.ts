@@ -233,4 +233,18 @@ describe('api: setup context', () => {
     await nextTick()
     expect(vm.$el.outerHTML).toMatch(`<div>1</div>`)
   })
+
+  it('directive resolution', () => {
+    const spy = vi.fn()
+    new Vue({
+      setup: () => ({
+        __sfc: true,
+        vDir: {
+          inserted: spy
+        }
+      }),
+      template: `<div v-dir />`
+    }).$mount()
+    expect(spy).toHaveBeenCalled()
+  })
 })
