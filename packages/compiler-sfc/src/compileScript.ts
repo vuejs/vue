@@ -1209,7 +1209,11 @@ export function compileScript(
       allBindings[key] = true
     }
   }
-  const returned = `{ ${Object.keys(allBindings).join(', ')} }`
+  // __sfc marker indicates these bindings are compiled from <script setup>
+  // and should not be proxied on `this`
+  const returned = `{ ${__TEST__ ? `` : `__sfc: true,`}${Object.keys(
+    allBindings
+  ).join(', ')} }`
 
   s.appendRight(endOffset, `\nreturn ${returned}\n}\n\n`)
 

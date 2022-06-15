@@ -1,3 +1,5 @@
+import { BindingMetadata } from 'sfc/types'
+
 export type CompilerOptions = {
   warn?: Function // allow customizing warning in different environments; e.g. node
   modules?: Array<ModuleOptions> // platform specific modules; e.g. style; class
@@ -28,6 +30,8 @@ export type CompilerOptions = {
 
   // for ssr optimization compiler
   scopeId?: string
+
+  bindingMetadata?: BindingMetadata
 }
 
 export type WarningMessage = {

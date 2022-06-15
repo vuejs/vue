@@ -1,4 +1,4 @@
-import { stripWith } from '../src/stripWith'
+import { prefixIdentifiers } from '../src/prefixIdentifiers'
 import { compile } from 'web/entry-compiler'
 import { format } from 'prettier'
 
@@ -11,7 +11,7 @@ it('should work', () => {
   </foo>
 </div>`)
 
-  const result = format(stripWith(render, `render`), {
+  const result = format(prefixIdentifiers(render, `render`), {
     semi: false,
     parser: 'babel'
   })
@@ -24,8 +24,8 @@ it('should work', () => {
 
   expect(result).toMatchInlineSnapshot(`
     "function render() {
-      var _vm = this
-      var _c = _vm._self._c
+      var _vm = this,
+        _c = _vm._self._c
       return _c(
         \\"div\\",
         { attrs: { id: \\"app\\" } },
@@ -39,8 +39,8 @@ it('should work', () => {
           _c(\\"foo\\", {
             inlineTemplate: {
               render: function () {
-                var _vm = this
-                var _c = _vm._self._c
+                var _vm = this,
+                  _c = _vm._self._c
                 return _c(\\"div\\", [_vm._v(_vm._s(_vm.bar))])
               },
               staticRenderFns: [],

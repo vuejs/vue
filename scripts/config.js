@@ -278,7 +278,8 @@ function genConfig(name) {
   // built-in vars
   const vars = {
     __VERSION__: version,
-    __DEV__: `process.env.NODE_ENV !== 'production'`
+    __DEV__: `process.env.NODE_ENV !== 'production'`,
+    __TEST__: false
   }
   // feature flags
   Object.keys(featureFlags).forEach(key => {

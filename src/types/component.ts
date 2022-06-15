@@ -108,6 +108,7 @@ export declare class Component {
 
   // @v3
   _setupState?: Record<string, any>
+  _setupProxy?: Record<string, any>
   _setupContext?: SetupContext
   _attrsProxy?: Record<string, any>
   _slotsProxy?: Record<string, () => VNode[]>

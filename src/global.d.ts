@@ -1,4 +1,5 @@
 declare const __DEV__: boolean
+declare const __TEST__: boolean
 
 interface Window {
   __VUE_DEVTOOLS_GLOBAL_HOOK__: DevtoolsHook

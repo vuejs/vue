@@ -43,11 +43,20 @@ export function initSetup(vm: Component) {
         )
       }
       vm._setupState = setupResult
-      for (const key in setupResult) {
-        if (!isReserved(key)) {
-          proxySetupProperty(vm, setupResult, key)
-        } else if (__DEV__) {
-          warn(`Avoid using variables that start with _ or $ in setup().`)
+      // __sfc indicates compiled bindings from <script setup>
+      if (!setupResult.__sfc) {
+        for (const key in setupResult) {
+          if (!isReserved(key)) {
+            proxySetupProperty(vm, setupResult, key)
+          } else if (__DEV__) {
+            warn(`Avoid using variables that start with _ or $ in setup().`)
+          }
+        }
+      } else {
+        // exposed for compiled render fn
+        const proxy = (vm._setupProxy = {})
+        for (const key in setupResult) {
+          proxySetupProperty(proxy, setupResult, key)
         }
       }
     } else if (__DEV__ && setupResult !== undefined) {
@@ -61,17 +70,17 @@ export function initSetup(vm: Component) {
 }
 
 function proxySetupProperty(
-  vm: Component,
+  target: any,
   setupResult: Record<string, any>,
   key: string
 ) {
-  const raw = setupResult[key]
-  const unwrap = isRef(raw)
-  Object.defineProperty(vm, key, {
+  let raw = setupResult[key]
+  Object.defineProperty(target, key, {
     enumerable: true,
     configurable: true,
-    get: unwrap ? () => raw.value : () => setupResult[key],
-    set: unwrap ? v => (raw.value = v) : v => (setupResult[key] = v)
+    get: () => (isRef(raw) ? raw.value : raw),
+    set: newVal =>
+      isRef(raw) ? (raw.value = newVal) : (raw = setupResult[key] = newVal)
   })
 }
 

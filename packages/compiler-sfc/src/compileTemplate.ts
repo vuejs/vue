@@ -1,4 +1,8 @@
-import { VueTemplateCompiler, VueTemplateCompilerOptions } from './types'
+import {
+  BindingMetadata,
+  VueTemplateCompiler,
+  VueTemplateCompilerOptions
+} from './types'
 import assetUrlsModule, {
   AssetURLOptions,
   TransformAssetUrlsOptions
@@ -6,7 +10,7 @@ import assetUrlsModule, {
 import srcsetModule from './templateCompilerModules/srcset'
 import consolidate from '@vue/consolidate'
 import * as _compiler from 'web/entry-compiler'
-import { stripWith } from './stripWith'
+import { prefixIdentifiers } from './prefixIdentifiers'
 import { WarningMessage } from 'types/compiler'
 
 export interface TemplateCompileOptions {
@@ -24,6 +28,7 @@ export interface TemplateCompileOptions {
   optimizeSSR?: boolean
   prettify?: boolean
   isTS?: boolean
+  bindings?: BindingMetadata
 }
 
 export interface TemplateCompileResult {
@@ -107,7 +112,8 @@ function actuallyCompile(
     isFunctional = false,
     optimizeSSR = false,
     prettify = true,
-    isTS = false
+    isTS = false,
+    bindings
   } = options
 
   const compile =
@@ -144,15 +150,23 @@ function actuallyCompile(
     // transpile code with vue-template-es2015-compiler, which is a forked
     // version of Buble that applies ES2015 transforms + stripping `with` usage
     let code =
-      `var __render__ = ${stripWith(
+      `var __render__ = ${prefixIdentifiers(
         render,
         `render`,
         isFunctional,
         isTS,
-        transpileOptions
+        transpileOptions,
+        bindings
       )}\n` +
       `var __staticRenderFns__ = [${staticRenderFns.map(code =>
-        stripWith(code, ``, isFunctional, isTS, transpileOptions)
+        prefixIdentifiers(
+          code,
+          ``,
+          isFunctional,
+          isTS,
+          transpileOptions,
+          bindings
+        )
       )}]` +
       `\n`
 
