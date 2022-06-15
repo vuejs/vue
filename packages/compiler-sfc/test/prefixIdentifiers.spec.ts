@@ -1,6 +1,7 @@
 import { prefixIdentifiers } from '../src/prefixIdentifiers'
 import { compile } from 'web/entry-compiler'
 import { format } from 'prettier'
+import { BindingTypes } from '../src/types'
 
 it('should work', () => {
   const { render } = compile(`<div id="app">
@@ -48,6 +49,44 @@ it('should work', () => {
           }),
         ],
         2
+      )
+    }
+    "
+  `)
+})
+
+it('setup bindings', () => {
+  const { render } = compile(`<div @click="count++">{{ count }}</div>`)
+
+  const result = format(
+    prefixIdentifiers(render, `render`, false, false, undefined, {
+      count: BindingTypes.SETUP_REF
+    }),
+    {
+      semi: false,
+      parser: 'babel'
+    }
+  )
+
+  expect(result).toMatch(`_setup = _vm._setupProxy`)
+  expect(result).toMatch(`_setup.count++`)
+  expect(result).toMatch(`_vm._s(_setup.count)`)
+
+  expect(result).toMatchInlineSnapshot(`
+    "function render() {
+      var _vm = this,
+        _c = _vm._self._c,
+        _setup = _vm._setupProxy
+      return _c(
+        \\"div\\",
+        {
+          on: {
+            click: function (\$event) {
+              _setup.count++
+            },
+          },
+        },
+        [_vm._v(_vm._s(_setup.count))]
       )
     }
     "
