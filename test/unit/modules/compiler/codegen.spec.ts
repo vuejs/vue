@@ -4,11 +4,12 @@ import { generate } from 'compiler/codegen'
 import { isObject, isFunction, extend } from 'shared/util'
 import { isReservedTag } from 'web/util/index'
 import { baseOptions } from 'web/compiler/options'
+import { BindingTypes } from '../../../../packages/compiler-sfc/src/types'
 
 function assertCodegen(template, generatedCode, ...args) {
-  let staticRenderFnCodes = []
+  let staticRenderFnCodes: string[] = []
   let generateOptions = baseOptions
-  let proc = null
+  let proc: Function | null = null
   let len = args.length
   while (len--) {
     const arg = args[len]
@@ -28,7 +29,6 @@ function assertCodegen(template, generatedCode, ...args) {
   expect(res.staticRenderFns).toEqual(staticRenderFnCodes)
 }
 
-/* eslint-disable quotes */
 describe('codegen', () => {
   it('generate directive', () => {
     assertCodegen(
@@ -624,7 +624,7 @@ describe('codegen', () => {
     expect(
       'Inline-template components must have exactly one child element.'
     ).toHaveBeenWarned()
-    expect(console.error.mock.calls.length).toBe(3)
+    expect((console.error as any).mock.calls.length).toBe(3)
   })
 
   it('generate static trees inside v-for', () => {
@@ -689,7 +689,7 @@ describe('codegen', () => {
   })
 
   it('not specified ast type', () => {
-    const res = generate(null, baseOptions)
+    const res = generate(undefined, baseOptions)
     expect(res.render).toBe(`with(this){return _c("div")}`)
     expect(res.staticRenderFns).toEqual([])
   })
@@ -709,5 +709,19 @@ describe('codegen', () => {
       `with(this){return _c('div',[(ok)?_l((1),function(i){return _c('foo',{key:i})}):_e()],2)}`
     )
   })
+
+  it('component with bindings ', () => {
+    const ast = parse(`<div><Foo/><foo-bar></foo-bar></div>`, baseOptions)
+    optimize(ast, baseOptions)
+    const res = generate(ast, {
+      ...baseOptions,
+      bindings: {
+        Foo: BindingTypes.SETUP_CONST,
+        FooBar: BindingTypes.SETUP_CONST
+      }
+    })
+    expect(res.render).toMatchInlineSnapshot(
+      '"with(this){return _c(\'div\',[_c(Foo),_c(FooBar)],1)}"'
+    )
+  })
 })
-/* eslint-enable quotes */

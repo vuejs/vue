@@ -102,7 +102,7 @@ export function genElement(el: ASTElement, state: CodegenState): string {
       let tag: string | undefined
       // check if this is a component in <script setup>
       const bindings = state.options.bindings
-      if (bindings && !bindings.__isScriptSetup) {
+      if (bindings && bindings.__isScriptSetup !== false) {
         tag =
           checkBindingType(bindings, el.tag) ||
           checkBindingType(bindings, camelize(el.tag)) ||

@@ -39,6 +39,8 @@ export function prefixIdentifiers(
     plugins
   })
 
+  const isScriptSetup = bindings && bindings.__isScriptSetup !== false
+
   walkIdentifiers(
     ast,
     ident => {
@@ -47,7 +49,7 @@ export function prefixIdentifiers(
         return
       }
 
-      if (!bindings) {
+      if (!isScriptSetup) {
         s.prependRight(ident.start!, '_vm.')
         return
       }
@@ -62,7 +64,7 @@ export function prefixIdentifiers(
           s.prependRight(
             node.start!,
             `var _vm=this,_c=_vm._self._c${
-              bindings ? `,_setup=_vm._setupProxy;` : `;`
+              isScriptSetup ? `,_setup=_vm._setupProxy;` : `;`
             }`
           )
         }
