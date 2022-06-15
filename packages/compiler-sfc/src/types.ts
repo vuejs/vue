@@ -1,4 +1,4 @@
-import { WarningMessage } from 'types/compiler'
+import { CompilerOptions, CompiledResult } from 'types/compiler'
 import { SFCDescriptor } from './parseComponent'
 
 export interface StartOfSourceMap {
@@ -31,20 +31,9 @@ export interface VueTemplateCompiler {
 // we'll just shim this much for now - in the future these types
 // should come from vue-template-compiler directly, or this package should be
 // part of the vue monorepo.
-export interface VueTemplateCompilerOptions {
-  modules?: Object[]
-  outputSourceRange?: boolean
-  whitespace?: 'preserve' | 'condense'
-  directives?: { [key: string]: Function }
-}
+export type VueTemplateCompilerOptions = CompilerOptions
 
-export interface VueTemplateCompilerResults {
-  ast: Object | undefined
-  render: string
-  staticRenderFns: string[]
-  errors: (string | WarningMessage)[]
-  tips: (string | WarningMessage)[]
-}
+export type VueTemplateCompilerResults = CompiledResult
 
 export const enum BindingTypes {
   /**

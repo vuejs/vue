@@ -31,7 +31,8 @@ export type CompilerOptions = {
   // for ssr optimization compiler
   scopeId?: string
 
-  bindingMetadata?: BindingMetadata
+  // SFC analyzed script bindings from `compileScript()`
+  bindings?: BindingMetadata
 }
 
 export type WarningMessage = {

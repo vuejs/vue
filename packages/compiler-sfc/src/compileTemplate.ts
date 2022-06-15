@@ -132,6 +132,7 @@ function actuallyCompile(
       filename: options.filename
     })
   }
+  finalCompilerOptions.bindings = bindings
 
   const { ast, render, staticRenderFns, tips, errors } = compile(
     source,

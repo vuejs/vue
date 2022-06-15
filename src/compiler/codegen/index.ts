@@ -1,6 +1,6 @@
 import { genHandlers } from './events'
 import baseDirectives from '../directives/index'
-import { camelize, no, extend } from 'shared/util'
+import { camelize, no, extend, capitalize } from 'shared/util'
 import { baseWarn, pluckModuleFunction } from '../helpers'
 import { emptySlotScopeToken } from '../parser/index'
 import {
@@ -13,6 +13,7 @@ import {
   ASTText,
   CompilerOptions
 } from 'types/compiler'
+import { BindingMetadata } from 'sfc/types'
 
 type TransformFunction = (el: ASTElement, code: string) => string
 type DataGenFunction = (el: ASTElement) => string
@@ -98,8 +99,19 @@ export function genElement(el: ASTElement, state: CodegenState): string {
         data = genData(el, state)
       }
 
+      let tag: string | undefined
+      // check if this is a component in <script setup>
+      const bindings = state.options.bindings
+      if (bindings && !bindings.__isScriptSetup) {
+        tag =
+          checkBindingType(bindings, el.tag) ||
+          checkBindingType(bindings, camelize(el.tag)) ||
+          checkBindingType(bindings, capitalize(camelize(el.tag)))
+      }
+      if (!tag) tag = `'${el.tag}'`
+
       const children = el.inlineTemplate ? null : genChildren(el, state, true)
-      code = `_c('${el.tag}'${
+      code = `_c(${tag}${
         data ? `,${data}` : '' // data
       }${
         children ? `,${children}` : '' // children
@@ -110,6 +122,13 @@ export function genElement(el: ASTElement, state: CodegenState): string {
       code = state.transforms[i](el, code)
     }
     return code
+  }
+}
+
+function checkBindingType(bindings: BindingMetadata, key: string) {
+  const type = bindings[key]
+  if (type && type.startsWith('setup')) {
+    return key
   }
 }
 
