@@ -68,7 +68,7 @@ it('setup bindings', () => {
     }
   )
 
-  expect(result).toMatch(`_setup = _vm._setupProxy`)
+  expect(result).toMatch(`_setup = _vm._self._setupProxy`)
   expect(result).toMatch(`_setup.count++`)
   expect(result).toMatch(`_vm._s(_setup.count)`)
 
@@ -76,7 +76,7 @@ it('setup bindings', () => {
     "function render() {
       var _vm = this,
         _c = _vm._self._c,
-        _setup = _vm._setupProxy
+        _setup = _vm._self._setupProxy
       return _c(
         \\"div\\",
         {
