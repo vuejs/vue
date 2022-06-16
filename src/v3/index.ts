@@ -1,3 +1,5 @@
+export const version: string = '__VERSION__'
+
 export {
   ref,
   shallowRef,
