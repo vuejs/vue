@@ -1,3 +1,12 @@
+# [2.7.0-alpha.12](https://github.com/vuejs/vue/compare/v2.7.0-alpha.11...v2.7.0-alpha.12) (2022-06-16)
+
+
+### Features
+
+* further align compiler-sfc api + expose rewriteDefault ([8ce585d](https://github.com/vuejs/vue/commit/8ce585d70c2e1adb04650801b03dcc9552cbaf95))
+
+
+
 # [2.7.0-alpha.11](https://github.com/vuejs/vue/compare/v2.7.0-alpha.10...v2.7.0-alpha.11) (2022-06-16)
 
 
