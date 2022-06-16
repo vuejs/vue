@@ -102,7 +102,7 @@ const bar = 1
     // should remove defineOptions import and call
     expect(content).not.toMatch('defineProps')
     // should generate correct setup signature
-    expect(content).toMatch(`setup(__props, { expose }) {`)
+    expect(content).toMatch(`setup(__props) {`)
     // should assign user identifier to it
     expect(content).toMatch(`const props = __props`)
     // should include context options in default export
@@ -149,7 +149,7 @@ const myEmit = defineEmits(['foo', 'bar'])
     // should remove defineOptions import and call
     expect(content).not.toMatch('defineEmits')
     // should generate correct setup signature
-    expect(content).toMatch(`setup(__props, { expose, emit: myEmit }) {`)
+    expect(content).toMatch(`setup(__props, { emit: myEmit }) {`)
     // should include context options in default export
     expect(content).toMatch(`export default {
   emits: ['foo', 'bar'],`)
@@ -769,7 +769,7 @@ const emit = defineEmits(['a', 'b'])
       expect(content).toMatch(`export default /*#__PURE__*/_defineComponent({
   props: { foo: String },
   emits: ['a', 'b'],
-  setup(__props, { expose, emit }) {`)
+  setup(__props, { emit }) {`)
     })
 
     test('defineProps w/ type', () => {

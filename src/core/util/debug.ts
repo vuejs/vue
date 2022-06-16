@@ -3,7 +3,7 @@ import { noop, isArray, isFunction } from 'shared/util'
 import type { Component } from 'types/component'
 import { currentInstance } from 'v3/currentInstance'
 
-export let warn = noop
+export let warn: (msg: string, vm?: Component | null) => void = noop
 export let tip = noop
 export let generateComponentTrace: (vm: Component) => string // work around flow check
 export let formatComponentName: (vm: Component, includeFile?: false) => string

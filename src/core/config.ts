@@ -13,8 +13,8 @@ export interface Config {
   productionTip: boolean
   performance: boolean
   devtools: boolean
-  errorHandler?: (err: Error, vm: Component, info: string) => void
-  warnHandler?: (msg: string, vm: Component, trace: string) => void
+  errorHandler?: (err: Error, vm: Component | null, info: string) => void
+  warnHandler?: (msg: string, vm: Component | null, trace: string) => void
   ignoredElements: Array<string | RegExp>
   keyCodes: { [key: string]: number | Array<number> }
 

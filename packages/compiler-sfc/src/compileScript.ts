@@ -1183,7 +1183,7 @@ export function compileScript(
     s.prependLeft(startOffset, `\nlet __temp${any}, __restore${any}\n`)
   }
 
-  const destructureElements = [`expose`]
+  const destructureElements = hasDefineExposeCall ? [`expose`] : []
   if (emitIdentifier) {
     destructureElements.push(
       emitIdentifier === `emit` ? `emit` : `emit: ${emitIdentifier}`
@@ -1256,9 +1256,6 @@ export function compileScript(
     runtimeOptions += genRuntimeEmits(typeDeclaredEmits)
   }
 
-  // <script setup> components are closed by default. If the user did not
-  // explicitly call `defineExpose`, call expose() with no args.
-  const exposeCall = hasDefineExposeCall ? `` : `  expose();\n`
   // wrap setup code with function.
   if (isTS) {
     // for TS, make sure the exported type is still valid type with
@@ -1273,7 +1270,7 @@ export function compileScript(
         `defineComponent`
       )}({${def}${runtimeOptions}\n  ${
         hasAwait ? `async ` : ``
-      }setup(${args}) {\n${exposeCall}`
+      }setup(${args}) {\n`
     )
     s.appendRight(endOffset, `})`)
   } else {
@@ -1283,14 +1280,14 @@ export function compileScript(
       s.prependLeft(
         startOffset,
         `\nexport default /*#__PURE__*/Object.assign(${DEFAULT_VAR}, {${runtimeOptions}\n  ` +
-          `${hasAwait ? `async ` : ``}setup(${args}) {\n${exposeCall}`
+          `${hasAwait ? `async ` : ``}setup(${args}) {\n`
       )
       s.appendRight(endOffset, `})`)
     } else {
       s.prependLeft(
         startOffset,
         `\nexport default {${runtimeOptions}\n  ` +
-          `${hasAwait ? `async ` : ``}setup(${args}) {\n${exposeCall}`
+          `${hasAwait ? `async ` : ``}setup(${args}) {\n`
       )
       s.appendRight(endOffset, `}`)
     }

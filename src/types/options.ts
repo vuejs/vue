@@ -90,7 +90,7 @@ export type ComponentOptions = {
   comments?: boolean
   inheritAttrs?: boolean
 
-  // Class API
+  // Legacy API
   abstract?: any
 
   // private

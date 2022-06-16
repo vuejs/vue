@@ -12,6 +12,7 @@ export interface SetupContext {
   attrs: Record<string, any>
   slots: Record<string, () => VNode[]>
   emit: (event: string, ...args: any[]) => any
+  expose: (exposed: Record<string, any>) => void
 }
 
 export function initSetup(vm: Component) {
@@ -47,7 +48,7 @@ export function initSetup(vm: Component) {
       if (!setupResult.__sfc) {
         for (const key in setupResult) {
           if (!isReserved(key)) {
-            proxySetupProperty(vm, setupResult, key)
+            proxyWithRefUnwrap(vm, setupResult, key)
           } else if (__DEV__) {
             warn(`Avoid using variables that start with _ or $ in setup().`)
           }
@@ -56,7 +57,7 @@ export function initSetup(vm: Component) {
         // exposed for compiled render fn
         const proxy = (vm._setupProxy = {})
         for (const key in setupResult) {
-          proxySetupProperty(proxy, setupResult, key)
+          proxyWithRefUnwrap(proxy, setupResult, key)
         }
       }
     } else if (__DEV__ && setupResult !== undefined) {
@@ -69,22 +70,23 @@ export function initSetup(vm: Component) {
   }
 }
 
-function proxySetupProperty(
+export function proxyWithRefUnwrap(
   target: any,
-  setupResult: Record<string, any>,
+  source: Record<string, any>,
   key: string
 ) {
-  let raw = setupResult[key]
+  let raw = source[key]
   Object.defineProperty(target, key, {
     enumerable: true,
     configurable: true,
     get: () => (isRef(raw) ? raw.value : raw),
     set: newVal =>
-      isRef(raw) ? (raw.value = newVal) : (raw = setupResult[key] = newVal)
+      isRef(raw) ? (raw.value = newVal) : (raw = source[key] = newVal)
   })
 }
 
-function createSetupContext(vm: Component) {
+function createSetupContext(vm: Component): SetupContext {
+  let exposeCalled = false
   return {
     get attrs() {
       return initAttrsProxy(vm)
@@ -93,8 +95,18 @@ function createSetupContext(vm: Component) {
       return initSlotsProxy(vm)
     },
     emit: bind(vm.$emit, vm) as any,
-    expose() {
-      // TODO
+    expose(exposed?: Record<string, any>) {
+      if (__DEV__) {
+        if (exposeCalled) {
+          warn(`expose() should be called only once per setup().`, vm)
+        }
+        exposeCalled = true
+      }
+      if (exposed) {
+        Object.keys(exposed).forEach(key =>
+          proxyWithRefUnwrap(vm, exposed, key)
+        )
+      }
     }
   }
 }
