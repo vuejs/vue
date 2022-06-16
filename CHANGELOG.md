@@ -1,3 +1,12 @@
+# [2.7.0-alpha.11](https://github.com/vuejs/vue/compare/v2.7.0-alpha.10...v2.7.0-alpha.11) (2022-06-16)
+
+
+### Bug Fixes
+
+* further align types with v3 ([2726b6d](https://github.com/vuejs/vue/commit/2726b6d9ff3030af63012a304c33781163461a23))
+
+
+
 # [2.7.0-alpha.10](https://github.com/vuejs/vue/compare/v2.7.0-alpha.9...v2.7.0-alpha.10) (2022-06-16)
 
 
