@@ -8,7 +8,7 @@ import {
   StylePreprocessorResults
 } from './stylePreprocessors'
 
-export interface StyleCompileOptions {
+export interface SFCStyleCompileOptions {
   source: string
   filename: string
   id: string
@@ -21,11 +21,11 @@ export interface StyleCompileOptions {
   postcssPlugins?: any[]
 }
 
-export interface AsyncStyleCompileOptions extends StyleCompileOptions {
+export interface SFCAsyncStyleCompileOptions extends SFCStyleCompileOptions {
   isAsync?: boolean
 }
 
-export interface StyleCompileResults {
+export interface SFCStyleCompileResults {
   code: string
   map: any | void
   rawResult: LazyResult | void
@@ -33,20 +33,20 @@ export interface StyleCompileResults {
 }
 
 export function compileStyle(
-  options: StyleCompileOptions
-): StyleCompileResults {
+  options: SFCStyleCompileOptions
+): SFCStyleCompileResults {
   return doCompileStyle({ ...options, isAsync: false })
 }
 
 export function compileStyleAsync(
-  options: StyleCompileOptions
-): Promise<StyleCompileResults> {
+  options: SFCStyleCompileOptions
+): Promise<SFCStyleCompileResults> {
   return Promise.resolve(doCompileStyle({ ...options, isAsync: true }))
 }
 
 export function doCompileStyle(
-  options: AsyncStyleCompileOptions
-): StyleCompileResults {
+  options: SFCAsyncStyleCompileOptions
+): SFCStyleCompileResults {
   const {
     filename,
     id,
@@ -94,7 +94,7 @@ export function doCompileStyle(
     if (options.isAsync) {
       return result
         .then(
-          (result: LazyResult): StyleCompileResults => ({
+          (result: LazyResult): SFCStyleCompileResults => ({
             code: result.css || '',
             map: result.map && result.map.toJSON(),
             errors,
@@ -102,7 +102,7 @@ export function doCompileStyle(
           })
         )
         .catch(
-          (error: Error): StyleCompileResults => ({
+          (error: Error): SFCStyleCompileResults => ({
             code: '',
             map: undefined,
             errors: [...errors, error.message],
@@ -127,7 +127,7 @@ export function doCompileStyle(
 }
 
 function preprocess(
-  options: StyleCompileOptions,
+  options: SFCStyleCompileOptions,
   preprocessor: StylePreprocessor
 ): StylePreprocessorResults {
   return preprocessor(

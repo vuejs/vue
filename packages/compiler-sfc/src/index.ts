@@ -8,8 +8,8 @@ export { generateCodeFrame } from 'compiler/codeframe'
 // types
 export { SFCBlock, SFCCustomBlock, SFCDescriptor } from './parseComponent'
 export {
-  TemplateCompileOptions,
-  TemplateCompileResult
+  SFCTemplateCompileOptions,
+  SFCTemplateCompileResult
 } from './compileTemplate'
-export { StyleCompileOptions, StyleCompileResults } from './compileStyle'
-export { ScriptCompileOptions } from './compileScript'
+export { SFCStyleCompileOptions, SFCStyleCompileResults } from './compileStyle'
+export { SFCScriptCompileOptions } from './compileScript'

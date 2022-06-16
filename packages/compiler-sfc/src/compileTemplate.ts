@@ -13,7 +13,7 @@ import * as _compiler from 'web/entry-compiler'
 import { prefixIdentifiers } from './prefixIdentifiers'
 import { WarningMessage } from 'types/compiler'
 
-export interface TemplateCompileOptions {
+export interface SFCTemplateCompileOptions {
   source: string
   filename: string
   compiler?: VueTemplateCompiler
@@ -31,7 +31,7 @@ export interface TemplateCompileOptions {
   bindings?: BindingMetadata
 }
 
-export interface TemplateCompileResult {
+export interface SFCTemplateCompileResult {
   ast: Object | undefined
   code: string
   source: string
@@ -40,8 +40,8 @@ export interface TemplateCompileResult {
 }
 
 export function compileTemplate(
-  options: TemplateCompileOptions
-): TemplateCompileResult {
+  options: SFCTemplateCompileOptions
+): SFCTemplateCompileResult {
   const { preprocessLang } = options
   const preprocessor = preprocessLang && consolidate[preprocessLang]
   if (preprocessor) {
@@ -68,7 +68,7 @@ export function compileTemplate(
 }
 
 function preprocess(
-  options: TemplateCompileOptions,
+  options: SFCTemplateCompileOptions,
   preprocessor: any
 ): string {
   const { source, filename, preprocessOptions } = options
@@ -99,8 +99,8 @@ function preprocess(
 }
 
 function actuallyCompile(
-  options: TemplateCompileOptions
-): TemplateCompileResult {
+  options: SFCTemplateCompileOptions
+): SFCTemplateCompileResult {
   const {
     source,
     compiler = _compiler,
