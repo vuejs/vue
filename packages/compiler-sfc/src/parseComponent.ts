@@ -17,12 +17,12 @@ export interface SFCCustomBlock {
   attrs: { [key: string]: string | true }
   start: number
   end: number
+  src?: string
   map?: RawSourceMap
 }
 
 export interface SFCBlock extends SFCCustomBlock {
   lang?: string
-  src?: string
   scoped?: boolean
   module?: string | boolean
 }

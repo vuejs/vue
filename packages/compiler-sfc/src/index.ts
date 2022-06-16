@@ -4,9 +4,10 @@ export { compileTemplate } from './compileTemplate'
 export { compileStyle, compileStyleAsync } from './compileStyle'
 export { compileScript } from './compileScript'
 export { generateCodeFrame } from 'compiler/codeframe'
+export { rewriteDefault } from './rewriteDefault'
 
 // types
-export { CompilerOptions } from 'types/compiler'
+export { CompilerOptions, WarningMessage } from 'types/compiler'
 export { TemplateCompiler } from './types'
 export {
   SFCBlock,

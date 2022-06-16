@@ -22,7 +22,7 @@ export interface ParseOptions {
   compiler?: TemplateCompiler
   compilerParseOptions?: VueTemplateCompilerParseOptions
   sourceRoot?: string
-  needMap?: boolean
+  sourceMap?: boolean
 }
 
 export function parse(options: ParseOptions): SFCDescriptor {
@@ -32,7 +32,7 @@ export function parse(options: ParseOptions): SFCDescriptor {
     compiler,
     compilerParseOptions = { pad: false } as VueTemplateCompilerParseOptions,
     sourceRoot = '',
-    needMap = true
+    sourceMap = true
   } = options
   const cacheKey = hash(
     filename + source + JSON.stringify(compilerParseOptions)
@@ -55,7 +55,7 @@ export function parse(options: ParseOptions): SFCDescriptor {
   output.shouldForceReload = prevImports =>
     hmrShouldReload(prevImports, output!)
 
-  if (needMap) {
+  if (sourceMap) {
     if (output.script && !output.script.src) {
       output.script.map = generateSourceMap(
         filename,
