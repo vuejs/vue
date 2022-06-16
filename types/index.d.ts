@@ -35,6 +35,8 @@ export {
 
 export * from './v3-manual-apis'
 export * from './v3-generated'
+// <script setup> helpers
+export * from './v3-setup-helpers'
 
 export { Data } from './common'
 export { SetupContext } from './v3-setup-context'

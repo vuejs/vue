@@ -1,7 +1,14 @@
 import { Component } from 'types/component'
+import { PropOptions } from 'types/options'
 import { def, invokeWithErrorHandling, isReserved, warn } from '../core/util'
 import VNode from '../core/vdom/vnode'
-import { bind, emptyObject, isFunction, isObject } from '../shared/util'
+import {
+  bind,
+  emptyObject,
+  isArray,
+  isFunction,
+  isObject
+} from '../shared/util'
 import { currentInstance, setCurrentInstance } from './currentInstance'
 import { isRef } from './reactivity/ref'
 
@@ -192,4 +199,36 @@ function getContext(): SetupContext {
   }
   const vm = currentInstance!
   return vm._setupContext || (vm._setupContext = createSetupContext(vm))
+}
+
+/**
+ * Runtime helper for merging default declarations. Imported by compiled code
+ * only.
+ * @internal
+ */
+export function mergeDefaults(
+  raw: string[] | Record<string, PropOptions>,
+  defaults: Record<string, any>
+): Record<string, PropOptions> {
+  const props = isArray(raw)
+    ? raw.reduce(
+        (normalized, p) => ((normalized[p] = {}), normalized),
+        {} as Record<string, PropOptions>
+      )
+    : raw
+  for (const key in defaults) {
+    const opt = props[key]
+    if (opt) {
+      if (isArray(opt) || isFunction(opt)) {
+        props[key] = { type: opt, default: defaults[key] }
+      } else {
+        opt.default = defaults[key]
+      }
+    } else if (opt === null) {
+      props[key] = { default: defaults[key] }
+    } else if (__DEV__) {
+      warn(`props default key "${key}" has no corresponding declaration.`)
+    }
+  }
+  return props
 }

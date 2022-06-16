@@ -26,7 +26,9 @@ export type ComponentOptions = {
 
   // data
   data: object | Function | void
-  props?: { [key: string]: PropOptions }
+  props?:
+    | string[]
+    | Record<string, Function | Array<Function> | null | PropOptions>
   propsData?: object
   computed?: {
     [key: string]:
@@ -105,8 +107,8 @@ export type ComponentOptions = {
 }
 
 export type PropOptions = {
-  type: Function | Array<Function> | null
-  default: any
-  required: boolean | null
-  validator: Function | null
+  type?: Function | Array<Function> | null
+  default?: any
+  required?: boolean | null
+  validator?: Function | null
 }

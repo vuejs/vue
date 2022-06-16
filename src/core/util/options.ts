@@ -467,7 +467,7 @@ export function resolveAsset(
   // fallback to prototype chain
   const res = assets[id] || assets[camelizedId] || assets[PascalCaseId]
   if (__DEV__ && warnMissing && !res) {
-    warn('Failed to resolve ' + type.slice(0, -1) + ': ' + id, options)
+    warn('Failed to resolve ' + type.slice(0, -1) + ': ' + id)
   }
   return res
 }
