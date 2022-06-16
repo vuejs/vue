@@ -1,3 +1,17 @@
+# [2.7.0-alpha.10](https://github.com/vuejs/vue/compare/v2.7.0-alpha.9...v2.7.0-alpha.10) (2022-06-16)
+
+
+### Bug Fixes
+
+* avoid warning when accessing _setupProxy ([cdfd9f3](https://github.com/vuejs/vue/commit/cdfd9f321e35981774785806bb1629a73ec58064))
+
+
+### Features
+
+* export version as named export ([749b96d](https://github.com/vuejs/vue/commit/749b96d84e6551c5187694a93c5493702035a239))
+
+
+
 # [2.7.0-alpha.9](https://github.com/vuejs/vue/compare/v2.7.0-alpha.8...v2.7.0-alpha.9) (2022-06-16)
 
 
