@@ -1,5 +1,5 @@
 import { SourceMapGenerator } from 'source-map'
-import { RawSourceMap, VueTemplateCompiler } from './types'
+import { RawSourceMap, TemplateCompiler } from './types'
 import {
   parseComponent,
   VueTemplateCompilerParseOptions,
@@ -19,7 +19,7 @@ const emptyRE = /^(?:\/\/)?\s*$/
 export interface ParseOptions {
   source: string
   filename?: string
-  compiler?: VueTemplateCompiler
+  compiler?: TemplateCompiler
   compilerParseOptions?: VueTemplateCompilerParseOptions
   sourceRoot?: string
   needMap?: boolean

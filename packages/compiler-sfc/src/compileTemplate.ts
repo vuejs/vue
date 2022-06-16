@@ -1,8 +1,4 @@
-import {
-  BindingMetadata,
-  VueTemplateCompiler,
-  VueTemplateCompilerOptions
-} from './types'
+import { BindingMetadata, TemplateCompiler } from './types'
 import assetUrlsModule, {
   AssetURLOptions,
   TransformAssetUrlsOptions
@@ -11,13 +7,13 @@ import srcsetModule from './templateCompilerModules/srcset'
 import consolidate from '@vue/consolidate'
 import * as _compiler from 'web/entry-compiler'
 import { prefixIdentifiers } from './prefixIdentifiers'
-import { WarningMessage } from 'types/compiler'
+import { CompilerOptions, WarningMessage } from 'types/compiler'
 
 export interface SFCTemplateCompileOptions {
   source: string
   filename: string
-  compiler?: VueTemplateCompiler
-  compilerOptions?: VueTemplateCompilerOptions
+  compiler?: TemplateCompiler
+  compilerOptions?: CompilerOptions
   transformAssetUrls?: AssetURLOptions | boolean
   transformAssetUrlsOptions?: TransformAssetUrlsOptions
   preprocessLang?: string
@@ -31,7 +27,7 @@ export interface SFCTemplateCompileOptions {
   bindings?: BindingMetadata
 }
 
-export interface SFCTemplateCompileResult {
+export interface SFCTemplateCompileResults {
   ast: Object | undefined
   code: string
   source: string
@@ -41,7 +37,7 @@ export interface SFCTemplateCompileResult {
 
 export function compileTemplate(
   options: SFCTemplateCompileOptions
-): SFCTemplateCompileResult {
+): SFCTemplateCompileResults {
   const { preprocessLang } = options
   const preprocessor = preprocessLang && consolidate[preprocessLang]
   if (preprocessor) {
@@ -100,7 +96,7 @@ function preprocess(
 
 function actuallyCompile(
   options: SFCTemplateCompileOptions
-): SFCTemplateCompileResult {
+): SFCTemplateCompileResults {
   const {
     source,
     compiler = _compiler,

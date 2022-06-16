@@ -14,26 +14,11 @@ export interface RawSourceMap extends StartOfSourceMap {
   mappings: string
 }
 
-export interface VueTemplateCompiler {
+export interface TemplateCompiler {
   parseComponent(source: string, options?: any): SFCDescriptor
-
-  compile(
-    template: string,
-    options: VueTemplateCompilerOptions
-  ): VueTemplateCompilerResults
-
-  ssrCompile(
-    template: string,
-    options: VueTemplateCompilerOptions
-  ): VueTemplateCompilerResults
+  compile(template: string, options: CompilerOptions): CompiledResult
+  ssrCompile(template: string, options: CompilerOptions): CompiledResult
 }
-
-// we'll just shim this much for now - in the future these types
-// should come from vue-template-compiler directly, or this package should be
-// part of the vue monorepo.
-export type VueTemplateCompilerOptions = CompilerOptions
-
-export type VueTemplateCompilerResults = CompiledResult
 
 export const enum BindingTypes {
   /**

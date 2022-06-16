@@ -6,10 +6,17 @@ export { compileScript } from './compileScript'
 export { generateCodeFrame } from 'compiler/codeframe'
 
 // types
-export { SFCBlock, SFCCustomBlock, SFCDescriptor } from './parseComponent'
+export { CompilerOptions } from 'types/compiler'
+export { TemplateCompiler } from './types'
+export {
+  SFCBlock,
+  SFCCustomBlock,
+  SFCScriptBlock,
+  SFCDescriptor
+} from './parseComponent'
 export {
   SFCTemplateCompileOptions,
-  SFCTemplateCompileResult
+  SFCTemplateCompileResults
 } from './compileTemplate'
 export { SFCStyleCompileOptions, SFCStyleCompileResults } from './compileStyle'
 export { SFCScriptCompileOptions } from './compileScript'
