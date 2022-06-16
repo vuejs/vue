@@ -13,6 +13,10 @@ export interface TransformAssetUrlsOptions {
    * imports, they will be directly rewritten to absolute urls.
    */
   base?: string
+  /**
+   * If true, also processes absolute urls.
+   */
+  includeAbsolute?: boolean
 }
 
 const defaultOptions: AssetURLOptions = {

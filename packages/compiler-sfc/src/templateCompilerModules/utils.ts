@@ -31,7 +31,12 @@ export function urlToRequire(
     return returnValue
   }
 
-  if (firstChar === '.' || firstChar === '~' || firstChar === '@') {
+  if (
+    transformAssetUrlsOption.includeAbsolute ||
+    firstChar === '.' ||
+    firstChar === '~' ||
+    firstChar === '@'
+  ) {
     if (!uriParts.hash) {
       return `require("${url}")`
     } else {
