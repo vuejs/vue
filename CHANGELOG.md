@@ -1,3 +1,15 @@
+# [2.7.0-alpha.9](https://github.com/vuejs/vue/compare/v2.7.0-alpha.8...v2.7.0-alpha.9) (2022-06-16)
+
+
+### Features
+
+* defineExpose() support ([3c2707b](https://github.com/vuejs/vue/commit/3c2707b62e1a355f182c08f85cf7bc9bca1bb34e))
+* directive resolution for `<script setup>` ([aa2b1f4](https://github.com/vuejs/vue/commit/aa2b1f4d93bdd257ae26a73994168709369aa6a0))
+* resolve components from `<script setup>` ([4b19339](https://github.com/vuejs/vue/commit/4b193390fbc203cc5bae46fe288b1c20c442cc03))
+* types for `<script setup>` macros ([7173ad4](https://github.com/vuejs/vue/commit/7173ad42729fa0913c3e7de94d251341929ee7c6))
+
+
+
 # [2.7.0-alpha.8](https://github.com/vuejs/vue/compare/v2.7.0-alpha.7...v2.7.0-alpha.8) (2022-06-14)
 
 ### Features
