@@ -64,7 +64,7 @@ export function prefixIdentifiers(
           s.prependRight(
             node.start!,
             `var _vm=this,_c=_vm._self._c${
-              isScriptSetup ? `,_setup=_vm._setupProxy;` : `;`
+              isScriptSetup ? `,_setup=_vm._self._setupProxy;` : `;`
             }`
           )
         }
