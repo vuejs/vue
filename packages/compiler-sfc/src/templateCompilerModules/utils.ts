@@ -14,8 +14,11 @@ export function urlToRequire(
     url = url.slice(secondChar === '/' ? 2 : 1)
   }
 
-  const uriParts = parseUriParts(url)
+  if (isExternalUrl(url) || isDataUrl(url) || firstChar === '#') {
+    return returnValue
+  }
 
+  const uriParts = parseUriParts(url)
   if (transformAssetUrlsOption.base) {
     // explicit base - directly rewrite the url into absolute url
     // does not apply to absolute urls or urls that start with `@`
@@ -66,4 +69,14 @@ function parseUriParts(urlString: string): UrlWithStringQuery {
     }
   }
   return returnValue
+}
+
+const externalRE = /^(https?:)?\/\//
+function isExternalUrl(url: string): boolean {
+  return externalRE.test(url)
+}
+
+const dataUrlRE = /^\s*data:/i
+function isDataUrl(url: string): boolean {
+  return dataUrlRE.test(url)
 }

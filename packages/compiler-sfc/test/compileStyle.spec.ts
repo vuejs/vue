@@ -9,7 +9,7 @@ test('preprocess less', () => {
       '.color { color: @red; }\n' +
       '</style>\n',
     filename: 'example.vue',
-    needMap: true
+    sourceMap: true
   }).styles[0]
 
   const result = compileStyle({
@@ -34,7 +34,7 @@ test('preprocess scss', () => {
       '.color { color: $red; }\n' +
       '</style>\n',
     filename: 'example.vue',
-    needMap: true
+    sourceMap: true
   }).styles[0]
   const result = compileStyle({
     id: 'v-scope-xxx',
@@ -59,7 +59,7 @@ test('preprocess sass', () => {
       '   color: $red\n' +
       '</style>\n',
     filename: 'example.vue',
-    needMap: true
+    sourceMap: true
   }).styles[0]
   const result = compileStyle({
     id: 'v-scope-xxx',
@@ -84,7 +84,7 @@ test('preprocess stylus', () => {
       '   color: red-color\n' +
       '</style>\n',
     filename: 'example.vue',
-    needMap: true
+    sourceMap: true
   }).styles[0]
   const result = compileStyle({
     id: 'v-scope-xxx',

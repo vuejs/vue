@@ -48,7 +48,7 @@ test('preprocess pug', () => {
       '   p Cool Pug example!\n' +
       '</template>\n',
     filename: 'example.vue',
-    needMap: true
+    sourceMap: true
   }).template as SFCBlock
 
   const result = compileTemplate({
@@ -103,7 +103,7 @@ test('warn missing preprocessor', () => {
     source: '<template lang="unknownLang">\n' + '</template>\n',
 
     filename: 'example.vue',
-    needMap: true
+    sourceMap: true
   }).template as SFCBlock
 
   const result = compileTemplate({
@@ -141,7 +141,6 @@ test('transform assetUrls', () => {
 })
 
 test('transform srcset', () => {
-  // TODO:
   const source = `
 <div>
   <img src="./logo.png">
@@ -226,4 +225,30 @@ test('transform assetUrls and srcset with base option', () => {
   expect(vnode.children[6].data.attrs.srcset).toBe(
     '/base/logo.png 2x, /base/logo.png 3x'
   )
+})
+
+test('transform with includeAbsolute', () => {
+  const source = `
+  <div>
+    <img src="./logo.png">
+    <img src="/logo.png">
+    <img src="https://foo.com/logo.png">
+  </div>
+  `
+  const result = compileTemplate({
+    filename: 'example.vue',
+    source,
+    transformAssetUrls: true,
+    transformAssetUrlsOptions: { includeAbsolute: true }
+  })
+
+  expect(result.errors.length).toBe(0)
+
+  const vnode = mockRender(result.code, {
+    './logo.png': 'relative',
+    '/logo.png': 'absolute'
+  })
+  expect(vnode.children[0].data.attrs.src).toBe('relative')
+  expect(vnode.children[2].data.attrs.src).toBe('absolute')
+  expect(vnode.children[4].data.attrs.src).toBe('https://foo.com/logo.png')
 })
