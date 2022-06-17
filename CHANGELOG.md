@@ -1,3 +1,12 @@
+# [2.7.0-beta.2](https://github.com/vuejs/vue/compare/v2.7.0-beta.1...v2.7.0-beta.2) (2022-06-17)
+
+
+### Bug Fixes
+
+* **compiler-sfc:** do not transform external and data urls in templates ([328ebff](https://github.com/vuejs/vue/commit/328ebff04198143385371c857ad23f739be9509d))
+
+
+
 # [2.7.0-beta.1](https://github.com/vuejs/vue/compare/v2.7.0-alpha.12...v2.7.0-beta.1) (2022-06-17)
 
 
