@@ -116,6 +116,9 @@ function initProps(vm: Component, propsOptions: Object) {
       proxy(vm, `_props`, key)
     }
   }
+  // observe prop
+  const ob = observe(vm._props)
+  ob && ob.vmCount++
   toggleObserving(true)
 }
 
