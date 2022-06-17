@@ -492,7 +492,7 @@ export function createPatchFunction (backend) {
   }
 
   function findIdxInOld (node, oldCh, start, end) {
-    for (let i = start; i < end; i++) {
+    for (let i = start + 1; i < end; i++) {
       const c = oldCh[i]
       if (isDef(c) && sameVnode(node, c)) return i
     }
