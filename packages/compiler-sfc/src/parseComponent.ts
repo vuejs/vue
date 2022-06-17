@@ -125,6 +125,11 @@ export function parseComponent(
           return cumulated
         }, {})
       }
+
+      if (typeof currentBlock.attrs.src === 'string') {
+        currentBlock.src = currentBlock.attrs.src
+      }
+
       if (isSpecialTag(tag)) {
         checkAttrs(currentBlock, attrs)
         if (tag === 'script') {
@@ -161,9 +166,6 @@ export function parseComponent(
       }
       if (attr.name === 'module') {
         block.module = attr.value || true
-      }
-      if (attr.name === 'src') {
-        block.src = attr.value
       }
     }
   }

@@ -202,10 +202,11 @@ describe('Single File Component parser', () => {
         }))
       }
       </test>
+      <custom src="./x.json"></custom>
     `,
       { deindent: true }
     )
-    expect(res.customBlocks.length).toBe(3)
+    expect(res.customBlocks.length).toBe(4)
 
     const simpleExample = res.customBlocks[0]
     expect(simpleExample.type).toBe('example')
@@ -233,6 +234,9 @@ describe('Single File Component parser', () => {
 }`)
     expect(simpleTest.attrs.name).toBe('simple')
     expect(simpleTest.attrs.foo).toBe('bar')
+
+    const customWithSrc = res.customBlocks[3]
+    expect(customWithSrc.src).toBe('./x.json')
   })
 
   // Regression #4289
