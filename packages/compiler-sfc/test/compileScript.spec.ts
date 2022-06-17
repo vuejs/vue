@@ -1,11 +1,11 @@
 import { BindingTypes } from '../src/types'
 import { parse, ParseOptions } from '../src/parse'
 import { parse as babelParse } from '@babel/parser'
-import { compileScript, ScriptCompileOptions } from '../src/compileScript'
+import { compileScript, SFCScriptCompileOptions } from '../src/compileScript'
 
 function compile(
   source: string,
-  options?: Partial<ScriptCompileOptions>,
+  options?: Partial<SFCScriptCompileOptions>,
   parseOptions?: Partial<ParseOptions>
 ) {
   const sfc = parse({
@@ -1162,120 +1162,6 @@ const emit = defineEmits(['a', 'b'])
       )
       expect(content).toMatch(`return { Baz }`)
       assertCode(content)
-    })
-  })
-
-  describe('async/await detection', () => {
-    function assertAwaitDetection(code: string, shouldAsync = true) {
-      const { content } = compile(`<script setup>${code}</script>`)
-      if (shouldAsync) {
-        expect(content).toMatch(`let __temp, __restore`)
-      }
-      expect(content).toMatch(`${shouldAsync ? `async ` : ``}setup(`)
-      assertCode(content)
-      return content
-    }
-
-    test('expression statement', () => {
-      assertAwaitDetection(`await foo`)
-    })
-
-    test('variable', () => {
-      assertAwaitDetection(`const a = 1 + (await foo)`)
-    })
-
-    test('ref', () => {
-      assertAwaitDetection(`let a = $ref(1 + (await foo))`)
-    })
-
-    // #4448
-    test('nested await', () => {
-      assertAwaitDetection(`await (await foo)`)
-      assertAwaitDetection(`await ((await foo))`)
-      assertAwaitDetection(`await (await (await foo))`)
-    })
-
-    // should prepend semicolon
-    test('nested leading await in expression statement', () => {
-      const code = assertAwaitDetection(`foo()\nawait 1 + await 2`)
-      expect(code).toMatch(`foo()\n;(`)
-    })
-
-    // #4596 should NOT prepend semicolon
-    test('single line conditions', () => {
-      const code = assertAwaitDetection(`if (false) await foo()`)
-      expect(code).not.toMatch(`if (false) ;(`)
-    })
-
-    test('nested statements', () => {
-      assertAwaitDetection(`if (ok) { await foo } else { await bar }`)
-    })
-
-    test('multiple `if` nested statements', () => {
-      assertAwaitDetection(`if (ok) {
-        let a = 'foo'
-        await 0 + await 1
-        await 2
-      } else if (a) {
-        await 10
-        if (b) {
-          await 0 + await 1
-        } else {
-          let a = 'foo'
-          await 2
-        }
-        if (b) {
-          await 3
-          await 4
-        }
-      } else {
-        await 5
-      }`)
-    })
-
-    test('multiple `if while` nested statements', () => {
-      assertAwaitDetection(`if (ok) {
-        while (d) {
-          await 5
-        }
-        while (d) {
-          await 5
-          await 6
-          if (c) {
-            let f = 10
-            10 + await 7
-          } else {
-            await 8
-            await 9
-          }
-        }
-      }`)
-    })
-
-    test('multiple `if for` nested statements', () => {
-      assertAwaitDetection(`if (ok) {
-        for (let a of [1,2,3]) {
-          await a
-        }
-        for (let a of [1,2,3]) {
-          await a
-          await a
-        }
-      }`)
-    })
-
-    test('should ignore await inside functions', () => {
-      // function declaration
-      assertAwaitDetection(`async function foo() { await bar }`, false)
-      // function expression
-      assertAwaitDetection(`const foo = async () => { await bar }`, false)
-      // object method
-      assertAwaitDetection(`const obj = { async method() { await bar }}`, false)
-      // class method
-      assertAwaitDetection(
-        `const cls = class Foo { async method() { await bar }}`,
-        false
-      )
     })
   })
 

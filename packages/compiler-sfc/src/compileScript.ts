@@ -30,7 +30,6 @@ import {
   CallExpression,
   RestElement,
   TSInterfaceBody,
-  AwaitExpression,
   Program,
   ObjectMethod,
   LVal,
@@ -187,7 +186,6 @@ export function compileScript(
     | undefined
   let emitsTypeDeclRaw: Node | undefined
   let emitIdentifier: string | undefined
-  let hasAwait = false
   let hasInlinedSsrRenderFn = false
   // props/emits declared via types
   const typeDeclaredProps: Record<string, PropTypeData> = {}
@@ -469,56 +467,6 @@ export function compileScript(
         )
       }
     })
-  }
-
-  /**
-   * await foo()
-   * -->
-   * ;(
-   *   ([__temp,__restore] = withAsyncContext(() => foo())),
-   *   await __temp,
-   *   __restore()
-   * )
-   *
-   * const a = await foo()
-   * -->
-   * const a = (
-   *   ([__temp, __restore] = withAsyncContext(() => foo())),
-   *   __temp = await __temp,
-   *   __restore(),
-   *   __temp
-   * )
-   */
-  function processAwait(
-    node: AwaitExpression,
-    needSemi: boolean,
-    isStatement: boolean
-  ) {
-    const argumentStart =
-      node.argument.extra && node.argument.extra.parenthesized
-        ? (node.argument.extra.parenStart as number)
-        : node.argument.start!
-
-    const argumentStr = source.slice(
-      argumentStart + startOffset,
-      node.argument.end! + startOffset
-    )
-
-    const containsNestedAwait = /\bawait\b/.test(argumentStr)
-
-    s.overwrite(
-      node.start! + startOffset,
-      argumentStart + startOffset,
-      `${needSemi ? `;` : ``}(\n  ([__temp,__restore] = ${helper(
-        `withAsyncContext`
-      )}(${containsNestedAwait ? `async ` : ``}() => `
-    )
-    s.appendLeft(
-      node.end! + startOffset,
-      `)),\n  ${isStatement ? `` : `__temp = `}await __temp,\n  __restore()${
-        isStatement ? `` : `,\n  __temp`
-      }\n)`
-    )
   }
 
   /**
@@ -984,23 +932,9 @@ export function compileScript(
             scope.push(child.body)
           }
           if (child.type === 'AwaitExpression') {
-            hasAwait = true
-            // if the await expression is an expression statement and
-            // - is in the root scope
-            // - or is not the first statement in a nested block scope
-            // then it needs a semicolon before the generated code.
-            const currentScope = scope[scope.length - 1]
-            const needsSemi = currentScope.some((n, i) => {
-              return (
-                (scope.length === 1 || i > 0) &&
-                n.type === 'ExpressionStatement' &&
-                n.start === child.start
-              )
-            })
-            processAwait(
-              child,
-              needsSemi,
-              parent.type === 'ExpressionStatement'
+            error(
+              `Vue 2 does not support top level await in <script setup>.`,
+              child
             )
           }
         },
@@ -1177,11 +1111,6 @@ export function compileScript(
       )}(__props, ${JSON.stringify(Object.keys(propsDestructuredBindings))})\n`
     )
   }
-  // inject temp variables for async context preservation
-  if (hasAwait) {
-    const any = isTS ? `: any` : ``
-    s.prependLeft(startOffset, `\nlet __temp${any}, __restore${any}\n`)
-  }
 
   const destructureElements = hasDefineExposeCall ? [`expose`] : []
   if (emitIdentifier) {
@@ -1268,9 +1197,7 @@ export function compileScript(
       startOffset,
       `\nexport default /*#__PURE__*/${helper(
         `defineComponent`
-      )}({${def}${runtimeOptions}\n  ${
-        hasAwait ? `async ` : ``
-      }setup(${args}) {\n`
+      )}({${def}${runtimeOptions}\n  setup(${args}) {\n`
     )
     s.appendRight(endOffset, `})`)
   } else {
@@ -1280,14 +1207,13 @@ export function compileScript(
       s.prependLeft(
         startOffset,
         `\nexport default /*#__PURE__*/Object.assign(${DEFAULT_VAR}, {${runtimeOptions}\n  ` +
-          `${hasAwait ? `async ` : ``}setup(${args}) {\n`
+          `setup(${args}) {\n`
       )
       s.appendRight(endOffset, `})`)
     } else {
       s.prependLeft(
         startOffset,
-        `\nexport default {${runtimeOptions}\n  ` +
-          `${hasAwait ? `async ` : ``}setup(${args}) {\n`
+        `\nexport default {${runtimeOptions}\n  setup(${args}) {\n`
       )
       s.appendRight(endOffset, `}`)
     }
