@@ -1,3 +1,18 @@
+# [2.7.0-beta.1](https://github.com/vuejs/vue/compare/v2.7.0-alpha.12...v2.7.0-beta.1) (2022-06-17)
+
+
+### Bug Fixes
+
+* **compiler-sfc:** expose src on custom blocks as well ([cdfc4c1](https://github.com/vuejs/vue/commit/cdfc4c134ddadc33f3b50d53ec6316b0c96f4567))
+
+
+### Features
+
+* **compiler-sfc:** support includeAbsolute in transformAssetUrl ([8f5817a](https://github.com/vuejs/vue/commit/8f5817a7c9a0664438e4299f82ac41a67f156f89))
+* warn top level await usage in `<script setup>` ([efa8a74](https://github.com/vuejs/vue/commit/efa8a749644cfd6a0d6e9e92a1f342e2eff77d5a))
+
+
+
 # [2.7.0-alpha.12](https://github.com/vuejs/vue/compare/v2.7.0-alpha.11...v2.7.0-alpha.12) (2022-06-16)
 
 
