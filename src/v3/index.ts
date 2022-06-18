@@ -76,6 +76,8 @@ export { useSlots, useAttrs, mergeDefaults } from './apiSetup'
 export { nextTick } from 'core/util/next-tick'
 export { set, del } from 'core/observer'
 
+export { useCssModule } from './sfc-helpers/useCssModule'
+
 /**
  * @internal type is manually declared in <root>/types/v3-define-component.d.ts
  */

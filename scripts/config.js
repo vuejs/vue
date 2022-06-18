@@ -279,7 +279,8 @@ function genConfig(name) {
   const vars = {
     __VERSION__: version,
     __DEV__: `process.env.NODE_ENV !== 'production'`,
-    __TEST__: false
+    __TEST__: false,
+    __GLOBAL__: opts.format === 'umd' || name.includes('browser')
   }
   // feature flags
   Object.keys(featureFlags).forEach(key => {
