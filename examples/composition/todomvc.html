@@ -1,4 +1,4 @@
-<script src="../../dist/vue.js"></script>
+<script src="../../dist/vue.min.js"></script>
 <link
   rel="stylesheet"
   href="../../node_modules/todomvc-app-css/index.css"
@@ -90,7 +90,7 @@
 <script>
   const { reactive, computed, watchEffect, onMounted, onUnmounted } = Vue
 
-  const STORAGE_KEY = 'todos-vuejs-3.x'
+  const STORAGE_KEY = 'todos-vuejs-3.x-composition'
   const todoStorage = {
     fetch() {
       const todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
