@@ -267,4 +267,31 @@ describe('api: setup context', () => {
       }
     }).$mount()
   })
+
+  it('should not track dep accessed in setup', async () => {
+    const spy = vi.fn()
+    const msg = ref('hi')
+
+    const Child = {
+      setup: () => {
+        msg.value
+        return () => {}
+      }
+    }
+
+    new Vue({
+      setup() {
+        return h => {
+          spy()
+          return h(Child)
+        }
+      }
+    }).$mount()
+
+    expect(spy).toHaveBeenCalledTimes(1)
+
+    msg.value = 'bye'
+    await nextTick()
+    expect(spy).toHaveBeenCalledTimes(1)
+  })
 })

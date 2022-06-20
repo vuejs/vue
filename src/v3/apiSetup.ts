@@ -1,6 +1,6 @@
 import { Component } from 'types/component'
 import { PropOptions } from 'types/options'
-import { toggleObserving } from '../core/observer'
+import { popTarget, pushTarget } from '../core/observer/dep'
 import { def, invokeWithErrorHandling, isReserved, warn } from '../core/util'
 import VNode from '../core/vdom/vnode'
 import {
@@ -31,7 +31,7 @@ export function initSetup(vm: Component) {
     const ctx = (vm._setupContext = createSetupContext(vm))
 
     setCurrentInstance(vm)
-    toggleObserving(false)
+    pushTarget()
     const setupResult = invokeWithErrorHandling(
       setup,
       null,
@@ -39,7 +39,7 @@ export function initSetup(vm: Component) {
       vm,
       `setup`
     )
-    toggleObserving(true)
+    popTarget()
     setCurrentInstance()
 
     if (isFunction(setupResult)) {
