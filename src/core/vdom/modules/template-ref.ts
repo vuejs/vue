@@ -33,6 +33,7 @@ export function registerRef(vnode: VNodeWithData, isRemoval?: boolean) {
   const vm = vnode.context
   const refValue = vnode.componentInstance || vnode.elm
   const value = isRemoval ? null : refValue
+  const $refsValue = isRemoval ? undefined : refValue
 
   if (isFunction(ref)) {
     invokeWithErrorHandling(ref, vm, [value], vm, `template ref function`)
@@ -67,14 +68,14 @@ export function registerRef(vnode: VNodeWithData, isRemoval?: boolean) {
       if (isRemoval && refs[ref] !== refValue) {
         return
       }
-      refs[ref] = value
+      refs[ref] = $refsValue
       setSetupRef(vm, ref, value)
     } else if (_isRef) {
       if (isRemoval && ref.value !== refValue) {
         return
       }
       ref.value = value
-      if (setupRefKey) refs[setupRefKey] = value
+      if (setupRefKey) refs[setupRefKey] = $refsValue
     } else if (__DEV__) {
       warn(`Invalid template ref type: ${typeof ref}`)
     }
