@@ -249,7 +249,7 @@ describe('api: setup context', () => {
   })
 
   // #12561
-  it.only('setup props should be reactive', () => {
+  it('setup props should be reactive', () => {
     const msg = ref('hi')
 
     const Child = {
