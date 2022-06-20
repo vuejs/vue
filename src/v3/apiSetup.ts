@@ -1,5 +1,6 @@
 import { Component } from 'types/component'
 import { PropOptions } from 'types/options'
+import { toggleObserving } from '../core/observer'
 import { def, invokeWithErrorHandling, isReserved, warn } from '../core/util'
 import VNode from '../core/vdom/vnode'
 import {
@@ -10,6 +11,7 @@ import {
   isObject
 } from '../shared/util'
 import { currentInstance, setCurrentInstance } from './currentInstance'
+import { shallowReactive } from './reactivity/reactive'
 import { isRef } from './reactivity/ref'
 
 /**
@@ -29,13 +31,15 @@ export function initSetup(vm: Component) {
     const ctx = (vm._setupContext = createSetupContext(vm))
 
     setCurrentInstance(vm)
+    toggleObserving(false)
     const setupResult = invokeWithErrorHandling(
       setup,
       null,
-      [vm._props, ctx],
+      [vm._props || shallowReactive({}), ctx],
       vm,
       `setup`
     )
+    toggleObserving(true)
     setCurrentInstance()
 
     if (isFunction(setupResult)) {

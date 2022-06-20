@@ -30,7 +30,7 @@ import {
   isFunction
 } from '../util/index'
 import type { Component } from 'types/component'
-import { TrackOpTypes } from '../../v3'
+import { shallowReactive, TrackOpTypes } from 'v3'
 
 const sharedPropertyDefinition = {
   enumerable: true,
@@ -71,7 +71,7 @@ export function initState(vm: Component) {
 
 function initProps(vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
-  const props = (vm._props = {})
+  const props = (vm._props = shallowReactive({}))
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
   const keys: string[] = (vm.$options._propKeys = [])

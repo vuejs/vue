@@ -1,4 +1,4 @@
-import { h, ref, reactive } from 'v3'
+import { h, ref, reactive, isReactive, toRef, isRef } from 'v3'
 import { nextTick } from 'core/util'
 import { effect } from 'v3/reactivity/effect'
 import Vue from 'vue'
@@ -246,5 +246,25 @@ describe('api: setup context', () => {
       template: `<div v-dir />`
     }).$mount()
     expect(spy).toHaveBeenCalled()
+  })
+
+  // #12561
+  it.only('setup props should be reactive', () => {
+    const msg = ref('hi')
+
+    const Child = {
+      props: ['msg'],
+      setup: props => {
+        expect(isReactive(props)).toBe(true)
+        expect(isRef(toRef(props, 'foo'))).toBe(true)
+        return () => {}
+      }
+    }
+
+    new Vue({
+      setup() {
+        return h => h(Child, { props: { msg } })
+      }
+    }).$mount()
   })
 })
