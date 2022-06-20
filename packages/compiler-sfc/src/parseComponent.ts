@@ -4,7 +4,6 @@ import { makeMap } from 'shared/util'
 import { ASTAttr, WarningMessage } from 'types/compiler'
 import { BindingMetadata, RawSourceMap } from './types'
 import type { ImportBinding } from './compileScript'
-import { parseCssVars } from './cssVars'
 
 export const DEFAULT_FILENAME = 'anonymous.vue'
 
@@ -208,9 +207,6 @@ export function parseComponent(
     end,
     outputSourceRange: options.outputSourceRange
   })
-
-  // parse CSS vars
-  sfc.cssVars = parseCssVars(sfc)
 
   return sfc
 }

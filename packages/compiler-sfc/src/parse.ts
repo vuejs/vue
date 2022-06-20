@@ -10,6 +10,7 @@ import {
 import hash from 'hash-sum'
 import LRU from 'lru-cache'
 import { hmrShouldReload } from './compileScript'
+import { parseCssVars } from './cssVars'
 
 const cache = new LRU<string, SFCDescriptor>(100)
 
@@ -57,6 +58,10 @@ export function parse(options: SFCParseOptions): SFCDescriptor {
   }
 
   output.filename = filename
+
+  // parse CSS vars
+  output.cssVars = parseCssVars(output)
+
   output.shouldForceReload = prevImports =>
     hmrShouldReload(prevImports, output!)
 
