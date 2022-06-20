@@ -81,8 +81,7 @@ function processRule(id: string, rule: Rule) {
 function rewriteSelector(
   id: string,
   selector: selectorParser.Selector,
-  selectorRoot: selectorParser.Root,
-  slotted = false
+  selectorRoot: selectorParser.Root
 ) {
   let node: selectorParser.Node | null = null
   let shouldInject = true
@@ -142,23 +141,22 @@ function rewriteSelector(
         return false
       }
 
-      // slot: use selector inside `::v-slotted` and inject [id + '-s']
-      // instead.
+      // !!! Vue 2 does not have :slotted support
       // ::v-slotted(.foo) -> .foo[xxxxxxx-s]
-      if (value === ':slotted' || value === '::v-slotted') {
-        rewriteSelector(id, n.nodes[0], selectorRoot, true /* slotted */)
-        let last: selectorParser.Selector['nodes'][0] = n
-        n.nodes[0].each(ss => {
-          selector.insertAfter(last, ss)
-          last = ss
-        })
-        // selector.insertAfter(n, n.nodes[0])
-        selector.removeChild(n)
-        // since slotted attribute already scopes the selector there's no
-        // need for the non-slot attribute.
-        shouldInject = false
-        return false
-      }
+      // if (value === ':slotted' || value === '::v-slotted') {
+      //   rewriteSelector(id, n.nodes[0], selectorRoot, true /* slotted */)
+      //   let last: selectorParser.Selector['nodes'][0] = n
+      //   n.nodes[0].each(ss => {
+      //     selector.insertAfter(last, ss)
+      //     last = ss
+      //   })
+      //   // selector.insertAfter(n, n.nodes[0])
+      //   selector.removeChild(n)
+      //   // since slotted attribute already scopes the selector there's no
+      //   // need for the non-slot attribute.
+      //   shouldInject = false
+      //   return false
+      // }
 
       // global: replace with inner selector and do not inject [id].
       // ::v-global(.foo) -> .foo
@@ -184,14 +182,13 @@ function rewriteSelector(
   }
 
   if (shouldInject) {
-    const idToAdd = slotted ? id + '-s' : id
     selector.insertAfter(
       // If node is null it means we need to inject [id] at the start
       // insertAfter can handle `null` here
       node as any,
       selectorParser.attribute({
-        attribute: idToAdd,
-        value: idToAdd,
+        attribute: id,
+        value: id,
         raws: {},
         quoteMark: `"`
       })
