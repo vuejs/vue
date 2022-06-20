@@ -1,3 +1,21 @@
+# [2.7.0-beta.3](https://github.com/vuejs/vue/compare/v2.7.0-beta.2...v2.7.0-beta.3) (2022-06-20)
+
+
+### Bug Fixes
+
+* remove wrong observe toggle, properly disable tracking in setup() ([2d67641](https://github.com/vuejs/vue/commit/2d676416566c06d7c789899c92bf0f6924ec284a))
+* **setup:** setup props should pass isReactive check ([52cf912](https://github.com/vuejs/vue/commit/52cf912d855a7fae8d8c89452f0d275846e26a87)), closes [#12561](https://github.com/vuejs/vue/issues/12561)
+* **template-ref:** preserve ref removal behavior in non-composition-api usage ([2533a36](https://github.com/vuejs/vue/commit/2533a360a838c41238dc9b9b840932f2957c65d4)), closes [#12554](https://github.com/vuejs/vue/issues/12554)
+
+
+### Features
+
+* **sfc:** css v-bind ([8ab0074](https://github.com/vuejs/vue/commit/8ab0074bab83473fd025ae538a3455e3277320c4))
+* **sfc:** parse needMap compat ([d3916b6](https://github.com/vuejs/vue/commit/d3916b69b491bb0964102b69a8bb2e9336f7677b))
+* useCssModules ([0fabda7](https://github.com/vuejs/vue/commit/0fabda7a3b016c1c0cb5d92f5d8efc35f0dbde40))
+
+
+
 # [2.7.0-beta.2](https://github.com/vuejs/vue/compare/v2.7.0-beta.1...v2.7.0-beta.2) (2022-06-17)
 
 
