@@ -13,7 +13,8 @@ export default defineConfig({
       shared: resolve('src/shared'),
       web: resolve('src/platforms/web'),
       v3: resolve('src/v3'),
-      vue: resolve('src/platforms/web/entry-runtime-with-compiler')
+      vue: resolve('src/platforms/web/entry-runtime-with-compiler'),
+      types: resolve('src/types')
     }
   },
   define: {

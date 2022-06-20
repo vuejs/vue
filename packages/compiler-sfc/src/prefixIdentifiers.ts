@@ -14,19 +14,15 @@ const doNotPrefix = makeMap(
 )
 
 /**
- * The input is expected to be the render function code directly returned from
- * `compile()` calls, e.g. `with(this){return ...}`
+ * The input is expected to be a valid expression.
  */
 export function prefixIdentifiers(
   source: string,
-  fnName = '',
   isFunctional = false,
   isTS = false,
   babelOptions: ParserOptions = {},
   bindings?: BindingMetadata
 ) {
-  source = `function ${fnName}(${isFunctional ? `_c,_vm` : ``}){${source}\n}`
-
   const s = new MagicString(source)
 
   const plugins: ParserPlugin[] = [

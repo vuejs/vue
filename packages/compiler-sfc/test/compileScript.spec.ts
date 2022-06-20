@@ -1,33 +1,5 @@
 import { BindingTypes } from '../src/types'
-import { parse, ParseOptions } from '../src/parse'
-import { parse as babelParse } from '@babel/parser'
-import { compileScript, SFCScriptCompileOptions } from '../src/compileScript'
-
-function compile(
-  source: string,
-  options?: Partial<SFCScriptCompileOptions>,
-  parseOptions?: Partial<ParseOptions>
-) {
-  const sfc = parse({
-    ...parseOptions,
-    source
-  })
-  return compileScript(sfc, options)
-}
-
-function assertCode(code: string) {
-  // parse the generated code to make sure it is valid
-  try {
-    babelParse(code, {
-      sourceType: 'module',
-      plugins: ['typescript']
-    })
-  } catch (e: any) {
-    console.log(code)
-    throw e
-  }
-  expect(code).toMatchSnapshot()
-}
+import { compile, assertCode } from './util'
 
 describe('SFC compile <script setup>', () => {
   test('should expose top level declarations', () => {

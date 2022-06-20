@@ -16,7 +16,7 @@ const cache = new LRU<string, SFCDescriptor>(100)
 const splitRE = /\r?\n/g
 const emptyRE = /^(?:\/\/)?\s*$/
 
-export interface ParseOptions {
+export interface SFCParseOptions {
   source: string
   filename?: string
   compiler?: TemplateCompiler
@@ -25,7 +25,7 @@ export interface ParseOptions {
   sourceMap?: boolean
 }
 
-export function parse(options: ParseOptions): SFCDescriptor {
+export function parse(options: SFCParseOptions): SFCDescriptor {
   const {
     source,
     filename = DEFAULT_FILENAME,

@@ -3,6 +3,8 @@ import { compile } from 'web/entry-compiler'
 import { format } from 'prettier'
 import { BindingTypes } from '../src/types'
 
+const toFn = (source: string) => `function render(){${source}\n}`
+
 it('should work', () => {
   const { render } = compile(`<div id="app">
   <div>{{ foo }}</div>
@@ -12,7 +14,7 @@ it('should work', () => {
   </foo>
 </div>`)
 
-  const result = format(prefixIdentifiers(render, `render`), {
+  const result = format(prefixIdentifiers(toFn(render)), {
     semi: false,
     parser: 'babel'
   })
@@ -59,7 +61,7 @@ it('setup bindings', () => {
   const { render } = compile(`<div @click="count++">{{ count }}</div>`)
 
   const result = format(
-    prefixIdentifiers(render, `render`, false, false, undefined, {
+    prefixIdentifiers(toFn(render), false, false, undefined, {
       count: BindingTypes.SETUP_REF
     }),
     {

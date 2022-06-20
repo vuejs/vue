@@ -7,6 +7,7 @@ import {
   StylePreprocessor,
   StylePreprocessorResults
 } from './stylePreprocessors'
+import { cssVarsPlugin } from './cssVars'
 
 export interface SFCStyleCompileOptions {
   source: string
@@ -19,6 +20,7 @@ export interface SFCStyleCompileOptions {
   preprocessOptions?: any
   postcssOptions?: any
   postcssPlugins?: any[]
+  isProd?: boolean
 }
 
 export interface SFCAsyncStyleCompileOptions extends SFCStyleCompileOptions {
@@ -52,6 +54,7 @@ export function doCompileStyle(
     id,
     scoped = true,
     trim = true,
+    isProd = false,
     preprocessLang,
     postcssOptions,
     postcssPlugins
@@ -62,6 +65,7 @@ export function doCompileStyle(
   const source = preProcessedSource ? preProcessedSource.code : options.source
 
   const plugins = (postcssPlugins || []).slice()
+  plugins.unshift(cssVarsPlugin({ id: id.replace(/^data-v-/, ''), isProd }))
   if (trim) {
     plugins.push(trimPlugin())
   }

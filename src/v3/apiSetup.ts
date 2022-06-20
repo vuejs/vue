@@ -86,13 +86,17 @@ export function proxyWithRefUnwrap(
   source: Record<string, any>,
   key: string
 ) {
-  let raw = source[key]
   Object.defineProperty(target, key, {
     enumerable: true,
     configurable: true,
-    get: () => (isRef(raw) ? raw.value : raw),
-    set: newVal =>
-      isRef(raw) ? (raw.value = newVal) : (raw = source[key] = newVal)
+    get: () => {
+      const raw = source[key]
+      return isRef(raw) ? raw.value : raw
+    },
+    set: newVal => {
+      const raw = source[key]
+      isRef(raw) ? (raw.value = newVal) : (source[key] = newVal)
+    }
   })
 }
 

@@ -42,6 +42,12 @@ import { isReservedTag } from 'web/util'
 import { dirRE } from 'compiler/parser'
 import { parseText } from 'compiler/parser/text-parser'
 import { DEFAULT_FILENAME } from './parseComponent'
+import {
+  CSS_VARS_HELPER,
+  genCssVarsCode,
+  genNormalScriptCssVarsCode
+} from './cssVars'
+import { rewriteDefault } from './rewriteDefault'
 
 // Special compiler macros
 const DEFINE_PROPS = 'defineProps'
@@ -57,6 +63,11 @@ const isBuiltInDir = makeMap(
 )
 
 export interface SFCScriptCompileOptions {
+  /**
+   * Scope ID for prefixing injected CSS variables.
+   * This must be consistent with the `id` passed to `compileStyle`.
+   */
+  id: string
   /**
    * Production mode. Used to determine whether to generate hashed CSS variables
    */
@@ -86,14 +97,15 @@ export interface ImportBinding {
  */
 export function compileScript(
   sfc: SFCDescriptor,
-  options: SFCScriptCompileOptions = {}
+  options: SFCScriptCompileOptions = { id: '' }
 ): SFCScriptBlock {
   let { filename, script, scriptSetup, source } = sfc
   const isProd = !!options.isProd
   const genSourceMap = options.sourceMap !== false
   let refBindings: string[] | undefined
 
-  // const cssVars = sfc.cssVars
+  const cssVars = sfc.cssVars
+  const scopeId = options.id ? options.id.replace(/^data-v-/, '') : ''
   const scriptLang = script && script.lang
   const scriptSetupLang = scriptSetup && scriptSetup.lang
   const isTS =
@@ -132,6 +144,16 @@ export function compileScript(
         sourceType: 'module'
       }).program
       const bindings = analyzeScriptBindings(scriptAst.body)
+      if (cssVars.length) {
+        content = rewriteDefault(content, DEFAULT_VAR, plugins)
+        content += genNormalScriptCssVarsCode(
+          cssVars,
+          bindings,
+          scopeId,
+          isProd
+        )
+        content += `\nexport default ${DEFAULT_VAR}`
+      }
       return {
         ...script,
         content,
@@ -1082,7 +1104,13 @@ export function compileScript(
   }
 
   // 8. inject `useCssVars` calls
-  // Not backported in Vue 2
+  if (cssVars.length) {
+    helperImports.add(CSS_VARS_HELPER)
+    s.prependRight(
+      startOffset,
+      `\n${genCssVarsCode(cssVars, bindingMetadata, scopeId, isProd)}\n`
+    )
+  }
 
   // 9. finalize setup() argument signature
   let args = `__props`

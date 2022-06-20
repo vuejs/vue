@@ -4,6 +4,7 @@ import { makeMap } from 'shared/util'
 import { ASTAttr, WarningMessage } from 'types/compiler'
 import { BindingMetadata, RawSourceMap } from './types'
 import type { ImportBinding } from './compileScript'
+import { parseCssVars } from './cssVars'
 
 export const DEFAULT_FILENAME = 'anonymous.vue'
 
@@ -50,7 +51,9 @@ export interface SFCDescriptor {
   scriptSetup: SFCScriptBlock | null
   styles: SFCBlock[]
   customBlocks: SFCCustomBlock[]
-  errors: WarningMessage[]
+  cssVars: string[]
+
+  errors: (string | WarningMessage)[]
 
   /**
    * compare with an existing descriptor to determine whether HMR should perform
@@ -84,6 +87,7 @@ export function parseComponent(
     scriptSetup: null, // TODO
     styles: [],
     customBlocks: [],
+    cssVars: [],
     errors: [],
     shouldForceReload: null as any // attached in parse() by compiler-sfc
   }
@@ -204,6 +208,9 @@ export function parseComponent(
     end,
     outputSourceRange: options.outputSourceRange
   })
+
+  // parse CSS vars
+  sfc.cssVars = parseCssVars(sfc)
 
   return sfc
 }

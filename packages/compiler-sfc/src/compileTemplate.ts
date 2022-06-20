@@ -148,8 +148,7 @@ function actuallyCompile(
     // version of Buble that applies ES2015 transforms + stripping `with` usage
     let code =
       `var __render__ = ${prefixIdentifiers(
-        render,
-        `render`,
+        `function render(${isFunctional ? `_c,_vm` : ``}){${render}\n}`,
         isFunctional,
         isTS,
         transpileOptions,
@@ -157,8 +156,7 @@ function actuallyCompile(
       )}\n` +
       `var __staticRenderFns__ = [${staticRenderFns.map(code =>
         prefixIdentifiers(
-          code,
-          ``,
+          `function (${isFunctional ? `_c,_vm` : ``}){${code}\n}`,
           isFunctional,
           isTS,
           transpileOptions,
