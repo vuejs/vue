@@ -23,6 +23,10 @@ export interface SFCParseOptions {
   compilerParseOptions?: VueTemplateCompilerParseOptions
   sourceRoot?: string
   sourceMap?: boolean
+  /**
+   * @deprecated use `sourceMap` instead.
+   */
+  needMap?: boolean
 }
 
 export function parse(options: SFCParseOptions): SFCDescriptor {
@@ -32,7 +36,8 @@ export function parse(options: SFCParseOptions): SFCDescriptor {
     compiler,
     compilerParseOptions = { pad: false } as VueTemplateCompilerParseOptions,
     sourceRoot = '',
-    sourceMap = true
+    needMap = true,
+    sourceMap = needMap
   } = options
   const cacheKey = hash(
     filename + source + JSON.stringify(compilerParseOptions)
