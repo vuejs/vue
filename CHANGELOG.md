@@ -1,3 +1,12 @@
+# [2.7.0-beta.4](https://github.com/vuejs/vue/compare/v2.7.0-beta.3...v2.7.0-beta.4) (2022-06-21)
+
+
+### Bug Fixes
+
+* **compiler-sfc:** properly handle shorthand property in template expressions ([9b9f2bf](https://github.com/vuejs/vue/commit/9b9f2bf1c8429136e7122d146e0e39bdeada5d1d)), closes [#12566](https://github.com/vuejs/vue/issues/12566)
+
+
+
 # [2.7.0-beta.3](https://github.com/vuejs/vue/compare/v2.7.0-beta.2...v2.7.0-beta.3) (2022-06-20)
 
 
